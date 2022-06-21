@@ -1,5 +1,5 @@
 import pytest
-from bluekafka_utils import KafkaMessage
+from bec_utils import KafkaMessage
 from koss.devicemanager import DeviceManagerKOSS
 from koss.scan_worker import ScanWorker
 

@@ -1,6 +1,6 @@
-import bluekafka_utils.KafkaMessage as KMessage
+import bec_utils.KafkaMessage as KMessage
 import msgpack
-from bluekafka_utils import MessageEndpoints
+from bec_utils import MessageEndpoints
 
 
 class ScanAcceptance:

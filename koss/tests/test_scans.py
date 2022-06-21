@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from bluekafka_utils import KafkaMessage as KMessage
+from bec_utils import KafkaMessage as KMessage
 from koss.scans import FermatSpiralScan, Move, Scan
 
 

@@ -1,9 +1,9 @@
 import enum
 from abc import ABC, abstractmethod
 
-import bluekafka_utils.KafkaMessage as KMessage
+import bec_utils.KafkaMessage as KMessage
 import numpy as np
-from bluekafka_utils import DeviceManagerBase
+from bec_utils import DeviceManagerBase
 from cytoolz import partition
 
 DeviceMsg = KMessage.DeviceInstructionMessage

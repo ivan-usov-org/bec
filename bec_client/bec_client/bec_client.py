@@ -2,7 +2,7 @@ import logging
 import threading
 
 import IPython
-from bluekafka_utils.connector import ConnectorBase
+from bec_utils.connector import ConnectorBase
 from IPython.terminal.prompts import Prompts, Token
 
 from .alarm_handler import AlarmHandler
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class BKClient:
     def __init__(self, bootstrap_server: list, Connector: ConnectorBase, scibec_url: str):
-        """Bluekafka Client
+        """bec Client
 
         Args:
             bootstrap_server (list): bootstrap server adress

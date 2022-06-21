@@ -2,7 +2,7 @@ import argparse
 import logging
 import threading
 
-from bluekafka_utils import RedisConnector, ServiceConfig
+from bec_utils import RedisConnector, ServiceConfig
 
 from koss.koss import KOSS
 

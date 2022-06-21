@@ -1,6 +1,6 @@
 import logging
 
-from bluekafka_utils import DeviceManagerBase
+from bec_utils import DeviceManagerBase
 
 from .opaas import OPAAS
 from . import devices

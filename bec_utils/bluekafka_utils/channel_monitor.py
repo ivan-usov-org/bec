@@ -1,7 +1,7 @@
 import argparse
 import threading
-from bluekafka_utils import RedisConnector, ServiceConfig
-from bluekafka_utils import KafkaMessage
+from bec_utils import RedisConnector, ServiceConfig
+from bec_utils import KafkaMessage
 import json
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)

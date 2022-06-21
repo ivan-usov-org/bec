@@ -3,11 +3,11 @@ import logging
 import threading
 import time
 
-import bluekafka_utils.KafkaMessage as KMessage
+import bec_utils.KafkaMessage as KMessage
 import msgpack
 import numpy as np
-from bluekafka_utils import Alarms, DeviceManagerBase, DeviceStatus, MessageEndpoints
-from bluekafka_utils.connector import ConsumerConnector
+from bec_utils import Alarms, DeviceManagerBase, DeviceStatus, MessageEndpoints
+from bec_utils.connector import ConsumerConnector
 
 from .prettytable import PrettyTable
 

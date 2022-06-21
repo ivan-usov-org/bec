@@ -4,9 +4,9 @@ import uuid
 from contextlib import ContextDecorator
 
 import msgpack
-from bluekafka_utils import KafkaMessage as KMessage
-from bluekafka_utils import MessageEndpoints
-from bluekafka_utils.connector import ConsumerConnector
+from bec_utils import KafkaMessage as KMessage
+from bec_utils import MessageEndpoints
+from bec_utils.connector import ConsumerConnector
 from cytoolz import partition
 
 from .callbacks import live_updates_readback, live_updates_table

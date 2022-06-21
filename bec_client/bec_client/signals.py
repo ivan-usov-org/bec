@@ -2,7 +2,7 @@ import signal
 import time
 import threading
 
-from bluekafka_utils.bluekafka_errors import ScanInterruption, ScanAbortion
+from bec_utils.bec_errors import ScanInterruption, ScanAbortion
 
 PAUSE_MSG = """
 The Scan Queue is entering a paused state. These are your options for changing

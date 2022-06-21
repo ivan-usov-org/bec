@@ -1,4 +1,4 @@
-class BluekafkaInterface:
+class becInterface:
     def mv(self):
         pass
 

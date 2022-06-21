@@ -4,4 +4,4 @@ import logging
 
 loggers = logging.getLogger(__name__)
 
-from .bluekafka_client import BKClient
+from .bec_client import BKClient

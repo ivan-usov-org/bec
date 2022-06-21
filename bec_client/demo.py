@@ -15,10 +15,10 @@ import uuid
 from dataclasses import dataclass
 from pathlib import Path
 
-from bluekafka_utils import RedisConnector, ServiceConfig
+from bec_utils import RedisConnector, ServiceConfig
 
-from bluekafka_client import BKClient
-from bluekafka_client import scans as scan_utils
+from bec_client import BKClient
+from bec_client import scans as scan_utils
 
 log_path = "./log/"
 Path(log_path).mkdir(parents=True, exist_ok=True)
@@ -35,7 +35,7 @@ logging.basicConfig(
 logging.getLogger("kafka").setLevel(50)
 logging.getLogger().addHandler(logging.StreamHandler())
 
-config_path = "../bluekafka_config.yaml"
+config_path = "../bec_config.yaml"
 
 config = ServiceConfig(config_path)
 

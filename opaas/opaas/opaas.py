@@ -6,11 +6,11 @@ import time
 from functools import reduce
 from io import StringIO
 
-import bluekafka_utils.KafkaMessage as KMessage
+import bec_utils.KafkaMessage as KMessage
 import msgpack
 import ophyd
-from bluekafka_utils import Alarms, MessageEndpoints
-from bluekafka_utils.connector import ConnectorBase
+from bec_utils import Alarms, MessageEndpoints
+from bec_utils.connector import ConnectorBase
 from ophyd.utils import errors as ophyd_errors
 
 from opaas.devices import is_serializable

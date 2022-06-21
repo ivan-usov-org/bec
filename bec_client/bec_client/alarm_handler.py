@@ -1,5 +1,5 @@
 from collections import deque
-from bluekafka_utils import Alarms, KafkaMessage, RedisConnector, MessageEndpoints
+from bec_utils import Alarms, KafkaMessage, RedisConnector, MessageEndpoints
 from collections import deque
 
 

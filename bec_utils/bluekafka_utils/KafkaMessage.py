@@ -4,7 +4,7 @@ from typing import Any, Union
 import msgpack
 
 
-class BluekafkaStatus(enum.Enum):
+class becStatus(enum.Enum):
     ERROR = -1
     OFF = 0
     IDLE = 1
@@ -312,7 +312,7 @@ class AlarmMessage(KafkaMessage):
 class StatusMessage(KafkaMessage):
     msg_type = "status_message"
 
-    def __init__(self, *, status: BluekafkaStatus, metadata: dict = None) -> None:
+    def __init__(self, *, status: becStatus, metadata: dict = None) -> None:
         """
 
         Args:

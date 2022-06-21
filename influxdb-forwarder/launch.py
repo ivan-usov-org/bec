@@ -1,7 +1,7 @@
 import argparse
 import logging
 
-from bluekafka_utils import RedisConnector, ServiceConfig, MessageEndpoints, KafkaMessage
+from bec_utils import RedisConnector, ServiceConfig, MessageEndpoints, KafkaMessage
 from datetime import datetime
 
 from influxdb_client import InfluxDBClient, Point, WritePrecision, rest

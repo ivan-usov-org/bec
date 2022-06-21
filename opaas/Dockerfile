@@ -9,14 +9,14 @@ RUN apt install -y libopenmpi-dev
 WORKDIR /code
 
 # copy the content of the local opaas directory to the working directory
-COPY bluekafka/ ./bluekafka
+COPY bec/ ./bec
 
-WORKDIR /code/bluekafka
-RUN pip install ./bluekafka_utils/
+WORKDIR /code/bec
+RUN pip install ./bec_utils/
 RUN pip install ./koss/
 RUN pip install ./ophyd/
 
-WORKDIR /code/bluekafka/opaas/
+WORKDIR /code/bec/opaas/
 RUN pip install -r requirements.txt
 
 # command to run on container start

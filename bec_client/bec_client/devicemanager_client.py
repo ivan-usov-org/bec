@@ -3,10 +3,10 @@ import logging
 import time
 import uuid
 
-import bluekafka_utils.KafkaMessage as KMessage
-from bluekafka_utils import Device, DeviceManagerBase, MessageEndpoints
+import bec_utils.KafkaMessage as KMessage
+from bec_utils import Device, DeviceManagerBase, MessageEndpoints
 
-from bluekafka_client.callbacks import ScanRequestError
+from bec_client.callbacks import ScanRequestError
 
 logger = logging.getLogger(__name__)
 

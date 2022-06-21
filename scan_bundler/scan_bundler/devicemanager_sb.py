@@ -1,7 +1,7 @@
 import logging
 
-from bluekafka_utils import Device, DeviceManagerBase
-from bluekafka_utils.connector import ConnectorBase
+from bec_utils import Device, DeviceManagerBase
+from bec_utils.connector import ConnectorBase
 
 logger = logging.getLogger(__name__)
 

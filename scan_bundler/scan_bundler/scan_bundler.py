@@ -3,11 +3,11 @@ import time
 import uuid
 from collections.abc import Iterable
 
-import bluekafka_utils.KafkaMessage as KMessage
+import bec_utils.KafkaMessage as KMessage
 import msgpack
 import numpy as np
-from bluekafka_utils import MessageEndpoints
-from bluekafka_utils.connector import ConnectorBase
+from bec_utils import MessageEndpoints
+from bec_utils.connector import ConnectorBase
 
 from .devicemanager_sb import DeviceManagerSB
 

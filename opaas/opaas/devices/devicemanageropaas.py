@@ -1,13 +1,13 @@
 import logging
 import time
 
-import bluekafka_utils.KafkaMessage as KMessage
+import bec_utils.KafkaMessage as KMessage
 import msgpack
 import ophyd
 import ophyd.sim as ops
 import ophyd_devices as opd
-from bluekafka_utils import Device, DeviceManagerBase, MessageEndpoints
-from bluekafka_utils.connector import ConnectorBase
+from bec_utils import Device, DeviceManagerBase, MessageEndpoints
+from bec_utils.connector import ConnectorBase
 from opaas.devices.device_serializer import get_device_info
 
 logger = logging.getLogger(__name__)

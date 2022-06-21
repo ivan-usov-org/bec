@@ -3,7 +3,7 @@ import logging
 import argparse
 
 from scan_bundler import ScanBundler
-from bluekafka_utils import RedisConnector, ServiceConfig
+from bec_utils import RedisConnector, ServiceConfig
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument(

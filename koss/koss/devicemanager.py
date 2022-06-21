@@ -1,5 +1,5 @@
-from bluekafka_utils import DeviceManagerBase, Device
-from bluekafka_utils.connector import ConnectorBase
+from bec_utils import DeviceManagerBase, Device
+from bec_utils.connector import ConnectorBase
 
 
 class DeviceManagerKOSS(DeviceManagerBase):

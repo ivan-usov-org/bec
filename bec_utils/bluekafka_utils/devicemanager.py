@@ -6,7 +6,7 @@ import msgpack
 import yaml
 from typeguard import typechecked
 
-from bluekafka_utils.connector import ConnectorBase
+from bec_utils.connector import ConnectorBase
 
 from .endpoints import MessageEndpoints
 from .kafka_connector import KafkaConnector

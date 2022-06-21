@@ -4,8 +4,8 @@ import inspect
 import logging
 
 import msgpack
-from bluekafka_utils import KafkaMessage, MessageEndpoints
-from bluekafka_utils.connector import ConnectorBase
+from bec_utils import KafkaMessage, MessageEndpoints
+from bec_utils.connector import ConnectorBase
 
 import koss.scans as kossScans
 

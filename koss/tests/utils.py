@@ -1,4 +1,4 @@
-from bluekafka_utils.connector import ConnectorBase
+from bec_utils.connector import ConnectorBase
 from koss.koss import KOSS
 from koss.scan_assembler import ScanAssembler
 

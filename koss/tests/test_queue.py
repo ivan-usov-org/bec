@@ -1,7 +1,7 @@
 import collections
 
 import pytest
-from bluekafka_utils import KafkaMessage, MessageEndpoints
+from bec_utils import KafkaMessage, MessageEndpoints
 from koss.bkqueue import QueueManager, ScanQueueStatus
 from koss.devicemanager import DeviceManagerKOSS
 
