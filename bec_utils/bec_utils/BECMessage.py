@@ -11,7 +11,7 @@ class becStatus(enum.Enum):
     RUNNING = 2
 
 
-class KafkaMessage:
+class BECMessage:
     msg_type: str
     content: dict
     metadata: dict
@@ -51,7 +51,7 @@ class KafkaMessage:
         return True
 
     def __eq__(self, other):
-        if not isinstance(other, KafkaMessage):
+        if not isinstance(other, BECMessage):
             # don't attempt to compare against unrelated types
             return False
         return (
@@ -67,7 +67,7 @@ class KafkaMessage:
         return f"{self.__class__.__name__}({self.content, self.metadata}))"
 
 
-class MessageReader(KafkaMessage):
+class MessageReader(BECMessage):
     def __init__(self, *, msg_type: str, content: dict, metadata: dict = None, **_kwargs) -> None:
         super().__init__(msg_type=msg_type, content=content, metadata=metadata)
 
@@ -77,7 +77,7 @@ class MessageReader(KafkaMessage):
         return msg_conv
 
 
-class ScanQueueMessage(KafkaMessage):
+class ScanQueueMessage(BECMessage):
     msg_type = "scan"
 
     def __init__(
@@ -98,7 +98,7 @@ class ScanQueueMessage(KafkaMessage):
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
 
 
-class ScanStatusMessage(KafkaMessage):
+class ScanStatusMessage(BECMessage):
     msg_type = "scan_status"
 
     def __init__(self, *, scanID: str, status: dict, info: dict, metadata: dict = None) -> None:
@@ -107,7 +107,7 @@ class ScanStatusMessage(KafkaMessage):
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
 
 
-class ScanQueueModificationMessage(KafkaMessage):
+class ScanQueueModificationMessage(BECMessage):
     msg_type = "scan_queue_modification"
     ACTIONS = ["pause", "deferred_pause", "continue", "abort", "clear"]
 
@@ -122,7 +122,7 @@ class ScanQueueModificationMessage(KafkaMessage):
         return True
 
 
-class ScanQueueStatusMessage(KafkaMessage):
+class ScanQueueStatusMessage(BECMessage):
     msg_type = "scan_queue_status"
 
     def __init__(self, *, queue: dict, metadata: dict = None) -> None:
@@ -140,7 +140,7 @@ class ScanQueueStatusMessage(KafkaMessage):
         return True
 
 
-class RequestResponseMessage(KafkaMessage):
+class RequestResponseMessage(BECMessage):
     msg_type = "request_response"
 
     def __init__(self, *, decision: str, message: str, metadata: dict = None) -> None:
@@ -156,7 +156,7 @@ class RequestResponseMessage(KafkaMessage):
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
 
 
-class DeviceInstructionMessage(KafkaMessage):
+class DeviceInstructionMessage(BECMessage):
     msg_type = "device_instruction"
 
     def __init__(self, *, device: str, action: str, parameter: dict, metadata: dict = None) -> None:
@@ -171,7 +171,7 @@ class DeviceInstructionMessage(KafkaMessage):
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
 
 
-class DeviceMessage(KafkaMessage):
+class DeviceMessage(BECMessage):
     msg_type = "device_message"
 
     def __init__(self, *, signals: dict, metadata: dict = None) -> None:
@@ -190,7 +190,7 @@ class DeviceMessage(KafkaMessage):
         return True
 
 
-class DeviceRPCMessage(KafkaMessage):
+class DeviceRPCMessage(BECMessage):
     msg_type = "device_rpc_message"
 
     def __init__(
@@ -211,7 +211,7 @@ class DeviceRPCMessage(KafkaMessage):
         return True
 
 
-class DeviceStatusMessage(KafkaMessage):
+class DeviceStatusMessage(BECMessage):
     msg_type = "device_status_message"
 
     def __init__(self, *, device: str, status: int, metadata: dict = None) -> None:
@@ -225,7 +225,7 @@ class DeviceStatusMessage(KafkaMessage):
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
 
 
-class DeviceInfoMessage(KafkaMessage):
+class DeviceInfoMessage(BECMessage):
     msg_type = "device_info_message"
 
     def __init__(self, *, device: str, info: dict, metadata: dict = None) -> None:
@@ -240,7 +240,7 @@ class DeviceInfoMessage(KafkaMessage):
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
 
 
-class ScanMessage(KafkaMessage):
+class ScanMessage(BECMessage):
     msg_type = "scan_message"
 
     def __init__(self, *, point_id: int, scanID: int, data: dict, metadata: dict = None) -> None:
@@ -255,7 +255,7 @@ class ScanMessage(KafkaMessage):
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
 
 
-class DeviceConfigMessage(KafkaMessage):
+class DeviceConfigMessage(BECMessage):
     msg_type = "device_config_message"
 
     def __init__(self, *, action: str, config: dict, metadata: dict = None) -> None:
@@ -269,7 +269,7 @@ class DeviceConfigMessage(KafkaMessage):
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
 
 
-class LogMessage(KafkaMessage):
+class LogMessage(BECMessage):
     msg_type = "log_message"
 
     def __init__(self, *, log_type: str, content: Union[dict, str], metadata: dict = None) -> None:
@@ -283,7 +283,7 @@ class LogMessage(KafkaMessage):
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
 
 
-class AlarmMessage(KafkaMessage):
+class AlarmMessage(BECMessage):
     msg_type = "alarm_message"
 
     def __init__(
@@ -309,7 +309,7 @@ class AlarmMessage(KafkaMessage):
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
 
 
-class StatusMessage(KafkaMessage):
+class StatusMessage(BECMessage):
     msg_type = "status_message"
 
     def __init__(self, *, status: becStatus, metadata: dict = None) -> None:

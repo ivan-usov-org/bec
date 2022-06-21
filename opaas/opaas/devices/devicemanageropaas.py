@@ -1,7 +1,7 @@
 import logging
 import time
 
-import bec_utils.KafkaMessage as KMessage
+import bec_utils.BECMessage as KMessage
 import msgpack
 import ophyd
 import ophyd.sim as ops

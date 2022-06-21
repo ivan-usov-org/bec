@@ -7,7 +7,7 @@ import uuid
 from enum import Enum
 from typing import Union
 
-import bec_utils.KafkaMessage as KMessage
+import bec_utils.BECMessage as KMessage
 from bec_utils import Alarms, MessageEndpoints
 
 from koss.scan_assembler import ScanAssembler

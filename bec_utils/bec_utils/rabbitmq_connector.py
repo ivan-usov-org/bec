@@ -2,7 +2,7 @@ from asyncio import queues
 import functools
 from kafka import KafkaConsumer, KafkaProducer
 from .connector import ConnectorBase, ConsumerConnectorThreaded, ProducerConnector
-from .KafkaMessage import LogMessage
+from .BECMessage import LogMessage
 import pika
 
 

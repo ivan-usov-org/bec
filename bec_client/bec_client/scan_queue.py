@@ -2,7 +2,7 @@ import logging
 import time
 from collections import deque
 
-import bec_utils.KafkaMessage as KMessage
+import bec_utils.BECMessage as KMessage
 from bec_utils import MessageEndpoints
 
 logger = logging.getLogger("scan_queue")

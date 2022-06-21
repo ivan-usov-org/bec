@@ -3,7 +3,7 @@ import logging
 import time
 import uuid
 
-import bec_utils.KafkaMessage as KMessage
+import bec_utils.BECMessage as KMessage
 from bec_utils import Device, DeviceManagerBase, MessageEndpoints
 
 from bec_client.callbacks import ScanRequestError

@@ -10,7 +10,7 @@ from bec_utils.connector import ConnectorBase
 
 from .endpoints import MessageEndpoints
 from .kafka_connector import KafkaConnector
-from .KafkaMessage import DeviceStatusMessage, LogMessage
+from .BECMessage import DeviceStatusMessage, LogMessage
 from .scibec import SciBec
 
 logger = logging.getLogger(__name__)

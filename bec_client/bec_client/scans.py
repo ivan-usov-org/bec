@@ -4,7 +4,7 @@ import uuid
 from contextlib import ContextDecorator
 
 import msgpack
-from bec_utils import KafkaMessage as KMessage
+from bec_utils import BECMessage as KMessage
 from bec_utils import MessageEndpoints
 from bec_utils.connector import ConsumerConnector
 from cytoolz import partition

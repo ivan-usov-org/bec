@@ -1,4 +1,4 @@
-import bec_utils.KafkaMessage as KMessage
+import bec_utils.BECMessage as KMessage
 
 import koss.scans as ks
 

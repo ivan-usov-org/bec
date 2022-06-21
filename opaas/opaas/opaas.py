@@ -6,7 +6,7 @@ import time
 from functools import reduce
 from io import StringIO
 
-import bec_utils.KafkaMessage as KMessage
+import bec_utils.BECMessage as KMessage
 import msgpack
 import ophyd
 from bec_utils import Alarms, MessageEndpoints

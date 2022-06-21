@@ -1,7 +1,7 @@
 import collections
 
 import pytest
-from bec_utils import KafkaMessage, MessageEndpoints
+from bec_utils import BECMessage, MessageEndpoints
 from koss.bkqueue import QueueManager, ScanQueueStatus
 from koss.devicemanager import DeviceManagerKOSS
 
@@ -38,7 +38,7 @@ class ScanQueueMock:
 @pytest.mark.parametrize("queue", [("primary",), ("alignment",)])
 def test_queuemanager_add_to_queue(queue):
     queue_manager = get_queuemanager()
-    msg = KafkaMessage.ScanQueueMessage(
+    msg = BECMessage.ScanQueueMessage(
         scan_type="mv",
         parameter={"args": {"samx": (1,)}, "kwargs": {}},
         queue=queue,
@@ -88,7 +88,7 @@ def test_set_clear_sends_message():
 def test_set_clear():
     queue_manager = get_queuemanager()
     queue_manager.queues = {"primary": ScanQueueMock(queue_manager)}
-    msg = KafkaMessage.ScanQueueMessage(
+    msg = BECMessage.ScanQueueMessage(
         scan_type="mv",
         parameter={"args": {"samx": (1,)}, "kwargs": {}},
         queue="primary",

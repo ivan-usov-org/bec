@@ -1,5 +1,5 @@
 import pytest
-from bec_utils import KafkaMessage
+from bec_utils import BECMessage
 from koss.devicemanager import DeviceManagerKOSS
 from koss.scan_worker import ScanWorker
 
@@ -20,7 +20,7 @@ def get_scan_worker() -> ScanWorker:
     "instruction,devices",
     [
         (
-            KafkaMessage.DeviceInstructionMessage(
+            BECMessage.DeviceInstructionMessage(
                 device="samy",
                 action="wait",
                 parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
@@ -29,7 +29,7 @@ def get_scan_worker() -> ScanWorker:
             ["samy"],
         ),
         (
-            KafkaMessage.DeviceInstructionMessage(
+            BECMessage.DeviceInstructionMessage(
                 device=["samx", "samy"],
                 action="wait",
                 parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},

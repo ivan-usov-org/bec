@@ -4,7 +4,7 @@ import inspect
 import logging
 
 import msgpack
-from bec_utils import KafkaMessage, MessageEndpoints
+from bec_utils import BECMessage, MessageEndpoints
 from bec_utils.connector import ConnectorBase
 
 import koss.scans as kossScans
@@ -91,7 +91,7 @@ class KOSS:
 
     @staticmethod
     def _alarm_callback(msg, parent: KOSS, **_kwargs):
-        msg = KafkaMessage.AlarmMessage.loads(msg.value)
+        msg = BECMessage.AlarmMessage.loads(msg.value)
         if "scanID" in msg.metadata:
             parent.qm._set_abort(scanID=msg.metadata["scanID"], queue=msg.metadata["stream"])
 

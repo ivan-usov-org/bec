@@ -1,7 +1,7 @@
 import argparse
 import threading
 from bec_utils import RedisConnector, ServiceConfig
-from bec_utils import KafkaMessage
+from bec_utils import BECMessage
 import json
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -23,7 +23,7 @@ config = ServiceConfig(config_path)
 
 
 def channel_callback(msg, **kwargs):
-    msg = KafkaMessage.MessageReader.loads(msg.value)
+    msg = BECMessage.MessageReader.loads(msg.value)
     out = {"msg_type": msg.msg_type, "content": msg.content, "metadata": msg.metadata}
     print(json.dumps(out, indent=4, default=lambda o: "<not serializable object>"))
 

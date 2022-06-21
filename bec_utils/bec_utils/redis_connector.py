@@ -11,7 +11,7 @@ from .connector import (
     ProducerConnector,
 )
 from .endpoints import MessageEndpoints
-from .KafkaMessage import AlarmMessage, LogMessage
+from .BECMessage import AlarmMessage, LogMessage
 
 
 class Alarms(int, enum.Enum):

@@ -22,13 +22,13 @@ import {ScanRepository} from '../repositories';
 const KAFKA_HOST = 'localhost:9092';
 const KAFKA_SCAN_REQUEST_TOPIC = 'scan_queue_request';
 
-export interface KafkaMessage {
+export interface BECMessage {
   msg_type: string,
   metadata: Object
   content: Object
 }
 
-export interface ScanQueueRequest extends KafkaMessage {
+export interface ScanQueueRequest extends BECMessage {
   content: {
     scan_type: string,
     parameter: Object,

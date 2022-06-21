@@ -1,5 +1,5 @@
 from collections import deque
-from bec_utils import Alarms, KafkaMessage, RedisConnector, MessageEndpoints
+from bec_utils import Alarms, BECMessage, RedisConnector, MessageEndpoints
 from collections import deque
 
 
@@ -9,7 +9,7 @@ class AlarmException(Exception):
 
 class AlarmBase(Exception):
     def __init__(
-        self, alarm: KafkaMessage.AlarmMessage, alarm_type: str, severity: Alarms, handled=False
+        self, alarm: BECMessage.AlarmMessage, alarm_type: str, severity: Alarms, handled=False
     ) -> None:
         self.alarm = alarm
         self.severity = severity
@@ -36,7 +36,7 @@ class AlarmHandler:
 
     @staticmethod
     def _alarm_consumer_callback(msg, *, parent, **kwargs):
-        msg = KafkaMessage.AlarmMessage.loads(msg.value)
+        msg = BECMessage.AlarmMessage.loads(msg.value)
         severity = Alarms(msg.content["severity"])
         parent.alarms_stack.appendleft(
             AlarmBase(

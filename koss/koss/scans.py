@@ -1,7 +1,7 @@
 import enum
 from abc import ABC, abstractmethod
 
-import bec_utils.KafkaMessage as KMessage
+import bec_utils.BECMessage as KMessage
 import numpy as np
 from bec_utils import DeviceManagerBase
 from cytoolz import partition

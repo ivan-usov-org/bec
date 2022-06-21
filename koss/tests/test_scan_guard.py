@@ -1,5 +1,5 @@
 import pytest
-from bec_utils import KafkaMessage as KMessage
+from bec_utils import BECMessage as KMessage
 from koss.devicemanager import DeviceManagerKOSS
 from koss.scan_guard import ScanGuard
 

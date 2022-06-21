@@ -4,7 +4,7 @@ import threading
 import time
 from enum import Enum
 
-import bec_utils.KafkaMessage as KMessage
+import bec_utils.BECMessage as KMessage
 import msgpack
 from bec_utils import DeviceStatus, MessageEndpoints
 

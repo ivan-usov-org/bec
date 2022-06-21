@@ -3,7 +3,7 @@ import time
 import uuid
 from collections.abc import Iterable
 
-import bec_utils.KafkaMessage as KMessage
+import bec_utils.BECMessage as KMessage
 import msgpack
 import numpy as np
 from bec_utils import MessageEndpoints

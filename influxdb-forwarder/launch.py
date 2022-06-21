@@ -1,7 +1,7 @@
 import argparse
 import logging
 
-from bec_utils import RedisConnector, ServiceConfig, MessageEndpoints, KafkaMessage
+from bec_utils import RedisConnector, ServiceConfig, MessageEndpoints, BECMessage
 from datetime import datetime
 
 from influxdb_client import InfluxDBClient, Point, WritePrecision, rest
@@ -24,7 +24,7 @@ logging.getLogger().addHandler(logging.StreamHandler())
 
 
 def influxdb_ingest(msg, influxdb_writer=None, **kwargs):
-    msg = KafkaMessage.DeviceMessage.loads(msg.value)
+    msg = BECMessage.DeviceMessage.loads(msg.value)
     signals = msg.content["signals"]
     for dev, data in signals.items():
         try:
