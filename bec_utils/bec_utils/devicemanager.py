@@ -8,9 +8,8 @@ from typeguard import typechecked
 
 from bec_utils.connector import ConnectorBase
 
-from .endpoints import MessageEndpoints
-from .kafka_connector import KafkaConnector
 from .BECMessage import DeviceStatusMessage, LogMessage
+from .endpoints import MessageEndpoints
 from .scibec import SciBec
 
 logger = logging.getLogger(__name__)
