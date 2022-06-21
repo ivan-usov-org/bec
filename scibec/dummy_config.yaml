@@ -1,0 +1,109 @@
+---
+samx:
+  status:
+    enabled: true
+  type: SynAxisOPAAS
+  config:
+    name: samx
+    labels: samx
+    delay: 1
+    speed: 100
+    update_frequency: 400
+  monitor: false
+samy:
+  status:
+    enabled: true
+  type: SynAxisOPAAS
+  config:
+    name: samy
+    labels: samy
+    delay: 1
+    speed: 100
+    update_frequency: 400
+  monitor: false
+samz:
+  status:
+    enabled: false
+  type: SynAxisOPAAS
+  config:
+    name: samz
+    labels: samz
+    delay: 1
+    update_frequency: 400
+  monitor: false
+fzpx:
+  status:
+    enabled: false
+  type: SynAxisOPAAS
+  config:
+    name: fzpx
+    labels: fzpx
+    delay: 1
+    update_frequency: 400
+  monitor: false
+fzpy:
+  status:
+    enabled: false
+  type: SynAxisOPAAS
+  config:
+    name: fzpy
+    labels: fzpy
+    delay: 1
+    update_frequency: 400
+  monitor: false
+fzpz:
+  status:
+    enabled: false
+  type: SynAxisOPAAS
+  config:
+    name: fzpz
+    labels: fzpz
+    delay: 1
+    update_frequency: 400
+  monitor: false
+hexx:
+  status:
+    enabled: false
+  type: SynAxisOPAAS
+  config:
+    name: hexx
+    labels: hexx
+    delay: 1
+    update_frequency: 400
+  monitor: false
+hexy:
+  status:
+    enabled: false
+  type: SynAxisOPAAS
+  config:
+    name: hexy
+    labels: hexy
+    delay: 1
+    update_frequency: 400
+  monitor: false
+hexz:
+  status:
+    enabled: false
+  type: SynAxisOPAAS
+  config:
+    name: hexz
+    labels: hexz
+    delay: 1
+    update_frequency: 400
+  monitor: false
+eiger_4:
+  status:
+    enabled: false
+  type: SynGauss
+  config:
+    name: eiger_4
+    labels: eiger_4
+  monitor: false
+pilatus_1:
+  status:
+    enabled: false
+  type: SynGauss
+  config:
+    name: pilatus_1
+    labels: pilatus_1
+  monitor: false

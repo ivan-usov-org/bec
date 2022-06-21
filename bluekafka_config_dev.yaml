@@ -1,0 +1,9 @@
+redis:
+  host: 129.129.195.115
+  port: 6379
+mongodb:
+  host: 129.129.195.115
+  port: 27017
+scibec:
+  host: http://129.129.195.115
+  port: 3030

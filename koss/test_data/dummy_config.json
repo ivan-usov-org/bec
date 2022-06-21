@@ -1,0 +1,44 @@
+{
+  "samx": {
+    "status": {
+      "enabled": true
+    },
+    "type": "SynAxisOPAAS",
+    "config": {
+      "name": "samx",
+      "labels": "samx",
+      "delay": 1,
+      "update_frequency": 120
+    }
+  },
+  "samy": {
+    "status": {
+      "enabled": true
+    },
+    "type": "SynAxis",
+    "config": {
+      "name": "samy",
+      "labels": "samy"
+    }
+  },
+  "eiger_4": {
+    "status": {
+      "enabled": true
+    },
+    "type": "SynGauss",
+    "config": {
+      "name": "det4",
+      "labels": "eiger_4"
+    }
+  },
+  "pilatus_1": {
+    "status": {
+      "enabled": false
+    },
+    "type": "SynGauss",
+    "config": {
+      "name": "det1",
+      "labels": "pilatus_1"
+    }
+  }
+}

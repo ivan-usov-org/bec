@@ -1,0 +1,11 @@
+pyyaml
+kafka-python
+numpy
+inflection
+networkx>=2.0
+pint
+cycler
+cytoolz
+msgpack
+ipython
+requests

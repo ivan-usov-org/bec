@@ -1,0 +1,16 @@
+kafka-python
+confluent-kafka
+pika
+numpy
+inflection
+networkx>=2.0
+pint
+ophyd
+pyyaml
+msgpack
+cytoolz
+requests
+pytest
+typeguard
+redis
+ophyd
