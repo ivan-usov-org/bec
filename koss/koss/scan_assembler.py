@@ -1,4 +1,4 @@
-import bec_utils.BECMessage as KMessage
+import bec_utils.BECMessage as BMessage
 
 import koss.scans as ks
 
@@ -18,7 +18,7 @@ class ScanAssembler:
     def _load_scans(self):
         self._scans = self.parent.scan_dict
 
-    def _unpack_scan(self, msg: KMessage.ScanQueueMessage):
+    def _unpack_scan(self, msg: BMessage.ScanQueueMessage):
         scan = msg.content.get("scan_type")
         scan_cls = getattr(ks, self._scans[scan]["class"])
 

@@ -1,7 +1,7 @@
 import logging
 import time
 
-import bec_utils.BECMessage as KMessage
+import bec_utils.BECMessage as BMessage
 import msgpack
 import ophyd
 import ophyd.sim as ops
@@ -21,7 +21,7 @@ class OPAASDevice(Device):
         self.metadata = {}
 
     def initialize_device_buffer(self, producer):
-        dev_msg = KMessage.DeviceMessage(signals=self.obj.read(), metadata={}).dumps()
+        dev_msg = BMessage.DeviceMessage(signals=self.obj.read(), metadata={}).dumps()
         pipe = producer.pipeline()
         producer.set_and_publish(MessageEndpoints.device_readback(self.name), dev_msg, pipe=pipe)
         producer.set(topic=MessageEndpoints.device_read(self.name), msg=dev_msg, pipe=pipe)
@@ -114,7 +114,7 @@ class DeviceManagerOPAAS(DeviceManagerBase):
         interface = get_device_info(obj, {})
         self.producer.set(
             MessageEndpoints.device_info(obj.name),
-            KMessage.DeviceInfoMessage(device=obj.name, info=interface).dumps(),
+            BMessage.DeviceInfoMessage(device=obj.name, info=interface).dumps(),
         )
 
     def reset_device_data(self, obj) -> None:
@@ -124,14 +124,14 @@ class DeviceManagerOPAAS(DeviceManagerBase):
         self.producer.r.delete(MessageEndpoints.device_info(obj.name))
 
     def _obj_callback_readback(self, *args, **kwargs):
-        # print(KMessage.DeviceMessage(signals=kwargs["obj"].read()).content)
+        # print(BMessage.DeviceMessage(signals=kwargs["obj"].read()).content)
         # start = time.time()
         obj = kwargs["obj"]
         if obj.connected:
             name = kwargs["obj"].root.name
             signals = kwargs["obj"].read()
             metadata = self.devices.get(kwargs["obj"].root.name).metadata
-            dev_msg = KMessage.DeviceMessage(signals=signals, metadata=metadata).dumps()
+            dev_msg = BMessage.DeviceMessage(signals=signals, metadata=metadata).dumps()
             pipe = self.producer.pipeline()
             self.producer.set_and_publish(MessageEndpoints.device_readback(name), dev_msg, pipe)
             pipe.execute()

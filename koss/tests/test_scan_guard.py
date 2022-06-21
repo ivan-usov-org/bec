@@ -1,5 +1,5 @@
 import pytest
-from bec_utils import BECMessage as KMessage
+from bec_utils import BECMessage as BMessage
 from koss.devicemanager import DeviceManagerKOSS
 from koss.scan_guard import ScanGuard
 
@@ -16,7 +16,7 @@ def test_check_motors_movable():
 
     sg = ScanGuard(parent=k)
     sg._check_motors_movable(
-        KMessage.ScanQueueMessage(
+        BMessage.ScanQueueMessage(
             scan_type="fermat_scan",
             parameter={
                 "args": {"samx": (-5, 5), "samy": (-5, 5)},
@@ -32,7 +32,7 @@ def test_check_motors_movable():
     dm._load_config_device()
 
     sg._check_motors_movable(
-        KMessage.ScanQueueMessage(
+        BMessage.ScanQueueMessage(
             scan_type="fermat_scan",
             parameter={
                 "args": {"samx": (-5, 5), "samy": (-5, 5)},

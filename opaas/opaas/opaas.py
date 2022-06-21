@@ -6,7 +6,7 @@ import time
 from functools import reduce
 from io import StringIO
 
-import bec_utils.BECMessage as KMessage
+import bec_utils.BECMessage as BMessage
 import msgpack
 import ophyd
 from bec_utils import Alarms, MessageEndpoints
@@ -93,7 +93,7 @@ class OPAAS:
 
     @staticmethod
     def consumer_interception_callback(msg, *, parent, **kwargs) -> None:
-        mvalue = KMessage.ScanQueueModificationMessage.loads(msg.value)
+        mvalue = BMessage.ScanQueueModificationMessage.loads(msg.value)
         logger.info("Receiving: %s", mvalue.content)
         if mvalue.content.get("action") == "deferred_pause":
             pass
@@ -108,7 +108,7 @@ class OPAAS:
 
     @staticmethod
     def instructions_callback(msg, *, parent, **kwargs) -> None:
-        instructions = KMessage.DeviceInstructionMessage.loads(msg.value)
+        instructions = BMessage.DeviceInstructionMessage.loads(msg.value)
         if instructions.content["device"] is not None:
             # pylint: disable=protected-access
             parent._update_device_metadata(instructions)
@@ -177,7 +177,7 @@ class OPAAS:
             # send result to client
             self.producer.set(
                 MessageEndpoints.device_rpc(instr_params.get("rpc_id")),
-                KMessage.DeviceRPCMessage(
+                BMessage.DeviceRPCMessage(
                     device=instr.content["device"],
                     return_val=res,
                     out=result.getvalue(),
@@ -192,7 +192,7 @@ class OPAAS:
             # send error to client
             self.producer.set(
                 MessageEndpoints.device_rpc(instr_params.get("rpc_id")),
-                KMessage.DeviceRPCMessage(
+                BMessage.DeviceRPCMessage(
                     device=instr.content["device"],
                     return_val=None,
                     out={"error": exc.__class__.__name__, "msg": exc.args},
@@ -220,7 +220,7 @@ class OPAAS:
             metadata = self.device_manager.devices.get(dev).metadata
             self.producer.set_and_publish(
                 MessageEndpoints.device_read(dev),
-                KMessage.DeviceMessage(signals=signals, metadata=metadata).dumps(),
+                BMessage.DeviceMessage(signals=signals, metadata=metadata).dumps(),
                 pipe,
             )
             status_info = metadata

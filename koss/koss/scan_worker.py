@@ -4,12 +4,12 @@ import threading
 import time
 from enum import Enum
 
-import bec_utils.BECMessage as KMessage
+import bec_utils.BECMessage as BMessage
 import msgpack
 from bec_utils import DeviceStatus, MessageEndpoints
 
-DeviceMsg = KMessage.DeviceInstructionMessage
-ScanStatusMsg = KMessage.ScanStatusMessage
+DeviceMsg = BMessage.DeviceInstructionMessage
+ScanStatusMsg = BMessage.ScanStatusMessage
 
 
 class InstructionQueueStatus(Enum):

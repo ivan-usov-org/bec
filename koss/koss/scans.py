@@ -1,13 +1,13 @@
 import enum
 from abc import ABC, abstractmethod
 
-import bec_utils.BECMessage as KMessage
+import bec_utils.BECMessage as BMessage
 import numpy as np
 from bec_utils import DeviceManagerBase
 from cytoolz import partition
 
-DeviceMsg = KMessage.DeviceInstructionMessage
-ScanMsg = KMessage.ScanQueueMessage
+DeviceMsg = BMessage.DeviceInstructionMessage
+ScanMsg = BMessage.ScanQueueMessage
 
 
 class LimitError(Exception):

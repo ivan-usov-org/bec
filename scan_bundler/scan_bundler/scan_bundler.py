@@ -3,7 +3,7 @@ import time
 import uuid
 from collections.abc import Iterable
 
-import bec_utils.BECMessage as KMessage
+import bec_utils.BECMessage as BMessage
 import msgpack
 import numpy as np
 from bec_utils import MessageEndpoints
@@ -60,7 +60,7 @@ class ScanBundler:
     @staticmethod
     def _device_read_callback(msg, parent, **kwargs):
         dev = msg.topic.decode().split(MessageEndpoints._device_read + "/")[-1].split(":sub")[0]
-        msg = KMessage.DeviceMessage.loads(msg.value)
+        msg = BMessage.DeviceMessage.loads(msg.value)
         if msg.content["signals"].get(dev) is not None:
             parent._add_device_to_storage(
                 msg.metadata["scanID"], dev, msg.content["signals"], msg.metadata
@@ -70,7 +70,7 @@ class ScanBundler:
 
     @staticmethod
     def _scan_queue_callback(msg, parent, **kwargs):
-        msg = KMessage.ScanQueueStatusMessage.loads(msg.value)
+        msg = BMessage.ScanQueueStatusMessage.loads(msg.value)
         print(msg)
         for q in msg.content["queue"]["primary"].get("info"):
             for rb in q.get("request_blocks"):
@@ -80,11 +80,11 @@ class ScanBundler:
 
     @staticmethod
     def _scan_status_callback(msg, parent, **kwargs):
-        msg = KMessage.ScanStatusMessage.loads(msg.value)
+        msg = BMessage.ScanStatusMessage.loads(msg.value)
         if msg.content.get("status") != "open":
             parent._scan_status_modification(msg)
 
-    def _scan_status_modification(self, msg: KMessage.ScanStatusMessage):
+    def _scan_status_modification(self, msg: BMessage.ScanStatusMessage):
         if msg.content.get("status") == "closed":
             scanID = msg.content.get("scanID")
             if scanID:
@@ -277,7 +277,7 @@ class ScanBundler:
 
         self.producer.send(
             MessageEndpoints.scan_segment(),
-            KMessage.ScanMessage(
+            BMessage.ScanMessage(
                 point_id=pointID,
                 scanID=scanID,
                 data=self.sync_storage[scanID][pointID],

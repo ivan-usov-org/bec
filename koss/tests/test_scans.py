@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from bec_utils import BECMessage as KMessage
+from bec_utils import BECMessage as BMessage
 from koss.scans import FermatSpiralScan, Move, Scan
 
 
@@ -32,31 +32,31 @@ class DMMock:
     "mv_msg,reference_msg_list",
     [
         (
-            KMessage.ScanQueueMessage(
+            BMessage.ScanQueueMessage(
                 scan_type="mv",
                 parameter={"args": {"samx": (1,), "samy": (2,)}, "kwargs": {}},
                 queue="primary",
             ),
             [
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={"value": 1, "group": "scan_motor", "wait_group": "scan_motor"},
                     metadata={"stream": "primary", "DIID": 0},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device="samy",
                     action="set",
                     parameter={"value": 2, "group": "scan_motor", "wait_group": "scan_motor"},
                     metadata={"stream": "primary", "DIID": 1},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device="samx",
                     action="wait",
                     parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
                     metadata={"stream": "primary", "DIID": 2},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device="samy",
                     action="wait",
                     parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
@@ -65,7 +65,7 @@ class DMMock:
             ],
         ),
         (
-            KMessage.ScanQueueMessage(
+            BMessage.ScanQueueMessage(
                 scan_type="mv",
                 parameter={
                     "args": {"samx": (1,), "samy": (2,), "samz": (3,)},
@@ -74,37 +74,37 @@ class DMMock:
                 queue="primary",
             ),
             [
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={"value": 1, "group": "scan_motor", "wait_group": "scan_motor"},
                     metadata={"stream": "primary", "DIID": 0},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device="samy",
                     action="set",
                     parameter={"value": 2, "group": "scan_motor", "wait_group": "scan_motor"},
                     metadata={"stream": "primary", "DIID": 1},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device="samz",
                     action="set",
                     parameter={"value": 3, "group": "scan_motor", "wait_group": "scan_motor"},
                     metadata={"stream": "primary", "DIID": 2},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device="samx",
                     action="wait",
                     parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
                     metadata={"stream": "primary", "DIID": 3},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device="samy",
                     action="wait",
                     parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
                     metadata={"stream": "primary", "DIID": 4},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device="samz",
                     action="wait",
                     parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
@@ -113,19 +113,19 @@ class DMMock:
             ],
         ),
         (
-            KMessage.ScanQueueMessage(
+            BMessage.ScanQueueMessage(
                 scan_type="mv",
                 parameter={"args": {"samx": (1,)}, "kwargs": {}},
                 queue="primary",
             ),
             [
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={"value": 1, "group": "scan_motor", "wait_group": "scan_motor"},
                     metadata={"stream": "primary", "DIID": 0},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device="samx",
                     action="wait",
                     parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
@@ -162,13 +162,13 @@ def test_scan_move(mv_msg, reference_msg_list):
     "scan_msg,reference_scan_list",
     [
         (
-            KMessage.ScanQueueMessage(
+            BMessage.ScanQueueMessage(
                 scan_type="grid_scan",
                 parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
                 queue="primary",
             ),
             [
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device=["samx"],
                     action="read",
                     parameter={
@@ -177,7 +177,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                     },
                     metadata={"stream": "primary", "DIID": 3},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device=["samx"],
                     action="wait",
                     parameter={
@@ -187,25 +187,25 @@ def test_scan_move(mv_msg, reference_msg_list):
                     },
                     metadata={"stream": "primary", "DIID": 4},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="open_scan",
                     parameter={"primary": ["samx"], "num_points": 3, "scan_name": "grid_scan"},
                     metadata={"stream": "primary", "DIID": 0},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="stage",
                     parameter={},
                     metadata={"stream": "primary", "DIID": 1},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="baseline_reading",
                     parameter={},
                     metadata={"stream": "baseline", "DIID": 1},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={
@@ -215,7 +215,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                     },
                     metadata={"stream": "primary", "DIID": 1},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={
@@ -225,19 +225,19 @@ def test_scan_move(mv_msg, reference_msg_list):
                     },
                     metadata={"stream": "primary", "DIID": 2},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
                     metadata={"pointID": 0, "stream": "primary", "DIID": 3},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "trigger", "time": 0.1},
                     metadata={"stream": "primary", "DIID": 4},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={
@@ -247,7 +247,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                     },
                     metadata={"pointID": 0, "stream": "primary", "DIID": 5},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={
@@ -257,7 +257,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                     },
                     metadata={"stream": "primary", "DIID": 6},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={
@@ -267,7 +267,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                     },
                     metadata={"stream": "primary", "DIID": 7},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={
@@ -277,7 +277,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                     },
                     metadata={"stream": "primary", "DIID": 8},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={
@@ -287,19 +287,19 @@ def test_scan_move(mv_msg, reference_msg_list):
                     },
                     metadata={"stream": "primary", "DIID": 9},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
                     metadata={"pointID": 1, "stream": "primary", "DIID": 10},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "trigger", "time": 0.1},
                     metadata={"stream": "primary", "DIID": 11},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={
@@ -309,7 +309,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                     },
                     metadata={"pointID": 1, "stream": "primary", "DIID": 12},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={
@@ -319,7 +319,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                     },
                     metadata={"stream": "primary", "DIID": 13},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={
@@ -329,7 +329,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                     },
                     metadata={"stream": "primary", "DIID": 14},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={
@@ -339,7 +339,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                     },
                     metadata={"stream": "primary", "DIID": 15},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={
@@ -349,13 +349,13 @@ def test_scan_move(mv_msg, reference_msg_list):
                     },
                     metadata={"stream": "primary", "DIID": 16},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
                     metadata={"pointID": 2, "stream": "primary", "DIID": 17},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={
@@ -364,7 +364,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                     },
                     metadata={"stream": "primary", "DIID": 18},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={
@@ -374,7 +374,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                     },
                     metadata={"pointID": 2, "stream": "primary", "DIID": 19},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={
@@ -384,7 +384,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                     },
                     metadata={"stream": "primary", "DIID": 20},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={
@@ -394,7 +394,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                     },
                     metadata={"stream": "primary", "DIID": 21},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={
@@ -404,7 +404,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                     },
                     metadata={"stream": "primary", "DIID": 22},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={
@@ -414,13 +414,13 @@ def test_scan_move(mv_msg, reference_msg_list):
                     },
                     metadata={"stream": "primary", "DIID": 23},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="unstage",
                     parameter={},
                     metadata={"stream": "primary", "DIID": 24},
                 ),
-                KMessage.DeviceInstructionMessage(
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="close_scan",
                     parameter={},
@@ -449,7 +449,7 @@ def test_scan_scan(scan_msg, reference_scan_list):
     "scan_msg,reference_scan_list",
     [
         (
-            KMessage.ScanQueueMessage(
+            BMessage.ScanQueueMessage(
                 scan_type="fermat_scan",
                 parameter={
                     "args": {"samx": (-5, 5), "samy": (-5, 5)},
@@ -471,7 +471,7 @@ def test_scan_scan(scan_msg, reference_scan_list):
             ],
         ),
         (
-            KMessage.ScanQueueMessage(
+            BMessage.ScanQueueMessage(
                 scan_type="fermat_scan",
                 parameter={
                     "args": {"samx": (-5, 5), "samy": (-5, 5)},

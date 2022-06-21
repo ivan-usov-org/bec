@@ -3,7 +3,7 @@ import logging
 import time
 import uuid
 
-import bec_utils.BECMessage as KMessage
+import bec_utils.BECMessage as BMessage
 from bec_utils import Device, DeviceManagerBase, MessageEndpoints
 
 from bec_client.callbacks import ScanRequestError
@@ -84,7 +84,7 @@ def rpc(fcn):
             "args": args,
             "kwargs": kwargs,
         }
-        msg = KMessage.ScanQueueMessage(
+        msg = BMessage.ScanQueueMessage(
             scan_type="device_rpc",
             parameter=params,
             queue="primary",
@@ -106,7 +106,7 @@ def rpc(fcn):
             if msg:
                 break
             time.sleep(0.1)
-        msg = KMessage.DeviceRPCMessage.loads(msg)
+        msg = BMessage.DeviceRPCMessage.loads(msg)
         return msg.content.get("return_val")
 
     return wrapper
@@ -167,7 +167,7 @@ class DeviceBase(Device):
         else:
             val = self.parent.producer.get(MessageEndpoints.device_read(self.name))
         if val:
-            return KMessage.DeviceMessage.loads(val).content["signals"].get(self.name)
+            return BMessage.DeviceMessage.loads(val).content["signals"].get(self.name)
         else:
             return None
 
@@ -280,8 +280,8 @@ class DMClient(DeviceManagerBase):
                 self.devices._add_device(name, obj)
             print(time.time() - start)
 
-    def _get_device_info(self, device_name) -> KMessage.DeviceInfoMessage:
-        msg = KMessage.DeviceInfoMessage.loads(
+    def _get_device_info(self, device_name) -> BMessage.DeviceInfoMessage:
+        msg = BMessage.DeviceInfoMessage.loads(
             self.producer.get(MessageEndpoints.device_info(device_name))
         )
         return msg
@@ -292,7 +292,7 @@ class DMClient(DeviceManagerBase):
                 msg = self._get_device_info(dev.get("name"))
                 self._add_device(dev, msg)
 
-    def _add_device(self, dev: dict, msg: KMessage.DeviceInfoMessage):
+    def _add_device(self, dev: dict, msg: BMessage.DeviceInfoMessage):
         name = msg.content["device"]
         info = msg.content["info"]
 

@@ -2,7 +2,7 @@ import logging
 import time
 from collections import deque
 
-import bec_utils.BECMessage as KMessage
+import bec_utils.BECMessage as BMessage
 from bec_utils import MessageEndpoints
 
 logger = logging.getLogger("scan_queue")
@@ -18,24 +18,24 @@ class ScanRequest:
         self.status = "pending"
         self.scanID = None  # request.metadata.get("scanID")
 
-    def update_with_response(self, response: KMessage.RequestResponseMessage):
+    def update_with_response(self, response: BMessage.RequestResponseMessage):
         self.response = response
         self.decision_pending = False
         self.request_id = response.metadata["RID"]
         self.accepted = [response.content["decision"] == "accepted"]
 
-    def update_with_request(self, request: KMessage.ScanQueueMessage):
+    def update_with_request(self, request: BMessage.ScanQueueMessage):
         self.request = request
         self.request_id = request.metadata["RID"]
 
     @classmethod
-    def from_request(cls, request: KMessage.ScanQueueMessage):
+    def from_request(cls, request: BMessage.ScanQueueMessage):
         scan_req = cls()
         scan_req.update_with_request(request=request)
         return scan_req
 
     @classmethod
-    def from_response(cls, response: KMessage.RequestResponseMessage):
+    def from_response(cls, response: BMessage.RequestResponseMessage):
         scan_req = cls()
         scan_req.update_with_response(response)
         return scan_req
@@ -208,7 +208,7 @@ class ScanQueue:
         action = "deferred_pause" if deferred_pause else "pause"
         self.parent.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
-            KMessage.ScanQueueModificationMessage(
+            BMessage.ScanQueueModificationMessage(
                 scanID=scanID, action=action, parameter={}
             ).dumps(),
         )
@@ -218,7 +218,7 @@ class ScanQueue:
             scanID = self.current_scanId
         self.parent.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
-            KMessage.ScanQueueModificationMessage(
+            BMessage.ScanQueueModificationMessage(
                 scanID=scanID, action="abort", parameter={}
             ).dumps(),
         )
@@ -228,7 +228,7 @@ class ScanQueue:
             scanID = self.current_scanId
         self.parent.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
-            KMessage.ScanQueueModificationMessage(
+            BMessage.ScanQueueModificationMessage(
                 scanID=scanID, action="continue", parameter={}
             ).dumps(),
         )
@@ -244,13 +244,13 @@ class ScanQueue:
 
     @staticmethod
     def _scan_segment_callback(msg, *, parent, **kwargs) -> None:
-        scan_msg = KMessage.ScanMessage.loads(msg.value)
+        scan_msg = BMessage.ScanMessage.loads(msg.value)
         if scan_msg is not None:
             parent.add_scan_msg(scan_msg)
 
     @staticmethod
     def _scan_queue_status_callback(msg, *, parent, **kwargs) -> None:
-        queue_status = KMessage.ScanQueueStatusMessage.loads(msg.value)
+        queue_status = BMessage.ScanQueueStatusMessage.loads(msg.value)
         if queue_status is not None:
             parent._update_queue_status(queue_status.content["queue"])
         # if scan.metadata is not None:
@@ -307,7 +307,7 @@ class ScanQueue:
 
     @staticmethod
     def _scan_queue_request_callback(msg, *, parent, **kwargs) -> None:
-        request = KMessage.ScanQueueMessage.loads(msg.value)
+        request = BMessage.ScanQueueMessage.loads(msg.value)
         if request.metadata is not None:
             if "RID" in request.metadata:
                 if parent.scan_queue_requests.get(request.metadata["RID"]) is not None:
@@ -319,7 +319,7 @@ class ScanQueue:
 
     @staticmethod
     def _scan_queue_request_response_callback(msg, *, parent, **kwargs) -> None:
-        response = KMessage.RequestResponseMessage.loads(msg.value)
+        response = BMessage.RequestResponseMessage.loads(msg.value)
         logger.debug(response)
         if parent.scan_queue_requests.get(response.metadata.get("RID")) is not None:
             parent.scan_queue_requests[response.metadata["RID"]].update_with_response(response)
@@ -334,7 +334,7 @@ class ScanQueue:
 
     @staticmethod
     def _scan_status_callback(msg, *, parent, **kwargs) -> None:
-        scan = KMessage.ScanStatusMessage.loads(msg.value)
+        scan = BMessage.ScanStatusMessage.loads(msg.value)
         scan_number = scan.content["info"].get("scan_number")
         if scan_number:
             parent.last_scan_number = scan_number

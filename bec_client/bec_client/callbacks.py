@@ -3,7 +3,7 @@ import logging
 import threading
 import time
 
-import bec_utils.BECMessage as KMessage
+import bec_utils.BECMessage as BMessage
 import msgpack
 import numpy as np
 from bec_utils import Alarms, DeviceManagerBase, DeviceStatus, MessageEndpoints
@@ -75,7 +75,7 @@ async def live_updates_readback(
         while not all(stop_dev.is_set() for stop_dev in stop):
             msg = consumer.poll_messages()
             if msg is not None:
-                msg = KMessage.DeviceMessage.loads(msg.value).content["signals"]
+                msg = BMessage.DeviceMessage.loads(msg.value).content["signals"]
                 for ind, dev in enumerate(devices):
                     if dev in msg:
                         dev_values[ind] = msg[dev].get("value")
