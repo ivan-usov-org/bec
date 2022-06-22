@@ -1,6 +1,7 @@
 from bec_utils.connector import ConnectorBase
 from koss.koss import KOSS
 from koss.scan_assembler import ScanAssembler
+from koss.scan_worker import InstructionQueueStatus
 
 
 def dummy_devices(enabled):
@@ -45,10 +46,20 @@ class ConnectorMock(ConnectorBase):
         return ProducerMock()
 
 
+class WorkerMock:
+    def __init__(self) -> None:
+        self.scan_id = None
+        self.scan_motors = []
+        self.current_scanID = None
+        self.current_scan_info = None
+        self.status = InstructionQueueStatus.IDLE
+
+
 class KossMock(KOSS):
     def __init__(self, dm, connector) -> None:
         self.dm = dm
         super().__init__(bootstrap_server="dummy", connector_cls=ConnectorMock, scibec_url="dummy")
+        self.scan_worker = WorkerMock()
 
     def _start_devicemanager(self):
         pass

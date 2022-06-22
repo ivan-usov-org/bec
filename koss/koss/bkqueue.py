@@ -145,11 +145,18 @@ class ScanQueue:
     MAX_HISTORY = 100
     DEFAULT_QUEUE_STATUS = ScanQueueStatus.RUNNING
 
-    def __init__(self, queue_manager: QueueManager) -> None:
+    def __init__(
+        self, queue_manager: QueueManager, instruction_queue_item_cls: InstructionQueueItem = None
+    ) -> None:
         self.queue = collections.deque()
         self.history_queue = collections.deque(maxlen=self.MAX_HISTORY)
         self.active_instruction_queue = None
         self.queue_manager = queue_manager
+        self._instruction_queue_item_cls = (
+            instruction_queue_item_cls
+            if instruction_queue_item_cls is not None
+            else InstructionQueueItem
+        )
         # self.open_instruction_queue = None
         self._status = self.DEFAULT_QUEUE_STATUS
         self.signal_event = threading.Event()
@@ -237,13 +244,13 @@ class ScanQueue:
                 queue_exists = True
         if not queue_exists:
             # create new queue element (InstructionQueueItem)
-            instruction_queue = InstructionQueueItem(
+            instruction_queue = self._instruction_queue_item_cls(
                 parent=self,
                 assembler=self.queue_manager.parent.scan_assembler,
                 worker=self.queue_manager.parent.scan_worker,
             )
         instruction_queue.append_scan_request(msg)
-        instruction_queue.queue.request_blocks[-1].update_scan_number(self.queue_manager)
+        instruction_queue.queue.update_scan_number(request_block_index=-1)
         if not queue_exists:
             instruction_queue.queue_group = target_group
             self.queue.append(instruction_queue)
@@ -359,6 +366,11 @@ class RequestBlockQueue:
 
         self.request_blocks_queue.append(request_block)
         self.request_blocks.append(request_block)
+
+    def update_scan_number(self, request_block_index):
+        self.request_blocks[request_block_index].update_scan_number(
+            self.parent.parent.queue_manager
+        )
 
     def _pull_request_block(self):
         if self.active_rb is None:
