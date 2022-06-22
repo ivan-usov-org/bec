@@ -87,9 +87,6 @@ async def live_updates_readback(
                     val = dm.parent.producer.get(MessageEndpoints.device_status(dev))
                     if val is not None:
                         val = msgpack.loads(val)
-                        # print(val.get("timestamp") - start)
-                        # print(dev_values)
-                        # print(DeviceStatus(val.get("status")))
                         if DeviceStatus(val.get("status")) == DeviceStatus.IDLE:
                             if all(
                                 np.isclose(
@@ -102,13 +99,6 @@ async def live_updates_readback(
                                     set_event_delayed(stop[ind], 0.2)
                 check_alarms(dm.parent)
                 await asyncio.sleep(0.1)
-                # else:
-
-                #     if all(
-                #         np.isclose(dev_values[ind], list(move_args.values())[ind])
-                #     ):
-                #         if not stop[ind].is_set:
-                #             set_event_delayed(stop[ind], 0.2)
             print_device_positions()
 
     print("\n")
@@ -132,6 +122,14 @@ async def wait_for_scan_request_decision(scan_queue_request):
     logger.debug(f"Waiting for decision finished after {time.time()-start} s.")
 
 
+def sort_devices(devices, scan_devices) -> list:
+    for scan_dev in list(scan_devices)[::-1]:
+        devices.remove(scan_dev)
+        devices.insert(0, scan_dev)
+    print(devices)
+    return devices
+
+
 async def live_updates_table(bk, request):
     acq_header = "seq. num"
     pause_requested = False
@@ -139,8 +137,9 @@ async def live_updates_table(bk, request):
     primary_devices = bk.devicemanager.devices.primary_devices(
         [bk.devicemanager.devices[dev] for dev in scan_devices]
     )
-    primary_devices = primary_devices[0 : min(15, len(primary_devices)) - 1]
+    primary_devices = primary_devices[0 : min(10, len(primary_devices)) - 1]
     devices = [dev.name for dev in primary_devices]
+    devices = sort_devices(devices, scan_devices)
     dev_values = [0 for dev in devices]
 
     RID = request.metadata["RID"]
