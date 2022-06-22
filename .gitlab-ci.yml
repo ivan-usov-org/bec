@@ -5,9 +5,8 @@ image: "python:3.8"
 #commands to run in the Docker container before starting each job.
 before_script:
   - pip install black
-  - pip install -r ./koss/requirements.txt
+  - pip install pytest
   - pip install -e ./koss 
-  - pip install -e ./bec_utils
 # different stages in the pipeline
 stages:
   - Formatter
