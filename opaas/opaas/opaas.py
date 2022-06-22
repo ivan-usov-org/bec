@@ -205,7 +205,9 @@ class OPAAS:
 
     def _set_device(self, instr) -> None:
         val = instr.content["parameter"]["value"]
-        self.device_manager.devices.get(instr.content["device"]).obj.set(val)
+        obj = self.device_manager.devices.get(instr.content["device"]).obj
+        self.device_manager.add_req_done_sub(obj)
+        obj.set(val)
 
     def _read_device(self, instr) -> None:
         # check performance -- we might have to change it to a background thread
@@ -216,7 +218,8 @@ class OPAAS:
         pipe = self.producer.pipeline()
         for dev in devices:
             self.device_manager.devices.get(dev).metadata = instr.metadata
-            signals = self.device_manager.devices.get(dev).obj.read()
+            obj = self.device_manager.devices.get(dev).obj
+            signals = obj.read()
             metadata = self.device_manager.devices.get(dev).metadata
             self.producer.set_and_publish(
                 MessageEndpoints.device_read(dev),

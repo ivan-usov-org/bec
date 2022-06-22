@@ -36,10 +36,9 @@ def set_event_delayed(event: threading.Event, delay: int) -> None:
 
 
 def check_alarms(bk):
-    if len(bk.alarms) > 0:
-        for alarm in bk.alarms:
-            if alarm.severity > Alarms.WARNING:
-                raise alarm
+    for alarm in bk.alarms(severity=Alarms.MINOR):
+        print(alarm)
+        raise alarm
 
 
 async def live_updates_readback(

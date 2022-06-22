@@ -40,6 +40,7 @@ class QueueManager:
                 source=msg.content,
                 content=limit_error.args[0],
                 alarm_type=limit_error.__class__.__name__,
+                metadata=msg.metadata,
             )
 
     def _start_scan_queue_consumer(self) -> None:
@@ -213,11 +214,10 @@ class ScanQueue:
                     self.history_queue.append(self.active_instruction_queue)
                     return self.active_instruction_queue
 
-                if len(self.queue) == 0:
-                    # we don't need to pause if there is no scan enqueued
-                    self.status = ScanQueueStatus.RUNNING
-
                 while self.status == ScanQueueStatus.PAUSED:
+                    if len(self.queue) == 0:
+                        # we don't need to pause if there is no scan enqueued
+                        self.status = ScanQueueStatus.RUNNING
                     time.sleep(1)
                     print("queue is paused")
 

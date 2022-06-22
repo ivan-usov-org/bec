@@ -2,6 +2,7 @@ import logging
 import threading
 
 import IPython
+from bec_utils import Alarms
 from bec_utils.connector import ConnectorBase
 from IPython.terminal.prompts import Prompts, Token
 
@@ -32,7 +33,7 @@ class BKClient:
         self.producer = self.connector.producer()
         self._sighandler = SigintHandler(self)
         self._ip = None
-        self._alarm_handler = None
+        self.alarm_handler = None
         self._load_scans()
 
     def start(self):
@@ -43,12 +44,19 @@ class BKClient:
         self._start_scan_queue()
         self._start_alarm_handler()
 
-    @property
-    def alarms(self):
-        if self._alarm_handler is None:
+    def alarms(self, severity=Alarms.WARNING):
+        if self.alarm_handler is None:
             return []
         else:
-            return self._alarm_handler.get_unhandled_alarms()
+            yield from self.alarm_handler.get_alarm(severity=severity)
+
+    def show_all_alarms(self, severity=Alarms.WARNING):
+        alarms = self.alarm_handler.get_unhandled_alarms(severity=severity)
+        for alarm in alarms:
+            print(alarm)
+
+    def clear_all_alarms(self):
+        self.alarm_handler.clear()
 
     def _load_scans(self):
         self.scans = Scans(self)
@@ -89,8 +97,8 @@ class BKClient:
 
     def _start_alarm_handler(self):
         logger.info("Starting alarm listener")
-        self._alarm_handler = AlarmHandler(self.connector)
-        self._alarm_handler.start()
+        self.alarm_handler = AlarmHandler(self.connector)
+        self.alarm_handler.start()
 
     def shutdown(self):
         logger.info("Shutting down device manager")

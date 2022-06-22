@@ -4,6 +4,7 @@ class MessageEndpoints:
     _device_read = "internal/devices/read"
     _device_last_read = "internal/devices/last_read"
     _device_readback = "internal/devices/readback"
+    _device_req_status = "internal/devices/req_status"
 
     # device config
     _device_config_request = "internal/devices/config_request"
@@ -50,6 +51,10 @@ class MessageEndpoints:
     @classmethod
     def device_readback(self, device: str):
         return f"{self._device_readback}/{device}"
+
+    @classmethod
+    def device_req_status(self, device: str):
+        return f"{self._device_req_status}/{device}"
 
     # device config
     @classmethod

@@ -1,6 +1,6 @@
 from collections import deque
-from bec_utils import Alarms, BECMessage, RedisConnector, MessageEndpoints
-from collections import deque
+
+from bec_utils import Alarms, BECMessage, MessageEndpoints, RedisConnector
 
 
 class AlarmException(Exception):
@@ -49,10 +49,19 @@ class AlarmHandler:
             alarm for alarm in self.alarms_stack if not alarm.handled and alarm.severity >= severity
         ]
 
+    def get_alarm(self, severity=Alarms.WARNING):
+        alarms = self.get_unhandled_alarms(severity=severity)
+        for alarm in alarms:
+            self.alarms_stack.remove(alarm)
+            yield alarm
+
     def raise_alarms(self, severity=Alarms.MINOR):
         alarms = self.get_unhandled_alarms(severity=severity)
         if len(alarms) > 0:
             raise alarms[0]
+
+    def clear(self):
+        self.alarms_stack.clear()
 
     def shutdown(self):
         self.alarm_consumer.shutdown()

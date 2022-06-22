@@ -225,6 +225,20 @@ class DeviceStatusMessage(BECMessage):
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
 
 
+class DeviceReqStatusMessage(BECMessage):
+    msg_type = "device_req_status_message"
+
+    def __init__(self, *, device: str, success: bool, metadata: dict = None) -> None:
+        """
+
+        Args:
+            signals:
+            metadata:
+        """
+        self.content = {"device": device, "success": success}
+        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+
+
 class DeviceInfoMessage(BECMessage):
     msg_type = "device_info_message"
 
