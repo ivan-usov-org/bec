@@ -1,5 +1,7 @@
 import functools
+import inspect
 import logging
+import sys
 import time
 import uuid
 
@@ -70,11 +72,39 @@ def rpc(fcn):
 
     @functools.wraps(fcn)
     def wrapper(self, *args, **kwargs):
-        full_func_call = ".".join([self._compile_function_path(), fcn.__name__])
-        device = full_func_call.split(".")[0]
-        func_call = ".".join(full_func_call.split(".")[1:])
+        device, func_call = self._get_rpc_func_name(fcn=fcn)
+
         if kwargs.get("cached", False):
             return fcn(self, *args, **kwargs)
+        return self._run_rpc_call(device, func_call, *args, **kwargs)
+
+    return wrapper
+
+
+class RPCBase:
+    def __init__(self, name: str, info: dict = None, parent=None) -> None:
+        self.name = name
+        if info is None:
+            info = {}
+        self._info = info.get("device_info")
+        self.parent = parent
+        self._enabled = False
+        self._custom_rpc_methods = {}
+        if self._info:
+            self._parse_info()
+
+    def _run(self, *args, **kwargs):
+        device, func_call = self._get_rpc_func_name(fcn_name=self.name, use_parent=True)
+        return self._run_rpc_call(device, func_call, args, kwargs)
+
+    @property
+    def root(self):
+        parent = self
+        while not isinstance(parent.parent, DMClient):
+            parent = parent.parent
+        return parent
+
+    def _run_rpc_call(self, device, func_call, *args, **kwargs):
         rpc_id = str(uuid.uuid4())
         requestID = str(uuid.uuid4())  # TODO: move this to the API server
         params = {
@@ -109,22 +139,29 @@ def rpc(fcn):
         msg = BMessage.DeviceRPCMessage.loads(msg)
         return msg.content.get("return_val")
 
-    return wrapper
+    def _get_rpc_func_name(self, fcn_name=None, fcn=None, use_parent=False):
+        if not fcn_name:
+            fcn_name = fcn.__name__
+        full_func_call = ".".join([self._compile_function_path(use_parent=use_parent), fcn_name])
+        device = full_func_call.split(".")[0]
+        func_call = ".".join(full_func_call.split(".")[1:])
+        return (device, func_call)
 
-
-class DeviceBase(Device):
-    def __init__(self, name: str, info: dict = {}, parent=None) -> None:
-        self.name = name
-        self._info = info.get("device_info")
-        self.parent = parent
-        self._enabled = False
-        if self._info:
-            self._parse_info()
+    def _compile_function_path(self, use_parent=False) -> str:
+        if use_parent:
+            parent = self.parent
+        else:
+            parent = self
+        func_call = []
+        while not isinstance(parent, DMClient):
+            func_call.append(parent.name)
+            parent = parent.parent
+        return ".".join(func_call[::-1])
 
     def _parse_info(self):
-        for signal_name in self._info.get("signals"):
-            print(signal_name)
-            setattr(self, signal_name, Signal(signal_name, parent=self))
+        if self._info.get("signals"):
+            for signal_name in self._info.get("signals"):
+                setattr(self, signal_name, Signal(signal_name, parent=self))
         if self._info.get("subdevices"):
             for dev in self._info.get("subdevices"):
                 base_class = dev["device_info"].get("device_base_class")
@@ -133,21 +170,31 @@ class DeviceBase(Device):
                 elif base_class == "device":
                     setattr(self, dev.get("name"), Device(signal_name, parent=self))
 
-    def _compile_function_path(self) -> str:
-        parent = self
-        func_call = []
-        while not isinstance(parent, DMClient):
-            func_call.append(parent.name)
-            parent = parent.parent
-        return ".".join(func_call[::-1])
+        for user_access_name, descr in self._info.get("custom_user_access").items():
 
-    @property
-    def root(self):
-        parent = self
-        while not isinstance(parent.parent, DMClient):
-            parent = parent.parent
-        return parent
+            if "type" in descr:
+                self._custom_rpc_methods[user_access_name] = RPCBase(
+                    name=user_access_name, info=descr, parent=self
+                )
+                setattr(
+                    self,
+                    user_access_name,
+                    self._custom_rpc_methods[user_access_name]._run,
+                )
+            else:
+                self._custom_rpc_methods[user_access_name] = RPCBase(
+                    name=user_access_name,
+                    info={"device_info": {"custom_user_access": descr}},
+                    parent=self,
+                )
+                setattr(
+                    self,
+                    user_access_name,
+                    self._custom_rpc_methods[user_access_name],
+                )
 
+
+class DeviceBase(RPCBase, Device):
     @property
     def enabled(self):
         return self.root._enabled
