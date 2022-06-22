@@ -11,7 +11,6 @@ if __name__ == "__main__":
     setup(
         install_requires=[
             "numpy",
-            "cytoolz",
         ]
     )
     local_deps = [utils]
