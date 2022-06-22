@@ -94,7 +94,9 @@ async def live_updates_readback(
                         if DeviceStatus(val.get("status")) == DeviceStatus.IDLE:
                             if all(
                                 np.isclose(
-                                    dev_values[ind], list(move_args.values())[ind], atol=0.05
+                                    dev_values[ind],
+                                    list(move_args.values())[ind],
+                                    atol=dm.devices[dev].deviceConfig.get("tolerance", 0.5),
                                 )
                             ):
                                 if not stop[ind].is_set():

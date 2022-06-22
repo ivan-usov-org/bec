@@ -265,6 +265,7 @@ for m in user_motors:
                 "speed": 100,
                 "update_frequency": 400,
                 "limits": [-50, 50],
+                "tolerance": 0.01,
             },
             "acquisition": {"schedule": "sync"},
             "deviceGroup": "userMotor",
@@ -290,6 +291,7 @@ if USE_LAMNI:
                     "host": "mpc2680.psi.ch",
                     "port": 8081,
                     "sign": m[2],
+                    "tolerance": 0.5,
                 },
                 "acquisition": {"schedule": "sync"},
                 "deviceGroup": "userMotor",
@@ -325,10 +327,7 @@ for m in beamline_monitor:
         {
             "status": {"enabled": True},
             "type": "SynAxisMonitor",
-            "config": {
-                "name": m,
-                "labels": m,
-            },
+            "config": {"name": m, "labels": m, "tolerance": 0.5},
             "acquisition": {"schedule": "sync"},
             "deviceGroup": "monitor",
         }
