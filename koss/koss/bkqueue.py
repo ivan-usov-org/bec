@@ -180,7 +180,8 @@ class ScanQueue:
             if len(set(scanID) & set(queue.scanID)) > 0:
                 remove.append(queue)
         if remove:
-            self.queue.remove(remove)
+            for rmv in remove:
+                self.queue.remove(rmv)
 
     def clear(self):
         self.queue.clear()
