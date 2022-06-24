@@ -135,6 +135,7 @@ class RPCBase:
                 break
             time.sleep(0.1)
         msg = BMessage.DeviceRPCMessage.loads(msg)
+        print(msg.content.get("out"))
         return msg.content.get("return_val")
 
     def _get_rpc_func_name(self, fcn_name=None, fcn=None, use_parent=False):
