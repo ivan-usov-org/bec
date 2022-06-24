@@ -3,6 +3,7 @@ import logging
 import sys
 import threading
 import time
+import traceback
 from functools import reduce
 from io import StringIO
 
@@ -156,7 +157,14 @@ class OPAAS:
             if callable(rpc_var):
                 args = tuple(instr_params.get("args", ()))
                 kwargs = instr_params.get("kwargs", {})
-                res = rpc_var()
+                if len(args[0]) > 0 and len(kwargs) > 0:
+                    res = rpc_var(*args[0], **kwargs)
+                elif len(args[0]) > 0:
+                    res = rpc_var(*args[0])
+                elif len(kwargs) > 0:
+                    res = rpc_var(**kwargs)
+                else:
+                    res = rpc_var()
             else:
                 res = rpc_var
             if not is_serializable(res):
@@ -195,7 +203,11 @@ class OPAAS:
                 BMessage.DeviceRPCMessage(
                     device=instr.content["device"],
                     return_val=None,
-                    out={"error": exc.__class__.__name__, "msg": exc.args},
+                    out={
+                        "error": exc.__class__.__name__,
+                        "msg": exc.args,
+                        "traceback": traceback.format_exc(),
+                    },
                     success=False,
                 ).dumps(),
             )
@@ -206,8 +218,21 @@ class OPAAS:
     def _set_device(self, instr) -> None:
         val = instr.content["parameter"]["value"]
         obj = self.device_manager.devices.get(instr.content["device"]).obj
-        self.device_manager.add_req_done_sub(obj)
-        obj.set(val)
+        # self.device_manager.add_req_done_sub(obj)
+        st = obj.set(val)
+        st.add_callback(self._status_callback)
+
+    def _status_callback(self, status):
+        pipe = self.producer.pipeline()
+        dev_msg = BMessage.DeviceReqStatusMessage(
+            device=status.device.name,
+            success=status.success,
+            metadata=self.device_manager.devices.get(status.device.name).metadata,
+        ).dumps()
+        self.producer.set_and_publish(
+            MessageEndpoints.device_req_status(status.device.name), dev_msg, pipe
+        )
+        pipe.execute()
 
     def _read_device(self, instr) -> None:
         # check performance -- we might have to change it to a background thread
