@@ -189,6 +189,8 @@ async def live_updates_table(bk, request):
                 print(f"Could not find queue entry for scanID {scanID}")
                 if bk.queue.find_scan(RID) is None:
                     return
+            while len(queue_item.status) == 0:
+                await asyncio.sleep(0.1)
             print(f"Starting scan {scan_number}.")
 
             header = [acq_header]
@@ -221,6 +223,10 @@ async def live_updates_table(bk, request):
                 #     print(t.get_header_separator())
                 #     break
             if queue_pos is None:
-                print(t.get_footer(f"Scan {scan_number} finished. Scan ID {scanID}."))
+                print(
+                    t.get_footer(
+                        f"Scan {scan_number} finished. Scan ID {scanID}. Elapsed time: {queue_item.end_time-queue_item.start_time:.2f} s"
+                    )
+                )
         else:
             raise ScanRequestError("Scan was rejected by the server.")

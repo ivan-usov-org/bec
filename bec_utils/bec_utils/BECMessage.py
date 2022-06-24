@@ -1,4 +1,5 @@
 import enum
+import time
 from typing import Any, Union
 
 import msgpack
@@ -101,9 +102,17 @@ class ScanQueueMessage(BECMessage):
 class ScanStatusMessage(BECMessage):
     msg_type = "scan_status"
 
-    def __init__(self, *, scanID: str, status: dict, info: dict, metadata: dict = None) -> None:
-
-        self.content = {"scanID": scanID, "status": status, "info": info}
+    def __init__(
+        self,
+        *,
+        scanID: str,
+        status: dict,
+        info: dict,
+        timestamp: float = None,
+        metadata: dict = None,
+    ) -> None:
+        tms = timestamp if timestamp is not None else time.time()
+        self.content = {"scanID": scanID, "status": status, "info": info, "timestamp": tms}
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
 
 
