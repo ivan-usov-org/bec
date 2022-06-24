@@ -1,7 +1,7 @@
 import numpy as np
 import yaml
 
-USE_LAMNI = False
+USE_LAMNI = True
 
 lamni_galil_motors = [
     # ("lsamx", "A", -1),
@@ -14,6 +14,13 @@ lamni_galil_motors = [
     ("leyey", "H", -1),
 ]
 
+lamni_smaract_motors = [
+    ("losax", "A", -1),
+    ("losay", "B", -1),
+    ("losaz", "C", 1),
+    ("lcsx", "D", -1),
+    ("lcsy", "E", -1),
+]
 
 user_motors = [
     "samx",
@@ -292,6 +299,24 @@ if USE_LAMNI:
                     "port": 8081,
                     "sign": m[2],
                     "tolerance": 0.5,
+                },
+                "acquisition": {"schedule": "sync"},
+                "deviceGroup": "userMotor",
+            }
+        )
+    for m in lamni_smaract_motors:
+        out[m[0]] = dict(
+            {
+                "status": {"enabled": True},
+                "type": "SmaractMotor",
+                "config": {
+                    "axis_Id": m[1],
+                    "name": m[0],
+                    "labels": m[0],
+                    "host": "mpc2680.psi.ch",
+                    "port": 8085,
+                    "sign": m[2],
+                    "tolerance": 0.05,
                 },
                 "acquisition": {"schedule": "sync"},
                 "deviceGroup": "userMotor",
