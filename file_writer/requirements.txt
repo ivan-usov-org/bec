@@ -1,0 +1,6 @@
+redis
+msgpack
+pyyaml
+typeguard
+requests
+h5py
