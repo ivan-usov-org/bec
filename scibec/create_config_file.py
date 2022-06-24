@@ -304,7 +304,7 @@ if USE_LAMNI:
                     "port": 8081,
                     "sign": m[2],
                     "tolerance": 0.5,
-                    "device_access":{"rt":"rtx"}
+                    "device_access": {"rt": "rtx"},
                 },
                 "acquisition": {"schedule": "sync"},
                 "deviceGroup": "userMotor",

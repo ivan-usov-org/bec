@@ -83,7 +83,7 @@ class DeviceManagerOPAAS(DeviceManagerBase):
         enabled = dev.get("enabled")
 
         _cls = self._get_device_class(dev["deviceClass"])
-        if len(dev["deviceConfig"].get("device_access", []))>0:
+        if len(dev["deviceConfig"].get("device_access", [])) > 0:
             obj = _cls(**dev["deviceConfig"], device_manager=self)
         else:
             obj = _cls(**dev["deviceConfig"])
