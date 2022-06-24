@@ -103,10 +103,6 @@ class DeviceManagerOPAAS(DeviceManagerBase):
 
         return opaas_obj
 
-    def add_req_done_sub(self, obj) -> None:
-        if "_req_done" in obj.event_types:
-            obj.subscribe(self._obj_callback_req_done, event_type="_req_done", run=False)
-
     def publish_device_info(self, obj) -> None:
         """
 
@@ -126,20 +122,6 @@ class DeviceManagerOPAAS(DeviceManagerBase):
         self.producer.r.delete(MessageEndpoints.device_read(obj.name))
         self.producer.r.delete(MessageEndpoints.device_last_read(obj.name))
         self.producer.r.delete(MessageEndpoints.device_info(obj.name))
-
-    def _obj_callback_req_done(self, *args, **kwargs):
-        print(args, kwargs)
-        obj = kwargs["obj"]
-        pipe = self.producer.pipeline()
-        dev_msg = BMessage.DeviceReqStatusMessage(
-            device=obj.root.name,
-            success=kwargs.get("success", True),
-            metadata=self.devices.get(obj.root.name).metadata,
-        ).dumps()
-        self.producer.set_and_publish(
-            MessageEndpoints.device_req_status(obj.root.name), dev_msg, pipe
-        )
-        pipe.execute()
 
     def _obj_callback_readback(self, *args, **kwargs):
         # print(BMessage.DeviceMessage(signals=kwargs["obj"].read()).content)
