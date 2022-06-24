@@ -137,9 +137,9 @@ async def live_updates_table(bk, request):
     primary_devices = bk.devicemanager.devices.primary_devices(
         [bk.devicemanager.devices[dev] for dev in scan_devices]
     )
-    primary_devices = primary_devices[0 : min(10, len(primary_devices)) - 1]
     devices = [dev.name for dev in primary_devices]
     devices = sort_devices(devices, scan_devices)
+    devices = devices[0 : min(10, len(devices)) - 1]
     dev_values = [0 for dev in devices]
 
     RID = request.metadata["RID"]

@@ -156,7 +156,7 @@ class OPAAS:
             if callable(rpc_var):
                 args = tuple(instr_params.get("args", ()))
                 kwargs = instr_params.get("kwargs", {})
-                res = rpc_var(*args, **kwargs)
+                res = rpc_var()
             else:
                 res = rpc_var
             if not is_serializable(res):
