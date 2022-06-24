@@ -83,7 +83,10 @@ class DeviceManagerOPAAS(DeviceManagerBase):
         enabled = dev.get("enabled")
 
         _cls = self._get_device_class(dev["deviceClass"])
-        obj = _cls(**dev["deviceConfig"])
+        if len(dev["deviceConfig"].get("device_access", []))>0:
+            obj = _cls(**dev["deviceConfig"], device_manager=self)
+        else:
+            obj = _cls(**dev["deviceConfig"])
         self.reset_device_data(obj)
         self.publish_device_info(obj)
         obj.subscribe(self._obj_callback_readback, run=enabled)

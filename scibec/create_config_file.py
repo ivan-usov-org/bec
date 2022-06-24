@@ -6,12 +6,17 @@ USE_LAMNI = True
 lamni_galil_motors = [
     # ("lsamx", "A", -1),
     # ("lsamy", "B", 1),
-    # ("lsamrot", "C", 1),
+    ("lsamrot", "C", 1),
     # ("loptz", "D", -1),
     # ("loptx", "E", 1),
     # ("lopty", "F", 1),
     ("leyex", "G", -1),
     ("leyey", "H", -1),
+]
+
+lamni_rt_motors = [
+    ("rtx", "A", 1),
+    ("rty", "B", 1),
 ]
 
 lamni_smaract_motors = [
@@ -299,6 +304,7 @@ if USE_LAMNI:
                     "port": 8081,
                     "sign": m[2],
                     "tolerance": 0.5,
+                    "device_access":{"rt":"rtx"}
                 },
                 "acquisition": {"schedule": "sync"},
                 "deviceGroup": "userMotor",
@@ -317,6 +323,24 @@ if USE_LAMNI:
                     "port": 8085,
                     "sign": m[2],
                     "tolerance": 0.05,
+                },
+                "acquisition": {"schedule": "sync"},
+                "deviceGroup": "userMotor",
+            }
+        )
+
+    for m in lamni_rt_motors:
+        out[m[0]] = dict(
+            {
+                "status": {"enabled": True},
+                "type": "RtLamniMotor",
+                "config": {
+                    "axis_Id": m[1],
+                    "name": m[0],
+                    "labels": m[0],
+                    "host": "mpc2680.psi.ch",
+                    "port": 3333,
+                    "sign": m[2],
                 },
                 "acquisition": {"schedule": "sync"},
                 "deviceGroup": "userMotor",
