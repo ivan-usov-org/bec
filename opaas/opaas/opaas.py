@@ -3,6 +3,7 @@ import logging
 import sys
 import threading
 import time
+import traceback
 from functools import reduce
 from io import StringIO
 
@@ -202,7 +203,11 @@ class OPAAS:
                 BMessage.DeviceRPCMessage(
                     device=instr.content["device"],
                     return_val=None,
-                    out={"error": exc.__class__.__name__, "msg": exc.args},
+                    out={
+                        "error": exc.__class__.__name__,
+                        "msg": exc.args,
+                        "traceback": traceback.format_exc(),
+                    },
                     success=False,
                 ).dumps(),
             )
