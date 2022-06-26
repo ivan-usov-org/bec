@@ -3,6 +3,7 @@ import time
 
 import redis
 
+from .BECMessage import AlarmMessage, LogMessage
 from .connector import (
     ConnectorBase,
     ConsumerConnector,
@@ -11,7 +12,6 @@ from .connector import (
     ProducerConnector,
 )
 from .endpoints import MessageEndpoints
-from .BECMessage import AlarmMessage, LogMessage
 
 
 class Alarms(int, enum.Enum):
