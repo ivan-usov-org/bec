@@ -10,15 +10,11 @@
 import datetime
 import logging
 import os
-import threading
-import uuid
-from dataclasses import dataclass
 from pathlib import Path
 
 from bec_utils import RedisConnector, ServiceConfig
 
 from bec_client import BKClient
-from bec_client import scans as scan_utils
 
 log_path = "./log/"
 Path(log_path).mkdir(parents=True, exist_ok=True)
@@ -28,7 +24,6 @@ logging.basicConfig(
         log_path,
         "client_" + str(datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")) + ".log",
     ),
-    # encoding="utf-8",
     level=logging.WARNING,
     filemode="w+",
 )
