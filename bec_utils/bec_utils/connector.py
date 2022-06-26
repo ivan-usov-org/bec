@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import _thread
 import abc
 import sys
 import threading
@@ -144,6 +145,9 @@ class ConsumerConnectorThreaded(threading.Thread, abc.ABC):
                 self.poll_messages()
             except KeyError:
                 print("Exception", sys.exc_info())
+            except Exception as e:
+                _thread.interrupt_main()
+                raise e
             finally:
                 if self.signal_event.is_set():
                     self.shutdown()
