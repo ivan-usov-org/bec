@@ -2,6 +2,7 @@ import datetime
 import sys
 import threading
 import time
+from asyncio.log import logger
 from enum import Enum
 
 import bec_utils.BECMessage as BMessage
@@ -92,8 +93,7 @@ class ScanWorker(threading.Thread):
         start = datetime.datetime.now()
 
         wait_group = instr.content["parameter"].get("wait_group")
-        print("Waiting for devices:", wait_group)
-        print(time.time())
+        logger.debug("Waiting for devices:", wait_group)
         if wait_group is not None:
             if wait_group in self._groups:
                 group_devices = [dev.name for dev in self._get_devices_from_instruction(instr)]
@@ -155,16 +155,14 @@ class ScanWorker(threading.Thread):
                 self._groups[wait_group] = [
                     dev for dev in self._groups[wait_group] if dev not in wait_group_devices
                 ]
-            print("Finished waiting")
-            print(time.time())
-        print(datetime.datetime.now() - start)
+            logger.debug("Finished waiting")
+        logger.debug(datetime.datetime.now() - start)
 
     def _wait_for_read(self, instr) -> None:
         start = datetime.datetime.now()
 
         wait_group = instr.content["parameter"].get("wait_group")
-        print("Waiting for devices:", wait_group)
-        print(time.time())
+        logger.debug("Waiting for devices:", wait_group)
         if wait_group is not None:
             if wait_group in self._groups:
                 group_devices = [dev.name for dev in self._get_devices_from_instruction(instr)]
@@ -198,9 +196,8 @@ class ScanWorker(threading.Thread):
                 self._groups[wait_group] = [
                     dev for dev in self._groups[wait_group] if dev not in wait_group_devices
                 ]
-            print("Finished waiting")
-            print(time.time())
-        print(datetime.datetime.now() - start)
+            logger.debug("Finished waiting")
+        logger.debug(datetime.datetime.now() - start)
 
     def _wait_for_trigger(self, instr) -> None:
         time.sleep(float(instr.content["parameter"]["time"]))
