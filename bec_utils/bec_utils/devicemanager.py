@@ -427,7 +427,7 @@ class DeviceManagerBase:
         else:
             return True
 
-    def _update_config(self, config) -> None:
+    def update_config(self, obj, config) -> None:
         raise NotImplementedError
 
     @property
