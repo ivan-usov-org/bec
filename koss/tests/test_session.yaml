@@ -1,0 +1,3467 @@
+accessGroups:
+- customer
+devices:
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: eyefoc
+    limits:
+    - -50
+    - 50
+    name: eyefoc
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  enabled: true
+  id: 62b34d81fc6a658e4760b051
+  name: eyefoc
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: eyex
+    limits:
+    - -50
+    - 50
+    name: eyex
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  enabled: true
+  id: 62b34d81fc6a658e4760b052
+  name: eyex
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: eyey
+    limits:
+    - -50
+    - 50
+    name: eyey
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  enabled: true
+  id: 62b34d81fc6a658e4760b053
+  name: eyey
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: hrox
+    limits:
+    - -50
+    - 50
+    name: hrox
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  enabled: true
+  id: 62b34d81fc6a658e4760b054
+  name: hrox
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: hroy
+    limits:
+    - -50
+    - 50
+    name: hroy
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  enabled: true
+  id: 62b34d81fc6a658e4760b055
+  name: hroy
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: hroz
+    limits:
+    - -50
+    - 50
+    name: hroz
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  enabled: true
+  id: 62b34d81fc6a658e4760b056
+  name: hroz
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: hx
+    limits:
+    - -50
+    - 50
+    name: hx
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  enabled: true
+  id: 62b34d81fc6a658e4760b057
+  name: hx
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: hy
+    limits:
+    - -50
+    - 50
+    name: hy
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  enabled: true
+  id: 62b34d81fc6a658e4760b058
+  name: hy
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: hz
+    limits:
+    - -50
+    - 50
+    name: hz
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  enabled: true
+  id: 62b34d81fc6a658e4760b059
+  name: hz
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: mbsx
+    limits:
+    - -50
+    - 50
+    name: mbsx
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  enabled: true
+  id: 62b34d81fc6a658e4760b05a
+  name: mbsx
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: mbsy
+    limits:
+    - -50
+    - 50
+    name: mbsy
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  enabled: true
+  id: 62b34d81fc6a658e4760b05b
+  name: mbsy
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: pinx
+    limits:
+    - -50
+    - 50
+    name: pinx
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  enabled: true
+  id: 62b34d81fc6a658e4760b05c
+  name: pinx
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: piny
+    limits:
+    - -50
+    - 50
+    name: piny
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  enabled: true
+  id: 62b34d81fc6a658e4760b05d
+  name: piny
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: pinz
+    limits:
+    - -50
+    - 50
+    name: pinz
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  enabled: true
+  id: 62b34d81fc6a658e4760b05e
+  name: pinz
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: samx
+    limits:
+    - -50
+    - 50
+    name: samx
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  enabled: true
+  id: 62b34d81fc6a658e4760b05f
+  name: samx
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: samy
+    limits:
+    - -50
+    - 50
+    name: samy
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  enabled: true
+  id: 62b34d81fc6a658e4760b060
+  name: samy
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: samz
+    limits:
+    - -50
+    - 50
+    name: samz
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  enabled: true
+  id: 62b34d81fc6a658e4760b061
+  name: samz
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm3a
+    name: bpm3a
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b062
+  name: bpm3a
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm3b
+    name: bpm3b
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b063
+  name: bpm3b
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm3c
+    name: bpm3c
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b064
+  name: bpm3c
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm3d
+    name: bpm3d
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b065
+  name: bpm3d
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm3i
+    name: bpm3i
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b066
+  name: bpm3i
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm3x
+    name: bpm3x
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b067
+  name: bpm3x
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm3y
+    name: bpm3y
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b068
+  name: bpm3y
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm3z
+    name: bpm3z
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b069
+  name: bpm3z
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm4a
+    name: bpm4a
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b06a
+  name: bpm4a
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm4b
+    name: bpm4b
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b06b
+  name: bpm4b
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm4c
+    name: bpm4c
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b06c
+  name: bpm4c
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm4d
+    name: bpm4d
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b06d
+  name: bpm4d
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm4i
+    name: bpm4i
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b06e
+  name: bpm4i
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm4s
+    name: bpm4s
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b06f
+  name: bpm4s
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm4x
+    name: bpm4x
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b070
+  name: bpm4x
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm4xf
+    name: bpm4xf
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b071
+  name: bpm4xf
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm4xm
+    name: bpm4xm
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b072
+  name: bpm4xm
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm4y
+    name: bpm4y
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b073
+  name: bpm4y
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm4yf
+    name: bpm4yf
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b074
+  name: bpm4yf
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm4ym
+    name: bpm4ym
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b075
+  name: bpm4ym
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm4z
+    name: bpm4z
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b076
+  name: bpm4z
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm5a
+    name: bpm5a
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b077
+  name: bpm5a
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm5b
+    name: bpm5b
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b078
+  name: bpm5b
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm5c
+    name: bpm5c
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b079
+  name: bpm5c
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm5d
+    name: bpm5d
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b07a
+  name: bpm5d
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm5i
+    name: bpm5i
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b07b
+  name: bpm5i
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm5x
+    name: bpm5x
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b07c
+  name: bpm5x
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm5y
+    name: bpm5y
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b07d
+  name: bpm5y
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm5z
+    name: bpm5z
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b07e
+  name: bpm5z
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm6a
+    name: bpm6a
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b07f
+  name: bpm6a
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm6b
+    name: bpm6b
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b080
+  name: bpm6b
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm6c
+    name: bpm6c
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b081
+  name: bpm6c
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm6d
+    name: bpm6d
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b082
+  name: bpm6d
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm6i
+    name: bpm6i
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b083
+  name: bpm6i
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm6x
+    name: bpm6x
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b084
+  name: bpm6x
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm6y
+    name: bpm6y
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b085
+  name: bpm6y
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: bpm6z
+    name: bpm6z
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b086
+  name: bpm6z
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: curr
+    name: curr
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b087
+  name: curr
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: diode
+    name: diode
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b088
+  name: diode
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: ebpmdx
+    name: ebpmdx
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b089
+  name: ebpmdx
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: ebpmdy
+    name: ebpmdy
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b08a
+  name: ebpmdy
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: ebpmux
+    name: ebpmux
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b08b
+  name: ebpmux
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: ebpmuy
+    name: ebpmuy
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b08c
+  name: ebpmuy
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: ftp
+    name: ftp
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b08d
+  name: ftp
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: temp
+    name: temp
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b08e
+  name: temp
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisMonitor
+  deviceConfig:
+    labels: transd
+    name: transd
+    tolerance: 0.5
+  deviceGroup: monitor
+  enabled: true
+  id: 62b34d81fc6a658e4760b08f
+  name: transd
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: aptrx
+    name: aptrx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d81fc6a658e4760b090
+  name: aptrx
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: aptry
+    name: aptry
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d81fc6a658e4760b091
+  name: aptry
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: bim2x
+    name: bim2x
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b092
+  name: bim2x
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: bim2y
+    name: bim2y
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b093
+  name: bim2y
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: bm1trx
+    name: bm1trx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b094
+  name: bm1trx
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: bm1try
+    name: bm1try
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b095
+  name: bm1try
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: bm2trx
+    name: bm2trx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b096
+  name: bm2trx
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: bm2try
+    name: bm2try
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b097
+  name: bm2try
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: bm3trx
+    name: bm3trx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b098
+  name: bm3trx
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: bm3try
+    name: bm3try
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b099
+  name: bm3try
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: bm4trx
+    name: bm4trx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b09a
+  name: bm4trx
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: bm4try
+    name: bm4try
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b09b
+  name: bm4try
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: bm5trx
+    name: bm5trx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b09c
+  name: bm5trx
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: bm5try
+    name: bm5try
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b09d
+  name: bm5try
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: bm6trx
+    name: bm6trx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b09e
+  name: bm6trx
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: bm6try
+    name: bm6try
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b09f
+  name: bm6try
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: bpm4r
+    name: bpm4r
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0a0
+  name: bpm4r
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: bpm5r
+    name: bpm5r
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0a1
+  name: bpm5r
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: bs1x
+    name: bs1x
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0a2
+  name: bs1x
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: bs1y
+    name: bs1y
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0a3
+  name: bs1y
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: bs2x
+    name: bs2x
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0a4
+  name: bs2x
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: bs2y
+    name: bs2y
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0a5
+  name: bs2y
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: burstn
+    name: burstn
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0a6
+  name: burstn
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: burstr
+    name: burstr
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0a7
+  name: burstr
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: ddg1a
+    name: ddg1a
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0a8
+  name: ddg1a
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: ddg1b
+    name: ddg1b
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0a9
+  name: ddg1b
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: ddg1c
+    name: ddg1c
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0aa
+  name: ddg1c
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: ddg1d
+    name: ddg1d
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0ab
+  name: ddg1d
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: ddg1e
+    name: ddg1e
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0ac
+  name: ddg1e
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: ddg1f
+    name: ddg1f
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0ad
+  name: ddg1f
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: ddg1g
+    name: ddg1g
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0ae
+  name: ddg1g
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: ddg1h
+    name: ddg1h
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0af
+  name: ddg1h
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: dettrx
+    name: dettrx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0b0
+  name: dettrx
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: di2trx
+    name: di2trx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0b1
+  name: di2trx
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: di2try
+    name: di2try
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0b2
+  name: di2try
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: dtpush
+    name: dtpush
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0b3
+  name: dtpush
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: dtth
+    name: dtth
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0b4
+  name: dtth
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: dttrx
+    name: dttrx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0b5
+  name: dttrx
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: dttry
+    name: dttry
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0b6
+  name: dttry
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: dttrz
+    name: dttrz
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0b7
+  name: dttrz
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: ebcsx
+    name: ebcsx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0b8
+  name: ebcsx
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: ebcsy
+    name: ebcsy
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0b9
+  name: ebcsy
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: ebfi1
+    name: ebfi1
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0ba
+  name: ebfi1
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: ebfi2
+    name: ebfi2
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0bb
+  name: ebfi2
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: ebfi3
+    name: ebfi3
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0bc
+  name: ebfi3
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: ebfi4
+    name: ebfi4
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0bd
+  name: ebfi4
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: ebfzpx
+    name: ebfzpx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0be
+  name: ebfzpx
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: ebfzpy
+    name: ebfzpy
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0bf
+  name: ebfzpy
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: ebtrx
+    name: ebtrx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0c0
+  name: ebtrx
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: ebtry
+    name: ebtry
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0c1
+  name: ebtry
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: ebtrz
+    name: ebtrz
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0c2
+  name: ebtrz
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: fi1try
+    name: fi1try
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0c3
+  name: fi1try
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: fi2try
+    name: fi2try
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0c4
+  name: fi2try
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: fi3try
+    name: fi3try
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0c5
+  name: fi3try
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: fsh1x
+    name: fsh1x
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0c6
+  name: fsh1x
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: fsh2x
+    name: fsh2x
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0c7
+  name: fsh2x
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: ftrans
+    name: ftrans
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0c8
+  name: ftrans
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: fttrx1
+    name: fttrx1
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0c9
+  name: fttrx1
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: fttrx2
+    name: fttrx2
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0ca
+  name: fttrx2
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: fttry1
+    name: fttry1
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0cb
+  name: fttry1
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: fttry2
+    name: fttry2
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0cc
+  name: fttry2
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: fttrz
+    name: fttrz
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0cd
+  name: fttrz
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: idgap
+    name: idgap
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0ce
+  name: idgap
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: mibd
+    name: mibd
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0cf
+  name: mibd
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: mibd1
+    name: mibd1
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0d0
+  name: mibd1
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: mibd2
+    name: mibd2
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0d1
+  name: mibd2
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: miroll
+    name: miroll
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0d2
+  name: miroll
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: mith
+    name: mith
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0d3
+  name: mith
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: mitrx
+    name: mitrx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0d4
+  name: mitrx
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: mitry
+    name: mitry
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0d5
+  name: mitry
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: mitry1
+    name: mitry1
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0d6
+  name: mitry1
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: mitry2
+    name: mitry2
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0d7
+  name: mitry2
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: mitry3
+    name: mitry3
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0d8
+  name: mitry3
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: mobd
+    name: mobd
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0d9
+  name: mobd
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: mobdai
+    name: mobdai
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0da
+  name: mobdai
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: mobdbo
+    name: mobdbo
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0db
+  name: mobdbo
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: mobdco
+    name: mobdco
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0dc
+  name: mobdco
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: mobddi
+    name: mobddi
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0dd
+  name: mobddi
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: mokev
+    name: mokev
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0de
+  name: mokev
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: mopush1
+    name: mopush1
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0df
+  name: mopush1
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: mopush2
+    name: mopush2
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0e0
+  name: mopush2
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: moroll1
+    name: moroll1
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0e1
+  name: moroll1
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: moroll2
+    name: moroll2
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0e2
+  name: moroll2
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: moth1
+    name: moth1
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0e3
+  name: moth1
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: moth1e
+    name: moth1e
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0e4
+  name: moth1e
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: moth2
+    name: moth2
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0e5
+  name: moth2
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: moth2e
+    name: moth2e
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0e6
+  name: moth2e
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: motrx2
+    name: motrx2
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0e7
+  name: motrx2
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: motry
+    name: motry
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0e8
+  name: motry
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: motry2
+    name: motry2
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0e9
+  name: motry2
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: motrz1
+    name: motrz1
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0ea
+  name: motrz1
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: motrz1e
+    name: motrz1e
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0eb
+  name: motrz1e
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: moyaw2
+    name: moyaw2
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0ec
+  name: moyaw2
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl0ch
+    name: sl0ch
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0ed
+  name: sl0ch
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl0trxi
+    name: sl0trxi
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0ee
+  name: sl0trxi
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl0trxo
+    name: sl0trxo
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0ef
+  name: sl0trxo
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl0wh
+    name: sl0wh
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0f0
+  name: sl0wh
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl1ch
+    name: sl1ch
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0f1
+  name: sl1ch
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl1cv
+    name: sl1cv
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0f2
+  name: sl1cv
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl1trxi
+    name: sl1trxi
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0f3
+  name: sl1trxi
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl1trxo
+    name: sl1trxo
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0f4
+  name: sl1trxo
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl1tryb
+    name: sl1tryb
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0f5
+  name: sl1tryb
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl1tryt
+    name: sl1tryt
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0f6
+  name: sl1tryt
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl1wh
+    name: sl1wh
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0f7
+  name: sl1wh
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl1wv
+    name: sl1wv
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0f8
+  name: sl1wv
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl2ch
+    name: sl2ch
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0f9
+  name: sl2ch
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl2cv
+    name: sl2cv
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0fa
+  name: sl2cv
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl2trxi
+    name: sl2trxi
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0fb
+  name: sl2trxi
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl2trxo
+    name: sl2trxo
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0fc
+  name: sl2trxo
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl2tryb
+    name: sl2tryb
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0fd
+  name: sl2tryb
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl2tryt
+    name: sl2tryt
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0fe
+  name: sl2tryt
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl2wh
+    name: sl2wh
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b0ff
+  name: sl2wh
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl2wv
+    name: sl2wv
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b100
+  name: sl2wv
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl3ch
+    name: sl3ch
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d82fc6a658e4760b101
+  name: sl3ch
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl3cv
+    name: sl3cv
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d83fc6a658e4760b102
+  name: sl3cv
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl3trxi
+    name: sl3trxi
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d83fc6a658e4760b103
+  name: sl3trxi
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl3trxo
+    name: sl3trxo
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d83fc6a658e4760b104
+  name: sl3trxo
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl3tryb
+    name: sl3tryb
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d83fc6a658e4760b105
+  name: sl3tryb
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl3tryt
+    name: sl3tryt
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d83fc6a658e4760b106
+  name: sl3tryt
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl3wh
+    name: sl3wh
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d83fc6a658e4760b107
+  name: sl3wh
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl3wv
+    name: sl3wv
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d83fc6a658e4760b108
+  name: sl3wv
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl4ch
+    name: sl4ch
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d83fc6a658e4760b109
+  name: sl4ch
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl4cv
+    name: sl4cv
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d83fc6a658e4760b10a
+  name: sl4cv
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl4trxi
+    name: sl4trxi
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d83fc6a658e4760b10b
+  name: sl4trxi
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl4trxo
+    name: sl4trxo
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d83fc6a658e4760b10c
+  name: sl4trxo
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl4tryb
+    name: sl4tryb
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d83fc6a658e4760b10d
+  name: sl4tryb
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl4tryt
+    name: sl4tryt
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d83fc6a658e4760b10e
+  name: sl4tryt
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl4wh
+    name: sl4wh
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d83fc6a658e4760b10f
+  name: sl4wh
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl4wv
+    name: sl4wv
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d83fc6a658e4760b110
+  name: sl4wv
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl5ch
+    name: sl5ch
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d83fc6a658e4760b111
+  name: sl5ch
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl5cv
+    name: sl5cv
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d83fc6a658e4760b112
+  name: sl5cv
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl5trxi
+    name: sl5trxi
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d83fc6a658e4760b113
+  name: sl5trxi
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl5trxo
+    name: sl5trxo
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d83fc6a658e4760b114
+  name: sl5trxo
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl5tryb
+    name: sl5tryb
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d83fc6a658e4760b115
+  name: sl5tryb
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl5tryt
+    name: sl5tryt
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d83fc6a658e4760b116
+  name: sl5tryt
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl5wh
+    name: sl5wh
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d83fc6a658e4760b117
+  name: sl5wh
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sl5wv
+    name: sl5wv
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d83fc6a658e4760b118
+  name: sl5wv
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: strox
+    name: strox
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d83fc6a658e4760b119
+  name: strox
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: stroy
+    name: stroy
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d83fc6a658e4760b11a
+  name: stroy
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: stroz
+    name: stroz
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d83fc6a658e4760b11b
+  name: stroz
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sttrx
+    name: sttrx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d83fc6a658e4760b11c
+  name: sttrx
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+- accessGroups:
+  - customer
+  acquisitionConfig:
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: sttry
+    name: sttry
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  enabled: true
+  id: 62b34d83fc6a658e4760b11d
+  name: sttry
+  ownerGroup: test
+  sessionId: 62b34d81fc6a658e4760b050
+id: 62b34d81fc6a658e4760b050
+name: test
+ownerGroup: test

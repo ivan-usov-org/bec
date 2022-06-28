@@ -196,7 +196,7 @@ class DeviceManagerBase:
     def update_config(self, obj, config) -> None:
         raise NotImplementedError
 
-    def load_config_from_disk(self, config_path) -> None:
+    def load_config_from_disk(self, config_path) -> dict:
         """
         load config from disk and send request
         Args:
@@ -227,8 +227,7 @@ class DeviceManagerBase:
         else:
             raise NotImplementedError
 
-        self._request = {"data": data, "request": "post"}
-        self.send_config_request()
+        return data
 
     def send_config_request(self, action: str = "update", config=None) -> None:
         """
