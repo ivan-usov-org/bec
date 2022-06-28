@@ -8,17 +8,13 @@ class DeviceMock:
     def __init__(self, name: str):
         self.name = name
         self.read_buffer = None
-        self._device_config = {"limits": [-50, 50]}
+        self.config = {"deviceConfig": {"limits": [-50, 50]}}
 
     def read(self):
         return self.read_buffer
 
     def readback(self):
         return self.read_buffer
-
-    @property
-    def deviceConfig(self):
-        return self._device_config
 
 
 class DMMock:
