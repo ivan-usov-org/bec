@@ -1,21 +1,18 @@
 import inspect
 import logging
 import time
+from email.message import Message
 
 import bec_utils.BECMessage as BMessage
 import msgpack
 import ophyd
 import ophyd.sim as ops
 import ophyd_devices as opd
-from bec_utils import Device, DeviceManagerBase, MessageEndpoints
+from bec_utils import Device, DeviceConfigError, DeviceManagerBase, MessageEndpoints
 from bec_utils.connector import ConnectorBase
 from opaas.devices.device_serializer import get_device_info
 
 logger = logging.getLogger(__name__)
-
-
-class DeviceConfigError(Exception):
-    pass
 
 
 class OPAASDevice(Device):
@@ -61,16 +58,27 @@ class DeviceManagerOPAAS(DeviceManagerBase):
                 enabled = dev.get("enabled")
                 logger.info(f"Adding device {name}: {'ENABLED' if enabled else 'DISABLED'}")
                 obj = self.initialize_device(dev)
+                for key, val in dev.items():
+                    obj.__setattr__(key, val)
 
-    def update_config(self, obj, config) -> None:
+    @staticmethod
+    def update_config(obj, config) -> None:
         if hasattr(obj, "update_config"):
             obj.update_config(config)
         else:
             for config_key, config_value in config.items():
+                # first handle the ophyd exceptions...
+                if config_key == "limits":
+                    if hasattr(obj, "low_limit_travel") and hasattr(obj, "high_limit_travel"):
+                        obj.low_limit_travel.set(config_value[0])
+                        obj.high_limit_travel.set(config_value[1])
+                        continue
+
                 if not hasattr(obj, config_key):
                     raise DeviceConfigError(
                         f"Unknown config parameter {config_key} for device of type {obj.__class__.__name__}."
                     )
+
                 config_attr = getattr(obj, config_key)
                 if isinstance(config_attr, ophyd.Signal):
                     config_attr.set(config_value)
@@ -194,7 +202,49 @@ class DeviceManagerOPAAS(DeviceManagerBase):
         # self._device_instructions_connector.signal_event.set()
         # self._device_instructions_connector.join()
 
+    def send_config_request_reply(self):
+        pass
+
     @staticmethod
     def _device_config_request_callback(msg, *, parent, **_kwargs) -> None:
-        logger.info(f"Received request: {msg.value}")
-        parent.parse_config_request(msg.value)
+        msg = BMessage.DeviceConfigMessage.loads(msg.value)
+        logger.info(f"Received request: {msg}")
+        parent.parse_config_request(msg)
+
+    def send_config(self, msg: BMessage.DeviceConfigMessage) -> None:
+        self.producer.send(MessageEndpoints.device_config(), msg.dumps())
+
+    def parse_config_request(self, msg: BMessage.DeviceConfigMessage) -> None:
+        try:
+            self._check_request_validity(msg)
+
+            if msg.content["action"] == "update":
+                for dev in msg.content["config"]:
+                    # store old config
+                    old_config = self.devices[dev].deviceConfig.copy()
+
+                    # apply config
+                    try:
+                        self.update_config(
+                            self.devices[dev].obj, msg.content["config"][dev]["config"]
+                        )
+                    except Exception as e:
+                        self.update_config(self.devices[dev].obj, old_config)
+                        raise DeviceConfigError(f"Error during object update. {e}")
+
+                    self.devices[dev].deviceConfig.update(msg.content["config"][dev]["config"])
+
+                    # update config in DB
+                    print("updating in DB")
+                    success = self._scibec.patch_device_config(
+                        self.devices[dev].id,
+                        {"deviceConfig": self.devices[dev].deviceConfig},
+                    )
+                    if not success:
+                        raise DeviceConfigError("Error during database update.")
+
+                # send updates to services
+                self.send_config(msg)
+
+        except DeviceConfigError as dev_conf_error:
+            self.send_config_request_reply(dev_conf_error)

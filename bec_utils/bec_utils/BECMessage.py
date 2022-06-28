@@ -285,8 +285,8 @@ class DeviceConfigMessage(BECMessage):
         """
 
         Args:
-            action: post or patch
-            config:
+            action: add, update or reload
+            config: device config (add, update) or None (reload)
         """
         self.content = {"action": action, "config": config}
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)

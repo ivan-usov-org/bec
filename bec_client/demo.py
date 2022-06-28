@@ -46,7 +46,7 @@ scans = bk.scans
 
 logging.info("Started BKClient")
 
-
+dev.samx.low_limit = -20
 # def plotfunc():
 #     dp = PlotAxis(bk.devicemanager.connector)
 #     dp.start()

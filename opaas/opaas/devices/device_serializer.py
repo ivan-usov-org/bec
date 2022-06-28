@@ -27,7 +27,7 @@ def get_custom_user_access_info(obj, obj_interface):
                 else:
                     continue
             else:
-                obj_interface[f] = {"type": "func"}
+                obj_interface[f] = {"type": "func", "doc": m.__doc__}
     return obj_interface
 
 
