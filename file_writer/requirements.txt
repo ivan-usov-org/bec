@@ -4,3 +4,4 @@ pyyaml
 typeguard
 requests
 h5py
+nexpy

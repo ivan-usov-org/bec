@@ -189,7 +189,9 @@ class RequestBase(ABC):
         if not self.simulate:
             print("check limits")
             for ii, dev in enumerate(self.scan_motors):
-                low_limit, high_limit = self.dm.devices[dev].deviceConfig.get("limits", [0, 0])
+                low_limit, high_limit = (
+                    self.dm.devices[dev].config["deviceConfig"].get("limits", [0, 0])
+                )
                 if low_limit >= high_limit:
                     return
                 for pos in self.positions:

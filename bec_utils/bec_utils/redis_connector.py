@@ -106,6 +106,10 @@ class RedisProducer(ProducerConnector):
     def pipeline(self):
         return self.r.pipeline()
 
+    def delete(self, topic, pipe=None):
+        client = pipe if pipe is not None else self.r
+        client.delete(topic)
+
     def get(self, topic: str, pipe=None, is_dict=False):
         client = pipe if pipe is not None else self.r
         if is_dict:

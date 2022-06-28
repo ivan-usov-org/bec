@@ -1,6 +1,10 @@
+import logging
+
 import bec_utils.BECMessage as BMessage
 import msgpack
 from bec_utils import MessageEndpoints
+
+logger = logging.getLogger(__name__)
 
 
 class ScanAcceptance:
@@ -141,7 +145,8 @@ class ScanGuard:
         accepted = scan_request_decision.get("accepted")
         # msg.metadata["scanID"] = str(uuid.uuid4()) if accepted else None
         self._send_scan_request_response(scan_request_decision, msg.metadata)
-
+        if not accepted:
+            logger.info(f"Request was rejected: {scan_request_decision}")
         if accepted:
             self._append_to_scan_queue(msg)
 

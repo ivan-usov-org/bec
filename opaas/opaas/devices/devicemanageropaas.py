@@ -1,12 +1,14 @@
+import inspect
 import logging
 import time
+from email.message import Message
 
 import bec_utils.BECMessage as BMessage
 import msgpack
 import ophyd
 import ophyd.sim as ops
 import ophyd_devices as opd
-from bec_utils import Device, DeviceManagerBase, MessageEndpoints
+from bec_utils import Device, DeviceConfigError, DeviceManagerBase, MessageEndpoints
 from bec_utils.connector import ConnectorBase
 from opaas.devices.device_serializer import get_device_info
 
@@ -14,10 +16,9 @@ logger = logging.getLogger(__name__)
 
 
 class OPAASDevice(Device):
-    def __init__(self, name, obj, enabled=False):
-        super().__init__(name)
+    def __init__(self, name, obj, config):
+        super().__init__(name, config)
         self.obj = obj
-        self.enabled = enabled
         self.metadata = {}
 
     def initialize_device_buffer(self, producer):
@@ -34,29 +35,8 @@ class DeviceManagerOPAAS(DeviceManagerBase):
         self._config_request_connector = None
         self._device_instructions_connector = None
 
-    def _load_config_device(self):
-        if self._is_config_valid():
-            for name, dev in self._config.items():
-                logger.info(
-                    f"Adding device {name}: {'ENABLED' if dev['status']['enabled'] else 'DISABLED'}"
-                )
-                # BODGE:
-                # TODO: remove this section
-                if dev["type"] == "SynGauss":
-                    obj = ops.det
-                else:
-                    _cls = self._get_device_class(dev["type"])
-                    obj = _cls(**dev["config"])
-                    obj.subscribe(self._obj_callback_readback, run=False)
-                    obj.subscribe(self._obj_callback_acq_done, event_type="acq_done", run=False)
-                    obj.motor_is_moving.subscribe(self._obj_callback_is_moving, run=False)
-                self.devices._add_device(name, OPAASDevice(name, obj, dev["status"]["enabled"]))
-
-        if self._is_config_valid():
-            for dev in self._session["devices"]:
-                obj = Device(dev.get("name"))
-                obj.enabled = dev.get("enabled")
-                self.devices._add_device(dev.get("name"), obj)
+    def update_config(self, config) -> None:
+        print(config)
 
     def _get_device_class(self, dev_type):
         module = None
@@ -78,27 +58,70 @@ class DeviceManagerOPAAS(DeviceManagerBase):
                 logger.info(f"Adding device {name}: {'ENABLED' if enabled else 'DISABLED'}")
                 obj = self.initialize_device(dev)
 
+    @staticmethod
+    def update_config(obj, config) -> None:
+        if hasattr(obj, "update_config"):
+            obj.update_config(config)
+        else:
+            for config_key, config_value in config.items():
+                # first handle the ophyd exceptions...
+                if config_key == "limits":
+                    if hasattr(obj, "low_limit_travel") and hasattr(obj, "high_limit_travel"):
+                        obj.low_limit_travel.set(config_value[0])
+                        obj.high_limit_travel.set(config_value[1])
+                        continue
+
+                if not hasattr(obj, config_key):
+                    raise DeviceConfigError(
+                        f"Unknown config parameter {config_key} for device of type {obj.__class__.__name__}."
+                    )
+
+                config_attr = getattr(obj, config_key)
+                if isinstance(config_attr, ophyd.Signal):
+                    config_attr.set(config_value)
+                elif callable(config_attr):
+                    config_attr(config_value)
+                else:
+                    setattr(obj, config_key, config_value)
+
     def initialize_device(self, dev: dict) -> OPAASDevice:
         name = dev.get("name")
         enabled = dev.get("enabled")
 
-        _cls = self._get_device_class(dev["deviceClass"])
-        if len(dev["deviceConfig"].get("device_access", [])) > 0:
-            obj = _cls(**dev["deviceConfig"], device_manager=self)
-        else:
-            obj = _cls(**dev["deviceConfig"])
-        self.reset_device_data(obj)
-        self.publish_device_info(obj)
+        dev_cls = self._get_device_class(dev["deviceClass"])
+        config = dev["deviceConfig"].copy()
+
+        class_params = inspect.signature(dev_cls)._parameters
+        class_params_and_config_keys = set(class_params) & config.keys()
+
+        init_kwargs = {key: config.pop(key) for key in class_params_and_config_keys}
+        if config.get("device_access"):
+            init_kwargs["device_manager"] = self
+
+        # initialize the device object
+        obj = dev_cls(**init_kwargs)
+        self.update_config(obj, config)
+
+        # refresh the device info
+        pipe = self.producer.pipeline()
+        self.reset_device_data(obj, pipe)
+        self.publish_device_info(obj, pipe)
+        pipe.execute()
+
+        # add subscriptions
         obj.subscribe(self._obj_callback_readback, run=enabled)
         if "acq_done" in obj.event_types:
             obj.subscribe(self._obj_callback_acq_done, event_type="acq_done", run=False)
         if "done_moving" in obj.event_types:
             obj.subscribe(self._obj_callback_done_moving, event_type="done_moving", run=False)
-
         if hasattr(obj, "motor_is_moving"):
             obj.motor_is_moving.subscribe(self._obj_callback_is_moving, run=enabled)
-        opaas_obj = OPAASDevice(name, obj, enabled)
+
+        # insert the created device obj into the device manager
+        opaas_obj = OPAASDevice(name, obj, config=dev)
         self.devices._add_device(name, opaas_obj)
+
+        # update device buffer
         if enabled:
             if not opaas_obj.obj.connected:
                 opaas_obj.obj.stage()
@@ -106,7 +129,7 @@ class DeviceManagerOPAAS(DeviceManagerBase):
 
         return opaas_obj
 
-    def publish_device_info(self, obj) -> None:
+    def publish_device_info(self, obj, pipe=None) -> None:
         """
 
 
@@ -118,13 +141,14 @@ class DeviceManagerOPAAS(DeviceManagerBase):
         self.producer.set(
             MessageEndpoints.device_info(obj.name),
             BMessage.DeviceInfoMessage(device=obj.name, info=interface).dumps(),
+            pipe,
         )
 
-    def reset_device_data(self, obj) -> None:
-        self.producer.r.delete(MessageEndpoints.device_status(obj.name))
-        self.producer.r.delete(MessageEndpoints.device_read(obj.name))
-        self.producer.r.delete(MessageEndpoints.device_last_read(obj.name))
-        self.producer.r.delete(MessageEndpoints.device_info(obj.name))
+    def reset_device_data(self, obj, pipe=None) -> None:
+        self.producer.delete(MessageEndpoints.device_status(obj.name), pipe)
+        self.producer.delete(MessageEndpoints.device_read(obj.name), pipe)
+        self.producer.delete(MessageEndpoints.device_last_read(obj.name), pipe)
+        self.producer.delete(MessageEndpoints.device_info(obj.name), pipe)
 
     def _obj_callback_readback(self, *args, **kwargs):
         # print(BMessage.DeviceMessage(signals=kwargs["obj"].read()).content)
@@ -175,7 +199,52 @@ class DeviceManagerOPAAS(DeviceManagerBase):
         # self._device_instructions_connector.signal_event.set()
         # self._device_instructions_connector.join()
 
+    def send_config_request_reply(self):
+        pass
+
     @staticmethod
     def _device_config_request_callback(msg, *, parent, **_kwargs) -> None:
-        logger.info(f"Received request: {msg.value}")
-        parent.parse_config_request(msg.value)
+        msg = BMessage.DeviceConfigMessage.loads(msg.value)
+        logger.info(f"Received request: {msg}")
+        parent.parse_config_request(msg)
+
+    def send_config(self, msg: BMessage.DeviceConfigMessage) -> None:
+        self.producer.send(MessageEndpoints.device_config(), msg.dumps())
+
+    def parse_config_request(self, msg: BMessage.DeviceConfigMessage) -> None:
+        try:
+            self._check_request_validity(msg)
+            if msg.content["action"] == "update":
+
+                for dev in msg.content["config"]:
+                    dev_config = msg.content["config"][dev]
+                    if "deviceConfig" in dev:
+                        # store old config
+                        old_config = self.devices[dev].config["deviceConfig"].copy()
+
+                        # apply config
+                        try:
+                            self.update_config(self.devices[dev].obj, dev_config["deviceConfig"])
+                        except Exception as e:
+                            self.update_config(self.devices[dev].obj, old_config)
+                            raise DeviceConfigError(f"Error during object update. {e}")
+
+                        self.devices[dev].deviceConfig.update(dev_config["deviceConfig"])
+
+                        # update config in DB
+                        print("updating in DB")
+                        success = self._scibec.patch_device_config(
+                            self.devices[dev].id,
+                            {"deviceConfig": self.devices[dev].config["deviceConfig"]},
+                        )
+                        if not success:
+                            raise DeviceConfigError("Error during database update.")
+
+                    if "enabled" in dev_config:
+                        self.devices[dev].config["enabled"] = dev_config["enabled"]
+
+                # send updates to services
+                self.send_config(msg)
+
+        except DeviceConfigError as dev_conf_error:
+            self.send_config_request_reply(dev_conf_error)

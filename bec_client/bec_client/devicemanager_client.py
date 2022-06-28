@@ -82,14 +82,16 @@ def rpc(fcn):
 class RPCBase:
     def __init__(self, name: str, info: dict = None, parent=None) -> None:
         self.name = name
+        self.config = None
         if info is None:
             info = {}
         self._info = info.get("device_info")
         self.parent = parent
-        self._enabled = False
         self._custom_rpc_methods = {}
         if self._info:
             self._parse_info()
+
+        self.run = lambda *args, **kwargs: self._run(*args, **kwargs)
 
     def _run(self, *args, **kwargs):
         device, func_call = self._get_rpc_func_name(fcn_name=self.name, use_parent=True)
@@ -178,8 +180,9 @@ class RPCBase:
                 setattr(
                     self,
                     user_access_name,
-                    self._custom_rpc_methods[user_access_name]._run,
+                    self._custom_rpc_methods[user_access_name].run,
                 )
+                setattr(getattr(self, user_access_name), "__doc__", descr.get("doc"))
             else:
                 self._custom_rpc_methods[user_access_name] = RPCBase(
                     name=user_access_name,
@@ -192,15 +195,19 @@ class RPCBase:
                     self._custom_rpc_methods[user_access_name],
                 )
 
+    def update_config(self, update):
+        self.root.parent.send_config_request(action="update", config={self.name: update})
+
 
 class DeviceBase(RPCBase, Device):
     @property
     def enabled(self):
-        return self.root._enabled
+        return self.root.config["enabled"]
 
     @enabled.setter
     def enabled(self, val):
-        self.root._enabled = val
+        self.update_config({"enabled": val})
+        self.root.config["enabled"] = val
 
     @rpc
     def trigger(self, rpc_id: str):
@@ -255,8 +262,8 @@ class Signal(DeviceBase):
     def limits(self):
         pass
 
-    @rpc
     def low_limit(self):
+        print("here")
         pass
 
     @rpc
@@ -285,17 +292,31 @@ class Positioner(DeviceBase):
     def egu(self):
         pass
 
-    @rpc
+    @property
     def limits(self):
-        pass
+        return self.config["deviceConfig"]["limits"]
 
-    @rpc
+    @limits.setter
+    def limits(self, val: list):
+        self.update_config({"deviceConfig": {"limits": val}})
+
+    @property
     def low_limit(self):
-        pass
+        return self.limits[0]
 
-    @rpc
+    @low_limit.setter
+    def low_limit(self, val: float):
+        limits = [val, self.high_limit]
+        self.update_config({"deviceConfig": {"limits": limits}})
+
+    @property
     def high_limit(self):
-        pass
+        return self.limits[1]
+
+    @high_limit.setter
+    def high_limit(self, val: float):
+        limits = [self.low_limit, val]
+        self.update_config({"deviceConfig": {"limits": limits}})
 
     @rpc
     def move(self):
@@ -314,17 +335,6 @@ class DMClient(DeviceManagerBase):
     def __init__(self, parent, scibec_url):
         super().__init__(parent.connector, scibec_url)
         self.parent = parent
-
-    def _load_config_device(self):
-        if self._is_config_valid():
-            start = time.time()
-            for name, dev in self._config.items():
-                logger.info(
-                    f"Adding device {name}: {'ENABLED' if dev['status']['enabled'] else 'DISABLED'}"
-                )
-                obj = ClientDevice(name, self, dev["status"]["enabled"])
-                self.devices._add_device(name, obj)
-            print(time.time() - start)
 
     def _get_device_info(self, device_name) -> BMessage.DeviceInfoMessage:
         msg = BMessage.DeviceInfoMessage.loads(
@@ -356,6 +366,5 @@ class DMClient(DeviceManagerBase):
         else:
             logger.error(f"Trying to add new device {name} of type {base_class}")
 
-        for key, val in dev.items():
-            obj.__setattr__(key, val)
+        obj.config = dev
         self.devices._add_device(name, obj)

@@ -1,18 +1,12 @@
 import pytest
 from bec_utils import BECMessage
-from koss.devicemanager import DeviceManagerKOSS
 from koss.scan_worker import ScanWorker
 
-from utils import ConnectorMock, KossMock, dummy_devices
+from utils import load_KossMock
 
 
 def get_scan_worker() -> ScanWorker:
-    devices = dummy_devices(True)
-    connector = ConnectorMock("")
-    device_manager = DeviceManagerKOSS(connector, "")
-    device_manager._config = devices
-    device_manager._load_config_device()
-    k = KossMock(device_manager, connector)
+    k = load_KossMock()
     return ScanWorker(parent=k)
 
 

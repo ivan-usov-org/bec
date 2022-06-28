@@ -1,26 +1,22 @@
+import os
+
+import yaml
 from bec_utils.connector import ConnectorBase
+from koss.devicemanager import DeviceManagerKOSS
 from koss.koss import KOSS
 from koss.scan_assembler import ScanAssembler
 from koss.scan_worker import InstructionQueueStatus
 
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
-def dummy_devices(enabled):
-    devices = {"samx": {}}
-    devices["samx"]["status"] = {}
-    devices["samx"]["status"]["enabled"] = True
-    devices["samx"]["type"] = "SynAxis"
-    devices["samx"]["config"] = {}
-    devices["samx"]["config"]["name"] = "motor"
-    devices["samx"]["config"]["labels"] = "samx"
-    devices["samx"]["config"]["delay"] = 5
-    devices["samy"] = {}
-    devices["samy"]["status"] = {}
-    devices["samy"]["status"]["enabled"] = enabled
-    devices["samy"]["type"] = "SynAxis"
-    devices["samy"]["config"] = {}
-    devices["samy"]["config"]["name"] = "motor"
-    devices["samy"]["config"]["labels"] = "samy"
-    return devices
+
+def load_KossMock():
+    connector = ConnectorMock("")
+    device_manager = DeviceManagerKOSS(connector, "")
+    with open(f"{dir_path}/test_session.yaml", "r") as f:
+        device_manager._session = yaml.safe_load(f)
+    device_manager._load_session()
+    return KossMock(device_manager, connector)
 
 
 class ConsumerMock:

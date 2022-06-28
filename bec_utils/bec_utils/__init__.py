@@ -1,6 +1,12 @@
 import logging
 
-from .devicemanager import Device, DeviceContainer, DeviceManagerBase, DeviceStatus
+from .devicemanager import (
+    Device,
+    DeviceConfigError,
+    DeviceContainer,
+    DeviceManagerBase,
+    DeviceStatus,
+)
 from .endpoints import MessageEndpoints
 from .redis_connector import Alarms, RedisConnector
 from .service_config import ServiceConfig
