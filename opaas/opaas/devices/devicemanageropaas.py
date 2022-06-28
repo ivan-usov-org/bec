@@ -16,10 +16,9 @@ logger = logging.getLogger(__name__)
 
 
 class OPAASDevice(Device):
-    def __init__(self, name, obj, enabled=False):
-        super().__init__(name)
+    def __init__(self, name, obj, config):
+        super().__init__(name, config)
         self.obj = obj
-        self.enabled = enabled
         self.metadata = {}
 
     def initialize_device_buffer(self, producer):
@@ -58,8 +57,6 @@ class DeviceManagerOPAAS(DeviceManagerBase):
                 enabled = dev.get("enabled")
                 logger.info(f"Adding device {name}: {'ENABLED' if enabled else 'DISABLED'}")
                 obj = self.initialize_device(dev)
-                for key, val in dev.items():
-                    obj.__setattr__(key, val)
 
     @staticmethod
     def update_config(obj, config) -> None:
@@ -121,7 +118,7 @@ class DeviceManagerOPAAS(DeviceManagerBase):
             obj.motor_is_moving.subscribe(self._obj_callback_is_moving, run=enabled)
 
         # insert the created device obj into the device manager
-        opaas_obj = OPAASDevice(name, obj, enabled)
+        opaas_obj = OPAASDevice(name, obj, config=dev)
         self.devices._add_device(name, opaas_obj)
 
         # update device buffer
@@ -217,31 +214,34 @@ class DeviceManagerOPAAS(DeviceManagerBase):
     def parse_config_request(self, msg: BMessage.DeviceConfigMessage) -> None:
         try:
             self._check_request_validity(msg)
-
             if msg.content["action"] == "update":
+
                 for dev in msg.content["config"]:
-                    # store old config
-                    old_config = self.devices[dev].deviceConfig.copy()
+                    dev_config = msg.content["config"][dev]
+                    if "deviceConfig" in dev:
+                        # store old config
+                        old_config = self.devices[dev].config["deviceConfig"].copy()
 
-                    # apply config
-                    try:
-                        self.update_config(
-                            self.devices[dev].obj, msg.content["config"][dev]["config"]
+                        # apply config
+                        try:
+                            self.update_config(self.devices[dev].obj, dev_config["deviceConfig"])
+                        except Exception as e:
+                            self.update_config(self.devices[dev].obj, old_config)
+                            raise DeviceConfigError(f"Error during object update. {e}")
+
+                        self.devices[dev].deviceConfig.update(dev_config["deviceConfig"])
+
+                        # update config in DB
+                        print("updating in DB")
+                        success = self._scibec.patch_device_config(
+                            self.devices[dev].id,
+                            {"deviceConfig": self.devices[dev].config["deviceConfig"]},
                         )
-                    except Exception as e:
-                        self.update_config(self.devices[dev].obj, old_config)
-                        raise DeviceConfigError(f"Error during object update. {e}")
+                        if not success:
+                            raise DeviceConfigError("Error during database update.")
 
-                    self.devices[dev].deviceConfig.update(msg.content["config"][dev]["config"])
-
-                    # update config in DB
-                    print("updating in DB")
-                    success = self._scibec.patch_device_config(
-                        self.devices[dev].id,
-                        {"deviceConfig": self.devices[dev].deviceConfig},
-                    )
-                    if not success:
-                        raise DeviceConfigError("Error during database update.")
+                    if "enabled" in dev_config:
+                        self.devices[dev].config["enabled"] = dev_config["enabled"]
 
                 # send updates to services
                 self.send_config(msg)

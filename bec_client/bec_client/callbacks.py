@@ -92,7 +92,9 @@ async def live_updates_readback(
                                 np.isclose(
                                     dev_values[ind],
                                     list(move_args.values())[ind],
-                                    atol=dm.devices[dev].deviceConfig.get("tolerance", 0.5),
+                                    atol=dm.devices[dev]
+                                    .config["deviceConfig"]
+                                    .get("tolerance", 0.5),
                                 )
                             ):
                                 if not stop[ind].is_set():
@@ -137,10 +139,6 @@ async def live_updates_table(bk, request):
     primary_devices = bk.devicemanager.devices.primary_devices(
         [bk.devicemanager.devices[dev] for dev in scan_devices]
     )
-    devices = [dev.name for dev in primary_devices]
-    devices = sort_devices(devices, scan_devices)
-    devices = devices[0 : min(10, len(devices)) - 1]
-    dev_values = [0 for dev in devices]
 
     RID = request.metadata["RID"]
 
@@ -154,7 +152,11 @@ async def live_updates_table(bk, request):
         while scan_queue_request.accepted is None:
             await asyncio.sleep(0.01)
         if scan_queue_request.accepted[0] == True:
-            # scanID = scan_queue_request.scanID
+
+            devices = [dev.name for dev in primary_devices]
+            devices = sort_devices(devices, scan_devices)
+            devices = devices[0 : min(10, len(devices)) - 1]
+            dev_values = [0 for dev in devices]
 
             queue_item = bk.queue.find_scan(RID=RID)
             timeout_time = 15
@@ -218,10 +220,6 @@ async def live_updates_table(bk, request):
                         break
                     elif point_id > queue_item.num_points:
                         raise RuntimeError("Received more points than expected.")
-                # if queue_pos is None:
-                #     print(t.get_row_separator())
-                #     print(t.get_header_separator())
-                #     break
             if queue_pos is None:
                 print(
                     t.get_footer(
@@ -229,4 +227,6 @@ async def live_updates_table(bk, request):
                     )
                 )
         else:
-            raise ScanRequestError("Scan was rejected by the server.")
+            raise ScanRequestError(
+                f"Scan was rejected by the server: {scan_queue_request.response.content.get('message')}"
+            )

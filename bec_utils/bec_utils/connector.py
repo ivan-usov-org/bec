@@ -143,8 +143,6 @@ class ConsumerConnectorThreaded(threading.Thread, abc.ABC):
         while True:
             try:
                 self.poll_messages()
-            except KeyError:
-                print("Exception", sys.exc_info())
             except Exception as e:
                 _thread.interrupt_main()
                 raise e

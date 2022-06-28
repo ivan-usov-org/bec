@@ -26,9 +26,9 @@ class DeviceStatus(enum.Enum):
 
 
 class Device:
-    def __init__(self, name, *args, parent=None):
+    def __init__(self, name, config, *args, parent=None):
         self.name = name
-        self._enabled = False
+        self.config = config
         self._signals = []
         self._subdevices = []
         self._status = DeviceStatus.IDLE
@@ -38,11 +38,11 @@ class Device:
 
     @property
     def enabled(self):
-        return self._enabled
+        return self.config["enabled"]
 
     @enabled.setter
     def enabled(self, value):
-        self._enabled = value
+        self.config["enabled"] = value
 
     def read(self):
         val = self.parent.producer.get(MessageEndpoints.device_read(self.name))
@@ -128,7 +128,7 @@ class DeviceContainer(dict):
         return [dev for _, dev in self.items() if not dev.enabled]
 
     def device_group(self, device_group) -> list:
-        return [dev for _, dev in self.items() if dev.deviceGroup == device_group]
+        return [dev for _, dev in self.items() if dev.config["deviceGroup"] == device_group]
 
     @typechecked
     def primary_devices(self, scan_motors: list) -> list:
@@ -248,9 +248,16 @@ class DeviceManagerBase:
         config = msg.content["config"]
         if action == "update":
             for dev in config:
-                logger.info(f"Updating device config for device {dev}.")
-                self.devices[dev].deviceConfig.update(config[dev]["config"])
-                logger.debug(f"New config for device {dev}: {self.devices[dev].deviceConfig}")
+                if "deviceConfig" in config[dev]:
+                    logger.info(f"Updating device config for device {dev}.")
+                    self.devices[dev].config["deviceConfig"].update(config[dev]["deviceConfig"])
+                    logger.debug(
+                        f"New config for device {dev}: {self.devices[dev].config['deviceConfig']}"
+                    )
+                if "enabled" in config[dev]:
+                    self.devices[dev].config["enabled"] = config[dev]["enabled"]
+                    status = "enabled" if self.devices[dev].enabled else "disabled"
+                    logger.info(f"Device {dev} has been {status}.")
         elif action == "add":
             for dev in config:
                 obj = self._create_device(dev)
@@ -392,8 +399,7 @@ class DeviceManagerBase:
 
     def _create_device(self, dev: dict, *args) -> Device:
         obj = self._device_cls(dev.get("name"), *args, parent=self)
-        for key, val in dev.items():
-            obj.__setattr__(key, val)
+        obj.config = dev
         return obj
 
     def _remove_device(self, dev_name):
