@@ -5,7 +5,7 @@ const config = {
   "name": "mongo",
   "connector": "mongodb",
   "url": "",
-  "host": "host.docker.internal",
+  "host": "localhost",
   "port": 27017,
   "user": "",
   "password": "",

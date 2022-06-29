@@ -1,21 +1,38 @@
 # This file is a template, and might need editing before it works on your project.
 # Official language image. Look for the different tagged releases at:
 # https://hub.docker.com/r/library/python/tags/
-image: "python:3.8" 
+image: "python:3.8"
 #commands to run in the Docker container before starting each job.
-before_script:
-  - pip install black
-  - pip install pytest
-  - pip install -e ./koss 
+variables:
+  DOCKER_DRIVER: overlay
+  DOCKER_BUILDKIT: 0
+
+services: 
+   - docker:18.09-dind
 # different stages in the pipeline
 stages:
   - Formatter
   - Test
+  - Integration-Test-Setup
 formatter:
   stage: Formatter
-  script: 
-  - black --check --diff --color --line-length=100 ./
+  script:
+    - pip install black
+    - black --check --diff --color --line-length=100 ./
 pytest:
   stage: Test
   script:
-  - cd koss/tests;pytest -v
+    - pip install pytest
+    - pip install -e ./koss
+    - cd koss/tests;pytest -v
+integration test setup:
+  stage: Integration-Test-Setup
+  image: docker:20.10.16
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+  script:
+    - docker-compose -f ./docker-compose.yaml up -d
+    - apk update; apk upgrade; apk add curl
+    - timeout 120 /bin/sh -c -- 'while true; do res=$(curl -X "GET" --max-time 3 "http://docker:3030/sessions"); if [ ! -z "$res" ]; then exit 0; fi; sleep 1; done;'
+  # - curl --fail http://localhost:3030/sessions
+
