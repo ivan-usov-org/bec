@@ -5,6 +5,9 @@ services:
     image: mongo
     ports:
       - "27017:27017"
+  redis-test:
+    image: redis
+    network_mode: host
   scibec-test-server:
     image: scibec-test-server
     build: ./scibec
