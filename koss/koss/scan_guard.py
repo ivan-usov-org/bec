@@ -1,8 +1,7 @@
 import logging
 
-import bec_utils.BECMessage as BMessage
 import msgpack
-from bec_utils import MessageEndpoints
+from bec_utils import BECMessage, MessageEndpoints
 
 logger = logging.getLogger(__name__)
 
@@ -104,7 +103,7 @@ class ScanGuard:
     def _scan_queue_request_callback(msg, parent, **kwargs):
         print(
             "Receiving scan request:",
-            BMessage.ScanQueueMessage.loads(msg.value).content,
+            BECMessage.ScanQueueMessage.loads(msg.value).content,
         )
         # pylint: disable=protected-access
         parent._handle_scan_request(msg.value)
@@ -113,7 +112,7 @@ class ScanGuard:
     def _scan_queue_modification_request_callback(msg, parent, **kwargs):
         print(
             "Receiving scan modification request:",
-            BMessage.ScanQueueModificationMessage.loads(msg.value).content,
+            BECMessage.ScanQueueModificationMessage.loads(msg.value).content,
         )
         # pylint: disable=protected-access
         parent._handle_scan_modification_request(msg.value)
@@ -122,7 +121,7 @@ class ScanGuard:
         decision = "accepted" if scan_request_decision["accepted"] else "rejected"
         self.dm.producer.send(
             MessageEndpoints.scan_queue_request_response(),
-            BMessage.RequestResponseMessage(
+            BECMessage.RequestResponseMessage(
                 decision=decision,
                 message=scan_request_decision["message"],
                 metadata=metadata,
@@ -139,7 +138,7 @@ class ScanGuard:
         Returns:
 
         """
-        msg = BMessage.ScanQueueMessage.loads(msg)
+        msg = BECMessage.ScanQueueMessage.loads(msg)
         scan_request_decision = self._is_valid_scan_request(msg)
 
         accepted = scan_request_decision.get("accepted")
@@ -161,7 +160,7 @@ class ScanGuard:
         Returns:
 
         """
-        msg = BMessage.ScanQueueModificationMessage.loads(msg)
+        msg = BECMessage.ScanQueueModificationMessage.loads(msg)
         self.dm.producer.send(MessageEndpoints.scan_queue_modification(), msg.dumps())
 
     def _append_to_scan_queue(self, msg):

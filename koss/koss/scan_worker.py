@@ -5,12 +5,11 @@ import time
 from asyncio.log import logger
 from enum import Enum
 
-import bec_utils.BECMessage as BMessage
 import msgpack
-from bec_utils import Alarms, DeviceStatus, MessageEndpoints
+from bec_utils import Alarms, BECMessage, DeviceStatus, MessageEndpoints
 
-DeviceMsg = BMessage.DeviceInstructionMessage
-ScanStatusMsg = BMessage.ScanStatusMessage
+DeviceMsg = BECMessage.DeviceInstructionMessage
+ScanStatusMsg = BECMessage.ScanStatusMessage
 
 
 class InstructionQueueStatus(Enum):
@@ -109,7 +108,7 @@ class ScanWorker(threading.Thread):
                     if None in device_status:
                         continue
                     device_status = [
-                        BMessage.DeviceReqStatusMessage.loads(dev) for dev in device_status
+                        BECMessage.DeviceReqStatusMessage.loads(dev) for dev in device_status
                     ]
                     devices_moved_successfully = all(
                         dev.content["success"] for dev in device_status
@@ -138,7 +137,7 @@ class ScanWorker(threading.Thread):
                             device_status[ind].metadata.get("scanID") == instr.metadata["scanID"]
                         )
                         if matching_DIID and matching_scanID:
-                            last_pos = BMessage.DeviceMessage.loads(
+                            last_pos = BECMessage.DeviceMessage.loads(
                                 self.dm.producer.get(
                                     MessageEndpoints.device_readback(failed_device[0])
                                 )

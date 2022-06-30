@@ -1,4 +1,4 @@
-import bec_utils.BECMessage as BMessage
+from bec_utils impot BECMessage
 
 import koss.scans as koss_scans
 
@@ -14,7 +14,7 @@ class ScanAssembler:
         self.connector = self.parent.connector
         self._scans = self.parent.scan_dict #TODO should these be the same dict, or a copy?
 
-    def assemble_device_instructions(self, msg: BMessage.ScanQueueMessage):
+    def assemble_device_instructions(self, msg: BECMessage.ScanQueueMessage):
         scan = msg.content.get("scan_type")
         cls_name self._scans[scan]["class"]
         scan_cls = getattr(koss_scans, cls_name)

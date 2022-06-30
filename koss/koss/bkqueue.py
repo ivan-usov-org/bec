@@ -7,8 +7,7 @@ import uuid
 from enum import Enum
 from typing import Union
 
-import bec_utils.BECMessage as BMessage
-from bec_utils import Alarms, MessageEndpoints
+from bec_utils import Alarms, BECMessage, MessageEndpoints
 
 from koss.scan_assembler import ScanAssembler
 from koss.scan_worker import InstructionQueueStatus, ScanAbortion, ScanWorker
@@ -31,7 +30,7 @@ class QueueManager:
         self.queues = {"primary": ScanQueue(self)}
         self._start_scan_queue_consumer()
 
-    def add_to_queue(self, scan_queue: str, msg: BMessage.ScanQueueMessage) -> None:
+    def add_to_queue(self, scan_queue: str, msg: BECMessage.ScanQueueMessage) -> None:
         try:
             self.queues[scan_queue].append(msg)
         except LimitError as limit_error:
@@ -59,7 +58,7 @@ class QueueManager:
 
     @staticmethod
     def _scan_queue_callback(msg, parent, **_kwargs) -> None:
-        scan_msg = BMessage.ScanQueueMessage.loads(msg.value)
+        scan_msg = BECMessage.ScanQueueMessage.loads(msg.value)
         print("Receiving scan:", scan_msg.content, time.time())
         # instructions = parent.scan_assembler.assemble_device_instructions(scan_msg)
         parent.add_to_queue("primary", scan_msg)
@@ -67,13 +66,13 @@ class QueueManager:
 
     @staticmethod
     def _scan_queue_modification_callback(msg, parent, **_kwargs):
-        scan_mod_msg = BMessage.ScanQueueModificationMessage.loads(msg.value)
+        scan_mod_msg = BECMessage.ScanQueueModificationMessage.loads(msg.value)
         print("Receiving scan modification:", scan_mod_msg.content)
         if scan_mod_msg:
             parent.scan_interception(scan_mod_msg)
             parent.send_queue_status()
 
-    def scan_interception(self, scan_mod_msg: BMessage.ScanQueueModificationMessage) -> None:
+    def scan_interception(self, scan_mod_msg: BECMessage.ScanQueueModificationMessage) -> None:
         action = scan_mod_msg.content["action"]
         self.__getattribute__("_set_" + action)(scanID=scan_mod_msg.content["scanID"])
 
@@ -121,7 +120,7 @@ class QueueManager:
             queue_export[k] = {"info": queue_info, "status": scan_queue.status.name}
         self.producer.send(
             MessageEndpoints.scan_queue_status(),
-            BMessage.ScanQueueStatusMessage(queue=queue_export).dumps(),
+            BECMessage.ScanQueueStatusMessage(queue=queue_export).dumps(),
         )
 
     def shutdown(self):
