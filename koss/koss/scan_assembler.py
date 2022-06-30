@@ -1,6 +1,6 @@
 import bec_utils.BECMessage as BMessage
 
-import koss.scans as ks
+import koss.scans as koss_scans
 
 
 class ScanAssembler:
@@ -10,25 +10,19 @@ class ScanAssembler:
 
     def __init__(self, *, parent):
         self.parent = parent
-        self.dm = self.parent.dm
+        self.device_manager = self.parent.device_manager
         self.connector = self.parent.connector
-        self._scans = dict()
-        self._load_scans()
+        self._scans = self.parent.scan_dict #TODO should these be the same dict, or a copy?
 
-    def _load_scans(self):
-        self._scans = self.parent.scan_dict
-
-    def _unpack_scan(self, msg: BMessage.ScanQueueMessage):
+    def assemble_device_instructions(self, msg: BMessage.ScanQueueMessage):
         scan = msg.content.get("scan_type")
-        scan_cls = getattr(ks, self._scans[scan]["class"])
+        cls_name self._scans[scan]["class"]
+        scan_cls = getattr(koss_scans, cls_name)
 
-        print(f"Preparing instructions of request of type {scan} / {scan_cls}")
+        print(f"Preparing instructions of request of type {scan} / {scan_cls}") #TODO: logging?
 
         return scan_cls(
-            devicemanager=self.dm,
+            device_manager=self.device_manager,
             parameter=msg.content.get("parameter"),
             metadata=msg.metadata,
         )
-
-    def assemble_device_instructions(self, msg):
-        return self._unpack_scan(msg)
