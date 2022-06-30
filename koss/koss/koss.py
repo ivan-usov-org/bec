@@ -10,7 +10,7 @@ from bec_utils.connector import ConnectorBase
 import koss.scans as koss_scans
 
 from .bkqueue import QueueManager
-from .devicemanager import DeviceManagerKOSS as DeviceManager #TODO rename original?
+from .devicemanager import DeviceManager
 from .scan_assembler import ScanAssembler
 from .scan_guard import ScanGuard
 from .scan_worker import ScanWorker
