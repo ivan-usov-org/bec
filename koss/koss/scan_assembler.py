@@ -1,4 +1,4 @@
-from bec_utils impot BECMessage
+from bec_utils import BECMessage
 
 import koss.scans as koss_scans
 
@@ -12,14 +12,14 @@ class ScanAssembler:
         self.parent = parent
         self.device_manager = self.parent.device_manager
         self.connector = self.parent.connector
-        self._scans = self.parent.scan_dict #TODO should these be the same dict, or a copy?
+        self._scans = self.parent.scan_dict  # TODO should these be the same dict, or a copy?
 
     def assemble_device_instructions(self, msg: BECMessage.ScanQueueMessage):
         scan = msg.content.get("scan_type")
-        cls_name self._scans[scan]["class"]
+        cls_name = self._scans[scan]["class"]
         scan_cls = getattr(koss_scans, cls_name)
 
-        print(f"Preparing instructions of request of type {scan} / {scan_cls}") #TODO: logging?
+        print(f"Preparing instructions of request of type {scan} / {scan_cls}")  # TODO: logging?
 
         return scan_cls(
             device_manager=self.device_manager,

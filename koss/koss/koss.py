@@ -58,9 +58,8 @@ class KOSS:
     def _start_scan_guard(self):
         self.scan_guard = ScanGuard(parent=self)
 
-
     def _update_available_scans(self):
-        for name, val in inspect.getmembers(koss_scans): #TODO: use vars() ?
+        for name, val in inspect.getmembers(koss_scans):  # TODO: use vars() ?
             try:
                 is_scan = issubclass(val, koss_scans.RequestBase)
             except TypeError:
@@ -77,7 +76,6 @@ class KOSS:
                 "scan_report_hint": val.scan_report_hint,
                 "doc": val.__doc__ or val.__init__.__doc__,
             }
-
 
     def _publish_available_scans(self):
         self.producer.set(MessageEndpoints.available_scans(), msgpack.dumps(self.scan_dict))
@@ -98,12 +96,11 @@ class KOSS:
         if scanID and queue:
             parent.queue_manager._set_abort(scanID=scanID, queue=queue)
 
-
     def load_config_from_disk(self, file_path):
         self.device_manager.load_config_from_disk(file_path)
 
     def shutdown(self):
         self.device_manager.shutdown()
         self.queue_manager.shutdown()
-        self.scan_worker.signal_event.set() #TODO: this should be a shutdown method, too
+        self.scan_worker.signal_event.set()  # TODO: this should be a shutdown method, too
         self.scan_worker.join()

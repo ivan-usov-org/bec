@@ -1,2 +1,2 @@
-import queue #TODO why?
+import queue  # TODO why?
 from . import koss

@@ -11,8 +11,7 @@ class ScanRejection(Exception):
 
 
 class ScanStatus:
-
-    def __init__(self, decision: bool=True, message: str=""):
+    def __init__(self, decision: bool = True, message: str = ""):
         self.decision = decision
         self.message = message
 
@@ -58,8 +57,8 @@ class ScanGuard:
             return ScanStatus()
 
     def _check_valid_request(self, request) -> None:
-            if request is None:
-                raise ScanRejection("Invalid request.")
+        if request is None:
+            raise ScanRejection("Invalid request.")
 
     def _check_valid_scan(self, request) -> None:
         avail_scans = msgpack.loads(self.producer.get(MessageEndpoints.available_scans()))
