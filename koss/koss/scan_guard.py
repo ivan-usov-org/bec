@@ -7,23 +7,23 @@ logger = logging.getLogger(__name__)
 
 
 class ScanAcceptance:
-    """ScanAcceptance"""
-
     _accepted = True
     _message = ""
 
-    def set(self, accepted: bool, message: str) -> None:
-        """set scan acceptance
+    def reject(message: str) -> None:
+        """reject scan
         Args:
-            accepted (bool): true if scan was accepted
-            message (str): non-empty message if scan was rejected
+            message (str): reason for rejection
         """
         if self._accepted:
-            self._accepted = accepted
+            self._accepted = False
             self._message = message
 
     def get(self) -> dict:
         return {"accepted": self._accepted, "message": self._message}
+
+    def __bool__(self):
+        return self._accepted
 
 
 class ScanGuard:
@@ -33,11 +33,10 @@ class ScanGuard:
         accepted, it enqueues a new scan message.
         """
         self.parent = parent
-        self.dm = self.parent.dm
+        self.device_manager = self.parent.device_manager
         self.connector = self.parent.connector
         self.producer = self.connector.producer()
         self._start_scan_queue_request_consumer()
-        self.scan_acc = ScanAcceptance()
 
     def _start_scan_queue_request_consumer(self):
         self._scan_queue_request_consumer = self.connector.consumer(
@@ -51,82 +50,84 @@ class ScanGuard:
             cb=self._scan_queue_modification_request_callback,
             parent=self,
         )
+
         self._scan_queue_request_consumer.start()
         self._scan_queue_modification_request_consumer.start()
 
     def _is_valid_scan_request(self, request) -> dict:
-        self.scan_acc = ScanAcceptance()
-        self._check_valid_scan(request)
-        self._check_baton(request)
-        self._check_motors_movable(request)
-        self._check_soft_limits(request)
+        scan_accept = ScanAcceptance()
 
         if request is None:
-            self.scan_acc.set(False, "Invalid request.")
+            scan_accept.reject("Invalid request.")
 
-        return self.scan_acc.get()
+        if scan_accept: self._check_valid_scan(request, scan_accept)
+        if scan_accept: self._check_baton(request, scan_accept)
+        if scan_accept: self._check_motors_movable(request, scan_accept)
+        if scan_accept: self._check_soft_limits(request, scan_accept)
 
-    def _check_valid_scan(self, request) -> None:
+        return scan_accept.get()
+
+    def _check_valid_scan(self, request, scan_accept) -> None:
         avail_scans = msgpack.loads(self.producer.get(MessageEndpoints.available_scans()))
-        if request.content.get("scan_type") not in avail_scans:
-            self.scan_acc.set(False, f"Unknown scan type {request.content.get('scan_type')}.")
+        scan_type = request.content.get("scan_type")
+        if scan_type not in avail_scans:
+            scan_accept.reject(f"Unknown scan type {scan_type}.")
+            return
 
-        if request.content.get("scan_type") == "device_rpc":
+        if scan_type == "device_rpc":
             # ensure that the requested rpc is allowed for this particular device
             params = request.content.get("parameter")
             if not self._device_rpc_is_valid(device=params.get("device"), func=params.get("func")):
-                self.scan_acc.set(False, f"Rejected rpc: {request.content}")
+                scan_accept.reject(f"Rejected rpc: {request.content}")
+                return
 
     def _device_rpc_is_valid(self, device: str, func: str) -> bool:
-
+        # TODO: ?
         return True
 
-    def _check_baton(self, request) -> None:
+    def _check_baton(self, request, scan_accept) -> None:
         # TODO: Implement baton handling
         pass
 
-    def _check_soft_limits(self, request) -> None:
+    def _check_motors_movable(self, request, scan_accept) -> None:
+        # TODO: Make sure you are not trying to move protected motors
+        if request.content["scan_type"] == "device_rpc":
+            return
+        motor_args = request.content["parameter"].get("args")
+        if not motor_args:
+            return
+        for m in motor_args:
+            if not self.device_manager.devices[m].enabled:
+                scan_accept.reject(f"Device {m} is not enabled.")
+                return
+
+    def _check_soft_limits(self, request, scan_accept) -> None:
         # TODO: Implement soft limit checks
         pass
 
-    def _check_motors_movable(self, request) -> None:
-        # TODO: Make sure you are not trying to move protected motors
-        if request.content["scan_type"] != "device_rpc":
-            motor_args = request.content["parameter"].get("args")
-            if motor_args:
-                motors = motor_args.keys()
-                for m in motors:
-                    if not self.dm.devices[m].enabled:
-                        self.scan_acc.set(False, f"Device {m} is not enabled.")
-
     @staticmethod
     def _scan_queue_request_callback(msg, parent, **kwargs):
-        print(
-            "Receiving scan request:",
-            BECMessage.ScanQueueMessage.loads(msg.value).content,
-        )
+        content = BECMessage.ScanQueueMessage.loads(msg.value).content
+        print("Receiving scan request:", content)
         # pylint: disable=protected-access
         parent._handle_scan_request(msg.value)
 
     @staticmethod
     def _scan_queue_modification_request_callback(msg, parent, **kwargs):
-        print(
-            "Receiving scan modification request:",
-            BECMessage.ScanQueueModificationMessage.loads(msg.value).content,
-        )
+        content = BECMessage.ScanQueueModificationMessage.loads(msg.value).content
+        print("Receiving scan modification request:", content)
         # pylint: disable=protected-access
         parent._handle_scan_modification_request(msg.value)
 
     def _send_scan_request_response(self, scan_request_decision, metadata):
-        decision = "accepted" if scan_request_decision["accepted"] else "rejected"
-        self.dm.producer.send(
-            MessageEndpoints.scan_queue_request_response(),
-            BECMessage.RequestResponseMessage(
-                decision=decision,
-                message=scan_request_decision["message"],
-                metadata=metadata,
-            ).dumps(),
-        )
+        sqrr = MessageEndpoints.scan_queue_request_response()
+        decision = scan_request_decision["accepted"]
+        decision = "accepted" if decision else "rejected"
+        message = scan_request_decision["message"]
+        rrm = BECMessage.RequestResponseMessage(
+            decision=decision, message=message, metadata=metadata
+        ).dumps()
+        self.device_manager.producer.send(sqrr, rrm)
 
     def _handle_scan_request(self, msg):
         """
@@ -144,10 +145,10 @@ class ScanGuard:
         accepted = scan_request_decision.get("accepted")
         # msg.metadata["scanID"] = str(uuid.uuid4()) if accepted else None
         self._send_scan_request_response(scan_request_decision, msg.metadata)
-        if not accepted:
-            logger.info(f"Request was rejected: {scan_request_decision}")
         if accepted:
             self._append_to_scan_queue(msg)
+        else:
+            logger.info(f"Request was rejected: {scan_request_decision}")
 
     def _handle_scan_modification_request(self, msg):
         """
@@ -160,9 +161,12 @@ class ScanGuard:
         Returns:
 
         """
-        msg = BECMessage.ScanQueueModificationMessage.loads(msg)
-        self.dm.producer.send(MessageEndpoints.scan_queue_modification(), msg.dumps())
+        msg = BECMessage.ScanQueueModificationMessage.loads(msg).dumps()
+        sqm = MessageEndpoints.scan_queue_modification()
+        self.device_manager.producer.send(sqm, msg)
 
     def _append_to_scan_queue(self, msg):
         print("Appending new scan to queue")
-        self.dm.producer.send(MessageEndpoints.scan_queue_insert(), msg.dumps())
+        msg = msg.dumps()
+        sqi = MessageEndpoints.scan_queue_insert()
+        self.device_manager.producer.send(sqi, msg)
