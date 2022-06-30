@@ -34,7 +34,7 @@ class ScanWorker(threading.Thread):
     def __init__(self, *, parent):
         super().__init__()
         self.parent = parent
-        self.dm = self.parent.dm
+        self.device_manager = self.parent.device_manager
         self.connector = self.parent.connector
         self.status = InstructionQueueStatus.IDLE
         self.signal_event = threading.Event()
@@ -49,14 +49,14 @@ class ScanWorker(threading.Thread):
         if not instr.content.get("device"):
             group = instr.content["parameter"].get("group")
             if group == "primary":
-                devices = self.dm.devices.primary_devices(self.scan_motors)
+                devices = self.device_manager.devices.primary_devices(self.scan_motors)
             elif group == "scan_motor":
                 devices = self.scan_motors
         else:
             instr_devices = instr.content.get("device")
             if not isinstance(instr_devices, list):
                 instr_devices = [instr_devices]
-            devices = [self.dm.devices[dev] for dev in instr_devices]
+            devices = [self.device_manager.devices[dev] for dev in instr_devices]
         return devices
 
     def _add_wait_group(self, instr) -> None:
@@ -100,9 +100,11 @@ class ScanWorker(threading.Thread):
                     dev for dev in self._groups[wait_group] if dev[0] in group_devices
                 ]
                 while True:
-                    pipe = self.dm.producer.pipeline()
+                    pipe = self.device_manager.producer.pipeline()
                     for dev, _ in wait_group_devices:
-                        self.dm.producer.get(MessageEndpoints.device_req_status(dev), pipe)
+                        self.device_manager.producer.get(
+                            MessageEndpoints.device_req_status(dev), pipe
+                        )
                     device_status = pipe.execute()
                     self._check_for_interruption()
                     if None in device_status:
@@ -138,7 +140,7 @@ class ScanWorker(threading.Thread):
                         )
                         if matching_DIID and matching_scanID:
                             last_pos = BECMessage.DeviceMessage.loads(
-                                self.dm.producer.get(
+                                self.device_manager.producer.get(
                                     MessageEndpoints.device_readback(failed_device[0])
                                 )
                             ).content["signals"][failed_device[0]]["value"]
@@ -169,9 +171,9 @@ class ScanWorker(threading.Thread):
                     dev for dev in self._groups[wait_group] if dev[0] in group_devices
                 ]
                 while True:
-                    pipe = self.dm.producer.pipeline()
+                    pipe = self.device_manager.producer.pipeline()
                     for dev, _ in wait_group_devices:
-                        self.dm.producer.get(MessageEndpoints.device_status(dev), pipe)
+                        self.device_manager.producer.get(MessageEndpoints.device_status(dev), pipe)
                     device_status = pipe.execute()
                     self._check_for_interruption()
                     if None in device_status:
@@ -209,22 +211,24 @@ class ScanWorker(threading.Thread):
         """
 
         # send instruction
-        self.dm.producer.send(MessageEndpoints.device_instructions(), instr.dumps())
+        self.device_manager.producer.send(MessageEndpoints.device_instructions(), instr.dumps())
 
     def _trigger_devices(self, instr) -> None:
         # self._get_triggerable_devices()
         pass
 
     def _send_rpc(self, instr) -> None:
-        self.dm.producer.send(MessageEndpoints.device_instructions(), instr.dumps())
+        self.device_manager.producer.send(MessageEndpoints.device_instructions(), instr.dumps())
 
     def _read_devices(self, instr) -> None:
-        # devices = self.dm.devices.device_group("monitor")
+        # devices = self.device_manager.devices.device_group("monitor")
         # devices.extend(self.scan_motors)
         devices = instr.content.get("device")
         if devices is None:
-            devices = [dev.name for dev in self.dm.devices.primary_devices(self.scan_motors)]
-        self.dm.producer.send(
+            devices = [
+                dev.name for dev in self.device_manager.devices.primary_devices(self.scan_motors)
+            ]
+        self.device_manager.producer.send(
             MessageEndpoints.device_instructions(),
             DeviceMsg(
                 device=devices,
@@ -235,8 +239,10 @@ class ScanWorker(threading.Thread):
         )
 
     def _baseline_reading(self, instr) -> None:
-        baseline_devices = [dev.name for dev in self.dm.devices.baseline_devices(self.scan_motors)]
-        self.dm.producer.send(
+        baseline_devices = [
+            dev.name for dev in self.device_manager.devices.baseline_devices(self.scan_motors)
+        ]
+        self.device_manager.producer.send(
             MessageEndpoints.device_instructions(),
             DeviceMsg(
                 device=baseline_devices,
@@ -257,7 +263,8 @@ class ScanWorker(threading.Thread):
             self.scan_id = instr.metadata.get("scanID")
             if instr.content["parameter"].get("primary") is not None:
                 self.scan_motors = [
-                    self.dm.devices[dev] for dev in instr.content["parameter"].get("primary")
+                    self.device_manager.devices[dev]
+                    for dev in instr.content["parameter"].get("primary")
                 ]
             # self.parent.scan_number += 1
 
@@ -266,7 +273,7 @@ class ScanWorker(threading.Thread):
         if self.scan_id == scan_id:
             self.scan_id = None
             self.current_scan_info["points"] = max_point_id
-            self.dm.producer.send(
+            self.device_manager.producer.send(
                 MessageEndpoints.scan_status(),
                 ScanStatusMsg(
                     scanID=self.current_scanID, status="closed", info=self.current_scan_info
@@ -304,7 +311,7 @@ class ScanWorker(threading.Thread):
                 self.current_scanID = instr.metadata.get("scanID")
                 self.current_scan_info = instr.metadata
                 self.current_scan_info.update({"scan_number": self.parent.scan_number})
-                self.dm.producer.send(
+                self.device_manager.producer.send(
                     MessageEndpoints.scan_status(),
                     ScanStatusMsg(
                         scanID=self.current_scanID,
@@ -354,10 +361,10 @@ class ScanWorker(threading.Thread):
         try:
             while not self.signal_event.is_set():
                 try:
-                    for queue in self.parent.qm.queues["primary"]:
+                    for queue in self.parent.queue_manager.queues["primary"]:
                         self._process_instructions(queue)
                 except ScanAbortion:
-                    self.parent.qm.queues["primary"].abort()
+                    self.parent.queue_manager.queues["primary"].abort()
                     self.reset()
         except KeyError:
             print("Exception", sys.exc_info())

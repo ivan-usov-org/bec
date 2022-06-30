@@ -155,7 +155,7 @@ class RequestBase(ABC):
     def __init__(
         self,
         *args,
-        devicemanager: DeviceManagerBase = None,
+        device_manager: DeviceManagerBase = None,
         parameter=None,
         metadata=None,
         **kwargs,
@@ -165,7 +165,7 @@ class RequestBase(ABC):
         self.caller_args = parameter.get("args", {})
         self.caller_kwargs = parameter.get("kwargs", {})
         self.metadata = metadata
-        self.dm = devicemanager
+        self.device_manager = device_manager
         self.simulate = False
         self.DIID = 0
         self.scan_motors = []
@@ -189,7 +189,7 @@ class RequestBase(ABC):
             print("check limits")
             for ii, dev in enumerate(self.scan_motors):
                 low_limit, high_limit = (
-                    self.dm.devices[dev].config["deviceConfig"].get("limits", [0, 0])
+                    self.device_manager.devices[dev].config["deviceConfig"].get("limits", [0, 0])
                 )
                 if low_limit >= high_limit:
                     return
@@ -236,13 +236,13 @@ class ScanBase(RequestBase):
     def __init__(
         self,
         *args,
-        devicemanager: DeviceManagerBase = None,
+        device_manager: DeviceManagerBase = None,
         parameter=None,
         metadata=None,
         **kwargs,
     ):
         super().__init__(
-            *args, devicemanager=devicemanager, parameter=parameter, metadata=metadata, **kwargs
+            *args, device_manager=device_manager, parameter=parameter, metadata=metadata, **kwargs
         )
         self.DIID = 0
         self.pointID = 0
@@ -316,7 +316,9 @@ class ScanBase(RequestBase):
         )
 
     def _set_position_offset(self):
-        self.start_pos = [self.dm.devices[dev].read().get("value") for dev in self.scan_motors]
+        self.start_pos = [
+            self.device_manager.devices[dev].read().get("value") for dev in self.scan_motors
+        ]
         if self.relative:
             self.positions += self.start_pos
 
