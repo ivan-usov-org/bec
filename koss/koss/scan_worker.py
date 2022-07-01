@@ -261,6 +261,9 @@ class ScanWorker(threading.Thread):
                     self.dm.devices[dev] for dev in instr.content["parameter"].get("primary")
                 ]
             # self.parent.scan_number += 1
+        if instr.content["parameter"].get("num_points"):
+            self.current_scan_info["points"] = instr.content["parameter"].get("num_points")
+            self._send_scan_status("open")
 
     def _close_scan(self, instr, max_point_id) -> None:
         scan_id = instr.metadata.get("scanID")
@@ -273,6 +276,16 @@ class ScanWorker(threading.Thread):
                     scanID=self.current_scanID, status="closed", info=self.current_scan_info
                 ).dumps(),
             )
+
+    def _send_scan_status(self, status: str):
+        self.dm.producer.send(
+            MessageEndpoints.scan_status(),
+            ScanStatusMsg(
+                scanID=self.current_scanID,
+                status=status,
+                info=self.current_scan_info,
+            ).dumps(),
+        )
 
     def _process_instructions(self, queue) -> None:
         """
@@ -305,14 +318,8 @@ class ScanWorker(threading.Thread):
                 self.current_scanID = instr.metadata.get("scanID")
                 self.current_scan_info = instr.metadata
                 self.current_scan_info.update({"scan_number": self.parent.scan_number})
-                self.dm.producer.send(
-                    MessageEndpoints.scan_status(),
-                    ScanStatusMsg(
-                        scanID=self.current_scanID,
-                        status="open",
-                        info=self.current_scan_info,
-                    ).dumps(),
-                )
+                if self.current_scanID:
+                    self._send_scan_status("open")
 
             # print("Device instruction: ", instr)
 
