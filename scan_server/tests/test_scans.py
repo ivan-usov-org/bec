@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from bec_utils import BECMessage as BMessage
-from koss.scans import FermatSpiralScan, Move, Scan
+from scan_server.scans import FermatSpiralScan, Move, Scan
 
 
 class DeviceMock:

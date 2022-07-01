@@ -2,21 +2,21 @@ import os
 
 import yaml
 from bec_utils.connector import ConnectorBase
-from koss.devicemanager import DeviceManagerKOSS
-from koss.koss import KOSS
-from koss.scan_assembler import ScanAssembler
-from koss.scan_worker import InstructionQueueStatus
+from scan_server.devicemanager import DeviceManagerScanServer
+from scan_server.scan_assembler import ScanAssembler
+from scan_server.scan_server import ScanServer
+from scan_server.scan_worker import InstructionQueueStatus
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-def load_KossMock():
+def load_ScanServerMock():
     connector = ConnectorMock("")
-    device_manager = DeviceManagerKOSS(connector, "")
+    device_manager = DeviceManagerScanServer(connector, "")
     with open(f"{dir_path}/test_session.yaml", "r") as f:
         device_manager._session = yaml.safe_load(f)
     device_manager._load_session()
-    return KossMock(device_manager, connector)
+    return ScanServerMock(device_manager, connector)
 
 
 class ConsumerMock:
@@ -51,7 +51,7 @@ class WorkerMock:
         self.status = InstructionQueueStatus.IDLE
 
 
-class KossMock(KOSS):
+class ScanServerMock(ScanServer):
     def __init__(self, dm, connector) -> None:
         self.dm = dm
         super().__init__(bootstrap_server="dummy", connector_cls=ConnectorMock, scibec_url="dummy")

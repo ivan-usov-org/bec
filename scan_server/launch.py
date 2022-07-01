@@ -4,7 +4,7 @@ import threading
 
 from bec_utils import RedisConnector, ServiceConfig
 
-from koss.koss import KOSS
+from scan_server.scan_server import ScanServer
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument(
@@ -17,14 +17,14 @@ config_path = clargs.config
 
 config = ServiceConfig(config_path)
 
-logging.basicConfig(filename="koss.log", level=logging.INFO, filemode="w+")
+logging.basicConfig(filename="ScanServer.log", level=logging.INFO, filemode="w+")
 # logging.getLogger("kafka").setLevel(50)
 logging.getLogger().addHandler(logging.StreamHandler())
 
 try:
     event = threading.Event()
     # pylint: disable=E1102
-    k = KOSS(
+    k = ScanServer(
         bootstrap_server=config.redis,
         connector_cls=RedisConnector,
         scibec_url=config.scibec,

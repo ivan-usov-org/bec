@@ -1,20 +1,20 @@
 import pytest
 from bec_utils import BECMessage, MessageEndpoints
-from koss.bkqueue import (
+from scan_server.bkqueue import (
     InstructionQueueItem,
     QueueManager,
     RequestBlockQueue,
     ScanQueue,
     ScanQueueStatus,
 )
-from koss.scan_assembler import ScanAssembler
-from koss.scan_worker import ScanWorker
+from scan_server.scan_assembler import ScanAssembler
+from scan_server.scan_worker import ScanWorker
 
-from utils import load_KossMock
+from utils import load_ScanServerMock
 
 
 def get_queuemanager() -> QueueManager:
-    k = load_KossMock()
+    k = load_ScanServerMock()
     return QueueManager(parent=k)
 
 
