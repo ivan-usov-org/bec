@@ -118,12 +118,20 @@ class ScanWorker(threading.Thread):
                         dev.metadata.get("scanID") == instr.metadata["scanID"]
                         for dev in device_status
                     )
+                    matching_requestID = all(
+                        dev.metadata.get("RID") == instr.metadata["RID"] for dev in device_status
+                    )
                     matching_DIID = all(
                         dev.metadata.get("DIID") == wait_group_devices[ii][1]
                         for ii, dev in enumerate(device_status)
                     )
 
-                    if devices_moved_successfully and matching_scanID and matching_DIID:
+                    if (
+                        devices_moved_successfully
+                        and matching_scanID
+                        and matching_DIID
+                        and matching_requestID
+                    ):
                         break
 
                     elif not devices_moved_successfully:
