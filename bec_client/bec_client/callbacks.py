@@ -9,6 +9,8 @@ import numpy as np
 from bec_utils import Alarms, DeviceManagerBase, DeviceStatus, MessageEndpoints
 from bec_utils.connector import ConsumerConnector
 
+from bec_client.progressbar import DeviceProgressBar
+
 from .prettytable import PrettyTable
 
 logger = logging.getLogger("client_callback")
@@ -39,6 +41,50 @@ def check_alarms(bk):
     for alarm in bk.alarms(severity=Alarms.MINOR):
         print(alarm)
         raise alarm
+
+
+async def live_updates_readback_progressbar(
+    dm: DeviceManagerBase, request: BMessage.ScanQueueMessage
+) -> None:
+    """Live feedback on motor movements using a progressbar.
+
+    Args:
+        dm (DeviceManagerBase): devicemanager
+        request (ScanQueueMessage): request that should be monitored
+
+    """
+    devices = request.content["parameter"]["args"].keys()
+    target_values = [x for xs in request.content["parameter"]["args"].values() for x in xs]
+
+    def get_device_values():
+        return [
+            dm.devices[dev].read(cached=True, use_readback=True).get("value") for dev in devices
+        ]
+
+    start_values = get_device_values()
+    with DeviceProgressBar(
+        devices=devices, start_values=start_values, target_values=target_values
+    ) as progress:
+        while not progress.finished:
+            check_alarms(dm.parent)
+            values = get_device_values()
+            progress.update(values=values)
+
+            pipe = dm.producer.pipeline()
+            for dev in devices:
+                dm.producer.get(MessageEndpoints.device_req_status(dev), pipe)
+            req_done_msgs = pipe.execute()
+
+            for dev, msg in zip(devices, req_done_msgs):
+                msg = BMessage.DeviceReqStatusMessage.loads(msg)
+                if not msg:
+                    continue
+                if not msg.metadata["RID"] == request.metadata["RID"]:
+                    continue
+                if msg.content.get("success", False):
+                    progress.set_finished(dev)
+
+            await progress.sleep()
 
 
 async def live_updates_readback(

@@ -9,7 +9,11 @@ from bec_utils import MessageEndpoints
 from bec_utils.connector import ConsumerConnector
 from cytoolz import partition
 
-from .callbacks import live_updates_readback, live_updates_table
+from .callbacks import (
+    live_updates_readback,
+    live_updates_readback_progressbar,
+    live_updates_table,
+)
 from .devicemanager_client import Device
 from .scan_queue import ScanReport
 
@@ -52,10 +56,9 @@ class ScanObject:
             if scan_report_type == "readback":
                 consumer = self._start_consumer(request)
                 self._send_scan_request(request)
-                await live_updates_readback(
+                await live_updates_readback_progressbar(
                     self.parent.devicemanager,
-                    request.content["parameter"]["args"],
-                    consumer,
+                    request,
                 )
                 consumer.shutdown()
             elif scan_report_type == "table":
