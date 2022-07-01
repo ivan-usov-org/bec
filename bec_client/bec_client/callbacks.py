@@ -9,7 +9,7 @@ import numpy as np
 from bec_utils import Alarms, DeviceManagerBase, DeviceStatus, MessageEndpoints
 from bec_utils.connector import ConsumerConnector
 
-from bec_client.progressbar import DeviceProgressBar
+from bec_client.progressbar import DeviceProgressBar, ScanProgressBar
 
 from .prettytable import PrettyTable
 
@@ -53,7 +53,7 @@ async def live_updates_readback_progressbar(
         request (ScanQueueMessage): request that should be monitored
 
     """
-    devices = request.content["parameter"]["args"].keys()
+    devices = list(request.content["parameter"]["args"].keys())
     target_values = [x for xs in request.content["parameter"]["args"].values() for x in xs]
 
     def get_device_values():
@@ -98,8 +98,7 @@ async def live_updates_readback(
         consumer (ConsumerConnector): active consumer
 
     """
-    start = time.time()
-    dm.parent._set_busy()
+
     devices = move_args.keys()
     print("  ", "\t".join(f"{dev}" for dev in devices))
     stop = [threading.Event() for dev in devices]
@@ -131,26 +130,26 @@ async def live_updates_readback(
                 ]
                 for ind, dev in enumerate(devices):
                     val = dm.parent.producer.get(MessageEndpoints.device_status(dev))
-                    if val is not None:
-                        val = msgpack.loads(val)
-                        if DeviceStatus(val.get("status")) == DeviceStatus.IDLE:
-                            if all(
-                                np.isclose(
-                                    dev_values[ind],
-                                    list(move_args.values())[ind],
-                                    atol=dm.devices[dev]
-                                    .config["deviceConfig"]
-                                    .get("tolerance", 0.5),
-                                )
-                            ):
-                                if not stop[ind].is_set():
-                                    set_event_delayed(stop[ind], 0.2)
+                    if not val:
+                        continue
+                    val = msgpack.loads(val)
+
+                    if DeviceStatus(val.get("status")) != DeviceStatus.IDLE:
+                        continue
+
+                    tolerance = dm.devices[dev].config["deviceConfig"].get("tolerance", 0.5)
+                    is_close = all(
+                        np.isclose(dev_values[ind], list(move_args.values())[ind], atol=tolerance)
+                    )
+                    if not is_close:
+                        continue
+                    if not stop[ind].is_set():
+                        set_event_delayed(stop[ind], 0.2)
                 check_alarms(dm.parent)
                 await asyncio.sleep(0.1)
             print_device_positions()
 
     print("\n")
-    dm.parent._set_idle()
 
 
 async def wait_for_scan_request(requests, RID):
@@ -180,7 +179,6 @@ def sort_devices(devices, scan_devices) -> list:
 
 async def live_updates_table(bk, request):
     acq_header = "seq. num"
-    pause_requested = False
     scan_devices = request.content["parameter"]["args"].keys()
     primary_devices = bk.devicemanager.devices.primary_devices(
         [bk.devicemanager.devices[dev] for dev in scan_devices]
@@ -197,7 +195,7 @@ async def live_updates_table(bk, request):
     if not scan_queue_request.decision_pending:
         while scan_queue_request.accepted is None:
             await asyncio.sleep(0.01)
-        if scan_queue_request.accepted[0] == True:
+        if scan_queue_request.accepted[0]:
 
             devices = [dev.name for dev in primary_devices]
             devices = sort_devices(devices, scan_devices)
@@ -224,7 +222,7 @@ async def live_updates_table(bk, request):
                 queue_pos = bk.queue.get_queue_position(scanID)
                 if queue_pos is None:
                     break
-                elif queue_pos > 0:
+                if queue_pos > 0:
                     print(
                         f"Scan is enqueued and is waiting for execution. Current position in queue: {queue_pos + 1}.",
                         end="\r",
@@ -243,35 +241,46 @@ async def live_updates_table(bk, request):
 
             header = [acq_header]
             header.extend(devices)
-            t = PrettyTable(header, padding=12)
-            print(t.get_header_lines())
+            table = PrettyTable(header, padding=12)
+            print(table.get_header_lines())
 
-            point_id = 0
-            while True:
-                check_alarms(bk)
-                point_data = queue_item.data.get(point_id)
-                if point_data:
-                    point_id += 1
-                    if point_id % 100 == 0:
-                        print(t.get_header_lines())
-                    for ind, dev in enumerate(devices):
-                        dev_values[ind] = point_data[dev][dev].get("value")
-                    print(t.get_row(point_id, *dev_values))
-                else:
-                    logger.debug("waiting for new data point")
-                    await asyncio.sleep(0.1)
+            with ScanProgressBar(scan_number=scan_number, clear_on_exit=True) as progressbar:
+                point_id = 0
+                while True:
+                    check_alarms(bk)
+                    point_data = queue_item.data.get(point_id)
+                    if queue_item.num_points:
+                        progressbar.max_points = queue_item.num_points - 1
+
+                    progressbar.update(point_id)
+                    if point_data:
+                        point_id += 1
+                        if point_id % 100 == 0:
+                            print(table.get_header_lines())
+                        for ind, dev in enumerate(devices):
+                            dev_values[ind] = point_data[dev][dev].get("value")
+                        print(table.get_row(point_id, *dev_values))
+                        progressbar.update(point_id)
+                    else:
+                        logger.debug("waiting for new data point")
+                        await asyncio.sleep(0.1)
+
+                    if (
+                        queue_item.num_points is not None
+                        and scanID not in queue_item.open_scan_defs
+                    ):
+                        if point_id == queue_item.num_points:
+                            break
+                        if point_id > queue_item.num_points:
+                            raise RuntimeError("Received more points than expected.")
+
                 queue_pos = bk.queue.get_queue_position(scanID)
-                if queue_item.num_points is not None and scanID not in queue_item._open_scan_defs:
-                    if point_id == queue_item.num_points:
-                        break
-                    elif point_id > queue_item.num_points:
-                        raise RuntimeError("Received more points than expected.")
-            if queue_pos is None:
-                print(
-                    t.get_footer(
-                        f"Scan {scan_number} finished. Scan ID {scanID}. Elapsed time: {queue_item.end_time-queue_item.start_time:.2f} s"
+                if queue_pos is None:
+                    print(
+                        table.get_footer(
+                            f"Scan {scan_number} finished. Scan ID {scanID}. Elapsed time: {queue_item.end_time-queue_item.start_time:.2f} s"
+                        )
                     )
-                )
         else:
             raise ScanRequestError(
                 f"Scan was rejected by the server: {scan_queue_request.response.content.get('message')}"

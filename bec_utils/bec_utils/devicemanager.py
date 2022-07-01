@@ -193,9 +193,6 @@ class DeviceManagerBase:
         self._start_connectors(bootstrap_server)
         self._get_config_from_DB()
 
-    def update_config(self, obj, config) -> None:
-        raise NotImplementedError
-
     def load_config_from_disk(self, config_path) -> dict:
         """
         load config from disk and send request
@@ -449,8 +446,8 @@ class DeviceManagerBase:
         """
         try:
             self.connector.shutdown()
-        except RuntimeError as re:
-            logger.error("Failed to shutdown connector", re)
+        except RuntimeError as runtime_error:
+            logger.error(f"Failed to shutdown connector. {runtime_error}")
 
     def __del__(self):
         self.shutdown()
