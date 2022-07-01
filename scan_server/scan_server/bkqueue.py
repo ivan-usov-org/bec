@@ -10,9 +10,9 @@ from typing import Union
 import bec_utils.BECMessage as BMessage
 from bec_utils import Alarms, MessageEndpoints
 
-from koss.scan_assembler import ScanAssembler
-from koss.scan_worker import InstructionQueueStatus, ScanAbortion, ScanWorker
-from koss.scans import LimitError
+from scan_server.scan_assembler import ScanAssembler
+from scan_server.scan_worker import InstructionQueueStatus, ScanAbortion, ScanWorker
+from scan_server.scans import LimitError
 
 
 class ScanQueueStatus(Enum):

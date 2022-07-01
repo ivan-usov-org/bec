@@ -1,9 +1,9 @@
 # import pytest
-# from .devicemanager import DeviceManagerKOSS
+# from .devicemanager import DeviceManagerScanServer
 
 # @pytest.fixture
 # def device_manager():
-#     return DeviceManagerKOSS()
+#     return DeviceManagerScanServer()
 
 
 # def dummy_devices():
@@ -28,7 +28,7 @@
 # def test__is_config_valid(device_manager):
 #     assert device_manager._is_config_valid()
 
-# @pytest.mark.parametrize('devs,device_manager', [(dummy_devices(), DeviceManagerKOSS())])
+# @pytest.mark.parametrize('devs,device_manager', [(dummy_devices(), DeviceManagerScanServer())])
 # def test__load_config(devs, device_manager):
 #     device_manager._load_config(devs)
 #     assert False

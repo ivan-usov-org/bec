@@ -1,6 +1,6 @@
 import bec_utils.BECMessage as BMessage
 
-import koss.scans as ks
+import scan_server.scans as ks
 
 
 class ScanAssembler:

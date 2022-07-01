@@ -1,12 +1,12 @@
 import pytest
 from bec_utils import BECMessage
-from koss.scan_worker import ScanWorker
+from scan_server.scan_worker import ScanWorker
 
-from utils import load_KossMock
+from utils import load_ScanServerMock
 
 
 def get_scan_worker() -> ScanWorker:
-    k = load_KossMock()
+    k = load_ScanServerMock()
     return ScanWorker(parent=k)
 
 
