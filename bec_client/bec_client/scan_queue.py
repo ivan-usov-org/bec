@@ -205,6 +205,9 @@ class ScanQueue:
     def request_scan_interruption(self, deferred_pause=True, scanID=None):
         if scanID is None:
             scanID = self.current_scanId
+        if not any(scanID):
+            return self.request_scan_abortion()
+
         action = "deferred_pause" if deferred_pause else "pause"
         self.parent.producer.send(
             MessageEndpoints.scan_queue_modification_request(),

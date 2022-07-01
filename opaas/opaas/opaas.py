@@ -96,11 +96,8 @@ class OPAAS:
     def consumer_interception_callback(msg, *, parent, **kwargs) -> None:
         mvalue = BMessage.ScanQueueModificationMessage.loads(msg.value)
         logger.info("Receiving: %s", mvalue.content)
-        if mvalue.content.get("action") == "deferred_pause":
-            pass
-        elif mvalue.content.get("action") == "pause":
+        if mvalue.content.get("action") in ["pause", "abort"]:
             parent.stop_devices()
-        # sig = int(msg.value)
 
     def stop_devices(self) -> None:
         logger.info("Stopping devices after receiving 'abort' request.")
