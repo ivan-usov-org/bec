@@ -58,8 +58,7 @@ class ScanObject:
                 self._send_scan_request(request)
                 await live_updates_readback_progressbar(
                     self.parent.devicemanager,
-                    request.content["parameter"]["args"],
-                    consumer,
+                    request,
                 )
                 consumer.shutdown()
             elif scan_report_type == "table":

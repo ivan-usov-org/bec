@@ -44,18 +44,17 @@ def check_alarms(bk):
 
 
 async def live_updates_readback_progressbar(
-    dm: DeviceManagerBase, move_args: dict, consumer: ConsumerConnector
+    dm: DeviceManagerBase, request: BMessage.ScanQueueMessage
 ) -> None:
     """Live feedback on motor movements using a progressbar.
 
     Args:
         dm (DeviceManagerBase): devicemanager
-        move_args (dict): arguments passed to the move command
-        consumer (ConsumerConnector): active consumer
+        request (ScanQueueMessage): request that should be monitored
 
     """
-    devices = move_args.keys()
-    target_values = [x for xs in move_args.values() for x in xs]
+    devices = request.content["parameter"]["args"].keys()
+    target_values = [x for xs in request.content["parameter"]["args"].values() for x in xs]
 
     def get_device_values():
         return [
@@ -70,6 +69,21 @@ async def live_updates_readback_progressbar(
             check_alarms(dm.parent)
             values = get_device_values()
             progress.update(values=values)
+
+            pipe = dm.producer.pipeline()
+            for dev in devices:
+                dm.producer.get(MessageEndpoints.device_req_status(dev), pipe)
+            req_done_msgs = pipe.execute()
+
+            for dev, msg in zip(devices, req_done_msgs):
+                msg = BMessage.DeviceReqStatusMessage.loads(msg)
+                if not msg:
+                    continue
+                if not msg.metadata["RID"] == request.metadata["RID"]:
+                    continue
+                if msg.content.get("success", False):
+                    progress.set_finished(dev)
+
             await progress.sleep()
 
 
