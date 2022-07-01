@@ -10,12 +10,12 @@ import ophyd.sim as ops
 import ophyd_devices as opd
 from bec_utils import Device, DeviceConfigError, DeviceManagerBase, MessageEndpoints
 from bec_utils.connector import ConnectorBase
-from opaas.devices.device_serializer import get_device_info
+from device_server.devices.device_serializer import get_device_info
 
 logger = logging.getLogger(__name__)
 
 
-class OPAASDevice(Device):
+class DSDevice(Device):
     def __init__(self, name, obj, config):
         super().__init__(name, config)
         self.obj = obj
@@ -29,7 +29,7 @@ class OPAASDevice(Device):
         pipe.execute()
 
 
-class DeviceManagerOPAAS(DeviceManagerBase):
+class DeviceManagerDS(DeviceManagerBase):
     def __init__(self, connector: ConnectorBase, scibec_url: str):
         super().__init__(connector, scibec_url)
         self._config_request_connector = None
@@ -84,7 +84,7 @@ class DeviceManagerOPAAS(DeviceManagerBase):
                 else:
                     setattr(obj, config_key, config_value)
 
-    def initialize_device(self, dev: dict) -> OPAASDevice:
+    def initialize_device(self, dev: dict) -> DSDevice:
         name = dev.get("name")
         enabled = dev.get("enabled")
 
@@ -118,7 +118,7 @@ class DeviceManagerOPAAS(DeviceManagerBase):
             obj.motor_is_moving.subscribe(self._obj_callback_is_moving, run=enabled)
 
         # insert the created device obj into the device manager
-        opaas_obj = OPAASDevice(name, obj, config=dev)
+        opaas_obj = DSDevice(name, obj, config=dev)
         self.devices._add_device(name, opaas_obj)
 
         # update device buffer

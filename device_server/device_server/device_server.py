@@ -14,8 +14,8 @@ from bec_utils import Alarms, MessageEndpoints
 from bec_utils.connector import ConnectorBase
 from ophyd.utils import errors as ophyd_errors
 
-from opaas.devices import is_serializable
-from opaas.devices.devicemanageropaas import DeviceManagerOPAAS
+from device_server.devices import is_serializable
+from device_server.devices.devicemanager import DeviceManagerDS
 
 logger = logging.getLogger(__name__)
 consumer_stop = threading.Event()
@@ -30,22 +30,22 @@ def rgetattr(obj, attr, *args):
     return reduce(_getattr, [obj] + attr.split("."))
 
 
-class OPAASStatus(enum.Enum):
+class DSStatus(enum.Enum):
     RUNNING = 1
     IDLE = 0
     ERROR = -1
 
 
-class OPAAS:
-    """OPAAS - ophyd as a service
+class DeviceServer:
+    """DeviceServer using ophyd as a service
     This class is intended to provide a thin wrapper around ophyd and the devicemanager. It acts as the entry point for other services
     """
 
     def __init__(self, bootstrap, Connector: ConnectorBase, scibec_url: str) -> None:
-        self._status = OPAASStatus.IDLE
+        self._status = DSStatus.IDLE
         self._tasks = []
         self.connector = Connector(bootstrap)
-        self.device_manager = DeviceManagerOPAAS(self.connector, scibec_url)
+        self.device_manager = DeviceManagerDS(self.connector, scibec_url)
         self.device_manager.initialize(bootstrap)
         self.threads = []
         self.sig_thread = None
@@ -71,13 +71,13 @@ class OPAAS:
         ]
         for t in self.threads:
             t.start()
-        self._status = OPAASStatus.RUNNING
+        self._status = DSStatus.RUNNING
 
     def stop(self) -> None:
         consumer_stop.set()
         for t in self.threads:
             t.join()
-        self._status = OPAASStatus.IDLE
+        self._status = DSStatus.IDLE
 
     def shutdown(self) -> None:
         self.stop()
@@ -258,16 +258,16 @@ class OPAAS:
         )
 
     @property
-    def status(self) -> OPAASStatus:
+    def status(self) -> DSStatus:
         return self._status
 
     @status.setter
     def status(self, val) -> None:
-        if OPAASStatus(val) == OPAASStatus.RUNNING:
-            if self.status != OPAASStatus.RUNNING:
+        if DSStatus(val) == DSStatus.RUNNING:
+            if self.status != DSStatus.RUNNING:
                 self.start()
-                self._status = OPAASStatus.RUNNING
-        elif OPAASStatus(val) == OPAASStatus.IDLE:
-            if self.status != OPAASStatus.IDLE:
+                self._status = DSStatus.RUNNING
+        elif DSStatus(val) == DSStatus.IDLE:
+            if self.status != DSStatus.IDLE:
                 self.stop()
-                self._status = OPAASStatus.IDLE
+                self._status = DSStatus.IDLE
