@@ -9,6 +9,8 @@ import numpy as np
 from bec_utils import Alarms, DeviceManagerBase, DeviceStatus, MessageEndpoints
 from bec_utils.connector import ConsumerConnector
 
+from bec_client.progressbar import DeviceProgressBar
+
 from .prettytable import PrettyTable
 
 logger = logging.getLogger("client_callback")
@@ -39,6 +41,36 @@ def check_alarms(bk):
     for alarm in bk.alarms(severity=Alarms.MINOR):
         print(alarm)
         raise alarm
+
+
+async def live_updates_readback_progressbar(
+    dm: DeviceManagerBase, move_args: dict, consumer: ConsumerConnector
+) -> None:
+    """Live feedback on motor movements using a progressbar.
+
+    Args:
+        dm (DeviceManagerBase): devicemanager
+        move_args (dict): arguments passed to the move command
+        consumer (ConsumerConnector): active consumer
+
+    """
+    devices = move_args.keys()
+    target_values = [x for xs in move_args.values() for x in xs]
+
+    def get_device_values():
+        return [
+            dm.devices[dev].read(cached=True, use_readback=True).get("value") for dev in devices
+        ]
+
+    start_values = get_device_values()
+    with DeviceProgressBar(
+        devices=devices, start_values=start_values, target_values=target_values
+    ) as progress:
+        while not progress.finished:
+            check_alarms(dm.parent)
+            values = get_device_values()
+            progress.update(values=values)
+            await progress.sleep()
 
 
 async def live_updates_readback(
