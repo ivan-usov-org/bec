@@ -199,7 +199,7 @@ class DeviceManagerOPAAS(DeviceManagerBase):
         # self._device_instructions_connector.signal_event.set()
         # self._device_instructions_connector.join()
 
-    def send_config_request_reply(self):
+    def send_config_request_reply(self, error_msg):
         pass
 
     @staticmethod
@@ -215,10 +215,10 @@ class DeviceManagerOPAAS(DeviceManagerBase):
         try:
             self._check_request_validity(msg)
             if msg.content["action"] == "update":
-
+                updated = False
                 for dev in msg.content["config"]:
                     dev_config = msg.content["config"][dev]
-                    if "deviceConfig" in dev:
+                    if "deviceConfig" in dev_config:
                         # store old config
                         old_config = self.devices[dev].config["deviceConfig"].copy()
 
@@ -229,22 +229,25 @@ class DeviceManagerOPAAS(DeviceManagerBase):
                             self.update_config(self.devices[dev].obj, old_config)
                             raise DeviceConfigError(f"Error during object update. {e}")
 
-                        self.devices[dev].deviceConfig.update(dev_config["deviceConfig"])
+                        self.devices[dev].config["deviceConfig"].update(dev_config["deviceConfig"])
 
                         # update config in DB
                         print("updating in DB")
                         success = self._scibec.patch_device_config(
-                            self.devices[dev].id,
+                            self.devices[dev].config["id"],
                             {"deviceConfig": self.devices[dev].config["deviceConfig"]},
                         )
                         if not success:
                             raise DeviceConfigError("Error during database update.")
+                        updated = True
 
                     if "enabled" in dev_config:
                         self.devices[dev].config["enabled"] = dev_config["enabled"]
+                        updated = True
 
                 # send updates to services
-                self.send_config(msg)
+                if updated:
+                    self.send_config(msg)
 
         except DeviceConfigError as dev_conf_error:
             self.send_config_request_reply(dev_conf_error)
