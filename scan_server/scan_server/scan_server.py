@@ -1,24 +1,23 @@
 from __future__ import annotations
 
 import inspect
-import logging
 
 import msgpack
-from bec_utils import BECMessage, MessageEndpoints
+from bec_utils import BECMessage, BECService, MessageEndpoints, bec_logger
 from bec_utils.connector import ConnectorBase
 
-import koss.scans as koss_scans
+import scan_server.scans as ScanServerScans
 
 from .bkqueue import QueueManager
-from .devicemanager import DeviceManager
+from .devicemanager import DeviceManagerScanServer
 from .scan_assembler import ScanAssembler
 from .scan_guard import ScanGuard
 from .scan_worker import ScanWorker
 
-logger = logging.getLogger(__name__)
+logger = bec_logger.logger
 
 
-class KOSS:
+class ScanServer(BECService):
     device_manager = None
     queue_manager = None
     scan_guard = None
@@ -26,10 +25,9 @@ class KOSS:
     scan_assembler = None
 
     def __init__(self, bootstrap_server: list, connector_cls: ConnectorBase, scibec_url: str):
-        self.bootstrap_server = bootstrap_server
+        super().__init__(bootstrap_server, connector_cls)
         self.scan_number = 0
         self.scan_dict = {}
-        self.connector = connector_cls(bootstrap_server)
         self.scibec_url = scibec_url
         self.producer = self.connector.producer()
         self._update_available_scans()
@@ -42,7 +40,7 @@ class KOSS:
         self._start_alarm_handler()
 
     def _start_device_manager(self):
-        self.device_manager = DeviceManager(self.connector, self.scibec_url)
+        self.device_manager = DeviceManagerScanServer(self.connector, self.scibec_url)
         self.device_manager.initialize([self.bootstrap_server])
 
     def _start_scan_server(self):
@@ -59,9 +57,9 @@ class KOSS:
         self.scan_guard = ScanGuard(parent=self)
 
     def _update_available_scans(self):
-        for name, val in inspect.getmembers(koss_scans):  # TODO: use vars() ?
+        for name, val in inspect.getmembers(ScanServerScans):  # TODO: use vars() ?
             try:
-                is_scan = issubclass(val, koss_scans.RequestBase)
+                is_scan = issubclass(val, ScanServerScans.RequestBase)
             except TypeError:
                 is_scan = False
 
@@ -89,12 +87,14 @@ class KOSS:
         self._alarm_consumer.start()
 
     @staticmethod
-    def _alarm_callback(msg, parent: KOSS, **_kwargs):
+    def _alarm_callback(msg, parent: ScanServer, **_kwargs):
         md = BECMessage.AlarmMessage.loads(msg.value).metadata
         scanID = md.get("scanID")
         queue = md.get("stream")
         if scanID and queue:
-            parent.queue_manager._set_abort(scanID=scanID, queue=queue)
+            parent.queue_manager._set_abort(
+                scanID=msg.metadata["scanID"], queue=msg.metadata["stream"]
+            )
 
     def load_config_from_disk(self, file_path):
         self.device_manager.load_config_from_disk(file_path)

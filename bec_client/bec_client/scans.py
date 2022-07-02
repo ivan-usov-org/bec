@@ -1,19 +1,21 @@
 import asyncio
-import logging
 import uuid
 from contextlib import ContextDecorator
 
 import msgpack
-from bec_utils import BECMessage as BMessage
-from bec_utils import MessageEndpoints
+from bec_utils import BECMessage, MessageEndpoints, bec_logger
 from bec_utils.connector import ConsumerConnector
 from cytoolz import partition
 
-from .callbacks import live_updates_readback, live_updates_table
+from .callbacks import (
+    live_updates_readback,
+    live_updates_readback_progressbar,
+    live_updates_table,
+)
 from .devicemanager_client import Device
 from .scan_queue import ScanReport
 
-logger = logging.getLogger("scans")
+logger = bec_logger.logger
 
 
 class ScanObject:
@@ -52,10 +54,14 @@ class ScanObject:
             if scan_report_type == "readback":
                 consumer = self._start_consumer(request)
                 self._send_scan_request(request)
-                await live_updates_readback(
+                # await live_updates_readback(
+                #     self.parent.devicemanager,
+                #     move_args=request.content["parameter"]["args"],
+                #     consumer=consumer,
+                # )
+                await live_updates_readback_progressbar(
                     self.parent.devicemanager,
-                    request.content["parameter"]["args"],
-                    consumer,
+                    request=request,
                 )
                 consumer.shutdown()
             elif scan_report_type == "table":
@@ -75,7 +81,7 @@ class ScanObject:
         else:
             return self.scan_info.get("scan_report_hint")
 
-    def _start_consumer(self, request: BMessage.ScanQueueMessage) -> ConsumerConnector:
+    def _start_consumer(self, request: BECMessage.ScanQueueMessage) -> ConsumerConnector:
         consumer = self.parent.devicemanager.connector.consumer(
             [
                 MessageEndpoints.device_readback(dev)
@@ -86,7 +92,7 @@ class ScanObject:
         )
         return consumer
 
-    def _send_scan_request(self, request: BMessage.ScanQueueMessage) -> None:
+    def _send_scan_request(self, request: BECMessage.ScanQueueMessage) -> None:
         self.parent.devicemanager.producer.send(
             MessageEndpoints.scan_queue_request(), request.dumps()
         )
@@ -140,7 +146,7 @@ class Scans:
     @staticmethod
     def _prepare_scan_request(
         scan_name: str, scan_info: dict, *args, **kwargs
-    ) -> BMessage.ScanQueueMessage:
+    ) -> BECMessage.ScanQueueMessage:
         """Prepare scan request message with given scan arguments
 
         Args:
@@ -153,7 +159,7 @@ class Scans:
             TypeError: Raised if an argument is not of the required type as specified in scan_info.
 
         Returns:
-            BMessage.ScanQueueMessage: _description_
+            BECMessage.ScanQueueMessage: _description_
         """
         arg_input = scan_info.get("arg_input")
         if arg_input is not None:
@@ -182,7 +188,7 @@ class Scans:
             "args": Scans._parameter_bundler(args, arg_bundle_size),
             "kwargs": kwargs,
         }
-        return BMessage.ScanQueueMessage(
+        return BECMessage.ScanQueueMessage(
             scan_type=scan_name, parameter=params, queue="primary", metadata=md
         )
 

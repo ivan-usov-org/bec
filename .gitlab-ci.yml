@@ -7,8 +7,8 @@ variables:
   DOCKER_DRIVER: overlay
   DOCKER_BUILDKIT: 0
 
-services: 
-   - docker:18.09-dind
+services:
+  - docker:18.09-dind
 # different stages in the pipeline
 stages:
   - Formatter
@@ -23,8 +23,8 @@ pytest:
   stage: Test
   script:
     - pip install pytest
-    - pip install -e ./koss
-    - cd koss/tests;pytest -v
+    - pip install -e ./scan_server
+    - cd scan_server/tests;pytest -v
 integration test setup:
   stage: Integration-Test-Setup
   image: docker:20.10.16
@@ -35,4 +35,3 @@ integration test setup:
     - apk update; apk upgrade; apk add curl
     - timeout 120 /bin/sh -c -- 'while true; do res=$(curl -X "GET" --max-time 3 "http://docker:3030/sessions"); if [ ! -z "$res" ]; then exit 0; fi; sleep 1; done;'
   # - curl --fail http://localhost:3030/sessions
-

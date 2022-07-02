@@ -1,25 +1,22 @@
-import logging
 import time
 import uuid
 from collections.abc import Iterable
 
-import bec_utils.BECMessage as BMessage
 import msgpack
 import numpy as np
-from bec_utils import MessageEndpoints
+from bec_utils import BECMessage, BECService, MessageEndpoints, bec_logger
 from bec_utils.connector import ConnectorBase
 
 from .devicemanager_sb import DeviceManagerSB
 
-logger = logging.getLogger(__name__)
+logger = bec_logger.logger
 
 
-class ScanBundler:
-    def __init__(self, bootstrap, Connector: ConnectorBase, scibec_url: str) -> None:
-        self.connector = Connector(bootstrap)
+class ScanBundler(BECService):
+    def __init__(self, bootstrap_server, connector_cls: ConnectorBase, scibec_url: str) -> None:
+        super().__init__(bootstrap_server, connector_cls)
         self.DM = DeviceManagerSB(self.connector, scibec_url)
-        self.DM.initialize(bootstrap)
-        self.producer = self.connector.producer()
+        self.DM.initialize(bootstrap_server)
         self._start_device_read_consumer()
         self._start_scan_queue_consumer()
         self._start_scan_status_consumer()
@@ -60,7 +57,7 @@ class ScanBundler:
     @staticmethod
     def _device_read_callback(msg, parent, **kwargs):
         dev = msg.topic.decode().split(MessageEndpoints._device_read + "/")[-1].split(":sub")[0]
-        msg = BMessage.DeviceMessage.loads(msg.value)
+        msg = BECMessage.DeviceMessage.loads(msg.value)
         if msg.content["signals"].get(dev) is not None:
             parent._add_device_to_storage(
                 msg.metadata["scanID"], dev, msg.content["signals"], msg.metadata
@@ -70,8 +67,8 @@ class ScanBundler:
 
     @staticmethod
     def _scan_queue_callback(msg, parent, **kwargs):
-        msg = BMessage.ScanQueueStatusMessage.loads(msg.value)
-        print(msg)
+        msg = BECMessage.ScanQueueStatusMessage.loads(msg.value)
+        logger.trace(msg)
         for q in msg.content["queue"]["primary"].get("info"):
             for rb in q.get("request_blocks"):
                 if rb.get("is_scan"):
@@ -80,11 +77,11 @@ class ScanBundler:
 
     @staticmethod
     def _scan_status_callback(msg, parent, **kwargs):
-        msg = BMessage.ScanStatusMessage.loads(msg.value)
+        msg = BECMessage.ScanStatusMessage.loads(msg.value)
         if msg.content.get("status") != "open":
             parent._scan_status_modification(msg)
 
-    def _scan_status_modification(self, msg: BMessage.ScanStatusMessage):
+    def _scan_status_modification(self, msg: BECMessage.ScanStatusMessage):
         if msg.content.get("status") == "closed":
             scanID = msg.content.get("scanID")
             if scanID:
@@ -226,7 +223,8 @@ class ScanBundler:
             }
 
             if all(status for status in baseline_devices_status.values()):
-                print("Baseline: ", self.sync_storage[scanID]["baseline"])
+                logger.info(f"Sending baseline readings for scanID {scanID}.")
+                logger.debug("Baseline: ", self.sync_storage[scanID]["baseline"])
 
     def _prepare_bluesky_event_data(self, scanID, pointID) -> dict:
         # event = {
@@ -273,11 +271,12 @@ class ScanBundler:
         pass
 
     def _send_scan_point(self, scanID, pointID) -> None:
-        print(pointID, self.sync_storage[scanID][pointID])
+        logger.info(f"Sending point {pointID} for scanID {scanID}.")
+        logger.debug(pointID, self.sync_storage[scanID][pointID])
 
         self.producer.send(
             MessageEndpoints.scan_segment(),
-            BMessage.ScanMessage(
+            BECMessage.ScanMessage(
                 point_id=pointID,
                 scanID=scanID,
                 data=self.sync_storage[scanID][pointID],

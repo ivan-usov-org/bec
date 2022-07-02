@@ -1,8 +1,8 @@
-from bec_utils import Device, DeviceManagerBase
+from bec_utils import DeviceManagerBase
 from bec_utils.connector import ConnectorBase
 
 
-class DeviceManager(DeviceManagerBase):
+class DeviceManagerScanServer(DeviceManagerBase):
     def __init__(self, connector: ConnectorBase, scibec_url: str):
         super().__init__(connector, scibec_url=scibec_url)
         self._device_groups = {}

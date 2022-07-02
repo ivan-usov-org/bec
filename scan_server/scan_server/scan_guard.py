@@ -1,9 +1,7 @@
-import logging
-
 import msgpack
-from bec_utils import BECMessage, MessageEndpoints
+from bec_utils import BECMessage, MessageEndpoints, bec_logger
 
-logger = logging.getLogger(__name__)
+logger = bec_logger.logger
 
 
 class ScanRejection(Exception):
@@ -11,8 +9,8 @@ class ScanRejection(Exception):
 
 
 class ScanStatus:
-    def __init__(self, decision: bool = True, message: str = ""):
-        self.decision = decision
+    def __init__(self, accepted: bool = True, message: str = ""):
+        self.accepted = accepted
         self.message = message
 
 
@@ -98,21 +96,21 @@ class ScanGuard:
     @staticmethod
     def _scan_queue_request_callback(msg, parent, **kwargs):
         content = BECMessage.ScanQueueMessage.loads(msg.value).content
-        print("Receiving scan request:", content)
+        logger.info("Receiving scan request:", content)
         # pylint: disable=protected-access
         parent._handle_scan_request(msg.value)
 
     @staticmethod
     def _scan_queue_modification_request_callback(msg, parent, **kwargs):
         content = BECMessage.ScanQueueModificationMessage.loads(msg.value).content
-        print("Receiving scan modification request:", content)
+        logger.info("Receiving scan modification request:", content)
         # pylint: disable=protected-access
         parent._handle_scan_modification_request(msg.value)
 
     def _send_scan_request_response(self, scan_status, metadata):
         sqrr = MessageEndpoints.scan_queue_request_response()
         rrm = BECMessage.RequestResponseMessage(
-            decision=scan_status.decision, message=scan_status.message, metadata=metadata
+            accepted=scan_status.accepted, message=scan_status.message, metadata=metadata
         ).dumps()
         self.device_manager.producer.send(sqrr, rrm)
 
@@ -132,7 +130,7 @@ class ScanGuard:
         # msg.metadata["scanID"] = str(uuid.uuid4()) if accepted else None #TODO: hmm?
         self._send_scan_request_response(scan_status, msg.metadata)
 
-        if scan_status.decision:
+        if scan_status.accepted:
             self._append_to_scan_queue(msg)
         else:
             logger.info(f"Request was rejected: {scan_status.message}")
@@ -153,7 +151,7 @@ class ScanGuard:
         self.device_manager.producer.send(sqm, msg)
 
     def _append_to_scan_queue(self, msg):
-        print("Appending new scan to queue")
+        logger.info("Appending new scan to queue")
         msg = msg.dumps()
         sqi = MessageEndpoints.scan_queue_insert()
         self.device_manager.producer.send(sqi, msg)

@@ -6,7 +6,9 @@ from asyncio.log import logger
 from enum import Enum
 
 import msgpack
-from bec_utils import Alarms, BECMessage, DeviceStatus, MessageEndpoints
+from bec_utils import Alarms, BECMessage, DeviceStatus, MessageEndpoints, bec_logger
+
+logger = bec_logger.logger
 
 DeviceMsg = BECMessage.DeviceInstructionMessage
 ScanStatusMsg = BECMessage.ScanStatusMessage
@@ -81,7 +83,7 @@ class ScanWorker(threading.Thread):
         elif wait_type == "trigger":
             self._wait_for_trigger(instr)
         else:
-            print("Unkown wait command")
+            logger.error("Unkown wait command")
 
     def _wait_for_idle(self, instr) -> None:
         """Wait for devices to become IDLE
@@ -119,12 +121,20 @@ class ScanWorker(threading.Thread):
                         dev.metadata.get("scanID") == instr.metadata["scanID"]
                         for dev in device_status
                     )
+                    matching_requestID = all(
+                        dev.metadata.get("RID") == instr.metadata["RID"] for dev in device_status
+                    )
                     matching_DIID = all(
                         dev.metadata.get("DIID") == wait_group_devices[ii][1]
                         for ii, dev in enumerate(device_status)
                     )
 
-                    if devices_moved_successfully and matching_scanID and matching_DIID:
+                    if (
+                        devices_moved_successfully
+                        and matching_scanID
+                        and matching_DIID
+                        and matching_requestID
+                    ):
                         break
 
                     elif not devices_moved_successfully:
@@ -267,6 +277,9 @@ class ScanWorker(threading.Thread):
                     for dev in instr.content["parameter"].get("primary")
                 ]
             # self.parent.scan_number += 1
+        if instr.content["parameter"].get("num_points"):
+            self.current_scan_info["points"] = instr.content["parameter"].get("num_points")
+            self._send_scan_status("open")
 
     def _close_scan(self, instr, max_point_id) -> None:
         scan_id = instr.metadata.get("scanID")
@@ -279,6 +292,16 @@ class ScanWorker(threading.Thread):
                     scanID=self.current_scanID, status="closed", info=self.current_scan_info
                 ).dumps(),
             )
+
+    def _send_scan_status(self, status: str):
+        self.device_manager.producer.send(
+            MessageEndpoints.scan_status(),
+            ScanStatusMsg(
+                scanID=self.current_scanID,
+                status=status,
+                info=self.current_scan_info,
+            ).dumps(),
+        )
 
     def _process_instructions(self, queue) -> None:
         """
@@ -311,16 +334,10 @@ class ScanWorker(threading.Thread):
                 self.current_scanID = instr.metadata.get("scanID")
                 self.current_scan_info = instr.metadata
                 self.current_scan_info.update({"scan_number": self.parent.scan_number})
-                self.device_manager.producer.send(
-                    MessageEndpoints.scan_status(),
-                    ScanStatusMsg(
-                        scanID=self.current_scanID,
-                        status="open",
-                        info=self.current_scan_info,
-                    ).dumps(),
-                )
+                if self.current_scanID:
+                    self._send_scan_status("open")
 
-            # print("Device instruction: ", instr)
+            logger.debug("Device instruction: ", instr)
 
             self._add_wait_group(instr)
 
@@ -346,7 +363,7 @@ class ScanWorker(threading.Thread):
                 _instruction_step(instr)
         queue.is_active = False
 
-        print(f"QUEUE ITEM finished after {time.time()-start:.2f} seconds")
+        logger.info(f"QUEUE ITEM finished after {time.time()-start:.2f} seconds")
         self.reset()
 
     def reset(self):
@@ -367,6 +384,6 @@ class ScanWorker(threading.Thread):
                     self.parent.queue_manager.queues["primary"].abort()
                     self.reset()
         except KeyError:
-            print("Exception", sys.exc_info())
+            logger.error("Exception", sys.exc_info())
         finally:
             self.connector.shutdown()

@@ -1,6 +1,8 @@
-from bec_utils import BECMessage
+from bec_utils import BECMessage, bec_logger
 
-import koss.scans as koss_scans
+import scan_server.scans as ScanServerScans
+
+logger = bec_logger.logger
 
 
 class ScanAssembler:
@@ -17,9 +19,9 @@ class ScanAssembler:
     def assemble_device_instructions(self, msg: BECMessage.ScanQueueMessage):
         scan = msg.content.get("scan_type")
         cls_name = self._scans[scan]["class"]
-        scan_cls = getattr(koss_scans, cls_name)
+        scan_cls = getattr(ScanServerScans, cls_name)
 
-        print(f"Preparing instructions of request of type {scan} / {scan_cls}")  # TODO: logging?
+        logger.info(f"Preparing instructions of request of type {scan} / {scan_cls.__name__}")
 
         return scan_cls(
             device_manager=self.device_manager,

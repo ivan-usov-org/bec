@@ -7,11 +7,14 @@ import uuid
 from enum import Enum
 from typing import Union
 
-from bec_utils import Alarms, BECMessage, MessageEndpoints
+from bec_utils import Alarms, BECMessage, MessageEndpoints, bec_logger
+from prettytable import PrettyTable
 
-from koss.scan_assembler import ScanAssembler
-from koss.scan_worker import InstructionQueueStatus, ScanAbortion, ScanWorker
-from koss.scans import LimitError
+from scan_server.scan_assembler import ScanAssembler
+from scan_server.scan_worker import InstructionQueueStatus, ScanAbortion, ScanWorker
+from scan_server.scans import LimitError
+
+logger = bec_logger.logger
 
 
 class ScanQueueStatus(Enum):
@@ -59,7 +62,7 @@ class QueueManager:
     @staticmethod
     def _scan_queue_callback(msg, parent, **_kwargs) -> None:
         scan_msg = BECMessage.ScanQueueMessage.loads(msg.value)
-        print("Receiving scan:", scan_msg.content, time.time())
+        logger.info("Receiving scan:", scan_msg.content, time.time())
         # instructions = parent.scan_assembler.assemble_device_instructions(scan_msg)
         parent.add_to_queue("primary", scan_msg)
         parent.send_queue_status()
@@ -67,7 +70,7 @@ class QueueManager:
     @staticmethod
     def _scan_queue_modification_callback(msg, parent, **_kwargs):
         scan_mod_msg = BECMessage.ScanQueueModificationMessage.loads(msg.value)
-        print("Receiving scan modification:", scan_mod_msg.content)
+        logger.info("Receiving scan modification:", scan_mod_msg.content)
         if scan_mod_msg:
             parent.scan_interception(scan_mod_msg)
             parent.send_queue_status()
@@ -98,9 +101,38 @@ class QueueManager:
         self.queues[queue].worker_status = InstructionQueueStatus.PAUSED
         self.queues[queue].clear()
 
-    def send_queue_status(self):
+    def send_queue_status(self) -> None:
+        queue_export = self.export_queue()
+        logger.info("New scan queue:")
+        for queue in self.describe_queue():
+            logger.info(f"\n {queue}")
+        self.producer.send(
+            MessageEndpoints.scan_queue_status(),
+            BECMessage.ScanQueueStatusMessage(queue=queue_export).dumps(),
+        )
+
+    def describe_queue(self) -> list:
+        queue_tables = []
+        for queue_name, scan_queue in self.queues.items():
+            table = PrettyTable()
+            table.title = f"{queue_name} queue"
+            table.field_names = ["queueID", "scanID", "is_scan", "scan_number", "status"]
+            for instruction_queue in scan_queue.queue:
+                table.add_row(
+                    [
+                        instruction_queue.queue_id,
+                        instruction_queue.scanID,
+                        instruction_queue.is_scan,
+                        instruction_queue.scan_number,
+                        instruction_queue.status.name,
+                    ]
+                )
+            queue_tables.append(table)
+        return queue_tables
+
+    def export_queue(self) -> dict:
         queue_export = {}
-        for k, scan_queue in self.queues.items():
+        for queue_name, scan_queue in self.queues.items():
             queue_info = []
             for instruction_queue in scan_queue.queue:
                 request_blocks = [rb.describe() for rb in instruction_queue.queue.request_blocks]
@@ -117,11 +149,8 @@ class QueueManager:
                         else None,
                     }
                 )
-            queue_export[k] = {"info": queue_info, "status": scan_queue.status.name}
-        self.producer.send(
-            MessageEndpoints.scan_queue_status(),
-            BECMessage.ScanQueueStatusMessage(queue=queue_export).dumps(),
-        )
+            queue_export[queue_name] = {"info": queue_info, "status": scan_queue.status.name}
+        return queue_export
 
     def shutdown(self):
         for queue in self.queues.values():
@@ -218,7 +247,7 @@ class ScanQueue:
                         # we don't need to pause if there is no scan enqueued
                         self.status = ScanQueueStatus.RUNNING
                     time.sleep(1)
-                    print("queue is paused")
+                    logger.info("Queue is paused")
 
                 self.active_instruction_queue = self.queue.popleft()
                 self.history_queue.append(self.active_instruction_queue)
@@ -517,12 +546,12 @@ class InstructionQueueItem:
 
         except StopIteration:
             if not self.scan_macros_complete:
-                print(
+                logger.info(
                     f"Waiting for new instructions or scan macro to be closed (scan def ids: {self.queue.scan_def_ids})"
                 )
                 time.sleep(0.1)
             elif self.queue_group is not None and not self.queue_group_is_closed:
-                print(
+                logger.info(
                     f"Waiting for new instructions or queue group to be closed (group id: {self.queue_group})"
                 )
                 time.sleep(0.1)

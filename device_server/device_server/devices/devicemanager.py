@@ -1,21 +1,25 @@
 import inspect
-import logging
 import time
-from email.message import Message
 
 import bec_utils.BECMessage as BMessage
 import msgpack
 import ophyd
 import ophyd.sim as ops
 import ophyd_devices as opd
-from bec_utils import Device, DeviceConfigError, DeviceManagerBase, MessageEndpoints
+from bec_utils import (
+    Device,
+    DeviceConfigError,
+    DeviceManagerBase,
+    MessageEndpoints,
+    bec_logger,
+)
 from bec_utils.connector import ConnectorBase
-from opaas.devices.device_serializer import get_device_info
+from device_server.devices.device_serializer import get_device_info
 
-logger = logging.getLogger(__name__)
+logger = bec_logger.logger
 
 
-class OPAASDevice(Device):
+class DSDevice(Device):
     def __init__(self, name, obj, config):
         super().__init__(name, config)
         self.obj = obj
@@ -29,14 +33,11 @@ class OPAASDevice(Device):
         pipe.execute()
 
 
-class DeviceManagerOPAAS(DeviceManagerBase):
+class DeviceManagerDS(DeviceManagerBase):
     def __init__(self, connector: ConnectorBase, scibec_url: str):
         super().__init__(connector, scibec_url)
         self._config_request_connector = None
         self._device_instructions_connector = None
-
-    def update_config(self, config) -> None:
-        print(config)
 
     def _get_device_class(self, dev_type):
         module = None
@@ -84,7 +85,7 @@ class DeviceManagerOPAAS(DeviceManagerBase):
                 else:
                     setattr(obj, config_key, config_value)
 
-    def initialize_device(self, dev: dict) -> OPAASDevice:
+    def initialize_device(self, dev: dict) -> DSDevice:
         name = dev.get("name")
         enabled = dev.get("enabled")
 
@@ -118,7 +119,7 @@ class DeviceManagerOPAAS(DeviceManagerBase):
             obj.motor_is_moving.subscribe(self._obj_callback_is_moving, run=enabled)
 
         # insert the created device obj into the device manager
-        opaas_obj = OPAASDevice(name, obj, config=dev)
+        opaas_obj = DSDevice(name, obj, config=dev)
         self.devices._add_device(name, opaas_obj)
 
         # update device buffer
@@ -199,7 +200,7 @@ class DeviceManagerOPAAS(DeviceManagerBase):
         # self._device_instructions_connector.signal_event.set()
         # self._device_instructions_connector.join()
 
-    def send_config_request_reply(self):
+    def send_config_request_reply(self, error_msg):
         pass
 
     @staticmethod
@@ -215,10 +216,10 @@ class DeviceManagerOPAAS(DeviceManagerBase):
         try:
             self._check_request_validity(msg)
             if msg.content["action"] == "update":
-
+                updated = False
                 for dev in msg.content["config"]:
                     dev_config = msg.content["config"][dev]
-                    if "deviceConfig" in dev:
+                    if "deviceConfig" in dev_config:
                         # store old config
                         old_config = self.devices[dev].config["deviceConfig"].copy()
 
@@ -229,22 +230,25 @@ class DeviceManagerOPAAS(DeviceManagerBase):
                             self.update_config(self.devices[dev].obj, old_config)
                             raise DeviceConfigError(f"Error during object update. {e}")
 
-                        self.devices[dev].deviceConfig.update(dev_config["deviceConfig"])
+                        self.devices[dev].config["deviceConfig"].update(dev_config["deviceConfig"])
 
                         # update config in DB
-                        print("updating in DB")
+                        logger.debug("updating in DB")
                         success = self._scibec.patch_device_config(
-                            self.devices[dev].id,
+                            self.devices[dev].config["id"],
                             {"deviceConfig": self.devices[dev].config["deviceConfig"]},
                         )
                         if not success:
                             raise DeviceConfigError("Error during database update.")
+                        updated = True
 
                     if "enabled" in dev_config:
                         self.devices[dev].config["enabled"] = dev_config["enabled"]
+                        updated = True
 
                 # send updates to services
-                self.send_config(msg)
+                if updated:
+                    self.send_config(msg)
 
         except DeviceConfigError as dev_conf_error:
             self.send_config_request_reply(dev_conf_error)
