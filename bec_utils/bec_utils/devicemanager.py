@@ -10,9 +10,10 @@ from bec_utils.connector import ConnectorBase
 
 from .BECMessage import DeviceConfigMessage, DeviceStatusMessage, LogMessage
 from .endpoints import MessageEndpoints
+from .logger import bec_logger
 from .scibec import SciBec
 
-logger = logging.getLogger(__name__)
+logger = bec_logger.logger
 
 
 class DeviceConfigError(Exception):
@@ -268,7 +269,6 @@ class DeviceManagerBase:
 
     def update_device_status(self, msg):
         msg = DeviceStatusMessage.loads(msg.value)
-        # print(f"Device update, {msg.content['device']}, {time.time()}")
         device = self.devices.get(msg.content["device"])
         if device:
             device.status = DeviceStatus(msg.content["status"])
@@ -293,16 +293,16 @@ class DeviceManagerBase:
         Returns:
 
         """
-        self._connector_base_consumer["log"] = self.connector.consumer(
-            MessageEndpoints.log(), cb=self._log_callback, parent=self
-        )
+        # self._connector_base_consumer["log"] = self.connector.consumer(
+        #     MessageEndpoints.log(), cb=self._log_callback, parent=self
+        # )
         self._connector_base_consumer["device_config"] = self.connector.consumer(
             MessageEndpoints.device_config(),
             cb=self._device_config_callback,
             parent=self,
         )
 
-        self._connector_base_consumer["log"].start()
+        # self._connector_base_consumer["log"].start()
         self._connector_base_consumer["device_config"].start()
 
     @staticmethod
@@ -350,7 +350,7 @@ class DeviceManagerBase:
 
     def _get_config_from_DB(self):
         self._session = self._scibec.get_current_session()[0]
-        logger.info(
+        logger.debug(
             f"Loaded session from DB: {json.dumps(self._session, sort_keys=True, indent=4)}"
         )
         self._load_session()

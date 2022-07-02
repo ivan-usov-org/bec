@@ -1,14 +1,18 @@
 import functools
-import logging
 import time
 import uuid
 
-import bec_utils.BECMessage as BMessage
-from bec_utils import Device, DeviceManagerBase, MessageEndpoints
+from bec_utils import (
+    BECMessage,
+    Device,
+    DeviceManagerBase,
+    MessageEndpoints,
+    bec_logger,
+)
 
 from bec_client.callbacks import ScanRequestError
 
-logger = logging.getLogger(__name__)
+logger = bec_logger.logger
 
 """
 Device (bluesky interface):
@@ -114,7 +118,7 @@ class RPCBase:
             "args": args,
             "kwargs": kwargs,
         }
-        msg = BMessage.ScanQueueMessage(
+        msg = BECMessage.ScanQueueMessage(
             scan_type="device_rpc",
             parameter=params,
             queue="primary",
@@ -136,7 +140,7 @@ class RPCBase:
             if msg:
                 break
             time.sleep(0.1)
-        msg = BMessage.DeviceRPCMessage.loads(msg)
+        msg = BECMessage.DeviceRPCMessage.loads(msg)
         print(msg.content.get("out"))
         return msg.content.get("return_val")
 
@@ -222,7 +226,7 @@ class DeviceBase(RPCBase, Device):
         else:
             val = self.parent.producer.get(MessageEndpoints.device_read(self.name))
         if val:
-            return BMessage.DeviceMessage.loads(val).content["signals"].get(self.name)
+            return BECMessage.DeviceMessage.loads(val).content["signals"].get(self.name)
         else:
             return None
 
@@ -338,8 +342,8 @@ class DMClient(DeviceManagerBase):
         super().__init__(parent.connector, scibec_url)
         self.parent = parent
 
-    def _get_device_info(self, device_name) -> BMessage.DeviceInfoMessage:
-        msg = BMessage.DeviceInfoMessage.loads(
+    def _get_device_info(self, device_name) -> BECMessage.DeviceInfoMessage:
+        msg = BECMessage.DeviceInfoMessage.loads(
             self.producer.get(MessageEndpoints.device_info(device_name))
         )
         return msg
@@ -350,7 +354,7 @@ class DMClient(DeviceManagerBase):
                 msg = self._get_device_info(dev.get("name"))
                 self._add_device(dev, msg)
 
-    def _add_device(self, dev: dict, msg: BMessage.DeviceInfoMessage):
+    def _add_device(self, dev: dict, msg: BECMessage.DeviceInfoMessage):
         name = msg.content["device"]
         info = msg.content["info"]
 

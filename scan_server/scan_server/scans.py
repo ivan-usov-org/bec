@@ -3,11 +3,13 @@ from abc import ABC, abstractmethod
 
 import bec_utils.BECMessage as BMessage
 import numpy as np
-from bec_utils import DeviceManagerBase
+from bec_utils import DeviceManagerBase, bec_logger
 from cytoolz import partition
 
 DeviceMsg = BMessage.DeviceInstructionMessage
 ScanMsg = BMessage.ScanQueueMessage
+
+logger = bec_logger.logger
 
 
 class LimitError(Exception):
@@ -187,7 +189,7 @@ class RequestBase(ABC):
 
     def _check_limits(self):
         if not self.simulate:
-            print("check limits")
+            logger.debug("check limits")
             for ii, dev in enumerate(self.scan_motors):
                 low_limit, high_limit = (
                     self.dm.devices[dev].config["deviceConfig"].get("limits", [0, 0])

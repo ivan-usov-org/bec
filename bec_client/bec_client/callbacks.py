@@ -1,19 +1,24 @@
 import asyncio
-import logging
 import threading
 import time
 
-import bec_utils.BECMessage as BMessage
 import msgpack
 import numpy as np
-from bec_utils import Alarms, DeviceManagerBase, DeviceStatus, MessageEndpoints
+from bec_utils import (
+    Alarms,
+    BECMessage,
+    DeviceManagerBase,
+    DeviceStatus,
+    MessageEndpoints,
+    bec_logger,
+)
 from bec_utils.connector import ConsumerConnector
 
 from bec_client.progressbar import DeviceProgressBar, ScanProgressBar
 
 from .prettytable import PrettyTable
 
-logger = logging.getLogger("client_callback")
+logger = bec_logger.logger
 
 
 class ScanRequestError(Exception):
@@ -44,7 +49,7 @@ def check_alarms(bk):
 
 
 async def live_updates_readback_progressbar(
-    dm: DeviceManagerBase, request: BMessage.ScanQueueMessage
+    dm: DeviceManagerBase, request: BECMessage.ScanQueueMessage
 ) -> None:
     """Live feedback on motor movements using a progressbar.
 
@@ -76,7 +81,7 @@ async def live_updates_readback_progressbar(
             req_done_msgs = pipe.execute()
 
             for dev, msg in zip(devices, req_done_msgs):
-                msg = BMessage.DeviceReqStatusMessage.loads(msg)
+                msg = BECMessage.DeviceReqStatusMessage.loads(msg)
                 if not msg:
                     continue
                 if not msg.metadata["RID"] == request.metadata["RID"]:
@@ -119,7 +124,7 @@ async def live_updates_readback(
         while not all(stop_dev.is_set() for stop_dev in stop):
             msg = consumer.poll_messages()
             if msg is not None:
-                msg = BMessage.DeviceMessage.loads(msg.value).content["signals"]
+                msg = BECMessage.DeviceMessage.loads(msg.value).content["signals"]
                 for ind, dev in enumerate(devices):
                     if dev in msg:
                         dev_values[ind] = msg[dev].get("value")

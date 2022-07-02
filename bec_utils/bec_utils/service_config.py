@@ -1,8 +1,10 @@
 import json
-import logging
+
 import yaml
 
-logger = logging.getLogger(__name__)
+from .logger import bec_logger
+
+logger = bec_logger.logger
 
 
 class ServiceConfig:

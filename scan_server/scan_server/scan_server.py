@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import inspect
-import logging
 
 import msgpack
-from bec_utils import BECMessage, MessageEndpoints
+from bec_utils import BECMessage, BECService, MessageEndpoints, bec_logger
 from bec_utils.connector import ConnectorBase
 
 import scan_server.scans as ScanServerScans
@@ -15,20 +14,19 @@ from .scan_assembler import ScanAssembler
 from .scan_guard import ScanGuard
 from .scan_worker import ScanWorker
 
-logger = logging.getLogger(__name__)
+logger = bec_logger.logger
 
 
-class ScanServer:
+class ScanServer(BECService):
     dm = None
     scan_guard = None
     scan_server = None
     scan_assembler = None
 
     def __init__(self, bootstrap_server: list, connector_cls: ConnectorBase, scibec_url: str):
-        self.bootstrap_server = bootstrap_server
+        super().__init__(bootstrap_server, connector_cls)
         self.scan_number = 0
         self.scan_dict = {}
-        self.connector = connector_cls(bootstrap_server)
         self.scibec_url = scibec_url
         self.producer = self.connector.producer()
         self._update_available_scans()
