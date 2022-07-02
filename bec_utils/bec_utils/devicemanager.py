@@ -332,7 +332,7 @@ class DeviceManagerBase:
 
         """
         msg = DeviceConfigMessage.loads(msg.value)
-        logger.info(f"\n\nReceived new config: {str(msg)}")
+        logger.info(f"Received new config: {str(msg)}")
         parent.parse_config_message(msg)
 
     @staticmethod

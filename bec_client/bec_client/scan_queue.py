@@ -20,7 +20,7 @@ class ScanRequest:
         self.response = response
         self.decision_pending = False
         self.request_id = response.metadata["RID"]
-        self.accepted = [response.content["decision"] == "accepted"]
+        self.accepted = [response.content["accepted"]]
 
     def update_with_request(self, request: BECMessage.ScanQueueMessage):
         self.request = request

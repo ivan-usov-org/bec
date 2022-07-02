@@ -1,4 +1,4 @@
-from bec_utils import Device, DeviceManagerBase
+from bec_utils import DeviceManagerBase
 from bec_utils.connector import ConnectorBase
 
 

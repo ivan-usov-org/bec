@@ -152,16 +152,16 @@ class ScanQueueStatusMessage(BECMessage):
 class RequestResponseMessage(BECMessage):
     msg_type = "request_response"
 
-    def __init__(self, *, decision: str, message: str, metadata: dict = None) -> None:
+    def __init__(self, *, accepted: bool, message: str, metadata: dict = None) -> None:
         """
         Message type for sending back decisions on the acceptance of requests.
         Args:
-            decision: String describing the decision, e.g. accepted, rejected, queued etc.
+            accepted: True if the request was accepted
             message: String describing the decision, e.g. "Invalid request"
             metadata: additional metadata to describe and identify the request / response
         """
 
-        self.content = {"decision": decision, "message": message}
+        self.content = {"accepted": accepted, "message": message}
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
 
 
