@@ -1,6 +1,6 @@
 import pytest
 from bec_utils import BECMessage as BMessage
-from scan_server.scan_guard import ScanGuard
+from scan_server.scan_guard import ScanGuard, ScanRejection
 
 from utils import load_ScanServerMock
 
@@ -19,24 +19,21 @@ def test_check_motors_movable():
             queue="primary",
         )
     )
-    assert sg.scan_acc._accepted == True
 
-    k.dm.devices["samx"].enabled = True
-    k.dm.devices["samy"].enabled = False
-
-    sg._check_motors_movable(
-        BMessage.ScanQueueMessage(
-            scan_type="fermat_scan",
-            parameter={
-                "args": {"samx": (-5, 5), "samy": (-5, 5)},
-                "kwargs": {"step": 3},
-            },
-            queue="primary",
+    k.device_manager.devices["samx"].enabled = True
+    k.device_manager.devices["samy"].enabled = False
+    with pytest.raises(ScanRejection) as scan_rejection:
+        sg._check_motors_movable(
+            BMessage.ScanQueueMessage(
+                scan_type="fermat_scan",
+                parameter={
+                    "args": {"samx": (-5, 5), "samy": (-5, 5)},
+                    "kwargs": {"step": 3},
+                },
+                queue="primary",
+            )
         )
-    )
-
-    assert sg.scan_acc._accepted == False
-    assert sg.scan_acc._message == "Device samy is not enabled."
+    assert "Device samy is not enabled." in scan_rejection.value.args
 
 
 @pytest.mark.parametrize("device,func,is_valid", [("samx", "read", True)])

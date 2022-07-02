@@ -36,5 +36,5 @@ def get_scan_worker() -> ScanWorker:
 def test_get_devices_from_instruction(instruction, devices):
     worker = get_scan_worker()
     assert worker._get_devices_from_instruction(instruction) == [
-        worker.dm.devices[dev] for dev in devices
+        worker.device_manager.devices[dev] for dev in devices
     ]

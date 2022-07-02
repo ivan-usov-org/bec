@@ -133,14 +133,14 @@ class DMMock:
 )
 def test_scan_move(mv_msg, reference_msg_list):
     msg_list = []
-    dm = DMMock()
-    dm.add_device("samx")
-    dm.devices["samx"].read_buffer = {"value": 0}
-    dm.add_device("samy")
-    dm.devices["samy"].read_buffer = {"value": 0}
-    dm.add_device("samz")
-    dm.devices["samz"].read_buffer = {"value": 0}
-    s = Move(parameter=mv_msg.content.get("parameter"), devicemanager=dm)
+    device_manager = DMMock()
+    device_manager.add_device("samx")
+    device_manager.devices["samx"].read_buffer = {"value": 0}
+    device_manager.add_device("samy")
+    device_manager.devices["samy"].read_buffer = {"value": 0}
+    device_manager.add_device("samz")
+    device_manager.devices["samz"].read_buffer = {"value": 0}
+    s = Move(parameter=mv_msg.content.get("parameter"), device_manager=device_manager)
     for step in s.run():
         msg_list.append(step)
 
@@ -427,11 +427,13 @@ def test_scan_move(mv_msg, reference_msg_list):
     ],
 )
 def test_scan_scan(scan_msg, reference_scan_list):
-    dm = DMMock()
-    dm.add_device("samx")
-    dm.devices["samx"].read_buffer = {"value": 0}
+    device_manager = DMMock()
+    device_manager.add_device("samx")
+    device_manager.devices["samx"].read_buffer = {"value": 0}
     msg_list = []
-    for step in Scan.scan(parameter=scan_msg.content.get("parameter"), devicemanager=dm):
+    for step in Scan.scan(
+        parameter=scan_msg.content.get("parameter"), device_manager=device_manager
+    ):
         msg_list.append(step)
     scan_uid = msg_list[0].metadata.get("scanID")
     for ii, _ in enumerate(reference_scan_list):
@@ -491,12 +493,14 @@ def test_scan_scan(scan_msg, reference_scan_list):
     ],
 )
 def test_fermat_scan(scan_msg, reference_scan_list):
-    dm = DMMock()
-    dm.add_device("samx")
-    dm.devices["samx"].read_buffer = {"value": 0}
-    dm.add_device("samy")
-    dm.devices["samy"].read_buffer = {"value": 0}
-    scan = FermatSpiralScan(parameter=scan_msg.content.get("parameter"), devicemanager=dm)
+    device_manager = DMMock()
+    device_manager.add_device("samx")
+    device_manager.devices["samx"].read_buffer = {"value": 0}
+    device_manager.add_device("samy")
+    device_manager.devices["samy"].read_buffer = {"value": 0}
+    scan = FermatSpiralScan(
+        parameter=scan_msg.content.get("parameter"), device_manager=device_manager
+    )
     scan.prepare_positions()
     # pylint: disable=protected-access
     pos = list(scan._get_position())

@@ -33,6 +33,9 @@ class ProducerMock:
     def send(self, queue, msg):
         self.message_sent = {"queue": queue, "msg": msg}
 
+    def set_and_publish(self, topic, msg):
+        pass
+
 
 class ConnectorMock(ConnectorBase):
     def consumer(self, *args, **kwargs) -> ConsumerMock:
@@ -52,12 +55,12 @@ class WorkerMock:
 
 
 class ScanServerMock(ScanServer):
-    def __init__(self, dm, connector) -> None:
-        self.dm = dm
+    def __init__(self, device_manager, connector) -> None:
+        self.device_manager = device_manager
         super().__init__(bootstrap_server="dummy", connector_cls=ConnectorMock, scibec_url="dummy")
         self.scan_worker = WorkerMock()
 
-    def _start_devicemanager(self):
+    def _start_device_manager(self):
         pass
 
     def _start_scan_server(self):
