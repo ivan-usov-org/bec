@@ -33,6 +33,9 @@ class MessageEndpoints:
     _log = "internal/log"
     _alarms = "internal/alarms"
 
+    # service
+    _services_status = "internal/services/status"
+
     ##########
 
     # devices feedback
@@ -128,3 +131,7 @@ class MessageEndpoints:
     @classmethod
     def alarm(self):
         return self._alarms
+
+    @classmethod
+    def service_status(self, service_id: str):
+        return f"{self._services_status}/{service_id}"

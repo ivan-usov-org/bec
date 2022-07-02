@@ -1,5 +1,4 @@
 import enum
-import logging
 import sys
 import threading
 import time
@@ -10,14 +9,15 @@ from io import StringIO
 import bec_utils.BECMessage as BMessage
 import msgpack
 import ophyd
-from bec_utils import Alarms, MessageEndpoints
+from bec_utils import Alarms, BECService, MessageEndpoints, bec_logger
 from bec_utils.connector import ConnectorBase
 from ophyd.utils import errors as ophyd_errors
 
 from device_server.devices import is_serializable
 from device_server.devices.devicemanager import DeviceManagerDS
 
-logger = logging.getLogger(__name__)
+logger = bec_logger.logger
+
 consumer_stop = threading.Event()
 
 
@@ -36,17 +36,17 @@ class DSStatus(enum.Enum):
     ERROR = -1
 
 
-class DeviceServer:
+class DeviceServer(BECService):
     """DeviceServer using ophyd as a service
     This class is intended to provide a thin wrapper around ophyd and the devicemanager. It acts as the entry point for other services
     """
 
-    def __init__(self, bootstrap, Connector: ConnectorBase, scibec_url: str) -> None:
+    def __init__(self, bootstrap_server, connector_cls: ConnectorBase, scibec_url: str) -> None:
+        super().__init__(bootstrap_server, connector_cls)
         self._status = DSStatus.IDLE
         self._tasks = []
-        self.connector = Connector(bootstrap)
         self.device_manager = DeviceManagerDS(self.connector, scibec_url)
-        self.device_manager.initialize(bootstrap)
+        self.device_manager.initialize(bootstrap_server)
         self.threads = []
         self.sig_thread = None
         self.sig_thread = self.connector.consumer(
@@ -55,7 +55,6 @@ class DeviceServer:
             parent=self,
         )
         self.sig_thread.start()
-        self.producer = self.connector.producer()
 
     def start(self) -> None:
         if consumer_stop.is_set():
@@ -189,7 +188,7 @@ class DeviceServer:
                     success=True,
                 ).dumps(),
             )
-            print(res)
+            logger.trace(res)
         except KeyboardInterrupt as kbi:
             sys.stdout = save_stdout
             raise KeyboardInterrupt from kbi

@@ -5,7 +5,7 @@ from typing import Any, Union
 import msgpack
 
 
-class becStatus(enum.Enum):
+class BECStatus(int, enum.Enum):
     ERROR = -1
     OFF = 0
     IDLE = 1
@@ -335,7 +335,7 @@ class AlarmMessage(BECMessage):
 class StatusMessage(BECMessage):
     msg_type = "status_message"
 
-    def __init__(self, *, status: becStatus, metadata: dict = None) -> None:
+    def __init__(self, *, status: BECStatus, metadata: dict = None) -> None:
         """
 
         Args:

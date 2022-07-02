@@ -1,8 +1,7 @@
-import logging
 import threading
 
 import IPython
-from bec_utils import Alarms
+from bec_utils import Alarms, BECService, bec_logger
 from bec_utils.connector import ConnectorBase
 from IPython.terminal.prompts import Prompts, Token
 
@@ -12,11 +11,11 @@ from .scan_queue import ScanQueue
 from .scans import Scans
 from .signals import SigintHandler
 
-logger = logging.getLogger(__name__)
+logger = bec_logger.logger
 
 
-class BKClient:
-    def __init__(self, bootstrap_server: list, Connector: ConnectorBase, scibec_url: str):
+class BKClient(BECService):
+    def __init__(self, bootstrap_server: list, connector_cls: ConnectorBase, scibec_url: str):
         """bec Client
 
         Args:
@@ -26,11 +25,9 @@ class BKClient:
         Returns:
             _type_: _description_
         """
+        super().__init__(bootstrap_server, connector_cls)
         self.devicemanager = None
-        self.bootstrap_server = bootstrap_server
         self.scibec_url = scibec_url
-        self.connector = Connector(bootstrap_server)
-        self.producer = self.connector.producer()
         self._sighandler = SigintHandler(self)
         self._ip = None
         self.alarm_handler = None

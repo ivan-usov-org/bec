@@ -5,12 +5,13 @@ import time
 from asyncio.log import logger
 from enum import Enum
 
-import bec_utils.BECMessage as BMessage
 import msgpack
-from bec_utils import Alarms, DeviceStatus, MessageEndpoints
+from bec_utils import Alarms, BECMessage, DeviceStatus, MessageEndpoints, bec_logger
 
-DeviceMsg = BMessage.DeviceInstructionMessage
-ScanStatusMsg = BMessage.ScanStatusMessage
+logger = bec_logger.logger
+
+DeviceMsg = BECMessage.DeviceInstructionMessage
+ScanStatusMsg = BECMessage.ScanStatusMessage
 
 
 class InstructionQueueStatus(Enum):
@@ -82,7 +83,7 @@ class ScanWorker(threading.Thread):
         elif wait_type == "trigger":
             self._wait_for_trigger(instr)
         else:
-            print("Unkown wait command")
+            logger.error("Unkown wait command")
 
     def _wait_for_idle(self, instr) -> None:
         """Wait for devices to become IDLE
@@ -109,7 +110,7 @@ class ScanWorker(threading.Thread):
                     if None in device_status:
                         continue
                     device_status = [
-                        BMessage.DeviceReqStatusMessage.loads(dev) for dev in device_status
+                        BECMessage.DeviceReqStatusMessage.loads(dev) for dev in device_status
                     ]
                     devices_moved_successfully = all(
                         dev.content["success"] for dev in device_status
@@ -146,7 +147,7 @@ class ScanWorker(threading.Thread):
                             device_status[ind].metadata.get("scanID") == instr.metadata["scanID"]
                         )
                         if matching_DIID and matching_scanID:
-                            last_pos = BMessage.DeviceMessage.loads(
+                            last_pos = BECMessage.DeviceMessage.loads(
                                 self.dm.producer.get(
                                     MessageEndpoints.device_readback(failed_device[0])
                                 )
@@ -329,7 +330,7 @@ class ScanWorker(threading.Thread):
                 if self.current_scanID:
                     self._send_scan_status("open")
 
-            # print("Device instruction: ", instr)
+            logger.debug("Device instruction: ", instr)
 
             self._add_wait_group(instr)
 
@@ -355,7 +356,7 @@ class ScanWorker(threading.Thread):
                 _instruction_step(instr)
         queue.is_active = False
 
-        print(f"QUEUE ITEM finished after {time.time()-start:.2f} seconds")
+        logger.info(f"QUEUE ITEM finished after {time.time()-start:.2f} seconds")
         self.reset()
 
     def reset(self):
@@ -376,6 +377,6 @@ class ScanWorker(threading.Thread):
                     self.parent.qm.queues["primary"].abort()
                     self.reset()
         except KeyError:
-            print("Exception", sys.exc_info())
+            logger.error("Exception", sys.exc_info())
         finally:
             self.connector.shutdown()

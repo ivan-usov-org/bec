@@ -1,18 +1,22 @@
 import inspect
-import logging
 import time
-from email.message import Message
 
 import bec_utils.BECMessage as BMessage
 import msgpack
 import ophyd
 import ophyd.sim as ops
 import ophyd_devices as opd
-from bec_utils import Device, DeviceConfigError, DeviceManagerBase, MessageEndpoints
+from bec_utils import (
+    Device,
+    DeviceConfigError,
+    DeviceManagerBase,
+    MessageEndpoints,
+    bec_logger,
+)
 from bec_utils.connector import ConnectorBase
 from device_server.devices.device_serializer import get_device_info
 
-logger = logging.getLogger(__name__)
+logger = bec_logger.logger
 
 
 class DSDevice(Device):
@@ -34,9 +38,6 @@ class DeviceManagerDS(DeviceManagerBase):
         super().__init__(connector, scibec_url)
         self._config_request_connector = None
         self._device_instructions_connector = None
-
-    def update_config(self, config) -> None:
-        print(config)
 
     def _get_device_class(self, dev_type):
         module = None
@@ -232,7 +233,7 @@ class DeviceManagerDS(DeviceManagerBase):
                         self.devices[dev].config["deviceConfig"].update(dev_config["deviceConfig"])
 
                         # update config in DB
-                        print("updating in DB")
+                        logger.debug("updating in DB")
                         success = self._scibec.patch_device_config(
                             self.devices[dev].config["id"],
                             {"deviceConfig": self.devices[dev].config["deviceConfig"]},
