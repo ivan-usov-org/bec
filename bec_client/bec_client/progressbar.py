@@ -45,17 +45,35 @@ class ProgressBarBase(abc.ABC):
     NUM_STEPS = 1000
     UPDATE_FREQUENCY = 10
 
-    def __init__(self, clear_on_exit):
+    def __init__(self, clear_on_exit: bool = False) -> None:
+        """Base class for progress bars. Override _init_tasks and _update_task for a new progress bar implementation.
+        Override columns for a customized bar style.
+
+        Args:
+            clear_on_exit (bool, optional): remove progress bar after completion. Defaults to False.
+
+        """
         self.clear_on_exit = clear_on_exit
         self._progress = None
         self._tasks = []
 
     @property
-    @abc.abstractmethod
-    def columns(self):
-        pass
+    def columns(self) -> Tuple[rich.progress.ProgressColumn, ...]:
+        """Columns used for a new Progress instance:
+           - a text column for the description (TextColumn)
+           - the bar itself (BarColumn)
+           - a text column showing completion percentage (TextColumn)
+           - an estimated-time-remaining column (TimeRemainingColumn)
+
+        Override in subclasses to customize the progress bar appearance.
+
+        Returns:
+            Tuple[rich.progress.ProgressColumn, ...]: columns
+        """
+        return rich.progress.Progress.get_default_columns()
 
     def start(self) -> None:
+        """Start the Progress handler and initialize the tasks."""
         self._progress = rich.progress.Progress(*self.columns, transient=self.clear_on_exit)
         self._progress.start()
         self._init_tasks()
@@ -64,19 +82,31 @@ class ProgressBarBase(abc.ABC):
         await asyncio.sleep(1 / self.UPDATE_FREQUENCY)
 
     def stop(self) -> None:
+        """Stop the Progress handler"""
         self._progress.stop()
 
     @abc.abstractmethod
-    def _init_tasks(self):
-        pass
+    def _init_tasks(self) -> None:
+        """Initialize tasks by appending new items to self._progress"""
 
     @property
-    def finished(self):
+    def finished(self) -> bool:
+        """True if all tasks have been completed.
+
+        Returns:
+            bool: True if all tasks have been completed.
+        """
         return self._progress.finished
 
     @abc.abstractmethod
-    def _update_task(self, task: int, value):
-        pass
+    def _update_task(self, task: int, value: Any) -> None:
+        """Update routine that is applied to each tasks during self.update calls
+
+        Args:
+            task (int): task ID
+            value (Any): updated value received from self.update
+
+        """
 
     def update(self, values):
         if not isinstance(values, list):
