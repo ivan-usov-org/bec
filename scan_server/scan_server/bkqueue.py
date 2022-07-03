@@ -77,26 +77,26 @@ class QueueManager:
 
     def scan_interception(self, scan_mod_msg: BECMessage.ScanQueueModificationMessage) -> None:
         action = scan_mod_msg.content["action"]
-        self.__getattribute__("_set_" + action)(scanID=scan_mod_msg.content["scanID"])
+        getattr("set_" + action)(scanID=scan_mod_msg.content["scanID"])
 
-    def _set_pause(self, scanID=None, queue="primary") -> None:
+    def set_pause(self, scanID=None, queue="primary") -> None:
         self.queues[queue].status = ScanQueueStatus.PAUSED
         self.queues[queue].worker_status = InstructionQueueStatus.PAUSED
 
-    def _set_deferred_pause(self, scanID=None, queue="primary") -> None:
+    def set_deferred_pause(self, scanID=None, queue="primary") -> None:
         self.queues[queue].status = ScanQueueStatus.PAUSED
         self.queues[queue].worker_status = InstructionQueueStatus.DEFERRED_PAUSE
 
-    def _set_continue(self, scanID=None, queue="primary") -> None:
+    def set_continue(self, scanID=None, queue="primary") -> None:
         self.queues[queue].status = ScanQueueStatus.RUNNING
         self.queues[queue].worker_status = InstructionQueueStatus.RUNNING
 
-    def _set_abort(self, scanID=None, queue="primary") -> None:
+    def set_abort(self, scanID=None, queue="primary") -> None:
         self.queues[queue].status = ScanQueueStatus.PAUSED
         self.queues[queue].worker_status = InstructionQueueStatus.STOPPED
         self.queues[queue].remove_queue_item(scanID=scanID)
 
-    def _set_clear(self, scanID=None, queue="primary") -> None:
+    def set_clear(self, scanID=None, queue="primary") -> None:
         self.queues[queue].status = ScanQueueStatus.PAUSED
         self.queues[queue].worker_status = InstructionQueueStatus.PAUSED
         self.queues[queue].clear()

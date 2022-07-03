@@ -14,12 +14,14 @@ class ScanAssembler:
         self.parent = parent
         self.device_manager = self.parent.device_manager
         self.connector = self.parent.connector
-        self._scans = self.parent.scan_dict  # TODO should these be the same dict, or a copy?
+        self.scan_manager = (
+            self.parent.scan_manager
+        )  # TODO should these be the same dict, or a copy?
 
     def assemble_device_instructions(self, msg: BECMessage.ScanQueueMessage):
         scan = msg.content.get("scan_type")
-        cls_name = self._scans[scan]["class"]
-        scan_cls = getattr(ScanServerScans, cls_name)
+        cls_name = self.scan_manager.available_scans[scan]["class"]
+        scan_cls = self.scan_manager.scan_dict[cls_name]
 
         logger.info(f"Preparing instructions of request of type {scan} / {scan_cls.__name__}")
 

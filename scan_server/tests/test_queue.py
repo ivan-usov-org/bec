@@ -64,35 +64,35 @@ def test_queuemanager_add_to_queue(queue):
 
 def test_set_pause():
     queue_manager = get_queuemanager()
-    queue_manager._set_pause(queue="primary")
+    queue_manager.set_pause(queue="primary")
     assert queue_manager.queues["primary"].status == ScanQueueStatus.PAUSED
     assert queue_manager.producer.message_sent.get("queue") == MessageEndpoints.scan_queue_status()
 
 
 def test_set_deferred_pause():
     queue_manager = get_queuemanager()
-    queue_manager._set_deferred_pause(queue="primary")
+    queue_manager.set_deferred_pause(queue="primary")
     assert queue_manager.queues["primary"].status == ScanQueueStatus.PAUSED
     assert queue_manager.producer.message_sent.get("queue") == MessageEndpoints.scan_queue_status()
 
 
 def test_set_continue():
     queue_manager = get_queuemanager()
-    queue_manager._set_continue(queue="primary")
+    queue_manager.set_continue(queue="primary")
     assert queue_manager.queues["primary"].status == ScanQueueStatus.RUNNING
     assert queue_manager.producer.message_sent.get("queue") == MessageEndpoints.scan_queue_status()
 
 
 def test_set_abort():
     queue_manager = get_queuemanager()
-    queue_manager._set_abort(queue="primary")
+    queue_manager.set_abort(queue="primary")
     assert queue_manager.queues["primary"].status == ScanQueueStatus.PAUSED
     assert queue_manager.producer.message_sent.get("queue") == MessageEndpoints.scan_queue_status()
 
 
 def test_set_clear_sends_message():
     queue_manager = get_queuemanager()
-    queue_manager._set_clear(queue="primary")
+    queue_manager.set_clear(queue="primary")
 
     assert queue_manager.queues["primary"].status == ScanQueueStatus.PAUSED
     assert queue_manager.producer.message_sent.get("queue") == MessageEndpoints.scan_queue_status()
@@ -124,5 +124,5 @@ def test_set_clear():
         metadata={"RID": "something"},
     )
     queue_manager.add_to_queue(scan_queue="primary", msg=msg)
-    queue_manager._set_clear(queue="primary")
+    queue_manager.set_clear(queue="primary")
     assert len(queue_manager.queues["primary"].queue) == 0
