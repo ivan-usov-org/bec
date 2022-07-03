@@ -1,7 +1,6 @@
 import abc
 import asyncio
-import time
-from typing import Any, Callable, List, Tuple
+from typing import Any, List, Tuple
 
 import numpy as np
 import rich.progress
@@ -175,19 +174,19 @@ class DeviceProgressBar(ProgressBarBase):
             )
 
     def _update_task(self, task: Any, value: float) -> None:
-        if not self._progress.tasks[task].finished:
-            movement_range = self.target_values[task] - self.start_values[task]
-            if np.abs(movement_range) > 0:
-                completed = np.abs(
-                    (value - self.start_values[task]) / movement_range * self.NUM_STEPS
-                )
-            else:
-                completed = self.NUM_STEPS
-            self._progress.update(
-                task,
-                completed=completed,
-                fields={"current_pos": value, "target_pos": self.target_values[task]},
-            )
+        if self._progress.tasks[task].finished:
+            return
+
+        movement_range = self.target_values[task] - self.start_values[task]
+        if np.abs(movement_range) > 0:
+            completed = np.abs((value - self.start_values[task]) / movement_range * self.NUM_STEPS)
+        else:
+            completed = self.NUM_STEPS
+        self._progress.update(
+            task,
+            completed=completed,
+            fields={"current_pos": value, "target_pos": self.target_values[task]},
+        )
 
     def set_finished(self, device):
         device_index = self.devices.index(device)
