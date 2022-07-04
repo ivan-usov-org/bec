@@ -36,20 +36,19 @@ class QueueManager:
     def add_to_queue(self, scan_queue: str, msg: BECMessage.ScanQueueMessage) -> None:
         try:
             self.queues[scan_queue].append(msg)
-        except LimitError as limit_error:
+        except Exception as exc:
+            if exc.__cause__:
+                content = str(exc.__cause__)
+            elif len(exc.args) > 0:
+                content = exc.args[0]
+            else:
+                content = ""
+            logger.error(content)
             self.connector.raise_alarm(
                 severity=Alarms.MAJOR,
                 source=msg.content,
-                content=str(limit_error.__cause__),
-                alarm_type=limit_error.__class__.__name__,
-                metadata=msg.metadata,
-            )
-        except ScanAbortion as scan_abortion:
-            self.connector.raise_alarm(
-                severity=Alarms.MAJOR,
-                source=msg.content,
-                content=str(scan_abortion.__cause__),
-                alarm_type=scan_abortion.__class__.__name__,
+                content=content,
+                alarm_type=exc.__class__.__name__,
                 metadata=msg.metadata,
             )
 

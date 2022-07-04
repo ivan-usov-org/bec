@@ -8,6 +8,8 @@ from enum import Enum
 import msgpack
 from bec_utils import Alarms, BECMessage, DeviceStatus, MessageEndpoints, bec_logger
 
+from scan_server.scans import LimitError
+
 logger = bec_logger.logger
 
 DeviceMsg = BECMessage.DeviceInstructionMessage
@@ -383,7 +385,22 @@ class ScanWorker(threading.Thread):
                 except ScanAbortion:
                     self.parent.queue_manager.queues["primary"].abort()
                     self.reset()
-        except KeyError:
-            logger.error("Exception", sys.exc_info())
+        except AttributeError as exc:
+            if exc.__cause__:
+                content = str(exc.__cause__)
+            elif len(exc.args) > 0:
+                content = exc.args[0]
+            else:
+                content = ""
+            logger.error(content)
+            self.connector.raise_alarm(
+                severity=Alarms.MAJOR,
+                source="ScanWorker",
+                content=content,
+                alarm_type=exc.__class__.__name__,
+                metadata={},
+            )
+            self.parent.queue_manager.queues["primary"].abort()
+            self.reset()
         finally:
             self.connector.shutdown()
