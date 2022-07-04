@@ -20,7 +20,7 @@ but they are executed in a specific order:
 - self.cleanup                           # send a close scan message and perform additional cleanups if needed
 """
 
-from scan_server.scans import ScanArgType, ScanBase, get_fermat_spiral_pos
+from scan_server.scans import ScanArgType, ScanBase
 
 
 class LamNIFermatScan(ScanBase):
@@ -48,9 +48,15 @@ class LamNIFermatScan(ScanBase):
 
         super().__init__(parameter=parameter, **kwargs)
         self.axis = []
-        self.step = parameter.get("kwargs", {}).get("step", 0.1)
-        self.center_x = parameter.get("kwargs", {}).get("center_x", 0)
-        self.center_y = parameter.get("kwargs", {}).get("center_y", 0)
+        scan_kwargs = parameter.get("kwargs", {})
+        self.fov_size = scan_kwargs.get("fov_size")
+        if len(self.fov_size) == 1:
+            self.fov_size *= 2  # if we only have one argument, let's assume it's a square
+        self.step = scan_kwargs.get("step", 0.1)
+        self.center_x = scan_kwargs.get("center_x", 0)
+        self.center_y = scan_kwargs.get("center_y", 0)
+        self.shift_x = scan_kwargs.get("shift_x", 0)
+        self.shift_y = scan_kwargs.get("shift_y", 0)
 
     def initialize(self):
         self.scan_motors = ["rtx", "rty"]
@@ -63,42 +69,5 @@ class LamNIFermatScan(ScanBase):
     def _prepare_setup(self):
         pass
 
-
-class FermatSpiralScan2(ScanBase):
-    scan_name = "fermat_scan2"
-    scan_report_hint = "table"
-    required_kwargs = ["exp_time", "step"]
-    arg_input = [ScanArgType.DEVICE, ScanArgType.FLOAT, ScanArgType.FLOAT]
-    arg_bundle_size = len(arg_input)
-
-    def __init__(self, *args, parameter=None, **kwargs):
-        """
-        A scan following Fermat's spiral.
-
-        Args:
-            *args: pairs of device / start position / end position / steps arguments
-            relative: Start from an absolute or relative position
-            burst: number of acquisition per point
-
-        Returns:
-
-        Examples:
-            >>> scans.fermat_scan(dev.motor1, -5, 5, dev.motor2, -5, 5, step=0.5, exp_time=0.1, relative=True)
-
-        """
-        super().__init__(parameter=parameter, **kwargs)
-        self.axis = []
-        self.step = parameter.get("kwargs", {}).get("step", 0.1)
-        self.spiral_type = parameter.get("kwargs", {}).get("spiral_type", 0)
-
-    def _calculate_positions(self):
-        params = list(self.caller_args.values())
-        self.positions = get_fermat_spiral_pos(
-            params[0][0],
-            params[0][1],
-            params[1][0],
-            params[1][1],
-            step=self.step,
-            spiral_type=self.spiral_type,
-            center=False,
-        )
+    def _calculate_positions(self) -> None:
+        pass
