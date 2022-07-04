@@ -13,7 +13,7 @@ services:
 stages:
   # - Formatter
   # - Test
-  # - Build
+  - Build
   - Integration-Test-Setup
 # formatter:
 #   stage: Formatter
@@ -40,12 +40,12 @@ stages:
 #   script:
 #     - docker build -t $REGISTRY_HOST/scan_server:test -f ./scan_server/Dockerfile .
 #     - docker image push $REGISTRY_HOST/scan_server:test
-# build scan bundler:
-#   stage: Build
-#   image: docker:20.10.16
-#   script:
-#     - docker build -t $REGISTRY_HOST/scan_bundler:test -f ./scan_bundler/Dockerfile .
-#     - docker image push $REGISTRY_HOST/scan_bundler:test
+build scan bundler:
+  stage: Build
+  image: docker:20.10.16
+  script:
+    - docker build -t $CI_REGISTRY/scan_bundler:test -f ./scan_bundler/Dockerfile .
+    - docker push $CI_REGISTRY/group/project/image:latest
 integration test setup:
   stage: Integration-Test-Setup
   image: docker:20.10.16
@@ -53,8 +53,8 @@ integration test setup:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
   script:
     - docker build -t $REGISTRY_HOST/scan_bundler:test -f ./scan_bundler/Dockerfile .
-    # - docker image push $REGISTRY_HOST/scan_bundler:test
+    - docker image push $REGISTRY_HOST/scan_bundler:test
     - docker-compose -f ./docker-compose.yaml up
     - apk update; apk upgrade; apk add curl
-    # - timeout 120 /bin/sh -c -- 'while true; do res=$(curl -X "GET" --max-time 3 "http://docker:3030/sessions"); if [ ! -z "$res" ]; then exit 0; fi; sleep 1; done;'
+    - timeout 120 /bin/sh -c -- 'while true; do res=$(curl -X "GET" --max-time 3 "http://docker:3030/sessions"); if [ ! -z "$res" ]; then exit 0; fi; sleep 1; done;'
   # - curl --fail http://localhost:3030/sessions
