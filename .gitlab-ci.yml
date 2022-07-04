@@ -31,6 +31,7 @@ integration test setup:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
   script:
+    - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@git.psi.ch/bec_testbench/ophyd_devices.git
     - docker-compose -f ./docker-compose.yaml up -d
     - apk update; apk upgrade; apk add curl
     - timeout 120 /bin/sh -c -- 'while true; do res=$(curl -X "GET" --max-time 3 "http://docker:3030/sessions"); if [ ! -z "$res" ]; then exit 0; fi; sleep 1; done;'
