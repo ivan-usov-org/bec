@@ -16,11 +16,52 @@ but they are executed in a specific order:
 - self.scan_core                         # run a loop over all position 
     - self._at_each_point(ind, pos)      # called at each position with the current index and the target positions as arguments
 - self.finalize                          # clean up the scan, e.g. move back to the start position; wait everything to finish
-- unstage                                # unstage all devices that have been staged before
-- cleanup                                # send a close scan message and perform additional cleanups if needed
+- self.unstage                           # unstage all devices that have been staged before
+- self.cleanup                           # send a close scan message and perform additional cleanups if needed
 """
 
 from scan_server.scans import ScanArgType, ScanBase, get_fermat_spiral_pos
+
+
+class LamNIFermatScan(ScanBase):
+    scan_name = "lamni_fermat_scan"
+    scan_report_hint = "table"
+    required_kwargs = ["fov_size", "exp_time", "step"]
+    arg_input = []
+    arg_bundle_size = None
+
+    def __init__(self, *args, parameter=None, **kwargs):
+        """
+        A LamNI scan following Fermat's spiral.
+
+        Kwargs:
+            shift_x: extra shift in x. The shift will not be rotated. (default 0).
+            shift_y: extra shift in y. The shift will not be rotated. (default 0).
+            center_x: center position in x at 0 deg.  (optional)
+            center_y: center position in y at 0 deg.  (optional)
+        Returns:
+
+        Examples:
+            >>> scans.lamni_fermat_scan(fov_size=[20], step=0.5, exp_time=0.1)
+            >>> scans.lamni_fermat_scan(fov_size=[20, 25], center_x=20, step=0.5, exp_time=0.1)
+        """
+
+        super().__init__(parameter=parameter, **kwargs)
+        self.axis = []
+        self.step = parameter.get("kwargs", {}).get("step", 0.1)
+        self.center_x = parameter.get("kwargs", {}).get("center_x", 0)
+        self.center_y = parameter.get("kwargs", {}).get("center_y", 0)
+
+    def initialize(self):
+        self.scan_motors = ["rtx", "rty"]
+
+    def prepare_positions(self):
+        self._calculate_positions()
+        self.num_pos = len(self.positions)
+        self._prepare_setup()
+
+    def _prepare_setup(self):
+        pass
 
 
 class FermatSpiralScan2(ScanBase):
