@@ -11,21 +11,21 @@ services:
   - docker:18.09-dind
 # different stages in the pipeline
 stages:
-  # - Formatter
-  # - Test
+  - Formatter
+  - Test
   - Build
-  # - Integration-Test-Setup
-# formatter:
-#   stage: Formatter
-#   script:
-#     - pip install black
-#     - black --check --diff --color --line-length=100 ./
-# pytest:
-#   stage: Test
-#   script:
-#     - pip install pytest
-#     - pip install -e ./scan_server
-#     - cd scan_server/tests;pytest -v
+  - Integration-Test-Setup
+formatter:
+  stage: Formatter
+  script:
+    - pip install black
+    - black --check --diff --color --line-length=100 ./
+pytest:
+  stage: Test
+  script:
+    - pip install pytest
+    - pip install -e ./scan_server
+    - cd scan_server/tests;pytest -v
 build device server:
   stage: Build
   image: docker:20.10.16
@@ -33,14 +33,13 @@ build device server:
     - apk update; apk upgrade; apk add git
     - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@git.psi.ch/bec_testbench/ophyd_devices.git
     - docker build -t device_server:test -f ./device_server/Dockerfile .
-# integration test setup:
-#   stage: Integration-Test-Setup
-#   image: docker:20.10.16
-#   rules:
-#     - if: '$CI_PIPELINE_SOURCE == "schedule"'
-#   script:
-#     - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@git.psi.ch/bec_testbench/ophyd_devices.git
-#     - docker-compose -f ./docker-compose.yaml up -d
-#     - apk update; apk upgrade; apk add curl
-#     - timeout 120 /bin/sh -c -- 'while true; do res=$(curl -X "GET" --max-time 3 "http://docker:3030/sessions"); if [ ! -z "$res" ]; then exit 0; fi; sleep 1; done;'
+integration test setup:
+  stage: Integration-Test-Setup
+  image: docker:20.10.16
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+  script:
+    - docker-compose -f ./docker-compose.yaml up -d
+    - apk update; apk upgrade; apk add curl
+    - timeout 120 /bin/sh -c -- 'while true; do res=$(curl -X "GET" --max-time 3 "http://docker:3030/sessions"); if [ ! -z "$res" ]; then exit 0; fi; sleep 1; done;'
   # - curl --fail http://localhost:3030/sessions
