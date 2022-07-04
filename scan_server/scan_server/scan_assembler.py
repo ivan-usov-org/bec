@@ -1,6 +1,6 @@
 from bec_utils import BECMessage, bec_logger
 
-import scan_server.scans as ScanServerScans
+from .scan_worker import ScanAbortion
 
 logger = bec_logger.logger
 
@@ -24,9 +24,13 @@ class ScanAssembler:
         scan_cls = self.scan_manager.scan_dict[cls_name]
 
         logger.info(f"Preparing instructions of request of type {scan} / {scan_cls.__name__}")
-
-        return scan_cls(
-            device_manager=self.device_manager,
-            parameter=msg.content.get("parameter"),
-            metadata=msg.metadata,
-        )
+        try:
+            scan_instance = scan_cls(
+                device_manager=self.device_manager,
+                parameter=msg.content.get("parameter"),
+                metadata=msg.metadata,
+            )
+            return scan_instance
+        except Exception as exc:
+            logger.error(f"Failed to initialize the scan class of type {scan_cls.__name__}")
+            raise ScanAbortion from exc
