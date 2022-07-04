@@ -40,13 +40,12 @@ pytest:
 #   script:
 #     - docker build -t $REGISTRY_HOST/scan_server:test -f ./scan_server/Dockerfile .
 #     - docker image push $REGISTRY_HOST/scan_server:test
-build scan bundler:
-  stage: Build
-  image: docker:18.09
-  script:
-    - docker login -u wakonig_k -p $CI_TOKEN $CI_REGISTRY
-    - docker build -t $CI_REGISTRY/bec/bec/scan_bundler:latest .
-    - docker push $CI_REGISTRY/bec/bec/scan_bundler:latest
+# build scan bundler:
+#   stage: Build
+#   image: docker:18.09
+#   script:
+#     - docker build -t $CI_REGISTRY/bec/bec/scan_bundler:latest .
+#     - docker push $CI_REGISTRY/bec/bec/scan_bundler:latest
 integration test setup:
   stage: Integration-Test-Setup
   image: docker:20.10.16
