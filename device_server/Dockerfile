@@ -15,4 +15,4 @@ RUN file="$(ls /code/bec/device_server)" && echo $file
 RUN pip install -e .
 
 # command to run on container start
-CMD [ "python", "launch.py", "--config", "./test_config.yaml"]
+CMD [ "python", "launch.py", "--config", "/code/bec/test_config.yaml"]
