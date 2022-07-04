@@ -3,9 +3,9 @@
 # https://hub.docker.com/r/library/python/tags/
 image: docker:18.09
 #commands to run in the Docker container before starting each job.
-# variables:
+variables:
 #   DOCKER_DRIVER: overlay2
-#   DOCKER_BUILDKIT: 0
+  DOCKER_BUILDKIT: 0
 
 services:
   - docker:18.09-dind
