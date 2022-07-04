@@ -94,7 +94,7 @@ class DeviceServer(BECService):
     @staticmethod
     def consumer_interception_callback(msg, *, parent, **kwargs) -> None:
         mvalue = BMessage.ScanQueueModificationMessage.loads(msg.value)
-        logger.info("Receiving: %s", mvalue.content)
+        logger.info(f"Receiving: {mvalue.content}")
         if mvalue.content.get("action") in ["pause", "abort"]:
             parent.stop_devices()
 
