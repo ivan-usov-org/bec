@@ -178,7 +178,6 @@ def sort_devices(devices, scan_devices) -> list:
     for scan_dev in list(scan_devices)[::-1]:
         devices.remove(scan_dev)
         devices.insert(0, scan_dev)
-    print(devices)
     return devices
 
 
@@ -237,7 +236,7 @@ async def live_updates_table(bk, request):
                 else:
                     break
             if queue_pos is None:
-                print(f"Could not find queue entry for scanID {scanID}")
+                logger.debug(f"Could not find queue entry for scanID {scanID}")
                 if bk.queue.find_scan(RID) is None:
                     return
             while len(queue_item.status) == 0:
