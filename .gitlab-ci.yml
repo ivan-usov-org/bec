@@ -3,12 +3,12 @@
 # https://hub.docker.com/r/library/python/tags/
 image: docker:18.09
 #commands to run in the Docker container before starting each job.
-variables:
-  DOCKER_DRIVER: overlay2
-  DOCKER_BUILDKIT: 0
+# variables:
+#   DOCKER_DRIVER: overlay2
+#   DOCKER_BUILDKIT: 0
 
-# services:
-#   - docker:18.09-dind
+services:
+  - docker:18.09-dind
 # different stages in the pipeline
 stages:
   # - Formatter
