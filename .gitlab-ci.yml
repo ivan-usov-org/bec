@@ -33,6 +33,16 @@ build device server:
     - apk update; apk upgrade; apk add git
     - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@git.psi.ch/bec_testbench/ophyd_devices.git
     - docker build -t device_server:test -f ./device_server/Dockerfile .
+build scan server:
+  stage: Build
+  image: docker:20.10.16
+  script:
+    - docker build -t scan_server:test -f ./scan_server/Dockerfile .
+build scan bundler:
+  stage: Build
+  image: docker:20.10.16
+  script:
+    - docker build -t scan_bundler:test -f ./scan_bundler/Dockerfile .
 integration test setup:
   stage: Integration-Test-Setup
   image: docker:20.10.16
