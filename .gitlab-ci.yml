@@ -45,7 +45,7 @@ build scan bundler:
   image: docker:20.10.16
   script:
     - docker build -t $CI_REGISTRY/scan_bundler:test -f ./scan_bundler/Dockerfile .
-    - docker push $CI_REGISTRY/group/project/image:latest
+    - docker push $CI_REGISTRY/scan_bundler:test
 integration test setup:
   stage: Integration-Test-Setup
   image: docker:20.10.16
