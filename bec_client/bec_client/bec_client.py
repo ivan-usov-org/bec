@@ -98,7 +98,7 @@ class BKClient(BECService):
         self.alarm_handler.start()
 
     def shutdown(self):
-        logger.info("Shutting down device manager")
+        # logger.info("Shutting down device manager")
         self.devicemanager.shutdown()
 
     def _exit_thread(self):
