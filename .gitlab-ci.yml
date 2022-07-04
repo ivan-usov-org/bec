@@ -1,7 +1,7 @@
 # This file is a template, and might need editing before it works on your project.
 # Official language image. Look for the different tagged releases at:
 # https://hub.docker.com/r/library/python/tags/
-image: "python:3.8"
+image: docker:18.09
 #commands to run in the Docker container before starting each job.
 variables:
   DOCKER_DRIVER: overlay2
@@ -42,7 +42,7 @@ stages:
 #     - docker image push $REGISTRY_HOST/scan_server:test
 build scan bundler:
   stage: Build
-  image: docker:20.10.16
+  image: docker:18.09
   script:
     - docker build -t $CI_REGISTRY/scan_bundler:test -f ./scan_bundler/Dockerfile .
     - docker push $CI_REGISTRY/scan_bundler:test
