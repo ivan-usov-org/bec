@@ -12,7 +12,7 @@ class MoveTaskProgressColumn(rich.progress.TaskProgressColumn):
         if task.total is None and self.show_speed:
             return self.render_speed(task.finished_speed or task.speed)
         if task.fields.get("fields"):
-            _text = f"[progress.percentage]{task.fields['fields'].get('current_pos'):10.2f} / {task.percentage:>3.0f} %"
+            _text = f"[progress.percentage]{task.fields['fields'].get('current_pos'):10.2f} / {task.fields['fields'].get('target_pos'):10.2f} / {task.percentage:>3.0f} %"
         else:
             _text = f"[progress.percentage]{task.percentage:>3.0f}%"
         if self.markup:
