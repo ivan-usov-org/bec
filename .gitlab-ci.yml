@@ -13,7 +13,7 @@ services:
 stages:
   - Formatter
   - Test
-  # - Build
+  - Build
   - Integration-Test-Setup
 formatter:
   stage: Formatter
