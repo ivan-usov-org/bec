@@ -13,19 +13,19 @@ services:
 stages:
   - Formatter
   - Test
-  # - Build
+  - Build
   - Integration-Test-Setup
-formatter:
-  stage: Formatter
-  script:
-    - pip install black
-    - black --check --diff --color --line-length=100 ./
-pytest:
-  stage: Test
-  script:
-    - pip install pytest
-    - pip install -e ./scan_server
-    - cd scan_server/tests;pytest -v
+# formatter:
+#   stage: Formatter
+#   script:
+#     - pip install black
+#     - black --check --diff --color --line-length=100 ./
+# pytest:
+#   stage: Test
+#   script:
+#     - pip install pytest
+#     - pip install -e ./scan_server
+#     - cd scan_server/tests;pytest -v
 # build device server:
 #   stage: Build
 #   image: docker:20.10.16
@@ -40,12 +40,13 @@ pytest:
 #   script:
 #     - docker build -t $REGISTRY_HOST/scan_server:test -f ./scan_server/Dockerfile .
 #     - docker image push $REGISTRY_HOST/scan_server:test
-# build scan bundler:
-  # stage: Build
-  # image: docker:18.09
-  # script:
-    # - docker build -t $CI_REGISTRY/scan_bundler:test -f ./scan_bundler/Dockerfile .
-    # - docker push $CI_REGISTRY/scan_bundler:test
+build scan bundler:
+  stage: Build
+  image: docker:18.09
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -t $CI_REGISTRY/scan_bundler:test -f ./scan_bundler/Dockerfile .
+    - docker push $CI_REGISTRY/scan_bundler:test
 integration test setup:
   stage: Integration-Test-Setup
   image: docker:20.10.16
