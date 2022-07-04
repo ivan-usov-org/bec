@@ -13,6 +13,7 @@ services:
 stages:
   - Formatter
   - Test
+  - Build
   - Integration-Test-Setup
 formatter:
   stage: Formatter
@@ -25,6 +26,11 @@ pytest:
     - pip install pytest
     - pip install -e ./scan_server
     - cd scan_server/tests;pytest -v
+build device server:
+  stage: Build
+  script:
+    - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@git.psi.ch/bec_testbench/ophyd_devices.git
+    - docker build -t device_server:test -f ./device_server .
 integration test setup:
   stage: Integration-Test-Setup
   image: docker:20.10.16
