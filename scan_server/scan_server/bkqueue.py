@@ -40,8 +40,16 @@ class QueueManager:
             self.connector.raise_alarm(
                 severity=Alarms.MAJOR,
                 source=msg.content,
-                content=limit_error.args[0],
+                content=str(limit_error.__cause__),
                 alarm_type=limit_error.__class__.__name__,
+                metadata=msg.metadata,
+            )
+        except ScanAbortion as scan_abortion:
+            self.connector.raise_alarm(
+                severity=Alarms.MAJOR,
+                source=msg.content,
+                content=str(scan_abortion.__cause__),
+                alarm_type=scan_abortion.__class__.__name__,
                 metadata=msg.metadata,
             )
 
@@ -77,7 +85,7 @@ class QueueManager:
 
     def scan_interception(self, scan_mod_msg: BECMessage.ScanQueueModificationMessage) -> None:
         action = scan_mod_msg.content["action"]
-        getattr("set_" + action)(scanID=scan_mod_msg.content["scanID"])
+        getattr(self, f"set_{action}")(scanID=scan_mod_msg.content["scanID"])
 
     def set_pause(self, scanID=None, queue="primary") -> None:
         self.queues[queue].status = ScanQueueStatus.PAUSED
