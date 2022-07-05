@@ -1,7 +1,7 @@
 # This file is a template, and might need editing before it works on your project.
 # Official language image. Look for the different tagged releases at:
 # https://hub.docker.com/r/library/python/tags/
-image: python:3.8
+image: python:3.8-alpine
 #commands to run in the Docker container before starting each job.
 variables:
 #   DOCKER_DRIVER: overlay2
@@ -13,7 +13,7 @@ services:
 stages:
   # - Formatter
   # - Test
-  - Build
+  # - Build
   - Integration-Test-Setup
 # formatter:
 #   stage: Formatter
@@ -40,15 +40,14 @@ stages:
 #   script:
 #     - docker build -t $REGISTRY_HOST/scan_server:test -f ./scan_server/Dockerfile .
 #     - docker image push $REGISTRY_HOST/scan_server:test
-build scan bundler:
-  stage: Build
-  image: docker:18.09
-  artifacts:
-    paths:
-      - scan_bundler.tar
-  script:
-    - docker build -t scan_bundler:test -f ./scan_bundler/Dockerfile .
-    - docker save -o scan_bundler.tar scan_bundler:test
+# build scan bundler:
+#   stage: Build
+#   image: docker:18.09
+#   artifacts:
+#     paths:
+#       - scan_bundler.tar
+#   script:
+#     - docker build -t scan_bundler:test -f ./scan_bundler/Dockerfile .
 integration test setup:
   stage: Integration-Test-Setup
   image: docker:20.10.16
@@ -58,10 +57,9 @@ integration test setup:
     - docker-compose -f ./docker-compose.yaml up -d
     - apk update; apk upgrade; apk add curl
     - timeout 120 /bin/sh -c -- 'while true; do res=$(curl -X "GET" --max-time 3 "http://docker:3030/sessions"); if [ ! -z "$res" ]; then exit 0; fi; sleep 1; done;'
-    # - docker build -t scan_bundler:test -f ./scan_bundler/Dockerfile .
-    # - docker build -t scan_server:test -f ./scan_server/Dockerfile .
-    # - docker run --network=host -d --name scan_server scan_server:test  
-    - docker load -i scan_bundler.tar
+    - docker build -t scan_bundler:test -f ./scan_bundler/Dockerfile .
+    - docker build -t scan_server:test -f ./scan_server/Dockerfile .
+    - docker run --network=host -d --name scan_server scan_server:test  
     - docker run --network=host --name scan_bundler scan_bundler:test 
     - timeout 120 /bin/sh -c -- 'while true; do res=$(curl -X "GET" --max-time 3 "http://docker:3030/sessions"); if [ ! -z "$res" ]; then exit 0; fi; sleep 1; done;'
   # - curl --fail http://localhost:3030/sessions
