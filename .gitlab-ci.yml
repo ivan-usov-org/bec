@@ -57,6 +57,8 @@ integration test setup:
     - docker-compose -f ./docker-compose.yaml up -d
     - apk update; apk upgrade; apk add curl
     - timeout 120 /bin/sh -c -- 'while true; do res=$(curl -X "GET" --max-time 3 "http://docker:3030/sessions"); if [ ! -z "$res" ]; then exit 0; fi; sleep 1; done;'
+    - docker build -t init_scibec:test -f ./scibec/init_scibec/Dockerfile .
+    - docker run --network=host -d --name init_scibec init_scibec:test
     - docker build -t scan_bundler:test -f ./scan_bundler/Dockerfile .
     - docker build -t scan_server:test -f ./scan_server/Dockerfile .
     - docker run --network=host -d --name scan_server scan_server:test  
