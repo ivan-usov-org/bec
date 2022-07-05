@@ -11,21 +11,21 @@ services:
   - docker:18.09-dind
 # different stages in the pipeline
 stages:
-  - Formatter
-  - Test
+  # - Formatter
+  # - Test
   - Build
   - Integration-Test-Setup
-formatter:
-  stage: Formatter
-  script:
-    - pip install black
-    - black --check --diff --color --line-length=100 ./
-pytest:
-  stage: Test
-  script:
-    - pip install pytest
-    - pip install -e ./scan_server
-    - cd scan_server/tests;pytest -v
+# formatter:
+#   stage: Formatter
+#   script:
+#     - pip install black
+#     - black --check --diff --color --line-length=100 ./
+# pytest:
+#   stage: Test
+#   script:
+#     - pip install pytest
+#     - pip install -e ./scan_server
+#     - cd scan_server/tests;pytest -v
 # build device server:
 #   stage: Build
 #   image: docker:20.10.16
@@ -43,8 +43,12 @@ pytest:
 build scan bundler:
   stage: Build
   image: docker:18.09
+  artifacts:
+    paths:
+      - scan_bundler.tar
   script:
     - docker build -t scan_bundler:test -f ./scan_bundler/Dockerfile .
+    - docker save -o scan_bundler.tar scan_bundler:test
 integration test setup:
   stage: Integration-Test-Setup
   image: docker:20.10.16
@@ -57,6 +61,7 @@ integration test setup:
     # - docker build -t scan_bundler:test -f ./scan_bundler/Dockerfile .
     # - docker build -t scan_server:test -f ./scan_server/Dockerfile .
     # - docker run --network=host -d --name scan_server scan_server:test  
+    - docker load -i scan_bundler.tar
     - docker run --network=host --name scan_bundler scan_bundler:test 
     - timeout 120 /bin/sh -c -- 'while true; do res=$(curl -X "GET" --max-time 3 "http://docker:3030/sessions"); if [ ! -z "$res" ]; then exit 0; fi; sleep 1; done;'
   # - curl --fail http://localhost:3030/sessions
