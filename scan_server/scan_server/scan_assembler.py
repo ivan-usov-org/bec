@@ -1,6 +1,6 @@
 from bec_utils import BECMessage, bec_logger
 
-from .scan_worker import ScanAbortion
+from .errors import ScanAbortion
 
 logger = bec_logger.logger
 

@@ -10,11 +10,20 @@ from typing import Union
 from bec_utils import Alarms, BECMessage, MessageEndpoints, bec_logger
 from prettytable import PrettyTable
 
-from scan_server.scan_assembler import ScanAssembler
-from scan_server.scan_worker import InstructionQueueStatus, ScanAbortion, ScanWorker
-from scan_server.scans import LimitError
+from .errors import LimitError, ScanAbortion
+from .scan_assembler import ScanAssembler
 
 logger = bec_logger.logger
+
+
+class InstructionQueueStatus(Enum):
+    STOPPED = -1
+    PENDING = 0
+    IDLE = 1
+    PAUSED = 2
+    DEFERRED_PAUSE = 3
+    RUNNING = 4
+    COMPLETED = 5
 
 
 class ScanQueueStatus(Enum):
@@ -122,8 +131,8 @@ class QueueManager:
         queue_tables = []
         for queue_name, scan_queue in self.queues.items():
             table = PrettyTable()
-            table.title = f"{queue_name} queue"
-            table.field_names = ["queueID", "scanID", "is_scan", "scan_number", "status"]
+            table.title = f"{queue_name} queue / Status: {scan_queue.status}"
+            table.field_names = ["queueID", "scanID", "is_scan", "scan_number", "IQ status"]
             for instruction_queue in scan_queue.queue:
                 table.add_row(
                     [
@@ -254,7 +263,6 @@ class ScanQueue:
                         # we don't need to pause if there is no scan enqueued
                         self.status = ScanQueueStatus.RUNNING
                     time.sleep(1)
-                    logger.info("Queue is paused")
 
                 self.active_instruction_queue = self.queue.popleft()
                 self.history_queue.append(self.active_instruction_queue)
@@ -458,7 +466,7 @@ class InstructionQueueItem:
         _type_: _description_
     """
 
-    def __init__(self, parent: ScanQueue, assembler: ScanAssembler, worker: ScanWorker) -> None:
+    def __init__(self, parent: ScanQueue, assembler: ScanAssembler, worker) -> None:
         self.instructions = []
         self.queue = RequestBlockQueue(parent=self, assembler=assembler)
         self.parent = parent

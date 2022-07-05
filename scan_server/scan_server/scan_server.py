@@ -68,9 +68,7 @@ class ScanServer(BECService):
         scanID = metadata.get("scanID")
         queue = metadata.get("stream")
         if scanID and queue:
-            parent.queue_manager.set_abort(
-                scanID=msg.metadata["scanID"], queue=msg.metadata["stream"]
-            )
+            parent.queue_manager.set_abort(scanID=scanID, queue=queue)
 
     def load_config_from_disk(self, file_path):
         self.device_manager.load_config_from_disk(file_path)
@@ -78,5 +76,4 @@ class ScanServer(BECService):
     def shutdown(self):
         self.device_manager.shutdown()
         self.queue_manager.shutdown()
-        self.scan_worker.signal_event.set()  # TODO: this should be a shutdown method, too
-        self.scan_worker.join()
+        self.scan_worker.shutdown()

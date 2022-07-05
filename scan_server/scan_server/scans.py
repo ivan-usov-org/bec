@@ -5,14 +5,12 @@ import numpy as np
 from bec_utils import BECMessage, DeviceManagerBase, bec_logger
 from cytoolz import partition
 
+from .errors import LimitError
+
 DeviceMsg = BECMessage.DeviceInstructionMessage
 ScanMsg = BECMessage.ScanQueueMessage
 
 logger = bec_logger.logger
-
-
-class LimitError(Exception):
-    pass
 
 
 class ScanArgType(str, enum.Enum):
