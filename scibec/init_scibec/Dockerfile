@@ -5,7 +5,7 @@ FROM python:3.8-alpine
 WORKDIR /code
 
 # copy the content of the local opaas directory to the working directory
-COPY . ./bec
+COPY ./scibec/init_scibec ./bec/scibec/init_scibec
 
 WORKDIR /code/bec/scibec/init_scibec
 RUN pip install requests pyyaml
