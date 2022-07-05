@@ -13,8 +13,6 @@ services:
 stages:
   - Formatter
   - Test
-  # - Build
-  - Integration-Test-Setup
 formatter:
   stage: Formatter
   script:
@@ -28,7 +26,7 @@ pytest:
     - cd scan_server/tests;pytest -v
 
 integration test setup:
-  stage: Integration-Test-Setup
+  stage: Test
   image: docker:20.10.16
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
