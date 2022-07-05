@@ -1,9 +1,9 @@
 redis:
-  host: "host.docker.internal"
+  host: "docker"
   port: 6379
 mongodb:
-  host: "host.docker.internal"
+  host: "docker"
   port: 27017
 scibec:
-  host: http://host.docker.internal
+  host: http://docker
   port: 3030
