@@ -55,7 +55,7 @@ integration test setup:
     - timeout 120 /bin/sh -c -- 'while true; do res=$(curl -X "GET" --max-time 3 "http://docker:3030/sessions"); if [ ! -z "$res" ]; then exit 0; fi; sleep 1; done;'
     - docker build -t scan_bundler:test -f ./scan_bundler/Dockerfile .
     - docker build -t scan_server:test -f ./scan_server/Dockerfile .
-    - docker run --network=host -d scan_server:test --name scan_server 
-    - docker run --network=host scan_bundler:test --name scan_bundler
+    - docker run --network=host -d --name scan_server scan_server:test  
+    - docker run --network=host --name scan_bundler scan_bundler:test 
     - timeout 120 /bin/sh -c -- 'while true; do res=$(curl -X "GET" --max-time 3 "http://docker:3030/sessions"); if [ ! -z "$res" ]; then exit 0; fi; sleep 1; done;'
   # - curl --fail http://localhost:3030/sessions
