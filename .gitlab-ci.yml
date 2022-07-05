@@ -54,6 +54,7 @@ integration test setup:
     - docker-compose -f ./docker-compose.yaml up -d
     - apk update; apk upgrade; apk add curl
     - timeout 120 /bin/sh -c -- 'while true; do res=$(curl -X "GET" --max-time 3 "http://docker:3030/sessions"); if [ ! -z "$res" ]; then exit 0; fi; sleep 1; done;'
+    - docker build -t scan_bundler:test -f ./scan_bundler/Dockerfile .
     - docker run --network=host scan_bundler:test --name scan_bundler
     - timeout 120 /bin/sh -c -- 'while true; do res=$(curl -X "GET" --max-time 3 "http://docker:3030/sessions"); if [ ! -z "$res" ]; then exit 0; fi; sleep 1; done;'
   # - curl --fail http://localhost:3030/sessions
