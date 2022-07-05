@@ -34,16 +34,21 @@ integration test setup:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
   script:
     - docker-compose -f ./docker-compose.yaml up -d
-    - apk update; apk upgrade; apk add curl
+    - apk update; apk upgrade; apk add curl; apk add git
+    - apk update; apk upgrade; apk add git
+    - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@git.psi.ch/bec_testbench/ophyd_devices.git
+
     - timeout 120 /bin/sh -c -- 'while true; do res=$(curl -X "GET" --max-time 3 "http://docker:3030/sessions"); if [ ! -z "$res" ]; then exit 0; fi; sleep 1; done;'
     - docker build -t init_scibec:test -f ./scibec/init_scibec/Dockerfile .
     - docker run --network=host --name init_scibec init_scibec:test
     - docker build -t scan_bundler:test -f ./scan_bundler/Dockerfile .
     - docker build -t scan_server:test -f ./scan_server/Dockerfile .
     - docker build -t device_server:test -f ./device_server/Dockerfile .
+
     - docker run --network=host -d --name device_server device_server:test 
     - docker run --network=host -d --name scan_server scan_server:test  
     - docker run --network=host -d --name scan_bundler scan_bundler:test 
+    
     - docker build -t en2end_client:test -f ./bec_client/tests/Dockerfile .
     - docker run --network=host --name scan_bundler scan_bundler:test 
     
