@@ -20,11 +20,3 @@ services:
       timeout: 5s
       start_period: 20s
       retries: 5
-  init-scibec:
-    image: python:3.8
-    volumes:
-      - scibec:/code/scibec
-    entrypoint:
-      - "python /code/scibec/update_sessions.py --config /code/scibec/test_config.yaml"
-    depends_on:
-      - scibec-test-server
