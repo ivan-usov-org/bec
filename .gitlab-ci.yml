@@ -44,5 +44,6 @@ integration test setup:
     - docker run --network=host -d --name device_server device_server:test 
     - docker run --network=host -d --name scan_server scan_server:test  
     - docker run --network=host -d --name scan_bundler scan_bundler:test 
-    - timeout 120 /bin/sh -c -- 'while true; do res=$(curl -X "GET" --max-time 3 "http://docker:3030/sessions"); if [ ! -z "$res" ]; then exit 0; fi; sleep 1; done;'
-  # - curl --fail http://localhost:3030/sessions
+    - docker build -t en2end_client:test -f ./bec_client/tests/Dockerfile .
+    - docker run --network=host --name scan_bundler scan_bundler:test 
+    
