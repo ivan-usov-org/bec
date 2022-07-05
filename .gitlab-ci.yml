@@ -40,12 +40,11 @@ pytest:
 #   script:
 #     - docker build -t $REGISTRY_HOST/scan_server:test -f ./scan_server/Dockerfile .
 #     - docker image push $REGISTRY_HOST/scan_server:test
-# build scan bundler:
-#   stage: Build
-#   image: docker:18.09
-#   script:
-#     - docker build -t $CI_REGISTRY/bec/bec/scan_bundler:latest .
-#     - docker push $CI_REGISTRY/bec/bec/scan_bundler:latest
+build scan bundler:
+  stage: Build
+  image: docker:18.09
+  script:
+    - docker build -t scan_bundler:test -f ./scan_bundler/Dockerfile .
 integration test setup:
   stage: Integration-Test-Setup
   image: docker:20.10.16
@@ -54,5 +53,7 @@ integration test setup:
   script:
     - docker-compose -f ./docker-compose.yaml up -d
     - apk update; apk upgrade; apk add curl
+    - timeout 120 /bin/sh -c -- 'while true; do res=$(curl -X "GET" --max-time 3 "http://docker:3030/sessions"); if [ ! -z "$res" ]; then exit 0; fi; sleep 1; done;'
+    - docker run --network=host scan_bundler:test --name scan_bundler
     - timeout 120 /bin/sh -c -- 'while true; do res=$(curl -X "GET" --max-time 3 "http://docker:3030/sessions"); if [ ! -z "$res" ]; then exit 0; fi; sleep 1; done;'
   # - curl --fail http://localhost:3030/sessions
