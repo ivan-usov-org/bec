@@ -1,5 +1,4 @@
 import datetime
-import sys
 import threading
 import time
 from asyncio.log import logger
@@ -7,8 +6,6 @@ from enum import Enum
 
 import msgpack
 from bec_utils import Alarms, BECMessage, DeviceStatus, MessageEndpoints, bec_logger
-
-from scan_server.scans import LimitError
 
 logger = bec_logger.logger
 
