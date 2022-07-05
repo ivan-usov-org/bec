@@ -7,7 +7,7 @@ from bec_client import BKClient
 from bec_utils import RedisConnector, ServiceConfig
 from bec_utils.bec_errors import ScanInterruption
 
-CONFIG_PATH = "../bec_config.yaml"
+CONFIG_PATH = "../test_config.yaml"
 
 
 def start_client():
