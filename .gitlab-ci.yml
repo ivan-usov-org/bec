@@ -48,5 +48,5 @@ integration test setup:
     - docker run --network=host -d --name scan_bundler scan_bundler:test 
     
     - docker build -t en2end_client:test -f ./bec_client/tests/Dockerfile .
-    - docker run --network=host --name scan_bundler scan_bundler:test 
+    - docker run --network=host --name end2end_client en2end_client:test 
     
