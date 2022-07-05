@@ -1,6 +1,9 @@
 # set base image (host OS)
 FROM python:3.8-alpine
 
+RUN apk update && apk add python3-dev \
+    gcc \
+    libc-dev
 # set the working directory in the container
 WORKDIR /code
 
