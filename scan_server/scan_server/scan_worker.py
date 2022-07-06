@@ -362,7 +362,6 @@ class ScanWorker(threading.Thread):
 
             self._add_wait_group(instr)
 
-            # TODO: for interception:
             self._check_for_interruption()
             if action == "wait":
                 self._wait_for_devices(instr)
@@ -388,9 +387,10 @@ class ScanWorker(threading.Thread):
         self.reset()
 
     def reset(self):
-        self._groups = dict()
+        """reset the scan worker and its member variables"""
+        self._groups = {}
         self.current_scanID = ""
-        self.current_scan_info = dict()
+        self.current_scan_info = {}
         self.scan_id = None
         self.interception_msg = None
         self.scan_motors = []
@@ -405,9 +405,7 @@ class ScanWorker(threading.Thread):
                     self.parent.queue_manager.queues["primary"].abort()
                     self.reset()
         except AttributeError as exc:
-            if exc.__cause__:
-                content = str(exc.__cause__)
-            elif len(exc.args) > 0:
+            if len(exc.args) > 0:
                 content = exc.args[0]
             else:
                 content = ""
@@ -425,5 +423,6 @@ class ScanWorker(threading.Thread):
             self.connector.shutdown()
 
     def shutdown(self):
+        """shutdown the scan worker"""
         self.signal_event.set()
         self.join()

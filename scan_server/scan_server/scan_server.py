@@ -70,10 +70,13 @@ class ScanServer(BECService):
         if scanID and queue:
             parent.queue_manager.set_abort(scanID=scanID, queue=queue)
 
-    def load_config_from_disk(self, file_path):
+    def load_config_from_disk(self, file_path: str) -> None:
+        """load a config file from disk"""
         self.device_manager.load_config_from_disk(file_path)
 
-    def shutdown(self):
+    def shutdown(self) -> None:
+        """shutdown the scan server"""
+
         self.device_manager.shutdown()
         self.queue_manager.shutdown()
         self.scan_worker.shutdown()

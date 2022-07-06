@@ -49,8 +49,8 @@ class ScanGuard:
             self._check_baton(request)
             self._check_motors_movable(request)
             self._check_soft_limits(request)
-        except ScanRejection as e:
-            return ScanStatus(False, str(e))
+        except ScanRejection as error:
+            return ScanStatus(False, str(error))
         else:
             return ScanStatus()
 
@@ -71,7 +71,8 @@ class ScanGuard:
                 raise ScanRejection(f"Rejected rpc: {request.content}")
 
     def _device_rpc_is_valid(self, device: str, func: str) -> bool:
-        # TODO: ?
+        # pylint: disable=unused-argument
+        # TODO: make sure the device rpc is valid and not exceeding the scope
         return True
 
     def _check_baton(self, request) -> None:
@@ -85,23 +86,23 @@ class ScanGuard:
         motor_args = request.content["parameter"].get("args")
         if not motor_args:
             return
-        for m in motor_args:
-            if not self.device_manager.devices[m].enabled:
-                raise ScanRejection(f"Device {m} is not enabled.")
+        for motor in motor_args:
+            if not self.device_manager.devices[motor].enabled:
+                raise ScanRejection(f"Device {motor} is not enabled.")
 
     def _check_soft_limits(self, request) -> None:
         # TODO: Implement soft limit checks
         pass
 
     @staticmethod
-    def _scan_queue_request_callback(msg, parent, **kwargs):
+    def _scan_queue_request_callback(msg, parent, **_kwargs):
         content = BECMessage.ScanQueueMessage.loads(msg.value).content
         logger.info(f"Receiving scan request: {content}")
         # pylint: disable=protected-access
         parent._handle_scan_request(msg.value)
 
     @staticmethod
-    def _scan_queue_modification_request_callback(msg, parent, **kwargs):
+    def _scan_queue_modification_request_callback(msg, parent, **_kwargs):
         content = BECMessage.ScanQueueModificationMessage.loads(msg.value).content
         logger.info(f"Receiving scan modification request: {content}")
         # pylint: disable=protected-access
@@ -127,7 +128,6 @@ class ScanGuard:
         msg = BECMessage.ScanQueueMessage.loads(msg)
         scan_status = self._is_valid_scan_request(msg)
 
-        # msg.metadata["scanID"] = str(uuid.uuid4()) if accepted else None #TODO: hmm?
         self._send_scan_request_response(scan_status, msg.metadata)
 
         if scan_status.accepted:
