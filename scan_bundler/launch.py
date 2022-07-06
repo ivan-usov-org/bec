@@ -22,7 +22,7 @@ sb = ScanBundler(config.redis, RedisConnector, config.scibec)
 
 try:
     event = threading.Event()
-    logger.info("Started ScanBundler")
+    logger.success("Started ScanBundler")
     event.wait()
 except KeyboardInterrupt as e:
     sb.shutdown()

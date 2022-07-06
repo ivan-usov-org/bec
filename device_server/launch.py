@@ -22,7 +22,7 @@ s = device_server.DeviceServer(config.redis, RedisConnector, config.scibec)
 try:
     event = threading.Event()
     s.start()
-    logger.info("Started DeviceServer")
+    logger.success("Started DeviceServer")
     event.wait()
 except KeyboardInterrupt as e:
     s.shutdown()

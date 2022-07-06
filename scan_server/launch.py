@@ -26,7 +26,7 @@ bec_server = ScanServer(
 try:
     event = threading.Event()
     # pylint: disable=E1102
-    logger.info("Started ScanServer")
+    logger.success("Started ScanServer")
     event.wait()
 except KeyboardInterrupt as e:
     # bec_server.connector.raise_error("KeyboardInterrupt")
