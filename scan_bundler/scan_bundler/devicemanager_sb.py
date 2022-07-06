@@ -1,9 +1,9 @@
 import logging
 
-from bec_utils import Device, DeviceManagerBase
+from bec_utils import Device, DeviceManagerBase, bec_logger
 from bec_utils.connector import ConnectorBase
 
-logger = logging.getLogger(__name__)
+logger = bec_logger.logger
 
 
 class DeviceManagerSB(DeviceManagerBase):

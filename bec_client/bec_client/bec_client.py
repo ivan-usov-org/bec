@@ -1,8 +1,7 @@
-import logging
 import threading
 
 import IPython
-from bec_utils import Alarms
+from bec_utils import Alarms, BECService, bec_logger
 from bec_utils.connector import ConnectorBase
 from IPython.terminal.prompts import Prompts, Token
 
@@ -12,11 +11,11 @@ from .scan_queue import ScanQueue
 from .scans import Scans
 from .signals import SigintHandler
 
-logger = logging.getLogger(__name__)
+logger = bec_logger.logger
 
 
-class BKClient:
-    def __init__(self, bootstrap_server: list, Connector: ConnectorBase, scibec_url: str):
+class BKClient(BECService):
+    def __init__(self, bootstrap_server: list, connector_cls: ConnectorBase, scibec_url: str):
         """bec Client
 
         Args:
@@ -26,13 +25,12 @@ class BKClient:
         Returns:
             _type_: _description_
         """
+        super().__init__(bootstrap_server, connector_cls)
         self.devicemanager = None
-        self.bootstrap_server = bootstrap_server
         self.scibec_url = scibec_url
-        self.connector = Connector(bootstrap_server)
-        self.producer = self.connector.producer()
         self._sighandler = SigintHandler(self)
         self._ip = None
+        self.queue = None
         self.alarm_handler = None
         self._load_scans()
 
@@ -47,8 +45,7 @@ class BKClient:
     def alarms(self, severity=Alarms.WARNING):
         if self.alarm_handler is None:
             return []
-        else:
-            yield from self.alarm_handler.get_alarm(severity=severity)
+        yield from self.alarm_handler.get_alarm(severity=severity)
 
     def show_all_alarms(self, severity=Alarms.WARNING):
         alarms = self.alarm_handler.get_unhandled_alarms(severity=severity)
@@ -101,7 +98,7 @@ class BKClient:
         self.alarm_handler.start()
 
     def shutdown(self):
-        logger.info("Shutting down device manager")
+        # logger.info("Shutting down device manager")
         self.devicemanager.shutdown()
 
     def _exit_thread(self):

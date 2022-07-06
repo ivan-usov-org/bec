@@ -3,6 +3,7 @@ import time
 
 import redis
 
+from .BECMessage import AlarmMessage, LogMessage
 from .connector import (
     ConnectorBase,
     ConsumerConnector,
@@ -11,7 +12,6 @@ from .connector import (
     ProducerConnector,
 )
 from .endpoints import MessageEndpoints
-from .BECMessage import AlarmMessage, LogMessage
 
 
 class Alarms(int, enum.Enum):
@@ -105,6 +105,10 @@ class RedisProducer(ProducerConnector):
 
     def pipeline(self):
         return self.r.pipeline()
+
+    def delete(self, topic, pipe=None):
+        client = pipe if pipe is not None else self.r
+        client.delete(topic)
 
     def get(self, topic: str, pipe=None, is_dict=False):
         client = pipe if pipe is not None else self.r
@@ -209,7 +213,9 @@ class RedisConsumerThreaded(ConsumerConnectorThreaded):
         """
         messages = self.pubsub.get_message(ignore_subscribe_messages=True)
         if messages is not None:
-            self.last_received_msg = time.time()
+            if f"{MessageEndpoints.log()}".encode() not in messages["channel"]:
+                # no need to update the update frequency just for logs
+                self.last_received_msg = time.time()
             msg = MessageObject(topic=messages["channel"], value=messages["data"])
             self.cb(msg, **self.kwargs)
         else:

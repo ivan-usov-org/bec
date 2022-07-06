@@ -1,10 +1,11 @@
 import enum
+import time
 from typing import Any, Union
 
 import msgpack
 
 
-class becStatus(enum.Enum):
+class BECStatus(int, enum.Enum):
     ERROR = -1
     OFF = 0
     IDLE = 1
@@ -101,9 +102,17 @@ class ScanQueueMessage(BECMessage):
 class ScanStatusMessage(BECMessage):
     msg_type = "scan_status"
 
-    def __init__(self, *, scanID: str, status: dict, info: dict, metadata: dict = None) -> None:
-
-        self.content = {"scanID": scanID, "status": status, "info": info}
+    def __init__(
+        self,
+        *,
+        scanID: str,
+        status: dict,
+        info: dict,
+        timestamp: float = None,
+        metadata: dict = None,
+    ) -> None:
+        tms = timestamp if timestamp is not None else time.time()
+        self.content = {"scanID": scanID, "status": status, "info": info, "timestamp": tms}
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
 
 
@@ -143,16 +152,16 @@ class ScanQueueStatusMessage(BECMessage):
 class RequestResponseMessage(BECMessage):
     msg_type = "request_response"
 
-    def __init__(self, *, decision: str, message: str, metadata: dict = None) -> None:
+    def __init__(self, *, accepted: bool, message: str, metadata: dict = None) -> None:
         """
         Message type for sending back decisions on the acceptance of requests.
         Args:
-            decision: String describing the decision, e.g. accepted, rejected, queued etc.
+            accepted: True if the request was accepted
             message: String describing the decision, e.g. "Invalid request"
             metadata: additional metadata to describe and identify the request / response
         """
 
-        self.content = {"decision": decision, "message": message}
+        self.content = {"accepted": accepted, "message": message}
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
 
 
@@ -276,8 +285,8 @@ class DeviceConfigMessage(BECMessage):
         """
 
         Args:
-            action: post or patch
-            config:
+            action: add, update or reload
+            config: device config (add, update) or None (reload)
         """
         self.content = {"action": action, "config": config}
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
@@ -326,7 +335,7 @@ class AlarmMessage(BECMessage):
 class StatusMessage(BECMessage):
     msg_type = "status_message"
 
-    def __init__(self, *, status: becStatus, metadata: dict = None) -> None:
+    def __init__(self, *, status: BECStatus, metadata: dict = None) -> None:
         """
 
         Args:

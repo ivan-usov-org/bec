@@ -1,5 +1,6 @@
-import requests
 import json
+
+import requests
 
 
 class SciBec:
@@ -12,5 +13,10 @@ class SciBec:
         headers = {"Content-type": "application/json"}
         res = requests.get(self.url + "/sessions", headers=headers, params=params, verify=False)
         return json.loads(res.content)
+
+    def patch_device_config(self, id, config) -> bool:
+        headers = {"Content-type": "application/json"}
+        res = requests.patch(f"{self.url}/devices/{id}", headers=headers, json=config, verify=False)
+        return res.ok
 
     # def send_run_request(self):
