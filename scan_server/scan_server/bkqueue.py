@@ -459,6 +459,7 @@ class RequestBlockQueue:
                 source=self.active_rb.msg.content,
                 content=limit_error.args[0],
                 alarm_type=limit_error.__class__.__name__,
+                metadata={},
             )
             raise ScanAbortion from limit_error
 
