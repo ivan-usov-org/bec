@@ -101,7 +101,7 @@ def test_scan_abort():
     def send_abort():
         time.sleep(2)
         _thread.interrupt_main()
-        time.sleep(0.2)
+        time.sleep(2)
         _thread.interrupt_main()
 
     threading.Thread(target=send_abort, daemon=True).start()
