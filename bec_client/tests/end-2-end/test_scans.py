@@ -104,11 +104,11 @@ def test_scan_abort():
         time.sleep(2)
         _thread.interrupt_main()
 
-    threading.Thread(target=send_abort, daemon=True).start()
     bec = start_client()
     scans = bec.scans
     dev = bec.devicemanager.devices
     try:
+        threading.Thread(target=send_abort, daemon=True).start()
         s = scans.line_scan(dev.samx, -5, 5, steps=100, exp_time=0.01)
     except ScanInterruption as scan_int:
         bec.queue.request_scan_abortion()
