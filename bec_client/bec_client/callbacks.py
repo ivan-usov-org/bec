@@ -72,6 +72,15 @@ async def live_updates_readback_progressbar(
             for dev in devices
         ]
 
+    while True:
+        msgs = [
+            BECMessage.DeviceMessage.loads(
+                device_manager.producer.get(MessageEndpoints.device_readback(dev))
+            )
+            for dev in devices
+        ]
+        if all(msg.metadata["RID"] == request.metadata["RID"] for msg in msgs):
+            break
     start_values = get_device_values()
     with DeviceProgressBar(
         devices=devices, start_values=start_values, target_values=target_values
@@ -84,22 +93,21 @@ async def live_updates_readback_progressbar(
                 device_manager.producer.get(MessageEndpoints.device_req_status(dev), pipe)
             req_done_msgs = pipe.execute()
 
+            values = get_device_values()
+            progress.update(values=values)
+
             msgs = [BECMessage.DeviceReqStatusMessage.loads(msg) for msg in req_done_msgs]
             request_ids = [msg.metadata["RID"] if msg else None for msg in msgs]
 
             if set(request_ids) != set([request.metadata["RID"]]):
+                await progress.sleep()
                 continue
-
-            values = get_device_values()
-            progress.update(values=values)
 
             for dev, msg in zip(devices, msgs):
                 if not msg:
                     continue
                 if msg.content.get("success", False):
                     progress.set_finished(dev)
-
-            await progress.sleep()
 
 
 async def live_updates_readback(

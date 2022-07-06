@@ -45,8 +45,7 @@ class BKClient(BECService):
     def alarms(self, severity=Alarms.WARNING):
         if self.alarm_handler is None:
             return []
-        else:
-            yield from self.alarm_handler.get_alarm(severity=severity)
+        yield from self.alarm_handler.get_alarm(severity=severity)
 
     def show_all_alarms(self, severity=Alarms.WARNING):
         alarms = self.alarm_handler.get_unhandled_alarms(severity=severity)

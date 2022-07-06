@@ -44,9 +44,6 @@ class ConnectorBase(abc.ABC):
     def send_log(self, msg):
         raise NotImplementedError
 
-    def raise_error(self, msg):
-        raise NotImplementedError
-
 
 class ProducerConnector(abc.ABC):
     def send(self, topic: str, msg) -> None:

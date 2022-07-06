@@ -218,7 +218,7 @@ class Scans:
 
 
 class ScanGroup(ContextDecorator):
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Scans = None) -> None:
         super().__init__()
         self.parent = parent
 
@@ -233,7 +233,7 @@ class ScanGroup(ContextDecorator):
 
 
 class ScanDef(ContextDecorator):
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Scans = None) -> None:
         super().__init__()
         self.parent = parent
 
@@ -249,7 +249,7 @@ class ScanDef(ContextDecorator):
 
 
 class HideReport(ContextDecorator):
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Scans = None) -> None:
         super().__init__()
         self.parent = parent
 

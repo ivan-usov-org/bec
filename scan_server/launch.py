@@ -29,7 +29,7 @@ try:
     logger.info("Started ScanServer")
     event.wait()
 except KeyboardInterrupt as e:
-    bec_server.connector.raise_error("KeyboardInterrupt")
+    # bec_server.connector.raise_error("KeyboardInterrupt")
     bec_server.shutdown()
     event.set()
     raise e

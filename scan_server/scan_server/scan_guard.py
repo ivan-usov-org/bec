@@ -96,14 +96,14 @@ class ScanGuard:
     @staticmethod
     def _scan_queue_request_callback(msg, parent, **kwargs):
         content = BECMessage.ScanQueueMessage.loads(msg.value).content
-        logger.info("Receiving scan request:", content)
+        logger.info(f"Receiving scan request: {content}")
         # pylint: disable=protected-access
         parent._handle_scan_request(msg.value)
 
     @staticmethod
     def _scan_queue_modification_request_callback(msg, parent, **kwargs):
         content = BECMessage.ScanQueueModificationMessage.loads(msg.value).content
-        logger.info("Receiving scan modification request:", content)
+        logger.info(f"Receiving scan modification request: {content}")
         # pylint: disable=protected-access
         parent._handle_scan_modification_request(msg.value)
 

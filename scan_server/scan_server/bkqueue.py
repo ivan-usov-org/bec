@@ -79,7 +79,7 @@ class QueueManager:
     @staticmethod
     def _scan_queue_callback(msg, parent, **_kwargs) -> None:
         scan_msg = BECMessage.ScanQueueMessage.loads(msg.value)
-        logger.info("Receiving scan:", scan_msg.content, time.time())
+        logger.info(f"Receiving scan: {scan_msg.content}")
         # instructions = parent.scan_assembler.assemble_device_instructions(scan_msg)
         parent.add_to_queue("primary", scan_msg)
         parent.send_queue_status()
@@ -87,7 +87,7 @@ class QueueManager:
     @staticmethod
     def _scan_queue_modification_callback(msg, parent, **_kwargs):
         scan_mod_msg = BECMessage.ScanQueueModificationMessage.loads(msg.value)
-        logger.info("Receiving scan modification:", scan_mod_msg.content)
+        logger.info(f"Receiving scan modification: {scan_mod_msg.content}")
         if scan_mod_msg:
             parent.scan_interception(scan_mod_msg)
             parent.send_queue_status()
