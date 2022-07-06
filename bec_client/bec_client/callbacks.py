@@ -54,7 +54,7 @@ def check_alarms(bk):
 
 
 async def live_updates_readback_progressbar(
-    dm: DeviceManagerBase, request: BECMessage.ScanQueueMessage
+    device_manager: DeviceManagerBase, request: BECMessage.ScanQueueMessage
 ) -> None:
     """Live feedback on motor movements using a progressbar.
 
@@ -68,7 +68,8 @@ async def live_updates_readback_progressbar(
 
     def get_device_values():
         return [
-            dm.devices[dev].read(cached=True, use_readback=True).get("value") for dev in devices
+            device_manager.devices[dev].read(cached=True, use_readback=True).get("value")
+            for dev in devices
         ]
 
     start_values = get_device_values()
@@ -76,20 +77,24 @@ async def live_updates_readback_progressbar(
         devices=devices, start_values=start_values, target_values=target_values
     ) as progress:
         while not progress.finished:
-            check_alarms(dm.parent)
+            check_alarms(device_manager.parent)
+
+            pipe = device_manager.producer.pipeline()
+            for dev in devices:
+                device_manager.producer.get(MessageEndpoints.device_req_status(dev), pipe)
+            req_done_msgs = pipe.execute()
+
+            msgs = [BECMessage.DeviceReqStatusMessage.loads(msg) for msg in req_done_msgs]
+            request_ids = [msg.metadata["RID"] if msg else None for msg in msgs]
+
+            if set(request_ids) != set([request.metadata["RID"]]):
+                continue
+
             values = get_device_values()
             progress.update(values=values)
 
-            pipe = dm.producer.pipeline()
-            for dev in devices:
-                dm.producer.get(MessageEndpoints.device_req_status(dev), pipe)
-            req_done_msgs = pipe.execute()
-
-            for dev, msg in zip(devices, req_done_msgs):
-                msg = BECMessage.DeviceReqStatusMessage.loads(msg)
+            for dev, msg in zip(devices, msgs):
                 if not msg:
-                    continue
-                if not msg.metadata["RID"] == request.metadata["RID"]:
                     continue
                 if msg.content.get("success", False):
                     progress.set_finished(dev)
@@ -253,10 +258,10 @@ async def live_updates_table(bk: BKClient, request: BECMessage.ScanQueueMessage)
     # get queue item
     queue_item = await get_queue_item(bk=bk, RID=RID)
 
-    block_id = queue_item.queueInfo.get_block_id(RID)
+    block_id = queue_item.queue_info.get_block_id(RID)
 
-    scanID = queue_item.queueInfo.scanID[block_id]
-    scan_number = queue_item.queueInfo.scan_number[block_id]
+    scanID = queue_item.queue_info.scanID[block_id]
+    scan_number = queue_item.queue_info.scan_number[block_id]
     while True:
         queue_pos = bk.queue.get_queue_position(scanID)
         if queue_pos is None or queue_pos == 0:
@@ -313,7 +318,7 @@ async def live_updates_table(bk: BKClient, request: BECMessage.ScanQueueMessage)
                 raise RuntimeError("Received more points than expected.")
 
         queue_pos = bk.queue.get_queue_position(scanID)
-        if queue_pos is None:
+        if queue_pos is None and queue_item.end_time:
             elapsed_time = queue_item.end_time - queue_item.start_time
             print(
                 table.get_footer(

@@ -30,6 +30,7 @@ class BKClient(BECService):
         self.scibec_url = scibec_url
         self._sighandler = SigintHandler(self)
         self._ip = None
+        self.queue = None
         self.alarm_handler = None
         self._load_scans()
 

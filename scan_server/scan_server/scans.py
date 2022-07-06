@@ -461,6 +461,7 @@ class ScanStub(RequestBase):
 
 class OpenScanDef(ScanStub):
     scan_name = "open_scan_def"
+    scan_report_hint = None
 
     def run(self, simulate=False):
         yield self.device_msg(device=None, action="open_scan_def", parameter={})

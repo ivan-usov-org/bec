@@ -74,6 +74,7 @@ def rpc(fcn):
 
     @functools.wraps(fcn)
     def wrapper(self, *args, **kwargs):
+        # pylint: disable=protected-access
         device, func_call = self._get_rpc_func_name(fcn=fcn)
 
         if kwargs.get("cached", False):
@@ -225,10 +226,11 @@ class DeviceBase(RPCBase, Device):
             val = self.parent.producer.get(MessageEndpoints.device_readback(self.name))
         else:
             val = self.parent.producer.get(MessageEndpoints.device_read(self.name))
+
         if val:
             return BECMessage.DeviceMessage.loads(val).content["signals"].get(self.name)
-        else:
-            return None
+
+        return None
 
     @rpc
     def describe(self):
@@ -348,7 +350,7 @@ class DMClient(DeviceManagerBase):
         )
         return msg
 
-    def _load_session(self):
+    def _load_session(self, _device_cls=None, *_args):
         if self._is_config_valid():
             for dev in self._session["devices"]:
                 msg = self._get_device_info(dev.get("name"))

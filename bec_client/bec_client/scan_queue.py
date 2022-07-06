@@ -92,24 +92,26 @@ class ScanReport:
 
 
 class Scan:
-    def __init__(self, queueInfo: QueueInfo = None, client=None) -> None:
-        self.queueInfo = queueInfo
-        self.data = dict()
+    def __init__(self, queue_info: QueueInfo = None, client=None) -> None:
+        self.queue_info = queue_info
+        self.data = {}
         self.num_points = None
+        self.start_time = None
+        self.end_time = None
         self.status = {}
         self.open_scan_defs = []
         self._client = client
 
-    def update_queue_info(self, queueInfo: QueueInfo):
-        self.queueInfo = queueInfo
+    def update_queue_info(self, queue_info: QueueInfo):
+        self.queue_info = queue_info
 
     @property
     def scanID(self):
-        return self.queueInfo.scanID
+        return self.queue_info.scanID
 
     @property
     def scan_number(self):
-        return self.queueInfo.scan_number
+        return self.queue_info.scan_number
 
     def abort(self):
         self._client.queue.request_scan_abortion(scanID=self.scanID)
@@ -171,8 +173,8 @@ class ScanQueue:
         self._scan_queue_request_response_consumer.start()
         self._scan_status_consumer.start()
         self._scan_segment_consumer.start()
-        self.current_scan_queue = dict()
-        self.scan_queue_requests = dict()
+        self.current_scan_queue = {}
+        self.scan_queue_requests = {}
         self.scan_storage = deque(maxlen=10)
         self._last_scan_number = 0
 
@@ -183,6 +185,7 @@ class ScanQueue:
     @last_scan_number.setter
     def last_scan_number(self, val):
         self._last_scan_number = val
+        # pylint: disable=protected-access
         self.parent._set_ipython_prompt_scan_number(val)
 
     @property
@@ -193,21 +196,27 @@ class ScanQueue:
 
     @property
     def current_scanId(self):
-        return (
-            self._current_scan_info.get("scanID") if self._current_scan_info is not None else None
-        )
+        return self.current_scan_info.get("scanID") if self.current_scan_info is not None else None
+
+    @property
+    def current_scan_info(self):
+        return self._current_scan_info
+
+    @current_scan_info.setter
+    def current_scan_info(self, val):
+        self._current_scan_info = val
 
     def resume(self):
         self.request_scan_continuation()
 
-    def request_scan_interruption(self, deferred_pause=True, scanID=None):
+    def request_scan_interruption(self, deferred_pause=True, scanID=None) -> None:
         if scanID is None:
             scanID = self.current_scanId
         if not any(scanID):
             return self.request_scan_abortion()
 
         action = "deferred_pause" if deferred_pause else "pause"
-        self.parent.producer.send(
+        return self.parent.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
             BECMessage.ScanQueueModificationMessage(
                 scanID=scanID, action=action, parameter={}
@@ -238,7 +247,7 @@ class ScanQueue:
         inserted = False
         while not inserted:
             for scan_obj in self.scan_storage:
-                if scan_obj.queueInfo.scanID == scan_msg.metadata["scanID"]:
+                if scan_obj.queue_info.scanID == scan_msg.metadata["scanID"]:
                     scan_obj.data[scan_msg.content["point_id"]] = scan_msg.content["data"]
                     inserted = True
             time.sleep(0.01)
@@ -262,9 +271,9 @@ class ScanQueue:
         for queue_item in self.current_scan_queue["primary"].get("info"):
             append = True
             for scan_obj in self.scan_storage:
-                if len(set(scan_obj.queueInfo.scanID) & set(queue_item["scanID"])) > 0:
+                if len(set(scan_obj.queue_info.scanID) & set(queue_item["scanID"])) > 0:
                     append = False
-                    scan_obj.update_queue_info(QueueInfo(**queue_item))
+                    scan_obj.update_queue_info(queue_info=QueueInfo(**queue_item))
             if any(queue_item["is_scan"]) and append:
                 logger.debug(f"Appending new scan: {queue_item}")
                 self.scan_storage.append(Scan(QueueInfo(**queue_item), client=self.parent))
@@ -276,29 +285,29 @@ class ScanQueue:
             logger.debug(
                 f"Updating current_scan_info: {self.current_scan_queue['primary'].get('info')[0]}"
             )
-            self._current_scan_info = self.current_scan_queue["primary"].get("info")[0]
+            self.current_scan_info = self.current_scan_queue["primary"].get("info")[0]
         else:
-            self._current_scan_info = None
+            self.current_scan_info = None
         self._update_scan_storage_queueinfo()
 
     def find_scan(self, RID=None, queueID=None, scanID=None, scan_number=None):
         if RID:
             for scan_obj in self.scan_storage:
-                for rb in scan_obj.queueInfo.request_blocks:
+                for rb in scan_obj.queue_info.request_blocks:
                     if rb["RID"] == RID:
                         return scan_obj
         if queueID:
             for scan_obj in self.scan_storage:
-                if scan_obj.queueInfo.queueID == queueID:
+                if scan_obj.queue_info.queueID == queueID:
                     return scan_obj
         if scanID:
             for scan_obj in self.scan_storage:
-                for rb in scan_obj.queueInfo.request_blocks:
+                for rb in scan_obj.queue_info.request_blocks:
                     if rb["scanID"] == scanID:
                         return scan_obj
         if scan_number:
             for scan_obj in self.scan_storage:
-                for rb in scan_obj.queueInfo.request_blocks:
+                for rb in scan_obj.queue_info.request_blocks:
                     if rb["scan_number"] == scan_number:
                         return scan_obj
         return None

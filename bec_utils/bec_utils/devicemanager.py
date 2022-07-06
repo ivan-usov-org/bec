@@ -1,6 +1,5 @@
 import enum
 import json
-import logging
 
 import msgpack
 import yaml
@@ -362,7 +361,7 @@ class DeviceManagerBase:
 
         """
         if self.connector is not None:
-            for key, con in self._connector_base_consumer.items():
+            for _, con in self._connector_base_consumer.items():
                 con.signal_event.set()
                 con.join()
 
@@ -403,11 +402,12 @@ class DeviceManagerBase:
         if dev_name in self.devices:
             self.devices.pop(dev_name)
 
-    def _load_session(self, device_cls=Device, *args):
+    def _load_session(self, *args, device_cls=Device):
         self._device_cls = device_cls
         if self._is_config_valid():
             for dev in self._session["devices"]:
                 obj = self._create_device(dev, args)
+                # pylint: disable=protected-access
                 self.devices._add_device(dev.get("name"), obj)
 
     def _check_request_validity(self, msg: DeviceConfigMessage) -> None:
@@ -433,10 +433,9 @@ class DeviceManagerBase:
     def _is_config_valid(self) -> bool:
         if self._config is None:
             return False
-        elif not isinstance(self._config, dict):
+        if not isinstance(self._config, dict):
             return False
-        else:
-            return True
+        return True
 
     def shutdown(self):
         """

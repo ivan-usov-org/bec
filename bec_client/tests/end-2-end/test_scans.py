@@ -2,7 +2,6 @@ import _thread
 import threading
 import time
 
-import pytest
 from bec_client import BKClient
 from bec_utils import RedisConnector, ServiceConfig
 from bec_utils.bec_errors import ScanInterruption
@@ -39,7 +38,7 @@ def test_fermat_scan(capsys):
     scans = bec.scans
     dev = bec.devicemanager.devices
     status = scans.fermat_scan(dev.samx, -5, 5, dev.samy, -5, 5, step=0.5, exp_time=0.01)
-    assert len(s.scan.data) == 199
+    assert len(status.scan.data) == 199
     assert status.scan.num_points == 199
     captured = capsys.readouterr()
     assert "finished. Scan ID" in captured.out
@@ -50,7 +49,7 @@ def test_line_scan(capsys):
     scans = bec.scans
     dev = bec.devicemanager.devices
     status = scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.01)
-    assert len(s.scan.data) == 10
+    assert len(status.scan.data) == 10
     assert status.scan.num_points == 10
     captured = capsys.readouterr()
     assert "finished. Scan ID" in captured.out
@@ -83,15 +82,15 @@ def test_mv_scan_mv():
     assert current_pos_samx["samx"]["value"] == 10
     assert current_pos_samy["samy"]["value"] == 20
     status = scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.01)
-    assert len(s.scan.data) == 100
+    assert len(status.scan.data) == 100
     assert status.scan.num_points == 100
     current_pos_samx = dev.samx.read()
     current_pos_samy = dev.samy.read()
     assert current_pos_samx["samx"]["value"] == 10
     assert current_pos_samy["samy"]["value"] == 20
     scans.umv(dev.samx, 20, dev.samy, -20)
-    s = scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.01)
-    assert len(s.scan.data) == 100
+    status = scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.01)
+    assert len(status.scan.data) == 100
     assert status.scan.num_points == 100
     current_pos_samx = dev.samx.read()
     current_pos_samy = dev.samy.read()

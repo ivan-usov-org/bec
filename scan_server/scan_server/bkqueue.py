@@ -8,7 +8,8 @@ from enum import Enum
 from typing import Union
 
 from bec_utils import Alarms, BECMessage, MessageEndpoints, bec_logger
-from prettytable import PrettyTable
+from rich.console import Console
+from rich.table import Table
 
 from .errors import LimitError, ScanAbortion
 from .scan_assembler import ScanAssembler
@@ -129,21 +130,30 @@ class QueueManager:
 
     def describe_queue(self) -> list:
         queue_tables = []
+        console = Console()
         for queue_name, scan_queue in self.queues.items():
-            table = PrettyTable()
-            table.title = f"{queue_name} queue / Status: {scan_queue.status}"
-            table.field_names = ["queueID", "scanID", "is_scan", "scan_number", "IQ status"]
+
+            table = Table(title=f"{queue_name} queue / {scan_queue.status}")
+            table.add_column("queueID", justify="center")
+            table.add_column("scanID", justify="center")
+            table.add_column("is_scan", justify="center")
+            table.add_column("type", justify="center")
+            table.add_column("scan_number", justify="center")
+            table.add_column("IQ status", justify="center")
+
             for instruction_queue in scan_queue.queue:
                 table.add_row(
-                    [
-                        instruction_queue.queue_id,
-                        instruction_queue.scanID,
-                        instruction_queue.is_scan,
-                        instruction_queue.scan_number,
-                        instruction_queue.status.name,
-                    ]
+                    instruction_queue.queue_id,
+                    ", ".join([str(s) for s in instruction_queue.scanID]),
+                    ", ".join([str(s) for s in instruction_queue.is_scan]),
+                    ", ".join([msg.content["scan_type"] for msg in instruction_queue.scan_msgs]),
+                    ", ".join([str(s) for s in instruction_queue.scan_number]),
+                    str(instruction_queue.status.name),
                 )
-            queue_tables.append(table)
+            with console.capture() as capture:
+                console.print(table)
+            queue_tables.append(capture.get())
+
         return queue_tables
 
     def export_queue(self) -> dict:

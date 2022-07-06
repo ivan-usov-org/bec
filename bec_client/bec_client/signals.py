@@ -35,10 +35,11 @@ class SignalHandler:
         self.interrupted = False
         self.count = 0
         self.log = log
+        self.released = False
+        self.original_handler = None
 
     def __enter__(self):
         self.interrupted = False
-        self.released = False
         self.count = 0
 
         self.original_handler = signal.getsignal(self.sig)
@@ -58,7 +59,7 @@ class SignalHandler:
         signal.signal(self.sig, handler)
         return self
 
-    def __exit__(self, type, value, tb):
+    def __exit__(self, _type, _value, _tb):
         self.release()
 
     def release(self):
@@ -73,21 +74,15 @@ class SignalHandler:
 
 
 class SigintHandler(SignalHandler):
-    def __init__(self, bk):
+    def __init__(self, bec):
         super().__init__(signal.SIGINT)
-        self.bk = bk
+        self.bec = bec
         self.last_sigint_time = None  # time most recent SIGINT was processed
         self.num_sigints_processed = 0  # count SIGINTs processed
 
-    def __enter__(self):
-        return super().__enter__()
-
     def handle_signals(self):
-        # Check for pause requests from keyboard.
-        # TODO, there is a possible race condition between the two
-        # pauses here
-        # status = self.bk.queue.scan_queue["primary"].get("status").lower()
-        current_scan = self.bk.queue._current_scan_info
+
+        current_scan = self.bec.queue.current_scan_info
         if not current_scan:
             raise KeyboardInterrupt
 
@@ -102,12 +97,10 @@ class SigintHandler(SignalHandler):
             # It's been 10 seconds since the last SIGINT. Reset.
             self.count = 1
             if self.last_sigint_time is not None:
-                print(
-                    "It has been 10 seconds since the " "last SIGINT. Resetting SIGINT " "handler."
-                )
-            # weeee push these to threads to not block the main thread
+                print("It has been 10 seconds since the last SIGINT. Resetting SIGINT handler.")
+
             threading.Thread(
-                target=self.bk.queue.request_scan_interruption,
+                target=self.bec.queue.request_scan_interruption,
                 args=(True,),
                 daemon=True,
             ).start()
@@ -125,7 +118,7 @@ class SigintHandler(SignalHandler):
         print("A hard pause will be requested.")
 
         threading.Thread(
-            target=self.bk.queue.request_scan_interruption,
+            target=self.bec.queue.request_scan_interruption,
             args=(False,),
             daemon=True,
         ).start()

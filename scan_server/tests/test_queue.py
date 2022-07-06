@@ -20,7 +20,7 @@ def get_queuemanager() -> QueueManager:
 
 class RequestBlockQueueMock(RequestBlockQueue):
     request_blocks = []
-    _scanID = None
+    _scanID = []
 
     @property
     def scanID(self):
