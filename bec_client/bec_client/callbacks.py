@@ -49,7 +49,7 @@ def set_event_delayed(event: threading.Event, delay: int) -> None:
 
 def check_alarms(bk):
     for alarm in bk.alarms(severity=Alarms.MINOR):
-        print(alarm)
+        # print(alarm)
         raise alarm
 
 
@@ -81,6 +81,7 @@ async def live_updates_readback_progressbar(
         ]
         if all(msg.metadata["RID"] == request.metadata["RID"] for msg in msgs):
             break
+        check_alarms(device_manager.parent)
     start_values = get_device_values()
     with DeviceProgressBar(
         devices=devices, start_values=start_values, target_values=target_values

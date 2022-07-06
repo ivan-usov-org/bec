@@ -2,7 +2,9 @@ import _thread
 import threading
 import time
 
+import pytest
 from bec_client import BKClient
+from bec_client.alarm_handler import AlarmBase
 from bec_utils import RedisConnector, ServiceConfig
 from bec_utils.bec_errors import ScanInterruption
 
@@ -11,6 +13,7 @@ CONFIG_PATH = "../test_config.yaml"
 # pylint: disable=no-member
 
 
+@pytest.mark.timeout(30)
 def start_client():
     config = ServiceConfig(CONFIG_PATH)
     bec = BKClient(
@@ -22,6 +25,7 @@ def start_client():
     return bec
 
 
+@pytest.mark.timeout(30)
 def test_grid_scan(capsys):
     bec = start_client()
     scans = bec.scans
@@ -33,6 +37,7 @@ def test_grid_scan(capsys):
     assert "finished. Scan ID" in captured.out
 
 
+@pytest.mark.timeout(30)
 def test_fermat_scan(capsys):
     bec = start_client()
     scans = bec.scans
@@ -44,6 +49,7 @@ def test_fermat_scan(capsys):
     assert "finished. Scan ID" in captured.out
 
 
+@pytest.mark.timeout(30)
 def test_line_scan(capsys):
     bec = start_client()
     scans = bec.scans
@@ -55,6 +61,7 @@ def test_line_scan(capsys):
     assert "finished. Scan ID" in captured.out
 
 
+@pytest.mark.timeout(30)
 def test_mv_scan(capsys):
     bec = start_client()
     scans = bec.scans
@@ -72,6 +79,7 @@ def test_mv_scan(capsys):
     assert ref_out_samy in captured.out
 
 
+@pytest.mark.timeout(30)
 def test_mv_scan_mv():
     bec = start_client()
     scans = bec.scans
@@ -98,6 +106,7 @@ def test_mv_scan_mv():
     assert current_pos_samy["samy"]["value"] == -20
 
 
+@pytest.mark.timeout(30)
 def test_scan_abort():
     def send_abort():
         time.sleep(2)
@@ -115,4 +124,30 @@ def test_scan_abort():
     except ScanInterruption:
         bec.queue.request_scan_abortion()
         aborted_scan = True
+    assert aborted_scan is True
+
+
+@pytest.mark.timeout(30)
+def test_limit_error():
+    bec = start_client()
+    scans = bec.scans
+    dev = bec.devicemanager.devices
+    aborted_scan = False
+    dev.samx.limits = [-50, 50]
+    try:
+        scans.line_scan(dev.samx, -520, 5, steps=200, exp_time=0.1, relative=False)
+    except AlarmBase as alarm:
+        assert alarm.alarm_type == "LimitError"
+        aborted_scan = True
+
+    assert aborted_scan is True
+
+    aborted_scan = False
+    dev.samx.limits = [-50, 50]
+    try:
+        scans.umv(dev.samx, 500)
+    except AlarmBase as alarm:
+        assert alarm.alarm_type == "LimitError"
+        aborted_scan = True
+
     assert aborted_scan is True
