@@ -396,7 +396,7 @@ class ScanBase(RequestBase):
     def _move_and_wait(self, pos):
         if not isinstance(pos, list) and not isinstance(pos, np.ndarray):
             pos = [pos]
-        if len(pos)==0:
+        if len(pos) == 0:
             return
         for ind, val in enumerate(self.scan_motors):
             yield self.device_msg(

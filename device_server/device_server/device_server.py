@@ -176,7 +176,7 @@ class DeviceServer(BECService):
                         severity=Alarms.WARNING,
                         source=instr,
                         content=f"Return value of rpc call {instr_params} is not serializable.",
-                        metadata={}
+                        metadata={},
                     )
 
             # send result to client
