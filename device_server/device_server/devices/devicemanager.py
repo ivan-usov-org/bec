@@ -72,6 +72,9 @@ class DeviceManagerDS(DeviceManagerBase):
                         obj.high_limit_travel.set(config_value[1])
                         continue
                 if config_key == "labels":
+                    if not config_value:
+                        config_value = set()
+                    obj._ophyd_labels_ = set(config_value)
                     continue
                 if not hasattr(obj, config_key):
                     raise DeviceConfigError(
