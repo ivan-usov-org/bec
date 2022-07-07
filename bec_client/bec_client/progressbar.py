@@ -220,7 +220,7 @@ class DeviceProgressBar(ProgressBarBase):
 
     def set_finished(self, device):
         device_index = self.devices.index(device)
-        self._progress.tasks[self._tasks[device_index]].completed = self.NUM_STEPS
+        self._progress.advance(self._tasks[device_index], self.NUM_STEPS)
 
 
 if __name__ == "__main__":
