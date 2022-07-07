@@ -20,29 +20,31 @@ but they are executed in a specific order:
 - self.cleanup                           # send a close scan message and perform additional cleanups if needed
 """
 
-import uuid
-from scan_server.scans import ScanArgType, ScanBase
-from bec_utils import MessageEndpoints, BECMessage
-import numpy as np
 import time
-from bec_utils import bec_logger
-MOVEMENT_SCALE_X = np.sin(np.radians(15))*np.cos(np.radians(30))
+import uuid
+
+import numpy as np
+from bec_utils import BECMessage, MessageEndpoints, bec_logger
+from scan_server.scans import ScanArgType, ScanBase
+
+MOVEMENT_SCALE_X = np.sin(np.radians(15)) * np.cos(np.radians(30))
 MOVEMENT_SCALE_Y = np.cos(np.radians(15))
 
 logger = bec_logger.logger
 
 
-def lamni_to_stage_coordinates(x:float,y:float) -> tuple:
+def lamni_to_stage_coordinates(x: float, y: float) -> tuple:
+    """convert from lamni coordinates to stage coordinates"""
     y_stage = y / MOVEMENT_SCALE_Y
-    x_stage = 2*(x-y_stage * MOVEMENT_SCALE_X )
+    x_stage = 2 * (x - y_stage * MOVEMENT_SCALE_X)
     return (x_stage, y_stage)
 
-def lamni_from_stage_coordinates(x_stage:float,y_stage:float) -> tuple:
+
+def lamni_from_stage_coordinates(x_stage: float, y_stage: float) -> tuple:
+    """convert to lamni coordinates from stage coordinates"""
     x = x_stage * 0.5 + y_stage * MOVEMENT_SCALE_X
     y = y_stage * MOVEMENT_SCALE_Y
     return (x, y)
-
-
 
 
 class LamNIFermatScan(ScanBase):
@@ -93,9 +95,9 @@ class LamNIFermatScan(ScanBase):
     def _calculate_positions(self) -> None:
         pass
 
-    def lamni_new_scan_center_interferometer(self, x,y):
-        """move to new scan center. xy in mm """
-        #rt_feedback_disable()
+    def lamni_new_scan_center_interferometer(self, x, y):
+        """move to new scan center. xy in mm"""
+        # rt_feedback_disable()
         time.sleep(0.05)
         lsamx_center = 8.866
         lsamy_center = 10.18
@@ -104,44 +106,57 @@ class LamNIFermatScan(ScanBase):
         rtx_current = self.device_manager.devices.rtx.read().get("value")
         rty_current = self.device_manager.devices.rty.read().get("value")
 
-        x_stage, y_stage = lamni_to_stage_coordinates(x,y)
+        x_stage, y_stage = lamni_to_stage_coordinates(x, y)
 
-        x_center_expect, y_center_expect = lamni_from_stage_coordinates(lsamx_current-lsamx_center,lsamy_current-lsamy_center)
+        x_center_expect, y_center_expect = lamni_from_stage_coordinates(
+            lsamx_current - lsamx_center, lsamy_current - lsamy_center
+        )
 
-        #in microns
-        x_drift = x_center_expect*1000-rtx_current
-        y_drift = y_center_expect*1000-rty_current
+        # in microns
+        x_drift = x_center_expect * 1000 - rtx_current
+        y_drift = y_center_expect * 1000 - rty_current
 
         logger.info(f"Current uncompensated drift of setup is x={x_drift:.3f}, y={y_drift:.3f}")
 
-        move_x = x_stage+lsamx_center+lamni_to_stage_coordinates(x_drift,y_drift)[0]/1000
-        move_y = y_stage+lsamy_center+lamni_to_stage_coordinates(x_drift,y_drift)[1]/1000
+        move_x = x_stage + lsamx_center + lamni_to_stage_coordinates(x_drift, y_drift)[0] / 1000
+        move_y = y_stage + lsamy_center + lamni_to_stage_coordinates(x_drift, y_drift)[1] / 1000
 
         coarse_move_req_x = np.abs(lsamx_current - move_x)
         coarse_move_req_y = np.abs(lsamy_current - move_y)
 
-        if np.abs(y_drift) > 150 or np.abs(x_drift) > 150 or (coarse_move_req_y<0.003 and coarse_move_req_x<0.003):
+        if (
+            np.abs(y_drift) > 150
+            or np.abs(x_drift) > 150
+            or (coarse_move_req_y < 0.003 and coarse_move_req_x < 0.003)
+        ):
             logger.info("No drift correction.")
         else:
-            logger.info(f"Compensating {[val/1000 for val in lamni_to_stage_coordinates(x_drift,y_drift)]}")
+            logger.info(
+                f"Compensating {[val/1000 for val in lamni_to_stage_coordinates(x_drift,y_drift)]}"
+            )
 
-            yield from self._move_and_wait_devices(["lsamx","lsamy"], [move_x, move_y])
-        
+            yield from self._move_and_wait_devices(["lsamx", "lsamy"], [move_x, move_y])
+
         rtx_current = self.device_manager.devices.rtx.read().get("value")
         rtx_current = self.device_manager.devices.rty.read().get("value")
 
-        rpc_id=str(uuid.uuid4())
-        yield from self.run_rpc("lsamx","controller.galil_show_all",str(rpc_id))
+        rpc_id = str(uuid.uuid4())
+        yield from self.run_rpc("lsamx", "controller.galil_show_all", str(rpc_id))
         val = self.get_from_rpc(rpc_id)
 
         logger.info(f"New scan center interferometer {rtx_current:.3f}, {rty_current:.3f} microns")
-
 
     def run_rpc(self, device, func_name, rpc_id, *args, **kwargs):
         yield self.device_msg(
             device=device,
             action="rpc",
-            parameter={"device":device, "func":func_name, "rpc_id":rpc_id, "args":list(args), "kwargs":kwargs},
+            parameter={
+                "device": device,
+                "func": func_name,
+                "rpc_id": rpc_id,
+                "args": list(args),
+                "kwargs": kwargs,
+            },
         )
 
     def get_from_rpc(self, rpc_id):
@@ -152,8 +167,7 @@ class LamNIFermatScan(ScanBase):
             time.sleep(0.1)
         msg = BECMessage.DeviceRPCMessage.loads(msg)
         print(msg.content.get("out"))
-        return msg.content.get("return_val")       
-
+        return msg.content.get("return_val")
 
     def _move_and_wait_devices(self, devices, pos):
         if not isinstance(pos, list) and not isinstance(pos, np.ndarray):
@@ -192,4 +206,3 @@ class LamNIFermatScan(ScanBase):
         yield from self.finalize()
         yield from self.unstage()
         yield from self.cleanup()
-    
