@@ -2,6 +2,7 @@ import _thread
 import threading
 import time
 
+import numpy as np
 import pytest
 from bec_client import BKClient
 from bec_client.alarm_handler import AlarmBase
@@ -67,14 +68,24 @@ def test_mv_scan(capsys):
     scans = bec.scans
     dev = bec.devicemanager.devices
     scans.mv(dev.samx, 10, dev.samy, 20)
-    current_pos_samx = dev.samx.read()
-    current_pos_samy = dev.samy.read()
-    assert current_pos_samx["samx"]["value"] == 10
-    assert current_pos_samy["samy"]["value"] == 20
+    current_pos_samx = dev.samx.read()["samx"]["value"]
+    current_pos_samy = dev.samy.read()["samy"]["value"]
+    assert np.isclose(
+        current_pos_samx, 10, atol=dev.samx.config["deviceConfig"].get("tolerance", 0.05)
+    )
+    assert np.isclose(
+        current_pos_samy, 20, atol=dev.samy.config["deviceConfig"].get("tolerance", 0.05)
+    )
     scans.umv(dev.samx, 10, dev.samy, 20)
+    current_pos_samx = dev.samx.read()["samx"]["value"]
+    current_pos_samy = dev.samy.read()["samy"]["value"]
     captured = capsys.readouterr()
-    ref_out_samx = "samx:     10.00 ━━━━━━━━━━━━━━━      10.00 /      10.00 / 100 % 0:00:00 0:00:00"
-    ref_out_samy = "samy:     20.00 ━━━━━━━━━━━━━━━      20.00 /      20.00 / 100 % 0:00:00 0:00:00"
+    ref_out_samx = (
+        f" ━━━━━━━━━━━━━━━      {current_pos_samx:.2f} /      10.00 / 100 % 0:00:00 0:00:00"
+    )
+    ref_out_samy = (
+        f" ━━━━━━━━━━━━━━━      {current_pos_samy:.2f} /      20.00 / 100 % 0:00:00 0:00:00"
+    )
     assert ref_out_samx in captured.out
     assert ref_out_samy in captured.out
 
@@ -85,25 +96,27 @@ def test_mv_scan_mv():
     scans = bec.scans
     dev = bec.devicemanager.devices
     scans.mv(dev.samx, 10, dev.samy, 20)
-    current_pos_samx = dev.samx.read()
-    current_pos_samy = dev.samy.read()
-    assert current_pos_samx["samx"]["value"] == 10
-    assert current_pos_samy["samy"]["value"] == 20
+    tolerance_samx = dev.samx.config["deviceConfig"].get("tolerance", 0.05)
+    tolerance_samy = dev.samy.config["deviceConfig"].get("tolerance", 0.05)
+    current_pos_samx = dev.samx.read()["samx"]["value"]
+    current_pos_samy = dev.samy.read()["samy"]["value"]
+    assert np.isclose(current_pos_samx, 10, atol=tolerance_samx)
+    assert np.isclose(current_pos_samy, 20, atol=tolerance_samy)
     status = scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.01)
     assert len(status.scan.data) == 100
     assert status.scan.num_points == 100
-    current_pos_samx = dev.samx.read()
-    current_pos_samy = dev.samy.read()
-    assert current_pos_samx["samx"]["value"] == 10
-    assert current_pos_samy["samy"]["value"] == 20
+    current_pos_samx = dev.samx.read()["samx"]["value"]
+    current_pos_samy = dev.samy.read()["samy"]["value"]
+    assert np.isclose(current_pos_samx, 10, atol=tolerance_samx * 2)
+    assert np.isclose(current_pos_samy, 20, atol=tolerance_samy * 2)
     scans.umv(dev.samx, 20, dev.samy, -20)
+    current_pos_samx = dev.samx.read()["samx"]["value"]
+    current_pos_samy = dev.samy.read()["samy"]["value"]
+    assert np.isclose(current_pos_samx, 20, atol=tolerance_samx)
+    assert np.isclose(current_pos_samy, -20, atol=tolerance_samy)
     status = scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.01)
     assert len(status.scan.data) == 100
     assert status.scan.num_points == 100
-    current_pos_samx = dev.samx.read()
-    current_pos_samy = dev.samy.read()
-    assert current_pos_samx["samx"]["value"] == 20
-    assert current_pos_samy["samy"]["value"] == -20
 
 
 @pytest.mark.timeout(100)

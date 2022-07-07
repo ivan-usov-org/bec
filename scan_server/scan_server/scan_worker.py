@@ -121,7 +121,7 @@ class ScanWorker(threading.Thread):
         group_devices = [dev.name for dev in self._get_devices_from_instruction(instr)]
         wait_group_devices = [dev for dev in self._groups[wait_group] if dev[0] in group_devices]
 
-        logger.debug("Waiting for devices:", wait_group)
+        logger.debug(f"Waiting for devices: {wait_group}")
 
         while True:
             pipe = self.device_manager.producer.pipeline()
@@ -198,7 +198,7 @@ class ScanWorker(threading.Thread):
         group_devices = [dev.name for dev in self._get_devices_from_instruction(instr)]
         wait_group_devices = [dev for dev in self._groups[wait_group] if dev[0] in group_devices]
 
-        logger.debug("Waiting for devices:", wait_group)
+        logger.debug(f"Waiting for devices: {wait_group}")
 
         while True:
             pipe = self.device_manager.producer.pipeline()
@@ -358,7 +358,7 @@ class ScanWorker(threading.Thread):
                 if self.current_scanID:
                     self._send_scan_status("open")
 
-            logger.debug("Device instruction: ", instr)
+            logger.debug(f"Device instruction: {instr}")
 
             self._add_wait_group(instr)
 
