@@ -79,7 +79,7 @@ async def live_updates_readback_progressbar(
             )
             for dev in devices
         ]
-        if all(msg.metadata["RID"] == request.metadata["RID"] for msg in msgs):
+        if all(msg.metadata.get("RID") == request.metadata["RID"] for msg in msgs):
             break
         check_alarms(device_manager.parent)
     start_values = get_device_values()

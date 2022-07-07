@@ -4,8 +4,8 @@ import yaml
 USE_LAMNI = True
 
 lamni_galil_motors = [
-    # ("lsamx", "A", -1),
-    # ("lsamy", "B", 1),
+    ("lsamx", "A", -1),
+    ("lsamy", "B", 1),
     ("lsamrot", "C", 1),
     # ("loptz", "D", -1),
     # ("loptx", "E", 1),

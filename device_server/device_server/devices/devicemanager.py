@@ -71,7 +71,8 @@ class DeviceManagerDS(DeviceManagerBase):
                         obj.low_limit_travel.set(config_value[0])
                         obj.high_limit_travel.set(config_value[1])
                         continue
-
+                if config_key == "labels":
+                    continue
                 if not hasattr(obj, config_key):
                     raise DeviceConfigError(
                         f"Unknown config parameter {config_key} for device of type {obj.__class__.__name__}."
@@ -100,7 +101,7 @@ class DeviceManagerDS(DeviceManagerBase):
             init_kwargs["device_manager"] = self
 
         # initialize the device object
-        obj = dev_cls(**init_kwargs)
+        obj = dev_cls(**init_kwargs, **config)
         self.update_config(obj, config)
 
         # refresh the device info
