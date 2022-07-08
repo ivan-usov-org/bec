@@ -230,9 +230,9 @@ class DeviceManagerDS(DeviceManagerBase):
                         # apply config
                         try:
                             self.update_config(self.devices[dev].obj, dev_config["deviceConfig"])
-                        except Exception as e:
+                        except Exception as exc:
                             self.update_config(self.devices[dev].obj, old_config)
-                            raise DeviceConfigError(f"Error during object update. {e}")
+                            raise DeviceConfigError(f"Error during object update. {exc}") from exc
 
                         self.devices[dev].config["deviceConfig"].update(dev_config["deviceConfig"])
 

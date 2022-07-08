@@ -92,7 +92,8 @@ disable=missing-module-docstring,
         unused-wildcard-import,
         logging-fstring-interpolation,
         line-too-long,
-        too-many-instance-attributes
+        too-many-instance-attributes,
+        wrong-import-order
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
