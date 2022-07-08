@@ -5,7 +5,7 @@ import threading
 import time
 import uuid
 from enum import Enum
-from typing import Union
+from typing import List, Union
 
 from bec_utils import Alarms, BECMessage, MessageEndpoints, bec_logger
 from rich.console import Console
@@ -214,8 +214,6 @@ class ScanQueue:
         StopIteration: _description_
         StopIteration: _description_
 
-    Returns:
-        _type_: _description_
     """
 
     MAX_HISTORY = 100
@@ -307,7 +305,7 @@ class ScanQueue:
             except IndexError:
                 time.sleep(0.01)
 
-    def append(self, msg, **_kwargs):
+    def append(self, msg: BECMessage.ScanQueueMessage, **_kwargs):
         """append a new message to the queue"""
         target_group = msg.metadata.get("queue_group")
         scan_def_id = msg.metadata.get("scan_def_id")
@@ -398,14 +396,14 @@ class RequestBlock:
             self.scan_motors = self.scan.scan_motors
 
     def update_scan_number(self, queue_manager):
-        "update the scan number"
+        """update the scan number"""
         if self.is_scan:
             self.scan_number = queue_manager.parent.scan_number
             if self.scan_def_id is None or self.msg.content["scan_type"] == "close_scan_def":
                 queue_manager.parent.scan_number += 1
 
     def describe(self):
-        "prepare a dictionary that summarizes the request block"
+        """prepare a dictionary that summarizes the request block"""
         return {
             "msg": self.msg.dumps(),
             "RID": self.RID,
@@ -428,18 +426,22 @@ class RequestBlockQueue:
         self.scan_def_ids = {}
 
     @property
-    def scanID(self):
+    def scanID(self) -> List[str]:
+        """get the scanIDs for all request blocks"""
         return [rb.scanID for rb in self.request_blocks]
 
     @property
-    def is_scan(self):
+    def is_scan(self) -> List[bool]:
+        """check if the request blocks describe scans"""
         return [rb.is_scan for rb in self.request_blocks]
 
     @property
-    def scan_number(self):
+    def scan_number(self) -> List[int]:
+        """get the list of scan numbers for all request blocks"""
         return [rb.scan_number for rb in self.request_blocks]
 
-    def append(self, msg):
+    def append(self, msg: BECMessage.ScanQueueMessage) -> None:
+        """append a new scan queue message"""
         request_block = RequestBlock(msg, self.assembler, parent=self)
         if "scan_def_id" in request_block.msg.metadata:
             scan_def_id = request_block.msg.metadata["scan_def_id"]
@@ -451,7 +453,8 @@ class RequestBlockQueue:
         self.request_blocks_queue.append(request_block)
         self.request_blocks.append(request_block)
 
-    def update_scan_number(self, request_block_index):
+    def update_scan_number(self, request_block_index: int) -> None:
+        """update the scan number for a given request block"""
         self.request_blocks[request_block_index].update_scan_number(
             self.parent.parent.queue_manager
         )
@@ -527,47 +530,59 @@ class InstructionQueueItem:
         self._status = InstructionQueueStatus.PENDING
 
     @property
-    def scan_number(self):
+    def scan_number(self) -> List[int]:
+        """get the scan numbers for the elements in this instruction queue"""
         return self.queue.scan_number
 
     @property
-    def status(self):
+    def status(self) -> InstructionQueueStatus:
+        """get the status of the instruction queue"""
         return self._status
 
     @status.setter
-    def status(self, val: ScanQueueStatus):
+    def status(self, val: InstructionQueueStatus) -> None:
+        """update the status of the instruction queue. By doing so, it will
+        also update its worker and publish the updated queue."""
         self._status = val
         self.worker.status = val
         self.parent.queue_manager.send_queue_status()
 
     @property
-    def active_request_block(self):
+    def active_request_block(self) -> RequestBlock:
+        """get the currently active request block"""
         return self.queue.active_rb
 
     @property
-    def scan_macros_complete(self):
+    def scan_macros_complete(self) -> bool:
+        """check if the scan macro has been completed"""
         return len(self.queue.scan_def_ids) == 0
 
     @property
-    def scanID(self):
+    def scanID(self) -> List[str]:
+        """get the scanIDs"""
         return self.queue.scanID
 
     @property
-    def is_scan(self):
+    def is_scan(self) -> List[bool]:
+        """check whether the InstructionQueue contains scan."""
         return self.queue.is_scan
 
-    def abort(self):
+    def abort(self) -> None:
+        """abort and clear all the instructions from the instruction queue"""
         self.instructions = iter([])
 
     def append_scan_request(self, msg):
+        """append a scan message to the instruction queue"""
         self.scan_msgs.append(msg)
         self.queue.append(msg)
 
     def set_active(self):
+        """change the instruction queue status to RUNNING"""
         if self.status == InstructionQueueStatus.PENDING:
             self.status = InstructionQueueStatus.RUNNING
 
     def describe(self):
+        """description of the instruction queue"""
         return {
             "scanID": self.queue.active_rb.scanID,
             "is_active": self.is_active,
