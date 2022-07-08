@@ -23,10 +23,6 @@ class ScanArgType(str, enum.Enum):
     DICT = "dict"
 
 
-def get_linspace_axis(start, stop, num_steps):
-    return np.linspace(start, stop, num_steps)
-
-
 def get_2D_raster_pos(axis, snaked=True):
     """get_2D_raster_post calculates and returns the positions for a 2D
 
@@ -56,6 +52,7 @@ def get_2D_raster_pos(axis, snaked=True):
     return positions
 
 
+# pylint: disable=too-many-arguments
 def get_fermat_spiral_pos(
     m1_start, m1_stop, m2_start, m2_stop, step=1, spiral_type=0, center=False
 ):
@@ -87,17 +84,17 @@ def get_fermat_spiral_pos(
 
     start = int(not center)
 
-    l1 = abs(m1_stop - m1_start)
-    l2 = abs(m2_stop - m2_start)
-    n_max = l1 * l2 * 2
+    length_axis1 = abs(m1_stop - m1_start)
+    length_axis2 = abs(m2_stop - m2_start)
+    n_max = length_axis1 * length_axis2 * 2
 
-    for ir in range(start, n_max):
-        r = step * 0.57 * np.sqrt(ir)
-        if abs(r * np.sin(ir * phi)) > l1 / 2:
+    for ii in range(start, n_max):
+        radius = step * 0.57 * np.sqrt(ii)
+        if abs(radius * np.sin(ii * phi)) > length_axis1 / 2:
             continue
-        if abs(r * np.cos(ir * phi)) > l2 / 2:
+        if abs(radius * np.cos(ii * phi)) > length_axis2 / 2:
             continue
-        positions.extend([(r * np.sin(ir * phi), r * np.cos(ir * phi))])
+        positions.extend([(radius * np.sin(ii * phi), radius * np.cos(ii * phi))])
     return np.array(positions)
 
 
@@ -608,7 +605,7 @@ class Scan(ScanBase):
 
     def _calculate_positions(self):
         for _, val in self.caller_args.items():
-            self.axis.append(get_linspace_axis(val[0], val[1], val[2]))
+            self.axis.append(np.linspace(val[0], val[1], val[2]))
         if len(self.axis) > 1:
             self.positions = get_2D_raster_pos(self.axis)
         else:
@@ -768,7 +765,7 @@ class LineScan(ScanBase):
 
     def _calculate_positions(self) -> None:
         for _, val in self.caller_args.items():
-            ax_pos = get_linspace_axis(val[0], val[1], self.steps)
+            ax_pos = np.linspace(val[0], val[1], self.steps)
             self.axis.append(ax_pos)
         self.positions = np.array(list(zip(*self.axis)))
 
