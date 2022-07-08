@@ -160,3 +160,21 @@ def test_limit_error():
         aborted_scan = True
 
     assert aborted_scan is True
+
+
+@pytest.mark.timeout(100)
+def test_queued_scan():
+    bec = start_client()
+    scans = bec.scans
+    dev = bec.devicemanager.devices
+    s1 = scans.line_scan(dev.samx, -5, 5, steps=200, exp_time=0.1, hide_report=True)
+    s2 = scans.line_scan(dev.samx, -5, 5, steps=200, exp_time=0.1, hide_report=True)
+
+    while True:
+        if not s1.scan:
+            continue
+        if s1.scan.queue_info.status != "RUNNING":
+            continue
+        assert bec.queue.get_queue_position(s1.scan.queue_info.scanID) == 0
+        assert bec.queue.get_queue_position(s2.scan.queue_info.scanID) == 1
+        break
