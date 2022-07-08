@@ -96,23 +96,47 @@ def test_mv_scan_mv():
     tolerance_samy = dev.samy.config["deviceConfig"].get("tolerance", 0.05)
     current_pos_samx = dev.samx.read()["samx"]["value"]
     current_pos_samy = dev.samy.read()["samy"]["value"]
+
+    # make sure the current position after mv is within the tolerance
     assert np.isclose(current_pos_samx, 10, atol=tolerance_samx)
     assert np.isclose(current_pos_samy, 20, atol=tolerance_samy)
+
     status = scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.01)
+
+    # make sure the scan completed the expected number of positions
     assert len(status.scan.data) == 100
     assert status.scan.num_points == 100
+
+    # make sure the scan is relative to the starting position
+    assert np.isclose(
+        current_pos_samx - 5, status.scan.data[0]["samx"]["samx"]["value"], atol=tolerance_samx
+    )
+
     current_pos_samx = dev.samx.read()["samx"]["value"]
     current_pos_samy = dev.samy.read()["samy"]["value"]
+
+    # make sure the new position is within 2x the tolerance (two movements)
     assert np.isclose(current_pos_samx, 10, atol=tolerance_samx * 2)
     assert np.isclose(current_pos_samy, 20, atol=tolerance_samy * 2)
+
     scans.umv(dev.samx, 20, dev.samy, -20)
     current_pos_samx = dev.samx.read()["samx"]["value"]
     current_pos_samy = dev.samy.read()["samy"]["value"]
+
+    # make sure the umv movement is within the tolerance
     assert np.isclose(current_pos_samx, 20, atol=tolerance_samx)
     assert np.isclose(current_pos_samy, -20, atol=tolerance_samy)
-    status = scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.01)
+
+    status = scans.grid_scan(
+        dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.01, relative=False
+    )
+
+    # make sure the scan completed the expected number of points
     assert len(status.scan.data) == 100
     assert status.scan.num_points == 100
+
+    # make sure the scan was absolute, not relative
+    assert np.isclose(-5, status.scan.data[0]["samx"]["samx"]["value"], atol=tolerance_samx)
 
 
 @pytest.mark.timeout(100)

@@ -13,6 +13,7 @@ from rich.table import Table
 
 from .errors import LimitError, ScanAbortion
 from .scan_assembler import ScanAssembler
+from .scans import ScanBase
 
 logger = bec_logger.logger
 
@@ -377,16 +378,7 @@ class RequestBlock:
 
     def _assemble(self):
         self.scan = self.scan_assembler.assemble_device_instructions(self.msg)
-        dev_msg_list = list(self.scan.run(simulate=True))
-        self.is_scan = any(
-            dev_msg.content.get("action")
-            in [
-                "open_scan",
-                "open_scan_def",
-                "close_scan_def",
-            ]
-            for dev_msg in dev_msg_list
-        )
+        self.is_scan = isinstance(self.scan, ScanBase)
         self.scan_def_id = self.msg.metadata.get("scan_def_id")
         self.scan = self.scan_assembler.assemble_device_instructions(self.msg)
         self.instructions = self.scan.run()
@@ -602,19 +594,20 @@ class InstructionQueueItem:
         try:
             instr = next(self.queue)
             # instr = next(self.__getattribute__(queue))
-            if instr:
-                if instr.content.get("action") == "close_scan_group":
-                    self.queue_group_is_closed = True
-                    raise StopIteration
-                if instr.content.get("action") == "close_scan_def":
-                    scan_def_id = instr.metadata.get("scan_def_id")
-                    if scan_def_id in self.queue.scan_def_ids:
-                        self.queue.scan_def_ids.pop(scan_def_id)
+            if not instr:
+                return
+            if instr.content.get("action") == "close_scan_group":
+                self.queue_group_is_closed = True
+                raise StopIteration
+            if instr.content.get("action") == "close_scan_def":
+                scan_def_id = instr.metadata.get("scan_def_id")
+                if scan_def_id in self.queue.scan_def_ids:
+                    self.queue.scan_def_ids.pop(scan_def_id)
 
-                instr.metadata["scanID"] = self.queue.active_rb.scanID
-                instr.metadata["queueID"] = self.queue_id
-                self.set_active()
-                return instr
+            instr.metadata["scanID"] = self.queue.active_rb.scanID
+            instr.metadata["queueID"] = self.queue_id
+            self.set_active()
+            return instr
 
         except StopIteration:
             if not self.scan_macros_complete:
