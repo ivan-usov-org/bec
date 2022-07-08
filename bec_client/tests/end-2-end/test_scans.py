@@ -80,12 +80,8 @@ def test_mv_scan(capsys):
     current_pos_samx = dev.samx.read()["samx"]["value"]
     current_pos_samy = dev.samy.read()["samy"]["value"]
     captured = capsys.readouterr()
-    ref_out_samx = (
-        f" ━━━━━━━━━━━━━━━      {current_pos_samx:.2f} /      10.00 / 100 % 0:00:00 0:00:00"
-    )
-    ref_out_samy = (
-        f" ━━━━━━━━━━━━━━━      {current_pos_samy:.2f} /      20.00 / 100 % 0:00:00 0:00:00"
-    )
+    ref_out_samx = f" ━━━━━━━━━━━━━━━ {current_pos_samx:10.2f} /      10.00 / 100 % 0:00:00 0:00:00"
+    ref_out_samy = f" ━━━━━━━━━━━━━━━ {current_pos_samy:10.2f} /      20.00 / 100 % 0:00:00 0:00:00"
     assert ref_out_samx in captured.out
     assert ref_out_samy in captured.out
 
