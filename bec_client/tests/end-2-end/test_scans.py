@@ -195,7 +195,7 @@ def test_queued_scan():
     s2 = scans.line_scan(dev.samx, -5, 5, steps=200, exp_time=0.1, hide_report=True)
 
     while True:
-        if not s1.scan:
+        if not s1.scan or not s2.scan:
             continue
         if s1.scan.queue_info.status != "RUNNING":
             continue
