@@ -67,7 +67,7 @@ def test_mv_scan(capsys):
     bec = start_client()
     scans = bec.scans
     dev = bec.devicemanager.devices
-    scans.mv(dev.samx, 10, dev.samy, 20)
+    scans.umv(dev.samx, 10, dev.samy, 20)
     current_pos_samx = dev.samx.read()["samx"]["value"]
     current_pos_samy = dev.samy.read()["samy"]["value"]
     assert np.isclose(
@@ -91,7 +91,7 @@ def test_mv_scan_mv():
     bec = start_client()
     scans = bec.scans
     dev = bec.devicemanager.devices
-    scans.mv(dev.samx, 10, dev.samy, 20)
+    scans.umv(dev.samx, 10, dev.samy, 20)
     tolerance_samx = dev.samx.config["deviceConfig"].get("tolerance", 0.05)
     tolerance_samy = dev.samy.config["deviceConfig"].get("tolerance", 0.05)
     current_pos_samx = dev.samx.read()["samx"]["value"]
