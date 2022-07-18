@@ -192,7 +192,7 @@ def test_queued_scan():
     scans = bec.scans
     dev = bec.devicemanager.devices
     s1 = scans.line_scan(dev.samx, -5, 5, steps=200, exp_time=0.1, hide_report=True)
-    s2 = scans.line_scan(dev.samx, -5, 5, steps=200, exp_time=0.1, hide_report=True)
+    s2 = scans.line_scan(dev.samx, -5, 5, steps=100, exp_time=0.1, hide_report=True)
 
     while True:
         if not s1.scan or not s2.scan:
