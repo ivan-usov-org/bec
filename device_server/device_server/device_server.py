@@ -5,8 +5,9 @@ import time
 import traceback
 from functools import reduce
 from io import StringIO
+from typing import Any
 
-import bec_utils.BECMessage as BMessage
+import bec_utils.BECMessage as BECMessage
 import msgpack
 import ophyd
 from bec_utils import Alarms, BECService, MessageEndpoints, bec_logger
@@ -57,6 +58,7 @@ class DeviceServer(BECService):
         self.sig_thread.start()
 
     def start(self) -> None:
+        """start the device server"""
         if consumer_stop.is_set():
             consumer_stop.clear()
 
@@ -73,12 +75,14 @@ class DeviceServer(BECService):
         self._status = DSStatus.RUNNING
 
     def stop(self) -> None:
+        """stop the device server"""
         consumer_stop.set()
         for t in self.threads:
             t.join()
         self._status = DSStatus.IDLE
 
     def shutdown(self) -> None:
+        """shutdown the device server"""
         self.stop()
         self.sig_thread.signal_event.set()
         self.sig_thread.join()
@@ -93,19 +97,22 @@ class DeviceServer(BECService):
 
     @staticmethod
     def consumer_interception_callback(msg, *, parent, **kwargs) -> None:
-        mvalue = BMessage.ScanQueueModificationMessage.loads(msg.value)
+        """callback for receiving scan modifications / interceptions"""
+        mvalue = BECMessage.ScanQueueModificationMessage.loads(msg.value)
         logger.info(f"Receiving: {mvalue.content}")
         if mvalue.content.get("action") in ["pause", "abort"]:
             parent.stop_devices()
 
     def stop_devices(self) -> None:
+        """stop all enabled devices"""
         logger.info("Stopping devices after receiving 'abort' request.")
         for dev in self.device_manager.devices.enabled_devices:
             dev.obj.stop()
 
     @staticmethod
     def instructions_callback(msg, *, parent, **kwargs) -> None:
-        instructions = BMessage.DeviceInstructionMessage.loads(msg.value)
+        """callback for handling device instructions"""
+        instructions = BECMessage.DeviceInstructionMessage.loads(msg.value)
         if instructions.content["device"] is not None:
             # pylint: disable=protected-access
             parent._update_device_metadata(instructions)
@@ -140,7 +147,40 @@ class DeviceServer(BECService):
                 metadata=instructions.metadata,
             )
 
-    def _run_rpc(self, instr) -> None:
+    def _get_result_from_rpc(self, rpc_var: Any, instr_params: dict) -> Any:
+
+        if callable(rpc_var):
+            args = tuple(instr_params.get("args", ()))
+            kwargs = instr_params.get("kwargs", {})
+            if len(args) > 0 and len(args[0]) > 0 and len(kwargs) > 0:
+                res = rpc_var(*args[0], **kwargs)
+            elif len(args) > 0 and len(args[0]) > 0:
+                res = rpc_var(*args[0])
+            elif len(kwargs) > 0:
+                res = rpc_var(**kwargs)
+            else:
+                res = rpc_var()
+        else:
+            res = rpc_var
+        if not is_serializable(res):
+            if isinstance(res, ophyd.StatusBase):
+                res = {
+                    "success": res.success,
+                    "timeout": res.timeout,
+                    "done": res.done,
+                    "settle_time": res.settle_time,
+                }
+            else:
+                res = None
+                self.connector.raise_alarm(
+                    severity=Alarms.WARNING,
+                    source=instr_params,
+                    content=f"Return value of rpc call {instr_params} is not serializable.",
+                    metadata={},
+                )
+        return res
+
+    def _run_rpc(self, instr: BECMessage.DeviceInstructionMessage) -> None:
         save_stdout = sys.stdout
         result = StringIO()
         sys.stdout = result
@@ -150,39 +190,12 @@ class DeviceServer(BECService):
                 self.device_manager.devices[instr.content["device"]].obj,
                 instr_params.get("func"),
             )
-            if callable(rpc_var):
-                args = tuple(instr_params.get("args", ()))
-                kwargs = instr_params.get("kwargs", {})
-                if len(args) > 0 and len(args[0]) > 0 and len(kwargs) > 0:
-                    res = rpc_var(*args[0], **kwargs)
-                elif len(args) > 0 and len(args[0]) > 0:
-                    res = rpc_var(*args[0])
-                elif len(kwargs) > 0:
-                    res = rpc_var(**kwargs)
-                else:
-                    res = rpc_var()
-            else:
-                res = rpc_var
-            if not is_serializable(res):
-                if isinstance(res, ophyd.StatusBase):
-                    res = {
-                        "success": res.success,
-                        "timeout": res.timeout,
-                        "done": res.done,
-                        "settle_time": res.settle_time,
-                    }
-                else:
-                    self.connector.raise_alarm(
-                        severity=Alarms.WARNING,
-                        source=instr,
-                        content=f"Return value of rpc call {instr_params} is not serializable.",
-                        metadata={},
-                    )
+            res = self._get_result_from_rpc(rpc_var, instr_params)
 
             # send result to client
             self.producer.set(
                 MessageEndpoints.device_rpc(instr_params.get("rpc_id")),
-                BMessage.DeviceRPCMessage(
+                BECMessage.DeviceRPCMessage(
                     device=instr.content["device"],
                     return_val=res,
                     out=result.getvalue(),
@@ -193,11 +206,13 @@ class DeviceServer(BECService):
         except KeyboardInterrupt as kbi:
             sys.stdout = save_stdout
             raise KeyboardInterrupt from kbi
+
         except Exception as exc:
+            # pylint: disable=broad-except
             # send error to client
             self.producer.set(
                 MessageEndpoints.device_rpc(instr_params.get("rpc_id")),
-                BMessage.DeviceRPCMessage(
+                BECMessage.DeviceRPCMessage(
                     device=instr.content["device"],
                     return_val=None,
                     out={
@@ -212,16 +227,16 @@ class DeviceServer(BECService):
             sys.stdout = save_stdout
         # self.producer.set(MessageEndpoints.device_rpc(), msgpack.dumps(res))
 
-    def _set_device(self, instr) -> None:
+    def _set_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
         val = instr.content["parameter"]["value"]
         obj = self.device_manager.devices.get(instr.content["device"]).obj
         # self.device_manager.add_req_done_sub(obj)
-        st = obj.set(val)
-        st.add_callback(self._status_callback)
+        status = obj.set(val)
+        status.add_callback(self._status_callback)
 
     def _status_callback(self, status):
         pipe = self.producer.pipeline()
-        dev_msg = BMessage.DeviceReqStatusMessage(
+        dev_msg = BECMessage.DeviceReqStatusMessage(
             device=status.device.name,
             success=status.success,
             metadata=self.device_manager.devices.get(status.device.name).metadata,
@@ -231,7 +246,7 @@ class DeviceServer(BECService):
         )
         pipe.execute()
 
-    def _read_device(self, instr) -> None:
+    def _read_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
         # check performance -- we might have to change it to a background thread
         dev_list = instr.content["device"]
         devices = []
@@ -245,7 +260,7 @@ class DeviceServer(BECService):
             metadata = self.device_manager.devices.get(dev).metadata
             self.producer.set_and_publish(
                 MessageEndpoints.device_read(dev),
-                BMessage.DeviceMessage(signals=signals, metadata=metadata).dumps(),
+                BECMessage.DeviceMessage(signals=signals, metadata=metadata).dumps(),
                 pipe,
             )
             status_info = metadata
@@ -259,10 +274,11 @@ class DeviceServer(BECService):
 
     @property
     def status(self) -> DSStatus:
+        """get the current status of the device server"""
         return self._status
 
     @status.setter
-    def status(self, val) -> None:
+    def status(self, val: DSStatus) -> None:
         if DSStatus(val) == DSStatus.RUNNING:
             if self.status != DSStatus.RUNNING:
                 self.start()

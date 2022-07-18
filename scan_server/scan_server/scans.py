@@ -23,10 +23,6 @@ class ScanArgType(str, enum.Enum):
     DICT = "dict"
 
 
-def get_linspace_axis(start, stop, num_steps):
-    return np.linspace(start, stop, num_steps)
-
-
 def get_2D_raster_pos(axis, snaked=True):
     """get_2D_raster_post calculates and returns the positions for a 2D
 
@@ -56,6 +52,7 @@ def get_2D_raster_pos(axis, snaked=True):
     return positions
 
 
+# pylint: disable=too-many-arguments
 def get_fermat_spiral_pos(
     m1_start, m1_stop, m2_start, m2_stop, step=1, spiral_type=0, center=False
 ):
@@ -87,17 +84,17 @@ def get_fermat_spiral_pos(
 
     start = int(not center)
 
-    l1 = abs(m1_stop - m1_start)
-    l2 = abs(m2_stop - m2_start)
-    n_max = l1 * l2 * 2
+    length_axis1 = abs(m1_stop - m1_start)
+    length_axis2 = abs(m2_stop - m2_start)
+    n_max = length_axis1 * length_axis2 * 2
 
-    for ir in range(start, n_max):
-        r = step * 0.57 * np.sqrt(ir)
-        if abs(r * np.sin(ir * phi)) > l1 / 2:
+    for ii in range(start, n_max):
+        radius = step * 0.57 * np.sqrt(ii)
+        if abs(radius * np.sin(ii * phi)) > length_axis1 / 2:
             continue
-        if abs(r * np.cos(ir * phi)) > l2 / 2:
+        if abs(radius * np.cos(ii * phi)) > length_axis2 / 2:
             continue
-        positions.extend([(r * np.sin(ir * phi), r * np.cos(ir * phi))])
+        positions.extend([(radius * np.sin(ii * phi), radius * np.cos(ii * phi))])
     return np.array(positions)
 
 
@@ -166,7 +163,6 @@ class RequestBase(ABC):
         self.caller_kwargs = parameter.get("kwargs", {})
         self.metadata = metadata
         self.device_manager = device_manager
-        self.simulate = False
         self.DIID = 0
         self.scan_motors = []
         self.positions = []
@@ -185,27 +181,26 @@ class RequestBase(ABC):
         pass
 
     def _check_limits(self):
-        if not self.simulate:
-            logger.debug("check limits")
-            for ii, dev in enumerate(self.scan_motors):
-                low_limit, high_limit = (
-                    self.device_manager.devices[dev].config["deviceConfig"].get("limits", [0, 0])
-                )
-                if low_limit >= high_limit:
-                    return
-                for pos in self.positions:
-                    pos_axis = pos[ii]
-                    if not low_limit <= pos_axis <= high_limit:
-                        raise LimitError(
-                            f"Target position {pos} for motor {dev} is outside of range: [{low_limit}, {high_limit}]"
-                        )
+        logger.debug("check limits")
+        for ii, dev in enumerate(self.scan_motors):
+            low_limit, high_limit = (
+                self.device_manager.devices[dev].config["deviceConfig"].get("limits", [0, 0])
+            )
+            if low_limit >= high_limit:
+                return
+            for pos in self.positions:
+                pos_axis = pos[ii]
+                if not low_limit <= pos_axis <= high_limit:
+                    raise LimitError(
+                        f"Target position {pos} for motor {dev} is outside of range: [{low_limit}, {high_limit}]"
+                    )
 
     def _get_scan_motors(self):
         if len(self.caller_args) > 0:
             self.scan_motors = list(self.caller_args.keys())
 
     @abstractmethod
-    def run(self, simulate=False):
+    def run(self):
         pass
 
 
@@ -255,7 +250,6 @@ class ScanBase(RequestBase):
         self.start_pos = np.repeat(0, len(self.scan_motors)).tolist()
         self.positions = []
         self.num_pos = None
-        self.simulate = False
 
         if self.scan_name == "":
             raise ValueError("scan_name cannot be empty")
@@ -422,8 +416,7 @@ class ScanBase(RequestBase):
         for ind, pos in enumerate(self.positions):
             yield (ind, pos)
 
-    def run(self, simulate=False):
-        self.simulate = simulate
+    def run(self):
         self.initialize()
         yield from self.read_scan_motors()
         self.prepare_positions()
@@ -465,7 +458,7 @@ class OpenScanDef(ScanStub):
     scan_name = "open_scan_def"
     scan_report_hint = None
 
-    def run(self, simulate=False):
+    def run(self):
         yield self.device_msg(device=None, action="open_scan_def", parameter={})
 
 
@@ -473,14 +466,14 @@ class CloseScanDef(ScanStub):
     scan_name = "close_scan_def"
     scan_report_hint = "table"
 
-    def run(self, simulate=False):
+    def run(self):
         yield self.device_msg(device=None, action="close_scan_def", parameter={})
 
 
 class CloseScanGroup(ScanStub):
     scan_name = "close_scan_group"
 
-    def run(self, simulate=False):
+    def run(self):
         yield self.device_msg(device=None, action="close_scan_group", parameter={})
 
 
@@ -498,7 +491,7 @@ class DeviceRPC(ScanStub):
     def _get_scan_motors(self):
         pass
 
-    def run(self, simulate=False):
+    def run(self):
         yield self.device_msg(
             device=self.parameter.get("device"),
             action="rpc",
@@ -506,7 +499,7 @@ class DeviceRPC(ScanStub):
         )
 
 
-class Move(ScanStub):
+class Move(RequestBase):
 
     scan_name = "mv"
     arg_input = [ScanArgType.DEVICE, ScanArgType.FLOAT]
@@ -554,7 +547,7 @@ class Move(ScanStub):
         self._calculate_positions()
         self._check_limits()
 
-    def run(self, simulate=False):
+    def run(self):
         self.initialize()
         self.prepare_positions()
         yield from self._at_each_point()
@@ -608,7 +601,7 @@ class Scan(ScanBase):
 
     def _calculate_positions(self):
         for _, val in self.caller_args.items():
-            self.axis.append(get_linspace_axis(val[0], val[1], val[2]))
+            self.axis.append(np.linspace(val[0], val[1], val[2]))
         if len(self.axis) > 1:
             self.positions = get_2D_raster_pos(self.axis)
         else:
@@ -768,7 +761,7 @@ class LineScan(ScanBase):
 
     def _calculate_positions(self) -> None:
         for _, val in self.caller_args.items():
-            ax_pos = get_linspace_axis(val[0], val[1], self.steps)
+            ax_pos = np.linspace(val[0], val[1], self.steps)
             self.axis.append(ax_pos)
         self.positions = np.array(list(zip(*self.axis)))
 
@@ -807,8 +800,7 @@ class OpenInteractiveScan(ScanBase):
         caller_args = list(self.caller_args.keys())
         self.scan_motors = caller_args
 
-    def run(self, simulate=False):
-        self.simulate = simulate
+    def run(self):
         yield self.device_msg(device=None, action="open_scan_def", parameter={})
         self.initialize()
         yield from self.read_scan_motors()
@@ -891,8 +883,7 @@ class AddInteractiveScanPoint(ScanBase):
         )
         self.pointID += 1
 
-    def run(self, simulate=False):
-        self.simulate = simulate
+    def run(self):
         yield from self.open_scan()
         yield from self._at_each_point()
         yield from self.close_scan()
@@ -927,8 +918,7 @@ class CloseInteractiveScan(ScanBase):
     def _calculate_positions(self):
         pass
 
-    def run(self, simulate=False):
-        self.simulate = simulate
+    def run(self):
         yield from self.finalize()
         yield from self.unstage()
         yield from self.cleanup()

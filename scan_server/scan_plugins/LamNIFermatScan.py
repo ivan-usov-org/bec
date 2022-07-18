@@ -277,13 +277,11 @@ class LamNIFermatScan(ScanBase):
             },
         )
 
-    def run(self, simulate=False):
-        self.simulate = simulate
+    def run(self):
         self.initialize()
         yield from self.read_scan_motors()
         self.prepare_positions()
-        if not self.simulate:
-            yield from self._prepare_setup()
+        yield from self._prepare_setup()
         yield from self.open_scan()
         yield from self.stage()
         yield from self.run_baseline_reading()

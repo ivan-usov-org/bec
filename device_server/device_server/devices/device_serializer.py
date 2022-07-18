@@ -3,43 +3,41 @@ import json
 from ophyd import Device, PositionerBase, Signal
 
 
-def is_serializable(f) -> bool:
+def is_serializable(var) -> bool:
+    """check if an object is json serializable"""
     try:
-        json.dumps(f)
+        json.dumps(var)
         return True
     except (TypeError, OverflowError):
         return False
 
 
 def get_custom_user_access_info(obj, obj_interface):
-
+    """extract user access method from an object"""
     # user_funcs = get_user_functions(obj)
     if hasattr(obj, "USER_ACCESS"):
-        for f in [f for f in dir(obj) if f in obj.USER_ACCESS]:
-            if f == "controller" or f == "on":
-                print(f)
-            m = getattr(obj, f)
-            if not callable(m):
-                if is_serializable(m):
-                    obj_interface[f] = {"type": type(m).__name__}
-                elif get_device_base_class(m) == "unknown":
-                    obj_interface[f] = get_custom_user_access_info(m, {})
+        for var in [func for func in dir(obj) if func in obj.USER_ACCESS]:
+            obj_member = getattr(obj, var)
+            if not callable(obj_member):
+                if is_serializable(obj_member):
+                    obj_interface[var] = {"type": type(obj_member).__name__}
+                elif get_device_base_class(obj_member) == "unknown":
+                    obj_interface[var] = get_custom_user_access_info(obj_member, {})
                 else:
                     continue
             else:
-                obj_interface[f] = {"type": "func", "doc": m.__doc__}
+                obj_interface[var] = {"type": "func", "doc": obj_member.__doc__}
     return obj_interface
 
 
 def get_device_base_class(obj) -> str:
     if isinstance(obj, PositionerBase):
         return "positioner"
-    elif isinstance(obj, Signal):
+    if isinstance(obj, Signal):
         return "signal"
-    elif isinstance(obj, Device):
+    if isinstance(obj, Device):
         return "device"
-    else:
-        return "unknown"
+    return "unknown"
 
 
 def get_device_info(obj, device_info):
@@ -77,7 +75,7 @@ def get_device_info(obj, device_info):
                 signals.append(component_name)
     sub_devices = []
     if hasattr(obj, "walk_subdevices"):
-        for name, dev in obj.walk_subdevices():
+        for _, dev in obj.walk_subdevices():
             sub_devices.append(get_device_info(dev, {}))
     return {
         "device_name": obj.name,

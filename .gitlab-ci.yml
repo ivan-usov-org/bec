@@ -34,9 +34,9 @@ pylint:
 pytest:
   stage: Test
   script:
-    - pip install pytest
+    - pip install pytest pytest-random-order
     - pip install -e ./scan_server
-    - cd scan_server/tests;pytest -v
+    - cd scan_server/tests;pytest -v --random-order
 
 end-2-end:
   stage: Test

@@ -1,6 +1,7 @@
 from bec_utils import BECMessage, bec_logger
 
 from .errors import ScanAbortion
+from .scans import RequestBase
 
 logger = bec_logger.logger
 
@@ -14,11 +15,21 @@ class ScanAssembler:
         self.parent = parent
         self.device_manager = self.parent.device_manager
         self.connector = self.parent.connector
-        self.scan_manager = (
-            self.parent.scan_manager
-        )  # TODO should these be the same dict, or a copy?
+        self.scan_manager = self.parent.scan_manager
 
-    def assemble_device_instructions(self, msg: BECMessage.ScanQueueMessage):
+    def assemble_device_instructions(self, msg: BECMessage.ScanQueueMessage) -> RequestBase:
+        """Assemble the device instructions for a given ScanQueueMessage.
+        This will be achieved by calling the specified class (must be a derived class of RequestBase)
+
+        Args:
+            msg (BECMessage.ScanQueueMessage): scan queue message for which the instruction should be assembled
+
+        Raises:
+            ScanAbortion: Raised if the scan initialization fails.
+
+        Returns:
+            RequestBase: Scan instance of the initialized scan class
+        """
         scan = msg.content.get("scan_type")
         cls_name = self.scan_manager.available_scans[scan]["class"]
         scan_cls = self.scan_manager.scan_dict[cls_name]

@@ -1,3 +1,4 @@
+import threading
 import time
 from collections import deque
 
@@ -137,6 +138,7 @@ class ScanQueue:
         self.parent = parent
         self._current_scan_info = None
         self.connector = self.parent.connector
+        self._lock = threading.Lock()
 
         self._scan_queue_consumer = self.connector.consumer(
             topics=MessageEndpoints.scan_queue_status(),
@@ -291,33 +293,36 @@ class ScanQueue:
         self._update_scan_storage_queueinfo()
 
     def find_scan(self, RID=None, queueID=None, scanID=None, scan_number=None):
-        if RID:
-            for scan_obj in self.scan_storage:
-                for rb in scan_obj.queue_info.request_blocks:
-                    if rb["RID"] == RID:
+        """find scan object matching either the RID, queueID, scanID or scan_number"""
+        with self._lock:
+            if RID:
+                for scan_obj in self.scan_storage:
+                    for request_block in scan_obj.queue_info.request_blocks:
+                        if request_block["RID"] == RID:
+                            return scan_obj
+            if queueID:
+                for scan_obj in self.scan_storage:
+                    if scan_obj.queue_info.queueID == queueID:
                         return scan_obj
-        if queueID:
-            for scan_obj in self.scan_storage:
-                if scan_obj.queue_info.queueID == queueID:
-                    return scan_obj
-        if scanID:
-            for scan_obj in self.scan_storage:
-                for rb in scan_obj.queue_info.request_blocks:
-                    if rb["scanID"] == scanID:
-                        return scan_obj
-        if scan_number:
-            for scan_obj in self.scan_storage:
-                for rb in scan_obj.queue_info.request_blocks:
-                    if rb["scan_number"] == scan_number:
-                        return scan_obj
-        return None
+            if scanID:
+                for scan_obj in self.scan_storage:
+                    for request_block in scan_obj.queue_info.request_blocks:
+                        if request_block["scanID"] == scanID:
+                            return scan_obj
+            if scan_number:
+                for scan_obj in self.scan_storage:
+                    for request_block in scan_obj.queue_info.request_blocks:
+                        if request_block["scan_number"] == scan_number:
+                            return scan_obj
+            return None
 
     def get_queue_position(self, scanID):
+        """get the current queue position for a scan"""
         for queue_group in self.current_scan_queue.values():
             if isinstance(queue_group, dict):
-                for id, q in enumerate(queue_group["info"]):
-                    if q["scanID"] == scanID:
-                        return id
+                for queue_position, queue in enumerate(queue_group["info"]):
+                    if queue["scanID"] == scanID:
+                        return queue_position
         return None
 
     @staticmethod
