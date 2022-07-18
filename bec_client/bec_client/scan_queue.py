@@ -138,7 +138,7 @@ class ScanQueue:
         self.parent = parent
         self._current_scan_info = None
         self.connector = self.parent.connector
-        self._lock = threading.RLock()
+        self._lock = threading.Lock()
 
         self._scan_queue_consumer = self.connector.consumer(
             topics=MessageEndpoints.scan_queue_status(),
