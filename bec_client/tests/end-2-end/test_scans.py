@@ -202,3 +202,5 @@ def test_queued_scan():
         assert bec.queue.get_queue_position(s1.scan.queue_info.scanID) == 0
         assert bec.queue.get_queue_position(s2.scan.queue_info.scanID) == 1
         break
+    while len(s2.scan.data) != 100:
+        time.sleep(0.5)
