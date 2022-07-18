@@ -9,7 +9,7 @@ COPY . ./bec
 
 WORKDIR /code/bec/bec_client
 RUN pip install -e .
-RUN pip install pytest pytest-timeout
+RUN pip install pytest pytest-timeout pytest-random-order
 
 # command to run on container start
 CMD [ "pytest", "-v", "./tests"]
