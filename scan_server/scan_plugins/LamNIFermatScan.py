@@ -25,7 +25,7 @@ import uuid
 
 import numpy as np
 from bec_utils import BECMessage, MessageEndpoints, bec_logger
-from scan_server.scans import ScanArgType, ScanBase
+from scan_server.scans import ScanBase
 
 MOVEMENT_SCALE_X = np.sin(np.radians(15)) * np.cos(np.radians(30))
 MOVEMENT_SCALE_Y = np.cos(np.radians(15))
@@ -99,11 +99,8 @@ class LamNIFermatScan(ScanBase):
         pass
 
     def lamni_rotation(self, angle):
-
-        rpc_id = str(uuid.uuid4())
         # get last setpoint (cannot be based on pos get because they will deviate slightly)
-        yield from self.run_rpc("lsamrot", "user_setpoint.get", str(rpc_id))
-        lsamrot_current_setpoint = self.get_from_rpc(rpc_id)
+        lsamrot_current_setpoint = yield from self.device_rpc("lsamrot", "user_setpoint.get")
         if angle == lsamrot_current_setpoint:
             logger.info("No rotation required")
         else:
@@ -114,20 +111,16 @@ class LamNIFermatScan(ScanBase):
         """move to new scan center. xy in mm"""
         lsamx_center = 8.866
         lsamy_center = 10.18
-        rpc_id = str(uuid.uuid4())
-        # could first check if feedback is enabled
 
-        yield from self.run_rpc("rtx", "controller.feedback_disable", str(rpc_id))
+        # could first check if feedback is enabled
+        yield from self.device_rpc("rtx", "controller.feedback_disable")
         time.sleep(0.05)
 
-        yield from self.run_rpc("rtx", "readback.get", str(rpc_id))
-        rtx_current = self.get_from_rpc(rpc_id)
-        yield from self.run_rpc("rty", "readback.get", str(rpc_id))
-        rty_current = self.get_from_rpc(rpc_id)
-        yield from self.run_rpc("lsamx", "readback.get", str(rpc_id))
-        lsamx_current = self.get_from_rpc(rpc_id)
-        yield from self.run_rpc("lsamy", "readback.get", str(rpc_id))
-        lsamy_current = self.get_from_rpc(rpc_id)
+        rtx_current = yield from self.device_rpc("rtx", "readback.get")
+        rty_current = yield from self.device_rpc("rty", "readback.get")
+        lsamx_current = yield from self.device_rpc("lsamx", "readback.get")
+        lsamy_current = yield from self.device_rpc("lsamy", "readback.get")
+
         # lsamx_current = self.device_manager.devices.lsamx.read().get("value")
         # lsamy_current = self.device_manager.devices.lsamy.read().get("value")
         # rtx_current = self.device_manager.devices.rtx.read().get("value")
@@ -165,10 +158,9 @@ class LamNIFermatScan(ScanBase):
             yield from self._move_and_wait_devices(["lsamx", "lsamy"], [move_x, move_y])
 
         time.sleep(0.01)
-        yield from self.run_rpc("rtx", "readback.get", str(rpc_id))
-        rtx_current = self.get_from_rpc(rpc_id)
-        yield from self.run_rpc("rty", "readback.get", str(rpc_id))
-        rty_current = self.get_from_rpc(rpc_id)
+        rtx_current = yield from self.device_rpc("rtx", "readback.get")
+        rty_current = yield from self.device_rpc("rty", "readback.get")
+
         logger.info(f"New scan center interferometer {rtx_current:.3f}, {rty_current:.3f} microns")
 
         # second iteration
@@ -199,10 +191,9 @@ class LamNIFermatScan(ScanBase):
             )
             yield from self._move_and_wait_devices(["lsamx", "lsamy"], [move_x, move_y])
             time.sleep(0.01)
-            yield from self.run_rpc("rtx", "readback.get", str(rpc_id))
-            rtx_current = self.get_from_rpc(rpc_id)
-            yield from self.run_rpc("rty", "readback.get", str(rpc_id))
-            rty_current = self.get_from_rpc(rpc_id)
+            rtx_current = yield from self.device_rpc("rtx", "readback.get")
+            rty_current = yield from self.device_rpc("rty", "readback.get")
+
             logger.info(
                 f"New scan center interferometer after second iteration {rtx_current:.3f}, {rty_current:.3f} microns"
             )
@@ -214,34 +205,10 @@ class LamNIFermatScan(ScanBase):
         else:
             logger.info("No second iteration required")
 
-        yield from self.run_rpc("rtx", "controller.feedback_enable_without_reset", str(rpc_id))
+        yield from self.device_rpc("rtx", "controller.feedback_enable_without_reset")
 
         # set_lm rtx _interferometer_pos_x-30 _interferometer_pos_x+30
         # set_lm rty _interferometer_pos_y-30 _interferometer_pos_y+30
-
-    def run_rpc(self, device, func_name, rpc_id, *args, **kwargs):
-        yield self.device_msg(
-            device=device,
-            action="rpc",
-            parameter={
-                "device": device,
-                "func": func_name,
-                "rpc_id": rpc_id,
-                "args": list(args),
-                "kwargs": kwargs,
-            },
-        )
-
-    def get_from_rpc(self, rpc_id):
-        time.sleep(0.1)  # otherwise appeared to read wrong message
-        while True:
-            msg = self.device_manager.producer.get(MessageEndpoints.device_rpc(rpc_id))
-            if msg:
-                break
-            time.sleep(0.1)
-        msg = BECMessage.DeviceRPCMessage.loads(msg)
-        print(msg.content.get("out"))
-        return msg.content.get("return_val")
 
     def _move_and_wait_devices(self, devices, pos):
         if not isinstance(pos, list) and not isinstance(pos, np.ndarray):

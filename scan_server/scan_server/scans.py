@@ -1,8 +1,10 @@
 import enum
+import time
+import uuid
 from abc import ABC, abstractmethod
 
 import numpy as np
-from bec_utils import BECMessage, DeviceManagerBase, bec_logger
+from bec_utils import BECMessage, DeviceManagerBase, MessageEndpoints, bec_logger
 from cytoolz import partition
 
 from .errors import LimitError
@@ -179,6 +181,35 @@ class RequestBase(ABC):
 
     def initialize(self):
         pass
+
+    def device_rpc(self, device, func_name, *args, **kwargs):
+        rpc_id = str(uuid.uuid4())
+        yield from self._run_rpc(device, func_name, rpc_id, *args, **kwargs)
+        return self._get_from_rpc(rpc_id)
+
+    def _run_rpc(self, device, func_name, rpc_id, *args, **kwargs):
+        yield self.device_msg(
+            device=device,
+            action="rpc",
+            parameter={
+                "device": device,
+                "func": func_name,
+                "rpc_id": rpc_id,
+                "args": list(args),
+                "kwargs": kwargs,
+            },
+        )
+
+    def _get_from_rpc(self, rpc_id):
+        time.sleep(0.1)  # otherwise appeared to read wrong message
+        while True:
+            msg = self.device_manager.producer.get(MessageEndpoints.device_rpc(rpc_id))
+            if msg:
+                break
+            time.sleep(0.1)
+        msg = BECMessage.DeviceRPCMessage.loads(msg)
+        print(msg.content.get("out"))
+        return msg.content.get("return_val")
 
     def _check_limits(self):
         logger.debug("check limits")
