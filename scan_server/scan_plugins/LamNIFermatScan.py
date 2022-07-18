@@ -48,7 +48,7 @@ def lamni_from_stage_coordinates(x_stage:float,y_stage:float) -> tuple:
 class LamNIFermatScan(ScanBase):
     scan_name = "lamni_fermat_scan"
     scan_report_hint = "table"
-    required_kwargs = ["fov_size", "exp_time", "step"]
+    required_kwargs = ["fov_size", "exp_time", "step", "angle"]
     arg_input = []
     arg_bundle_size = None
 
@@ -61,6 +61,7 @@ class LamNIFermatScan(ScanBase):
             shift_y: extra shift in y. The shift will not be rotated. (default 0).
             center_x: center position in x at 0 deg.  (optional)
             center_y: center position in y at 0 deg.  (optional)
+            angle: rotation angle (will rotate first)
         Returns:
 
         Examples:
@@ -79,6 +80,8 @@ class LamNIFermatScan(ScanBase):
         self.center_y = scan_kwargs.get("center_y", 0)
         self.shift_x = scan_kwargs.get("shift_x", 0)
         self.shift_y = scan_kwargs.get("shift_y", 0)
+        self.angle = scan_kwargs.get("angle", 0)
+
 
     def initialize(self):
         self.scan_motors = ["rtx", "rty"]
@@ -88,21 +91,46 @@ class LamNIFermatScan(ScanBase):
         self.num_pos = len(self.positions)
 
     def _prepare_setup(self):
+        yield from self.lamni_rotation(self.angle)
         yield from self.lamni_new_scan_center_interferometer(self.center_x, self.center_y)
 
     def _calculate_positions(self) -> None:
         pass
 
+    def lamni_rotation(self, angle):
+
+        rpc_id=str(uuid.uuid4())
+        #get last setpoint (cannot be based on pos get because they will deviate slightly)
+        yield from self.run_rpc("lsamrot","user_setpoint.get",str(rpc_id))
+        lsamrot_current_setpoint = self.get_from_rpc(rpc_id)
+        if angle == lsamrot_current_setpoint:
+            logger.info("No rotation required")
+        else:
+            logger.info("Rotating to requested angle")
+            yield from self._move_and_wait_devices(["lsamrot"],[angle])
+
     def lamni_new_scan_center_interferometer(self, x,y):
         """move to new scan center. xy in mm """
-        #rt_feedback_disable()
-        time.sleep(0.05)
         lsamx_center = 8.866
         lsamy_center = 10.18
-        lsamx_current = self.device_manager.devices.lsamx.read().get("value")
-        lsamy_current = self.device_manager.devices.lsamy.read().get("value")
-        rtx_current = self.device_manager.devices.rtx.read().get("value")
-        rty_current = self.device_manager.devices.rty.read().get("value")
+        rpc_id=str(uuid.uuid4())
+        #could first check if feedback is enabled
+
+        yield from self.run_rpc("rtx","controller.feedback_disable",str(rpc_id))
+        time.sleep(0.05)
+
+        yield from self.run_rpc("rtx","readback.get",str(rpc_id))
+        rtx_current = self.get_from_rpc(rpc_id)
+        yield from self.run_rpc("rty","readback.get",str(rpc_id))
+        rty_current = self.get_from_rpc(rpc_id)
+        yield from self.run_rpc("lsamx","readback.get",str(rpc_id))
+        lsamx_current = self.get_from_rpc(rpc_id)
+        yield from self.run_rpc("lsamy","readback.get",str(rpc_id))
+        lsamy_current = self.get_from_rpc(rpc_id)
+        #lsamx_current = self.device_manager.devices.lsamx.read().get("value")
+        #lsamy_current = self.device_manager.devices.lsamy.read().get("value")
+        #rtx_current = self.device_manager.devices.rtx.read().get("value")
+        #rty_current = self.device_manager.devices.rty.read().get("value")
 
         x_stage, y_stage = lamni_to_stage_coordinates(x,y)
 
@@ -127,14 +155,43 @@ class LamNIFermatScan(ScanBase):
 
             yield from self._move_and_wait_devices(["lsamx","lsamy"], [move_x, move_y])
         
-        rtx_current = self.device_manager.devices.rtx.read().get("value")
-        rtx_current = self.device_manager.devices.rty.read().get("value")
-
-        rpc_id=str(uuid.uuid4())
-        yield from self.run_rpc("lsamx","controller.galil_show_all",str(rpc_id))
-        val = self.get_from_rpc(rpc_id)
-
+        time.sleep(0.01)
+        yield from self.run_rpc("rtx","readback.get",str(rpc_id))
+        rtx_current = self.get_from_rpc(rpc_id)
+        yield from self.run_rpc("rty","readback.get",str(rpc_id))
+        rty_current = self.get_from_rpc(rpc_id)
         logger.info(f"New scan center interferometer {rtx_current:.3f}, {rty_current:.3f} microns")
+        
+        #second iteration
+        x_center_expect, y_center_expect = lamni_from_stage_coordinates(x_stage, y_stage)
+
+        #in microns
+        x_drift2 = x_center_expect*1000-rtx_current
+        y_drift2 = y_center_expect*1000-rty_current
+        logger.info(f"Uncompensated drift of setup after first iteration is x={x_drift2:.3f}, y={y_drift2:.3f}")
+
+        if np.abs(x_drift2)>5 or np.abs(y_drift2)>5:
+            logger.info(f"Compensating second iteration {[val/1000 for val in lamni_to_stage_coordinates(x_drift2,y_drift2)]}")
+            move_x = x_stage+lsamx_center+lamni_to_stage_coordinates(x_drift,y_drift)[0]/1000+lamni_to_stage_coordinates(x_drift2,y_drift2)[0]/1000
+            move_y = y_stage+lsamy_center+lamni_to_stage_coordinates(x_drift,y_drift)[1]/1000+lamni_to_stage_coordinates(x_drift2,y_drift2)[1]/1000
+            yield from self._move_and_wait_devices(["lsamx","lsamy"], [move_x, move_y])
+            time.sleep(0.01)
+            yield from self.run_rpc("rtx","readback.get",str(rpc_id))
+            rtx_current = self.get_from_rpc(rpc_id)
+            yield from self.run_rpc("rty","readback.get",str(rpc_id))
+            rty_current = self.get_from_rpc(rpc_id)
+            logger.info(f"New scan center interferometer after second iteration {rtx_current:.3f}, {rty_current:.3f} microns")
+            x_drift2 = x_center_expect*1000-rtx_current
+            y_drift2 = y_center_expect*1000-rty_current
+            logger.info(f"Uncompensated drift of setup after second iteration is x={x_drift2:.3f}, y={y_drift2:.3f}")
+        else:
+            logger.info("No second iteration required")
+
+        yield from self.run_rpc("rtx","controller.feedback_enable_without_reset",str(rpc_id))
+        
+
+        #set_lm rtx _interferometer_pos_x-30 _interferometer_pos_x+30
+        #set_lm rty _interferometer_pos_y-30 _interferometer_pos_y+30
 
 
     def run_rpc(self, device, func_name, rpc_id, *args, **kwargs):
@@ -145,6 +202,7 @@ class LamNIFermatScan(ScanBase):
         )
 
     def get_from_rpc(self, rpc_id):
+        time.sleep(0.1)  #otherwise appeared to read wrong message
         while True:
             msg = self.device_manager.producer.get(MessageEndpoints.device_rpc(rpc_id))
             if msg:
@@ -175,6 +233,17 @@ class LamNIFermatScan(ScanBase):
                 "type": "move",
                 "group": "scan_motor",
                 "wait_group": "scan_motor",
+            },
+        )
+
+    def open_scan(self):
+        yield self.device_msg(
+            device=None,
+            action="open_scan",
+            parameter={
+                "primary": self.scan_motors,
+                "num_points": self.num_pos,
+                "scan_name": self.scan_name,
             },
         )
 
