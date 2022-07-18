@@ -228,6 +228,7 @@ class DeviceServer(BECService):
         # self.producer.set(MessageEndpoints.device_rpc(), msgpack.dumps(res))
 
     def _set_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
+        logger.debug(f"Setting device: {instr}")
         val = instr.content["parameter"]["value"]
         obj = self.device_manager.devices.get(instr.content["device"]).obj
         # self.device_manager.add_req_done_sub(obj)
