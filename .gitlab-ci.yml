@@ -36,7 +36,7 @@ pytest:
   script:
     - pip install pytest pytest-random-order
     - pip install -e ./scan_server
-    - cd scan_server/tests;pytest -v
+    - cd scan_server/tests;pytest -v --random-order
 
 end-2-end:
   stage: Test
