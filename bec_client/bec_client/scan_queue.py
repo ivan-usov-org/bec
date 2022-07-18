@@ -270,15 +270,16 @@ class ScanQueue:
         #         parent.scan_queue[scan.metadata["scanID"]] = Scan.from_ScanRequest(scan)
 
     def _update_scan_storage_queueinfo(self):
-        for queue_item in self.current_scan_queue["primary"].get("info"):
-            append = True
-            for scan_obj in self.scan_storage:
-                if len(set(scan_obj.queue_info.scanID) & set(queue_item["scanID"])) > 0:
-                    append = False
-                    scan_obj.update_queue_info(queue_info=QueueInfo(**queue_item))
-            if any(queue_item["is_scan"]) and append:
-                logger.debug(f"Appending new scan: {queue_item}")
-                self.scan_storage.append(Scan(QueueInfo(**queue_item), client=self.parent))
+        with self._lock:
+            for queue_item in self.current_scan_queue["primary"].get("info"):
+                append = True
+                for scan_obj in self.scan_storage:
+                    if len(set(scan_obj.queue_info.scanID) & set(queue_item["scanID"])) > 0:
+                        append = False
+                        scan_obj.update_queue_info(queue_info=QueueInfo(**queue_item))
+                if any(queue_item["is_scan"]) and append:
+                    logger.debug(f"Appending new scan: {queue_item}")
+                    self.scan_storage.append(Scan(QueueInfo(**queue_item), client=self.parent))
 
     def _update_queue_status(self, msg):
         self.current_scan_queue = msg
