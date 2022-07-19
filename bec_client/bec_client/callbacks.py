@@ -86,7 +86,8 @@ async def live_updates_readback_progressbar(
     with DeviceProgressBar(
         devices=devices, start_values=start_values, target_values=target_values
     ) as progress:
-        while not progress.finished:
+        req_done = False
+        while not progress.finished and not req_done:
             check_alarms(device_manager.parent)
 
             pipe = device_manager.producer.pipeline()
@@ -103,6 +104,8 @@ async def live_updates_readback_progressbar(
             if set(request_ids) != set([request.metadata["RID"]]):
                 await progress.sleep()
                 continue
+
+            req_done = True
 
             for dev, msg in zip(devices, msgs):
                 if not msg:
