@@ -27,6 +27,9 @@ import numpy as np
 from bec_utils import BECMessage, MessageEndpoints, bec_logger
 from scan_server.scans import ScanBase
 
+import matplotlib.pyplot as plt
+
+
 MOVEMENT_SCALE_X = np.sin(np.radians(15)) * np.cos(np.radians(30))
 MOVEMENT_SCALE_Y = np.cos(np.radians(15))
 
@@ -115,8 +118,21 @@ class LamNIFermatScan(ScanBase):
         )
 
     def _prepare_setup(self):
+        yield from self.device_rpc("rtx","controller.clear_trajectory_generator")
         yield from self.lamni_rotation(self.angle)
         yield from self.lamni_new_scan_center_interferometer(self.center_x, self.center_y)
+        yield from self._plot_target_pos()
+        #yield from self._transfer_positions_to_LamNI()
+        # start HW scan  p _rt_put_and_receive(sprintf("sd"))
+        #time.sleep(30)
+
+    def _plot_target_pos(self):
+        plt.plot(self.positions)
+        plt.show()
+
+    def _transfer_positions_to_LamNI(self):
+        for pos in self.positions:
+            yield from self.device_rpc("rtx", f"controller.add_pos_to_scan", (pos[0], pos[1]))
 
     def _calculate_positions(self):
         self.positions = self.get_lamni_fermat_spiral_pos(
@@ -164,9 +180,6 @@ class LamNIFermatScan(ScanBase):
         length_axis2 = np.abs(m2_stop - m2_start)
         n_max = int(length_axis1 * length_axis2 * 2)
 
-        # das mag er nicht
-        # yield from self.device_rpc("rtx","controller.clear_trajectory_generator")
-
         for ii in range(start, n_max):
             radius = step * 0.57 * np.sqrt(ii)
             if abs(radius * np.sin(ii * phi)) > length_axis1 / 2:
@@ -178,8 +191,6 @@ class LamNIFermatScan(ScanBase):
             if self._lamni_check_pos_in_piezo_range(x, y):
                 positions.extend([(x + self.center_x * 1000, y + self.center_y * 1000)])
                 # for testing we just shift by center_i and prepare also the setup to center_i
-
-                # yield from self.device_rpc("rtx", f"controller.add_pos_to_scan({x},{y})")
         return np.array(positions)
 
     def lamni_rotation(self, angle):
