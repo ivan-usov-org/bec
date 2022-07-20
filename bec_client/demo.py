@@ -16,6 +16,7 @@ bec_logger.level = bec_logger.LOGLEVEL.SUCCESS
 
 CONFIG_PATH = "../bec_config_mirko.yaml"
 
+
 config = ServiceConfig(CONFIG_PATH)
 
 bk = BKClient(

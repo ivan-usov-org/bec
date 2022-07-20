@@ -3,6 +3,7 @@ import yaml
 
 USE_LAMNI = True
 
+
 lamni_galil_motors = [
     ("lsamx", "A", -1),
     ("lsamy", "B", 1),

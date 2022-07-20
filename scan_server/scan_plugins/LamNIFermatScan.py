@@ -118,13 +118,13 @@ class LamNIFermatScan(ScanBase):
         )
 
     def _prepare_setup(self):
-        yield from self.device_rpc("rtx","controller.clear_trajectory_generator")
+        yield from self.device_rpc("rtx", "controller.clear_trajectory_generator")
         yield from self.lamni_rotation(self.angle)
         yield from self.lamni_new_scan_center_interferometer(self.center_x, self.center_y)
         yield from self._plot_target_pos()
-        #yield from self._transfer_positions_to_LamNI()
+        # yield from self._transfer_positions_to_LamNI()
         # start HW scan  p _rt_put_and_receive(sprintf("sd"))
-        #time.sleep(30)
+        # time.sleep(30)
 
     def _plot_target_pos(self):
         plt.plot(self.positions)

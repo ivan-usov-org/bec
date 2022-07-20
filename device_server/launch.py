@@ -8,6 +8,7 @@ import device_server
 logger = bec_logger.logger
 bec_logger.level = bec_logger.LOGLEVEL.DEBUG
 
+
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument(
     "--config",
