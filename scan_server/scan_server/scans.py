@@ -326,6 +326,7 @@ class ScanBase(RequestBase):
                 "primary": self.scan_motors,
                 "num_points": self.num_pos,
                 "scan_name": self.scan_name,
+                "scan_type": "step",
             },
         )
 
