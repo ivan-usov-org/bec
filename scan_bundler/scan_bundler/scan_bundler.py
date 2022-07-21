@@ -27,6 +27,7 @@ class ScanBundler(BECService):
         self.baseline_devices = dict()
         self.scan_motors = dict()
         self.metadata = dict()
+        self.current_queue = None
 
     def _start_device_read_consumer(self):
         self._device_read_consumer = self.connector.consumer(
@@ -70,6 +71,7 @@ class ScanBundler(BECService):
     def _scan_queue_callback(msg, parent, **kwargs):
         msg = BECMessage.ScanQueueStatusMessage.loads(msg.value)
         logger.trace(msg)
+        parent.current_queue = msg.content["queue"]["primary"].get("info")
         for q in msg.content["queue"]["primary"].get("info"):
             for rb in q.get("request_blocks"):
                 if rb.get("is_scan"):
@@ -240,6 +242,12 @@ class ScanBundler(BECService):
         while not scanID in self.sync_storage:
             time.sleep(0.1)
         while not "scan_type" in self.sync_storage[scanID]:
+            scan_exists = False
+            for queue in self.current_queue:
+                if scanID in queue["scanID"]:
+                    scan_exists = True
+            if not scan_exists:
+                return
             time.sleep(0.1)
 
         if metadata["stream"] == "primary":
