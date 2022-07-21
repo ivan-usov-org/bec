@@ -10,7 +10,7 @@ but they are executed in a specific order:
     - self._calculate_positions          # calculate the positions
     - self._set_positions_offset         # apply the previously retrieved scan position shift (if needed)
     - self._check_limits                 # tests to ensure the limits won't be reached
-- self.open_scan                         # send and open_scan message including the scan name, the number of points and the scan motor names
+- self.open_scan                         # send an open_scan message including the scan name, the number of points and the scan motor names
 - self.stage                             # stage all devices for the upcoming acquisiton
 - self.run_baseline_readings             # read all devices to get a baseline for the upcoming scan
 - self.scan_core                         # run a loop over all position 
@@ -26,6 +26,9 @@ import uuid
 import numpy as np
 from bec_utils import BECMessage, MessageEndpoints, bec_logger
 from scan_server.scans import ScanBase
+
+import matplotlib.pyplot as plt
+
 
 MOVEMENT_SCALE_X = np.sin(np.radians(15)) * np.cos(np.radians(30))
 MOVEMENT_SCALE_Y = np.cos(np.radians(15))
@@ -64,6 +67,7 @@ class LamNIFermatScan(ScanBase):
             center_x: center position in x at 0 deg.  (optional)
             center_y: center position in y at 0 deg.  (optional)
             angle: rotation angle (will rotate first)
+            scantype: fly (i.e. HW triggered step in case of LamNI) or step
         Returns:
 
         Examples:
@@ -83,20 +87,115 @@ class LamNIFermatScan(ScanBase):
         self.shift_x = scan_kwargs.get("shift_x", 0)
         self.shift_y = scan_kwargs.get("shift_y", 0)
         self.angle = scan_kwargs.get("angle", 0)
+        self.scantype = scan_kwargs.get("scantype", "step")
 
     def initialize(self):
         self.scan_motors = ["rtx", "rty"]
 
     def prepare_positions(self):
         self._calculate_positions()
+        # self._sort_positions()
+
         self.num_pos = len(self.positions)
 
+    def _lamni_check_pos_in_piezo_range(self, x, y) -> bool:
+        # this function checks if positions are reachable in a scan
+        # these x y intererometer positions are not shifted to the scan center
+        # so its purpose is to see if the position is reachable by the
+        # rotated piezo stage. For a scan these positions have to be shifted to
+        # the current scan center before starting the scan
+        stage_x, stage_y = lamni_to_stage_coordinates(x, y)
+
+        # piezo stage is currently rotated to stage_angle_deg in degrees
+        # rotate positions to the piezo stage system
+        alpha = (self.angle - 300 + 30.5) / 180 * np.pi
+        stage_x_rot = np.cos(alpha) * stage_x + np.sin(alpha) * stage_y
+        stage_y_rot = -np.sin(alpha) * stage_x + np.cos(alpha) * stage_y
+
+        _lamni_piezo_range = 20
+
+        return np.abs(stage_x_rot) <= (_lamni_piezo_range / 2) and np.abs(stage_y_rot) <= (
+            _lamni_piezo_range / 2
+        )
+
     def _prepare_setup(self):
+        yield from self.device_rpc("rtx", "controller.clear_trajectory_generator")
         yield from self.lamni_rotation(self.angle)
         yield from self.lamni_new_scan_center_interferometer(self.center_x, self.center_y)
+        self._plot_target_pos()
+        if self.scantype == "fly":
+            yield from self._transfer_positions_to_LamNI()
 
-    def _calculate_positions(self) -> None:
-        pass
+    def _plot_target_pos(self):
+        # return
+        plt.plot(self.positions[:, 0], self.positions[:, 1], alpha=0.2)
+        plt.scatter(self.positions[:, 0], self.positions[:, 1])
+        plt.savefig("mygraph.png")
+        plt.clf()
+        # plt.show()
+
+    def _transfer_positions_to_LamNI(self):
+        for pos in self.positions:
+            yield from self.device_rpc("rtx", f"controller.add_pos_to_scan", (pos[0], pos[1]))
+
+    def _calculate_positions(self):
+        self.positions = self.get_lamni_fermat_spiral_pos(
+            -np.abs(self.fov_size[0] / 2),
+            np.abs(self.fov_size[0] / 2),
+            -np.abs(self.fov_size[1] / 2),
+            np.abs(self.fov_size[1] / 2),
+            step=self.step,
+            spiral_type=0,
+            center=False,
+        )
+
+    def get_lamni_fermat_spiral_pos(
+        self, m1_start, m1_stop, m2_start, m2_stop, step=1, spiral_type=0, center=False
+    ):
+        """[summary]
+
+        Args:
+            m1_start (float): start position motor 1
+            m1_stop (float): end position motor 1
+            m2_start (float): start position motor 2
+            m2_stop (float): end position motor 2
+            step (float, optional): Step size. Defaults to 1.
+            spiral_type (float, optional): Angular offset in radians that determines the shape of the spiral.
+            A spiral with spiral_type=2 is the same as spiral_type=0. Defaults to 0.
+            center (bool, optional): Add a center point. Defaults to False.
+
+        Raises:
+            TypeError: [description]
+            TypeError: [description]
+            TypeError: [description]
+
+        Returns:
+            [type]: [description]
+
+        Yields:
+            [type]: [description]
+        """
+        positions = []
+        phi = 2 * np.pi * ((1 + np.sqrt(5)) / 2.0) + spiral_type * np.pi
+
+        start = int(not center)
+
+        length_axis1 = np.abs(m1_stop - m1_start)
+        length_axis2 = np.abs(m2_stop - m2_start)
+        n_max = int(length_axis1 * length_axis2 * 3.2 / step / step)
+
+        for ii in range(start, n_max):
+            radius = step * 0.57 * np.sqrt(ii)
+            if abs(radius * np.sin(ii * phi)) > length_axis1 / 2:
+                continue
+            if abs(radius * np.cos(ii * phi)) > length_axis2 / 2:
+                continue
+            x = radius * np.sin(ii * phi)
+            y = radius * np.cos(ii * phi)
+            if self._lamni_check_pos_in_piezo_range(x, y):
+                positions.extend([(x + self.center_x * 1000, y + self.center_y * 1000)])
+                # for testing we just shift by center_i and prepare also the setup to center_i
+        return np.array(positions)
 
     def lamni_rotation(self, angle):
         # get last setpoint (cannot be based on pos get because they will deviate slightly)
@@ -120,11 +219,6 @@ class LamNIFermatScan(ScanBase):
         rty_current = yield from self.device_rpc("rty", "readback.get")
         lsamx_current = yield from self.device_rpc("lsamx", "readback.get")
         lsamy_current = yield from self.device_rpc("lsamy", "readback.get")
-
-        # lsamx_current = self.device_manager.devices.lsamx.read().get("value")
-        # lsamy_current = self.device_manager.devices.lsamy.read().get("value")
-        # rtx_current = self.device_manager.devices.rtx.read().get("value")
-        # rty_current = self.device_manager.devices.rty.read().get("value")
 
         x_stage, y_stage = lamni_to_stage_coordinates(x, y)
 
@@ -207,9 +301,6 @@ class LamNIFermatScan(ScanBase):
 
         yield from self.device_rpc("rtx", "controller.feedback_enable_without_reset")
 
-        # set_lm rtx _interferometer_pos_x-30 _interferometer_pos_x+30
-        # set_lm rty _interferometer_pos_y-30 _interferometer_pos_y+30
-
     def _move_and_wait_devices(self, devices, pos):
         if not isinstance(pos, list) and not isinstance(pos, np.ndarray):
             pos = [pos]
@@ -244,6 +335,15 @@ class LamNIFermatScan(ScanBase):
                 "scan_type": "step",
             },
         )
+
+    def scan_core(self):
+        if self.scantype == "step":
+            for ind, pos in self._get_position():
+                for self.burst_index in range(self.burst_at_each_point):
+                    yield from self._at_each_point(ind, pos)
+                self.burst_index = 0
+        elif self.scantype == "fly":
+            yield from self.device_rpc("rtx", "controller.kickoff")
 
     def run(self):
         self.initialize()

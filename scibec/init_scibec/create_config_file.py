@@ -3,6 +3,7 @@ import yaml
 
 USE_LAMNI = False
 
+
 lamni_galil_motors = [
     ("lsamx", "A", -1),
     ("lsamy", "B", 1),
@@ -359,6 +360,7 @@ if USE_LAMNI:
                     "host": "mpc2680.psi.ch",
                     "port": 3333,
                     "sign": m[2],
+                    "device_access": True,
                 },
                 "acquisition": {"schedule": "sync"},
                 "deviceGroup": "userMotor",
