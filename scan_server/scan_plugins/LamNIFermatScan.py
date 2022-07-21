@@ -67,6 +67,7 @@ class LamNIFermatScan(ScanBase):
             center_x: center position in x at 0 deg.  (optional)
             center_y: center position in y at 0 deg.  (optional)
             angle: rotation angle (will rotate first)
+            scantype: fly (i.e. HW triggered step in case of LamNI) or step
         Returns:
 
         Examples:
@@ -86,6 +87,7 @@ class LamNIFermatScan(ScanBase):
         self.shift_x = scan_kwargs.get("shift_x", 0)
         self.shift_y = scan_kwargs.get("shift_y", 0)
         self.angle = scan_kwargs.get("angle", 0)
+        self.scantype = scan_kwargs.get("scantype", "step")
 
     def initialize(self):
         self.scan_motors = ["rtx", "rty"]
@@ -93,7 +95,6 @@ class LamNIFermatScan(ScanBase):
     def prepare_positions(self):
         self._calculate_positions()
         # self._sort_positions()
-        # self.shift()
 
         self.num_pos = len(self.positions)
 
@@ -122,11 +123,11 @@ class LamNIFermatScan(ScanBase):
         yield from self.lamni_rotation(self.angle)
         yield from self.lamni_new_scan_center_interferometer(self.center_x, self.center_y)
         self._plot_target_pos()
-        # yield from self._transfer_positions_to_LamNI()
-        # start HW scan  p _rt_put_and_receive(sprintf("sd"))
-        # time.sleep(30)
+        if self.scantype == "fly":
+            yield from self._transfer_positions_to_LamNI()
 
     def _plot_target_pos(self):
+        # return
         plt.plot(self.positions[:, 0], self.positions[:, 1], alpha=0.2)
         plt.scatter(self.positions[:, 0], self.positions[:, 1])
         plt.savefig("mygraph.png")
@@ -181,7 +182,7 @@ class LamNIFermatScan(ScanBase):
 
         length_axis1 = np.abs(m1_stop - m1_start)
         length_axis2 = np.abs(m2_stop - m2_start)
-        n_max = int(length_axis1 * length_axis2 * 2)
+        n_max = int(length_axis1 * length_axis2 * 3.2 / step / step)
 
         for ii in range(start, n_max):
             radius = step * 0.57 * np.sqrt(ii)
@@ -334,6 +335,15 @@ class LamNIFermatScan(ScanBase):
                 "scan_type": "step",
             },
         )
+
+    def scan_core(self):
+        if self.scantype == "step":
+            for ind, pos in self._get_position():
+                for self.burst_index in range(self.burst_at_each_point):
+                    yield from self._at_each_point(ind, pos)
+                self.burst_index = 0
+        elif self.scantype == "fly":
+            yield from self.device_rpc("rtx", "controller.kickoff")
 
     def run(self):
         self.initialize()
