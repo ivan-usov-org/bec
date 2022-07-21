@@ -201,12 +201,12 @@ class RequestBase(ABC):
         )
 
     def _get_from_rpc(self, rpc_id):
-        time.sleep(0.1)  # otherwise appeared to read wrong message
+        # time.sleep(0.1)  # otherwise appeared to read wrong message
         while True:
             msg = self.device_manager.producer.get(MessageEndpoints.device_rpc(rpc_id))
             if msg:
                 break
-            time.sleep(0.1)
+            time.sleep(0.001)
         msg = BECMessage.DeviceRPCMessage.loads(msg)
         print(msg.content.get("out"))
         return msg.content.get("return_val")

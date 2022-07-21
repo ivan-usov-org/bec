@@ -87,7 +87,7 @@ async def live_updates_readback_progressbar(
         devices=devices, start_values=start_values, target_values=target_values
     ) as progress:
         req_done = False
-        while not progress.finished and not req_done:
+        while not progress.finished or not req_done:
             check_alarms(device_manager.parent)
 
             pipe = device_manager.producer.pipeline()
@@ -100,13 +100,11 @@ async def live_updates_readback_progressbar(
 
             msgs = [BECMessage.DeviceReqStatusMessage.loads(msg) for msg in req_done_msgs]
             request_ids = [msg.metadata["RID"] if msg else None for msg in msgs]
-
             if set(request_ids) != set([request.metadata["RID"]]):
                 await progress.sleep()
                 continue
 
             req_done = True
-
             for dev, msg in zip(devices, msgs):
                 if not msg:
                     continue
