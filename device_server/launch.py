@@ -6,7 +6,7 @@ from bec_utils import RedisConnector, ServiceConfig, bec_logger
 import device_server
 
 logger = bec_logger.logger
-bec_logger.level = bec_logger.LOGLEVEL.DEBUG
+bec_logger.level = bec_logger.LOGLEVEL.INFO
 
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
