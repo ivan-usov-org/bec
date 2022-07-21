@@ -269,6 +269,17 @@ class ScanWorker(threading.Thread):
             ).dumps(),
         )
 
+    def _kickoff_devices(self, instr: DeviceMsg) -> None:
+        self.device_manager.producer.send(
+            MessageEndpoints.device_instructions(),
+            DeviceMsg(
+                device=instr.content.get("device"),
+                action="kickoff",
+                parameter=instr.content["parameter"],
+                metadata=instr.metadata,
+            ).dumps(),
+        )
+
     def _baseline_reading(self, instr: DeviceMsg) -> None:
         baseline_devices = [
             dev.name for dev in self.device_manager.devices.baseline_devices(self.scan_motors)
@@ -298,6 +309,8 @@ class ScanWorker(threading.Thread):
                     for dev in instr.content["parameter"].get("primary")
                 ]
             # self.parent.scan_number += 1
+        if instr.content["parameter"].get("scan_type"):
+            self.current_scan_info["scan_type"] = instr.content["parameter"].get("scan_type")
         if instr.content["parameter"].get("num_points"):
             self.current_scan_info["points"] = instr.content["parameter"].get("num_points")
             self._send_scan_status("open")
@@ -371,6 +384,8 @@ class ScanWorker(threading.Thread):
                 self._set_devices(instr)
             elif action == "read":
                 self._read_devices(instr)
+            elif action == "kickoff":
+                self._kickoff_devices(instr)
             elif action == "baseline_reading":
                 self._baseline_reading(instr)
             elif action == "rpc":

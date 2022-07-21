@@ -1,7 +1,7 @@
 import numpy as np
 import yaml
 
-USE_LAMNI = True
+USE_LAMNI = False
 
 lamni_galil_motors = [
     ("lsamx", "A", -1),
@@ -283,6 +283,23 @@ for m in user_motors:
             "deviceGroup": "userMotor",
         }
     )
+
+out["flyer_sim"] = dict(
+    {
+        "status": {"enabled": True},
+        "type": "SynFlyer",
+        "config": {
+            "name": "flyer_sim",
+            "labels": "flyer_sim",
+            "delay": 1,
+            "speed": 100,
+            "update_frequency": 400,
+            "device_access": True,
+        },
+        "acquisition": {"schedule": "flyer"},
+        "deviceGroup": "userMotor",
+    }
+)
 
 with open("demo_config.yaml", "w+") as f:
     f.write(write_sep("User motors"))

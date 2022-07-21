@@ -100,9 +100,8 @@ class DeviceManagerDS(DeviceManagerBase):
         class_params_and_config_keys = set(class_params) & config.keys()
 
         init_kwargs = {key: config.pop(key) for key in class_params_and_config_keys}
-        if config.get("device_access") or (
-            config.get("device_access") is None and config.get("device_mapping")
-        ):
+        device_access = config.pop("device_access", None)
+        if device_access or (device_access is None and config.get("device_mapping")):
             init_kwargs["device_manager"] = self
 
         # initialize the device object

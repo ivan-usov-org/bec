@@ -127,6 +127,9 @@ class DeviceServer(BECService):
             elif action == "rpc":
                 # pylint: disable=protected-access
                 parent._run_rpc(instructions)
+            elif action == "kickoff":
+                # pylint: disable=protected-access
+                parent._kickoff_device(instructions)
         except ophyd_errors.LimitError as limit_error:
             content = limit_error.args[0] if len(limit_error.args) > 0 else ""
             parent.connector.raise_alarm(
@@ -226,6 +229,11 @@ class DeviceServer(BECService):
         finally:
             sys.stdout = save_stdout
         # self.producer.set(MessageEndpoints.device_rpc(), msgpack.dumps(res))
+
+    def _kickoff_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
+        logger.debug(f"Kickoff device: {instr}")
+        obj = self.device_manager.devices.get(instr.content["device"]).obj
+        obj.kickoff(metadata=instr.metadata)
 
     def _set_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
         logger.debug(f"Setting device: {instr}")
