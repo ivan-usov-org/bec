@@ -355,7 +355,7 @@ async def live_updates_table(bk: BKClient, request: BECMessage.ScanQueueMessage)
 
         queue_pos = bk.queue.get_queue_position(scanID)
 
-        while not queue_item.end_time and queue_pos is not None:
+        while not queue_item.end_time or queue_pos is not None:
             await asyncio.sleep(0.1)
 
         elapsed_time = queue_item.end_time - queue_item.start_time
