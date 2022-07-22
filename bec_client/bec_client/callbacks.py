@@ -230,14 +230,25 @@ async def get_queue_item(bk: BKClient, RID: str):
     return queue_item
 
 
-def prepare_table(devices, scan_msg) -> PrettyTable:
-    header = ["seq. num"]
+def get_devices(device_manager, request, scan_msg):
     if scan_msg.metadata["scan_type"] == "step":
-        header.extend(devices)
-    elif scan_msg.metadata["scan_type"] == "fly":
-        header.extend(scan_msg.content["data"].keys())
-    table = PrettyTable(header, padding=12)
-    return table
+        return get_devices_from_request(device_manager=device_manager, request=request)
+    if scan_msg.metadata["scan_type"] == "fly":
+        return [
+            flyer_signal
+            for flyer in scan_msg.content["data"].values()
+            for flyer_signal in flyer.keys()
+        ]
+
+
+# def prepare_table(devices, scan_msg) -> PrettyTable:
+#     header = ["seq. num"]
+#     if scan_msg.metadata["scan_type"] == "step":
+#         header.extend(devices)
+#     elif scan_msg.metadata["scan_type"] == "fly":
+#         header.extend(devices)
+#     table = PrettyTable(header, padding=12)
+#     return table
 
 
 async def live_updates_table(bk: BKClient, request: BECMessage.ScanQueueMessage):
@@ -290,8 +301,7 @@ async def live_updates_table(bk: BKClient, request: BECMessage.ScanQueueMessage)
         queue_pos = bk.queue.get_queue_position(scanID)
         if queue_pos is None:
             logger.debug(f"Could not find queue entry for scanID {scanID}")
-            if bk.queue.find_scan(RID) is None:
-                return
+            return
         if queue_pos == 0:
             break
         print(
@@ -315,7 +325,11 @@ async def live_updates_table(bk: BKClient, request: BECMessage.ScanQueueMessage)
             progressbar.update(point_id)
             if point_data:
                 if not table:
-                    table = prepare_table(devices, point_data)
+                    devices = get_devices(bk.devicemanager, request, point_data)
+                    dev_values = [0 for dev in devices]
+                    header = ["seq. num"]
+                    header.extend(devices)
+                    table = PrettyTable(header, padding=12)
                     print(table.get_header_lines())
 
                 point_id += 1

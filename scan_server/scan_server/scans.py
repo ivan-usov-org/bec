@@ -772,7 +772,7 @@ class RoundScanFlySim(ScanBase):
         yield self.device_msg(
             device="flyer_sim",
             action="kickoff",
-            parameter={},
+            parameter={"num_pos": self.num_pos},
             metadata={},
         )
 
@@ -797,11 +797,12 @@ class RoundScanFlySim(ScanBase):
                 },
             )
             msg = self.device_manager.producer.get(MessageEndpoints.device_status("flyer_sim"))
-            status = BECMessage.DeviceStatusMessage.loads(msg)
-            if status.content.get("status", 1) == 0 and self.metadata.get(
-                "RID"
-            ) == status.metadata.get("RID"):
-                break
+            if msg:
+                status = BECMessage.DeviceStatusMessage.loads(msg)
+                if status.content.get("status", 1) == 0 and self.metadata.get(
+                    "RID"
+                ) == status.metadata.get("RID"):
+                    break
 
             time.sleep(1)
             logger.debug("reading monitors")

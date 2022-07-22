@@ -230,7 +230,7 @@ class ScanBundler(BECService):
             print("flyer")
         if "pointID" not in metadata:
             return
-        dev = {device: signal}
+        dev = {sig: {sig: signal[sig]} for sig in signal.keys()}
         pointID = metadata["pointID"]
         primary_devices = self.primary_devices[scanID]
 

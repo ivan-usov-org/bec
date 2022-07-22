@@ -239,7 +239,7 @@ class DeviceServer(BECService):
     def _kickoff_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
         logger.debug(f"Kickoff device: {instr}")
         obj = self.device_manager.devices.get(instr.content["device"]).obj
-        obj.kickoff(metadata=instr.metadata)
+        obj.kickoff(metadata=instr.metadata, **instr.content["parameter"])
 
     def _set_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
         logger.debug(f"Setting device: {instr}")
@@ -279,10 +279,11 @@ class DeviceServer(BECService):
                 BECMessage.DeviceMessage(signals=signals, metadata=metadata).dumps(),
                 pipe,
             )
-            status_info = metadata
-            status_info["status"] = 0
-            status_info["timestamp"] = time.time()
-            self.producer.set(MessageEndpoints.device_status(dev), msgpack.dumps(status_info), pipe)
+            self.producer.set(
+                MessageEndpoints.device_status(dev),
+                BECMessage.DeviceStatusMessage(device=dev, status=0, metadata=metadata).dumps(),
+                pipe,
+            )
         pipe.execute()
         logger.debug(
             f"Elapsed time for reading and updating status info: {(time.time()-start)*1000} ms"

@@ -130,6 +130,11 @@ class DeviceContainer(dict):
     def device_group(self, device_group) -> list:
         return [dev for _, dev in self.items() if dev.config["deviceGroup"] == device_group]
 
+    def async_devices(self) -> list:
+        return [
+            dev for _, dev in self.items() if dev.config["acquisitionConfig"]["schedule"] != "sync"
+        ]
+
     @typechecked
     def primary_devices(self, scan_motors: list) -> list:
         devices = self.device_group("monitor")
@@ -140,6 +145,7 @@ class DeviceContainer(dict):
     def baseline_devices(self, scan_motors: list) -> list:
         excluded_devices = self.device_group("monitor")
         excluded_devices.extend(scan_motors)
+        excluded_devices.extend(self.async_devices())
         return [dev for dev in self.enabled_devices if dev not in excluded_devices]
 
     def _add_device(self, name, obj) -> None:

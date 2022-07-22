@@ -207,19 +207,20 @@ class ScanWorker(threading.Thread):
             device_status = pipe.execute()
 
             self._check_for_interruption()
+            device_status = [BECMessage.DeviceStatusMessage.loads(dev) for dev in device_status]
 
             if None in device_status:
                 continue
-
-            device_status = [msgpack.loads(dev) for dev in device_status]
             devices_are_idle = all(
-                DeviceStatus(dev.get("status")) == DeviceStatus.IDLE for dev in device_status
+                DeviceStatus(dev.content.get("status")) == DeviceStatus.IDLE
+                for dev in device_status
             )
             matching_scanID = all(
-                dev.get("scanID") == instr.metadata["scanID"] for dev in device_status
+                dev.metadata.get("scanID") == instr.metadata["scanID"] for dev in device_status
             )
             matching_DIID = all(
-                dev.get("DIID") == wait_group_devices[ii][1] for ii, dev in enumerate(device_status)
+                dev.metadata.get("DIID") == wait_group_devices[ii][1]
+                for ii, dev in enumerate(device_status)
             )
             if devices_are_idle and matching_scanID and matching_DIID:
                 break
