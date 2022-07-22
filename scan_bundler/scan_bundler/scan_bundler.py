@@ -1,6 +1,7 @@
 import time
 import uuid
 from collections.abc import Iterable
+from concurrent.futures import ThreadPoolExecutor
 
 import msgpack
 import numpy as np
@@ -28,6 +29,7 @@ class ScanBundler(BECService):
         self.scan_motors = dict()
         self.metadata = dict()
         self.current_queue = None
+        self.executor = ThreadPoolExecutor(max_workers=4)
 
     def _start_device_read_consumer(self):
         self._device_read_consumer = self.connector.consumer(
@@ -61,8 +63,12 @@ class ScanBundler(BECService):
         msg = BECMessage.DeviceMessage.loads(msg.value)
         logger.debug(f"Received reading from device {dev}")
         # if msg.content["signals"].get(dev) is not None:
-        parent._add_device_to_storage(
-            msg.metadata["scanID"], dev, msg.content["signals"], msg.metadata
+        parent.executor.submit(
+            parent._add_device_to_storage,
+            msg.metadata["scanID"],
+            dev,
+            msg.content["signals"],
+            msg.metadata,
         )
         # else:
         #     logger.warning(f"Received reading from unknown device {dev}")
@@ -220,6 +226,8 @@ class ScanBundler(BECService):
             self._send_scan_point(scanID, pointID)
 
     def _fly_scan_update(self, scanID, device, signal, metadata):
+        if device == "flyer_sim":
+            print("flyer")
         if "pointID" not in metadata:
             return
         dev = {device: signal}
@@ -230,12 +238,6 @@ class ScanBundler(BECService):
             **self.sync_storage[scanID].get(pointID, {}),
             **dev,
         }
-
-        if primary_devices["pointID"].get(pointID) is None:
-            primary_devices["pointID"][pointID] = {
-                dev.name: False for dev in primary_devices["devices"]
-            }
-        primary_devices["pointID"][pointID][device] = True
 
         self._update_monitor_signals(scanID, pointID)
         self._send_scan_point(scanID, pointID)
@@ -250,17 +252,17 @@ class ScanBundler(BECService):
             if elapsed_time > timeout_time:
                 return
 
-        scan_exists = False
-        for queue in self.current_queue:
-            if scanID in queue["scanID"]:
-                scan_exists = True
-        if not scan_exists:
-            return
+        # scan_exists = False
+        # for queue in self.current_queue:
+        #     if scanID in queue["scanID"]:
+        #         scan_exists = True
+        # if not scan_exists:
+        #     return
 
         if metadata["stream"] == "primary":
             if self.sync_storage[scanID]["info"]["scan_type"] == "step":
                 self._step_scan_update(scanID, device, signal, metadata)
-            elif self.sync_storage[scanID]["scan_type"] == "fly":
+            elif self.sync_storage[scanID]["info"]["scan_type"] == "fly":
                 self._fly_scan_update(scanID, device, signal, metadata)
             else:
                 raise RuntimeError(f"Unknown scan type {self.sync_storage[scanID]['scan_type']}")

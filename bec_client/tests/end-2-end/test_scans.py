@@ -109,7 +109,9 @@ def test_mv_scan_mv():
 
     # make sure the scan is relative to the starting position
     assert np.isclose(
-        current_pos_samx - 5, status.scan.data[0]["samx"]["samx"]["value"], atol=tolerance_samx
+        current_pos_samx - 5,
+        status.scan.data[0].content["data"]["samx"]["samx"]["value"],
+        atol=tolerance_samx,
     )
 
     current_pos_samx = dev.samx.read()["samx"]["value"]
@@ -136,7 +138,9 @@ def test_mv_scan_mv():
     assert status.scan.num_points == 100
 
     # make sure the scan was absolute, not relative
-    assert np.isclose(-5, status.scan.data[0]["samx"]["samx"]["value"], atol=tolerance_samx)
+    assert np.isclose(
+        -5, status.scan.data[0].content["data"]["samx"]["samx"]["value"], atol=tolerance_samx
+    )
 
 
 @pytest.mark.timeout(100)

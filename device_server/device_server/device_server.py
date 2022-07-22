@@ -3,6 +3,7 @@ import sys
 import threading
 import time
 import traceback
+from concurrent.futures import ThreadPoolExecutor
 from functools import reduce
 from io import StringIO
 from typing import Any
@@ -56,6 +57,7 @@ class DeviceServer(BECService):
             parent=self,
         )
         self.sig_thread.start()
+        self.executor = ThreadPoolExecutor(max_workers=4)
 
     def start(self) -> None:
         """start the device server"""
@@ -109,30 +111,29 @@ class DeviceServer(BECService):
         for dev in self.device_manager.devices.enabled_devices:
             dev.obj.stop()
 
-    @staticmethod
-    def instructions_callback(msg, *, parent, **kwargs) -> None:
-        """callback for handling device instructions"""
+    def handle_device_instructions(self, msg) -> None:
+
         instructions = BECMessage.DeviceInstructionMessage.loads(msg.value)
         if instructions.content["device"] is not None:
             # pylint: disable=protected-access
-            parent._update_device_metadata(instructions)
+            self._update_device_metadata(instructions)
         action = instructions.content["action"]
         try:
             if action == "set":
                 # pylint: disable=protected-access
-                parent._set_device(instructions)
+                self._set_device(instructions)
             elif action == "read":
                 # pylint: disable=protected-access
-                parent._read_device(instructions)
+                self._read_device(instructions)
             elif action == "rpc":
                 # pylint: disable=protected-access
-                parent._run_rpc(instructions)
+                self._run_rpc(instructions)
             elif action == "kickoff":
                 # pylint: disable=protected-access
-                parent._kickoff_device(instructions)
+                self._kickoff_device(instructions)
         except ophyd_errors.LimitError as limit_error:
             content = limit_error.args[0] if len(limit_error.args) > 0 else ""
-            parent.connector.raise_alarm(
+            self.connector.raise_alarm(
                 severity=Alarms.MAJOR,
                 source=instructions.content,
                 content=content,
@@ -140,15 +141,20 @@ class DeviceServer(BECService):
                 metadata=instructions.metadata,
             )
         except Exception as exc:
-            parent.connector.log_error({"source": msg.value, "message": exc.args})
+            self.connector.log_error({"source": msg.value, "message": exc.args})
             content = exc.args[0] if len(exc.args) > 0 else ""
-            parent.connector.raise_alarm(
+            self.connector.raise_alarm(
                 severity=Alarms.MAJOR,
                 source=instructions.content,
                 content=content,
                 alarm_type=exc.__class__.__name__,
                 metadata=instructions.metadata,
             )
+
+    @staticmethod
+    def instructions_callback(msg, *, parent, **kwargs) -> None:
+        """callback for handling device instructions"""
+        parent.executor.submit(parent.handle_device_instructions, msg)
 
     def _get_result_from_rpc(self, rpc_var: Any, instr_params: dict) -> Any:
 
