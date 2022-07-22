@@ -309,11 +309,14 @@ class ScanWorker(threading.Thread):
                     for dev in instr.content["parameter"].get("primary")
                 ]
             # self.parent.scan_number += 1
-        if instr.content["parameter"].get("scan_type"):
-            self.current_scan_info["scan_type"] = instr.content["parameter"].get("scan_type")
-        if instr.content["parameter"].get("num_points"):
-            self.current_scan_info["points"] = instr.content["parameter"].get("num_points")
-            self._send_scan_status("open")
+        # if instr.content["parameter"].get("scan_type"):
+        #     self.current_scan_info["scan_type"] = instr.content["parameter"].get("scan_type")
+        # if instr.content["parameter"].get("num_points"):
+        #     self.current_scan_info["points"] = instr.content["parameter"].get("num_points")
+
+        self.current_scan_info = {**instr.metadata, **instr.content["parameter"]}
+        self.current_scan_info.update({"scan_number": self.parent.scan_number})
+        self._send_scan_status("open")
 
     def _close_scan(self, instr: DeviceMsg, max_point_id: int) -> None:
         scan_id = instr.metadata.get("scanID")
@@ -366,10 +369,8 @@ class ScanWorker(threading.Thread):
 
             if self.current_scanID != instr.metadata.get("scanID"):
                 self.current_scanID = instr.metadata.get("scanID")
-                self.current_scan_info = instr.metadata
-                self.current_scan_info.update({"scan_number": self.parent.scan_number})
-                if self.current_scanID:
-                    self._send_scan_status("open")
+                # if self.current_scanID:
+                #     self._send_scan_status("open")
 
             logger.debug(f"Device instruction: {instr}")
 

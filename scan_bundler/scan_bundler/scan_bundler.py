@@ -72,19 +72,21 @@ class ScanBundler(BECService):
         msg = BECMessage.ScanQueueStatusMessage.loads(msg.value)
         logger.trace(msg)
         parent.current_queue = msg.content["queue"]["primary"].get("info")
-        for q in msg.content["queue"]["primary"].get("info"):
-            for rb in q.get("request_blocks"):
-                if rb.get("is_scan"):
-                    parent.metadata[rb["scanID"]] = q
-                    parent._initialize_scan_container(rb)
+        # for q in msg.content["queue"]["primary"].get("info"):
+        #     for rb in q.get("request_blocks"):
+        #         if rb.get("is_scan"):
+        #             parent.metadata[rb["scanID"]] = q
+        #             parent._initialize_scan_container(rb)
 
     @staticmethod
     def _scan_status_callback(msg, parent, **kwargs):
         msg = BECMessage.ScanStatusMessage.loads(msg.value)
         info = msg.content.get("info")
-        if info.get("scan_type"):
-            parent.sync_storage[info.get("scanID")]["scan_type"] = info.get("scan_type")
-        if msg.content.get("status") != "open":
+        # if info.get("scan_type"):
+        #     parent.sync_storage[info.get("scanID")]["scan_type"] = info.get("scan_type")
+        if msg.content.get("status") == "open":
+            parent._initialize_scan_container(msg)
+        else:
             parent._scan_status_modification(msg)
 
     def _scan_status_modification(self, msg: BECMessage.ScanStatusMessage):
@@ -103,12 +105,13 @@ class ScanBundler(BECService):
                 self.bluesky_metadata[scanID]["stop"] = doc
                 self.producer.send(MessageEndpoints.bluesky_events(), msgpack.dumps(("stop", doc)))
 
-    def _initialize_scan_container(self, queue):
-        scanID = queue["scanID"]
-        scan_motors = list(set([self.DM.devices[m] for m in queue["scan_motors"]]))
+    def _initialize_scan_container(self, scan_msg: BECMessage.ScanStatusMessage):
+        scan_info = scan_msg.content["info"]
+        scanID = scan_info["scanID"]
+        scan_motors = list(set([self.DM.devices[m] for m in scan_info["primary"]]))
         self.scan_motors[scanID] = scan_motors
         if not scanID in self.sync_storage:
-            self.sync_storage[scanID] = dict()
+            self.sync_storage[scanID] = {"info": scan_info}
             self.bluesky_metadata[scanID] = dict()
             # for now lets assume that all devices are primary devices:
             self.primary_devices[scanID] = {
@@ -148,9 +151,8 @@ class ScanBundler(BECService):
             "time": time.time(),
             "uid": str(uuid.uuid4()),
             "scanID": scanID,
-            "queueID": self.metadata[scanID]["queueID"],
-            "scan_id": self.metadata[scanID]["scan_number"],
-            "request_blocks": self.metadata[scanID]["request_blocks"],
+            "queueID": self.sync_storage[scanID]["info"]["queueID"],
+            "scan_id": self.sync_storage[scanID]["info"]["scan_number"],
             "motors": tuple([dev.name for dev in self.scan_motors[scanID]]),
         }
         self.bluesky_metadata[scanID]["start"] = doc
@@ -239,19 +241,24 @@ class ScanBundler(BECService):
         self._send_scan_point(scanID, pointID)
 
     def _add_device_to_storage(self, scanID, device, signal, metadata):
+
+        timeout_time = 1
+        elapsed_time = 0
         while not scanID in self.sync_storage:
             time.sleep(0.1)
-        while not "scan_type" in self.sync_storage[scanID]:
-            scan_exists = False
-            for queue in self.current_queue:
-                if scanID in queue["scanID"]:
-                    scan_exists = True
-            if not scan_exists:
+            elapsed_time += 0.1
+            if elapsed_time > timeout_time:
                 return
-            time.sleep(0.1)
+
+        scan_exists = False
+        for queue in self.current_queue:
+            if scanID in queue["scanID"]:
+                scan_exists = True
+        if not scan_exists:
+            return
 
         if metadata["stream"] == "primary":
-            if self.sync_storage[scanID]["scan_type"] == "step":
+            if self.sync_storage[scanID]["info"]["scan_type"] == "step":
                 self._step_scan_update(scanID, device, signal, metadata)
             elif self.sync_storage[scanID]["scan_type"] == "fly":
                 self._fly_scan_update(scanID, device, signal, metadata)
@@ -326,7 +333,7 @@ class ScanBundler(BECService):
                 point_id=pointID,
                 scanID=scanID,
                 data=self.sync_storage[scanID][pointID],
-                metadata=self.metadata[scanID],
+                metadata=self.sync_storage[scanID]["info"],
             ).dumps(),
         )
         # self.producer.send(

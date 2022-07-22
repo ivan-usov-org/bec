@@ -249,7 +249,7 @@ class ScanQueue:
         inserted = False
         while not inserted:
             for scan_obj in self.scan_storage:
-                if scan_obj.queue_info.scanID == scan_msg.metadata["scanID"]:
+                if scan_msg.metadata["scanID"] in scan_obj.queue_info.scanID:
                     scan_obj.data[scan_msg.content["point_id"]] = scan_msg.content["data"]
                     inserted = True
             time.sleep(0.01)

@@ -288,6 +288,7 @@ async def live_updates_table(bk: BKClient, request: BECMessage.ScanQueueMessage)
         if bk.queue.find_scan(RID) is None:
             return
     while len(queue_item.status) == 0:
+        check_alarms(bk)
         await asyncio.sleep(0.1)
     print(f"Starting scan {scan_number}.")
 
