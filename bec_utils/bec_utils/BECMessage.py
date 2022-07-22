@@ -4,6 +4,10 @@ from typing import Any, Union
 
 import msgpack
 
+from .logger import bec_logger
+
+logger = bec_logger.logger
+
 
 class BECStatus(int, enum.Enum):
     ERROR = -1
@@ -44,9 +48,13 @@ class BECMessage:
     @classmethod
     def _validated_return(cls, msg):
         if cls.msg_type != msg.get("msg_type"):
+            logger.warning(f"Invalid message type: {msg.get('msg_type')}")
             return None
         msg_conv = cls(**msg.get("content"), metadata=msg.get("metadata"))
-        return msg_conv if msg_conv._is_valid() else None
+        if msg_conv._is_valid():
+            return msg_conv
+        logger.warning(f"Invalid message: {msg_conv}")
+        return None
 
     def _is_valid(self) -> bool:
         return True

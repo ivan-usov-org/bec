@@ -1,4 +1,5 @@
 import enum
+import threading
 import time
 import uuid
 from abc import ABC, abstractmethod
@@ -255,6 +256,7 @@ class ScanBase(RequestBase):
 
     scan_name = ""
     scan_report_hint = None
+    scan_type = "step"
     arg_input = [ScanArgType.DEVICE]
     arg_bundle_size = len(arg_input)
     required_kwargs = []
@@ -326,7 +328,7 @@ class ScanBase(RequestBase):
                 "primary": self.scan_motors,
                 "num_points": self.num_pos,
                 "scan_name": self.scan_name,
-                "scan_type": "step",
+                "scan_type": self.scan_type,
             },
         )
 
@@ -721,6 +723,89 @@ class RoundScan(ScanBase):
         self.positions = get_round_scan_positions(
             r_in=params[1], r_out=params[2], nr=params[3], nth=params[4]
         )
+
+
+class RoundScanFlySim(ScanBase):
+    scan_name = "round_scan_fly"
+    scan_report_hint = "table"
+    scan_type = "fly"
+    required_kwargs = ["exp_time"]
+    arg_input = [
+        ScanArgType.DEVICE,
+        ScanArgType.DEVICE,
+        ScanArgType.FLOAT,
+        ScanArgType.FLOAT,
+        ScanArgType.INT,
+        ScanArgType.INT,
+    ]
+    arg_bundle_size = len(arg_input)
+
+    def __init__(self, *args, parameter=None, **kwargs):
+        """
+        A scan following a round shell-like pattern.
+
+        Args:
+            *args: motor1, motor2, inner ring, outer ring, number of rings, number of positions in the first ring
+            relative: Start from an absolute or relative position
+            burst: number of acquisition per point
+
+        Returns:
+
+        Examples:
+            >>> scans.round_scan(dev.motor1, dev.motor2, 0, 50, 5, 3, exp_time=0.1, relative=True)
+
+        """
+        super().__init__(parameter=parameter, **kwargs)
+        self.axis = []
+
+    def _get_scan_motors(self):
+        caller_args = list(self.caller_args.items())[0]
+        self.scan_motors = [caller_args[0], caller_args[1][0]]
+
+    def _calculate_positions(self):
+        params = list(self.caller_args.values())[0]
+        self.positions = get_round_scan_positions(
+            r_in=params[1], r_out=params[2], nr=params[3], nth=params[4]
+        )
+
+    def scan_core(self):
+        yield self.device_msg(
+            device="flyer_sim",
+            action="kickoff",
+            parameter={"num_pos": self.num_pos},
+            metadata={},
+        )
+
+        while True:
+            yield self.device_msg(
+                device=None,
+                action="read",
+                parameter={
+                    "target": "primary",
+                    "group": "primary",
+                    "wait_group": "readout_primary",
+                },
+                metadata={},
+            )
+            yield self.device_msg(
+                device=None,
+                action="wait",
+                parameter={
+                    "type": "read",
+                    "group": "primary",
+                    "wait_group": "readout_primary",
+                },
+            )
+            msg = self.device_manager.producer.get(MessageEndpoints.device_status("flyer_sim"))
+            if msg:
+                status = BECMessage.DeviceStatusMessage.loads(msg)
+                if status.content.get("status", 1) == 0 and self.metadata.get(
+                    "RID"
+                ) == status.metadata.get("RID"):
+                    break
+
+            time.sleep(1)
+            logger.debug("reading monitors")
 
 
 class RoundROIScan(ScanBase):

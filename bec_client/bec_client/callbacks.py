@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import queue
 import threading
 import time
 from typing import TYPE_CHECKING
@@ -229,6 +230,27 @@ async def get_queue_item(bk: BKClient, RID: str):
     return queue_item
 
 
+def get_devices(device_manager, request, scan_msg):
+    if scan_msg.metadata["scan_type"] == "step":
+        return get_devices_from_request(device_manager=device_manager, request=request)
+    if scan_msg.metadata["scan_type"] == "fly":
+        return [
+            flyer_signal
+            for flyer in scan_msg.content["data"].values()
+            for flyer_signal in flyer.keys()
+        ]
+
+
+# def prepare_table(devices, scan_msg) -> PrettyTable:
+#     header = ["seq. num"]
+#     if scan_msg.metadata["scan_type"] == "step":
+#         header.extend(devices)
+#     elif scan_msg.metadata["scan_type"] == "fly":
+#         header.extend(devices)
+#     table = PrettyTable(header, padding=12)
+#     return table
+
+
 async def live_updates_table(bk: BKClient, request: BECMessage.ScanQueueMessage):
     """Live updates for scans using a table and a scan progess bar.
 
@@ -241,8 +263,6 @@ async def live_updates_table(bk: BKClient, request: BECMessage.ScanQueueMessage)
         RuntimeError: Raised if more points than requested are returned.
         ScanRequestError: Raised if the scan was rejected by the server.
     """
-
-    acq_header = "seq. num"
 
     RID = request.metadata["RID"]
 
@@ -272,9 +292,17 @@ async def live_updates_table(bk: BKClient, request: BECMessage.ScanQueueMessage)
 
     scanID = queue_item.queue_info.scanID[block_id]
     scan_number = queue_item.queue_info.scan_number[block_id]
+
+    # while len(queue_item.status) == 0:
+    #     check_alarms(bk)
+    #     await asyncio.sleep(0.1)
+
     while True:
         queue_pos = bk.queue.get_queue_position(scanID)
-        if queue_pos is None or queue_pos == 0:
+        if queue_pos is None:
+            logger.debug(f"Could not find queue entry for scanID {scanID}")
+            return
+        if queue_pos == 0:
             break
         print(
             f"Scan is enqueued and is waiting for execution. Current position in queue: {queue_pos + 1}.",
@@ -283,34 +311,32 @@ async def live_updates_table(bk: BKClient, request: BECMessage.ScanQueueMessage)
         )
         await asyncio.sleep(0.1)
 
-    if queue_pos is None:
-        logger.debug(f"Could not find queue entry for scanID {scanID}")
-        if bk.queue.find_scan(RID) is None:
-            return
-    while len(queue_item.status) == 0:
-        await asyncio.sleep(0.1)
-    print(f"Starting scan {scan_number}.")
-
-    header = [acq_header]
-    header.extend(devices)
-    table = PrettyTable(header, padding=12)
-    print(table.get_header_lines())
+    print(f"\nStarting scan {scan_number}.")
 
     with ScanProgressBar(scan_number=scan_number, clear_on_exit=True) as progressbar:
         point_id = 0
+        table = None
         while True:
             check_alarms(bk)
             point_data = queue_item.data.get(point_id)
             if queue_item.num_points:
-                progressbar.max_points = queue_item.num_points - 1
+                progressbar.max_points = queue_item.num_points
 
             progressbar.update(point_id)
             if point_data:
+                if not table:
+                    devices = get_devices(bk.devicemanager, request, point_data)
+                    dev_values = [0 for dev in devices]
+                    header = ["seq. num"]
+                    header.extend(devices)
+                    table = PrettyTable(header, padding=12)
+                    print(table.get_header_lines())
+
                 point_id += 1
                 if point_id % 100 == 0:
                     print(table.get_header_lines())
                 for ind, dev in enumerate(devices):
-                    dev_values[ind] = point_data[dev][dev].get("value")
+                    dev_values[ind] = point_data.content["data"][dev][dev].get("value")
                 print(table.get_row(point_id, *dev_values))
                 progressbar.update(point_id)
             else:
@@ -328,10 +354,13 @@ async def live_updates_table(bk: BKClient, request: BECMessage.ScanQueueMessage)
                 raise RuntimeError("Received more points than expected.")
 
         queue_pos = bk.queue.get_queue_position(scanID)
-        if queue_pos is None and queue_item.end_time:
-            elapsed_time = queue_item.end_time - queue_item.start_time
-            print(
-                table.get_footer(
-                    f"Scan {scan_number} finished. Scan ID {scanID}. Elapsed time: {elapsed_time:.2f} s"
-                )
+
+        while not queue_item.end_time and queue_pos is not None:
+            await asyncio.sleep(0.1)
+
+        elapsed_time = queue_item.end_time - queue_item.start_time
+        print(
+            table.get_footer(
+                f"Scan {scan_number} finished. Scan ID {scanID}. Elapsed time: {elapsed_time:.2f} s"
             )
+        )

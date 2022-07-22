@@ -249,8 +249,8 @@ class ScanQueue:
         inserted = False
         while not inserted:
             for scan_obj in self.scan_storage:
-                if scan_obj.queue_info.scanID == scan_msg.metadata["scanID"]:
-                    scan_obj.data[scan_msg.content["point_id"]] = scan_msg.content["data"]
+                if scan_msg.metadata["scanID"] in scan_obj.queue_info.scanID:
+                    scan_obj.data[scan_msg.content["point_id"]] = scan_msg
                     inserted = True
             time.sleep(0.01)
 
@@ -319,10 +319,12 @@ class ScanQueue:
 
     def get_queue_position(self, scanID):
         """get the current queue position for a scan"""
+        if not isinstance(scanID, list):
+            scanID = [scanID]
         for queue_group in self.current_scan_queue.values():
             if isinstance(queue_group, dict):
                 for queue_position, queue in enumerate(queue_group["info"]):
-                    if queue["scanID"] == scanID:
+                    if scanID == queue["scanID"]:
                         return queue_position
         return None
 
@@ -368,8 +370,7 @@ class ScanQueue:
                 elif scan.content.get("status") == "closed":
                     scan_obj.end_time = scan.content.get("timestamp")
                 scan_obj.status[scan.content["scanID"]] = scan.content.get("status")
-                if scan.content["info"].get("points"):
-                    scan_obj.num_points = scan.content["info"].get("points") + 1
+                if scan.content["info"].get("num_points"):
+                    scan_obj.num_points = scan.content["info"].get("num_points")
                 break
-            else:
-                time.sleep(0.1)
+            time.sleep(0.1)
