@@ -299,6 +299,7 @@ async def live_updates_table(bk: BKClient, request: BECMessage.ScanQueueMessage)
 
     while True:
         queue_pos = bk.queue.get_queue_position(scanID)
+        check_alarms(bk)
         if queue_pos is None:
             logger.debug(f"Could not find queue entry for scanID {scanID}")
             return
@@ -353,9 +354,8 @@ async def live_updates_table(bk: BKClient, request: BECMessage.ScanQueueMessage)
             if point_id > queue_item.num_points:
                 raise RuntimeError("Received more points than expected.")
 
-        queue_pos = bk.queue.get_queue_position(scanID)
-
         while not queue_item.end_time or queue_pos is not None:
+            queue_pos = bk.queue.get_queue_position(scanID)
             await asyncio.sleep(0.1)
 
         elapsed_time = queue_item.end_time - queue_item.start_time
