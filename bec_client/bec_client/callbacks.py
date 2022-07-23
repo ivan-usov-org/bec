@@ -302,7 +302,7 @@ async def live_updates_table(bk: BKClient, request: BECMessage.ScanQueueMessage)
         check_alarms(bk)
         if queue_pos is None:
             logger.debug(f"Could not find queue entry for scanID {scanID}")
-            return
+            continue
         if queue_pos == 0:
             break
         print(
