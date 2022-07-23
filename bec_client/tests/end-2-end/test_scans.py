@@ -14,7 +14,7 @@ CONFIG_PATH = "../test_config.yaml"
 # pylint: disable=no-member
 
 
-@pytest.mark.timeout(100)
+@pytest.mark.timeout(200)
 def start_client():
     config = ServiceConfig(CONFIG_PATH)
     bec = BKClient(
@@ -26,7 +26,7 @@ def start_client():
     return bec
 
 
-@pytest.mark.timeout(100)
+@pytest.mark.timeout(200)
 def test_grid_scan(capsys):
     bec = start_client()
     scans = bec.scans
@@ -38,7 +38,7 @@ def test_grid_scan(capsys):
     assert "finished. Scan ID" in captured.out
 
 
-@pytest.mark.timeout(100)
+@pytest.mark.timeout(200)
 def test_fermat_scan(capsys):
     bec = start_client()
     scans = bec.scans
@@ -50,7 +50,7 @@ def test_fermat_scan(capsys):
     assert "finished. Scan ID" in captured.out
 
 
-@pytest.mark.timeout(100)
+@pytest.mark.timeout(200)
 def test_line_scan(capsys):
     bec = start_client()
     scans = bec.scans
@@ -62,7 +62,7 @@ def test_line_scan(capsys):
     assert "finished. Scan ID" in captured.out
 
 
-@pytest.mark.timeout(100)
+@pytest.mark.timeout(200)
 def test_mv_scan(capsys):
     bec = start_client()
     scans = bec.scans
@@ -86,7 +86,7 @@ def test_mv_scan(capsys):
     assert ref_out_samy in captured.out
 
 
-@pytest.mark.timeout(100)
+@pytest.mark.timeout(200)
 def test_mv_scan_mv():
     bec = start_client()
     scans = bec.scans
@@ -143,7 +143,7 @@ def test_mv_scan_mv():
     )
 
 
-@pytest.mark.timeout(100)
+@pytest.mark.timeout(200)
 def test_scan_abort():
     def send_abort(bec):
         while True:
@@ -168,7 +168,7 @@ def test_scan_abort():
     assert aborted_scan is True
 
 
-@pytest.mark.timeout(100)
+@pytest.mark.timeout(200)
 def test_limit_error():
     bec = start_client()
     scans = bec.scans
@@ -194,7 +194,7 @@ def test_limit_error():
     assert aborted_scan is True
 
 
-@pytest.mark.timeout(100)
+@pytest.mark.timeout(200)
 def test_queued_scan():
     bec = start_client()
     scans = bec.scans
