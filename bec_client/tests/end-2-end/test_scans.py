@@ -197,7 +197,6 @@ def test_limit_error():
 @pytest.mark.timeout(200)
 def test_queued_scan():
     bec = start_client()
-    bec_logger.level = bec_logger.LOGLEVEL.DEBUG
     scans = bec.scans
     dev = bec.devicemanager.devices
     s1 = scans.line_scan(dev.samx, -5, 5, steps=100, exp_time=0.1, hide_report=True)
