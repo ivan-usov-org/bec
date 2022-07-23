@@ -146,9 +146,9 @@ def test_mv_scan_mv():
 @pytest.mark.timeout(100)
 def test_scan_abort():
     def send_abort():
-        time.sleep(2)
+        time.sleep(8)
         _thread.interrupt_main()
-        time.sleep(1)
+        time.sleep(4)
         _thread.interrupt_main()
 
     bec = start_client()
