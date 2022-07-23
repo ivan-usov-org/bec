@@ -244,13 +244,13 @@ class ScanBundler(BECService):
 
     def _add_device_to_storage(self, scanID, device, signal, metadata):
 
-        timeout_time = 1
-        elapsed_time = 0
+        # timeout_time = 1
+        # elapsed_time = 0
         while not scanID in self.sync_storage:
             time.sleep(0.1)
-            elapsed_time += 0.1
-            if elapsed_time > timeout_time:
-                return
+            # elapsed_time += 0.1
+            # if elapsed_time > timeout_time:
+            #     return
 
         # scan_exists = False
         # for queue in self.current_queue:
