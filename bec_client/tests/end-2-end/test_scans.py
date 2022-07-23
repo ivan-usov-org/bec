@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 from bec_client import BKClient
 from bec_client.alarm_handler import AlarmBase
-from bec_utils import RedisConnector, ServiceConfig
+from bec_utils import RedisConnector, ServiceConfig, bec_logger
 from bec_utils.bec_errors import ScanInterruption
 
 CONFIG_PATH = "../test_config.yaml"
@@ -197,6 +197,7 @@ def test_limit_error():
 @pytest.mark.timeout(200)
 def test_queued_scan():
     bec = start_client()
+    bec_logger.level = bec_logger.LOGLEVEL.DEBUG
     scans = bec.scans
     dev = bec.devicemanager.devices
     s1 = scans.line_scan(dev.samx, -5, 5, steps=100, exp_time=0.1, hide_report=True)
@@ -204,14 +205,11 @@ def test_queued_scan():
 
     while True:
         if not s1.scan or not s2.scan:
-            print(f"s1: {s1.scan}, s2: {s2.scan}")
             continue
         if s1.scan.queue_info.status != "RUNNING":
-            print(f"s1 status: {s1.scan.queue_info.status}")
             continue
         assert bec.queue.get_queue_position(s1.scan.queue_info.scanID) == 0
         assert bec.queue.get_queue_position(s2.scan.queue_info.scanID) == 1
         break
     while len(s2.scan.data) != 50:
-        print(f"s2 len: {len(s2.scan.data)}")
         time.sleep(0.5)
