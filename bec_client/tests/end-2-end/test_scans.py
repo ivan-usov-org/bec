@@ -204,11 +204,14 @@ def test_queued_scan():
 
     while True:
         if not s1.scan or not s2.scan:
+            print(f"s1: {s1.scan}, s2: {s2.scan}")
             continue
         if s1.scan.queue_info.status != "RUNNING":
+            print(f"s1 status: {s1.scan.queue_info.status}")
             continue
         assert bec.queue.get_queue_position(s1.scan.queue_info.scanID) == 0
         assert bec.queue.get_queue_position(s2.scan.queue_info.scanID) == 1
         break
     while len(s2.scan.data) != 50:
+        print(f"s2 len: {len(s2.scan.data)}")
         time.sleep(0.5)
