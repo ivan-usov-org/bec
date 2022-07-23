@@ -81,7 +81,6 @@ class ScanBundler(BECService):
         # for q in msg.content["queue"]["primary"].get("info"):
         #     for rb in q.get("request_blocks"):
         #         if rb.get("is_scan"):
-        #             parent.metadata[rb["scanID"]] = q
         #             parent._initialize_scan_container(rb)
 
     @staticmethod
@@ -90,9 +89,10 @@ class ScanBundler(BECService):
         info = msg.content.get("info")
         # if info.get("scan_type"):
         #     parent.sync_storage[info.get("scanID")]["scan_type"] = info.get("scan_type")
-        if msg.content.get("status") == "open":
+        scanID = msg.content["scanID"]
+        if not scanID in parent.sync_storage:
             parent._initialize_scan_container(msg)
-        else:
+        if msg.content.get("status") != "open":
             parent._scan_status_modification(msg)
 
     def _scan_status_modification(self, msg: BECMessage.ScanStatusMessage):
@@ -112,24 +112,31 @@ class ScanBundler(BECService):
                 self.producer.send(MessageEndpoints.bluesky_events(), msgpack.dumps(("stop", doc)))
 
     def _initialize_scan_container(self, scan_msg: BECMessage.ScanStatusMessage):
-        scan_info = scan_msg.content["info"]
-        scanID = scan_info["scanID"]
-        scan_motors = list(set([self.DM.devices[m] for m in scan_info["primary"]]))
-        self.scan_motors[scanID] = scan_motors
-        if not scanID in self.sync_storage:
-            self.sync_storage[scanID] = {"info": scan_info}
-            self.bluesky_metadata[scanID] = dict()
-            # for now lets assume that all devices are primary devices:
-            self.primary_devices[scanID] = {
-                "devices": self.DM.devices.primary_devices(scan_motors),
-                "pointID": {},
-            }
-            self.monitor_devices[scanID] = dict()
-            self.baseline_devices[scanID] = {
-                "devices": self.DM.devices.baseline_devices(scan_motors),
-                "done": {dev.name: False for dev in self.DM.devices.baseline_devices(scan_motors)},
-            }
-            self.send_run_start_document(scanID)
+        scanID = scan_msg.content["scanID"]
+        if scan_msg.content.get("status") == "open":
+            scan_info = scan_msg.content["info"]
+            scan_motors = list(set([self.DM.devices[m] for m in scan_info["primary"]]))
+            self.scan_motors[scanID] = scan_motors
+            if not scanID in self.sync_storage:
+                self.sync_storage[scanID] = {"info": scan_info}
+                self.bluesky_metadata[scanID] = dict()
+                # for now lets assume that all devices are primary devices:
+                self.primary_devices[scanID] = {
+                    "devices": self.DM.devices.primary_devices(scan_motors),
+                    "pointID": {},
+                }
+                self.monitor_devices[scanID] = dict()
+                self.baseline_devices[scanID] = {
+                    "devices": self.DM.devices.baseline_devices(scan_motors),
+                    "done": {
+                        dev.name: False for dev in self.DM.devices.baseline_devices(scan_motors)
+                    },
+                }
+                self.send_run_start_document(scanID)
+                return
+
+        self.sync_storage[scanID] = {}
+        return
 
     def send_run_start_document(self, scanID) -> None:
         #  {'data_session': 'vist54321',

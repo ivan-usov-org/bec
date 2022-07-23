@@ -43,6 +43,7 @@ class QueueManager:
         self.key = ""
         self.queues = {"primary": ScanQueue(self)}
         self._start_scan_queue_consumer()
+        self._lock = threading.Lock()
 
     def add_to_queue(self, scan_queue: str, msg: BECMessage.ScanQueueMessage) -> None:
         """Add a new ScanQueueMessage to the queue.
@@ -138,14 +139,15 @@ class QueueManager:
 
     def send_queue_status(self) -> None:
         """send the current queue to redis"""
-        queue_export = self.export_queue()
-        logger.info("New scan queue:")
-        for queue in self.describe_queue():
-            logger.info(f"\n {queue}")
-        self.producer.send(
-            MessageEndpoints.scan_queue_status(),
-            BECMessage.ScanQueueStatusMessage(queue=queue_export).dumps(),
-        )
+        with self._lock:
+            queue_export = self.export_queue()
+            logger.info("New scan queue:")
+            for queue in self.describe_queue():
+                logger.info(f"\n {queue}")
+            self.producer.send(
+                MessageEndpoints.scan_queue_status(),
+                BECMessage.ScanQueueStatusMessage(queue=queue_export).dumps(),
+            )
 
     def describe_queue(self) -> list:
         """create a rich.table description of the current scan queue"""
@@ -298,7 +300,7 @@ class ScanQueue:
                         self.status = ScanQueueStatus.RUNNING
                     time.sleep(1)
 
-                self.active_instruction_queue = self.queue.popleft()
+                self.active_instruction_queue = self.queue[0]
                 self.history_queue.append(self.active_instruction_queue)
                 # self.active_instruction_queue
                 return self.active_instruction_queue
@@ -535,6 +537,8 @@ class InstructionQueueItem:
     def status(self, val: InstructionQueueStatus) -> None:
         """update the status of the instruction queue. By doing so, it will
         also update its worker and publish the updated queue."""
+        if val == InstructionQueueStatus.PENDING:
+            print("stop!")
         self._status = val
         self.worker.status = val
         self.parent.queue_manager.send_queue_status()
