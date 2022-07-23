@@ -355,6 +355,7 @@ async def live_updates_table(bk: BKClient, request: BECMessage.ScanQueueMessage)
                 raise RuntimeError("Received more points than expected.")
 
         while not queue_item.end_time or queue_pos is not None:
+            check_alarms(bk)
             queue_pos = bk.queue.get_queue_position(scanID)
             await asyncio.sleep(0.1)
 
