@@ -145,10 +145,14 @@ def test_mv_scan_mv():
 
 @pytest.mark.timeout(100)
 def test_scan_abort():
-    def send_abort():
-        time.sleep(8)
-        _thread.interrupt_main()
-        time.sleep(4)
+    def send_abort(bec):
+        while True:
+            if not bec.queue.current_scan:
+                continue
+            if len(bec.queue.current_scan.data) > 0:
+                _thread.interrupt_main()
+                break
+        time.sleep(2)
         _thread.interrupt_main()
 
     bec = start_client()
@@ -156,7 +160,7 @@ def test_scan_abort():
     dev = bec.devicemanager.devices
     aborted_scan = False
     try:
-        threading.Thread(target=send_abort, daemon=True).start()
+        threading.Thread(target=send_abort, args=(bec,), daemon=True).start()
         scans.line_scan(dev.samx, -5, 5, steps=200, exp_time=0.1)
     except ScanInterruption:
         bec.queue.request_scan_abortion()
