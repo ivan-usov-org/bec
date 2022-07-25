@@ -23,12 +23,10 @@ but they are executed in a specific order:
 import time
 import uuid
 
+import matplotlib.pyplot as plt
 import numpy as np
 from bec_utils import BECMessage, MessageEndpoints, bec_logger
 from scan_server.scans import ScanBase
-
-import matplotlib.pyplot as plt
-
 
 MOVEMENT_SCALE_X = np.sin(np.radians(15)) * np.cos(np.radians(30))
 MOVEMENT_SCALE_Y = np.cos(np.radians(15))
@@ -53,6 +51,7 @@ def lamni_from_stage_coordinates(x_stage: float, y_stage: float) -> tuple:
 class LamNIFermatScan(ScanBase):
     scan_name = "lamni_fermat_scan"
     scan_report_hint = "table"
+    scan_type = "step"
     required_kwargs = ["fov_size", "exp_time", "step", "angle"]
     arg_input = []
     arg_bundle_size = None
@@ -92,7 +91,7 @@ class LamNIFermatScan(ScanBase):
         self.shift_x = scan_kwargs.get("shift_x", 0)
         self.shift_y = scan_kwargs.get("shift_y", 0)
         self.angle = scan_kwargs.get("angle", 0)
-        self.scantype = scan_kwargs.get("scantype", "step")
+        self.scan_type = scan_kwargs.get("scan_type", "step")
         self.stitch_x = scan_kwargs.get("stitch_x", 0)
         self.stitch_y = scan_kwargs.get("stitch_y", 0)
         self.fov_circular = scan_kwargs.get("fov_circular", 0)
@@ -154,7 +153,7 @@ class LamNIFermatScan(ScanBase):
         total_shift_x, total_shift_y = self._compute_total_shift()
         yield from self.lamni_new_scan_center_interferometer(total_shift_x, total_shift_y)
         self._plot_target_pos()
-        if self.scantype == "fly":
+        if self.scan_type == "fly":
             yield from self._transfer_positions_to_LamNI()
 
     def _plot_target_pos(self):
@@ -403,13 +402,21 @@ class LamNIFermatScan(ScanBase):
         )
 
     def scan_core(self):
-        if self.scantype == "step":
+        if self.scan_type == "step":
             for ind, pos in self._get_position():
                 for self.burst_index in range(self.burst_at_each_point):
                     yield from self._at_each_point(ind, pos)
                 self.burst_index = 0
-        elif self.scantype == "fly":
-            yield from self.device_rpc("rtx", "controller.kickoff")
+        elif self.scan_type == "fly":
+            # use a device message to receive the scan number and
+            # scan ID before sending the message to the device server
+            yield self.device_msg(
+                device="rtx",
+                action="kickoff",
+                parameter={"num_pos": self.num_pos},
+                metadata={},
+            )
+            # yield from self.device_rpc("rtx", "controller.kickoff")
 
     def run(self):
         self.initialize()
