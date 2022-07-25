@@ -759,8 +759,8 @@ class RoundScanFlySim(ScanBase):
         self.axis = []
 
     def _get_scan_motors(self):
-        caller_args = list(self.caller_args.items())[0]
-        self.scan_motors = [caller_args[0], caller_args[1][0]]
+        # caller_args = list(self.caller_args.items())[0]
+        self.scan_motors = ["flyer_sim"]
 
     def _calculate_positions(self):
         params = list(self.caller_args.values())[0]
