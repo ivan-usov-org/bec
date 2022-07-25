@@ -208,7 +208,7 @@ class RequestBase(ABC):
                 break
             time.sleep(0.001)
         msg = BECMessage.DeviceRPCMessage.loads(msg)
-        print(msg.content.get("out"))
+        logger.debug(msg.content.get("out"))
         return msg.content.get("return_val")
 
     def _check_limits(self):
