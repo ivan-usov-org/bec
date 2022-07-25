@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 from bec_client import BKClient
 from bec_client.alarm_handler import AlarmBase
-from bec_utils import RedisConnector, ServiceConfig
+from bec_utils import RedisConnector, ServiceConfig, bec_logger
 from bec_utils.bec_errors import ScanInterruption
 
 CONFIG_PATH = "../test_config.yaml"
@@ -14,7 +14,7 @@ CONFIG_PATH = "../test_config.yaml"
 # pylint: disable=no-member
 
 
-@pytest.mark.timeout(100)
+@pytest.mark.timeout(200)
 def start_client():
     config = ServiceConfig(CONFIG_PATH)
     bec = BKClient(
@@ -26,7 +26,7 @@ def start_client():
     return bec
 
 
-@pytest.mark.timeout(100)
+@pytest.mark.timeout(200)
 def test_grid_scan(capsys):
     bec = start_client()
     scans = bec.scans
@@ -38,7 +38,7 @@ def test_grid_scan(capsys):
     assert "finished. Scan ID" in captured.out
 
 
-@pytest.mark.timeout(100)
+@pytest.mark.timeout(200)
 def test_fermat_scan(capsys):
     bec = start_client()
     scans = bec.scans
@@ -50,7 +50,7 @@ def test_fermat_scan(capsys):
     assert "finished. Scan ID" in captured.out
 
 
-@pytest.mark.timeout(100)
+@pytest.mark.timeout(200)
 def test_line_scan(capsys):
     bec = start_client()
     scans = bec.scans
@@ -62,7 +62,7 @@ def test_line_scan(capsys):
     assert "finished. Scan ID" in captured.out
 
 
-@pytest.mark.timeout(100)
+@pytest.mark.timeout(200)
 def test_mv_scan(capsys):
     bec = start_client()
     scans = bec.scans
@@ -86,7 +86,7 @@ def test_mv_scan(capsys):
     assert ref_out_samy in captured.out
 
 
-@pytest.mark.timeout(100)
+@pytest.mark.timeout(200)
 def test_mv_scan_mv():
     bec = start_client()
     scans = bec.scans
@@ -109,7 +109,9 @@ def test_mv_scan_mv():
 
     # make sure the scan is relative to the starting position
     assert np.isclose(
-        current_pos_samx - 5, status.scan.data[0]["samx"]["samx"]["value"], atol=tolerance_samx
+        current_pos_samx - 5,
+        status.scan.data[0].content["data"]["samx"]["samx"]["value"],
+        atol=tolerance_samx,
     )
 
     current_pos_samx = dev.samx.read()["samx"]["value"]
@@ -136,15 +138,21 @@ def test_mv_scan_mv():
     assert status.scan.num_points == 100
 
     # make sure the scan was absolute, not relative
-    assert np.isclose(-5, status.scan.data[0]["samx"]["samx"]["value"], atol=tolerance_samx)
+    assert np.isclose(
+        -5, status.scan.data[0].content["data"]["samx"]["samx"]["value"], atol=tolerance_samx
+    )
 
 
-@pytest.mark.timeout(100)
+@pytest.mark.timeout(200)
 def test_scan_abort():
-    def send_abort():
+    def send_abort(bec):
+        while True:
+            if not bec.queue.current_scan:
+                continue
+            if len(bec.queue.current_scan.data) > 0:
+                _thread.interrupt_main()
+                break
         time.sleep(2)
-        _thread.interrupt_main()
-        time.sleep(1)
         _thread.interrupt_main()
 
     bec = start_client()
@@ -152,7 +160,7 @@ def test_scan_abort():
     dev = bec.devicemanager.devices
     aborted_scan = False
     try:
-        threading.Thread(target=send_abort, daemon=True).start()
+        threading.Thread(target=send_abort, args=(bec,), daemon=True).start()
         scans.line_scan(dev.samx, -5, 5, steps=200, exp_time=0.1)
     except ScanInterruption:
         bec.queue.request_scan_abortion()
@@ -160,7 +168,7 @@ def test_scan_abort():
     assert aborted_scan is True
 
 
-@pytest.mark.timeout(100)
+@pytest.mark.timeout(200)
 def test_limit_error():
     bec = start_client()
     scans = bec.scans
@@ -186,7 +194,7 @@ def test_limit_error():
     assert aborted_scan is True
 
 
-@pytest.mark.timeout(100)
+@pytest.mark.timeout(200)
 def test_queued_scan():
     bec = start_client()
     scans = bec.scans

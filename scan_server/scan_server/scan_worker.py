@@ -207,19 +207,20 @@ class ScanWorker(threading.Thread):
             device_status = pipe.execute()
 
             self._check_for_interruption()
+            device_status = [BECMessage.DeviceStatusMessage.loads(dev) for dev in device_status]
 
             if None in device_status:
                 continue
-
-            device_status = [msgpack.loads(dev) for dev in device_status]
             devices_are_idle = all(
-                DeviceStatus(dev.get("status")) == DeviceStatus.IDLE for dev in device_status
+                DeviceStatus(dev.content.get("status")) == DeviceStatus.IDLE
+                for dev in device_status
             )
             matching_scanID = all(
-                dev.get("scanID") == instr.metadata["scanID"] for dev in device_status
+                dev.metadata.get("scanID") == instr.metadata["scanID"] for dev in device_status
             )
             matching_DIID = all(
-                dev.get("DIID") == wait_group_devices[ii][1] for ii, dev in enumerate(device_status)
+                dev.metadata.get("DIID") == wait_group_devices[ii][1]
+                for ii, dev in enumerate(device_status)
             )
             if devices_are_idle and matching_scanID and matching_DIID:
                 break
@@ -269,6 +270,17 @@ class ScanWorker(threading.Thread):
             ).dumps(),
         )
 
+    def _kickoff_devices(self, instr: DeviceMsg) -> None:
+        self.device_manager.producer.send(
+            MessageEndpoints.device_instructions(),
+            DeviceMsg(
+                device=instr.content.get("device"),
+                action="kickoff",
+                parameter=instr.content["parameter"],
+                metadata=instr.metadata,
+            ).dumps(),
+        )
+
     def _baseline_reading(self, instr: DeviceMsg) -> None:
         baseline_devices = [
             dev.name for dev in self.device_manager.devices.baseline_devices(self.scan_motors)
@@ -298,9 +310,14 @@ class ScanWorker(threading.Thread):
                     for dev in instr.content["parameter"].get("primary")
                 ]
             # self.parent.scan_number += 1
-        if instr.content["parameter"].get("num_points"):
-            self.current_scan_info["points"] = instr.content["parameter"].get("num_points")
-            self._send_scan_status("open")
+        # if instr.content["parameter"].get("scan_type"):
+        #     self.current_scan_info["scan_type"] = instr.content["parameter"].get("scan_type")
+        # if instr.content["parameter"].get("num_points"):
+        #     self.current_scan_info["points"] = instr.content["parameter"].get("num_points")
+
+        self.current_scan_info = {**instr.metadata, **instr.content["parameter"]}
+        self.current_scan_info.update({"scan_number": self.parent.scan_number})
+        self._send_scan_status("open")
 
     def _close_scan(self, instr: DeviceMsg, max_point_id: int) -> None:
         scan_id = instr.metadata.get("scanID")
@@ -353,10 +370,8 @@ class ScanWorker(threading.Thread):
 
             if self.current_scanID != instr.metadata.get("scanID"):
                 self.current_scanID = instr.metadata.get("scanID")
-                self.current_scan_info = instr.metadata
-                self.current_scan_info.update({"scan_number": self.parent.scan_number})
-                if self.current_scanID:
-                    self._send_scan_status("open")
+                # if self.current_scanID:
+                #     self._send_scan_status("open")
 
             logger.debug(f"Device instruction: {instr}")
 
@@ -371,6 +386,8 @@ class ScanWorker(threading.Thread):
                 self._set_devices(instr)
             elif action == "read":
                 self._read_devices(instr)
+            elif action == "kickoff":
+                self._kickoff_devices(instr)
             elif action == "baseline_reading":
                 self._baseline_reading(instr)
             elif action == "rpc":
@@ -402,6 +419,7 @@ class ScanWorker(threading.Thread):
                     for queue in self.parent.queue_manager.queues["primary"]:
                         self._process_instructions(queue)
                 except ScanAbortion:
+                    self._send_scan_status("aborted")
                     self.parent.queue_manager.queues["primary"].abort()
                     self.reset()
         except AttributeError as exc:

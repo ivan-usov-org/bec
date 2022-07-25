@@ -171,11 +171,12 @@ class DeviceManagerDS(DeviceManagerBase):
         # print(f"Elapsed time for readback of {kwargs['obj'].name}, pos {kwargs['obj'].read()}: {(time.time()-start)*1000} ms")
 
     def _obj_callback_acq_done(self, *_args, **kwargs):
-        status_info = self.devices.get(kwargs["obj"].root.name).metadata
-        status_info["status"] = 0
+        device = kwargs["obj"].root.name
+        status = 0
+        metadata = self.devices[device].metadata
         self.producer.set(
-            MessageEndpoints.device_status(kwargs["obj"].root.name),
-            msgpack.dumps(status_info),
+            MessageEndpoints.device_status(device),
+            BMessage.DeviceStatusMessage(device=device, status=status, metadata=metadata).dumps(),
         )
 
     def _obj_callback_done_moving(self, *args, **kwargs):
@@ -183,12 +184,12 @@ class DeviceManagerDS(DeviceManagerBase):
         self._obj_callback_acq_done(*args, **kwargs)
 
     def _obj_callback_is_moving(self, *_args, **kwargs):
-        status_info = self.devices.get(kwargs["obj"].root.name).metadata
-        status_info["status"] = int(kwargs.get("value"))
-        status_info["timestamp"] = time.time()
+        device = kwargs["obj"].root.name
+        status = int(kwargs.get("value"))
+        metadata = self.devices[device].metadata
         self.producer.set(
             MessageEndpoints.device_status(kwargs["obj"].root.name),
-            msgpack.dumps(status_info),
+            BMessage.DeviceStatusMessage(device=device, status=status, metadata=metadata).dumps(),
         )
 
     def _start_custom_connectors(self, bootstrap_server):
