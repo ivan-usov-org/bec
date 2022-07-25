@@ -233,8 +233,6 @@ class ScanBundler(BECService):
             self._send_scan_point(scanID, pointID)
 
     def _fly_scan_update(self, scanID, device, signal, metadata):
-        if device == "flyer_sim":
-            print("flyer")
         if "pointID" not in metadata:
             return
         dev = {sig: {sig: signal[sig]} for sig in signal.keys()}
