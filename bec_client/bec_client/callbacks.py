@@ -233,11 +233,7 @@ def get_devices(device_manager, request, scan_msg):
     if scan_msg.metadata["scan_type"] == "step":
         return get_devices_from_request(device_manager=device_manager, request=request)
     if scan_msg.metadata["scan_type"] == "fly":
-        return [
-            flyer_signal
-            for flyer in scan_msg.content["data"].values()
-            for flyer_signal in flyer.keys()
-        ]
+        return scan_msg.content["data"].keys()
 
 
 async def wait_for_scan_to_start(bec, scanID):
@@ -334,7 +330,8 @@ async def live_updates_table(bec: BKClient, request: BECMessage.ScanQueueMessage
                 if point_id % 100 == 0:
                     print(table.get_header_lines())
                 for ind, dev in enumerate(devices):
-                    dev_values[ind] = point_data.content["data"][dev][dev].get("value")
+                    signal = point_data.content["data"][dev].get(dev)
+                    dev_values[ind] = signal.get("value") if signal else signal
                 print(table.get_row(point_id, *dev_values))
                 progressbar.update(point_id)
             else:
