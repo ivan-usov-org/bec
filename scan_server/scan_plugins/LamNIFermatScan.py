@@ -62,12 +62,17 @@ class LamNIFermatScan(ScanBase):
         A LamNI scan following Fermat's spiral.
 
         Kwargs:
-            shift_x: extra shift in x. The shift will not be rotated. (default 0).
-            shift_y: extra shift in y. The shift will not be rotated. (default 0).
-            center_x: center position in x at 0 deg.  (optional)
-            center_y: center position in y at 0 deg.  (optional)
-            angle: rotation angle (will rotate first)
+            fov_size [um]: Fov in the piezo plane (i.e. piezo range). Max 80 um
+            step [um]: stepsize
+            shift_x/y [mm]: extra shift in x/y. The shift is directly applied to the scan. It will not be auto rotated. (default 0).
+            center_x/center_y [mm]: center position in x/y at 0 deg. This shift is rotated
+                               using the geometry of LamNI
+                               It is determined by the first 'click' in the x-ray eye alignemnt procedure
+            angle [deg]: rotation angle (will rotate first)
             scantype: fly (i.e. HW triggered step in case of LamNI) or step
+            stitch_x/y: shift scan to adjacent stitch region
+            fov_circular [um]: generate a circular field of view in the sample plane. This is an additional cropping to fov_size.
+            stitch_overlap [um]: overlap of the stitched regions
         Returns:
 
         Examples:
@@ -88,6 +93,11 @@ class LamNIFermatScan(ScanBase):
         self.shift_y = scan_kwargs.get("shift_y", 0)
         self.angle = scan_kwargs.get("angle", 0)
         self.scantype = scan_kwargs.get("scantype", "step")
+        self.stitch_x = scan_kwargs.get("stitch_x", 0)
+        self.stitch_y = scan_kwargs.get("stitch_y", 0)
+        self.fov_circular = scan_kwargs.get("fov_circular", 0)
+        self.stitch_overlap = scan_kwargs.get("stitch_overlap", 1)
+        self.keep_plot = scan_kwargs.get("keep_plot", 0)
 
     def initialize(self):
         self.scan_motors = ["rtx", "rty"]
@@ -98,13 +108,19 @@ class LamNIFermatScan(ScanBase):
 
         self.num_pos = len(self.positions)
 
-    def _lamni_check_pos_in_piezo_range(self, x, y) -> bool:
+    def _lamni_check_pos_in_fov_range_and_circ_fov(self, x, y) -> bool:
         # this function checks if positions are reachable in a scan
         # these x y intererometer positions are not shifted to the scan center
         # so its purpose is to see if the position is reachable by the
         # rotated piezo stage. For a scan these positions have to be shifted to
         # the current scan center before starting the scan
         stage_x, stage_y = lamni_to_stage_coordinates(x, y)
+        stage_x_with_stitch, stage_y_with_stitch = self._lamni_compute_stitch_center(
+            self.stitch_x, self.stitch_y, self.angle
+        )
+        stage_x_with_stitch, stage_y_with_stitch = lamni_to_stage_coordinates(
+            stage_x_with_stitch, stage_y_with_stitch
+        )
 
         # piezo stage is currently rotated to stage_angle_deg in degrees
         # rotate positions to the piezo stage system
@@ -112,16 +128,31 @@ class LamNIFermatScan(ScanBase):
         stage_x_rot = np.cos(alpha) * stage_x + np.sin(alpha) * stage_y
         stage_y_rot = -np.sin(alpha) * stage_x + np.cos(alpha) * stage_y
 
-        _lamni_piezo_range = 20
+        stage_x_rot_with_stitch = (
+            np.cos(alpha) * stage_x_with_stitch + np.sin(alpha) * stage_y_with_stitch
+        )
+        stage_y_rot_with_stitch = (
+            -np.sin(alpha) * stage_x_with_stitch + np.cos(alpha) * stage_y_with_stitch
+        )
 
-        return np.abs(stage_x_rot) <= (_lamni_piezo_range / 2) and np.abs(stage_y_rot) <= (
-            _lamni_piezo_range / 2
+        return (
+            np.abs(stage_x_rot) <= (self.fov_size[1] / 2)
+            and np.abs(stage_y_rot) <= (self.fov_size[0] / 2)
+            and (
+                self.fov_circular == 0
+                or (
+                    np.power((stage_x_rot_with_stitch + stage_x_rot), 2)
+                    + np.power((stage_y_rot_with_stitch + stage_y_rot), 2)
+                )
+                <= pow((self.fov_circular / 2), 2)
+            )
         )
 
     def _prepare_setup(self):
         yield from self.device_rpc("rtx", "controller.clear_trajectory_generator")
         yield from self.lamni_rotation(self.angle)
-        yield from self.lamni_new_scan_center_interferometer(self.center_x, self.center_y)
+        total_shift_x, total_shift_y = self._compute_total_shift()
+        yield from self.lamni_new_scan_center_interferometer(total_shift_x, total_shift_y)
         self._plot_target_pos()
         if self.scantype == "fly":
             yield from self._transfer_positions_to_LamNI()
@@ -131,12 +162,12 @@ class LamNIFermatScan(ScanBase):
         plt.plot(self.positions[:, 0], self.positions[:, 1], alpha=0.2)
         plt.scatter(self.positions[:, 0], self.positions[:, 1])
         plt.savefig("mygraph.png")
-        plt.clf()
+        if not self.keep_plot:
+            plt.clf()
         # plt.show()
 
     def _transfer_positions_to_LamNI(self):
-        for pos in self.positions:
-            yield from self.device_rpc("rtx", f"controller.add_pos_to_scan", (pos[0], pos[1]))
+        yield from self.device_rpc("rtx", f"controller.add_pos_to_scan", (self.positions.tolist(),))
 
     def _calculate_positions(self):
         self.positions = self.get_lamni_fermat_spiral_pos(
@@ -147,6 +178,38 @@ class LamNIFermatScan(ScanBase):
             step=self.step,
             spiral_type=0,
             center=False,
+        )
+
+    def _lamni_compute_scan_center(self, x, y, angle_deg):
+        # assuming a scan point was found at interferometer x,y at zero degrees
+        # this function computes the new interferometer coordinates of this spot
+        # at a different rotation angle based on the lamni geometry
+        alpha = angle_deg / 180 * np.pi
+        stage_x, stage_y = lamni_to_stage_coordinates(x, y)
+        stage_x_rot = np.cos(alpha) * stage_x - np.sin(alpha) * stage_y
+        stage_y_rot = np.sin(alpha) * stage_x + np.cos(alpha) * stage_y
+        return lamni_from_stage_coordinates(stage_x_rot, stage_y_rot)
+
+    def _lamni_compute_stitch_center(self, xcount, ycount, angle_deg):
+        alpha = angle_deg / 180 * np.pi
+        stage_x = xcount * (self.fov_size[0] - self.stitch_overlap)
+        stage_y = ycount * (self.fov_size[1] - self.stitch_overlap)
+        x_rot = np.cos(alpha) * stage_x - np.sin(alpha) * stage_y
+        y_rot = np.sin(alpha) * stage_x + np.cos(alpha) * stage_y
+
+        return lamni_from_stage_coordinates(x_rot, y_rot)
+
+    def _compute_total_shift(self):
+        _shfitx, _shfity = self._lamni_compute_scan_center(self.center_x, self.center_y, self.angle)
+        x_stitch_shift, y_stitch_shift = self._lamni_compute_stitch_center(
+            self.stitch_x, self.stitch_y, self.angle
+        )
+        logger.info(
+            f"Total shift [mm] {_shfitx+x_stitch_shift/1000+self.shift_x}, {_shfity+y_stitch_shift/1000+self.shift_y}"
+        )
+        return (
+            _shfitx + x_stitch_shift / 1000 + self.shift_x,
+            _shfity + y_stitch_shift / 1000 + self.shift_y,
         )
 
     def get_lamni_fermat_spiral_pos(
@@ -184,16 +247,19 @@ class LamNIFermatScan(ScanBase):
         length_axis2 = np.abs(m2_stop - m2_start)
         n_max = int(length_axis1 * length_axis2 * 3.2 / step / step)
 
+        total_shift_x, total_shift_y = self._compute_total_shift()
+
         for ii in range(start, n_max):
             radius = step * 0.57 * np.sqrt(ii)
-            if abs(radius * np.sin(ii * phi)) > length_axis1 / 2:
-                continue
-            if abs(radius * np.cos(ii * phi)) > length_axis2 / 2:
-                continue
+            # FOV is restructed below at check pos in range
+            # if abs(radius * np.sin(ii * phi)) > length_axis1 / 2:
+            #    continue
+            # if abs(radius * np.cos(ii * phi)) > length_axis2 / 2:
+            #    continue
             x = radius * np.sin(ii * phi)
             y = radius * np.cos(ii * phi)
-            if self._lamni_check_pos_in_piezo_range(x, y):
-                positions.extend([(x + self.center_x * 1000, y + self.center_y * 1000)])
+            if self._lamni_check_pos_in_fov_range_and_circ_fov(x, y):
+                positions.extend([(x + total_shift_x * 1000, y + total_shift_y * 1000)])
                 # for testing we just shift by center_i and prepare also the setup to center_i
         return np.array(positions)
 
