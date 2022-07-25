@@ -26,8 +26,8 @@ class ScanBundler(BECService):
         self.primary_devices = dict()
         self.monitor_devices = dict()
         self.baseline_devices = dict()
+        self.device_storage = dict()
         self.scan_motors = dict()
-        self.metadata = dict()
         self.current_queue = None
         self.executor = ThreadPoolExecutor(max_workers=4)
 
@@ -125,7 +125,7 @@ class ScanBundler(BECService):
                     "devices": self.DM.devices.primary_devices(scan_motors),
                     "pointID": {},
                 }
-                self.monitor_devices[scanID] = dict()
+                self.monitor_devices[scanID] = self.DM.devices.device_group("monitor")
                 self.baseline_devices[scanID] = {
                     "devices": self.DM.devices.baseline_devices(scan_motors),
                     "done": {
@@ -239,7 +239,6 @@ class ScanBundler(BECService):
             return
         dev = {sig: {sig: signal[sig]} for sig in signal.keys()}
         pointID = metadata["pointID"]
-        primary_devices = self.primary_devices[scanID]
 
         self.sync_storage[scanID][pointID] = {
             **self.sync_storage[scanID].get(pointID, {}),
@@ -265,7 +264,7 @@ class ScanBundler(BECService):
         #         scan_exists = True
         # if not scan_exists:
         #     return
-
+        self.device_storage[device] = signal
         if metadata["stream"] == "primary":
             if self.sync_storage[scanID]["info"]["scan_type"] == "step":
                 self._step_scan_update(scanID, device, signal, metadata)
@@ -330,7 +329,10 @@ class ScanBundler(BECService):
         return bls_event
 
     def _update_monitor_signals(self, scanID, pointID) -> None:
-        pass
+        if self.sync_storage[scanID]["info"]["scan_type"] == "fly":
+            # for fly scans, take all primary and monitor signals
+            for dev in self.primary_devices[scanID]["devices"]:
+                self.sync_storage[scanID][pointID][dev.name] = self.device_storage.get(dev.name)
 
     def _send_scan_point(self, scanID, pointID) -> None:
         logger.info(f"Sending point {pointID} for scanID {scanID}.")
