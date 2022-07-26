@@ -4,6 +4,8 @@ from bec_utils import BECMessage as BMessage
 from scan_plugins.LamNIFermatScan import LamNIFermatScan
 from scan_server.scans import FermatSpiralScan, Move, Scan
 
+from utils import ProducerMock
+
 
 class DeviceMock:
     def __init__(self, name: str):
@@ -16,11 +18,6 @@ class DeviceMock:
 
     def readback(self):
         return self.read_buffer
-
-
-class ProducerMock:
-    def get(self, topic):
-        return None
 
 
 class DMMock:

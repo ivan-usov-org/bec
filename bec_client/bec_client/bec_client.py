@@ -1,7 +1,8 @@
 import threading
+from typing import List, Tuple
 
 import IPython
-from bec_utils import Alarms, BECService, bec_logger
+from bec_utils import Alarms, BECService, MessageEndpoints, bec_logger
 from bec_utils.connector import ConnectorBase
 from IPython.terminal.prompts import Prompts, Token
 
@@ -54,6 +55,16 @@ class BKClient(BECService):
 
     def clear_all_alarms(self):
         self.alarm_handler.clear()
+
+    @property
+    def pre_scan_hooks(self):
+        return self.producer.lrange(MessageEndpoints.pre_scan_macros(), 0, -1)
+
+    @pre_scan_hooks.setter
+    def pre_scan_hooks(self, hooks: List):
+        self.producer.delete(MessageEndpoints.pre_scan_macros())
+        for hook in hooks:
+            self.producer.lpush(MessageEndpoints.pre_scan_macros(), hook)
 
     def _load_scans(self):
         self.scans = Scans(self)
