@@ -1,3 +1,4 @@
+import ast
 import enum
 import threading
 import time
@@ -169,6 +170,7 @@ class RequestBase(ABC):
         self.DIID = 0
         self.scan_motors = []
         self.positions = []
+        self._pre_scan_macros = []
         self._get_scan_motors()
         if metadata is None:
             self.metadata = {}
@@ -180,8 +182,16 @@ class RequestBase(ABC):
         self.DIID += 1
         return msg
 
+    def run_pre_scan_macros(self):
+        macros = self.device_manager.producer.lrange(MessageEndpoints.pre_scan_macros(), 0, -1)
+        for macro in macros:
+            macro = macro.decode()
+            func_name = ast.parse(macro).body[0].name
+            exec(macro)
+            eval(func_name)(self.device_manager.devices, self)
+
     def initialize(self):
-        pass
+        self.run_pre_scan_macros()
 
     def device_rpc(self, device, func_name, *args, **kwargs):
         rpc_id = str(uuid.uuid4())
@@ -288,7 +298,7 @@ class ScanBase(RequestBase):
             raise ValueError("scan_name cannot be empty")
 
     def initialize(self):
-        pass
+        super().initialize()
 
     def read_scan_motors(self):
         yield self.device_msg(

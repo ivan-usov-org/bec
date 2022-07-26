@@ -1,5 +1,6 @@
 import enum
 import time
+from typing import Tuple
 
 import redis
 
@@ -90,6 +91,15 @@ class RedisProducer(ProducerConnector):
 
     def send(self, topic: str, msg) -> None:
         self.r.publish(f"{topic}:sub", msg)
+
+    def lpush(self, topic: str, msgs: str) -> None:
+        self.r.lpush(f"{topic}:val", msgs)
+
+    def rpush(self, topic: str, msgs: str) -> None:
+        self.r.rpush(f"{topic}:val", msgs)
+
+    def lrange(self, topic: str, start: int, end: int):
+        return self.r.lrange(f"{topic}:val", start, end)
 
     def set_and_publish(self, topic: str, msg, pipe=None) -> None:
         client = pipe if pipe is not None else self.r

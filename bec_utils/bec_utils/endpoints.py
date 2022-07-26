@@ -28,6 +28,8 @@ class MessageEndpoints:
     # instructions
     _device_instructions = "internal/devices/instructions"
     _device_rpc = "internal/devices/rpc"
+    _pre_scan_macros = "internal/pre_scan_macros"
+    _post_scan_macros = "internal/post_scan_macros"
 
     # log
     _log = "internal/log"
@@ -122,6 +124,14 @@ class MessageEndpoints:
     @classmethod
     def device_rpc(self, rpc_id: str):
         return f"{self._device_rpc}/{rpc_id}"
+
+    @classmethod
+    def pre_scan_macros(self):
+        return self._pre_scan_macros
+
+    @classmethod
+    def post_scan_macros(self):
+        return self._post_scan_macros
 
     # log
     @classmethod
