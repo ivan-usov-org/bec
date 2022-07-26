@@ -36,6 +36,18 @@ class ProducerMock:
     def set_and_publish(self, topic, msg):
         pass
 
+    def lpush(self, queue, msg):
+        pass
+
+    def rpush(self, queue, msg):
+        pass
+
+    def lrange(self, queue, start, stop):
+        return []
+
+    def get(self, queue):
+        return None
+
 
 class ConnectorMock(ConnectorBase):
     def consumer(self, *args, **kwargs) -> ConsumerMock:
