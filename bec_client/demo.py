@@ -14,7 +14,7 @@ from bec_client import BKClient
 logger = bec_logger.logger
 bec_logger.level = bec_logger.LOGLEVEL.SUCCESS
 
-CONFIG_PATH = "../bec_config.yaml"
+CONFIG_PATH = "../bec_config_mirko.yaml"
 
 
 config = ServiceConfig(CONFIG_PATH)
@@ -31,7 +31,8 @@ scans = bk.scans
 
 logger.success("Started BKClient")
 # scans.fermat_scan(dev.samx, -2, 2, dev.samy, -2, 2, step=1.5, exp_time=0.02, relative=True)
-dev.samx.low_limit = -20
+# dev.samx.low_limit = -20
+scans.round_scan_fly(dev.samx, dev.samy, 0, 50, 20, 3, exp_time=0.1, relative=True)
 # def plotfunc():
 #     dp = PlotAxis(bk.devicemanager.connector)
 #     dp.start()

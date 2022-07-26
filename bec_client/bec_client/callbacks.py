@@ -331,7 +331,7 @@ async def live_updates_table(bec: BKClient, request: BECMessage.ScanQueueMessage
                     print(table.get_header_lines())
                 for ind, dev in enumerate(devices):
                     signal = point_data.content["data"][dev].get(dev)
-                    dev_values[ind] = signal.get("value") if signal else signal
+                    dev_values[ind] = signal.get("value") if signal else -999
                 print(table.get_row(point_id, *dev_values))
                 progressbar.update(point_id)
             else:

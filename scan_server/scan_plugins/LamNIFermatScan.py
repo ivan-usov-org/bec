@@ -397,7 +397,7 @@ class LamNIFermatScan(ScanBase):
                 "primary": self.scan_motors,
                 "num_points": self.num_pos,
                 "scan_name": self.scan_name,
-                "scan_type": "step",
+                "scan_type": self.scan_type,
             },
         )
 
@@ -413,9 +413,39 @@ class LamNIFermatScan(ScanBase):
             yield self.device_msg(
                 device="rtx",
                 action="kickoff",
-                parameter={"num_pos": self.num_pos},
+                parameter={},
                 metadata={},
             )
+            while True:
+                yield self.device_msg(
+                    device=None,
+                    action="read",
+                    parameter={
+                        "target": "primary",
+                        "group": "primary",
+                        "wait_group": "readout_primary",
+                    },
+                    metadata={},
+                )
+                yield self.device_msg(
+                    device=None,
+                    action="wait",
+                    parameter={
+                        "type": "read",
+                        "group": "primary",
+                        "wait_group": "readout_primary",
+                    },
+                )
+                msg = self.device_manager.producer.get(MessageEndpoints.device_status("rt_scan"))
+                if msg:
+                    status = BECMessage.DeviceStatusMessage.loads(msg)
+                    if status.content.get("status", 1) == 0 and self.metadata.get(
+                        "RID"
+                    ) == status.metadata.get("RID"):
+                        break
+
+                time.sleep(1)
+                logger.debug("reading monitors")
             # yield from self.device_rpc("rtx", "controller.kickoff")
 
     def run(self):
