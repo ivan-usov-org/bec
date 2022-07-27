@@ -43,6 +43,8 @@ end-2-end:
   image: docker:20.10.16
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
   script:
     # spin up redis, mongo and scibec
     - docker-compose -f ./docker-compose.yaml up -d
