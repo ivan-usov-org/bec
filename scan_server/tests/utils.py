@@ -13,6 +13,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 def load_ScanServerMock():
     connector = ConnectorMock("")
     device_manager = DeviceManagerScanServer(connector, "")
+    device_manager.producer = connector.producer()
     with open(f"{dir_path}/test_session.yaml", "r") as f:
         device_manager._session = yaml.safe_load(f)
     device_manager._load_session()
