@@ -9,7 +9,7 @@ import numpy as np
 from bec_utils import BECMessage, DeviceManagerBase, MessageEndpoints, bec_logger
 from cytoolz import partition
 
-from .errors import LimitError
+from .errors import LimitError, ScanAbortion
 
 DeviceMsg = BECMessage.DeviceInstructionMessage
 ScanMsg = BECMessage.ScanQueueMessage
@@ -733,6 +733,90 @@ class RoundScan(ScanBase):
         self.positions = get_round_scan_positions(
             r_in=params[1], r_out=params[2], nr=params[3], nth=params[4]
         )
+
+
+class ContLineScan(ScanBase):
+    scan_name = "cont_line_scan"
+    scan_report_hint = "table"
+    required_kwargs = ["exp_time", "steps"]
+    arg_input = [ScanArgType.DEVICE, ScanArgType.FLOAT, ScanArgType.FLOAT]
+    arg_bundle_size = len(arg_input)
+    scan_type = "step"
+
+    def __init__(self, *args, parameter=None, **kwargs):
+        """
+        A line scan for one or more motors.
+
+        Args:
+            *args: pairs of device / start position / end position
+            exp_time: exposure time in s
+            steps: number of steps (please note: 5 steps == 6 positions)
+            relative: Start from an absolute or relative position
+            burst: number of acquisition per point
+
+        Returns:
+
+        Examples:
+            >>> scans.cont_line_scan(dev.motor1, -5, 5, steps=10, exp_time=0.1, relative=True)
+
+        """
+        super().__init__(parameter=parameter, **kwargs)
+        self.axis = []
+        self.steps = parameter.get("kwargs", {}).get("steps", 10)
+        self.offset = 100
+
+    def _calculate_positions(self) -> None:
+        for _, val in self.caller_args.items():
+            ax_pos = np.linspace(val[0], val[1], self.steps)
+            self.axis.append(ax_pos)
+        self.positions = np.array(list(zip(*self.axis)))
+
+    def _at_each_point(self):
+        yield self.device_msg(
+            device=None,
+            action="trigger",
+            parameter={"group": "trigger"},
+            metadata={"pointID": self.pointID},
+        )
+        yield self.device_msg(
+            device=None,
+            action="read",
+            parameter={
+                "target": "primary",
+                "group": "primary",
+                "wait_group": "readout_primary",
+            },
+            metadata={"pointID": self.pointID},
+        )
+        self.pointID += 1
+
+    def scan_core(self):
+        yield from self._move_and_wait(self.positions[0] - self.offset)
+        # send the slow motor on its way
+        yield self.device_msg(
+            device=self.scan_motors[0],
+            action="set",
+            parameter={
+                "value": self.positions[-1][0],
+                "group": "scan_motor",
+                "wait_group": "scan_motor",
+            },
+        )
+
+        while self.pointID < len(self.positions[:]):
+            cont_motor_positions = self.device_manager.devices[self.scan_motors[0]].readback()
+
+            if not cont_motor_positions:
+                continue
+
+            cont_motor_positions = cont_motor_positions.get("value")
+            logger.debug(f"Current position of {self.scan_motors[0]}: {cont_motor_positions}")
+            if np.isclose(cont_motor_positions, self.positions[self.pointID][0], atol=0.5):
+                logger.debug(f"reading point {self.pointID}")
+                yield from self._at_each_point()
+                continue
+            if cont_motor_positions > self.positions[self.pointID][0]:
+                raise ScanAbortion(f"Skipped point {self.pointID + 1}")
 
 
 class RoundScanFlySim(ScanBase):
