@@ -12,6 +12,11 @@ from bec_utils import (
 
 from bec_client.callbacks import ScanRequestError
 
+
+class RPCError(Exception):
+    pass
+
+
 logger = bec_logger.logger
 
 """
@@ -140,8 +145,13 @@ class RPCBase:
             msg = self.root.parent.producer.get(MessageEndpoints.device_rpc(rpc_id))
             if msg:
                 break
-            time.sleep(0.1)
+            time.sleep(0.01)
         msg = BECMessage.DeviceRPCMessage.loads(msg)
+        if not msg.content["success"]:
+            error = msg.content["out"]
+            raise RPCError(
+                f"During an RPC, the following error occured:\n{error['error']}: {error['msg']}.\nTraceback: {error['traceback']}\n The scan will be aborted."
+            )
         print(msg.content.get("out"))
         return msg.content.get("return_val")
 
