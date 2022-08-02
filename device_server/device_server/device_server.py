@@ -23,6 +23,10 @@ logger = bec_logger.logger
 consumer_stop = threading.Event()
 
 
+class DisabledDeviceError(Exception):
+    pass
+
+
 def rgetattr(obj, attr, *args):
     """See https://stackoverflow.com/questions/31174295/getattr-and-setattr-on-nested-objects"""
 
@@ -111,14 +115,26 @@ class DeviceServer(BECService):
         for dev in self.device_manager.devices.enabled_devices:
             dev.obj.stop()
 
-    def handle_device_instructions(self, msg) -> None:
+    def _assert_device_is_enabled(self, instructions) -> None:
+        devices = instructions.content["device"]
+        if isinstance(devices, list):
+            for dev in devices:
+                if not self.device_manager.devices[dev].enabled:
+                    raise DisabledDeviceError(f"Cannot access disabled device {dev}.")
+        elif isinstance(devices, str):
+            if not self.device_manager.devices[devices].enabled:
+                raise DisabledDeviceError(f"Cannot access disabled device {devices}.")
 
-        instructions = BECMessage.DeviceInstructionMessage.loads(msg.value)
-        if instructions.content["device"] is not None:
-            # pylint: disable=protected-access
-            self._update_device_metadata(instructions)
-        action = instructions.content["action"]
+    def handle_device_instructions(self, msg) -> None:
         try:
+            instructions = BECMessage.DeviceInstructionMessage.loads(msg.value)
+            action = instructions.content["action"]
+            if instructions.content["device"] is not None:
+                if action != "rpc":
+                    # rpc has its own error handling
+                    self._assert_device_is_enabled(instructions)
+                self._update_device_metadata(instructions)
+
             if action == "set":
                 # pylint: disable=protected-access
                 self._set_device(instructions)
@@ -198,6 +214,7 @@ class DeviceServer(BECService):
         sys.stdout = result
         try:
             instr_params = instr.content.get("parameter")
+            self._assert_device_is_enabled(instr)
             rpc_var = rgetattr(
                 self.device_manager.devices[instr.content["device"]].obj,
                 instr_params.get("func"),

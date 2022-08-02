@@ -254,6 +254,14 @@ class DeviceManagerDS(DeviceManagerBase):
 
                     if "enabled" in dev_config:
                         self.devices[dev].config["enabled"] = dev_config["enabled"]
+                        # update config in DB
+                        logger.debug("updating in DB")
+                        success = self._scibec.patch_device_config(
+                            self.devices[dev].config["id"],
+                            {"enabled": self.devices[dev].enabled},
+                        )
+                        if not success:
+                            raise DeviceConfigError("Error during database update.")
                         updated = True
 
                 # send updates to services
