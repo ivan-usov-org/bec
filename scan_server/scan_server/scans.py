@@ -212,13 +212,17 @@ class RequestBase(ABC):
         )
 
     def _get_from_rpc(self, rpc_id):
-        # time.sleep(0.1)  # otherwise appeared to read wrong message
         while True:
             msg = self.device_manager.producer.get(MessageEndpoints.device_rpc(rpc_id))
             if msg:
                 break
             time.sleep(0.001)
         msg = BECMessage.DeviceRPCMessage.loads(msg)
+        if not msg.content["success"]:
+            error = msg.content["out"]
+            raise ScanAbortion(
+                f"During an RPC, the following error occured:\n{error['error']}: {error['msg']}.\nTraceback: {error['traceback']}\n The scan will be aborted."
+            )
         logger.debug(msg.content.get("out"))
         return msg.content.get("return_val")
 
@@ -536,6 +540,7 @@ class DeviceRPC(ScanStub):
         pass
 
     def run(self):
+        # different to calling self.device_rpc, this procedure will not wait for a reply.
         yield self.device_msg(
             device=self.parameter.get("device"),
             action="rpc",
