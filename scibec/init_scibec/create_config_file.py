@@ -1,7 +1,7 @@
 import numpy as np
 import yaml
 
-USE_LAMNI = False
+USE_LAMNI = True
 
 
 lamni_galil_motors = [

@@ -20,8 +20,8 @@ logger = bec_logger.logger
 
 
 class DSDevice(Device):
-    def __init__(self, name, obj, config):
-        super().__init__(name, config)
+    def __init__(self, name, obj, config, parent=None):
+        super().__init__(name, config, parent=parent)
         self.obj = obj
         self.metadata = {}
 
@@ -124,14 +124,18 @@ class DeviceManagerDS(DeviceManagerBase):
             obj.motor_is_moving.subscribe(self._obj_callback_is_moving, run=enabled)
 
         # insert the created device obj into the device manager
-        opaas_obj = DSDevice(name, obj, config=dev)
+        opaas_obj = DSDevice(name, obj, config=dev, parent=self)
         self.devices._add_device(name, opaas_obj)
 
         # update device buffer
         if enabled:
-            if not opaas_obj.obj.connected:
-                opaas_obj.obj.stage()
-            opaas_obj.initialize_device_buffer(self.producer)
+            try:
+                if not opaas_obj.obj.connected:
+                    opaas_obj.obj.stage()
+                opaas_obj.initialize_device_buffer(self.producer)
+            except Exception as exc:
+                logger.error(f"Failed to stage {opaas_obj.name}. The device will be disabled.")
+                opaas_obj.enabled = False
 
         return opaas_obj
 
@@ -250,6 +254,14 @@ class DeviceManagerDS(DeviceManagerBase):
 
                     if "enabled" in dev_config:
                         self.devices[dev].config["enabled"] = dev_config["enabled"]
+                        # update config in DB
+                        logger.debug("updating in DB")
+                        success = self._scibec.patch_device_config(
+                            self.devices[dev].config["id"],
+                            {"enabled": self.devices[dev].enabled},
+                        )
+                        if not success:
+                            raise DeviceConfigError("Error during database update.")
                         updated = True
 
                 # send updates to services

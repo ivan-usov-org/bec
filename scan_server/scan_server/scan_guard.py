@@ -73,6 +73,8 @@ class ScanGuard:
     def _device_rpc_is_valid(self, device: str, func: str) -> bool:
         # pylint: disable=unused-argument
         # TODO: make sure the device rpc is valid and not exceeding the scope
+        if not device:
+            return False
         return True
 
     def _check_baton(self, request) -> None:
@@ -80,9 +82,11 @@ class ScanGuard:
         pass
 
     def _check_motors_movable(self, request) -> None:
-        # TODO: Make sure you are not trying to move protected motors
         if request.content["scan_type"] == "device_rpc":
-            return
+            device = request.content["parameter"]["device"]
+            if not self.device_manager.devices[device].enabled:
+                raise ScanRejection(f"Device {device} is not enabled.")
+
         motor_args = request.content["parameter"].get("args")
         if not motor_args:
             return

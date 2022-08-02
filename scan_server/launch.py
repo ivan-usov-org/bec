@@ -15,7 +15,7 @@ clargs = parser.parse_args()
 config_path = clargs.config
 
 config = ServiceConfig(config_path)
-bec_logger.level = bec_logger.LOGLEVEL.INFO
+bec_logger.level = bec_logger.LOGLEVEL.DEBUG
 logger = bec_logger.logger
 
 bec_server = ScanServer(

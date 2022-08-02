@@ -422,7 +422,7 @@ class ScanWorker(threading.Thread):
                     self._send_scan_status("aborted")
                     self.parent.queue_manager.queues["primary"].abort()
                     self.reset()
-        except AttributeError as exc:
+        except Exception as exc:
             if len(exc.args) > 0:
                 content = exc.args[0]
             else:

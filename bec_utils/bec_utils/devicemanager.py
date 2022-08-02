@@ -43,6 +43,7 @@ class Device:
     @enabled.setter
     def enabled(self, value):
         self.config["enabled"] = value
+        self.parent.send_config_request(action="update", config={self.name: {"enabled": value}})
 
     def read(self):
         val = self.parent.producer.get(MessageEndpoints.device_read(self.name))
