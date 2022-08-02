@@ -21,7 +21,6 @@ but they are executed in a specific order:
 """
 
 import time
-import uuid
 
 import matplotlib.pyplot as plt
 import numpy as np
