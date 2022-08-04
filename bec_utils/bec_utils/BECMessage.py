@@ -31,8 +31,13 @@ class BECMessage:
     def loads(cls, msg):
         if isinstance(msg, bytes):
             msg = msgpack.loads(msg, raw=False)
+            if msg["msg_type"] == "bundle_message":
+                return [
+                    cls._validated_return(msgpack.loads(sub_message))
+                    for sub_message in msg["content"]["messages"]
+                ]
             return cls._validated_return(msg)
-        elif isinstance(msg, dict):
+        if isinstance(msg, dict):
             return cls(**msg)
 
     def dumps(self):
@@ -74,6 +79,26 @@ class BECMessage:
 
     def __str__(self):
         return f"{self.__class__.__name__}({self.content, self.metadata}))"
+
+
+class BundleMessage(BECMessage):
+    msg_type = "bundle_message"
+
+    def __init__(self, *, messages: list = None, metadata: dict = None, **_kwargs) -> None:
+        content = {}
+        super().__init__(msg_type=self.msg_type, content=content, metadata=metadata)
+        self.content["messages"] = [] if not messages else messages
+
+    def append(self, msg: BECMessage):
+        if isinstance(msg, bytes):
+            self.content["messages"].append(msg)
+        elif isinstance(msg, BECMessage):
+            self.content["messages"].append(msg.dumps())
+        else:
+            raise AttributeError(f"Cannot append message of type {msg.__class__.__name__}")
+
+    def __len__(self):
+        return len(self.content["messages"])
 
 
 class MessageReader(BECMessage):
