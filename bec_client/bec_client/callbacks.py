@@ -233,7 +233,8 @@ def get_devices(device_manager, request, scan_msg):
     if scan_msg.metadata["scan_type"] == "step":
         return get_devices_from_request(device_manager=device_manager, request=request)
     if scan_msg.metadata["scan_type"] == "fly":
-        return scan_msg.content["data"].keys()
+        devices = list(scan_msg.content["data"].keys())
+        return devices[0 : min(10, len(devices)) - 1]
 
 
 async def wait_for_scan_to_start(bec, scanID):
