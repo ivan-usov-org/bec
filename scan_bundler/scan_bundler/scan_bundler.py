@@ -1,3 +1,4 @@
+import collections
 import threading
 import time
 import uuid
@@ -31,9 +32,10 @@ class ScanBundler(BECService):
         self.device_storage = dict()
         self.scan_motors = dict()
         self.current_queue = None
-        self.executor = ThreadPoolExecutor(max_workers=1)
+        self.executor = ThreadPoolExecutor(max_workers=4)
         self._send_buffer = Queue()
         self._start_buffered_producer()
+        self.scanID_queue = collections.deque(maxlen=5)
 
     def _start_buffered_producer(self):
         self._buffered_producer_thread = threading.Thread(
@@ -100,6 +102,8 @@ class ScanBundler(BECService):
         #     parent.sync_storage[info.get("scanID")]["scan_type"] = info.get("scan_type")
         scanID = msg.content["scanID"]
         if not scanID in parent.sync_storage:
+            parent.scanID_queue.append(scanID)
+            parent.cleanup_storage()
             parent._initialize_scan_container(msg)
         if msg.content.get("status") != "open":
             parent._scan_status_modification(msg)
@@ -108,6 +112,7 @@ class ScanBundler(BECService):
         if msg.content.get("status") == "closed":
             scanID = msg.content.get("scanID")
             if scanID:
+                self.sync_storage[scanID]["status"] = "closed"
                 doc = {
                     "time": time.time(),
                     "uid": str(uuid.uuid4()),
@@ -127,7 +132,7 @@ class ScanBundler(BECService):
             scan_motors = list(set([self.DM.devices[m] for m in scan_info["primary"]]))
             self.scan_motors[scanID] = scan_motors
             if not scanID in self.sync_storage:
-                self.sync_storage[scanID] = {"info": scan_info}
+                self.sync_storage[scanID] = {"info": scan_info, "status": "open"}
                 self.bluesky_metadata[scanID] = dict()
                 # for now lets assume that all devices are primary devices:
                 self.primary_devices[scanID] = {
@@ -357,8 +362,27 @@ class ScanBundler(BECService):
                 continue
             time.sleep(0.1)
 
+    def cleanup_storage(self):
+        remove_scanIDs = []
+        for scanID, entry in self.sync_storage.items():
+            if entry.get("status") != "closed":
+                continue
+            if len(entry.keys()) != 3:
+                continue
+            if scanID in self.scanID_queue:
+                continue
+            remove_scanIDs.append(scanID)
+
+        for scanID in remove_scanIDs:
+            self.sync_storage.pop(scanID)
+            self.bluesky_metadata.pop(scanID)
+            self.primary_devices.pop(scanID)
+            self.monitor_devices.pop(scanID)
+            self.baseline_devices.pop(scanID)
+            self.scan_motors.pop(scanID)
+
     def _send_scan_point(self, scanID, pointID) -> None:
-        logger.debug(f"Sending point {pointID} for scanID {scanID}.")
+        logger.info(f"Sending point {pointID} for scanID {scanID}.")
         logger.debug(f"{pointID}, {self.sync_storage[scanID][pointID]}")
         self._send_buffer.put(
             BECMessage.ScanMessage(
