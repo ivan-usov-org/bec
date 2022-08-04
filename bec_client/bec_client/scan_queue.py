@@ -358,18 +358,21 @@ class ScanQueue:
     @staticmethod
     def _scan_status_callback(msg, *, parent, **kwargs) -> None:
         scan = BECMessage.ScanStatusMessage.loads(msg.value)
+        scanID = scan.content["scanID"]
+        if not scanID:
+            return
         scan_number = scan.content["info"].get("scan_number")
         if scan_number:
             parent.last_scan_number = scan_number
 
         while True:
-            scan_obj = parent.find_scan(scanID=scan.content["scanID"])
+            scan_obj = parent.find_scan(scanID=scanID)
             if scan_obj is not None:
                 if scan.content.get("status") == "open":
                     scan_obj.start_time = scan.content.get("timestamp")
                 elif scan.content.get("status") == "closed":
                     scan_obj.end_time = scan.content.get("timestamp")
-                scan_obj.status[scan.content["scanID"]] = scan.content.get("status")
+                scan_obj.status[scanID] = scan.content.get("status")
                 if scan.content["info"].get("num_points"):
                     scan_obj.num_points = scan.content["info"].get("num_points")
                 break
