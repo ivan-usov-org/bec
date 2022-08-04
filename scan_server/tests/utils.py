@@ -1,61 +1,25 @@
 import os
 
+import bec_utils
 import yaml
-from bec_utils.connector import ConnectorBase
+from bec_utils.tests.utils import ConnectorMock
 from scan_server.devicemanager import DeviceManagerScanServer
 from scan_server.scan_assembler import ScanAssembler
 from scan_server.scan_server import ScanServer
 from scan_server.scan_worker import InstructionQueueStatus
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
+# dir_path = os.path.dirname(os.path.realpath(__file__))
+dir_path = os.path.dirname(bec_utils.__file__)
 
 
 def load_ScanServerMock():
     connector = ConnectorMock("")
     device_manager = DeviceManagerScanServer(connector, "")
     device_manager.producer = connector.producer()
-    with open(f"{dir_path}/test_session.yaml", "r") as f:
+    with open(f"{dir_path}/tests/test_session.yaml", "r") as f:
         device_manager._session = yaml.safe_load(f)
     device_manager._load_session()
     return ScanServerMock(device_manager, connector)
-
-
-class ConsumerMock:
-    def start(self):
-        pass
-
-
-class ProducerMock:
-    message_sent = {}
-
-    def set(self, topic, msg):
-        pass
-
-    def send(self, queue, msg):
-        self.message_sent = {"queue": queue, "msg": msg}
-
-    def set_and_publish(self, topic, msg):
-        pass
-
-    def lpush(self, queue, msg):
-        pass
-
-    def rpush(self, queue, msg):
-        pass
-
-    def lrange(self, queue, start, stop):
-        return []
-
-    def get(self, queue):
-        return None
-
-
-class ConnectorMock(ConnectorBase):
-    def consumer(self, *args, **kwargs) -> ConsumerMock:
-        return ConsumerMock()
-
-    def producer(self, *args, **kwargs):
-        return ProducerMock()
 
 
 class WorkerMock:

@@ -246,18 +246,20 @@ class ScanQueue:
         )
 
     def add_scan_msg(self, scan_msg):
-        inserted = False
-        while not inserted:
+
+        while True:
             for scan_obj in self.scan_storage:
                 if scan_msg.metadata["scanID"] in scan_obj.queue_info.scanID:
                     scan_obj.data[scan_msg.content["point_id"]] = scan_msg
-                    inserted = True
+                    return
             time.sleep(0.01)
 
     @staticmethod
     def _scan_segment_callback(msg, *, parent, **kwargs) -> None:
-        scan_msg = BECMessage.ScanMessage.loads(msg.value)
-        if scan_msg is not None:
+        scan_msgs = BECMessage.ScanMessage.loads(msg.value)
+        if not isinstance(scan_msgs, list):
+            scan_msgs = [scan_msgs]
+        for scan_msg in scan_msgs:
             parent.add_scan_msg(scan_msg)
 
     @staticmethod

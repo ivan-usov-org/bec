@@ -89,17 +89,21 @@ class RedisProducer(ProducerConnector):
     def __init__(self, host: str, port: int) -> None:
         self.r = redis.Redis(host=host, port=port)
 
-    def send(self, topic: str, msg) -> None:
-        self.r.publish(f"{topic}:sub", msg)
+    def send(self, topic: str, msg, pipe=None) -> None:
+        client = pipe if pipe is not None else self.r
+        client.publish(f"{topic}:sub", msg)
 
-    def lpush(self, topic: str, msgs: str) -> None:
-        self.r.lpush(f"{topic}:val", msgs)
+    def lpush(self, topic: str, msgs: str, pipe=None) -> None:
+        client = pipe if pipe is not None else self.r
+        client.lpush(f"{topic}:val", msgs)
 
-    def rpush(self, topic: str, msgs: str) -> None:
-        self.r.rpush(f"{topic}:val", msgs)
+    def rpush(self, topic: str, msgs: str, pipe=None) -> None:
+        client = pipe if pipe is not None else self.r
+        client.rpush(f"{topic}:val", msgs)
 
-    def lrange(self, topic: str, start: int, end: int):
-        return self.r.lrange(f"{topic}:val", start, end)
+    def lrange(self, topic: str, start: int, end: int, pipe=None):
+        client = pipe if pipe is not None else self.r
+        return client.lrange(f"{topic}:val", start, end)
 
     def set_and_publish(self, topic: str, msg, pipe=None) -> None:
         client = pipe if pipe is not None else self.r

@@ -540,7 +540,7 @@ class DeviceRPC(ScanStub):
         pass
 
     def run(self):
-        # different to calling self.device_rpc, this procedure will not wait for a reply.
+        # different to calling self.device_rpc, this procedure will not wait for a reply and therefore not check any errors.
         yield self.device_msg(
             device=self.parameter.get("device"),
             action="rpc",
