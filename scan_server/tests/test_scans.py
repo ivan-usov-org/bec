@@ -1,10 +1,9 @@
 import numpy as np
 import pytest
 from bec_utils import BECMessage as BMessage
+from bec_utils.tests.utils import ProducerMock
 from scan_plugins.LamNIFermatScan import LamNIFermatScan
 from scan_server.scans import FermatSpiralScan, Move, Scan
-
-from utils import ProducerMock
 
 
 class DeviceMock:
