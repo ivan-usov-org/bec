@@ -147,9 +147,9 @@ def test_mv_scan_mv():
 def test_scan_abort():
     def send_abort(bec):
         while True:
-            if not bec.queue.current_scan:
+            if not bec.queue.scan_storage.current_scan:
                 continue
-            if len(bec.queue.current_scan.data) > 0:
+            if len(bec.queue.scan_storage.current_scan.data) > 0:
                 _thread.interrupt_main()
                 break
         time.sleep(2)
@@ -205,10 +205,10 @@ def test_queued_scan():
     while True:
         if not s1.scan or not s2.scan:
             continue
-        if s1.scan.queue_info.status != "RUNNING":
+        if s1.scan.status != "open":
             continue
-        assert bec.queue.get_queue_position(s1.scan.queue_info.scanID) == 0
-        assert bec.queue.get_queue_position(s2.scan.queue_info.scanID) == 1
+        assert s1.scan.queue.queue_position == 0
+        assert s2.scan.queue.queue_position == 1
         break
     while len(s2.scan.data) != 50:
         time.sleep(0.5)

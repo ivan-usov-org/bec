@@ -4,7 +4,6 @@ import bec_utils
 import yaml
 from bec_client.bec_client import BKClient
 from bec_client.devicemanager_client import DMClient
-from bec_client.scan_queue import ScanQueue
 from bec_utils import BECMessage
 from bec_utils.tests.utils import ConnectorMock
 
@@ -69,4 +68,4 @@ def get_bec_client_mock():
 
 def test_scan_update():
     bec_client = get_bec_client_mock()
-    queue = ScanQueue(bec_client)
+    # queue = ScanQueue(bec_client)

@@ -82,7 +82,7 @@ class SigintHandler(SignalHandler):
 
     def handle_signals(self):
 
-        current_scan = self.bec.queue.current_scan_info
+        current_scan = self.bec.queue.scan_storage.current_scan_info
         if not current_scan:
             raise KeyboardInterrupt
 

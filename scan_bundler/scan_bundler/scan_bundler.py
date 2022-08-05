@@ -36,6 +36,7 @@ class ScanBundler(BECService):
         self._send_buffer = Queue()
         self._start_buffered_producer()
         self.scanID_queue = collections.deque(maxlen=5)
+        self._lock = threading.Lock()
 
     def _start_buffered_producer(self):
         self._buffered_producer_thread = threading.Thread(
@@ -241,10 +242,13 @@ class ScanBundler(BECService):
                 dev.name: False for dev in primary_devices["devices"]
             }
         primary_devices["pointID"][pointID][device] = True
-
-        if all(status for status in primary_devices["pointID"][pointID].values()):
-            self._update_monitor_signals(scanID, pointID)
-            self._send_scan_point(scanID, pointID)
+        with self._lock:
+            all_primary_devices_completed = all(
+                status for status in primary_devices["pointID"][pointID].values()
+            )
+            if all_primary_devices_completed and self.sync_storage[scanID].get(pointID):
+                self._update_monitor_signals(scanID, pointID)
+                self._send_scan_point(scanID, pointID)
 
     def _fly_scan_update(self, scanID, device, signal, metadata):
 
@@ -259,8 +263,10 @@ class ScanBundler(BECService):
             **self.sync_storage[scanID].get(pointID, {}),
             **dev,
         }
-        self._update_monitor_signals(scanID, pointID)
-        self._send_scan_point(scanID, pointID)
+        with self._lock:
+            if self.sync_storage[scanID].get(pointID):
+                self._update_monitor_signals(scanID, pointID)
+                self._send_scan_point(scanID, pointID)
 
     def _add_device_to_storage(self, msgs, device):
         for msg in msgs:
