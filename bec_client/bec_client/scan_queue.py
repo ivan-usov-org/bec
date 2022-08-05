@@ -360,6 +360,9 @@ class ScanQueue:
     @staticmethod
     def _scan_status_callback(msg, *, parent, **kwargs) -> None:
         scan = BECMessage.ScanStatusMessage.loads(msg.value)
+        scanID = scan.content["scanID"]
+        if not scanID:
+            return
         scan_number = scan.content["info"].get("scan_number")
         if scan_number:
             parent.last_scan_number = scan_number
