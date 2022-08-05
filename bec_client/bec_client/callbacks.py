@@ -17,6 +17,9 @@ from bec_utils import (
 )
 from bec_utils.connector import ConsumerConnector
 
+from bec_client.request_items import RequestItem, RequestStorage
+from bec_client.scan_items import ScanItem, ScanStorage
+
 from .prettytable import PrettyTable
 from .progressbar import DeviceProgressBar, ScanProgressBar
 
@@ -177,13 +180,13 @@ async def live_updates_readback(
     print("\n")
 
 
-async def wait_for_scan_request(requests, RID):
+async def wait_for_scan_request(requests: RequestStorage, RID: str) -> RequestItem:
     logger.debug("Waiting for request ID")
     start = time.time()
-    while requests.get(RID) is None:
+    while requests.find_request_by_ID(RID) is None:
         await asyncio.sleep(0.1)
     logger.debug(f"Waiting for request ID finished after {time.time()-start} s.")
-    return requests.get(RID)
+    return requests.find_request_by_ID(RID)
 
 
 async def wait_for_scan_request_decision(scan_queue_request):
@@ -213,20 +216,17 @@ def get_devices_from_request(device_manager, request) -> list:
     return devices
 
 
-async def get_queue_item(bec: BKClient, RID: str):
-    queue_item = bec.queue.find_scan(RID=RID)
+async def get_scan_item(bec: BKClient, request_item: RequestItem) -> ScanItem:
     timeout_time = 15
     sleep_time = 0.1
     consumed_time = 0
-    while queue_item is None:
+    while request_item.scan is None:
         check_alarms(bec)
         await asyncio.sleep(sleep_time)
         consumed_time += sleep_time
         if consumed_time > timeout_time:
             raise TimeoutError("Reached timeout while waiting for scan data.")
-        queue_item = bec.queue.find_scan(RID=RID)
-
-    return queue_item
+    return request_item.scan
 
 
 def get_devices(device_manager, request, scan_msg):
@@ -237,12 +237,12 @@ def get_devices(device_manager, request, scan_msg):
         return devices[0 : min(10, len(devices)) - 1]
 
 
-async def wait_for_scan_to_start(bec, scanID):
+async def wait_for_scan_to_start(bec, scan_item: ScanItem):
     while True:
-        queue_pos = bec.queue.get_queue_position(scanID)
+        queue_pos = scan_item.queue.queue_position
         check_alarms(bec)
         if queue_pos is None:
-            logger.debug(f"Could not find queue entry for scanID {scanID}")
+            logger.debug(f"Could not find queue entry for scanID {scan_item.scanID}")
             continue
         if queue_pos == 0:
             break
@@ -254,11 +254,9 @@ async def wait_for_scan_to_start(bec, scanID):
         await asyncio.sleep(0.1)
 
 
-async def wait_for_queue_item_to_finish(bec, queue_item, scanID):
-    queue_pos = bec.queue.get_queue_position(scanID)
-    while not queue_item.end_time or queue_pos is not None:
+async def wait_for_scan_item_to_finish(bec, scan_item):
+    while not scan_item.end_time or scan_item.queue.queue_position is not None:
         check_alarms(bec)
-        queue_pos = bec.queue.get_queue_position(scanID)
         await asyncio.sleep(0.1)
 
 
@@ -277,9 +275,9 @@ async def live_updates_table(bec: BKClient, request: BECMessage.ScanQueueMessage
 
     RID = request.metadata["RID"]
 
-    scan_queue_requests = bec.queue.scan_queue_requests
+    request_storage = bec.queue.request_storage
 
-    scan_queue_request = await wait_for_scan_request(scan_queue_requests, RID)
+    scan_queue_request = await wait_for_scan_request(request_storage, RID)
 
     await wait_for_scan_request_decision(scan_queue_request)
     check_alarms(bec)
@@ -297,25 +295,26 @@ async def live_updates_table(bec: BKClient, request: BECMessage.ScanQueueMessage
     dev_values = [0 for dev in devices]
 
     # get queue item
-    queue_item = await get_queue_item(bec=bec, RID=RID)
+    # queue_item = await get_queue_item(bec=bec, RID=RID)
 
-    block_id = queue_item.queue_info.get_block_id(RID)
+    # block_id = queue_item.queue_info.get_block_id(RID)
 
-    scanID = queue_item.queue_info.scanID[block_id]
-    scan_number = queue_item.queue_info.scan_number[block_id]
+    # scanID = queue_item.queue_info.scanID[block_id]
+    # scan_number = queue_item.queue_info.scan_number[block_id]
+    scan_item = await get_scan_item(bec=bec, request_item=scan_queue_request)
 
-    await wait_for_scan_to_start(bec, scanID)
+    await wait_for_scan_to_start(bec, scan_item)
 
-    print(f"\nStarting scan {scan_number}.")
+    print(f"\nStarting scan {scan_item.scan_number}.")
 
-    with ScanProgressBar(scan_number=scan_number, clear_on_exit=True) as progressbar:
+    with ScanProgressBar(scan_number=scan_item.scan_number, clear_on_exit=True) as progressbar:
         point_id = 0
         table = None
         while True:
             check_alarms(bec)
-            point_data = queue_item.data.get(point_id)
-            if queue_item.num_points:
-                progressbar.max_points = queue_item.num_points
+            point_data = scan_item.data.get(point_id)
+            if scan_item.num_points:
+                progressbar.max_points = scan_item.num_points
 
             progressbar.update(point_id)
             if point_data:
@@ -339,21 +338,21 @@ async def live_updates_table(bec: BKClient, request: BECMessage.ScanQueueMessage
                 logger.debug("waiting for new data point")
                 await asyncio.sleep(0.1)
 
-            if not queue_item.num_points:
+            if not scan_item.num_points:
                 continue
-            if scanID in queue_item.open_scan_defs:
+            if scan_item.scanID in scan_item.open_scan_defs:
                 continue
 
-            if point_id == queue_item.num_points:
+            if point_id == scan_item.num_points:
                 break
-            if point_id > queue_item.num_points:
+            if point_id > scan_item.num_points:
                 raise RuntimeError("Received more points than expected.")
 
-        await wait_for_queue_item_to_finish(bec, queue_item, scanID)
+        await wait_for_scan_item_to_finish(bec, scan_item=scan_item)
 
-        elapsed_time = queue_item.end_time - queue_item.start_time
+        elapsed_time = scan_item.end_time - scan_item.start_time
         print(
             table.get_footer(
-                f"Scan {scan_number} finished. Scan ID {scanID}. Elapsed time: {elapsed_time:.2f} s"
+                f"Scan {scan_item.scan_number} finished. Scan ID {scan_item.scanID}. Elapsed time: {elapsed_time:.2f} s"
             )
         )

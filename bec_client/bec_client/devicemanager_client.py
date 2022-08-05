@@ -131,10 +131,10 @@ class RPCBase:
             metadata={"RID": requestID},
         )
         self.root.parent.producer.send(MessageEndpoints.scan_queue_request(), msg.dumps())
-        scan_queue = self.root.parent.parent.queue
-        while scan_queue.scan_queue_requests.get(requestID) is None:
+        queue = self.root.parent.parent.queue
+        while queue.request_storage.find_request_by_ID(requestID) is None:
             time.sleep(0.1)
-        scan_queue_request = scan_queue.scan_queue_requests.get(requestID)
+        scan_queue_request = queue.request_storage.find_request_by_ID(requestID)
         while scan_queue_request.decision_pending:
             time.sleep(0.1)
         if not all(scan_queue_request.accepted):
@@ -281,7 +281,6 @@ class Signal(DeviceBase):
         pass
 
     def low_limit(self):
-        print("here")
         pass
 
     @rpc

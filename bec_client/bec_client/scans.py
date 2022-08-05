@@ -9,7 +9,7 @@ from cytoolz import partition
 
 from .callbacks import live_updates_readback_progressbar, live_updates_table
 from .devicemanager_client import Device
-from .scan_queue import ScanReport
+from .scan_manager import ScanReport
 
 logger = bec_logger.logger
 

@@ -6,9 +6,10 @@ from bec_utils import Alarms, BECService, MessageEndpoints, bec_logger
 from bec_utils.connector import ConnectorBase
 from IPython.terminal.prompts import Prompts, Token
 
+from bec_client.scan_manager import ScanManager
+
 from .alarm_handler import AlarmHandler
 from .devicemanager_client import DMClient
-from .scan_queue import ScanQueue
 from .scans import Scans
 from .signals import SigintHandler
 
@@ -70,7 +71,7 @@ class BKClient(BECService):
         self.scans = Scans(self)
 
     def _start_scan_queue(self):
-        self.queue = ScanQueue(self)
+        self.queue = ScanManager(self.connector)
 
     def _set_ipython_prompt_scan_number(self, scan_number: int):
         if self._ip:
