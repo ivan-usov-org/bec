@@ -188,7 +188,7 @@ class RPCBase:
                         self, dev.get("name"), Device(dev.get("name"), config=None, parent=self)
                     )
 
-        for user_access_name, descr in self._info.get("custom_user_access").items():
+        for user_access_name, descr in self._info.get("custom_user_access", {}).items():
 
             if "type" in descr:
                 self._custom_rpc_methods[user_access_name] = RPCBase(
