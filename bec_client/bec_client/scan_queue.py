@@ -368,14 +368,21 @@ class ScanQueue:
             parent.last_scan_number = scan_number
 
         while True:
-            scan_obj = parent.find_scan(scanID=scanID)
-            if scan_obj is not None:
-                if scan.content.get("status") == "open":
-                    scan_obj.start_time = scan.content.get("timestamp")
-                elif scan.content.get("status") == "closed":
-                    scan_obj.end_time = scan.content.get("timestamp")
-                scan_obj.status[scanID] = scan.content.get("status")
-                if scan.content["info"].get("num_points"):
-                    scan_obj.num_points = scan.content["info"].get("num_points")
-                break
-            time.sleep(0.1)
+            scan_obj = parent.find_scan(scanID=scan.content["scanID"])
+            if not scan_obj:
+                time.sleep(0.1)
+                continue
+
+            # update timestamps
+            if scan.content.get("status") == "open":
+                scan_obj.start_time = scan.content.get("timestamp")
+            elif scan.content.get("status") == "closed":
+                scan_obj.end_time = scan.content.get("timestamp")
+
+            # update status message
+            scan_obj.status[scan.content["scanID"]] = scan.content.get("status")
+
+            # update total number of points
+            if scan.content["info"].get("num_points"):
+                scan_obj.num_points = scan.content["info"].get("num_points")
+            break
