@@ -9,8 +9,6 @@ from bec_utils import BECMessage, bec_logger
 
 if TYPE_CHECKING:
     from bec_client.scan_manager import ScanManager
-    from queue_items import QueueItem
-    from request_items import RequestItem
 
 logger = bec_logger.logger
 
@@ -18,6 +16,7 @@ logger = bec_logger.logger
 class ScanItem:
     status: dict
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         scan_manager: ScanManager,
@@ -25,7 +24,7 @@ class ScanItem:
         scan_number: list,
         scanID: list,
         status: str,
-        **kwargs,
+        **_kwargs,
     ) -> None:
         self.scan_manager = scan_manager
         self._queueID = queueID
@@ -40,6 +39,7 @@ class ScanItem:
 
     @property
     def queue(self):
+        """get the queue item for the current scan item"""
         return self.scan_manager.queue_storage.find_queue_item_by_ID(self._queueID)
 
     def __eq__(self, other):

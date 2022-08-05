@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 
 
 class RequestItem:
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         scan_manager: ScanManager,
@@ -25,7 +26,7 @@ class RequestItem:
         request=None,
         response=None,
         accepted: bool = None,
-        **kwargs,
+        **_kwargs,
     ) -> None:
         self.scan_manager = scan_manager
         self.requestID = requestID
@@ -37,17 +38,20 @@ class RequestItem:
         self._scanID = scanID
 
     def update_with_response(self, response: BECMessage.RequestResponseMessage):
+        """update the current request item with a RequestResponseMessage / response message"""
         self.response = response
         self.decision_pending = False
         self.requestID = response.metadata["RID"]
         self.accepted = [response.content["accepted"]]
 
     def update_with_request(self, request: BECMessage.ScanQueueMessage):
+        """update the current request item with a ScanQueueMessage / request message"""
         self.request = request
         self.requestID = request.metadata["RID"]
 
     @classmethod
     def from_response(cls, scan_manager: ScanManager, response: BECMessage.RequestResponseMessage):
+        """initialize a request item from a RequestReponseMessage / response message"""
         scan_req = cls(
             scan_manager=scan_manager,
             requestID=response.metadata["RID"],
@@ -59,6 +63,7 @@ class RequestItem:
 
     @classmethod
     def from_request(cls, scan_manager: ScanManager, request: BECMessage.ScanQueueMessage):
+        """initialize a request item from a ScanQueueMessage / request message"""
         scan_req = cls(
             scan_manager=scan_manager, requestID=request.metadata["RID"], request=request
         )
@@ -66,6 +71,7 @@ class RequestItem:
 
     @property
     def scan(self) -> ScanItem:
+        """get the scan item for the given request item"""
         queue_item = self.scan_manager.queue_storage.find_queue_item_by_requestID(self.requestID)
         if not queue_item:
             return None
@@ -75,6 +81,7 @@ class RequestItem:
 
     @property
     def queue(self) -> QueueItem:
+        """get the queue item for the given request_item"""
         return self.scan_manager.queue_storage.find_queue_item_by_requestID(self.requestID)
 
 
@@ -119,3 +126,4 @@ class RequestStorage:
             return
 
         self.storage.append(RequestItem.from_request(self.scan_manager, request_msg))
+        return

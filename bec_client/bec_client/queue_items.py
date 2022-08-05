@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import threading
 from collections import deque
-from optparse import Option
 from typing import TYPE_CHECKING, Deque, List, Optional
 
 from bec_utils import BECMessage
@@ -14,6 +13,7 @@ if TYPE_CHECKING:
 
 
 class QueueItem:
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         scan_manager: ScanManager,
@@ -22,7 +22,7 @@ class QueueItem:
         status: str,
         active_request_block: dict,
         scanID: List(str),
-        **kwargs,
+        **_kwargs,
     ) -> None:
         self.scan_manager = scan_manager
         self.queueID = queueID
@@ -34,10 +34,12 @@ class QueueItem:
 
     @property
     def scans(self) -> List[ScanItem]:
+        """get the scans items assigned to the current queue item"""
         return [self.scan_manager.scan_storage.find_scan_by_ID(scanID) for scanID in self._scans]
 
     @property
     def requests(self) -> List[RequestItem]:
+        """get the request items assigned to the current queue item"""
         return [
             self.scan_manager.request_storage.find_request_by_ID(requestID)
             for requestID in self._requests
@@ -48,10 +50,11 @@ class QueueItem:
         """get the current queue position"""
         current_queue = self.scan_manager.queue_storage.current_scan_queue
         for queue_group in current_queue.values():
-            if isinstance(queue_group, dict):
-                for queue_position, queue in enumerate(queue_group["info"]):
-                    if self.queueID == queue["queueID"]:
-                        return queue_position
+            if not isinstance(queue_group, dict):
+                continue
+            for queue_position, queue in enumerate(queue_group["info"]):
+                if self.queueID == queue["queueID"]:
+                    return queue_position
         return None
 
 
@@ -65,6 +68,7 @@ class QueueStorage:
         self.current_scan_queue = None
 
     def update_with_status(self, queue_msg: BECMessage.ScanQueueStatusMessage) -> None:
+        """update a queue item with a new ScanQueueStatusMessage / queue message"""
         self.current_scan_queue = queue_msg.content["queue"]
         queue_info = self.current_scan_queue["primary"].get("info")
         with self._lock:
@@ -83,6 +87,7 @@ class QueueStorage:
     def find_queue_item_by_requestID(self, requestID: str) -> Optional(QueueItem):
         """find a queue item based on its requestID"""
         for queue_item in self.storage:
+            # pylint: disable=protected-access
             if requestID in queue_item._requests:
                 return queue_item
         return None
@@ -90,6 +95,7 @@ class QueueStorage:
     def find_queue_item_by_scanID(self, scanID: str) -> Optional(QueueItem):
         """find a queue item based on its scanID"""
         for queue_item in self.storage:
+            # pylint: disable=protected-access
             if scanID in queue_item._scans:
                 return queue_item
         return None

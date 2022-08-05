@@ -28,6 +28,7 @@ class ScanReport:
 
     @property
     def scan(self):
+        """get the scan item"""
         return self.request.scan
 
 
@@ -77,7 +78,14 @@ class ScanManager:
         self.queue_storage.update_with_status(queue)
         self.scan_storage.update_with_queue_status(queue)
 
-    def request_scan_interruption(self, deferred_pause=True, scanID=None) -> None:
+    def request_scan_interruption(self, deferred_pause=True, scanID: str = None) -> None:
+        """request a scan interruption
+
+        Args:
+            deferred_pause (bool, optional): Request a deferred pause. If False, a pause will be requested. Defaults to True.
+            scanID (str, optional): ScanID. Defaults to None.
+
+        """
         if scanID is None:
             scanID = self.scan_storage.current_scanID
         if not any(scanID):
@@ -92,6 +100,12 @@ class ScanManager:
         )
 
     def request_scan_abortion(self, scanID=None):
+        """request a scan abortion
+
+        Args:
+            scanID (str, optional): ScanID. Defaults to None.
+
+        """
         if scanID is None:
             scanID = self.scan_storage.current_scanID
         self.producer.send(
@@ -102,6 +116,12 @@ class ScanManager:
         )
 
     def request_scan_continuation(self, scanID=None):
+        """request a scan continuation
+
+        Args:
+            scanID (str, optional): ScanID. Defaults to None.
+
+        """
         if scanID is None:
             scanID = self.scan_storage.current_scanID
         self.producer.send(
@@ -112,30 +132,30 @@ class ScanManager:
         )
 
     @staticmethod
-    def _scan_queue_status_callback(msg, *, parent: ScanManager, **kwargs) -> None:
+    def _scan_queue_status_callback(msg, *, parent: ScanManager, **_kwargs) -> None:
         queue_status = BECMessage.ScanQueueStatusMessage.loads(msg.value)
         if not queue_status:
             return
         parent.update_with_queue_status(queue_status)
 
     @staticmethod
-    def _scan_queue_request_callback(msg, *, parent: ScanManager, **kwargs) -> None:
+    def _scan_queue_request_callback(msg, *, parent: ScanManager, **_kwargs) -> None:
         request = BECMessage.ScanQueueMessage.loads(msg.value)
         parent.request_storage.update_with_request(request)
 
     @staticmethod
-    def _scan_queue_request_response_callback(msg, *, parent: ScanManager, **kwargs) -> None:
+    def _scan_queue_request_response_callback(msg, *, parent: ScanManager, **_kwargs) -> None:
         response = BECMessage.RequestResponseMessage.loads(msg.value)
         logger.debug(response)
         parent.request_storage.update_with_response(response)
 
     @staticmethod
-    def _scan_status_callback(msg, *, parent: ScanManager, **kwargs) -> None:
+    def _scan_status_callback(msg, *, parent: ScanManager, **_kwargs) -> None:
         scan = BECMessage.ScanStatusMessage.loads(msg.value)
         parent.scan_storage.update_with_scan_status(scan)
 
     @staticmethod
-    def _scan_segment_callback(msg, *, parent: ScanManager, **kwargs) -> None:
+    def _scan_segment_callback(msg, *, parent: ScanManager, **_kwargs) -> None:
         scan_msgs = BECMessage.ScanMessage.loads(msg.value)
         if not isinstance(scan_msgs, list):
             scan_msgs = [scan_msgs]
