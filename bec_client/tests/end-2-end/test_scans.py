@@ -10,7 +10,7 @@ from bec_utils import RedisConnector, ServiceConfig, bec_logger
 from bec_utils.bec_errors import ScanInterruption
 
 CONFIG_PATH = "../test_config.yaml"
-
+CONFIG_PATH = "../bec_config_dev.yaml"
 # pylint: disable=no-member
 
 
@@ -31,6 +31,7 @@ def test_grid_scan(capsys):
     bec = start_client()
     scans = bec.scans
     dev = bec.devicemanager.devices
+    scans.umv(dev.samx, 0, dev.samy, 0)
     status = scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.01)
     assert len(status.scan.data) == 100
     assert status.scan.num_points == 100
@@ -91,6 +92,9 @@ def test_mv_scan_mv():
     bec = start_client()
     scans = bec.scans
     dev = bec.devicemanager.devices
+
+    dev.samx.limits = [-50, 50]
+    dev.samy.limits = [-50, 50]
     scans.umv(dev.samx, 10, dev.samy, 20)
     tolerance_samx = dev.samx.config["deviceConfig"].get("tolerance", 0.05)
     tolerance_samy = dev.samy.config["deviceConfig"].get("tolerance", 0.05)
