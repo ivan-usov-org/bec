@@ -12,22 +12,22 @@ class ProducerMock:
     def set(self, topic, msg):
         pass
 
-    def send(self, queue, msg):
-        self.message_sent = {"queue": queue, "msg": msg}
+    def send(self, topic, msg):
+        self.message_sent = {"queue": topic, "msg": msg}
 
-    def set_and_publish(self, queue, msg):
-        self.message_sent = {"queue": queue, "msg": msg}
+    def set_and_publish(self, topic, msg):
+        self.message_sent = {"queue": topic, "msg": msg}
 
-    def lpush(self, queue, msg):
+    def lpush(self, topic, msg):
         pass
 
-    def rpush(self, queue, msg):
+    def rpush(self, topic, msg):
         pass
 
-    def lrange(self, queue, start, stop):
+    def lrange(self, topic, start, stop):
         return []
 
-    def get(self, queue):
+    def get(self, topic):
         return None
 
 
