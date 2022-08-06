@@ -133,7 +133,7 @@ class ScanBundler(BECService):
             scan_motors = list(set([self.DM.devices[m] for m in scan_info["primary"]]))
             self.scan_motors[scanID] = scan_motors
             if not scanID in self.sync_storage:
-                self.sync_storage[scanID] = {"info": scan_info, "status": "open"}
+                self.sync_storage[scanID] = {"info": scan_info, "status": "open", "sent": set()}
                 self.bluesky_metadata[scanID] = dict()
                 # for now lets assume that all devices are primary devices:
                 self.primary_devices[scanID] = {
@@ -404,6 +404,7 @@ class ScanBundler(BECService):
         #     msgpack.dumps(("event", self._prepare_bluesky_event_data(scanID, pointID))),
         # )
         self.sync_storage[scanID].pop(pointID)
+        self.sync_storage[scanID]["sent"].add(pointID)
 
     def shutdown(self):
         self.DM.shutdown()
