@@ -33,14 +33,14 @@ class RequestItem:
         self.request = request
         self.response = response
         self.accepted = accepted
-        self.decision_pending = decision_pending
+        self._decision_pending = decision_pending
         self.status = "PENDING"  # needed?
         self._scanID = scanID
 
     def update_with_response(self, response: BECMessage.RequestResponseMessage):
         """update the current request item with a RequestResponseMessage / response message"""
         self.response = response
-        self.decision_pending = False
+        self._decision_pending = False
         self.requestID = response.metadata["RID"]
         self.accepted = [response.content["accepted"]]
 
@@ -48,6 +48,21 @@ class RequestItem:
         """update the current request item with a ScanQueueMessage / request message"""
         self.request = request
         self.requestID = request.metadata["RID"]
+
+    @property
+    def decision_pending(self) -> bool:
+        """indicates whether a decision has been made to accept or decline a scan request"""
+        if not self._decision_pending:
+            return self._decision_pending
+
+        if self.scan:
+            self._decision_pending = False
+            self.accepted = [True]
+        return self._decision_pending
+
+    @decision_pending.setter
+    def decision_pending(self, val: bool) -> None:
+        self._decision_pending = val
 
     @classmethod
     def from_response(cls, scan_manager: ScanManager, response: BECMessage.RequestResponseMessage):
@@ -70,7 +85,7 @@ class RequestItem:
         return scan_req
 
     @property
-    def scan(self) -> ScanItem:
+    def scan(self) -> Optional(ScanItem):
         """get the scan item for the given request item"""
         queue_item = self.scan_manager.queue_storage.find_queue_item_by_requestID(self.requestID)
         if not queue_item:
@@ -102,15 +117,16 @@ class RequestStorage:
 
     def update_with_response(self, response_msg: BECMessage.RequestResponseMessage) -> None:
         """create or update request item based on a new RequestResponseMessage"""
-        request_item = self.find_request_by_ID(response_msg.metadata.get("RID"))
-        if request_item:
-            request_item.update_with_response(response_msg)
-            logger.debug("Scan queue request exists. Updating with response.")
-            return
+        with self._lock:
+            request_item = self.find_request_by_ID(response_msg.metadata.get("RID"))
+            if request_item:
+                request_item.update_with_response(response_msg)
+                logger.debug("Scan queue request exists. Updating with response.")
+                return
 
-        # it could be that the response arrived before the request
-        self.storage.append(RequestItem.from_response(self.scan_manager, response_msg))
-        logger.debug("Scan queue request does not exist. Creating from response.")
+            # it could be that the response arrived before the request
+            self.storage.append(RequestItem.from_response(self.scan_manager, response_msg))
+            logger.debug("Scan queue request does not exist. Creating from response.")
 
     def update_with_request(self, request_msg: BECMessage.ScanQueueMessage) -> None:
         """create or update request item based on a new ScanQueueMessage (i.e. request message)"""
@@ -119,11 +135,11 @@ class RequestStorage:
 
         if not request_msg.metadata.get("RID"):
             return
+        with self._lock:
+            request_item = self.find_request_by_ID(request_msg.metadata.get("RID"))
+            if request_item:
+                request_item.update_with_request(request_msg)
+                return
 
-        request_item = self.find_request_by_ID(request_msg.metadata.get("RID"))
-        if request_item:
-            request_item.update_with_request(request_msg)
+            self.storage.append(RequestItem.from_request(self.scan_manager, request_msg))
             return
-
-        self.storage.append(RequestItem.from_request(self.scan_manager, request_msg))
-        return
