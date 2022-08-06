@@ -38,13 +38,16 @@ def queue_is_empty(queue) -> bool:
     return False
 
 
-def wait_for_empty_queue(bec):
-    queue_info = BECMessage.ScanQueueStatusMessage.loads(
+def get_queue(bec):
+    return BECMessage.ScanQueueStatusMessage.loads(
         bec.queue.producer.get(MessageEndpoints.scan_queue_status())
     )
-    while not queue_is_empty(queue_info.content["queue"]):
+
+
+def wait_for_empty_queue(bec):
+    while not queue_is_empty(get_queue(bec).content["queue"]):
         time.sleep(1)
-    while queue_info.content["queue"]["primary"]["status"] != "RUNNING":
+    while get_queue(bec).content["queue"]["primary"]["status"] != "RUNNING":
         time.sleep(1)
 
 
