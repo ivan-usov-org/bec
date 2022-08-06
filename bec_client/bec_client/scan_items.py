@@ -59,7 +59,7 @@ class ScanStorage:
     def current_scan_info(self) -> dict:
         """get the current scan info from the scan queue"""
         scan_queue = self.scan_manager.queue_storage.current_scan_queue
-        if not scan_queue:
+        if not scan_queue or not scan_queue["primary"].get("info"):
             return None
         return scan_queue["primary"].get("info")[0]
 
