@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 from bec_client import BKClient
 from bec_client.alarm_handler import AlarmBase
-from bec_utils import RedisConnector, ServiceConfig
+from bec_utils import BECMessage, MessageEndpoints, RedisConnector, ServiceConfig
 from bec_utils.bec_errors import ScanInterruption
 
 CONFIG_PATH = "../test_config.yaml"
@@ -39,7 +39,12 @@ def queue_is_empty(queue) -> bool:
 
 
 def wait_for_empty_queue(bec):
-    while not queue_is_empty(bec.queue.queue_storage.current_scan_queue):
+    queue_info = BECMessage.ScanQueueStatusMessage.loads(
+        bec.queue.producer.get(MessageEndpoints.scan_queue_status())
+    )
+    while not queue_is_empty(queue_info.content["queue"]):
+        time.sleep(1)
+    while queue_info.content["queue"]["primary"]["status"] != "RUNNING":
         time.sleep(1)
 
 
