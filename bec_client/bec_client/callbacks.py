@@ -241,6 +241,8 @@ async def wait_for_scan_to_start(bec, scan_item: ScanItem):
     while True:
         queue_pos = scan_item.queue.queue_position
         check_alarms(bec)
+        if scan_item.status == "closed":
+            break
         if queue_pos is None:
             logger.debug(f"Could not find queue entry for scanID {scan_item.scanID}")
             continue
