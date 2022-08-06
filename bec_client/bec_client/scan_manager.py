@@ -131,6 +131,15 @@ class ScanManager:
             ).dumps(),
         )
 
+    def request_queue_reset(self):
+        """request a scan queue reset"""
+        self.producer.send(
+            MessageEndpoints.scan_queue_modification_request(),
+            BECMessage.ScanQueueModificationMessage(
+                scanID=None, action="clear", parameter={}
+            ).dumps(),
+        )
+
     @staticmethod
     def _scan_queue_status_callback(msg, *, parent: ScanManager, **_kwargs) -> None:
         queue_status = BECMessage.ScanQueueStatusMessage.loads(msg.value)
