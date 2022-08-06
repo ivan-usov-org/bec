@@ -6,12 +6,41 @@ import numpy as np
 import pytest
 from bec_client import BKClient
 from bec_client.alarm_handler import AlarmBase
-from bec_utils import RedisConnector, ServiceConfig, bec_logger
+from bec_utils import RedisConnector, ServiceConfig
 from bec_utils.bec_errors import ScanInterruption
 
 CONFIG_PATH = "../test_config.yaml"
 CONFIG_PATH = "../bec_config_dev.yaml"
 # pylint: disable=no-member
+# pylint: disable=missing-function-docstring
+# pylint: disable=redefined-outer-name
+
+
+@pytest.fixture(scope="session", autouse=True)
+def client():
+    config = ServiceConfig(CONFIG_PATH)
+    bec = BKClient(
+        [config.redis],
+        RedisConnector,
+        config.scibec,
+    )
+    bec.start()
+    bec.queue.request_queue_reset()
+    bec.queue.request_scan_continuation()
+    return bec
+
+
+def queue_is_empty(queue) -> bool:
+    if not queue:
+        return True
+    if not queue["primary"].get("info"):
+        return True
+    return False
+
+
+def wait_for_empty_queue(bec):
+    while not queue_is_empty(bec.queue.queue_storage.current_scan_queue):
+        time.sleep(1)
 
 
 @pytest.mark.timeout(200)
@@ -29,9 +58,10 @@ def start_client():
 
 
 @pytest.mark.timeout(200)
-def test_grid_scan(capsys):
-    bec = start_client()
+def test_grid_scan(capsys, client):
+    bec = client
     scans = bec.scans
+    wait_for_empty_queue(bec)
     dev = bec.devicemanager.devices
     scans.umv(dev.samx, 0, dev.samy, 0)
     status = scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.01)
@@ -42,9 +72,10 @@ def test_grid_scan(capsys):
 
 
 @pytest.mark.timeout(200)
-def test_fermat_scan(capsys):
-    bec = start_client()
+def test_fermat_scan(capsys, client):
+    bec = client
     scans = bec.scans
+    wait_for_empty_queue(bec)
     dev = bec.devicemanager.devices
     status = scans.fermat_scan(dev.samx, -5, 5, dev.samy, -5, 5, step=0.5, exp_time=0.01)
     assert len(status.scan.data) == 199
@@ -54,9 +85,10 @@ def test_fermat_scan(capsys):
 
 
 @pytest.mark.timeout(200)
-def test_line_scan(capsys):
-    bec = start_client()
+def test_line_scan(capsys, client):
+    bec = client
     scans = bec.scans
+    wait_for_empty_queue(bec)
     dev = bec.devicemanager.devices
     status = scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.01)
     assert len(status.scan.data) == 10
@@ -66,9 +98,10 @@ def test_line_scan(capsys):
 
 
 @pytest.mark.timeout(200)
-def test_mv_scan(capsys):
-    bec = start_client()
+def test_mv_scan(capsys, client):
+    bec = client
     scans = bec.scans
+    wait_for_empty_queue(bec)
     dev = bec.devicemanager.devices
     scans.umv(dev.samx, 10, dev.samy, 20)
     current_pos_samx = dev.samx.read()["samx"]["value"]
@@ -90,9 +123,10 @@ def test_mv_scan(capsys):
 
 
 @pytest.mark.timeout(200)
-def test_mv_scan_mv():
-    bec = start_client()
+def test_mv_scan_mv(client):
+    bec = client
     scans = bec.scans
+    wait_for_empty_queue(bec)
     dev = bec.devicemanager.devices
 
     dev.samx.limits = [-50, 50]
@@ -150,7 +184,7 @@ def test_mv_scan_mv():
 
 
 @pytest.mark.timeout(200)
-def test_scan_abort():
+def test_scan_abort(client):
     def send_abort(bec):
         while True:
             if not bec.queue.scan_storage.current_scan:
@@ -161,7 +195,8 @@ def test_scan_abort():
         time.sleep(2)
         _thread.interrupt_main()
 
-    bec = start_client()
+    bec = client
+    wait_for_empty_queue(bec)
     scans = bec.scans
     dev = bec.devicemanager.devices
     aborted_scan = False
@@ -175,8 +210,9 @@ def test_scan_abort():
 
 
 @pytest.mark.timeout(200)
-def test_limit_error():
-    bec = start_client()
+def test_limit_error(client):
+    bec = client
+    wait_for_empty_queue(bec)
     scans = bec.scans
     dev = bec.devicemanager.devices
     aborted_scan = False
@@ -201,20 +237,21 @@ def test_limit_error():
 
 
 @pytest.mark.timeout(200)
-def test_queued_scan():
-    bec = start_client()
+def test_queued_scan(client):
+    bec = client
+    wait_for_empty_queue(bec)
     scans = bec.scans
     dev = bec.devicemanager.devices
-    s1 = scans.line_scan(dev.samx, -5, 5, steps=100, exp_time=0.1, hide_report=True)
-    s2 = scans.line_scan(dev.samx, -5, 5, steps=50, exp_time=0.1, hide_report=True)
+    scan1 = scans.line_scan(dev.samx, -5, 5, steps=100, exp_time=0.1, hide_report=True)
+    scan2 = scans.line_scan(dev.samx, -5, 5, steps=50, exp_time=0.1, hide_report=True)
 
     while True:
-        if not s1.scan or not s2.scan:
+        if not scan1.scan or not scan2.scan:
             continue
-        if s1.scan.status != "open":
+        if scan1.scan.status != "open":
             continue
-        assert s1.scan.queue.queue_position == 0
-        assert s2.scan.queue.queue_position == 1
+        assert scan1.scan.queue.queue_position == 0
+        assert scan2.scan.queue.queue_position == 1
         break
-    while len(s2.scan.data) != 50:
+    while len(scan2.scan.data) != 50:
         time.sleep(0.5)
