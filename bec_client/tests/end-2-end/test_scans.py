@@ -23,6 +23,8 @@ def start_client():
         config.scibec,
     )
     bec.start()
+    bec.queue.request_queue_reset()
+    bec.queue.request_scan_continuation()
     return bec
 
 
