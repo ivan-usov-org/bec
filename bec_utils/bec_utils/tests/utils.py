@@ -15,8 +15,8 @@ class ProducerMock:
     def send(self, queue, msg):
         self.message_sent = {"queue": queue, "msg": msg}
 
-    def set_and_publish(self, topic, msg):
-        pass
+    def set_and_publish(self, queue, msg):
+        self.message_sent = {"queue": queue, "msg": msg}
 
     def lpush(self, queue, msg):
         pass
