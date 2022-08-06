@@ -144,7 +144,7 @@ class QueueManager:
             logger.info("New scan queue:")
             for queue in self.describe_queue():
                 logger.info(f"\n {queue}")
-            self.producer.send(
+            self.producer.set_and_publish(
                 MessageEndpoints.scan_queue_status(),
                 BECMessage.ScanQueueStatusMessage(queue=queue_export).dumps(),
             )
