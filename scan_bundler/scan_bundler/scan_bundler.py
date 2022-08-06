@@ -243,9 +243,17 @@ class ScanBundler(BECService):
             }
         primary_devices["pointID"][pointID][device] = True
         with self._lock:
-            all_primary_devices_completed = all(
+            primary_devices_completed = [
                 status for status in primary_devices["pointID"][pointID].values()
-            )
+            ]
+
+            if all(primary_devices_completed) and (
+                len(primary_devices_completed) == len(self.primary_devices[scanID]["devices"])
+            ):
+                all_primary_devices_completed = True
+            else:
+                all_primary_devices_completed = False
+
             if all_primary_devices_completed and self.sync_storage[scanID].get(pointID):
                 self._update_monitor_signals(scanID, pointID)
                 self._send_scan_point(scanID, pointID)
@@ -404,7 +412,10 @@ class ScanBundler(BECService):
         #     msgpack.dumps(("event", self._prepare_bluesky_event_data(scanID, pointID))),
         # )
         self.sync_storage[scanID].pop(pointID)
-        self.sync_storage[scanID]["sent"].add(pointID)
+        if not pointID in self.sync_storage[scanID]["sent"]:
+            self.sync_storage[scanID]["sent"].add(pointID)
+        else:
+            logger.warning(f"Resubmitting existing pointID {pointID} for scanID {scanID}")
 
     def shutdown(self):
         self.DM.shutdown()
