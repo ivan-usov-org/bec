@@ -10,7 +10,7 @@ from bec_utils import RedisConnector, ServiceConfig
 from bec_utils.bec_errors import ScanInterruption
 
 CONFIG_PATH = "../test_config.yaml"
-CONFIG_PATH = "../bec_config_dev.yaml"
+# CONFIG_PATH = "../bec_config_dev.yaml"
 # pylint: disable=no-member
 # pylint: disable=missing-function-docstring
 # pylint: disable=redefined-outer-name
