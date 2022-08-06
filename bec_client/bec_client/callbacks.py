@@ -18,7 +18,7 @@ from bec_utils import (
 from bec_utils.connector import ConsumerConnector
 
 from bec_client.request_items import RequestItem, RequestStorage
-from bec_client.scan_items import ScanItem, ScanStorage
+from bec_client.scan_items import ScanItem
 
 from .prettytable import PrettyTable
 from .progressbar import DeviceProgressBar, ScanProgressBar
@@ -51,8 +51,8 @@ def set_event_delayed(event: threading.Event, delay: int) -> None:
 
 
 def check_alarms(bec):
+    """check for alarms and raise them if needed"""
     for alarm in bec.alarms(severity=Alarms.MINOR):
-        # print(alarm)
         raise alarm
 
 
@@ -116,7 +116,7 @@ async def live_updates_readback_progressbar(
 
 
 async def live_updates_readback(
-    dm: DeviceManagerBase, move_args: dict, consumer: ConsumerConnector
+    device_manager: DeviceManagerBase, move_args: dict, consumer: ConsumerConnector
 ) -> None:
     """Live feedback on motor movements.
 
@@ -131,7 +131,8 @@ async def live_updates_readback(
     print("  ", "\t".join(f"{dev}" for dev in devices))
     stop = [threading.Event() for dev in devices]
     dev_values = [
-        dm.devices[dev].read(cached=True, use_readback=True).get("value") for dev in devices
+        device_manager.devices[dev].read(cached=True, use_readback=True).get("value")
+        for dev in devices
     ]
 
     def print_device_positions():
@@ -153,11 +154,11 @@ async def live_updates_readback(
                         dev_values[ind] = msg[dev].get("value")
             else:
                 dev_values = [
-                    dm.devices[dev].read(cached=True, use_readback=True).get("value")
+                    device_manager.devices[dev].read(cached=True, use_readback=True).get("value")
                     for dev in devices
                 ]
                 for ind, dev in enumerate(devices):
-                    val = dm.parent.producer.get(MessageEndpoints.device_status(dev))
+                    val = device_manager.parent.producer.get(MessageEndpoints.device_status(dev))
                     if not val:
                         continue
                     val = msgpack.loads(val)
@@ -165,7 +166,9 @@ async def live_updates_readback(
                     if DeviceStatus(val.get("status")) != DeviceStatus.IDLE:
                         continue
 
-                    tolerance = dm.devices[dev].config["deviceConfig"].get("tolerance", 0.5)
+                    tolerance = (
+                        device_manager.devices[dev].config["deviceConfig"].get("tolerance", 0.5)
+                    )
                     is_close = all(
                         np.isclose(dev_values[ind], list(move_args.values())[ind], atol=tolerance)
                     )
@@ -173,7 +176,7 @@ async def live_updates_readback(
                         continue
                     if not stop[ind].is_set():
                         set_event_delayed(stop[ind], 0.2)
-                check_alarms(dm.parent)
+                check_alarms(device_manager.parent)
                 await asyncio.sleep(0.1)
             print_device_positions()
 
@@ -181,6 +184,7 @@ async def live_updates_readback(
 
 
 async def wait_for_scan_request(requests: RequestStorage, RID: str) -> RequestItem:
+    """wait for scan queuest"""
     logger.debug("Waiting for request ID")
     start = time.time()
     while requests.find_request_by_ID(RID) is None:
@@ -190,6 +194,7 @@ async def wait_for_scan_request(requests: RequestStorage, RID: str) -> RequestIt
 
 
 async def wait_for_scan_request_decision(scan_queue_request):
+    """wait for a scan queuest decision"""
     logger.debug("Waiting for decision")
     start = time.time()
     while scan_queue_request.decision_pending:
@@ -198,6 +203,7 @@ async def wait_for_scan_request_decision(scan_queue_request):
 
 
 def sort_devices(devices, scan_devices) -> list:
+    """sort the devices to ensure that the table starts with scan motors"""
     for scan_dev in list(scan_devices)[::-1]:
         devices.remove(scan_dev)
         devices.insert(0, scan_dev)
@@ -205,6 +211,7 @@ def sort_devices(devices, scan_devices) -> list:
 
 
 def get_devices_from_request(device_manager, request) -> list:
+    """extract interesting devices from a scan request"""
     scan_devices = request.content["parameter"]["args"].keys()
     primary_devices = device_manager.devices.primary_devices(
         [device_manager.devices[dev] for dev in scan_devices]
@@ -217,6 +224,7 @@ def get_devices_from_request(device_manager, request) -> list:
 
 
 async def get_scan_item(bec: BKClient, request_item: RequestItem) -> ScanItem:
+    """get the current scan item"""
     timeout_time = 15
     sleep_time = 0.1
     consumed_time = 0
@@ -230,6 +238,7 @@ async def get_scan_item(bec: BKClient, request_item: RequestItem) -> ScanItem:
 
 
 def get_devices(device_manager, request, scan_msg):
+    """get the devices for the callback"""
     if scan_msg.metadata["scan_type"] == "step":
         return get_devices_from_request(device_manager=device_manager, request=request)
     if scan_msg.metadata["scan_type"] == "fly":
@@ -238,6 +247,7 @@ def get_devices(device_manager, request, scan_msg):
 
 
 async def wait_for_scan_to_start(bec, scan_item: ScanItem):
+    """wait until the scan starts"""
     while True:
         queue_pos = scan_item.queue.queue_position
         check_alarms(bec)
@@ -257,6 +267,7 @@ async def wait_for_scan_to_start(bec, scan_item: ScanItem):
 
 
 async def wait_for_scan_item_to_finish(bec, scan_item):
+    """wait for scan completion"""
     while not scan_item.end_time or scan_item.queue.queue_position is not None:
         check_alarms(bec)
         await asyncio.sleep(0.1)
