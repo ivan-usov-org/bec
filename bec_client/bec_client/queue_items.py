@@ -63,7 +63,7 @@ class QueueStorage:
 
     def __init__(self, scan_manager: ScanManager, maxlen=50) -> None:
         self.storage: Deque[QueueItem] = deque(maxlen=maxlen)
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()
         self.scan_manager = scan_manager
         self.current_scan_queue = None
 
@@ -79,23 +79,26 @@ class QueueStorage:
 
     def find_queue_item_by_ID(self, queueID: str) -> Optional(QueueItem):
         """find a queue item based on its queueID"""
-        for queue_item in self.storage:
-            if queue_item.queueID == queueID:
-                return queue_item
-        return None
+        with self._lock:
+            for queue_item in self.storage:
+                if queue_item.queueID == queueID:
+                    return queue_item
+            return None
 
     def find_queue_item_by_requestID(self, requestID: str) -> Optional(QueueItem):
         """find a queue item based on its requestID"""
-        for queue_item in self.storage:
-            # pylint: disable=protected-access
-            if requestID in queue_item._requests:
-                return queue_item
-        return None
+        with self._lock:
+            for queue_item in self.storage:
+                # pylint: disable=protected-access
+                if requestID in queue_item._requests:
+                    return queue_item
+            return None
 
     def find_queue_item_by_scanID(self, scanID: str) -> Optional(QueueItem):
         """find a queue item based on its scanID"""
-        for queue_item in self.storage:
-            # pylint: disable=protected-access
-            if scanID in queue_item._scans:
-                return queue_item
-        return None
+        with self._lock:
+            for queue_item in self.storage:
+                # pylint: disable=protected-access
+                if scanID in queue_item._scans:
+                    return queue_item
+            return None
