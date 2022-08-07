@@ -5,7 +5,7 @@ import time
 from collections import deque
 from typing import TYPE_CHECKING, Optional
 
-from bec_utils import BECMessage, bec_logger
+from bec_utils import BECMessage, bec_logger, threadlocked
 
 if TYPE_CHECKING:
     from bec_client.scan_manager import ScanManager
@@ -53,7 +53,7 @@ class ScanStorage:
         self.scan_manager = scan_manager
         self.storage = deque(maxlen=maxlen)
         self.last_scan_number = init_scan_number
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()
 
     @property
     def current_scan_info(self) -> dict:
@@ -75,6 +75,7 @@ class ScanStorage:
         """get the current scanID"""
         return self.current_scan_info.get("scanID") if self.current_scan_info is not None else None
 
+    @threadlocked
     def find_scan_by_ID(self, scanID: str) -> Optional(ScanItem):
         """find a scan item based on its scanID"""
         for scan in self.storage:
@@ -116,36 +117,38 @@ class ScanStorage:
     def add_scan_segment(self, scan_msg: BECMessage.ScanMessage) -> None:
         """update a scan item with a new scan segment"""
         while True:
-            for scan_item in self.storage:
-                if scan_item.scanID == scan_msg.metadata["scanID"]:
-                    scan_item.data[scan_msg.content["point_id"]] = scan_msg
-                    return
+            with self._lock:
+                for scan_item in self.storage:
+                    if scan_item.scanID == scan_msg.metadata["scanID"]:
+                        scan_item.data[scan_msg.content["point_id"]] = scan_msg
+                        return
             time.sleep(0.01)
 
+    @threadlocked
     def add_scan_item(self, queueID: str, scan_number: list, scanID: list, status: str):
         """append new scan item to scan storage"""
         self.storage.append(ScanItem(self.scan_manager, queueID, scan_number, scanID, status))
 
+    @threadlocked
     def update_with_queue_status(self, queue_msg: BECMessage.ScanQueueStatusMessage):
         """create new scan items based on their existence in the queue info"""
         queue_info = queue_msg.content["queue"]["primary"].get("info")
-        with self._lock:
-            for queue_item in queue_info:
-                # append = True
-                # for scan_obj in self.storage:
-                #     if len(set(scan_obj.scanID) & set(queue_item["scanID"])) > 0:
-                #         append = False
-                if not any(queue_item["is_scan"]):
+        for queue_item in queue_info:
+            # append = True
+            # for scan_obj in self.storage:
+            #     if len(set(scan_obj.scanID) & set(queue_item["scanID"])) > 0:
+            #         append = False
+            if not any(queue_item["is_scan"]):
+                continue
+
+            for ii, scan in enumerate(queue_item["scanID"]):
+                if self.find_scan_by_ID(scan):
                     continue
 
-                for ii, scan in enumerate(queue_item["scanID"]):
-                    if self.find_scan_by_ID(scan):
-                        continue
-
-                    logger.debug(f"Appending new scan: {queue_item}")
-                    self.add_scan_item(
-                        queueID=queue_item["queueID"],
-                        scan_number=queue_item["scan_number"][ii],
-                        scanID=queue_item["scanID"][ii],
-                        status=queue_item["status"],
-                    )
+                logger.debug(f"Appending new scan: {queue_item}")
+                self.add_scan_item(
+                    queueID=queue_item["queueID"],
+                    scan_number=queue_item["scan_number"][ii],
+                    scanID=queue_item["scanID"][ii],
+                    status=queue_item["status"],
+                )

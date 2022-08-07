@@ -4,7 +4,7 @@ import threading
 from collections import deque
 from typing import TYPE_CHECKING, Deque, List, Optional
 
-from bec_utils import BECMessage
+from bec_utils import BECMessage, threadlocked
 
 if TYPE_CHECKING:
     from request_items import RequestItem
@@ -67,38 +67,38 @@ class QueueStorage:
         self.scan_manager = scan_manager
         self.current_scan_queue = None
 
+    @threadlocked
     def update_with_status(self, queue_msg: BECMessage.ScanQueueStatusMessage) -> None:
         """update a queue item with a new ScanQueueStatusMessage / queue message"""
         self.current_scan_queue = queue_msg.content["queue"]
         queue_info = self.current_scan_queue["primary"].get("info")
-        with self._lock:
-            for queue_item in queue_info:
-                if self.find_queue_item_by_ID(queueID=queue_item["queueID"]):
-                    continue
-                self.storage.append(QueueItem(scan_manager=self.scan_manager, **queue_item))
+        for queue_item in queue_info:
+            if self.find_queue_item_by_ID(queueID=queue_item["queueID"]):
+                continue
+            self.storage.append(QueueItem(scan_manager=self.scan_manager, **queue_item))
 
+    @threadlocked
     def find_queue_item_by_ID(self, queueID: str) -> Optional(QueueItem):
         """find a queue item based on its queueID"""
-        with self._lock:
-            for queue_item in self.storage:
-                if queue_item.queueID == queueID:
-                    return queue_item
-            return None
+        for queue_item in self.storage:
+            if queue_item.queueID == queueID:
+                return queue_item
+        return None
 
+    @threadlocked
     def find_queue_item_by_requestID(self, requestID: str) -> Optional(QueueItem):
         """find a queue item based on its requestID"""
-        with self._lock:
-            for queue_item in self.storage:
-                # pylint: disable=protected-access
-                if requestID in queue_item._requests:
-                    return queue_item
-            return None
+        for queue_item in self.storage:
+            # pylint: disable=protected-access
+            if requestID in queue_item._requests:
+                return queue_item
+        return None
 
+    @threadlocked
     def find_queue_item_by_scanID(self, scanID: str) -> Optional(QueueItem):
         """find a queue item based on its scanID"""
-        with self._lock:
-            for queue_item in self.storage:
-                # pylint: disable=protected-access
-                if scanID in queue_item._scans:
-                    return queue_item
-            return None
+        for queue_item in self.storage:
+            # pylint: disable=protected-access
+            if scanID in queue_item._scans:
+                return queue_item
+        return None

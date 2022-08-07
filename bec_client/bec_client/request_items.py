@@ -4,7 +4,7 @@ import threading
 from collections import deque
 from typing import TYPE_CHECKING, Deque, Optional
 
-from bec_utils import BECMessage, bec_logger
+from bec_utils import BECMessage, bec_logger, threadlocked
 
 logger = bec_logger.logger
 
@@ -105,9 +105,10 @@ class RequestStorage:
 
     def __init__(self, scan_manager: ScanManager, maxlen=50) -> None:
         self.storage: Deque[RequestItem] = deque(maxlen=maxlen)
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()
         self.scan_manager = scan_manager
 
+    @threadlocked
     def find_request_by_ID(self, requestID: str) -> Optional(RequestItem):
         """find a request item based on its requestID"""
         for request in self.storage:
@@ -115,19 +116,20 @@ class RequestStorage:
                 return request
         return None
 
+    @threadlocked
     def update_with_response(self, response_msg: BECMessage.RequestResponseMessage) -> None:
         """create or update request item based on a new RequestResponseMessage"""
-        with self._lock:
-            request_item = self.find_request_by_ID(response_msg.metadata.get("RID"))
-            if request_item:
-                request_item.update_with_response(response_msg)
-                logger.debug("Scan queue request exists. Updating with response.")
-                return
+        request_item = self.find_request_by_ID(response_msg.metadata.get("RID"))
+        if request_item:
+            request_item.update_with_response(response_msg)
+            logger.debug("Scan queue request exists. Updating with response.")
+            return
 
-            # it could be that the response arrived before the request
-            self.storage.append(RequestItem.from_response(self.scan_manager, response_msg))
-            logger.debug("Scan queue request does not exist. Creating from response.")
+        # it could be that the response arrived before the request
+        self.storage.append(RequestItem.from_response(self.scan_manager, response_msg))
+        logger.debug("Scan queue request does not exist. Creating from response.")
 
+    @threadlocked
     def update_with_request(self, request_msg: BECMessage.ScanQueueMessage) -> None:
         """create or update request item based on a new ScanQueueMessage (i.e. request message)"""
         if not request_msg.metadata:
@@ -135,11 +137,11 @@ class RequestStorage:
 
         if not request_msg.metadata.get("RID"):
             return
-        with self._lock:
-            request_item = self.find_request_by_ID(request_msg.metadata.get("RID"))
-            if request_item:
-                request_item.update_with_request(request_msg)
-                return
 
-            self.storage.append(RequestItem.from_request(self.scan_manager, request_msg))
+        request_item = self.find_request_by_ID(request_msg.metadata.get("RID"))
+        if request_item:
+            request_item.update_with_request(request_msg)
             return
+
+        self.storage.append(RequestItem.from_request(self.scan_manager, request_msg))
+        return
