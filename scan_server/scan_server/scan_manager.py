@@ -31,6 +31,7 @@ class ScanManager:
         self.publish_available_scans()
 
     def load_plugins(self):
+        """load scan plugins"""
         plugin_path = self.DEFAULT_PLUGIN_PATH
         files = glob.glob(os.path.join(plugin_path, "*.py"))
         for file in files:
@@ -74,6 +75,7 @@ class ScanManager:
             }
 
     def publish_available_scans(self):
+        """send all available scans to the broker"""
         self.parent.producer.set(
             MessageEndpoints.available_scans(), msgpack.dumps(self.available_scans)
         )

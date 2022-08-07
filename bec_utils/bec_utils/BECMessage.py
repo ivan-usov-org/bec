@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import enum
 import time
-from typing import Any, Union
+from typing import Any, Optional, Union
 
 import msgpack
 
@@ -28,7 +30,8 @@ class BECMessage:
         self.version = 1.0
 
     @classmethod
-    def loads(cls, msg):
+    def loads(cls, msg) -> Optional(BECMessage):
+        """load BECMessage from bytes or dict input"""
         if isinstance(msg, bytes):
             msg = msgpack.loads(msg, raw=False)
             if msg["msg_type"] == "bundle_message":
@@ -39,8 +42,10 @@ class BECMessage:
             return cls._validated_return(msg)
         if isinstance(msg, dict):
             return cls(**msg)
+        return None
 
     def dumps(self):
+        """dump BECMessage with msgpack"""
         return msgpack.dumps(
             {
                 "msg_type": self.msg_type,
@@ -90,6 +95,7 @@ class BundleMessage(BECMessage):
         self.content["messages"] = [] if not messages else messages
 
     def append(self, msg: BECMessage):
+        """append a new BECMessage to the bundle"""
         if isinstance(msg, bytes):
             self.content["messages"].append(msg)
         elif isinstance(msg, BECMessage):

@@ -12,6 +12,9 @@ from scan_server.scan_worker import ScanWorker
 
 from utils import load_ScanServerMock
 
+# pylint: disable=missing-function-docstring
+# pylint: disable=protected-access
+
 
 def get_queuemanager() -> QueueManager:
     k = load_ScanServerMock()

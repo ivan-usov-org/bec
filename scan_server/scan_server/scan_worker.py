@@ -4,7 +4,6 @@ import time
 from asyncio.log import logger
 from typing import List
 
-import msgpack
 from bec_utils import (
     Alarms,
     BECMessage,
@@ -422,6 +421,7 @@ class ScanWorker(threading.Thread):
                     self._send_scan_status("aborted")
                     self.parent.queue_manager.queues["primary"].abort()
                     self.reset()
+        # pylint: disable=broad-except
         except Exception as exc:
             if len(exc.args) > 0:
                 content = exc.args[0]

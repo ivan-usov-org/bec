@@ -5,7 +5,7 @@ import threading
 import time
 import uuid
 from enum import Enum
-from typing import List, Union
+from typing import List, Optional, Union
 
 from bec_utils import Alarms, BECMessage, MessageEndpoints, bec_logger
 from rich.console import Console
@@ -111,16 +111,19 @@ class QueueManager:
         getattr(self, f"set_{action}")(scanID=scan_mod_msg.content["scanID"])
 
     def set_pause(self, scanID=None, queue="primary") -> None:
+        # pylint: disable=unused-argument
         """pause the queue and the currenlty running instruction queue"""
         self.queues[queue].status = ScanQueueStatus.PAUSED
         self.queues[queue].worker_status = InstructionQueueStatus.PAUSED
 
     def set_deferred_pause(self, scanID=None, queue="primary") -> None:
+        # pylint: disable=unused-argument
         """pause the queue but continue with the currently running instruction queue until the next checkpoint"""
         self.queues[queue].status = ScanQueueStatus.PAUSED
         self.queues[queue].worker_status = InstructionQueueStatus.DEFERRED_PAUSE
 
     def set_continue(self, scanID=None, queue="primary") -> None:
+        # pylint: disable=unused-argument
         """continue with the currently scheduled queue and instruction queue"""
         self.queues[queue].status = ScanQueueStatus.RUNNING
         self.queues[queue].worker_status = InstructionQueueStatus.RUNNING
@@ -132,6 +135,7 @@ class QueueManager:
         self.queues[queue].remove_queue_item(scanID=scanID)
 
     def set_clear(self, scanID=None, queue="primary") -> None:
+        # pylint: disable=unused-argument
         """pause the queue and clear all its elements"""
         self.queues[queue].status = ScanQueueStatus.PAUSED
         self.queues[queue].worker_status = InstructionQueueStatus.PAUSED
@@ -260,8 +264,10 @@ class ScanQueue:
         self._status = val
         self.queue_manager.send_queue_status()
 
-    def remove_queue_item(self, scanID: str):
+    def remove_queue_item(self, scanID: str) -> None:
         """remove a queue item from the queue"""
+        if not scanID:
+            return
         remove = []
         for queue in self.queue:
             if len(set(scanID) & set(queue.scanID)) > 0:
@@ -594,12 +600,14 @@ class InstructionQueueItem:
         if raise_stopiteration:
             raise StopIteration
 
-    def _get_next(self, queue="instructions", raise_stopiteration=True):
+    def _get_next(
+        self, queue="instructions", raise_stopiteration=True
+    ) -> Optional(BECMessage.DeviceInstructionMessage):
         try:
             instr = next(self.queue)
             # instr = next(self.__getattribute__(queue))
             if not instr:
-                return
+                return None
             if instr.content.get("action") == "close_scan_group":
                 self.queue_group_is_closed = True
                 raise StopIteration
@@ -626,6 +634,7 @@ class InstructionQueueItem:
                 time.sleep(0.1)
             else:
                 self._set_finished(raise_stopiteration=raise_stopiteration)
+        return None
 
     def __next__(self):
         if self.status in [
