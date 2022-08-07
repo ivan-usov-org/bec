@@ -45,6 +45,8 @@ def get_queue(bec):
 
 
 def wait_for_empty_queue(bec):
+    if not get_queue(bec):
+        return
     while not queue_is_empty(get_queue(bec).content["queue"]):
         time.sleep(1)
     while get_queue(bec).content["queue"]["primary"]["status"] != "RUNNING":
