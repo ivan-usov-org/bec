@@ -27,7 +27,8 @@ def client():
     bec.start()
     bec.queue.request_queue_reset()
     bec.queue.request_scan_continuation()
-    return bec
+    yield bec
+    bec.shutdown()
 
 
 def queue_is_empty(queue) -> bool:

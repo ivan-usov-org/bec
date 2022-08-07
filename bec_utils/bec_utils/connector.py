@@ -166,13 +166,13 @@ class ConsumerConnectorThreaded(threading.Thread, abc.ABC):
                 self.cb(msg, **self.kwargs)
 
     def shutdown(self):
-        self.connector.close()
+        self.signal_event.set()
 
     # def stop(self) -> None:
     #     """
     #     Stop consumer
     #     Returns:
-    #
+
     #     """
     #     self.signal_event.set()
     #     self.connector.close()

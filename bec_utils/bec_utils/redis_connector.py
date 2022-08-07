@@ -276,4 +276,5 @@ class RedisConsumerThreaded(ConsumerConnectorThreaded):
                 time.sleep(self.sleep_times[sleep_time])
 
     def shutdown(self):
+        super().shutdown()
         self.pubsub.close()

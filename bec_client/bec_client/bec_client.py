@@ -1,4 +1,5 @@
 import threading
+import time
 from typing import List, Tuple
 
 import IPython
@@ -35,6 +36,8 @@ class BKClient(BECService):
         self.queue = None
         self.alarm_handler = None
         self._load_scans()
+        self._exit_event = threading.Event()
+        self._exit_handler_thread = None
 
     def start(self):
         logger.info("Starting new client")
@@ -95,9 +98,14 @@ class BKClient(BECService):
             self._ip.prompts.status = 2
 
     def _start_exit_handler(self):
-        monitor = threading.Thread(target=self._exit_thread)
-        monitor.daemon = True
-        monitor.start()
+        self._exit_handler_thread = threading.Thread(target=self._exit_thread)
+        self._exit_handler_thread.daemon = True
+        self._exit_handler_thread.start()
+
+    def _shutdown_exit_handler(self):
+        self._exit_event.set()
+        if self._exit_handler_thread:
+            self._exit_handler_thread.join()
 
     def _start_devicemanager(self):
         logger.info("Starting device manager")
@@ -110,13 +118,20 @@ class BKClient(BECService):
         self.alarm_handler.start()
 
     def shutdown(self):
-        # logger.info("Shutting down device manager")
+        """shutdown the client and all its components"""
+        super().shutdown()
         self.devicemanager.shutdown()
+        self.queue.shutdown()
+        self.alarm_handler.shutdown()
+        self._shutdown_exit_handler()
+        print("done")
 
     def _exit_thread(self):
         main_thread = threading.main_thread()
-        main_thread.join()
-        self.shutdown()
+        while main_thread.is_alive() and not self._exit_event.is_set():
+            time.sleep(0.1)
+        if not self._exit_event.is_set():
+            self.shutdown()
 
 
 class BKClientPrompt(Prompts):

@@ -21,7 +21,8 @@ class BECService:
         self._service_id = str(uuid.uuid4())
         self._user = getpass.getuser()
         self._hostname = socket.gethostname()
-
+        self._service_info_thread = None
+        self._service_info_event = threading.Event()
         self._initialize_logger()
         self._start_update_service_info()
 
@@ -31,7 +32,7 @@ class BECService:
         )
 
     def _update_service_info(self):
-        while True:
+        while not self._service_info_event.is_set():
             logger.trace("Updating service info")
             self.producer.set_and_publish(
                 topic=MessageEndpoints.service_status(self._service_id),
@@ -40,4 +41,11 @@ class BECService:
             time.sleep(3)
 
     def _start_update_service_info(self):
-        threading.Thread(target=self._update_service_info, daemon=True).start()
+        self._service_info_thread = threading.Thread(target=self._update_service_info, daemon=True)
+        self._service_info_thread.start()
+
+    def shutdown(self):
+        """shutdown the BECService"""
+        self._service_info_event.set()
+        if self._service_info_thread:
+            self._service_info_thread.join()

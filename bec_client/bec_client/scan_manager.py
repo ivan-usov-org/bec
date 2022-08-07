@@ -170,3 +170,11 @@ class ScanManager:
             scan_msgs = [scan_msgs]
         for scan_msg in scan_msgs:
             parent.scan_storage.add_scan_segment(scan_msg)
+
+    def shutdown(self):
+        """stop the scan manager's threads"""
+        self._scan_queue_consumer.shutdown()
+        self._scan_queue_request_consumer.shutdown()
+        self._scan_queue_request_response_consumer.shutdown()
+        self._scan_status_consumer.shutdown()
+        self._scan_segment_consumer.shutdown()
