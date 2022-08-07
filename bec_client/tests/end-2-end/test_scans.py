@@ -27,6 +27,7 @@ def client():
     bec.start()
     bec.queue.request_queue_reset()
     bec.queue.request_scan_continuation()
+    time.sleep(5)
     yield bec
     bec.shutdown()
 
