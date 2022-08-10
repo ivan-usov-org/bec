@@ -9,7 +9,6 @@ from io import StringIO
 from typing import Any
 
 import bec_utils.BECMessage as BECMessage
-import msgpack
 import ophyd
 from bec_utils import Alarms, BECService, MessageEndpoints, bec_logger
 from bec_utils.connector import ConnectorBase
@@ -76,15 +75,15 @@ class DeviceServer(BECService):
                 parent=self,
             ),
         ]
-        for t in self.threads:
-            t.start()
+        for thread in self.threads:
+            thread.start()
         self._status = DSStatus.RUNNING
 
     def stop(self) -> None:
         """stop the device server"""
         consumer_stop.set()
-        for t in self.threads:
-            t.join()
+        for thread in self.threads:
+            thread.join()
         self._status = DSStatus.IDLE
 
     def shutdown(self) -> None:
@@ -102,7 +101,7 @@ class DeviceServer(BECService):
             self.device_manager.devices.get(dev).metadata = instr.metadata
 
     @staticmethod
-    def consumer_interception_callback(msg, *, parent, **kwargs) -> None:
+    def consumer_interception_callback(msg, *, parent, **_kwargs) -> None:
         """callback for receiving scan modifications / interceptions"""
         mvalue = BECMessage.ScanQueueModificationMessage.loads(msg.value)
         logger.info(f"Receiving: {mvalue.content}")
@@ -126,6 +125,13 @@ class DeviceServer(BECService):
                 raise DisabledDeviceError(f"Cannot access disabled device {devices}.")
 
     def handle_device_instructions(self, msg) -> None:
+        """Parse a device instruction message and handle the requested action. Action
+        types are set, read, rpc, kickoff or trigger.
+
+        Args:
+            msg (DeviceInstructionMessage): A DeviceInstructionMessage containing the action and its parameters
+
+        """
         try:
             instructions = BECMessage.DeviceInstructionMessage.loads(msg.value)
             action = instructions.content["action"]
@@ -159,7 +165,7 @@ class DeviceServer(BECService):
                 alarm_type=limit_error.__class__.__name__,
                 metadata=instructions.metadata,
             )
-        except Exception as exc:
+        except Exception as exc:  # pylint: disable=broad-except
             self.connector.log_error({"source": msg.value, "message": exc.args})
             content = exc.args[0] if len(exc.args) > 0 else ""
             self.connector.raise_alarm(
@@ -171,7 +177,7 @@ class DeviceServer(BECService):
             )
 
     @staticmethod
-    def instructions_callback(msg, *, parent, **kwargs) -> None:
+    def instructions_callback(msg, *, parent, **_kwargs) -> None:
         """callback for handling device instructions"""
         parent.executor.submit(parent.handle_device_instructions, msg)
 
@@ -236,8 +242,7 @@ class DeviceServer(BECService):
             sys.stdout = save_stdout
             raise KeyboardInterrupt from kbi
 
-        except Exception as exc:
-            # pylint: disable=broad-except
+        except Exception as exc:  # pylint: disable=broad-except
             # send error to client
             self.producer.set(
                 MessageEndpoints.device_rpc(instr_params.get("rpc_id")),
@@ -254,7 +259,6 @@ class DeviceServer(BECService):
             )
         finally:
             sys.stdout = save_stdout
-        # self.producer.set(MessageEndpoints.device_rpc(), msgpack.dumps(res))
 
     def _trigger_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
         logger.debug(f"Kickoff device: {instr}")
