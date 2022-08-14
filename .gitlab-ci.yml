@@ -41,6 +41,9 @@ pytest:
 end-2-end:
   stage: Test
   image: docker:20.10.16
+  artifacts:
+    paths:
+      - redis.log
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
