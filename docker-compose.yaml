@@ -24,9 +24,9 @@ services:
     image: redis:latest
     depends_on:
       - "redis-test"
-    command: redis-cli monitor > /redis.log
+    command: redis-cli monitor > /data/redis.log
     network_mode: host
     volumes:
-      - logs:/
+      - logs:/data
 volumes:
   logs:
