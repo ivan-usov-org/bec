@@ -165,7 +165,7 @@ class LamNIFermatScan(ScanBase):
         # plt.show()
 
     def _transfer_positions_to_LamNI(self):
-        yield from self.device_rpc("rtx", f"controller.add_pos_to_scan", (self.positions.tolist(),))
+        yield from self.device_rpc("rtx", "controller.add_pos_to_scan", (self.positions.tolist(),))
 
     def _calculate_positions(self):
         self.positions = self.get_lamni_fermat_spiral_pos(
