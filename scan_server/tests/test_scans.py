@@ -5,6 +5,9 @@ from bec_utils.tests.utils import ProducerMock
 from scan_plugins.LamNIFermatScan import LamNIFermatScan
 from scan_server.scans import FermatSpiralScan, Move, Scan
 
+# pylint: disable=missing-function-docstring
+# pylint: disable=protected-access
+
 
 class DeviceMock:
     def __init__(self, name: str):

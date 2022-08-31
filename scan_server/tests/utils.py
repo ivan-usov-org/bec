@@ -4,9 +4,11 @@ import bec_utils
 import yaml
 from bec_utils.tests.utils import ConnectorMock
 from scan_server.devicemanager import DeviceManagerScanServer
-from scan_server.scan_assembler import ScanAssembler
 from scan_server.scan_server import ScanServer
 from scan_server.scan_worker import InstructionQueueStatus
+
+# pylint: disable=missing-function-docstring
+# pylint: disable=protected-access
 
 # dir_path = os.path.dirname(os.path.realpath(__file__))
 dir_path = os.path.dirname(bec_utils.__file__)

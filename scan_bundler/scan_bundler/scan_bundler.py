@@ -35,7 +35,7 @@ class ScanBundler(BECService):
         self.executor = ThreadPoolExecutor(max_workers=4)
         self._send_buffer = Queue()
         self._start_buffered_producer()
-        self.scanID_queue = collections.deque(maxlen=5)
+        self.scanID_history = collections.deque(maxlen=5)
         self._lock = threading.Lock()
 
     def _start_buffered_producer(self):
@@ -78,13 +78,7 @@ class ScanBundler(BECService):
         logger.debug(f"Received reading from device {dev}")
         if not isinstance(msgs, list):
             msgs = [msgs]
-        parent.executor.submit(
-            parent._add_device_to_storage,
-            msgs,
-            dev,
-        )
-        # else:
-        #     logger.warning(f"Received reading from unknown device {dev}")
+        parent.executor.submit(parent._add_device_to_storage, msgs, dev)
 
     @staticmethod
     def _scan_queue_callback(msg, parent, **_kwargs):
@@ -104,9 +98,9 @@ class ScanBundler(BECService):
         #     parent.sync_storage[info.get("scanID")]["scan_type"] = info.get("scan_type")
         scanID = msg.content["scanID"]
         if not scanID in self.sync_storage:
-            self.scanID_queue.append(scanID)
             self.cleanup_storage()
             self._initialize_scan_container(msg)
+            self.scanID_history.append(scanID)
         if msg.content.get("status") != "open":
             self._scan_status_modification(msg)
 
@@ -131,11 +125,11 @@ class ScanBundler(BECService):
         scanID = scan_msg.content["scanID"]
         if scan_msg.content.get("status") == "open":
             scan_info = scan_msg.content["info"]
-            scan_motors = list(set([self.device_manager.devices[m] for m in scan_info["primary"]]))
+            scan_motors = list(set(self.device_manager.devices[m] for m in scan_info["primary"]))
             self.scan_motors[scanID] = scan_motors
             if not scanID in self.sync_storage:
                 self.sync_storage[scanID] = {"info": scan_info, "status": "open", "sent": set()}
-                self.bluesky_metadata[scanID] = dict()
+                self.bluesky_metadata[scanID] = {}
                 # for now lets assume that all devices are primary devices:
                 self.primary_devices[scanID] = {
                     "devices": self.device_manager.devices.primary_devices(scan_motors),
@@ -389,7 +383,7 @@ class ScanBundler(BECService):
                 continue
             if len(entry.keys()) != 3:
                 continue
-            if scanID in self.scanID_queue:
+            if scanID in self.scanID_history:
                 continue
             remove_scanIDs.append(scanID)
 
