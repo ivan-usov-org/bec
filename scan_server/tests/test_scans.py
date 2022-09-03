@@ -864,4 +864,12 @@ def test_LamNIFermatScan(scan_msg, reference_scan_list):
             reference_scan_list[ii].content["parameter"]["rpc_id"] = scan_instructions[ii].content[
                 "parameter"
             ]["rpc_id"]
+        if instr.content["parameter"].get("value"):
+            assert np.isclose(
+                instr.content["parameter"].get("value"),
+                reference_scan_list[ii].content["parameter"].get("value"),
+            )
+            instr.content["parameter"]["value"] = reference_scan_list[ii].content["parameter"][
+                "value"
+            ]
     assert scan_instructions == reference_scan_list
