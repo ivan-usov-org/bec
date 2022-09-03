@@ -47,7 +47,7 @@ end-2-end:
     paths:
       - ScanServer.log
       - ScanBundler.log
-      - ScanServer.log
+      - DeviceServer.log
     expire_in: 1 week
 
   rules:
