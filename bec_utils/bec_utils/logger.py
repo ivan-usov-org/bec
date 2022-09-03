@@ -42,6 +42,7 @@ class BECLogger:
         self.service_name = service_name
         self.producer = self.connector.producer()
         self._configured = True
+        self._update_sinks()
 
     def _logger_callback(self, msg):
         if not self._configured:
@@ -64,6 +65,8 @@ class BECLogger:
         self.logger.remove()
         # self.logger.add(self._logger_callback, serialize=True, level=self._log_level)
         self.logger.add(sys.stderr, level=self._log_level, format=self.format)
+        if self.service_name:
+            self.logger.add(f"{self.service_name}.log", level=self._log_level, format=self.format)
 
     @property
     def level(self):
