@@ -42,8 +42,12 @@ end-2-end:
   stage: Test
   image: docker:20.10.16
   artifacts:
+    when: on_failure
     paths:
       - ScanServer.log
+      - ScanBundler.log
+      - ScanServer.log
+
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
@@ -79,3 +83,5 @@ end-2-end:
     - docker run --network=host --name end2end_client en2end_client:test
 
     - docker cp scan_server:/code/bec/scan_server/ScanServer.log $CI_PROJECT_DIR/ScanServer.log
+    - docker cp scan_bundler:/code/bec/scan_bundler/ScanBundler.log $CI_PROJECT_DIR/ScanBundler.log
+    - docker cp device_server:/code/bec/device_server/DeviceServer.log $CI_PROJECT_DIR/DeviceServer.log
