@@ -4,7 +4,7 @@
 image: python:3.8
 #commands to run in the Docker container before starting each job.
 variables:
-#   DOCKER_DRIVER: overlay2
+  #   DOCKER_DRIVER: overlay2
   DOCKER_BUILDKIT: 0
 
 services:
@@ -43,7 +43,7 @@ end-2-end:
   image: docker:20.10.16
   artifacts:
     paths:
-      - redis.log
+      - ScanServer.log
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
@@ -70,11 +70,12 @@ end-2-end:
     - docker build -t device_server:test -f ./device_server/Dockerfile .
 
     # run scan_bundler, scan_server and device_server
-    - docker run --network=host -d --name device_server device_server:test 
-    - docker run --network=host -d --name scan_server scan_server:test  
-    - docker run --network=host -d --name scan_bundler scan_bundler:test 
-    
+    - docker run --network=host -d --name device_server device_server:test
+    - docker run --network=host -d --name scan_server scan_server:test
+    - docker run --network=host -d --name scan_bundler scan_bundler:test
+
     # build and run the tests
     - docker build -t en2end_client:test -f ./bec_client/tests/Dockerfile .
-    - docker run --network=host --name end2end_client en2end_client:test 
-    
+    - docker run --network=host --name end2end_client en2end_client:test
+
+    - docker cp scan_server:test:/code/bec/scan_server/ScanServer.log $CI_PROJECT_DIR/ScanServer.log
