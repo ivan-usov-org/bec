@@ -31,6 +31,7 @@ pylint:
   artifacts:
     paths:
       - ./pylint/
+    expire_in: 1 week
 pytest:
   stage: Test
   script:
@@ -47,6 +48,7 @@ end-2-end:
       - ScanServer.log
       - ScanBundler.log
       - ScanServer.log
+    expire_in: 1 week
 
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
