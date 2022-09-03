@@ -19,11 +19,14 @@ logger = bec_logger.logger
 class ScanBundler(BECService):
     def __init__(self, bootstrap_server, connector_cls: ConnectorBase, scibec_url: str) -> None:
         super().__init__(bootstrap_server, connector_cls)
-        self.device_manager = DeviceManagerSB(self.connector, scibec_url)
-        self.device_manager.initialize(bootstrap_server)
+
+        self.device_manager = None
+        self.scibec_url = scibec_url
+        self._start_device_manager()
         self._start_device_read_consumer()
         self._start_scan_queue_consumer()
         self._start_scan_status_consumer()
+
         self.sync_storage = {}
         self.bluesky_metadata = {}
         self.primary_devices = {}
@@ -33,6 +36,7 @@ class ScanBundler(BECService):
         self.scan_motors = {}
         self.current_queue = None
         self.executor = ThreadPoolExecutor(max_workers=4)
+        self.executor_tasks = collections.deque(maxlen=100)
         self._send_buffer = Queue()
         self._start_buffered_producer()
         self.scanID_history = collections.deque(maxlen=5)
@@ -43,6 +47,10 @@ class ScanBundler(BECService):
             target=self._buffered_publish, daemon=True
         )
         self._buffered_producer_thread.start()
+
+    def _start_device_manager(self):
+        self.device_manager = DeviceManagerSB(self.connector, self.scibec_url)
+        self.device_manager.initialize(self.bootstrap_server)
 
     def _start_device_read_consumer(self):
         self._device_read_consumer = self.connector.consumer(
@@ -78,7 +86,8 @@ class ScanBundler(BECService):
         logger.debug(f"Received reading from device {dev}")
         if not isinstance(msgs, list):
             msgs = [msgs]
-        parent.executor.submit(parent._add_device_to_storage, msgs, dev)
+        task = parent.executor.submit(parent._add_device_to_storage, msgs, dev)
+        parent.executor_tasks.append(task)
 
     @staticmethod
     def _scan_queue_callback(msg, parent, **_kwargs):
@@ -246,12 +255,10 @@ class ScanBundler(BECService):
                 status for status in primary_devices["pointID"][pointID].values()
             ]
 
-            if all(primary_devices_completed) and (
-                len(primary_devices_completed) == len(self.primary_devices[scanID]["devices"])
-            ):
-                all_primary_devices_completed = True
-            else:
-                all_primary_devices_completed = False
+            all_primary_devices_completed = bool(
+                all(primary_devices_completed)
+                and (len(primary_devices_completed) == len(self.primary_devices[scanID]["devices"]))
+            )
 
             if all_primary_devices_completed and self.sync_storage[scanID].get(pointID):
                 self._update_monitor_signals(scanID, pointID)
@@ -278,14 +285,27 @@ class ScanBundler(BECService):
     def _add_device_to_storage(self, msgs, device):
         for msg in msgs:
             metadata = msg.metadata
-            scanID = metadata["scanID"]
-            signal = msg.content["signals"]
 
+            scanID = metadata.get("scanID")
+            if not scanID:
+                logger.error("Received device message without scanID")
+                return
+
+            signal = msg.content.get("signals")
+            if not signal:
+                logger.error("Received device message without signals")
+                return
+
+            timeout_time = 10
+            elapsed_time = 0
             while not scanID in self.sync_storage:
                 time.sleep(0.1)
-                # elapsed_time += 0.1
-                # if elapsed_time > timeout_time:
-                #     return
+                elapsed_time += 0.1
+                if elapsed_time > timeout_time:
+                    logger.error(
+                        f"Failed to insert device data for {device} to sync_storage: Could not find a matching scanID {scanID} in sync_storage."
+                    )
+                    return
 
             # scan_exists = False
             # for queue in self.current_queue:
