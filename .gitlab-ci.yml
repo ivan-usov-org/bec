@@ -55,7 +55,7 @@ end-2-end:
   stage: Test
   image: docker:20.10.16
   artifacts:
-    when: always
+    when: on_failure
     paths:
       - ScanServer.log
       - ScanBundler.log
