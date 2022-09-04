@@ -44,6 +44,12 @@ test ScanBundler:
     - pip install pytest pytest-random-order
     - pip install -e ./scan_bundler
     - cd scan_bundler/tests;pytest -v --random-order
+test client:
+  stage: Test
+  script:
+    - pip install pytest pytest-random-order
+    - pip install -e ./bec_client
+    - cd bec_client/tests/client_tests;pytest -v --random-order
 
 end-2-end:
   stage: Test
