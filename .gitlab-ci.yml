@@ -32,12 +32,18 @@ pylint:
     paths:
       - ./pylint/
     expire_in: 1 week
-pytest:
+test ScanServer:
   stage: Test
   script:
     - pip install pytest pytest-random-order
     - pip install -e ./scan_server
     - cd scan_server/tests;pytest -v --random-order
+test ScanBundler:
+  stage: Test
+  script:
+    - pip install pytest pytest-random-order
+    - pip install -e ./scan_bundler
+    - cd scan_bundler/tests;pytest -v --random-order
 
 end-2-end:
   stage: Test
@@ -83,7 +89,7 @@ end-2-end:
     # build and run the tests
     - docker build -t en2end_client:test -f ./bec_client/tests/Dockerfile .
     - docker run --network=host --name end2end_client en2end_client:test
-    
+
   after_script:
     - docker cp scan_server:/code/bec/scan_server/ScanServer.log $CI_PROJECT_DIR/ScanServer.log
     - docker cp scan_bundler:/code/bec/scan_bundler/ScanBundler.log $CI_PROJECT_DIR/ScanBundler.log
