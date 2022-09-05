@@ -5,7 +5,7 @@ from typing import Callable
 import numpy as np
 from bec_utils import BECMessage, MessageEndpoints, ProducerConnector, bec_logger
 
-from .errors import LimitError, ScanAbortion
+from .errors import ScanAbortion
 
 DeviceMsg = BECMessage.DeviceInstructionMessage
 logger = bec_logger.logger
@@ -29,7 +29,14 @@ class DeviceMsgMixin:
 
     def send_rpc_and_wait(self, device, func_name, *args, **kwargs):
         rpc_id = str(uuid.uuid4())
-        yield from self._run_rpc(device, func_name, rpc_id, *args, **kwargs)
+        parameter = {
+            "device": device,
+            "func": func_name,
+            "rpc_id": rpc_id,
+            "args": list(args),
+            "kwargs": kwargs,
+        }
+        yield from self.rpc(device=device, parameter=parameter)
         return self._get_from_rpc(rpc_id)
 
     def set_and_wait(self, *, device, positions):
@@ -43,19 +50,6 @@ class DeviceMsgMixin:
             )
         yield from self.wait(
             device=device, wait_type="move", group="scan_motor", wait_group="scan_motor"
-        )
-
-    def _run_rpc(self, device, func_name, rpc_id, *args, **kwargs):
-        yield self.device_msg(
-            device=device,
-            action="rpc",
-            parameter={
-                "device": device,
-                "func": func_name,
-                "rpc_id": rpc_id,
-                "args": list(args),
-                "kwargs": kwargs,
-            },
         )
 
     def _get_from_rpc(self, rpc_id):
@@ -73,8 +67,10 @@ class DeviceMsgMixin:
         logger.debug(msg.content.get("out"))
         return msg.content.get("return_val")
 
-    def read_and_wait(self, group: str, wait_group: str, device: list = None):
-        yield from self.read(device=device, group=group, wait_group=wait_group)
+    def read_and_wait(
+        self, *, group: str, wait_group: str, device: list = None, pointID: int = None
+    ):
+        yield from self.read(device=device, group=group, wait_group=wait_group, pointID=pointID)
         yield from self.wait(device=device, wait_type="read", group=group, wait_group=wait_group)
 
     def open_scan(self, *, scan_motors: list, num_pos: int, scan_name: str, scan_type: str):
@@ -89,11 +85,12 @@ class DeviceMsgMixin:
             },
         )
 
-    def kickoff(self, *, device):
+    def kickoff(self, *, device: str, parameter: dict = None):
+        parameter = parameter if not None else {}
         yield self.device_msg(
             device=device,
             action="kickoff",
-            parameter={},
+            parameter=parameter,
             metadata={},
         )
 
@@ -173,7 +170,7 @@ class DeviceMsgMixin:
     def close_scan_group(self):
         yield self.device_msg(device=None, action="close_scan_group", parameter={})
 
-    def rpc(self, device: str, parameter: dict):
+    def rpc(self, *, device: str, parameter: dict):
         yield self.device_msg(
             device=device,
             action="rpc",

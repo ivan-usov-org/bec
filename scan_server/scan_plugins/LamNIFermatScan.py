@@ -317,7 +317,9 @@ class LamNIFermatScan(ScanBase):
                 f"Compensating {[val/1000 for val in lamni_to_stage_coordinates(x_drift,y_drift)]}"
             )
 
-            yield from self.stubs.set_and_wait(["lsamx", "lsamy"], [move_x, move_y])
+            yield from self.stubs.set_and_wait(
+                device=["lsamx", "lsamy"], positions=[move_x, move_y]
+            )
 
         time.sleep(0.01)
         rtx_current = yield from self.stubs.send_rpc_and_wait("rtx", "readback.get")
@@ -351,7 +353,9 @@ class LamNIFermatScan(ScanBase):
                 + lamni_to_stage_coordinates(x_drift, y_drift)[1] / 1000
                 + lamni_to_stage_coordinates(x_drift2, y_drift2)[1] / 1000
             )
-            yield from self.stubs.set_and_wait(["lsamx", "lsamy"], [move_x, move_y])
+            yield from self.stubs.set_and_wait(
+                device=["lsamx", "lsamy"], positions=[move_x, move_y]
+            )
             time.sleep(0.01)
             rtx_current = yield from self.stubs.send_rpc_and_wait("rtx", "readback.get")
             rty_current = yield from self.stubs.send_rpc_and_wait("rty", "readback.get")

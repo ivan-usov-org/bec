@@ -1,8 +1,6 @@
 import ast
 import enum
-import threading
 import time
-import uuid
 from abc import ABC, abstractmethod
 
 import numpy as np
@@ -673,35 +671,18 @@ class ContLineScan(ScanBase):
         self.positions = np.array(list(zip(*self.axis)))
 
     def _at_each_point(self):
-        yield self.device_msg(
-            device=None,
-            action="trigger",
-            parameter={"group": "trigger"},
-            metadata={"pointID": self.pointID},
-        )
-        yield self.device_msg(
-            device=None,
-            action="read",
-            parameter={
-                "target": "primary",
-                "group": "primary",
-                "wait_group": "readout_primary",
-            },
-            metadata={"pointID": self.pointID},
-        )
+        yield from self.stubs.trigger(group="trigger", pointID=self.pointID)
+        yield from self.stubs.read(group="primary", wait_group="primary", pointID=self.pointID)
         self.pointID += 1
 
     def scan_core(self):
         yield from self._move_and_wait(self.positions[0] - self.offset)
         # send the slow motor on its way
-        yield self.device_msg(
+        yield from self.stubs.set(
             device=self.scan_motors[0],
-            action="set",
-            parameter={
-                "value": self.positions[-1][0],
-                "group": "scan_motor",
-                "wait_group": "scan_motor",
-            },
+            value=self.positions[-1][0],
+            group="scan_motor",
+            wait_group="scan_motor",
         )
 
         while self.pointID < len(self.positions[:]):
@@ -772,33 +753,10 @@ class RoundScanFlySim(ScanBase):
         )
 
     def scan_core(self):
-        yield self.device_msg(
-            device="flyer_sim",
-            action="kickoff",
-            parameter={"num_pos": self.num_pos},
-            metadata={},
-        )
+        yield from self.stubs.kickoff(device="flyer_sim", parameter={"num_pos": self.num_pos})
 
         while True:
-            yield self.device_msg(
-                device=None,
-                action="read",
-                parameter={
-                    "target": "primary",
-                    "group": "primary",
-                    "wait_group": "readout_primary",
-                },
-                metadata={},
-            )
-            yield self.device_msg(
-                device=None,
-                action="wait",
-                parameter={
-                    "type": "read",
-                    "group": "primary",
-                    "wait_group": "readout_primary",
-                },
-            )
+            yield from self.stubs.read_and_wait(group="primary", wait_group="readout_primary")
             msg = self.device_manager.producer.get(MessageEndpoints.device_status("flyer_sim"))
             if msg:
                 status = BECMessage.DeviceStatusMessage.loads(msg)
@@ -921,7 +879,7 @@ class OpenInteractiveScan(ScanBase):
         self.scan_motors = caller_args
 
     def run(self):
-        yield self.device_msg(device=None, action="open_scan_def", parameter={})
+        yield from self.stubs.open_scan_def()
         self.initialize()
         yield from self.read_scan_motors()
         yield from self.open_scan()
@@ -962,44 +920,10 @@ class AddInteractiveScanPoint(ScanBase):
         self.scan_motors = list(self.caller_args.keys())
 
     def _at_each_point(self, ind=None, pos=None):
-        yield self.device_msg(
-            device=None,
-            action="trigger",
-            parameter={"group": "trigger"},
-            metadata={"pointID": self.pointID},
-        )
-        yield self.device_msg(
-            device=None,
-            action="wait",
-            parameter={"type": "trigger", "time": self.exp_time},
-        )
-        yield self.device_msg(
-            device=None,
-            action="read",
-            parameter={
-                "target": "primary",
-                "group": "primary",
-                "wait_group": "readout_primary",
-            },
-            metadata={"pointID": self.pointID},
-        )
-        yield self.device_msg(
-            device=None,
-            action="wait",
-            parameter={
-                "type": "read",
-                "group": "scan_motor",
-                "wait_group": "readout_primary",
-            },
-        )
-        yield self.device_msg(
-            device=None,
-            action="wait",
-            parameter={
-                "type": "read",
-                "group": "primary",
-                "wait_group": "readout_primary",
-            },
+        yield from self.stubs.trigger(group="trigger", pointID=self.pointID)
+        yield from self.stubs.wait(wait_type="trigger", wait_time=self.exp_time)
+        yield from self.stubs.read_and_wait(
+            group="primary", wait_group="readout_primary", pointID=self.pointID
         )
         self.pointID += 1
 
@@ -1042,4 +966,4 @@ class CloseInteractiveScan(ScanBase):
         yield from self.finalize()
         yield from self.unstage()
         yield from self.cleanup()
-        yield self.device_msg(device=None, action="close_scan_def", parameter={})
+        yield from self.stubs.close_scan_def()
