@@ -267,3 +267,14 @@ def test_queued_scan(client):
         break
     while len(scan2.scan.data) != 50:
         time.sleep(0.5)
+
+
+@pytest.mark.timeout(200)
+def test_fly_scan(client):
+    bec = client
+    wait_for_empty_queue(bec)
+    scans = bec.scans
+    dev = bec.devicemanager.devices
+    status = scans.round_scan_fly(dev.flyer_sim, 0, 50, 20, 3, exp_time=0.1, relative=True)
+    assert len(status.scan.data) == 693
+    assert status.scan.num_points == 693
