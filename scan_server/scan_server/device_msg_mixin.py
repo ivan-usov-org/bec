@@ -95,9 +95,9 @@ class DeviceMsgMixin:
         """Trigger a reading and wait for completion.
 
         Args:
-            group (str): waitingsub group
-            wait_group (str): _description_
-            device (list, optional): _description_. Defaults to None.
+            wait_group (str): wait group
+            device (list, optional): List of device names. Can be specified instead of group. Defaults to None.
+            group (str, optional): Group name of devices. Can be specified instead of device. Defaults to None.
             pointID (int, optional): _description_. Defaults to None.
 
         """
@@ -106,6 +106,15 @@ class DeviceMsgMixin:
         yield from self.wait(device=device, wait_type="read", group=group, wait_group=wait_group)
 
     def open_scan(self, *, scan_motors: list, num_pos: int, scan_name: str, scan_type: str):
+        """Open a new scan.
+
+        Args:
+            scan_motors (list): List of scan motors.
+            num_pos (int): Number of positions within the scope of this scan.
+            scan_name (str): Scan name.
+            scan_type (str): Scan type (e.g. 'step' or 'fly')
+
+        """
         yield self._device_msg(
             device=None,
             action="open_scan",
@@ -118,6 +127,12 @@ class DeviceMsgMixin:
         )
 
     def kickoff(self, *, device: str, parameter: dict = None):
+        """Kickoff a fly scan device.
+
+        Args:
+            device (str): Device name of flyer.
+            parameter (dict, optional): Additional parameters that should be forwarded to the device. Defaults to {}.
+        """
         parameter = parameter if not None else {}
         yield self._device_msg(
             device=device,
@@ -127,15 +142,19 @@ class DeviceMsgMixin:
         )
 
     def close_scan(self):
+        """Close the scan."""
         yield self._device_msg(device=None, action="close_scan", parameter={})
 
     def stage(self):
+        """Stage all devices"""
         yield self._device_msg(device=None, action="stage", parameter={})
 
     def unstage(self):
+        """Unstage all devices"""
         yield self._device_msg(device=None, action="unstage", parameter={})
 
     def baseline_reading(self):
+        """Run the baseline readings."""
         yield self._device_msg(
             device=None,
             action="baseline_reading",
@@ -147,12 +166,21 @@ class DeviceMsgMixin:
         self,
         *,
         wait_type: str,
-        device=None,
+        device: Union[List[str], str] = None,
         group: str = None,
         wait_group: str = None,
-        wait_time=None,
+        wait_time: float = None,
     ):
+        """Wait for an event.
 
+        Args:
+            wait_type (str): wait type
+            device (Union[List[str], str], optional): List of device names. Defaults to None.
+            group (str, optional): Device group that can be used instead of the device argument. Defaults to None.
+            wait_group (str, optional): Wait group. Defaults to None.
+            wait_time (float, optional): Wait time (for wait_type="trigger"). Defaults to None.
+
+        """
         self._check_device_and_groups(device, group)
         parameter = {"type": wait_type, "time": wait_time, "group": group, "wait_group": wait_group}
         self._exclude_nones(parameter)
@@ -168,11 +196,19 @@ class DeviceMsgMixin:
         wait_group: str,
         device: list = None,
         pointID: int = None,
-        target=None,
         group: str = None,
     ):
+        """_summary_
+
+        Args:
+            wait_group (str): Wait group.
+            device (list, optional): Device name. Can be used instead of group. Defaults to None.
+            pointID (int, optional): pointID to assign this reading to point within the scan. Defaults to None.
+            group (str, optional): Device group. Can be used instead of device. Defaults to None.
+
+        """
         self._check_device_and_groups(device, group)
-        parameter = {"target": target, "group": group, "wait_group": wait_group}
+        parameter = {"group": group, "wait_group": wait_group}
         metadata = {"pointID": pointID}
         self._exclude_nones(parameter)
         self._exclude_nones(metadata)
@@ -184,6 +220,13 @@ class DeviceMsgMixin:
         )
 
     def trigger(self, *, group: str, pointID: int):
+        """Trigger a device group
+
+        Args:
+            group (str): Device group that should receive the trigger.
+            pointID (int): pointID that should be attached to this trigger event.
+
+        """
         yield self._device_msg(
             device=None,
             action="trigger",
@@ -192,6 +235,14 @@ class DeviceMsgMixin:
         )
 
     def set(self, *, device: str, value: float, wait_group: str):
+        """Set the device to a specific value.
+
+        Args:
+            device (str): Device name
+            value (float): Target value.
+            wait_group (str): wait group for this event.
+
+        """
         yield self._device_msg(
             device=device,
             action="set",
@@ -202,15 +253,25 @@ class DeviceMsgMixin:
         )
 
     def open_scan_def(self):
+        """open a new scan definition"""
         yield self._device_msg(device=None, action="open_scan_def", parameter={})
 
     def close_scan_def(self):
+        """close a scan definition"""
         yield self._device_msg(device=None, action="close_scan_def", parameter={})
 
     def close_scan_group(self):
+        """close a scan group"""
         yield self._device_msg(device=None, action="close_scan_group", parameter={})
 
     def rpc(self, *, device: str, parameter: dict):
+        """Perfrom an RPC (remote procedure call) on a device.
+
+        Args:
+            device (str): Device name.
+            parameter (dict): parameters used for this rpc instructions.
+
+        """
         yield self._device_msg(
             device=device,
             action="rpc",

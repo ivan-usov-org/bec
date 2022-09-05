@@ -337,10 +337,7 @@ class ScanBase(RequestBase):
         yield from self.stubs.trigger(group="trigger", pointID=self.pointID)
         yield from self.stubs.wait(wait_type="trigger", group="trigger", wait_time=self.exp_time)
         yield from self.stubs.read(
-            group="primary",
-            wait_group="readout_primary",
-            pointID=self.pointID,
-            target="primary",
+            group="primary", wait_group="readout_primary", pointID=self.pointID
         )
         yield from self.stubs.wait(
             wait_type="read", group="scan_motor", wait_group="readout_primary"

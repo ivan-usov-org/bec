@@ -245,7 +245,6 @@ def test_scan_move(mv_msg, reference_msg_list):
                     device=None,
                     action="read",
                     parameter={
-                        "target": "primary",
                         "group": "primary",
                         "wait_group": "readout_primary",
                     },
@@ -306,7 +305,6 @@ def test_scan_move(mv_msg, reference_msg_list):
                     device=None,
                     action="read",
                     parameter={
-                        "target": "primary",
                         "group": "primary",
                         "wait_group": "readout_primary",
                     },
@@ -371,7 +369,6 @@ def test_scan_move(mv_msg, reference_msg_list):
                     device=None,
                     action="read",
                     parameter={
-                        "target": "primary",
                         "group": "primary",
                         "wait_group": "readout_primary",
                     },
@@ -757,7 +754,6 @@ def test_device_rpc():
                     device=None,
                     action="read",
                     parameter={
-                        "target": "primary",
                         "group": "primary",
                         "wait_group": "readout_primary",
                     },
@@ -819,7 +815,6 @@ def test_device_rpc():
                     device=None,
                     action="read",
                     parameter={
-                        "target": "primary",
                         "group": "primary",
                         "wait_group": "readout_primary",
                     },
