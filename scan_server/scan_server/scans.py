@@ -274,9 +274,7 @@ class ScanBase(RequestBase):
 
     def read_scan_motors(self):
         # TODO: check if we can remove the groups from read_and_wait
-        yield from self.stubs.read_and_wait(
-            device=self.scan_motors, group="scan_motor", wait_group="scan_motor"
-        )
+        yield from self.stubs.read_and_wait(device=self.scan_motors, wait_group="scan_motor")
 
     @abstractmethod
     def _calculate_positions(self) -> None:
@@ -337,7 +335,7 @@ class ScanBase(RequestBase):
             )
 
         yield from self.stubs.trigger(group="trigger", pointID=self.pointID)
-        yield from self.stubs.wait(wait_type="trigger", wait_time=self.exp_time)
+        yield from self.stubs.wait(wait_type="trigger", group="trigger", wait_time=self.exp_time)
         yield from self.stubs.read(
             group="primary",
             wait_group="readout_primary",
@@ -356,9 +354,7 @@ class ScanBase(RequestBase):
         if len(pos) == 0:
             return
         for ind, val in enumerate(self.scan_motors):
-            yield from self.stubs.set(
-                device=val, value=pos[ind], group="scan_motor", wait_group="scan_motor"
-            )
+            yield from self.stubs.set(device=val, value=pos[ind], wait_group="scan_motor")
 
         yield from self.stubs.wait(wait_type="move", group="scan_motor", wait_group="scan_motor")
 
@@ -474,14 +470,11 @@ class Move(RequestBase):
             yield from self.stubs.set(
                 device=motor,
                 value=self.positions[0][ii],
-                group="scan_motor",
                 wait_group="scan_motor",
             )
 
         for motor in self.scan_motors:
-            yield from self.stubs.wait(
-                wait_type="move", device=motor, group="scan_motor", wait_group="scan_motor"
-            )
+            yield from self.stubs.wait(wait_type="move", device=motor, wait_group="scan_motor")
 
     def cleanup(self):
         pass
@@ -681,7 +674,6 @@ class ContLineScan(ScanBase):
         yield from self.stubs.set(
             device=self.scan_motors[0],
             value=self.positions[-1][0],
-            group="scan_motor",
             wait_group="scan_motor",
         )
 
@@ -921,7 +913,7 @@ class AddInteractiveScanPoint(ScanBase):
 
     def _at_each_point(self, ind=None, pos=None):
         yield from self.stubs.trigger(group="trigger", pointID=self.pointID)
-        yield from self.stubs.wait(wait_type="trigger", wait_time=self.exp_time)
+        yield from self.stubs.wait(wait_type="trigger", group="trigger", wait_time=self.exp_time)
         yield from self.stubs.read_and_wait(
             group="primary", wait_group="readout_primary", pointID=self.pointID
         )

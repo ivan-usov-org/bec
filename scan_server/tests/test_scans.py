@@ -43,25 +43,25 @@ class DMMock:
                 BMessage.DeviceInstructionMessage(
                     device="samx",
                     action="set",
-                    parameter={"value": 1, "group": "scan_motor", "wait_group": "scan_motor"},
+                    parameter={"value": 1, "wait_group": "scan_motor"},
                     metadata={"stream": "primary", "DIID": 0},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="samy",
                     action="set",
-                    parameter={"value": 2, "group": "scan_motor", "wait_group": "scan_motor"},
+                    parameter={"value": 2, "wait_group": "scan_motor"},
                     metadata={"stream": "primary", "DIID": 1},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="samx",
                     action="wait",
-                    parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
+                    parameter={"type": "move", "wait_group": "scan_motor"},
                     metadata={"stream": "primary", "DIID": 2},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="samy",
                     action="wait",
-                    parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
+                    parameter={"type": "move", "wait_group": "scan_motor"},
                     metadata={"stream": "primary", "DIID": 3},
                 ),
             ],
@@ -79,37 +79,37 @@ class DMMock:
                 BMessage.DeviceInstructionMessage(
                     device="samx",
                     action="set",
-                    parameter={"value": 1, "group": "scan_motor", "wait_group": "scan_motor"},
+                    parameter={"value": 1, "wait_group": "scan_motor"},
                     metadata={"stream": "primary", "DIID": 0},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="samy",
                     action="set",
-                    parameter={"value": 2, "group": "scan_motor", "wait_group": "scan_motor"},
+                    parameter={"value": 2, "wait_group": "scan_motor"},
                     metadata={"stream": "primary", "DIID": 1},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="samz",
                     action="set",
-                    parameter={"value": 3, "group": "scan_motor", "wait_group": "scan_motor"},
+                    parameter={"value": 3, "wait_group": "scan_motor"},
                     metadata={"stream": "primary", "DIID": 2},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="samx",
                     action="wait",
-                    parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
+                    parameter={"type": "move", "wait_group": "scan_motor"},
                     metadata={"stream": "primary", "DIID": 3},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="samy",
                     action="wait",
-                    parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
+                    parameter={"type": "move", "wait_group": "scan_motor"},
                     metadata={"stream": "primary", "DIID": 4},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="samz",
                     action="wait",
-                    parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
+                    parameter={"type": "move", "wait_group": "scan_motor"},
                     metadata={"stream": "primary", "DIID": 5},
                 ),
             ],
@@ -124,13 +124,13 @@ class DMMock:
                 BMessage.DeviceInstructionMessage(
                     device="samx",
                     action="set",
-                    parameter={"value": 1, "group": "scan_motor", "wait_group": "scan_motor"},
+                    parameter={"value": 1, "wait_group": "scan_motor"},
                     metadata={"stream": "primary", "DIID": 0},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="samx",
                     action="wait",
-                    parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
+                    parameter={"type": "move", "wait_group": "scan_motor"},
                     metadata={"stream": "primary", "DIID": 1},
                 ),
             ],
@@ -174,7 +174,6 @@ def test_scan_move(mv_msg, reference_msg_list):
                     device=["samx"],
                     action="read",
                     parameter={
-                        "group": "scan_motor",
                         "wait_group": "scan_motor",
                     },
                     metadata={"stream": "primary", "DIID": 3},
@@ -184,7 +183,6 @@ def test_scan_move(mv_msg, reference_msg_list):
                     action="wait",
                     parameter={
                         "type": "read",
-                        "group": "scan_motor",
                         "wait_group": "scan_motor",
                     },
                     metadata={"stream": "primary", "DIID": 4},
@@ -217,7 +215,6 @@ def test_scan_move(mv_msg, reference_msg_list):
                     action="set",
                     parameter={
                         "value": -5.0,
-                        "group": "scan_motor",
                         "wait_group": "scan_motor",
                     },
                     metadata={"stream": "primary", "DIID": 1},
@@ -241,7 +238,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                 BMessage.DeviceInstructionMessage(
                     device=None,
                     action="wait",
-                    parameter={"type": "trigger", "time": 0.1},
+                    parameter={"type": "trigger", "group": "trigger", "time": 0.1},
                     metadata={"stream": "primary", "DIID": 4},
                 ),
                 BMessage.DeviceInstructionMessage(
@@ -269,7 +266,6 @@ def test_scan_move(mv_msg, reference_msg_list):
                     action="set",
                     parameter={
                         "value": 0.0,
-                        "group": "scan_motor",
                         "wait_group": "scan_motor",
                     },
                     metadata={"stream": "primary", "DIID": 7},
@@ -303,7 +299,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                 BMessage.DeviceInstructionMessage(
                     device=None,
                     action="wait",
-                    parameter={"type": "trigger", "time": 0.1},
+                    parameter={"type": "trigger", "group": "trigger", "time": 0.1},
                     metadata={"stream": "primary", "DIID": 11},
                 ),
                 BMessage.DeviceInstructionMessage(
@@ -331,7 +327,6 @@ def test_scan_move(mv_msg, reference_msg_list):
                     action="set",
                     parameter={
                         "value": 5.0,
-                        "group": "scan_motor",
                         "wait_group": "scan_motor",
                     },
                     metadata={"stream": "primary", "DIID": 14},
@@ -367,6 +362,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                     action="wait",
                     parameter={
                         "type": "trigger",
+                        "group": "trigger",
                         "time": 0.1,
                     },
                     metadata={"stream": "primary", "DIID": 18},
@@ -396,7 +392,6 @@ def test_scan_move(mv_msg, reference_msg_list):
                     action="set",
                     parameter={
                         "value": 0.0,
-                        "group": "scan_motor",
                         "wait_group": "scan_motor",
                     },
                     metadata={"stream": "primary", "DIID": 21},
@@ -558,13 +553,13 @@ def test_device_rpc():
                 BMessage.DeviceInstructionMessage(
                     device=["rtx", "rty"],
                     action="read",
-                    parameter={"group": "scan_motor", "wait_group": "scan_motor"},
+                    parameter={"wait_group": "scan_motor"},
                     metadata={"stream": "primary", "DIID": 0},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device=["rtx", "rty"],
                     action="wait",
-                    parameter={"type": "read", "group": "scan_motor", "wait_group": "scan_motor"},
+                    parameter={"type": "read", "wait_group": "scan_motor"},
                     metadata={"stream": "primary", "DIID": 1},
                 ),
                 BMessage.DeviceInstructionMessage(
@@ -594,13 +589,13 @@ def test_device_rpc():
                 BMessage.DeviceInstructionMessage(
                     device="lsamrot",
                     action="set",
-                    parameter={"value": 10, "group": "scan_motor", "wait_group": "scan_motor"},
+                    parameter={"value": 10, "wait_group": "scan_motor"},
                     metadata={"stream": "primary", "DIID": 3},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device=["lsamrot"],
                     action="wait",
-                    parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
+                    parameter={"type": "move", "wait_group": "scan_motor"},
                     metadata={"stream": "primary", "DIID": 4},
                 ),
                 BMessage.DeviceInstructionMessage(
@@ -727,7 +722,6 @@ def test_device_rpc():
                     action="set",
                     parameter={
                         "value": -0.7700589354581364,
-                        "group": "scan_motor",
                         "wait_group": "scan_motor",
                     },
                     metadata={"stream": "primary", "DIID": 17},
@@ -737,7 +731,6 @@ def test_device_rpc():
                     action="set",
                     parameter={
                         "value": -0.8406005210092851,
-                        "group": "scan_motor",
                         "wait_group": "scan_motor",
                     },
                     metadata={"stream": "primary", "DIID": 18},
@@ -757,7 +750,7 @@ def test_device_rpc():
                 BMessage.DeviceInstructionMessage(
                     device=None,
                     action="wait",
-                    parameter={"type": "trigger", "time": 0.1},
+                    parameter={"type": "trigger", "group": "trigger", "time": 0.1},
                     metadata={"stream": "primary", "DIID": 21},
                 ),
                 BMessage.DeviceInstructionMessage(
@@ -785,7 +778,6 @@ def test_device_rpc():
                     action="set",
                     parameter={
                         "value": 1.3681828686580249,
-                        "group": "scan_motor",
                         "wait_group": "scan_motor",
                     },
                     metadata={"stream": "primary", "DIID": 24},
@@ -795,7 +787,6 @@ def test_device_rpc():
                     action="set",
                     parameter={
                         "value": 2.1508313829565298,
-                        "group": "scan_motor",
                         "wait_group": "scan_motor",
                     },
                     metadata={"stream": "primary", "DIID": 25},
@@ -821,7 +812,7 @@ def test_device_rpc():
                 BMessage.DeviceInstructionMessage(
                     device=None,
                     action="wait",
-                    parameter={"type": "trigger", "time": 0.1},
+                    parameter={"type": "trigger", "group": "trigger", "time": 0.1},
                     metadata={"stream": "primary", "DIID": 29},
                 ),
                 BMessage.DeviceInstructionMessage(
