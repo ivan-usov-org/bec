@@ -281,5 +281,5 @@ class DeviceMsgMixin:
     def _check_device_and_groups(self, device, group):
         if device and group:
             raise DeviceMessageError("Device and device group was specified. Pick one.")
-        if not device and not group:
+        if device is None and group is None:
             raise DeviceMessageError("Either devices or device groups have to be specified.")
