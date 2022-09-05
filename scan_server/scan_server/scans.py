@@ -741,7 +741,14 @@ class RoundScanFlySim(ScanBase):
         )
 
     def scan_core(self):
-        yield from self.stubs.kickoff(device=self.flyer, parameter={"num_pos": self.num_pos})
+        yield from self.stubs.kickoff(
+            device=self.flyer,
+            parameter={
+                "num_pos": self.num_pos,
+                "positions": self.positions.tolist(),
+                "exp_time": self.exp_time,
+            },
+        )
 
         while True:
             yield from self.stubs.read_and_wait(group="primary", wait_group="readout_primary")
