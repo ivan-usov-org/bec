@@ -3,7 +3,7 @@ import pytest
 from bec_utils import BECMessage as BMessage
 from bec_utils.tests.utils import ProducerMock
 from scan_plugins.LamNIFermatScan import LamNIFermatScan
-from scan_server.scans import FermatSpiralScan, Move, Scan
+from scan_server.scans import DeviceRPC, FermatSpiralScan, Move, Scan
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=protected-access
@@ -520,6 +520,28 @@ def test_fermat_scan(scan_msg, reference_scan_list):
     )
 
 
+def test_device_rpc():
+    device_manager = DMMock()
+    parameter = {
+        "device": "samx",
+        "rpc_id": "baf7c4c0-4948-4046-8fc5-ad1e9d188c10",
+        "func": "read",
+        "args": [],
+        "kwargs": {},
+    }
+
+    scan = DeviceRPC(parameter=parameter, device_manager=device_manager)
+    scan_instructions = list(scan.run())
+    assert scan_instructions == [
+        BMessage.DeviceInstructionMessage(
+            device="samx",
+            action="rpc",
+            parameter=parameter,
+            metadata={"stream": "primary", "DIID": 0},
+        )
+    ]
+
+
 @pytest.mark.parametrize(
     "scan_msg,reference_scan_list",
     [
@@ -853,7 +875,7 @@ def test_LamNIFermatScan(scan_msg, reference_scan_list):
     scan = LamNIFermatScan(
         parameter=scan_msg.content.get("parameter"), device_manager=device_manager
     )
-    scan._get_from_rpc = lambda x: 0
+    scan.stubs._get_from_rpc = lambda x: 0
     scan_instructions = list(scan.run())
     scan_uid = scan_instructions[0].metadata.get("scanID")
     for ii, instr in enumerate(reference_scan_list):
