@@ -697,7 +697,6 @@ class RoundScanFlySim(ScanBase):
     required_kwargs = ["exp_time"]
     arg_input = [
         ScanArgType.DEVICE,
-        ScanArgType.DEVICE,
         ScanArgType.FLOAT,
         ScanArgType.FLOAT,
         ScanArgType.INT,
@@ -717,15 +716,15 @@ class RoundScanFlySim(ScanBase):
         Returns:
 
         Examples:
-            >>> scans.round_scan(dev.motor1, dev.motor2, 0, 50, 5, 3, exp_time=0.1, relative=True)
+            >>> scans.round_scan_fly(dev.flyer_sim, 0, 50, 5, 3, exp_time=0.1, relative=True)
 
         """
         super().__init__(parameter=parameter, **kwargs)
         self.axis = []
 
     def _get_scan_motors(self):
-        # caller_args = list(self.caller_args.items())[0]
         self.scan_motors = []
+        self.flyer = list(self.caller_args.keys())[0]
 
     def prepare_positions(self):
         self._calculate_positions()
@@ -738,15 +737,22 @@ class RoundScanFlySim(ScanBase):
     def _calculate_positions(self):
         params = list(self.caller_args.values())[0]
         self.positions = get_round_scan_positions(
-            r_in=params[1], r_out=params[2], nr=params[3], nth=params[4]
+            r_in=params[0], r_out=params[1], nr=params[2], nth=params[3]
         )
 
     def scan_core(self):
-        yield from self.stubs.kickoff(device="flyer_sim", parameter={"num_pos": self.num_pos})
+        yield from self.stubs.kickoff(
+            device=self.flyer,
+            parameter={
+                "num_pos": self.num_pos,
+                "positions": self.positions.tolist(),
+                "exp_time": self.exp_time,
+            },
+        )
 
         while True:
             yield from self.stubs.read_and_wait(group="primary", wait_group="readout_primary")
-            msg = self.device_manager.producer.get(MessageEndpoints.device_status("flyer_sim"))
+            msg = self.device_manager.producer.get(MessageEndpoints.device_status(self.flyer))
             if msg:
                 status = BECMessage.DeviceStatusMessage.loads(msg)
                 if status.content.get("status", 1) == 0 and self.metadata.get(

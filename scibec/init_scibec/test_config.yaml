@@ -1,7 +1,20 @@
 ############################################################
 ####################### User motors ########################
 ############################################################
-
+flyer_sim:
+    acquisition:
+        schedule: flyer
+    config:
+        delay: 1
+        device_access: true
+        labels: flyer_sim
+        name: flyer_sim
+        speed: 100
+        update_frequency: 400
+    deviceGroup: userMotor
+    status:
+        enabled: true
+    type: SynFlyer
 eyefoc:
     acquisition:
         schedule: sync
