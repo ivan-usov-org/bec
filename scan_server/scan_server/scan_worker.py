@@ -355,6 +355,7 @@ class ScanWorker(threading.Thread):
         max_point_id = 0
 
         def _instruction_step(instr: DeviceMsg):
+            logger.debug(instr)
             action = instr.content.get("action")
             scan_def_id = instr.metadata.get("scan_def_id")
             if "pointID" in instr.metadata:

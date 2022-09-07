@@ -1,14 +1,13 @@
 import ast
 import enum
-import threading
 import time
-import uuid
 from abc import ABC, abstractmethod
 
 import numpy as np
 from bec_utils import BECMessage, DeviceManagerBase, MessageEndpoints, bec_logger
 from cytoolz import partition
 
+from .device_msg_mixin import DeviceMsgMixin
 from .errors import LimitError, ScanAbortion
 
 DeviceMsg = BECMessage.DeviceInstructionMessage
@@ -174,13 +173,15 @@ class RequestBase(ABC):
         self._get_scan_motors()
         if metadata is None:
             self.metadata = {}
+        self.stubs = DeviceMsgMixin(
+            producer=self.device_manager.producer, device_msg_callback=self.device_msg_metadata
+        )
 
-    def device_msg(self, **kwargs):
+    def device_msg_metadata(self):
         default_metadata = {"stream": "primary", "DIID": self.DIID}
-        msg = DeviceMsg(**kwargs)
-        msg.metadata = {**default_metadata, **self.metadata, **msg.metadata}
+        metadata = {**default_metadata, **self.metadata}
         self.DIID += 1
-        return msg
+        return metadata
 
     def run_pre_scan_macros(self):
         macros = self.device_manager.producer.lrange(MessageEndpoints.pre_scan_macros(), 0, -1)
@@ -192,39 +193,6 @@ class RequestBase(ABC):
 
     def initialize(self):
         self.run_pre_scan_macros()
-
-    def device_rpc(self, device, func_name, *args, **kwargs):
-        rpc_id = str(uuid.uuid4())
-        yield from self._run_rpc(device, func_name, rpc_id, *args, **kwargs)
-        return self._get_from_rpc(rpc_id)
-
-    def _run_rpc(self, device, func_name, rpc_id, *args, **kwargs):
-        yield self.device_msg(
-            device=device,
-            action="rpc",
-            parameter={
-                "device": device,
-                "func": func_name,
-                "rpc_id": rpc_id,
-                "args": list(args),
-                "kwargs": kwargs,
-            },
-        )
-
-    def _get_from_rpc(self, rpc_id):
-        while True:
-            msg = self.device_manager.producer.get(MessageEndpoints.device_rpc(rpc_id))
-            if msg:
-                break
-            time.sleep(0.001)
-        msg = BECMessage.DeviceRPCMessage.loads(msg)
-        if not msg.content["success"]:
-            error = msg.content["out"]
-            raise ScanAbortion(
-                f"During an RPC, the following error occured:\n{error['error']}: {error['msg']}.\nTraceback: {error['traceback']}\n The scan will be aborted."
-            )
-        logger.debug(msg.content.get("out"))
-        return msg.content.get("return_val")
 
     def _check_limits(self):
         logger.debug("check limits")
@@ -305,23 +273,8 @@ class ScanBase(RequestBase):
         super().initialize()
 
     def read_scan_motors(self):
-        yield self.device_msg(
-            device=self.scan_motors,
-            action="read",
-            parameter={
-                "group": "scan_motor",
-                "wait_group": "scan_motor",
-            },
-        )
-        yield self.device_msg(
-            device=self.scan_motors,
-            action="wait",
-            parameter={
-                "type": "read",
-                "group": "scan_motor",
-                "wait_group": "scan_motor",
-            },
-        )
+        # TODO: check if we can remove the groups from read_and_wait
+        yield from self.stubs.read_and_wait(device=self.scan_motors, wait_group="scan_motor")
 
     @abstractmethod
     def _calculate_positions(self) -> None:
@@ -335,27 +288,18 @@ class ScanBase(RequestBase):
         self._check_limits()
 
     def open_scan(self):
-        yield self.device_msg(
-            device=None,
-            action="open_scan",
-            parameter={
-                "primary": self.scan_motors,
-                "num_points": self.num_pos,
-                "scan_name": self.scan_name,
-                "scan_type": self.scan_type,
-            },
+        yield from self.stubs.open_scan(
+            scan_motors=self.scan_motors,
+            num_pos=self.num_pos,
+            scan_name=self.scan_name,
+            scan_type=self.scan_type,
         )
 
     def stage(self):
-        yield self.device_msg(device=None, action="stage", parameter={})
+        yield from self.stubs.stage()
 
     def run_baseline_reading(self):
-        yield self.device_msg(
-            device=None,
-            action="baseline_reading",
-            parameter={},
-            metadata={"stream": "baseline"},
-        )
+        yield from self.stubs.baseline_reading()
 
     def _set_position_offset(self):
         self.start_pos = [
@@ -365,7 +309,7 @@ class ScanBase(RequestBase):
             self.positions += self.start_pos
 
     def close_scan(self):
-        yield self.device_msg(device=None, action="close_scan", parameter={})
+        yield from self.stubs.close_scan()
 
     def scan_core(self):
         for ind, pos in self._get_position():
@@ -375,18 +319,10 @@ class ScanBase(RequestBase):
 
     def finalize(self):
         yield from self._move_and_wait(self.start_pos)
-        yield self.device_msg(
-            device=None,
-            action="wait",
-            parameter={
-                "type": "read",
-                "group": "primary",
-                "wait_group": "readout_primary",
-            },
-        )
+        yield from self.stubs.wait(wait_type="read", group="primary", wait_group="readout_primary")
 
     def unstage(self):
-        yield self.device_msg(device=None, action="unstage", parameter={})
+        yield from self.stubs.unstage()
 
     def cleanup(self):
         yield from self.close_scan()
@@ -394,45 +330,19 @@ class ScanBase(RequestBase):
     def _at_each_point(self, ind=None, pos=None):
         yield from self._move_and_wait(pos)
         if ind > 0:
-            yield self.device_msg(
-                device=None,
-                action="wait",
-                parameter={
-                    "type": "read",
-                    "group": "primary",
-                    "wait_group": "readout_primary",
-                },
+            yield from self.stubs.wait(
+                wait_type="read", group="primary", wait_group="readout_primary"
             )
-        yield self.device_msg(
-            device=None,
-            action="trigger",
-            parameter={"group": "trigger"},
-            metadata={"pointID": self.pointID},
+
+        yield from self.stubs.trigger(group="trigger", pointID=self.pointID)
+        yield from self.stubs.wait(wait_type="trigger", group="trigger", wait_time=self.exp_time)
+        yield from self.stubs.read(
+            group="primary", wait_group="readout_primary", pointID=self.pointID
         )
-        yield self.device_msg(
-            device=None,
-            action="wait",
-            parameter={"type": "trigger", "time": self.exp_time},
+        yield from self.stubs.wait(
+            wait_type="read", group="scan_motor", wait_group="readout_primary"
         )
-        yield self.device_msg(
-            device=None,
-            action="read",
-            parameter={
-                "target": "primary",
-                "group": "primary",
-                "wait_group": "readout_primary",
-            },
-            metadata={"pointID": self.pointID},
-        )
-        yield self.device_msg(
-            device=None,
-            action="wait",
-            parameter={
-                "type": "read",
-                "group": "scan_motor",
-                "wait_group": "readout_primary",
-            },
-        )
+
         self.pointID += 1
 
     def _move_and_wait(self, pos):
@@ -441,24 +351,9 @@ class ScanBase(RequestBase):
         if len(pos) == 0:
             return
         for ind, val in enumerate(self.scan_motors):
-            yield self.device_msg(
-                device=val,
-                action="set",
-                parameter={
-                    "value": pos[ind],
-                    "group": "scan_motor",
-                    "wait_group": "scan_motor",
-                },
-            )
-        yield self.device_msg(
-            device=None,
-            action="wait",
-            parameter={
-                "type": "move",
-                "group": "scan_motor",
-                "wait_group": "scan_motor",
-            },
-        )
+            yield from self.stubs.set(device=val, value=pos[ind], wait_group="scan_motor")
+
+        yield from self.stubs.wait(wait_type="move", group="scan_motor", wait_group="scan_motor")
 
     def _get_position(self):
         for ind, pos in enumerate(self.positions):
@@ -507,7 +402,7 @@ class OpenScanDef(ScanStub):
     scan_report_hint = None
 
     def run(self):
-        yield self.device_msg(device=None, action="open_scan_def", parameter={})
+        yield from self.stubs.open_scan_def()
 
 
 class CloseScanDef(ScanStub):
@@ -515,14 +410,14 @@ class CloseScanDef(ScanStub):
     scan_report_hint = "table"
 
     def run(self):
-        yield self.device_msg(device=None, action="close_scan_def", parameter={})
+        yield from self.stubs.close_scan_def()
 
 
 class CloseScanGroup(ScanStub):
     scan_name = "close_scan_group"
 
     def run(self):
-        yield self.device_msg(device=None, action="close_scan_group", parameter={})
+        yield from self.stubs.close_scan_group()
 
 
 class DeviceRPC(ScanStub):
@@ -541,11 +436,7 @@ class DeviceRPC(ScanStub):
 
     def run(self):
         # different to calling self.device_rpc, this procedure will not wait for a reply and therefore not check any errors.
-        yield self.device_msg(
-            device=self.parameter.get("device"),
-            action="rpc",
-            parameter=self.parameter,
-        )
+        yield from self.stubs.rpc(device=self.parameter.get("device"), parameter=self.parameter)
 
 
 class Move(RequestBase):
@@ -573,21 +464,14 @@ class Move(RequestBase):
 
     def _at_each_point(self, pos=None):
         for ii, motor in enumerate(self.scan_motors):
-            yield self.device_msg(
+            yield from self.stubs.set(
                 device=motor,
-                action="set",
-                parameter={
-                    "value": self.positions[0][ii],
-                    "group": "scan_motor",
-                    "wait_group": "scan_motor",
-                },
+                value=self.positions[0][ii],
+                wait_group="scan_motor",
             )
+
         for motor in self.scan_motors:
-            yield self.device_msg(
-                device=motor,
-                action="wait",
-                parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
-            )
+            yield from self.stubs.wait(wait_type="move", device=motor, wait_group="scan_motor")
 
     def cleanup(self):
         pass
@@ -777,35 +661,17 @@ class ContLineScan(ScanBase):
         self.positions = np.array(list(zip(*self.axis)))
 
     def _at_each_point(self):
-        yield self.device_msg(
-            device=None,
-            action="trigger",
-            parameter={"group": "trigger"},
-            metadata={"pointID": self.pointID},
-        )
-        yield self.device_msg(
-            device=None,
-            action="read",
-            parameter={
-                "target": "primary",
-                "group": "primary",
-                "wait_group": "readout_primary",
-            },
-            metadata={"pointID": self.pointID},
-        )
+        yield from self.stubs.trigger(group="trigger", pointID=self.pointID)
+        yield from self.stubs.read(group="primary", wait_group="primary", pointID=self.pointID)
         self.pointID += 1
 
     def scan_core(self):
         yield from self._move_and_wait(self.positions[0] - self.offset)
         # send the slow motor on its way
-        yield self.device_msg(
+        yield from self.stubs.set(
             device=self.scan_motors[0],
-            action="set",
-            parameter={
-                "value": self.positions[-1][0],
-                "group": "scan_motor",
-                "wait_group": "scan_motor",
-            },
+            value=self.positions[-1][0],
+            wait_group="scan_motor",
         )
 
         while self.pointID < len(self.positions[:]):
@@ -876,33 +742,10 @@ class RoundScanFlySim(ScanBase):
         )
 
     def scan_core(self):
-        yield self.device_msg(
-            device="flyer_sim",
-            action="kickoff",
-            parameter={"num_pos": self.num_pos},
-            metadata={},
-        )
+        yield from self.stubs.kickoff(device="flyer_sim", parameter={"num_pos": self.num_pos})
 
         while True:
-            yield self.device_msg(
-                device=None,
-                action="read",
-                parameter={
-                    "target": "primary",
-                    "group": "primary",
-                    "wait_group": "readout_primary",
-                },
-                metadata={},
-            )
-            yield self.device_msg(
-                device=None,
-                action="wait",
-                parameter={
-                    "type": "read",
-                    "group": "primary",
-                    "wait_group": "readout_primary",
-                },
-            )
+            yield from self.stubs.read_and_wait(group="primary", wait_group="readout_primary")
             msg = self.device_manager.producer.get(MessageEndpoints.device_status("flyer_sim"))
             if msg:
                 status = BECMessage.DeviceStatusMessage.loads(msg)
@@ -1025,7 +868,7 @@ class OpenInteractiveScan(ScanBase):
         self.scan_motors = caller_args
 
     def run(self):
-        yield self.device_msg(device=None, action="open_scan_def", parameter={})
+        yield from self.stubs.open_scan_def()
         self.initialize()
         yield from self.read_scan_motors()
         yield from self.open_scan()
@@ -1066,44 +909,10 @@ class AddInteractiveScanPoint(ScanBase):
         self.scan_motors = list(self.caller_args.keys())
 
     def _at_each_point(self, ind=None, pos=None):
-        yield self.device_msg(
-            device=None,
-            action="trigger",
-            parameter={"group": "trigger"},
-            metadata={"pointID": self.pointID},
-        )
-        yield self.device_msg(
-            device=None,
-            action="wait",
-            parameter={"type": "trigger", "time": self.exp_time},
-        )
-        yield self.device_msg(
-            device=None,
-            action="read",
-            parameter={
-                "target": "primary",
-                "group": "primary",
-                "wait_group": "readout_primary",
-            },
-            metadata={"pointID": self.pointID},
-        )
-        yield self.device_msg(
-            device=None,
-            action="wait",
-            parameter={
-                "type": "read",
-                "group": "scan_motor",
-                "wait_group": "readout_primary",
-            },
-        )
-        yield self.device_msg(
-            device=None,
-            action="wait",
-            parameter={
-                "type": "read",
-                "group": "primary",
-                "wait_group": "readout_primary",
-            },
+        yield from self.stubs.trigger(group="trigger", pointID=self.pointID)
+        yield from self.stubs.wait(wait_type="trigger", group="trigger", wait_time=self.exp_time)
+        yield from self.stubs.read_and_wait(
+            group="primary", wait_group="readout_primary", pointID=self.pointID
         )
         self.pointID += 1
 
@@ -1146,4 +955,4 @@ class CloseInteractiveScan(ScanBase):
         yield from self.finalize()
         yield from self.unstage()
         yield from self.cleanup()
-        yield self.device_msg(device=None, action="close_scan_def", parameter={})
+        yield from self.stubs.close_scan_def()

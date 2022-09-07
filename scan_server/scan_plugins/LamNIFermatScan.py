@@ -147,7 +147,7 @@ class LamNIFermatScan(ScanBase):
         )
 
     def _prepare_setup(self):
-        yield from self.device_rpc("rtx", "controller.clear_trajectory_generator")
+        yield from self.stubs.send_rpc_and_wait("rtx", "controller.clear_trajectory_generator")
         yield from self.lamni_rotation(self.angle)
         total_shift_x, total_shift_y = self._compute_total_shift()
         yield from self.lamni_new_scan_center_interferometer(total_shift_x, total_shift_y)
@@ -165,7 +165,9 @@ class LamNIFermatScan(ScanBase):
         # plt.show()
 
     def _transfer_positions_to_LamNI(self):
-        yield from self.device_rpc("rtx", "controller.add_pos_to_scan", (self.positions.tolist(),))
+        yield from self.stubs.send_rpc_and_wait(
+            "rtx", "controller.add_pos_to_scan", (self.positions.tolist(),)
+        )
 
     def _calculate_positions(self):
         self.positions = self.get_lamni_fermat_spiral_pos(
@@ -263,12 +265,14 @@ class LamNIFermatScan(ScanBase):
 
     def lamni_rotation(self, angle):
         # get last setpoint (cannot be based on pos get because they will deviate slightly)
-        lsamrot_current_setpoint = yield from self.device_rpc("lsamrot", "user_setpoint.get")
+        lsamrot_current_setpoint = yield from self.stubs.send_rpc_and_wait(
+            "lsamrot", "user_setpoint.get"
+        )
         if angle == lsamrot_current_setpoint:
             logger.info("No rotation required")
         else:
             logger.info("Rotating to requested angle")
-            yield from self._move_and_wait_devices(["lsamrot"], [angle])
+            yield from self.stubs.set_and_wait(device=["lsamrot"], positions=[angle])
 
     def lamni_new_scan_center_interferometer(self, x, y):
         """move to new scan center. xy in mm"""
@@ -276,13 +280,13 @@ class LamNIFermatScan(ScanBase):
         lsamy_center = 10.18
 
         # could first check if feedback is enabled
-        yield from self.device_rpc("rtx", "controller.feedback_disable")
+        yield from self.stubs.send_rpc_and_wait("rtx", "controller.feedback_disable")
         time.sleep(0.05)
 
-        rtx_current = yield from self.device_rpc("rtx", "readback.get")
-        rty_current = yield from self.device_rpc("rty", "readback.get")
-        lsamx_current = yield from self.device_rpc("lsamx", "readback.get")
-        lsamy_current = yield from self.device_rpc("lsamy", "readback.get")
+        rtx_current = yield from self.stubs.send_rpc_and_wait("rtx", "readback.get")
+        rty_current = yield from self.stubs.send_rpc_and_wait("rty", "readback.get")
+        lsamx_current = yield from self.stubs.send_rpc_and_wait("lsamx", "readback.get")
+        lsamy_current = yield from self.stubs.send_rpc_and_wait("lsamy", "readback.get")
 
         x_stage, y_stage = lamni_to_stage_coordinates(x, y)
 
@@ -313,11 +317,13 @@ class LamNIFermatScan(ScanBase):
                 f"Compensating {[val/1000 for val in lamni_to_stage_coordinates(x_drift,y_drift)]}"
             )
 
-            yield from self._move_and_wait_devices(["lsamx", "lsamy"], [move_x, move_y])
+            yield from self.stubs.set_and_wait(
+                device=["lsamx", "lsamy"], positions=[move_x, move_y]
+            )
 
         time.sleep(0.01)
-        rtx_current = yield from self.device_rpc("rtx", "readback.get")
-        rty_current = yield from self.device_rpc("rty", "readback.get")
+        rtx_current = yield from self.stubs.send_rpc_and_wait("rtx", "readback.get")
+        rty_current = yield from self.stubs.send_rpc_and_wait("rty", "readback.get")
 
         logger.info(f"New scan center interferometer {rtx_current:.3f}, {rty_current:.3f} microns")
 
@@ -347,10 +353,12 @@ class LamNIFermatScan(ScanBase):
                 + lamni_to_stage_coordinates(x_drift, y_drift)[1] / 1000
                 + lamni_to_stage_coordinates(x_drift2, y_drift2)[1] / 1000
             )
-            yield from self._move_and_wait_devices(["lsamx", "lsamy"], [move_x, move_y])
+            yield from self.stubs.set_and_wait(
+                device=["lsamx", "lsamy"], positions=[move_x, move_y]
+            )
             time.sleep(0.01)
-            rtx_current = yield from self.device_rpc("rtx", "readback.get")
-            rty_current = yield from self.device_rpc("rty", "readback.get")
+            rtx_current = yield from self.stubs.send_rpc_and_wait("rtx", "readback.get")
+            rty_current = yield from self.stubs.send_rpc_and_wait("rty", "readback.get")
 
             logger.info(
                 f"New scan center interferometer after second iteration {rtx_current:.3f}, {rty_current:.3f} microns"
@@ -363,42 +371,7 @@ class LamNIFermatScan(ScanBase):
         else:
             logger.info("No second iteration required")
 
-        yield from self.device_rpc("rtx", "controller.feedback_enable_without_reset")
-
-    def _move_and_wait_devices(self, devices, pos):
-        if not isinstance(pos, list) and not isinstance(pos, np.ndarray):
-            pos = [pos]
-        for ind, val in enumerate(devices):
-            yield self.device_msg(
-                device=val,
-                action="set",
-                parameter={
-                    "value": pos[ind],
-                    "group": "scan_motor",
-                    "wait_group": "scan_motor",
-                },
-            )
-        yield self.device_msg(
-            device=devices,
-            action="wait",
-            parameter={
-                "type": "move",
-                "group": "scan_motor",
-                "wait_group": "scan_motor",
-            },
-        )
-
-    def open_scan(self):
-        yield self.device_msg(
-            device=None,
-            action="open_scan",
-            parameter={
-                "primary": self.scan_motors,
-                "num_points": self.num_pos,
-                "scan_name": self.scan_name,
-                "scan_type": self.scan_type,
-            },
-        )
+        yield from self.stubs.send_rpc_and_wait("rtx", "controller.feedback_enable_without_reset")
 
     def scan_core(self):
         if self.scan_type == "step":
@@ -409,32 +382,9 @@ class LamNIFermatScan(ScanBase):
         elif self.scan_type == "fly":
             # use a device message to receive the scan number and
             # scan ID before sending the message to the device server
-            yield self.device_msg(
-                device="rtx",
-                action="kickoff",
-                parameter={},
-                metadata={},
-            )
+            yield from self.stubs.kickoff(device="rtx")
             while True:
-                yield self.device_msg(
-                    device=None,
-                    action="read",
-                    parameter={
-                        "target": "primary",
-                        "group": "primary",
-                        "wait_group": "readout_primary",
-                    },
-                    metadata={},
-                )
-                yield self.device_msg(
-                    device=None,
-                    action="wait",
-                    parameter={
-                        "type": "read",
-                        "group": "primary",
-                        "wait_group": "readout_primary",
-                    },
-                )
+                yield from self.stubs.read_and_wait(group="primary", wait_group="readout_primary")
                 msg = self.device_manager.producer.get(MessageEndpoints.device_status("rt_scan"))
                 if msg:
                     status = BECMessage.DeviceStatusMessage.loads(msg)

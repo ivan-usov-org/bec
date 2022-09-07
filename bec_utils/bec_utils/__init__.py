@@ -1,6 +1,7 @@
 import logging
 
 from .bec_service import BECService, bec_logger
+from .connector import ProducerConnector
 from .devicemanager import (
     Device,
     DeviceConfigError,
