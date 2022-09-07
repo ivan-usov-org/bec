@@ -7,8 +7,8 @@ import numpy as np
 from bec_utils import BECMessage, DeviceManagerBase, MessageEndpoints, bec_logger
 from cytoolz import partition
 
-from .device_msg_mixin import DeviceMsgMixin
 from .errors import LimitError, ScanAbortion
+from .scan_stubs import ScanStubs
 
 DeviceMsg = BECMessage.DeviceInstructionMessage
 ScanMsg = BECMessage.ScanQueueMessage
@@ -173,7 +173,7 @@ class RequestBase(ABC):
         self._get_scan_motors()
         if metadata is None:
             self.metadata = {}
-        self.stubs = DeviceMsgMixin(
+        self.stubs = ScanStubs(
             producer=self.device_manager.producer, device_msg_callback=self.device_msg_metadata
         )
 
