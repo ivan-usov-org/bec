@@ -12,6 +12,7 @@ import bec_utils.BECMessage as BECMessage
 import ophyd
 from bec_utils import Alarms, BECService, MessageEndpoints, bec_logger
 from bec_utils.connector import ConnectorBase
+from ophyd import Staged
 from ophyd.utils import errors as ophyd_errors
 
 from device_server.devices import is_serializable
@@ -333,6 +334,11 @@ class DeviceServer(BECService):
             devices = [devices]
 
         for dev in devices:
+            obj = self.device_manager.devices[dev].obj
+            # pylint: disable=protected-access
+            if obj._staged == Staged.yes:
+                logger.warning(f"Device {obj.name} was already staged and will be first unstaged.")
+                self.device_manager.devices[dev].obj.unstage()
             self.device_manager.devices[dev].obj.stage()
 
     def _unstage_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
@@ -341,7 +347,12 @@ class DeviceServer(BECService):
             devices = [devices]
 
         for dev in devices:
-            self.device_manager.devices[dev].obj.unstage()
+            obj = self.device_manager.devices[dev].obj
+            # pylint: disable=protected-access
+            if obj._staged == Staged.yes:
+                self.device_manager.devices[dev].obj.unstage()
+                continue
+            logger.warning(f"Device {obj.name} was already unstaged.")
 
     @property
     def status(self) -> DSStatus:
