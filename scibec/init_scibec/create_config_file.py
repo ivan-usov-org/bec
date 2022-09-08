@@ -443,6 +443,7 @@ for m in detectors:
             "config": {
                 "name": m,
                 "labels": m,
+                "device_access": True,
             },
             "acquisition": {"schedule": "sync"},
             "deviceGroup": "detectors",
