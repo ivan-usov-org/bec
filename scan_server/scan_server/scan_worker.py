@@ -1,6 +1,7 @@
 import datetime
 import threading
 import time
+import traceback
 from asyncio.log import logger
 from typing import List
 
@@ -245,8 +246,16 @@ class ScanWorker(threading.Thread):
         self.device_manager.producer.send(MessageEndpoints.device_instructions(), instr.dumps())
 
     def _trigger_devices(self, instr: DeviceMsg) -> None:
-        # self._get_triggerable_devices()
-        pass
+        devices = [dev.name for dev in self.device_manager.devices.detectors()]
+        self.device_manager.producer.send(
+            MessageEndpoints.device_instructions(),
+            DeviceMsg(
+                device=devices,
+                action="trigger",
+                parameter=instr.content["parameter"],
+                metadata=instr.metadata,
+            ).dumps(),
+        )
 
     def _send_rpc(self, instr: DeviceMsg) -> None:
         self.device_manager.producer.send(MessageEndpoints.device_instructions(), instr.dumps())
@@ -424,10 +433,7 @@ class ScanWorker(threading.Thread):
                     self.reset()
         # pylint: disable=broad-except
         except Exception as exc:
-            if len(exc.args) > 0:
-                content = exc.args[0]
-            else:
-                content = ""
+            content = traceback.format_exc()
             logger.error(content)
             self.connector.raise_alarm(
                 severity=Alarms.MAJOR,
