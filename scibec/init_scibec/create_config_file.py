@@ -1,8 +1,8 @@
-import numpy as np
 import yaml
 
-USE_LAMNI = True
+USE_LAMNI = False
 
+detectors = ["eiger"]
 
 lamni_galil_motors = [
     ("lsamx", "A", -1),
@@ -432,6 +432,27 @@ with open("demo_config.yaml", "a") as f:
     f.write(write_sep("Beamline motors"))
     f.write(yaml.dump(out))
     f.write(write_sep("Beamline motors end here", sep_type="footer"))
+
+
+out = dict()
+for m in detectors:
+    out[m] = dict(
+        {
+            "status": {"enabled": True},
+            "type": "SynSLSDetector",
+            "config": {
+                "name": m,
+                "labels": m,
+            },
+            "acquisition": {"schedule": "sync"},
+            "deviceGroup": "detectors",
+        }
+    )
+
+with open("demo_config.yaml", "a") as f:
+    f.write(write_sep("Cameras and detectors"))
+    f.write(yaml.dump(out))
+    f.write(write_sep("Cameras and detectors end here", sep_type="footer"))
 
 
 sls_status = [
