@@ -339,8 +339,32 @@ class ScanWorker(threading.Thread):
                 ).dumps(),
             )
 
-    def _send_scan_status(self, status: str):
+    def _stage_devices(self, instr: DeviceMsg) -> None:
+        devices = [dev.name for dev in self.device_manager.devices.enabled_devices]
         self.device_manager.producer.send(
+            MessageEndpoints.device_instructions(),
+            DeviceMsg(
+                device=devices,
+                action="stage",
+                parameter=instr.content["parameter"],
+                metadata=instr.metadata,
+            ).dumps(),
+        )
+
+    def _unstage_devices(self, instr: DeviceMsg) -> None:
+        devices = [dev.name for dev in self.device_manager.devices.enabled_devices]
+        self.device_manager.producer.send(
+            MessageEndpoints.device_instructions(),
+            DeviceMsg(
+                device=devices,
+                action="unstage",
+                parameter=instr.content["parameter"],
+                metadata=instr.metadata,
+            ).dumps(),
+        )
+
+    def _send_scan_status(self, status: str):
+        self.device_manager.producer.set_and_publish(
             MessageEndpoints.scan_status(),
             ScanStatusMsg(
                 scanID=self.current_scanID,
@@ -399,6 +423,10 @@ class ScanWorker(threading.Thread):
                 self._baseline_reading(instr)
             elif action == "rpc":
                 self._send_rpc(instr)
+            elif action == "stage":
+                self._stage_devices(instr)
+            elif action == "unstage":
+                self._unstage_devices(instr)
             else:
                 logger.warning(f"Unknown device instruction: {instr}")
 
