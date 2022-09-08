@@ -21,6 +21,7 @@ class MessageEndpoints:
     _scan_queue_status = "internal/queue/queue_status"
 
     # scan info
+    _scan_number = "scans/scan_number"
     _scan_status = "scans/scan_status"
     _available_scans = "scans/available_scans"
     _scan_segment = "scans/scan_segment"
@@ -101,6 +102,11 @@ class MessageEndpoints:
         return cls._scan_queue_status
 
     # scan info
+
+    @classmethod
+    def scan_number(cls):
+        return cls._scan_number
+
     @classmethod
     def scan_status(cls):
         return cls._scan_status
