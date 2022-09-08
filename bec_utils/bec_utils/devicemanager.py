@@ -38,29 +38,32 @@ class Device:
 
     @property
     def enabled(self):
+        """Whether or not the device is enabled"""
         return self.config["enabled"]
 
     @enabled.setter
     def enabled(self, value):
+        """Whether or not the device is enabled"""
         self.config["enabled"] = value
         self.parent.send_config_request(action="update", config={self.name: {"enabled": value}})
 
     def read(self):
+        """get the last reading from a device"""
         val = self.parent.producer.get(MessageEndpoints.device_read(self.name))
         if val:
             return msgpack.loads(val)["content"]["signals"].get(self.name)
-        else:
-            return None
+        return None
 
     def readback(self):
+        """get the last readback value from a device"""
         val = self.parent.producer.get(MessageEndpoints.device_readback(self.name))
         if val:
             return msgpack.loads(val)["content"]["signals"].get(self.name)
-        else:
-            return None
+        return None
 
     @property
     def status(self):
+        """get the current status of the device"""
         val = self.parent.producer.get(MessageEndpoints.device_status(self.name))
         if val is None:
             return val
@@ -69,6 +72,7 @@ class Device:
 
     @property
     def signals(self):
+        """get the last signals from a device"""
         if not self._signals:
             val = self.parent.producer.get(MessageEndpoints.device_read(self.name))
             if val is None:
@@ -117,37 +121,50 @@ class DeviceContainer(dict):
 
     @property
     def enabled_devices(self) -> list:
+        """get a list of enabled devices"""
         return [dev for _, dev in self.items() if dev.enabled]
 
     @property
     def disabled_devices(self) -> list:
-        """
-
-        Returns: list of disabled devices
-
-        """
+        """get a list of disabled devices"""
         return [dev for _, dev in self.items() if not dev.enabled]
 
-    def device_group(self, device_group) -> list:
+    def device_group(self, device_group: str) -> list:
+        """get all devices that belong to the specified device group
+
+        Args:
+            device_group (str): Device group (e.g. monitor, detectors, beamlineMotor, userMotor)
+
+        Returns:
+            list: List of devices that belong to the specified device group
+        """
         return [dev for _, dev in self.items() if dev.config["deviceGroup"] == device_group]
 
     def async_devices(self) -> list:
+        """get a list of all synchronous devices"""
         return [
             dev for _, dev in self.items() if dev.config["acquisitionConfig"]["schedule"] != "sync"
         ]
 
     @typechecked
     def primary_devices(self, scan_motors: list) -> list:
+        """get a list of all enabled primary devices (i.e. monitors + scan motors)"""
         devices = self.device_group("monitor")
         devices.extend(scan_motors)
         return [dev for dev in self.enabled_devices if dev in devices]
 
     @typechecked
     def baseline_devices(self, scan_motors: list) -> list:
+        """get a list of all enabled baseline devices"""
         excluded_devices = self.device_group("monitor")
         excluded_devices.extend(scan_motors)
         excluded_devices.extend(self.async_devices())
         return [dev for dev in self.enabled_devices if dev not in excluded_devices]
+
+    @typechecked
+    def detectors(self) -> list:
+        """get a list of all enabled detectors"""
+        return [dev for dev in self.enabled_devices if dev in self.device_group("detectors")]
 
     def _add_device(self, name, obj) -> None:
         """
