@@ -1,8 +1,7 @@
 import inspect
-import time
+import traceback
 
 import bec_utils.BECMessage as BMessage
-import msgpack
 import ophyd
 import ophyd.sim as ops
 import ophyd_devices as opd
@@ -15,6 +14,7 @@ from bec_utils import (
 )
 from bec_utils.connector import ConnectorBase
 from device_server.devices.device_serializer import get_device_info
+from ophyd.ophydobj import OphydObject
 
 logger = bec_logger.logger
 
@@ -26,6 +26,7 @@ class DSDevice(Device):
         self.metadata = {}
 
     def initialize_device_buffer(self, producer):
+        """initialize the device read and readback buffer on redis with a new reading"""
         dev_msg = BMessage.DeviceMessage(signals=self.obj.read(), metadata={}).dumps()
         pipe = producer.pipeline()
         producer.set_and_publish(MessageEndpoints.device_readback(self.name), dev_msg, pipe=pipe)
@@ -51,16 +52,23 @@ class DeviceManagerDS(DeviceManagerBase):
             TypeError(f"Unknown device class {dev_type}")
         return getattr(module, dev_type)
 
-    def _load_session(self, *args, **kwargs):
+    def _load_session(self, *_args, **_kwargs):
         if self._is_config_valid():
             for dev in self._session["devices"]:
                 name = dev.get("name")
                 enabled = dev.get("enabled")
                 logger.info(f"Adding device {name}: {'ENABLED' if enabled else 'DISABLED'}")
-                obj = self.initialize_device(dev)
+                self.initialize_device(dev)
 
     @staticmethod
-    def update_config(obj, config) -> None:
+    def update_config(obj: OphydObject, config: dict) -> None:
+        """Update an ophyd device's config
+
+        Args:
+            obj (Ophydobj): Ophyd object that should be updated
+            config (dict): Config dictionary
+
+        """
         if hasattr(obj, "update_config"):
             obj.update_config(config)
         else:
@@ -74,6 +82,7 @@ class DeviceManagerDS(DeviceManagerBase):
                 if config_key == "labels":
                     if not config_value:
                         config_value = set()
+                    # pylint: disable=protected-access
                     obj._ophyd_labels_ = set(config_value)
                     continue
                 if not hasattr(obj, config_key):
@@ -90,12 +99,19 @@ class DeviceManagerDS(DeviceManagerBase):
                     setattr(obj, config_key, config_value)
 
     def initialize_device(self, dev: dict) -> DSDevice:
+        """
+        Prepares a device for later usage.
+        This includes inspecting the device class signature,
+        initializing the object, refreshing the device info and buffer,
+        as well as adding subscriptions.
+        """
         name = dev.get("name")
         enabled = dev.get("enabled")
 
         dev_cls = self._get_device_class(dev["deviceClass"])
         config = dev["deviceConfig"].copy()
 
+        # pylint: disable=protected-access
         class_params = inspect.signature(dev_cls)._parameters
         class_params_and_config_keys = set(class_params) & config.keys()
 
@@ -115,9 +131,8 @@ class DeviceManagerDS(DeviceManagerBase):
         pipe.execute()
 
         # add subscriptions
-        obj.subscribe(self._obj_callback_readback, run=enabled)
-        if "acq_done" in obj.event_types:
-            obj.subscribe(self._obj_callback_acq_done, event_type="acq_done", run=False)
+        if "readback" in obj.event_types:
+            obj.subscribe(self._obj_callback_readback, run=enabled)
         if "done_moving" in obj.event_types:
             obj.subscribe(self._obj_callback_done_moving, event_type="done_moving", run=False)
         if hasattr(obj, "motor_is_moving"):
@@ -125,6 +140,8 @@ class DeviceManagerDS(DeviceManagerBase):
 
         # insert the created device obj into the device manager
         opaas_obj = DSDevice(name, obj, config=dev, parent=self)
+
+        # pylint:disable=protected-access # this function is shared with clients and it is currently not foreseen that clients add new devices
         self.devices._add_device(name, opaas_obj)
 
         # update device buffer
@@ -133,15 +150,20 @@ class DeviceManagerDS(DeviceManagerBase):
                 if not opaas_obj.obj.connected:
                     opaas_obj.obj.stage()
                 opaas_obj.initialize_device_buffer(self.producer)
-            except Exception as exc:
-                logger.error(f"Failed to stage {opaas_obj.name}. The device will be disabled.")
+            # pylint:disable=broad-except
+            except Exception:
+                error_traceback = traceback.format_exc()
+                logger.error(
+                    f"{error_traceback}. Failed to stage {opaas_obj.name}. The device will be disabled."
+                )
                 opaas_obj.enabled = False
 
         return opaas_obj
 
-    def publish_device_info(self, obj, pipe=None) -> None:
+    def publish_device_info(self, obj: OphydObject, pipe=None) -> None:
         """
-
+        Publish the device info to redis. The device info contains
+        inter alia the class name, user functions and signals.
 
         Args:
             obj (_type_): _description_
@@ -154,15 +176,14 @@ class DeviceManagerDS(DeviceManagerBase):
             pipe,
         )
 
-    def reset_device_data(self, obj, pipe=None) -> None:
+    def reset_device_data(self, obj: OphydObject, pipe=None) -> None:
+        """delete all device data and device info"""
         self.producer.delete(MessageEndpoints.device_status(obj.name), pipe)
         self.producer.delete(MessageEndpoints.device_read(obj.name), pipe)
         self.producer.delete(MessageEndpoints.device_last_read(obj.name), pipe)
         self.producer.delete(MessageEndpoints.device_info(obj.name), pipe)
 
-    def _obj_callback_readback(self, *args, **kwargs):
-        # print(BMessage.DeviceMessage(signals=kwargs["obj"].read()).content)
-        # start = time.time()
+    def _obj_callback_readback(self, *_args, **kwargs):
         obj = kwargs["obj"]
         if obj.connected:
             name = obj.root.name
@@ -172,20 +193,19 @@ class DeviceManagerDS(DeviceManagerBase):
             pipe = self.producer.pipeline()
             self.producer.set_and_publish(MessageEndpoints.device_readback(name), dev_msg, pipe)
             pipe.execute()
-        # print(f"Elapsed time for readback of {kwargs['obj'].name}, pos {kwargs['obj'].read()}: {(time.time()-start)*1000} ms")
 
     def _obj_callback_acq_done(self, *_args, **kwargs):
         device = kwargs["obj"].root.name
         status = 0
         metadata = self.devices[device].metadata
-        self.producer.set(
+        self.producer.send(
             MessageEndpoints.device_status(device),
             BMessage.DeviceStatusMessage(device=device, status=status, metadata=metadata).dumps(),
         )
 
     def _obj_callback_done_moving(self, *args, **kwargs):
         self._obj_callback_readback(*args, **kwargs)
-        self._obj_callback_acq_done(*args, **kwargs)
+        # self._obj_callback_acq_done(*args, **kwargs)
 
     def _obj_callback_is_moving(self, *_args, **kwargs):
         device = kwargs["obj"].root.name
@@ -207,11 +227,9 @@ class DeviceManagerDS(DeviceManagerBase):
     def _stop_custom_consumer(self) -> None:
         self._config_request_connector.signal_event.set()
         self._config_request_connector.join()
-        # self._device_instructions_connector.signal_event.set()
-        # self._device_instructions_connector.join()
 
-    def send_config_request_reply(self, error_msg):
-        pass
+    def send_config_request_rejection(self, error_msg):
+        """send a reply back if the config request was rejected"""
 
     @staticmethod
     def _device_config_request_callback(msg, *, parent, **_kwargs) -> None:
@@ -220,53 +238,83 @@ class DeviceManagerDS(DeviceManagerBase):
         parent.parse_config_request(msg)
 
     def send_config(self, msg: BMessage.DeviceConfigMessage) -> None:
+        """broadcast a new config"""
         self.producer.send(MessageEndpoints.device_config(), msg.dumps())
 
     def parse_config_request(self, msg: BMessage.DeviceConfigMessage) -> None:
+        """Processes a config request. If successful, it emits a config reply
+
+        Args:
+            msg (BMessage.DeviceConfigMessage): Config request
+
+        """
         try:
             self._check_request_validity(msg)
-            if msg.content["action"] == "update":
-                updated = False
-                for dev in msg.content["config"]:
-                    dev_config = msg.content["config"][dev]
-                    if "deviceConfig" in dev_config:
-                        # store old config
-                        old_config = self.devices[dev].config["deviceConfig"].copy()
+            if msg.content["action"] != "update":
+                return
+            updated = False
+            for dev in msg.content["config"]:
+                dev_config = msg.content["config"][dev]
+                if "deviceConfig" in dev_config:
+                    # store old config
+                    old_config = self.devices[dev].config["deviceConfig"].copy()
 
-                        # apply config
-                        try:
-                            self.update_config(self.devices[dev].obj, dev_config["deviceConfig"])
-                        except Exception as exc:
-                            self.update_config(self.devices[dev].obj, old_config)
-                            raise DeviceConfigError(f"Error during object update. {exc}") from exc
+                    # apply config
+                    try:
+                        self.update_config(self.devices[dev].obj, dev_config["deviceConfig"])
+                    except Exception as exc:
+                        self.update_config(self.devices[dev].obj, old_config)
+                        raise DeviceConfigError(f"Error during object update. {exc}") from exc
 
-                        self.devices[dev].config["deviceConfig"].update(dev_config["deviceConfig"])
+                    self.devices[dev].config["deviceConfig"].update(dev_config["deviceConfig"])
 
-                        # update config in DB
-                        logger.debug("updating in DB")
-                        success = self._scibec.patch_device_config(
-                            self.devices[dev].config["id"],
-                            {"deviceConfig": self.devices[dev].config["deviceConfig"]},
-                        )
-                        if not success:
-                            raise DeviceConfigError("Error during database update.")
-                        updated = True
+                    # update config in DB
+                    self.update_device_config_in_db(device_name=dev)
+                    updated = True
 
-                    if "enabled" in dev_config:
-                        self.devices[dev].config["enabled"] = dev_config["enabled"]
-                        # update config in DB
-                        logger.debug("updating in DB")
-                        success = self._scibec.patch_device_config(
-                            self.devices[dev].config["id"],
-                            {"enabled": self.devices[dev].enabled},
-                        )
-                        if not success:
-                            raise DeviceConfigError("Error during database update.")
-                        updated = True
+                if "enabled" in dev_config:
+                    self.devices[dev].config["enabled"] = dev_config["enabled"]
+                    # update device enabled status in DB
+                    self.update_device_enabled_in_db(device_name=dev)
+                    updated = True
 
-                # send updates to services
-                if updated:
-                    self.send_config(msg)
+            # send updates to services
+            if updated:
+                self.send_config(msg)
 
         except DeviceConfigError as dev_conf_error:
-            self.send_config_request_reply(dev_conf_error)
+            self.send_config_request_rejection(dev_conf_error)
+
+    def update_device_enabled_in_db(self, device_name: str) -> None:
+        """Update a device enabled setting in the DB with the local version
+
+        Args:
+            device_name (str): Name of the device that should be updated
+
+        Raises:
+            DeviceConfigError: Raised if the db update fails.
+        """
+        logger.debug("updating in DB")
+        success = self._scibec.patch_device_config(
+            self.devices[device_name].config["id"],
+            {"enabled": self.devices[device_name].enabled},
+        )
+        if not success:
+            raise DeviceConfigError("Error during database update.")
+
+    def update_device_config_in_db(self, device_name: str) -> None:
+        """Update a device config in the DB with the local version
+
+        Args:
+            device_name (str): Name of the device that should be updated
+
+        Raises:
+            DeviceConfigError: Raised if the db update fails.
+        """
+        logger.debug("updating in DB")
+        success = self._scibec.patch_device_config(
+            self.devices[device_name].config["id"],
+            {"deviceConfig": self.devices[device_name].config["deviceConfig"]},
+        )
+        if not success:
+            raise DeviceConfigError("Error during database update.")
