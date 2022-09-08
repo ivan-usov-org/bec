@@ -142,20 +142,19 @@ class DeviceServer(BECService):
                 self._update_device_metadata(instructions)
 
             if action == "set":
-                # pylint: disable=protected-access
                 self._set_device(instructions)
             elif action == "read":
-                # pylint: disable=protected-access
                 self._read_device(instructions)
             elif action == "rpc":
-                # pylint: disable=protected-access
                 self._run_rpc(instructions)
             elif action == "kickoff":
-                # pylint: disable=protected-access
                 self._kickoff_device(instructions)
             elif action == "trigger":
-                # pylint: disable=protected-access
                 self._trigger_device(instructions)
+            elif action == "stage":
+                self._stage_device(instructions)
+            elif action == "unstage":
+                self._unstage_device(instructions)
             else:
                 logger.warning(f"Received unknown device instruction: {instructions}")
         except ophyd_errors.LimitError as limit_error:
@@ -302,9 +301,10 @@ class DeviceServer(BECService):
 
     def _read_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
         # check performance -- we might have to change it to a background thread
-        dev_list = instr.content["device"]
-        devices = []
-        devices.extend([dev_list] if not isinstance(dev_list, list) else dev_list)
+        devices = instr.content["device"]
+        if not isinstance(devices, list):
+            devices = [devices]
+
         start = time.time()
         pipe = self.producer.pipeline()
         for dev in devices:
@@ -326,6 +326,22 @@ class DeviceServer(BECService):
         logger.debug(
             f"Elapsed time for reading and updating status info: {(time.time()-start)*1000} ms"
         )
+
+    def _stage_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
+        devices = instr.content["device"]
+        if not isinstance(devices, list):
+            devices = [devices]
+
+        for dev in devices:
+            self.device_manager.devices[dev].obj.stage()
+
+    def _unstage_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
+        devices = instr.content["device"]
+        if not isinstance(devices, list):
+            devices = [devices]
+
+        for dev in devices:
+            self.device_manager.devices[dev].obj.unstage()
 
     @property
     def status(self) -> DSStatus:
