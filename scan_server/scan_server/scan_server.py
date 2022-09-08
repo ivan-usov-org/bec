@@ -23,7 +23,6 @@ class ScanServer(BECService):
 
     def __init__(self, bootstrap_server: list, connector_cls: ConnectorBase, scibec_url: str):
         super().__init__(bootstrap_server, connector_cls)
-        self.scan_number = 0
         self.scibec_url = scibec_url
         self.producer = self.connector.producer()
         self._start_scan_manager()
@@ -33,6 +32,7 @@ class ScanServer(BECService):
         self._start_scan_assembler()
         self._start_scan_server()
         self._start_alarm_handler()
+        self.scan_number = 0
 
     def _start_device_manager(self):
         self.device_manager = DeviceManagerScanServer(self.connector, self.scibec_url)
@@ -69,6 +69,16 @@ class ScanServer(BECService):
         queue = metadata.get("stream")
         if scanID and queue:
             parent.queue_manager.set_abort(scanID=scanID, queue=queue)
+
+    @property
+    def scan_number(self) -> int:
+        """get the current scan number"""
+        return int(self.producer.get(MessageEndpoints.scan_number()))
+
+    @scan_number.setter
+    def scan_number(self, val: int):
+        """set the current scan number"""
+        self.producer.set(MessageEndpoints.scan_number(), val)
 
     def load_config_from_disk(self, file_path: str) -> None:
         """load a config file from disk"""
