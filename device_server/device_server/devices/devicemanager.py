@@ -144,19 +144,26 @@ class DeviceManagerDS(DeviceManagerBase):
         # pylint:disable=protected-access # this function is shared with clients and it is currently not foreseen that clients add new devices
         self.devices._add_device(name, opaas_obj)
 
-        # update device buffer
-        if enabled:
-            try:
-                if not opaas_obj.obj.connected:
-                    opaas_obj.obj.stage()
-                opaas_obj.initialize_device_buffer(self.producer)
-            # pylint:disable=broad-except
-            except Exception:
-                error_traceback = traceback.format_exc()
-                logger.error(
-                    f"{error_traceback}. Failed to stage {opaas_obj.name}. The device will be disabled."
-                )
-                opaas_obj.enabled = False
+        if not enabled:
+            return opaas_obj
+
+        # update device buffer for enabled devices
+        try:
+            if not opaas_obj.obj.connected:
+                if hasattr(opaas_obj.obj, "controler"):
+                    opaas_obj.obj.controller.on()
+                    opaas_obj.initialize_device_buffer(self.producer)
+                else:
+                    logger.error(
+                        f"Device {opaas_obj.obj.name} does not implement the socket controller interface and cannot be turned on."
+                    )
+        # pylint:disable=broad-except
+        except Exception:
+            error_traceback = traceback.format_exc()
+            logger.error(
+                f"{error_traceback}. Failed to stage {opaas_obj.name}. The device will be disabled."
+            )
+            opaas_obj.enabled = False
 
         return opaas_obj
 
