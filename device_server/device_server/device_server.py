@@ -156,8 +156,11 @@ class DeviceServer(BECService):
             elif action == "trigger":
                 # pylint: disable=protected-access
                 self._trigger_device(instructions)
+            else:
+                logger.warning(f"Received unknown device instruction: {instructions}")
         except ophyd_errors.LimitError as limit_error:
-            content = limit_error.args[0] if len(limit_error.args) > 0 else ""
+            content = traceback.format_exc()
+            logger.error(content)
             self.connector.raise_alarm(
                 severity=Alarms.MAJOR,
                 source=instructions.content,
@@ -166,8 +169,9 @@ class DeviceServer(BECService):
                 metadata=instructions.metadata,
             )
         except Exception as exc:  # pylint: disable=broad-except
-            self.connector.log_error({"source": msg.value, "message": exc.args})
-            content = exc.args[0] if len(exc.args) > 0 else ""
+            content = traceback.format_exc()
+            self.connector.log_error({"source": msg.value, "message": content})
+            logger.error(content)
             self.connector.raise_alarm(
                 severity=Alarms.MAJOR,
                 source=instructions.content,
@@ -262,8 +266,13 @@ class DeviceServer(BECService):
 
     def _trigger_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
         logger.debug(f"Kickoff device: {instr}")
-        obj = self.device_manager.devices.get(instr.content["device"]).obj
-        obj.trigger(metadata=instr.metadata, **instr.content["parameter"])
+        devices = instr.content["device"]
+        if not isinstance(devices, list):
+            devices = [devices]
+        for dev in devices:
+            obj = self.device_manager.devices.get(dev)
+            obj.metadata = instr.metadata
+            obj.obj.trigger()
 
     def _kickoff_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
         logger.debug(f"Kickoff device: {instr}")
