@@ -159,6 +159,7 @@ class DeviceContainer(dict):
         excluded_devices = self.device_group("monitor")
         excluded_devices.extend(scan_motors)
         excluded_devices.extend(self.async_devices())
+        excluded_devices.extend(self.detectors())
         return [dev for dev in self.enabled_devices if dev not in excluded_devices]
 
     @typechecked
