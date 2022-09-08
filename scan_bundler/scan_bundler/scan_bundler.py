@@ -105,6 +105,7 @@ class ScanBundler(BECService):
         # info = msg.content.get("info")
         # if info.get("scan_type"):
         #     parent.sync_storage[info.get("scanID")]["scan_type"] = info.get("scan_type")
+        logger.info(f"Received new scan status: {msg}")
         scanID = msg.content["scanID"]
         if not scanID in self.sync_storage:
             self.cleanup_storage()

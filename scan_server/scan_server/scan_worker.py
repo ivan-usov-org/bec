@@ -39,6 +39,7 @@ class ScanWorker(threading.Thread):
         self.scan_motors = []
         self.current_scanID = None
         self.current_scan_info = None
+        self._staged_devices = set()
         self.reset()
 
     def _get_devices_from_instruction(self, instr: DeviceMsg) -> List[Device]:
@@ -341,6 +342,7 @@ class ScanWorker(threading.Thread):
 
     def _stage_devices(self, instr: DeviceMsg) -> None:
         devices = [dev.name for dev in self.device_manager.devices.enabled_devices]
+        self._staged_devices.update(devices)
         self.device_manager.producer.send(
             MessageEndpoints.device_instructions(),
             DeviceMsg(
@@ -351,15 +353,19 @@ class ScanWorker(threading.Thread):
             ).dumps(),
         )
 
-    def _unstage_devices(self, instr: DeviceMsg) -> None:
-        devices = [dev.name for dev in self.device_manager.devices.enabled_devices]
+    def _unstage_devices(self, instr: DeviceMsg = None, devices: list = None) -> None:
+        if not devices:
+            devices = [dev.name for dev in self.device_manager.devices.enabled_devices]
+        parameter = {} if not instr else instr.content["parameter"]
+        metadata = {} if not instr else instr.metadata
+        self._staged_devices.difference_update(devices)
         self.device_manager.producer.send(
             MessageEndpoints.device_instructions(),
             DeviceMsg(
                 device=devices,
                 action="unstage",
-                parameter=instr.content["parameter"],
-                metadata=instr.metadata,
+                parameter=parameter,
+                metadata=metadata,
             ).dumps(),
         )
 
@@ -449,6 +455,10 @@ class ScanWorker(threading.Thread):
         self.interception_msg = None
         self.scan_motors = []
 
+    def cleanup(self):
+        """perform cleanup instructions"""
+        self._unstage_devices(devices=list(self._staged_devices))
+
     def run(self):
         try:
             while not self.signal_event.is_set():
@@ -457,8 +467,10 @@ class ScanWorker(threading.Thread):
                         self._process_instructions(queue)
                 except ScanAbortion:
                     self._send_scan_status("aborted")
+                    self.cleanup()
                     self.parent.queue_manager.queues["primary"].abort()
                     self.reset()
+
         # pylint: disable=broad-except
         except Exception as exc:
             content = traceback.format_exc()
