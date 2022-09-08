@@ -367,27 +367,25 @@ class ScanWorker(threading.Thread):
             logger.debug(instr)
             action = instr.content.get("action")
             scan_def_id = instr.metadata.get("scan_def_id")
+            if self.current_scanID != instr.metadata.get("scanID"):
+                self.current_scanID = instr.metadata.get("scanID")
+
             if "pointID" in instr.metadata:
                 nonlocal max_point_id
                 max_point_id = instr.metadata["pointID"]
+
+            self._add_wait_group(instr)
+
+            logger.debug(f"Device instruction: {instr}")
+            self._check_for_interruption()
+
             if action == "open_scan":
                 self._open_scan(instr)
             elif action == "close_scan" and scan_def_id is None:
                 self._close_scan(instr, max_point_id)
             elif action == "close_scan_def":
                 self._close_scan(instr, max_point_id)
-
-            if self.current_scanID != instr.metadata.get("scanID"):
-                self.current_scanID = instr.metadata.get("scanID")
-                # if self.current_scanID:
-                #     self._send_scan_status("open")
-
-            logger.debug(f"Device instruction: {instr}")
-
-            self._add_wait_group(instr)
-
-            self._check_for_interruption()
-            if action == "wait":
+            elif action == "wait":
                 self._wait_for_devices(instr)
             elif action == "trigger":
                 self._trigger_devices(instr)
@@ -401,6 +399,8 @@ class ScanWorker(threading.Thread):
                 self._baseline_reading(instr)
             elif action == "rpc":
                 self._send_rpc(instr)
+            else:
+                logger.warning(f"Unknown device instruction: {instr}")
 
         queue.is_active = True
         for instr in queue:
