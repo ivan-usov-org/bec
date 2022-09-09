@@ -435,10 +435,10 @@ class ScanWorker(threading.Thread):
                 self._baseline_reading(instr)
             elif action == "rpc":
                 self._send_rpc(instr)
-            elif action == "stage":
-                self._stage_devices(instr)
-            elif action == "unstage":
-                self._unstage_devices(instr)
+            # elif action == "stage":
+            #     self._stage_devices(instr)
+            # elif action == "unstage":
+            #     self._unstage_devices(instr)
             else:
                 logger.warning(f"Unknown device instruction: {instr}")
 
