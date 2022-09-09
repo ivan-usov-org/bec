@@ -108,8 +108,8 @@ class ScanBundler(BECService):
         if not scanID in self.sync_storage:
             self.cleanup_storage()
             self._initialize_scan_container(msg)
-            self.scanID_history.append(scanID)
-            return
+            if scanID not in self.scanID_history:
+                self.scanID_history.append(scanID)
         if msg.content.get("status") != "open":
             self._scan_status_modification(msg)
 
@@ -127,19 +127,21 @@ class ScanBundler(BECService):
             self.sync_storage[scanID]["status"] = status
         else:
             self.sync_storage[scanID] = {"info": {}, "status": status, "sent": set()}
-            self.scanID_history.append(scanID)
+            self.storage_initialized.add(scanID)
+            if scanID not in self.scanID_history:
+                self.scanID_history.append(scanID)
 
-        doc = {
-            "time": time.time(),
-            "uid": str(uuid.uuid4()),
-            "scanID": scanID,
-            "run_start": self.bluesky_metadata[scanID]["start"]["uid"],
-            "exit_status": "success" if status == "closed" else "aborted",
-            "reason": "",
-            "num_events": msg.content["info"].get("num_points"),
-        }
-        self.bluesky_metadata[scanID]["stop"] = doc
-        self.producer.send(MessageEndpoints.bluesky_events(), msgpack.dumps(("stop", doc)))
+        # doc = {
+        #     "time": time.time(),
+        #     "uid": str(uuid.uuid4()),
+        #     "scanID": scanID,
+        #     "run_start": self.bluesky_metadata[scanID]["start"]["uid"],
+        #     "exit_status": "success" if status == "closed" else "aborted",
+        #     "reason": "",
+        #     "num_events": msg.content["info"].get("num_points"),
+        # }
+        # self.bluesky_metadata[scanID]["stop"] = doc
+        # self.producer.send(MessageEndpoints.bluesky_events(), msgpack.dumps(("stop", doc)))
 
     def _initialize_scan_container(self, scan_msg: BECMessage.ScanStatusMessage):
         if scan_msg.content.get("status") != "open":
@@ -296,7 +298,9 @@ class ScanBundler(BECService):
                         MessageEndpoints.scan_status() + "_list", -5, -1
                     )
                 ]
-                logger.info(f"Messages in redis: {msgs}")
+                for msg in msgs:
+                    if msg.content["scanID"] == scanID:
+                        self.handle_scan_status_message(msg)
                 if scanID in self.sync_storage:
                     if self.sync_storage[scanID]["status"] in ["closed", "aborted"]:
                         logger.info(
@@ -310,7 +314,8 @@ class ScanBundler(BECService):
                         f"Failed to insert device data for {device} to sync_storage: Could not find a matching scanID {scanID} in sync_storage."
                     )
                     return
-
+            if self.sync_storage[scanID]["status"] in ["aborted", "closed"]:
+                return
             self.device_storage[device] = signal
             stream = metadata.get("stream")
             if stream == "primary":
