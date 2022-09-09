@@ -13,6 +13,7 @@ from bec_utils import (
     bec_logger,
 )
 from bec_utils.connector import ConnectorBase
+from device_server.devices.config_handler import ConfigHandler
 from device_server.devices.device_serializer import get_device_info
 from ophyd.ophydobj import OphydObject
 
@@ -37,10 +38,17 @@ class DSDevice(Device):
 
 
 class DeviceManagerDS(DeviceManagerBase):
-    def __init__(self, connector: ConnectorBase, scibec_url: str):
+    def __init__(
+        self, connector: ConnectorBase, scibec_url: str, config_handler: ConfigHandler = None
+    ):
         super().__init__(connector, scibec_url)
         self._config_request_connector = None
         self._device_instructions_connector = None
+        self.config_handler = (
+            config_handler
+            if not None
+            else ConfigHandler(producer=self.producer, device_manager=self)
+        )
 
     def _get_device_class(self, dev_type):
         module = None
@@ -244,86 +252,4 @@ class DeviceManagerDS(DeviceManagerBase):
     def _device_config_request_callback(msg, *, parent, **_kwargs) -> None:
         msg = BMessage.DeviceConfigMessage.loads(msg.value)
         logger.info(f"Received request: {msg}")
-        parent.parse_config_request(msg)
-
-    def send_config(self, msg: BMessage.DeviceConfigMessage) -> None:
-        """broadcast a new config"""
-        self.producer.send(MessageEndpoints.device_config(), msg.dumps())
-
-    def parse_config_request(self, msg: BMessage.DeviceConfigMessage) -> None:
-        """Processes a config request. If successful, it emits a config reply
-
-        Args:
-            msg (BMessage.DeviceConfigMessage): Config request
-
-        """
-        try:
-            self._check_request_validity(msg)
-            if msg.content["action"] != "update":
-                return
-            updated = False
-            for dev in msg.content["config"]:
-                dev_config = msg.content["config"][dev]
-                if "deviceConfig" in dev_config:
-                    # store old config
-                    old_config = self.devices[dev].config["deviceConfig"].copy()
-
-                    # apply config
-                    try:
-                        self.update_config(self.devices[dev].obj, dev_config["deviceConfig"])
-                    except Exception as exc:
-                        self.update_config(self.devices[dev].obj, old_config)
-                        raise DeviceConfigError(f"Error during object update. {exc}") from exc
-
-                    self.devices[dev].config["deviceConfig"].update(dev_config["deviceConfig"])
-
-                    # update config in DB
-                    self.update_device_config_in_db(device_name=dev)
-                    updated = True
-
-                if "enabled" in dev_config:
-                    self.devices[dev].config["enabled"] = dev_config["enabled"]
-                    # update device enabled status in DB
-                    self.update_device_enabled_in_db(device_name=dev)
-                    updated = True
-
-            # send updates to services
-            if updated:
-                self.send_config(msg)
-
-        except DeviceConfigError as dev_conf_error:
-            self.send_config_request_rejection(dev_conf_error)
-
-    def update_device_enabled_in_db(self, device_name: str) -> None:
-        """Update a device enabled setting in the DB with the local version
-
-        Args:
-            device_name (str): Name of the device that should be updated
-
-        Raises:
-            DeviceConfigError: Raised if the db update fails.
-        """
-        logger.debug("updating in DB")
-        success = self._scibec.patch_device_config(
-            self.devices[device_name].config["id"],
-            {"enabled": self.devices[device_name].enabled},
-        )
-        if not success:
-            raise DeviceConfigError("Error during database update.")
-
-    def update_device_config_in_db(self, device_name: str) -> None:
-        """Update a device config in the DB with the local version
-
-        Args:
-            device_name (str): Name of the device that should be updated
-
-        Raises:
-            DeviceConfigError: Raised if the db update fails.
-        """
-        logger.debug("updating in DB")
-        success = self._scibec.patch_device_config(
-            self.devices[device_name].config["id"],
-            {"deviceConfig": self.devices[device_name].config["deviceConfig"]},
-        )
-        if not success:
-            raise DeviceConfigError("Error during database update.")
+        parent.config_handler.parse_config_request(msg)
