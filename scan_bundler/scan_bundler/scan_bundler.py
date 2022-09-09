@@ -34,6 +34,7 @@ class ScanBundler(BECService):
         self.baseline_devices = {}
         self.device_storage = {}
         self.scan_motors = {}
+        self.storage_initialized = set()
         self.current_queue = None
         self.executor = ThreadPoolExecutor(max_workers=4)
         self.executor_tasks = collections.deque(maxlen=100)
@@ -153,6 +154,7 @@ class ScanBundler(BECService):
                         for dev in self.device_manager.devices.baseline_devices(scan_motors)
                     },
                 }
+                self.storage_initialized.add(scanID)
                 self.send_run_start_document(scanID)
                 return
 
@@ -299,7 +301,7 @@ class ScanBundler(BECService):
 
             timeout_time = 10
             elapsed_time = 0
-            while not scanID in self.sync_storage:
+            while not scanID in self.storage_initialized:
                 time.sleep(0.1)
                 elapsed_time += 0.1
                 if elapsed_time > timeout_time:
@@ -315,7 +317,8 @@ class ScanBundler(BECService):
             # if not scan_exists:
             #     return
             self.device_storage[device] = signal
-            if metadata["stream"] == "primary":
+            stream = metadata.get("stream")
+            if stream == "primary":
                 if self.sync_storage[scanID]["info"]["scan_type"] == "step":
                     self._step_scan_update(scanID, device, signal, metadata)
                 elif self.sync_storage[scanID]["info"]["scan_type"] == "fly":
@@ -325,7 +328,7 @@ class ScanBundler(BECService):
                         f"Unknown scan type {self.sync_storage[scanID]['scan_type']}"
                     )
 
-            elif metadata["stream"] == "baseline":
+            elif stream == "baseline":
                 dev = {device: signal}
                 baseline_devices_status = self.baseline_devices[scanID]["done"]
                 baseline_devices_status[device] = True
@@ -415,6 +418,7 @@ class ScanBundler(BECService):
             self.monitor_devices.pop(scanID)
             self.baseline_devices.pop(scanID)
             self.scan_motors.pop(scanID)
+            self.storage_initialized.remove(scanID)
 
     def _send_scan_point(self, scanID, pointID) -> None:
         logger.info(f"Sending point {pointID} for scanID {scanID}.")
