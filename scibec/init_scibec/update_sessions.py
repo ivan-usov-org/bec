@@ -57,12 +57,12 @@ if __name__ == "__main__":
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     scibec_url = "http://localhost:3030"
     # config_path = "./dummy_config.yaml"
-    config_path = "./demo_config.yaml"
+    config_path = "./init_scibec/demo_config.yaml"
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         "--config",
-        default="./demo_config.yaml",
+        default="./init_scibec/demo_config.yaml",
         help="path to the config file",
     )
     parser.add_argument(

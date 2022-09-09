@@ -99,7 +99,7 @@ class RedisProducer(ProducerConnector):
         client = pipe if pipe is not None else self.r
         client.publish(f"{topic}:sub", msg)
 
-    def lpush(self, topic: str, msgs: str, pipe=None) -> None:
+    def lpush(self, topic: str, msgs: str, pipe=None) -> int:
         """Time complexity: O(1) for each element added, so O(N) to
         add N elements when the command is called with multiple arguments.
         Insert all the specified values at the head of the list stored at key.
@@ -108,9 +108,13 @@ class RedisProducer(ProducerConnector):
         is not a list, an error is returned."""
 
         client = pipe if pipe is not None else self.r
-        client.lpush(f"{topic}:val", msgs)
+        return client.lpush(f"{topic}:val", msgs)
 
-    def rpush(self, topic: str, msgs: str, pipe=None) -> None:
+    def lset(self, topic: str, index: int, msgs: str, pipe=None) -> None:
+        client = pipe if pipe is not None else self.r
+        return client.lset(f"{topic}:val", index, msgs)
+
+    def rpush(self, topic: str, msgs: str, pipe=None) -> int:
         """O(1) for each element added, so O(N) to add N elements when the
         command is called with multiple arguments. Insert all the specified
         values at the tail of the list stored at key. If key does not exist,
@@ -118,7 +122,7 @@ class RedisProducer(ProducerConnector):
         key holds a value that is not a list, an error is returned."""
 
         client = pipe if pipe is not None else self.r
-        client.rpush(f"{topic}:val", msgs)
+        return client.rpush(f"{topic}:val", msgs)
 
     def lrange(self, topic: str, start: int, end: int, pipe=None):
         """O(S+N) where S is the distance of start offset from HEAD for small

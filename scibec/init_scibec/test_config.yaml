@@ -2676,15 +2676,15 @@ sttry:
 ################## Cameras and detectors ###################
 ############################################################
 
-eiger:
-    acquisition:
-        schedule: sync
-    config:
-        device_access: true
-        labels: eiger
-        name: eiger
-    deviceGroup: detectors
-    status:
-        enabled: true
-    type: SynSLSDetector
+# eiger:
+#     acquisition:
+#         schedule: sync
+#     config:
+#         device_access: true
+#         labels: eiger
+#         name: eiger
+#     deviceGroup: detectors
+#     status:
+#         enabled: true
+#     type: SynSLSDetector
 ############## Cameras and detectors end here ##############
