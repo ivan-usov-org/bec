@@ -152,11 +152,11 @@ class DeviceManagerDS(DeviceManagerBase):
             if not opaas_obj.obj.connected:
                 if hasattr(opaas_obj.obj, "controler"):
                     opaas_obj.obj.controller.on()
-                    opaas_obj.initialize_device_buffer(self.producer)
                 else:
                     logger.error(
                         f"Device {opaas_obj.obj.name} does not implement the socket controller interface and cannot be turned on."
                     )
+            opaas_obj.initialize_device_buffer(self.producer)
         # pylint:disable=broad-except
         except Exception:
             error_traceback = traceback.format_exc()
