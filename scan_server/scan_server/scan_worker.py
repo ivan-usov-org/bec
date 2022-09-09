@@ -328,12 +328,7 @@ class ScanWorker(threading.Thread):
         if self.scan_id == scan_id:
             self.scan_id = None
             self.current_scan_info["points"] = max_point_id
-            self.device_manager.producer.send(
-                MessageEndpoints.scan_status(),
-                ScanStatusMsg(
-                    scanID=self.current_scanID, status="closed", info=self.current_scan_info
-                ).dumps(),
-            )
+            self._send_scan_status("closed")
 
     def _stage_devices(self, instr: DeviceMsg) -> None:
         devices = [dev.name for dev in self.device_manager.devices.enabled_devices]
@@ -366,13 +361,28 @@ class ScanWorker(threading.Thread):
 
     def _send_scan_status(self, status: str):
         logger.info(f"New scan status: {self.current_scanID} / {status} / {self.current_scan_info}")
+        msg = ScanStatusMsg(
+            scanID=self.current_scanID,
+            status=status,
+            info=self.current_scan_info,
+        ).dumps()
+        if "scan_list_id" not in self.current_scan_info:
+            self.current_scan_info["scan_list_id"] = (
+                self.device_manager.producer.rpush(
+                    MessageEndpoints.scan_status() + "_list",
+                    msg,
+                )
+                - 1
+            )
+        else:
+            self.device_manager.producer.lset(
+                MessageEndpoints.scan_status() + "_list",
+                self.current_scan_info["scan_list_id"],
+                msg,
+            )
         self.device_manager.producer.set_and_publish(
             MessageEndpoints.scan_status(),
-            ScanStatusMsg(
-                scanID=self.current_scanID,
-                status=status,
-                info=self.current_scan_info,
-            ).dumps(),
+            msg,
         )
 
     def _process_instructions(self, queue: InstructionQueueItem) -> None:

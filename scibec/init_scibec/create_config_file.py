@@ -450,7 +450,7 @@ for m in detectors:
         }
     )
 
-with open("demo_config.yaml", "a") as f:
+with open("./init_scibec/demo_config.yaml", "a") as f:
     f.write(write_sep("Cameras and detectors"))
     f.write(yaml.dump(out))
     f.write(write_sep("Cameras and detectors end here", sep_type="footer"))

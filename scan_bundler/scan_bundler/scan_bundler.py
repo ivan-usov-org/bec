@@ -40,7 +40,7 @@ class ScanBundler(BECService):
         self.executor_tasks = collections.deque(maxlen=100)
         self._send_buffer = Queue()
         self._start_buffered_producer()
-        self.scanID_history = collections.deque(maxlen=5)
+        self.scanID_history = collections.deque(maxlen=20)
         self._lock = threading.Lock()
 
     def _start_buffered_producer(self):
@@ -103,87 +103,75 @@ class ScanBundler(BECService):
 
     def handle_scan_status_message(self, msg: BECMessage.ScanStatusMessage) -> None:
         """handle scan status messages"""
-        # info = msg.content.get("info")
-        # if info.get("scan_type"):
-        #     parent.sync_storage[info.get("scanID")]["scan_type"] = info.get("scan_type")
         logger.info(f"Received new scan status: {msg}")
         scanID = msg.content["scanID"]
         if not scanID in self.sync_storage:
             self.cleanup_storage()
             self._initialize_scan_container(msg)
             self.scanID_history.append(scanID)
+            return
         if msg.content.get("status") != "open":
             self._scan_status_modification(msg)
 
     def _scan_status_modification(self, msg: BECMessage.ScanStatusMessage):
-        if msg.content.get("status") == "closed":
-            scanID = msg.content.get("scanID")
-            if scanID:
-                self.sync_storage[scanID]["status"] = "closed"
-                doc = {
-                    "time": time.time(),
-                    "uid": str(uuid.uuid4()),
-                    "scanID": scanID,
-                    "run_start": self.bluesky_metadata[scanID]["start"]["uid"],
-                    "exit_status": "success",
-                    "reason": "",
-                    "num_events": msg.content["info"].get("points") + 1,
-                }
-                self.bluesky_metadata[scanID]["stop"] = doc
-                self.producer.send(MessageEndpoints.bluesky_events(), msgpack.dumps(("stop", doc)))
+        status = msg.content.get("status")
+        if status not in ["closed", "aborted"]:
+            logger.error(f"Unknown scan status {status}")
+            return
+
+        scanID = msg.content.get("scanID")
+        if not scanID:
+            logger.error(f"Received scan status update without scanID: {msg}")
+            return
+        if self.sync_storage.get(scanID):
+            self.sync_storage[scanID]["status"] = status
+        else:
+            self.sync_storage[scanID] = {"info": {}, "status": status, "sent": set()}
+            self.scanID_history.append(scanID)
+
+        doc = {
+            "time": time.time(),
+            "uid": str(uuid.uuid4()),
+            "scanID": scanID,
+            "run_start": self.bluesky_metadata[scanID]["start"]["uid"],
+            "exit_status": "success" if status == "closed" else "aborted",
+            "reason": "",
+            "num_events": msg.content["info"].get("num_points"),
+        }
+        self.bluesky_metadata[scanID]["stop"] = doc
+        self.producer.send(MessageEndpoints.bluesky_events(), msgpack.dumps(("stop", doc)))
 
     def _initialize_scan_container(self, scan_msg: BECMessage.ScanStatusMessage):
-        scanID = scan_msg.content["scanID"]
-        if scan_msg.content.get("status") == "open":
-            scan_info = scan_msg.content["info"]
-            scan_motors = list(set(self.device_manager.devices[m] for m in scan_info["primary"]))
-            self.scan_motors[scanID] = scan_motors
-            if not scanID in self.sync_storage:
-                self.sync_storage[scanID] = {"info": scan_info, "status": "open", "sent": set()}
-                self.bluesky_metadata[scanID] = {}
-                # for now lets assume that all devices are primary devices:
-                self.primary_devices[scanID] = {
-                    "devices": self.device_manager.devices.primary_devices(scan_motors),
-                    "pointID": {},
-                }
-                self.monitor_devices[scanID] = self.device_manager.devices.device_group("monitor")
-                self.baseline_devices[scanID] = {
-                    "devices": self.device_manager.devices.baseline_devices(scan_motors),
-                    "done": {
-                        dev.name: False
-                        for dev in self.device_manager.devices.baseline_devices(scan_motors)
-                    },
-                }
-                self.storage_initialized.add(scanID)
-                self.send_run_start_document(scanID)
-                return
+        if scan_msg.content.get("status") != "open":
+            return
 
-        self.sync_storage[scanID] = {}
-        return
+        scanID = scan_msg.content["scanID"]
+        scan_info = scan_msg.content["info"]
+        scan_motors = list(set(self.device_manager.devices[m] for m in scan_info["primary"]))
+
+        self.scan_motors[scanID] = scan_motors
+        if not scanID in self.storage_initialized:
+            self.sync_storage[scanID] = {"info": scan_info, "status": "open", "sent": set()}
+            self.bluesky_metadata[scanID] = {}
+            # for now lets assume that all devices are primary devices:
+            self.primary_devices[scanID] = {
+                "devices": self.device_manager.devices.primary_devices(scan_motors),
+                "pointID": {},
+            }
+            self.monitor_devices[scanID] = self.device_manager.devices.device_group("monitor")
+            self.baseline_devices[scanID] = {
+                "devices": self.device_manager.devices.baseline_devices(scan_motors),
+                "done": {
+                    dev.name: False
+                    for dev in self.device_manager.devices.baseline_devices(scan_motors)
+                },
+            }
+            self.storage_initialized.add(scanID)
+            self.send_run_start_document(scanID)
+            return
 
     def send_run_start_document(self, scanID) -> None:
         """Bluesky only: send run start documents."""
-        #  {'data_session': 'vist54321',
-        # 'data_groups': ['bl42', 'proposal12345'],
-        # 'detectors': ['random_walk:x'],
-        # 'hints': {'dimensions': [(['random_walk:dt'], 'primary')]},
-        # 'motors': ('random_walk:dt',),
-        # 'num_intervals': 2,
-        # 'num_points': 3,
-        # 'plan_args': {'args': ["EpicsSignal(read_pv='random_walk:dt', " "name='random_walk:dt', " 'value=1.0, ' 'timestamp=1550070001.828528, ' 'auto_monitor=False, ' 'string=False, ' "write_pv='random_walk:dt', " 'limits=False, ' 'put_complete=False)', -1, 1],
-        #             'detectors': ["EpicsSignal(read_pv='random_walk:x', " "name='random_walk:x', " 'value=1.61472277847348, ' 'timestamp=1550070000.807677, ' 'auto_monitor=False, ' 'string=False, ' "write_pv='random_walk:x', " 'limits=False, ' 'put_complete=False)'],
-        #             'num': 3,
-        #             'per_step': 'None'},
-        # 'plan_name': 'scan',
-        # 'plan_pattern': 'inner_product',
-        # 'plan_pattern_args': {'args': ["EpicsSignal(read_pv='random_walk:dt', " "name='random_walk:dt', " 'value=1.0, ' 'timestamp=1550070001.828528, ' 'auto_monitor=False, ' 'string=False, ' "write_pv='random_walk:dt', " 'limits=False, ' 'put_complete=False)', -1, 1],
-        #                     'num': 3},
-        # 'plan_pattern_module': 'bluesky.plan_patterns',
-        # 'plan_type': 'generator',
-        # 'scan_id': 2,
-        # 'time': 1550070004.9850419,
-        # 'uid': 'ba1f9076-7925-4af8-916e-0e1eaa1b3c47'}
-
         doc = {
             "time": time.time(),
             "uid": str(uuid.uuid4()),
@@ -302,6 +290,12 @@ class ScanBundler(BECService):
             timeout_time = 10
             elapsed_time = 0
             while not scanID in self.storage_initialized:
+                if scanID in self.sync_storage:
+                    if self.sync_storage[scanID]["status"] in ["closed", "aborted"]:
+                        logger.info(
+                            f"Received reading for {self.sync_storage[scanID]['status']} scan {scanID}."
+                        )
+                        return
                 time.sleep(0.1)
                 elapsed_time += 0.1
                 if elapsed_time > timeout_time:
@@ -310,12 +304,6 @@ class ScanBundler(BECService):
                     )
                     return
 
-            # scan_exists = False
-            # for queue in self.current_queue:
-            #     if scanID in queue["scanID"]:
-            #         scan_exists = True
-            # if not scan_exists:
-            #     return
             self.device_storage[device] = signal
             stream = metadata.get("stream")
             if stream == "primary":
@@ -403,7 +391,7 @@ class ScanBundler(BECService):
         """remove old scanIDs to free memory"""
         remove_scanIDs = []
         for scanID, entry in self.sync_storage.items():
-            if entry.get("status") != "closed":
+            if entry.get("status") not in ["closed", "aborted"]:
                 continue
             if len(entry.keys()) != 3:
                 continue
