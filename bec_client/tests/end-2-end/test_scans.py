@@ -55,7 +55,7 @@ def wait_for_empty_queue(bec):
         time.sleep(1)
 
 
-@pytest.mark.timeout(200)
+@pytest.mark.timeout(100)
 def start_client():
     config = ServiceConfig(CONFIG_PATH)
     bec = BKClient(
@@ -69,7 +69,7 @@ def start_client():
     return bec
 
 
-@pytest.mark.timeout(200)
+@pytest.mark.timeout(100)
 def test_grid_scan(capsys, client):
     bec = client
     scans = bec.scans
@@ -83,7 +83,7 @@ def test_grid_scan(capsys, client):
     assert "finished. Scan ID" in captured.out
 
 
-@pytest.mark.timeout(200)
+@pytest.mark.timeout(100)
 def test_fermat_scan(capsys, client):
     bec = client
     scans = bec.scans
@@ -96,7 +96,7 @@ def test_fermat_scan(capsys, client):
     assert "finished. Scan ID" in captured.out
 
 
-@pytest.mark.timeout(200)
+@pytest.mark.timeout(100)
 def test_line_scan(capsys, client):
     bec = client
     scans = bec.scans
@@ -109,7 +109,7 @@ def test_line_scan(capsys, client):
     assert "finished. Scan ID" in captured.out
 
 
-@pytest.mark.timeout(200)
+@pytest.mark.timeout(100)
 def test_mv_scan(capsys, client):
     bec = client
     scans = bec.scans
@@ -134,7 +134,7 @@ def test_mv_scan(capsys, client):
     assert ref_out_samy in captured.out
 
 
-@pytest.mark.timeout(200)
+@pytest.mark.timeout(100)
 def test_mv_scan_mv(client):
     bec = client
     scans = bec.scans
@@ -195,7 +195,7 @@ def test_mv_scan_mv(client):
     )
 
 
-@pytest.mark.timeout(200)
+@pytest.mark.timeout(100)
 def test_scan_abort(client):
     def send_abort(bec):
         while True:
@@ -221,7 +221,7 @@ def test_scan_abort(client):
     assert aborted_scan is True
 
 
-@pytest.mark.timeout(200)
+@pytest.mark.timeout(100)
 def test_limit_error(client):
     bec = client
     wait_for_empty_queue(bec)
@@ -248,7 +248,7 @@ def test_limit_error(client):
     assert aborted_scan is True
 
 
-@pytest.mark.timeout(200)
+@pytest.mark.timeout(100)
 def test_queued_scan(client):
     bec = client
     wait_for_empty_queue(bec)
@@ -269,7 +269,7 @@ def test_queued_scan(client):
         time.sleep(0.5)
 
 
-@pytest.mark.timeout(200)
+@pytest.mark.timeout(100)
 def test_fly_scan(client):
     bec = client
     wait_for_empty_queue(bec)

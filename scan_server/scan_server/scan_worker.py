@@ -365,7 +365,7 @@ class ScanWorker(threading.Thread):
         )
 
     def _send_scan_status(self, status: str):
-        logger.info("New scan status: {self.current_scanID} / {status} / {self.current_scan_info}")
+        logger.info(f"New scan status: {self.current_scanID} / {status} / {self.current_scan_info}")
         self.device_manager.producer.set_and_publish(
             MessageEndpoints.scan_status(),
             ScanStatusMsg(
