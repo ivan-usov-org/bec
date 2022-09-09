@@ -318,11 +318,6 @@ class ScanWorker(threading.Thread):
                     self.device_manager.devices[dev]
                     for dev in instr.content["parameter"].get("primary")
                 ]
-            # self.parent.scan_number += 1
-        # if instr.content["parameter"].get("scan_type"):
-        #     self.current_scan_info["scan_type"] = instr.content["parameter"].get("scan_type")
-        # if instr.content["parameter"].get("num_points"):
-        #     self.current_scan_info["points"] = instr.content["parameter"].get("num_points")
 
         self.current_scan_info = {**instr.metadata, **instr.content["parameter"]}
         self.current_scan_info.update({"scan_number": self.parent.scan_number})
@@ -370,6 +365,7 @@ class ScanWorker(threading.Thread):
         )
 
     def _send_scan_status(self, status: str):
+        logger.info("New scan status: {self.current_scanID} / {status} / {self.current_scan_info}")
         self.device_manager.producer.set_and_publish(
             MessageEndpoints.scan_status(),
             ScanStatusMsg(
