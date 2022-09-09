@@ -247,6 +247,7 @@ class ScanWorker(threading.Thread):
         self.device_manager.producer.send(MessageEndpoints.device_instructions(), instr.dumps())
 
     def _trigger_devices(self, instr: DeviceMsg) -> None:
+        return
         devices = [dev.name for dev in self.device_manager.devices.detectors()]
         self.device_manager.producer.send(
             MessageEndpoints.device_instructions(),
@@ -435,10 +436,10 @@ class ScanWorker(threading.Thread):
                 self._baseline_reading(instr)
             elif action == "rpc":
                 self._send_rpc(instr)
-            # elif action == "stage":
-            #     self._stage_devices(instr)
-            # elif action == "unstage":
-            #     self._unstage_devices(instr)
+            elif action == "stage":
+                self._stage_devices(instr)
+            elif action == "unstage":
+                self._unstage_devices(instr)
             else:
                 logger.warning(f"Unknown device instruction: {instr}")
 
