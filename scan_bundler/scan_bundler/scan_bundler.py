@@ -290,6 +290,13 @@ class ScanBundler(BECService):
             timeout_time = 10
             elapsed_time = 0
             while not scanID in self.storage_initialized:
+                msgs = [
+                    BECMessage.ScanStatusMessage.loads(msg)
+                    for msg in self.device_manager.producer.lrange(
+                        MessageEndpoints.scan_status() + "_list", -5, -1
+                    )
+                ]
+                logger.info(f"Messages in redis: {msgs}")
                 if scanID in self.sync_storage:
                     if self.sync_storage[scanID]["status"] in ["closed", "aborted"]:
                         logger.info(
