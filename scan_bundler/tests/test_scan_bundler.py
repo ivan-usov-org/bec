@@ -77,3 +77,35 @@ def test_device_read_callback(scanID, storageID):
         assert not scan_bundler.device_storage
         return
     assert "samx" in scan_bundler.device_storage
+
+
+def test_status_modification():
+    scanID = "test_scanID"
+    scan_bundler = load_ScanBundlerMock()
+    scan_bundler.sync_storage[scanID] = {"status": "open"}
+    msg = BECMessage.ScanStatusMessage(
+        scanID=scanID,
+        status="closed",
+        info={
+            "primary": ["samx"],
+            "queueID": "my-queue-ID",
+            "scan_number": 5,
+            "scan_type": "step",
+        },
+    )
+    scan_bundler._scan_status_modification(msg)
+    assert scan_bundler.sync_storage[scanID]["status"] == "closed"
+
+    scanID = "scanID_not_available"
+    msg = BECMessage.ScanStatusMessage(
+        scanID=scanID,
+        status="closed",
+        info={
+            "primary": ["samx"],
+            "queueID": "my-queue-ID",
+            "scan_number": 5,
+            "scan_type": "step",
+        },
+    )
+    scan_bundler._scan_status_modification(msg)
+    assert scan_bundler.sync_storage[scanID]["info"] == {}
