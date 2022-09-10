@@ -46,6 +46,7 @@ class BKClient(BECService):
         self._configure_prompt()
         self._start_scan_queue()
         self._start_alarm_handler()
+        self._configure_logger()
 
     def alarms(self, severity=Alarms.WARNING):
         if self.alarm_handler is None:
@@ -84,6 +85,11 @@ class BKClient(BECService):
         self._ip = IPython.get_ipython()
         if self._ip is not None:
             self._ip.prompts = BKClientPrompt(self._ip, "demo")
+
+    def _configure_logger(self):
+        bec_logger.logger.remove()
+        bec_logger.add_file_log(bec_logger.LOGLEVEL.INFO)
+        bec_logger.add_sys_stderr(bec_logger.LOGLEVEL.SUCCESS)
 
     def _set_error(self):
         if self._ip is not None:
