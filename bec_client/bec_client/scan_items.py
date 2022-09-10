@@ -116,6 +116,9 @@ class ScanStorage:
 
     def add_scan_segment(self, scan_msg: BECMessage.ScanMessage) -> None:
         """update a scan item with a new scan segment"""
+        logger.info(
+            f"Received scan segment {scan_msg.content['point_id']} for scan {scan_msg.metadata['scanID']}: "
+        )
         while True:
             with self._lock:
                 for scan_item in self.storage:

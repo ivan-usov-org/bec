@@ -229,21 +229,22 @@ class ScanBundler(BECService):
     def _step_scan_update(self, scanID, device, signal, metadata):
         if "pointID" not in metadata:
             return
-        dev = {device: signal}
-        pointID = metadata["pointID"]
-        primary_devices = self.primary_devices[scanID]
-
-        self.sync_storage[scanID][pointID] = {
-            **self.sync_storage[scanID].get(pointID, {}),
-            **dev,
-        }
-
-        if primary_devices["pointID"].get(pointID) is None:
-            primary_devices["pointID"][pointID] = {
-                dev.name: False for dev in primary_devices["devices"]
-            }
-        primary_devices["pointID"][pointID][device] = True
         with self._lock:
+            dev = {device: signal}
+            pointID = metadata["pointID"]
+            primary_devices = self.primary_devices[scanID]
+
+            self.sync_storage[scanID][pointID] = {
+                **self.sync_storage[scanID].get(pointID, {}),
+                **dev,
+            }
+
+            if primary_devices["pointID"].get(pointID) is None:
+                primary_devices["pointID"][pointID] = {
+                    dev.name: False for dev in primary_devices["devices"]
+                }
+            primary_devices["pointID"][pointID][device] = True
+
             primary_devices_completed = [
                 status for status in primary_devices["pointID"][pointID].values()
             ]
@@ -315,7 +316,10 @@ class ScanBundler(BECService):
                     )
                     return
             if self.sync_storage[scanID]["status"] in ["aborted", "closed"]:
-                return
+                # check if the sync_storage has been initialized properly.
+                # In case of post-scan initialization, scan info is not available
+                if not self.sync_storage[scanID]["info"].get("scan_type"):
+                    return
             self.device_storage[device] = signal
             stream = metadata.get("stream")
             if stream == "primary":
@@ -436,7 +440,7 @@ class ScanBundler(BECService):
         #     MessageEndpoints.bluesky_events(),
         #     msgpack.dumps(("event", self._prepare_bluesky_event_data(scanID, pointID))),
         # )
-        self.sync_storage[scanID].pop(pointID)
+        # self.sync_storage[scanID].pop(pointID)
         if not pointID in self.sync_storage[scanID]["sent"]:
             self.sync_storage[scanID]["sent"].add(pointID)
         else:
