@@ -52,7 +52,7 @@ class BKClient(BECService):
     def alarms(self, severity=Alarms.WARNING):
         """get the next alarm with at least the specified severity"""
         if self.alarm_handler is None:
-            return []
+            yield []
         yield from self.alarm_handler.get_alarm(severity=severity)
 
     def show_all_alarms(self, severity=Alarms.WARNING):
