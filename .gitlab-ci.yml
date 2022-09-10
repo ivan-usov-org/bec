@@ -32,32 +32,17 @@ pylint:
     paths:
       - ./pylint/
     expire_in: 1 week
-test ScanServer:
-  stage: Test
-  script:
-    - pip install pytest pytest-random-order
-    - pip install -e ./scan_server
-    - cd scan_server/tests;pytest -v --random-order
-test DeviceServer:
+tests:
   stage: Test
   script:
     - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
     - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices
-    - pip install pytest pytest-random-order
+    - pip install pytest pytest-random-order pytest-cov
     - pip install -e ./device_server
-    - cd device_server/tests;pytest -v --random-order
-test ScanBundler:
-  stage: Test
-  script:
-    - pip install pytest pytest-random-order
+    - pip install -e ./scan_server
     - pip install -e ./scan_bundler
-    - cd scan_bundler/tests;pytest -v --random-order
-test client:
-  stage: Test
-  script:
-    - pip install pytest pytest-random-order
     - pip install -e ./bec_client
-    - cd bec_client/tests/client_tests;pytest -v --random-order
+    - pytest -v --random-order --cov=./device_server/device_server --cov=./scan_server/scan_server --cov=./scan_bundler/scan_bundler --cov=./bec_client/bec_client ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests
 
 end-2-end:
   stage: Test
