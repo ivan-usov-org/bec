@@ -42,6 +42,7 @@ tests:
     - pip install -e ./scan_server
     - pip install -e ./scan_bundler
     - pip install -e ./bec_client
+    - pytest -v --random-order ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests
     - pytest -v --random-order --cov=./device_server/device_server --cov=./scan_server/scan_server --cov=./scan_bundler/scan_bundler --cov=./bec_client/bec_client ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests
 
 end-2-end:
