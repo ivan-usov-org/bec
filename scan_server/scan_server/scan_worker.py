@@ -370,14 +370,14 @@ class ScanWorker(threading.Thread):
         if "scan_list_id" not in self.current_scan_info:
             self.current_scan_info["scan_list_id"] = (
                 self.device_manager.producer.rpush(
-                    MessageEndpoints.scan_status() + "_list",
+                    MessageEndpoints.scan_status_list(),
                     msg,
                 )
                 - 1
             )
         else:
             self.device_manager.producer.lset(
-                MessageEndpoints.scan_status() + "_list",
+                MessageEndpoints.scan_status_list(),
                 self.current_scan_info["scan_list_id"],
                 msg,
             )
@@ -397,6 +397,8 @@ class ScanWorker(threading.Thread):
         Returns:
 
         """
+        self.current_instruction_queue_item = queue
+
         start = time.time()
         max_point_id = 0
 
@@ -449,6 +451,8 @@ class ScanWorker(threading.Thread):
                 self._check_for_interruption()
                 _instruction_step(instr)
         queue.is_active = False
+        queue.status = InstructionQueueStatus.COMPLETED
+        self.current_instruction_queue_item = None
 
         logger.info(f"QUEUE ITEM finished after {time.time()-start:.2f} seconds")
         self.reset()
@@ -472,8 +476,12 @@ class ScanWorker(threading.Thread):
                 try:
                     for queue in self.parent.queue_manager.queues["primary"]:
                         self._process_instructions(queue)
+                        queue.append_to_queue_history()
+
                 except ScanAbortion:
                     self._send_scan_status("aborted")
+                    queue.status = InstructionQueueStatus.STOPPED
+                    queue.append_to_queue_history()
                     self.cleanup()
                     self.parent.queue_manager.queues["primary"].abort()
                     self.reset()
