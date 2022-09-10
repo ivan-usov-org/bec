@@ -41,7 +41,8 @@ test ScanServer:
 test DeviceServer:
   stage: Test
   script:
-    - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git ../ophyd_devices
+    - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
+    - export OPHYD_DEVICES_PATH=./ophyd_devices
     - pip install pytest pytest-random-order
     - pip install -e ./device_server
     - cd device_server/tests;pytest -v --random-order
