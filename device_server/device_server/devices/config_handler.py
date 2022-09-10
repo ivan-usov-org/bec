@@ -27,7 +27,7 @@ class ConfigHandler:
 
         """
         try:
-            self.device_manager._check_request_validity(msg)
+            self.device_manager.check_request_validity(msg)
             if msg.content["action"] != "update":
                 return
             updated = False
@@ -74,7 +74,7 @@ class ConfigHandler:
             DeviceConfigError: Raised if the db update fails.
         """
         logger.debug("updating in DB")
-        success = self.device_manager._scibec.patch_device_config(
+        success = self.device_manager.scibec.patch_device_config(
             self.device_manager.devices[device_name].config["id"],
             {"enabled": self.device_manager.devices[device_name].enabled},
         )
@@ -91,7 +91,7 @@ class ConfigHandler:
             DeviceConfigError: Raised if the db update fails.
         """
         logger.debug("updating in DB")
-        success = self.device_manager._scibec.patch_device_config(
+        success = self.device_manager.scibec.patch_device_config(
             self.device_manager.devices[device_name].config["id"],
             {"deviceConfig": self.device_manager.devices[device_name].config["deviceConfig"]},
         )
