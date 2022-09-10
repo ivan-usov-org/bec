@@ -4,7 +4,7 @@ import threading
 from collections import deque
 from typing import TYPE_CHECKING, Deque, List, Optional
 
-from bec_utils import BECMessage, threadlocked
+from bec_utils import BECMessage, MessageEndpoints, threadlocked
 
 if TYPE_CHECKING:
     from request_items import RequestItem
@@ -66,6 +66,20 @@ class QueueStorage:
         self._lock = threading.RLock()
         self.scan_manager = scan_manager
         self.current_scan_queue = None
+
+    def queue_history(self, history=5):
+        """get the queue history of length 'history'"""
+        if not history:
+            raise ValueError("History length cannot be 0.")
+        if history < 0:
+            history *= -1
+
+        return [
+            BECMessage.ScanQueueHistoryMessage.loads(msg)
+            for msg in self.scan_manager.producer.lrange(
+                MessageEndpoints.scan_queue_history(), history, -1
+            )
+        ]
 
     @threadlocked
     def update_with_status(self, queue_msg: BECMessage.ScanQueueStatusMessage) -> None:

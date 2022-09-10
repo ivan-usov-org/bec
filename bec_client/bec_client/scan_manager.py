@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from bec_utils import BECMessage, MessageEndpoints, bec_logger
+import time
+from math import inf
+
+from bec_utils import BECMessage, MessageEndpoints, bec_errors, bec_logger
 
 from bec_client.queue_items import QueueStorage
 from bec_client.request_items import RequestStorage
@@ -30,6 +33,36 @@ class ScanReport:
     def scan(self):
         """get the scan item"""
         return self.request.scan
+
+    def wait(self, timeout=None):
+        """wait until the request is completed"""
+        timeout = timeout if timeout is not None else inf
+        queue_item = None
+        elapsed_time = 0
+        sleep_time = 0.1
+        while not queue_item:
+            queue_item = self._client.queue.queue_storage.find_queue_item_by_requestID(
+                self.request.requestID
+            )
+            elapsed_time += sleep_time
+            time.sleep(sleep_time)
+            if elapsed_time > timeout:
+                raise TimeoutError
+        while True:
+            queue_history = self._client.queue.queue_storage.queue_history()
+            for queue in queue_history:
+                if not queue.content["queueID"] == queue_item.queueID:
+                    continue
+                if queue.content["status"] not in ["STOPPED", "COMPLETED"]:
+                    continue
+                if queue.content["status"] == "COMPLETED":
+                    return
+                if queue.content["status"] == "STOPPED":
+                    raise bec_errors.ScanAbortion
+            elapsed_time += sleep_time
+            time.sleep(sleep_time)
+            if elapsed_time > timeout:
+                raise TimeoutError
 
 
 class ScanManager:
