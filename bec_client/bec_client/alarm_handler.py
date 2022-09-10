@@ -39,7 +39,7 @@ class AlarmHandler:
         self.alarm_consumer.start()
 
     @staticmethod
-    def _alarm_consumer_callback(msg, *, parent, **kwargs):
+    def _alarm_consumer_callback(msg, *, parent, **_kwargs):
         msg = BECMessage.AlarmMessage.loads(msg.value)
         parent.add_alarm(msg)
 

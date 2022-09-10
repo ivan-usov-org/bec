@@ -122,6 +122,7 @@ class Scans:
 
     @staticmethod
     def get_arg_type(in_type: str):
+        """translate type string into python type"""
         # pylint: disable=too-many-return-statements
         if in_type == "float":
             return (float, int)
@@ -206,14 +207,17 @@ class Scans:
 
     @property
     def scan_group(self):
+        """Context manager / decorator for defining scan groups"""
         return self._scan_group_ctx
 
     @property
     def scan_def(self):
+        """Context manager / decorator for defining new scans"""
         return self._scan_def_ctx
 
     @property
     def hide_report(self):
+        """Context manager / decorator for hiding the report"""
         return self._hide_report_ctx
 
 

@@ -1,6 +1,6 @@
 import threading
 import time
-from typing import List, Tuple
+from typing import List
 
 import IPython
 from bec_utils import Alarms, BECService, MessageEndpoints, bec_logger
@@ -40,6 +40,7 @@ class BKClient(BECService):
         self._exit_handler_thread = None
 
     def start(self):
+        """start the client"""
         logger.info("Starting new client")
         self._start_devicemanager()
         self._start_exit_handler()
@@ -49,20 +50,24 @@ class BKClient(BECService):
         self._configure_logger()
 
     def alarms(self, severity=Alarms.WARNING):
+        """get the next alarm with at least the specified severity"""
         if self.alarm_handler is None:
             return []
         yield from self.alarm_handler.get_alarm(severity=severity)
 
     def show_all_alarms(self, severity=Alarms.WARNING):
+        """print all unhandled alarms"""
         alarms = self.alarm_handler.get_unhandled_alarms(severity=severity)
         for alarm in alarms:
             print(alarm)
 
     def clear_all_alarms(self):
+        """remove all alarms from stack"""
         self.alarm_handler.clear()
 
     @property
     def pre_scan_hooks(self):
+        """currently stored pre-scan hooks"""
         return self.producer.lrange(MessageEndpoints.pre_scan_macros(), 0, -1)
 
     @pre_scan_hooks.setter
@@ -167,6 +172,7 @@ class BKClientPrompt(Prompts):
 
     @property
     def username(self):
+        """current username"""
         return self._username
 
     @username.setter
