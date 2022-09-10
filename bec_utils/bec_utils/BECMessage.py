@@ -138,6 +138,20 @@ class ScanQueueMessage(BECMessage):
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
 
 
+class ScanQueueHistoryMessage(BECMessage):
+    msg_type = "queue_history"
+
+    def __init__(
+        self, *, status: str, queueID: str, info=dict, queue="primary", metadata: dict = None
+    ) -> None:
+        """
+        Sent after removal from the active queue.
+        """
+
+        self.content = {"status": status, "queueID": queueID, "info": info, "queue": queue}
+        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+
+
 class ScanStatusMessage(BECMessage):
     msg_type = "scan_status"
 

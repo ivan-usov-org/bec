@@ -188,20 +188,7 @@ class QueueManager:
         for queue_name, scan_queue in self.queues.items():
             queue_info = []
             for instruction_queue in scan_queue.queue:
-                request_blocks = [rb.describe() for rb in instruction_queue.queue.request_blocks]
-                queue_info.append(
-                    {
-                        "queueID": instruction_queue.queue_id,
-                        "scanID": instruction_queue.scanID,
-                        "is_scan": instruction_queue.is_scan,
-                        "request_blocks": request_blocks,
-                        "scan_number": instruction_queue.scan_number,
-                        "status": instruction_queue.status.name,
-                        "active_request_block": instruction_queue.active_request_block.describe()
-                        if instruction_queue.active_request_block
-                        else None,
-                    }
-                )
+                queue_info.append(instruction_queue.describe())
             queue_export[queue_name] = {"info": queue_info, "status": scan_queue.status.name}
         return queue_export
 
@@ -304,7 +291,7 @@ class ScanQueue:
                     if len(self.queue) == 0:
                         # we don't need to pause if there is no scan enqueued
                         self.status = ScanQueueStatus.RUNNING
-                    time.sleep(1)
+                    time.sleep(0.1)
 
                 self.active_instruction_queue = self.queue[0]
                 self.history_queue.append(self.active_instruction_queue)
@@ -585,12 +572,26 @@ class InstructionQueueItem:
 
     def describe(self):
         """description of the instruction queue"""
-        return {
-            "scanID": self.queue.active_rb.scanID,
-            "is_active": self.is_active,
-            "completed": self.completed,
-            "deferred_pause": self.deferred_pause,
+        request_blocks = [rb.describe() for rb in self.queue.request_blocks]
+        content = {
+            "queueID": self.queue_id,
+            "scanID": self.scanID,
+            "is_scan": self.is_scan,
+            "request_blocks": request_blocks,
+            "scan_number": self.scan_number,
+            "status": self.status.name,
+            "active_request_block": self.active_request_block.describe()
+            if self.active_request_block
+            else None,
         }
+        return content
+
+    def append_to_queue_history(self):
+        """append a new queue item to the redis history buffer"""
+        msg = BECMessage.ScanQueueHistoryMessage(
+            status=self.status.name, queueID=self.queue_id, info=self.describe()
+        )
+        self.parent.queue_manager.producer.rpush(MessageEndpoints.scan_queue_history(), msg.dumps())
 
     def __iter__(self):
         return self

@@ -19,10 +19,12 @@ class MessageEndpoints:
     _scan_queue_request = "internal/queue/queue_request"
     _scan_queue_request_response = "internal/queue/queue_request_response"
     _scan_queue_status = "internal/queue/queue_status"
+    _scan_queue_history = "internal/queue/queue_history"
 
     # scan info
     _scan_number = "scans/scan_number"
     _scan_status = "scans/scan_status"
+    _scan_status_list = "scans/scan_status_list"
     _available_scans = "scans/available_scans"
     _scan_segment = "scans/scan_segment"
     _bluesky_events = "scans/bluesky-events"
@@ -101,6 +103,10 @@ class MessageEndpoints:
     def scan_queue_status(cls):
         return cls._scan_queue_status
 
+    @classmethod
+    def scan_queue_history(cls):
+        return cls._scan_queue_history
+
     # scan info
 
     @classmethod
@@ -110,6 +116,10 @@ class MessageEndpoints:
     @classmethod
     def scan_status(cls):
         return cls._scan_status
+
+    @classmethod
+    def scan_status_list(cls):
+        return cls._scan_status_list
 
     @classmethod
     def available_scans(cls):
