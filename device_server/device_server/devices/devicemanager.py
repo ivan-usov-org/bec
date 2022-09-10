@@ -24,6 +24,7 @@ class DSDevice(Device):
         super().__init__(name, config, parent=parent)
         self.obj = obj
         self.metadata = {}
+        self.initialized = False
 
     def initialize_device_buffer(self, producer):
         """initialize the device read and readback buffer on redis with a new reading"""
@@ -32,6 +33,7 @@ class DSDevice(Device):
         producer.set_and_publish(MessageEndpoints.device_readback(self.name), dev_msg, pipe=pipe)
         producer.set(topic=MessageEndpoints.device_read(self.name), msg=dev_msg, pipe=pipe)
         pipe.execute()
+        self.initialized = True
 
 
 class DeviceManagerDS(DeviceManagerBase):
