@@ -109,4 +109,4 @@ end-2-end:
     - docker cp scan_server:/code/bec/scan_server/ScanServer.log $CI_PROJECT_DIR/ScanServer.log
     - docker cp scan_bundler:/code/bec/scan_bundler/ScanBundler.log $CI_PROJECT_DIR/ScanBundler.log
     - docker cp device_server:/code/bec/device_server/DeviceServer.log $CI_PROJECT_DIR/DeviceServer.log
-    - docker cp device_server:/code/bec/bec_client/BKClient.log $CI_PROJECT_DIR/BKClient.log
+    - docker cp en2end_client:/code/bec/bec_client/BKClient.log $CI_PROJECT_DIR/BKClient.log
