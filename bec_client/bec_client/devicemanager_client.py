@@ -19,60 +19,6 @@ class RPCError(Exception):
 
 logger = bec_logger.logger
 
-"""
-Device (bluesky interface):
-* trigger
-* read
-* describe
-* stage
-* unstage
-* pause
-* resume
-
-Signal:
-* trigger
-* get
-* put
-* set
-* value
-* read
-* describe
-* limits
-* low limit
-* high limit
-
-
-Positioner:
-* trigger
-* read
-* set 
-* stop
-* settle_time
-* timeout
-* egu
-* limits
-* low_limit
-* high_limit
-* move
-* position
-* moving
-
-
-
-
-
-
-
-device status
-* connected
-* enabled
-* status (idle, moving etc)
-
-
-
-instead of motor_is_moving, subscribe to SUB_DONE for receiving successful movements and SUB_REQ_DONE for "requested move finished". The latter is cleared after each request
-"""
-
 
 def rpc(fcn):
     """Decorator to perform rpc calls."""
@@ -159,7 +105,7 @@ class RPCBase:
         if not fcn_name:
             fcn_name = fcn.__name__
         full_func_call = ".".join([self._compile_function_path(use_parent=use_parent), fcn_name])
-        device = full_func_call.split(".")[0]
+        device = full_func_call.split(".", maxsplit=1)[0]
         func_call = ".".join(full_func_call.split(".")[1:])
         return (device, func_call)
 
@@ -217,6 +163,17 @@ class RPCBase:
 
 
 class DeviceBase(RPCBase, Device):
+    """
+    Device (bluesky interface):
+    * trigger
+    * read
+    * describe
+    * stage
+    * unstage
+    * pause
+    * resume
+    """
+
     @property
     def enabled(self):
         return self.root.config["enabled"]
@@ -260,6 +217,20 @@ class DeviceBase(RPCBase, Device):
 
 
 class Signal(DeviceBase):
+    """
+    Signal:
+    * trigger
+    * get
+    * put
+    * set
+    * value
+    * read
+    * describe
+    * limits
+    * low limit
+    * high limit
+    """
+
     @rpc
     def get(self):
         pass
@@ -289,6 +260,23 @@ class Signal(DeviceBase):
 
 
 class Positioner(DeviceBase):
+    """
+    Positioner:
+    * trigger
+    * read
+    * set
+    * stop
+    * settle_time
+    * timeout
+    * egu
+    * limits
+    * low_limit
+    * high_limit
+    * move
+    * position
+    * moving
+    """
+
     @rpc
     def set(self, val):
         pass

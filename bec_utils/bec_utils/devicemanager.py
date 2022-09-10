@@ -218,6 +218,11 @@ class DeviceManagerBase:
         self._start_connectors(bootstrap_server)
         self._get_config_from_DB()
 
+    @property
+    def scibec(self):
+        """SciBec instance"""
+        return self._scibec
+
     def load_config_from_disk(self, config_path) -> dict:
         """
         load config from disk and send request
@@ -435,7 +440,7 @@ class DeviceManagerBase:
                 # pylint: disable=protected-access
                 self.devices._add_device(dev.get("name"), obj)
 
-    def _check_request_validity(self, msg: DeviceConfigMessage) -> None:
+    def check_request_validity(self, msg: DeviceConfigMessage) -> None:
         if msg.content["action"] not in ["update", "add", "remove", "reload"]:
             raise DeviceConfigError("Action must be either add, remove, update, or reload.")
         if msg.content["action"] in ["update", "add", "remove"] and not msg.content["config"]:
