@@ -63,12 +63,21 @@ class BECLogger:
 
     def _update_sinks(self):
         self.logger.remove()
-        # self.logger.add(self._logger_callback, serialize=True, level=self._log_level)
-        self.logger.add(sys.stderr, level=self._log_level, format=self.format, enqueue=True)
+        # self.add_redis_log(self._log_level)
+        self.add_sys_stderr(self._log_level)
+        self.add_file_log(self._log_level)
+
+    def add_sys_stderr(self, level: LogLevel):
+        self.logger.add(sys.stderr, level=level, format=self.format, enqueue=True)
+
+    def add_file_log(self, level: LogLevel):
         if self.service_name:
             self.logger.add(
-                f"{self.service_name}.log", level=self._log_level, format=self.format, enqueue=True
+                f"{self.service_name}.log", level=level, format=self.format, enqueue=True
             )
+
+    def add_redis_log(self, level: LogLevel):
+        self.logger.add(self._logger_callback, serialize=True, level=level)
 
     @property
     def level(self):
