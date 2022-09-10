@@ -247,7 +247,6 @@ class ScanWorker(threading.Thread):
         self.device_manager.producer.send(MessageEndpoints.device_instructions(), instr.dumps())
 
     def _trigger_devices(self, instr: DeviceMsg) -> None:
-        return
         devices = [dev.name for dev in self.device_manager.devices.detectors()]
         self.device_manager.producer.send(
             MessageEndpoints.device_instructions(),
