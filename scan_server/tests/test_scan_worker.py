@@ -77,11 +77,11 @@ def test_wait_for_idle():
         success=True,
         metadata={"stream": "primary", "DIID": 3, "scanID": scanID, "RID": requestID},
     )
-    worker.device_manager.producer._get_buffer = {
-        MessageEndpoints.device_req_status("samx"): req_msg.dumps()
-    }
-    worker._add_wait_group(msg1)
-    worker._wait_for_idle(msg2)
+    with mock.patch(
+        "scan_server.scan_worker.ScanWorker._get_device_status", return_value=[req_msg.dumps()]
+    ) as device_status:
+        worker._add_wait_group(msg1)
+        worker._wait_for_idle(msg2)
 
 
 @pytest.mark.parametrize(

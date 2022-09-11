@@ -107,6 +107,12 @@ class ScanWorker(threading.Thread):
             logger.error("Unkown wait command")
             raise DeviceMessageError("Unkown wait command")
 
+    def _get_device_status(self, devices: list) -> list:
+        pipe = self.device_manager.producer.pipeline()
+        for dev in devices:
+            self.device_manager.producer.get(MessageEndpoints.device_req_status(dev), pipe)
+        return pipe.execute()
+
     def _wait_for_idle(self, instr: DeviceMsg) -> None:
         """Wait for devices to become IDLE
 
@@ -126,11 +132,7 @@ class ScanWorker(threading.Thread):
         logger.debug(f"Waiting for devices: {wait_group}")
 
         while True:
-            pipe = self.device_manager.producer.pipeline()
-            for dev, _ in wait_group_devices:
-                self.device_manager.producer.get(MessageEndpoints.device_req_status(dev), pipe)
-            device_status = pipe.execute()
-
+            device_status = self._get_device_status([dev for dev, _ in wait_group_devices])
             self._check_for_interruption()
 
             if None in device_status:
