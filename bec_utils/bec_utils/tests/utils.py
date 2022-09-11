@@ -18,8 +18,9 @@ class ConsumerMock:
 
 
 class ProducerMock:
-    message_sent = {}
-    _get_buffer = {}
+    def __init__(self) -> None:
+        self.message_sent = {}
+        self._get_buffer = {}
 
     def set(self, topic, msg, pipe=None):
         if pipe:
