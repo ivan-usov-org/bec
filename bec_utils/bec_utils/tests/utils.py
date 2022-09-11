@@ -62,7 +62,7 @@ class ProducerMock:
         val = self._get_buffer.get(topic)
         if isinstance(val, list):
             return val.pop(0)
-        self._get_buffer.pop(topic)
+        self._get_buffer.pop(topic, None)
         return val
 
     def pipeline(self):
