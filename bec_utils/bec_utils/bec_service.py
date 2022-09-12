@@ -35,7 +35,7 @@ class BECService:
             return
         services = [
             service.decode().split(":", maxsplit=1)[0]
-            for service in self.producer.r.keys(MessageEndpoints.service_status("*"))
+            for service in self.producer.keys(MessageEndpoints.service_status("*"))
         ]
         msgs = [BECMessage.StatusMessage.loads(self.producer.get(service)) for service in services]
         for msg in msgs:

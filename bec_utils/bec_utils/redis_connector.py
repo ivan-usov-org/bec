@@ -161,6 +161,10 @@ class RedisProducer(ProducerConnector):
         if not pipe:
             client.execute()
 
+    def keys(self, pattern: str) -> list:
+        """returns all keys matching a pattern"""
+        return self.r.keys(pattern)
+
     def pipeline(self):
         """create a new pipeline"""
         return self.r.pipeline()
