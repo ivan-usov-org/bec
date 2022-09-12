@@ -77,7 +77,9 @@ class QueueStorage:
         return [
             BECMessage.ScanQueueHistoryMessage.loads(msg)
             for msg in self.scan_manager.producer.lrange(
-                MessageEndpoints.scan_queue_history(), history, -1
+                MessageEndpoints.scan_queue_history(),
+                0,
+                history,
             )
         ]
 

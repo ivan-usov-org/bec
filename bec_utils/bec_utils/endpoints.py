@@ -1,4 +1,7 @@
 # pylint: disable=too-many-public-methods
+from string import Template
+
+
 class MessageEndpoints:
     # devices feedback
     _device_status = "internal/devices/status"
@@ -28,6 +31,9 @@ class MessageEndpoints:
     _available_scans = "scans/available_scans"
     _scan_segment = "scans/scan_segment"
     _bluesky_events = "scans/bluesky-events"
+    _public_scan_info = Template("public/$scanID/scan_info")
+    _public_scan_segment = Template("public/$scanID/scan_segment/$pointID")
+    _public_scan_data = Template("public/$scanID/scan_data/$device/$pointID")
 
     # instructions
     _device_instructions = "internal/devices/instructions"
@@ -149,6 +155,18 @@ class MessageEndpoints:
     @classmethod
     def post_scan_macros(cls):
         return cls._post_scan_macros
+
+    @classmethod
+    def public_scan_info(cls, scanID: str):
+        return cls._public_scan_info.substitute(scanID=scanID)
+
+    @classmethod
+    def public_scan_segment(cls, scanID: str, pointID: int):
+        return cls._public_scan_segment.substitute(scanID=scanID, pointID=pointID)
+
+    @classmethod
+    def public_scan_data(cls, scanID: str, device: str, pointID: str):
+        return cls._public_scan_data.substitute(scanID=scanID, device=device, pointID=pointID)
 
     # log
     @classmethod

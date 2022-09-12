@@ -369,24 +369,12 @@ class ScanWorker(threading.Thread):
             status=status,
             info=self.current_scan_info,
         ).dumps()
-        if "scan_list_id" not in self.current_scan_info:
-            self.current_scan_info["scan_list_id"] = (
-                self.device_manager.producer.rpush(
-                    MessageEndpoints.scan_status_list(),
-                    msg,
-                )
-                - 1
-            )
-        else:
-            self.device_manager.producer.lset(
-                MessageEndpoints.scan_status_list(),
-                self.current_scan_info["scan_list_id"],
-                msg,
-            )
-        self.device_manager.producer.set_and_publish(
-            MessageEndpoints.scan_status(),
-            msg,
+        pipe = self.device_manager.producer.pipeline()
+        self.device_manager.producer.set(
+            MessageEndpoints.public_scan_info(self.current_scanID), msg, pipe=pipe, expire=1800
         )
+        self.device_manager.producer.set_and_publish(MessageEndpoints.scan_status(), msg, pipe=pipe)
+        pipe.execute()
 
     def _process_instructions(self, queue: InstructionQueueItem) -> None:
         """

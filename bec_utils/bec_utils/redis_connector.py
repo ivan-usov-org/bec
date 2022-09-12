@@ -99,7 +99,7 @@ class RedisProducer(ProducerConnector):
         client = pipe if pipe is not None else self.r
         client.publish(f"{topic}:sub", msg)
 
-    def lpush(self, topic: str, msgs: str, pipe=None) -> int:
+    def lpush(self, topic: str, msgs: str, pipe=None, max_size: int = None) -> None:
         """Time complexity: O(1) for each element added, so O(N) to
         add N elements when the command is called with multiple arguments.
         Insert all the specified values at the head of the list stored at key.
@@ -107,8 +107,12 @@ class RedisProducer(ProducerConnector):
         performing the push operations. When key holds a value that
         is not a list, an error is returned."""
 
-        client = pipe if pipe is not None else self.r
-        return client.lpush(f"{topic}:val", msgs)
+        client = pipe if pipe is not None else self.pipeline()
+        client.lpush(f"{topic}:val", msgs)
+        if max_size:
+            client.ltrim(f"{topic}:val", 0, max_size)
+        if not pipe:
+            client.execute()
 
     def lset(self, topic: str, index: int, msgs: str, pipe=None) -> None:
         client = pipe if pipe is not None else self.r
@@ -137,17 +141,23 @@ class RedisProducer(ProducerConnector):
 
     def set_and_publish(self, topic: str, msg, pipe=None) -> None:
         """piped combination of self.publish and self.set"""
-        client = pipe if pipe is not None else self.r
+        client = pipe if pipe is not None else self.pipeline()
         client.publish(f"{topic}:sub", msg)
         client.set(f"{topic}:val", msg)
+        if not pipe:
+            client.execute()
 
-    def set(self, topic: str, msg, pipe=None, is_dict=False) -> None:
+    def set(self, topic: str, msg, pipe=None, is_dict=False, expire: int = None) -> None:
         """set redis value"""
-        client = pipe if pipe is not None else self.r
+        client = pipe if pipe is not None else self.pipeline()
         if is_dict:
             client.hmset(f"{topic}:val", msg)
         else:
             client.set(f"{topic}:val", msg)
+        if expire:
+            client.expire(f"{topic}:val", expire)
+        if not pipe:
+            client.execute()
 
     def pipeline(self):
         """create a new pipeline"""

@@ -591,7 +591,9 @@ class InstructionQueueItem:
         msg = BECMessage.ScanQueueHistoryMessage(
             status=self.status.name, queueID=self.queue_id, info=self.describe()
         )
-        self.parent.queue_manager.producer.rpush(MessageEndpoints.scan_queue_history(), msg.dumps())
+        self.parent.queue_manager.producer.lpush(
+            MessageEndpoints.scan_queue_history(), msg.dumps(), max_size=100
+        )
 
     def __iter__(self):
         return self
