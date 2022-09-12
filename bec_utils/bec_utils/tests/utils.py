@@ -22,7 +22,7 @@ class ProducerMock:
         self.message_sent = {}
         self._get_buffer = {}
 
-    def set(self, topic, msg, pipe=None):
+    def set(self, topic, msg, pipe=None, expire: int = None):
         if pipe:
             pipe._pipe_buffer.append(("set", (topic, msg)))
             return
@@ -33,7 +33,7 @@ class ProducerMock:
             return
         self.message_sent = {"queue": topic, "msg": msg}
 
-    def set_and_publish(self, topic, msg, pipe=None):
+    def set_and_publish(self, topic, msg, pipe=None, expire: int = None):
         if pipe:
             pipe._pipe_buffer.append(("set_and_publish", (topic, msg)))
             return
@@ -65,6 +65,9 @@ class ProducerMock:
             return val.pop(0)
         self._get_buffer.pop(topic, None)
         return val
+
+    def keys(self, pattern: str) -> list:
+        return []
 
     def pipeline(self):
         return PipelineMock(self)

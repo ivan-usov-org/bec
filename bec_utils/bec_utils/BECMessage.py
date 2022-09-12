@@ -388,12 +388,14 @@ class AlarmMessage(BECMessage):
 class StatusMessage(BECMessage):
     msg_type = "status_message"
 
-    def __init__(self, *, status: BECStatus, metadata: dict = None) -> None:
+    def __init__(self, *, name: str, status: BECStatus, info: dict, metadata: dict = None) -> None:
         """
 
         Args:
             status: error, off, idle or running
             metadata: status metadata
         """
-        self.content = {"status": status.value}
+        if not isinstance(status, BECMessage):
+            status = BECStatus(status)
+        self.content = {"name": name, "status": status.value, "info": info}
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)

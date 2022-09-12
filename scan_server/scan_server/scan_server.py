@@ -22,7 +22,7 @@ class ScanServer(BECService):
     scan_manager = None
 
     def __init__(self, bootstrap_server: list, connector_cls: ConnectorBase, scibec_url: str):
-        super().__init__(bootstrap_server, connector_cls)
+        super().__init__(bootstrap_server, connector_cls, unique_service=True)
         self.scibec_url = scibec_url
         self.producer = self.connector.producer()
         self._start_scan_manager()

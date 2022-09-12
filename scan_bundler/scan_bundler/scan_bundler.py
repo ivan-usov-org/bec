@@ -18,7 +18,7 @@ logger = bec_logger.logger
 
 class ScanBundler(BECService):
     def __init__(self, bootstrap_server, connector_cls: ConnectorBase, scibec_url: str) -> None:
-        super().__init__(bootstrap_server, connector_cls)
+        super().__init__(bootstrap_server, connector_cls, unique_service=True)
 
         self.device_manager = None
         self.scibec_url = scibec_url

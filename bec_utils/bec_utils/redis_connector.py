@@ -139,11 +139,13 @@ class RedisProducer(ProducerConnector):
         client = pipe if pipe is not None else self.r
         return client.lrange(f"{topic}:val", start, end)
 
-    def set_and_publish(self, topic: str, msg, pipe=None) -> None:
+    def set_and_publish(self, topic: str, msg, pipe=None, expire: int = None) -> None:
         """piped combination of self.publish and self.set"""
         client = pipe if pipe is not None else self.pipeline()
         client.publish(f"{topic}:sub", msg)
         client.set(f"{topic}:val", msg)
+        if expire:
+            client.expire(f"{topic}:val", expire)
         if not pipe:
             client.execute()
 
@@ -158,6 +160,10 @@ class RedisProducer(ProducerConnector):
             client.expire(f"{topic}:val", expire)
         if not pipe:
             client.execute()
+
+    def keys(self, pattern: str) -> list:
+        """returns all keys matching a pattern"""
+        return self.r.keys(pattern)
 
     def pipeline(self):
         """create a new pipeline"""
