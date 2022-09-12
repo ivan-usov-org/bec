@@ -395,11 +395,25 @@ class ScanBundler(BECService):
 
     def _buffered_publish(self):
         while True:
-            msgs = BECMessage.BundleMessage()
+            msgs_to_send = []
             while not self._send_buffer.empty():
-                msgs.append(self._send_buffer.get())
-            if len(msgs) > 0:
-                self.producer.send(MessageEndpoints.scan_segment(), msgs.dumps())
+                msgs_to_send.append(self._send_buffer.get())
+            if len(msgs_to_send) > 0:
+                pipe = self.producer.pipeline()
+                msgs = BECMessage.BundleMessage()
+                for msg in msgs_to_send:
+                    scanID = msg.content["scanID"]
+                    pointID = msg.content["point_id"]
+                    msg_dump = msg.dumps()
+                    msgs.append(msg_dump)
+                    self.producer.set(
+                        MessageEndpoints.public_scan_segment(scanID=scanID, pointID=pointID),
+                        msg_dump,
+                        pipe=pipe,
+                        expire=1800,
+                    )
+                self.producer.send(MessageEndpoints.scan_segment(), msgs.dumps(), pipe=pipe)
+                pipe.execute()
                 continue
             time.sleep(0.1)
 
@@ -433,7 +447,7 @@ class ScanBundler(BECService):
                 scanID=scanID,
                 data=self.sync_storage[scanID][pointID],
                 metadata=self.sync_storage[scanID]["info"],
-            ).dumps()
+            )
         )
 
         # self.producer.send(
