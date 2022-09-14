@@ -102,7 +102,7 @@ def test_set_abort():
     queue_manager = get_queuemanager()
     queue_manager.producer.message_sent = []
     queue_manager.set_abort(queue="primary")
-    assert queue_manager.queues["primary"].status == ScanQueueStatus.RUNNING
+    assert queue_manager.queues["primary"].status == ScanQueueStatus.PAUSED
     assert len(queue_manager.producer.message_sent) == 1
     assert (
         queue_manager.producer.message_sent[0].get("queue") == MessageEndpoints.scan_queue_status()
