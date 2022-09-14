@@ -151,7 +151,6 @@ class RequestBase(ABC):
     arg_input = [ScanArgType.DEVICE]
     arg_bundle_size = len(arg_input)
     required_kwargs = []
-    return_to_start_after_abort = False
 
     def __init__(
         self,
@@ -243,7 +242,6 @@ class ScanBase(RequestBase):
     arg_input = [ScanArgType.DEVICE]
     arg_bundle_size = len(arg_input)
     required_kwargs = []
-    return_to_start_after_abort = True
 
     def __init__(
         self,
@@ -319,11 +317,8 @@ class ScanBase(RequestBase):
                 yield from self._at_each_point(ind, pos)
             self.burst_index = 0
 
-    def return_to_start(self):
-        yield from self._move_and_wait(self.start_pos)
-
     def finalize(self):
-        yield from self.return_to_start()
+        yield from self._move_and_wait(self.start_pos)
         yield from self.stubs.wait(wait_type="read", group="primary", wait_group="readout_primary")
 
     def unstage(self):
