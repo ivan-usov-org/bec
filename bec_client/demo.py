@@ -7,32 +7,17 @@
 # 		○ server reads from scan queue and pushes instructions to device_instructions
 #          OPAAS reads from device instructions, performs action and sends readback to device_<id>
 
-import datetime
-import logging
-import os
-from pathlib import Path
-
-from bec_utils import RedisConnector, ServiceConfig
+from bec_utils import RedisConnector, ServiceConfig, bec_logger
 
 from bec_client import BKClient
 
-log_path = "./log/"
-Path(log_path).mkdir(parents=True, exist_ok=True)
+logger = bec_logger.logger
+bec_logger.level = bec_logger.LOGLEVEL.SUCCESS
 
-logging.basicConfig(
-    filename=os.path.join(
-        log_path,
-        "client_" + str(datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")) + ".log",
-    ),
-    level=logging.WARNING,
-    filemode="w+",
-)
-logging.getLogger("kafka").setLevel(50)
-logging.getLogger().addHandler(logging.StreamHandler())
+CONFIG_PATH = "../bec_config.yaml"
 
-config_path = "../bec_config.yaml"
 
-config = ServiceConfig(config_path)
+config = ServiceConfig(CONFIG_PATH)
 
 bk = BKClient(
     [config.redis],
@@ -44,12 +29,15 @@ bk.start()
 dev = bk.devicemanager.devices
 scans = bk.scans
 
-logging.info("Started BKClient")
-scans.fermat_scan(dev.samx, -2, 2, dev.samy, -2, 2, step=1.5, exp_time=0.02, relative=True)
+logger.success("Started BKClient")
+# scans.fermat_scan(dev.samx, -2, 2, dev.samy, -2, 2, step=1.5, exp_time=0.02, relative=True)
 # dev.samx.low_limit = -20
+# scans.round_scan_fly(dev.samx, dev.samy, 0, 50, 20, 3, exp_time=0.1, relative=True)
 # def plotfunc():
 #     dp = PlotAxis(bk.devicemanager.connector)
 #     dp.start()
+
+# scans.umv(dev.samx, -150)
 
 # scans.mv(dev.samx, 20, dev.samy, -20)
 # s = scans.line_scan(dev.samy, -5, 40, steps=10, exp_time=0.1)

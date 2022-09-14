@@ -80,7 +80,6 @@ confidence=
 # --disable=W".
 disable=missing-module-docstring,
         missing-class-docstring,
-        missing-function-docstring,
         import-error,
         no-name-in-module,
         raw-checker-failed,
@@ -88,13 +87,13 @@ disable=missing-module-docstring,
         locally-disabled,
         file-ignored,
         suppressed-message,
-        useless-suppression,
         deprecated-pragma,
         use-symbolic-message-instead,
         unused-wildcard-import,
         logging-fstring-interpolation,
         line-too-long,
-        too-many-instance-attributes
+        too-many-instance-attributes,
+        wrong-import-order
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -408,7 +407,7 @@ good-names=i,
 
 # Good variable names regexes, separated by a comma. If names match any regex,
 # they will always be accepted
-good-names-rgxs=.*scanID.*,.*RID.*,.*pointID.*,.*ID.*
+good-names-rgxs=.*scanID.*,.*RID.*,.*pointID.*,.*ID.*,.*_2D.*,.*_1D.*
 
 # Include a hint for the correct naming format with invalid-name.
 include-naming-hint=no

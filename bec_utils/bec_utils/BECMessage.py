@@ -1,11 +1,17 @@
+from __future__ import annotations
+
 import enum
 import time
-from typing import Any, Union
+from typing import Any, Optional, Union
 
 import msgpack
 
+from .logger import bec_logger
 
-class becStatus(enum.Enum):
+logger = bec_logger.logger
+
+
+class BECStatus(int, enum.Enum):
     ERROR = -1
     OFF = 0
     IDLE = 1
@@ -24,14 +30,22 @@ class BECMessage:
         self.version = 1.0
 
     @classmethod
-    def loads(cls, msg):
+    def loads(cls, msg) -> Optional(BECMessage):
+        """load BECMessage from bytes or dict input"""
         if isinstance(msg, bytes):
             msg = msgpack.loads(msg, raw=False)
+            if msg["msg_type"] == "bundle_message":
+                return [
+                    cls._validated_return(msgpack.loads(sub_message))
+                    for sub_message in msg["content"]["messages"]
+                ]
             return cls._validated_return(msg)
-        elif isinstance(msg, dict):
+        if isinstance(msg, dict):
             return cls(**msg)
+        return None
 
     def dumps(self):
+        """dump BECMessage with msgpack"""
         return msgpack.dumps(
             {
                 "msg_type": self.msg_type,
@@ -44,9 +58,13 @@ class BECMessage:
     @classmethod
     def _validated_return(cls, msg):
         if cls.msg_type != msg.get("msg_type"):
+            logger.warning(f"Invalid message type: {msg.get('msg_type')}")
             return None
         msg_conv = cls(**msg.get("content"), metadata=msg.get("metadata"))
-        return msg_conv if msg_conv._is_valid() else None
+        if msg_conv._is_valid():
+            return msg_conv
+        logger.warning(f"Invalid message: {msg_conv}")
+        return None
 
     def _is_valid(self) -> bool:
         return True
@@ -66,6 +84,27 @@ class BECMessage:
 
     def __str__(self):
         return f"{self.__class__.__name__}({self.content, self.metadata}))"
+
+
+class BundleMessage(BECMessage):
+    msg_type = "bundle_message"
+
+    def __init__(self, *, messages: list = None, metadata: dict = None, **_kwargs) -> None:
+        content = {}
+        super().__init__(msg_type=self.msg_type, content=content, metadata=metadata)
+        self.content["messages"] = [] if not messages else messages
+
+    def append(self, msg: BECMessage):
+        """append a new BECMessage to the bundle"""
+        if isinstance(msg, bytes):
+            self.content["messages"].append(msg)
+        elif isinstance(msg, BECMessage):
+            self.content["messages"].append(msg.dumps())
+        else:
+            raise AttributeError(f"Cannot append message of type {msg.__class__.__name__}")
+
+    def __len__(self):
+        return len(self.content["messages"])
 
 
 class MessageReader(BECMessage):
@@ -96,6 +135,20 @@ class ScanQueueMessage(BECMessage):
         """
 
         self.content = {"scan_type": scan_type, "parameter": parameter, "queue": queue}
+        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+
+
+class ScanQueueHistoryMessage(BECMessage):
+    msg_type = "queue_history"
+
+    def __init__(
+        self, *, status: str, queueID: str, info=dict, queue="primary", metadata: dict = None
+    ) -> None:
+        """
+        Sent after removal from the active queue.
+        """
+
+        self.content = {"status": status, "queueID": queueID, "info": info, "queue": queue}
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
 
 
@@ -152,16 +205,16 @@ class ScanQueueStatusMessage(BECMessage):
 class RequestResponseMessage(BECMessage):
     msg_type = "request_response"
 
-    def __init__(self, *, decision: str, message: str, metadata: dict = None) -> None:
+    def __init__(self, *, accepted: bool, message: str, metadata: dict = None) -> None:
         """
         Message type for sending back decisions on the acceptance of requests.
         Args:
-            decision: String describing the decision, e.g. accepted, rejected, queued etc.
+            accepted: True if the request was accepted
             message: String describing the decision, e.g. "Invalid request"
             metadata: additional metadata to describe and identify the request / response
         """
 
-        self.content = {"decision": decision, "message": message}
+        self.content = {"accepted": accepted, "message": message}
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
 
 
@@ -335,12 +388,14 @@ class AlarmMessage(BECMessage):
 class StatusMessage(BECMessage):
     msg_type = "status_message"
 
-    def __init__(self, *, status: becStatus, metadata: dict = None) -> None:
+    def __init__(self, *, name: str, status: BECStatus, info: dict, metadata: dict = None) -> None:
         """
 
         Args:
             status: error, off, idle or running
             metadata: status metadata
         """
-        self.content = {"status": status.value}
+        if not isinstance(status, BECMessage):
+            status = BECStatus(status)
+        self.content = {"name": name, "status": status.value, "info": info}
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)

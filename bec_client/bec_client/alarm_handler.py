@@ -1,6 +1,8 @@
+import threading
 from collections import deque
+from typing import List
 
-from bec_utils import Alarms, BECMessage, MessageEndpoints, RedisConnector
+from bec_utils import Alarms, BECMessage, MessageEndpoints, RedisConnector, threadlocked
 
 
 class AlarmException(Exception):
@@ -27,41 +29,82 @@ class AlarmHandler:
         self.connector = connector
         self.alarm_consumer = None
         self.alarms_stack = deque(maxlen=100)
+        self._lock = threading.RLock()
 
     def start(self):
+        """start the alarm handler and its subscriptions"""
         self.alarm_consumer = self.connector.consumer(
             topics=MessageEndpoints.alarm(), cb=self._alarm_consumer_callback, parent=self
         )
         self.alarm_consumer.start()
 
     @staticmethod
-    def _alarm_consumer_callback(msg, *, parent, **kwargs):
+    def _alarm_consumer_callback(msg, *, parent, **_kwargs):
         msg = BECMessage.AlarmMessage.loads(msg.value)
+        parent.add_alarm(msg)
+
+    @threadlocked
+    def add_alarm(self, msg: BECMessage.AlarmMessage):
+        """Add a new alarm message to the stack.
+
+        Args:
+            msg (BECMessage.AlarmMessage): Alarm message that should be added
+        """
         severity = Alarms(msg.content["severity"])
-        parent.alarms_stack.appendleft(
+        self.alarms_stack.appendleft(
             AlarmBase(
                 alarm=msg, alarm_type=msg.content["alarm_type"], severity=severity, handled=False
             )
         )
 
-    def get_unhandled_alarms(self, severity=Alarms.WARNING):
+    @threadlocked
+    def get_unhandled_alarms(self, severity=Alarms.WARNING) -> List:
+        """Get all unhandled alarms equal or above a minimum severity.
+
+        Args:
+            severity (Alarms, optional): Minimum severity. Defaults to Alarms.WARNING.
+
+        Returns:
+            list: List of unhandled alarms
+
+        """
         return [
             alarm for alarm in self.alarms_stack if not alarm.handled and alarm.severity >= severity
         ]
 
+    @threadlocked
     def get_alarm(self, severity=Alarms.WARNING):
+        """Get the next alarm
+
+        Args:
+            severity (Alarm, optional): Minimum severity. Defaults to Alarms.WARNING.
+
+        Yields:
+            AlarmBase: Alarm
+        """
         alarms = self.get_unhandled_alarms(severity=severity)
         for alarm in alarms:
             self.alarms_stack.remove(alarm)
             yield alarm
 
     def raise_alarms(self, severity=Alarms.MINOR):
+        """Raise unhandled alarms with specified severity.
+
+        Args:
+            severity (Alarm, optional): Minimum severity. Defaults to Alarms.MINOR.
+
+        Raises:
+            alarms: Alarm exception.
+        """
         alarms = self.get_unhandled_alarms(severity=severity)
         if len(alarms) > 0:
             raise alarms[0]
 
+    @threadlocked
     def clear(self):
+        """clear all alarms from stack"""
         self.alarms_stack.clear()
 
     def shutdown(self):
+        """shutdown the alarm handler"""
         self.alarm_consumer.shutdown()

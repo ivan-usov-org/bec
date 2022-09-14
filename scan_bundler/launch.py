@@ -1,9 +1,12 @@
-import threading
-import logging
 import argparse
+import threading
+
+from bec_utils import RedisConnector, ServiceConfig, bec_logger
 
 from scan_bundler import ScanBundler
-from bec_utils import RedisConnector, ServiceConfig
+
+logger = bec_logger.logger
+bec_logger.level = bec_logger.LOGLEVEL.INFO
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument(
@@ -16,15 +19,11 @@ config_path = clargs.config
 
 config = ServiceConfig(config_path)
 
-logging.basicConfig(filename="scan_bundler.log", level=logging.INFO, filemode="w+")
-logging.getLogger("kafka").setLevel(50)
-logging.getLogger().addHandler(logging.StreamHandler())
-
 sb = ScanBundler(config.redis, RedisConnector, config.scibec)
 
 try:
     event = threading.Event()
-    logging.info("Started ScanBundler")
+    logger.success("Started ScanBundler")
     event.wait()
 except KeyboardInterrupt as e:
     sb.shutdown()

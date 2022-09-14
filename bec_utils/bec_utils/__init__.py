@@ -1,5 +1,7 @@
 import logging
 
+from .bec_service import BECService, bec_logger
+from .connector import ProducerConnector
 from .devicemanager import (
     Device,
     DeviceConfigError,
@@ -10,5 +12,4 @@ from .devicemanager import (
 from .endpoints import MessageEndpoints
 from .redis_connector import Alarms, RedisConnector
 from .service_config import ServiceConfig
-
-loggers = logging.getLogger(__name__)
+from .utils import threadlocked

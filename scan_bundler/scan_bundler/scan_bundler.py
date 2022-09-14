@@ -1,35 +1,57 @@
-import logging
+import collections
+import threading
 import time
 import uuid
 from collections.abc import Iterable
+from concurrent.futures import ThreadPoolExecutor
+from queue import Queue
 
-import bec_utils.BECMessage as BMessage
 import msgpack
 import numpy as np
-from bec_utils import MessageEndpoints
+from bec_utils import BECMessage, BECService, MessageEndpoints, bec_logger
 from bec_utils.connector import ConnectorBase
 
 from .devicemanager_sb import DeviceManagerSB
 
-logger = logging.getLogger(__name__)
+logger = bec_logger.logger
 
 
-class ScanBundler:
-    def __init__(self, bootstrap, Connector: ConnectorBase, scibec_url: str) -> None:
-        self.connector = Connector(bootstrap)
-        self.DM = DeviceManagerSB(self.connector, scibec_url)
-        self.DM.initialize(bootstrap)
-        self.producer = self.connector.producer()
+class ScanBundler(BECService):
+    def __init__(self, bootstrap_server, connector_cls: ConnectorBase, scibec_url: str) -> None:
+        super().__init__(bootstrap_server, connector_cls, unique_service=True)
+
+        self.device_manager = None
+        self.scibec_url = scibec_url
+        self._start_device_manager()
         self._start_device_read_consumer()
         self._start_scan_queue_consumer()
         self._start_scan_status_consumer()
-        self.sync_storage = dict()
-        self.bluesky_metadata = dict()
-        self.primary_devices = dict()
-        self.monitor_devices = dict()
-        self.baseline_devices = dict()
-        self.scan_motors = dict()
-        self.metadata = dict()
+
+        self.sync_storage = {}
+        self.bluesky_metadata = {}
+        self.primary_devices = {}
+        self.monitor_devices = {}
+        self.baseline_devices = {}
+        self.device_storage = {}
+        self.scan_motors = {}
+        self.storage_initialized = set()
+        self.current_queue = None
+        self.executor = ThreadPoolExecutor(max_workers=4)
+        self.executor_tasks = collections.deque(maxlen=100)
+        self._send_buffer = Queue()
+        self._start_buffered_producer()
+        self.scanID_history = collections.deque(maxlen=20)
+        self._lock = threading.Lock()
+
+    def _start_buffered_producer(self):
+        self._buffered_producer_thread = threading.Thread(
+            target=self._buffered_publish, daemon=True
+        )
+        self._buffered_producer_thread.start()
+
+    def _start_device_manager(self):
+        self.device_manager = DeviceManagerSB(self.connector, self.scibec_url)
+        self.device_manager.initialize(self.bootstrap_server)
 
     def _start_device_read_consumer(self):
         self._device_read_consumer = self.connector.consumer(
@@ -58,109 +80,121 @@ class ScanBundler:
         self._scan_status_consumer.start()
 
     @staticmethod
-    def _device_read_callback(msg, parent, **kwargs):
+    def _device_read_callback(msg, parent, **_kwargs):
+        # pylint: disable=protected-access
         dev = msg.topic.decode().split(MessageEndpoints._device_read + "/")[-1].split(":sub")[0]
-        msg = BMessage.DeviceMessage.loads(msg.value)
-        if msg.content["signals"].get(dev) is not None:
-            parent._add_device_to_storage(
-                msg.metadata["scanID"], dev, msg.content["signals"], msg.metadata
-            )
-        else:
-            logger.warning(f"Received reading from unknown device {dev}")
+        msgs = BECMessage.DeviceMessage.loads(msg.value)
+        logger.debug(f"Received reading from device {dev}")
+        if not isinstance(msgs, list):
+            msgs = [msgs]
+        task = parent.executor.submit(parent._add_device_to_storage, msgs, dev)
+        parent.executor_tasks.append(task)
 
     @staticmethod
-    def _scan_queue_callback(msg, parent, **kwargs):
-        msg = BMessage.ScanQueueStatusMessage.loads(msg.value)
-        print(msg)
-        for q in msg.content["queue"]["primary"].get("info"):
-            for rb in q.get("request_blocks"):
-                if rb.get("is_scan"):
-                    parent.metadata[rb["scanID"]] = q
-                    parent._initialize_scan_container(rb)
+    def _scan_queue_callback(msg, parent, **_kwargs):
+        msg = BECMessage.ScanQueueStatusMessage.loads(msg.value)
+        logger.trace(msg)
+        parent.current_queue = msg.content["queue"]["primary"].get("info")
 
     @staticmethod
-    def _scan_status_callback(msg, parent, **kwargs):
-        msg = BMessage.ScanStatusMessage.loads(msg.value)
-        if msg.content.get("status") != "open":
-            parent._scan_status_modification(msg)
+    def _scan_status_callback(msg, parent, **_kwargs):
+        msg = BECMessage.ScanStatusMessage.loads(msg.value)
+        parent.handle_scan_status_message(msg)
 
-    def _scan_status_modification(self, msg: BMessage.ScanStatusMessage):
-        if msg.content.get("status") == "closed":
-            scanID = msg.content.get("scanID")
-            if scanID:
-                doc = {
-                    "time": time.time(),
-                    "uid": str(uuid.uuid4()),
-                    "scanID": scanID,
-                    "run_start": self.bluesky_metadata[scanID]["start"]["uid"],
-                    "exit_status": "success",
-                    "reason": "",
-                    "num_events": msg.content["info"].get("points") + 1,
-                }
-                self.bluesky_metadata[scanID]["stop"] = doc
-                self.producer.send(MessageEndpoints.bluesky_events(), msgpack.dumps(("stop", doc)))
-
-    def _initialize_scan_container(self, queue):
-        scanID = queue["scanID"]
-        scan_motors = list(set([self.DM.devices[m] for m in queue["scan_motors"]]))
-        self.scan_motors[scanID] = scan_motors
+    def handle_scan_status_message(self, msg: BECMessage.ScanStatusMessage) -> None:
+        """handle scan status messages"""
+        logger.info(f"Received new scan status: {msg}")
+        scanID = msg.content["scanID"]
         if not scanID in self.sync_storage:
-            self.sync_storage[scanID] = dict()
-            self.bluesky_metadata[scanID] = dict()
+            self.cleanup_storage()
+            self._initialize_scan_container(msg)
+            if scanID not in self.scanID_history:
+                self.scanID_history.append(scanID)
+        if msg.content.get("status") != "open":
+            self._scan_status_modification(msg)
+
+    def _scan_status_modification(self, msg: BECMessage.ScanStatusMessage):
+        status = msg.content.get("status")
+        if status not in ["closed", "aborted"]:
+            logger.error(f"Unknown scan status {status}")
+            return
+
+        scanID = msg.content.get("scanID")
+        if not scanID:
+            logger.error(f"Received scan status update without scanID: {msg}")
+            return
+        if self.sync_storage.get(scanID):
+            self.sync_storage[scanID]["status"] = status
+        else:
+            self.sync_storage[scanID] = {"info": {}, "status": status, "sent": set()}
+            self.storage_initialized.add(scanID)
+            if scanID not in self.scanID_history:
+                self.scanID_history.append(scanID)
+
+        # doc = {
+        #     "time": time.time(),
+        #     "uid": str(uuid.uuid4()),
+        #     "scanID": scanID,
+        #     "run_start": self.bluesky_metadata[scanID]["start"]["uid"],
+        #     "exit_status": "success" if status == "closed" else "aborted",
+        #     "reason": "",
+        #     "num_events": msg.content["info"].get("num_points"),
+        # }
+        # self.bluesky_metadata[scanID]["stop"] = doc
+        # self.producer.send(MessageEndpoints.bluesky_events(), msgpack.dumps(("stop", doc)))
+
+    def _initialize_scan_container(self, scan_msg: BECMessage.ScanStatusMessage):
+        if scan_msg.content.get("status") != "open":
+            return
+
+        scanID = scan_msg.content["scanID"]
+        scan_info = scan_msg.content["info"]
+        scan_motors = list(set(self.device_manager.devices[m] for m in scan_info["primary"]))
+
+        self.scan_motors[scanID] = scan_motors
+        if not scanID in self.storage_initialized:
+            self.sync_storage[scanID] = {"info": scan_info, "status": "open", "sent": set()}
+            self.bluesky_metadata[scanID] = {}
             # for now lets assume that all devices are primary devices:
             self.primary_devices[scanID] = {
-                "devices": self.DM.devices.primary_devices(scan_motors),
+                "devices": self.device_manager.devices.primary_devices(scan_motors),
                 "pointID": {},
             }
-            self.monitor_devices[scanID] = dict()
+            self.monitor_devices[scanID] = self.device_manager.devices.device_group("monitor")
             self.baseline_devices[scanID] = {
-                "devices": self.DM.devices.baseline_devices(scan_motors),
-                "done": {dev.name: False for dev in self.DM.devices.baseline_devices(scan_motors)},
+                "devices": self.device_manager.devices.baseline_devices(scan_motors),
+                "done": {
+                    dev.name: False
+                    for dev in self.device_manager.devices.baseline_devices(scan_motors)
+                },
             }
+            self.storage_initialized.add(scanID)
             self.send_run_start_document(scanID)
+            return
 
     def send_run_start_document(self, scanID) -> None:
-        #  {'data_session': 'vist54321',
-        # 'data_groups': ['bl42', 'proposal12345'],
-        # 'detectors': ['random_walk:x'],
-        # 'hints': {'dimensions': [(['random_walk:dt'], 'primary')]},
-        # 'motors': ('random_walk:dt',),
-        # 'num_intervals': 2,
-        # 'num_points': 3,
-        # 'plan_args': {'args': ["EpicsSignal(read_pv='random_walk:dt', " "name='random_walk:dt', " 'value=1.0, ' 'timestamp=1550070001.828528, ' 'auto_monitor=False, ' 'string=False, ' "write_pv='random_walk:dt', " 'limits=False, ' 'put_complete=False)', -1, 1],
-        #             'detectors': ["EpicsSignal(read_pv='random_walk:x', " "name='random_walk:x', " 'value=1.61472277847348, ' 'timestamp=1550070000.807677, ' 'auto_monitor=False, ' 'string=False, ' "write_pv='random_walk:x', " 'limits=False, ' 'put_complete=False)'],
-        #             'num': 3,
-        #             'per_step': 'None'},
-        # 'plan_name': 'scan',
-        # 'plan_pattern': 'inner_product',
-        # 'plan_pattern_args': {'args': ["EpicsSignal(read_pv='random_walk:dt', " "name='random_walk:dt', " 'value=1.0, ' 'timestamp=1550070001.828528, ' 'auto_monitor=False, ' 'string=False, ' "write_pv='random_walk:dt', " 'limits=False, ' 'put_complete=False)', -1, 1],
-        #                     'num': 3},
-        # 'plan_pattern_module': 'bluesky.plan_patterns',
-        # 'plan_type': 'generator',
-        # 'scan_id': 2,
-        # 'time': 1550070004.9850419,
-        # 'uid': 'ba1f9076-7925-4af8-916e-0e1eaa1b3c47'}
-
+        """Bluesky only: send run start documents."""
         doc = {
             "time": time.time(),
             "uid": str(uuid.uuid4()),
             "scanID": scanID,
-            "queueID": self.metadata[scanID]["queueID"],
-            "scan_id": self.metadata[scanID]["scan_number"],
-            "request_blocks": self.metadata[scanID]["request_blocks"],
-            "motors": tuple([dev.name for dev in self.scan_motors[scanID]]),
+            "queueID": self.sync_storage[scanID]["info"]["queueID"],
+            "scan_id": self.sync_storage[scanID]["info"]["scan_number"],
+            "motors": tuple(dev.name for dev in self.scan_motors[scanID]),
         }
         self.bluesky_metadata[scanID]["start"] = doc
         self.producer.send(MessageEndpoints.bluesky_events(), msgpack.dumps(("start", doc)))
         self.send_descriptor_document(scanID)
 
     def send_descriptor_document(self, scanID) -> None:
+        """Bluesky only: send descriptor document"""
+
         def _get_data_keys():
             signals = {}
             for dev in self.primary_devices[scanID]["devices"]:
                 # copied from bluesky/callbacks/stream.py:
-                for k, v in dev.signals.items():
-                    val = v["value"]
+                for key, val in dev.signals.items():
+                    val = val["value"]
                     # String key
                     if isinstance(val, str):
                         key_desc = {"dtype": "string", "shape": []}
@@ -170,7 +204,7 @@ class ScanBundler:
                     # Number
                     else:
                         key_desc = {"dtype": "number", "shape": []}
-                    signals[k] = key_desc
+                    signals[key] = key_desc
             return signals
 
         doc = {
@@ -192,41 +226,125 @@ class ScanBundler:
         self.bluesky_metadata[scanID]["descriptor"] = doc
         self.producer.send(MessageEndpoints.bluesky_events(), msgpack.dumps(("descriptor", doc)))
 
-    def _add_device_to_storage(self, scanID, device, signal, metadata):
-        while not scanID in self.sync_storage:
-            time.sleep(0.1)
-        dev = {device: signal}
-        if metadata["stream"] == "primary":
-            if "pointID" in metadata:
-                pointID = metadata["pointID"]
-                primary_devices = self.primary_devices[scanID]
+    def _step_scan_update(self, scanID, device, signal, metadata):
+        if "pointID" not in metadata:
+            return
+        with self._lock:
+            dev = {device: signal}
+            pointID = metadata["pointID"]
+            primary_devices = self.primary_devices[scanID]
 
-                self.sync_storage[scanID][pointID] = {
-                    **self.sync_storage[scanID].get(pointID, {}),
-                    **dev,
-                }
-
-                if primary_devices["pointID"].get(pointID) is None:
-                    primary_devices["pointID"][pointID] = {
-                        dev.name: False for dev in primary_devices["devices"]
-                    }
-                primary_devices["pointID"][pointID][device] = True
-
-                if all(status for status in primary_devices["pointID"][pointID].values()):
-                    self._update_monitor_signals(scanID, pointID)
-                    self._send_scan_point(scanID, pointID)
-
-        elif metadata["stream"] == "baseline":
-            baseline_devices_status = self.baseline_devices[scanID]["done"]
-            baseline_devices_status[device] = True
-
-            self.sync_storage[scanID]["baseline"] = {
-                **self.sync_storage[scanID].get("baseline", {}),
+            self.sync_storage[scanID][pointID] = {
+                **self.sync_storage[scanID].get(pointID, {}),
                 **dev,
             }
 
-            if all(status for status in baseline_devices_status.values()):
-                print("Baseline: ", self.sync_storage[scanID]["baseline"])
+            if primary_devices["pointID"].get(pointID) is None:
+                primary_devices["pointID"][pointID] = {
+                    dev.name: False for dev in primary_devices["devices"]
+                }
+            primary_devices["pointID"][pointID][device] = True
+
+            primary_devices_completed = [
+                status for status in primary_devices["pointID"][pointID].values()
+            ]
+
+            all_primary_devices_completed = bool(
+                all(primary_devices_completed)
+                and (len(primary_devices_completed) == len(self.primary_devices[scanID]["devices"]))
+            )
+
+            if all_primary_devices_completed and self.sync_storage[scanID].get(pointID):
+                self._update_monitor_signals(scanID, pointID)
+                self._send_scan_point(scanID, pointID)
+
+    def _fly_scan_update(self, scanID, device, signal, metadata):
+
+        if "pointID" not in metadata:
+            return
+        dev = {}
+        for sig_key, sig_val in signal.items():
+            dev[sig_key] = {sig_key: sig_val}
+        pointID = metadata["pointID"]
+
+        self.sync_storage[scanID][pointID] = {
+            **self.sync_storage[scanID].get(pointID, {}),
+            **dev,
+        }
+        with self._lock:
+            if self.sync_storage[scanID].get(pointID):
+                self._update_monitor_signals(scanID, pointID)
+                self._send_scan_point(scanID, pointID)
+
+    def _add_device_to_storage(self, msgs, device):
+        for msg in msgs:
+            metadata = msg.metadata
+
+            scanID = metadata.get("scanID")
+            if not scanID:
+                logger.error("Received device message without scanID")
+                return
+
+            signal = msg.content.get("signals")
+            if not signal:
+                logger.error("Received device message without signals")
+                return
+
+            timeout_time = 10
+            elapsed_time = 0
+            while not scanID in self.storage_initialized:
+                msgs = [
+                    BECMessage.ScanStatusMessage.loads(msg)
+                    for msg in self.device_manager.producer.lrange(
+                        MessageEndpoints.scan_status() + "_list", -5, -1
+                    )
+                ]
+                for msg in msgs:
+                    if msg.content["scanID"] == scanID:
+                        self.handle_scan_status_message(msg)
+                if scanID in self.sync_storage:
+                    if self.sync_storage[scanID]["status"] in ["closed", "aborted"]:
+                        logger.info(
+                            f"Received reading for {self.sync_storage[scanID]['status']} scan {scanID}."
+                        )
+                        return
+                time.sleep(0.1)
+                elapsed_time += 0.1
+                if elapsed_time > timeout_time:
+                    logger.error(
+                        f"Failed to insert device data for {device} to sync_storage: Could not find a matching scanID {scanID} in sync_storage."
+                    )
+                    return
+            if self.sync_storage[scanID]["status"] in ["aborted", "closed"]:
+                # check if the sync_storage has been initialized properly.
+                # In case of post-scan initialization, scan info is not available
+                if not self.sync_storage[scanID]["info"].get("scan_type"):
+                    return
+            self.device_storage[device] = signal
+            stream = metadata.get("stream")
+            if stream == "primary":
+                if self.sync_storage[scanID]["info"]["scan_type"] == "step":
+                    self._step_scan_update(scanID, device, signal, metadata)
+                elif self.sync_storage[scanID]["info"]["scan_type"] == "fly":
+                    self._fly_scan_update(scanID, device, signal, metadata)
+                else:
+                    raise RuntimeError(
+                        f"Unknown scan type {self.sync_storage[scanID]['scan_type']}"
+                    )
+
+            elif stream == "baseline":
+                dev = {device: signal}
+                baseline_devices_status = self.baseline_devices[scanID]["done"]
+                baseline_devices_status[device] = True
+
+                self.sync_storage[scanID]["baseline"] = {
+                    **self.sync_storage[scanID].get("baseline", {}),
+                    **dev,
+                }
+
+                if all(status for status in baseline_devices_status.values()):
+                    logger.info(f"Sending baseline readings for scanID {scanID}.")
+                    logger.debug("Baseline: ", self.sync_storage[scanID]["baseline"])
 
     def _prepare_bluesky_event_data(self, scanID, pointID) -> dict:
         # event = {
@@ -270,25 +388,77 @@ class ScanBundler:
         return bls_event
 
     def _update_monitor_signals(self, scanID, pointID) -> None:
-        pass
+        if self.sync_storage[scanID]["info"]["scan_type"] == "fly":
+            # for fly scans, take all primary and monitor signals
+            for dev in self.primary_devices[scanID]["devices"]:
+                self.sync_storage[scanID][pointID][dev.name] = self.device_storage.get(dev.name)
+
+    def _buffered_publish(self):
+        while True:
+            msgs_to_send = []
+            while not self._send_buffer.empty():
+                msgs_to_send.append(self._send_buffer.get())
+            if len(msgs_to_send) > 0:
+                pipe = self.producer.pipeline()
+                msgs = BECMessage.BundleMessage()
+                for msg in msgs_to_send:
+                    scanID = msg.content["scanID"]
+                    pointID = msg.content["point_id"]
+                    msg_dump = msg.dumps()
+                    msgs.append(msg_dump)
+                    self.producer.set(
+                        MessageEndpoints.public_scan_segment(scanID=scanID, pointID=pointID),
+                        msg_dump,
+                        pipe=pipe,
+                        expire=1800,
+                    )
+                self.producer.send(MessageEndpoints.scan_segment(), msgs.dumps(), pipe=pipe)
+                pipe.execute()
+                continue
+            time.sleep(0.1)
+
+    def cleanup_storage(self):
+        """remove old scanIDs to free memory"""
+        remove_scanIDs = []
+        for scanID, entry in self.sync_storage.items():
+            if entry.get("status") not in ["closed", "aborted"]:
+                continue
+            if len(entry.keys()) != 3:
+                continue
+            if scanID in self.scanID_history:
+                continue
+            remove_scanIDs.append(scanID)
+
+        for scanID in remove_scanIDs:
+            self.sync_storage.pop(scanID)
+            self.bluesky_metadata.pop(scanID)
+            self.primary_devices.pop(scanID)
+            self.monitor_devices.pop(scanID)
+            self.baseline_devices.pop(scanID)
+            self.scan_motors.pop(scanID)
+            self.storage_initialized.remove(scanID)
 
     def _send_scan_point(self, scanID, pointID) -> None:
-        print(pointID, self.sync_storage[scanID][pointID])
-
-        self.producer.send(
-            MessageEndpoints.scan_segment(),
-            BMessage.ScanMessage(
+        logger.info(f"Sending point {pointID} for scanID {scanID}.")
+        logger.debug(f"{pointID}, {self.sync_storage[scanID][pointID]}")
+        self._send_buffer.put(
+            BECMessage.ScanMessage(
                 point_id=pointID,
                 scanID=scanID,
                 data=self.sync_storage[scanID][pointID],
-                metadata=self.metadata[scanID],
-            ).dumps(),
+                metadata=self.sync_storage[scanID]["info"],
+            )
         )
-        self.producer.send(
-            MessageEndpoints.bluesky_events(),
-            msgpack.dumps(("event", self._prepare_bluesky_event_data(scanID, pointID))),
-        )
-        self.sync_storage[scanID].pop(pointID)
+
+        # self.producer.send(
+        #     MessageEndpoints.bluesky_events(),
+        #     msgpack.dumps(("event", self._prepare_bluesky_event_data(scanID, pointID))),
+        # )
+        # self.sync_storage[scanID].pop(pointID)
+        if not pointID in self.sync_storage[scanID]["sent"]:
+            self.sync_storage[scanID]["sent"].add(pointID)
+        else:
+            logger.warning(f"Resubmitting existing pointID {pointID} for scanID {scanID}")
 
     def shutdown(self):
-        self.DM.shutdown()
+        self.device_manager.shutdown()

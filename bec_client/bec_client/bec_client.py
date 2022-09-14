@@ -1,22 +1,24 @@
-import logging
 import threading
+import time
+from typing import List
 
 import IPython
-from bec_utils import Alarms
+from bec_utils import Alarms, BECService, MessageEndpoints, bec_logger
 from bec_utils.connector import ConnectorBase
 from IPython.terminal.prompts import Prompts, Token
 
+from bec_client.scan_manager import ScanManager
+
 from .alarm_handler import AlarmHandler
 from .devicemanager_client import DMClient
-from .scan_queue import ScanQueue
 from .scans import Scans
 from .signals import SigintHandler
 
-logger = logging.getLogger(__name__)
+logger = bec_logger.logger
 
 
-class BKClient:
-    def __init__(self, bootstrap_server: list, Connector: ConnectorBase, scibec_url: str):
+class BKClient(BECService):
+    def __init__(self, bootstrap_server: list, connector_cls: ConnectorBase, scibec_url: str):
         """bec Client
 
         Args:
@@ -26,43 +28,59 @@ class BKClient:
         Returns:
             _type_: _description_
         """
+        super().__init__(bootstrap_server, connector_cls)
         self.devicemanager = None
-        self.bootstrap_server = bootstrap_server
         self.scibec_url = scibec_url
-        self.connector = Connector(bootstrap_server)
-        self.producer = self.connector.producer()
         self._sighandler = SigintHandler(self)
         self._ip = None
+        self.queue = None
         self.alarm_handler = None
         self._load_scans()
+        self._exit_event = threading.Event()
+        self._exit_handler_thread = None
 
     def start(self):
+        """start the client"""
         logger.info("Starting new client")
         self._start_devicemanager()
         self._start_exit_handler()
         self._configure_prompt()
         self._start_scan_queue()
         self._start_alarm_handler()
+        self._configure_logger()
 
     def alarms(self, severity=Alarms.WARNING):
+        """get the next alarm with at least the specified severity"""
         if self.alarm_handler is None:
-            return []
-        else:
-            yield from self.alarm_handler.get_alarm(severity=severity)
+            yield []
+        yield from self.alarm_handler.get_alarm(severity=severity)
 
     def show_all_alarms(self, severity=Alarms.WARNING):
+        """print all unhandled alarms"""
         alarms = self.alarm_handler.get_unhandled_alarms(severity=severity)
         for alarm in alarms:
             print(alarm)
 
     def clear_all_alarms(self):
+        """remove all alarms from stack"""
         self.alarm_handler.clear()
+
+    @property
+    def pre_scan_hooks(self):
+        """currently stored pre-scan hooks"""
+        return self.producer.lrange(MessageEndpoints.pre_scan_macros(), 0, -1)
+
+    @pre_scan_hooks.setter
+    def pre_scan_hooks(self, hooks: List):
+        self.producer.delete(MessageEndpoints.pre_scan_macros())
+        for hook in hooks:
+            self.producer.lpush(MessageEndpoints.pre_scan_macros(), hook)
 
     def _load_scans(self):
         self.scans = Scans(self)
 
     def _start_scan_queue(self):
-        self.queue = ScanQueue(self)
+        self.queue = ScanManager(self.connector)
 
     def _set_ipython_prompt_scan_number(self, scan_number: int):
         if self._ip:
@@ -72,6 +90,11 @@ class BKClient:
         self._ip = IPython.get_ipython()
         if self._ip is not None:
             self._ip.prompts = BKClientPrompt(self._ip, "demo")
+
+    def _configure_logger(self):
+        bec_logger.logger.remove()
+        bec_logger.add_file_log(bec_logger.LOGLEVEL.INFO)
+        bec_logger.add_sys_stderr(bec_logger.LOGLEVEL.SUCCESS)
 
     def _set_error(self):
         if self._ip is not None:
@@ -86,9 +109,14 @@ class BKClient:
             self._ip.prompts.status = 2
 
     def _start_exit_handler(self):
-        monitor = threading.Thread(target=self._exit_thread)
-        monitor.daemon = True
-        monitor.start()
+        self._exit_handler_thread = threading.Thread(target=self._exit_thread)
+        self._exit_handler_thread.daemon = True
+        self._exit_handler_thread.start()
+
+    def _shutdown_exit_handler(self):
+        self._exit_event.set()
+        if self._exit_handler_thread:
+            self._exit_handler_thread.join()
 
     def _start_devicemanager(self):
         logger.info("Starting device manager")
@@ -101,13 +129,20 @@ class BKClient:
         self.alarm_handler.start()
 
     def shutdown(self):
-        logger.info("Shutting down device manager")
+        """shutdown the client and all its components"""
+        super().shutdown()
         self.devicemanager.shutdown()
+        self.queue.shutdown()
+        self.alarm_handler.shutdown()
+        self._shutdown_exit_handler()
+        print("done")
 
     def _exit_thread(self):
         main_thread = threading.main_thread()
-        main_thread.join()
-        self.shutdown()
+        while main_thread.is_alive() and not self._exit_event.is_set():
+            time.sleep(0.1)
+        if not self._exit_event.is_set():
+            self.shutdown()
 
 
 class BKClientPrompt(Prompts):
@@ -137,6 +172,7 @@ class BKClientPrompt(Prompts):
 
     @property
     def username(self):
+        """current username"""
         return self._username
 
     @username.setter

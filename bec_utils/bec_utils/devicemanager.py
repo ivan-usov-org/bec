@@ -1,6 +1,5 @@
 import enum
 import json
-import logging
 
 import msgpack
 import yaml
@@ -10,9 +9,10 @@ from bec_utils.connector import ConnectorBase
 
 from .BECMessage import DeviceConfigMessage, DeviceStatusMessage, LogMessage
 from .endpoints import MessageEndpoints
+from .logger import bec_logger
 from .scibec import SciBec
 
-logger = logging.getLogger(__name__)
+logger = bec_logger.logger
 
 
 class DeviceConfigError(Exception):
@@ -38,28 +38,32 @@ class Device:
 
     @property
     def enabled(self):
+        """Whether or not the device is enabled"""
         return self.config["enabled"]
 
     @enabled.setter
     def enabled(self, value):
+        """Whether or not the device is enabled"""
         self.config["enabled"] = value
+        self.parent.send_config_request(action="update", config={self.name: {"enabled": value}})
 
     def read(self):
+        """get the last reading from a device"""
         val = self.parent.producer.get(MessageEndpoints.device_read(self.name))
         if val:
             return msgpack.loads(val)["content"]["signals"].get(self.name)
-        else:
-            return None
+        return None
 
     def readback(self):
+        """get the last readback value from a device"""
         val = self.parent.producer.get(MessageEndpoints.device_readback(self.name))
         if val:
             return msgpack.loads(val)["content"]["signals"].get(self.name)
-        else:
-            return None
+        return None
 
     @property
     def status(self):
+        """get the current status of the device"""
         val = self.parent.producer.get(MessageEndpoints.device_status(self.name))
         if val is None:
             return val
@@ -68,6 +72,7 @@ class Device:
 
     @property
     def signals(self):
+        """get the last signals from a device"""
         if not self._signals:
             val = self.parent.producer.get(MessageEndpoints.device_read(self.name))
             if val is None:
@@ -116,31 +121,51 @@ class DeviceContainer(dict):
 
     @property
     def enabled_devices(self) -> list:
+        """get a list of enabled devices"""
         return [dev for _, dev in self.items() if dev.enabled]
 
     @property
     def disabled_devices(self) -> list:
-        """
-
-        Returns: list of disabled devices
-
-        """
+        """get a list of disabled devices"""
         return [dev for _, dev in self.items() if not dev.enabled]
 
-    def device_group(self, device_group) -> list:
+    def device_group(self, device_group: str) -> list:
+        """get all devices that belong to the specified device group
+
+        Args:
+            device_group (str): Device group (e.g. monitor, detectors, beamlineMotor, userMotor)
+
+        Returns:
+            list: List of devices that belong to the specified device group
+        """
         return [dev for _, dev in self.items() if dev.config["deviceGroup"] == device_group]
+
+    def async_devices(self) -> list:
+        """get a list of all synchronous devices"""
+        return [
+            dev for _, dev in self.items() if dev.config["acquisitionConfig"]["schedule"] != "sync"
+        ]
 
     @typechecked
     def primary_devices(self, scan_motors: list) -> list:
+        """get a list of all enabled primary devices (i.e. monitors + scan motors)"""
         devices = self.device_group("monitor")
         devices.extend(scan_motors)
         return [dev for dev in self.enabled_devices if dev in devices]
 
     @typechecked
     def baseline_devices(self, scan_motors: list) -> list:
+        """get a list of all enabled baseline devices"""
         excluded_devices = self.device_group("monitor")
         excluded_devices.extend(scan_motors)
+        excluded_devices.extend(self.async_devices())
+        excluded_devices.extend(self.detectors())
         return [dev for dev in self.enabled_devices if dev not in excluded_devices]
+
+    @typechecked
+    def detectors(self) -> list:
+        """get a list of all enabled detectors"""
+        return [dev for dev in self.enabled_devices if dev in self.device_group("detectors")]
 
     def _add_device(self, name, obj) -> None:
         """
@@ -193,8 +218,10 @@ class DeviceManagerBase:
         self._start_connectors(bootstrap_server)
         self._get_config_from_DB()
 
-    def update_config(self, obj, config) -> None:
-        raise NotImplementedError
+    @property
+    def scibec(self):
+        """SciBec instance"""
+        return self._scibec
 
     def load_config_from_disk(self, config_path) -> dict:
         """
@@ -271,7 +298,6 @@ class DeviceManagerBase:
 
     def update_device_status(self, msg):
         msg = DeviceStatusMessage.loads(msg.value)
-        # print(f"Device update, {msg.content['device']}, {time.time()}")
         device = self.devices.get(msg.content["device"])
         if device:
             device.status = DeviceStatus(msg.content["status"])
@@ -296,16 +322,16 @@ class DeviceManagerBase:
         Returns:
 
         """
-        self._connector_base_consumer["log"] = self.connector.consumer(
-            MessageEndpoints.log(), cb=self._log_callback, parent=self
-        )
+        # self._connector_base_consumer["log"] = self.connector.consumer(
+        #     MessageEndpoints.log(), cb=self._log_callback, parent=self
+        # )
         self._connector_base_consumer["device_config"] = self.connector.consumer(
             MessageEndpoints.device_config(),
             cb=self._device_config_callback,
             parent=self,
         )
 
-        self._connector_base_consumer["log"].start()
+        # self._connector_base_consumer["log"].start()
         self._connector_base_consumer["device_config"].start()
 
     @staticmethod
@@ -335,7 +361,7 @@ class DeviceManagerBase:
 
         """
         msg = DeviceConfigMessage.loads(msg.value)
-        logger.info(f"\n\nReceived new config: {str(msg)}")
+        logger.info(f"Received new config: {str(msg)}")
         parent.parse_config_message(msg)
 
     @staticmethod
@@ -353,7 +379,7 @@ class DeviceManagerBase:
 
     def _get_config_from_DB(self):
         self._session = self._scibec.get_current_session()[0]
-        logger.info(
+        logger.debug(
             f"Loaded session from DB: {json.dumps(self._session, sort_keys=True, indent=4)}"
         )
         self._load_session()
@@ -365,7 +391,7 @@ class DeviceManagerBase:
 
         """
         if self.connector is not None:
-            for key, con in self._connector_base_consumer.items():
+            for _, con in self._connector_base_consumer.items():
                 con.signal_event.set()
                 con.join()
 
@@ -406,14 +432,15 @@ class DeviceManagerBase:
         if dev_name in self.devices:
             self.devices.pop(dev_name)
 
-    def _load_session(self, device_cls=Device, *args):
+    def _load_session(self, *args, device_cls=Device):
         self._device_cls = device_cls
         if self._is_config_valid():
             for dev in self._session["devices"]:
                 obj = self._create_device(dev, args)
+                # pylint: disable=protected-access
                 self.devices._add_device(dev.get("name"), obj)
 
-    def _check_request_validity(self, msg: DeviceConfigMessage) -> None:
+    def check_request_validity(self, msg: DeviceConfigMessage) -> None:
         if msg.content["action"] not in ["update", "add", "remove", "reload"]:
             raise DeviceConfigError("Action must be either add, remove, update, or reload.")
         if msg.content["action"] in ["update", "add", "remove"] and not msg.content["config"]:
@@ -436,10 +463,9 @@ class DeviceManagerBase:
     def _is_config_valid(self) -> bool:
         if self._config is None:
             return False
-        elif not isinstance(self._config, dict):
+        if not isinstance(self._config, dict):
             return False
-        else:
-            return True
+        return True
 
     def shutdown(self):
         """
@@ -449,8 +475,8 @@ class DeviceManagerBase:
         """
         try:
             self.connector.shutdown()
-        except RuntimeError as re:
-            logger.error("Failed to shutdown connector", re)
+        except RuntimeError as runtime_error:
+            logger.error(f"Failed to shutdown connector. {runtime_error}")
 
     def __del__(self):
         self.shutdown()

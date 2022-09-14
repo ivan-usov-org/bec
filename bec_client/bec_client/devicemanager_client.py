@@ -1,68 +1,23 @@
 import functools
-import logging
 import time
 import uuid
 
-import bec_utils.BECMessage as BMessage
-from bec_utils import Device, DeviceManagerBase, MessageEndpoints
+from bec_utils import (
+    BECMessage,
+    Device,
+    DeviceManagerBase,
+    MessageEndpoints,
+    bec_logger,
+)
 
 from bec_client.callbacks import ScanRequestError
 
-logger = logging.getLogger(__name__)
 
-"""
-Device (bluesky interface):
-* trigger
-* read
-* describe
-* stage
-* unstage
-* pause
-* resume
-
-Signal:
-* trigger
-* get
-* put
-* set
-* value
-* read
-* describe
-* limits
-* low limit
-* high limit
+class RPCError(Exception):
+    pass
 
 
-Positioner:
-* trigger
-* read
-* set 
-* stop
-* settle_time
-* timeout
-* egu
-* limits
-* low_limit
-* high_limit
-* move
-* position
-* moving
-
-
-
-
-
-
-
-device status
-* connected
-* enabled
-* status (idle, moving etc)
-
-
-
-instead of motor_is_moving, subscribe to SUB_DONE for receiving successful movements and SUB_REQ_DONE for "requested move finished". The latter is cleared after each request
-"""
+logger = bec_logger.logger
 
 
 def rpc(fcn):
@@ -70,6 +25,7 @@ def rpc(fcn):
 
     @functools.wraps(fcn)
     def wrapper(self, *args, **kwargs):
+        # pylint: disable=protected-access
         device, func_call = self._get_rpc_func_name(fcn=fcn)
 
         if kwargs.get("cached", False):
@@ -114,17 +70,17 @@ class RPCBase:
             "args": args,
             "kwargs": kwargs,
         }
-        msg = BMessage.ScanQueueMessage(
+        msg = BECMessage.ScanQueueMessage(
             scan_type="device_rpc",
             parameter=params,
             queue="primary",
             metadata={"RID": requestID},
         )
         self.root.parent.producer.send(MessageEndpoints.scan_queue_request(), msg.dumps())
-        scan_queue = self.root.parent.parent.queue
-        while scan_queue.scan_queue_requests.get(requestID) is None:
+        queue = self.root.parent.parent.queue
+        while queue.request_storage.find_request_by_ID(requestID) is None:
             time.sleep(0.1)
-        scan_queue_request = scan_queue.scan_queue_requests.get(requestID)
+        scan_queue_request = queue.request_storage.find_request_by_ID(requestID)
         while scan_queue_request.decision_pending:
             time.sleep(0.1)
         if not all(scan_queue_request.accepted):
@@ -135,8 +91,13 @@ class RPCBase:
             msg = self.root.parent.producer.get(MessageEndpoints.device_rpc(rpc_id))
             if msg:
                 break
-            time.sleep(0.1)
-        msg = BMessage.DeviceRPCMessage.loads(msg)
+            time.sleep(0.01)
+        msg = BECMessage.DeviceRPCMessage.loads(msg)
+        if not msg.content["success"]:
+            error = msg.content["out"]
+            raise RPCError(
+                f"During an RPC, the following error occured:\n{error['error']}: {error['msg']}.\nTraceback: {error['traceback']}\n The scan will be aborted."
+            )
         print(msg.content.get("out"))
         return msg.content.get("return_val")
 
@@ -144,7 +105,7 @@ class RPCBase:
         if not fcn_name:
             fcn_name = fcn.__name__
         full_func_call = ".".join([self._compile_function_path(use_parent=use_parent), fcn_name])
-        device = full_func_call.split(".")[0]
+        device = full_func_call.split(".", maxsplit=1)[0]
         func_call = ".".join(full_func_call.split(".")[1:])
         return (device, func_call)
 
@@ -167,11 +128,13 @@ class RPCBase:
             for dev in self._info.get("subdevices"):
                 base_class = dev["device_info"].get("device_base_class")
                 if base_class == "positioner":
-                    setattr(self, dev.get("name"), Positioner(signal_name, parent=self))
+                    setattr(self, dev.get("name"), Positioner(dev.get("name"), parent=self))
                 elif base_class == "device":
-                    setattr(self, dev.get("name"), Device(signal_name, parent=self))
+                    setattr(
+                        self, dev.get("name"), Device(dev.get("name"), config=None, parent=self)
+                    )
 
-        for user_access_name, descr in self._info.get("custom_user_access").items():
+        for user_access_name, descr in self._info.get("custom_user_access", {}).items():
 
             if "type" in descr:
                 self._custom_rpc_methods[user_access_name] = RPCBase(
@@ -200,6 +163,17 @@ class RPCBase:
 
 
 class DeviceBase(RPCBase, Device):
+    """
+    Device (bluesky interface):
+    * trigger
+    * read
+    * describe
+    * stage
+    * unstage
+    * pause
+    * resume
+    """
+
     @property
     def enabled(self):
         return self.root.config["enabled"]
@@ -219,10 +193,11 @@ class DeviceBase(RPCBase, Device):
             val = self.parent.producer.get(MessageEndpoints.device_readback(self.name))
         else:
             val = self.parent.producer.get(MessageEndpoints.device_read(self.name))
+
         if val:
-            return BMessage.DeviceMessage.loads(val).content["signals"].get(self.name)
-        else:
-            return None
+            return BECMessage.DeviceMessage.loads(val).content["signals"].get(self.name)
+
+        return None
 
     @rpc
     def describe(self):
@@ -242,6 +217,20 @@ class DeviceBase(RPCBase, Device):
 
 
 class Signal(DeviceBase):
+    """
+    Signal:
+    * trigger
+    * get
+    * put
+    * set
+    * value
+    * read
+    * describe
+    * limits
+    * low limit
+    * high limit
+    """
+
     @rpc
     def get(self):
         pass
@@ -263,7 +252,6 @@ class Signal(DeviceBase):
         pass
 
     def low_limit(self):
-        print("here")
         pass
 
     @rpc
@@ -272,6 +260,23 @@ class Signal(DeviceBase):
 
 
 class Positioner(DeviceBase):
+    """
+    Positioner:
+    * trigger
+    * read
+    * set
+    * stop
+    * settle_time
+    * timeout
+    * egu
+    * limits
+    * low_limit
+    * high_limit
+    * move
+    * position
+    * moving
+    """
+
     @rpc
     def set(self, val):
         pass
@@ -336,19 +341,19 @@ class DMClient(DeviceManagerBase):
         super().__init__(parent.connector, scibec_url)
         self.parent = parent
 
-    def _get_device_info(self, device_name) -> BMessage.DeviceInfoMessage:
-        msg = BMessage.DeviceInfoMessage.loads(
+    def _get_device_info(self, device_name) -> BECMessage.DeviceInfoMessage:
+        msg = BECMessage.DeviceInfoMessage.loads(
             self.producer.get(MessageEndpoints.device_info(device_name))
         )
         return msg
 
-    def _load_session(self):
+    def _load_session(self, _device_cls=None, *_args):
         if self._is_config_valid():
             for dev in self._session["devices"]:
                 msg = self._get_device_info(dev.get("name"))
                 self._add_device(dev, msg)
 
-    def _add_device(self, dev: dict, msg: BMessage.DeviceInfoMessage):
+    def _add_device(self, dev: dict, msg: BECMessage.DeviceInfoMessage):
         name = msg.content["device"]
         info = msg.content["info"]
 

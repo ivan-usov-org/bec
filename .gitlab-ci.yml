@@ -1,38 +1,102 @@
 # This file is a template, and might need editing before it works on your project.
 # Official language image. Look for the different tagged releases at:
 # https://hub.docker.com/r/library/python/tags/
-image: "python:3.8"
+image: python:3.8
 #commands to run in the Docker container before starting each job.
 variables:
-  DOCKER_DRIVER: overlay
+  #   DOCKER_DRIVER: overlay2
   DOCKER_BUILDKIT: 0
 
-services: 
-   - docker:18.09-dind
+services:
+  - docker:18.09-dind
 # different stages in the pipeline
 stages:
   - Formatter
   - Test
-  - Integration-Test-Setup
 formatter:
   stage: Formatter
   script:
     - pip install black
     - black --check --diff --color --line-length=100 ./
-pytest:
+pylint:
+  stage: Formatter
+  before_script:
+    - pip install pylint pylint-exit anybadge
+  script:
+    - mkdir ./pylint
+    - pylint ./bec_utils/bec_utils ./scan_server/scan_server ./device_server/device_server ./scan_bundler/scan_bundler ./bec_client/bec_client --output-format=text . | tee ./pylint/pylint.log || pylint-exit $?
+    - PYLINT_SCORE=$(sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' ./pylint/pylint.log)
+    - anybadge --label=Pylint --file=pylint/pylint.svg --value=$PYLINT_SCORE 2=red 4=orange 8=yellow 10=green
+    - echo "Pylint score is $PYLINT_SCORE"
+  artifacts:
+    paths:
+      - ./pylint/
+    expire_in: 1 week
+tests:
   stage: Test
   script:
-    - pip install pytest
-    - pip install -e ./koss
-    - cd koss/tests;pytest -v
-integration test setup:
-  stage: Integration-Test-Setup
+    - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
+    - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices
+    - pip install pytest pytest-random-order pytest-cov
+    - pip install -e ./device_server
+    - pip install -e ./scan_server
+    - pip install -e ./scan_bundler
+    - pip install -e ./bec_client
+    - coverage run --source=./device_server/device_server,./scan_server/scan_server,./scan_bundler/scan_bundler,./bec_client/bec_client -m pytest -v --random-order ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests
+    - coverage report
+    - coverage xml
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  artifacts:
+    reports:
+      cobertura: coverage.xml
+end-2-end:
+  stage: Test
   image: docker:20.10.16
+  artifacts:
+    when: on_failure
+    paths:
+      - ScanServer.log
+      - ScanBundler.log
+      - DeviceServer.log
+      - BKClient.log
+    expire_in: 1 week
+
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
   script:
+    # spin up redis, mongo and scibec
     - docker-compose -f ./docker-compose.yaml up -d
-    - apk update; apk upgrade; apk add curl
-    - timeout 120 /bin/sh -c -- 'while true; do res=$(curl -X "GET" --max-time 3 "http://docker:3030/sessions"); if [ ! -z "$res" ]; then exit 0; fi; sleep 1; done;'
-  # - curl --fail http://localhost:3030/sessions
+    - apk update; apk upgrade; apk add curl; apk add git
+    - apk update; apk upgrade; apk add git
 
+    # get ophyd devices repo (needed for the device_server)
+    - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
+
+    # make sure that the API server is healthy and ready
+    - timeout 120 /bin/sh -c -- 'while true; do res=$(curl -X "GET" --max-time 3 "http://docker:3030/sessions"); if [ ! -z "$res" ]; then exit 0; fi; sleep 1; done;'
+
+    # initialize the database with the test config
+    - docker build -t init_scibec:test -f ./scibec/init_scibec/Dockerfile .
+    - docker run --network=host --name init_scibec init_scibec:test
+
+    # build scan_bundler, scan_server and device_server
+    - docker build -t scan_bundler:test -f ./scan_bundler/Dockerfile .
+    - docker build -t scan_server:test -f ./scan_server/Dockerfile .
+    - docker build -t device_server:test -f ./device_server/Dockerfile .
+
+    # run scan_bundler, scan_server and device_server
+    - docker run --network=host -d --name device_server device_server:test
+    - docker run --network=host -d --name scan_server scan_server:test
+    - docker run --network=host -d --name scan_bundler scan_bundler:test
+
+    # build and run the tests
+    - docker build -t en2end_client:test -f ./bec_client/tests/Dockerfile .
+    - docker run --network=host --name end2end_client en2end_client:test
+
+  after_script:
+    - docker cp scan_server:/code/bec/scan_server/ScanServer.log $CI_PROJECT_DIR/ScanServer.log
+    - docker cp scan_bundler:/code/bec/scan_bundler/ScanBundler.log $CI_PROJECT_DIR/ScanBundler.log
+    - docker cp device_server:/code/bec/device_server/DeviceServer.log $CI_PROJECT_DIR/DeviceServer.log
+    - docker cp end2end_client:/code/bec/bec_client/BKClient.log $CI_PROJECT_DIR/BKClient.log
