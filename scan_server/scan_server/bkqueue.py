@@ -129,10 +129,17 @@ class QueueManager:
         self.queues[queue].worker_status = InstructionQueueStatus.RUNNING
 
     def set_abort(self, scanID=None, queue="primary") -> None:
-        """abort the scan and remove it from the queue. This will leave the queue in a paused state"""
-        self.queues[queue].status = ScanQueueStatus.PAUSED
+        """abort the scan and remove it from the queue. This will leave the queue in a paused state after the cleanup"""
+        self.queues[queue].status = ScanQueueStatus.RUNNING
         self.queues[queue].worker_status = InstructionQueueStatus.STOPPED
         self.queues[queue].remove_queue_item(scanID=scanID)
+
+    def set_halt(self, scanID=None, queue="primary") -> None:
+        """abort the scan and do not perform any cleanup routines"""
+        instruction_queue = self.queues[queue].active_instruction_queue
+        if instruction_queue:
+            instruction_queue.return_to_start = False
+        self.set_abort(scanID=scanID, queue=queue)
 
     def set_clear(self, scanID=None, queue="primary") -> None:
         # pylint: disable=unused-argument
@@ -140,6 +147,10 @@ class QueueManager:
         self.queues[queue].status = ScanQueueStatus.PAUSED
         self.queues[queue].worker_status = InstructionQueueStatus.PAUSED
         self.queues[queue].clear()
+
+    def set_repeat_scan(self, scanID=None, queue="primary") -> None:
+        """abort and repeat the currently running scan. The active scan will be aborted."""
+        self.queues[queue].status = ScanQueueStatus.PAUSED
 
     def send_queue_status(self) -> None:
         """send the current queue to redis"""
@@ -437,8 +448,17 @@ class RequestBlockQueue:
             else:
                 self.scan_def_ids[scan_def_id] = {"scanID": request_block.scanID, "pointID": 0}
 
+        self.append_request_block(request_block)
+
+    def append_request_block(self, request_block: RequestBlock) -> None:
+        """append a new request block to the queue"""
         self.request_blocks_queue.append(request_block)
         self.request_blocks.append(request_block)
+
+    def flush_request_blocks(self) -> None:
+        """clear all request blocks from the queue"""
+        self.request_blocks = []
+        self.request_blocks_queue.clear()
 
     def update_scan_number(self, request_block_index: int) -> None:
         """update the scan number for a given request block"""
@@ -514,7 +534,9 @@ class InstructionQueueItem:
         self.scan_msgs = []
         self.scan_assembler = assembler
         self.worker = worker
+        self.stopped = False
         self._status = InstructionQueueStatus.PENDING
+        self._return_to_start = None
 
     @property
     def scan_number(self) -> List[int]:
@@ -569,6 +591,19 @@ class InstructionQueueItem:
         """change the instruction queue status to RUNNING"""
         if self.status == InstructionQueueStatus.PENDING:
             self.status = InstructionQueueStatus.RUNNING
+
+    @property
+    def return_to_start(self) -> bool:
+        """whether or not to return to the start position after scan abortion"""
+        if self._return_to_start is not None:
+            return self._return_to_start
+        if self.active_request_block:
+            return self.active_request_block.scan.return_to_start_after_abort
+        return False
+
+    @return_to_start.setter
+    def return_to_start(self, val: bool) -> bool:
+        self._return_to_start = val
 
     def describe(self):
         """description of the instruction queue"""
