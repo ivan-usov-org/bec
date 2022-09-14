@@ -369,9 +369,10 @@ class ScanWorker(threading.Thread):
             status=status,
             info=self.current_scan_info,
         ).dumps()
+        expire = None if status == "open" else 1800
         pipe = self.device_manager.producer.pipeline()
         self.device_manager.producer.set(
-            MessageEndpoints.public_scan_info(self.current_scanID), msg, pipe=pipe, expire=1800
+            MessageEndpoints.public_scan_info(self.current_scanID), msg, pipe=pipe, expire=expire
         )
         self.device_manager.producer.set_and_publish(MessageEndpoints.scan_status(), msg, pipe=pipe)
         pipe.execute()
@@ -393,12 +394,28 @@ class ScanWorker(threading.Thread):
         self.max_point_id = 0
 
         queue.is_active = True
-        for instr in queue:
-            if instr is not None:
+        try:
+            for instr in queue:
+                if instr is None:
+                    continue
                 self._check_for_interruption()
                 self._instruction_step(instr)
+        except ScanAbortion as exc:
+            self._groups = {}
+            if queue.stopped or not (queue.return_to_start and queue.active_request_block):
+                raise ScanAbortion from exc
+            queue.stopped = True
+            cleanup = queue.active_request_block.scan.return_to_start()
+            self.status = InstructionQueueStatus.RUNNING
+            for instr in cleanup:
+                self._check_for_interruption()
+                instr.metadata["scanID"] = queue.queue.active_rb.scanID
+                instr.metadata["queueID"] = queue.queue_id
+                self._instruction_step(instr)
         queue.is_active = False
-        queue.status = InstructionQueueStatus.COMPLETED
+        queue.status = (
+            InstructionQueueStatus.STOPPED if queue.stopped else InstructionQueueStatus.COMPLETED
+        )
         self.current_instruction_queue_item = None
 
         logger.info(f"QUEUE ITEM finished after {time.time()-start:.2f} seconds")
@@ -465,7 +482,8 @@ class ScanWorker(threading.Thread):
                 try:
                     for queue in self.parent.queue_manager.queues["primary"]:
                         self._process_instructions(queue)
-                        queue.append_to_queue_history()
+                        if not queue.stopped:
+                            queue.append_to_queue_history()
 
                 except ScanAbortion:
                     self._send_scan_status("aborted")
