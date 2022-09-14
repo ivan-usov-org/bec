@@ -369,9 +369,10 @@ class ScanWorker(threading.Thread):
             status=status,
             info=self.current_scan_info,
         ).dumps()
+        expire = None if status == "open" else 1800
         pipe = self.device_manager.producer.pipeline()
         self.device_manager.producer.set(
-            MessageEndpoints.public_scan_info(self.current_scanID), msg, pipe=pipe, expire=1800
+            MessageEndpoints.public_scan_info(self.current_scanID), msg, pipe=pipe, expire=expire
         )
         self.device_manager.producer.set_and_publish(MessageEndpoints.scan_status(), msg, pipe=pipe)
         pipe.execute()

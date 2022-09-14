@@ -116,11 +116,7 @@ def test_close_scan(msg, scan_id, num_points, exp_num_points):
     worker.scan_id = scan_id
     worker.current_scan_info["points"] = 19
 
-    def send_scan_status_mock(*args):
-        pass
-
     reset = bool(worker.scan_id == msg.metadata["scanID"])
-    # worker._send_scan_status = send_scan_status_mock
     with mock.patch(
         "scan_server.scan_worker.ScanWorker._send_scan_status"
     ) as send_scan_status_mock:
@@ -132,6 +128,36 @@ def test_close_scan(msg, scan_id, num_points, exp_num_points):
         else:
             assert worker.scan_id == scan_id
     assert worker.current_scan_info["points"] == exp_num_points
+
+
+@pytest.mark.parametrize(
+    "status,expire",
+    [
+        (
+            "open",
+            None,
+        ),
+        (
+            "closed",
+            1800,
+        ),
+        (
+            "aborted",
+            1800,
+        ),
+    ],
+)
+def test_send_scan_status(status, expire):
+    worker = get_scan_worker()
+    worker.current_scanID = str(uuid.uuid4())
+    worker._send_scan_status(status)
+    scan_info_msgs = [
+        msg
+        for msg in worker.device_manager.producer.message_sent
+        if msg["queue"] == MessageEndpoints.public_scan_info(scanID=worker.current_scanID)
+    ]
+    assert len(scan_info_msgs) == 1
+    assert scan_info_msgs[0]["expire"] == expire
 
 
 @pytest.mark.parametrize(
