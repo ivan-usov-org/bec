@@ -394,9 +394,23 @@ class ScanWorker(threading.Thread):
         self.max_point_id = 0
 
         queue.is_active = True
-        for instr in queue:
-            if instr is not None:
+        try:
+            for instr in queue:
+                if instr is None:
+                    continue
                 self._check_for_interruption()
+                self._instruction_step(instr)
+        except ScanAbortion as exc:
+            self._groups = {}
+            if queue.stopped:
+                raise ScanAbortion from exc
+            queue.stopped = True
+            cleanup = queue.active_request_block.scan.return_to_start()
+            self.status = InstructionQueueStatus.RUNNING
+            for instr in cleanup:
+                self._check_for_interruption()
+                instr.metadata["scanID"] = queue.queue.active_rb.scanID
+                instr.metadata["queueID"] = queue.queue_id
                 self._instruction_step(instr)
         queue.is_active = False
         queue.status = (
@@ -472,24 +486,24 @@ class ScanWorker(threading.Thread):
                             queue.append_to_queue_history()
 
                 except ScanAbortion:
-                    if queue.return_to_start and queue.active_request_block:
-                        queue.stopped = True
-                        queue.parent.active_instruction_queue = None
-                        queue.status = InstructionQueueStatus.DEFERRED_PAUSE
-                        new_request_block = queue.active_request_block
-                        new_request_block.instructions = new_request_block.scan.return_to_start()
+                    # if queue.return_to_start and queue.active_request_block:
+                    #     queue.stopped = True
+                    #     queue.parent.active_instruction_queue = None
+                    #     queue.status = InstructionQueueStatus.DEFERRED_PAUSE
+                    #     new_request_block = queue.active_request_block
+                    #     new_request_block.instructions = new_request_block.scan.return_to_start()
 
-                        queue.queue.flush_request_blocks()
-                        queue.queue.append_request_block(new_request_block)
-                        queue.parent.queue.append(queue)
+                    #     queue.queue.flush_request_blocks()
+                    #     queue.queue.append_request_block(new_request_block)
+                    #     queue.parent.queue.append(queue)
 
-                    else:
-                        self._send_scan_status("aborted")
-                        queue.status = InstructionQueueStatus.STOPPED
-                        queue.append_to_queue_history()
-                        self.cleanup()
-                        self.parent.queue_manager.queues["primary"].abort()
-                        self.reset()
+                    # else:
+                    self._send_scan_status("aborted")
+                    queue.status = InstructionQueueStatus.STOPPED
+                    queue.append_to_queue_history()
+                    self.cleanup()
+                    self.parent.queue_manager.queues["primary"].abort()
+                    self.reset()
 
         # pylint: disable=broad-except
         except Exception as exc:
