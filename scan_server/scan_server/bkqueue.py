@@ -334,7 +334,7 @@ class ScanQueue:
                 worker=self.queue_manager.parent.scan_worker,
             )
         instruction_queue.append_scan_request(msg)
-        instruction_queue.queue.update_scan_number(request_block_index=-1)
+        # instruction_queue.queue.update_scan_number(request_block_index=-1)
         if not queue_exists:
             instruction_queue.queue_group = target_group
             self.queue.append(instruction_queue)
@@ -377,7 +377,7 @@ class RequestBlock:
         self.scan_assembler = assembler
         self.is_scan = False
         self.scanID = None
-        self.scan_number = None
+        # self.scan_number = None
         self.parent = parent
         self.scan_def_id = None
         self._assemble()
@@ -393,12 +393,27 @@ class RequestBlock:
         if self.scan.caller_args:
             self.scan_motors = self.scan.scan_motors
 
-    def update_scan_number(self, queue_manager):
-        """update the scan number"""
-        if self.is_scan:
-            self.scan_number = queue_manager.parent.scan_number
-            if self.scan_def_id is None or self.msg.content["scan_type"] == "close_scan_def":
-                queue_manager.parent.scan_number += 1
+    @property
+    def scan_number(self):
+        """get the predicted scan number"""
+        if not self.is_scan:
+            return None
+        return self.parent.parent.parent.queue_manager.parent.scan_number + self.scanIDs_head()
+
+    def scanIDs_head(self) -> int:
+        """calculate the scanID offset in the queue for the current request block"""
+        offset = 0
+        for queue in self.parent.parent.parent.queue:
+            if queue.queue_id != self.parent.parent.queue_id:
+                offset += len([scanID for scanID in queue.scanID if scanID])
+            else:
+                for scanID in queue.scanID:
+                    if scanID == self.scanID:
+                        return offset
+                    if scanID:
+                        offset += 1
+                return offset
+        return offset
 
     def describe(self):
         """prepare a dictionary that summarizes the request block"""
@@ -479,6 +494,12 @@ class RequestBlockQueue:
             else:
                 raise StopIteration
 
+    def increase_scan_number(self) -> None:
+        """increse the scan number counter"""
+        rbl = self.active_rb
+        if rbl.scan_def_id is None or rbl.msg.content["scan_type"] == "close_scan_def":
+            self.parent.parent.queue_manager.parent.scan_number += 1
+
     def __iter__(self):
         return self
 
@@ -491,6 +512,7 @@ class RequestBlockQueue:
                 pointID = getattr(self.active_rb.scan, "pointID", None)
                 if pointID is not None:
                     self.scan_def_ids[self.active_rb.scan_def_id]["pointID"] = pointID
+            self.increase_scan_number()
             self.active_rb = None
             self._pull_request_block()
             return next(self.active_rb.instructions)
