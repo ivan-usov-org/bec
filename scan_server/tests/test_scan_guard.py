@@ -5,25 +5,10 @@ from scan_server.scan_guard import ScanGuard, ScanRejection
 from utils import load_ScanServerMock
 
 
-def test_check_motors_movable():
-    k = load_ScanServerMock()
-
-    sg = ScanGuard(parent=k)
-    sg._check_motors_movable(
-        BMessage.ScanQueueMessage(
-            scan_type="fermat_scan",
-            parameter={
-                "args": {"samx": (-5, 5), "samy": (-5, 5)},
-                "kwargs": {"step": 3},
-            },
-            queue="primary",
-        )
-    )
-
-    k.device_manager.devices["samx"].enabled = True
-    k.device_manager.devices["samy"].enabled = False
-    with pytest.raises(ScanRejection) as scan_rejection:
-        sg._check_motors_movable(
+@pytest.mark.parametrize(
+    "scan_queue_msg",
+    [
+        (
             BMessage.ScanQueueMessage(
                 scan_type="fermat_scan",
                 parameter={
@@ -32,7 +17,41 @@ def test_check_motors_movable():
                 },
                 queue="primary",
             )
-        )
+        ),
+        (
+            BMessage.ScanQueueMessage(
+                scan_type="device_rpc",
+                parameter={
+                    "device": "samy",
+                    "args": {},
+                    "kwargs": {},
+                },
+                queue="primary",
+            )
+        ),
+        (
+            BMessage.ScanQueueMessage(
+                scan_type="device_rpc",
+                parameter={
+                    "device": ["samy"],
+                    "args": {},
+                    "kwargs": {},
+                },
+                queue="primary",
+            )
+        ),
+    ],
+)
+def test_check_motors_movable_enabled(scan_queue_msg):
+    k = load_ScanServerMock()
+
+    sg = ScanGuard(parent=k)
+    sg._check_motors_movable(scan_queue_msg)
+
+    k.device_manager.devices["samx"].enabled = True
+    k.device_manager.devices["samy"].enabled = False
+    with pytest.raises(ScanRejection) as scan_rejection:
+        sg._check_motors_movable(scan_queue_msg)
     assert "Device samy is not enabled." in scan_rejection.value.args
 
 
