@@ -225,6 +225,10 @@ def test_scan_abort(client):
     assert aborted_scan is True
     while bec.queue.scan_storage.storage[0].status == "open":
         time.sleep(0.5)
+
+    current_queue = bec.queue.queue_storage.current_scan_queue["primary"]
+    while current_queue["info"] or current_queue["status"] != "RUNNING":
+        time.sleep(0.5)
     scans.line_scan(dev.samx, -5, 5, steps=50, exp_time=0.1)
     scan_number_end = bec.queue.current_scan_number
     assert scan_number_end == scan_number_start + 2
