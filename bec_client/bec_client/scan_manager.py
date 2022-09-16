@@ -173,6 +173,10 @@ class ScanManager:
             ).dumps(),
         )
 
+    @property
+    def current_scan_number(self):
+        return int(self.producer.get(MessageEndpoints.scan_number()))
+
     @staticmethod
     def _scan_queue_status_callback(msg, *, parent: ScanManager, **_kwargs) -> None:
         queue_status = BECMessage.ScanQueueStatusMessage.loads(msg.value)
