@@ -107,10 +107,10 @@ class ScanWorker(threading.Thread):
             logger.error("Unkown wait command")
             raise DeviceMessageError("Unkown wait command")
 
-    def _get_device_status(self, devices: list) -> list:
+    def _get_device_status(self, msg_cls: MessageEndpoints, devices: list) -> list:
         pipe = self.device_manager.producer.pipeline()
         for dev in devices:
-            self.device_manager.producer.get(MessageEndpoints.device_req_status(dev), pipe)
+            self.device_manager.producer.get(msg_cls(dev), pipe)
         return pipe.execute()
 
     def _check_for_failed_movements(self, device_status: list, devices: list, instr: DeviceMsg):
@@ -154,7 +154,9 @@ class ScanWorker(threading.Thread):
         logger.debug(f"Waiting for devices: {wait_group}")
 
         while True:
-            device_status = self._get_device_status([dev for dev, _ in wait_group_devices])
+            device_status = self._get_device_status(
+                MessageEndpoints.device_req_status, [dev for dev, _ in wait_group_devices]
+            )
             self._check_for_interruption()
 
             if None in device_status:
@@ -204,7 +206,9 @@ class ScanWorker(threading.Thread):
         logger.debug(f"Waiting for devices: {wait_group}")
 
         while True:
-            device_status = self._get_device_status([dev for dev, _ in wait_group_devices])
+            device_status = self._get_device_status(
+                MessageEndpoints.device_status, [dev for dev, _ in wait_group_devices]
+            )
             self._check_for_interruption()
             device_status = [BECMessage.DeviceStatusMessage.loads(dev) for dev in device_status]
 
