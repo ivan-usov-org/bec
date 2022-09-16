@@ -311,7 +311,7 @@ class ScanBundler(BECService):
                 time.sleep(0.1)
                 elapsed_time += 0.1
                 if elapsed_time > timeout_time:
-                    logger.error(
+                    logger.warning(
                         f"Failed to insert device data for {device} to sync_storage: Could not find a matching scanID {scanID} in sync_storage."
                     )
                     return
@@ -430,12 +430,18 @@ class ScanBundler(BECService):
             remove_scanIDs.append(scanID)
 
         for scanID in remove_scanIDs:
-            self.sync_storage.pop(scanID)
-            self.bluesky_metadata.pop(scanID)
-            self.primary_devices.pop(scanID)
-            self.monitor_devices.pop(scanID)
-            self.baseline_devices.pop(scanID)
-            self.scan_motors.pop(scanID)
+            for storage in [
+                "sync_storage",
+                "bluesky_metadata",
+                "primary_devices",
+                "monitor_devices",
+                "baseline_devices",
+                "scan_motors",
+            ]:
+                try:
+                    getattr(self, storage).pop(scanID)
+                except KeyError:
+                    logger.warning(f"Failed to remove {scanID} from {storage}.")
             self.storage_initialized.remove(scanID)
 
     def _send_scan_point(self, scanID, pointID) -> None:
