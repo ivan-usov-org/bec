@@ -167,10 +167,8 @@ class ScanWorker(threading.Thread):
                 matching_DIID = (
                     device_status[ind].metadata.get("DIID") == wait_group_devices[ind][1]
                 )
-                matching_scanID = (
-                    device_status[ind].metadata.get("scanID") == instr.metadata["scanID"]
-                )
-                if matching_DIID and matching_scanID:
+                matching_RID = device_status[ind].metadata.get("RID") == instr.metadata["RID"]
+                if matching_DIID and matching_RID:
                     last_pos = BECMessage.DeviceMessage.loads(
                         self.device_manager.producer.get(
                             MessageEndpoints.device_readback(failed_device[0])
