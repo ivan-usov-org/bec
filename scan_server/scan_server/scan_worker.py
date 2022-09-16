@@ -113,6 +113,28 @@ class ScanWorker(threading.Thread):
             self.device_manager.producer.get(MessageEndpoints.device_req_status(dev), pipe)
         return pipe.execute()
 
+    def _check_for_failed_movements(self, device_status: list, devices: list, instr: DeviceMsg):
+        if all(dev.content["success"] for dev in device_status):
+            return
+        ind = [dev.content["success"] for dev in device_status].index(False)
+        failed_device = devices[ind]
+
+        # make sure that this is not an old message
+        matching_DIID = device_status[ind].metadata.get("DIID") == devices[ind][1]
+        matching_RID = device_status[ind].metadata.get("RID") == instr.metadata["RID"]
+        if matching_DIID and matching_RID:
+            last_pos = BECMessage.DeviceMessage.loads(
+                self.device_manager.producer.get(MessageEndpoints.device_readback(failed_device[0]))
+            ).content["signals"][failed_device[0]]["value"]
+            self.connector.raise_alarm(
+                severity=Alarms.MAJOR,
+                source=instr.content,
+                content=f"Movement of device {failed_device[0]} failed whilst trying to reach the target position. Last recorded position: {last_pos}",
+                alarm_type="MovementFailed",
+                metadata=instr.metadata,
+            )
+            raise ScanAbortion
+
     def _wait_for_idle(self, instr: DeviceMsg) -> None:
         """Wait for devices to become IDLE
 
@@ -160,28 +182,7 @@ class ScanWorker(threading.Thread):
                 break
 
             if not devices_moved_successfully:
-                ind = [dev.content["success"] for dev in device_status].index(False)
-                failed_device = wait_group_devices[ind]
-
-                # make sure that this is not an old message
-                matching_DIID = (
-                    device_status[ind].metadata.get("DIID") == wait_group_devices[ind][1]
-                )
-                matching_RID = device_status[ind].metadata.get("RID") == instr.metadata["RID"]
-                if matching_DIID and matching_RID:
-                    last_pos = BECMessage.DeviceMessage.loads(
-                        self.device_manager.producer.get(
-                            MessageEndpoints.device_readback(failed_device[0])
-                        )
-                    ).content["signals"][failed_device[0]]["value"]
-                    self.connector.raise_alarm(
-                        severity=Alarms.MAJOR,
-                        source=instr.content,
-                        content=f"Movement of device {failed_device[0]} failed whilst trying to reach the target position. Last recorded position: {last_pos}",
-                        alarm_type="MovementFailed",
-                        metadata=instr.metadata,
-                    )
-                    raise ScanAbortion
+                self._check_for_failed_movements(device_status, wait_group_devices, instr)
 
         self._groups[wait_group] = [
             dev for dev in self._groups[wait_group] if dev not in wait_group_devices
@@ -203,11 +204,7 @@ class ScanWorker(threading.Thread):
         logger.debug(f"Waiting for devices: {wait_group}")
 
         while True:
-            pipe = self.device_manager.producer.pipeline()
-            for dev, _ in wait_group_devices:
-                self.device_manager.producer.get(MessageEndpoints.device_status(dev), pipe)
-            device_status = pipe.execute()
-
+            device_status = self._get_device_status([dev for dev, _ in wait_group_devices])
             self._check_for_interruption()
             device_status = [BECMessage.DeviceStatusMessage.loads(dev) for dev in device_status]
 
