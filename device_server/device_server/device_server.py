@@ -336,6 +336,8 @@ class DeviceServer(BECService):
 
         for dev in devices:
             obj = self.device_manager.devices[dev].obj
+            if not hasattr(obj, "_staged"):
+                continue
             # pylint: disable=protected-access
             if obj._staged == Staged.yes:
                 logger.warning(f"Device {obj.name} was already staged and will be first unstaged.")
@@ -349,6 +351,8 @@ class DeviceServer(BECService):
 
         for dev in devices:
             obj = self.device_manager.devices[dev].obj
+            if not hasattr(obj, "_staged"):
+                continue
             # pylint: disable=protected-access
             if obj._staged == Staged.yes:
                 self.device_manager.devices[dev].obj.unstage()
