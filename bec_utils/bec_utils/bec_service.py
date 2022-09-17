@@ -33,16 +33,30 @@ class BECService:
     def _check_services(self) -> None:
         if not self._unique_service:
             return
-        services = [
-            service.decode().split(":", maxsplit=1)[0]
-            for service in self.producer.keys(MessageEndpoints.service_status("*"))
-        ]
-        msgs = [BECMessage.StatusMessage.loads(self.producer.get(service)) for service in services]
-        for msg in msgs:
-            if msg.content["name"] == self.__class__.__name__:
-                raise RuntimeError(
-                    f"Another instance of {self.__class__.__name__} launched by user {msg.content['info']['user']} is already running on {msg.content['info']['hostname']}"
-                )
+
+        timeout_time = 8
+        elapsed_time = 0
+        sleep_time = 0.5
+        while True:
+            services = [
+                service.decode().split(":", maxsplit=1)[0]
+                for service in self.producer.keys(MessageEndpoints.service_status("*"))
+            ]
+            msgs = [
+                BECMessage.StatusMessage.loads(self.producer.get(service)) for service in services
+            ]
+            try:
+                for msg in msgs:
+                    if msg.content["name"] == self.__class__.__name__:
+                        raise RuntimeError(
+                            f"Another instance of {self.__class__.__name__} launched by user {msg.content['info']['user']} is already running on {msg.content['info']['hostname']}"
+                        )
+                break
+            except RuntimeError as service_error:
+                if elapsed_time > timeout_time:
+                    raise RuntimeError from service_error
+                elapsed_time += sleep_time
+                time.sleep(sleep_time)
 
     def _initialize_logger(self) -> None:
         bec_logger.configure(
