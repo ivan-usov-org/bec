@@ -89,7 +89,8 @@ class QueueStorage:
         msg = BECMessage.ScanQueueStatusMessage.loads(
             self.scan_manager.producer.get(MessageEndpoints.scan_queue_status())
         )
-        self._current_scan_queue = msg.content["queue"]
+        if msg:
+            self._current_scan_queue = msg.content["queue"]
         return self._current_scan_queue
 
     @current_scan_queue.setter
