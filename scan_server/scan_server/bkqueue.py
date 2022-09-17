@@ -178,7 +178,8 @@ class QueueManager:
             table.add_column("scan_number", justify="center")
             table.add_column("IQ status", justify="center")
 
-            for instruction_queue in scan_queue.queue:
+            queue = list(scan_queue.queue)  # local ref for thread safety
+            for instruction_queue in queue:
                 table.add_row(
                     instruction_queue.queue_id,
                     ", ".join([str(s) for s in instruction_queue.scanID]),
