@@ -316,12 +316,12 @@ class DeviceServer(BECService):
             metadata = self.device_manager.devices.get(dev).metadata
             self.producer.set_and_publish(
                 MessageEndpoints.device_read(dev),
-                BECMessage.DeviceMessage(signals=signals, metadata=metadata).dumps(),
+                BECMessage.DeviceMessage(signals=signals, metadata=instr.metadata).dumps(),
                 pipe,
             )
             self.producer.set(
                 MessageEndpoints.device_status(dev),
-                BECMessage.DeviceStatusMessage(device=dev, status=0, metadata=metadata).dumps(),
+                BECMessage.DeviceStatusMessage(device=dev, status=0, metadata=instr.metadata).dumps(),
                 pipe,
             )
         pipe.execute()
