@@ -285,6 +285,10 @@ def test_queued_scan(client):
         break
     while len(scan2.scan.data) != 50:
         time.sleep(0.5)
+    current_queue = bec.queue.queue_storage.current_scan_queue["primary"]
+    while current_queue["info"] or current_queue["status"] != "RUNNING":
+        time.sleep(0.5)
+        current_queue = bec.queue.queue_storage.current_scan_queue["primary"]
     scan_number_end = bec.queue.current_scan_number
     assert scan_number_end == scan_number_start + 2
 
