@@ -220,6 +220,7 @@ def test_scan_abort(client):
         threading.Thread(target=send_abort, args=(bec,), daemon=True).start()
         scans.line_scan(dev.samx, -5, 5, steps=200, exp_time=0.1)
     except ScanInterruption:
+        time.sleep(2)
         bec.queue.request_scan_abortion()
         aborted_scan = True
     assert aborted_scan is True
@@ -230,6 +231,9 @@ def test_scan_abort(client):
     while current_queue["info"] or current_queue["status"] != "RUNNING":
         time.sleep(0.5)
         current_queue = bec.queue.queue_storage.current_scan_queue["primary"]
+
+    assert len(bec.queue.scan_storage.storage[0].data) < 200
+
     scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1)
     scan_number_end = bec.queue.current_scan_number
     assert scan_number_end == scan_number_start + 2
