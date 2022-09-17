@@ -125,6 +125,7 @@ class ScanManager:
             return self.request_scan_abortion()
 
         action = "deferred_pause" if deferred_pause else "pause"
+        logger.info(f"Requesting {action}")
         return self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
             BECMessage.ScanQueueModificationMessage(
@@ -141,6 +142,7 @@ class ScanManager:
         """
         if scanID is None:
             scanID = self.scan_storage.current_scanID
+        logger.info("Requesting scan abortion")
         self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
             BECMessage.ScanQueueModificationMessage(
@@ -157,6 +159,7 @@ class ScanManager:
         """
         if scanID is None:
             scanID = self.scan_storage.current_scanID
+        logger.info("Requesting scan continuation")
         self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
             BECMessage.ScanQueueModificationMessage(
@@ -166,6 +169,7 @@ class ScanManager:
 
     def request_queue_reset(self):
         """request a scan queue reset"""
+        logger.info("Requesting a queue reset")
         self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
             BECMessage.ScanQueueModificationMessage(
