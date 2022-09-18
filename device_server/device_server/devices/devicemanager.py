@@ -176,15 +176,7 @@ class DeviceManagerDS(DeviceManagerBase):
 
         # update device buffer for enabled devices
         try:
-            if not opaas_obj.obj.connected:
-                if hasattr(opaas_obj.obj, "controller"):
-                    opaas_obj.obj.controller.on()
-                elif hasattr(opaas_obj.obj, "wait_for_connection"):
-                    opaas_obj.obj.wait_for_connection(timeout=10)
-                else:
-                    logger.error(
-                        f"Device {opaas_obj.obj.name} does not implement the socket controller interface and cannot be turned on."
-                    )
+            self.connect_device(opaas_obj.obj)
             opaas_obj.initialize_device_buffer(self.producer)
         # pylint:disable=broad-except
         except Exception:
@@ -195,6 +187,23 @@ class DeviceManagerDS(DeviceManagerBase):
             opaas_obj.enabled = False
 
         return opaas_obj
+
+    @staticmethod
+    def connect_device(obj):
+        """establish a connection to a device"""
+        if obj.connected:
+            return
+        if hasattr(obj, "controller"):
+            obj.controller.on()
+            return
+        if hasattr(obj, "wait_for_connection"):
+            obj.wait_for_connection(timeout=10)
+            return
+
+        logger.error(
+            f"Device {obj.name} does not implement the socket controller interface nor wait_for_connection and cannot be turned on."
+        )
+        raise ConnectionError(f"Failed to establish a connection to device {obj.name}")
 
     def publish_device_info(self, obj: OphydObject, pipe=None) -> None:
         """
