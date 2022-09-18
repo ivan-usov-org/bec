@@ -4,6 +4,11 @@ import _thread
 import abc
 import sys
 import threading
+import traceback
+
+from .logger import bec_logger
+
+logger = bec_logger.logger
 
 
 class MessageObject:
@@ -141,6 +146,7 @@ class ConsumerConnectorThreaded(threading.Thread, abc.ABC):
             try:
                 self.poll_messages()
             except Exception as e:
+                logger.error(traceback.format_exc())
                 _thread.interrupt_main()
                 raise e
             finally:

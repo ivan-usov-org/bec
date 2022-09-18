@@ -65,7 +65,7 @@ class QueueStorage:
         self.storage: Deque[QueueItem] = deque(maxlen=maxlen)
         self._lock = threading.RLock()
         self.scan_manager = scan_manager
-        self.current_scan_queue = None
+        self._current_scan_queue = None
 
     def queue_history(self, history=5):
         """get the queue history of length 'history'"""
@@ -82,6 +82,20 @@ class QueueStorage:
                 history,
             )
         ]
+
+    @property
+    def current_scan_queue(self) -> dict:
+        """get the current scan queue from redis"""
+        msg = BECMessage.ScanQueueStatusMessage.loads(
+            self.scan_manager.producer.get(MessageEndpoints.scan_queue_status())
+        )
+        if msg:
+            self._current_scan_queue = msg.content["queue"]
+        return self._current_scan_queue
+
+    @current_scan_queue.setter
+    def current_scan_queue(self, val: dict):
+        self._current_scan_queue = val
 
     @threadlocked
     def update_with_status(self, queue_msg: BECMessage.ScanQueueStatusMessage) -> None:

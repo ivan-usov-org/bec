@@ -139,6 +139,7 @@ def test_mv_scan_mv(client):
     bec = client
     scans = bec.scans
     wait_for_empty_queue(bec)
+    scan_number_start = bec.queue.current_scan_number
     dev = bec.devicemanager.devices
 
     dev.samx.limits = [-50, 50]
@@ -193,6 +194,8 @@ def test_mv_scan_mv(client):
     assert np.isclose(
         -5, status.scan.data[0].content["data"]["samx"]["samx"]["value"], atol=tolerance_samx
     )
+    scan_number_end = bec.queue.current_scan_number
+    assert scan_number_end == scan_number_start + 2
 
 
 @pytest.mark.timeout(100)
@@ -209,6 +212,7 @@ def test_scan_abort(client):
 
     bec = client
     wait_for_empty_queue(bec)
+    scan_number_start = bec.queue.current_scan_number
     scans = bec.scans
     dev = bec.devicemanager.devices
     aborted_scan = False
@@ -216,15 +220,30 @@ def test_scan_abort(client):
         threading.Thread(target=send_abort, args=(bec,), daemon=True).start()
         scans.line_scan(dev.samx, -5, 5, steps=200, exp_time=0.1)
     except ScanInterruption:
+        time.sleep(2)
         bec.queue.request_scan_abortion()
         aborted_scan = True
     assert aborted_scan is True
+    while bec.queue.scan_storage.storage[0].status == "open":
+        time.sleep(0.5)
+
+    current_queue = bec.queue.queue_storage.current_scan_queue["primary"]
+    while current_queue["info"] or current_queue["status"] != "RUNNING":
+        time.sleep(0.5)
+        current_queue = bec.queue.queue_storage.current_scan_queue["primary"]
+
+    assert len(bec.queue.scan_storage.storage[-1].data) < 200
+
+    scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1)
+    scan_number_end = bec.queue.current_scan_number
+    assert scan_number_end == scan_number_start + 2
 
 
 @pytest.mark.timeout(100)
 def test_limit_error(client):
     bec = client
     wait_for_empty_queue(bec)
+    scan_number_start = bec.queue.current_scan_number
     scans = bec.scans
     dev = bec.devicemanager.devices
     aborted_scan = False
@@ -246,12 +265,15 @@ def test_limit_error(client):
         aborted_scan = True
 
     assert aborted_scan is True
+    scan_number_end = bec.queue.current_scan_number
+    assert scan_number_end == scan_number_start + 1
 
 
 @pytest.mark.timeout(100)
 def test_queued_scan(client):
     bec = client
     wait_for_empty_queue(bec)
+    scan_number_start = bec.queue.current_scan_number
     scans = bec.scans
     dev = bec.devicemanager.devices
     scan1 = scans.line_scan(dev.samx, -5, 5, steps=100, exp_time=0.1, hide_report=True)
@@ -267,6 +289,12 @@ def test_queued_scan(client):
         break
     while len(scan2.scan.data) != 50:
         time.sleep(0.5)
+    current_queue = bec.queue.queue_storage.current_scan_queue["primary"]
+    while current_queue["info"] or current_queue["status"] != "RUNNING":
+        time.sleep(0.5)
+        current_queue = bec.queue.queue_storage.current_scan_queue["primary"]
+    scan_number_end = bec.queue.current_scan_number
+    assert scan_number_end == scan_number_start + 2
 
 
 @pytest.mark.timeout(100)

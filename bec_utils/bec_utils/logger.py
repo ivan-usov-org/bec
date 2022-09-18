@@ -1,12 +1,17 @@
+from __future__ import annotations
+
 import enum
 import json
 import sys
+from typing import TYPE_CHECKING
 
 from loguru import logger as loguru_logger
 
 from . import BECMessage
-from .connector import ConnectorBase
 from .endpoints import MessageEndpoints
+
+if TYPE_CHECKING:
+    from .connector import ConnectorBase
 
 
 class LogLevel(int, enum.Enum):

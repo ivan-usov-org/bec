@@ -7,7 +7,7 @@ import uuid
 from enum import Enum
 from typing import List, Optional, Union
 
-from bec_utils import Alarms, BECMessage, MessageEndpoints, bec_logger
+from bec_utils import Alarms, BECMessage, MessageEndpoints, bec_logger, threadlocked
 from rich.console import Console
 from rich.table import Table
 
@@ -43,7 +43,7 @@ class QueueManager:
         self.key = ""
         self.queues = {"primary": ScanQueue(self)}
         self._start_scan_queue_consumer()
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()
 
     def add_to_queue(self, scan_queue: str, msg: BECMessage.ScanQueueMessage) -> None:
         """Add a new ScanQueueMessage to the queue.
@@ -178,7 +178,8 @@ class QueueManager:
             table.add_column("scan_number", justify="center")
             table.add_column("IQ status", justify="center")
 
-            for instruction_queue in scan_queue.queue:
+            queue = list(scan_queue.queue)  # local ref for thread safety
+            for instruction_queue in queue:
                 table.add_row(
                     instruction_queue.queue_id,
                     ", ".join([str(s) for s in instruction_queue.scanID]),
@@ -193,12 +194,14 @@ class QueueManager:
 
         return queue_tables
 
+    @threadlocked
     def export_queue(self) -> dict:
         """extract the queue info from the queue"""
         queue_export = {}
         for queue_name, scan_queue in self.queues.items():
             queue_info = []
-            for instruction_queue in scan_queue.queue:
+            instruction_queues = list(scan_queue.queue)  # local ref for thread safety
+            for instruction_queue in instruction_queues:
                 queue_info.append(instruction_queue.describe())
             queue_export[queue_name] = {"info": queue_info, "status": scan_queue.status.name}
         return queue_export
@@ -334,7 +337,7 @@ class ScanQueue:
                 worker=self.queue_manager.parent.scan_worker,
             )
         instruction_queue.append_scan_request(msg)
-        instruction_queue.queue.update_scan_number(request_block_index=-1)
+        # instruction_queue.queue.update_scan_number(request_block_index=-1)
         if not queue_exists:
             instruction_queue.queue_group = target_group
             self.queue.append(instruction_queue)
@@ -377,7 +380,7 @@ class RequestBlock:
         self.scan_assembler = assembler
         self.is_scan = False
         self.scanID = None
-        self.scan_number = None
+        self._scan_number = None
         self.parent = parent
         self.scan_def_id = None
         self._assemble()
@@ -393,12 +396,40 @@ class RequestBlock:
         if self.scan.caller_args:
             self.scan_motors = self.scan.scan_motors
 
-    def update_scan_number(self, queue_manager):
-        """update the scan number"""
-        if self.is_scan:
-            self.scan_number = queue_manager.parent.scan_number
-            if self.scan_def_id is None or self.msg.content["scan_type"] == "close_scan_def":
-                queue_manager.parent.scan_number += 1
+    @property
+    def scan_number(self):
+        """get the predicted scan number"""
+        if not self.is_scan:
+            return None
+        if self._scan_number is not None:
+            return self._scan_number
+        return self.parent.parent.parent.queue_manager.parent.scan_number + self.scanIDs_head()
+
+    def assign_scan_number(self) -> None:
+        """assign and fix the current scan number prediction"""
+        if not self.is_scan:
+            return None
+        self._scan_number = (
+            self.parent.parent.parent.queue_manager.parent.scan_number + self.scanIDs_head()
+        )
+        return None
+
+    def scanIDs_head(self) -> int:
+        """calculate the scanID offset in the queue for the current request block"""
+        offset = 0
+        for queue in self.parent.parent.parent.queue:
+            if queue.status == InstructionQueueStatus.COMPLETED:
+                continue
+            if queue.queue_id != self.parent.parent.queue_id:
+                offset += len([scanID for scanID in queue.scanID if scanID])
+            else:
+                for scanID in queue.scanID:
+                    if scanID == self.scanID:
+                        return offset
+                    if scanID:
+                        offset += 1
+                return offset
+        return offset
 
     def describe(self):
         """prepare a dictionary that summarizes the request block"""
@@ -475,9 +506,20 @@ class RequestBlockQueue:
                         self.active_rb.scan.pointID = self.scan_def_ids[self.active_rb.scan_def_id][
                             "pointID"
                         ]
+                if self.active_rb.is_scan:
+                    self.active_rb.assign_scan_number()
 
             else:
                 raise StopIteration
+
+    def increase_scan_number(self) -> None:
+        """increase the scan number counter"""
+        rbl = self.active_rb
+        if not rbl.is_scan:
+            return
+        if rbl.scan_def_id is None or rbl.msg.content["scan_type"] == "close_scan_def":
+            self.parent.parent.queue_manager.parent.scan_number += 1
+        return
 
     def __iter__(self):
         return self
@@ -491,6 +533,7 @@ class RequestBlockQueue:
                 pointID = getattr(self.active_rb.scan, "pointID", None)
                 if pointID is not None:
                     self.scan_def_ids[self.active_rb.scan_def_id]["pointID"] = pointID
+            self.increase_scan_number()
             self.active_rb = None
             self._pull_request_block()
             return next(self.active_rb.instructions)
@@ -503,6 +546,8 @@ class RequestBlockQueue:
                 metadata={},
             )
             raise ScanAbortion from limit_error
+        except ScanAbortion as scan_abortion:
+            breakpoint()
 
 
 class InstructionQueueItem:
