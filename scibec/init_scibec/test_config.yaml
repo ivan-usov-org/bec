@@ -1,2690 +1,2726 @@
+
+
 ############################################################
 ####################### User motors ########################
 ############################################################
-flyer_sim:
-    acquisition:
-        schedule: flyer
-    config:
-        delay: 1
-        device_access: true
-        labels: flyer_sim
-        name: flyer_sim
-        speed: 100
-        update_frequency: 400
-    deviceGroup: userMotor
-    status:
-        enabled: true
-    type: SynFlyer
+
 eyefoc:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: eyefoc
-        limits:
-            - -50
-            - 50
-        name: eyefoc
-        speed: 100
-        tolerance: 0.01
-        update_frequency: 400
-    deviceGroup: userMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: eyefoc
+    limits:
+    - -50
+    - 50
+    name: eyefoc
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 eyex:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: eyex
-        limits:
-            - -50
-            - 50
-        name: eyex
-        speed: 100
-        tolerance: 0.01
-        update_frequency: 400
-    deviceGroup: userMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: eyex
+    limits:
+    - -50
+    - 50
+    name: eyex
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 eyey:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: eyey
-        limits:
-            - -50
-            - 50
-        name: eyey
-        speed: 100
-        tolerance: 0.01
-        update_frequency: 400
-    deviceGroup: userMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: eyey
+    limits:
+    - -50
+    - 50
+    name: eyey
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
+flyer_sim:
+  acquisition:
+    schedule: flyer
+  config:
+    delay: 1
+    device_access: true
+    labels: flyer_sim
+    name: flyer_sim
+    speed: 100
+    update_frequency: 400
+  deviceGroup: userMotor
+  status:
+    enabled: true
+  type: SynFlyer
 hrox:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: hrox
-        limits:
-            - -50
-            - 50
-        name: hrox
-        speed: 100
-        tolerance: 0.01
-        update_frequency: 400
-    deviceGroup: userMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: hrox
+    limits:
+    - -50
+    - 50
+    name: hrox
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 hroy:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: hroy
-        limits:
-            - -50
-            - 50
-        name: hroy
-        speed: 100
-        tolerance: 0.01
-        update_frequency: 400
-    deviceGroup: userMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: hroy
+    limits:
+    - -50
+    - 50
+    name: hroy
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 hroz:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: hroz
-        limits:
-            - -50
-            - 50
-        name: hroz
-        speed: 100
-        tolerance: 0.01
-        update_frequency: 400
-    deviceGroup: userMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: hroz
+    limits:
+    - -50
+    - 50
+    name: hroz
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 hx:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: hx
-        limits:
-            - -50
-            - 50
-        name: hx
-        speed: 100
-        tolerance: 0.01
-        update_frequency: 400
-    deviceGroup: userMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: hx
+    limits:
+    - -50
+    - 50
+    name: hx
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 hy:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: hy
-        limits:
-            - -50
-            - 50
-        name: hy
-        speed: 100
-        tolerance: 0.01
-        update_frequency: 400
-    deviceGroup: userMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: hy
+    limits:
+    - -50
+    - 50
+    name: hy
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 hz:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: hz
-        limits:
-            - -50
-            - 50
-        name: hz
-        speed: 100
-        tolerance: 0.01
-        update_frequency: 400
-    deviceGroup: userMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: hz
+    limits:
+    - -50
+    - 50
+    name: hz
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 mbsx:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: mbsx
-        limits:
-            - -50
-            - 50
-        name: mbsx
-        speed: 100
-        tolerance: 0.01
-        update_frequency: 400
-    deviceGroup: userMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: mbsx
+    limits:
+    - -50
+    - 50
+    name: mbsx
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 mbsy:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: mbsy
-        limits:
-            - -50
-            - 50
-        name: mbsy
-        speed: 100
-        tolerance: 0.01
-        update_frequency: 400
-    deviceGroup: userMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: mbsy
+    limits:
+    - -50
+    - 50
+    name: mbsy
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 pinx:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: pinx
-        limits:
-            - -50
-            - 50
-        name: pinx
-        speed: 100
-        tolerance: 0.01
-        update_frequency: 400
-    deviceGroup: userMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: pinx
+    limits:
+    - -50
+    - 50
+    name: pinx
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 piny:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: piny
-        limits:
-            - -50
-            - 50
-        name: piny
-        speed: 100
-        tolerance: 0.01
-        update_frequency: 400
-    deviceGroup: userMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: piny
+    limits:
+    - -50
+    - 50
+    name: piny
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 pinz:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: pinz
-        limits:
-            - -50
-            - 50
-        name: pinz
-        speed: 100
-        tolerance: 0.01
-        update_frequency: 400
-    deviceGroup: userMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: pinz
+    limits:
+    - -50
+    - 50
+    name: pinz
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 samx:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: samx
-        limits:
-            - -50
-            - 50
-        name: samx
-        speed: 100
-        tolerance: 0.01
-        update_frequency: 400
-    deviceGroup: userMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: samx
+    limits:
+    - -50
+    - 50
+    name: samx
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 samy:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: samy
-        limits:
-            - -50
-            - 50
-        name: samy
-        speed: 100
-        tolerance: 0.01
-        update_frequency: 400
-    deviceGroup: userMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: samy
+    limits:
+    - -50
+    - 50
+    name: samy
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 samz:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: samz
-        limits:
-            - -50
-            - 50
-        name: samz
-        speed: 100
-        tolerance: 0.01
-        update_frequency: 400
-    deviceGroup: userMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: samz
+    limits:
+    - -50
+    - 50
+    name: samz
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: userMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
+
 
 ################### User motors end here ###################
+
+
 
 ############################################################
 #################### Beamline monitors #####################
 ############################################################
 
 bpm3a:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm3a
-        name: bpm3a
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm3a
+    name: bpm3a
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm3b:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm3b
-        name: bpm3b
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm3b
+    name: bpm3b
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm3c:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm3c
-        name: bpm3c
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm3c
+    name: bpm3c
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm3d:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm3d
-        name: bpm3d
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm3d
+    name: bpm3d
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm3i:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm3i
-        name: bpm3i
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm3i
+    name: bpm3i
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm3x:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm3x
-        name: bpm3x
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm3x
+    name: bpm3x
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm3y:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm3y
-        name: bpm3y
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm3y
+    name: bpm3y
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm3z:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm3z
-        name: bpm3z
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm3z
+    name: bpm3z
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm4a:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm4a
-        name: bpm4a
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm4a
+    name: bpm4a
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm4b:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm4b
-        name: bpm4b
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm4b
+    name: bpm4b
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm4c:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm4c
-        name: bpm4c
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm4c
+    name: bpm4c
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm4d:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm4d
-        name: bpm4d
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm4d
+    name: bpm4d
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm4i:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm4i
-        name: bpm4i
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm4i
+    name: bpm4i
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm4s:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm4s
-        name: bpm4s
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm4s
+    name: bpm4s
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm4x:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm4x
-        name: bpm4x
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm4x
+    name: bpm4x
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm4xf:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm4xf
-        name: bpm4xf
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm4xf
+    name: bpm4xf
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm4xm:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm4xm
-        name: bpm4xm
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm4xm
+    name: bpm4xm
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm4y:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm4y
-        name: bpm4y
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm4y
+    name: bpm4y
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm4yf:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm4yf
-        name: bpm4yf
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm4yf
+    name: bpm4yf
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm4ym:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm4ym
-        name: bpm4ym
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm4ym
+    name: bpm4ym
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm4z:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm4z
-        name: bpm4z
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm4z
+    name: bpm4z
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm5a:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm5a
-        name: bpm5a
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm5a
+    name: bpm5a
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm5b:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm5b
-        name: bpm5b
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm5b
+    name: bpm5b
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm5c:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm5c
-        name: bpm5c
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm5c
+    name: bpm5c
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm5d:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm5d
-        name: bpm5d
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm5d
+    name: bpm5d
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm5i:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm5i
-        name: bpm5i
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm5i
+    name: bpm5i
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm5x:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm5x
-        name: bpm5x
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm5x
+    name: bpm5x
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm5y:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm5y
-        name: bpm5y
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm5y
+    name: bpm5y
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm5z:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm5z
-        name: bpm5z
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm5z
+    name: bpm5z
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm6a:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm6a
-        name: bpm6a
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm6a
+    name: bpm6a
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm6b:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm6b
-        name: bpm6b
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm6b
+    name: bpm6b
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm6c:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm6c
-        name: bpm6c
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm6c
+    name: bpm6c
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm6d:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm6d
-        name: bpm6d
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm6d
+    name: bpm6d
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm6i:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm6i
-        name: bpm6i
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm6i
+    name: bpm6i
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm6x:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm6x
-        name: bpm6x
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm6x
+    name: bpm6x
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm6y:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm6y
-        name: bpm6y
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm6y
+    name: bpm6y
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 bpm6z:
-    acquisition:
-        schedule: sync
-    config:
-        labels: bpm6z
-        name: bpm6z
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: bpm6z
+    name: bpm6z
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 curr:
-    acquisition:
-        schedule: sync
-    config:
-        labels: curr
-        name: curr
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: curr
+    name: curr
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 diode:
-    acquisition:
-        schedule: sync
-    config:
-        labels: diode
-        name: diode
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: diode
+    name: diode
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 ebpmdx:
-    acquisition:
-        schedule: sync
-    config:
-        labels: ebpmdx
-        name: ebpmdx
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: ebpmdx
+    name: ebpmdx
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 ebpmdy:
-    acquisition:
-        schedule: sync
-    config:
-        labels: ebpmdy
-        name: ebpmdy
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: ebpmdy
+    name: ebpmdy
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 ebpmux:
-    acquisition:
-        schedule: sync
-    config:
-        labels: ebpmux
-        name: ebpmux
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: ebpmux
+    name: ebpmux
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 ebpmuy:
-    acquisition:
-        schedule: sync
-    config:
-        labels: ebpmuy
-        name: ebpmuy
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: ebpmuy
+    name: ebpmuy
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 ftp:
-    acquisition:
-        schedule: sync
-    config:
-        labels: ftp
-        name: ftp
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: ftp
+    name: ftp
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 temp:
-    acquisition:
-        schedule: sync
-    config:
-        labels: temp
-        name: temp
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: temp
+    name: temp
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
 transd:
-    acquisition:
-        schedule: sync
-    config:
-        labels: transd
-        name: transd
-        tolerance: 0.5
-    deviceGroup: monitor
-    status:
-        enabled: true
-    type: SynAxisMonitor
+  acquisition:
+    schedule: sync
+  config:
+    labels: transd
+    name: transd
+    tolerance: 0.5
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynAxisMonitor
+
 
 ################ Beamline monitors end here ################
+
+
 
 ############################################################
 ##################### Beamline motors ######################
 ############################################################
 
 aptrx:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: aptrx
-        name: aptrx
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: aptrx
+    name: aptrx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 aptry:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: aptry
-        name: aptry
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: aptry
+    name: aptry
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 bim2x:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: bim2x
-        name: bim2x
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: bim2x
+    name: bim2x
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 bim2y:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: bim2y
-        name: bim2y
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: bim2y
+    name: bim2y
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 bm1trx:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: bm1trx
-        name: bm1trx
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: bm1trx
+    name: bm1trx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 bm1try:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: bm1try
-        name: bm1try
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: bm1try
+    name: bm1try
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 bm2trx:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: bm2trx
-        name: bm2trx
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: bm2trx
+    name: bm2trx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 bm2try:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: bm2try
-        name: bm2try
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: bm2try
+    name: bm2try
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 bm3trx:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: bm3trx
-        name: bm3trx
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: bm3trx
+    name: bm3trx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 bm3try:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: bm3try
-        name: bm3try
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: bm3try
+    name: bm3try
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 bm4trx:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: bm4trx
-        name: bm4trx
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: bm4trx
+    name: bm4trx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 bm4try:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: bm4try
-        name: bm4try
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: bm4try
+    name: bm4try
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 bm5trx:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: bm5trx
-        name: bm5trx
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: bm5trx
+    name: bm5trx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 bm5try:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: bm5try
-        name: bm5try
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: bm5try
+    name: bm5try
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 bm6trx:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: bm6trx
-        name: bm6trx
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: bm6trx
+    name: bm6trx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 bm6try:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: bm6try
-        name: bm6try
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: bm6try
+    name: bm6try
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 bpm4r:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: bpm4r
-        name: bpm4r
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: bpm4r
+    name: bpm4r
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 bpm5r:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: bpm5r
-        name: bpm5r
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: bpm5r
+    name: bpm5r
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 bs1x:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: bs1x
-        name: bs1x
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: bs1x
+    name: bs1x
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 bs1y:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: bs1y
-        name: bs1y
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: bs1y
+    name: bs1y
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 bs2x:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: bs2x
-        name: bs2x
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: bs2x
+    name: bs2x
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 bs2y:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: bs2y
-        name: bs2y
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: bs2y
+    name: bs2y
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 burstn:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: burstn
-        name: burstn
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: burstn
+    name: burstn
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 burstr:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: burstr
-        name: burstr
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: burstr
+    name: burstr
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 ddg1a:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: ddg1a
-        name: ddg1a
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: ddg1a
+    name: ddg1a
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 ddg1b:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: ddg1b
-        name: ddg1b
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: ddg1b
+    name: ddg1b
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 ddg1c:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: ddg1c
-        name: ddg1c
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: ddg1c
+    name: ddg1c
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 ddg1d:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: ddg1d
-        name: ddg1d
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: ddg1d
+    name: ddg1d
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 ddg1e:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: ddg1e
-        name: ddg1e
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: ddg1e
+    name: ddg1e
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 ddg1f:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: ddg1f
-        name: ddg1f
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: ddg1f
+    name: ddg1f
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 ddg1g:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: ddg1g
-        name: ddg1g
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: ddg1g
+    name: ddg1g
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 ddg1h:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: ddg1h
-        name: ddg1h
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: ddg1h
+    name: ddg1h
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 dettrx:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: dettrx
-        name: dettrx
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: dettrx
+    name: dettrx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 di2trx:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: di2trx
-        name: di2trx
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: di2trx
+    name: di2trx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 di2try:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: di2try
-        name: di2try
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: di2try
+    name: di2try
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 dtpush:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: dtpush
-        name: dtpush
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: dtpush
+    name: dtpush
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 dtth:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: dtth
-        name: dtth
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: dtth
+    name: dtth
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 dttrx:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: dttrx
-        name: dttrx
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: dttrx
+    name: dttrx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 dttry:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: dttry
-        name: dttry
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: dttry
+    name: dttry
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 dttrz:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: dttrz
-        name: dttrz
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: dttrz
+    name: dttrz
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 ebcsx:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: ebcsx
-        name: ebcsx
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: ebcsx
+    name: ebcsx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 ebcsy:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: ebcsy
-        name: ebcsy
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: ebcsy
+    name: ebcsy
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 ebfi1:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: ebfi1
-        name: ebfi1
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: ebfi1
+    name: ebfi1
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 ebfi2:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: ebfi2
-        name: ebfi2
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: ebfi2
+    name: ebfi2
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 ebfi3:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: ebfi3
-        name: ebfi3
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: ebfi3
+    name: ebfi3
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 ebfi4:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: ebfi4
-        name: ebfi4
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: ebfi4
+    name: ebfi4
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 ebfzpx:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: ebfzpx
-        name: ebfzpx
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: ebfzpx
+    name: ebfzpx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 ebfzpy:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: ebfzpy
-        name: ebfzpy
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: ebfzpy
+    name: ebfzpy
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 ebtrx:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: ebtrx
-        name: ebtrx
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: ebtrx
+    name: ebtrx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 ebtry:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: ebtry
-        name: ebtry
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: ebtry
+    name: ebtry
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 ebtrz:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: ebtrz
-        name: ebtrz
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: ebtrz
+    name: ebtrz
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 fi1try:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: fi1try
-        name: fi1try
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: fi1try
+    name: fi1try
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 fi2try:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: fi2try
-        name: fi2try
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: fi2try
+    name: fi2try
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 fi3try:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: fi3try
-        name: fi3try
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: fi3try
+    name: fi3try
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 fsh1x:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: fsh1x
-        name: fsh1x
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: fsh1x
+    name: fsh1x
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 fsh2x:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: fsh2x
-        name: fsh2x
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: fsh2x
+    name: fsh2x
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 ftrans:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: ftrans
-        name: ftrans
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: ftrans
+    name: ftrans
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 fttrx1:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: fttrx1
-        name: fttrx1
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: fttrx1
+    name: fttrx1
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 fttrx2:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: fttrx2
-        name: fttrx2
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: fttrx2
+    name: fttrx2
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 fttry1:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: fttry1
-        name: fttry1
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: fttry1
+    name: fttry1
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 fttry2:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: fttry2
-        name: fttry2
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: fttry2
+    name: fttry2
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 fttrz:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: fttrz
-        name: fttrz
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: fttrz
+    name: fttrz
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 idgap:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: idgap
-        name: idgap
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: idgap
+    name: idgap
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 mibd:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: mibd
-        name: mibd
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: mibd
+    name: mibd
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 mibd1:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: mibd1
-        name: mibd1
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: mibd1
+    name: mibd1
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 mibd2:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: mibd2
-        name: mibd2
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: mibd2
+    name: mibd2
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 miroll:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: miroll
-        name: miroll
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: miroll
+    name: miroll
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 mith:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: mith
-        name: mith
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: mith
+    name: mith
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 mitrx:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: mitrx
-        name: mitrx
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: mitrx
+    name: mitrx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 mitry:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: mitry
-        name: mitry
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: mitry
+    name: mitry
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 mitry1:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: mitry1
-        name: mitry1
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: mitry1
+    name: mitry1
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 mitry2:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: mitry2
-        name: mitry2
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: mitry2
+    name: mitry2
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 mitry3:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: mitry3
-        name: mitry3
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: mitry3
+    name: mitry3
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 mobd:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: mobd
-        name: mobd
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: mobd
+    name: mobd
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 mobdai:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: mobdai
-        name: mobdai
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: mobdai
+    name: mobdai
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 mobdbo:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: mobdbo
-        name: mobdbo
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: mobdbo
+    name: mobdbo
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 mobdco:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: mobdco
-        name: mobdco
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: mobdco
+    name: mobdco
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 mobddi:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: mobddi
-        name: mobddi
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: mobddi
+    name: mobddi
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 mokev:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: mokev
-        name: mokev
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: mokev
+    name: mokev
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 mopush1:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: mopush1
-        name: mopush1
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: mopush1
+    name: mopush1
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 mopush2:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: mopush2
-        name: mopush2
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: mopush2
+    name: mopush2
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 moroll1:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: moroll1
-        name: moroll1
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: moroll1
+    name: moroll1
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 moroll2:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: moroll2
-        name: moroll2
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: moroll2
+    name: moroll2
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 moth1:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: moth1
-        name: moth1
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: moth1
+    name: moth1
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 moth1e:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: moth1e
-        name: moth1e
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: moth1e
+    name: moth1e
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 moth2:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: moth2
-        name: moth2
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: moth2
+    name: moth2
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 moth2e:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: moth2e
-        name: moth2e
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: moth2e
+    name: moth2e
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 motrx2:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: motrx2
-        name: motrx2
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: motrx2
+    name: motrx2
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 motry:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: motry
-        name: motry
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: motry
+    name: motry
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 motry2:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: motry2
-        name: motry2
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: motry2
+    name: motry2
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 motrz1:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: motrz1
-        name: motrz1
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: motrz1
+    name: motrz1
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 motrz1e:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: motrz1e
-        name: motrz1e
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: motrz1e
+    name: motrz1e
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 moyaw2:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: moyaw2
-        name: moyaw2
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: moyaw2
+    name: moyaw2
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl0ch:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl0ch
-        name: sl0ch
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl0ch
+    name: sl0ch
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl0trxi:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl0trxi
-        name: sl0trxi
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl0trxi
+    name: sl0trxi
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl0trxo:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl0trxo
-        name: sl0trxo
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl0trxo
+    name: sl0trxo
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl0wh:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl0wh
-        name: sl0wh
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl0wh
+    name: sl0wh
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl1ch:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl1ch
-        name: sl1ch
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl1ch
+    name: sl1ch
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl1cv:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl1cv
-        name: sl1cv
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl1cv
+    name: sl1cv
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl1trxi:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl1trxi
-        name: sl1trxi
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl1trxi
+    name: sl1trxi
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl1trxo:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl1trxo
-        name: sl1trxo
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl1trxo
+    name: sl1trxo
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl1tryb:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl1tryb
-        name: sl1tryb
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl1tryb
+    name: sl1tryb
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl1tryt:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl1tryt
-        name: sl1tryt
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl1tryt
+    name: sl1tryt
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl1wh:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl1wh
-        name: sl1wh
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl1wh
+    name: sl1wh
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl1wv:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl1wv
-        name: sl1wv
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl1wv
+    name: sl1wv
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl2ch:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl2ch
-        name: sl2ch
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl2ch
+    name: sl2ch
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl2cv:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl2cv
-        name: sl2cv
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl2cv
+    name: sl2cv
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl2trxi:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl2trxi
-        name: sl2trxi
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl2trxi
+    name: sl2trxi
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl2trxo:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl2trxo
-        name: sl2trxo
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl2trxo
+    name: sl2trxo
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl2tryb:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl2tryb
-        name: sl2tryb
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl2tryb
+    name: sl2tryb
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl2tryt:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl2tryt
-        name: sl2tryt
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl2tryt
+    name: sl2tryt
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl2wh:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl2wh
-        name: sl2wh
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl2wh
+    name: sl2wh
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl2wv:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl2wv
-        name: sl2wv
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl2wv
+    name: sl2wv
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl3ch:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl3ch
-        name: sl3ch
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl3ch
+    name: sl3ch
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl3cv:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl3cv
-        name: sl3cv
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl3cv
+    name: sl3cv
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl3trxi:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl3trxi
-        name: sl3trxi
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl3trxi
+    name: sl3trxi
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl3trxo:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl3trxo
-        name: sl3trxo
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl3trxo
+    name: sl3trxo
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl3tryb:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl3tryb
-        name: sl3tryb
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl3tryb
+    name: sl3tryb
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl3tryt:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl3tryt
-        name: sl3tryt
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl3tryt
+    name: sl3tryt
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl3wh:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl3wh
-        name: sl3wh
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl3wh
+    name: sl3wh
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl3wv:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl3wv
-        name: sl3wv
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl3wv
+    name: sl3wv
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl4ch:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl4ch
-        name: sl4ch
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl4ch
+    name: sl4ch
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl4cv:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl4cv
-        name: sl4cv
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl4cv
+    name: sl4cv
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl4trxi:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl4trxi
-        name: sl4trxi
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl4trxi
+    name: sl4trxi
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl4trxo:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl4trxo
-        name: sl4trxo
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl4trxo
+    name: sl4trxo
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl4tryb:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl4tryb
-        name: sl4tryb
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl4tryb
+    name: sl4tryb
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl4tryt:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl4tryt
-        name: sl4tryt
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl4tryt
+    name: sl4tryt
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl4wh:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl4wh
-        name: sl4wh
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl4wh
+    name: sl4wh
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl4wv:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl4wv
-        name: sl4wv
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl4wv
+    name: sl4wv
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl5ch:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl5ch
-        name: sl5ch
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl5ch
+    name: sl5ch
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl5cv:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl5cv
-        name: sl5cv
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl5cv
+    name: sl5cv
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl5trxi:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl5trxi
-        name: sl5trxi
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl5trxi
+    name: sl5trxi
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl5trxo:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl5trxo
-        name: sl5trxo
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl5trxo
+    name: sl5trxo
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl5tryb:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl5tryb
-        name: sl5tryb
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl5tryb
+    name: sl5tryb
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl5tryt:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl5tryt
-        name: sl5tryt
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl5tryt
+    name: sl5tryt
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl5wh:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl5wh
-        name: sl5wh
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl5wh
+    name: sl5wh
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sl5wv:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sl5wv
-        name: sl5wv
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sl5wv
+    name: sl5wv
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 strox:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: strox
-        name: strox
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: strox
+    name: strox
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 stroy:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: stroy
-        name: stroy
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: stroy
+    name: stroy
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 stroz:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: stroz
-        name: stroz
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: stroz
+    name: stroz
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sttrx:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sttrx
-        name: sttrx
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sttrx
+    name: sttrx
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
 sttry:
-    acquisition:
-        schedule: sync
-    config:
-        delay: 1
-        labels: sttry
-        name: sttry
-        speed: 100
-        update_frequency: 400
-    deviceGroup: beamlineMotor
-    status:
-        enabled: true
-    type: SynAxisOPAAS
+  acquisition:
+    schedule: sync
+  config:
+    delay: 1
+    labels: sttry
+    name: sttry
+    speed: 100
+    update_frequency: 400
+  deviceGroup: beamlineMotor
+  status:
+    enabled: true
+  type: SynAxisOPAAS
+
+
 ################# Beamline motors end here #################
+
+
 
 ############################################################
 ################## Cameras and detectors ###################
 ############################################################
 
 eiger:
-    acquisition:
-        schedule: sync
-    config:
-        device_access: true
-        labels: eiger
-        name: eiger
-    deviceGroup: detectors
-    status:
-        enabled: true
-    type: SynSLSDetector
+  acquisition:
+    schedule: sync
+  config:
+    device_access: true
+    labels: eiger
+    name: eiger
+  deviceGroup: detectors
+  status:
+    enabled: true
+  type: SynSLSDetector
+
+
 ############## Cameras and detectors end here ##############
+
+
+
+############################################################
+############### Simulated read-only signals ################
+############################################################
+
+ring_current_sim:
+  acquisition:
+    schedule: sync
+  config:
+    labels: ring_current_sim
+    name: ring_current_sim
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynSignalRO
+
+
+########### Simulated read-only signals end here ###########
+

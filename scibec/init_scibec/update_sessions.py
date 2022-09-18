@@ -30,6 +30,30 @@ def add_session():
     return resJSON
 
 
+def make_filter(
+    where: dict = None,
+    limit: int = 0,
+    skip: int = 0,
+    fields: dict = None,
+    include: dict = None,
+    order: list = None,
+):
+    filt = dict()
+    if where is not None:
+        items = [where.copy()]
+        filt["where"] = {"and": items}
+    if limit > 0:
+        filt["limit"] = limit
+    if skip > 0:
+        filt["skip"] = skip
+    if fields is not None:
+        filt["fields"] = include
+    if order is not None:
+        filt["order"] = order
+    filt = json.dumps(filt)
+    return {"filter": filt}
+
+
 def add_device(
     *, name, enabled, deviceClass, deviceGroup, deviceConfig, acquisitionConfig, session
 ):
@@ -96,3 +120,14 @@ if __name__ == "__main__":
             acquisitionConfig=val["acquisition"],
             session=sessionId,
         )
+
+    dump_to_disk = True
+    if dump_to_disk:
+        filter = make_filter(where={"sessionId": sessionId})
+        session = requests.get(
+            scibec_url + "/devices",
+            params=filter,
+            verify=False,
+        )
+        with open("test_session.yaml", "w+") as fstream:
+            yaml.dump(json.loads(session.content), fstream)

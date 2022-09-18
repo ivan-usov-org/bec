@@ -40,6 +40,12 @@ class DeviceServerMock(DeviceServer):
             parameter={},
             metadata={"stream": "primary", "DIID": 1},
         ),
+        BECMessage.DeviceInstructionMessage(
+            device="ring_current_sim",
+            action="stage",
+            parameter={},
+            metadata={"stream": "primary", "DIID": 1},
+        ),
     ],
 )
 def test_stage_device(instr):
@@ -47,8 +53,13 @@ def test_stage_device(instr):
     device_server._stage_device(instr)
     devices = instr.content["device"]
     devices = devices if isinstance(devices, list) else [devices]
+    dev_man = device_server.device_manager.devices
     for dev in devices:
+        if not hasattr(dev_man[dev].obj, "_staged"):
+            continue
         assert device_server.device_manager.devices[dev].obj._staged == Staged.yes
     device_server._unstage_device(instr)
     for dev in devices:
+        if not hasattr(dev_man[dev].obj, "_staged"):
+            continue
         assert device_server.device_manager.devices[dev].obj._staged == Staged.no
