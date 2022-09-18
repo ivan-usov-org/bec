@@ -45,9 +45,14 @@ class DeviceManagerDS(DeviceManagerBase):
         super().__init__(connector, scibec_url)
         self._config_request_connector = None
         self._device_instructions_connector = None
+        self._config_handler_cls = config_handler
+        self.config_handler = None
+
+    def initialize(self, bootstrap_server) -> None:
+        super().initialize(bootstrap_server)
         self.config_handler = (
-            config_handler
-            if not None
+            self._config_handler_cls
+            if self._config_handler_cls is not None
             else ConfigHandler(producer=self.producer, device_manager=self)
         )
 

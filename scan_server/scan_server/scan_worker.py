@@ -411,10 +411,9 @@ class ScanWorker(threading.Thread):
                 instr.metadata["scanID"] = queue.queue.active_rb.scanID
                 instr.metadata["queueID"] = queue.queue_id
                 self._instruction_step(instr)
+            raise ScanAbortion from exc
         queue.is_active = False
-        queue.status = (
-            InstructionQueueStatus.STOPPED if queue.stopped else InstructionQueueStatus.COMPLETED
-        )
+        queue.status = InstructionQueueStatus.COMPLETED
         self.current_instruction_queue_item = None
 
         logger.info(f"QUEUE ITEM finished after {time.time()-start:.2f} seconds")
@@ -485,6 +484,7 @@ class ScanWorker(threading.Thread):
                             queue.append_to_queue_history()
 
                 except ScanAbortion:
+                    queue.queue.increase_scan_number()
                     self._send_scan_status("aborted")
                     queue.status = InstructionQueueStatus.STOPPED
                     queue.append_to_queue_history()

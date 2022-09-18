@@ -102,7 +102,9 @@ async def live_updates_readback_progressbar(
             progress.update(values=values)
 
             msgs = [BECMessage.DeviceReqStatusMessage.loads(msg) for msg in req_done_msgs]
-            request_ids = [msg.metadata["RID"] if msg else None for msg in msgs]
+            request_ids = [
+                msg.metadata["RID"] if (msg and msg.metadata.get("RID")) else None for msg in msgs
+            ]
             if set(request_ids) != set([request.metadata["RID"]]):
                 await progress.sleep()
                 continue
