@@ -363,7 +363,7 @@ class DeviceServer(BECService):
             if obj._staged == Staged.yes:
                 self.device_manager.devices[dev].obj.unstage()
                 continue
-            logger.warning(f"Device {obj.name} was already unstaged.")
+            logger.debug(f"Device {obj.name} was already unstaged.")
 
     @property
     def status(self) -> DSStatus:
