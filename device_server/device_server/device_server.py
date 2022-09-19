@@ -51,8 +51,8 @@ class DeviceServer(BECService):
         super().__init__(bootstrap_server, connector_cls, unique_service=True)
         self._status = DSStatus.IDLE
         self._tasks = []
-        self.device_manager = DeviceManagerDS(self.connector, scibec_url)
-        self.device_manager.initialize(bootstrap_server)
+        self.device_manager = None
+        self.scibec_url = scibec_url
         self.threads = []
         self.sig_thread = None
         self.sig_thread = self.connector.consumer(
@@ -62,6 +62,11 @@ class DeviceServer(BECService):
         )
         self.sig_thread.start()
         self.executor = ThreadPoolExecutor(max_workers=4)
+        self._start_device_manager()
+
+    def _start_device_manager(self):
+        self.device_manager = DeviceManagerDS(self.connector, self.scibec_url)
+        self.device_manager.initialize(self.bootstrap_server)
 
     def start(self) -> None:
         """start the device server"""
@@ -113,7 +118,8 @@ class DeviceServer(BECService):
         """stop all enabled devices"""
         logger.info("Stopping devices after receiving 'abort' request.")
         for dev in self.device_manager.devices.enabled_devices:
-            dev.obj.stop()
+            if hasattr(dev.obj, "stop"):
+                dev.obj.stop()
 
     def _assert_device_is_enabled(self, instructions) -> None:
         devices = instructions.content["device"]
@@ -313,15 +319,16 @@ class DeviceServer(BECService):
             self.device_manager.devices.get(dev).metadata = instr.metadata
             obj = self.device_manager.devices.get(dev).obj
             signals = obj.read()
-            metadata = self.device_manager.devices.get(dev).metadata
             self.producer.set_and_publish(
                 MessageEndpoints.device_read(dev),
-                BECMessage.DeviceMessage(signals=signals, metadata=metadata).dumps(),
+                BECMessage.DeviceMessage(signals=signals, metadata=instr.metadata).dumps(),
                 pipe,
             )
             self.producer.set(
                 MessageEndpoints.device_status(dev),
-                BECMessage.DeviceStatusMessage(device=dev, status=0, metadata=metadata).dumps(),
+                BECMessage.DeviceStatusMessage(
+                    device=dev, status=0, metadata=instr.metadata
+                ).dumps(),
                 pipe,
             )
         pipe.execute()
@@ -336,6 +343,8 @@ class DeviceServer(BECService):
 
         for dev in devices:
             obj = self.device_manager.devices[dev].obj
+            if not hasattr(obj, "_staged"):
+                continue
             # pylint: disable=protected-access
             if obj._staged == Staged.yes:
                 logger.warning(f"Device {obj.name} was already staged and will be first unstaged.")
@@ -349,11 +358,13 @@ class DeviceServer(BECService):
 
         for dev in devices:
             obj = self.device_manager.devices[dev].obj
+            if not hasattr(obj, "_staged"):
+                continue
             # pylint: disable=protected-access
             if obj._staged == Staged.yes:
                 self.device_manager.devices[dev].obj.unstage()
                 continue
-            logger.warning(f"Device {obj.name} was already unstaged.")
+            logger.debug(f"Device {obj.name} was already unstaged.")
 
     @property
     def status(self) -> DSStatus:

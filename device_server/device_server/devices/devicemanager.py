@@ -16,6 +16,7 @@ from bec_utils.connector import ConnectorBase
 from device_server.devices.config_handler import ConfigHandler
 from device_server.devices.device_serializer import get_device_info
 from ophyd.ophydobj import OphydObject
+from ophyd.signal import EpicsSignalBase
 
 logger = bec_logger.logger
 
@@ -127,8 +128,16 @@ class DeviceManagerDS(DeviceManagerBase):
         config = dev["deviceConfig"].copy()
 
         # pylint: disable=protected-access
-        class_params = inspect.signature(dev_cls)._parameters
-        class_params_and_config_keys = set(class_params) & config.keys()
+        device_classes = [dev_cls]
+        if issubclass(dev_cls, ophyd.Signal):
+            device_classes.append(ophyd.Signal)
+        if issubclass(dev_cls, EpicsSignalBase):
+            device_classes.append(EpicsSignalBase)
+        class_params = set()
+        for device_class in device_classes:
+            class_params.update(inspect.signature(device_class)._parameters)
+
+        class_params_and_config_keys = class_params & config.keys()
 
         init_kwargs = {key: config.pop(key) for key in class_params_and_config_keys}
         device_access = config.pop("device_access", None)
@@ -148,6 +157,9 @@ class DeviceManagerDS(DeviceManagerBase):
         # add subscriptions
         if "readback" in obj.event_types:
             obj.subscribe(self._obj_callback_readback, run=enabled)
+        elif "value" in obj.event_types:
+            obj.subscribe(self._obj_callback_readback, run=enabled)
+
         if "done_moving" in obj.event_types:
             obj.subscribe(self._obj_callback_done_moving, event_type="done_moving", run=False)
         if hasattr(obj, "motor_is_moving"):
@@ -164,13 +176,7 @@ class DeviceManagerDS(DeviceManagerBase):
 
         # update device buffer for enabled devices
         try:
-            if not opaas_obj.obj.connected:
-                if hasattr(opaas_obj.obj, "controler"):
-                    opaas_obj.obj.controller.on()
-                else:
-                    logger.error(
-                        f"Device {opaas_obj.obj.name} does not implement the socket controller interface and cannot be turned on."
-                    )
+            self.connect_device(opaas_obj.obj)
             opaas_obj.initialize_device_buffer(self.producer)
         # pylint:disable=broad-except
         except Exception:
@@ -181,6 +187,23 @@ class DeviceManagerDS(DeviceManagerBase):
             opaas_obj.enabled = False
 
         return opaas_obj
+
+    @staticmethod
+    def connect_device(obj):
+        """establish a connection to a device"""
+        if obj.connected:
+            return
+        if hasattr(obj, "controller"):
+            obj.controller.on()
+            return
+        if hasattr(obj, "wait_for_connection"):
+            obj.wait_for_connection(timeout=10)
+            return
+
+        logger.error(
+            f"Device {obj.name} does not implement the socket controller interface nor wait_for_connection and cannot be turned on."
+        )
+        raise ConnectionError(f"Failed to establish a connection to device {obj.name}")
 
     def publish_device_info(self, obj: OphydObject, pipe=None) -> None:
         """

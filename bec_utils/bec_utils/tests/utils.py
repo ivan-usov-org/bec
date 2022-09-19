@@ -1,4 +1,5 @@
 from bec_utils.connector import ConnectorBase
+from bec_utils.redis_connector import Alarms
 
 
 class PipelineMock:
@@ -93,3 +94,8 @@ class ConnectorMock(ConnectorBase):
 
     def producer(self, *args, **kwargs):
         return ProducerMock()
+
+    def raise_alarm(
+        self, severity: Alarms, alarm_type: str, source: str, content: dict, metadata: dict
+    ):
+        pass

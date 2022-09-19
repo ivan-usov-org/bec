@@ -84,13 +84,18 @@ class ScanGuard:
     def _check_motors_movable(self, request) -> None:
         if request.content["scan_type"] == "device_rpc":
             device = request.content["parameter"]["device"]
-            if not self.device_manager.devices[device].enabled:
-                raise ScanRejection(f"Device {device} is not enabled.")
+            if not isinstance(device, list):
+                device = [device]
+            for dev in device:
+                if not self.device_manager.devices[dev].enabled:
+                    raise ScanRejection(f"Device {dev} is not enabled.")
 
         motor_args = request.content["parameter"].get("args")
         if not motor_args:
             return
         for motor in motor_args:
+            if not motor:
+                continue
             if not self.device_manager.devices[motor].enabled:
                 raise ScanRejection(f"Device {motor} is not enabled.")
 
