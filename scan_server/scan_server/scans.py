@@ -304,9 +304,10 @@ class ScanBase(RequestBase):
         yield from self.stubs.baseline_reading()
 
     def _set_position_offset(self):
-        self.start_pos = [
-            self.device_manager.devices[dev].read().get("value") for dev in self.scan_motors
-        ]
+        self.start_pos = []
+        for dev in self.scan_motors:
+            val = yield from self.stubs.send_rpc_and_wait(dev, "read")
+            self.start_pos.append(val[dev].get("value"))
         if self.relative:
             self.positions += self.start_pos
 
@@ -463,9 +464,11 @@ class Move(RequestBase):
             >>> scans.mv(dev.samx, 1, dev.samy,2)
         """
         super().__init__(parameter=parameter, **kwargs)
+        self.relative = parameter["kwargs"].get("relative", True)
+        self.start_pos = np.repeat(0, len(self.scan_motors)).tolist()
 
     def _calculate_positions(self):
-        self.positions = [[val[0] for val in self.caller_args.values()]]
+        self.positions = np.asarray([[val[0] for val in self.caller_args.values()]], dtype=float)
 
     def _at_each_point(self, pos=None):
         for ii, motor in enumerate(self.scan_motors):
@@ -475,19 +478,26 @@ class Move(RequestBase):
                 wait_group="scan_motor",
             )
 
-        for motor in self.scan_motors:
-            yield from self.stubs.wait(wait_type="move", device=motor, wait_group="scan_motor")
-
     def cleanup(self):
         pass
 
+    def _set_position_offset(self):
+        self.start_pos = []
+        for dev in self.scan_motors:
+            val = yield from self.stubs.send_rpc_and_wait(dev, "read")
+            self.start_pos.append(val[dev].get("value"))
+
+        if self.relative:
+            self.positions += self.start_pos
+
     def prepare_positions(self):
         self._calculate_positions()
+        yield from self._set_position_offset()
         self._check_limits()
 
     def run(self):
         self.initialize()
-        self.prepare_positions()
+        yield from self.prepare_positions()
         yield from self._at_each_point()
 
 
@@ -505,6 +515,17 @@ class UpdatedMove(Move):
 
     scan_name = "umv"
     scan_report_hint = "readback"
+
+    def _at_each_point(self, pos=None):
+        for ii, motor in enumerate(self.scan_motors):
+            yield from self.stubs.set(
+                device=motor,
+                value=self.positions[0][ii],
+                wait_group="scan_motor",
+            )
+
+        for motor in self.scan_motors:
+            yield from self.stubs.wait(wait_type="move", device=motor, wait_group="scan_motor")
 
 
 class Scan(ScanBase):
