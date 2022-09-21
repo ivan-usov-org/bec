@@ -204,8 +204,22 @@ class ScanManager:
             ).dumps(),
         )
 
+    def request_scan_repeat(self, scanID=None, replace=True):
+        """request to repeat a scan"""
+        if scanID is None:
+            scanID = self.scan_storage.current_scanID
+        logger.info("Requesting to abort and repeat a scan")
+        position = "replace" if replace else "append"
+        self.producer.send(
+            MessageEndpoints.scan_queue_modification_request(),
+            BECMessage.ScanQueueModificationMessage(
+                scanID=scanID, action="repeat", parameter={"position": position}
+            ).dumps(),
+        )
+
     @property
-    def current_scan_number(self):
+    def next_scan_number(self):
+        """get the next scan number from redis"""
         return int(self.producer.get(MessageEndpoints.scan_number()))
 
     @staticmethod
