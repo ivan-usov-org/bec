@@ -805,8 +805,65 @@ class RoundROIScan(ScanBase):
         )
 
 
-class RepeatScan:
-    pass
+class Acquire(ScanBase):
+    scan_name = "acquire"
+    scan_report_hint = "table"
+    required_kwargs = ["exp_time"]
+    arg_input = []
+    arg_bundle_size = len(arg_input)
+
+    def __init__(self, *args, parameter=None, **kwargs):
+        """
+        A scan following a round-roi-like pattern.
+
+        Args:
+            *args: motor1, width for motor1, motor2, width for motor2,
+            dr: shell width
+            nth: number of points in the first shell
+            relative: Start from an absolute or relative position
+            burst: number of acquisition per point
+
+        Returns:
+
+        Examples:
+            >>> scans.acquire(exp_time=0.1, relative=True)
+
+        """
+        super().__init__(parameter=parameter, **kwargs)
+        self.axis = []
+
+    def _calculate_positions(self) -> None:
+        self.num_pos = self.burst_at_each_point
+
+    def prepare_positions(self):
+        self._calculate_positions()
+
+    def _at_each_point(self, ind=None, pos=None):
+        if ind > 0:
+            yield from self.stubs.wait(
+                wait_type="read", group="primary", wait_group="readout_primary"
+            )
+        yield from self.stubs.trigger(group="trigger", pointID=self.pointID)
+        yield from self.stubs.wait(wait_type="trigger", group="trigger", wait_time=self.exp_time)
+        yield from self.stubs.read(
+            group="primary", wait_group="readout_primary", pointID=self.pointID
+        )
+
+    def scan_core(self):
+        for self.burst_index in range(self.burst_at_each_point):
+            yield from self._at_each_point(self.burst_index)
+        self.burst_index = 0
+
+    def run(self):
+        self.initialize()
+        self.prepare_positions()
+        yield from self.open_scan()
+        yield from self.stage()
+        yield from self.run_baseline_reading()
+        yield from self.scan_core()
+        yield from self.finalize()
+        yield from self.unstage()
+        yield from self.cleanup()
 
 
 class LineScan(ScanBase):
