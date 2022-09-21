@@ -1,3 +1,5 @@
+import traceback
+
 import msgpack
 from bec_utils import BECMessage, MessageEndpoints, bec_logger
 
@@ -49,8 +51,9 @@ class ScanGuard:
             self._check_baton(request)
             self._check_motors_movable(request)
             self._check_soft_limits(request)
-        except ScanRejection as error:
-            return ScanStatus(False, str(error))
+        except Exception as error:
+            content = traceback.format_exc()
+            return ScanStatus(False, str(content))
         else:
             return ScanStatus()
 
@@ -89,7 +92,7 @@ class ScanGuard:
             for dev in device:
                 if not self.device_manager.devices[dev].enabled:
                     raise ScanRejection(f"Device {dev} is not enabled.")
-
+            return
         motor_args = request.content["parameter"].get("args")
         if not motor_args:
             return
