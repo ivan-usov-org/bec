@@ -1,6 +1,7 @@
 import ast
 import enum
 import time
+import uuid
 from abc import ABC, abstractmethod
 
 import numpy as np
@@ -286,7 +287,7 @@ class ScanBase(RequestBase):
     def prepare_positions(self):
         self._calculate_positions()
         self.num_pos = len(self.positions)
-        self._set_position_offset()
+        yield from self._set_position_offset()
         self._check_limits()
 
     def open_scan(self):
@@ -368,7 +369,7 @@ class ScanBase(RequestBase):
     def run(self):
         self.initialize()
         yield from self.read_scan_motors()
-        self.prepare_positions()
+        yield from self.prepare_positions()
         yield from self.open_scan()
         yield from self.stage()
         yield from self.run_baseline_reading()
@@ -476,19 +477,20 @@ class Move(RequestBase):
                 device=motor,
                 value=self.positions[0][ii],
                 wait_group="scan_motor",
+                metadata={"response": True},
             )
 
     def cleanup(self):
         pass
 
     def _set_position_offset(self):
+        if not self.relative:
+            return
         self.start_pos = []
         for dev in self.scan_motors:
             val = yield from self.stubs.send_rpc_and_wait(dev, "read")
             self.start_pos.append(val[dev].get("value"))
-
-        if self.relative:
-            self.positions += self.start_pos
+        self.positions += self.start_pos
 
     def prepare_positions(self):
         self._calculate_positions()

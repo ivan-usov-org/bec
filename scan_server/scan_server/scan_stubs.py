@@ -105,7 +105,9 @@ class ScanStubs:
         yield from self.read(device=device, group=group, wait_group=wait_group, pointID=pointID)
         yield from self.wait(device=device, wait_type="read", group=group, wait_group=wait_group)
 
-    def open_scan(self, *, scan_motors: list, num_pos: int, scan_name: str, scan_type: str):
+    def open_scan(
+        self, *, scan_motors: list, num_pos: int, scan_name: str, scan_type: str, metadata=None
+    ):
         """Open a new scan.
 
         Args:
@@ -124,9 +126,10 @@ class ScanStubs:
                 "scan_name": scan_name,
                 "scan_type": scan_type,
             },
+            metadata=metadata,
         )
 
-    def kickoff(self, *, device: str, parameter: dict = None):
+    def kickoff(self, *, device: str, parameter: dict = None, metadata=None):
         """Kickoff a fly scan device.
 
         Args:
@@ -138,7 +141,7 @@ class ScanStubs:
             device=device,
             action="kickoff",
             parameter=parameter,
-            metadata={},
+            metadata=metadata,
         )
 
     def close_scan(self):
@@ -234,7 +237,7 @@ class ScanStubs:
             metadata={"pointID": pointID},
         )
 
-    def set(self, *, device: str, value: float, wait_group: str):
+    def set(self, *, device: str, value: float, wait_group: str, metadata=None):
         """Set the device to a specific value.
 
         Args:
@@ -250,6 +253,7 @@ class ScanStubs:
                 "value": value,
                 "wait_group": wait_group,
             },
+            metadata=metadata,
         )
 
     def open_scan_def(self):

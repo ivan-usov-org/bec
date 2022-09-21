@@ -1,3 +1,5 @@
+from unittest import mock
+
 import numpy as np
 import pytest
 from bec_utils import BECMessage as BMessage
@@ -44,25 +46,13 @@ class DMMock:
                     device="samx",
                     action="set",
                     parameter={"value": 1, "wait_group": "scan_motor"},
-                    metadata={"stream": "primary", "DIID": 0},
+                    metadata={"stream": "primary", "DIID": 0, "response": True},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="samy",
                     action="set",
                     parameter={"value": 2, "wait_group": "scan_motor"},
-                    metadata={"stream": "primary", "DIID": 1},
-                ),
-                BMessage.DeviceInstructionMessage(
-                    device="samx",
-                    action="wait",
-                    parameter={"type": "move", "wait_group": "scan_motor"},
-                    metadata={"stream": "primary", "DIID": 2},
-                ),
-                BMessage.DeviceInstructionMessage(
-                    device="samy",
-                    action="wait",
-                    parameter={"type": "move", "wait_group": "scan_motor"},
-                    metadata={"stream": "primary", "DIID": 3},
+                    metadata={"stream": "primary", "DIID": 1, "response": True},
                 ),
             ],
         ),
@@ -80,37 +70,19 @@ class DMMock:
                     device="samx",
                     action="set",
                     parameter={"value": 1, "wait_group": "scan_motor"},
-                    metadata={"stream": "primary", "DIID": 0},
+                    metadata={"stream": "primary", "DIID": 0, "response": True},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="samy",
                     action="set",
                     parameter={"value": 2, "wait_group": "scan_motor"},
-                    metadata={"stream": "primary", "DIID": 1},
+                    metadata={"stream": "primary", "DIID": 1, "response": True},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="samz",
                     action="set",
                     parameter={"value": 3, "wait_group": "scan_motor"},
-                    metadata={"stream": "primary", "DIID": 2},
-                ),
-                BMessage.DeviceInstructionMessage(
-                    device="samx",
-                    action="wait",
-                    parameter={"type": "move", "wait_group": "scan_motor"},
-                    metadata={"stream": "primary", "DIID": 3},
-                ),
-                BMessage.DeviceInstructionMessage(
-                    device="samy",
-                    action="wait",
-                    parameter={"type": "move", "wait_group": "scan_motor"},
-                    metadata={"stream": "primary", "DIID": 4},
-                ),
-                BMessage.DeviceInstructionMessage(
-                    device="samz",
-                    action="wait",
-                    parameter={"type": "move", "wait_group": "scan_motor"},
-                    metadata={"stream": "primary", "DIID": 5},
+                    metadata={"stream": "primary", "DIID": 2, "response": True},
                 ),
             ],
         ),
@@ -125,13 +97,7 @@ class DMMock:
                     device="samx",
                     action="set",
                     parameter={"value": 1, "wait_group": "scan_motor"},
-                    metadata={"stream": "primary", "DIID": 0},
-                ),
-                BMessage.DeviceInstructionMessage(
-                    device="samx",
-                    action="wait",
-                    parameter={"type": "move", "wait_group": "scan_motor"},
-                    metadata={"stream": "primary", "DIID": 1},
+                    metadata={"stream": "primary", "DIID": 0, "response": True},
                 ),
             ],
         ),
@@ -141,23 +107,19 @@ def test_scan_move(mv_msg, reference_msg_list):
     msg_list = []
     device_manager = DMMock()
     device_manager.add_device("samx")
-    device_manager.devices["samx"].read_buffer = {"value": 0}
     device_manager.add_device("samy")
-    device_manager.devices["samy"].read_buffer = {"value": 0}
     device_manager.add_device("samz")
-    device_manager.devices["samz"].read_buffer = {"value": 0}
+
+    def offset_mock():
+        yield None
+
     s = Move(parameter=mv_msg.content.get("parameter"), device_manager=device_manager)
+    s._set_position_offset = offset_mock
     for step in s.run():
-        msg_list.append(step)
+        if step:
+            msg_list.append(step)
 
     assert msg_list == reference_msg_list
-
-
-# def test_scan_positions():
-#     samx = DummyObject("samx")
-#     pos = []
-#     for s in Scan.scan(samx, -5, 5, 10, exp_time=0.1):
-#         pos.append(s)
 
 
 @pytest.mark.parametrize(
@@ -434,10 +396,15 @@ def test_scan_scan(scan_msg, reference_scan_list):
     device_manager.add_device("samx")
     device_manager.devices["samx"].read_buffer = {"value": 0}
     msg_list = []
-    for step in Scan.scan(
-        parameter=scan_msg.content.get("parameter"), device_manager=device_manager
-    ):
-        msg_list.append(step)
+
+    def offset_mock():
+        yield None
+
+    scan = Scan(parameter=scan_msg.content.get("parameter"), device_manager=device_manager)
+    scan._set_position_offset = offset_mock
+    for step in scan.run():
+        if step:
+            msg_list.append(step)
     scan_uid = msg_list[0].metadata.get("scanID")
     for ii, _ in enumerate(reference_scan_list):
         if reference_scan_list[ii].metadata.get("scanID") is not None:
@@ -504,7 +471,12 @@ def test_fermat_scan(scan_msg, reference_scan_list):
     scan = FermatSpiralScan(
         parameter=scan_msg.content.get("parameter"), device_manager=device_manager
     )
-    scan.prepare_positions()
+
+    def offset_mock():
+        yield None
+
+    scan._set_position_offset = offset_mock
+    next(scan.prepare_positions())
     # pylint: disable=protected-access
     pos = list(scan._get_position())
     assert pytest.approx(np.vstack(np.array(pos, dtype=object)[:, 1])) == np.vstack(

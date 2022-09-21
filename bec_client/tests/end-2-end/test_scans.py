@@ -115,7 +115,7 @@ def test_mv_scan(capsys, client):
     scans = bec.scans
     wait_for_empty_queue(bec)
     dev = bec.devicemanager.devices
-    scans.umv(dev.samx, 10, dev.samy, 20)
+    scans.mv(dev.samx, 10, dev.samy, 20, relative=False).wait()
     current_pos_samx = dev.samx.read()["samx"]["value"]
     current_pos_samy = dev.samy.read()["samy"]["value"]
     assert np.isclose(
@@ -124,7 +124,7 @@ def test_mv_scan(capsys, client):
     assert np.isclose(
         current_pos_samy, 20, atol=dev.samy.config["deviceConfig"].get("tolerance", 0.05)
     )
-    scans.umv(dev.samx, 10, dev.samy, 20)
+    scans.umv(dev.samx, 10, dev.samy, 20, relative=False)
     current_pos_samx = dev.samx.read()["samx"]["value"]
     current_pos_samy = dev.samy.read()["samy"]["value"]
     captured = capsys.readouterr()
@@ -144,7 +144,7 @@ def test_mv_scan_mv(client):
 
     dev.samx.limits = [-50, 50]
     dev.samy.limits = [-50, 50]
-    scans.umv(dev.samx, 10, dev.samy, 20)
+    scans.umv(dev.samx, 10, dev.samy, 20, relative=False)
     tolerance_samx = dev.samx.config["deviceConfig"].get("tolerance", 0.05)
     tolerance_samy = dev.samy.config["deviceConfig"].get("tolerance", 0.05)
     current_pos_samx = dev.samx.read()["samx"]["value"]
@@ -174,7 +174,7 @@ def test_mv_scan_mv(client):
     assert np.isclose(current_pos_samx, 10, atol=tolerance_samx * 2)
     assert np.isclose(current_pos_samy, 20, atol=tolerance_samy * 2)
 
-    scans.umv(dev.samx, 20, dev.samy, -20)
+    scans.umv(dev.samx, 20, dev.samy, -20, relative=False)
     current_pos_samx = dev.samx.read()["samx"]["value"]
     current_pos_samy = dev.samy.read()["samy"]["value"]
 
