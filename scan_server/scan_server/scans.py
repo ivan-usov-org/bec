@@ -758,6 +758,7 @@ class RoundScanFlySim(ScanBase):
         self._calculate_positions()
         self.num_pos = len(self.positions)
         self._check_limits()
+        yield None
 
     def finalize(self):
         yield
