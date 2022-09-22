@@ -207,7 +207,11 @@ def test_scan_abort(client):
             if len(bec.queue.scan_storage.current_scan.data) > 10:
                 _thread.interrupt_main()
                 break
-        time.sleep(2)
+        while True:
+            queue = bec.queue.queue_storage.current_scan_queue
+            if queue["primary"]["info"][0]["status"] == "DEFERRED_PAUSE":
+                break
+            time.sleep(0.5)
         _thread.interrupt_main()
 
     bec = client
