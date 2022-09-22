@@ -115,7 +115,11 @@ class ScanGuard:
 
     @staticmethod
     def _scan_queue_modification_request_callback(msg, parent, **_kwargs):
-        content = BECMessage.ScanQueueModificationMessage.loads(msg.value).content
+        mod_msg = BECMessage.ScanQueueModificationMessage.loads(msg.value)
+        if mod_msg is None:
+            logger.warning("Failed to parse scan queue modification message.")
+            return
+        content = mod_msg.content
         logger.info(f"Receiving scan modification request: {content}")
         # pylint: disable=protected-access
         parent._handle_scan_modification_request(msg.value)
