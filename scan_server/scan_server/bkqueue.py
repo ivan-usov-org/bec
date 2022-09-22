@@ -150,8 +150,8 @@ class QueueManager:
         self.queues[queue].worker_status = InstructionQueueStatus.PAUSED
         self.queues[queue].clear()
 
-    def set_repeat(self, scanID=None, queue="primary", parameter: dict = None) -> None:
-        """abort and repeat the currently running scan. The active scan will be aborted."""
+    def set_restart(self, scanID=None, queue="primary", parameter: dict = None) -> None:
+        """abort and restart the currently running scan. The active scan will be aborted."""
         if not scanID:
             scanID = self.queues[queue].queue[0].active_request_block.scanID
         if isinstance(scanID, list):
@@ -167,7 +167,7 @@ class QueueManager:
                 time.sleep(0.5)
                 continue
 
-            if scanID in self.queues[queue].queue[0].scanID:
+            if len(self.queues[queue].queue) > 0 and scanID in self.queues[queue].queue[0].scanID:
                 time.sleep(0.5)
                 continue
             self.add_to_queue(queue, history[-1].scan_msgs[0], 0)
