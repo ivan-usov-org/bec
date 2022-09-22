@@ -243,7 +243,7 @@ class ScanBase(RequestBase):
     scan_type = "step"
     arg_input = [ScanArgType.DEVICE]
     arg_bundle_size = len(arg_input)
-    required_kwargs = []
+    required_kwargs = ["required"]
     return_to_start_after_abort = True
 
     def __init__(
@@ -261,7 +261,7 @@ class ScanBase(RequestBase):
         self.pointID = 0
         self.exp_time = self.caller_kwargs.get("exp_time", 0.1)
 
-        self.relative = parameter["kwargs"].get("relative", True)
+        self.relative = parameter["kwargs"].get("relative", False)
         self.burst_at_each_point = parameter["kwargs"].get("burst_at_each_point", 1)
         self.burst_index = 0
 
@@ -276,7 +276,6 @@ class ScanBase(RequestBase):
         super().initialize()
 
     def read_scan_motors(self):
-        # TODO: check if we can remove the groups from read_and_wait
         yield from self.stubs.read_and_wait(device=self.scan_motors, wait_group="scan_motor")
 
     @abstractmethod
@@ -452,6 +451,7 @@ class Move(RequestBase):
     arg_input = [ScanArgType.DEVICE, ScanArgType.FLOAT]
     arg_bundle_size = len(arg_input)
     scan_report_hint = None
+    required_kwargs = ["relative"]
 
     def __init__(self, *args, parameter=None, **kwargs):
         """
@@ -465,7 +465,7 @@ class Move(RequestBase):
             >>> scans.mv(dev.samx, 1, dev.samy,2)
         """
         super().__init__(parameter=parameter, **kwargs)
-        self.relative = parameter["kwargs"].get("relative", True)
+        self.relative = parameter["kwargs"].get("relative", False)
         self.start_pos = np.repeat(0, len(self.scan_motors)).tolist()
 
     def _calculate_positions(self):
@@ -540,7 +540,7 @@ class Scan(ScanBase):
         ScanArgType.INT,
     ]
     arg_bundle_size = len(arg_input)
-    required_kwargs = ["exp_time"]
+    required_kwargs = ["exp_time", "relative"]
 
     def __init__(self, *args, parameter=None, **kwargs):
         """
@@ -572,7 +572,7 @@ class Scan(ScanBase):
 class FermatSpiralScan(ScanBase):
     scan_name = "fermat_scan"
     scan_report_hint = "table"
-    required_kwargs = ["exp_time", "step"]
+    required_kwargs = ["exp_time", "step", "relative"]
     arg_input = [ScanArgType.DEVICE, ScanArgType.FLOAT, ScanArgType.FLOAT]
     arg_bundle_size = len(arg_input)
 
@@ -612,7 +612,7 @@ class FermatSpiralScan(ScanBase):
 class RoundScan(ScanBase):
     scan_name = "round_scan"
     scan_report_hint = "table"
-    required_kwargs = ["exp_time"]
+    required_kwargs = ["exp_time", "relative"]
     arg_input = [
         ScanArgType.DEVICE,
         ScanArgType.DEVICE,
@@ -655,7 +655,7 @@ class RoundScan(ScanBase):
 class ContLineScan(ScanBase):
     scan_name = "cont_line_scan"
     scan_report_hint = "table"
-    required_kwargs = ["exp_time", "steps"]
+    required_kwargs = ["exp_time", "steps", "relative"]
     arg_input = [ScanArgType.DEVICE, ScanArgType.FLOAT, ScanArgType.FLOAT]
     arg_bundle_size = len(arg_input)
     scan_type = "step"
@@ -722,7 +722,7 @@ class RoundScanFlySim(ScanBase):
     scan_name = "round_scan_fly"
     scan_report_hint = "table"
     scan_type = "fly"
-    required_kwargs = ["exp_time"]
+    required_kwargs = ["exp_time", "relative"]
     arg_input = [
         ScanArgType.DEVICE,
         ScanArgType.FLOAT,
@@ -796,7 +796,7 @@ class RoundScanFlySim(ScanBase):
 class RoundROIScan(ScanBase):
     scan_name = "round_roi_scan"
     scan_report_hint = "table"
-    required_kwargs = ["exp_time", "dr", "nth"]
+    required_kwargs = ["exp_time", "dr", "nth", "relative"]
     arg_input = [ScanArgType.DEVICE, ScanArgType.FLOAT]
     arg_bundle_size = len(arg_input)
 
@@ -836,7 +836,7 @@ class RepeatScan:
 class LineScan(ScanBase):
     scan_name = "line_scan"
     scan_report_hint = "table"
-    required_kwargs = ["exp_time", "steps"]
+    required_kwargs = ["exp_time", "steps", "relative"]
     arg_input = [ScanArgType.DEVICE, ScanArgType.FLOAT, ScanArgType.FLOAT]
     arg_bundle_size = len(arg_input)
 
