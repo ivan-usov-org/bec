@@ -204,8 +204,8 @@ class ScanManager:
             ).dumps(),
         )
 
-    def request_scan_repeat(self, scanID=None, replace=True):
-        """request to repeat a scan"""
+    def request_scan_restart(self, scanID=None, replace=True):
+        """request to restart a scan"""
         if scanID is None:
             scanID = self.scan_storage.current_scanID
         logger.info("Requesting to abort and repeat a scan")
@@ -213,7 +213,7 @@ class ScanManager:
         self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
             BECMessage.ScanQueueModificationMessage(
-                scanID=scanID, action="repeat", parameter={"position": position}
+                scanID=scanID, action="restart", parameter={"position": position}
             ).dumps(),
         )
 
