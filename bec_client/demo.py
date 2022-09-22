@@ -25,6 +25,7 @@ bk = BKClient(
     config.scibec,
 )
 bk.start()
+bk.load_high_level_interface("spec_hli")
 
 dev = bk.devicemanager.devices
 scans = bk.scans
