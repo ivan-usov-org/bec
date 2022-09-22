@@ -204,7 +204,7 @@ def test_scan_abort(client):
         while True:
             if not bec.queue.scan_storage.current_scan:
                 continue
-            if len(bec.queue.scan_storage.current_scan.data) > 0:
+            if len(bec.queue.scan_storage.current_scan.data) > 10:
                 _thread.interrupt_main()
                 break
         time.sleep(2)
@@ -309,7 +309,7 @@ def test_fly_scan(client):
 
 
 @pytest.mark.timeout(100)
-def test_scan_repeat(client):
+def test_scan_restart(client):
     bec = client
     wait_for_empty_queue(bec)
     scans = bec.scans
@@ -321,7 +321,7 @@ def test_scan_repeat(client):
                 continue
             if len(bec.queue.scan_storage.current_scan.data) > 0:
                 time.sleep(2)
-                bec.queue.request_scan_repeat()
+                bec.queue.request_scan_restart()
                 bec.queue.request_scan_continuation()
                 break
 
@@ -357,7 +357,7 @@ def test_scan_observer_repeat(client):
                 time.sleep(2)
                 bec.queue.request_scan_interruption(deferred_pause=False)
                 time.sleep(5)
-                bec.queue.request_scan_repeat()
+                bec.queue.request_scan_restart()
                 bec.queue.request_scan_continuation()
                 break
 
