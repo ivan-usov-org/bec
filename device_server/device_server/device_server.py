@@ -292,6 +292,7 @@ class DeviceServer(BECService):
         obj = self.device_manager.devices.get(instr.content["device"]).obj
         # self.device_manager.add_req_done_sub(obj)
         status = obj.set(val)
+        status.__dict__["instruction"] = instr
         status.add_callback(self._status_callback)
 
     def _status_callback(self, status):
@@ -305,6 +306,15 @@ class DeviceServer(BECService):
         self.producer.set_and_publish(
             MessageEndpoints.device_req_status(status.device.name), dev_msg, pipe
         )
+        response = status.instruction.metadata.get("response")
+        if response:
+            self.producer.lpush(
+                MessageEndpoints.device_req_status(status.instruction.metadata["RID"]),
+                dev_msg,
+                pipe,
+                expire=18000,
+            )
+
         pipe.execute()
 
     def _read_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
