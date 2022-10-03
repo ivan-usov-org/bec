@@ -435,6 +435,6 @@ def test_scan_observer_repeat(client):
     while current_queue["info"] or current_queue["status"] != "RUNNING":
         time.sleep(0.5)
         current_queue = bec.queue.queue_storage.current_scan_queue["primary"]
-    time.sleep(5)
-    scan_number_end = bec.queue.next_scan_number
-    assert scan_number_end == scan_number_start + 2
+    while True:
+        if bec.queue.next_scan_number == scan_number_start + 2:
+            break
