@@ -32,8 +32,6 @@ class Device:
         self._signals = []
         self._subdevices = []
         self._status = DeviceStatus.IDLE
-        self.DIID = None
-        self.scanID = None
         self.parent = parent
 
     @property
@@ -81,7 +79,22 @@ class Device:
         return self._signals
 
     def __repr__(self):
-        return f"{type(self).__name__}(name={self.name}, enabled={self.enabled})"
+        config = "".join(
+            [f"\t{key}: {val}\n" for key, val in self.config.get("deviceConfig").items()]
+        )
+        separator = "--" * 10
+        return (
+            f"{type(self).__name__}(name={self.name}, enabled={self.enabled}):\n"
+            f"{separator}\n"
+            "Details:\n"
+            f"\tStatus: {'enabled' if self.enabled else 'disabled'}\n"
+            f"\tLast recorded value: {self.read(cached=True)}\n"
+            f"\tDevice class': {self.config.get('deviceClass')}\n"
+            f"\tDevice group': {self.config.get('deviceGroup')}\n"
+            f"{separator}\n"
+            "Config:\n"
+            f"{config}"
+        )
 
 
 class DeviceContainer(dict):

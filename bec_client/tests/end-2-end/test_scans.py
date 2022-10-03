@@ -75,8 +75,8 @@ def test_grid_scan(capsys, client):
     scans = bec.scans
     wait_for_empty_queue(bec)
     dev = bec.devicemanager.devices
-    scans.umv(dev.samx, 0, dev.samy, 0)
-    status = scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.01)
+    scans.umv(dev.samx, 0, dev.samy, 0, relative=False)
+    status = scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.01, relative=True)
     assert len(status.scan.data) == 100
     assert status.scan.num_points == 100
     captured = capsys.readouterr()
@@ -89,7 +89,9 @@ def test_fermat_scan(capsys, client):
     scans = bec.scans
     wait_for_empty_queue(bec)
     dev = bec.devicemanager.devices
-    status = scans.fermat_scan(dev.samx, -5, 5, dev.samy, -5, 5, step=0.5, exp_time=0.01)
+    status = scans.fermat_scan(
+        dev.samx, -5, 5, dev.samy, -5, 5, step=0.5, exp_time=0.01, relative=True
+    )
     assert len(status.scan.data) == 199
     assert status.scan.num_points == 199
     captured = capsys.readouterr()
@@ -102,7 +104,7 @@ def test_line_scan(capsys, client):
     scans = bec.scans
     wait_for_empty_queue(bec)
     dev = bec.devicemanager.devices
-    status = scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.01)
+    status = scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.01, relative=True)
     assert len(status.scan.data) == 10
     assert status.scan.num_points == 10
     captured = capsys.readouterr()
@@ -154,7 +156,7 @@ def test_mv_scan_mv(client):
     assert np.isclose(current_pos_samx, 10, atol=tolerance_samx)
     assert np.isclose(current_pos_samy, 20, atol=tolerance_samy)
 
-    status = scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.01)
+    status = scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.01, relative=True)
 
     # make sure the scan completed the expected number of positions
     assert len(status.scan.data) == 100
@@ -226,7 +228,7 @@ def test_scan_abort(client):
     aborted_scan = False
     try:
         threading.Thread(target=send_abort, args=(bec,), daemon=True).start()
-        scans.line_scan(dev.samx, -5, 5, steps=200, exp_time=0.1)
+        scans.line_scan(dev.samx, -5, 5, steps=200, exp_time=0.1, relative=True)
     except ScanInterruption:
         time.sleep(2)
         bec.queue.request_scan_abortion()
@@ -242,8 +244,8 @@ def test_scan_abort(client):
 
     assert len(bec.queue.scan_storage.storage[-1].data) < 200
 
-    scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1)
-    scan_number_end = bec.queue.next_scan_number
+    scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=True)
+    scan_number_end = bec.queue.current_scan_number
     assert scan_number_end == scan_number_start + 2
 
 
@@ -267,7 +269,7 @@ def test_limit_error(client):
     aborted_scan = False
     dev.samx.limits = [-50, 50]
     try:
-        scans.umv(dev.samx, 500)
+        scans.umv(dev.samx, 500, relative=False)
     except AlarmBase as alarm:
         assert alarm.alarm_type == "LimitError"
         aborted_scan = True
@@ -284,8 +286,12 @@ def test_queued_scan(client):
     scan_number_start = bec.queue.next_scan_number
     scans = bec.scans
     dev = bec.devicemanager.devices
-    scan1 = scans.line_scan(dev.samx, -5, 5, steps=100, exp_time=0.1, hide_report=True)
-    scan2 = scans.line_scan(dev.samx, -5, 5, steps=50, exp_time=0.1, hide_report=True)
+    scan1 = scans.line_scan(
+        dev.samx, -5, 5, steps=100, exp_time=0.1, hide_report=True, relative=True
+    )
+    scan2 = scans.line_scan(
+        dev.samx, -5, 5, steps=50, exp_time=0.1, hide_report=True, relative=True
+    )
 
     while True:
         if not scan1.scan or not scan2.scan:
