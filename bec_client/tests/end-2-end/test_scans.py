@@ -7,7 +7,7 @@ import pytest
 from bec_client import BKClient
 from bec_client.alarm_handler import AlarmBase
 from bec_utils import BECMessage, MessageEndpoints, RedisConnector, ServiceConfig
-from bec_utils.bec_errors import ScanInterruption
+from bec_utils.bec_errors import ScanAbortion, ScanInterruption
 
 CONFIG_PATH = "../test_config.yaml"
 # CONFIG_PATH = "../bec_config_dev.yaml"
@@ -204,11 +204,13 @@ def test_mv_scan_mv(client):
 def test_scan_abort(client):
     def send_abort(bec):
         while True:
-            current_scan = bec.queue.scan_storage.current_scan_info
-            if not current_scan:
+            current_scan_info = bec.queue.scan_storage.current_scan_info
+            if not current_scan_info:
                 continue
-            status = current_scan.get("status").lower()
+            status = current_scan_info.get("status").lower()
             if status not in ["running", "deferred_pause"]:
+                continue
+            if bec.queue.scan_storage.current_scan is None:
                 continue
             if len(bec.queue.scan_storage.current_scan.data) > 10:
                 _thread.interrupt_main()
@@ -357,7 +359,7 @@ def test_scan_restart(client):
 
 
 @pytest.mark.timeout(100)
-def test_scan_observer_repeat(client):
+def test_scan_observer_repeat_queued(client):
     bec = client
     wait_for_empty_queue(bec)
     scans = bec.scans
@@ -390,3 +392,38 @@ def test_scan_observer_repeat(client):
         current_queue = bec.queue.queue_storage.current_scan_queue["primary"]
     scan_number_end = bec.queue.next_scan_number
     assert scan_number_end == scan_number_start + 3
+
+
+@pytest.mark.timeout(100)
+def test_scan_observer_repeat(client):
+    bec = client
+    wait_for_empty_queue(bec)
+    scans = bec.scans
+    dev = bec.devicemanager.devices
+
+    def send_repeat(bec):
+        while True:
+            if not bec.queue.scan_storage.current_scan:
+                continue
+            if len(bec.queue.scan_storage.current_scan.data) > 0:
+                time.sleep(2)
+                bec.queue.request_scan_interruption(deferred_pause=False)
+                time.sleep(5)
+                bec.queue.request_scan_restart()
+                bec.queue.request_scan_continuation()
+                break
+
+    scan_number_start = bec.queue.next_scan_number
+    # start repeat thread
+    threading.Thread(target=send_repeat, args=(bec,), daemon=True).start()
+    # start scan
+    with pytest.raises(ScanAbortion):
+        scan1 = scans.line_scan(dev.samx, -5, 5, steps=50, exp_time=0.1, hide_report=True)
+        scan1.wait()
+
+    current_queue = bec.queue.queue_storage.current_scan_queue["primary"]
+    while current_queue["info"] or current_queue["status"] != "RUNNING":
+        time.sleep(0.5)
+        current_queue = bec.queue.queue_storage.current_scan_queue["primary"]
+    scan_number_end = bec.queue.next_scan_number
+    assert scan_number_end == scan_number_start + 2
