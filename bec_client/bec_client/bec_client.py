@@ -1,3 +1,6 @@
+import builtins
+import importlib
+import inspect
 import threading
 import time
 from typing import List
@@ -38,6 +41,7 @@ class BKClient(BECService):
         self._load_scans()
         self._exit_event = threading.Event()
         self._exit_handler_thread = None
+        self._hli_funcs = {}
 
     def start(self):
         """start the client"""
@@ -78,6 +82,14 @@ class BKClient(BECService):
 
     def _load_scans(self):
         self.scans = Scans(self)
+        builtins.scans = self.scans
+
+    def load_high_level_interface(self, module_name):
+        mod = importlib.import_module(f"bec_client.high_level_interfaces.{module_name}")
+        members = inspect.getmembers(mod)
+        funcs = {name: func for name, func in members if not name.startswith("__")}
+        self._hli_funcs = funcs
+        builtins.__dict__.update(funcs)
 
     def _start_scan_queue(self):
         self.queue = ScanManager(self.connector)
