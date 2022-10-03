@@ -247,7 +247,7 @@ def test_scan_abort(client):
     assert len(bec.queue.scan_storage.storage[-1].data) < 200
 
     scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=True)
-    scan_number_end = bec.queue.current_scan_number
+    scan_number_end = bec.queue.next_scan_number
     assert scan_number_end == scan_number_start + 2
 
 
