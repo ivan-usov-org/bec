@@ -345,8 +345,12 @@ def test_scan_restart(client):
     # start repeat thread
     threading.Thread(target=send_repeat, args=(bec,), daemon=True).start()
     # start scan
-    scan1 = scans.line_scan(dev.samx, -5, 5, steps=50, exp_time=0.1, hide_report=True)
-    scan2 = scans.line_scan(dev.samx, -5, 5, steps=50, exp_time=0.1, hide_report=True)
+    scan1 = scans.line_scan(
+        dev.samx, -5, 5, steps=50, exp_time=0.1, hide_report=True, relative=True
+    )
+    scan2 = scans.line_scan(
+        dev.samx, -5, 5, steps=50, exp_time=0.1, hide_report=True, relative=True
+    )
 
     scan2.wait()
 
@@ -381,8 +385,12 @@ def test_scan_observer_repeat_queued(client):
     # start repeat thread
     threading.Thread(target=send_repeat, args=(bec,), daemon=True).start()
     # start scan
-    scan1 = scans.line_scan(dev.samx, -5, 5, steps=50, exp_time=0.1, hide_report=True)
-    scan2 = scans.line_scan(dev.samx, -5, 5, steps=50, exp_time=0.1, hide_report=True)
+    scan1 = scans.line_scan(
+        dev.samx, -5, 5, steps=50, exp_time=0.1, hide_report=True, relative=True
+    )
+    scan2 = scans.line_scan(
+        dev.samx, -5, 5, steps=50, exp_time=0.1, hide_report=True, relative=True
+    )
 
     scan2.wait()
 
@@ -418,7 +426,9 @@ def test_scan_observer_repeat(client):
     threading.Thread(target=send_repeat, args=(bec,), daemon=True).start()
     # start scan
     with pytest.raises(ScanAbortion):
-        scan1 = scans.line_scan(dev.samx, -5, 5, steps=50, exp_time=0.1, hide_report=True)
+        scan1 = scans.line_scan(
+            dev.samx, -5, 5, steps=50, exp_time=0.1, hide_report=True, relative=True
+        )
         scan1.wait()
 
     current_queue = bec.queue.queue_storage.current_scan_queue["primary"]
