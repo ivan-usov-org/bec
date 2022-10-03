@@ -202,7 +202,11 @@ def test_mv_scan_mv(client):
 def test_scan_abort(client):
     def send_abort(bec):
         while True:
-            if not bec.queue.scan_storage.current_scan:
+            current_scan = bec.queue.scan_storage.current_scan_info
+            if not current_scan:
+                continue
+            status = current_scan.get("status").lower()
+            if status not in ["running", "deferred_pause"]:
                 continue
             if len(bec.queue.scan_storage.current_scan.data) > 10:
                 _thread.interrupt_main()
