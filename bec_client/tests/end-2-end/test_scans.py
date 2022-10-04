@@ -6,8 +6,16 @@ import numpy as np
 import pytest
 from bec_client import BKClient
 from bec_client.alarm_handler import AlarmBase
-from bec_utils import BECMessage, MessageEndpoints, RedisConnector, ServiceConfig
+from bec_utils import (
+    BECMessage,
+    MessageEndpoints,
+    RedisConnector,
+    ServiceConfig,
+    bec_logger,
+)
 from bec_utils.bec_errors import ScanAbortion, ScanInterruption
+
+logger = bec_logger.logger
 
 CONFIG_PATH = "../test_config.yaml"
 # CONFIG_PATH = "../bec_config_dev.yaml"
@@ -232,6 +240,7 @@ def test_scan_abort(client):
         threading.Thread(target=send_abort, args=(bec,), daemon=True).start()
         scans.line_scan(dev.samx, -5, 5, steps=200, exp_time=0.1, relative=True)
     except ScanInterruption:
+        logger.info("Raised ScanInterruption")
         time.sleep(2)
         bec.queue.request_scan_abortion()
         aborted_scan = True
