@@ -235,7 +235,7 @@ def cSAXS_NeXus_format(storage, data):
 
     # /entry/sample
     control = entry.create_group("sample")
-    control.attrs["NX_class"] = "NXmonitor"
+    control.attrs["NX_class"] = "NXsample"
     control.create_dataset(name="name", data=data.get("samplename"))
     control.create_dataset(name="description", data=data.get("sample_description"))
     x_translation = control.create_dataset(name="x_translation", data=data.get("samx"))
