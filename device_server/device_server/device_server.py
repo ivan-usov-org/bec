@@ -110,6 +110,9 @@ class DeviceServer(BECService):
     def consumer_interception_callback(msg, *, parent, **_kwargs) -> None:
         """callback for receiving scan modifications / interceptions"""
         mvalue = BECMessage.ScanQueueModificationMessage.loads(msg.value)
+        if mvalue is None:
+            logger.warning("Failed to parse scan queue modification message.")
+            return
         logger.info(f"Receiving: {mvalue.content}")
         if mvalue.content.get("action") in ["pause", "abort"]:
             parent.stop_devices()

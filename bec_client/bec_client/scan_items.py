@@ -73,7 +73,9 @@ class ScanStorage:
     @property
     def current_scanID(self) -> Optional(str):
         """get the current scanID"""
-        return self.current_scan_info.get("scanID") if self.current_scan_info is not None else None
+        if self.current_scan_info is None:
+            return None
+        return self.current_scan_info.get("scanID")
 
     @threadlocked
     def find_scan_by_ID(self, scanID: str) -> Optional(ScanItem):
