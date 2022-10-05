@@ -331,6 +331,20 @@ class ScanMessage(BECMessage):
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
 
 
+class ScanBaselineMessage(BECMessage):
+    msg_type = "scan_baseline_message"
+
+    def __init__(self, *, scanID: int, data: dict, metadata: dict = None) -> None:
+        """
+
+        Args:
+            scanID:
+            data:
+        """
+        self.content = {"scanID": scanID, "data": data}
+        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+
+
 class DeviceConfigMessage(BECMessage):
     msg_type = "device_config_message"
 
