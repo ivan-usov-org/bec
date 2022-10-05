@@ -1,15 +1,20 @@
 import os
 from unittest import mock
 
+import file_writer
 import h5py
 import numpy as np
 from file_writer import NexusFileWriter, NeXusFileXMLWriter
 from file_writer.file_writer import HDF5Storage, cSAXS_NeXus_format
 
+dir_path = os.path.dirname(file_writer.__file__)
+
 
 def test_nexus_file_xml_writer():
     file_writer = NeXusFileXMLWriter()
-    file_writer.configure(layout_file=os.path.abspath("./layout_cSAXS_NXsas.xml"))
+    file_writer.configure(
+        layout_file=os.path.abspath(os.path.join(dir_path, "../layout_cSAXS_NXsas.xml"))
+    )
     with mock.patch.object(
         file_writer, "_create_device_data_storage", return_value={"samx": [0, 1, 2]}
     ):
