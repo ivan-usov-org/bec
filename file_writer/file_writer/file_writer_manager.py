@@ -1,9 +1,17 @@
 import os
 
-from bec_utils import BECMessage, BECService, DeviceManagerBase, MessageEndpoints
+from bec_utils import (
+    BECMessage,
+    BECService,
+    DeviceManagerBase,
+    MessageEndpoints,
+    bec_logger,
+)
 from bec_utils.connector import ConnectorBase
 
 from .file_writer import NexusFileWriter, NeXusFileXMLWriter
+
+logger = bec_logger.logger
 
 
 class ScanStorage:
@@ -86,7 +94,7 @@ class FileWriterManager(BECService):
             self.scan_storage[scanID].append(
                 pointID=msg.content.get("point_id"), data=msg.content.get("data")
             )
-            print(msg.content.get("point_id"))
+            logger.debug(msg.content.get("point_id"))
             self.check_storage_status(scanID=scanID)
 
     def update_baseline_reading(self, scanID: str) -> None:
@@ -108,6 +116,15 @@ class FileWriterManager(BECService):
 
     def write_file(self, scanID: str):
         storage = self.scan_storage[scanID]
-        file_path = os.path.join(self.base_path, f"S{storage.scan_number:05d}.h5")
-        self.file_writer.write(file_path=file_path, data=storage)
+        file_path = os.path.abspath(os.path.join(self.base_path, f"S{storage.scan_number:05d}.h5"))
+        successful = True
+        try:
+            logger.info(f"Writing file {file_path}")
+            self.file_writer.write(file_path=file_path, data=storage)
+        except:
+            successful = False
         self.scan_storage.pop(scanID)
+        self.producer.set_and_publish(
+            MessageEndpoints.public_file(scanID),
+            BECMessage.FileMessage(file_path=file_path, successful=successful).dumps(),
+        )

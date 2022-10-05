@@ -413,3 +413,19 @@ class StatusMessage(BECMessage):
             status = BECStatus(status)
         self.content = {"name": name, "status": status.value, "info": info}
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+
+
+class FileMessage(BECMessage):
+    msg_type = "file_message"
+
+    def __init__(self, *, file_path: str, successful: bool, metadata: dict = None) -> None:
+        """
+
+        Args:
+            file_path: path to the written file
+            successful: True if the file writing was successful
+            metadata: status metadata
+        """
+
+        self.content = {"file_path": file_path, "successful": successful}
+        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
