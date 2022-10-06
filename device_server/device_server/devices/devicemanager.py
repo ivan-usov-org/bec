@@ -49,12 +49,12 @@ class DeviceManagerDS(DeviceManagerBase):
         self.config_handler = None
 
     def initialize(self, bootstrap_server) -> None:
-        super().initialize(bootstrap_server)
         self.config_handler = (
             self._config_handler_cls
             if self._config_handler_cls is not None
             else ConfigHandler(producer=self.producer, device_manager=self)
         )
+        super().initialize(bootstrap_server)
 
     def _get_device_class(self, dev_type):
         module = None
