@@ -12,12 +12,12 @@ logger = bec_logger.logger
 
 class ConfigHandler:
     def __init__(self, producer: ProducerConnector, device_manager: DeviceManagerBase) -> None:
-        self.producer = producer
         self.device_manager = device_manager
+        self.producer = self.device_manager.producer
 
     def send_config(self, msg: BMessage.DeviceConfigMessage) -> None:
         """broadcast a new config"""
-        self.producer.send(MessageEndpoints.device_config(), msg.dumps())
+        self.device_manager.producer.send(MessageEndpoints.device_config(), msg.dumps())
 
     def parse_config_request(self, msg: BMessage.DeviceConfigMessage) -> None:
         """Processes a config request. If successful, it emits a config reply
