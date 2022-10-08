@@ -167,8 +167,8 @@ class QueueManager:
             scanID = scanID[0]
         self.queues[queue].status = ScanQueueStatus.PAUSED
         self.queues[queue].worker_status = InstructionQueueStatus.STOPPED
-        scan_msgs = self._wait_for_scan_msg_to_appear_in_history(scanID, queue)
-        self.add_to_queue(queue, scan_msgs[0], 0)
+        instruction_queue = self._wait_for_queue_to_appear_in_history(scanID, queue)
+        self.add_to_queue(queue, instruction_queue.scan_msgs[0], 0)
 
     def _get_active_scanID(self, queue):
         if len(self.queues[queue].queue) == 0:
@@ -178,7 +178,7 @@ class QueueManager:
         return self.queues[queue].queue[0].active_request_block.scanID
 
     @timeout(10)
-    def _wait_for_scan_msg_to_appear_in_history(self, scanID, queue):
+    def _wait_for_queue_to_appear_in_history(self, scanID, queue):
         while True:
             history = self.queues[queue].history_queue
             if len(history) == 0:

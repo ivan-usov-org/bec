@@ -136,7 +136,7 @@ def test_set_restart():
     queue_manager.add_to_queue(scan_queue="primary", msg=msg)
     with mock.patch.object(queue_manager, "_get_active_scanID", return_value="new_scanID"):
         with mock.patch.object(
-            queue_manager, "_wait_for_scan_msg_to_appear_in_history"
+            queue_manager, "_wait_for_queue_to_appear_in_history"
         ) as scan_msg_wait:
             queue_manager.set_restart(queue="primary")
             scan_msg_wait.assert_called_once_with("new_scanID", "primary")
