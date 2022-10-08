@@ -42,7 +42,7 @@ tests:
     - pip install -e ./scan_server
     - pip install -e ./scan_bundler
     - pip install -e ./bec_client
-    - coverage run --source=./bec_utils/bec_utils,./device_server/device_server,./scan_server/scan_server,./scan_bundler/scan_bundler,./bec_client/bec_client -m pytest -v --random-order ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests
+    - coverage run --source=./bec_utils/bec_utils,./device_server/device_server,./scan_server/scan_server,./scan_bundler/scan_bundler,./bec_client/bec_client -m pytest -v --random-order ./bec_utils/tests ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests
     - coverage report
     - coverage xml
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
