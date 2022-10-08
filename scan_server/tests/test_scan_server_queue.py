@@ -2,7 +2,8 @@ from unittest import mock
 
 import pytest
 from bec_utils import BECMessage, MessageEndpoints
-from scan_server.bkqueue import (
+from scan_server.scan_assembler import ScanAssembler
+from scan_server.scan_queue import (
     InstructionQueueItem,
     QueueManager,
     RequestBlock,
@@ -10,7 +11,6 @@ from scan_server.bkqueue import (
     ScanQueue,
     ScanQueueStatus,
 )
-from scan_server.scan_assembler import ScanAssembler
 from scan_server.scan_worker import ScanWorker
 
 from utils import load_ScanServerMock
