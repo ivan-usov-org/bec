@@ -15,10 +15,10 @@ class SingletonThreadpool:
     """
 
     DEFAULT_MAX_WORKER = 100
+    executor = None
 
     def __init__(self, max_workers=DEFAULT_MAX_WORKER) -> None:
-        if not hasattr(self, "_initialized"):
-            self._initialized = True
+        if self.executor is None:
             self.executor = ThreadPoolExecutor(max_workers=max_workers)
         if max_workers > self.executor._max_workers:
             self.executor._max_workers = max_workers
