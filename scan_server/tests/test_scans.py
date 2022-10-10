@@ -7,7 +7,15 @@ import pytest
 from bec_utils import BECMessage as BMessage
 from bec_utils.tests.utils import ProducerMock
 from scan_plugins.LamNIFermatScan import LamNIFermatScan
-from scan_server.scans import DeviceRPC, FermatSpiralScan, Move, RequestBase, Scan
+from scan_server.scans import (
+    DeviceRPC,
+    FermatSpiralScan,
+    Move,
+    RequestBase,
+    Scan,
+    get_2D_raster_pos,
+    get_round_roi_scan_positions,
+)
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=protected-access
@@ -536,6 +544,18 @@ def test_pre_scan_macro():
             with mock.patch("builtins.eval") as eval_mock:
                 request.initialize()
                 eval_mock.assert_called_once_with("pre_scan_macro")
+
+
+@pytest.mark.parametrize("in_args,reference_positions", [((5, 5, 1, 1), [[1, 0], [2, 0], [-2, 0]])])
+def test_round_roi_scan_positions(in_args, reference_positions):
+    positions = get_round_roi_scan_positions(*in_args)
+    assert np.isclose(positions, reference_positions).all()
+
+
+@pytest.mark.parametrize("in_args,reference_positions", [((5, 5, 1, 1), [[1, 0], [2, 0], [-2, 0]])])
+def test_raster_scan_positions(in_args, reference_positions):
+    positions = get_2D_raster_pos(*in_args)
+    assert np.isclose(positions, reference_positions).all()
 
 
 def test_get_func_name_from_macro():
