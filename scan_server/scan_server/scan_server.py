@@ -3,11 +3,11 @@ from __future__ import annotations
 from bec_utils import BECMessage, BECService, MessageEndpoints, bec_logger
 from bec_utils.connector import ConnectorBase
 
-from .bkqueue import QueueManager
 from .devicemanager import DeviceManagerScanServer
 from .scan_assembler import ScanAssembler
 from .scan_guard import ScanGuard
 from .scan_manager import ScanManager
+from .scan_queue import QueueManager
 from .scan_worker import ScanWorker
 
 logger = bec_logger.logger

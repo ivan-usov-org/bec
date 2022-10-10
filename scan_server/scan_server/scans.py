@@ -185,11 +185,15 @@ class RequestBase(ABC):
         self.DIID += 1
         return metadata
 
+    @staticmethod
+    def _get_func_name_from_macro(macro: str):
+        return ast.parse(macro).body[0].name
+
     def run_pre_scan_macros(self):
         macros = self.device_manager.producer.lrange(MessageEndpoints.pre_scan_macros(), 0, -1)
         for macro in macros:
-            macro = macro.decode()
-            func_name = ast.parse(macro).body[0].name
+            macro = macro.decode().strip()
+            func_name = self._get_func_name_from_macro(macro)
             exec(macro)
             eval(func_name)(self.device_manager.devices, self)
 

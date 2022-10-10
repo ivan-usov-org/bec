@@ -1,13 +1,16 @@
+from unittest import mock
+
 import pytest
 from bec_utils import BECMessage, MessageEndpoints
-from scan_server.bkqueue import (
+from scan_server.scan_assembler import ScanAssembler
+from scan_server.scan_queue import (
     InstructionQueueItem,
     QueueManager,
+    RequestBlock,
     RequestBlockQueue,
     ScanQueue,
     ScanQueueStatus,
 )
-from scan_server.scan_assembler import ScanAssembler
 from scan_server.scan_worker import ScanWorker
 
 from utils import load_ScanServerMock
@@ -119,6 +122,69 @@ def test_set_clear_sends_message():
     assert (
         queue_manager.producer.message_sent[0].get("queue") == MessageEndpoints.scan_queue_status()
     )
+
+
+def test_set_restart():
+    queue_manager = get_queuemanager()
+    queue_manager.queues = {"primary": ScanQueue(queue_manager, InstructionQueueMock)}
+    msg = BECMessage.ScanQueueMessage(
+        scan_type="mv",
+        parameter={"args": {"samx": (1,)}, "kwargs": {}},
+        queue="primary",
+        metadata={"RID": "something"},
+    )
+    queue_manager.add_to_queue(scan_queue="primary", msg=msg)
+    with mock.patch.object(queue_manager, "_get_active_scanID", return_value="new_scanID"):
+        with mock.patch.object(
+            queue_manager, "_wait_for_queue_to_appear_in_history"
+        ) as scan_msg_wait:
+            queue_manager.set_restart(queue="primary")
+            scan_msg_wait.assert_called_once_with("new_scanID", "primary")
+
+
+def test_request_block():
+    scan_server = load_ScanServerMock()
+    msg = BECMessage.ScanQueueMessage(
+        scan_type="mv",
+        parameter={"args": {"samx": (1,)}, "kwargs": {}},
+        queue="primary",
+        metadata={"RID": "something"},
+    )
+    request_block = RequestBlock(msg, assembler=ScanAssembler(parent=scan_server))
+
+
+@pytest.mark.parametrize(
+    "scan_queue_msg",
+    [
+        (
+            BECMessage.ScanQueueMessage(
+                scan_type="mv",
+                parameter={"args": {"samx": (1,)}, "kwargs": {}},
+                queue="primary",
+                metadata={"RID": "something"},
+            )
+        ),
+        (
+            BECMessage.ScanQueueMessage(
+                scan_type="grid_scan",
+                parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
+                queue="primary",
+                metadata={"RID": "something"},
+            )
+        ),
+    ],
+)
+def test_request_block_scan_number(scan_queue_msg):
+    scan_server = load_ScanServerMock()
+    request_block = RequestBlock(scan_queue_msg, assembler=ScanAssembler(parent=scan_server))
+    if not request_block.is_scan:
+        assert request_block.scan_number is None
+        return
+    with mock.patch.object(
+        RequestBlock, "_scan_server_scan_number", new_callable=mock.PropertyMock, return_value=5
+    ):
+        with mock.patch.object(RequestBlock, "scanIDs_head", return_value=0):
+            assert request_block.scan_number == 5
 
 
 def test_remove_queue_item():
