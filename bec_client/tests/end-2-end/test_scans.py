@@ -447,3 +447,22 @@ def test_scan_observer_repeat(client):
     while True:
         if bec.queue.next_scan_number == scan_number_start + 2:
             break
+
+
+@pytest.mark.timeout(100)
+def test_file_writer(client):
+    bec = client
+    wait_for_empty_queue(bec)
+    scans = bec.scans
+    dev = bec.devicemanager.devices
+
+    scan = scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.01, relative=True)
+    assert len(scan.scan.data) == 100
+    msg = bec.devicemanager.producer.get(MessageEndpoints.public_file(scan.scan.scanID))
+    while True:
+        if msg:
+            break
+        msg = bec.devicemanager.producer.get(MessageEndpoints.public_file(scan.scan.scanID))
+
+    file_msg = BECMessage.FileMessage.loads(msg)
+    assert file_msg.content["successful"]

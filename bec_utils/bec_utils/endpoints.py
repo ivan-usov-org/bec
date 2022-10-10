@@ -34,6 +34,8 @@ class MessageEndpoints:
     _public_scan_info = Template("public/$scanID/scan_info")
     _public_scan_segment = Template("public/$scanID/scan_segment/$pointID")
     _public_scan_data = Template("public/$scanID/scan_data/$device/$pointID")
+    _public_scan_baseline = Template("public/$scanID/scan_baseline")
+    _public_file = Template("public/$scanID/file")
 
     # instructions
     _device_instructions = "internal/devices/instructions"
@@ -167,6 +169,14 @@ class MessageEndpoints:
     @classmethod
     def public_scan_data(cls, scanID: str, device: str, pointID: str):
         return cls._public_scan_data.substitute(scanID=scanID, device=device, pointID=pointID)
+
+    @classmethod
+    def public_scan_baseline(cls, scanID: str):
+        return cls._public_scan_baseline.substitute(scanID=scanID)
+
+    @classmethod
+    def public_file(cls, scanID: str):
+        return cls._public_file.substitute(scanID=scanID)
 
     # log
     @classmethod
