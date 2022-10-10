@@ -7,7 +7,14 @@ import uuid
 from enum import Enum
 from typing import List, Optional, Union
 
-from bec_utils import Alarms, BECMessage, MessageEndpoints, bec_logger, threadlocked
+from bec_utils import (
+    Alarms,
+    BECMessage,
+    MessageEndpoints,
+    bec_logger,
+    threadlocked,
+    timeout,
+)
 from rich.console import Console
 from rich.table import Table
 
@@ -153,26 +160,38 @@ class QueueManager:
     def set_restart(self, scanID=None, queue="primary", parameter: dict = None) -> None:
         """abort and restart the currently running scan. The active scan will be aborted."""
         if not scanID:
-            scanID = self.queues[queue].queue[0].active_request_block.scanID
+            scanID = self._get_active_scanID(queue)
+        if not scanID:
+            return
         if isinstance(scanID, list):
             scanID = scanID[0]
         self.queues[queue].status = ScanQueueStatus.PAUSED
         self.queues[queue].worker_status = InstructionQueueStatus.STOPPED
+        instruction_queue = self._wait_for_queue_to_appear_in_history(scanID, queue)
+        self.add_to_queue(queue, instruction_queue.scan_msgs[0], 0)
+
+    def _get_active_scanID(self, queue):
+        if len(self.queues[queue].queue) == 0:
+            return None
+        if self.queues[queue].queue[0].active_request_block is None:
+            return None
+        return self.queues[queue].queue[0].active_request_block.scanID
+
+    @timeout(10)
+    def _wait_for_queue_to_appear_in_history(self, scanID, queue):
         while True:
             history = self.queues[queue].history_queue
             if len(history) == 0:
-                time.sleep(0.5)
+                time.sleep(0.1)
                 continue
             if not scanID in history[-1].scanID:
-                time.sleep(0.5)
+                time.sleep(0.1)
                 continue
 
             if len(self.queues[queue].queue) > 0 and scanID in self.queues[queue].queue[0].scanID:
-                time.sleep(0.5)
+                time.sleep(0.1)
                 continue
-            self.add_to_queue(queue, history[-1].scan_msgs[0], 0)
-            # self.set_continue()
-            break
+            return history[-1]
 
     def send_queue_status(self) -> None:
         """send the current queue to redis"""
@@ -426,15 +445,17 @@ class RequestBlock:
             return None
         if self._scan_number is not None:
             return self._scan_number
-        return self.parent.parent.parent.queue_manager.parent.scan_number + self.scanIDs_head()
+        return self._scan_server_scan_number + self.scanIDs_head()
+
+    @property
+    def _scan_server_scan_number(self):
+        return self.parent.parent.parent.queue_manager.parent.scan_number
 
     def assign_scan_number(self) -> None:
         """assign and fix the current scan number prediction"""
         if not self.is_scan:
             return None
-        self._scan_number = (
-            self.parent.parent.parent.queue_manager.parent.scan_number + self.scanIDs_head()
-        )
+        self._scan_number = self._scan_server_scan_number + self.scanIDs_head()
         return None
 
     def scanIDs_head(self) -> int:
@@ -521,19 +542,18 @@ class RequestBlockQueue:
         )
 
     def _pull_request_block(self):
-        if self.active_rb is None:
-            if len(self.request_blocks_queue) > 0:
-                self.active_rb = self.request_blocks_queue.popleft()
-                if self.active_rb.scan_def_id in self.scan_def_ids:
-                    if hasattr(self.active_rb.scan, "pointID"):
-                        self.active_rb.scan.pointID = self.scan_def_ids[self.active_rb.scan_def_id][
-                            "pointID"
-                        ]
-                if self.active_rb.is_scan:
-                    self.active_rb.assign_scan_number()
-
-            else:
-                raise StopIteration
+        if self.active_rb is not None:
+            return
+        if len(self.request_blocks_queue) == 0:
+            raise StopIteration
+        self.active_rb = self.request_blocks_queue.popleft()
+        if self.active_rb.scan_def_id in self.scan_def_ids:
+            if hasattr(self.active_rb.scan, "pointID"):
+                self.active_rb.scan.pointID = self.scan_def_ids[self.active_rb.scan_def_id][
+                    "pointID"
+                ]
+        if self.active_rb.is_scan:
+            self.active_rb.assign_scan_number()
 
     def increase_scan_number(self) -> None:
         """increase the scan number counter"""
@@ -569,8 +589,6 @@ class RequestBlockQueue:
                 metadata={},
             )
             raise ScanAbortion from limit_error
-        except ScanAbortion as scan_abortion:
-            breakpoint()
 
 
 class InstructionQueueItem:

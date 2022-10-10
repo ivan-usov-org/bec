@@ -14,8 +14,8 @@ from bec_utils import (
     bec_logger,
 )
 
-from .bkqueue import InstructionQueueItem, InstructionQueueStatus
 from .errors import DeviceMessageError, ScanAbortion
+from .scan_queue import InstructionQueueItem, InstructionQueueStatus
 
 logger = bec_logger.logger
 
