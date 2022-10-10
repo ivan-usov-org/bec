@@ -552,9 +552,19 @@ def test_round_roi_scan_positions(in_args, reference_positions):
     assert np.isclose(positions, reference_positions).all()
 
 
-@pytest.mark.parametrize("in_args,reference_positions", [((5, 5, 1, 1), [[1, 0], [2, 0], [-2, 0]])])
-def test_raster_scan_positions(in_args, reference_positions):
-    positions = get_2D_raster_pos(*in_args)
+@pytest.mark.parametrize(
+    "in_args,reference_positions,snaked",
+    [
+        (([list(range(2)), list(range(2))],), [[0, 1], [0, 0], [1, 0], [1, 1]], True),
+        (
+            ([list(range(2)), list(range(3))],),
+            [[0, 0], [0, 1], [0, 2], [1, 0], [1, 1], [1, 2]],
+            False,
+        ),
+    ],
+)
+def test_raster_scan_positions(in_args, reference_positions, snaked):
+    positions = get_2D_raster_pos(*in_args, snaked=snaked)
     assert np.isclose(positions, reference_positions).all()
 
 
@@ -577,6 +587,12 @@ def test_get_func_name_from_macro():
         device_manager=device_manager, parameter=scan_msg.content["parameter"]
     )
     assert request._get_func_name_from_macro(macros[0].decode().strip()) == "pre_scan_macro"
+
+
+@pytest.mark.parametrize("in_args,reference_positions", [((5, 5, 1, 1), [[1, 0], [2, 0], [-2, 0]])])
+def test_round_roi_scan_positions(in_args, reference_positions):
+    positions = get_round_roi_scan_positions(*in_args)
+    assert np.isclose(positions, reference_positions).all()
 
 
 @pytest.mark.parametrize(
