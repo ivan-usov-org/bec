@@ -1,11 +1,13 @@
+import inspect
 from unittest import mock
+from urllib.request import Request
 
 import numpy as np
 import pytest
 from bec_utils import BECMessage as BMessage
 from bec_utils.tests.utils import ProducerMock
 from scan_plugins.LamNIFermatScan import LamNIFermatScan
-from scan_server.scans import DeviceRPC, FermatSpiralScan, Move, Scan
+from scan_server.scans import DeviceRPC, FermatSpiralScan, Move, RequestBase, Scan
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=protected-access
@@ -504,6 +506,57 @@ def test_device_rpc():
             metadata={"stream": "primary", "DIID": 0},
         )
     ]
+
+
+def test_pre_scan_macro():
+    def pre_scan_macro(devices: dict, request: RequestBase):
+        pass
+
+    device_manager = DMMock()
+    device_manager.add_device("samx")
+    macros = [inspect.getsource(pre_scan_macro).encode()]
+    scan_msg = BMessage.ScanQueueMessage(
+        scan_type="fermat_scan",
+        parameter={
+            "args": {"samx": (-5, 5), "samy": (-5, 5)},
+            "kwargs": {"step": 3},
+        },
+        queue="primary",
+    )
+    request = FermatSpiralScan(
+        device_manager=device_manager, parameter=scan_msg.content["parameter"]
+    )
+    with mock.patch.object(
+        request.device_manager.producer,
+        "lrange",
+        new_callable=mock.PropertyMock,
+        return_value=macros,
+    ) as macros_mock:
+        with mock.patch.object(request, "_get_func_name_from_macro", return_value="pre_scan_macro"):
+            with mock.patch("builtins.eval") as eval_mock:
+                request.initialize()
+                eval_mock.assert_called_once_with("pre_scan_macro")
+
+
+def test_get_func_name_from_macro():
+    def pre_scan_macro(devices: dict, request: RequestBase):
+        pass
+
+    device_manager = DMMock()
+    device_manager.add_device("samx")
+    macros = [inspect.getsource(pre_scan_macro).encode()]
+    scan_msg = BMessage.ScanQueueMessage(
+        scan_type="fermat_scan",
+        parameter={
+            "args": {"samx": (-5, 5), "samy": (-5, 5)},
+            "kwargs": {"step": 3},
+        },
+        queue="primary",
+    )
+    request = FermatSpiralScan(
+        device_manager=device_manager, parameter=scan_msg.content["parameter"]
+    )
+    assert request._get_func_name_from_macro(macros[0].decode().strip()) == "pre_scan_macro"
 
 
 @pytest.mark.parametrize(
