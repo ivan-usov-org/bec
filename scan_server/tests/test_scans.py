@@ -589,12 +589,6 @@ def test_get_func_name_from_macro():
     assert request._get_func_name_from_macro(macros[0].decode().strip()) == "pre_scan_macro"
 
 
-@pytest.mark.parametrize("in_args,reference_positions", [((5, 5, 1, 1), [[1, 0], [2, 0], [-2, 0]])])
-def test_round_roi_scan_positions(in_args, reference_positions):
-    positions = get_round_roi_scan_positions(*in_args)
-    assert np.isclose(positions, reference_positions).all()
-
-
 @pytest.mark.parametrize(
     "scan_msg,reference_scan_list",
     [
