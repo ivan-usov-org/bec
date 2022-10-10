@@ -5,7 +5,7 @@ from concurrent.futures import TimeoutError as CFTimeoutError
 # pylint: disable=too-few-public-methods
 class SingletonThreadpool:
     """Singleton class for handling threadpools: Instantiating a new class instance
-    is indempotent and will return the already existing class. However, the number of
+    is idempotent and will return the already existing class. However, the number of
     workers can be increased by instantiating a new class instance.
 
     >>> pool = SingleThreadpool(max_workers=100)
@@ -15,10 +15,10 @@ class SingletonThreadpool:
     """
 
     DEFAULT_MAX_WORKER = 100
+    executor = None
 
     def __init__(self, max_workers=DEFAULT_MAX_WORKER) -> None:
-        if not hasattr(self, "_initialized"):
-            self._initialized = True
+        if self.executor is None:
             self.executor = ThreadPoolExecutor(max_workers=max_workers)
         if max_workers > self.executor._max_workers:
             self.executor._max_workers = max_workers
