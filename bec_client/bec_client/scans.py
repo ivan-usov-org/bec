@@ -7,7 +7,7 @@ from bec_utils import BECMessage, MessageEndpoints, bec_logger
 from bec_utils.connector import ConsumerConnector
 from cytoolz import partition
 
-from .callbacks.live_table import live_updates_table
+from .callbacks.live_table import LiveUpdatesTable
 from .callbacks.move_device import live_updates_readback_progressbar
 from .devicemanager_client import Device
 from .scan_manager import ScanReport
@@ -64,7 +64,7 @@ class ScanObject:
                     self.parent.scans._scan_def_id is None
                     or request.content["scan_type"] == "close_scan_def"
                 ):
-                    await live_updates_table(self.parent, request)
+                    await LiveUpdatesTable(self.parent, request).run()
             else:
                 self._send_scan_request(request)
             return scan_report

@@ -14,6 +14,10 @@ class ClientMock(BKClient):
     def _load_scans(self):
         pass
 
+    def start(self):
+        self._start_scan_queue()
+        self._start_alarm_handler()
+
 
 class DMClientMock(DMClient):
     def _get_device_info(self, device_name) -> BECMessage.DeviceInfoMessage:
