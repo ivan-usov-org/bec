@@ -8,7 +8,7 @@ from bec_client.callbacks.move_device import (
 )
 from bec_utils import BECMessage
 
-from utils import get_bec_client_mock
+from .utils import get_bec_client_mock
 
 
 @pytest.mark.asyncio
