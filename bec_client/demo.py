@@ -38,7 +38,7 @@ logger.success("Started BKClient")
 #     dp = PlotAxis(bk.devicemanager.connector)
 #     dp.start()
 
-# scans.umv(dev.samx, -150)
+scans.umv(dev.samx, 10, relative=True)
 
 # scans.mv(dev.samx, 20, dev.samy, -20)
 # s = scans.line_scan(dev.samy, -5, 40, steps=10, exp_time=0.1)

@@ -28,4 +28,5 @@ def set_event_delayed(event: threading.Event, delay: int) -> None:
 def check_alarms(bec):
     """check for alarms and raise them if needed"""
     for alarm in bec.alarms(severity=Alarms.MINOR):
-        raise alarm
+        if alarm:
+            raise alarm
