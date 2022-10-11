@@ -1,188 +1,21 @@
 from __future__ import annotations
 
 import asyncio
-import threading
 import time
 from typing import TYPE_CHECKING
 
-import msgpack
-import numpy as np
-from bec_utils import (
-    Alarms,
-    BECMessage,
-    DeviceManagerBase,
-    DeviceStatus,
-    MessageEndpoints,
-    bec_logger,
-)
-from bec_utils.connector import ConsumerConnector
-
+from bec_client.prettytable import PrettyTable
+from bec_client.progressbar import ScanProgressBar
 from bec_client.request_items import RequestItem, RequestStorage
 from bec_client.scan_items import ScanItem
+from bec_utils import BECMessage, bec_logger
 
-from .prettytable import PrettyTable
-from .progressbar import DeviceProgressBar, ScanProgressBar
+from .utils import ScanRequestError, check_alarms
 
 if TYPE_CHECKING:
-    from .bec_client import BKClient
+    from bec_client.bec_client import BKClient
 
 logger = bec_logger.logger
-
-
-class ScanRequestError(Exception):
-    pass
-
-
-def set_event_delayed(event: threading.Event, delay: int) -> None:
-    """Set event with a delay
-
-    Args:
-        event (threading.Event): event that should be set
-        delay (int): delay time in seconds
-
-    """
-
-    def call_set():
-        time.sleep(delay)
-        event.set()
-
-    thread = threading.Thread(target=call_set, daemon=True)
-    thread.start()
-
-
-def check_alarms(bec):
-    """check for alarms and raise them if needed"""
-    for alarm in bec.alarms(severity=Alarms.MINOR):
-        raise alarm
-
-
-async def live_updates_readback_progressbar(
-    device_manager: DeviceManagerBase, request: BECMessage.ScanQueueMessage
-) -> None:
-    """Live feedback on motor movements using a progressbar.
-
-    Args:
-        dm (DeviceManagerBase): devicemanager
-        request (ScanQueueMessage): request that should be monitored
-
-    """
-    devices = list(request.content["parameter"]["args"].keys())
-    target_values = [x for xs in request.content["parameter"]["args"].values() for x in xs]
-
-    def get_device_values():
-        return [
-            device_manager.devices[dev].read(cached=True, use_readback=True).get("value")
-            for dev in devices
-        ]
-
-    while True:
-        msgs = [
-            BECMessage.DeviceMessage.loads(
-                device_manager.producer.get(MessageEndpoints.device_readback(dev))
-            )
-            for dev in devices
-        ]
-        if all(msg.metadata.get("RID") == request.metadata["RID"] for msg in msgs if msg):
-            break
-        check_alarms(device_manager.parent)
-    start_values = get_device_values()
-    with DeviceProgressBar(
-        devices=devices, start_values=start_values, target_values=target_values
-    ) as progress:
-        req_done = False
-        while not progress.finished or not req_done:
-            check_alarms(device_manager.parent)
-
-            pipe = device_manager.producer.pipeline()
-            for dev in devices:
-                device_manager.producer.get(MessageEndpoints.device_req_status(dev), pipe)
-            req_done_msgs = pipe.execute()
-
-            values = get_device_values()
-            progress.update(values=values)
-
-            msgs = [BECMessage.DeviceReqStatusMessage.loads(msg) for msg in req_done_msgs]
-            request_ids = [
-                msg.metadata["RID"] if (msg and msg.metadata.get("RID")) else None for msg in msgs
-            ]
-            if set(request_ids) != set([request.metadata["RID"]]):
-                await progress.sleep()
-                continue
-
-            req_done = True
-            for dev, msg in zip(devices, msgs):
-                if not msg:
-                    continue
-                if msg.content.get("success", False):
-                    progress.set_finished(dev)
-
-
-async def live_updates_readback(
-    device_manager: DeviceManagerBase, move_args: dict, consumer: ConsumerConnector
-) -> None:
-    """Live feedback on motor movements.
-
-    Args:
-        dm (DeviceManagerBase): devicemanager
-        move_args (dict): arguments passed to the move command
-        consumer (ConsumerConnector): active consumer
-
-    """
-
-    devices = move_args.keys()
-    print("  ", "\t".join(f"{dev}" for dev in devices))
-    stop = [threading.Event() for dev in devices]
-    dev_values = [
-        device_manager.devices[dev].read(cached=True, use_readback=True).get("value")
-        for dev in devices
-    ]
-
-    def print_device_positions():
-        print(
-            "  ",
-            "\t".join(f"{dev:0.3f}" for dev in dev_values),
-            end="\r",
-            flush=True,
-        )
-
-    print_device_positions()
-    if not all(np.isclose(dev_values, list(move_args.values()))[0]):
-        while not all(stop_dev.is_set() for stop_dev in stop):
-            msg = consumer.poll_messages()
-            if msg is not None:
-                msg = BECMessage.DeviceMessage.loads(msg.value).content["signals"]
-                for ind, dev in enumerate(devices):
-                    if dev in msg:
-                        dev_values[ind] = msg[dev].get("value")
-            else:
-                dev_values = [
-                    device_manager.devices[dev].read(cached=True, use_readback=True).get("value")
-                    for dev in devices
-                ]
-                for ind, dev in enumerate(devices):
-                    val = device_manager.parent.producer.get(MessageEndpoints.device_status(dev))
-                    if not val:
-                        continue
-                    val = msgpack.loads(val)
-
-                    if DeviceStatus(val.get("status")) != DeviceStatus.IDLE:
-                        continue
-
-                    tolerance = (
-                        device_manager.devices[dev].config["deviceConfig"].get("tolerance", 0.5)
-                    )
-                    is_close = all(
-                        np.isclose(dev_values[ind], list(move_args.values())[ind], atol=tolerance)
-                    )
-                    if not is_close:
-                        continue
-                    if not stop[ind].is_set():
-                        set_event_delayed(stop[ind], 0.2)
-                check_alarms(device_manager.parent)
-                await asyncio.sleep(0.1)
-            print_device_positions()
-
-    print("\n")
 
 
 async def wait_for_scan_request(requests: RequestStorage, RID: str) -> RequestItem:
