@@ -27,7 +27,7 @@ bk = BKClient(
 bk.start()
 bk.load_high_level_interface("spec_hli")
 
-dev = bk.devicemanager.devices
+dev = bk.device_manager.devices
 scans = bk.scans
 
 logger.success("Started BKClient")
@@ -35,10 +35,10 @@ logger.success("Started BKClient")
 # dev.samx.low_limit = -20
 # scans.round_scan_fly(dev.samx, dev.samy, 0, 50, 20, 3, exp_time=0.1, relative=True)
 # def plotfunc():
-#     dp = PlotAxis(bk.devicemanager.connector)
+#     dp = PlotAxis(bk.device_manager.connector)
 #     dp.start()
 
-# scans.umv(dev.samx, -150)
+# scans.umv(dev.samx, 10, relative=True)
 
 # scans.mv(dev.samx, 20, dev.samy, -20)
 # s = scans.line_scan(dev.samy, -5, 40, steps=10, exp_time=0.1)

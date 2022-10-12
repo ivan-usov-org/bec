@@ -272,7 +272,7 @@ class RedisConsumerThreaded(ConsumerConnectorThreaded):
         self.pubsub = self.r.pubsub()
         self.host = host
         self.port = port
-        self.sleep_times = [None, 0.1]
+        self.sleep_times = [0.005, 0.1]
         self.last_received_msg = 0
         self.idle_time = 30
 

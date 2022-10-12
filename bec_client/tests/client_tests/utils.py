@@ -14,6 +14,10 @@ class ClientMock(BKClient):
     def _load_scans(self):
         pass
 
+    def start(self):
+        self._start_scan_queue()
+        self._start_alarm_handler()
+
 
 class DMClientMock(DMClient):
     def _get_device_info(self, device_name) -> BECMessage.DeviceInfoMessage:
@@ -63,9 +67,10 @@ def get_bec_client_mock():
         device_manager._session = yaml.safe_load(f)
     device_manager.producer = device_manager.connector.producer()
     device_manager._load_session()
+    client.device_manager = device_manager
     return client
 
 
-def test_scan_update():
-    bec_client = get_bec_client_mock()
-    # queue = ScanQueue(bec_client)
+# def test_scan_update():
+#     bec_client = get_bec_client_mock()
+#     # queue = ScanQueue(bec_client)

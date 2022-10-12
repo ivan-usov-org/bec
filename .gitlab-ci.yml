@@ -37,7 +37,7 @@ tests:
   script:
     - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
     - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices
-    - pip install pytest pytest-random-order pytest-cov
+    - pip install pytest pytest-random-order pytest-cov pytest-asyncio
     - pip install -e ./device_server
     - pip install -e ./scan_server
     - pip install -e ./scan_bundler

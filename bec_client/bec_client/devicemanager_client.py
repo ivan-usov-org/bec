@@ -10,7 +10,7 @@ from bec_utils import (
     bec_logger,
 )
 
-from bec_client.callbacks import ScanRequestError
+from bec_client.callbacks.utils import ScanRequestError
 
 
 class RPCError(Exception):
