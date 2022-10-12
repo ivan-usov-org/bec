@@ -1,8 +1,10 @@
 import os
+from unittest import mock
 
 import bec_utils
 import pytest
 import yaml
+from bec_utils import BECMessage
 from bec_utils.tests.utils import ConnectorMock
 from device_server.devices.devicemanager import DeviceManagerDS
 
@@ -73,3 +75,31 @@ def test_conntect_device(obj, raises_error):
             device_manager.connect_device(obj)
         return
     device_manager.connect_device(obj)
+
+
+def test_disable_unreachable_devices():
+    connector = ConnectorMock("")
+    device_manager = DeviceManagerDS(connector, "")
+
+    def get_config_from_mock():
+        with open(f"{dir_path}/tests/test_session.yaml", "r") as session_file:
+            device_manager._session = yaml.safe_load(session_file)
+        device_manager._load_session()
+
+    def mocked_failed_connection(obj):
+        if obj.name == "samx":
+            raise ConnectionError
+
+    with mock.patch.object(device_manager, "connect_device", wraps=mocked_failed_connection):
+        with mock.patch.object(device_manager, "_get_config_from_DB", get_config_from_mock):
+            device_manager.initialize("")
+            assert device_manager.config_handler is not None
+            assert device_manager.devices.samx.enabled is False
+            msg = BECMessage.DeviceConfigMessage(
+                action="update", config={"samx": {"enabled": False}}
+            )
+            with mock.patch.object(
+                device_manager.config_handler, "update_device_enabled_in_db"
+            ) as update_device_db:
+                device_manager.config_handler.parse_config_request(msg)
+                update_device_db.assert_called_once_with(device_name="samx")

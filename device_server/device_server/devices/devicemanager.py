@@ -52,7 +52,7 @@ class DeviceManagerDS(DeviceManagerBase):
         self.config_handler = (
             self._config_handler_cls
             if self._config_handler_cls is not None
-            else ConfigHandler(producer=self.producer, device_manager=self)
+            else ConfigHandler(device_manager=self)
         )
         super().initialize(bootstrap_server)
 
