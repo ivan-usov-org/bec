@@ -136,7 +136,7 @@ class ScanStubs:
             device (str): Device name of flyer.
             parameter (dict, optional): Additional parameters that should be forwarded to the device. Defaults to {}.
         """
-        parameter = parameter if not None else {}
+        parameter = parameter if parameter is not None else {}
         yield self._device_msg(
             device=device,
             action="kickoff",
