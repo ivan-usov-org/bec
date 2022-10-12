@@ -14,7 +14,9 @@ logger = bec_logger.logger
 class ScanStubs:
     def __init__(self, producer: ProducerConnector, device_msg_callback: Callable = None) -> None:
         self.producer = producer
-        self.device_msg_metadata = device_msg_callback if not None else lambda self: {}
+        self.device_msg_metadata = (
+            device_msg_callback if device_msg_callback is not None else lambda: {}
+        )
 
     @staticmethod
     def _exclude_nones(input_dict: dict):
@@ -136,7 +138,7 @@ class ScanStubs:
             device (str): Device name of flyer.
             parameter (dict, optional): Additional parameters that should be forwarded to the device. Defaults to {}.
         """
-        parameter = parameter if not None else {}
+        parameter = parameter if parameter is not None else {}
         yield self._device_msg(
             device=device,
             action="kickoff",
