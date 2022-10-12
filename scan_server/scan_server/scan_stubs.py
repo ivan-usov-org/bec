@@ -14,7 +14,9 @@ logger = bec_logger.logger
 class ScanStubs:
     def __init__(self, producer: ProducerConnector, device_msg_callback: Callable = None) -> None:
         self.producer = producer
-        self.device_msg_metadata = device_msg_callback if not None else lambda self: {}
+        self.device_msg_metadata = (
+            device_msg_callback if device_msg_callback is not None else lambda: {}
+        )
 
     @staticmethod
     def _exclude_nones(input_dict: dict):
