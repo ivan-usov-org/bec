@@ -154,7 +154,7 @@ class QueueManager:
         # pylint: disable=unused-argument
         """pause the queue and clear all its elements"""
         self.queues[queue].status = ScanQueueStatus.PAUSED
-        self.queues[queue].worker_status = InstructionQueueStatus.PAUSED
+        self.queues[queue].worker_status = InstructionQueueStatus.STOPPED
         self.queues[queue].clear()
 
     def set_restart(self, scanID=None, queue="primary", parameter: dict = None) -> None:
@@ -319,6 +319,7 @@ class ScanQueue:
     def clear(self):
         """clear the queue"""
         self.queue.clear()
+        self.active_instruction_queue = None
 
     def __iter__(self):
         return self
