@@ -24,7 +24,7 @@ pylint:
     - pip install pylint pylint-exit anybadge
   script:
     - mkdir ./pylint
-    - pylint ./bec_utils/bec_utils ./scan_server/scan_server ./device_server/device_server ./scan_bundler/scan_bundler ./bec_client/bec_client --output-format=text . | tee ./pylint/pylint.log || pylint-exit $?
+    - pylint ./bec_utils/bec_utils ./scan_server/scan_server ./device_server/device_server ./scan_bundler/scan_bundler ./bec_client/bec_client ./file_writer/file_writer --output-format=text . | tee ./pylint/pylint.log || pylint-exit $?
     - PYLINT_SCORE=$(sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' ./pylint/pylint.log)
     - anybadge --label=Pylint --file=pylint/pylint.svg --value=$PYLINT_SCORE 2=red 4=orange 8=yellow 10=green
     - echo "Pylint score is $PYLINT_SCORE"
@@ -42,7 +42,8 @@ tests:
     - pip install -e ./scan_server
     - pip install -e ./scan_bundler
     - pip install -e ./bec_client
-    - coverage run --source=./bec_utils/bec_utils,./device_server/device_server,./scan_server/scan_server,./scan_bundler/scan_bundler,./bec_client/bec_client -m pytest -v --random-order ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests
+    - pip install -e ./file_writer
+    - coverage run --source=./bec_utils/bec_utils,./device_server/device_server,./scan_server/scan_server,./scan_bundler/scan_bundler,./bec_client/bec_client,./file_writer/file_writer -m pytest -v --random-order ./bec_utils/tests ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests ./file_writer/tests
     - coverage report
     - coverage xml
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
@@ -85,11 +86,13 @@ end-2-end:
     - docker build -t scan_bundler:test -f ./scan_bundler/Dockerfile .
     - docker build -t scan_server:test -f ./scan_server/Dockerfile .
     - docker build -t device_server:test -f ./device_server/Dockerfile .
+    - docker build -t file_writer:test -f ./file_writer/Dockerfile .
 
     # run scan_bundler, scan_server and device_server
     - docker run --network=host -d --name device_server device_server:test
     - docker run --network=host -d --name scan_server scan_server:test
     - docker run --network=host -d --name scan_bundler scan_bundler:test
+    - docker run --network=host -d --name file_writer file_writer:test
 
     # build and run the tests
     - docker build -t en2end_client:test -f ./bec_client/tests/Dockerfile .

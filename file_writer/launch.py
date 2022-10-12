@@ -1,10 +1,13 @@
 import argparse
-import logging
+import os
 import threading
 
-from bluekafka_utils import RedisConnector, ServiceConfig
+from bec_utils import RedisConnector, ServiceConfig, bec_logger
 
 from file_writer import FileWriterManager
+
+logger = bec_logger.logger
+bec_logger.level = bec_logger.LOGLEVEL.INFO
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument(
@@ -17,15 +20,11 @@ config_path = clargs.config
 
 config = ServiceConfig(config_path)
 
-logging.basicConfig(filename="scan_bundler.log", level=logging.INFO, filemode="w+")
-logging.getLogger("kafka").setLevel(50)
-logging.getLogger().addHandler(logging.StreamHandler())
-
-sb = FileWriterManager(config.redis, RedisConnector, config.scibec)
-
+file_writer = FileWriterManager(config.redis, RedisConnector, config.scibec)
+file_writer.file_writer.configure(layout_file=os.path.abspath("./layout_cSAXS_NXsas.xml"))
 try:
     event = threading.Event()
-    logging.info("Started FileWriter")
+    logger.success("Started FileWriter")
     event.wait()
 except KeyboardInterrupt as e:
-    sb.shutdown()
+    file_writer.shutdown()
