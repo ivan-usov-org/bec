@@ -1,7 +1,6 @@
 import collections
 import inspect
 from unittest import mock
-from urllib.request import Request
 
 import numpy as np
 import pytest
