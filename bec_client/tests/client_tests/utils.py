@@ -67,7 +67,7 @@ def get_bec_client_mock():
         device_manager._session = yaml.safe_load(f)
     device_manager.producer = device_manager.connector.producer()
     device_manager._load_session()
-    client.devicemanager = device_manager
+    client.device_manager = device_manager
     return client
 
 

@@ -134,7 +134,7 @@ class LiveUpdatesTable:
 
     def get_devices_from_request(self) -> list:
         """extract interesting devices from a scan request"""
-        device_manager = self.bec.devicemanager
+        device_manager = self.bec.device_manager
         scan_devices = self.request.content["parameter"]["args"].keys()
         primary_devices = device_manager.devices.primary_devices(
             [device_manager.devices[dev] for dev in scan_devices]

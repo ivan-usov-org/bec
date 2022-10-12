@@ -3,8 +3,8 @@ from unittest import mock
 
 import pytest
 from bec_client.callbacks.move_device import (
+    LiveUpdatesReadbackProgressbar,
     ReadbackDataMixin,
-    live_updates_readback_progressbar,
 )
 from bec_utils import BECMessage
 
@@ -42,6 +42,4 @@ async def test_move_callback():
         with mock.patch.object(ReadbackDataMixin, "wait_for_RID"):
             with mock.patch.object(ReadbackDataMixin, "get_device_values", mock_readback):
                 with mock.patch.object(ReadbackDataMixin, "get_request_done_msgs", mock_req_msg):
-                    await live_updates_readback_progressbar(
-                        device_manager=client.devicemanager, request=request
-                    )
+                    await LiveUpdatesReadbackProgressbar(bec=client, request=request).run()

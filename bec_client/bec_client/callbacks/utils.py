@@ -1,7 +1,14 @@
+from __future__ import annotations
+
+import abc
 import threading
 import time
+from typing import TYPE_CHECKING
 
-from bec_utils import Alarms
+from bec_utils import Alarms, BECMessage
+
+if TYPE_CHECKING:
+    from bec_client.bec_client import BKClient
 
 
 class ScanRequestError(Exception):
@@ -30,3 +37,13 @@ def check_alarms(bec):
     for alarm in bec.alarms(severity=Alarms.MINOR):
         if alarm:
             raise alarm
+
+
+class LiveUpdatesBase(abc.ABC):
+    def __init__(self, bec: BKClient, request: BECMessage.ScanQueueMessage) -> None:
+        self.bec = bec
+        self.request = request
+
+    @abc.abstractmethod
+    def run(self):
+        pass

@@ -32,7 +32,7 @@ class BKClient(BECService):
             _type_: _description_
         """
         super().__init__(bootstrap_server, connector_cls)
-        self.devicemanager = None
+        self.device_manager = None
         self.scibec_url = scibec_url
         self._sighandler = SigintHandler(self)
         self._ip = None
@@ -46,7 +46,7 @@ class BKClient(BECService):
     def start(self):
         """start the client"""
         logger.info("Starting new client")
-        self._start_devicemanager()
+        self._start_device_manager()
         self._start_exit_handler()
         self._configure_prompt()
         self._start_scan_queue()
@@ -130,10 +130,10 @@ class BKClient(BECService):
         if self._exit_handler_thread:
             self._exit_handler_thread.join()
 
-    def _start_devicemanager(self):
+    def _start_device_manager(self):
         logger.info("Starting device manager")
-        self.devicemanager = DMClient(self, self.scibec_url)
-        self.devicemanager.initialize(self.bootstrap_server)
+        self.device_manager = DMClient(self, self.scibec_url)
+        self.device_manager.initialize(self.bootstrap_server)
 
     def _start_alarm_handler(self):
         logger.info("Starting alarm listener")
@@ -143,7 +143,7 @@ class BKClient(BECService):
     def shutdown(self):
         """shutdown the client and all its components"""
         super().shutdown()
-        self.devicemanager.shutdown()
+        self.device_manager.shutdown()
         self.queue.shutdown()
         self.alarm_handler.shutdown()
         self._shutdown_exit_handler()

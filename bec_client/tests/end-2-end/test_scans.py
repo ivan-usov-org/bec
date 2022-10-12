@@ -82,7 +82,7 @@ def test_grid_scan(capsys, client):
     bec = client
     scans = bec.scans
     wait_for_empty_queue(bec)
-    dev = bec.devicemanager.devices
+    dev = bec.device_manager.devices
     scans.umv(dev.samx, 0, dev.samy, 0, relative=False)
     status = scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.01, relative=True)
     assert len(status.scan.data) == 100
@@ -96,7 +96,7 @@ def test_fermat_scan(capsys, client):
     bec = client
     scans = bec.scans
     wait_for_empty_queue(bec)
-    dev = bec.devicemanager.devices
+    dev = bec.device_manager.devices
     status = scans.fermat_scan(
         dev.samx, -5, 5, dev.samy, -5, 5, step=0.5, exp_time=0.01, relative=True
     )
@@ -111,7 +111,7 @@ def test_line_scan(capsys, client):
     bec = client
     scans = bec.scans
     wait_for_empty_queue(bec)
-    dev = bec.devicemanager.devices
+    dev = bec.device_manager.devices
     status = scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.01, relative=True)
     assert len(status.scan.data) == 10
     assert status.scan.num_points == 10
@@ -124,7 +124,7 @@ def test_mv_scan(capsys, client):
     bec = client
     scans = bec.scans
     wait_for_empty_queue(bec)
-    dev = bec.devicemanager.devices
+    dev = bec.device_manager.devices
     scans.mv(dev.samx, 10, dev.samy, 20, relative=False).wait()
     current_pos_samx = dev.samx.read()["samx"]["value"]
     current_pos_samy = dev.samy.read()["samy"]["value"]
@@ -150,7 +150,7 @@ def test_mv_scan_mv(client):
     scans = bec.scans
     wait_for_empty_queue(bec)
     scan_number_start = bec.queue.next_scan_number
-    dev = bec.devicemanager.devices
+    dev = bec.device_manager.devices
 
     dev.samx.limits = [-50, 50]
     dev.samy.limits = [-50, 50]
@@ -234,7 +234,7 @@ def test_scan_abort(client):
     wait_for_empty_queue(bec)
     scan_number_start = bec.queue.next_scan_number
     scans = bec.scans
-    dev = bec.devicemanager.devices
+    dev = bec.device_manager.devices
     aborted_scan = False
     try:
         threading.Thread(target=send_abort, args=(bec,), daemon=True).start()
@@ -266,7 +266,7 @@ def test_limit_error(client):
     wait_for_empty_queue(bec)
     scan_number_start = bec.queue.next_scan_number
     scans = bec.scans
-    dev = bec.devicemanager.devices
+    dev = bec.device_manager.devices
     aborted_scan = False
     dev.samx.limits = [-50, 50]
     try:
@@ -296,7 +296,7 @@ def test_queued_scan(client):
     wait_for_empty_queue(bec)
     scan_number_start = bec.queue.next_scan_number
     scans = bec.scans
-    dev = bec.devicemanager.devices
+    dev = bec.device_manager.devices
     scan1 = scans.line_scan(
         dev.samx, -5, 5, steps=100, exp_time=0.1, hide_report=True, relative=True
     )
@@ -327,7 +327,7 @@ def test_fly_scan(client):
     bec = client
     wait_for_empty_queue(bec)
     scans = bec.scans
-    dev = bec.devicemanager.devices
+    dev = bec.device_manager.devices
     status = scans.round_scan_fly(dev.flyer_sim, 0, 50, 20, 3, exp_time=0.1, relative=True)
     assert len(status.scan.data) == 693
     assert status.scan.num_points == 693
@@ -338,7 +338,7 @@ def test_scan_restart(client):
     bec = client
     wait_for_empty_queue(bec)
     scans = bec.scans
-    dev = bec.devicemanager.devices
+    dev = bec.device_manager.devices
 
     def send_repeat(bec):
         while True:
@@ -376,7 +376,7 @@ def test_scan_observer_repeat_queued(client):
     bec = client
     wait_for_empty_queue(bec)
     scans = bec.scans
-    dev = bec.devicemanager.devices
+    dev = bec.device_manager.devices
 
     def send_repeat(bec):
         while True:
@@ -416,7 +416,7 @@ def test_scan_observer_repeat(client):
     bec = client
     wait_for_empty_queue(bec)
     scans = bec.scans
-    dev = bec.devicemanager.devices
+    dev = bec.device_manager.devices
 
     def send_repeat(bec):
         while True:
@@ -454,15 +454,15 @@ def test_file_writer(client):
     bec = client
     wait_for_empty_queue(bec)
     scans = bec.scans
-    dev = bec.devicemanager.devices
+    dev = bec.device_manager.devices
 
     scan = scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.01, relative=True)
     assert len(scan.scan.data) == 100
-    msg = bec.devicemanager.producer.get(MessageEndpoints.public_file(scan.scan.scanID))
+    msg = bec.device_manager.producer.get(MessageEndpoints.public_file(scan.scan.scanID))
     while True:
         if msg:
             break
-        msg = bec.devicemanager.producer.get(MessageEndpoints.public_file(scan.scan.scanID))
+        msg = bec.device_manager.producer.get(MessageEndpoints.public_file(scan.scan.scanID))
 
     file_msg = BECMessage.FileMessage.loads(msg)
     assert file_msg.content["successful"]
