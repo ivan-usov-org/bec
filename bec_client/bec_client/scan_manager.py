@@ -253,6 +253,9 @@ class ScanManager:
         for scan_msg in scan_msgs:
             parent.scan_storage.add_scan_segment(scan_msg)
 
+    def __repr__(self) -> str:
+        return "\n".join(self.queue_storage.describe_queue())
+
     def shutdown(self):
         """stop the scan manager's threads"""
         self._scan_queue_consumer.shutdown()

@@ -6,6 +6,8 @@ from collections import deque
 from typing import TYPE_CHECKING, Deque, List, Optional
 
 from bec_utils import BECMessage, MessageEndpoints, threadlocked
+from rich.console import Console
+from rich.table import Table
 
 if TYPE_CHECKING:
     from request_items import RequestItem
@@ -139,6 +141,36 @@ class QueueStorage:
     @current_scan_queue.setter
     def current_scan_queue(self, val: dict):
         self._current_scan_queue = val
+
+    def describe_queue(self):
+        """create a rich.table description of the current scan queue"""
+        queue_tables = []
+        console = Console()
+        for queue_name, scan_queue in self.current_scan_queue.items():
+            table = Table(title=f"{queue_name} queue / {scan_queue.get('status')}")
+            table.add_column("queueID", justify="center")
+            table.add_column("scanID", justify="center")
+            table.add_column("is_scan", justify="center")
+            table.add_column("type", justify="center")
+            table.add_column("scan_number", justify="center")
+            table.add_column("IQ status", justify="center")
+
+            for instruction_queue in scan_queue.get("info"):
+                scan_msgs = [
+                    msg.get("content") for msg in instruction_queue.get("request_blocks", [])
+                ]
+                table.add_row(
+                    instruction_queue.get("queueID"),
+                    ", ".join([str(s) for s in instruction_queue.get("scanID")]),
+                    ", ".join([str(s) for s in instruction_queue.get("is_scan")]),
+                    ", ".join([msg["scan_type"] for msg in scan_msgs]),
+                    ", ".join([str(s) for s in instruction_queue.get("scan_number")]),
+                    instruction_queue.get("status"),
+                )
+            with console.capture() as capture:
+                console.print(table)
+            queue_tables.append(capture.get())
+        return queue_tables
 
     @threadlocked
     def update_with_status(self, queue_msg: BECMessage.ScanQueueStatusMessage) -> None:
