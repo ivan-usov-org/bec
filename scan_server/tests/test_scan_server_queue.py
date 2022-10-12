@@ -5,6 +5,7 @@ from bec_utils import BECMessage, MessageEndpoints
 from scan_server.scan_assembler import ScanAssembler
 from scan_server.scan_queue import (
     InstructionQueueItem,
+    InstructionQueueStatus,
     QueueManager,
     RequestBlock,
     RequestBlockQueue,
@@ -115,13 +116,22 @@ def test_set_abort():
 def test_set_clear_sends_message():
     queue_manager = get_queuemanager()
     queue_manager.producer.message_sent = []
-    queue_manager.set_clear(queue="primary")
+    setter_mock = mock.Mock(wraps=ScanQueue.worker_status.fset)
+    # pylint: disable=assignment-from-no-return
+    # pylint: disable=too-many-function-args
+    mock_property = ScanQueue.worker_status.setter(setter_mock)
+    with mock.patch.object(ScanQueue, "worker_status", mock_property):
+        queue_manager.set_clear(queue="primary")
 
-    assert queue_manager.queues["primary"].status == ScanQueueStatus.PAUSED
-    assert len(queue_manager.producer.message_sent) == 1
-    assert (
-        queue_manager.producer.message_sent[0].get("queue") == MessageEndpoints.scan_queue_status()
-    )
+        assert queue_manager.queues["primary"].status == ScanQueueStatus.PAUSED
+        mock_property.fset.assert_called_once_with(
+            queue_manager.queues["primary"], InstructionQueueStatus.STOPPED
+        )
+        assert len(queue_manager.producer.message_sent) == 1
+        assert (
+            queue_manager.producer.message_sent[0].get("queue")
+            == MessageEndpoints.scan_queue_status()
+        )
 
 
 def test_set_restart():
