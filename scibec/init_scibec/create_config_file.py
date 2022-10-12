@@ -5,14 +5,14 @@ USE_LAMNI = False
 detectors = ["eiger"]
 
 lamni_galil_motors = [
-    ("lsamx", "A", -1),
-    ("lsamy", "B", 1),
-    ("lsamrot", "C", 1),
-    # ("loptz", "D", -1),
-    # ("loptx", "E", 1),
-    # ("lopty", "F", 1),
-    ("leyex", "G", -1),
-    ("leyey", "H", -1),
+    ("lsamx", "A", -1, 0.5),
+    ("lsamy", "B", 1, 0.5),
+    ("lsamrot", "C", 1, 0.5),
+    # ("loptz", "D", -1, 0.5),
+    # ("loptx", "E", 1, 0.5),
+    # ("lopty", "F", 1, 0.5),
+    ("leyex", "G", -1, 0.001),
+    ("leyey", "H", -1, 0.001),
 ]
 
 lamni_rt_motors = [
@@ -324,7 +324,7 @@ if USE_LAMNI:
                     "port": 8081,
                     "sign": m[2],
                     "limits": [0, 0],
-                    "tolerance": 0.5,
+                    "tolerance": m[3],
                     "device_access": True,
                     "device_mapping": {"rt": "rtx"},
                 },
