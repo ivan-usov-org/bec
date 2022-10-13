@@ -40,6 +40,9 @@ async def test_move_callback():
 
     with mock.patch("bec_client.callbacks.move_device.check_alarms") as check_alarms_mock:
         with mock.patch.object(ReadbackDataMixin, "wait_for_RID"):
-            with mock.patch.object(ReadbackDataMixin, "get_device_values", mock_readback):
-                with mock.patch.object(ReadbackDataMixin, "get_request_done_msgs", mock_req_msg):
-                    await LiveUpdatesReadbackProgressbar(bec=client, request=request).run()
+            with mock.patch.object(LiveUpdatesReadbackProgressbar, "wait_for_request_acceptance"):
+                with mock.patch.object(ReadbackDataMixin, "get_device_values", mock_readback):
+                    with mock.patch.object(
+                        ReadbackDataMixin, "get_request_done_msgs", mock_req_msg
+                    ):
+                        await LiveUpdatesReadbackProgressbar(bec=client, request=request).run()

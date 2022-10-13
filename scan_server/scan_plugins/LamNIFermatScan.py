@@ -306,6 +306,9 @@ class LamNIFermatScan(ScanBase):
         coarse_move_req_x = np.abs(lsamx_current - move_x)
         coarse_move_req_y = np.abs(lsamy_current - move_y)
 
+        self.device_manager.devices.lsamx.enabled = True
+        self.device_manager.devices.lsamy.enabled = True
+
         if (
             np.abs(y_drift) > 150
             or np.abs(x_drift) > 150
@@ -316,7 +319,6 @@ class LamNIFermatScan(ScanBase):
             logger.info(
                 f"Compensating {[val/1000 for val in lamni_to_stage_coordinates(x_drift,y_drift)]}"
             )
-
             yield from self.stubs.set_and_wait(
                 device=["lsamx", "lsamy"], positions=[move_x, move_y]
             )
@@ -370,6 +372,9 @@ class LamNIFermatScan(ScanBase):
             )
         else:
             logger.info("No second iteration required")
+
+        self.device_manager.devices.lsamx.enabled = False
+        self.device_manager.devices.lsamy.enabled = False
 
         yield from self.stubs.send_rpc_and_wait("rtx", "controller.feedback_enable_without_reset")
 
