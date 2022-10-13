@@ -6,7 +6,7 @@ import numpy as np
 from bec_client.progressbar import DeviceProgressBar
 from bec_utils import BECMessage, DeviceManagerBase, MessageEndpoints
 
-from .utils import LiveUpdatesBase, check_alarms
+from .utils import LiveUpdatesBase, ScanRequestMixin, check_alarms
 
 if TYPE_CHECKING:
     from bec_client.bec_client import BKClient
@@ -60,9 +60,10 @@ class LiveUpdatesReadbackProgressbar(LiveUpdatesBase):
 
     async def core(self):
         data_source = ReadbackDataMixin(self.bec.device_manager, self.devices)
+        start_values = data_source.get_device_values()
+        await self.wait_for_request_acceptance()
         data_source.wait_for_RID(self.request)
 
-        start_values = data_source.get_device_values()
         target_values = [x for xs in self.request.content["parameter"]["args"].values() for x in xs]
         if self.request.content["parameter"]["kwargs"].get("relative"):
             target_values = np.asarray(target_values) + np.asarray(start_values)

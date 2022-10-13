@@ -1,61 +1,19 @@
 from __future__ import annotations
 
 import asyncio
-import time
 from typing import TYPE_CHECKING
 
 import numpy as np
 from bec_client.prettytable import PrettyTable
 from bec_client.progressbar import ScanProgressBar
-from bec_client.request_items import RequestItem
 from bec_utils import BECMessage, bec_logger
 
-from .utils import ScanRequestError, check_alarms
+from .utils import LiveUpdatesBase, ScanRequestMixin, check_alarms
 
 if TYPE_CHECKING:
     from bec_client.bec_client import BKClient
 
 logger = bec_logger.logger
-
-
-class ScanRequestMixin:
-    def __init__(self, bec: BKClient, RID: str) -> None:
-        self.bec = bec
-        self.request_storage = self.bec.queue.request_storage
-        self.RID = RID
-        self.scan_queue_request = None
-
-    async def _wait_for_scan_request(self) -> RequestItem:
-        """wait for scan queuest"""
-        logger.debug("Waiting for request ID")
-        start = time.time()
-        while self.request_storage.find_request_by_ID(self.RID) is None:
-            await asyncio.sleep(0.1)
-        logger.debug(f"Waiting for request ID finished after {time.time()-start} s.")
-        return self.request_storage.find_request_by_ID(self.RID)
-
-    async def _wait_for_scan_request_decision(self):
-        """wait for a scan queuest decision"""
-        logger.debug("Waiting for decision")
-        start = time.time()
-        while self.scan_queue_request.decision_pending:
-            await asyncio.sleep(0.1)
-        logger.debug(f"Waiting for decision finished after {time.time()-start} s.")
-
-    async def wait(self):
-        """wait for the request acceptance"""
-        self.scan_queue_request = await self._wait_for_scan_request()
-
-        await self._wait_for_scan_request_decision()
-        check_alarms(self.bec)
-
-        while self.scan_queue_request.accepted is None:
-            await asyncio.sleep(0.01)
-
-        if not self.scan_queue_request.accepted[0]:
-            raise ScanRequestError(
-                f"Scan was rejected by the server: {self.scan_queue_request.response.content.get('message')}"
-            )
 
 
 def sort_devices(devices, scan_devices) -> list:
@@ -66,7 +24,7 @@ def sort_devices(devices, scan_devices) -> list:
     return devices
 
 
-class LiveUpdatesTable:
+class LiveUpdatesTable(LiveUpdatesBase):
     """Live updates for scans using a table and a scan progess bar.
 
     Args:
@@ -80,19 +38,11 @@ class LiveUpdatesTable:
     """
 
     def __init__(self, bec: BKClient, request: BECMessage.ScanQueueMessage) -> None:
-        self.bec = bec
-        self.request = request
-        self.RID = request.metadata["RID"]
+        super().__init__(bec, request)
         self.scan_queue_request = None
         self.scan_item = None
         self.dev_values = None
         self.point_data = None
-
-    async def wait_for_request_acceptance(self):
-        scan_request = ScanRequestMixin(self.bec, self.RID)
-        await scan_request.wait()
-
-        self.scan_queue_request = scan_request.scan_queue_request
 
     async def wait_for_scan_to_start(self):
         """wait until the scan starts"""

@@ -3,11 +3,8 @@ import time
 from unittest import mock
 
 import pytest
-from bec_client.callbacks.live_table import (
-    LiveUpdatesTable,
-    ScanRequestMixin,
-    sort_devices,
-)
+from bec_client.callbacks.live_table import LiveUpdatesTable, sort_devices
+from bec_client.callbacks.utils import ScanRequestMixin
 from bec_utils import BECMessage
 
 from .utils import get_bec_client_mock
