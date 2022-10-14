@@ -50,6 +50,9 @@ class MessageEndpoints:
     # service
     _services_status = "internal/services/status"
 
+    # misc
+    _public_global_vars = "public/vars"
+
     ##########
 
     # devices feedback
@@ -190,3 +193,8 @@ class MessageEndpoints:
     @classmethod
     def service_status(cls, service_id: str):
         return f"{cls._services_status}/{service_id}"
+
+    # misc
+    @classmethod
+    def global_vars(cls, var_name: str):
+        return f"{cls._public_global_vars}/{var_name}"
