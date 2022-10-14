@@ -55,6 +55,11 @@ class ConfigHandler:
                     # update device enabled status in DB
                     self.update_device_enabled_in_db(device_name=dev)
                     updated = True
+                if "enabled_set" in dev_config:
+                    device.config["enabled_set"] = dev_config["enabled_set"]
+                    # update device enabled status in DB
+                    self.update_device_enabled_set_in_db(device_name=dev)
+                    updated = True
 
             # send updates to services
             if updated:
@@ -76,6 +81,23 @@ class ConfigHandler:
         success = self.device_manager.scibec.patch_device_config(
             self.device_manager.devices[device_name].config["id"],
             {"enabled": self.device_manager.devices[device_name].enabled},
+        )
+        if not success:
+            raise DeviceConfigError("Error during database update.")
+
+    def update_device_enabled_set_in_db(self, device_name: str) -> None:
+        """Update a device enabled setting in the DB with the local version
+
+        Args:
+            device_name (str): Name of the device that should be updated
+
+        Raises:
+            DeviceConfigError: Raised if the db update fails.
+        """
+        logger.debug("updating in DB")
+        success = self.device_manager.scibec.patch_device_config(
+            self.device_manager.devices[device_name].config["id"],
+            {"enabled_set": self.device_manager.devices[device_name].enabled_set},
         )
         if not success:
             raise DeviceConfigError("Error during database update.")

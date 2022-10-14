@@ -123,6 +123,7 @@ class DeviceManagerDS(DeviceManagerBase):
         """
         name = dev.get("name")
         enabled = dev.get("enabled")
+        enabled_set = dev.get("enabled_set", True)
 
         dev_cls = self._get_device_class(dev["deviceClass"])
         config = dev["deviceConfig"].copy()
@@ -185,7 +186,6 @@ class DeviceManagerDS(DeviceManagerBase):
                 f"{error_traceback}. Failed to stage {opaas_obj.name}. The device will be disabled."
             )
             opaas_obj.enabled = False
-
         return opaas_obj
 
     @staticmethod
