@@ -1,11 +1,5 @@
 from bec_utils import BECMessage as BMessage
-from bec_utils import (
-    DeviceConfigError,
-    DeviceManagerBase,
-    MessageEndpoints,
-    ProducerConnector,
-    bec_logger,
-)
+from bec_utils import DeviceConfigError, DeviceManagerBase, MessageEndpoints, bec_logger
 
 logger = bec_logger.logger
 
@@ -64,9 +58,14 @@ class ConfigHandler:
             # send updates to services
             if updated:
                 self.send_config(msg)
+                self.device_manager.send_config_request_reply(
+                    accepted=True, error_msg=None, metadata=msg.metadata
+                )
 
         except DeviceConfigError as dev_conf_error:
-            self.device_manager.send_config_request_rejection(dev_conf_error)
+            self.device_manager.send_config_request_reply(
+                accepted=False, error_msg=dev_conf_error, metadata=msg.metadata
+            )
 
     def update_device_enabled_in_db(self, device_name: str) -> None:
         """Update a device enabled setting in the DB with the local version

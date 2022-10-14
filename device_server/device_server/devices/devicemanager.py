@@ -1,11 +1,11 @@
 import inspect
 import traceback
 
-import bec_utils.BECMessage as BMessage
 import ophyd
 import ophyd.sim as ops
 import ophyd_devices as opd
 from bec_utils import (
+    BECMessage,
     Device,
     DeviceConfigError,
     DeviceManagerBase,
@@ -30,7 +30,7 @@ class DSDevice(Device):
 
     def initialize_device_buffer(self, producer):
         """initialize the device read and readback buffer on redis with a new reading"""
-        dev_msg = BMessage.DeviceMessage(signals=self.obj.read(), metadata={}).dumps()
+        dev_msg = BECMessage.DeviceMessage(signals=self.obj.read(), metadata={}).dumps()
         pipe = producer.pipeline()
         producer.set_and_publish(MessageEndpoints.device_readback(self.name), dev_msg, pipe=pipe)
         producer.set(topic=MessageEndpoints.device_read(self.name), msg=dev_msg, pipe=pipe)
@@ -217,7 +217,7 @@ class DeviceManagerDS(DeviceManagerBase):
         interface = get_device_info(obj, {})
         self.producer.set(
             MessageEndpoints.device_info(obj.name),
-            BMessage.DeviceInfoMessage(device=obj.name, info=interface).dumps(),
+            BECMessage.DeviceInfoMessage(device=obj.name, info=interface).dumps(),
             pipe,
         )
 
@@ -234,7 +234,7 @@ class DeviceManagerDS(DeviceManagerBase):
             name = obj.root.name
             signals = obj.read()
             metadata = self.devices.get(obj.root.name).metadata
-            dev_msg = BMessage.DeviceMessage(signals=signals, metadata=metadata).dumps()
+            dev_msg = BECMessage.DeviceMessage(signals=signals, metadata=metadata).dumps()
             pipe = self.producer.pipeline()
             self.producer.set_and_publish(MessageEndpoints.device_readback(name), dev_msg, pipe)
             pipe.execute()
@@ -245,7 +245,7 @@ class DeviceManagerDS(DeviceManagerBase):
         metadata = self.devices[device].metadata
         self.producer.send(
             MessageEndpoints.device_status(device),
-            BMessage.DeviceStatusMessage(device=device, status=status, metadata=metadata).dumps(),
+            BECMessage.DeviceStatusMessage(device=device, status=status, metadata=metadata).dumps(),
         )
 
     def _obj_callback_done_moving(self, *args, **kwargs):
@@ -258,7 +258,7 @@ class DeviceManagerDS(DeviceManagerBase):
         metadata = self.devices[device].metadata
         self.producer.set(
             MessageEndpoints.device_status(kwargs["obj"].root.name),
-            BMessage.DeviceStatusMessage(device=device, status=status, metadata=metadata).dumps(),
+            BECMessage.DeviceStatusMessage(device=device, status=status, metadata=metadata).dumps(),
         )
 
     def _start_custom_connectors(self, bootstrap_server):
@@ -273,11 +273,18 @@ class DeviceManagerDS(DeviceManagerBase):
         self._config_request_connector.signal_event.set()
         self._config_request_connector.join()
 
-    def send_config_request_rejection(self, error_msg):
-        """send a reply back if the config request was rejected"""
+    def send_config_request_reply(self, accepted, error_msg, metadata):
+        """send a config request reply"""
+        msg = BECMessage.RequestResponseMessage(
+            accepted=accepted, message=error_msg, metadata=metadata
+        )
+        RID = metadata.get("RID")
+        self.producer.set(
+            MessageEndpoints.device_config_request_response(RID), msg.dumps(), expire=60
+        )
 
     @staticmethod
     def _device_config_request_callback(msg, *, parent, **_kwargs) -> None:
-        msg = BMessage.DeviceConfigMessage.loads(msg.value)
+        msg = BECMessage.DeviceConfigMessage.loads(msg.value)
         logger.info(f"Received request: {msg}")
         parent.config_handler.parse_config_request(msg)
