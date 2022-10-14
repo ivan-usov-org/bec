@@ -178,16 +178,19 @@ class DeviceServer(BECService):
                 metadata=instructions.metadata,
             )
         except Exception as exc:  # pylint: disable=broad-except
-            content = traceback.format_exc()
-            self.connector.log_error({"source": msg.value, "message": content})
-            logger.error(content)
-            self.connector.raise_alarm(
-                severity=Alarms.MAJOR,
-                source=instructions.content,
-                content=content,
-                alarm_type=exc.__class__.__name__,
-                metadata=instructions.metadata,
-            )
+            if action == "rpc":
+                self._send_rpc_exception(exc, instructions)
+            else:
+                content = traceback.format_exc()
+                self.connector.log_error({"source": msg.value, "message": content})
+                logger.error(content)
+                self.connector.raise_alarm(
+                    severity=Alarms.MAJOR,
+                    source=instructions.content,
+                    content=content,
+                    alarm_type=exc.__class__.__name__,
+                    metadata=instructions.metadata,
+                )
 
     @staticmethod
     def instructions_callback(msg, *, parent, **_kwargs) -> None:
@@ -258,21 +261,26 @@ class DeviceServer(BECService):
 
         except Exception as exc:  # pylint: disable=broad-except
             # send error to client
-            self.producer.set(
-                MessageEndpoints.device_rpc(instr_params.get("rpc_id")),
-                BECMessage.DeviceRPCMessage(
-                    device=instr.content["device"],
-                    return_val=None,
-                    out={
-                        "error": exc.__class__.__name__,
-                        "msg": exc.args,
-                        "traceback": traceback.format_exc(),
-                    },
-                    success=False,
-                ).dumps(),
-            )
+            self._send_rpc_exception(exc, instr)
+
         finally:
             sys.stdout = save_stdout
+
+    def _send_rpc_exception(self, exc: Exception, instr: BECMessage.DeviceInstructionMessage):
+        instr_params = instr.content.get("parameter")
+        self.producer.set(
+            MessageEndpoints.device_rpc(instr_params.get("rpc_id")),
+            BECMessage.DeviceRPCMessage(
+                device=instr.content["device"],
+                return_val=None,
+                out={
+                    "error": exc.__class__.__name__,
+                    "msg": exc.args,
+                    "traceback": traceback.format_exc(),
+                },
+                success=False,
+            ).dumps(),
+        )
 
     def _trigger_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
         logger.debug(f"Kickoff device: {instr}")
