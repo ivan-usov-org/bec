@@ -45,6 +45,17 @@ class Device:
         self.config["enabled"] = value
         self.parent.send_config_request(action="update", config={self.name: {"enabled": value}})
 
+    @property
+    def enabled_set(self):
+        """Whether or not the device can be set"""
+        return self.config.get("enabled_set", True)
+
+    @enabled_set.setter
+    def enabled_set(self, value):
+        """Whether or not the device can be set"""
+        self.config["enabled_set"] = value
+        self.parent.send_config_request(action="update", config={self.name: {"enabled_set": value}})
+
     def read(self):
         """get the last reading from a device"""
         val = self.parent.producer.get(MessageEndpoints.device_read(self.name))

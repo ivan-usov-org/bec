@@ -1,5 +1,5 @@
-import {belongsTo, Entity, hasMany, model, property} from '@loopback/repository';
-import {Session} from '.';
+import { belongsTo, Entity, hasMany, model, property } from '@loopback/repository';
+import { Session } from '.';
 
 export interface DeviceConfig {
   name?: string,
@@ -17,7 +17,7 @@ export class Device extends Entity {
     type: 'string',
     id: true,
     generated: true,
-    mongodb: {dataType: 'ObjectId'}
+    mongodb: { dataType: 'ObjectId' }
   })
   id: string;
 
@@ -39,20 +39,20 @@ export class Device extends Entity {
   })
   accessGroups?: string[];
 
-  @hasMany(() => Device, {keyTo: 'parentId'})
+  @hasMany(() => Device, { keyTo: 'parentId' })
   subdevices?: Device[];
 
   @belongsTo(() => Device,
     {}, //relation metadata goes in here
     {// property definition goes in here
-      mongodb: {dataType: 'ObjectId'}
+      mongodb: { dataType: 'ObjectId' }
     })
   parentId?: string;
 
   @belongsTo(() => Session,
     {}, //relation metadata goes in here
     {// property definition goes in here
-      mongodb: {dataType: 'ObjectId'}
+      mongodb: { dataType: 'ObjectId' }
     })
   sessionId?: string;
 
@@ -61,6 +61,12 @@ export class Device extends Entity {
     required: true,
   })
   enabled: boolean;
+
+  @property({
+    type: 'boolean',
+    required: false,
+  })
+  enabled_set: boolean;
 
   @property({
     type: 'string',

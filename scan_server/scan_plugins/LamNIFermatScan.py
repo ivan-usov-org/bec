@@ -306,8 +306,8 @@ class LamNIFermatScan(ScanBase):
         coarse_move_req_x = np.abs(lsamx_current - move_x)
         coarse_move_req_y = np.abs(lsamy_current - move_y)
 
-        self.device_manager.devices.lsamx.enabled = True
-        self.device_manager.devices.lsamy.enabled = True
+        self.device_manager.devices.lsamx.enabled_set = True
+        self.device_manager.devices.lsamy.enabled_set = True
 
         if (
             np.abs(y_drift) > 150
@@ -373,8 +373,8 @@ class LamNIFermatScan(ScanBase):
         else:
             logger.info("No second iteration required")
 
-        self.device_manager.devices.lsamx.enabled = False
-        self.device_manager.devices.lsamy.enabled = False
+        self.device_manager.devices.lsamx.enabled_set = False
+        self.device_manager.devices.lsamy.enabled_set = False
 
         yield from self.stubs.send_rpc_and_wait("rtx", "controller.feedback_enable_without_reset")
 

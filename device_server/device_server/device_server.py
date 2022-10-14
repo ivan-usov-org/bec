@@ -290,6 +290,11 @@ class DeviceServer(BECService):
         obj.kickoff(metadata=instr.metadata, **instr.content["parameter"])
 
     def _set_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
+        device_obj = self.device_manager.devices.get(instr.content["device"])
+        if not device_obj.enabled_set:
+            raise DisabledDeviceError(
+                f"Setting the device {device_obj.name} is currently disabled."
+            )
         logger.debug(f"Setting device: {instr}")
         val = instr.content["parameter"]["value"]
         obj = self.device_manager.devices.get(instr.content["device"]).obj
