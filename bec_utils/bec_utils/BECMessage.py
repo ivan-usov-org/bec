@@ -429,3 +429,18 @@ class FileMessage(BECMessage):
 
         self.content = {"file_path": file_path, "successful": successful}
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+
+
+class VariableMessage(BECMessage):
+    msg_type = "var_message"
+
+    def __init__(self, *, value: str, metadata: dict = None) -> None:
+        """
+
+        Args:
+            value: value of the global var
+            metadata: status metadata
+        """
+
+        self.content = {"value": value}
+        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)

@@ -3,6 +3,7 @@ import socket
 import threading
 import time
 import uuid
+from typing import Any
 
 from . import BECMessage
 from .connector import ConnectorBase
@@ -80,6 +81,43 @@ class BECService:
     def _start_update_service_info(self):
         self._service_info_thread = threading.Thread(target=self._update_service_info, daemon=True)
         self._service_info_thread.start()
+
+    def set_global_var(self, name: str, val: Any) -> None:
+        """Set a global variable through Redis
+
+        Args:
+            name (str): Name of the variable
+            val (Any): Value of the variable
+
+        """
+        self.producer.set(
+            MessageEndpoints.global_vars(name), BECMessage.VariableMessage(value=val).dumps()
+        )
+
+    def get_global_var(self, name: str) -> Any:
+        """Get a global variable from Redis
+
+        Args:
+            name (str): Name of the variable
+
+        Returns:
+            Any: Value of the variable
+        """
+        msg = BECMessage.VariableMessage.loads(
+            self.producer.get(MessageEndpoints.global_vars(name))
+        )
+        if msg:
+            return msg.content.get("value")
+        return None
+
+    def delete_global_var(self, name: str) -> None:
+        """Delete a global variable from Redis
+
+        Args:
+            name (str): Name of the variable
+
+        """
+        self.producer.delete(MessageEndpoints.global_vars(name) + ":val")
 
     def shutdown(self):
         """shutdown the BECService"""
