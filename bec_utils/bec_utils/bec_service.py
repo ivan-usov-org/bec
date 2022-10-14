@@ -103,8 +103,21 @@ class BECService:
         Returns:
             Any: Value of the variable
         """
-        msg = self.producer.get(MessageEndpoints.global_vars(name))
-        return BECMessage.VariableMessage.loads(msg)
+        msg = BECMessage.VariableMessage.loads(
+            self.producer.get(MessageEndpoints.global_vars(name))
+        )
+        if msg:
+            return msg.content.get("value")
+        return None
+
+    def delete_global_var(self, name: str) -> None:
+        """Delete a global variable from Redis
+
+        Args:
+            name (str): Name of the variable
+
+        """
+        self.producer.delete(MessageEndpoints.global_vars(name) + ":val")
 
     def shutdown(self):
         """shutdown the BECService"""
