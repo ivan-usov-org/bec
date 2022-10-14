@@ -302,18 +302,18 @@ class DeviceManagerBase:
             DeviceConfigMessage(action="update", config=config, metadata={"RID": RID}).dumps(),
         )
 
-        def wait_for_config_reply(RID: str):
-            while True:
-                msg = self.producer.get(MessageEndpoints.device_config_request_response(RID))
-                if msg is None:
-                    continue
-                return RequestResponseMessage.loads(msg)
-
         threadpool = SingletonThreadpool()
-        future = threadpool.executor.submit(wait_for_config_reply, RID)
+        future = threadpool.executor.submit(self._wait_for_config_reply, RID)
         reply = future.result()
         if not reply.content["accepted"]:
             raise DeviceConfigError(f"Failed to update the config: {reply.content['message']}.")
+
+    def _wait_for_config_reply(self, RID: str) -> RequestResponseMessage:
+        while True:
+            msg = self.producer.get(MessageEndpoints.device_config_request_response(RID))
+            if msg is None:
+                continue
+            return RequestResponseMessage.loads(msg)
 
     def parse_config_message(self, msg: DeviceConfigMessage):
         action = msg.content["action"]
