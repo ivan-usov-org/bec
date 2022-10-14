@@ -90,16 +90,23 @@ def test_disable_unreachable_devices():
         if obj.name == "samx":
             raise ConnectionError
 
+    config_reply = BECMessage.RequestResponseMessage(accepted=True, message="")
+
     with mock.patch.object(device_manager, "connect_device", wraps=mocked_failed_connection):
         with mock.patch.object(device_manager, "_get_config_from_DB", get_config_from_mock):
-            device_manager.initialize("")
-            assert device_manager.config_handler is not None
-            assert device_manager.devices.samx.enabled is False
-            msg = BECMessage.DeviceConfigMessage(
-                action="update", config={"samx": {"enabled": False}}
-            )
             with mock.patch.object(
-                device_manager.config_handler, "update_device_enabled_in_db"
-            ) as update_device_db:
-                device_manager.config_handler.parse_config_request(msg)
-                update_device_db.assert_called_once_with(device_name="samx")
+                device_manager,
+                "_wait_for_config_reply",
+                return_value=config_reply,
+            ):
+                device_manager.initialize("")
+                assert device_manager.config_handler is not None
+                assert device_manager.devices.samx.enabled is False
+                msg = BECMessage.DeviceConfigMessage(
+                    action="update", config={"samx": {"enabled": False}}
+                )
+                with mock.patch.object(
+                    device_manager.config_handler, "update_device_enabled_in_db"
+                ) as update_device_db:
+                    device_manager.config_handler.parse_config_request(msg)
+                    update_device_db.assert_called_once_with(device_name="samx")

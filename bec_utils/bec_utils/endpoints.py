@@ -12,6 +12,7 @@ class MessageEndpoints:
 
     # device config
     _device_config_request = "internal/devices/config_request"
+    _device_config_request_response = "internal/devices/config_request_response"
     _device_config = "internal/devices/config"
     _device_info = "internal/devices/info"
 
@@ -80,6 +81,10 @@ class MessageEndpoints:
     @classmethod
     def device_config_request(cls):
         return cls._device_config_request
+
+    @classmethod
+    def device_config_request_response(cls, RID: str):
+        return f"{cls._device_config_request_response}/{RID}"
 
     @classmethod
     def device_config(cls):

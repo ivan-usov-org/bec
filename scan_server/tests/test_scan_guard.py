@@ -1,5 +1,7 @@
+from unittest import mock
+
 import pytest
-from bec_utils import BECMessage as BMessage
+from bec_utils import BECMessage
 from scan_server.scan_guard import ScanGuard, ScanRejection
 
 from utils import load_ScanServerMock
@@ -9,7 +11,7 @@ from utils import load_ScanServerMock
     "scan_queue_msg",
     [
         (
-            BMessage.ScanQueueMessage(
+            BECMessage.ScanQueueMessage(
                 scan_type="fermat_scan",
                 parameter={
                     "args": {"samx": (-5, 5), "samy": (-5, 5)},
@@ -19,7 +21,7 @@ from utils import load_ScanServerMock
             )
         ),
         (
-            BMessage.ScanQueueMessage(
+            BECMessage.ScanQueueMessage(
                 scan_type="device_rpc",
                 parameter={
                     "device": "samy",
@@ -30,7 +32,7 @@ from utils import load_ScanServerMock
             )
         ),
         (
-            BMessage.ScanQueueMessage(
+            BECMessage.ScanQueueMessage(
                 scan_type="device_rpc",
                 parameter={
                     "device": ["samy"],
@@ -47,12 +49,13 @@ def test_check_motors_movable_enabled(scan_queue_msg):
 
     sg = ScanGuard(parent=k)
     sg._check_motors_movable(scan_queue_msg)
-
-    k.device_manager.devices["samx"].enabled = True
-    k.device_manager.devices["samy"].enabled = False
-    with pytest.raises(ScanRejection) as scan_rejection:
-        sg._check_motors_movable(scan_queue_msg)
-    assert "Device samy is not enabled." in scan_rejection.value.args
+    config_reply = BECMessage.RequestResponseMessage(accepted=True, message="")
+    with mock.patch.object(k.device_manager, "_wait_for_config_reply", return_value=config_reply):
+        k.device_manager.devices["samx"].enabled = True
+        k.device_manager.devices["samy"].enabled = False
+        with pytest.raises(ScanRejection) as scan_rejection:
+            sg._check_motors_movable(scan_queue_msg)
+        assert "Device samy is not enabled." in scan_rejection.value.args
 
 
 @pytest.mark.parametrize("device,func,is_valid", [("samx", "read", True)])

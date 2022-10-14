@@ -1,5 +1,7 @@
 import enum
 import json
+import threading
+import uuid
 
 import msgpack
 import yaml
@@ -7,10 +9,16 @@ from typeguard import typechecked
 
 from bec_utils.connector import ConnectorBase
 
-from .BECMessage import DeviceConfigMessage, DeviceStatusMessage, LogMessage
+from .BECMessage import (
+    DeviceConfigMessage,
+    DeviceStatusMessage,
+    LogMessage,
+    RequestResponseMessage,
+)
 from .endpoints import MessageEndpoints
 from .logger import bec_logger
 from .scibec import SciBec
+from .timeout import SingletonThreadpool
 
 logger = bec_logger.logger
 
@@ -288,11 +296,24 @@ class DeviceManagerBase:
         """
         if action in ["update", "add"] and not config:
             raise DeviceConfigError(f"Config cannot be empty for an {action} request.")
-
+        RID = str(uuid.uuid4())
         self.producer.send(
             MessageEndpoints.device_config_request(),
-            DeviceConfigMessage(action="update", config=config).dumps(),
+            DeviceConfigMessage(action="update", config=config, metadata={"RID": RID}).dumps(),
         )
+
+        threadpool = SingletonThreadpool()
+        future = threadpool.executor.submit(self._wait_for_config_reply, RID)
+        reply = future.result()
+        if not reply.content["accepted"]:
+            raise DeviceConfigError(f"Failed to update the config: {reply.content['message']}.")
+
+    def _wait_for_config_reply(self, RID: str) -> RequestResponseMessage:
+        while True:
+            msg = self.producer.get(MessageEndpoints.device_config_request_response(RID))
+            if msg is None:
+                continue
+            return RequestResponseMessage.loads(msg)
 
     def parse_config_message(self, msg: DeviceConfigMessage):
         action = msg.content["action"]
