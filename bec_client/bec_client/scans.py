@@ -156,8 +156,8 @@ class Scans:
             BECMessage.ScanQueueMessage: _description_
         """
         arg_input = scan_info.get("arg_input", [])
+        arg_bundle_size = scan_info.get("arg_bundle_size")
         if len(arg_input) > 0:
-            arg_bundle_size = len(arg_input)
             if len(args) % len(arg_input) != 0:
                 raise TypeError(
                     f"{scan_info.get('doc')}\n {scan_name} takes multiples of {len(arg_input)} arguments ({len(args)} given).",
@@ -173,7 +173,6 @@ class Scans:
                     )
         else:
             logger.warning("Could not check arguments against scan input types.")
-            arg_bundle_size = len(args)
         metadata = {}
         if "md" in kwargs:
             metadata = kwargs.pop("md")
@@ -196,6 +195,8 @@ class Scans:
         Returns:
 
         """
+        if not bundle_size:
+            return args
         params = {}
         for cmds in partition(bundle_size, args):
             cmds_serialized = [cmd.name if hasattr(cmd, "name") else cmd for cmd in cmds]
