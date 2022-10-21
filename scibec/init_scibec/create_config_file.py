@@ -271,9 +271,9 @@ out = dict()
 for m in user_motors:
     out[m] = dict(
         {
-            "status": {"enabled": True},
-            "type": "SynAxisOPAAS",
-            "config": {
+            "status": {"enabled": True, "enabled_set": True},
+            "deviceClass": "SynAxisOPAAS",
+            "deviceConfig": {
                 "name": m,
                 "labels": m,
                 "delay": 1,
@@ -282,16 +282,16 @@ for m in user_motors:
                 "limits": [-50, 50],
                 "tolerance": 0.01,
             },
-            "acquisition": {"schedule": "sync"},
-            "deviceGroup": "userMotor",
+            "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "userMotor"},
+            "deviceGroup": "user motors",
         }
     )
 
 out["flyer_sim"] = dict(
     {
-        "status": {"enabled": True},
-        "type": "SynFlyer",
-        "config": {
+        "status": {"enabled": True, "enabled_set": True},
+        "deviceClass": "SynFlyer",
+        "deviceConfig": {
             "name": "flyer_sim",
             "labels": "flyer_sim",
             "delay": 1,
@@ -299,8 +299,8 @@ out["flyer_sim"] = dict(
             "update_frequency": 400,
             "device_access": True,
         },
-        "acquisition": {"schedule": "flyer"},
-        "deviceGroup": "userMotor",
+        "acquisitionConfig": {"schedule": "flyer", "acquisitionGroup": "userMotor"},
+        "deviceGroup": "flyer",
     }
 )
 
@@ -314,9 +314,9 @@ if USE_LAMNI:
     for m in lamni_galil_motors:
         out[m[0]] = dict(
             {
-                "status": {"enabled": True},
-                "type": "GalilMotor",
-                "config": {
+                "status": {"enabled": True, "enabled_set": True},
+                "deviceClass": "GalilMotor",
+                "deviceConfig": {
                     "axis_Id": m[1],
                     "name": m[0],
                     "labels": m[0],
@@ -328,16 +328,16 @@ if USE_LAMNI:
                     "device_access": True,
                     "device_mapping": {"rt": "rtx"},
                 },
-                "acquisition": {"schedule": "sync"},
-                "deviceGroup": "userMotor",
+                "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "userMotor"},
+                "deviceGroup": "lamni",
             }
         )
     for m in lamni_smaract_motors:
         out[m[0]] = dict(
             {
-                "status": {"enabled": True},
-                "type": "SmaractMotor",
-                "config": {
+                "status": {"enabled": True, "enabled_set": True},
+                "deviceClass": "SmaractMotor",
+                "deviceConfig": {
                     "axis_Id": m[1],
                     "name": m[0],
                     "labels": m[0],
@@ -347,17 +347,17 @@ if USE_LAMNI:
                     "sign": m[2],
                     "tolerance": 0.05,
                 },
-                "acquisition": {"schedule": "sync"},
-                "deviceGroup": "userMotor",
+                "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "userMotor"},
+                "deviceGroup": "lamni",
             }
         )
 
     for m in lamni_rt_motors:
         out[m[0]] = dict(
             {
-                "status": {"enabled": True},
-                "type": "RtLamniMotor",
-                "config": {
+                "status": {"enabled": True, "enabled_set": True},
+                "deviceClass": "RtLamniMotor",
+                "deviceConfig": {
                     "axis_Id": m[1],
                     "name": m[0],
                     "labels": m[0],
@@ -367,8 +367,8 @@ if USE_LAMNI:
                     "sign": m[2],
                     "device_access": True,
                 },
-                "acquisition": {"schedule": "sync"},
-                "deviceGroup": "userMotor",
+                "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "userMotor"},
+                "deviceGroup": "lamni",
             }
         )
 
@@ -378,32 +378,15 @@ if USE_LAMNI:
         f.write(write_sep("LamNI motors end here", sep_type="footer"))
 
 
-# out = dict()
-# for m in ["px", "py", "pz"]:
-#     out[m] = dict(
-#         {
-#             "status": {"enabled": True},
-#             "type": "NPointAxis",
-#             "config": {"name": m, "labels": m, "settling_time": 0.1},
-#             "acquisition": {"schedule": "sync"},
-#             "deviceGroup": "userMotor",
-#         }
-#     )
-
-# with open("./init_scibec/demo_config.yaml", "a") as f:
-#     f.write(write_sep("NPoint motors"))
-#     f.write(yaml.dump(out))
-#     f.write(write_sep("NPoint motors end here", sep_type="footer"))
-
 out = dict()
 for m in beamline_monitor:
     out[m] = dict(
         {
-            "status": {"enabled": True},
-            "type": "SynAxisMonitor",
-            "config": {"name": m, "labels": m, "tolerance": 0.5},
-            "acquisition": {"schedule": "sync"},
-            "deviceGroup": "monitor",
+            "status": {"enabled": True, "enabled_set": True},
+            "deviceClass": "SynAxisMonitor",
+            "deviceConfig": {"name": m, "labels": m, "tolerance": 0.5},
+            "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "monitor"},
+            "deviceGroup": "beamline",
         }
     )
 
@@ -416,17 +399,17 @@ out = dict()
 for m in beamline_motors:
     out[m] = dict(
         {
-            "status": {"enabled": True},
-            "type": "SynAxisOPAAS",
-            "config": {
+            "status": {"enabled": True, "enabled_set": True},
+            "deviceClass": "SynAxisOPAAS",
+            "deviceConfig": {
                 "name": m,
                 "labels": m,
                 "delay": 1,
                 "speed": 100,
                 "update_frequency": 400,
             },
-            "acquisition": {"schedule": "sync"},
-            "deviceGroup": "beamlineMotor",
+            "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "beamlineMotor"},
+            "deviceGroup": "beamline",
         }
     )
 
@@ -440,15 +423,15 @@ out = dict()
 for m in detectors:
     out[m] = dict(
         {
-            "status": {"enabled": True},
-            "type": "SynSLSDetector",
-            "config": {
+            "status": {"enabled": True, "enabled_set": True},
+            "deviceClass": "SynSLSDetector",
+            "deviceConfig": {
                 "name": m,
                 "labels": m,
                 "device_access": True,
             },
-            "acquisition": {"schedule": "sync"},
-            "deviceGroup": "detectors",
+            "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "detectors"},
+            "deviceGroup": "detector",
         }
     )
 
@@ -461,14 +444,14 @@ out = dict()
 for m in read_only_signals:
     out[m] = dict(
         {
-            "status": {"enabled": True},
-            "type": "SynSignalRO",
-            "config": {
+            "status": {"enabled": True, "enabled_set": True},
+            "deviceClass": "SynSignalRO",
+            "deviceConfig": {
                 "name": m,
                 "labels": m,
             },
-            "acquisition": {"schedule": "sync"},
-            "deviceGroup": "monitor",
+            "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "monitor"},
+            "deviceGroup": "beamline",
         }
     )
 
@@ -509,11 +492,11 @@ out = dict()
 for name, pv in sls_status:
     out[name] = dict(
         {
-            "status": {"enabled": True},
-            "type": "EpicsSignalRO",
-            "config": {"read_pv": pv, "name": name, "auto_monitor": True},
-            "acquisition": {"schedule": "monitor"},
-            "deviceGroup": "status",
+            "status": {"enabled": True, "enabled_set": False},
+            "deviceClass": "EpicsSignalRO",
+            "deviceConfig": {"read_pv": pv, "name": name, "auto_monitor": True},
+            "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "status"},
+            "deviceGroup": "SLS status",
         }
     )
 

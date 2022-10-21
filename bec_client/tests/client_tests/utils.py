@@ -24,7 +24,8 @@ class DMClientMock(DMClient):
         session_info = self.get_device(device_name)
         device_base_class = (
             "positioner"
-            if session_info["deviceGroup"] in ["userMotor", "beamlineMotor"]
+            if session_info["acquisitionConfig"]["acquisitionGroup"]
+            in ["userMotor", "beamlineMotor"]
             else "signal"
         )
         if device_base_class == "positioner":

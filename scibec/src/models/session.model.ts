@@ -1,5 +1,5 @@
-import {Entity, hasMany, model, property} from '@loopback/repository';
-import {Device, Scan} from '.';
+import { belongsTo, Entity, hasMany, model, property } from '@loopback/repository';
+import { Device, Scan } from '.';
 
 @model()
 export class Session extends Entity {
@@ -37,10 +37,18 @@ export class Session extends Entity {
   })
   name?: string;
 
-  @hasMany(() => Scan, {keyTo: 'sessionId'})
+  @belongsTo(() => Session,
+    {}, //relation metadata goes in here
+    {// property definition goes in here
+      mongodb: { dataType: 'ObjectId' },
+      required: true
+    })
+  beamlineId?: string;
+
+  @hasMany(() => Scan, { keyTo: 'sessionId' })
   scans?: Scan[];
 
-  @hasMany(() => Device, {keyTo: 'sessionId'})
+  @hasMany(() => Device, { keyTo: 'sessionId' })
   devices?: Device[];
 
   // @belongsTo(() => Session,

@@ -7,8 +7,8 @@ export interface DeviceConfig {
 }
 
 export interface AcquisitionConfig {
-  schedule?: string,
-  maxFrequency?: number
+  schedule: string,
+  acquisitionGroup: string
 }
 
 @model()
@@ -29,6 +29,12 @@ export class Device extends Entity {
 
   @property({
     type: 'string',
+    required: false,
+  })
+  description: string;
+
+  @property({
+    type: 'string',
     description: 'Only members of the ownerGroup are allowed to modify this device'
   })
   ownerGroup?: string;
@@ -38,6 +44,17 @@ export class Device extends Entity {
     index: true,
   })
   accessGroups?: string[];
+
+  @property({
+    type: 'date',
+  })
+  createdAt: Date;
+
+  @property({
+    type: 'string',
+  })
+  createdBy: string;
+
 
   @hasMany(() => Device, { keyTo: 'parentId' })
   subdevices?: Device[];
@@ -52,6 +69,7 @@ export class Device extends Entity {
   @belongsTo(() => Session,
     {}, //relation metadata goes in here
     {// property definition goes in here
+      description: 'Session to which this device belongs.',
       mongodb: { dataType: 'ObjectId' }
     })
   sessionId?: string;
@@ -59,38 +77,51 @@ export class Device extends Entity {
   @property({
     type: 'boolean',
     required: true,
+    description: 'True if the device should be enabled.',
   })
   enabled: boolean;
 
   @property({
     type: 'boolean',
     required: false,
+    description: 'True if the device is settable.',
   })
   enabled_set: boolean;
 
   @property({
     type: 'string',
     required: true,
+    description: 'Ophyd device class',
   })
   deviceClass: string;
 
   @property({
     type: 'string',
     required: true,
+    description: 'User-defined group for easier access and grouping.',
   })
   deviceGroup?: string;
 
   @property({
     type: 'object',
     required: true,
+    description: 'Device config, including the ophyd init arguments. Must at least contain name and label.',
   })
   deviceConfig: DeviceConfig;
 
   @property({
     type: 'object',
     required: true,
+    description: 'Config to determine the behaviour during data acquisition. Must include the fields schedule and acquisitionGroup.',
   })
-  acquisitionConfig: DeviceConfig;
+  acquisitionConfig: AcquisitionConfig;
+
+  @property({
+    type: 'object',
+    required: false,
+    description: 'Additional fields for user settings such as in and out positions.',
+  })
+  userParameter: object;
 
 
 

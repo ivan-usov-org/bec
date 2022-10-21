@@ -1,9 +1,9 @@
-import {inject} from '@loopback/core';
-import {DefaultCrudRepository} from '@loopback/repository';
-import {MongoDataSource} from '../datasources';
-import {Device, DeviceRelations} from '../models';
+import { inject } from '@loopback/core';
+import { MongoDataSource } from '../datasources';
+import { Device, DeviceRelations } from '../models';
+import { AutoAddRepository } from './autoadd.repository';
 
-export class DeviceRepository extends DefaultCrudRepository<
+export class DeviceRepository extends AutoAddRepository<
   Device,
   typeof Device.prototype.id,
   DeviceRelations

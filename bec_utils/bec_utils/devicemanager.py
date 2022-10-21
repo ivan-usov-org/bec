@@ -1,6 +1,5 @@
 import enum
 import json
-import threading
 import uuid
 
 import msgpack
@@ -8,6 +7,7 @@ import yaml
 from typeguard import typechecked
 
 from bec_utils.connector import ConnectorBase
+from bec_utils.session_manager import SessionManager
 
 from .BECMessage import (
     DeviceConfigMessage,
@@ -19,6 +19,7 @@ from .endpoints import MessageEndpoints
 from .logger import bec_logger
 from .scibec import SciBec
 from .timeout import SingletonThreadpool
+from .timeout import timeout as bec_timeout
 
 logger = bec_logger.logger
 
@@ -64,7 +65,7 @@ class Device:
         self.config["enabled_set"] = value
         self.parent.send_config_request(action="update", config={self.name: {"enabled_set": value}})
 
-    def read(self):
+    def read(self, cached):
         """get the last reading from a device"""
         val = self.parent.producer.get(MessageEndpoints.device_read(self.name))
         if val:
@@ -109,6 +110,7 @@ class Device:
             f"\tStatus: {'enabled' if self.enabled else 'disabled'}\n"
             f"\tLast recorded value: {self.read(cached=True)}\n"
             f"\tDevice class': {self.config.get('deviceClass')}\n"
+            f"\Acquisition group': {self.config['acquisitionConfig'].get('acquisitionGroup')}\n"
             f"\tDevice group': {self.config.get('deviceGroup')}\n"
             f"{separator}\n"
             "Config:\n"
@@ -170,7 +172,11 @@ class DeviceContainer(dict):
         Returns:
             list: List of devices that belong to the specified device group
         """
-        return [dev for _, dev in self.items() if dev.config["deviceGroup"] == device_group]
+        return [
+            dev
+            for _, dev in self.items()
+            if dev.config["acquisitionConfig"]["acquisitionGroup"] == device_group
+        ]
 
     def async_devices(self) -> list:
         """get a list of all synchronous devices"""
@@ -299,15 +305,19 @@ class DeviceManagerBase:
         RID = str(uuid.uuid4())
         self.producer.send(
             MessageEndpoints.device_config_request(),
-            DeviceConfigMessage(action="update", config=config, metadata={"RID": RID}).dumps(),
+            DeviceConfigMessage(action=action, config=config, metadata={"RID": RID}).dumps(),
         )
 
-        threadpool = SingletonThreadpool()
-        future = threadpool.executor.submit(self._wait_for_config_reply, RID)
-        reply = future.result()
+        # threadpool = SingletonThreadpool()
+        # future = threadpool.executor.submit(self._wait_for_config_reply, RID)
+        # reply = future.result(timeout=10)
+        # future = self._wait_for_config_reply()
+        # reply = future.result()
+        reply = self._wait_for_config_reply(RID)
         if not reply.content["accepted"]:
             raise DeviceConfigError(f"Failed to update the config: {reply.content['message']}.")
 
+    @bec_timeout(10)
     def _wait_for_config_reply(self, RID: str) -> RequestResponseMessage:
         while True:
             msg = self.producer.get(MessageEndpoints.device_config_request_response(RID))
@@ -335,8 +345,9 @@ class DeviceManagerBase:
                 obj = self._create_device(dev)
                 self.devices._add_device(dev.get("name"), obj)
         elif action == "reload":
+            logger.info("Reloading config.")
             self.devices.flush()
-            self._load_session()
+            self._get_config_from_DB()
         elif action == "remove":
             for dev in config:
                 self._remove_device(dev)
@@ -344,17 +355,18 @@ class DeviceManagerBase:
     def update_device_status(self, msg):
         msg = DeviceStatusMessage.loads(msg.value)
         device = self.devices.get(msg.content["device"])
-        if device:
-            device.status = DeviceStatus(msg.content["status"])
-            if device.DIID is not None:
-                if device.DIID > msg.metadata["DIID"]:
-                    if device.scanID != msg.metadata["scanID"]:
-                        device.DIID = msg.metadata["DIID"]
-                elif device.DIID < msg.metadata["DIID"]:
+        if not device:
+            return
+        device.status = DeviceStatus(msg.content["status"])
+        if device.DIID is not None:
+            if device.DIID > msg.metadata["DIID"]:
+                if device.scanID != msg.metadata["scanID"]:
                     device.DIID = msg.metadata["DIID"]
-            else:
+            elif device.DIID < msg.metadata["DIID"]:
                 device.DIID = msg.metadata["DIID"]
-            device.scanID = msg.metadata["scanID"]
+        else:
+            device.DIID = msg.metadata["DIID"]
+        device.scanID = msg.metadata["scanID"]
 
     def _start_connectors(self, bootstrap_server) -> None:
         self._start_base_consumer()
@@ -423,7 +435,22 @@ class DeviceManagerBase:
         parent.update_device_status(msg)
 
     def _get_config_from_DB(self):
-        self._session = self._scibec.get_current_session()[0]
+        beamlines = self._scibec.get_beamlines()
+        if not beamlines:
+            logger.warning("No config available.")
+            return
+        if len(beamlines) > 1:
+            logger.warning("More than one beamline available.")
+        beamline = beamlines[0]
+
+        session = self._scibec.get_current_session(beamline["name"], include_devices=True)
+        if not session:
+            logger.warning(f"No config available for beamline {beamline['name']}.")
+            return
+        if not session.get("devices"):
+            logger.warning(f"The currently active config has no devices specified.")
+            return
+        self._session = session
         logger.debug(
             f"Loaded session from DB: {json.dumps(self._session, sort_keys=True, indent=4)}"
         )
@@ -488,12 +515,13 @@ class DeviceManagerBase:
     def check_request_validity(self, msg: DeviceConfigMessage) -> None:
         if msg.content["action"] not in ["update", "add", "remove", "reload"]:
             raise DeviceConfigError("Action must be either add, remove, update, or reload.")
-        if msg.content["action"] in ["update", "add", "remove"] and not msg.content["config"]:
-            raise DeviceConfigError(
-                "Config cannot be empty for an action of type add, remove or update."
-            )
-        if not isinstance(msg.content["config"], dict):
-            raise DeviceConfigError("Config must be of type dict.")
+        if msg.content["action"] in ["update", "add", "remove"]:
+            if not msg.content["config"]:
+                raise DeviceConfigError(
+                    "Config cannot be empty for an action of type add, remove or update."
+                )
+            if not isinstance(msg.content["config"], dict):
+                raise DeviceConfigError("Config must be of type dict.")
         if msg.content["action"] in ["update", "remove"]:
             for dev in msg.content["config"].keys():
                 if dev not in self.devices:

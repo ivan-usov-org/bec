@@ -1,3 +1,5 @@
+import traceback
+
 from bec_utils import BECMessage as BMessage
 from bec_utils import DeviceConfigError, DeviceManagerBase, MessageEndpoints, bec_logger
 
@@ -21,50 +23,63 @@ class ConfigHandler:
         """
         try:
             self.device_manager.check_request_validity(msg)
-            if msg.content["action"] != "update":
-                return
-            updated = False
-            for dev in msg.content["config"]:
-                dev_config = msg.content["config"][dev]
-                device = self.device_manager.devices[dev]
-                if "deviceConfig" in dev_config:
-                    # store old config
-                    old_config = device.config["deviceConfig"].copy()
-
-                    # apply config
-                    try:
-                        self.device_manager.update_config(device.obj, dev_config["deviceConfig"])
-                    except Exception as exc:
-                        self.device_manager.update_config(device.obj, old_config)
-                        raise DeviceConfigError(f"Error during object update. {exc}") from exc
-
-                    device.config["deviceConfig"].update(dev_config["deviceConfig"])
-
-                    # update config in DB
-                    self.update_device_config_in_db(device_name=dev)
-                    updated = True
-
-                if "enabled" in dev_config:
-                    device.config["enabled"] = dev_config["enabled"]
-                    # update device enabled status in DB
-                    self.update_device_enabled_in_db(device_name=dev)
-                    updated = True
-                if "enabled_set" in dev_config:
-                    device.config["enabled_set"] = dev_config["enabled_set"]
-                    # update device enabled status in DB
-                    self.update_device_enabled_set_in_db(device_name=dev)
-                    updated = True
-
-            # send updates to services
-            if updated:
-                self.send_config(msg)
-                self.device_manager.send_config_request_reply(
-                    accepted=True, error_msg=None, metadata=msg.metadata
-                )
+            if msg.content["action"] == "update":
+                self._update_config(msg)
+            if msg.content["action"] == "reload":
+                self._reload_config(msg)
 
         except DeviceConfigError as dev_conf_error:
+            content = traceback.format_exc()
             self.device_manager.send_config_request_reply(
-                accepted=False, error_msg=dev_conf_error, metadata=msg.metadata
+                accepted=False, error_msg=content, metadata=msg.metadata
+            )
+
+    def _reload_config(self, msg: BMessage.DeviceConfigMessage):
+        self.device_manager.send_config_request_reply(
+            accepted=True, error_msg=None, metadata=msg.metadata
+        )
+        self.send_config(msg)
+        self.device_manager.devices.flush()
+        self.device_manager._get_config_from_DB()
+
+    def _update_config(self, msg: BMessage.DeviceConfigMessage):
+        updated = False
+        for dev in msg.content["config"]:
+            dev_config = msg.content["config"][dev]
+            device = self.device_manager.devices[dev]
+            if "deviceConfig" in dev_config:
+                # store old config
+                old_config = device.config["deviceConfig"].copy()
+
+                # apply config
+                try:
+                    self.device_manager.update_config(device.obj, dev_config["deviceConfig"])
+                except Exception as exc:
+                    self.device_manager.update_config(device.obj, old_config)
+                    raise DeviceConfigError(f"Error during object update. {exc}") from exc
+
+                device.config["deviceConfig"].update(dev_config["deviceConfig"])
+
+                # update config in DB
+                self.update_device_config_in_db(device_name=dev)
+                updated = True
+
+            if "enabled" in dev_config:
+                device.config["enabled"] = dev_config["enabled"]
+                # update device enabled status in DB
+                self.update_device_enabled_in_db(device_name=dev)
+                updated = True
+            if "enabled_set" in dev_config:
+                device.config["enabled_set"] = dev_config["enabled_set"]
+                # update device enabled status in DB
+                self.update_device_enabled_set_in_db(device_name=dev)
+                updated = True
+
+        # send updates to services
+        if updated:
+            self.send_config(msg)
+            self.device_manager.send_config_request_reply(
+                accepted=True, error_msg=None, metadata=msg.metadata
             )
 
     def update_device_enabled_in_db(self, device_name: str) -> None:

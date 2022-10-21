@@ -1,3 +1,5 @@
+import ctypes
+import threading
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as CFTimeoutError
 
@@ -44,12 +46,35 @@ def timeout(timeout_time: float):
 
     def Inner(fcn):
         def wrapper(*args, **kwargs):
-            fcn_future = threadpool.executor.submit(fcn, *args, **kwargs)
             try:
+                fcn_future = threadpool.executor.submit(fcn, *args, **kwargs)
                 return fcn_future.result(timeout=timeout_time)
-            except CFTimeoutError as error:
-                raise TimeoutError from error
+            finally:
+                if fcn_future.running():
+                    fcn_future.cancel()
 
         return wrapper
 
     return Inner
+
+
+set_async_exc = ctypes.pythonapi.PyThreadState_SetAsyncExc
+
+
+def killthread(thread, exc=KeyboardInterrupt):
+    if not thread.is_alive():
+        return
+
+    ident = ctypes.c_long(thread.ident)
+    exc = ctypes.py_object(exc)
+
+    res = set_async_exc(ident, exc)
+    if res == 0:
+        raise ValueError(f"thread {thread} does not exist")
+    elif res > 1:
+        # if return value is greater than one, you are in trouble.
+        # you should call it again with exc=NULL to revert the effect.
+        set_async_exc(ident, None)
+        raise SystemError(
+            f"PyThreadState_SetAsyncExc on thread {thread} failed with return value {res}"
+        )

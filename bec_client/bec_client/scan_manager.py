@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import datetime
 import time
 from math import inf
 
 from bec_utils import BECMessage, MessageEndpoints, bec_errors, bec_logger
+from bec_utils import timeout as bec_timeout
 
 from bec_client.queue_items import QueueStorage
 from bec_client.request_items import RequestStorage
@@ -63,33 +65,43 @@ class ScanReport:
 
     def wait(self, timeout=None):
         """wait until the request is completed"""
-        timeout = timeout if timeout is not None else inf
-        elapsed_time = 0
-        sleep_time = 0.1
-        while True:
-            if self.status == "COMPLETED":
-                break
-            if self.status == "STOPPED":
-                raise bec_errors.ScanAbortion
-            elapsed_time += sleep_time
-            time.sleep(sleep_time)
-            if elapsed_time > timeout:
-                raise TimeoutError
 
-        if self.request.request.content["scan_type"] != "mv":
-            return
+        @bec_timeout(timeout)
+        def _wait():
+            sleep_time = 0.1
+            while True:
+                if self.status == "COMPLETED":
+                    break
+                if self.status == "STOPPED":
+                    raise bec_errors.ScanAbortion
+                time.sleep(sleep_time)
 
-        while True:
-            motors = list(self.request.request.content["parameter"]["args"].keys())
-            request_status = self._client.device_manager.producer.lrange(
-                MessageEndpoints.device_req_status(self.request.requestID), 0, -1
-            )
-            if len(request_status) == len(motors):
-                break
-            elapsed_time += sleep_time
-            time.sleep(sleep_time)
-            if elapsed_time > timeout:
-                raise TimeoutError
+            if self.request.request.content["scan_type"] != "mv":
+                return
+
+            while True:
+                motors = list(self.request.request.content["parameter"]["args"].keys())
+                request_status = self._client.device_manager.producer.lrange(
+                    MessageEndpoints.device_req_status(self.request.requestID), 0, -1
+                )
+                if len(request_status) == len(motors):
+                    break
+                time.sleep(sleep_time)
+
+        _wait()
+
+    def __repr__(self) -> str:
+        separator = "--" * 10
+        return (
+            "ScanReport:\n"
+            f"{separator}\n"
+            "Details:\n"
+            f"\tStatus: {self.status}\n"
+            f"\tStart time: {datetime.datetime.fromtimestamp(self.scan.start_time).strftime('%c')}\n"
+            f"\tEnd time': {datetime.datetime.fromtimestamp(self.scan.end_time).strftime('%c')}\n"
+            f"\tScan number': {self.scan.scan_number}\n"
+            f"\tNumber of points': {self.scan.num_points}\n"
+        )
 
 
 class ScanManager:
