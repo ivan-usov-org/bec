@@ -177,10 +177,10 @@ class XrayEyeAlign:
                         f"Base shift values from movement are x {self.shift_xy[0]}, y {self.shift_xy[1]}\n"
                     )
                     self.shift_xy[0] += (
-                        self.alignment_values[0][0] - self.alignment_values[0][1]
+                        self.alignment_values[0][0] - self.alignment_values[1][0]
                     ) * 1000
                     self.shift_xy[1] += (
-                        self.alignment_values[1][1] - self.alignment_values[1][0]
+                        self.alignment_values[1][1] - self.alignment_values[0][1]
                     ) * 1000
                     print(
                         f"Base shift values from movement and clicked position are x {self.shift_xy[0]}, y {self.shift_xy[1]}\n"
