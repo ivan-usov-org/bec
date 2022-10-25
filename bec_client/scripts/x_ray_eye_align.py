@@ -22,6 +22,7 @@ class XrayEyeAlign:
     PIXEL_CALIBRATION = 0.2 / 218  # .2 with binning
 
     def __init__(self, client) -> None:
+        self.client = client
         self.device_manager = client.device_manager
         self.scans = client.scans
         self.xeye = self.device_manager.devices.xeye
@@ -254,6 +255,37 @@ class XrayEyeAlign:
                     self.update_frame()
 
             time.sleep(0.2)
+
+        self.write_output()
+        fovx = self._xray_fov_xy[0] * self.PIXEL_CALIBRATION * 1000 / 2
+        fovy = self._xray_fov_xy[1] * self.PIXEL_CALIBRATION * 1000 / 2
+        print(
+            f"The largest field of view from the xrayeyealign was \nfovx = {fovx:.0f} microns, fovy = {fovy:.0f} microns\n"
+        )
+        print("Use matlab routine to fit the current alignment...\n")
+
+        print(
+            f"This additional shift is applied to the base shift values\n which are x {self.shift_xy[0]}, y {self.shift_xy[1]}\n"
+        )
+
+        self._disable_rt_feedback()
+
+        self.tomo_rotate(0)
+
+        print("\n\nNEXT LOAD ALIGNMENT PARAMETERS\nby running lamni_read_alignment_parameters\n")
+
+        self.client.set_global_var("tomo_fov_offset", self.shift_xy)
+
+    def write_output(self):
+        with open("./xrayeye_alignmentvalues.txt", "w") as alignment_values_file:
+            alignment_values_file.write(f"angle\thorizontal\tvertical\n")
+            for k in range(11):
+                fovx_offset = self.alignment_values[0][0] - self.alignment_values[k][0]
+                fovy_offset = self.alignment_values[k][1] - self.alignment_values[0][1]
+                print(
+                    f"Writing to file new alignment: number {k}, value x {fovx_offset}, y {fovy_offset}"
+                )
+                alignment_values_file.write(f"{(k-2)*45}\t{fovx_offset}\t{fovy_offset}\n")
 
 
 # # ----------------------------------------------------------------------
