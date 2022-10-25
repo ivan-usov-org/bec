@@ -64,7 +64,7 @@ class XrayEyeAlign:
     def _loptics_out(self):
         raise NotImplementedError
 
-    def tomo_rotate(self, val:float):
+    def tomo_rotate(self, val: float):
         umv(self.device_manager.lsamrot, val)
 
     def get_tomo_angle(self):
@@ -184,7 +184,7 @@ class XrayEyeAlign:
                     )
 
                     self.scans.lamni_move_to_scan_center(
-                        self.shift_xy[0]/1000, self.shift_xy[1]/1000, self.get_tomo_angle()
+                        self.shift_xy[0] / 1000, self.shift_xy[1] / 1000, self.get_tomo_angle()
                     ).wait()
 
                     self.send_message("please wait ...")
@@ -193,7 +193,7 @@ class XrayEyeAlign:
                     time.sleep(1)
 
                     self.scans.lamni_move_to_scan_center(
-                        self.shift_xy[0]/1000, self.shift_xy[1]/1000, self.get_tomo_angle() 
+                        self.shift_xy[0] / 1000, self.shift_xy[1] / 1000, self.get_tomo_angle()
                     ).wait()
 
                     epics_put("XOMNYI-XEYE-ANGLE:0", self.get_tomo_angle())
@@ -210,12 +210,12 @@ class XrayEyeAlign:
                     self._disable_rt_feedback()
                     self._tomo_rotate((k - 1) * 45 - 45 / 2)
                     self.scans.lamni_move_to_scan_center(
-                        self.shift_xy[0]/1000, self.shift_xy[1]/1000, self.get_tomo_angle()
+                        self.shift_xy[0] / 1000, self.shift_xy[1] / 1000, self.get_tomo_angle()
                     ).wait()
                     self._disable_rt_feedback()
                     self._tomo_rotate((k - 1) * 45)
                     self.scans.lamni_move_to_scan_center(
-                        self.shift_xy[0]/1000, self.shift_xy[1]/1000, self.get_tomo_angle()
+                        self.shift_xy[0] / 1000, self.shift_xy[1] / 1000, self.get_tomo_angle()
                     ).wait()
 
                     epics_put("XOMNYI-XEYE-ANGLE:0", self.get_tomo_angle())
@@ -242,7 +242,7 @@ class XrayEyeAlign:
                     shiftx = shiftx + _xrayeyalignmvx
                     shifty = shifty + _xrayeyalignmvy
                     self.scans.lamni_move_to_scan_center(
-                        self.shift_xy[0]/1000, self.shift_xy[1]/1000, self.get_tomo_angle()
+                        self.shift_xy[0] / 1000, self.shift_xy[1] / 1000, self.get_tomo_angle()
                     ).wait()
                     print(f"Current center horizontal {shiftx} vertical {shifty}\n")
                     epics_put("XOMNYI-XEYE-MVY:0", 0)
