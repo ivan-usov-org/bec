@@ -140,15 +140,15 @@ class SciBec:
                     )
                 except yaml.YAMLError as er:
                     logger.error(f"Error while loading config from disk: {repr(er)}")
-        elif file_path.endswith(".json"):
-            with open(file_path) as stream:
-                try:
-                    data = json.load(stream)
-                    logger.trace(
-                        f"Loaded new config from disk: {json.dumps(data, sort_keys=True, indent=4)}"
-                    )
-                except json.JSONDecodeError as er:
-                    logger.error(f"Error while loading config from disk: {repr(er)}")
+        # elif file_path.endswith(".json"):
+        #     with open(file_path) as stream:
+        #         try:
+        #             data = json.load(stream)
+        #             logger.trace(
+        #                 f"Loaded new config from disk: {json.dumps(data, sort_keys=True, indent=4)}"
+        #             )
+        #         except json.JSONDecodeError as er:
+        #             logger.error(f"Error while loading config from disk: {repr(er)}")
         else:
             raise NotImplementedError
 
