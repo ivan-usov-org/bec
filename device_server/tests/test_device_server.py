@@ -4,7 +4,7 @@ from bec_utils.tests.utils import ConnectorMock
 from device_server import DeviceServer
 from ophyd import Staged
 
-from test_device_manager import load_device_manager
+from test_device_manager_ds import load_device_manager
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=protected-access
