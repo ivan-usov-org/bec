@@ -309,27 +309,20 @@ class DeviceManagerBase:
             DeviceConfigMessage(action=action, config=config, metadata={"RID": RID}).dumps(),
         )
 
-        # threadpool = SingletonThreadpool()
-        # future = threadpool.executor.submit(self._wait_for_config_reply, RID)
-        # reply = future.result(timeout=10)
-        # future = self._wait_for_config_reply()
-        # reply = future.result()
-        reply_future = self.run_wait_for_config_reply(RID)
+        reply = self.wait_for_config_reply(RID)
+
+        if not reply.content["accepted"]:
+            raise DeviceConfigError(f"Failed to update the config: {reply.content['message']}.")
+
+    def wait_for_config_reply(self, RID: str) -> RequestResponseMessage:
+        reply_future = asyncio.run_coroutine_threadsafe(
+            self._wait_for_config_reply(RID), asyncio.get_event_loop()
+        )
         try:
             reply = reply_future.result(3)
         except asyncio.TimeoutError:
             raise DeviceConfigError(f"Reached timeout whilst trying to update the config.")
-
-        # reply = asyncio.run(self.wait_for_config_reply(RID))
-        # reply = self._wait_for_config_reply(RID)
-        if not reply.content["accepted"]:
-            raise DeviceConfigError(f"Failed to update the config: {reply.content['message']}.")
-
-    def run_wait_for_config_reply(self, RID: str) -> asyncio.Future:
-        reply_future = asyncio.run_coroutine_threadsafe(
-            self._wait_for_config_reply(RID), asyncio.get_event_loop()
-        )
-        return reply_future
+        return reply
 
     async def _wait_for_config_reply(self, RID: str) -> RequestResponseMessage:
         while True:

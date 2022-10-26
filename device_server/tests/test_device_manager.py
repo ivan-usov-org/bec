@@ -1,3 +1,4 @@
+import concurrent
 import os
 from unittest import mock
 
@@ -96,7 +97,7 @@ def test_disable_unreachable_devices():
         with mock.patch.object(device_manager, "_get_config_from_DB", get_config_from_mock):
             with mock.patch.object(
                 device_manager,
-                "_wait_for_config_reply",
+                "wait_for_config_reply",
                 return_value=config_reply,
             ):
                 device_manager.initialize("")

@@ -24,13 +24,12 @@ def test_request_response():
         if obj.name == "samx":
             raise ConnectionError
 
-    config_reply = concurrent.futures.Future()
-    config_reply.set_result(BECMessage.RequestResponseMessage(accepted=True, message=""))
+    config_reply = BECMessage.RequestResponseMessage(accepted=True, message="")
     with mock.patch.object(device_manager, "connect_device", wraps=mocked_failed_connection):
         with mock.patch.object(device_manager, "_get_config_from_DB", get_config_from_mock):
             with mock.patch.object(
                 device_manager,
-                "run_wait_for_config_reply",
+                "wait_for_config_reply",
                 return_value=config_reply,
             ):
                 device_manager.initialize("")
