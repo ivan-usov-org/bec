@@ -19,6 +19,7 @@ if __name__ == "__main__":
             "ipython",
             "cytoolz",
             "rich",
+            "pyepics",
         ]
     )
     local_deps = [utils]
