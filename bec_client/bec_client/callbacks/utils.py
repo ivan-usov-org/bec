@@ -10,7 +10,7 @@ from bec_client.request_items import RequestItem
 from bec_utils import Alarms, BECMessage, bec_logger
 
 if TYPE_CHECKING:
-    from bec_client.bec_client import BKClient
+    from bec_client.bec_client import BECClient
 
 logger = bec_logger.logger
 
@@ -44,7 +44,7 @@ def check_alarms(bec):
 
 
 class LiveUpdatesBase(abc.ABC):
-    def __init__(self, bec: BKClient, request: BECMessage.ScanQueueMessage) -> None:
+    def __init__(self, bec: BECClient, request: BECMessage.ScanQueueMessage) -> None:
         self.bec = bec
         self.request = request
         self.RID = request.metadata["RID"]
@@ -61,7 +61,7 @@ class LiveUpdatesBase(abc.ABC):
 
 
 class ScanRequestMixin:
-    def __init__(self, bec: BKClient, RID: str) -> None:
+    def __init__(self, bec: BECClient, RID: str) -> None:
         self.bec = bec
         self.request_storage = self.bec.queue.request_storage
         self.RID = RID

@@ -2,7 +2,7 @@ import os
 
 import bec_utils
 import yaml
-from bec_client.bec_client import BKClient
+from bec_client.bec_client import BECClient
 from bec_client.devicemanager_client import DMClient
 from bec_utils import BECMessage
 from bec_utils.tests.utils import ConnectorMock
@@ -10,7 +10,7 @@ from bec_utils.tests.utils import ConnectorMock
 dir_path = os.path.dirname(bec_utils.__file__)
 
 
-class ClientMock(BKClient):
+class ClientMock(BECClient):
     def _load_scans(self):
         pass
 
