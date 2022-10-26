@@ -9,7 +9,7 @@
 
 from bec_utils import RedisConnector, ServiceConfig, bec_logger
 
-from bec_client import BKClient
+from bec_client import BECClient
 
 logger = bec_logger.logger
 bec_logger.level = bec_logger.LOGLEVEL.SUCCESS
@@ -19,7 +19,7 @@ CONFIG_PATH = "../bec_config.yaml"
 
 config = ServiceConfig(CONFIG_PATH)
 
-bk = BKClient(
+bk = BECClient(
     [config.redis],
     RedisConnector,
     config.scibec,
@@ -30,8 +30,7 @@ bk.load_high_level_interface("spec_hli")
 dev = bk.device_manager.devices
 scans = bk.scans
 
-logger.success("Started BKClient")
-print(bk.service_status)
+logger.success("Started BECClient")
 # scans.fermat_scan(dev.samx, -2, 2, dev.samy, -2, 2, step=1.5, exp_time=0.02, relative=True)
 # dev.samx.low_limit = -20
 # scans.round_scan_fly(dev.samx, dev.samy, 0, 50, 20, 3, exp_time=0.1, relative=True)

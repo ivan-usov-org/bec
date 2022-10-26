@@ -22,6 +22,7 @@ class XrayEyeAlign:
     PIXEL_CALIBRATION = 0.2 / 218  # .2 with binning
 
     def __init__(self, client) -> None:
+        self.client = client
         self.device_manager = client.device_manager
         self.scans = client.scans
         self.xeye = self.device_manager.devices.xeye
@@ -59,19 +60,21 @@ class XrayEyeAlign:
         self.device_manager.devices.rtx.controller.feedback_disable()
 
     def _enable_rt_feedback(self):
-        self.device_manager.devices.rtx.controller.feedback_enable_without_reset()
+        self.device_manager.devices.rtx.controller.feedback_enable_with_reset()
 
     def _loptics_out(self):
-        raise NotImplementedError
+        # raise NotImplementedError
+        pass
 
-    def tomo_rotate(self):
-        raise NotImplementedError
+    def tomo_rotate(self, val: float):
+        umv(self.device_manager.devices.lsamrot, val)
 
     def get_tomo_angle(self):
-        raise NotImplementedError
+        return self.device_manager.devices.lsamrot.readback.read()["lsamrot"]["value"]
 
     def _lfzp_in(self):
-        raise NotImplementedError
+        # raise NotImplementedError
+        pass
 
     def update_fov(self, k: int):
         self._xray_fov_xy[0] = max(epics_get(f"XOMNYI-XEYE-XWIDTH_X:{k}"), self._xray_fov_xy[0])
@@ -174,7 +177,7 @@ class XrayEyeAlign:
                         f"Base shift values from movement are x {self.shift_xy[0]}, y {self.shift_xy[1]}\n"
                     )
                     self.shift_xy[0] += (
-                        self.alignment_values[0][0] - self.alignment_values[0][1]
+                        self.alignment_values[0][0] - self.alignment_values[1][0]
                     ) * 1000
                     self.shift_xy[1] += (
                         self.alignment_values[1][1] - self.alignment_values[0][1]
@@ -184,7 +187,7 @@ class XrayEyeAlign:
                     )
 
                     self.scans.lamni_move_to_scan_center(
-                        self.shift_xy[0], self.shift_xy[1], self.get_tomo_angle() / 1000
+                        self.shift_xy[0] / 1000, self.shift_xy[1] / 1000, self.get_tomo_angle()
                     ).wait()
 
                     self.send_message("please wait ...")
@@ -193,7 +196,7 @@ class XrayEyeAlign:
                     time.sleep(1)
 
                     self.scans.lamni_move_to_scan_center(
-                        self.shift_xy[0], self.shift_xy[1], self.get_tomo_angle() / 1000
+                        self.shift_xy[0] / 1000, self.shift_xy[1] / 1000, self.get_tomo_angle()
                     ).wait()
 
                     epics_put("XOMNYI-XEYE-ANGLE:0", self.get_tomo_angle())
@@ -208,14 +211,14 @@ class XrayEyeAlign:
 
                     # we swtich feedback off before rotating to not have it on and off again later for smooth operation
                     self._disable_rt_feedback()
-                    self._tomo_rotate((k - 1) * 45 - 45 / 2)
+                    self.tomo_rotate((k - 1) * 45 - 45 / 2)
                     self.scans.lamni_move_to_scan_center(
-                        self.shift_xy[0], self.shift_xy[1], self.get_tomo_angle() / 1000
+                        self.shift_xy[0] / 1000, self.shift_xy[1] / 1000, self.get_tomo_angle()
                     ).wait()
                     self._disable_rt_feedback()
-                    self._tomo_rotate((k - 1) * 45)
+                    self.tomo_rotate((k - 1) * 45)
                     self.scans.lamni_move_to_scan_center(
-                        self.shift_xy[0], self.shift_xy[1], self.get_tomo_angle() / 1000
+                        self.shift_xy[0] / 1000, self.shift_xy[1] / 1000, self.get_tomo_angle()
                     ).wait()
 
                     epics_put("XOMNYI-XEYE-ANGLE:0", self.get_tomo_angle())
@@ -239,15 +242,50 @@ class XrayEyeAlign:
                 _xrayeyalignmvx = epics_get("XOMNYI-XEYE-MVX:0")
                 _xrayeyalignmvy = epics_get("XOMNYI-XEYE-MVY:0")
                 if _xrayeyalignmvx != 0 or _xrayeyalignmvy != 0:
-                    shiftx = shiftx + _xrayeyalignmvx
-                    shifty = shifty + _xrayeyalignmvy
-                    # lamni_new_scan_center_interferometer(shiftx/1000,shifty/1000) #TODO really?
-                    print(f"Current center horizontal {shiftx} vertical {shifty}\n")
+                    self.shift_xy[0] = self.shift_xy[0] + _xrayeyalignmvx
+                    self.shift_xy[1] = self.shift_xy[1] + _xrayeyalignmvy
+                    self.scans.lamni_move_to_scan_center(
+                        self.shift_xy[0] / 1000, self.shift_xy[1] / 1000, self.get_tomo_angle()
+                    ).wait()
+                    print(
+                        f"Current center horizontal {self.shift_xy[0]} vertical {self.shift_xy[1]}\n"
+                    )
                     epics_put("XOMNYI-XEYE-MVY:0", 0)
                     epics_put("XOMNYI-XEYE-MVX:0", 0)
                     self.update_frame()
 
             time.sleep(0.2)
+
+        self.write_output()
+        fovx = self._xray_fov_xy[0] * self.PIXEL_CALIBRATION * 1000 / 2
+        fovy = self._xray_fov_xy[1] * self.PIXEL_CALIBRATION * 1000 / 2
+        print(
+            f"The largest field of view from the xrayeyealign was \nfovx = {fovx:.0f} microns, fovy = {fovy:.0f} microns\n"
+        )
+        print("Use matlab routine to fit the current alignment...\n")
+
+        print(
+            f"This additional shift is applied to the base shift values\n which are x {self.shift_xy[0]}, y {self.shift_xy[1]}\n"
+        )
+
+        self._disable_rt_feedback()
+
+        self.tomo_rotate(0)
+
+        print("\n\nNEXT LOAD ALIGNMENT PARAMETERS\nby running lamni_read_alignment_parameters\n")
+
+        self.client.set_global_var("tomo_fov_offset", self.shift_xy)
+
+    def write_output(self):
+        with open("./xrayeye_alignmentvalues.txt", "w") as alignment_values_file:
+            alignment_values_file.write(f"angle\thorizontal\tvertical\n")
+            for k in range(11):
+                fovx_offset = self.alignment_values[0][0] - self.alignment_values[k][0]
+                fovy_offset = self.alignment_values[k][1] - self.alignment_values[0][1]
+                print(
+                    f"Writing to file new alignment: number {k}, value x {fovx_offset}, y {fovy_offset}"
+                )
+                alignment_values_file.write(f"{(k-2)*45}\t{fovx_offset}\t{fovy_offset}\n")
 
 
 # # ----------------------------------------------------------------------

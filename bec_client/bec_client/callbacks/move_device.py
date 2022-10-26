@@ -9,7 +9,7 @@ from bec_utils import BECMessage, DeviceManagerBase, MessageEndpoints
 from .utils import LiveUpdatesBase, ScanRequestMixin, check_alarms
 
 if TYPE_CHECKING:
-    from bec_client.bec_client import BKClient
+    from bec_client.bec_client import BECClient
 
 
 class ReadbackDataMixin:
@@ -54,7 +54,7 @@ class LiveUpdatesReadbackProgressbar(LiveUpdatesBase):
 
     """
 
-    def __init__(self, bec: BKClient, request: BECMessage.ScanQueueMessage) -> None:
+    def __init__(self, bec: BECClient, request: BECMessage.ScanQueueMessage) -> None:
         super().__init__(bec, request)
         self.devices = list(request.content["parameter"]["args"].keys())
 

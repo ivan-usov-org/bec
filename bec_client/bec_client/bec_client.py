@@ -20,7 +20,7 @@ from .signals import SigintHandler
 logger = bec_logger.logger
 
 
-class BKClient(BECService):
+class BECClient(BECService):
     def __init__(self, bootstrap_server: list, connector_cls: ConnectorBase, scibec_url: str):
         """bec Client
 
@@ -101,7 +101,7 @@ class BKClient(BECService):
     def _configure_prompt(self):
         self._ip = IPython.get_ipython()
         if self._ip is not None:
-            self._ip.prompts = BKClientPrompt(ip=self._ip, client=self, username="demo")
+            self._ip.prompts = BECClientPrompt(ip=self._ip, client=self, username="demo")
 
     def _configure_logger(self):
         bec_logger.logger.remove()
@@ -157,7 +157,7 @@ class BKClient(BECService):
             self.shutdown()
 
 
-class BKClientPrompt(Prompts):
+class BECClientPrompt(Prompts):
     def __init__(self, ip, username, client, status=0):
         self._username = username
         self.client = client

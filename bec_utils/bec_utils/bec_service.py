@@ -6,6 +6,9 @@ import time
 import uuid
 from typing import Any
 
+from rich.console import Console
+from rich.table import Table
+
 from . import BECMessage
 from .BECMessage import BECStatus
 from .connector import ConnectorBase
@@ -137,6 +140,27 @@ class BECService:
 
         """
         self.producer.delete(MessageEndpoints.global_vars(name) + ":val")
+
+    @property
+    def global_vars(self):
+        """Get all available global variables"""
+        available_keys = self.producer.keys(MessageEndpoints.global_vars("*"))
+
+        def get_endpoint_from_topic(topic: str) -> str:
+            return topic.decode().split(MessageEndpoints.global_vars(""))[-1].split(":val")[0]
+
+        endpoints = [get_endpoint_from_topic(k) for k in available_keys]
+
+        console = Console()
+        table = Table(title="Global variables")
+        table.add_column("Variable", justify="center")
+        table.add_column("Content", justify="center")
+        for endpoint in endpoints:
+            var = str(self.get_global_var(endpoint))
+            if len(var) > 20:
+                var = var[0:10] + "..., " + var[-10:]
+            table.add_row(endpoint, var)
+        console.print(table)
 
     def shutdown(self):
         """shutdown the BECService"""
