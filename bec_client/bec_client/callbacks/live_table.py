@@ -11,7 +11,7 @@ from bec_utils import BECMessage, bec_logger
 from .utils import LiveUpdatesBase, ScanRequestMixin, check_alarms
 
 if TYPE_CHECKING:
-    from bec_client.bec_client import BKClient
+    from bec_client.bec_client import BECClient
 
 logger = bec_logger.logger
 
@@ -28,7 +28,7 @@ class LiveUpdatesTable(LiveUpdatesBase):
     """Live updates for scans using a table and a scan progess bar.
 
     Args:
-        bec (BKClient): client instance
+        bec (BECClient): client instance
         request (BECMessage.ScanQueueMessage): The scan request that should be monitored
 
     Raises:
@@ -37,7 +37,7 @@ class LiveUpdatesTable(LiveUpdatesBase):
         ScanRequestError: Raised if the scan was rejected by the server.
     """
 
-    def __init__(self, bec: BKClient, request: BECMessage.ScanQueueMessage) -> None:
+    def __init__(self, bec: BECClient, request: BECMessage.ScanQueueMessage) -> None:
         super().__init__(bec, request)
         self.scan_queue_request = None
         self.scan_item = None

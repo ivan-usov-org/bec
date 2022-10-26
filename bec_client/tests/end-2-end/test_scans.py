@@ -4,7 +4,7 @@ import time
 
 import numpy as np
 import pytest
-from bec_client import BKClient
+from bec_client import BECClient
 from bec_client.alarm_handler import AlarmBase
 from bec_utils import (
     BECMessage,
@@ -27,7 +27,7 @@ CONFIG_PATH = "../test_config.yaml"
 @pytest.fixture(scope="session", autouse=True)
 def client():
     config = ServiceConfig(CONFIG_PATH)
-    bec = BKClient(
+    bec = BECClient(
         [config.redis],
         RedisConnector,
         config.scibec,
@@ -66,7 +66,7 @@ def wait_for_empty_queue(bec):
 @pytest.mark.timeout(100)
 def start_client():
     config = ServiceConfig(CONFIG_PATH)
-    bec = BKClient(
+    bec = BECClient(
         [config.redis],
         RedisConnector,
         config.scibec,
