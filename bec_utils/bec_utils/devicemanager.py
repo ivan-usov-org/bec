@@ -271,39 +271,6 @@ class DeviceManagerBase:
         """SciBec instance"""
         return self._scibec
 
-    def load_config_from_disk(self, config_path) -> dict:
-        """
-        load config from disk and send request
-        Args:
-            config_path: path to config file
-
-        Returns:
-
-        """
-        data = {}
-        if config_path.endswith(".yaml"):
-            with open(config_path, "r") as stream:
-                try:
-                    data = yaml.safe_load(stream)
-                    logger.info(
-                        f"Loaded new config from disk: {json.dumps(data, sort_keys=True, indent=4)}"
-                    )
-                except yaml.YAMLError as er:
-                    logger.error(f"Error while loading config from disk: {repr(er)}")
-        elif config_path.endswith(".json"):
-            with open(config_path) as stream:
-                try:
-                    data = json.load(stream)
-                    logger.info(
-                        f"Loaded new config from disk: {json.dumps(data, sort_keys=True, indent=4)}"
-                    )
-                except json.JSONDecodeError as er:
-                    logger.error(f"Error while loading config from disk: {repr(er)}")
-        else:
-            raise NotImplementedError
-
-        return data
-
     def send_config_request(self, action: str = "update", config=None) -> None:
         """
         send request to update config
