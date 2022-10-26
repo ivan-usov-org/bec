@@ -163,9 +163,10 @@ class SciBec:
         if len(beamlines) > 1:
             logger.warning("More than one beamline available.")
         beamline = beamlines[0]
-        session = self.get_session_by_id(beamline["activeSession"])
-        if session:
-            self._delete_session(session[0]["id"])
+        if beamline.get("activeSession"):
+            session = self.get_session_by_id(beamline["activeSession"])
+            if session:
+                self._delete_session(session[0]["id"])
         session = self.add_session(beamline["name"], "demo")
         self.set_current_session(beamline["name"], "demo")
         for name, device in data.items():
