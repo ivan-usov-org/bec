@@ -12,6 +12,8 @@ import IPython
 from bec_utils import Alarms, BECService, MessageEndpoints, bec_logger
 from bec_utils.connector import ConnectorBase
 from IPython.terminal.prompts import Prompts, Token
+from rich.console import Console
+from rich.table import Table
 
 from bec_client.scan_manager import ScanManager
 
@@ -88,7 +90,7 @@ class BECClient(BECService):
     def load_all_user_scripts(self) -> None:
         """Load all scripts from the `scripts` directory."""
         current_path = pathlib.Path(__file__).parent.resolve()
-        script_files = glob.glob(os.path.join(current_path, "../scripts/*.py"))
+        script_files = glob.glob(os.path.abspath(os.path.join(current_path, "../scripts/*.py")))
         for file in script_files:
             self.load_user_script(file)
         builtins.__dict__.update(self._scripts)
@@ -117,7 +119,7 @@ class BECClient(BECService):
             if name in self._scripts:
                 logger.warning(f"Conflicting definitions for {name}.")
             logger.info(f"Importing {name}")
-            self._scripts[name] = cls
+            self._scripts[name] = {"cls": cls, "fname": file}
 
     def forget_user_script(self, name: str) -> None:
         """unload / remove a user scripts. The file will remain on disk."""
@@ -126,6 +128,17 @@ class BECClient(BECService):
             return
         builtins.__dict__.pop(name)
         self._scripts.pop(name)
+
+    def list_user_scripts(self):
+        """display all currently loaded user functions"""
+        console = Console()
+        table = Table(title="User scripts")
+        table.add_column("Name", justify="center")
+        table.add_column("Location", justify="center", overflow="fold")
+
+        for name, content in self._scripts.items():
+            table.add_row(name, content.get("fname"))
+        console.print(table)
 
     def _load_scans(self):
         self.scans = Scans(self)
