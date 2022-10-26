@@ -50,7 +50,7 @@ def test_check_motors_movable_enabled(scan_queue_msg):
     sg = ScanGuard(parent=k)
     sg._check_motors_movable(scan_queue_msg)
     config_reply = BECMessage.RequestResponseMessage(accepted=True, message="")
-    with mock.patch.object(k.device_manager, "_wait_for_config_reply", return_value=config_reply):
+    with mock.patch.object(k.device_manager, "wait_for_config_reply", return_value=config_reply):
         k.device_manager.devices["samx"].enabled = True
         k.device_manager.devices["samy"].enabled = False
         with pytest.raises(ScanRejection) as scan_rejection:

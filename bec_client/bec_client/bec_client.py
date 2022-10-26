@@ -101,7 +101,7 @@ class BECClient(BECService):
     def _configure_prompt(self):
         self._ip = IPython.get_ipython()
         if self._ip is not None:
-            self._ip.prompts = BECClientPrompt(self._ip, "demo")
+            self._ip.prompts = BECClientPrompt(ip=self._ip, client=self, username="demo")
 
     def _configure_logger(self):
         bec_logger.logger.remove()
@@ -158,10 +158,10 @@ class BECClient(BECService):
 
 
 class BECClientPrompt(Prompts):
-    def __init__(self, ip, username, status=0):
+    def __init__(self, ip, username, client, status=0):
         self._username = username
+        self.client = client
         self.status = status
-        self.scan_number = 0
         super().__init__(ip)
 
     def in_prompt_tokens(self, cli=None):
@@ -177,7 +177,7 @@ class BECClientPrompt(Prompts):
             (Token.Prompt, " ["),
             (Token.PromptNum, str(self.shell.execution_count)),
             (Token.Prompt, "/"),
-            (Token.PromptNum, str(self.scan_number)),
+            (Token.PromptNum, str(self.client.queue.next_scan_number)),
             (Token.Prompt, "] "),
             (Token.Prompt, "❯❯ "),
         ]

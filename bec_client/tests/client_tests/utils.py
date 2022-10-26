@@ -5,7 +5,7 @@ import yaml
 from bec_client.bec_client import BECClient
 from bec_client.devicemanager_client import DMClient
 from bec_utils import BECMessage
-from bec_utils.tests.utils import ConnectorMock
+from bec_utils.tests.utils import ConnectorMock, create_session_from_config
 
 dir_path = os.path.dirname(bec_utils.__file__)
 
@@ -24,7 +24,8 @@ class DMClientMock(DMClient):
         session_info = self.get_device(device_name)
         device_base_class = (
             "positioner"
-            if session_info["deviceGroup"] in ["userMotor", "beamlineMotor"]
+            if session_info["acquisitionConfig"]["acquisitionGroup"]
+            in ["userMotor", "beamlineMotor"]
             else "signal"
         )
         if device_base_class == "positioner":
@@ -63,8 +64,8 @@ class DMClientMock(DMClient):
 def get_bec_client_mock():
     client = ClientMock([], ConnectorMock, "")
     device_manager = DMClientMock(client, "")
-    with open(f"{dir_path}/tests/test_session.yaml", "r") as f:
-        device_manager._session = yaml.safe_load(f)
+    with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
+        device_manager._session = create_session_from_config(yaml.safe_load(f))
     device_manager.producer = device_manager.connector.producer()
     device_manager._load_session()
     client.device_manager = device_manager

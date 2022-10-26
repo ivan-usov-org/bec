@@ -11,11 +11,11 @@ from .logger import bec_logger
 logger = bec_logger.logger
 
 
-class BECStatus(int, enum.Enum):
-    ERROR = -1
-    OFF = 0
-    IDLE = 1
+class BECStatus(enum.Enum):
     RUNNING = 2
+    BUSY = 1
+    IDLE = 0
+    ERROR = -1
 
 
 class BECMessage:

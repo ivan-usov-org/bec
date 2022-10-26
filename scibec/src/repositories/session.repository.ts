@@ -1,11 +1,12 @@
-import {Getter, inject} from '@loopback/core';
-import {DefaultCrudRepository, HasManyRepositoryFactory, repository} from '@loopback/repository';
-import {MongoDataSource} from '../datasources';
-import {Device, Scan, Session, SessionRelations} from '../models';
-import {DeviceRepository} from './device.repository';
-import {ScanRepository} from './scan.repository';
+import { Getter, inject } from '@loopback/core';
+import { DefaultCrudRepository, HasManyRepositoryFactory, repository } from '@loopback/repository';
+import { MongoDataSource } from '../datasources';
+import { Device, Scan, Session, SessionRelations } from '../models';
+import { AutoAddRepository } from './autoadd.repository';
+import { DeviceRepository } from './device.repository';
+import { ScanRepository } from './scan.repository';
 
-export class SessionRepository extends DefaultCrudRepository<
+export class SessionRepository extends AutoAddRepository<
   Session,
   typeof Session.prototype.id,
   SessionRelations
