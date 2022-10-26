@@ -3140,3 +3140,143 @@ ring_current_sim:
 
 ################ Read-only signals end here ################
 
+
+
+############################################################
+###################### SLS status PVs ######################
+############################################################
+
+current_deadband:
+  acquisitionConfig:
+    acquisitionGroup: status
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: current_deadband
+    read_pv: ALIRF-GUN:CUR-DBAND
+  deviceGroup: SLS status
+  status:
+    enabled: true
+    enabled_set: false
+fast_orbit_feedback:
+  acquisitionConfig:
+    acquisitionGroup: status
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: fast_orbit_feedback
+    read_pv: ARIDI-BPM:FOFBSTATUS-G
+  deviceGroup: SLS status
+  status:
+    enabled: true
+    enabled_set: false
+orbit_feedback_mode:
+  acquisitionConfig:
+    acquisitionGroup: status
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: orbit_feedback_mode
+    read_pv: ARIDI-BPM:OFB-MODE
+  deviceGroup: SLS status
+  status:
+    enabled: true
+    enabled_set: false
+ring_current:
+  acquisitionConfig:
+    acquisitionGroup: status
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: ring_current
+    read_pv: ARIDI-PCT:CURRENT
+  deviceGroup: SLS status
+  status:
+    enabled: true
+    enabled_set: false
+sls_crane_usage:
+  acquisitionConfig:
+    acquisitionGroup: status
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: sls_crane_usage
+    read_pv: IBWKR-0101-QH10003:D01_H_D-WA
+  deviceGroup: SLS status
+  status:
+    enabled: true
+    enabled_set: false
+sls_current_threshold:
+  acquisitionConfig:
+    acquisitionGroup: status
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: sls_current_threshold
+    read_pv: ALIRF-GUN:CUR-LOWLIM
+  deviceGroup: SLS status
+  status:
+    enabled: true
+    enabled_set: false
+sls_filling_lifetime:
+  acquisitionConfig:
+    acquisitionGroup: status
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: sls_filling_lifetime
+    read_pv: ARIDI-PCT:TAU-HOUR
+  deviceGroup: SLS status
+  status:
+    enabled: true
+    enabled_set: false
+sls_filling_pattern:
+  acquisitionConfig:
+    acquisitionGroup: status
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: sls_filling_pattern
+    read_pv: ACORF-FILL:PAT-SELECT
+  deviceGroup: SLS status
+  status:
+    enabled: true
+    enabled_set: false
+sls_injection_mode:
+  acquisitionConfig:
+    acquisitionGroup: status
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: sls_injection_mode
+    read_pv: ALIRF-GUN:INJ-MODE
+  deviceGroup: SLS status
+  status:
+    enabled: true
+    enabled_set: false
+sls_machine_status:
+  acquisitionConfig:
+    acquisitionGroup: status
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: sls_machine_status
+    read_pv: ACOAU-ACCU:OP-MODE
+  deviceGroup: SLS status
+  status:
+    enabled: true
+    enabled_set: false
+
+
+################# SLS status PVs end here ##################
+

@@ -1,3 +1,4 @@
+import asyncio
 import enum
 import json
 import uuid
@@ -313,15 +314,28 @@ class DeviceManagerBase:
         # reply = future.result(timeout=10)
         # future = self._wait_for_config_reply()
         # reply = future.result()
-        reply = self._wait_for_config_reply(RID)
+        reply_future = self.run_wait_for_config_reply(RID)
+        try:
+            reply = reply_future.result(3)
+        except asyncio.TimeoutError:
+            raise DeviceConfigError(f"Reached timeout whilst trying to update the config.")
+
+        # reply = asyncio.run(self.wait_for_config_reply(RID))
+        # reply = self._wait_for_config_reply(RID)
         if not reply.content["accepted"]:
             raise DeviceConfigError(f"Failed to update the config: {reply.content['message']}.")
 
-    @bec_timeout(10)
-    def _wait_for_config_reply(self, RID: str) -> RequestResponseMessage:
+    def run_wait_for_config_reply(self, RID: str) -> asyncio.Future:
+        reply_future = asyncio.run_coroutine_threadsafe(
+            self._wait_for_config_reply(RID), asyncio.get_event_loop()
+        )
+        return reply_future
+
+    async def _wait_for_config_reply(self, RID: str) -> RequestResponseMessage:
         while True:
             msg = self.producer.get(MessageEndpoints.device_config_request_response(RID))
             if msg is None:
+                asyncio.sleep(0.1)
                 continue
             return RequestResponseMessage.loads(msg)
 
