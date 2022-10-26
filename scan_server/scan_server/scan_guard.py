@@ -99,6 +99,8 @@ class ScanGuard:
         for motor in motor_args:
             if not motor:
                 continue
+            if motor not in self.device_manager.devices:
+                continue
             if not self.device_manager.devices[motor].enabled:
                 raise ScanRejection(f"Device {motor} is not enabled.")
 

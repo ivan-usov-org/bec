@@ -216,8 +216,15 @@ class RequestBase(ABC):
                     )
 
     def _get_scan_motors(self):
-        if len(self.caller_args) > 0:
+        if len(self.caller_args) == 0:
+            return
+        if self.arg_bundle_size:
             self.scan_motors = list(self.caller_args.keys())
+            return
+        for motor in self.caller_args:
+            if motor not in self.device_manager.devices:
+                continue
+            self.scan_motors.append(motor)
 
     @abstractmethod
     def run(self):
