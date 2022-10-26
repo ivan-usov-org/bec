@@ -5,7 +5,7 @@ import bec_utils
 import pytest
 import yaml
 from bec_utils import BECMessage
-from bec_utils.devicemanager import DeviceManagerBase
+from bec_utils.devicemanager import DeviceConfigError, DeviceManagerBase
 from bec_utils.tests.utils import ConnectorMock, create_session_from_config
 
 dir_path = os.path.dirname(bec_utils.__file__)
@@ -66,3 +66,23 @@ def test_config_request_reload():
         dm.parse_config_message(msg)
         assert len(dm.devices) == 0
         get_config.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    "msg,raised",
+    [
+        (BECMessage.DeviceConfigMessage(action="wrong_action", config={}), True),
+        (BECMessage.DeviceConfigMessage(action="add", config={}), True),
+        (BECMessage.DeviceConfigMessage(action="remove", config={}), True),
+        (BECMessage.DeviceConfigMessage(action="reload", config={}), False),
+    ],
+)
+def test_check_request_validity(msg, raised):
+    connector = ConnectorMock("")
+    dm = DeviceManagerBase(connector, "")
+
+    if raised:
+        with pytest.raises(DeviceConfigError):
+            dm.check_request_validity(msg)
+    else:
+        dm.check_request_validity(msg)
