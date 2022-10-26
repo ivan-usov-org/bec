@@ -56,7 +56,7 @@ class BECClient(BECService):
         self._start_scan_queue()
         self._start_alarm_handler()
         self._configure_logger()
-        self.load_user_scripts()
+        self.load_all_user_scripts()
 
     def alarms(self, severity=Alarms.WARNING):
         """get the next alarm with at least the specified severity"""
@@ -85,32 +85,47 @@ class BECClient(BECService):
         for hook in hooks:
             self.producer.lpush(MessageEndpoints.pre_scan_macros(), hook)
 
-    def load_user_scripts(self):
+    def load_all_user_scripts(self) -> None:
         """Load all scripts from the `scripts` directory."""
         current_path = pathlib.Path(__file__).parent.resolve()
         script_files = glob.glob(os.path.join(current_path, "../scripts/*.py"))
         for file in script_files:
-            module_spec = importlib.util.spec_from_file_location("scripts", file)
-            plugin_module = importlib.util.module_from_spec(module_spec)
-            module_spec.loader.exec_module(plugin_module)
-            module_members = inspect.getmembers(plugin_module)
-            for name, cls in module_members:
-                if not callable(cls):
-                    continue
-                # ignore imported classes
-                if cls.__module__ != "scripts":
-                    continue
-                if name in self._scripts:
-                    logger.warning(f"Conflicting definitions for {name}.")
-                logger.info(f"Importing {name}")
-                self._scripts[name] = cls
+            self.load_user_script(file)
         builtins.__dict__.update(self._scripts)
 
-    def forget_user_scripts(self):
-        """remove loaded user scripts from builtins. The files will remain on disk though!"""
+    def forget_all_user_scripts(self) -> None:
+        """unload / remove loaded user scripts from builtins. The files will remain on disk though!"""
         for name in self._scripts:
-            builtins.__dict__.pop(name)
-        self._scripts = {}
+            self.forget_user_script(name)
+
+    def load_user_script(self, file: str) -> None:
+        """load a user script file and import all its definitions
+
+        Args:
+            file (str): Full path to the script file.
+        """
+        module_spec = importlib.util.spec_from_file_location("scripts", file)
+        plugin_module = importlib.util.module_from_spec(module_spec)
+        module_spec.loader.exec_module(plugin_module)
+        module_members = inspect.getmembers(plugin_module)
+        for name, cls in module_members:
+            if not callable(cls):
+                continue
+            # ignore imported classes
+            if cls.__module__ != "scripts":
+                continue
+            if name in self._scripts:
+                logger.warning(f"Conflicting definitions for {name}.")
+            logger.info(f"Importing {name}")
+            self._scripts[name] = cls
+
+    def forget_user_script(self, name: str) -> None:
+        """unload / remove a user scripts. The file will remain on disk."""
+        if not name in self._scripts:
+            logger.error(f"{name} is not a known user script.")
+            return
+        builtins.__dict__.pop(name)
+        self._scripts.pop(name)
 
     def _load_scans(self):
         self.scans = Scans(self)
