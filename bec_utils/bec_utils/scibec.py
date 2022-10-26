@@ -253,7 +253,7 @@ class HttpClient:
             verify=self._verify_certificate,
         )
         req.raise_for_status()
-        return {}
+        return req.ok
 
     @authenticated
     @formatted_http_error
@@ -265,7 +265,7 @@ class HttpClient:
             verify=self._verify_certificate,
         )
         req.raise_for_status()
-        return {}
+        return req.ok
 
     @staticmethod
     def make_filter(
