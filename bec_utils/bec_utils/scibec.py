@@ -275,8 +275,21 @@ class HttpClient:
         fields: dict = None,
         include: list = None,
         order: list = None,
-    ):
-        filt = dict()
+    ) -> dict:
+        """_summary_
+
+        Args:
+            where (dict, optional): Where filter. Defaults to None.
+            limit (int, optional): Limit filter. Defaults to 0.
+            skip (int, optional): skip entries. Defaults to 0.
+            fields (dict, optional): Include only certain fields. Defaults to None.
+            include (list, optional): Include embedded documents. Defaults to None.
+            order (list, optional): Order of documents. Defaults to None.
+
+        Returns:
+            dict: Filter dictionary
+        """
+        filt = {}
         if where is not None:
             items = [where.copy()]
             filt["where"] = {"and": items}

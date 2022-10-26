@@ -1,4 +1,5 @@
 import asyncio
+import concurrent
 import enum
 import json
 import uuid
@@ -320,7 +321,7 @@ class DeviceManagerBase:
         )
         try:
             reply = reply_future.result(3)
-        except asyncio.TimeoutError:
+        except concurrent.futures.TimeoutError:
             raise DeviceConfigError(f"Reached timeout whilst trying to update the config.")
         return reply
 
