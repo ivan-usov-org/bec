@@ -1,3 +1,4 @@
+import concurrent
 import time
 
 import pytest
@@ -11,7 +12,7 @@ def test_timeout(timeout_time, sleep_time):
         time.sleep(val)
 
     if timeout_time is not None and timeout_time < sleep_time:
-        with pytest.raises(TimeoutError):
+        with pytest.raises(concurrent.futures.TimeoutError):
             run_dummy(sleep_time)
     else:
         run_dummy(sleep_time)

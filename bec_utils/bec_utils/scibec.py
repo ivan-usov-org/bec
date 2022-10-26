@@ -129,7 +129,7 @@ class SciBec:
     def _delete_device(self, device_id: str):
         return self.client.delete_request(f"{self.url}/devices/{device_id}")
 
-    def load_config_from_file(self, file_path: str):
+    def load_config_from_file(self, file_path: str) -> dict:
         data = {}
         if file_path.endswith(".yaml"):
             with open(file_path, "r") as stream:
