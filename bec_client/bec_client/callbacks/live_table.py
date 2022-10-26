@@ -37,6 +37,8 @@ class LiveUpdatesTable(LiveUpdatesBase):
         ScanRequestError: Raised if the scan was rejected by the server.
     """
 
+    MAX_DEVICES = 10
+
     def __init__(self, bec: BECClient, request: BECMessage.ScanQueueMessage) -> None:
         super().__init__(bec, request)
         self.scan_queue_request = None
@@ -79,7 +81,9 @@ class LiveUpdatesTable(LiveUpdatesBase):
             return self.get_devices_from_request()
         if self.point_data.metadata["scan_type"] == "fly":
             devices = list(self.point_data.content["data"].keys())
-            return devices[0 : min(10, len(devices)) - 1]
+            if len(devices) > self.MAX_DEVICES:
+                return devices[0 : self.MAX_DEVICES]
+            return devices
         return None
 
     def get_devices_from_request(self) -> list:
@@ -91,8 +95,8 @@ class LiveUpdatesTable(LiveUpdatesBase):
         )
         devices = [dev.name for dev in primary_devices]
         devices = sort_devices(devices, scan_devices)
-        devices = devices[0 : min(10, len(devices)) - 1]
-
+        if len(devices) > self.MAX_DEVICES:
+            return devices[0 : self.MAX_DEVICES]
         return devices
 
     def _prepare_table(self) -> PrettyTable:
