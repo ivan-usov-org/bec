@@ -40,9 +40,13 @@ class DSDevice(Device):
 
 class DeviceManagerDS(DeviceManagerBase):
     def __init__(
-        self, connector: ConnectorBase, scibec_url: str, config_handler: ConfigHandler = None
+        self,
+        connector: ConnectorBase,
+        scibec_url: str,
+        config_handler: ConfigHandler = None,
+        status_cb: list = None,
     ):
-        super().__init__(connector, scibec_url)
+        super().__init__(connector, scibec_url, status_cb)
         self._config_request_connector = None
         self._device_instructions_connector = None
         self._config_handler_cls = config_handler

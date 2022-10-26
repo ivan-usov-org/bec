@@ -1,4 +1,3 @@
-import enum
 import sys
 import threading
 import time
@@ -8,9 +7,9 @@ from functools import reduce
 from io import StringIO
 from typing import Any
 
-import bec_utils.BECMessage as BECMessage
 import ophyd
-from bec_utils import Alarms, BECService, MessageEndpoints, bec_logger
+from bec_utils import Alarms, BECMessage, BECService, MessageEndpoints, bec_logger
+from bec_utils.BECMessage import BECStatus
 from bec_utils.connector import ConnectorBase
 from ophyd import Staged
 from ophyd.utils import errors as ophyd_errors
@@ -36,12 +35,6 @@ def rgetattr(obj, attr, *args):
     return reduce(_getattr, [obj] + attr.split("."))
 
 
-class DSStatus(enum.Enum):
-    RUNNING = 1
-    IDLE = 0
-    ERROR = -1
-
-
 class DeviceServer(BECService):
     """DeviceServer using ophyd as a service
     This class is intended to provide a thin wrapper around ophyd and the devicemanager. It acts as the entry point for other services
@@ -49,7 +42,6 @@ class DeviceServer(BECService):
 
     def __init__(self, bootstrap_server, connector_cls: ConnectorBase, scibec_url: str) -> None:
         super().__init__(bootstrap_server, connector_cls, unique_service=True)
-        self._status = DSStatus.IDLE
         self._tasks = []
         self.device_manager = None
         self.scibec_url = scibec_url
@@ -65,7 +57,9 @@ class DeviceServer(BECService):
         self._start_device_manager()
 
     def _start_device_manager(self):
-        self.device_manager = DeviceManagerDS(self.connector, self.scibec_url)
+        self.device_manager = DeviceManagerDS(
+            self.connector, self.scibec_url, status_cb=self.update_status
+        )
         self.device_manager.initialize(self.bootstrap_server)
 
     def start(self) -> None:
@@ -83,14 +77,17 @@ class DeviceServer(BECService):
         ]
         for thread in self.threads:
             thread.start()
-        self._status = DSStatus.RUNNING
+        self.status = BECStatus.RUNNING
+
+    def update_status(self, status: BECStatus):
+        self.status = status
 
     def stop(self) -> None:
         """stop the device server"""
         consumer_stop.set()
         for thread in self.threads:
             thread.join()
-        self._status = DSStatus.IDLE
+        self.status = BECStatus.IDLE
 
     def shutdown(self) -> None:
         """shutdown the device server"""
@@ -391,19 +388,3 @@ class DeviceServer(BECService):
                 self.device_manager.devices[dev].obj.unstage()
                 continue
             logger.debug(f"Device {obj.name} was already unstaged.")
-
-    @property
-    def status(self) -> DSStatus:
-        """get the current status of the device server"""
-        return self._status
-
-    @status.setter
-    def status(self, val: DSStatus) -> None:
-        if DSStatus(val) == DSStatus.RUNNING:
-            if self.status != DSStatus.RUNNING:
-                self.start()
-                self._status = DSStatus.RUNNING
-        elif DSStatus(val) == DSStatus.IDLE:
-            if self.status != DSStatus.IDLE:
-                self.stop()
-                self._status = DSStatus.IDLE

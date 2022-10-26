@@ -11,6 +11,7 @@ from bec_utils.connector import ConnectorBase
 from bec_utils.session_manager import SessionManager
 
 from .BECMessage import (
+    BECStatus,
     DeviceConfigMessage,
     DeviceStatusMessage,
     LogMessage,
@@ -239,9 +240,13 @@ class DeviceManagerBase:
     producer = None
     _scibec = SciBec()
     _device_cls = Device
+    _status_cb = []
 
-    def __init__(self, connector: ConnectorBase, scibec_url: str = None) -> None:
+    def __init__(
+        self, connector: ConnectorBase, scibec_url: str = None, status_cb: list = None
+    ) -> None:
         self.connector = connector
+        self._status_cb = status_cb if isinstance(status_cb, list) else [status_cb]
         if scibec_url is not None:
             self._scibec.url = scibec_url
 
@@ -256,6 +261,10 @@ class DeviceManagerBase:
         """
         self._start_connectors(bootstrap_server)
         self._get_config_from_DB()
+
+    def update_status(self, status: BECStatus):
+        for cb in self._status_cb:
+            cb(status)
 
     @property
     def scibec(self):

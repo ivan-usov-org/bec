@@ -1,7 +1,13 @@
 import traceback
 
 from bec_utils import BECMessage as BMessage
-from bec_utils import DeviceConfigError, DeviceManagerBase, MessageEndpoints, bec_logger
+from bec_utils import (
+    BECStatus,
+    DeviceConfigError,
+    DeviceManagerBase,
+    MessageEndpoints,
+    bec_logger,
+)
 
 logger = bec_logger.logger
 
@@ -39,8 +45,10 @@ class ConfigHandler:
             accepted=True, error_msg=None, metadata=msg.metadata
         )
         self.send_config(msg)
+        self.device_manager.update_status(BECStatus.BUSY)
         self.device_manager.devices.flush()
         self.device_manager._get_config_from_DB()
+        self.device_manager.update_status(BECStatus.RUNNING)
 
     def _update_config(self, msg: BMessage.DeviceConfigMessage):
         updated = False
