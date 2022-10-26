@@ -51,8 +51,8 @@ class DeviceServer(BECService):
         super().__init__(bootstrap_server, connector_cls, unique_service=True)
         self._status = DSStatus.IDLE
         self._tasks = []
-        self.device_manager = DeviceManagerDS(self.connector, scibec_url)
-        self.device_manager.initialize(bootstrap_server)
+        self.device_manager = None
+        self.scibec_url = scibec_url
         self.threads = []
         self.sig_thread = None
         self.sig_thread = self.connector.consumer(
@@ -62,6 +62,11 @@ class DeviceServer(BECService):
         )
         self.sig_thread.start()
         self.executor = ThreadPoolExecutor(max_workers=4)
+        self._start_device_manager()
+
+    def _start_device_manager(self):
+        self.device_manager = DeviceManagerDS(self.connector, self.scibec_url)
+        self.device_manager.initialize(self.bootstrap_server)
 
     def start(self) -> None:
         """start the device server"""
@@ -105,6 +110,9 @@ class DeviceServer(BECService):
     def consumer_interception_callback(msg, *, parent, **_kwargs) -> None:
         """callback for receiving scan modifications / interceptions"""
         mvalue = BECMessage.ScanQueueModificationMessage.loads(msg.value)
+        if mvalue is None:
+            logger.warning("Failed to parse scan queue modification message.")
+            return
         logger.info(f"Receiving: {mvalue.content}")
         if mvalue.content.get("action") in ["pause", "abort"]:
             parent.stop_devices()
@@ -113,7 +121,8 @@ class DeviceServer(BECService):
         """stop all enabled devices"""
         logger.info("Stopping devices after receiving 'abort' request.")
         for dev in self.device_manager.devices.enabled_devices:
-            dev.obj.stop()
+            if hasattr(dev.obj, "stop"):
+                dev.obj.stop()
 
     def _assert_device_is_enabled(self, instructions) -> None:
         devices = instructions.content["device"]
@@ -169,16 +178,19 @@ class DeviceServer(BECService):
                 metadata=instructions.metadata,
             )
         except Exception as exc:  # pylint: disable=broad-except
-            content = traceback.format_exc()
-            self.connector.log_error({"source": msg.value, "message": content})
-            logger.error(content)
-            self.connector.raise_alarm(
-                severity=Alarms.MAJOR,
-                source=instructions.content,
-                content=content,
-                alarm_type=exc.__class__.__name__,
-                metadata=instructions.metadata,
-            )
+            if action == "rpc":
+                self._send_rpc_exception(exc, instructions)
+            else:
+                content = traceback.format_exc()
+                self.connector.log_error({"source": msg.value, "message": content})
+                logger.error(content)
+                self.connector.raise_alarm(
+                    severity=Alarms.MAJOR,
+                    source=instructions.content,
+                    content=content,
+                    alarm_type=exc.__class__.__name__,
+                    metadata=instructions.metadata,
+                )
 
     @staticmethod
     def instructions_callback(msg, *, parent, **_kwargs) -> None:
@@ -249,21 +261,26 @@ class DeviceServer(BECService):
 
         except Exception as exc:  # pylint: disable=broad-except
             # send error to client
-            self.producer.set(
-                MessageEndpoints.device_rpc(instr_params.get("rpc_id")),
-                BECMessage.DeviceRPCMessage(
-                    device=instr.content["device"],
-                    return_val=None,
-                    out={
-                        "error": exc.__class__.__name__,
-                        "msg": exc.args,
-                        "traceback": traceback.format_exc(),
-                    },
-                    success=False,
-                ).dumps(),
-            )
+            self._send_rpc_exception(exc, instr)
+
         finally:
             sys.stdout = save_stdout
+
+    def _send_rpc_exception(self, exc: Exception, instr: BECMessage.DeviceInstructionMessage):
+        instr_params = instr.content.get("parameter")
+        self.producer.set(
+            MessageEndpoints.device_rpc(instr_params.get("rpc_id")),
+            BECMessage.DeviceRPCMessage(
+                device=instr.content["device"],
+                return_val=None,
+                out={
+                    "error": exc.__class__.__name__,
+                    "msg": exc.args,
+                    "traceback": traceback.format_exc(),
+                },
+                success=False,
+            ).dumps(),
+        )
 
     def _trigger_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
         logger.debug(f"Kickoff device: {instr}")
@@ -281,11 +298,17 @@ class DeviceServer(BECService):
         obj.kickoff(metadata=instr.metadata, **instr.content["parameter"])
 
     def _set_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
+        device_obj = self.device_manager.devices.get(instr.content["device"])
+        if not device_obj.enabled_set:
+            raise DisabledDeviceError(
+                f"Setting the device {device_obj.name} is currently disabled."
+            )
         logger.debug(f"Setting device: {instr}")
         val = instr.content["parameter"]["value"]
         obj = self.device_manager.devices.get(instr.content["device"]).obj
         # self.device_manager.add_req_done_sub(obj)
         status = obj.set(val)
+        status.__dict__["instruction"] = instr
         status.add_callback(self._status_callback)
 
     def _status_callback(self, status):
@@ -299,6 +322,15 @@ class DeviceServer(BECService):
         self.producer.set_and_publish(
             MessageEndpoints.device_req_status(status.device.name), dev_msg, pipe
         )
+        response = status.instruction.metadata.get("response")
+        if response:
+            self.producer.lpush(
+                MessageEndpoints.device_req_status(status.instruction.metadata["RID"]),
+                dev_msg,
+                pipe,
+                expire=18000,
+            )
+
         pipe.execute()
 
     def _read_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
@@ -313,15 +345,16 @@ class DeviceServer(BECService):
             self.device_manager.devices.get(dev).metadata = instr.metadata
             obj = self.device_manager.devices.get(dev).obj
             signals = obj.read()
-            metadata = self.device_manager.devices.get(dev).metadata
             self.producer.set_and_publish(
                 MessageEndpoints.device_read(dev),
-                BECMessage.DeviceMessage(signals=signals, metadata=metadata).dumps(),
+                BECMessage.DeviceMessage(signals=signals, metadata=instr.metadata).dumps(),
                 pipe,
             )
             self.producer.set(
                 MessageEndpoints.device_status(dev),
-                BECMessage.DeviceStatusMessage(device=dev, status=0, metadata=metadata).dumps(),
+                BECMessage.DeviceStatusMessage(
+                    device=dev, status=0, metadata=instr.metadata
+                ).dumps(),
                 pipe,
             )
         pipe.execute()
@@ -336,6 +369,8 @@ class DeviceServer(BECService):
 
         for dev in devices:
             obj = self.device_manager.devices[dev].obj
+            if not hasattr(obj, "_staged"):
+                continue
             # pylint: disable=protected-access
             if obj._staged == Staged.yes:
                 logger.warning(f"Device {obj.name} was already staged and will be first unstaged.")
@@ -349,11 +384,13 @@ class DeviceServer(BECService):
 
         for dev in devices:
             obj = self.device_manager.devices[dev].obj
+            if not hasattr(obj, "_staged"):
+                continue
             # pylint: disable=protected-access
             if obj._staged == Staged.yes:
                 self.device_manager.devices[dev].obj.unstage()
                 continue
-            logger.warning(f"Device {obj.name} was already unstaged.")
+            logger.debug(f"Device {obj.name} was already unstaged.")
 
     @property
     def status(self) -> DSStatus:

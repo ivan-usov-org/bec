@@ -7,7 +7,8 @@ from bec_utils import BECMessage, MessageEndpoints, bec_logger
 from bec_utils.connector import ConsumerConnector
 from cytoolz import partition
 
-from .callbacks import live_updates_readback_progressbar, live_updates_table
+from .callbacks.live_table import LiveUpdatesTable
+from .callbacks.move_device import LiveUpdatesReadbackProgressbar
 from .devicemanager_client import Device
 from .scan_manager import ScanReport
 
@@ -51,15 +52,11 @@ class ScanObject:
             if scan_report_type == "readback":
                 consumer = self._start_consumer(request)
                 self._send_scan_request(request)
-                # await live_updates_readback(
-                #     self.parent.devicemanager,
-                #     move_args=request.content["parameter"]["args"],
-                #     consumer=consumer,
-                # )
-                await live_updates_readback_progressbar(
-                    self.parent.devicemanager,
-                    request=request,
-                )
+
+                await LiveUpdatesReadbackProgressbar(
+                    self.parent,
+                    request,
+                ).run()
                 consumer.shutdown()
             elif scan_report_type == "table":
                 self._send_scan_request(request)
@@ -67,7 +64,7 @@ class ScanObject:
                     self.parent.scans._scan_def_id is None
                     or request.content["scan_type"] == "close_scan_def"
                 ):
-                    await live_updates_table(self.parent, request)
+                    await LiveUpdatesTable(self.parent, request).run()
             else:
                 self._send_scan_request(request)
             return scan_report
@@ -78,7 +75,7 @@ class ScanObject:
         return self.scan_info.get("scan_report_hint")
 
     def _start_consumer(self, request: BECMessage.ScanQueueMessage) -> ConsumerConnector:
-        consumer = self.parent.devicemanager.connector.consumer(
+        consumer = self.parent.device_manager.connector.consumer(
             [
                 MessageEndpoints.device_readback(dev)
                 for dev in request.content["parameter"]["args"].keys()
@@ -89,7 +86,7 @@ class ScanObject:
         return consumer
 
     def _send_scan_request(self, request: BECMessage.ScanQueueMessage) -> None:
-        self.parent.devicemanager.producer.send(
+        self.parent.device_manager.producer.send(
             MessageEndpoints.scan_queue_request(), request.dumps()
         )
 
@@ -159,8 +156,8 @@ class Scans:
             BECMessage.ScanQueueMessage: _description_
         """
         arg_input = scan_info.get("arg_input", [])
+        arg_bundle_size = scan_info.get("arg_bundle_size")
         if len(arg_input) > 0:
-            arg_bundle_size = len(arg_input)
             if len(args) % len(arg_input) != 0:
                 raise TypeError(
                     f"{scan_info.get('doc')}\n {scan_name} takes multiples of {len(arg_input)} arguments ({len(args)} given).",
@@ -176,7 +173,6 @@ class Scans:
                     )
         else:
             logger.warning("Could not check arguments against scan input types.")
-            arg_bundle_size = len(args)
         metadata = {}
         if "md" in kwargs:
             metadata = kwargs.pop("md")
@@ -199,6 +195,8 @@ class Scans:
         Returns:
 
         """
+        if not bundle_size:
+            return args
         params = {}
         for cmds in partition(bundle_size, args):
             cmds_serialized = [cmd.name if hasattr(cmd, "name") else cmd for cmd in cmds]

@@ -99,7 +99,9 @@ class RedisProducer(ProducerConnector):
         client = pipe if pipe is not None else self.r
         client.publish(f"{topic}:sub", msg)
 
-    def lpush(self, topic: str, msgs: str, pipe=None, max_size: int = None) -> None:
+    def lpush(
+        self, topic: str, msgs: str, pipe=None, max_size: int = None, expire: int = None
+    ) -> None:
         """Time complexity: O(1) for each element added, so O(N) to
         add N elements when the command is called with multiple arguments.
         Insert all the specified values at the head of the list stored at key.
@@ -111,6 +113,8 @@ class RedisProducer(ProducerConnector):
         client.lpush(f"{topic}:val", msgs)
         if max_size:
             client.ltrim(f"{topic}:val", 0, max_size)
+        if expire:
+            client.expire(f"{topic}:val", expire)
         if not pipe:
             client.execute()
 
@@ -268,7 +272,7 @@ class RedisConsumerThreaded(ConsumerConnectorThreaded):
         self.pubsub = self.r.pubsub()
         self.host = host
         self.port = port
-        self.sleep_times = [None, 0.1]
+        self.sleep_times = [0.005, 0.1]
         self.last_received_msg = 0
         self.idle_time = 30
 

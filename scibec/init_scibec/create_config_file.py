@@ -5,14 +5,14 @@ USE_LAMNI = False
 detectors = ["eiger"]
 
 lamni_galil_motors = [
-    ("lsamx", "A", -1),
-    ("lsamy", "B", 1),
-    ("lsamrot", "C", 1),
-    # ("loptz", "D", -1),
-    # ("loptx", "E", 1),
-    # ("lopty", "F", 1),
-    ("leyex", "G", -1),
-    ("leyey", "H", -1),
+    ("lsamx", "A", -1, 0.5),
+    ("lsamy", "B", 1, 0.5),
+    ("lsamrot", "C", 1, 0.5),
+    # ("loptz", "D", -1, 0.5),
+    # ("loptx", "E", 1, 0.5),
+    # ("lopty", "F", 1, 0.5),
+    ("leyex", "G", -1, 0.001),
+    ("leyey", "H", -1, 0.001),
 ]
 
 lamni_rt_motors = [
@@ -242,6 +242,8 @@ beamline_motors = [
     "bim2y",
 ]
 
+read_only_signals = ["ring_current_sim"]
+
 
 def write_sep(sep_text, width=60, sep_type="header") -> str:
     sep_text = " " + sep_text + " "
@@ -302,7 +304,7 @@ out["flyer_sim"] = dict(
     }
 )
 
-with open("demo_config.yaml", "w+") as f:
+with open("./init_scibec/demo_config.yaml", "w+") as f:
     f.write(write_sep("User motors"))
     f.write(yaml.dump(out))
     f.write(write_sep("User motors end here", sep_type="footer"))
@@ -322,7 +324,7 @@ if USE_LAMNI:
                     "port": 8081,
                     "sign": m[2],
                     "limits": [0, 0],
-                    "tolerance": 0.5,
+                    "tolerance": m[3],
                     "device_access": True,
                     "device_mapping": {"rt": "rtx"},
                 },
@@ -370,7 +372,7 @@ if USE_LAMNI:
             }
         )
 
-    with open("demo_config.yaml", "a") as f:
+    with open("./init_scibec/demo_config.yaml", "a") as f:
         f.write(write_sep("LamNI motors"))
         f.write(yaml.dump(out))
         f.write(write_sep("LamNI motors end here", sep_type="footer"))
@@ -388,7 +390,7 @@ if USE_LAMNI:
 #         }
 #     )
 
-# with open("demo_config.yaml", "a") as f:
+# with open("./init_scibec/demo_config.yaml", "a") as f:
 #     f.write(write_sep("NPoint motors"))
 #     f.write(yaml.dump(out))
 #     f.write(write_sep("NPoint motors end here", sep_type="footer"))
@@ -405,7 +407,7 @@ for m in beamline_monitor:
         }
     )
 
-with open("demo_config.yaml", "a") as f:
+with open("./init_scibec/demo_config.yaml", "a") as f:
     f.write(write_sep("Beamline monitors"))
     f.write(yaml.dump(out))
     f.write(write_sep("Beamline monitors end here", sep_type="footer"))
@@ -428,7 +430,7 @@ for m in beamline_motors:
         }
     )
 
-with open("demo_config.yaml", "a") as f:
+with open("./init_scibec/demo_config.yaml", "a") as f:
     f.write(write_sep("Beamline motors"))
     f.write(yaml.dump(out))
     f.write(write_sep("Beamline motors end here", sep_type="footer"))
@@ -454,6 +456,26 @@ with open("./init_scibec/demo_config.yaml", "a") as f:
     f.write(write_sep("Cameras and detectors"))
     f.write(yaml.dump(out))
     f.write(write_sep("Cameras and detectors end here", sep_type="footer"))
+
+out = dict()
+for m in read_only_signals:
+    out[m] = dict(
+        {
+            "status": {"enabled": True},
+            "type": "SynSignalRO",
+            "config": {
+                "name": m,
+                "labels": m,
+            },
+            "acquisition": {"schedule": "sync"},
+            "deviceGroup": "monitor",
+        }
+    )
+
+with open("./init_scibec/demo_config.yaml", "a") as f:
+    f.write(write_sep("Simulated read-only signals"))
+    f.write(yaml.dump(out))
+    f.write(write_sep("Simulated read-only signals end here", sep_type="footer"))
 
 
 sls_status = [
@@ -495,7 +517,7 @@ for name, pv in sls_status:
         }
     )
 
-# with open("demo_config.yaml", "a") as f:
+# with open("./init_scibec/demo_config.yaml", "a") as f:
 #     f.write(write_sep("SLS status PVs"))
 #     f.write(yaml.dump(out))
 #     f.write(write_sep("SLS status PVs end here", sep_type="footer"))

@@ -25,7 +25,7 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 from bec_utils import BECMessage, MessageEndpoints, bec_logger
-from scan_server.scans import ScanBase
+from scan_server.scans import RequestBase, ScanArgType, ScanBase
 
 MOVEMENT_SCALE_X = np.sin(np.radians(15)) * np.cos(np.radians(30))
 MOVEMENT_SCALE_Y = np.cos(np.radians(15))
@@ -47,7 +47,146 @@ def lamni_from_stage_coordinates(x_stage: float, y_stage: float) -> tuple:
     return (x, y)
 
 
-class LamNIFermatScan(ScanBase):
+class LamNIMixin:
+    def _lamni_compute_scan_center(self, x, y, angle_deg):
+        # assuming a scan point was found at interferometer x,y at zero degrees
+        # this function computes the new interferometer coordinates of this spot
+        # at a different rotation angle based on the lamni geometry
+        alpha = angle_deg / 180 * np.pi
+        stage_x, stage_y = lamni_to_stage_coordinates(x, y)
+        stage_x_rot = np.cos(alpha) * stage_x - np.sin(alpha) * stage_y
+        stage_y_rot = np.sin(alpha) * stage_x + np.cos(alpha) * stage_y
+        return lamni_from_stage_coordinates(stage_x_rot, stage_y_rot)
+
+    def lamni_new_scan_center_interferometer(self, x, y):
+        """move to new scan center. xy in mm"""
+        lsamx_center = 8.866
+        lsamy_center = 10.18
+
+        # could first check if feedback is enabled
+        yield from self.stubs.send_rpc_and_wait("rtx", "controller.feedback_disable")
+        time.sleep(0.05)
+
+        rtx_current = yield from self.stubs.send_rpc_and_wait("rtx", "readback.get")
+        rty_current = yield from self.stubs.send_rpc_and_wait("rty", "readback.get")
+        lsamx_current = yield from self.stubs.send_rpc_and_wait("lsamx", "readback.get")
+        lsamy_current = yield from self.stubs.send_rpc_and_wait("lsamy", "readback.get")
+
+        x_stage, y_stage = lamni_to_stage_coordinates(x, y)
+
+        x_center_expect, y_center_expect = lamni_from_stage_coordinates(
+            lsamx_current - lsamx_center, lsamy_current - lsamy_center
+        )
+
+        # in microns
+        x_drift = x_center_expect * 1000 - rtx_current
+        y_drift = y_center_expect * 1000 - rty_current
+
+        logger.info(f"Current uncompensated drift of setup is x={x_drift:.3f}, y={y_drift:.3f}")
+
+        move_x = x_stage + lsamx_center + lamni_to_stage_coordinates(x_drift, y_drift)[0] / 1000
+        move_y = y_stage + lsamy_center + lamni_to_stage_coordinates(x_drift, y_drift)[1] / 1000
+
+        coarse_move_req_x = np.abs(lsamx_current - move_x)
+        coarse_move_req_y = np.abs(lsamy_current - move_y)
+
+        self.device_manager.devices.lsamx.enabled_set = True
+        self.device_manager.devices.lsamy.enabled_set = True
+
+        if (
+            np.abs(y_drift) > 150
+            or np.abs(x_drift) > 150
+            or (coarse_move_req_y < 0.003 and coarse_move_req_x < 0.003)
+        ):
+            logger.info("No drift correction.")
+        else:
+            logger.info(
+                f"Compensating {[val/1000 for val in lamni_to_stage_coordinates(x_drift,y_drift)]}"
+            )
+            yield from self.stubs.set_and_wait(
+                device=["lsamx", "lsamy"], positions=[move_x, move_y]
+            )
+
+        time.sleep(0.01)
+        rtx_current = yield from self.stubs.send_rpc_and_wait("rtx", "readback.get")
+        rty_current = yield from self.stubs.send_rpc_and_wait("rty", "readback.get")
+
+        logger.info(f"New scan center interferometer {rtx_current:.3f}, {rty_current:.3f} microns")
+
+        # second iteration
+        x_center_expect, y_center_expect = lamni_from_stage_coordinates(x_stage, y_stage)
+
+        # in microns
+        x_drift2 = x_center_expect * 1000 - rtx_current
+        y_drift2 = y_center_expect * 1000 - rty_current
+        logger.info(
+            f"Uncompensated drift of setup after first iteration is x={x_drift2:.3f}, y={y_drift2:.3f}"
+        )
+
+        if np.abs(x_drift2) > 5 or np.abs(y_drift2) > 5:
+            logger.info(
+                f"Compensating second iteration {[val/1000 for val in lamni_to_stage_coordinates(x_drift2,y_drift2)]}"
+            )
+            move_x = (
+                x_stage
+                + lsamx_center
+                + lamni_to_stage_coordinates(x_drift, y_drift)[0] / 1000
+                + lamni_to_stage_coordinates(x_drift2, y_drift2)[0] / 1000
+            )
+            move_y = (
+                y_stage
+                + lsamy_center
+                + lamni_to_stage_coordinates(x_drift, y_drift)[1] / 1000
+                + lamni_to_stage_coordinates(x_drift2, y_drift2)[1] / 1000
+            )
+            yield from self.stubs.set_and_wait(
+                device=["lsamx", "lsamy"], positions=[move_x, move_y]
+            )
+            time.sleep(0.01)
+            rtx_current = yield from self.stubs.send_rpc_and_wait("rtx", "readback.get")
+            rty_current = yield from self.stubs.send_rpc_and_wait("rty", "readback.get")
+
+            logger.info(
+                f"New scan center interferometer after second iteration {rtx_current:.3f}, {rty_current:.3f} microns"
+            )
+            x_drift2 = x_center_expect * 1000 - rtx_current
+            y_drift2 = y_center_expect * 1000 - rty_current
+            logger.info(
+                f"Uncompensated drift of setup after second iteration is x={x_drift2:.3f}, y={y_drift2:.3f}"
+            )
+        else:
+            logger.info("No second iteration required")
+
+        self.device_manager.devices.lsamx.enabled_set = False
+        self.device_manager.devices.lsamy.enabled_set = False
+
+        yield from self.stubs.send_rpc_and_wait("rtx", "controller.feedback_enable_without_reset")
+
+
+class LamNIMoveToScanCenter(RequestBase, LamNIMixin):
+    scan_name = "lamni_move_to_scan_center"
+    scan_report_hint = None
+    scan_type = "step"
+    required_kwargs = []
+    arg_input = [ScanArgType.FLOAT, ScanArgType.FLOAT, ScanArgType.FLOAT]
+    arg_bundle_size = None
+
+    def __init__(self, *args, parameter=None, **kwargs):
+        """
+        Args:
+            *args: shift x, shift y, tomo angle in deg
+
+        Examples:
+            >>> scans.lamni_move_to_scan_center(1.2, 2.8, 12.5)
+        """
+        super().__init__(parameter=parameter, **kwargs)
+
+    def run(self):
+        center_x, center_y = self._lamni_compute_scan_center(*self.caller_args)
+        yield from self.lamni_new_scan_center_interferometer(center_x, center_y)
+
+
+class LamNIFermatScan(ScanBase, LamNIMixin):
     scan_name = "lamni_fermat_scan"
     scan_report_hint = "table"
     scan_type = "step"
@@ -180,16 +319,6 @@ class LamNIFermatScan(ScanBase):
             center=False,
         )
 
-    def _lamni_compute_scan_center(self, x, y, angle_deg):
-        # assuming a scan point was found at interferometer x,y at zero degrees
-        # this function computes the new interferometer coordinates of this spot
-        # at a different rotation angle based on the lamni geometry
-        alpha = angle_deg / 180 * np.pi
-        stage_x, stage_y = lamni_to_stage_coordinates(x, y)
-        stage_x_rot = np.cos(alpha) * stage_x - np.sin(alpha) * stage_y
-        stage_y_rot = np.sin(alpha) * stage_x + np.cos(alpha) * stage_y
-        return lamni_from_stage_coordinates(stage_x_rot, stage_y_rot)
-
     def _lamni_compute_stitch_center(self, xcount, ycount, angle_deg):
         alpha = angle_deg / 180 * np.pi
         stage_x = xcount * (self.fov_size[0] - self.stitch_overlap)
@@ -273,105 +402,6 @@ class LamNIFermatScan(ScanBase):
         else:
             logger.info("Rotating to requested angle")
             yield from self.stubs.set_and_wait(device=["lsamrot"], positions=[angle])
-
-    def lamni_new_scan_center_interferometer(self, x, y):
-        """move to new scan center. xy in mm"""
-        lsamx_center = 8.866
-        lsamy_center = 10.18
-
-        # could first check if feedback is enabled
-        yield from self.stubs.send_rpc_and_wait("rtx", "controller.feedback_disable")
-        time.sleep(0.05)
-
-        rtx_current = yield from self.stubs.send_rpc_and_wait("rtx", "readback.get")
-        rty_current = yield from self.stubs.send_rpc_and_wait("rty", "readback.get")
-        lsamx_current = yield from self.stubs.send_rpc_and_wait("lsamx", "readback.get")
-        lsamy_current = yield from self.stubs.send_rpc_and_wait("lsamy", "readback.get")
-
-        x_stage, y_stage = lamni_to_stage_coordinates(x, y)
-
-        x_center_expect, y_center_expect = lamni_from_stage_coordinates(
-            lsamx_current - lsamx_center, lsamy_current - lsamy_center
-        )
-
-        # in microns
-        x_drift = x_center_expect * 1000 - rtx_current
-        y_drift = y_center_expect * 1000 - rty_current
-
-        logger.info(f"Current uncompensated drift of setup is x={x_drift:.3f}, y={y_drift:.3f}")
-
-        move_x = x_stage + lsamx_center + lamni_to_stage_coordinates(x_drift, y_drift)[0] / 1000
-        move_y = y_stage + lsamy_center + lamni_to_stage_coordinates(x_drift, y_drift)[1] / 1000
-
-        coarse_move_req_x = np.abs(lsamx_current - move_x)
-        coarse_move_req_y = np.abs(lsamy_current - move_y)
-
-        if (
-            np.abs(y_drift) > 150
-            or np.abs(x_drift) > 150
-            or (coarse_move_req_y < 0.003 and coarse_move_req_x < 0.003)
-        ):
-            logger.info("No drift correction.")
-        else:
-            logger.info(
-                f"Compensating {[val/1000 for val in lamni_to_stage_coordinates(x_drift,y_drift)]}"
-            )
-
-            yield from self.stubs.set_and_wait(
-                device=["lsamx", "lsamy"], positions=[move_x, move_y]
-            )
-
-        time.sleep(0.01)
-        rtx_current = yield from self.stubs.send_rpc_and_wait("rtx", "readback.get")
-        rty_current = yield from self.stubs.send_rpc_and_wait("rty", "readback.get")
-
-        logger.info(f"New scan center interferometer {rtx_current:.3f}, {rty_current:.3f} microns")
-
-        # second iteration
-        x_center_expect, y_center_expect = lamni_from_stage_coordinates(x_stage, y_stage)
-
-        # in microns
-        x_drift2 = x_center_expect * 1000 - rtx_current
-        y_drift2 = y_center_expect * 1000 - rty_current
-        logger.info(
-            f"Uncompensated drift of setup after first iteration is x={x_drift2:.3f}, y={y_drift2:.3f}"
-        )
-
-        if np.abs(x_drift2) > 5 or np.abs(y_drift2) > 5:
-            logger.info(
-                f"Compensating second iteration {[val/1000 for val in lamni_to_stage_coordinates(x_drift2,y_drift2)]}"
-            )
-            move_x = (
-                x_stage
-                + lsamx_center
-                + lamni_to_stage_coordinates(x_drift, y_drift)[0] / 1000
-                + lamni_to_stage_coordinates(x_drift2, y_drift2)[0] / 1000
-            )
-            move_y = (
-                y_stage
-                + lsamy_center
-                + lamni_to_stage_coordinates(x_drift, y_drift)[1] / 1000
-                + lamni_to_stage_coordinates(x_drift2, y_drift2)[1] / 1000
-            )
-            yield from self.stubs.set_and_wait(
-                device=["lsamx", "lsamy"], positions=[move_x, move_y]
-            )
-            time.sleep(0.01)
-            rtx_current = yield from self.stubs.send_rpc_and_wait("rtx", "readback.get")
-            rty_current = yield from self.stubs.send_rpc_and_wait("rty", "readback.get")
-
-            logger.info(
-                f"New scan center interferometer after second iteration {rtx_current:.3f}, {rty_current:.3f} microns"
-            )
-            x_drift2 = x_center_expect * 1000 - rtx_current
-            y_drift2 = y_center_expect * 1000 - rty_current
-            logger.info(
-                f"Uncompensated drift of setup after second iteration is x={x_drift2:.3f}, y={y_drift2:.3f}"
-            )
-        else:
-            logger.info("No second iteration required")
-
-        yield from self.stubs.send_rpc_and_wait("rtx", "controller.feedback_enable_without_reset")
 
     def scan_core(self):
         if self.scan_type == "step":

@@ -1,3 +1,5 @@
+import traceback
+
 import msgpack
 from bec_utils import BECMessage, MessageEndpoints, bec_logger
 
@@ -49,8 +51,9 @@ class ScanGuard:
             self._check_baton(request)
             self._check_motors_movable(request)
             self._check_soft_limits(request)
-        except ScanRejection as error:
-            return ScanStatus(False, str(error))
+        except Exception as error:
+            content = traceback.format_exc()
+            return ScanStatus(False, str(content))
         else:
             return ScanStatus()
 
@@ -84,13 +87,20 @@ class ScanGuard:
     def _check_motors_movable(self, request) -> None:
         if request.content["scan_type"] == "device_rpc":
             device = request.content["parameter"]["device"]
-            if not self.device_manager.devices[device].enabled:
-                raise ScanRejection(f"Device {device} is not enabled.")
-
+            if not isinstance(device, list):
+                device = [device]
+            for dev in device:
+                if not self.device_manager.devices[dev].enabled:
+                    raise ScanRejection(f"Device {dev} is not enabled.")
+            return
         motor_args = request.content["parameter"].get("args")
         if not motor_args:
             return
         for motor in motor_args:
+            if not motor:
+                continue
+            if motor not in self.device_manager.devices:
+                continue
             if not self.device_manager.devices[motor].enabled:
                 raise ScanRejection(f"Device {motor} is not enabled.")
 
@@ -107,7 +117,11 @@ class ScanGuard:
 
     @staticmethod
     def _scan_queue_modification_request_callback(msg, parent, **_kwargs):
-        content = BECMessage.ScanQueueModificationMessage.loads(msg.value).content
+        mod_msg = BECMessage.ScanQueueModificationMessage.loads(msg.value)
+        if mod_msg is None:
+            logger.warning("Failed to parse scan queue modification message.")
+            return
+        content = mod_msg.content
         logger.info(f"Receiving scan modification request: {content}")
         # pylint: disable=protected-access
         parent._handle_scan_modification_request(msg.value)

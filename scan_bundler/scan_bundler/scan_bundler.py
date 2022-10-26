@@ -262,16 +262,17 @@ class ScanBundler(BECService):
 
         if "pointID" not in metadata:
             return
-        dev = {}
-        for sig_key, sig_val in signal.items():
-            dev[sig_key] = {sig_key: sig_val}
-        pointID = metadata["pointID"]
-
-        self.sync_storage[scanID][pointID] = {
-            **self.sync_storage[scanID].get(pointID, {}),
-            **dev,
-        }
         with self._lock:
+            dev = {}
+            for sig_key, sig_val in signal.items():
+                dev[sig_key] = {sig_key: sig_val}
+            pointID = metadata["pointID"]
+
+            self.sync_storage[scanID][pointID] = {
+                **self.sync_storage[scanID].get(pointID, {}),
+                **dev,
+            }
+
             if self.sync_storage[scanID].get(pointID):
                 self._update_monitor_signals(scanID, pointID)
                 self._send_scan_point(scanID, pointID)
@@ -311,7 +312,7 @@ class ScanBundler(BECService):
                 time.sleep(0.1)
                 elapsed_time += 0.1
                 if elapsed_time > timeout_time:
-                    logger.error(
+                    logger.warning(
                         f"Failed to insert device data for {device} to sync_storage: Could not find a matching scanID {scanID} in sync_storage."
                     )
                     return
@@ -333,18 +334,20 @@ class ScanBundler(BECService):
                     )
 
             elif stream == "baseline":
-                dev = {device: signal}
-                baseline_devices_status = self.baseline_devices[scanID]["done"]
-                baseline_devices_status[device] = True
+                with self._lock:
+                    dev = {device: signal}
+                    baseline_devices_status = self.baseline_devices[scanID]["done"]
+                    baseline_devices_status[device] = True
 
-                self.sync_storage[scanID]["baseline"] = {
-                    **self.sync_storage[scanID].get("baseline", {}),
-                    **dev,
-                }
+                    self.sync_storage[scanID]["baseline"] = {
+                        **self.sync_storage[scanID].get("baseline", {}),
+                        **dev,
+                    }
 
-                if all(status for status in baseline_devices_status.values()):
-                    logger.info(f"Sending baseline readings for scanID {scanID}.")
-                    logger.debug("Baseline: ", self.sync_storage[scanID]["baseline"])
+                    if all(status for status in baseline_devices_status.values()):
+                        logger.info(f"Sending baseline readings for scanID {scanID}.")
+                        logger.debug("Baseline: ", self.sync_storage[scanID]["baseline"])
+                        self._send_baseline(scanID=scanID)
 
     def _prepare_bluesky_event_data(self, scanID, pointID) -> dict:
         # event = {
@@ -430,12 +433,18 @@ class ScanBundler(BECService):
             remove_scanIDs.append(scanID)
 
         for scanID in remove_scanIDs:
-            self.sync_storage.pop(scanID)
-            self.bluesky_metadata.pop(scanID)
-            self.primary_devices.pop(scanID)
-            self.monitor_devices.pop(scanID)
-            self.baseline_devices.pop(scanID)
-            self.scan_motors.pop(scanID)
+            for storage in [
+                "sync_storage",
+                "bluesky_metadata",
+                "primary_devices",
+                "monitor_devices",
+                "baseline_devices",
+                "scan_motors",
+            ]:
+                try:
+                    getattr(self, storage).pop(scanID)
+                except KeyError:
+                    logger.warning(f"Failed to remove {scanID} from {storage}.")
             self.storage_initialized.remove(scanID)
 
     def _send_scan_point(self, scanID, pointID) -> None:
@@ -459,6 +468,19 @@ class ScanBundler(BECService):
             self.sync_storage[scanID]["sent"].add(pointID)
         else:
             logger.warning(f"Resubmitting existing pointID {pointID} for scanID {scanID}")
+
+    def _send_baseline(self, scanID: str) -> None:
+        pipe = self.producer.pipeline()
+        msg = BECMessage.ScanBaselineMessage(
+            scanID=scanID, data=self.sync_storage[scanID]["baseline"]
+        ).dumps()
+        self.producer.set(
+            MessageEndpoints.public_scan_baseline(scanID=scanID),
+            msg,
+            pipe=pipe,
+            expire=1800,
+        )
+        pipe.execute()
 
     def shutdown(self):
         self.device_manager.shutdown()

@@ -1,3 +1,6 @@
+import builtins
+import importlib
+import inspect
 import threading
 import time
 from typing import List
@@ -17,7 +20,7 @@ from .signals import SigintHandler
 logger = bec_logger.logger
 
 
-class BKClient(BECService):
+class BECClient(BECService):
     def __init__(self, bootstrap_server: list, connector_cls: ConnectorBase, scibec_url: str):
         """bec Client
 
@@ -29,7 +32,7 @@ class BKClient(BECService):
             _type_: _description_
         """
         super().__init__(bootstrap_server, connector_cls)
-        self.devicemanager = None
+        self.device_manager = None
         self.scibec_url = scibec_url
         self._sighandler = SigintHandler(self)
         self._ip = None
@@ -38,11 +41,12 @@ class BKClient(BECService):
         self._load_scans()
         self._exit_event = threading.Event()
         self._exit_handler_thread = None
+        self._hli_funcs = {}
 
     def start(self):
         """start the client"""
         logger.info("Starting new client")
-        self._start_devicemanager()
+        self._start_device_manager()
         self._start_exit_handler()
         self._configure_prompt()
         self._start_scan_queue()
@@ -78,6 +82,14 @@ class BKClient(BECService):
 
     def _load_scans(self):
         self.scans = Scans(self)
+        builtins.scans = self.scans
+
+    def load_high_level_interface(self, module_name):
+        mod = importlib.import_module(f"bec_client.high_level_interfaces.{module_name}")
+        members = inspect.getmembers(mod)
+        funcs = {name: func for name, func in members if not name.startswith("__")}
+        self._hli_funcs = funcs
+        builtins.__dict__.update(funcs)
 
     def _start_scan_queue(self):
         self.queue = ScanManager(self.connector)
@@ -89,7 +101,7 @@ class BKClient(BECService):
     def _configure_prompt(self):
         self._ip = IPython.get_ipython()
         if self._ip is not None:
-            self._ip.prompts = BKClientPrompt(self._ip, "demo")
+            self._ip.prompts = BECClientPrompt(self._ip, "demo")
 
     def _configure_logger(self):
         bec_logger.logger.remove()
@@ -118,10 +130,10 @@ class BKClient(BECService):
         if self._exit_handler_thread:
             self._exit_handler_thread.join()
 
-    def _start_devicemanager(self):
+    def _start_device_manager(self):
         logger.info("Starting device manager")
-        self.devicemanager = DMClient(self, self.scibec_url)
-        self.devicemanager.initialize(self.bootstrap_server)
+        self.device_manager = DMClient(self, self.scibec_url)
+        self.device_manager.initialize(self.bootstrap_server)
 
     def _start_alarm_handler(self):
         logger.info("Starting alarm listener")
@@ -131,7 +143,7 @@ class BKClient(BECService):
     def shutdown(self):
         """shutdown the client and all its components"""
         super().shutdown()
-        self.devicemanager.shutdown()
+        self.device_manager.shutdown()
         self.queue.shutdown()
         self.alarm_handler.shutdown()
         self._shutdown_exit_handler()
@@ -145,7 +157,7 @@ class BKClient(BECService):
             self.shutdown()
 
 
-class BKClientPrompt(Prompts):
+class BECClientPrompt(Prompts):
     def __init__(self, ip, username, status=0):
         self._username = username
         self.status = status

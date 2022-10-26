@@ -7,7 +7,14 @@ import uuid
 from enum import Enum
 from typing import List, Optional, Union
 
-from bec_utils import Alarms, BECMessage, MessageEndpoints, bec_logger
+from bec_utils import (
+    Alarms,
+    BECMessage,
+    MessageEndpoints,
+    bec_logger,
+    threadlocked,
+    timeout,
+)
 from rich.console import Console
 from rich.table import Table
 
@@ -43,9 +50,9 @@ class QueueManager:
         self.key = ""
         self.queues = {"primary": ScanQueue(self)}
         self._start_scan_queue_consumer()
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()
 
-    def add_to_queue(self, scan_queue: str, msg: BECMessage.ScanQueueMessage) -> None:
+    def add_to_queue(self, scan_queue: str, msg: BECMessage.ScanQueueMessage, position=-1) -> None:
         """Add a new ScanQueueMessage to the queue.
 
         Args:
@@ -54,7 +61,7 @@ class QueueManager:
 
         """
         try:
-            self.queues[scan_queue].append(msg)
+            self.queues[scan_queue].insert(msg, position=position)
         # pylint: disable=broad-except
         except Exception as exc:
             if len(exc.args) > 0:
@@ -100,6 +107,7 @@ class QueueManager:
             parent.scan_interception(scan_mod_msg)
             parent.send_queue_status()
 
+    @threadlocked
     def scan_interception(self, scan_mod_msg: BECMessage.ScanQueueModificationMessage) -> None:
         """handle a scan interception by compiling the requested method name and forwarding the request.
 
@@ -108,61 +116,93 @@ class QueueManager:
 
         """
         action = scan_mod_msg.content["action"]
-        getattr(self, f"set_{action}")(scanID=scan_mod_msg.content["scanID"])
+        parameter = scan_mod_msg.content["parameter"]
+        getattr(self, f"set_{action}")(scanID=scan_mod_msg.content["scanID"], parameter=parameter)
 
-    def set_pause(self, scanID=None, queue="primary") -> None:
+    def set_pause(self, scanID=None, queue="primary", parameter: dict = None) -> None:
         # pylint: disable=unused-argument
         """pause the queue and the currenlty running instruction queue"""
         self.queues[queue].status = ScanQueueStatus.PAUSED
         self.queues[queue].worker_status = InstructionQueueStatus.PAUSED
 
-    def set_deferred_pause(self, scanID=None, queue="primary") -> None:
+    def set_deferred_pause(self, scanID=None, queue="primary", parameter: dict = None) -> None:
         # pylint: disable=unused-argument
         """pause the queue but continue with the currently running instruction queue until the next checkpoint"""
         self.queues[queue].status = ScanQueueStatus.PAUSED
         self.queues[queue].worker_status = InstructionQueueStatus.DEFERRED_PAUSE
 
-    def set_continue(self, scanID=None, queue="primary") -> None:
+    def set_continue(self, scanID=None, queue="primary", parameter: dict = None) -> None:
         # pylint: disable=unused-argument
         """continue with the currently scheduled queue and instruction queue"""
         self.queues[queue].status = ScanQueueStatus.RUNNING
         self.queues[queue].worker_status = InstructionQueueStatus.RUNNING
 
-    def set_abort(self, scanID=None, queue="primary") -> None:
+    def set_abort(self, scanID=None, queue="primary", parameter: dict = None) -> None:
         """abort the scan and remove it from the queue. This will leave the queue in a paused state after the cleanup"""
         self.queues[queue].status = ScanQueueStatus.PAUSED
         self.queues[queue].worker_status = InstructionQueueStatus.STOPPED
         # self.queues[queue].remove_queue_item(scanID=scanID)
 
-    def set_halt(self, scanID=None, queue="primary") -> None:
+    def set_halt(self, scanID=None, queue="primary", parameter: dict = None) -> None:
         """abort the scan and do not perform any cleanup routines"""
         instruction_queue = self.queues[queue].active_instruction_queue
         if instruction_queue:
             instruction_queue.return_to_start = False
         self.set_abort(scanID=scanID, queue=queue)
 
-    def set_clear(self, scanID=None, queue="primary") -> None:
+    def set_clear(self, scanID=None, queue="primary", parameter: dict = None) -> None:
         # pylint: disable=unused-argument
         """pause the queue and clear all its elements"""
         self.queues[queue].status = ScanQueueStatus.PAUSED
-        self.queues[queue].worker_status = InstructionQueueStatus.PAUSED
+        self.queues[queue].worker_status = InstructionQueueStatus.STOPPED
         self.queues[queue].clear()
 
-    def set_repeat_scan(self, scanID=None, queue="primary") -> None:
-        """abort and repeat the currently running scan. The active scan will be aborted."""
+    def set_restart(self, scanID=None, queue="primary", parameter: dict = None) -> None:
+        """abort and restart the currently running scan. The active scan will be aborted."""
+        if not scanID:
+            scanID = self._get_active_scanID(queue)
+        if not scanID:
+            return
+        if isinstance(scanID, list):
+            scanID = scanID[0]
         self.queues[queue].status = ScanQueueStatus.PAUSED
+        self.queues[queue].worker_status = InstructionQueueStatus.STOPPED
+        instruction_queue = self._wait_for_queue_to_appear_in_history(scanID, queue)
+        self.add_to_queue(queue, instruction_queue.scan_msgs[0], 0)
+
+    def _get_active_scanID(self, queue):
+        if len(self.queues[queue].queue) == 0:
+            return None
+        if self.queues[queue].queue[0].active_request_block is None:
+            return None
+        return self.queues[queue].queue[0].active_request_block.scanID
+
+    @timeout(10)
+    def _wait_for_queue_to_appear_in_history(self, scanID, queue):
+        while True:
+            history = self.queues[queue].history_queue
+            if len(history) == 0:
+                time.sleep(0.1)
+                continue
+            if not scanID in history[-1].scanID:
+                time.sleep(0.1)
+                continue
+
+            if len(self.queues[queue].queue) > 0 and scanID in self.queues[queue].queue[0].scanID:
+                time.sleep(0.1)
+                continue
+            return history[-1]
 
     def send_queue_status(self) -> None:
         """send the current queue to redis"""
-        with self._lock:
-            queue_export = self.export_queue()
-            logger.info("New scan queue:")
-            for queue in self.describe_queue():
-                logger.info(f"\n {queue}")
-            self.producer.set_and_publish(
-                MessageEndpoints.scan_queue_status(),
-                BECMessage.ScanQueueStatusMessage(queue=queue_export).dumps(),
-            )
+        queue_export = self.export_queue()
+        logger.info("New scan queue:")
+        for queue in self.describe_queue():
+            logger.info(f"\n {queue}")
+        self.producer.set_and_publish(
+            MessageEndpoints.scan_queue_status(),
+            BECMessage.ScanQueueStatusMessage(queue=queue_export).dumps(),
+        )
 
     def describe_queue(self) -> list:
         """create a rich.table description of the current scan queue"""
@@ -178,7 +218,8 @@ class QueueManager:
             table.add_column("scan_number", justify="center")
             table.add_column("IQ status", justify="center")
 
-            for instruction_queue in scan_queue.queue:
+            queue = list(scan_queue.queue)  # local ref for thread safety
+            for instruction_queue in queue:
                 table.add_row(
                     instruction_queue.queue_id,
                     ", ".join([str(s) for s in instruction_queue.scanID]),
@@ -198,7 +239,8 @@ class QueueManager:
         queue_export = {}
         for queue_name, scan_queue in self.queues.items():
             queue_info = []
-            for instruction_queue in scan_queue.queue:
+            instruction_queues = list(scan_queue.queue)  # local ref for thread safety
+            for instruction_queue in instruction_queues:
                 queue_info.append(instruction_queue.describe())
             queue_export[queue_name] = {"info": queue_info, "status": scan_queue.status.name}
         return queue_export
@@ -277,6 +319,7 @@ class ScanQueue:
     def clear(self):
         """clear the queue"""
         self.queue.clear()
+        self.active_instruction_queue = None
 
     def __iter__(self):
         return self
@@ -312,8 +355,8 @@ class ScanQueue:
             except IndexError:
                 time.sleep(0.01)
 
-    def append(self, msg: BECMessage.ScanQueueMessage, **_kwargs):
-        """append a new message to the queue"""
+    def insert(self, msg: BECMessage.ScanQueueMessage, position=-1, **_kwargs):
+        """insert a new message to the queue"""
         target_group = msg.metadata.get("queue_group")
         scan_def_id = msg.metadata.get("scan_def_id")
         instruction_queue = None
@@ -334,10 +377,13 @@ class ScanQueue:
                 worker=self.queue_manager.parent.scan_worker,
             )
         instruction_queue.append_scan_request(msg)
-        instruction_queue.queue.update_scan_number(request_block_index=-1)
+        # instruction_queue.queue.update_scan_number(request_block_index=-1)
         if not queue_exists:
             instruction_queue.queue_group = target_group
-            self.queue.append(instruction_queue)
+            if position == -1:
+                self.queue.append(instruction_queue)
+                return
+            self.queue.insert(position, instruction_queue)
 
     def get_queue_item(self, group=None, scan_def_id=None):
         """get a queue item based on its group or scan_def_id"""
@@ -377,7 +423,7 @@ class RequestBlock:
         self.scan_assembler = assembler
         self.is_scan = False
         self.scanID = None
-        self.scan_number = None
+        self._scan_number = None
         self.parent = parent
         self.scan_def_id = None
         self._assemble()
@@ -393,12 +439,42 @@ class RequestBlock:
         if self.scan.caller_args:
             self.scan_motors = self.scan.scan_motors
 
-    def update_scan_number(self, queue_manager):
-        """update the scan number"""
-        if self.is_scan:
-            self.scan_number = queue_manager.parent.scan_number
-            if self.scan_def_id is None or self.msg.content["scan_type"] == "close_scan_def":
-                queue_manager.parent.scan_number += 1
+    @property
+    def scan_number(self):
+        """get the predicted scan number"""
+        if not self.is_scan:
+            return None
+        if self._scan_number is not None:
+            return self._scan_number
+        return self._scan_server_scan_number + self.scanIDs_head()
+
+    @property
+    def _scan_server_scan_number(self):
+        return self.parent.parent.parent.queue_manager.parent.scan_number
+
+    def assign_scan_number(self) -> None:
+        """assign and fix the current scan number prediction"""
+        if not self.is_scan:
+            return None
+        self._scan_number = self._scan_server_scan_number + self.scanIDs_head()
+        return None
+
+    def scanIDs_head(self) -> int:
+        """calculate the scanID offset in the queue for the current request block"""
+        offset = 0
+        for queue in self.parent.parent.parent.queue:
+            if queue.status == InstructionQueueStatus.COMPLETED:
+                continue
+            if queue.queue_id != self.parent.parent.queue_id:
+                offset += len([scanID for scanID in queue.scanID if scanID])
+            else:
+                for scanID in queue.scanID:
+                    if scanID == self.scanID:
+                        return offset
+                    if scanID:
+                        offset += 1
+                return offset
+        return offset
 
     def describe(self):
         """prepare a dictionary that summarizes the request block"""
@@ -467,17 +543,27 @@ class RequestBlockQueue:
         )
 
     def _pull_request_block(self):
-        if self.active_rb is None:
-            if len(self.request_blocks_queue) > 0:
-                self.active_rb = self.request_blocks_queue.popleft()
-                if self.active_rb.scan_def_id in self.scan_def_ids:
-                    if hasattr(self.active_rb.scan, "pointID"):
-                        self.active_rb.scan.pointID = self.scan_def_ids[self.active_rb.scan_def_id][
-                            "pointID"
-                        ]
+        if self.active_rb is not None:
+            return
+        if len(self.request_blocks_queue) == 0:
+            raise StopIteration
+        self.active_rb = self.request_blocks_queue.popleft()
+        if self.active_rb.scan_def_id in self.scan_def_ids:
+            if hasattr(self.active_rb.scan, "pointID"):
+                self.active_rb.scan.pointID = self.scan_def_ids[self.active_rb.scan_def_id][
+                    "pointID"
+                ]
+        if self.active_rb.is_scan:
+            self.active_rb.assign_scan_number()
 
-            else:
-                raise StopIteration
+    def increase_scan_number(self) -> None:
+        """increase the scan number counter"""
+        rbl = self.active_rb
+        if not rbl.is_scan:
+            return
+        if rbl.scan_def_id is None or rbl.msg.content["scan_type"] == "close_scan_def":
+            self.parent.parent.queue_manager.parent.scan_number += 1
+        return
 
     def __iter__(self):
         return self
@@ -491,6 +577,7 @@ class RequestBlockQueue:
                 pointID = getattr(self.active_rb.scan, "pointID", None)
                 if pointID is not None:
                     self.scan_def_ids[self.active_rb.scan_def_id]["pointID"] = pointID
+            self.increase_scan_number()
             self.active_rb = None
             self._pull_request_block()
             return next(self.active_rb.instructions)

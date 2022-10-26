@@ -1,3 +1,5 @@
+
+
 ############################################################
 ####################### User motors ########################
 ############################################################
@@ -9,8 +11,8 @@ eyefoc:
     delay: 1
     labels: eyefoc
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: eyefoc
     speed: 100
     tolerance: 0.01
@@ -26,8 +28,8 @@ eyex:
     delay: 1
     labels: eyex
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: eyex
     speed: 100
     tolerance: 0.01
@@ -43,8 +45,8 @@ eyey:
     delay: 1
     labels: eyey
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: eyey
     speed: 100
     tolerance: 0.01
@@ -53,6 +55,20 @@ eyey:
   status:
     enabled: true
   type: SynAxisOPAAS
+flyer_sim:
+  acquisition:
+    schedule: flyer
+  config:
+    delay: 1
+    device_access: true
+    labels: flyer_sim
+    name: flyer_sim
+    speed: 100
+    update_frequency: 400
+  deviceGroup: userMotor
+  status:
+    enabled: true
+  type: SynFlyer
 hrox:
   acquisition:
     schedule: sync
@@ -60,8 +76,8 @@ hrox:
     delay: 1
     labels: hrox
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: hrox
     speed: 100
     tolerance: 0.01
@@ -77,8 +93,8 @@ hroy:
     delay: 1
     labels: hroy
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: hroy
     speed: 100
     tolerance: 0.01
@@ -94,8 +110,8 @@ hroz:
     delay: 1
     labels: hroz
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: hroz
     speed: 100
     tolerance: 0.01
@@ -111,8 +127,8 @@ hx:
     delay: 1
     labels: hx
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: hx
     speed: 100
     tolerance: 0.01
@@ -128,8 +144,8 @@ hy:
     delay: 1
     labels: hy
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: hy
     speed: 100
     tolerance: 0.01
@@ -145,8 +161,8 @@ hz:
     delay: 1
     labels: hz
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: hz
     speed: 100
     tolerance: 0.01
@@ -162,8 +178,8 @@ mbsx:
     delay: 1
     labels: mbsx
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: mbsx
     speed: 100
     tolerance: 0.01
@@ -179,8 +195,8 @@ mbsy:
     delay: 1
     labels: mbsy
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: mbsy
     speed: 100
     tolerance: 0.01
@@ -196,8 +212,8 @@ pinx:
     delay: 1
     labels: pinx
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: pinx
     speed: 100
     tolerance: 0.01
@@ -213,8 +229,8 @@ piny:
     delay: 1
     labels: piny
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: piny
     speed: 100
     tolerance: 0.01
@@ -230,8 +246,8 @@ pinz:
     delay: 1
     labels: pinz
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: pinz
     speed: 100
     tolerance: 0.01
@@ -247,8 +263,8 @@ samx:
     delay: 1
     labels: samx
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: samx
     speed: 100
     tolerance: 0.01
@@ -264,8 +280,8 @@ samy:
     delay: 1
     labels: samy
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: samy
     speed: 100
     tolerance: 0.01
@@ -281,8 +297,8 @@ samz:
     delay: 1
     labels: samz
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: samz
     speed: 100
     tolerance: 0.01
@@ -292,7 +308,10 @@ samz:
     enabled: true
   type: SynAxisOPAAS
 
+
 ################### User motors end here ###################
+
+
 
 ############################################################
 #################### Beamline monitors #####################
@@ -805,7 +824,10 @@ transd:
     enabled: true
   type: SynAxisMonitor
 
+
 ################ Beamline monitors end here ################
+
+
 
 ############################################################
 ##################### Beamline motors ######################
@@ -2657,5 +2679,48 @@ sttry:
   status:
     enabled: true
   type: SynAxisOPAAS
+
+
 ################# Beamline motors end here #################
+
+
+
+############################################################
+################## Cameras and detectors ###################
+############################################################
+
+eiger:
+  acquisition:
+    schedule: sync
+  config:
+    device_access: true
+    labels: eiger
+    name: eiger
+  deviceGroup: detectors
+  status:
+    enabled: true
+  type: SynSLSDetector
+
+
+############## Cameras and detectors end here ##############
+
+
+
+############################################################
+############### Simulated read-only signals ################
+############################################################
+
+ring_current_sim:
+  acquisition:
+    schedule: sync
+  config:
+    labels: ring_current_sim
+    name: ring_current_sim
+  deviceGroup: monitor
+  status:
+    enabled: true
+  type: SynSignalRO
+
+
+########### Simulated read-only signals end here ###########
 

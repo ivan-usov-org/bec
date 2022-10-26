@@ -34,7 +34,6 @@ class RequestItem:
         self.response = response
         self.accepted = accepted
         self._decision_pending = decision_pending
-        self.status = "PENDING"  # needed?
         self._scanID = scanID
 
     def update_with_response(self, response: BECMessage.RequestResponseMessage):
@@ -91,7 +90,7 @@ class RequestItem:
         if not queue_item:
             return None
         # pylint: disable=protected-access
-        request_index = queue_item._requests.index(self.requestID)
+        request_index = queue_item.requestIDs.index(self.requestID)
         return queue_item.scans[request_index]
 
     @property

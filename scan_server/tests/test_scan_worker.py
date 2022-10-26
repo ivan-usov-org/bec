@@ -3,6 +3,7 @@ from unittest import mock
 
 import pytest
 from bec_utils import BECMessage, MessageEndpoints
+from scan_server.errors import ScanAbortion
 from scan_server.scan_worker import ScanWorker
 
 from utils import load_ScanServerMock
@@ -56,32 +57,170 @@ def test_add_wait_group():
     assert worker._groups == {"scan_motor": [("samx", 3)]}
 
 
-def test_wait_for_idle():
+@pytest.mark.parametrize(
+    "msg1,msg2,req_msg",
+    [
+        (
+            BECMessage.DeviceInstructionMessage(
+                device="samx",
+                action="set",
+                parameter={"value": 10, "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+            ),
+            BECMessage.DeviceInstructionMessage(
+                device=["samx"],
+                action="wait",
+                parameter={"type": "move", "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 4, "scanID": "scanID", "RID": "requestID"},
+            ),
+            BECMessage.DeviceReqStatusMessage(
+                device="samx",
+                success=False,
+                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+            ),
+        ),
+        (
+            BECMessage.DeviceInstructionMessage(
+                device="samx",
+                action="set",
+                parameter={"value": 10, "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+            ),
+            BECMessage.DeviceInstructionMessage(
+                device=["samx"],
+                action="wait",
+                parameter={"type": "move", "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 4, "scanID": "scanID", "RID": "requestID"},
+            ),
+            BECMessage.DeviceReqStatusMessage(
+                device="samx",
+                success=True,
+                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+            ),
+        ),
+    ],
+)
+def test_wait_for_idle(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
     worker = get_scan_worker()
-    scanID = str(uuid.uuid4())
-    requestID = str(uuid.uuid4())
-    msg1 = BECMessage.DeviceInstructionMessage(
-        device="samx",
-        action="set",
-        parameter={"value": 10, "wait_group": "scan_motor"},
-        metadata={"stream": "primary", "DIID": 3, "scanID": scanID, "RID": requestID},
-    )
-    msg2 = BECMessage.DeviceInstructionMessage(
-        device=["samx"],
-        action="wait",
-        parameter={"type": "move", "wait_group": "scan_motor"},
-        metadata={"stream": "primary", "DIID": 4, "scanID": scanID, "RID": requestID},
-    )
-    req_msg = BECMessage.DeviceReqStatusMessage(
-        device="samx",
-        success=True,
-        metadata={"stream": "primary", "DIID": 3, "scanID": scanID, "RID": requestID},
-    )
+
     with mock.patch(
         "scan_server.scan_worker.ScanWorker._get_device_status", return_value=[req_msg.dumps()]
     ) as device_status:
+        worker.device_manager.producer._get_buffer[
+            MessageEndpoints.device_readback("samx")
+        ] = BECMessage.DeviceMessage(signals={"samx": {"value": 4}}, metadata={}).dumps()
+
         worker._add_wait_group(msg1)
-        worker._wait_for_idle(msg2)
+        if req_msg.content["success"]:
+            worker._wait_for_idle(msg2)
+        else:
+            with pytest.raises(ScanAbortion):
+                worker._wait_for_idle(msg2)
+
+
+@pytest.mark.parametrize(
+    "device_status,devices,instr,abort",
+    [
+        (
+            [
+                BECMessage.DeviceReqStatusMessage(
+                    device="samx",
+                    success=True,
+                    metadata={
+                        "stream": "primary",
+                        "DIID": 3,
+                        "scanID": "scanID",
+                        "RID": "requestID",
+                    },
+                )
+            ],
+            [("samx", 4)],
+            BECMessage.DeviceInstructionMessage(
+                device=["samx"],
+                action="wait",
+                parameter={"type": "move", "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 4, "scanID": "scanID", "RID": "requestID"},
+            ),
+            False,
+        ),
+        (
+            [
+                BECMessage.DeviceReqStatusMessage(
+                    device="samx",
+                    success=False,
+                    metadata={
+                        "stream": "primary",
+                        "DIID": 3,
+                        "scanID": "scanID",
+                        "RID": "request",
+                    },
+                )
+            ],
+            [("samx", 4)],
+            BECMessage.DeviceInstructionMessage(
+                device=["samx"],
+                action="wait",
+                parameter={"type": "move", "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 4, "scanID": "scanID", "RID": "requestID"},
+            ),
+            False,
+        ),
+        (
+            [
+                BECMessage.DeviceReqStatusMessage(
+                    device="samx",
+                    success=False,
+                    metadata={
+                        "stream": "primary",
+                        "DIID": 4,
+                        "scanID": "scanID",
+                        "RID": "requestID",
+                    },
+                )
+            ],
+            [("samx", 4)],
+            BECMessage.DeviceInstructionMessage(
+                device=["samx"],
+                action="wait",
+                parameter={"type": "move", "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 4, "scanID": "scanID", "RID": "requestID"},
+            ),
+            True,
+        ),
+        (
+            [
+                BECMessage.DeviceReqStatusMessage(
+                    device="samx",
+                    success=False,
+                    metadata={
+                        "stream": "primary",
+                        "DIID": 3,
+                        "scanID": "scanID",
+                        "RID": "requestID",
+                    },
+                )
+            ],
+            [("samx", 4)],
+            BECMessage.DeviceInstructionMessage(
+                device=["samx"],
+                action="wait",
+                parameter={"type": "move", "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 4, "scanID": "scanID", "RID": "requestID"},
+            ),
+            False,
+        ),
+    ],
+)
+def test_check_for_failed_movements(device_status, devices, instr, abort):
+    worker = get_scan_worker()
+    if abort:
+        with pytest.raises(ScanAbortion):
+            worker.device_manager.producer._get_buffer[
+                MessageEndpoints.device_readback("samx")
+            ] = BECMessage.DeviceMessage(signals={"samx": {"value": 4}}, metadata={}).dumps()
+            worker._check_for_failed_movements(device_status, devices, instr)
+    else:
+        worker._check_for_failed_movements(device_status, devices, instr)
 
 
 @pytest.mark.parametrize(

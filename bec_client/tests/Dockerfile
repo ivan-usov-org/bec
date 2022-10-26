@@ -12,4 +12,4 @@ RUN pip install -e .
 RUN pip install pytest pytest-timeout pytest-random-order
 
 # command to run on container start
-CMD [ "pytest", "-v", "--random-order", "./tests"]
+CMD [ "pytest", "-v", "--random-order", "./tests/end-2-end"]

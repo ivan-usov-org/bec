@@ -43,7 +43,12 @@ class ScanManager:
             module_spec.loader.exec_module(plugin_module)
             module_members = inspect.getmembers(plugin_module)
             for name, cls in module_members:
-                if name == filename:
+                if not inspect.isclass(cls):
+                    continue
+                # ignore imported classes
+                if cls.__module__ != "scan_plugins":
+                    continue
+                if issubclass(cls, ScanServerScans.RequestBase):
                     self._plugins[name] = cls
                     logger.info(f"Loading scan plugin {name}")
 
@@ -70,6 +75,7 @@ class ScanManager:
                 "class": scan_cls.__name__,
                 "arg_input": scan_cls.arg_input,
                 "required_kwargs": scan_cls.required_kwargs,
+                "arg_bundle_size": scan_cls.arg_bundle_size,
                 "scan_report_hint": scan_cls.scan_report_hint,
                 "doc": scan_cls.__doc__ or scan_cls.__init__.__doc__,
             }

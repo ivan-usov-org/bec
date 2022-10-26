@@ -1,11 +1,11 @@
 import inspect
 import traceback
 
-import bec_utils.BECMessage as BMessage
 import ophyd
 import ophyd.sim as ops
 import ophyd_devices as opd
 from bec_utils import (
+    BECMessage,
     Device,
     DeviceConfigError,
     DeviceManagerBase,
@@ -16,6 +16,7 @@ from bec_utils.connector import ConnectorBase
 from device_server.devices.config_handler import ConfigHandler
 from device_server.devices.device_serializer import get_device_info
 from ophyd.ophydobj import OphydObject
+from ophyd.signal import EpicsSignalBase
 
 logger = bec_logger.logger
 
@@ -29,7 +30,7 @@ class DSDevice(Device):
 
     def initialize_device_buffer(self, producer):
         """initialize the device read and readback buffer on redis with a new reading"""
-        dev_msg = BMessage.DeviceMessage(signals=self.obj.read(), metadata={}).dumps()
+        dev_msg = BECMessage.DeviceMessage(signals=self.obj.read(), metadata={}).dumps()
         pipe = producer.pipeline()
         producer.set_and_publish(MessageEndpoints.device_readback(self.name), dev_msg, pipe=pipe)
         producer.set(topic=MessageEndpoints.device_read(self.name), msg=dev_msg, pipe=pipe)
@@ -44,11 +45,16 @@ class DeviceManagerDS(DeviceManagerBase):
         super().__init__(connector, scibec_url)
         self._config_request_connector = None
         self._device_instructions_connector = None
+        self._config_handler_cls = config_handler
+        self.config_handler = None
+
+    def initialize(self, bootstrap_server) -> None:
         self.config_handler = (
-            config_handler
-            if not None
-            else ConfigHandler(producer=self.producer, device_manager=self)
+            self._config_handler_cls
+            if self._config_handler_cls is not None
+            else ConfigHandler(device_manager=self)
         )
+        super().initialize(bootstrap_server)
 
     def _get_device_class(self, dev_type):
         module = None
@@ -117,13 +123,22 @@ class DeviceManagerDS(DeviceManagerBase):
         """
         name = dev.get("name")
         enabled = dev.get("enabled")
+        enabled_set = dev.get("enabled_set", True)
 
         dev_cls = self._get_device_class(dev["deviceClass"])
         config = dev["deviceConfig"].copy()
 
         # pylint: disable=protected-access
-        class_params = inspect.signature(dev_cls)._parameters
-        class_params_and_config_keys = set(class_params) & config.keys()
+        device_classes = [dev_cls]
+        if issubclass(dev_cls, ophyd.Signal):
+            device_classes.append(ophyd.Signal)
+        if issubclass(dev_cls, EpicsSignalBase):
+            device_classes.append(EpicsSignalBase)
+        class_params = set()
+        for device_class in device_classes:
+            class_params.update(inspect.signature(device_class)._parameters)
+
+        class_params_and_config_keys = class_params & config.keys()
 
         init_kwargs = {key: config.pop(key) for key in class_params_and_config_keys}
         device_access = config.pop("device_access", None)
@@ -143,6 +158,9 @@ class DeviceManagerDS(DeviceManagerBase):
         # add subscriptions
         if "readback" in obj.event_types:
             obj.subscribe(self._obj_callback_readback, run=enabled)
+        elif "value" in obj.event_types:
+            obj.subscribe(self._obj_callback_readback, run=enabled)
+
         if "done_moving" in obj.event_types:
             obj.subscribe(self._obj_callback_done_moving, event_type="done_moving", run=False)
         if hasattr(obj, "motor_is_moving"):
@@ -159,13 +177,7 @@ class DeviceManagerDS(DeviceManagerBase):
 
         # update device buffer for enabled devices
         try:
-            if not opaas_obj.obj.connected:
-                if hasattr(opaas_obj.obj, "controler"):
-                    opaas_obj.obj.controller.on()
-                else:
-                    logger.error(
-                        f"Device {opaas_obj.obj.name} does not implement the socket controller interface and cannot be turned on."
-                    )
+            self.connect_device(opaas_obj.obj)
             opaas_obj.initialize_device_buffer(self.producer)
         # pylint:disable=broad-except
         except Exception:
@@ -174,8 +186,24 @@ class DeviceManagerDS(DeviceManagerBase):
                 f"{error_traceback}. Failed to stage {opaas_obj.name}. The device will be disabled."
             )
             opaas_obj.enabled = False
-
         return opaas_obj
+
+    @staticmethod
+    def connect_device(obj):
+        """establish a connection to a device"""
+        if obj.connected:
+            return
+        if hasattr(obj, "controller"):
+            obj.controller.on()
+            return
+        if hasattr(obj, "wait_for_connection"):
+            obj.wait_for_connection(timeout=10)
+            return
+
+        logger.error(
+            f"Device {obj.name} does not implement the socket controller interface nor wait_for_connection and cannot be turned on."
+        )
+        raise ConnectionError(f"Failed to establish a connection to device {obj.name}")
 
     def publish_device_info(self, obj: OphydObject, pipe=None) -> None:
         """
@@ -189,7 +217,7 @@ class DeviceManagerDS(DeviceManagerBase):
         interface = get_device_info(obj, {})
         self.producer.set(
             MessageEndpoints.device_info(obj.name),
-            BMessage.DeviceInfoMessage(device=obj.name, info=interface).dumps(),
+            BECMessage.DeviceInfoMessage(device=obj.name, info=interface).dumps(),
             pipe,
         )
 
@@ -206,7 +234,7 @@ class DeviceManagerDS(DeviceManagerBase):
             name = obj.root.name
             signals = obj.read()
             metadata = self.devices.get(obj.root.name).metadata
-            dev_msg = BMessage.DeviceMessage(signals=signals, metadata=metadata).dumps()
+            dev_msg = BECMessage.DeviceMessage(signals=signals, metadata=metadata).dumps()
             pipe = self.producer.pipeline()
             self.producer.set_and_publish(MessageEndpoints.device_readback(name), dev_msg, pipe)
             pipe.execute()
@@ -217,7 +245,7 @@ class DeviceManagerDS(DeviceManagerBase):
         metadata = self.devices[device].metadata
         self.producer.send(
             MessageEndpoints.device_status(device),
-            BMessage.DeviceStatusMessage(device=device, status=status, metadata=metadata).dumps(),
+            BECMessage.DeviceStatusMessage(device=device, status=status, metadata=metadata).dumps(),
         )
 
     def _obj_callback_done_moving(self, *args, **kwargs):
@@ -230,7 +258,7 @@ class DeviceManagerDS(DeviceManagerBase):
         metadata = self.devices[device].metadata
         self.producer.set(
             MessageEndpoints.device_status(kwargs["obj"].root.name),
-            BMessage.DeviceStatusMessage(device=device, status=status, metadata=metadata).dumps(),
+            BECMessage.DeviceStatusMessage(device=device, status=status, metadata=metadata).dumps(),
         )
 
     def _start_custom_connectors(self, bootstrap_server):
@@ -245,11 +273,18 @@ class DeviceManagerDS(DeviceManagerBase):
         self._config_request_connector.signal_event.set()
         self._config_request_connector.join()
 
-    def send_config_request_rejection(self, error_msg):
-        """send a reply back if the config request was rejected"""
+    def send_config_request_reply(self, accepted, error_msg, metadata):
+        """send a config request reply"""
+        msg = BECMessage.RequestResponseMessage(
+            accepted=accepted, message=error_msg, metadata=metadata
+        )
+        RID = metadata.get("RID")
+        self.producer.set(
+            MessageEndpoints.device_config_request_response(RID), msg.dumps(), expire=60
+        )
 
     @staticmethod
     def _device_config_request_callback(msg, *, parent, **_kwargs) -> None:
-        msg = BMessage.DeviceConfigMessage.loads(msg.value)
+        msg = BECMessage.DeviceConfigMessage.loads(msg.value)
         logger.info(f"Received request: {msg}")
         parent.config_handler.parse_config_request(msg)

@@ -1,6 +1,7 @@
 import ast
 import enum
 import time
+import uuid
 from abc import ABC, abstractmethod
 
 import numpy as np
@@ -184,11 +185,15 @@ class RequestBase(ABC):
         self.DIID += 1
         return metadata
 
+    @staticmethod
+    def _get_func_name_from_macro(macro: str):
+        return ast.parse(macro).body[0].name
+
     def run_pre_scan_macros(self):
         macros = self.device_manager.producer.lrange(MessageEndpoints.pre_scan_macros(), 0, -1)
         for macro in macros:
-            macro = macro.decode()
-            func_name = ast.parse(macro).body[0].name
+            macro = macro.decode().strip()
+            func_name = self._get_func_name_from_macro(macro)
             exec(macro)
             eval(func_name)(self.device_manager.devices, self)
 
@@ -211,8 +216,15 @@ class RequestBase(ABC):
                     )
 
     def _get_scan_motors(self):
-        if len(self.caller_args) > 0:
+        if len(self.caller_args) == 0:
+            return
+        if self.arg_bundle_size:
             self.scan_motors = list(self.caller_args.keys())
+            return
+        for motor in self.caller_args:
+            if motor not in self.device_manager.devices:
+                continue
+            self.scan_motors.append(motor)
 
     @abstractmethod
     def run(self):
@@ -242,7 +254,7 @@ class ScanBase(RequestBase):
     scan_type = "step"
     arg_input = [ScanArgType.DEVICE]
     arg_bundle_size = len(arg_input)
-    required_kwargs = []
+    required_kwargs = ["required"]
     return_to_start_after_abort = True
 
     def __init__(
@@ -260,7 +272,7 @@ class ScanBase(RequestBase):
         self.pointID = 0
         self.exp_time = self.caller_kwargs.get("exp_time", 0.1)
 
-        self.relative = parameter["kwargs"].get("relative", True)
+        self.relative = parameter["kwargs"].get("relative", False)
         self.burst_at_each_point = parameter["kwargs"].get("burst_at_each_point", 1)
         self.burst_index = 0
 
@@ -275,7 +287,6 @@ class ScanBase(RequestBase):
         super().initialize()
 
     def read_scan_motors(self):
-        # TODO: check if we can remove the groups from read_and_wait
         yield from self.stubs.read_and_wait(device=self.scan_motors, wait_group="scan_motor")
 
     @abstractmethod
@@ -286,7 +297,7 @@ class ScanBase(RequestBase):
     def prepare_positions(self):
         self._calculate_positions()
         self.num_pos = len(self.positions)
-        self._set_position_offset()
+        yield from self._set_position_offset()
         self._check_limits()
 
     def open_scan(self):
@@ -304,9 +315,10 @@ class ScanBase(RequestBase):
         yield from self.stubs.baseline_reading()
 
     def _set_position_offset(self):
-        self.start_pos = [
-            self.device_manager.devices[dev].read().get("value") for dev in self.scan_motors
-        ]
+        self.start_pos = []
+        for dev in self.scan_motors:
+            val = yield from self.stubs.send_rpc_and_wait(dev, "read")
+            self.start_pos.append(val[dev].get("value"))
         if self.relative:
             self.positions += self.start_pos
 
@@ -367,7 +379,7 @@ class ScanBase(RequestBase):
     def run(self):
         self.initialize()
         yield from self.read_scan_motors()
-        self.prepare_positions()
+        yield from self.prepare_positions()
         yield from self.open_scan()
         yield from self.stage()
         yield from self.run_baseline_reading()
@@ -450,6 +462,7 @@ class Move(RequestBase):
     arg_input = [ScanArgType.DEVICE, ScanArgType.FLOAT]
     arg_bundle_size = len(arg_input)
     scan_report_hint = None
+    required_kwargs = ["relative"]
 
     def __init__(self, *args, parameter=None, **kwargs):
         """
@@ -463,9 +476,11 @@ class Move(RequestBase):
             >>> scans.mv(dev.samx, 1, dev.samy,2)
         """
         super().__init__(parameter=parameter, **kwargs)
+        self.relative = parameter["kwargs"].get("relative", False)
+        self.start_pos = np.repeat(0, len(self.scan_motors)).tolist()
 
     def _calculate_positions(self):
-        self.positions = [[val[0] for val in self.caller_args.values()]]
+        self.positions = np.asarray([[val[0] for val in self.caller_args.values()]], dtype=float)
 
     def _at_each_point(self, pos=None):
         for ii, motor in enumerate(self.scan_motors):
@@ -473,21 +488,29 @@ class Move(RequestBase):
                 device=motor,
                 value=self.positions[0][ii],
                 wait_group="scan_motor",
+                metadata={"response": True},
             )
-
-        for motor in self.scan_motors:
-            yield from self.stubs.wait(wait_type="move", device=motor, wait_group="scan_motor")
 
     def cleanup(self):
         pass
 
+    def _set_position_offset(self):
+        if not self.relative:
+            return
+        self.start_pos = []
+        for dev in self.scan_motors:
+            val = yield from self.stubs.send_rpc_and_wait(dev, "read")
+            self.start_pos.append(val[dev].get("value"))
+        self.positions += self.start_pos
+
     def prepare_positions(self):
         self._calculate_positions()
+        yield from self._set_position_offset()
         self._check_limits()
 
     def run(self):
         self.initialize()
-        self.prepare_positions()
+        yield from self.prepare_positions()
         yield from self._at_each_point()
 
 
@@ -506,6 +529,17 @@ class UpdatedMove(Move):
     scan_name = "umv"
     scan_report_hint = "readback"
 
+    def _at_each_point(self, pos=None):
+        for ii, motor in enumerate(self.scan_motors):
+            yield from self.stubs.set(
+                device=motor,
+                value=self.positions[0][ii],
+                wait_group="scan_motor",
+            )
+
+        for motor in self.scan_motors:
+            yield from self.stubs.wait(wait_type="move", device=motor, wait_group="scan_motor")
+
 
 class Scan(ScanBase):
     scan_name = "grid_scan"
@@ -517,7 +551,7 @@ class Scan(ScanBase):
         ScanArgType.INT,
     ]
     arg_bundle_size = len(arg_input)
-    required_kwargs = ["exp_time"]
+    required_kwargs = ["exp_time", "relative"]
 
     def __init__(self, *args, parameter=None, **kwargs):
         """
@@ -549,7 +583,7 @@ class Scan(ScanBase):
 class FermatSpiralScan(ScanBase):
     scan_name = "fermat_scan"
     scan_report_hint = "table"
-    required_kwargs = ["exp_time", "step"]
+    required_kwargs = ["exp_time", "step", "relative"]
     arg_input = [ScanArgType.DEVICE, ScanArgType.FLOAT, ScanArgType.FLOAT]
     arg_bundle_size = len(arg_input)
 
@@ -589,7 +623,7 @@ class FermatSpiralScan(ScanBase):
 class RoundScan(ScanBase):
     scan_name = "round_scan"
     scan_report_hint = "table"
-    required_kwargs = ["exp_time"]
+    required_kwargs = ["exp_time", "relative"]
     arg_input = [
         ScanArgType.DEVICE,
         ScanArgType.DEVICE,
@@ -632,7 +666,7 @@ class RoundScan(ScanBase):
 class ContLineScan(ScanBase):
     scan_name = "cont_line_scan"
     scan_report_hint = "table"
-    required_kwargs = ["exp_time", "steps"]
+    required_kwargs = ["exp_time", "steps", "relative"]
     arg_input = [ScanArgType.DEVICE, ScanArgType.FLOAT, ScanArgType.FLOAT]
     arg_bundle_size = len(arg_input)
     scan_type = "step"
@@ -699,7 +733,7 @@ class RoundScanFlySim(ScanBase):
     scan_name = "round_scan_fly"
     scan_report_hint = "table"
     scan_type = "fly"
-    required_kwargs = ["exp_time"]
+    required_kwargs = ["exp_time", "relative"]
     arg_input = [
         ScanArgType.DEVICE,
         ScanArgType.FLOAT,
@@ -735,6 +769,7 @@ class RoundScanFlySim(ScanBase):
         self._calculate_positions()
         self.num_pos = len(self.positions)
         self._check_limits()
+        yield None
 
     def finalize(self):
         yield
@@ -772,7 +807,7 @@ class RoundScanFlySim(ScanBase):
 class RoundROIScan(ScanBase):
     scan_name = "round_roi_scan"
     scan_report_hint = "table"
-    required_kwargs = ["exp_time", "dr", "nth"]
+    required_kwargs = ["exp_time", "dr", "nth", "relative"]
     arg_input = [ScanArgType.DEVICE, ScanArgType.FLOAT]
     arg_bundle_size = len(arg_input)
 
@@ -805,14 +840,71 @@ class RoundROIScan(ScanBase):
         )
 
 
-class RepeatScan:
-    pass
+class Acquire(ScanBase):
+    scan_name = "acquire"
+    scan_report_hint = "table"
+    required_kwargs = ["exp_time"]
+    arg_input = []
+    arg_bundle_size = len(arg_input)
+
+    def __init__(self, *args, parameter=None, **kwargs):
+        """
+        A scan following a round-roi-like pattern.
+
+        Args:
+            *args: motor1, width for motor1, motor2, width for motor2,
+            dr: shell width
+            nth: number of points in the first shell
+            relative: Start from an absolute or relative position
+            burst: number of acquisition per point
+
+        Returns:
+
+        Examples:
+            >>> scans.acquire(exp_time=0.1, relative=True)
+
+        """
+        super().__init__(parameter=parameter, **kwargs)
+        self.axis = []
+
+    def _calculate_positions(self) -> None:
+        self.num_pos = self.burst_at_each_point
+
+    def prepare_positions(self):
+        self._calculate_positions()
+
+    def _at_each_point(self, ind=None, pos=None):
+        if ind > 0:
+            yield from self.stubs.wait(
+                wait_type="read", group="primary", wait_group="readout_primary"
+            )
+        yield from self.stubs.trigger(group="trigger", pointID=self.pointID)
+        yield from self.stubs.wait(wait_type="trigger", group="trigger", wait_time=self.exp_time)
+        yield from self.stubs.read(
+            group="primary", wait_group="readout_primary", pointID=self.pointID
+        )
+
+    def scan_core(self):
+        for self.burst_index in range(self.burst_at_each_point):
+            yield from self._at_each_point(self.burst_index)
+        self.burst_index = 0
+
+    def run(self):
+        self.initialize()
+        self.prepare_positions()
+        yield from self.open_scan()
+        yield from self.stage()
+        yield from self.run_baseline_reading()
+        yield from self.scan_core()
+        yield from self.finalize()
+        yield from self.unstage()
+        yield from self.cleanup()
 
 
 class LineScan(ScanBase):
     scan_name = "line_scan"
     scan_report_hint = "table"
-    required_kwargs = ["exp_time", "steps"]
+    required_kwargs = ["exp_time", "steps", "relative"]
     arg_input = [ScanArgType.DEVICE, ScanArgType.FLOAT, ScanArgType.FLOAT]
     arg_bundle_size = len(arg_input)
 

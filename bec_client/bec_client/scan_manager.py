@@ -16,6 +16,7 @@ class ScanReport:
     def __init__(self) -> None:
         self._client = None
         self.request = None
+        self._queue_item = None
 
     @classmethod
     def from_request(cls, request: BECMessage.ScanQueueMessage, client=None):
@@ -34,8 +35,18 @@ class ScanReport:
         """get the scan item"""
         return self.request.scan
 
-    def wait(self, timeout=None):
-        """wait until the request is completed"""
+    @property
+    def status(self):
+        """returns the current status of the request"""
+        return self.queue_item.status
+
+    @property
+    def queue_item(self):
+        if not self._queue_item:
+            self._queue_item = self._get_queue_item(timeout=10)
+        return self._queue_item
+
+    def _get_queue_item(self, timeout=None):
         timeout = timeout if timeout is not None else inf
         queue_item = None
         elapsed_time = 0
@@ -48,17 +59,33 @@ class ScanReport:
             time.sleep(sleep_time)
             if elapsed_time > timeout:
                 raise TimeoutError
+        return queue_item
+
+    def wait(self, timeout=None):
+        """wait until the request is completed"""
+        timeout = timeout if timeout is not None else inf
+        elapsed_time = 0
+        sleep_time = 0.1
         while True:
-            queue_history = self._client.queue.queue_storage.queue_history()
-            for queue in queue_history:
-                if not queue.content["queueID"] == queue_item.queueID:
-                    continue
-                if queue.content["status"] not in ["STOPPED", "COMPLETED"]:
-                    continue
-                if queue.content["status"] == "COMPLETED":
-                    return
-                if queue.content["status"] == "STOPPED":
-                    raise bec_errors.ScanAbortion
+            if self.status == "COMPLETED":
+                break
+            if self.status == "STOPPED":
+                raise bec_errors.ScanAbortion
+            elapsed_time += sleep_time
+            time.sleep(sleep_time)
+            if elapsed_time > timeout:
+                raise TimeoutError
+
+        if self.request.request.content["scan_type"] != "mv":
+            return
+
+        while True:
+            motors = list(self.request.request.content["parameter"]["args"].keys())
+            request_status = self._client.device_manager.producer.lrange(
+                MessageEndpoints.device_req_status(self.request.requestID), 0, -1
+            )
+            if len(request_status) == len(motors):
+                break
             elapsed_time += sleep_time
             time.sleep(sleep_time)
             if elapsed_time > timeout:
@@ -125,6 +152,7 @@ class ScanManager:
             return self.request_scan_abortion()
 
         action = "deferred_pause" if deferred_pause else "pause"
+        logger.info(f"Requesting {action}")
         return self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
             BECMessage.ScanQueueModificationMessage(
@@ -141,6 +169,7 @@ class ScanManager:
         """
         if scanID is None:
             scanID = self.scan_storage.current_scanID
+        logger.info("Requesting scan abortion")
         self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
             BECMessage.ScanQueueModificationMessage(
@@ -157,6 +186,7 @@ class ScanManager:
         """
         if scanID is None:
             scanID = self.scan_storage.current_scanID
+        logger.info("Requesting scan continuation")
         self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
             BECMessage.ScanQueueModificationMessage(
@@ -166,12 +196,31 @@ class ScanManager:
 
     def request_queue_reset(self):
         """request a scan queue reset"""
+        logger.info("Requesting a queue reset")
         self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
             BECMessage.ScanQueueModificationMessage(
                 scanID=None, action="clear", parameter={}
             ).dumps(),
         )
+
+    def request_scan_restart(self, scanID=None, replace=True):
+        """request to restart a scan"""
+        if scanID is None:
+            scanID = self.scan_storage.current_scanID
+        logger.info("Requesting to abort and repeat a scan")
+        position = "replace" if replace else "append"
+        self.producer.send(
+            MessageEndpoints.scan_queue_modification_request(),
+            BECMessage.ScanQueueModificationMessage(
+                scanID=scanID, action="restart", parameter={"position": position}
+            ).dumps(),
+        )
+
+    @property
+    def next_scan_number(self):
+        """get the next scan number from redis"""
+        return int(self.producer.get(MessageEndpoints.scan_number()))
 
     @staticmethod
     def _scan_queue_status_callback(msg, *, parent: ScanManager, **_kwargs) -> None:
@@ -203,6 +252,9 @@ class ScanManager:
             scan_msgs = [scan_msgs]
         for scan_msg in scan_msgs:
             parent.scan_storage.add_scan_segment(scan_msg)
+
+    def __repr__(self) -> str:
+        return "\n".join(self.queue_storage.describe_queue())
 
     def shutdown(self):
         """stop the scan manager's threads"""

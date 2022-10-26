@@ -1,0 +1,327 @@
+<?xml version="1.0" standalone="no" ?>
+<hdf5_layout>  <!-- don't change this -->
+  <group name="entry">    <!-- don't change this -->
+    <attribute name="NX_class" source="constant" value="NXentry" type="string"/>
+    <attribute name="definition" source="constant" value="NXsas" type="string"/>
+    <attribute name="start_time" source="bec" entry="D"/>
+    <attribute name="version" source="constant" value="1.0" type="string"/>
+    <group name="collection">
+      <attribute name="NX_class" source="constant" value="NXcollection" type="string"/>
+      <group name="becES1" bec_default="true"/>
+    </group>    <!-- end group Collection (NDAttributes) (default) -->
+    <group name="control">
+      <attribute name="NX_class" source="constant" value="NXmonitor" type="string"/>
+      <dataset name="mode" source="constant" value="monitor" type="string"/>
+      <dataset name="integral" source="bec" entry="bpm4s"/>
+    </group>
+    <!-- <hardlink name="data" target="/entry/instrument/eiger_4/data"/> -->
+    <hardlink name="data" target="{/entry/instrument/eiger_1, 
+                                  /entry/instrument/eiger_4, 
+                                  /entry/instrument/pilatus_1,
+                                  /entry/instrument/pilatus_2}"/>
+    <!-- The "target" attribute in /entry/instrument/detector/data is used to 
+           tell Nexus utilities that this is a hardlink. Use {entry/detector1, entry/detector2} to 
+           set a hierarchy: Use detector 2 of detector 1 is not available. -->
+    <group name="sample">
+      <dataset name="name" source="bec" entry="samplename"/>
+      <dataset name="description" source="bec" entry="sample_description"/>
+      <dataset name="x_translation" source="bec" entry="samx" units="mm"/>
+      <dataset name="y_translation" source="bec" entry="samy" units="mm"/>
+      <dataset name="temperature_log" source="bec" entry="temp" units="K"/>
+    </group>
+    <group name="instrument">
+      <attribute name="NX_class" source="constant" value="NXinstrument" type="string"/>
+      <dataset name="name" source="constant" value="cSAXS beamline" type="string"/>
+      <group name="source">
+        <attribute name="NX_class" source="constant" value="NXsource" type="string"/>
+        <dataset name="type" source="constant" value="Synchrotron X-ray Source" type="string"/>
+        <dataset name="name" source="constant" value="Swiss Light Source" type="string"/>
+        <dataset name="probe" source="constant" value="x-ray" type="string"/>
+        <dataset name="distance" source="relative" expression="-33800-samz" entry="samz" default="-33800" units="mm"/>
+        <dataset name="sigma_x" source="constant" value="0.202" type="float" units="mm"/>
+        <dataset name="sigma_y" source="constant" value="0.018" type="float" units="mm"/>
+        <dataset name="divergence_x" source="constant" value="0.000135" type="float" units="radians"/>
+        <dataset name="divergence_y" source="constant" value="0.000025" type="float" units="radians"/>
+        <dataset name="current" source="bec" entry="curr" units="mA"/>
+      </group>      <!-- end group source -->
+      <group name="insertion_device">
+        <attribute name="NX_class" source="constant" value="NXinsertion_device" type="string"/>
+        <dataset name="type" source="constant" value="undulator" type="string"/>
+        <dataset name="gap" source="bec" entry="idgap"/>
+        <dataset name="k" source="constant" value="2.46" type="float"/>
+        <dataset name="length" source="constant" value="1820" type="float"/>
+      </group>      <!-- end group insertion device -->
+      <group name="slit_0">
+        <attribute name="NX_class" source="constant" value="NXslit" type="string"/>
+        <dataset name="material" source="constant" value="OFHC Cu" type="string"/>
+        <dataset name="description" source="constant" value="Horizontal secondary source slit" type="string"/>
+        <dataset name="x_gap" source="bec" entry="sl0wh" units="mm"/>
+        <dataset name="x_translation" source="bec" entry="sl0ch" units="mm"/>
+        <dataset name="distance" source="relative" expression="-21700-samz" entry="samz" default="-21700" units="mm"/>
+      </group>      <!-- end group slit_0 -->
+      <group name="slit_1">
+        <attribute name="NX_class" source="constant" value="NXslit" type="string"/>
+        <dataset name="material" source="constant" value="OFHC Cu" type="string"/>
+        <dataset name="description" source="constant" value="Slit 1, optics hutch" type="string"/>
+        <dataset name="x_gap" source="bec" entry="sl1wh" units="mm"/>
+        <dataset name="y_gap" source="bec" entry="sl1wv" units="mm"/>
+        <dataset name="x_translation" source="bec" entry="sl1ch" units="mm"/>
+        <dataset name="height" source="bec" entry="sl1cv" units="mm"/>
+        <dataset name="distance" source="relative" expression="-7800-samz" entry="samz" default="-7800" units="mm"/>
+      </group>      <!-- end group slit_1 -->
+      <group name="monochromator">
+        <attribute name="NX_class" source="constant" value="NXmonochromator" type="string"/>
+        <dataset name="wavelength" source="relative" expression="12.3984193/mokev" entry="mokev" units="Angstrom"/>
+        <dataset name="energy" source="bec" entry="mokev" units="keV"/>
+        <dataset name="type" source="constant" value="Double crystal fixed exit monochromator." type="string"/>
+        <dataset name="distance" source="relative" expression="-5220-samz" entry="samz" default="-5220" units="mm"/>
+        <group name="crystal_1">
+          <attribute name="NX_class" source="constant" value="NXcrystal" type="string"/>
+          <dataset name="usage" source="constant" value="Bragg" type="string"/>
+          <dataset name="type" source="constant" value="Si" type="string"/>
+          <dataset name="order_no" source="constant" value="1" type="float"/>
+          <dataset name="reflection" source="constant" value="[1 1 1]" type="string"/>
+          <dataset name="bragg_angle" source="bec" entry="moth1" units="degrees"/>
+        </group>        <!--end group crystal_1 -->
+        <group name="crystal_2">
+          <attribute name="NX_class" source="constant" value="NXcrystal" type="string"/>
+          <dataset name="usage" source="constant" value="Bragg" type="string"/>
+          <dataset name="type" source="constant" value="Si" type="string"/>
+          <dataset name="order_no" source="constant" value="2" type="float"/>
+          <dataset name="reflection" source="constant" value="[1 1 1]" type="string"/>
+          <dataset name="bragg_angle" source="bec" entry="moth1" units="degrees"/>
+          <dataset name="bend_x" source="bec" entry="mobd" units="degrees"/>
+        </group>        <!--end group crystal_2 -->
+      </group>      <!-- end group monochromator -->
+      <group name="XBPM4">
+          <attribute name="NX_class" source="constant" value="NXdetector" type="string"/>
+          <group name="XBPM4_sum">
+            <dataset name="data" source="bec" entry="bpm4s" units="NX_DIMENSIONLESS"/>
+            <dataset name="description" source="constant" value="Sum of counts for the four quadrants." type="string"/>
+          </group>
+          <group name="XBPM4_x">
+            <dataset name="data" source="bec" entry="bpm4x" units="NX_DIMENSIONLESS"/>
+            <dataset name="description" source="constant" value="Normalized difference of counts between left and right quadrants." type="string"/>
+          </group>
+          <group name="XBPM4_y">
+            <dataset name="data" source="bec" entry="bpm4y" units="NX_DIMENSIONLESS"/>
+            <dataset name="description" source="constant" value="Normalized difference of counts between high and low quadrants." type="string"/>
+          </group>
+          <group name="XBPM4_skew">
+            <dataset name="data" source="bec" entry="bpm4z" units="NX_DIMENSIONLESS"/>
+            <dataset name="description" source="constant" value="Normalized difference of counts between diagonal quadrants." type="string"/>
+          </group>
+      </group> <!-- end group XBPM4 -->
+      <group name="mirror">
+        <attribute name="NX_class" source="constant" value="NXmirror" type="string"/>
+        <dataset name="type" source="constant" value="single" type="string"/>
+        <dataset name="description" source="constant" value="Grazing incidence mirror to reject high-harmonic wavelengths from the monochromator. There are three coating options available that are used dependi
+ng on the X-ray energy, no coating (SiO2), rhodium (Rh) or platinum (Pt)." type="string"/>
+        <dataset name="incident_angle" source="bec" entry="mith" units="deg"/>
+        <dataset name="substrate_material" source="constant" value="SiO2" type="string"/>
+        <dataset name="coating_material" source="bec" entry="mirror_coating" units="NX_CHAR"/>
+        <dataset name="bend_y" source="bec" entry="mibd" units="NX_DIMENSIONLESS"/>
+        <dataset name="distance" source="relative" expression="-4370-samz" entry="samz" default="-4370" units="mm"/>
+      </group>      <!-- end group mirror -->  
+      <group name="XBPM5">
+          <attribute name="NX_class" source="constant" value="NXdetector" type="string"/>
+          <group name="XBPM5_sum">
+            <dataset name="data" source="bec" entry="bpm5s" units="NX_DIMENSIONLESS"/>
+            <dataset name="description" source="constant" value="Sum of counts for the four quadrants."/>
+          </group>
+          <group name="XBPM5_x">
+            <dataset name="data" source="bec" entry="bpm5x" units="NX_DIMENSIONLESS"/>
+            <dataset name="description" source="constant" value="Normalized difference of counts between left and right quadrants."/>
+          </group>
+          <group name="XBPM5_y">
+            <dataset name="data" source="bec" entry="bpm5y" units="NX_DIMENSIONLESS"/>
+            <dataset name="description" source="constant" value="Normalized difference of counts between high and low quadrants."/>
+          </group>
+          <group name="XBPM5_skew">
+            <dataset name="data" source="bec" entry="bpm5z" units="NX_DIMENSIONLESS"/>
+            <dataset name="description" source="constant" value="Normalized difference of counts between diagonal quadrants."/>
+          </group>
+      </group> <!-- end group XBPM5 -->
+      <group name="slit_2">
+        <attribute name="NX_class" source="constant" value="NXslit" type="string"/>
+        <dataset name="material" source="constant" value="Ag" type="string"/>
+        <dataset name="description" source="constant" value="Slit 2, optics hutch" type="string"/>
+        <dataset name="x_gap" source="bec" entry="sl2wh" units="mm"/>
+        <dataset name="y_gap" source="bec" entry="sl2wv" units="mm"/>
+        <dataset name="x_translation" source="bec" entry="sl2ch" units="mm"/>
+        <dataset name="height" source="bec" entry="sl2cv" units="mm"/>
+        <dataset name="distance" source="relative" expression="-3140-samz" entry="samz" default="-3140" units="mm"/>
+      </group>      <!-- end group slit_2 -->
+
+
+      <!-- ############################################################ -->
+      <!-- Here ends the optics hutch and starts the experimental hutch -->
+      <!-- ############################################################ -->
+
+      <!-- uncomment XBPM6 once they are working reliably -->
+      <!-- <group name="XBPM6">
+          <attribute name="NX_class" source="constant" value="NXdetector" type="string"/>
+          <group name="XBPM6_sum">
+            <dataset name="data" source="bec" entry="bpm6s" units="NX_DIMENSIONLESS"/>
+            <dataset name="description" source="constant" value="Sum of counts for the four quadrants."/>
+          </group>
+          <group name="XBPM6_x">
+            <dataset name="data" source="bec" entry="bpm6x" units="NX_DIMENSIONLESS"/>
+            <dataset name="description" source="constant" value="Normalized difference of counts between left and right quadrants."/>
+          </group>
+          <group name="XBPM6_y">
+            <dataset name="data" source="bec" entry="bpm6y" units="NX_DIMENSIONLESS"/>
+            <dataset name="description" source="constant" value="Normalized difference of counts between high and low quadrants."/>
+          </group>
+          <group name="XBPM6_skew">
+            <dataset name="data" source="bec" entry="bpm6z" units="NX_DIMENSIONLESS"/>
+            <dataset name="description" source="constant" value="Normalized difference of counts between diagonal quadrants."/>
+          </group>
+      </group> end group XBPM6 -->
+      <group name="slit_3">
+        <attribute name="NX_class" source="constant" value="NXslit" type="string"/>
+        <dataset name="material" source="constant" value="Si" type="string"/>
+        <dataset name="description" source="constant" value="Slit 3, experimental hutch, exposure box" type="string"/>
+        <dataset name="x_gap" source="bec" entry="sl3wh" units="mm"/>
+        <dataset name="y_gap" source="bec" entry="sl3wv" units="mm"/>
+        <dataset name="x_translation" source="bec" entry="sl3ch" units="mm"/>
+        <dataset name="height" source="bec" entry="sl3cv" units="mm"/>
+        <!-- <dataset name="distance" source="relative" expression="-?????-samz" entry="samz" default="-????" units="mm"/> -->
+      </group>      <!-- end group slit_3 -->
+      <group name="filter_set">
+        <attribute name="NX_class" source="constant" value="NXattenuator" type="string"/>
+        <dataset name="material" source="constant" value="Si" type="string"/>
+        <dataset name="description" source="constant" value="The filter set consists of 4 linear stages, each with five filter positions. Additionally, each one allows for an out position to allow 'no filtering'." type="string"/>
+        <!-- <dataset name="distance" source="relative" expression="-?????-samz" entry="samz" default="-????" units="mm"/> -->
+        <dataset name="attenuator_transmission" source="relative" expression="10^(ftrans)" entry="ftrans" default="-????" units="mm"/>
+      </group>      <!-- end group slit_3 -->
+      <group name="slit_4">
+        <attribute name="NX_class" source="constant" value="NXslit" type="string"/>
+        <dataset name="material" source="constant" value="Ge" type="string"/>
+        <dataset name="description" source="constant" value="Slit 4, experimental hutch, exposure box" type="string"/>
+        <dataset name="x_gap" source="bec" entry="sl4wh" units="mm"/>
+        <dataset name="y_gap" source="bec" entry="sl4wv" units="mm"/>
+        <dataset name="x_translation" source="bec" entry="sl4ch" units="mm"/>
+        <dataset name="height" source="bec" entry="sl4cv" units="mm"/>
+        <!-- <dataset name="distance" source="relative" expression="-?????-samz" entry="samz" default="-????" units="mm"/> -->
+      </group>      <!-- end group slit_4 -->
+      <group name="slit_5">
+        <attribute name="NX_class" source="constant" value="NXslit" type="string"/>
+        <dataset name="material" source="constant" value="Si" type="string"/>
+        <dataset name="description" source="constant" value="Slit 5, experimental hutch, exposure box" type="string"/>
+        <dataset name="x_gap" source="bec" entry="sl5wh" units="mm"/>
+        <dataset name="y_gap" source="bec" entry="sl5wv" units="mm"/>
+        <dataset name="x_translation" source="bec" entry="sl5ch" units="mm"/>
+        <dataset name="height" source="bec" entry="sl5cv" units="mm"/>
+        <!-- <dataset name="distance" source="relative" expression="-?????-samz" entry="samz" default="-????" units="mm"/> -->
+      </group>      <!-- end group slit_5 -->
+      <group name="beam_stop_1">
+        <attribute name="NX_class" source="constant" value="NX_beamstop" type="string"/>
+        <dataset name="description" source="constant" value="circular" type="string"/>
+        <dataset name="size" source="constant" value="3" units="mm" type="float"/>
+        <dataset name="x" source="bec" entry="bs1x" units="mm"/>
+        <dataset name="y" source="bec" entry="bs1y" units="mm"/>
+        <!-- <dataset name="distance" source="relative" expression="-?????-samz" entry="samz" default="-????" units="mm"/> -->
+      </group>      <!-- end group beam_stop_1 -->
+      <group name="beam_stop_2">
+        <attribute name="NX_class" source="constant" value="NX_beamstop" type="string"/>
+        <dataset name="description" source="constant" value="rectangular" type="string"/>
+        <dataset name="size_x" source="constant" value="5" units="mm" type="float"/>
+        <dataset name="size_y" source="constant" value="2.25" units="mm" type="float"/>
+        <dataset name="x" source="bec" entry="bs2x" units="mm"/>
+        <dataset name="y" source="bec" entry="bs2y" units="mm"/>
+        <dataset name="data" source="bec" entry="diode" units="NX_DIMENSIONLESS"/>
+        <!-- <dataset name="distance" source="relative" expression="-?????-samz" entry="samz" default="-????" units="mm"/> -->
+      </group>      <!-- end group beam_stop_2 -->
+
+
+      <!-- ############################################################ -->
+      <!--                        detectors                             -->
+      <!-- ############################################################ -->
+
+      <group name="eiger_1" dependency="/entry/instrument/eiger_1/data">
+        <attribute name="NX_class" source="constant" value="NXdetector" type="string"/>
+        <dataset name="x_pixel_size" source="constant" value="75" type="float" units="microns"/>
+        <dataset name="y_pixel_size" source="constant" value="75" type="float" units="microns"/>
+        <dataset name="polar_angle" source="constant" value="0" type="float" units="degrees"/>
+        <dataset name="azimuthal_angle" source="constant" value="0" type="float" units="degrees"/>
+        <dataset name="rotation_angle" source="constant" value="0" type="float" units="degrees"/>
+        <dataset name="description" source="constant" value="Eiger 9M detector, in-house developed, Paul Scherrer Institute" type="string"/>
+        <dataset name="type" source="constant" value="Single-photon counting detector, 320 micron-thick Si chip" type="string"/>
+        <group name="orientation">
+          <dataset name="transpose" source="constant" value="1" type="float"/>
+          <dataset name="rot90" source="constant" value="0" type="float"/>
+          <attribute name="description" source="constant" value="Orientation defines the number of counterclockwise rotations by 90 deg followed by a transposition to reach the 'cameraman orientation', that is looking towards the beam." type="string"/>
+        </group>
+      </group>   <!-- end Eiger 9M -->
+      
+      <group name="eiger_3" dependency="/entry/instrument/eiger_3/data">
+        <attribute name="NX_class" source="constant" value="NXdetector" type="string"/>
+        <dataset name="x_pixel_size" source="constant" value="75" type="float" units="microns"/>
+        <dataset name="y_pixel_size" source="constant" value="75" type="float" units="microns"/>
+        <dataset name="polar_angle" source="constant" value="0" type="float" units="degrees"/>
+        <dataset name="azimuthal_angle" source="constant" value="0" type="float" units="degrees"/>
+        <dataset name="rotation_angle" source="constant" value="0" type="float" units="degrees"/>
+        <dataset name="description" source="constant" value="Eiger 500K detector, in-house developed by Ian Johnson, Paul Scherrer Institute" type="string"/>
+        <dataset name="type" source="constant" value="Single-photon counting detector, 320 micron-thick Si chip" type="string"/>
+        <group name="orientation">
+          <dataset name="transpose" source="constant" value="1" type="float"/>
+          <dataset name="rot90" source="constant" value="3" type="float"/>
+          <attribute name="description" source="constant" value="Orientation defines the number of counterclockwise rotations by 90 deg followed by a transposition to reach the 'cameraman orientation', that is looking towards the beam." type="string"/>
+        </group>
+      </group>   <!-- end Eiger 500K -->
+      
+      <group name="eiger_4" dependency="/entry/instrument/eiger_4/data">
+        <attribute name="NX_class" source="constant" value="NXdetector" type="string"/>
+        <dataset name="x_pixel_size" source="constant" value="75" type="float" units="microns"/>
+        <dataset name="y_pixel_size" source="constant" value="75" type="float" units="microns"/>
+        <dataset name="polar_angle" source="constant" value="0" type="float" units="degrees"/>
+        <dataset name="azimuthal_angle" source="constant" value="0" type="float" units="degrees"/>
+        <dataset name="rotation_angle" source="constant" value="0" type="float" units="degrees"/>
+        <dataset name="description" source="constant" value="Eiger 1.5M detector, in-house developed, Paul Scherrer Institute" type="string"/>
+        <dataset name="type" source="constant" value="Single-photon counting detector, 320 micron-thick Si chip" type="string"/>
+        <group name="orientation">
+          <dataset name="transpose" source="constant" value="1" type="float"/>
+          <dataset name="rot90" source="constant" value="3" type="float"/>
+          <attribute name="description" source="constant" value="Orientation defines the number of counterclockwise rotations by 90 deg followed by a transposition to reach the 'cameraman orientation', that is looking towards the beam." type="string"/>
+        </group>
+      </group> <!-- end Eiger 1.5M -->
+      <group name="pilatus_1" dependency="/entry/instrument/pilatus_1/data">
+        <attribute name="NX_class" source="constant" value="NXdetector" type="string"/>
+        <dataset name="x_pixel_size" source="constant" value="172" type="float" units="microns"/>
+        <dataset name="y_pixel_size" source="constant" value="172" type="float" units="microns"/>
+        <dataset name="polar_angle" source="constant" value="0" type="float" units="degrees"/>
+        <dataset name="azimuthal_angle" source="constant" value="0" type="float" units="degrees"/>
+        <dataset name="rotation_angle" source="constant" value="0" type="float" units="degrees"/>
+        <dataset name="description" source="constant" value="Pilatus 2M detector, in-house developed, Paul Scherrer Institute" type="string"/>
+        <dataset name="type" source="constant" value="Single-photon counting detector, 320 micron-thick Si chip" type="string"/>
+        <group name="orientation">
+          <dataset name="transpose" source="constant" value="1" type="float"/>
+          <dataset name="rot90" source="constant" value="2" type="float"/>
+          <attribute name="description" source="constant" value="Orientation defines the number of counterclockwise rotations by 90 deg followed by a transposition to reach the 'cameraman orientation', that is looking towards the beam." type="string"/>
+        </group>
+      </group>   <!-- end Pilatus 2M -->
+      
+      <group name="pilatus_2" dependency="/entry/instrument/pilatus_2/data">
+        <attribute name="NX_class" source="constant" value="NXdetector" type="string"/>
+        <dataset name="x_pixel_size" source="constant" value="172" type="float" units="microns"/>
+        <dataset name="y_pixel_size" source="constant" value="172" type="float" units="microns"/>
+        <dataset name="polar_angle" source="constant" value="0" type="float" units="degrees"/>
+        <dataset name="azimuthal_angle" source="constant" value="0" type="float" units="degrees"/>
+        <dataset name="rotation_angle" source="constant" value="0" type="float" units="degrees"/>
+        <dataset name="description" source="constant" value="Pilatus 300K detector, Dectris, Switzerland" type="string"/>
+        <dataset name="type" source="constant" value="Single-photon counting detector, 320 micron-thick Si chip" type="string"/>
+        <group name="orientation">
+          <dataset name="transpose" source="constant" value="1" type="float"/>
+          <dataset name="rot90" source="constant" value="2" type="float"/>
+          <attribute name="description" source="constant" value="Orientation defines the number of counterclockwise rotations by 90 deg followed by a transposition to reach the 'cameraman orientation', that is looking towards the beam." type="string"/>
+        </group>
+      </group>   <!-- end Pilatus 300K -->
+
+      <group name="mcs" dependency="entry: mcs_data">
+        <dataset name="data" source="dat" entry="mcs_data"/>
+      </group>
+
+    </group>    <!-- end group instrument -->
+  </group>  <!-- end group entry -->
+</hdf5_layout>

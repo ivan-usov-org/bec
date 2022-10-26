@@ -3,11 +3,11 @@ from __future__ import annotations
 from bec_utils import BECMessage, BECService, MessageEndpoints, bec_logger
 from bec_utils.connector import ConnectorBase
 
-from .bkqueue import QueueManager
 from .devicemanager import DeviceManagerScanServer
 from .scan_assembler import ScanAssembler
 from .scan_guard import ScanGuard
 from .scan_manager import ScanManager
+from .scan_queue import QueueManager
 from .scan_worker import ScanWorker
 
 logger = bec_logger.logger
@@ -65,10 +65,9 @@ class ScanServer(BECService):
     @staticmethod
     def _alarm_callback(msg, parent: ScanServer, **_kwargs):
         metadata = BECMessage.AlarmMessage.loads(msg.value).metadata
-        scanID = metadata.get("scanID")
         queue = metadata.get("stream")
-        if scanID and queue:
-            parent.queue_manager.set_abort(scanID=scanID, queue=queue)
+        # shouldn't this be specific to a single queue?
+        parent.queue_manager.set_abort(queue=queue)
 
     @property
     def scan_number(self) -> int:

@@ -12,6 +12,7 @@ class MessageEndpoints:
 
     # device config
     _device_config_request = "internal/devices/config_request"
+    _device_config_request_response = "internal/devices/config_request_response"
     _device_config = "internal/devices/config"
     _device_info = "internal/devices/info"
 
@@ -34,6 +35,8 @@ class MessageEndpoints:
     _public_scan_info = Template("public/$scanID/scan_info")
     _public_scan_segment = Template("public/$scanID/scan_segment/$pointID")
     _public_scan_data = Template("public/$scanID/scan_data/$device/$pointID")
+    _public_scan_baseline = Template("public/$scanID/scan_baseline")
+    _public_file = Template("public/$scanID/file")
 
     # instructions
     _device_instructions = "internal/devices/instructions"
@@ -47,6 +50,9 @@ class MessageEndpoints:
 
     # service
     _services_status = "internal/services/status"
+
+    # misc
+    _public_global_vars = "public/vars"
 
     ##########
 
@@ -75,6 +81,10 @@ class MessageEndpoints:
     @classmethod
     def device_config_request(cls):
         return cls._device_config_request
+
+    @classmethod
+    def device_config_request_response(cls, RID: str):
+        return f"{cls._device_config_request_response}/{RID}"
 
     @classmethod
     def device_config(cls):
@@ -168,6 +178,14 @@ class MessageEndpoints:
     def public_scan_data(cls, scanID: str, device: str, pointID: str):
         return cls._public_scan_data.substitute(scanID=scanID, device=device, pointID=pointID)
 
+    @classmethod
+    def public_scan_baseline(cls, scanID: str):
+        return cls._public_scan_baseline.substitute(scanID=scanID)
+
+    @classmethod
+    def public_file(cls, scanID: str):
+        return cls._public_file.substitute(scanID=scanID)
+
     # log
     @classmethod
     def log(cls):
@@ -180,3 +198,8 @@ class MessageEndpoints:
     @classmethod
     def service_status(cls, service_id: str):
         return f"{cls._services_status}/{service_id}"
+
+    # misc
+    @classmethod
+    def global_vars(cls, var_name: str):
+        return f"{cls._public_global_vars}/{var_name}"

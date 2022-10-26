@@ -10,7 +10,7 @@ from bec_utils import (
     bec_logger,
 )
 
-from bec_client.callbacks import ScanRequestError
+from bec_client.callbacks.utils import ScanRequestError
 
 
 class RPCError(Exception):
@@ -323,9 +323,8 @@ class Positioner(DeviceBase):
         limits = [self.low_limit, val]
         self.update_config({"deviceConfig": {"limits": limits}})
 
-    @rpc
-    def move(self):
-        pass
+    def move(self, val: float):
+        return self.parent.parent.scans.mv(self, val)
 
     @rpc
     def position(self):

@@ -1,23 +1,16 @@
 from bec_utils import BECMessage as BMessage
-from bec_utils import (
-    DeviceConfigError,
-    DeviceManagerBase,
-    MessageEndpoints,
-    ProducerConnector,
-    bec_logger,
-)
+from bec_utils import DeviceConfigError, DeviceManagerBase, MessageEndpoints, bec_logger
 
 logger = bec_logger.logger
 
 
 class ConfigHandler:
-    def __init__(self, producer: ProducerConnector, device_manager: DeviceManagerBase) -> None:
-        self.producer = producer
+    def __init__(self, device_manager: DeviceManagerBase) -> None:
         self.device_manager = device_manager
 
     def send_config(self, msg: BMessage.DeviceConfigMessage) -> None:
         """broadcast a new config"""
-        self.producer.send(MessageEndpoints.device_config(), msg.dumps())
+        self.device_manager.producer.send(MessageEndpoints.device_config(), msg.dumps())
 
     def parse_config_request(self, msg: BMessage.DeviceConfigMessage) -> None:
         """Processes a config request. If successful, it emits a config reply
@@ -56,13 +49,23 @@ class ConfigHandler:
                     # update device enabled status in DB
                     self.update_device_enabled_in_db(device_name=dev)
                     updated = True
+                if "enabled_set" in dev_config:
+                    device.config["enabled_set"] = dev_config["enabled_set"]
+                    # update device enabled status in DB
+                    self.update_device_enabled_set_in_db(device_name=dev)
+                    updated = True
 
             # send updates to services
             if updated:
                 self.send_config(msg)
+                self.device_manager.send_config_request_reply(
+                    accepted=True, error_msg=None, metadata=msg.metadata
+                )
 
         except DeviceConfigError as dev_conf_error:
-            self.device_manager.send_config_request_rejection(dev_conf_error)
+            self.device_manager.send_config_request_reply(
+                accepted=False, error_msg=dev_conf_error, metadata=msg.metadata
+            )
 
     def update_device_enabled_in_db(self, device_name: str) -> None:
         """Update a device enabled setting in the DB with the local version
@@ -77,6 +80,23 @@ class ConfigHandler:
         success = self.device_manager.scibec.patch_device_config(
             self.device_manager.devices[device_name].config["id"],
             {"enabled": self.device_manager.devices[device_name].enabled},
+        )
+        if not success:
+            raise DeviceConfigError("Error during database update.")
+
+    def update_device_enabled_set_in_db(self, device_name: str) -> None:
+        """Update a device enabled setting in the DB with the local version
+
+        Args:
+            device_name (str): Name of the device that should be updated
+
+        Raises:
+            DeviceConfigError: Raised if the db update fails.
+        """
+        logger.debug("updating in DB")
+        success = self.device_manager.scibec.patch_device_config(
+            self.device_manager.devices[device_name].config["id"],
+            {"enabled_set": self.device_manager.devices[device_name].enabled_set},
         )
         if not success:
             raise DeviceConfigError("Error during database update.")

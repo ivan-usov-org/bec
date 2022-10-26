@@ -14,8 +14,8 @@ from bec_utils import (
     bec_logger,
 )
 
-from .bkqueue import InstructionQueueItem, InstructionQueueStatus
 from .errors import DeviceMessageError, ScanAbortion
+from .scan_queue import InstructionQueueItem, InstructionQueueStatus
 
 logger = bec_logger.logger
 
@@ -107,11 +107,33 @@ class ScanWorker(threading.Thread):
             logger.error("Unkown wait command")
             raise DeviceMessageError("Unkown wait command")
 
-    def _get_device_status(self, devices: list) -> list:
+    def _get_device_status(self, msg_cls: MessageEndpoints, devices: list) -> list:
         pipe = self.device_manager.producer.pipeline()
         for dev in devices:
-            self.device_manager.producer.get(MessageEndpoints.device_req_status(dev), pipe)
+            self.device_manager.producer.get(msg_cls(dev), pipe)
         return pipe.execute()
+
+    def _check_for_failed_movements(self, device_status: list, devices: list, instr: DeviceMsg):
+        if all(dev.content["success"] for dev in device_status):
+            return
+        ind = [dev.content["success"] for dev in device_status].index(False)
+        failed_device = devices[ind]
+
+        # make sure that this is not an old message
+        matching_DIID = device_status[ind].metadata.get("DIID") == devices[ind][1]
+        matching_RID = device_status[ind].metadata.get("RID") == instr.metadata["RID"]
+        if matching_DIID and matching_RID:
+            last_pos = BECMessage.DeviceMessage.loads(
+                self.device_manager.producer.get(MessageEndpoints.device_readback(failed_device[0]))
+            ).content["signals"][failed_device[0]]["value"]
+            self.connector.raise_alarm(
+                severity=Alarms.MAJOR,
+                source=instr.content,
+                content=f"Movement of device {failed_device[0]} failed whilst trying to reach the target position. Last recorded position: {last_pos}",
+                alarm_type="MovementFailed",
+                metadata=instr.metadata,
+            )
+            raise ScanAbortion
 
     def _wait_for_idle(self, instr: DeviceMsg) -> None:
         """Wait for devices to become IDLE
@@ -132,7 +154,9 @@ class ScanWorker(threading.Thread):
         logger.debug(f"Waiting for devices: {wait_group}")
 
         while True:
-            device_status = self._get_device_status([dev for dev, _ in wait_group_devices])
+            device_status = self._get_device_status(
+                MessageEndpoints.device_req_status, [dev for dev, _ in wait_group_devices]
+            )
             self._check_for_interruption()
 
             if None in device_status:
@@ -160,30 +184,7 @@ class ScanWorker(threading.Thread):
                 break
 
             if not devices_moved_successfully:
-                ind = [dev.content["success"] for dev in device_status].index(False)
-                failed_device = wait_group_devices[ind]
-
-                # make sure that this is not an old message
-                matching_DIID = (
-                    device_status[ind].metadata.get("DIID") == wait_group_devices[ind][1]
-                )
-                matching_scanID = (
-                    device_status[ind].metadata.get("scanID") == instr.metadata["scanID"]
-                )
-                if matching_DIID and matching_scanID:
-                    last_pos = BECMessage.DeviceMessage.loads(
-                        self.device_manager.producer.get(
-                            MessageEndpoints.device_readback(failed_device[0])
-                        )
-                    ).content["signals"][failed_device[0]]["value"]
-                    self.connector.raise_alarm(
-                        severity=Alarms.MAJOR,
-                        source=instr.content,
-                        content=f"Movement of device {failed_device[0]} failed whilst trying to reach the target position. Last recorded position: {last_pos}",
-                        alarm_type="MovementFailed",
-                        metadata=instr.metadata,
-                    )
-                    raise ScanAbortion
+                self._check_for_failed_movements(device_status, wait_group_devices, instr)
 
         self._groups[wait_group] = [
             dev for dev in self._groups[wait_group] if dev not in wait_group_devices
@@ -205,11 +206,9 @@ class ScanWorker(threading.Thread):
         logger.debug(f"Waiting for devices: {wait_group}")
 
         while True:
-            pipe = self.device_manager.producer.pipeline()
-            for dev, _ in wait_group_devices:
-                self.device_manager.producer.get(MessageEndpoints.device_status(dev), pipe)
-            device_status = pipe.execute()
-
+            device_status = self._get_device_status(
+                MessageEndpoints.device_status, [dev for dev, _ in wait_group_devices]
+            )
             self._check_for_interruption()
             device_status = [BECMessage.DeviceStatusMessage.loads(dev) for dev in device_status]
 
@@ -412,10 +411,9 @@ class ScanWorker(threading.Thread):
                 instr.metadata["scanID"] = queue.queue.active_rb.scanID
                 instr.metadata["queueID"] = queue.queue_id
                 self._instruction_step(instr)
+            raise ScanAbortion from exc
         queue.is_active = False
-        queue.status = (
-            InstructionQueueStatus.STOPPED if queue.stopped else InstructionQueueStatus.COMPLETED
-        )
+        queue.status = InstructionQueueStatus.COMPLETED
         self.current_instruction_queue_item = None
 
         logger.info(f"QUEUE ITEM finished after {time.time()-start:.2f} seconds")
@@ -486,6 +484,7 @@ class ScanWorker(threading.Thread):
                             queue.append_to_queue_history()
 
                 except ScanAbortion:
+                    queue.queue.increase_scan_number()
                     self._send_scan_status("aborted")
                     queue.status = InstructionQueueStatus.STOPPED
                     queue.append_to_queue_history()
