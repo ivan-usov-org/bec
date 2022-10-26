@@ -1,3 +1,5 @@
+import uuid
+
 from bec_utils.connector import ConnectorBase
 from bec_utils.redis_connector import Alarms
 
@@ -99,3 +101,22 @@ class ConnectorMock(ConnectorBase):
         self, severity: Alarms, alarm_type: str, source: str, content: dict, metadata: dict
     ):
         pass
+
+
+def create_session_from_config(config: dict) -> dict:
+    device_configs = []
+    session_id = str(uuid.uuid4())
+    for name, conf in config.items():
+        status = conf.pop("status")
+        dev_conf = {
+            "id": str(uuid.uuid4()),
+            "accessGroups": "customer",
+            "name": name,
+            "sessionId": session_id,
+            "enabled": status["enabled"],
+            "enabled_set": status["enabled_set"],
+        }
+        dev_conf.update(conf)
+        device_configs.append(dev_conf)
+    session = {"accessGroups": "customer", "devices": device_configs}
+    return session
