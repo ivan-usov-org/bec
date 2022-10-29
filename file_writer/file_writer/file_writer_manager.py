@@ -22,12 +22,13 @@ class ScanStorage:
         self.scan_finished = False
         self.num_points = None
         self.baseline = None
+        self.metadata = {}
 
     def append(self, pointID, data):
         self.scan_segments[pointID] = data
 
     def ready_to_write(self) -> bool:
-        return self.scan_finished and (self.num_points + 1 == len(self.scan_segments))
+        return self.scan_finished and (self.num_points == len(self.scan_segments))
 
 
 class FileWriterManager(BECService):
@@ -79,9 +80,13 @@ class FileWriterManager(BECService):
             self.scan_storage[scanID] = ScanStorage(
                 scan_number=msg.content["info"].get("scan_number"), scanID=scanID
             )
+        metadata = msg.content.get("info").copy()
+        metadata.pop("DIID", None)
+        metadata.pop("stream", None)
+        self.scan_storage[scanID].metadata.update(metadata)
         if msg.content.get("status") == "closed":
             self.scan_storage[scanID].scan_finished = True
-            self.scan_storage[scanID].num_points = msg.content["info"]["points"]
+            self.scan_storage[scanID].num_points = msg.content["info"]["num_points"]
             self.check_storage_status(scanID=scanID)
 
     def insert_to_scan_storage(self, msg: BECMessage.ScanMessage) -> None:

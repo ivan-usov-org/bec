@@ -157,10 +157,18 @@ class HDF5StorageWriter:
         self.add_content(group, val._storage)
 
         if name == "bec" and container.attrs.get("NX_class") == "NXcollection":
-            for dev_name, value in self.device_storage.items():
+            for key, value in self.device_storage.items():
                 if value is None:
                     continue
-                group.create_dataset(name=dev_name, data=value)
+                if isinstance(value, dict):
+
+                    sub_storage = HDF5Storage(key)
+                    dict_to_storage(sub_storage, value)
+                    self.add_group(key, group, sub_storage)
+                    # self.add_content(group, sub_storage._storage)
+                    continue
+
+                group.create_dataset(name=key, data=value)
 
     def add_dataset(self, name: str, container: typing.Any, val: HDF5Storage):
         data = val._data
@@ -206,10 +214,20 @@ class NexusFileWriter(FileWriter):
     def write(self, file_path: str, data):
         print(f"writing file to {file_path}")
         device_storage = self._create_device_data_storage(data)
+        device_storage["metadata"] = data.metadata
         writer_storage = cSAXS_NeXus_format(HDF5Storage(), device_storage)
 
         with h5py.File(file_path, "w") as file:
             HDF5StorageWriter.write_to_file(writer_storage._storage, device_storage, file)
+
+
+def dict_to_storage(storage, data):
+    for key, val in data.items():
+        if isinstance(val, dict):
+            sub = storage.create_group(key)
+            dict_to_storage(sub, val)
+            continue
+        storage.create_dataset(key, val)
 
 
 def cSAXS_NeXus_format(storage, data):
