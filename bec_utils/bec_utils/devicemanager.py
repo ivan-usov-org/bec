@@ -4,11 +4,9 @@ import time
 import uuid
 
 import msgpack
-import yaml
 from typeguard import typechecked
 
 from bec_utils.connector import ConnectorBase
-from bec_utils.session_manager import SessionManager
 
 from .BECMessage import (
     BECStatus,
@@ -20,8 +18,6 @@ from .BECMessage import (
 from .endpoints import MessageEndpoints
 from .logger import bec_logger
 from .scibec import SciBec
-from .timeout import SingletonThreadpool
-from .timeout import timeout as bec_timeout
 
 logger = bec_logger.logger
 
@@ -103,12 +99,15 @@ class Device:
     @property
     def user_parameter(self) -> dict:
         """get the user parameter for this device"""
-        return self.config.get("userParameter")
+        return self.config["userParameter"]
 
-    @user_parameter.setter
-    def user_parameter(self, val: dict):
-        self.config["userParameter"] = val
+    def set_user_parameter(self, val: dict):
         self.parent.send_config_request(action="update", config={self.name: {"userParameter": val}})
+
+    def update_user_parameter(self, val: dict):
+        param = self.user_parameter
+        param.update(val)
+        self.set_user_parameter(param)
 
     def __repr__(self):
         config = "".join(
@@ -329,6 +328,11 @@ class DeviceManagerBase:
                     self.devices[dev].config["enabled"] = config[dev]["enabled"]
                     status = "enabled" if self.devices[dev].enabled else "disabled"
                     logger.info(f"Device {dev} has been {status}.")
+                if "enabled_set" in config[dev]:
+                    self.devices[dev].config["enabled_set"] = config[dev]["enabled_set"]
+                if "userParameter" in config[dev]:
+                    self.devices[dev].config["userParameter"] = config[dev]["userParameter"]
+
         elif action == "add":
             for dev in config:
                 obj = self._create_device(dev)
