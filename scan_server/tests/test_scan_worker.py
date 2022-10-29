@@ -224,7 +224,7 @@ def test_check_for_failed_movements(device_status, devices, instr, abort):
 
 
 @pytest.mark.parametrize(
-    "msg,scan_id,num_points,exp_num_points",
+    "msg,scan_id,max_point_id,exp_num_points",
     [
         (
             BECMessage.DeviceInstructionMessage(
@@ -234,7 +234,7 @@ def test_check_for_failed_movements(device_status, devices, instr, abort):
                 metadata={"stream": "primary", "DIID": 18, "scanID": "12345"},
             ),
             "12345",
-            20,
+            19,
             20,
         ),
         (
@@ -245,28 +245,28 @@ def test_check_for_failed_movements(device_status, devices, instr, abort):
                 metadata={"stream": "primary", "DIID": 18, "scanID": "12345"},
             ),
             "0987",
-            20,
+            200,
             19,
         ),
     ],
 )
-def test_close_scan(msg, scan_id, num_points, exp_num_points):
+def test_close_scan(msg, scan_id, max_point_id, exp_num_points):
     worker = get_scan_worker()
     worker.scan_id = scan_id
-    worker.current_scan_info["points"] = 19
+    worker.current_scan_info["num_points"] = 19
 
     reset = bool(worker.scan_id == msg.metadata["scanID"])
     with mock.patch(
         "scan_server.scan_worker.ScanWorker._send_scan_status"
     ) as send_scan_status_mock:
-        worker._close_scan(msg, max_point_id=num_points)
+        worker._close_scan(msg, max_point_id=max_point_id)
         if reset:
             send_scan_status_mock.assert_called_once()
             send_scan_status_mock.assert_called_with("closed")
             assert worker.scan_id == None
         else:
             assert worker.scan_id == scan_id
-    assert worker.current_scan_info["points"] == exp_num_points
+    assert worker.current_scan_info["num_points"] == exp_num_points
 
 
 @pytest.mark.parametrize(

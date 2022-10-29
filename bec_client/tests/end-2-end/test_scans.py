@@ -2,7 +2,6 @@ import _thread
 import threading
 import time
 
-import h5py
 import numpy as np
 import pytest
 from bec_client import BECClient
