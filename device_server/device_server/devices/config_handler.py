@@ -83,6 +83,11 @@ class ConfigHandler:
                 self.update_device_enabled_set_in_db(device_name=dev)
                 updated = True
 
+            if "userParameter" in dev_config:
+                device.config["userParameter"] = dev_config["userParameter"]
+                self.update_user_parameter_in_db(device_name=dev)
+                updated = True
+
         # send updates to services
         if updated:
             self.send_config(msg)
@@ -137,6 +142,23 @@ class ConfigHandler:
         success = self.device_manager.scibec.patch_device_config(
             self.device_manager.devices[device_name].config["id"],
             {"deviceConfig": self.device_manager.devices[device_name].config["deviceConfig"]},
+        )
+        if not success:
+            raise DeviceConfigError("Error during database update.")
+
+    def update_user_parameter_in_db(self, device_name: str) -> None:
+        """Update user parameter in the DB with the local version
+
+        Args:
+            device_name (str): Name of the device that should be updated
+
+        Raises:
+            DeviceConfigError: Raised if the db update fails.
+        """
+        logger.debug("updating in DB")
+        success = self.device_manager.scibec.patch_device_config(
+            self.device_manager.devices[device_name].config["id"],
+            {"userParameter": self.device_manager.devices[device_name].config["userParameter"]},
         )
         if not success:
             raise DeviceConfigError("Error during database update.")

@@ -100,6 +100,16 @@ class Device:
             self._signals = msgpack.loads(val)["content"]["signals"]
         return self._signals
 
+    @property
+    def user_parameter(self) -> dict:
+        """get the user parameter for this device"""
+        return self.config.get("userParameter")
+
+    @user_parameter.setter
+    def user_parameter(self, val: dict):
+        self.config["userParameter"] = val
+        self.parent.send_config_request(action="update", config={self.name: {"userParameter": val}})
+
     def __repr__(self):
         config = "".join(
             [f"\t{key}: {val}\n" for key, val in self.config.get("deviceConfig").items()]
