@@ -99,7 +99,7 @@ class Device:
     @property
     def user_parameter(self) -> dict:
         """get the user parameter for this device"""
-        return self.config["userParameter"]
+        return self.config.get("userParameter")
 
     def set_user_parameter(self, val: dict):
         self.parent.send_config_request(action="update", config={self.name: {"userParameter": val}})
