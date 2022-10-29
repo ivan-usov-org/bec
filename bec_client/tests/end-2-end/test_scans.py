@@ -2,6 +2,7 @@ import _thread
 import threading
 import time
 
+import h5py
 import numpy as np
 import pytest
 from bec_client import BECClient
@@ -457,7 +458,19 @@ def test_file_writer(client):
     scans = bec.scans
     dev = bec.device_manager.devices
 
-    scan = scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.01, relative=True)
+    scan = scans.grid_scan(
+        dev.samx,
+        -5,
+        5,
+        10,
+        dev.samy,
+        -5,
+        5,
+        10,
+        exp_time=0.01,
+        relative=True,
+        md={"datasetID": 325},
+    )
     assert len(scan.scan.data) == 100
     msg = bec.device_manager.producer.get(MessageEndpoints.public_file(scan.scan.scanID))
     while True:
@@ -467,3 +480,14 @@ def test_file_writer(client):
 
     file_msg = BECMessage.FileMessage.loads(msg)
     assert file_msg.content["successful"]
+
+    # currently not working due to access restrictions in docker:
+
+    # with h5py.File(file_msg.content["file_path"], "r") as file:
+    #     assert file["entry"]["collection"]["bec"]["metadata"]["datasetID"][()] == 325
+
+    #     file_data = file["entry"]["collection"]["bec"]["samx"][()]
+    #     stream_data = [
+    #         msg.content["data"]["samx"]["samx"]["value"] for msg in scan.scan.data.values()
+    #     ]
+    #     assert all(file_data == stream_data)

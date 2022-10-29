@@ -25,6 +25,7 @@ class FileWriter(abc.ABC):
             for dev in data.scan_segments[point]:
                 if dev not in device_storage:
                     device_storage[dev] = [data.scan_segments[point][dev][dev]["value"]]
+                    continue
                 device_storage[dev].append(data.scan_segments[point][dev][dev]["value"])
         for dev_name, value in data.baseline.items():
             device_storage[dev_name] = value[dev_name]["value"]
