@@ -26,17 +26,18 @@ logger = bec_logger.logger
 
 
 class BECClient(BECService):
-    def __init__(self, bootstrap_server: list, connector_cls: ConnectorBase, scibec_url: str):
-        """bec Client
+    def __init__(self) -> None:
+        pass
 
-        Args:
-            bootstrap_server (list): bootstrap server adress
-            Connector (ConnectorBase): connector class
+    def __new__(cls):
+        if not hasattr(cls, "_client"):
+            cls._client = super(BECClient, cls).__new__(cls)
+            cls._initialized = False
+        return cls._client
 
-        Returns:
-            _type_: _description_
-        """
+    def initialize(self, bootstrap_server: list, connector_cls: ConnectorBase, scibec_url: str):
         super().__init__(bootstrap_server, connector_cls)
+        # pylint: disable=attribute-defined-outside-init
         self.device_manager = None
         self.scibec_url = scibec_url
         self._sighandler = SigintHandler(self)
@@ -48,9 +49,13 @@ class BECClient(BECService):
         self._exit_handler_thread = None
         self._hli_funcs = {}
         self._scripts = {}
+        self._initialized = True
 
     def start(self):
         """start the client"""
+        if not self._initialized:
+            raise RuntimeError("Client has not been initialized yet.")
+
         logger.info("Starting new client")
         self._start_device_manager()
         self._start_exit_handler()

@@ -8,7 +8,7 @@ from bec_client.prettytable import PrettyTable
 from bec_client.progressbar import ScanProgressBar
 from bec_utils import BECMessage, bec_logger
 
-from .utils import LiveUpdatesBase, ScanRequestMixin, check_alarms
+from .utils import LiveUpdatesBase, check_alarms
 
 if TYPE_CHECKING:
     from bec_client.bec_client import BECClient

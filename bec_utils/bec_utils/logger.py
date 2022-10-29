@@ -30,6 +30,8 @@ class BECLogger:
     LOGLEVEL = LogLevel
 
     def __init__(self) -> None:
+        if hasattr(self, "_configured"):
+            return
         self.bootstrap_server = None
         self.connector = None
         self.service_name = None
@@ -38,6 +40,12 @@ class BECLogger:
         self._log_level = LogLevel.INFO
         self.level = self._log_level
         self._configured = False
+
+    def __new__(cls):
+        if not hasattr(cls, "_logger"):
+            cls._logger = super(BECLogger, cls).__new__(cls)
+            cls._initialized = False
+        return cls._logger
 
     def configure(
         self, bootstrap_server: list, connector_cls: ConnectorBase, service_name: str
