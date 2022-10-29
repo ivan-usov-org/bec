@@ -27,7 +27,8 @@ CONFIG_PATH = "../test_config.yaml"
 @pytest.fixture(scope="session", autouse=True)
 def client():
     config = ServiceConfig(CONFIG_PATH)
-    bec = BECClient(
+    bec = BECClient()
+    bec.initialize(
         [config.redis],
         RedisConnector,
         config.scibec,
