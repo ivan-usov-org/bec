@@ -440,6 +440,10 @@ class RequestBlock:
             self.scan_motors = self.scan.scan_motors
 
     @property
+    def metadata(self):
+        return self.msg.metadata
+
+    @property
     def scan_number(self):
         """get the predicted scan number"""
         if not self.is_scan:

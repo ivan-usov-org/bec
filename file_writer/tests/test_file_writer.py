@@ -6,6 +6,7 @@ import h5py
 import numpy as np
 from file_writer import NexusFileWriter, NeXusFileXMLWriter
 from file_writer.file_writer import HDF5Storage, cSAXS_NeXus_format
+from file_writer.file_writer_manager import ScanStorage
 
 dir_path = os.path.dirname(file_writer.__file__)
 
@@ -36,7 +37,7 @@ def test_nexus_file_writer():
     with mock.patch.object(
         file_writer, "_create_device_data_storage", return_value={"samx": [0, 1, 2]}
     ):
-        file_writer.write("./test.h5", {})
+        file_writer.write("./test.h5", ScanStorage("2", "scanID-string"))
     with h5py.File("./test.h5", "r") as test_file:
         assert list(test_file) == ["entry"]
         assert list(test_file["entry"]) == ["collection", "control", "instrument", "sample"]
@@ -44,3 +45,16 @@ def test_nexus_file_writer():
         assert test_file["entry"]["sample"].attrs["NX_class"] == "NXsample"
         assert test_file["entry"]["sample"]["x_translation"].attrs["units"] == "mm"
         assert all(np.asarray(test_file["entry"]["sample"]["x_translation"]) == [0, 1, 2])
+
+
+def test_create_device_data_storage():
+    file_writer = NexusFileWriter()
+    storage = ScanStorage("2", "scanID-string")
+    storage.num_points = 2
+    storage.scan_segments = {
+        0: {"samx": {"samx": {"value": 0.1}}, "samy": {"samy": {"value": 1.1}}},
+        1: {"samx": {"samx": {"value": 0.2}}, "samy": {"samy": {"value": 1.2}}},
+    }
+    storage.baseline = {}
+    device_storage = file_writer._create_device_data_storage(storage)
+    assert len(device_storage["samx"]) == 2

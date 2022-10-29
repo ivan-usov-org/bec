@@ -62,7 +62,8 @@ class DMClientMock(DMClient):
 
 
 def get_bec_client_mock():
-    client = ClientMock([], ConnectorMock, "")
+    client = ClientMock()
+    client.initialize([], ConnectorMock, "")
     device_manager = DMClientMock(client, "")
     with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
         device_manager._session = create_session_from_config(yaml.safe_load(f))

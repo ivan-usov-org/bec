@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import datetime
 import time
 from math import inf
@@ -7,6 +8,7 @@ from math import inf
 from bec_utils import BECMessage, MessageEndpoints, bec_errors, bec_logger
 from bec_utils import timeout as bec_timeout
 
+from bec_client.callbacks.live_table import LiveUpdatesTable
 from bec_client.queue_items import QueueStorage
 from bec_client.request_items import RequestStorage
 from bec_client.scan_items import ScanStorage
@@ -89,6 +91,12 @@ class ScanReport:
                 time.sleep(sleep_time)
 
         _wait()
+
+    async def _run_subscription(self):
+        await LiveUpdatesTable(self._client, self.request.request).run()
+
+    def subscribe(self):
+        asyncio.run(self._run_subscription())
 
     def __repr__(self) -> str:
         separator = "--" * 10

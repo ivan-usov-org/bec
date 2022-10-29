@@ -320,8 +320,10 @@ class ScanWorker(threading.Thread):
                     self.device_manager.devices[dev]
                     for dev in instr.content["parameter"].get("primary")
                 ]
+        metadata = self.current_instruction_queue_item.active_request_block.metadata
 
         self.current_scan_info = {**instr.metadata, **instr.content["parameter"]}
+        self.current_scan_info.update(metadata)
         self.current_scan_info.update({"scan_number": self.parent.scan_number})
         self._send_scan_status("open")
 
@@ -329,7 +331,10 @@ class ScanWorker(threading.Thread):
         scan_id = instr.metadata.get("scanID")
         if self.scan_id == scan_id:
             self.scan_id = None
-            self.current_scan_info["points"] = max_point_id
+
+            # flyers do not increase the point_id but instead set the num_points directly
+            if self.current_scan_info.get("scan_type") != "fly":
+                self.current_scan_info["num_points"] = max_point_id + 1  # point_id starts at 0
             self._send_scan_status("closed")
 
     def _stage_devices(self, instr: DeviceMsg) -> None:
