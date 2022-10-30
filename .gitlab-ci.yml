@@ -109,6 +109,7 @@ pages:
   stage: Deploy
   script:
   - pip install -U sphinx
+  - pip install sphinx-rtd-theme
   - sphinx-build -b html ./docs/source public
   artifacts:
     paths:
