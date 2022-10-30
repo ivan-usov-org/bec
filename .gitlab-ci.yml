@@ -13,6 +13,7 @@ services:
 stages:
   - Formatter
   - Test
+  - Deploy
 formatter:
   stage: Formatter
   script:
@@ -103,3 +104,15 @@ end-2-end:
     - docker cp scan_bundler:/code/bec/scan_bundler/ScanBundler.log $CI_PROJECT_DIR/ScanBundler.log
     - docker cp device_server:/code/bec/device_server/DeviceServer.log $CI_PROJECT_DIR/DeviceServer.log
     - docker cp end2end_client:/code/bec/bec_client/BKClient.log $CI_PROJECT_DIR/BKClient.log
+
+pages:
+  stage: Deploy
+  script:
+  - pip install -U sphinx
+  - sphinx-build -b html ./docs/source public
+  artifacts:
+    paths:
+    - public
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+
