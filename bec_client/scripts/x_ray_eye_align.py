@@ -1,7 +1,9 @@
 import time
 from collections import defaultdict
+from http import client
 
 import epics
+import numpy as np
 
 
 def epics_put(channel, value):
@@ -286,6 +288,231 @@ class XrayEyeAlign:
                     f"Writing to file new alignment: number {k}, value x {fovx_offset}, y {fovy_offset}"
                 )
                 alignment_values_file.write(f"{(k-2)*45}\t{fovx_offset}\t{fovy_offset}\n")
+
+    def read_alignment_parameters(self):
+        tomo_fit_xray_eye = np.zeros((2, 3))
+        with open("ptychotomoalign_Ax.txt", "r") as file:
+            tomo_fit_xray_eye[0][0] = file.readline()
+
+        with open("ptychotomoalign_Bx.txt", "r") as file:
+            tomo_fit_xray_eye[0][1] = file.readline()
+
+        with open("ptychotomoalign_Cx.txt", "r") as file:
+            tomo_fit_xray_eye[0][2] = file.readline()
+
+        with open("ptychotomoalign_Ay.txt", "r") as file:
+            tomo_fit_xray_eye[1][0] = file.readline()
+
+        with open("ptychotomoalign_By.txt", "r") as file:
+            tomo_fit_xray_eye[1][1] = file.readline()
+
+        with open("ptychotomoalign_Cy.txt", "r") as file:
+            tomo_fit_xray_eye[1][2] = file.readline()
+
+        self.client.set_global_var("tomo_fit_xray_eye", list(tomo_fit_xray_eye))
+        # x amp, phase, offset, y amp, phase, offset
+        #  0 0    0 1    0 2     1 0    1 1    1 2
+
+        print("New alignment parameters loaded from X-ray eye\n")
+        print(
+            f"X Amplitude {tomo_fit_xray_eye[0][0]},"
+            f"X Phase {tomo_fit_xray_eye[0][1]}, "
+            f"X Offset {tomo_fit_xray_eye[0][2]},"
+            f"Y Amplitude {tomo_fit_xray_eye[1][0]},"
+            f"Y Phase {tomo_fit_xray_eye[1][1]},"
+            f"Y Offset {tomo_fit_xray_eye[1][2]}"
+        )
+
+
+class LamNI:
+    def __init__(self, client):
+        self.client = client
+        self.align = XrayEyeAlign(client)
+        self.corr_pos_x = []
+        self.corr_pos_y = []
+        self.corr_angle = []
+
+    @property
+    def tomo_fovx_offset(self):
+        val = self.client.get_global_var("tomo_fovx_offset")
+        if val is None:
+            return 0.0
+        return val
+
+    @tomo_fovx_offset.setter
+    def tomo_fovx_offset(self, val: float):
+        self.client.set_global_var("tomo_fovx_offset", val)
+
+    @property
+    def tomo_fovy_offset(self):
+        val = self.client.get_global_var("tomo_fovy_offset")
+        if val is None:
+            return 0.0
+        return val
+
+    @tomo_fovy_offset.setter
+    def tomo_fovy_offset(self, val: float):
+        self.client.set_global_var("tomo_fovy_offset", val)
+
+    @property
+    def tomo_shellstep(self):
+        val = self.client.get_global_var("tomo_shellstep")
+        if val is None:
+            return 0.0
+        return val
+
+    @tomo_shellstep.setter
+    def tomo_shellstep(self, val: float):
+        self.client.set_global_var("tomo_shellstep", val)
+
+    @property
+    def tomo_circfov(self):
+        val = self.client.get_global_var("tomo_circfov")
+        if val is None:
+            return 0.0
+        return val
+
+    @tomo_circfov.setter
+    def tomo_circfov(self, val: float):
+        self.client.set_global_var("tomo_circfov", val)
+
+    @property
+    def tomo_countingtime(self):
+        val = self.client.get_global_var("tomo_countingtime")
+        if val is None:
+            return 0.0
+        return val
+
+    @tomo_countingtime.setter
+    def tomo_countingtime(self, val: float):
+        self.client.set_global_var("tomo_countingtime", val)
+
+    @property
+    def manual_shift_x(self):
+        val = self.client.get_global_var("manual_shift_x")
+        if val is None:
+            return 0.0
+        return val
+
+    @manual_shift_x.setter
+    def manual_shift_x(self, val: float):
+        self.client.set_global_var("manual_shift_x", val)
+
+    @property
+    def manual_shift_y(self):
+        val = self.client.get_global_var("manual_shift_y")
+        if val is None:
+            return 0.0
+        return val
+
+    @manual_shift_y.setter
+    def manual_shift_y(self, val: float):
+        self.client.set_global_var("manual_shift_y", val)
+
+    @property
+    def lamni_piezo_range(self):
+        val = self.client.get_global_var("lamni_piezo_range")
+        if val is None:
+            return 0.0
+        return val
+
+    @lamni_piezo_range.setter
+    def lamni_piezo_range(self, val: float):
+        self.client.set_global_var("lamni_piezo_range", val)
+
+    def tomo_scan_projection(self, angle: float):
+        additional_correction = self.compute_additional_correction(angle)
+        correction_xeye_mu = self.lamni_compute_additional_correction_xeye_mu(angle)
+        print(
+            f"lamni_scan {self.tomo_shellstep} {self.tomo_countingtime} 0 0 "
+            f"{self.tomo_fovx_offset} {self.tomo_fovy_offset} "
+            f"{self.manual_shift_x+correction_xeye_mu[0]-additional_correction[0]} "
+            f"{self.manual_shift_y+correction_xeye_mu[1]-additional_correction[1]} "
+            f"{self.tomo_circfov} {angle}"
+        )
+
+    def lamni_compute_additional_correction_xeye_mu(self, angle):
+        import math
+
+        tomo_fit_xray_eye = self.client.get_global_var("tomo_fit_xray_eye")
+        # x amp, phase, offset, y amp, phase, offset
+        #  0 0    0 1    0 2     1 0    1 1    1 2
+        correction_x = (
+            tomo_fit_xray_eye[0][0] * math.sin(math.radians(angle) + tomo_fit_xray_eye[0][1])
+            + tomo_fit_xray_eye[0][2]
+        )
+        correction_y = (
+            tomo_fit_xray_eye[1][0] * math.sin(math.radians(angle) + tomo_fit_xray_eye[1][1])
+            + tomo_fit_xray_eye[1][2]
+        )
+
+        print(f"Xeye correction x {correction_x}, y {correction_y} for angle {angle}\n")
+        return (correction_x, correction_y)
+
+    def compute_additional_correction(self, angle):
+        import math
+
+        additional_correction_shift = self.client.get_global_var("additional_correction_shift")
+        # [0][] x , [1][] y, [2][] angle, [3][0] number of elements
+
+        if additional_correction_shift is None:
+            print("Not applying any additional correction. No data available.\n")
+            return (0, 0)
+
+        # find index of closest angle
+        for j in range(0, additional_correction_shift[3][0]):
+            newangledelta = math.fabs(additional_correction_shift[2][j] - angle)
+            if j == 0:
+                angledelta = newangledelta
+                additional_correction_shift_x = additional_correction_shift[0][j]
+                additional_correction_shift_y = additional_correction_shift[1][j]
+            if newangledelta < angledelta:
+                additional_correction_shift_x = additional_correction_shift[0][j]
+                additional_correction_shift_y = additional_correction_shift[1][j]
+                angledelta = newangledelta
+
+        if additional_correction_shift_x == 0 and angle < additional_correction_shift[2][0]:
+            additional_correction_shift_x = additional_correction_shift[0][0]
+            additional_correction_shift_y = additional_correction_shift[1][0]
+
+        if (
+            additional_correction_shift_x == 0
+            and angle > additional_correction_shift[2][additional_correction_shift[3][0] - 1]
+        ):
+            additional_correction_shift_x = additional_correction_shift[0][
+                additional_correction_shift[3][0] - 1
+            ]
+            additional_correction_shift_y = additional_correction_shift[1][
+                additional_correction_shift[3][0] - 1
+            ]
+
+        return (additional_correction_shift_x, additional_correction_shift_y)
+
+    def lamni_read_additional_correction(self, correction_file: str):
+        # "additional_correction_shift"
+        # [0][] x , [1][] y, [2][] angle, [3][0] number of elements
+
+        with open(correction_file, "r") as f:
+            num_elements = f.readline()
+            int_num_elements = int(num_elements.split(" ")[2])
+            print(int_num_elements)
+            corr_pos_x = []
+            corr_pos_y = []
+            corr_angle = []
+            for j in range(0, int_num_elements * 3):
+                line = f.readline()
+                value = line.split(" ")[2]
+                name = line.split(" ")[0].split("[")[0]
+                if name == "corr_pos_x":
+                    corr_pos_x.append(value)
+                elif name == "corr_pos_y":
+                    corr_pos_y.append(value)
+                elif name == "corr_angle":
+                    corr_angle.append(value)
+        self.corr_pos_x = corr_pos_x
+        self.corr_pos_y = corr_pos_y
+        self.corr_angle = corr_angle
+        return
 
 
 # # ----------------------------------------------------------------------
