@@ -348,6 +348,12 @@ class ScanBundler(BECService):
                         logger.info(f"Sending baseline readings for scanID {scanID}.")
                         logger.debug("Baseline: ", self.sync_storage[scanID]["baseline"])
                         self._send_baseline(scanID=scanID)
+                        self.baseline_devices[scanID]["done"] = {
+                            dev.name: False
+                            for dev in self.device_manager.devices.baseline_devices(
+                                self.scan_motors[scanID]
+                            )
+                        }
 
     def _prepare_bluesky_event_data(self, scanID, pointID) -> dict:
         # event = {

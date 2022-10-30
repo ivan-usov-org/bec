@@ -443,6 +443,8 @@ class ScanWorker(threading.Thread):
             self._open_scan(instr)
         elif action == "close_scan" and scan_def_id is None:
             self._close_scan(instr, self.max_point_id)
+        elif action == "open_scan_def":
+            pass
         elif action == "close_scan_def":
             self._close_scan(instr, self.max_point_id)
         elif action == "wait":
