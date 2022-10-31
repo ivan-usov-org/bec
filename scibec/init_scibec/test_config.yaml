@@ -3143,140 +3143,86 @@ ring_current_sim:
 
 
 ############################################################
-###################### SLS status PVs ######################
+##################### Disabled devices #####################
 ############################################################
 
-current_deadband:
+motor1_disabled:
   acquisitionConfig:
-    acquisitionGroup: status
+    acquisitionGroup: userMotor
     schedule: sync
-  deviceClass: EpicsSignalRO
+  deviceClass: SynAxisOPAAS
   deviceConfig:
-    auto_monitor: true
-    name: current_deadband
-    read_pv: ALIRF-GUN:CUR-DBAND
-  deviceGroup: SLS status
+    delay: 1
+    labels: motor1_disabled
+    limits:
+    - -50
+    - 50
+    name: motor1_disabled
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: user motors
+  status:
+    enabled: false
+    enabled_set: true
+motor1_disabled_set:
+  acquisitionConfig:
+    acquisitionGroup: userMotor
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: motor1_disabled_set
+    limits:
+    - -50
+    - 50
+    name: motor1_disabled_set
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: user motors
   status:
     enabled: true
     enabled_set: false
-fast_orbit_feedback:
+motor2_disabled:
   acquisitionConfig:
-    acquisitionGroup: status
+    acquisitionGroup: userMotor
     schedule: sync
-  deviceClass: EpicsSignalRO
+  deviceClass: SynAxisOPAAS
   deviceConfig:
-    auto_monitor: true
-    name: fast_orbit_feedback
-    read_pv: ARIDI-BPM:FOFBSTATUS-G
-  deviceGroup: SLS status
+    delay: 1
+    labels: motor2_disabled
+    limits:
+    - -50
+    - 50
+    name: motor2_disabled
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: user motors
   status:
-    enabled: true
-    enabled_set: false
-orbit_feedback_mode:
+    enabled: false
+    enabled_set: true
+motor2_disabled_set:
   acquisitionConfig:
-    acquisitionGroup: status
+    acquisitionGroup: userMotor
     schedule: sync
-  deviceClass: EpicsSignalRO
+  deviceClass: SynAxisOPAAS
   deviceConfig:
-    auto_monitor: true
-    name: orbit_feedback_mode
-    read_pv: ARIDI-BPM:OFB-MODE
-  deviceGroup: SLS status
-  status:
-    enabled: true
-    enabled_set: false
-ring_current:
-  acquisitionConfig:
-    acquisitionGroup: status
-    schedule: sync
-  deviceClass: EpicsSignalRO
-  deviceConfig:
-    auto_monitor: true
-    name: ring_current
-    read_pv: ARIDI-PCT:CURRENT
-  deviceGroup: SLS status
-  status:
-    enabled: true
-    enabled_set: false
-sls_crane_usage:
-  acquisitionConfig:
-    acquisitionGroup: status
-    schedule: sync
-  deviceClass: EpicsSignalRO
-  deviceConfig:
-    auto_monitor: true
-    name: sls_crane_usage
-    read_pv: IBWKR-0101-QH10003:D01_H_D-WA
-  deviceGroup: SLS status
-  status:
-    enabled: true
-    enabled_set: false
-sls_current_threshold:
-  acquisitionConfig:
-    acquisitionGroup: status
-    schedule: sync
-  deviceClass: EpicsSignalRO
-  deviceConfig:
-    auto_monitor: true
-    name: sls_current_threshold
-    read_pv: ALIRF-GUN:CUR-LOWLIM
-  deviceGroup: SLS status
-  status:
-    enabled: true
-    enabled_set: false
-sls_filling_lifetime:
-  acquisitionConfig:
-    acquisitionGroup: status
-    schedule: sync
-  deviceClass: EpicsSignalRO
-  deviceConfig:
-    auto_monitor: true
-    name: sls_filling_lifetime
-    read_pv: ARIDI-PCT:TAU-HOUR
-  deviceGroup: SLS status
-  status:
-    enabled: true
-    enabled_set: false
-sls_filling_pattern:
-  acquisitionConfig:
-    acquisitionGroup: status
-    schedule: sync
-  deviceClass: EpicsSignalRO
-  deviceConfig:
-    auto_monitor: true
-    name: sls_filling_pattern
-    read_pv: ACORF-FILL:PAT-SELECT
-  deviceGroup: SLS status
-  status:
-    enabled: true
-    enabled_set: false
-sls_injection_mode:
-  acquisitionConfig:
-    acquisitionGroup: status
-    schedule: sync
-  deviceClass: EpicsSignalRO
-  deviceConfig:
-    auto_monitor: true
-    name: sls_injection_mode
-    read_pv: ALIRF-GUN:INJ-MODE
-  deviceGroup: SLS status
-  status:
-    enabled: true
-    enabled_set: false
-sls_machine_status:
-  acquisitionConfig:
-    acquisitionGroup: status
-    schedule: sync
-  deviceClass: EpicsSignalRO
-  deviceConfig:
-    auto_monitor: true
-    name: sls_machine_status
-    read_pv: ACOAU-ACCU:OP-MODE
-  deviceGroup: SLS status
+    delay: 1
+    labels: motor2_disabled_set
+    limits:
+    - -50
+    - 50
+    name: motor2_disabled_set
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceGroup: user motors
   status:
     enabled: true
     enabled_set: false
 
 
-################# SLS status PVs end here ##################
+################ Disabled devices end here #################
 
