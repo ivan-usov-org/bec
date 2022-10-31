@@ -473,45 +473,35 @@ class LamNI:
     def compute_additional_correction(self, angle):
         import math
 
-        additional_correction_shift = self.client.get_global_var("additional_correction_shift")
-        # [0][] x , [1][] y, [2][] angle, [3][0] number of elements
-
-        if additional_correction_shift is None:
+        if not self.corr_pos_x:
             print("Not applying any additional correction. No data available.\n")
             return (0, 0)
 
         # find index of closest angle
-        for j in range(0, additional_correction_shift[3][0]):
-            newangledelta = math.fabs(additional_correction_shift[2][j] - angle)
+        for j in range(len(self.corr_pos_x)):
+            newangledelta = math.fabs(self.corr_angle[j] - angle)
             if j == 0:
                 angledelta = newangledelta
-                additional_correction_shift_x = additional_correction_shift[0][j]
-                additional_correction_shift_y = additional_correction_shift[1][j]
+                additional_correction_shift_x = self.corr_pos_x[j]
+                additional_correction_shift_y = self.corr_pos_y[j]
+                continue
+
             if newangledelta < angledelta:
-                additional_correction_shift_x = additional_correction_shift[0][j]
-                additional_correction_shift_y = additional_correction_shift[1][j]
+                additional_correction_shift_x = self.corr_pos_x[j]
+                additional_correction_shift_y = self.corr_pos_y[j]
                 angledelta = newangledelta
 
-        if additional_correction_shift_x == 0 and angle < additional_correction_shift[2][0]:
-            additional_correction_shift_x = additional_correction_shift[0][0]
-            additional_correction_shift_y = additional_correction_shift[1][0]
+        if additional_correction_shift_x == 0 and angle < self.corr_angle[0]:
+            additional_correction_shift_x = self.corr_pos_x[0]
+            additional_correction_shift_y = self.corr_pos_y[0]
 
-        if (
-            additional_correction_shift_x == 0
-            and angle > additional_correction_shift[2][additional_correction_shift[3][0] - 1]
-        ):
-            additional_correction_shift_x = additional_correction_shift[0][
-                additional_correction_shift[3][0] - 1
-            ]
-            additional_correction_shift_y = additional_correction_shift[1][
-                additional_correction_shift[3][0] - 1
-            ]
+        if additional_correction_shift_x == 0 and angle > self.corr_angle[-1]:
+            additional_correction_shift_x = self.corr_pos_x[-1]
+            additional_correction_shift_y = self.corr_pos_y[-1]
 
         return (additional_correction_shift_x, additional_correction_shift_y)
 
     def lamni_read_additional_correction(self, correction_file: str):
-        # "additional_correction_shift"
-        # [0][] x , [1][] y, [2][] angle, [3][0] number of elements
 
         with open(correction_file, "r") as f:
             num_elements = f.readline()
@@ -534,6 +524,40 @@ class LamNI:
         self.corr_pos_y = corr_pos_y
         self.corr_angle = corr_angle
         return
+
+    def sub_tomo_scan(self, subtomo_number, start_angle=None, tomo_stepsize=10.0):
+
+        if start_angle is None:
+            if subtomo_number == 1:
+                start_angle = 0
+            elif subtomo_number == 2:
+                start_angle = tomo_stepsize / 8.0 * 4
+            elif subtomo_number == 3:
+                start_angle = tomo_stepsize / 8.0 * 2
+            elif subtomo_number == 4:
+                start_angle = tomo_stepsize / 8.0 * 6
+            elif subtomo_number == 5:
+                start_angle = tomo_stepsize / 8.0 * 1
+            elif subtomo_number == 6:
+                start_angle = tomo_stepsize / 8.0 * 5
+            elif subtomo_number == 7:
+                start_angle = tomo_stepsize / 8.0 * 3
+            elif subtomo_number == 8:
+                start_angle = tomo_stepsize / 8.0 * 7
+
+        # _tomo_shift_angles (potential global variable)
+        _tomo_shift_angles = 0
+        angle_end = start_angle + 360
+        for angle in np.linspace(
+            start_angle + _tomo_shift_angles, angle_end, num=360 / tomo_stepsize + 1, endpoint=True
+        ):
+            if 0 <= angle < 360.05:
+                print(f"Starting LamNI scan for angle {angle}")
+                self.tomo_scan_projection(angle)
+
+    def tomo_scan(self):
+        for ii in range(8):
+            self.sub_tomo_scan(ii + 1)
 
 
 # # ----------------------------------------------------------------------
