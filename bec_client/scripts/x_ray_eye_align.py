@@ -337,7 +337,7 @@ class LamNI:
         val = self.client.get_global_var("tomo_fov_offset")
         if val is None:
             return 0.0
-        return val[0]
+        return val[0]/1000
 
     @tomo_fovx_offset.setter
     def tomo_fovx_offset(self, val: float):
@@ -348,7 +348,7 @@ class LamNI:
         val = self.client.get_global_var("tomo_fov_offset")
         if val is None:
             return 0.0
-        return val[1]
+        return val[1]/1000
 
     @tomo_fovy_offset.setter
     def tomo_fovy_offset(self, val: float):
