@@ -32,7 +32,7 @@ class ScanServer(BECService):
         self._start_scan_assembler()
         self._start_scan_server()
         self._start_alarm_handler()
-        self.scan_number = 0
+        self.scan_number = 1
         self.status = BECStatus.RUNNING
 
     def _start_device_manager(self):
