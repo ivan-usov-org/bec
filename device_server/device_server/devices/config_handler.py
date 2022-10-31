@@ -1,19 +1,19 @@
+from __future__ import annotations
+
 import traceback
+from typing import TYPE_CHECKING
 
 from bec_utils import BECMessage as BMessage
-from bec_utils import (
-    BECStatus,
-    DeviceConfigError,
-    DeviceManagerBase,
-    MessageEndpoints,
-    bec_logger,
-)
+from bec_utils import BECStatus, DeviceConfigError, MessageEndpoints, bec_logger
+
+if TYPE_CHECKING:
+    from devicemanager import DeviceManagerDS
 
 logger = bec_logger.logger
 
 
 class ConfigHandler:
-    def __init__(self, device_manager: DeviceManagerBase) -> None:
+    def __init__(self, device_manager: DeviceManagerDS) -> None:
         self.device_manager = device_manager
 
     def send_config(self, msg: BMessage.DeviceConfigMessage) -> None:
@@ -74,6 +74,16 @@ class ConfigHandler:
 
             if "enabled" in dev_config:
                 device.config["enabled"] = dev_config["enabled"]
+
+                if device.enabled:
+                    # pylint:disable=protected-access
+                    if device.obj._destroyed:
+                        self.device_manager.initialize_device(device.config)
+                    else:
+                        self.device_manager.initialize_enabled_device(device)
+                else:
+                    self.device_manager.disconnect_device(device.obj)
+
                 # update device enabled status in DB
                 self.update_device_enabled_in_db(device_name=dev)
                 updated = True
