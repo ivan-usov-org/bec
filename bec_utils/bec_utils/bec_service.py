@@ -141,9 +141,9 @@ class BECService:
         """
         self.producer.delete(MessageEndpoints.global_vars(name) + ":val")
 
-    @property
-    def global_vars(self):
+    def global_vars(self) -> str:
         """Get all available global variables"""
+        # sadly, this cannot be a property as it causes side effects with IPython's tab completion
         available_keys = self.producer.keys(MessageEndpoints.global_vars("*"))
 
         def get_endpoint_from_topic(topic: str) -> str:
@@ -157,8 +157,8 @@ class BECService:
         table.add_column("Content", justify="center")
         for endpoint in endpoints:
             var = str(self.get_global_var(endpoint))
-            if len(var) > 20:
-                var = var[0:10] + "..., " + var[-10:]
+            if len(var) > 40:
+                var = var[0:20] + "..., " + var[-20:]
             table.add_row(endpoint, var)
         console.print(table)
 
