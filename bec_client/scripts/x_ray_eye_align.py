@@ -309,7 +309,7 @@ class XrayEyeAlign:
         with open("ptychotomoalign_Cy.txt", "r") as file:
             tomo_fit_xray_eye[1][2] = file.readline()
 
-        self.client.set_global_var("tomo_fit_xray_eye", list(tomo_fit_xray_eye))
+        self.client.set_global_var("tomo_fit_xray_eye", tomo_fit_xray_eye.tolist())
         # x amp, phase, offset, y amp, phase, offset
         #  0 0    0 1    0 2     1 0    1 1    1 2
 
@@ -334,25 +334,25 @@ class LamNI:
 
     @property
     def tomo_fovx_offset(self):
-        val = self.client.get_global_var("tomo_fovx_offset")
+        val = self.client.get_global_var("tomo_fov_offset")
         if val is None:
             return 0.0
-        return val
+        return val[0]
 
     @tomo_fovx_offset.setter
     def tomo_fovx_offset(self, val: float):
-        self.client.set_global_var("tomo_fovx_offset", val)
+        self.client.set_global_var("tomo_fov_offset", val)
 
     @property
     def tomo_fovy_offset(self):
-        val = self.client.get_global_var("tomo_fovy_offset")
+        val = self.client.get_global_var("tomo_fov_offset")
         if val is None:
             return 0.0
-        return val
+        return val[1]
 
     @tomo_fovy_offset.setter
     def tomo_fovy_offset(self, val: float):
-        self.client.set_global_var("tomo_fovy_offset", val)
+        self.client.set_global_var("tomo_fov_offset", val)
 
     @property
     def tomo_shellstep(self):
@@ -424,7 +424,7 @@ class LamNI:
         additional_correction = self.compute_additional_correction(angle)
         correction_xeye_mu = self.lamni_compute_additional_correction_xeye_mu(angle)
         print(
-            f"scans.lamni_fermat_scan(step={self.tomo_shellstep}, stitch_x={0}, stitch_y={0}, stitch_overlap={1},"
+            f"scans.lamni_fermat_scan(fov_size=[20,20], step={self.tomo_shellstep}, stitch_x={0}, stitch_y={0}, stitch_overlap={1},"
             f"center_x={self.tomo_fovx_offset}, center_y={self.tomo_fovy_offset}, "
             f"shift_x={self.manual_shift_x+correction_xeye_mu[0]-additional_correction[0]}, "
             f"shift_y={self.manual_shift_y+correction_xeye_mu[1]-additional_correction[1]}, "
@@ -444,11 +444,11 @@ class LamNI:
         correction_x = (
             tomo_fit_xray_eye[0][0] * math.sin(math.radians(angle) + tomo_fit_xray_eye[0][1])
             + tomo_fit_xray_eye[0][2]
-        )
+        )/1000
         correction_y = (
             tomo_fit_xray_eye[1][0] * math.sin(math.radians(angle) + tomo_fit_xray_eye[1][1])
             + tomo_fit_xray_eye[1][2]
-        )
+        )/1000
 
         print(f"Xeye correction x {correction_x}, y {correction_y} for angle {angle}\n")
         return (correction_x, correction_y)
