@@ -358,7 +358,7 @@ class LamNI:
     def tomo_shellstep(self):
         val = self.client.get_global_var("tomo_shellstep")
         if val is None:
-            return 0.0
+            return 1
         return val
 
     @tomo_shellstep.setter
@@ -435,6 +435,10 @@ class LamNI:
         import math
 
         tomo_fit_xray_eye = self.client.get_global_var("tomo_fit_xray_eye")
+        if tomo_fit_xray_eye is None:
+            print("Not applying any additional correction. No x-ray eye data available.\n")
+            return (0, 0)
+
         # x amp, phase, offset, y amp, phase, offset
         #  0 0    0 1    0 2     1 0    1 1    1 2
         correction_x = (
