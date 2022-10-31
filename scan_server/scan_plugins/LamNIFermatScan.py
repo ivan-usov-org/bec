@@ -60,8 +60,14 @@ class LamNIMixin:
 
     def lamni_new_scan_center_interferometer(self, x, y):
         """move to new scan center. xy in mm"""
-        lsamx_center = 8.866
-        lsamy_center = 10.18
+        lsamx_user_params = self.device_manager.devices.lsamx.user_parameter
+        if lsamx_user_params is None or lsamx_user_params.get("center") is None:
+            raise RuntimeError("lsamx center is not defined")
+        lsamy_user_params = self.device_manager.devices.lsamy.user_parameter
+        if lsamy_user_params is None or lsamy_user_params.get("center") is None:
+            raise RuntimeError("lsamy center is not defined")
+        lsamx_center = lsamx_user_params.get("center")
+        lsamy_center = lsamy_user_params.get("center")
 
         # could first check if feedback is enabled
         yield from self.stubs.send_rpc_and_wait("rtx", "controller.feedback_disable")
