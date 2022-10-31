@@ -424,11 +424,11 @@ class LamNI:
         additional_correction = self.compute_additional_correction(angle)
         correction_xeye_mu = self.lamni_compute_additional_correction_xeye_mu(angle)
         print(
-            f"lamni_scan {self.tomo_shellstep} {self.tomo_countingtime} 0 0 "
-            f"{self.tomo_fovx_offset} {self.tomo_fovy_offset} "
-            f"{self.manual_shift_x+correction_xeye_mu[0]-additional_correction[0]} "
-            f"{self.manual_shift_y+correction_xeye_mu[1]-additional_correction[1]} "
-            f"{self.tomo_circfov} {angle}"
+            f"scans.lamni_fermat_scan(step={self.tomo_shellstep}, stitch_x={0}, stitch_y={0}, stitch_overlap={1},"
+            f"center_x={self.tomo_fovx_offset}, center_y={self.tomo_fovy_offset}, "
+            f"shift_x={self.manual_shift_x+correction_xeye_mu[0]-additional_correction[0]}, "
+            f"shift_y={self.manual_shift_y+correction_xeye_mu[1]-additional_correction[1]}, "
+            f"fov_circular={self.tomo_circfov}, angle={angle}, scan_type='fly')"
         )
 
     def lamni_compute_additional_correction_xeye_mu(self, angle):
