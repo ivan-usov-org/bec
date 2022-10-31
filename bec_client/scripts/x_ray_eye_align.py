@@ -297,19 +297,19 @@ class XrayEyeAlign:
         with open(os.path.join(dir_path, "ptychotomoalign_Ax.txt"), "r") as file:
             tomo_fit_xray_eye[0][0] = file.readline()
 
-        with open("ptychotomoalign_Bx.txt", "r") as file:
+        with open(os.path.join(dir_path, "ptychotomoalign_Bx.txt"), "r") as file:
             tomo_fit_xray_eye[0][1] = file.readline()
 
-        with open("ptychotomoalign_Cx.txt", "r") as file:
+        with open(os.path.join(dir_path, "ptychotomoalign_Cx.txt"), "r") as file:
             tomo_fit_xray_eye[0][2] = file.readline()
 
-        with open("ptychotomoalign_Ay.txt", "r") as file:
+        with open(os.path.join(dir_path, "ptychotomoalign_Ay.txt"), "r") as file:
             tomo_fit_xray_eye[1][0] = file.readline()
 
-        with open("ptychotomoalign_By.txt", "r") as file:
+        with open(os.path.join(dir_path, "ptychotomoalign_By.txt"), "r") as file:
             tomo_fit_xray_eye[1][1] = file.readline()
 
-        with open("ptychotomoalign_Cy.txt", "r") as file:
+        with open(os.path.join(dir_path, "ptychotomoalign_Cy.txt"), "r") as file:
             tomo_fit_xray_eye[1][2] = file.readline()
 
         self.client.set_global_var("tomo_fit_xray_eye", tomo_fit_xray_eye.tolist())
