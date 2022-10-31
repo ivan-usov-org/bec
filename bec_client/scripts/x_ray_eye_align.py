@@ -1,9 +1,12 @@
+import os
 import time
 from collections import defaultdict
-from http import client
 
 import epics
 import numpy as np
+from bec_utils import bec_logger
+
+logger = bec_logger.logger
 
 
 def epics_put(channel, value):
@@ -289,9 +292,9 @@ class XrayEyeAlign:
                 )
                 alignment_values_file.write(f"{(k-2)*45}\t{fovx_offset}\t{fovy_offset}\n")
 
-    def read_alignment_parameters(self):
+    def read_alignment_parameters(self, dir_path="~/Data10/specES1/internal/"):
         tomo_fit_xray_eye = np.zeros((2, 3))
-        with open("ptychotomoalign_Ax.txt", "r") as file:
+        with open(os.path.join(dir_path, "ptychotomoalign_Ax.txt"), "r") as file:
             tomo_fit_xray_eye[0][0] = file.readline()
 
         with open("ptychotomoalign_Bx.txt", "r") as file:
@@ -337,7 +340,7 @@ class LamNI:
         val = self.client.get_global_var("tomo_fov_offset")
         if val is None:
             return 0.0
-        return val[0]/1000
+        return val[0] / 1000
 
     @tomo_fovx_offset.setter
     def tomo_fovx_offset(self, val: float):
@@ -348,7 +351,7 @@ class LamNI:
         val = self.client.get_global_var("tomo_fov_offset")
         if val is None:
             return 0.0
-        return val[1]/1000
+        return val[1] / 1000
 
     @tomo_fovy_offset.setter
     def tomo_fovy_offset(self, val: float):
@@ -423,12 +426,26 @@ class LamNI:
     def tomo_scan_projection(self, angle: float):
         additional_correction = self.compute_additional_correction(angle)
         correction_xeye_mu = self.lamni_compute_additional_correction_xeye_mu(angle)
-        print(
+        logger.info(
             f"scans.lamni_fermat_scan(fov_size=[20,20], step={self.tomo_shellstep}, stitch_x={0}, stitch_y={0}, stitch_overlap={1},"
             f"center_x={self.tomo_fovx_offset}, center_y={self.tomo_fovy_offset}, "
             f"shift_x={self.manual_shift_x+correction_xeye_mu[0]-additional_correction[0]}, "
             f"shift_y={self.manual_shift_y+correction_xeye_mu[1]-additional_correction[1]}, "
             f"fov_circular={self.tomo_circfov}, angle={angle}, scan_type='fly')"
+        )
+        return scans.lamni_fermat_scan(
+            fov_size=[20, 20],
+            step=self.tomo_shellstep,
+            stitch_x=0,
+            stitch_y=0,
+            stitch_overlap=1,
+            center_x=self.tomo_fovx_offset,
+            center_y=self.tomo_fovy_offset,
+            shift_x=(self.manual_shift_x + correction_xeye_mu[0] - additional_correction[0]),
+            shift_y=(self.manual_shift_y + correction_xeye_mu[1] - additional_correction[1]),
+            fov_circular=self.tomo_circfov,
+            angle=angle,
+            scan_type="fly",
         )
 
     def lamni_compute_additional_correction_xeye_mu(self, angle):
@@ -444,11 +461,11 @@ class LamNI:
         correction_x = (
             tomo_fit_xray_eye[0][0] * math.sin(math.radians(angle) + tomo_fit_xray_eye[0][1])
             + tomo_fit_xray_eye[0][2]
-        )/1000
+        ) / 1000
         correction_y = (
             tomo_fit_xray_eye[1][0] * math.sin(math.radians(angle) + tomo_fit_xray_eye[1][1])
             + tomo_fit_xray_eye[1][2]
-        )/1000
+        ) / 1000
 
         print(f"Xeye correction x {correction_x}, y {correction_y} for angle {angle}\n")
         return (correction_x, correction_y)
