@@ -1,5 +1,7 @@
 import os
+from pathlib import Path
 
+import numpy as np
 from bec_utils import (
     BECMessage,
     BECService,
@@ -9,7 +11,7 @@ from bec_utils import (
 )
 from bec_utils.connector import ConnectorBase
 
-from .file_writer import NexusFileWriter, NeXusFileXMLWriter
+from .file_writer import NexusFileWriter
 
 logger = bec_logger.logger
 
@@ -121,7 +123,12 @@ class FileWriterManager(BECService):
 
     def write_file(self, scanID: str):
         storage = self.scan_storage[scanID]
-        file_path = os.path.abspath(os.path.join(self.base_path, f"S{storage.scan_number:05d}.h5"))
+        scan = storage.scan_number
+        scan_bundle = 1000
+        scan_dir = f"S{scan//scan_bundle:04d}-{scan//scan_bundle+scan_bundle-1:04d}/S{scan:04d}"
+        data_dir = Path(os.path.join(self.base_path, "data", scan_dir))
+        data_dir.mkdir(parents=True, exist_ok=True)
+        file_path = os.path.abspath(os.path.join(data_dir, f"S{storage.scan_number:05d}.h5"))
         successful = True
         try:
             logger.info(f"Writing file {file_path}")
