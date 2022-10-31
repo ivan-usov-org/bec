@@ -93,7 +93,7 @@ class DemoConfig(ConfigBase):
             "eyefoc",
         ]
 
-        out = dict()
+        out = {}
         for m in user_motors:
             out[m] = dict(
                 {
@@ -340,7 +340,7 @@ class DemoConfig(ConfigBase):
             "bim2y",
         ]
 
-        out = dict()
+        out = {}
         for m in beamline_motors:
             out[m] = dict(
                 {
@@ -383,39 +383,55 @@ class DemoConfig(ConfigBase):
 class TestConfig(DemoConfig):
     def run(self):
         super().run()
-        self.write_sls_status()
+        self.write_disabled_devices()
 
-    def write_sls_status(self):
-        sls_status = [
-            ("ring_current", "ARIDI-PCT:CURRENT"),
-            ("current_deadband", "ALIRF-GUN:CUR-DBAND"),
-            ("orbit_feedback_mode", "ARIDI-BPM:OFB-MODE"),
-            ("sls_filling_lifetime", "ARIDI-PCT:TAU-HOUR"),
-            ("sls_filling_pattern", "ACORF-FILL:PAT-SELECT"),
-            ("fast_orbit_feedback", "ARIDI-BPM:FOFBSTATUS-G"),
-            ("sls_current_threshold", "ALIRF-GUN:CUR-LOWLIM"),
-            ("sls_machine_status", "ACOAU-ACCU:OP-MODE"),
-            ("sls_crane_usage", "IBWKR-0101-QH10003:D01_H_D-WA"),
-            ("sls_injection_mode", "ALIRF-GUN:INJ-MODE"),
-        ]
-        out = dict()
-        for name, pv in sls_status:
-            out[name] = dict(
+    def write_disabled_devices(self):
+
+        out = {}
+        for m in ["motor1_disabled", "motor2_disabled"]:
+            out[m] = dict(
                 {
-                    "status": {"enabled": True, "enabled_set": False},
-                    "deviceClass": "EpicsSignalRO",
-                    "deviceConfig": {"read_pv": pv, "name": name, "auto_monitor": True},
-                    "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "status"},
-                    "deviceGroup": "SLS status",
+                    "status": {"enabled": False, "enabled_set": True},
+                    "deviceClass": "SynAxisOPAAS",
+                    "deviceConfig": {
+                        "name": m,
+                        "labels": m,
+                        "delay": 1,
+                        "speed": 100,
+                        "update_frequency": 400,
+                        "limits": [-50, 50],
+                        "tolerance": 0.01,
+                    },
+                    "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "userMotor"},
+                    "deviceGroup": "user motors",
                 }
             )
-        self.write_section(out, "SLS status PVs")
+        for m in ["motor1_disabled_set", "motor2_disabled_set"]:
+            out[m] = dict(
+                {
+                    "status": {"enabled": True, "enabled_set": False},
+                    "deviceClass": "SynAxisOPAAS",
+                    "deviceConfig": {
+                        "name": m,
+                        "labels": m,
+                        "delay": 1,
+                        "speed": 100,
+                        "update_frequency": 400,
+                        "limits": [-50, 50],
+                        "tolerance": 0.01,
+                    },
+                    "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "userMotor"},
+                    "deviceGroup": "user motors",
+                }
+            )
+        self.write_section(out, "Disabled devices")
 
 
 class X12SAConfig(TestConfig):
     def run(self):
         super().run()
         self.write_x12sa_status()
+        self.write_sls_status()
 
     def write_x12sa_status(self):
         x12sa_status = [
@@ -444,3 +460,29 @@ class X12SAConfig(TestConfig):
                 }
             )
         self.write_section(out, "X12SA status PVs")
+
+    def write_sls_status(self):
+        sls_status = [
+            ("ring_current", "ARIDI-PCT:CURRENT"),
+            ("current_deadband", "ALIRF-GUN:CUR-DBAND"),
+            ("orbit_feedback_mode", "ARIDI-BPM:OFB-MODE"),
+            ("sls_filling_lifetime", "ARIDI-PCT:TAU-HOUR"),
+            ("sls_filling_pattern", "ACORF-FILL:PAT-SELECT"),
+            ("fast_orbit_feedback", "ARIDI-BPM:FOFBSTATUS-G"),
+            ("sls_current_threshold", "ALIRF-GUN:CUR-LOWLIM"),
+            ("sls_machine_status", "ACOAU-ACCU:OP-MODE"),
+            ("sls_crane_usage", "IBWKR-0101-QH10003:D01_H_D-WA"),
+            ("sls_injection_mode", "ALIRF-GUN:INJ-MODE"),
+        ]
+        out = {}
+        for name, pv in sls_status:
+            out[name] = dict(
+                {
+                    "status": {"enabled": True, "enabled_set": False},
+                    "deviceClass": "EpicsSignalRO",
+                    "deviceConfig": {"read_pv": pv, "name": name, "auto_monitor": True},
+                    "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "status"},
+                    "deviceGroup": "SLS status",
+                }
+            )
+        self.write_section(out, "SLS status PVs")
