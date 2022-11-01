@@ -1,3 +1,5 @@
+import builtins
+
 from bec_utils import RedisConnector, ServiceConfig, bec_logger
 
 from bec_client import BECClient
@@ -19,10 +21,14 @@ bk.initialize(
 bk.start()
 bk.load_high_level_interface("spec_hli")
 
-dev = bk.device_manager.devices
-scans = bk.scans
+builtins.dev = bk.device_manager.devices
+builtins.scans = bk.scans
 
 logger.success("Started BECClient")
+
+
+# tomo_scan_sim()
+
 # status = scans.fermat_scan(
 #     dev.samx, -10, 10, dev.samy, -10, 10, step=1, exp_time=0.02, relative=False, hide_report=True
 # )
