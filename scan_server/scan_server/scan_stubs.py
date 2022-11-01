@@ -69,9 +69,14 @@ class ScanStubs:
         msg = BECMessage.DeviceRPCMessage.loads(msg)
         if not msg.content["success"]:
             error = msg.content["out"]
-            raise ScanAbortion(
-                f"During an RPC, the following error occured:\n{error['error']}: {error['msg']}.\nTraceback: {error['traceback']}\n The scan will be aborted."
-            )
+            if isinstance(error, dict) and {"error", "msg", "traceback"}.issubset(
+                set(error.keys())
+            ):
+                error_msg = f"During an RPC, the following error occured:\n{error['error']}: {error['msg']}.\nTraceback: {error['traceback']}\n The scan will be aborted."
+            else:
+                error_msg = "During an RPC, an error occured"
+            raise ScanAbortion(error_msg)
+
         logger.debug(msg.content.get("out"))
         return msg.content.get("return_val")
 
