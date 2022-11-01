@@ -346,22 +346,6 @@ class DeviceManagerBase:
             for dev in config:
                 self._remove_device(dev)
 
-    def update_device_status(self, msg):
-        msg = DeviceStatusMessage.loads(msg.value)
-        device = self.devices.get(msg.content["device"])
-        if not device:
-            return
-        device.status = DeviceStatus(msg.content["status"])
-        if device.DIID is not None:
-            if device.DIID > msg.metadata["DIID"]:
-                if device.scanID != msg.metadata["scanID"]:
-                    device.DIID = msg.metadata["DIID"]
-            elif device.DIID < msg.metadata["DIID"]:
-                device.DIID = msg.metadata["DIID"]
-        else:
-            device.DIID = msg.metadata["DIID"]
-        device.scanID = msg.metadata["scanID"]
-
     def _start_connectors(self, bootstrap_server) -> None:
         self._start_base_consumer()
         self.producer = self.connector.producer()
@@ -414,19 +398,6 @@ class DeviceManagerBase:
         msg = DeviceConfigMessage.loads(msg.value)
         logger.info(f"Received new config: {str(msg)}")
         parent.parse_config_message(msg)
-
-    @staticmethod
-    def _device_status_callback(msg, *, parent, **kwargs) -> None:
-        """
-        Consumer callback for handling device status updates
-        Args:
-            cls: Reference to the DeviceManager instance
-            msg: message of type DeviceConfigMessage
-
-        Returns:
-
-        """
-        parent.update_device_status(msg)
 
     def _get_config_from_DB(self):
         beamlines = self._scibec.get_beamlines()
