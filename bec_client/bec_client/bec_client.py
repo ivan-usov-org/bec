@@ -98,7 +98,7 @@ class BECClient(BECService):
         script_files = glob.glob(os.path.abspath(os.path.join(current_path, "../scripts/*.py")))
         for file in script_files:
             self.load_user_script(file)
-        builtins.__dict__.update({name:v["cls"] for name,v in self._scripts.items()})
+        builtins.__dict__.update({name: v["cls"] for name, v in self._scripts.items()})
 
     def forget_all_user_scripts(self) -> None:
         """unload / remove loaded user scripts from builtins. The files will remain on disk though!"""
