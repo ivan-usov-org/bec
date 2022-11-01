@@ -11,7 +11,6 @@ from bec_utils.connector import ConnectorBase
 from .BECMessage import (
     BECStatus,
     DeviceConfigMessage,
-    DeviceStatusMessage,
     LogMessage,
     RequestResponseMessage,
 )
@@ -101,9 +100,11 @@ class Device:
         """get the user parameter for this device"""
         return self.config.get("userParameter")
 
+    @typechecked
     def set_user_parameter(self, val: dict):
         self.parent.send_config_request(action="update", config={self.name: {"userParameter": val}})
 
+    @typechecked
     def update_user_parameter(self, val: dict):
         param = self.user_parameter
         param.update(val)
