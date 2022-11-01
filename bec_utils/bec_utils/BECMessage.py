@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import enum
 import time
-from typing import Any, Optional, Union
+from typing import Any, List, Optional, Union
 
 import msgpack
 
@@ -443,4 +443,19 @@ class VariableMessage(BECMessage):
         """
 
         self.content = {"value": value}
+        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+
+
+class ObserverMessage(BECMessage):
+    msg_type = "observer_message"
+
+    def __init__(self, *, observer: List[dict], metadata: dict = None) -> None:
+        """
+
+        Args:
+            observer: list of observer descriptions
+            metadata: status metadata
+        """
+
+        self.content = {"observer": observer}
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)

@@ -53,6 +53,7 @@ class MessageEndpoints:
 
     # misc
     _public_global_vars = "public/vars"
+    _observer = "internal/observer"
 
     ##########
 
@@ -203,3 +204,7 @@ class MessageEndpoints:
     @classmethod
     def global_vars(cls, var_name: str):
         return f"{cls._public_global_vars}/{var_name}"
+
+    @classmethod
+    def observer(cls):
+        return cls._observer
