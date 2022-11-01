@@ -27,7 +27,7 @@ builtins.scans = bk.scans
 logger.success("Started BECClient")
 
 
-tomo_scan_sim()
+# tomo_scan_sim()
 
 # status = scans.fermat_scan(
 #     dev.samx, -10, 10, dev.samy, -10, 10, step=1, exp_time=0.02, relative=False, hide_report=True
