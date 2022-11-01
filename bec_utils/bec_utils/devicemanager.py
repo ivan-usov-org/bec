@@ -399,20 +399,6 @@ class DeviceManagerBase:
         logger.info(f"Received new config: {str(msg)}")
         parent.parse_config_message(msg)
 
-    @staticmethod
-    def _device_status_callback(msg, *, parent, **kwargs) -> None:
-        """
-        Consumer callback for handling device status updates
-        Args:
-            cls: Reference to the DeviceManager instance
-            msg: message of type DeviceConfigMessage
-
-        Returns:
-
-        """
-        msg = DeviceStatusMessage.loads(msg.value)
-        parent.update_device_status(msg)
-
     def _get_config_from_DB(self):
         beamlines = self._scibec.get_beamlines()
         if not beamlines:
