@@ -1,5 +1,6 @@
 import abc
 import asyncio
+import builtins
 from typing import Any, List, Tuple
 
 import numpy as np
@@ -56,6 +57,7 @@ class ProgressBarBase(abc.ABC):
         self.clear_on_exit = clear_on_exit
         self._progress = None
         self._tasks = []
+        self._is_master = False
 
     @property
     def columns(self) -> Tuple[rich.progress.ProgressColumn, ...]:
@@ -74,8 +76,14 @@ class ProgressBarBase(abc.ABC):
 
     def start(self) -> None:
         """Start the Progress handler and initialize the tasks."""
-        self._progress = rich.progress.Progress(*self.columns, transient=self.clear_on_exit)
-        self._progress.start()
+        if not hasattr(builtins, "_progress_rich"):
+            self._progress = rich.progress.Progress(*self.columns, transient=self.clear_on_exit)
+            self._progress.start()
+            self._init_tasks()
+            builtins._progress_rich = self._progress
+            self._is_master = True
+            return
+        self._progress = builtins._progress_rich
         self._init_tasks()
 
     async def sleep(self):
@@ -83,7 +91,8 @@ class ProgressBarBase(abc.ABC):
 
     def stop(self) -> None:
         """Stop the Progress handler"""
-        self._progress.stop()
+        if self._is_master:
+            self._progress.stop()
 
     @abc.abstractmethod
     def _init_tasks(self) -> None:
@@ -142,6 +151,54 @@ class ScanProgressBar(ProgressBarBase):
         self._tasks.append(
             self._progress.add_task(f"[green] Scan {self.scan_number}: ", total=self.max_points)
         )
+
+    def _update_tasks_total(self, max_points: int) -> None:
+        self._progress.tasks[1].total = max_points
+
+    @property
+    def max_points(self) -> int:
+        return self._max_points
+
+    @max_points.setter
+    def max_points(self, max_points: int) -> None:
+        self._max_points = max_points
+        self._update_tasks_total(max_points)
+
+    def _update_task(self, task: int, value):
+        if self.max_points:
+            self._progress.update(
+                task,
+                completed=value,
+                fields={"current_scan_pos": value},
+            )
+        else:
+            self._progress.update(
+                task,
+                fields={"current_scan_pos": value},
+            )
+        if self._progress.tasks[-1].finished:
+            self._progress.remove_task(task)
+
+
+class ScanGroupProgressBar(ProgressBarBase):
+    def __init__(self, name: str, clear_on_exit=False) -> None:
+        super().__init__(clear_on_exit)
+        self._max_points = None
+        self.name = name
+
+    @property
+    def columns(self) -> Tuple:
+        return (
+            rich.progress.TextColumn("[progress.description]{task.description}"),
+            rich.progress.BarColumn(),
+            ScanTaskProgressColumn(),
+            rich.progress.TimeRemainingColumn(),
+            rich.progress.TimeElapsedColumn(),
+        )
+
+    def _init_tasks(self):
+
+        self._tasks.append(self._progress.add_task(f"[green] {self.name}: ", total=self.max_points))
 
     def _update_tasks_total(self, max_points: int) -> None:
         self._progress.tasks[0].total = max_points
