@@ -20,6 +20,7 @@ tmux send-keys -t 'Main' "source ./bec_venv/bin/activate; cd ./scan_server; pyth
 
 tmux split-window -h
 tmux split-window -h
+tmux split-window -h
 tmux select-layout even-horizontal
 
 tmux select-pane -t 1
@@ -27,6 +28,11 @@ tmux send-keys -t 'Main' "source ./bec_venv/bin/activate; cd ./device_server; py
 
 tmux select-pane -t 2
 tmux send-keys -t 'Main' "source ./bec_venv/bin/activate; cd ./scan_bundler; python launch.py --config $CONFIG_FILE" C-b-m
+
+tmux select-pane -t 3
+tmux send-keys -t 'Main' "source ./bec_venv/bin/activate; cd ./file_writer; python launch.py --config $CONFIG_FILE" C-b-m
+
+tmux set -g mode-mouse on
 
 #tmux send-keys -t 'Main' C-b-% C-b-m
 

@@ -30,7 +30,7 @@ class DeviceMock:
     def __init__(self, name: str):
         self.name = name
         self.read_buffer = None
-        self.config = {"deviceConfig": {"limits": [-50, 50]}}
+        self.config = {"deviceConfig": {"limits": [-50, 50]}, "userParameter": None}
         self._enabled_set = True
         self._enabled = True
 
@@ -55,6 +55,10 @@ class DeviceMock:
     @enabled.setter
     def enabled(self, val: bool):
         self._enabled = val
+
+    @property
+    def user_parameter(self):
+        return self.config["userParameter"]
 
 
 class DMMock:
@@ -1359,7 +1363,9 @@ def test_get_func_name_from_macro():
 def test_LamNIFermatScan(scan_msg, reference_scan_list):
     device_manager = DMMock()
     device_manager.add_device("lsamx")
+    device_manager.devices["lsamx"].config["userParameter"] = {"center": 8.1}
     device_manager.add_device("lsamy")
+    device_manager.devices["lsamy"].config["userParameter"] = {"center": 10}
     device_manager.add_device("samx")
     device_manager.devices["samx"].read_buffer = {"value": 0}
     device_manager.add_device("samy")
