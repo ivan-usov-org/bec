@@ -1,5 +1,3 @@
-import builtins
-
 from bec_utils import RedisConnector, ServiceConfig, bec_logger
 
 from bec_client import BECClient
@@ -12,17 +10,17 @@ CONFIG_PATH = "../bec_config.yaml"
 
 config = ServiceConfig(CONFIG_PATH)
 
-bk = BECClient()
-bk.initialize(
+bec = BECClient()
+bec.initialize(
     config.redis,
     RedisConnector,
     config.scibec,
 )
-bk.start()
-bk.load_high_level_interface("spec_hli")
+bec.start()
+bec.load_high_level_interface("spec_hli")
 
-builtins.dev = bk.device_manager.devices
-builtins.scans = bk.scans
+dev = bec.device_manager.devices
+scans = bec.scans
 
 logger.success("Started BECClient")
 
