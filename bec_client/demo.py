@@ -12,20 +12,29 @@ CONFIG_PATH = "../bec_config.yaml"
 
 config = ServiceConfig(CONFIG_PATH)
 
-bk = BECClient()
-bk.initialize(
+bec = BECClient()
+bec.initialize(
     config.redis,
     RedisConnector,
     config.scibec,
 )
-bk.start()
-bk.load_high_level_interface("spec_hli")
+bec.start()
+bec.load_high_level_interface("spec_hli")
 
-builtins.dev = bk.device_manager.devices
-builtins.scans = bk.scans
+dev = bec.device_manager.devices
+scans = bec.scans
 
 logger.success("Started BECClient")
 
+# bk.observer.add_observer(name="test", device="samy", limits=[0, 10], on_trigger="pause", on_resume="restart")
+
+# bk.observer.get_observer(name="test").enable = False
+# bk.observer.get_observer(device="test")
+
+# bk.observer.list_observer()
+# bk.observer.enable_all()
+# bk.observer.disable_all()
+# bk.observer.set_mode()???
 
 # tomo_scan_sim()
 
