@@ -6,7 +6,7 @@ import pytest
 import yaml
 from bec_utils import BECMessage, MessageEndpoints
 from bec_utils.devicemanager import DeviceManagerBase
-from bec_utils.observer import Observer, ObserverAction, ObserverManager
+from bec_utils.observer import Observer, ObserverAction, ObserverManagerBase
 from bec_utils.tests.utils import ConnectorMock, create_session_from_config
 
 dir_path = os.path.dirname(bec_utils.__file__)
@@ -99,7 +99,7 @@ def device_manager():
 
 def test_observer_manager_None(device_manager):
     with mock.patch.object(device_manager.producer, "get", return_value=None) as producer_get:
-        observer_manager = ObserverManager(device_manager=device_manager)
+        observer_manager = ObserverManagerBase(device_manager=device_manager)
         producer_get.assert_called_once_with(MessageEndpoints.observer())
         assert len(observer_manager._observer) == 0
 
@@ -117,7 +117,7 @@ def test_observer_manager_msg(device_manager):
         ]
     ).dumps()
     with mock.patch.object(device_manager.producer, "get", return_value=msg) as producer_get:
-        observer_manager = ObserverManager(device_manager=device_manager)
+        observer_manager = ObserverManagerBase(device_manager=device_manager)
         producer_get.assert_called_once_with(MessageEndpoints.observer())
         assert len(observer_manager._observer) == 1
 
@@ -142,7 +142,7 @@ def test_observer_manager_msg(device_manager):
 def test_add_observer(device_manager, observer, raises_error):
 
     with mock.patch.object(device_manager.producer, "get", return_value=None) as producer_get:
-        observer_manager = ObserverManager(device_manager=device_manager)
+        observer_manager = ObserverManagerBase(device_manager=device_manager)
         observer_manager.add_observer(observer)
         with pytest.raises(AttributeError):
             observer_manager.add_observer(observer)
@@ -188,7 +188,7 @@ def test_add_observer_existing_device(device_manager, observer, raises_error):
         }
     )
     with mock.patch.object(device_manager.producer, "get", return_value=None) as producer_get:
-        observer_manager = ObserverManager(device_manager=device_manager)
+        observer_manager = ObserverManagerBase(device_manager=device_manager)
         observer_manager.add_observer(default_observer)
         if raises_error:
             with pytest.raises(AttributeError):

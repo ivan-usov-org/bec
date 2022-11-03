@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import enum
+from typing import List
 
 from typeguard import typechecked
 
@@ -35,7 +36,7 @@ class Observer:
         self._check_limits(limits, low_limit, high_limit)
 
         self.target_value = target_value
-        self._enabled = False
+        self._enabled = True
 
         self._check_device()
         self._check_trigger()
@@ -121,10 +122,14 @@ class Observer:
         return cls(**config)
 
 
-class ObserverManager:
+class ObserverManagerBase:
     def __init__(self, device_manager: DeviceManagerBase):
         self.device_manager = device_manager
         self._observer = self._get_installed_observer()
+
+    @property
+    def observer(self):
+        return self._observer
 
     @typechecked
     def add_observer(self, observer: Observer, ignore_existing=False):
@@ -137,10 +142,11 @@ class ObserverManager:
                 f"Device {observer.device} is already being observed. If you want to add an additional observer for this device, use 'ignore_existing=True'."
             )
         self._observer.append(observer)
-        self.update_observer()
+        self.send_observer()
 
     def _is_device_observed(self, device: str) -> bool:
-        return any(obs.device == device for obs in self._observer)
+        tmp = self.observer
+        return any(obs.device == device for obs in tmp)
 
     def _get_installed_observer(self):
         # get current observer list from Redis
@@ -148,11 +154,17 @@ class ObserverManager:
         if msg is None:
             return []
         observer_msg = BECMessage.ObserverMessage.loads(msg)
-        return [Observer.from_dict(obs) for obs in observer_msg.content["observer"]]
+        return self._dict_to_observer(observer_msg.content["observer"])
 
-    def update_observer(self):
+    def _dict_to_observer(self, observer: List[dict]):
+        return [Observer.from_dict(obs) for obs in observer]
+
+    def send_observer(self):
         # send the current observer list to MongoDB and Redis
-        pass
+        self.device_manager.producer.set_and_publish(
+            MessageEndpoints.observer(),
+            BECMessage.ObserverMessage(observer=[obs.to_dict() for obs in self._observer]).dumps(),
+        )
 
     def list_observer(self):
         pass

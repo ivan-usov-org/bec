@@ -4,6 +4,7 @@ from bec_utils import BECMessage, BECService, BECStatus, MessageEndpoints, bec_l
 from bec_utils.connector import ConnectorBase
 
 from .devicemanager import DeviceManagerScanServer
+from .observer import ObserverManager
 from .scan_assembler import ScanAssembler
 from .scan_guard import ScanGuard
 from .scan_manager import ScanManager
@@ -20,6 +21,7 @@ class ScanServer(BECService):
     scan_server = None
     scan_assembler = None
     scan_manager = None
+    observer_manager = None
 
     def __init__(self, bootstrap_server: list, connector_cls: ConnectorBase, scibec_url: str):
         super().__init__(bootstrap_server, connector_cls, unique_service=True)
@@ -32,6 +34,7 @@ class ScanServer(BECService):
         self._start_scan_assembler()
         self._start_scan_server()
         self._start_alarm_handler()
+        self._start_observer()
         self.scan_number = 1
         self.status = BECStatus.RUNNING
 
@@ -63,6 +66,10 @@ class ScanServer(BECService):
         )
         self._alarm_consumer.start()
 
+    def _start_observer(self):
+        self.observer_manager = ObserverManager(self.device_manager, self)
+        self.observer_manager.start()
+
     @staticmethod
     def _alarm_callback(msg, parent: ScanServer, **_kwargs):
         metadata = BECMessage.AlarmMessage.loads(msg.value).metadata
@@ -79,10 +86,6 @@ class ScanServer(BECService):
     def scan_number(self, val: int):
         """set the current scan number"""
         self.producer.set(MessageEndpoints.scan_number(), val)
-
-    def load_config_from_disk(self, file_path: str) -> None:
-        """load a config file from disk"""
-        self.device_manager.load_config_from_disk(file_path)
 
     def shutdown(self) -> None:
         """shutdown the scan server"""
