@@ -47,11 +47,11 @@ def test_config_request_update():
         action="update", config={"samx": {"deviceConfig": {"tolerance": 1}}}
     )
     dm.parse_config_message(msg)
-    assert dm.devices.samx.config["deviceConfig"]["tolerance"] == 1
+    assert dm.devices.samx._config["deviceConfig"]["tolerance"] == 1
 
     msg = BECMessage.DeviceConfigMessage(action="update", config={"samx": {"enabled": False}})
     dm.parse_config_message(msg)
-    assert dm.devices.samx.config["enabled"] is False
+    assert dm.devices.samx._config["enabled"] is False
 
 
 def test_config_request_reload():
