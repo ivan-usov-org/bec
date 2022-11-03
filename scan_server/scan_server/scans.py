@@ -204,7 +204,7 @@ class RequestBase(ABC):
         logger.debug("check limits")
         for ii, dev in enumerate(self.scan_motors):
             low_limit, high_limit = (
-                self.device_manager.devices[dev].config["deviceConfig"].get("limits", [0, 0])
+                self.device_manager.devices[dev]._config["deviceConfig"].get("limits", [0, 0])
             )
             if low_limit >= high_limit:
                 return

@@ -38,7 +38,7 @@ def rpc(fcn):
 class RPCBase:
     def __init__(self, name: str, info: dict = None, parent=None) -> None:
         self.name = name
-        self.config = None
+        self._config = None
         if info is None:
             info = {}
         self._info = info.get("device_info")
@@ -176,12 +176,12 @@ class DeviceBase(RPCBase, Device):
 
     @property
     def enabled(self):
-        return self.root.config["enabled"]
+        return self.root._config["enabled"]
 
     @enabled.setter
     def enabled(self, val):
         self.update_config({"enabled": val})
-        self.root.config["enabled"] = val
+        self.root._config["enabled"] = val
 
     @rpc
     def trigger(self, rpc_id: str):
@@ -299,7 +299,7 @@ class Positioner(DeviceBase):
 
     @property
     def limits(self):
-        return self.config["deviceConfig"]["limits"]
+        return self._config["deviceConfig"]["limits"]
 
     @limits.setter
     def limits(self, val: list):
@@ -370,5 +370,5 @@ class DMClient(DeviceManagerBase):
         else:
             logger.error(f"Trying to add new device {name} of type {base_class}")
 
-        obj.config = dev
+        obj._config = dev
         self.devices._add_device(name, obj)

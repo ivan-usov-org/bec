@@ -34,32 +34,44 @@ class DeviceStatus(enum.Enum):
 class Device:
     def __init__(self, name, config, *args, parent=None):
         self.name = name
-        self.config = config
+        self._config = config
         self._signals = []
         self._subdevices = []
         self._status = DeviceStatus.IDLE
         self.parent = parent
 
+    def get_device_config(self):
+        """get the device config for this device"""
+        return self._config["deviceConfig"]
+
+    @typechecked
+    def set_device_config(self, val: dict):
+        """set the device config for this device"""
+        self._config["deviceConfig"].update(val)
+        return self.parent.send_config_request(
+            action="update", config={self.name: {"deviceConfig": self._config["deviceConfig"]}}
+        )
+
     @property
     def enabled(self):
         """Whether or not the device is enabled"""
-        return self.config["enabled"]
+        return self._config["enabled"]
 
     @enabled.setter
     def enabled(self, value):
         """Whether or not the device is enabled"""
-        self.config["enabled"] = value
+        self._config["enabled"] = value
         self.parent.send_config_request(action="update", config={self.name: {"enabled": value}})
 
     @property
     def enabled_set(self):
         """Whether or not the device can be set"""
-        return self.config.get("enabled_set", True)
+        return self._config.get("enabled_set", True)
 
     @enabled_set.setter
     def enabled_set(self, value):
         """Whether or not the device can be set"""
-        self.config["enabled_set"] = value
+        self._config["enabled_set"] = value
         self.parent.send_config_request(action="update", config={self.name: {"enabled_set": value}})
 
     def read(self, cached):
@@ -98,7 +110,7 @@ class Device:
     @property
     def user_parameter(self) -> dict:
         """get the user parameter for this device"""
-        return self.config.get("userParameter")
+        return self._config.get("userParameter")
 
     @typechecked
     def set_user_parameter(self, val: dict):
@@ -112,7 +124,7 @@ class Device:
 
     def __repr__(self):
         config = "".join(
-            [f"\t{key}: {val}\n" for key, val in self.config.get("deviceConfig").items()]
+            [f"\t{key}: {val}\n" for key, val in self._config.get("deviceConfig").items()]
         )
         separator = "--" * 10
         return (
@@ -121,10 +133,10 @@ class Device:
             "Details:\n"
             f"\tStatus: {'enabled' if self.enabled else 'disabled'}\n"
             f"\tLast recorded value: {self.read(cached=True)}\n"
-            f"\tDevice class': {self.config.get('deviceClass')}\n"
-            f"\tAcquisition group': {self.config['acquisitionConfig'].get('acquisitionGroup')}\n"
-            f"\tDevice group': {self.config.get('deviceGroup')}\n"
-            f"\tUser parameter': {self.config.get('userParameter')}\n"
+            f"\tDevice class': {self._config.get('deviceClass')}\n"
+            f"\tAcquisition group': {self._config['acquisitionConfig'].get('acquisitionGroup')}\n"
+            f"\tDevice group': {self._config.get('deviceGroup')}\n"
+            f"\tUser parameter': {self._config.get('userParameter')}\n"
             f"{separator}\n"
             "Config:\n"
             f"{config}"
@@ -188,13 +200,13 @@ class DeviceContainer(dict):
         return [
             dev
             for _, dev in self.items()
-            if dev.config["acquisitionConfig"]["acquisitionGroup"] == device_group
+            if dev._config["acquisitionConfig"]["acquisitionGroup"] == device_group
         ]
 
     def async_devices(self) -> list:
         """get a list of all synchronous devices"""
         return [
-            dev for _, dev in self.items() if dev.config["acquisitionConfig"]["schedule"] != "sync"
+            dev for _, dev in self.items() if dev._config["acquisitionConfig"]["schedule"] != "sync"
         ]
 
     @typechecked
@@ -322,18 +334,18 @@ class DeviceManagerBase:
             for dev in config:
                 if "deviceConfig" in config[dev]:
                     logger.info(f"Updating device config for device {dev}.")
-                    self.devices[dev].config["deviceConfig"].update(config[dev]["deviceConfig"])
+                    self.devices[dev]._config["deviceConfig"].update(config[dev]["deviceConfig"])
                     logger.debug(
-                        f"New config for device {dev}: {self.devices[dev].config['deviceConfig']}"
+                        f"New config for device {dev}: {self.devices[dev]._config['deviceConfig']}"
                     )
                 if "enabled" in config[dev]:
-                    self.devices[dev].config["enabled"] = config[dev]["enabled"]
+                    self.devices[dev]._config["enabled"] = config[dev]["enabled"]
                     status = "enabled" if self.devices[dev].enabled else "disabled"
                     logger.info(f"Device {dev} has been {status}.")
                 if "enabled_set" in config[dev]:
-                    self.devices[dev].config["enabled_set"] = config[dev]["enabled_set"]
+                    self.devices[dev]._config["enabled_set"] = config[dev]["enabled_set"]
                 if "userParameter" in config[dev]:
-                    self.devices[dev].config["userParameter"] = config[dev]["userParameter"]
+                    self.devices[dev]._config["userParameter"] = config[dev]["userParameter"]
 
         elif action == "add":
             for dev in config:
@@ -463,7 +475,7 @@ class DeviceManagerBase:
 
     def _create_device(self, dev: dict, *args) -> Device:
         obj = self._device_cls(dev.get("name"), *args, parent=self)
-        obj.config = dev
+        obj._config = dev
         return obj
 
     def _remove_device(self, dev_name):
