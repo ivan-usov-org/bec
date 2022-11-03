@@ -1,3 +1,4 @@
+import builtins
 import os
 import time
 from collections import defaultdict
@@ -99,22 +100,6 @@ class XrayEyeAlign:
         epics_put("XOMNYI-XEYE-MESSAGE:0.DESC", msg)
 
     def align(self):
-        # TODO prepare output files
-        # dname = sprintf("%sptychotomoalign_scannum.txt",_spec_internal_dir())
-        # unix(sprintf("rm -f %s",dname))
-
-        # dname = sprintf("%sptychotomoalign_numproj.txt",_spec_internal_dir())
-        # unix(sprintf("rm -f %s",dname))
-
-        # #dname = sprintf("%sptychotomoalign_*.txt",_spec_internal_dir())
-        # #unix(sprintf("rm -f %s",dname))
-
-        # dname = sprintf("%sxrayeye_alignmentvalue_x*",_spec_internal_dir())
-        # unix(sprintf("rm -f %s",dname))
-
-        # dname = sprintf("%sptycho_alignmentvalue_x*",_spec_internal_dir())
-        # unix(sprintf("rm -f %s",dname))
-
         # this makes sure we are in a defined state
         self._disable_rt_feedback()
 
@@ -424,6 +409,7 @@ class LamNI:
         self.client.set_global_var("lamni_piezo_range", val)
 
     def tomo_scan_projection(self, angle: float):
+        scans = builtins.__dict__.get("scans")
         additional_correction = self.compute_additional_correction(angle)
         correction_xeye_mu = self.lamni_compute_additional_correction_xeye_mu(angle)
         logger.info(
@@ -558,75 +544,3 @@ class LamNI:
     def tomo_scan(self):
         for ii in range(8):
             self.sub_tomo_scan(ii + 1)
-
-
-# # ----------------------------------------------------------------------
-# def _ttl_check_channel_out(channel) '{
-#   if ((channel < 1) || (channel > _ttl_out_channel_max)) {
-#     printf("TTL: channel must be within the range from 1 to %d. Current value is %.0f.\n",\
-#            _ttl_out_channel_max,channel)
-#     exit
-#   }
-#   return (sprintf("X12SA-ES1-TTL:OUT_%02.0f",channel))
-# }'
-
-
-# io.mac
-# # ----------------------------------------------------------------------
-# def _ttl_out(channel,value) '{
-#   global _io_debug
-#   local epics_channel
-
-#   # check for valid channel number
-#   epics_channel = _ttl_check_channel_out(channel)
-
-#   if ((value != 0) && (value != 1)) {
-#     printf("ttl_out: value must be 0 or 1. Current value is %.0f.\n",value)
-#     exit
-#   }
-
-#   epics_put_stop(sprintf("%s.VAL",epics_channel),value,2.0,"_ttl_out")
-#   if (_io_debug) {
-#     printf("_ttl_out(%d,%d)\n",channel,value)
-#   }
-# }'
-
-
-# shutter.mac
-# ----------------------------------------------------------------------
-# def fshopen '{
-#   _ttl_out(_fsh_ttl_channel,1)
-# }'
-
-# # ----------------------------------------------------------------------
-# def fshclose '{
-#   global _fsh_close_delay_active
-#   global _fsh_single_delay_active
-
-#   # ensure that the delayed closing is deactivated
-#   epics_put("X12SA-ES1-FSHDELAY:ON","OFF")
-#   _fsh_close_delay_active = 0
-#   _fsh_single_delay_active = 0
-
-#   # close the fast shutter
-#   _ttl_out(_fsh_ttl_channel,0)
-# }'
-
-# # ----------------------------------------------------------------------
-# def fshon '{
-#   global _fsh_is_on
-
-#   if (_fsh_is_on) {
-#     printf("The fast shutter is already enabled.\n")
-#   } else {
-#     printf("Enabling the fast shutter.\n")
-#   }
-
-#   _fsh_is_on = 1
-#   ttl_out_auto _fsh_ttl_channel 1
-#   if (_io_wait_time < _fsh_wait_time_sec) {
-#     printf("increasing the IO wait time from %.3f to %.3f seconds:\n",\
-#            _io_wait_time,_fsh_wait_time_sec)
-#     io_wait _fsh_wait_time_sec
-#   }
-# }'

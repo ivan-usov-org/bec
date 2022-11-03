@@ -52,6 +52,7 @@ class BECClient(BECService):
         self._scripts = {}
         self._initialized = True
         self.config = None
+        builtins.bec = self
 
     def start(self):
         """start the client"""
@@ -97,6 +98,7 @@ class BECClient(BECService):
 
     def load_all_user_scripts(self) -> None:
         """Load all scripts from the `scripts` directory."""
+        self.forget_all_user_scripts()
         current_path = pathlib.Path(__file__).parent.resolve()
         script_files = glob.glob(os.path.abspath(os.path.join(current_path, "../scripts/*.py")))
         for file in script_files:
@@ -202,6 +204,7 @@ class BECClient(BECService):
         logger.info("Starting device manager")
         self.device_manager = DMClient(self, self.scibec_url)
         self.device_manager.initialize(self.bootstrap_server)
+        builtins.dev = self.device_manager.devices
 
     def _start_alarm_handler(self):
         logger.info("Starting alarm listener")
