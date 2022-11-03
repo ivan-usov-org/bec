@@ -15,6 +15,7 @@ from IPython.terminal.prompts import Prompts, Token
 from rich.console import Console
 from rich.table import Table
 
+from bec_client.config_helper import ConfigHelper
 from bec_client.scan_manager import ScanManager
 
 from .alarm_handler import AlarmHandler
@@ -50,6 +51,7 @@ class BECClient(BECService):
         self._hli_funcs = {}
         self._scripts = {}
         self._initialized = True
+        self.config = None
 
     def start(self):
         """start the client"""
@@ -64,6 +66,7 @@ class BECClient(BECService):
         self._start_alarm_handler()
         self._configure_logger()
         self.load_all_user_scripts()
+        self.config = ConfigHelper(self)
 
     def alarms(self, severity=Alarms.WARNING):
         """get the next alarm with at least the specified severity"""

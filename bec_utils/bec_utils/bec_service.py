@@ -22,6 +22,7 @@ class BECService:
     def __init__(
         self, bootstrap_server: list, connector_cls: ConnectorBase, unique_service=False
     ) -> None:
+        super().__init__()
         self.bootstrap_server = bootstrap_server
         self._connector_cls = connector_cls
         self.connector = connector_cls(bootstrap_server)
