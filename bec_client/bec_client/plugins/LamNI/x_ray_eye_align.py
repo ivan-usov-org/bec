@@ -484,7 +484,9 @@ class LamNI:
         if additional_correction_shift_x == 0 and angle > self.corr_angle[-1]:
             additional_correction_shift_x = self.corr_pos_x[-1]
             additional_correction_shift_y = self.corr_pos_y[-1]
-
+        logger.info(
+            f"Additional correction shifts: {additional_correction_shift_x} {additional_correction_shift_y}"
+        )
         return (additional_correction_shift_x, additional_correction_shift_y)
 
     def lamni_read_additional_correction(self, correction_file: str):
@@ -501,11 +503,11 @@ class LamNI:
                 value = line.split(" ")[2]
                 name = line.split(" ")[0].split("[")[0]
                 if name == "corr_pos_x":
-                    corr_pos_x.append(value)
+                    corr_pos_x.append(float(value) / 1000)
                 elif name == "corr_pos_y":
-                    corr_pos_y.append(value)
+                    corr_pos_y.append(float(value) / 1000)
                 elif name == "corr_angle":
-                    corr_angle.append(value)
+                    corr_angle.append(float(value))
         self.corr_pos_x = corr_pos_x
         self.corr_pos_y = corr_pos_y
         self.corr_angle = corr_angle

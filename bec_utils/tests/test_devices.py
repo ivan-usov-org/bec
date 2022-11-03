@@ -29,7 +29,7 @@ def test_create_device_saves_config(device_config):
     connector = ConnectorMock("")
     dm = DeviceManagerBase(connector, "")
     obj = dm._create_device(device_config, ())
-    assert obj.config == device_config
+    assert obj._config == device_config
 
 
 def test_device_enabled(device_config):
@@ -86,12 +86,12 @@ def test_device_update_user_parameter(device_config, val, raised_error):
     connector = ConnectorMock("")
     dm = DeviceManagerBase(connector, "")
     obj = dm._create_device(device_config, ())
-    obj.config["userParameter"] = {"in": 2, "out": 5}
+    obj._config["userParameter"] = {"in": 2, "out": 5}
     with mock.patch.object(obj.parent, "send_config_request") as config_req:
         if raised_error is None:
             obj.update_user_parameter(val)
             config_req.assert_called_once_with(
-                action="update", config={obj.name: {"userParameter": obj.config["userParameter"]}}
+                action="update", config={obj.name: {"userParameter": obj._config["userParameter"]}}
             )
         else:
             with pytest.raises(raised_error):

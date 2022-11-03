@@ -130,10 +130,10 @@ def test_mv_scan(capsys, client):
     current_pos_samx = dev.samx.read()["samx"]["value"]
     current_pos_samy = dev.samy.read()["samy"]["value"]
     assert np.isclose(
-        current_pos_samx, 10, atol=dev.samx.config["deviceConfig"].get("tolerance", 0.05)
+        current_pos_samx, 10, atol=dev.samx._config["deviceConfig"].get("tolerance", 0.05)
     )
     assert np.isclose(
-        current_pos_samy, 20, atol=dev.samy.config["deviceConfig"].get("tolerance", 0.05)
+        current_pos_samy, 20, atol=dev.samy._config["deviceConfig"].get("tolerance", 0.05)
     )
     scans.umv(dev.samx, 10, dev.samy, 20, relative=False)
     current_pos_samx = dev.samx.read()["samx"]["value"]
@@ -156,8 +156,8 @@ def test_mv_scan_mv(client):
     dev.samx.limits = [-50, 50]
     dev.samy.limits = [-50, 50]
     scans.umv(dev.samx, 10, dev.samy, 20, relative=False)
-    tolerance_samx = dev.samx.config["deviceConfig"].get("tolerance", 0.05)
-    tolerance_samy = dev.samy.config["deviceConfig"].get("tolerance", 0.05)
+    tolerance_samx = dev.samx._config["deviceConfig"].get("tolerance", 0.05)
+    tolerance_samy = dev.samy._config["deviceConfig"].get("tolerance", 0.05)
     current_pos_samx = dev.samx.read()["samx"]["value"]
     current_pos_samy = dev.samy.read()["samy"]["value"]
 
