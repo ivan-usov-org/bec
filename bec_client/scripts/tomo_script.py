@@ -25,13 +25,13 @@ def sub_tomo_scan(subtomo_number, start_angle=None, tomo_stepsize=10.0):
     _tomo_shift_angles = 0
     angle_end = start_angle + 360
     for angle in np.linspace(
-        start_angle + _tomo_shift_angles, angle_end, num=360 / tomo_stepsize + 1, endpoint=True
+        start_angle + _tomo_shift_angles, angle_end, num=int(360 / tomo_stepsize + 1), endpoint=True
     ):
         if 0 <= angle < 360.05:
             print(f"Starting LamNI scan for angle {angle}")
             lamni.tomo_scan_projection(angle)
 
 
-def tomo_scan():
-    for ii in range(8):
-        sub_tomo_scan(ii + 1)
+def tomo_scan(subtomo_number=1, start_angle=None, tomo_stepsize=10):
+    for ii in range(subtomo_number - 1, 8):
+        sub_tomo_scan(ii + 1, start_angle=start_angle, tomo_stepsize=tomo_stepsize)
