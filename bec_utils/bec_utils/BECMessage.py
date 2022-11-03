@@ -171,7 +171,7 @@ class ScanStatusMessage(BECMessage):
 
 class ScanQueueModificationMessage(BECMessage):
     msg_type = "scan_queue_modification"
-    ACTIONS = ["pause", "deferred_pause", "continue", "abort", "clear", "restart"]
+    ACTIONS = ["pause", "deferred_pause", "continue", "abort", "clear", "restart", "halt"]
 
     def __init__(self, *, scanID: str, action: str, parameter: dict, metadata: dict = None) -> None:
 

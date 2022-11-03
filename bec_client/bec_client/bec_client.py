@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import builtins
 import glob
 import importlib
@@ -11,6 +13,13 @@ from typing import List
 import IPython
 from bec_utils import Alarms, BECService, MessageEndpoints, bec_logger
 from bec_utils.connector import ConnectorBase
+from IPython.core.magic import (
+    Magics,
+    cell_magic,
+    line_cell_magic,
+    line_magic,
+    magics_class,
+)
 from IPython.terminal.prompts import Prompts, Token
 from rich.console import Console
 from rich.table import Table
@@ -68,6 +77,7 @@ class BECClient(BECService):
         self._configure_logger()
         self.load_all_user_scripts()
         self.config = ConfigHelper(self)
+        self._load_magics()
 
     def alarms(self, severity=Alarms.WARNING):
         """get the next alarm with at least the specified severity"""
@@ -211,6 +221,10 @@ class BECClient(BECService):
         self.alarm_handler = AlarmHandler(self.connector)
         self.alarm_handler.start()
 
+    def _load_magics(self):
+        magics = BECMagics(self._ip, self)
+        self._ip.register_magics(magics)
+
     def shutdown(self):
         """shutdown the client and all its components"""
         super().shutdown()
@@ -261,3 +275,45 @@ class BECClientPrompt(Prompts):
     @username.setter
     def username(self, value):
         self._username = value
+
+
+@magics_class
+class BECMagics(Magics):
+    def __init__(self, shell, client: BECClient):
+        super(BECMagics, self).__init__(shell)
+        self.client = client
+
+    @line_magic
+    def abort(self, line):
+        "Request a scan abortion"
+        return self.client.queue.request_scan_abortion()
+
+    @line_magic
+    def reset(self, line):
+        "Request a scan queue reset"
+        return self.client.queue.request_queue_reset()
+
+    @line_magic
+    def resume(self, line):
+        "Resume the scan"
+        return self.client.queue.request_scan_continuation()
+
+    @line_magic
+    def pause(self, line):
+        "Request a scan pause"
+        return self.client.queue.request_scan_interruption(deferred_pause=False)
+
+    @line_magic
+    def deferred_pause(self, line):
+        "Request a deferred pause"
+        return self.client.queue.request_scan_interruption(deferred_pause=True)
+
+    @line_magic
+    def restart(self, line):
+        "Request a scan restart"
+        return self.client.queue.request_scan_restart()
+
+    @line_magic
+    def halt(self, line):
+        "Request a scan halt, i.e. abort without cleanup."
+        return self.client.queue.request_scan_halt()
