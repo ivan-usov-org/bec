@@ -33,5 +33,5 @@ def sub_tomo_scan(subtomo_number, start_angle=None, tomo_stepsize=10.0):
 
 
 def tomo_scan(subtomo_number=1, start_angle=None, tomo_stepsize=10):
-    for ii in range(subtomo_number-1,8):
+    for ii in range(subtomo_number - 1, 8):
         sub_tomo_scan(ii + 1, start_angle=start_angle, tomo_stepsize=tomo_stepsize)
