@@ -11,6 +11,7 @@ from typing import List
 import IPython
 from bec_utils import Alarms, BECService, MessageEndpoints, bec_logger
 from bec_utils.connector import ConnectorBase
+from bec_utils.observer import Observer, ObserverManagerBase
 from IPython.terminal.prompts import Prompts, Token
 from rich.console import Console
 from rich.table import Table
@@ -50,6 +51,7 @@ class BECClient(BECService):
         self._hli_funcs = {}
         self._scripts = {}
         self._initialized = True
+        self.observer = None
 
     def start(self):
         """start the client"""
@@ -64,6 +66,7 @@ class BECClient(BECService):
         self._start_alarm_handler()
         self._configure_logger()
         self.load_all_user_scripts()
+        self._start_observer()
 
     def alarms(self, severity=Alarms.WARNING):
         """get the next alarm with at least the specified severity"""
@@ -204,6 +207,9 @@ class BECClient(BECService):
         logger.info("Starting alarm listener")
         self.alarm_handler = AlarmHandler(self.connector)
         self.alarm_handler.start()
+
+    def _start_observer(self):
+        self.observer = ObserverManagerBase(self.device_manager)
 
     def shutdown(self):
         """shutdown the client and all its components"""
