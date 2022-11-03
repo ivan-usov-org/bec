@@ -134,6 +134,7 @@ class FileWriterManager(BECService):
             logger.info(f"Writing file {file_path}")
             self.file_writer.write(file_path=file_path, data=storage)
         except:
+            logger.error(f"Failed to write file for scan {scan}")
             successful = False
         self.scan_storage.pop(scanID)
         self.producer.set_and_publish(
