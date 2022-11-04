@@ -71,13 +71,12 @@ class BECClient(BECService):
         logger.info("Starting new client")
         self._start_device_manager()
         self._start_exit_handler()
-        self._configure_prompt()
+        self._configure_ipython()
         self._start_scan_queue()
         self._start_alarm_handler()
         self._configure_logger()
         self.load_all_user_scripts()
         self.config = ConfigHelper(self)
-        self._load_magics()
 
     def alarms(self, severity=Alarms.WARNING):
         """get the next alarm with at least the specified severity"""
@@ -178,10 +177,11 @@ class BECClient(BECService):
         if self._ip:
             self._ip.prompts.scan_number = scan_number + 1
 
-    def _configure_prompt(self):
+    def _configure_ipython(self):
         self._ip = IPython.get_ipython()
         if self._ip is not None:
             self._ip.prompts = BECClientPrompt(ip=self._ip, client=self, username="demo")
+            self._load_magics()
 
     def _configure_logger(self):
         bec_logger.logger.remove()
