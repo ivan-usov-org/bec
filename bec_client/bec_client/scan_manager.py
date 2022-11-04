@@ -198,6 +198,23 @@ class ScanManager:
             ).dumps(),
         )
 
+    def request_scan_halt(self, scanID=None):
+        """request a scan halt
+
+        Args:
+            scanID (str, optional): ScanID. Defaults to None.
+
+        """
+        if scanID is None:
+            scanID = self.scan_storage.current_scanID
+        logger.info("Requesting scan halt")
+        self.producer.send(
+            MessageEndpoints.scan_queue_modification_request(),
+            BECMessage.ScanQueueModificationMessage(
+                scanID=scanID, action="halt", parameter={}
+            ).dumps(),
+        )
+
     def request_scan_continuation(self, scanID=None):
         """request a scan continuation
 

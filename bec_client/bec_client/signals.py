@@ -8,10 +8,10 @@ PAUSE_MSG = """
 The Scan Queue is entering a paused state. These are your options for changing
 the state of the queue:
 
-bk.queue.resume()    Resume the scan.
-bk.queue.abort()     Perform cleanup, then kill plan. Mark exit_stats='aborted'.
-bk.queue.stop()      Perform cleanup, then kill plan. Mark exit_status='success'.
-bk.queue.halt()      Emergency Stop: Do not perform cleanup --- just stop.
+%resume              Resume the scan.
+%restart             Restart the scan.
+%abort               Perform cleanup, then kill plan. Mark exit_stats='aborted'.
+%halt                Emergency Stop: Do not perform cleanup --- just stop.
 """
 
 
