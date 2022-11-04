@@ -26,6 +26,7 @@ class Observer:
         low_limit: float = None,
         high_limit: float = None,
         target_value=None,
+        parent=None,
     ):
         self.name = name
         self.device = device
@@ -36,6 +37,7 @@ class Observer:
         self._check_limits(limits, low_limit, high_limit)
 
         self.target_value = target_value
+        self.parent = parent
         self._enabled = True
 
         self._check_device()
