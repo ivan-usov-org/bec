@@ -4,7 +4,6 @@ import threading
 import time
 from typing import TYPE_CHECKING, List
 
-import numpy as np
 from bec_utils import BECMessage, MessageEndpoints, bec_logger
 from bec_utils.observer import Observer, ObserverManagerBase
 
@@ -22,30 +21,29 @@ class ObserverThread(threading.Thread, Observer):
         super(threading.Thread, self).__init__(**kwargs)
         self.signal = threading.Event()
         self._triggered = False
+        self.producer = self.parent.device_manager.producer
 
     def run(self) -> None:
         while not self.signal.is_set():
             if not self._is_condition_met():
+                if self._triggered:
+                    self._send_command(trigger="on_resume")
+                    self._triggered = False
                 time.sleep(0.01)
                 continue
-            self._run_action()
+            if not self._triggered:
+                self._send_command(trigger="on_trigger")
+                self._triggered = True
+                continue
+            time.sleep(1)
             logger.debug(f"Running observer {self.name}.")
-
-    def _run_action(self):
-        if self._triggered:
-            self._send_command(trigger="on_resume")
-        else:
-            self._send_command(trigger="on_trigger")
-        self._triggered = not self._triggered
 
     def _send_command(self, trigger):
         action = getattr(self, trigger)
-        if action == "abort":
+        if action == "halt":
             return self._send_halt()
         if action == "abort":
             return self._send_abort()
-        if action == "resume":
-            return self._send_resume()
         if action == "deferred_pause":
             return self._send_deferred_pause()
         if action == "pause":
@@ -59,7 +57,7 @@ class ObserverThread(threading.Thread, Observer):
         return None
 
     def _send_abort(self):
-        self.parent.producer.send(
+        self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
             BECMessage.ScanQueueModificationMessage(
                 scanID=None, action="abort", parameter={}
@@ -67,23 +65,15 @@ class ObserverThread(threading.Thread, Observer):
         )
 
     def _send_halt(self):
-        self.parent.producer.send(
+        self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
             BECMessage.ScanQueueModificationMessage(
                 scanID=None, action="halt", parameter={}
             ).dumps(),
         )
 
-    def _send_resume(self):
-        self.parent.producer.send(
-            MessageEndpoints.scan_queue_modification_request(),
-            BECMessage.ScanQueueModificationMessage(
-                scanID=None, action="resume", parameter={}
-            ).dumps(),
-        )
-
     def _send_deferred_pause(self) -> None:
-        self.parent.producer.send(
+        self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
             BECMessage.ScanQueueModificationMessage(
                 scanID=None, action="deferred_pause", parameter={}
@@ -91,7 +81,7 @@ class ObserverThread(threading.Thread, Observer):
         )
 
     def _send_pause(self) -> None:
-        self.parent.producer.send(
+        self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
             BECMessage.ScanQueueModificationMessage(
                 scanID=None, action="pause", parameter={}
@@ -99,7 +89,7 @@ class ObserverThread(threading.Thread, Observer):
         )
 
     def _send_continuation(self):
-        self.parent.producer.send(
+        self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
             BECMessage.ScanQueueModificationMessage(
                 scanID=None, action="continue", parameter={}
@@ -109,7 +99,7 @@ class ObserverThread(threading.Thread, Observer):
     def _send_queue_reset(self):
         """request a scan queue reset"""
         logger.info("Requesting a queue reset")
-        self.parent.producer.send(
+        self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
             BECMessage.ScanQueueModificationMessage(
                 scanID=None, action="clear", parameter={}
@@ -117,7 +107,7 @@ class ObserverThread(threading.Thread, Observer):
         )
 
     def _send_scan_restart(self):
-        self.parent.producer.send(
+        self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
             BECMessage.ScanQueueModificationMessage(
                 scanID=None, action="restart", parameter={"position": "replace"}
@@ -126,7 +116,7 @@ class ObserverThread(threading.Thread, Observer):
 
     def _is_condition_met(self):
         dev = self.parent.device_manager.devices[self.device]
-        val = dev.read(cached=True)
+        val = dev.readback()
         if self.low_limit is not None:
             if val["value"] < self.low_limit:
                 return True

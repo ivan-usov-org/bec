@@ -11,8 +11,12 @@ from bec_utils.devicemanager import DeviceManagerBase
 
 class ObserverAction(str, enum.Enum):
     PAUSE = "pause"
-    RESUME = "resume"
     RESTART = "restart"
+    ABORT = "abort"
+    DEFERRED_PAUSE = "deferred_pause"
+    CONTINUE = "continue"
+    RESET = "reset"
+    HALT = "halt"
 
 
 class Observer:
@@ -96,9 +100,9 @@ class Observer:
             self.device = self.device.name
 
     def _check_trigger(self):
-        if not isinstance(self.on_trigger, ObserverAction):
+        if self.on_trigger is not None and not isinstance(self.on_trigger, ObserverAction):
             self.on_trigger = ObserverAction(self.on_trigger)
-        if not isinstance(self.on_resume, ObserverAction):
+        if self.on_resume is not None and not isinstance(self.on_resume, ObserverAction):
             self.on_resume = ObserverAction(self.on_resume)
 
     def _check_targets(self):
@@ -133,8 +137,8 @@ class ObserverManagerBase:
     def observer(self):
         return self._observer
 
-    @typechecked
-    def add_observer(self, observer: Observer, ignore_existing=False):
+    def add_observer(self, *, ignore_existing=False, **kwargs):
+        observer = Observer(**kwargs)
         if not hasattr(self.device_manager.devices, observer.device):
             AttributeError(
                 f"The specified observer uses device {observer.device} which is currently not configured."
@@ -145,6 +149,12 @@ class ObserverManagerBase:
             )
         self._observer.append(observer)
         self.send_observer()
+
+    def delete_observer(self, name: str):
+        for obs in self.observer:
+            if obs.name == name:
+                self.observer.remove(obs)
+                return
 
     def _is_device_observed(self, device: str) -> bool:
         tmp = self.observer
@@ -169,4 +179,4 @@ class ObserverManagerBase:
         )
 
     def list_observer(self):
-        pass
+        print(self.observer)
