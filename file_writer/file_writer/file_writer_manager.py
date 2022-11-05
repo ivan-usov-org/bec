@@ -125,10 +125,10 @@ class FileWriterManager(BECService):
         storage = self.scan_storage[scanID]
         scan = storage.scan_number
         scan_bundle = 1000
-        scan_dir = f"S{scan//scan_bundle:04d}-{scan//scan_bundle+scan_bundle-1:04d}/S{scan:04d}"
+        scan_dir = self._get_scan_dir(scan_bundle, scan, leading_zeros=5)
         data_dir = Path(os.path.join(self.base_path, "data", scan_dir))
         data_dir.mkdir(parents=True, exist_ok=True)
-        file_path = os.path.abspath(os.path.join(data_dir, f"S{storage.scan_number:04d}.h5"))
+        file_path = os.path.abspath(os.path.join(data_dir, f"S{storage.scan_number:05d}.h5"))
         successful = True
         try:
             logger.info(f"Writing file {file_path}")
@@ -140,3 +140,9 @@ class FileWriterManager(BECService):
             MessageEndpoints.public_file(scanID),
             BECMessage.FileMessage(file_path=file_path, successful=successful).dumps(),
         )
+
+    def _get_scan_dir(self, scan_bundle, scan_number, leading_zeros=None):
+        if leading_zeros is None:
+            leading_zeros = len(str(scan_bundle))
+        floor_dir = scan_number // scan_bundle * scan_bundle
+        return f"S{floor_dir:0{leading_zeros}d}-{floor_dir+scan_bundle-1:0{leading_zeros}d}/S{scan_number:0{leading_zeros}d}"
