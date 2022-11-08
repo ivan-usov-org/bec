@@ -4,9 +4,8 @@ import time
 import uuid
 
 import msgpack
-from typeguard import typechecked
-
 from bec_utils.connector import ConnectorBase
+from typeguard import typechecked
 
 from .BECMessage import (
     BECStatus,
@@ -123,24 +122,26 @@ class Device:
         self.set_user_parameter(param)
 
     def __repr__(self):
-        config = "".join(
-            [f"\t{key}: {val}\n" for key, val in self._config.get("deviceConfig").items()]
-        )
-        separator = "--" * 10
-        return (
-            f"{type(self).__name__}(name={self.name}, enabled={self.enabled}):\n"
-            f"{separator}\n"
-            "Details:\n"
-            f"\tStatus: {'enabled' if self.enabled else 'disabled'}\n"
-            f"\tLast recorded value: {self.read(cached=True)}\n"
-            f"\tDevice class': {self._config.get('deviceClass')}\n"
-            f"\tAcquisition group': {self._config['acquisitionConfig'].get('acquisitionGroup')}\n"
-            f"\tDevice group': {self._config.get('deviceGroup')}\n"
-            f"\tUser parameter': {self._config.get('userParameter')}\n"
-            f"{separator}\n"
-            "Config:\n"
-            f"{config}"
-        )
+        if isinstance(self.parent, DeviceManagerBase):
+            config = "".join(
+                [f"\t{key}: {val}\n" for key, val in self._config.get("deviceConfig").items()]
+            )
+            separator = "--" * 10
+            return (
+                f"{type(self).__name__}(name={self.name}, enabled={self.enabled}):\n"
+                f"{separator}\n"
+                "Details:\n"
+                f"\tStatus: {'enabled' if self.enabled else 'disabled'}\n"
+                f"\tLast recorded value: {self.read(cached=True)}\n"
+                f"\tDevice class: {self._config.get('deviceClass')}\n"
+                f"\tAcquisition group: {self._config['acquisitionConfig'].get('acquisitionGroup')}\n"
+                f"\tDevice group: {self._config.get('deviceGroup')}\n"
+                f"\tUser parameter: {self._config.get('userParameter')}\n"
+                f"{separator}\n"
+                "Config:\n"
+                f"{config}"
+            )
+        return f"{type(self).__name__}(name={self.name}, enabled={self.enabled})"
 
 
 class DeviceContainer(dict):

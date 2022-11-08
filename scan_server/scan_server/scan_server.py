@@ -66,7 +66,7 @@ class ScanServer(BECService):
     @staticmethod
     def _alarm_callback(msg, parent: ScanServer, **_kwargs):
         metadata = BECMessage.AlarmMessage.loads(msg.value).metadata
-        queue = metadata.get("stream")
+        queue = metadata.get("stream", "primary")
         # shouldn't this be specific to a single queue?
         parent.queue_manager.set_abort(queue=queue)
 
