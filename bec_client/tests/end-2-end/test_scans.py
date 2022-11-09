@@ -4,8 +4,6 @@ import time
 
 import numpy as np
 import pytest
-from bec_client import BECClient
-from bec_client.alarm_handler import AlarmBase
 from bec_utils import (
     BECMessage,
     MessageEndpoints,
@@ -14,6 +12,9 @@ from bec_utils import (
     bec_logger,
 )
 from bec_utils.bec_errors import ScanAbortion, ScanInterruption
+
+from bec_client import BECClient
+from bec_client.alarm_handler import AlarmBase
 
 logger = bec_logger.logger
 
@@ -101,8 +102,8 @@ def test_fermat_scan(capsys, client):
     status = scans.fermat_scan(
         dev.samx, -5, 5, dev.samy, -5, 5, step=0.5, exp_time=0.01, relative=True
     )
-    assert len(status.scan.data) == 199
-    assert status.scan.num_points == 199
+    assert len(status.scan.data) == 393
+    assert status.scan.num_points == 393
     captured = capsys.readouterr()
     assert "finished. Scan ID" in captured.out
 

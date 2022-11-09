@@ -117,7 +117,8 @@ class BECClient(BECService):
     def forget_all_user_scripts(self) -> None:
         """unload / remove loaded user scripts from builtins. The files will remain on disk though!"""
         for name in self._scripts:
-            self.forget_user_script(name)
+            builtins.__dict__.pop(name)
+        self._scripts.clear()
 
     def load_user_script(self, file: str) -> None:
         """load a user script file and import all its definitions

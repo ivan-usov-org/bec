@@ -188,7 +188,7 @@ class DeviceBase(RPCBase, Device):
         pass
 
     @rpc
-    def read(self, cached=False, use_readback=False):
+    def read(self, cached=False, use_readback=True):
         if use_readback:
             val = self.parent.producer.get(MessageEndpoints.device_readback(self.name))
         else:
@@ -323,8 +323,8 @@ class Positioner(DeviceBase):
         limits = [self.low_limit, val]
         self.update_config({"deviceConfig": {"limits": limits}})
 
-    def move(self, val: float):
-        return self.parent.parent.scans.mv(self, val)
+    def move(self, val: float, relative=False):
+        return self.parent.parent.scans.mv(self, val, relative=relative)
 
     @rpc
     def position(self):

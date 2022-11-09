@@ -90,7 +90,7 @@ def get_fermat_spiral_pos(
 
     length_axis1 = abs(m1_stop - m1_start)
     length_axis2 = abs(m2_stop - m2_start)
-    n_max = length_axis1 * length_axis2 * 2
+    n_max = int(length_axis1 * length_axis2 * 3.2 / step / step)
 
     for ii in range(start, n_max):
         radius = step * 0.57 * np.sqrt(ii)
