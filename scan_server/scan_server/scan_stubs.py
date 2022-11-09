@@ -113,13 +113,14 @@ class ScanStubs:
         yield from self.wait(device=device, wait_type="read", group=group, wait_group=wait_group)
 
     def open_scan(
-        self, *, scan_motors: list, num_pos: int, scan_name: str, scan_type: str, metadata=None
+        self, *, scan_motors: list, num_pos: int, scan_name: str, scan_type: str, positions=None, metadata=None
     ):
         """Open a new scan.
 
         Args:
             scan_motors (list): List of scan motors.
             num_pos (int): Number of positions within the scope of this scan.
+            positions (list): List of positions for this scan.
             scan_name (str): Scan name.
             scan_type (str): Scan type (e.g. 'step' or 'fly')
 
@@ -130,6 +131,7 @@ class ScanStubs:
             parameter={
                 "primary": scan_motors,
                 "num_points": num_pos,
+                "positions": positions,
                 "scan_name": scan_name,
                 "scan_type": scan_type,
             },

@@ -304,6 +304,7 @@ class ScanBase(RequestBase):
         yield from self.stubs.open_scan(
             scan_motors=self.scan_motors,
             num_pos=self.num_pos,
+            positions=self.positions.tolist(),
             scan_name=self.scan_name,
             scan_type=self.scan_type,
         )
