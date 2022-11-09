@@ -47,7 +47,6 @@ class ScanStubs:
 
         Examples:
             >>> send_rpc_and_wait("samx", "controller.my_custom_function")
-
         """
         rpc_id = str(uuid.uuid4())
         parameter = {
@@ -113,7 +112,14 @@ class ScanStubs:
         yield from self.wait(device=device, wait_type="read", group=group, wait_group=wait_group)
 
     def open_scan(
-        self, *, scan_motors: list, num_pos: int, scan_name: str, scan_type: str, positions=None, metadata=None
+        self,
+        *,
+        scan_motors: list,
+        num_pos: int,
+        scan_name: str,
+        scan_type: str,
+        positions=None,
+        metadata=None,
     ):
         """Open a new scan.
 
