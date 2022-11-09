@@ -13,6 +13,7 @@ services:
 stages:
   - Formatter
   - Test
+  - Deploy
 formatter:
   stage: Formatter
   script:
@@ -43,7 +44,7 @@ tests:
     - pip install -e ./scan_bundler
     - pip install -e ./bec_client
     - pip install -e ./file_writer
-    - coverage run --source=./bec_utils/bec_utils,./device_server/device_server,./scan_server/scan_server,./scan_bundler/scan_bundler,./bec_client/bec_client,./file_writer/file_writer -m pytest -v --random-order ./bec_utils/tests ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests ./file_writer/tests
+    - coverage run --source=./bec_utils/bec_utils,./device_server/device_server,./scan_server/scan_server,./scan_bundler/scan_bundler,./bec_client/bec_client,./file_writer/file_writer --omit=*/bec_client/bec_client/plugins/*,*/bec_client/scripts/* -m pytest -v --random-order ./bec_utils/tests ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests ./file_writer/tests
     - coverage report
     - coverage xml
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
@@ -103,3 +104,16 @@ end-2-end:
     - docker cp scan_bundler:/code/bec/scan_bundler/ScanBundler.log $CI_PROJECT_DIR/ScanBundler.log
     - docker cp device_server:/code/bec/device_server/DeviceServer.log $CI_PROJECT_DIR/DeviceServer.log
     - docker cp end2end_client:/code/bec/bec_client/BKClient.log $CI_PROJECT_DIR/BKClient.log
+
+pages:
+  stage: Deploy
+  script:
+  - pip install -U sphinx
+  - pip install sphinx-rtd-theme
+  - sphinx-build -b html ./docs/source public
+  artifacts:
+    paths:
+    - public
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from bec_utils import BECMessage, BECService, MessageEndpoints, bec_logger
+from bec_utils import BECMessage, BECService, BECStatus, MessageEndpoints, bec_logger
 from bec_utils.connector import ConnectorBase
 
 from .devicemanager import DeviceManagerScanServer
@@ -32,7 +32,8 @@ class ScanServer(BECService):
         self._start_scan_assembler()
         self._start_scan_server()
         self._start_alarm_handler()
-        self.scan_number = 0
+        self.scan_number = 1
+        self.status = BECStatus.RUNNING
 
     def _start_device_manager(self):
         self.device_manager = DeviceManagerScanServer(self.connector, self.scibec_url)
@@ -65,7 +66,7 @@ class ScanServer(BECService):
     @staticmethod
     def _alarm_callback(msg, parent: ScanServer, **_kwargs):
         metadata = BECMessage.AlarmMessage.loads(msg.value).metadata
-        queue = metadata.get("stream")
+        queue = metadata.get("stream", "primary")
         # shouldn't this be specific to a single queue?
         parent.queue_manager.set_abort(queue=queue)
 
@@ -78,10 +79,6 @@ class ScanServer(BECService):
     def scan_number(self, val: int):
         """set the current scan number"""
         self.producer.set(MessageEndpoints.scan_number(), val)
-
-    def load_config_from_disk(self, file_path: str) -> None:
-        """load a config file from disk"""
-        self.device_manager.load_config_from_disk(file_path)
 
     def shutdown(self) -> None:
         """shutdown the scan server"""

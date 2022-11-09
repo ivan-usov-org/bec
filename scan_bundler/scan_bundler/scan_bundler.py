@@ -40,7 +40,7 @@ class ScanBundler(BECService):
         self.executor_tasks = collections.deque(maxlen=100)
         self._send_buffer = Queue()
         self._start_buffered_producer()
-        self.scanID_history = collections.deque(maxlen=20)
+        self.scanID_history = collections.deque(maxlen=10)
         self._lock = threading.Lock()
 
     def _start_buffered_producer(self):
@@ -105,8 +105,8 @@ class ScanBundler(BECService):
         """handle scan status messages"""
         logger.info(f"Received new scan status: {msg}")
         scanID = msg.content["scanID"]
+        self.cleanup_storage()
         if not scanID in self.sync_storage:
-            self.cleanup_storage()
             self._initialize_scan_container(msg)
             if scanID not in self.scanID_history:
                 self.scanID_history.append(scanID)
@@ -348,6 +348,12 @@ class ScanBundler(BECService):
                         logger.info(f"Sending baseline readings for scanID {scanID}.")
                         logger.debug("Baseline: ", self.sync_storage[scanID]["baseline"])
                         self._send_baseline(scanID=scanID)
+                        self.baseline_devices[scanID]["done"] = {
+                            dev.name: False
+                            for dev in self.device_manager.devices.baseline_devices(
+                                self.scan_motors[scanID]
+                            )
+                        }
 
     def _prepare_bluesky_event_data(self, scanID, pointID) -> dict:
         # event = {
@@ -425,8 +431,6 @@ class ScanBundler(BECService):
         remove_scanIDs = []
         for scanID, entry in self.sync_storage.items():
             if entry.get("status") not in ["closed", "aborted"]:
-                continue
-            if len(entry.keys()) != 3:
                 continue
             if scanID in self.scanID_history:
                 continue

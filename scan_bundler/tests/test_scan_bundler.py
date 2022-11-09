@@ -6,7 +6,7 @@ import bec_utils
 import pytest
 import yaml
 from bec_utils import BECMessage, MessageEndpoints
-from bec_utils.tests.utils import ConnectorMock
+from bec_utils.tests.utils import ConnectorMock, create_session_from_config
 from scan_bundler import ScanBundler
 from scan_bundler.devicemanager_sb import DeviceManagerSB
 
@@ -25,8 +25,8 @@ def load_ScanBundlerMock():
     connector = ConnectorMock("")
     device_manager = DeviceManagerSB(connector, "")
     device_manager.producer = connector.producer()
-    with open(f"{dir_path}/tests/test_session.yaml", "r") as session_file:
-        device_manager._session = yaml.safe_load(session_file)
+    with open(f"{dir_path}/tests/test_config.yaml", "r") as session_file:
+        device_manager._session = create_session_from_config(yaml.safe_load(session_file))
     device_manager._load_session()
     return ScanBundlerMock(device_manager, connector)
 

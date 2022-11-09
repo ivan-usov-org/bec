@@ -1,7 +1,13 @@
+import builtins
+import os
 import time
 from collections import defaultdict
 
 import epics
+import numpy as np
+from bec_utils import bec_logger
+
+logger = bec_logger.logger
 
 
 def epics_put(channel, value):
@@ -94,22 +100,6 @@ class XrayEyeAlign:
         epics_put("XOMNYI-XEYE-MESSAGE:0.DESC", msg)
 
     def align(self):
-        # TODO prepare output files
-        # dname = sprintf("%sptychotomoalign_scannum.txt",_spec_internal_dir())
-        # unix(sprintf("rm -f %s",dname))
-
-        # dname = sprintf("%sptychotomoalign_numproj.txt",_spec_internal_dir())
-        # unix(sprintf("rm -f %s",dname))
-
-        # #dname = sprintf("%sptychotomoalign_*.txt",_spec_internal_dir())
-        # #unix(sprintf("rm -f %s",dname))
-
-        # dname = sprintf("%sxrayeye_alignmentvalue_x*",_spec_internal_dir())
-        # unix(sprintf("rm -f %s",dname))
-
-        # dname = sprintf("%sptycho_alignmentvalue_x*",_spec_internal_dir())
-        # unix(sprintf("rm -f %s",dname))
-
         # this makes sure we are in a defined state
         self._disable_rt_feedback()
 
@@ -287,74 +277,272 @@ class XrayEyeAlign:
                 )
                 alignment_values_file.write(f"{(k-2)*45}\t{fovx_offset}\t{fovy_offset}\n")
 
+    def read_alignment_parameters(self, dir_path="~/Data10/specES1/internal/"):
+        tomo_fit_xray_eye = np.zeros((2, 3))
+        with open(os.path.join(dir_path, "ptychotomoalign_Ax.txt"), "r") as file:
+            tomo_fit_xray_eye[0][0] = file.readline()
 
-# # ----------------------------------------------------------------------
-# def _ttl_check_channel_out(channel) '{
-#   if ((channel < 1) || (channel > _ttl_out_channel_max)) {
-#     printf("TTL: channel must be within the range from 1 to %d. Current value is %.0f.\n",\
-#            _ttl_out_channel_max,channel)
-#     exit
-#   }
-#   return (sprintf("X12SA-ES1-TTL:OUT_%02.0f",channel))
-# }'
+        with open(os.path.join(dir_path, "ptychotomoalign_Bx.txt"), "r") as file:
+            tomo_fit_xray_eye[0][1] = file.readline()
+
+        with open(os.path.join(dir_path, "ptychotomoalign_Cx.txt"), "r") as file:
+            tomo_fit_xray_eye[0][2] = file.readline()
+
+        with open(os.path.join(dir_path, "ptychotomoalign_Ay.txt"), "r") as file:
+            tomo_fit_xray_eye[1][0] = file.readline()
+
+        with open(os.path.join(dir_path, "ptychotomoalign_By.txt"), "r") as file:
+            tomo_fit_xray_eye[1][1] = file.readline()
+
+        with open(os.path.join(dir_path, "ptychotomoalign_Cy.txt"), "r") as file:
+            tomo_fit_xray_eye[1][2] = file.readline()
+
+        self.client.set_global_var("tomo_fit_xray_eye", tomo_fit_xray_eye.tolist())
+        # x amp, phase, offset, y amp, phase, offset
+        #  0 0    0 1    0 2     1 0    1 1    1 2
+
+        print("New alignment parameters loaded from X-ray eye\n")
+        print(
+            f"X Amplitude {tomo_fit_xray_eye[0][0]},"
+            f"X Phase {tomo_fit_xray_eye[0][1]}, "
+            f"X Offset {tomo_fit_xray_eye[0][2]},"
+            f"Y Amplitude {tomo_fit_xray_eye[1][0]},"
+            f"Y Phase {tomo_fit_xray_eye[1][1]},"
+            f"Y Offset {tomo_fit_xray_eye[1][2]}"
+        )
 
 
-# io.mac
-# # ----------------------------------------------------------------------
-# def _ttl_out(channel,value) '{
-#   global _io_debug
-#   local epics_channel
+class LamNI:
+    def __init__(self, client):
+        self.client = client
+        self.align = XrayEyeAlign(client)
+        self.corr_pos_x = []
+        self.corr_pos_y = []
+        self.corr_angle = []
 
-#   # check for valid channel number
-#   epics_channel = _ttl_check_channel_out(channel)
+    @property
+    def tomo_fovx_offset(self):
+        val = self.client.get_global_var("tomo_fov_offset")
+        if val is None:
+            return 0.0
+        return val[0] / 1000
 
-#   if ((value != 0) && (value != 1)) {
-#     printf("ttl_out: value must be 0 or 1. Current value is %.0f.\n",value)
-#     exit
-#   }
+    @tomo_fovx_offset.setter
+    def tomo_fovx_offset(self, val: float):
+        self.client.set_global_var("tomo_fov_offset", val)
 
-#   epics_put_stop(sprintf("%s.VAL",epics_channel),value,2.0,"_ttl_out")
-#   if (_io_debug) {
-#     printf("_ttl_out(%d,%d)\n",channel,value)
-#   }
-# }'
+    @property
+    def tomo_fovy_offset(self):
+        val = self.client.get_global_var("tomo_fov_offset")
+        if val is None:
+            return 0.0
+        return val[1] / 1000
 
+    @tomo_fovy_offset.setter
+    def tomo_fovy_offset(self, val: float):
+        self.client.set_global_var("tomo_fov_offset", val)
 
-# shutter.mac
-# ----------------------------------------------------------------------
-# def fshopen '{
-#   _ttl_out(_fsh_ttl_channel,1)
-# }'
+    @property
+    def tomo_shellstep(self):
+        val = self.client.get_global_var("tomo_shellstep")
+        if val is None:
+            return 1
+        return val
 
-# # ----------------------------------------------------------------------
-# def fshclose '{
-#   global _fsh_close_delay_active
-#   global _fsh_single_delay_active
+    @tomo_shellstep.setter
+    def tomo_shellstep(self, val: float):
+        self.client.set_global_var("tomo_shellstep", val)
 
-#   # ensure that the delayed closing is deactivated
-#   epics_put("X12SA-ES1-FSHDELAY:ON","OFF")
-#   _fsh_close_delay_active = 0
-#   _fsh_single_delay_active = 0
+    @property
+    def tomo_circfov(self):
+        val = self.client.get_global_var("tomo_circfov")
+        if val is None:
+            return 0.0
+        return val
 
-#   # close the fast shutter
-#   _ttl_out(_fsh_ttl_channel,0)
-# }'
+    @tomo_circfov.setter
+    def tomo_circfov(self, val: float):
+        self.client.set_global_var("tomo_circfov", val)
 
-# # ----------------------------------------------------------------------
-# def fshon '{
-#   global _fsh_is_on
+    @property
+    def tomo_countingtime(self):
+        val = self.client.get_global_var("tomo_countingtime")
+        if val is None:
+            return 0.0
+        return val
 
-#   if (_fsh_is_on) {
-#     printf("The fast shutter is already enabled.\n")
-#   } else {
-#     printf("Enabling the fast shutter.\n")
-#   }
+    @tomo_countingtime.setter
+    def tomo_countingtime(self, val: float):
+        self.client.set_global_var("tomo_countingtime", val)
 
-#   _fsh_is_on = 1
-#   ttl_out_auto _fsh_ttl_channel 1
-#   if (_io_wait_time < _fsh_wait_time_sec) {
-#     printf("increasing the IO wait time from %.3f to %.3f seconds:\n",\
-#            _io_wait_time,_fsh_wait_time_sec)
-#     io_wait _fsh_wait_time_sec
-#   }
-# }'
+    @property
+    def manual_shift_x(self):
+        val = self.client.get_global_var("manual_shift_x")
+        if val is None:
+            return 0.0
+        return val
+
+    @manual_shift_x.setter
+    def manual_shift_x(self, val: float):
+        self.client.set_global_var("manual_shift_x", val)
+
+    @property
+    def manual_shift_y(self):
+        val = self.client.get_global_var("manual_shift_y")
+        if val is None:
+            return 0.0
+        return val
+
+    @manual_shift_y.setter
+    def manual_shift_y(self, val: float):
+        self.client.set_global_var("manual_shift_y", val)
+
+    @property
+    def lamni_piezo_range(self):
+        val = self.client.get_global_var("lamni_piezo_range")
+        if val is None:
+            return 0.0
+        return val
+
+    @lamni_piezo_range.setter
+    def lamni_piezo_range(self, val: float):
+        self.client.set_global_var("lamni_piezo_range", val)
+
+    def tomo_scan_projection(self, angle: float):
+        scans = builtins.__dict__.get("scans")
+        additional_correction = self.compute_additional_correction(angle)
+        correction_xeye_mu = self.lamni_compute_additional_correction_xeye_mu(angle)
+        logger.info(
+            f"scans.lamni_fermat_scan(fov_size=[20,20], step={self.tomo_shellstep}, stitch_x={0}, stitch_y={0}, stitch_overlap={1},"
+            f"center_x={self.tomo_fovx_offset}, center_y={self.tomo_fovy_offset}, "
+            f"shift_x={self.manual_shift_x+correction_xeye_mu[0]-additional_correction[0]}, "
+            f"shift_y={self.manual_shift_y+correction_xeye_mu[1]-additional_correction[1]}, "
+            f"fov_circular={self.tomo_circfov}, angle={angle}, scan_type='fly')"
+        )
+        return scans.lamni_fermat_scan(
+            fov_size=[20, 20],
+            step=self.tomo_shellstep,
+            stitch_x=0,
+            stitch_y=0,
+            stitch_overlap=1,
+            center_x=self.tomo_fovx_offset,
+            center_y=self.tomo_fovy_offset,
+            shift_x=(self.manual_shift_x + correction_xeye_mu[0] - additional_correction[0]),
+            shift_y=(self.manual_shift_y + correction_xeye_mu[1] - additional_correction[1]),
+            fov_circular=self.tomo_circfov,
+            angle=angle,
+            scan_type="fly",
+        )
+
+    def lamni_compute_additional_correction_xeye_mu(self, angle):
+        import math
+
+        tomo_fit_xray_eye = self.client.get_global_var("tomo_fit_xray_eye")
+        if tomo_fit_xray_eye is None:
+            print("Not applying any additional correction. No x-ray eye data available.\n")
+            return (0, 0)
+
+        # x amp, phase, offset, y amp, phase, offset
+        #  0 0    0 1    0 2     1 0    1 1    1 2
+        correction_x = (
+            tomo_fit_xray_eye[0][0] * math.sin(math.radians(angle) + tomo_fit_xray_eye[0][1])
+            + tomo_fit_xray_eye[0][2]
+        ) / 1000
+        correction_y = (
+            tomo_fit_xray_eye[1][0] * math.sin(math.radians(angle) + tomo_fit_xray_eye[1][1])
+            + tomo_fit_xray_eye[1][2]
+        ) / 1000
+
+        print(f"Xeye correction x {correction_x}, y {correction_y} for angle {angle}\n")
+        return (correction_x, correction_y)
+
+    def compute_additional_correction(self, angle):
+        import math
+
+        if not self.corr_pos_x:
+            print("Not applying any additional correction. No data available.\n")
+            return (0, 0)
+
+        # find index of closest angle
+        for j in range(len(self.corr_pos_x)):
+            newangledelta = math.fabs(self.corr_angle[j] - angle)
+            if j == 0:
+                angledelta = newangledelta
+                additional_correction_shift_x = self.corr_pos_x[j]
+                additional_correction_shift_y = self.corr_pos_y[j]
+                continue
+
+            if newangledelta < angledelta:
+                additional_correction_shift_x = self.corr_pos_x[j]
+                additional_correction_shift_y = self.corr_pos_y[j]
+                angledelta = newangledelta
+
+        if additional_correction_shift_x == 0 and angle < self.corr_angle[0]:
+            additional_correction_shift_x = self.corr_pos_x[0]
+            additional_correction_shift_y = self.corr_pos_y[0]
+
+        if additional_correction_shift_x == 0 and angle > self.corr_angle[-1]:
+            additional_correction_shift_x = self.corr_pos_x[-1]
+            additional_correction_shift_y = self.corr_pos_y[-1]
+        logger.info(
+            f"Additional correction shifts: {additional_correction_shift_x} {additional_correction_shift_y}"
+        )
+        return (additional_correction_shift_x, additional_correction_shift_y)
+
+    def lamni_read_additional_correction(self, correction_file: str):
+
+        with open(correction_file, "r") as f:
+            num_elements = f.readline()
+            int_num_elements = int(num_elements.split(" ")[2])
+            print(int_num_elements)
+            corr_pos_x = []
+            corr_pos_y = []
+            corr_angle = []
+            for j in range(0, int_num_elements * 3):
+                line = f.readline()
+                value = line.split(" ")[2]
+                name = line.split(" ")[0].split("[")[0]
+                if name == "corr_pos_x":
+                    corr_pos_x.append(float(value) / 1000)
+                elif name == "corr_pos_y":
+                    corr_pos_y.append(float(value) / 1000)
+                elif name == "corr_angle":
+                    corr_angle.append(float(value))
+        self.corr_pos_x = corr_pos_x
+        self.corr_pos_y = corr_pos_y
+        self.corr_angle = corr_angle
+        return
+
+    def sub_tomo_scan(self, subtomo_number, start_angle=None, tomo_stepsize=10.0):
+
+        if start_angle is None:
+            if subtomo_number == 1:
+                start_angle = 0
+            elif subtomo_number == 2:
+                start_angle = tomo_stepsize / 8.0 * 4
+            elif subtomo_number == 3:
+                start_angle = tomo_stepsize / 8.0 * 2
+            elif subtomo_number == 4:
+                start_angle = tomo_stepsize / 8.0 * 6
+            elif subtomo_number == 5:
+                start_angle = tomo_stepsize / 8.0 * 1
+            elif subtomo_number == 6:
+                start_angle = tomo_stepsize / 8.0 * 5
+            elif subtomo_number == 7:
+                start_angle = tomo_stepsize / 8.0 * 3
+            elif subtomo_number == 8:
+                start_angle = tomo_stepsize / 8.0 * 7
+
+        # _tomo_shift_angles (potential global variable)
+        _tomo_shift_angles = 0
+        angle_end = start_angle + 360
+        for angle in np.linspace(
+            start_angle + _tomo_shift_angles, angle_end, num=360 / tomo_stepsize + 1, endpoint=True
+        ):
+            if 0 <= angle < 360.05:
+                print(f"Starting LamNI scan for angle {angle}")
+                self.tomo_scan_projection(angle)
+
+    def tomo_scan(self):
+        for ii in range(8):
+            self.sub_tomo_scan(ii + 1)

@@ -7,6 +7,7 @@ import pytest
 from bec_utils import BECMessage as BMessage
 from bec_utils.devicemanager import DeviceContainer
 from bec_utils.tests.utils import ProducerMock
+
 from scan_plugins.LamNIFermatScan import LamNIFermatScan
 from scan_server.scans import (
     Acquire,
@@ -30,7 +31,7 @@ class DeviceMock:
     def __init__(self, name: str):
         self.name = name
         self.read_buffer = None
-        self.config = {"deviceConfig": {"limits": [-50, 50]}}
+        self._config = {"deviceConfig": {"limits": [-50, 50]}, "userParameter": None}
         self._enabled_set = True
         self._enabled = True
 
@@ -55,6 +56,10 @@ class DeviceMock:
     @enabled.setter
     def enabled(self, val: bool):
         self._enabled = val
+
+    @property
+    def user_parameter(self):
+        return self._config["userParameter"]
 
 
 class DMMock:
@@ -314,6 +319,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     parameter={
                         "primary": ["samx"],
                         "num_points": 3,
+                        "positions": [[-5.0], [0.0], [5.0]],
                         "scan_name": "grid_scan",
                         "scan_type": "step",
                     },
@@ -676,6 +682,7 @@ def test_fermat_scan(scan_msg, reference_scan_list):
                     parameter={
                         "primary": ["samx"],
                         "num_points": 3,
+                        "positions": [[-5.0], [0.0], [5.0]],
                         "scan_name": "cont_line_scan",
                         "scan_type": "step",
                     },
@@ -880,6 +887,7 @@ def test_device_rpc():
                     parameter={
                         "primary": [],
                         "num_points": 1,
+                        "positions": [],
                         "scan_name": "acquire",
                         "scan_type": "step",
                     },
@@ -1201,6 +1209,10 @@ def test_get_func_name_from_macro():
                     parameter={
                         "primary": ["rtx", "rty"],
                         "num_points": 2,
+                        "positions": [
+                            [-0.7700589354581364, -0.8406005210092851],
+                            [1.3681828686580249, 2.1508313829565298],
+                        ],
                         "scan_name": "lamni_fermat_scan",
                         "scan_type": "step",
                     },
@@ -1359,7 +1371,9 @@ def test_get_func_name_from_macro():
 def test_LamNIFermatScan(scan_msg, reference_scan_list):
     device_manager = DMMock()
     device_manager.add_device("lsamx")
+    device_manager.devices["lsamx"]._config["userParameter"] = {"center": 8.1}
     device_manager.add_device("lsamy")
+    device_manager.devices["lsamy"]._config["userParameter"] = {"center": 10}
     device_manager.add_device("samx")
     device_manager.devices["samx"].read_buffer = {"value": 0}
     device_manager.add_device("samy")
@@ -1385,5 +1399,13 @@ def test_LamNIFermatScan(scan_msg, reference_scan_list):
             )
             instr.content["parameter"]["value"] = scan_instructions[ii].content["parameter"][
                 "value"
+            ]
+        if instr.content["parameter"].get("positions"):
+            assert np.isclose(
+                instr.content["parameter"].get("positions"),
+                scan_instructions[ii].content["parameter"].get("positions"),
+            ).all()
+            instr.content["parameter"]["positions"] = scan_instructions[ii].content["parameter"][
+                "positions"
             ]
     assert scan_instructions == reference_scan_list

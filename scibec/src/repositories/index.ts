@@ -3,3 +3,4 @@ export * from './device.repository';
 export * from './dataset.repository';
 export * from './scan.repository';
 export * from './session.repository';
+export * from './beamline.repository';

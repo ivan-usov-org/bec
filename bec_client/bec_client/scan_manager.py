@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+import asyncio
+import datetime
 import time
 from math import inf
 
 from bec_utils import BECMessage, MessageEndpoints, bec_errors, bec_logger
+from bec_utils import timeout as bec_timeout
 
+from bec_client.callbacks.live_table import LiveUpdatesTable
 from bec_client.queue_items import QueueStorage
 from bec_client.request_items import RequestStorage
 from bec_client.scan_items import ScanStorage
@@ -63,33 +67,50 @@ class ScanReport:
 
     def wait(self, timeout=None):
         """wait until the request is completed"""
-        timeout = timeout if timeout is not None else inf
-        elapsed_time = 0
-        sleep_time = 0.1
-        while True:
-            if self.status == "COMPLETED":
-                break
-            if self.status == "STOPPED":
-                raise bec_errors.ScanAbortion
-            elapsed_time += sleep_time
-            time.sleep(sleep_time)
-            if elapsed_time > timeout:
-                raise TimeoutError
 
-        if self.request.request.content["scan_type"] != "mv":
-            return
+        @bec_timeout(timeout)
+        def _wait():
+            sleep_time = 0.1
+            while True:
+                if self.status == "COMPLETED":
+                    break
+                if self.status == "STOPPED":
+                    raise bec_errors.ScanAbortion
+                time.sleep(sleep_time)
 
-        while True:
-            motors = list(self.request.request.content["parameter"]["args"].keys())
-            request_status = self._client.device_manager.producer.lrange(
-                MessageEndpoints.device_req_status(self.request.requestID), 0, -1
+            if self.request.request.content["scan_type"] != "mv":
+                return
+
+            while True:
+                motors = list(self.request.request.content["parameter"]["args"].keys())
+                request_status = self._client.device_manager.producer.lrange(
+                    MessageEndpoints.device_req_status(self.request.requestID), 0, -1
+                )
+                if len(request_status) == len(motors):
+                    break
+                time.sleep(sleep_time)
+
+        _wait()
+
+    async def _run_subscription(self):
+        await LiveUpdatesTable(self._client, self.request.request).run()
+
+    def subscribe(self):
+        asyncio.run(self._run_subscription())
+
+    def __repr__(self) -> str:
+        separator = "--" * 10
+        details = f"\tStatus: {self.status}\n"
+        if self.scan:
+            details += (
+                f"\tStart time: {datetime.datetime.fromtimestamp(self.scan.start_time).strftime('%c')}\n"
+                f"\tEnd time': {datetime.datetime.fromtimestamp(self.scan.end_time).strftime('%c')}\n"
+                f"\tElapsed time: {(self.scan.end_time-self.scan.start_time):.1f} s\n"
+                f"\tScan ID': {self.scan.scanID}\n"
+                f"\tScan number': {self.scan.scan_number}\n"
+                f"\tNumber of points': {self.scan.num_points}\n"
             )
-            if len(request_status) == len(motors):
-                break
-            elapsed_time += sleep_time
-            time.sleep(sleep_time)
-            if elapsed_time > timeout:
-                raise TimeoutError
+        return "ScanReport:\n" f"{separator}\n" f"{details}"
 
 
 class ScanManager:
@@ -174,6 +195,23 @@ class ScanManager:
             MessageEndpoints.scan_queue_modification_request(),
             BECMessage.ScanQueueModificationMessage(
                 scanID=scanID, action="abort", parameter={}
+            ).dumps(),
+        )
+
+    def request_scan_halt(self, scanID=None):
+        """request a scan halt
+
+        Args:
+            scanID (str, optional): ScanID. Defaults to None.
+
+        """
+        if scanID is None:
+            scanID = self.scan_storage.current_scanID
+        logger.info("Requesting scan halt")
+        self.producer.send(
+            MessageEndpoints.scan_queue_modification_request(),
+            BECMessage.ScanQueueModificationMessage(
+                scanID=scanID, action="halt", parameter={}
             ).dumps(),
         )
 

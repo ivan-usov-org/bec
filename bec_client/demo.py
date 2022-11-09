@@ -1,12 +1,3 @@
-# 	• initialize:
-# 		○ server loads config from disk and sends it Kafka
-# 		○ OPAAS confirms it and sends new config to Kafka
-# 		○ client, server and OPAAS read new config
-# 	• move motor
-# 		○ client requests mvr(motor1, 5) and sends it to scan queue
-# 		○ server reads from scan queue and pushes instructions to device_instructions
-#          OPAAS reads from device instructions, performs action and sends readback to device_<id>
-
 from bec_utils import RedisConnector, ServiceConfig, bec_logger
 
 from bec_client import BECClient
@@ -19,19 +10,29 @@ CONFIG_PATH = "../bec_config.yaml"
 
 config = ServiceConfig(CONFIG_PATH)
 
-bk = BECClient(
-    [config.redis],
+bec = BECClient()
+bec.initialize(
+    config.redis,
     RedisConnector,
     config.scibec,
 )
-bk.start()
-bk.load_high_level_interface("spec_hli")
+bec.start()
+bec.load_high_level_interface("spec_hli")
 
-dev = bk.device_manager.devices
-scans = bk.scans
+dev = bec.device_manager.devices
+scans = bec.scans
 
 logger.success("Started BECClient")
-# scans.fermat_scan(dev.samx, -2, 2, dev.samy, -2, 2, step=1.5, exp_time=0.02, relative=True)
+
+
+# tomo_scan_sim()
+
+# status = scans.fermat_scan(
+#     dev.samx, -10, 10, dev.samy, -10, 10, step=1, exp_time=0.02, relative=False, hide_report=True
+# )
+# time.sleep(2)
+# status.subscribe()
+
 # dev.samx.low_limit = -20
 # scans.round_scan_fly(dev.samx, dev.samy, 0, 50, 20, 3, exp_time=0.1, relative=True)
 # def plotfunc():

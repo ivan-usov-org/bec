@@ -1,24 +1,21 @@
 import enum
 import json
-import threading
+import time
 import uuid
 
 import msgpack
-import yaml
+from bec_utils.connector import ConnectorBase
 from typeguard import typechecked
 
-from bec_utils.connector import ConnectorBase
-
 from .BECMessage import (
+    BECStatus,
     DeviceConfigMessage,
-    DeviceStatusMessage,
     LogMessage,
     RequestResponseMessage,
 )
 from .endpoints import MessageEndpoints
 from .logger import bec_logger
 from .scibec import SciBec
-from .timeout import SingletonThreadpool
 
 logger = bec_logger.logger
 
@@ -36,35 +33,47 @@ class DeviceStatus(enum.Enum):
 class Device:
     def __init__(self, name, config, *args, parent=None):
         self.name = name
-        self.config = config
+        self._config = config
         self._signals = []
         self._subdevices = []
         self._status = DeviceStatus.IDLE
         self.parent = parent
 
+    def get_device_config(self):
+        """get the device config for this device"""
+        return self._config["deviceConfig"]
+
+    @typechecked
+    def set_device_config(self, val: dict):
+        """set the device config for this device"""
+        self._config["deviceConfig"].update(val)
+        return self.parent.send_config_request(
+            action="update", config={self.name: {"deviceConfig": self._config["deviceConfig"]}}
+        )
+
     @property
     def enabled(self):
         """Whether or not the device is enabled"""
-        return self.config["enabled"]
+        return self._config["enabled"]
 
     @enabled.setter
     def enabled(self, value):
         """Whether or not the device is enabled"""
-        self.config["enabled"] = value
+        self._config["enabled"] = value
         self.parent.send_config_request(action="update", config={self.name: {"enabled": value}})
 
     @property
     def enabled_set(self):
         """Whether or not the device can be set"""
-        return self.config.get("enabled_set", True)
+        return self._config.get("enabled_set", True)
 
     @enabled_set.setter
     def enabled_set(self, value):
         """Whether or not the device can be set"""
-        self.config["enabled_set"] = value
+        self._config["enabled_set"] = value
         self.parent.send_config_request(action="update", config={self.name: {"enabled_set": value}})
 
-    def read(self):
+    def read(self, cached):
         """get the last reading from a device"""
         val = self.parent.producer.get(MessageEndpoints.device_read(self.name))
         if val:
@@ -97,23 +106,42 @@ class Device:
             self._signals = msgpack.loads(val)["content"]["signals"]
         return self._signals
 
+    @property
+    def user_parameter(self) -> dict:
+        """get the user parameter for this device"""
+        return self._config.get("userParameter")
+
+    @typechecked
+    def set_user_parameter(self, val: dict):
+        self.parent.send_config_request(action="update", config={self.name: {"userParameter": val}})
+
+    @typechecked
+    def update_user_parameter(self, val: dict):
+        param = self.user_parameter
+        param.update(val)
+        self.set_user_parameter(param)
+
     def __repr__(self):
-        config = "".join(
-            [f"\t{key}: {val}\n" for key, val in self.config.get("deviceConfig").items()]
-        )
-        separator = "--" * 10
-        return (
-            f"{type(self).__name__}(name={self.name}, enabled={self.enabled}):\n"
-            f"{separator}\n"
-            "Details:\n"
-            f"\tStatus: {'enabled' if self.enabled else 'disabled'}\n"
-            f"\tLast recorded value: {self.read(cached=True)}\n"
-            f"\tDevice class': {self.config.get('deviceClass')}\n"
-            f"\tDevice group': {self.config.get('deviceGroup')}\n"
-            f"{separator}\n"
-            "Config:\n"
-            f"{config}"
-        )
+        if isinstance(self.parent, DeviceManagerBase):
+            config = "".join(
+                [f"\t{key}: {val}\n" for key, val in self._config.get("deviceConfig").items()]
+            )
+            separator = "--" * 10
+            return (
+                f"{type(self).__name__}(name={self.name}, enabled={self.enabled}):\n"
+                f"{separator}\n"
+                "Details:\n"
+                f"\tStatus: {'enabled' if self.enabled else 'disabled'}\n"
+                f"\tLast recorded value: {self.read(cached=True)}\n"
+                f"\tDevice class: {self._config.get('deviceClass')}\n"
+                f"\tAcquisition group: {self._config['acquisitionConfig'].get('acquisitionGroup')}\n"
+                f"\tDevice group: {self._config.get('deviceGroup')}\n"
+                f"\tUser parameter: {self._config.get('userParameter')}\n"
+                f"{separator}\n"
+                "Config:\n"
+                f"{config}"
+            )
+        return f"{type(self).__name__}(name={self.name}, enabled={self.enabled})"
 
 
 class DeviceContainer(dict):
@@ -170,12 +198,16 @@ class DeviceContainer(dict):
         Returns:
             list: List of devices that belong to the specified device group
         """
-        return [dev for _, dev in self.items() if dev.config["deviceGroup"] == device_group]
+        return [
+            dev
+            for _, dev in self.items()
+            if dev._config["acquisitionConfig"]["acquisitionGroup"] == device_group
+        ]
 
     def async_devices(self) -> list:
         """get a list of all synchronous devices"""
         return [
-            dev for _, dev in self.items() if dev.config["acquisitionConfig"]["schedule"] != "sync"
+            dev for _, dev in self.items() if dev._config["acquisitionConfig"]["schedule"] != "sync"
         ]
 
     @typechecked
@@ -232,9 +264,13 @@ class DeviceManagerBase:
     producer = None
     _scibec = SciBec()
     _device_cls = Device
+    _status_cb = []
 
-    def __init__(self, connector: ConnectorBase, scibec_url: str = None) -> None:
+    def __init__(
+        self, connector: ConnectorBase, scibec_url: str = None, status_cb: list = None
+    ) -> None:
         self.connector = connector
+        self._status_cb = status_cb if isinstance(status_cb, list) else [status_cb]
         if scibec_url is not None:
             self._scibec.url = scibec_url
 
@@ -250,43 +286,14 @@ class DeviceManagerBase:
         self._start_connectors(bootstrap_server)
         self._get_config_from_DB()
 
+    def update_status(self, status: BECStatus):
+        for cb in self._status_cb:
+            cb(status)
+
     @property
     def scibec(self):
         """SciBec instance"""
         return self._scibec
-
-    def load_config_from_disk(self, config_path) -> dict:
-        """
-        load config from disk and send request
-        Args:
-            config_path: path to config file
-
-        Returns:
-
-        """
-        data = {}
-        if config_path.endswith(".yaml"):
-            with open(config_path, "r") as stream:
-                try:
-                    data = yaml.safe_load(stream)
-                    logger.info(
-                        f"Loaded new config from disk: {json.dumps(data, sort_keys=True, indent=4)}"
-                    )
-                except yaml.YAMLError as er:
-                    logger.error(f"Error while loading config from disk: {repr(er)}")
-        elif config_path.endswith(".json"):
-            with open(config_path) as stream:
-                try:
-                    data = json.load(stream)
-                    logger.info(
-                        f"Loaded new config from disk: {json.dumps(data, sort_keys=True, indent=4)}"
-                    )
-                except json.JSONDecodeError as er:
-                    logger.error(f"Error while loading config from disk: {repr(er)}")
-        else:
-            raise NotImplementedError
-
-        return data
 
     def send_config_request(self, action: str = "update", config=None) -> None:
         """
@@ -299,19 +306,25 @@ class DeviceManagerBase:
         RID = str(uuid.uuid4())
         self.producer.send(
             MessageEndpoints.device_config_request(),
-            DeviceConfigMessage(action="update", config=config, metadata={"RID": RID}).dumps(),
+            DeviceConfigMessage(action=action, config=config, metadata={"RID": RID}).dumps(),
         )
 
-        threadpool = SingletonThreadpool()
-        future = threadpool.executor.submit(self._wait_for_config_reply, RID)
-        reply = future.result()
+        reply = self.wait_for_config_reply(RID)
+
         if not reply.content["accepted"]:
             raise DeviceConfigError(f"Failed to update the config: {reply.content['message']}.")
 
-    def _wait_for_config_reply(self, RID: str) -> RequestResponseMessage:
+    def wait_for_config_reply(self, RID: str) -> RequestResponseMessage:
+        start = 0
+        timeout = 10
         while True:
             msg = self.producer.get(MessageEndpoints.device_config_request_response(RID))
             if msg is None:
+                time.sleep(0.1)
+                start += 0.1
+
+                if start > timeout:
+                    raise DeviceConfigError("Timeout reached whilst waiting for config reply.")
                 continue
             return RequestResponseMessage.loads(msg)
 
@@ -322,39 +335,30 @@ class DeviceManagerBase:
             for dev in config:
                 if "deviceConfig" in config[dev]:
                     logger.info(f"Updating device config for device {dev}.")
-                    self.devices[dev].config["deviceConfig"].update(config[dev]["deviceConfig"])
+                    self.devices[dev]._config["deviceConfig"].update(config[dev]["deviceConfig"])
                     logger.debug(
-                        f"New config for device {dev}: {self.devices[dev].config['deviceConfig']}"
+                        f"New config for device {dev}: {self.devices[dev]._config['deviceConfig']}"
                     )
                 if "enabled" in config[dev]:
-                    self.devices[dev].config["enabled"] = config[dev]["enabled"]
+                    self.devices[dev]._config["enabled"] = config[dev]["enabled"]
                     status = "enabled" if self.devices[dev].enabled else "disabled"
                     logger.info(f"Device {dev} has been {status}.")
+                if "enabled_set" in config[dev]:
+                    self.devices[dev]._config["enabled_set"] = config[dev]["enabled_set"]
+                if "userParameter" in config[dev]:
+                    self.devices[dev]._config["userParameter"] = config[dev]["userParameter"]
+
         elif action == "add":
             for dev in config:
                 obj = self._create_device(dev)
                 self.devices._add_device(dev.get("name"), obj)
         elif action == "reload":
+            logger.info("Reloading config.")
             self.devices.flush()
-            self._load_session()
+            self._get_config_from_DB()
         elif action == "remove":
             for dev in config:
                 self._remove_device(dev)
-
-    def update_device_status(self, msg):
-        msg = DeviceStatusMessage.loads(msg.value)
-        device = self.devices.get(msg.content["device"])
-        if device:
-            device.status = DeviceStatus(msg.content["status"])
-            if device.DIID is not None:
-                if device.DIID > msg.metadata["DIID"]:
-                    if device.scanID != msg.metadata["scanID"]:
-                        device.DIID = msg.metadata["DIID"]
-                elif device.DIID < msg.metadata["DIID"]:
-                    device.DIID = msg.metadata["DIID"]
-            else:
-                device.DIID = msg.metadata["DIID"]
-            device.scanID = msg.metadata["scanID"]
 
     def _start_connectors(self, bootstrap_server) -> None:
         self._start_base_consumer()
@@ -409,21 +413,23 @@ class DeviceManagerBase:
         logger.info(f"Received new config: {str(msg)}")
         parent.parse_config_message(msg)
 
-    @staticmethod
-    def _device_status_callback(msg, *, parent, **kwargs) -> None:
-        """
-        Consumer callback for handling device status updates
-        Args:
-            cls: Reference to the DeviceManager instance
-            msg: message of type DeviceConfigMessage
-
-        Returns:
-
-        """
-        parent.update_device_status(msg)
-
     def _get_config_from_DB(self):
-        self._session = self._scibec.get_current_session()[0]
+        beamlines = self._scibec.get_beamlines()
+        if not beamlines:
+            logger.warning("No config available.")
+            return
+        if len(beamlines) > 1:
+            logger.warning("More than one beamline available.")
+        beamline = beamlines[0]
+
+        session = self._scibec.get_current_session(beamline["name"], include_devices=True)
+        if not session:
+            logger.warning(f"No config available for beamline {beamline['name']}.")
+            return
+        if not session.get("devices"):
+            logger.warning(f"The currently active config has no devices specified.")
+            return
+        self._session = session
         logger.debug(
             f"Loaded session from DB: {json.dumps(self._session, sort_keys=True, indent=4)}"
         )
@@ -470,7 +476,7 @@ class DeviceManagerBase:
 
     def _create_device(self, dev: dict, *args) -> Device:
         obj = self._device_cls(dev.get("name"), *args, parent=self)
-        obj.config = dev
+        obj._config = dev
         return obj
 
     def _remove_device(self, dev_name):
@@ -488,12 +494,13 @@ class DeviceManagerBase:
     def check_request_validity(self, msg: DeviceConfigMessage) -> None:
         if msg.content["action"] not in ["update", "add", "remove", "reload"]:
             raise DeviceConfigError("Action must be either add, remove, update, or reload.")
-        if msg.content["action"] in ["update", "add", "remove"] and not msg.content["config"]:
-            raise DeviceConfigError(
-                "Config cannot be empty for an action of type add, remove or update."
-            )
-        if not isinstance(msg.content["config"], dict):
-            raise DeviceConfigError("Config must be of type dict.")
+        if msg.content["action"] in ["update", "add", "remove"]:
+            if not msg.content["config"]:
+                raise DeviceConfigError(
+                    "Config cannot be empty for an action of type add, remove or update."
+                )
+            if not isinstance(msg.content["config"], dict):
+                raise DeviceConfigError("Config must be of type dict.")
         if msg.content["action"] in ["update", "remove"]:
             for dev in msg.content["config"].keys():
                 if dev not in self.devices:

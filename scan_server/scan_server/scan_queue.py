@@ -434,10 +434,14 @@ class RequestBlock:
         self.scan_def_id = self.msg.metadata.get("scan_def_id")
         self.scan = self.scan_assembler.assemble_device_instructions(self.msg)
         self.instructions = self.scan.run()
-        if self.is_scan and self.scanID is None:
+        if (self.is_scan or self.scan_def_id is not None) and self.scanID is None:
             self.scanID = str(uuid.uuid4())
         if self.scan.caller_args:
             self.scan_motors = self.scan.scan_motors
+
+    @property
+    def metadata(self):
+        return self.msg.metadata
 
     @property
     def scan_number(self):
@@ -559,7 +563,7 @@ class RequestBlockQueue:
     def increase_scan_number(self) -> None:
         """increase the scan number counter"""
         rbl = self.active_rb
-        if not rbl.is_scan:
+        if not rbl.is_scan and rbl.scan_def_id is None:
             return
         if rbl.scan_def_id is None or rbl.msg.content["scan_type"] == "close_scan_def":
             self.parent.parent.queue_manager.parent.scan_number += 1

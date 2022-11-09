@@ -1,5 +1,7 @@
 import os
+from pathlib import Path
 
+import numpy as np
 from bec_utils import (
     BECMessage,
     BECService,
@@ -9,7 +11,7 @@ from bec_utils import (
 )
 from bec_utils.connector import ConnectorBase
 
-from .file_writer import NexusFileWriter, NeXusFileXMLWriter
+from .file_writer import NexusFileWriter
 
 logger = bec_logger.logger
 
@@ -22,12 +24,13 @@ class ScanStorage:
         self.scan_finished = False
         self.num_points = None
         self.baseline = None
+        self.metadata = {}
 
     def append(self, pointID, data):
         self.scan_segments[pointID] = data
 
     def ready_to_write(self) -> bool:
-        return self.scan_finished and (self.num_points + 1 == len(self.scan_segments))
+        return self.scan_finished and (self.num_points == len(self.scan_segments))
 
 
 class FileWriterManager(BECService):
@@ -79,9 +82,13 @@ class FileWriterManager(BECService):
             self.scan_storage[scanID] = ScanStorage(
                 scan_number=msg.content["info"].get("scan_number"), scanID=scanID
             )
+        metadata = msg.content.get("info").copy()
+        metadata.pop("DIID", None)
+        metadata.pop("stream", None)
+        self.scan_storage[scanID].metadata.update(metadata)
         if msg.content.get("status") == "closed":
             self.scan_storage[scanID].scan_finished = True
-            self.scan_storage[scanID].num_points = msg.content["info"]["points"]
+            self.scan_storage[scanID].num_points = msg.content["info"]["num_points"]
             self.check_storage_status(scanID=scanID)
 
     def insert_to_scan_storage(self, msg: BECMessage.ScanMessage) -> None:
@@ -116,7 +123,12 @@ class FileWriterManager(BECService):
 
     def write_file(self, scanID: str):
         storage = self.scan_storage[scanID]
-        file_path = os.path.abspath(os.path.join(self.base_path, f"S{storage.scan_number:05d}.h5"))
+        scan = storage.scan_number
+        scan_bundle = 1000
+        scan_dir = self._get_scan_dir(scan_bundle, scan, leading_zeros=5)
+        data_dir = Path(os.path.join(self.base_path, "data", scan_dir))
+        data_dir.mkdir(parents=True, exist_ok=True)
+        file_path = os.path.abspath(os.path.join(data_dir, f"S{storage.scan_number:05d}.h5"))
         successful = True
         try:
             logger.info(f"Writing file {file_path}")
@@ -128,3 +140,9 @@ class FileWriterManager(BECService):
             MessageEndpoints.public_file(scanID),
             BECMessage.FileMessage(file_path=file_path, successful=successful).dumps(),
         )
+
+    def _get_scan_dir(self, scan_bundle, scan_number, leading_zeros=None):
+        if leading_zeros is None:
+            leading_zeros = len(str(scan_bundle))
+        floor_dir = scan_number // scan_bundle * scan_bundle
+        return f"S{floor_dir:0{leading_zeros}d}-{floor_dir+scan_bundle-1:0{leading_zeros}d}/S{scan_number:0{leading_zeros}d}"

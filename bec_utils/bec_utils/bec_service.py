@@ -1,3 +1,4 @@
+import enum
 import getpass
 import socket
 import threading
@@ -9,6 +10,7 @@ from rich.console import Console
 from rich.table import Table
 
 from . import BECMessage
+from .BECMessage import BECStatus
 from .connector import ConnectorBase
 from .endpoints import MessageEndpoints
 from .logger import bec_logger
@@ -20,6 +22,7 @@ class BECService:
     def __init__(
         self, bootstrap_server: list, connector_cls: ConnectorBase, unique_service=False
     ) -> None:
+        super().__init__()
         self.bootstrap_server = bootstrap_server
         self._connector_cls = connector_cls
         self.connector = connector_cls(bootstrap_server)
@@ -30,8 +33,10 @@ class BECService:
         self._hostname = socket.gethostname()
         self._service_info_thread = None
         self._service_info_event = threading.Event()
+        self._services_info = {}
         self._initialize_logger()
         self._check_services()
+        self._status = BECStatus.BUSY
         self._start_update_service_info()
 
     def _check_services(self) -> None:
@@ -42,16 +47,10 @@ class BECService:
         elapsed_time = 0
         sleep_time = 0.5
         while True:
-            services = [
-                service.decode().split(":", maxsplit=1)[0]
-                for service in self.producer.keys(MessageEndpoints.service_status("*"))
-            ]
-            msgs = [
-                BECMessage.StatusMessage.loads(self.producer.get(service)) for service in services
-            ]
+            self._update_existing_services()
             try:
-                for msg in msgs:
-                    if msg.content["name"] == self.__class__.__name__:
+                for service_name, msg in self._services_info.items():
+                    if service_name == self.__class__.__name__:
                         raise RuntimeError(
                             f"Another instance of {self.__class__.__name__} launched by user {msg.content['info']['user']} is already running on {msg.content['info']['hostname']}"
                         )
@@ -67,19 +66,40 @@ class BECService:
             self.bootstrap_server, self._connector_cls, service_name=self.__class__.__name__
         )
 
+    def _update_existing_services(self):
+        services = [
+            service.decode().split(":", maxsplit=1)[0]
+            for service in self.producer.keys(MessageEndpoints.service_status("*"))
+        ]
+        msgs = [BECMessage.StatusMessage.loads(self.producer.get(service)) for service in services]
+        self._services_info = {msg.content["name"]: msg for msg in msgs}
+
     def _update_service_info(self):
         while not self._service_info_event.is_set():
             logger.trace("Updating service info")
-            self.producer.set_and_publish(
-                topic=MessageEndpoints.service_status(self._service_id),
-                msg=BECMessage.StatusMessage(
-                    name=self.__class__.__name__,
-                    status=BECMessage.BECStatus.RUNNING,
-                    info={"user": self._user, "hostname": self._hostname, "timestamp": time.time()},
-                ).dumps(),
-                expire=6,
-            )
+            self._send_service_status()
             time.sleep(3)
+
+    def _send_service_status(self):
+        self.producer.set_and_publish(
+            topic=MessageEndpoints.service_status(self._service_id),
+            msg=BECMessage.StatusMessage(
+                name=self.__class__.__name__,
+                status=self.status,
+                info={"user": self._user, "hostname": self._hostname, "timestamp": time.time()},
+            ).dumps(),
+            expire=6,
+        )
+
+    @property
+    def status(self) -> BECStatus:
+        """get the current BECService status"""
+        return self._status
+
+    @status.setter
+    def status(self, val: BECStatus):
+        self._status = val
+        self._send_service_status()
 
     def _start_update_service_info(self):
         self._service_info_thread = threading.Thread(target=self._update_service_info, daemon=True)
@@ -122,9 +142,9 @@ class BECService:
         """
         self.producer.delete(MessageEndpoints.global_vars(name) + ":val")
 
-    @property
-    def global_vars(self):
+    def global_vars(self) -> str:
         """Get all available global variables"""
+        # sadly, this cannot be a property as it causes side effects with IPython's tab completion
         available_keys = self.producer.keys(MessageEndpoints.global_vars("*"))
 
         def get_endpoint_from_topic(topic: str) -> str:
@@ -138,8 +158,8 @@ class BECService:
         table.add_column("Content", justify="center")
         for endpoint in endpoints:
             var = str(self.get_global_var(endpoint))
-            if len(var) > 20:
-                var = var[0:10] + "..., " + var[-10:]
+            if len(var) > 40:
+                var = var[0:20] + "..., " + var[-20:]
             table.add_row(endpoint, var)
         console.print(table)
 
@@ -148,3 +168,11 @@ class BECService:
         self._service_info_event.set()
         if self._service_info_thread:
             self._service_info_thread.join()
+
+    @property
+    def service_status(self):
+        self._update_existing_services()
+        return self._services_info
+
+    def wait_for_service(self, name, status=BECStatus.RUNNING):
+        pass

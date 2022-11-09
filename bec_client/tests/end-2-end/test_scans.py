@@ -4,8 +4,6 @@ import time
 
 import numpy as np
 import pytest
-from bec_client import BECClient
-from bec_client.alarm_handler import AlarmBase
 from bec_utils import (
     BECMessage,
     MessageEndpoints,
@@ -14,6 +12,9 @@ from bec_utils import (
     bec_logger,
 )
 from bec_utils.bec_errors import ScanAbortion, ScanInterruption
+
+from bec_client import BECClient
+from bec_client.alarm_handler import AlarmBase
 
 logger = bec_logger.logger
 
@@ -27,7 +28,8 @@ CONFIG_PATH = "../test_config.yaml"
 @pytest.fixture(scope="session", autouse=True)
 def client():
     config = ServiceConfig(CONFIG_PATH)
-    bec = BECClient(
+    bec = BECClient()
+    bec.initialize(
         [config.redis],
         RedisConnector,
         config.scibec,
@@ -100,8 +102,8 @@ def test_fermat_scan(capsys, client):
     status = scans.fermat_scan(
         dev.samx, -5, 5, dev.samy, -5, 5, step=0.5, exp_time=0.01, relative=True
     )
-    assert len(status.scan.data) == 199
-    assert status.scan.num_points == 199
+    assert len(status.scan.data) == 393
+    assert status.scan.num_points == 393
     captured = capsys.readouterr()
     assert "finished. Scan ID" in captured.out
 
@@ -129,10 +131,10 @@ def test_mv_scan(capsys, client):
     current_pos_samx = dev.samx.read()["samx"]["value"]
     current_pos_samy = dev.samy.read()["samy"]["value"]
     assert np.isclose(
-        current_pos_samx, 10, atol=dev.samx.config["deviceConfig"].get("tolerance", 0.05)
+        current_pos_samx, 10, atol=dev.samx._config["deviceConfig"].get("tolerance", 0.05)
     )
     assert np.isclose(
-        current_pos_samy, 20, atol=dev.samy.config["deviceConfig"].get("tolerance", 0.05)
+        current_pos_samy, 20, atol=dev.samy._config["deviceConfig"].get("tolerance", 0.05)
     )
     scans.umv(dev.samx, 10, dev.samy, 20, relative=False)
     current_pos_samx = dev.samx.read()["samx"]["value"]
@@ -155,8 +157,8 @@ def test_mv_scan_mv(client):
     dev.samx.limits = [-50, 50]
     dev.samy.limits = [-50, 50]
     scans.umv(dev.samx, 10, dev.samy, 20, relative=False)
-    tolerance_samx = dev.samx.config["deviceConfig"].get("tolerance", 0.05)
-    tolerance_samy = dev.samy.config["deviceConfig"].get("tolerance", 0.05)
+    tolerance_samx = dev.samx._config["deviceConfig"].get("tolerance", 0.05)
+    tolerance_samy = dev.samy._config["deviceConfig"].get("tolerance", 0.05)
     current_pos_samx = dev.samx.read()["samx"]["value"]
     current_pos_samy = dev.samy.read()["samy"]["value"]
 
@@ -456,7 +458,19 @@ def test_file_writer(client):
     scans = bec.scans
     dev = bec.device_manager.devices
 
-    scan = scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.01, relative=True)
+    scan = scans.grid_scan(
+        dev.samx,
+        -5,
+        5,
+        10,
+        dev.samy,
+        -5,
+        5,
+        10,
+        exp_time=0.01,
+        relative=True,
+        md={"datasetID": 325},
+    )
     assert len(scan.scan.data) == 100
     msg = bec.device_manager.producer.get(MessageEndpoints.public_file(scan.scan.scanID))
     while True:
@@ -466,3 +480,14 @@ def test_file_writer(client):
 
     file_msg = BECMessage.FileMessage.loads(msg)
     assert file_msg.content["successful"]
+
+    # currently not working due to access restrictions in docker:
+
+    # with h5py.File(file_msg.content["file_path"], "r") as file:
+    #     assert file["entry"]["collection"]["bec"]["metadata"]["datasetID"][()] == 325
+
+    #     file_data = file["entry"]["collection"]["bec"]["samx"][()]
+    #     stream_data = [
+    #         msg.content["data"]["samx"]["samx"]["value"] for msg in scan.scan.data.values()
+    #     ]
+    #     assert all(file_data == stream_data)

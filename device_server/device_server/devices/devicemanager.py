@@ -40,9 +40,13 @@ class DSDevice(Device):
 
 class DeviceManagerDS(DeviceManagerBase):
     def __init__(
-        self, connector: ConnectorBase, scibec_url: str, config_handler: ConfigHandler = None
+        self,
+        connector: ConnectorBase,
+        scibec_url: str,
+        config_handler: ConfigHandler = None,
+        status_cb: list = None,
     ):
-        super().__init__(connector, scibec_url)
+        super().__init__(connector, scibec_url, status_cb)
         self._config_request_connector = None
         self._device_instructions_connector = None
         self._config_handler_cls = config_handler
@@ -177,8 +181,7 @@ class DeviceManagerDS(DeviceManagerBase):
 
         # update device buffer for enabled devices
         try:
-            self.connect_device(opaas_obj.obj)
-            opaas_obj.initialize_device_buffer(self.producer)
+            self.initialize_enabled_device(opaas_obj)
         # pylint:disable=broad-except
         except Exception:
             error_traceback = traceback.format_exc()
@@ -187,6 +190,21 @@ class DeviceManagerDS(DeviceManagerBase):
             )
             opaas_obj.enabled = False
         return opaas_obj
+
+    def initialize_enabled_device(self, opaas_obj):
+        """connect to an enabled device and initialize the device buffer"""
+        self.connect_device(opaas_obj.obj)
+        opaas_obj.initialize_device_buffer(self.producer)
+
+    @staticmethod
+    def disconnect_device(obj):
+        """disconnect from a device"""
+        if not obj.connected:
+            return
+        if hasattr(obj, "controller"):
+            obj.controller.off()
+            return
+        obj.destroy()
 
     @staticmethod
     def connect_device(obj):

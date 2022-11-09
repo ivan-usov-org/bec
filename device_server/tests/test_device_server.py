@@ -1,10 +1,12 @@
+from unittest import mock
+
 import pytest
 from bec_utils import BECMessage
 from bec_utils.tests.utils import ConnectorMock
 from device_server import DeviceServer
 from ophyd import Staged
 
-from test_device_manager import load_device_manager
+from test_device_manager_ds import load_device_manager
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=protected-access
@@ -63,3 +65,20 @@ def test_stage_device(instr):
         if not hasattr(dev_man[dev].obj, "_staged"):
             continue
         assert device_server.device_manager.devices[dev].obj._staged == Staged.no
+
+
+def test_stop_devices():
+    device_server = load_DeviceServerMock()
+    dev = device_server.device_manager.devices
+    assert len(dev) > len(dev.enabled_devices)
+    with mock.patch.object(dev.samx.obj, "stop") as stop:
+        device_server.stop_devices()
+        stop.assert_called_once()
+
+    with mock.patch.object(dev.motor1_disabled.obj, "stop") as stop:
+        device_server.stop_devices()
+        stop.assert_not_called()
+
+    with mock.patch.object(dev.motor1_disabled_set.obj, "stop") as stop:
+        device_server.stop_devices()
+        stop.assert_not_called()
