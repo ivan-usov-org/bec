@@ -312,9 +312,12 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         self._check_limits()
 
     def open_scan(self):
+        """open the scan"""
+        positions = self.positions if isinstance(self.positions, list) else self.positions.tolist()
         yield from self.stubs.open_scan(
             scan_motors=self.scan_motors,
             num_pos=self.num_pos,
+            positions=positions,
             scan_name=self.scan_name,
             scan_type=self.scan_type,
         )
