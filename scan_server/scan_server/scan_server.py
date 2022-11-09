@@ -80,10 +80,6 @@ class ScanServer(BECService):
         """set the current scan number"""
         self.producer.set(MessageEndpoints.scan_number(), val)
 
-    def load_config_from_disk(self, file_path: str) -> None:
-        """load a config file from disk"""
-        self.device_manager.load_config_from_disk(file_path)
-
     def shutdown(self) -> None:
         """shutdown the scan server"""
 
