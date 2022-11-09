@@ -32,7 +32,7 @@ class ScanItem:
         self.scanID = scanID
         self.status = status
         self.data = {}
-        self.open_scan_defs = []
+        self.open_scan_defs = set()
         self.num_points = None
         self.start_time = None
         self.end_time = None
@@ -114,6 +114,14 @@ class ScanStorage:
             # update total number of points
             if scan_status.content["info"].get("num_points"):
                 scan_item.num_points = scan_status.content["info"].get("num_points")
+
+            # add scan def id
+            scan_def_id = scan_status.content["info"].get("scan_def_id")
+            if scan_def_id:
+                if scan_status.content.get("status") != "open":
+                    scan_item.open_scan_defs.remove(scan_def_id)
+                else:
+                    scan_item.open_scan_defs.add(scan_def_id)
             break
 
     def add_scan_segment(self, scan_msg: BECMessage.ScanMessage) -> None:
