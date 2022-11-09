@@ -13,13 +13,7 @@ from typing import List
 import IPython
 from bec_utils import Alarms, BECService, MessageEndpoints, bec_logger
 from bec_utils.connector import ConnectorBase
-from IPython.core.magic import (
-    Magics,
-    cell_magic,
-    line_cell_magic,
-    line_magic,
-    magics_class,
-)
+from IPython.core.magic import Magics, line_magic, magics_class
 from IPython.terminal.prompts import Prompts, Token
 from rich.console import Console
 from rich.table import Table
@@ -28,6 +22,7 @@ from bec_client.config_helper import ConfigHelper
 from bec_client.scan_manager import ScanManager
 
 from .alarm_handler import AlarmHandler
+from .callbacks.callback_manager import CallbackManager
 from .devicemanager_client import DMClient
 from .scans import Scans
 from .signals import SigintHandler
@@ -61,6 +56,7 @@ class BECClient(BECService):
         self._scripts = {}
         self._initialized = True
         self.config = None
+        self.callback_manager = CallbackManager(self)
         builtins.bec = self
 
     def start(self):
@@ -297,7 +293,8 @@ class BECMagics(Magics):
     @line_magic
     def resume(self, line):
         "Resume the scan"
-        return self.client.queue.request_scan_continuation()
+        self.client.queue.request_scan_continuation()
+        return self.client.callback_manager.continue_request()
 
     @line_magic
     def pause(self, line):
@@ -312,7 +309,8 @@ class BECMagics(Magics):
     @line_magic
     def restart(self, line):
         "Request a scan restart"
-        return self.client.queue.request_scan_restart()
+        self.client.queue.request_scan_restart()
+        return self.client.callback_manager.continue_request()
 
     @line_magic
     def halt(self, line):

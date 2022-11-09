@@ -1,73 +1,58 @@
+from __future__ import annotations
+
 import asyncio
 import uuid
 from contextlib import ContextDecorator
+from typing import TYPE_CHECKING
 
 import msgpack
 from bec_utils import BECMessage, MessageEndpoints, bec_logger
 from bec_utils.connector import ConsumerConnector
 from cytoolz import partition
 
-from .callbacks.live_table import LiveUpdatesTable
-from .callbacks.move_device import LiveUpdatesReadbackProgressbar
 from .devicemanager_client import Device
 from .scan_manager import ScanReport
+
+if TYPE_CHECKING:
+    from bec_client import BECClient
 
 logger = bec_logger.logger
 
 
 class ScanObject:
-    def __init__(self, scan_name: str, scan_info: dict, parent=None) -> None:
+    def __init__(self, scan_name: str, scan_info: dict, parent: BECClient = None) -> None:
         self.scan_name = scan_name
         self.scan_info = scan_info
         self.parent = parent
 
         # run must be an anonymous function to allow for multiple doc strings
-        self.run = lambda *args, **kwargs: asyncio.run(self._run(*args, **kwargs))
+        self.run = lambda *args, **kwargs: self._run(*args, **kwargs)
 
-    async def _run(self, *args, **kwargs):
-        # pylint: disable=protected-access
-        with self.parent._sighandler:
-            scans = self.parent.scans
+    def _run(self, *args, **kwargs):
+        scans = self.parent.scans
 
-            # handle reserved kwargs:
-            hide_report_kwarg = kwargs.get("hide_report", False)
-            hide_report = hide_report_kwarg or scans._hide_report
+        # handle reserved kwargs:
+        hide_report_kwarg = kwargs.get("hide_report", False)
+        hide_report = hide_report_kwarg or scans._hide_report
 
-            if scans._scan_group:
-                if "md" not in kwargs:
-                    kwargs["md"] = {}
-                kwargs["md"]["queue_group"] = scans._scan_group
-            if scans._scan_def_id:
-                if "md" not in kwargs:
-                    kwargs["md"] = {}
-                kwargs["md"]["scan_def_id"] = scans._scan_def_id
+        if scans._scan_group:
+            if "md" not in kwargs:
+                kwargs["md"] = {}
+            kwargs["md"]["queue_group"] = scans._scan_group
+        if scans._scan_def_id:
+            if "md" not in kwargs:
+                kwargs["md"] = {}
+            kwargs["md"]["scan_def_id"] = scans._scan_def_id
 
-            request = Scans.prepare_scan_request(self.scan_name, self.scan_info, *args, **kwargs)
-            requestID = str(uuid.uuid4())  # TODO: move this to the API server
-            request.metadata["RID"] = requestID
+        request = Scans.prepare_scan_request(self.scan_name, self.scan_info, *args, **kwargs)
+        requestID = str(uuid.uuid4())  # TODO: move this to the API server
+        request.metadata["RID"] = requestID
 
-            scan_report = ScanReport.from_request(request, client=self.parent)
+        self._send_scan_request(request)
+        scan_report_type = self._get_scan_report_type(hide_report)
+        self.parent.callback_manager.process_request(request, scan_report_type)
 
-            scan_report_type = self._get_scan_report_type(hide_report)
-            if scan_report_type == "readback":
-                consumer = self._start_consumer(request)
-                self._send_scan_request(request)
-
-                await LiveUpdatesReadbackProgressbar(
-                    self.parent,
-                    request,
-                ).run()
-                consumer.shutdown()
-            elif scan_report_type == "table":
-                self._send_scan_request(request)
-                if (
-                    self.parent.scans._scan_def_id is None
-                    or request.content["scan_type"] == "close_scan_def"
-                ):
-                    await LiveUpdatesTable(self.parent, request).run()
-            else:
-                self._send_scan_request(request)
-            return scan_report
+        return ScanReport.from_request(request, client=self.parent)
 
     def _get_scan_report_type(self, hide_report) -> str:
         if hide_report:
