@@ -9,6 +9,7 @@ from bec_utils import BECMessage, DeviceManagerBase, MessageEndpoints, bec_logge
 from cytoolz import partition
 
 from .errors import LimitError, ScanAbortion
+from .path_optimization import PathOptimizerMixin
 from .scan_stubs import ScanStubs
 
 DeviceMsg = BECMessage.DeviceInstructionMessage
@@ -231,7 +232,7 @@ class RequestBase(ABC):
         pass
 
 
-class ScanBase(RequestBase):
+class ScanBase(RequestBase, PathOptimizerMixin):
     """
     procedure:
     - initialize
@@ -274,6 +275,7 @@ class ScanBase(RequestBase):
 
         self.relative = parameter["kwargs"].get("relative", False)
         self.burst_at_each_point = parameter["kwargs"].get("burst_at_each_point", 1)
+        self.optim_trajectory = parameter["kwargs"].get("optim_trajectory")
         self.burst_index = 0
 
         self.start_pos = np.repeat(0, len(self.scan_motors)).tolist()
@@ -294,8 +296,17 @@ class ScanBase(RequestBase):
         """Calculate the positions"""
         pass
 
+    def _optimize_trajectory(self):
+        if not self.optim_trajectory:
+            return
+        if self.optim_trajectory == "corridor":
+            self.positions = self.optimize_corridor(self.positions)
+            return
+        return
+
     def prepare_positions(self):
         self._calculate_positions()
+        self._optimize_trajectory()
         self.num_pos = len(self.positions)
         yield from self._set_position_offset()
         self._check_limits()
@@ -595,11 +606,12 @@ class FermatSpiralScan(ScanBase):
             *args: pairs of device / start position / end position / steps arguments
             relative: Start from an absolute or relative position
             burst: number of acquisition per point
+            optim_trajectory: routine used for the trajectory optimization, e.g. 'corridor'. Default: None
 
         Returns:
 
         Examples:
-            >>> scans.fermat_scan(dev.motor1, -5, 5, dev.motor2, -5, 5, step=0.5, exp_time=0.1, relative=True)
+            >>> scans.fermat_scan(dev.motor1, -5, 5, dev.motor2, -5, 5, step=0.5, exp_time=0.1, relative=True, optim_trajectory="corridor")
 
         """
         super().__init__(parameter=parameter, **kwargs)
