@@ -15,6 +15,7 @@ class MessageEndpoints:
     _device_config_request_response = "internal/devices/config_request_response"
     _device_config = "internal/devices/config"
     _device_info = "internal/devices/info"
+    _device_staged = "internal/devices/staged"
 
     # scan queue
     _scan_queue_modification = "internal/queue/queue_modification"
@@ -94,6 +95,10 @@ class MessageEndpoints:
     @classmethod
     def device_info(cls, device: str):
         return f"{cls._device_info}/{device}"
+
+    @classmethod
+    def device_staged(cls, device: str):
+        return f"{cls._device_staged}/{device}"
 
     # scan queue
     @classmethod
