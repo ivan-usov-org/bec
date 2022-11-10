@@ -367,27 +367,43 @@ class DeviceServer(BECService):
         if not isinstance(devices, list):
             devices = [devices]
 
+        pipe = self.producer.pipeline()
         for dev in devices:
             obj = self.device_manager.devices[dev].obj
-            if not hasattr(obj, "_staged"):
-                continue
-            # pylint: disable=protected-access
-            if obj._staged == Staged.yes:
-                logger.warning(f"Device {obj.name} was already staged and will be first unstaged.")
-                self.device_manager.devices[dev].obj.unstage()
-            self.device_manager.devices[dev].obj.stage()
+            if hasattr(obj, "_staged"):
+                # pylint: disable=protected-access
+                if obj._staged == Staged.yes:
+                    logger.info(f"Device {obj.name} was already staged and will be first unstaged.")
+                    self.device_manager.devices[dev].obj.unstage()
+                self.device_manager.devices[dev].obj.stage()
+            self.producer.set(
+                MessageEndpoints.device_staged(dev),
+                BECMessage.DeviceStatusMessage(
+                    device=dev, status=1, metadata=instr.metadata
+                ).dumps(),
+                pipe,
+            )
+        pipe.execute()
 
     def _unstage_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
         devices = instr.content["device"]
         if not isinstance(devices, list):
             devices = [devices]
 
+        pipe = self.producer.pipeline()
         for dev in devices:
             obj = self.device_manager.devices[dev].obj
-            if not hasattr(obj, "_staged"):
-                continue
-            # pylint: disable=protected-access
-            if obj._staged == Staged.yes:
-                self.device_manager.devices[dev].obj.unstage()
-                continue
-            logger.debug(f"Device {obj.name} was already unstaged.")
+            if hasattr(obj, "_staged"):
+                # pylint: disable=protected-access
+                if obj._staged == Staged.yes:
+                    self.device_manager.devices[dev].obj.unstage()
+                else:
+                    logger.debug(f"Device {obj.name} was already unstaged.")
+            self.producer.set(
+                MessageEndpoints.device_staged(dev),
+                BECMessage.DeviceStatusMessage(
+                    device=dev, status=0, metadata=instr.metadata
+                ).dumps(),
+                pipe,
+            )
+        pipe.execute()
