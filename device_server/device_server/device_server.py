@@ -117,12 +117,14 @@ class DeviceServer(BECService):
     def stop_devices(self) -> None:
         """stop all enabled devices"""
         logger.info("Stopping devices after receiving 'abort' request.")
+        self.status = BECStatus.BUSY
         for dev in self.device_manager.devices.enabled_devices:
             if not dev.enabled_set:
                 # don't stop devices that we haven't set
                 continue
             if hasattr(dev.obj, "stop"):
                 dev.obj.stop()
+        self.status = BECStatus.RUNNING
 
     def _assert_device_is_enabled(self, instructions) -> None:
         devices = instructions.content["device"]
