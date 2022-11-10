@@ -259,6 +259,9 @@ class ScanWorker(threading.Thread):
             if devices_are_ready and matching_scanID and matching_DIID:
                 break
 
+    def _wait_for_device_server(self) -> None:
+        self.parent.wait_for_service("DeviceServer")
+
     def _set_devices(self, instr: DeviceMsg) -> None:
         """Send device instruction to set a device to a specific value
 
@@ -428,6 +431,9 @@ class ScanWorker(threading.Thread):
 
         start = time.time()
         self.max_point_id = 0
+
+        # make sure the device server is ready to receive data
+        self._wait_for_device_server()
 
         queue.is_active = True
         try:

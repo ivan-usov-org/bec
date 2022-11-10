@@ -171,8 +171,16 @@ class BECService:
 
     @property
     def service_status(self):
+        """get the status of active services"""
         self._update_existing_services()
         return self._services_info
 
     def wait_for_service(self, name, status=BECStatus.RUNNING):
-        pass
+        while True:
+            service_status_msg = self.service_status.get(name)
+            if service_status_msg is not None:
+                service_status = BECStatus(service_status_msg.content["status"])
+                if service_status == status:
+                    return
+            logger.info(f"Waiting for {name}.")
+            time.sleep(0.05)
