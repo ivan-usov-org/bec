@@ -1,12 +1,17 @@
-from .config import TestConfig
+from .config import X12SAConfig, DemoConfig
 
 
-class LamNIConfig(TestConfig):
+class LamNIConfig(DemoConfig, X12SAConfig):
     def run(self):
         self.write_galil_motors()
         self.write_rt_motors()
         self.write_smaract_motors()
-        super().run()
+        self.write_eiger1p5m()
+        self.write_x12sa_status()
+        self.write_sls_status()
+        self.write_sim_user_motors()
+        self.write_sim_beamline_motors()
+        self.write_sim_beamline_monitors()
 
     def write_galil_motors(self):
         lamni_galil_motors = [
@@ -99,3 +104,15 @@ class LamNIConfig(TestConfig):
                 }
             )
         self.write_section(out, "LamNI SmarAct motors")
+
+    def write_eiger1p5m(self):
+        out = {
+            "eiger1p5m": {
+                "status": {"enabled": True, "enabled_set": True},
+                "deviceClass": "Eiger1p5MDetector",
+                "deviceConfig": {"device_access": True, "name": "eiger1p5m"},
+                "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "detectors"},
+                "deviceGroup": "detector",
+            }
+        }
+        self.write_section(out, "LamNI Eiger 1.5M in vacuum")
