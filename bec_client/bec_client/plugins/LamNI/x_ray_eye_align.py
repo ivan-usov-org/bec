@@ -267,11 +267,13 @@ class XrayEyeAlign:
         self.client.set_global_var("tomo_fov_offset", self.shift_xy)
 
     def write_output(self):
-        with open("./xrayeye_alignmentvalues.txt", "w") as alignment_values_file:
+        with open(
+            os.path.expanduser("~/Data10/specES1/internal/xrayeye_alignmentvalues"), "w"
+        ) as alignment_values_file:
             alignment_values_file.write(f"angle\thorizontal\tvertical\n")
-            for k in range(11):
-                fovx_offset = self.alignment_values[0][0] - self.alignment_values[k][0]
-                fovy_offset = self.alignment_values[k][1] - self.alignment_values[0][1]
+            for k in range(2, 11):
+                fovx_offset = (self.alignment_values[0][0] - self.alignment_values[k][0]) * 1000
+                fovy_offset = (self.alignment_values[k][1] - self.alignment_values[0][1]) * 1000
                 print(
                     f"Writing to file new alignment: number {k}, value x {fovx_offset}, y {fovy_offset}"
                 )
