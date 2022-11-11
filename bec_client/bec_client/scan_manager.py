@@ -263,7 +263,7 @@ class ScanManager:
 
     @next_scan_number.setter
     @typechecked
-    def next_scan_number(self, val:int):
+    def next_scan_number(self, val: int):
         """set the next scan number in redis"""
         return self.producer.set(MessageEndpoints.scan_number(), val)
 
