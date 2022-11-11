@@ -25,6 +25,7 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 from bec_utils import BECMessage, MessageEndpoints, bec_logger
+
 from scan_server.scans import RequestBase, ScanArgType, ScanBase
 
 MOVEMENT_SCALE_X = np.sin(np.radians(15)) * np.cos(np.radians(30))
@@ -212,7 +213,7 @@ class LamNIFermatScan(ScanBase, LamNIMixin):
                                using the geometry of LamNI
                                It is determined by the first 'click' in the x-ray eye alignemnt procedure
             angle [deg]: rotation angle (will rotate first)
-            scantype: fly (i.e. HW triggered step in case of LamNI) or step
+            scan_type: fly (i.e. HW triggered step in case of LamNI) or step
             stitch_x/y: shift scan to adjacent stitch region
             fov_circular [um]: generate a circular field of view in the sample plane. This is an additional cropping to fov_size.
             stitch_overlap [um]: overlap of the stitched regions
