@@ -46,13 +46,13 @@ class XrayEyeAlign:
         # wait for start live
         while epics_get("XOMNYI-XEYE-ACQDONE:0") == 0:
             time.sleep(0.5)
-            print("waiting for live view to start..\n")
+            print("waiting for live view to start...")
         fshopen()
 
         epics_put("XOMNYI-XEYE-ACQDONE:0", 0)
 
         while epics_get("XOMNYI-XEYE-ACQDONE:0") == 0:
-            print("waiting for new frame..\n")
+            print("waiting for new frame...")
             time.sleep(0.5)
 
         time.sleep(0.5)
@@ -60,7 +60,7 @@ class XrayEyeAlign:
         epics_put("XOMNYI-XEYE-ACQ:0", 0)
         time.sleep(1)
         # fshclose
-        print("got new frame\n")
+        print("got new frame")
 
     def _disable_rt_feedback(self):
         self.device_manager.devices.rtx.controller.feedback_disable()
@@ -138,7 +138,7 @@ class XrayEyeAlign:
                 val_y = epics_get(f"XOMNYI-XEYE-YVAL_Y:{k}") * self.PIXEL_CALIBRATION  # in mm
                 self.alignment_values[k] = [val_x, val_y]
                 print(
-                    f"Clicked position {k}: x {self.alignment_values[k][0]}, y {self.alignment_values[k][1]}\n"
+                    f"Clicked position {k}: x {self.alignment_values[k][0]}, y {self.alignment_values[k][1]}"
                 )
 
                 if k == 0:  # received center value of FZP
@@ -147,7 +147,7 @@ class XrayEyeAlign:
                     self._loptics_out()
                     epics_put("XOMNYI-XEYE-SUBMIT:0", -1)  # disable submit button
                     self.movement_buttons_enabled = False
-                    print("Moving sample in, FZP out\n")
+                    print("Moving sample in, FZP out")
 
                     self._disable_rt_feedback()
                     time.sleep(0.3)
@@ -164,7 +164,7 @@ class XrayEyeAlign:
                     k == 1
                 ):  # received sample center value at samroy 0 ie the final base shift values
                     print(
-                        f"Base shift values from movement are x {self.shift_xy[0]}, y {self.shift_xy[1]}\n"
+                        f"Base shift values from movement are x {self.shift_xy[0]}, y {self.shift_xy[1]}"
                     )
                     self.shift_xy[0] += (
                         self.alignment_values[0][0] - self.alignment_values[1][0]
@@ -173,7 +173,7 @@ class XrayEyeAlign:
                         self.alignment_values[1][1] - self.alignment_values[0][1]
                     ) * 1000
                     print(
-                        f"Base shift values from movement and clicked position are x {self.shift_xy[0]}, y {self.shift_xy[1]}\n"
+                        f"Base shift values from movement and clicked position are x {self.shift_xy[0]}, y {self.shift_xy[1]}"
                     )
 
                     self.scans.lamni_move_to_scan_center(
@@ -238,7 +238,7 @@ class XrayEyeAlign:
                         self.shift_xy[0] / 1000, self.shift_xy[1] / 1000, self.get_tomo_angle()
                     ).wait()
                     print(
-                        f"Current center horizontal {self.shift_xy[0]} vertical {self.shift_xy[1]}\n"
+                        f"Current center horizontal {self.shift_xy[0]} vertical {self.shift_xy[1]}"
                     )
                     epics_put("XOMNYI-XEYE-MVY:0", 0)
                     epics_put("XOMNYI-XEYE-MVX:0", 0)
@@ -250,12 +250,12 @@ class XrayEyeAlign:
         fovx = self._xray_fov_xy[0] * self.PIXEL_CALIBRATION * 1000 / 2
         fovy = self._xray_fov_xy[1] * self.PIXEL_CALIBRATION * 1000 / 2
         print(
-            f"The largest field of view from the xrayeyealign was \nfovx = {fovx:.0f} microns, fovy = {fovy:.0f} microns\n"
+            f"The largest field of view from the xrayeyealign was \nfovx = {fovx:.0f} microns, fovy = {fovy:.0f} microns"
         )
-        print("Use matlab routine to fit the current alignment...\n")
+        print("Use matlab routine to fit the current alignment...")
 
         print(
-            f"This additional shift is applied to the base shift values\n which are x {self.shift_xy[0]}, y {self.shift_xy[1]}\n"
+            f"This additional shift is applied to the base shift values\n which are x {self.shift_xy[0]}, y {self.shift_xy[1]}"
         )
 
         self._disable_rt_feedback()
@@ -267,11 +267,13 @@ class XrayEyeAlign:
         self.client.set_global_var("tomo_fov_offset", self.shift_xy)
 
     def write_output(self):
-        with open("./xrayeye_alignmentvalues.txt", "w") as alignment_values_file:
+        with open(
+            os.path.expanduser("~/Data10/specES1/internal/xrayeye_alignmentvalues"), "w"
+        ) as alignment_values_file:
             alignment_values_file.write(f"angle\thorizontal\tvertical\n")
-            for k in range(11):
-                fovx_offset = self.alignment_values[0][0] - self.alignment_values[k][0]
-                fovy_offset = self.alignment_values[k][1] - self.alignment_values[0][1]
+            for k in range(2, 11):
+                fovx_offset = (self.alignment_values[0][0] - self.alignment_values[k][0]) * 1000
+                fovy_offset = (self.alignment_values[k][1] - self.alignment_values[0][1]) * 1000
                 print(
                     f"Writing to file new alignment: number {k}, value x {fovx_offset}, y {fovy_offset}"
                 )
@@ -301,7 +303,7 @@ class XrayEyeAlign:
         # x amp, phase, offset, y amp, phase, offset
         #  0 0    0 1    0 2     1 0    1 1    1 2
 
-        print("New alignment parameters loaded from X-ray eye\n")
+        print("New alignment parameters loaded from X-ray eye")
         print(
             f"X Amplitude {tomo_fit_xray_eye[0][0]},"
             f"X Phase {tomo_fit_xray_eye[0][1]}, "

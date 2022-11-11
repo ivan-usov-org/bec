@@ -1054,7 +1054,13 @@ def test_get_func_name_from_macro():
                 scan_type="lamni_fermat_scan",
                 parameter={
                     "args": {},
-                    "kwargs": {"fov_size": [5], "exp_time": 0.1, "step": 2, "angle": 10},
+                    "kwargs": {
+                        "fov_size": [5],
+                        "exp_time": 0.1,
+                        "step": 2,
+                        "angle": 10,
+                        "scan_type": "step",
+                    },
                 },
                 queue="primary",
             ),

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import datetime
+from typeguard import typechecked
 import time
 from math import inf
 
@@ -259,6 +260,12 @@ class ScanManager:
     def next_scan_number(self):
         """get the next scan number from redis"""
         return int(self.producer.get(MessageEndpoints.scan_number()))
+
+    @next_scan_number.setter
+    @typechecked
+    def next_scan_number(self, val: int):
+        """set the next scan number in redis"""
+        return self.producer.set(MessageEndpoints.scan_number(), val)
 
     @staticmethod
     def _scan_queue_status_callback(msg, *, parent: ScanManager, **_kwargs) -> None:

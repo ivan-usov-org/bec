@@ -1,9 +1,11 @@
 import os
 from unittest import mock
 
-import file_writer
 import h5py
 import numpy as np
+from test_file_writer_manager import load_FileWriter
+
+import file_writer
 from file_writer import NexusFileWriter, NeXusFileXMLWriter
 from file_writer.file_writer import HDF5Storage, cSAXS_NeXus_format
 from file_writer.file_writer_manager import ScanStorage
@@ -12,7 +14,8 @@ dir_path = os.path.dirname(file_writer.__file__)
 
 
 def test_nexus_file_xml_writer():
-    file_writer = NeXusFileXMLWriter()
+    file_manager = load_FileWriter()
+    file_writer = NeXusFileXMLWriter(file_manager)
     file_writer.configure(
         layout_file=os.path.abspath(os.path.join(dir_path, "../layout_cSAXS_NXsas.xml"))
     )
@@ -23,7 +26,10 @@ def test_nexus_file_xml_writer():
 
 
 def test_csaxs_nexus_format():
-    writer_storage = cSAXS_NeXus_format(HDF5Storage(), {"samx": [0, 1, 2]})
+    file_manager = load_FileWriter()
+    writer_storage = cSAXS_NeXus_format(
+        HDF5Storage(), {"samx": [0, 1, 2]}, file_manager.device_manager
+    )
     assert writer_storage._storage["entry"].attrs["definition"] == "NXsas"
     assert writer_storage._storage["entry"]._storage["sample"]._storage["x_translation"]._data == [
         0,
@@ -33,7 +39,8 @@ def test_csaxs_nexus_format():
 
 
 def test_nexus_file_writer():
-    file_writer = NexusFileWriter()
+    file_manager = load_FileWriter()
+    file_writer = NexusFileWriter(file_manager)
     with mock.patch.object(
         file_writer, "_create_device_data_storage", return_value={"samx": [0, 1, 2]}
     ):
@@ -48,7 +55,8 @@ def test_nexus_file_writer():
 
 
 def test_create_device_data_storage():
-    file_writer = NexusFileWriter()
+    file_manager = load_FileWriter()
+    file_writer = NexusFileWriter(file_manager)
     storage = ScanStorage("2", "scanID-string")
     storage.num_points = 2
     storage.scan_segments = {

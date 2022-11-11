@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-
+import traceback
 import numpy as np
 from bec_utils import (
     BECMessage,
@@ -42,8 +42,8 @@ class FileWriterManager(BECService):
         self._start_scan_segment_consumer()
         self._start_scan_status_consumer()
         self.scan_storage = {}
-        self.base_path = "./"  # should be configured
-        self.file_writer = NexusFileWriter()
+        self.base_path = os.path.expanduser("~/Data10")  # should be configured
+        self.file_writer = NexusFileWriter(self)
 
     def _start_device_manager(self):
         self.device_manager = DeviceManagerBase(self.connector, self.scibec_url)
@@ -126,14 +126,16 @@ class FileWriterManager(BECService):
         scan = storage.scan_number
         scan_bundle = 1000
         scan_dir = self._get_scan_dir(scan_bundle, scan, leading_zeros=5)
-        data_dir = Path(os.path.join(self.base_path, "data", scan_dir))
+        data_dir = Path(os.path.join(self.base_path, "bec", "data", scan_dir))
         data_dir.mkdir(parents=True, exist_ok=True)
         file_path = os.path.abspath(os.path.join(data_dir, f"S{storage.scan_number:05d}.h5"))
         successful = True
         try:
             logger.info(f"Writing file {file_path}")
             self.file_writer.write(file_path=file_path, data=storage)
-        except:
+        except Exception as exc:
+            content = traceback.format_exc()
+            logger.error(content)
             successful = False
         self.scan_storage.pop(scanID)
         self.producer.set_and_publish(

@@ -25,6 +25,7 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 from bec_utils import BECMessage, MessageEndpoints, bec_logger
+
 from scan_server.scans import RequestBase, ScanArgType, ScanBase
 
 MOVEMENT_SCALE_X = np.sin(np.radians(15)) * np.cos(np.radians(30))
@@ -212,7 +213,7 @@ class LamNIFermatScan(ScanBase, LamNIMixin):
                                using the geometry of LamNI
                                It is determined by the first 'click' in the x-ray eye alignemnt procedure
             angle [deg]: rotation angle (will rotate first)
-            scantype: fly (i.e. HW triggered step in case of LamNI) or step
+            scan_type: fly (i.e. HW triggered step in case of LamNI) or step
             stitch_x/y: shift scan to adjacent stitch region
             fov_circular [um]: generate a circular field of view in the sample plane. This is an additional cropping to fov_size.
             stitch_overlap [um]: overlap of the stitched regions
@@ -220,7 +221,7 @@ class LamNIFermatScan(ScanBase, LamNIMixin):
 
         Examples:
             >>> scans.lamni_fermat_scan(fov_size=[20], step=0.5, exp_time=0.1)
-            >>> scans.lamni_fermat_scan(fov_size=[20, 25], center_x=20, step=0.5, exp_time=0.1)
+            >>> scans.lamni_fermat_scan(fov_size=[20, 25], center_x=0.02, center_y=0, shift_x=0, shift_y=0, angle=0, step=0.5, fov_circular=0, exp_time=0.1)
         """
 
         super().__init__(parameter=parameter, **kwargs)
@@ -235,7 +236,7 @@ class LamNIFermatScan(ScanBase, LamNIMixin):
         self.shift_x = scan_kwargs.get("shift_x", 0)
         self.shift_y = scan_kwargs.get("shift_y", 0)
         self.angle = scan_kwargs.get("angle", 0)
-        self.scan_type = scan_kwargs.get("scan_type", "step")
+        self.scan_type = scan_kwargs.get("scan_type", "fly")
         self.stitch_x = scan_kwargs.get("stitch_x", 0)
         self.stitch_y = scan_kwargs.get("stitch_y", 0)
         self.fov_circular = scan_kwargs.get("fov_circular", 0)
@@ -247,6 +248,7 @@ class LamNIFermatScan(ScanBase, LamNIMixin):
 
     def prepare_positions(self):
         self._calculate_positions()
+        self._optimize_trajectory()
         # self._sort_positions()
 
         self.num_pos = len(self.positions)

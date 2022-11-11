@@ -5,12 +5,19 @@ import h5py
 import numpy as np
 import xmltodict
 
+from bec_utils import bec_logger
+
+logger = bec_logger.logger
+
 
 class NeXusLayoutError(Exception):
     pass
 
 
 class FileWriter(abc.ABC):
+    def __init__(self, file_writer_manager):
+        self.file_writer_manager = file_writer_manager
+
     def configure(self, *args, **kwargs):
         ...
 
@@ -28,7 +35,10 @@ class FileWriter(abc.ABC):
                     continue
                 device_storage[dev].append(data.scan_segments[point][dev][dev]["value"])
         for dev_name, value in data.baseline.items():
-            device_storage[dev_name] = value[dev_name]["value"]
+            if dev_name in value:
+                device_storage[dev_name] = value[dev_name]["value"]
+                continue
+            logger.warning(f"Skipping device {dev_name} as it does not contain a {dev_name} value.")
         return device_storage
 
 
@@ -216,7 +226,9 @@ class NexusFileWriter(FileWriter):
         print(f"writing file to {file_path}")
         device_storage = self._create_device_data_storage(data)
         device_storage["metadata"] = data.metadata
-        writer_storage = cSAXS_NeXus_format(HDF5Storage(), device_storage)
+        writer_storage = cSAXS_NeXus_format(
+            HDF5Storage(), device_storage, self.file_writer_manager.device_manager
+        )
 
         with h5py.File(file_path, "w") as file:
             HDF5StorageWriter.write_to_file(writer_storage._storage, device_storage, file)
@@ -231,7 +243,7 @@ def dict_to_storage(storage, data):
         storage.create_dataset(key, val)
 
 
-def cSAXS_NeXus_format(storage, data):
+def cSAXS_NeXus_format(storage, data, device_manager):
     # /entry
     entry = storage.create_group("entry")
     entry.attrs["NX_class"] = "NXentry"
@@ -522,5 +534,30 @@ def cSAXS_NeXus_format(storage, data):
     bms2_y.attrs["units"] = "mm"
     bms2_data = beam_stop_2.create_dataset(name="data", data=data.get("diode"))
     bms2_data.attrs["units"] = "NX_DIMENSIONLESS"
+
+    eiger1p5m = device_manager.devices.get("eiger1p5m")
+
+    if eiger1p5m and eiger1p5m.enabled:
+        eiger_4 = instrument.create_group("eiger_4")
+        eiger_4.attrs["NX_class"] = "NXdetector"
+        x_pixel_size = eiger_4.create_dataset(name="x_pixel_size", data=75)
+        x_pixel_size.attrs["units"] = "um"
+        y_pixel_size = eiger_4.create_dataset(name="y_pixel_size", data=75)
+        y_pixel_size.attrs["units"] = "um"
+        polar_angle = eiger_4.create_dataset(name="polar_angle", data=0)
+        polar_angle.attrs["units"] = "degrees"
+        azimuthal_angle = eiger_4.create_dataset(name="azimuthal_angle", data=0)
+        azimuthal_angle.attrs["units"] = "degrees"
+        rotation_angle = eiger_4.create_dataset(name="rotation_angle", data=0)
+        rotation_angle.attrs["units"] = "degrees"
+        description = eiger_4.create_dataset(
+            name="description", data="Single-photon counting detector, 320 micron-thick Si chip"
+        )
+        orientation = eiger_4.create_group("orientation")
+        orientation.attrs[
+            "description"
+        ] = "Orientation defines the number of counterclockwise rotations by 90 deg followed by a transposition to reach the 'cameraman orientation', that is looking towards the beam."
+        orientation.create_dataset(name="transpose", data=1)
+        orientation.create_dataset(name="rot90", data=3)
 
     return storage
