@@ -42,6 +42,11 @@ export class Beamline extends Entity {
   })
   activeSession?: string;
 
+  @property({
+    type: 'string',
+  })
+  activeEaccount?: string;
+
   @hasMany(() => Session, { keyTo: 'beamlineId' })
   sessions?: Session[];
 
