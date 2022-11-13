@@ -567,6 +567,8 @@ class RequestBlockQueue:
             return
         if rbl.scan_def_id is None or rbl.msg.content["scan_type"] == "close_scan_def":
             self.parent.parent.queue_manager.parent.scan_number += 1
+            if not rbl.msg.metadata.get("dataset_id_on_hold"):
+                self.parent.parent.queue_manager.parent.dataset_number += 1
         return
 
     def __iter__(self):
