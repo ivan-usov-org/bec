@@ -349,6 +349,7 @@ class ScanWorker(threading.Thread):
         self.current_scan_info = {**instr.metadata, **instr.content["parameter"]}
         self.current_scan_info.update(metadata)
         self.current_scan_info.update({"scan_number": self.parent.scan_number})
+        self.current_scan_info.update({"dataset_number": self.parent.dataset_number})
         self.current_scan_info.update({"exp_time": self._exposure_time})
         self._send_scan_status("open")
 

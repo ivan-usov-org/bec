@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import asyncio
 import datetime
-from typeguard import typechecked
 import time
 from math import inf
 
 from bec_utils import BECMessage, MessageEndpoints, bec_errors, bec_logger
 from bec_utils import timeout as bec_timeout
+from typeguard import typechecked
 
 from bec_client.callbacks.live_table import LiveUpdatesTable
 from bec_client.queue_items import QueueStorage
@@ -266,6 +266,17 @@ class ScanManager:
     def next_scan_number(self, val: int):
         """set the next scan number in redis"""
         return self.producer.set(MessageEndpoints.scan_number(), val)
+
+    @property
+    def next_dataset_number(self):
+        """get the next dataset number from redis"""
+        return int(self.producer.get(MessageEndpoints.dataset_number()))
+
+    @next_dataset_number.setter
+    @typechecked
+    def next_dataset_number(self, val: int):
+        """set the next dataset number in redis"""
+        return self.producer.set(MessageEndpoints.dataset_number(), val)
 
     @staticmethod
     def _scan_queue_status_callback(msg, *, parent: ScanManager, **_kwargs) -> None:

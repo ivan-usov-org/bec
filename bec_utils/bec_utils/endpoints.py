@@ -28,6 +28,7 @@ class MessageEndpoints:
 
     # scan info
     _scan_number = "scans/scan_number"
+    _dataset_number = "scans/dataset_number"
     _scan_status = "scans/scan_status"
     _scan_status_list = "scans/scan_status_list"
     _available_scans = "scans/available_scans"
@@ -134,6 +135,10 @@ class MessageEndpoints:
     @classmethod
     def scan_number(cls):
         return cls._scan_number
+
+    @classmethod
+    def dataset_number(cls):
+        return cls._dataset_number
 
     @classmethod
     def scan_status(cls):

@@ -43,6 +43,10 @@ class ScanObject:
             if "md" not in kwargs:
                 kwargs["md"] = {}
             kwargs["md"]["scan_def_id"] = scans._scan_def_id
+        if scans._dataset_id_on_hold:
+            if "md" not in kwargs:
+                kwargs["md"] = {}
+            kwargs["md"]["dataset_id_on_hold"] = scans._dataset_id_on_hold
 
         request = Scans.prepare_scan_request(self.scan_name, self.scan_info, *args, **kwargs)
         requestID = str(uuid.uuid4())  # TODO: move this to the API server
@@ -87,6 +91,8 @@ class Scans:
         self._scan_def_ctx = ScanDef(parent=self)
         self._hide_report = None
         self._hide_report_ctx = HideReport(parent=self)
+        self._dataset_id_on_hold = None
+        self._dataset_id_on_hold_ctx = DatasetIdOnHold(parent=self)
 
     def _import_scans(self):
 
@@ -203,6 +209,11 @@ class Scans:
         """Context manager / decorator for hiding the report"""
         return self._hide_report_ctx
 
+    @property
+    def dataset_id_on_hold(self):
+        """Context manager / decorator for hiding the report"""
+        return self._dataset_id_on_hold_ctx
+
 
 class ScanGroup(ContextDecorator):
     def __init__(self, parent: Scans = None) -> None:
@@ -247,3 +258,19 @@ class HideReport(ContextDecorator):
 
     def __exit__(self, *exc):
         self.parent._hide_report = None
+
+
+class DatasetIdOnHold(ContextDecorator):
+    def __init__(self, parent: Scans = None) -> None:
+        super().__init__()
+        self.parent = parent
+
+    def __enter__(self):
+        if self.parent._dataset_id_on_hold is None:
+            self.parent._dataset_id_on_hold = True
+        return self
+
+    def __exit__(self, *exc):
+        self.parent._dataset_id_on_hold = None
+        queue = self.parent.parent.queue
+        queue.next_dataset_number += 1

@@ -32,7 +32,7 @@ class ScanServer(BECService):
         self._start_scan_assembler()
         self._start_scan_server()
         self._start_alarm_handler()
-        self.scan_number = 1
+        self._reset_scan_number()
         self.status = BECStatus.RUNNING
 
     def _start_device_manager(self):
@@ -63,6 +63,12 @@ class ScanServer(BECService):
         )
         self._alarm_consumer.start()
 
+    def _reset_scan_number(self):
+        if self.producer.get(MessageEndpoints.scan_number()) is None:
+            self.scan_number = 1
+        if self.producer.get(MessageEndpoints.dataset_number()) is None:
+            self.dataset_number = 1
+
     @staticmethod
     def _alarm_callback(msg, parent: ScanServer, **_kwargs):
         metadata = BECMessage.AlarmMessage.loads(msg.value).metadata
@@ -79,6 +85,16 @@ class ScanServer(BECService):
     def scan_number(self, val: int):
         """set the current scan number"""
         self.producer.set(MessageEndpoints.scan_number(), val)
+
+    @property
+    def dataset_number(self) -> int:
+        """get the current dataset number"""
+        return int(self.producer.get(MessageEndpoints.dataset_number()))
+
+    @dataset_number.setter
+    def dataset_number(self, val: int):
+        """set the current dataset number"""
+        self.producer.set(MessageEndpoints.dataset_number(), val)
 
     def shutdown(self) -> None:
         """shutdown the scan server"""
