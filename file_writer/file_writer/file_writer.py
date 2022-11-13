@@ -4,7 +4,6 @@ import typing
 import h5py
 import numpy as np
 import xmltodict
-
 from bec_utils import bec_logger
 
 logger = bec_logger.logger
@@ -158,6 +157,10 @@ class HDF5Storage:
         self._storage[name] = HDF5Storage(storage_type="dataset", data=data)
         return self._storage[name]
 
+    def create_soft_link(self, name: str, target: str):
+        self._storage[name] = HDF5Storage(storage_type="softlink", data=target)
+        return self._storage[name]
+
 
 class HDF5StorageWriter:
     device_storage = None
@@ -195,11 +198,11 @@ class HDF5StorageWriter:
             if value is not None:
                 container.attrs[name] = value
 
-    def add_hardlink(self, container, val):
+    def add_hardlink(self, name, container, val):
         pass
 
-    def add_softlink(self, container, val):
-        pass
+    def add_softlink(self, name, container, val):
+        container[name] = h5py.SoftLink(val._data)
 
     def add_content(self, container, storage):
         for name, val in storage.items():
@@ -208,9 +211,9 @@ class HDF5StorageWriter:
             elif val._storage_type == "dataset":
                 self.add_dataset(name, container, val)
             elif val._storage_type == "hardlink":
-                self.add_hardlink(container, val)
+                self.add_hardlink(name, container, val)
             elif val._storage_type == "softlink":
-                self.add_softlink(container, val)
+                self.add_softlink(name, container, val)
             else:
                 pass
 
@@ -263,6 +266,8 @@ def cSAXS_NeXus_format(storage, data, device_manager):
     control.create_dataset(name="integral", data=data.get("bpm4s"))
 
     # /entry/data
+    if "eiger_4" in device_manager.devices:
+        entry.create_soft_link(name="data", target="/entry/instrument/eiger_4")
 
     # /entry/sample
     control = entry.create_group("sample")
@@ -535,9 +540,7 @@ def cSAXS_NeXus_format(storage, data, device_manager):
     bms2_data = beam_stop_2.create_dataset(name="data", data=data.get("diode"))
     bms2_data.attrs["units"] = "NX_DIMENSIONLESS"
 
-    eiger1p5m = device_manager.devices.get("eiger1p5m")
-
-    if eiger1p5m and eiger1p5m.enabled:
+    if "eiger1p5m" in device_manager.devices and device_manager.devices.eiger1p5m.enabled:
         eiger_4 = instrument.create_group("eiger_4")
         eiger_4.attrs["NX_class"] = "NXdetector"
         x_pixel_size = eiger_4.create_dataset(name="x_pixel_size", data=75)
