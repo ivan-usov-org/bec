@@ -71,9 +71,12 @@ logger.success("Started BECClient")
 # scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.02)
 
 # with scans.scan_def:
-#     scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1)
-#     scans.line_scan(dev.samx, -8, 8, steps=10, exp_time=0.1)
+#     scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=True)
+#     scans.line_scan(dev.samx, -8, 8, steps=10, exp_time=0.1, relative=True)
 
+# with scans.dataset_id_on_hold:
+#     scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=True)
+#     scans.line_scan(dev.samx, -8, 8, steps=10, exp_time=0.1, relative=True)
 
 # scan_def_id = str(uuid.uuid4())
 # scans.open_scan_def(md={"scan_def_id": scan_def_id})
