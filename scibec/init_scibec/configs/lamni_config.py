@@ -1,4 +1,6 @@
 from .config import X12SAConfig, DemoConfig
+import yaml
+import os
 
 
 class LamNIConfig(DemoConfig, X12SAConfig):
@@ -9,9 +11,10 @@ class LamNIConfig(DemoConfig, X12SAConfig):
         self.write_eiger1p5m()
         self.write_x12sa_status()
         self.write_sls_status()
-        self.write_sim_user_motors()
-        self.write_sim_beamline_motors()
-        self.write_sim_beamline_monitors()
+        self.load_csaxs_config()
+        # self.write_sim_user_motors()
+        # self.write_sim_beamline_motors()
+        # self.write_sim_beamline_monitors()
 
     def write_galil_motors(self):
         lamni_galil_motors = [
@@ -108,6 +111,7 @@ class LamNIConfig(DemoConfig, X12SAConfig):
     def write_eiger1p5m(self):
         out = {
             "eiger1p5m": {
+                "description": "Eiger 1.5M in vacuum detector, in-house developed, PSI",
                 "status": {"enabled": True, "enabled_set": True},
                 "deviceClass": "Eiger1p5MDetector",
                 "deviceConfig": {"device_access": True, "name": "eiger1p5m"},
@@ -116,3 +120,11 @@ class LamNIConfig(DemoConfig, X12SAConfig):
             }
         }
         self.write_section(out, "LamNI Eiger 1.5M in vacuum")
+
+    def load_csaxs_config(self):
+        CONFIG_PATH = "./init_scibec/configs/test_config_cSAXS.yaml"
+        content = {}
+        with open(CONFIG_PATH, "r") as csaxs_config_file:
+            content = yaml.safe_load(csaxs_config_file.read())
+
+        self.write_section(content, "Default cSAXS config")
