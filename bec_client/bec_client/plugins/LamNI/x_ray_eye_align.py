@@ -2,8 +2,10 @@ import builtins
 import os
 import time
 from collections import defaultdict
-
+import threading
 import epics
+import subprocess
+import datetime
 import numpy as np
 from bec_utils import bec_logger
 
@@ -321,6 +323,11 @@ class LamNI:
         self.corr_pos_x = []
         self.corr_pos_y = []
         self.corr_angle = []
+        self.check_shutter = True
+        self.check_light_available = True
+        self.check_fofb = True
+        self._check_msgs = []
+        self.tomo_id = None
 
     @property
     def tomo_fovx_offset(self):
@@ -515,6 +522,67 @@ class LamNI:
         self.corr_angle = corr_angle
         return
 
+    def _run_beamline_checks(self):
+        msgs = []
+        if self.check_shutter:
+            if epics_get("X12SA-OP-ST1:OPEN_EPS") != "open":
+                self._beam_is_okay = False
+                msgs.append("Check beam failed: Shutter is closed.")
+        if self.check_light_available:
+            if epics_get("ACOAU-ACCU:OP-MODE.VAL") < 4:
+                self._beam_is_okay = False
+                msgs.append("Check beam failed: Light not available.")
+        if self.check_fofb:
+            if epics_get("ARIDI-BPM:FOFBSTATUS-G") != "running":
+                self._beam_is_okay = False
+                msgs.append("Check beam failed: Fast orbit feedback is not running.")
+        return msgs
+
+    def _check_beam(self):
+        while not self._stop_beam_check_event.is_set():
+            self._check_msgs = self._run_beamline_checks()
+
+            if not self._beam_is_okay:
+                self._stop_beam_check_event.set()
+            time.sleep(1)
+
+    def _start_beam_check(self):
+        self._beam_is_okay = True
+        self._stop_beam_check_event = threading.Event()
+
+        self.beam_check_thread = threading.Thread(target=self._check_beam, daemon=True)
+        self.beam_check_thread.start()
+
+    def _was_beam_okay(self):
+        self._stop_beam_check_event.set()
+        self.beam_check_thread.join()
+        return self._beam_is_okay
+
+    def _print_beamline_checks(self):
+        for msg in self._check_msgs:
+            logger.warning(msg)
+
+    def _wait_for_beamline_checks(self):
+        self._print_beamline_checks()
+        while True:
+            self._beam_is_okay = True
+            self._check_msgs = self._run_beamline_checks()
+            if self._beam_is_okay:
+                break
+            self._print_beamline_checks()
+            time.sleep(1)
+
+    def add_sample_database(
+        self, samplename, date, eaccount, scan_number, setup, sample_additional_info, user
+    ):
+        subprocess.run(
+            f"wget --user=omny --password=samples -q -O /tmp/currsamplesnr.txt 'https://omny.web.psi.ch/samples/newmeasurement.php?sample={samplename}&date={date}&eaccount={eaccount}&scannr={scan_number}&setup={setup}&additional={sample_additional_info}&user={user}'",
+            shell=True,
+        )
+        with open("/tmp/currsamplesnr.txt") as tomo_number_file:
+            tomo_number = int(tomo_number_file.read())
+        return tomo_number
+
     def sub_tomo_scan(self, subtomo_number, start_angle=None, tomo_stepsize=10.0):
 
         if start_angle is None:
@@ -539,12 +607,41 @@ class LamNI:
         _tomo_shift_angles = 0
         angle_end = start_angle + 360
         for angle in np.linspace(
-            start_angle + _tomo_shift_angles, angle_end, num=360 / tomo_stepsize + 1, endpoint=True
+            start_angle + _tomo_shift_angles,
+            angle_end,
+            num=int(360 / tomo_stepsize + 1),
+            endpoint=True,
         ):
+            successful = False
             if 0 <= angle < 360.05:
                 print(f"Starting LamNI scan for angle {angle}")
-                self.tomo_scan_projection(angle)
+                while not successful:
+                    self._start_beam_check()
+                    self.tomo_scan_projection(angle)
+                    if self._was_beam_okay():
+                        successful = True
+                    else:
+                        self._wait_for_beamline_checks()
+                tomo_id = 0
+                with open(
+                    os.path.expanduser("~/Data10/specES1/dat-files/tomography_scannumbers.txt"),
+                    "a+",
+                ) as out_file:
+                    out_file.write(
+                        f"{bec.queue.next_scan_number-1} {angle} {dev.lsamrot.read()['lsamrot']['value']} {self.tomo_id} {subtomo_number} {0} {'lamni'}\n"
+                    )
 
-    def tomo_scan(self):
-        for ii in range(8):
-            self.sub_tomo_scan(ii + 1)
+    def tomo_scan(self, subtomo_start=1, start_angle=None):
+        if subtomo_start == 1 and start_angle is None:
+            self.tomo_id = self.add_sample_database(
+                "bec_test_sample",
+                str(datetime.date.today()),
+                "e20588",
+                bec.queue.next_scan_number,
+                "lamni",
+                "test additional info",
+                "BEC",
+            )
+        for ii in range(subtomo_start, 9):
+            self.sub_tomo_scan(ii, start_angle=start_angle)
+            start_angle = None
