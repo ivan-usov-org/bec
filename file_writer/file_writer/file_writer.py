@@ -343,10 +343,10 @@ def cSAXS_NeXus_format(storage, data, device_manager):
     mono = instrument.create_group("monochromator")
     mono.attrs["NX_class"] = "NXmonochromator"
     wavelength = mono.create_dataset(
-        name="wavelength", data=12.3984193 / (data.get("mokev", -1) + 1e-9)
+        name="wavelength", data=12.3984193 / (data.get("mokev", [-1])[0] + 1e-9)
     )
     wavelength.attrs["units"] = "Angstrom"
-    energy = mono.create_dataset(name="energy", data=data.get("mokev"))
+    energy = mono.create_dataset(name="energy", data=data.get("mokev", [-1])[0])
     energy.attrs["units"] = "keV"
     mono.create_dataset(name="type", data="Double crystal fixed exit monochromator.")
     distance = mono.create_dataset(name="distance", data=-5220 - np.asarray(data.get("samz", 0)))
