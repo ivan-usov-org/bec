@@ -309,8 +309,15 @@ class BECMagics(Magics):
     @line_magic
     def restart(self, line):
         "Request a scan restart"
-        self.client.queue.request_scan_restart()
-        return self.client.callback_manager.continue_request()
+        old_req_ids = self.client.queue.scan_storage.current_scan.queue.requestIDs
+        request = self.client.queue.request_storage.find_request_by_ID(old_req_ids[0]).request
+        requestID = self.client.queue.request_scan_restart()
+        request.metadata["RID"] = requestID
+        hide_report = request.metadata.get("hide_report", False)
+        scan_report = self.client.scans._available_scans["fermat_scan"]._get_scan_report_type(
+            hide_report
+        )
+        return self.client.callback_manager.process_request(request, scan_report)
 
     @line_magic
     def halt(self, line):

@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import datetime
 import time
+import uuid
 from math import inf
 
 from bec_utils import BECMessage, MessageEndpoints, bec_errors, bec_logger
@@ -243,18 +244,24 @@ class ScanManager:
             ).dumps(),
         )
 
-    def request_scan_restart(self, scanID=None, replace=True):
+    def request_scan_restart(self, scanID=None, requestID=None, replace=True) -> str:
         """request to restart a scan"""
         if scanID is None:
             scanID = self.scan_storage.current_scanID
+        if requestID is None:
+            requestID = str(uuid.uuid4())
         logger.info("Requesting to abort and repeat a scan")
         position = "replace" if replace else "append"
+
         self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
             BECMessage.ScanQueueModificationMessage(
-                scanID=scanID, action="restart", parameter={"position": position}
+                scanID=scanID,
+                action="restart",
+                parameter={"position": position, "RID": requestID},
             ).dumps(),
         )
+        return requestID
 
     @property
     def next_scan_number(self):

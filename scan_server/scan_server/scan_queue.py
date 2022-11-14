@@ -168,7 +168,11 @@ class QueueManager:
         self.queues[queue].status = ScanQueueStatus.PAUSED
         self.queues[queue].worker_status = InstructionQueueStatus.STOPPED
         instruction_queue = self._wait_for_queue_to_appear_in_history(scanID, queue)
-        self.add_to_queue(queue, instruction_queue.scan_msgs[0], 0)
+        scan_msg = instruction_queue.scan_msgs[0]
+        RID = parameter.get("RID")
+        if RID:
+            scan_msg.metadata["RID"] = RID
+        self.add_to_queue(queue, scan_msg, 0)
 
     def _get_active_scanID(self, queue):
         if len(self.queues[queue].queue) == 0:
