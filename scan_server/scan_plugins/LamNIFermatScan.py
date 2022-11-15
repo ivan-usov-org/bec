@@ -241,7 +241,8 @@ class LamNIFermatScan(ScanBase, LamNIMixin):
         self.stitch_y = scan_kwargs.get("stitch_y", 0)
         self.fov_circular = scan_kwargs.get("fov_circular", 0)
         self.stitch_overlap = scan_kwargs.get("stitch_overlap", 1)
-        self.keep_plot = scan_kwargs.get("keep_plot", 0)
+        # self.keep_plot = scan_kwargs.get("keep_plot", 0)
+        self.optim_trajectory = scan_kwargs.get("optim_trajectory", "corridor")
 
     def initialize(self):
         self.scan_motors = ["rtx", "rty"]
@@ -298,18 +299,18 @@ class LamNIFermatScan(ScanBase, LamNIMixin):
         yield from self.lamni_rotation(self.angle)
         total_shift_x, total_shift_y = self._compute_total_shift()
         yield from self.lamni_new_scan_center_interferometer(total_shift_x, total_shift_y)
-        self._plot_target_pos()
+        # self._plot_target_pos()
         if self.scan_type == "fly":
             yield from self._transfer_positions_to_LamNI()
 
-    def _plot_target_pos(self):
-        # return
-        plt.plot(self.positions[:, 0], self.positions[:, 1], alpha=0.2)
-        plt.scatter(self.positions[:, 0], self.positions[:, 1])
-        plt.savefig("mygraph.png")
-        if not self.keep_plot:
-            plt.clf()
-        # plt.show()
+    # def _plot_target_pos(self):
+    #     # return
+    #     plt.plot(self.positions[:, 0], self.positions[:, 1], alpha=0.2)
+    #     plt.scatter(self.positions[:, 0], self.positions[:, 1])
+    #     plt.savefig("mygraph.png")
+    #     if not self.keep_plot:
+    #         plt.clf()
+    #     # plt.show()
 
     def _transfer_positions_to_LamNI(self):
         yield from self.stubs.send_rpc_and_wait(
