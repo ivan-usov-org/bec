@@ -2,24 +2,17 @@ import builtins
 import os
 import time
 from collections import defaultdict
-
-import epics
+import threading
+import subprocess
+import datetime
 import numpy as np
+from pathlib import Path
 from bec_utils import bec_logger
+from typeguard import typechecked
+from .lamni_optics_mixin import LamNIOpticsMixin
+from bec_client.plugins.cSAXS import fshopen, fshclose, epics_get, epics_put
 
 logger = bec_logger.logger
-
-
-def epics_put(channel, value):
-    epics.caput(channel, value)
-
-
-def epics_get(channel):
-    return epics.caget(channel)
-
-
-def fshopen():
-    pass
 
 
 class XrayEyeAlign:
@@ -262,7 +255,9 @@ class XrayEyeAlign:
 
         self.tomo_rotate(0)
 
-        print("\n\nNEXT LOAD ALIGNMENT PARAMETERS\nby running lamni_read_alignment_parameters\n")
+        print(
+            "\n\nNEXT LOAD ALIGNMENT PARAMETERS\nby running lamni.align.read_alignment_parameters()\n"
+        )
 
         self.client.set_global_var("tomo_fov_offset", self.shift_xy)
 
@@ -279,7 +274,7 @@ class XrayEyeAlign:
                 )
                 alignment_values_file.write(f"{(k-2)*45}\t{fovx_offset}\t{fovy_offset}\n")
 
-    def read_alignment_parameters(self, dir_path="~/Data10/specES1/internal/"):
+    def read_alignment_parameters(self, dir_path=os.path.expanduser("~/Data10/specES1/internal/")):
         tomo_fit_xray_eye = np.zeros((2, 3))
         with open(os.path.join(dir_path, "ptychotomoalign_Ax.txt"), "r") as file:
             tomo_fit_xray_eye[0][0] = file.readline()
@@ -314,13 +309,30 @@ class XrayEyeAlign:
         )
 
 
-class LamNI:
+class LamNI(LamNIOpticsMixin):
     def __init__(self, client):
+        super().__init__()
         self.client = client
         self.align = XrayEyeAlign(client)
         self.corr_pos_x = []
         self.corr_pos_y = []
         self.corr_angle = []
+        self.check_shutter = True
+        self.check_light_available = True
+        self.check_fofb = True
+        self._check_msgs = []
+        self.tomo_id = None
+
+    def get_beamline_checks_enabled(self):
+        print(
+            f"Shutter: {self.check_shutter}\nFOFB: {self.check_fofb}\nLight available: {self.check_light_available}"
+        )
+
+    def set_beamline_checks_enabled(self, val: bool):
+        self.check_shutter = val
+        self.check_light_available = val
+        self.check_fofb = val
+        self.get_beamline_checks_enabled()
 
     @property
     def tomo_fovx_offset(self):
@@ -370,7 +382,7 @@ class LamNI:
     def tomo_countingtime(self):
         val = self.client.get_global_var("tomo_countingtime")
         if val is None:
-            return 0.0
+            return 0.1
         return val
 
     @tomo_countingtime.setter
@@ -400,41 +412,124 @@ class LamNI:
         self.client.set_global_var("manual_shift_y", val)
 
     @property
-    def lamni_piezo_range(self):
-        val = self.client.get_global_var("lamni_piezo_range")
+    def lamni_piezo_range_x(self):
+        val = self.client.get_global_var("lamni_piezo_range_x")
         if val is None:
-            return 0.0
+            return 20
         return val
 
-    @lamni_piezo_range.setter
-    def lamni_piezo_range(self, val: float):
-        self.client.set_global_var("lamni_piezo_range", val)
+    @lamni_piezo_range_x.setter
+    def lamni_piezo_range_x(self, val: float):
+        if val > 80:
+            raise ValueError("Piezo range cannot be larger than 80 um.")
+        self.client.set_global_var("lamni_piezo_range_x", val)
+
+    @property
+    def lamni_piezo_range_y(self):
+        val = self.client.get_global_var("lamni_piezo_range_y")
+        if val is None:
+            return 20
+        return val
+
+    @lamni_piezo_range_y.setter
+    def lamni_piezo_range_y(self, val: float):
+        if val > 80:
+            raise ValueError("Piezo range cannot be larger than 80 um.")
+        self.client.set_global_var("lamni_piezo_range_y", val)
+
+    @property
+    def lamni_stitch_x(self):
+        val = self.client.get_global_var("lamni_stitch_x")
+        if val is None:
+            return 0
+        return val
+
+    @lamni_stitch_x.setter
+    @typechecked
+    def lamni_stitch_x(self, val: int):
+        self.client.set_global_var("lamni_stitch_x", val)
+
+    @property
+    def lamni_stitch_y(self):
+        val = self.client.get_global_var("lamni_stitch_y")
+        if val is None:
+            return 0
+        return val
+
+    @lamni_stitch_y.setter
+    @typechecked
+    def lamni_stitch_y(self, val: int):
+        self.client.set_global_var("lamni_stitch_y", val)
+
+    @property
+    def ptycho_reconstruct_foldername(self):
+        val = self.client.get_global_var("ptycho_reconstruct_foldername")
+        if val is None:
+            return "ptycho_reconstruct"
+        return val
+
+    @ptycho_reconstruct_foldername.setter
+    def ptycho_reconstruct_foldername(self, val: str):
+        self.client.set_global_var("ptycho_reconstruct_foldername", val)
+
+    @property
+    def tomo_angle_stepsize(self):
+        val = self.client.get_global_var("tomo_angle_stepsize")
+        if val is None:
+            return 10.0
+        return val
+
+    @tomo_angle_stepsize.setter
+    def tomo_angle_stepsize(self, val: float):
+        self.client.set_global_var("tomo_angle_stepsize", val)
+
+    @property
+    def tomo_stitch_overlap(self):
+        val = self.client.get_global_var("tomo_stitch_overlap")
+        if val is None:
+            return 0.2
+        return val
+
+    @tomo_stitch_overlap.setter
+    def tomo_stitch_overlap(self, val: float):
+        self.client.set_global_var("tomo_stitch_overlap", val)
 
     def tomo_scan_projection(self, angle: float):
         scans = builtins.__dict__.get("scans")
         additional_correction = self.compute_additional_correction(angle)
         correction_xeye_mu = self.lamni_compute_additional_correction_xeye_mu(angle)
-        logger.info(
-            f"scans.lamni_fermat_scan(fov_size=[20,20], step={self.tomo_shellstep}, stitch_x={0}, stitch_y={0}, stitch_overlap={1},"
-            f"center_x={self.tomo_fovx_offset}, center_y={self.tomo_fovy_offset}, "
-            f"shift_x={self.manual_shift_x+correction_xeye_mu[0]-additional_correction[0]}, "
-            f"shift_y={self.manual_shift_y+correction_xeye_mu[1]-additional_correction[1]}, "
-            f"fov_circular={self.tomo_circfov}, angle={angle}, scan_type='fly')"
-        )
-        return scans.lamni_fermat_scan(
-            fov_size=[20, 20],
-            step=self.tomo_shellstep,
-            stitch_x=0,
-            stitch_y=0,
-            stitch_overlap=1,
-            center_x=self.tomo_fovx_offset,
-            center_y=self.tomo_fovy_offset,
-            shift_x=(self.manual_shift_x + correction_xeye_mu[0] - additional_correction[0]),
-            shift_y=(self.manual_shift_y + correction_xeye_mu[1] - additional_correction[1]),
-            fov_circular=self.tomo_circfov,
-            angle=angle,
-            scan_type="fly",
-        )
+
+        self._current_scan_list = []
+
+        for stitch_x in range(-self.lamni_stitch_x, self.lamni_stitch_x + 1):
+            for stitch_y in range(-self.lamni_stitch_y, self.lamni_stitch_y + 1):
+                self._current_scan_list.append(bec.queue.next_scan_number)
+                logger.info(
+                    f"scans.lamni_fermat_scan(fov_size=[{self.lamni_piezo_range_x},{self.lamni_piezo_range_y}], step={self.tomo_shellstep}, stitch_x={0}, stitch_y={0}, stitch_overlap={1},"
+                    f"center_x={self.tomo_fovx_offset}, center_y={self.tomo_fovy_offset}, "
+                    f"shift_x={self.manual_shift_x+correction_xeye_mu[0]-additional_correction[0]}, "
+                    f"shift_y={self.manual_shift_y+correction_xeye_mu[1]-additional_correction[1]}, "
+                    f"fov_circular={self.tomo_circfov}, angle={angle}, scan_type='fly')"
+                )
+                scans.lamni_fermat_scan(
+                    fov_size=[self.lamni_piezo_range_x, self.lamni_piezo_range_y],
+                    step=self.tomo_shellstep,
+                    stitch_x=stitch_x,
+                    stitch_y=stitch_y,
+                    stitch_overlap=self.tomo_stitch_overlap,
+                    center_x=self.tomo_fovx_offset,
+                    center_y=self.tomo_fovy_offset,
+                    shift_x=(
+                        self.manual_shift_x + correction_xeye_mu[0] - additional_correction[0]
+                    ),
+                    shift_y=(
+                        self.manual_shift_y + correction_xeye_mu[1] - additional_correction[1]
+                    ),
+                    fov_circular=self.tomo_circfov,
+                    angle=angle,
+                    scan_type="fly",
+                    exp_time=self.tomo_countingtime,
+                )
 
     def lamni_compute_additional_correction_xeye_mu(self, angle):
         import math
@@ -515,36 +610,193 @@ class LamNI:
         self.corr_angle = corr_angle
         return
 
-    def sub_tomo_scan(self, subtomo_number, start_angle=None, tomo_stepsize=10.0):
+    def _run_beamline_checks(self):
+        msgs = []
+        if self.check_shutter:
+            if epics_get("X12SA-OP-ST1:OPEN_EPS") != "open":
+                self._beam_is_okay = False
+                msgs.append("Check beam failed: Shutter is closed.")
+        if self.check_light_available:
+            if epics_get("ACOAU-ACCU:OP-MODE.VAL") < 4:
+                self._beam_is_okay = False
+                msgs.append("Check beam failed: Light not available.")
+        if self.check_fofb:
+            if epics_get("ARIDI-BPM:FOFBSTATUS-G") != "running":
+                self._beam_is_okay = False
+                msgs.append("Check beam failed: Fast orbit feedback is not running.")
+        return msgs
+
+    def _check_beam(self):
+        while not self._stop_beam_check_event.is_set():
+            self._check_msgs = self._run_beamline_checks()
+
+            if not self._beam_is_okay:
+                self._stop_beam_check_event.set()
+            time.sleep(1)
+
+    def _start_beam_check(self):
+        self._beam_is_okay = True
+        self._stop_beam_check_event = threading.Event()
+
+        self.beam_check_thread = threading.Thread(target=self._check_beam, daemon=True)
+        self.beam_check_thread.start()
+
+    def _was_beam_okay(self):
+        self._stop_beam_check_event.set()
+        self.beam_check_thread.join()
+        return self._beam_is_okay
+
+    def _print_beamline_checks(self):
+        for msg in self._check_msgs:
+            logger.warning(msg)
+
+    def _wait_for_beamline_checks(self):
+        self._print_beamline_checks()
+        while True:
+            self._beam_is_okay = True
+            self._check_msgs = self._run_beamline_checks()
+            if self._beam_is_okay:
+                break
+            self._print_beamline_checks()
+            time.sleep(1)
+
+    def add_sample_database(
+        self, samplename, date, eaccount, scan_number, setup, sample_additional_info, user
+    ):
+        subprocess.run(
+            f"wget --user=omny --password=samples -q -O /tmp/currsamplesnr.txt 'https://omny.web.psi.ch/samples/newmeasurement.php?sample={samplename}&date={date}&eaccount={eaccount}&scannr={scan_number}&setup={setup}&additional={sample_additional_info}&user={user}'",
+            shell=True,
+        )
+        with open("/tmp/currsamplesnr.txt") as tomo_number_file:
+            tomo_number = int(tomo_number_file.read())
+        return tomo_number
+
+    def sub_tomo_scan(self, subtomo_number, start_angle=None):
 
         if start_angle is None:
             if subtomo_number == 1:
                 start_angle = 0
             elif subtomo_number == 2:
-                start_angle = tomo_stepsize / 8.0 * 4
+                start_angle = self.tomo_angle_stepsize / 8.0 * 4
             elif subtomo_number == 3:
-                start_angle = tomo_stepsize / 8.0 * 2
+                start_angle = self.tomo_angle_stepsize / 8.0 * 2
             elif subtomo_number == 4:
-                start_angle = tomo_stepsize / 8.0 * 6
+                start_angle = self.tomo_angle_stepsize / 8.0 * 6
             elif subtomo_number == 5:
-                start_angle = tomo_stepsize / 8.0 * 1
+                start_angle = self.tomo_angle_stepsize / 8.0 * 1
             elif subtomo_number == 6:
-                start_angle = tomo_stepsize / 8.0 * 5
+                start_angle = self.tomo_angle_stepsize / 8.0 * 5
             elif subtomo_number == 7:
-                start_angle = tomo_stepsize / 8.0 * 3
+                start_angle = self.tomo_angle_stepsize / 8.0 * 3
             elif subtomo_number == 8:
-                start_angle = tomo_stepsize / 8.0 * 7
+                start_angle = self.tomo_angle_stepsize / 8.0 * 7
 
         # _tomo_shift_angles (potential global variable)
         _tomo_shift_angles = 0
         angle_end = start_angle + 360
         for angle in np.linspace(
-            start_angle + _tomo_shift_angles, angle_end, num=360 / tomo_stepsize + 1, endpoint=True
+            start_angle + _tomo_shift_angles,
+            angle_end,
+            num=int(360 / self.tomo_angle_stepsize) + 1,
+            endpoint=True,
         ):
+            successful = False
             if 0 <= angle < 360.05:
                 print(f"Starting LamNI scan for angle {angle}")
-                self.tomo_scan_projection(angle)
+                while not successful:
+                    self._start_beam_check()
+                    self.tomo_scan_projection(angle)
 
-    def tomo_scan(self):
-        for ii in range(8):
-            self.sub_tomo_scan(ii + 1)
+                    if self._was_beam_okay():
+                        successful = True
+                    else:
+                        self._wait_for_beamline_checks()
+                self.tomo_reconstruct()
+                tomo_id = 0
+                with open(
+                    os.path.expanduser("~/Data10/specES1/dat-files/tomography_scannumbers.txt"),
+                    "a+",
+                ) as out_file:
+                    out_file.write(
+                        f"{bec.queue.next_scan_number-1} {angle} {dev.lsamrot.read()['lsamrot']['value']} {self.tomo_id} {subtomo_number} {0} {'lamni'}\n"
+                    )
+
+    def tomo_scan(self, subtomo_start=1, start_angle=None):
+        if subtomo_start == 1 and start_angle is None:
+            self.tomo_id = self.add_sample_database(
+                "bec_test_sample",
+                str(datetime.date.today()),
+                "e20588",
+                bec.queue.next_scan_number,
+                "lamni",
+                "test additional info",
+                "BEC",
+            )
+        for ii in range(subtomo_start, 9):
+            self.sub_tomo_scan(ii, start_angle=start_angle)
+            start_angle = None
+
+    def tomo_parameters(self):
+        print(f"Current settings:")
+        print(f"Counting time           <ctime>  =  {self.tomo_countingtime} s")
+        print(f"Stepsize microns         <step>  =  {self.tomo_shellstep}")
+        print(
+            f"Piezo range (max 80)  <microns>  =  {self.lamni_piezo_range_x}, {self.lamni_piezo_range_y}"
+        )
+        print(f"Stitching number x,y             =  {self.lamni_stitch_x}, {self.lamni_stitch_y}")
+        print(f"Stitching overlap                =  {self.tomo_stitch_overlap}")
+        print(f"Circuilar FOV diam    <microns>  =  {self.tomo_circfov}")
+        print(f"Reconstruction queue name        =  {self.ptycho_reconstruct_foldername}")
+        print(
+            f"For information, fov offset is rotating and finding the ROI, manual shift moves rotation center"
+        )
+        print(f"   _tomo_fovx_offset       <mm>  =  {self.tomo_fovx_offset}")
+        print(f"   _tomo_fovy_offset       <mm>  =  {self.tomo_fovy_offset}")
+        print(f"   _manual_shift_x         <mm>  =  {self.manual_shift_x}")
+        print(f"   _manual_shift_y         <mm>  =  {self.manual_shift_y}")
+        print(f"Angular step within sub-tomogram:   {self.tomo_angle_stepsize} degrees")
+        print(f"Resulting in number of projections: {360/self.tomo_angle_stepsize*8}\n")
+
+        np = input("Are these parameters correctly set for your scan? ")
+        if np == "y":
+            print("good then")
+        else:
+            self.tomo_countingtime = self._get_val("<ctime> s", self.tomo_countingtime, float)
+            self.tomo_shellstep = self._get_val("<step size> um", self.tomo_shellstep, float)
+            self.lamni_piezo_range_x = self._get_val(
+                "<piezo range X (max 80)> um", self.lamni_piezo_range_x, float
+            )
+            self.lamni_piezo_range_y = self._get_val(
+                "<piezo range Y (max 80)> um", self.lamni_piezo_range_y, float
+            )
+            self.lamni_stitch_x = self._get_val("<stitch X>", self.lamni_stitch_x, int)
+            self.lamni_stitch_y = self._get_val("<stitch Y>", self.lamni_stitch_y, int)
+            self.tomo_circfov = self._get_val("<circular FOV> um", self.tomo_circfov, float)
+            self.ptycho_reconstruct_foldername = self._get_val(
+                "Reconstruction queue ", self.ptycho_reconstruct_foldername, str
+            )
+            tomo_numberofprojections = self._get_val(
+                "Number of projections", 360 / self.tomo_angle_stepsize * 8, int
+            )
+
+            print(f"The angular step will be {360/tomo_numberofprojections}")
+            self.tomo_angle_stepsize = 360 / tomo_numberofprojections * 8
+            print(f"The angular step in a subtomogram it will be {self.tomo_angle_stepsize}")
+
+    @staticmethod
+    def _get_val(msg: str, default_value, data_type):
+        return data_type(input(f"{msg} ({default_value}): ") or default_value)
+
+    def tomo_reconstruct(self):
+        BASE_PATH = os.path.expanduser("~/Data10/specES1")
+        ptycho_queue_path = Path(os.path.join(BASE_PATH, self.ptycho_reconstruct_foldername))
+        ptycho_queue_path.mkdir(parents=True, exist_ok=True)
+
+        last_scan_number = bec.queue.next_scan_number - 1
+        ptycho_queue_file = os.path.abspath(
+            os.path.join(ptycho_queue_path, f"scan_{last_scan_number:05d}.dat")
+        )
+        with open(ptycho_queue_file, "w") as queue_file:
+            scans = " ".join([str(scan) for scan in self._current_scan_list])
+            queue_file.write(f"p.scan_number {scans}\n")
+            queue_file.write(f"p.check_nextscan_started 1\n")

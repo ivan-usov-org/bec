@@ -22,6 +22,15 @@ bec.load_high_level_interface("spec_hli")
 dev = bec.device_manager.devices
 scans = bec.scans
 
+
+from bec_client.plugins.cSAXS import *
+from bec_client.plugins import LamNI
+
+lamni = LamNI.LamNI(bec)
+bec._ip.prompts.username = "LamNI"
+bec._ip.prompts.status = 1
+
+
 logger.success("Started BECClient")
 
 

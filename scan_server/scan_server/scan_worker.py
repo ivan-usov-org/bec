@@ -320,12 +320,14 @@ class ScanWorker(threading.Thread):
         baseline_devices = [
             dev.name for dev in self.device_manager.devices.baseline_devices(self.scan_motors)
         ]
+        params = instr.content["parameter"]
+        params.update({"ignore_failure": True})
         self.device_manager.producer.send(
             MessageEndpoints.device_instructions(),
             DeviceMsg(
                 device=baseline_devices,
                 action="read",
-                parameter=instr.content["parameter"],
+                parameter=params,
                 metadata=instr.metadata,
             ).dumps(),
         )

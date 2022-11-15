@@ -105,7 +105,8 @@ class LiveUpdatesTable(LiveUpdatesBase):
     def _prepare_table(self) -> PrettyTable:
         header = ["seq. num"]
         header.extend(self.devices)
-        return PrettyTable(header, padding=12)
+        max_len = max([len(head) for head in header])
+        return PrettyTable(header, padding=max_len)
 
     async def update_scan_item(self):
         """get the current scan item"""
