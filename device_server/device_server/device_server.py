@@ -350,13 +350,13 @@ class DeviceServer(BECService):
                 signals = obj.read()
             except Exception as exc:
                 if not instr.content["parameter"].get("ignore_failure"):
-                    raise exc
+                    signals = obj.read()
                 logger.warning(f"Failed to read {dev}. Trying to load an old value.")
                 old_msg = BECMessage.DeviceMessage.loads(
                     self.producer.get(MessageEndpoints.device_read(dev))
                 )
                 if not old_msg:
-                    raise exc
+                    signals = obj.read()
                 signals = old_msg.content["signals"]
             self.producer.set_and_publish(
                 MessageEndpoints.device_read(dev),
