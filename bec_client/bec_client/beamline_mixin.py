@@ -32,12 +32,10 @@ class BeamlineMixin:
         self._add_ofb_mode(table, info)
         self._add_fofb(table, info)
         self._add_crane_usage(table, info)
-
-        table.add_row("Crane usage", self._get_info_val(info, "sls_info_crane_usage"))
         console.print(table)
 
     def _add_machine_status(self, table, info):
-        val = self._get_info_val(info, "sls_info_operation")
+        val = self._get_info_val(info, "sls_info_machine_status")
         if val not in ["Light Available", "Light-Available"]:
             return table.add_row("Machine status", val, style=self.ALARM_STYLE)
         return table.add_row("Machine status", val, style=self.DEFAULT_STYLE)
@@ -49,16 +47,16 @@ class BeamlineMixin:
         return table.add_row("Injection mode", val, style=self.DEFAULT_STYLE)
 
     def _add_current_threshold(self, table, info):
-        val = self._get_info_val(info, "sls_info_current_threshold")
+        val = info["sls_info_current_threshold"]["value"]
         if val < 350:
-            return table.add_row("Current threshold", val, style=self.ALARM_STYLE)
-        return table.add_row("Current threshold", val, style=self.DEFAULT_STYLE)
+            return table.add_row("Current threshold", str(val), style=self.ALARM_STYLE)
+        return table.add_row("Current threshold", str(val), style=self.DEFAULT_STYLE)
 
     def _add_current_deadband(self, table, info):
-        val = self._get_info_val(info, "sls_info_current_deadband")
+        val = info["sls_info_current_deadband"]["value"]
         if val > 2:
-            return table.add_row("Current deadband", val, style=self.ALARM_STYLE)
-        return table.add_row("Current deadband", val, style=self.DEFAULT_STYLE)
+            return table.add_row("Current deadband", str(val), style=self.ALARM_STYLE)
+        return table.add_row("Current deadband", str(val), style=self.DEFAULT_STYLE)
 
     def _add_filling_pattern(self, table, info):
         val = self._get_info_val(info, "sls_info_filling_pattern")
@@ -88,4 +86,4 @@ class BeamlineMixin:
 
     def _add_crane_usage(self, table, info):
         val = self._get_info_val(info, "sls_info_crane_usage")
-        return table.add_row("SLS crane usage", f"{val:.2f} h", style=self.DEFAULT_STYLE)
+        return table.add_row("SLS crane usage", val, style=self.DEFAULT_STYLE)
