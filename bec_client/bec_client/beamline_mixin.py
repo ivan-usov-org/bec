@@ -14,6 +14,23 @@ class BeamlineMixin:
     def _get_info_val(info, entry):
         return str(info[entry]["value"])
 
+    def operator_messages(self):
+        info = dev.sls_operator.read(cached=True)
+        console = Console()
+
+        table = Table(title="SLS Operator messages", box=box.SQUARE)
+        table.add_column("Message", justify="center")
+        table.add_column("Time", justify="center")
+
+        for i in range(1, 6):
+            msg = info[f"sls_operator_messages_message{i}"]["value"]
+            date = info[f"sls_operator_date_message{i}"]["value"]
+            if msg:
+                table.add_row(msg, date)
+        if table.row_count() == 0:
+            table.add_row("No messages available", "")
+        console.print(table)
+
     def sls_info(self):
         info = dev.sls_info.read(cached=True)
         console = Console()
