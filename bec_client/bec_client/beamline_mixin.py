@@ -1,9 +1,12 @@
+from rich import box, style
 from rich.console import Console
 from rich.table import Table
-from rich import box
 
 
 class BeamlineMixin:
+    DEFAULT_STYLE = style.Style(color="green")
+    ALARM_STYLE = style.Style(color="red", bold=True)
+
     def bl_show_all(self):
         pass
 
@@ -19,36 +22,70 @@ class BeamlineMixin:
         table.add_column("Key", justify="center")
         table.add_column("Value", justify="center")
 
-        table.add_row("Operation", self._get_info_val(info, "sls_info_operation"), style="green")
-        table.add_row("Injection mode", self._get_info_val(info, "sls_info_injection_mode"))
-        table.add_row("Current threshold", self._get_info_val(info, "sls_info_current_threshold"))
-        table.add_row("Current deadband", self._get_info_val(info, "sls_info_current_deadband"))
-        table.add_row("SLS filling pattern", self._get_info_val(info, "sls_info_filling_pattern"))
-        table.add_row(
-            "SLS filling lifetime", self._get_info_val(info, "sls_info_filling_life_time")
-        )
-        table.add_row(
-            "Orbit feedback mode", self._get_info_val(info, "sls_info_orbit_feedback_mode")
-        )
-        table.add_row(
-            "Fast orbit feedback", self._get_info_val(info, "sls_info_fast_orbit_feedback")
-        )
-        table.add_row("Ring current", self._get_info_val(info, "sls_info_ring_current"))
-        table.add_row("Machine status", self._get_info_val(info, "sls_info_machine_status"))
+        self._add_machine_status(table, info)
+        self._add_injection_mode(table, info)
+        self._add_ring_current(table, info)
+        self._add_current_threshold(table, info)
+        self._add_current_deadband(table, info)
+        self._add_filling_pattern(table, info)
+        self._add_filling_lifetime(table, info)
+        self._add_ofb_mode(table, info)
+        self._add_fofb(table, info)
+        self._add_crane_usage(table, info)
+
         table.add_row("Crane usage", self._get_info_val(info, "sls_info_crane_usage"))
         console.print(table)
-        # print(capture.get())
-        # 'sls_info_operation': {'value': 4, 'timestamp': 1668513745.471894},
-        #  'sls_info_injection_mode': {'value': 0, 'timestamp': 1668509097.698679},
-        #  'sls_info_current_threshold': {'value': 100.08,
-        #   'timestamp': 1668513682.659547},
-        #  'sls_info_current_deadband': {'value': 1.8, 'timestamp': 1668429763.942621},
-        #  'sls_info_filling_pattern': {'value': 0, 'timestamp': 1668003328.055626},
-        #  'sls_info_filling_life_time': {'value': 10.837996821263589,
-        #   'timestamp': 1668514585.78606},
-        #  'sls_info_orbit_feedback_mode': {'value': 1, 'timestamp': 1668513492.229837},
-        #  'sls_info_fast_orbit_feedback': {'value': 0, 'timestamp': 1668513368.463382},
-        #  'sls_info_ring_current': {'value': 102.04752098435712,
-        #   'timestamp': 1668514586.193489},
-        #  'sls_info_machine_status': {'value': 4, 'timestamp': 1668513745.471894},
-        #  'sls_info_crane_usage': {'value': 0, 'timestamp': 1667911444.509}}
+
+    def _add_machine_status(self, table, info):
+        val = self._get_info_val(info, "sls_info_operation")
+        if val not in ["Light Available", "Light-Available"]:
+            return table.add_row("Machine status", val, style=self.ALARM_STYLE)
+        return table.add_row("Machine status", val, style=self.DEFAULT_STYLE)
+
+    def _add_injection_mode(self, table, info):
+        val = self._get_info_val(info, "sls_info_injection_mode")
+        if val not in ["TOP-UP", "FREQ-REFILL"]:
+            return table.add_row("Injection mode", val, style=self.ALARM_STYLE)
+        return table.add_row("Injection mode", val, style=self.DEFAULT_STYLE)
+
+    def _add_current_threshold(self, table, info):
+        val = self._get_info_val(info, "sls_info_current_threshold")
+        if val < 350:
+            return table.add_row("Current threshold", val, style=self.ALARM_STYLE)
+        return table.add_row("Current threshold", val, style=self.DEFAULT_STYLE)
+
+    def _add_current_deadband(self, table, info):
+        val = self._get_info_val(info, "sls_info_current_deadband")
+        if val > 2:
+            return table.add_row("Current deadband", val, style=self.ALARM_STYLE)
+        return table.add_row("Current deadband", val, style=self.DEFAULT_STYLE)
+
+    def _add_filling_pattern(self, table, info):
+        val = self._get_info_val(info, "sls_info_filling_pattern")
+        return table.add_row("Filling pattern", val, style=self.DEFAULT_STYLE)
+
+    def _add_filling_lifetime(self, table, info):
+        val = info["sls_info_filling_life_time"]["value"]
+        return table.add_row("SLS filling lifetime", f"{val:.2f} h", style=self.DEFAULT_STYLE)
+
+    def _add_ofb_mode(self, table, info):
+        val = self._get_info_val(info, "sls_info_orbit_feedback_mode")
+        if val not in ["fast"]:
+            return table.add_row("Orbit feedback mode", val, style=self.ALARM_STYLE)
+        return table.add_row("Orbit feedback mode", val, style=self.DEFAULT_STYLE)
+
+    def _add_fofb(self, table, info):
+        val = self._get_info_val(info, "sls_info_fast_orbit_feedback")
+        if val not in ["running"]:
+            return table.add_row("Fast orbit feedback", val, style=self.ALARM_STYLE)
+        return table.add_row("Fast orbit feedback", val, style=self.DEFAULT_STYLE)
+
+    def _add_ring_current(self, table, info):
+        val = info["sls_info_ring_current"]["value"]
+        if val < 300:
+            return table.add_row("Ring current", f"{val:.3f} mA", style=self.ALARM_STYLE)
+        return table.add_row("Ring current", f"{val:.3f} mA", style=self.DEFAULT_STYLE)
+
+    def _add_crane_usage(self, table, info):
+        val = self._get_info_val(info, "sls_info_crane_usage")
+        return table.add_row("SLS crane usage", f"{val:.2f} h", style=self.DEFAULT_STYLE)
