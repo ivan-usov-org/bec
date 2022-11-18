@@ -8,7 +8,8 @@ class BeamlineMixin:
     ALARM_STYLE = style.Style(color="red", bold=True)
 
     def bl_show_all(self):
-        pass
+        self.sls_info()
+        self.operator_messages()
 
     @staticmethod
     def _get_info_val(info, entry):
@@ -27,7 +28,7 @@ class BeamlineMixin:
             date = info[f"sls_operator_date_message{i}"]["value"]
             if msg:
                 table.add_row(msg, date)
-        if table.row_count() == 0:
+        if table.row_count == 0:
             table.add_row("No messages available", "")
         console.print(table)
 
