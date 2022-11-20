@@ -60,7 +60,8 @@ end-2-end:
       - ScanServer.log
       - ScanBundler.log
       - DeviceServer.log
-      - BKClient.log
+      - BECClient.log
+      - FileWriterManager.log
     expire_in: 1 week
 
   rules:
@@ -103,17 +104,17 @@ end-2-end:
     - docker cp scan_server:/code/bec/scan_server/ScanServer.log $CI_PROJECT_DIR/ScanServer.log
     - docker cp scan_bundler:/code/bec/scan_bundler/ScanBundler.log $CI_PROJECT_DIR/ScanBundler.log
     - docker cp device_server:/code/bec/device_server/DeviceServer.log $CI_PROJECT_DIR/DeviceServer.log
-    - docker cp end2end_client:/code/bec/bec_client/BKClient.log $CI_PROJECT_DIR/BKClient.log
+    - docker cp file_writer:/code/bec/file_writer/FileWriterManager.log $CI_PROJECT_DIR/FileWriterManager.log
+    - docker cp end2end_client:/code/bec/bec_client/BECClient.log $CI_PROJECT_DIR/BECClient.log
 
 pages:
   stage: Deploy
   script:
-  - pip install -U sphinx
-  - pip install sphinx-rtd-theme
-  - sphinx-build -b html ./docs/source public
+    - pip install -U sphinx
+    - pip install sphinx-rtd-theme
+    - sphinx-build -b html ./docs/source public
   artifacts:
     paths:
-    - public
+      - public
   rules:
     - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
-
