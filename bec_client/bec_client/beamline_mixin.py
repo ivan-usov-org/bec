@@ -1,3 +1,5 @@
+import builtins
+
 from rich import box, style
 from rich.console import Console
 from rich.table import Table
@@ -8,6 +10,7 @@ class BeamlineMixin:
     ALARM_STYLE = style.Style(color="red", bold=True)
 
     def bl_show_all(self):
+        """Display general information about the SLS and the current status of the beamline"""
         self.sls_info()
         self.operator_messages()
 
@@ -15,13 +18,25 @@ class BeamlineMixin:
     def _get_info_val(info, entry):
         return str(info[entry]["value"])
 
-    def operator_messages(self):
+    def _get_operator_messages(self) -> dict:
+        dev = builtins.__dict__.get("dev")
         info = dev.sls_operator.read(cached=True)
-        console = Console()
+        if set(info.keys()) != {f"sls_operator_messages_message{i}" for i in range(1, 6)}:
+            ValueError("Unexpected data structure for sls operator messages.")
+        return info
 
+    def _get_console(self) -> Console:
+        return Console()
+
+    def operator_messages(self):
+        """Display information about the current SLS status"""
+
+        console = self._get_console()
         table = Table(title="SLS Operator messages", box=box.SQUARE)
         table.add_column("Message", justify="center")
         table.add_column("Time", justify="center")
+
+        info = self._get_operator_messages()
 
         for i in range(1, 6):
             msg = info[f"sls_operator_messages_message{i}"]["value"]
@@ -32,13 +47,21 @@ class BeamlineMixin:
             table.add_row("No messages available", "")
         console.print(table)
 
-    def sls_info(self):
+    def _get_sls_info(self) -> dict:
+        dev = builtins.__dict__.get("dev")
         info = dev.sls_info.read(cached=True)
-        console = Console()
+        return info
+
+    def sls_info(self):
+        """Display information about the current SLS status"""
+
+        console = self._get_console()
 
         table = Table(title="SLS Info", box=box.SQUARE)
         table.add_column("Key", justify="center")
         table.add_column("Value", justify="center")
+
+        info = self._get_sls_info()
 
         self._add_machine_status(table, info)
         self._add_injection_mode(table, info)
