@@ -1216,8 +1216,8 @@ def test_get_func_name_from_macro():
                         "primary": ["rtx", "rty"],
                         "num_points": 2,
                         "positions": [
-                            [-0.7700589354581364, -0.8406005210092851],
                             [1.3681828686580249, 2.1508313829565298],
+                            [-0.7700589354581364, -0.8406005210092851],
                         ],
                         "scan_name": "lamni_fermat_scan",
                         "scan_type": "step",
@@ -1240,7 +1240,7 @@ def test_get_func_name_from_macro():
                     device="rtx",
                     action="set",
                     parameter={
-                        "value": -0.7700589354581364,
+                        "value": 1.3681828686580249,
                         "wait_group": "scan_motor",
                     },
                     metadata={"stream": "primary", "DIID": 17},
@@ -1249,7 +1249,7 @@ def test_get_func_name_from_macro():
                     device="rty",
                     action="set",
                     parameter={
-                        "value": -0.8406005210092851,
+                        "value": 2.1508313829565298,
                         "wait_group": "scan_motor",
                     },
                     metadata={"stream": "primary", "DIID": 18},
@@ -1295,7 +1295,7 @@ def test_get_func_name_from_macro():
                     device="rtx",
                     action="set",
                     parameter={
-                        "value": 1.3681828686580249,
+                        "value": -0.7700589354581364,
                         "wait_group": "scan_motor",
                     },
                     metadata={"stream": "primary", "DIID": 24},
@@ -1304,7 +1304,7 @@ def test_get_func_name_from_macro():
                     device="rty",
                     action="set",
                     parameter={
-                        "value": 2.1508313829565298,
+                        "value": -0.8406005210092851,
                         "wait_group": "scan_motor",
                     },
                     metadata={"stream": "primary", "DIID": 25},

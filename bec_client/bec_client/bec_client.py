@@ -26,11 +26,12 @@ from .callbacks.callback_manager import CallbackManager
 from .devicemanager_client import DMClient
 from .scans import Scans
 from .signals import SigintHandler
+from .beamline_mixin import BeamlineMixin
 
 logger = bec_logger.logger
 
 
-class BECClient(BECService):
+class BECClient(BECService, BeamlineMixin):
     def __init__(self) -> None:
         pass
 

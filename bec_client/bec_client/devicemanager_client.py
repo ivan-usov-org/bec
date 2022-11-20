@@ -194,10 +194,12 @@ class DeviceBase(RPCBase, Device):
         else:
             val = self.parent.producer.get(MessageEndpoints.device_read(self.name))
 
-        if val:
-            return BECMessage.DeviceMessage.loads(val).content["signals"].get(self.name)
-
-        return None
+        if not val:
+            return None
+        signals = BECMessage.DeviceMessage.loads(val).content["signals"]
+        if signals.get(self.name):
+            return signals.get(self.name)
+        return signals
 
     @rpc
     def describe(self):

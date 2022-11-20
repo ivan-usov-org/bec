@@ -320,12 +320,14 @@ class ScanWorker(threading.Thread):
         baseline_devices = [
             dev.name for dev in self.device_manager.devices.baseline_devices(self.scan_motors)
         ]
+        params = instr.content["parameter"]
+        params.update({"ignore_failure": True})
         self.device_manager.producer.send(
             MessageEndpoints.device_instructions(),
             DeviceMsg(
                 device=baseline_devices,
                 action="read",
-                parameter=instr.content["parameter"],
+                parameter=params,
                 metadata=instr.metadata,
             ).dumps(),
         )
@@ -351,6 +353,9 @@ class ScanWorker(threading.Thread):
         self.current_scan_info.update({"scan_number": self.parent.scan_number})
         self.current_scan_info.update({"dataset_number": self.parent.dataset_number})
         self.current_scan_info.update({"exp_time": self._exposure_time})
+        self.current_scan_info["scan_msgs"] = [
+            str(scan_msg) for scan_msg in self.current_instruction_queue_item.scan_msgs
+        ]
         self._send_scan_status("open")
 
     def _close_scan(self, instr: DeviceMsg, max_point_id: int) -> None:

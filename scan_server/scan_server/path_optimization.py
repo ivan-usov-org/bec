@@ -5,7 +5,7 @@ class PathOptimizerMixin:
     def get_radius(self, pos):
         return np.sqrt(np.abs(pos[:, 0]) ** 2 + np.abs(pos[:, 1]) ** 2)
 
-    def optimize_corridor(self, positions, corridor_size=None, sort_axis=0):
+    def optimize_corridor(self, positions, corridor_size=None, sort_axis=1):
         if len(positions[0]) < 2:
             return positions
         if corridor_size is None:
