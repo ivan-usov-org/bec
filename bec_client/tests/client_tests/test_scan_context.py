@@ -97,4 +97,4 @@ def test_get_arg_type(in_type, out):
 def test_get_arg_type_raises():
     client = get_bec_client_mock()
     with pytest.raises(TypeError):
-        res = client.scans.get_arg_type("not_existing")
+        client.scans.get_arg_type("not_existing")

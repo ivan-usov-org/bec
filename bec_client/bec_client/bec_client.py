@@ -1,11 +1,8 @@
 from __future__ import print_function
 
 import builtins
-import glob
 import importlib
 import inspect
-import os
-import pathlib
 import threading
 import time
 from typing import List
@@ -13,25 +10,24 @@ from typing import List
 import IPython
 from bec_utils import Alarms, BECService, MessageEndpoints, bec_logger
 from bec_utils.connector import ConnectorBase
-from IPython.core.magic import Magics, line_magic, magics_class
 from IPython.terminal.prompts import Prompts, Token
-from rich.console import Console
-from rich.table import Table
 
 from bec_client.config_helper import ConfigHelper
 from bec_client.scan_manager import ScanManager
 
 from .alarm_handler import AlarmHandler
 from .beamline_mixin import BeamlineMixin
+from .bec_magics import BECMagics
 from .callbacks.callback_manager import CallbackManager
 from .devicemanager_client import DMClient
 from .scans import Scans
 from .signals import SigintHandler
+from .user_scripts_mixin import UserScriptsMixin
 
 logger = bec_logger.logger
 
 
-class BECClient(BECService, BeamlineMixin):
+class BECClient(BECService, BeamlineMixin, UserScriptsMixin):
     def __init__(self) -> None:
         pass
 
@@ -55,7 +51,6 @@ class BECClient(BECService, BeamlineMixin):
         self._exit_event = threading.Event()
         self._exit_handler_thread = None
         self._hli_funcs = {}
-        self._scripts = {}
         self._initialized = True
         self.config = None
         self.callback_manager = CallbackManager(self)
@@ -103,61 +98,6 @@ class BECClient(BECService, BeamlineMixin):
         self.producer.delete(MessageEndpoints.pre_scan_macros())
         for hook in hooks:
             self.producer.lpush(MessageEndpoints.pre_scan_macros(), hook)
-
-    def load_all_user_scripts(self) -> None:
-        """Load all scripts from the `scripts` directory."""
-        self.forget_all_user_scripts()
-        current_path = pathlib.Path(__file__).parent.resolve()
-        script_files = glob.glob(os.path.abspath(os.path.join(current_path, "../scripts/*.py")))
-        for file in script_files:
-            self.load_user_script(file)
-        builtins.__dict__.update({name: v["cls"] for name, v in self._scripts.items()})
-
-    def forget_all_user_scripts(self) -> None:
-        """unload / remove loaded user scripts from builtins. The files will remain on disk though!"""
-        for name in self._scripts:
-            builtins.__dict__.pop(name)
-        self._scripts.clear()
-
-    def load_user_script(self, file: str) -> None:
-        """load a user script file and import all its definitions
-
-        Args:
-            file (str): Full path to the script file.
-        """
-        module_spec = importlib.util.spec_from_file_location("scripts", file)
-        plugin_module = importlib.util.module_from_spec(module_spec)
-        module_spec.loader.exec_module(plugin_module)
-        module_members = inspect.getmembers(plugin_module)
-        for name, cls in module_members:
-            if not callable(cls):
-                continue
-            # ignore imported classes
-            if cls.__module__ != "scripts":
-                continue
-            if name in self._scripts:
-                logger.warning(f"Conflicting definitions for {name}.")
-            logger.info(f"Importing {name}")
-            self._scripts[name] = {"cls": cls, "fname": file}
-
-    def forget_user_script(self, name: str) -> None:
-        """unload / remove a user scripts. The file will remain on disk."""
-        if not name in self._scripts:
-            logger.error(f"{name} is not a known user script.")
-            return
-        builtins.__dict__.pop(name)
-        self._scripts.pop(name)
-
-    def list_user_scripts(self):
-        """display all currently loaded user functions"""
-        console = Console()
-        table = Table(title="User scripts")
-        table.add_column("Name", justify="center")
-        table.add_column("Location", justify="center", overflow="fold")
-
-        for name, content in self._scripts.items():
-            table.add_row(name, content.get("fname"))
-        console.print(table)
 
     def _load_scans(self):
         self.scans = Scans(self)
@@ -275,54 +215,3 @@ class BECClientPrompt(Prompts):
     @username.setter
     def username(self, value):
         self._username = value
-
-
-@magics_class
-class BECMagics(Magics):
-    def __init__(self, shell, client: BECClient):
-        super(BECMagics, self).__init__(shell)
-        self.client = client
-
-    @line_magic
-    def abort(self, line):
-        "Request a scan abortion"
-        return self.client.queue.request_scan_abortion()
-
-    @line_magic
-    def reset(self, line):
-        "Request a scan queue reset"
-        return self.client.queue.request_queue_reset()
-
-    @line_magic
-    def resume(self, line):
-        "Resume the scan"
-        self.client.queue.request_scan_continuation()
-        return self.client.callback_manager.continue_request()
-
-    @line_magic
-    def pause(self, line):
-        "Request a scan pause"
-        return self.client.queue.request_scan_interruption(deferred_pause=False)
-
-    @line_magic
-    def deferred_pause(self, line):
-        "Request a deferred pause"
-        return self.client.queue.request_scan_interruption(deferred_pause=True)
-
-    @line_magic
-    def restart(self, line):
-        "Request a scan restart"
-        old_req_ids = self.client.queue.scan_storage.current_scan.queue.requestIDs
-        request = self.client.queue.request_storage.find_request_by_ID(old_req_ids[0]).request
-        requestID = self.client.queue.request_scan_restart()
-        request.metadata["RID"] = requestID
-        hide_report = request.metadata.get("hide_report", False)
-        scan_report = self.client.scans._available_scans["fermat_scan"]._get_scan_report_type(
-            hide_report
-        )
-        return self.client.callback_manager.process_request(request, scan_report)
-
-    @line_magic
-    def halt(self, line):
-        "Request a scan halt, i.e. abort without cleanup."
-        return self.client.queue.request_scan_halt()
