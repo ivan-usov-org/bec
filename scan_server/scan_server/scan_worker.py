@@ -288,8 +288,6 @@ class ScanWorker(threading.Thread):
         self.device_manager.producer.send(MessageEndpoints.device_instructions(), instr.dumps())
 
     def _read_devices(self, instr: DeviceMsg) -> None:
-        # devices = self.device_manager.devices.device_group("monitor")
-        # devices.extend(self.scan_motors)
         devices = instr.content.get("device")
         if devices is None:
             devices = [

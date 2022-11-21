@@ -4,8 +4,9 @@ import time
 import uuid
 
 import msgpack
-from bec_utils.connector import ConnectorBase
 from typeguard import typechecked
+
+from bec_utils.connector import ConnectorBase
 
 from .BECMessage import (
     BECStatus,
@@ -189,11 +190,11 @@ class DeviceContainer(dict):
         """get a list of disabled devices"""
         return [dev for _, dev in self.items() if not dev.enabled]
 
-    def device_group(self, device_group: str) -> list:
-        """get all devices that belong to the specified device group
+    def acquisition_group(self, acquisition_group: str) -> list:
+        """get all devices that belong to the specified acquisition group
 
         Args:
-            device_group (str): Device group (e.g. monitor, detectors, beamlineMotor, userMotor)
+            acquisition_group (str): Acquisition group (e.g. monitor, detectors, beamlineMotor, userMotor)
 
         Returns:
             list: List of devices that belong to the specified device group
@@ -201,7 +202,7 @@ class DeviceContainer(dict):
         return [
             dev
             for _, dev in self.items()
-            if dev._config["acquisitionConfig"]["acquisitionGroup"] == device_group
+            if dev._config["acquisitionConfig"]["acquisitionGroup"] == acquisition_group
         ]
 
     def async_devices(self) -> list:
@@ -213,23 +214,24 @@ class DeviceContainer(dict):
     @typechecked
     def primary_devices(self, scan_motors: list) -> list:
         """get a list of all enabled primary devices (i.e. monitors + scan motors)"""
-        devices = self.device_group("monitor")
+        devices = self.acquisition_group("monitor")
         devices.extend(scan_motors)
         return [dev for dev in self.enabled_devices if dev in devices]
 
     @typechecked
     def baseline_devices(self, scan_motors: list) -> list:
         """get a list of all enabled baseline devices"""
-        excluded_devices = self.device_group("monitor")
+        excluded_devices = self.acquisition_group("monitor")
         excluded_devices.extend(scan_motors)
         excluded_devices.extend(self.async_devices())
         excluded_devices.extend(self.detectors())
+        excluded_devices.extend(self.acquisition_group("status"))
         return [dev for dev in self.enabled_devices if dev not in excluded_devices]
 
     @typechecked
     def detectors(self) -> list:
         """get a list of all enabled detectors"""
-        return [dev for dev in self.enabled_devices if dev in self.device_group("detectors")]
+        return [dev for dev in self.enabled_devices if dev in self.acquisition_group("detectors")]
 
     def _add_device(self, name, obj) -> None:
         """
