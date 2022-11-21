@@ -23,6 +23,7 @@ CONFIG_PATH = "../test_config.yaml"
 # pylint: disable=no-member
 # pylint: disable=missing-function-docstring
 # pylint: disable=redefined-outer-name
+# pylint: disable=protected-access
 
 
 @pytest.fixture(scope="session", autouse=True)
