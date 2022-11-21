@@ -3,6 +3,11 @@ from unittest import mock
 
 from bec_client.user_scripts_mixin import UserScriptsMixin
 
+# pylint: disable=no-member
+# pylint: disable=missing-function-docstring
+# pylint: disable=redefined-outer-name
+# pylint: disable=protected-access
+
 
 def dummy_func():
     pass
