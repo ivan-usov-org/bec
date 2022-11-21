@@ -8,6 +8,7 @@ from queue import Queue
 
 import msgpack
 import numpy as np
+
 from bec_utils import BECMessage, BECService, MessageEndpoints, bec_logger
 from bec_utils.connector import ConnectorBase
 
@@ -160,7 +161,7 @@ class ScanBundler(BECService):
                 "devices": self.device_manager.devices.primary_devices(scan_motors),
                 "pointID": {},
             }
-            self.monitor_devices[scanID] = self.device_manager.devices.device_group("monitor")
+            self.monitor_devices[scanID] = self.device_manager.devices.acquisition_group("monitor")
             self.baseline_devices[scanID] = {
                 "devices": self.device_manager.devices.baseline_devices(scan_motors),
                 "done": {
