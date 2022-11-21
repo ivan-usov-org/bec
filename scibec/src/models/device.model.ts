@@ -8,7 +8,8 @@ export interface DeviceConfig {
 
 export interface AcquisitionConfig {
   schedule: string,
-  acquisitionGroup: string
+  acquisitionGroup: string,
+  onFailure: string
 }
 
 @model()
@@ -98,9 +99,9 @@ export class Device extends Entity {
   @property({
     type: 'string',
     required: true,
-    description: 'User-defined group for easier access and grouping.',
+    description: 'User-defined tags for easier access and grouping.',
   })
-  deviceGroup?: string;
+  deviceTags?: string[];
 
   @property({
     type: 'object',
