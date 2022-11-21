@@ -22,11 +22,11 @@ from bec_client.config_helper import ConfigHelper
 from bec_client.scan_manager import ScanManager
 
 from .alarm_handler import AlarmHandler
+from .beamline_mixin import BeamlineMixin
 from .callbacks.callback_manager import CallbackManager
 from .devicemanager_client import DMClient
 from .scans import Scans
 from .signals import SigintHandler
-from .beamline_mixin import BeamlineMixin
 
 logger = bec_logger.logger
 
@@ -42,6 +42,7 @@ class BECClient(BECService, BeamlineMixin):
         return cls._client
 
     def initialize(self, bootstrap_server: list, connector_cls: ConnectorBase, scibec_url: str):
+        """initialize the BEC client"""
         super().__init__(bootstrap_server, connector_cls)
         # pylint: disable=attribute-defined-outside-init
         self.device_manager = None
@@ -59,6 +60,7 @@ class BECClient(BECService, BeamlineMixin):
         self.config = None
         self.callback_manager = CallbackManager(self)
         builtins.bec = self
+        self.metadata = {}
 
     def start(self):
         """start the client"""
