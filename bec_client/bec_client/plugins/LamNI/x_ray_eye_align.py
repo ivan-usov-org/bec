@@ -1,16 +1,20 @@
 import builtins
+import datetime
 import os
+import subprocess
+import threading
 import time
 from collections import defaultdict
-import threading
-import subprocess
-import datetime
-import numpy as np
 from pathlib import Path
+
+import numpy as np
 from bec_utils import bec_logger
+from bec_utils.pdf_writer import PDFWriter
 from typeguard import typechecked
+
+from bec_client.plugins.cSAXS import epics_get, epics_put, fshclose, fshopen
+
 from .lamni_optics_mixin import LamNIOpticsMixin
-from bec_client.plugins.cSAXS import fshopen, fshclose, epics_get, epics_put
 
 logger = bec_logger.logger
 
@@ -561,7 +565,7 @@ class LamNI(LamNIOpticsMixin):
             return (0, 0)
 
         # find index of closest angle
-        for j in range(len(self.corr_pos_x)):
+        for j, _ in enumerate(self.corr_pos_x):
             newangledelta = math.fabs(self.corr_angle[j] - angle)
             if j == 0:
                 angledelta = newangledelta
@@ -800,3 +804,43 @@ class LamNI(LamNIOpticsMixin):
             scans = " ".join([str(scan) for scan in self._current_scan_list])
             queue_file.write(f"p.scan_number {scans}\n")
             queue_file.write(f"p.check_nextscan_started 1\n")
+
+    def write_pdf_report(self):
+        header = (
+            " \n" * 3
+            + "  :::            :::       :::   :::   ::::    ::: ::::::::::: \n"
+            + "  :+:          :+: :+:    :+:+: :+:+:  :+:+:   :+:     :+:     \n"
+            + "  +:+         +:+   +:+  +:+ +:+:+ +:+ :+:+:+  +:+     +:+     \n"
+            + "  +#+        +#++:++#++: +#+  +:+  +#+ +#+ +:+ +#+     +#+     \n"
+            + "  +#+        +#+     +#+ +#+       +#+ +#+  +#+#+#     +#+     \n"
+            + "  #+#        #+#     #+# #+#       #+# #+#   #+#+#     #+#     \n"
+            + "  ########## ###     ### ###       ### ###    #### ########### \n"
+        )
+        padding = 20
+        piezo_range = f"{self.lamni_piezo_range_x:.2f}/{self.lamni_piezo_range_y:.2f}"
+        stitching = f"{self.lamni_stitch_x:.2f}/{self.lamni_stitch_y:.2f}"
+        content = (
+            f"{'Sample Name:':<{padding}}{'test':>{padding}}\n",
+            f"{'Sample Name:':<{padding}}{'test':>{padding}}\n",
+            f"{'Measurement ID:':<{padding}}{str(self.tomo_id):>{padding}}\n",
+            f"{'Dataset ID:':<{padding}}{str(self.client.queue.next_dataset_number):>{padding}}\n",
+            f"{'Sample Info:':<{padding}}{'Sample Info':>{padding}}\n",
+            f"{'e-account:':<{padding}}{str(self.client.username):>{padding}}\n",
+            f"{'Number of projections:':<{padding}}{int(360 / self.tomo_angle_stepsize * 8):>{padding}}\n",
+            f"{'First scan number:':<{padding}}{self.client.queue.next_scan_number:>{padding}}\n",
+            f"{'Last scan number approx.:':<{padding}}{self.client.queue.next_scan_number + int(360 / self.tomo_angle_stepsize * 8) + 10:>{padding}}\n",
+            f"{'Current photon energy:':<{padding}}{dev.mokev.read(cached=True)['mokev']['value']:>{padding}.4f}\n",
+            f"{'Exposure time:':<{padding}}{self.tomo_countingtime:>{padding}.2f}\n",
+            f"{'Fermat spiral step size:':<{padding}}{self.tomo_shellstep:>{padding}.2f}\n",
+            f"{'Piezo range (FOV sample plane):':<{padding}}{piezo_range>{padding}}\n",
+            f"{'Restriction to circular FOV:':<{padding}}{self.tomo_circfov:>{padding}.2f}\n",
+            f"{'Stitching:':<{padding}}{stitching:>{padding}}\n",
+            f"{'Number of individual sub-tomograms:':<{padding}}{8:>{padding}}\n",
+            f"{'Angular step within sub-tomogram:':<{padding}}{self.tomo_angle_stepsize:>{padding}.2f}\n",
+        )
+
+        with PDFWriter(os.path.expanduser("~/Data10/")) as file:
+            file.write(header)
+            file.write(content)
+
+        self.client.logbook.send_msg("".join(content).replace("\n", "</p><p>"))

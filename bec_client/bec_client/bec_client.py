@@ -3,6 +3,7 @@ from __future__ import print_function
 import builtins
 import importlib
 import inspect
+import subprocess
 import threading
 import time
 from typing import List
@@ -10,6 +11,7 @@ from typing import List
 import IPython
 from bec_utils import Alarms, BECService, MessageEndpoints, bec_logger
 from bec_utils.connector import ConnectorBase
+from bec_utils.logbook_connector import LogbookConnector
 from IPython.terminal.prompts import Prompts, Token
 
 from bec_client.config_helper import ConfigHelper
@@ -56,6 +58,13 @@ class BECClient(BECService, BeamlineMixin, UserScriptsMixin):
         self.callback_manager = CallbackManager(self)
         builtins.bec = self
         self.metadata = {}
+        self.logbook = LogbookConnector()
+        self._update_username()
+
+    @property
+    def username(self) -> str:
+        """get the current username"""
+        return self._username
 
     def start(self):
         """start the client"""
@@ -109,6 +118,13 @@ class BECClient(BECService, BeamlineMixin, UserScriptsMixin):
         funcs = {name: func for name, func in members if not name.startswith("__")}
         self._hli_funcs = funcs
         builtins.__dict__.update(funcs)
+
+    def _update_username(self):
+        self._username = (
+            subprocess.run("whoami", shell=True, stdout=subprocess.PIPE)
+            .stdout.decode()
+            .split("\n")[0]
+        )
 
     def _start_scan_queue(self):
         self.queue = ScanManager(self.connector)
