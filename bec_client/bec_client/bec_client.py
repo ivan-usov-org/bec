@@ -120,7 +120,11 @@ class BECClient(BECService, BeamlineMixin, UserScriptsMixin):
         builtins.__dict__.update(funcs)
 
     def _update_username(self):
-        self._username = subprocess.run("whoami", shell=True, stdout=subprocess.PIPE)
+        self._username = (
+            subprocess.run("whoami", shell=True, stdout=subprocess.PIPE)
+            .stdout.decode()
+            .split("\n")[0]
+        )
 
     def _start_scan_queue(self):
         self.queue = ScanManager(self.connector)
