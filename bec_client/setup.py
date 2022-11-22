@@ -6,11 +6,9 @@ from setuptools import setup
 current_path = pathlib.Path(__file__).parent.resolve()
 
 utils = f"{current_path}/../bec_utils/"
-__version__ = "0.1.0"
 
 if __name__ == "__main__":
     setup(
-        version=__version__,
         install_requires=[
             "numpy",
             "msgpack",
