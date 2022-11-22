@@ -1,4 +1,5 @@
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+semantic-release changelog -D version_variable=$SCRIPT_DIR/../../semantic_release/__init__.py:__version__
+semantic-release version -D version_variable=$SCRIPT_DIR/../../semantic_release/__init__.py:__version__
 black --line-length=100 $(git diff --cached --name-only --diff-filter=ACM)
 git add $(git diff --cached --name-only --diff-filter=ACM)
-semantic-release changelog
-semantic-release version
