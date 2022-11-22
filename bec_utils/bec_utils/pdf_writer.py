@@ -36,7 +36,7 @@ class PDFWriter:
     RIGHT_MARGIN = 20
     FONT_SIZE = 10
 
-    def __init__(self, file: str, title: str = None) -> None:
+    def __init__(self, file: str, title: str = None, font="Courier") -> None:
         """Filer writer for pdfs.
 
         Args:
@@ -46,12 +46,13 @@ class PDFWriter:
         """
         self.file = file
         self.title = title
+        self.font = font
         self._pdf = BECPDF(orientation="P", unit="mm", format="A4")
         if self.title:
             self._pdf.set_title(self.title)
         self._pdf.add_page()
         self._pdf.set_margins(left=self.LEFT_MARGIN, top=self.TOP_MARGIN, right=self.RIGHT_MARGIN)
-        self._pdf.set_font("Courier", "", self.FONT_SIZE)
+        self._pdf.set_font(self.font, "", self.FONT_SIZE)
 
     def __enter__(self):
         return self
