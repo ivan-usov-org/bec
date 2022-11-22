@@ -6,9 +6,11 @@ from setuptools import setup
 current_path = pathlib.Path(__file__).parent.resolve()
 
 utils = f"{current_path}/../bec_utils/"
+__version__ = "0.0.1"
 
 if __name__ == "__main__":
     setup(
+        version=__version__,
         install_requires=[
             "numpy",
             "msgpack",
@@ -20,7 +22,7 @@ if __name__ == "__main__":
             "cytoolz",
             "rich",
             "pyepics",
-        ]
+        ],
     )
     local_deps = [utils]
     for dep in local_deps:
