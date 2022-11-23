@@ -9,7 +9,12 @@ export interface DeviceConfig {
 export interface AcquisitionConfig {
   schedule: string,
   acquisitionGroup: string,
-  onFailure: string
+}
+
+enum FailureType {
+  RAISE = 'raise',
+  RETRY = 'retry',
+  BUFFER = 'buffer',
 }
 
 @model()
@@ -96,9 +101,7 @@ export class Device extends Entity {
   })
   deviceClass: string;
 
-  @property({
-    type: 'string',
-    required: true,
+  @property.array(String, {
     description: 'User-defined tags for easier access and grouping.',
   })
   deviceTags?: string[];
@@ -116,6 +119,17 @@ export class Device extends Entity {
     description: 'Config to determine the behaviour during data acquisition. Must include the fields schedule and acquisitionGroup.',
   })
   acquisitionConfig: AcquisitionConfig;
+
+  @property({
+    type: 'string',
+    jsonSchema: {
+      enum: Object.values(FailureType),
+    },
+    description:
+      'Defines how device failures are handled. "raise" raises an error immediately. "buffer" will try fall back to old values, should this not be possible, an error will be raised. "retry" will retry once before raising an error.',
+    default: 'retry',
+  })
+  onFailure?: FailureType
 
   @property({
     type: 'object',
