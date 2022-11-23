@@ -4,6 +4,9 @@ import time
 
 import numpy as np
 import pytest
+
+from bec_client import BECClient
+from bec_client.alarm_handler import AlarmBase
 from bec_utils import (
     BECMessage,
     MessageEndpoints,
@@ -13,12 +16,9 @@ from bec_utils import (
 )
 from bec_utils.bec_errors import ScanAbortion, ScanInterruption
 
-from bec_client import BECClient
-from bec_client.alarm_handler import AlarmBase
-
 logger = bec_logger.logger
 
-CONFIG_PATH = "../test_config.yaml"
+CONFIG_PATH = "../ci/test_config.yaml"
 # CONFIG_PATH = "../bec_config_dev.yaml"
 # pylint: disable=no-member
 # pylint: disable=missing-function-docstring
