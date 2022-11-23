@@ -1,6 +1,6 @@
-from .config import X12SAConfig, DemoConfig
 import yaml
-import os
+
+from .config import DemoConfig, X12SAConfig
 
 
 class LamNIConfig(DemoConfig, X12SAConfig):
@@ -46,7 +46,7 @@ class LamNIConfig(DemoConfig, X12SAConfig):
                         "device_mapping": {"rt": "rtx"},
                     },
                     "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "userMotor"},
-                    "deviceGroup": "lamni",
+                    "deviceTags": ["lamni"],
                 }
             )
         self.write_section(out, "LamNI Galil motors")
@@ -73,7 +73,7 @@ class LamNIConfig(DemoConfig, X12SAConfig):
                         "device_access": True,
                     },
                     "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "userMotor"},
-                    "deviceGroup": "lamni",
+                    "deviceTags": ["lamni"],
                 }
             )
         self.write_section(out, "LamNI RT")
@@ -103,7 +103,7 @@ class LamNIConfig(DemoConfig, X12SAConfig):
                         "tolerance": 0.05,
                     },
                     "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "userMotor"},
-                    "deviceGroup": "lamni",
+                    "deviceTags": ["lamni"],
                 }
             )
         self.write_section(out, "LamNI SmarAct motors")
@@ -116,7 +116,7 @@ class LamNIConfig(DemoConfig, X12SAConfig):
                 "deviceClass": "Eiger1p5MDetector",
                 "deviceConfig": {"device_access": True, "name": "eiger1p5m"},
                 "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "detectors"},
-                "deviceGroup": "detector",
+                "deviceTags": ["detector"],
             }
         }
         self.write_section(out, "LamNI Eiger 1.5M in vacuum")
