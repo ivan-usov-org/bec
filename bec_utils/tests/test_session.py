@@ -1,8 +1,9 @@
 import os
 from unittest import mock
 
-import bec_utils
 import pytest
+
+import bec_utils
 from bec_utils.scibec import HttpClient, SciBec, SciBecError
 
 dir_path = os.path.dirname(bec_utils.__file__)
@@ -18,7 +19,7 @@ def test_load_from_file():
     file_path = f"{dir_path}/tests/test_config.yaml"
     scibec = SciBec()
     config = scibec.load_config_from_file(file_path)
-    assert {"acquisitionConfig", "deviceClass", "deviceGroup", "deviceConfig", "status"} == set(
+    assert {"acquisitionConfig", "deviceClass", "deviceTags", "deviceConfig", "status"} == set(
         config["samx"].keys()
     )
 
