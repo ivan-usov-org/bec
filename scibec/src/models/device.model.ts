@@ -6,9 +6,29 @@ export interface DeviceConfig {
   label?: string
 }
 
+enum AcquisitionGroup {
+  MOTOR = "motor",
+  MONITOR = "monitor",
+  STATUS = "status",
+  DETECTOR = "detector",
+}
+
+enum AcquisitionPriority {
+  PRIMARY = "primary",
+  SECONDARY = "secondary",
+  SKIP = "skip"
+}
+
+enum AcquisitionSchedule {
+  SYNC = "sync",
+  ASYNC = "async",
+  FLYER = "flyer",
+}
+
 export interface AcquisitionConfig {
-  schedule: string,
-  acquisitionGroup: string,
+  schedule: AcquisitionSchedule,
+  acquisitionGroup: AcquisitionGroup,
+  priority: AcquisitionPriority
 }
 
 enum FailureType {
@@ -115,8 +135,28 @@ export class Device extends Entity {
 
   @property({
     type: 'object',
+    jsonSchema: {
+      properties: {
+        schedule: {
+          "description": "Acquisition scheduling.",
+          "type": "string",
+          "enum": ["sync", "async", "flyer"]
+        },
+        acquisitionGroup: {
+          "description": "Type of device.",
+          "type": "string",
+          "enum": ["motor", "monitor", "status", "detector"],
+        },
+        priority: {
+          "description": "Priority of the device during a scan.",
+          "type": "string",
+          "enum": ["primary", "secondary", "skip"],
+        },
+      },
+      required: ["schedule", "acquisitionGroup", "priority"]
+    },
     required: true,
-    description: 'Config to determine the behaviour during data acquisition. Must include the fields schedule and acquisitionGroup.',
+    description: 'Config to determine the behaviour during data acquisition. Must include the fields schedule, priority and acquisitionGroup.',
   })
   acquisitionConfig: AcquisitionConfig;
 
