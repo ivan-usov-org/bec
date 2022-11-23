@@ -70,7 +70,7 @@ end-2-end:
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
   script:
     # spin up redis, mongo and scibec
-    - docker-compose -f ./docker-compose.yaml up -d
+    - docker-compose -f ./ci/docker-compose.yaml up -d
     - apk update; apk upgrade; apk add curl; apk add git
 
     # get ophyd devices repo (needed for the device_server)
