@@ -136,7 +136,7 @@ class Device:
                 f"\tLast recorded value: {self.read(cached=True)}\n"
                 f"\tDevice class: {self._config.get('deviceClass')}\n"
                 f"\tAcquisition group: {self._config['acquisitionConfig'].get('acquisitionGroup')}\n"
-                f"\tDevice group: {self._config.get('deviceGroup')}\n"
+                f"\tDevice tags: {self._config.get('deviceTags', [])}\n"
                 f"\tUser parameter: {self._config.get('userParameter')}\n"
                 f"{separator}\n"
                 "Config:\n"

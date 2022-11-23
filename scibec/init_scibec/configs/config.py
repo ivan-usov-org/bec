@@ -54,7 +54,7 @@ class DemoConfig(ConfigBase):
 
     def write_sim_detectors(self):
         detectors = ["eiger"]
-        out = dict()
+        out = {}
         for m in detectors:
             out[m] = dict(
                 {
@@ -66,7 +66,7 @@ class DemoConfig(ConfigBase):
                         "device_access": True,
                     },
                     "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "detectors"},
-                    "deviceGroup": "detector",
+                    "deviceTags": ["detector"],
                 }
             )
 
@@ -109,7 +109,7 @@ class DemoConfig(ConfigBase):
                         "tolerance": 0.01,
                     },
                     "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "userMotor"},
-                    "deviceGroup": "user motors",
+                    "deviceTags": ["user motors"],
                 }
             )
 
@@ -126,7 +126,7 @@ class DemoConfig(ConfigBase):
                     "device_access": True,
                 },
                 "acquisitionConfig": {"schedule": "flyer", "acquisitionGroup": "userMotor"},
-                "deviceGroup": "flyer",
+                "deviceTags": ["flyer"],
             }
         )
         self.write_section(out, "User motors")
@@ -181,7 +181,7 @@ class DemoConfig(ConfigBase):
             "diode",
         ]
 
-        out = dict()
+        out = {}
         for m in beamline_monitor:
             out[m] = dict(
                 {
@@ -189,7 +189,7 @@ class DemoConfig(ConfigBase):
                     "deviceClass": "SynAxisMonitor",
                     "deviceConfig": {"name": m, "labels": m, "tolerance": 0.5},
                     "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "monitor"},
-                    "deviceGroup": "beamline",
+                    "deviceTags": ["beamline"],
                 }
             )
         self.write_section(out, "Beamline monitors")
@@ -354,7 +354,7 @@ class DemoConfig(ConfigBase):
                         "update_frequency": 400,
                     },
                     "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "beamlineMotor"},
-                    "deviceGroup": "beamline",
+                    "deviceTags": ["beamline"],
                 }
             )
         self.write_section(out, "Beamline motors")
@@ -373,7 +373,7 @@ class DemoConfig(ConfigBase):
                         "labels": m,
                     },
                     "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "monitor"},
-                    "deviceGroup": "beamline",
+                    "deviceTags": ["beamline"],
                 }
             )
 
@@ -403,7 +403,7 @@ class TestConfig(DemoConfig):
                         "tolerance": 0.01,
                     },
                     "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "userMotor"},
-                    "deviceGroup": "user motors",
+                    "deviceTags": ["user motors"],
                 }
             )
         for m in ["motor1_disabled_set", "motor2_disabled_set"]:
@@ -421,7 +421,7 @@ class TestConfig(DemoConfig):
                         "tolerance": 0.01,
                     },
                     "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "userMotor"},
-                    "deviceGroup": "user motors",
+                    "deviceTags": ["user motors"],
                 }
             )
         self.write_section(out, "Disabled devices")
@@ -447,7 +447,7 @@ class X12SAConfig(ConfigBase):
             ("x12sa_id_gap", "X12SA-ID-GAP:READ"),
         ]
 
-        out = dict()
+        out = {}
         for name, pv in x12sa_status:
             out[name] = dict(
                 {
@@ -455,7 +455,7 @@ class X12SAConfig(ConfigBase):
                     "deviceClass": "EpicsSignalRO",
                     "deviceConfig": {"read_pv": pv, "name": name, "auto_monitor": True},
                     "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "status"},
-                    "deviceGroup": "X12SA status",
+                    "deviceTags": ["X12SA status"],
                 }
             )
         self.write_section(out, "X12SA status PVs")
@@ -468,7 +468,7 @@ class X12SAConfig(ConfigBase):
                 "deviceClass": "SLSInfo",
                 "deviceConfig": {"name": "sls_info"},
                 "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "status"},
-                "deviceGroup": "SLS status",
+                "deviceTags": ["SLS status"],
             }
         )
         out["sls_operator"] = dict(
@@ -477,7 +477,7 @@ class X12SAConfig(ConfigBase):
                 "deviceClass": "SLSOperatorMessages",
                 "deviceConfig": {"name": "sls_operator"},
                 "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "status"},
-                "deviceGroup": "SLS status",
+                "deviceTags": ["SLS status"],
             }
         )
         self.write_section(out, "SLS status PVs")
