@@ -470,8 +470,8 @@ class X12SAConfig(ConfigBase):
             ("x12sa_op_status", "ACOAU-ACCU:OP-X12SA"),
             ("x12sa_es1_shutter_status", "X12SA-OP-ST1:OPEN_EPS"),
             ("x12sa_fe_status", "X12SA-FE-PH1:CLOSE4BL"),
-            ("x12sa_temp_median", "X12SA-OP-CC:HEAT_TEMP_MED"),
-            ("x12sa_temp_current", "X12SA-OP-CC:HEAT_TEMP"),
+            # ("x12sa_temp_median", "X12SA-OP-CC:HEAT_TEMP_MED"),
+            # ("x12sa_temp_current", "X12SA-OP-CC:HEAT_TEMP"),
             ("x12sa_storage_ring_vac", "X12SA-SR-VAC:SETPOINT"),
             ("x12sa_es1_valve", "X12SA-ES-VW1:OPEN"),
             ("x12sa_exposure_box1_pressure", "X12SA-ES-CH1MF1:PRESSURE"),
@@ -497,20 +497,40 @@ class X12SAConfig(ConfigBase):
         self.write_section(out, "X12SA status PVs")
 
     def write_sls_status(self):
+        sls_status = [
+            ("sls_injection_mode", "ALIRF-GUN:INJ-MODE", True),
+            ("sls_current_threshold", "ALIRF-GUN:CUR-LOWLIM", False),
+            ("sls_current_deadband", "ALIRF-GUN:CUR-DBAND", False),
+            ("sls_filling_pattern", "ACORF-FILL:PAT-SELECT", True),
+            ("sls_filling_life_time", "ARIDI-PCT:TAU-HOUR", False),
+            ("sls_orbit_feedback_mode", "ARIDI-BPM:OFB-MODE", True),
+            ("sls_fast_orbit_feedback", "ARIDI-BPM:FOFBSTATUS-G", True),
+            ("sls_ring_current", "ARIDI-PCT:CURRENT", False),
+            ("sls_machine_status", "ACOAU-ACCU:OP-MODE", True),
+            ("sls_crane_usage", "IBWKR-0101-QH10003:D01_H_D-WA", True),
+        ]
         out = {}
-        out["sls_info"] = dict(
-            {
-                "status": {"enabled": True, "enabled_set": False},
-                "deviceClass": "SLSInfo",
-                "deviceConfig": {"name": "sls_info"},
-                "acquisitionConfig": {
-                    "schedule": "sync",
-                    "acquisitionGroup": "status",
-                    "priority": "skip",
-                },
-                "deviceTags": ["SLS status"],
-            }
-        )
+        for name, pv, is_string in sls_status:
+            out[name] = dict(
+                {
+                    "status": {"enabled": True, "enabled_set": False},
+                    "deviceClass": "EpicsSignalRO",
+                    "deviceConfig": {
+                        "read_pv": pv,
+                        "name": name,
+                        "auto_monitor": True,
+                        "string": is_string,
+                    },
+                    "acquisitionConfig": {
+                        "schedule": "sync",
+                        "acquisitionGroup": "monitor",
+                        "priority": "secondary",
+                    },
+                    "onFailure": "buffer",
+                    "deviceTags": ["SLS status"],
+                }
+            )
+        self.write_section(out, "SLS status PVs")
         out["sls_operator"] = dict(
             {
                 "status": {"enabled": True, "enabled_set": False},
@@ -521,6 +541,7 @@ class X12SAConfig(ConfigBase):
                     "acquisitionGroup": "status",
                     "priority": "skip",
                 },
+                "onFailure": "buffer",
                 "deviceTags": ["SLS status"],
             }
         )
