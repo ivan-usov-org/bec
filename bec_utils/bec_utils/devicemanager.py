@@ -8,12 +8,7 @@ from typeguard import typechecked
 
 from bec_utils.connector import ConnectorBase
 
-from .BECMessage import (
-    BECStatus,
-    DeviceConfigMessage,
-    LogMessage,
-    RequestResponseMessage,
-)
+from .BECMessage import BECStatus, DeviceConfigMessage, LogMessage, RequestResponseMessage
 from .endpoints import MessageEndpoints
 from .logger import bec_logger
 from .scibec import SciBec
@@ -29,6 +24,12 @@ class DeviceStatus(enum.Enum):
     IDLE = 0
     RUNNING = 1
     BUSY = 2
+
+
+class OnFailure(str, enum.Enum):
+    RAISE = "raise"
+    BUFFER = "buffer"
+    RETRY = "retry"
 
 
 class Device:
@@ -50,6 +51,21 @@ class Device:
         self._config["deviceConfig"].update(val)
         return self.parent.send_config_request(
             action="update", config={self.name: {"deviceConfig": self._config["deviceConfig"]}}
+        )
+
+    @property
+    def on_failure(self) -> OnFailure:
+        """get the failure behaviour for this device"""
+        return OnFailure(self._config["onFailure"])
+
+    @on_failure.setter
+    def on_failure(self, val: OnFailure):
+        """set the failure behaviour for this device"""
+        if not isinstance(val, OnFailure):
+            val = OnFailure(val)
+        self._config["onFailure"] = val
+        return self.parent.send_config_request(
+            action="update", config={self.name: {"onFailure": self._config["onFailure"]}}
         )
 
     @property
