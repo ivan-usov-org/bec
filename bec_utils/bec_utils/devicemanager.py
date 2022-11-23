@@ -9,12 +9,7 @@ from typeguard import typechecked
 
 from bec_utils.connector import ConnectorBase
 
-from .BECMessage import (
-    BECStatus,
-    DeviceConfigMessage,
-    LogMessage,
-    RequestResponseMessage,
-)
+from .BECMessage import BECStatus, DeviceConfigMessage, LogMessage, RequestResponseMessage
 from .endpoints import MessageEndpoints
 from .logger import bec_logger
 from .scibec import SciBec
@@ -277,6 +272,13 @@ class DeviceContainer(dict):
         if not isinstance(tags, list):
             tags = list(tags)
         return [dev for _, dev in self.items() if set(tags) & set(dev._config["deviceTags"])]
+
+    def show_tags(self) -> List:
+        """returns a list of used tags in the current config"""
+        tags = set()
+        for _, dev in self.items():
+            tags.update(dev._config["deviceTags"])
+        return list(tags)
 
     @typechecked
     def detectors(self) -> list:

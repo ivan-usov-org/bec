@@ -62,8 +62,10 @@ def wait_for_empty_queue(bec):
         time.sleep(1)
     while not queue_is_empty(get_queue(bec).content["queue"]):
         time.sleep(1)
+        logger.info(bec.queue)
     while get_queue(bec).content["queue"]["primary"]["status"] != "RUNNING":
         time.sleep(1)
+        logger.info(bec.queue)
 
 
 @pytest.mark.timeout(100)
