@@ -2,13 +2,19 @@ import enum
 import json
 import time
 import uuid
+from typing import List
 
 import msgpack
 from typeguard import typechecked
 
 from bec_utils.connector import ConnectorBase
 
-from .BECMessage import BECStatus, DeviceConfigMessage, LogMessage, RequestResponseMessage
+from .BECMessage import (
+    BECStatus,
+    DeviceConfigMessage,
+    LogMessage,
+    RequestResponseMessage,
+)
 from .endpoints import MessageEndpoints
 from .logger import bec_logger
 from .scibec import SciBec
@@ -51,6 +57,28 @@ class Device:
         self._config["deviceConfig"].update(val)
         return self.parent.send_config_request(
             action="update", config={self.name: {"deviceConfig": self._config["deviceConfig"]}}
+        )
+
+    def get_device_tags(self) -> List:
+        """get the device tags for this device"""
+        return self._config["deviceTags"]
+
+    @typechecked
+    def set_device_tags(self, val: list):
+        """set the device tags for this device"""
+        self._config["deviceTags"] = val
+        return self.parent.send_config_request(
+            action="update", config={self.name: {"deviceTags": self._config["deviceTags"]}}
+        )
+
+    @typechecked
+    def add_device_tag(self, val: str):
+        """add a device tag for this device"""
+        if val in self._config["deviceTags"]:
+            return None
+        self._config["deviceTags"].append(val)
+        return self.parent.send_config_request(
+            action="update", config={self.name: {"deviceTags": self._config["deviceTags"]}}
         )
 
     @property
@@ -243,6 +271,12 @@ class DeviceContainer(dict):
         excluded_devices.extend(self.detectors())
         excluded_devices.extend(self.acquisition_group("status"))
         return [dev for dev in self.enabled_devices if dev not in excluded_devices]
+
+    def get_devices_with_tags(self, tags: List) -> List:
+        """get a list of all devices that have the specified tags"""
+        if not isinstance(tags, list):
+            tags = list(tags)
+        return [dev for _, dev in self.items() if set(tags) & set(dev._config["deviceTags"])]
 
     @typechecked
     def detectors(self) -> list:

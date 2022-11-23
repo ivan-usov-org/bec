@@ -103,6 +103,11 @@ class ConfigHandler:
                 self.update_device_key_in_db(device_name=dev, key="onFailure")
                 updated = True
 
+            if "deviceTags" in dev_config:
+                device._config["deviceTags"] = dev_config["deviceTags"]
+                self.update_device_key_in_db(device_name=dev, key="deviceTags")
+                updated = True
+
         # send updates to services
         if updated:
             self.send_config(msg)
