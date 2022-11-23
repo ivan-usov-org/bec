@@ -1,19 +1,41 @@
+import builtins
 import os
 
-import yaml
-
 import bec_utils
-from bec_client.bec_client import BECClient
-from bec_client.devicemanager_client import DMClient
+import yaml
 from bec_utils import BECMessage
 from bec_utils.tests.utils import ConnectorMock, create_session_from_config
 
+from bec_client.bec_client import BECClient
+from bec_client.devicemanager_client import DMClient
+from bec_client.scans import Scans
+
 dir_path = os.path.dirname(bec_utils.__file__)
+
+# pylint: disable=no-member
+# pylint: disable=missing-function-docstring
+# pylint: disable=redefined-outer-name
+# pylint: disable=protected-access
+
+
+class ScansMock(Scans):
+    def _import_scans(self):
+        pass
+
+    def open_scan_def(self):
+        pass
+
+    def close_scan_def(self):
+        pass
+
+    def close_scan_group(self):
+        pass
 
 
 class ClientMock(BECClient):
     def _load_scans(self):
-        pass
+        self.scans = ScansMock(self)
+        builtins.scans = self.scans
 
     def start(self):
         self._start_scan_queue()
