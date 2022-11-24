@@ -28,7 +28,7 @@ enum AcquisitionSchedule {
 export interface AcquisitionConfig {
   schedule: AcquisitionSchedule,
   acquisitionGroup: AcquisitionGroup,
-  priority: AcquisitionPriority
+  readoutPriority: AcquisitionPriority
 }
 
 enum FailureType {
@@ -147,16 +147,16 @@ export class Device extends Entity {
           "type": "string",
           "enum": ["motor", "monitor", "status", "detector"],
         },
-        priority: {
+        readoutPriority: {
           "description": "Priority of the device during a scan.",
           "type": "string",
           "enum": ["primary", "secondary", "skip"],
         },
       },
-      required: ["schedule", "acquisitionGroup", "priority"]
+      required: ["schedule", "acquisitionGroup", "readoutPriority"]
     },
     required: true,
-    description: 'Config to determine the behaviour during data acquisition. Must include the fields schedule, priority and acquisitionGroup.',
+    description: 'Config to determine the behaviour during data acquisition. Must include the fields schedule, readoutPriority and acquisitionGroup.',
   })
   acquisitionConfig: AcquisitionConfig;
 

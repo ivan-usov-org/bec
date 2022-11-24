@@ -180,7 +180,7 @@ class Device:
                 f"\tLast recorded value: {self.read(cached=True)}\n"
                 f"\tDevice class: {self._config.get('deviceClass')}\n"
                 f"\tAcquisition group: {self._config['acquisitionConfig'].get('acquisitionGroup')}\n"
-                f"\tAcquisition priority: {self._config['acquisitionConfig'].get('priority')}\n"
+                f"\tAcquisition readoutPriority: {self._config['acquisitionConfig'].get('readoutPriority')}\n"
                 f"\tDevice tags: {self._config.get('deviceTags', [])}\n"
                 f"\tUser parameter: {self._config.get('userParameter')}\n"
                 f"{separator}\n"
@@ -257,12 +257,12 @@ class DeviceContainer(dict):
             acquisition_priority (str): Acquisition priority (e.g. primary, secondary, skip)
 
         Returns:
-            list: List of devices that belong to the specified acquisition priority
+            list: List of devices that belong to the specified acquisition readoutPriority
         """
         return [
             dev
             for _, dev in self.items()
-            if dev._config["acquisitionConfig"]["priority"] == acquisition_priority
+            if dev._config["acquisitionConfig"]["readoutPriority"] == acquisition_priority
         ]
 
     def async_devices(self) -> list:

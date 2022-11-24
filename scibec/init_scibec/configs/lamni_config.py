@@ -48,7 +48,7 @@ class LamNIConfig(DemoConfig, X12SAConfig):
                     "acquisitionConfig": {
                         "schedule": "sync",
                         "acquisitionGroup": "motor",
-                        "priority": "secondary",
+                        "readoutPriority": "secondary",
                     },
                     "deviceTags": ["lamni"],
                 }
@@ -79,7 +79,7 @@ class LamNIConfig(DemoConfig, X12SAConfig):
                     "acquisitionConfig": {
                         "schedule": "sync",
                         "acquisitionGroup": "motor",
-                        "priority": "secondary",
+                        "readoutPriority": "secondary",
                     },
                     "deviceTags": ["lamni"],
                 }
@@ -113,7 +113,7 @@ class LamNIConfig(DemoConfig, X12SAConfig):
                     "acquisitionConfig": {
                         "schedule": "sync",
                         "acquisitionGroup": "motor",
-                        "priority": "secondary",
+                        "readoutPriority": "secondary",
                     },
                     "deviceTags": ["lamni"],
                 }
@@ -130,7 +130,7 @@ class LamNIConfig(DemoConfig, X12SAConfig):
                 "acquisitionConfig": {
                     "schedule": "sync",
                     "acquisitionGroup": "detectors",
-                    "priority": "primary",
+                    "readoutPriority": "primary",
                 },
                 "deviceTags": ["detector"],
             }

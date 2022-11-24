@@ -22,7 +22,7 @@ def device_config():
         "acquisitionConfig": {
             "acquisitionGroup": "detectors",
             "schedule": "sync",
-            "priority": "primary",
+            "readoutPriority": "primary",
         },
         "deviceClass": "SynSLSDetector",
         "deviceConfig": {"device_access": True, "labels": "eiger", "name": "eiger"},
