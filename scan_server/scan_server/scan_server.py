@@ -80,10 +80,12 @@ class ScanServer(BECService):
     def _reset_scan_number(self):
         if self.producer.get(MessageEndpoints.scan_number()) is None:
             self.scan_number = 1
+        if self.producer.get(MessageEndpoints.dataset_number()) is None:
             self.dataset_number = 1
 
     @staticmethod
     def _alarm_callback(msg, parent: ScanServer, **_kwargs):
+        msg = BECMessage.AlarmMessage.loads(msg.value)
         queue = msg.metadata.get("stream", "primary")
         if Alarms(msg.content["severity"]) == Alarms.MAJOR:
             # shouldn't this be specific to a single queue?
