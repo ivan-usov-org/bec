@@ -1,9 +1,10 @@
 import os
 from unittest import mock
 
-import bec_utils
 import pytest
 import yaml
+
+import bec_utils
 from bec_utils import BECMessage, MessageEndpoints
 from bec_utils.devicemanager import DeviceManagerBase
 from bec_utils.observer import Observer, ObserverAction, ObserverManagerBase
@@ -123,75 +124,68 @@ def test_observer_manager_msg(device_manager):
 
 
 @pytest.mark.parametrize(
-    "observer,raises_error",
+    "observer_kwargs,raises_error",
     [
         (
-            Observer.from_dict(
-                {
-                    "name": "test_observer",
-                    "device": "samx",
-                    "on_trigger": "pause",
-                    "on_resume": "restart",
-                    "limits": [380, None],
-                }
-            ),
+            {
+                "name": "test_observer",
+                "device": "samx",
+                "on_trigger": "pause",
+                "on_resume": "restart",
+                "limits": [380, None],
+            },
             False,
         )
     ],
 )
-def test_add_observer(device_manager, observer, raises_error):
+def test_add_observer(device_manager, observer_kwargs, raises_error):
 
     with mock.patch.object(device_manager.producer, "get", return_value=None) as producer_get:
         observer_manager = ObserverManagerBase(device_manager=device_manager)
-        observer_manager.add_observer(observer)
+        observer_manager.add_observer(**observer_kwargs)
         with pytest.raises(AttributeError):
-            observer_manager.add_observer(observer)
+            observer_manager.add_observer(**observer_kwargs)
 
 
 @pytest.mark.parametrize(
-    "observer,raises_error",
+    "observer_kwargs,raises_error",
     [
         (
-            Observer.from_dict(
-                {
-                    "name": "test_observer",
-                    "device": "samx",
-                    "on_trigger": "pause",
-                    "on_resume": "restart",
-                    "limits": [380, None],
-                }
-            ),
+            {
+                "name": "test_observer",
+                "device": "samx",
+                "on_trigger": "pause",
+                "on_resume": "restart",
+                "limits": [380, None],
+            },
             True,
         ),
         (
-            Observer.from_dict(
-                {
-                    "name": "test_observer",
-                    "device": "samy",
-                    "on_trigger": "pause",
-                    "on_resume": "restart",
-                    "limits": [380, None],
-                }
-            ),
+            {
+                "name": "test_observer",
+                "device": "samy",
+                "on_trigger": "pause",
+                "on_resume": "restart",
+                "limits": [380, None],
+            },
             False,
         ),
     ],
 )
-def test_add_observer_existing_device(device_manager, observer, raises_error):
-    default_observer = Observer.from_dict(
-        {
-            "name": "test_observer",
-            "device": "samx",
-            "on_trigger": "pause",
-            "on_resume": "restart",
-            "limits": [380, None],
-        }
-    )
+def test_add_observer_existing_device(device_manager, observer_kwargs, raises_error):
+    default_observer = {
+        "name": "test_observer",
+        "device": "samx",
+        "on_trigger": "pause",
+        "on_resume": "restart",
+        "limits": [380, None],
+    }
+
     with mock.patch.object(device_manager.producer, "get", return_value=None) as producer_get:
         observer_manager = ObserverManagerBase(device_manager=device_manager)
-        observer_manager.add_observer(default_observer)
+        observer_manager.add_observer(**default_observer)
         if raises_error:
             with pytest.raises(AttributeError):
-                observer_manager.add_observer(observer)
+                observer_manager.add_observer(**observer_kwargs)
         else:
-            observer_manager.add_observer(observer)
+            observer_manager.add_observer(**observer_kwargs)
