@@ -124,7 +124,14 @@ class SciBec:
 
     def add_device(self, device_info: dict):
         headers = {"Content-type": "application/json"}
-        return self.client.post_request(f"{self.url}/devices", payload=device_info, headers=headers)
+        try:
+            res = self.client.post_request(
+                f"{self.url}/devices", payload=device_info, headers=headers
+            )
+        except Exception as exc:
+            print(f"Failed to add device with device_info: {device_info}.")
+            raise exc
+        return res
 
     def _delete_device(self, device_id: str):
         return self.client.delete_request(f"{self.url}/devices/{device_id}")

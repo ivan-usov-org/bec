@@ -1,8 +1,9 @@
 import os
 from unittest import mock
 
-import bec_utils
 import pytest
+
+import bec_utils
 from bec_utils.devicemanager import DeviceManagerBase
 from bec_utils.tests.utils import ConnectorMock
 
@@ -18,10 +19,14 @@ def device_config():
         "sessionId": "569ea788-09d7-44fc-a140-b0b34a2b7f6f",
         "enabled": True,
         "enabled_set": True,
-        "acquisitionConfig": {"acquisitionGroup": "detectors", "schedule": "sync"},
+        "acquisitionConfig": {
+            "acquisitionGroup": "detectors",
+            "schedule": "sync",
+            "readoutPriority": "monitored",
+        },
         "deviceClass": "SynSLSDetector",
         "deviceConfig": {"device_access": True, "labels": "eiger", "name": "eiger"},
-        "deviceGroup": "detector",
+        "deviceTags": ["detector"],
     }
 
 

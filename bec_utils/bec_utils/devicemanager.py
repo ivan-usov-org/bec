@@ -9,7 +9,12 @@ from typeguard import typechecked
 
 from bec_utils.connector import ConnectorBase
 
-from .BECMessage import BECStatus, DeviceConfigMessage, LogMessage, RequestResponseMessage
+from .BECMessage import (
+    BECStatus,
+    DeviceConfigMessage,
+    LogMessage,
+    RequestResponseMessage,
+)
 from .endpoints import MessageEndpoints
 from .logger import bec_logger
 from .scibec import SciBec
@@ -31,6 +36,12 @@ class OnFailure(str, enum.Enum):
     RAISE = "raise"
     BUFFER = "buffer"
     RETRY = "retry"
+
+
+class ReadoutPriority(str, enum.Enum):
+    MONITORED = "monitored"
+    BASELINE = "baseline"
+    IGNORED = "ignored"
 
 
 class Device:
@@ -175,6 +186,7 @@ class Device:
                 f"\tLast recorded value: {self.read(cached=True)}\n"
                 f"\tDevice class: {self._config.get('deviceClass')}\n"
                 f"\tAcquisition group: {self._config['acquisitionConfig'].get('acquisitionGroup')}\n"
+                f"\tAcquisition readoutPriority: {self._config['acquisitionConfig'].get('readoutPriority')}\n"
                 f"\tDevice tags: {self._config.get('deviceTags', [])}\n"
                 f"\tUser parameter: {self._config.get('userParameter')}\n"
                 f"{separator}\n"
@@ -233,7 +245,7 @@ class DeviceContainer(dict):
         """get all devices that belong to the specified acquisition group
 
         Args:
-            acquisition_group (str): Acquisition group (e.g. monitor, detectors, beamlineMotor, userMotor)
+            acquisition_group (str): Acquisition group (e.g. monitor, detector, motor, status)
 
         Returns:
             list: List of devices that belong to the specified device group
@@ -244,6 +256,22 @@ class DeviceContainer(dict):
             if dev._config["acquisitionConfig"]["acquisitionGroup"] == acquisition_group
         ]
 
+    def readout_priority(self, readout_priority: ReadoutPriority) -> list:
+        """get all devices with the specified readout proprity
+
+        Args:
+            readout_priority (str): Readout priority (e.g. monitored, baseline, ignored)
+
+        Returns:
+            list: List of devices that belong to the specified acquisition readoutPriority
+        """
+        val = ReadoutPriority(readout_priority)
+        return [
+            dev
+            for _, dev in self.items()
+            if dev._config["acquisitionConfig"]["readoutPriority"] == str(readout_priority)
+        ]
+
     def async_devices(self) -> list:
         """get a list of all synchronous devices"""
         return [
@@ -251,20 +279,25 @@ class DeviceContainer(dict):
         ]
 
     @typechecked
-    def primary_devices(self, scan_motors: list) -> list:
-        """get a list of all enabled primary devices (i.e. monitors + scan motors)"""
-        devices = self.acquisition_group("monitor")
-        devices.extend(scan_motors)
-        return [dev for dev in self.enabled_devices if dev in devices]
+    def primary_devices(self, scan_motors: list = None) -> list:
+        """get a list of all enabled primary devices"""
+        devices = self.readout_priority("monitored")
+        if scan_motors:
+            devices.extend(scan_motors)
+
+        return [
+            dev
+            for dev in self.enabled_devices
+            if dev in devices and dev not in self.acquisition_group("detector")
+        ]
 
     @typechecked
     def baseline_devices(self, scan_motors: list) -> list:
         """get a list of all enabled baseline devices"""
-        excluded_devices = self.acquisition_group("monitor")
-        excluded_devices.extend(scan_motors)
+        excluded_devices = self.primary_devices(scan_motors)
         excluded_devices.extend(self.async_devices())
         excluded_devices.extend(self.detectors())
-        excluded_devices.extend(self.acquisition_group("status"))
+        excluded_devices.extend(self.readout_priority("ignored"))
         return [dev for dev in self.enabled_devices if dev not in excluded_devices]
 
     def get_devices_with_tags(self, tags: List) -> List:
@@ -283,7 +316,7 @@ class DeviceContainer(dict):
     @typechecked
     def detectors(self) -> list:
         """get a list of all enabled detectors"""
-        return [dev for dev in self.enabled_devices if dev in self.acquisition_group("detectors")]
+        return [dev for dev in self.enabled_devices if dev in self.acquisition_group("detector")]
 
     def _add_device(self, name, obj) -> None:
         """

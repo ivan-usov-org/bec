@@ -27,7 +27,7 @@ class LamNIConfig(DemoConfig, X12SAConfig):
             ("leyex", "G", -1, 0.001),
             ("leyey", "H", -1, 0.001),
         ]
-        out = dict()
+        out = {}
         for m in lamni_galil_motors:
             out[m[0]] = dict(
                 {
@@ -45,7 +45,11 @@ class LamNIConfig(DemoConfig, X12SAConfig):
                         "device_access": True,
                         "device_mapping": {"rt": "rtx"},
                     },
-                    "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "userMotor"},
+                    "acquisitionConfig": {
+                        "schedule": "sync",
+                        "acquisitionGroup": "motor",
+                        "readoutPriority": "baseline",
+                    },
                     "deviceTags": ["lamni"],
                 }
             )
@@ -72,7 +76,11 @@ class LamNIConfig(DemoConfig, X12SAConfig):
                         "sign": m[2],
                         "device_access": True,
                     },
-                    "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "userMotor"},
+                    "acquisitionConfig": {
+                        "schedule": "sync",
+                        "acquisitionGroup": "motor",
+                        "readoutPriority": "baseline",
+                    },
                     "deviceTags": ["lamni"],
                 }
             )
@@ -102,7 +110,11 @@ class LamNIConfig(DemoConfig, X12SAConfig):
                         "sign": m[2],
                         "tolerance": 0.05,
                     },
-                    "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "userMotor"},
+                    "acquisitionConfig": {
+                        "schedule": "sync",
+                        "acquisitionGroup": "motor",
+                        "readoutPriority": "baseline",
+                    },
                     "deviceTags": ["lamni"],
                 }
             )
@@ -115,7 +127,11 @@ class LamNIConfig(DemoConfig, X12SAConfig):
                 "status": {"enabled": True, "enabled_set": True},
                 "deviceClass": "Eiger1p5MDetector",
                 "deviceConfig": {"device_access": True, "name": "eiger1p5m"},
-                "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "detectors"},
+                "acquisitionConfig": {
+                    "schedule": "sync",
+                    "acquisitionGroup": "detectors",
+                    "readoutPriority": "monitored",
+                },
                 "deviceTags": ["detector"],
             }
         }
