@@ -530,7 +530,7 @@ class X12SAConfig(ConfigBase):
                     "deviceTags": ["SLS status"],
                 }
             )
-        self.write_section(out, "SLS status PVs")
+
         out["sls_operator"] = dict(
             {
                 "status": {"enabled": True, "enabled_set": False},
