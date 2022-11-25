@@ -13,6 +13,8 @@ from bec_utils import Alarms, BECService, MessageEndpoints, bec_logger
 from bec_utils.connector import ConnectorBase
 from bec_utils.logbook_connector import LogbookConnector
 from IPython.terminal.prompts import Prompts, Token
+from rich.console import Console
+from rich.table import Table
 
 from bec_client.config_helper import ConfigHelper
 from bec_client.scan_manager import ScanManager
@@ -38,6 +40,9 @@ class BECClient(BECService, BeamlineMixin, UserScriptsMixin):
             cls._client = super(BECClient, cls).__new__(cls)
             cls._initialized = False
         return cls._client
+
+    def __repr__(self) -> str:
+        return f"BECClient\n\nTo get a list of available commands, type `bec.show_all_commands()`"
 
     def initialize(self, bootstrap_server: list, connector_cls: ConnectorBase, scibec_url: str):
         """initialize the BEC client"""
@@ -196,6 +201,47 @@ class BECClient(BECService, BeamlineMixin, UserScriptsMixin):
             time.sleep(0.1)
         if not self._exit_event.is_set():
             self.shutdown()
+
+    def _print_available_commands(self, title: str, data: tuple) -> None:
+        console = Console()
+        table = Table(title=title)
+        table.add_column("Name", justify="center")
+        table.add_column("Description", justify="center")
+        for name, descr in data:
+            table.add_row(name, descr)
+        console.print(table)
+
+    def _print_user_script_commands(self) -> None:
+        data = self._get_user_script_commands()
+        self._print_available_commands("User scripts", data)
+
+    def _get_user_script_commands(self) -> list:
+        avail_commands = []
+        for name, val in self._scripts.items():
+            descr = self._get_description_from_doc_string(val["cls"].__doc__)
+            avail_commands.append((name, descr))
+        return avail_commands
+
+    def _get_scan_commands(self) -> list:
+        avail_commands = []
+        for name, scan in self.scans._available_scans.items():
+            descr = self._get_description_from_doc_string(scan.scan_info["doc"])
+            avail_commands.append((name, descr))
+        return avail_commands
+
+    def _print_scan_commands(self) -> None:
+        data = self._get_scan_commands()
+        self._print_available_commands("Scans", data)
+
+    def show_all_commands(self):
+        self._print_user_script_commands()
+        self._print_scan_commands()
+
+    @staticmethod
+    def _get_description_from_doc_string(doc_string: str) -> str:
+        if not doc_string:
+            return ""
+        return doc_string.strip().split("\n")[0]
 
 
 class BECClientPrompt(Prompts):
