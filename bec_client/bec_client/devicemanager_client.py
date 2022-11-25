@@ -188,7 +188,7 @@ class DeviceBase(RPCBase, Device):
         pass
 
     @rpc
-    def read(self, cached=False, use_readback=True):
+    def read(self, cached=False, use_readback=True, filter_signal=True):
         if use_readback:
             val = self.parent.producer.get(MessageEndpoints.device_readback(self.name))
         else:
@@ -197,9 +197,13 @@ class DeviceBase(RPCBase, Device):
         if not val:
             return None
         signals = BECMessage.DeviceMessage.loads(val).content["signals"]
-        if signals.get(self.name):
+        if filter_signal and signals.get(self.name):
             return signals.get(self.name)
         return signals
+
+    @rpc
+    def read_configuration(self):
+        pass
 
     @rpc
     def describe(self):
