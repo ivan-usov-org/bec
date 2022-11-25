@@ -1,4 +1,5 @@
 import os
+import traceback
 from pathlib import Path
 
 import numpy as np
@@ -42,8 +43,8 @@ class FileWriterManager(BECService):
         self._start_scan_segment_consumer()
         self._start_scan_status_consumer()
         self.scan_storage = {}
-        self.base_path = "./"  # should be configured
-        self.file_writer = NexusFileWriter()
+        self.base_path = os.path.expanduser("~/Data10")  # should be configured
+        self.file_writer = NexusFileWriter(self)
 
     def _start_device_manager(self):
         self.device_manager = DeviceManagerBase(self.connector, self.scibec_url)
@@ -125,19 +126,26 @@ class FileWriterManager(BECService):
         storage = self.scan_storage[scanID]
         scan = storage.scan_number
         scan_bundle = 1000
-        scan_dir = f"S{scan//scan_bundle:04d}-{scan//scan_bundle+scan_bundle-1:04d}/S{scan:04d}"
-        data_dir = Path(os.path.join(self.base_path, "data", scan_dir))
+        scan_dir = self._get_scan_dir(scan_bundle, scan, leading_zeros=5)
+        data_dir = Path(os.path.join(self.base_path, "bec", "data", scan_dir))
         data_dir.mkdir(parents=True, exist_ok=True)
-        file_path = os.path.abspath(os.path.join(data_dir, f"S{storage.scan_number:04d}.h5"))
+        file_path = os.path.abspath(os.path.join(data_dir, f"S{storage.scan_number:05d}.h5"))
         successful = True
         try:
             logger.info(f"Writing file {file_path}")
             self.file_writer.write(file_path=file_path, data=storage)
-        except:
-            logger.error(f"Failed to write file for scan {scan}")
+        except Exception as exc:
+            content = traceback.format_exc()
+            logger.error(content)
             successful = False
         self.scan_storage.pop(scanID)
         self.producer.set_and_publish(
             MessageEndpoints.public_file(scanID),
             BECMessage.FileMessage(file_path=file_path, successful=successful).dumps(),
         )
+
+    def _get_scan_dir(self, scan_bundle, scan_number, leading_zeros=None):
+        if leading_zeros is None:
+            leading_zeros = len(str(scan_bundle))
+        floor_dir = scan_number // scan_bundle * scan_bundle
+        return f"S{floor_dir:0{leading_zeros}d}-{floor_dir+scan_bundle-1:0{leading_zeros}d}/S{scan_number:0{leading_zeros}d}"

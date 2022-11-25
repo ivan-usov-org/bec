@@ -15,6 +15,7 @@ class MessageEndpoints:
     _device_config_request_response = "internal/devices/config_request_response"
     _device_config = "internal/devices/config"
     _device_info = "internal/devices/info"
+    _device_staged = "internal/devices/staged"
 
     # scan queue
     _scan_queue_modification = "internal/queue/queue_modification"
@@ -27,6 +28,7 @@ class MessageEndpoints:
 
     # scan info
     _scan_number = "scans/scan_number"
+    _dataset_number = "scans/dataset_number"
     _scan_status = "scans/scan_status"
     _scan_status_list = "scans/scan_status_list"
     _available_scans = "scans/available_scans"
@@ -95,6 +97,10 @@ class MessageEndpoints:
     def device_info(cls, device: str):
         return f"{cls._device_info}/{device}"
 
+    @classmethod
+    def device_staged(cls, device: str):
+        return f"{cls._device_staged}/{device}"
+
     # scan queue
     @classmethod
     def scan_queue_modification(cls):
@@ -129,6 +135,10 @@ class MessageEndpoints:
     @classmethod
     def scan_number(cls):
         return cls._scan_number
+
+    @classmethod
+    def dataset_number(cls):
+        return cls._dataset_number
 
     @classmethod
     def scan_status(cls):

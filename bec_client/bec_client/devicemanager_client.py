@@ -38,7 +38,7 @@ def rpc(fcn):
 class RPCBase:
     def __init__(self, name: str, info: dict = None, parent=None) -> None:
         self.name = name
-        self.config = None
+        self._config = None
         if info is None:
             info = {}
         self._info = info.get("device_info")
@@ -176,28 +176,34 @@ class DeviceBase(RPCBase, Device):
 
     @property
     def enabled(self):
-        return self.root.config["enabled"]
+        return self.root._config["enabled"]
 
     @enabled.setter
     def enabled(self, val):
         self.update_config({"enabled": val})
-        self.root.config["enabled"] = val
+        self.root._config["enabled"] = val
 
     @rpc
     def trigger(self, rpc_id: str):
         pass
 
     @rpc
-    def read(self, cached=False, use_readback=False):
+    def read(self, cached=False, use_readback=True, filter_signal=True):
         if use_readback:
             val = self.parent.producer.get(MessageEndpoints.device_readback(self.name))
         else:
             val = self.parent.producer.get(MessageEndpoints.device_read(self.name))
 
-        if val:
-            return BECMessage.DeviceMessage.loads(val).content["signals"].get(self.name)
+        if not val:
+            return None
+        signals = BECMessage.DeviceMessage.loads(val).content["signals"]
+        if filter_signal and signals.get(self.name):
+            return signals.get(self.name)
+        return signals
 
-        return None
+    @rpc
+    def read_configuration(self):
+        pass
 
     @rpc
     def describe(self):
@@ -299,7 +305,7 @@ class Positioner(DeviceBase):
 
     @property
     def limits(self):
-        return self.config["deviceConfig"]["limits"]
+        return self._config["deviceConfig"]["limits"]
 
     @limits.setter
     def limits(self, val: list):
@@ -323,8 +329,8 @@ class Positioner(DeviceBase):
         limits = [self.low_limit, val]
         self.update_config({"deviceConfig": {"limits": limits}})
 
-    def move(self, val: float):
-        return self.parent.parent.scans.mv(self, val)
+    def move(self, val: float, relative=False):
+        return self.parent.parent.scans.mv(self, val, relative=relative)
 
     @rpc
     def position(self):
@@ -370,5 +376,5 @@ class DMClient(DeviceManagerBase):
         else:
             logger.error(f"Trying to add new device {name} of type {base_class}")
 
-        obj.config = dev
+        obj._config = dev
         self.devices._add_device(name, obj)

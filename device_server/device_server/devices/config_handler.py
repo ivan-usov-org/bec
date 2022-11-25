@@ -57,7 +57,7 @@ class ConfigHandler:
             device = self.device_manager.devices[dev]
             if "deviceConfig" in dev_config:
                 # store old config
-                old_config = device.config["deviceConfig"].copy()
+                old_config = device._config["deviceConfig"].copy()
 
                 # apply config
                 try:
@@ -66,36 +66,51 @@ class ConfigHandler:
                     self.device_manager.update_config(device.obj, old_config)
                     raise DeviceConfigError(f"Error during object update. {exc}") from exc
 
-                device.config["deviceConfig"].update(dev_config["deviceConfig"])
+                device._config["deviceConfig"].update(dev_config["deviceConfig"])
 
                 # update config in DB
-                self.update_device_config_in_db(device_name=dev)
+                self.update_device_key_in_db(device_name=dev, key="deviceConfig")
                 updated = True
 
             if "enabled" in dev_config:
-                device.config["enabled"] = dev_config["enabled"]
+                device._config["enabled"] = dev_config["enabled"]
 
                 if device.enabled:
                     # pylint:disable=protected-access
                     if device.obj._destroyed:
-                        self.device_manager.initialize_device(device.config)
+                        self.device_manager.initialize_device(device._config)
                     else:
                         self.device_manager.initialize_enabled_device(device)
                 else:
                     self.device_manager.disconnect_device(device.obj)
 
                 # update device enabled status in DB
-                self.update_device_enabled_in_db(device_name=dev)
+                self.update_device_key_in_db(device_name=dev, key="enabled")
                 updated = True
             if "enabled_set" in dev_config:
-                device.config["enabled_set"] = dev_config["enabled_set"]
+                device._config["enabled_set"] = dev_config["enabled_set"]
                 # update device enabled status in DB
-                self.update_device_enabled_set_in_db(device_name=dev)
+                self.update_device_key_in_db(device_name=dev, key="enabled_set")
                 updated = True
 
             if "userParameter" in dev_config:
-                device.config["userParameter"] = dev_config["userParameter"]
-                self.update_user_parameter_in_db(device_name=dev)
+                device._config["userParameter"] = dev_config["userParameter"]
+                self.update_device_key_in_db(device_name=dev, key="userParameter")
+                updated = True
+
+            if "onFailure" in dev_config:
+                device._config["onFailure"] = dev_config["onFailure"]
+                self.update_device_key_in_db(device_name=dev, key="onFailure")
+                updated = True
+
+            if "deviceTags" in dev_config:
+                device._config["deviceTags"] = dev_config["deviceTags"]
+                self.update_device_key_in_db(device_name=dev, key="deviceTags")
+                updated = True
+
+            if "acquisitionConfig" in dev_config:
+                device._config["acquisitionConfig"] = dev_config["acquisitionConfig"]
+                self.update_device_key_in_db(device_name=dev, key="acquisitionConfig")
                 updated = True
 
         # send updates to services
@@ -105,70 +120,20 @@ class ConfigHandler:
                 accepted=True, error_msg=None, metadata=msg.metadata
             )
 
-    def update_device_enabled_in_db(self, device_name: str) -> None:
-        """Update a device enabled setting in the DB with the local version
+    def update_device_key_in_db(self, device_name: str, key: str) -> None:
+        """Update a device key in the DB with the local version
 
         Args:
             device_name (str): Name of the device that should be updated
+            key (str): Name of the config entry that should be updated
 
         Raises:
             DeviceConfigError: Raised if the db update fails.
         """
         logger.debug("updating in DB")
         success = self.device_manager.scibec.patch_device_config(
-            self.device_manager.devices[device_name].config["id"],
-            {"enabled": self.device_manager.devices[device_name].enabled},
-        )
-        if not success:
-            raise DeviceConfigError("Error during database update.")
-
-    def update_device_enabled_set_in_db(self, device_name: str) -> None:
-        """Update a device enabled setting in the DB with the local version
-
-        Args:
-            device_name (str): Name of the device that should be updated
-
-        Raises:
-            DeviceConfigError: Raised if the db update fails.
-        """
-        logger.debug("updating in DB")
-        success = self.device_manager.scibec.patch_device_config(
-            self.device_manager.devices[device_name].config["id"],
-            {"enabled_set": self.device_manager.devices[device_name].enabled_set},
-        )
-        if not success:
-            raise DeviceConfigError("Error during database update.")
-
-    def update_device_config_in_db(self, device_name: str) -> None:
-        """Update a device config in the DB with the local version
-
-        Args:
-            device_name (str): Name of the device that should be updated
-
-        Raises:
-            DeviceConfigError: Raised if the db update fails.
-        """
-        logger.debug("updating in DB")
-        success = self.device_manager.scibec.patch_device_config(
-            self.device_manager.devices[device_name].config["id"],
-            {"deviceConfig": self.device_manager.devices[device_name].config["deviceConfig"]},
-        )
-        if not success:
-            raise DeviceConfigError("Error during database update.")
-
-    def update_user_parameter_in_db(self, device_name: str) -> None:
-        """Update user parameter in the DB with the local version
-
-        Args:
-            device_name (str): Name of the device that should be updated
-
-        Raises:
-            DeviceConfigError: Raised if the db update fails.
-        """
-        logger.debug("updating in DB")
-        success = self.device_manager.scibec.patch_device_config(
-            self.device_manager.devices[device_name].config["id"],
-            {"userParameter": self.device_manager.devices[device_name].config["userParameter"]},
+            self.device_manager.devices[device_name]._config["id"],
+            {key: self.device_manager.devices[device_name]._config[key]},
         )
         if not success:
             raise DeviceConfigError("Error during database update.")

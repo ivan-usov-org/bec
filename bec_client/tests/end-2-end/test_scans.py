@@ -4,6 +4,7 @@ import time
 
 import numpy as np
 import pytest
+
 from bec_client import BECClient
 from bec_client.alarm_handler import AlarmBase
 from bec_utils import (
@@ -17,11 +18,12 @@ from bec_utils.bec_errors import ScanAbortion, ScanInterruption
 
 logger = bec_logger.logger
 
-CONFIG_PATH = "../test_config.yaml"
+CONFIG_PATH = "../ci/test_config.yaml"
 # CONFIG_PATH = "../bec_config_dev.yaml"
 # pylint: disable=no-member
 # pylint: disable=missing-function-docstring
 # pylint: disable=redefined-outer-name
+# pylint: disable=protected-access
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -60,8 +62,10 @@ def wait_for_empty_queue(bec):
         time.sleep(1)
     while not queue_is_empty(get_queue(bec).content["queue"]):
         time.sleep(1)
+        logger.info(bec.queue)
     while get_queue(bec).content["queue"]["primary"]["status"] != "RUNNING":
         time.sleep(1)
+        logger.info(bec.queue)
 
 
 @pytest.mark.timeout(100)
@@ -101,8 +105,8 @@ def test_fermat_scan(capsys, client):
     status = scans.fermat_scan(
         dev.samx, -5, 5, dev.samy, -5, 5, step=0.5, exp_time=0.01, relative=True
     )
-    assert len(status.scan.data) == 199
-    assert status.scan.num_points == 199
+    assert len(status.scan.data) == 393
+    assert status.scan.num_points == 393
     captured = capsys.readouterr()
     assert "finished. Scan ID" in captured.out
 
@@ -130,10 +134,10 @@ def test_mv_scan(capsys, client):
     current_pos_samx = dev.samx.read()["samx"]["value"]
     current_pos_samy = dev.samy.read()["samy"]["value"]
     assert np.isclose(
-        current_pos_samx, 10, atol=dev.samx.config["deviceConfig"].get("tolerance", 0.05)
+        current_pos_samx, 10, atol=dev.samx._config["deviceConfig"].get("tolerance", 0.05)
     )
     assert np.isclose(
-        current_pos_samy, 20, atol=dev.samy.config["deviceConfig"].get("tolerance", 0.05)
+        current_pos_samy, 20, atol=dev.samy._config["deviceConfig"].get("tolerance", 0.05)
     )
     scans.umv(dev.samx, 10, dev.samy, 20, relative=False)
     current_pos_samx = dev.samx.read()["samx"]["value"]
@@ -156,8 +160,8 @@ def test_mv_scan_mv(client):
     dev.samx.limits = [-50, 50]
     dev.samy.limits = [-50, 50]
     scans.umv(dev.samx, 10, dev.samy, 20, relative=False)
-    tolerance_samx = dev.samx.config["deviceConfig"].get("tolerance", 0.05)
-    tolerance_samy = dev.samy.config["deviceConfig"].get("tolerance", 0.05)
+    tolerance_samx = dev.samx._config["deviceConfig"].get("tolerance", 0.05)
+    tolerance_samy = dev.samy._config["deviceConfig"].get("tolerance", 0.05)
     current_pos_samx = dev.samx.read()["samx"]["value"]
     current_pos_samy = dev.samy.read()["samy"]["value"]
 

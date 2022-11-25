@@ -204,7 +204,6 @@ class QueueStorage:
     def find_queue_item_by_scanID(self, scanID: str) -> Optional(QueueItem):
         """find a queue item based on its scanID"""
         for queue_item in self.storage:
-            # pylint: disable=protected-access
-            if scanID in queue_item._scans:
+            if scanID in queue_item.scans:
                 return queue_item
         return None

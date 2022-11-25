@@ -1,9 +1,11 @@
 import os
+from collections import defaultdict
 from unittest import mock
 
-import bec_utils
 import pytest
 import yaml
+
+import bec_utils
 from bec_utils import BECMessage
 from bec_utils.devicemanager import DeviceConfigError, DeviceManagerBase
 from bec_utils.tests.utils import ConnectorMock, create_session_from_config
@@ -47,11 +49,11 @@ def test_config_request_update():
         action="update", config={"samx": {"deviceConfig": {"tolerance": 1}}}
     )
     dm.parse_config_message(msg)
-    assert dm.devices.samx.config["deviceConfig"]["tolerance"] == 1
+    assert dm.devices.samx._config["deviceConfig"]["tolerance"] == 1
 
     msg = BECMessage.DeviceConfigMessage(action="update", config={"samx": {"enabled": False}})
     dm.parse_config_message(msg)
-    assert dm.devices.samx.config["enabled"] is False
+    assert dm.devices.samx._config["enabled"] is False
 
 
 def test_config_request_reload():
@@ -134,3 +136,40 @@ def test_get_config_from_DB_calls_load():
                 dm._get_config_from_DB()
                 current_session.assert_called_once_with("test", include_devices=True)
                 load_session.assert_called_once()
+
+
+def test_get_devices_with_tags():
+    connector = ConnectorMock("")
+    dm = DeviceManagerBase(connector, "")
+    config_content = None
+    with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
+        config_content = yaml.safe_load(f)
+        dm._session = create_session_from_config(config_content)
+    dm._load_session()
+    available_tags = defaultdict(lambda: [])
+    for dev_name, dev in config_content.items():
+        for tag in dev["deviceTags"]:
+            available_tags[tag].append(dev_name)
+
+    for tag, devices in available_tags.items():
+        dev_list = dm.devices.get_devices_with_tags(tag)
+        dev_names = {dev.name for dev in dev_list}
+        assert dev_names == set(devices)
+
+    assert len(dm.devices.get_devices_with_tags("someting")) == 0
+
+
+def test_show_tags():
+    connector = ConnectorMock("")
+    dm = DeviceManagerBase(connector, "")
+    config_content = None
+    with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
+        config_content = yaml.safe_load(f)
+        dm._session = create_session_from_config(config_content)
+    dm._load_session()
+    available_tags = defaultdict(lambda: [])
+    for dev_name, dev in config_content.items():
+        for tag in dev["deviceTags"]:
+            available_tags[tag].append(dev_name)
+
+    assert set(dm.devices.show_tags()) == set(available_tags.keys())

@@ -168,7 +168,11 @@ class QueueManager:
         self.queues[queue].status = ScanQueueStatus.PAUSED
         self.queues[queue].worker_status = InstructionQueueStatus.STOPPED
         instruction_queue = self._wait_for_queue_to_appear_in_history(scanID, queue)
-        self.add_to_queue(queue, instruction_queue.scan_msgs[0], 0)
+        scan_msg = instruction_queue.scan_msgs[0]
+        RID = parameter.get("RID")
+        if RID:
+            scan_msg.metadata["RID"] = RID
+        self.add_to_queue(queue, scan_msg, 0)
 
     def _get_active_scanID(self, queue):
         if len(self.queues[queue].queue) == 0:
@@ -434,7 +438,7 @@ class RequestBlock:
         self.scan_def_id = self.msg.metadata.get("scan_def_id")
         self.scan = self.scan_assembler.assemble_device_instructions(self.msg)
         self.instructions = self.scan.run()
-        if self.is_scan and self.scanID is None:
+        if (self.is_scan or self.scan_def_id is not None) and self.scanID is None:
             self.scanID = str(uuid.uuid4())
         if self.scan.caller_args:
             self.scan_motors = self.scan.scan_motors
@@ -563,10 +567,12 @@ class RequestBlockQueue:
     def increase_scan_number(self) -> None:
         """increase the scan number counter"""
         rbl = self.active_rb
-        if not rbl.is_scan:
+        if not rbl.is_scan and rbl.scan_def_id is None:
             return
         if rbl.scan_def_id is None or rbl.msg.content["scan_type"] == "close_scan_def":
             self.parent.parent.queue_manager.parent.scan_number += 1
+            if not rbl.msg.metadata.get("dataset_id_on_hold"):
+                self.parent.parent.queue_manager.parent.dataset_number += 1
         return
 
     def __iter__(self):

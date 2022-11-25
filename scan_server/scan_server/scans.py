@@ -9,6 +9,7 @@ from bec_utils import BECMessage, DeviceManagerBase, MessageEndpoints, bec_logge
 from cytoolz import partition
 
 from .errors import LimitError, ScanAbortion
+from .path_optimization import PathOptimizerMixin
 from .scan_stubs import ScanStubs
 
 DeviceMsg = BECMessage.DeviceInstructionMessage
@@ -90,7 +91,7 @@ def get_fermat_spiral_pos(
 
     length_axis1 = abs(m1_stop - m1_start)
     length_axis2 = abs(m2_stop - m2_start)
-    n_max = length_axis1 * length_axis2 * 2
+    n_max = int(length_axis1 * length_axis2 * 3.2 / step / step)
 
     for ii in range(start, n_max):
         radius = step * 0.57 * np.sqrt(ii)
@@ -204,7 +205,7 @@ class RequestBase(ABC):
         logger.debug("check limits")
         for ii, dev in enumerate(self.scan_motors):
             low_limit, high_limit = (
-                self.device_manager.devices[dev].config["deviceConfig"].get("limits", [0, 0])
+                self.device_manager.devices[dev]._config["deviceConfig"].get("limits", [0, 0])
             )
             if low_limit >= high_limit:
                 return
@@ -231,7 +232,7 @@ class RequestBase(ABC):
         pass
 
 
-class ScanBase(RequestBase):
+class ScanBase(RequestBase, PathOptimizerMixin):
     """
     procedure:
     - initialize
@@ -274,6 +275,7 @@ class ScanBase(RequestBase):
 
         self.relative = parameter["kwargs"].get("relative", False)
         self.burst_at_each_point = parameter["kwargs"].get("burst_at_each_point", 1)
+        self.optim_trajectory = parameter["kwargs"].get("optim_trajectory")
         self.burst_index = 0
 
         self.start_pos = np.repeat(0, len(self.scan_motors)).tolist()
@@ -294,16 +296,28 @@ class ScanBase(RequestBase):
         """Calculate the positions"""
         pass
 
+    def _optimize_trajectory(self):
+        if not self.optim_trajectory:
+            return
+        if self.optim_trajectory == "corridor":
+            self.positions = self.optimize_corridor(self.positions)
+            return
+        return
+
     def prepare_positions(self):
         self._calculate_positions()
+        self._optimize_trajectory()
         self.num_pos = len(self.positions)
         yield from self._set_position_offset()
         self._check_limits()
 
     def open_scan(self):
+        """open the scan"""
+        positions = self.positions if isinstance(self.positions, list) else self.positions.tolist()
         yield from self.stubs.open_scan(
             scan_motors=self.scan_motors,
             num_pos=self.num_pos,
+            positions=positions,
             scan_name=self.scan_name,
             scan_type=self.scan_type,
         )
@@ -595,11 +609,12 @@ class FermatSpiralScan(ScanBase):
             *args: pairs of device / start position / end position / steps arguments
             relative: Start from an absolute or relative position
             burst: number of acquisition per point
+            optim_trajectory: routine used for the trajectory optimization, e.g. 'corridor'. Default: None
 
         Returns:
 
         Examples:
-            >>> scans.fermat_scan(dev.motor1, -5, 5, dev.motor2, -5, 5, step=0.5, exp_time=0.1, relative=True)
+            >>> scans.fermat_scan(dev.motor1, -5, 5, dev.motor2, -5, 5, step=0.5, exp_time=0.1, relative=True, optim_trajectory="corridor")
 
         """
         super().__init__(parameter=parameter, **kwargs)

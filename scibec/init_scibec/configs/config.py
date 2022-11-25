@@ -54,7 +54,7 @@ class DemoConfig(ConfigBase):
 
     def write_sim_detectors(self):
         detectors = ["eiger"]
-        out = dict()
+        out = {}
         for m in detectors:
             out[m] = dict(
                 {
@@ -65,8 +65,12 @@ class DemoConfig(ConfigBase):
                         "labels": m,
                         "device_access": True,
                     },
-                    "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "detectors"},
-                    "deviceGroup": "detector",
+                    "acquisitionConfig": {
+                        "schedule": "sync",
+                        "acquisitionGroup": "detector",
+                        "readoutPriority": "monitored",
+                    },
+                    "deviceTags": ["detector"],
                 }
             )
 
@@ -108,8 +112,12 @@ class DemoConfig(ConfigBase):
                         "limits": [-50, 50],
                         "tolerance": 0.01,
                     },
-                    "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "userMotor"},
-                    "deviceGroup": "user motors",
+                    "acquisitionConfig": {
+                        "schedule": "sync",
+                        "acquisitionGroup": "motor",
+                        "readoutPriority": "baseline",
+                    },
+                    "deviceTags": ["user motors"],
                 }
             )
 
@@ -125,8 +133,12 @@ class DemoConfig(ConfigBase):
                     "update_frequency": 400,
                     "device_access": True,
                 },
-                "acquisitionConfig": {"schedule": "flyer", "acquisitionGroup": "userMotor"},
-                "deviceGroup": "flyer",
+                "acquisitionConfig": {
+                    "schedule": "flyer",
+                    "acquisitionGroup": "motor",
+                    "readoutPriority": "baseline",
+                },
+                "deviceTags": ["flyer"],
             }
         )
         self.write_section(out, "User motors")
@@ -181,15 +193,19 @@ class DemoConfig(ConfigBase):
             "diode",
         ]
 
-        out = dict()
+        out = {}
         for m in beamline_monitor:
             out[m] = dict(
                 {
                     "status": {"enabled": True, "enabled_set": True},
                     "deviceClass": "SynAxisMonitor",
                     "deviceConfig": {"name": m, "labels": m, "tolerance": 0.5},
-                    "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "monitor"},
-                    "deviceGroup": "beamline",
+                    "acquisitionConfig": {
+                        "schedule": "sync",
+                        "acquisitionGroup": "monitor",
+                        "readoutPriority": "monitored",
+                    },
+                    "deviceTags": ["beamline"],
                 }
             )
         self.write_section(out, "Beamline monitors")
@@ -353,8 +369,12 @@ class DemoConfig(ConfigBase):
                         "speed": 100,
                         "update_frequency": 400,
                     },
-                    "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "beamlineMotor"},
-                    "deviceGroup": "beamline",
+                    "acquisitionConfig": {
+                        "schedule": "sync",
+                        "acquisitionGroup": "motor",
+                        "readoutPriority": "baseline",
+                    },
+                    "deviceTags": ["beamline"],
                 }
             )
         self.write_section(out, "Beamline motors")
@@ -372,8 +392,12 @@ class DemoConfig(ConfigBase):
                         "name": m,
                         "labels": m,
                     },
-                    "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "monitor"},
-                    "deviceGroup": "beamline",
+                    "acquisitionConfig": {
+                        "schedule": "sync",
+                        "acquisitionGroup": "monitor",
+                        "readoutPriority": "monitored",
+                    },
+                    "deviceTags": ["beamline"],
                 }
             )
 
@@ -402,8 +426,12 @@ class TestConfig(DemoConfig):
                         "limits": [-50, 50],
                         "tolerance": 0.01,
                     },
-                    "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "userMotor"},
-                    "deviceGroup": "user motors",
+                    "acquisitionConfig": {
+                        "schedule": "sync",
+                        "acquisitionGroup": "motor",
+                        "readoutPriority": "baseline",
+                    },
+                    "deviceTags": ["user motors"],
                 }
             )
         for m in ["motor1_disabled_set", "motor2_disabled_set"]:
@@ -420,14 +448,18 @@ class TestConfig(DemoConfig):
                         "limits": [-50, 50],
                         "tolerance": 0.01,
                     },
-                    "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "userMotor"},
-                    "deviceGroup": "user motors",
+                    "acquisitionConfig": {
+                        "schedule": "sync",
+                        "acquisitionGroup": "motor",
+                        "readoutPriority": "baseline",
+                    },
+                    "deviceTags": ["user motors"],
                 }
             )
         self.write_section(out, "Disabled devices")
 
 
-class X12SAConfig(TestConfig):
+class X12SAConfig(ConfigBase):
     def run(self):
         super().run()
         self.write_x12sa_status()
@@ -438,9 +470,8 @@ class X12SAConfig(TestConfig):
             ("x12sa_op_status", "ACOAU-ACCU:OP-X12SA"),
             ("x12sa_es1_shutter_status", "X12SA-OP-ST1:OPEN_EPS"),
             ("x12sa_fe_status", "X12SA-FE-PH1:CLOSE4BL"),
-            ("x12sa_temp_median", "X12SA-OP-CC:HEAT_TEMP_MED"),
-            ("x12sa_temp_current", "X12SA-OP-CC:HEAT_TEMP"),
-            ("sec_21_vibration", "XCOVI-AXIS21:PSDV1MAX"),
+            # ("x12sa_temp_median", "X12SA-OP-CC:HEAT_TEMP_MED"),
+            # ("x12sa_temp_current", "X12SA-OP-CC:HEAT_TEMP"),
             ("x12sa_storage_ring_vac", "X12SA-SR-VAC:SETPOINT"),
             ("x12sa_es1_valve", "X12SA-ES-VW1:OPEN"),
             ("x12sa_exposure_box1_pressure", "X12SA-ES-CH1MF1:PRESSURE"),
@@ -448,41 +479,70 @@ class X12SAConfig(TestConfig):
             ("x12sa_id_gap", "X12SA-ID-GAP:READ"),
         ]
 
-        out = dict()
+        out = {}
         for name, pv in x12sa_status:
             out[name] = dict(
                 {
                     "status": {"enabled": True, "enabled_set": False},
                     "deviceClass": "EpicsSignalRO",
                     "deviceConfig": {"read_pv": pv, "name": name, "auto_monitor": True},
-                    "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "status"},
-                    "deviceGroup": "X12SA status",
+                    "acquisitionConfig": {
+                        "schedule": "sync",
+                        "acquisitionGroup": "status",
+                        "readoutPriority": "ignored",
+                    },
+                    "deviceTags": ["X12SA status"],
                 }
             )
         self.write_section(out, "X12SA status PVs")
 
     def write_sls_status(self):
         sls_status = [
-            ("ring_current", "ARIDI-PCT:CURRENT"),
-            ("current_deadband", "ALIRF-GUN:CUR-DBAND"),
-            ("orbit_feedback_mode", "ARIDI-BPM:OFB-MODE"),
-            ("sls_filling_lifetime", "ARIDI-PCT:TAU-HOUR"),
-            ("sls_filling_pattern", "ACORF-FILL:PAT-SELECT"),
-            ("fast_orbit_feedback", "ARIDI-BPM:FOFBSTATUS-G"),
-            ("sls_current_threshold", "ALIRF-GUN:CUR-LOWLIM"),
-            ("sls_machine_status", "ACOAU-ACCU:OP-MODE"),
-            ("sls_crane_usage", "IBWKR-0101-QH10003:D01_H_D-WA"),
-            ("sls_injection_mode", "ALIRF-GUN:INJ-MODE"),
+            ("sls_injection_mode", "ALIRF-GUN:INJ-MODE", True),
+            ("sls_current_threshold", "ALIRF-GUN:CUR-LOWLIM", False),
+            ("sls_current_deadband", "ALIRF-GUN:CUR-DBAND", False),
+            ("sls_filling_pattern", "ACORF-FILL:PAT-SELECT", True),
+            ("sls_filling_life_time", "ARIDI-PCT:TAU-HOUR", False),
+            ("sls_orbit_feedback_mode", "ARIDI-BPM:OFB-MODE", True),
+            ("sls_fast_orbit_feedback", "ARIDI-BPM:FOFBSTATUS-G", True),
+            ("sls_ring_current", "ARIDI-PCT:CURRENT", False),
+            ("sls_machine_status", "ACOAU-ACCU:OP-MODE", True),
+            ("sls_crane_usage", "IBWKR-0101-QH10003:D01_H_D-WA", True),
         ]
         out = {}
-        for name, pv in sls_status:
+        for name, pv, is_string in sls_status:
             out[name] = dict(
                 {
                     "status": {"enabled": True, "enabled_set": False},
                     "deviceClass": "EpicsSignalRO",
-                    "deviceConfig": {"read_pv": pv, "name": name, "auto_monitor": True},
-                    "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "status"},
-                    "deviceGroup": "SLS status",
+                    "deviceConfig": {
+                        "read_pv": pv,
+                        "name": name,
+                        "auto_monitor": True,
+                        "string": is_string,
+                    },
+                    "acquisitionConfig": {
+                        "schedule": "sync",
+                        "acquisitionGroup": "monitor",
+                        "readoutPriority": "baseline",
+                    },
+                    "onFailure": "buffer",
+                    "deviceTags": ["SLS status"],
                 }
             )
+        self.write_section(out, "SLS status PVs")
+        out["sls_operator"] = dict(
+            {
+                "status": {"enabled": True, "enabled_set": False},
+                "deviceClass": "SLSOperatorMessages",
+                "deviceConfig": {"name": "sls_operator"},
+                "acquisitionConfig": {
+                    "schedule": "sync",
+                    "acquisitionGroup": "status",
+                    "readoutPriority": "ignored",
+                },
+                "onFailure": "buffer",
+                "deviceTags": ["SLS status"],
+            }
+        )
         self.write_section(out, "SLS status PVs")

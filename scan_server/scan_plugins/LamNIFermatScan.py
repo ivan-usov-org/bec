@@ -25,6 +25,7 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 from bec_utils import BECMessage, MessageEndpoints, bec_logger
+
 from scan_server.scans import RequestBase, ScanArgType, ScanBase
 
 MOVEMENT_SCALE_X = np.sin(np.radians(15)) * np.cos(np.radians(30))
@@ -60,8 +61,14 @@ class LamNIMixin:
 
     def lamni_new_scan_center_interferometer(self, x, y):
         """move to new scan center. xy in mm"""
-        lsamx_center = 8.866
-        lsamy_center = 10.18
+        lsamx_user_params = self.device_manager.devices.lsamx.user_parameter
+        if lsamx_user_params is None or lsamx_user_params.get("center") is None:
+            raise RuntimeError("lsamx center is not defined")
+        lsamy_user_params = self.device_manager.devices.lsamy.user_parameter
+        if lsamy_user_params is None or lsamy_user_params.get("center") is None:
+            raise RuntimeError("lsamy center is not defined")
+        lsamx_center = lsamx_user_params.get("center")
+        lsamy_center = lsamy_user_params.get("center")
 
         # could first check if feedback is enabled
         yield from self.stubs.send_rpc_and_wait("rtx", "controller.feedback_disable")
@@ -173,6 +180,8 @@ class LamNIMoveToScanCenter(RequestBase, LamNIMixin):
 
     def __init__(self, *args, parameter=None, **kwargs):
         """
+        Move LamNI to a new scan center.
+
         Args:
             *args: shift x, shift y, tomo angle in deg
 
@@ -206,7 +215,7 @@ class LamNIFermatScan(ScanBase, LamNIMixin):
                                using the geometry of LamNI
                                It is determined by the first 'click' in the x-ray eye alignemnt procedure
             angle [deg]: rotation angle (will rotate first)
-            scantype: fly (i.e. HW triggered step in case of LamNI) or step
+            scan_type: fly (i.e. HW triggered step in case of LamNI) or step
             stitch_x/y: shift scan to adjacent stitch region
             fov_circular [um]: generate a circular field of view in the sample plane. This is an additional cropping to fov_size.
             stitch_overlap [um]: overlap of the stitched regions
@@ -214,7 +223,7 @@ class LamNIFermatScan(ScanBase, LamNIMixin):
 
         Examples:
             >>> scans.lamni_fermat_scan(fov_size=[20], step=0.5, exp_time=0.1)
-            >>> scans.lamni_fermat_scan(fov_size=[20, 25], center_x=20, step=0.5, exp_time=0.1)
+            >>> scans.lamni_fermat_scan(fov_size=[20, 25], center_x=0.02, center_y=0, shift_x=0, shift_y=0, angle=0, step=0.5, fov_circular=0, exp_time=0.1)
         """
 
         super().__init__(parameter=parameter, **kwargs)
@@ -229,18 +238,20 @@ class LamNIFermatScan(ScanBase, LamNIMixin):
         self.shift_x = scan_kwargs.get("shift_x", 0)
         self.shift_y = scan_kwargs.get("shift_y", 0)
         self.angle = scan_kwargs.get("angle", 0)
-        self.scan_type = scan_kwargs.get("scan_type", "step")
+        self.scan_type = scan_kwargs.get("scan_type", "fly")
         self.stitch_x = scan_kwargs.get("stitch_x", 0)
         self.stitch_y = scan_kwargs.get("stitch_y", 0)
         self.fov_circular = scan_kwargs.get("fov_circular", 0)
         self.stitch_overlap = scan_kwargs.get("stitch_overlap", 1)
-        self.keep_plot = scan_kwargs.get("keep_plot", 0)
+        # self.keep_plot = scan_kwargs.get("keep_plot", 0)
+        self.optim_trajectory = scan_kwargs.get("optim_trajectory", "corridor")
 
     def initialize(self):
         self.scan_motors = ["rtx", "rty"]
 
     def prepare_positions(self):
         self._calculate_positions()
+        self._optimize_trajectory()
         # self._sort_positions()
 
         self.num_pos = len(self.positions)
@@ -290,18 +301,18 @@ class LamNIFermatScan(ScanBase, LamNIMixin):
         yield from self.lamni_rotation(self.angle)
         total_shift_x, total_shift_y = self._compute_total_shift()
         yield from self.lamni_new_scan_center_interferometer(total_shift_x, total_shift_y)
-        self._plot_target_pos()
+        # self._plot_target_pos()
         if self.scan_type == "fly":
             yield from self._transfer_positions_to_LamNI()
 
-    def _plot_target_pos(self):
-        # return
-        plt.plot(self.positions[:, 0], self.positions[:, 1], alpha=0.2)
-        plt.scatter(self.positions[:, 0], self.positions[:, 1])
-        plt.savefig("mygraph.png")
-        if not self.keep_plot:
-            plt.clf()
-        # plt.show()
+    # def _plot_target_pos(self):
+    #     # return
+    #     plt.plot(self.positions[:, 0], self.positions[:, 1], alpha=0.2)
+    #     plt.scatter(self.positions[:, 0], self.positions[:, 1])
+    #     plt.savefig("mygraph.png")
+    #     if not self.keep_plot:
+    #         plt.clf()
+    #     # plt.show()
 
     def _transfer_positions_to_LamNI(self):
         yield from self.stubs.send_rpc_and_wait(

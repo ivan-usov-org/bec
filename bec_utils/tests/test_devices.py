@@ -1,8 +1,9 @@
 import os
 from unittest import mock
 
-import bec_utils
 import pytest
+
+import bec_utils
 from bec_utils.devicemanager import DeviceManagerBase
 from bec_utils.tests.utils import ConnectorMock
 
@@ -18,10 +19,14 @@ def device_config():
         "sessionId": "569ea788-09d7-44fc-a140-b0b34a2b7f6f",
         "enabled": True,
         "enabled_set": True,
-        "acquisitionConfig": {"acquisitionGroup": "detectors", "schedule": "sync"},
+        "acquisitionConfig": {
+            "acquisitionGroup": "detectors",
+            "schedule": "sync",
+            "readoutPriority": "monitored",
+        },
         "deviceClass": "SynSLSDetector",
         "deviceConfig": {"device_access": True, "labels": "eiger", "name": "eiger"},
-        "deviceGroup": "detector",
+        "deviceTags": ["detector"],
     }
 
 
@@ -29,7 +34,7 @@ def test_create_device_saves_config(device_config):
     connector = ConnectorMock("")
     dm = DeviceManagerBase(connector, "")
     obj = dm._create_device(device_config, ())
-    assert obj.config == device_config
+    assert obj._config == device_config
 
 
 def test_device_enabled(device_config):
@@ -86,12 +91,12 @@ def test_device_update_user_parameter(device_config, val, raised_error):
     connector = ConnectorMock("")
     dm = DeviceManagerBase(connector, "")
     obj = dm._create_device(device_config, ())
-    obj.config["userParameter"] = {"in": 2, "out": 5}
+    obj._config["userParameter"] = {"in": 2, "out": 5}
     with mock.patch.object(obj.parent, "send_config_request") as config_req:
         if raised_error is None:
             obj.update_user_parameter(val)
             config_req.assert_called_once_with(
-                action="update", config={obj.name: {"userParameter": obj.config["userParameter"]}}
+                action="update", config={obj.name: {"userParameter": obj._config["userParameter"]}}
             )
         else:
             with pytest.raises(raised_error):
