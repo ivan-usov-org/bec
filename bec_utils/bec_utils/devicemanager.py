@@ -5,16 +5,13 @@ import uuid
 from typing import List
 
 import msgpack
+from rich.console import Console
+from rich.table import Table
 from typeguard import typechecked
 
 from bec_utils.connector import ConnectorBase
 
-from .BECMessage import (
-    BECStatus,
-    DeviceConfigMessage,
-    LogMessage,
-    RequestResponseMessage,
-)
+from .BECMessage import BECStatus, DeviceConfigMessage, LogMessage, RequestResponseMessage
 from .endpoints import MessageEndpoints
 from .logger import bec_logger
 from .scibec import SciBec
@@ -303,7 +300,7 @@ class DeviceContainer(dict):
     def get_devices_with_tags(self, tags: List) -> List:
         """get a list of all devices that have the specified tags"""
         if not isinstance(tags, list):
-            tags = list(tags)
+            tags = [tags]
         return [dev for _, dev in self.items() if set(tags) & set(dev._config["deviceTags"])]
 
     def show_tags(self) -> List:
@@ -317,6 +314,34 @@ class DeviceContainer(dict):
     def detectors(self) -> list:
         """get a list of all enabled detectors"""
         return [dev for dev in self.enabled_devices if dev in self.acquisition_group("detector")]
+
+    def wm(self, device_names: List[str]):
+        if not isinstance(device_names, list):
+            device_names = [device_names]
+        if len(device_names) == 0:
+            return
+        if not isinstance(device_names[0], Device):
+            device_names = [self.__dict__[dev] for dev in device_names]
+        console = Console()
+        table = Table()
+        table.add_column("", justify="center")
+        table.add_column("readback", justify="center")
+        table.add_column("setpoint", justify="center")
+        dev_read = {dev.name: dev.read(cached=True, filter_signal=False) for dev in device_names}
+        readbacks = {}
+        setpoints = {}
+        for dev, read in dev_read.items():
+            if dev in read:
+                readbacks[dev] = f"{read[dev]['value']:.4f}"
+            else:
+                readbacks[dev] = "N/A"
+            if f"{dev}_setpoint" in read:
+                setpoints[dev] = f"{read[dev]['value']:.4f}"
+            else:
+                setpoints[dev] = "N/A"
+        for dev in device_names:
+            table.add_row(dev.name, readbacks[dev.name], setpoints[dev.name])
+        console.print(table)
 
     def _add_device(self, name, obj) -> None:
         """
