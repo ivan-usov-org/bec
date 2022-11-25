@@ -11,6 +11,7 @@ import ophyd
 from bec_utils import Alarms, BECMessage, BECService, MessageEndpoints, bec_logger
 from bec_utils.BECMessage import BECStatus
 from bec_utils.connector import ConnectorBase
+from bec_utils.devicemanager import OnFailure
 from ophyd import Staged
 from ophyd.utils import errors as ophyd_errors
 
@@ -349,17 +350,30 @@ class DeviceServer(BECService):
             try:
                 signals = obj.read()
             except Exception as exc:
-                if not instr.content["parameter"].get("ignore_failure"):
+                ds_dev = self.device_manager.devices.get(dev)
+                if ds_dev.on_failure == OnFailure.RAISE:
                     raise exc
-                logger.warning(f"Failed to read {dev}. Trying to load an old value.")
-                old_msg = BECMessage.DeviceMessage.loads(
-                    self.producer.get(MessageEndpoints.device_read(dev))
-                )
-                if not old_msg:
-                    raise exc
-                signals = old_msg.content["signals"]
+
+                if ds_dev.on_failure == OnFailure.RETRY:
+                    # try to read it again, may have been only a glitch
+                    signals = obj.read()
+                elif ds_dev.on_failure == OnFailure.BUFFER:
+                    # if possible, fall back to past readings
+                    logger.warning(f"Failed to read {dev}. Trying to load an old value.")
+                    old_msg = BECMessage.DeviceMessage.loads(
+                        self.producer.get(MessageEndpoints.device_read(dev))
+                    )
+                    if not old_msg:
+                        raise exc
+                    signals = old_msg.content["signals"]
+
             self.producer.set_and_publish(
                 MessageEndpoints.device_read(dev),
+                BECMessage.DeviceMessage(signals=signals, metadata=instr.metadata).dumps(),
+                pipe,
+            )
+            self.producer.set_and_publish(
+                MessageEndpoints.device_readback(dev),
                 BECMessage.DeviceMessage(signals=signals, metadata=instr.metadata).dumps(),
                 pipe,
             )
