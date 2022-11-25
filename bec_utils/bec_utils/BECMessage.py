@@ -168,6 +168,12 @@ class ScanStatusMessage(BECMessage):
         self.content = {"scanID": scanID, "status": status, "info": info, "timestamp": tms}
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
 
+    def __str__(self):
+        content = self.content.copy()
+        if content["info"].get("positions"):
+            content["info"]["positions"] = "..."
+        return f"{self.__class__.__name__}({content, self.metadata}))"
+
 
 class ScanQueueModificationMessage(BECMessage):
     msg_type = "scan_queue_modification"
