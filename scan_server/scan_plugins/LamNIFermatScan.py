@@ -180,6 +180,8 @@ class LamNIMoveToScanCenter(RequestBase, LamNIMixin):
 
     def __init__(self, *args, parameter=None, **kwargs):
         """
+        Move LamNI to a new scan center.
+
         Args:
             *args: shift x, shift y, tomo angle in deg
 

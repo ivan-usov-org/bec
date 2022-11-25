@@ -30,6 +30,9 @@ class ScanObject:
         self.run = lambda *args, **kwargs: self._run(*args, **kwargs)
 
     def _run(self, *args, **kwargs):
+        if self.client.alarm_handler.alarms_stack:
+            logger.warning("The alarm stack is not empty but will be cleared now.")
+            self.client.clear_all_alarms()
         scans = self.client.scans
 
         # handle reserved kwargs:

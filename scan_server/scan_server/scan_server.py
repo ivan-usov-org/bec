@@ -1,6 +1,13 @@
 from __future__ import annotations
 
-from bec_utils import BECMessage, BECService, BECStatus, MessageEndpoints, bec_logger
+from bec_utils import (
+    Alarms,
+    BECMessage,
+    BECService,
+    BECStatus,
+    MessageEndpoints,
+    bec_logger,
+)
 from bec_utils.connector import ConnectorBase
 
 from .devicemanager import DeviceManagerScanServer
@@ -71,10 +78,11 @@ class ScanServer(BECService):
 
     @staticmethod
     def _alarm_callback(msg, parent: ScanServer, **_kwargs):
-        metadata = BECMessage.AlarmMessage.loads(msg.value).metadata
-        queue = metadata.get("stream", "primary")
-        # shouldn't this be specific to a single queue?
-        parent.queue_manager.set_abort(queue=queue)
+        msg = BECMessage.AlarmMessage.loads(msg.value)
+        queue = msg.metadata.get("stream", "primary")
+        if Alarms(msg.content["severity"]) == Alarms.MAJOR:
+            # shouldn't this be specific to a single queue?
+            parent.queue_manager.set_abort(queue=queue)
 
     @property
     def scan_number(self) -> int:
