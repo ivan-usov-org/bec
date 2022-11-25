@@ -1,3 +1,5 @@
+
+
 ############################################################
 ################## Cameras and detectors ###################
 ############################################################
@@ -5,7 +7,7 @@
 eiger:
   acquisitionConfig:
     acquisitionGroup: detector
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynSLSDetector
   deviceConfig:
@@ -13,12 +15,15 @@ eiger:
     labels: eiger
     name: eiger
   deviceTags:
-    - detector
+  - detector
   status:
     enabled: true
     enabled_set: true
 
+
 ############## Cameras and detectors end here ##############
+
+
 
 ############################################################
 ####################### User motors ########################
@@ -27,70 +32,70 @@ eiger:
 eyefoc:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
     labels: eyefoc
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: eyefoc
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-    - user motors
+  - user motors
   status:
     enabled: true
     enabled_set: true
 eyex:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
     labels: eyex
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: eyex
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-    - user motors
+  - user motors
   status:
     enabled: true
     enabled_set: true
 eyey:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
     labels: eyey
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: eyey
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-    - user motors
+  - user motors
   status:
     enabled: true
     enabled_set: true
 flyer_sim:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: flyer
   deviceClass: SynFlyer
   deviceConfig:
@@ -101,306 +106,309 @@ flyer_sim:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - flyer
+  - flyer
   status:
     enabled: true
     enabled_set: true
 hrox:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
     labels: hrox
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: hrox
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-    - user motors
+  - user motors
   status:
     enabled: true
     enabled_set: true
 hroy:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
     labels: hroy
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: hroy
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-    - user motors
+  - user motors
   status:
     enabled: true
     enabled_set: true
 hroz:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
     labels: hroz
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: hroz
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-    - user motors
+  - user motors
   status:
     enabled: true
     enabled_set: true
 hx:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
     labels: hx
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: hx
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-    - user motors
+  - user motors
   status:
     enabled: true
     enabled_set: true
 hy:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
     labels: hy
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: hy
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-    - user motors
+  - user motors
   status:
     enabled: true
     enabled_set: true
 hz:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
     labels: hz
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: hz
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-    - user motors
+  - user motors
   status:
     enabled: true
     enabled_set: true
 mbsx:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
     labels: mbsx
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: mbsx
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-    - user motors
+  - user motors
   status:
     enabled: true
     enabled_set: true
 mbsy:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
     labels: mbsy
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: mbsy
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-    - user motors
+  - user motors
   status:
     enabled: true
     enabled_set: true
 pinx:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
     labels: pinx
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: pinx
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-    - user motors
+  - user motors
   status:
     enabled: true
     enabled_set: true
 piny:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
     labels: piny
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: piny
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-    - user motors
+  - user motors
   status:
     enabled: true
     enabled_set: true
 pinz:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
     labels: pinz
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: pinz
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-    - user motors
+  - user motors
   status:
     enabled: true
     enabled_set: true
 samx:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
     labels: samx
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: samx
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-    - user motors
+  - user motors
   status:
     enabled: true
     enabled_set: true
 samy:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
     labels: samy
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: samy
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-    - user motors
+  - user motors
   status:
     enabled: true
     enabled_set: true
 samz:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
     labels: samz
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: samz
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-    - user motors
+  - user motors
   status:
     enabled: true
     enabled_set: true
 
+
 ################### User motors end here ###################
+
+
 
 ############################################################
 #################### Beamline monitors #####################
@@ -409,7 +417,7 @@ samz:
 bpm3a:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -417,14 +425,14 @@ bpm3a:
     name: bpm3a
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm3b:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -432,14 +440,14 @@ bpm3b:
     name: bpm3b
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm3c:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -447,14 +455,14 @@ bpm3c:
     name: bpm3c
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm3d:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -462,14 +470,14 @@ bpm3d:
     name: bpm3d
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm3i:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -477,14 +485,14 @@ bpm3i:
     name: bpm3i
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm3x:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -492,14 +500,14 @@ bpm3x:
     name: bpm3x
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm3y:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -507,14 +515,14 @@ bpm3y:
     name: bpm3y
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm3z:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -522,14 +530,14 @@ bpm3z:
     name: bpm3z
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm4a:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -537,14 +545,14 @@ bpm4a:
     name: bpm4a
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm4b:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -552,14 +560,14 @@ bpm4b:
     name: bpm4b
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm4c:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -567,14 +575,14 @@ bpm4c:
     name: bpm4c
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm4d:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -582,14 +590,14 @@ bpm4d:
     name: bpm4d
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm4i:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -597,14 +605,14 @@ bpm4i:
     name: bpm4i
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm4s:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -612,14 +620,14 @@ bpm4s:
     name: bpm4s
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm4x:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -627,14 +635,14 @@ bpm4x:
     name: bpm4x
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm4xf:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -642,14 +650,14 @@ bpm4xf:
     name: bpm4xf
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm4xm:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -657,14 +665,14 @@ bpm4xm:
     name: bpm4xm
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm4y:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -672,14 +680,14 @@ bpm4y:
     name: bpm4y
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm4yf:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -687,14 +695,14 @@ bpm4yf:
     name: bpm4yf
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm4ym:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -702,14 +710,14 @@ bpm4ym:
     name: bpm4ym
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm4z:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -717,14 +725,14 @@ bpm4z:
     name: bpm4z
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm5a:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -732,14 +740,14 @@ bpm5a:
     name: bpm5a
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm5b:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -747,14 +755,14 @@ bpm5b:
     name: bpm5b
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm5c:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -762,14 +770,14 @@ bpm5c:
     name: bpm5c
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm5d:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -777,14 +785,14 @@ bpm5d:
     name: bpm5d
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm5i:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -792,14 +800,14 @@ bpm5i:
     name: bpm5i
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm5x:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -807,14 +815,14 @@ bpm5x:
     name: bpm5x
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm5y:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -822,14 +830,14 @@ bpm5y:
     name: bpm5y
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm5z:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -837,14 +845,14 @@ bpm5z:
     name: bpm5z
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm6a:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -852,14 +860,14 @@ bpm6a:
     name: bpm6a
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm6b:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -867,14 +875,14 @@ bpm6b:
     name: bpm6b
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm6c:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -882,14 +890,14 @@ bpm6c:
     name: bpm6c
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm6d:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -897,14 +905,14 @@ bpm6d:
     name: bpm6d
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm6i:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -912,14 +920,14 @@ bpm6i:
     name: bpm6i
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm6x:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -927,14 +935,14 @@ bpm6x:
     name: bpm6x
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm6y:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -942,14 +950,14 @@ bpm6y:
     name: bpm6y
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm6z:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -957,14 +965,14 @@ bpm6z:
     name: bpm6z
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 curr:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -972,14 +980,14 @@ curr:
     name: curr
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 diode:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -987,14 +995,14 @@ diode:
     name: diode
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 ebpmdx:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -1002,14 +1010,14 @@ ebpmdx:
     name: ebpmdx
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 ebpmdy:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -1017,14 +1025,14 @@ ebpmdy:
     name: ebpmdy
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 ebpmux:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -1032,14 +1040,14 @@ ebpmux:
     name: ebpmux
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 ebpmuy:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -1047,14 +1055,14 @@ ebpmuy:
     name: ebpmuy
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 ftp:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -1062,14 +1070,14 @@ ftp:
     name: ftp
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 temp:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -1077,14 +1085,14 @@ temp:
     name: temp
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 transd:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynAxisMonitor
   deviceConfig:
@@ -1092,12 +1100,15 @@ transd:
     name: transd
     tolerance: 0.5
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 
+
 ################ Beamline monitors end here ################
+
+
 
 ############################################################
 ##################### Beamline motors ######################
@@ -1106,7 +1117,7 @@ transd:
 aptrx:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1116,14 +1127,14 @@ aptrx:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 aptry:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1133,14 +1144,14 @@ aptry:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bim2x:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1150,14 +1161,14 @@ bim2x:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bim2y:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1167,14 +1178,14 @@ bim2y:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bm1trx:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1184,14 +1195,14 @@ bm1trx:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bm1try:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1201,14 +1212,14 @@ bm1try:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bm2trx:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1218,14 +1229,14 @@ bm2trx:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bm2try:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1235,14 +1246,14 @@ bm2try:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bm3trx:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1252,14 +1263,14 @@ bm3trx:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bm3try:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1269,14 +1280,14 @@ bm3try:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bm4trx:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1286,14 +1297,14 @@ bm4trx:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bm4try:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1303,14 +1314,14 @@ bm4try:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bm5trx:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1320,14 +1331,14 @@ bm5trx:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bm5try:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1337,14 +1348,14 @@ bm5try:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bm6trx:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1354,14 +1365,14 @@ bm6trx:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bm6try:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1371,14 +1382,14 @@ bm6try:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm4r:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1388,14 +1399,14 @@ bpm4r:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bpm5r:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1405,14 +1416,14 @@ bpm5r:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bs1x:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1422,14 +1433,14 @@ bs1x:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bs1y:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1439,14 +1450,14 @@ bs1y:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bs2x:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1456,14 +1467,14 @@ bs2x:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 bs2y:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1473,14 +1484,14 @@ bs2y:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 burstn:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1490,14 +1501,14 @@ burstn:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 burstr:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1507,14 +1518,14 @@ burstr:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 ddg1a:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1524,14 +1535,14 @@ ddg1a:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 ddg1b:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1541,14 +1552,14 @@ ddg1b:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 ddg1c:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1558,14 +1569,14 @@ ddg1c:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 ddg1d:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1575,14 +1586,14 @@ ddg1d:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 ddg1e:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1592,14 +1603,14 @@ ddg1e:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 ddg1f:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1609,14 +1620,14 @@ ddg1f:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 ddg1g:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1626,14 +1637,14 @@ ddg1g:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 ddg1h:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1643,14 +1654,14 @@ ddg1h:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 dettrx:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1660,14 +1671,14 @@ dettrx:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 di2trx:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1677,14 +1688,14 @@ di2trx:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 di2try:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1694,14 +1705,14 @@ di2try:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 dtpush:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1711,14 +1722,14 @@ dtpush:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 dtth:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1728,14 +1739,14 @@ dtth:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 dttrx:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1745,14 +1756,14 @@ dttrx:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 dttry:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1762,14 +1773,14 @@ dttry:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 dttrz:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1779,14 +1790,14 @@ dttrz:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 ebcsx:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1796,14 +1807,14 @@ ebcsx:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 ebcsy:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1813,14 +1824,14 @@ ebcsy:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 ebfi1:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1830,14 +1841,14 @@ ebfi1:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 ebfi2:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1847,14 +1858,14 @@ ebfi2:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 ebfi3:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1864,14 +1875,14 @@ ebfi3:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 ebfi4:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1881,14 +1892,14 @@ ebfi4:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 ebfzpx:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1898,14 +1909,14 @@ ebfzpx:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 ebfzpy:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1915,14 +1926,14 @@ ebfzpy:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 ebtrx:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1932,14 +1943,14 @@ ebtrx:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 ebtry:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1949,14 +1960,14 @@ ebtry:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 ebtrz:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1966,14 +1977,14 @@ ebtrz:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 fi1try:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -1983,14 +1994,14 @@ fi1try:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 fi2try:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2000,14 +2011,14 @@ fi2try:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 fi3try:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2017,14 +2028,14 @@ fi3try:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 fsh1x:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2034,14 +2045,14 @@ fsh1x:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 fsh2x:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2051,14 +2062,14 @@ fsh2x:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 ftrans:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2068,14 +2079,14 @@ ftrans:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 fttrx1:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2085,14 +2096,14 @@ fttrx1:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 fttrx2:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2102,14 +2113,14 @@ fttrx2:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 fttry1:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2119,14 +2130,14 @@ fttry1:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 fttry2:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2136,14 +2147,14 @@ fttry2:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 fttrz:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2153,14 +2164,14 @@ fttrz:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 idgap:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2170,14 +2181,14 @@ idgap:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 mibd:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2187,14 +2198,14 @@ mibd:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 mibd1:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2204,14 +2215,14 @@ mibd1:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 mibd2:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2221,14 +2232,14 @@ mibd2:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 miroll:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2238,14 +2249,14 @@ miroll:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 mith:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2255,14 +2266,14 @@ mith:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 mitrx:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2272,14 +2283,14 @@ mitrx:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 mitry:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2289,14 +2300,14 @@ mitry:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 mitry1:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2306,14 +2317,14 @@ mitry1:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 mitry2:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2323,14 +2334,14 @@ mitry2:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 mitry3:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2340,14 +2351,14 @@ mitry3:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 mobd:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2357,14 +2368,14 @@ mobd:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 mobdai:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2374,14 +2385,14 @@ mobdai:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 mobdbo:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2391,14 +2402,14 @@ mobdbo:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 mobdco:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2408,14 +2419,14 @@ mobdco:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 mobddi:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2425,14 +2436,14 @@ mobddi:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 mokev:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2442,14 +2453,14 @@ mokev:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 mopush1:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2459,14 +2470,14 @@ mopush1:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 mopush2:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2476,14 +2487,14 @@ mopush2:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 moroll1:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2493,14 +2504,14 @@ moroll1:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 moroll2:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2510,14 +2521,14 @@ moroll2:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 moth1:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2527,14 +2538,14 @@ moth1:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 moth1e:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2544,14 +2555,14 @@ moth1e:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 moth2:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2561,14 +2572,14 @@ moth2:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 moth2e:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2578,14 +2589,14 @@ moth2e:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 motrx2:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2595,14 +2606,14 @@ motrx2:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 motry:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2612,14 +2623,14 @@ motry:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 motry2:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2629,14 +2640,14 @@ motry2:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 motrz1:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2646,14 +2657,14 @@ motrz1:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 motrz1e:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2663,14 +2674,14 @@ motrz1e:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 moyaw2:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2680,14 +2691,14 @@ moyaw2:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl0ch:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2697,14 +2708,14 @@ sl0ch:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl0trxi:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2714,14 +2725,14 @@ sl0trxi:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl0trxo:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2731,14 +2742,14 @@ sl0trxo:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl0wh:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2748,14 +2759,14 @@ sl0wh:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl1ch:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2765,14 +2776,14 @@ sl1ch:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl1cv:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2782,14 +2793,14 @@ sl1cv:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl1trxi:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2799,14 +2810,14 @@ sl1trxi:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl1trxo:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2816,14 +2827,14 @@ sl1trxo:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl1tryb:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2833,14 +2844,14 @@ sl1tryb:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl1tryt:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2850,14 +2861,14 @@ sl1tryt:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl1wh:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2867,14 +2878,14 @@ sl1wh:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl1wv:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2884,14 +2895,14 @@ sl1wv:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl2ch:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2901,14 +2912,14 @@ sl2ch:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl2cv:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2918,14 +2929,14 @@ sl2cv:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl2trxi:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2935,14 +2946,14 @@ sl2trxi:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl2trxo:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2952,14 +2963,14 @@ sl2trxo:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl2tryb:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2969,14 +2980,14 @@ sl2tryb:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl2tryt:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -2986,14 +2997,14 @@ sl2tryt:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl2wh:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3003,14 +3014,14 @@ sl2wh:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl2wv:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3020,14 +3031,14 @@ sl2wv:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl3ch:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3037,14 +3048,14 @@ sl3ch:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl3cv:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3054,14 +3065,14 @@ sl3cv:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl3trxi:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3071,14 +3082,14 @@ sl3trxi:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl3trxo:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3088,14 +3099,14 @@ sl3trxo:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl3tryb:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3105,14 +3116,14 @@ sl3tryb:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl3tryt:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3122,14 +3133,14 @@ sl3tryt:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl3wh:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3139,14 +3150,14 @@ sl3wh:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl3wv:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3156,14 +3167,14 @@ sl3wv:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl4ch:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3173,14 +3184,14 @@ sl4ch:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl4cv:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3190,14 +3201,14 @@ sl4cv:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl4trxi:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3207,14 +3218,14 @@ sl4trxi:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl4trxo:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3224,14 +3235,14 @@ sl4trxo:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl4tryb:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3241,14 +3252,14 @@ sl4tryb:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl4tryt:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3258,14 +3269,14 @@ sl4tryt:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl4wh:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3275,14 +3286,14 @@ sl4wh:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl4wv:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3292,14 +3303,14 @@ sl4wv:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl5ch:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3309,14 +3320,14 @@ sl5ch:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl5cv:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3326,14 +3337,14 @@ sl5cv:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl5trxi:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3343,14 +3354,14 @@ sl5trxi:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl5trxo:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3360,14 +3371,14 @@ sl5trxo:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl5tryb:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3377,14 +3388,14 @@ sl5tryb:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl5tryt:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3394,14 +3405,14 @@ sl5tryt:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl5wh:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3411,14 +3422,14 @@ sl5wh:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sl5wv:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3428,14 +3439,14 @@ sl5wv:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 strox:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3445,14 +3456,14 @@ strox:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 stroy:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3462,14 +3473,14 @@ stroy:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 stroz:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3479,14 +3490,14 @@ stroz:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sttrx:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3496,14 +3507,14 @@ sttrx:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 sttry:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
@@ -3513,12 +3524,15 @@ sttry:
     speed: 100
     update_frequency: 400
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 
+
 ################# Beamline motors end here #################
+
+
 
 ############################################################
 #################### Read-only signals #####################
@@ -3527,19 +3541,22 @@ sttry:
 ring_current_sim:
   acquisitionConfig:
     acquisitionGroup: monitor
-    readoutPriority: primary
+    readoutPriority: monitored
     schedule: sync
   deviceClass: SynSignalRO
   deviceConfig:
     labels: ring_current_sim
     name: ring_current_sim
   deviceTags:
-    - beamline
+  - beamline
   status:
     enabled: true
     enabled_set: true
 
+
 ################ Read-only signals end here ################
+
+
 
 ############################################################
 ##################### Disabled devices #####################
@@ -3548,86 +3565,88 @@ ring_current_sim:
 motor1_disabled:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
     labels: motor1_disabled
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: motor1_disabled
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-    - user motors
+  - user motors
   status:
     enabled: false
     enabled_set: true
 motor1_disabled_set:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
     labels: motor1_disabled_set
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: motor1_disabled_set
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-    - user motors
+  - user motors
   status:
     enabled: true
     enabled_set: false
 motor2_disabled:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
     labels: motor2_disabled
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: motor2_disabled
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-    - user motors
+  - user motors
   status:
     enabled: false
     enabled_set: true
 motor2_disabled_set:
   acquisitionConfig:
     acquisitionGroup: motor
-    readoutPriority: secondary
+    readoutPriority: baseline
     schedule: sync
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
     labels: motor2_disabled_set
     limits:
-      - -50
-      - 50
+    - -50
+    - 50
     name: motor2_disabled_set
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-    - user motors
+  - user motors
   status:
     enabled: true
     enabled_set: false
+
+
 ################ Disabled devices end here #################
 

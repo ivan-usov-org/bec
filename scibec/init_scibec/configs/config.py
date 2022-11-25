@@ -68,7 +68,7 @@ class DemoConfig(ConfigBase):
                     "acquisitionConfig": {
                         "schedule": "sync",
                         "acquisitionGroup": "detector",
-                        "readoutPriority": "primary",
+                        "readoutPriority": "monitored",
                     },
                     "deviceTags": ["detector"],
                 }
@@ -115,7 +115,7 @@ class DemoConfig(ConfigBase):
                     "acquisitionConfig": {
                         "schedule": "sync",
                         "acquisitionGroup": "motor",
-                        "readoutPriority": "secondary",
+                        "readoutPriority": "baseline",
                     },
                     "deviceTags": ["user motors"],
                 }
@@ -136,7 +136,7 @@ class DemoConfig(ConfigBase):
                 "acquisitionConfig": {
                     "schedule": "flyer",
                     "acquisitionGroup": "motor",
-                    "readoutPriority": "secondary",
+                    "readoutPriority": "baseline",
                 },
                 "deviceTags": ["flyer"],
             }
@@ -203,7 +203,7 @@ class DemoConfig(ConfigBase):
                     "acquisitionConfig": {
                         "schedule": "sync",
                         "acquisitionGroup": "monitor",
-                        "readoutPriority": "primary",
+                        "readoutPriority": "monitored",
                     },
                     "deviceTags": ["beamline"],
                 }
@@ -372,7 +372,7 @@ class DemoConfig(ConfigBase):
                     "acquisitionConfig": {
                         "schedule": "sync",
                         "acquisitionGroup": "motor",
-                        "readoutPriority": "secondary",
+                        "readoutPriority": "baseline",
                     },
                     "deviceTags": ["beamline"],
                 }
@@ -395,7 +395,7 @@ class DemoConfig(ConfigBase):
                     "acquisitionConfig": {
                         "schedule": "sync",
                         "acquisitionGroup": "monitor",
-                        "readoutPriority": "primary",
+                        "readoutPriority": "monitored",
                     },
                     "deviceTags": ["beamline"],
                 }
@@ -429,7 +429,7 @@ class TestConfig(DemoConfig):
                     "acquisitionConfig": {
                         "schedule": "sync",
                         "acquisitionGroup": "motor",
-                        "readoutPriority": "secondary",
+                        "readoutPriority": "baseline",
                     },
                     "deviceTags": ["user motors"],
                 }
@@ -451,7 +451,7 @@ class TestConfig(DemoConfig):
                     "acquisitionConfig": {
                         "schedule": "sync",
                         "acquisitionGroup": "motor",
-                        "readoutPriority": "secondary",
+                        "readoutPriority": "baseline",
                     },
                     "deviceTags": ["user motors"],
                 }
@@ -489,7 +489,7 @@ class X12SAConfig(ConfigBase):
                     "acquisitionConfig": {
                         "schedule": "sync",
                         "acquisitionGroup": "status",
-                        "readoutPriority": "skip",
+                        "readoutPriority": "ignored",
                     },
                     "deviceTags": ["X12SA status"],
                 }
@@ -524,7 +524,7 @@ class X12SAConfig(ConfigBase):
                     "acquisitionConfig": {
                         "schedule": "sync",
                         "acquisitionGroup": "monitor",
-                        "readoutPriority": "secondary",
+                        "readoutPriority": "baseline",
                     },
                     "onFailure": "buffer",
                     "deviceTags": ["SLS status"],
@@ -539,7 +539,7 @@ class X12SAConfig(ConfigBase):
                 "acquisitionConfig": {
                     "schedule": "sync",
                     "acquisitionGroup": "status",
-                    "readoutPriority": "skip",
+                    "readoutPriority": "ignored",
                 },
                 "onFailure": "buffer",
                 "deviceTags": ["SLS status"],

@@ -13,10 +13,10 @@ enum AcquisitionGroup {
   DETECTOR = "detector",
 }
 
-enum AcquisitionPriority {
-  PRIMARY = "primary",
-  SECONDARY = "secondary",
-  SKIP = "skip"
+enum ReadoutPriority {
+  MONITORED = "monitored",
+  BASELINE = "baseline",
+  IGNORED = "ignored"
 }
 
 enum AcquisitionSchedule {
@@ -28,7 +28,7 @@ enum AcquisitionSchedule {
 export interface AcquisitionConfig {
   schedule: AcquisitionSchedule,
   acquisitionGroup: AcquisitionGroup,
-  readoutPriority: AcquisitionPriority
+  readoutPriority: ReadoutPriority
 }
 
 enum FailureType {
@@ -148,9 +148,9 @@ export class Device extends Entity {
           "enum": ["motor", "monitor", "status", "detector"],
         },
         readoutPriority: {
-          "description": "Priority of the device during a scan.",
+          "description": "Readout priority of the device during a scan.",
           "type": "string",
-          "enum": ["primary", "secondary", "skip"],
+          "enum": ["monitored", "baseline", "ignored"],
         },
       },
       required: ["schedule", "acquisitionGroup", "readoutPriority"]

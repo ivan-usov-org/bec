@@ -38,6 +38,12 @@ class OnFailure(str, enum.Enum):
     RETRY = "retry"
 
 
+class ReadoutPriority(str, enum.Enum):
+    MONITORED = "monitored"
+    BASELINE = "baseline"
+    IGNORED = "ignored"
+
+
 class Device:
     def __init__(self, name, config, *args, parent=None):
         self.name = name
@@ -250,19 +256,20 @@ class DeviceContainer(dict):
             if dev._config["acquisitionConfig"]["acquisitionGroup"] == acquisition_group
         ]
 
-    def acquisition_priority(self, acquisition_priority: str) -> list:
-        """get all devices with the specified acquisition proprity
+    def readout_priority(self, readout_priority: ReadoutPriority) -> list:
+        """get all devices with the specified readout proprity
 
         Args:
-            acquisition_priority (str): Acquisition priority (e.g. primary, secondary, skip)
+            readout_priority (str): Readout priority (e.g. monitored, baseline, ignored)
 
         Returns:
             list: List of devices that belong to the specified acquisition readoutPriority
         """
+        val = ReadoutPriority(readout_priority)
         return [
             dev
             for _, dev in self.items()
-            if dev._config["acquisitionConfig"]["readoutPriority"] == acquisition_priority
+            if dev._config["acquisitionConfig"]["readoutPriority"] == str(readout_priority)
         ]
 
     def async_devices(self) -> list:
@@ -274,7 +281,7 @@ class DeviceContainer(dict):
     @typechecked
     def primary_devices(self, scan_motors: list = None) -> list:
         """get a list of all enabled primary devices"""
-        devices = self.acquisition_priority("primary")
+        devices = self.readout_priority("monitored")
         if scan_motors:
             devices.extend(scan_motors)
 
@@ -290,7 +297,7 @@ class DeviceContainer(dict):
         excluded_devices = self.primary_devices(scan_motors)
         excluded_devices.extend(self.async_devices())
         excluded_devices.extend(self.detectors())
-        excluded_devices.extend(self.acquisition_priority("skip"))
+        excluded_devices.extend(self.readout_priority("ignored"))
         return [dev for dev in self.enabled_devices if dev not in excluded_devices]
 
     def get_devices_with_tags(self, tags: List) -> List:
