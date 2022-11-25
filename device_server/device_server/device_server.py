@@ -350,6 +350,13 @@ class DeviceServer(BECService):
             try:
                 signals = obj.read()
             except Exception as exc:
+                self.device_manager.connector.raise_alarm(
+                    severity=Alarms.WARNING,
+                    alarm_type="Warning",
+                    source="DeviceServer",
+                    content=f"Failed to read device {dev}.",
+                    metadata={},
+                )
                 ds_dev = self.device_manager.devices.get(dev)
                 if ds_dev.on_failure == OnFailure.RAISE:
                     raise exc
