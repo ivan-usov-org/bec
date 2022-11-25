@@ -11,7 +11,12 @@ from typeguard import typechecked
 
 from bec_utils.connector import ConnectorBase
 
-from .BECMessage import BECStatus, DeviceConfigMessage, LogMessage, RequestResponseMessage
+from .BECMessage import (
+    BECStatus,
+    DeviceConfigMessage,
+    LogMessage,
+    RequestResponseMessage,
+)
 from .endpoints import MessageEndpoints
 from .logger import bec_logger
 from .scibec import SciBec
@@ -82,6 +87,22 @@ class Device:
         self._config["deviceTags"].append(val)
         return self.parent.send_config_request(
             action="update", config={self.name: {"deviceTags": self._config["deviceTags"]}}
+        )
+
+    @property
+    def readout_priority(self) -> ReadoutPriority:
+        """get the readout priority for this device"""
+        return OnFailure(self._config["onFailure"])
+
+    @readout_priority.setter
+    def readout_priority(self, val: ReadoutPriority):
+        """set the readout priority for this device"""
+        if not isinstance(val, ReadoutPriority):
+            val = ReadoutPriority(val)
+        self._config["acquisitionConfig"]["readoutPriority"] = val
+        return self.parent.send_config_request(
+            action="update",
+            config={self.name: {"acquisitionConfig": self._config["acquisitionConfig"]}},
         )
 
     @property
