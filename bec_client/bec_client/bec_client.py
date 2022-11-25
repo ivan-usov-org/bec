@@ -11,11 +11,8 @@ from typing import List
 import IPython
 from bec_utils import Alarms, BECService, MessageEndpoints, bec_logger
 from bec_utils.connector import ConnectorBase
-<<<<<<< HEAD
-from bec_utils.observer import Observer, ObserverManagerBase
-=======
 from bec_utils.logbook_connector import LogbookConnector
->>>>>>> master
+from bec_utils.observer import Observer, ObserverManagerBase
 from IPython.terminal.prompts import Prompts, Token
 from rich.console import Console
 from rich.table import Table
@@ -190,7 +187,7 @@ class BECClient(BECService, BeamlineMixin, UserScriptsMixin):
 
     def _start_observer(self):
         self.observer = ObserverManagerBase(self.device_manager)
-        
+
     def _load_magics(self):
         magics = BECMagics(self._ip, self)
         self._ip.register_magics(magics)
