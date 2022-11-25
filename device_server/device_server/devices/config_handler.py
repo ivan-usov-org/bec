@@ -108,6 +108,11 @@ class ConfigHandler:
                 self.update_device_key_in_db(device_name=dev, key="deviceTags")
                 updated = True
 
+            if "acquisitionConfig" in dev_config:
+                device._config["acquisitionConfig"] = dev_config["acquisitionConfig"]
+                self.update_device_key_in_db(device_name=dev, key="acquisitionConfig")
+                updated = True
+
         # send updates to services
         if updated:
             self.send_config(msg)
