@@ -1917,7 +1917,7 @@ sec:
     enabled_set: false
 sl0h:
   acquisitionConfig:
-    acquisitionGroup: epicsDevice
+    acquisitionGroup: motor
     readoutPriority: baseline
     schedule: sync
   description: FrontEnd slit virtual movement
@@ -1965,7 +1965,7 @@ sl0trxo:
     enabled_set: false
 sl1h:
   acquisitionConfig:
-    acquisitionGroup: epicsDevice
+    acquisitionGroup: motor
     readoutPriority: baseline
     schedule: sync
   description: OpticsHutch slit virtual movement
@@ -2045,7 +2045,7 @@ sl1tryt:
     enabled_set: false
 sl1v:
   acquisitionConfig:
-    acquisitionGroup: epicsDevice
+    acquisitionGroup: motor
     readoutPriority: baseline
     schedule: sync
   description: OpticsHutch slit virtual movement
@@ -2061,7 +2061,7 @@ sl1v:
     enabled_set: false
 sl2h:
   acquisitionConfig:
-    acquisitionGroup: epicsDevice
+    acquisitionGroup: motor
     readoutPriority: baseline
     schedule: sync
   description: OpticsHutch slit 2 virtual movement
@@ -2141,7 +2141,7 @@ sl2tryt:
     enabled_set: false
 sl2v:
   acquisitionConfig:
-    acquisitionGroup: epicsDevice
+    acquisitionGroup: motor
     readoutPriority: baseline
     schedule: sync
   description: OpticsHutch slit 2 virtual movement
