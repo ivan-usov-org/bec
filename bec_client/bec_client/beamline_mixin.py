@@ -34,6 +34,8 @@ class BeamlineMixin:
         self._add_xbox1_pressure(table, info)
         self._add_xbox2_pressure(table, info)
 
+        console.print(table)
+
     def _add_op_status(self, table, info):
         val = self._get_info_val(info, "x12sa_op_status")
         if val not in ["attended"]:
