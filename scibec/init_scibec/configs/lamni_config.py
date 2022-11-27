@@ -129,7 +129,7 @@ class LamNIConfig(DemoConfig, X12SAConfig):
                 "deviceConfig": {"device_access": True, "name": "eiger1p5m"},
                 "acquisitionConfig": {
                     "schedule": "sync",
-                    "acquisitionGroup": "detectors",
+                    "acquisitionGroup": "detector",
                     "readoutPriority": "monitored",
                 },
                 "deviceTags": ["detector"],
