@@ -148,7 +148,8 @@ def test_set_restart():
         with mock.patch.object(
             queue_manager, "_wait_for_queue_to_appear_in_history"
         ) as scan_msg_wait:
-            queue_manager.set_restart(queue="primary", parameter={"RID": "something_new"})
+            with queue_manager._lock:
+                queue_manager.set_restart(queue="primary", parameter={"RID": "something_new"})
             scan_msg_wait.assert_called_once_with("new_scanID", "primary")
 
 

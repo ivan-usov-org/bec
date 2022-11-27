@@ -616,18 +616,25 @@ class LamNI(LamNIOpticsMixin):
 
     def _run_beamline_checks(self):
         msgs = []
-        if self.check_shutter:
-            if epics_get("X12SA-OP-ST1:OPEN_EPS") != "open":
-                self._beam_is_okay = False
-                msgs.append("Check beam failed: Shutter is closed.")
-        if self.check_light_available:
-            if epics_get("ACOAU-ACCU:OP-MODE.VAL") < 4:
-                self._beam_is_okay = False
-                msgs.append("Check beam failed: Light not available.")
-        if self.check_fofb:
-            if epics_get("ARIDI-BPM:FOFBSTATUS-G") != "running":
-                self._beam_is_okay = False
-                msgs.append("Check beam failed: Fast orbit feedback is not running.")
+        dev = builtins.__dict__.get("dev")
+        try:
+            if self.check_shutter:
+                shutter_val = dev.x12sa_es1_shutter_status.read(cached=True)
+                if shutter_val["value"].lower() != "open":
+                    self._beam_is_okay = False
+                    msgs.append("Check beam failed: Shutter is closed.")
+            if self.check_light_available:
+                machine_status = dev.sls_machine_status.read(cached=True)
+                if machine_status["value"] not in ["Light Available", "Light-Available"]:
+                    self._beam_is_okay = False
+                    msgs.append("Check beam failed: Light not available.")
+            if self.check_fofb:
+                fast_orbit_feedback = dev.sls_fast_orbit_feedback.read(cached=True)
+                if fast_orbit_feedback["value"] != "running":
+                    self._beam_is_okay = False
+                    msgs.append("Check beam failed: Fast orbit feedback is not running.")
+        except Exception:
+            logger.warning("Failed to check beam.")
         return msgs
 
     def _check_beam(self):
