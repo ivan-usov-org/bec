@@ -1611,6 +1611,7 @@ mokev:
   description: Monochromator energy in keV
   deviceClass: EnergyKev
   deviceConfig:
+    auto_monitor: true
     name: mokev
     read_pv: X12SA-OP-MO:ROX2
   deviceTags:
@@ -1698,6 +1699,7 @@ moth1:
   description: Monochromator Theta 1
   deviceClass: MonoTheta1
   deviceConfig:
+    auto_monitor: true
     name: moth1
     read_pv: X12SA-OP-MO:ROX1
   deviceTags:
@@ -1733,7 +1735,8 @@ moth2:
   description: Monochromator Theta 2
   deviceClass: MonoTheta2
   deviceConfig:
-    name: moth1
+    auto_monitor: true
+    name: moth2
     read_pv: X12SA-OP-MO:ROX2
   deviceTags:
     - cSAXS
