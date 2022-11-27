@@ -467,20 +467,21 @@ class X12SAConfig(ConfigBase):
 
     def write_x12sa_status(self):
         x12sa_status = [
-            ("x12sa_op_status", "ACOAU-ACCU:OP-X12SA"),
-            ("x12sa_es1_shutter_status", "X12SA-OP-ST1:OPEN_EPS"),
-            ("x12sa_fe_status", "X12SA-FE-PH1:CLOSE4BL"),
+            ("x12sa_op_status", "ACOAU-ACCU:OP-X12SA", True),
+            ("x12sa_es1_shutter_status", "X12SA-OP-ST1:OPEN_EPS", True),
+            ("x12sa_fe_status", "X12SA-FE-PH1:CLOSE4BL", True),
             # ("x12sa_temp_median", "X12SA-OP-CC:HEAT_TEMP_MED"),
             # ("x12sa_temp_current", "X12SA-OP-CC:HEAT_TEMP"),
-            ("x12sa_storage_ring_vac", "X12SA-SR-VAC:SETPOINT"),
-            ("x12sa_es1_valve", "X12SA-ES-VW1:OPEN"),
-            ("x12sa_exposure_box1_pressure", "X12SA-ES-CH1MF1:PRESSURE"),
-            ("x12sa_exposure_box2_pressure", "X12SA-ES-EB1MF1:PRESSURE"),
-            ("x12sa_id_gap", "X12SA-ID-GAP:READ"),
+            ("x12sa_storage_ring_vac", "X12SA-SR-VAC:SETPOINT", True),
+            ("x12sa_es1_valve", "X12SA-ES-VW1:OPEN", True),
+            ("x12sa_exposure_box1_pressure", "X12SA-ES-CH1MF1:PRESSURE", False),
+            ("x12sa_exposure_box2_pressure", "X12SA-ES-EB1MF1:PRESSURE", False),
+            ("x12sa_id_gap", "X12SA-ID-GAP:READ", False),
+            ("x12sa_mokev", "X12SA-OP-MO:E-GET", False),
         ]
 
         out = {}
-        for name, pv in x12sa_status:
+        for name, pv, is_string in x12sa_status:
             out[name] = dict(
                 {
                     "status": {"enabled": True, "enabled_set": False},
@@ -490,6 +491,7 @@ class X12SAConfig(ConfigBase):
                         "schedule": "sync",
                         "acquisitionGroup": "status",
                         "readoutPriority": "ignored",
+                        "string": is_string,
                     },
                     "deviceTags": ["X12SA status"],
                 }
