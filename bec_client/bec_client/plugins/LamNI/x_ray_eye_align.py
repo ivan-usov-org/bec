@@ -9,6 +9,7 @@ from pathlib import Path
 
 import numpy as np
 from bec_utils import bec_logger
+from bec_utils.logbook_connector import LogbookMessage
 from bec_utils.pdf_writer import PDFWriter
 from typeguard import typechecked
 
@@ -663,6 +664,15 @@ class LamNI(LamNIOpticsMixin):
 
     def _wait_for_beamline_checks(self):
         self._print_beamline_checks()
+        try:
+            msg = LogbookMessage(self.client.logbook)
+            msg.add_text(
+                f"<p><mark class='pen-red'><strong>Beamline checks failed at {str(datetime.datetime.now())}: {''.join(self._check_msgs)}</strong></mark></p>"
+            ).add_tag(["BEC", "beam_check"])
+            self.client.logbook.send_logbook_message(msg)
+        except Exception:
+            logger.warning("Failed to send update to SciLog.")
+
         while True:
             self._beam_is_okay = True
             self._check_msgs = self._run_beamline_checks()
@@ -670,6 +680,15 @@ class LamNI(LamNIOpticsMixin):
                 break
             self._print_beamline_checks()
             time.sleep(1)
+
+        try:
+            msg = LogbookMessage(self.client.logbook)
+            msg.add_text(
+                f"<p><mark class='pen-red'><strong>Operation resumed at {str(datetime.datetime.now())}.</strong></mark></p>"
+            ).add_tag(["BEC", "beam_check"])
+            self.client.logbook.send_logbook_message(msg)
+        except Exception:
+            logger.warning("Failed to send update to SciLog.")
 
     def add_sample_database(
         self, samplename, date, eaccount, scan_number, setup, sample_additional_info, user
@@ -826,11 +845,11 @@ class LamNI(LamNIOpticsMixin):
         padding = 20
         piezo_range = f"{self.lamni_piezo_range_x:.2f}/{self.lamni_piezo_range_y:.2f}"
         stitching = f"{self.lamni_stitch_x:.2f}/{self.lamni_stitch_y:.2f}"
+        dataset_id = str(self.client.queue.next_dataset_number)
         content = (
             f"{'Sample Name:':<{padding}}{'test':>{padding}}\n",
-            f"{'Sample Name:':<{padding}}{'test':>{padding}}\n",
             f"{'Measurement ID:':<{padding}}{str(self.tomo_id):>{padding}}\n",
-            f"{'Dataset ID:':<{padding}}{str(self.client.queue.next_dataset_number):>{padding}}\n",
+            f"{'Dataset ID:':<{padding}}{dataset_id:>{padding}}\n",
             f"{'Sample Info:':<{padding}}{'Sample Info':>{padding}}\n",
             f"{'e-account:':<{padding}}{str(self.client.username):>{padding}}\n",
             f"{'Number of projections:':<{padding}}{int(360 / self.tomo_angle_stepsize * 8):>{padding}}\n",
@@ -850,4 +869,9 @@ class LamNI(LamNIOpticsMixin):
             file.write(header)
             file.write(content)
 
-        self.client.logbook.send_msg("".join(content).replace("\n", "</p><p>"))
+        msg = LogbookMessage(self.client.logbook)
+        logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lamni_logo.png")
+        msg.add_file(logo_path).add_text("".join(content).replace("\n", "</p><p>")).add_tag(
+            ["BEC", "tomo_parameters", f"dataset_id_{dataset_id}", "LamNI"]
+        )
+        self.client.logbook.send_logbook_message(msg)
