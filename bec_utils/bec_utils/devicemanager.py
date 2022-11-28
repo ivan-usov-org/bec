@@ -11,12 +11,7 @@ from typeguard import typechecked
 
 from bec_utils.connector import ConnectorBase
 
-from .BECMessage import (
-    BECStatus,
-    DeviceConfigMessage,
-    LogMessage,
-    RequestResponseMessage,
-)
+from .BECMessage import BECStatus, DeviceConfigMessage, LogMessage, RequestResponseMessage
 from .endpoints import MessageEndpoints
 from .logger import bec_logger
 from .scibec import SciBec
@@ -337,6 +332,18 @@ class DeviceContainer(dict):
         return [dev for dev in self.enabled_devices if dev in self.acquisition_group("detector")]
 
     def wm(self, device_names: List[str]):
+        """Get the current position of one or more devices.
+
+        Args:
+            device_names (List[str]): List of device names
+
+        Examples:
+            >>> dev.wm('samx')
+            >>> dev.wm(['samx', 'samy'])
+            >>> dev.wm(dev.primary_devices())
+            >>> dev.wm(dev.get_devices_with_tags('user motors'))
+
+        """
         if not isinstance(device_names, list):
             device_names = [device_names]
         if len(device_names) == 0:
@@ -383,6 +390,18 @@ class DeviceContainer(dict):
 
         """
         return [dev.describe() for name, dev in self.devices.items()]
+
+    def show_all(self) -> None:
+        """print all devices"""
+        print(
+            [
+                (name, dev._config["acquisitionConfig"]["acquisitionGroup"])
+                for name, dev in self.items()
+            ]
+        )
+
+    def __repr__(self) -> str:
+        return f"Device container."
 
 
 class DeviceManagerBase:
