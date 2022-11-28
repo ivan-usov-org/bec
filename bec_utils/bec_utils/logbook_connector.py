@@ -90,8 +90,12 @@ class LogbookConnector:
 
 
 if __name__ == "__main__":
+    import datetime
+
     logbook = LogbookConnector()
     msg = LogbookMessage(logbook)
-    msg.add_text("Test").add_file("/Users/wakonig_k/Desktop/lamni_logo.png")
-    msg.add_text("Test").add_tag("BEC")
+    # msg.add_text("Test").add_file("/Users/wakonig_k/Desktop/lamni_logo.png")
+    msg.add_text(
+        f"<p><mark class='pen-red'><strong>Beamline checks failed at {str(datetime.datetime.now())}.</strong></mark></p>"
+    ).add_tag("BEC")
     logbook.send_logbook_message(msg)

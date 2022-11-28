@@ -664,6 +664,15 @@ class LamNI(LamNIOpticsMixin):
 
     def _wait_for_beamline_checks(self):
         self._print_beamline_checks()
+        try:
+            msg = LogbookMessage(self.client.logbook)
+            msg.add_text(
+                f"<p><mark class='pen-red'><strong>Beamline checks failed at {str(datetime.datetime.now())}: {''.join(self._check_msgs)}</strong></mark></p>"
+            ).add_tag(["BEC", "beam_check"])
+            self.client.logbook.send_logbook_message(msg)
+        except Exception:
+            logger.warning("Failed to send update to SciLog.")
+
         while True:
             self._beam_is_okay = True
             self._check_msgs = self._run_beamline_checks()
@@ -671,6 +680,15 @@ class LamNI(LamNIOpticsMixin):
                 break
             self._print_beamline_checks()
             time.sleep(1)
+
+        try:
+            msg = LogbookMessage(self.client.logbook)
+            msg.add_text(
+                f"<p><mark class='pen-red'><strong>Operation resumed at {str(datetime.datetime.now())}.</strong></mark></p>"
+            ).add_tag(["BEC", "beam_check"])
+            self.client.logbook.send_logbook_message(msg)
+        except Exception:
+            logger.warning("Failed to send update to SciLog.")
 
     def add_sample_database(
         self, samplename, date, eaccount, scan_number, setup, sample_additional_info, user
