@@ -5,6 +5,7 @@ import uuid
 from typing import List
 
 import msgpack
+from numpy import isin
 from rich.console import Console
 from rich.table import Table
 from typeguard import typechecked
@@ -87,7 +88,7 @@ class Device:
     @property
     def readout_priority(self) -> ReadoutPriority:
         """get the readout priority for this device"""
-        return OnFailure(self._config["onFailure"])
+        return ReadoutPriority(self._config["acquisitionConfig"]["readoutPriority"])
 
     @readout_priority.setter
     def readout_priority(self, val: ReadoutPriority):
@@ -152,7 +153,7 @@ class Device:
         return None
 
     @property
-    def status(self):
+    def device_status(self):
         """get the current status of the device"""
         val = self.parent.producer.get(MessageEndpoints.device_status(self.name))
         if val is None:
@@ -360,11 +361,25 @@ class DeviceContainer(dict):
         setpoints = {}
         for dev, read in dev_read.items():
             if dev in read:
-                readbacks[dev] = f"{read[dev]['value']:.4f}"
+                val = read[dev]["value"]
+                if not isinstance(val, str):
+                    readbacks[dev] = f"{val:.4f}"
+                else:
+                    readbacks[dev] = val
             else:
                 readbacks[dev] = "N/A"
             if f"{dev}_setpoint" in read:
-                setpoints[dev] = f"{read[dev]['value']:.4f}"
+                val = read[f"{dev}_setpoint"]["value"]
+                if not isinstance(val, str):
+                    setpoints[dev] = f"{val:.4f}"
+                else:
+                    setpoints[dev] = val
+            elif f"{dev}_user_setpoint" in read:
+                val = read[f"{dev}_user_setpoint"]["value"]
+                if not isinstance(val, str):
+                    setpoints[dev] = f"{val:.4f}"
+                else:
+                    setpoints[dev] = val
             else:
                 setpoints[dev] = "N/A"
         for dev in device_names:
