@@ -503,6 +503,24 @@ bpm3d:
   status:
     enabled: true
     enabled_set: false
+bpm4i:
+  acquisitionConfig:
+    acquisitionGroup: monitor
+    readoutPriority: baseline
+    schedule: sync
+  description: "XBPM 4: integrated counts"
+  deviceClass: Bpm4i
+  deviceConfig:
+    auto_monitor: true
+    name: bpm4i
+    read_pv: X12SA-OP1-SCALER.
+  deviceTags:
+    - cSAXS
+    - bpm4
+  onFailure: buffer
+  status:
+    enabled: true
+    enabled_set: false    
 bpm4a:
   acquisitionConfig:
     acquisitionGroup: monitor
