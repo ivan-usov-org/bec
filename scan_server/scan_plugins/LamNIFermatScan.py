@@ -422,8 +422,13 @@ class LamNIFermatScan(ScanBase, LamNIMixin):
             # use a device message to receive the scan number and
             # scan ID before sending the message to the device server
             yield from self.stubs.kickoff(device="rtx")
+            update_time = 0.5
+            current_time = 0
             while True:
-                yield from self.stubs.read_and_wait(group="primary", wait_group="readout_primary")
+                if current_time % 5 == 0:
+                    yield from self.stubs.read_and_wait(
+                        group="primary", wait_group="readout_primary"
+                    )
                 msg = self.device_manager.producer.get(MessageEndpoints.device_status("rt_scan"))
                 if msg:
                     status = BECMessage.DeviceStatusMessage.loads(msg)
@@ -432,7 +437,8 @@ class LamNIFermatScan(ScanBase, LamNIMixin):
                     ) == status.metadata.get("RID"):
                         break
 
-                time.sleep(1)
+                time.sleep(update_time)
+                current_time += update_time
                 logger.debug("reading monitors")
             # yield from self.device_rpc("rtx", "controller.kickoff")
 
