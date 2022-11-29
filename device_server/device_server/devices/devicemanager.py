@@ -159,17 +159,6 @@ class DeviceManagerDS(DeviceManagerBase):
         self.publish_device_info(obj, pipe)
         pipe.execute()
 
-        # add subscriptions
-        if "readback" in obj.event_types:
-            obj.subscribe(self._obj_callback_readback, run=enabled)
-        elif "value" in obj.event_types:
-            obj.subscribe(self._obj_callback_readback, run=enabled)
-
-        if "done_moving" in obj.event_types:
-            obj.subscribe(self._obj_callback_done_moving, event_type="done_moving", run=False)
-        if hasattr(obj, "motor_is_moving"):
-            obj.motor_is_moving.subscribe(self._obj_callback_is_moving, run=enabled)
-
         # insert the created device obj into the device manager
         opaas_obj = DSDevice(name, obj, config=dev, parent=self)
 
@@ -189,6 +178,19 @@ class DeviceManagerDS(DeviceManagerBase):
                 f"{error_traceback}. Failed to stage {opaas_obj.name}. The device will be disabled."
             )
             opaas_obj.enabled = False
+
+        obj = opaas_obj.obj
+        # add subscriptions
+        if "readback" in obj.event_types:
+            obj.subscribe(self._obj_callback_readback, run=opaas_obj.enabled)
+        elif "value" in obj.event_types:
+            obj.subscribe(self._obj_callback_readback, run=opaas_obj.enabled)
+
+        if "done_moving" in obj.event_types:
+            obj.subscribe(self._obj_callback_done_moving, event_type="done_moving", run=False)
+        if hasattr(obj, "motor_is_moving"):
+            obj.motor_is_moving.subscribe(self._obj_callback_is_moving, run=opaas_obj.enabled)
+
         return opaas_obj
 
     def initialize_enabled_device(self, opaas_obj):
