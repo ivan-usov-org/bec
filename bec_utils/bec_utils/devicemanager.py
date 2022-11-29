@@ -5,7 +5,6 @@ import uuid
 from typing import List
 
 import msgpack
-from numpy import isin
 from rich.console import Console
 from rich.table import Table
 from typeguard import typechecked
