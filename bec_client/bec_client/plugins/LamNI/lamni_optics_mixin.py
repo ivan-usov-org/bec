@@ -3,35 +3,52 @@ from rich.console import Console
 from rich.table import Table
 from rich import box
 
+from bec_client.bec_client.plugins.cSAXS.cSAXS_beamline import fshclose
+
 
 class LamNIOpticsMixin:
-    def leyey_out(self):
-        loptics_in()
-        fshon()
-        umv(dev.leyey, 0.5)
+    @staticmethod
+    def _get_user_param_safe(device, var):
+        param = dev[device].user_parameter
+        if not param or param.get(var) is None:
+            raise ValueError(f"Device {device} has no user parameter definition for {var}.")
+        return param.get(var)
 
-        # TODO filter
+    def leyey_out(self):
+        self.loptics_in()
+        fshclose()
+        leyey_out = self._get_user_param_safe("leyey", "out")
+        umv(dev.leyey, leyey_out)
 
         epics_put("XOMNYI-XEYE-ACQ:0", 2)
-        # umv dttrz 5236.1953 fttrz -2934.5479
+        umv(dev.dttrz, 5830, dev.fttrz, 3338)
 
     def leye_in(self):
         bec.queue.next_dataset_number += 1
-        # umv dttrz 5236+600 fttrz -2934+600
+        umv(dev.dttrz, 5830 + 600, dev.fttrz, 3338 + 600)
         while True:
             moved_out = (input("Did the flight tube move out? (Y/n)") or "y").lower()
             if moved_out == "y":
                 break
             if moved_out == "n":
                 return
-        umv(dev.leyex, 14.094, dev.leyey, 47.294)
+        leyex_in = self._get_user_param_safe("leyex", "in")
+        leyey_in = self._get_user_param_safe("leyey", "in")
+        umv(dev.leyex, leyex_in, dev.leyey, leyey_in)
         self.align.update_frame()
 
     def _lfzp_in(self):
-        # umv loptx -0.549000 lopty 3.680000 #for 13 keV and 100 mu, 60 nm fzp
-        pass
+        loptx_in = self._get_user_param_safe("loptx", "in")
+        lopty_in = self._get_user_param_safe("lopty", "in")
+        umv(
+            dev.loptx, loptx_in, dev.lopty, lopty_in
+        )  # for 7.2567 keV and 150 mu, 60 nm fzp, loptz 83.6000 for propagation 1.4 mm
 
     def lfzp_in(self):
+        """
+        move in the lamni zone plate.
+        This will disable rt feedback, move the FZP and re-enabled the feedback.
+        """
         if "rtx" in dev and dev.rtx.enabled:
             dev.rtx.feedback_disable()
 
@@ -41,16 +58,22 @@ class LamNIOpticsMixin:
             dev.rtx.feedback_enable_with_reset()
 
     def loptics_in(self):
+        """
+        Move in the lamni optics, including the FZP and the OSA.
+        """
         self.lfzp_in()
         self.losa_in()
 
-    def _loptics_out(self):
+    def loptics_out(self):
+        """Move out the lamni optics"""
         if "rtx" in dev and dev.rtx.enabled:
             dev.rtx.feedback_disable()
 
-        self.lcs_out()
+        # self.lcs_out()
         self.losa_out()
-        # umv loptx -0.549000-0.15 lopty 3.680000-0.15
+        loptx_out = self._get_user_param_safe("loptx", "out")
+        lopty_out = self._get_user_param_safe("lopty", "out")
+        umv(dev.loptx, loptx_out, dev.lopty, lopty_out)
 
         if "rtx" in dev and dev.rtx.enabled:
             time.sleep(1)
@@ -64,15 +87,27 @@ class LamNIOpticsMixin:
         umv(dev.lcsy, 3)
 
     def losa_in(self):
+        # 6.2 keV, 170 um FZP
+        # umv(dev.losax, -1.4450000, dev.losay, -0.1800)
+        # umv(dev.losaz, -1)
+        # 6.7, 170
+        # umv(dev.losax, -1.4850, dev.losay, -0.1930)
+        # umv(dev.losaz, 1.0000)
+        # 7.2, 150
+        losax_in = self._get_user_param_safe("losax", "in")
+        losay_in = self._get_user_param_safe("losay", "in")
+        losaz_in = self._get_user_param_safe("losaz", "in")
+        umv(dev.losax, losax_in, dev.losay, losay_in)
+        umv(dev.losaz, losaz_in)
         # 11 kev
-        # umv(dev.losax, -1.1900, dev.losay, -0.1860)
-        # umv(dev.losaz, 1.0)
-        pass
+        # umv(dev.losax, -1.161000, dev.losay, -0.196)
+        # umv(dev.losaz, 1.0000)
 
     def losa_out(self):
-        # umv losaz -3
-        # umv losay 3.8
-        pass
+        losay_out = self._get_user_param_safe("losay", "out")
+        losaz_out = self._get_user_param_safe("losaz", "out")
+        umv(dev.losaz, losaz_out)
+        umv(dev.losay, losay_out)
 
     def lfzp_info(self):
         loptz_val = dev.loptz.read()["loptz"]["value"]
