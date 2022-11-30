@@ -86,8 +86,6 @@ class LamNIConfig(DemoConfig, X12SAConfig):
                     "deviceTags": ["lamni"],
                 }
             )
-            if m[3]:
-                out[m[0]]["userParameter"] = m[3]
         self.write_section(out, "LamNI RT")
 
     def write_smaract_motors(self):
@@ -122,6 +120,8 @@ class LamNIConfig(DemoConfig, X12SAConfig):
                     "deviceTags": ["lamni"],
                 }
             )
+            if m[3]:
+                out[m[0]]["userParameter"] = m[3]
         self.write_section(out, "LamNI SmarAct motors")
 
     def write_eiger1p5m(self):
