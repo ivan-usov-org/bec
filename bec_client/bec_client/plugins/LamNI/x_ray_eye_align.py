@@ -25,8 +25,9 @@ class XrayEyeAlign:
     # PIXEL_CALIBRATION = 0.2/209 #.2 with binning
     PIXEL_CALIBRATION = 0.2 / 218  # .2 with binning
 
-    def __init__(self, client) -> None:
+    def __init__(self, client, lamni) -> None:
         self.client = client
+        self.lamni = lamni
         self.device_manager = client.device_manager
         self.scans = client.scans
         self.xeye = self.device_manager.devices.xeye
@@ -66,19 +67,11 @@ class XrayEyeAlign:
     def _enable_rt_feedback(self):
         self.device_manager.devices.rtx.controller.feedback_enable_with_reset()
 
-    def _loptics_out(self):
-        # raise NotImplementedError
-        pass
-
     def tomo_rotate(self, val: float):
         umv(self.device_manager.devices.lsamrot, val)
 
     def get_tomo_angle(self):
         return self.device_manager.devices.lsamrot.readback.read()["lsamrot"]["value"]
-
-    def _lfzp_in(self):
-        # raise NotImplementedError
-        pass
 
     def update_fov(self, k: int):
         self._xray_fov_xy[0] = max(epics_get(f"XOMNYI-XEYE-XWIDTH_X:{k}"), self._xray_fov_xy[0])
@@ -120,7 +113,7 @@ class XrayEyeAlign:
         k = 0
 
         # move zone plate in, eye in to get beam position
-        self._lfzp_in()
+        self.lamni.lfzp_in()
 
         self.update_frame()
 
@@ -142,7 +135,7 @@ class XrayEyeAlign:
                 if k == 0:  # received center value of FZP
                     self.send_message("please wait ...")
                     # perform movement: FZP out, Sample in
-                    self._loptics_out()
+                    self.lamni.loptics_out()
                     epics_put("XOMNYI-XEYE-SUBMIT:0", -1)  # disable submit button
                     self.movement_buttons_enabled = False
                     print("Moving sample in, FZP out")
@@ -318,7 +311,7 @@ class LamNI(LamNIOpticsMixin):
     def __init__(self, client):
         super().__init__()
         self.client = client
-        self.align = XrayEyeAlign(client)
+        self.align = XrayEyeAlign(client, lamni)
         self.corr_pos_x = []
         self.corr_pos_y = []
         self.corr_angle = []
