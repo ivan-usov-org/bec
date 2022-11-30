@@ -511,9 +511,8 @@ bpm4i:
   description: "XBPM 4: integrated counts"
   deviceClass: Bpm4i
   deviceConfig:
-    auto_monitor: true
     name: bpm4i
-    read_pv: X12SA-OP1-SCALER.
+    prefix: X12SA-OP1-SCALER.
   deviceTags:
     - cSAXS
     - bpm4
