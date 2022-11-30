@@ -20,8 +20,8 @@ class BeamlineMixin:
         console = self._get_console()
 
         table = Table(title="X12SA Info", box=box.SQUARE)
-        table.add_column("Key", justify="center")
-        table.add_column("Value", justify="center")
+        table.add_column("Key", justify="left")
+        table.add_column("Value", justify="left")
 
         info = self._get_beamline_info_messages()
         self._add_op_status(table, info)
@@ -134,8 +134,8 @@ class BeamlineMixin:
 
         console = self._get_console()
         table = Table(title="SLS Operator messages", box=box.SQUARE)
-        table.add_column("Message", justify="center")
-        table.add_column("Time", justify="center")
+        table.add_column("Message", justify="left")
+        table.add_column("Time", justify="left")
 
         info = self._get_operator_messages()
 
@@ -159,8 +159,8 @@ class BeamlineMixin:
         console = self._get_console()
 
         table = Table(title="SLS Info", box=box.SQUARE)
-        table.add_column("Key", justify="center")
-        table.add_column("Value", justify="center")
+        table.add_column("Key", justify="left")
+        table.add_column("Value", justify="left")
 
         info = self._get_sls_info()
 

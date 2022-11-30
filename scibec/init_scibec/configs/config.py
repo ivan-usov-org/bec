@@ -486,12 +486,16 @@ class X12SAConfig(ConfigBase):
                 {
                     "status": {"enabled": True, "enabled_set": False},
                     "deviceClass": "EpicsSignalRO",
-                    "deviceConfig": {"read_pv": pv, "name": name, "auto_monitor": True},
+                    "deviceConfig": {
+                        "read_pv": pv,
+                        "name": name,
+                        "auto_monitor": True,
+                        "string": is_string,
+                    },
                     "acquisitionConfig": {
                         "schedule": "sync",
                         "acquisitionGroup": "status",
                         "readoutPriority": "ignored",
-                        "string": is_string,
                     },
                     "deviceTags": ["X12SA status"],
                 }
@@ -507,7 +511,6 @@ class X12SAConfig(ConfigBase):
             ("sls_filling_life_time", "ARIDI-PCT:TAU-HOUR", False),
             ("sls_orbit_feedback_mode", "ARIDI-BPM:OFB-MODE", True),
             ("sls_fast_orbit_feedback", "ARIDI-BPM:FOFBSTATUS-G", True),
-            ("sls_ring_current", "ARIDI-PCT:CURRENT", False),
             ("sls_machine_status", "ACOAU-ACCU:OP-MODE", True),
             ("sls_crane_usage", "IBWKR-0101-QH10003:D01_H_D-WA", True),
         ]
@@ -533,11 +536,43 @@ class X12SAConfig(ConfigBase):
                 }
             )
 
+        out["sls_ring_current"] = {
+            "status": {"enabled": True, "enabled_set": False},
+            "deviceClass": "EpicsSignalRO",
+            "deviceConfig": {
+                "read_pv": "ARIDI-PCT:CURRENT",
+                "name": "sls_ring_current",
+                "auto_monitor": True,
+                "string": False,
+            },
+            "acquisitionConfig": {
+                "schedule": "sync",
+                "acquisitionGroup": "monitor",
+                "readoutPriority": "monitored",
+            },
+            "onFailure": "buffer",
+            "deviceTags": ["SLS status"],
+        }
+
         out["sls_operator"] = dict(
             {
                 "status": {"enabled": True, "enabled_set": False},
                 "deviceClass": "SLSOperatorMessages",
                 "deviceConfig": {"name": "sls_operator"},
+                "acquisitionConfig": {
+                    "schedule": "sync",
+                    "acquisitionGroup": "status",
+                    "readoutPriority": "ignored",
+                },
+                "onFailure": "buffer",
+                "deviceTags": ["SLS status"],
+            }
+        )
+        out["sls_info"] = dict(
+            {
+                "status": {"enabled": True, "enabled_set": False},
+                "deviceClass": "SLSInfo",
+                "deviceConfig": {"name": "sls_info"},
                 "acquisitionConfig": {
                     "schedule": "sync",
                     "acquisitionGroup": "status",

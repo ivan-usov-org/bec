@@ -414,23 +414,23 @@ bpm2i:
   status:
     enabled: true
     enabled_set: false
-bpm3:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
-  description: "XBPM 3: White beam AH501 before mono"
-  deviceClass: QuadEM
-  deviceConfig:
-    name: bpm3
-    prefix: "X12SA-OP-BPM3:"
-  deviceTags:
-    - cSAXS
-    - bpm3
-  onFailure: buffer
-  status:
-    enabled: true
-    enabled_set: false
+# bpm3:
+#   acquisitionConfig:
+#     acquisitionGroup: monitor
+#     readoutPriority: baseline
+#     schedule: sync
+#   description: "XBPM 3: White beam AH501 before mono"
+#   deviceClass: QuadEM
+#   deviceConfig:
+#     name: bpm3
+#     prefix: "X12SA-OP-BPM3:"
+#   deviceTags:
+#     - cSAXS
+#     - bpm3
+#   onFailure: buffer
+#   status:
+#     enabled: true
+#     enabled_set: false
 bpm3a:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -503,6 +503,24 @@ bpm3d:
   status:
     enabled: true
     enabled_set: false
+bpm4i:
+  acquisitionConfig:
+    acquisitionGroup: monitor
+    readoutPriority: baseline
+    schedule: sync
+  description: "XBPM 4: integrated counts"
+  deviceClass: Bpm4i
+  deviceConfig:
+    auto_monitor: true
+    name: bpm4i
+    read_pv: X12SA-OP1-SCALER.
+  deviceTags:
+    - cSAXS
+    - bpm4
+  onFailure: buffer
+  status:
+    enabled: true
+    enabled_set: false    
 bpm4a:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -575,23 +593,23 @@ bpm4d:
   status:
     enabled: true
     enabled_set: false
-bpm5:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
-  description: "XBPM 5: AH501 past the mirror"
-  deviceClass: QuadEM
-  deviceConfig:
-    name: bpm5
-    prefix: "X12SA-OP-BPM5:"
-  deviceTags:
-    - cSAXS
-    - bpm5
-  onFailure: buffer
-  status:
-    enabled: true
-    enabled_set: false
+# bpm5:
+#   acquisitionConfig:
+#     acquisitionGroup: monitor
+#     readoutPriority: baseline
+#     schedule: sync
+#   description: "XBPM 5: AH501 past the mirror"
+#   deviceClass: QuadEM
+#   deviceConfig:
+#     name: bpm5
+#     prefix: "X12SA-OP-BPM5:"
+#   deviceTags:
+#     - cSAXS
+#     - bpm5
+#   onFailure: buffer
+#   status:
+#     enabled: true
+#     enabled_set: false
 bpm5a:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -664,23 +682,23 @@ bpm5d:
   status:
     enabled: true
     enabled_set: false
-bpm6:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
-  description: "XBPM 6: Xbox, not commissioned"
-  deviceClass: QuadEM
-  deviceConfig:
-    name: bpm6
-    prefix: "X12SA-OP-BPM6:"
-  deviceTags:
-    - cSAXS
-    - bpm6
-  onFailure: buffer
-  status:
-    enabled: true
-    enabled_set: false
+# bpm6:
+#   acquisitionConfig:
+#     acquisitionGroup: monitor
+#     readoutPriority: baseline
+#     schedule: sync
+#   description: "XBPM 6: Xbox, not commissioned"
+#   deviceClass: QuadEM
+#   deviceConfig:
+#     name: bpm6
+#     prefix: "X12SA-OP-BPM6:"
+#   deviceTags:
+#     - cSAXS
+#     - bpm6
+#   onFailure: buffer
+#   status:
+#     enabled: true
+#     enabled_set: false
 bpm6a:
   acquisitionConfig:
     acquisitionGroup: monitor
