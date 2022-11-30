@@ -9,6 +9,10 @@ def epics_get(channel):
     return epics.caget(channel)
 
 
+def fshon():
+    pass
+
+
 def fshopen():
     """open the fast shutter"""
     epics_put("X12SA-ES1-TTL:OUT_01", 1)
