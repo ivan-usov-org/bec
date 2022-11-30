@@ -5,10 +5,10 @@ from .config import DemoConfig, X12SAConfig
 
 class LamNIConfig(DemoConfig, X12SAConfig):
     def run(self):
-        self.write_galil_motors()
-        self.write_rt_motors()
-        self.write_smaract_motors()
-        self.write_eiger1p5m()
+        # self.write_galil_motors()
+        # self.write_rt_motors()
+        # self.write_smaract_motors()
+        # self.write_eiger1p5m()
         self.write_x12sa_status()
         self.write_sls_status()
         self.load_csaxs_config()
@@ -18,14 +18,14 @@ class LamNIConfig(DemoConfig, X12SAConfig):
 
     def write_galil_motors(self):
         lamni_galil_motors = [
-            ("lsamx", "A", -1, 0.5),
-            ("lsamy", "B", 1, 0.5),
-            ("lsamrot", "C", 1, 0.5),
-            # ("loptz", "D", -1, 0.5),
-            # ("loptx", "E", 1, 0.5),
-            # ("lopty", "F", 1, 0.5),
-            ("leyex", "G", -1, 0.001),
-            ("leyey", "H", -1, 0.001),
+            ("lsamx", "A", -1, 0.5, {"center": 8.768000}),
+            ("lsamy", "B", 1, 0.5, {"center": 10.041000}),
+            ("lsamrot", "C", 1, 0.5, {}),
+            ("loptz", "D", -1, 0.5, {}),
+            ("loptx", "E", 1, 0.5, {"in": -0.8380, "out": -0.699}),
+            ("lopty", "F", 1, 0.5, {"in": 3.3540, "out": 3.53}),
+            ("leyex", "G", -1, 0.001, {"in": 14.117000}),
+            ("leyey", "H", -1, 0.001, {"in": 48.069000, "out": 0.5}),
         ]
         out = {}
         for m in lamni_galil_motors:
@@ -53,6 +53,8 @@ class LamNIConfig(DemoConfig, X12SAConfig):
                     "deviceTags": ["lamni"],
                 }
             )
+            if m[4]:
+                out[m[0]]["userParameter"] = m[4]
         self.write_section(out, "LamNI Galil motors")
 
     def write_rt_motors(self):
@@ -88,11 +90,11 @@ class LamNIConfig(DemoConfig, X12SAConfig):
 
     def write_smaract_motors(self):
         lamni_smaract_motors = [
-            ("losax", "A", -1),
-            ("losay", "B", -1),
-            ("losaz", "C", 1),
-            ("lcsx", "D", -1),
-            ("lcsy", "E", -1),
+            ("losax", "A", -1, {"in": -0.848000}),
+            ("losay", "B", -1, {"in": 0.135000, "out": 3.8}),
+            ("losaz", "C", 1, {"in": -1, "out": -3}),
+            ("lcsx", "D", -1, {}),
+            ("lcsy", "E", -1, {}),
         ]
         out = dict()
         for m in lamni_smaract_motors:
@@ -118,6 +120,8 @@ class LamNIConfig(DemoConfig, X12SAConfig):
                     "deviceTags": ["lamni"],
                 }
             )
+            if m[3]:
+                out[m[0]]["userParameter"] = m[3]
         self.write_section(out, "LamNI SmarAct motors")
 
     def write_eiger1p5m(self):

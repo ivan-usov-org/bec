@@ -1,3 +1,58 @@
+ppth:
+  acquisitionConfig:
+    acquisitionGroup: motor
+    readoutPriority: baseline
+    schedule: sync
+  description: phase plate angle
+  deviceClass: EpicsMotor
+  deviceConfig:
+    name: ppth
+    prefix: X12SA-ES2-ES23
+  deviceTags:
+    - cSAXS
+    - lamni
+    - phase plates
+  onFailure: buffer
+  status:
+    enabled: true
+    enabled_set: true  
+ppx:
+  acquisitionConfig:
+    acquisitionGroup: motor
+    readoutPriority: baseline
+    schedule: sync
+  description: phase plate
+  deviceClass: EpicsMotor
+  deviceConfig:
+    name: ppx
+    prefix: X12SA-ES2-ES01
+  deviceTags:
+    - cSAXS
+    - lamni
+    - phase plates
+  onFailure: buffer
+  status:
+    enabled: true
+    enabled_set: true  
+ppthenc:
+  acquisitionConfig:
+    acquisitionGroup: monitor
+    readoutPriority: baseline
+    schedule: sync
+  description: phase plate encoder
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    name: ppthenc
+    prefix: X12SA-ES2-EC1.VAL
+  deviceTags:
+    - cSAXS
+    - lamni
+    - phase plates
+  onFailure: buffer
+  status:
+    enabled: true
+    enabled_set: false 
+
 FBPMDX:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -511,9 +566,8 @@ bpm4i:
   description: "XBPM 4: integrated counts"
   deviceClass: Bpm4i
   deviceConfig:
-    auto_monitor: true
     name: bpm4i
-    read_pv: X12SA-OP1-SCALER.
+    prefix: X12SA-OP1-SCALER.
   deviceTags:
     - cSAXS
     - bpm4
