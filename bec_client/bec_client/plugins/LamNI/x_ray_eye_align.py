@@ -311,7 +311,7 @@ class LamNI(LamNIOpticsMixin):
     def __init__(self, client):
         super().__init__()
         self.client = client
-        self.align = XrayEyeAlign(client, lamni)
+        self.align = XrayEyeAlign(client, self)
         self.corr_pos_x = []
         self.corr_pos_y = []
         self.corr_angle = []
