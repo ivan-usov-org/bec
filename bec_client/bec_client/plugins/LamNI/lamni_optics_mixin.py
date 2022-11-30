@@ -3,7 +3,7 @@ from rich.console import Console
 from rich.table import Table
 from rich import box
 
-from bec_client.bec_client.plugins.cSAXS.cSAXS_beamline import fshclose
+from bec_client.plugins.cSAXS import fshclose
 
 
 class LamNIOpticsMixin:
