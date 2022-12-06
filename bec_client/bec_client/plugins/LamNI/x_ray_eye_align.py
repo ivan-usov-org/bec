@@ -1,5 +1,6 @@
 import builtins
 import datetime
+import math
 import os
 import subprocess
 import threading
@@ -321,6 +322,9 @@ class LamNI(LamNIOpticsMixin):
         self.check_fofb = True
         self._check_msgs = []
         self.tomo_id = None
+        self._beam_is_okay = True
+        self._stop_beam_check_event = None
+        self.beam_check_thread = None
 
     def get_beamline_checks_enabled(self):
         print(
@@ -495,6 +499,7 @@ class LamNI(LamNIOpticsMixin):
 
     def tomo_scan_projection(self, angle: float):
         scans = builtins.__dict__.get("scans")
+        bec = builtins.__dict__.get("bec")
         additional_correction = self.compute_additional_correction(angle)
         correction_xeye_mu = self.lamni_compute_additional_correction_xeye_mu(angle)
 
@@ -532,8 +537,6 @@ class LamNI(LamNIOpticsMixin):
                 )
 
     def lamni_compute_additional_correction_xeye_mu(self, angle):
-        import math
-
         tomo_fit_xray_eye = self.client.get_global_var("tomo_fit_xray_eye")
         if tomo_fit_xray_eye is None:
             print("Not applying any additional correction. No x-ray eye data available.\n")
@@ -554,8 +557,6 @@ class LamNI(LamNIOpticsMixin):
         return (correction_x, correction_y)
 
     def compute_additional_correction(self, angle):
-        import math
-
         if not self.corr_pos_x:
             print("Not applying any additional correction. No data available.\n")
             return (0, 0)
@@ -688,6 +689,7 @@ class LamNI(LamNIOpticsMixin):
     def add_sample_database(
         self, samplename, date, eaccount, scan_number, setup, sample_additional_info, user
     ):
+        """Add a sample to the omny sample database. This also retrieves the tomo id."""
         subprocess.run(
             f"wget --user=omny --password=samples -q -O /tmp/currsamplesnr.txt 'https://omny.web.psi.ch/samples/newmeasurement.php?sample={samplename}&date={date}&eaccount={eaccount}&scannr={scan_number}&setup={setup}&additional={sample_additional_info}&user={user}'",
             shell=True,
@@ -697,6 +699,9 @@ class LamNI(LamNIOpticsMixin):
         return tomo_number
 
     def sub_tomo_scan(self, subtomo_number, start_angle=None):
+        """start a subtomo"""
+        dev = builtins.__dict__.get("dev")
+        bec = builtins.__dict__.get("bec")
 
         if start_angle is None:
             if subtomo_number == 1:
@@ -748,6 +753,7 @@ class LamNI(LamNIOpticsMixin):
                     )
 
     def tomo_scan(self, subtomo_start=1, start_angle=None):
+        """start a tomo scan"""
         if subtomo_start == 1 and start_angle is None:
             # pylint: disable=undefined-variable
             self.tomo_id = self.add_sample_database(
@@ -764,6 +770,7 @@ class LamNI(LamNIOpticsMixin):
             start_angle = None
 
     def tomo_parameters(self):
+        """print and update the tomo parameters"""
         print(f"Current settings:")
         print(f"Counting time           <ctime>  =  {self.tomo_countingtime} s")
         print(f"Stepsize microns         <step>  =  {self.tomo_shellstep}")
@@ -814,9 +821,11 @@ class LamNI(LamNIOpticsMixin):
     def _get_val(msg: str, default_value, data_type):
         return data_type(input(f"{msg} ({default_value}): ") or default_value)
 
-    def tomo_reconstruct(self):
-        BASE_PATH = os.path.expanduser("~/Data10/specES1")
-        ptycho_queue_path = Path(os.path.join(BASE_PATH, self.ptycho_reconstruct_foldername))
+    def tomo_reconstruct(self, base_path="~/Data10/specES1"):
+        """write the tomo reconstruct file for the reconstruction queue"""
+        bec = builtins.__dict__.get("bec")
+        base_path = os.path.expanduser(base_path)
+        ptycho_queue_path = Path(os.path.join(base_path, self.ptycho_reconstruct_foldername))
         ptycho_queue_path.mkdir(parents=True, exist_ok=True)
 
         # pylint: disable=undefined-variable
@@ -830,6 +839,8 @@ class LamNI(LamNIOpticsMixin):
             queue_file.write(f"p.check_nextscan_started 1\n")
 
     def write_pdf_report(self):
+        """create and write the pdf report with the current LamNI settings"""
+        dev = builtins.__dict__.get("dev")
         header = (
             " \n" * 3
             + "  :::            :::       :::   :::   ::::    ::: ::::::::::: \n"
