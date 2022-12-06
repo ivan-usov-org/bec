@@ -513,6 +513,14 @@ class DeviceManagerBase:
                     self.devices[dev]._config["enabled_set"] = config[dev]["enabled_set"]
                 if "userParameter" in config[dev]:
                     self.devices[dev]._config["userParameter"] = config[dev]["userParameter"]
+                if "onFailure" in config[dev]:
+                    self.devices[dev]._config["onFailure"] = config[dev]["onFailure"]
+                if "deviceTags" in config[dev]:
+                    self.devices[dev]._config["deviceTags"] = config[dev]["deviceTags"]
+                if "acquisitionConfig" in config[dev]:
+                    self.devices[dev]._config["acquisitionConfig"] = config[dev][
+                        "acquisitionConfig"
+                    ]
 
         elif action == "add":
             for dev in config:

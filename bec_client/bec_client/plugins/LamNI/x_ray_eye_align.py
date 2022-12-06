@@ -68,6 +68,7 @@ class XrayEyeAlign:
         self.device_manager.devices.rtx.controller.feedback_enable_with_reset()
 
     def tomo_rotate(self, val: float):
+        # pylint: disable=undefined-variable
         umv(self.device_manager.devices.lsamrot, val)
 
     def get_tomo_angle(self):
@@ -501,6 +502,7 @@ class LamNI(LamNIOpticsMixin):
 
         for stitch_x in range(-self.lamni_stitch_x, self.lamni_stitch_x + 1):
             for stitch_y in range(-self.lamni_stitch_y, self.lamni_stitch_y + 1):
+                # pylint: disable=undefined-variable
                 self._current_scan_list.append(bec.queue.next_scan_number)
                 logger.info(
                     f"scans.lamni_fermat_scan(fov_size=[{self.lamni_piezo_range_x},{self.lamni_piezo_range_y}], step={self.tomo_shellstep}, stitch_x={0}, stitch_y={0}, stitch_overlap={1},"
@@ -740,12 +742,14 @@ class LamNI(LamNIOpticsMixin):
                     os.path.expanduser("~/Data10/specES1/dat-files/tomography_scannumbers.txt"),
                     "a+",
                 ) as out_file:
+                    # pylint: disable=undefined-variable
                     out_file.write(
                         f"{bec.queue.next_scan_number-1} {angle} {dev.lsamrot.read()['lsamrot']['value']} {self.tomo_id} {subtomo_number} {0} {'lamni'}\n"
                     )
 
     def tomo_scan(self, subtomo_start=1, start_angle=None):
         if subtomo_start == 1 and start_angle is None:
+            # pylint: disable=undefined-variable
             self.tomo_id = self.add_sample_database(
                 "bec_test_sample",
                 str(datetime.date.today()),
@@ -815,6 +819,7 @@ class LamNI(LamNIOpticsMixin):
         ptycho_queue_path = Path(os.path.join(BASE_PATH, self.ptycho_reconstruct_foldername))
         ptycho_queue_path.mkdir(parents=True, exist_ok=True)
 
+        # pylint: disable=undefined-variable
         last_scan_number = bec.queue.next_scan_number - 1
         ptycho_queue_file = os.path.abspath(
             os.path.join(ptycho_queue_path, f"scan_{last_scan_number:05d}.dat")
@@ -839,6 +844,7 @@ class LamNI(LamNIOpticsMixin):
         piezo_range = f"{self.lamni_piezo_range_x:.2f}/{self.lamni_piezo_range_y:.2f}"
         stitching = f"{self.lamni_stitch_x:.2f}/{self.lamni_stitch_y:.2f}"
         dataset_id = str(self.client.queue.next_dataset_number)
+        # pylint: disable=undefined-variable
         content = (
             f"{'Sample Name:':<{padding}}{'test':>{padding}}\n",
             f"{'Measurement ID:':<{padding}}{str(self.tomo_id):>{padding}}\n",
