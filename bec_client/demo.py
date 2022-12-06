@@ -31,6 +31,12 @@ bec._ip.prompts.username = "LamNI"
 bec._ip.prompts.status = 1
 
 
+def log_console(execution_info):
+    logger.info(f"[CONSOLE LOG] | {execution_info.info.raw_cell}")
+
+
+bec._ip.events.register("post_run_cell", log_console)
+
 logger.success("Started BECClient")
 
 
