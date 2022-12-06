@@ -5,10 +5,10 @@ from .config import DemoConfig, X12SAConfig
 
 class LamNIConfig(DemoConfig, X12SAConfig):
     def run(self):
-        # self.write_galil_motors()
-        # self.write_rt_motors()
-        # self.write_smaract_motors()
-        # self.write_eiger1p5m()
+        self.write_galil_motors()
+        self.write_rt_motors()
+        self.write_smaract_motors()
+        self.write_eiger1p5m()
         self.write_x12sa_status()
         self.write_sls_status()
         self.load_csaxs_config()
