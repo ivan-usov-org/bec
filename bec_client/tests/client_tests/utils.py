@@ -31,6 +31,9 @@ class ScansMock(Scans):
     def close_scan_group(self):
         pass
 
+    def umv(self):
+        pass
+
 
 class ClientMock(BECClient):
     def _load_scans(self):
