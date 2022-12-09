@@ -754,6 +754,7 @@ class LamNI(LamNIOpticsMixin):
 
     def tomo_scan(self, subtomo_start=1, start_angle=None):
         """start a tomo scan"""
+        bec = builtins.__dict__.get("bec")
         if subtomo_start == 1 and start_angle is None:
             # pylint: disable=undefined-variable
             self.tomo_id = self.add_sample_database(
@@ -771,7 +772,7 @@ class LamNI(LamNIOpticsMixin):
 
     def tomo_parameters(self):
         """print and update the tomo parameters"""
-        print(f"Current settings:")
+        print("Current settings:")
         print(f"Counting time           <ctime>  =  {self.tomo_countingtime} s")
         print(f"Stepsize microns         <step>  =  {self.tomo_shellstep}")
         print(
@@ -782,7 +783,7 @@ class LamNI(LamNIOpticsMixin):
         print(f"Circuilar FOV diam    <microns>  =  {self.tomo_circfov}")
         print(f"Reconstruction queue name        =  {self.ptycho_reconstruct_foldername}")
         print(
-            f"For information, fov offset is rotating and finding the ROI, manual shift moves rotation center"
+            "For information, fov offset is rotating and finding the ROI, manual shift moves rotation center"
         )
         print(f"   _tomo_fovx_offset       <mm>  =  {self.tomo_fovx_offset}")
         print(f"   _tomo_fovy_offset       <mm>  =  {self.tomo_fovy_offset}")
@@ -791,8 +792,8 @@ class LamNI(LamNIOpticsMixin):
         print(f"Angular step within sub-tomogram:   {self.tomo_angle_stepsize} degrees")
         print(f"Resulting in number of projections: {360/self.tomo_angle_stepsize*8}\n")
 
-        np = input("Are these parameters correctly set for your scan? ")
-        if np == "y":
+        user_input = input("Are these parameters correctly set for your scan? ")
+        if user_input == "y":
             print("good then")
         else:
             self.tomo_countingtime = self._get_val("<ctime> s", self.tomo_countingtime, float)
