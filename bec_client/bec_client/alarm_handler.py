@@ -2,7 +2,16 @@ import threading
 from collections import deque
 from typing import List
 
-from bec_utils import Alarms, BECMessage, MessageEndpoints, RedisConnector, threadlocked
+from bec_utils import (
+    Alarms,
+    BECMessage,
+    MessageEndpoints,
+    RedisConnector,
+    bec_logger,
+    threadlocked,
+)
+
+logger = bec_logger.logger
 
 
 class AlarmException(Exception):
@@ -51,11 +60,12 @@ class AlarmHandler:
             msg (BECMessage.AlarmMessage): Alarm message that should be added
         """
         severity = Alarms(msg.content["severity"])
-        self.alarms_stack.appendleft(
-            AlarmBase(
-                alarm=msg, alarm_type=msg.content["alarm_type"], severity=severity, handled=False
-            )
+        alarm = AlarmBase(
+            alarm=msg, alarm_type=msg.content["alarm_type"], severity=severity, handled=False
         )
+        if severity > Alarms.WARNING:
+            self.alarms_stack.appendleft(alarm)
+        logger.warning(f"{msg.content['source']}: {msg.content['content']}")
 
     @threadlocked
     def get_unhandled_alarms(self, severity=Alarms.WARNING) -> List:

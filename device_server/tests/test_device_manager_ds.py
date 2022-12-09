@@ -2,9 +2,10 @@ import concurrent
 import os
 from unittest import mock
 
-import bec_utils
 import pytest
 import yaml
+
+import bec_utils
 from bec_utils import BECMessage
 from bec_utils.tests.utils import ConnectorMock, create_session_from_config
 from device_server.devices.devicemanager import DeviceManagerDS
@@ -107,7 +108,7 @@ def test_disable_unreachable_devices():
                     action="update", config={"samx": {"enabled": False}}
                 )
                 with mock.patch.object(
-                    device_manager.config_handler, "update_device_enabled_in_db"
+                    device_manager.config_handler, "update_device_key_in_db"
                 ) as update_device_db:
                     device_manager.config_handler.parse_config_request(msg)
-                    update_device_db.assert_called_once_with(device_name="samx")
+                    update_device_db.assert_called_once_with(device_name="samx", key="enabled")

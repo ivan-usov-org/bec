@@ -70,9 +70,8 @@ end-2-end:
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
   script:
     # spin up redis, mongo and scibec
-    - docker-compose -f ./docker-compose.yaml up -d
+    - docker-compose -f ./ci/docker-compose.yaml up -d
     - apk update; apk upgrade; apk add curl; apk add git
-    - apk update; apk upgrade; apk add git
 
     # get ophyd devices repo (needed for the device_server)
     - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
@@ -84,13 +83,13 @@ end-2-end:
     - docker build -t init_scibec:test -f ./scibec/init_scibec/Dockerfile .
     - docker run --network=host --name init_scibec init_scibec:test
 
-    # build scan_bundler, scan_server and device_server
+    # build scan_bundler, scan_server, device_server and file_writer
     - docker build -t scan_bundler:test -f ./scan_bundler/Dockerfile .
     - docker build -t scan_server:test -f ./scan_server/Dockerfile .
     - docker build -t device_server:test -f ./device_server/Dockerfile .
     - docker build -t file_writer:test -f ./file_writer/Dockerfile .
 
-    # run scan_bundler, scan_server and device_server
+    # run scan_bundler, scan_server, device_server and file_writer
     - docker run --network=host -d --name device_server device_server:test
     - docker run --network=host -d --name scan_server scan_server:test
     - docker run --network=host -d --name scan_bundler scan_bundler:test
@@ -101,6 +100,7 @@ end-2-end:
     - docker run --network=host --name end2end_client en2end_client:test
 
   after_script:
+    # copy the log files to the project directory in order to be reachable by git artifacts
     - docker cp scan_server:/code/bec/scan_server/ScanServer.log $CI_PROJECT_DIR/ScanServer.log
     - docker cp scan_bundler:/code/bec/scan_bundler/ScanBundler.log $CI_PROJECT_DIR/ScanBundler.log
     - docker cp device_server:/code/bec/device_server/DeviceServer.log $CI_PROJECT_DIR/DeviceServer.log

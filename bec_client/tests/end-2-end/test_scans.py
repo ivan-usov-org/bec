@@ -4,6 +4,9 @@ import time
 
 import numpy as np
 import pytest
+
+from bec_client import BECClient
+from bec_client.alarm_handler import AlarmBase
 from bec_utils import (
     BECMessage,
     MessageEndpoints,
@@ -13,16 +16,14 @@ from bec_utils import (
 )
 from bec_utils.bec_errors import ScanAbortion, ScanInterruption
 
-from bec_client import BECClient
-from bec_client.alarm_handler import AlarmBase
-
 logger = bec_logger.logger
 
-CONFIG_PATH = "../test_config.yaml"
+CONFIG_PATH = "../ci/test_config.yaml"
 # CONFIG_PATH = "../bec_config_dev.yaml"
 # pylint: disable=no-member
 # pylint: disable=missing-function-docstring
 # pylint: disable=redefined-outer-name
+# pylint: disable=protected-access
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -61,8 +62,10 @@ def wait_for_empty_queue(bec):
         time.sleep(1)
     while not queue_is_empty(get_queue(bec).content["queue"]):
         time.sleep(1)
+        logger.info(bec.queue)
     while get_queue(bec).content["queue"]["primary"]["status"] != "RUNNING":
         time.sleep(1)
+        logger.info(bec.queue)
 
 
 @pytest.mark.timeout(100)

@@ -2,18 +2,16 @@ import enum
 import json
 import time
 import uuid
+from typing import List
 
 import msgpack
+from rich.console import Console
+from rich.table import Table
 from typeguard import typechecked
 
 from bec_utils.connector import ConnectorBase
 
-from .BECMessage import (
-    BECStatus,
-    DeviceConfigMessage,
-    LogMessage,
-    RequestResponseMessage,
-)
+from .BECMessage import BECStatus, DeviceConfigMessage, LogMessage, RequestResponseMessage
 from .endpoints import MessageEndpoints
 from .logger import bec_logger
 from .scibec import SciBec
@@ -29,6 +27,18 @@ class DeviceStatus(enum.Enum):
     IDLE = 0
     RUNNING = 1
     BUSY = 2
+
+
+class OnFailure(str, enum.Enum):
+    RAISE = "raise"
+    BUFFER = "buffer"
+    RETRY = "retry"
+
+
+class ReadoutPriority(str, enum.Enum):
+    MONITORED = "monitored"
+    BASELINE = "baseline"
+    IGNORED = "ignored"
 
 
 class Device:
@@ -50,6 +60,59 @@ class Device:
         self._config["deviceConfig"].update(val)
         return self.parent.send_config_request(
             action="update", config={self.name: {"deviceConfig": self._config["deviceConfig"]}}
+        )
+
+    def get_device_tags(self) -> List:
+        """get the device tags for this device"""
+        return self._config["deviceTags"]
+
+    @typechecked
+    def set_device_tags(self, val: list):
+        """set the device tags for this device"""
+        self._config["deviceTags"] = val
+        return self.parent.send_config_request(
+            action="update", config={self.name: {"deviceTags": self._config["deviceTags"]}}
+        )
+
+    @typechecked
+    def add_device_tag(self, val: str):
+        """add a device tag for this device"""
+        if val in self._config["deviceTags"]:
+            return None
+        self._config["deviceTags"].append(val)
+        return self.parent.send_config_request(
+            action="update", config={self.name: {"deviceTags": self._config["deviceTags"]}}
+        )
+
+    @property
+    def readout_priority(self) -> ReadoutPriority:
+        """get the readout priority for this device"""
+        return ReadoutPriority(self._config["acquisitionConfig"]["readoutPriority"])
+
+    @readout_priority.setter
+    def readout_priority(self, val: ReadoutPriority):
+        """set the readout priority for this device"""
+        if not isinstance(val, ReadoutPriority):
+            val = ReadoutPriority(val)
+        self._config["acquisitionConfig"]["readoutPriority"] = val
+        return self.parent.send_config_request(
+            action="update",
+            config={self.name: {"acquisitionConfig": self._config["acquisitionConfig"]}},
+        )
+
+    @property
+    def on_failure(self) -> OnFailure:
+        """get the failure behaviour for this device"""
+        return OnFailure(self._config["onFailure"])
+
+    @on_failure.setter
+    def on_failure(self, val: OnFailure):
+        """set the failure behaviour for this device"""
+        if not isinstance(val, OnFailure):
+            val = OnFailure(val)
+        self._config["onFailure"] = val
+        return self.parent.send_config_request(
+            action="update", config={self.name: {"onFailure": self._config["onFailure"]}}
         )
 
     @property
@@ -89,7 +152,7 @@ class Device:
         return None
 
     @property
-    def status(self):
+    def device_status(self):
         """get the current status of the device"""
         val = self.parent.producer.get(MessageEndpoints.device_status(self.name))
         if val is None:
@@ -136,7 +199,8 @@ class Device:
                 f"\tLast recorded value: {self.read(cached=True)}\n"
                 f"\tDevice class: {self._config.get('deviceClass')}\n"
                 f"\tAcquisition group: {self._config['acquisitionConfig'].get('acquisitionGroup')}\n"
-                f"\tDevice group: {self._config.get('deviceGroup')}\n"
+                f"\tAcquisition readoutPriority: {self._config['acquisitionConfig'].get('readoutPriority')}\n"
+                f"\tDevice tags: {self._config.get('deviceTags', [])}\n"
                 f"\tUser parameter: {self._config.get('userParameter')}\n"
                 f"{separator}\n"
                 "Config:\n"
@@ -194,7 +258,7 @@ class DeviceContainer(dict):
         """get all devices that belong to the specified acquisition group
 
         Args:
-            acquisition_group (str): Acquisition group (e.g. monitor, detectors, beamlineMotor, userMotor)
+            acquisition_group (str): Acquisition group (e.g. monitor, detector, motor, status)
 
         Returns:
             list: List of devices that belong to the specified device group
@@ -205,6 +269,22 @@ class DeviceContainer(dict):
             if dev._config["acquisitionConfig"]["acquisitionGroup"] == acquisition_group
         ]
 
+    def readout_priority(self, readout_priority: ReadoutPriority) -> list:
+        """get all devices with the specified readout proprity
+
+        Args:
+            readout_priority (str): Readout priority (e.g. monitored, baseline, ignored)
+
+        Returns:
+            list: List of devices that belong to the specified acquisition readoutPriority
+        """
+        val = ReadoutPriority(readout_priority)
+        return [
+            dev
+            for _, dev in self.items()
+            if dev._config["acquisitionConfig"]["readoutPriority"] == str(readout_priority)
+        ]
+
     def async_devices(self) -> list:
         """get a list of all synchronous devices"""
         return [
@@ -212,26 +292,98 @@ class DeviceContainer(dict):
         ]
 
     @typechecked
-    def primary_devices(self, scan_motors: list) -> list:
-        """get a list of all enabled primary devices (i.e. monitors + scan motors)"""
-        devices = self.acquisition_group("monitor")
-        devices.extend(scan_motors)
-        return [dev for dev in self.enabled_devices if dev in devices]
+    def primary_devices(self, scan_motors: list = None) -> list:
+        """get a list of all enabled primary devices"""
+        devices = self.readout_priority("monitored")
+        if scan_motors:
+            devices.extend(scan_motors)
+
+        return [
+            dev
+            for dev in self.enabled_devices
+            if dev in devices and dev not in self.acquisition_group("detector")
+        ]
 
     @typechecked
     def baseline_devices(self, scan_motors: list) -> list:
         """get a list of all enabled baseline devices"""
-        excluded_devices = self.acquisition_group("monitor")
-        excluded_devices.extend(scan_motors)
+        excluded_devices = self.primary_devices(scan_motors)
         excluded_devices.extend(self.async_devices())
         excluded_devices.extend(self.detectors())
-        excluded_devices.extend(self.acquisition_group("status"))
+        excluded_devices.extend(self.readout_priority("ignored"))
         return [dev for dev in self.enabled_devices if dev not in excluded_devices]
+
+    def get_devices_with_tags(self, tags: List) -> List:
+        """get a list of all devices that have the specified tags"""
+        if not isinstance(tags, list):
+            tags = [tags]
+        return [dev for _, dev in self.items() if set(tags) & set(dev._config["deviceTags"])]
+
+    def show_tags(self) -> List:
+        """returns a list of used tags in the current config"""
+        tags = set()
+        for _, dev in self.items():
+            tags.update(dev._config["deviceTags"])
+        return list(tags)
 
     @typechecked
     def detectors(self) -> list:
         """get a list of all enabled detectors"""
-        return [dev for dev in self.enabled_devices if dev in self.acquisition_group("detectors")]
+        return [dev for dev in self.enabled_devices if dev in self.acquisition_group("detector")]
+
+    def wm(self, device_names: List[str]):
+        """Get the current position of one or more devices.
+
+        Args:
+            device_names (List[str]): List of device names
+
+        Examples:
+            >>> dev.wm('samx')
+            >>> dev.wm(['samx', 'samy'])
+            >>> dev.wm(dev.primary_devices())
+            >>> dev.wm(dev.get_devices_with_tags('user motors'))
+
+        """
+        if not isinstance(device_names, list):
+            device_names = [device_names]
+        if len(device_names) == 0:
+            return
+        if not isinstance(device_names[0], Device):
+            device_names = [self.__dict__[dev] for dev in device_names]
+        console = Console()
+        table = Table()
+        table.add_column("", justify="center")
+        table.add_column("readback", justify="center")
+        table.add_column("setpoint", justify="center")
+        dev_read = {dev.name: dev.read(cached=True, filter_signal=False) for dev in device_names}
+        readbacks = {}
+        setpoints = {}
+        for dev, read in dev_read.items():
+            if dev in read:
+                val = read[dev]["value"]
+                if not isinstance(val, str):
+                    readbacks[dev] = f"{val:.4f}"
+                else:
+                    readbacks[dev] = val
+            else:
+                readbacks[dev] = "N/A"
+            if f"{dev}_setpoint" in read:
+                val = read[f"{dev}_setpoint"]["value"]
+                if not isinstance(val, str):
+                    setpoints[dev] = f"{val:.4f}"
+                else:
+                    setpoints[dev] = val
+            elif f"{dev}_user_setpoint" in read:
+                val = read[f"{dev}_user_setpoint"]["value"]
+                if not isinstance(val, str):
+                    setpoints[dev] = f"{val:.4f}"
+                else:
+                    setpoints[dev] = val
+            else:
+                setpoints[dev] = "N/A"
+        for dev in device_names:
+            table.add_row(dev.name, readbacks[dev.name], setpoints[dev.name])
+        console.print(table)
 
     def _add_device(self, name, obj) -> None:
         """
@@ -252,6 +404,18 @@ class DeviceContainer(dict):
 
         """
         return [dev.describe() for name, dev in self.devices.items()]
+
+    def show_all(self) -> None:
+        """print all devices"""
+        print(
+            [
+                (name, dev._config["acquisitionConfig"]["acquisitionGroup"])
+                for name, dev in self.items()
+            ]
+        )
+
+    def __repr__(self) -> str:
+        return f"Device container."
 
 
 class DeviceManagerBase:
@@ -349,6 +513,14 @@ class DeviceManagerBase:
                     self.devices[dev]._config["enabled_set"] = config[dev]["enabled_set"]
                 if "userParameter" in config[dev]:
                     self.devices[dev]._config["userParameter"] = config[dev]["userParameter"]
+                if "onFailure" in config[dev]:
+                    self.devices[dev]._config["onFailure"] = config[dev]["onFailure"]
+                if "deviceTags" in config[dev]:
+                    self.devices[dev]._config["deviceTags"] = config[dev]["deviceTags"]
+                if "acquisitionConfig" in config[dev]:
+                    self.devices[dev]._config["acquisitionConfig"] = config[dev][
+                        "acquisitionConfig"
+                    ]
 
         elif action == "add":
             for dev in config:

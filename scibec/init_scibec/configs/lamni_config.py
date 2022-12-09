@@ -1,14 +1,14 @@
-from .config import X12SAConfig, DemoConfig
 import yaml
-import os
+
+from .config import DemoConfig, X12SAConfig
 
 
 class LamNIConfig(DemoConfig, X12SAConfig):
     def run(self):
-        self.write_galil_motors()
-        self.write_rt_motors()
-        self.write_smaract_motors()
-        self.write_eiger1p5m()
+        # self.write_galil_motors()
+        # self.write_rt_motors()
+        # self.write_smaract_motors()
+        # self.write_eiger1p5m()
         self.write_x12sa_status()
         self.write_sls_status()
         self.load_csaxs_config()
@@ -18,16 +18,16 @@ class LamNIConfig(DemoConfig, X12SAConfig):
 
     def write_galil_motors(self):
         lamni_galil_motors = [
-            ("lsamx", "A", -1, 0.5),
-            ("lsamy", "B", 1, 0.5),
-            ("lsamrot", "C", 1, 0.5),
-            # ("loptz", "D", -1, 0.5),
-            # ("loptx", "E", 1, 0.5),
-            # ("lopty", "F", 1, 0.5),
-            ("leyex", "G", -1, 0.001),
-            ("leyey", "H", -1, 0.001),
+            ("lsamx", "A", -1, 0.5, {"center": 8.768000}),
+            ("lsamy", "B", 1, 0.5, {"center": 10.041000}),
+            ("lsamrot", "C", 1, 0.5, {}),
+            ("loptz", "D", -1, 0.5, {}),
+            ("loptx", "E", 1, 0.5, {"in": -0.8380, "out": -0.699}),
+            ("lopty", "F", 1, 0.5, {"in": 3.3540, "out": 3.53}),
+            ("leyex", "G", -1, 0.001, {"in": 14.117000}),
+            ("leyey", "H", -1, 0.001, {"in": 48.069000, "out": 0.5}),
         ]
-        out = dict()
+        out = {}
         for m in lamni_galil_motors:
             out[m[0]] = dict(
                 {
@@ -45,10 +45,16 @@ class LamNIConfig(DemoConfig, X12SAConfig):
                         "device_access": True,
                         "device_mapping": {"rt": "rtx"},
                     },
-                    "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "userMotor"},
-                    "deviceGroup": "lamni",
+                    "acquisitionConfig": {
+                        "schedule": "sync",
+                        "acquisitionGroup": "motor",
+                        "readoutPriority": "baseline",
+                    },
+                    "deviceTags": ["lamni"],
                 }
             )
+            if m[4]:
+                out[m[0]]["userParameter"] = m[4]
         self.write_section(out, "LamNI Galil motors")
 
     def write_rt_motors(self):
@@ -72,19 +78,23 @@ class LamNIConfig(DemoConfig, X12SAConfig):
                         "sign": m[2],
                         "device_access": True,
                     },
-                    "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "userMotor"},
-                    "deviceGroup": "lamni",
+                    "acquisitionConfig": {
+                        "schedule": "sync",
+                        "acquisitionGroup": "motor",
+                        "readoutPriority": "baseline",
+                    },
+                    "deviceTags": ["lamni"],
                 }
             )
         self.write_section(out, "LamNI RT")
 
     def write_smaract_motors(self):
         lamni_smaract_motors = [
-            ("losax", "A", -1),
-            ("losay", "B", -1),
-            ("losaz", "C", 1),
-            ("lcsx", "D", -1),
-            ("lcsy", "E", -1),
+            ("losax", "A", -1, {"in": -0.848000}),
+            ("losay", "B", -1, {"in": 0.135000, "out": 3.8}),
+            ("losaz", "C", 1, {"in": -1, "out": -3}),
+            ("lcsx", "D", -1, {}),
+            ("lcsy", "E", -1, {}),
         ]
         out = dict()
         for m in lamni_smaract_motors:
@@ -102,10 +112,16 @@ class LamNIConfig(DemoConfig, X12SAConfig):
                         "sign": m[2],
                         "tolerance": 0.05,
                     },
-                    "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "userMotor"},
-                    "deviceGroup": "lamni",
+                    "acquisitionConfig": {
+                        "schedule": "sync",
+                        "acquisitionGroup": "motor",
+                        "readoutPriority": "baseline",
+                    },
+                    "deviceTags": ["lamni"],
                 }
             )
+            if m[3]:
+                out[m[0]]["userParameter"] = m[3]
         self.write_section(out, "LamNI SmarAct motors")
 
     def write_eiger1p5m(self):
@@ -115,8 +131,12 @@ class LamNIConfig(DemoConfig, X12SAConfig):
                 "status": {"enabled": True, "enabled_set": True},
                 "deviceClass": "Eiger1p5MDetector",
                 "deviceConfig": {"device_access": True, "name": "eiger1p5m"},
-                "acquisitionConfig": {"schedule": "sync", "acquisitionGroup": "detectors"},
-                "deviceGroup": "detector",
+                "acquisitionConfig": {
+                    "schedule": "sync",
+                    "acquisitionGroup": "detector",
+                    "readoutPriority": "monitored",
+                },
+                "deviceTags": ["detector"],
             }
         }
         self.write_section(out, "LamNI Eiger 1.5M in vacuum")

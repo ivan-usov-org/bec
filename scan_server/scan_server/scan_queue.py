@@ -167,7 +167,9 @@ class QueueManager:
             scanID = scanID[0]
         self.queues[queue].status = ScanQueueStatus.PAUSED
         self.queues[queue].worker_status = InstructionQueueStatus.STOPPED
+        self._lock.release()
         instruction_queue = self._wait_for_queue_to_appear_in_history(scanID, queue)
+        self._lock.acquire()
         scan_msg = instruction_queue.scan_msgs[0]
         RID = parameter.get("RID")
         if RID:
@@ -197,6 +199,7 @@ class QueueManager:
                 continue
             return history[-1]
 
+    @threadlocked
     def send_queue_status(self) -> None:
         """send the current queue to redis"""
         queue_export = self.export_queue()
