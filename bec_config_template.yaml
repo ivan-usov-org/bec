@@ -5,5 +5,5 @@ mongodb:
   host: localhost
   port: 27017
 scibec:
-  host: http://[::1]
+  host: http://localhost
   port: 3030
