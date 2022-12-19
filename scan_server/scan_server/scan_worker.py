@@ -343,13 +343,20 @@ class ScanWorker(threading.Thread):
                     self.device_manager.devices[dev]
                     for dev in instr.content["parameter"].get("primary")
                 ]
-        metadata = self.current_instruction_queue_item.active_request_block.metadata
+        active_rb = self.current_instruction_queue_item.active_request_block
+        metadata = active_rb.metadata
 
         self.current_scan_info = {**instr.metadata, **instr.content["parameter"]}
         self.current_scan_info.update(metadata)
-        self.current_scan_info.update({"scan_number": self.parent.scan_number})
-        self.current_scan_info.update({"dataset_number": self.parent.dataset_number})
-        self.current_scan_info.update({"exp_time": self._exposure_time})
+        self.current_scan_info.update(
+            {
+                "scan_number": self.parent.scan_number,
+                "dataset_number": self.parent.dataset_number,
+                "exp_time": self._exposure_time,
+                "scan_report_hint": active_rb.scan.scan_report_hint,
+                "scan_report_devices": active_rb.scan.scan_report_devices,
+            }
+        )
         self.current_scan_info["scan_msgs"] = [
             str(scan_msg) for scan_msg in self.current_instruction_queue_item.scan_msgs
         ]
