@@ -995,6 +995,19 @@ def test_pre_scan_macro():
                 eval_mock.assert_called_once_with("pre_scan_macro")
 
 
+def test_scan_report_devices():
+    device_manager = DMMock()
+    device_manager.add_device("samx")
+    parameter = {
+        "args": {"samx": (-5, 5), "samy": (-5, 5)},
+        "kwargs": {"step": 3},
+    }
+    request = FermatSpiralScan(device_manager=device_manager, parameter=parameter)
+    assert request.scan_report_devices == ["samx", "samy"]
+    request.scan_report_devices = ["samx", "samz"]
+    assert request.scan_report_devices == ["samx", "samz"]
+
+
 @pytest.mark.parametrize("in_args,reference_positions", [((5, 5, 1, 1), [[1, 0], [2, 0], [-2, 0]])])
 def test_round_roi_scan_positions(in_args, reference_positions):
     positions = get_round_roi_scan_positions(*in_args)
