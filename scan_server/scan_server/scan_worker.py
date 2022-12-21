@@ -44,6 +44,11 @@ class ScanWorker(threading.Thread):
         self._exposure_time = None
         self.reset()
 
+    @property
+    def scan_report_instructions(self):
+        req_block = self.current_instruction_queue_item.active_request_block
+        return req_block.scan_report_instructions
+
     def _get_devices_from_instruction(self, instr: DeviceMsg) -> List[Device]:
         """Extract devices from instruction message
 
@@ -343,16 +348,24 @@ class ScanWorker(threading.Thread):
                     self.device_manager.devices[dev]
                     for dev in instr.content["parameter"].get("primary")
                 ]
+        if not instr.metadata.get("scan_def_id"):
+            self.max_point_id = 0
+        num_points = self.max_point_id + instr.content["parameter"]["num_points"]
+        if self.max_point_id:
+            num_points += 1
         metadata = self.current_instruction_queue_item.active_request_block.metadata
-
         self.current_scan_info = {**instr.metadata, **instr.content["parameter"]}
         self.current_scan_info.update(metadata)
         self.current_scan_info.update({"scan_number": self.parent.scan_number})
         self.current_scan_info.update({"dataset_number": self.parent.dataset_number})
         self.current_scan_info.update({"exp_time": self._exposure_time})
+        self.current_scan_info.update({"num_points": num_points})
         self.current_scan_info["scan_msgs"] = [
             str(scan_msg) for scan_msg in self.current_instruction_queue_item.scan_msgs
         ]
+        self.scan_report_instructions.append({"table_wait": num_points})
+        self.current_instruction_queue_item.parent.queue_manager.send_queue_status()
+
         self._send_scan_status("open")
 
     def _close_scan(self, instr: DeviceMsg, max_point_id: int) -> None:
@@ -507,6 +520,9 @@ class ScanWorker(threading.Thread):
             self._stage_devices(instr)
         elif action == "unstage":
             self._unstage_devices(instr)
+        elif action == "scan_report_instruction":
+            self.scan_report_instructions.append(instr.content["parameter"])
+            self.current_instruction_queue_item.parent.queue_manager.send_queue_status()
         else:
             logger.warning(f"Unknown device instruction: {instr}")
 

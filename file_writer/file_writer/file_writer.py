@@ -1,4 +1,5 @@
 import abc
+import json
 import typing
 
 import h5py
@@ -188,6 +189,9 @@ class HDF5StorageWriter:
         data = val._data
         if data is None:
             return
+        if isinstance(data, list):
+            if data and isinstance(data[0], dict):
+                data = json.dumps(data)
         dataset = container.create_dataset(name, data=data)
         self.add_attribute(dataset, val.attrs)
         self.add_content(dataset, val._storage)

@@ -522,9 +522,16 @@ class Move(RequestBase):
         yield from self._set_position_offset()
         self._check_limits()
 
+    def scan_report_instructions(self):
+        if not self.scan_report_hint:
+            yield None
+            return
+        yield from self.stubs.scan_report_instruction({"readback": self.metadata["RID"]})
+
     def run(self):
         self.initialize()
         yield from self.prepare_positions()
+        yield from self.scan_report_instructions()
         yield from self._at_each_point()
 
 
