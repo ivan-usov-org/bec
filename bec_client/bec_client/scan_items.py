@@ -33,9 +33,11 @@ class ScanItem:
         self.status = status
         self.data = {}
         self.open_scan_defs = set()
+        self.open_queue_group = None
         self.num_points = None
         self.start_time = None
         self.end_time = None
+        self.scan_report_instructions = []
 
     @property
     def queue(self):
@@ -98,31 +100,42 @@ class ScanStorage:
 
         while True:
             scan_item = self.find_scan_by_ID(scanID=scan_status.content["scanID"])
-            if not scan_item:
-                time.sleep(0.1)
-                continue
+            if scan_item:
+                break
+            time.sleep(0.1)
 
-            # update timestamps
-            if scan_status.content.get("status") == "open":
-                scan_item.start_time = scan_status.content.get("timestamp")
-            elif scan_status.content.get("status") == "closed":
-                scan_item.end_time = scan_status.content.get("timestamp")
+        # update timestamps
+        if scan_status.content.get("status") == "open":
+            scan_item.start_time = scan_status.content.get("timestamp")
+        elif scan_status.content.get("status") == "closed":
+            scan_item.end_time = scan_status.content.get("timestamp")
 
-            # update status message
-            scan_item.status = scan_status.content.get("status")
+        # update status message
+        scan_item.status = scan_status.content.get("status")
 
-            # update total number of points
-            if scan_status.content["info"].get("num_points"):
-                scan_item.num_points = scan_status.content["info"].get("num_points")
+        # update total number of points
+        if scan_status.content["info"].get("num_points"):
+            scan_item.num_points = scan_status.content["info"].get("num_points")
 
-            # add scan def id
-            scan_def_id = scan_status.content["info"].get("scan_def_id")
-            if scan_def_id:
-                if scan_status.content.get("status") != "open":
-                    scan_item.open_scan_defs.remove(scan_def_id)
-                else:
-                    scan_item.open_scan_defs.add(scan_def_id)
-            break
+        # update scan number
+        if scan_item.scan_number is None:
+            scan_item.scan_number = scan_number
+
+        # add scan report info
+        scan_item.scan_report_instructions = scan_status.content["info"].get(
+            "scan_report_instructions"
+        )
+
+        # add scan def id
+        scan_def_id = scan_status.content["info"].get("scan_def_id")
+        if scan_def_id:
+            if scan_status.content.get("status") != "open":
+                scan_item.open_scan_defs.remove(scan_def_id)
+            else:
+                scan_item.open_scan_defs.add(scan_def_id)
+
+        # add queue group
+        scan_item.open_queue_group = scan_status.content["info"].get("queue_group")
 
     def add_scan_segment(self, scan_msg: BECMessage.ScanMessage) -> None:
         """update a scan item with a new scan segment"""

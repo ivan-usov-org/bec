@@ -297,6 +297,16 @@ class ScanStubs:
             parameter=parameter,
         )
 
+    def scan_report_instruction(self, instructions: dict):
+        """Scan report instructions
+
+        Args:
+            instructions (dict): Dict containing the scan report instructions
+        """
+        yield self._device_msg(
+            device=None, action="scan_report_instruction", parameter=instructions
+        )
+
     def _check_device_and_groups(self, device, group):
         if device and group:
             raise DeviceMessageError("Device and device group was specified. Pick one.")

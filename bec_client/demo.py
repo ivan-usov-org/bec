@@ -11,11 +11,7 @@ CONFIG_PATH = "../bec_config.yaml"
 config = ServiceConfig(CONFIG_PATH)
 
 bec = BECClient()
-bec.initialize(
-    config.redis,
-    RedisConnector,
-    config.scibec,
-)
+bec.initialize(config.redis, RedisConnector, config.scibec)
 bec.start()
 bec.load_high_level_interface("spec_hli")
 
@@ -37,7 +33,7 @@ logger.success("Started BECClient")
 # tomo_scan_sim()
 
 # status = scans.fermat_scan(
-#     dev.samx, -10, 10, dev.samy, -10, 10, step=1, exp_time=0.02, relative=False, hide_report=True
+#     dev.samx, -5, 5, dev.samy, -5, 5, step=1, exp_time=0.02, relative=False, hide_report=True
 # )
 # time.sleep(2)
 # status.subscribe()
@@ -79,10 +75,18 @@ logger.success("Started BECClient")
 # scans.umv(dev.samx, 0)
 # scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.02)
 
-# with scans.scan_def:
-#     scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=True)
-#     scans.line_scan(dev.samx, -8, 8, steps=10, exp_time=0.1, relative=True)
 
+# @scans.scan_group
+# def scan_with_decorator():
+#     scans.umv(dev.samx, 5, relative=False)
+#     scans.line_scan(dev.samx, -5, 5, steps=100, exp_time=0.1, relative=True)
+#     scans.umv(dev.samx, 5, relative=False)
+#     scans.line_scan(dev.samx, -5, 5, steps=100, exp_time=0.1, relative=True)
+#     # scans.line_scan(dev.samx, -8, 8, steps=200, exp_time=0.1, relative=True)
+
+
+# with scans.scan_def:
+#     scan_with_decorator()
 # with scans.dataset_id_on_hold:
 #     scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=True)
 #     scans.line_scan(dev.samx, -8, 8, steps=10, exp_time=0.1, relative=True)
@@ -113,8 +117,8 @@ logger.success("Started BECClient")
 
 
 # with scans.scan_group:
-#     scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.02)
-#     scans.umv(dev.samx, 10)
+#     scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.02, relative=True)
+#     scans.umv(dev.samx, 10, relative=True)
 
 # alignment()
 

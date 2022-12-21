@@ -434,6 +434,7 @@ class RequestBlock:
         self.parent = parent
         self.scan_def_id = None
         self._assemble()
+        self.scan_report_instructions = []
 
     def _assemble(self):
         self.scan = self.scan_assembler.assemble_device_instructions(self.msg)
@@ -498,6 +499,7 @@ class RequestBlock:
             "scanID": self.scanID,
             "metadata": self.msg.metadata,
             "content": self.msg.content,
+            "report_instructions": self.scan_report_instructions,
         }
 
 
@@ -534,7 +536,6 @@ class RequestBlockQueue:
                 request_block.scanID = self.scan_def_ids[scan_def_id]["scanID"]
             else:
                 self.scan_def_ids[scan_def_id] = {"scanID": request_block.scanID, "pointID": 0}
-
         self.append_request_block(request_block)
 
     def append_request_block(self, request_block: RequestBlock) -> None:
