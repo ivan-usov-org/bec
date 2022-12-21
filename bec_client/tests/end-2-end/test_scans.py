@@ -4,9 +4,6 @@ import time
 
 import numpy as np
 import pytest
-
-from bec_client import BECClient
-from bec_client.alarm_handler import AlarmBase
 from bec_utils import (
     BECMessage,
     MessageEndpoints,
@@ -15,6 +12,9 @@ from bec_utils import (
     bec_logger,
 )
 from bec_utils.bec_errors import ScanAbortion, ScanInterruption
+
+from bec_client import BECClient
+from bec_client.alarm_handler import AlarmBase
 
 logger = bec_logger.logger
 
@@ -87,6 +87,7 @@ def test_grid_scan(capsys, client):
     bec = client
     scans = bec.scans
     wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_grid_scan"})
     dev = bec.device_manager.devices
     scans.umv(dev.samx, 0, dev.samy, 0, relative=False)
     status = scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.01, relative=True)
@@ -101,6 +102,7 @@ def test_fermat_scan(capsys, client):
     bec = client
     scans = bec.scans
     wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_fermat_scan"})
     dev = bec.device_manager.devices
     status = scans.fermat_scan(
         dev.samx, -5, 5, dev.samy, -5, 5, step=0.5, exp_time=0.01, relative=True
@@ -116,6 +118,7 @@ def test_line_scan(capsys, client):
     bec = client
     scans = bec.scans
     wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_line_scan"})
     dev = bec.device_manager.devices
     status = scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.01, relative=True)
     assert len(status.scan.data) == 10
@@ -129,6 +132,7 @@ def test_mv_scan(capsys, client):
     bec = client
     scans = bec.scans
     wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_mv_scan"})
     dev = bec.device_manager.devices
     scans.mv(dev.samx, 10, dev.samy, 20, relative=False).wait()
     current_pos_samx = dev.samx.read()["samx"]["value"]
@@ -154,6 +158,7 @@ def test_mv_scan_mv(client):
     bec = client
     scans = bec.scans
     wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_mv_scan_mv"})
     scan_number_start = bec.queue.next_scan_number
     dev = bec.device_manager.devices
 
@@ -237,6 +242,7 @@ def test_scan_abort(client):
 
     bec = client
     wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_scan_abort"})
     scan_number_start = bec.queue.next_scan_number
     scans = bec.scans
     dev = bec.device_manager.devices
@@ -269,6 +275,7 @@ def test_scan_abort(client):
 def test_limit_error(client):
     bec = client
     wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_limit_error"})
     scan_number_start = bec.queue.next_scan_number
     scans = bec.scans
     dev = bec.device_manager.devices
@@ -299,6 +306,7 @@ def test_limit_error(client):
 def test_queued_scan(client):
     bec = client
     wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_queued_scan"})
     scan_number_start = bec.queue.next_scan_number
     scans = bec.scans
     dev = bec.device_manager.devices
@@ -331,6 +339,7 @@ def test_queued_scan(client):
 def test_fly_scan(client):
     bec = client
     wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_fly_scan"})
     scans = bec.scans
     dev = bec.device_manager.devices
     status = scans.round_scan_fly(dev.flyer_sim, 0, 50, 20, 3, exp_time=0.1, relative=True)
@@ -342,6 +351,7 @@ def test_fly_scan(client):
 def test_scan_restart(client):
     bec = client
     wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_scan_restart"})
     scans = bec.scans
     dev = bec.device_manager.devices
 
@@ -380,6 +390,7 @@ def test_scan_restart(client):
 def test_scan_observer_repeat_queued(client):
     bec = client
     wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_scan_observer_repeat_queued"})
     scans = bec.scans
     dev = bec.device_manager.devices
 
@@ -420,6 +431,7 @@ def test_scan_observer_repeat_queued(client):
 def test_scan_observer_repeat(client):
     bec = client
     wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_scan_observer_repeat"})
     scans = bec.scans
     dev = bec.device_manager.devices
 
@@ -458,6 +470,7 @@ def test_scan_observer_repeat(client):
 def test_file_writer(client):
     bec = client
     wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_file_writer"})
     scans = bec.scans
     dev = bec.device_manager.devices
 
@@ -494,3 +507,69 @@ def test_file_writer(client):
     #         msg.content["data"]["samx"]["samx"]["value"] for msg in scan.scan.data.values()
     #     ]
     #     assert all(file_data == stream_data)
+
+
+@pytest.mark.timeout(100)
+def test_scan_def_callback(capsys, client):
+    bec = client
+    wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_scan_def_callback"})
+    scans = bec.scans
+    dev = bec.device_manager.devices
+    scan_number = bec.queue.next_scan_number
+    with scans.scan_def:
+        scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=False)
+        scans.umv(dev.samy, 5, relative=False)
+        current_pos_samy = dev.samy.read(cached=True)["value"]
+        captured = capsys.readouterr()
+        assert f"Starting scan {scan_number}" in captured.out
+        ref_out_samy = (
+            f" ━━━━━━━━━━━━━━━ {current_pos_samy:10.2f} /       5.00 / 100 % 0:00:00 0:00:00"
+        )
+        assert ref_out_samy in captured.out
+        scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=False)
+    captured = capsys.readouterr()
+    assert f"Scan {scan_number} finished." in captured.out
+
+
+@pytest.mark.timeout(100)
+def test_scan_def(client):
+    bec = client
+    wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_scan_def"})
+    scans = bec.scans
+    dev = bec.device_manager.devices
+    scan_number = bec.queue.next_scan_number
+    with scans.scan_def:
+        scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=False)
+        scans.umv(dev.samy, 5, relative=False)
+        scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=False)
+
+    assert scan_number == bec.queue.next_scan_number - 1
+
+    scan_number = bec.queue.next_scan_number
+
+    @scans.scan_def
+    def scan_def_with_decorator():
+        scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=False)
+        scans.umv(dev.samy, 5, relative=False)
+        scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=False)
+
+    scan_def_with_decorator()
+    assert scan_number == bec.queue.next_scan_number - 1
+
+
+@pytest.mark.timeout(100)
+def test_group_def(client):
+    bec = client
+    wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_scan_def"})
+    scans = bec.scans
+    dev = bec.device_manager.devices
+    scan_number = bec.queue.next_scan_number
+    with scans.scan_group:
+        scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=False)
+        scans.umv(dev.samy, 5, relative=False)
+        scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=False)
+
+    assert scan_number == bec.queue.next_scan_number - 2

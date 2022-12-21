@@ -67,15 +67,26 @@ class LiveUpdatesTable(LiveUpdatesBase):
                 flush=True,
             )
             await asyncio.sleep(0.1)
+        while not self.scan_item.scan_number:
+            await asyncio.sleep(0.05)
 
     async def wait_for_scan_item_to_finish(self):
         """wait for scan completion"""
-        while not self.scan_item.end_time or self.scan_item.queue.queue_position is not None:
+        while True:
+            if self.scan_item.end_time:
+                if self.scan_item.open_queue_group:
+                    break
+                if self.scan_item.queue.queue_position is None:
+                    break
             self.check_alarms()
             await asyncio.sleep(0.1)
 
     def check_alarms(self):
         check_alarms(self.bec)
+
+    async def resume(self, request):
+        super().__init__(self.bec, request)
+        await self.process_request()
 
     @property
     def devices(self):
@@ -116,7 +127,21 @@ class LiveUpdatesTable(LiveUpdatesBase):
         self.scan_item = self.scan_queue_request.scan
 
     async def core(self):
-        print(f"\nStarting scan {self.scan_item.scan_number}.")
+        req_ID = self.scan_queue_request.requestID
+        while True:
+            request_block = [
+                req for req in self.scan_item.queue.request_blocks if req["RID"] == req_ID
+            ][0]
+            if not request_block["is_scan"]:
+                break
+            if request_block["report_instructions"]:
+                break
+
+        for instr in request_block["report_instructions"]:
+            await self._run_table_update(instr["table_wait"])
+
+    async def _run_table_update(self, target_num_points):
+
         with ScanProgressBar(
             scan_number=self.scan_item.scan_number, clear_on_exit=True
         ) as progressbar:
@@ -147,25 +172,43 @@ class LiveUpdatesTable(LiveUpdatesBase):
 
                 if not self.scan_item.num_points:
                     continue
-                if self.scan_item.open_scan_defs:
-                    continue
+                # if self.scan_item.open_scan_defs:
+                #     continue
 
-                if self.point_id == self.scan_item.num_points:
+                if self.point_id == target_num_points:
                     break
                 if self.point_id > self.scan_item.num_points:
                     raise RuntimeError("Received more points than expected.")
 
-            await self.wait_for_scan_item_to_finish()
-
-            elapsed_time = self.scan_item.end_time - self.scan_item.start_time
-            print(
-                self.table.get_footer(
-                    f"Scan {self.scan_item.scan_number} finished. Scan ID {self.scan_item.scanID}. Elapsed time: {elapsed_time:.2f} s"
-                )
+    def close_table(self):
+        elapsed_time = self.scan_item.end_time - self.scan_item.start_time
+        print(
+            self.table.get_footer(
+                f"Scan {self.scan_item.scan_number} finished. Scan ID {self.scan_item.scanID}. Elapsed time: {elapsed_time:.2f} s"
             )
+        )
 
-    async def run(self):
+    async def process_request(self):
+        if self.request.content["scan_type"] == "close_scan_def":
+            await self.wait_for_scan_item_to_finish()
+            self.close_table()
+            return
+
         await self.wait_for_request_acceptance()
         await asyncio.wait_for(self.update_scan_item(), timeout=15)
         await self.wait_for_scan_to_start()
+
+        if self.table:
+            self.table = None
+        else:
+            print(f"\nStarting scan {self.scan_item.scan_number}.")
+
         await self.core()
+
+    async def run(self):
+        if self.request.content["scan_type"] == "open_scan_def":
+            await self.wait_for_request_acceptance()
+            return
+        await self.process_request()
+        await self.wait_for_scan_item_to_finish()
+        self.close_table()
