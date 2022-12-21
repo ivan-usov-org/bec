@@ -136,6 +136,7 @@ class LiveUpdatesTable(LiveUpdatesBase):
                 break
             if request_block["report_instructions"]:
                 break
+            self.check_alarms()
 
         for instr in request_block["report_instructions"]:
             await self._run_table_update(instr["table_wait"])
