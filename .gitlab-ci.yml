@@ -56,7 +56,7 @@ tests-3.9:
   stage: Test
   image: python:3.9
 
-verify-3.10:
+tests-3.10:
   extends: "tests"
   stage: Test
   image: python:3.10
