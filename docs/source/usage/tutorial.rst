@@ -93,18 +93,12 @@ The same mv command can also be executed by calling the device method `move`
 Run a scan
 ~~~~~~~~~~~
 
+All currently available scans are accessible through `scans.`, e.g.
 
->>> 
-Please start bec_client using ipython (starting from "bec" folder) as needed:
+.. code-block:: python
 
-```
-cd bec_client
-ipython
-%run demo.py
-```
->>>
+    s = scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=False)
 
-The following commands should all be run in ipython.
 
 .. 
     ### 3.2.3 Run a software based fly scan [TODO: MORE DETAILS]
@@ -116,8 +110,12 @@ The following commands should all be run in ipython.
 Inspect the scan data
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-[TODO]
+The return value of a scan is a python object of type `ScanReport`. All data is stored in `<scan_report>.scan.data`, e.g.
 
+.. code-block:: python
+
+    s = scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=False)
+    print(s.scan.data) # print the scan data
 
 Setup and configuration
 ------------------------
