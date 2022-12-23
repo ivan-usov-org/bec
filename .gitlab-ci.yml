@@ -113,6 +113,7 @@ pages:
     - pip install -U sphinx
     - pip install -r ./docs/source/requirements.txt
     - sphinx-build -b html ./docs/source public
+    - curl -X POST -d "branches=master" -d "token=$RTD_TOKEN" https://readthedocs.org/api/v2/webhook/beamline-experiment-control/221870/
   artifacts:
     paths:
       - public
