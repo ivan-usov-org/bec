@@ -216,7 +216,7 @@ By default, :file:`update_sessions.py` will look for a config file :file:`./init
 
 
 Start the python services
-------------------
+--------------------------
 
 For now please launch the following four services in separate terminal tabs, starting from "bec" folder.
 Please activate the proper environment **in each terminal** as needed.
