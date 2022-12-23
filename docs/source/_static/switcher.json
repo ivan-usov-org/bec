@@ -1,0 +1,12 @@
+[
+    {
+        "name": "production",
+        "version": "0.1",
+        "url": "https://beamline-experiment-control.readthedocs.io/en/production/index.html",
+    },
+    {
+        "name": "master",
+        "version": "0.1",
+        "url": "https://beamline-experiment-control.readthedocs.io/en/latest/index.html",
+    },
+]

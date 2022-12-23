@@ -46,3 +46,9 @@ language = "Python"
 # html_theme = 'alabaster'
 html_theme = "pydata_sphinx_theme"
 html_static_path = ["_static"]
+html_theme_options = {
+    "switcher": {
+        "json_url": "https://beamline-experiment-control.readthedocs.io/en/latest/_static/switcher.json",
+    },
+    "navbar_start": ["navbar-logo", "version-switcher"],
+}
