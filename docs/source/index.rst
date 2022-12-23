@@ -12,7 +12,7 @@ Welcome to BEC's documentation!
 
    usage/introduction
    usage/installation
-   usage/tutorial
+   usage/quickstart
    autodoc/autodoc
 
 

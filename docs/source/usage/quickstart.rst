@@ -1,5 +1,5 @@
-Tutorial
-========
+Quickstart
+==========
 
 Client
 ------------------------
@@ -117,8 +117,8 @@ The return value of a scan is a python object of type `ScanReport`. All data is 
     s = scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=False)
     print(s.scan.data) # print the scan data
 
-Setup and configuration
-------------------------
+Load, save and update the configuration
+----------------------------------------
 
 Instead of using :file:`update_session.py` (cf.  :ref:`update_session` ) you can also the bec_client to update the current session. With the bec_client running, use
 
@@ -136,8 +136,7 @@ You can also use SciBec directly:
     scibec.update_session_with_file(<my-config.yaml>)
 
 
-Alternatively, use the bec_client to update the configuration of current session in mongo database and save to a file
-
+Alternatively, use the bec_client to update the configuration of the current session in mongo database and optionally save it to a file.
 Please start bec_client using ipython (starting from "bec" folder) as needed:
 
 .. code-block:: bash
@@ -170,7 +169,11 @@ To save the current session to disk, use
 
     bec.config.save_current_session("./config_saved.yaml") # this will save a file bec_client/config_saved.yaml
 
+Changes you have made to the yaml file on disk can be loaded again using
 
+.. code-block:: python
+
+    bec.config.update_session_with_file("./config_saved_modified.yaml") 
 
 .. 
     ### 3.1.3 [TODO: TO BE DEVELOPED] Use **Web GUI tool** to update the configuration of current session in mongo database
