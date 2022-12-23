@@ -2,6 +2,8 @@ from unittest import mock
 
 import pytest
 from bec_utils import BECMessage, MessageEndpoints
+from utils import load_ScanServerMock
+
 from scan_server.scan_assembler import ScanAssembler
 from scan_server.scan_queue import (
     InstructionQueueItem,
@@ -13,8 +15,6 @@ from scan_server.scan_queue import (
     ScanQueueStatus,
 )
 from scan_server.scan_worker import ScanWorker
-
-from utils import load_ScanServerMock
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=protected-access
@@ -148,7 +148,8 @@ def test_set_restart():
         with mock.patch.object(
             queue_manager, "_wait_for_queue_to_appear_in_history"
         ) as scan_msg_wait:
-            queue_manager.set_restart(queue="primary")
+            with queue_manager._lock:
+                queue_manager.set_restart(queue="primary", parameter={"RID": "something_new"})
             scan_msg_wait.assert_called_once_with("new_scanID", "primary")
 
 

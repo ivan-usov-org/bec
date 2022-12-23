@@ -1,73 +1,67 @@
-import asyncio
+from __future__ import annotations
+
+import builtins
 import uuid
 from contextlib import ContextDecorator
+from typing import TYPE_CHECKING
 
 import msgpack
 from bec_utils import BECMessage, MessageEndpoints, bec_logger
 from bec_utils.connector import ConsumerConnector
 from cytoolz import partition
+from typeguard import typechecked
 
-from .callbacks.live_table import LiveUpdatesTable
-from .callbacks.move_device import LiveUpdatesReadbackProgressbar
 from .devicemanager_client import Device
 from .scan_manager import ScanReport
+
+if TYPE_CHECKING:
+    from bec_client import BECClient
 
 logger = bec_logger.logger
 
 
 class ScanObject:
-    def __init__(self, scan_name: str, scan_info: dict, parent=None) -> None:
+    def __init__(self, scan_name: str, scan_info: dict, client: BECClient = None) -> None:
         self.scan_name = scan_name
         self.scan_info = scan_info
-        self.parent = parent
+        self.client = client
 
         # run must be an anonymous function to allow for multiple doc strings
-        self.run = lambda *args, **kwargs: asyncio.run(self._run(*args, **kwargs))
+        self.run = lambda *args, **kwargs: self._run(*args, **kwargs)
 
-    async def _run(self, *args, **kwargs):
-        # pylint: disable=protected-access
-        with self.parent._sighandler:
-            scans = self.parent.scans
+    def _run(self, *args, **kwargs):
+        if self.client.alarm_handler.alarms_stack:
+            logger.warning("The alarm stack is not empty but will be cleared now.")
+            self.client.clear_all_alarms()
+        scans = self.client.scans
 
-            # handle reserved kwargs:
-            hide_report_kwarg = kwargs.get("hide_report", False)
-            hide_report = hide_report_kwarg or scans._hide_report
+        # handle reserved kwargs:
+        hide_report_kwarg = kwargs.get("hide_report", False)
+        hide_report = hide_report_kwarg or scans._hide_report
 
-            if scans._scan_group:
-                if "md" not in kwargs:
-                    kwargs["md"] = {}
-                kwargs["md"]["queue_group"] = scans._scan_group
-            if scans._scan_def_id:
-                if "md" not in kwargs:
-                    kwargs["md"] = {}
-                kwargs["md"]["scan_def_id"] = scans._scan_def_id
+        metadata = self.client.metadata.copy()
 
-            request = Scans.prepare_scan_request(self.scan_name, self.scan_info, *args, **kwargs)
-            requestID = str(uuid.uuid4())  # TODO: move this to the API server
-            request.metadata["RID"] = requestID
+        if "md" in kwargs:
+            metadata.update(kwargs["md"])
 
-            scan_report = ScanReport.from_request(request, client=self.parent)
+        if scans._scan_group:
+            metadata["queue_group"] = scans._scan_group
+        if scans._scan_def_id:
+            metadata["scan_def_id"] = scans._scan_def_id
+        if scans._dataset_id_on_hold:
+            metadata["dataset_id_on_hold"] = scans._dataset_id_on_hold
 
-            scan_report_type = self._get_scan_report_type(hide_report)
-            if scan_report_type == "readback":
-                consumer = self._start_consumer(request)
-                self._send_scan_request(request)
+        kwargs["md"] = metadata
 
-                await LiveUpdatesReadbackProgressbar(
-                    self.parent,
-                    request,
-                ).run()
-                consumer.shutdown()
-            elif scan_report_type == "table":
-                self._send_scan_request(request)
-                if (
-                    self.parent.scans._scan_def_id is None
-                    or request.content["scan_type"] == "close_scan_def"
-                ):
-                    await LiveUpdatesTable(self.parent, request).run()
-            else:
-                self._send_scan_request(request)
-            return scan_report
+        request = Scans.prepare_scan_request(self.scan_name, self.scan_info, *args, **kwargs)
+        requestID = str(uuid.uuid4())  # TODO: move this to the API server
+        request.metadata["RID"] = requestID
+
+        self._send_scan_request(request)
+        scan_report_type = self._get_scan_report_type(hide_report)
+        self.client.callback_manager.process_request(request, scan_report_type)
+
+        return ScanReport.from_request(request, client=self.client)
 
     def _get_scan_report_type(self, hide_report) -> str:
         if hide_report:
@@ -75,7 +69,7 @@ class ScanObject:
         return self.scan_info.get("scan_report_hint")
 
     def _start_consumer(self, request: BECMessage.ScanQueueMessage) -> ConsumerConnector:
-        consumer = self.parent.device_manager.connector.consumer(
+        consumer = self.client.device_manager.connector.consumer(
             [
                 MessageEndpoints.device_readback(dev)
                 for dev in request.content["parameter"]["args"].keys()
@@ -86,7 +80,7 @@ class ScanObject:
         return consumer
 
     def _send_scan_request(self, request: BECMessage.ScanQueueMessage) -> None:
-        self.parent.device_manager.producer.send(
+        self.client.device_manager.producer.send(
             MessageEndpoints.scan_queue_request(), request.dumps()
         )
 
@@ -102,6 +96,8 @@ class Scans:
         self._scan_def_ctx = ScanDef(parent=self)
         self._hide_report = None
         self._hide_report_ctx = HideReport(parent=self)
+        self._dataset_id_on_hold = None
+        self._dataset_id_on_hold_ctx = DatasetIdOnHold(parent=self)
 
     def _import_scans(self):
 
@@ -109,7 +105,7 @@ class Scans:
             self.parent.producer.get(MessageEndpoints.available_scans())
         )
         for scan_name, scan_info in available_scans.items():
-            self._available_scans[scan_name] = ScanObject(scan_name, scan_info, parent=self.parent)
+            self._available_scans[scan_name] = ScanObject(scan_name, scan_info, client=self.parent)
             setattr(
                 self,
                 scan_name,
@@ -218,6 +214,11 @@ class Scans:
         """Context manager / decorator for hiding the report"""
         return self._hide_report_ctx
 
+    @property
+    def dataset_id_on_hold(self):
+        """Context manager / decorator for hiding the report"""
+        return self._dataset_id_on_hold_ctx
+
 
 class ScanGroup(ContextDecorator):
     def __init__(self, parent: Scans = None) -> None:
@@ -262,3 +263,43 @@ class HideReport(ContextDecorator):
 
     def __exit__(self, *exc):
         self.parent._hide_report = None
+
+
+class DatasetIdOnHold(ContextDecorator):
+    def __init__(self, parent: Scans = None) -> None:
+        super().__init__()
+        self.parent = parent
+
+    def __enter__(self):
+        if self.parent._dataset_id_on_hold is None:
+            self.parent._dataset_id_on_hold = True
+        return self
+
+    def __exit__(self, *exc):
+        self.parent._dataset_id_on_hold = None
+        queue = self.parent.parent.queue
+        queue.next_dataset_number += 1
+
+
+class Metadata:
+    @typechecked
+    def __init__(self, metadata: dict) -> None:
+        """Context manager for updating metadata
+
+        Args:
+            metadata (dict): Metadata dictionary
+        """
+        self.client = self._get_client()
+        self._metadata = metadata
+        self._orig_metadata = None
+
+    def _get_client(self):
+        return builtins.__dict__["bec"]
+
+    def __enter__(self):
+        self._orig_metadata = self.client.metadata.copy()
+        self.client.metadata.update(self._metadata)
+        return self
+
+    def __exit__(self, *exc):
+        self.client.metadata = self._orig_metadata

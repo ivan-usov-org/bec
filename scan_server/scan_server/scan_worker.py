@@ -41,7 +41,13 @@ class ScanWorker(threading.Thread):
         self.current_scan_info = None
         self._staged_devices = set()
         self.max_point_id = 0
+        self._exposure_time = None
         self.reset()
+
+    @property
+    def scan_report_instructions(self):
+        req_block = self.current_instruction_queue_item.active_request_block
+        return req_block.scan_report_instructions
 
     def _get_devices_from_instruction(self, instr: DeviceMsg) -> List[Device]:
         """Extract devices from instruction message
@@ -238,6 +244,29 @@ class ScanWorker(threading.Thread):
     def _wait_for_trigger(self, instr: DeviceMsg) -> None:
         time.sleep(float(instr.content["parameter"]["time"]))
 
+    def _wait_for_stage(self, staged: bool, devices: list, metadata: dict) -> None:
+        while True:
+            stage_status = self._get_device_status(MessageEndpoints.device_staged, devices)
+            self._check_for_interruption()
+            device_status = [BECMessage.DeviceStatusMessage.loads(dev) for dev in stage_status]
+
+            if None in device_status:
+                continue
+            devices_are_ready = all(
+                bool(dev.content.get("status")) == staged for dev in device_status
+            )
+            matching_scanID = all(
+                dev.metadata.get("scanID") == metadata["scanID"] for dev in device_status
+            )
+            matching_DIID = all(
+                dev.metadata.get("DIID") == metadata["DIID"] for dev in device_status
+            )
+            if devices_are_ready and matching_scanID and matching_DIID:
+                break
+
+    def _wait_for_device_server(self) -> None:
+        self.parent.wait_for_service("DeviceServer")
+
     def _set_devices(self, instr: DeviceMsg) -> None:
         """Send device instruction to set a device to a specific value
 
@@ -264,8 +293,6 @@ class ScanWorker(threading.Thread):
         self.device_manager.producer.send(MessageEndpoints.device_instructions(), instr.dumps())
 
     def _read_devices(self, instr: DeviceMsg) -> None:
-        # devices = self.device_manager.devices.device_group("monitor")
-        # devices.extend(self.scan_motors)
         devices = instr.content.get("device")
         if devices is None:
             devices = [
@@ -296,12 +323,13 @@ class ScanWorker(threading.Thread):
         baseline_devices = [
             dev.name for dev in self.device_manager.devices.baseline_devices(self.scan_motors)
         ]
+        params = instr.content["parameter"]
         self.device_manager.producer.send(
             MessageEndpoints.device_instructions(),
             DeviceMsg(
                 device=baseline_devices,
                 action="read",
-                parameter=instr.content["parameter"],
+                parameter=params,
                 metadata=instr.metadata,
             ).dumps(),
         )
@@ -320,11 +348,34 @@ class ScanWorker(threading.Thread):
                     self.device_manager.devices[dev]
                     for dev in instr.content["parameter"].get("primary")
                 ]
-        metadata = self.current_instruction_queue_item.active_request_block.metadata
+
+        if not instr.metadata.get("scan_def_id"):
+            self.max_point_id = 0
+        num_points = self.max_point_id + instr.content["parameter"]["num_points"]
+        if self.max_point_id:
+            num_points += 1
+
+        active_rb = self.current_instruction_queue_item.active_request_block
+        metadata = active_rb.metadata
 
         self.current_scan_info = {**instr.metadata, **instr.content["parameter"]}
         self.current_scan_info.update(metadata)
-        self.current_scan_info.update({"scan_number": self.parent.scan_number})
+        self.current_scan_info.update(
+            {
+                "scan_number": self.parent.scan_number,
+                "dataset_number": self.parent.dataset_number,
+                "exp_time": self._exposure_time,
+                "scan_report_hint": active_rb.scan.scan_report_hint,
+                "scan_report_devices": active_rb.scan.scan_report_devices,
+                "num_points": num_points,
+            }
+        )
+        self.current_scan_info["scan_msgs"] = [
+            str(scan_msg) for scan_msg in self.current_instruction_queue_item.scan_msgs
+        ]
+        self.scan_report_instructions.append({"table_wait": num_points})
+        self.current_instruction_queue_item.parent.queue_manager.send_queue_status()
+
         self._send_scan_status("open")
 
     def _close_scan(self, instr: DeviceMsg, max_point_id: int) -> None:
@@ -349,8 +400,11 @@ class ScanWorker(threading.Thread):
                 metadata=instr.metadata,
             ).dumps(),
         )
+        self._wait_for_stage(staged=True, devices=devices, metadata=instr.metadata)
 
-    def _unstage_devices(self, instr: DeviceMsg = None, devices: list = None) -> None:
+    def _unstage_devices(
+        self, instr: DeviceMsg = None, devices: list = None, cleanup=False
+    ) -> None:
         if not devices:
             devices = [dev.name for dev in self.device_manager.devices.enabled_devices]
         parameter = {} if not instr else instr.content["parameter"]
@@ -365,9 +419,16 @@ class ScanWorker(threading.Thread):
                 metadata=metadata,
             ).dumps(),
         )
+        if not cleanup:
+            self._wait_for_stage(staged=False, devices=devices, metadata=metadata)
 
     def _send_scan_status(self, status: str):
-        logger.info(f"New scan status: {self.current_scanID} / {status} / {self.current_scan_info}")
+        current_scan_info_print = self.current_scan_info.copy()
+        if current_scan_info_print.get("positions", []):
+            current_scan_info_print["positions"] = "..."
+        logger.info(
+            f"New scan status: {self.current_scanID} / {status} / {current_scan_info_print}"
+        )
         msg = ScanStatusMsg(
             scanID=self.current_scanID,
             status=status,
@@ -397,12 +458,16 @@ class ScanWorker(threading.Thread):
         start = time.time()
         self.max_point_id = 0
 
+        # make sure the device server is ready to receive data
+        self._wait_for_device_server()
+
         queue.is_active = True
         try:
             for instr in queue:
                 if instr is None:
                     continue
                 self._check_for_interruption()
+                self._exposure_time = getattr(queue.active_request_block.scan, "exp_time", None)
                 self._instruction_step(instr)
         except ScanAbortion as exc:
             self._groups = {}
@@ -465,6 +530,9 @@ class ScanWorker(threading.Thread):
             self._stage_devices(instr)
         elif action == "unstage":
             self._unstage_devices(instr)
+        elif action == "scan_report_instruction":
+            self.scan_report_instructions.append(instr.content["parameter"])
+            self.current_instruction_queue_item.parent.queue_manager.send_queue_status()
         else:
             logger.warning(f"Unknown device instruction: {instr}")
 
@@ -479,7 +547,7 @@ class ScanWorker(threading.Thread):
 
     def cleanup(self):
         """perform cleanup instructions"""
-        self._unstage_devices(devices=list(self._staged_devices))
+        self._unstage_devices(devices=list(self._staged_devices), cleanup=True)
 
     def run(self):
         try:

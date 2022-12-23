@@ -1,0 +1,72 @@
+{
+    "title": "NewDevice",
+    "type": "object",
+    "description": "(tsType: Omit<Device, 'id'>, schemaOptions: { title: 'NewDevice', exclude: [ 'id' ] })",
+    "properties": {
+        "name": {"type": "string"},
+        "description": {"type": "string"},
+        "ownerGroup": {
+            "type": "string",
+            "description": "Only members of the ownerGroup are allowed to modify this device",
+        },
+        "accessGroups": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "description": "groups whose members have read access to this device",
+            },
+        },
+        "createdAt": {"type": "string", "format": "date-time"},
+        "createdBy": {"type": "string"},
+        "parentId": {"type": "string"},
+        "sessionId": {"type": "string", "description": "Session to which this device belongs."},
+        "enabled": {"type": "boolean", "description": "True if the device should be enabled."},
+        "enabled_set": {"type": "boolean", "description": "True if the device is settable."},
+        "deviceClass": {"type": "string", "description": "Ophyd device class"},
+        "deviceTags": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "description": "User-defined tags for easier access and grouping.",
+            },
+        },
+        "deviceConfig": {
+            "type": "object",
+            "description": "Device config, including the ophyd init arguments. Must at least contain name and label.",
+        },
+        "acquisitionConfig": {
+            "type": "object",
+            "description": "Config to determine the behaviour during data acquisition. Must include the fields schedule, readoutPriority and acquisitionGroup.",
+            "properties": {
+                "schedule": {
+                    "description": "Acquisition scheduling.",
+                    "type": "string",
+                    "enum": ["sync", "async", "flyer"],
+                },
+                "acquisitionGroup": {
+                    "description": "Type of device.",
+                    "type": "string",
+                    "enum": ["motor", "monitor", "status", "detector"],
+                },
+                "readoutPriority": {
+                    "description": "Readout priority of the device during a scan.",
+                    "type": "string",
+                    "enum": ["monitored", "baseline", "ignored"],
+                },
+            },
+            "required": ["schedule", "acquisitionGroup", "readoutPriority"],
+        },
+        "onFailure": {
+            "type": "string",
+            "description": 'Defines how device failures are handled. "raise" raises an error immediately. "buffer" will try fall back to old values, should this not be possible, an error will be raised. "retry" will retry once before raising an error.',
+            "enum": ["raise", "retry", "buffer"],
+        },
+        "userParameter": {
+            "type": "object",
+            "description": "Additional fields for user settings such as in and out positions.",
+        },
+    },
+    "required": ["name", "enabled", "deviceClass", "deviceConfig", "acquisitionConfig"],
+    "additionalProperties": false,
+    "x-typescript-type": "Omit<Device, 'id'>",
+}

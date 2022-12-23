@@ -1,7 +1,6 @@
 import ast
 import enum
 import time
-import uuid
 from abc import ABC, abstractmethod
 
 import numpy as np
@@ -173,12 +172,23 @@ class RequestBase(ABC):
         self.scan_motors = []
         self.positions = []
         self._pre_scan_macros = []
+        self._scan_report_devices = None
         self._get_scan_motors()
         if metadata is None:
             self.metadata = {}
         self.stubs = ScanStubs(
             producer=self.device_manager.producer, device_msg_callback=self.device_msg_metadata
         )
+
+    @property
+    def scan_report_devices(self):
+        if self._scan_report_devices is None:
+            return self.scan_motors
+        return self._scan_report_devices
+
+    @scan_report_devices.setter
+    def scan_report_devices(self, devices: list):
+        self._scan_report_devices = devices
 
     def device_msg_metadata(self):
         default_metadata = {"stream": "primary", "DIID": self.DIID}
@@ -522,9 +532,16 @@ class Move(RequestBase):
         yield from self._set_position_offset()
         self._check_limits()
 
+    def scan_report_instructions(self):
+        if not self.scan_report_hint:
+            yield None
+            return
+        yield from self.stubs.scan_report_instruction({"readback": self.metadata["RID"]})
+
     def run(self):
         self.initialize()
         yield from self.prepare_positions()
+        yield from self.scan_report_instructions()
         yield from self._at_each_point()
 
 

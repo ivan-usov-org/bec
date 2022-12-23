@@ -168,31 +168,58 @@ def test_scan_move(mv_msg, reference_msg_list):
                 scan_type="umv",
                 parameter={"args": {"samx": (1,), "samy": (2,)}, "kwargs": {}},
                 queue="primary",
+                metadata={"RID": "0bab7ee3-b384-4571-b...0fff984c05"},
             ),
             [
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="scan_report_instruction",
+                    parameter={"readback": "0bab7ee3-b384-4571-b...0fff984c05"},
+                    metadata={
+                        "stream": "primary",
+                        "DIID": 0,
+                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
+                    },
+                ),
                 BMessage.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={"value": 1.0, "wait_group": "scan_motor"},
-                    metadata={"stream": "primary", "DIID": 0},
+                    metadata={
+                        "stream": "primary",
+                        "DIID": 1,
+                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
+                    },
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="samy",
                     action="set",
                     parameter={"value": 2.0, "wait_group": "scan_motor"},
-                    metadata={"stream": "primary", "DIID": 1},
+                    metadata={
+                        "stream": "primary",
+                        "DIID": 2,
+                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
+                    },
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="samx",
                     action="wait",
                     parameter={"type": "move", "wait_group": "scan_motor"},
-                    metadata={"stream": "primary", "DIID": 2},
+                    metadata={
+                        "stream": "primary",
+                        "DIID": 3,
+                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
+                    },
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="samy",
                     action="wait",
                     parameter={"type": "move", "wait_group": "scan_motor"},
-                    metadata={"stream": "primary", "DIID": 3},
+                    metadata={
+                        "stream": "primary",
+                        "DIID": 4,
+                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
+                    },
                 ),
             ],
         ),
@@ -204,43 +231,78 @@ def test_scan_move(mv_msg, reference_msg_list):
                     "kwargs": {},
                 },
                 queue="primary",
+                metadata={"RID": "0bab7ee3-b384-4571-b...0fff984c05"},
             ),
             [
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="scan_report_instruction",
+                    parameter={"readback": "0bab7ee3-b384-4571-b...0fff984c05"},
+                    metadata={
+                        "stream": "primary",
+                        "DIID": 0,
+                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
+                    },
+                ),
                 BMessage.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={"value": 1.0, "wait_group": "scan_motor"},
-                    metadata={"stream": "primary", "DIID": 0},
+                    metadata={
+                        "stream": "primary",
+                        "DIID": 1,
+                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
+                    },
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="samy",
                     action="set",
                     parameter={"value": 2.0, "wait_group": "scan_motor"},
-                    metadata={"stream": "primary", "DIID": 1},
+                    metadata={
+                        "stream": "primary",
+                        "DIID": 2,
+                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
+                    },
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="samz",
                     action="set",
                     parameter={"value": 3.0, "wait_group": "scan_motor"},
-                    metadata={"stream": "primary", "DIID": 2},
+                    metadata={
+                        "stream": "primary",
+                        "DIID": 3,
+                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
+                    },
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="samx",
                     action="wait",
                     parameter={"type": "move", "wait_group": "scan_motor"},
-                    metadata={"stream": "primary", "DIID": 3},
+                    metadata={
+                        "stream": "primary",
+                        "DIID": 4,
+                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
+                    },
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="samy",
                     action="wait",
                     parameter={"type": "move", "wait_group": "scan_motor"},
-                    metadata={"stream": "primary", "DIID": 4},
+                    metadata={
+                        "stream": "primary",
+                        "DIID": 5,
+                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
+                    },
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="samz",
                     action="wait",
                     parameter={"type": "move", "wait_group": "scan_motor"},
-                    metadata={"stream": "primary", "DIID": 5},
+                    metadata={
+                        "stream": "primary",
+                        "DIID": 6,
+                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
+                    },
                 ),
             ],
         ),
@@ -249,19 +311,38 @@ def test_scan_move(mv_msg, reference_msg_list):
                 scan_type="umv",
                 parameter={"args": {"samx": (1,)}, "kwargs": {}},
                 queue="primary",
+                metadata={"RID": "0bab7ee3-b384-4571-b...0fff984c05"},
             ),
             [
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="scan_report_instruction",
+                    parameter={"readback": "0bab7ee3-b384-4571-b...0fff984c05"},
+                    metadata={
+                        "stream": "primary",
+                        "DIID": 0,
+                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
+                    },
+                ),
                 BMessage.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={"value": 1.0, "wait_group": "scan_motor"},
-                    metadata={"stream": "primary", "DIID": 0},
+                    metadata={
+                        "stream": "primary",
+                        "DIID": 1,
+                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
+                    },
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="samx",
                     action="wait",
                     parameter={"type": "move", "wait_group": "scan_motor"},
-                    metadata={"stream": "primary", "DIID": 1},
+                    metadata={
+                        "stream": "primary",
+                        "DIID": 2,
+                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
+                    },
                 ),
             ],
         ),
@@ -277,7 +358,11 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
     def offset_mock():
         yield None
 
-    s = UpdatedMove(parameter=mv_msg.content.get("parameter"), device_manager=device_manager)
+    s = UpdatedMove(
+        parameter=mv_msg.content.get("parameter"),
+        device_manager=device_manager,
+        metadata=mv_msg.metadata,
+    )
     s._set_position_offset = offset_mock
     for step in s.run():
         if step:
@@ -995,6 +1080,19 @@ def test_pre_scan_macro():
                 eval_mock.assert_called_once_with("pre_scan_macro")
 
 
+def test_scan_report_devices():
+    device_manager = DMMock()
+    device_manager.add_device("samx")
+    parameter = {
+        "args": {"samx": (-5, 5), "samy": (-5, 5)},
+        "kwargs": {"step": 3},
+    }
+    request = FermatSpiralScan(device_manager=device_manager, parameter=parameter)
+    assert request.scan_report_devices == ["samx", "samy"]
+    request.scan_report_devices = ["samx", "samz"]
+    assert request.scan_report_devices == ["samx", "samz"]
+
+
 @pytest.mark.parametrize("in_args,reference_positions", [((5, 5, 1, 1), [[1, 0], [2, 0], [-2, 0]])])
 def test_round_roi_scan_positions(in_args, reference_positions):
     positions = get_round_roi_scan_positions(*in_args)
@@ -1054,7 +1152,13 @@ def test_get_func_name_from_macro():
                 scan_type="lamni_fermat_scan",
                 parameter={
                     "args": {},
-                    "kwargs": {"fov_size": [5], "exp_time": 0.1, "step": 2, "angle": 10},
+                    "kwargs": {
+                        "fov_size": [5],
+                        "exp_time": 0.1,
+                        "step": 2,
+                        "angle": 10,
+                        "scan_type": "step",
+                    },
                 },
                 queue="primary",
             ),
@@ -1210,8 +1314,8 @@ def test_get_func_name_from_macro():
                         "primary": ["rtx", "rty"],
                         "num_points": 2,
                         "positions": [
-                            [-0.7700589354581364, -0.8406005210092851],
                             [1.3681828686580249, 2.1508313829565298],
+                            [-0.7700589354581364, -0.8406005210092851],
                         ],
                         "scan_name": "lamni_fermat_scan",
                         "scan_type": "step",
@@ -1234,7 +1338,7 @@ def test_get_func_name_from_macro():
                     device="rtx",
                     action="set",
                     parameter={
-                        "value": -0.7700589354581364,
+                        "value": 1.3681828686580249,
                         "wait_group": "scan_motor",
                     },
                     metadata={"stream": "primary", "DIID": 17},
@@ -1243,7 +1347,7 @@ def test_get_func_name_from_macro():
                     device="rty",
                     action="set",
                     parameter={
-                        "value": -0.8406005210092851,
+                        "value": 2.1508313829565298,
                         "wait_group": "scan_motor",
                     },
                     metadata={"stream": "primary", "DIID": 18},
@@ -1289,7 +1393,7 @@ def test_get_func_name_from_macro():
                     device="rtx",
                     action="set",
                     parameter={
-                        "value": 1.3681828686580249,
+                        "value": -0.7700589354581364,
                         "wait_group": "scan_motor",
                     },
                     metadata={"stream": "primary", "DIID": 24},
@@ -1298,7 +1402,7 @@ def test_get_func_name_from_macro():
                     device="rty",
                     action="set",
                     parameter={
-                        "value": 2.1508313829565298,
+                        "value": -0.8406005210092851,
                         "wait_group": "scan_motor",
                     },
                     metadata={"stream": "primary", "DIID": 25},

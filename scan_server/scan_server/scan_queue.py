@@ -167,8 +167,14 @@ class QueueManager:
             scanID = scanID[0]
         self.queues[queue].status = ScanQueueStatus.PAUSED
         self.queues[queue].worker_status = InstructionQueueStatus.STOPPED
+        self._lock.release()
         instruction_queue = self._wait_for_queue_to_appear_in_history(scanID, queue)
-        self.add_to_queue(queue, instruction_queue.scan_msgs[0], 0)
+        self._lock.acquire()
+        scan_msg = instruction_queue.scan_msgs[0]
+        RID = parameter.get("RID")
+        if RID:
+            scan_msg.metadata["RID"] = RID
+        self.add_to_queue(queue, scan_msg, 0)
 
     def _get_active_scanID(self, queue):
         if len(self.queues[queue].queue) == 0:
@@ -193,6 +199,7 @@ class QueueManager:
                 continue
             return history[-1]
 
+    @threadlocked
     def send_queue_status(self) -> None:
         """send the current queue to redis"""
         queue_export = self.export_queue()
@@ -427,6 +434,7 @@ class RequestBlock:
         self.parent = parent
         self.scan_def_id = None
         self._assemble()
+        self.scan_report_instructions = []
 
     def _assemble(self):
         self.scan = self.scan_assembler.assemble_device_instructions(self.msg)
@@ -491,6 +499,7 @@ class RequestBlock:
             "scanID": self.scanID,
             "metadata": self.msg.metadata,
             "content": self.msg.content,
+            "report_instructions": self.scan_report_instructions,
         }
 
 
@@ -527,7 +536,6 @@ class RequestBlockQueue:
                 request_block.scanID = self.scan_def_ids[scan_def_id]["scanID"]
             else:
                 self.scan_def_ids[scan_def_id] = {"scanID": request_block.scanID, "pointID": 0}
-
         self.append_request_block(request_block)
 
     def append_request_block(self, request_block: RequestBlock) -> None:
@@ -567,6 +575,8 @@ class RequestBlockQueue:
             return
         if rbl.scan_def_id is None or rbl.msg.content["scan_type"] == "close_scan_def":
             self.parent.parent.queue_manager.parent.scan_number += 1
+            if not rbl.msg.metadata.get("dataset_id_on_hold"):
+                self.parent.parent.queue_manager.parent.dataset_number += 1
         return
 
     def __iter__(self):

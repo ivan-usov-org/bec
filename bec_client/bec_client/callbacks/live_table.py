@@ -4,9 +4,10 @@ import asyncio
 from typing import TYPE_CHECKING
 
 import numpy as np
+from bec_utils import BECMessage, bec_logger
+
 from bec_client.prettytable import PrettyTable
 from bec_client.progressbar import ScanProgressBar
-from bec_utils import BECMessage, bec_logger
 
 from .utils import LiveUpdatesBase, check_alarms
 
@@ -45,6 +46,8 @@ class LiveUpdatesTable(LiveUpdatesBase):
         self.scan_item = None
         self.dev_values = None
         self.point_data = None
+        self.point_id = 0
+        self.table = None
 
     async def wait_for_scan_to_start(self):
         """wait until the scan starts"""
@@ -64,15 +67,26 @@ class LiveUpdatesTable(LiveUpdatesBase):
                 flush=True,
             )
             await asyncio.sleep(0.1)
+        while not self.scan_item.scan_number:
+            await asyncio.sleep(0.05)
 
     async def wait_for_scan_item_to_finish(self):
         """wait for scan completion"""
-        while not self.scan_item.end_time or self.scan_item.queue.queue_position is not None:
+        while True:
+            if self.scan_item.end_time:
+                if self.scan_item.open_queue_group:
+                    break
+                if self.scan_item.queue.queue_position is None:
+                    break
             self.check_alarms()
             await asyncio.sleep(0.1)
 
     def check_alarms(self):
         check_alarms(self.bec)
+
+    async def resume(self, request):
+        super().__init__(self.bec, request)
+        await self.process_request()
 
     @property
     def devices(self):
@@ -102,7 +116,8 @@ class LiveUpdatesTable(LiveUpdatesBase):
     def _prepare_table(self) -> PrettyTable:
         header = ["seq. num"]
         header.extend(self.devices)
-        return PrettyTable(header, padding=12)
+        max_len = max([len(head) for head in header])
+        return PrettyTable(header, padding=max_len)
 
     async def update_scan_item(self):
         """get the current scan item"""
@@ -112,58 +127,89 @@ class LiveUpdatesTable(LiveUpdatesBase):
         self.scan_item = self.scan_queue_request.scan
 
     async def core(self):
-        print(f"\nStarting scan {self.scan_item.scan_number}.")
+        req_ID = self.scan_queue_request.requestID
+        while True:
+            request_block = [
+                req for req in self.scan_item.queue.request_blocks if req["RID"] == req_ID
+            ][0]
+            if not request_block["is_scan"]:
+                break
+            if request_block["report_instructions"]:
+                break
+            self.check_alarms()
+
+        for instr in request_block["report_instructions"]:
+            await self._run_table_update(instr["table_wait"])
+
+    async def _run_table_update(self, target_num_points):
+
         with ScanProgressBar(
             scan_number=self.scan_item.scan_number, clear_on_exit=True
         ) as progressbar:
-            point_id = 0
-            table = None
             while True:
                 self.check_alarms()
-                self.point_data = self.scan_item.data.get(point_id)
+                self.point_data = self.scan_item.data.get(self.point_id)
                 if self.scan_item.num_points:
                     progressbar.max_points = self.scan_item.num_points
 
-                progressbar.update(point_id)
+                progressbar.update(self.point_id)
                 if self.point_data:
-                    if not table:
+                    if not self.table:
                         self.dev_values = list(np.zeros_like(self.devices))
-                        table = self._prepare_table()
-                        print(table.get_header_lines())
+                        self.table = self._prepare_table()
+                        print(self.table.get_header_lines())
 
-                    point_id += 1
-                    if point_id % 100 == 0:
-                        print(table.get_header_lines())
+                    self.point_id += 1
+                    if self.point_id % 100 == 0:
+                        print(self.table.get_header_lines())
                     for ind, dev in enumerate(self.devices):
                         signal = self.point_data.content["data"][dev].get(dev)
                         self.dev_values[ind] = signal.get("value") if signal else -999
-                    print(table.get_row(point_id, *self.dev_values))
-                    progressbar.update(point_id)
+                    print(self.table.get_row(self.point_id, *self.dev_values))
+                    progressbar.update(self.point_id)
                 else:
                     logger.debug("waiting for new data point")
                     await asyncio.sleep(0.1)
 
                 if not self.scan_item.num_points:
                     continue
-                if self.scan_item.open_scan_defs:
-                    continue
+                # if self.scan_item.open_scan_defs:
+                #     continue
 
-                if point_id == self.scan_item.num_points:
+                if self.point_id == target_num_points:
                     break
-                if point_id > self.scan_item.num_points:
+                if self.point_id > self.scan_item.num_points:
                     raise RuntimeError("Received more points than expected.")
 
-            await self.wait_for_scan_item_to_finish()
-
-            elapsed_time = self.scan_item.end_time - self.scan_item.start_time
-            print(
-                table.get_footer(
-                    f"Scan {self.scan_item.scan_number} finished. Scan ID {self.scan_item.scanID}. Elapsed time: {elapsed_time:.2f} s"
-                )
+    def close_table(self):
+        elapsed_time = self.scan_item.end_time - self.scan_item.start_time
+        print(
+            self.table.get_footer(
+                f"Scan {self.scan_item.scan_number} finished. Scan ID {self.scan_item.scanID}. Elapsed time: {elapsed_time:.2f} s"
             )
+        )
 
-    async def run(self):
+    async def process_request(self):
+        if self.request.content["scan_type"] == "close_scan_def":
+            await self.wait_for_scan_item_to_finish()
+            self.close_table()
+            return
+
         await self.wait_for_request_acceptance()
         await asyncio.wait_for(self.update_scan_item(), timeout=15)
         await self.wait_for_scan_to_start()
+
+        if self.table:
+            self.table = None
+        else:
+            print(f"\nStarting scan {self.scan_item.scan_number}.")
+
         await self.core()
+
+    async def run(self):
+        if self.request.content["scan_type"] == "open_scan_def":
+            await self.wait_for_request_acceptance()
+            return
+        await self.process_request()
+        await self.wait_for_scan_item_to_finish()
+        self.close_table()

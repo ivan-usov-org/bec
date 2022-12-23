@@ -11,6 +11,7 @@ import ophyd
 from bec_utils import Alarms, BECMessage, BECService, MessageEndpoints, bec_logger
 from bec_utils.BECMessage import BECStatus
 from bec_utils.connector import ConnectorBase
+from bec_utils.devicemanager import OnFailure
 from ophyd import Staged
 from ophyd.utils import errors as ophyd_errors
 
@@ -117,12 +118,14 @@ class DeviceServer(BECService):
     def stop_devices(self) -> None:
         """stop all enabled devices"""
         logger.info("Stopping devices after receiving 'abort' request.")
+        self.status = BECStatus.BUSY
         for dev in self.device_manager.devices.enabled_devices:
             if not dev.enabled_set:
                 # don't stop devices that we haven't set
                 continue
             if hasattr(dev.obj, "stop"):
                 dev.obj.stop()
+        self.status = BECStatus.RUNNING
 
     def _assert_device_is_enabled(self, instructions) -> None:
         devices = instructions.content["device"]
@@ -344,9 +347,40 @@ class DeviceServer(BECService):
         for dev in devices:
             self.device_manager.devices.get(dev).metadata = instr.metadata
             obj = self.device_manager.devices.get(dev).obj
-            signals = obj.read()
+            try:
+                signals = obj.read()
+            except Exception as exc:
+                self.device_manager.connector.raise_alarm(
+                    severity=Alarms.WARNING,
+                    alarm_type="Warning",
+                    source="DeviceServer",
+                    content=f"Failed to read device {dev}.",
+                    metadata={},
+                )
+                ds_dev = self.device_manager.devices.get(dev)
+                if ds_dev.on_failure == OnFailure.RAISE:
+                    raise exc
+
+                if ds_dev.on_failure == OnFailure.RETRY:
+                    # try to read it again, may have been only a glitch
+                    signals = obj.read()
+                elif ds_dev.on_failure == OnFailure.BUFFER:
+                    # if possible, fall back to past readings
+                    logger.warning(f"Failed to read {dev}. Trying to load an old value.")
+                    old_msg = BECMessage.DeviceMessage.loads(
+                        self.producer.get(MessageEndpoints.device_read(dev))
+                    )
+                    if not old_msg:
+                        raise exc
+                    signals = old_msg.content["signals"]
+
             self.producer.set_and_publish(
                 MessageEndpoints.device_read(dev),
+                BECMessage.DeviceMessage(signals=signals, metadata=instr.metadata).dumps(),
+                pipe,
+            )
+            self.producer.set_and_publish(
+                MessageEndpoints.device_readback(dev),
                 BECMessage.DeviceMessage(signals=signals, metadata=instr.metadata).dumps(),
                 pipe,
             )
@@ -367,27 +401,43 @@ class DeviceServer(BECService):
         if not isinstance(devices, list):
             devices = [devices]
 
+        pipe = self.producer.pipeline()
         for dev in devices:
             obj = self.device_manager.devices[dev].obj
-            if not hasattr(obj, "_staged"):
-                continue
-            # pylint: disable=protected-access
-            if obj._staged == Staged.yes:
-                logger.warning(f"Device {obj.name} was already staged and will be first unstaged.")
-                self.device_manager.devices[dev].obj.unstage()
-            self.device_manager.devices[dev].obj.stage()
+            if hasattr(obj, "_staged"):
+                # pylint: disable=protected-access
+                if obj._staged == Staged.yes:
+                    logger.info(f"Device {obj.name} was already staged and will be first unstaged.")
+                    self.device_manager.devices[dev].obj.unstage()
+                self.device_manager.devices[dev].obj.stage()
+            self.producer.set(
+                MessageEndpoints.device_staged(dev),
+                BECMessage.DeviceStatusMessage(
+                    device=dev, status=1, metadata=instr.metadata
+                ).dumps(),
+                pipe,
+            )
+        pipe.execute()
 
     def _unstage_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
         devices = instr.content["device"]
         if not isinstance(devices, list):
             devices = [devices]
 
+        pipe = self.producer.pipeline()
         for dev in devices:
             obj = self.device_manager.devices[dev].obj
-            if not hasattr(obj, "_staged"):
-                continue
-            # pylint: disable=protected-access
-            if obj._staged == Staged.yes:
-                self.device_manager.devices[dev].obj.unstage()
-                continue
-            logger.debug(f"Device {obj.name} was already unstaged.")
+            if hasattr(obj, "_staged"):
+                # pylint: disable=protected-access
+                if obj._staged == Staged.yes:
+                    self.device_manager.devices[dev].obj.unstage()
+                else:
+                    logger.debug(f"Device {obj.name} was already unstaged.")
+            self.producer.set(
+                MessageEndpoints.device_staged(dev),
+                BECMessage.DeviceStatusMessage(
+                    device=dev, status=0, metadata=instr.metadata
+                ).dumps(),
+                pipe,
+            )
+        pipe.execute()

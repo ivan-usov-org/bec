@@ -3,10 +3,12 @@ from __future__ import annotations
 import asyncio
 import datetime
 import time
+import uuid
 from math import inf
 
 from bec_utils import BECMessage, MessageEndpoints, bec_errors, bec_logger
 from bec_utils import timeout as bec_timeout
+from typeguard import typechecked
 
 from bec_client.callbacks.live_table import LiveUpdatesTable
 from bec_client.queue_items import QueueStorage
@@ -242,23 +244,46 @@ class ScanManager:
             ).dumps(),
         )
 
-    def request_scan_restart(self, scanID=None, replace=True):
+    def request_scan_restart(self, scanID=None, requestID=None, replace=True) -> str:
         """request to restart a scan"""
         if scanID is None:
             scanID = self.scan_storage.current_scanID
+        if requestID is None:
+            requestID = str(uuid.uuid4())
         logger.info("Requesting to abort and repeat a scan")
         position = "replace" if replace else "append"
+
         self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
             BECMessage.ScanQueueModificationMessage(
-                scanID=scanID, action="restart", parameter={"position": position}
+                scanID=scanID,
+                action="restart",
+                parameter={"position": position, "RID": requestID},
             ).dumps(),
         )
+        return requestID
 
     @property
     def next_scan_number(self):
         """get the next scan number from redis"""
         return int(self.producer.get(MessageEndpoints.scan_number()))
+
+    @next_scan_number.setter
+    @typechecked
+    def next_scan_number(self, val: int):
+        """set the next scan number in redis"""
+        return self.producer.set(MessageEndpoints.scan_number(), val)
+
+    @property
+    def next_dataset_number(self):
+        """get the next dataset number from redis"""
+        return int(self.producer.get(MessageEndpoints.dataset_number()))
+
+    @next_dataset_number.setter
+    @typechecked
+    def next_dataset_number(self, val: int):
+        """set the next dataset number in redis"""
+        return self.producer.set(MessageEndpoints.dataset_number(), val)
 
     @staticmethod
     def _scan_queue_status_callback(msg, *, parent: ScanManager, **_kwargs) -> None:

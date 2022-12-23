@@ -164,9 +164,16 @@ class ScanGuard:
         Returns:
 
         """
-        msg = BECMessage.ScanQueueModificationMessage.loads(msg).dumps()
+        mod_msg = BECMessage.ScanQueueModificationMessage.loads(msg)
+
+        if mod_msg.content.get("action") == "restart":
+            RID = mod_msg.content["parameter"].get("RID")
+            if RID:
+                mod_msg.metadata["RID"] = RID
+                self._send_scan_request_response(ScanStatus(), mod_msg.metadata)
+
         sqm = MessageEndpoints.scan_queue_modification()
-        self.device_manager.producer.send(sqm, msg)
+        self.device_manager.producer.send(sqm, mod_msg.dumps())
 
     def _append_to_scan_queue(self, msg):
         logger.info("Appending new scan to queue")
