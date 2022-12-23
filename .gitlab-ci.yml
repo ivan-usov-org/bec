@@ -111,7 +111,7 @@ pages:
   stage: Deploy
   script:
     - pip install -U sphinx
-    - pip install sphinx-rtd-theme
+    - pip install pydata-sphinx-theme sphinx-copybutton recommonmark
     - sphinx-build -b html ./docs/source public
   artifacts:
     paths:
