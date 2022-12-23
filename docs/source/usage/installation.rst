@@ -12,6 +12,8 @@ Install docker
 Create a new virtual environment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. note:: The minimum python version is 3.8. Although newer python versions are being tested, they are currently not actively supported.
+
 Python environment
 ^^^^^^^^^^^^^^^^^^
 .. code-block:: bash
@@ -112,25 +114,31 @@ Now you could open a browser and check out `<http://localhost:3030>`_ page.
 Inspect services
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* Check the running docker containers:
-  ```
-  sudo docker ps
-  ```
-* Connect to a running docker container:
-  ```
-  sudo docker exec -it <container-name> /bin/bash
-  ```
+To check the running docker containers:
+
+.. code-block:: bash
+
+    sudo docker ps
+  
+To connect to a running docker container:
+
+.. code-block:: bash
+
+    sudo docker exec -it <container-name> /bin/bash
+
 
 MongoDB
 ^^^^^^^^^^^^^^^^^^
 Inspect MongoDB 
 
-If the MongoDB instance is running on docker, first connect to the container using <br>
-```
-sudo docker exec -it <container-name> /bin/bash
-```
+If the MongoDB instance is running on docker, first connect to the container using
+
+.. code-block:: bash
+
+    sudo docker exec -it <container-name> /bin/bash
+
 Running `mongo` (mongoDB version < 6) or `mongosh` (mongoDB version >= 6) will connect you to the mongo shell. Once connected, the database can be selected with `use scibec` . 
-You can now run queries on e.g. devices using `db.Device.find()` .
+You can now run queries on e.g. devices using `db.Device.find()`.
 To delete everything, use `db.Device.drop()`
 
 If you want to reset the entire database, you will have to delete the data stored in Beamline, Session and Device.

@@ -12,7 +12,7 @@ Beamline Experiment Control
 
    usage/introduction
    usage/installation
-   usage/tutorial
+   usage/quickstart
    autodoc/autodoc
 
 
