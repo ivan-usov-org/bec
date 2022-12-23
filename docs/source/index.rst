@@ -6,25 +6,13 @@
 Welcome to BEC's documentation!
 ===============================
 
-.. autosummary::
-   :toctree: _autosummary
-   :template: custom-module-template.rst
-   :recursive:
-
-   bec_client
-   bec_utils
-   scan_bundler
-   scan_server
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+
+   usage/introduction
+   usage/installation
+   usage/tutorial
+   autodoc/autodoc
 
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
