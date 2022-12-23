@@ -51,6 +51,15 @@ tests:
   artifacts:
     reports:
       cobertura: coverage.xml
+tests-3.9:
+  extends: "tests"
+  stage: Test
+  image: python:3.9
+
+verify-3.10:
+  extends: "tests"
+  stage: Test
+  image: python:3.10
 end-2-end:
   stage: Test
   image: docker:20.10.16
