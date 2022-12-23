@@ -111,7 +111,7 @@ pages:
   stage: Deploy
   script:
     - pip install -U sphinx
-    - pip install -r ./docs/requirements.txt
+    - pip install -r ./docs/source/requirements.txt
     - sphinx-build -b html ./docs/source public
   artifacts:
     paths:
