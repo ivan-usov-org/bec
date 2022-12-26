@@ -319,7 +319,7 @@ class DeviceServer(BECService):
         dev_msg = BECMessage.DeviceReqStatusMessage(
             device=status.device.name,
             success=status.success,
-            metadata=self.device_manager.devices.get(status.device.name).metadata,
+            metadata=status.instruction.metadata,
         ).dumps()
         logger.debug(f"req status for device {status.device.name}: {status.success}")
         self.producer.set_and_publish(
