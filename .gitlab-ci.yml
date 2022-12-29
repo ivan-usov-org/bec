@@ -59,11 +59,14 @@ tests-3.9:
   extends: "tests"
   stage: Test
   image: python:3.9
+  allow_failure: true
 
 tests-3.10:
   extends: "tests"
   stage: Test
   image: python:3.10
+  allow_failure: true
+  
 end-2-end:
   stage: Test
   needs: []
