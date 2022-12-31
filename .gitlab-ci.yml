@@ -12,7 +12,9 @@ services:
 # different stages in the pipeline
 stages:
   - Formatter
-  - Test
+  - Unittests
+  - AdditionalTests
+  - End2End
   - Deploy
 formatter:
   stage: Formatter
@@ -36,7 +38,7 @@ pylint:
       - ./pylint/
     expire_in: 1 week
 tests:
-  stage: Test
+  stage: Unittests
   needs: []
   script:
     - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
@@ -55,8 +57,9 @@ tests:
     reports:
       junit: report.xml
       cobertura: coverage.xml
+
 tests-3.9:
-  stage: Test
+  stage: AdditionalTests
   image: python:3.9
   needs: ["tests"]
   allow_failure: true
@@ -73,12 +76,12 @@ tests-3.9:
 
 tests-3.10:
   extends: "tests-3.9"
-  stage: Test
+  stage: AdditionalTests
   image: python:3.10
   allow_failure: true
   
 end-2-end:
-  stage: Test
+  stage: End2End
   needs: []
   image: docker:20.10.16
   artifacts:
