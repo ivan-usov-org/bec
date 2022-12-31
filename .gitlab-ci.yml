@@ -129,6 +129,11 @@ pages:
   needs: ["tests"]
   script:
     - pip install -U sphinx
+    - pip install -e ./device_server
+    - pip install -e ./scan_server
+    - pip install -e ./scan_bundler
+    - pip install -e ./bec_client
+    - pip install -e ./file_writer
     - pip install -r ./docs/source/requirements.txt
     - sphinx-build -b html ./docs/source public
     - curl -X POST -d "branches=$CI_COMMIT_REF_NAME" -d "token=$RTD_TOKEN" https://readthedocs.org/api/v2/webhook/beamline-experiment-control/221870/
