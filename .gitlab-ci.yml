@@ -56,17 +56,25 @@ tests:
       junit: report.xml
       cobertura: coverage.xml
 tests-3.9:
-  extends: "tests"
   stage: Test
   image: python:3.9
   needs: ["tests"]
   allow_failure: true
+  script: 
+    - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
+    - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices
+    - pip install pytest pytest-random-order pytest-cov pytest-asyncio
+    - pip install -e ./device_server
+    - pip install -e ./scan_server
+    - pip install -e ./scan_bundler
+    - pip install -e ./bec_client
+    - pip install -e ./file_writer    
+    - pytest -v --junitxml=report.xml --random-order ./bec_utils/tests ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests ./file_writer/tests
 
 tests-3.10:
-  extends: "tests"
+  extends: "tests-3.9"
   stage: Test
   image: python:3.10
-  needs: ["tests"]
   allow_failure: true
   
 end-2-end:
