@@ -142,6 +142,8 @@ pages:
   needs: ["tests"]
   script:
     - pip install sphinx==3.5.0
+    - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
+    - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices    
     - pip install -r ./docs/source/requirements.txt
     - pip install -e ./device_server
     - pip install -e ./scan_server
