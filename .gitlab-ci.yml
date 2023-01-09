@@ -150,11 +150,8 @@ pages:
     - pip install -e ./scan_bundler
     - pip install -e ./bec_client
     - pip install -e ./file_writer    
-    - sphinx-build -b html ./docs/source public
+    - cd ./docs/source; make html
     - curl -X POST -d "branches=$CI_COMMIT_REF_NAME" -d "token=$RTD_TOKEN" https://readthedocs.org/api/v2/webhook/beamline-experiment-control/221870/
-  artifacts:
-    paths:
-      - public
   rules:
     - if: '$CI_COMMIT_REF_NAME == "master"'
     - if: '$CI_COMMIT_REF_NAME == "production"'
