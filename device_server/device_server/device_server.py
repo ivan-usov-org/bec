@@ -27,6 +27,10 @@ class DisabledDeviceError(Exception):
     pass
 
 
+class InvalidDeviceError(Exception):
+    pass
+
+
 def rgetattr(obj, attr, *args):
     """See https://stackoverflow.com/questions/31174295/getattr-and-setattr-on-nested-objects"""
 
@@ -127,15 +131,23 @@ class DeviceServer(BECService):
                 dev.obj.stop()
         self.status = BECStatus.RUNNING
 
-    def _assert_device_is_enabled(self, instructions) -> None:
+    def _assert_device_is_enabled(self, instructions: BECMessage.DeviceInstructionMessage) -> None:
         devices = instructions.content["device"]
-        if isinstance(devices, list):
-            for dev in devices:
-                if not self.device_manager.devices[dev].enabled:
-                    raise DisabledDeviceError(f"Cannot access disabled device {dev}.")
-        elif isinstance(devices, str):
-            if not self.device_manager.devices[devices].enabled:
-                raise DisabledDeviceError(f"Cannot access disabled device {devices}.")
+
+        if isinstance(devices, str):
+            devices = [devices]
+
+        for dev in devices:
+            if not self.device_manager.devices[dev].enabled:
+                raise DisabledDeviceError(f"Cannot access disabled device {dev}.")
+
+    def _assert_device_is_valid(self, instructions: BECMessage.DeviceInstructionMessage) -> None:
+        devices = instructions.content["device"]
+        if isinstance(devices, str):
+            devices = [devices]
+        for dev in devices:
+            if dev not in self.device_manager.devices:
+                raise InvalidDeviceError(f"There is no device with the name {dev}.")
 
     def handle_device_instructions(self, msg) -> None:
         """Parse a device instruction message and handle the requested action. Action
@@ -149,6 +161,7 @@ class DeviceServer(BECService):
             instructions = BECMessage.DeviceInstructionMessage.loads(msg.value)
             action = instructions.content["action"]
             if instructions.content["device"] is not None:
+                self._assert_device_is_valid(instructions)
                 if action != "rpc":
                     # rpc has its own error handling
                     self._assert_device_is_enabled(instructions)
