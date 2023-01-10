@@ -27,6 +27,10 @@ class DisabledDeviceError(Exception):
     pass
 
 
+class InvalidDeviceError(Exception):
+    pass
+
+
 def rgetattr(obj, attr, *args):
     """See https://stackoverflow.com/questions/31174295/getattr-and-setattr-on-nested-objects"""
 
@@ -98,9 +102,9 @@ class DeviceServer(BECService):
         self.device_manager.shutdown()
 
     def _update_device_metadata(self, instr) -> None:
-        dev_list = instr.content["device"]
-        devices = []
-        devices.extend([dev_list] if not isinstance(dev_list, list) else dev_list)
+        devices = instr.content["device"]
+        if not isinstance(devices, list):
+            devices = [devices]
         for dev in devices:
             self.device_manager.devices.get(dev).metadata = instr.metadata
 
@@ -127,32 +131,45 @@ class DeviceServer(BECService):
                 dev.obj.stop()
         self.status = BECStatus.RUNNING
 
-    def _assert_device_is_enabled(self, instructions) -> None:
+    def _assert_device_is_enabled(self, instructions: BECMessage.DeviceInstructionMessage) -> None:
         devices = instructions.content["device"]
-        if isinstance(devices, list):
-            for dev in devices:
-                if not self.device_manager.devices[dev].enabled:
-                    raise DisabledDeviceError(f"Cannot access disabled device {dev}.")
-        elif isinstance(devices, str):
-            if not self.device_manager.devices[devices].enabled:
-                raise DisabledDeviceError(f"Cannot access disabled device {devices}.")
 
-    def handle_device_instructions(self, msg) -> None:
+        if isinstance(devices, str):
+            devices = [devices]
+
+        for dev in devices:
+            if not self.device_manager.devices[dev].enabled:
+                raise DisabledDeviceError(f"Cannot access disabled device {dev}.")
+
+    def _assert_device_is_valid(self, instructions: BECMessage.DeviceInstructionMessage) -> None:
+        devices = instructions.content["device"]
+        if not devices:
+            raise InvalidDeviceError("At least one device must be specified.")
+        if isinstance(devices, str):
+            devices = [devices]
+        for dev in devices:
+            if dev not in self.device_manager.devices:
+                raise InvalidDeviceError(f"There is no device with the name {dev}.")
+
+    def handle_device_instructions(self, msg: str) -> None:
         """Parse a device instruction message and handle the requested action. Action
         types are set, read, rpc, kickoff or trigger.
 
         Args:
-            msg (DeviceInstructionMessage): A DeviceInstructionMessage containing the action and its parameters
+            msg (str): A DeviceInstructionMessage string containing the action and its parameters
 
         """
+        action = None
         try:
-            instructions = BECMessage.DeviceInstructionMessage.loads(msg.value)
+            instructions = BECMessage.DeviceInstructionMessage.loads(msg)
+            if not instructions.content["device"]:
+                return
             action = instructions.content["action"]
-            if instructions.content["device"] is not None:
-                if action != "rpc":
-                    # rpc has its own error handling
-                    self._assert_device_is_enabled(instructions)
-                self._update_device_metadata(instructions)
+            self._assert_device_is_valid(instructions)
+            if action != "rpc":
+                # rpc has its own error handling
+                self._assert_device_is_enabled(instructions)
+            self._update_device_metadata(instructions)
 
             if action == "set":
                 self._set_device(instructions)
@@ -185,7 +202,7 @@ class DeviceServer(BECService):
                 self._send_rpc_exception(exc, instructions)
             else:
                 content = traceback.format_exc()
-                self.connector.log_error({"source": msg.value, "message": content})
+                self.connector.log_error({"source": msg, "message": content})
                 logger.error(content)
                 self.connector.raise_alarm(
                     severity=Alarms.MAJOR,
@@ -198,7 +215,7 @@ class DeviceServer(BECService):
     @staticmethod
     def instructions_callback(msg, *, parent, **_kwargs) -> None:
         """callback for handling device instructions"""
-        parent.executor.submit(parent.handle_device_instructions, msg)
+        parent.executor.submit(parent.handle_device_instructions, msg.value)
 
     def _get_result_from_rpc(self, rpc_var: Any, instr_params: dict) -> Any:
 
