@@ -162,6 +162,8 @@ class DeviceServer(BECService):
         action = None
         try:
             instructions = BECMessage.DeviceInstructionMessage.loads(msg)
+            if not instructions.content["device"]:
+                return
             action = instructions.content["action"]
             self._assert_device_is_valid(instructions)
             if action != "rpc":
