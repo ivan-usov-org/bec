@@ -215,8 +215,6 @@ def test_kickoff_device(instr):
 )
 def test_assert_device_is_enabled(instr):
     device_server = load_DeviceServerMock()
-    # device_server._assert_device_is_enabled(instr)
-
     devices = instr.content["device"]
 
     if not isinstance(devices, list):
@@ -227,5 +225,38 @@ def test_assert_device_is_enabled(instr):
             with pytest.raises(Exception) as exc_info:
                 device_server._assert_device_is_enabled(instr)
             assert exc_info.value.args[0] == f"Cannot access disabled device {dev}."
+        else:
+            device_server._assert_device_is_enabled(instr)
+
+
+@pytest.mark.parametrize(
+    "instr",
+    [
+        BECMessage.DeviceInstructionMessage(
+            device="samx",
+            action="stage",
+            parameter={},
+            metadata={"stream": "primary", "DIID": 1, "RID": "test"},
+        ),
+        BECMessage.DeviceInstructionMessage(
+            device="not_a_valid_device",
+            action="stage",
+            parameter={},
+            metadata={"stream": "primary", "DIID": 1, "RID": "test"},
+        ),
+    ],
+)
+def test_assert_device_is_valid(instr):
+    device_server = load_DeviceServerMock()
+    devices = instr.content["device"]
+
+    if not isinstance(devices, list):
+        devices = [devices]
+
+    for dev in devices:
+        if dev not in device_server.device_manager.devices:
+            with pytest.raises(Exception) as exc_info:
+                device_server._assert_device_is_valid(instr)
+            assert exc_info.value.args[0] == f"There is no device with the name {dev}."
         else:
             device_server._assert_device_is_enabled(instr)
