@@ -131,6 +131,36 @@ def test_stop_devices():
         ),
     ],
 )
+def test_update_device_metadata(instr):
+    device_server = load_DeviceServerMock()
+
+    devices = instr.content["device"]
+    if not isinstance(devices, list):
+        devices = [devices]
+
+    device_server._update_device_metadata(instr)
+
+    for dev in devices:
+        assert device_server.device_manager.devices.get(dev).metadata == instr.metadata
+
+
+@pytest.mark.parametrize(
+    "instr",
+    [
+        BECMessage.DeviceInstructionMessage(
+            device="samx",
+            action="read",
+            parameter={},
+            metadata={"stream": "primary", "DIID": 1, "RID": "test"},
+        ),
+        BECMessage.DeviceInstructionMessage(
+            device=["samx", "samy"],
+            action="read",
+            parameter={},
+            metadata={"stream": "primary", "DIID": 1, "RID": "test2"},
+        ),
+    ],
+)
 def test_read_device(instr):
     device_server = load_DeviceServerMock()
     device_server._read_device(instr)
