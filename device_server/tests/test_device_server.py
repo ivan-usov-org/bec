@@ -2,6 +2,7 @@ from unittest import mock
 
 import pytest
 from bec_utils import BECMessage, MessageEndpoints
+from bec_utils.BECMessage import BECStatus
 from bec_utils.tests.utils import ConnectorMock
 from ophyd import Staged
 from test_device_manager_ds import load_device_manager
@@ -26,6 +27,16 @@ class DeviceServerMock(DeviceServer):
 
     def _start_device_manager(self):
         pass
+
+
+@pytest.mark.parametrize("status", [BECStatus.ERROR, BECStatus.RUNNING, BECStatus.IDLE])
+def test_update_status(status):
+    device_server = load_DeviceServerMock()
+    assert device_server.status == BECStatus.BUSY
+
+    device_server.update_status(status)
+
+    assert device_server.status == status
 
 
 @pytest.mark.parametrize(
