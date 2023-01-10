@@ -143,6 +143,8 @@ class DeviceServer(BECService):
 
     def _assert_device_is_valid(self, instructions: BECMessage.DeviceInstructionMessage) -> None:
         devices = instructions.content["device"]
+        if not devices:
+            raise InvalidDeviceError("At least one device must be specified.")
         if isinstance(devices, str):
             devices = [devices]
         for dev in devices:
@@ -160,12 +162,11 @@ class DeviceServer(BECService):
         try:
             instructions = BECMessage.DeviceInstructionMessage.loads(msg)
             action = instructions.content["action"]
-            if instructions.content["device"] is not None:
-                self._assert_device_is_valid(instructions)
-                if action != "rpc":
-                    # rpc has its own error handling
-                    self._assert_device_is_enabled(instructions)
-                self._update_device_metadata(instructions)
+            self._assert_device_is_valid(instructions)
+            if action != "rpc":
+                # rpc has its own error handling
+                self._assert_device_is_enabled(instructions)
+            self._update_device_metadata(instructions)
 
             if action == "set":
                 self._set_device(instructions)

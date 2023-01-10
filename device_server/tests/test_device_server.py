@@ -7,6 +7,7 @@ from ophyd import Staged
 from test_device_manager_ds import load_device_manager
 
 from device_server import DeviceServer
+from device_server.device_server import InvalidDeviceError
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=protected-access
@@ -244,18 +245,29 @@ def test_assert_device_is_enabled(instr):
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
         ),
+        BECMessage.DeviceInstructionMessage(
+            device=None,
+            action="stage",
+            parameter={},
+            metadata={"stream": "primary", "DIID": 1, "RID": "test"},
+        ),
     ],
 )
 def test_assert_device_is_valid(instr):
     device_server = load_DeviceServerMock()
     devices = instr.content["device"]
 
+    if not devices:
+        with pytest.raises(InvalidDeviceError):
+            device_server._assert_device_is_valid(instr)
+        return
+
     if not isinstance(devices, list):
         devices = [devices]
 
     for dev in devices:
         if dev not in device_server.device_manager.devices:
-            with pytest.raises(Exception) as exc_info:
+            with pytest.raises(InvalidDeviceError) as exc_info:
                 device_server._assert_device_is_valid(instr)
             assert exc_info.value.args[0] == f"There is no device with the name {dev}."
         else:
