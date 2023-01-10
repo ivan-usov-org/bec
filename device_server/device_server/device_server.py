@@ -301,7 +301,7 @@ class DeviceServer(BECService):
         )
 
     def _trigger_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
-        logger.debug(f"Kickoff device: {instr}")
+        logger.debug(f"Trigger device: {instr}")
         devices = instr.content["device"]
         if not isinstance(devices, list):
             devices = [devices]
