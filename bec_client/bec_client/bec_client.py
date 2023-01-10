@@ -42,7 +42,7 @@ class BECClient(BECService, BeamlineMixin, UserScriptsMixin):
         return cls._client
 
     def __repr__(self) -> str:
-        return f"BECClient\n\nTo get a list of available commands, type `bec.show_all_commands()`"
+        return "BECClient\n\nTo get a list of available commands, type `bec.show_all_commands()`"
 
     def initialize(self, bootstrap_server: list, connector_cls: ConnectorBase, scibec_url: str):
         """initialize the BEC client"""
