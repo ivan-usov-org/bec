@@ -92,18 +92,32 @@ def test_stop_devices():
             action="read",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
-        )
+        ),
+        BECMessage.DeviceInstructionMessage(
+            device=["samx", "samy"],
+            action="read",
+            parameter={},
+            metadata={"stream": "primary", "DIID": 1, "RID": "test2"},
+        ),
     ],
 )
 def test_read_device(instr):
     device_server = load_DeviceServerMock()
     device_server._read_device(instr)
-    res = [
-        msg
-        for msg in device_server.producer.message_sent
-        if msg["queue"] == MessageEndpoints.device_read("samx")
-    ]
-    assert BECMessage.DeviceMessage.loads(res[-1]["msg"]).metadata["RID"] == "test"
+    devices = instr.content["device"]
+    # RID = instr.content['metadata']['RID']
+    if not isinstance(devices, list):
+        devices = [devices]
+    for device in devices:
+        res = [
+            msg
+            for msg in device_server.producer.message_sent
+            if msg["queue"] == MessageEndpoints.device_read(device)
+        ]
+        assert (
+            BECMessage.DeviceMessage.loads(res[-1]["msg"]).metadata["RID"] == instr.metadata["RID"]
+        )
+        assert BECMessage.DeviceMessage.loads(res[-1]["msg"]).metadata["stream"] == "primary"
 
 
 @pytest.mark.parametrize(
