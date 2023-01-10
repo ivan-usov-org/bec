@@ -105,7 +105,6 @@ def test_read_device(instr):
     device_server = load_DeviceServerMock()
     device_server._read_device(instr)
     devices = instr.content["device"]
-    # RID = instr.content['metadata']['RID']
     if not isinstance(devices, list):
         devices = [devices]
     for device in devices:
@@ -183,3 +182,50 @@ def test_kickoff_device(instr):
     ) as kickoff:
         device_server._kickoff_device(instr)
         kickoff.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    "instr",
+    [
+        BECMessage.DeviceInstructionMessage(
+            device="eiger",
+            action="stage",
+            parameter={},
+            metadata={"stream": "primary", "DIID": 1, "RID": "test"},
+        ),
+        BECMessage.DeviceInstructionMessage(
+            device=["samx", "samy"],
+            action="stage",
+            parameter={},
+            metadata={"stream": "primary", "DIID": 1, "RID": "test"},
+        ),
+        BECMessage.DeviceInstructionMessage(
+            device="motor2_disabled",
+            action="stage",
+            parameter={},
+            metadata={"stream": "primary", "DIID": 1, "RID": "test"},
+        ),
+        BECMessage.DeviceInstructionMessage(
+            device="motor1_disabled",
+            action="stage",
+            parameter={},
+            metadata={"stream": "primary", "DIID": 1, "RID": "test"},
+        ),
+    ],
+)
+def test_assert_device_is_enabled(instr):
+    device_server = load_DeviceServerMock()
+    # device_server._assert_device_is_enabled(instr)
+
+    devices = instr.content["device"]
+
+    if not isinstance(devices, list):
+        devices = [devices]
+
+    for dev in devices:
+        if not device_server.device_manager.devices[dev].enabled:
+            with pytest.raises(Exception) as exc_info:
+                device_server._assert_device_is_enabled(instr)
+            assert exc_info.value.args[0] == f"Cannot access disabled device {dev}."
+        else:
+            device_server._assert_device_is_enabled(instr)
