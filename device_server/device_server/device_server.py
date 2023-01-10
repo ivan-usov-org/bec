@@ -102,9 +102,9 @@ class DeviceServer(BECService):
         self.device_manager.shutdown()
 
     def _update_device_metadata(self, instr) -> None:
-        dev_list = instr.content["device"]
-        devices = []
-        devices.extend([dev_list] if not isinstance(dev_list, list) else dev_list)
+        devices = instr.content["device"]
+        if not isinstance(devices, list):
+            devices = [devices]
         for dev in devices:
             self.device_manager.devices.get(dev).metadata = instr.metadata
 
