@@ -5,6 +5,8 @@ import pytest
 from rich.console import Console
 
 from bec_client.beamline_mixin import BeamlineMixin
+from bec_client.plugins.cSAXS.beamline_info import BeamlineInfo
+from bec_client.plugins.SLS.sls_info import OperatorInfo, SLSInfo
 
 
 def _get_operator_messages(num: int):
@@ -35,10 +37,12 @@ def _get_operator_messages(num: int):
 )
 def test_operator_messages(info, out):
     mixin = BeamlineMixin()
-    with mock.patch.object(mixin, "_get_operator_messages", return_value=info) as get_op_msgs:
+    mixin._bl_info_register(OperatorInfo)
+    bl_call = mixin._bl_calls[-1]
+    with mock.patch.object(bl_call, "_get_operator_messages", return_value=info) as get_op_msgs:
         console = Console(file=io.StringIO(), width=120)
-        with mock.patch.object(mixin, "_get_console", return_value=console):
-            mixin.operator_messages()
+        with mock.patch.object(bl_call, "_get_console", return_value=console):
+            mixin.bl_show_all()
             get_op_msgs.assert_called_once()
             # pylint: disable=no-member
             output = console.file.getvalue()
@@ -69,10 +73,12 @@ def test_operator_messages(info, out):
 )
 def test_sls_info(info, out):
     mixin = BeamlineMixin()
-    with mock.patch.object(mixin, "_get_sls_info", return_value=info) as get_sls_info:
+    mixin._bl_info_register(SLSInfo)
+    bl_call = mixin._bl_calls[-1]
+    with mock.patch.object(bl_call, "_get_sls_info", return_value=info) as get_sls_info:
         console = Console(file=io.StringIO(), width=120)
-        with mock.patch.object(mixin, "_get_console", return_value=console):
-            mixin.sls_info()
+        with mock.patch.object(bl_call, "_get_console", return_value=console):
+            mixin.bl_show_all()
             get_sls_info.assert_called_once()
             # pylint: disable=no-member
             output = console.file.getvalue()
@@ -81,9 +87,13 @@ def test_sls_info(info, out):
 
 def test_bl_show_all():
     mixin = BeamlineMixin()
-    with mock.patch.object(mixin, "sls_info") as sls_info:
-        with mock.patch.object(mixin, "operator_messages") as op_msgs:
-            with mock.patch.object(mixin, "beamline_info") as bl_info:
+    mixin._bl_info_register(SLSInfo)
+    mixin._bl_info_register(OperatorInfo)
+    mixin._bl_info_register(BeamlineInfo)
+    calls = mixin._bl_calls
+    with mock.patch.object(calls[0], "show") as sls_info:
+        with mock.patch.object(calls[1], "show") as op_msgs:
+            with mock.patch.object(calls[2], "show") as bl_info:
                 mixin.bl_show_all()
                 bl_info.assert_called_once()
                 op_msgs.assert_called_once()
@@ -113,10 +123,14 @@ def test_bl_show_all():
 )
 def test_bl_info(info, out):
     mixin = BeamlineMixin()
-    with mock.patch.object(mixin, "_get_beamline_info_messages", return_value=info) as get_bl_info:
+    mixin._bl_info_register(BeamlineInfo)
+    bl_call = mixin._bl_calls[-1]
+    with mock.patch.object(
+        bl_call, "_get_beamline_info_messages", return_value=info
+    ) as get_bl_info:
         console = Console(file=io.StringIO(), width=120)
-        with mock.patch.object(mixin, "_get_console", return_value=console):
-            mixin.beamline_info()
+        with mock.patch.object(bl_call, "_get_console", return_value=console):
+            mixin.bl_show_all()
             get_bl_info.assert_called_once()
             # pylint: disable=no-member
             output = console.file.getvalue()
