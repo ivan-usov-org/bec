@@ -275,8 +275,38 @@ def test_assert_device_is_valid(instr):
 
 
 @pytest.mark.parametrize(
-    "msg",
+    "instr",
     [
+        BECMessage.DeviceInstructionMessage(
+            device="samx",
+            action="set",
+            parameter={},
+            metadata={"stream": "primary", "DIID": 1, "RID": "test"},
+        ),
+        BECMessage.DeviceInstructionMessage(
+            device="samx",
+            action="read",
+            parameter={},
+            metadata={"stream": "primary", "DIID": 1, "RID": "test"},
+        ),
+        BECMessage.DeviceInstructionMessage(
+            device="samx",
+            action="rpc",
+            parameter={},
+            metadata={"stream": "primary", "DIID": 1, "RID": "test"},
+        ),
+        BECMessage.DeviceInstructionMessage(
+            device="samx",
+            action="kickoff",
+            parameter={},
+            metadata={"stream": "primary", "DIID": 1, "RID": "test"},
+        ),
+        BECMessage.DeviceInstructionMessage(
+            device="samx",
+            action="trigger",
+            parameter={},
+            metadata={"stream": "primary", "DIID": 1, "RID": "test"},
+        ),
         BECMessage.DeviceInstructionMessage(
             device="samx",
             action="stage",
@@ -284,18 +314,58 @@ def test_assert_device_is_valid(instr):
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
         ),
         BECMessage.DeviceInstructionMessage(
-            device="not_a_valid_device",
-            action="stage",
+            device="samx",
+            action="unstage",
+            parameter={},
+            metadata={"stream": "primary", "DIID": 1, "RID": "test"},
+        ),
+        BECMessage.DeviceInstructionMessage(
+            device="samx",
+            action="run",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
         ),
     ],
 )
-def test_handle_device_instructions(msg):
-    pass
-    # instructions = BECMessage.DeviceInstructionMessage.loads(msg)
-    # action = instructions.content["action"]
+def test_handle_device_instructions(instr):
+    device_server = load_DeviceServerMock()
 
-    # print(action)
-    # device_server = load_DeviceServerMock()
-    # device_server.handle_device_instructions(msg)
+    device_server._assert_device_is_valid = mock.MagicMock()
+    device_server._assert_device_is_enabled = mock.MagicMock()
+    device_server._update_device_metadata = mock.MagicMock()
+
+    device_server._set_device = mock.MagicMock()
+    device_server._read_device = mock.MagicMock()
+    device_server._run_rpc = mock.MagicMock()
+    device_server._kickoff_device = mock.MagicMock()
+    device_server._trigger_device = mock.MagicMock()
+    device_server._stage_device = mock.MagicMock()
+    device_server._unstage_device = mock.MagicMock()
+
+    msg = BECMessage.DeviceInstructionMessage.dumps(instr)
+
+    device_server.handle_device_instructions(msg)
+    instructions = BECMessage.DeviceInstructionMessage.loads(msg)
+    action = instructions.content["action"]
+
+    if instructions.content["device"] is not None:
+        device_server._assert_device_is_valid.assert_called_once_with(instructions)
+        if action != "rpc":
+            # rpc has its own error handling
+            device_server._assert_device_is_enabled.assert_called_once_with(instructions)
+        device_server._update_device_metadata.assert_called_once_with(instructions)
+
+    if action == "set":
+        device_server._set_device.assert_called_once_with(instructions)
+    elif action == "read":
+        device_server._read_device.assert_called_once_with(instructions)
+    elif action == "rpc":
+        device_server._run_rpc.assert_called_once_with(instructions)
+    elif action == "kickoff":
+        device_server._kickoff_device.assert_called_once_with(instructions)
+    elif action == "trigger":
+        device_server._trigger_device.assert_called_once_with(instructions)
+    elif action == "stage":
+        device_server._stage_device.assert_called_once_with(instructions)
+    elif action == "unstage":
+        device_server._unstage_device.assert_called_once_with(instructions)
