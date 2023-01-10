@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+import bec_utils
 from bec_utils import BECMessage, MessageEndpoints
 from bec_utils.BECMessage import BECStatus
 from bec_utils.tests.utils import ConnectorMock
@@ -9,6 +10,7 @@ from test_device_manager_ds import load_device_manager
 
 from device_server import DeviceServer
 from device_server.device_server import InvalidDeviceError
+
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=protected-access
@@ -29,6 +31,16 @@ class DeviceServerMock(DeviceServer):
         pass
 
 
+def test_start():
+    device_server = load_DeviceServerMock()
+
+    device_server.start()
+
+    assert device_server.threads
+    assert type(device_server.threads[0]) == bec_utils.tests.utils.ConsumerMock
+    assert device_server.status == BECStatus.RUNNING
+
+
 @pytest.mark.parametrize("status", [BECStatus.ERROR, BECStatus.RUNNING, BECStatus.IDLE])
 def test_update_status(status):
     device_server = load_DeviceServerMock()
@@ -37,6 +49,12 @@ def test_update_status(status):
     device_server.update_status(status)
 
     assert device_server.status == status
+
+
+def test_stop():
+    device_server = load_DeviceServerMock()
+    device_server.stop()
+    assert device_server.status == BECStatus.IDLE
 
 
 @pytest.mark.parametrize(
