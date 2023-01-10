@@ -2,12 +2,12 @@ import concurrent
 import os
 from unittest import mock
 
+import bec_utils
 import pytest
 import yaml
-
-import bec_utils
 from bec_utils import BECMessage
 from bec_utils.tests.utils import ConnectorMock, create_session_from_config
+
 from device_server.devices.devicemanager import DeviceManagerDS
 
 # pylint: disable=missing-function-docstring
@@ -49,7 +49,7 @@ class EpicsDeviceMock(DeviceMock):
 
 
 def load_device_manager():
-    connector = ConnectorMock("")
+    connector = ConnectorMock("", store_data=False)
     device_manager = DeviceManagerDS(connector, "")
     device_manager.producer = connector.producer()
     with open(f"{dir_path}/tests/test_config.yaml", "r") as session_file:
@@ -58,8 +58,12 @@ def load_device_manager():
     return device_manager
 
 
-def test_device_init():
-    device_manager = load_device_manager()
+@pytest.fixture
+def device_manager():
+    return load_device_manager()
+
+
+def test_device_init(device_manager):
     for dev in device_manager.devices.values():
         if not dev.enabled:
             continue
@@ -70,8 +74,7 @@ def test_device_init():
     "obj,raises_error",
     [(DeviceMock(), True), (DeviceControllerMock(), False), (EpicsDeviceMock(), False)],
 )
-def test_conntect_device(obj, raises_error):
-    device_manager = load_device_manager()
+def test_conntect_device(device_manager, obj, raises_error):
     if raises_error:
         with pytest.raises(ConnectionError):
             device_manager.connect_device(obj)
