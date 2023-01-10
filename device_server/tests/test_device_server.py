@@ -260,3 +260,30 @@ def test_assert_device_is_valid(instr):
             assert exc_info.value.args[0] == f"There is no device with the name {dev}."
         else:
             device_server._assert_device_is_enabled(instr)
+
+
+@pytest.mark.parametrize(
+    "msg",
+    [
+        BECMessage.DeviceInstructionMessage(
+            device="samx",
+            action="stage",
+            parameter={},
+            metadata={"stream": "primary", "DIID": 1, "RID": "test"},
+        ),
+        BECMessage.DeviceInstructionMessage(
+            device="not_a_valid_device",
+            action="stage",
+            parameter={},
+            metadata={"stream": "primary", "DIID": 1, "RID": "test"},
+        ),
+    ],
+)
+def test_handle_device_instructions(msg):
+    pass
+    # instructions = BECMessage.DeviceInstructionMessage.loads(msg)
+    # action = instructions.content["action"]
+
+    # print(action)
+    # device_server = load_DeviceServerMock()
+    # device_server.handle_device_instructions(msg)
