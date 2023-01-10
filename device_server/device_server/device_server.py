@@ -149,16 +149,16 @@ class DeviceServer(BECService):
             if dev not in self.device_manager.devices:
                 raise InvalidDeviceError(f"There is no device with the name {dev}.")
 
-    def handle_device_instructions(self, msg) -> None:
+    def handle_device_instructions(self, msg: str) -> None:
         """Parse a device instruction message and handle the requested action. Action
         types are set, read, rpc, kickoff or trigger.
 
         Args:
-            msg (DeviceInstructionMessage): A DeviceInstructionMessage containing the action and its parameters
+            msg (str): A DeviceInstructionMessage string containing the action and its parameters
 
         """
         try:
-            instructions = BECMessage.DeviceInstructionMessage.loads(msg.value)
+            instructions = BECMessage.DeviceInstructionMessage.loads(msg)
             action = instructions.content["action"]
             if instructions.content["device"] is not None:
                 self._assert_device_is_valid(instructions)
@@ -198,7 +198,7 @@ class DeviceServer(BECService):
                 self._send_rpc_exception(exc, instructions)
             else:
                 content = traceback.format_exc()
-                self.connector.log_error({"source": msg.value, "message": content})
+                self.connector.log_error({"source": msg, "message": content})
                 logger.error(content)
                 self.connector.raise_alarm(
                     severity=Alarms.MAJOR,
@@ -211,7 +211,7 @@ class DeviceServer(BECService):
     @staticmethod
     def instructions_callback(msg, *, parent, **_kwargs) -> None:
         """callback for handling device instructions"""
-        parent.executor.submit(parent.handle_device_instructions, msg)
+        parent.executor.submit(parent.handle_device_instructions, msg.value)
 
     def _get_result_from_rpc(self, rpc_var: Any, instr_params: dict) -> Any:
 
