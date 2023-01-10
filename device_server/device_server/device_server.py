@@ -159,6 +159,7 @@ class DeviceServer(BECService):
             msg (str): A DeviceInstructionMessage string containing the action and its parameters
 
         """
+        action = None
         try:
             instructions = BECMessage.DeviceInstructionMessage.loads(msg)
             action = instructions.content["action"]
