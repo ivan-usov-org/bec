@@ -22,7 +22,8 @@ class BeamlineShowInfo:
 
 
 class BeamlineMixin:
-    def __init__(self) -> None:
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self._bl_calls = []
 
     def bl_show_all(self):
