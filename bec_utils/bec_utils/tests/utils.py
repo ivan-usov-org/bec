@@ -12,10 +12,14 @@ class PipelineMock:
         self._producer = producer
 
     def execute(self):
-        return [
+        if not self._producer.store_data:
+            return []
+        res = [
             getattr(self._producer, method)(*args, **kwargs)
             for method, args, kwargs in self._pipe_buffer
         ]
+        self._pipe_buffer = []
+        return res
 
 
 class ConsumerMock:
@@ -24,9 +28,10 @@ class ConsumerMock:
 
 
 class ProducerMock:
-    def __init__(self) -> None:
+    def __init__(self, store_data=True) -> None:
         self.message_sent = []
         self._get_buffer = {}
+        self.store_data = store_data
 
     def set(self, topic, msg, pipe=None, expire: int = None):
         if pipe:
@@ -91,11 +96,15 @@ class ProducerMock:
 
 
 class ConnectorMock(ConnectorBase):
+    def __init__(self, bootstrap_server: list, store_data=True):
+        super().__init__(bootstrap_server)
+        self.store_data = store_data
+
     def consumer(self, *args, **kwargs) -> ConsumerMock:
         return ConsumerMock()
 
     def producer(self, *args, **kwargs):
-        return ProducerMock()
+        return ProducerMock(self.store_data)
 
     def raise_alarm(
         self, severity: Alarms, alarm_type: str, source: str, content: dict, metadata: dict
