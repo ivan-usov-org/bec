@@ -388,3 +388,9 @@ def test_mixin_init_topics_and_pattern(mixin, topics, pattern):
             assert ret_pattern == [f"{pat}:sub" for pat in pattern]
         else:
             assert ret_pattern == [f"{pattern}:sub"]
+
+
+def test_mixin_init_redis_cls(mixin, consumer):
+
+    mixin._init_redis_cls(consumer, None)
+    assert consumer.r == redis.Redis(host="localhost", port=1)
