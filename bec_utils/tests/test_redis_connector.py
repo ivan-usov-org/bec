@@ -1,7 +1,13 @@
 from unittest import mock
 import pytest
 
-from bec_utils.redis_connector import RedisProducer, RedisConnector, Alarms
+from bec_utils.redis_connector import (
+    RedisProducer,
+    RedisConnector,
+    Alarms,
+    RedisConsumer,
+    RedisConsumerThreaded,
+)
 import redis
 
 from bec_utils.endpoints import MessageEndpoints
@@ -23,9 +29,30 @@ def connector():
 
 
 def test_redis_connector_producer(connector):
-
     ret = connector.producer()
     assert type(ret) == RedisProducer
+
+
+@pytest.mark.parametrize("topics, threaded", [["topics", True], ["topics", False], [None, True]])
+def test_redis_connector_consumer(connector, threaded, topics):
+
+    pattern = None
+    len_of_threads = len(connector._threads)
+
+    if threaded:
+        if topics is None and pattern is None:
+            with pytest.raises(Exception) as exc_info:
+                ret = connector.consumer(topics=topics, threaded=threaded)
+
+            assert exc_info.value.args[0] == "Topics must be set for threaded consumer"
+        else:
+            ret = connector.consumer(topics=topics, threaded=threaded)
+            assert len(connector._threads) == len_of_threads + 1
+            assert type(ret) == RedisConsumerThreaded
+
+    else:
+        ret = connector.consumer(topics=topics, threaded=threaded)
+        assert type(ret) == RedisConsumer
 
 
 def test_redis_connector_log_warning(connector):
