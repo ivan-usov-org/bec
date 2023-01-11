@@ -122,8 +122,9 @@ def test_redis_producer_set(producer, topic, msg, is_dict, expire):
 @pytest.mark.parametrize("pattern", ["samx", 32])
 def test_redis_producer_keys(producer, pattern):
 
-    producer.keys(pattern)
+    ret = producer.keys(pattern)
     producer.r.keys.assert_called_once_with(pattern)
+    assert ret == redis.Redis().keys()
 
 
 def test_redis_producer_get(producer):
