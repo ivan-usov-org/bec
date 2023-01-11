@@ -45,6 +45,9 @@ class RedisConnector(ConnectorBase):
         threaded=True,
         **kwargs,
     ):
+        if cb is None:
+            raise ValueError("The callback function must be specified.")
+
         if threaded:
             if topics is None and pattern is None:
                 raise ValueError("Topics must be set for threaded consumer")
@@ -61,18 +64,17 @@ class RedisConnector(ConnectorBase):
             )
             self._threads.append(listener)
             return listener
-        else:
-            return RedisConsumer(
-                self.host,
-                self.port,
-                topics,
-                pattern,
-                group_id,
-                event,
-                cb,
-                redis_cls=self.redis_cls,
-                **kwargs,
-            )
+        return RedisConsumer(
+            self.host,
+            self.port,
+            topics,
+            pattern,
+            group_id,
+            event,
+            cb,
+            redis_cls=self.redis_cls,
+            **kwargs,
+        )
 
     def log_warning(self, msg):
         """send a warning"""
@@ -205,11 +207,38 @@ class RedisProducer(ProducerConnector):
         client = pipe if pipe is not None else self.r
         if is_dict:
             return client.hgetall(f"{topic}:val")
+        return client.get(f"{topic}:val")
+
+
+class RedisConsumerMixin:
+    def _init_topics_and_pattern(self, topics, pattern):
+        if topics:
+            if isinstance(topics, list):
+                topics = [f"{topic}:sub" for topic in topics]
+            else:
+                topics = [f"{topics}:sub"]
+        if pattern:
+            if isinstance(pattern, list):
+                pattern = [f"{pat}:sub" for pat in pattern]
+            else:
+                pattern = [f"{pattern}:sub"]
+        return topics, pattern
+
+    def _init_redis_cls(self, redis_cls):
+        # pylint: disable=invalid-name
+        if redis_cls:
+            self.r = redis_cls(host=self.host, port=self.port)
         else:
-            return client.get(f"{topic}:val")
+            self.r = redis.Redis(host=self.host, port=self.port)
+
+    def initialize_connector(self) -> None:
+        if self.pattern is not None:
+            self.pubsub.psubscribe(self.pattern)
+        else:
+            self.pubsub.subscribe(self.topics)
 
 
-class RedisConsumer(ConsumerConnector):
+class RedisConsumer(RedisConsumerMixin, ConsumerConnector):
     # pylint: disable=too-many-arguments
     def __init__(
         self,
@@ -223,33 +252,26 @@ class RedisConsumer(ConsumerConnector):
         redis_cls=None,
         **kwargs,
     ):
-        bootstrap_server = "".join([host, ":", port])
-        if isinstance(topics, list):
-            topics = [f"{topic}:sub" for topic in topics]
-        else:
-            topics = [f"{topics}:sub"]
-        if pattern:
-            if isinstance(pattern, list):
-                pattern = [f"{pattern}:sub" for pattern in self.pattern]
-            else:
-                pattern = [f"{pattern}:sub"]
-        super().__init__(bootstrap_server, topics, pattern, group_id, event, cb, **kwargs)
-        # pylint: disable=invalid-name
-        if redis_cls:
-            self.r = redis_cls(host=host, port=port)
-        else:
-            self.r = redis.Redis(host=host, port=port)
-        self.pubsub = self.r.pubsub()
         self.host = host
         self.port = port
-        self.initialize_connector()
 
-    def initialize_connector(self) -> None:
-        """initialize the consumer connector"""
-        if self.pattern is not None:
-            self.pubsub.psubscribe(self.pattern)
-        else:
-            self.pubsub.subscribe(self.topics)
+        bootstrap_server = "".join([host, ":", port])
+        topics, pattern = self._init_topics_and_pattern(topics, pattern)
+        super().__init__(
+            bootstrap_server=bootstrap_server,
+            topics=topics,
+            pattern=pattern,
+            group_id=group_id,
+            event=event,
+            cb=cb,
+            **kwargs,
+        )
+
+        self._init_redis_cls(redis_cls)
+
+        self.pubsub = self.r.pubsub()
+
+        self.initialize_connector()
 
     def poll_messages(self) -> None:
         """
@@ -269,7 +291,7 @@ class RedisConsumer(ConsumerConnector):
         self.pubsub.close()
 
 
-class RedisConsumerThreaded(ConsumerConnectorThreaded):
+class RedisConsumerThreaded(RedisConsumerMixin, ConsumerConnectorThreaded):
     # pylint: disable=too-many-arguments
     def __init__(
         self,
@@ -283,34 +305,27 @@ class RedisConsumerThreaded(ConsumerConnectorThreaded):
         redis_cls=None,
         **kwargs,
     ):
-        bootstrap_server = "".join([host, ":", port])
-        if isinstance(topics, list):
-            topics = [f"{topic}:sub" for topic in topics]
-        else:
-            topics = [f"{topics}:sub"]
-        if pattern:
-            if isinstance(pattern, list):
-                pattern = [f"{pattern}:sub" for pattern in self.pattern]
-            else:
-                pattern = [f"{pattern}:sub"]
-        super().__init__(bootstrap_server, topics, pattern, group_id, event, cb, **kwargs)
-        # pylint: disable=invalid-name
-        if redis_cls:
-            self.r = redis_cls(host=host, port=port)
-        else:
-            self.r = redis.Redis(host=host, port=port)
-        self.pubsub = self.r.pubsub()
         self.host = host
         self.port = port
+
+        bootstrap_server = "".join([host, ":", port])
+        topics, pattern = self._init_topics_and_pattern(topics, pattern)
+        super().__init__(
+            bootstrap_server=bootstrap_server,
+            topics=topics,
+            pattern=pattern,
+            group_id=group_id,
+            event=event,
+            cb=cb,
+            **kwargs,
+        )
+
+        self._init_redis_cls(redis_cls)
+        self.pubsub = self.r.pubsub()
+
         self.sleep_times = [0.005, 0.1]
         self.last_received_msg = 0
         self.idle_time = 30
-
-    def initialize_connector(self) -> None:
-        if self.pattern is not None:
-            self.pubsub.psubscribe(self.pattern)
-        else:
-            self.pubsub.subscribe(self.topics)
 
     def poll_messages(self) -> None:
         """
