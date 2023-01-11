@@ -293,8 +293,14 @@ def use_pipe_fcn(producer, use_pipe):
 
 
 @pytest.mark.parametrize(
-    "topics, pattern", [["topics1", None], [["topics1", "topics2"], None], [None, "pattern1"]]
-)  # , [None, ["pattern1", "pattern2"]]])
+    "topics, pattern",
+    [
+        ["topics1", None],
+        [["topics1", "topics2"], None],
+        [None, "pattern1"],
+        [None, ["pattern1", "pattern2"]],
+    ],
+)
 def test_redis_consumer_init(consumer, topics, pattern):
 
     with mock.patch("bec_utils.redis_connector.redis.Redis"):
@@ -331,8 +337,15 @@ def test_redis_consumer_initialize_connector(consumer, pattern, topics):
 
 
 def test_redis_consumer_poll_messages(consumer):
-    pass
-    # ret = consumer.poll_messages() # can't run the fcn , get stuck at "return self.cb(msg, **self.kwargs)" - > 'NoneType' object is not callable
+    def cb_fcn(msg, **kwargs):
+        print(msg)
+
+    consumer.cb = cb_fcn
+
+    ret = consumer.poll_messages()
+
+    assert ret == None
+    consumer.pubsub.get_message.assert_called_once_with(ignore_subscribe_messages=True)
 
 
 def test_redis_consumer_shutdown(consumer):
