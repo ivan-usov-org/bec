@@ -1,7 +1,7 @@
 from unittest import mock
 import pytest
 
-from bec_utils.redis_connector import RedisProducer, RedisConnector
+from bec_utils.redis_connector import RedisProducer, RedisConnector, Alarms
 import redis
 
 from bec_utils.endpoints import MessageEndpoints
@@ -46,6 +46,31 @@ def test_redis_connector_log_error(connector):
     connector.log_error("msg")
     connector._notifications_producer.send.assert_called_once_with(
         MessageEndpoints.log(), LogMessage(log_type="error", content="msg").dumps()
+    )
+
+
+@pytest.mark.parametrize(
+    "severity, alarm_type, source, content, metadata",
+    [
+        [Alarms.MAJOR, "alarm", "source", {"content": "content1"}, {"metadata": "metadata1"}],
+        [Alarms.MINOR, "alarm", "source", {"content": "content1"}, {"metadata": "metadata1"}],
+        [Alarms.WARNING, "alarm", "source", {"content": "content1"}, {"metadata": "metadata1"}],
+    ],
+)
+def test_redis_connector_raise_alarm(connector, severity, alarm_type, source, content, metadata):
+    connector._notifications_producer.set_and_publish = mock.MagicMock()
+
+    connector.raise_alarm(severity, alarm_type, source, content, metadata)
+
+    connector._notifications_producer.set_and_publish.assert_called_once_with(
+        MessageEndpoints.alarm(),
+        AlarmMessage(
+            severity=severity,
+            alarm_type=alarm_type,
+            source=source,
+            content=content,
+            metadata=metadata,
+        ).dumps(),
     )
 
 
