@@ -11,7 +11,7 @@ from bec_utils.redis_connector import (
     RedisConsumer,
     RedisConsumerThreaded,
     RedisProducer,
-    MessageObject,
+    RedisConsumerMixin,
 )
 
 
@@ -34,6 +34,13 @@ def consumer():
     with mock.patch("bec_utils.redis_connector.redis.Redis"):
         consumer = RedisConsumer("localhost", "1", topics="topics")
         yield consumer
+
+
+@pytest.fixture
+def mixin():
+    with mock.patch("bec_utils.redis_connector.redis.Redis"):
+        mixin = RedisConsumerMixin
+        yield mixin
 
 
 def test_redis_connector_producer(connector):
@@ -356,3 +363,28 @@ def test_redis_consumer_shutdown(consumer):
 def test_redis_consumer_additional_kwargs(connector):
     cons = connector.consumer(topics="topic", parent="here")
     assert "parent" in cons.kwargs
+
+
+@pytest.mark.parametrize(
+    "topics, pattern",
+    [
+        ["topics1", None],
+        [["topics1", "topics2"], None],
+        [None, "pattern1"],
+        [None, ["pattern1", "pattern2"]],
+    ],
+)
+def test_mixin_init_topics_and_pattern(mixin, topics, pattern):
+
+    ret_topics, ret_pattern = mixin._init_topics_and_pattern(mixin, topics, pattern)
+
+    if topics:
+        if isinstance(topics, list):
+            assert ret_topics == [f"{topic}:sub" for topic in topics]
+        else:
+            assert ret_topics == [f"{topics}:sub"]
+    if pattern:
+        if isinstance(pattern, list):
+            assert ret_pattern == [f"{pat}:sub" for pat in pattern]
+        else:
+            assert ret_pattern == [f"{pattern}:sub"]
