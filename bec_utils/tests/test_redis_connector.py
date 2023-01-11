@@ -39,6 +39,13 @@ def consumer():
 
 
 @pytest.fixture
+def consumer_threaded():
+    with mock.patch("bec_utils.redis_connector.redis.Redis"):
+        consumer_threaded = RedisConsumerThreaded("localhost", "1", topics="topics")
+        yield consumer_threaded
+
+
+@pytest.fixture
 def mixin():
     with mock.patch("bec_utils.redis_connector.redis.Redis"):
         mixin = RedisConsumerMixin
@@ -404,3 +411,39 @@ def test_mixin_init_redis_cls(mixin, consumer):
 
     mixin._init_redis_cls(consumer, None)
     assert consumer.r == redis.Redis(host="localhost", port=1)
+
+
+@pytest.mark.parametrize(
+    "topics, pattern",
+    [
+        ["topics1", None],
+        [["topics1", "topics2"], None],
+        [None, "pattern1"],
+        [None, ["pattern1", "pattern2"]],
+    ],
+)
+def test_redis_consumer_threaded_init(consumer_threaded, topics, pattern):
+
+    with mock.patch("bec_utils.redis_connector.redis.Redis"):
+        consumer_threaded = RedisConsumerThreaded(
+            "localhost", "1", topics, pattern, redis_cls=redis.Redis, cb=lambda *args, **kwargs: ...
+        )
+
+        if topics:
+            if isinstance(topics, list):
+                assert consumer_threaded.topics == [f"{topic}:sub" for topic in topics]
+            else:
+                assert consumer_threaded.topics == [f"{topics}:sub"]
+        if pattern:
+            if isinstance(pattern, list):
+                assert consumer_threaded.pattern == [f"{pat}:sub" for pat in pattern]
+            else:
+                assert consumer_threaded.pattern == [f"{pattern}:sub"]
+
+        assert consumer_threaded.r == redis.Redis()
+        assert consumer_threaded.pubsub == consumer_threaded.r.pubsub()
+        assert consumer_threaded.host == "localhost"
+        assert consumer_threaded.port == "1"
+        assert consumer_threaded.sleep_times == [0.005, 0.1]
+        assert consumer_threaded.last_received_msg == 0
+        assert consumer_threaded.idle_time == 30
