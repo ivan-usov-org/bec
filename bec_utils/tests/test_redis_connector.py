@@ -133,6 +133,18 @@ def test_redis_producer_pipeline(producer):
     assert ret == redis.Redis().pipeline()
 
 
+@pytest.mark.parametrize("topic,use_pipe", [["topic1", True], ["topic2", False]])
+def test_redis_producer_delete(producer, topic, use_pipe):
+    pipe = use_pipe_fcn(producer, use_pipe)
+
+    producer.delete(topic, pipe)
+
+    if pipe:
+        producer.pipeline().delete.assert_called_once_with(topic)
+    else:
+        producer.r.delete.assert_called_once_with(topic)
+
+
 def test_redis_producer_get(producer):
     producer.get("topic")
     producer.r.get.assert_called_once()
