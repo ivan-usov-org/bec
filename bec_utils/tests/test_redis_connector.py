@@ -119,12 +119,18 @@ def test_redis_producer_set(producer, topic, msg, is_dict, expire):
         producer.r.pipeline().execute.assert_called_once()
 
 
-@pytest.mark.parametrize("pattern", ["samx", 32])
+@pytest.mark.parametrize("pattern", ["samx", "samy"])
 def test_redis_producer_keys(producer, pattern):
 
     ret = producer.keys(pattern)
     producer.r.keys.assert_called_once_with(pattern)
     assert ret == redis.Redis().keys()
+
+
+def test_redis_producer_pipeline(producer):
+    ret = producer.pipeline()
+    producer.r.pipeline.assert_called_once()
+    assert ret == redis.Redis().pipeline()
 
 
 def test_redis_producer_get(producer):
