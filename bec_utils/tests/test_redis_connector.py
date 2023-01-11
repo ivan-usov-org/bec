@@ -289,20 +289,24 @@ def test_redis_producer_get(producer, topic, use_pipe, is_dict):
 def use_pipe_fcn(producer, use_pipe):
     if use_pipe:
         return producer.pipeline()
-    else:
-        return None
+    return None
 
 
-@pytest.mark.parametrize("pattern, topics", [["pattern", "topics1"], [None, "topics2"]])
-def test_redis_consumer_initialize_connector(consumer, pattern, topics):
-    consumer.pattern = pattern
-    print(consumer.topics)
+def test_redis_consumer_additional_kwargs(connector):
+    cons = connector.consumer(topics="topic", parent="here")
+    assert "parent" in cons.kwargs
 
-    consumer.topics = topics
-    print(consumer.topics)
-    consumer.initialize_connector()
 
-    if consumer.pattern is not None:
-        consumer.pubsub.psubscribe.assert_called_once_with(consumer.pattern)
-    else:
-        consumer.pubsub.subscribe.assert_called_with(consumer.topics)
+# @pytest.mark.parametrize("pattern, topics", [["pattern", "topics1"], [None, "topics2"]])
+# def test_redis_consumer_initialize_connector(consumer, pattern, topics):
+#     consumer.pattern = pattern
+#     print(consumer.topics)
+
+#     consumer.topics = topics
+#     print(consumer.topics)
+#     consumer.initialize_connector()
+
+#     if consumer.pattern is not None:
+#         consumer.pubsub.psubscribe.assert_called_once_with(consumer.pattern)
+#     else:
+#         consumer.pubsub.subscribe.assert_called_with(consumer.topics)

@@ -141,6 +141,7 @@ class ConsumerConnectorThreaded(ConsumerConnector, threading.Thread):
             group_id=group_id,
             event=event,
             cb=cb,
+            **kwargs,
         )
         super(ConsumerConnector, self).__init__(daemon=True)
         self.signal_event = event if event is not None else threading.Event()
