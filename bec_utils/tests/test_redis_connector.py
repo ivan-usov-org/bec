@@ -2,6 +2,7 @@ from unittest import mock
 import pytest
 
 from bec_utils.redis_connector import RedisProducer
+import redis
 
 
 @pytest.fixture
@@ -36,6 +37,25 @@ def test_redis_producer_lpush(producer, topic, msgs, max_size, expire):
         producer.r.pipeline().expire.assert_called_once_with(f"{topic}:val", expire)
     if not pipe:
         producer.r.pipeline().execute.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    "topic , index , msgs, use_pipe", [["topic1", 1, "msg1", True], ["topic2", 4, "msg2", False]]
+)
+def test_redis_producer_lset(producer, topic, index, msgs, use_pipe):
+    if use_pipe:
+        pipe = producer.pipeline()
+    else:
+        pipe = None
+
+    ret = producer.lset(topic, index, msgs, pipe)
+
+    if pipe:
+        producer.r.pipeline().lset.assert_called_once_with(f"{topic}:val", index, msgs)
+        assert ret == redis.Redis().pipeline().lset()
+    else:
+        producer.r.lset.assert_called_once_with(f"{topic}:val", index, msgs)
+        assert ret == redis.Redis().lset()
 
 
 def test_redis_producer_set(producer):
