@@ -28,6 +28,13 @@ def connector():
         yield connector
 
 
+@pytest.fixture
+def consumer():
+    with mock.patch("bec_utils.redis_connector.redis.Redis"):
+        consumer = RedisConsumer("localhost", "1")
+        yield consumer
+
+
 def test_redis_connector_producer(connector):
     ret = connector.producer()
     assert type(ret) == RedisProducer
@@ -277,3 +284,18 @@ def use_pipe_fcn(producer, use_pipe):
         return producer.pipeline()
     else:
         return None
+
+
+@pytest.mark.parametrize("pattern, topics", [["pattern", "topics1"], [None, "topics2"]])
+def test_redis_consumer_initialize_connector(consumer, pattern, topics):
+    consumer.pattern = pattern
+    print(consumer.topics)
+
+    consumer.topics = topics
+    print(consumer.topics)
+    consumer.initialize_connector()
+
+    if consumer.pattern is not None:
+        consumer.pubsub.psubscribe.assert_called_once_with(consumer.pattern)
+    else:
+        consumer.pubsub.subscribe.assert_called_with(consumer.topics)
