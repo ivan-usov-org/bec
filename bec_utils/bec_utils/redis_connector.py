@@ -224,10 +224,11 @@ class RedisConsumer(ConsumerConnector):
         **kwargs,
     ):
         bootstrap_server = "".join([host, ":", port])
-        if isinstance(topics, list):
-            topics = [f"{topic}:sub" for topic in topics]
-        else:
-            topics = [f"{topics}:sub"]
+        if topics:
+            if isinstance(topics, list):
+                topics = [f"{topic}:sub" for topic in topics]
+            else:
+                topics = [f"{topics}:sub"]
         if pattern:
             if isinstance(pattern, list):
                 pattern = [f"{pattern}:sub" for pattern in self.pattern]
