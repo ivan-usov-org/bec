@@ -1,8 +1,11 @@
 from unittest import mock
 import pytest
 
-from bec_utils.redis_connector import RedisProducer
+from bec_utils.redis_connector import RedisProducer, RedisConnector
 import redis
+
+from bec_utils.endpoints import MessageEndpoints
+from bec_utils.BECMessage import AlarmMessage, LogMessage
 
 
 @pytest.fixture
@@ -10,6 +13,13 @@ def producer():
     with mock.patch("bec_utils.redis_connector.redis.Redis"):
         prod = RedisProducer("localhost", 1)
         yield prod
+
+
+@pytest.fixture
+def connector():
+    with mock.patch("bec_utils.redis_connector.redis.Redis"):
+        connector = RedisConnector("localhost:1")
+        yield connector
 
 
 @pytest.mark.parametrize("topic , msg", [["topic1", "msg1"], ["topic2", "msg2"]])
@@ -182,3 +192,12 @@ def use_pipe_fcn(producer, use_pipe):
         return producer.pipeline()
     else:
         return None
+
+
+def test_redis_connector_log_warning(connector):
+    connector._notifications_producer.send = mock.MagicMock()
+
+    connector.log_warning("msg")
+    connector._notifications_producer.send.assert_called_once_with(
+        MessageEndpoints.log(), LogMessage(log_type="warning", content="msg").dumps()
+    )
