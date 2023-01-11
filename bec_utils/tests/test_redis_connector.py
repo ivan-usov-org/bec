@@ -20,6 +20,24 @@ def test_redis_producer_send(producer, topic, msg):
     producer.r.pipeline().publish.assert_called_once_with(f"{topic}:sub", msg)
 
 
+@pytest.mark.parametrize(
+    "topic, msgs, max_size, expire",
+    [["topic", "msgs", None, None], ["topic", "msgs", 10, None], ["topic", "msgs", None, 100]],
+)
+def test_redis_producer_lpush(producer, topic, msgs, max_size, expire):
+    pipe = None
+    producer.lpush(topic, msgs, pipe, max_size, expire)
+
+    producer.r.pipeline().lpush.assert_called_once_with(f"{topic}:val", msgs)
+
+    if max_size:
+        producer.r.pipeline().ltrim.assert_called_once_with(f"{topic}:val", 0, max_size)
+    if expire:
+        producer.r.pipeline().expire.assert_called_once_with(f"{topic}:val", expire)
+    if not pipe:
+        producer.r.pipeline().execute.assert_called_once()
+
+
 def test_redis_producer_set(producer):
     producer.set("topic", "msg")
     producer.r.pipeline().set.assert_called_once()
