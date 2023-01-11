@@ -87,6 +87,21 @@ def test_redis_producer_lrange(producer, topic, start, end, use_pipe):
         assert ret == redis.Redis().lrange()
 
 
+@pytest.mark.parametrize(
+    "topic, msg, pipe, expire", [["topic1", "msg1", None, 400], ["topic2", "msg2", None, None]]
+)
+def test_redis_producer_set_and_publish(producer, topic, msg, pipe, expire):
+
+    producer.set_and_publish(topic, msg, pipe, expire)
+
+    producer.r.pipeline().publish.assert_called_once_with(f"{topic}:sub", msg)
+    producer.r.pipeline().set.assert_called_once_with(f"{topic}:val", msg)
+    if expire:
+        producer.r.pipeline().expire.assert_called_once_with(f"{topic}:val", expire)
+    if not pipe:
+        producer.r.pipeline().execute.assert_called_once()
+
+
 def test_redis_producer_set(producer):
     producer.set("topic", "msg")
     producer.r.pipeline().set.assert_called_once()
