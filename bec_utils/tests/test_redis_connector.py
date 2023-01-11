@@ -102,14 +102,21 @@ def test_redis_producer_set_and_publish(producer, topic, msg, pipe, expire):
         producer.r.pipeline().execute.assert_called_once()
 
 
-def test_redis_producer_set(producer):
-    producer.set("topic", "msg")
-    producer.r.pipeline().set.assert_called_once()
+@pytest.mark.parametrize(
+    "topic, msg, is_dict, expire", [["topic1", "msg1", True, None], ["topic2", "msg2", False, 400]]
+)
+def test_redis_producer_set(producer, topic, msg, is_dict, expire):
+    pipe = None
+    producer.set(topic, msg, pipe, is_dict, expire)
 
-
-def test_redis_producer_get(producer):
-    producer.get("topic")
-    producer.r.get.assert_called_once()
+    if is_dict:
+        producer.r.pipeline().hmset.assert_called_once_with(f"{topic}:val", msg)
+    else:
+        producer.r.pipeline().set.assert_called_once_with(f"{topic}:val", msg)
+    if expire:
+        producer.r.pipeline().expire.assert_called_once_with(f"{topic}:val", expire)
+    if not pipe:
+        producer.r.pipeline().execute.assert_called_once()
 
 
 @pytest.mark.parametrize("pattern", ["samx", 32])
@@ -117,6 +124,11 @@ def test_redis_producer_keys(producer, pattern):
 
     producer.keys(pattern)
     producer.r.keys.assert_called_once_with(pattern)
+
+
+def test_redis_producer_get(producer):
+    producer.get("topic")
+    producer.r.get.assert_called_once()
 
 
 def use_pipe_fcn(producer, use_pipe):
