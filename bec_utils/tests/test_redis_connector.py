@@ -40,6 +40,15 @@ def test_redis_connector_log_message(connector):
     )
 
 
+def test_redis_connector_log_error(connector):
+    connector._notifications_producer.send = mock.MagicMock()
+
+    connector.log_error("msg")
+    connector._notifications_producer.send.assert_called_once_with(
+        MessageEndpoints.log(), LogMessage(log_type="error", content="msg").dumps()
+    )
+
+
 @pytest.mark.parametrize("topic , msg", [["topic1", "msg1"], ["topic2", "msg2"]])
 def test_redis_producer_send(producer, topic, msg):
     producer.send(topic, msg)
