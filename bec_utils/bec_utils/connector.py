@@ -2,13 +2,16 @@ from __future__ import annotations
 
 import _thread
 import abc
-import sys
 import threading
 import traceback
 
 from .logger import bec_logger
 
 logger = bec_logger.logger
+
+
+class ConsumerConnectorError(Exception):
+    pass
 
 
 class MessageObject:
@@ -52,7 +55,7 @@ class ConnectorBase(abc.ABC):
 
 class ProducerConnector(abc.ABC):
     def send(self, topic: str, msg) -> None:
-        raise NotImplemented
+        raise NotImplementedError
 
 
 class ConsumerConnector(abc.ABC):
@@ -78,7 +81,6 @@ class ConsumerConnector(abc.ABC):
             kwargs: additional keyword arguments
 
         """
-        super().__init__()
         self.bootstrap = bootstrap_server
         self.topics = topics
         self.pattern = pattern
@@ -86,6 +88,9 @@ class ConsumerConnector(abc.ABC):
         self.connector = None
         self.cb = cb
         self.kwargs = kwargs
+
+        if not self.topics and not self.pattern:
+            raise ConsumerConnectorError("Either a topic or a patter must be specified.")
 
     def initialize_connector(self) -> None:
         """
@@ -100,12 +105,12 @@ class ConsumerConnector(abc.ABC):
 
         """
         messages = self.connector.poll(10.0)
-        for key, values in messages.items():
+        for _, values in messages.items():
             for msg in values:
                 self.cb(msg, **self.kwargs)
 
 
-class ConsumerConnectorThreaded(threading.Thread, abc.ABC):
+class ConsumerConnectorThreaded(ConsumerConnector, threading.Thread):
     def __init__(
         self,
         bootstrap_server,
@@ -117,7 +122,7 @@ class ConsumerConnectorThreaded(threading.Thread, abc.ABC):
         **kwargs,
     ):
         """
-        ConsumerConnector class defines the threaded communication with the broker for consuming messages.
+        ConsumerConnectorThreaded class defines the threaded communication with the broker for consuming messages.
         An implementation ought to inherit from this class and implement the initialize_connector and poll_messages methods.
         Once started, the connector is expected to poll new messages until the signal_event is set.
 
@@ -129,15 +134,16 @@ class ConsumerConnectorThreaded(threading.Thread, abc.ABC):
             kwargs: additional keyword arguments
 
         """
-        super().__init__(daemon=True)
-        self.bootstrap = bootstrap_server
-        self.topics = topics
-        self.pattern = pattern
-        self.group_id = group_id
+        super().__init__(
+            bootstrap_server=bootstrap_server,
+            topics=topics,
+            pattern=pattern,
+            group_id=group_id,
+            event=event,
+            cb=cb,
+        )
+        super(ConsumerConnector, self).__init__(daemon=True)
         self.signal_event = event if event is not None else threading.Event()
-        self.connector = None
-        self.cb = cb
-        self.kwargs = kwargs
 
     def run(self):
         self.initialize_connector()
@@ -153,23 +159,6 @@ class ConsumerConnectorThreaded(threading.Thread, abc.ABC):
                 if self.signal_event.is_set():
                     self.shutdown()
                     break
-
-    def initialize_connector(self) -> None:
-        """
-        initialize the connector instance self.connector
-        The connector will be initialized once the thread is started
-        """
-        raise NotImplementedError
-
-    def poll_messages(self) -> None:
-        """
-        Poll messages from self.connector and call the callback function self.cb
-
-        """
-        messages = self.connector.poll(10.0)
-        for key, values in messages.items():
-            for msg in values:
-                self.cb(msg, **self.kwargs)
 
     def shutdown(self):
         self.signal_event.set()
