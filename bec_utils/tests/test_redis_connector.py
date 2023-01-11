@@ -145,9 +145,36 @@ def test_redis_producer_delete(producer, topic, use_pipe):
         producer.r.delete.assert_called_once_with(topic)
 
 
-def test_redis_producer_get(producer):
-    producer.get("topic")
-    producer.r.get.assert_called_once()
+@pytest.mark.parametrize(
+    "topic, use_pipe, is_dict",
+    [
+        ["topic1", True, True],
+        ["topic2", False, True],
+        ["topic3", True, False],
+        ["topic4", False, False],
+    ],
+)
+def test_redis_producer_get(producer, topic, use_pipe, is_dict):
+    pipe = use_pipe_fcn(producer, use_pipe)
+
+    ret = producer.get(topic, pipe, is_dict)
+    if is_dict:
+        if pipe:
+            producer.pipeline().hgetall.assert_called_once_with(f"{topic}:val")
+            assert ret == redis.Redis().pipeline().hgetall()
+
+        else:
+            producer.r.hgetall.assert_called_once_with(f"{topic}:val")
+            assert ret == redis.Redis().hgetall()
+
+    else:
+        if pipe:
+            producer.pipeline().get.assert_called_once_with(f"{topic}:val")
+            assert ret == redis.Redis().pipeline().get()
+
+        else:
+            producer.r.get.assert_called_once_with(f"{topic}:val")
+            assert ret == redis.Redis().get()
 
 
 def use_pipe_fcn(producer, use_pipe):
