@@ -22,6 +22,24 @@ def connector():
         yield connector
 
 
+def test_redis_connector_log_warning(connector):
+    connector._notifications_producer.send = mock.MagicMock()
+
+    connector.log_warning("msg")
+    connector._notifications_producer.send.assert_called_once_with(
+        MessageEndpoints.log(), LogMessage(log_type="warning", content="msg").dumps()
+    )
+
+
+def test_redis_connector_log_message(connector):
+    connector._notifications_producer.send = mock.MagicMock()
+
+    connector.log_message("msg")
+    connector._notifications_producer.send.assert_called_once_with(
+        MessageEndpoints.log(), LogMessage(log_type="log", content="msg").dumps()
+    )
+
+
 @pytest.mark.parametrize("topic , msg", [["topic1", "msg1"], ["topic2", "msg2"]])
 def test_redis_producer_send(producer, topic, msg):
     producer.send(topic, msg)
@@ -192,12 +210,3 @@ def use_pipe_fcn(producer, use_pipe):
         return producer.pipeline()
     else:
         return None
-
-
-def test_redis_connector_log_warning(connector):
-    connector._notifications_producer.send = mock.MagicMock()
-
-    connector.log_warning("msg")
-    connector._notifications_producer.send.assert_called_once_with(
-        MessageEndpoints.log(), LogMessage(log_type="warning", content="msg").dumps()
-    )
