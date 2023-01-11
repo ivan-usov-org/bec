@@ -71,6 +71,22 @@ def test_redis_producer_rpush(producer, topic, msgs, use_pipe):
         assert ret == redis.Redis().rpush()
 
 
+@pytest.mark.parametrize(
+    "topic, start, end, use_pipe", [["topic1", 0, 4, True], ["topic2", 3, 7, False]]
+)
+def test_redis_producer_lrange(producer, topic, start, end, use_pipe):
+    pipe = use_pipe_fcn(producer, use_pipe)
+
+    ret = producer.lrange(topic, start, end, pipe)
+
+    if pipe:
+        producer.r.pipeline().lrange.assert_called_once_with(f"{topic}:val", start, end)
+        assert ret == redis.Redis().pipeline().lrange()
+    else:
+        producer.r.lrange.assert_called_once_with(f"{topic}:val", start, end)
+        assert ret == redis.Redis().lrange()
+
+
 def test_redis_producer_set(producer):
     producer.set("topic", "msg")
     producer.r.pipeline().set.assert_called_once()
