@@ -22,6 +22,12 @@ def connector():
         yield connector
 
 
+def test_redis_connector_producer(connector):
+
+    ret = connector.producer()
+    assert type(ret) == RedisProducer
+
+
 def test_redis_connector_log_warning(connector):
     connector._notifications_producer.send = mock.MagicMock()
 
