@@ -7,6 +7,7 @@ from bec_utils.redis_connector import (
     Alarms,
     RedisConsumer,
     RedisConsumerThreaded,
+    MessageObject,
 )
 import redis
 
@@ -286,16 +287,49 @@ def use_pipe_fcn(producer, use_pipe):
         return None
 
 
+@pytest.mark.parametrize(
+    "topics, pattern", [["topics1", None], [["topics1", "topics2"], None], [None, "pattern1"]]
+)  # , [None, ["pattern1", "pattern2"]]])
+def test_redis_consumer_init(consumer, topics, pattern):
+
+    with mock.patch("bec_utils.redis_connector.redis.Redis"):
+        consumer = RedisConsumer("localhost", "1", topics, pattern, redis_cls=redis.Redis)
+
+        if topics:
+            if isinstance(topics, list):
+                assert consumer.topics == [f"{topic}:sub" for topic in topics]
+            else:
+                assert consumer.topics == [f"{topics}:sub"]
+        if pattern:
+            if isinstance(pattern, list):
+                assert consumer.pattern == [f"{pat}:sub" for pat in pattern]
+            else:
+                assert consumer.pattern == [f"{pattern}:sub"]
+
+        assert consumer.r == redis.Redis()
+        assert consumer.pubsub == consumer.r.pubsub()
+        assert consumer.host == "localhost"
+        assert consumer.port == "1"
+
+
 @pytest.mark.parametrize("pattern, topics", [["pattern", "topics1"], [None, "topics2"]])
 def test_redis_consumer_initialize_connector(consumer, pattern, topics):
     consumer.pattern = pattern
-    print(consumer.topics)
 
     consumer.topics = topics
-    print(consumer.topics)
     consumer.initialize_connector()
 
     if consumer.pattern is not None:
         consumer.pubsub.psubscribe.assert_called_once_with(consumer.pattern)
     else:
         consumer.pubsub.subscribe.assert_called_with(consumer.topics)
+
+
+def test_redis_consumer_poll_messages(consumer):
+    pass
+    # ret = consumer.poll_messages() # can't run the fcn , get stuck at "return self.cb(msg, **self.kwargs)" - > 'NoneType' object is not callable
+
+
+def test_redis_consumer_shutdown(consumer):
+    consumer.shutdown()
+    consumer.pubsub.close.assert_called_once()
