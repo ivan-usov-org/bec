@@ -43,10 +43,7 @@ def test_redis_producer_lpush(producer, topic, msgs, max_size, expire):
     "topic , index , msgs, use_pipe", [["topic1", 1, "msg1", True], ["topic2", 4, "msg2", False]]
 )
 def test_redis_producer_lset(producer, topic, index, msgs, use_pipe):
-    if use_pipe:
-        pipe = producer.pipeline()
-    else:
-        pipe = None
+    pipe = use_pipe_fcn(producer, use_pipe)
 
     ret = producer.lset(topic, index, msgs, pipe)
 
@@ -56,6 +53,22 @@ def test_redis_producer_lset(producer, topic, index, msgs, use_pipe):
     else:
         producer.r.lset.assert_called_once_with(f"{topic}:val", index, msgs)
         assert ret == redis.Redis().lset()
+
+
+@pytest.mark.parametrize(
+    "topic, msgs, use_pipe", [["topic1", "msg1", True], ["topic2", "msg2", False]]
+)
+def test_redis_producer_rpush(producer, topic, msgs, use_pipe):
+    pipe = use_pipe_fcn(producer, use_pipe)
+
+    ret = producer.rpush(topic, msgs, pipe)
+
+    if pipe:
+        producer.r.pipeline().rpush.assert_called_once_with(f"{topic}:val", msgs)
+        assert ret == redis.Redis().pipeline().rpush()
+    else:
+        producer.r.rpush.assert_called_once_with(f"{topic}:val", msgs)
+        assert ret == redis.Redis().rpush()
 
 
 def test_redis_producer_set(producer):
@@ -73,3 +86,10 @@ def test_redis_producer_keys(producer, pattern):
 
     producer.keys(pattern)
     producer.r.keys.assert_called_once_with(pattern)
+
+
+def use_pipe_fcn(producer, use_pipe):
+    if use_pipe:
+        return producer.pipeline()
+    else:
+        return None
