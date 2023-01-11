@@ -1,18 +1,18 @@
 from unittest import mock
 import pytest
-
-from bec_utils.redis_connector import (
-    RedisProducer,
-    RedisConnector,
-    Alarms,
-    RedisConsumer,
-    RedisConsumerThreaded,
-    MessageObject,
-)
 import redis
 
-from bec_utils.endpoints import MessageEndpoints
 from bec_utils.BECMessage import AlarmMessage, LogMessage
+from bec_utils.connector import ConsumerConnectorError
+from bec_utils.endpoints import MessageEndpoints
+from bec_utils.redis_connector import (
+    Alarms,
+    RedisConnector,
+    RedisConsumer,
+    RedisConsumerThreaded,
+    RedisProducer,
+    MessageObject,
+)
 
 
 @pytest.fixture
@@ -32,16 +32,18 @@ def connector():
 @pytest.fixture
 def consumer():
     with mock.patch("bec_utils.redis_connector.redis.Redis"):
-        consumer = RedisConsumer("localhost", "1")
+        consumer = RedisConsumer("localhost", "1", topics="topics")
         yield consumer
 
 
 def test_redis_connector_producer(connector):
     ret = connector.producer()
-    assert type(ret) == RedisProducer
+    assert isinstance(ret, RedisProducer)
 
 
-@pytest.mark.parametrize("topics, threaded", [["topics", True], ["topics", False], [None, True]])
+@pytest.mark.parametrize(
+    "topics, threaded", [["topics", True], ["topics", False], [None, True], [None, False]]
+)
 def test_redis_connector_consumer(connector, threaded, topics):
 
     pattern = None
@@ -49,18 +51,22 @@ def test_redis_connector_consumer(connector, threaded, topics):
 
     if threaded:
         if topics is None and pattern is None:
-            with pytest.raises(Exception) as exc_info:
+            with pytest.raises(ValueError) as exc_info:
                 ret = connector.consumer(topics=topics, threaded=threaded)
 
             assert exc_info.value.args[0] == "Topics must be set for threaded consumer"
         else:
             ret = connector.consumer(topics=topics, threaded=threaded)
             assert len(connector._threads) == len_of_threads + 1
-            assert type(ret) == RedisConsumerThreaded
+            assert isinstance(ret, RedisConsumerThreaded)
 
     else:
+        if not topics:
+            with pytest.raises(ConsumerConnectorError):
+                ret = connector.consumer(topics=topics, threaded=threaded)
+            return
         ret = connector.consumer(topics=topics, threaded=threaded)
-        assert type(ret) == RedisConsumer
+        assert isinstance(ret, RedisConsumer)
 
 
 def test_redis_connector_log_warning(connector):
@@ -283,8 +289,7 @@ def test_redis_producer_get(producer, topic, use_pipe, is_dict):
 def use_pipe_fcn(producer, use_pipe):
     if use_pipe:
         return producer.pipeline()
-    else:
-        return None
+    return None
 
 
 @pytest.mark.parametrize(
@@ -333,3 +338,8 @@ def test_redis_consumer_poll_messages(consumer):
 def test_redis_consumer_shutdown(consumer):
     consumer.shutdown()
     consumer.pubsub.close.assert_called_once()
+
+
+def test_redis_consumer_additional_kwargs(connector):
+    cons = connector.consumer(topics="topic", parent="here")
+    assert "parent" in cons.kwargs
