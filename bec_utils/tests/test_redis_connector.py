@@ -52,20 +52,26 @@ def test_redis_connector_consumer(connector, threaded, topics):
     if threaded:
         if topics is None and pattern is None:
             with pytest.raises(ValueError) as exc_info:
-                ret = connector.consumer(topics=topics, threaded=threaded)
+                ret = connector.consumer(
+                    topics=topics, threaded=threaded, cb=lambda *args, **kwargs: ...
+                )
 
             assert exc_info.value.args[0] == "Topics must be set for threaded consumer"
         else:
-            ret = connector.consumer(topics=topics, threaded=threaded)
+            ret = connector.consumer(
+                topics=topics, threaded=threaded, cb=lambda *args, **kwargs: ...
+            )
             assert len(connector._threads) == len_of_threads + 1
             assert isinstance(ret, RedisConsumerThreaded)
 
     else:
         if not topics:
             with pytest.raises(ConsumerConnectorError):
-                ret = connector.consumer(topics=topics, threaded=threaded)
+                ret = connector.consumer(
+                    topics=topics, threaded=threaded, cb=lambda *args, **kwargs: ...
+                )
             return
-        ret = connector.consumer(topics=topics, threaded=threaded)
+        ret = connector.consumer(topics=topics, threaded=threaded, cb=lambda *args, **kwargs: ...)
         assert isinstance(ret, RedisConsumer)
 
 
@@ -293,7 +299,7 @@ def use_pipe_fcn(producer, use_pipe):
 
 
 def test_redis_consumer_additional_kwargs(connector):
-    cons = connector.consumer(topics="topic", parent="here")
+    cons = connector.consumer(topics="topic", parent="here", cb=lambda *args, **kwargs: ...)
     assert "parent" in cons.kwargs
 
 

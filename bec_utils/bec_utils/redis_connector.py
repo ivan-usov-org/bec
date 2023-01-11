@@ -45,6 +45,9 @@ class RedisConnector(ConnectorBase):
         threaded=True,
         **kwargs,
     ):
+        if cb is None:
+            raise ValueError("The callback function must be specified.")
+
         if threaded:
             if topics is None and pattern is None:
                 raise ValueError("Topics must be set for threaded consumer")
@@ -204,8 +207,7 @@ class RedisProducer(ProducerConnector):
         client = pipe if pipe is not None else self.r
         if is_dict:
             return client.hgetall(f"{topic}:val")
-        else:
-            return client.get(f"{topic}:val")
+        return client.get(f"{topic}:val")
 
 
 class RedisConsumerMixin:
@@ -255,7 +257,15 @@ class RedisConsumer(RedisConsumerMixin, ConsumerConnector):
 
         bootstrap_server = "".join([host, ":", port])
         topics, pattern = self._init_topics_and_pattern(topics, pattern)
-        super().__init__(bootstrap_server, topics, pattern, group_id, event, cb, **kwargs)
+        super().__init__(
+            bootstrap_server=bootstrap_server,
+            topics=topics,
+            pattern=pattern,
+            group_id=group_id,
+            event=event,
+            cb=cb,
+            **kwargs,
+        )
 
         self._init_redis_cls(redis_cls)
 
@@ -300,7 +310,15 @@ class RedisConsumerThreaded(RedisConsumerMixin, ConsumerConnectorThreaded):
 
         bootstrap_server = "".join([host, ":", port])
         topics, pattern = self._init_topics_and_pattern(topics, pattern)
-        super().__init__(bootstrap_server, topics, pattern, group_id, event, cb, **kwargs)
+        super().__init__(
+            bootstrap_server=bootstrap_server,
+            topics=topics,
+            pattern=pattern,
+            group_id=group_id,
+            event=event,
+            cb=cb,
+            **kwargs,
+        )
 
         self._init_redis_cls(redis_cls)
         self.pubsub = self.r.pubsub()
