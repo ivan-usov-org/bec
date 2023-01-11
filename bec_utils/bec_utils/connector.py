@@ -62,11 +62,11 @@ class ConsumerConnector(abc.ABC):
     def __init__(
         self,
         bootstrap_server,
+        cb,
         topics=None,
         pattern=None,
         group_id=None,
         event=None,
-        cb=None,
         **kwargs,
     ):
         """
@@ -114,11 +114,11 @@ class ConsumerConnectorThreaded(ConsumerConnector, threading.Thread):
     def __init__(
         self,
         bootstrap_server,
+        cb,
         topics=None,
         pattern=None,
         group_id=None,
         event=None,
-        cb=None,
         **kwargs,
     ):
         """
