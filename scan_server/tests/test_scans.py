@@ -14,6 +14,7 @@ from scan_server.scans import (
     ContLineScan,
     DeviceRPC,
     FermatSpiralScan,
+    LineScan,
     Move,
     RequestBase,
     ScanBase,
@@ -1806,3 +1807,56 @@ def test_round_scan_fly_sim_scan_core(in_args, reference_positions):
         parameter={"num_pos": None, "positions": reference_positions, "exp_time": 0.1},
         metadata={"stream": "primary", "DIID": 0},
     )
+
+
+@pytest.mark.parametrize(
+    "in_args,reference_positions",
+    [
+        (
+            [[-3, 3], [-2, 2]],
+            [
+                [-3.0, -2.0],
+                [-2.33333333, -1.55555556],
+                [-1.66666667, -1.11111111],
+                [-1.0, -0.66666667],
+                [-0.33333333, -0.22222222],
+                [0.33333333, 0.22222222],
+                [1.0, 0.66666667],
+                [1.66666667, 1.11111111],
+                [2.33333333, 1.55555556],
+                [3.0, 2.0],
+            ],
+        ),
+        (
+            [[-1, 1], [-1, 2]],
+            [
+                [-1.0, -1.0],
+                [-0.77777778, -0.66666667],
+                [-0.55555556, -0.33333333],
+                [-0.33333333, 0.0],
+                [-0.11111111, 0.33333333],
+                [0.11111111, 0.66666667],
+                [0.33333333, 1.0],
+                [0.55555556, 1.33333333],
+                [0.77777778, 1.66666667],
+                [1.0, 2.0],
+            ],
+        ),
+    ],
+)
+def test_line_scan_calculate_positions(in_args, reference_positions):
+
+    device_manager = DMMock()
+    device_manager.add_device("flyer_sim")
+    scan_msg = BMessage.ScanQueueMessage(
+        scan_type="round_scan_fly",
+        parameter={
+            "args": {"samx": in_args[0], "samy": in_args[1]},
+            "kwargs": {"realtive": True},
+        },
+        queue="primary",
+    )
+    request = LineScan(device_manager=device_manager, parameter=scan_msg.content["parameter"])
+
+    request._calculate_positions()
+    assert np.isclose(request.positions, reference_positions).all()
