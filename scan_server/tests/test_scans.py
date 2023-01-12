@@ -19,6 +19,7 @@ from scan_server.scans import (
     ScanBase,
     Scan,
     UpdatedMove,
+    RoundScanFlySim,
     get_2D_raster_pos,
     get_fermat_spiral_pos,
     get_round_roi_scan_positions,
@@ -1705,3 +1706,24 @@ def test_LamNIFermatScan(scan_msg, reference_scan_list):
                 "positions"
             ]
     assert scan_instructions == reference_scan_list
+
+
+def test_round_scan_fly_sim_get_scan_motors():
+
+    device_manager = DMMock()
+    device_manager.add_device("flyer_sim")
+    scan_msg = BMessage.ScanQueueMessage(
+        scan_type="round_scan_fly",
+        parameter={
+            "args": {"flyer_sim": (0, 50, 5, 3)},
+            "kwargs": {"realtive": True},
+        },
+        queue="primary",
+    )
+    request = RoundScanFlySim(
+        device_manager=device_manager, parameter=scan_msg.content["parameter"]
+    )
+
+    request._get_scan_motors()
+    assert request.scan_motors == []
+    assert request.flyer == list(scan_msg.content["parameter"]["args"].keys())[0]
