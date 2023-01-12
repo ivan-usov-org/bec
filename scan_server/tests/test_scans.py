@@ -1196,6 +1196,55 @@ def test_scan_report_devices():
     assert request.scan_report_devices == ["samx", "samy", "samz"]
 
 
+def test_request_base_check_limits():
+    device_manager = DMMock()
+    device_manager.add_device("samx")
+    device_manager.add_device("samy")
+    scan_msg = BMessage.ScanQueueMessage(
+        scan_type="fermat_scan",
+        parameter={
+            "args": {"samx": (-5, 5), "samy": (-5, 5)},
+            "kwargs": {"step": 3},
+        },
+        queue="primary",
+    )
+    request = FermatSpiralScan(
+        device_manager=device_manager, parameter=scan_msg.content["parameter"]
+    )
+    assert request.scan_motors == ["samx", "samy"]
+    assert request.device_manager.devices["samy"]._config["deviceConfig"].get("limits", [0, 0]) == [
+        -50,
+        50,
+    ]
+    request.device_manager.devices["samy"]._config["deviceConfig"]["limits"] = [5, -5]
+    assert request.device_manager.devices["samy"]._config["deviceConfig"].get("limits", [0, 0]) == [
+        5,
+        -5,
+    ]
+    request.positions = [[-100, 30]]
+
+    for ii, dev in enumerate(request.scan_motors):
+
+        low_limit, high_limit = (
+            request.device_manager.devices[dev]._config["deviceConfig"].get("limits", [0, 0])
+        )
+        for pos in request.positions:
+            pos_axis = pos[ii]
+            if low_limit >= high_limit:
+                continue
+            if not low_limit <= pos_axis <= high_limit:
+                with pytest.raises(Exception) as exc_info:
+                    request._check_limits()
+                assert (
+                    exc_info.value.args[0]
+                    == f"Target position {pos} for motor {dev} is outside of range: [{low_limit}, {high_limit}]"
+                )
+            else:
+                request._check_limits()
+
+    assert request.positions == [[-100, 30]]
+
+
 @pytest.mark.parametrize(
     "scan_msg,reference_scan_list",
     [
