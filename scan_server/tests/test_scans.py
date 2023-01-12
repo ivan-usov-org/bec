@@ -19,6 +19,7 @@ from scan_server.scans import (
     Scan,
     UpdatedMove,
     get_2D_raster_pos,
+    get_fermat_spiral_pos,
     get_round_roi_scan_positions,
     get_round_scan_positions,
 )
@@ -1121,6 +1122,37 @@ def test_round_scan_positions(in_args, reference_positions):
 def test_raster_scan_positions(in_args, reference_positions, snaked):
     positions = get_2D_raster_pos(*in_args, snaked=snaked)
     assert np.isclose(positions, reference_positions).all()
+
+
+@pytest.mark.parametrize(
+    "in_args",
+    [
+        ([-2, 2, -2, 2]),
+        ([-1, 1, -3, 3]),
+    ],
+)
+def test_get_fermat_spiral_pos(in_args):
+    positions = get_fermat_spiral_pos(*in_args)
+
+    ref_positions = []
+    phi = 2 * np.pi * ((1 + np.sqrt(5)) / 2.0)
+
+    start = 1
+
+    length_axis1 = abs(in_args[1] - in_args[0])
+    length_axis2 = abs(in_args[3] - in_args[2])
+    n_max = int(length_axis1 * length_axis2 * 3.2)
+
+    for ii in range(start, n_max):
+        radius = 0.57 * np.sqrt(ii)
+        if abs(radius * np.sin(ii * phi)) > length_axis1 / 2:
+            continue
+        if abs(radius * np.cos(ii * phi)) > length_axis2 / 2:
+            continue
+        ref_positions.extend([(radius * np.sin(ii * phi), radius * np.cos(ii * phi))])
+    ref_positions = np.array(ref_positions)
+
+    assert np.isclose(positions, ref_positions).all()
 
 
 def test_get_func_name_from_macro():
