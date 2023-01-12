@@ -1176,6 +1176,26 @@ def test_get_func_name_from_macro():
     assert request._get_func_name_from_macro(macros[0].decode().strip()) == "pre_scan_macro"
 
 
+def test_scan_report_devices():
+    device_manager = DMMock()
+    device_manager.add_device("samx")
+    scan_msg = BMessage.ScanQueueMessage(
+        scan_type="fermat_scan",
+        parameter={
+            "args": {"samx": (-5, 5), "samy": (-5, 5)},
+            "kwargs": {"step": 3},
+        },
+        queue="primary",
+    )
+    request = FermatSpiralScan(
+        device_manager=device_manager, parameter=scan_msg.content["parameter"]
+    )
+    assert request.scan_report_devices == ["samx", "samy"]
+
+    request.scan_report_devices = ["samx", "samy", "samz"]
+    assert request.scan_report_devices == ["samx", "samy", "samz"]
+
+
 @pytest.mark.parametrize(
     "scan_msg,reference_scan_list",
     [
