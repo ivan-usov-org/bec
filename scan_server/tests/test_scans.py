@@ -1126,34 +1126,45 @@ def test_raster_scan_positions(in_args, reference_positions, snaked):
 
 
 @pytest.mark.parametrize(
-    "in_args",
+    "in_args, center, reference_positions",
     [
-        ([-2, 2, -2, 2]),
-        ([-1, 1, -3, 3]),
+        (
+            [-2, 2, -2, 2],
+            False,
+            [
+                [-0.38502947, -0.42030026],
+                [0.8030152, 0.07047403],
+                [-0.78349739, 0.6006928],
+                [0.19856742, -1.12257337],
+                [0.68409143, 1.07541569],
+                [-1.34834023, -0.36246191],
+                [1.33834167, -0.69508386],
+                [-0.55304807, 1.51437705],
+                [-0.65246146, -1.5806309],
+                [1.63258446, 0.76398167],
+                [-1.80382449, 0.565789],
+                [0.99004828, -1.70839234],
+                [-1.74471832, -1.22660425],
+                [-1.46933912, 1.74339971],
+                [1.70582397, 1.71416585],
+                [1.95717083, -1.63324289],
+            ],
+        ),
+        (
+            [-1, 1, -1, 1],
+            1,
+            [
+                [0.0, 0.0],
+                [-0.38502947, -0.42030026],
+                [0.8030152, 0.07047403],
+                [-0.78349739, 0.6006928],
+            ],
+        ),
     ],
 )
-def test_get_fermat_spiral_pos(in_args):
-    positions = get_fermat_spiral_pos(*in_args)
-
-    ref_positions = []
-    phi = 2 * np.pi * ((1 + np.sqrt(5)) / 2.0)
-
-    start = 1
-
-    length_axis1 = abs(in_args[1] - in_args[0])
-    length_axis2 = abs(in_args[3] - in_args[2])
-    n_max = int(length_axis1 * length_axis2 * 3.2)
-
-    for ii in range(start, n_max):
-        radius = 0.57 * np.sqrt(ii)
-        if abs(radius * np.sin(ii * phi)) > length_axis1 / 2:
-            continue
-        if abs(radius * np.cos(ii * phi)) > length_axis2 / 2:
-            continue
-        ref_positions.extend([(radius * np.sin(ii * phi), radius * np.cos(ii * phi))])
-    ref_positions = np.array(ref_positions)
-
-    assert np.isclose(positions, ref_positions).all()
+def test_get_fermat_spiral_pos(in_args, center, reference_positions):
+    positions = get_fermat_spiral_pos(*in_args, center=center)
+    assert np.isclose(positions, reference_positions).all()
 
 
 def test_get_func_name_from_macro():
