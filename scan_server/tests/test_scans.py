@@ -1727,3 +1727,30 @@ def test_round_scan_fly_sim_get_scan_motors():
     request._get_scan_motors()
     assert request.scan_motors == []
     assert request.flyer == list(scan_msg.content["parameter"]["args"].keys())[0]
+
+
+def test_round_scan_fly_sim_prepare_positions():
+
+    device_manager = DMMock()
+    device_manager.add_device("flyer_sim")
+    scan_msg = BMessage.ScanQueueMessage(
+        scan_type="round_scan_fly",
+        parameter={
+            "args": {"flyer_sim": (0, 50, 5, 3)},
+            "kwargs": {"realtive": True},
+        },
+        queue="primary",
+    )
+    request = RoundScanFlySim(
+        device_manager=device_manager, parameter=scan_msg.content["parameter"]
+    )
+    request._calculate_positions = mock.MagicMock()
+    request._check_limits = mock.MagicMock()
+    pos = [1, 2, 3, 4]
+    request.positions = pos
+
+    next(request.prepare_positions())
+
+    request._calculate_positions.assert_called_once()
+    assert request.num_pos == len(pos)
+    request._check_limits.assert_called_once()
