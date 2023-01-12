@@ -1296,6 +1296,35 @@ def test_scan_base_init():
     assert exc_info.value.args[0] == "scan_name cannot be empty"
 
 
+def test_scan_base_set_position_offset():
+    device_manager = DMMock()
+    device_manager.add_device("samx")
+
+    scan_msg = BMessage.ScanQueueMessage(
+        scan_type="fermat_scan",
+        parameter={
+            "args": {"samx": (-5, 5), "samy": (-5, 5)},
+            "kwargs": {"step": 3},
+        },
+        queue="primary",
+    )
+    request = FermatSpiralScan(
+        device_manager=device_manager, parameter=scan_msg.content["parameter"]
+    )
+
+    assert request.positions == []
+    request._set_position_offset()
+    assert request.positions == []
+
+    request.relative == True
+    request._set_position_offset()
+
+    start_pos_ref = [0, 0]
+    request.positions += start_pos_ref
+    assert request.positions == [0, 0]
+    assert request.start_pos == start_pos_ref
+
+
 @pytest.mark.parametrize(
     "scan_msg,reference_scan_list",
     [
