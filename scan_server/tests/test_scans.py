@@ -1245,6 +1245,31 @@ def test_request_base_check_limits():
     assert request.positions == [[-100, 30]]
 
 
+def test_request_get_scan_motors():
+    device_manager = DMMock()
+    device_manager.add_device("samx")
+    device_manager.add_device("samz")
+    scan_msg = BMessage.ScanQueueMessage(
+        scan_type="fermat_scan",
+        parameter={
+            "args": {"samx": (-5, 5), "samy": (-5, 5)},
+            "kwargs": {"step": 3},
+        },
+        queue="primary",
+    )
+    request = FermatSpiralScan(
+        device_manager=device_manager, parameter=scan_msg.content["parameter"]
+    )
+
+    assert request.caller_args == scan_msg.content["parameter"]["args"]
+    assert request.scan_motors == ["samx", "samy"]
+
+    request.caller_args = {"samz": (-2, 2)}
+    request.arg_bundle_size = 0
+    request._get_scan_motors()
+    assert request.scan_motors == ["samx", "samy", "samz"]
+
+
 @pytest.mark.parametrize(
     "scan_msg,reference_scan_list",
     [
