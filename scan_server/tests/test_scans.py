@@ -16,6 +16,7 @@ from scan_server.scans import (
     FermatSpiralScan,
     Move,
     RequestBase,
+    ScanBase,
     Scan,
     UpdatedMove,
     get_2D_raster_pos,
@@ -1268,6 +1269,31 @@ def test_request_get_scan_motors():
     request.arg_bundle_size = 0
     request._get_scan_motors()
     assert request.scan_motors == ["samx", "samy", "samz"]
+
+
+def test_scan_base_init():
+    device_manager = DMMock()
+    device_manager.add_device("samx")
+
+    class ScanBaseMock(ScanBase):
+        scan_name = ""
+
+        def _calculate_positions(self):
+            pass
+
+    scan_msg = BMessage.ScanQueueMessage(
+        scan_type="",
+        parameter={
+            "args": {"samx": (-5, 5), "samy": (-5, 5)},
+            "kwargs": {"step": 3},
+        },
+        queue="primary",
+    )
+    with pytest.raises(ValueError) as exc_info:
+        request = ScanBaseMock(
+            device_manager=device_manager, parameter=scan_msg.content["parameter"]
+        )
+    assert exc_info.value.args[0] == "scan_name cannot be empty"
 
 
 @pytest.mark.parametrize(
