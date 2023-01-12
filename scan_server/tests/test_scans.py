@@ -1754,3 +1754,26 @@ def test_round_scan_fly_sim_prepare_positions():
     request._calculate_positions.assert_called_once()
     assert request.num_pos == len(pos)
     request._check_limits.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    "in_args,reference_positions", [((1, 5, 1, 1), [[0, -3], [0, -7], [0, 7]])]
+)
+def test_round_scan_fly_sim_calculate_positions(in_args, reference_positions):
+
+    device_manager = DMMock()
+    device_manager.add_device("flyer_sim")
+    scan_msg = BMessage.ScanQueueMessage(
+        scan_type="round_scan_fly",
+        parameter={
+            "args": {"flyer_sim": in_args},
+            "kwargs": {"realtive": True},
+        },
+        queue="primary",
+    )
+    request = RoundScanFlySim(
+        device_manager=device_manager, parameter=scan_msg.content["parameter"]
+    )
+
+    request._calculate_positions()
+    assert np.isclose(request.positions, reference_positions).all()
