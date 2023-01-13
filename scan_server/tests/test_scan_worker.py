@@ -284,6 +284,28 @@ def test_wait_for_device_server():
 
 
 @pytest.mark.parametrize(
+    "instr",
+    [
+        (
+            BECMessage.DeviceInstructionMessage(
+                device=["samx"],
+                action="set",
+                parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
+                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+            )
+        ),
+    ],
+)
+def test_set_devices(instr):
+    worker = get_scan_worker()
+    worker.device_manager.producer.send = mock.MagicMock()
+    worker._set_devices(instr)
+    worker.device_manager.producer.send.assert_called_once_with(
+        MessageEndpoints.device_instructions(), instr.dumps()
+    )
+
+
+@pytest.mark.parametrize(
     "device_status,devices,instr,abort",
     [
         (
