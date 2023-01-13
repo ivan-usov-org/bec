@@ -110,8 +110,8 @@ class ScanWorker(threading.Thread):
         elif wait_type == "trigger":
             self._wait_for_trigger(instr)
         else:
-            logger.error("Unkown wait command")
-            raise DeviceMessageError("Unkown wait command")
+            logger.error("Unknown wait command")
+            raise DeviceMessageError("Unknown wait command")
 
     def _get_device_status(self, msg_cls: MessageEndpoints, devices: list) -> list:
         pipe = self.device_manager.producer.pipeline()

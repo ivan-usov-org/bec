@@ -2,11 +2,13 @@ import uuid
 from unittest import mock
 
 import pytest
-from bec_utils import BECMessage, MessageEndpoints
-from scan_server.errors import ScanAbortion
+from bec_utils import BECMessage, MessageEndpoints, DeviceStatus
+from scan_server.errors import ScanAbortion, DeviceMessageError
 from scan_server.scan_worker import ScanWorker
 
 from utils import load_ScanServerMock
+import time
+from scan_server.scan_queue import InstructionQueueStatus
 
 
 def get_scan_worker() -> ScanWorker:
@@ -44,17 +46,102 @@ def test_get_devices_from_instruction(instruction, devices):
     ]
 
 
-def test_add_wait_group():
+@pytest.mark.parametrize(
+    "instructions",
+    [
+        (
+            BECMessage.DeviceInstructionMessage(
+                device="samx",
+                action="set",
+                parameter={"value": 10, "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 3},
+            )
+        ),
+        BECMessage.DeviceInstructionMessage(
+            device="samx",
+            action="set",
+            parameter={"value": 10, "wait_group": "scan_motor"},
+            metadata={"stream": "primary", "DIID": None},
+        ),
+    ],
+)
+def test_add_wait_group(instructions):
     worker = get_scan_worker()
-    msg1 = BECMessage.DeviceInstructionMessage(
-        device="samx",
-        action="set",
-        parameter={"value": 10, "wait_group": "scan_motor"},
-        metadata={"stream": "primary", "DIID": 3},
-    )
-    worker._add_wait_group(msg1)
+    if instructions.metadata["DIID"]:
+        worker._add_wait_group(instructions)
+        assert worker._groups == {"scan_motor": [("samx", 3)]}
 
-    assert worker._groups == {"scan_motor": [("samx", 3)]}
+        worker._groups["scan_motor"] = [("samy", 2)]
+        worker._add_wait_group(instructions)
+        assert worker._groups == {"scan_motor": [("samy", 2), ("samx", 3)]}
+
+    else:
+        with pytest.raises(DeviceMessageError) as exc_info:
+            worker._add_wait_group(instructions)
+        assert exc_info.value.args[0] == "Device message metadata does not contain a DIID entry."
+
+
+@pytest.mark.parametrize(
+    "instructions,wait_type",
+    [
+        (
+            BECMessage.DeviceInstructionMessage(
+                device="samy",
+                action="wait",
+                parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 3},
+            ),
+            "move",
+        ),
+        (
+            BECMessage.DeviceInstructionMessage(
+                device="samy",
+                action="wait",
+                parameter={"type": "read", "group": "scan_motor", "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 3},
+            ),
+            "read",
+        ),
+        (
+            BECMessage.DeviceInstructionMessage(
+                device="samy",
+                action="wait",
+                parameter={"type": "trigger", "group": "scan_motor", "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 3},
+            ),
+            "trigger",
+        ),
+        (
+            BECMessage.DeviceInstructionMessage(
+                device="samy",
+                action="wait",
+                parameter={"type": None, "group": "scan_motor", "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 3},
+            ),
+            None,
+        ),
+    ],
+)
+def test_wait_for_devices(instructions, wait_type):
+
+    worker = get_scan_worker()
+    worker._wait_for_idle = mock.MagicMock()
+    worker._wait_for_read = mock.MagicMock()
+    worker._wait_for_trigger = mock.MagicMock()
+
+    if wait_type:
+        worker._wait_for_devices(instructions)
+
+    if wait_type == "move":
+        worker._wait_for_idle.assert_called_once_with(instructions)
+    elif wait_type == "read":
+        worker._wait_for_read.assert_called_once_with(instructions)
+    elif wait_type == "trigger":
+        worker._wait_for_trigger.assert_called_once_with(instructions)
+    else:
+        with pytest.raises(DeviceMessageError) as exc_info:
+            worker._wait_for_devices(instructions)
+        assert exc_info.value.args[0] == "Unknown wait command"
 
 
 @pytest.mark.parametrize(
@@ -116,6 +203,157 @@ def test_wait_for_idle(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
         else:
             with pytest.raises(ScanAbortion):
                 worker._wait_for_idle(msg2)
+
+
+@pytest.mark.parametrize(
+    "msg1,msg2,req_msg",
+    [
+        (
+            BECMessage.DeviceInstructionMessage(
+                device=["samx"],
+                action="set",
+                parameter={"value": 10, "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+            ),
+            BECMessage.DeviceInstructionMessage(
+                device=["samx"],
+                action="wait",
+                parameter={"type": "move", "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 4, "scanID": "scanID", "RID": "requestID"},
+            ),
+            BECMessage.DeviceStatusMessage(
+                device="samx",
+                status=0,
+                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+            ),
+        ),
+    ],
+)
+def test_wait_for_read(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
+    worker = get_scan_worker()
+    worker._check_for_interruption = mock.MagicMock()
+
+    with mock.patch(
+        "scan_server.scan_worker.ScanWorker._get_device_status", return_value=[req_msg.dumps()]
+    ) as device_status:
+        assert worker._groups == {}
+        worker._groups["scan_motor"] = [("samx", 3), "samy"]
+        worker.device_manager.producer._get_buffer[
+            MessageEndpoints.device_readback("samx")
+        ] = BECMessage.DeviceMessage(signals={"samx": {"value": 4}}, metadata={}).dumps()
+        worker._add_wait_group(msg1)
+        worker._wait_for_read(msg2)
+        assert worker._groups == {"scan_motor": ["samy"]}
+        worker._check_for_interruption.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    "instr",
+    [
+        (
+            BECMessage.DeviceInstructionMessage(
+                device=["samx"],
+                action="set",
+                parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
+                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+            )
+        ),
+    ],
+)
+def test_wait_for_trigger(instr):
+    worker = get_scan_worker()
+
+    with mock.patch("time.sleep", return_value=None) as patched_time_sleep:
+        worker._wait_for_trigger(instr)
+    patched_time_sleep.assert_called_once_with(instr.content["parameter"]["time"])
+
+
+def test_wait_for_device_server():
+    worker = get_scan_worker()
+    worker.parent.wait_for_service = mock.MagicMock()
+    worker._wait_for_device_server()
+    worker.parent.wait_for_service.assert_called_once_with("DeviceServer")
+
+
+@pytest.mark.parametrize(
+    "instr",
+    [
+        (
+            BECMessage.DeviceInstructionMessage(
+                device=["samx"],
+                action="set",
+                parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
+                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+            )
+        ),
+    ],
+)
+def test_set_devices(instr):
+    worker = get_scan_worker()
+    worker.device_manager.producer.send = mock.MagicMock()
+    worker._set_devices(instr)
+    worker.device_manager.producer.send.assert_called_once_with(
+        MessageEndpoints.device_instructions(), instr.dumps()
+    )
+
+
+@pytest.mark.parametrize(
+    "instr",
+    [
+        (
+            BECMessage.DeviceInstructionMessage(
+                device=["samx"],
+                action="trigger",
+                parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
+                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+            )
+        ),
+    ],
+)
+def test_trigger_devices(instr):
+    worker = get_scan_worker()
+    worker.device_manager.producer.send = mock.MagicMock()
+    worker._trigger_devices(instr)
+    devices = [dev.name for dev in worker.device_manager.devices.detectors()]
+
+    worker.device_manager.producer.send.assert_called_once_with(
+        MessageEndpoints.device_instructions(),
+        BECMessage.DeviceInstructionMessage(
+            device=devices,
+            action="trigger",
+            parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
+            metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+        ).dumps(),
+    )
+
+
+@pytest.mark.parametrize(
+    "instr",
+    [
+        (
+            BECMessage.DeviceInstructionMessage(
+                device=["samx"],
+                action="trigger",
+                parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
+                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+            )
+        ),
+    ],
+)
+def test_send_rpc(instr):
+    worker = get_scan_worker()
+    worker.device_manager.producer.send = mock.MagicMock()
+    worker._send_rpc(instr)
+    worker.device_manager.producer.send.assert_called_once_with(
+        MessageEndpoints.device_instructions(), instr.dumps()
+    )
+
+
+def test_check_for_interruption():
+    worker = get_scan_worker()
+    worker.status = InstructionQueueStatus.STOPPED
+    with pytest.raises(ScanAbortion) as exc_info:
+        worker._check_for_interruption()
 
 
 @pytest.mark.parametrize(
