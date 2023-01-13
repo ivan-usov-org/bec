@@ -1091,7 +1091,7 @@ def test_scan_report_devices():
         "args": {"samx": (-5, 5), "samy": (-5, 5)},
         "kwargs": {"step": 3},
     }
-    request = FermatSpiralScan(device_manager=device_manager, parameter=parameter)
+    request = RequestBase(device_manager=device_manager, parameter=parameter)
     assert request.scan_report_devices == ["samx", "samy"]
     request.scan_report_devices = ["samx", "samz"]
     assert request.scan_report_devices == ["samx", "samz"]
@@ -1211,6 +1211,10 @@ def test_scan_report_devices():
 
 
 def test_request_base_check_limits():
+    class RequestBaseMock(RequestBase):
+        def run(self):
+            pass
+
     device_manager = DMMock()
     device_manager.add_device("samx")
     device_manager.add_device("samy")
@@ -1222,9 +1226,10 @@ def test_request_base_check_limits():
         },
         queue="primary",
     )
-    request = FermatSpiralScan(
+    request = RequestBaseMock(
         device_manager=device_manager, parameter=scan_msg.content["parameter"]
     )
+
     assert request.scan_motors == ["samx", "samy"]
     assert request.device_manager.devices["samy"]._config["deviceConfig"].get("limits", [0, 0]) == [
         -50,
@@ -1235,6 +1240,7 @@ def test_request_base_check_limits():
         5,
         -5,
     ]
+
     request.positions = [[-100, 30]]
 
     for ii, dev in enumerate(request.scan_motors):
@@ -1259,29 +1265,40 @@ def test_request_base_check_limits():
     assert request.positions == [[-100, 30]]
 
 
-def test_request_get_scan_motors():
+def test_request_base_get_scan_motors():
+    class RequestBaseMock(RequestBase):
+        def run(self):
+            pass
+
     device_manager = DMMock()
     device_manager.add_device("samx")
     device_manager.add_device("samz")
     scan_msg = BMessage.ScanQueueMessage(
         scan_type="fermat_scan",
         parameter={
-            "args": {"samx": (-5, 5), "samy": (-5, 5)},
+            "args": {"samx": (-5, 5)},
             "kwargs": {"step": 3},
         },
         queue="primary",
     )
-    request = FermatSpiralScan(
+    request = RequestBaseMock(
         device_manager=device_manager, parameter=scan_msg.content["parameter"]
     )
 
-    assert request.caller_args == scan_msg.content["parameter"]["args"]
-    assert request.scan_motors == ["samx", "samy"]
+    assert request.scan_motors == ["samx"]
+    request.caller_args = ""
+    request._get_scan_motors()
+    assert request.scan_motors == ["samx"]
 
-    request.caller_args = {"samz": (-2, 2)}
+    request.arg_bundle_size = 2
+    request.caller_args = {"samz": (-2, 2), "samy": (-1, 2)}
+    request._get_scan_motors()
+    assert request.scan_motors == ["samz", "samy"]
+
+    request.caller_args = {"samx"}
     request.arg_bundle_size = 0
     request._get_scan_motors()
-    assert request.scan_motors == ["samx", "samy", "samz"]
+    assert request.scan_motors == ["samz", "samy", "samx"]
 
 
 def test_scan_base_init():

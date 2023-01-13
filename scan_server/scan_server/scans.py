@@ -218,6 +218,7 @@ class RequestBase(ABC):
                 self.device_manager.devices[dev]._config["deviceConfig"].get("limits", [0, 0])
             )
             if low_limit >= high_limit:
+                # if both limits are equal or low > high, no restrictions ought to be applied
                 return
             for pos in self.positions:
                 pos_axis = pos[ii]
@@ -678,7 +679,7 @@ class RoundScan(ScanBase):
         Returns:
 
         Examples:
-            >>> scans.round_scan(dev.motor1, dev.motor2, 0, 50, 5, 3, exp_time=0.1, relative=True)
+            >>> scans.round_scan(dev.motor1, dev.motor2, 0, 25, 5, 3, exp_time=0.1, relative=True)
 
         """
         super().__init__(parameter=parameter, **kwargs)
