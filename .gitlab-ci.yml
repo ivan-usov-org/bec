@@ -16,6 +16,14 @@ stages:
   - AdditionalTests
   - End2End
   - Deploy
+
+.install-bec-services: &install-bec-services
+    - pip install -e ./device_server
+    - pip install -e ./scan_server
+    - pip install -e ./scan_bundler
+    - pip install -e ./bec_client
+    - pip install -e ./file_writer
+
 formatter:
   stage: Formatter
   needs: []
@@ -44,11 +52,7 @@ tests:
     - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
     - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices
     - pip install pytest pytest-random-order pytest-cov pytest-asyncio
-    - pip install -e ./device_server
-    - pip install -e ./scan_server
-    - pip install -e ./scan_bundler
-    - pip install -e ./bec_client
-    - pip install -e ./file_writer
+    - *install-bec-services
     - coverage run --source=./bec_utils/bec_utils,./device_server/device_server,./scan_server/scan_server,./scan_bundler/scan_bundler,./bec_client/bec_client,./file_writer/file_writer --omit=*/bec_client/bec_client/plugins/*,*/bec_client/scripts/* -m pytest -v --junitxml=report.xml --random-order ./bec_utils/tests ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests ./file_writer/tests
     - coverage report
     - coverage xml
@@ -67,11 +71,7 @@ tests-3.9:
     - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
     - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices
     - pip install pytest pytest-random-order pytest-cov pytest-asyncio
-    - pip install -e ./device_server
-    - pip install -e ./scan_server
-    - pip install -e ./scan_bundler
-    - pip install -e ./bec_client
-    - pip install -e ./file_writer    
+    - *install-bec-services    
     - pytest -v --junitxml=report.xml --random-order ./bec_utils/tests ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests ./file_writer/tests
 
 tests-3.10:
@@ -144,11 +144,7 @@ pages:
     - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
     - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices    
     - pip install -r ./docs/source/requirements.txt
-    - pip install -e ./device_server
-    - pip install -e ./scan_server
-    - pip install -e ./scan_bundler
-    - pip install -e ./bec_client
-    - pip install -e ./file_writer    
+    - *install-bec-services    
     - cd ./docs/source; make html
     - curl -X POST -d "branches=$CI_COMMIT_REF_NAME" -d "token=$RTD_TOKEN" https://readthedocs.org/api/v2/webhook/beamline-experiment-control/221870/
   rules:
