@@ -44,17 +44,39 @@ def test_get_devices_from_instruction(instruction, devices):
     ]
 
 
-def test_add_wait_group():
+@pytest.mark.parametrize(
+    "instructions",
+    [
+        (
+            BECMessage.DeviceInstructionMessage(
+                device="samx",
+                action="set",
+                parameter={"value": 10, "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 3},
+            )
+        ),
+        BECMessage.DeviceInstructionMessage(
+            device="samx",
+            action="set",
+            parameter={"value": 10, "wait_group": "scan_motor"},
+            metadata={"stream": "primary", "DIID": None},
+        ),
+    ],
+)
+def test_add_wait_group(instructions):
     worker = get_scan_worker()
-    msg1 = BECMessage.DeviceInstructionMessage(
-        device="samx",
-        action="set",
-        parameter={"value": 10, "wait_group": "scan_motor"},
-        metadata={"stream": "primary", "DIID": 3},
-    )
-    worker._add_wait_group(msg1)
+    if instructions.metadata["DIID"]:
+        worker._add_wait_group(instructions)
+        assert worker._groups == {"scan_motor": [("samx", 3)]}
 
-    assert worker._groups == {"scan_motor": [("samx", 3)]}
+        worker._groups["scan_motor"] = [("samy", 2)]
+        worker._add_wait_group(instructions)
+        assert worker._groups == {"scan_motor": [("samy", 2), ("samx", 3)]}
+
+    else:
+        with pytest.raises(DeviceMessageError) as exc_info:
+            worker._add_wait_group(instructions)
+        assert exc_info.value.args[0] == "Device message metadata does not contain a DIID entry."
 
 
 @pytest.mark.parametrize(
