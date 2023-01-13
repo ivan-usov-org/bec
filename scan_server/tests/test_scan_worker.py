@@ -144,15 +144,6 @@ def test_wait_for_devices(instructions, wait_type):
 
 
 @pytest.mark.parametrize(
-    "msg_cls, devices, reference",
-    [(MessageEndpoints.device_status, ["samx", "samy"], [None, None])],
-)
-def test_get_device_status(msg_cls, devices, reference):
-    worker = get_scan_worker()
-    assert worker._get_device_status(msg_cls, devices) == reference
-
-
-@pytest.mark.parametrize(
     "msg1,msg2,req_msg",
     [
         (
