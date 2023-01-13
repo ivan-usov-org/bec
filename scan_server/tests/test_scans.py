@@ -14,11 +14,15 @@ from scan_server.scans import (
     ContLineScan,
     DeviceRPC,
     FermatSpiralScan,
+    LineScan,
     Move,
     RequestBase,
+    ScanBase,
     Scan,
     UpdatedMove,
+    RoundScanFlySim,
     get_2D_raster_pos,
+    get_fermat_spiral_pos,
     get_round_roi_scan_positions,
     get_round_scan_positions,
 )
@@ -1087,7 +1091,7 @@ def test_scan_report_devices():
         "args": {"samx": (-5, 5), "samy": (-5, 5)},
         "kwargs": {"step": 3},
     }
-    request = FermatSpiralScan(device_manager=device_manager, parameter=parameter)
+    request = RequestBase(device_manager=device_manager, parameter=parameter)
     assert request.scan_report_devices == ["samx", "samy"]
     request.scan_report_devices = ["samx", "samz"]
     assert request.scan_report_devices == ["samx", "samz"]
@@ -1123,6 +1127,48 @@ def test_raster_scan_positions(in_args, reference_positions, snaked):
     assert np.isclose(positions, reference_positions).all()
 
 
+@pytest.mark.parametrize(
+    "in_args, center, reference_positions",
+    [
+        (
+            [-2, 2, -2, 2],
+            False,
+            [
+                [-0.38502947, -0.42030026],
+                [0.8030152, 0.07047403],
+                [-0.78349739, 0.6006928],
+                [0.19856742, -1.12257337],
+                [0.68409143, 1.07541569],
+                [-1.34834023, -0.36246191],
+                [1.33834167, -0.69508386],
+                [-0.55304807, 1.51437705],
+                [-0.65246146, -1.5806309],
+                [1.63258446, 0.76398167],
+                [-1.80382449, 0.565789],
+                [0.99004828, -1.70839234],
+                [-1.74471832, -1.22660425],
+                [-1.46933912, 1.74339971],
+                [1.70582397, 1.71416585],
+                [1.95717083, -1.63324289],
+            ],
+        ),
+        (
+            [-1, 1, -1, 1],
+            1,
+            [
+                [0.0, 0.0],
+                [-0.38502947, -0.42030026],
+                [0.8030152, 0.07047403],
+                [-0.78349739, 0.6006928],
+            ],
+        ),
+    ],
+)
+def test_get_fermat_spiral_pos(in_args, center, reference_positions):
+    positions = get_fermat_spiral_pos(*in_args, center=center)
+    assert np.isclose(positions, reference_positions).all()
+
+
 def test_get_func_name_from_macro():
     def pre_scan_macro(devices: dict, request: RequestBase):
         pass
@@ -1142,6 +1188,171 @@ def test_get_func_name_from_macro():
         device_manager=device_manager, parameter=scan_msg.content["parameter"]
     )
     assert request._get_func_name_from_macro(macros[0].decode().strip()) == "pre_scan_macro"
+
+
+def test_scan_report_devices():
+    device_manager = DMMock()
+    device_manager.add_device("samx")
+    scan_msg = BMessage.ScanQueueMessage(
+        scan_type="fermat_scan",
+        parameter={
+            "args": {"samx": (-5, 5), "samy": (-5, 5)},
+            "kwargs": {"step": 3},
+        },
+        queue="primary",
+    )
+    request = FermatSpiralScan(
+        device_manager=device_manager, parameter=scan_msg.content["parameter"]
+    )
+    assert request.scan_report_devices == ["samx", "samy"]
+
+    request.scan_report_devices = ["samx", "samy", "samz"]
+    assert request.scan_report_devices == ["samx", "samy", "samz"]
+
+
+def test_request_base_check_limits():
+    class RequestBaseMock(RequestBase):
+        def run(self):
+            pass
+
+    device_manager = DMMock()
+    device_manager.add_device("samx")
+    device_manager.add_device("samy")
+    scan_msg = BMessage.ScanQueueMessage(
+        scan_type="fermat_scan",
+        parameter={
+            "args": {"samx": (-5, 5), "samy": (-5, 5)},
+            "kwargs": {"step": 3},
+        },
+        queue="primary",
+    )
+    request = RequestBaseMock(
+        device_manager=device_manager, parameter=scan_msg.content["parameter"]
+    )
+
+    assert request.scan_motors == ["samx", "samy"]
+    assert request.device_manager.devices["samy"]._config["deviceConfig"].get("limits", [0, 0]) == [
+        -50,
+        50,
+    ]
+    request.device_manager.devices["samy"]._config["deviceConfig"]["limits"] = [5, -5]
+    assert request.device_manager.devices["samy"]._config["deviceConfig"].get("limits", [0, 0]) == [
+        5,
+        -5,
+    ]
+
+    request.positions = [[-100, 30]]
+
+    for ii, dev in enumerate(request.scan_motors):
+
+        low_limit, high_limit = (
+            request.device_manager.devices[dev]._config["deviceConfig"].get("limits", [0, 0])
+        )
+        for pos in request.positions:
+            pos_axis = pos[ii]
+            if low_limit >= high_limit:
+                continue
+            if not low_limit <= pos_axis <= high_limit:
+                with pytest.raises(Exception) as exc_info:
+                    request._check_limits()
+                assert (
+                    exc_info.value.args[0]
+                    == f"Target position {pos} for motor {dev} is outside of range: [{low_limit}, {high_limit}]"
+                )
+            else:
+                request._check_limits()
+
+    assert request.positions == [[-100, 30]]
+
+
+def test_request_base_get_scan_motors():
+    class RequestBaseMock(RequestBase):
+        def run(self):
+            pass
+
+    device_manager = DMMock()
+    device_manager.add_device("samx")
+    device_manager.add_device("samz")
+    scan_msg = BMessage.ScanQueueMessage(
+        scan_type="fermat_scan",
+        parameter={
+            "args": {"samx": (-5, 5)},
+            "kwargs": {"step": 3},
+        },
+        queue="primary",
+    )
+    request = RequestBaseMock(
+        device_manager=device_manager, parameter=scan_msg.content["parameter"]
+    )
+
+    assert request.scan_motors == ["samx"]
+    request.caller_args = ""
+    request._get_scan_motors()
+    assert request.scan_motors == ["samx"]
+
+    request.arg_bundle_size = 2
+    request.caller_args = {"samz": (-2, 2), "samy": (-1, 2)}
+    request._get_scan_motors()
+    assert request.scan_motors == ["samz", "samy"]
+
+    request.caller_args = {"samx"}
+    request.arg_bundle_size = 0
+    request._get_scan_motors()
+    assert request.scan_motors == ["samz", "samy", "samx"]
+
+
+def test_scan_base_init():
+    device_manager = DMMock()
+    device_manager.add_device("samx")
+
+    class ScanBaseMock(ScanBase):
+        scan_name = ""
+
+        def _calculate_positions(self):
+            pass
+
+    scan_msg = BMessage.ScanQueueMessage(
+        scan_type="",
+        parameter={
+            "args": {"samx": (-5, 5), "samy": (-5, 5)},
+            "kwargs": {"step": 3},
+        },
+        queue="primary",
+    )
+    with pytest.raises(ValueError) as exc_info:
+        request = ScanBaseMock(
+            device_manager=device_manager, parameter=scan_msg.content["parameter"]
+        )
+    assert exc_info.value.args[0] == "scan_name cannot be empty"
+
+
+def test_scan_base_set_position_offset():
+    device_manager = DMMock()
+    device_manager.add_device("samx")
+
+    scan_msg = BMessage.ScanQueueMessage(
+        scan_type="fermat_scan",
+        parameter={
+            "args": {"samx": (-5, 5), "samy": (-5, 5)},
+            "kwargs": {"step": 3},
+        },
+        queue="primary",
+    )
+    request = FermatSpiralScan(
+        device_manager=device_manager, parameter=scan_msg.content["parameter"]
+    )
+
+    assert request.positions == []
+    request._set_position_offset()
+    assert request.positions == []
+
+    request.relative == True
+    request._set_position_offset()
+
+    start_pos_ref = [0, 0]
+    request.positions += start_pos_ref
+    assert request.positions == [0, 0]
+    assert request.start_pos == start_pos_ref
 
 
 @pytest.mark.parametrize(
@@ -1513,3 +1724,156 @@ def test_LamNIFermatScan(scan_msg, reference_scan_list):
                 "positions"
             ]
     assert scan_instructions == reference_scan_list
+
+
+def test_round_scan_fly_sim_get_scan_motors():
+
+    device_manager = DMMock()
+    device_manager.add_device("flyer_sim")
+    scan_msg = BMessage.ScanQueueMessage(
+        scan_type="round_scan_fly",
+        parameter={
+            "args": {"flyer_sim": (0, 50, 5, 3)},
+            "kwargs": {"realtive": True},
+        },
+        queue="primary",
+    )
+    request = RoundScanFlySim(
+        device_manager=device_manager, parameter=scan_msg.content["parameter"]
+    )
+
+    request._get_scan_motors()
+    assert request.scan_motors == []
+    assert request.flyer == list(scan_msg.content["parameter"]["args"].keys())[0]
+
+
+def test_round_scan_fly_sim_prepare_positions():
+
+    device_manager = DMMock()
+    device_manager.add_device("flyer_sim")
+    scan_msg = BMessage.ScanQueueMessage(
+        scan_type="round_scan_fly",
+        parameter={
+            "args": {"flyer_sim": (0, 50, 5, 3)},
+            "kwargs": {"realtive": True},
+        },
+        queue="primary",
+    )
+    request = RoundScanFlySim(
+        device_manager=device_manager, parameter=scan_msg.content["parameter"]
+    )
+    request._calculate_positions = mock.MagicMock()
+    request._check_limits = mock.MagicMock()
+    pos = [1, 2, 3, 4]
+    request.positions = pos
+
+    next(request.prepare_positions())
+
+    request._calculate_positions.assert_called_once()
+    assert request.num_pos == len(pos)
+    request._check_limits.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    "in_args,reference_positions", [((1, 5, 1, 1), [[0, -3], [0, -7], [0, 7]])]
+)
+def test_round_scan_fly_sim_calculate_positions(in_args, reference_positions):
+
+    device_manager = DMMock()
+    device_manager.add_device("flyer_sim")
+    scan_msg = BMessage.ScanQueueMessage(
+        scan_type="round_scan_fly",
+        parameter={
+            "args": {"flyer_sim": in_args},
+            "kwargs": {"realtive": True},
+        },
+        queue="primary",
+    )
+    request = RoundScanFlySim(
+        device_manager=device_manager, parameter=scan_msg.content["parameter"]
+    )
+
+    request._calculate_positions()
+    assert np.isclose(request.positions, reference_positions).all()
+
+
+@pytest.mark.parametrize(
+    "in_args,reference_positions", [((1, 5, 1, 1), [[0, -3], [0, -7], [0, 7]])]
+)
+def test_round_scan_fly_sim_scan_core(in_args, reference_positions):
+
+    device_manager = DMMock()
+    device_manager.add_device("flyer_sim")
+    scan_msg = BMessage.ScanQueueMessage(
+        scan_type="round_scan_fly",
+        parameter={
+            "args": {"flyer_sim": in_args},
+            "kwargs": {"realtive": True},
+        },
+        queue="primary",
+    )
+    request = RoundScanFlySim(
+        device_manager=device_manager, parameter=scan_msg.content["parameter"]
+    )
+    request.positions = np.array(reference_positions)
+
+    ret = next(request.scan_core())
+    assert ret == BMessage.DeviceInstructionMessage(
+        device="flyer_sim",
+        action="kickoff",
+        parameter={"num_pos": None, "positions": reference_positions, "exp_time": 0.1},
+        metadata={"stream": "primary", "DIID": 0},
+    )
+
+
+@pytest.mark.parametrize(
+    "in_args,reference_positions",
+    [
+        (
+            [[-3, 3], [-2, 2]],
+            [
+                [-3.0, -2.0],
+                [-2.33333333, -1.55555556],
+                [-1.66666667, -1.11111111],
+                [-1.0, -0.66666667],
+                [-0.33333333, -0.22222222],
+                [0.33333333, 0.22222222],
+                [1.0, 0.66666667],
+                [1.66666667, 1.11111111],
+                [2.33333333, 1.55555556],
+                [3.0, 2.0],
+            ],
+        ),
+        (
+            [[-1, 1], [-1, 2]],
+            [
+                [-1.0, -1.0],
+                [-0.77777778, -0.66666667],
+                [-0.55555556, -0.33333333],
+                [-0.33333333, 0.0],
+                [-0.11111111, 0.33333333],
+                [0.11111111, 0.66666667],
+                [0.33333333, 1.0],
+                [0.55555556, 1.33333333],
+                [0.77777778, 1.66666667],
+                [1.0, 2.0],
+            ],
+        ),
+    ],
+)
+def test_line_scan_calculate_positions(in_args, reference_positions):
+
+    device_manager = DMMock()
+    device_manager.add_device("flyer_sim")
+    scan_msg = BMessage.ScanQueueMessage(
+        scan_type="round_scan_fly",
+        parameter={
+            "args": {"samx": in_args[0], "samy": in_args[1]},
+            "kwargs": {"realtive": True},
+        },
+        queue="primary",
+    )
+    request = LineScan(device_manager=device_manager, parameter=scan_msg.content["parameter"])
+
+    request._calculate_positions()
+    assert np.isclose(request.positions, reference_positions).all()
