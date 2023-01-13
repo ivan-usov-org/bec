@@ -8,6 +8,7 @@ from scan_server.scan_worker import ScanWorker
 
 from utils import load_ScanServerMock
 import time
+from scan_server.scan_queue import InstructionQueueStatus
 
 
 def get_scan_worker() -> ScanWorker:
@@ -346,6 +347,13 @@ def test_send_rpc(instr):
     worker.device_manager.producer.send.assert_called_once_with(
         MessageEndpoints.device_instructions(), instr.dumps()
     )
+
+
+def test_check_for_interruption():
+    worker = get_scan_worker()
+    worker.status = InstructionQueueStatus.STOPPED
+    with pytest.raises(ScanAbortion) as exc_info:
+        worker._check_for_interruption()
 
 
 @pytest.mark.parametrize(
