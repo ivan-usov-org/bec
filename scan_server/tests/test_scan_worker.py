@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 from bec_utils import BECMessage, MessageEndpoints
-from scan_server.errors import ScanAbortion
+from scan_server.errors import ScanAbortion, DeviceMessageError
 from scan_server.scan_worker import ScanWorker
 
 from utils import load_ScanServerMock
@@ -55,6 +55,69 @@ def test_add_wait_group():
     worker._add_wait_group(msg1)
 
     assert worker._groups == {"scan_motor": [("samx", 3)]}
+
+
+@pytest.mark.parametrize(
+    "instructions,wait_type",
+    [
+        (
+            BECMessage.DeviceInstructionMessage(
+                device="samy",
+                action="wait",
+                parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 3},
+            ),
+            "move",
+        ),
+        (
+            BECMessage.DeviceInstructionMessage(
+                device="samy",
+                action="wait",
+                parameter={"type": "read", "group": "scan_motor", "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 3},
+            ),
+            "read",
+        ),
+        (
+            BECMessage.DeviceInstructionMessage(
+                device="samy",
+                action="wait",
+                parameter={"type": "trigger", "group": "scan_motor", "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 3},
+            ),
+            "trigger",
+        ),
+        (
+            BECMessage.DeviceInstructionMessage(
+                device="samy",
+                action="wait",
+                parameter={"type": None, "group": "scan_motor", "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 3},
+            ),
+            None,
+        ),
+    ],
+)
+def test_wait_for_devices(instructions, wait_type):
+
+    worker = get_scan_worker()
+    worker._wait_for_idle = mock.MagicMock()
+    worker._wait_for_read = mock.MagicMock()
+    worker._wait_for_trigger = mock.MagicMock()
+
+    if wait_type:
+        worker._wait_for_devices(instructions)
+
+    if wait_type == "move":
+        worker._wait_for_idle.assert_called_once_with(instructions)
+    elif wait_type == "read":
+        worker._wait_for_read.assert_called_once_with(instructions)
+    elif wait_type == "trigger":
+        worker._wait_for_trigger.assert_called_once_with(instructions)
+    else:
+        with pytest.raises(DeviceMessageError) as exc_info:
+            worker._wait_for_devices(instructions)
+        assert exc_info.value.args[0] == "Unknown wait command"
 
 
 @pytest.mark.parametrize(
