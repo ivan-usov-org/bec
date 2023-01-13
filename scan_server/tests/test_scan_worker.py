@@ -2,7 +2,7 @@ import uuid
 from unittest import mock
 
 import pytest
-from bec_utils import BECMessage, MessageEndpoints
+from bec_utils import BECMessage, MessageEndpoints, DeviceStatus
 from scan_server.errors import ScanAbortion, DeviceMessageError
 from scan_server.scan_worker import ScanWorker
 
@@ -210,6 +210,48 @@ def test_wait_for_idle(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
         else:
             with pytest.raises(ScanAbortion):
                 worker._wait_for_idle(msg2)
+
+
+@pytest.mark.parametrize(
+    "msg1,msg2,req_msg",
+    [
+        (
+            BECMessage.DeviceInstructionMessage(
+                device=["samx"],
+                action="set",
+                parameter={"value": 10, "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+            ),
+            BECMessage.DeviceInstructionMessage(
+                device=["samx"],
+                action="wait",
+                parameter={"type": "move", "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 4, "scanID": "scanID", "RID": "requestID"},
+            ),
+            BECMessage.DeviceStatusMessage(
+                device="samx",
+                status=0,
+                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+            ),
+        ),
+    ],
+)
+def test_wait_for_read(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
+    worker = get_scan_worker()
+    worker._check_for_interruption = mock.MagicMock()
+
+    with mock.patch(
+        "scan_server.scan_worker.ScanWorker._get_device_status", return_value=[req_msg.dumps()]
+    ) as device_status:
+        assert worker._groups == {}
+        worker._groups["scan_motor"] = [("samx", 3), "samy"]
+        worker.device_manager.producer._get_buffer[
+            MessageEndpoints.device_readback("samx")
+        ] = BECMessage.DeviceMessage(signals={"samx": {"value": 4}}, metadata={}).dumps()
+        worker._add_wait_group(msg1)
+        worker._wait_for_read(msg2)
+        assert worker._groups == {"scan_motor": ["samy"]}
+        worker._check_for_interruption.assert_called_once()
 
 
 @pytest.mark.parametrize(
