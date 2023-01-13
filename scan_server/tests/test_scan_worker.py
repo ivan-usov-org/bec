@@ -7,6 +7,7 @@ from scan_server.errors import ScanAbortion, DeviceMessageError
 from scan_server.scan_worker import ScanWorker
 
 from utils import load_ScanServerMock
+import time
 
 
 def get_scan_worker() -> ScanWorker:
@@ -252,6 +253,27 @@ def test_wait_for_read(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
         worker._wait_for_read(msg2)
         assert worker._groups == {"scan_motor": ["samy"]}
         worker._check_for_interruption.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    "instr",
+    [
+        (
+            BECMessage.DeviceInstructionMessage(
+                device=["samx"],
+                action="set",
+                parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
+                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+            )
+        ),
+    ],
+)
+def test_wait_for_trigger(instr):
+    worker = get_scan_worker()
+
+    with mock.patch("time.sleep", return_value=None) as patched_time_sleep:
+        worker._wait_for_trigger(instr)
+    patched_time_sleep.assert_called_once_with(instr.content["parameter"]["time"])
 
 
 @pytest.mark.parametrize(
