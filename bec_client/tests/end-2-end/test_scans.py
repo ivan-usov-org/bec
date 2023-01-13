@@ -69,20 +69,6 @@ def wait_for_empty_queue(bec):
 
 
 @pytest.mark.timeout(100)
-def start_client():
-    config = ServiceConfig(CONFIG_PATH)
-    bec = BECClient(
-        [config.redis],
-        RedisConnector,
-        config.scibec,
-    )
-    bec.start()
-    bec.queue.request_queue_reset()
-    bec.queue.request_scan_continuation()
-    return bec
-
-
-@pytest.mark.timeout(100)
 def test_grid_scan(capsys, client):
     bec = client
     scans = bec.scans
