@@ -276,6 +276,13 @@ def test_wait_for_trigger(instr):
     patched_time_sleep.assert_called_once_with(instr.content["parameter"]["time"])
 
 
+def test_wait_for_device_server():
+    worker = get_scan_worker()
+    worker.parent.wait_for_service = mock.MagicMock()
+    worker._wait_for_device_server()
+    worker.parent.wait_for_service.assert_called_once_with("DeviceServer")
+
+
 @pytest.mark.parametrize(
     "device_status,devices,instr,abort",
     [
