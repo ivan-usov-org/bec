@@ -1,10 +1,12 @@
+import os
 import pathlib
 import subprocess
 
 from setuptools import setup
 
 current_path = pathlib.Path(__file__).parent.resolve()
-
+os.environ["BEC_CLIENT_PATH"] = str(current_path)
+print(current_path)
 utils = f"{current_path}/../bec_utils/"
 
 if __name__ == "__main__":
@@ -20,7 +22,8 @@ if __name__ == "__main__":
             "cytoolz",
             "rich",
             "pyepics",
-        ]
+        ],
+        scripts=["bec_client/bin/bec"],
     )
     local_deps = [utils]
     for dep in local_deps:
