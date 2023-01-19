@@ -1,17 +1,22 @@
 ###############################################################
 ####### INITIALIZE THE BEC CLIENT - DO NOT MODIFY #############
 ###############################################################
+import pathlib
+
 from bec_utils import RedisConnector, ServiceConfig, bec_logger
 
 from bec_client import BECClient
 
 # pylint: disable=wrong-import-position
 # pylint: disable=protected-access
+# pylint: disable=unused-import
+# pylint: disable=ungrouped-imports
 
 logger = bec_logger.logger
 bec_logger.level = bec_logger.LOGLEVEL.SUCCESS
 
-CONFIG_PATH = "../bec_config.yaml"
+current_path = pathlib.Path(__file__).parent.resolve()
+CONFIG_PATH = f"{current_path}/../../../bec_config.yaml"
 
 config = ServiceConfig(CONFIG_PATH)
 
@@ -24,11 +29,14 @@ dev = bec.device_manager.devices
 scans = bec.scans
 
 ####################### END OF INIT #############################
+#################################################################
+
 
 # MODIFY THE SECTIONS BELOW TO CUSTOMIZE THE BEC
 
 ################################################################
 ################################################################
+import numpy as np  # not needed but always nice to have
 
 # SETUP BEAMLINE INFO
 from bec_client.plugins.cSAXS.beamline_info import BeamlineInfo
