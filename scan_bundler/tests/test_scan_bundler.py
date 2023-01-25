@@ -1,6 +1,8 @@
 import os
 import time
 from concurrent.futures import wait
+from unittest import mock
+import threading
 
 import bec_utils
 import pytest
@@ -40,6 +42,20 @@ class ScanBundlerMock(ScanBundler):
         pass
 
 
+def test_start_buffered_producer():
+    sb = load_ScanBundlerMock()
+    assert isinstance(sb._buffered_producer_thread, threading.Thread)
+    sb._start_buffered_producer()
+    with pytest.raises(Exception) as exc_info:
+        sb._buffered_producer_thread.start()
+    assert exc_info.value.args[0] == "threads can only be started once"
+
+
+def test_start_device_manager():
+    sb = load_ScanBundlerMock()
+    assert isinstance(sb.device_manager, DeviceManagerSB)
+
+
 @pytest.mark.parametrize(
     "scanID,storageID", [("adlk-jalskdj", None), ("adlk-jalskdj", "adlk-jalskdj")]
 )
@@ -77,6 +93,59 @@ def test_device_read_callback(scanID, storageID):
         assert not scan_bundler.device_storage
         return
     assert "samx" in scan_bundler.device_storage
+
+
+@pytest.mark.parametrize(
+    "queue_msg",
+    [
+        BECMessage.ScanQueueStatusMessage(
+            queue={
+                "primary": {
+                    "info": [
+                        {
+                            "queueID": "7c15c9a2-71d4-4f2a-91a7-c4a63088fa38",
+                            "scanID": ["bfa582aa-f9cd-4258-ab5d-3e5d54d3dde5"],
+                            "is_scan": [True],
+                            "request_blocks": [
+                                {
+                                    "msg": b"\x84\xa8msg_type\xa4scan\xa7content\x83\xa9scan_type\xabfermat_scan\xa9parameter\x82\xa4args\x82\xa4samx\x92\xfe\x02\xa4samy\x92\xfe\x02\xa6kwargs\x83\xa4step\xcb?\xf8\x00\x00\x00\x00\x00\x00\xa8exp_time\xcb?\x94z\xe1G\xae\x14{\xa8relative\xc3\xa5queue\xa7primary\xa8metadata\x81\xa3RID\xd9$cd8fc68f-fe65-4031-9a37-e0e7ba9df542\xa7version\xcb?\xf0\x00\x00\x00\x00\x00\x00",
+                                    "RID": "cd8fc68f-fe65-4031-9a37-e0e7ba9df542",
+                                    "scan_motors": ["samx", "samy"],
+                                    "is_scan": True,
+                                    "scan_number": 25,
+                                    "scanID": "bfa582aa-f9cd-4258-ab5d-3e5d54d3dde5",
+                                    "metadata": {"RID": "cd8fc68f-fe65-4031-9a37-e0e7ba9df542"},
+                                    "content": {
+                                        "scan_type": "fermat_scan",
+                                        "parameter": {
+                                            "args": {"samx": [-2, 2], "samy": [-2, 2]},
+                                            "kwargs": {
+                                                "step": 1.5,
+                                                "exp_time": 0.02,
+                                                "relative": True,
+                                            },
+                                        },
+                                        "queue": "primary",
+                                    },
+                                }
+                            ],
+                            "scan_number": [25],
+                            "status": "PENDING",
+                            "active_request_block": None,
+                        }
+                    ],
+                    "status": "RUNNING",
+                }
+            }
+        ),
+    ],
+)
+def test_scan_queue_callback(queue_msg):
+    sb = load_ScanBundlerMock()
+    msg = MessageMock()
+    msg.value = queue_msg.dumps()
+    sb._scan_queue_callback(msg, sb)
+    assert sb.current_queue == queue_msg.content["queue"]["primary"].get("info")
 
 
 def test_status_modification():
