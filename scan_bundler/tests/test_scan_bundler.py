@@ -148,6 +148,33 @@ def test_scan_queue_callback(queue_msg):
     assert sb.current_queue == queue_msg.content["queue"]["primary"].get("info")
 
 
+@pytest.mark.parametrize(
+    "scan_msg",
+    [
+        BECMessage.ScanStatusMessage(
+            scanID="6ff7a89a-79e5-43ad-828b-c1e1aeed5803",
+            status="closed",
+            info={
+                "stream": "primary",
+                "DIID": 4,
+                "RID": "a53538b4-79f3-4132-91b5-d044e438f460",
+                "scanID": "3ea07f69-b0ee-44fa-8451-b85824a37397",
+                "queueID": "84e5bc19-e2fc-4b03-b706-004420322813",
+                "primary": ["samx", "samy"],
+                "num_points": 143,
+            },
+        ),
+    ],
+)
+def test_scan_status_callback(scan_msg):
+    sb = load_ScanBundlerMock()
+    msg = MessageMock()
+    sb.handle_scan_status_message = mock.MagicMock()
+    msg.value = scan_msg.dumps()
+    sb._scan_status_callback(msg, sb)
+    sb.handle_scan_status_message.assert_called_once_with(scan_msg)
+
+
 def test_status_modification():
     scanID = "test_scanID"
     scan_bundler = load_ScanBundlerMock()
