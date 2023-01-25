@@ -3,9 +3,10 @@ import time
 from unittest import mock
 
 import pytest
+from bec_utils import BECMessage
+
 from bec_client.callbacks.live_table import LiveUpdatesTable, sort_devices
 from bec_client.callbacks.utils import ScanRequestMixin
-from bec_utils import BECMessage
 
 from .utils import get_bec_client_mock
 
@@ -39,19 +40,38 @@ def test_sort_devices():
     assert devices == ["samx", "samy", "bpm4i", "bpm4s"]
 
 
-def test_get_devices_from_request():
+@pytest.mark.parametrize(
+    "request_msg,scan_report_devices",
+    [
+        (
+            BECMessage.ScanQueueMessage(
+                scan_type="grid_scan",
+                parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
+                queue="primary",
+                metadata={"RID": "something"},
+            ),
+            ["samx"],
+        ),
+        (
+            BECMessage.ScanQueueMessage(
+                scan_type="round_scan",
+                parameter={"args": {"samx": ["samy", 0, 25, 5, 3]}},
+                queue="primary",
+                metadata={"RID": "something"},
+            ),
+            ["samx", "samy"],
+        ),
+    ],
+)
+def test_get_devices_from_scan_data(request_msg, scan_report_devices):
     client = get_bec_client_mock()
     client.start()
-    request_msg = BECMessage.ScanQueueMessage(
-        scan_type="grid_scan",
-        parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
-        queue="primary",
-        metadata={"RID": "something"},
+    data = BECMessage.ScanMessage(
+        point_id=0, scanID="", data={}, metadata={"scan_report_devices": scan_report_devices}
     )
-
     live_update = LiveUpdatesTable(client, request_msg)
-    devices = live_update.get_devices_from_request()
-    assert devices[0] == "samx"
+    devices = live_update.get_devices_from_scan_data(data)
+    assert devices[0 : len(scan_report_devices)] == scan_report_devices
 
 
 @pytest.mark.asyncio
