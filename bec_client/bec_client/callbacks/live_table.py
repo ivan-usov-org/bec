@@ -92,7 +92,7 @@ class LiveUpdatesTable(LiveUpdatesBase):
     def devices(self):
         """get the devices for the callback"""
         if self.point_data.metadata["scan_type"] == "step":
-            return self.get_devices_from_request()
+            return self.get_devices_from_scan_data(self.scan_item.data[0])
         if self.point_data.metadata["scan_type"] == "fly":
             devices = list(self.point_data.content["data"].keys())
             if len(devices) > self.MAX_DEVICES:
@@ -100,10 +100,10 @@ class LiveUpdatesTable(LiveUpdatesBase):
             return devices
         return None
 
-    def get_devices_from_request(self) -> list:
+    def get_devices_from_scan_data(self, data: BECMessage.ScanMessage) -> list:
         """extract interesting devices from a scan request"""
         device_manager = self.bec.device_manager
-        scan_devices = self.scan_item.data[0].metadata.get("scan_report_devices")
+        scan_devices = data.metadata.get("scan_report_devices")
         primary_devices = device_manager.devices.primary_devices(
             [device_manager.devices[dev] for dev in scan_devices]
         )
