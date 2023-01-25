@@ -175,6 +175,65 @@ def test_scan_status_callback(scan_msg):
     sb.handle_scan_status_message.assert_called_once_with(scan_msg)
 
 
+@pytest.mark.parametrize(
+    "scan_msg, sync_storage",
+    [
+        [
+            BECMessage.ScanStatusMessage(
+                scanID="6ff7a89a-79e5-43ad-828b-c1e1aeed5803",
+                status="closed",
+                info={
+                    "stream": "primary",
+                    "DIID": 4,
+                    "RID": "a53538b4-79f3-4132-91b5-d044e438f460",
+                    "scanID": "3ea07f69-b0ee-44fa-8451-b85824a37397",
+                    "queueID": "84e5bc19-e2fc-4b03-b706-004420322813",
+                    "primary": ["samx", "samy"],
+                    "num_points": 143,
+                },
+            ),
+            [],
+        ],
+        [
+            BECMessage.ScanStatusMessage(
+                scanID="6ff7a89a-79e5-43ad-828b-c1e1aeed5803",
+                status="open",
+                info={
+                    "stream": "primary",
+                    "DIID": 4,
+                    "RID": "a53538b4-79f3-4132-91b5-d044e438f460",
+                    "scanID": "3ea07f69-b0ee-44fa-8451-b85824a37397",
+                    "queueID": "84e5bc19-e2fc-4b03-b706-004420322813",
+                    "primary": ["samx", "samy"],
+                    "num_points": 143,
+                },
+            ),
+            ["6ff7a89a-79e5-43ad-828b-c1e1aeed5803"],
+        ],
+    ],
+)
+def test_handle_scan_status_message(scan_msg, sync_storage):
+    sb = load_ScanBundlerMock()
+    sb.cleanup_storage = mock.MagicMock()
+    scanID = scan_msg.content["scanID"]
+    sb._initialize_scan_container = mock.MagicMock()
+    sb._scan_status_modification = mock.MagicMock()
+    sb.sync_storage = sync_storage
+
+    sb.handle_scan_status_message(scan_msg)
+
+    if not scanID in sb.sync_storage:
+        sb._initialize_scan_container.assert_called_once_with(scan_msg)
+        assert scanID in sb.scanID_history
+    else:
+        sb._initialize_scan_container.assert_not_called()
+
+    if scan_msg.content.get("status") != "open":
+        sb._scan_status_modification.assert_called_once_with(scan_msg)
+    else:
+        sb._scan_status_modification.assert_not_called()
+
+
 def test_status_modification():
     scanID = "test_scanID"
     scan_bundler = load_ScanBundlerMock()
