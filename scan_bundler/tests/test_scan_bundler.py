@@ -264,3 +264,69 @@ def test_status_modification():
     )
     scan_bundler._scan_status_modification(msg)
     assert scan_bundler.sync_storage[scanID]["info"] == {}
+
+
+@pytest.mark.parametrize(
+    "scan_msg",
+    [
+        BECMessage.ScanStatusMessage(
+            scanID="6ff7a89a-79e5-43ad-828b-c1e1aeed5803",
+            status="closed",
+            info={
+                "stream": "primary",
+                "DIID": 4,
+                "RID": "a53538b4-79f3-4132-91b5-d044e438f460",
+                "scanID": "3ea07f69-b0ee-44fa-8451-b85824a37397",
+                "queueID": "84e5bc19-e2fc-4b03-b706-004420322813",
+                "scan_number": 5,
+                "primary": ["samx", "samy"],
+                "num_points": 143,
+            },
+        ),
+        BECMessage.ScanStatusMessage(
+            scanID="6ff7a89a-79e5-43ad-828b-c1e1aeed5803",
+            status="open",
+            info={
+                "stream": "primary",
+                "DIID": 4,
+                "RID": "a53538b4-79f3-4132-91b5-d044e438f460",
+                "scanID": "3ea07f69-b0ee-44fa-8451-b85824a37397",
+                "queueID": "84e5bc19-e2fc-4b03-b706-004420322813",
+                "scan_number": 5,
+                "primary": ["samx", "samy", "eyex", "bpm3a"],
+                "num_points": 143,
+            },
+        ),
+    ],
+)
+def test_initialize_scan_container(scan_msg):
+    sb = load_ScanBundlerMock()
+    scanID = scan_msg.content["scanID"]
+    scan_info = scan_msg.content["info"]
+    scan_motors = list(set(sb.device_manager.devices[m] for m in scan_info["primary"]))
+    bl_devs = sb.device_manager.devices.baseline_devices(scan_motors)
+
+    sb.send_run_start_document = mock.MagicMock()
+
+    sb._initialize_scan_container(
+        scan_msg
+    )  # The sb.device_manager.devices[m] will crash if m is not a motor in devices
+
+    if scan_msg.content.get("status") != "open":
+        return
+    assert sb.scan_motors[scanID] == scan_motors
+    assert sb.sync_storage[scanID] == {"info": scan_info, "status": "open", "sent": set()}
+    assert sb.bluesky_metadata[scanID] == {}
+    assert sb.primary_devices[scanID] == {
+        "devices": sb.device_manager.devices.primary_devices(scan_motors),
+        "pointID": {},
+    }
+    assert sb.monitor_devices[scanID] == sb.device_manager.devices.acquisition_group("monitor")
+    assert "eyex" not in [dev.name for dev in bl_devs]
+    assert sb.baseline_devices[scanID] == {
+        "devices": bl_devs,
+        "done": {dev.name: False for dev in bl_devs},
+    }
+
+    assert scanID in sb.storage_initialized
+    sb.send_run_start_document.assert_called_once()
