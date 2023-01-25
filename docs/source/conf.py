@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "BEC"
-copyright = "2022, Klaus Wakonig"
+copyright = "2022, Paul Scherrer Institute, Switzerland"
 author = "Klaus Wakonig"
 release = "0.1"
 
