@@ -46,12 +46,12 @@ class ScanBundler(BECService):
         self.executor = ThreadPoolExecutor(max_workers=4)
         self.executor_tasks = collections.deque(maxlen=100)
         # self._send_buffer = Queue()
-        self._start_buffered_producer()
         self.scanID_history = collections.deque(maxlen=10)
         self._lock = threading.Lock()
         self._initialize_signals()
         self._emitters = []
         self._initialize_emitters()
+        self._start_buffered_producer()
 
     def _start_buffered_producer(self):
         self._buffered_producer_thread = threading.Thread(
@@ -64,9 +64,9 @@ class ScanBundler(BECService):
         self._emitters.append(BECEmitter(self))
 
     def _initialize_signals(self):
-        self.scan_status_update = signal("scan status update")
+        self.scan_status_update = signal("scan_status_update")
         self.cleanup = signal("cleanup")
-        self.scan_point = signal("scan point")
+        self.scan_point = signal("scan_point")
 
     def _start_device_manager(self):
         self.device_manager = DeviceManagerSB(self.connector, self.scibec_url)
@@ -188,7 +188,8 @@ class ScanBundler(BECService):
                 },
             }
             self.storage_initialized.add(scanID)
-            self.scan_status_update.send(scanID)
+            # self.scan_status_update.send(scanID)
+            self._emitters[0].send_run_start_document(scanID)
             # self.send_run_start_document(scanID)
             return
 
@@ -367,7 +368,8 @@ class ScanBundler(BECService):
                     if all(status for status in baseline_devices_status.values()):
                         logger.info(f"Sending baseline readings for scanID {scanID}.")
                         logger.debug("Baseline: ", self.sync_storage[scanID]["baseline"])
-                        self._send_baseline(scanID=scanID)
+                        # self._send_baseline(scanID=scanID)
+                        self._emitters[1]._send_baseline(scanID=scanID)
                         self.baseline_devices[scanID]["done"] = {
                             dev.name: False
                             for dev in self.device_manager.devices.baseline_devices(
@@ -423,7 +425,7 @@ class ScanBundler(BECService):
                 self.sync_storage[scanID][pointID][dev.name] = self.device_storage.get(dev.name)
 
     def _buffered_publish(self):
-        pass
+        self._emitters[1]._buffered_publish()
 
     #     while True:
     #         msgs_to_send = []
@@ -471,14 +473,17 @@ class ScanBundler(BECService):
                     getattr(self, storage).pop(scanID)
                 except KeyError:
                     logger.warning(f"Failed to remove {scanID} from {storage}.")
-            self.cleanup.send(scanID)
+            # self.cleanup.send(scanID)
+            self._emitters[0].cleanup_storage()
             self.storage_initialized.remove(scanID)
 
     def _send_scan_point(self, scanID, pointID) -> None:
         logger.info(f"Sending point {pointID} for scanID {scanID}.")
         logger.debug(f"{pointID}, {self.sync_storage[scanID][pointID]}")
 
-        self.scan_point.send(scanID, pointID)
+        # self.scan_point.send(scanID, pointID)
+        self._emitters[0].send_bluesky_scan_point()
+        self._emitters[1].send_bec_scan_point()
 
         # self._send_buffer.put(
         #     BECMessage.ScanMessage(

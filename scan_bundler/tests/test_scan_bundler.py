@@ -41,7 +41,7 @@ class ScanBundlerMock(ScanBundler):
 
 
 @pytest.mark.parametrize(
-    "scanID,storageID", [("adlk-jalskdj", None), ("adlk-jalskdj", "adlk-jalskdj")]
+    "scanID,storageID", [("adlk-jalskdj", None), ("adlk-jalskdjs", "adlk-jalskdjs")]
 )
 def test_device_read_callback(scanID, storageID):
     scan_bundler = load_ScanBundlerMock()
@@ -76,7 +76,9 @@ def test_device_read_callback(scanID, storageID):
     if scanID != storageID:
         assert not scan_bundler.device_storage
         return
-    assert "samx" in scan_bundler.device_storage
+    assert (
+        "samx" in scan_bundler.device_storage
+    )  # fails second time line 318, should not enter that while-loop...
 
 
 def test_status_modification():
