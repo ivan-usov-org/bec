@@ -3,7 +3,6 @@ from __future__ import annotations
 import time
 import uuid
 from collections.abc import Iterable
-import blinker
 import msgpack
 import numpy as np
 from typing import TYPE_CHECKING
@@ -21,18 +20,8 @@ class BlueskyEmitter:
 
         self.scan_bundler = scan_bundler
         self.bluesky_metadata = {}
-        self._connect_signals()
 
-    def _connect_signals(self):
-        sb = self.scan_bundler
-
-        blinker.signal("scan_status_update").connect(self.send_run_start_document)
-        blinker.signal("cleanup").connect(self.cleanup_storage)
-        blinker.signal("scan_point").connect(self.send_bluesky_scan_point)
-
-    def send_run_start_document(
-        self, scanID
-    ) -> None:  # comes here twice in tests and the second time sb.sync_storage[scanID] is empty...
+    def send_run_start_document(self, scanID) -> None:
         """Bluesky only: send run start documents."""
         print("run start doc")
         sb = self.scan_bundler

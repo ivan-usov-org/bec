@@ -17,13 +17,6 @@ class BECEmitter:
     def __init__(self, scan_bundler: ScanBundler) -> None:
         self.scan_bundler = scan_bundler
         self._send_buffer = Queue()
-        self._connect_signals()
-
-    def _connect_signals(self):
-        sb = self.scan_bundler
-
-        # sb.scan_status_update.connect(self.)
-        sb.scan_point.connect(self._send_bec_scan_point)
 
     def _send_bec_scan_point(self, scanID, pointID) -> None:
         sb = self.scan_bundler
