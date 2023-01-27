@@ -3,12 +3,13 @@ import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-from bec_utils import BECMessage, BECService, MessageEndpoints, bec_logger
+from bec_utils import BECMessage, BECService
+from bec_utils import DeviceManagerBase as DeviceManager
+from bec_utils import MessageEndpoints, bec_logger
 from bec_utils.connector import ConnectorBase
 
 from .bec_emitter import BECEmitter
 from .bluesky_emitter import BlueskyEmitter
-from .devicemanager_sb import DeviceManagerBase as DeviceManager
 
 logger = bec_logger.logger
 

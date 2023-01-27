@@ -5,11 +5,12 @@ from concurrent.futures import wait
 import bec_utils
 import pytest
 import yaml
-from bec_utils import BECMessage, MessageEndpoints
+from bec_utils import BECMessage
+from bec_utils import DeviceManagerBase as DeviceManager
+from bec_utils import MessageEndpoints
 from bec_utils.tests.utils import ConnectorMock, create_session_from_config
 
 from scan_bundler import ScanBundler
-from scan_bundler.devicemanager_sb import DeviceManagerSB
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=protected-access
@@ -24,7 +25,7 @@ class MessageMock:
 
 def load_ScanBundlerMock():
     connector = ConnectorMock("")
-    device_manager = DeviceManagerSB(connector, "")
+    device_manager = DeviceManager(connector, "")
     device_manager.producer = connector.producer()
     with open(f"{dir_path}/tests/test_config.yaml", "r") as session_file:
         device_manager._session = create_session_from_config(yaml.safe_load(session_file))
