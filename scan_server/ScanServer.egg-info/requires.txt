@@ -1,4 +1,0 @@
-numpy
-cytoolz
-rich
-matplotlib
