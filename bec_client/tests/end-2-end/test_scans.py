@@ -91,7 +91,16 @@ def test_fermat_scan(capsys, client):
     bec.metadata.update({"unit_test": "test_fermat_scan"})
     dev = bec.device_manager.devices
     status = scans.fermat_scan(
-        dev.samx, -5, 5, dev.samy, -5, 5, step=0.5, exp_time=0.01, relative=True
+        dev.samx,
+        -5,
+        5,
+        dev.samy,
+        -5,
+        5,
+        step=0.5,
+        exp_time=0.01,
+        relative=True,
+        optim_trajectory="corridor",
     )
     assert len(status.scan.data) == 393
     assert status.scan.num_points == 393
