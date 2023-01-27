@@ -25,7 +25,6 @@ class ScanBundler(BECService):
         self._start_scan_status_consumer()
 
         self.sync_storage = {}
-        self.bluesky_metadata = {}
         self.primary_devices = {}
         self.monitor_devices = {}
         self.baseline_devices = {}
@@ -37,19 +36,13 @@ class ScanBundler(BECService):
         self.executor_tasks = collections.deque(maxlen=100)
         self.scanID_history = collections.deque(maxlen=10)
         self._lock = threading.Lock()
-        self._emitters = []
+        self.bec_emitter = None
+        self.bluesky_emitter = None
         self._initialize_emitters()
-        self._start_buffered_producer()
-
-    def _start_buffered_producer(self):
-        self._buffered_producer_thread = threading.Thread(
-            target=self._buffered_publish, daemon=True
-        )
-        self._buffered_producer_thread.start()
 
     def _initialize_emitters(self):
-        self._emitters.append(BlueskyEmitter(self))
-        self._emitters.append(BECEmitter(self))
+        self.bluesky_emitter = BlueskyEmitter(self)
+        self.bec_emitter = BECEmitter(self)
 
     def _start_device_manager(self):
         self.device_manager = DeviceManagerSB(self.connector, self.scibec_url)
@@ -133,18 +126,6 @@ class ScanBundler(BECService):
             if scanID not in self.scanID_history:
                 self.scanID_history.append(scanID)
 
-        # doc = {
-        #     "time": time.time(),
-        #     "uid": str(uuid.uuid4()),
-        #     "scanID": scanID,
-        #     "run_start": self.bluesky_metadata[scanID]["start"]["uid"],
-        #     "exit_status": "success" if status == "closed" else "aborted",
-        #     "reason": "",
-        #     "num_events": msg.content["info"].get("num_points"),
-        # }
-        # self.bluesky_metadata[scanID]["stop"] = doc
-        # self.producer.send(MessageEndpoints.bluesky_events(), msgpack.dumps(("stop", doc)))
-
     def _initialize_scan_container(self, scan_msg: BECMessage.ScanStatusMessage):
         if scan_msg.content.get("status") != "open":
             return
@@ -156,7 +137,6 @@ class ScanBundler(BECService):
         self.scan_motors[scanID] = scan_motors
         if not scanID in self.storage_initialized:
             self.sync_storage[scanID] = {"info": scan_info, "status": "open", "sent": set()}
-            # for now lets assume that all devices are primary devices:
             self.primary_devices[scanID] = {
                 "devices": self.device_manager.devices.primary_devices(scan_motors),
                 "pointID": {},
@@ -170,7 +150,7 @@ class ScanBundler(BECService):
                 },
             }
             self.storage_initialized.add(scanID)
-            self._emitters[0].send_run_start_document(scanID)
+            # self.bluesky_emitter.send_run_start_document(scanID)
             return
 
     def _step_scan_update(self, scanID, device, signal, metadata):
@@ -239,7 +219,7 @@ class ScanBundler(BECService):
                 logger.info(f"Sending baseline readings for scanID {scanID}.")
                 logger.debug("Baseline: ", self.sync_storage[scanID]["baseline"])
                 # self._send_baseline(scanID=scanID)
-                self._emitters[1]._send_baseline(scanID=scanID)
+                self.bec_emitter.send_baseline(scanID=scanID)
                 self.baseline_devices[scanID]["done"] = {
                     dev.name: False
                     for dev in self.device_manager.devices.baseline_devices(
@@ -314,9 +294,6 @@ class ScanBundler(BECService):
             for dev in self.primary_devices[scanID]["devices"]:
                 self.sync_storage[scanID][pointID][dev.name] = self.device_storage.get(dev.name)
 
-    def _buffered_publish(self):
-        self._emitters[1]._buffered_publish()
-
     def cleanup_storage(self):
         """remove old scanIDs to free memory"""
         remove_scanIDs = []
@@ -339,33 +316,20 @@ class ScanBundler(BECService):
                     getattr(self, storage).pop(scanID)
                 except KeyError:
                     logger.warning(f"Failed to remove {scanID} from {storage}.")
-            self._emitters[0].cleanup_storage()
+            # self.bluesky_emitter.cleanup_storage(scanID)
             self.storage_initialized.remove(scanID)
 
     def _send_scan_point(self, scanID, pointID) -> None:
         logger.info(f"Sending point {pointID} for scanID {scanID}.")
         logger.debug(f"{pointID}, {self.sync_storage[scanID][pointID]}")
 
-        self._emitters[0].send_bluesky_scan_point()
-        self._emitters[1].send_bec_scan_point()
+        # self.bluesky_emitter.send_bluesky_scan_point()
+        self.bec_emitter.send_bec_scan_point(scanID, pointID)
 
         if not pointID in self.sync_storage[scanID]["sent"]:
             self.sync_storage[scanID]["sent"].add(pointID)
         else:
             logger.warning(f"Resubmitting existing pointID {pointID} for scanID {scanID}")
-
-    def _send_baseline(self, scanID: str) -> None:
-        pipe = self.producer.pipeline()
-        msg = BECMessage.ScanBaselineMessage(
-            scanID=scanID, data=self.sync_storage[scanID]["baseline"]
-        ).dumps()
-        self.producer.set(
-            MessageEndpoints.public_scan_baseline(scanID=scanID),
-            msg,
-            pipe=pipe,
-            expire=1800,
-        )
-        pipe.execute()
 
     def shutdown(self):
         self.device_manager.shutdown()
