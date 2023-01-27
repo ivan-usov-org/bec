@@ -7,6 +7,7 @@ import pytest
 import yaml
 from bec_utils import BECMessage, MessageEndpoints
 from bec_utils.tests.utils import ConnectorMock, create_session_from_config
+
 from scan_bundler import ScanBundler
 from scan_bundler.devicemanager_sb import DeviceManagerSB
 
@@ -54,7 +55,7 @@ def test_device_read_callback(scanID, storageID):
     msg = MessageMock()
     msg.value = BECMessage.DeviceMessage(
         signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-        metadata={"scanID": "adlk-jalskdj", "stream": "primary"},
+        metadata={"scanID": scanID, "stream": "primary"},
     ).dumps()
     msg.topic = MessageEndpoints.device_read("samx").encode()
 
