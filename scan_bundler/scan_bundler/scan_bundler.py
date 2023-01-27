@@ -8,7 +8,7 @@ from bec_utils.connector import ConnectorBase
 
 from .bec_emitter import BECEmitter
 from .bluesky_emitter import BlueskyEmitter
-from .devicemanager_sb import DeviceManagerSB
+from .devicemanager_sb import DeviceManagerBase as DeviceManager
 
 logger = bec_logger.logger
 
@@ -45,7 +45,7 @@ class ScanBundler(BECService):
         self.bec_emitter = BECEmitter(self)
 
     def _start_device_manager(self):
-        self.device_manager = DeviceManagerSB(self.connector, self.scibec_url)
+        self.device_manager = DeviceManager(self.connector, self.scibec_url)
         self.device_manager.initialize(self.bootstrap_server)
 
     def _start_device_read_consumer(self):
