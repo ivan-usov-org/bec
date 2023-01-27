@@ -154,7 +154,7 @@ class ScanBundler(BECService):
                 },
             }
             self.storage_initialized.add(scanID)
-            # self.bluesky_emitter.send_run_start_document(scanID)
+            self.run_emitter("on_init", scanID)
             return
 
     def _step_scan_update(self, scanID, device, signal, metadata):

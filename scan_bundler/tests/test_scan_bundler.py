@@ -296,7 +296,7 @@ def test_initialize_scan_container(scan_msg):
     scan_motors = list(set(sb.device_manager.devices[m] for m in scan_info["primary"]))
     bl_devs = sb.device_manager.devices.baseline_devices(scan_motors)
 
-    with mock.patch.object(sb.bluesky_emitter, "send_run_start_document") as send_mock:
+    with mock.patch.object(sb, "run_emitter") as emitter_mock:
 
         sb._initialize_scan_container(
             scan_msg
@@ -318,7 +318,7 @@ def test_initialize_scan_container(scan_msg):
         }
 
         assert scanID in sb.storage_initialized
-        # send_mock.assert_called_once()
+        emitter_mock.assert_called_once_with("on_init", scanID)
 
 
 @pytest.mark.parametrize(
