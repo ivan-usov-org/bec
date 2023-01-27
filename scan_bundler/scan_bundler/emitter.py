@@ -21,26 +21,34 @@ class EmitterBase:
         self._send_buffer.put((msg, endpoint, public))
 
     def _buffered_publish(self):
-
         while True:
-            msgs_to_send = []
-            while not self._send_buffer.empty():
-                msgs_to_send.append(self._send_buffer.get())
-            if len(msgs_to_send) > 0:
-                pipe = self.producer.pipeline()
-                msgs = BECMessage.BundleMessage()
-                _, endpoint, _ = msgs_to_send[0]
-                for msg, endpoint, public in msgs_to_send:
-                    msg_dump = msg.dumps()
-                    msgs.append(msg_dump)
-                    if public:
-                        self.producer.set(
-                            public,
-                            msg_dump,
-                            pipe=pipe,
-                            expire=1800,
-                        )
-                self.producer.send(endpoint, msgs.dumps(), pipe=pipe)
-                pipe.execute()
-                continue
+            self._publish_data()
+
+    def _get_messages_from_buffer(self) -> list:
+        msgs_to_send = []
+        while not self._send_buffer.empty():
+            msgs_to_send.append(self._send_buffer.get())
+        return msgs_to_send
+
+    def _publish_data(self) -> None:
+        msgs_to_send = self._get_messages_from_buffer()
+
+        if not msgs_to_send:
             time.sleep(0.1)
+            return
+
+        pipe = self.producer.pipeline()
+        msgs = BECMessage.BundleMessage()
+        _, endpoint, _ = msgs_to_send[0]
+        for msg, endpoint, public in msgs_to_send:
+            msg_dump = msg.dumps()
+            msgs.append(msg_dump)
+            if public:
+                self.producer.set(
+                    public,
+                    msg_dump,
+                    pipe=pipe,
+                    expire=1800,
+                )
+        self.producer.send(endpoint, msgs.dumps(), pipe=pipe)
+        pipe.execute()
