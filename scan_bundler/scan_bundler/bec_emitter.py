@@ -17,7 +17,13 @@ class BECEmitter(EmitterBase):
         super().__init__(scan_bundler.producer)
         self.scan_bundler = scan_bundler
 
-    def send_bec_scan_point(self, scanID, pointID) -> None:
+    def on_scan_point_emit(self, scanID: str, pointID: int):
+        self._send_bec_scan_point(scanID, pointID)
+
+    def on_baseline_emit(self, scanID: str):
+        self._send_baseline(scanID)
+
+    def _send_bec_scan_point(self, scanID, pointID) -> None:
         sb = self.scan_bundler
 
         msg = BECMessage.ScanMessage(
@@ -32,7 +38,7 @@ class BECEmitter(EmitterBase):
             MessageEndpoints.public_scan_segment(scanID=scanID, pointID=pointID),
         )
 
-    def send_baseline(self, scanID: str) -> None:
+    def _send_baseline(self, scanID: str) -> None:
         sb = self.scan_bundler
 
         pipe = sb.producer.pipeline()

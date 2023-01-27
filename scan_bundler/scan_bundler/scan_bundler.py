@@ -2,6 +2,7 @@ import collections
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
+from typing import Callable
 
 from bec_utils import BECMessage, BECService
 from bec_utils import DeviceManagerBase as DeviceManager
@@ -37,13 +38,15 @@ class ScanBundler(BECService):
         self.executor_tasks = collections.deque(maxlen=100)
         self.scanID_history = collections.deque(maxlen=10)
         self._lock = threading.Lock()
-        self.bec_emitter = None
-        self.bluesky_emitter = None
+        self._emitter = []
         self._initialize_emitters()
 
     def _initialize_emitters(self):
-        self.bluesky_emitter = BlueskyEmitter(self)
-        self.bec_emitter = BECEmitter(self)
+        self._emitter = [BECEmitter(self), BlueskyEmitter(self)]
+
+    def run_emitter(self, emitter_method: Callable, *args, **kwargs):
+        for emi in self._emitter:
+            getattr(emi, emitter_method)(*args, **kwargs)
 
     def _start_device_manager(self):
         self.device_manager = DeviceManager(self.connector, self.scibec_url)
@@ -216,17 +219,16 @@ class ScanBundler(BECService):
                 **dev,
             }
 
-            if all(status for status in baseline_devices_status.values()):
-                logger.info(f"Sending baseline readings for scanID {scanID}.")
-                logger.debug("Baseline: ", self.sync_storage[scanID]["baseline"])
-                # self._send_baseline(scanID=scanID)
-                self.bec_emitter.send_baseline(scanID=scanID)
-                self.baseline_devices[scanID]["done"] = {
-                    dev.name: False
-                    for dev in self.device_manager.devices.baseline_devices(
-                        self.scan_motors[scanID]
-                    )
-                }
+            if not all(status for status in baseline_devices_status.values()):
+                return
+
+            logger.info(f"Sending baseline readings for scanID {scanID}.")
+            logger.debug("Baseline: ", self.sync_storage[scanID]["baseline"])
+            self.run_emitter("on_baseline_emit", scanID)
+            self.baseline_devices[scanID]["done"] = {
+                dev.name: False
+                for dev in self.device_manager.devices.baseline_devices(self.scan_motors[scanID])
+            }
 
     def _wait_for_scanID(self, scanID):
         timeout_time = 10
@@ -324,8 +326,7 @@ class ScanBundler(BECService):
         logger.info(f"Sending point {pointID} for scanID {scanID}.")
         logger.debug(f"{pointID}, {self.sync_storage[scanID][pointID]}")
 
-        # self.bluesky_emitter.send_bluesky_scan_point()
-        self.bec_emitter.send_bec_scan_point(scanID, pointID)
+        self.run_emitter("on_scan_point_emit", scanID, pointID)
 
         if not pointID in self.sync_storage[scanID]["sent"]:
             self.sync_storage[scanID]["sent"].add(pointID)

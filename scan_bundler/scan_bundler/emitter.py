@@ -52,3 +52,15 @@ class EmitterBase:
                 )
         self.producer.send(endpoint, msgs.dumps(), pipe=pipe)
         pipe.execute()
+
+    def on_init(self, scanID: str):
+        pass
+
+    def on_scan_point_emit(self, scanID: str, pointID: int):
+        pass
+
+    def on_basemline_emit(self, scanID: str):
+        pass
+
+    def on_cleanup(self, scanID: str):
+        pass
