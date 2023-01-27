@@ -10,7 +10,7 @@ utils = f"{current_path}/../bec_utils/"
 if __name__ == "__main__":
     setup(
         install_requires=[
-            "numpy",
+            "numpy", "blinker"
         ]
     )
     local_deps = [utils]
