@@ -1,12 +1,9 @@
 import os
-import threading
 import time
-import uuid
 from concurrent.futures import wait
 from unittest import mock
 
 import bec_utils
-import msgpack
 import pytest
 import yaml
 from bec_utils import BECMessage, MessageEndpoints
