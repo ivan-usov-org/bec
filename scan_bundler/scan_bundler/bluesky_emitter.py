@@ -3,11 +3,13 @@ from __future__ import annotations
 import time
 import uuid
 from collections.abc import Iterable
-import msgpack
-import numpy as np
 from typing import TYPE_CHECKING
 
+import msgpack
+import numpy as np
 from bec_utils import MessageEndpoints, bec_logger
+
+from .emitter import EmitterBase
 
 logger = bec_logger.logger
 
@@ -15,9 +17,9 @@ if TYPE_CHECKING:
     from .scan_bundler import ScanBundler
 
 
-class BlueskyEmitter:
+class BlueskyEmitter(EmitterBase):
     def __init__(self, scan_bundler: ScanBundler) -> None:
-
+        super().__init__(scan_bundler.producer)
         self.scan_bundler = scan_bundler
         self.bluesky_metadata = {}
 
