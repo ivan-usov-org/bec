@@ -1,16 +1,14 @@
 import collections
 import threading
 import time
-
 from concurrent.futures import ThreadPoolExecutor
 
 from bec_utils import BECMessage, BECService, MessageEndpoints, bec_logger
 from bec_utils.connector import ConnectorBase
 
-from .devicemanager_sb import DeviceManagerSB
-
 from .bec_emitter import BECEmitter
 from .bluesky_emitter import BlueskyEmitter
+from .devicemanager_sb import DeviceManagerSB
 
 logger = bec_logger.logger
 
@@ -226,6 +224,54 @@ class ScanBundler(BECService):
                 self._update_monitor_signals(scanID, pointID)
                 self._send_scan_point(scanID, pointID)
 
+    def _baseline_update(self, scanID, device, signal):
+        with self._lock:
+            dev = {device: signal}
+            baseline_devices_status = self.baseline_devices[scanID]["done"]
+            baseline_devices_status[device] = True
+
+            self.sync_storage[scanID]["baseline"] = {
+                **self.sync_storage[scanID].get("baseline", {}),
+                **dev,
+            }
+
+            if all(status for status in baseline_devices_status.values()):
+                logger.info(f"Sending baseline readings for scanID {scanID}.")
+                logger.debug("Baseline: ", self.sync_storage[scanID]["baseline"])
+                # self._send_baseline(scanID=scanID)
+                self._emitters[1]._send_baseline(scanID=scanID)
+                self.baseline_devices[scanID]["done"] = {
+                    dev.name: False
+                    for dev in self.device_manager.devices.baseline_devices(
+                        self.scan_motors[scanID]
+                    )
+                }
+
+    def _wait_for_scanID(self, scanID):
+        timeout_time = 10
+        elapsed_time = 0
+        while not scanID in self.storage_initialized:
+            msgs = [
+                BECMessage.ScanStatusMessage.loads(msg)
+                for msg in self.device_manager.producer.lrange(
+                    MessageEndpoints.scan_status() + "_list", -5, -1
+                )
+            ]
+            for msg in msgs:
+                if msg.content["scanID"] == scanID:
+                    self.handle_scan_status_message(msg)
+            if scanID in self.sync_storage:
+                if self.sync_storage[scanID]["status"] in ["closed", "aborted"]:
+                    logger.info(
+                        f"Received reading for {self.sync_storage[scanID]['status']} scan {scanID}."
+                    )
+                    return
+            time.sleep(0.05)
+            elapsed_time += 0.05
+            if elapsed_time > timeout_time:
+                logger.warning(f"Could not find a matching scanID {scanID} in sync_storage.")
+                return
+
     def _add_device_to_storage(self, msgs, device):
         for msg in msgs:
             metadata = msg.metadata
@@ -240,31 +286,8 @@ class ScanBundler(BECService):
                 logger.error("Received device message without signals")
                 return
 
-            timeout_time = 10
-            elapsed_time = 0
-            while not scanID in self.storage_initialized:
-                msgs = [
-                    BECMessage.ScanStatusMessage.loads(msg)
-                    for msg in self.device_manager.producer.lrange(
-                        MessageEndpoints.scan_status() + "_list", -5, -1
-                    )
-                ]
-                for msg in msgs:
-                    if msg.content["scanID"] == scanID:
-                        self.handle_scan_status_message(msg)
-                if scanID in self.sync_storage:
-                    if self.sync_storage[scanID]["status"] in ["closed", "aborted"]:
-                        logger.info(
-                            f"Received reading for {self.sync_storage[scanID]['status']} scan {scanID}."
-                        )
-                        return
-                time.sleep(0.1)
-                elapsed_time += 0.1
-                if elapsed_time > timeout_time:
-                    logger.warning(
-                        f"Failed to insert device data for {device} to sync_storage: Could not find a matching scanID {scanID} in sync_storage."
-                    )
-                    return
+            self._wait_for_scanID(scanID)
+
             if self.sync_storage[scanID]["status"] in ["aborted", "closed"]:
                 # check if the sync_storage has been initialized properly.
                 # In case of post-scan initialization, scan info is not available
@@ -283,27 +306,7 @@ class ScanBundler(BECService):
                     )
 
             elif stream == "baseline":
-                with self._lock:
-                    dev = {device: signal}
-                    baseline_devices_status = self.baseline_devices[scanID]["done"]
-                    baseline_devices_status[device] = True
-
-                    self.sync_storage[scanID]["baseline"] = {
-                        **self.sync_storage[scanID].get("baseline", {}),
-                        **dev,
-                    }
-
-                    if all(status for status in baseline_devices_status.values()):
-                        logger.info(f"Sending baseline readings for scanID {scanID}.")
-                        logger.debug("Baseline: ", self.sync_storage[scanID]["baseline"])
-                        # self._send_baseline(scanID=scanID)
-                        self._emitters[1]._send_baseline(scanID=scanID)
-                        self.baseline_devices[scanID]["done"] = {
-                            dev.name: False
-                            for dev in self.device_manager.devices.baseline_devices(
-                                self.scan_motors[scanID]
-                            )
-                        }
+                self._baseline_update(scanID, device, signal)
 
     def _update_monitor_signals(self, scanID, pointID) -> None:
         if self.sync_storage[scanID]["info"]["scan_type"] == "fly":
