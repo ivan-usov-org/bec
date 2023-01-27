@@ -157,10 +157,11 @@ def test_scan_queue_callback(queue_msg):
 def test_scan_status_callback(scan_msg):
     sb = load_ScanBundlerMock()
     msg = MessageMock()
-    sb.handle_scan_status_message = mock.MagicMock()
     msg.value = scan_msg.dumps()
-    sb._scan_status_callback(msg, sb)
-    sb.handle_scan_status_message.assert_called_once_with(scan_msg)
+
+    with mock.patch.object(sb, "handle_scan_status_message") as handle_scan_status_message_mock:
+        sb._scan_status_callback(msg, sb)
+        handle_scan_status_message_mock.assert_called_once_with(scan_msg)
 
 
 @pytest.mark.parametrize(
@@ -202,24 +203,24 @@ def test_scan_status_callback(scan_msg):
 )
 def test_handle_scan_status_message(scan_msg, sync_storage):
     sb = load_ScanBundlerMock()
-    sb.cleanup_storage = mock.MagicMock()
     scanID = scan_msg.content["scanID"]
-    sb._initialize_scan_container = mock.MagicMock()
-    sb._scan_status_modification = mock.MagicMock()
     sb.sync_storage = sync_storage
 
-    sb.handle_scan_status_message(scan_msg)
+    with mock.patch.object(sb, "cleanup_storage") as cleanup_storage_mock:
+        with mock.patch.object(sb, "_initialize_scan_container") as init_mock:
+            with mock.patch.object(sb, "_scan_status_modification") as status_mock:
 
-    if not scanID in sb.sync_storage:
-        sb._initialize_scan_container.assert_called_once_with(scan_msg)
-        assert scanID in sb.scanID_history
-    else:
-        sb._initialize_scan_container.assert_not_called()
+                sb.handle_scan_status_message(scan_msg)
+                if not scanID in sb.sync_storage:
+                    init_mock.assert_called_once_with(scan_msg)
+                    assert scanID in sb.scanID_history
+                else:
+                    init_mock.assert_not_called()
 
-    if scan_msg.content.get("status") != "open":
-        sb._scan_status_modification.assert_called_once_with(scan_msg)
-    else:
-        sb._scan_status_modification.assert_not_called()
+                if scan_msg.content.get("status") != "open":
+                    status_mock.assert_called_once_with(scan_msg)
+                else:
+                    status_mock.assert_not_called()
 
 
 def test_status_modification():
