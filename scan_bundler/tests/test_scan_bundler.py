@@ -1,16 +1,17 @@
 import os
+import threading
 import time
+import uuid
 from concurrent.futures import wait
 from unittest import mock
-import threading
-import uuid
 
-import msgpack
 import bec_utils
+import msgpack
 import pytest
 import yaml
 from bec_utils import BECMessage, MessageEndpoints
 from bec_utils.tests.utils import ConnectorMock, create_session_from_config
+
 from scan_bundler import ScanBundler
 from scan_bundler.devicemanager_sb import DeviceManagerSB
 
@@ -45,7 +46,7 @@ class ScanBundlerMock(ScanBundler):
 
 
 @pytest.mark.parametrize(
-    "scanID,storageID", [("adlk-jalskdj", None), ("adlk-jalskdj", "adlk-jalskdj")]
+    "scanID,storageID", [("adlk-jalskdj", None), ("adlk-jalskdjs", "adlk-jalskdjs")]
 )
 def test_device_read_callback(scanID, storageID):
     scan_bundler = load_ScanBundlerMock()
@@ -58,7 +59,7 @@ def test_device_read_callback(scanID, storageID):
     msg = MessageMock()
     msg.value = BECMessage.DeviceMessage(
         signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-        metadata={"scanID": "adlk-jalskdj", "stream": "primary"},
+        metadata={"scanID": scanID, "stream": "primary"},
     ).dumps()
     msg.topic = MessageEndpoints.device_read("samx").encode()
 
@@ -327,7 +328,7 @@ def test_initialize_scan_container(scan_msg):
         [
             BECMessage.DeviceMessage(
                 signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-                metadata={"scanID": "adlk-jalskdj", "stream": "primary", "pointID": 23},
+                metadata={"scanID": "adlk-jalskdja", "stream": "primary", "pointID": 23},
             ),
             23,
             True,
@@ -335,7 +336,7 @@ def test_initialize_scan_container(scan_msg):
         [
             BECMessage.DeviceMessage(
                 signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-                metadata={"scanID": "adlk-jalskdj", "stream": "primary", "pointID": 23},
+                metadata={"scanID": "adlk-jalskdjb", "stream": "primary", "pointID": 23},
             ),
             23,
             False,
@@ -343,7 +344,7 @@ def test_initialize_scan_container(scan_msg):
         [
             BECMessage.DeviceMessage(
                 signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-                metadata={"scanID": "adlk-jalskdj", "stream": "primary"},
+                metadata={"scanID": "adlk-jalskdjc", "stream": "primary"},
             ),
             23,
             False,
