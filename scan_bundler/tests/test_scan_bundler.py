@@ -295,30 +295,30 @@ def test_initialize_scan_container(scan_msg):
     scan_motors = list(set(sb.device_manager.devices[m] for m in scan_info["primary"]))
     bl_devs = sb.device_manager.devices.baseline_devices(scan_motors)
 
-    sb.send_run_start_document = mock.MagicMock()
+    with mock.patch.object(sb, "send_run_start_document") as send_mock:
 
-    sb._initialize_scan_container(
-        scan_msg
-    )  # The sb.device_manager.devices[m] will crash if m is not a motor in devices
+        sb._initialize_scan_container(
+            scan_msg
+        )  # The sb.device_manager.devices[m] will crash if m is not a motor in devices
 
-    if scan_msg.content.get("status") != "open":
-        return
-    assert sb.scan_motors[scanID] == scan_motors
-    assert sb.sync_storage[scanID] == {"info": scan_info, "status": "open", "sent": set()}
-    assert sb.bluesky_metadata[scanID] == {}
-    assert sb.primary_devices[scanID] == {
-        "devices": sb.device_manager.devices.primary_devices(scan_motors),
-        "pointID": {},
-    }
-    assert sb.monitor_devices[scanID] == sb.device_manager.devices.acquisition_group("monitor")
-    assert "eyex" not in [dev.name for dev in bl_devs]
-    assert sb.baseline_devices[scanID] == {
-        "devices": bl_devs,
-        "done": {dev.name: False for dev in bl_devs},
-    }
+        if scan_msg.content.get("status") != "open":
+            return
+        assert sb.scan_motors[scanID] == scan_motors
+        assert sb.sync_storage[scanID] == {"info": scan_info, "status": "open", "sent": set()}
+        assert sb.bluesky_metadata[scanID] == {}
+        assert sb.primary_devices[scanID] == {
+            "devices": sb.device_manager.devices.primary_devices(scan_motors),
+            "pointID": {},
+        }
+        assert sb.monitor_devices[scanID] == sb.device_manager.devices.acquisition_group("monitor")
+        assert "eyex" not in [dev.name for dev in bl_devs]
+        assert sb.baseline_devices[scanID] == {
+            "devices": bl_devs,
+            "done": {dev.name: False for dev in bl_devs},
+        }
 
-    assert scanID in sb.storage_initialized
-    sb.send_run_start_document.assert_called_once()
+        assert scanID in sb.storage_initialized
+        send_mock.assert_called_once()
 
 
 @pytest.mark.parametrize(
@@ -369,27 +369,28 @@ def test_step_scan_update(scan_msg, pointID, primary):
     dev = {device: signal}
     if primary:
         primary_devices["pointID"][pointID] = {dev.name: True for dev in primary_devices["devices"]}
-    sb._update_monitor_signals = mock.MagicMock()
-    sb._send_scan_point = mock.MagicMock()
 
-    sb._step_scan_update(scanID, device, signal, metadata)
+    with mock.patch.object(sb, "_update_monitor_signals") as update_mock:
+        with mock.patch.object(sb, "_send_scan_point") as send_mock:
 
-    if "pointID" not in metadata:
-        assert sb.sync_storage[scanID] == {"info": {}, "status": "open", "sent": set()}
-        return
+            sb._step_scan_update(scanID, device, signal, metadata)
 
-    assert sb.sync_storage[scanID][pointID] == {
-        **sb.sync_storage[scanID].get(pointID, {}),
-        **dev,
-    }
+            if "pointID" not in metadata:
+                assert sb.sync_storage[scanID] == {"info": {}, "status": "open", "sent": set()}
+                return
 
-    assert primary_devices["pointID"][pointID][device] == True
+            assert sb.sync_storage[scanID][pointID] == {
+                **sb.sync_storage[scanID].get(pointID, {}),
+                **dev,
+            }
 
-    if primary:
-        sb._update_monitor_signals.assert_called_once()
-        sb._send_scan_point.assert_called_once()
+            assert primary_devices["pointID"][pointID][device] == True
 
-    else:
-        pd_test = {dev.name: False for dev in primary_devices["devices"]}
-        pd_test["samx"] = True
-        assert primary_devices["pointID"][pointID] == pd_test
+            if primary:
+                update_mock.assert_called_once()
+                send_mock.assert_called_once()
+
+            else:
+                pd_test = {dev.name: False for dev in primary_devices["devices"]}
+                pd_test["samx"] = True
+                assert primary_devices["pointID"][pointID] == pd_test
