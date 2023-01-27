@@ -1,0 +1,4 @@
+numpy
+cytoolz
+ophyd
+pyepics

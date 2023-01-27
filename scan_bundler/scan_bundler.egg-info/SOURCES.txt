@@ -1,0 +1,10 @@
+setup.cfg
+setup.py
+./scan_bundler/__init__.py
+./scan_bundler/devicemanager_sb.py
+./scan_bundler/scan_bundler.py
+./scan_bundler.egg-info/PKG-INFO
+./scan_bundler.egg-info/SOURCES.txt
+./scan_bundler.egg-info/dependency_links.txt
+./scan_bundler.egg-info/requires.txt
+./scan_bundler.egg-info/top_level.txt

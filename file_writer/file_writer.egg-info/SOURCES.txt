@@ -1,0 +1,10 @@
+setup.cfg
+setup.py
+./file_writer/__init__.py
+./file_writer/file_writer.py
+./file_writer/file_writer_manager.py
+./file_writer.egg-info/PKG-INFO
+./file_writer.egg-info/SOURCES.txt
+./file_writer.egg-info/dependency_links.txt
+./file_writer.egg-info/requires.txt
+./file_writer.egg-info/top_level.txt

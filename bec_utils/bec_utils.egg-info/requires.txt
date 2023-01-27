@@ -1,0 +1,7 @@
+msgpack
+requests
+typeguard
+pyyaml
+redis
+loguru
+rich
