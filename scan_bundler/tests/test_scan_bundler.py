@@ -394,3 +394,44 @@ def test_step_scan_update(scan_msg, pointID, primary):
                 pd_test = {dev.name: False for dev in primary_devices["devices"]}
                 pd_test["samx"] = True
                 assert primary_devices["pointID"][pointID] == pd_test
+
+
+@pytest.mark.parametrize(
+    "scanID,storage,remove",
+    [
+        ("lkasjd", {"status": "open"}, False),
+        ("alskjd", {"status": "closed"}, True),
+        ("poiflkj", {"status": "aborted"}, True),
+    ],
+)
+def test_cleanup_storage(scanID, storage, remove):
+    sb = load_ScanBundlerMock()
+    sb.sync_storage[scanID] = storage
+    sb.storage_initialized.add(scanID)
+    with mock.patch.object(sb, "run_emitter") as emitter:
+        sb.cleanup_storage()
+        if remove:
+            emitter.assert_called_once_with("on_cleanup", scanID)
+            assert scanID not in sb.storage_initialized
+        else:
+            emitter.assert_not_called()
+            assert scanID in sb.storage_initialized
+
+
+@pytest.mark.parametrize(
+    "scanID,pointID,sent",
+    [
+        ("lkasjd", 1, True),
+        ("alskjd", 2, False),
+    ],
+)
+def test_send_scan_point(scanID, pointID, sent):
+    sb = load_ScanBundlerMock()
+    sb.sync_storage[scanID] = {"sent": set([1])}
+    sb.sync_storage[scanID][pointID] = {}
+    with mock.patch.object(sb, "run_emitter") as emitter:
+        with mock.patch("scan_bundler.scan_bundler.logger") as logger:
+            sb._send_scan_point(scanID, pointID)
+            emitter.assert_called_once_with("on_scan_point_emit", scanID, pointID)
+            if sent:
+                logger.debug.assert_called_once()
