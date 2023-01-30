@@ -12,6 +12,7 @@ from bec_utils import MessageEndpoints
 from bec_utils.tests.utils import ConnectorMock, create_session_from_config
 
 from scan_bundler import ScanBundler
+from scan_bundler.emitter import EmitterBase
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=protected-access
@@ -435,3 +436,15 @@ def test_send_scan_point(scanID, pointID, sent):
             emitter.assert_called_once_with("on_scan_point_emit", scanID, pointID)
             if sent:
                 logger.debug.assert_called_once()
+
+
+def test_run_emitter():
+    sb = load_ScanBundlerMock()
+    with mock.patch("scan_bundler.scan_bundler.logger") as logger:
+        sb.run_emitter("on_init", "jlaksjd", "jlkasjd")
+        logger.error.assert_called()
+
+    sb._emitter = [EmitterBase(sb)]
+    with mock.patch.object(sb._emitter[0], "on_init") as init:
+        sb.run_emitter("on_init", "jlaksjd")
+        init.assert_called_once_with("jlaksjd")
