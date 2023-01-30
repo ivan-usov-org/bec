@@ -7,8 +7,6 @@ variables:
   #   DOCKER_DRIVER: overlay2
   DOCKER_BUILDKIT: 0
 
-services:
-  - docker:18.09-dind
 # different stages in the pipeline
 stages:
   - Formatter
@@ -90,6 +88,8 @@ end-2-end:
   stage: End2End
   needs: []
   image: docker:20.10.16
+  services:
+    - docker:18.09-dind
   artifacts:
     when: on_failure
     paths:
