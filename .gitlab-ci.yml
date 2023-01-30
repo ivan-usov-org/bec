@@ -61,6 +61,9 @@ tests:
     reports:
       junit: report.xml
       cobertura: coverage.xml
+    paths:
+      - coverage.xml
+    expire_in: 1 week      
 
 tests-3.9:
   stage: AdditionalTests
