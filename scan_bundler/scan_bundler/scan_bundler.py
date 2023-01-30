@@ -320,6 +320,7 @@ class ScanBundler(BECService):
                 except KeyError:
                     logger.warning(f"Failed to remove {scanID} from {storage}.")
             # self.bluesky_emitter.cleanup_storage(scanID)
+            self.run_emitter("on_cleanup", scanID)
             self.storage_initialized.remove(scanID)
 
     def _send_scan_point(self, scanID, pointID) -> None:
