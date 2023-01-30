@@ -1,6 +1,7 @@
 import collections
 import threading
 import time
+import traceback
 from concurrent.futures import ThreadPoolExecutor
 from typing import Callable
 
@@ -46,7 +47,11 @@ class ScanBundler(BECService):
 
     def run_emitter(self, emitter_method: Callable, *args, **kwargs):
         for emi in self._emitter:
-            getattr(emi, emitter_method)(*args, **kwargs)
+            try:
+                getattr(emi, emitter_method)(*args, **kwargs)
+            except Exception:
+                content = traceback.format_exc()
+                logger.error(f"Failed to run emitter: {content}")
 
     def _start_device_manager(self):
         self.device_manager = DeviceManager(self.connector, self.scibec_url)
