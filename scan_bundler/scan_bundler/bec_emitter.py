@@ -23,7 +23,7 @@ class BECEmitter(EmitterBase):
     def on_baseline_emit(self, scanID: str):
         self._send_baseline(scanID)
 
-    def _send_bec_scan_point(self, scanID, pointID) -> None:
+    def _send_bec_scan_point(self, scanID: str, pointID: int) -> None:
         sb = self.scan_bundler
 
         msg = BECMessage.ScanMessage(
@@ -41,14 +41,11 @@ class BECEmitter(EmitterBase):
     def _send_baseline(self, scanID: str) -> None:
         sb = self.scan_bundler
 
-        pipe = sb.producer.pipeline()
         msg = BECMessage.ScanBaselineMessage(
             scanID=scanID, data=sb.sync_storage[scanID]["baseline"]
         ).dumps()
         sb.producer.set(
             MessageEndpoints.public_scan_baseline(scanID=scanID),
             msg,
-            pipe=pipe,
             expire=1800,
         )
-        pipe.execute()
