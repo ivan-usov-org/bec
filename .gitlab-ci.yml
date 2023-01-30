@@ -57,6 +57,8 @@ tests:
     - coverage report
     - coverage xml
     - sed -i'' -e "s|<source>/builds/bec/bec</source>|<source>/builds/bec/bec/scan_bundler</source>|g" coverage.xml
+    - sed -i'' -e "s|scan_bundler.scan_bundler|scan_bundler|g" coverage.xml
+    - sed -i'' -e "s|scan_bundler/scan_bundler|scan_bundler|g" coverage.xml
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     reports:
