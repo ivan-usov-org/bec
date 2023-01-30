@@ -25,9 +25,15 @@ class BlueskyEmitter(EmitterBase):
 
     def send_run_start_document(self, scanID) -> None:
         """Bluesky only: send run start documents."""
-        print("run start doc")
-        sb = self.scan_bundler
+        logger.debug(f"sending run start doc for scanID {scanID}")
         self.bluesky_metadata[scanID] = {}
+        doc = self._get_run_start_document(scanID)
+        self.bluesky_metadata[scanID]["start"] = doc
+        self.producer.send(MessageEndpoints.bluesky_events(), msgpack.dumps(("start", doc)))
+        self.send_descriptor_document(scanID)
+
+    def _get_run_start_document(self, scanID) -> dict:
+        sb = self.scan_bundler
         doc = {
             "time": time.time(),
             "uid": str(uuid.uuid4()),
@@ -36,36 +42,33 @@ class BlueskyEmitter(EmitterBase):
             "scan_id": sb.sync_storage[scanID]["info"]["scan_number"],
             "motors": tuple(dev.name for dev in sb.scan_motors[scanID]),
         }
-        self.bluesky_metadata[scanID]["start"] = doc
-        sb.producer.send(MessageEndpoints.bluesky_events(), msgpack.dumps(("start", doc)))
-        self.send_descriptor_document(scanID)
+        return doc
 
-    def send_descriptor_document(self, scanID) -> None:
-        """Bluesky only: send descriptor document"""
+    def _get_data_keys(self, scanID):
         sb = self.scan_bundler
+        signals = {}
+        for dev in sb.primary_devices[scanID]["devices"]:
+            # copied from bluesky/callbacks/stream.py:
+            for key, val in dev.signals.items():
+                val = val["value"]
+                # String key
+                if isinstance(val, str):
+                    key_desc = {"dtype": "string", "shape": []}
+                # Iterable
+                elif isinstance(val, Iterable):
+                    key_desc = {"dtype": "array", "shape": np.shape(val)}
+                # Number
+                else:
+                    key_desc = {"dtype": "number", "shape": []}
+                signals[key] = key_desc
+        return signals
 
-        def _get_data_keys():
-            signals = {}
-            for dev in sb.primary_devices[scanID]["devices"]:
-                # copied from bluesky/callbacks/stream.py:
-                for key, val in dev.signals.items():
-                    val = val["value"]
-                    # String key
-                    if isinstance(val, str):
-                        key_desc = {"dtype": "string", "shape": []}
-                    # Iterable
-                    elif isinstance(val, Iterable):
-                        key_desc = {"dtype": "array", "shape": np.shape(val)}
-                    # Number
-                    else:
-                        key_desc = {"dtype": "number", "shape": []}
-                    signals[key] = key_desc
-            return signals
-
+    def _get_descriptor_document(self, scanID) -> dict:
+        sb = self.scan_bundler
         doc = {
             "run_start": self.bluesky_metadata[scanID]["start"]["uid"],
             "time": time.time(),
-            "data_keys": _get_data_keys(),
+            "data_keys": self._get_data_keys(scanID),
             "uid": str(uuid.uuid4()),
             "configuration": {},
             "name": "primary",
@@ -77,8 +80,13 @@ class BlueskyEmitter(EmitterBase):
                 dev.name: list(dev.signals.keys()) for dev in sb.primary_devices[scanID]["devices"]
             },
         }
+        return doc
+
+    def send_descriptor_document(self, scanID) -> None:
+        """Bluesky only: send descriptor document"""
+        doc = self._get_descriptor_document(scanID)
         self.bluesky_metadata[scanID]["descriptor"] = doc
-        sb.producer.send(MessageEndpoints.bluesky_events(), msgpack.dumps(("descriptor", doc)))
+        self.producer.send(MessageEndpoints.bluesky_events(), msgpack.dumps(("descriptor", doc)))
 
     def cleanup_storage(self, scanID):
         """remove old scanIDs to free memory"""
@@ -139,3 +147,9 @@ class BlueskyEmitter(EmitterBase):
                 bls_event["data"][key] = val["value"]
                 bls_event["timestamps"][key] = val["timestamp"]
         return bls_event
+
+    def on_cleanup(self, scanID: str):
+        self.cleanup_storage(scanID)
+
+    def on_init(self, scanID: str):
+        self.send_run_start_document(scanID)
