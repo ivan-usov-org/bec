@@ -235,16 +235,18 @@ class ScanBundler(BECService):
                 for dev in self.device_manager.devices.baseline_devices(self.scan_motors[scanID])
             }
 
-    def _wait_for_scanID(self, scanID):
-        timeout_time = 10
+    def _get_scan_status_history(self, length):
+        return [
+            BECMessage.ScanStatusMessage.loads(msg)
+            for msg in self.producer.lrange(
+                MessageEndpoints.scan_status() + "_list", length * -1, -1
+            )
+        ]
+
+    def _wait_for_scanID(self, scanID, timeout_time=10):
         elapsed_time = 0
         while not scanID in self.storage_initialized:
-            msgs = [
-                BECMessage.ScanStatusMessage.loads(msg)
-                for msg in self.device_manager.producer.lrange(
-                    MessageEndpoints.scan_status() + "_list", -5, -1
-                )
-            ]
+            msgs = self._get_scan_status_history(5)
             for msg in msgs:
                 if msg.content["scanID"] == scanID:
                     self.handle_scan_status_message(msg)
@@ -257,10 +259,9 @@ class ScanBundler(BECService):
             time.sleep(0.05)
             elapsed_time += 0.05
             if elapsed_time > timeout_time:
-                logger.warning(f"Could not find a matching scanID {scanID} in sync_storage.")
-                return
+                raise TimeoutError(f"Reached timeout whilst waiting for scanID {scanID} to appear.")
 
-    def _add_device_to_storage(self, msgs, device):
+    def _add_device_to_storage(self, msgs, device, timeout_time=10):
         for msg in msgs:
             metadata = msg.metadata
 
@@ -274,7 +275,11 @@ class ScanBundler(BECService):
                 logger.error("Received device message without signals")
                 return
 
-            self._wait_for_scanID(scanID)
+            try:
+                self._wait_for_scanID(scanID, timeout_time=timeout_time)
+            except TimeoutError:
+                logger.warning(f"Could not find a matching scanID {scanID} in sync_storage.")
+                return
 
             if self.sync_storage[scanID]["status"] in ["aborted", "closed"]:
                 # check if the sync_storage has been initialized properly.
@@ -290,7 +295,7 @@ class ScanBundler(BECService):
                     self._fly_scan_update(scanID, device, signal, metadata)
                 else:
                     raise RuntimeError(
-                        f"Unknown scan type {self.sync_storage[scanID]['scan_type']}"
+                        f"Unknown scan type {self.sync_storage[scanID]['info']['scan_type']}"
                     )
 
             elif stream == "baseline":
@@ -299,7 +304,8 @@ class ScanBundler(BECService):
     def _update_monitor_signals(self, scanID, pointID) -> None:
         if self.sync_storage[scanID]["info"]["scan_type"] == "fly":
             # for fly scans, take all primary and monitor signals
-            for dev in self.primary_devices[scanID]["devices"]:
+            devices = self.primary_devices[scanID]["devices"]
+            for dev in devices:
                 self.sync_storage[scanID][pointID][dev.name] = self.device_storage.get(dev.name)
 
     def cleanup_storage(self):
