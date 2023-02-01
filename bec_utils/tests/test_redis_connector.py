@@ -61,7 +61,6 @@ def test_redis_connector_producer(connector):
     "topics, threaded", [["topics", True], ["topics", False], [None, True], [None, False]]
 )
 def test_redis_connector_consumer(connector, threaded, topics):
-
     pattern = None
     len_of_threads = len(connector._threads)
 
@@ -222,7 +221,6 @@ def test_redis_producer_lrange(producer, topic, start, end, use_pipe):
     "topic, msg, pipe, expire", [["topic1", "msg1", None, 400], ["topic2", "msg2", None, None]]
 )
 def test_redis_producer_set_and_publish(producer, topic, msg, pipe, expire):
-
     producer.set_and_publish(topic, msg, pipe, expire)
 
     producer.r.pipeline().publish.assert_called_once_with(f"{topic}:sub", msg)
@@ -252,7 +250,6 @@ def test_redis_producer_set(producer, topic, msg, is_dict, expire):
 
 @pytest.mark.parametrize("pattern", ["samx", "samy"])
 def test_redis_producer_keys(producer, pattern):
-
     ret = producer.keys(pattern)
     producer.r.keys.assert_called_once_with(pattern)
     assert ret == redis.Redis().keys()
@@ -324,7 +321,6 @@ def use_pipe_fcn(producer, use_pipe):
     ],
 )
 def test_redis_consumer_init(consumer, topics, pattern):
-
     with mock.patch("bec_utils.redis_connector.redis.Redis"):
         consumer = RedisConsumer(
             "localhost", "1", topics, pattern, redis_cls=redis.Redis, cb=lambda *args, **kwargs: ...
@@ -392,7 +388,6 @@ def test_redis_consumer_additional_kwargs(connector):
     ],
 )
 def test_mixin_init_topics_and_pattern(mixin, topics, pattern):
-
     ret_topics, ret_pattern = mixin._init_topics_and_pattern(mixin, topics, pattern)
 
     if topics:
@@ -408,7 +403,6 @@ def test_mixin_init_topics_and_pattern(mixin, topics, pattern):
 
 
 def test_mixin_init_redis_cls(mixin, consumer):
-
     mixin._init_redis_cls(consumer, None)
     assert consumer.r == redis.Redis(host="localhost", port=1)
 
@@ -423,7 +417,6 @@ def test_mixin_init_redis_cls(mixin, consumer):
     ],
 )
 def test_redis_consumer_threaded_init(consumer_threaded, topics, pattern):
-
     with mock.patch("bec_utils.redis_connector.redis.Redis"):
         consumer_threaded = RedisConsumerThreaded(
             "localhost", "1", topics, pattern, redis_cls=redis.Redis, cb=lambda *args, **kwargs: ...

@@ -237,7 +237,6 @@ class RequestBlockMock(RequestBlock):
 
 
 def test_request_block_queue_scanIDs():
-
     req_block_queue = RequestBlockQueue(mock.MagicMock(), mock.MagicMock())
     rb1 = RequestBlockMock("", str(uuid.uuid4()))
     rb2 = RequestBlockMock("", str(uuid.uuid4()))

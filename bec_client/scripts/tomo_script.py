@@ -2,7 +2,6 @@ import numpy as np
 
 
 def sub_tomo_scan(subtomo_number, start_angle=None, tomo_stepsize=10.0):
-
     if start_angle is None:
         if subtomo_number == 1:
             start_angle = 0

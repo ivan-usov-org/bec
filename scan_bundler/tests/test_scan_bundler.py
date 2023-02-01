@@ -376,7 +376,6 @@ def test_handle_scan_status_message(scan_msg, sync_storage):
     with mock.patch.object(sb, "cleanup_storage") as cleanup_storage_mock:
         with mock.patch.object(sb, "_initialize_scan_container") as init_mock:
             with mock.patch.object(sb, "_scan_status_modification") as status_mock:
-
                 sb.handle_scan_status_message(scan_msg)
                 if not scanID in sb.sync_storage:
                     init_mock.assert_called_once_with(scan_msg)
@@ -463,7 +462,6 @@ def test_initialize_scan_container(scan_msg):
     bl_devs = sb.device_manager.devices.baseline_devices(scan_motors)
 
     with mock.patch.object(sb, "run_emitter") as emitter_mock:
-
         sb._initialize_scan_container(
             scan_msg
         )  # The sb.device_manager.devices[m] will crash if m is not a motor in devices
@@ -517,7 +515,6 @@ def test_initialize_scan_container(scan_msg):
     ],
 )
 def test_step_scan_update(scan_msg, pointID, primary):
-
     sb = load_ScanBundlerMock()
 
     metadata = scan_msg.metadata
@@ -538,7 +535,6 @@ def test_step_scan_update(scan_msg, pointID, primary):
 
     with mock.patch.object(sb, "_update_monitor_signals") as update_mock:
         with mock.patch.object(sb, "_send_scan_point") as send_mock:
-
             sb._step_scan_update(scanID, device, signal, metadata)
 
             if "pointID" not in metadata:

@@ -123,7 +123,6 @@ def test_add_wait_group(instructions):
     ],
 )
 def test_wait_for_devices(instructions, wait_type):
-
     worker = get_scan_worker()
     worker._wait_for_idle = mock.MagicMock()
     worker._wait_for_read = mock.MagicMock()
