@@ -135,7 +135,6 @@ class RPCBase:
                     )
 
         for user_access_name, descr in self._info.get("custom_user_access", {}).items():
-
             if "type" in descr:
                 self._custom_rpc_methods[user_access_name] = RPCBase(
                     name=user_access_name, info=descr, parent=self

@@ -216,7 +216,6 @@ class QueueManager:
         queue_tables = []
         console = Console()
         for queue_name, scan_queue in self.queues.items():
-
             table = Table(title=f"{queue_name} queue / {scan_queue.status}")
             table.add_column("queueID", justify="center")
             table.add_column("scanID", justify="center")

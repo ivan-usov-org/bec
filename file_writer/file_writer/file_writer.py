@@ -176,7 +176,6 @@ class HDF5StorageWriter:
                 if value is None:
                     continue
                 if isinstance(value, dict):
-
                     sub_storage = HDF5Storage(key)
                     dict_to_storage(sub_storage, value)
                     self.add_group(key, group, sub_storage)

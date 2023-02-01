@@ -100,7 +100,6 @@ class Scans:
         self._dataset_id_on_hold_ctx = DatasetIdOnHold(parent=self)
 
     def _import_scans(self):
-
         available_scans = msgpack.loads(
             self.parent.producer.get(MessageEndpoints.available_scans())
         )
