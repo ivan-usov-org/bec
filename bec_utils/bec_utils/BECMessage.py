@@ -180,7 +180,6 @@ class ScanQueueModificationMessage(BECMessage):
     ACTIONS = ["pause", "deferred_pause", "continue", "abort", "clear", "restart", "halt"]
 
     def __init__(self, *, scanID: str, action: str, parameter: dict, metadata: dict = None) -> None:
-
         self.content = {"scanID": scanID, "action": action, "parameter": parameter}
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
 
@@ -194,7 +193,6 @@ class ScanQueueStatusMessage(BECMessage):
     msg_type = "scan_queue_status"
 
     def __init__(self, *, queue: dict, metadata: dict = None) -> None:
-
         self.content = {"queue": queue}
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
 
