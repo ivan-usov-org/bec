@@ -410,7 +410,6 @@ class TestConfig(DemoConfig):
         self.write_disabled_devices()
 
     def write_disabled_devices(self):
-
         out = {}
         for m in ["motor1_disabled", "motor2_disabled"]:
             out[m] = dict(

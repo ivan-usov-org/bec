@@ -482,7 +482,6 @@ class DeviceRPC(ScanStub):
 
 
 class Move(RequestBase):
-
     scan_name = "mv"
     arg_input = [ScanArgType.DEVICE, ScanArgType.FLOAT]
     arg_bundle_size = len(arg_input)

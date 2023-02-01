@@ -140,7 +140,6 @@ def test_observer_manager_msg(device_manager):
     ],
 )
 def test_add_observer(device_manager, observer, raises_error):
-
     with mock.patch.object(device_manager.producer, "get", return_value=None) as producer_get:
         observer_manager = ObserverManager(device_manager=device_manager)
         observer_manager.add_observer(observer)

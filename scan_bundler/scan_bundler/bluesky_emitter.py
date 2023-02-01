@@ -100,7 +100,6 @@ class BlueskyEmitter(EmitterBase):
                 logger.warning(f"Failed to remove {scanID} from {storage}.")
 
     def send_bluesky_scan_point(self, scanID, pointID) -> None:
-
         self.producer.send(
             MessageEndpoints.bluesky_events(),
             msgpack.dumps(("event", self._prepare_bluesky_event_data(scanID, pointID))),

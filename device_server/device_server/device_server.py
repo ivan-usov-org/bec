@@ -218,7 +218,6 @@ class DeviceServer(BECService):
         parent.executor.submit(parent.handle_device_instructions, msg.value)
 
     def _get_result_from_rpc(self, rpc_var: Any, instr_params: dict) -> Any:
-
         if callable(rpc_var):
             args = tuple(instr_params.get("args", ()))
             kwargs = instr_params.get("kwargs", {})

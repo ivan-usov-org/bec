@@ -36,7 +36,6 @@ def test_parse_config_request(msg):
 
 
 def test_config_request_update():
-
     connector = ConnectorMock("")
     dm = DeviceManagerBase(connector, "")
     with open(f"{dir_path}/tests/test_config.yaml", "r") as f:

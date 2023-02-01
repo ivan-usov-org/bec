@@ -1244,7 +1244,6 @@ def test_request_base_check_limits():
     request.positions = [[-100, 30]]
 
     for ii, dev in enumerate(request.scan_motors):
-
         low_limit, high_limit = (
             request.device_manager.devices[dev]._config["deviceConfig"].get("limits", [0, 0])
         )
@@ -1727,7 +1726,6 @@ def test_LamNIFermatScan(scan_msg, reference_scan_list):
 
 
 def test_round_scan_fly_sim_get_scan_motors():
-
     device_manager = DMMock()
     device_manager.add_device("flyer_sim")
     scan_msg = BMessage.ScanQueueMessage(
@@ -1748,7 +1746,6 @@ def test_round_scan_fly_sim_get_scan_motors():
 
 
 def test_round_scan_fly_sim_prepare_positions():
-
     device_manager = DMMock()
     device_manager.add_device("flyer_sim")
     scan_msg = BMessage.ScanQueueMessage(
@@ -1778,7 +1775,6 @@ def test_round_scan_fly_sim_prepare_positions():
     "in_args,reference_positions", [((1, 5, 1, 1), [[0, -3], [0, -7], [0, 7]])]
 )
 def test_round_scan_fly_sim_calculate_positions(in_args, reference_positions):
-
     device_manager = DMMock()
     device_manager.add_device("flyer_sim")
     scan_msg = BMessage.ScanQueueMessage(
@@ -1801,7 +1797,6 @@ def test_round_scan_fly_sim_calculate_positions(in_args, reference_positions):
     "in_args,reference_positions", [((1, 5, 1, 1), [[0, -3], [0, -7], [0, 7]])]
 )
 def test_round_scan_fly_sim_scan_core(in_args, reference_positions):
-
     device_manager = DMMock()
     device_manager.add_device("flyer_sim")
     scan_msg = BMessage.ScanQueueMessage(
@@ -1862,7 +1857,6 @@ def test_round_scan_fly_sim_scan_core(in_args, reference_positions):
     ],
 )
 def test_line_scan_calculate_positions(in_args, reference_positions):
-
     device_manager = DMMock()
     device_manager.add_device("flyer_sim")
     scan_msg = BMessage.ScanQueueMessage(

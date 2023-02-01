@@ -588,7 +588,6 @@ class LamNI(LamNIOpticsMixin):
         return (additional_correction_shift_x, additional_correction_shift_y)
 
     def lamni_read_additional_correction(self, correction_file: str):
-
         with open(correction_file, "r") as f:
             num_elements = f.readline()
             int_num_elements = int(num_elements.split(" ")[2])

@@ -142,7 +142,6 @@ class LiveUpdatesTable(LiveUpdatesBase):
             await self._run_table_update(instr["table_wait"])
 
     async def _run_table_update(self, target_num_points):
-
         with ScanProgressBar(
             scan_number=self.scan_item.scan_number, clear_on_exit=True
         ) as progressbar:
