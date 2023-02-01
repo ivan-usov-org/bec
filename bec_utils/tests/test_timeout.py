@@ -1,8 +1,6 @@
 import concurrent
 import time
 
-import gevent
-import gevent.monkey
 import pytest
 
 from bec_utils.timeout import SingletonThreadpool, timeout
@@ -30,10 +28,3 @@ def test_singleton_threadpool():
     assert executor_id == id(new_threadpool.executor)
     new_threadpool = SingletonThreadpool(max_workers=SingletonThreadpool.DEFAULT_MAX_WORKER + 10)
     assert threadpool.executor._max_workers == SingletonThreadpool.DEFAULT_MAX_WORKER + 10
-
-
-def test_bec_timeout():
-    def too_long():
-        time.sleep(2)
-
-    gevent.with_timeout(1, too_long)
