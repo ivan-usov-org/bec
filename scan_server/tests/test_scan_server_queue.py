@@ -44,7 +44,7 @@ class RequestBlockQueueMock(RequestBlockQueue):
 class InstructionQueueMock(InstructionQueueItem):
     def __init__(self, parent: ScanQueue, assembler: ScanAssembler, worker: ScanWorker) -> None:
         super().__init__(parent, assembler, worker)
-        self.queue = RequestBlockQueueMock(self.parent, assembler)
+        self.queue = RequestBlockQueueMock(self, assembler)
 
     def append_scan_request(self, msg):
         self.scan_msgs.append(msg)

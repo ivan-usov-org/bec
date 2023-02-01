@@ -463,7 +463,7 @@ class RequestBlock:
 
     @property
     def _scan_server_scan_number(self):
-        return self.parent.parent.parent.queue_manager.parent.scan_number
+        return self.parent.scan_queue.queue_manager.parent.scan_number
 
     def assign_scan_number(self) -> None:
         """assign and fix the current scan number prediction"""
@@ -475,10 +475,10 @@ class RequestBlock:
     def scanIDs_head(self) -> int:
         """calculate the scanID offset in the queue for the current request block"""
         offset = 0
-        for queue in self.parent.parent.parent.queue:
+        for queue in self.parent.scan_queue.queue:
             if queue.status == InstructionQueueStatus.COMPLETED:
                 continue
-            if queue.queue_id != self.parent.parent.queue_id:
+            if queue.queue_id != self.parent.instruction_queue.queue_id:
                 offset += len([scanID for scanID in queue.scanID if scanID])
             else:
                 for scanID in queue.scanID:
@@ -505,10 +505,11 @@ class RequestBlock:
 
 
 class RequestBlockQueue:
-    def __init__(self, scan_queue, assembler) -> None:
+    def __init__(self, instruction_queue, assembler) -> None:
         self.request_blocks_queue = collections.deque()
         self.request_blocks = []
-        self.scan_queue = scan_queue
+        self.instruction_queue = instruction_queue
+        self.scan_queue = instruction_queue.parent
         self.assembler = assembler
         self.active_rb = None
         self.scan_def_ids = {}
@@ -627,8 +628,8 @@ class InstructionQueueItem:
 
     def __init__(self, parent: ScanQueue, assembler: ScanAssembler, worker) -> None:
         self.instructions = []
-        self.queue = RequestBlockQueue(scan_queue=parent, assembler=assembler)
         self.parent = parent
+        self.queue = RequestBlockQueue(instruction_queue=self, assembler=assembler)
         self.producer = self.parent.queue_manager.producer
         self._is_scan = False
         self.is_active = False  # set to true while a worker is processing the instructions
