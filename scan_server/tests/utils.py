@@ -2,8 +2,9 @@ import os
 
 import bec_utils
 import yaml
+from bec_utils import DeviceManagerBase as DeviceManager
 from bec_utils.tests.utils import ConnectorMock, create_session_from_config
-from scan_server.devicemanager import DeviceManagerScanServer
+
 from scan_server.scan_server import ScanServer
 from scan_server.scan_worker import InstructionQueueStatus
 
@@ -16,7 +17,7 @@ dir_path = os.path.dirname(bec_utils.__file__)
 
 def load_ScanServerMock():
     connector = ConnectorMock("")
-    device_manager = DeviceManagerScanServer(connector, "")
+    device_manager = DeviceManager(connector, "")
     device_manager.producer = connector.producer()
     with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
         device_manager._session = create_session_from_config(yaml.safe_load(f))
