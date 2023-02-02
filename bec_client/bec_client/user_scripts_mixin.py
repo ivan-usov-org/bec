@@ -7,6 +7,7 @@ import pathlib
 from typing import List
 
 from bec_utils import bec_logger
+from pylint import epylint as lint
 from rich.console import Console
 from rich.table import Table
 
@@ -39,6 +40,7 @@ class UserScriptsMixin:
         Args:
             file (str): Full path to the script file.
         """
+        self._run_linter_on_file(file)
         module_members = self._load_script_module(file)
         for name, cls in module_members:
             if not callable(cls):
@@ -76,3 +78,14 @@ class UserScriptsMixin:
         module_spec.loader.exec_module(plugin_module)
         module_members = inspect.getmembers(plugin_module)
         return module_members
+
+    def _run_linter_on_file(self, file) -> None:
+        accepted_vars = ",".join([key for key in builtins.__dict__ if not key.startswith("_")])
+        pylint_stdout, _ = lint.py_run(
+            f"{file} --errors-only --additional-builtins={accepted_vars}", return_std=True
+        )
+        pylint_msg = pylint_stdout.getvalue()
+        if pylint_msg:
+            logger.error(
+                f"During the import of {file}, the following error was detected: \n{pylint_msg}"
+            )
