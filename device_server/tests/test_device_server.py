@@ -202,92 +202,164 @@ def test_assert_device_is_valid(instr):
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
         ),
+    ],
+)
+def test_handle_device_instructions_set(instr):
+    device_server = load_DeviceServerMock()
+    msg = BECMessage.DeviceInstructionMessage.dumps(instr)
+    instructions = BECMessage.DeviceInstructionMessage.loads(msg)
+
+    with mock.patch.object(device_server, "_assert_device_is_valid") as assert_device_is_valid_mock:
+        with mock.patch.object(
+            device_server, "_assert_device_is_enabled"
+        ) as assert_device_is_enabled_mock:
+            with mock.patch.object(
+                device_server, "_update_device_metadata"
+            ) as update_device_metadata_mock:
+                with mock.patch.object(device_server, "_set_device") as set_mock:
+                    device_server.handle_device_instructions(msg)
+
+                    assert_device_is_valid_mock.assert_called_once_with(instructions)
+                    assert_device_is_enabled_mock.assert_called_once_with(instructions)
+                    update_device_metadata_mock.assert_called_once_with(instructions)
+
+                    set_mock.assert_called_once_with(instructions)
+
+
+@pytest.mark.parametrize(
+    "instr",
+    [
         BECMessage.DeviceInstructionMessage(
             device="samx",
             action="read",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
         ),
+    ],
+)
+def test_handle_device_instructions_read(instr):
+    device_server = load_DeviceServerMock()
+    msg = BECMessage.DeviceInstructionMessage.dumps(instr)
+    instructions = BECMessage.DeviceInstructionMessage.loads(msg)
+
+    with mock.patch.object(device_server, "_read_device") as read_mock:
+        device_server.handle_device_instructions(msg)
+        read_mock.assert_called_once_with(instructions)
+
+
+@pytest.mark.parametrize(
+    "instr",
+    [
         BECMessage.DeviceInstructionMessage(
             device="samx",
             action="rpc",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
         ),
+    ],
+)
+def test_handle_device_instructions_rpc(instr):
+    device_server = load_DeviceServerMock()
+    msg = BECMessage.DeviceInstructionMessage.dumps(instr)
+    instructions = BECMessage.DeviceInstructionMessage.loads(msg)
+    with mock.patch.object(device_server, "_assert_device_is_valid") as assert_device_is_valid_mock:
+        with mock.patch.object(
+            device_server, "_assert_device_is_enabled"
+        ) as assert_device_is_enabled_mock:
+            with mock.patch.object(
+                device_server, "_update_device_metadata"
+            ) as update_device_metadata_mock:
+                with mock.patch.object(device_server, "_run_rpc") as rpc_mock:
+                    device_server.handle_device_instructions(msg)
+                    rpc_mock.assert_called_once_with(instructions)
+
+                    assert_device_is_valid_mock.assert_called_once_with(instructions)
+                    assert_device_is_enabled_mock.assert_not_called()
+                    update_device_metadata_mock.assert_called_once_with(instructions)
+
+
+@pytest.mark.parametrize(
+    "instr",
+    [
         BECMessage.DeviceInstructionMessage(
             device="samx",
             action="kickoff",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
         ),
+    ],
+)
+def test_handle_device_instructions_kickoff(instr):
+    device_server = load_DeviceServerMock()
+    msg = BECMessage.DeviceInstructionMessage.dumps(instr)
+    instructions = BECMessage.DeviceInstructionMessage.loads(msg)
+
+    with mock.patch.object(device_server, "_kickoff_device") as kickoff_mock:
+        device_server.handle_device_instructions(msg)
+        kickoff_mock.assert_called_once_with(instructions)
+
+
+@pytest.mark.parametrize(
+    "instr",
+    [
         BECMessage.DeviceInstructionMessage(
             device="samx",
             action="trigger",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
         ),
+    ],
+)
+def test_handle_device_instructions_trigger(instr):
+    device_server = load_DeviceServerMock()
+    msg = BECMessage.DeviceInstructionMessage.dumps(instr)
+    instructions = BECMessage.DeviceInstructionMessage.loads(msg)
+
+    with mock.patch.object(device_server, "_trigger_device") as trigger_mock:
+        device_server.handle_device_instructions(msg)
+        trigger_mock.assert_called_once_with(instructions)
+
+
+@pytest.mark.parametrize(
+    "instr",
+    [
         BECMessage.DeviceInstructionMessage(
             device="samx",
             action="stage",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
         ),
+    ],
+)
+def test_handle_device_instructions_stage(instr):
+    device_server = load_DeviceServerMock()
+    msg = BECMessage.DeviceInstructionMessage.dumps(instr)
+    instructions = BECMessage.DeviceInstructionMessage.loads(msg)
+
+    with mock.patch.object(device_server, "_stage_device") as stage_mock:
+        device_server.handle_device_instructions(msg)
+        stage_mock.assert_called_once_with(instructions)
+
+
+@pytest.mark.parametrize(
+    "instr",
+    [
         BECMessage.DeviceInstructionMessage(
             device="samx",
             action="unstage",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
         ),
-        BECMessage.DeviceInstructionMessage(
-            device="samx",
-            action="run",
-            parameter={},
-            metadata={"stream": "primary", "DIID": 1, "RID": "test"},
-        ),
     ],
 )
-def test_handle_device_instructions(instr):
+def test_handle_device_instructions_unstage(instr):
     device_server = load_DeviceServerMock()
-
-    device_server._assert_device_is_valid = mock.MagicMock()
-    device_server._assert_device_is_enabled = mock.MagicMock()
-    device_server._update_device_metadata = mock.MagicMock()
-
-    device_server._set_device = mock.MagicMock()
-    device_server._read_device = mock.MagicMock()
-    device_server._run_rpc = mock.MagicMock()
-    device_server._kickoff_device = mock.MagicMock()
-    device_server._trigger_device = mock.MagicMock()
-    device_server._stage_device = mock.MagicMock()
-    device_server._unstage_device = mock.MagicMock()
-
     msg = BECMessage.DeviceInstructionMessage.dumps(instr)
-
-    device_server.handle_device_instructions(msg)
     instructions = BECMessage.DeviceInstructionMessage.loads(msg)
-    action = instructions.content["action"]
 
-    if instructions.content["device"] is not None:
-        device_server._assert_device_is_valid.assert_called_once_with(instructions)
-        if action != "rpc":
-            # rpc has its own error handling
-            device_server._assert_device_is_enabled.assert_called_once_with(instructions)
-        device_server._update_device_metadata.assert_called_once_with(instructions)
-
-    if action == "set":
-        device_server._set_device.assert_called_once_with(instructions)
-    elif action == "read":
-        device_server._read_device.assert_called_once_with(instructions)
-    elif action == "rpc":
-        device_server._run_rpc.assert_called_once_with(instructions)
-    elif action == "kickoff":
-        device_server._kickoff_device.assert_called_once_with(instructions)
-    elif action == "trigger":
-        device_server._trigger_device.assert_called_once_with(instructions)
-    elif action == "stage":
-        device_server._stage_device.assert_called_once_with(instructions)
-    elif action == "unstage":
-        device_server._unstage_device.assert_called_once_with(instructions)
+    with mock.patch.object(device_server, "_unstage_device") as unstage_mock:
+        device_server.handle_device_instructions(msg)
+        unstage_mock.assert_called_once_with(instructions)
 
 
 @pytest.mark.parametrize(
