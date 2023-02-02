@@ -21,6 +21,7 @@ if __name__ == "__main__":
             "cytoolz",
             "rich",
             "pyepics",
+            "pylint",
         ],
         scripts=["bec_client/bin/bec"],
     )
