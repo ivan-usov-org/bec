@@ -424,9 +424,9 @@ def test_wait_for_stage():
 
 def test_wait_for_device_server():
     worker = get_scan_worker()
-    worker.parent.wait_for_service = mock.MagicMock()
-    worker._wait_for_device_server()
-    worker.parent.wait_for_service.assert_called_once_with("DeviceServer")
+    with mock.patch.object(worker.parent, "wait_for_service") as service_mock:
+        worker._wait_for_device_server()
+        service_mock.assert_called_once_with("DeviceServer")
 
 
 @pytest.mark.parametrize(
