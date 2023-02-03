@@ -20,11 +20,11 @@ services:
       timeout: 5s
       start_period: 20s
       retries: 5
-  redis-cli:
-    image: redis:latest
-    depends_on:
-      - "redis-test"
-    command: redis-cli monitor > /data/redis.log
-    network_mode: host
-    volumes:
-      - /tmp:/data
+  # redis-cli:
+  #   image: redis:latest
+  #   depends_on:
+  #     - "redis-test"
+  #   command: redis-cli monitor > /data/redis.log
+  #   network_mode: host
+  #   volumes:
+  #     - /tmp:/data
