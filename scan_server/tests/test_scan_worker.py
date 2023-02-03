@@ -184,6 +184,111 @@ def test_wait_for_devices(instructions, wait_type):
 
 
 @pytest.mark.parametrize(
+    "device_status,devices,instr,abort",
+    [
+        (
+            [
+                BECMessage.DeviceReqStatusMessage(
+                    device="samx",
+                    success=True,
+                    metadata={
+                        "stream": "primary",
+                        "DIID": 3,
+                        "scanID": "scanID",
+                        "RID": "requestID",
+                    },
+                )
+            ],
+            [("samx", 4)],
+            BECMessage.DeviceInstructionMessage(
+                device=["samx"],
+                action="wait",
+                parameter={"type": "move", "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 4, "scanID": "scanID", "RID": "requestID"},
+            ),
+            False,
+        ),
+        (
+            [
+                BECMessage.DeviceReqStatusMessage(
+                    device="samx",
+                    success=False,
+                    metadata={
+                        "stream": "primary",
+                        "DIID": 3,
+                        "scanID": "scanID",
+                        "RID": "request",
+                    },
+                )
+            ],
+            [("samx", 4)],
+            BECMessage.DeviceInstructionMessage(
+                device=["samx"],
+                action="wait",
+                parameter={"type": "move", "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 4, "scanID": "scanID", "RID": "requestID"},
+            ),
+            False,
+        ),
+        (
+            [
+                BECMessage.DeviceReqStatusMessage(
+                    device="samx",
+                    success=False,
+                    metadata={
+                        "stream": "primary",
+                        "DIID": 4,
+                        "scanID": "scanID",
+                        "RID": "requestID",
+                    },
+                )
+            ],
+            [("samx", 4)],
+            BECMessage.DeviceInstructionMessage(
+                device=["samx"],
+                action="wait",
+                parameter={"type": "move", "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 4, "scanID": "scanID", "RID": "requestID"},
+            ),
+            True,
+        ),
+        (
+            [
+                BECMessage.DeviceReqStatusMessage(
+                    device="samx",
+                    success=False,
+                    metadata={
+                        "stream": "primary",
+                        "DIID": 3,
+                        "scanID": "scanID",
+                        "RID": "requestID",
+                    },
+                )
+            ],
+            [("samx", 4)],
+            BECMessage.DeviceInstructionMessage(
+                device=["samx"],
+                action="wait",
+                parameter={"type": "move", "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 4, "scanID": "scanID", "RID": "requestID"},
+            ),
+            False,
+        ),
+    ],
+)
+def test_check_for_failed_movements(device_status, devices, instr, abort):
+    worker = get_scan_worker()
+    if abort:
+        with pytest.raises(ScanAbortion):
+            worker.device_manager.producer._get_buffer[
+                MessageEndpoints.device_readback("samx")
+            ] = BECMessage.DeviceMessage(signals={"samx": {"value": 4}}, metadata={}).dumps()
+            worker._check_for_failed_movements(device_status, devices, instr)
+    else:
+        worker._check_for_failed_movements(device_status, devices, instr)
+
+
+@pytest.mark.parametrize(
     "msg1,msg2,req_msg",
     [
         (
@@ -307,6 +412,16 @@ def test_wait_for_trigger(instr):
     patched_time_sleep.assert_called_once_with(instr.content["parameter"]["time"])
 
 
+def test_wait_for_stage():
+    worker = get_scan_worker()
+    devices = ["samx", "samy"]
+    with mock.patch.object(worker, "_get_device_status") as status_mock:
+        with mock.patch.object(worker, "_check_for_interruption") as interruption_mock:
+            worker._wait_for_stage(True, devices, {})
+            status_mock.assert_called_once_with(MessageEndpoints.device_staged, devices)
+            interruption_mock.assert_called_once()
+
+
 def test_wait_for_device_server():
     worker = get_scan_worker()
     worker.parent.wait_for_service = mock.MagicMock()
@@ -393,111 +508,6 @@ def test_check_for_interruption():
     worker.status = InstructionQueueStatus.STOPPED
     with pytest.raises(ScanAbortion) as exc_info:
         worker._check_for_interruption()
-
-
-@pytest.mark.parametrize(
-    "device_status,devices,instr,abort",
-    [
-        (
-            [
-                BECMessage.DeviceReqStatusMessage(
-                    device="samx",
-                    success=True,
-                    metadata={
-                        "stream": "primary",
-                        "DIID": 3,
-                        "scanID": "scanID",
-                        "RID": "requestID",
-                    },
-                )
-            ],
-            [("samx", 4)],
-            BECMessage.DeviceInstructionMessage(
-                device=["samx"],
-                action="wait",
-                parameter={"type": "move", "wait_group": "scan_motor"},
-                metadata={"stream": "primary", "DIID": 4, "scanID": "scanID", "RID": "requestID"},
-            ),
-            False,
-        ),
-        (
-            [
-                BECMessage.DeviceReqStatusMessage(
-                    device="samx",
-                    success=False,
-                    metadata={
-                        "stream": "primary",
-                        "DIID": 3,
-                        "scanID": "scanID",
-                        "RID": "request",
-                    },
-                )
-            ],
-            [("samx", 4)],
-            BECMessage.DeviceInstructionMessage(
-                device=["samx"],
-                action="wait",
-                parameter={"type": "move", "wait_group": "scan_motor"},
-                metadata={"stream": "primary", "DIID": 4, "scanID": "scanID", "RID": "requestID"},
-            ),
-            False,
-        ),
-        (
-            [
-                BECMessage.DeviceReqStatusMessage(
-                    device="samx",
-                    success=False,
-                    metadata={
-                        "stream": "primary",
-                        "DIID": 4,
-                        "scanID": "scanID",
-                        "RID": "requestID",
-                    },
-                )
-            ],
-            [("samx", 4)],
-            BECMessage.DeviceInstructionMessage(
-                device=["samx"],
-                action="wait",
-                parameter={"type": "move", "wait_group": "scan_motor"},
-                metadata={"stream": "primary", "DIID": 4, "scanID": "scanID", "RID": "requestID"},
-            ),
-            True,
-        ),
-        (
-            [
-                BECMessage.DeviceReqStatusMessage(
-                    device="samx",
-                    success=False,
-                    metadata={
-                        "stream": "primary",
-                        "DIID": 3,
-                        "scanID": "scanID",
-                        "RID": "requestID",
-                    },
-                )
-            ],
-            [("samx", 4)],
-            BECMessage.DeviceInstructionMessage(
-                device=["samx"],
-                action="wait",
-                parameter={"type": "move", "wait_group": "scan_motor"},
-                metadata={"stream": "primary", "DIID": 4, "scanID": "scanID", "RID": "requestID"},
-            ),
-            False,
-        ),
-    ],
-)
-def test_check_for_failed_movements(device_status, devices, instr, abort):
-    worker = get_scan_worker()
-    if abort:
-        with pytest.raises(ScanAbortion):
-            worker.device_manager.producer._get_buffer[
-                MessageEndpoints.device_readback("samx")
-            ] = BECMessage.DeviceMessage(signals={"samx": {"value": 4}}, metadata={}).dumps()
-            worker._check_for_failed_movements(device_status, devices, instr)
-    else:
-        worker._check_for_failed_movements(device_status, devices, instr)
 
 
 @pytest.mark.parametrize(
