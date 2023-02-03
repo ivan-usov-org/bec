@@ -37,13 +37,53 @@ def get_scan_worker() -> ScanWorker:
             ),
             ["samx", "samy"],
         ),
+        (
+            BECMessage.DeviceInstructionMessage(
+                device="",
+                action="wait",
+                parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 3},
+            ),
+            ["samx", "samy"],
+        ),
+        (
+            BECMessage.DeviceInstructionMessage(
+                device="",
+                action="wait",
+                parameter={"type": "move", "group": "primary", "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 3},
+            ),
+            ["samx", "samy"],
+        ),
+        (
+            BECMessage.DeviceInstructionMessage(
+                device="",
+                action="wait",
+                parameter={"type": "move", "group": "nogroup", "wait_group": "scan_motor"},
+                metadata={"stream": "primary", "DIID": 3},
+            ),
+            ["samx", "samy"],
+        ),
     ],
 )
 def test_get_devices_from_instruction(instruction, devices):
     worker = get_scan_worker()
-    assert worker._get_devices_from_instruction(instruction) == [
-        worker.device_manager.devices[dev] for dev in devices
-    ]
+    worker.scan_motors = devices
+
+    returned_devices = worker._get_devices_from_instruction(instruction)
+
+    if not instruction.content.get("device"):
+        group = instruction.content["parameter"].get("group")
+        if group == "primary":
+            assert returned_devices == worker.device_manager.devices.primary_devices(
+                worker.scan_motors
+            )
+        elif group == "scan_motor":
+            assert returned_devices == devices
+        else:
+            assert returned_devices == []
+    else:
+        assert returned_devices == [worker.device_manager.devices[dev] for dev in devices]
 
 
 @pytest.mark.parametrize(
