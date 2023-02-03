@@ -87,7 +87,6 @@ end-2-end:
   artifacts:
     when: on_failure
     paths:
-      - DockerCompose.log
       - ScanServer.log
       - ScanBundler.log
       - DeviceServer.log
@@ -109,8 +108,7 @@ end-2-end:
 
     # make sure that the API server is healthy and ready
     - timeout 120 /bin/sh -c -- 'while true; do res=$(curl -X "GET" --max-time 3 "http://docker:3030/sessions"); if [ ! -z "$res" ]; then exit 0; fi; sleep 1; done;'
-    - docker-compose logs > $CI_PROJECT_DIR/DockerCompose.log
-    
+
     # initialize the database with the test config
     - docker build -t init_scibec:test -f ./scibec/init_scibec/Dockerfile .
     - docker run --network=host --name init_scibec init_scibec:test
