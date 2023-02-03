@@ -554,6 +554,37 @@ def test_read_devices(instr):
             )
 
 
+@pytest.mark.parametrize(
+    "instr, devices, parameter, metadata",
+    [
+        (
+            BECMessage.DeviceInstructionMessage(
+                device=["samx"],
+                action="trigger",
+                parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
+                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+            ),
+            ["samx"],
+            {"value": 10, "wait_group": "scan_motor", "time": 30},
+            {"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+        ),
+    ],
+)
+def test_kickoff_devices(instr, devices, parameter, metadata):
+    worker = get_scan_worker()
+    with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
+        worker._kickoff_devices(instr)
+        send_mock.assert_called_once_with(
+            MessageEndpoints.device_instructions(),
+            BECMessage.DeviceInstructionMessage(
+                device=devices,
+                action="kickoff",
+                parameter=parameter,
+                metadata=metadata,
+            ).dumps(),
+        )
+
+
 def test_check_for_interruption():
     worker = get_scan_worker()
     worker.status = InstructionQueueStatus.STOPPED
