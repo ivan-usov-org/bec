@@ -8,7 +8,7 @@ from scan_server.scan_worker import ScanWorker
 
 from utils import load_ScanServerMock
 import time
-from scan_server.scan_queue import InstructionQueueStatus
+from scan_server.scan_queue import InstructionQueueStatus, InstructionQueueItem
 
 
 def get_scan_worker() -> ScanWorker:
@@ -23,7 +23,11 @@ def get_scan_worker() -> ScanWorker:
             BECMessage.DeviceInstructionMessage(
                 device="samy",
                 action="wait",
-                parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
+                parameter={
+                    "type": "move",
+                    "group": "scan_motor",
+                    "wait_group": "scan_motor",
+                },
                 metadata={"stream": "primary", "DIID": 3},
             ),
             ["samy"],
@@ -32,7 +36,11 @@ def get_scan_worker() -> ScanWorker:
             BECMessage.DeviceInstructionMessage(
                 device=["samx", "samy"],
                 action="wait",
-                parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
+                parameter={
+                    "type": "move",
+                    "group": "scan_motor",
+                    "wait_group": "scan_motor",
+                },
                 metadata={"stream": "primary", "DIID": 3},
             ),
             ["samx", "samy"],
@@ -41,7 +49,11 @@ def get_scan_worker() -> ScanWorker:
             BECMessage.DeviceInstructionMessage(
                 device="",
                 action="wait",
-                parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
+                parameter={
+                    "type": "move",
+                    "group": "scan_motor",
+                    "wait_group": "scan_motor",
+                },
                 metadata={"stream": "primary", "DIID": 3},
             ),
             ["samx", "samy"],
@@ -50,7 +62,11 @@ def get_scan_worker() -> ScanWorker:
             BECMessage.DeviceInstructionMessage(
                 device="",
                 action="wait",
-                parameter={"type": "move", "group": "primary", "wait_group": "scan_motor"},
+                parameter={
+                    "type": "move",
+                    "group": "primary",
+                    "wait_group": "scan_motor",
+                },
                 metadata={"stream": "primary", "DIID": 3},
             ),
             ["samx", "samy"],
@@ -59,7 +75,11 @@ def get_scan_worker() -> ScanWorker:
             BECMessage.DeviceInstructionMessage(
                 device="",
                 action="wait",
-                parameter={"type": "move", "group": "nogroup", "wait_group": "scan_motor"},
+                parameter={
+                    "type": "move",
+                    "group": "nogroup",
+                    "wait_group": "scan_motor",
+                },
                 metadata={"stream": "primary", "DIID": 3},
             ),
             ["samx", "samy"],
@@ -128,7 +148,11 @@ def test_add_wait_group(instructions):
             BECMessage.DeviceInstructionMessage(
                 device="samy",
                 action="wait",
-                parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
+                parameter={
+                    "type": "move",
+                    "group": "scan_motor",
+                    "wait_group": "scan_motor",
+                },
                 metadata={"stream": "primary", "DIID": 3},
             ),
             "move",
@@ -137,7 +161,11 @@ def test_add_wait_group(instructions):
             BECMessage.DeviceInstructionMessage(
                 device="samy",
                 action="wait",
-                parameter={"type": "read", "group": "scan_motor", "wait_group": "scan_motor"},
+                parameter={
+                    "type": "read",
+                    "group": "scan_motor",
+                    "wait_group": "scan_motor",
+                },
                 metadata={"stream": "primary", "DIID": 3},
             ),
             "read",
@@ -146,7 +174,11 @@ def test_add_wait_group(instructions):
             BECMessage.DeviceInstructionMessage(
                 device="samy",
                 action="wait",
-                parameter={"type": "trigger", "group": "scan_motor", "wait_group": "scan_motor"},
+                parameter={
+                    "type": "trigger",
+                    "group": "scan_motor",
+                    "wait_group": "scan_motor",
+                },
                 metadata={"stream": "primary", "DIID": 3},
             ),
             "trigger",
@@ -155,7 +187,11 @@ def test_add_wait_group(instructions):
             BECMessage.DeviceInstructionMessage(
                 device="samy",
                 action="wait",
-                parameter={"type": None, "group": "scan_motor", "wait_group": "scan_motor"},
+                parameter={
+                    "type": None,
+                    "group": "scan_motor",
+                    "wait_group": "scan_motor",
+                },
                 metadata={"stream": "primary", "DIID": 3},
             ),
             None,
@@ -168,7 +204,6 @@ def test_wait_for_devices(instructions, wait_type):
     with mock.patch.object(worker, "_wait_for_idle") as idle_mock:
         with mock.patch.object(worker, "_wait_for_read") as read_mock:
             with mock.patch.object(worker, "_wait_for_trigger") as trigger_mock:
-
                 if wait_type:
                     worker._wait_for_devices(instructions)
 
@@ -205,7 +240,12 @@ def test_wait_for_devices(instructions, wait_type):
                 device=["samx"],
                 action="wait",
                 parameter={"type": "move", "wait_group": "scan_motor"},
-                metadata={"stream": "primary", "DIID": 4, "scanID": "scanID", "RID": "requestID"},
+                metadata={
+                    "stream": "primary",
+                    "DIID": 4,
+                    "scanID": "scanID",
+                    "RID": "requestID",
+                },
             ),
             False,
         ),
@@ -227,7 +267,12 @@ def test_wait_for_devices(instructions, wait_type):
                 device=["samx"],
                 action="wait",
                 parameter={"type": "move", "wait_group": "scan_motor"},
-                metadata={"stream": "primary", "DIID": 4, "scanID": "scanID", "RID": "requestID"},
+                metadata={
+                    "stream": "primary",
+                    "DIID": 4,
+                    "scanID": "scanID",
+                    "RID": "requestID",
+                },
             ),
             False,
         ),
@@ -249,7 +294,12 @@ def test_wait_for_devices(instructions, wait_type):
                 device=["samx"],
                 action="wait",
                 parameter={"type": "move", "wait_group": "scan_motor"},
-                metadata={"stream": "primary", "DIID": 4, "scanID": "scanID", "RID": "requestID"},
+                metadata={
+                    "stream": "primary",
+                    "DIID": 4,
+                    "scanID": "scanID",
+                    "RID": "requestID",
+                },
             ),
             True,
         ),
@@ -271,7 +321,12 @@ def test_wait_for_devices(instructions, wait_type):
                 device=["samx"],
                 action="wait",
                 parameter={"type": "move", "wait_group": "scan_motor"},
-                metadata={"stream": "primary", "DIID": 4, "scanID": "scanID", "RID": "requestID"},
+                metadata={
+                    "stream": "primary",
+                    "DIID": 4,
+                    "scanID": "scanID",
+                    "RID": "requestID",
+                },
             ),
             False,
         ),
@@ -297,18 +352,33 @@ def test_check_for_failed_movements(device_status, devices, instr, abort):
                 device="samx",
                 action="set",
                 parameter={"value": 10, "wait_group": "scan_motor"},
-                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+                metadata={
+                    "stream": "primary",
+                    "DIID": 3,
+                    "scanID": "scanID",
+                    "RID": "requestID",
+                },
             ),
             BECMessage.DeviceInstructionMessage(
                 device=["samx"],
                 action="wait",
                 parameter={"type": "move", "wait_group": "scan_motor"},
-                metadata={"stream": "primary", "DIID": 4, "scanID": "scanID", "RID": "requestID"},
+                metadata={
+                    "stream": "primary",
+                    "DIID": 4,
+                    "scanID": "scanID",
+                    "RID": "requestID",
+                },
             ),
             BECMessage.DeviceReqStatusMessage(
                 device="samx",
                 success=False,
-                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+                metadata={
+                    "stream": "primary",
+                    "DIID": 3,
+                    "scanID": "scanID",
+                    "RID": "requestID",
+                },
             ),
         ),
         (
@@ -316,18 +386,33 @@ def test_check_for_failed_movements(device_status, devices, instr, abort):
                 device="samx",
                 action="set",
                 parameter={"value": 10, "wait_group": "scan_motor"},
-                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+                metadata={
+                    "stream": "primary",
+                    "DIID": 3,
+                    "scanID": "scanID",
+                    "RID": "requestID",
+                },
             ),
             BECMessage.DeviceInstructionMessage(
                 device=["samx"],
                 action="wait",
                 parameter={"type": "move", "wait_group": "scan_motor"},
-                metadata={"stream": "primary", "DIID": 4, "scanID": "scanID", "RID": "requestID"},
+                metadata={
+                    "stream": "primary",
+                    "DIID": 4,
+                    "scanID": "scanID",
+                    "RID": "requestID",
+                },
             ),
             BECMessage.DeviceReqStatusMessage(
                 device="samx",
                 success=True,
-                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+                metadata={
+                    "stream": "primary",
+                    "DIID": 3,
+                    "scanID": "scanID",
+                    "RID": "requestID",
+                },
             ),
         ),
     ],
@@ -336,7 +421,8 @@ def test_wait_for_idle(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
     worker = get_scan_worker()
 
     with mock.patch(
-        "scan_server.scan_worker.ScanWorker._get_device_status", return_value=[req_msg.dumps()]
+        "scan_server.scan_worker.ScanWorker._get_device_status",
+        return_value=[req_msg.dumps()],
     ) as device_status:
         worker.device_manager.producer._get_buffer[
             MessageEndpoints.device_readback("samx")
@@ -358,18 +444,33 @@ def test_wait_for_idle(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
                 device=["samx"],
                 action="set",
                 parameter={"value": 10, "wait_group": "scan_motor"},
-                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+                metadata={
+                    "stream": "primary",
+                    "DIID": 3,
+                    "scanID": "scanID",
+                    "RID": "requestID",
+                },
             ),
             BECMessage.DeviceInstructionMessage(
                 device=["samx"],
                 action="wait",
                 parameter={"type": "move", "wait_group": "scan_motor"},
-                metadata={"stream": "primary", "DIID": 4, "scanID": "scanID", "RID": "requestID"},
+                metadata={
+                    "stream": "primary",
+                    "DIID": 4,
+                    "scanID": "scanID",
+                    "RID": "requestID",
+                },
             ),
             BECMessage.DeviceStatusMessage(
                 device="samx",
                 status=0,
-                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+                metadata={
+                    "stream": "primary",
+                    "DIID": 3,
+                    "scanID": "scanID",
+                    "RID": "requestID",
+                },
             ),
         ),
     ],
@@ -378,7 +479,8 @@ def test_wait_for_read(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
     worker = get_scan_worker()
 
     with mock.patch(
-        "scan_server.scan_worker.ScanWorker._get_device_status", return_value=[req_msg.dumps()]
+        "scan_server.scan_worker.ScanWorker._get_device_status",
+        return_value=[req_msg.dumps()],
     ) as device_status:
         with mock.patch.object(worker, "_check_for_interruption") as interruption_mock:
             assert worker._groups == {}
@@ -400,7 +502,12 @@ def test_wait_for_read(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
                 device=["samx"],
                 action="set",
                 parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
-                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+                metadata={
+                    "stream": "primary",
+                    "DIID": 3,
+                    "scanID": "scanID",
+                    "RID": "requestID",
+                },
             )
         ),
     ],
@@ -438,7 +545,12 @@ def test_wait_for_device_server():
                 device=["samx"],
                 action="set",
                 parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
-                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+                metadata={
+                    "stream": "primary",
+                    "DIID": 3,
+                    "scanID": "scanID",
+                    "RID": "requestID",
+                },
             )
         ),
     ],
@@ -458,7 +570,12 @@ def test_set_devices(instr):
                 device=["samx"],
                 action="trigger",
                 parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
-                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+                metadata={
+                    "stream": "primary",
+                    "DIID": 3,
+                    "scanID": "scanID",
+                    "RID": "requestID",
+                },
             )
         ),
     ],
@@ -466,7 +583,6 @@ def test_set_devices(instr):
 def test_trigger_devices(instr):
     worker = get_scan_worker()
     with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
-
         worker._trigger_devices(instr)
         devices = [dev.name for dev in worker.device_manager.devices.detectors()]
 
@@ -476,7 +592,12 @@ def test_trigger_devices(instr):
                 device=devices,
                 action="trigger",
                 parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
-                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+                metadata={
+                    "stream": "primary",
+                    "DIID": 3,
+                    "scanID": "scanID",
+                    "RID": "requestID",
+                },
             ).dumps(),
         )
 
@@ -489,7 +610,12 @@ def test_trigger_devices(instr):
                 device=["samx"],
                 action="trigger",
                 parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
-                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+                metadata={
+                    "stream": "primary",
+                    "DIID": 3,
+                    "scanID": "scanID",
+                    "RID": "requestID",
+                },
             )
         ),
     ],
@@ -509,7 +635,12 @@ def test_send_rpc(instr):
                 device=["samx"],
                 action="trigger",
                 parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
-                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+                metadata={
+                    "stream": "primary",
+                    "DIID": 3,
+                    "scanID": "scanID",
+                    "RID": "requestID",
+                },
             )
         ),
         (
@@ -517,7 +648,12 @@ def test_send_rpc(instr):
                 device=None,
                 action="trigger",
                 parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
-                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+                metadata={
+                    "stream": "primary",
+                    "DIID": 3,
+                    "scanID": "scanID",
+                    "RID": "requestID",
+                },
             )
         ),
     ],
@@ -562,7 +698,12 @@ def test_read_devices(instr):
                 device=["samx"],
                 action="trigger",
                 parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
-                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+                metadata={
+                    "stream": "primary",
+                    "DIID": 3,
+                    "scanID": "scanID",
+                    "RID": "requestID",
+                },
             ),
             ["samx"],
             {"value": 10, "wait_group": "scan_motor", "time": 30},
@@ -590,6 +731,34 @@ def test_check_for_interruption():
     worker.status = InstructionQueueStatus.STOPPED
     with pytest.raises(ScanAbortion) as exc_info:
         worker._check_for_interruption()
+
+
+@pytest.mark.parametrize(
+    "instr",
+    [
+        BECMessage.DeviceInstructionMessage(
+            device=None,
+            action="close_scan",
+            parameter={"num_points": 150},
+            metadata={
+                "stream": "primary",
+                "DIID": 18,
+                "scanID": "12345",
+                "scan_def_id": 100,
+            },
+        ),
+    ],
+)
+def test_open_scan(instr):
+    worker = get_scan_worker()
+
+    assert worker.scan_id == None
+    assert instr.metadata.get("scan_def_id") == 100
+    # worker.current_instruction_queue_item.active_request_block = [instr]
+
+    # with mock.patch.object(worker, "_send_scan_status") as send_mock:
+    #     worker._open_scan(instr)
+    #     send_mock.assert_called_once_with("open")
 
 
 @pytest.mark.parametrize(
@@ -694,7 +863,12 @@ def test_send_scan_status(status, expire):
                 device=["samx"],
                 action="wait",
                 parameter={"type": "move", "wait_group": "scan_motor"},
-                metadata={"stream": "primary", "DIID": 4, "scanID": "12345", "RID": "123456"},
+                metadata={
+                    "stream": "primary",
+                    "DIID": 4,
+                    "scanID": "12345",
+                    "RID": "123456",
+                },
             ),
             "_wait_for_devices",
         ),
