@@ -2,6 +2,7 @@ import builtins
 import os
 
 import bec_utils
+import pytest
 import yaml
 from bec_utils import BECMessage
 from bec_utils.tests.utils import ConnectorMock, create_session_from_config
@@ -96,6 +97,23 @@ def get_bec_client_mock():
     device_manager._load_session()
     client.device_manager = device_manager
     return client
+
+
+@pytest.fixture()
+def bec_client():
+    client = ClientMock()
+    client.initialize([], ConnectorMock, "")
+    device_manager = DMClientMock(client, "")
+    if not "test_session" in builtins.__dict__:
+        with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
+            builtins.__dict__["test_session"] = create_session_from_config(yaml.safe_load(f))
+    device_manager._session = builtins.__dict__["test_session"]
+    device_manager.producer = device_manager.connector.producer()
+    device_manager._load_session()
+    client.device_manager = device_manager
+    yield client
+    del ClientMock._client
+    device_manager.devices.flush()
 
 
 # def test_scan_update():

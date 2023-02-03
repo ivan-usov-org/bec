@@ -38,6 +38,7 @@ def test_user_script_forget():
 
 def test_load_user_script():
     scripts = UserScriptsMixin()
+    builtins.__dict__["dev"] = scripts
     dummy_func.__module__ = "scripts"
     with mock.patch.object(scripts, "_run_linter_on_file") as linter:
         with mock.patch.object(
@@ -56,6 +57,7 @@ def test_user_script_linter():
     scripts = UserScriptsMixin()
     current_path = pathlib.Path(__file__).parent.resolve()
     script_path = os.path.join(current_path, "test_data", "user_script_with_bug.py")
+    builtins.__dict__["dev"] = scripts
     with mock.patch("bec_client.user_scripts_mixin.logger") as logger:
         scripts._run_linter_on_file(script_path)
         logger.error.assert_called_once()

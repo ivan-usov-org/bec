@@ -8,12 +8,12 @@ from bec_utils import BECMessage
 from bec_client.callbacks.live_table import LiveUpdatesTable, sort_devices
 from bec_client.callbacks.utils import ScanRequestMixin
 
-from .utils import get_bec_client_mock
+from .utils import bec_client
 
 
 @pytest.mark.asyncio
-async def test_scan_request_mixin():
-    client = get_bec_client_mock()
+async def test_scan_request_mixin(bec_client):
+    client = bec_client
     client.start()
     request_msg = BECMessage.ScanQueueMessage(
         scan_type="grid_scan",
@@ -63,8 +63,8 @@ def test_sort_devices():
         ),
     ],
 )
-def test_get_devices_from_scan_data(request_msg, scan_report_devices):
-    client = get_bec_client_mock()
+def test_get_devices_from_scan_data(bec_client, request_msg, scan_report_devices):
+    client = bec_client
     client.start()
     data = BECMessage.ScanMessage(
         point_id=0, scanID="", data={}, metadata={"scan_report_devices": scan_report_devices}
@@ -75,8 +75,8 @@ def test_get_devices_from_scan_data(request_msg, scan_report_devices):
 
 
 @pytest.mark.asyncio
-async def test_wait_for_request_acceptance():
-    client = get_bec_client_mock()
+async def test_wait_for_request_acceptance(bec_client):
+    client = bec_client
     client.start()
     request_msg = BECMessage.ScanQueueMessage(
         scan_type="grid_scan",

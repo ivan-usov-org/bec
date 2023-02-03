@@ -2,18 +2,19 @@ import collections
 from unittest import mock
 
 import pytest
+from bec_utils import BECMessage
+
 from bec_client.callbacks.move_device import (
     LiveUpdatesReadbackProgressbar,
     ReadbackDataMixin,
 )
-from bec_utils import BECMessage
 
-from .utils import get_bec_client_mock
+from .utils import bec_client
 
 
 @pytest.mark.asyncio
-async def test_move_callback():
-    client = get_bec_client_mock()
+async def test_move_callback(bec_client):
+    client = bec_client
     request = BECMessage.ScanQueueMessage(
         scan_type="umv",
         parameter={"args": {"samx": [10]}, "kwargs": {"relative": True}},
