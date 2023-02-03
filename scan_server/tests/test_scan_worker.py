@@ -501,6 +501,59 @@ def test_send_rpc(instr):
         send_mock.assert_called_once_with(MessageEndpoints.device_instructions(), instr.dumps())
 
 
+@pytest.mark.parametrize(
+    "instr",
+    [
+        (
+            BECMessage.DeviceInstructionMessage(
+                device=["samx"],
+                action="trigger",
+                parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
+                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+            )
+        ),
+        (
+            BECMessage.DeviceInstructionMessage(
+                device=None,
+                action="trigger",
+                parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
+                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+            )
+        ),
+    ],
+)
+def test_read_devices(instr):
+    worker = get_scan_worker()
+    devices = instr.content.get("device")
+    if devices is None:
+        devices = [
+            dev.name for dev in worker.device_manager.devices.primary_devices(worker.scan_motors)
+        ]
+    with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
+        worker._read_devices(instr)
+
+        if instr.content.get("device"):
+            send_mock.assert_called_once_with(
+                MessageEndpoints.device_instructions(),
+                BECMessage.DeviceInstructionMessage(
+                    device=["samx"],
+                    action="read",
+                    parameter=instr.content["parameter"],
+                    metadata=instr.metadata,
+                ).dumps(),
+            )
+        else:
+            send_mock.assert_called_once_with(
+                MessageEndpoints.device_instructions(),
+                BECMessage.DeviceInstructionMessage(
+                    device=devices,
+                    action="read",
+                    parameter=instr.content["parameter"],
+                    metadata=instr.metadata,
+                ).dumps(),
+            )
+
+
 def test_check_for_interruption():
     worker = get_scan_worker()
     worker.status = InstructionQueueStatus.STOPPED
