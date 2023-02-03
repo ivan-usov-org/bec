@@ -111,6 +111,9 @@ class ConnectorMock(ConnectorBase):
     ):
         pass
 
+    def log_error(*args, **kwargs):
+        pass
+
 
 def create_session_from_config(config: dict) -> dict:
     device_configs = []

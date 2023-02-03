@@ -1,8 +1,10 @@
 from unittest import mock
-
+from unittest.mock import ANY
+import traceback
 import pytest
+
 import bec_utils
-from bec_utils import BECMessage, MessageEndpoints
+from bec_utils import BECMessage, MessageEndpoints, Alarms
 from bec_utils.BECMessage import BECStatus
 from bec_utils.tests.utils import ConnectorMock
 from ophyd import Staged
@@ -10,6 +12,7 @@ from test_device_manager_ds import load_device_manager
 
 from device_server import DeviceServer
 from device_server.device_server import InvalidDeviceError
+from ophyd.utils import errors as ophyd_errors
 
 
 # pylint: disable=missing-function-docstring
@@ -224,6 +227,69 @@ def test_handle_device_instructions_set(instr):
                     update_device_metadata_mock.assert_called_once_with(instructions)
 
                     set_mock.assert_called_once_with(instructions)
+
+
+@pytest.mark.parametrize(
+    "instr",
+    [
+        BECMessage.DeviceInstructionMessage(
+            device="samx",
+            action="set",
+            parameter={},
+            metadata={"stream": "primary", "DIID": 1, "RID": "test"},
+        ),
+    ],
+)
+def test_handle_device_instructions_exception(instr):
+    device_server = load_DeviceServerMock()
+    msg = BECMessage.DeviceInstructionMessage.dumps(instr)
+    instructions = BECMessage.DeviceInstructionMessage.loads(msg)
+
+    with mock.patch.object(device_server, "_assert_device_is_valid") as valid_mock:
+        with mock.patch.object(device_server.connector, "log_error") as log_mock:
+            with mock.patch.object(device_server.connector, "raise_alarm") as alarm_mock:
+                valid_mock.side_effect = Exception("Exception")
+                device_server.handle_device_instructions(msg)
+
+                valid_mock.assert_called_once_with(instructions)
+                log_mock.assert_called_once_with({"source": msg, "message": ANY})
+                alarm_mock.assert_called_once_with(
+                    severity=Alarms.MAJOR,
+                    source=instructions.content,
+                    content=ANY,  # could you set this to anything? or how do i find the traceback?
+                    alarm_type="Exception",
+                    metadata=instructions.metadata,
+                )
+
+
+@pytest.mark.parametrize(
+    "instr",
+    [
+        BECMessage.DeviceInstructionMessage(
+            device="samx",
+            action="set",
+            parameter={},
+            metadata={"stream": "primary", "DIID": 1, "RID": "test"},
+        ),
+    ],
+)
+def test_handle_device_instructions_limit_error(instr):
+    device_server = load_DeviceServerMock()
+    msg = BECMessage.DeviceInstructionMessage.dumps(instr)
+    instructions = BECMessage.DeviceInstructionMessage.loads(msg)
+
+    with mock.patch.object(device_server.connector, "raise_alarm") as alarm_mock:
+        with mock.patch.object(device_server, "_set_device") as set_mock:
+            set_mock.side_effect = ophyd_errors.LimitError("Wrong limits")
+            device_server.handle_device_instructions(msg)
+
+            alarm_mock.assert_called_once_with(
+                severity=Alarms.MAJOR,
+                source=instructions.content,
+                content=ANY,
+                alarm_type="LimitError",
+                metadata=instructions.metadata,
+            )
 
 
 @pytest.mark.parametrize(
