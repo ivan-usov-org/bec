@@ -7,7 +7,9 @@ import pathlib
 from typing import List
 
 from bec_utils import bec_logger
-from pylint import epylint as lint
+from pylint import lint
+from pylint.message import Message
+from pylint.reporters import CollectingReporter
 from rich.console import Console
 from rich.table import Table
 
@@ -81,11 +83,19 @@ class UserScriptsMixin:
 
     def _run_linter_on_file(self, file) -> None:
         accepted_vars = ",".join([key for key in builtins.__dict__ if not key.startswith("_")])
-        pylint_stdout, _ = lint.py_run(
-            f"{file} --errors-only --additional-builtins={accepted_vars}", return_std=True
+        reporter = CollectingReporter()
+        lint.Run(
+            [file, "--errors-only", f"--additional-builtins={accepted_vars}"],
+            exit=False,
+            reporter=reporter,
         )
-        pylint_msg = pylint_stdout.getvalue()
-        if pylint_msg:
+        if not reporter.messages:
+            return
+
+        def _format_pylint_output(msg: Message):
+            return f"Line {msg.line}, column {msg.column}: {msg.msg}."
+
+        for msg in reporter.messages:
             logger.error(
-                f"During the import of {file}, the following error was detected: \n{pylint_msg}"
+                f"During the import of {file}, the following error was detected: \n{_format_pylint_output(msg)}.\nThe script was imported but may not work as expected."
             )

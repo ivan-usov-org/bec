@@ -1,12 +1,7 @@
 import builtins
 import os
 import pathlib
-from io import StringIO
 from unittest import mock
-
-import pylint.lint
-from pylint import epylint as lint
-from pylint.reporters import text
 
 from bec_client.user_scripts_mixin import UserScriptsMixin
 
