@@ -164,23 +164,24 @@ def test_add_wait_group(instructions):
 )
 def test_wait_for_devices(instructions, wait_type):
     worker = get_scan_worker()
-    worker._wait_for_idle = mock.MagicMock()
-    worker._wait_for_read = mock.MagicMock()
-    worker._wait_for_trigger = mock.MagicMock()
 
-    if wait_type:
-        worker._wait_for_devices(instructions)
+    with mock.patch.object(worker, "_wait_for_idle") as idle_mock:
+        with mock.patch.object(worker, "_wait_for_read") as read_mock:
+            with mock.patch.object(worker, "_wait_for_trigger") as trigger_mock:
 
-    if wait_type == "move":
-        worker._wait_for_idle.assert_called_once_with(instructions)
-    elif wait_type == "read":
-        worker._wait_for_read.assert_called_once_with(instructions)
-    elif wait_type == "trigger":
-        worker._wait_for_trigger.assert_called_once_with(instructions)
-    else:
-        with pytest.raises(DeviceMessageError) as exc_info:
-            worker._wait_for_devices(instructions)
-        assert exc_info.value.args[0] == "Unknown wait command"
+                if wait_type:
+                    worker._wait_for_devices(instructions)
+
+                if wait_type == "move":
+                    idle_mock.assert_called_once_with(instructions)
+                elif wait_type == "read":
+                    read_mock.assert_called_once_with(instructions)
+                elif wait_type == "trigger":
+                    trigger_mock.assert_called_once_with(instructions)
+                else:
+                    with pytest.raises(DeviceMessageError) as exc_info:
+                        worker._wait_for_devices(instructions)
+                    assert exc_info.value.args[0] == "Unknown wait command"
 
 
 @pytest.mark.parametrize(
@@ -375,20 +376,20 @@ def test_wait_for_idle(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
 )
 def test_wait_for_read(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
     worker = get_scan_worker()
-    worker._check_for_interruption = mock.MagicMock()
 
     with mock.patch(
         "scan_server.scan_worker.ScanWorker._get_device_status", return_value=[req_msg.dumps()]
     ) as device_status:
-        assert worker._groups == {}
-        worker._groups["scan_motor"] = [("samx", 3), "samy"]
-        worker.device_manager.producer._get_buffer[
-            MessageEndpoints.device_readback("samx")
-        ] = BECMessage.DeviceMessage(signals={"samx": {"value": 4}}, metadata={}).dumps()
-        worker._add_wait_group(msg1)
-        worker._wait_for_read(msg2)
-        assert worker._groups == {"scan_motor": ["samy"]}
-        worker._check_for_interruption.assert_called_once()
+        with mock.patch.object(worker, "_check_for_interruption") as interruption_mock:
+            assert worker._groups == {}
+            worker._groups["scan_motor"] = [("samx", 3), "samy"]
+            worker.device_manager.producer._get_buffer[
+                MessageEndpoints.device_readback("samx")
+            ] = BECMessage.DeviceMessage(signals={"samx": {"value": 4}}, metadata={}).dumps()
+            worker._add_wait_group(msg1)
+            worker._wait_for_read(msg2)
+            assert worker._groups == {"scan_motor": ["samy"]}
+            interruption_mock.assert_called_once()
 
 
 @pytest.mark.parametrize(
@@ -444,11 +445,9 @@ def test_wait_for_device_server():
 )
 def test_set_devices(instr):
     worker = get_scan_worker()
-    worker.device_manager.producer.send = mock.MagicMock()
-    worker._set_devices(instr)
-    worker.device_manager.producer.send.assert_called_once_with(
-        MessageEndpoints.device_instructions(), instr.dumps()
-    )
+    with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
+        worker._set_devices(instr)
+        send_mock.assert_called_once_with(MessageEndpoints.device_instructions(), instr.dumps())
 
 
 @pytest.mark.parametrize(
@@ -466,19 +465,20 @@ def test_set_devices(instr):
 )
 def test_trigger_devices(instr):
     worker = get_scan_worker()
-    worker.device_manager.producer.send = mock.MagicMock()
-    worker._trigger_devices(instr)
-    devices = [dev.name for dev in worker.device_manager.devices.detectors()]
+    with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
 
-    worker.device_manager.producer.send.assert_called_once_with(
-        MessageEndpoints.device_instructions(),
-        BECMessage.DeviceInstructionMessage(
-            device=devices,
-            action="trigger",
-            parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
-            metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
-        ).dumps(),
-    )
+        worker._trigger_devices(instr)
+        devices = [dev.name for dev in worker.device_manager.devices.detectors()]
+
+        send_mock.assert_called_once_with(
+            MessageEndpoints.device_instructions(),
+            BECMessage.DeviceInstructionMessage(
+                device=devices,
+                action="trigger",
+                parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
+                metadata={"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+            ).dumps(),
+        )
 
 
 @pytest.mark.parametrize(
@@ -496,11 +496,9 @@ def test_trigger_devices(instr):
 )
 def test_send_rpc(instr):
     worker = get_scan_worker()
-    worker.device_manager.producer.send = mock.MagicMock()
-    worker._send_rpc(instr)
-    worker.device_manager.producer.send.assert_called_once_with(
-        MessageEndpoints.device_instructions(), instr.dumps()
-    )
+    with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
+        worker._send_rpc(instr)
+        send_mock.assert_called_once_with(MessageEndpoints.device_instructions(), instr.dumps())
 
 
 def test_check_for_interruption():
