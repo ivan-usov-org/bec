@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="lM8l5Z0Aq0sgoTEFW-dG" name="current">
-        <mxGraphModel dx="1978" dy="646" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+        <mxGraphModel dx="2055" dy="581" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
             <root>
                 <mxCell id="soIy7uyMmyg0S_ZOvgGp-0"/>
                 <mxCell id="soIy7uyMmyg0S_ZOvgGp-1" parent="soIy7uyMmyg0S_ZOvgGp-0"/>
@@ -83,7 +83,7 @@
         </mxGraphModel>
     </diagram>
     <diagram id="vCNyTx4VJkq-spmLpPzz" name="envisioned">
-        <mxGraphModel dx="2146" dy="780" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+        <mxGraphModel dx="2360" dy="781" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -183,16 +183,10 @@
                     <mxGeometry y="90" width="90" height="30" as="geometry"/>
                 </mxCell>
                 <mxCell id="1Hn1AgGyMTO8uLk5IlXV-22" value="Sample" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;" parent="1" vertex="1">
-                    <mxGeometry x="-370" y="560" width="140" height="120" as="geometry"/>
+                    <mxGeometry x="-370" y="560" width="140" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="1Hn1AgGyMTO8uLk5IlXV-23" value="experiments []" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" parent="1Hn1AgGyMTO8uLk5IlXV-22" vertex="1">
                     <mxGeometry y="30" width="140" height="30" as="geometry"/>
-                </mxCell>
-                <mxCell id="1Hn1AgGyMTO8uLk5IlXV-24" value="Item 2" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" parent="1Hn1AgGyMTO8uLk5IlXV-22" vertex="1">
-                    <mxGeometry y="60" width="140" height="30" as="geometry"/>
-                </mxCell>
-                <mxCell id="1Hn1AgGyMTO8uLk5IlXV-25" value="Item 3" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;" parent="1Hn1AgGyMTO8uLk5IlXV-22" vertex="1">
-                    <mxGeometry y="90" width="140" height="30" as="geometry"/>
                 </mxCell>
                 <mxCell id="1Hn1AgGyMTO8uLk5IlXV-26" value="User" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;" parent="1" vertex="1">
                     <mxGeometry x="-350" y="390" width="140" height="90" as="geometry"/>
