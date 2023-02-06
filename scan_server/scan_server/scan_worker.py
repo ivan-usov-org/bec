@@ -364,7 +364,7 @@ class ScanWorker(threading.Thread):
 
         self._send_scan_status("open")
 
-    def update_current_scan_info(self, active_rb, instr, num_points):
+    def _update_current_scan_info(self, active_rb, instr, num_points):
         metadata = active_rb.metadata
         self.current_scan_info = {**instr.metadata, **instr.content["parameter"]}
         self.current_scan_info.update(metadata)
