@@ -15,7 +15,7 @@ from bec_utils import (
 )
 
 from .errors import DeviceMessageError, ScanAbortion
-from .scan_queue import InstructionQueueItem, InstructionQueueStatus
+from .scan_queue import InstructionQueueItem, InstructionQueueStatus, RequestBlock
 
 logger = bec_logger.logger
 
@@ -357,14 +357,14 @@ class ScanWorker(threading.Thread):
 
         active_rb = self.current_instruction_queue_item.active_request_block
 
-        self._update_current_scan_info(active_rb, instr, num_points)
+        self._initialize_scan_info(active_rb, instr, num_points)
 
         self.scan_report_instructions.append({"table_wait": num_points})
         self.current_instruction_queue_item.parent.queue_manager.send_queue_status()
 
         self._send_scan_status("open")
 
-    def _update_current_scan_info(self, active_rb, instr, num_points):
+    def _initialize_scan_info(self, active_rb: RequestBlock, instr: DeviceMsg, num_points: int):
         metadata = active_rb.metadata
         self.current_scan_info = {**instr.metadata, **instr.content["parameter"]}
         self.current_scan_info.update(metadata)
