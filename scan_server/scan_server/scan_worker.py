@@ -42,6 +42,7 @@ class ScanWorker(threading.Thread):
         self._staged_devices = set()
         self.max_point_id = 0
         self._exposure_time = None
+        self.current_instruction_queue_item = None
         self.reset()
 
     @property
