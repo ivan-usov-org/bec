@@ -4,6 +4,7 @@ from unittest import mock
 import pytest
 from bec_utils import BECMessage, MessageEndpoints, DeviceStatus
 from scan_server.errors import ScanAbortion, DeviceMessageError
+from scan_server.scan_assembler import ScanAssembler
 from scan_server.scan_worker import ScanWorker
 
 from utils import load_ScanServerMock
@@ -734,31 +735,76 @@ def test_check_for_interruption():
 
 
 @pytest.mark.parametrize(
-    "instr",
+    "instr, corr_num_points, scan_id",
     [
-        BECMessage.DeviceInstructionMessage(
-            device=None,
-            action="close_scan",
-            parameter={"num_points": 150},
-            metadata={
-                "stream": "primary",
-                "DIID": 18,
-                "scanID": "12345",
-                "scan_def_id": 100,
-            },
+        (
+            BECMessage.DeviceInstructionMessage(
+                device=None,
+                action="open_scan",
+                parameter={"num_points": 150, "primary": ["samx", "samy"]},
+                metadata={
+                    "stream": "primary",
+                    "DIID": 18,
+                    "scanID": "12345",
+                    "scan_def_id": 100,
+                    "pointID": 50,
+                    "RID": 11,
+                },
+            ),
+            201,
+            False,
+        ),
+        (
+            BECMessage.DeviceInstructionMessage(
+                device=None,
+                action="open_scan",
+                parameter={"num_points": 150},
+                metadata={"stream": "primary", "DIID": 18, "scanID": "12345", "RID": 11},
+            ),
+            150,
+            True,
         ),
     ],
 )
-def test_open_scan(instr):
+def test_open_scan(instr, corr_num_points, scan_id):
     worker = get_scan_worker()
 
-    assert worker.scan_id == None
-    assert instr.metadata.get("scan_def_id") == 100
-    # worker.current_instruction_queue_item.active_request_block = [instr]
+    if not scan_id:
+        assert worker.scan_id == None
+    else:
+        worker.scan_id = 111
+        worker.scan_motors = ["bpm4i"]
 
-    # with mock.patch.object(worker, "_send_scan_status") as send_mock:
-    #     worker._open_scan(instr)
-    #     send_mock.assert_called_once_with("open")
+    if "pointID" in instr.metadata:
+        worker.max_point_id = instr.metadata["pointID"]
+
+    assert worker.parent.producer.get(MessageEndpoints.scan_number()) == None
+
+    with mock.patch.object(worker, "current_instruction_queue_item") as queue_mock:
+        with mock.patch.object(worker, "_initialize_scan_info") as init_mock:
+            with mock.patch.object(worker.scan_report_instructions, "append") as instr_append_mock:
+                with mock.patch.object(worker, "_send_scan_status") as send_mock:
+                    with mock.patch.object(
+                        worker.current_instruction_queue_item.parent.queue_manager,
+                        "send_queue_status",
+                    ) as queue_status_mock:
+                        worker._open_scan(instr)
+
+                        if not scan_id:
+                            assert worker.scan_id == instr.metadata.get("scanID")
+                            assert worker.scan_motors == [
+                                worker.device_manager.devices["samx"],
+                                worker.device_manager.devices["samy"],
+                            ]
+                        else:
+                            assert worker.scan_id == 111
+                            assert worker.scan_motors == ["bpm4i"]
+                        init_mock.assert_called_once_with(
+                            queue_mock.active_request_block, instr, corr_num_points
+                        )
+                        instr_append_mock.assert_called_once_with({"table_wait": corr_num_points})
+                        queue_status_mock.assert_called_once()
+                        send_mock.assert_called_once_with("open")
 
 
 @pytest.mark.parametrize(
