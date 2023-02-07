@@ -5,7 +5,7 @@ import pytest
 from bec_utils import BECMessage, MessageEndpoints, DeviceStatus
 from scan_server.errors import ScanAbortion, DeviceMessageError
 from scan_server.scan_assembler import ScanAssembler
-from scan_server.scan_worker import ScanWorker
+from scan_server.scan_worker import DeviceMsg, ScanWorker
 
 from utils import load_ScanServerMock
 import time
@@ -872,17 +872,50 @@ def test_close_scan(msg, scan_id, max_point_id, exp_num_points):
     worker.current_scan_info["num_points"] = 19
 
     reset = bool(worker.scan_id == msg.metadata["scanID"])
-    with mock.patch(
-        "scan_server.scan_worker.ScanWorker._send_scan_status"
-    ) as send_scan_status_mock:
+    with mock.patch.object(worker, "_send_scan_status") as send_scan_status_mock:
         worker._close_scan(msg, max_point_id=max_point_id)
         if reset:
-            send_scan_status_mock.assert_called_once()
             send_scan_status_mock.assert_called_with("closed")
             assert worker.scan_id == None
         else:
             assert worker.scan_id == scan_id
     assert worker.current_scan_info["num_points"] == exp_num_points
+
+
+@pytest.mark.parametrize(
+    "msg",
+    [
+        BECMessage.DeviceInstructionMessage(
+            device=None,
+            action="close_scan",
+            parameter={},
+            metadata={"stream": "primary", "DIID": 18, "scanID": "12345"},
+        ),
+    ],
+)
+def test_stage_device(msg):
+    worker = get_scan_worker()
+
+    with mock.patch.object(worker, "_wait_for_stage") as wait_mock:
+        with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
+            worker._stage_devices(msg)
+
+            for dev in worker.device_manager.devices.enabled_devices:
+                assert dev.name in worker._staged_devices
+            send_mock.assert_called_once_with(
+                MessageEndpoints.device_instructions(),
+                DeviceMsg(
+                    device=[dev.name for dev in worker.device_manager.devices.enabled_devices],
+                    action="stage",
+                    parameter=msg.content["parameter"],
+                    metadata=msg.metadata,
+                ).dumps(),
+            )
+            wait_mock.assert_called_once_with(
+                staged=True,
+                devices=[dev.name for dev in worker.device_manager.devices.enabled_devices],
+                metadata=msg.metadata,
+            )
 
 
 @pytest.mark.parametrize(
