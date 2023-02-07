@@ -919,6 +919,53 @@ def test_stage_device(msg):
 
 
 @pytest.mark.parametrize(
+    "msg, devices, parameter, metadata, cleanup",
+    [
+        (
+            BECMessage.DeviceInstructionMessage(
+                device=None,
+                action="close_scan",
+                parameter={"parameter": "param"},
+                metadata={"stream": "primary", "DIID": 18, "scanID": "12345"},
+            ),
+            ["samx"],
+            {"parameter": "param"},
+            {"stream": "primary", "DIID": 18, "scanID": "12345"},
+            False,
+        ),
+        (None, None, {}, {}, False),
+        (None, None, {}, {}, True),
+    ],
+)
+def test_unstage_device(msg, devices, parameter, metadata, cleanup):
+    worker = get_scan_worker()
+    if not devices:
+        devices = [dev.name for dev in worker.device_manager.devices.enabled_devices]
+
+    with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
+        with mock.patch.object(worker, "_wait_for_stage") as wait_mock:
+            worker._unstage_devices(msg, devices, cleanup)
+
+            send_mock.assert_called_once_with(
+                MessageEndpoints.device_instructions(),
+                DeviceMsg(
+                    device=devices,
+                    action="unstage",
+                    parameter=parameter,
+                    metadata=metadata,
+                ).dumps(),
+            )
+            if cleanup:
+                wait_mock.assert_not_called()
+            else:
+                wait_mock.assert_called_once_with(
+                    staged=False,
+                    devices=devices,
+                    metadata=metadata,
+                )
+
+
+@pytest.mark.parametrize(
     "status,expire",
     [
         (
