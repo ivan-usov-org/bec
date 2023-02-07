@@ -9,7 +9,7 @@ from scan_server.scan_worker import ScanWorker
 
 from utils import load_ScanServerMock
 import time
-from scan_server.scan_queue import InstructionQueueStatus, InstructionQueueItem
+from scan_server.scan_queue import InstructionQueueStatus, InstructionQueueItem, RequestBlock
 
 
 def get_scan_worker() -> ScanWorker:
@@ -805,6 +805,38 @@ def test_open_scan(instr, corr_num_points, scan_id):
                         instr_append_mock.assert_called_once_with({"table_wait": corr_num_points})
                         queue_status_mock.assert_called_once()
                         send_mock.assert_called_once_with("open")
+
+
+@pytest.mark.parametrize(
+    "msg",
+    [
+        BECMessage.ScanQueueMessage(
+            scan_type="grid_scan",
+            parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}, "num_points": 100},
+            queue="primary",
+            metadata={"RID": "something"},
+        ),
+    ],
+)
+def test_initialize_scan_info(msg):
+    worker = get_scan_worker()
+    scan_server = load_ScanServerMock()
+    rb = RequestBlock(msg, assembler=ScanAssembler(parent=scan_server))
+    assert rb.metadata == {"RID": "something"}
+
+    with mock.patch.object(worker, "current_instruction_queue_item"):
+        worker._initialize_scan_info(rb, msg, msg.content["parameter"].get("num_points"))
+        assert worker.current_scan_info == {
+            **msg.metadata,
+            **msg.content["parameter"],
+            "scan_number": 2,
+            "dataset_number": 3,
+            "exp_time": None,
+            "scan_report_hint": rb.scan.scan_report_hint,
+            "scan_report_devices": rb.scan.scan_report_devices,
+            "num_points": 100,
+            "scan_msgs": [],
+        }
 
 
 @pytest.mark.parametrize(
