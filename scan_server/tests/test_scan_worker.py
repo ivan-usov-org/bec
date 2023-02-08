@@ -1219,3 +1219,22 @@ def test_instruction_step(msg, method):
     with mock.patch(f"scan_server.scan_worker.ScanWorker.{method}") as instruction_method:
         worker._instruction_step(msg)
         instruction_method.assert_called_once()
+
+
+def test_reset():
+    worker = get_scan_worker()
+    worker._gropus = 1
+    worker.current_scanID = 1
+    worker.current_scan_info = 1
+    worker.scan_id = 1
+    worker.interception_msg = 1
+    worker.scan_motors = 1
+
+    worker.reset()
+
+    assert worker._groups == {}
+    assert worker.current_scanID == ""
+    assert worker.current_scan_info == {}
+    assert worker.scan_id == None
+    assert worker.interception_msg == None
+    assert worker.scan_motors == []
