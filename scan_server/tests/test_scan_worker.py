@@ -1238,3 +1238,10 @@ def test_reset():
     assert worker.scan_id == None
     assert worker.interception_msg == None
     assert worker.scan_motors == []
+
+
+def test_cleanup():
+    worker = get_scan_worker()
+    with mock.patch.object(worker, "_unstage_devices") as unstage_mock:
+        worker.cleanup()
+        unstage_mock.assert_called_once_with(devices=list(worker._staged_devices), cleanup=True)
