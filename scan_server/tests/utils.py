@@ -4,9 +4,14 @@ import bec_utils
 import yaml
 from bec_utils import DeviceManagerBase as DeviceManager
 from bec_utils.tests.utils import ConnectorMock, create_session_from_config
+from scan_server.scan_assembler import ScanAssembler
+from scan_server.scan_queue import InstructionQueueItem, RequestBlock, RequestBlockQueue, ScanQueue
 
 from scan_server.scan_server import ScanServer
 from scan_server.scan_worker import InstructionQueueStatus
+from bec_utils import MessageEndpoints
+
+from scan_server.scans import RequestBase
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=protected-access
@@ -32,6 +37,7 @@ class WorkerMock:
         self.current_scanID = None
         self.current_scan_info = None
         self.status = InstructionQueueStatus.IDLE
+        self.current_instruction_queue_item = None
 
 
 class ScanServerMock(ScanServer):
@@ -47,4 +53,22 @@ class ScanServerMock(ScanServer):
         pass
 
     def shutdown(self):
+        pass
+
+    @property
+    def scan_number(self) -> int:
+        """get the current scan number"""
+        return 2
+
+    @scan_number.setter
+    def scan_number(self, val: int):
+        pass
+
+    @property
+    def dataset_number(self) -> int:
+        """get the current dataset number"""
+        return 3
+
+    @dataset_number.setter
+    def dataset_number(self, val: int):
         pass
