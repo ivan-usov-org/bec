@@ -1245,3 +1245,12 @@ def test_cleanup():
     with mock.patch.object(worker, "_unstage_devices") as unstage_mock:
         worker.cleanup()
         unstage_mock.assert_called_once_with(devices=list(worker._staged_devices), cleanup=True)
+
+
+def test_shutdown():
+    worker = get_scan_worker()
+    with mock.patch.object(worker.signal_event, "set") as set_mock:
+        with mock.patch.object(worker, "join") as join_mock:
+            worker.shutdown()
+            set_mock.assert_called_once()
+            join_mock.assert_called_once()
