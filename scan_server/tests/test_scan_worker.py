@@ -9,12 +9,67 @@ from scan_server.scan_worker import DeviceMsg, ScanWorker
 
 from utils import load_ScanServerMock
 import time
-from scan_server.scan_queue import InstructionQueueStatus, InstructionQueueItem, RequestBlock
+from scan_server.scan_queue import (
+    InstructionQueueStatus,
+    InstructionQueueItem,
+    QueueManager,
+    RequestBlock,
+    RequestBlockQueue,
+    ScanQueue,
+)
 
 
 def get_scan_worker() -> ScanWorker:
     k = load_ScanServerMock()
     return ScanWorker(parent=k)
+
+
+class RequestBlockQueueMock(RequestBlockQueue):
+    request_blocks = []
+    _scanID = []
+
+    @property
+    def scanID(self):
+        return self._scanID
+
+    def update_scan_number(self, request_block_index):
+        pass
+
+    def append(self, msg):
+        pass
+
+
+class InstructionQueueMock(InstructionQueueItem):
+    def __init__(self, parent: ScanQueue, assembler: ScanAssembler, worker: ScanWorker) -> None:
+        super().__init__(parent, assembler, worker)
+        self.queue = RequestBlockQueueMock(self, assembler)
+        # self.queue.active_rb = []
+        self.idx = 1
+
+    def append_scan_request(self, msg):
+        self.scan_msgs.append(msg)
+        self.queue.append(msg)
+
+    def __next__(self):
+        if (
+            self.status
+            in [
+                InstructionQueueStatus.RUNNING,
+                InstructionQueueStatus.DEFERRED_PAUSE,
+                InstructionQueueStatus.PENDING,
+            ]
+            and self.idx < 5
+        ):
+            self.idx += 1
+            return "instr_status"
+
+        else:
+            raise StopIteration
+
+        # while self.status == InstructionQueueStatus.PAUSED:
+        #     return "instr_paused"
+
+        # return "instr"
 
 
 @pytest.mark.parametrize(
@@ -993,6 +1048,48 @@ def test_send_scan_status(status, expire):
     ]
     assert len(scan_info_msgs) == 1
     assert scan_info_msgs[0]["expire"] == expire
+
+
+@pytest.mark.parametrize("abortion", [False, True])
+def test_process_instructions(abortion):
+    worker = get_scan_worker()
+    scan_server = load_ScanServerMock()
+    scan_queue = ScanQueue(QueueManager(scan_server))
+    queue = InstructionQueueMock(
+        parent=scan_queue, assembler=ScanAssembler(parent=scan_server), worker=worker
+    )
+
+    with mock.patch.object(worker, "_wait_for_device_server") as wait_mock:
+        with mock.patch.object(worker, "reset") as reset_mock:
+            with mock.patch.object(worker, "_check_for_interruption") as interruption_mock:
+                with mock.patch.object(queue.queue, "active_rb") as rb_mock:
+                    with mock.patch.object(worker, "_instruction_step") as step_mock:
+                        if abortion:
+                            interruption_mock.side_effect = ScanAbortion
+                            with pytest.raises(ScanAbortion) as exc_info:
+                                worker._process_instructions(queue)
+                        else:
+                            worker._process_instructions(queue)
+
+                        assert worker.max_point_id == 0
+                        wait_mock.assert_called_once()
+
+                        if not abortion:
+                            assert interruption_mock.call_count == 4
+                            assert worker._exposure_time == getattr(rb_mock.scan, "exp_time", None)
+                            assert step_mock.call_count == 4
+                            assert queue.is_active == False
+                            assert queue.status == InstructionQueueStatus.COMPLETED
+                            assert worker.current_instruction_queue_item == None
+                            reset_mock.assert_called_once()
+
+                        else:
+                            assert worker._groups == {}
+                            assert queue.stopped == True
+                            assert interruption_mock.call_count == 1
+                            assert queue.is_active == True
+                            assert queue.status == InstructionQueueStatus.PENDING
+                            assert worker.current_instruction_queue_item == queue
 
 
 @pytest.mark.parametrize(
