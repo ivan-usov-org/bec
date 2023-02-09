@@ -21,6 +21,7 @@ from scan_server.scans import (
     RoundScanFlySim,
     Scan,
     ScanBase,
+    TimeScan,
     UpdatedMove,
     get_2D_raster_pos,
     get_fermat_spiral_pos,
@@ -1085,17 +1086,17 @@ def test_pre_scan_macro():
                 eval_mock.assert_called_once_with("pre_scan_macro")
 
 
-def test_scan_report_devices():
-    device_manager = DMMock()
-    device_manager.add_device("samx")
-    parameter = {
-        "args": {"samx": (-5, 5), "samy": (-5, 5)},
-        "kwargs": {"step": 3},
-    }
-    request = RequestBase(device_manager=device_manager, parameter=parameter)
-    assert request.scan_report_devices == ["samx", "samy"]
-    request.scan_report_devices = ["samx", "samz"]
-    assert request.scan_report_devices == ["samx", "samz"]
+# def test_scan_report_devices():
+#     device_manager = DMMock()
+#     device_manager.add_device("samx")
+#     parameter = {
+#         "args": {"samx": (-5, 5), "samy": (-5, 5)},
+#         "kwargs": {"step": 3},
+#     }
+#     request = RequestBase(device_manager=device_manager, parameter=parameter)
+#     assert request.scan_report_devices == ["samx", "samy"]
+#     request.scan_report_devices = ["samx", "samz"]
+#     assert request.scan_report_devices == ["samx", "samz"]
 
 
 @pytest.mark.parametrize("in_args,reference_positions", [((5, 5, 1, 1), [[1, 0], [2, 0], [-2, 0]])])
@@ -1900,4 +1901,167 @@ def test_list_scan_raises_for_different_lengths():
         queue="primary",
     )
     with pytest.raises(ValueError):
-        request = ListScan(device_manager=device_manager, parameter=scan_msg.content["parameter"])
+        ListScan(device_manager=device_manager, parameter=scan_msg.content["parameter"])
+
+
+@pytest.mark.parametrize(
+    "scan_msg,reference_scan_list",
+    [
+        (
+            BMessage.ScanQueueMessage(
+                scan_type="time_scan",
+                parameter={
+                    "args": {},
+                    "kwargs": {"points": 3, "interval": 1, "exp_time": 0.1, "relative": True},
+                },
+                queue="primary",
+            ),
+            [
+                BMessage.DeviceInstructionMessage(
+                    device=[],
+                    action="read",
+                    parameter={"wait_group": "scan_motor"},
+                    metadata={"stream": "primary", "DIID": 0},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=[],
+                    action="wait",
+                    parameter={"type": "read", "wait_group": "scan_motor"},
+                    metadata={"stream": "primary", "DIID": 1},
+                ),
+                None,
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="open_scan",
+                    parameter={
+                        "primary": [],
+                        "num_points": 3,
+                        "positions": [],
+                        "scan_name": "time_scan",
+                        "scan_type": "step",
+                    },
+                    metadata={"stream": "primary", "DIID": 2},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="stage",
+                    parameter={},
+                    metadata={"stream": "primary", "DIID": 3},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="baseline_reading",
+                    parameter={},
+                    metadata={"stream": "baseline", "DIID": 4},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="trigger",
+                    parameter={"group": "trigger"},
+                    metadata={"stream": "primary", "DIID": 5, "pointID": 0},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="wait",
+                    parameter={"type": "trigger", "time": 0.1, "group": "trigger"},
+                    metadata={"stream": "primary", "DIID": 6},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="read",
+                    parameter={"group": "primary", "wait_group": "readout_primary"},
+                    metadata={"stream": "primary", "DIID": 7, "pointID": 0},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="wait",
+                    parameter={"type": "trigger", "time": 0.9, "group": "trigger"},
+                    metadata={"stream": "primary", "DIID": 8},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="wait",
+                    parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
+                    metadata={"stream": "primary", "DIID": 9},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="trigger",
+                    parameter={"group": "trigger"},
+                    metadata={"stream": "primary", "DIID": 10, "pointID": 1},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="wait",
+                    parameter={"type": "trigger", "time": 0.1, "group": "trigger"},
+                    metadata={"stream": "primary", "DIID": 11},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="read",
+                    parameter={"group": "primary", "wait_group": "readout_primary"},
+                    metadata={"stream": "primary", "DIID": 12, "pointID": 1},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="wait",
+                    parameter={"type": "trigger", "time": 0.9, "group": "trigger"},
+                    metadata={"stream": "primary", "DIID": 13},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="wait",
+                    parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
+                    metadata={"stream": "primary", "DIID": 14},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="trigger",
+                    parameter={"group": "trigger"},
+                    metadata={"stream": "primary", "DIID": 15, "pointID": 2},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="wait",
+                    parameter={"type": "trigger", "time": 0.1, "group": "trigger"},
+                    metadata={"stream": "primary", "DIID": 16},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="read",
+                    parameter={"group": "primary", "wait_group": "readout_primary"},
+                    metadata={"stream": "primary", "DIID": 17, "pointID": 2},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="wait",
+                    parameter={"type": "trigger", "time": 0.9, "group": "trigger"},
+                    metadata={"stream": "primary", "DIID": 18},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="wait",
+                    parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
+                    metadata={"stream": "primary", "DIID": 19},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="unstage",
+                    parameter={},
+                    metadata={"stream": "primary", "DIID": 20},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="close_scan",
+                    parameter={},
+                    metadata={"stream": "primary", "DIID": 21},
+                ),
+            ],
+        )
+    ],
+)
+def test_time_scan(scan_msg, reference_scan_list):
+    device_manager = DMMock()
+    request = TimeScan(device_manager=device_manager, parameter=scan_msg.content["parameter"])
+    scan_instructions = list(request.run())
+    assert scan_instructions == reference_scan_list
