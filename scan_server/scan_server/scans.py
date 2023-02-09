@@ -872,6 +872,38 @@ class RoundROIScan(ScanBase):
         )
 
 
+class ListScan(ScanBase):
+    scan_name = "list_scan"
+    scan_report_hint = "table"
+    required_kwargs = ["exp_time", "relative"]
+    arg_input = [ScanArgType.DEVICE, ScanArgType.LIST]
+    arg_bundle_size = len(arg_input)
+
+    def __init__(self, *args, parameter=None, **kwargs):
+        """
+        A scan following the positions specified in a list.
+        Please note that all lists must be of equal length.
+
+        Args:
+            *args: pairs of motors and position lists
+            relative: Start from an absolute or relative position
+            burst: number of acquisition per point
+
+        Returns:
+
+        Examples:
+            >>> scans.list_scan(dev.motor1, [0,1,2,3,4], dev.motor2, [4,3,2,1,0], exp_time=0.1, relative=True)
+
+        """
+        super().__init__(parameter=parameter, **kwargs)
+        self.axis = []
+        if len(set(len(entry[0]) for entry in self.caller_args.values())) != 1:
+            raise ValueError("All position lists must be of equal length.")
+
+    def _calculate_positions(self):
+        self.positions = np.vstack(self.caller_args.values()).T.tolist()
+
+
 class Acquire(ScanBase):
     scan_name = "acquire"
     scan_report_hint = "table"

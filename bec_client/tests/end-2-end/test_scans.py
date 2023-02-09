@@ -568,3 +568,32 @@ def test_group_def(client):
         scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=False)
 
     assert scan_number == bec.queue.next_scan_number - 2
+
+
+@pytest.mark.timeout(100)
+def test_list_scan(client):
+    bec = client
+    wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_list_scan"})
+    scans = bec.scans
+    dev = bec.device_manager.devices
+
+    status = scans.list_scan(
+        dev.samx, [0, 1, 2, 3, 4], dev.samy, [0, 1, 2, 3, 4], exp_time=0.1, relative=False
+    )
+    assert len(status.scan.data) == 5
+
+    status = scans.list_scan(dev.samx, [0, 1, 2, 3, 4, 5], exp_time=0.1, relative=False)
+    assert len(status.scan.data) == 6
+
+    status = scans.list_scan(
+        dev.samx,
+        [0, 1, 2, 3],
+        dev.samy,
+        [0, 1, 2, 3],
+        dev.samz,
+        [0, 1, 2, 3],
+        exp_time=0.1,
+        relative=False,
+    )
+    assert len(status.scan.data) == 4

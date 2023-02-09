@@ -15,12 +15,13 @@ from scan_server.scans import (
     DeviceRPC,
     FermatSpiralScan,
     LineScan,
+    ListScan,
     Move,
     RequestBase,
-    ScanBase,
-    Scan,
-    UpdatedMove,
     RoundScanFlySim,
+    Scan,
+    ScanBase,
+    UpdatedMove,
     get_2D_raster_pos,
     get_fermat_spiral_pos,
     get_round_roi_scan_positions,
@@ -1858,9 +1859,8 @@ def test_round_scan_fly_sim_scan_core(in_args, reference_positions):
 )
 def test_line_scan_calculate_positions(in_args, reference_positions):
     device_manager = DMMock()
-    device_manager.add_device("flyer_sim")
     scan_msg = BMessage.ScanQueueMessage(
-        scan_type="round_scan_fly",
+        scan_type="line_scan",
         parameter={
             "args": {"samx": in_args[0], "samy": in_args[1]},
             "kwargs": {"realtive": True},
@@ -1871,3 +1871,33 @@ def test_line_scan_calculate_positions(in_args, reference_positions):
 
     request._calculate_positions()
     assert np.isclose(request.positions, reference_positions).all()
+
+
+def test_list_scan_calculate_positions():
+    device_manager = DMMock()
+    scan_msg = BMessage.ScanQueueMessage(
+        scan_type="list_scan",
+        parameter={
+            "args": {"samx": [[0, 1, 2, 3, 4]], "samy": [[0, 1, 2, 3, 4]]},
+            "kwargs": {"realtive": True},
+        },
+        queue="primary",
+    )
+
+    request = ListScan(device_manager=device_manager, parameter=scan_msg.content["parameter"])
+    request._calculate_positions()
+    assert np.isclose(request.positions, [[0, 0], [1, 1], [2, 2], [3, 3], [4, 4]]).all()
+
+
+def test_list_scan_raises_for_different_lengths():
+    device_manager = DMMock()
+    scan_msg = BMessage.ScanQueueMessage(
+        scan_type="list_scan",
+        parameter={
+            "args": {"samx": [[0, 1, 2, 3, 4]], "samy": [[0, 1, 2, 3]]},
+            "kwargs": {"realtive": True},
+        },
+        queue="primary",
+    )
+    with pytest.raises(ValueError):
+        request = ListScan(device_manager=device_manager, parameter=scan_msg.content["parameter"])
