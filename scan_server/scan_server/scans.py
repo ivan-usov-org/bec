@@ -904,6 +904,63 @@ class ListScan(ScanBase):
         self.positions = np.vstack(self.caller_args.values()).T.tolist()
 
 
+class TimeScan(ScanBase):
+    scan_name = "time_scan"
+    scan_report_hint = "table"
+    required_kwargs = ["exp_time", "points", "interval"]
+    arg_input = []
+    arg_bundle_size = len(arg_input)
+
+    def __init__(self, *args, parameter=None, **kwargs):
+        """
+        Trigger and readout devices at a fixed interval.
+        Note that the interval time cannot be less than the exposure time.
+        The effective "sleep" time between points is
+            sleep_time = interval - exp_time
+
+        Args:
+            points: number of points
+            interval: time interval between points
+            exp_time: exposure time in s
+            burst: number of acquisition per point
+
+        Returns:
+
+        Examples:
+            >>> scans.time_scan(points=10, interval=1.5, exp_time=0.1, relative=True)
+
+        """
+        super().__init__(parameter=parameter, **kwargs)
+        self.axis = []
+        self.points = parameter.get("kwargs", {}).get("points")
+        self.interval = parameter.get("kwargs", {}).get("interval")
+        self.interval -= self.exp_time
+
+    def _calculate_positions(self) -> None:
+        pass
+
+    def prepare_positions(self):
+        self.num_pos = self.points
+        yield None
+
+    def _at_each_point(self, ind=None, pos=None):
+        if ind > 0:
+            yield from self.stubs.wait(
+                wait_type="read", group="primary", wait_group="readout_primary"
+            )
+        yield from self.stubs.trigger(group="trigger", pointID=self.pointID)
+        yield from self.stubs.wait(wait_type="trigger", group="trigger", wait_time=self.exp_time)
+        yield from self.stubs.read(
+            group="primary", wait_group="readout_primary", pointID=self.pointID
+        )
+        yield from self.stubs.wait(wait_type="trigger", group="trigger", wait_time=self.interval)
+        self.pointID += 1
+
+    def scan_core(self):
+        for ind in range(self.num_pos):
+            yield from self._at_each_point(ind)
+
+
 class Acquire(ScanBase):
     scan_name = "acquire"
     scan_report_hint = "table"

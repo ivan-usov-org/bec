@@ -597,3 +597,13 @@ def test_list_scan(client):
         relative=False,
     )
     assert len(status.scan.data) == 4
+
+
+@pytest.mark.timeout(100)
+def test_time_scan(client):
+    bec = client
+    wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_time_scan"})
+    scans = bec.scans
+    status = scans.time_scan(points=5, interval=0.5, exp_time=0.1, relative=False)
+    assert len(status.scan.data) == 5
