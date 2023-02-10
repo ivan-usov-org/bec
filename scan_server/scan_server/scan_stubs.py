@@ -216,7 +216,7 @@ class ScanStubs:
         pointID: int = None,
         group: str = None,
     ):
-        """_summary_
+        """Read from a device / device group.
 
         Args:
             wait_group (str): Wait group.
@@ -234,6 +234,15 @@ class ScanStubs:
             device=device,
             action="read",
             parameter=parameter,
+            metadata=metadata,
+        )
+
+    def publish_data_as_read(self, *, device: str, data: dict, pointID: int):
+        metadata = {"pointID": pointID}
+        yield self._device_msg(
+            device=device,
+            action="publish_data_as_read",
+            parameter={"data": data},
             metadata=metadata,
         )
 
