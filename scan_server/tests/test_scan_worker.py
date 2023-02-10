@@ -801,6 +801,107 @@ def test_kickoff_devices(instr, devices, parameter, metadata):
         )
 
 
+@pytest.mark.parametrize(
+    "instr, devices",
+    [
+        (
+            BECMessage.DeviceInstructionMessage(
+                device=["samx"],
+                action="trigger",
+                parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
+                metadata={
+                    "stream": "primary",
+                    "DIID": 3,
+                    "scanID": "scanID",
+                    "RID": "requestID",
+                },
+            ),
+            None,
+        ),
+    ],
+)
+def test_publish_readback(instr, devices):
+    worker = get_scan_worker()
+    with mock.patch.object(worker, "_get_readback", return_value=[{}]) as get_readback:
+        with mock.patch.object(worker.device_manager, "producer") as producer_mock:
+            worker._publish_readback(instr)
+
+            get_readback.assert_called_once_with(["samx"])
+            pipe = producer_mock.pipeline()
+            msg = BECMessage.DeviceMessage(
+                signals={},
+                metadata=instr.metadata,
+            ).dumps()
+
+            producer_mock.set_and_publish.assert_called_once_with(
+                MessageEndpoints.device_read("samx"), msg, pipe
+            )
+            pipe.execute.assert_called_once()
+
+
+def test_get_readback():
+    worker = get_scan_worker()
+    devices = ["samx"]
+    with mock.patch.object(worker.device_manager, "producer") as producer_mock:
+        worker._get_readback(devices)
+        pipe = producer_mock.pipeline()
+        producer_mock.get.assert_called_once_with(
+            MessageEndpoints.device_readback("samx"), pipe=pipe
+        )
+        pipe.execute.assert_called_once()
+
+
+def test_publish_data_as_read():
+    worker = get_scan_worker()
+    instr = BECMessage.DeviceInstructionMessage(
+        device=["samx"],
+        action="publish_data_as_read",
+        parameter={"data": {}},
+        metadata={
+            "stream": "primary",
+            "DIID": 3,
+            "scanID": "scanID",
+            "RID": "requestID",
+        },
+    )
+    with mock.patch.object(worker.device_manager, "producer") as producer_mock:
+        worker._publish_data_as_read(instr)
+        msg = BECMessage.DeviceMessage(
+            signals=instr.content["parameter"]["data"],
+            metadata=instr.metadata,
+        ).dumps()
+        producer_mock.set_and_publish.assert_called_once_with(
+            MessageEndpoints.device_read("samx"), msg
+        )
+
+
+def test_publish_data_as_read_multiple():
+    worker = get_scan_worker()
+    data = [{"samx": {}}, {"samy": {}}]
+    devices = ["samx", "samy"]
+    instr = BECMessage.DeviceInstructionMessage(
+        device=devices,
+        action="publish_data_as_read",
+        parameter={"data": data},
+        metadata={
+            "stream": "primary",
+            "DIID": 3,
+            "scanID": "scanID",
+            "RID": "requestID",
+        },
+    )
+    with mock.patch.object(worker.device_manager, "producer") as producer_mock:
+        worker._publish_data_as_read(instr)
+        mock_calls = []
+        for device, dev_data in zip(devices, data):
+            msg = BECMessage.DeviceMessage(
+                signals=dev_data,
+                metadata=instr.metadata,
+            ).dumps()
+            mock_calls.append(mock.call(MessageEndpoints.device_read(device), msg))
+        assert producer_mock.set_and_publish.mock_calls == mock_calls
+
+
 def test_check_for_interruption():
     worker = get_scan_worker()
     worker.status = InstructionQueueStatus.STOPPED
@@ -1230,6 +1331,18 @@ def test_process_instructions(abortion):
         (
             BECMessage.DeviceInstructionMessage(device=None, action="close_scan_def", parameter={}),
             "_close_scan",
+        ),
+        (
+            BECMessage.DeviceInstructionMessage(
+                device=None, action="publish_data_as_read", parameter={}
+            ),
+            "_publish_data_as_read",
+        ),
+        (
+            BECMessage.DeviceInstructionMessage(
+                device=None, action="scan_report_instruction", parameter={}
+            ),
+            "_process_scan_report_instruction",
         ),
     ],
 )

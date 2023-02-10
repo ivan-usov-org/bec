@@ -342,18 +342,24 @@ class ScanWorker(threading.Thread):
         return pipe.execute()
 
     def _get_readback(self, devices: list) -> list:
+        producer = self.device_manager.producer
         # cached readout
-        pipe = self.device_manager.producer.pipeline()
+        pipe = producer.pipeline()
         for dev in devices:
-            self.device_manager.get(MessageEndpoints.device_readback(dev), pipe=pipe)
+            producer.get(MessageEndpoints.device_readback(dev), pipe=pipe)
         return pipe.execute()
 
     def _publish_data_as_read(self, instr: DeviceMsg):
         producer = self.device_manager.producer
         data = instr.content["parameter"]["data"]
-        device = instr.content["device"]
-        msg = BECMessage.DeviceMessage(signals=data, metadata=instr.metadata).dumps()
-        producer.set_and_publish(MessageEndpoints.device_read(device), msg)
+        devices = instr.content["device"]
+        if not isinstance(devices, list):
+            devices = [devices]
+        if not isinstance(data, list):
+            data = [data]
+        for device, dev_data in zip(devices, data):
+            msg = BECMessage.DeviceMessage(signals=dev_data, metadata=instr.metadata).dumps()
+            producer.set_and_publish(MessageEndpoints.device_read(device), msg)
 
     def _kickoff_devices(self, instr: DeviceMsg) -> None:
         self.device_manager.producer.send(
@@ -428,6 +434,10 @@ class ScanWorker(threading.Thread):
         self.current_scan_info["scan_msgs"] = [
             str(scan_msg) for scan_msg in self.current_instruction_queue_item.scan_msgs
         ]
+
+    def _process_scan_report_instruction(self, instr):
+        self.scan_report_instructions.append(instr.content["parameter"])
+        self.current_instruction_queue_item.parent.queue_manager.send_queue_status()
 
     def _close_scan(self, instr: DeviceMsg, max_point_id: int) -> None:
         scan_id = instr.metadata.get("scanID")
@@ -585,8 +595,8 @@ class ScanWorker(threading.Thread):
         elif action == "publish_data_as_read":
             self._publish_data_as_read(instr)
         elif action == "scan_report_instruction":
-            self.scan_report_instructions.append(instr.content["parameter"])
-            self.current_instruction_queue_item.parent.queue_manager.send_queue_status()
+            self._process_scan_report_instruction(instr)
+
         else:
             logger.warning(f"Unknown device instruction: {instr}")
 
