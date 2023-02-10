@@ -97,9 +97,9 @@ class ScanWorker(threading.Thread):
             raise DeviceMessageError("Device message metadata does not contain a DIID entry.")
 
         if wait_group in self._groups:
-            self._groups[wait_group].extend([(dev.name, DIID) for dev in devices])
+            self._groups[wait_group].update({dev.name: DIID for dev in devices})
         else:
-            self._groups[wait_group] = [(dev.name, DIID) for dev in devices]
+            self._groups[wait_group] = {dev.name: DIID for dev in devices}
 
     def _wait_for_devices(self, instr: DeviceMsg) -> None:
         wait_type = instr.content["parameter"].get("type")
@@ -156,7 +156,11 @@ class ScanWorker(threading.Thread):
             return
 
         group_devices = [dev.name for dev in self._get_devices_from_instruction(instr)]
-        wait_group_devices = [dev for dev in self._groups[wait_group] if dev[0] in group_devices]
+        wait_group_devices = [
+            (dev_name, DIID)
+            for dev_name, DIID in self._groups[wait_group].items()
+            if dev_name in group_devices
+        ]
 
         logger.debug(f"Waiting for devices: {wait_group}")
 
@@ -193,9 +197,9 @@ class ScanWorker(threading.Thread):
             if not devices_moved_successfully:
                 self._check_for_failed_movements(device_status, wait_group_devices, instr)
 
-        self._groups[wait_group] = [
-            dev for dev in self._groups[wait_group] if dev not in wait_group_devices
-        ]
+        self._groups[wait_group] = {
+            dev: DIID for dev, DIID in self._groups[wait_group].items() if dev not in group_devices
+        }
         logger.debug("Finished waiting")
         logger.debug(datetime.datetime.now() - start)
 
@@ -208,7 +212,11 @@ class ScanWorker(threading.Thread):
             return
 
         group_devices = [dev.name for dev in self._get_devices_from_instruction(instr)]
-        wait_group_devices = [dev for dev in self._groups[wait_group] if dev[0] in group_devices]
+        wait_group_devices = [
+            (dev_name, DIID)
+            for dev_name, DIID in self._groups[wait_group].items()
+            if dev_name in group_devices
+        ]
 
         logger.debug(f"Waiting for devices: {wait_group}")
 
@@ -236,9 +244,9 @@ class ScanWorker(threading.Thread):
                 break
             # time.sleep(1e-4)
 
-        self._groups[wait_group] = [
-            dev for dev in self._groups[wait_group] if dev not in wait_group_devices
-        ]
+        self._groups[wait_group] = {
+            dev: DIID for dev, DIID in self._groups[wait_group].items() if dev not in group_devices
+        }
         logger.debug("Finished waiting")
         logger.debug(datetime.datetime.now() - start)
 
@@ -294,12 +302,18 @@ class ScanWorker(threading.Thread):
         self.device_manager.producer.send(MessageEndpoints.device_instructions(), instr.dumps())
 
     def _read_devices(self, instr: DeviceMsg) -> None:
+        if instr.metadata.get("cached"):
+            self._publish_readback(instr)
+            return
+
+        producer = self.device_manager.producer
+
         devices = instr.content.get("device")
         if devices is None:
             devices = [
                 dev.name for dev in self.device_manager.devices.primary_devices(self.scan_motors)
             ]
-        self.device_manager.producer.send(
+        producer.send(
             MessageEndpoints.device_instructions(),
             DeviceMsg(
                 device=devices,
@@ -308,6 +322,38 @@ class ScanWorker(threading.Thread):
                 metadata=instr.metadata,
             ).dumps(),
         )
+        return
+
+    def _publish_readback(self, instr: DeviceMsg, devices: list = None) -> None:
+        producer = self.device_manager.producer
+        if not devices:
+            devices = instr.content.get("device")
+
+        # cached readout
+        readouts = self._get_readback(devices)
+        pipe = producer.pipeline()
+        for readout, device in zip(readouts, devices):
+            msg = BECMessage.DeviceMessage(signals=readout, metadata=instr.metadata).dumps()
+            producer.set_and_publish(
+                MessageEndpoints.device_read(device),
+                msg,
+                pipe,
+            )
+        return pipe.execute()
+
+    def _get_readback(self, devices: list) -> list:
+        # cached readout
+        pipe = self.device_manager.producer.pipeline()
+        for dev in devices:
+            self.device_manager.get(MessageEndpoints.device_readback(dev), pipe=pipe)
+        return pipe.execute()
+
+    def _publish_data_as_read(self, instr: DeviceMsg):
+        producer = self.device_manager.producer
+        data = instr.content["parameter"]["data"]
+        device = instr.content["device"]
+        msg = BECMessage.DeviceMessage(signals=data, metadata=instr.metadata).dumps()
+        producer.set_and_publish(MessageEndpoints.device_read(device), msg)
 
     def _kickoff_devices(self, instr: DeviceMsg) -> None:
         self.device_manager.producer.send(
@@ -536,6 +582,8 @@ class ScanWorker(threading.Thread):
             self._stage_devices(instr)
         elif action == "unstage":
             self._unstage_devices(instr)
+        elif action == "publish_data_as_read":
+            self._publish_data_as_read(instr)
         elif action == "scan_report_instruction":
             self.scan_report_instructions.append(instr.content["parameter"])
             self.current_instruction_queue_item.parent.queue_manager.send_queue_status()
