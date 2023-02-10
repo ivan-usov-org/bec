@@ -1,22 +1,22 @@
+import time
 import uuid
 from unittest import mock
 
 import pytest
-from bec_utils import BECMessage, MessageEndpoints, DeviceStatus
-from scan_server.errors import ScanAbortion, DeviceMessageError
-from scan_server.scan_assembler import ScanAssembler
-from scan_server.scan_worker import DeviceMsg, ScanWorker
-
+from bec_utils import BECMessage, DeviceStatus, MessageEndpoints
 from utils import load_ScanServerMock
-import time
+
+from scan_server.errors import DeviceMessageError, ScanAbortion
+from scan_server.scan_assembler import ScanAssembler
 from scan_server.scan_queue import (
-    InstructionQueueStatus,
     InstructionQueueItem,
+    InstructionQueueStatus,
     QueueManager,
     RequestBlock,
     RequestBlockQueue,
     ScanQueue,
 )
+from scan_server.scan_worker import DeviceMsg, ScanWorker
 
 
 def get_scan_worker() -> ScanWorker:
@@ -185,16 +185,35 @@ def test_add_wait_group(instructions):
     worker = get_scan_worker()
     if instructions.metadata["DIID"]:
         worker._add_wait_group(instructions)
-        assert worker._groups == {"scan_motor": [("samx", 3)]}
+        assert worker._groups == {"scan_motor": {"samx": 3}}
 
-        worker._groups["scan_motor"] = [("samy", 2)]
+        worker._groups["scan_motor"] = {"samy": 2}
         worker._add_wait_group(instructions)
-        assert worker._groups == {"scan_motor": [("samy", 2), ("samx", 3)]}
+        assert worker._groups == {"scan_motor": {"samy": 2, "samx": 3}}
 
     else:
         with pytest.raises(DeviceMessageError) as exc_info:
             worker._add_wait_group(instructions)
         assert exc_info.value.args[0] == "Device message metadata does not contain a DIID entry."
+
+
+def test_add_wait_group_to_existing_wait_group():
+    instr1 = BECMessage.DeviceInstructionMessage(
+        device="samx",
+        action="set",
+        parameter={"value": 10, "wait_group": "scan_motor"},
+        metadata={"stream": "primary", "DIID": 3},
+    )
+    instr2 = BECMessage.DeviceInstructionMessage(
+        device="samx",
+        action="set",
+        parameter={"value": 10, "wait_group": "scan_motor"},
+        metadata={"stream": "primary", "DIID": 4},
+    )
+    worker = get_scan_worker()
+    worker._add_wait_group(instr1)
+    worker._add_wait_group(instr2)
+    assert worker._groups == {"scan_motor": {"samx": 4}}
 
 
 @pytest.mark.parametrize(
@@ -540,13 +559,13 @@ def test_wait_for_read(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
     ) as device_status:
         with mock.patch.object(worker, "_check_for_interruption") as interruption_mock:
             assert worker._groups == {}
-            worker._groups["scan_motor"] = [("samx", 3), "samy"]
+            worker._groups["scan_motor"] = {"samx": 3, "samy": 4}
             worker.device_manager.producer._get_buffer[
                 MessageEndpoints.device_readback("samx")
             ] = BECMessage.DeviceMessage(signals={"samx": {"value": 4}}, metadata={}).dumps()
             worker._add_wait_group(msg1)
             worker._wait_for_read(msg2)
-            assert worker._groups == {"scan_motor": ["samy"]}
+            assert worker._groups == {"scan_motor": {"samy": 4}}
             interruption_mock.assert_called_once()
 
 
@@ -780,6 +799,107 @@ def test_kickoff_devices(instr, devices, parameter, metadata):
                 metadata=metadata,
             ).dumps(),
         )
+
+
+@pytest.mark.parametrize(
+    "instr, devices",
+    [
+        (
+            BECMessage.DeviceInstructionMessage(
+                device=["samx"],
+                action="trigger",
+                parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
+                metadata={
+                    "stream": "primary",
+                    "DIID": 3,
+                    "scanID": "scanID",
+                    "RID": "requestID",
+                },
+            ),
+            None,
+        ),
+    ],
+)
+def test_publish_readback(instr, devices):
+    worker = get_scan_worker()
+    with mock.patch.object(worker, "_get_readback", return_value=[{}]) as get_readback:
+        with mock.patch.object(worker.device_manager, "producer") as producer_mock:
+            worker._publish_readback(instr)
+
+            get_readback.assert_called_once_with(["samx"])
+            pipe = producer_mock.pipeline()
+            msg = BECMessage.DeviceMessage(
+                signals={},
+                metadata=instr.metadata,
+            ).dumps()
+
+            producer_mock.set_and_publish.assert_called_once_with(
+                MessageEndpoints.device_read("samx"), msg, pipe
+            )
+            pipe.execute.assert_called_once()
+
+
+def test_get_readback():
+    worker = get_scan_worker()
+    devices = ["samx"]
+    with mock.patch.object(worker.device_manager, "producer") as producer_mock:
+        worker._get_readback(devices)
+        pipe = producer_mock.pipeline()
+        producer_mock.get.assert_called_once_with(
+            MessageEndpoints.device_readback("samx"), pipe=pipe
+        )
+        pipe.execute.assert_called_once()
+
+
+def test_publish_data_as_read():
+    worker = get_scan_worker()
+    instr = BECMessage.DeviceInstructionMessage(
+        device=["samx"],
+        action="publish_data_as_read",
+        parameter={"data": {}},
+        metadata={
+            "stream": "primary",
+            "DIID": 3,
+            "scanID": "scanID",
+            "RID": "requestID",
+        },
+    )
+    with mock.patch.object(worker.device_manager, "producer") as producer_mock:
+        worker._publish_data_as_read(instr)
+        msg = BECMessage.DeviceMessage(
+            signals=instr.content["parameter"]["data"],
+            metadata=instr.metadata,
+        ).dumps()
+        producer_mock.set_and_publish.assert_called_once_with(
+            MessageEndpoints.device_read("samx"), msg
+        )
+
+
+def test_publish_data_as_read_multiple():
+    worker = get_scan_worker()
+    data = [{"samx": {}}, {"samy": {}}]
+    devices = ["samx", "samy"]
+    instr = BECMessage.DeviceInstructionMessage(
+        device=devices,
+        action="publish_data_as_read",
+        parameter={"data": data},
+        metadata={
+            "stream": "primary",
+            "DIID": 3,
+            "scanID": "scanID",
+            "RID": "requestID",
+        },
+    )
+    with mock.patch.object(worker.device_manager, "producer") as producer_mock:
+        worker._publish_data_as_read(instr)
+        mock_calls = []
+        for device, dev_data in zip(devices, data):
+            msg = BECMessage.DeviceMessage(
+                signals=dev_data,
+                metadata=instr.metadata,
+            ).dumps()
+            mock_calls.append(mock.call(MessageEndpoints.device_read(device), msg))
+        assert producer_mock.set_and_publish.mock_calls == mock_calls
 
 
 def test_check_for_interruption():
@@ -1211,6 +1331,18 @@ def test_process_instructions(abortion):
         (
             BECMessage.DeviceInstructionMessage(device=None, action="close_scan_def", parameter={}),
             "_close_scan",
+        ),
+        (
+            BECMessage.DeviceInstructionMessage(
+                device=None, action="publish_data_as_read", parameter={}
+            ),
+            "_publish_data_as_read",
+        ),
+        (
+            BECMessage.DeviceInstructionMessage(
+                device=None, action="scan_report_instruction", parameter={}
+            ),
+            "_process_scan_report_instruction",
         ),
     ],
 )

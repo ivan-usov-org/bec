@@ -2,6 +2,7 @@ import ast
 import enum
 import time
 from abc import ABC, abstractmethod
+from typing import List, Tuple
 
 import numpy as np
 from bec_utils import BECMessage, DeviceManagerBase, MessageEndpoints, bec_logger
@@ -959,6 +960,72 @@ class TimeScan(ScanBase):
     def scan_core(self):
         for ind in range(self.num_pos):
             yield from self._at_each_point(ind)
+
+
+class MonitorScan(ScanBase):
+    scan_name = "monitor_scan"
+    scan_report_hint = "table"
+    required_kwargs = ["relative"]
+    arg_input = [ScanArgType.DEVICE, ScanArgType.FLOAT, ScanArgType.FLOAT]
+    arg_bundle_size = len(arg_input)
+    scan_type = "fly"
+
+    def __init__(self, *args, parameter=None, **kwargs):
+        """
+        Readout all primary devices at each update of the monitored device.
+
+        Args:
+            device:
+            start position:
+            end position:
+
+        Returns:
+
+        Examples:
+            >>> scans.cont_line_scan(dev.motor1, -5, 5, steps=10, exp_time=0.1, relative=True)
+
+        """
+        super().__init__(parameter=parameter, **kwargs)
+        self.axis = []
+
+    def _calculate_positions(self) -> None:
+        self.positions = np.vstack(self.caller_args.values()).T.tolist()
+
+    def _get_flyer_status(self) -> List:
+        flyer = self.scan_motors[0]
+        producer = self.device_manager.producer
+
+        pipe = producer.pipeline()
+        producer.lrange(MessageEndpoints.device_req_status(self.metadata["RID"]), 0, -1, pipe)
+        producer.get(MessageEndpoints.device_readback(flyer), pipe)
+        return pipe.execute()
+
+    def scan_core(self):
+        flyer = self.scan_motors[0]
+
+        yield from self._move_and_wait(self.positions[0][0])
+
+        # send the slow motor on its way
+        yield from self.stubs.set(
+            device=flyer,
+            value=self.positions[1][0],
+            wait_group="scan_motor",
+            metadata={"response": True},
+        )
+
+        while True:
+            move_completed, readback = self._get_flyer_status()
+
+            if move_completed:
+                break
+
+            if not readback:
+                continue
+            readback = BECMessage.DeviceMessage.loads(readback).content["signals"]
+            yield from self.stubs.publish_data_as_read(
+                device=flyer, data=readback, pointID=self.pointID
+            )
+            self.pointID += 1
 
 
 class Acquire(ScanBase):
