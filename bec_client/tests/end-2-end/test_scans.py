@@ -617,5 +617,6 @@ def test_monitor_scan(client):
     scans = bec.scans
     dev = bec.device_manager.devices
     dev.samx.limits = [-1100, 1100]
+    time.sleep(5)
     status = scans.monitor_scan(dev.samx, -100, 100, relative=False)
     assert len(status.scan.data) > 100
