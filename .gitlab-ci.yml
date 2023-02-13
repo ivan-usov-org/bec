@@ -70,7 +70,7 @@ tests-3.9:
     - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
     - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices
     - pip install pytest pytest-random-order pytest-cov pytest-asyncio
-    - apk update; apk upgrade; apk add gcc
+    - apt-get install -y gcc
     - *install-bec-services    
     - pytest -v --junitxml=report.xml --random-order ./bec_utils/tests ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests ./file_writer/tests
 
@@ -146,6 +146,7 @@ pages:
     - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
     - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices    
     - pip install -r ./docs/source/requirements.txt
+    - apt-get install -y gcc
     - *install-bec-services    
     - cd ./docs/source; make html
     - curl -X POST -d "branches=$CI_COMMIT_REF_NAME" -d "token=$RTD_TOKEN" https://readthedocs.org/api/v2/webhook/beamline-experiment-control/221870/
