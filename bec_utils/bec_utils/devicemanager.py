@@ -163,11 +163,10 @@ class Device:
     @property
     def signals(self):
         """get the last signals from a device"""
-        if not self._signals:
-            val = self.parent.producer.get(MessageEndpoints.device_read(self.name))
-            if val is None:
-                return None
-            self._signals = msgpack.loads(val)["content"]["signals"]
+        val = self.parent.producer.get(MessageEndpoints.device_read(self.name))
+        if val is None:
+            return None
+        self._signals = msgpack.loads(val)["content"]["signals"]
         return self._signals
 
     @property

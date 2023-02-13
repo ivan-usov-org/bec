@@ -991,6 +991,12 @@ class MonitorScan(ScanBase):
     def _calculate_positions(self) -> None:
         self.positions = np.vstack(self.caller_args.values()).T.tolist()
 
+    def prepare_positions(self):
+        self._calculate_positions()
+        self.num_pos = 0
+        yield from self._set_position_offset()
+        self._check_limits()
+
     def _get_flyer_status(self) -> List:
         flyer = self.scan_motors[0]
         producer = self.device_manager.producer
