@@ -16,7 +16,6 @@ stages:
   - Deploy
 
 .install-bec-services: &install-bec-services
-RUN apt-get update -y && apt-get install -y gcc
     - pip install -e ./device_server
     - pip install -e ./scan_server
     - pip install -e ./scan_bundler
