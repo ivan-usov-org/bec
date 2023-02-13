@@ -463,3 +463,18 @@ class ObserverMessage(BECMessage):
 
         self.content = {"observer": observer}
         super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+
+
+class ServiceMetricMessage(BECMessage):
+    msg_type = "service_metric_message"
+
+    def __init__(self, *, name: str, metrics: dict, metadata: dict = None) -> None:
+        """
+
+        Args:
+            observer: list of observer descriptions
+            metadata: status metadata
+        """
+
+        self.content = {"name": name, "metrics": metrics}
+        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
