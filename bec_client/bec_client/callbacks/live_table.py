@@ -150,6 +150,8 @@ class LiveUpdatesTable(LiveUpdatesBase):
                 self.point_data = self.scan_item.data.get(self.point_id)
                 if self.scan_item.num_points:
                     progressbar.max_points = self.scan_item.num_points
+                    if target_num_points == 0:
+                        target_num_points = self.scan_item.num_points
 
                 progressbar.update(self.point_id)
                 if self.point_data:
@@ -162,7 +164,7 @@ class LiveUpdatesTable(LiveUpdatesBase):
                     if self.point_id % 100 == 0:
                         print(self.table.get_header_lines())
                     for ind, dev in enumerate(self.devices):
-                        signal = self.point_data.content["data"][dev].get(dev)
+                        signal = self.point_data.content["data"].get(dev, {}).get(dev)
                         self.dev_values[ind] = signal.get("value") if signal else -999
                     print(self.table.get_row(self.point_id, *self.dev_values))
                     progressbar.update(self.point_id)

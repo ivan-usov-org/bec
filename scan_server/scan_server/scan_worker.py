@@ -445,7 +445,10 @@ class ScanWorker(threading.Thread):
             self.scan_id = None
 
             # flyers do not increase the point_id but instead set the num_points directly
-            if self.current_scan_info.get("scan_type") != "fly":
+            if (
+                self.current_scan_info.get("scan_type") != "fly"
+                or self.current_scan_info["num_points"] == 0
+            ):
                 # point_id starts at 0
                 self.current_scan_info["num_points"] = max_point_id + 1
             self._send_scan_status("closed")
