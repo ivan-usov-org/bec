@@ -650,6 +650,26 @@ def test_update_monitor_signals():
         "devices": sb.device_manager.devices.primary_devices([]),
         "pointID": {},
     }
-    sb.device_storage["bpm3a"] = {"value": 400}
-    sb._update_monitor_signals(scanID, pointID)
-    assert sb.sync_storage[scanID][pointID]["bpm3a"] == sb.device_storage["bpm3a"]
+    num_devices = len(sb.device_manager.devices.primary_devices([]))
+    with mock.patch.object(
+        sb,
+        "_get_last_device_readback",
+        return_value=[{"value": 400} for _ in range(num_devices)],
+    ):
+        sb._update_monitor_signals(scanID, pointID)
+        assert sb.sync_storage[scanID][pointID]["bpm3a"] == {"value": 400}
+
+
+def test_get_last_device_readback():
+    sb = load_ScanBundlerMock()
+    dev_msg = BECMessage.DeviceMessage(
+        signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
+        metadata={"scanID": "laksjd", "stream": "primary"},
+    )
+    with mock.patch.object(sb, "producer") as producer_mock:
+        producer_mock.pipeline().execute.return_value = [dev_msg.dumps()]
+        ret = sb._get_last_device_readback([sb.device_manager.devices.samx])
+        assert producer_mock.get.mock_calls == [
+            mock.call(MessageEndpoints.device_readback("samx"), producer_mock.pipeline())
+        ]
+        assert ret == [dev_msg.content["signals"]]

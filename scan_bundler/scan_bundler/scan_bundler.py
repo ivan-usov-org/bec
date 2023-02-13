@@ -304,13 +304,19 @@ class ScanBundler(BECService):
         if self.sync_storage[scanID]["info"]["scan_type"] == "fly":
             # for fly scans, take all primary and monitor signals
             devices = self.primary_devices[scanID]["devices"]
-            pipe = self.producer.pipeline()
-            for dev in devices:
-                self.producer.get(MessageEndpoints.device_readback(dev.name), pipe)
-            readings = pipe.execute()
+
+            readings = self._get_last_device_readback(devices)
+
             for read, dev in zip(readings, devices):
-                read = BECMessage.DeviceMessage.loads(read)
-                self.sync_storage[scanID][pointID][dev.name] = read.content["signals"]
+                self.sync_storage[scanID][pointID][dev.name] = read
+
+    def _get_last_device_readback(self, devices: list) -> list:
+        pipe = self.producer.pipeline()
+        for dev in devices:
+            self.producer.get(MessageEndpoints.device_readback(dev.name), pipe)
+        read_raw = pipe.execute()
+
+        return [BECMessage.DeviceMessage.loads(read).content["signals"] for read in read_raw]
 
     def cleanup_storage(self):
         """remove old scanIDs to free memory"""
