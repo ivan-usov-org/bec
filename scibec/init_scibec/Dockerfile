@@ -8,7 +8,7 @@ WORKDIR /code
 COPY ./scibec/init_scibec ./bec/scibec/init_scibec
 COPY ./bec_utils ./bec/bec_utils/
 
-RUN apt-get update -y && apt-get install -y gcc
+RUN apk update && apk add python3-dev gcc libc-dev
 RUN pip install -e ./bec/bec_utils/
 WORKDIR /code/bec/scibec/init_scibec
 
