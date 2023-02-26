@@ -68,6 +68,9 @@ repo_update:
 
       - git status -uno
       - git add ./scibec/openapi_schema.json
+
+      # exit if there are no changes
+      - if [[ -z $(git status -uno --porcelain) ]]; then exit 0; fi
       - git commit -m 'ci update'
       - echo ${CI_COMMIT_REF_NAME}
       - git push -o ci.skip https://oauth2:$CI_UPDATES@gitlab.psi.ch/bec/bec.git ${CI_COMMIT_REF_NAME}
