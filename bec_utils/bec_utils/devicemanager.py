@@ -14,7 +14,6 @@ from bec_utils.connector import ConnectorBase
 from .BECMessage import BECStatus, DeviceConfigMessage, LogMessage, RequestResponseMessage
 from .endpoints import MessageEndpoints
 from .logger import bec_logger
-from .scibec import SciBec
 
 logger = bec_logger.logger
 
@@ -427,17 +426,12 @@ class DeviceManagerBase:
 
     _connector_base_consumer = {}
     producer = None
-    _scibec = SciBec()
     _device_cls = Device
     _status_cb = []
 
-    def __init__(
-        self, connector: ConnectorBase, scibec_url: str = None, status_cb: list = None
-    ) -> None:
+    def __init__(self, connector: ConnectorBase, status_cb: list = None) -> None:
         self.connector = connector
         self._status_cb = status_cb if isinstance(status_cb, list) else [status_cb]
-        if scibec_url is not None:
-            self._scibec.url = scibec_url
 
     def initialize(self, bootstrap_server) -> None:
         """
@@ -449,16 +443,11 @@ class DeviceManagerBase:
 
         """
         self._start_connectors(bootstrap_server)
-        self._get_config_from_DB()
+        self._get_config()
 
     def update_status(self, status: BECStatus):
         for cb in self._status_cb:
             cb(status)
-
-    @property
-    def scibec(self):
-        """SciBec instance"""
-        return self._scibec
 
     def send_config_request(self, action: str = "update", config=None) -> None:
         """
@@ -528,7 +517,7 @@ class DeviceManagerBase:
         elif action == "reload":
             logger.info("Reloading config.")
             self.devices.flush()
-            self._get_config_from_DB()
+            self._get_config()
         elif action == "remove":
             for dev in config:
                 self._remove_device(dev)
@@ -547,14 +536,14 @@ class DeviceManagerBase:
         # self._connector_base_consumer["log"] = self.connector.consumer(
         #     MessageEndpoints.log(), cb=self._log_callback, parent=self
         # )
-        self._connector_base_consumer["device_config"] = self.connector.consumer(
-            MessageEndpoints.device_config(),
-            cb=self._device_config_callback,
+        self._connector_base_consumer["device_config_update"] = self.connector.consumer(
+            MessageEndpoints.device_config_update(),
+            cb=self._device_config_update_callback,
             parent=self,
         )
 
         # self._connector_base_consumer["log"].start()
-        self._connector_base_consumer["device_config"].start()
+        self._connector_base_consumer["device_config_update"].start()
 
     @staticmethod
     def _log_callback(msg, *, parent, **kwargs) -> None:
@@ -572,7 +561,7 @@ class DeviceManagerBase:
         logger.info(f"Received log message: {str(msg)}")
 
     @staticmethod
-    def _device_config_callback(msg, *, parent, **kwargs) -> None:
+    def _device_config_update_callback(msg, *, parent, **kwargs) -> None:
         """
         Consumer callback for handling new device configuration
         Args:
@@ -586,27 +575,20 @@ class DeviceManagerBase:
         logger.info(f"Received new config: {str(msg)}")
         parent.parse_config_message(msg)
 
-    def _get_config_from_DB(self):
-        beamlines = self._scibec.get_beamlines()
-        if not beamlines:
+    def _get_config(self):
+        self._session["devices"] = self._get_redis_device_config()
+        if not self._session["devices"]:
             logger.warning("No config available.")
-            return
-        if len(beamlines) > 1:
-            logger.warning("More than one beamline available.")
-        beamline = beamlines[0]
-
-        session = self._scibec.get_current_session(beamline["name"], include_devices=True)
-        if not session:
-            logger.warning(f"No config available for beamline {beamline['name']}.")
-            return
-        if not session.get("devices"):
-            logger.warning(f"The currently active config has no devices specified.")
-            return
-        self._session = session
-        logger.debug(
-            f"Loaded session from DB: {json.dumps(self._session, sort_keys=True, indent=4)}"
-        )
         self._load_session()
+
+    def _set_redis_device_config(self, devices: list) -> None:
+        self.producer.set(MessageEndpoints.device_config(), msgpack.dumps(devices))
+
+    def _get_redis_device_config(self) -> list:
+        devices = self.producer.get(MessageEndpoints.device_config())
+        if not devices:
+            return []
+        return msgpack.loads(devices)
 
     def _stop_base_consumer(self):
         """
@@ -658,11 +640,12 @@ class DeviceManagerBase:
 
     def _load_session(self, *args, device_cls=Device):
         self._device_cls = device_cls
-        if self._is_config_valid():
-            for dev in self._session["devices"]:
-                obj = self._create_device(dev, args)
-                # pylint: disable=protected-access
-                self.devices._add_device(dev.get("name"), obj)
+        if not self._is_config_valid():
+            return
+        for dev in self._session["devices"]:
+            obj = self._create_device(dev, args)
+            # pylint: disable=protected-access
+            self.devices._add_device(dev.get("name"), obj)
 
     def check_request_validity(self, msg: DeviceConfigMessage) -> None:
         if msg.content["action"] not in ["update", "add", "remove", "reload"]:

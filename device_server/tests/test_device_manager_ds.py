@@ -84,7 +84,7 @@ def test_conntect_device(device_manager, obj, raises_error):
 
 def test_disable_unreachable_devices():
     connector = ConnectorMock("")
-    device_manager = DeviceManagerDS(connector, "")
+    device_manager = DeviceManagerDS(connector)
 
     def get_config_from_mock():
         with open(f"{dir_path}/tests/test_config.yaml", "r") as session_file:
@@ -98,7 +98,7 @@ def test_disable_unreachable_devices():
     config_reply = BECMessage.RequestResponseMessage(accepted=True, message="")
 
     with mock.patch.object(device_manager, "connect_device", wraps=mocked_failed_connection):
-        with mock.patch.object(device_manager, "_get_config_from_DB", get_config_from_mock):
+        with mock.patch.object(device_manager, "_get_config", get_config_from_mock):
             with mock.patch.object(
                 device_manager,
                 "wait_for_config_reply",

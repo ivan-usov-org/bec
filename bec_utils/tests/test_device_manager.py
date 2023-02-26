@@ -16,7 +16,7 @@ dir_path = os.path.dirname(bec_utils.__file__)
 def test_dm_initialize():
     connector = ConnectorMock("")
     dm = DeviceManagerBase(connector, "")
-    with mock.patch.object(dm, "_get_config_from_DB") as get_config:
+    with mock.patch.object(dm, "_get_config") as get_config:
         dm.initialize("")
         get_config.assert_called_once()
 
@@ -63,7 +63,7 @@ def test_config_request_reload():
     dm._load_session()
 
     msg = BECMessage.DeviceConfigMessage(action="reload", config=None)
-    with mock.patch.object(dm, "_get_config_from_DB") as get_config:
+    with mock.patch.object(dm, "_get_config") as get_config:
         dm.parse_config_message(msg)
         assert len(dm.devices) == 0
         get_config.assert_called_once()
@@ -89,16 +89,16 @@ def test_check_request_validity(msg, raised):
         dm.check_request_validity(msg)
 
 
-def test_get_config_from_DB_no_beamline():
+def test_get_config_no_beamline():
     connector = ConnectorMock("")
     dm = DeviceManagerBase(connector, "")
     with mock.patch.object(dm._scibec, "get_beamlines", return_value=[]):
         with mock.patch.object(dm, "_load_session") as load_session:
-            dm._get_config_from_DB()
+            dm._get_config()
             load_session.assert_not_called()
 
 
-def test_get_config_from_DB_no_active_session():
+def test_get_config_no_active_session():
     connector = ConnectorMock("")
     dm = DeviceManagerBase(connector, "")
     with mock.patch.object(dm._scibec, "get_beamlines", return_value=[{"name": "test"}]):
@@ -106,12 +106,12 @@ def test_get_config_from_DB_no_active_session():
             dm._scibec, "get_current_session", return_value=None
         ) as current_session:
             with mock.patch.object(dm, "_load_session") as load_session:
-                dm._get_config_from_DB()
+                dm._get_config()
                 current_session.assert_called_once_with("test", include_devices=True)
                 load_session.assert_not_called()
 
 
-def test_get_config_from_DB_no_devices():
+def test_get_config_no_devices():
     connector = ConnectorMock("")
     dm = DeviceManagerBase(connector, "")
     with mock.patch.object(dm._scibec, "get_beamlines", return_value=[{"name": "test"}]):
@@ -119,12 +119,12 @@ def test_get_config_from_DB_no_devices():
             dm._scibec, "get_current_session", return_value={"devices": []}
         ) as current_session:
             with mock.patch.object(dm, "_load_session") as load_session:
-                dm._get_config_from_DB()
+                dm._get_config()
                 current_session.assert_called_once_with("test", include_devices=True)
                 load_session.assert_not_called()
 
 
-def test_get_config_from_DB_calls_load():
+def test_get_config_calls_load():
     connector = ConnectorMock("")
     dm = DeviceManagerBase(connector, "")
     with mock.patch.object(dm._scibec, "get_beamlines", return_value=[{"name": "test"}]):
@@ -132,9 +132,10 @@ def test_get_config_from_DB_calls_load():
             dm._scibec, "get_current_session", return_value={"devices": [{}]}
         ) as current_session:
             with mock.patch.object(dm, "_load_session") as load_session:
-                dm._get_config_from_DB()
-                current_session.assert_called_once_with("test", include_devices=True)
-                load_session.assert_called_once()
+                with mock.patch.object(dm, "producer") as producer:
+                    dm._get_config()
+                    current_session.assert_called_once_with("test", include_devices=True)
+                    load_session.assert_called_once()
 
 
 def test_get_devices_with_tags():

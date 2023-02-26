@@ -1,24 +1,32 @@
 from __future__ import annotations
 
+import os
 import traceback
 from typing import TYPE_CHECKING
 
+import bec_utils
+import msgpack
 from bec_utils import BECMessage as BMessage
 from bec_utils import BECStatus, DeviceConfigError, MessageEndpoints, bec_logger
+
+from .scibec_validator import SciBecValidator
 
 if TYPE_CHECKING:
     from devicemanager import DeviceManagerDS
 
 logger = bec_logger.logger
 
+dir_path = os.path.abspath(os.path.join(os.path.dirname(bec_utils.__file__), "../../scibec/"))
+
 
 class ConfigHandler:
     def __init__(self, device_manager: DeviceManagerDS) -> None:
         self.device_manager = device_manager
+        self.validator = SciBecValidator(os.path.join(dir_path, "openapi_schema.json"))
 
     def send_config(self, msg: BMessage.DeviceConfigMessage) -> None:
         """broadcast a new config"""
-        self.device_manager.producer.send(MessageEndpoints.device_config(), msg.dumps())
+        self.device_manager.producer.send(MessageEndpoints.device_config_update(), msg.dumps())
 
     def parse_config_request(self, msg: BMessage.DeviceConfigMessage) -> None:
         """Processes a config request. If successful, it emits a config reply
@@ -47,7 +55,7 @@ class ConfigHandler:
         self.send_config(msg)
         self.device_manager.update_status(BECStatus.BUSY)
         self.device_manager.devices.flush()
-        self.device_manager._get_config_from_DB()
+        self.device_manager._get_config()
         self.device_manager.update_status(BECStatus.RUNNING)
 
     def _update_config(self, msg: BMessage.DeviceConfigMessage):
@@ -55,63 +63,9 @@ class ConfigHandler:
         for dev in msg.content["config"]:
             dev_config = msg.content["config"][dev]
             device = self.device_manager.devices[dev]
-            if "deviceConfig" in dev_config:
-                # store old config
-                old_config = device._config["deviceConfig"].copy()
-
-                # apply config
-                try:
-                    self.device_manager.update_config(device.obj, dev_config["deviceConfig"])
-                except Exception as exc:
-                    self.device_manager.update_config(device.obj, old_config)
-                    raise DeviceConfigError(f"Error during object update. {exc}") from exc
-
-                device._config["deviceConfig"].update(dev_config["deviceConfig"])
-
-                # update config in DB
-                self.update_device_key_in_db(device_name=dev, key="deviceConfig")
-                updated = True
-
-            if "enabled" in dev_config:
-                device._config["enabled"] = dev_config["enabled"]
-
-                if device.enabled:
-                    # pylint:disable=protected-access
-                    if device.obj._destroyed:
-                        self.device_manager.initialize_device(device._config)
-                    else:
-                        self.device_manager.initialize_enabled_device(device)
-                else:
-                    self.device_manager.disconnect_device(device.obj)
-
-                # update device enabled status in DB
-                self.update_device_key_in_db(device_name=dev, key="enabled")
-                updated = True
-            if "enabled_set" in dev_config:
-                device._config["enabled_set"] = dev_config["enabled_set"]
-                # update device enabled status in DB
-                self.update_device_key_in_db(device_name=dev, key="enabled_set")
-                updated = True
-
-            if "userParameter" in dev_config:
-                device._config["userParameter"] = dev_config["userParameter"]
-                self.update_device_key_in_db(device_name=dev, key="userParameter")
-                updated = True
-
-            if "onFailure" in dev_config:
-                device._config["onFailure"] = dev_config["onFailure"]
-                self.update_device_key_in_db(device_name=dev, key="onFailure")
-                updated = True
-
-            if "deviceTags" in dev_config:
-                device._config["deviceTags"] = dev_config["deviceTags"]
-                self.update_device_key_in_db(device_name=dev, key="deviceTags")
-                updated = True
-
-            if "acquisitionConfig" in dev_config:
-                device._config["acquisitionConfig"] = dev_config["acquisitionConfig"]
-                self.update_device_key_in_db(device_name=dev, key="acquisitionConfig")
-                updated = True
+            updated = self._update_device_config(device, dev_config.copy())
+            if updated:
+                self.update_config_in_redis(device)
 
         # send updates to services
         if updated:
@@ -120,20 +74,71 @@ class ConfigHandler:
                 accepted=True, error_msg=None, metadata=msg.metadata
             )
 
-    def update_device_key_in_db(self, device_name: str, key: str) -> None:
-        """Update a device key in the DB with the local version
+    def _update_device_config(self, device, dev_config) -> bool:
+        if "deviceConfig" in dev_config:
+            # store old config
+            old_config = device._config["deviceConfig"].copy()
 
-        Args:
-            device_name (str): Name of the device that should be updated
-            key (str): Name of the config entry that should be updated
+            # apply config
+            try:
+                self.device_manager.update_config(device.obj, dev_config["deviceConfig"])
+            except Exception as exc:
+                self.device_manager.update_config(device.obj, old_config)
+                raise DeviceConfigError(f"Error during object update. {exc}") from exc
 
-        Raises:
-            DeviceConfigError: Raised if the db update fails.
-        """
-        logger.debug("updating in DB")
-        success = self.device_manager.scibec.patch_device_config(
-            self.device_manager.devices[device_name]._config["id"],
-            {key: self.device_manager.devices[device_name]._config[key]},
+            ref_config = device._config["deviceConfig"].copy()
+            ref_config.update(dev_config["deviceConfig"])
+            self._validate_update({"deviceConfig": ref_config})
+
+            device._config["deviceConfig"].update(dev_config["deviceConfig"])
+
+            updated = True
+            dev_config.pop("device_config")
+
+        if "enabled" in dev_config:
+            self._validate_update({"enabled": dev_config["enabled"]})
+            device._config["enabled"] = dev_config["enabled"]
+
+            if device.enabled:
+                # pylint:disable=protected-access
+                if device.obj._destroyed:
+                    self.device_manager.initialize_device(device._config)
+                else:
+                    self.device_manager.initialize_enabled_device(device)
+            else:
+                self.device_manager.disconnect_device(device.obj)
+
+            updated = True
+            dev_config.pop("enabled")
+
+        if not dev_config:
+            return updated
+
+        available_keys = [
+            "enabled_set",
+            "userParamter",
+            "onFailure",
+            "deviceTags",
+            "acquisitionConfig",
+        ]
+        for key in available_keys:
+            if key not in dev_config:
+                raise DeviceConfigError(f"Unknown update key {key}.")
+
+            self._validate_update({key: dev_config[key]})
+            device._config[key] = dev_config[key]
+            updated = True
+
+        return updated
+
+    def _validate_update(self, update):
+        self.validator.validate_device_patch(update)
+
+    def update_config_in_redis(self, device):
+        raw_msg = self.device_manager.producer.get(MessageEndpoints.device_config())
+        config = msgpack.loads(raw_msg)
+        index = next(
+            index for index, dev_conf in enumerate(config) if dev_conf["name"] == device.name
         )
-        if not success:
-            raise DeviceConfigError("Error during database update.")
+        config[index] = device._config
+        self.device_manager.producer.set(MessageEndpoints.device_config(), msgpack.dumps(config))

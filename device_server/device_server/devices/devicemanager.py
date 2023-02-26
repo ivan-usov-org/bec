@@ -13,10 +13,11 @@ from bec_utils import (
     bec_logger,
 )
 from bec_utils.connector import ConnectorBase
-from device_server.devices.config_handler import ConfigHandler
-from device_server.devices.device_serializer import get_device_info
 from ophyd.ophydobj import OphydObject
 from ophyd.signal import EpicsSignalBase
+
+from device_server.devices.config_handler import ConfigHandler
+from device_server.devices.device_serializer import get_device_info
 
 logger = bec_logger.logger
 
@@ -42,11 +43,10 @@ class DeviceManagerDS(DeviceManagerBase):
     def __init__(
         self,
         connector: ConnectorBase,
-        scibec_url: str,
         config_handler: ConfigHandler = None,
         status_cb: list = None,
     ):
-        super().__init__(connector, scibec_url, status_cb)
+        super().__init__(connector, status_cb)
         self._config_request_connector = None
         self._device_instructions_connector = None
         self._config_handler_cls = config_handler

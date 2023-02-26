@@ -45,11 +45,10 @@ class DeviceServer(BECService):
     This class is intended to provide a thin wrapper around ophyd and the devicemanager. It acts as the entry point for other services
     """
 
-    def __init__(self, bootstrap_server, connector_cls: ConnectorBase, scibec_url: str) -> None:
+    def __init__(self, bootstrap_server, connector_cls: ConnectorBase) -> None:
         super().__init__(bootstrap_server, connector_cls, unique_service=True)
         self._tasks = []
         self.device_manager = None
-        self.scibec_url = scibec_url
         self.threads = []
         self.sig_thread = None
         self.sig_thread = self.connector.consumer(
@@ -62,9 +61,7 @@ class DeviceServer(BECService):
         self._start_device_manager()
 
     def _start_device_manager(self):
-        self.device_manager = DeviceManagerDS(
-            self.connector, self.scibec_url, status_cb=self.update_status
-        )
+        self.device_manager = DeviceManagerDS(self.connector, status_cb=self.update_status)
         self.device_manager.initialize(self.bootstrap_server)
 
     def start(self) -> None:
