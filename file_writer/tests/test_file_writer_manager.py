@@ -5,6 +5,7 @@ import pytest
 import yaml
 from bec_utils import DeviceManagerBase
 from bec_utils.tests.utils import ConnectorMock, create_session_from_config
+
 from file_writer import FileWriterManager
 
 # pylint: disable=missing-function-docstring
@@ -26,6 +27,7 @@ def load_FileWriter():
 class FileWriterManagerMock(FileWriterManager):
     def __init__(self, device_manager, connector) -> None:
         self.device_manager = device_manager
+        config = ServiceConfig
         super().__init__(bootstrap_server="dummy", connector_cls=ConnectorMock, scibec_url="dummy")
 
     def _start_device_manager(self):

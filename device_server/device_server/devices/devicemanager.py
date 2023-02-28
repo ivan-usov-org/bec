@@ -280,31 +280,3 @@ class DeviceManagerDS(DeviceManagerBase):
             MessageEndpoints.device_status(kwargs["obj"].root.name),
             BECMessage.DeviceStatusMessage(device=device, status=status, metadata=metadata).dumps(),
         )
-
-    def _start_custom_connectors(self, bootstrap_server):
-        self._config_request_connector = self.connector.consumer(
-            MessageEndpoints.device_config_request(),
-            cb=self._device_config_request_callback,
-            parent=self,
-        )
-        self._config_request_connector.start()
-
-    def _stop_custom_consumer(self) -> None:
-        self._config_request_connector.signal_event.set()
-        self._config_request_connector.join()
-
-    def send_config_request_reply(self, accepted, error_msg, metadata):
-        """send a config request reply"""
-        msg = BECMessage.RequestResponseMessage(
-            accepted=accepted, message=error_msg, metadata=metadata
-        )
-        RID = metadata.get("RID")
-        self.producer.set(
-            MessageEndpoints.device_config_request_response(RID), msg.dumps(), expire=60
-        )
-
-    @staticmethod
-    def _device_config_request_callback(msg, *, parent, **_kwargs) -> None:
-        msg = BECMessage.DeviceConfigMessage.loads(msg.value)
-        logger.info(f"Received request: {msg}")
-        parent.config_handler.parse_config_request(msg)

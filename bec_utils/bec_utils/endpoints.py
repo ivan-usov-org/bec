@@ -13,6 +13,8 @@ class MessageEndpoints:
     # device config
     _device_config_request = "internal/devices/config_request"
     _device_config_request_response = "internal/devices/config_request_response"
+    _device_server_config_update = "internal/devices/config_request_response"
+    _device_server_config_update_response = "internal/devices/config_request_response"
     _device_config_update = "internal/devices/config_update"
     _device_config = "internal/devices/config"
     _device_info = "internal/devices/info"

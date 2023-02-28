@@ -14,18 +14,20 @@ from .BECMessage import BECStatus
 from .connector import ConnectorBase
 from .endpoints import MessageEndpoints
 from .logger import bec_logger
+from .service_config import ServiceConfig
 
 logger = bec_logger.logger
 
 
 class BECService:
     def __init__(
-        self, bootstrap_server: list, connector_cls: ConnectorBase, unique_service=False
+        self, config: ServiceConfig, connector_cls: ConnectorBase, unique_service=False
     ) -> None:
         super().__init__()
-        self.bootstrap_server = bootstrap_server
+        self._service_config = config
+        self.bootstrap_server = config.redis
         self._connector_cls = connector_cls
-        self.connector = connector_cls(bootstrap_server)
+        self.connector = connector_cls(self.bootstrap_server)
         self._unique_service = unique_service
         self.producer = self.connector.producer()
         self._service_id = str(uuid.uuid4())
