@@ -1,7 +1,7 @@
 from bec_utils import BECService, ServiceConfig
 from bec_utils.connector import ConnectorBase
 
-from scihub.scibec_connector import SciBecConnector
+from scihub.scibec import SciBecConnector
 
 
 class SciHub(BECService):
@@ -12,4 +12,4 @@ class SciHub(BECService):
         self.scibec_connector = None
 
     def _start_scibec_connector(self):
-        self.scibec_connector = SciBecConnector(self.config, self.connector)
+        self.scibec_connector = SciBecConnector(self, self.connector)

@@ -31,9 +31,8 @@ def client():
     config = ServiceConfig(CONFIG_PATH)
     bec = BECClient()
     bec.initialize(
-        [config.redis],
+        config,
         RedisConnector,
-        config.scibec,
     )
     bec.start()
     bec.queue.request_queue_reset()

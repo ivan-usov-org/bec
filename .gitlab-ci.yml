@@ -22,6 +22,7 @@ stages:
     - pip install -e ./scan_bundler
     - pip install -e ./bec_client
     - pip install -e ./file_writer
+    - pip install -e ./scihub
 
 formatter:
   stage: Formatter
@@ -144,6 +145,8 @@ end-2-end:
     # initialize the database with the test config
     - docker build -t init_scibec:test -f ./scibec/init_scibec/Dockerfile .
     - docker run --network=host --name init_scibec init_scibec:test
+    - docker build -t scihub:test -f ./scihub/Dockerfile .
+    - docker run --network=host -d --name scihub scihub:test
 
     # build scan_bundler, scan_server, device_server and file_writer
     - docker build -t scan_bundler:test -f ./scan_bundler/Dockerfile .

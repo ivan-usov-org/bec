@@ -2,7 +2,7 @@ import os
 
 import bec_utils
 
-from device_server.devices.scibec_validator import SciBecValidator
+from scihub.scibec.scibec_validator import SciBecValidator
 
 dir_path = os.path.abspath(os.path.join(os.path.dirname(bec_utils.__file__), "../../scibec/"))
 SCHEMA = os.path.join(dir_path, "openapi_schema.json")

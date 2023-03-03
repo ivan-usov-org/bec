@@ -7,8 +7,10 @@ mongodb:
 scibec:
   host: http://localhost
   port: 3030
+  beamline: MyBeamline
 service_config:
   file_writer:
     plugin: default
     base_path: ~/Data10
+    
 

@@ -7,7 +7,7 @@ WORKDIR /code
 # copy the content of the local opaas directory to the working directory
 COPY . ./bec
 
-WORKDIR /code/bec/log_receiver
+WORKDIR /code/bec/scihub
 RUN pip install -e .
 
 # command to run on container start

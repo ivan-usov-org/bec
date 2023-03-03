@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import os
 import time
 import traceback
 import uuid
+from typing import TYPE_CHECKING
 
 import bec_utils
 import msgpack
@@ -12,13 +15,17 @@ from bec_utils.connector import ConnectorBase
 
 from .scibec_validator import SciBecValidator
 
+if TYPE_CHECKING:
+    from scihub.scibec.scibec_connector import SciBecConnector
+
 dir_path = os.path.abspath(os.path.join(os.path.dirname(bec_utils.__file__), "../../scibec/"))
 
 
 class ConfigHandler:
-    def __init__(self, config: ServiceConfig, connector: ConnectorBase) -> None:
+    def __init__(self, scibec_connector: SciBecConnector, connector: ConnectorBase) -> None:
+        self.scibec_connector = scibec_connector
         self.device_manager = DeviceManager(connector)
-        self.device_manager.initialize(config.redis)
+        self.device_manager.initialize(scibec_connector.config.redis)
         self.producer = connector.producer()
         self.validator = SciBecValidator(os.path.join(dir_path, "openapi_schema.json"))
 
@@ -55,6 +62,9 @@ class ConfigHandler:
         )
 
     def _reload_config(self, msg: BECMessage.DeviceConfigMessage):
+        # if we have a connection to SciBec, pull the data before forwarding the reload request
+        if self.scibec_connector.scibec:
+            self.scibec_connector.update_session()
         self.send_config_request_reply(accepted=True, error_msg=None, metadata=msg.metadata)
         self.send_config(msg)
         # self.device_manager.update_status(BECStatus.BUSY)
@@ -103,27 +113,9 @@ class ConfigHandler:
         updated = False
         if "deviceConfig" in dev_config:
             RID = str(uuid.uuid4())
-            self._update_device_server(RID, {device.name, dev_config})
+            self._update_device_server(RID, {device.name: dev_config})
             updated = self._wait_for_device_server_update(RID)
-
-            # # store old config
-            # old_config = device._config["deviceConfig"].copy()
-
-            # # apply config
-            # try:
-            #     self.device_manager.update_config(device.obj, dev_config["deviceConfig"])
-            # except Exception as exc:
-            #     self.device_manager.update_config(device.obj, old_config)
-            #     raise DeviceConfigError(f"Error during object update. {exc}") from exc
-
-            # ref_config = device._config["deviceConfig"].copy()
-            # ref_config.update(dev_config["deviceConfig"])
-            # self._validate_update({"deviceConfig": ref_config})
-
-            # device._config["deviceConfig"].update(dev_config["deviceConfig"])
-
-            updated = True
-            dev_config.pop("device_config")
+            dev_config.pop("deviceConfig")
 
         if "enabled" in dev_config:
             self._validate_update({"enabled": dev_config["enabled"]})
@@ -131,16 +123,6 @@ class ConfigHandler:
             RID = str(uuid.uuid4())
             self._update_device_server(RID, {device.name: dev_config})
             updated = self._wait_for_device_server_update(RID)
-            # if device.enabled:
-            #     # pylint:disable=protected-access
-            #     if device.obj._destroyed:
-            #         self.device_manager.initialize_device(device._config)
-            #     else:
-            #         self.device_manager.initialize_enabled_device(device)
-            # else:
-            #     self.device_manager.disconnect_device(device.obj)
-
-            updated = True
             dev_config.pop("enabled")
 
         if not dev_config:
@@ -148,7 +130,7 @@ class ConfigHandler:
 
         available_keys = [
             "enabled_set",
-            "userParamter",
+            "userParameter",
             "onFailure",
             "deviceTags",
             "acquisitionConfig",

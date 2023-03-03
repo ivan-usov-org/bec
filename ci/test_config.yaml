@@ -7,3 +7,11 @@ mongodb:
 scibec:
   host: http://localhost
   port: 3030
+  beamline: TestBeamline
+service_config:
+  general:
+    reset_queue_on_cancel: True
+    enforce_ACLs: False
+  file_writer:
+    plugin: default
+    base_path: ~/Data10
