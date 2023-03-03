@@ -89,53 +89,17 @@ def test_check_request_validity(msg, raised):
         dm.check_request_validity(msg)
 
 
-def test_get_config_no_beamline():
-    connector = ConnectorMock("")
-    dm = DeviceManagerBase(connector, "")
-    with mock.patch.object(dm._scibec, "get_beamlines", return_value=[]):
-        with mock.patch.object(dm, "_load_session") as load_session:
-            dm._get_config()
-            load_session.assert_not_called()
-
-
-def test_get_config_no_active_session():
-    connector = ConnectorMock("")
-    dm = DeviceManagerBase(connector, "")
-    with mock.patch.object(dm._scibec, "get_beamlines", return_value=[{"name": "test"}]):
-        with mock.patch.object(
-            dm._scibec, "get_current_session", return_value=None
-        ) as current_session:
-            with mock.patch.object(dm, "_load_session") as load_session:
-                dm._get_config()
-                current_session.assert_called_once_with("test", include_devices=True)
-                load_session.assert_not_called()
-
-
-def test_get_config_no_devices():
-    connector = ConnectorMock("")
-    dm = DeviceManagerBase(connector, "")
-    with mock.patch.object(dm._scibec, "get_beamlines", return_value=[{"name": "test"}]):
-        with mock.patch.object(
-            dm._scibec, "get_current_session", return_value={"devices": []}
-        ) as current_session:
-            with mock.patch.object(dm, "_load_session") as load_session:
-                dm._get_config()
-                current_session.assert_called_once_with("test", include_devices=True)
-                load_session.assert_not_called()
-
-
 def test_get_config_calls_load():
     connector = ConnectorMock("")
     dm = DeviceManagerBase(connector, "")
-    with mock.patch.object(dm._scibec, "get_beamlines", return_value=[{"name": "test"}]):
-        with mock.patch.object(
-            dm._scibec, "get_current_session", return_value={"devices": [{}]}
-        ) as current_session:
-            with mock.patch.object(dm, "_load_session") as load_session:
-                with mock.patch.object(dm, "producer") as producer:
-                    dm._get_config()
-                    current_session.assert_called_once_with("test", include_devices=True)
-                    load_session.assert_called_once()
+    with mock.patch.object(
+        dm, "_get_redis_device_config", return_value={"devices": [{}]}
+    ) as get_redis_config:
+        with mock.patch.object(dm, "_load_session") as load_session:
+            with mock.patch.object(dm, "producer") as producer:
+                dm._get_config()
+                get_redis_config.assert_called_once()
+                load_session.assert_called_once()
 
 
 def test_get_devices_with_tags():
