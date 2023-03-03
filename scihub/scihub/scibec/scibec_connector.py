@@ -23,6 +23,7 @@ class SciBecConnector:
         self.scibec = None
         self.scibec_info = {}
         self.connect_to_scibec()
+        self.update_session()
         self.config_handler = ConfigHandler(self, connector)
 
         self._config_request_handler = None
