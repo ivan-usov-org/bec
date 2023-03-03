@@ -169,12 +169,17 @@ class SciBec:
         if len(beamlines) > 1:
             logger.warning("More than one beamline available.")
         beamline = beamlines[0]
+        self.set_session_data(beamline, data)
+
+    def set_session_data(self, beamline: dict, data: dict):
+        session_name = "demo"
         if beamline.get("activeSession"):
             session = self.get_session_by_id(beamline["activeSession"])
             if session:
+                session_name = session[0]["name"]
                 self._delete_session(session[0]["id"])
-        session = self.add_session(beamline["name"], "demo")
-        self.set_current_session(beamline["name"], "demo")
+        session = self.add_session(beamline["name"], session_name)
+        self.set_current_session(beamline["name"], session_name)
         for name, device in data.items():
             device["enabled"] = device["status"]["enabled"]
             if device["status"].get("enabled_set"):

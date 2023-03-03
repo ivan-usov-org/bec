@@ -42,6 +42,8 @@ class ConfigHandler:
                 self._update_config(msg)
             if msg.content["action"] == "reload":
                 self._reload_config(msg)
+            if msg.content["action"] == "set":
+                self._set_config(msg)
 
         except DeviceConfigError as dev_conf_error:
             content = traceback.format_exc()
@@ -60,6 +62,17 @@ class ConfigHandler:
         self.producer.set(
             MessageEndpoints.device_config_request_response(RID), msg.dumps(), expire=60
         )
+
+    def _set_config(self, msg: BECMessage.DeviceConfigMessage):
+        config = msg.content["config"]
+        scibec = self.scibec_connector.scibec
+        beamline = self.scibec_connector.scibec_info.get("beamline")
+        if scibec and beamline:
+            scibec.set_session_data(beamline, config)
+        self.scibec_connector.update_session()
+        self.send_config_request_reply(accepted=True, error_msg=None, metadata=msg.metadata)
+        reload_msg = BECMessage.DeviceConfigMessage(action="reload", config={})
+        self.send_config(reload_msg)
 
     def _reload_config(self, msg: BECMessage.DeviceConfigMessage):
         # if we have a connection to SciBec, pull the data before forwarding the reload request
@@ -80,7 +93,7 @@ class ConfigHandler:
             device = self.device_manager.devices[dev]
             updated = self._update_device_config(device, config.copy())
             if updated:
-                self.update_scibec_config(device)
+                self.update_config_in_redis(device)
 
         # send updates to services
         if updated:
@@ -147,15 +160,6 @@ class ConfigHandler:
 
     def _validate_update(self, update):
         self.validator.validate_device_patch(update)
-
-    def update_scibec_config(self, device):
-        raw_msg = self.device_manager.producer.get(MessageEndpoints.device_config())
-        config = msgpack.loads(raw_msg)
-        index = next(
-            index for index, dev_conf in enumerate(config) if dev_conf["name"] == device.name
-        )
-        config[index] = device._config
-        self.device_manager.producer.set(MessageEndpoints.device_config(), msgpack.dumps(config))
 
     def update_config_in_redis(self, device):
         raw_msg = self.device_manager.producer.get(MessageEndpoints.device_config())

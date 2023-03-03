@@ -455,7 +455,7 @@ class DeviceManagerBase:
         Returns:
 
         """
-        if action in ["update", "add"] and not config:
+        if action in ["update", "add", "set"] and not config:
             raise DeviceConfigError(f"Config cannot be empty for an {action} request.")
         RID = str(uuid.uuid4())
         self.producer.send(
@@ -648,12 +648,12 @@ class DeviceManagerBase:
             self.devices._add_device(dev.get("name"), obj)
 
     def check_request_validity(self, msg: DeviceConfigMessage) -> None:
-        if msg.content["action"] not in ["update", "add", "remove", "reload"]:
-            raise DeviceConfigError("Action must be either add, remove, update, or reload.")
-        if msg.content["action"] in ["update", "add", "remove"]:
+        if msg.content["action"] not in ["update", "add", "remove", "reload", "set"]:
+            raise DeviceConfigError("Action must be either add, remove, update, set or reload.")
+        if msg.content["action"] in ["update", "add", "remove", "set"]:
             if not msg.content["config"]:
                 raise DeviceConfigError(
-                    "Config cannot be empty for an action of type add, remove or update."
+                    "Config cannot be empty for an action of type add, remove, set or update."
                 )
             if not isinstance(msg.content["config"], dict):
                 raise DeviceConfigError("Config must be of type dict.")

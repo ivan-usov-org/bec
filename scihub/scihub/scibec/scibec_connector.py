@@ -5,9 +5,10 @@ from typing import TYPE_CHECKING
 import msgpack
 from bec_utils import BECMessage, MessageEndpoints, ServiceConfig, bec_logger
 from bec_utils.connector import ConnectorBase
+from requests import ConnectionError
 
 from .config_handler import ConfigHandler
-from .scibec import SciBec
+from .scibec import SciBec, SciBecError
 
 if TYPE_CHECKING:
     from scihub import SciHub
@@ -68,15 +69,19 @@ class SciBecConnector:
         scibec_host = self.scihub.config.scibec
         if not self.scihub.config.scibec:
             return
-        beamline = self.scihub.config.config["scibec"].get("beamline")
-        if not beamline:
-            logger.warning(f"Cannot connect to SciBec without a beamline specified.")
-            return
-        logger.info(f"Connecting to SciBec on {scibec_host}")
-        self.scibec = SciBec()
-        self.scibec.url = scibec_host
-        beamline_info = self.scibec.get_beamline(beamline)
-        self.scibec_info["beamline"] = beamline_info
-        if not beamline_info:
-            logger.warning(f"Could not find a beamline with the name {beamline}")
+        try:
+            beamline = self.scihub.config.config["scibec"].get("beamline")
+            if not beamline:
+                logger.warning(f"Cannot connect to SciBec without a beamline specified.")
+                return
+            logger.info(f"Connecting to SciBec on {scibec_host}")
+            self.scibec = SciBec()
+            self.scibec.url = scibec_host
+            beamline_info = self.scibec.get_beamline(beamline)
+            self.scibec_info["beamline"] = beamline_info
+            if not beamline_info:
+                logger.warning(f"Could not find a beamline with the name {beamline}")
+                return
+        except (ConnectionError, SciBecError) as exc:
+            self.scibec = None
             return

@@ -1,11 +1,16 @@
 from __future__ import annotations
 
+import json
 from typing import TYPE_CHECKING
 
+import msgpack
 import yaml
+from bec_utils import MessageEndpoints, bec_logger
 
 if TYPE_CHECKING:
     from .bec_client import BECClient
+
+logger = bec_logger.logger
 
 
 class ConfigHelper:
@@ -19,10 +24,26 @@ class ConfigHelper:
             file_path (str): Full path to the yaml file.
             reload (bool, optional): Send a reload request to all services. Defaults to True.
         """
-        dm = self.parent.device_manager
-        dm.scibec.update_session_with_file(file_path)
+        config = self._load_config_from_file(file_path)
+        self.parent.device_manager.send_config_request(action="set", config=config)
         if reload:
-            dm.send_config_request(action="reload")
+            self.parent.device_manager.send_config_request(action="reload")
+
+    def _load_config_from_file(self, file_path: str) -> dict:
+        data = {}
+        if not file_path.endswith(".yaml"):
+            raise NotImplementedError
+
+        with open(file_path, "r", encoding="utf-8") as stream:
+            try:
+                data = yaml.safe_load(stream)
+                logger.trace(
+                    f"Loaded new config from disk: {json.dumps(data, sort_keys=True, indent=4)}"
+                )
+            except yaml.YAMLError as err:
+                logger.error(f"Error while loading config from disk: {repr(err)}")
+
+        return data
 
     def save_current_session(self, file_path: str):
         """Save the current session as a yaml file to disk.
@@ -30,26 +51,10 @@ class ConfigHelper:
         Args:
             file_path (str): Full path to the yaml file.
         """
-        scibec = self.parent.device_manager.scibec
-        beamlines = scibec.get_beamlines()
-        if not beamlines:
-            print("No config available.")
-            return
-        if len(beamlines) > 1:
-            print("More than one beamline available.")
-            return
-
-        beamline = beamlines[0]
-        if not beamline.get("activeSession"):
-            print("No active session.")
-            return
-        session = scibec.get_session_by_id(beamline["activeSession"], include_devices=True)
-        devices = session[0].get("devices")
-        if not devices:
-            print("No devices found for the current session.")
-            return
+        msg_raw = self.parent.producer.get(MessageEndpoints.device_config())
+        config = msgpack.loads(msg_raw)
         out = {}
-        for dev in devices:
+        for dev in config:
             dev.pop("id")
             dev.pop("createdAt")
             dev.pop("createdBy")
