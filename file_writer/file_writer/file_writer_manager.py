@@ -39,7 +39,7 @@ class ScanStorage:
 class FileWriterManager(BECService):
     def __init__(self, config: ServiceConfig, connector_cls: ConnectorBase) -> None:
         super().__init__(config, connector_cls, unique_service=True)
-        self.scibec_url = config.scibec
+        self.file_writer_config = self._service_config.service_config.get("file_writer")
         self.producer = self.connector.producer()
         self._start_device_manager()
         self._start_scan_segment_consumer()
@@ -49,7 +49,7 @@ class FileWriterManager(BECService):
         self.file_writer = NexusFileWriter(self)
 
     def _start_device_manager(self):
-        self.device_manager = DeviceManagerBase(self.connector, self.scibec_url)
+        self.device_manager = DeviceManagerBase(self.connector)
         self.device_manager.initialize([self.bootstrap_server])
 
     def _start_scan_segment_consumer(self):
@@ -80,13 +80,12 @@ class FileWriterManager(BECService):
         parent.update_scan_storage_with_status(msg)
 
     def _get_base_path(self):
-        file_writer_config = self._service_config.service_config.get("file_writer")
-        if not file_writer_config:
+        if not self.file_writer_config:
             raise ServiceConfigError("Service config must contain a file writer definition.")
-        if not file_writer_config.get("base_path"):
+        if not self.file_writer_config.get("base_path"):
             raise ServiceConfigError("File writer config must define a base path.")
 
-        return file_writer_config.get("base_path")
+        return self.file_writer_config.get("base_path")
 
     def update_scan_storage_with_status(self, msg: BECMessage.ScanStatusMessage):
         scanID = msg.content.get("scanID")

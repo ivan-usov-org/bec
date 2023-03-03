@@ -7,6 +7,8 @@ import numpy as np
 import xmltodict
 from bec_utils import bec_logger
 
+import file_writer_plugins as fwp
+
 logger = bec_logger.logger
 
 
@@ -232,7 +234,8 @@ class NexusFileWriter(FileWriter):
         print(f"writing file to {file_path}")
         device_storage = self._create_device_data_storage(data)
         device_storage["metadata"] = data.metadata
-        writer_storage = cSAXS_NeXus_format(
+        writer_format = getattr(fwp, self.file_writer_manager.file_writer_config.get("plugin"))
+        writer_storage = writer_format(
             HDF5Storage(), device_storage, self.file_writer_manager.device_manager
         )
 

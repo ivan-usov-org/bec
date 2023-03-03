@@ -20,13 +20,13 @@ class ServiceConfig:
         self.config = {}
         self._load_config()
         if self.config:
-            self._load_urls("scibec")
-            self._load_urls("redis")
-            self._load_urls("mongodb")
+            self._load_urls("scibec", required=False)
+            self._load_urls("redis", required=True)
+            self._load_urls("mongodb", required=False)
 
-        self._update_config(config=config, scibec=scibec, redis=redis, mongodb=mongodb)
+        self._update_config(service_config=config, scibec=scibec, redis=redis, mongodb=mongodb)
 
-        self.service_config = self.config.get("service_config")
+        self.service_config = self.config.get("service_config", {})
 
     def _update_config(self, **kwargs):
         for key, val in kwargs.items():
@@ -43,22 +43,25 @@ class ServiceConfig:
                 f"Loaded new config from disk: {json.dumps(self.config, sort_keys=True, indent=4)}"
             )
 
-    def _load_urls(self, entry: str):
+    def _load_urls(self, entry: str, required: bool = True):
         config = self.config.get(entry)
-        if not config:
+        if config:
+            return f"{config['host']}:{config['port']}"
+
+        if required:
             raise ValueError(
                 f"The provided config does not specify the url (host and port) for {entry}."
             )
-        return f"{config['host']}:{config['port']}"
+        return ""
 
     @property
     def scibec(self):
-        return self._load_urls("scibec")
+        return self._load_urls("scibec", required=False)
 
     @property
     def redis(self):
-        return self._load_urls("redis")
+        return self._load_urls("redis", required=True)
 
     @property
     def mongodb(self):
-        return self._load_urls("mongodb")
+        return self._load_urls("mongodb", required=False)
