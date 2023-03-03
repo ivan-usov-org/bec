@@ -1,8 +1,9 @@
-**/venv
+**/*_venv
 **/.idea
 *.log
 **/__pycache__
-.DS_Store
+**/.DS_Store
 **/out
 **/.vscode
 **/.pytest_cache
+**/*.egg*
