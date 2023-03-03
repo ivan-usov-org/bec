@@ -13,5 +13,5 @@ service_config:
     reset_queue_on_cancel: True
     enforce_ACLs: False
   file_writer:
-    plugin: default
-    base_path: ~/Data10
+    plugin: default_NeXus_format
+    base_path: ./ 
