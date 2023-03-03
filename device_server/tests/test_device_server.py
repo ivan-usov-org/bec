@@ -4,7 +4,7 @@ from unittest.mock import ANY
 
 import bec_utils
 import pytest
-from bec_utils import Alarms, BECMessage, MessageEndpoints
+from bec_utils import Alarms, BECMessage, MessageEndpoints, ServiceConfig
 from bec_utils.BECMessage import BECStatus
 from bec_utils.tests.utils import ConnectorMock
 from ophyd import Staged
@@ -26,7 +26,8 @@ def load_DeviceServerMock():
 
 class DeviceServerMock(DeviceServer):
     def __init__(self, device_manager, connector_cls) -> None:
-        super().__init__(bootstrap_server="dummy", connector_cls=ConnectorMock)
+        config = ServiceConfig(redis={"host": "dummy", "port": 6379})
+        super().__init__(config, connector_cls=ConnectorMock)
         self.device_manager = device_manager
 
     def _start_device_manager(self):

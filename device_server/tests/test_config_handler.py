@@ -1,4 +1,3 @@
-import concurrent
 import os
 from unittest import mock
 
@@ -35,7 +34,7 @@ def test_request_response():
             ):
                 device_manager.initialize("")
                 with mock.patch.object(
-                    device_manager, "send_config_request_reply"
+                    device_manager.config_handler, "send_config_request_reply"
                 ) as request_reply:
                     device_manager.config_handler.parse_config_request(
                         msg=BECMessage.DeviceConfigMessage(

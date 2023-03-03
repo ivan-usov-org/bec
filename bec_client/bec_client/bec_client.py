@@ -9,7 +9,7 @@ import time
 from typing import List
 
 import IPython
-from bec_utils import Alarms, BECService, MessageEndpoints, bec_logger
+from bec_utils import Alarms, BECService, MessageEndpoints, ServiceConfig, bec_logger
 from bec_utils.connector import ConnectorBase
 from bec_utils.logbook_connector import LogbookConnector
 from IPython.terminal.prompts import Prompts, Token
@@ -44,12 +44,12 @@ class BECClient(BECService, BeamlineMixin, UserScriptsMixin):
     def __repr__(self) -> str:
         return "BECClient\n\nTo get a list of available commands, type `bec.show_all_commands()`"
 
-    def initialize(self, bootstrap_server: list, connector_cls: ConnectorBase, scibec_url: str):
+    def initialize(self, config: ServiceConfig, connector_cls: ConnectorBase):
         """initialize the BEC client"""
-        super().__init__(bootstrap_server, connector_cls)
+        super().__init__(config, connector_cls)
         # pylint: disable=attribute-defined-outside-init
         self.device_manager = None
-        self.scibec_url = scibec_url
+        self.scibec_url = config.scibec
         self._sighandler = SigintHandler(self)
         self._ip = None
         self.queue = None

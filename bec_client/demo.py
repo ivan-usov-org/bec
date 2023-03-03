@@ -11,7 +11,7 @@ CONFIG_PATH = "../bec_config.yaml"
 config = ServiceConfig(CONFIG_PATH)
 
 bec = BECClient()
-bec.initialize(config.redis, RedisConnector, config.scibec)
+bec.initialize(config, RedisConnector)
 bec.start()
 bec.load_high_level_interface("spec_hli")
 

@@ -93,6 +93,14 @@ class MessageEndpoints:
         return f"{cls._device_config_request_response}/{RID}"
 
     @classmethod
+    def device_server_config_request(cls):
+        return cls._device_server_config_update
+
+    @classmethod
+    def device_server_config_request_response(cls, RID: str):
+        return f"{cls._device_server_config_update_response}/{RID}"
+
+    @classmethod
     def device_config_update(cls):
         return cls._device_config_update
 

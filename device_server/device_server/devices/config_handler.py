@@ -1,49 +1,97 @@
 from __future__ import annotations
 
-import os
 import traceback
 from typing import TYPE_CHECKING
 
-import bec_utils
-import msgpack
-from bec_utils import BECMessage as BMessage
-from bec_utils import BECStatus, DeviceConfigError, MessageEndpoints, bec_logger
-
-from .scibec_validator import SciBecValidator
+from bec_utils import (
+    BECMessage,
+    BECStatus,
+    DeviceConfigError,
+    MessageEndpoints,
+    bec_logger,
+)
 
 if TYPE_CHECKING:
     from devicemanager import DeviceManagerDS
 
 logger = bec_logger.logger
 
-dir_path = os.path.abspath(os.path.join(os.path.dirname(bec_utils.__file__), "../../scibec/"))
-
 
 class ConfigHandler:
     def __init__(self, device_manager: DeviceManagerDS) -> None:
         self.device_manager = device_manager
-        self.validator = SciBecValidator(os.path.join(dir_path, "openapi_schema.json"))
+        self.connector = self.device_manager.connector
+        self._config_request_handler = None
 
-    def send_config(self, msg: BMessage.DeviceConfigMessage) -> None:
-        """broadcast a new config"""
-        self.device_manager.producer.send(MessageEndpoints.device_config_update(), msg.dumps())
+        self._start_config_handler()
 
-    def parse_config_request(self, msg: BMessage.DeviceConfigMessage) -> None:
+    def _start_config_handler(self) -> None:
+        self._config_request_handler = self.connector.consumer(
+            MessageEndpoints.device_server_config_request(),
+            cb=self._device_config_callback,
+            parent=self,
+        )
+        self._config_request_handler.start()
+
+    @staticmethod
+    def _device_config_callback(msg, *, parent, **_kwargs) -> None:
+        msg = BECMessage.DeviceConfigMessage.loads(msg.value)
+        logger.info(f"Received request: {msg}")
+        parent.parse_config_request(msg)
+
+    def parse_config_request(self, msg: BECMessage.DeviceConfigMessage) -> None:
         """Processes a config request. If successful, it emits a config reply
 
         Args:
             msg (BMessage.DeviceConfigMessage): Config request
 
         """
+        error_msg = ""
+        accepted = True
         try:
             self.device_manager.check_request_validity(msg)
             if msg.content["action"] == "update":
                 self._update_config(msg)
-            if msg.content["action"] == "reload":
-                self._reload_config(msg)
-
+            if msg.content["action"] == "add":
+                raise NotImplementedError
         except DeviceConfigError as dev_conf_error:
-            content = traceback.format_exc()
-            self.device_manager.send_config_request_reply(
-                accepted=False, error_msg=content, metadata=msg.metadata
+            error_msg = traceback.format_exc()
+            accepted = False
+        finally:
+            self.send_config_request_reply(
+                accepted=accepted, error_msg=error_msg, metadata=msg.metadata
             )
+
+    def send_config_request_reply(self, accepted, error_msg, metadata):
+        """send a config request reply"""
+        msg = BECMessage.RequestResponseMessage(
+            accepted=accepted, message=error_msg, metadata=metadata
+        )
+        RID = metadata.get("RID")
+        self.device_manager.producer.set(
+            MessageEndpoints.device_config_request_response(RID), msg.dumps(), expire=60
+        )
+
+    def _update_config(self, msg):
+        for dev, dev_config in msg.content["config"].items():
+            device = self.device_manager.devices[dev]
+            if "deviceConfig" in dev_config:
+                # store old config
+                old_config = device._config["deviceConfig"].copy()
+
+                # apply config
+                try:
+                    self.device_manager.update_config(device.obj, dev_config["deviceConfig"])
+                except Exception as exc:
+                    self.device_manager.update_config(device.obj, old_config)
+                    raise DeviceConfigError(f"Error during object update. {exc}") from exc
+
+            if "enabled" in dev_config:
+                if dev_config["enabled"]:
+                    # pylint:disable=protected-access
+                    if device.obj._destroyed:
+                        self.device_manager.initialize_device(device._config)
+                    else:
+                        self.device_manager.initialize_enabled_device(device)
+                else:
+                    self.device_manager.disconnect_device(device.obj)
