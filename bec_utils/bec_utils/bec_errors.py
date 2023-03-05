@@ -8,3 +8,7 @@ class ScanInterruption(Exception):
 
 class ServiceConfigError(Exception):
     pass
+
+
+class DeviceConfigError(Exception):
+    pass

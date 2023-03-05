@@ -9,14 +9,20 @@ import time
 from typing import List
 
 import IPython
-from bec_utils import Alarms, BECService, MessageEndpoints, ServiceConfig, bec_logger
+from bec_utils import (
+    Alarms,
+    BECService,
+    ConfigHelper,
+    MessageEndpoints,
+    ServiceConfig,
+    bec_logger,
+)
 from bec_utils.connector import ConnectorBase
 from bec_utils.logbook_connector import LogbookConnector
 from IPython.terminal.prompts import Prompts, Token
 from rich.console import Console
 from rich.table import Table
 
-from bec_client.config_helper import ConfigHelper
 from bec_client.scan_manager import ScanManager
 
 from .alarm_handler import AlarmHandler

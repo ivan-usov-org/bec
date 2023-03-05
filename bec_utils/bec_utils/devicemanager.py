@@ -9,6 +9,7 @@ from rich.console import Console
 from rich.table import Table
 from typeguard import typechecked
 
+from bec_utils import ConfigHelper
 from bec_utils.connector import ConnectorBase
 
 from .BECMessage import BECStatus, DeviceConfigMessage, LogMessage, RequestResponseMessage
@@ -57,7 +58,7 @@ class Device:
     def set_device_config(self, val: dict):
         """set the device config for this device"""
         self._config["deviceConfig"].update(val)
-        return self.parent.send_config_request(
+        return self.parent.config_helper.send_config_request(
             action="update", config={self.name: {"deviceConfig": self._config["deviceConfig"]}}
         )
 
@@ -69,7 +70,7 @@ class Device:
     def set_device_tags(self, val: list):
         """set the device tags for this device"""
         self._config["deviceTags"] = val
-        return self.parent.send_config_request(
+        return self.parent.config_helper.send_config_request(
             action="update", config={self.name: {"deviceTags": self._config["deviceTags"]}}
         )
 
@@ -79,7 +80,7 @@ class Device:
         if val in self._config["deviceTags"]:
             return None
         self._config["deviceTags"].append(val)
-        return self.parent.send_config_request(
+        return self.parent.config_helper.send_config_request(
             action="update", config={self.name: {"deviceTags": self._config["deviceTags"]}}
         )
 
@@ -94,7 +95,7 @@ class Device:
         if not isinstance(val, ReadoutPriority):
             val = ReadoutPriority(val)
         self._config["acquisitionConfig"]["readoutPriority"] = val
-        return self.parent.send_config_request(
+        return self.parent.config_helper.send_config_request(
             action="update",
             config={self.name: {"acquisitionConfig": self._config["acquisitionConfig"]}},
         )
@@ -110,7 +111,7 @@ class Device:
         if not isinstance(val, OnFailure):
             val = OnFailure(val)
         self._config["onFailure"] = val
-        return self.parent.send_config_request(
+        return self.parent.config_helper.send_config_request(
             action="update", config={self.name: {"onFailure": self._config["onFailure"]}}
         )
 
@@ -123,7 +124,9 @@ class Device:
     def enabled(self, value):
         """Whether or not the device is enabled"""
         self._config["enabled"] = value
-        self.parent.send_config_request(action="update", config={self.name: {"enabled": value}})
+        self.parent.config_helper.send_config_request(
+            action="update", config={self.name: {"enabled": value}}
+        )
 
     @property
     def enabled_set(self):
@@ -134,7 +137,9 @@ class Device:
     def enabled_set(self, value):
         """Whether or not the device can be set"""
         self._config["enabled_set"] = value
-        self.parent.send_config_request(action="update", config={self.name: {"enabled_set": value}})
+        self.parent.config_helper.send_config_request(
+            action="update", config={self.name: {"enabled_set": value}}
+        )
 
     def read(self, cached):
         """get the last reading from a device"""
@@ -175,7 +180,9 @@ class Device:
 
     @typechecked
     def set_user_parameter(self, val: dict):
-        self.parent.send_config_request(action="update", config={self.name: {"userParameter": val}})
+        self.parent.config_helper.send_config_request(
+            action="update", config={self.name: {"userParameter": val}}
+        )
 
     @typechecked
     def update_user_parameter(self, val: dict):
@@ -426,6 +433,7 @@ class DeviceManagerBase:
 
     _connector_base_consumer = {}
     producer = None
+    config_helper = None
     _device_cls = Device
     _status_cb = []
 
@@ -443,6 +451,7 @@ class DeviceManagerBase:
 
         """
         self._start_connectors(bootstrap_server)
+        self.config_helper = ConfigHelper(self.connector)
         self._get_config()
 
     def update_status(self, status: BECStatus):
