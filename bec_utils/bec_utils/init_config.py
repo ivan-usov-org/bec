@@ -1,6 +1,9 @@
 import argparse
 
-from bec_utils import ConfigHelper, RedisConnector
+import msgpack
+import yaml
+
+from bec_utils import MessageEndpoints, RedisConnector
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument(
@@ -16,6 +19,8 @@ parser.add_argument(
 
 clargs = parser.parse_args()
 connector = RedisConnector(clargs.redis)
+producer = connector.producer()
 
-config_helper = ConfigHelper(connector)
-config_helper.update_session_with_file(clargs.config)
+with open(clargs.config, "r", encoding="utf-8") as stream:
+    data = yaml.safe_load(stream)
+producer.set(MessageEndpoints.device_config(), msgpack.dumps(data))
