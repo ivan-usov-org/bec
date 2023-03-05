@@ -1,6 +1,6 @@
 import argparse
 
-from bec_utils import ConfigHelper
+from bec_utils import ConfigHelper, RedisConnector
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument(
@@ -15,6 +15,7 @@ parser.add_argument(
 )
 
 clargs = parser.parse_args()
+connector = RedisConnector(clargs.redis)
 
-config_helper = ConfigHelper(clargs.redis)
+config_helper = ConfigHelper(connector)
 config_helper.update_session_with_file(clargs.config)
