@@ -84,7 +84,7 @@ tests:
     - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices
     - pip install pytest pytest-random-order pytest-cov pytest-asyncio
     - *install-bec-services
-    - coverage run --source=./bec_utils/bec_utils,./device_server/device_server,./scan_server/scan_server,./scan_bundler/scan_bundler,./bec_client/bec_client,./file_writer/file_writer,./scihub/scihub --omit=*/bec_client/bec_client/plugins/*,*/bec_client/scripts/* -m pytest -v --junitxml=report.xml --random-order ./bec_utils/tests ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests ./file_writer/tests, ./scihub/tests
+    - coverage run --source=./bec_utils/bec_utils,./device_server/device_server,./scan_server/scan_server,./scan_bundler/scan_bundler,./bec_client/bec_client,./file_writer/file_writer,./scihub/scihub --omit=*/bec_client/bec_client/plugins/*,*/bec_client/scripts/* -m pytest -v --junitxml=report.xml --random-order ./bec_utils/tests ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests ./file_writer/tests ./scihub/tests
     - coverage report
     - coverage xml
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
