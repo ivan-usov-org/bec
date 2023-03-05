@@ -189,10 +189,10 @@ end-2-end-light:
     - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
 
     # initialize the database with the test config
-    - docker build -t scihub:test -f ./scihub/Dockerfile .
-    - docker run --network=host -d --name scihub scihub:test
     - docker build -t init_config:test -f ./ci/config_init_dockerfile .
     - docker run --network=host --name init_config init_config:test
+    - docker build -t scihub:test -f ./scihub/Dockerfile .
+    - docker run --network=host -d --name scihub scihub:test
 
     # build scan_bundler, scan_server, device_server and file_writer
     - docker build -t scan_bundler:test -f ./scan_bundler/Dockerfile .
