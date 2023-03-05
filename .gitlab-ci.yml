@@ -84,7 +84,7 @@ tests:
     - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices
     - pip install pytest pytest-random-order pytest-cov pytest-asyncio
     - *install-bec-services
-    - coverage run --source=./bec_utils/bec_utils,./device_server/device_server,./scan_server/scan_server,./scan_bundler/scan_bundler,./bec_client/bec_client,./file_writer/file_writer --omit=*/bec_client/bec_client/plugins/*,*/bec_client/scripts/* -m pytest -v --junitxml=report.xml --random-order ./bec_utils/tests ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests ./file_writer/tests
+    - coverage run --source=./bec_utils/bec_utils,./device_server/device_server,./scan_server/scan_server,./scan_bundler/scan_bundler,./bec_client/bec_client,./file_writer/file_writer,./scihub/scihub --omit=*/bec_client/bec_client/plugins/*,*/bec_client/scripts/* -m pytest -v --junitxml=report.xml --random-order ./bec_utils/tests ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests ./file_writer/tests, ./scihub/tests
     - coverage report
     - coverage xml
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
@@ -109,6 +109,12 @@ tests-3.10:
   extends: "tests-3.9"
   stage: AdditionalTests
   image: python:3.10
+  allow_failure: true
+
+tests-3.11:
+  extends: "tests-3.9"
+  stage: AdditionalTests
+  image: python:3.11
   allow_failure: true
 
 end-2-end:
@@ -172,37 +178,37 @@ end-2-end:
     - docker cp file_writer:/code/bec/file_writer/FileWriterManager.log $CI_PROJECT_DIR/FileWriterManager.log
     - docker cp end2end_client:/code/bec/bec_client/BECClient.log $CI_PROJECT_DIR/BECClient.log
 
-# end-2-end-light:
-#   extends: "end-2-end"
-#   script:
-#     # spin up redis
-#     - docker run --network=host -d --name redis-test redis
-#     - apk update; apk upgrade; apk add git
+end-2-end-light:
+  extends: "end-2-end"
+  script:
+    # spin up redis
+    - docker run --network=host -d --name redis-test redis
+    - apk update; apk upgrade; apk add git
 
-#     # get ophyd devices repo (needed for the device_server)
-#     - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
+    # get ophyd devices repo (needed for the device_server)
+    - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
 
-#     # initialize the database with the test config
-#     - docker build -t scihub:test -f ./scihub/Dockerfile .
-#     - docker run --network=host -d --name scihub scihub:test
-#     - docker build -t init_config:test -f ./ci/init_config_dockerfile .
-#     - docker run --network=host --name init_config init_config:test
+    # initialize the database with the test config
+    - docker build -t scihub:test -f ./scihub/Dockerfile .
+    - docker run --network=host -d --name scihub scihub:test
+    - docker build -t init_config:test -f ./ci/init_config_dockerfile .
+    - docker run --network=host --name init_config init_config:test
 
-#     # build scan_bundler, scan_server, device_server and file_writer
-#     - docker build -t scan_bundler:test -f ./scan_bundler/Dockerfile .
-#     - docker build -t scan_server:test -f ./scan_server/Dockerfile .
-#     - docker build -t device_server:test -f ./device_server/Dockerfile .
-#     - docker build -t file_writer:test -f ./file_writer/Dockerfile .
+    # build scan_bundler, scan_server, device_server and file_writer
+    - docker build -t scan_bundler:test -f ./scan_bundler/Dockerfile .
+    - docker build -t scan_server:test -f ./scan_server/Dockerfile .
+    - docker build -t device_server:test -f ./device_server/Dockerfile .
+    - docker build -t file_writer:test -f ./file_writer/Dockerfile .
 
-#     # run scan_bundler, scan_server, device_server and file_writer
-#     - docker run --network=host -d --name device_server device_server:test
-#     - docker run --network=host -d --name scan_server scan_server:test
-#     - docker run --network=host -d --name scan_bundler scan_bundler:test
-#     - docker run --network=host -d --name file_writer file_writer:test
+    # run scan_bundler, scan_server, device_server and file_writer
+    - docker run --network=host -d --name device_server device_server:test
+    - docker run --network=host -d --name scan_server scan_server:test
+    - docker run --network=host -d --name scan_bundler scan_bundler:test
+    - docker run --network=host -d --name file_writer file_writer:test
 
-#     # build and run the tests
-#     - docker build -t en2end_client:test -f ./bec_client/tests/Dockerfile .
-#     - docker run --network=host --name end2end_client en2end_client:test  
+    # build and run the tests
+    - docker build -t en2end_client:test -f ./bec_client/tests/Dockerfile .
+    - docker run --network=host --name end2end_client en2end_client:test  
 
 
 pages:
