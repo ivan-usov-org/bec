@@ -100,12 +100,12 @@ def test_disable_unreachable_devices():
     with mock.patch.object(device_manager, "connect_device", wraps=mocked_failed_connection):
         with mock.patch.object(device_manager, "_get_config", get_config_from_mock):
             with mock.patch.object(
-                device_manager,
+                device_manager.config_helper,
                 "wait_for_config_reply",
                 return_value=config_reply,
             ):
                 device_manager.initialize("")
-                assert device_manager.config_handler is not None
+                assert device_manager.config_update_handler is not None
                 assert device_manager.devices.samx.enabled is False
                 msg = BECMessage.DeviceConfigMessage(
                     action="update", config={"samx": {"enabled": False}}

@@ -16,7 +16,7 @@ from bec_utils.connector import ConnectorBase
 from ophyd.ophydobj import OphydObject
 from ophyd.signal import EpicsSignalBase
 
-from device_server.devices.config_handler import ConfigHandler
+from device_server.devices.config_update_handler import ConfigUpdateHandler
 from device_server.devices.device_serializer import get_device_info
 
 logger = bec_logger.logger
@@ -43,20 +43,20 @@ class DeviceManagerDS(DeviceManagerBase):
     def __init__(
         self,
         connector: ConnectorBase,
-        config_handler: ConfigHandler = None,
+        config_update_handler: ConfigUpdateHandler = None,
         status_cb: list = None,
     ):
         super().__init__(connector, status_cb)
         self._config_request_connector = None
         self._device_instructions_connector = None
-        self._config_handler_cls = config_handler
-        self.config_handler = None
+        self._config_update_handler_cls = config_update_handler
+        self.config_update_handler = None
 
     def initialize(self, bootstrap_server) -> None:
-        self.config_handler = (
-            self._config_handler_cls
-            if self._config_handler_cls is not None
-            else ConfigHandler(device_manager=self)
+        self.config_update_handler = (
+            self._config_update_handler_cls
+            if self._config_update_handler_cls is not None
+            else ConfigUpdateHandler(device_manager=self)
         )
         super().initialize(bootstrap_server)
 

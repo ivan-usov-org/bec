@@ -9,7 +9,7 @@ import msgpack
 import yaml
 
 from .bec_errors import DeviceConfigError
-from .BECMessage import BECMessage
+from .BECMessage import DeviceConfigMessage, RequestResponseMessage
 from .endpoints import MessageEndpoints
 from .logger import bec_logger
 
@@ -58,7 +58,7 @@ class ConfigHelper:
         Args:
             file_path (str): Full path to the yaml file.
         """
-        msg_raw = self.parent.producer.get(MessageEndpoints.device_config())
+        msg_raw = self.producer.get(MessageEndpoints.device_config())
         config = msgpack.loads(msg_raw)
         out = {}
         for dev in config:
@@ -91,9 +91,7 @@ class ConfigHelper:
         RID = str(uuid.uuid4())
         self.producer.send(
             MessageEndpoints.device_config_request(),
-            BECMessage.DeviceConfigMessage(
-                action=action, config=config, metadata={"RID": RID}
-            ).dumps(),
+            DeviceConfigMessage(action=action, config=config, metadata={"RID": RID}).dumps(),
         )
 
         reply = self.wait_for_config_reply(RID)
@@ -101,7 +99,7 @@ class ConfigHelper:
         if not reply.content["accepted"]:
             raise DeviceConfigError(f"Failed to update the config: {reply.content['message']}.")
 
-    def wait_for_config_reply(self, RID: str) -> BECMessage.RequestResponseMessage:
+    def wait_for_config_reply(self, RID: str) -> RequestResponseMessage:
         start = 0
         timeout = 10
         while True:
@@ -113,4 +111,4 @@ class ConfigHelper:
                 if start > timeout:
                     raise DeviceConfigError("Timeout reached whilst waiting for config reply.")
                 continue
-            return BECMessage.RequestResponseMessage.loads(msg)
+            return RequestResponseMessage.loads(msg)

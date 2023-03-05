@@ -90,7 +90,7 @@ class BECClient(BECService, BeamlineMixin, UserScriptsMixin):
         self._start_alarm_handler()
         self._configure_logger()
         self.load_all_user_scripts()
-        self.config = ConfigHelper(self)
+        self.config = ConfigHelper(self.connector)
 
     def alarms(self, severity=Alarms.WARNING):
         """get the next alarm with at least the specified severity"""

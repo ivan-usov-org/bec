@@ -28,15 +28,15 @@ def test_request_response():
     with mock.patch.object(device_manager, "connect_device", wraps=mocked_failed_connection):
         with mock.patch.object(device_manager, "_get_config", get_config_from_mock):
             with mock.patch.object(
-                device_manager,
+                device_manager.config_helper,
                 "wait_for_config_reply",
                 return_value=config_reply,
             ):
                 device_manager.initialize("")
                 with mock.patch.object(
-                    device_manager.config_handler, "send_config_request_reply"
+                    device_manager.config_update_handler, "send_config_request_reply"
                 ) as request_reply:
-                    device_manager.config_handler.parse_config_request(
+                    device_manager.config_update_handler.parse_config_request(
                         msg=BECMessage.DeviceConfigMessage(
                             action="update", config={"something": "something"}
                         )

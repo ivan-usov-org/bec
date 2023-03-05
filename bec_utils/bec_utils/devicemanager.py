@@ -433,6 +433,7 @@ class DeviceManagerBase:
 
     def __init__(self, connector: ConnectorBase, status_cb: list = None) -> None:
         self.connector = connector
+        self.config_helper = ConfigHelper(self.connector)
         self._status_cb = status_cb if isinstance(status_cb, list) else [status_cb]
 
     def initialize(self, bootstrap_server) -> None:
@@ -445,7 +446,6 @@ class DeviceManagerBase:
 
         """
         self._start_connectors(bootstrap_server)
-        self.config_helper = ConfigHelper(self.connector)
         self._get_config()
 
     def update_status(self, status: BECStatus):
