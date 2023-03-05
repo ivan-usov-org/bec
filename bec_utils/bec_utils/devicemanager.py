@@ -1,7 +1,4 @@
 import enum
-import json
-import time
-import uuid
 from typing import List
 
 import msgpack
@@ -12,15 +9,12 @@ from typeguard import typechecked
 from bec_utils import ConfigHelper
 from bec_utils.connector import ConnectorBase
 
-from .BECMessage import BECStatus, DeviceConfigMessage, LogMessage, RequestResponseMessage
+from .bec_errors import DeviceConfigError
+from .BECMessage import BECStatus, DeviceConfigMessage, LogMessage
 from .endpoints import MessageEndpoints
 from .logger import bec_logger
 
 logger = bec_logger.logger
-
-
-class DeviceConfigError(Exception):
-    pass
 
 
 class DeviceStatus(enum.Enum):
@@ -457,39 +451,6 @@ class DeviceManagerBase:
     def update_status(self, status: BECStatus):
         for cb in self._status_cb:
             cb(status)
-
-    def send_config_request(self, action: str = "update", config=None) -> None:
-        """
-        send request to update config
-        Returns:
-
-        """
-        if action in ["update", "add", "set"] and not config:
-            raise DeviceConfigError(f"Config cannot be empty for an {action} request.")
-        RID = str(uuid.uuid4())
-        self.producer.send(
-            MessageEndpoints.device_config_request(),
-            DeviceConfigMessage(action=action, config=config, metadata={"RID": RID}).dumps(),
-        )
-
-        reply = self.wait_for_config_reply(RID)
-
-        if not reply.content["accepted"]:
-            raise DeviceConfigError(f"Failed to update the config: {reply.content['message']}.")
-
-    def wait_for_config_reply(self, RID: str) -> RequestResponseMessage:
-        start = 0
-        timeout = 10
-        while True:
-            msg = self.producer.get(MessageEndpoints.device_config_request_response(RID))
-            if msg is None:
-                time.sleep(0.1)
-                start += 0.1
-
-                if start > timeout:
-                    raise DeviceConfigError("Timeout reached whilst waiting for config reply.")
-                continue
-            return RequestResponseMessage.loads(msg)
 
     def parse_config_message(self, msg: DeviceConfigMessage):
         action = msg.content["action"]
