@@ -158,7 +158,9 @@ class RPCBase:
                 )
 
     def update_config(self, update):
-        self.root.parent.send_config_request(action="update", config={self.name: update})
+        self.root.parent.config_helper.send_config_request(
+            action="update", config={self.name: update}
+        )
 
 
 class DeviceBase(RPCBase, Device):
