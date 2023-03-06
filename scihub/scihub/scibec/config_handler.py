@@ -45,7 +45,7 @@ class ConfigHandler:
             if msg.content["action"] == "set":
                 self._set_config(msg)
 
-        except DeviceConfigError as dev_conf_error:
+        except Exception:
             content = traceback.format_exc()
             self.send_config_request_reply(accepted=False, error_msg=content, metadata=msg.metadata)
 
@@ -69,7 +69,7 @@ class ConfigHandler:
         beamline = self.scibec_connector.scibec_info.get("beamline")
         if scibec and beamline:
             scibec.set_session_data(beamline, config)
-        self.scibec_connector.update_session()
+            self.scibec_connector.update_session()
         self.send_config_request_reply(accepted=True, error_msg=None, metadata=msg.metadata)
         reload_msg = BECMessage.DeviceConfigMessage(action="reload", config={})
         self.send_config(reload_msg)
