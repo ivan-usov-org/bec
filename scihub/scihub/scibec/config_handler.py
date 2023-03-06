@@ -10,7 +10,7 @@ import bec_utils
 import msgpack
 from bec_utils import BECMessage, Device, DeviceConfigError
 from bec_utils import DeviceManagerBase as DeviceManager
-from bec_utils import MessageEndpoints, ServiceConfig
+from bec_utils import MessageEndpoints
 from bec_utils.connector import ConnectorBase
 
 from .scibec_validator import SciBecValidator
