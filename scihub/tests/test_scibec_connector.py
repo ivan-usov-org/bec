@@ -22,8 +22,15 @@ def test_scibec_connector(SciHubMock):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
 
 
-def test_get_current_session(SciHubMock):
+def test_get_current_session_with_SciBec(SciHubMock):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
-    with mock.patch.object(scibec_connector.scibec, "get_session_by_id") as scibec_get_session:
+    scibec_connector.scibec_info["beamline"] = {"activeSession": "12345"}
+    with mock.patch.object(scibec_connector, "scibec") as scibec:
         scibec_connector.get_current_session()
-        scibec_get_session.assert_called_once()
+        scibec.get_session_by_id.assert_called_once()
+
+
+def test_get_current_session_without_SciBec(SciHubMock):
+    scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
+    scibec_connector.scibec_info["beamline"] = {"activeSession": "12345"}
+    assert scibec_connector.get_current_session() is None
