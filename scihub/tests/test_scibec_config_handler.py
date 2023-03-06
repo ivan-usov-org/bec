@@ -109,3 +109,55 @@ def test_config_handler_set_config_with_scibec(SciHubMock):
                 )
                 req_reply.assert_called_once_with(accepted=True, error_msg=None, metadata={})
                 update_session.assert_called_once()
+
+
+def test_config_handler_update_config(SciHubMock):
+    scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
+    config_handler = scibec_connector.config_handler
+    msg = BECMessage.DeviceConfigMessage(
+        action="update", config={"samx": {"enabled": True}}, metadata={}
+    )
+    with mock.patch.object(config_handler.device_manager, "devices") as dev:
+        with mock.patch.object(
+            config_handler, "_update_device_config", return_value=True
+        ) as update_device_config:
+            with mock.patch.object(
+                config_handler, "update_config_in_redis"
+            ) as update_config_in_redis:
+                with mock.patch.object(config_handler, "send_config") as send_config:
+                    with mock.patch.object(
+                        config_handler, "send_config_request_reply"
+                    ) as send_config_request_reply:
+                        config_handler._update_config(msg)
+                        update_device_config.assert_called_once_with(dev["samx"], {"enabled": True})
+                        update_config_in_redis.assert_called_once_with(dev["samx"])
+
+                        send_config.assert_called_once_with(msg)
+                        send_config_request_reply.assert_called_once_with(
+                            accepted=True, error_msg=None, metadata={}
+                        )
+
+
+def test_config_handler_update_config_not_updated(SciHubMock):
+    scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
+    config_handler = scibec_connector.config_handler
+    msg = BECMessage.DeviceConfigMessage(
+        action="update", config={"samx": {"enabled": True}}, metadata={}
+    )
+    with mock.patch.object(config_handler.device_manager, "devices") as dev:
+        with mock.patch.object(
+            config_handler, "_update_device_config", return_value=False
+        ) as update_device_config:
+            with mock.patch.object(
+                config_handler, "update_config_in_redis"
+            ) as update_config_in_redis:
+                with mock.patch.object(config_handler, "send_config") as send_config:
+                    with mock.patch.object(
+                        config_handler, "send_config_request_reply"
+                    ) as send_config_request_reply:
+                        config_handler._update_config(msg)
+                        update_device_config.assert_called_once_with(dev["samx"], {"enabled": True})
+                        update_config_in_redis.assert_not_called()
+
+                        send_config.assert_not_called()
+                        send_config_request_reply.assert_not_called()
