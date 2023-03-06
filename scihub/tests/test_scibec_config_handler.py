@@ -56,3 +56,13 @@ def test_parse_config_request_exception(SciHubMock):
         with mock.patch("scihub.scibec.config_handler.traceback.format_exc") as exc:
             config_handler.parse_config_request(msg)
             req_reply.assert_called_once_with(accepted=False, error_msg=exc(), metadata={})
+
+
+def test_config_handler_reload_config(SciHubMock):
+    scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
+    config_handler = scibec_connector.config_handler
+    msg = BECMessage.DeviceConfigMessage(action="reload", config={}, metadata={})
+    with mock.patch.object(config_handler, "send_config_request_reply") as req_reply:
+        with mock.patch.object(config_handler, "send_config") as send:
+            config_handler.parse_config_request(msg)
+            send.assert_called_once_with(msg)
