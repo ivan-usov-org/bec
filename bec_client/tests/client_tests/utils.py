@@ -100,6 +100,7 @@ def bec_client():
             builtins.__dict__["test_session"] = create_session_from_config(yaml.safe_load(f))
     device_manager._session = builtins.__dict__["test_session"]
     device_manager.producer = device_manager.connector.producer()
+    client.wait_for_service = lambda service_name: None
     device_manager._load_session()
     client.device_manager = device_manager
     yield client

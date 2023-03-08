@@ -627,14 +627,14 @@ def test_rpc_calls(client):
     wait_for_empty_queue(bec)
     bec.metadata.update({"unit_test": "test_rpc_calls"})
     dev = bec.device_manager.devices
-    assert dev.samx.dummy_controller.func_with_args(2, 3) == [2, 3]
-    assert dev.samx.dummy_controller.func_with_kwargs(kwinput1=2, kwinput2=3) == {
+    assert dev.samx.dummy_controller._func_with_args(2, 3) == [2, 3]
+    assert dev.samx.dummy_controller._func_with_kwargs(kwinput1=2, kwinput2=3) == {
         "kwinput1": 2,
         "kwinput2": 3,
     }
-    assert dev.samx.dummy_controller.func_with_args_and_kwargs(2, 3, kwinput1=2, kwinput2=3) == [
+    assert dev.samx.dummy_controller._func_with_args_and_kwargs(2, 3, kwinput1=2, kwinput2=3) == [
         [2, 3],
-        {"kwinput1": 2, "kwinput1": 3},
+        {"kwinput1": 2, "kwinput2": 3},
     ]
 
-    assert dev.samx.dummy_controller.func_without_args_and_kwargs() is None
+    assert dev.samx.dummy_controller._func_without_args_kwargs() is None

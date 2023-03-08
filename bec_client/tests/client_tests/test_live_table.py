@@ -11,6 +11,7 @@ from bec_client.callbacks.utils import ScanRequestMixin
 from .utils import bec_client
 
 
+@pytest.mark.timeout(20)
 @pytest.mark.asyncio
 async def test_scan_request_mixin(bec_client):
     client = bec_client
@@ -74,6 +75,7 @@ def test_get_devices_from_scan_data(bec_client, request_msg, scan_report_devices
     assert devices[0 : len(scan_report_devices)] == scan_report_devices
 
 
+@pytest.mark.timeout(20)
 @pytest.mark.asyncio
 async def test_wait_for_request_acceptance(bec_client):
     client = bec_client
