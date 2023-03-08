@@ -3,6 +3,7 @@ from unittest import mock
 import pytest
 from bec_utils import BECMessage
 from bec_utils.bec_errors import DeviceConfigError
+from fastjsonschema import JsonSchemaException
 from test_scibec_connector import SciHubMock
 
 from scihub.scibec import SciBecConnector
@@ -88,11 +89,25 @@ def test_config_handler_set_config(SciHubMock):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     config_handler = scibec_connector.config_handler
     msg = BECMessage.DeviceConfigMessage(
-        action="set", config={"samx": {"enabled": True}}, metadata={}
+        action="set", config={"samx": {"status": {"enabled": True}}}, metadata={}
     )
-    with mock.patch.object(config_handler, "send_config_request_reply") as req_reply:
-        config_handler._set_config(msg)
-        req_reply.assert_called_once_with(accepted=True, error_msg=None, metadata={})
+    with mock.patch.object(config_handler.validator, "validate_device") as validator:
+        with mock.patch.object(config_handler, "send_config_request_reply") as req_reply:
+            config_handler._set_config(msg)
+            req_reply.assert_called_once_with(accepted=True, error_msg=None, metadata={})
+            validator.assert_called_once_with({"enabled": True, "name": "samx"})
+
+
+def test_config_handler_set_invalid_config_raises(SciHubMock):
+    scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
+    config_handler = scibec_connector.config_handler
+    msg = BECMessage.DeviceConfigMessage(
+        action="set", config={"samx": {"status": {"enabled": True}}}, metadata={}
+    )
+    with pytest.raises(JsonSchemaException):
+        with mock.patch.object(config_handler, "send_config_request_reply") as req_reply:
+            config_handler._set_config(msg)
+            req_reply.assert_called_once_with(accepted=True, error_msg=None, metadata={})
 
 
 def test_config_handler_set_config_with_scibec(SciHubMock):
