@@ -70,6 +70,15 @@ class ConfigHandler:
         if scibec and beamline:
             scibec.set_session_data(beamline, config)
             self.scibec_connector.update_session()
+        else:
+            for name, device in config.items():
+                device["enabled"] = device["status"]["enabled"]
+                if device["status"].get("enabled_set"):
+                    device["enabled_set"] = device["status"].get("enabled_set")
+                device.pop("status")
+                device["name"] = name
+                self.validator.validate_device(device)
+        self.scibec_connector.set_redis_config(list(config.values()))
         self.send_config_request_reply(accepted=True, error_msg=None, metadata=msg.metadata)
         reload_msg = BECMessage.DeviceConfigMessage(action="reload", config={})
         self.send_config(reload_msg)
