@@ -218,11 +218,11 @@ class DeviceServer(BECService):
         if callable(rpc_var):
             args = tuple(instr_params.get("args", ()))
             kwargs = instr_params.get("kwargs", {})
-            if len(args) > 0 and len(args[0]) > 0 and len(kwargs) > 0:
-                res = rpc_var(*args[0], **kwargs)
-            elif len(args) > 0 and len(args[0]) > 0:
-                res = rpc_var(*args[0])
-            elif len(kwargs) > 0:
+            if args and kwargs:
+                res = rpc_var(*args, **kwargs)
+            elif args:
+                res = rpc_var(*args)
+            elif kwargs:
                 res = rpc_var(**kwargs)
             else:
                 res = rpc_var()

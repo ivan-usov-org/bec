@@ -51,7 +51,7 @@ class RPCBase:
 
     def _run(self, *args, **kwargs):
         device, func_call = self._get_rpc_func_name(fcn_name=self.name, use_parent=True)
-        return self._run_rpc_call(device, func_call, args, kwargs)
+        return self._run_rpc_call(device, func_call, *args, **kwargs)
 
     @property
     def root(self):

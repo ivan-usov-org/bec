@@ -619,3 +619,22 @@ def test_monitor_scan(client):
     time.sleep(5)
     status = scans.monitor_scan(dev.samx, -100, 100, relative=False)
     assert len(status.scan.data) > 100
+
+
+@pytest.mark.timeout(100)
+def test_rpc_calls(client):
+    bec = client
+    wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_rpc_calls"})
+    dev = bec.device_manager.devices
+    assert dev.samx.dummy_controller.func_with_args(2, 3) == [2, 3]
+    assert dev.samx.dummy_controller.func_with_kwargs(kwinput1=2, kwinput2=3) == {
+        "kwinput1": 2,
+        "kwinput2": 3,
+    }
+    assert dev.samx.dummy_controller.func_with_args_and_kwargs(2, 3, kwinput1=2, kwinput2=3) == [
+        [2, 3],
+        {"kwinput1": 2, "kwinput1": 3},
+    ]
+
+    assert dev.samx.dummy_controller.func_without_args_and_kwargs() is None
