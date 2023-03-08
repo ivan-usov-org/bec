@@ -2,6 +2,7 @@ import ctypes
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as CFTimeoutError
+from typing import Callable
 
 
 # pylint: disable=too-few-public-methods
