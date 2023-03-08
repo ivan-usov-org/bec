@@ -44,7 +44,13 @@ To install Redis, you can either use conda
 
     conda install redis
 
-or install it manually by following the instructions `here <https://redis.io/docs/getting-started/>`_. If you prefer to run redis in Docker, you can also follow the instructions in `Start docker containers for MongoDB, SciBec API server, and Redis`_
+or install it manually by following the instructions `here <https://redis.io/docs/getting-started/>`_. Once installed, start it with 
+
+.. code-block:: bash
+
+    redis-server
+
+If you prefer to run redis in Docker, you can also follow the instructions in `Start docker containers for MongoDB, SciBec API server, and Redis`_
 
 
 .. include:: install/install_bec_services.rst
