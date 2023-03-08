@@ -354,6 +354,7 @@ class DMClient(DeviceManagerBase):
         return msg
 
     def _load_session(self, _device_cls=None, *_args):
+        self.parent.wait_for_service("DeviceServer")
         if self._is_config_valid():
             for dev in self._session["devices"]:
                 msg = self._get_device_info(dev.get("name"))
