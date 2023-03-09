@@ -481,16 +481,22 @@ class DeviceManagerBase:
                     ]
 
         elif action == "add":
+            self.update_status(BECStatus.BUSY)
             for dev in config:
                 obj = self._create_device(dev)
                 self.devices._add_device(dev.get("name"), obj)
+            self.update_status(BECStatus.RUNNING)
         elif action == "reload":
+            self.update_status(BECStatus.BUSY)
             logger.info("Reloading config.")
             self.devices.flush()
             self._get_config()
+            self.update_status(BECStatus.RUNNING)
         elif action == "remove":
+            self.update_status(BECStatus.BUSY)
             for dev in config:
                 self._remove_device(dev)
+            self.update_status(BECStatus.RUNNING)
 
     def _start_connectors(self, bootstrap_server) -> None:
         self._start_base_consumer()
