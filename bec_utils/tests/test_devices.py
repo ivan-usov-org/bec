@@ -32,14 +32,14 @@ def device_config():
 
 def test_create_device_saves_config(device_config):
     connector = ConnectorMock("")
-    dm = DeviceManagerBase(connector, "")
+    dm = DeviceManagerBase(connector)
     obj = dm._create_device(device_config, ())
     assert obj._config == device_config
 
 
 def test_device_enabled(device_config):
     connector = ConnectorMock("")
-    dm = DeviceManagerBase(connector, "")
+    dm = DeviceManagerBase(connector)
     obj = dm._create_device(device_config, ())
     assert obj.enabled == device_config["enabled"]
     device_config["enabled"] = False
@@ -48,18 +48,18 @@ def test_device_enabled(device_config):
 
 def test_device_enable(device_config):
     connector = ConnectorMock("")
-    dm = DeviceManagerBase(connector, "")
+    dm = DeviceManagerBase(connector)
     obj = dm._create_device(device_config, ())
-    with mock.patch.object(obj.parent, "send_config_request") as config_req:
+    with mock.patch.object(obj.parent.config_helper, "send_config_request") as config_req:
         obj.enabled = True
         config_req.assert_called_once_with(action="update", config={obj.name: {"enabled": True}})
 
 
 def test_device_enable_set(device_config):
     connector = ConnectorMock("")
-    dm = DeviceManagerBase(connector, "")
+    dm = DeviceManagerBase(connector)
     obj = dm._create_device(device_config, ())
-    with mock.patch.object(obj.parent, "send_config_request") as config_req:
+    with mock.patch.object(obj.parent.config_helper, "send_config_request") as config_req:
         obj.enabled_set = True
         config_req.assert_called_once_with(
             action="update", config={obj.name: {"enabled_set": True}}
@@ -71,9 +71,9 @@ def test_device_enable_set(device_config):
 )
 def test_device_set_user_parameter(device_config, val, raised_error):
     connector = ConnectorMock("")
-    dm = DeviceManagerBase(connector, "")
+    dm = DeviceManagerBase(connector)
     obj = dm._create_device(device_config, ())
-    with mock.patch.object(obj.parent, "send_config_request") as config_req:
+    with mock.patch.object(obj.parent.config_helper, "send_config_request") as config_req:
         if raised_error is None:
             obj.set_user_parameter(val)
             config_req.assert_called_once_with(
@@ -89,10 +89,10 @@ def test_device_set_user_parameter(device_config, val, raised_error):
 )
 def test_device_update_user_parameter(device_config, val, raised_error):
     connector = ConnectorMock("")
-    dm = DeviceManagerBase(connector, "")
+    dm = DeviceManagerBase(connector)
     obj = dm._create_device(device_config, ())
     obj._config["userParameter"] = {"in": 2, "out": 5}
-    with mock.patch.object(obj.parent, "send_config_request") as config_req:
+    with mock.patch.object(obj.parent.config_helper, "send_config_request") as config_req:
         if raised_error is None:
             obj.update_user_parameter(val)
             config_req.assert_called_once_with(

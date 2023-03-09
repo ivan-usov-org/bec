@@ -13,6 +13,6 @@ Beamline Experiment Control
    usage/introduction
    usage/installation
    usage/quickstart
-   autodoc/autodoc
+   usage/bec_config
 
 

@@ -111,7 +111,7 @@ class ConnectorMock(ConnectorBase):
     ):
         pass
 
-    def log_error(*args, **kwargs):
+    def log_error(self, *args, **kwargs):
         pass
 
 

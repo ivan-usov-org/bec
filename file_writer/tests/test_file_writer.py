@@ -7,8 +7,9 @@ from test_file_writer_manager import load_FileWriter
 
 import file_writer
 from file_writer import NexusFileWriter, NeXusFileXMLWriter
-from file_writer.file_writer import HDF5Storage, cSAXS_NeXus_format
+from file_writer.file_writer import HDF5Storage
 from file_writer.file_writer_manager import ScanStorage
+from file_writer_plugins.cSAXS import NeXus_format as cSAXS_Nexus_format
 
 dir_path = os.path.dirname(file_writer.__file__)
 
@@ -27,7 +28,7 @@ def test_nexus_file_xml_writer():
 
 def test_csaxs_nexus_format():
     file_manager = load_FileWriter()
-    writer_storage = cSAXS_NeXus_format(
+    writer_storage = cSAXS_Nexus_format(
         HDF5Storage(), {"samx": [0, 1, 2]}, file_manager.device_manager
     )
     assert writer_storage._storage["entry"].attrs["definition"] == "NXsas"

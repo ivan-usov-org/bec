@@ -1,14 +1,17 @@
 import os
-from pathlib import Path
 import traceback
+from pathlib import Path
+
 import numpy as np
 from bec_utils import (
     BECMessage,
     BECService,
     DeviceManagerBase,
     MessageEndpoints,
+    ServiceConfig,
     bec_logger,
 )
+from bec_utils.bec_errors import ServiceConfigError
 from bec_utils.connector import ConnectorBase
 
 from .file_writer import NexusFileWriter
@@ -34,19 +37,19 @@ class ScanStorage:
 
 
 class FileWriterManager(BECService):
-    def __init__(self, bootstrap_server, connector_cls: ConnectorBase, scibec_url: str) -> None:
-        super().__init__(bootstrap_server, connector_cls, unique_service=True)
-        self.scibec_url = scibec_url
+    def __init__(self, config: ServiceConfig, connector_cls: ConnectorBase) -> None:
+        super().__init__(config, connector_cls, unique_service=True)
+        self.file_writer_config = self._service_config.service_config.get("file_writer")
         self.producer = self.connector.producer()
         self._start_device_manager()
         self._start_scan_segment_consumer()
         self._start_scan_status_consumer()
         self.scan_storage = {}
-        self.base_path = os.path.expanduser("~/Data10")  # should be configured
+        self.base_path = self._get_base_path()
         self.file_writer = NexusFileWriter(self)
 
     def _start_device_manager(self):
-        self.device_manager = DeviceManagerBase(self.connector, self.scibec_url)
+        self.device_manager = DeviceManagerBase(self.connector)
         self.device_manager.initialize([self.bootstrap_server])
 
     def _start_scan_segment_consumer(self):
@@ -75,6 +78,14 @@ class FileWriterManager(BECService):
     def _scan_status_callback(msg, *, parent):
         msg = BECMessage.ScanStatusMessage.loads(msg.value)
         parent.update_scan_storage_with_status(msg)
+
+    def _get_base_path(self):
+        if not self.file_writer_config:
+            raise ServiceConfigError("Service config must contain a file writer definition.")
+        if not self.file_writer_config.get("base_path"):
+            raise ServiceConfigError("File writer config must define a base path.")
+
+        return self.file_writer_config.get("base_path")
 
     def update_scan_storage_with_status(self, msg: BECMessage.ScanStatusMessage):
         scanID = msg.content.get("scanID")

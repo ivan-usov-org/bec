@@ -1,7 +1,4 @@
 import enum
-import json
-import time
-import uuid
 from typing import List
 
 import msgpack
@@ -9,18 +6,15 @@ from rich.console import Console
 from rich.table import Table
 from typeguard import typechecked
 
+from bec_utils import ConfigHelper
 from bec_utils.connector import ConnectorBase
 
-from .BECMessage import BECStatus, DeviceConfigMessage, LogMessage, RequestResponseMessage
+from .bec_errors import DeviceConfigError
+from .BECMessage import BECStatus, DeviceConfigMessage, LogMessage
 from .endpoints import MessageEndpoints
 from .logger import bec_logger
-from .scibec import SciBec
 
 logger = bec_logger.logger
-
-
-class DeviceConfigError(Exception):
-    pass
 
 
 class DeviceStatus(enum.Enum):
@@ -58,7 +52,7 @@ class Device:
     def set_device_config(self, val: dict):
         """set the device config for this device"""
         self._config["deviceConfig"].update(val)
-        return self.parent.send_config_request(
+        return self.parent.config_helper.send_config_request(
             action="update", config={self.name: {"deviceConfig": self._config["deviceConfig"]}}
         )
 
@@ -70,7 +64,7 @@ class Device:
     def set_device_tags(self, val: list):
         """set the device tags for this device"""
         self._config["deviceTags"] = val
-        return self.parent.send_config_request(
+        return self.parent.config_helper.send_config_request(
             action="update", config={self.name: {"deviceTags": self._config["deviceTags"]}}
         )
 
@@ -80,7 +74,7 @@ class Device:
         if val in self._config["deviceTags"]:
             return None
         self._config["deviceTags"].append(val)
-        return self.parent.send_config_request(
+        return self.parent.config_helper.send_config_request(
             action="update", config={self.name: {"deviceTags": self._config["deviceTags"]}}
         )
 
@@ -95,7 +89,7 @@ class Device:
         if not isinstance(val, ReadoutPriority):
             val = ReadoutPriority(val)
         self._config["acquisitionConfig"]["readoutPriority"] = val
-        return self.parent.send_config_request(
+        return self.parent.config_helper.send_config_request(
             action="update",
             config={self.name: {"acquisitionConfig": self._config["acquisitionConfig"]}},
         )
@@ -111,7 +105,7 @@ class Device:
         if not isinstance(val, OnFailure):
             val = OnFailure(val)
         self._config["onFailure"] = val
-        return self.parent.send_config_request(
+        return self.parent.config_helper.send_config_request(
             action="update", config={self.name: {"onFailure": self._config["onFailure"]}}
         )
 
@@ -124,7 +118,9 @@ class Device:
     def enabled(self, value):
         """Whether or not the device is enabled"""
         self._config["enabled"] = value
-        self.parent.send_config_request(action="update", config={self.name: {"enabled": value}})
+        self.parent.config_helper.send_config_request(
+            action="update", config={self.name: {"enabled": value}}
+        )
 
     @property
     def enabled_set(self):
@@ -135,7 +131,9 @@ class Device:
     def enabled_set(self, value):
         """Whether or not the device can be set"""
         self._config["enabled_set"] = value
-        self.parent.send_config_request(action="update", config={self.name: {"enabled_set": value}})
+        self.parent.config_helper.send_config_request(
+            action="update", config={self.name: {"enabled_set": value}}
+        )
 
     def read(self, cached):
         """get the last reading from a device"""
@@ -176,7 +174,9 @@ class Device:
 
     @typechecked
     def set_user_parameter(self, val: dict):
-        self.parent.send_config_request(action="update", config={self.name: {"userParameter": val}})
+        self.parent.config_helper.send_config_request(
+            action="update", config={self.name: {"userParameter": val}}
+        )
 
     @typechecked
     def update_user_parameter(self, val: dict):
@@ -427,17 +427,14 @@ class DeviceManagerBase:
 
     _connector_base_consumer = {}
     producer = None
-    _scibec = SciBec()
+    config_helper = None
     _device_cls = Device
     _status_cb = []
 
-    def __init__(
-        self, connector: ConnectorBase, scibec_url: str = None, status_cb: list = None
-    ) -> None:
+    def __init__(self, connector: ConnectorBase, status_cb: list = None) -> None:
         self.connector = connector
+        self.config_helper = ConfigHelper(self.connector)
         self._status_cb = status_cb if isinstance(status_cb, list) else [status_cb]
-        if scibec_url is not None:
-            self._scibec.url = scibec_url
 
     def initialize(self, bootstrap_server) -> None:
         """
@@ -449,49 +446,12 @@ class DeviceManagerBase:
 
         """
         self._start_connectors(bootstrap_server)
-        self._get_config_from_DB()
+        self._get_config()
 
     def update_status(self, status: BECStatus):
         for cb in self._status_cb:
-            cb(status)
-
-    @property
-    def scibec(self):
-        """SciBec instance"""
-        return self._scibec
-
-    def send_config_request(self, action: str = "update", config=None) -> None:
-        """
-        send request to update config
-        Returns:
-
-        """
-        if action in ["update", "add"] and not config:
-            raise DeviceConfigError(f"Config cannot be empty for an {action} request.")
-        RID = str(uuid.uuid4())
-        self.producer.send(
-            MessageEndpoints.device_config_request(),
-            DeviceConfigMessage(action=action, config=config, metadata={"RID": RID}).dumps(),
-        )
-
-        reply = self.wait_for_config_reply(RID)
-
-        if not reply.content["accepted"]:
-            raise DeviceConfigError(f"Failed to update the config: {reply.content['message']}.")
-
-    def wait_for_config_reply(self, RID: str) -> RequestResponseMessage:
-        start = 0
-        timeout = 10
-        while True:
-            msg = self.producer.get(MessageEndpoints.device_config_request_response(RID))
-            if msg is None:
-                time.sleep(0.1)
-                start += 0.1
-
-                if start > timeout:
-                    raise DeviceConfigError("Timeout reached whilst waiting for config reply.")
-                continue
-            return RequestResponseMessage.loads(msg)
+            if cb:
+                cb(status)
 
     def parse_config_message(self, msg: DeviceConfigMessage):
         action = msg.content["action"]
@@ -522,16 +482,22 @@ class DeviceManagerBase:
                     ]
 
         elif action == "add":
+            self.update_status(BECStatus.BUSY)
             for dev in config:
                 obj = self._create_device(dev)
                 self.devices._add_device(dev.get("name"), obj)
+            self.update_status(BECStatus.RUNNING)
         elif action == "reload":
+            self.update_status(BECStatus.BUSY)
             logger.info("Reloading config.")
             self.devices.flush()
-            self._get_config_from_DB()
+            self._get_config()
+            self.update_status(BECStatus.RUNNING)
         elif action == "remove":
+            self.update_status(BECStatus.BUSY)
             for dev in config:
                 self._remove_device(dev)
+            self.update_status(BECStatus.RUNNING)
 
     def _start_connectors(self, bootstrap_server) -> None:
         self._start_base_consumer()
@@ -547,14 +513,14 @@ class DeviceManagerBase:
         # self._connector_base_consumer["log"] = self.connector.consumer(
         #     MessageEndpoints.log(), cb=self._log_callback, parent=self
         # )
-        self._connector_base_consumer["device_config"] = self.connector.consumer(
-            MessageEndpoints.device_config(),
-            cb=self._device_config_callback,
+        self._connector_base_consumer["device_config_update"] = self.connector.consumer(
+            MessageEndpoints.device_config_update(),
+            cb=self._device_config_update_callback,
             parent=self,
         )
 
         # self._connector_base_consumer["log"].start()
-        self._connector_base_consumer["device_config"].start()
+        self._connector_base_consumer["device_config_update"].start()
 
     @staticmethod
     def _log_callback(msg, *, parent, **kwargs) -> None:
@@ -572,7 +538,7 @@ class DeviceManagerBase:
         logger.info(f"Received log message: {str(msg)}")
 
     @staticmethod
-    def _device_config_callback(msg, *, parent, **kwargs) -> None:
+    def _device_config_update_callback(msg, *, parent, **kwargs) -> None:
         """
         Consumer callback for handling new device configuration
         Args:
@@ -586,27 +552,20 @@ class DeviceManagerBase:
         logger.info(f"Received new config: {str(msg)}")
         parent.parse_config_message(msg)
 
-    def _get_config_from_DB(self):
-        beamlines = self._scibec.get_beamlines()
-        if not beamlines:
+    def _get_config(self):
+        self._session["devices"] = self._get_redis_device_config()
+        if not self._session["devices"]:
             logger.warning("No config available.")
-            return
-        if len(beamlines) > 1:
-            logger.warning("More than one beamline available.")
-        beamline = beamlines[0]
-
-        session = self._scibec.get_current_session(beamline["name"], include_devices=True)
-        if not session:
-            logger.warning(f"No config available for beamline {beamline['name']}.")
-            return
-        if not session.get("devices"):
-            logger.warning(f"The currently active config has no devices specified.")
-            return
-        self._session = session
-        logger.debug(
-            f"Loaded session from DB: {json.dumps(self._session, sort_keys=True, indent=4)}"
-        )
         self._load_session()
+
+    def _set_redis_device_config(self, devices: list) -> None:
+        self.producer.set(MessageEndpoints.device_config(), msgpack.dumps(devices))
+
+    def _get_redis_device_config(self) -> list:
+        devices = self.producer.get(MessageEndpoints.device_config())
+        if not devices:
+            return []
+        return msgpack.loads(devices)
 
     def _stop_base_consumer(self):
         """
@@ -658,19 +617,20 @@ class DeviceManagerBase:
 
     def _load_session(self, *args, device_cls=Device):
         self._device_cls = device_cls
-        if self._is_config_valid():
-            for dev in self._session["devices"]:
-                obj = self._create_device(dev, args)
-                # pylint: disable=protected-access
-                self.devices._add_device(dev.get("name"), obj)
+        if not self._is_config_valid():
+            return
+        for dev in self._session["devices"]:
+            obj = self._create_device(dev, args)
+            # pylint: disable=protected-access
+            self.devices._add_device(dev.get("name"), obj)
 
     def check_request_validity(self, msg: DeviceConfigMessage) -> None:
-        if msg.content["action"] not in ["update", "add", "remove", "reload"]:
-            raise DeviceConfigError("Action must be either add, remove, update, or reload.")
-        if msg.content["action"] in ["update", "add", "remove"]:
+        if msg.content["action"] not in ["update", "add", "remove", "reload", "set"]:
+            raise DeviceConfigError("Action must be either add, remove, update, set or reload.")
+        if msg.content["action"] in ["update", "add", "remove", "set"]:
             if not msg.content["config"]:
                 raise DeviceConfigError(
-                    "Config cannot be empty for an action of type add, remove or update."
+                    "Config cannot be empty for an action of type add, remove, set or update."
                 )
             if not isinstance(msg.content["config"], dict):
                 raise DeviceConfigError("Config must be of type dict.")

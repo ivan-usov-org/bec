@@ -53,7 +53,7 @@ class ScanStubs:
             "device": device,
             "func": func_name,
             "rpc_id": rpc_id,
-            "args": list(args),
+            "args": args,
             "kwargs": kwargs,
         }
         yield from self.rpc(device=device, parameter=parameter)
