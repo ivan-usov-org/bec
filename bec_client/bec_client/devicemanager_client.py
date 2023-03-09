@@ -343,8 +343,8 @@ class Positioner(DeviceBase):
 
 
 class DMClient(DeviceManagerBase):
-    def __init__(self, parent, scibec_url):
-        super().__init__(parent.connector, scibec_url)
+    def __init__(self, parent):
+        super().__init__(parent.connector)
         self.parent = parent
 
     def _get_device_info(self, device_name) -> BECMessage.DeviceInfoMessage:

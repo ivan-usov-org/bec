@@ -15,7 +15,7 @@ dir_path = os.path.dirname(bec_utils.__file__)
 
 def test_dm_initialize():
     connector = ConnectorMock("")
-    dm = DeviceManagerBase(connector, "")
+    dm = DeviceManagerBase(connector)
     with mock.patch.object(dm, "_get_config") as get_config:
         dm.initialize("")
         get_config.assert_called_once()
@@ -31,13 +31,13 @@ def test_dm_initialize():
 )
 def test_parse_config_request(msg):
     connector = ConnectorMock("")
-    dm = DeviceManagerBase(connector, "")
+    dm = DeviceManagerBase(connector)
     dm.parse_config_message(msg)
 
 
 def test_config_request_update():
     connector = ConnectorMock("")
-    dm = DeviceManagerBase(connector, "")
+    dm = DeviceManagerBase(connector)
     with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
         dm._session = create_session_from_config(yaml.safe_load(f))
     dm._load_session()
@@ -57,7 +57,7 @@ def test_config_request_update():
 
 def test_config_request_reload():
     connector = ConnectorMock("")
-    dm = DeviceManagerBase(connector, "")
+    dm = DeviceManagerBase(connector)
     with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
         dm._session = create_session_from_config(yaml.safe_load(f))
     dm._load_session()
@@ -80,7 +80,7 @@ def test_config_request_reload():
 )
 def test_check_request_validity(msg, raised):
     connector = ConnectorMock("")
-    dm = DeviceManagerBase(connector, "")
+    dm = DeviceManagerBase(connector)
 
     if raised:
         with pytest.raises(DeviceConfigError):
@@ -91,7 +91,7 @@ def test_check_request_validity(msg, raised):
 
 def test_get_config_calls_load():
     connector = ConnectorMock("")
-    dm = DeviceManagerBase(connector, "")
+    dm = DeviceManagerBase(connector)
     with mock.patch.object(
         dm, "_get_redis_device_config", return_value={"devices": [{}]}
     ) as get_redis_config:
@@ -104,7 +104,7 @@ def test_get_config_calls_load():
 
 def test_get_devices_with_tags():
     connector = ConnectorMock("")
-    dm = DeviceManagerBase(connector, "")
+    dm = DeviceManagerBase(connector)
     config_content = None
     with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
         config_content = yaml.safe_load(f)
@@ -125,7 +125,7 @@ def test_get_devices_with_tags():
 
 def test_show_tags():
     connector = ConnectorMock("")
-    dm = DeviceManagerBase(connector, "")
+    dm = DeviceManagerBase(connector)
     config_content = None
     with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
         config_content = yaml.safe_load(f)
