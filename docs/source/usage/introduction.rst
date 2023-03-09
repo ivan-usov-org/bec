@@ -1,5 +1,6 @@
+#############
 Introduction
--------------
+#############
 
 BEC is a **B**\ eamline **E**\ xperiment **C**\ ontrol system that relies on multiple small services for orchestrating and steering the experiment at large research facilities. The usage of small services allows for a more modular system and facilitates the long-term maintainability. 
 

@@ -59,6 +59,8 @@ If you prefer to run redis in Docker, you can also follow the instructions in `S
 
 .. include:: install/start_client.rst
 
+You are now ready to load your first device configuration. To this end, please follow the instructions given in :doc:`quickstart`.
+
 
 
 ********************************************
