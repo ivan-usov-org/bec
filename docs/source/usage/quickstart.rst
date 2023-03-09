@@ -2,6 +2,16 @@
 Quickstart
 ###########
 
+The following quickstart guide assumes that your system is already installed and running. If not, please follow the instructions in :doc:`installation`.
+
+***************************
+Create a new configuration
+***************************
+
+If you already have a list of your devices and their configuration, you can skip this step and continue with `Load, save and update the configuration`_.
+
+.. include:: install/create_config.rst
+
 ****************************************
 Load, save and update the configuration
 ****************************************
