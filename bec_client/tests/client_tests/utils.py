@@ -94,7 +94,7 @@ def bec_client():
         ServiceConfig(redis={"host": "host", "port": 123}, scibec={"host": "host", "port": 123}),
         ConnectorMock,
     )
-    device_manager = DMClientMock(client, "")
+    device_manager = DMClientMock(client)
     if not "test_session" in builtins.__dict__:
         with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
             builtins.__dict__["test_session"] = create_session_from_config(yaml.safe_load(f))

@@ -179,7 +179,7 @@ class BECClient(BECService, BeamlineMixin, UserScriptsMixin):
 
     def _start_device_manager(self):
         logger.info("Starting device manager")
-        self.device_manager = DMClient(self, self.scibec_url)
+        self.device_manager = DMClient(self)
         self.device_manager.initialize(self.bootstrap_server)
         builtins.dev = self.device_manager.devices
 
