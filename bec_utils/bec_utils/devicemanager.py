@@ -450,7 +450,8 @@ class DeviceManagerBase:
 
     def update_status(self, status: BECStatus):
         for cb in self._status_cb:
-            cb(status)
+            if cb:
+                cb(status)
 
     def parse_config_message(self, msg: DeviceConfigMessage):
         action = msg.content["action"]
