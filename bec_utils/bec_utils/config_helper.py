@@ -33,8 +33,6 @@ class ConfigHelper:
         """
         config = self._load_config_from_file(file_path)
         self.send_config_request(action="set", config=config)
-        if reload:
-            self.send_config_request(action="reload")
 
     def _load_config_from_file(self, file_path: str) -> dict:
         data = {}
