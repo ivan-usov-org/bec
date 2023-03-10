@@ -29,6 +29,21 @@ scans = bec.scans
 
 logger.success("Started BECClient")
 
+# from bec_client.plotting import GrumpyConnector
+# bec.plotter = GrumpyConnector()
+# bec.plotter.connect()
+
+
+# def basic_plot(data, metadata):
+#     plot_name = f"Scan {metadata['scan_number']}"
+#     if bec.plotter.current_plot != plot_name:
+#         bec.plotter.new_plot(plot_name, {})
+#     x = data["data"]["samx"]["samx"]["value"]
+#     y = data["data"]["bpm3a"]["bpm3a"]["value"]
+#     bec.plotter.append_data([x, y])
+
+
+# scans.line_scan(dev.samx, -5, 5, steps=100, exp_time=0.1, relative=False, callback=basic_plot)
 
 # tomo_scan_sim()
 

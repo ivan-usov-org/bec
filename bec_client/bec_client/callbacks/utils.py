@@ -66,10 +66,10 @@ class LiveUpdatesBase(abc.ABC):
     def run(self):
         pass
 
-    def emit_point(self, data: dict):
+    def emit_point(self, data: dict, metadata: dict = None):
         for cb in self.callbacks:
             try:
-                cb(data)
+                cb(data, metadata=metadata)
             except Exception:
                 content = traceback.format_exc()
                 logger.warning(f"Failed to run callback function: {content}")

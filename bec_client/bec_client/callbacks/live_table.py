@@ -169,7 +169,7 @@ class LiveUpdatesTable(LiveUpdatesBase):
                         signal = self.point_data.content["data"].get(dev, {}).get(dev)
                         self.dev_values[ind] = signal.get("value") if signal else -999
                     print(self.table.get_row(self.point_id, *self.dev_values))
-                    self.emit_point(self.point_data.content)
+                    self.emit_point(self.point_data.content, metadata=self.point_data.metadata)
                     progressbar.update(self.point_id)
                 else:
                     logger.debug("waiting for new data point")
