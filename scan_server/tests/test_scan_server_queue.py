@@ -106,12 +106,28 @@ def test_set_continue():
 def test_set_abort():
     queue_manager = get_queuemanager()
     queue_manager.producer.message_sent = []
+    msg = BECMessage.ScanQueueMessage(
+        scan_type="mv",
+        parameter={"args": {"samx": (1,)}, "kwargs": {}},
+        queue="primary",
+        metadata={"RID": "something"},
+    )
+    queue_manager.queues = {"primary": ScanQueue(queue_manager, InstructionQueueMock)}
+    queue_manager.add_to_queue(scan_queue="primary", msg=msg)
     queue_manager.set_abort(queue="primary")
     assert queue_manager.queues["primary"].status == ScanQueueStatus.PAUSED
-    assert len(queue_manager.producer.message_sent) == 1
+    assert len(queue_manager.producer.message_sent) == 2
     assert (
         queue_manager.producer.message_sent[0].get("queue") == MessageEndpoints.scan_queue_status()
     )
+
+
+def test_set_abort_with_empty_queue():
+    queue_manager = get_queuemanager()
+    queue_manager.producer.message_sent = []
+    queue_manager.set_abort(queue="primary")
+    assert queue_manager.queues["primary"].status == ScanQueueStatus.RUNNING
+    assert len(queue_manager.producer.message_sent) == 0
 
 
 def test_set_clear_sends_message():
