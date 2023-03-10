@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable, List
 
 import numpy as np
 from bec_utils import BECMessage, bec_logger
@@ -40,8 +40,10 @@ class LiveUpdatesTable(LiveUpdatesBase):
 
     MAX_DEVICES = 10
 
-    def __init__(self, bec: BECClient, request: BECMessage.ScanQueueMessage) -> None:
-        super().__init__(bec, request)
+    def __init__(
+        self, bec: BECClient, request: BECMessage.ScanQueueMessage, callbacks: List[Callable] = None
+    ) -> None:
+        super().__init__(bec, request, callbacks)
         self.scan_queue_request = None
         self.scan_item = None
         self.dev_values = None
@@ -167,6 +169,7 @@ class LiveUpdatesTable(LiveUpdatesBase):
                         signal = self.point_data.content["data"].get(dev, {}).get(dev)
                         self.dev_values[ind] = signal.get("value") if signal else -999
                     print(self.table.get_row(self.point_id, *self.dev_values))
+                    self.emit_point(self.point_data.content, metadata=self.point_data.metadata)
                     progressbar.update(self.point_id)
                 else:
                     logger.debug("waiting for new data point")
