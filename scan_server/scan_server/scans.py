@@ -778,7 +778,7 @@ class RoundScanFlySim(ScanBase):
 
     def __init__(self, *args, parameter=None, **kwargs):
         """
-        A scan following a round shell-like pattern.
+        A fly scan following a round shell-like pattern.
 
         Args:
             *args: motor1, motor2, inner ring, outer ring, number of rings, number of positions in the first ring
