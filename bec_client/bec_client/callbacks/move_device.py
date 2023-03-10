@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable, List
 
 import numpy as np
-from bec_client.progressbar import DeviceProgressBar
 from bec_utils import BECMessage, DeviceManagerBase, MessageEndpoints
 
-from .utils import LiveUpdatesBase, ScanRequestMixin, check_alarms
+from bec_client.progressbar import DeviceProgressBar
+
+from .utils import LiveUpdatesBase, check_alarms
 
 if TYPE_CHECKING:
     from bec_client.bec_client import BECClient
@@ -54,8 +55,10 @@ class LiveUpdatesReadbackProgressbar(LiveUpdatesBase):
 
     """
 
-    def __init__(self, bec: BECClient, request: BECMessage.ScanQueueMessage) -> None:
-        super().__init__(bec, request)
+    def __init__(
+        self, bec: BECClient, request: BECMessage.ScanQueueMessage, callbacks: List[Callable] = None
+    ) -> None:
+        super().__init__(bec, request, callbacks)
         self.devices = list(request.content["parameter"]["args"].keys())
 
     async def core(self):

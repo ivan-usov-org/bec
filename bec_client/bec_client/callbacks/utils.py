@@ -4,10 +4,12 @@ import abc
 import asyncio
 import threading
 import time
-from typing import TYPE_CHECKING
+import traceback
+from typing import TYPE_CHECKING, Callable, List
+
+from bec_utils import Alarms, BECMessage, bec_logger
 
 from bec_client.request_items import RequestItem
-from bec_utils import Alarms, BECMessage, bec_logger
 
 if TYPE_CHECKING:
     from bec_client.bec_client import BECClient
@@ -44,11 +46,16 @@ def check_alarms(bec):
 
 
 class LiveUpdatesBase(abc.ABC):
-    def __init__(self, bec: BECClient, request: BECMessage.ScanQueueMessage) -> None:
+    def __init__(
+        self, bec: BECClient, request: BECMessage.ScanQueueMessage, callbacks: List[Callable] = None
+    ) -> None:
         self.bec = bec
         self.request = request
         self.RID = request.metadata["RID"]
         self.scan_queue_request = None
+        if callbacks is None:
+            self.callbacks = []
+        self.callbacks = callbacks if isinstance(callbacks, list) else [callbacks]
 
     async def wait_for_request_acceptance(self):
         scan_request = ScanRequestMixin(self.bec, self.RID)
@@ -58,6 +65,14 @@ class LiveUpdatesBase(abc.ABC):
     @abc.abstractmethod
     def run(self):
         pass
+
+    def emit_point(self, data: dict):
+        for cb in self.callbacks:
+            try:
+                cb(data)
+            except Exception:
+                content = traceback.format_exc()
+                logger.warning(f"Failed to run callback function: {content}")
 
 
 class ScanRequestMixin:
