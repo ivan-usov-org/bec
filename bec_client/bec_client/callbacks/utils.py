@@ -68,6 +68,8 @@ class LiveUpdatesBase(abc.ABC):
 
     def emit_point(self, data: dict, metadata: dict = None):
         for cb in self.callbacks:
+            if not cb:
+                continue
             try:
                 cb(data, metadata=metadata)
             except Exception:
