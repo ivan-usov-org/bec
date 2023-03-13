@@ -58,7 +58,7 @@ class CallbackManager:
             self._interrupted_request = None
         except ScanInterruption as scan_interr:
             self._interrupted_request = (request, scan_report_type)
-            raise ScanInterruption from scan_interr
+            raise scan_interr
 
     def continue_request(self):
         if not self._interrupted_request:

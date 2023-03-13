@@ -71,6 +71,7 @@ class BECClient(BECService, BeamlineMixin, UserScriptsMixin):
         self.metadata = {}
         # self.logbook = LogbookConnector()
         self._update_username()
+        self.history = None
 
     @property
     def username(self) -> str:
@@ -91,6 +92,7 @@ class BECClient(BECService, BeamlineMixin, UserScriptsMixin):
         self._configure_logger()
         self.load_all_user_scripts()
         self.config = ConfigHelper(self.connector)
+        self.history = self.queue.queue_storage.storage
 
     def alarms(self, severity=Alarms.WARNING):
         """get the next alarm with at least the specified severity"""

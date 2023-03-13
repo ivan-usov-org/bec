@@ -118,13 +118,13 @@ class ScanBundler(BECService):
 
     def _scan_status_modification(self, msg: BECMessage.ScanStatusMessage):
         status = msg.content.get("status")
-        if status not in ["closed", "aborted"]:
+        if status not in ["closed", "aborted", "paused", "halted"]:
             logger.error(f"Unknown scan status {status}")
             return
 
         scanID = msg.content.get("scanID")
         if not scanID:
-            logger.error(f"Received scan status update without scanID: {msg}")
+            logger.warning(f"Received scan status update without scanID: {msg}")
             return
         if self.sync_storage.get(scanID):
             self.sync_storage[scanID]["status"] = status
