@@ -60,11 +60,11 @@ class ConfigHelper:
         config = msgpack.loads(msg_raw)
         out = {}
         for dev in config:
-            dev.pop("id")
-            dev.pop("createdAt")
-            dev.pop("createdBy")
-            dev.pop("sessionId")
-            enabled = dev.pop("enabled")
+            dev.pop("id", None)
+            dev.pop("createdAt", None)
+            dev.pop("createdBy", None)
+            dev.pop("sessionId", None)
+            enabled = dev.pop("enabled", None)
             config = {"status": {"enabled": enabled}}
 
             enabled_set = dev.pop("enabled_set", None)
