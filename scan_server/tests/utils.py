@@ -24,9 +24,16 @@ from scan_server.scans import RequestBase
 dir_path = os.path.dirname(bec_utils.__file__)
 
 
+class DeviceManagerMock(DeviceManager):
+    def _create_device(self, dev, *args):
+        obj = self._device_cls(dev.get("name"), *args, parent=self)
+        obj._config = dev
+        return obj
+
+
 def load_ScanServerMock():
     connector = ConnectorMock("")
-    device_manager = DeviceManager(connector, "")
+    device_manager = DeviceManagerMock(connector, "")
     device_manager.producer = connector.producer()
     with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
         device_manager._session = create_session_from_config(yaml.safe_load(f))
