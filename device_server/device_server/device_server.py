@@ -103,7 +103,8 @@ class DeviceServer(BECService):
         if not isinstance(devices, list):
             devices = [devices]
         for dev in devices:
-            self.device_manager.devices.get(dev).metadata = instr.metadata
+            device_root = dev.split(".")[0]
+            self.device_manager.devices.get(device_root).metadata[dev] = instr.metadata
 
     @staticmethod
     def consumer_interception_callback(msg, *, parent, **_kwargs) -> None:
@@ -135,8 +136,15 @@ class DeviceServer(BECService):
             devices = [devices]
 
         for dev in devices:
+            dev = dev.split(".")[0]
             if not self.device_manager.devices[dev].enabled:
                 raise DisabledDeviceError(f"Cannot access disabled device {dev}.")
+
+    @staticmethod
+    def _get_ds_device_name(name: str) -> str:
+        obj = name.split(".")
+        obj.insert(1, "obj")
+        return ".".join(obj)
 
     def _assert_device_is_valid(self, instructions: BECMessage.DeviceInstructionMessage) -> None:
         devices = instructions.content["device"]
@@ -145,7 +153,10 @@ class DeviceServer(BECService):
         if isinstance(devices, str):
             devices = [devices]
         for dev in devices:
-            if dev not in self.device_manager.devices:
+            try:
+                obj = DeviceServer._get_ds_device_name(dev)
+                ophyd_device = rgetattr(self.device_manager.devices, obj)
+            except AttributeError:
                 raise InvalidDeviceError(f"There is no device with the name {dev}.")
 
     def handle_device_instructions(self, msg: str) -> None:
@@ -314,30 +325,40 @@ class DeviceServer(BECService):
         obj.kickoff(metadata=instr.metadata, **instr.content["parameter"])
 
     def _set_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
-        device_obj = self.device_manager.devices.get(instr.content["device"])
+        device = instr.content["device"]
+        device_components = device.split(".")
+        dev_root = device_components[0]
+        target_device = DeviceServer._get_ds_device_name(device)
+
+        device_obj = self.device_manager.devices.get(dev_root)
         if not device_obj.enabled_set:
             raise DisabledDeviceError(
                 f"Setting the device {device_obj.name} is currently disabled."
             )
         logger.debug(f"Setting device: {instr}")
         val = instr.content["parameter"]["value"]
-        obj = self.device_manager.devices.get(instr.content["device"]).obj
-        # self.device_manager.add_req_done_sub(obj)
+        obj = self.device_manager.devices[target_device]
+        if len(device_components) > 1:
+            # add readback callback for nested calls
+            if "readback" in obj.event_types:
+                obj.subscribe(self.device_manager._obj_callback_readback, run=True)
+            elif "value" in obj.event_types:
+                obj.subscribe(self.device_manager._obj_callback_readback, run=True)
+
         status = obj.set(val)
         status.__dict__["instruction"] = instr
         status.add_callback(self._status_callback)
 
     def _status_callback(self, status):
         pipe = self.producer.pipeline()
+        name = status.device.name.replace("_", ".")
         dev_msg = BECMessage.DeviceReqStatusMessage(
-            device=status.device.name,
+            device=name,
             success=status.success,
             metadata=status.instruction.metadata,
         ).dumps()
-        logger.debug(f"req status for device {status.device.name}: {status.success}")
-        self.producer.set_and_publish(
-            MessageEndpoints.device_req_status(status.device.name), dev_msg, pipe
-        )
+        logger.debug(f"req status for device {name}: {status.success}")
+        self.producer.set_and_publish(MessageEndpoints.device_req_status(name), dev_msg, pipe)
         response = status.instruction.metadata.get("response")
         if response:
             self.producer.lpush(

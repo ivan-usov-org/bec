@@ -1,4 +1,7 @@
 import enum
+import functools
+import time
+import uuid
 from typing import List
 
 import msgpack
@@ -9,12 +12,29 @@ from typeguard import typechecked
 from bec_utils import ConfigHelper
 from bec_utils.connector import ConnectorBase
 
-from .bec_errors import DeviceConfigError
-from .BECMessage import BECStatus, DeviceConfigMessage, LogMessage
+from .bec_errors import DeviceConfigError, RPCError, ScanRequestError
+from .BECMessage import (
+    BECStatus,
+    DeviceConfigMessage,
+    DeviceInfoMessage,
+    DeviceMessage,
+    DeviceRPCMessage,
+    LogMessage,
+    ScanQueueMessage,
+)
 from .endpoints import MessageEndpoints
 from .logger import bec_logger
 
 logger = bec_logger.logger
+
+
+def rgetattr(obj, attr, *args):
+    """See https://stackoverflow.com/questions/31174295/getattr-and-setattr-on-nested-objects"""
+
+    def _getattr(obj, attr):
+        return getattr(obj, attr, *args)
+
+    return functools.reduce(_getattr, [obj] + attr.split("."))
 
 
 class DeviceStatus(enum.Enum):
@@ -47,6 +67,18 @@ class Device:
     def get_device_config(self):
         """get the device config for this device"""
         return self._config["deviceConfig"]
+
+    def _get_full_obj_name(self) -> str:
+        """Return the full object name"""
+        names = []
+        obj = self
+        while not isinstance(obj.parent, DeviceManagerBase):
+            names.append(obj.name)
+            obj = obj.parent
+        dotted_name = ".".join(names[::-1])
+        if not dotted_name:
+            return obj.root.name
+        return f"{obj.root.name}.{dotted_name}"
 
     @typechecked
     def set_device_config(self, val: dict):
@@ -228,6 +260,17 @@ class DeviceContainer(dict):
             self.__setitem__(key, value)
         else:
             raise AttributeError("Unsupported device type.")
+
+    def get(self, key, default=None):
+        try:
+            self[key]
+        except KeyError:
+            return default
+
+    def __getitem__(self, key):
+        if "." in key:
+            return rgetattr(self, key)
+        return self.__dict__[key]
 
     def __setitem__(self, key, value):
         super().__setitem__(key, value)
@@ -415,6 +458,336 @@ class DeviceContainer(dict):
 
     def __repr__(self) -> str:
         return f"Device container."
+
+
+def rpc(fcn):
+    """Decorator to perform rpc calls."""
+
+    @functools.wraps(fcn)
+    def wrapper(self, *args, **kwargs):
+        # pylint: disable=protected-access
+        device, func_call = self._get_rpc_func_name(fcn=fcn)
+
+        if kwargs.get("cached", False):
+            return fcn(self, *args, **kwargs)
+        return self._run_rpc_call(device, func_call, *args, **kwargs)
+
+    return wrapper
+
+
+class RPCBase:
+    def __init__(self, name: str, info: dict = None, config: dict = None, parent=None) -> None:
+        self.name = name
+        if info is None:
+            info = {}
+        self._info = info.get("device_info")
+        self.parent = parent
+        self._config = config if config else self.root._config
+        self._custom_rpc_methods = {}
+        if self._info:
+            self._parse_info()
+
+        self.run = lambda *args, **kwargs: self._run(*args, **kwargs)
+
+    def _run(self, *args, **kwargs):
+        device, func_call = self._get_rpc_func_name(fcn_name=self.name, use_parent=True)
+        return self._run_rpc_call(device, func_call, *args, **kwargs)
+
+    @property
+    def root(self):
+        parent = self
+        while not isinstance(parent.parent, DeviceManagerBase):
+            parent = parent.parent
+        return parent
+
+    def _run_rpc_call(self, device, func_call, *args, **kwargs):
+        rpc_id = str(uuid.uuid4())
+        requestID = str(uuid.uuid4())  # TODO: move this to the API server
+        params = {
+            "device": device,
+            "rpc_id": rpc_id,
+            "func": func_call,
+            "args": args,
+            "kwargs": kwargs,
+        }
+        msg = ScanQueueMessage(
+            scan_type="device_rpc",
+            parameter=params,
+            queue="primary",
+            metadata={"RID": requestID},
+        )
+        self.root.parent.producer.send(MessageEndpoints.scan_queue_request(), msg.dumps())
+        queue = self.root.parent.parent.queue
+        while queue.request_storage.find_request_by_ID(requestID) is None:
+            time.sleep(0.1)
+        scan_queue_request = queue.request_storage.find_request_by_ID(requestID)
+        while scan_queue_request.decision_pending:
+            time.sleep(0.1)
+        if not all(scan_queue_request.accepted):
+            raise ScanRequestError(
+                f"Function call was rejected by the server: {scan_queue_request.response.content['message']}"
+            )
+        while True:
+            msg = self.root.parent.producer.get(MessageEndpoints.device_rpc(rpc_id))
+            if msg:
+                break
+            time.sleep(0.01)
+        msg = DeviceRPCMessage.loads(msg)
+        if not msg.content["success"]:
+            error = msg.content["out"]
+            raise RPCError(
+                f"During an RPC, the following error occured:\n{error['error']}: {error['msg']}.\nTraceback: {error['traceback']}\n The scan will be aborted."
+            )
+        print(msg.content.get("out"))
+        return msg.content.get("return_val")
+
+    def _get_rpc_func_name(self, fcn_name=None, fcn=None, use_parent=False):
+        if not fcn_name:
+            fcn_name = fcn.__name__
+        full_func_call = ".".join([self._compile_function_path(use_parent=use_parent), fcn_name])
+        device = full_func_call.split(".", maxsplit=1)[0]
+        func_call = ".".join(full_func_call.split(".")[1:])
+        return (device, func_call)
+
+    def _compile_function_path(self, use_parent=False) -> str:
+        if use_parent:
+            parent = self.parent
+        else:
+            parent = self
+        func_call = []
+        while not isinstance(parent, DeviceManagerBase):
+            func_call.append(parent.name)
+            parent = parent.parent
+        return ".".join(func_call[::-1])
+
+    def _parse_info(self):
+        if self._info.get("signals"):
+            for signal_name in self._info.get("signals"):
+                setattr(self, signal_name, Signal(signal_name, parent=self))
+        if self._info.get("sub_devices"):
+            for dev in self._info.get("sub_devices"):
+                base_class = dev["device_info"].get("device_base_class")
+                if base_class == "positioner":
+                    setattr(
+                        self,
+                        dev.get("device_attr_name"),
+                        Positioner(dev.get("device_attr_name"), parent=self),
+                    )
+                elif base_class == "device":
+                    setattr(
+                        self,
+                        dev.get("device_attr_name"),
+                        DeviceBase(dev.get("device_attr_name"), config=None, parent=self),
+                    )
+
+        for user_access_name, descr in self._info.get("custom_user_access", {}).items():
+            if "type" in descr:
+                self._custom_rpc_methods[user_access_name] = RPCBase(
+                    name=user_access_name, info=descr, parent=self
+                )
+                setattr(
+                    self,
+                    user_access_name,
+                    self._custom_rpc_methods[user_access_name].run,
+                )
+                setattr(getattr(self, user_access_name), "__doc__", descr.get("doc"))
+            else:
+                self._custom_rpc_methods[user_access_name] = RPCBase(
+                    name=user_access_name,
+                    info={"device_info": {"custom_user_access": descr}},
+                    parent=self,
+                )
+                setattr(
+                    self,
+                    user_access_name,
+                    self._custom_rpc_methods[user_access_name],
+                )
+
+    def update_config(self, update):
+        self.root.parent.config_helper.send_config_request(
+            action="update", config={self.name: update}
+        )
+
+
+class DeviceBase(RPCBase, Device):
+    """
+    Device (bluesky interface):
+    * trigger
+    * read
+    * describe
+    * stage
+    * unstage
+    * pause
+    * resume
+    """
+
+    @property
+    def enabled(self):
+        return self.root._config["enabled"]
+
+    @enabled.setter
+    def enabled(self, val):
+        self.update_config({"enabled": val})
+        self.root._config["enabled"] = val
+
+    @rpc
+    def trigger(self, rpc_id: str):
+        pass
+
+    @rpc
+    def read(self, cached=False, use_readback=True, filter_signal=True):
+        full_name = self._get_full_obj_name()
+        if use_readback:
+            val = self.root.parent.producer.get(MessageEndpoints.device_readback(full_name))
+        else:
+            val = self.root.parent.producer.get(MessageEndpoints.device_read(full_name))
+
+        if not val:
+            return None
+        signals = DeviceMessage.loads(val).content["signals"]
+        signal_name = full_name.replace(".", "_")
+        if filter_signal and signals.get(signal_name):
+            return signals.get(signal_name)
+        return signals
+
+    @rpc
+    def read_configuration(self):
+        pass
+
+    @rpc
+    def describe(self):
+        pass
+
+    @rpc
+    def stage(self):
+        pass
+
+    @rpc
+    def unstage(self):
+        pass
+
+    @rpc
+    def summary(self):
+        pass
+
+
+class Signal(DeviceBase):
+    """
+    Signal:
+    * trigger
+    * get
+    * put
+    * set
+    * value
+    * read
+    * describe
+    * limits
+    * low limit
+    * high limit
+    """
+
+    @rpc
+    def get(self):
+        pass
+
+    @rpc
+    def put(self, val):
+        pass
+
+    @rpc
+    def set(self, val):
+        pass
+
+    @rpc
+    def value(self):
+        pass
+
+    @rpc
+    def limits(self):
+        pass
+
+    def low_limit(self):
+        pass
+
+    @rpc
+    def high_limit(self):
+        pass
+
+
+class Positioner(DeviceBase):
+    """
+    Positioner:
+    * trigger
+    * read
+    * set
+    * stop
+    * settle_time
+    * timeout
+    * egu
+    * limits
+    * low_limit
+    * high_limit
+    * move
+    * position
+    * moving
+    """
+
+    @rpc
+    def set(self, val):
+        pass
+
+    @rpc
+    def stop(self):
+        pass
+
+    @rpc
+    def settle_time(self):
+        pass
+
+    @rpc
+    def timeout(self):
+        pass
+
+    @rpc
+    def egu(self):
+        pass
+
+    @property
+    def limits(self):
+        return self._config["deviceConfig"]["limits"]
+
+    @limits.setter
+    def limits(self, val: list):
+        self.update_config({"deviceConfig": {"limits": val}})
+
+    @property
+    def low_limit(self):
+        return self.limits[0]
+
+    @low_limit.setter
+    def low_limit(self, val: float):
+        limits = [val, self.high_limit]
+        self.update_config({"deviceConfig": {"limits": limits}})
+
+    @property
+    def high_limit(self):
+        return self.limits[1]
+
+    @high_limit.setter
+    def high_limit(self, val: float):
+        limits = [self.low_limit, val]
+        self.update_config({"deviceConfig": {"limits": limits}})
+
+    def move(self, val: float, relative=False):
+        return self.parent.parent.scans.mv(self, val, relative=relative)
+
+    @rpc
+    def position(self):
+        pass
+
+    @rpc
+    def moving(self):
+        pass
 
 
 class DeviceManagerBase:
@@ -606,9 +979,29 @@ class DeviceManagerBase:
         """
         pass
 
+    def _get_device_info(self, device_name) -> DeviceInfoMessage:
+        msg = DeviceInfoMessage.loads(self.producer.get(MessageEndpoints.device_info(device_name)))
+        return msg
+
     def _create_device(self, dev: dict, *args) -> Device:
-        obj = self._device_cls(dev.get("name"), *args, parent=self)
-        obj._config = dev
+        msg = self._get_device_info(dev.get("name"))
+        name = msg.content["device"]
+        info = msg.content["info"]
+
+        base_class = info["device_info"]["device_base_class"]
+
+        if base_class == "device":
+            logger.info(f"Adding new device {name}")
+            obj = DeviceBase(name, info, config=dev, parent=self)
+        elif base_class == "positioner":
+            logger.info(f"Adding new positioner {name}")
+            obj = Positioner(name, info, config=dev, parent=self)
+        elif base_class == "signal":
+            logger.info(f"Adding new signal {name}")
+            obj = Signal(name, info, config=dev, parent=self)
+        else:
+            logger.error(f"Trying to add new device {name} of type {base_class}")
+
         return obj
 
     def _remove_device(self, dev_name):

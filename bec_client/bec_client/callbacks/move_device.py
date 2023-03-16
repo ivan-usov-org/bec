@@ -20,10 +20,15 @@ class ReadbackDataMixin:
 
     def get_device_values(self):
         """get the current device values"""
-        return [
-            self.device_manager.devices[dev].read(cached=True, use_readback=True).get("value")
-            for dev in self.devices
-        ]
+        device_values = []
+        for device in self.devices:
+            device_obj = self.device_manager.devices[device]
+            dev_value = device_obj.read(cached=True, use_readback=True)
+            if not dev_value:
+                dev_value = device_obj.root.read(cached=True, use_readback=True)
+            device_values.append(dev_value.get("value"))
+
+        return device_values
 
     def get_request_done_msgs(self):
         """get all request-done messages"""

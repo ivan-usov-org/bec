@@ -5,14 +5,9 @@ import traceback
 from asyncio.log import logger
 from typing import List
 
-from bec_utils import (
-    Alarms,
-    BECMessage,
-    Device,
-    DeviceStatus,
-    MessageEndpoints,
-    bec_logger,
-)
+from bec_utils import Alarms, BECMessage, Device
+from bec_utils import DeviceManagerBase as DeviceManager
+from bec_utils import DeviceStatus, MessageEndpoints, bec_logger
 
 from .errors import DeviceMessageError, ScanAbortion
 from .scan_queue import InstructionQueueItem, InstructionQueueStatus, RequestBlock
@@ -97,9 +92,23 @@ class ScanWorker(threading.Thread):
             raise DeviceMessageError("Device message metadata does not contain a DIID entry.")
 
         if wait_group in self._groups:
-            self._groups[wait_group].update({dev.name: DIID for dev in devices})
+            self._groups[wait_group].update(
+                {ScanWorker.get_full_obj_name(dev): DIID for dev in devices}
+            )
         else:
-            self._groups[wait_group] = {dev.name: DIID for dev in devices}
+            self._groups[wait_group] = {ScanWorker.get_full_obj_name(dev): DIID for dev in devices}
+
+    @staticmethod
+    def get_full_obj_name(obj) -> str:
+        """Return the full object name"""
+        names = []
+        while not isinstance(obj.parent, DeviceManager):
+            names.append(obj.name)
+            obj = obj.parent
+        dotted_name = ".".join(names[::-1])
+        if not dotted_name:
+            return obj.root.name
+        return f"{obj.root.name}.{dotted_name}"
 
     def _wait_for_devices(self, instr: DeviceMsg) -> None:
         wait_type = instr.content["parameter"].get("type")

@@ -36,13 +36,13 @@ def rpc(fcn):
 
 
 class RPCBase:
-    def __init__(self, name: str, info: dict = None, parent=None) -> None:
+    def __init__(self, name: str, info: dict = None, config: dict = None, parent=None) -> None:
         self.name = name
-        self._config = None
         if info is None:
             info = {}
         self._info = info.get("device_info")
         self.parent = parent
+        self._config = config if config else self.root._config
         self._custom_rpc_methods = {}
         if self._info:
             self._parse_info()
@@ -124,14 +124,20 @@ class RPCBase:
         if self._info.get("signals"):
             for signal_name in self._info.get("signals"):
                 setattr(self, signal_name, Signal(signal_name, parent=self))
-        if self._info.get("subdevices"):
-            for dev in self._info.get("subdevices"):
+        if self._info.get("sub_devices"):
+            for dev in self._info.get("sub_devices"):
                 base_class = dev["device_info"].get("device_base_class")
                 if base_class == "positioner":
-                    setattr(self, dev.get("name"), Positioner(dev.get("name"), parent=self))
+                    setattr(
+                        self,
+                        dev.get("device_attr_name"),
+                        Positioner(dev.get("device_attr_name"), parent=self),
+                    )
                 elif base_class == "device":
                     setattr(
-                        self, dev.get("name"), Device(dev.get("name"), config=None, parent=self)
+                        self,
+                        dev.get("device_attr_name"),
+                        DeviceBase(dev.get("device_attr_name"), config=None, parent=self),
                     )
 
         for user_access_name, descr in self._info.get("custom_user_access", {}).items():
@@ -353,31 +359,30 @@ class DMClient(DeviceManagerBase):
         )
         return msg
 
-    def _load_session(self, _device_cls=None, *_args):
-        time.sleep(1)
-        self.parent.wait_for_service("DeviceServer")
-        if self._is_config_valid():
-            for dev in self._session["devices"]:
-                msg = self._get_device_info(dev.get("name"))
-                self._add_device(dev, msg)
+    # def _load_session(self, _device_cls=None, *_args):
+    #     time.sleep(1)
+    #     self.parent.wait_for_service("DeviceServer")
+    #     if self._is_config_valid():
+    #         for dev in self._session["devices"]:
+    #             msg = self._get_device_info(dev.get("name"))
+    #             self._add_device(dev, msg)
 
-    def _add_device(self, dev: dict, msg: BECMessage.DeviceInfoMessage):
-        name = msg.content["device"]
-        info = msg.content["info"]
+    # def _add_device(self, dev: dict, msg: BECMessage.DeviceInfoMessage):
+    #     name = msg.content["device"]
+    #     info = msg.content["info"]
 
-        base_class = info["device_info"]["device_base_class"]
+    #     base_class = info["device_info"]["device_base_class"]
 
-        if base_class == "device":
-            logger.info(f"Adding new device {name}")
-            obj = DeviceBase(name, info, parent=self)
-        elif base_class == "positioner":
-            logger.info(f"Adding new positioner {name}")
-            obj = Positioner(name, info, parent=self)
-        elif base_class == "signal":
-            logger.info(f"Adding new signal {name}")
-            obj = Signal(name, info, parent=self)
-        else:
-            logger.error(f"Trying to add new device {name} of type {base_class}")
+    #     if base_class == "device":
+    #         logger.info(f"Adding new device {name}")
+    #         obj = DeviceBase(name, info, config=dev, parent=self)
+    #     elif base_class == "positioner":
+    #         logger.info(f"Adding new positioner {name}")
+    #         obj = Positioner(name, info, config=dev, parent=self)
+    #     elif base_class == "signal":
+    #         logger.info(f"Adding new signal {name}")
+    #         obj = Signal(name, info, config=dev, parent=self)
+    #     else:
+    #         logger.error(f"Trying to add new device {name} of type {base_class}")
 
-        obj._config = dev
-        self.devices._add_device(name, obj)
+    #     self.devices._add_device(name, obj)

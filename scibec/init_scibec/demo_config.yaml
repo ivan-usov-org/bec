@@ -92,6 +92,21 @@ eyey:
   status:
     enabled: true
     enabled_set: true
+field:
+  acquisitionConfig:
+    acquisitionGroup: motor
+    readoutPriority: baseline
+    schedule: sync
+  deviceClass: SynDeviceOPAAS
+  deviceConfig:
+    device_access: false
+    labels: field
+    name: field
+  deviceTags:
+  - user motors
+  status:
+    enabled: true
+    enabled_set: true
 flyer_sim:
   acquisitionConfig:
     acquisitionGroup: motor

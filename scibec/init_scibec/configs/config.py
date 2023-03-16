@@ -120,7 +120,21 @@ class DemoConfig(ConfigBase):
                     "deviceTags": ["user motors"],
                 }
             )
-
+        out["field"] = {
+            "status": {"enabled": True, "enabled_set": True},
+            "deviceClass": "SynDeviceOPAAS",
+            "deviceConfig": {
+                "name": "field",
+                "labels": "field",
+                "device_access": False,
+            },
+            "acquisitionConfig": {
+                "schedule": "sync",
+                "acquisitionGroup": "motor",
+                "readoutPriority": "baseline",
+            },
+            "deviceTags": ["user motors"],
+        }
         out["flyer_sim"] = dict(
             {
                 "status": {"enabled": True, "enabled_set": True},

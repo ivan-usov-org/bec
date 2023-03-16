@@ -12,3 +12,11 @@ class ServiceConfigError(Exception):
 
 class DeviceConfigError(Exception):
     pass
+
+
+class ScanRequestError(Exception):
+    pass
+
+
+class RPCError(Exception):
+    pass

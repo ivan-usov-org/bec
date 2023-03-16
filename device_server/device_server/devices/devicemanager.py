@@ -253,10 +253,13 @@ class DeviceManagerDS(DeviceManagerBase):
         if obj.connected:
             name = obj.root.name
             signals = obj.read()
-            metadata = self.devices.get(obj.root.name).metadata
+            full_device_name = f"{name}.{obj.dotted_name}" if obj.dotted_name else name
+            metadata = self.devices.get(obj.root.name).metadata.get(full_device_name)
             dev_msg = BECMessage.DeviceMessage(signals=signals, metadata=metadata).dumps()
             pipe = self.producer.pipeline()
-            self.producer.set_and_publish(MessageEndpoints.device_readback(name), dev_msg, pipe)
+            self.producer.set_and_publish(
+                MessageEndpoints.device_readback(full_device_name), dev_msg, pipe
+            )
             pipe.execute()
 
     def _obj_callback_acq_done(self, *_args, **kwargs):

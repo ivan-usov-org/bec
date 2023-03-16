@@ -11,7 +11,7 @@ from bec_utils.connector import ConsumerConnector
 from cytoolz import partition
 from typeguard import typechecked
 
-from .devicemanager_client import Device
+from .devicemanager_client import Device, DMClient
 from .scan_manager import ScanReport
 
 if TYPE_CHECKING:
@@ -194,9 +194,23 @@ class Scans:
             return args
         params = {}
         for cmds in partition(bundle_size, args):
-            cmds_serialized = [cmd.name if hasattr(cmd, "name") else cmd for cmd in cmds]
+            cmds_serialized = [
+                Scans.get_full_obj_name(cmd) if hasattr(cmd, "name") else cmd for cmd in cmds
+            ]
             params[cmds_serialized[0]] = cmds_serialized[1:]
         return params
+
+    @staticmethod
+    def get_full_obj_name(obj) -> str:
+        """Return the full object name"""
+        names = []
+        while not isinstance(obj.parent, DMClient):
+            names.append(obj.name)
+            obj = obj.parent
+        dotted_name = ".".join(names[::-1])
+        if not dotted_name:
+            return obj.root.name
+        return f"{obj.root.name}.{dotted_name}"
 
     @property
     def scan_group(self):
