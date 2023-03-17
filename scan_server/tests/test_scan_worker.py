@@ -151,15 +151,16 @@ def test_get_devices_from_instruction(instruction, devices):
     if not instruction.content.get("device"):
         group = instruction.content["parameter"].get("group")
         if group == "primary":
-            assert returned_devices == worker.device_manager.devices.primary_devices(
-                worker.scan_motors
-            )
+            assert returned_devices == [
+                dev.name
+                for dev in worker.device_manager.devices.primary_devices(worker.scan_motors)
+            ]
         elif group == "scan_motor":
             assert returned_devices == devices
         else:
             assert returned_devices == []
     else:
-        assert returned_devices == [worker.device_manager.devices[dev] for dev in devices]
+        assert returned_devices == devices
 
 
 @pytest.mark.parametrize(

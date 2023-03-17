@@ -264,8 +264,9 @@ class DeviceServer(BECService):
         try:
             instr_params = instr.content.get("parameter")
             self._assert_device_is_enabled(instr)
+            target_device = DeviceServer._get_ds_device_name(instr.content["device"])
             rpc_var = rgetattr(
-                self.device_manager.devices[instr.content["device"]].obj,
+                self.device_manager.devices[target_device],
                 instr_params.get("func"),
             )
             res = self._get_result_from_rpc(rpc_var, instr_params)
@@ -321,7 +322,8 @@ class DeviceServer(BECService):
 
     def _kickoff_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
         logger.debug(f"Kickoff device: {instr}")
-        obj = self.device_manager.devices.get(instr.content["device"]).obj
+        target_device = DeviceServer._get_ds_device_name(instr.content["device"])
+        obj = self.device_manager.devices.get(target_device)
         obj.kickoff(metadata=instr.metadata, **instr.content["parameter"])
 
     def _set_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
@@ -379,8 +381,8 @@ class DeviceServer(BECService):
         start = time.time()
         pipe = self.producer.pipeline()
         for dev in devices:
-            self.device_manager.devices.get(dev).metadata = instr.metadata
-            obj = self.device_manager.devices.get(dev).obj
+            target_device = DeviceServer._get_ds_device_name(dev)
+            obj = self.device_manager.devices.get(target_device)
             try:
                 signals = obj.read()
             except Exception as exc:

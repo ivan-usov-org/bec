@@ -140,21 +140,28 @@ class ScanBundler(BECService):
 
         scanID = scan_msg.content["scanID"]
         scan_info = scan_msg.content["info"]
-        scan_motors = list(set(self.device_manager.devices[m] for m in scan_info["primary"]))
+        scan_motors = list(set(scan_info["primary"]))
 
         self.scan_motors[scanID] = scan_motors
         if not scanID in self.storage_initialized:
             self.sync_storage[scanID] = {"info": scan_info, "status": "open", "sent": set()}
+            primary_devices = [dev.name for dev in self.device_manager.devices.primary_devices([])]
+            primary_devices.extend(scan_motors)
+            primary_devices = list(set(primary_devices))
             self.primary_devices[scanID] = {
-                "devices": self.device_manager.devices.primary_devices(scan_motors),
+                "devices": primary_devices,
                 "pointID": {},
             }
             self.monitor_devices[scanID] = self.device_manager.devices.acquisition_group("monitor")
+
+            scan_motor_devices = [
+                self.device_manager.devices[dev.split(".")[0]] for dev in self.scan_motors[scanID]
+            ]
             self.baseline_devices[scanID] = {
-                "devices": self.device_manager.devices.baseline_devices(scan_motors),
+                "devices": self.device_manager.devices.baseline_devices(scan_motor_devices),
                 "done": {
                     dev.name: False
-                    for dev in self.device_manager.devices.baseline_devices(scan_motors)
+                    for dev in self.device_manager.devices.baseline_devices(scan_motor_devices)
                 },
             }
             self.storage_initialized.add(scanID)
@@ -176,7 +183,7 @@ class ScanBundler(BECService):
 
             if primary_devices["pointID"].get(pointID) is None:
                 primary_devices["pointID"][pointID] = {
-                    dev.name: False for dev in primary_devices["devices"]
+                    dev: False for dev in primary_devices["devices"]
                 }
             primary_devices["pointID"][pointID][device] = True
 
@@ -229,8 +236,7 @@ class ScanBundler(BECService):
             logger.debug("Baseline: ", self.sync_storage[scanID]["baseline"])
             self.run_emitter("on_baseline_emit", scanID)
             self.baseline_devices[scanID]["done"] = {
-                dev.name: False
-                for dev in self.device_manager.devices.baseline_devices(self.scan_motors[scanID])
+                dev.name: False for dev in self.baseline_devices[scanID]["devices"]
             }
 
     def _get_scan_status_history(self, length):

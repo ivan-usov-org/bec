@@ -87,7 +87,7 @@ def test_update_device_metadata(instr):
     device_server._update_device_metadata(instr)
 
     for dev in devices:
-        assert device_server.device_manager.devices.get(dev).metadata == instr.metadata
+        assert device_server.device_manager.devices.get(dev).metadata == {dev: instr.metadata}
 
 
 def test_stop_devices():

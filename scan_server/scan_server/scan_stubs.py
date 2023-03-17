@@ -74,6 +74,7 @@ class ScanStubs:
                 error_msg = f"During an RPC, the following error occured:\n{error['error']}: {error['msg']}.\nTraceback: {error['traceback']}\n The scan will be aborted."
             else:
                 error_msg = "During an RPC, an error occured"
+            logger.error(error_msg)
             raise ScanAbortion(error_msg)
 
         logger.debug(msg.content.get("out"))

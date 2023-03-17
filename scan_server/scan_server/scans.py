@@ -215,8 +215,9 @@ class RequestBase(ABC):
     def _check_limits(self):
         logger.debug("check limits")
         for ii, dev in enumerate(self.scan_motors):
+            root_dev = dev.split(".")[0]
             low_limit, high_limit = (
-                self.device_manager.devices[dev].root._config["deviceConfig"].get("limits", [0, 0])
+                self.device_manager.devices[root_dev]._config["deviceConfig"].get("limits", [0, 0])
             )
             if low_limit >= high_limit:
                 # if both limits are equal or low > high, no restrictions ought to be applied
@@ -344,7 +345,8 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         self.start_pos = []
         for dev in self.scan_motors:
             val = yield from self.stubs.send_rpc_and_wait(dev, "read")
-            self.start_pos.append(val[dev].get("value"))
+            dev_name = dev.replace(".", "_")
+            self.start_pos.append(val[dev_name].get("value"))
         if self.relative:
             self.positions += self.start_pos
 

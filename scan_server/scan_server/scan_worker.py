@@ -58,14 +58,16 @@ class ScanWorker(threading.Thread):
         if not instr.content.get("device"):
             group = instr.content["parameter"].get("group")
             if group == "primary":
-                devices = self.device_manager.devices.primary_devices(self.scan_motors)
+                devices = [dev.name for dev in self.device_manager.devices.primary_devices([])]
+                devices.extend(self.scan_motors)
+                devices = list(set(devices))
             elif group == "scan_motor":
                 devices = self.scan_motors
         else:
             instr_devices = instr.content.get("device")
             if not isinstance(instr_devices, list):
                 instr_devices = [instr_devices]
-            devices = [self.device_manager.devices[dev] for dev in instr_devices]
+            devices = instr_devices
         return devices
 
     def _add_wait_group(self, instr: DeviceMsg) -> None:
@@ -92,11 +94,9 @@ class ScanWorker(threading.Thread):
             raise DeviceMessageError("Device message metadata does not contain a DIID entry.")
 
         if wait_group in self._groups:
-            self._groups[wait_group].update(
-                {ScanWorker.get_full_obj_name(dev): DIID for dev in devices}
-            )
+            self._groups[wait_group].update({dev: DIID for dev in devices})
         else:
-            self._groups[wait_group] = {ScanWorker.get_full_obj_name(dev): DIID for dev in devices}
+            self._groups[wait_group] = {dev: DIID for dev in devices}
 
     @staticmethod
     def get_full_obj_name(obj) -> str:
@@ -164,7 +164,7 @@ class ScanWorker(threading.Thread):
         if not wait_group or wait_group not in self._groups:
             return
 
-        group_devices = [dev.name for dev in self._get_devices_from_instruction(instr)]
+        group_devices = self._get_devices_from_instruction(instr)
         wait_group_devices = [
             (dev_name, DIID)
             for dev_name, DIID in self._groups[wait_group].items()
@@ -220,7 +220,7 @@ class ScanWorker(threading.Thread):
         if not wait_group or wait_group not in self._groups:
             return
 
-        group_devices = [dev.name for dev in self._get_devices_from_instruction(instr)]
+        group_devices = self._get_devices_from_instruction(instr)
         wait_group_devices = [
             (dev_name, DIID)
             for dev_name, DIID in self._groups[wait_group].items()
@@ -319,9 +319,8 @@ class ScanWorker(threading.Thread):
 
         devices = instr.content.get("device")
         if devices is None:
-            devices = [
-                dev.name for dev in self.device_manager.devices.primary_devices(self.scan_motors)
-            ]
+            devices = [dev.name for dev in self.device_manager.devices.primary_devices([])]
+            devices.extend(self.scan_motors)
         producer.send(
             MessageEndpoints.device_instructions(),
             DeviceMsg(
@@ -382,8 +381,11 @@ class ScanWorker(threading.Thread):
         )
 
     def _baseline_reading(self, instr: DeviceMsg) -> None:
+        scan_motor_devices = [
+            self.device_manager.devices[dev.split(".")[0]] for dev in self.scan_motors
+        ]
         baseline_devices = [
-            dev.name for dev in self.device_manager.devices.baseline_devices(self.scan_motors)
+            dev.name for dev in self.device_manager.devices.baseline_devices(scan_motor_devices)
         ]
         params = instr.content["parameter"]
         self.device_manager.producer.send(
@@ -408,10 +410,7 @@ class ScanWorker(threading.Thread):
         if not self.scan_id:
             self.scan_id = instr.metadata.get("scanID")
             if instr.content["parameter"].get("primary") is not None:
-                self.scan_motors = [
-                    self.device_manager.devices[dev]
-                    for dev in instr.content["parameter"].get("primary")
-                ]
+                self.scan_motors = instr.content["parameter"].get("primary")
 
         if not instr.metadata.get("scan_def_id"):
             self.max_point_id = 0
