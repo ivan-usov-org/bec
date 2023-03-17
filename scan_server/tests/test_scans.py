@@ -48,6 +48,10 @@ class DeviceMock:
         return self.read_buffer
 
     @property
+    def root(self):
+        return self
+
+    @property
     def enabled_set(self) -> bool:
         return self._enabled_set
 

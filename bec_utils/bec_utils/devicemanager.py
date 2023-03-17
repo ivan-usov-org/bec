@@ -64,6 +64,13 @@ class Device:
         self._status = DeviceStatus.IDLE
         self.parent = parent
 
+    @property
+    def root(self):
+        parent = self
+        while not isinstance(parent.parent, DeviceManagerBase):
+            parent = parent.parent
+        return parent
+
     def get_device_config(self):
         """get the device config for this device"""
         return self._config["deviceConfig"]
@@ -979,29 +986,9 @@ class DeviceManagerBase:
         """
         pass
 
-    def _get_device_info(self, device_name) -> DeviceInfoMessage:
-        msg = DeviceInfoMessage.loads(self.producer.get(MessageEndpoints.device_info(device_name)))
-        return msg
-
     def _create_device(self, dev: dict, *args) -> Device:
-        msg = self._get_device_info(dev.get("name"))
-        name = msg.content["device"]
-        info = msg.content["info"]
-
-        base_class = info["device_info"]["device_base_class"]
-
-        if base_class == "device":
-            logger.info(f"Adding new device {name}")
-            obj = DeviceBase(name, info, config=dev, parent=self)
-        elif base_class == "positioner":
-            logger.info(f"Adding new positioner {name}")
-            obj = Positioner(name, info, config=dev, parent=self)
-        elif base_class == "signal":
-            logger.info(f"Adding new signal {name}")
-            obj = Signal(name, info, config=dev, parent=self)
-        else:
-            logger.error(f"Trying to add new device {name} of type {base_class}")
-
+        obj = self._device_cls(dev.get("name"), *args, parent=self)
+        obj._config = dev
         return obj
 
     def _remove_device(self, dev_name):
@@ -1058,3 +1045,30 @@ class DeviceManagerBase:
 
     def __del__(self):
         self.shutdown()
+
+
+class DeviceManagerOphyd(DeviceManagerBase):
+    def _get_device_info(self, device_name) -> DeviceInfoMessage:
+        msg = DeviceInfoMessage.loads(self.producer.get(MessageEndpoints.device_info(device_name)))
+        return msg
+
+    def _create_device(self, dev: dict, *args) -> Device:
+        msg = self._get_device_info(dev.get("name"))
+        name = msg.content["device"]
+        info = msg.content["info"]
+
+        base_class = info["device_info"]["device_base_class"]
+
+        if base_class == "device":
+            logger.info(f"Adding new device {name}")
+            obj = DeviceBase(name, info, config=dev, parent=self)
+        elif base_class == "positioner":
+            logger.info(f"Adding new positioner {name}")
+            obj = Positioner(name, info, config=dev, parent=self)
+        elif base_class == "signal":
+            logger.info(f"Adding new signal {name}")
+            obj = Signal(name, info, config=dev, parent=self)
+        else:
+            logger.error(f"Trying to add new device {name} of type {base_class}")
+
+        return obj

@@ -5,7 +5,7 @@ import uuid
 from bec_utils import (
     BECMessage,
     Device,
-    DeviceManagerBase,
+    DeviceManagerOphyd,
     MessageEndpoints,
     bec_logger,
 )
@@ -348,41 +348,7 @@ class Positioner(DeviceBase):
         pass
 
 
-class DMClient(DeviceManagerBase):
+class DMClient(DeviceManagerOphyd):
     def __init__(self, parent):
         super().__init__(parent.connector)
         self.parent = parent
-
-    def _get_device_info(self, device_name) -> BECMessage.DeviceInfoMessage:
-        msg = BECMessage.DeviceInfoMessage.loads(
-            self.producer.get(MessageEndpoints.device_info(device_name))
-        )
-        return msg
-
-    # def _load_session(self, _device_cls=None, *_args):
-    #     time.sleep(1)
-    #     self.parent.wait_for_service("DeviceServer")
-    #     if self._is_config_valid():
-    #         for dev in self._session["devices"]:
-    #             msg = self._get_device_info(dev.get("name"))
-    #             self._add_device(dev, msg)
-
-    # def _add_device(self, dev: dict, msg: BECMessage.DeviceInfoMessage):
-    #     name = msg.content["device"]
-    #     info = msg.content["info"]
-
-    #     base_class = info["device_info"]["device_base_class"]
-
-    #     if base_class == "device":
-    #         logger.info(f"Adding new device {name}")
-    #         obj = DeviceBase(name, info, config=dev, parent=self)
-    #     elif base_class == "positioner":
-    #         logger.info(f"Adding new positioner {name}")
-    #         obj = Positioner(name, info, config=dev, parent=self)
-    #     elif base_class == "signal":
-    #         logger.info(f"Adding new signal {name}")
-    #         obj = Signal(name, info, config=dev, parent=self)
-    #     else:
-    #         logger.error(f"Trying to add new device {name} of type {base_class}")
-
-    #     self.devices._add_device(name, obj)

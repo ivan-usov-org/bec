@@ -9,6 +9,7 @@ from .devicemanager import (
     DeviceConfigError,
     DeviceContainer,
     DeviceManagerBase,
+    DeviceManagerOphyd,
     DeviceStatus,
 )
 from .endpoints import MessageEndpoints
