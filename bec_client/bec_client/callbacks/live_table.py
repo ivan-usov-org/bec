@@ -116,12 +116,16 @@ class LiveUpdatesTable(LiveUpdatesBase):
         return devices
 
     def _prepare_table(self) -> PrettyTable:
+        header = self._get_header()
+        max_len = max(len(head) for head in header)
+        return PrettyTable(header, padding=max_len)
+
+    def _get_header(self) -> List:
         header = ["seq. num"]
         for dev in self.devices:
             obj = self.bec.device_manager.devices[dev]
             header.extend(obj._hints)
-        max_len = max([len(head) for head in header])
-        return PrettyTable(header, padding=max_len)
+        return header
 
     async def update_scan_item(self):
         """get the current scan item"""
@@ -160,7 +164,7 @@ class LiveUpdatesTable(LiveUpdatesBase):
                 progressbar.update(self.point_id)
                 if self.point_data:
                     if not self.table:
-                        self.dev_values = list(np.zeros_like(self.devices))
+                        self.dev_values = (len(self._get_header()) - 1) * [0]
                         self.table = self._prepare_table()
                         print(self.table.get_header_lines())
 
