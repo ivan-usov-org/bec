@@ -313,12 +313,12 @@ class ScanBundler(BECService):
             readings = self._get_last_device_readback(devices)
 
             for read, dev in zip(readings, devices):
-                self.sync_storage[scanID][pointID][dev.name] = read
+                self.sync_storage[scanID][pointID][dev] = read
 
     def _get_last_device_readback(self, devices: list) -> list:
         pipe = self.producer.pipeline()
         for dev in devices:
-            self.producer.get(MessageEndpoints.device_readback(dev.name), pipe)
+            self.producer.get(MessageEndpoints.device_readback(dev), pipe)
         read_raw = pipe.execute()
 
         return [BECMessage.DeviceMessage.loads(read).content["signals"] for read in read_raw]
