@@ -54,6 +54,13 @@ class RPCBase:
         return self._run_rpc_call(device, func_call, *args, **kwargs)
 
     @property
+    def _hints(self):
+        hints = self._info.get("hints")
+        if not hints:
+            return []
+        return hints.get("fields", [])
+
+    @property
     def root(self):
         parent = self
         while not isinstance(parent.parent, DMClient):
