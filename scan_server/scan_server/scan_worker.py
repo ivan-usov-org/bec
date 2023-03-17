@@ -372,6 +372,17 @@ class ScanWorker(threading.Thread):
             ).dumps(),
         )
 
+    def _complete_devices(self, instr: DeviceMsg) -> None:
+        self.device_manager.producer.send(
+            MessageEndpoints.device_instructions(),
+            DeviceMsg(
+                device=instr.content.get("device"),
+                action="complete",
+                parameter={},
+                metadata=instr.metadata,
+            ).dumps(),
+        )
+
     def _baseline_reading(self, instr: DeviceMsg) -> None:
         baseline_devices = [
             dev.name for dev in self.device_manager.devices.baseline_devices(self.scan_motors)
@@ -444,13 +455,19 @@ class ScanWorker(threading.Thread):
         if self.scan_id == scan_id:
             self.scan_id = None
 
-            # flyers do not increase the point_id but instead set the num_points directly
-            if (
+            scan_info = self.current_scan_info
+            if scan_info.get("scan_type")=="fly":
+                # flyers do not increase the point_id but instead set the num_points directly
+                num_points = self.current_instruction_queue_item.active_request_block.scan.num_pos
+                self.current_scan_info["num_points"] = num_points
+            
+            elif (
                 self.current_scan_info.get("scan_type") != "fly"
                 or self.current_scan_info["num_points"] == 0
             ):
                 # point_id starts at 0
                 self.current_scan_info["num_points"] = max_point_id + 1
+
             self._send_scan_status("closed")
 
     def _stage_devices(self, instr: DeviceMsg) -> None:
@@ -587,6 +604,8 @@ class ScanWorker(threading.Thread):
             self._read_devices(instr)
         elif action == "kickoff":
             self._kickoff_devices(instr)
+        elif action == "complete":
+            self._complete_devices(instr)
         elif action == "baseline_reading":
             self._baseline_reading(instr)
         elif action == "rpc":

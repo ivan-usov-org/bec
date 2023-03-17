@@ -106,11 +106,11 @@ class ScanReport:
         if self.scan:
             details += (
                 f"\tStart time: {datetime.datetime.fromtimestamp(self.scan.start_time).strftime('%c')}\n"
-                f"\tEnd time': {datetime.datetime.fromtimestamp(self.scan.end_time).strftime('%c')}\n"
+                f"\tEnd time: {datetime.datetime.fromtimestamp(self.scan.end_time).strftime('%c')}\n"
                 f"\tElapsed time: {(self.scan.end_time-self.scan.start_time):.1f} s\n"
-                f"\tScan ID': {self.scan.scanID}\n"
-                f"\tScan number': {self.scan.scan_number}\n"
-                f"\tNumber of points': {self.scan.num_points}\n"
+                f"\tScan ID: {self.scan.scanID}\n"
+                f"\tScan number: {self.scan.scan_number}\n"
+                f"\tNumber of points: {self.scan.num_points}\n"
             )
         return "ScanReport:\n" f"{separator}\n" f"{details}"
 

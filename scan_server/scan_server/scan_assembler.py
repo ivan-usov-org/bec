@@ -2,6 +2,7 @@ from bec_utils import BECMessage, bec_logger
 
 from .errors import ScanAbortion
 from .scans import RequestBase
+import traceback
 
 logger = bec_logger.logger
 
@@ -43,5 +44,6 @@ class ScanAssembler:
             )
             return scan_instance
         except Exception as exc:
-            logger.error(f"Failed to initialize the scan class of type {scan_cls.__name__}")
+            content = traceback.format_exc()
+            logger.error(f"Failed to initialize the scan class of type {scan_cls.__name__}. {content}")
             raise ScanAbortion from exc

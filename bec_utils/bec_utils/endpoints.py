@@ -9,6 +9,7 @@ class MessageEndpoints:
     _device_last_read = "internal/devices/last_read"
     _device_readback = "internal/devices/readback"
     _device_req_status = "internal/devices/req_status"
+    _device_progress = "internal/devices/progress"
 
     # device config
     _device_config_request = "internal/devices/config_request"
@@ -79,6 +80,10 @@ class MessageEndpoints:
     @classmethod
     def device_req_status(cls, device: str):
         return f"{cls._device_req_status}/{device}"
+
+    @classmethod
+    def device_progress(cls, device: str):
+        return f"{cls._device_progress}/{device}"
 
     # device config
     @classmethod

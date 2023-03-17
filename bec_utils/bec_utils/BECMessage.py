@@ -5,11 +5,18 @@ import time
 from typing import Any, List, Optional, Union
 
 import msgpack
+import json
+import numpy as np
 
 from .logger import bec_logger
 
 logger = bec_logger.logger
 
+
+def encode_numpy_array(obj):
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    return obj
 
 class BECStatus(enum.Enum):
     RUNNING = 2
@@ -46,13 +53,15 @@ class BECMessage:
 
     def dumps(self):
         """dump BECMessage with msgpack"""
+        
         return msgpack.dumps(
             {
                 "msg_type": self.msg_type,
                 "content": self.content,
                 "metadata": self.metadata,
                 "version": self.version,
-            }
+            },
+            default=encode_numpy_array,
         )
 
     @classmethod

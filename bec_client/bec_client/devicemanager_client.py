@@ -124,14 +124,14 @@ class RPCBase:
         if self._info.get("signals"):
             for signal_name in self._info.get("signals"):
                 setattr(self, signal_name, Signal(signal_name, parent=self))
-        if self._info.get("subdevices"):
-            for dev in self._info.get("subdevices"):
+        if self._info.get("sub_devices"):
+            for dev in self._info.get("sub_devices"):
                 base_class = dev["device_info"].get("device_base_class")
                 if base_class == "positioner":
-                    setattr(self, dev.get("name"), Positioner(dev.get("name"), parent=self))
+                    setattr(self, dev.get("attr_name"), Positioner(dev.get("attr_name"), parent=self))
                 elif base_class == "device":
                     setattr(
-                        self, dev.get("name"), Device(dev.get("name"), config=None, parent=self)
+                        self, dev.get("attr_name"), Device(dev.get("attr_name"), config=None, parent=self)
                     )
 
         for user_access_name, descr in self._info.get("custom_user_access", {}).items():

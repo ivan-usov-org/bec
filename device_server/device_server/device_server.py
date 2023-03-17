@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 from functools import reduce
 from io import StringIO
 from typing import Any
+import inspect
 
 import ophyd
 from bec_utils import Alarms, BECMessage, BECService, MessageEndpoints, bec_logger
@@ -179,6 +180,8 @@ class DeviceServer(BECService):
                 self._run_rpc(instructions)
             elif action == "kickoff":
                 self._kickoff_device(instructions)
+            elif action == "complete":
+                self._complete_device(instructions)
             elif action == "trigger":
                 self._trigger_device(instructions)
             elif action == "stage":
@@ -221,10 +224,10 @@ class DeviceServer(BECService):
         if callable(rpc_var):
             args = tuple(instr_params.get("args", ()))
             kwargs = instr_params.get("kwargs", {})
-            if len(args) > 0 and len(args[0]) > 0 and len(kwargs) > 0:
-                res = rpc_var(*args[0], **kwargs)
-            elif len(args) > 0 and len(args[0]) > 0:
-                res = rpc_var(*args[0])
+            if len(args) > 0 and len(kwargs) > 0:
+                res = rpc_var(*args, **kwargs)
+            elif len(args) > 0:
+                res = rpc_var(*args)
             elif len(kwargs) > 0:
                 res = rpc_var(**kwargs)
             else:
@@ -314,7 +317,19 @@ class DeviceServer(BECService):
     def _kickoff_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
         logger.debug(f"Kickoff device: {instr}")
         obj = self.device_manager.devices.get(instr.content["device"]).obj
-        obj.kickoff(metadata=instr.metadata, **instr.content["parameter"])
+        kickoff_args = inspect.getfullargspec(obj.kickoff).args
+        if len(kickoff_args)>1:
+            obj.kickoff(metadata=instr.metadata, **instr.content["parameter"])
+            return
+        obj.configure(instr.content["parameter"])
+        obj.kickoff()
+
+    def _complete_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
+        obj = self.device_manager.devices.get(instr.content["device"]).obj
+
+        status = obj.complete()
+        status.__dict__["instruction"] = instr
+        status.add_callback(self._status_callback)
 
     def _set_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
         device_obj = self.device_manager.devices.get(instr.content["device"])
@@ -332,14 +347,15 @@ class DeviceServer(BECService):
 
     def _status_callback(self, status):
         pipe = self.producer.pipeline()
+        device_name = status.device.root.name
         dev_msg = BECMessage.DeviceReqStatusMessage(
-            device=status.device.name,
+            device=device_name,
             success=status.success,
             metadata=status.instruction.metadata,
         ).dumps()
-        logger.debug(f"req status for device {status.device.name}: {status.success}")
+        logger.debug(f"req status for device {device_name}: {status.success}")
         self.producer.set_and_publish(
-            MessageEndpoints.device_req_status(status.device.name), dev_msg, pipe
+            MessageEndpoints.device_req_status(device_name), dev_msg, pipe
         )
         response = status.instruction.metadata.get("response")
         if response:
