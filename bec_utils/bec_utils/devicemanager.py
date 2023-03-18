@@ -10,7 +10,7 @@ from bec_utils import ConfigHelper
 from bec_utils.connector import ConnectorBase
 
 from .bec_errors import DeviceConfigError
-from .BECMessage import BECStatus, DeviceConfigMessage, LogMessage
+from .BECMessage import BECStatus, DeviceConfigMessage, DeviceInfoMessage, LogMessage
 from .endpoints import MessageEndpoints
 from .logger import bec_logger
 
@@ -651,6 +651,11 @@ class DeviceManagerBase:
         if not isinstance(self._config, dict):
             return False
         return True
+
+    def get_device_info(self, device_name: str, key: str):
+        raw_msg = self.producer.get(MessageEndpoints.device_info(device_name))
+        msg = DeviceInfoMessage.loads(raw_msg)
+        return msg.content["info"].get(key)
 
     def shutdown(self):
         """
