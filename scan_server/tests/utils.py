@@ -52,6 +52,12 @@ class ScanServerMock(ScanServer):
         )
         self.scan_worker = WorkerMock()
 
+    def _start_metrics_emitter(self):
+        pass
+
+    def _start_update_service_info(self):
+        pass
+
     def _start_device_manager(self):
         pass
 
