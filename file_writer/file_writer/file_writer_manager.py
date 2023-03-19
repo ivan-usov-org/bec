@@ -142,7 +142,7 @@ class FileWriterManager(BECService):
         file_path = os.path.abspath(os.path.join(data_dir, f"S{storage.scan_number:05d}.h5"))
         successful = True
         try:
-            logger.info(f"Writing file {file_path}")
+            logger.info(f"Starting writing to file {file_path}.")
             self.file_writer.write(file_path=file_path, data=storage)
         except Exception as exc:
             content = traceback.format_exc()
@@ -153,6 +153,10 @@ class FileWriterManager(BECService):
             MessageEndpoints.public_file(scanID),
             BECMessage.FileMessage(file_path=file_path, successful=successful).dumps(),
         )
+        if successful:
+            logger.success(f"Finished writing file {file_path}.")
+            return
+        logger.error(f"Failed to write to file {file_path}.")
 
     def _get_scan_dir(self, scan_bundle, scan_number, leading_zeros=None):
         if leading_zeros is None:

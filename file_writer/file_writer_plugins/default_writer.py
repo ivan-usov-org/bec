@@ -27,12 +27,6 @@ def NeXus_format(storage, data, device_manager):
     control.attrs["NX_class"] = "NXsample"
     control.create_dataset(name="name", data=data.get("samplename"))
     control.create_dataset(name="description", data=data.get("sample_description"))
-    x_translation = control.create_dataset(name="x_translation", data=data.get("samx"))
-    x_translation.attrs["units"] = "mm"
-    y_translation = control.create_dataset(name="y_translation", data=data.get("samy"))
-    y_translation.attrs["units"] = "mm"
-    temperature_log = control.create_dataset(name="temperature_log", data=data.get("temp"))
-    temperature_log.attrs["units"] = "K"
 
     # /entry/instrument
     instrument = entry.create_group("instrument")

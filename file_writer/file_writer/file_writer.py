@@ -1,13 +1,15 @@
 import abc
 import json
+import traceback
 import typing
 
 import h5py
-import numpy as np
 import xmltodict
 from bec_utils import bec_logger
 
 import file_writer_plugins as fwp
+
+from .merged_dicts import merge_dicts
 
 logger = bec_logger.logger
 
@@ -30,17 +32,13 @@ class FileWriter(abc.ABC):
     @staticmethod
     def _create_device_data_storage(data):
         device_storage = {}
+        device_storage.update(data.baseline)
         for point in range(data.num_points):
             for dev in data.scan_segments[point]:
                 if dev not in device_storage:
-                    device_storage[dev] = [data.scan_segments[point][dev][dev]["value"]]
+                    device_storage[dev] = [data.scan_segments[point][dev]]
                     continue
-                device_storage[dev].append(data.scan_segments[point][dev][dev]["value"])
-        for dev_name, value in data.baseline.items():
-            if dev_name in value:
-                device_storage[dev_name] = value[dev_name]["value"]
-                continue
-            logger.warning(f"Skipping device {dev_name} as it does not contain a {dev_name} value.")
+                device_storage[dev].append(data.scan_segments[point][dev])
         return device_storage
 
 
@@ -183,19 +181,29 @@ class HDF5StorageWriter:
                     self.add_group(key, group, sub_storage)
                     # self.add_content(group, sub_storage._storage)
                     continue
+                if isinstance(value, list) and isinstance(value[0], dict):
+                    merged_dict = merge_dicts(value)
+                    sub_storage = HDF5Storage(key)
+                    dict_to_storage(sub_storage, merged_dict)
+                    self.add_group(key, group, sub_storage)
+                    continue
 
                 group.create_dataset(name=key, data=value)
 
     def add_dataset(self, name: str, container: typing.Any, val: HDF5Storage):
-        data = val._data
-        if data is None:
-            return
-        if isinstance(data, list):
-            if data and isinstance(data[0], dict):
-                data = json.dumps(data)
-        dataset = container.create_dataset(name, data=data)
-        self.add_attribute(dataset, val.attrs)
-        self.add_content(dataset, val._storage)
+        try:
+            data = val._data
+            if data is None:
+                return
+            if isinstance(data, list):
+                if data and isinstance(data[0], dict):
+                    data = json.dumps(data)
+            dataset = container.create_dataset(name, data=data)
+            self.add_attribute(dataset, val.attrs)
+            self.add_content(dataset, val._storage)
+        except Exception as exc:
+            content = traceback.format_exc()
+            logger.error(f"Failed to write dataset {name}: {content}")
         return
 
     def add_attribute(self, container: typing.Any, attributes: dict):
@@ -231,7 +239,6 @@ class HDF5StorageWriter:
 
 class NexusFileWriter(FileWriter):
     def write(self, file_path: str, data):
-        print(f"writing file to {file_path}")
         device_storage = self._create_device_data_storage(data)
         device_storage["metadata"] = data.metadata
         writer_format = getattr(fwp, self.file_writer_manager.file_writer_config.get("plugin"))

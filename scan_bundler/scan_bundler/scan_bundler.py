@@ -197,14 +197,11 @@ class ScanBundler(BECService):
         if "pointID" not in metadata:
             return
         with self._lock:
-            dev = {}
-            for sig_key, sig_val in signal.items():
-                dev[sig_key] = {sig_key: sig_val}
             pointID = metadata["pointID"]
 
             self.sync_storage[scanID][pointID] = {
                 **self.sync_storage[scanID].get(pointID, {}),
-                **dev,
+                **signal,
             }
 
             if self.sync_storage[scanID].get(pointID):

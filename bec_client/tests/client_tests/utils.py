@@ -102,6 +102,8 @@ def bec_client():
     device_manager.producer = device_manager.connector.producer()
     client.wait_for_service = lambda service_name: None
     device_manager._load_session()
+    for name, dev in device_manager.devices.items():
+        dev._info["hints"] = {"fields": [name]}
     client.device_manager = device_manager
     yield client
     del ClientMock._client

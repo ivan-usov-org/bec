@@ -109,17 +109,23 @@ class LiveUpdatesTable(LiveUpdatesBase):
         primary_devices = device_manager.devices.primary_devices(
             [device_manager.devices[dev] for dev in scan_devices]
         )
-        devices = [dev.name for dev in primary_devices]
+        devices = [hint for dev in primary_devices for hint in dev._hints]
         devices = sort_devices(devices, scan_devices)
         if len(devices) > self.MAX_DEVICES:
             return devices[0 : self.MAX_DEVICES]
         return devices
 
     def _prepare_table(self) -> PrettyTable:
-        header = ["seq. num"]
-        header.extend(self.devices)
-        max_len = max([len(head) for head in header])
+        header = self._get_header()
+        max_len = max(len(head) for head in header)
         return PrettyTable(header, padding=max_len)
+
+    def _get_header(self) -> List:
+        header = ["seq. num"]
+        for dev in self.devices:
+            obj = self.bec.device_manager.devices[dev]
+            header.extend(obj._hints)
+        return header
 
     async def update_scan_item(self):
         """get the current scan item"""
@@ -158,16 +164,20 @@ class LiveUpdatesTable(LiveUpdatesBase):
                 progressbar.update(self.point_id)
                 if self.point_data:
                     if not self.table:
-                        self.dev_values = list(np.zeros_like(self.devices))
+                        self.dev_values = (len(self._get_header()) - 1) * [0]
                         self.table = self._prepare_table()
                         print(self.table.get_header_lines())
 
                     self.point_id += 1
                     if self.point_id % 100 == 0:
                         print(self.table.get_header_lines())
-                    for ind, dev in enumerate(self.devices):
-                        signal = self.point_data.content["data"].get(dev, {}).get(dev)
-                        self.dev_values[ind] = signal.get("value") if signal else -999
+                    ind = 0
+                    for dev in self.devices:
+                        obj = self.bec.device_manager.devices[dev]
+                        for hint in obj._hints:
+                            signal = self.point_data.content["data"].get(dev, {}).get(hint)
+                            self.dev_values[ind] = signal.get("value") if signal else -999
+                            ind += 1
                     print(self.table.get_row(self.point_id, *self.dev_values))
                     self.emit_point(self.point_data.content, metadata=self.point_data.metadata)
                     progressbar.update(self.point_id)

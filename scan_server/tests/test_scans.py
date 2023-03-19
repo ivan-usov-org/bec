@@ -1743,7 +1743,7 @@ def test_round_scan_fly_sim_get_scan_motors():
     )
 
     request._get_scan_motors()
-    assert request.scan_motors == []
+    assert request.scan_motors == ["flyer_sim"]
     assert request.flyer == list(scan_msg.content["parameter"]["args"].keys())[0]
 
 
