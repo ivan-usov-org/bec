@@ -3,11 +3,12 @@ import json
 import typing
 
 import h5py
-import numpy as np
 import xmltodict
 from bec_utils import bec_logger
 
 import file_writer_plugins as fwp
+
+from .merged_dicts import merge_dicts
 
 logger = bec_logger.logger
 
@@ -33,9 +34,9 @@ class FileWriter(abc.ABC):
         for point in range(data.num_points):
             for dev in data.scan_segments[point]:
                 if dev not in device_storage:
-                    device_storage[dev] = [data.scan_segments[point][dev][dev]["value"]]
+                    device_storage[dev] = [data.scan_segments[point][dev]]
                     continue
-                device_storage[dev].append(data.scan_segments[point][dev][dev]["value"])
+                device_storage[dev].append(data.scan_segments[point][dev])
         for dev_name, value in data.baseline.items():
             if dev_name in value:
                 device_storage[dev_name] = value[dev_name]["value"]
@@ -182,6 +183,12 @@ class HDF5StorageWriter:
                     dict_to_storage(sub_storage, value)
                     self.add_group(key, group, sub_storage)
                     # self.add_content(group, sub_storage._storage)
+                    continue
+                if isinstance(value, list):
+                    merged_dict = merge_dicts(value)
+                    sub_storage = HDF5Storage(key)
+                    dict_to_storage(sub_storage, merged_dict)
+                    self.add_group(key, group, sub_storage)
                     continue
 
                 group.create_dataset(name=key, data=value)

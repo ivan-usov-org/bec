@@ -795,7 +795,7 @@ class RoundScanFlySim(ScanBase):
         self.axis = []
 
     def _get_scan_motors(self):
-        self.scan_motors = []
+        self.scan_motors = list(self.caller_args.keys())
         self.flyer = list(self.caller_args.keys())[0]
 
     def prepare_positions(self):
@@ -822,15 +822,17 @@ class RoundScanFlySim(ScanBase):
                 "exp_time": self.exp_time,
             },
         )
+        target_DIID = self.DIID - 1
 
         while True:
             yield from self.stubs.read_and_wait(group="primary", wait_group="readout_primary")
             msg = self.device_manager.producer.get(MessageEndpoints.device_status(self.flyer))
             if msg:
                 status = BECMessage.DeviceStatusMessage.loads(msg)
-                if status.content.get("status", 1) == 0 and self.metadata.get(
-                    "RID"
-                ) == status.metadata.get("RID"):
+                device_is_idle = status.content.get("status", 1) == 0
+                matching_RID = self.metadata.get("RID") == status.metadata.get("RID")
+                matching_DIID = target_DIID == status.metadata.get("DIID")
+                if device_is_idle and matching_RID and matching_DIID:
                     break
 
             time.sleep(1)
@@ -989,7 +991,7 @@ class MonitorScan(ScanBase):
         self.axis = []
 
     def _get_scan_motors(self):
-        self.scan_motors = []
+        self.scan_motors = list(self.caller_args.keys())
         self.flyer = list(self.caller_args.keys())[0]
 
     def _calculate_positions(self) -> None:

@@ -37,6 +37,7 @@ class ScanWorker(threading.Thread):
         self.signal_event = threading.Event()
         self.scan_id = None
         self.scan_motors = []
+        self.scan_type = None
         self.current_scanID = None
         self.current_scan_info = None
         self._staged_devices = set()
@@ -403,6 +404,7 @@ class ScanWorker(threading.Thread):
                     self.device_manager.devices[dev]
                     for dev in instr.content["parameter"].get("primary")
                 ]
+            self.scan_type = instr.content["parameter"].get("scan_type")
 
         if not instr.metadata.get("scan_def_id"):
             self.max_point_id = 0

@@ -297,11 +297,10 @@ class DeviceContainer(dict):
         if scan_motors:
             devices.extend(scan_motors)
 
-        return [
-            dev
-            for dev in self.enabled_devices
-            if dev in devices and dev not in self.acquisition_group("detector")
-        ]
+        excluded_devices = self.acquisition_group("detector")
+        excluded_devices.extend(self.async_devices())
+        excluded_devices.extend(self.disabled_devices)
+        return [dev for dev in devices if dev not in excluded_devices]
 
     @typechecked
     def baseline_devices(self, scan_motors: list) -> list:
