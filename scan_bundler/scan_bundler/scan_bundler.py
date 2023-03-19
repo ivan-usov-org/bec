@@ -17,11 +17,10 @@ logger = bec_logger.logger
 
 
 class ScanBundler(BECService):
-    def __init__(self, bootstrap_server, connector_cls: ConnectorBase, scibec_url: str) -> None:
-        super().__init__(bootstrap_server, connector_cls, unique_service=True)
+    def __init__(self, config, connector_cls: ConnectorBase) -> None:
+        super().__init__(config, connector_cls, unique_service=True)
 
         self.device_manager = None
-        self.scibec_url = scibec_url
         self._start_device_manager()
         self._start_device_read_consumer()
         self._start_scan_queue_consumer()
@@ -54,7 +53,7 @@ class ScanBundler(BECService):
                 logger.error(f"Failed to run emitter: {content}")
 
     def _start_device_manager(self):
-        self.device_manager = DeviceManager(self.connector, self.scibec_url)
+        self.device_manager = DeviceManager(self.connector)
         self.device_manager.initialize(self.bootstrap_server)
 
     def _start_device_read_consumer(self):
@@ -119,13 +118,13 @@ class ScanBundler(BECService):
 
     def _scan_status_modification(self, msg: BECMessage.ScanStatusMessage):
         status = msg.content.get("status")
-        if status not in ["closed", "aborted"]:
+        if status not in ["closed", "aborted", "paused", "halted"]:
             logger.error(f"Unknown scan status {status}")
             return
 
         scanID = msg.content.get("scanID")
         if not scanID:
-            logger.error(f"Received scan status update without scanID: {msg}")
+            logger.warning(f"Received scan status update without scanID: {msg}")
             return
         if self.sync_storage.get(scanID):
             self.sync_storage[scanID]["status"] = status
@@ -198,14 +197,11 @@ class ScanBundler(BECService):
         if "pointID" not in metadata:
             return
         with self._lock:
-            dev = {}
-            for sig_key, sig_val in signal.items():
-                dev[sig_key] = {sig_key: sig_val}
             pointID = metadata["pointID"]
 
             self.sync_storage[scanID][pointID] = {
                 **self.sync_storage[scanID].get(pointID, {}),
-                **dev,
+                **signal,
             }
 
             if self.sync_storage[scanID].get(pointID):

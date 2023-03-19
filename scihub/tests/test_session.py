@@ -1,10 +1,10 @@
 import os
 from unittest import mock
 
+import bec_utils
 import pytest
 
-import bec_utils
-from bec_utils.scibec import HttpClient, SciBec, SciBecError
+from scihub.scibec.scibec import HttpClient, SciBec, SciBecError
 
 dir_path = os.path.dirname(bec_utils.__file__)
 

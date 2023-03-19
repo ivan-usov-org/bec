@@ -11,7 +11,7 @@ CONFIG_PATH = "../bec_config.yaml"
 config = ServiceConfig(CONFIG_PATH)
 
 bec = BECClient()
-bec.initialize(config.redis, RedisConnector, config.scibec)
+bec.initialize(config, RedisConnector)
 bec.start()
 bec.load_high_level_interface("spec_hli")
 
@@ -29,6 +29,24 @@ scans = bec.scans
 
 logger.success("Started BECClient")
 
+# scans.round_scan_fly(dev.flyer_sim, 0, 50, 20, 3, exp_time=0.1, relative=True)
+# scans.monitor_scan(dev.samx, -100, 100, relative=False)
+
+# from bec_client.plotting import GrumpyConnector
+# bec.plotter = GrumpyConnector()
+# bec.plotter.connect()
+
+
+# def basic_plot(data, metadata):
+#     plot_name = f"Scan {metadata['scan_number']}"
+#     if bec.plotter.current_plot != plot_name:
+#         bec.plotter.new_plot(plot_name, {})
+#     x = data["data"]["samx"]["samx"]["value"]
+#     y = data["data"]["bpm3a"]["bpm3a"]["value"]
+#     bec.plotter.append_data([x, y])
+
+
+# scans.line_scan(dev.samx, -5, 5, steps=100, exp_time=0.1, relative=False, callback=basic_plot)
 
 # tomo_scan_sim()
 

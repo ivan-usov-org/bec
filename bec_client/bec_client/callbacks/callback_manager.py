@@ -19,7 +19,7 @@ class CallbackManager:
         self._interrupted_request = None
         self._active_callback = None
 
-    def process_request(self, request, scan_report_type):
+    def process_request(self, request, scan_report_type, callbacks):
         # pylint: disable=protected-access
         try:
             with self.client._sighandler:
@@ -29,19 +29,19 @@ class CallbackManager:
                     if scan_report_type == "readback":
                         asyncio.run(
                             LiveUpdatesReadbackProgressbar(
-                                self.client,
-                                request,
+                                self.client, request, callbacks=callbacks
                             ).run()
                         )
                     elif scan_report_type == "table":
-                        asyncio.run(LiveUpdatesTable(self.client, request).run())
+                        asyncio.run(
+                            LiveUpdatesTable(self.client, request, callbacks=callbacks).run()
+                        )
                 else:
                     if self._active_callback:
                         if scan_report_type == "readback":
                             asyncio.run(
                                 LiveUpdatesReadbackProgressbar(
-                                    self.client,
-                                    request,
+                                    self.client, request, callbacks=callbacks
                                 ).run()
                             )
                         else:
@@ -50,13 +50,15 @@ class CallbackManager:
                             self._active_callback = None
                         return
 
-                    self._active_callback = LiveUpdatesTable(self.client, request)
+                    self._active_callback = LiveUpdatesTable(
+                        self.client, request, callbacks=callbacks
+                    )
                     asyncio.run(self._active_callback.run())
 
             self._interrupted_request = None
         except ScanInterruption as scan_interr:
             self._interrupted_request = (request, scan_report_type)
-            raise ScanInterruption from scan_interr
+            raise scan_interr
 
     def continue_request(self):
         if not self._interrupted_request:

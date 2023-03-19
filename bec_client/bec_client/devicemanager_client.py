@@ -51,7 +51,14 @@ class RPCBase:
 
     def _run(self, *args, **kwargs):
         device, func_call = self._get_rpc_func_name(fcn_name=self.name, use_parent=True)
-        return self._run_rpc_call(device, func_call, args, kwargs)
+        return self._run_rpc_call(device, func_call, *args, **kwargs)
+
+    @property
+    def _hints(self):
+        hints = self._info.get("hints")
+        if not hints:
+            return []
+        return hints.get("fields", [])
 
     @property
     def root(self):
@@ -158,7 +165,9 @@ class RPCBase:
                 )
 
     def update_config(self, update):
-        self.root.parent.send_config_request(action="update", config={self.name: update})
+        self.root.parent.config_helper.send_config_request(
+            action="update", config={self.name: update}
+        )
 
 
 class DeviceBase(RPCBase, Device):
@@ -341,8 +350,8 @@ class Positioner(DeviceBase):
 
 
 class DMClient(DeviceManagerBase):
-    def __init__(self, parent, scibec_url):
-        super().__init__(parent.connector, scibec_url)
+    def __init__(self, parent):
+        super().__init__(parent.connector)
         self.parent = parent
 
     def _get_device_info(self, device_name) -> BECMessage.DeviceInfoMessage:
@@ -352,6 +361,8 @@ class DMClient(DeviceManagerBase):
         return msg
 
     def _load_session(self, _device_cls=None, *_args):
+        time.sleep(1)
+        self.parent.wait_for_service("DeviceServer")
         if self._is_config_valid():
             for dev in self._session["devices"]:
                 msg = self._get_device_info(dev.get("name"))

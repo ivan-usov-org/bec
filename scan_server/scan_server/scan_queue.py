@@ -139,7 +139,8 @@ class QueueManager:
 
     def set_abort(self, scanID=None, queue="primary", parameter: dict = None) -> None:
         """abort the scan and remove it from the queue. This will leave the queue in a paused state after the cleanup"""
-        self.queues[queue].status = ScanQueueStatus.PAUSED
+        if self.queues[queue].queue:
+            self.queues[queue].status = ScanQueueStatus.PAUSED
         self.queues[queue].worker_status = InstructionQueueStatus.STOPPED
         # self.queues[queue].remove_queue_item(scanID=scanID)
 

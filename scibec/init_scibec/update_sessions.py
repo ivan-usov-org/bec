@@ -1,4 +1,4 @@
-from bec_utils.scibec import SciBec
+from scihub.scibec import SciBec
 
 if __name__ == "__main__":
     import argparse

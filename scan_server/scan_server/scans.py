@@ -778,7 +778,7 @@ class RoundScanFlySim(ScanBase):
 
     def __init__(self, *args, parameter=None, **kwargs):
         """
-        A scan following a round shell-like pattern.
+        A fly scan following a round shell-like pattern.
 
         Args:
             *args: motor1, motor2, inner ring, outer ring, number of rings, number of positions in the first ring
@@ -795,7 +795,7 @@ class RoundScanFlySim(ScanBase):
         self.axis = []
 
     def _get_scan_motors(self):
-        self.scan_motors = []
+        self.scan_motors = list(self.caller_args.keys())
         self.flyer = list(self.caller_args.keys())[0]
 
     def prepare_positions(self):
@@ -822,15 +822,17 @@ class RoundScanFlySim(ScanBase):
                 "exp_time": self.exp_time,
             },
         )
+        target_DIID = self.DIID - 1
 
         while True:
             yield from self.stubs.read_and_wait(group="primary", wait_group="readout_primary")
             msg = self.device_manager.producer.get(MessageEndpoints.device_status(self.flyer))
             if msg:
                 status = BECMessage.DeviceStatusMessage.loads(msg)
-                if status.content.get("status", 1) == 0 and self.metadata.get(
-                    "RID"
-                ) == status.metadata.get("RID"):
+                device_is_idle = status.content.get("status", 1) == 0
+                matching_RID = self.metadata.get("RID") == status.metadata.get("RID")
+                matching_DIID = target_DIID == status.metadata.get("DIID")
+                if device_is_idle and matching_RID and matching_DIID:
                     break
 
             time.sleep(1)
@@ -988,6 +990,10 @@ class MonitorScan(ScanBase):
         super().__init__(parameter=parameter, **kwargs)
         self.axis = []
 
+    def _get_scan_motors(self):
+        self.scan_motors = list(self.caller_args.keys())
+        self.flyer = list(self.caller_args.keys())[0]
+
     def _calculate_positions(self) -> None:
         self.positions = np.vstack(self.caller_args.values()).T.tolist()
 
@@ -998,22 +1004,22 @@ class MonitorScan(ScanBase):
         self._check_limits()
 
     def _get_flyer_status(self) -> List:
-        flyer = self.scan_motors[0]
         producer = self.device_manager.producer
 
         pipe = producer.pipeline()
         producer.lrange(MessageEndpoints.device_req_status(self.metadata["RID"]), 0, -1, pipe)
-        producer.get(MessageEndpoints.device_readback(flyer), pipe)
+        producer.get(MessageEndpoints.device_readback(self.flyer), pipe)
         return pipe.execute()
 
     def scan_core(self):
-        flyer = self.scan_motors[0]
-
-        yield from self._move_and_wait(self.positions[0][0])
+        yield from self.stubs.set(
+            device=self.flyer, value=self.positions[0][0], wait_group="scan_motor"
+        )
+        yield from self.stubs.wait(wait_type="move", device=self.flyer, wait_group="scan_motor")
 
         # send the slow motor on its way
         yield from self.stubs.set(
-            device=flyer,
+            device=self.flyer,
             value=self.positions[1][0],
             wait_group="scan_motor",
             metadata={"response": True},
@@ -1029,7 +1035,7 @@ class MonitorScan(ScanBase):
                 continue
             readback = BECMessage.DeviceMessage.loads(readback).content["signals"]
             yield from self.stubs.publish_data_as_read(
-                device=flyer, data=readback, pointID=self.pointID
+                device=self.flyer, data=readback, pointID=self.pointID
             )
             self.pointID += 1
 

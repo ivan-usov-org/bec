@@ -3,7 +3,7 @@ from __future__ import annotations
 import builtins
 import uuid
 from contextlib import ContextDecorator
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 import msgpack
 from bec_utils import BECMessage, MessageEndpoints, bec_logger
@@ -29,7 +29,7 @@ class ScanObject:
         # run must be an anonymous function to allow for multiple doc strings
         self.run = lambda *args, **kwargs: self._run(*args, **kwargs)
 
-    def _run(self, *args, **kwargs):
+    def _run(self, *args, callback: Callable = None, **kwargs):
         if self.client.alarm_handler.alarms_stack:
             logger.warning("The alarm stack is not empty but will be cleared now.")
             self.client.clear_all_alarms()
@@ -59,7 +59,7 @@ class ScanObject:
 
         self._send_scan_request(request)
         scan_report_type = self._get_scan_report_type(hide_report)
-        self.client.callback_manager.process_request(request, scan_report_type)
+        self.client.callback_manager.process_request(request, scan_report_type, callback)
 
         return ScanReport.from_request(request, client=self.client)
 

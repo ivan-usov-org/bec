@@ -4,3 +4,11 @@ class ScanAbortion(Exception):
 
 class ScanInterruption(Exception):
     pass
+
+
+class ServiceConfigError(Exception):
+    pass
+
+
+class DeviceConfigError(Exception):
+    pass

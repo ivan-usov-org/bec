@@ -13,6 +13,9 @@ class MessageEndpoints:
     # device config
     _device_config_request = "internal/devices/config_request"
     _device_config_request_response = "internal/devices/config_request_response"
+    _device_server_config_update = "internal/devices/config_request_response"
+    _device_server_config_update_response = "internal/devices/config_request_response"
+    _device_config_update = "internal/devices/config_update"
     _device_config = "internal/devices/config"
     _device_info = "internal/devices/info"
     _device_staged = "internal/devices/staged"
@@ -89,6 +92,18 @@ class MessageEndpoints:
     @classmethod
     def device_config_request_response(cls, RID: str):
         return f"{cls._device_config_request_response}/{RID}"
+
+    @classmethod
+    def device_server_config_request(cls):
+        return cls._device_server_config_update
+
+    @classmethod
+    def device_server_config_request_response(cls, RID: str):
+        return f"{cls._device_server_config_update_response}/{RID}"
+
+    @classmethod
+    def device_config_update(cls):
+        return cls._device_config_update
 
     @classmethod
     def device_config(cls):

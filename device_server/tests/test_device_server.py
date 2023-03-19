@@ -1,19 +1,18 @@
+import traceback
 from unittest import mock
 from unittest.mock import ANY
-import traceback
-import pytest
 
 import bec_utils
-from bec_utils import BECMessage, MessageEndpoints, Alarms
+import pytest
+from bec_utils import Alarms, BECMessage, MessageEndpoints, ServiceConfig
 from bec_utils.BECMessage import BECStatus
 from bec_utils.tests.utils import ConnectorMock
 from ophyd import Staged
+from ophyd.utils import errors as ophyd_errors
 from test_device_manager_ds import load_device_manager
 
 from device_server import DeviceServer
 from device_server.device_server import InvalidDeviceError
-from ophyd.utils import errors as ophyd_errors
-
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=protected-access
@@ -27,7 +26,8 @@ def load_DeviceServerMock():
 
 class DeviceServerMock(DeviceServer):
     def __init__(self, device_manager, connector_cls) -> None:
-        super().__init__(bootstrap_server="dummy", connector_cls=ConnectorMock, scibec_url="dummy")
+        config = ServiceConfig(redis={"host": "dummy", "port": 6379})
+        super().__init__(config, connector_cls=ConnectorMock)
         self.device_manager = device_manager
 
     def _start_device_manager(self):

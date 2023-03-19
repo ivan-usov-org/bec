@@ -14,7 +14,7 @@ if __name__ == "__main__":
             "numpy",
             "msgpack",
             "requests",
-            "typeguard",
+            "typeguard<3.0",
             "pyyaml",
             "redis",
             "ipython",

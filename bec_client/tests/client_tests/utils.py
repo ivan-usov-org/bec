@@ -4,7 +4,7 @@ import os
 import bec_utils
 import pytest
 import yaml
-from bec_utils import BECMessage
+from bec_utils import BECMessage, ServiceConfig
 from bec_utils.tests.utils import ConnectorMock, create_session_from_config
 
 from bec_client.bec_client import BECClient
@@ -87,35 +87,24 @@ class DMClientMock(DMClient):
                 return dev
 
 
-def get_bec_client_mock():
-    client = ClientMock()
-    client.initialize([], ConnectorMock, "")
-    device_manager = DMClientMock(client, "")
-    with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
-        device_manager._session = create_session_from_config(yaml.safe_load(f))
-    device_manager.producer = device_manager.connector.producer()
-    device_manager._load_session()
-    client.device_manager = device_manager
-    return client
-
-
 @pytest.fixture()
 def bec_client():
     client = ClientMock()
-    client.initialize([], ConnectorMock, "")
-    device_manager = DMClientMock(client, "")
+    client.initialize(
+        ServiceConfig(redis={"host": "host", "port": 123}, scibec={"host": "host", "port": 123}),
+        ConnectorMock,
+    )
+    device_manager = DMClientMock(client)
     if not "test_session" in builtins.__dict__:
         with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
             builtins.__dict__["test_session"] = create_session_from_config(yaml.safe_load(f))
     device_manager._session = builtins.__dict__["test_session"]
     device_manager.producer = device_manager.connector.producer()
+    client.wait_for_service = lambda service_name: None
     device_manager._load_session()
+    for name, dev in device_manager.devices.items():
+        dev._info["hints"] = {"fields": [name]}
     client.device_manager = device_manager
     yield client
     del ClientMock._client
     device_manager.devices.flush()
-
-
-# def test_scan_update():
-#     bec_client = get_bec_client_mock()
-#     # queue = ScanQueue(bec_client)

@@ -53,7 +53,7 @@ class ScanStubs:
             "device": device,
             "func": func_name,
             "rpc_id": rpc_id,
-            "args": list(args),
+            "args": args,
             "kwargs": kwargs,
         }
         yield from self.rpc(device=device, parameter=parameter)
@@ -242,7 +242,7 @@ class ScanStubs:
         yield self._device_msg(
             device=device,
             action="publish_data_as_read",
-            parameter={"data": data},
+            parameter={"data": {device: data}},
             metadata=metadata,
         )
 

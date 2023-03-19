@@ -37,6 +37,7 @@ class ScanWorker(threading.Thread):
         self.signal_event = threading.Event()
         self.scan_id = None
         self.scan_motors = []
+        self.scan_type = None
         self.current_scanID = None
         self.current_scan_info = None
         self._staged_devices = set()
@@ -388,6 +389,8 @@ class ScanWorker(threading.Thread):
         )
 
     def _check_for_interruption(self) -> None:
+        if self.status == InstructionQueueStatus.PAUSED:
+            self._send_scan_status("paused")
         while self.status == InstructionQueueStatus.PAUSED:
             time.sleep(0.1)
         if self.status == InstructionQueueStatus.STOPPED:
@@ -401,6 +404,7 @@ class ScanWorker(threading.Thread):
                     self.device_manager.devices[dev]
                     for dev in instr.content["parameter"].get("primary")
                 ]
+            self.scan_type = instr.content["parameter"].get("scan_type")
 
         if not instr.metadata.get("scan_def_id"):
             self.max_point_id = 0
@@ -499,7 +503,7 @@ class ScanWorker(threading.Thread):
             status=status,
             info=self.current_scan_info,
         ).dumps()
-        expire = None if status == "open" else 1800
+        expire = None if status in ["open", "paused"] else 1800
         pipe = self.device_manager.producer.pipeline()
         self.device_manager.producer.set(
             MessageEndpoints.public_scan_info(self.current_scanID), msg, pipe=pipe, expire=expire
@@ -627,7 +631,10 @@ class ScanWorker(threading.Thread):
 
                 except ScanAbortion:
                     queue.queue.increase_scan_number()
-                    self._send_scan_status("aborted")
+                    if queue.return_to_start:
+                        self._send_scan_status("aborted")
+                    else:
+                        self._send_scan_status("halted")
                     queue.status = InstructionQueueStatus.STOPPED
                     queue.append_to_queue_history()
                     self.cleanup()

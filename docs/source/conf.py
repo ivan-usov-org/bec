@@ -28,7 +28,7 @@ extensions = [
     "recommonmark",
     "sphinx_copybutton",
 ]
-autosummary_generate = True  # Turn on sphinx.ext.autosummary
+autosummary_generate = False  # Turn on sphinx.ext.autosummary
 add_module_names = False  # Remove namespaces from class/method signatures
 autodoc_inherit_docstrings = True  # If no docstring, inherit from base class
 set_type_checking_flag = True  # Enable 'expensive' imports for sphinx_autodoc_typehints

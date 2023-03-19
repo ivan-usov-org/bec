@@ -20,7 +20,7 @@ config_path = clargs.config
 
 config = ServiceConfig(config_path)
 
-s = device_server.DeviceServer(config.redis, RedisConnector, config.scibec)
+s = device_server.DeviceServer(config, RedisConnector)
 try:
     event = threading.Event()
     s.start()

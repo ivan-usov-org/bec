@@ -5,7 +5,7 @@ if __name__ == "__main__":
         install_requires=[
             "msgpack",
             "requests",
-            "typeguard",
+            "typeguard<3.0",
             "pyyaml",
             "redis",
             "loguru",

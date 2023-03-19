@@ -45,11 +45,10 @@ class DeviceServer(BECService):
     This class is intended to provide a thin wrapper around ophyd and the devicemanager. It acts as the entry point for other services
     """
 
-    def __init__(self, bootstrap_server, connector_cls: ConnectorBase, scibec_url: str) -> None:
-        super().__init__(bootstrap_server, connector_cls, unique_service=True)
+    def __init__(self, config, connector_cls: ConnectorBase) -> None:
+        super().__init__(config, connector_cls, unique_service=True)
         self._tasks = []
         self.device_manager = None
-        self.scibec_url = scibec_url
         self.threads = []
         self.sig_thread = None
         self.sig_thread = self.connector.consumer(
@@ -62,9 +61,7 @@ class DeviceServer(BECService):
         self._start_device_manager()
 
     def _start_device_manager(self):
-        self.device_manager = DeviceManagerDS(
-            self.connector, self.scibec_url, status_cb=self.update_status
-        )
+        self.device_manager = DeviceManagerDS(self.connector, status_cb=self.update_status)
         self.device_manager.initialize(self.bootstrap_server)
 
     def start(self) -> None:
@@ -221,11 +218,11 @@ class DeviceServer(BECService):
         if callable(rpc_var):
             args = tuple(instr_params.get("args", ()))
             kwargs = instr_params.get("kwargs", {})
-            if len(args) > 0 and len(args[0]) > 0 and len(kwargs) > 0:
-                res = rpc_var(*args[0], **kwargs)
-            elif len(args) > 0 and len(args[0]) > 0:
-                res = rpc_var(*args[0])
-            elif len(kwargs) > 0:
+            if args and kwargs:
+                res = rpc_var(*args, **kwargs)
+            elif args:
+                res = rpc_var(*args)
+            elif kwargs:
                 res = rpc_var(**kwargs)
             else:
                 res = rpc_var()

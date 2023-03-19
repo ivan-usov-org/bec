@@ -79,9 +79,14 @@ def get_device_info(obj, device_info):
             sub_devices.append(get_device_info(dev, {}))
     return {
         "device_name": obj.name,
+        "device_attr_name": getattr(obj, "attr_name", ""),
+        "device_dotted_name": getattr(obj, "dotted_name", ""),
         "device_info": {
             "device_base_class": get_device_base_class(obj),
             "signals": signals,
+            "hints": obj.hints,
+            "describe": obj.describe(),
+            "describe_configuration": obj.describe_configuration(),
             "sub_devices": sub_devices,
             "custom_user_access": user_access,
         },

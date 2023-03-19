@@ -19,9 +19,8 @@ bec_logger.level = bec_logger.LOGLEVEL.INFO
 logger = bec_logger.logger
 
 bec_server = ScanServer(
-    bootstrap_server=config.redis,
+    config=config,
     connector_cls=RedisConnector,
-    scibec_url=config.scibec,
 )
 try:
     event = threading.Event()
