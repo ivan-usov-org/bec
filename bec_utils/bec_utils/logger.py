@@ -89,8 +89,8 @@ class BECLogger:
                 f"{self.service_name}.log", level=level, format=self.format, enqueue=True
             )
 
-    def add_redis_log(self, level: LogLevel):
-        self.logger.add(self._logger_callback, serialize=True, level=level)
+    # def add_redis_log(self, level: LogLevel):
+    #     self.logger.add(self._logger_callback, serialize=True, level=level)
 
     @property
     def level(self):

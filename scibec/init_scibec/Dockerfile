@@ -1,5 +1,5 @@
 # set base image (host OS)
-FROM python:3.8
+FROM python:3.8-alpine
 
 # set the working directory in the container
 WORKDIR /code
@@ -9,7 +9,8 @@ COPY ./scibec/init_scibec ./bec/scibec/init_scibec
 COPY ./bec_utils ./bec/bec_utils/
 COPY ./scihub ./bec/scihub/
 
-RUN pip install -e ./bec/bec_utils
+RUN apk update && apk add gcc libc-dev build-base linux-headers
+RUN pip install -e ./bec/bec_utils/
 RUN pip install -e ./bec/scihub/
 WORKDIR /code/bec/scibec/init_scibec
 

@@ -55,6 +55,7 @@ class MessageEndpoints:
 
     # service
     _services_status = "internal/services/status"
+    _metrics = "internal/services/metrics"
 
     # misc
     _public_global_vars = "public/vars"
@@ -221,9 +222,14 @@ class MessageEndpoints:
     def alarm(cls):
         return cls._alarms
 
+    # service
     @classmethod
     def service_status(cls, service_id: str):
         return f"{cls._services_status}/{service_id}"
+
+    @classmethod
+    def metrics(cls, service_id: str):
+        return f"{cls._metrics}/{service_id}"
 
     # misc
     @classmethod
