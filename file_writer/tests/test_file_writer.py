@@ -3,6 +3,7 @@ from unittest import mock
 
 import h5py
 import numpy as np
+import pytest
 from test_file_writer_manager import load_FileWriter
 
 import file_writer
@@ -66,23 +67,34 @@ def test_create_device_data_storage():
     }
     storage.baseline = {}
     device_storage = file_writer._create_device_data_storage(storage)
+    assert len(device_storage.keys()) == 2
     assert len(device_storage["samx"]) == 2
+    assert device_storage["samx"][0]["samx"]["value"] == 0.1
+    assert device_storage["samx"][1]["samx"]["value"] == 0.2
 
 
-def test_write_data_storage():
+@pytest.mark.parametrize(
+    "segments",
+    [
+        (
+            {
+                0: {
+                    "samx": {"samx": {"value": 0.11}, "samx_setpoint": {"value": 0.1}},
+                    "samy": {"samy": {"value": 1.1}},
+                },
+                1: {
+                    "samx": {"samx": {"value": 0.21}, "samx_setpoint": {"value": 0.2}},
+                    "samy": {"samy": {"value": 1.2}},
+                },
+            }
+        )
+    ],
+)
+def test_write_data_storage(segments):
     file_manager = load_FileWriter()
     file_writer = NexusFileWriter(file_manager)
     storage = ScanStorage("2", "scanID-string")
     storage.num_points = 2
-    storage.scan_segments = {
-        0: {
-            "samx": {"samx": {"value": 0.11}, "samx_setpoint": {"value": 0.1}},
-            "samy": {"samy": {"value": 1.1}},
-        },
-        1: {
-            "samx": {"samx": {"value": 0.21}, "samx_setpoint": {"value": 0.2}},
-            "samy": {"samy": {"value": 1.2}},
-        },
-    }
+    storage.scan_segments = segments
     storage.baseline = {}
     file_writer.write("./test.h5", storage)

@@ -184,7 +184,7 @@ class HDF5StorageWriter:
                     self.add_group(key, group, sub_storage)
                     # self.add_content(group, sub_storage._storage)
                     continue
-                if isinstance(value, list):
+                if isinstance(value, list) and isinstance(value[0], dict):
                     merged_dict = merge_dicts(value)
                     sub_storage = HDF5Storage(key)
                     dict_to_storage(sub_storage, merged_dict)
