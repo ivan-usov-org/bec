@@ -74,7 +74,7 @@ def test_create_device_data_storage():
 
 
 @pytest.mark.parametrize(
-    "segments",
+    "segments,baseline,metadata",
     [
         (
             {
@@ -86,15 +86,52 @@ def test_create_device_data_storage():
                     "samx": {"samx": {"value": 0.21}, "samx_setpoint": {"value": 0.2}},
                     "samy": {"samy": {"value": 1.2}},
                 },
-            }
+            },
+            {
+                "eyefoc": {
+                    "eyefoc": {"value": 0, "timestamp": 1679226971.564248},
+                    "eyefoc_setpoint": {"value": 0, "timestamp": 1679226971.564235},
+                    "eyefoc_motor_is_moving": {"value": 0, "timestamp": 1679226971.564249},
+                },
+                "field": {
+                    "field_x": {"value": 0, "timestamp": 1679226971.579148},
+                    "field_x_setpoint": {"value": 0, "timestamp": 1679226971.579145},
+                    "field_x_motor_is_moving": {"value": 0, "timestamp": 1679226971.579148},
+                    "field_y": {"value": 0, "timestamp": 1679226971.5799649},
+                    "field_y_setpoint": {"value": 0, "timestamp": 1679226971.579962},
+                    "field_y_motor_is_moving": {"value": 0, "timestamp": 1679226971.579966},
+                    "field_z_zsub": {"value": 0, "timestamp": 1679226971.58087},
+                    "field_z_zsub_setpoint": {"value": 0, "timestamp": 1679226971.580867},
+                    "field_z_zsub_motor_is_moving": {"value": 0, "timestamp": 1679226971.58087},
+                },
+            },
+            {
+                "RID": "5ee455b8-d0ef-452d-b54a-e7cea5cea19e",
+                "scanID": "a9fb36e4-3f38-486c-8434-c8eca19472ba",
+                "queueID": "14463a5b-1c65-4888-8f87-4808c90a241f",
+                "primary": ["samx"],
+                "num_points": 2,
+                "positions": [[-100], [100]],
+                "scan_name": "monitor_scan",
+                "scan_type": "fly",
+                "scan_number": 88,
+                "dataset_number": 88,
+                "exp_time": 0.1,
+                "scan_report_hint": "table",
+                "scan_report_devices": ["samx"],
+                "scan_msgs": [
+                    "ScanQueueMessage(({'scan_type': 'monitor_scan', 'parameter': {'args': {'samx': [-100, 100]}, 'kwargs': {'relative': False}}, 'queue': 'primary'}, {'RID': '5ee455b8-d0ef-452d-b54a-e7cea5cea19e'})))"
+                ],
+            },
         )
     ],
 )
-def test_write_data_storage(segments):
+def test_write_data_storage(segments, baseline, metadata):
     file_manager = load_FileWriter()
     file_writer = NexusFileWriter(file_manager)
     storage = ScanStorage("2", "scanID-string")
     storage.num_points = 2
     storage.scan_segments = segments
-    storage.baseline = {}
+    storage.baseline = baseline
+    storage.metadata = metadata
     file_writer.write("./test.h5", storage)

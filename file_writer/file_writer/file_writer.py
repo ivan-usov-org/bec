@@ -1,5 +1,6 @@
 import abc
 import json
+import traceback
 import typing
 
 import h5py
@@ -31,17 +32,13 @@ class FileWriter(abc.ABC):
     @staticmethod
     def _create_device_data_storage(data):
         device_storage = {}
+        device_storage.update(data.baseline)
         for point in range(data.num_points):
             for dev in data.scan_segments[point]:
                 if dev not in device_storage:
                     device_storage[dev] = [data.scan_segments[point][dev]]
                     continue
                 device_storage[dev].append(data.scan_segments[point][dev])
-        for dev_name, value in data.baseline.items():
-            if dev_name in value:
-                device_storage[dev_name] = value[dev_name]["value"]
-                continue
-            logger.warning(f"Skipping device {dev_name} as it does not contain a {dev_name} value.")
         return device_storage
 
 
@@ -194,15 +191,19 @@ class HDF5StorageWriter:
                 group.create_dataset(name=key, data=value)
 
     def add_dataset(self, name: str, container: typing.Any, val: HDF5Storage):
-        data = val._data
-        if data is None:
-            return
-        if isinstance(data, list):
-            if data and isinstance(data[0], dict):
-                data = json.dumps(data)
-        dataset = container.create_dataset(name, data=data)
-        self.add_attribute(dataset, val.attrs)
-        self.add_content(dataset, val._storage)
+        try:
+            data = val._data
+            if data is None:
+                return
+            if isinstance(data, list):
+                if data and isinstance(data[0], dict):
+                    data = json.dumps(data)
+            dataset = container.create_dataset(name, data=data)
+            self.add_attribute(dataset, val.attrs)
+            self.add_content(dataset, val._storage)
+        except Exception as exc:
+            content = traceback.format_exc()
+            logger.error(f"Failed to write dataset {name}: {content}")
         return
 
     def add_attribute(self, container: typing.Any, attributes: dict):
@@ -238,7 +239,6 @@ class HDF5StorageWriter:
 
 class NexusFileWriter(FileWriter):
     def write(self, file_path: str, data):
-        print(f"writing file to {file_path}")
         device_storage = self._create_device_data_storage(data)
         device_storage["metadata"] = data.metadata
         writer_format = getattr(fwp, self.file_writer_manager.file_writer_config.get("plugin"))
