@@ -9,13 +9,9 @@ COPY ./scibec/init_scibec ./bec/scibec/init_scibec
 COPY ./bec_utils ./bec/bec_utils/
 COPY ./scihub ./bec/scihub/
 
-<<<<<<< HEAD
 RUN apk update && apk add gcc libc-dev build-base linux-headers
 RUN pip install -e ./bec/bec_utils/
-=======
-RUN pip install -e ./bec/bec_utils
 RUN pip install -e ./bec/scihub/
->>>>>>> master
 WORKDIR /code/bec/scibec/init_scibec
 
 # command to run on container start
