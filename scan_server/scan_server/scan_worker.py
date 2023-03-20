@@ -445,17 +445,24 @@ class ScanWorker(threading.Thread):
 
     def _close_scan(self, instr: DeviceMsg, max_point_id: int) -> None:
         scan_id = instr.metadata.get("scanID")
-        if self.scan_id == scan_id:
-            self.scan_id = None
 
+        if self.scan_id != scan_id:
+            return
+
+        # reset the scan ID now that the scan will be closed
+        self.scan_id = None
+
+        scan_info = self.current_scan_info
+        if scan_info.get("scan_type") == "fly":
             # flyers do not increase the point_id but instead set the num_points directly
-            if (
-                self.current_scan_info.get("scan_type") != "fly"
-                or self.current_scan_info["num_points"] == 0
-            ):
-                # point_id starts at 0
-                self.current_scan_info["num_points"] = max_point_id + 1
-            self._send_scan_status("closed")
+            num_points = self.current_instruction_queue_item.active_request_block.scan.num_pos
+            self.current_scan_info["num_points"] = num_points
+
+        elif scan_info.get("scan_type") != "fly" or scan_info["num_points"] == 0:
+            # point_id starts at 0
+            scan_info["num_points"] = max_point_id + 1
+
+        self._send_scan_status("closed")
 
     def _stage_devices(self, instr: DeviceMsg) -> None:
         devices = [dev.name for dev in self.device_manager.devices.enabled_devices]

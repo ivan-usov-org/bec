@@ -159,6 +159,55 @@ class ScanStubs:
             metadata=metadata,
         )
 
+    def complete(self, *, device: str, metadata=None):
+        """Complete a fly scan device.
+
+        Args:
+            device (str): Device name of flyer.
+        """
+        yield self._device_msg(
+            device=device,
+            action="complete",
+            parameter={},
+            metadata=metadata,
+        )
+
+    def get_req_status(self, device: str, RID: str, DIID: int):
+        """Check if a device request status matches the given RID and DIID
+
+        Args:
+            device (str): device under inspection
+            RID (str): request ID
+            DIID (int): device instruction ID
+
+        """
+        raw_msg = self.producer.get(MessageEndpoints.device_req_status(device))
+        if not raw_msg:
+            return 0
+        msg = BECMessage.DeviceReqStatusMessage.loads(raw_msg)
+        matching_RID = msg.metadata.get("RID") == RID
+        matching_DIID = msg.metadata.get("DIID") == DIID
+        if matching_DIID and matching_RID:
+            return 1
+        return 0
+
+    def get_device_progress(self, device: str, RID: str):
+        """Get reported device progress
+
+        Args:
+            device (str): Name of the device
+            RID (str): request ID
+
+        """
+        raw_msg = self.producer.get(MessageEndpoints.device_progress(device))
+        if not raw_msg:
+            return None
+        msg = BECMessage.DeviceStatusMessage.loads(raw_msg)
+        matching_RID = msg.metadata.get("RID") == RID
+        if not matching_RID:
+            return None
+        return msg.content["status"]
+
     def close_scan(self):
         """Close the scan."""
         yield self._device_msg(device=None, action="close_scan", parameter={})

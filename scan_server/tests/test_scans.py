@@ -9,6 +9,7 @@ from bec_utils.devicemanager import DeviceContainer
 from bec_utils.tests.utils import ProducerMock
 
 from scan_plugins.LamNIFermatScan import LamNIFermatScan
+from scan_plugins.otf_scan import OTFScan
 from scan_server.scans import (
     Acquire,
     ContLineScan,
@@ -2064,4 +2065,90 @@ def test_time_scan(scan_msg, reference_scan_list):
     device_manager = DMMock()
     request = TimeScan(device_manager=device_manager, parameter=scan_msg.content["parameter"])
     scan_instructions = list(request.run())
+    assert scan_instructions == reference_scan_list
+
+
+@pytest.mark.parametrize(
+    "scan_msg,reference_scan_list",
+    [
+        (
+            BMessage.ScanQueueMessage(
+                scan_type="otf_scan",
+                parameter={
+                    "args": {},
+                    "kwargs": {"e1": 700, "e2": 740, "time": 4},
+                },
+                queue="primary",
+                metadata={"RID": "1234"},
+            ),
+            [
+                None,
+                None,
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="open_scan",
+                    parameter={
+                        "primary": ["otf"],
+                        "num_points": 0,
+                        "positions": [],
+                        "scan_name": "otf_scan",
+                        "scan_type": "fly",
+                    },
+                    metadata={"stream": "primary", "DIID": 0, "RID": "1234"},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="stage",
+                    parameter={},
+                    metadata={"stream": "primary", "DIID": 1, "RID": "1234"},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="baseline_reading",
+                    parameter={},
+                    metadata={"stream": "baseline", "DIID": 2, "RID": "1234"},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device="otf",
+                    action="kickoff",
+                    parameter={"e1": 700, "e2": 740, "time": 4},
+                    metadata={"stream": "primary", "DIID": 3, "RID": "1234"},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device="otf",
+                    action="complete",
+                    parameter={},
+                    metadata={"stream": "primary", "DIID": 4, "RID": "1234"},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="wait",
+                    parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
+                    metadata={"stream": "primary", "DIID": 5, "RID": "1234"},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="unstage",
+                    parameter={},
+                    metadata={"stream": "primary", "DIID": 6, "RID": "1234"},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="close_scan",
+                    parameter={},
+                    metadata={"stream": "primary", "DIID": 7, "RID": "1234"},
+                ),
+            ],
+        )
+    ],
+)
+def test_otf_scan(scan_msg, reference_scan_list):
+    device_manager = DMMock()
+    request = OTFScan(
+        device_manager=device_manager,
+        parameter=scan_msg.content["parameter"],
+        metadata=scan_msg.metadata,
+    )
+    with mock.patch.object(request.stubs, "get_req_status", return_value=1):
+        scan_instructions = list(request.run())
     assert scan_instructions == reference_scan_list
