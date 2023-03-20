@@ -458,7 +458,7 @@ class ScanWorker(threading.Thread):
             num_points = self.current_instruction_queue_item.active_request_block.scan.num_pos
             self.current_scan_info["num_points"] = num_points
 
-        elif scan_info["num_points"] == 0:
+        else:
             # point_id starts at 0
             scan_info["num_points"] = max_point_id + 1
 
