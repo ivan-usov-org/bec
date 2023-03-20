@@ -296,7 +296,7 @@ class DeviceManagerDS(DeviceManagerBase):
 
         emitted_points = ds_obj.emitted_points.get(metadata["scanID"], 0)
 
-        # make sure the length of all arrays is equal
+        # make sure all arrays are of equal length
         max_points = min(len(d) for d in data.values())
         bundle = BECMessage.BundleMessage()
         for ii in range(emitted_points, max_points):

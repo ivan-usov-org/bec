@@ -1,3 +1,4 @@
+import inspect
 import sys
 import threading
 import time
@@ -93,6 +94,7 @@ class DeviceServer(BECService):
 
     def shutdown(self) -> None:
         """shutdown the device server"""
+        super().shutdown()
         self.stop()
         self.sig_thread.signal_event.set()
         self.sig_thread.join()
@@ -176,6 +178,8 @@ class DeviceServer(BECService):
                 self._run_rpc(instructions)
             elif action == "kickoff":
                 self._kickoff_device(instructions)
+            elif action == "complete":
+                self._complete_device(instructions)
             elif action == "trigger":
                 self._trigger_device(instructions)
             elif action == "stage":
@@ -311,7 +315,18 @@ class DeviceServer(BECService):
     def _kickoff_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
         logger.debug(f"Kickoff device: {instr}")
         obj = self.device_manager.devices.get(instr.content["device"]).obj
-        obj.kickoff(metadata=instr.metadata, **instr.content["parameter"])
+        kickoff_args = inspect.getfullargspec(obj.kickoff).args
+        if len(kickoff_args) > 1:
+            obj.kickoff(metadata=instr.metadata, **instr.content["parameter"])
+            return
+        obj.configure(instr.content["parameter"])
+        obj.kickoff()
+
+    def _complete_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
+        obj = self.device_manager.devices.get(instr.content["device"]).obj
+        status = obj.complete()
+        status.__dict__["instruction"] = instr
+        status.add_callback(self._status_callback)
 
     def _set_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
         device_obj = self.device_manager.devices.get(instr.content["device"])

@@ -45,6 +45,12 @@ class ScanBundlerMock(ScanBundler):
     def _start_device_manager(self):
         pass
 
+    def _start_metrics_emitter(self):
+        pass
+
+    def _start_update_service_info(self):
+        pass
+
 
 def test_device_read_callback():
     scan_bundler = load_ScanBundlerMock()
