@@ -13,6 +13,7 @@ class PipelineMock:
 
     def execute(self):
         if not self._producer.store_data:
+            self._pipe_buffer = []
             return []
         res = [
             getattr(self._producer, method)(*args, **kwargs)
@@ -55,7 +56,7 @@ class ProducerMock:
 
     def send(self, topic, msg, pipe=None):
         if pipe:
-            pipe._pipe_buffer.append(("send", (topic, msg)))
+            pipe._pipe_buffer.append(("send", (topic, msg), {}))
             return
         self.message_sent.append({"queue": topic, "msg": msg})
 
