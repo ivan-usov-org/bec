@@ -1081,6 +1081,7 @@ class MonitorScan(ScanBase):
                 device=self.flyer, data=readback, pointID=self.pointID
             )
             self.pointID += 1
+            self.num_pos += 1
 
 
 class Acquire(ScanBase):
