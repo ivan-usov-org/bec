@@ -14,7 +14,7 @@ from .logger import bec_logger
 
 logger = bec_logger.logger
 
-BECCOMPRESSION = "json"
+BECCOMPRESSION = "msgpack"
 DEFAULT_VERSION = 1.1
 
 
@@ -27,27 +27,31 @@ def encode_numpy_array(obj):
 
 class BECMessageCompression:
     @abstractmethod
-    def loads(self, msg) -> dict:
+    def loads(self, msg, **kwargs) -> dict:
         """load and decompress a message"""
 
     @abstractmethod
-    def dumps(self, msg) -> str:
+    def dumps(self, msg, **kwargs) -> str:
         """compress a message"""
 
 
 class MsgpackCompression(BECMessageCompression):
-    def loads(self, msg) -> dict:
+    def loads(self, msg, encode=True, **kwargs) -> dict:
+        if not encode:
+            return msgpack.loads(msg, raw=False)
         return msgpack.loads(base64.b64decode(msg.encode()), raw=False)
 
-    def dumps(self, msg) -> str:
+    def dumps(self, msg, encode=True, **kwargs) -> str:
+        if not encode:
+            return msgpack.dumps(msg)
         return base64.b64encode(msgpack.dumps(msg, default=encode_numpy_array)).decode()
 
 
 class JsonCompression(BECMessageCompression):
-    def loads(self, msg):
+    def loads(self, msg, **kwargs):
         return json.loads(msg)
 
-    def dumps(self, msg):
+    def dumps(self, msg, **kwargs):
         return json.dumps(msg, default=encode_numpy_array)
 
 
@@ -127,7 +131,7 @@ class BECMessage:
                 "version": self.version,
                 "compression": BECCOMPRESSION,
             }
-            return self.compression_handler.dumps(msg)
+            return self.compression_handler.dumps(msg, encode=False)
         if self.version == 1.1:
             msg = {
                 "content": self.content,
