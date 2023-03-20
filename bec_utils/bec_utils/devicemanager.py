@@ -10,7 +10,14 @@ from bec_utils import ConfigHelper
 from bec_utils.connector import ConnectorBase
 
 from .bec_errors import DeviceConfigError
-from .BECMessage import BECStatus, DeviceConfigMessage, DeviceInfoMessage, LogMessage
+from .BECMessage import (
+    BECStatus,
+    DeviceConfigMessage,
+    DeviceInfoMessage,
+    DeviceMessage,
+    DeviceStatusMessage,
+    LogMessage,
+)
 from .endpoints import MessageEndpoints
 from .logger import bec_logger
 
@@ -139,14 +146,14 @@ class Device:
         """get the last reading from a device"""
         val = self.parent.producer.get(MessageEndpoints.device_read(self.name))
         if val:
-            return msgpack.loads(val)["content"]["signals"].get(self.name)
+            return DeviceMessage.loads(val).content["signals"].get(self.name)
         return None
 
     def readback(self):
         """get the last readback value from a device"""
         val = self.parent.producer.get(MessageEndpoints.device_readback(self.name))
         if val:
-            return msgpack.loads(val)["content"]["signals"].get(self.name)
+            return DeviceMessage.loads(val).content["signals"].get(self.name)
         return None
 
     @property
@@ -155,8 +162,8 @@ class Device:
         val = self.parent.producer.get(MessageEndpoints.device_status(self.name))
         if val is None:
             return val
-        val = msgpack.loads(val)
-        return val.get("status")
+        val = DeviceStatusMessage.loads(val)
+        return val.content.get("status")
 
     @property
     def signals(self):
@@ -164,7 +171,7 @@ class Device:
         val = self.parent.producer.get(MessageEndpoints.device_read(self.name))
         if val is None:
             return None
-        self._signals = msgpack.loads(val)["content"]["signals"]
+        self._signals = DeviceMessage.loads(val).content["signals"]
         return self._signals
 
     @property
