@@ -1,9 +1,8 @@
-import time
 import uuid
 from unittest import mock
 
 import pytest
-from bec_utils import BECMessage, DeviceStatus, MessageEndpoints
+from bec_utils import BECMessage, MessageEndpoints
 from utils import load_ScanServerMock
 
 from scan_server.errors import DeviceMessageError, ScanAbortion

@@ -436,6 +436,49 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         return params
 
 
+class FlyScanBase(ScanBase):
+    scan_type = "fly"
+
+    def _get_flyer_status(self) -> List:
+        flyer = self.scan_motors[0]
+        producer = self.device_manager.producer
+
+        pipe = producer.pipeline()
+        producer.lrange(MessageEndpoints.device_req_status(self.metadata["RID"]), 0, -1, pipe)
+        producer.get(MessageEndpoints.device_readback(flyer), pipe)
+        return pipe.execute()
+
+    def scan_core(self):
+        yield from self.stubs.kickoff(
+            device=self.scan_motors[0],
+            parameter=self.caller_kwargs,
+        )
+        yield from self.stubs.complete(device=self.scan_motors[0])
+        target_diid = self.DIID - 1
+
+        while True:
+            status = self.stubs.get_req_status(
+                device=self.scan_motors[0], RID=self.metadata["RID"], DIID=target_diid
+            )
+            progress = self.stubs.get_device_progress(
+                device=self.scan_motors[0], RID=self.metadata["RID"]
+            )
+            if progress:
+                self.num_pos = progress
+            if status:
+                break
+            time.sleep(1)
+
+    def _calculate_positions(self) -> None:
+        pass
+
+    def read_scan_motors(self):
+        yield None
+
+    def prepare_positions(self):
+        yield None
+
+
 class ScanStub(RequestBase):
     pass
 
@@ -1038,6 +1081,7 @@ class MonitorScan(ScanBase):
                 device=self.flyer, data=readback, pointID=self.pointID
             )
             self.pointID += 1
+            self.num_pos += 1
 
 
 class Acquire(ScanBase):
