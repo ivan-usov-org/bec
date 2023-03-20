@@ -62,9 +62,11 @@ def load_device_manager():
     return device_manager
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def device_manager():
-    return load_device_manager()
+    device_manager = load_device_manager()
+    yield device_manager
+    device_manager.shutdown()
 
 
 def test_device_init(device_manager):

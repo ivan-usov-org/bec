@@ -94,6 +94,7 @@ class DeviceServer(BECService):
 
     def shutdown(self) -> None:
         """shutdown the device server"""
+        super().shutdown()
         self.stop()
         self.sig_thread.signal_event.set()
         self.sig_thread.join()

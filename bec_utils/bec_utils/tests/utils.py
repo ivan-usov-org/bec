@@ -23,8 +23,22 @@ class PipelineMock:
 
 
 class ConsumerMock:
+    def __init__(self) -> None:
+        self.signal_event = SignalMock()
+
     def start(self):
         pass
+
+    def join(self):
+        pass
+
+
+class SignalMock:
+    def __init__(self) -> None:
+        self.is_set = False
+
+    def set(self):
+        self.is_set = True
 
 
 class ProducerMock:

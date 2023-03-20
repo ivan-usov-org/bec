@@ -9,13 +9,21 @@ from bec_utils.BECMessage import BECStatus
 from bec_utils.tests.utils import ConnectorMock
 from ophyd import Staged
 from ophyd.utils import errors as ophyd_errors
-from test_device_manager_ds import load_device_manager
+from test_device_manager_ds import device_manager, load_device_manager
 
 from device_server import DeviceServer
 from device_server.device_server import InvalidDeviceError
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=protected-access
+
+
+@pytest.fixture(scope="function")
+def device_server_mock(device_manager):
+    connector = ConnectorMock("")
+    device_server = DeviceServerMock(device_manager, connector)
+    yield device_server
+    device_server.shutdown()
 
 
 def load_DeviceServerMock():
@@ -33,9 +41,15 @@ class DeviceServerMock(DeviceServer):
     def _start_device_manager(self):
         pass
 
+    def _start_metrics_emitter(self):
+        pass
 
-def test_start():
-    device_server = load_DeviceServerMock()
+    def _start_update_service_info(self):
+        pass
+
+
+def test_start(device_server_mock):
+    device_server = device_server_mock
 
     device_server.start()
 
@@ -45,8 +59,8 @@ def test_start():
 
 
 @pytest.mark.parametrize("status", [BECStatus.ERROR, BECStatus.RUNNING, BECStatus.IDLE])
-def test_update_status(status):
-    device_server = load_DeviceServerMock()
+def test_update_status(device_server_mock, status):
+    device_server = device_server_mock
     assert device_server.status == BECStatus.BUSY
 
     device_server.update_status(status)
@@ -54,8 +68,8 @@ def test_update_status(status):
     assert device_server.status == status
 
 
-def test_stop():
-    device_server = load_DeviceServerMock()
+def test_stop(device_server_mock):
+    device_server = device_server_mock
     device_server.stop()
     assert device_server.status == BECStatus.IDLE
 
@@ -77,8 +91,8 @@ def test_stop():
         ),
     ],
 )
-def test_update_device_metadata(instr):
-    device_server = load_DeviceServerMock()
+def test_update_device_metadata(device_server_mock, instr):
+    device_server = device_server_mock
 
     devices = instr.content["device"]
     if not isinstance(devices, list):
@@ -90,8 +104,8 @@ def test_update_device_metadata(instr):
         assert device_server.device_manager.devices.get(dev).metadata == instr.metadata
 
 
-def test_stop_devices():
-    device_server = load_DeviceServerMock()
+def test_stop_devices(device_server_mock):
+    device_server = device_server_mock
     dev = device_server.device_manager.devices
     assert len(dev) > len(dev.enabled_devices)
     with mock.patch.object(dev.samx.obj, "stop") as stop:
@@ -136,8 +150,8 @@ def test_stop_devices():
         ),
     ],
 )
-def test_assert_device_is_enabled(instr):
-    device_server = load_DeviceServerMock()
+def test_assert_device_is_enabled(device_server_mock, instr):
+    device_server = device_server_mock
     devices = instr.content["device"]
 
     if not isinstance(devices, list):
@@ -175,8 +189,8 @@ def test_assert_device_is_enabled(instr):
         ),
     ],
 )
-def test_assert_device_is_valid(instr):
-    device_server = load_DeviceServerMock()
+def test_assert_device_is_valid(device_server_mock, instr):
+    device_server = device_server_mock
     devices = instr.content["device"]
 
     if not devices:
@@ -207,8 +221,8 @@ def test_assert_device_is_valid(instr):
         ),
     ],
 )
-def test_handle_device_instructions_set(instr):
-    device_server = load_DeviceServerMock()
+def test_handle_device_instructions_set(device_server_mock, instr):
+    device_server = device_server_mock
     msg = BECMessage.DeviceInstructionMessage.dumps(instr)
     instructions = BECMessage.DeviceInstructionMessage.loads(msg)
 
@@ -240,8 +254,8 @@ def test_handle_device_instructions_set(instr):
         ),
     ],
 )
-def test_handle_device_instructions_exception(instr):
-    device_server = load_DeviceServerMock()
+def test_handle_device_instructions_exception(device_server_mock, instr):
+    device_server = device_server_mock
     msg = BECMessage.DeviceInstructionMessage.dumps(instr)
     instructions = BECMessage.DeviceInstructionMessage.loads(msg)
 
@@ -273,8 +287,8 @@ def test_handle_device_instructions_exception(instr):
         ),
     ],
 )
-def test_handle_device_instructions_limit_error(instr):
-    device_server = load_DeviceServerMock()
+def test_handle_device_instructions_limit_error(device_server_mock, instr):
+    device_server = device_server_mock
     msg = BECMessage.DeviceInstructionMessage.dumps(instr)
     instructions = BECMessage.DeviceInstructionMessage.loads(msg)
 
@@ -303,8 +317,8 @@ def test_handle_device_instructions_limit_error(instr):
         ),
     ],
 )
-def test_handle_device_instructions_read(instr):
-    device_server = load_DeviceServerMock()
+def test_handle_device_instructions_read(device_server_mock, instr):
+    device_server = device_server_mock
     msg = BECMessage.DeviceInstructionMessage.dumps(instr)
     instructions = BECMessage.DeviceInstructionMessage.loads(msg)
 
@@ -324,8 +338,8 @@ def test_handle_device_instructions_read(instr):
         ),
     ],
 )
-def test_handle_device_instructions_rpc(instr):
-    device_server = load_DeviceServerMock()
+def test_handle_device_instructions_rpc(device_server_mock, instr):
+    device_server = device_server_mock
     msg = BECMessage.DeviceInstructionMessage.dumps(instr)
     instructions = BECMessage.DeviceInstructionMessage.loads(msg)
     with mock.patch.object(device_server, "_assert_device_is_valid") as assert_device_is_valid_mock:
@@ -355,8 +369,8 @@ def test_handle_device_instructions_rpc(instr):
         ),
     ],
 )
-def test_handle_device_instructions_kickoff(instr):
-    device_server = load_DeviceServerMock()
+def test_handle_device_instructions_kickoff(device_server_mock, instr):
+    device_server = device_server_mock
     msg = BECMessage.DeviceInstructionMessage.dumps(instr)
     instructions = BECMessage.DeviceInstructionMessage.loads(msg)
 
@@ -376,8 +390,8 @@ def test_handle_device_instructions_kickoff(instr):
         ),
     ],
 )
-def test_handle_device_instructions_trigger(instr):
-    device_server = load_DeviceServerMock()
+def test_handle_device_instructions_trigger(device_server_mock, instr):
+    device_server = device_server_mock
     msg = BECMessage.DeviceInstructionMessage.dumps(instr)
     instructions = BECMessage.DeviceInstructionMessage.loads(msg)
 
@@ -397,8 +411,8 @@ def test_handle_device_instructions_trigger(instr):
         ),
     ],
 )
-def test_handle_device_instructions_stage(instr):
-    device_server = load_DeviceServerMock()
+def test_handle_device_instructions_stage(device_server_mock, instr):
+    device_server = device_server_mock
     msg = BECMessage.DeviceInstructionMessage.dumps(instr)
     instructions = BECMessage.DeviceInstructionMessage.loads(msg)
 
@@ -418,8 +432,8 @@ def test_handle_device_instructions_stage(instr):
         ),
     ],
 )
-def test_handle_device_instructions_unstage(instr):
-    device_server = load_DeviceServerMock()
+def test_handle_device_instructions_unstage(device_server_mock, instr):
+    device_server = device_server_mock
     msg = BECMessage.DeviceInstructionMessage.dumps(instr)
     instructions = BECMessage.DeviceInstructionMessage.loads(msg)
 
@@ -445,8 +459,8 @@ def test_handle_device_instructions_unstage(instr):
         ),
     ],
 )
-def test_trigger_device(instr):
-    device_server = load_DeviceServerMock()
+def test_trigger_device(device_server_mock, instr):
+    device_server = device_server_mock
     devices = instr.content["device"]
     if not isinstance(devices, list):
         devices = [devices]
@@ -470,8 +484,8 @@ def test_trigger_device(instr):
         )
     ],
 )
-def test_kickoff_device(instr):
-    device_server = load_DeviceServerMock()
+def test_kickoff_device(device_server_mock, instr):
+    device_server = device_server_mock
     with mock.patch.object(
         device_server.device_manager.devices.flyer_sim.obj, "kickoff"
     ) as kickoff:
@@ -490,8 +504,8 @@ def test_kickoff_device(instr):
         )
     ],
 )
-def test_set_device(instr):
-    device_server = load_DeviceServerMock()
+def test_set_device(device_server_mock, instr):
+    device_server = device_server_mock
     device_server._set_device(instr)
     while True:
         res = [
@@ -523,8 +537,8 @@ def test_set_device(instr):
         ),
     ],
 )
-def test_read_device(instr):
-    device_server = load_DeviceServerMock()
+def test_read_device(device_server_mock, instr):
+    device_server = device_server_mock
     device_server._read_device(instr)
     devices = instr.content["device"]
     if not isinstance(devices, list):
@@ -564,8 +578,8 @@ def test_read_device(instr):
         ),
     ],
 )
-def test_stage_device(instr):
-    device_server = load_DeviceServerMock()
+def test_stage_device(device_server_mock, instr):
+    device_server = device_server_mock
     device_server._stage_device(instr)
     devices = instr.content["device"]
     devices = devices if isinstance(devices, list) else [devices]
