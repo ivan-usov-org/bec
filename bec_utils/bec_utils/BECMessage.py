@@ -1,14 +1,54 @@
 from __future__ import annotations
 
+import base64
 import enum
+import json
 import time
+from abc import abstractmethod
 from typing import Any, List, Optional, Union
 
 import msgpack
+import numpy as np
 
 from .logger import bec_logger
 
 logger = bec_logger.logger
+
+BECCOMPRESSION = "json"
+DEFAULT_VERSION = 1.1
+
+
+def encode_numpy_array(obj):
+    """encode a numpy array to a list"""
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    return obj
+
+
+class BECMessageCompression:
+    @abstractmethod
+    def loads(self, msg) -> dict:
+        """load and decompress a message"""
+
+    @abstractmethod
+    def dumps(self, msg) -> str:
+        """compress a message"""
+
+
+class MsgpackCompression(BECMessageCompression):
+    def loads(self, msg) -> dict:
+        return msgpack.loads(base64.b64decode(msg.encode()), raw=False)
+
+    def dumps(self, msg) -> str:
+        return base64.b64encode(msgpack.dumps(msg, default=encode_numpy_array)).decode()
+
+
+class JsonCompression(BECMessageCompression):
+    def loads(self, msg):
+        return json.loads(msg)
+
+    def dumps(self, msg):
+        return json.dumps(msg, default=encode_numpy_array)
 
 
 class BECStatus(enum.Enum):
@@ -23,44 +63,100 @@ class BECMessage:
     content: dict
     metadata: dict
 
-    def __init__(self, *, msg_type: str, content: dict, metadata: dict = None) -> None:
+    def __init__(
+        self,
+        *,
+        msg_type: str,
+        content: dict,
+        metadata: dict = None,
+        version: float = DEFAULT_VERSION,
+    ) -> None:
         self.msg_type = msg_type
         self.content = content
         self.metadata = metadata if metadata is not None else {}
-        self.version = 1.0
+        self.version = version
+        self.compression_handler = self._get_compression_handler()
+
+    @staticmethod
+    def _get_compression_handler(compression: str = BECCOMPRESSION) -> BECMessageCompression:
+        if compression == "msgpack":
+            return MsgpackCompression()
+        if compression == "json":
+            return JsonCompression()
+        raise RuntimeError(f"Unsupported compression type {compression}.")
 
     @classmethod
     def loads(cls, msg) -> Optional(BECMessage):
         """load BECMessage from bytes or dict input"""
-        if isinstance(msg, bytes):
-            msg = msgpack.loads(msg, raw=False)
+        try:
+            msg = json.loads(msg)
+            version = msg["version"]
+        except Exception:
+            version = 1.0
+
+        if version == 1.0:
+            if isinstance(msg, bytes):
+                msg = msgpack.loads(msg, raw=False)
+                if msg["msg_type"] == "bundle_message":
+                    return [
+                        cls._validated_return(msgpack.loads(sub_message))
+                        for sub_message in msg["content"]["messages"]
+                    ]
+                return cls._validated_return(msg)
+            if isinstance(msg, dict):
+                return cls(metadata=msg.get("metadata"), **msg.get("content", {}))
+            return None
+        if version == 1.1:
+            msg_compression = msg.get("compression")
+            compression_handler = cls._get_compression_handler(msg_compression)
+            msg["body"] = compression_handler.loads(msg.get("body"))
             if msg["msg_type"] == "bundle_message":
-                return [
-                    cls._validated_return(msgpack.loads(sub_message))
-                    for sub_message in msg["content"]["messages"]
-                ]
+                msgs = msg["body"]["content"]["messages"]
+                return [cls.loads(sub_message) for sub_message in msgs]
             return cls._validated_return(msg)
-        if isinstance(msg, dict):
-            return cls(**msg)
-        return None
+        else:
+            raise RuntimeError(f"Unsupported BECMessage version {version}.")
 
     def dumps(self):
         """dump BECMessage with msgpack"""
-        return msgpack.dumps(
-            {
+        if self.version == 1.0:
+            msg = {
                 "msg_type": self.msg_type,
                 "content": self.content,
                 "metadata": self.metadata,
                 "version": self.version,
+                "compression": BECCOMPRESSION,
             }
-        )
+            return self.compression_handler.dumps(msg)
+        if self.version == 1.1:
+            msg = {
+                "content": self.content,
+                "metadata": self.metadata,
+            }
+            msg_header = {
+                "msg_type": self.msg_type,
+                "version": self.version,
+                "compression": BECCOMPRESSION,
+            }
+            msg_body = self.compression_handler.dumps(msg)
+            return json.dumps(
+                {
+                    **msg_header,
+                    "body": msg_body,
+                }
+            )
 
     @classmethod
     def _validated_return(cls, msg):
+        version = msg.get("version")
+        if version == 1.0:
+            msg_body = msg
+        else:
+            msg_body = msg.get("body")
         if cls.msg_type != msg.get("msg_type"):
             logger.warning(f"Invalid message type: {msg.get('msg_type')}")
             return None
-        msg_conv = cls(**msg.get("content"), metadata=msg.get("metadata"))
+        msg_conv = cls(**msg_body.get("content"), metadata=msg_body.get("metadata"))
         if msg_conv._is_valid():
             return msg_conv
         logger.warning(f"Invalid message: {msg_conv}")
@@ -73,11 +169,13 @@ class BECMessage:
         if not isinstance(other, BECMessage):
             # don't attempt to compare against unrelated types
             return False
-        return (
-            self.content == other.content
-            and self.msg_type == other.msg_type
-            and self.metadata == other.metadata
-        )
+
+        try:
+            np.testing.assert_equal(self.content, other.content)
+        except AssertionError:
+            return False
+
+        return self.msg_type == other.msg_type and self.metadata == other.metadata
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.content, self.metadata}))"
@@ -89,14 +187,23 @@ class BECMessage:
 class BundleMessage(BECMessage):
     msg_type = "bundle_message"
 
-    def __init__(self, *, messages: list = None, metadata: dict = None, **_kwargs) -> None:
+    def __init__(
+        self,
+        *,
+        messages: list = None,
+        metadata: dict = None,
+        version: float = DEFAULT_VERSION,
+        **_kwargs,
+    ) -> None:
         content = {}
-        super().__init__(msg_type=self.msg_type, content=content, metadata=metadata)
+        super().__init__(
+            msg_type=self.msg_type, content=content, metadata=metadata, version=version
+        )
         self.content["messages"] = [] if not messages else messages
 
     def append(self, msg: BECMessage):
         """append a new BECMessage to the bundle"""
-        if isinstance(msg, bytes):
+        if isinstance(msg, bytes) or isinstance(msg, str):
             self.content["messages"].append(msg)
         elif isinstance(msg, BECMessage):
             self.content["messages"].append(msg.dumps())
@@ -108,8 +215,16 @@ class BundleMessage(BECMessage):
 
 
 class MessageReader(BECMessage):
-    def __init__(self, *, msg_type: str, content: dict, metadata: dict = None, **_kwargs) -> None:
-        super().__init__(msg_type=msg_type, content=content, metadata=metadata)
+    def __init__(
+        self,
+        *,
+        msg_type: str,
+        content: dict,
+        metadata: dict = None,
+        version: float = DEFAULT_VERSION,
+        **_kwargs,
+    ) -> None:
+        super().__init__(msg_type=msg_type, content=content, metadata=metadata, version=version)
 
     @classmethod
     def _validated_return(cls, msg):
@@ -121,7 +236,13 @@ class ScanQueueMessage(BECMessage):
     msg_type = "scan"
 
     def __init__(
-        self, *, scan_type: str, parameter: dict, queue="primary", metadata: dict = None
+        self,
+        *,
+        scan_type: str,
+        parameter: dict,
+        queue="primary",
+        metadata: dict = None,
+        version: float = DEFAULT_VERSION,
     ) -> None:
         """
         Sent by the API server / user to the scan_queue topic. It will be consumed by the scan server.
@@ -135,21 +256,32 @@ class ScanQueueMessage(BECMessage):
         """
 
         self.content = {"scan_type": scan_type, "parameter": parameter, "queue": queue}
-        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )
 
 
 class ScanQueueHistoryMessage(BECMessage):
     msg_type = "queue_history"
 
     def __init__(
-        self, *, status: str, queueID: str, info=dict, queue="primary", metadata: dict = None
+        self,
+        *,
+        status: str,
+        queueID: str,
+        info=dict,
+        queue="primary",
+        metadata: dict = None,
+        version: float = DEFAULT_VERSION,
     ) -> None:
         """
         Sent after removal from the active queue.
         """
 
         self.content = {"status": status, "queueID": queueID, "info": info, "queue": queue}
-        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )
 
 
 class ScanStatusMessage(BECMessage):
@@ -163,10 +295,13 @@ class ScanStatusMessage(BECMessage):
         info: dict,
         timestamp: float = None,
         metadata: dict = None,
+        version: float = DEFAULT_VERSION,
     ) -> None:
         tms = timestamp if timestamp is not None else time.time()
         self.content = {"scanID": scanID, "status": status, "info": info, "timestamp": tms}
-        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )
 
     def __str__(self):
         content = self.content.copy()
@@ -179,9 +314,19 @@ class ScanQueueModificationMessage(BECMessage):
     msg_type = "scan_queue_modification"
     ACTIONS = ["pause", "deferred_pause", "continue", "abort", "clear", "restart", "halt"]
 
-    def __init__(self, *, scanID: str, action: str, parameter: dict, metadata: dict = None) -> None:
+    def __init__(
+        self,
+        *,
+        scanID: str,
+        action: str,
+        parameter: dict,
+        metadata: dict = None,
+        version: float = DEFAULT_VERSION,
+    ) -> None:
         self.content = {"scanID": scanID, "action": action, "parameter": parameter}
-        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )
 
     def _is_valid(self) -> bool:
         if not self.content.get("action") in self.ACTIONS:
@@ -192,9 +337,13 @@ class ScanQueueModificationMessage(BECMessage):
 class ScanQueueStatusMessage(BECMessage):
     msg_type = "scan_queue_status"
 
-    def __init__(self, *, queue: dict, metadata: dict = None) -> None:
+    def __init__(
+        self, *, queue: dict, metadata: dict = None, version: float = DEFAULT_VERSION
+    ) -> None:
         self.content = {"queue": queue}
-        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )
 
     def _is_valid(self) -> bool:
         if (
@@ -209,7 +358,14 @@ class ScanQueueStatusMessage(BECMessage):
 class RequestResponseMessage(BECMessage):
     msg_type = "request_response"
 
-    def __init__(self, *, accepted: bool, message: str, metadata: dict = None) -> None:
+    def __init__(
+        self,
+        *,
+        accepted: bool,
+        message: str,
+        metadata: dict = None,
+        version: float = DEFAULT_VERSION,
+    ) -> None:
         """
         Message type for sending back decisions on the acceptance of requests.
         Args:
@@ -219,13 +375,23 @@ class RequestResponseMessage(BECMessage):
         """
 
         self.content = {"accepted": accepted, "message": message}
-        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )
 
 
 class DeviceInstructionMessage(BECMessage):
     msg_type = "device_instruction"
 
-    def __init__(self, *, device: str, action: str, parameter: dict, metadata: dict = None) -> None:
+    def __init__(
+        self,
+        *,
+        device: str,
+        action: str,
+        parameter: dict,
+        metadata: dict = None,
+        version: float = DEFAULT_VERSION,
+    ) -> None:
         """
 
         Args:
@@ -234,13 +400,17 @@ class DeviceInstructionMessage(BECMessage):
             parameter:
         """
         self.content = {"device": device, "action": action, "parameter": parameter}
-        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )
 
 
 class DeviceMessage(BECMessage):
     msg_type = "device_message"
 
-    def __init__(self, *, signals: dict, metadata: dict = None) -> None:
+    def __init__(
+        self, *, signals: dict, metadata: dict = None, version: float = DEFAULT_VERSION
+    ) -> None:
         """
 
         Args:
@@ -248,7 +418,9 @@ class DeviceMessage(BECMessage):
             metadata:
         """
         self.content = {"signals": signals}
-        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )
 
     def _is_valid(self) -> bool:
         if not isinstance(self.content["signals"], dict):
@@ -260,7 +432,14 @@ class DeviceRPCMessage(BECMessage):
     msg_type = "device_rpc_message"
 
     def __init__(
-        self, *, device: str, return_val: Any, out: str, success: bool = True, metadata: dict = None
+        self,
+        *,
+        device: str,
+        return_val: Any,
+        out: str,
+        success: bool = True,
+        metadata: dict = None,
+        version: float = DEFAULT_VERSION,
     ) -> None:
         """
 
@@ -269,7 +448,9 @@ class DeviceRPCMessage(BECMessage):
             metadata:
         """
         self.content = {"device": device, "return_val": return_val, "out": out, "success": success}
-        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )
 
     def _is_valid(self) -> bool:
         if not isinstance(self.content["device"], str):
@@ -280,7 +461,9 @@ class DeviceRPCMessage(BECMessage):
 class DeviceStatusMessage(BECMessage):
     msg_type = "device_status_message"
 
-    def __init__(self, *, device: str, status: int, metadata: dict = None) -> None:
+    def __init__(
+        self, *, device: str, status: int, metadata: dict = None, version: float = DEFAULT_VERSION
+    ) -> None:
         """
 
         Args:
@@ -288,13 +471,17 @@ class DeviceStatusMessage(BECMessage):
             metadata:
         """
         self.content = {"device": device, "status": status}
-        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )
 
 
 class DeviceReqStatusMessage(BECMessage):
     msg_type = "device_req_status_message"
 
-    def __init__(self, *, device: str, success: bool, metadata: dict = None) -> None:
+    def __init__(
+        self, *, device: str, success: bool, metadata: dict = None, version: float = DEFAULT_VERSION
+    ) -> None:
         """
 
         Args:
@@ -302,13 +489,17 @@ class DeviceReqStatusMessage(BECMessage):
             metadata:
         """
         self.content = {"device": device, "success": success}
-        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )
 
 
 class DeviceInfoMessage(BECMessage):
     msg_type = "device_info_message"
 
-    def __init__(self, *, device: str, info: dict, metadata: dict = None) -> None:
+    def __init__(
+        self, *, device: str, info: dict, metadata: dict = None, version: float = DEFAULT_VERSION
+    ) -> None:
         """
 
         Args:
@@ -317,13 +508,23 @@ class DeviceInfoMessage(BECMessage):
             metadata:
         """
         self.content = {"device": device, "info": info}
-        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )
 
 
 class ScanMessage(BECMessage):
     msg_type = "scan_message"
 
-    def __init__(self, *, point_id: int, scanID: int, data: dict, metadata: dict = None) -> None:
+    def __init__(
+        self,
+        *,
+        point_id: int,
+        scanID: int,
+        data: dict,
+        metadata: dict = None,
+        version: float = DEFAULT_VERSION,
+    ) -> None:
         """
 
         Args:
@@ -332,13 +533,17 @@ class ScanMessage(BECMessage):
             data:
         """
         self.content = {"point_id": point_id, "scanID": scanID, "data": data}
-        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )
 
 
 class ScanBaselineMessage(BECMessage):
     msg_type = "scan_baseline_message"
 
-    def __init__(self, *, scanID: int, data: dict, metadata: dict = None) -> None:
+    def __init__(
+        self, *, scanID: int, data: dict, metadata: dict = None, version: float = DEFAULT_VERSION
+    ) -> None:
         """
 
         Args:
@@ -346,13 +551,17 @@ class ScanBaselineMessage(BECMessage):
             data:
         """
         self.content = {"scanID": scanID, "data": data}
-        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )
 
 
 class DeviceConfigMessage(BECMessage):
     msg_type = "device_config_message"
 
-    def __init__(self, *, action: str, config: dict, metadata: dict = None) -> None:
+    def __init__(
+        self, *, action: str, config: dict, metadata: dict = None, version: float = DEFAULT_VERSION
+    ) -> None:
         """
 
         Args:
@@ -360,13 +569,22 @@ class DeviceConfigMessage(BECMessage):
             config: device config (add, update) or None (reload)
         """
         self.content = {"action": action, "config": config}
-        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )
 
 
 class LogMessage(BECMessage):
     msg_type = "log_message"
 
-    def __init__(self, *, log_type: str, content: Union[dict, str], metadata: dict = None) -> None:
+    def __init__(
+        self,
+        *,
+        log_type: str,
+        content: Union[dict, str],
+        metadata: dict = None,
+        version: float = DEFAULT_VERSION,
+    ) -> None:
         """
 
         Args:
@@ -374,14 +592,23 @@ class LogMessage(BECMessage):
             content: log's content
         """
         self.content = {"log_type": log_type, "content": content}
-        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )
 
 
 class AlarmMessage(BECMessage):
     msg_type = "alarm_message"
 
     def __init__(
-        self, *, severity: int, alarm_type=str, source: str, content: dict, metadata: dict = None
+        self,
+        *,
+        severity: int,
+        alarm_type=str,
+        source: str,
+        content: dict,
+        metadata: dict = None,
+        version: float = DEFAULT_VERSION,
     ) -> None:
         """Alarm message
         Severity 1: Minor alarm, no user interaction needed. The system can continue.
@@ -400,13 +627,23 @@ class AlarmMessage(BECMessage):
             "source": source,
             "content": content,
         }
-        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )
 
 
 class StatusMessage(BECMessage):
     msg_type = "status_message"
 
-    def __init__(self, *, name: str, status: BECStatus, info: dict, metadata: dict = None) -> None:
+    def __init__(
+        self,
+        *,
+        name: str,
+        status: BECStatus,
+        info: dict,
+        metadata: dict = None,
+        version: float = DEFAULT_VERSION,
+    ) -> None:
         """
 
         Args:
@@ -416,13 +653,22 @@ class StatusMessage(BECMessage):
         if not isinstance(status, BECMessage):
             status = BECStatus(status)
         self.content = {"name": name, "status": status.value, "info": info}
-        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )
 
 
 class FileMessage(BECMessage):
     msg_type = "file_message"
 
-    def __init__(self, *, file_path: str, successful: bool, metadata: dict = None) -> None:
+    def __init__(
+        self,
+        *,
+        file_path: str,
+        successful: bool,
+        metadata: dict = None,
+        version: float = DEFAULT_VERSION,
+    ) -> None:
         """
 
         Args:
@@ -432,13 +678,17 @@ class FileMessage(BECMessage):
         """
 
         self.content = {"file_path": file_path, "successful": successful}
-        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )
 
 
 class VariableMessage(BECMessage):
     msg_type = "var_message"
 
-    def __init__(self, *, value: str, metadata: dict = None) -> None:
+    def __init__(
+        self, *, value: str, metadata: dict = None, version: float = DEFAULT_VERSION
+    ) -> None:
         """
 
         Args:
@@ -447,13 +697,17 @@ class VariableMessage(BECMessage):
         """
 
         self.content = {"value": value}
-        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )
 
 
 class ObserverMessage(BECMessage):
     msg_type = "observer_message"
 
-    def __init__(self, *, observer: List[dict], metadata: dict = None) -> None:
+    def __init__(
+        self, *, observer: List[dict], metadata: dict = None, version: float = DEFAULT_VERSION
+    ) -> None:
         """
 
         Args:
@@ -462,13 +716,17 @@ class ObserverMessage(BECMessage):
         """
 
         self.content = {"observer": observer}
-        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )
 
 
 class ServiceMetricMessage(BECMessage):
     msg_type = "service_metric_message"
 
-    def __init__(self, *, name: str, metrics: dict, metadata: dict = None) -> None:
+    def __init__(
+        self, *, name: str, metrics: dict, metadata: dict = None, version: float = DEFAULT_VERSION
+    ) -> None:
         """
 
         Args:
@@ -477,4 +735,6 @@ class ServiceMetricMessage(BECMessage):
         """
 
         self.content = {"name": name, "metrics": metrics}
-        super().__init__(msg_type=self.msg_type, content=self.content, metadata=metadata)
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )

@@ -136,13 +136,15 @@ class RPCBase:
                 base_class = dev["device_info"].get("device_base_class")
                 if base_class == "positioner":
                     setattr(
-                        self, dev.get("attr_name"), Positioner(dev.get("attr_name"), parent=self)
+                        self,
+                        dev.get("device_attr_name"),
+                        Positioner(dev.get("device_attr_name"), parent=self),
                     )
                 elif base_class == "device":
                     setattr(
                         self,
-                        dev.get("attr_name"),
-                        Device(dev.get("attr_name"), config=None, parent=self),
+                        dev.get("device_attr_name"),
+                        Device(dev.get("device_attr_name"), config=None, parent=self),
                     )
 
         for user_access_name, descr in self._info.get("custom_user_access", {}).items():
