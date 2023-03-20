@@ -188,6 +188,8 @@ class DeviceManagerDS(DeviceManagerBase):
 
         if "done_moving" in obj.event_types:
             obj.subscribe(self._obj_callback_done_moving, event_type="done_moving", run=False)
+        if "flyer" in obj.event_types:
+            obj.subscribe(self._obj_flyer_callback, event_type="flyer", run=False)
         if hasattr(obj, "motor_is_moving"):
             obj.motor_is_moving.subscribe(self._obj_callback_is_moving, run=opaas_obj.enabled)
 
@@ -280,3 +282,40 @@ class DeviceManagerDS(DeviceManagerBase):
             MessageEndpoints.device_status(kwargs["obj"].root.name),
             BECMessage.DeviceStatusMessage(device=device, status=status, metadata=metadata).dumps(),
         )
+
+    def _obj_flyer_callback(self, *_args, **kwargs):
+        obj = kwargs["obj"]
+        data = kwargs["value"].get("data")
+        ds_obj = self.devices[obj.root.name]
+        metadata = ds_obj.metadata
+        if "scanID" not in metadata:
+            return
+
+        if not hasattr(ds_obj, "emitted_points"):
+            ds_obj.emitted_points = {}
+
+        emitted_points = ds_obj.emitted_points.get(metadata["scanID"], 0)
+
+        # make sure the length of all arrays is equal
+        max_points = min(len(d) for d in data.values())
+        bundle = BECMessage.BundleMessage()
+        for ii in range(emitted_points, max_points):
+            signals = {}
+            for key, val in data.items():
+                signals[key] = {"value": val[ii]}
+            bundle.append(
+                BECMessage.DeviceMessage(
+                    signals=signals,
+                    metadata={"pointID": ii, **metadata},
+                ).dumps()
+            )
+        ds_obj.emitted_points[metadata["scanID"]] = max_points
+        pipe = self.producer.pipeline()
+        self.producer.send(MessageEndpoints.device_read(obj.root.name), bundle.dumps(), pipe=pipe)
+        msg = BECMessage.DeviceStatusMessage(
+            device=obj.root.name, status=max_points, metadata=metadata
+        )
+        self.producer.set_and_publish(
+            MessageEndpoints.device_progress(obj.root.name), msg.dumps(), pipe=pipe
+        )
+        pipe.execute()
