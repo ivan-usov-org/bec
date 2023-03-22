@@ -5,6 +5,7 @@ import collections
 import time
 from typing import TYPE_CHECKING
 
+from bec_utils import bec_logger
 from bec_utils.bec_errors import ScanInterruption
 
 from .live_table import LiveUpdatesTable
@@ -13,6 +14,8 @@ from .utils import ScanRequestMixin, check_alarms
 
 if TYPE_CHECKING:
     from bec_client import BECClient
+
+logger = bec_logger.logger
 
 
 class CallbackManager:
@@ -97,6 +100,14 @@ class CallbackManager:
             )
             asyncio.run(self._active_callback.run())
 
+    def _available_req_blocks(self, queue, request):
+        available_blocks = [
+            req_block
+            for req_block in queue.request_blocks
+            if req_block["RID"] == request.metadata["RID"]
+        ]
+        return available_blocks
+
     def process_request(self, request, scan_report_type, callbacks):
         # pylint: disable=protected-access
         try:
@@ -121,11 +132,8 @@ class CallbackManager:
                     check_alarms(self.client)
                     if not queue.request_blocks:
                         continue
-                    available_blocks = [
-                        req_block
-                        for req_block in queue.request_blocks
-                        if req_block["RID"] == request.metadata["RID"]
-                    ]
+
+                    available_blocks = self._available_req_blocks(queue, request)
                     req_block = available_blocks[self._request_block_index[req_id]]
                     if req_block["content"]["scan_type"] == "open_scan_def":
                         break
@@ -142,6 +150,8 @@ class CallbackManager:
                     if not queue.active_request_block:
                         break
 
+                available_blocks = self._available_req_blocks(queue, request)
+                req_block = available_blocks[self._request_block_index[req_id]]
                 report_instructions = req_block.get("report_instructions", [])
                 self._process_report_instructions(report_instructions)
 
