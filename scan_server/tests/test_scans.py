@@ -1395,6 +1395,7 @@ def test_scan_base_set_position_offset():
                     },
                 },
                 queue="primary",
+                metadata={"RID": "1234"},
             ),
             [
                 BMessage.DeviceInstructionMessage(
@@ -1432,6 +1433,22 @@ def test_scan_base_set_position_offset():
                         "kwargs": {},
                     },
                     metadata={"stream": "primary", "DIID": 2},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="scan_report_instruction",
+                    parameter={
+                        "readback": {
+                            "RID": "1234",
+                            "devices": ["lsamrot"],
+                            "start": [0],
+                            "end": [10],
+                        }
+                    },
+                    metadata={
+                        "stream": "primary",
+                        "DIID": 0,
+                    },
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="lsamrot",
@@ -1717,7 +1734,9 @@ def test_LamNIFermatScan(scan_msg, reference_scan_list):
     device_manager.add_device("samy")
     device_manager.devices["samy"].read_buffer = {"value": 0}
     scan = LamNIFermatScan(
-        parameter=scan_msg.content.get("parameter"), device_manager=device_manager
+        parameter=scan_msg.content.get("parameter"),
+        device_manager=device_manager,
+        metadata=scan_msg.metadata,
     )
     scan.stubs._get_from_rpc = lambda x: 0
     scan_instructions = list(scan.run())
@@ -1726,6 +1745,7 @@ def test_LamNIFermatScan(scan_msg, reference_scan_list):
         if instr.metadata.get("scanID") is not None:
             instr.metadata["scanID"] = scan_uid
         instr.metadata["DIID"] = ii
+        instr.metadata["RID"] = scan.metadata.get("RID")
         if instr.content["action"] == "rpc":
             reference_scan_list[ii].content["parameter"]["rpc_id"] = scan_instructions[ii].content[
                 "parameter"
