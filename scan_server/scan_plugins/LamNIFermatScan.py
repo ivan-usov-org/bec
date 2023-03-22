@@ -412,6 +412,16 @@ class LamNIFermatScan(ScanBase, LamNIMixin):
             logger.info("No rotation required")
         else:
             logger.info("Rotating to requested angle")
+            yield from self.stubs.scan_report_instruction(
+                {
+                    "readback": {
+                        "RID": self.metadata["RID"],
+                        "devices": ["lsamrot"],
+                        "start": [lsamrot_current_setpoint],
+                        "end": [angle],
+                    }
+                }
+            )
             yield from self.stubs.set_and_wait(device=["lsamrot"], positions=[angle])
 
     def scan_core(self):

@@ -775,6 +775,8 @@ class InstructionQueueItem:
                 )
                 time.sleep(0.1)
             elif self.queue_group is not None and not self.queue_group_is_closed:
+                self.queue.active_rb = None
+                self.parent.queue_manager.send_queue_status()
                 logger.info(
                     f"Waiting for new instructions or queue group to be closed (group id: {self.queue_group})"
                 )

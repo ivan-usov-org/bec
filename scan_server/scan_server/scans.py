@@ -563,12 +563,12 @@ class Move(RequestBase):
         pass
 
     def _set_position_offset(self):
-        if not self.relative:
-            return
         self.start_pos = []
         for dev in self.scan_motors:
             val = yield from self.stubs.send_rpc_and_wait(dev, "read")
             self.start_pos.append(val[dev].get("value"))
+        if not self.relative:
+            return
         self.positions += self.start_pos
 
     def prepare_positions(self):
@@ -580,7 +580,16 @@ class Move(RequestBase):
         if not self.scan_report_hint:
             yield None
             return
-        yield from self.stubs.scan_report_instruction({"readback": self.metadata["RID"]})
+        yield from self.stubs.scan_report_instruction(
+            {
+                "readback": {
+                    "RID": self.metadata["RID"],
+                    "devices": self.scan_motors,
+                    "start": self.start_pos,
+                    "end": self.positions[0],
+                }
+            }
+        )
 
     def run(self):
         self.initialize()

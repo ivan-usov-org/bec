@@ -41,9 +41,15 @@ class LiveUpdatesTable(LiveUpdatesBase):
     MAX_DEVICES = 10
 
     def __init__(
-        self, bec: BECClient, request: BECMessage.ScanQueueMessage, callbacks: List[Callable] = None
+        self,
+        bec: BECClient,
+        report_instruction: dict = None,
+        request: BECMessage.ScanQueueMessage = None,
+        callbacks: List[Callable] = None,
     ) -> None:
-        super().__init__(bec, request, callbacks)
+        super().__init__(
+            bec, report_instruction=report_instruction, request=request, callbacks=callbacks
+        )
         self.scan_queue_request = None
         self.scan_item = None
         self.dev_values = None
@@ -86,8 +92,10 @@ class LiveUpdatesTable(LiveUpdatesBase):
     def check_alarms(self):
         check_alarms(self.bec)
 
-    async def resume(self, request):
-        super().__init__(self.bec, request)
+    async def resume(self, request, report_instruction, callbacks):
+        super().__init__(
+            self.bec, request=request, report_instruction=report_instruction, callbacks=callbacks
+        )
         await self.process_request()
 
     @property
@@ -146,8 +154,7 @@ class LiveUpdatesTable(LiveUpdatesBase):
                 break
             self.check_alarms()
 
-        for instr in request_block["report_instructions"]:
-            await self._run_table_update(instr["table_wait"])
+        await self._run_table_update(self.report_instruction["table_wait"])
 
     async def _run_table_update(self, target_num_points):
         with ScanProgressBar(
