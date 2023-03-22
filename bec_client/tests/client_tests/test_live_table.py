@@ -33,7 +33,8 @@ async def test_scan_request_mixin(bec_client):
 
     client.queue.request_storage.update_with_request(request_msg)
     threading.Thread(target=update_with_response, args=(response_msg,)).start()
-    await request_mixin.wait()
+    with mock.patch.object(client.queue.queue_storage, "find_queue_item_by_requestID"):
+        await request_mixin.wait()
 
 
 def test_sort_devices():
@@ -70,7 +71,7 @@ def test_get_devices_from_scan_data(bec_client, request_msg, scan_report_devices
     data = BECMessage.ScanMessage(
         point_id=0, scanID="", data={}, metadata={"scan_report_devices": scan_report_devices}
     )
-    live_update = LiveUpdatesTable(client, request_msg)
+    live_update = LiveUpdatesTable(client, {"table_wait": 10}, request_msg)
     devices = live_update.get_devices_from_scan_data(data)
     assert devices[0 : len(scan_report_devices)] == scan_report_devices
 
@@ -91,5 +92,6 @@ async def test_wait_for_request_acceptance(bec_client):
     )
     client.queue.request_storage.update_with_request(request_msg)
     client.queue.request_storage.update_with_response(response_msg)
-    live_update = LiveUpdatesTable(client, request_msg)
-    await live_update.wait_for_request_acceptance()
+    live_update = LiveUpdatesTable(client, {"table_wait": 10}, request_msg)
+    with mock.patch.object(client.queue.queue_storage, "find_queue_item_by_requestID"):
+        await live_update.wait_for_request_acceptance()

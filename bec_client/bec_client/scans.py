@@ -58,8 +58,10 @@ class ScanObject:
         request.metadata["RID"] = requestID
 
         self._send_scan_request(request)
-        scan_report_type = self._get_scan_report_type(hide_report)
-        self.client.callback_manager.process_request(request, scan_report_type, callback)
+
+        if not hide_report:
+            scan_report_type = self._get_scan_report_type(hide_report)
+            self.client.callback_manager.process_request(request, scan_report_type, callback)
 
         return ScanReport.from_request(request, client=self.client)
 

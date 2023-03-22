@@ -181,7 +181,14 @@ def test_scan_move(mv_msg, reference_msg_list):
                 BMessage.DeviceInstructionMessage(
                     device=None,
                     action="scan_report_instruction",
-                    parameter={"readback": "0bab7ee3-b384-4571-b...0fff984c05"},
+                    parameter={
+                        "readback": {
+                            "RID": "0bab7ee3-b384-4571-b...0fff984c05",
+                            "devices": ["samx", "samy"],
+                            "start": [0, 0],
+                            "end": [1.0, 2.0],
+                        }
+                    },
                     metadata={
                         "stream": "primary",
                         "DIID": 0,
@@ -244,7 +251,14 @@ def test_scan_move(mv_msg, reference_msg_list):
                 BMessage.DeviceInstructionMessage(
                     device=None,
                     action="scan_report_instruction",
-                    parameter={"readback": "0bab7ee3-b384-4571-b...0fff984c05"},
+                    parameter={
+                        "readback": {
+                            "RID": "0bab7ee3-b384-4571-b...0fff984c05",
+                            "devices": ["samx", "samy", "samz"],
+                            "start": [0, 0, 0],
+                            "end": [1.0, 2.0, 3.0],
+                        }
+                    },
                     metadata={
                         "stream": "primary",
                         "DIID": 0,
@@ -324,7 +338,14 @@ def test_scan_move(mv_msg, reference_msg_list):
                 BMessage.DeviceInstructionMessage(
                     device=None,
                     action="scan_report_instruction",
-                    parameter={"readback": "0bab7ee3-b384-4571-b...0fff984c05"},
+                    parameter={
+                        "readback": {
+                            "RID": "0bab7ee3-b384-4571-b...0fff984c05",
+                            "devices": ["samx"],
+                            "start": [0],
+                            "end": [1.0],
+                        }
+                    },
                     metadata={
                         "stream": "primary",
                         "DIID": 0,

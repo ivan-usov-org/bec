@@ -47,12 +47,17 @@ def check_alarms(bec):
 
 class LiveUpdatesBase(abc.ABC):
     def __init__(
-        self, bec: BECClient, request: BECMessage.ScanQueueMessage, callbacks: List[Callable] = None
+        self,
+        bec: BECClient,
+        report_instruction: dict = None,
+        request: BECMessage.ScanQueueMessage = None,
+        callbacks: List[Callable] = None,
     ) -> None:
         self.bec = bec
         self.request = request
         self.RID = request.metadata["RID"]
         self.scan_queue_request = None
+        self.report_instruction = report_instruction
         if callbacks is None:
             self.callbacks = []
         self.callbacks = callbacks if isinstance(callbacks, list) else [callbacks]
@@ -109,6 +114,9 @@ class ScanRequestMixin:
         check_alarms(self.bec)
 
         while self.scan_queue_request.accepted is None:
+            await asyncio.sleep(0.01)
+
+        while self.request_storage.storage[0].queue is None:
             await asyncio.sleep(0.01)
 
         if not self.scan_queue_request.accepted[0]:
