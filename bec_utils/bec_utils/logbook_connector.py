@@ -30,13 +30,19 @@ class LogbookConnector:
         if not msg:
             return
         msg = msgpack.loads(msg)
+
+        account = self.producer.get(MessageEndpoints.account())
+        if not account:
+            return
+        account = account.decode()
+
         self._scilog_module = scilog
 
         self.log = self._scilog_module.SciLog(msg["url"], options={"token": msg["token"]})
         # FIXME the python sdk should not use the ownergroup
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            logbooks = self.log.get_logbooks(readACL={"inq": ["p20588"]})
+            logbooks = self.log.get_logbooks(readACL={"inq": [account]})
         if len(logbooks) > 1:
             raise NotImplementedError
         self.log.select_logbook(logbooks[0])
