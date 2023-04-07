@@ -9,7 +9,6 @@ from pathlib import Path
 
 import numpy as np
 from bec_utils import bec_logger
-from bec_utils.logbook_connector import LogbookMessage
 from bec_utils.pdf_writer import PDFWriter
 from typeguard import typechecked
 
@@ -18,6 +17,7 @@ from bec_client.plugins.cSAXS import epics_get, epics_put, fshclose, fshopen
 from .lamni_optics_mixin import LamNIOpticsMixin
 
 logger = bec_logger.logger
+bec = builtins.__dict__.get("bec")
 
 
 class XrayEyeAlign:
@@ -548,7 +548,7 @@ class LamNI(LamNIOpticsMixin):
 
     def write_to_scilog(self, content):
         try:
-            msg = LogbookMessage(self.client.logbook)
+            msg = bec.logbook.LogbookMessage(self.client.logbook)
             msg.add_text(content).add_tag(["BEC"])
             self.client.logbook.send_logbook_message(msg)
         except Exception:
@@ -556,7 +556,7 @@ class LamNI(LamNIOpticsMixin):
 
     def tomo_scan_projection(self, angle: float):
         scans = builtins.__dict__.get("scans")
-        bec = builtins.__dict__.get("bec")
+
         additional_correction = self.compute_additional_correction(angle)
         additional_correction_2 = self.compute_additional_correction_2(angle)
         correction_xeye_mu = self.lamni_compute_additional_correction_xeye_mu(angle)
@@ -782,7 +782,7 @@ class LamNI(LamNIOpticsMixin):
     def _wait_for_beamline_checks(self):
         self._print_beamline_checks()
         try:
-            msg = LogbookMessage(self.client.logbook)
+            msg = bec.logbook.LogbookMessage(self.client.logbook)
             msg.add_text(
                 f"<p><mark class='pen-red'><strong>Beamline checks failed at {str(datetime.datetime.now())}: {''.join(self._check_msgs)}</strong></mark></p>"
             ).add_tag(["BEC", "beam_check"])
@@ -799,7 +799,7 @@ class LamNI(LamNIOpticsMixin):
             time.sleep(1)
 
         try:
-            msg = LogbookMessage(self.client.logbook)
+            msg = bec.logbook.LogbookMessage(self.client.logbook)
             msg.add_text(
                 f"<p><mark class='pen-red'><strong>Operation resumed at {str(datetime.datetime.now())}.</strong></mark></p>"
             ).add_tag(["BEC", "beam_check"])
@@ -1031,7 +1031,7 @@ class LamNI(LamNIOpticsMixin):
             shell=True,
         )
         # status = subprocess.run(f"cp /tmp/spec-e20131-specES1.pdf {user_target}", shell=True)
-        msg = LogbookMessage(self.client.logbook)
+        msg = bec.logbook.LogbookMessage(self.client.logbook)
         logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "LamNI_logo.png")
         msg.add_file(logo_path).add_text("".join(content).replace("\n", "</p><p>")).add_tag(
             ["BEC", "tomo_parameters", f"dataset_id_{dataset_id}", "LamNI"]
