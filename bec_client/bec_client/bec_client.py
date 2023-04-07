@@ -69,7 +69,7 @@ class BECClient(BECService, BeamlineMixin, UserScriptsMixin):
         self.callback_manager = CallbackManager(self)
         builtins.bec = self
         self.metadata = {}
-        # self.logbook = LogbookConnector()
+        self.logbook = LogbookConnector(self.connector)
         self._update_username()
         self.history = None
 

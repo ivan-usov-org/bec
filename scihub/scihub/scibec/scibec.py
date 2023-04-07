@@ -210,8 +210,12 @@ def formatted_http_error(func):
     def formatted_call(*args, **kwargs):
         try:
             out = func(*args, **kwargs)
-        except requests.HTTPError as exc:
-            raise SciBecError(f"{exc.response.reason} Error Message: {exc.response.text}") from exc
+        except (requests.HTTPError, requests.Timeout) as exc:
+            if hasattr(exc.response, "reason"):
+                raise SciBecError(
+                    f"{exc.response.reason} Error Message: {exc.response.text}"
+                ) from exc
+            raise SciBecError from exc
         return out
 
     return formatted_call
