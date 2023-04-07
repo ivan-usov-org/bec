@@ -62,6 +62,12 @@ class MessageEndpoints:
     _public_global_vars = "public/vars"
     _observer = "internal/observer"
 
+    # logbook
+    _logbook = "internal/logbook"
+
+    # experiment
+    _account = "internal/account"
+
     ##########
 
     # devices feedback
@@ -244,3 +250,13 @@ class MessageEndpoints:
     @classmethod
     def observer(cls):
         return cls._observer
+
+    # logbook
+    @classmethod
+    def logbook(cls):
+        return cls._logbook
+
+    # experiment
+    @classmethod
+    def account(cls):
+        return cls._account
