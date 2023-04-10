@@ -18,6 +18,7 @@ class SciLogConnector:
         self.user = None
         self.user_secret = None
         self._configured = False
+        self._scilog_thread = None
         self._load_environment()
         self._start_scilog_update()
 
@@ -68,7 +69,8 @@ class SciLogConnector:
             self._configured = True
 
     def shutdown(self):
-        self._scilog_thread.stop()
+        if self._scilog_thread:
+            self._scilog_thread.stop()
 
 
 class RepeatedTimer:
