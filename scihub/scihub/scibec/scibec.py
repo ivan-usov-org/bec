@@ -195,7 +195,7 @@ class SciBec:
     #     beamline = beamlines[0]
     #     self.set_session_data(beamline, data)
 
-    def set_session_data(self, experiment_id: dict, data: dict):
+    def set_session_data(self, experiment_id: str, data: dict):
         session_name = "demo"
         experiment = self.get_experiment_by_id(experiment_id)[0]
         if experiment.get("activeSession"):

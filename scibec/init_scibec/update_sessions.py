@@ -22,7 +22,23 @@ if __name__ == "__main__":
 
     scibec = SciBec()
     scibec.url = scibec_url
-    beamlines = scibec.get_beamlines()
-    if not beamlines:
-        scibec.add_beamline("TestBeamline")
-    scibec.update_session_with_file(config_path)
+    beamline = scibec.get_beamline("TestBeamline")
+    if not beamline:
+        beamline = scibec.add_beamline("TestBeamline")
+
+    if not beamline.get("activeExperiment"):
+        experiment = {
+            "name": "demo",
+            "readACL": ["demoGroup"],
+            "createACL": ["demoGroup"],
+            "updateACL": ["demoGroup"],
+            "beamlineId": beamline["id"],
+            "writeAccount": "demoGroup",
+            "experimentInfo": {},
+        }
+        res = scibec.add_experiment(experiment)
+        scibec.set_experiment_active(res["id"])
+        beamline["activeExperiment"] = res["id"]
+
+    data = scibec.load_config_from_file(config_path)
+    scibec.set_session_data(experiment_id=beamline["activeExperiment"], data=data)
