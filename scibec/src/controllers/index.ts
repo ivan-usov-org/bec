@@ -8,3 +8,4 @@ export * from './access-account.controller';
 export * from './experiment.controller';
 export * from './experiment-account.controller';
 export * from './functional-account.controller';
+export * from './event.controller';
