@@ -38,8 +38,18 @@ class SciBecConnector:
     def get_current_session(self):
         if not self.scibec or not self.scibec_info.get("beamline"):
             return None
+        if not self.scibec_info["beamline"]["activeExperiment"]:
+            return None
+        experiment = self.scibec.get_experiment_by_id(
+            self.scibec_info["beamline"]["activeExperiment"]
+        )
+        if not experiment:
+            return None
+        session_id = experiment[0].get("activeSession")
+        if not session_id:
+            return None
         self.scibec_info["activeSession"] = self.scibec.get_session_by_id(
-            self.scibec_info["beamline"]["activeSession"], include_devices=True
+            session_id, include_devices=True
         )
         return self.scibec_info["activeSession"]
 

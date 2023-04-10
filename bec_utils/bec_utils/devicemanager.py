@@ -249,6 +249,7 @@ class DeviceContainer(dict):
 
     def flush(self) -> None:
         self.clear()
+        self.__dict__.clear()
 
     @property
     def enabled_devices(self) -> list:
