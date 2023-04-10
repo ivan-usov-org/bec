@@ -12,24 +12,23 @@ import {
   get,
   getModelSchemaRef,
   patch,
-  put,
   del,
   requestBody,
   response,
 } from '@loopback/rest';
-import {Beamline} from '../models';
-import {BeamlineRepository} from '../repositories';
+import { Beamline } from '../models';
+import { BeamlineRepository } from '../repositories';
 
 export class BeamlineController {
   constructor(
     @repository(BeamlineRepository)
-    public beamlineRepository : BeamlineRepository,
-  ) {}
+    public beamlineRepository: BeamlineRepository,
+  ) { }
 
   @post('/beamlines')
   @response(200, {
     description: 'Beamline model instance',
-    content: {'application/json': {schema: getModelSchemaRef(Beamline)}},
+    content: { 'application/json': { schema: getModelSchemaRef(Beamline) } },
   })
   async create(
     @requestBody({
@@ -50,7 +49,7 @@ export class BeamlineController {
   @get('/beamlines/count')
   @response(200, {
     description: 'Beamline model count',
-    content: {'application/json': {schema: CountSchema}},
+    content: { 'application/json': { schema: CountSchema } },
   })
   async count(
     @param.where(Beamline) where?: Where<Beamline>,
@@ -65,7 +64,7 @@ export class BeamlineController {
       'application/json': {
         schema: {
           type: 'array',
-          items: getModelSchemaRef(Beamline, {includeRelations: true}),
+          items: getModelSchemaRef(Beamline, { includeRelations: true }),
         },
       },
     },
@@ -79,13 +78,13 @@ export class BeamlineController {
   @patch('/beamlines')
   @response(200, {
     description: 'Beamline PATCH success count',
-    content: {'application/json': {schema: CountSchema}},
+    content: { 'application/json': { schema: CountSchema } },
   })
   async updateAll(
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Beamline, {partial: true}),
+          schema: getModelSchemaRef(Beamline, { partial: true }),
         },
       },
     })
@@ -100,13 +99,13 @@ export class BeamlineController {
     description: 'Beamline model instance',
     content: {
       'application/json': {
-        schema: getModelSchemaRef(Beamline, {includeRelations: true}),
+        schema: getModelSchemaRef(Beamline, { includeRelations: true }),
       },
     },
   })
   async findById(
     @param.path.string('id') id: string,
-    @param.filter(Beamline, {exclude: 'where'}) filter?: FilterExcludingWhere<Beamline>
+    @param.filter(Beamline, { exclude: 'where' }) filter?: FilterExcludingWhere<Beamline>
   ): Promise<Beamline> {
     return this.beamlineRepository.findById(id, filter);
   }
@@ -120,24 +119,13 @@ export class BeamlineController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Beamline, {partial: true}),
+          schema: getModelSchemaRef(Beamline, { partial: true }),
         },
       },
     })
     beamline: Beamline,
   ): Promise<void> {
     await this.beamlineRepository.updateById(id, beamline);
-  }
-
-  @put('/beamlines/{id}')
-  @response(204, {
-    description: 'Beamline PUT success',
-  })
-  async replaceById(
-    @param.path.string('id') id: string,
-    @requestBody() beamline: Beamline,
-  ): Promise<void> {
-    await this.beamlineRepository.replaceById(id, beamline);
   }
 
   @del('/beamlines/{id}')

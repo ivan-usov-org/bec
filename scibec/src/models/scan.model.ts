@@ -1,46 +1,9 @@
-import {belongsTo, Entity, hasMany, model, property} from '@loopback/repository';
-import {Dataset, DatasetWithRelations, Session, SessionWithRelations} from '.';
+import { belongsTo, hasMany, model, property } from '@loopback/repository';
+import { Dataset, Event, DatasetWithRelations, Session, SessionWithRelations } from '.';
+import { SciBecEntity } from './scibecentity.model';
 
 @model()
-export class Scan extends Entity {
-  @property({
-    type: 'string',
-    id: true,
-    generated: true,
-    mongodb: {datatype: 'ObjectId'}
-  })
-  id?: string;
-
-  @property({
-    type: 'string',
-  })
-  ownerGroup?: string;
-
-  @property({
-    type: 'array',
-    itemType: 'string',
-  })
-  accessGroups?: string[];
-
-  @property({
-    type: 'date',
-  })
-  createdAt: Date;
-
-  @property({
-    type: 'string',
-  })
-  createdBy: string;
-
-  @property({
-    type: 'date',
-  })
-  updatedAt: Date;
-
-  @property({
-    type: 'string',
-  })
-  updatedBy: string;
+export class Scan extends SciBecEntity {
 
   @property({
     type: 'string',
@@ -48,43 +11,51 @@ export class Scan extends Entity {
   scanType: string;
 
   @property({
-    type: 'string',
-    default: "primary"
+    type: 'object',
+  })
+  scanParameter: Object;
+
+  @property({
+    type: 'object',
+  })
+  userParameter: Object;
+
+  @property({
+    type: 'object',
   })
   queue: string;
 
   @property({
     type: 'object',
   })
-  parameter: Object;
+  exitStatus?: string;
+
+  @property({
+    type: 'object',
+  })
+  metadata?: Object;
+
+  @property({
+    type: 'object',
+  })
+  files?: Object;
 
   @belongsTo(() => Session,
     {}, //relation metadata goes in here
     {// property definition goes in here
-      mongodb: {dataType: 'ObjectId'}
+      mongodb: { dataType: 'ObjectId' }
     })
   sessionId?: string;
 
-  @hasMany(() => Dataset, {keyTo: 'scanId'})
-  datasets?: Dataset[];
-
-  @hasMany(() => Scan, {keyTo: 'parentId'})
-  subscans?: Scan[];
-
-  @belongsTo(() => Scan,
+  @belongsTo(() => Dataset,
     {}, //relation metadata goes in here
     {// property definition goes in here
-      mongodb: {dataType: 'ObjectId'}
+      mongodb: { dataType: 'ObjectId' }
     })
-  parentId?: string;
+  datasetId?: string;
 
-  // @belongsTo(() => Session,
-  //   {}, //relation metadata goes in here
-  //   {// property definition goes in here
-  //     mongodb: {dataType: 'ObjectId'}
-  //   })
-  // sessionId?: string;
-
+  @hasMany(() => Event, { keyTo: 'scanId' })
+  events?: Event[];
 
   constructor(data?: Partial<Scan>) {
     super(data);
@@ -95,8 +66,6 @@ export interface ScanRelations {
   // describe navigational properties here
   session?: SessionWithRelations;
   datasets?: DatasetWithRelations[];
-  subscans?: ScanWithRelations[];
-  parent?: ScanWithRelations;
 }
 
 export type ScanWithRelations = Scan & ScanRelations;

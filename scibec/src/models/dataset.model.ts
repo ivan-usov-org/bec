@@ -1,61 +1,24 @@
-import {belongsTo, Entity, model, property} from '@loopback/repository';
-import {Scan} from '.';
+import { belongsTo, hasMany, model, property } from '@loopback/repository';
+import { Experiment, Scan } from '.';
+import { SciBecEntity } from './scibecentity.model';
 
 @model()
-export class Dataset extends Entity {
-  @property({
-    type: 'string',
-    id: true,
-    generated: true,
-    mongodb: {datatype: 'ObjectId'}
-  })
-  id?: string;
-
-  @property({
-    type: 'string',
-    description: 'Only members of the ownerGroup are allowed to modify this device'
-  })
-  ownerGroup?: string;
-
-  @property.array(String, {
-    description: 'groups whose members have read access to this device',
-    index: true,
-  })
-  accessGroups?: string[];
+export class Dataset extends SciBecEntity {
 
   @property({
     type: 'string',
   })
   name?: string;
 
-  @property({
-    type: 'date',
-  })
-  createdAt: Date;
+  @hasMany(() => Scan, { keyTo: 'datasetId' })
+  scans?: Scan[];
 
-  @property({
-    type: 'string',
-  })
-  createdBy: string;
-
-  @property({
-    type: 'date',
-  })
-  updatedAt: Date;
-
-  @property({
-    type: 'string',
-  })
-  updatedBy: string;
-
-
-
-  @belongsTo(() => Scan,
+  @belongsTo(() => Experiment,
     {}, //relation metadata goes in here
     {// property definition goes in here
-      mongodb: {dataType: 'ObjectId'}
+      mongodb: { dataType: 'ObjectId' }
     })
-  scanId?: string;
+  experimentId?: string;
 
   constructor(data?: Partial<Dataset>) {
     super(data);
