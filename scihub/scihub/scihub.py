@@ -18,4 +18,9 @@ class SciHub(BECService):
         self.scibec_connector = SciBecConnector(self, self.connector)
 
     def _start_scilog_connector(self):
-        self.scibec_connector = SciLogConnector(self.connector)
+        self.scilog_connector = SciLogConnector(self.connector)
+
+    def shutdown(self):
+        super().shutdown()
+        self.scibec_connector.shutdown()
+        self.scilog_connector.shutdown()

@@ -95,3 +95,6 @@ class SciBecConnector:
         except (ConnectionError, SciBecError) as exc:
             self.scibec = None
             return
+
+    def shutdown(self):
+        pass

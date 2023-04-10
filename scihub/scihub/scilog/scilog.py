@@ -67,6 +67,9 @@ class SciLogConnector:
         if self.host and self.user and self.user_secret:
             self._configured = True
 
+    def shutdown(self):
+        self._scilog_thread.stop()
+
 
 class RepeatedTimer:
     def __init__(self, interval, function, *args, **kwargs):
