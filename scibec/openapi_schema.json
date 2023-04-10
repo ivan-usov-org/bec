@@ -1325,6 +1325,309 @@
         "operationId": "DeviceController.find"
       }
     },
+    "/events/count": {
+      "get": {
+        "x-controller-name": "EventController",
+        "x-operation-name": "count",
+        "tags": [
+          "EventController"
+        ],
+        "responses": {
+          "200": {
+            "description": "Event model count",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/loopback.Count"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "where",
+            "in": "query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "Event.WhereFilter",
+                  "additionalProperties": true,
+                  "x-typescript-type": "@loopback/repository#Where<Event>"
+                }
+              }
+            }
+          }
+        ],
+        "operationId": "EventController.count"
+      }
+    },
+    "/events/{id}": {
+      "put": {
+        "x-controller-name": "EventController",
+        "x-operation-name": "replaceById",
+        "tags": [
+          "EventController"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Event PUT success"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Event"
+              }
+            }
+          },
+          "x-parameter-index": 1
+        },
+        "operationId": "EventController.replaceById"
+      },
+      "patch": {
+        "x-controller-name": "EventController",
+        "x-operation-name": "updateById",
+        "tags": [
+          "EventController"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Event PATCH success"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventPartial"
+              }
+            }
+          },
+          "x-parameter-index": 1
+        },
+        "operationId": "EventController.updateById"
+      },
+      "get": {
+        "x-controller-name": "EventController",
+        "x-operation-name": "findById",
+        "tags": [
+          "EventController"
+        ],
+        "responses": {
+          "200": {
+            "description": "Event model instance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventWithRelations"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Event.Filter"
+                }
+              }
+            }
+          }
+        ],
+        "operationId": "EventController.findById"
+      },
+      "delete": {
+        "x-controller-name": "EventController",
+        "x-operation-name": "deleteById",
+        "tags": [
+          "EventController"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Event DELETE success"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "operationId": "EventController.deleteById"
+      }
+    },
+    "/events": {
+      "post": {
+        "x-controller-name": "EventController",
+        "x-operation-name": "create",
+        "tags": [
+          "EventController"
+        ],
+        "responses": {
+          "200": {
+            "description": "Event model instance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Event"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewEvent"
+              }
+            }
+          }
+        },
+        "operationId": "EventController.create"
+      },
+      "patch": {
+        "x-controller-name": "EventController",
+        "x-operation-name": "updateAll",
+        "tags": [
+          "EventController"
+        ],
+        "responses": {
+          "200": {
+            "description": "Event PATCH success count",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/loopback.Count"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "where",
+            "in": "query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "Event.WhereFilter",
+                  "additionalProperties": true,
+                  "x-typescript-type": "@loopback/repository#Where<Event>"
+                }
+              }
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventPartial"
+              }
+            }
+          }
+        },
+        "operationId": "EventController.updateAll"
+      },
+      "get": {
+        "x-controller-name": "EventController",
+        "x-operation-name": "find",
+        "tags": [
+          "EventController"
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of Event model instances",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventWithRelations"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "filter",
+            "in": "query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Event.Filter1"
+                }
+              }
+            }
+          }
+        ],
+        "operationId": "EventController.find"
+      }
+    },
     "/experiment-accounts/count": {
       "get": {
         "x-controller-name": "ExperimentAccountController",
@@ -4882,6 +5185,217 @@
         "additionalProperties": false,
         "x-typescript-type": "Partial<Device>"
       },
+      "Event": {
+        "title": "Event",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "createACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can create subentries"
+            }
+          },
+          "readACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can read this entry"
+            }
+          },
+          "updateACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "deleteACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can delete this entry"
+            }
+          },
+          "shareACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
+            }
+          },
+          "adminACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object"
+          },
+          "deviceId": {
+            "type": "string",
+            "description": "The events device"
+          },
+          "scanId": {
+            "type": "string",
+            "description": "The parent scan"
+          }
+        },
+        "additionalProperties": false
+      },
+      "NewEvent": {
+        "title": "NewEvent",
+        "type": "object",
+        "description": "(tsType: Omit<Event, 'id'>, schemaOptions: { title: 'NewEvent', exclude: [ 'id' ] })",
+        "properties": {
+          "createACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can create subentries"
+            }
+          },
+          "readACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can read this entry"
+            }
+          },
+          "updateACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "deleteACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can delete this entry"
+            }
+          },
+          "shareACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
+            }
+          },
+          "adminACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object"
+          },
+          "deviceId": {
+            "type": "string",
+            "description": "The events device"
+          },
+          "scanId": {
+            "type": "string",
+            "description": "The parent scan"
+          }
+        },
+        "additionalProperties": false,
+        "x-typescript-type": "Omit<Event, 'id'>"
+      },
+      "EventPartial": {
+        "title": "EventPartial",
+        "type": "object",
+        "description": "(tsType: Partial<Event>, schemaOptions: { partial: true })",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "createACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can create subentries"
+            }
+          },
+          "readACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can read this entry"
+            }
+          },
+          "updateACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "deleteACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can delete this entry"
+            }
+          },
+          "shareACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
+            }
+          },
+          "adminACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object"
+          },
+          "deviceId": {
+            "type": "string",
+            "description": "The events device"
+          },
+          "scanId": {
+            "type": "string",
+            "description": "The parent scan"
+          }
+        },
+        "additionalProperties": false,
+        "x-typescript-type": "Partial<Event>"
+      },
       "NewExperimentAccount": {
         "title": "NewExperimentAccount",
         "type": "object",
@@ -7551,6 +8065,317 @@
         },
         "additionalProperties": false,
         "x-typescript-type": "@loopback/repository#Filter<Device>"
+      },
+      "Event.ScopeFilter": {
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "example": 100
+          },
+          "skip": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "order": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "where": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "fields": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": true
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "uniqueItems": true
+              }
+            ]
+          },
+          "include": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            }
+          }
+        },
+        "additionalProperties": false,
+        "title": "Event.ScopeFilter"
+      },
+      "Event.IncludeFilter.Items": {
+        "title": "Event.IncludeFilter.Items",
+        "type": "object",
+        "properties": {
+          "relation": {
+            "type": "string"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/Event.ScopeFilter"
+          }
+        }
+      },
+      "Event.Filter": {
+        "type": "object",
+        "title": "Event.Filter",
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "example": 100
+          },
+          "skip": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "order": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "fields": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "boolean"
+                  },
+                  "createACL": {
+                    "type": "boolean"
+                  },
+                  "readACL": {
+                    "type": "boolean"
+                  },
+                  "updateACL": {
+                    "type": "boolean"
+                  },
+                  "deleteACL": {
+                    "type": "boolean"
+                  },
+                  "shareACL": {
+                    "type": "boolean"
+                  },
+                  "adminACL": {
+                    "type": "boolean"
+                  },
+                  "createdAt": {
+                    "type": "boolean"
+                  },
+                  "createdBy": {
+                    "type": "boolean"
+                  },
+                  "data": {
+                    "type": "boolean"
+                  },
+                  "deviceId": {
+                    "type": "boolean"
+                  },
+                  "scanId": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "id",
+                    "createACL",
+                    "readACL",
+                    "updateACL",
+                    "deleteACL",
+                    "shareACL",
+                    "adminACL",
+                    "createdAt",
+                    "createdBy",
+                    "data",
+                    "deviceId",
+                    "scanId"
+                  ],
+                  "example": "id"
+                },
+                "uniqueItems": true
+              }
+            ],
+            "title": "Event.Fields"
+          },
+          "include": {
+            "title": "Event.IncludeFilter",
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Event.IncludeFilter.Items"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        "additionalProperties": false,
+        "x-typescript-type": "@loopback/repository#Filter<Event>"
+      },
+      "Event.Filter1": {
+        "type": "object",
+        "title": "Event.Filter",
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "example": 100
+          },
+          "skip": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "order": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "where": {
+            "title": "Event.WhereFilter",
+            "type": "object",
+            "additionalProperties": true
+          },
+          "fields": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "boolean"
+                  },
+                  "createACL": {
+                    "type": "boolean"
+                  },
+                  "readACL": {
+                    "type": "boolean"
+                  },
+                  "updateACL": {
+                    "type": "boolean"
+                  },
+                  "deleteACL": {
+                    "type": "boolean"
+                  },
+                  "shareACL": {
+                    "type": "boolean"
+                  },
+                  "adminACL": {
+                    "type": "boolean"
+                  },
+                  "createdAt": {
+                    "type": "boolean"
+                  },
+                  "createdBy": {
+                    "type": "boolean"
+                  },
+                  "data": {
+                    "type": "boolean"
+                  },
+                  "deviceId": {
+                    "type": "boolean"
+                  },
+                  "scanId": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "id",
+                    "createACL",
+                    "readACL",
+                    "updateACL",
+                    "deleteACL",
+                    "shareACL",
+                    "adminACL",
+                    "createdAt",
+                    "createdBy",
+                    "data",
+                    "deviceId",
+                    "scanId"
+                  ],
+                  "example": "id"
+                },
+                "uniqueItems": true
+              }
+            ],
+            "title": "Event.Fields"
+          },
+          "include": {
+            "title": "Event.IncludeFilter",
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Event.IncludeFilter.Items"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        "additionalProperties": false,
+        "x-typescript-type": "@loopback/repository#Filter<Event>"
       },
       "ExperimentAccount.ScopeFilter": {
         "properties": {
