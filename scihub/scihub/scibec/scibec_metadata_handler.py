@@ -34,9 +34,7 @@ class SciBecMetadataHandler:
         if not scan:
             info = msg.content["info"]
             dataset_number = info.get("dataset_number")
-            dataset = scibec.get_dataset_by_experiment_and_number(
-                experiment_id, dataset_number
-            )
+            dataset = scibec.get_dataset_by_experiment_and_number(experiment_id, dataset_number)
             if not dataset:
                 dataset_data = {"experimentId": experiment_id, "number": dataset_number}
                 dataset = scibec.add_dataset(dataset_data)

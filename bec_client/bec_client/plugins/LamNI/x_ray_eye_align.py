@@ -97,7 +97,7 @@ class XrayEyeAlign:
     def align(self):
         # reset shift xy and fov params
         self._reset_init_values()
-        
+
         # this makes sure we are in a defined state
         self._disable_rt_feedback()
 

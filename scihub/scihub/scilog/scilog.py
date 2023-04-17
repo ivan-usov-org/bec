@@ -13,6 +13,7 @@ logger = bec_logger.logger
 if TYPE_CHECKING:
     from scihub import SciHub
 
+
 class SciLogConnector:
     token_expiration_time = 86400  # one day
 

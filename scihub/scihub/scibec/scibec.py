@@ -26,9 +26,7 @@ class SciBec:
 
     def get_beamlines(self, params=None) -> list:
         headers = {"Content-type": "application/json"}
-        return self.client.get_request(
-            f"{self.url}/beamlines", headers=headers, params=params
-        )
+        return self.client.get_request(f"{self.url}/beamlines", headers=headers, params=params)
 
     def get_beamline(self, beamline: str, raise_none=False) -> dict:
         params = self.client.make_filter(where={"name": beamline})
@@ -66,23 +64,17 @@ class SciBec:
     def get_experiment(self, name: str) -> dict:
         params = self.client.make_filter(where={"name": name})
         headers = {"Content-type": "application/json"}
-        return self.client.get_request(
-            f"{self.url}/experiments", headers=headers, params=params
-        )
+        return self.client.get_request(f"{self.url}/experiments", headers=headers, params=params)
 
     def get_experiment_by_id(self, experiment_id: str) -> dict:
         headers = {"Content-type": "application/json"}
         params = self.client.make_filter(where={"id": experiment_id})
-        return self.client.get_request(
-            f"{self.url}/experiments", params=params, headers=headers
-        )
+        return self.client.get_request(f"{self.url}/experiments", params=params, headers=headers)
 
     def get_experiment_by_pgroup(self, pgroup: str) -> dict:
         headers = {"Content-type": "application/json"}
         params = self.client.make_filter(where={"writeAccount": pgroup})
-        return self.client.get_request(
-            f"{self.url}/experiments", params=params, headers=headers
-        )
+        return self.client.get_request(f"{self.url}/experiments", params=params, headers=headers)
 
     def add_experiment(self, experiment: dict) -> bool:
         headers = {"Content-type": "application/json"}
@@ -93,9 +85,7 @@ class SciBec:
     def set_experiment_active(self, experiment_id: str) -> None:
         experiment = self.get_experiment_by_id(experiment_id)
         if not experiment:
-            raise SciBecError(
-                f"Could not find a matching experiment for ID {experiment_id}."
-            )
+            raise SciBecError(f"Could not find a matching experiment for ID {experiment_id}.")
         beamline_id = experiment[0]["beamlineId"]
         self.patch_beamline(beamline_id, {"activeExperiment": experiment_id})
 
@@ -104,9 +94,7 @@ class SciBec:
         params = self.client.make_filter(
             include=[{"relation": "sessions"}], where={"name": beamline}
         )
-        return self.client.get_request(
-            f"{self.url}/beamlines", params=params, headers=headers
-        )
+        return self.client.get_request(f"{self.url}/beamlines", params=params, headers=headers)
 
     def add_session(self, experiment_id: str, session: str):
         headers = {"Content-type": "application/json"}
@@ -114,17 +102,13 @@ class SciBec:
             "name": session,
             "experimentId": experiment_id,
         }
-        return self.client.post_request(
-            f"{self.url}/sessions", payload=obj, headers=headers
-        )
+        return self.client.post_request(f"{self.url}/sessions", payload=obj, headers=headers)
 
     def get_session_by_id(self, session_id: str, include_devices=False):
         headers = {"Content-type": "application/json"}
         include = [{"relation": "devices"}] if include_devices else None
         params = self.client.make_filter(where={"id": session_id}, include=include)
-        return self.client.get_request(
-            f"{self.url}/sessions", params=params, headers=headers
-        )
+        return self.client.get_request(f"{self.url}/sessions", params=params, headers=headers)
 
     def get_session_by_name(self, beamline: str, session: str, include_devices=False):
         beamline = self.get_beamline(beamline, raise_none=True)
@@ -133,9 +117,7 @@ class SciBec:
         params = self.client.make_filter(
             where={"name": session, "beamlineId": beamline["id"]}, include=include
         )
-        return self.client.get_request(
-            f"{self.url}/sessions", params=params, headers=headers
-        )
+        return self.client.get_request(f"{self.url}/sessions", params=params, headers=headers)
 
     # def get_current_session(self, beamline: str, include_devices=False):
     #     beamline_info = self.get_beamline(beamline, raise_none=True)
@@ -168,37 +150,25 @@ class SciBec:
     def get_datasets_by_experiment(self, experiment_id: str):
         headers = {"Content-type": "application/json"}
         params = self.client.make_filter(where={"experimentId": experiment_id})
-        return self.client.get_request(
-            f"{self.url}/datasets", params=params, headers=headers
-        )
+        return self.client.get_request(f"{self.url}/datasets", params=params, headers=headers)
 
     def get_dataset_by_experiment_and_number(self, experiment_id: str, number: int):
         headers = {"Content-type": "application/json"}
-        params = self.client.make_filter(
-            where={"experimentId": experiment_id, "number": number}
-        )
-        return self.client.get_request(
-            f"{self.url}/datasets", params=params, headers=headers
-        )
+        params = self.client.make_filter(where={"experimentId": experiment_id, "number": number})
+        return self.client.get_request(f"{self.url}/datasets", params=params, headers=headers)
 
     def add_dataset(self, data: dict):
         headers = {"Content-type": "application/json"}
-        return self.client.post_request(
-            f"{self.url}/datasets", payload=data, headers=headers
-        )
+        return self.client.post_request(f"{self.url}/datasets", payload=data, headers=headers)
 
     def get_scan_by_scanID(self, scanID):
         headers = {"Content-type": "application/json"}
         params = self.client.make_filter(where={"scanId": scanID})
-        return self.client.get_request(
-            f"{self.url}/scans", params=params, headers=headers
-        )
+        return self.client.get_request(f"{self.url}/scans", params=params, headers=headers)
 
     def add_scan(self, data: dict):
         headers = {"Content-type": "application/json"}
-        return self.client.post_request(
-            f"{self.url}/scans", payload=data, headers=headers
-        )
+        return self.client.post_request(f"{self.url}/scans", payload=data, headers=headers)
 
     def patch_scan(self, scan_id: str, data: dict):
         headers = {"Content-type": "application/json"}
