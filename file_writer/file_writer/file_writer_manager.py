@@ -85,7 +85,7 @@ class FileWriterManager(BECService):
         if not self.file_writer_config.get("base_path"):
             raise ServiceConfigError("File writer config must define a base path.")
 
-        return self.file_writer_config.get("base_path")
+        return os.path.expanduser(self.file_writer_config.get("base_path"))
 
     def update_scan_storage_with_status(self, msg: BECMessage.ScanStatusMessage):
         scanID = msg.content.get("scanID")

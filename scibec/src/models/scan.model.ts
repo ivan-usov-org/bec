@@ -23,7 +23,22 @@ export class Scan extends SciBecEntity {
   @property({
     type: 'object',
   })
-  queue: string;
+  queue?: string;
+
+  @property({
+    type: 'object',
+  })
+  scanId?: string;
+
+  @property({
+    type: 'object',
+  })
+  requestId?: string;
+
+  @property({
+    type: 'object',
+  })
+  queueId?: string;
 
   @property({
     type: 'object',

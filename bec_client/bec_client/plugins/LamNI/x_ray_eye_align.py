@@ -32,6 +32,9 @@ class XrayEyeAlign:
         self.scans = client.scans
         self.xeye = self.device_manager.devices.xeye
         self.alignment_values = defaultdict(list)
+        self._reset_init_values()
+
+    def _reset_init_values(self):
         self.shift_xy = [0, 0]
         self._xray_fov_xy = [0, 0]
 
@@ -92,6 +95,9 @@ class XrayEyeAlign:
         epics_put("XOMNYI-XEYE-MESSAGE:0.DESC", msg)
 
     def align(self):
+        # reset shift xy and fov params
+        self._reset_init_values()
+        
         # this makes sure we are in a defined state
         self._disable_rt_feedback()
 
