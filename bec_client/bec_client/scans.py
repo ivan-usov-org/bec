@@ -168,8 +168,7 @@ class Scans:
                     raise TypeError(
                         f"{scan_info.get('doc')}\n Argument {ii} must be of type {arg_input[ii%len(arg_input)]}, not {type(arg).__name__}."
                     )
-        else:
-            logger.warning("Could not check arguments against scan input types.")
+
         metadata = {}
         if "md" in kwargs:
             metadata = kwargs.pop("md")

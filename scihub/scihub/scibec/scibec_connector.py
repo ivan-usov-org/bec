@@ -9,6 +9,7 @@ from requests import ConnectionError
 
 from .config_handler import ConfigHandler
 from .scibec import SciBec, SciBecError
+from .scibec_metadata_handler import SciBecMetadataHandler
 
 if TYPE_CHECKING:
     from scihub import SciHub
@@ -28,7 +29,9 @@ class SciBecConnector:
         self.config_handler = ConfigHandler(self, connector)
 
         self._config_request_handler = None
+        self._metadata_handler = None
         self._start_config_request_handler()
+        self._start_metadata_handler()
 
     @property
     def config(self):
@@ -61,6 +64,9 @@ class SciBecConnector:
     def set_redis_config(self, config):
         self.producer.set(MessageEndpoints.device_config(), msgpack.dumps(config))
 
+    def _start_metadata_handler(self) -> None:
+        self._metadata_handler = SciBecMetadataHandler(self)
+
     def _start_config_request_handler(self) -> None:
         self._config_request_handler = self.connector.consumer(
             MessageEndpoints.device_config_request(),
@@ -82,13 +88,27 @@ class SciBecConnector:
         try:
             beamline = self.scihub.config.config["scibec"].get("beamline")
             if not beamline:
-                logger.warning(f"Cannot connect to SciBec without a beamline specified.")
+                logger.warning(
+                    f"Cannot connect to SciBec without a beamline specified."
+                )
                 return
             logger.info(f"Connecting to SciBec on {scibec_host}")
             self.scibec = SciBec()
             self.scibec.url = scibec_host
             beamline_info = self.scibec.get_beamline(beamline)
             self.scibec_info["beamline"] = beamline_info
+            experiment_id = beamline_info.get("activeExperiment")
+            if experiment_id:
+                experiment = self.scibec.get_experiment_by_id(experiment_id)
+                self.scibec_info["activeExperiment"] = experiment
+                if not "activeSession" in experiment[0]:
+                    return
+                session = self.scibec.get_session_by_id(experiment[0]["activeSession"])
+                self.scibec_info["activeSession"] = session
+                write_account = experiment[0]["writeAccount"]
+                if write_account[0] == "p":
+                    write_account = write_account.replace("p", "e")
+                self.producer.set(MessageEndpoints.account(), write_account.encode())
             if not beamline_info:
                 logger.warning(f"Could not find a beamline with the name {beamline}")
                 return

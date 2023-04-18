@@ -32,6 +32,9 @@ class XrayEyeAlign:
         self.scans = client.scans
         self.xeye = self.device_manager.devices.xeye
         self.alignment_values = defaultdict(list)
+        self._reset_init_values()
+
+    def _reset_init_values(self):
         self.shift_xy = [0, 0]
         self._xray_fov_xy = [0, 0]
 
@@ -92,6 +95,9 @@ class XrayEyeAlign:
         epics_put("XOMNYI-XEYE-MESSAGE:0.DESC", msg)
 
     def align(self):
+        # reset shift xy and fov params
+        self._reset_init_values()
+        
         # this makes sure we are in a defined state
         self._disable_rt_feedback()
 
@@ -155,9 +161,9 @@ class XrayEyeAlign:
                 elif (
                     k == 1
                 ):  # received sample center value at samroy 0 ie the final base shift values
-                    print(
-                        f"Base shift values from movement are x {self.shift_xy[0]}, y {self.shift_xy[1]}"
-                    )
+                    msg = f"Base shift values from movement are x {self.shift_xy[0]}, y {self.shift_xy[1]}"
+                    print(msg)
+                    logger.info(msg)
                     self.shift_xy[0] += (
                         self.alignment_values[0][0] - self.alignment_values[1][0]
                     ) * 1000
@@ -320,7 +326,7 @@ class LamNI(LamNIOpticsMixin):
         self.check_light_available = True
         self.check_fofb = True
         self._check_msgs = []
-        self.tomo_id = None
+        self.tomo_id = -1
         self.corr_pos_x_2 = []
         self.corr_pos_y_2 = []
         self.corr_angle_2 = []
@@ -382,8 +388,12 @@ class LamNI(LamNIOpticsMixin):
         return val[0] / 1000
 
     @tomo_fovx_offset.setter
+    @typechecked
     def tomo_fovx_offset(self, val: float):
-        self.client.set_global_var("tomo_fov_offset", val)
+        val_old = self.client.get_global_var("tomo_fov_offset")
+        if val_old is None:
+            val_old = [0.0, 0.0]
+        self.client.set_global_var("tomo_fov_offset", [val*1000,val_old[1]])
 
     @property
     def tomo_fovy_offset(self):
@@ -393,8 +403,12 @@ class LamNI(LamNIOpticsMixin):
         return val[1] / 1000
 
     @tomo_fovy_offset.setter
+    @typechecked
     def tomo_fovy_offset(self, val: float):
-        self.client.set_global_var("tomo_fov_offset", val)
+        val_old = self.client.get_global_var("tomo_fov_offset")
+        if val_old is None:
+            val_old = [0.0, 0.0]
+        self.client.set_global_var("tomo_fov_offset", [val_old[0], val*1000])
 
     @property
     def tomo_shellstep(self):
@@ -548,7 +562,7 @@ class LamNI(LamNIOpticsMixin):
 
     def write_to_scilog(self, content):
         try:
-            msg = bec.logbook.LogbookMessage(self.client.logbook)
+            msg = bec.logbook.LogbookMessage()
             msg.add_text(content).add_tag(["BEC"])
             self.client.logbook.send_logbook_message(msg)
         except Exception:
@@ -596,7 +610,7 @@ class LamNI(LamNIOpticsMixin):
                         self.manual_shift_y
                         + correction_xeye_mu[1]
                         - additional_correction[1]
-                        - additional_correction_2[0]
+                        - additional_correction_2[1]
                     ),
                     fov_circular=self.tomo_circfov,
                     angle=angle,
@@ -782,7 +796,7 @@ class LamNI(LamNIOpticsMixin):
     def _wait_for_beamline_checks(self):
         self._print_beamline_checks()
         try:
-            msg = bec.logbook.LogbookMessage(self.client.logbook)
+            msg = bec.logbook.LogbookMessage()
             msg.add_text(
                 f"<p><mark class='pen-red'><strong>Beamline checks failed at {str(datetime.datetime.now())}: {''.join(self._check_msgs)}</strong></mark></p>"
             ).add_tag(["BEC", "beam_check"])
@@ -799,7 +813,7 @@ class LamNI(LamNIOpticsMixin):
             time.sleep(1)
 
         try:
-            msg = bec.logbook.LogbookMessage(self.client.logbook)
+            msg = bec.logbook.LogbookMessage()
             msg.add_text(
                 f"<p><mark class='pen-red'><strong>Operation resumed at {str(datetime.datetime.now())}.</strong></mark></p>"
             ).add_tag(["BEC", "beam_check"])
@@ -906,7 +920,7 @@ class LamNI(LamNIOpticsMixin):
             self.tomo_id = self.add_sample_database(
                 "bec_test_sample",
                 str(datetime.date.today()),
-                "e20131",
+                bec.active_account.decode(),
                 bec.queue.next_scan_number,
                 "lamni",
                 "test additional info",
@@ -1031,7 +1045,7 @@ class LamNI(LamNIOpticsMixin):
             shell=True,
         )
         # status = subprocess.run(f"cp /tmp/spec-e20131-specES1.pdf {user_target}", shell=True)
-        msg = bec.logbook.LogbookMessage(self.client.logbook)
+        msg = bec.logbook.LogbookMessage()
         logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "LamNI_logo.png")
         msg.add_file(logo_path).add_text("".join(content).replace("\n", "</p><p>")).add_tag(
             ["BEC", "tomo_parameters", f"dataset_id_{dataset_id}", "LamNI"]

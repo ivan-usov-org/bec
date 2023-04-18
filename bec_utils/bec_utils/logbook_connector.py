@@ -35,6 +35,7 @@ class LogbookConnector:
         if not account:
             return
         account = account.decode()
+        account = account.replace("e", "p")
 
         self._scilog_module = scilog
 

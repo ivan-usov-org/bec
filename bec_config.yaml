@@ -1,0 +1,19 @@
+redis:
+  host: localhost
+  port: 6379
+mongodb:
+  host: localhost
+  port: 27017
+scibec:
+  host: http://localhost
+  port: 3030
+  beamline: CSAXS
+service_config:
+  file_writer:
+    plugin: cSAXS_NeXus_format
+    base_path: ~/Data10/
+  scilog:
+    env_file: /sls/X12SA/data/gac-x12saop/scilog
+    
+    
+

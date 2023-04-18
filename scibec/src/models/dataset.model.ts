@@ -10,6 +10,11 @@ export class Dataset extends SciBecEntity {
   })
   name?: string;
 
+  @property({
+    type: 'number',
+  })
+  number?: number;
+
   @hasMany(() => Scan, { keyTo: 'datasetId' })
   scans?: Scan[];
 
