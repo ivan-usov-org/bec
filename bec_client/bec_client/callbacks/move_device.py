@@ -65,7 +65,10 @@ class LiveUpdatesReadbackProgressbar(LiveUpdatesBase):
         super().__init__(
             bec, report_instruction=report_instruction, request=request, callbacks=callbacks
         )
-        self.devices = report_instruction["readback"]["devices"]
+        if report_instruction:
+            self.devices = report_instruction["readback"]["devices"]
+        else:
+            self.devices = list(request.content["parameter"]["args"].keys())
 
     async def core(self):
         data_source = ReadbackDataMixin(self.bec.device_manager, self.devices)
