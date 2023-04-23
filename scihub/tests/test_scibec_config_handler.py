@@ -116,13 +116,13 @@ def test_config_handler_set_config_with_scibec(SciHubMock):
     msg = BECMessage.DeviceConfigMessage(
         action="set", config={"samx": {"enabled": True}}, metadata={}
     )
-    scibec_connector.scibec_info = {"beamline": {"info": []}}
+    scibec_connector.scibec_info = {"beamline": {"info": [], "activeExperiment": "12345"}}
     with mock.patch.object(scibec_connector, "scibec") as scibec:
         with mock.patch.object(config_handler, "send_config_request_reply") as req_reply:
             with mock.patch.object(scibec_connector, "update_session") as update_session:
                 config_handler._set_config(msg)
                 scibec.set_session_data.assert_called_once_with(
-                    {"info": []}, {"samx": {"enabled": True}}
+                    "12345", {"samx": {"enabled": True}}
                 )
                 req_reply.assert_called_once_with(accepted=True, error_msg=None, metadata={})
                 update_session.assert_called_once()

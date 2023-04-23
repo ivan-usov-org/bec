@@ -12,24 +12,23 @@ import {
   get,
   getModelSchemaRef,
   patch,
-  put,
   del,
   requestBody,
   response,
 } from '@loopback/rest';
-import {Session} from '../models';
-import {SessionRepository} from '../repositories';
+import { Session } from '../models';
+import { SessionRepository } from '../repositories';
 
 export class SessionController {
   constructor(
     @repository(SessionRepository)
-    public sessionRepository : SessionRepository,
-  ) {}
+    public sessionRepository: SessionRepository,
+  ) { }
 
   @post('/sessions')
   @response(200, {
     description: 'Session model instance',
-    content: {'application/json': {schema: getModelSchemaRef(Session)}},
+    content: { 'application/json': { schema: getModelSchemaRef(Session) } },
   })
   async create(
     @requestBody({
@@ -50,7 +49,7 @@ export class SessionController {
   @get('/sessions/count')
   @response(200, {
     description: 'Session model count',
-    content: {'application/json': {schema: CountSchema}},
+    content: { 'application/json': { schema: CountSchema } },
   })
   async count(
     @param.where(Session) where?: Where<Session>,
@@ -65,7 +64,7 @@ export class SessionController {
       'application/json': {
         schema: {
           type: 'array',
-          items: getModelSchemaRef(Session, {includeRelations: true}),
+          items: getModelSchemaRef(Session, { includeRelations: true }),
         },
       },
     },
@@ -79,13 +78,13 @@ export class SessionController {
   @patch('/sessions')
   @response(200, {
     description: 'Session PATCH success count',
-    content: {'application/json': {schema: CountSchema}},
+    content: { 'application/json': { schema: CountSchema } },
   })
   async updateAll(
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Session, {partial: true}),
+          schema: getModelSchemaRef(Session, { partial: true }),
         },
       },
     })
@@ -100,13 +99,13 @@ export class SessionController {
     description: 'Session model instance',
     content: {
       'application/json': {
-        schema: getModelSchemaRef(Session, {includeRelations: true}),
+        schema: getModelSchemaRef(Session, { includeRelations: true }),
       },
     },
   })
   async findById(
     @param.path.string('id') id: string,
-    @param.filter(Session, {exclude: 'where'}) filter?: FilterExcludingWhere<Session>
+    @param.filter(Session, { exclude: 'where' }) filter?: FilterExcludingWhere<Session>
   ): Promise<Session> {
     return this.sessionRepository.findById(id, filter);
   }
@@ -120,24 +119,13 @@ export class SessionController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Session, {partial: true}),
+          schema: getModelSchemaRef(Session, { partial: true }),
         },
       },
     })
     session: Session,
   ): Promise<void> {
     await this.sessionRepository.updateById(id, session);
-  }
-
-  @put('/sessions/{id}')
-  @response(204, {
-    description: 'Session PUT success',
-  })
-  async replaceById(
-    @param.path.string('id') id: string,
-    @requestBody() session: Session,
-  ): Promise<void> {
-    await this.sessionRepository.replaceById(id, session);
   }
 
   @del('/sessions/{id}')

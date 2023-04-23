@@ -1,5 +1,7 @@
 import { belongsTo, Entity, hasMany, model, property } from '@loopback/repository';
-import { Session } from '.';
+import { Session, Event } from '.';
+import { SciBecEntity } from './scibecentity.model';
+
 
 export interface DeviceConfig {
   name?: string,
@@ -38,14 +40,7 @@ enum FailureType {
 }
 
 @model()
-export class Device extends Entity {
-  @property({
-    type: 'string',
-    id: true,
-    generated: true,
-    mongodb: { dataType: 'ObjectId' }
-  })
-  id: string;
+export class Device extends SciBecEntity {
 
   @property({
     type: 'string',
@@ -58,29 +53,6 @@ export class Device extends Entity {
     required: false,
   })
   description: string;
-
-  @property({
-    type: 'string',
-    description: 'Only members of the ownerGroup are allowed to modify this device'
-  })
-  ownerGroup?: string;
-
-  @property.array(String, {
-    description: 'groups whose members have read access to this device',
-    index: true,
-  })
-  accessGroups?: string[];
-
-  @property({
-    type: 'date',
-  })
-  createdAt: Date;
-
-  @property({
-    type: 'string',
-  })
-  createdBy: string;
-
 
   @hasMany(() => Device, { keyTo: 'parentId' })
   subdevices?: Device[];
@@ -178,7 +150,8 @@ export class Device extends Entity {
   })
   userParameter: object;
 
-
+  @hasMany(() => Event, { keyTo: 'deviceId' })
+  events?: Event[];
 
   constructor(data?: Partial<Device>) {
     super(data);

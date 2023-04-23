@@ -1,10 +1,10 @@
-import { HasManyRepositoryFactory, repository } from '@loopback/repository';
+import { HasManyRepositoryFactory, HasOneRepositoryFactory, repository } from '@loopback/repository';
 import { MongoDataSource } from '../datasources';
-import { Beamline, BeamlineRelations } from '../models';
+import { AccessConfig, Beamline, BeamlineRelations, Experiment } from '../models';
 import { Getter, inject } from '@loopback/core';
-import { Session } from '../models';
-import { SessionRepository } from './session.repository';
 import { AutoAddRepository } from './autoadd.repository';
+import { ExperimentRepository } from './experiment.repository';
+import { AccessConfigRepository } from './access-config.repository';
 
 
 export class BeamlineRepository extends AutoAddRepository<
@@ -12,16 +12,20 @@ export class BeamlineRepository extends AutoAddRepository<
   typeof Beamline.prototype.id,
   BeamlineRelations
 > {
-  public readonly sessions: HasManyRepositoryFactory<Session, string>;
+  public readonly experiments: HasManyRepositoryFactory<Experiment, string>;
+  public readonly accessConfig: HasOneRepositoryFactory<AccessConfig, string>;
 
   constructor(
     @inject('datasources.mongo') dataSource: MongoDataSource,
-    @repository.getter('SessionRepository') sessionRepositoryGetter: Getter<SessionRepository>,
+    @repository.getter('ExperimentRepository') experimentRepositoryGetter: Getter<ExperimentRepository>,
+    @repository.getter('AccessConfigRepository') accessConfigRepositoryGetter: Getter<AccessConfigRepository>,
   ) {
     super(Beamline, dataSource);
-    this.sessions = this.createHasManyRepositoryFactoryFor('sessions', sessionRepositoryGetter);
+    this.experiments = this.createHasManyRepositoryFactoryFor('experiments', experimentRepositoryGetter);
+    this.accessConfig = this.createHasOneRepositoryFactoryFor('accessConfig', accessConfigRepositoryGetter);
 
     // add these lines to register inclusion resolver.
-    this.registerInclusionResolver('sessions', this.sessions.inclusionResolver);
+    this.registerInclusionResolver('experiments', this.experiments.inclusionResolver);
+    this.registerInclusionResolver('accessConfig', this.accessConfig.inclusionResolver);
   }
 }
