@@ -28,11 +28,7 @@ scans = bec.scans
 
 
 logger.success("Started BECClient")
-from bec_client.plugins.LamNI import *
 
-lamni = LamNI(bec)
-dev.rtx.controller.feedback_enable_with_reset()
-lamni.align.align()
 
 # dev.rtx.controller.feedback_enable_with_reset()
 # scans.lamni_fermat_scan(fov_size=[20, 25], center_x=0, center_y=0, shift_x=0, shift_y=0, angle=10, step=0.5, fov_circular=0, exp_time=0.05)
