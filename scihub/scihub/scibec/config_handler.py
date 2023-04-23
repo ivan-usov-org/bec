@@ -109,6 +109,8 @@ class ConfigHandler:
             device = self.device_manager.devices[dev]
             updated = self._update_device_config(device, config.copy())
             if updated:
+                if "id" in device._config and self.scibec_connector.scibec:
+                    self.scibec_connector.scibec.patch_device_config(device._config["id"], config)
                 self.update_config_in_redis(device)
 
         # send updates to services

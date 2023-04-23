@@ -207,7 +207,13 @@ class BECService:
             if len(var) > 40:
                 var = var[0:20] + "..., " + var[-20:]
             table.add_row(endpoint, var)
-        console.print(table)
+        with console.capture() as capture:
+                console.print(table)  
+        out = capture.get()
+        logger.info(out)
+        print(out)
+        
+
 
     def shutdown(self):
         """shutdown the BECService"""

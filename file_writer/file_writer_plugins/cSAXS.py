@@ -1,5 +1,7 @@
 import numpy as np
 
+def get_entry(data, name, default=None):
+    return data.get(name, {}).get(name,{}).get("value", default)
 
 def get_entry(data, name, default=None):
     return data.get(name, {}).get(name, {}).get("value", default)

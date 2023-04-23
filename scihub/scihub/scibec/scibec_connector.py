@@ -88,7 +88,9 @@ class SciBecConnector:
         try:
             beamline = self.scihub.config.config["scibec"].get("beamline")
             if not beamline:
-                logger.warning(f"Cannot connect to SciBec without a beamline specified.")
+                logger.warning(
+                    f"Cannot connect to SciBec without a beamline specified."
+                )
                 return
             logger.info(f"Connecting to SciBec on {scibec_host}")
             self.scibec = SciBec()
@@ -99,6 +101,8 @@ class SciBecConnector:
             if experiment_id:
                 experiment = self.scibec.get_experiment_by_id(experiment_id)
                 self.scibec_info["activeExperiment"] = experiment
+                if not "activeSession" in experiment[0]:
+                    return
                 session = self.scibec.get_session_by_id(experiment[0]["activeSession"])
                 self.scibec_info["activeSession"] = session
                 write_account = experiment[0]["writeAccount"]
