@@ -892,6 +892,7 @@ class LamNI(LamNIOpticsMixin):
                             num_repeats = self.special_angle_repeats
                     else:
                         num_repeats = 1
+                    start_scan_number = bec.queue.next_scan_number
                     for i in range(num_repeats):
                         self._at_each_angle(angle)
 
@@ -900,15 +901,19 @@ class LamNI(LamNIOpticsMixin):
                     else:
                         self._wait_for_beamline_checks()
 
-                tomo_id = 0
-                with open(
-                    os.path.expanduser("~/Data10/specES1/dat-files/tomography_scannumbers.txt"),
-                    "a+",
-                ) as out_file:
-                    # pylint: disable=undefined-variable
-                    out_file.write(
-                        f"{bec.queue.next_scan_number-1} {angle} {dev.lsamrot.read()['lsamrot']['value']:.3f} {self.tomo_id} {subtomo_number} {0} {'lamni'}\n"
-                    )
+                end_scan_number = bec.queue.next_scan_number
+                for scan_nr in range(start_scan_number, end_scan_number):
+                    self._write_tomo_scan_number(scan_nr, angle, subtomo_number)
+
+    def _write_tomo_scan_number(self, scan_number: int, angle: float, subtomo_number: int) -> None:
+        tomo_scan_numbers_file = os.path.expanduser(
+            "~/Data10/specES1/dat-files/tomography_scannumbers.txt"
+        )
+        with open(tomo_scan_numbers_file, "a+") as out_file:
+            # pylint: disable=undefined-variable
+            out_file.write(
+                f"{scan_number} {angle} {dev.lsamrot.read()['lsamrot']['value']:.3f} {self.tomo_id} {subtomo_number} {0} {'lamni'}\n"
+            )
 
     def tomo_scan(self, subtomo_start=1, start_angle=None):
         """start a tomo scan"""
