@@ -26,21 +26,6 @@ export class Scan extends SciBecEntity {
   queue?: string;
 
   @property({
-    type: 'object',
-  })
-  scanId?: string;
-
-  @property({
-    type: 'object',
-  })
-  requestId?: string;
-
-  @property({
-    type: 'object',
-  })
-  queueId?: string;
-
-  @property({
     type: 'string',
   })
   scanId: string;
