@@ -393,7 +393,7 @@ class LamNI(LamNIOpticsMixin):
         val_old = self.client.get_global_var("tomo_fov_offset")
         if val_old is None:
             val_old = [0.0, 0.0]
-        self.client.set_global_var("tomo_fov_offset", [val*1000,val_old[1]])
+        self.client.set_global_var("tomo_fov_offset", [val * 1000, val_old[1]])
 
     @property
     def tomo_fovy_offset(self):
@@ -408,7 +408,7 @@ class LamNI(LamNIOpticsMixin):
         val_old = self.client.get_global_var("tomo_fov_offset")
         if val_old is None:
             val_old = [0.0, 0.0]
-        self.client.set_global_var("tomo_fov_offset", [val_old[0], val*1000])
+        self.client.set_global_var("tomo_fov_offset", [val_old[0], val * 1000])
 
     @property
     def tomo_shellstep(self):

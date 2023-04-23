@@ -208,12 +208,10 @@ class BECService:
                 var = var[0:20] + "..., " + var[-20:]
             table.add_row(endpoint, var)
         with console.capture() as capture:
-                console.print(table)  
+            console.print(table)
         out = capture.get()
         logger.info(out)
         print(out)
-        
-
 
     def shutdown(self):
         """shutdown the BECService"""
