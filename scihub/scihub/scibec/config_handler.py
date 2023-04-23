@@ -66,9 +66,10 @@ class ConfigHandler:
     def _set_config(self, msg: BECMessage.DeviceConfigMessage):
         config = msg.content["config"]
         scibec = self.scibec_connector.scibec
-        beamline = self.scibec_connector.scibec_info.get("beamline")
-        if scibec and beamline:
-            scibec.set_session_data(beamline, config)
+        experiment = self.scibec_connector.scibec_info.get("beamline", {}).get("activeExperiment")
+
+        if scibec and experiment:
+            scibec.set_session_data(experiment, config)
             self.scibec_connector.update_session()
         else:
             for name, device in config.items():
