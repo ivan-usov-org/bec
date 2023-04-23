@@ -21,19 +21,39 @@ export class Scan extends SciBecEntity {
   userParameter: Object;
 
   @property({
-    type: 'object',
+    type: 'string',
   })
   queue: string;
 
   @property({
-    type: 'object',
+    type: 'string',
   })
-  exitStatus?: string;
+  scanId: string;
+
+  @property({
+    type: 'string',
+  })
+  requestId: string;
+
+  @property({
+    type: 'string',
+  })
+  queueId: string;
+
+  @property({
+    type: 'string',
+  })
+  exitStatus: string;
+
+  @property({
+    type: 'number',
+  })
+  scanNumber?: number;
 
   @property({
     type: 'object',
   })
-  metadata?: Object;
+  metadata: Object;
 
   @property({
     type: 'object',
@@ -69,3 +89,4 @@ export interface ScanRelations {
 }
 
 export type ScanWithRelations = Scan & ScanRelations;
+
