@@ -139,11 +139,44 @@ class SciBec:
             )
         update_obj = {"activeSession": session_id}
         self.client.patch_request(
-            f"{self.url}/experiments/{experiment_id}", headers=headers, payload=update_obj
+            f"{self.url}/experiments/{experiment_id}",
+            headers=headers,
+            payload=update_obj,
         )
 
     def _delete_session(self, session_id: str):
         return self.client.delete_request(f"{self.url}/sessions/{session_id}")
+
+    def get_datasets_by_experiment(self, experiment_id: str):
+        headers = {"Content-type": "application/json"}
+        params = self.client.make_filter(where={"experimentId": experiment_id})
+        return self.client.get_request(f"{self.url}/datasets", params=params, headers=headers)
+
+    def get_dataset_by_experiment_and_number(self, experiment_id: str, number: int):
+        headers = {"Content-type": "application/json"}
+        params = self.client.make_filter(where={"experimentId": experiment_id, "number": number})
+        return self.client.get_request(f"{self.url}/datasets", params=params, headers=headers)
+
+    def add_dataset(self, data: dict):
+        headers = {"Content-type": "application/json"}
+        return self.client.post_request(f"{self.url}/datasets", payload=data, headers=headers)
+
+    def get_scan_by_scanID(self, scanID):
+        headers = {"Content-type": "application/json"}
+        params = self.client.make_filter(where={"scanId": scanID})
+        return self.client.get_request(f"{self.url}/scans", params=params, headers=headers)
+
+    def add_scan(self, data: dict):
+        headers = {"Content-type": "application/json"}
+        return self.client.post_request(f"{self.url}/scans", payload=data, headers=headers)
+
+    def patch_scan(self, scan_id: str, data: dict):
+        headers = {"Content-type": "application/json"}
+        return self.client.patch_request(
+            f"{self.url}/scans/{scan_id}",
+            headers=headers,
+            payload=data,
+        )
 
     def add_device(self, device_info: dict):
         headers = {"Content-type": "application/json"}

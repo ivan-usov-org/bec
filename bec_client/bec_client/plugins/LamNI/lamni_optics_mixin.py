@@ -24,13 +24,13 @@ class LamNIOpticsMixin:
         epics_put("XOMNYI-XEYE-ACQ:0", 2)
         # move rotation stage to zero to avoid problems with wires
         umv(dev.lsamrot, 0)
-        umv(dev.dttrz, 5830, dev.fttrz, 3338)
+        umv(dev.dttrz, 5854, dev.fttrz, 2395)
 
     def leye_in(self):
         bec.queue.next_dataset_number += 1
         # move rotation stage to zero to avoid problems with wires
         umv(dev.lsamrot, 0)
-        umv(dev.dttrz, 5830 + 600, dev.fttrz, 3338 + 600)
+        umv(dev.dttrz, 6419.677, dev.fttrz, 2959.979)
         while True:
             moved_out = (input("Did the flight tube move out? (Y/n)") or "y").lower()
             if moved_out == "y":

@@ -1,58 +1,3 @@
-ppth:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
-  description: phase plate angle
-  deviceClass: EpicsMotor
-  deviceConfig:
-    name: ppth
-    prefix: X12SA-ES2-ES23
-  deviceTags:
-    - cSAXS
-    - lamni
-    - phase plates
-  onFailure: buffer
-  status:
-    enabled: true
-    enabled_set: true  
-ppx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
-  description: phase plate
-  deviceClass: EpicsMotor
-  deviceConfig:
-    name: ppx
-    prefix: X12SA-ES2-ES01
-  deviceTags:
-    - cSAXS
-    - lamni
-    - phase plates
-  onFailure: buffer
-  status:
-    enabled: true
-    enabled_set: true  
-ppthenc:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
-  description: phase plate encoder
-  deviceClass: EpicsSignalRO
-  deviceConfig:
-    name: ppthenc
-    read_pv: X12SA-ES2-EC1.VAL
-  deviceTags:
-    - cSAXS
-    - lamni
-    - phase plates
-  onFailure: buffer
-  status:
-    enabled: true
-    enabled_set: false 
-
 FBPMDX:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -65,12 +10,12 @@ FBPMDX:
     name: FBPMDX
     read_pv: X12SA-ID-FBPMD:X
   deviceTags:
-    - cSAXS
-    - fofb
+  - cSAXS
+  - fofb
+  name: FBPMDX
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 FBPMDY:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -83,12 +28,12 @@ FBPMDY:
     name: FBPMDY
     read_pv: X12SA-ID-FBPMD:Y
   deviceTags:
-    - cSAXS
-    - fofb
+  - cSAXS
+  - fofb
+  name: FBPMDY
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 FBPMUX:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -101,12 +46,12 @@ FBPMUX:
     name: FBPMUX
     read_pv: X12SA-ID-FBPMU:X
   deviceTags:
-    - cSAXS
-    - fofb
+  - cSAXS
+  - fofb
+  name: FBPMUX
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 FBPMUY:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -119,12 +64,12 @@ FBPMUY:
     name: FBPMUY
     read_pv: X12SA-ID-FBPMU:Y
   deviceTags:
-    - cSAXS
-    - fofb
+  - cSAXS
+  - fofb
+  name: FBPMUY
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 XASYM:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -137,12 +82,12 @@ XASYM:
     name: XASYM
     read_pv: X12SA-LBB:X-ASYM
   deviceTags:
-    - cSAXS
-    - fofb
+  - cSAXS
+  - fofb
+  name: XASYM
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 XSYM:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -155,12 +100,12 @@ XSYM:
     name: XSYM
     read_pv: X12SA-LBB:X-SYM
   deviceTags:
-    - cSAXS
-    - fofb
+  - cSAXS
+  - fofb
+  name: XSYM
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 YASYM:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -173,12 +118,12 @@ YASYM:
     name: YASYM
     read_pv: X12SA-LBB:Y-ASYM
   deviceTags:
-    - cSAXS
-    - fofb
+  - cSAXS
+  - fofb
+  name: YASYM
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 YSYM:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -191,12 +136,12 @@ YSYM:
     name: YSYM
     read_pv: X12SA-LBB:Y-SYM
   deviceTags:
-    - cSAXS
-    - fofb
+  - cSAXS
+  - fofb
+  name: YSYM
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 aptrx:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -208,11 +153,11 @@ aptrx:
     name: aptrx
     prefix: X12SA-ES1-PIN1:TRX1
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: aptrx
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 aptry:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -224,11 +169,11 @@ aptry:
     name: aptry
     prefix: X12SA-ES1-PIN1:TRY1
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: aptry
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bm1trx:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -240,12 +185,12 @@ bm1trx:
     name: bm1trx
     prefix: X12SA-FE-BM1:TRH
   deviceTags:
-    - cSAXS
-    - bm1
+  - cSAXS
+  - bm1
+  name: bm1trx
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bm1try:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -257,12 +202,12 @@ bm1try:
     name: bm1try
     prefix: X12SA-FE-BM1:TRV
   deviceTags:
-    - cSAXS
-    - bm1
+  - cSAXS
+  - bm1
+  name: bm1try
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bm2trx:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -274,12 +219,12 @@ bm2trx:
     name: bm2trx
     prefix: X12SA-FE-BM2:TRH
   deviceTags:
-    - cSAXS
-    - bm2
+  - cSAXS
+  - bm2
+  name: bm2trx
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bm2try:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -291,12 +236,12 @@ bm2try:
     name: bm2try
     prefix: X12SA-FE-BM2:TRV
   deviceTags:
-    - cSAXS
-    - bm2
+  - cSAXS
+  - bm2
+  name: bm2try
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bm3trx:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -308,12 +253,12 @@ bm3trx:
     name: bm3trx
     prefix: X12SA-OP-BM1:TRX1
   deviceTags:
-    - cSAXS
-    - bm3
+  - cSAXS
+  - bm3
+  name: bm3trx
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bm3try:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -325,12 +270,12 @@ bm3try:
     name: bm3try
     prefix: X12SA-OP-BM1:TRY1
   deviceTags:
-    - cSAXS
-    - bm3
+  - cSAXS
+  - bm3
+  name: bm3try
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bm4trx:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -342,12 +287,12 @@ bm4trx:
     name: bm4trx
     prefix: X12SA-OP-BM2:TRX1
   deviceTags:
-    - cSAXS
-    - bm4
+  - cSAXS
+  - bm4
+  name: bm4trx
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bm4try:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -359,12 +304,12 @@ bm4try:
     name: bm4try
     prefix: X12SA-OP-BM2:TRY1
   deviceTags:
-    - cSAXS
-    - bm4
+  - cSAXS
+  - bm4
+  name: bm4try
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bm5trx:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -376,12 +321,12 @@ bm5trx:
     name: bm5trx
     prefix: X12SA-OP-BM3:TRX1
   deviceTags:
-    - cSAXS
-    - bm5
+  - cSAXS
+  - bm5
+  name: bm5trx
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bm5try:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -393,29 +338,29 @@ bm5try:
     name: bm5try
     prefix: X12SA-OP-BM3:TRY1
   deviceTags:
-    - cSAXS
-    - bm5
+  - cSAXS
+  - bm5
+  name: bm5try
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bpm1:
   acquisitionConfig:
     acquisitionGroup: monitor
     readoutPriority: baseline
     schedule: sync
-  description: "XBPM 1: Somewhere around mono (VME)"
+  description: 'XBPM 1: Somewhere around mono (VME)'
   deviceClass: XbpmCsaxsOp
   deviceConfig:
     name: bpm1
-    prefix: "X12SA-OP-BPM2:"
+    prefix: 'X12SA-OP-BPM2:'
   deviceTags:
-    - cSAXS
-    - bpm1
+  - cSAXS
+  - bpm1
+  name: bpm1
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bpm1i:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -428,29 +373,29 @@ bpm1i:
     name: bpm1i
     read_pv: X12SA-OP-BPM1:SUM
   deviceTags:
-    - cSAXS
-    - bpm1
+  - cSAXS
+  - bpm1
+  name: bpm1i
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bpm2:
   acquisitionConfig:
     acquisitionGroup: monitor
     readoutPriority: baseline
     schedule: sync
-  description: "XBPM 2: Somewhere around mono (VME)"
+  description: 'XBPM 2: Somewhere around mono (VME)'
   deviceClass: XbpmCsaxsOp
   deviceConfig:
     name: bpm2
-    prefix: "X12SA-OP-BPM2:"
+    prefix: 'X12SA-OP-BPM2:'
   deviceTags:
-    - cSAXS
-    - bpm2
+  - cSAXS
+  - bpm2
+  name: bpm2
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bpm2i:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -463,368 +408,317 @@ bpm2i:
     name: bpm2i
     read_pv: X12SA-OP-BPM2:SUM
   deviceTags:
-    - cSAXS
-    - bpm2
+  - cSAXS
+  - bpm2
+  name: bpm2i
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
-# bpm3:
-#   acquisitionConfig:
-#     acquisitionGroup: monitor
-#     readoutPriority: baseline
-#     schedule: sync
-#   description: "XBPM 3: White beam AH501 before mono"
-#   deviceClass: QuadEM
-#   deviceConfig:
-#     name: bpm3
-#     prefix: "X12SA-OP-BPM3:"
-#   deviceTags:
-#     - cSAXS
-#     - bpm3
-#   onFailure: buffer
-#   status:
-#     enabled: true
-#     enabled_set: false
 bpm3a:
   acquisitionConfig:
     acquisitionGroup: monitor
     readoutPriority: baseline
     schedule: sync
-  description: "XBPM 3: White beam AH501 before mono"
+  description: 'XBPM 3: White beam AH501 before mono'
   deviceClass: EpicsSignalRO
   deviceConfig:
     auto_monitor: true
     name: bpm3a
     read_pv: X12SA-OP-BPM3:Current1:MeanValue_RBV
   deviceTags:
-    - cSAXS
-    - bpm3
+  - cSAXS
+  - bpm3
+  name: bpm3a
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bpm3b:
   acquisitionConfig:
     acquisitionGroup: monitor
     readoutPriority: baseline
     schedule: sync
-  description: "XBPM 3: White beam AH501 before mono"
+  description: 'XBPM 3: White beam AH501 before mono'
   deviceClass: EpicsSignalRO
   deviceConfig:
     auto_monitor: true
     name: bpm3b
     read_pv: X12SA-OP-BPM3:Current2:MeanValue_RBV
   deviceTags:
-    - cSAXS
-    - bpm3
+  - cSAXS
+  - bpm3
+  name: bpm3b
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bpm3c:
   acquisitionConfig:
     acquisitionGroup: monitor
     readoutPriority: baseline
     schedule: sync
-  description: "XBPM 3: White beam AH501 before mono"
+  description: 'XBPM 3: White beam AH501 before mono'
   deviceClass: EpicsSignalRO
   deviceConfig:
     auto_monitor: true
     name: bpm3c
     read_pv: X12SA-OP-BPM3:Current3:MeanValue_RBV
   deviceTags:
-    - cSAXS
-    - bpm3
+  - cSAXS
+  - bpm3
+  name: bpm3c
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bpm3d:
   acquisitionConfig:
     acquisitionGroup: monitor
     readoutPriority: baseline
     schedule: sync
-  description: "XBPM 3: White beam AH501 before mono"
+  description: 'XBPM 3: White beam AH501 before mono'
   deviceClass: EpicsSignalRO
   deviceConfig:
     auto_monitor: true
     name: bpm3d
     read_pv: X12SA-OP-BPM3:Current4:MeanValue_RBV
   deviceTags:
-    - cSAXS
-    - bpm3
+  - cSAXS
+  - bpm3
+  name: bpm3d
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
-bpm4i:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
-  description: "XBPM 4: integrated counts"
-  deviceClass: Bpm4i
-  deviceConfig:
-    name: bpm4i
-    prefix: X12SA-OP1-SCALER.
-  deviceTags:
-    - cSAXS
-    - bpm4
-  onFailure: buffer
-  status:
-    enabled: true
-    enabled_set: false    
 bpm4a:
   acquisitionConfig:
     acquisitionGroup: monitor
     readoutPriority: baseline
     schedule: sync
-  description: "XBPM 4: VME between mono and mirror"
+  description: 'XBPM 4: VME between mono and mirror'
   deviceClass: EpicsSignalRO
   deviceConfig:
     auto_monitor: true
     name: bpm4a
     read_pv: X12SA-OP1-SCALER.S2
   deviceTags:
-    - cSAXS
-    - bpm4
+  - cSAXS
+  - bpm4
+  name: bpm4a
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bpm4b:
   acquisitionConfig:
     acquisitionGroup: monitor
     readoutPriority: baseline
     schedule: sync
-  description: "XBPM 4: VME between mono and mirror"
+  description: 'XBPM 4: VME between mono and mirror'
   deviceClass: EpicsSignalRO
   deviceConfig:
     auto_monitor: true
     name: bpm4b
     read_pv: X12SA-OP1-SCALER.S3
   deviceTags:
-    - cSAXS
-    - bpm4
+  - cSAXS
+  - bpm4
+  name: bpm4b
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bpm4c:
   acquisitionConfig:
     acquisitionGroup: monitor
     readoutPriority: baseline
     schedule: sync
-  description: "XBPM 4: VME between mono and mirror"
+  description: 'XBPM 4: VME between mono and mirror'
   deviceClass: EpicsSignalRO
   deviceConfig:
     auto_monitor: true
     name: bpm4c
     read_pv: X12SA-OP1-SCALER.S4
   deviceTags:
-    - cSAXS
-    - bpm4
+  - cSAXS
+  - bpm4
+  name: bpm4c
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bpm4d:
   acquisitionConfig:
     acquisitionGroup: monitor
     readoutPriority: baseline
     schedule: sync
-  description: "XBPM 4: VME between mono and mirror"
+  description: 'XBPM 4: VME between mono and mirror'
   deviceClass: EpicsSignalRO
   deviceConfig:
     auto_monitor: true
     name: bpm4d
     read_pv: X12SA-OP1-SCALER.S5
   deviceTags:
-    - cSAXS
-    - bpm4
+  - cSAXS
+  - bpm4
+  name: bpm4d
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
-# bpm5:
-#   acquisitionConfig:
-#     acquisitionGroup: monitor
-#     readoutPriority: baseline
-#     schedule: sync
-#   description: "XBPM 5: AH501 past the mirror"
-#   deviceClass: QuadEM
-#   deviceConfig:
-#     name: bpm5
-#     prefix: "X12SA-OP-BPM5:"
-#   deviceTags:
-#     - cSAXS
-#     - bpm5
-#   onFailure: buffer
-#   status:
-#     enabled: true
-#     enabled_set: false
+bpm4i:
+  acquisitionConfig:
+    acquisitionGroup: monitor
+    readoutPriority: baseline
+    schedule: sync
+  description: 'XBPM 4: integrated counts'
+  deviceClass: Bpm4i
+  deviceConfig:
+    name: bpm4i
+    prefix: X12SA-OP1-SCALER.
+  deviceTags:
+  - cSAXS
+  - bpm4
+  name: bpm4i
+  onFailure: buffer
+  status:
+    enabled: true
 bpm5a:
   acquisitionConfig:
     acquisitionGroup: monitor
     readoutPriority: baseline
     schedule: sync
-  description: "XBPM 5: AH501 past the mirror"
+  description: 'XBPM 5: AH501 past the mirror'
   deviceClass: EpicsSignalRO
   deviceConfig:
     auto_monitor: true
     name: bpm5a
     read_pv: X12SA-OP-BPM5:Current1:MeanValue_RBV
   deviceTags:
-    - cSAXS
-    - bpm5
+  - cSAXS
+  - bpm5
+  name: bpm5a
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bpm5b:
   acquisitionConfig:
     acquisitionGroup: monitor
     readoutPriority: baseline
     schedule: sync
-  description: "XBPM 5: AH501 past the mirror"
+  description: 'XBPM 5: AH501 past the mirror'
   deviceClass: EpicsSignalRO
   deviceConfig:
     auto_monitor: true
     name: bpm5b
     read_pv: X12SA-OP-BPM5:Current2:MeanValue_RBV
   deviceTags:
-    - cSAXS
-    - bpm5
+  - cSAXS
+  - bpm5
+  name: bpm5b
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bpm5c:
   acquisitionConfig:
     acquisitionGroup: monitor
     readoutPriority: baseline
     schedule: sync
-  description: "XBPM 5: AH501 past the mirror"
+  description: 'XBPM 5: AH501 past the mirror'
   deviceClass: EpicsSignalRO
   deviceConfig:
     auto_monitor: true
     name: bpm5c
     read_pv: X12SA-OP-BPM5:Current3:MeanValue_RBV
   deviceTags:
-    - cSAXS
-    - bpm5
+  - cSAXS
+  - bpm5
+  name: bpm5c
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bpm5d:
   acquisitionConfig:
     acquisitionGroup: monitor
     readoutPriority: baseline
     schedule: sync
-  description: "XBPM 5: AH501 past the mirror"
+  description: 'XBPM 5: AH501 past the mirror'
   deviceClass: EpicsSignalRO
   deviceConfig:
     auto_monitor: true
     name: bpm5d
     read_pv: X12SA-OP-BPM5:Current4:MeanValue_RBV
   deviceTags:
-    - cSAXS
-    - bpm5
+  - cSAXS
+  - bpm5
+  name: bpm5d
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
-# bpm6:
-#   acquisitionConfig:
-#     acquisitionGroup: monitor
-#     readoutPriority: baseline
-#     schedule: sync
-#   description: "XBPM 6: Xbox, not commissioned"
-#   deviceClass: QuadEM
-#   deviceConfig:
-#     name: bpm6
-#     prefix: "X12SA-OP-BPM6:"
-#   deviceTags:
-#     - cSAXS
-#     - bpm6
-#   onFailure: buffer
-#   status:
-#     enabled: true
-#     enabled_set: false
 bpm6a:
   acquisitionConfig:
     acquisitionGroup: monitor
     readoutPriority: baseline
     schedule: sync
-  description: "XBPM 6: Xbox, not commissioned"
+  description: 'XBPM 6: Xbox, not commissioned'
   deviceClass: EpicsSignalRO
   deviceConfig:
     auto_monitor: true
     name: bpm6a
     read_pv: X12SA-OP-BPM6:Current1:MeanValue_RBV
   deviceTags:
-    - cSAXS
-    - bpm6
+  - cSAXS
+  - bpm6
+  name: bpm6a
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bpm6b:
   acquisitionConfig:
     acquisitionGroup: monitor
     readoutPriority: baseline
     schedule: sync
-  description: "XBPM 6: Xbox, not commissioned"
+  description: 'XBPM 6: Xbox, not commissioned'
   deviceClass: EpicsSignalRO
   deviceConfig:
     auto_monitor: true
     name: bpm6b
     read_pv: X12SA-OP-BPM6:Current2:MeanValue_RBV
   deviceTags:
-    - cSAXS
-    - bpm6
+  - cSAXS
+  - bpm6
+  name: bpm6b
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bpm6c:
   acquisitionConfig:
     acquisitionGroup: monitor
     readoutPriority: baseline
     schedule: sync
-  description: "XBPM 6: Xbox, not commissioned"
+  description: 'XBPM 6: Xbox, not commissioned'
   deviceClass: EpicsSignalRO
   deviceConfig:
     auto_monitor: true
     name: bpm6c
     read_pv: X12SA-OP-BPM6:Current3:MeanValue_RBV
   deviceTags:
-    - cSAXS
-    - bpm6
+  - cSAXS
+  - bpm6
+  name: bpm6c
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bpm6d:
   acquisitionConfig:
     acquisitionGroup: monitor
     readoutPriority: baseline
     schedule: sync
-  description: "XBPM 6: Xbox, not commissioned"
+  description: 'XBPM 6: Xbox, not commissioned'
   deviceClass: EpicsSignalRO
   deviceConfig:
     auto_monitor: true
     name: bpm6d
     read_pv: X12SA-OP-BPM6:Current4:MeanValue_RBV
   deviceTags:
-    - cSAXS
-    - bpm6
+  - cSAXS
+  - bpm6
+  name: bpm6d
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bs1x:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -836,12 +730,12 @@ bs1x:
     name: bs1x
     prefix: X12SA-ES1-BS1:TRX1
   deviceTags:
-    - cSAXS
-    - beam stop
+  - cSAXS
+  - beam stop
+  name: bs1x
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bs1y:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -853,12 +747,12 @@ bs1y:
     name: bs1y
     prefix: X12SA-ES1-BS1:TRY1
   deviceTags:
-    - cSAXS
-    - beam stop
+  - cSAXS
+  - beam stop
+  name: bs1y
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bs2x:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -870,12 +764,12 @@ bs2x:
     name: bs2x
     prefix: X12SA-ES1-BS2:TRX1
   deviceTags:
-    - cSAXS
-    - beam stop
+  - cSAXS
+  - beam stop
+  name: bs2x
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 bs2y:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -887,12 +781,12 @@ bs2y:
     name: bs2y
     prefix: X12SA-ES1-BS2:TRY1
   deviceTags:
-    - cSAXS
-    - beam stop
+  - cSAXS
+  - beam stop
+  name: bs2y
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 curr:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -905,11 +799,11 @@ curr:
     name: curr
     read_pv: ARIDI-PCT:CURRENT
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: curr
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 cyb:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -922,11 +816,11 @@ cyb:
     name: cyb
     read_pv: X12SA-ES1-SCALER.S2
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: cyb
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 dettrx:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -938,12 +832,12 @@ dettrx:
     name: dettrx
     prefix: X12SA-ES1-DET1:TRX1
   deviceTags:
-    - cSAXS
-    - detector table
+  - cSAXS
+  - detector table
+  name: dettrx
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 di2trx:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -955,11 +849,11 @@ di2trx:
     name: di2trx
     prefix: X12SA-FE-DI2:TRX1
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: di2trx
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 di2try:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -971,11 +865,11 @@ di2try:
     name: di2try
     prefix: X12SA-FE-DI2:TRY1
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: di2try
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 diode:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -988,11 +882,11 @@ diode:
     name: diode
     read_pv: X12SA-ES1-SCALER.S3
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: diode
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 dtpush:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1004,12 +898,12 @@ dtpush:
     name: dtpush
     prefix: X12SA-ES1-DETT:ROX1
   deviceTags:
-    - cSAXS
-    - detector table
+  - cSAXS
+  - detector table
+  name: dtpush
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 dtth:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1021,12 +915,12 @@ dtth:
     name: dtth
     prefix: X12SA-ES1-DETT:ROX1
   deviceTags:
-    - cSAXS
-    - detector table
+  - cSAXS
+  - detector table
+  name: dtth
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 dttrx:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1038,12 +932,12 @@ dttrx:
     name: dttrx
     prefix: X12SA-ES1-DETT:TRX1
   deviceTags:
-    - cSAXS
-    - detector table
+  - cSAXS
+  - detector table
+  name: dttrx
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 dttry:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1055,12 +949,12 @@ dttry:
     name: dttry
     prefix: X12SA-ES1-DETT:TRY1
   deviceTags:
-    - cSAXS
-    - detector table
+  - cSAXS
+  - detector table
+  name: dttry
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 dttrz:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1072,12 +966,12 @@ dttrz:
     name: dttrz
     prefix: X12SA-ES1-DETT:TRZ1
   deviceTags:
-    - cSAXS
-    - detector table
+  - cSAXS
+  - detector table
+  name: dttrz
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 ebtrx:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1089,12 +983,12 @@ ebtrx:
     name: ebtrx
     prefix: X12SA-ES1-EB:TRX1
   deviceTags:
-    - cSAXS
-    - xbox
+  - cSAXS
+  - xbox
+  name: ebtrx
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 ebtry:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1106,12 +1000,12 @@ ebtry:
     name: ebtry
     prefix: X12SA-ES1-EB:TRY1
   deviceTags:
-    - cSAXS
-    - xbox
+  - cSAXS
+  - xbox
+  name: ebtry
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 ebtrz:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1123,12 +1017,29 @@ ebtrz:
     name: ebtrz
     prefix: X12SA-ES1-EB:TRZ1
   deviceTags:
-    - cSAXS
-    - xbox
+  - cSAXS
+  - xbox
+  name: ebtrz
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
+eiger1p5m:
+  acquisitionConfig:
+    acquisitionGroup: detector
+    readoutPriority: monitored
+    schedule: sync
+  description: Eiger 1.5M in vacuum detector, in-house developed, PSI
+  deviceClass: Eiger1p5MDetector
+  deviceConfig:
+    device_access: true
+    name: eiger1p5m
+  deviceTags:
+  - detector
+  name: eiger1p5m
+  onFailure: retry
+  status:
+    enabled: true
+    enabled_set: true
 eyecenx:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -1141,12 +1052,12 @@ eyecenx:
     name: eyecenx
     read_pv: XOMNYI-XEYE-XCEN:0
   deviceTags:
-    - cSAXS
-    - xeye
+  - cSAXS
+  - xeye
+  name: eyecenx
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 eyeceny:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -1159,12 +1070,12 @@ eyeceny:
     name: eyeceny
     read_pv: XOMNYI-XEYE-YCEN:0
   deviceTags:
-    - cSAXS
-    - xeye
+  - cSAXS
+  - xeye
+  name: eyeceny
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 eyefoc:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1176,12 +1087,12 @@ eyefoc:
     name: eyefoc
     prefix: X12SA-ES2-ES25
   deviceTags:
-    - cSAXS
-    - xeye
+  - cSAXS
+  - xeye
+  name: eyefoc
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 eyeint:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -1194,12 +1105,12 @@ eyeint:
     name: eyeint
     read_pv: XOMNYI-XEYE-INT_MEAN:0
   deviceTags:
-    - cSAXS
-    - xeye
+  - cSAXS
+  - xeye
+  name: eyeint
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 eyex:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1211,12 +1122,12 @@ eyex:
     name: eyex
     prefix: X12SA-ES2-ES01
   deviceTags:
-    - cSAXS
-    - xeye
+  - cSAXS
+  - xeye
+  name: eyex
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 eyey:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1228,12 +1139,12 @@ eyey:
     name: eyey
     prefix: X12SA-ES2-ES02
   deviceTags:
-    - cSAXS
-    - xeye
+  - cSAXS
+  - xeye
+  name: eyey
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 fal0:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -1246,11 +1157,11 @@ fal0:
     name: fal0
     read_pv: X12SA-ES1-SCALER.S4
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: fal0
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 fal1:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -1263,11 +1174,11 @@ fal1:
     name: fal1
     read_pv: X12SA-ES1-SCALER.S5
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: fal1
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 fal2:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -1280,11 +1191,11 @@ fal2:
     name: fal2
     read_pv: X12SA-ES1-SCALER.S6
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: fal2
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 fi1try:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1296,12 +1207,12 @@ fi1try:
     name: fi1try
     prefix: X12SA-OP-FI1:TRY1
   deviceTags:
-    - cSAXS
-    - filter
+  - cSAXS
+  - filter
+  name: fi1try
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 fi2try:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1313,12 +1224,12 @@ fi2try:
     name: fi2try
     prefix: X12SA-OP-FI2:TRY1
   deviceTags:
-    - cSAXS
-    - filter
+  - cSAXS
+  - filter
+  name: fi2try
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 fi3try:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1330,12 +1241,12 @@ fi3try:
     name: fi3try
     prefix: X12SA-OP-FI3:TRY1
   deviceTags:
-    - cSAXS
-    - filter
+  - cSAXS
+  - filter
+  name: fi3try
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 ftp:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -1348,12 +1259,12 @@ ftp:
     name: ftp
     read_pv: X12SA-ES1-FT1MT1:PRESSURE
   deviceTags:
-    - cSAXS
-    - flight tube
+  - cSAXS
+  - flight tube
+  name: ftp
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 fttrx1:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1365,12 +1276,12 @@ fttrx1:
     name: fttrx1
     prefix: X12SA-ES1-FTS1:TRX1
   deviceTags:
-    - cSAXS
-    - flight tube
+  - cSAXS
+  - flight tube
+  name: fttrx1
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 fttrx2:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1382,12 +1293,12 @@ fttrx2:
     name: fttrx2
     prefix: X12SA-ES1-FTS2:TRX1
   deviceTags:
-    - cSAXS
-    - flight tube
+  - cSAXS
+  - flight tube
+  name: fttrx2
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 fttry1:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1399,12 +1310,12 @@ fttry1:
     name: fttry1
     prefix: X12SA-ES1-FTS1:TRY1
   deviceTags:
-    - cSAXS
-    - flight tube
+  - cSAXS
+  - flight tube
+  name: fttry1
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 fttry2:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1416,12 +1327,12 @@ fttry2:
     name: fttry2
     prefix: X12SA-ES1-FTS2:TRY1
   deviceTags:
-    - cSAXS
-    - flight tube
+  - cSAXS
+  - flight tube
+  name: fttry2
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 fttrz:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1433,12 +1344,12 @@ fttrz:
     name: fttrz
     prefix: X12SA-ES1-FTS1:TRZ1
   deviceTags:
-    - cSAXS
-    - flight tube
+  - cSAXS
+  - flight tube
+  name: fttrz
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 idgap:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -1450,11 +1361,11 @@ idgap:
     name: idgap
     prefix: X12SA-ID
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: idgap
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 led:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -1467,11 +1378,346 @@ led:
     name: led
     read_pv: X12SA-ES1-SCALER.S4
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: led
   onFailure: buffer
   status:
     enabled: true
+leyex:
+  acquisitionConfig:
+    acquisitionGroup: motor
+    readoutPriority: baseline
+    schedule: sync
+  deviceClass: GalilMotor
+  deviceConfig:
+    axis_Id: G
+    device_access: true
+    device_mapping:
+      rt: rtx
+    host: mpc2680.psi.ch
+    labels: leyex
+    limits:
+    - 0
+    - 0
+    name: leyex
+    port: 8081
+    sign: -1
+    tolerance: 0.001
+  deviceTags:
+  - lamni
+  name: leyex
+  onFailure: retry
+  status:
+    enabled: true
+    enabled_set: true
+  userParameter:
+    in: 14.117
+leyey:
+  acquisitionConfig:
+    acquisitionGroup: motor
+    readoutPriority: baseline
+    schedule: sync
+  deviceClass: GalilMotor
+  deviceConfig:
+    axis_Id: H
+    device_access: true
+    device_mapping:
+      rt: rtx
+    host: mpc2680.psi.ch
+    labels: leyey
+    limits:
+    - 0
+    - 0
+    name: leyey
+    port: 8081
+    sign: -1
+    tolerance: 0.001
+  deviceTags:
+  - lamni
+  name: leyey
+  onFailure: retry
+  status:
+    enabled: true
+    enabled_set: true
+  userParameter:
+    in: 48.069
+    out: 0.5
+lmagnet:
+  acquisitionConfig:
+    acquisitionGroup: motor
+    readoutPriority: baseline
+    schedule: sync
+  deviceClass: SmaractMotor
+  deviceConfig:
+    axis_Id: F
+    host: mpc2680.psi.ch
+    labels: lmagnet
+    limits:
+    - 0
+    - 0
+    name: lmagnet
+    port: 8085
+    sign: -1
+    tolerance: 0.05
+  deviceTags:
+  - lamni
+  name: lmagnet
+  onFailure: retry
+  status:
+    enabled: true
+    enabled_set: true
+loptx:
+  acquisitionConfig:
+    acquisitionGroup: motor
+    readoutPriority: baseline
+    schedule: sync
+  deviceClass: GalilMotor
+  deviceConfig:
+    axis_Id: E
+    device_access: true
+    device_mapping:
+      rt: rtx
+    host: mpc2680.psi.ch
+    labels: loptx
+    limits:
+    - 0
+    - 0
+    name: loptx
+    port: 8081
+    sign: 1
+    tolerance: 0.5
+  deviceTags:
+  - lamni
+  name: loptx
+  onFailure: retry
+  status:
+    enabled: true
     enabled_set: false
+  userParameter:
+    in: -0.244
+    out: -0.394
+lopty:
+  acquisitionConfig:
+    acquisitionGroup: motor
+    readoutPriority: baseline
+    schedule: sync
+  deviceClass: GalilMotor
+  deviceConfig:
+    axis_Id: F
+    device_access: true
+    device_mapping:
+      rt: rtx
+    host: mpc2680.psi.ch
+    labels: lopty
+    limits:
+    - 0
+    - 0
+    name: lopty
+    port: 8081
+    sign: 1
+    tolerance: 0.5
+  deviceTags:
+  - lamni
+  name: lopty
+  onFailure: retry
+  status:
+    enabled: true
+    enabled_set: false
+  userParameter:
+    in: 3.724
+    out: 3.5300000000000002
+loptz:
+  acquisitionConfig:
+    acquisitionGroup: motor
+    readoutPriority: baseline
+    schedule: sync
+  deviceClass: GalilMotor
+  deviceConfig:
+    axis_Id: D
+    device_access: true
+    device_mapping:
+      rt: rtx
+    host: mpc2680.psi.ch
+    labels: loptz
+    limits:
+    - 0
+    - 0
+    name: loptz
+    port: 8081
+    sign: -1
+    tolerance: 0.5
+  deviceTags:
+  - lamni
+  name: loptz
+  onFailure: retry
+  status:
+    enabled: true
+    enabled_set: false
+losax:
+  acquisitionConfig:
+    acquisitionGroup: motor
+    readoutPriority: baseline
+    schedule: sync
+  deviceClass: SmaractMotor
+  deviceConfig:
+    axis_Id: A
+    host: mpc2680.psi.ch
+    labels: losax
+    limits:
+    - 0
+    - 0
+    name: losax
+    port: 8085
+    sign: -1
+    tolerance: 0.05
+  deviceTags:
+  - lamni
+  name: losax
+  onFailure: retry
+  status:
+    enabled: true
+    enabled_set: true
+  userParameter:
+    in: -1.442
+losay:
+  acquisitionConfig:
+    acquisitionGroup: motor
+    readoutPriority: baseline
+    schedule: sync
+  deviceClass: SmaractMotor
+  deviceConfig:
+    axis_Id: B
+    host: mpc2680.psi.ch
+    labels: losay
+    limits:
+    - 0
+    - 0
+    name: losay
+    port: 8085
+    sign: -1
+    tolerance: 0.05
+  deviceTags:
+  - lamni
+  name: losay
+  onFailure: retry
+  status:
+    enabled: true
+    enabled_set: true
+  userParameter:
+    in: -0.171
+    out: 3.8
+losaz:
+  acquisitionConfig:
+    acquisitionGroup: motor
+    readoutPriority: baseline
+    schedule: sync
+  deviceClass: SmaractMotor
+  deviceConfig:
+    axis_Id: C
+    host: mpc2680.psi.ch
+    labels: losaz
+    limits:
+    - 0
+    - 0
+    name: losaz
+    port: 8085
+    sign: 1
+    tolerance: 0.05
+  deviceTags:
+  - lamni
+  name: losaz
+  onFailure: retry
+  status:
+    enabled: true
+    enabled_set: true
+  userParameter:
+    in: -1
+    out: -3
+lsamrot:
+  acquisitionConfig:
+    acquisitionGroup: motor
+    readoutPriority: baseline
+    schedule: sync
+  deviceClass: GalilMotor
+  deviceConfig:
+    axis_Id: C
+    device_access: true
+    device_mapping:
+      rt: rtx
+    host: mpc2680.psi.ch
+    labels: lsamrot
+    limits:
+    - 0
+    - 0
+    name: lsamrot
+    port: 8081
+    sign: 1
+    tolerance: 0.5
+  deviceTags:
+  - lamni
+  name: lsamrot
+  onFailure: retry
+  status:
+    enabled: true
+    enabled_set: true
+lsamx:
+  acquisitionConfig:
+    acquisitionGroup: motor
+    readoutPriority: baseline
+    schedule: sync
+  deviceClass: GalilMotor
+  deviceConfig:
+    axis_Id: A
+    device_access: true
+    device_mapping:
+      rt: rtx
+    host: mpc2680.psi.ch
+    labels: lsamx
+    limits:
+    - 0
+    - 0
+    name: lsamx
+    port: 8081
+    sign: -1
+    tolerance: 0.5
+  deviceTags:
+  - lamni
+  name: lsamx
+  onFailure: retry
+  status:
+    enabled: true
+    enabled_set: false
+  userParameter:
+    center: 8.53
+lsamy:
+  acquisitionConfig:
+    acquisitionGroup: motor
+    readoutPriority: baseline
+    schedule: sync
+  deviceClass: GalilMotor
+  deviceConfig:
+    axis_Id: B
+    device_access: true
+    device_mapping:
+      rt: rtx
+    host: mpc2680.psi.ch
+    labels: lsamy
+    limits:
+    - 0
+    - 0
+    name: lsamy
+    port: 8081
+    sign: 1
+    tolerance: 0.5
+  deviceTags:
+  - lamni
+  name: lsamy
+  onFailure: retry
+  status:
+    enabled: true
+    enabled_set: false
+  userParameter:
+    center: 10.029
 mibd1:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1483,12 +1729,12 @@ mibd1:
     name: mibd1
     prefix: X12SA-OP-MI:TRZ1
   deviceTags:
-    - cSAXS
-    - mirror
+  - cSAXS
+  - mirror
+  name: mibd1
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 mibd2:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1500,12 +1746,12 @@ mibd2:
     name: mibd2
     prefix: X12SA-OP-MI:TRZ2
   deviceTags:
-    - cSAXS
-    - mirror
+  - cSAXS
+  - mirror
+  name: mibd2
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 micfoc:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1517,11 +1763,11 @@ micfoc:
     name: micfoc
     prefix: X12SA-ES2-ES03
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: micfoc
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 mitrx:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1533,12 +1779,12 @@ mitrx:
     name: mitrx
     prefix: X12SA-OP-MI:TRX1
   deviceTags:
-    - cSAXS
-    - mirror
+  - cSAXS
+  - mirror
+  name: mitrx
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 mitry1:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1550,12 +1796,12 @@ mitry1:
     name: mitry1
     prefix: X12SA-OP-MI:TRY1
   deviceTags:
-    - cSAXS
-    - mirror
+  - cSAXS
+  - mirror
+  name: mitry1
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 mitry2:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1567,12 +1813,12 @@ mitry2:
     name: mitry2
     prefix: X12SA-OP-MI:TRY2
   deviceTags:
-    - cSAXS
-    - mirror
+  - cSAXS
+  - mirror
+  name: mitry2
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 mitry3:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1584,12 +1830,12 @@ mitry3:
     name: mitry3
     prefix: X12SA-OP-MI:TRY3
   deviceTags:
-    - cSAXS
-    - mirror
+  - cSAXS
+  - mirror
+  name: mitry3
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 mobd:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1599,14 +1845,14 @@ mobd:
   deviceClass: PmMonoBender
   deviceConfig:
     name: mobd
-    prefix: "X12SA-OP-MO:"
+    prefix: 'X12SA-OP-MO:'
   deviceTags:
-    - cSAXS
-    - mono
+  - cSAXS
+  - mono
+  name: mobd
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 mobdai:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1618,12 +1864,12 @@ mobdai:
     name: mobdai
     prefix: X12SA-OP-MO:TRYA
   deviceTags:
-    - cSAXS
-    - mono
+  - cSAXS
+  - mono
+  name: mobdai
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 mobdbo:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1635,12 +1881,12 @@ mobdbo:
     name: mobdbo
     prefix: X12SA-OP-MO:TRYB
   deviceTags:
-    - cSAXS
-    - mono
+  - cSAXS
+  - mono
+  name: mobdbo
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 mobdco:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1652,12 +1898,12 @@ mobdco:
     name: mobdco
     prefix: X12SA-OP-MO:TRYC
   deviceTags:
-    - cSAXS
-    - mono
+  - cSAXS
+  - mono
+  name: mobdco
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 mobddi:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1669,12 +1915,12 @@ mobddi:
     name: mobddi
     prefix: X12SA-OP-MO:TRYD
   deviceTags:
-    - cSAXS
-    - mono
+  - cSAXS
+  - mono
+  name: mobddi
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 mokev:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -1687,12 +1933,12 @@ mokev:
     name: mokev
     read_pv: X12SA-OP-MO:ROX2
   deviceTags:
-    - cSAXS
-    - mono
+  - cSAXS
+  - mono
+  name: mokev
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 mopush1:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -1705,12 +1951,12 @@ mopush1:
     name: mopush1
     read_pv: X12SA-OP-MO:ROX1
   deviceTags:
-    - cSAXS
-    - mono
+  - cSAXS
+  - mono
+  name: mopush1
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 mopush2:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -1723,12 +1969,12 @@ mopush2:
     name: mopush2
     read_pv: X12SA-OP-MO:ROX2
   deviceTags:
-    - cSAXS
-    - mono
+  - cSAXS
+  - mono
+  name: mopush2
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 moroll1:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1740,12 +1986,12 @@ moroll1:
     name: moroll1
     prefix: X12SA-OP-MO:ROZ1
   deviceTags:
-    - cSAXS
-    - mono
+  - cSAXS
+  - mono
+  name: moroll1
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 moroll2:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1757,12 +2003,12 @@ moroll2:
     name: moroll2
     prefix: X12SA-OP-MO:ROZ2
   deviceTags:
-    - cSAXS
-    - mono
+  - cSAXS
+  - mono
+  name: moroll2
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 moth1:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -1775,12 +2021,12 @@ moth1:
     name: moth1
     read_pv: X12SA-OP-MO:ROX1
   deviceTags:
-    - cSAXS
-    - mono
+  - cSAXS
+  - mono
+  name: moth1
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 moth1e:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -1793,12 +2039,12 @@ moth1e:
     name: moth1e
     read_pv: X12SA-OP-MO:ECX1
   deviceTags:
-    - cSAXS
-    - mono
+  - cSAXS
+  - mono
+  name: moth1e
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 moth2:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -1811,12 +2057,12 @@ moth2:
     name: moth2
     read_pv: X12SA-OP-MO:ROX2
   deviceTags:
-    - cSAXS
-    - mono
+  - cSAXS
+  - mono
+  name: moth2
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 moth2e:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -1829,12 +2075,12 @@ moth2e:
     name: moth2e
     read_pv: X12SA-OP-MO:ECX2
   deviceTags:
-    - cSAXS
-    - mono
+  - cSAXS
+  - mono
+  name: moth2e
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 motrx2:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1846,12 +2092,12 @@ motrx2:
     name: motrx2
     prefix: X12SA-OP-MO:TRX2
   deviceTags:
-    - cSAXS
-    - mono
+  - cSAXS
+  - mono
+  name: motrx2
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 motry:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1863,12 +2109,12 @@ motry:
     name: motry
     prefix: X12SA-OP-OT:TRY
   deviceTags:
-    - cSAXS
-    - mono
+  - cSAXS
+  - mono
+  name: motry
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 motry2:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1880,12 +2126,12 @@ motry2:
     name: motry2
     prefix: X12SA-OP-MO:TRY2
   deviceTags:
-    - cSAXS
-    - mono
+  - cSAXS
+  - mono
+  name: motry2
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 motrz1:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1897,12 +2143,12 @@ motrz1:
     name: motrz1
     prefix: X12SA-OP-MO:TRZ1
   deviceTags:
-    - cSAXS
-    - mono
+  - cSAXS
+  - mono
+  name: motrz1
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 motrz1e:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -1915,12 +2161,12 @@ motrz1e:
     name: motrz1e
     read_pv: X12SA-OP-MO:ECZ1
   deviceTags:
-    - cSAXS
-    - mono
+  - cSAXS
+  - mono
+  name: motrz1e
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 moyaw2:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1932,12 +2178,116 @@ moyaw2:
     name: moyaw2
     prefix: X12SA-OP-MO:ROY2
   deviceTags:
-    - cSAXS
-    - mono
+  - cSAXS
+  - mono
+  name: moyaw2
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
+ppth:
+  acquisitionConfig:
+    acquisitionGroup: motor
+    readoutPriority: baseline
+    schedule: sync
+  description: phase plate angle
+  deviceClass: EpicsMotor
+  deviceConfig:
+    name: ppth
+    prefix: X12SA-ES2-ES23
+  deviceTags:
+  - cSAXS
+  - lamni
+  - phase plates
+  name: ppth
+  onFailure: buffer
+  status:
+    enabled: true
+    enabled_set: true
+ppthenc:
+  acquisitionConfig:
+    acquisitionGroup: monitor
+    readoutPriority: baseline
+    schedule: sync
+  description: phase plate encoder
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    name: ppthenc
+    read_pv: X12SA-ES2-EC1.VAL
+  deviceTags:
+  - cSAXS
+  - lamni
+  - phase plates
+  name: ppthenc
+  onFailure: buffer
+  status:
+    enabled: true
+ppx:
+  acquisitionConfig:
+    acquisitionGroup: motor
+    readoutPriority: baseline
+    schedule: sync
+  description: phase plate
+  deviceClass: EpicsMotor
+  deviceConfig:
+    name: ppx
+    prefix: X12SA-ES2-ES01
+  deviceTags:
+  - cSAXS
+  - lamni
+  - phase plates
+  name: ppx
+  onFailure: buffer
+  status:
+    enabled: true
+    enabled_set: true
+rtx:
+  acquisitionConfig:
+    acquisitionGroup: motor
+    readoutPriority: baseline
+    schedule: sync
+  deviceClass: RtLamniMotor
+  deviceConfig:
+    axis_Id: A
+    device_access: true
+    host: mpc2680.psi.ch
+    labels: rtx
+    limits:
+    - 0
+    - 0
+    name: rtx
+    port: 3333
+    sign: 1
+  deviceTags:
+  - lamni
+  name: rtx
+  onFailure: retry
+  status:
+    enabled: true
+    enabled_set: true
+rty:
+  acquisitionConfig:
+    acquisitionGroup: motor
+    readoutPriority: baseline
+    schedule: sync
+  deviceClass: RtLamniMotor
+  deviceConfig:
+    axis_Id: B
+    device_access: true
+    host: mpc2680.psi.ch
+    labels: rty
+    limits:
+    - 0
+    - 0
+    name: rty
+    port: 3333
+    sign: 1
+  deviceTags:
+  - lamni
+  name: rty
+  onFailure: retry
+  status:
+    enabled: true
+    enabled_set: true
 samx:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1949,11 +2299,11 @@ samx:
     name: samx
     prefix: X12SA-ES2-ES04
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: samx
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 samy:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1965,11 +2315,11 @@ samy:
     name: samy
     prefix: X12SA-ES2-ES05
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: samy
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 sec:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -1982,11 +2332,11 @@ sec:
     name: sec
     read_pv: X12SA-ES1-SCALER.S1
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: sec
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 sl0h:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -1996,13 +2346,13 @@ sl0h:
   deviceClass: SlitH
   deviceConfig:
     name: sl0h
-    prefix: "X12SA-FE-SH1:"
+    prefix: 'X12SA-FE-SH1:'
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: sl0h
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 sl0trxi:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -2014,11 +2364,11 @@ sl0trxi:
     name: sl0trxi
     prefix: X12SA-FE-SH1:TRX1
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: sl0trxi
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 sl0trxo:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -2030,11 +2380,11 @@ sl0trxo:
     name: sl0trxo
     prefix: X12SA-FE-SH1:TRX2
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: sl0trxo
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 sl1h:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -2044,13 +2394,13 @@ sl1h:
   deviceClass: SlitH
   deviceConfig:
     name: sl1h
-    prefix: "X12SA-OP-SH1:"
+    prefix: 'X12SA-OP-SH1:'
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: sl1h
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 sl1trxi:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -2062,11 +2412,11 @@ sl1trxi:
     name: sl1trxi
     prefix: X12SA-OP-SH1:TRX2
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: sl1trxi
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 sl1trxo:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -2078,11 +2428,11 @@ sl1trxo:
     name: sl1trxo
     prefix: X12SA-OP-SH1:TRX1
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: sl1trxo
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 sl1tryb:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -2094,11 +2444,11 @@ sl1tryb:
     name: sl1tryb
     prefix: X12SA-OP-SV1:TRY2
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: sl1tryb
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 sl1tryt:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -2110,11 +2460,11 @@ sl1tryt:
     name: sl1tryt
     prefix: X12SA-OP-SV1:TRY1
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: sl1tryt
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 sl1v:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -2124,13 +2474,13 @@ sl1v:
   deviceClass: SlitV
   deviceConfig:
     name: sl1v
-    prefix: "X12SA-OP-SV1:"
+    prefix: 'X12SA-OP-SV1:'
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: sl1v
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 sl2h:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -2140,13 +2490,13 @@ sl2h:
   deviceClass: SlitH
   deviceConfig:
     name: sl2h
-    prefix: "X12SA-OP-SH2:"
+    prefix: 'X12SA-OP-SH2:'
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: sl2h
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 sl2trxi:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -2158,11 +2508,11 @@ sl2trxi:
     name: sl2trxi
     prefix: X12SA-OP-SH2:TRX2
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: sl2trxi
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 sl2trxo:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -2174,11 +2524,11 @@ sl2trxo:
     name: sl2trxo
     prefix: X12SA-OP-SH2:TRX1
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: sl2trxo
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 sl2tryb:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -2190,11 +2540,11 @@ sl2tryb:
     name: sl2tryb
     prefix: X12SA-OP-SV2:TRY2
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: sl2tryb
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 sl2tryt:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -2206,11 +2556,11 @@ sl2tryt:
     name: sl2tryt
     prefix: X12SA-OP-SV2:TRY1
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: sl2tryt
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 sl2v:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -2220,13 +2570,211 @@ sl2v:
   deviceClass: SlitV
   deviceConfig:
     name: sl2v
-    prefix: "X12SA-OP-SV2:"
+    prefix: 'X12SA-OP-SV2:'
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: sl2v
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
+sls_crane_usage:
+  acquisitionConfig:
+    acquisitionGroup: monitor
+    readoutPriority: baseline
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: sls_crane_usage
+    read_pv: IBWKR-0101-QH10003:D01_H_D-WA
+    string: true
+  deviceTags:
+  - SLS status
+  name: sls_crane_usage
+  onFailure: buffer
+  status:
+    enabled: true
+sls_current_deadband:
+  acquisitionConfig:
+    acquisitionGroup: monitor
+    readoutPriority: baseline
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: sls_current_deadband
+    read_pv: ALIRF-GUN:CUR-DBAND
+    string: false
+  deviceTags:
+  - SLS status
+  name: sls_current_deadband
+  onFailure: buffer
+  status:
+    enabled: true
+sls_current_threshold:
+  acquisitionConfig:
+    acquisitionGroup: monitor
+    readoutPriority: baseline
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: sls_current_threshold
+    read_pv: ALIRF-GUN:CUR-LOWLIM
+    string: false
+  deviceTags:
+  - SLS status
+  name: sls_current_threshold
+  onFailure: buffer
+  status:
+    enabled: true
+sls_fast_orbit_feedback:
+  acquisitionConfig:
+    acquisitionGroup: monitor
+    readoutPriority: baseline
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: sls_fast_orbit_feedback
+    read_pv: ARIDI-BPM:FOFBSTATUS-G
+    string: true
+  deviceTags:
+  - SLS status
+  name: sls_fast_orbit_feedback
+  onFailure: buffer
+  status:
+    enabled: true
+sls_filling_life_time:
+  acquisitionConfig:
+    acquisitionGroup: monitor
+    readoutPriority: baseline
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: sls_filling_life_time
+    read_pv: ARIDI-PCT:TAU-HOUR
+    string: false
+  deviceTags:
+  - SLS status
+  name: sls_filling_life_time
+  onFailure: buffer
+  status:
+    enabled: true
+sls_filling_pattern:
+  acquisitionConfig:
+    acquisitionGroup: monitor
+    readoutPriority: baseline
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: sls_filling_pattern
+    read_pv: ACORF-FILL:PAT-SELECT
+    string: true
+  deviceTags:
+  - SLS status
+  name: sls_filling_pattern
+  onFailure: buffer
+  status:
+    enabled: true
+sls_info:
+  acquisitionConfig:
+    acquisitionGroup: status
+    readoutPriority: ignored
+    schedule: sync
+  deviceClass: SLSInfo
+  deviceConfig:
+    name: sls_info
+  deviceTags:
+  - SLS status
+  name: sls_info
+  onFailure: buffer
+  status:
+    enabled: true
+sls_injection_mode:
+  acquisitionConfig:
+    acquisitionGroup: monitor
+    readoutPriority: baseline
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: sls_injection_mode
+    read_pv: ALIRF-GUN:INJ-MODE
+    string: true
+  deviceTags:
+  - SLS status
+  name: sls_injection_mode
+  onFailure: buffer
+  status:
+    enabled: true
+sls_machine_status:
+  acquisitionConfig:
+    acquisitionGroup: monitor
+    readoutPriority: baseline
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: sls_machine_status
+    read_pv: ACOAU-ACCU:OP-MODE
+    string: true
+  deviceTags:
+  - SLS status
+  name: sls_machine_status
+  onFailure: buffer
+  status:
+    enabled: true
+sls_operator:
+  acquisitionConfig:
+    acquisitionGroup: status
+    readoutPriority: ignored
+    schedule: sync
+  deviceClass: SLSOperatorMessages
+  deviceConfig:
+    name: sls_operator
+  deviceTags:
+  - SLS status
+  name: sls_operator
+  onFailure: buffer
+  status:
+    enabled: true
+sls_orbit_feedback_mode:
+  acquisitionConfig:
+    acquisitionGroup: monitor
+    readoutPriority: baseline
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: sls_orbit_feedback_mode
+    read_pv: ARIDI-BPM:OFB-MODE
+    string: true
+  deviceTags:
+  - SLS status
+  name: sls_orbit_feedback_mode
+  onFailure: buffer
+  status:
+    enabled: true
+sls_ring_current:
+  acquisitionConfig:
+    acquisitionGroup: monitor
+    readoutPriority: monitored
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: sls_ring_current
+    read_pv: ARIDI-PCT:CURRENT
+    string: false
+  deviceTags:
+  - SLS status
+  name: sls_ring_current
+  onFailure: buffer
+  status:
+    enabled: true
 strox:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -2238,11 +2786,11 @@ strox:
     name: strox
     prefix: X12SA-HG
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: strox
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 stroy:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -2254,11 +2802,11 @@ stroy:
     name: stroy
     prefix: X12SA-HG
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: stroy
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 stroz:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -2270,11 +2818,11 @@ stroz:
     name: stroz
     prefix: X12SA-HG
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: stroz
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 sttrx:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -2286,11 +2834,11 @@ sttrx:
     name: sttrx
     prefix: X12SA-HG
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: sttrx
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 sttry:
   acquisitionConfig:
     acquisitionGroup: motor
@@ -2302,11 +2850,11 @@ sttry:
     name: sttry
     prefix: X12SA-HG
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: sttry
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
 transd:
   acquisitionConfig:
     acquisitionGroup: monitor
@@ -2319,8 +2867,161 @@ transd:
     name: transd
     read_pv: X12SA-OP-BPM1:Current1:MeanValue_RBV
   deviceTags:
-    - cSAXS
+  - cSAXS
+  name: transd
   onFailure: buffer
   status:
     enabled: true
-    enabled_set: false
+x12sa_es1_shutter_status:
+  acquisitionConfig:
+    acquisitionGroup: status
+    readoutPriority: ignored
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: x12sa_es1_shutter_status
+    read_pv: X12SA-OP-ST1:OPEN_EPS
+    string: true
+  deviceTags:
+  - X12SA status
+  name: x12sa_es1_shutter_status
+  onFailure: retry
+  status:
+    enabled: true
+x12sa_es1_valve:
+  acquisitionConfig:
+    acquisitionGroup: status
+    readoutPriority: ignored
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: x12sa_es1_valve
+    read_pv: X12SA-ES-VW1:OPEN
+    string: true
+  deviceTags:
+  - X12SA status
+  name: x12sa_es1_valve
+  onFailure: retry
+  status:
+    enabled: true
+x12sa_exposure_box1_pressure:
+  acquisitionConfig:
+    acquisitionGroup: status
+    readoutPriority: ignored
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: x12sa_exposure_box1_pressure
+    read_pv: X12SA-ES-CH1MF1:PRESSURE
+    string: false
+  deviceTags:
+  - X12SA status
+  name: x12sa_exposure_box1_pressure
+  onFailure: retry
+  status:
+    enabled: true
+x12sa_exposure_box2_pressure:
+  acquisitionConfig:
+    acquisitionGroup: status
+    readoutPriority: ignored
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: x12sa_exposure_box2_pressure
+    read_pv: X12SA-ES-EB1MF1:PRESSURE
+    string: false
+  deviceTags:
+  - X12SA status
+  name: x12sa_exposure_box2_pressure
+  onFailure: retry
+  status:
+    enabled: true
+x12sa_fe_status:
+  acquisitionConfig:
+    acquisitionGroup: status
+    readoutPriority: ignored
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: x12sa_fe_status
+    read_pv: X12SA-FE-PH1:CLOSE4BL
+    string: true
+  deviceTags:
+  - X12SA status
+  name: x12sa_fe_status
+  onFailure: retry
+  status:
+    enabled: true
+x12sa_id_gap:
+  acquisitionConfig:
+    acquisitionGroup: status
+    readoutPriority: ignored
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: x12sa_id_gap
+    read_pv: X12SA-ID-GAP:READ
+    string: false
+  deviceTags:
+  - X12SA status
+  name: x12sa_id_gap
+  onFailure: retry
+  status:
+    enabled: true
+x12sa_mokev:
+  acquisitionConfig:
+    acquisitionGroup: status
+    readoutPriority: ignored
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: x12sa_mokev
+    read_pv: X12SA-OP-MO:E-GET
+    string: false
+  deviceTags:
+  - X12SA status
+  name: x12sa_mokev
+  onFailure: retry
+  status:
+    enabled: true
+x12sa_op_status:
+  acquisitionConfig:
+    acquisitionGroup: status
+    readoutPriority: ignored
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: x12sa_op_status
+    read_pv: ACOAU-ACCU:OP-X12SA
+    string: true
+  deviceTags:
+  - X12SA status
+  name: x12sa_op_status
+  onFailure: retry
+  status:
+    enabled: true
+x12sa_storage_ring_vac:
+  acquisitionConfig:
+    acquisitionGroup: status
+    readoutPriority: ignored
+    schedule: sync
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    name: x12sa_storage_ring_vac
+    read_pv: X12SA-SR-VAC:SETPOINT
+    string: true
+  deviceTags:
+  - X12SA status
+  name: x12sa_storage_ring_vac
+  onFailure: retry
+  status:
+    enabled: true

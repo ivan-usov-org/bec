@@ -30,7 +30,9 @@ def test_nexus_file_xml_writer():
 def test_csaxs_nexus_format():
     file_manager = load_FileWriter()
     writer_storage = cSAXS_Nexus_format(
-        HDF5Storage(), {"samx": [0, 1, 2]}, file_manager.device_manager
+        HDF5Storage(),
+        {"samx": {"samx": {"value": [0, 1, 2]}}, "mokev": {"mokev": {"value": 12.456}}},
+        file_manager.device_manager,
     )
     assert writer_storage._storage["entry"].attrs["definition"] == "NXsas"
     assert writer_storage._storage["entry"]._storage["sample"]._storage["x_translation"]._data == [
