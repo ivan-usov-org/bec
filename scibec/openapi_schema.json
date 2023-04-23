@@ -3682,6 +3682,9 @@
           "name": {
             "type": "string"
           },
+          "number": {
+            "type": "number"
+          },
           "experimentId": {
             "type": "string"
           },
@@ -3843,10 +3846,22 @@
             "type": "object"
           },
           "queue": {
-            "type": "object"
+            "type": "string"
+          },
+          "scanId": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "queueId": {
+            "type": "string"
           },
           "exitStatus": {
-            "type": "object"
+            "type": "string"
+          },
+          "scanNumber": {
+            "type": "number"
           },
           "metadata": {
             "type": "object"
@@ -4592,6 +4607,9 @@
           "name": {
             "type": "string"
           },
+          "number": {
+            "type": "number"
+          },
           "experimentId": {
             "type": "string"
           }
@@ -4654,6 +4672,9 @@
           },
           "name": {
             "type": "string"
+          },
+          "number": {
+            "type": "number"
           },
           "experimentId": {
             "type": "string"
@@ -4721,6 +4742,9 @@
           },
           "name": {
             "type": "string"
+          },
+          "number": {
+            "type": "number"
           },
           "experimentId": {
             "type": "string"
@@ -6098,10 +6122,22 @@
             "type": "object"
           },
           "queue": {
-            "type": "object"
+            "type": "string"
+          },
+          "scanId": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "queueId": {
+            "type": "string"
           },
           "exitStatus": {
-            "type": "object"
+            "type": "string"
+          },
+          "scanNumber": {
+            "type": "number"
           },
           "metadata": {
             "type": "object"
@@ -6182,10 +6218,22 @@
             "type": "object"
           },
           "queue": {
-            "type": "object"
+            "type": "string"
+          },
+          "scanId": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "queueId": {
+            "type": "string"
           },
           "exitStatus": {
-            "type": "object"
+            "type": "string"
+          },
+          "scanNumber": {
+            "type": "number"
           },
           "metadata": {
             "type": "object"
@@ -6270,10 +6318,22 @@
             "type": "object"
           },
           "queue": {
-            "type": "object"
+            "type": "string"
+          },
+          "scanId": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "queueId": {
+            "type": "string"
           },
           "exitStatus": {
-            "type": "object"
+            "type": "string"
+          },
+          "scanNumber": {
+            "type": "number"
           },
           "metadata": {
             "type": "object"
@@ -7517,6 +7577,9 @@
                   "name": {
                     "type": "boolean"
                   },
+                  "number": {
+                    "type": "boolean"
+                  },
                   "experimentId": {
                     "type": "boolean"
                   }
@@ -7538,6 +7601,7 @@
                     "createdAt",
                     "createdBy",
                     "name",
+                    "number",
                     "experimentId"
                   ],
                   "example": "id"
@@ -7635,6 +7699,9 @@
                   "name": {
                     "type": "boolean"
                   },
+                  "number": {
+                    "type": "boolean"
+                  },
                   "experimentId": {
                     "type": "boolean"
                   }
@@ -7656,6 +7723,7 @@
                     "createdAt",
                     "createdBy",
                     "name",
+                    "number",
                     "experimentId"
                   ],
                   "example": "id"
@@ -9504,7 +9572,19 @@
                   "queue": {
                     "type": "boolean"
                   },
+                  "scanId": {
+                    "type": "boolean"
+                  },
+                  "requestId": {
+                    "type": "boolean"
+                  },
+                  "queueId": {
+                    "type": "boolean"
+                  },
                   "exitStatus": {
+                    "type": "boolean"
+                  },
+                  "scanNumber": {
                     "type": "boolean"
                   },
                   "metadata": {
@@ -9540,7 +9620,11 @@
                     "scanParameter",
                     "userParameter",
                     "queue",
+                    "scanId",
+                    "requestId",
+                    "queueId",
                     "exitStatus",
+                    "scanNumber",
                     "metadata",
                     "files",
                     "sessionId",
@@ -9650,7 +9734,19 @@
                   "queue": {
                     "type": "boolean"
                   },
+                  "scanId": {
+                    "type": "boolean"
+                  },
+                  "requestId": {
+                    "type": "boolean"
+                  },
+                  "queueId": {
+                    "type": "boolean"
+                  },
                   "exitStatus": {
+                    "type": "boolean"
+                  },
+                  "scanNumber": {
                     "type": "boolean"
                   },
                   "metadata": {
@@ -9686,7 +9782,11 @@
                     "scanParameter",
                     "userParameter",
                     "queue",
+                    "scanId",
+                    "requestId",
+                    "queueId",
                     "exitStatus",
+                    "scanNumber",
                     "metadata",
                     "files",
                     "sessionId",
