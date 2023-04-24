@@ -1,4 +1,5 @@
 import functools
+import threading
 import time
 import uuid
 
@@ -9,6 +10,7 @@ from bec_utils import (
     MessageEndpoints,
     bec_logger,
 )
+from bec_utils.redis_connector import RedisProducer
 
 from bec_client.callbacks.utils import ScanRequestError
 
@@ -33,6 +35,33 @@ def rpc(fcn):
         return self._run_rpc_call(device, func_call, *args, **kwargs)
 
     return wrapper
+
+
+class Status:
+    def __init__(self, producer: RedisProducer, RID: str) -> None:
+        self._producer = producer
+        self._RID = RID
+
+    def wait(self, timeout=None):
+        """wait until the request is completed"""
+        sleep_time_step = 0.1
+        sleep_count = 0
+
+        def _sleep(sleep_time):
+            nonlocal sleep_count
+            nonlocal timeout
+            time.sleep(sleep_time)
+            sleep_count += sleep_time
+            if timeout is not None and sleep_count > timeout:
+                raise TimeoutError()
+
+        while True:
+            request_status = self._producer.lrange(
+                MessageEndpoints.device_req_status(self._RID), 0, -1
+            )
+            if request_status:
+                break
+            _sleep(sleep_time_step)
 
 
 class RPCBase:
@@ -81,7 +110,7 @@ class RPCBase:
             scan_type="device_rpc",
             parameter=params,
             queue="primary",
-            metadata={"RID": requestID},
+            metadata={"RID": requestID, "response": True},
         )
         self.root.parent.producer.send(MessageEndpoints.scan_queue_request(), msg.dumps())
         queue = self.root.parent.parent.queue
@@ -106,7 +135,12 @@ class RPCBase:
                 f"During an RPC, the following error occured:\n{error['error']}: {error['msg']}.\nTraceback: {error['traceback']}\n The scan will be aborted."
             )
         print(msg.content.get("out"))
-        return msg.content.get("return_val")
+        return_val = msg.content.get("return_val")
+        if not isinstance(return_val, dict):
+            return return_val
+        if return_val.get("type") == "status" and return_val.get("RID"):
+            return Status(self.root.parent.producer, return_val.get("RID"))
+        return return_val
 
     def _get_rpc_func_name(self, fcn_name=None, fcn=None, use_parent=False):
         if not fcn_name:

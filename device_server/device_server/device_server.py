@@ -234,20 +234,14 @@ class DeviceServer(BECService):
             res = rpc_var
         if not is_serializable(res):
             if isinstance(res, ophyd.StatusBase):
-                res = {
-                    "success": res.success,
-                    "timeout": res.timeout,
-                    "done": res.done,
-                    "settle_time": res.settle_time,
-                }
-            else:
-                res = None
-                self.connector.raise_alarm(
-                    severity=Alarms.WARNING,
-                    source=instr_params,
-                    content=f"Return value of rpc call {instr_params} is not serializable.",
-                    metadata={},
-                )
+                return res
+            res = None
+            self.connector.raise_alarm(
+                severity=Alarms.WARNING,
+                source=instr_params,
+                content=f"Return value of rpc call {instr_params} is not serializable.",
+                metadata={},
+            )
         return res
 
     def _run_rpc(self, instr: BECMessage.DeviceInstructionMessage) -> None:
@@ -262,7 +256,17 @@ class DeviceServer(BECService):
                 instr_params.get("func"),
             )
             res = self._get_result_from_rpc(rpc_var, instr_params)
-
+            if isinstance(res, ophyd.StatusBase):
+                res.__dict__["instruction"] = instr
+                res.add_callback(self._status_callback)
+                res = {
+                    "type": "status",
+                    "RID": instr.metadata.get("RID"),
+                    "success": res.success,
+                    "timeout": res.timeout,
+                    "done": res.done,
+                    "settle_time": res.settle_time,
+                }
             # send result to client
             self.producer.set(
                 MessageEndpoints.device_rpc(instr_params.get("rpc_id")),
@@ -344,14 +348,18 @@ class DeviceServer(BECService):
 
     def _status_callback(self, status):
         pipe = self.producer.pipeline()
+        if hasattr(status, "device"):
+            device_name = status.device.name
+        else:
+            device_name = status.obj.name
         dev_msg = BECMessage.DeviceReqStatusMessage(
-            device=status.device.name,
+            device=device_name,
             success=status.success,
             metadata=status.instruction.metadata,
         ).dumps()
-        logger.debug(f"req status for device {status.device.name}: {status.success}")
+        logger.debug(f"req status for device {device_name}: {status.success}")
         self.producer.set_and_publish(
-            MessageEndpoints.device_req_status(status.device.name), dev_msg, pipe
+            MessageEndpoints.device_req_status(device_name), dev_msg, pipe
         )
         response = status.instruction.metadata.get("response")
         if response:
