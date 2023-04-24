@@ -1,8 +1,12 @@
+import os
+
+os.environ["EPICS_CA_AUTO_ADDR_LIST"] = "NO"
+os.environ["EPICS_CA_ADDR_LIST"] = "129.129.112.255 sls-x07ma-cagw.psi.ch:5824"
+os.environ["PYTHONIOENCODING"] = "latin1"
 import argparse
 import threading
 
 from bec_utils import RedisConnector, ServiceConfig, bec_logger
-
 import device_server
 
 logger = bec_logger.logger

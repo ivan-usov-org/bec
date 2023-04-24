@@ -142,19 +142,23 @@ class Device:
             action="update", config={self.name: {"enabled_set": value}}
         )
 
-    def read(self, cached):
+    def read(self, cached, filter_readback=True):
         """get the last reading from a device"""
         val = self.parent.producer.get(MessageEndpoints.device_read(self.name))
-        if val:
+        if not val:
+            return None
+        if filter_readback:
             return DeviceMessage.loads(val).content["signals"].get(self.name)
-        return None
+        return DeviceMessage.loads(val).content["signals"]
 
-    def readback(self):
+    def readback(self, filter_readback=True):
         """get the last readback value from a device"""
         val = self.parent.producer.get(MessageEndpoints.device_readback(self.name))
-        if val:
+        if not val:
+            return None
+        if filter_readback:
             return DeviceMessage.loads(val).content["signals"].get(self.name)
-        return None
+        return DeviceMessage.loads(val).content["signals"]
 
     @property
     def device_status(self):

@@ -131,8 +131,9 @@ class LiveUpdatesTable(LiveUpdatesBase):
     def _get_header(self) -> List:
         header = ["seq. num"]
         for dev in self.devices:
-            obj = self.bec.device_manager.devices[dev]
-            header.extend(obj._hints)
+            if dev in self.bec.device_manager.devices:
+                obj = self.bec.device_manager.devices[dev]
+                header.extend(obj._hints)
         return header
 
     async def update_scan_item(self):
@@ -180,11 +181,12 @@ class LiveUpdatesTable(LiveUpdatesBase):
                         print(self.table.get_header_lines())
                     ind = 0
                     for dev in self.devices:
-                        obj = self.bec.device_manager.devices[dev]
-                        for hint in obj._hints:
-                            signal = self.point_data.content["data"].get(dev, {}).get(hint)
-                            self.dev_values[ind] = signal.get("value") if signal else -999
-                            ind += 1
+                        if dev in self.bec.device_manager.devices:
+                            obj = self.bec.device_manager.devices[dev]
+                            for hint in obj._hints:
+                                signal = self.point_data.content["data"].get(dev, {}).get(hint)
+                                self.dev_values[ind] = signal.get("value") if signal else -999
+                                ind += 1
                     print(self.table.get_row(self.point_id, *self.dev_values))
                     self.emit_point(self.point_data.content, metadata=self.point_data.metadata)
                     progressbar.update(self.point_id)

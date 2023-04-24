@@ -345,13 +345,13 @@ class DeviceServer(BECService):
     def _status_callback(self, status):
         pipe = self.producer.pipeline()
         dev_msg = BECMessage.DeviceReqStatusMessage(
-            device=status.device.name,
+            device=status.device.root.name,
             success=status.success,
             metadata=status.instruction.metadata,
         ).dumps()
-        logger.debug(f"req status for device {status.device.name}: {status.success}")
+        logger.debug(f"req status for device {status.device.root.name}: {status.success}")
         self.producer.set_and_publish(
-            MessageEndpoints.device_req_status(status.device.name), dev_msg, pipe
+            MessageEndpoints.device_req_status(status.device.root.name), dev_msg, pipe
         )
         response = status.instruction.metadata.get("response")
         if response:
