@@ -216,7 +216,7 @@ class Scans:
 
     @property
     def dataset_id_on_hold(self):
-        """Context manager / decorator for hiding the report"""
+        """Context manager / decorator for setting the dataset id on hold"""
         return self._dataset_id_on_hold_ctx
 
 
