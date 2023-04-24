@@ -1420,7 +1420,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"stream": "primary", "DIID": 2},
+                    metadata={"stream": "primary", "DIID": 2, "response": True},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="lsamrot",
@@ -1432,7 +1432,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"stream": "primary", "DIID": 2},
+                    metadata={"stream": "primary", "DIID": 2, "response": True},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device=None,
@@ -1472,7 +1472,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"stream": "primary", "DIID": 5},
+                    metadata={"stream": "primary", "DIID": 5, "response": True},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="rtx",
@@ -1484,7 +1484,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"stream": "primary", "DIID": 6},
+                    metadata={"stream": "primary", "DIID": 6, "response": True},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="rty",
@@ -1496,7 +1496,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"stream": "primary", "DIID": 7},
+                    metadata={"stream": "primary", "DIID": 7, "response": True},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="lsamx",
@@ -1508,7 +1508,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"stream": "primary", "DIID": 8},
+                    metadata={"stream": "primary", "DIID": 8, "response": True},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="lsamy",
@@ -1520,7 +1520,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"stream": "primary", "DIID": 9},
+                    metadata={"stream": "primary", "DIID": 9, "response": True},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="rtx",
@@ -1532,7 +1532,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"stream": "primary", "DIID": 10},
+                    metadata={"stream": "primary", "DIID": 10, "response": True},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="rty",
@@ -1544,7 +1544,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"stream": "primary", "DIID": 11},
+                    metadata={"stream": "primary", "DIID": 11, "response": True},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="rtx",
@@ -1556,7 +1556,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"stream": "primary", "DIID": 12},
+                    metadata={"stream": "primary", "DIID": 12, "response": True},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device=None,
