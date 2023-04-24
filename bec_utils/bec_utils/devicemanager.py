@@ -303,7 +303,11 @@ class DeviceContainer(dict):
         """get a list of all enabled primary devices"""
         devices = self.readout_priority("monitored")
         if scan_motors:
-            devices.extend(scan_motors)
+            if not isinstance(scan_motors, list):
+                scan_motors = [scan_motors]
+            for scan_motor in scan_motors:
+                if not scan_motor in devices:
+                    devices.append(scan_motor)
 
         excluded_devices = self.acquisition_group("detector")
         excluded_devices.extend(self.async_devices())
