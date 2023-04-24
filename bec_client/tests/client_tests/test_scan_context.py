@@ -16,8 +16,8 @@ from .utils import bec_client
 def test_metadata_handler(bec_client):
     client = bec_client
     client.metadata = {"descr": "test", "uid": "12345"}
-    with Metadata({"descr": "alignment"}):
-        assert client.metadata == {"descr": "alignment", "uid": "12345"}
+    with Metadata({"descr": "alignment", "pol": 1}):
+        assert client.metadata == {"descr": "alignment", "uid": "12345", "pol": 1}
 
     assert client.metadata == {"descr": "test", "uid": "12345"}
 
@@ -40,6 +40,33 @@ def test_dataset_id_on_hold_cm(bec_client):
         with dataset_id_on_hold:
             assert client.scans._dataset_id_on_hold is True
 
+    assert client.scans._dataset_id_on_hold is None
+
+
+def test_dataset_id_on_hold_cm_nested(bec_client):
+    client = bec_client
+    client.scans._dataset_id_on_hold = None
+    dataset_id_on_hold = DatasetIdOnHold(client.scans)
+    with mock.patch.object(client, "queue"):
+        with dataset_id_on_hold:
+            assert client.scans._dataset_id_on_hold is True
+            with dataset_id_on_hold:
+                assert client.scans._dataset_id_on_hold is True
+            assert client.scans._dataset_id_on_hold is True
+    assert client.scans._dataset_id_on_hold is None
+
+
+def test_dataset_id_on_hold_cleanup_on_error(bec_client):
+    client = bec_client
+    client.scans._dataset_id_on_hold = None
+    dataset_id_on_hold = DatasetIdOnHold(client.scans)
+    with pytest.raises(AttributeError):
+        with mock.patch.object(client, "queue"):
+            with dataset_id_on_hold:
+                assert client.scans._dataset_id_on_hold is True
+                with dataset_id_on_hold:
+                    assert client.scans._dataset_id_on_hold is True
+                    raise AttributeError()
     assert client.scans._dataset_id_on_hold is None
 
 

@@ -216,7 +216,7 @@ class Scans:
 
     @property
     def dataset_id_on_hold(self):
-        """Context manager / decorator for hiding the report"""
+        """Context manager / decorator for setting the dataset id on hold"""
         return self._dataset_id_on_hold_ctx
 
 
@@ -269,13 +269,18 @@ class DatasetIdOnHold(ContextDecorator):
     def __init__(self, parent: Scans = None) -> None:
         super().__init__()
         self.parent = parent
+        self._call_count = 0
 
     def __enter__(self):
+        self._call_count += 1
         if self.parent._dataset_id_on_hold is None:
             self.parent._dataset_id_on_hold = True
         return self
 
     def __exit__(self, *exc):
+        self._call_count -= 1
+        if self._call_count:
+            return
         self.parent._dataset_id_on_hold = None
         queue = self.parent.parent.queue
         queue.next_dataset_number += 1
