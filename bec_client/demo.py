@@ -28,7 +28,7 @@ scans = bec.scans
 
 
 logger.success("Started BECClient")
-scans.otf_scan(e1=700, e2=710, time=1)
+
 # scans.round_scan_fly(dev.flyer_sim, 0, 50, 20, 3, exp_time=0.1, relative=True)
 # scans.monitor_scan(dev.samx, -100, 100, relative=False)
 

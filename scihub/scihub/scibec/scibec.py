@@ -29,9 +29,7 @@ class SciBec:
         return self.client.get_request(f"{self.url}/beamlines", headers=headers, params=params)
 
     def get_beamline(self, beamline: str, raise_none=False) -> dict:
-        params = self.client.make_filter(
-            where={"name": beamline}, include=[{"relation": "sessions"}]
-        )
+        params = self.client.make_filter(where={"name": beamline})
         beamline = self.get_beamlines(params=params)
 
         if not beamline:
@@ -54,8 +52,42 @@ class SciBec:
             f"{self.url}/beamlines", headers=headers, payload={"name": name}
         )
 
+    def patch_beamline(self, id: str, payload: dict) -> dict:
+        headers = {"Content-type": "application/json"}
+        return self.client.patch_request(
+            f"{self.url}/beamlines/{id}", headers=headers, payload=payload
+        )
+
     def _delete_beamline(self, beamline_id: str):
         return self.client.delete_request(f"{self.url}/beamlines/{beamline_id}")
+
+    def get_experiment(self, name: str) -> dict:
+        params = self.client.make_filter(where={"name": name})
+        headers = {"Content-type": "application/json"}
+        return self.client.get_request(f"{self.url}/experiments", headers=headers, params=params)
+
+    def get_experiment_by_id(self, experiment_id: str) -> dict:
+        headers = {"Content-type": "application/json"}
+        params = self.client.make_filter(where={"id": experiment_id})
+        return self.client.get_request(f"{self.url}/experiments", params=params, headers=headers)
+
+    def get_experiment_by_pgroup(self, pgroup: str) -> dict:
+        headers = {"Content-type": "application/json"}
+        params = self.client.make_filter(where={"writeAccount": pgroup})
+        return self.client.get_request(f"{self.url}/experiments", params=params, headers=headers)
+
+    def add_experiment(self, experiment: dict) -> bool:
+        headers = {"Content-type": "application/json"}
+        return self.client.post_request(
+            f"{self.url}/experiments", headers=headers, payload=experiment
+        )
+
+    def set_experiment_active(self, experiment_id: str) -> None:
+        experiment = self.get_experiment_by_id(experiment_id)
+        if not experiment:
+            raise SciBecError(f"Could not find a matching experiment for ID {experiment_id}.")
+        beamline_id = experiment[0]["beamlineId"]
+        self.patch_beamline(beamline_id, {"activeExperiment": experiment_id})
 
     def get_available_sessions(self, beamline: str) -> list:
         headers = {"Content-type": "application/json"}
@@ -64,15 +96,11 @@ class SciBec:
         )
         return self.client.get_request(f"{self.url}/beamlines", params=params, headers=headers)
 
-    def add_session(self, beamline: str, session: str):
-        beamline = self.get_beamline(beamline, raise_none=True)
-
+    def add_session(self, experiment_id: str, session: str):
         headers = {"Content-type": "application/json"}
         obj = {
-            "ownerGroup": "test",
-            "accessGroups": ["customer"],
             "name": session,
-            "beamlineId": beamline["id"],
+            "experimentId": experiment_id,
         }
         return self.client.post_request(f"{self.url}/sessions", payload=obj, headers=headers)
 
@@ -91,35 +119,64 @@ class SciBec:
         )
         return self.client.get_request(f"{self.url}/sessions", params=params, headers=headers)
 
-    def get_current_session(self, beamline: str, include_devices=False):
-        beamline_info = self.get_beamline(beamline, raise_none=True)
-        if not beamline_info.get("activeSession"):
-            return
-        session = self.get_session_by_id(
-            beamline_info["activeSession"], include_devices=include_devices
-        )
-        if session:
-            return session[0]
-        return
+    # def get_current_session(self, beamline: str, include_devices=False):
+    #     beamline_info = self.get_beamline(beamline, raise_none=True)
+    #     if not beamline_info.get("activeSession"):
+    #         return
+    #     session = self.get_session_by_id(
+    #         beamline_info["activeSession"], include_devices=include_devices
+    #     )
+    #     if session:
+    #         return session[0]
+    #     return
 
-    def set_current_session(self, beamline: str, session: str):
+    def set_current_session(self, experiment_id: str, session_id: str):
         headers = {"Content-type": "application/json"}
-        beamline = self.get_beamline(beamline, raise_none=True)
-        if not "sessions" in beamline:
-            raise SciBecError(f"Beamline {beamline} has no sessions.")
-        target_session = None
-        for avail_session in beamline["sessions"]:
-            if avail_session["name"] == session:
-                target_session = avail_session
-        if not target_session:
-            raise SciBecError(f"Beamline {beamline} has no session {session}.")
-        update_obj = {"activeSession": target_session["id"]}
+        experiment = self.get_experiment_by_id(experiment_id)
+        if not experiment:
+            raise SciBecError(
+                f"Could not find an experiment matching the given id: {experiment_id}."
+            )
+        update_obj = {"activeSession": session_id}
         self.client.patch_request(
-            f"{self.url}/beamlines/{beamline['id']}", headers=headers, payload=update_obj
+            f"{self.url}/experiments/{experiment_id}",
+            headers=headers,
+            payload=update_obj,
         )
 
     def _delete_session(self, session_id: str):
         return self.client.delete_request(f"{self.url}/sessions/{session_id}")
+
+    def get_datasets_by_experiment(self, experiment_id: str):
+        headers = {"Content-type": "application/json"}
+        params = self.client.make_filter(where={"experimentId": experiment_id})
+        return self.client.get_request(f"{self.url}/datasets", params=params, headers=headers)
+
+    def get_dataset_by_experiment_and_number(self, experiment_id: str, number: int):
+        headers = {"Content-type": "application/json"}
+        params = self.client.make_filter(where={"experimentId": experiment_id, "number": number})
+        return self.client.get_request(f"{self.url}/datasets", params=params, headers=headers)
+
+    def add_dataset(self, data: dict):
+        headers = {"Content-type": "application/json"}
+        return self.client.post_request(f"{self.url}/datasets", payload=data, headers=headers)
+
+    def get_scan_by_scanID(self, scanID):
+        headers = {"Content-type": "application/json"}
+        params = self.client.make_filter(where={"scanId": scanID})
+        return self.client.get_request(f"{self.url}/scans", params=params, headers=headers)
+
+    def add_scan(self, data: dict):
+        headers = {"Content-type": "application/json"}
+        return self.client.post_request(f"{self.url}/scans", payload=data, headers=headers)
+
+    def patch_scan(self, scan_id: str, data: dict):
+        headers = {"Content-type": "application/json"}
+        return self.client.patch_request(
+            f"{self.url}/scans/{scan_id}",
+            headers=headers,
+            payload=data,
+        )
 
     def add_device(self, device_info: dict):
         headers = {"Content-type": "application/json"}
@@ -160,26 +217,27 @@ class SciBec:
 
         return data
 
-    def update_session_with_file(self, file_path: str):
-        data = self.load_config_from_file(file_path)
-        beamlines = self.get_beamlines()
-        if not beamlines:
-            logger.warning("No config available.")
-            return
-        if len(beamlines) > 1:
-            logger.warning("More than one beamline available.")
-        beamline = beamlines[0]
-        self.set_session_data(beamline, data)
+    # def update_session_with_file(self, file_path: str, beamline_name: str):
+    #     data = self.load_config_from_file(file_path)
+    #     beamlines = self.get_beamline(beamline_name)
+    #     if not beamlines:
+    #         logger.warning("No config available.")
+    #         return
+    #     if len(beamlines) > 1:
+    #         logger.warning("More than one beamline available.")
+    #     beamline = beamlines[0]
+    #     self.set_session_data(beamline, data)
 
-    def set_session_data(self, beamline: dict, data: dict):
+    def set_session_data(self, experiment_id: str, data: dict):
         session_name = "demo"
-        if beamline.get("activeSession"):
-            session = self.get_session_by_id(beamline["activeSession"])
+        experiment = self.get_experiment_by_id(experiment_id)[0]
+        if experiment.get("activeSession"):
+            session = self.get_session_by_id(experiment["activeSession"])
             if session:
                 session_name = session[0]["name"]
                 self._delete_session(session[0]["id"])
-        session = self.add_session(beamline["name"], session_name)
-        self.set_current_session(beamline["name"], session_name)
+        session = self.add_session(experiment["id"], session_name)
+        self.set_current_session(experiment["id"], session["id"])
         for name, device in data.items():
             device["enabled"] = device["status"]["enabled"]
             if device["status"].get("enabled_set"):
@@ -210,8 +268,12 @@ def formatted_http_error(func):
     def formatted_call(*args, **kwargs):
         try:
             out = func(*args, **kwargs)
-        except requests.HTTPError as exc:
-            raise SciBecError(f"{exc.response.reason} Error Message: {exc.response.text}") from exc
+        except (requests.HTTPError, requests.Timeout) as exc:
+            if hasattr(exc.response, "reason"):
+                raise SciBecError(
+                    f"{exc.response.reason} Error Message: {exc.response.text}"
+                ) from exc
+            raise SciBecError from exc
         return out
 
     return formatted_call

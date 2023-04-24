@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 import bec_utils
 import msgpack
-from bec_utils import BECMessage, Device, DeviceConfigError
+from bec_utils import BECMessage, Device, DeviceConfigError, bec_logger
 from bec_utils import DeviceManagerBase as DeviceManager
 from bec_utils import MessageEndpoints
 from bec_utils.connector import ConnectorBase
@@ -17,6 +17,8 @@ from .scibec_validator import SciBecValidator
 
 if TYPE_CHECKING:
     from scihub.scibec.scibec_connector import SciBecConnector
+
+logger = bec_logger.logger
 
 dir_path = os.path.abspath(os.path.join(os.path.dirname(bec_utils.__file__), "../../scibec/"))
 
@@ -66,9 +68,11 @@ class ConfigHandler:
     def _set_config(self, msg: BECMessage.DeviceConfigMessage):
         config = msg.content["config"]
         scibec = self.scibec_connector.scibec
-        beamline = self.scibec_connector.scibec_info.get("beamline")
-        if scibec and beamline:
-            scibec.set_session_data(beamline, config)
+        logger.debug(self.scibec_connector.scibec_info)
+        experiment = self.scibec_connector.scibec_info.get("beamline", {}).get("activeExperiment")
+
+        if scibec and experiment:
+            scibec.set_session_data(experiment, config)
             self.scibec_connector.update_session()
         else:
             for name, device in config.items():
@@ -105,6 +109,8 @@ class ConfigHandler:
             device = self.device_manager.devices[dev]
             updated = self._update_device_config(device, config.copy())
             if updated:
+                if "id" in device._config and self.scibec_connector.scibec:
+                    self.scibec_connector.scibec.patch_device_config(device._config["id"], config)
                 self.update_config_in_redis(device)
 
         # send updates to services

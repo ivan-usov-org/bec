@@ -69,7 +69,7 @@ class BECClient(BECService, BeamlineMixin, UserScriptsMixin):
         self.callback_manager = CallbackManager(self)
         builtins.bec = self
         self.metadata = {}
-        # self.logbook = LogbookConnector()
+        self.logbook = LogbookConnector(self.connector)
         self._update_username()
         self.history = None
 
@@ -77,6 +77,11 @@ class BECClient(BECService, BeamlineMixin, UserScriptsMixin):
     def username(self) -> str:
         """get the current username"""
         return self._username
+
+    @property
+    def active_account(self) -> str:
+        """get the currently active target (e)account"""
+        return self.producer.get(MessageEndpoints.account())
 
     def start(self):
         """start the client"""
@@ -151,6 +156,7 @@ class BECClient(BECService, BeamlineMixin, UserScriptsMixin):
         if self._ip is not None:
             self._ip.prompts = BECClientPrompt(ip=self._ip, client=self, username="demo")
             self._load_magics()
+            self._ip.events.register("post_run_cell", log_console)
 
     def _configure_logger(self):
         bec_logger.logger.remove()
@@ -285,3 +291,8 @@ class BECClientPrompt(Prompts):
     @username.setter
     def username(self, value):
         self._username = value
+
+
+def log_console(execution_info):
+    """log the console input"""
+    logger.info(f"[CONSOLE LOG] | {execution_info.info.raw_cell}")

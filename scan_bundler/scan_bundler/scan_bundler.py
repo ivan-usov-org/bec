@@ -180,9 +180,7 @@ class ScanBundler(BECService):
                 }
             primary_devices["pointID"][pointID][device] = True
 
-            primary_devices_completed = [
-                status for status in primary_devices["pointID"][pointID].values()
-            ]
+            primary_devices_completed = list(primary_devices["pointID"][pointID].values())
 
             all_primary_devices_completed = bool(
                 all(primary_devices_completed)

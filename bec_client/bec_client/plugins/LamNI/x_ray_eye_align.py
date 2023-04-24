@@ -1,6 +1,5 @@
 import builtins
 import datetime
-import math
 import os
 import subprocess
 import threading
@@ -10,7 +9,6 @@ from pathlib import Path
 
 import numpy as np
 from bec_utils import bec_logger
-from bec_utils.logbook_connector import LogbookMessage
 from bec_utils.pdf_writer import PDFWriter
 from typeguard import typechecked
 
@@ -19,6 +17,7 @@ from bec_client.plugins.cSAXS import epics_get, epics_put, fshclose, fshopen
 from .lamni_optics_mixin import LamNIOpticsMixin
 
 logger = bec_logger.logger
+bec = builtins.__dict__.get("bec")
 
 
 class XrayEyeAlign:
@@ -33,6 +32,9 @@ class XrayEyeAlign:
         self.scans = client.scans
         self.xeye = self.device_manager.devices.xeye
         self.alignment_values = defaultdict(list)
+        self._reset_init_values()
+
+    def _reset_init_values(self):
         self.shift_xy = [0, 0]
         self._xray_fov_xy = [0, 0]
 
@@ -93,6 +95,9 @@ class XrayEyeAlign:
         epics_put("XOMNYI-XEYE-MESSAGE:0.DESC", msg)
 
     def align(self):
+        # reset shift xy and fov params
+        self._reset_init_values()
+
         # this makes sure we are in a defined state
         self._disable_rt_feedback()
 
@@ -156,9 +161,9 @@ class XrayEyeAlign:
                 elif (
                     k == 1
                 ):  # received sample center value at samroy 0 ie the final base shift values
-                    print(
-                        f"Base shift values from movement are x {self.shift_xy[0]}, y {self.shift_xy[1]}"
-                    )
+                    msg = f"Base shift values from movement are x {self.shift_xy[0]}, y {self.shift_xy[1]}"
+                    print(msg)
+                    logger.info(msg)
                     self.shift_xy[0] += (
                         self.alignment_values[0][0] - self.alignment_values[1][0]
                     ) * 1000
@@ -321,10 +326,30 @@ class LamNI(LamNIOpticsMixin):
         self.check_light_available = True
         self.check_fofb = True
         self._check_msgs = []
-        self.tomo_id = None
+        self.tomo_id = -1
+        self.corr_pos_x_2 = []
+        self.corr_pos_y_2 = []
+        self.corr_angle_2 = []
+        self.special_angles = []
+        self.special_angle_repeats = 20
+        self.special_angle_tolerance = 20
+        self._current_special_angles = []
         self._beam_is_okay = True
         self._stop_beam_check_event = None
         self.beam_check_thread = None
+
+    def reset_correction(self):
+        self.corr_pos_x = []
+        self.corr_pos_y = []
+        self.corr_angle = []
+
+    def reset_correction_2(self):
+        self.corr_pos_x_2 = []
+        self.corr_pos_y_2 = []
+        self.corr_angle_2 = []
+
+    def reset_xray_eye_correction(self):
+        self.client.delete_global_var("tomo_fit_xray_eye")
 
     def get_beamline_checks_enabled(self):
         print(
@@ -337,6 +362,24 @@ class LamNI(LamNIOpticsMixin):
         self.check_fofb = val
         self.get_beamline_checks_enabled()
 
+    def set_special_angles(self, angles: list, repeats: int = 20, tolerance: float = 0.5):
+        """Set the special angles for a tomo
+
+        Args:
+            angles (list): List of special angles
+            repeats (int, optional): Number of repeats at a special angle. Defaults to 20.
+            tolerance (float, optional): Number of repeats at a special angle. Defaults to 0.5.
+
+        """
+        self.special_angles = angles
+        self.special_angle_repeats = repeats
+        self.special_angle_tolerance = tolerance
+
+    def remove_special_angles(self):
+        """Remove the special angles and set the number of repeats to 1"""
+        self.special_angles = []
+        self.special_angle_repeats = 1
+
     @property
     def tomo_fovx_offset(self):
         val = self.client.get_global_var("tomo_fov_offset")
@@ -345,8 +388,12 @@ class LamNI(LamNIOpticsMixin):
         return val[0] / 1000
 
     @tomo_fovx_offset.setter
+    @typechecked
     def tomo_fovx_offset(self, val: float):
-        self.client.set_global_var("tomo_fov_offset", val)
+        val_old = self.client.get_global_var("tomo_fov_offset")
+        if val_old is None:
+            val_old = [0.0, 0.0]
+        self.client.set_global_var("tomo_fov_offset", [val * 1000, val_old[1]])
 
     @property
     def tomo_fovy_offset(self):
@@ -356,8 +403,12 @@ class LamNI(LamNIOpticsMixin):
         return val[1] / 1000
 
     @tomo_fovy_offset.setter
+    @typechecked
     def tomo_fovy_offset(self, val: float):
-        self.client.set_global_var("tomo_fov_offset", val)
+        val_old = self.client.get_global_var("tomo_fov_offset")
+        if val_old is None:
+            val_old = [0.0, 0.0]
+        self.client.set_global_var("tomo_fov_offset", [val_old[0], val * 1000])
 
     @property
     def tomo_shellstep(self):
@@ -497,10 +548,31 @@ class LamNI(LamNIOpticsMixin):
     def tomo_stitch_overlap(self, val: float):
         self.client.set_global_var("tomo_stitch_overlap", val)
 
+    def write_to_spec_log(self, content):
+        try:
+            with open(
+                os.path.expanduser(
+                    "~/Data10/specES1/log-files/specES1_started_2022_11_30_1313.log"
+                ),
+                "a",
+            ) as log_file:
+                log_file.write(content)
+        except Exception:
+            logger.warning("Failed to write to spec log file (omny web page).")
+
+    def write_to_scilog(self, content):
+        try:
+            msg = bec.logbook.LogbookMessage()
+            msg.add_text(content).add_tag(["BEC"])
+            self.client.logbook.send_logbook_message(msg)
+        except Exception:
+            logger.warning("Failed to write to scilog.")
+
     def tomo_scan_projection(self, angle: float):
         scans = builtins.__dict__.get("scans")
-        bec = builtins.__dict__.get("bec")
+
         additional_correction = self.compute_additional_correction(angle)
+        additional_correction_2 = self.compute_additional_correction_2(angle)
         correction_xeye_mu = self.lamni_compute_additional_correction_xeye_mu(angle)
 
         self._current_scan_list = []
@@ -512,10 +584,14 @@ class LamNI(LamNIOpticsMixin):
                 logger.info(
                     f"scans.lamni_fermat_scan(fov_size=[{self.lamni_piezo_range_x},{self.lamni_piezo_range_y}], step={self.tomo_shellstep}, stitch_x={0}, stitch_y={0}, stitch_overlap={1},"
                     f"center_x={self.tomo_fovx_offset}, center_y={self.tomo_fovy_offset}, "
-                    f"shift_x={self.manual_shift_x+correction_xeye_mu[0]-additional_correction[0]}, "
-                    f"shift_y={self.manual_shift_y+correction_xeye_mu[1]-additional_correction[1]}, "
+                    f"shift_x={self.manual_shift_x+correction_xeye_mu[0]-additional_correction[0]-additional_correction_2[0]}, "
+                    f"shift_y={self.manual_shift_y+correction_xeye_mu[1]-additional_correction[1]-additional_correction_2[1]}, "
                     f"fov_circular={self.tomo_circfov}, angle={angle}, scan_type='fly')"
                 )
+                log_message = f"{str(datetime.datetime.now())}: LamNI scan projection at angle {angle}, scan number {bec.queue.next_scan_number}.\n"
+                self.write_to_spec_log(log_message)
+                self.write_to_scilog(log_message)
+
                 scans.lamni_fermat_scan(
                     fov_size=[self.lamni_piezo_range_x, self.lamni_piezo_range_y],
                     step=self.tomo_shellstep,
@@ -525,10 +601,16 @@ class LamNI(LamNIOpticsMixin):
                     center_x=self.tomo_fovx_offset,
                     center_y=self.tomo_fovy_offset,
                     shift_x=(
-                        self.manual_shift_x + correction_xeye_mu[0] - additional_correction[0]
+                        self.manual_shift_x
+                        + correction_xeye_mu[0]
+                        - additional_correction[0]
+                        - additional_correction_2[0]
                     ),
                     shift_y=(
-                        self.manual_shift_y + correction_xeye_mu[1] - additional_correction[1]
+                        self.manual_shift_y
+                        + correction_xeye_mu[1]
+                        - additional_correction[1]
+                        - additional_correction_2[1]
                     ),
                     fov_circular=self.tomo_circfov,
                     angle=angle,
@@ -545,11 +627,11 @@ class LamNI(LamNIOpticsMixin):
         # x amp, phase, offset, y amp, phase, offset
         #  0 0    0 1    0 2     1 0    1 1    1 2
         correction_x = (
-            tomo_fit_xray_eye[0][0] * math.sin(math.radians(angle) + tomo_fit_xray_eye[0][1])
+            tomo_fit_xray_eye[0][0] * np.sin(np.radians(angle) + tomo_fit_xray_eye[0][1])
             + tomo_fit_xray_eye[0][2]
         ) / 1000
         correction_y = (
-            tomo_fit_xray_eye[1][0] * math.sin(math.radians(angle) + tomo_fit_xray_eye[1][1])
+            tomo_fit_xray_eye[1][0] * np.sin(np.radians(angle) + tomo_fit_xray_eye[1][1])
             + tomo_fit_xray_eye[1][2]
         ) / 1000
 
@@ -563,7 +645,7 @@ class LamNI(LamNIOpticsMixin):
 
         # find index of closest angle
         for j, _ in enumerate(self.corr_pos_x):
-            newangledelta = math.fabs(self.corr_angle[j] - angle)
+            newangledelta = np.fabs(self.corr_angle[j] - angle)
             if j == 0:
                 angledelta = newangledelta
                 additional_correction_shift_x = self.corr_pos_x[j]
@@ -582,7 +664,7 @@ class LamNI(LamNIOpticsMixin):
         if additional_correction_shift_x == 0 and angle > self.corr_angle[-1]:
             additional_correction_shift_x = self.corr_pos_x[-1]
             additional_correction_shift_y = self.corr_pos_y[-1]
-        logger.info(
+        print(
             f"Additional correction shifts: {additional_correction_shift_x} {additional_correction_shift_y}"
         )
         return (additional_correction_shift_x, additional_correction_shift_y)
@@ -608,6 +690,60 @@ class LamNI(LamNIOpticsMixin):
         self.corr_pos_x = corr_pos_x
         self.corr_pos_y = corr_pos_y
         self.corr_angle = corr_angle
+        return
+
+    def compute_additional_correction_2(self, angle):
+        if not self.corr_pos_x_2:
+            print("Not applying any additional secondary correction. No data available.\n")
+            return (0, 0)
+
+        # find index of closest angle
+        for j, _ in enumerate(self.corr_pos_x_2):
+            newangledelta = np.fabs(self.corr_angle_2[j] - angle)
+            if j == 0:
+                angledelta = newangledelta
+                additional_correction_shift_x = self.corr_pos_x_2[j]
+                additional_correction_shift_y = self.corr_pos_y_2[j]
+                continue
+
+            if newangledelta < angledelta:
+                additional_correction_shift_x = self.corr_pos_x_2[j]
+                additional_correction_shift_y = self.corr_pos_y_2[j]
+                angledelta = newangledelta
+
+        if additional_correction_shift_x == 0 and angle < self.corr_angle_2[0]:
+            additional_correction_shift_x = self.corr_pos_x_2[0]
+            additional_correction_shift_y = self.corr_pos_y_2[0]
+
+        if additional_correction_shift_x == 0 and angle > self.corr_angle_2[-1]:
+            additional_correction_shift_x = self.corr_pos_x_2[-1]
+            additional_correction_shift_y = self.corr_pos_y_2[-1]
+        print(
+            f"Additional correction shifts 2: {additional_correction_shift_x} {additional_correction_shift_y}"
+        )
+        return (additional_correction_shift_x, additional_correction_shift_y)
+
+    def lamni_read_additional_correction_2(self, correction_file: str):
+        with open(correction_file, "r") as f:
+            num_elements = f.readline()
+            int_num_elements = int(num_elements.split(" ")[2])
+            print(int_num_elements)
+            corr_pos_x = []
+            corr_pos_y = []
+            corr_angle = []
+            for j in range(0, int_num_elements * 3):
+                line = f.readline()
+                value = line.split(" ")[2]
+                name = line.split(" ")[0].split("[")[0]
+                if name == "corr_pos_x":
+                    corr_pos_x.append(float(value) / 1000)
+                elif name == "corr_pos_y":
+                    corr_pos_y.append(float(value) / 1000)
+                elif name == "corr_angle":
+                    corr_angle.append(float(value))
+        self.corr_pos_x_2 = corr_pos_x
+        self.corr_pos_y_2 = corr_pos_y
+        self.corr_angle_2 = corr_angle
         return
 
     def _run_beamline_checks(self):
@@ -660,7 +796,7 @@ class LamNI(LamNIOpticsMixin):
     def _wait_for_beamline_checks(self):
         self._print_beamline_checks()
         try:
-            msg = LogbookMessage(self.client.logbook)
+            msg = bec.logbook.LogbookMessage()
             msg.add_text(
                 f"<p><mark class='pen-red'><strong>Beamline checks failed at {str(datetime.datetime.now())}: {''.join(self._check_msgs)}</strong></mark></p>"
             ).add_tag(["BEC", "beam_check"])
@@ -677,7 +813,7 @@ class LamNI(LamNIOpticsMixin):
             time.sleep(1)
 
         try:
-            msg = LogbookMessage(self.client.logbook)
+            msg = bec.logbook.LogbookMessage()
             msg.add_text(
                 f"<p><mark class='pen-red'><strong>Operation resumed at {str(datetime.datetime.now())}.</strong></mark></p>"
             ).add_tag(["BEC", "beam_check"])
@@ -696,6 +832,19 @@ class LamNI(LamNIOpticsMixin):
         with open("/tmp/currsamplesnr.txt") as tomo_number_file:
             tomo_number = int(tomo_number_file.read())
         return tomo_number
+
+    def _at_each_angle(self, angle: float) -> None:
+        self.tomo_scan_projection(angle)
+        self.tomo_reconstruct()
+
+        ### XMCD ###
+        # 2 projections, 1 for each polarization state
+        # cp()
+        # self.tomo_scan_projection(angle)
+        # self.tomo_reconstruct()
+        # cm()
+        # self.tomo_scan_projection(angle)
+        # self.tomo_reconstruct()
 
     def sub_tomo_scan(self, subtomo_number, start_angle=None):
         """start a subtomo"""
@@ -734,37 +883,55 @@ class LamNI(LamNIOpticsMixin):
                 print(f"Starting LamNI scan for angle {angle}")
                 while not successful:
                     self._start_beam_check()
-                    self.tomo_scan_projection(angle)
+                    if not self.special_angles:
+                        self._current_special_angles = []
+                    if self._current_special_angles:
+                        next_special_angle = self._current_special_angles[0]
+                        if np.isclose(angle, next_special_angle, atol=0.5):
+                            self._current_special_angles.pop(0)
+                            num_repeats = self.special_angle_repeats
+                    else:
+                        num_repeats = 1
+                    start_scan_number = bec.queue.next_scan_number
+                    for i in range(num_repeats):
+                        self._at_each_angle(angle)
 
                     if self._was_beam_okay():
                         successful = True
                     else:
                         self._wait_for_beamline_checks()
-                self.tomo_reconstruct()
-                tomo_id = 0
-                with open(
-                    os.path.expanduser("~/Data10/specES1/dat-files/tomography_scannumbers.txt"),
-                    "a+",
-                ) as out_file:
-                    # pylint: disable=undefined-variable
-                    out_file.write(
-                        f"{bec.queue.next_scan_number-1} {angle} {dev.lsamrot.read()['lsamrot']['value']} {self.tomo_id} {subtomo_number} {0} {'lamni'}\n"
-                    )
+
+                end_scan_number = bec.queue.next_scan_number
+                for scan_nr in range(start_scan_number, end_scan_number):
+                    self._write_tomo_scan_number(scan_nr, angle, subtomo_number)
+
+    def _write_tomo_scan_number(self, scan_number: int, angle: float, subtomo_number: int) -> None:
+        tomo_scan_numbers_file = os.path.expanduser(
+            "~/Data10/specES1/dat-files/tomography_scannumbers.txt"
+        )
+        with open(tomo_scan_numbers_file, "a+") as out_file:
+            # pylint: disable=undefined-variable
+            out_file.write(
+                f"{scan_number} {angle} {dev.lsamrot.read()['lsamrot']['value']:.3f} {self.tomo_id} {subtomo_number} {0} {'lamni'}\n"
+            )
 
     def tomo_scan(self, subtomo_start=1, start_angle=None):
         """start a tomo scan"""
         bec = builtins.__dict__.get("bec")
+        self._current_special_angles = self.special_angles.copy()
+
         if subtomo_start == 1 and start_angle is None:
             # pylint: disable=undefined-variable
             self.tomo_id = self.add_sample_database(
                 "bec_test_sample",
                 str(datetime.date.today()),
-                "e20588",
+                bec.active_account.decode(),
                 bec.queue.next_scan_number,
                 "lamni",
                 "test additional info",
                 "BEC",
             )
+            self.write_pdf_report()
         for ii in range(subtomo_start, 9):
             self.sub_tomo_scan(ii, start_angle=start_angle)
             start_angle = None
@@ -855,8 +1022,7 @@ class LamNI(LamNIOpticsMixin):
         piezo_range = f"{self.lamni_piezo_range_x:.2f}/{self.lamni_piezo_range_y:.2f}"
         stitching = f"{self.lamni_stitch_x:.2f}/{self.lamni_stitch_y:.2f}"
         dataset_id = str(self.client.queue.next_dataset_number)
-        # pylint: disable=undefined-variable
-        content = (
+        content = [
             f"{'Sample Name:':<{padding}}{'test':>{padding}}\n",
             f"{'Measurement ID:':<{padding}}{str(self.tomo_id):>{padding}}\n",
             f"{'Dataset ID:':<{padding}}{dataset_id:>{padding}}\n",
@@ -865,22 +1031,27 @@ class LamNI(LamNIOpticsMixin):
             f"{'Number of projections:':<{padding}}{int(360 / self.tomo_angle_stepsize * 8):>{padding}}\n",
             f"{'First scan number:':<{padding}}{self.client.queue.next_scan_number:>{padding}}\n",
             f"{'Last scan number approx.:':<{padding}}{self.client.queue.next_scan_number + int(360 / self.tomo_angle_stepsize * 8) + 10:>{padding}}\n",
-            f"{'Current photon energy:':<{padding}}{dev.mokev.read(cached=True)['mokev']['value']:>{padding}.4f}\n",
+            f"{'Current photon energy:':<{padding}}{dev.mokev.read(cached=True)['value']:>{padding}.4f}\n",
             f"{'Exposure time:':<{padding}}{self.tomo_countingtime:>{padding}.2f}\n",
             f"{'Fermat spiral step size:':<{padding}}{self.tomo_shellstep:>{padding}.2f}\n",
-            f"{'Piezo range (FOV sample plane):':<{padding}}{piezo_range>{padding}}\n",
+            f"{'Piezo range (FOV sample plane):':<{padding}}{piezo_range:>{padding}}\n",
             f"{'Restriction to circular FOV:':<{padding}}{self.tomo_circfov:>{padding}.2f}\n",
             f"{'Stitching:':<{padding}}{stitching:>{padding}}\n",
             f"{'Number of individual sub-tomograms:':<{padding}}{8:>{padding}}\n",
             f"{'Angular step within sub-tomogram:':<{padding}}{self.tomo_angle_stepsize:>{padding}.2f}\n",
-        )
-
-        with PDFWriter(os.path.expanduser("~/Data10/")) as file:
+        ]
+        content = "".join(content)
+        user_target = os.path.expanduser(f"~/Data10/documentation/tomo_scan_ID_{self.tomo_id}.pdf")
+        with PDFWriter(user_target) as file:
             file.write(header)
             file.write(content)
-
-        msg = LogbookMessage(self.client.logbook)
-        logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lamni_logo.png")
+        subprocess.run(
+            "xterm /work/sls/spec/local/XOMNY/bin/upload/upload_last_pon.sh &",
+            shell=True,
+        )
+        # status = subprocess.run(f"cp /tmp/spec-e20131-specES1.pdf {user_target}", shell=True)
+        msg = bec.logbook.LogbookMessage()
+        logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "LamNI_logo.png")
         msg.add_file(logo_path).add_text("".join(content).replace("\n", "</p><p>")).add_tag(
             ["BEC", "tomo_parameters", f"dataset_id_{dataset_id}", "LamNI"]
         )

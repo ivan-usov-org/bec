@@ -363,6 +363,7 @@ class ScanWorker(threading.Thread):
             producer.set_and_publish(MessageEndpoints.device_read(device), msg)
 
     def _kickoff_devices(self, instr: DeviceMsg) -> None:
+        # logger.info("kickoff")
         self.device_manager.producer.send(
             MessageEndpoints.device_instructions(),
             DeviceMsg(

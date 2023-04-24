@@ -1,35 +1,9 @@
-import { belongsTo, Entity, hasMany, model, property } from '@loopback/repository';
-import { Device, Scan } from '.';
+import { belongsTo, hasMany, model, property } from '@loopback/repository';
+import { Device, Experiment, Scan } from '.';
+import { SciBecEntity } from './scibecentity.model';
 
 @model()
-export class Session extends Entity {
-  @property({
-    type: 'string',
-    id: true,
-    generated: true,
-  })
-  id?: string;
-
-  @property({
-    type: 'string',
-  })
-  ownerGroup?: string;
-
-  @property({
-    type: 'array',
-    itemType: 'string',
-  })
-  accessGroups?: string[];
-
-  @property({
-    type: 'date',
-  })
-  createdAt: Date;
-
-  @property({
-    type: 'string',
-  })
-  createdBy: string;
+export class Session extends SciBecEntity {
 
   @property({
     type: 'string',
@@ -37,13 +11,19 @@ export class Session extends Entity {
   })
   name?: string;
 
-  @belongsTo(() => Session,
+  // @property({
+  //   type: 'string',
+  //   required: true,
+  // })
+  // experimentId: string;
+
+  @belongsTo(() => Experiment,
     {}, //relation metadata goes in here
     {// property definition goes in here
-      mongodb: { dataType: 'ObjectId' },
-      required: true
+      description: 'Session to which this device belongs.',
+      mongodb: { dataType: 'ObjectId' }
     })
-  beamlineId?: string;
+  experimentId?: string;
 
   @hasMany(() => Scan, { keyTo: 'sessionId' })
   scans?: Scan[];
@@ -51,12 +31,10 @@ export class Session extends Entity {
   @hasMany(() => Device, { keyTo: 'sessionId' })
   devices?: Device[];
 
-  // @belongsTo(() => Session,
-  //   {}, //relation metadata goes in here
-  //   {// property definition goes in here
-  //     mongodb: {dataType: 'ObjectId'}
-  //   })
-  // sessionId?: string;
+  @property({
+    type: 'object',
+  })
+  sessionConfig?: object;
 
   constructor(data?: Partial<Session>) {
     super(data);

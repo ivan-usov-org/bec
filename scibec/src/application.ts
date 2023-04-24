@@ -1,16 +1,17 @@
-import {BootMixin} from '@loopback/boot';
-import {ApplicationConfig} from '@loopback/core';
-import {RepositoryMixin} from '@loopback/repository';
-import {RestApplication} from '@loopback/rest';
+import { BootMixin } from '@loopback/boot';
+import { ApplicationConfig } from '@loopback/core';
+import { RepositoryMixin } from '@loopback/repository';
+import { RestApplication } from '@loopback/rest';
 import {
   RestExplorerBindings,
   RestExplorerComponent
 } from '@loopback/rest-explorer';
-import {ServiceMixin} from '@loopback/service-proxy';
+import { ServiceMixin } from '@loopback/service-proxy';
 import path from 'path';
-import {MySequence} from './sequence';
+import { MySequence } from './sequence';
+import { startWebsocket } from './utils/websocket';
 
-export {ApplicationConfig};
+export { ApplicationConfig };
 
 export class ScibecApplication extends BootMixin(
   ServiceMixin(RepositoryMixin(RestApplication)),
@@ -42,5 +43,9 @@ export class ScibecApplication extends BootMixin(
         nested: true,
       },
     };
+  }
+
+  async startWebsocket(): Promise<void> {
+    return startWebsocket(this);
   }
 }

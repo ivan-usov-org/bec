@@ -202,6 +202,10 @@ class DeviceBase(RPCBase, Device):
         pass
 
     @rpc
+    def stop(self):
+        pass
+
+    @rpc
     def read(self, cached=False, use_readback=True, filter_signal=True):
         if use_readback:
             val = self.parent.producer.get(MessageEndpoints.device_readback(self.name))

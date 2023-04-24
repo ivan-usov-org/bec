@@ -49,5 +49,9 @@ bec._bl_info_register(OperatorInfo)
 # SETUP CLIENT PLUGINS
 # from bec_client.plugins.cSAXS import fshclose, fshopen, fshstatus
 
-bec._ip.prompts.username = "X-Treme"
-bec._ip.prompts.status = 1
+# bec._ip.prompts.username = "LamNI"
+# bec._ip.prompts.status = 1
+
+# from bec_client.plugins.LamNI import *
+
+# lamni = LamNI(bec)

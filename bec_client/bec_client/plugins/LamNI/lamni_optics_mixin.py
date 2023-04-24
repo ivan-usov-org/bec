@@ -1,9 +1,10 @@
 import time
+
+from rich import box
 from rich.console import Console
 from rich.table import Table
-from rich import box
 
-from bec_client.plugins.cSAXS import fshclose
+from bec_client.plugins.cSAXS import epics_get, epics_put, fshclose
 
 
 class LamNIOpticsMixin:
@@ -21,11 +22,15 @@ class LamNIOpticsMixin:
         umv(dev.leyey, leyey_out)
 
         epics_put("XOMNYI-XEYE-ACQ:0", 2)
-        umv(dev.dttrz, 5830, dev.fttrz, 3338)
+        # move rotation stage to zero to avoid problems with wires
+        umv(dev.lsamrot, 0)
+        umv(dev.dttrz, 5854, dev.fttrz, 2395)
 
     def leye_in(self):
         bec.queue.next_dataset_number += 1
-        umv(dev.dttrz, 5830 + 600, dev.fttrz, 3338 + 600)
+        # move rotation stage to zero to avoid problems with wires
+        umv(dev.lsamrot, 0)
+        umv(dev.dttrz, 6419.677, dev.fttrz, 2959.979)
         while True:
             moved_out = (input("Did the flight tube move out? (Y/n)") or "y").lower()
             if moved_out == "y":
@@ -50,12 +55,12 @@ class LamNIOpticsMixin:
         This will disable rt feedback, move the FZP and re-enabled the feedback.
         """
         if "rtx" in dev and dev.rtx.enabled:
-            dev.rtx.feedback_disable()
+            dev.rtx.controller.feedback_disable()
 
         self._lfzp_in()
 
         if "rtx" in dev and dev.rtx.enabled:
-            dev.rtx.feedback_enable_with_reset()
+            dev.rtx.controller.feedback_enable_with_reset()
 
     def loptics_in(self):
         """
@@ -67,7 +72,7 @@ class LamNIOpticsMixin:
     def loptics_out(self):
         """Move out the lamni optics"""
         if "rtx" in dev and dev.rtx.enabled:
-            dev.rtx.feedback_disable()
+            dev.rtx.controller.feedback_disable()
 
         # self.lcs_out()
         self.losa_out()
@@ -77,7 +82,7 @@ class LamNIOpticsMixin:
 
         if "rtx" in dev and dev.rtx.enabled:
             time.sleep(1)
-            dev.rtx.feedback_enable_with_reset()
+            dev.rtx.controller.feedback_enable_with_reset()
 
     def lcs_in(self):
         # umv lcsx -1.852 lcsy -0.095
