@@ -46,6 +46,7 @@ class LiveUpdatesTable(LiveUpdatesBase):
         report_instruction: dict = None,
         request: BECMessage.ScanQueueMessage = None,
         callbacks: List[Callable] = None,
+        print_table_data=True,
     ) -> None:
         super().__init__(
             bec, report_instruction=report_instruction, request=request, callbacks=callbacks
@@ -56,6 +57,7 @@ class LiveUpdatesTable(LiveUpdatesBase):
         self.point_data = None
         self.point_id = 0
         self.table = None
+        self._print_table_data = print_table_data
 
     async def wait_for_scan_to_start(self):
         """wait until the scan starts"""
@@ -161,7 +163,7 @@ class LiveUpdatesTable(LiveUpdatesBase):
 
     async def _run_table_update(self, target_num_points):
         with ScanProgressBar(
-            scan_number=self.scan_item.scan_number, clear_on_exit=True
+            scan_number=self.scan_item.scan_number, clear_on_exit=self._print_table_data
         ) as progressbar:
             while True:
                 self.check_alarms()
@@ -173,27 +175,8 @@ class LiveUpdatesTable(LiveUpdatesBase):
 
                 progressbar.update(self.point_id)
                 if self.point_data:
-                    if not self.table:
-                        self.dev_values = (len(self._get_header()) - 1) * [0]
-                        self.table = self._prepare_table()
-                        print(self.table.get_header_lines())
-
                     self.point_id += 1
-                    if self.point_id % 100 == 0:
-                        print(self.table.get_header_lines())
-                    ind = 0
-                    for dev in self.devices:
-                        if dev in self.bec.device_manager.devices:
-                            obj = self.bec.device_manager.devices[dev]
-                            for hint in obj._hints:
-                                signal = self.point_data.content["data"].get(dev, {}).get(hint)
-                                self.dev_values[ind] = signal.get("value") if signal else -999
-                                ind += 1
-                        else:
-                            signal = self.point_data.content["data"].get(dev, {})
-                            self.dev_values[ind] = signal.get("value") if signal else -999
-                            ind += 1
-                    print(self.table.get_row(self.point_id, *self.dev_values))
+                    self.print_table_data()
                     self.emit_point(self.point_data.content, metadata=self.point_data.metadata)
                     progressbar.update(self.point_id)
                 else:
@@ -202,15 +185,40 @@ class LiveUpdatesTable(LiveUpdatesBase):
 
                 if not self.scan_item.num_points:
                     continue
-                # if self.scan_item.open_scan_defs:
-                #     continue
 
                 if self.point_id == target_num_points:
                     break
                 if self.point_id > self.scan_item.num_points:
                     raise RuntimeError("Received more points than expected.")
 
+    def print_table_data(self):
+        if not self._print_table_data:
+            return
+
+        if not self.table:
+            self.dev_values = (len(self._get_header()) - 1) * [0]
+            self.table = self._prepare_table()
+            print(self.table.get_header_lines())
+
+        if self.point_id % 100 == 0:
+            print(self.table.get_header_lines())
+        ind = 0
+        for dev in self.devices:
+            if dev in self.bec.device_manager.devices:
+                obj = self.bec.device_manager.devices[dev]
+                for hint in obj._hints:
+                    signal = self.point_data.content["data"].get(dev, {}).get(hint)
+                    self.dev_values[ind] = signal.get("value") if signal else -999
+                    ind += 1
+            else:
+                signal = self.point_data.content["data"].get(dev, {})
+                self.dev_values[ind] = signal.get("value") if signal else -999
+                ind += 1
+        print(self.table.get_row(self.point_id, *self.dev_values))
+
     def close_table(self):
+        if not self.table:
+            return
         elapsed_time = self.scan_item.end_time - self.scan_item.start_time
         print(
             self.table.get_footer(
@@ -231,7 +239,8 @@ class LiveUpdatesTable(LiveUpdatesBase):
         if self.table:
             self.table = None
         else:
-            print(f"\nStarting scan {self.scan_item.scan_number}.")
+            if self._print_table_data:
+                print(f"\nStarting scan {self.scan_item.scan_number}.")
 
         await self.core()
 
