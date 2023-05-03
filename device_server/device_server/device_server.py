@@ -4,7 +4,6 @@ import threading
 import time
 import traceback
 from concurrent.futures import ThreadPoolExecutor
-from functools import reduce
 from io import StringIO
 from typing import Any
 
@@ -16,7 +15,7 @@ from bec_utils.devicemanager import OnFailure
 from ophyd import Staged
 from ophyd.utils import errors as ophyd_errors
 
-from device_server.devices import is_serializable
+from device_server.devices import is_serializable, rgetattr
 from device_server.devices.devicemanager import DeviceManagerDS
 
 logger = bec_logger.logger
@@ -30,15 +29,6 @@ class DisabledDeviceError(Exception):
 
 class InvalidDeviceError(Exception):
     pass
-
-
-def rgetattr(obj, attr, *args):
-    """See https://stackoverflow.com/questions/31174295/getattr-and-setattr-on-nested-objects"""
-
-    def _getattr(obj, attr):
-        return getattr(obj, attr, *args)
-
-    return reduce(_getattr, [obj] + attr.split("."))
 
 
 class DeviceServer(BECService):
@@ -319,8 +309,10 @@ class DeviceServer(BECService):
         if len(kickoff_args) > 1:
             obj.kickoff(metadata=instr.metadata, **instr.content["parameter"])
             return
-        obj.configure(instr.content["parameter"])
-        obj.kickoff()
+        obj.configure(instr.content["parameter"].get("configure", {}))
+        status = obj.kickoff()
+        status.__dict__["instruction"] = instr
+        status.add_callback(self._status_callback)
 
     def _complete_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
         obj = self.device_manager.devices.get(instr.content["device"]).obj

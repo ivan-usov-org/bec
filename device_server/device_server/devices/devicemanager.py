@@ -1,5 +1,6 @@
 import inspect
 import traceback
+from functools import reduce
 
 import ophyd
 import ophyd.sim as ops
@@ -20,6 +21,15 @@ from device_server.devices.config_update_handler import ConfigUpdateHandler
 from device_server.devices.device_serializer import get_device_info
 
 logger = bec_logger.logger
+
+
+def rgetattr(obj, attr, *args):
+    """See https://stackoverflow.com/questions/31174295/getattr-and-setattr-on-nested-objects"""
+
+    def _getattr(obj, attr):
+        return getattr(obj, attr, *args)
+
+    return reduce(_getattr, [obj] + attr.split("."))
 
 
 class DSDevice(Device):
@@ -68,8 +78,13 @@ class DeviceManagerDS(DeviceManagerBase):
             module = opd
         elif hasattr(ops, dev_type):
             module = ops
+        elif ":" in dev_type:
+            dev_type_scope = dev_type.split(":")
+            prefix = dev_type_scope[:-1]
+            dev_type = dev_type_scope[-1]
+            module = rgetattr(opd, ".".join(prefix))
         else:
-            TypeError(f"Unknown device class {dev_type}")
+            raise TypeError(f"Unknown device class {dev_type}")
         return getattr(module, dev_type)
 
     def _load_session(self, *_args, **_kwargs):
