@@ -3,6 +3,7 @@ from unittest import mock
 import pytest
 from bec_utils import BECMessage, MessageEndpoints
 from bec_utils.tests.utils import ConnectorMock
+
 from scan_server.scan_stubs import ScanAbortion, ScanStubs
 
 
@@ -14,7 +15,10 @@ from scan_server.scan_stubs import ScanAbortion, ScanStubs
             None,
             None,
             BECMessage.DeviceInstructionMessage(
-                device="rtx", action="kickoff", parameter={}, metadata={}
+                device="rtx",
+                action="kickoff",
+                parameter={"configure": {}, "wait_group": "kickoff"},
+                metadata={},
             ),
         ),
         (
@@ -24,7 +28,10 @@ from scan_server.scan_stubs import ScanAbortion, ScanStubs
             BECMessage.DeviceInstructionMessage(
                 device="rtx",
                 action="kickoff",
-                parameter={"num_pos": 5, "positions": [1, 2, 3, 4, 5], "exp_time": 2},
+                parameter={
+                    "configure": {"num_pos": 5, "positions": [1, 2, 3, 4, 5], "exp_time": 2},
+                    "wait_group": "kickoff",
+                },
                 metadata={},
             ),
         ),
