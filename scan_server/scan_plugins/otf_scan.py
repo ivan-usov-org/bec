@@ -1,7 +1,9 @@
-from scan_server.scans import FlyScanBase, ScanBase, ScanArgType
+import time
+
 import numpy as np
 from bec_utils import bec_logger
-import time
+
+from scan_server.scans import FlyScanBase, ScanArgType, ScanBase
 
 logger = bec_logger.logger
 
@@ -24,23 +26,32 @@ class OTFScan(FlyScanBase):
         self.axis = []
         self.scan_motors = []
         self.num_pos = 0
+        self.mono = self.caller_kwargs.get("mono", "mono")
+        self.otf_device = self.caller_kwargs.get("otf", "otf")
 
     def scan_core(self):
-        yield from self.stubs.set(device="mono", value=self.caller_kwargs["e1"], wait_group="flyer")
-        yield from self.stubs.wait(device=["mono"], wait_group="flyer", wait_type="move")
-        yield from self.stubs.kickoff(
-            device="otf",
-            parameter=self.caller_kwargs,
+        yield from self.stubs.set(
+            device=self.mono, value=self.caller_kwargs["e1"], wait_group="flyer"
         )
-        yield from self.stubs.complete(device="otf")
+        yield from self.stubs.wait(device=[self.mono], wait_group="flyer", wait_type="move")
+        yield from self.stubs.kickoff(
+            device=self.otf_device,
+            parameter={
+                key: val for key, val in self.caller_kwargs.items() if key in ["e1", "e2", "time"]
+            },
+        )
+        yield from self.stubs.wait(device=[self.otf_device], wait_group="kickoff", wait_type="move")
+        yield from self.stubs.complete(device=self.otf_device)
         target_diid = self.DIID - 1
 
         while True:
             yield from self.stubs.read_and_wait(group="primary", wait_group="readout_primary")
             status = self.stubs.get_req_status(
-                device="otf", RID=self.metadata["RID"], DIID=target_diid
+                device=self.otf_device, RID=self.metadata["RID"], DIID=target_diid
             )
-            progress = self.stubs.get_device_progress(device="otf", RID=self.metadata["RID"])
+            progress = self.stubs.get_device_progress(
+                device=self.otf_device, RID=self.metadata["RID"]
+            )
             if progress:
                 self.num_pos = progress
             if status:

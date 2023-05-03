@@ -144,7 +144,7 @@ class ScanStubs:
             metadata=metadata,
         )
 
-    def kickoff(self, *, device: str, parameter: dict = None, metadata=None):
+    def kickoff(self, *, device: str, parameter: dict = None, wait_group="kickoff", metadata=None):
         """Kickoff a fly scan device.
 
         Args:
@@ -152,6 +152,7 @@ class ScanStubs:
             parameter (dict, optional): Additional parameters that should be forwarded to the device. Defaults to {}.
         """
         parameter = parameter if parameter is not None else {}
+        parameter = {"configure": parameter, "wait_group": wait_group}
         yield self._device_msg(
             device=device,
             action="kickoff",
