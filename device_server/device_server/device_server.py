@@ -306,10 +306,11 @@ class DeviceServer(BECService):
         logger.debug(f"Kickoff device: {instr}")
         obj = self.device_manager.devices.get(instr.content["device"]).obj
         kickoff_args = inspect.getfullargspec(obj.kickoff).args
+        kickoff_parameter = instr.content["parameter"].get("configure", {})
         if len(kickoff_args) > 1:
-            obj.kickoff(metadata=instr.metadata, **instr.content["parameter"])
+            obj.kickoff(metadata=instr.metadata, **kickoff_parameter)
             return
-        obj.configure(instr.content["parameter"].get("configure", {}))
+        obj.configure(kickoff_parameter)
         status = obj.kickoff()
         status.__dict__["instruction"] = instr
         status.add_callback(self._status_callback)
