@@ -344,7 +344,7 @@ class DeviceServer(BECService):
         if hasattr(status, "device"):
             device_name = status.device.root.name
         else:
-            device_name = status.obj.name
+            device_name = status.obj.root.name
         dev_msg = BECMessage.DeviceReqStatusMessage(
             device=device_name,
             success=status.success,

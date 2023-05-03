@@ -1,4 +1,5 @@
 import enum
+import time
 from typing import List
 
 import msgpack
@@ -20,6 +21,7 @@ from .BECMessage import (
 )
 from .endpoints import MessageEndpoints
 from .logger import bec_logger
+from .redis_connector import RedisProducer
 
 logger = bec_logger.logger
 
@@ -40,6 +42,33 @@ class ReadoutPriority(str, enum.Enum):
     MONITORED = "monitored"
     BASELINE = "baseline"
     IGNORED = "ignored"
+
+
+class Status:
+    def __init__(self, producer: RedisProducer, RID: str) -> None:
+        self._producer = producer
+        self._RID = RID
+
+    def wait(self, timeout=None):
+        """wait until the request is completed"""
+        sleep_time_step = 0.1
+        sleep_count = 0
+
+        def _sleep(sleep_time):
+            nonlocal sleep_count
+            nonlocal timeout
+            time.sleep(sleep_time)
+            sleep_count += sleep_time
+            if timeout is not None and sleep_count > timeout:
+                raise TimeoutError()
+
+        while True:
+            request_status = self._producer.lrange(
+                MessageEndpoints.device_req_status(self._RID), 0, -1
+            )
+            if request_status:
+                break
+            _sleep(sleep_time_step)
 
 
 class Device:

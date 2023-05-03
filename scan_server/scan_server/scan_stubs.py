@@ -3,7 +3,13 @@ import uuid
 from typing import Callable, List, Union
 
 import numpy as np
-from bec_utils import BECMessage, MessageEndpoints, ProducerConnector, bec_logger
+from bec_utils import (
+    BECMessage,
+    MessageEndpoints,
+    ProducerConnector,
+    Status,
+    bec_logger,
+)
 
 from .errors import DeviceMessageError, ScanAbortion
 
@@ -77,7 +83,12 @@ class ScanStubs:
             raise ScanAbortion(error_msg)
 
         logger.debug(msg.content.get("out"))
-        return msg.content.get("return_val")
+        return_val = msg.content.get("return_val")
+        if not isinstance(return_val, dict):
+            return return_val
+        if return_val.get("type") == "status" and return_val.get("RID"):
+            return Status(self.producer, return_val.get("RID"))
+        return return_val
 
     def set_and_wait(self, *, device: List[str], positions: Union[list, np.ndarray]):
         """Set devices to a specific position and wait completion.

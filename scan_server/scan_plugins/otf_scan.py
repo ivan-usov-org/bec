@@ -120,13 +120,17 @@ class HystScan(ScanBase):
 
     def scan_core(self):
         # yield from self._move_and_wait(self.positions[0])
-        # yield from self.stubs.send_rpc_and_wait("field_x", "ramprate.set", self.default_ramp_rate)
+        status = yield from self.stubs.send_rpc_and_wait(
+            "field_x", "ramprate.set", self.default_ramp_rate
+        )
+        status.wait()
         yield from self.stubs.set(
             device=self.flyer, value=self.flyer_positions[0], wait_group="flyer"
         )
         yield from self.stubs.wait(device=[self.flyer], wait_group="flyer", wait_type="move")
 
-        # yield from self.stubs.send_rpc_and_wait("field_x", "ramprate.set", self.ramp_rate)
+        status = yield from self.stubs.send_rpc_and_wait("field_x", "ramprate.set", self.ramp_rate)
+        status.wait()
         # send the slow motor on its way
         yield from self.stubs.set(
             device=self.flyer,
@@ -162,7 +166,11 @@ class HystScan(ScanBase):
             self.pointID += 1
             self.scan_motors[0]
             self.num_pos += 1
-        # yield from self.stubs.send_rpc_and_wait("field_x", "ramprate.set", self.default_ramp_rate)
+
+        status = yield from self.stubs.send_rpc_and_wait(
+            "field_x", "ramprate.set", self.default_ramp_rate
+        )
+        status.wait()
 
     def return_to_start(self):
         yield None

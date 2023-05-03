@@ -10,6 +10,7 @@ from .devicemanager import (
     DeviceContainer,
     DeviceManagerBase,
     DeviceStatus,
+    Status,
 )
 from .endpoints import MessageEndpoints
 from .redis_connector import Alarms, RedisConnector
