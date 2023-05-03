@@ -56,7 +56,7 @@ class ScanStubs:
             "args": args,
             "kwargs": kwargs,
         }
-        yield from self.rpc(device=device, parameter=parameter)
+        yield from self.rpc(device=device, parameter=parameter, metadata={"response": True})
         return self._get_from_rpc(rpc_id)
 
     def _get_from_rpc(self, rpc_id):
@@ -342,7 +342,7 @@ class ScanStubs:
         """close a scan group"""
         yield self._device_msg(device=None, action="close_scan_group", parameter={})
 
-    def rpc(self, *, device: str, parameter: dict):
+    def rpc(self, *, device: str, parameter: dict, metadata=None):
         """Perfrom an RPC (remote procedure call) on a device.
 
         Args:
@@ -354,6 +354,7 @@ class ScanStubs:
             device=device,
             action="rpc",
             parameter=parameter,
+            metadata=metadata,
         )
 
     def scan_report_instruction(self, instructions: dict):
