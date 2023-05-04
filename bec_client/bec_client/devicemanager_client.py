@@ -7,6 +7,7 @@ from bec_utils import (
     Device,
     DeviceManagerBase,
     MessageEndpoints,
+    Status,
     bec_logger,
 )
 
@@ -81,7 +82,7 @@ class RPCBase:
             scan_type="device_rpc",
             parameter=params,
             queue="primary",
-            metadata={"RID": requestID},
+            metadata={"RID": requestID, "response": True},
         )
         self.root.parent.producer.send(MessageEndpoints.scan_queue_request(), msg.dumps())
         queue = self.root.parent.parent.queue
@@ -106,7 +107,12 @@ class RPCBase:
                 f"During an RPC, the following error occured:\n{error['error']}: {error['msg']}.\nTraceback: {error['traceback']}\n The scan will be aborted."
             )
         print(msg.content.get("out"))
-        return msg.content.get("return_val")
+        return_val = msg.content.get("return_val")
+        if not isinstance(return_val, dict):
+            return return_val
+        if return_val.get("type") == "status" and return_val.get("RID"):
+            return Status(self.root.parent.producer, return_val.get("RID"))
+        return return_val
 
     def _get_rpc_func_name(self, fcn_name=None, fcn=None, use_parent=False):
         if not fcn_name:

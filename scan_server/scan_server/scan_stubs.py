@@ -3,7 +3,13 @@ import uuid
 from typing import Callable, List, Union
 
 import numpy as np
-from bec_utils import BECMessage, MessageEndpoints, ProducerConnector, bec_logger
+from bec_utils import (
+    BECMessage,
+    MessageEndpoints,
+    ProducerConnector,
+    Status,
+    bec_logger,
+)
 
 from .errors import DeviceMessageError, ScanAbortion
 
@@ -56,7 +62,7 @@ class ScanStubs:
             "args": args,
             "kwargs": kwargs,
         }
-        yield from self.rpc(device=device, parameter=parameter)
+        yield from self.rpc(device=device, parameter=parameter, metadata={"response": True})
         return self._get_from_rpc(rpc_id)
 
     def _get_from_rpc(self, rpc_id):
@@ -77,7 +83,12 @@ class ScanStubs:
             raise ScanAbortion(error_msg)
 
         logger.debug(msg.content.get("out"))
-        return msg.content.get("return_val")
+        return_val = msg.content.get("return_val")
+        if not isinstance(return_val, dict):
+            return return_val
+        if return_val.get("type") == "status" and return_val.get("RID"):
+            return Status(self.producer, return_val.get("RID"))
+        return return_val
 
     def set_and_wait(self, *, device: List[str], positions: Union[list, np.ndarray]):
         """Set devices to a specific position and wait completion.
@@ -144,7 +155,7 @@ class ScanStubs:
             metadata=metadata,
         )
 
-    def kickoff(self, *, device: str, parameter: dict = None, metadata=None):
+    def kickoff(self, *, device: str, parameter: dict = None, wait_group="kickoff", metadata=None):
         """Kickoff a fly scan device.
 
         Args:
@@ -152,6 +163,7 @@ class ScanStubs:
             parameter (dict, optional): Additional parameters that should be forwarded to the device. Defaults to {}.
         """
         parameter = parameter if parameter is not None else {}
+        parameter = {"configure": parameter, "wait_group": wait_group}
         yield self._device_msg(
             device=device,
             action="kickoff",
@@ -341,7 +353,7 @@ class ScanStubs:
         """close a scan group"""
         yield self._device_msg(device=None, action="close_scan_group", parameter={})
 
-    def rpc(self, *, device: str, parameter: dict):
+    def rpc(self, *, device: str, parameter: dict, metadata=None):
         """Perfrom an RPC (remote procedure call) on a device.
 
         Args:
@@ -353,6 +365,7 @@ class ScanStubs:
             device=device,
             action="rpc",
             parameter=parameter,
+            metadata=metadata,
         )
 
     def scan_report_instruction(self, instructions: dict):
