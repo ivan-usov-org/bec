@@ -37,6 +37,7 @@ class MessageEndpoints:
     _scan_status_list = "scans/scan_status_list"
     _available_scans = "scans/available_scans"
     _scan_segment = "scans/scan_segment"
+    _scan_baseline = "scans/scan_baseline"
     _bluesky_events = "scans/bluesky-events"
     _public_scan_info = Template("public/$scanID/scan_info")
     _public_scan_segment = Template("public/$scanID/scan_segment/$pointID")
@@ -186,6 +187,10 @@ class MessageEndpoints:
     @classmethod
     def scan_segment(cls):
         return cls._scan_segment
+
+    @classmethod
+    def scan_baseline(cls):
+        return cls._scan_baseline
 
     # instructions
     @classmethod
