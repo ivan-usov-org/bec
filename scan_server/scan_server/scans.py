@@ -175,6 +175,8 @@ class RequestBase(ABC):
         self._pre_scan_macros = []
         self._scan_report_devices = None
         self._get_scan_motors()
+        self.readout_priority = {"monitored": [], "baseline": [], "ignored": []}
+        self.update_readout_priority()
         if metadata is None:
             self.metadata = {}
         self.stubs = ScanStubs(
@@ -238,6 +240,10 @@ class RequestBase(ABC):
             if motor not in self.device_manager.devices:
                 continue
             self.scan_motors.append(motor)
+
+    def update_readout_priority(self):
+        """update the readout priority for this request. Typically the monitored devices should also include the scan motors."""
+        self.readout_priority["monitored"] = self.scan_motors
 
     @abstractmethod
     def run(self):
@@ -328,6 +334,7 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         positions = self.positions if isinstance(self.positions, list) else self.positions.tolist()
         yield from self.stubs.open_scan(
             scan_motors=self.scan_motors,
+            readout_priority=self.readout_priority,
             num_pos=self.num_pos,
             positions=positions,
             scan_name=self.scan_name,

@@ -126,6 +126,7 @@ class ScanStubs:
         self,
         *,
         scan_motors: list,
+        readout_priority: dict,
         num_pos: int,
         scan_name: str,
         scan_type: str,
@@ -136,6 +137,7 @@ class ScanStubs:
 
         Args:
             scan_motors (list): List of scan motors.
+            readout_priority (dict): Modification of the readout priority.
             num_pos (int): Number of positions within the scope of this scan.
             positions (list): List of positions for this scan.
             scan_name (str): Scan name.
@@ -146,7 +148,8 @@ class ScanStubs:
             device=None,
             action="open_scan",
             parameter={
-                "primary": scan_motors,
+                "scan_motors": scan_motors,
+                "readout_priority": readout_priority,
                 "num_points": num_pos,
                 "positions": positions,
                 "scan_name": scan_name,
