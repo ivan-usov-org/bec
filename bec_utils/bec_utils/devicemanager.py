@@ -229,7 +229,9 @@ class Device:
         self.set_user_parameter(param)
 
     def __eq__(self, other):
-        return other.name == self.name
+        if isinstance(other, Device):
+            return other.name == self.name
+        return False
 
     def __hash__(self):
         return self.name.__hash__()
@@ -350,7 +352,10 @@ class DeviceContainer(dict):
                 scan_motors = [scan_motors]
             for scan_motor in scan_motors:
                 if not scan_motor in devices:
-                    devices.append(scan_motor)
+                    if isinstance(scan_motor, Device):
+                        devices.append(scan_motor)
+                    else:
+                        devices.append(self.get(scan_motor))
         if not readout_priority:
             readout_priority = {}
 
