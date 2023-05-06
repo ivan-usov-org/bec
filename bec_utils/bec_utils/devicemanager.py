@@ -228,6 +228,12 @@ class Device:
         param.update(val)
         self.set_user_parameter(param)
 
+    def __eq__(self, other):
+        return other.name == self.name
+
+    def __hash__(self):
+        return self.name.__hash__()
+
     def __repr__(self):
         if isinstance(self.parent, DeviceManagerBase):
             config = "".join(
@@ -356,7 +362,7 @@ class DeviceContainer(dict):
         excluded_devices.extend([self.get(dev) for dev in readout_priority.get("baseline", [])])
         excluded_devices.extend([self.get(dev) for dev in readout_priority.get("ignored", [])])
 
-        return [dev for dev in devices if dev not in excluded_devices]
+        return [dev for dev in set(devices) if dev not in excluded_devices]
 
     @typechecked
     def baseline_devices(self, scan_motors: list = None, readout_priority: dict = None) -> list:
@@ -374,7 +380,7 @@ class DeviceContainer(dict):
         excluded_devices.extend([self.get(dev) for dev in readout_priority.get("monitored", [])])
         excluded_devices.extend([self.get(dev) for dev in readout_priority.get("ignored", [])])
 
-        return [dev for dev in self.enabled_devices if dev not in excluded_devices]
+        return [dev for dev in set(devices) if dev not in excluded_devices]
 
     def get_devices_with_tags(self, tags: List) -> List:
         """get a list of all devices that have the specified tags"""
