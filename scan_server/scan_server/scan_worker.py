@@ -37,6 +37,7 @@ class ScanWorker(threading.Thread):
         self.signal_event = threading.Event()
         self.scan_id = None
         self.scan_motors = []
+        self.readout_priority = {}
         self.scan_type = None
         self.current_scanID = None
         self.current_scan_info = None
@@ -64,7 +65,9 @@ class ScanWorker(threading.Thread):
         if not instr.content.get("device"):
             group = instr.content["parameter"].get("group")
             if group == "primary":
-                devices = self.device_manager.devices.primary_devices(self.scan_motors)
+                devices = self.device_manager.devices.primary_devices(
+                    self.readout_priority["monitored"]
+                )
             elif group == "scan_motor":
                 devices = self.scan_motors
         else:
@@ -312,7 +315,10 @@ class ScanWorker(threading.Thread):
         devices = instr.content.get("device")
         if devices is None:
             devices = [
-                dev.name for dev in self.device_manager.devices.primary_devices(self.scan_motors)
+                dev.name
+                for dev in self.device_manager.devices.primary_devices(
+                    self.readout_priority["monitored"]
+                )
             ]
         producer.send(
             MessageEndpoints.device_instructions(),
@@ -387,7 +393,10 @@ class ScanWorker(threading.Thread):
 
     def _baseline_reading(self, instr: DeviceMsg) -> None:
         baseline_devices = [
-            dev.name for dev in self.device_manager.devices.baseline_devices(self.scan_motors)
+            dev.name
+            for dev in self.device_manager.devices.baseline_devices(
+                readout_priority=self.readout_priority
+            )
         ]
         params = instr.content["parameter"]
         self.device_manager.producer.send(
@@ -414,8 +423,9 @@ class ScanWorker(threading.Thread):
             if instr.content["parameter"].get("primary") is not None:
                 self.scan_motors = [
                     self.device_manager.devices[dev]
-                    for dev in instr.content["parameter"].get("primary")
+                    for dev in instr.content["parameter"].get("scan_motors")
                 ]
+                self.readout_priority = instr.content["parameter"].get("readout_priority", {})
             self.scan_type = instr.content["parameter"].get("scan_type")
 
         if not instr.metadata.get("scan_def_id"):

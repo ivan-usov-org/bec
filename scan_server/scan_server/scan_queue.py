@@ -425,6 +425,7 @@ class RequestBlock:
         self.instructions = None
         self.scan = None
         self.scan_motors = []
+        self.readout_priority = {}
         self.msg = msg
         self.RID = msg.metadata["RID"]
         self.scan_assembler = assembler
@@ -444,6 +445,7 @@ class RequestBlock:
             self.scanID = str(uuid.uuid4())
         if self.scan.caller_args:
             self.scan_motors = self.scan.scan_motors
+        self.readout_priority = self.scan.readout_priority
 
     @property
     def scan_def_id(self):
@@ -496,6 +498,7 @@ class RequestBlock:
             "msg": self.msg.dumps(),
             "RID": self.RID,
             "scan_motors": self.scan_motors,
+            "readout_priority": self.readout_priority,
             "is_scan": self.is_scan,
             "scan_number": self.scan_number,
             "scanID": self.scanID,
