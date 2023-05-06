@@ -178,6 +178,11 @@ class SciBec:
             payload=data,
         )
 
+    def add_event(self, data: dict, device_id: str, scan_id: str):
+        headers = {"Content-type": "application/json"}
+        payload = {"data": data, "deviceId": device_id, "scanId": scan_id}
+        return self.client.post_request(f"{self.url}/events", payload=payload, headers=headers)
+
     def add_device(self, device_info: dict):
         headers = {"Content-type": "application/json"}
         try:
