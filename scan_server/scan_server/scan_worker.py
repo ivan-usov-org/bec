@@ -66,7 +66,7 @@ class ScanWorker(threading.Thread):
             group = instr.content["parameter"].get("group")
             if group == "primary":
                 devices = self.device_manager.devices.primary_devices(
-                    self.readout_priority["monitored"]
+                    self.readout_priority.get("monitored", [])
                 )
             elif group == "scan_motor":
                 devices = self.scan_motors
@@ -317,7 +317,7 @@ class ScanWorker(threading.Thread):
             devices = [
                 dev.name
                 for dev in self.device_manager.devices.primary_devices(
-                    self.readout_priority["monitored"]
+                    self.readout_priority.get("monitored", [])
                 )
             ]
         producer.send(
@@ -420,7 +420,7 @@ class ScanWorker(threading.Thread):
     def _open_scan(self, instr: DeviceMsg) -> None:
         if not self.scan_id:
             self.scan_id = instr.metadata.get("scanID")
-            if instr.content["parameter"].get("primary") is not None:
+            if instr.content["parameter"].get("scan_motors") is not None:
                 self.scan_motors = [
                     self.device_manager.devices[dev]
                     for dev in instr.content["parameter"].get("scan_motors")
