@@ -144,6 +144,7 @@ class InstructionQueueMock(InstructionQueueItem):
 def test_get_devices_from_instruction(instruction, devices):
     worker = get_scan_worker()
     worker.scan_motors = devices
+    worker.readout_priority.update({"monitored": devices})
 
     returned_devices = worker._get_devices_from_instruction(instruction)
 
@@ -707,7 +708,7 @@ def test_send_rpc(instr):
         (
             BECMessage.DeviceInstructionMessage(
                 device=["samx"],
-                action="trigger",
+                action="read",
                 parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
                 metadata={
                     "stream": "primary",
@@ -719,8 +720,8 @@ def test_send_rpc(instr):
         ),
         (
             BECMessage.DeviceInstructionMessage(
-                device=None,
-                action="trigger",
+                device=[],
+                action="read",
                 parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
                 metadata={
                     "stream": "primary",
@@ -734,11 +735,11 @@ def test_send_rpc(instr):
 )
 def test_read_devices(instr):
     worker = get_scan_worker()
-    devices = instr.content.get("device")
-    if devices is None:
-        devices = [
-            dev.name for dev in worker.device_manager.devices.primary_devices(worker.scan_motors)
-        ]
+    instr_devices = instr.content["device"]
+    if instr_devices is None:
+        instr_devices = []
+    worker.readout_priority.update({"monitored": instr_devices})
+    devices = [dev.name for dev in worker._get_devices_from_instruction(instr)]
     with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
         worker._read_devices(instr)
 
@@ -915,7 +916,7 @@ def test_check_for_interruption():
             BECMessage.DeviceInstructionMessage(
                 device=None,
                 action="open_scan",
-                parameter={"num_points": 150, "primary": ["samx", "samy"]},
+                parameter={"num_points": 150, "scan_motors": ["samx", "samy"]},
                 metadata={
                     "stream": "primary",
                     "DIID": 18,
@@ -1218,7 +1219,7 @@ def test_process_instructions(abortion):
             BECMessage.DeviceInstructionMessage(
                 device=None,
                 action="open_scan",
-                parameter={},
+                parameter={"readout_priority": {"monitored": [], "baseline": [], "ignored": []}},
                 metadata={"stream": "primary", "DIID": 18, "scanID": "12345"},
             ),
             "_open_scan",

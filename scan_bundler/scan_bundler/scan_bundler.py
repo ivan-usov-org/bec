@@ -32,6 +32,7 @@ class ScanBundler(BECService):
         self.baseline_devices = {}
         self.device_storage = {}
         self.scan_motors = {}
+        self.readout_priority = {}
         self.storage_initialized = set()
         self.current_queue = None
         self.executor = ThreadPoolExecutor(max_workers=4)
@@ -140,21 +141,27 @@ class ScanBundler(BECService):
 
         scanID = scan_msg.content["scanID"]
         scan_info = scan_msg.content["info"]
-        scan_motors = list(set(self.device_manager.devices[m] for m in scan_info["primary"]))
-
+        scan_motors = list(set(self.device_manager.devices[m] for m in scan_info["scan_motors"]))
         self.scan_motors[scanID] = scan_motors
+        self.readout_priority[scanID] = scan_info["readout_priority"]
         if not scanID in self.storage_initialized:
             self.sync_storage[scanID] = {"info": scan_info, "status": "open", "sent": set()}
             self.primary_devices[scanID] = {
-                "devices": self.device_manager.devices.primary_devices(scan_motors),
+                "devices": self.device_manager.devices.primary_devices(
+                    readout_priority=self.readout_priority[scanID]
+                ),
                 "pointID": {},
             }
             self.monitor_devices[scanID] = self.device_manager.devices.acquisition_group("monitor")
             self.baseline_devices[scanID] = {
-                "devices": self.device_manager.devices.baseline_devices(scan_motors),
+                "devices": self.device_manager.devices.baseline_devices(
+                    readout_priority=self.readout_priority[scanID]
+                ),
                 "done": {
                     dev.name: False
-                    for dev in self.device_manager.devices.baseline_devices(scan_motors)
+                    for dev in self.device_manager.devices.baseline_devices(
+                        readout_priority=self.readout_priority[scanID]
+                    )
                 },
             }
             self.storage_initialized.add(scanID)
@@ -225,7 +232,9 @@ class ScanBundler(BECService):
             self.run_emitter("on_baseline_emit", scanID)
             self.baseline_devices[scanID]["done"] = {
                 dev.name: False
-                for dev in self.device_manager.devices.baseline_devices(self.scan_motors[scanID])
+                for dev in self.device_manager.devices.baseline_devices(
+                    readout_priority=self.readout_priority[scanID]
+                )
             }
 
     def _get_scan_status_history(self, length):
@@ -329,6 +338,7 @@ class ScanBundler(BECService):
                 "monitor_devices",
                 "baseline_devices",
                 "scan_motors",
+                "readout_priority",
             ]:
                 try:
                     getattr(self, storage).pop(scanID)

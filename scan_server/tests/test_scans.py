@@ -430,7 +430,8 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     device=None,
                     action="open_scan",
                     parameter={
-                        "primary": ["samx"],
+                        "scan_motors": ["samx"],
+                        "readout_priority": {"monitored": ["samx"], "baseline": [], "ignored": []},
                         "num_points": 3,
                         "positions": [[-5.0], [0.0], [5.0]],
                         "scan_name": "grid_scan",
@@ -793,7 +794,8 @@ def test_fermat_scan(scan_msg, reference_scan_list):
                     device=None,
                     action="open_scan",
                     parameter={
-                        "primary": ["samx"],
+                        "scan_motors": ["samx"],
+                        "readout_priority": {"monitored": ["samx"], "baseline": [], "ignored": []},
                         "num_points": 3,
                         "positions": [[-5.0], [0.0], [5.0]],
                         "scan_name": "cont_line_scan",
@@ -998,7 +1000,8 @@ def test_device_rpc():
                     device=None,
                     action="open_scan",
                     parameter={
-                        "primary": [],
+                        "scan_motors": [],
+                        "readout_priority": {"monitored": [], "baseline": [], "ignored": []},
                         "num_points": 1,
                         "positions": [],
                         "scan_name": "acquire",
@@ -1562,7 +1565,12 @@ def test_scan_base_set_position_offset():
                     device=None,
                     action="open_scan",
                     parameter={
-                        "primary": ["rtx", "rty"],
+                        "scan_motors": ["rtx", "rty"],
+                        "readout_priority": {
+                            "monitored": [],
+                            "baseline": [],
+                            "ignored": [],
+                        },
                         "num_points": 2,
                         "positions": [
                             [1.3681828686580249, 2.1508313829565298],
@@ -1979,7 +1987,8 @@ def test_list_scan_raises_for_different_lengths():
                     device=None,
                     action="open_scan",
                     parameter={
-                        "primary": [],
+                        "scan_motors": [],
+                        "readout_priority": {"monitored": [], "baseline": [], "ignored": []},
                         "num_points": 3,
                         "positions": [],
                         "scan_name": "time_scan",
@@ -2132,7 +2141,8 @@ def test_time_scan(scan_msg, reference_scan_list):
                     device=None,
                     action="open_scan",
                     parameter={
-                        "primary": [],
+                        "scan_motors": [],
+                        "readout_priority": {"monitored": [], "baseline": [], "ignored": []},
                         "num_points": 0,
                         "positions": [],
                         "scan_name": "otf_scan",

@@ -137,3 +137,61 @@ def test_show_tags():
             available_tags[tag].append(dev_name)
 
     assert set(dm.devices.show_tags()) == set(available_tags.keys())
+
+
+@pytest.mark.parametrize(
+    "scan_motors_in,readout_priority_in",
+    [
+        ([], {}),
+        (["samx"], {}),
+        ([], {"monitored": ["samx"]}),
+        ([], {"baseline": ["samx"]}),
+    ],
+)
+def test_primary_devices_are_unique(scan_motors_in, readout_priority_in):
+    connector = ConnectorMock("")
+    dm = DeviceManagerBase(connector)
+    config_content = None
+    with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
+        config_content = yaml.safe_load(f)
+        dm._session = create_session_from_config(config_content)
+    dm._load_session()
+    scan_motors = [dm.devices.get(dev) for dev in scan_motors_in]
+    devices = dm.devices.primary_devices(
+        scan_motors=scan_motors, readout_priority=readout_priority_in
+    )
+    device_names = set(dev.name for dev in devices)
+    assert len(device_names) == len(devices)
+
+
+@pytest.mark.parametrize(
+    "scan_motors_in,readout_priority_in",
+    [
+        ([], {}),
+        ([], {"monitored": ["samx"], "baseline": [], "ignored": []}),
+        ([], {"monitored": [], "baseline": ["samx"], "ignored": []}),
+        ([], {"monitored": ["samx", "samy"], "baseline": [], "ignored": ["bpm4i"]}),
+    ],
+)
+def test_primary_devices_with_readout_priority(scan_motors_in, readout_priority_in):
+    connector = ConnectorMock("")
+    dm = DeviceManagerBase(connector)
+    config_content = None
+    with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
+        config_content = yaml.safe_load(f)
+        dm._session = create_session_from_config(config_content)
+    dm._load_session()
+    scan_motors = [dm.devices.get(dev) for dev in scan_motors_in]
+    primary_devices = dm.devices.primary_devices(
+        scan_motors=scan_motors, readout_priority=readout_priority_in
+    )
+    baseline_devices = dm.devices.baseline_devices(
+        scan_motors=scan_motors, readout_priority=readout_priority_in
+    )
+    primary_device_names = set(dev.name for dev in primary_devices)
+    baseline_devices_names = set(dev.name for dev in baseline_devices)
+
+    assert len(primary_device_names & baseline_devices_names) == 0
+
+    assert len(set(readout_priority_in.get("ignored", [])) & baseline_devices_names) == 0
+    assert len(set(readout_priority_in.get("ignored", [])) & primary_device_names) == 0

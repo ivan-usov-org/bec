@@ -79,7 +79,8 @@ def test_device_read_callback():
                     scanID="adlk-jalskdjs",
                     status="open",
                     info={
-                        "primary": ["samx"],
+                        "scan_motors": ["samx"],
+                        "readout_priority": {"monitored": ["samx"], "baseline": [], "ignored": []},
                         "queueID": "my-queue-ID",
                         "scan_number": 5,
                         "scan_type": "step",
@@ -95,7 +96,8 @@ def test_device_read_callback():
                     scanID="adlk-jalskdjs",
                     status="open",
                     info={
-                        "primary": ["samx"],
+                        "scan_motors": ["samx"],
+                        "readout_priority": {"monitored": ["samx"], "baseline": [], "ignored": []},
                         "queueID": "my-queue-ID",
                         "scan_number": 5,
                         "scan_type": "step",
@@ -274,6 +276,11 @@ def test_add_device_to_storage_baseline(msg, scan_type):
                                     "msg": b"\x84\xa8msg_type\xa4scan\xa7content\x83\xa9scan_type\xabfermat_scan\xa9parameter\x82\xa4args\x82\xa4samx\x92\xfe\x02\xa4samy\x92\xfe\x02\xa6kwargs\x83\xa4step\xcb?\xf8\x00\x00\x00\x00\x00\x00\xa8exp_time\xcb?\x94z\xe1G\xae\x14{\xa8relative\xc3\xa5queue\xa7primary\xa8metadata\x81\xa3RID\xd9$cd8fc68f-fe65-4031-9a37-e0e7ba9df542\xa7version\xcb?\xf0\x00\x00\x00\x00\x00\x00",
                                     "RID": "cd8fc68f-fe65-4031-9a37-e0e7ba9df542",
                                     "scan_motors": ["samx", "samy"],
+                                    "readout_priority": {
+                                        "monitored": ["samx", "samy"],
+                                        "baseline": [],
+                                        "ignored": [],
+                                    },
                                     "is_scan": True,
                                     "scan_number": 25,
                                     "scanID": "bfa582aa-f9cd-4258-ab5d-3e5d54d3dde5",
@@ -442,7 +449,8 @@ def test_status_modification():
                 "scanID": "3ea07f69-b0ee-44fa-8451-b85824a37397",
                 "queueID": "84e5bc19-e2fc-4b03-b706-004420322813",
                 "scan_number": 5,
-                "primary": ["samx", "samy"],
+                "scan_motors": ["samx", "samy"],
+                "readout_priority": {"monitored": ["samx", "samy"], "baseline": [], "ignored": []},
                 "num_points": 143,
             },
         ),
@@ -456,7 +464,12 @@ def test_status_modification():
                 "scanID": "3ea07f69-b0ee-44fa-8451-b85824a37397",
                 "queueID": "84e5bc19-e2fc-4b03-b706-004420322813",
                 "scan_number": 5,
-                "primary": ["samx", "samy", "eyex", "bpm3a"],
+                "scan_motors": ["samx", "samy", "eyex", "bpm3a"],
+                "readout_priority": {
+                    "monitored": ["samx", "samy", "eyex", "bpm3a"],
+                    "baseline": [],
+                    "ignored": [],
+                },
                 "num_points": 143,
             },
         ),
@@ -466,8 +479,9 @@ def test_initialize_scan_container(scan_msg):
     sb = load_ScanBundlerMock()
     scanID = scan_msg.content["scanID"]
     scan_info = scan_msg.content["info"]
-    scan_motors = list(set(sb.device_manager.devices[m] for m in scan_info["primary"]))
-    bl_devs = sb.device_manager.devices.baseline_devices(scan_motors)
+    scan_motors = list(set(sb.device_manager.devices[m] for m in scan_info["scan_motors"]))
+    readout_priority = scan_info["readout_priority"]
+    bl_devs = sb.device_manager.devices.baseline_devices(readout_priority=readout_priority)
 
     with mock.patch.object(sb, "run_emitter") as emitter_mock:
         sb._initialize_scan_container(
@@ -479,7 +493,7 @@ def test_initialize_scan_container(scan_msg):
         assert sb.scan_motors[scanID] == scan_motors
         assert sb.sync_storage[scanID] == {"info": scan_info, "status": "open", "sent": set()}
         assert sb.primary_devices[scanID] == {
-            "devices": sb.device_manager.devices.primary_devices(scan_motors),
+            "devices": sb.device_manager.devices.primary_devices(readout_priority=readout_priority),
             "pointID": {},
         }
         assert sb.monitor_devices[scanID] == sb.device_manager.devices.acquisition_group("monitor")
@@ -644,6 +658,7 @@ def test_baseline_update(scanID, device, signal):
     sb.baseline_devices[scanID] = {"done": {device: False}}
     sb.sync_storage[scanID] = {}
     sb.scan_motors[scanID] = []
+    sb.readout_priority[scanID] = {}
     with mock.patch.object(sb, "run_emitter") as emitter:
         sb._baseline_update(scanID, device, signal)
         emitter.assert_called_once_with("on_baseline_emit", scanID)

@@ -89,7 +89,8 @@ class Device:
         """set the device config for this device"""
         self._config["deviceConfig"].update(val)
         return self.parent.config_helper.send_config_request(
-            action="update", config={self.name: {"deviceConfig": self._config["deviceConfig"]}}
+            action="update",
+            config={self.name: {"deviceConfig": self._config["deviceConfig"]}},
         )
 
     def get_device_tags(self) -> List:
@@ -101,7 +102,8 @@ class Device:
         """set the device tags for this device"""
         self._config["deviceTags"] = val
         return self.parent.config_helper.send_config_request(
-            action="update", config={self.name: {"deviceTags": self._config["deviceTags"]}}
+            action="update",
+            config={self.name: {"deviceTags": self._config["deviceTags"]}},
         )
 
     @typechecked
@@ -111,7 +113,8 @@ class Device:
             return None
         self._config["deviceTags"].append(val)
         return self.parent.config_helper.send_config_request(
-            action="update", config={self.name: {"deviceTags": self._config["deviceTags"]}}
+            action="update",
+            config={self.name: {"deviceTags": self._config["deviceTags"]}},
         )
 
     @property
@@ -142,7 +145,8 @@ class Device:
             val = OnFailure(val)
         self._config["onFailure"] = val
         return self.parent.config_helper.send_config_request(
-            action="update", config={self.name: {"onFailure": self._config["onFailure"]}}
+            action="update",
+            config={self.name: {"onFailure": self._config["onFailure"]}},
         )
 
     @property
@@ -223,6 +227,14 @@ class Device:
         param = self.user_parameter
         param.update(val)
         self.set_user_parameter(param)
+
+    def __eq__(self, other):
+        if isinstance(other, Device):
+            return other.name == self.name
+        return False
+
+    def __hash__(self):
+        return self.name.__hash__()
 
     def __repr__(self):
         if isinstance(self.parent, DeviceManagerBase):
@@ -332,7 +344,7 @@ class DeviceContainer(dict):
         ]
 
     @typechecked
-    def primary_devices(self, scan_motors: list = None) -> list:
+    def primary_devices(self, scan_motors: list = None, readout_priority: dict = None) -> list:
         """get a list of all enabled primary devices"""
         devices = self.readout_priority("monitored")
         if scan_motors:
@@ -340,21 +352,40 @@ class DeviceContainer(dict):
                 scan_motors = [scan_motors]
             for scan_motor in scan_motors:
                 if not scan_motor in devices:
-                    devices.append(scan_motor)
+                    if isinstance(scan_motor, Device):
+                        devices.append(scan_motor)
+                    else:
+                        devices.append(self.get(scan_motor))
+        if not readout_priority:
+            readout_priority = {}
+
+        devices.extend([self.get(dev) for dev in readout_priority.get("monitored", [])])
 
         excluded_devices = self.acquisition_group("detector")
         excluded_devices.extend(self.async_devices())
         excluded_devices.extend(self.disabled_devices)
-        return [dev for dev in devices if dev not in excluded_devices]
+        excluded_devices.extend([self.get(dev) for dev in readout_priority.get("baseline", [])])
+        excluded_devices.extend([self.get(dev) for dev in readout_priority.get("ignored", [])])
+
+        return [dev for dev in set(devices) if dev not in excluded_devices]
 
     @typechecked
-    def baseline_devices(self, scan_motors: list) -> list:
+    def baseline_devices(self, scan_motors: list = None, readout_priority: dict = None) -> list:
         """get a list of all enabled baseline devices"""
+        if not readout_priority:
+            readout_priority = {}
+
+        devices = self.enabled_devices
+        devices.extend([self.get(dev) for dev in readout_priority.get("baseline", [])])
+
         excluded_devices = self.primary_devices(scan_motors)
         excluded_devices.extend(self.async_devices())
         excluded_devices.extend(self.detectors())
         excluded_devices.extend(self.readout_priority("ignored"))
-        return [dev for dev in self.enabled_devices if dev not in excluded_devices]
+        excluded_devices.extend([self.get(dev) for dev in readout_priority.get("monitored", [])])
+        excluded_devices.extend([self.get(dev) for dev in readout_priority.get("ignored", [])])
+
+        return [dev for dev in set(devices) if dev not in excluded_devices]
 
     def get_devices_with_tags(self, tags: List) -> List:
         """get a list of all devices that have the specified tags"""
