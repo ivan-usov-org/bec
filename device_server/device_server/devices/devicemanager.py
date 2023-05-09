@@ -93,7 +93,11 @@ class DeviceManagerDS(DeviceManagerBase):
                 name = dev.get("name")
                 enabled = dev.get("enabled")
                 logger.info(f"Adding device {name}: {'ENABLED' if enabled else 'DISABLED'}")
-                self.initialize_device(dev)
+                try:
+                    self.initialize_device(dev)
+                except Exception as exc:
+                    content = traceback.format_exc()
+                    logger.error(f"Failed to initialize device: {dev}: {content}.")
 
     @staticmethod
     def update_config(obj: OphydObject, config: dict) -> None:
