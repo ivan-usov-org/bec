@@ -2,8 +2,14 @@ from unittest import mock
 
 import pytest
 
-from bec_client.devicemanager_client import Device
-from bec_client.scans import DatasetIdOnHold, HideReport, Metadata, ScanDef, ScanGroup
+from bec_client_lib.devicemanager_client import Device
+from bec_client_lib.scans import (
+    DatasetIdOnHold,
+    HideReport,
+    Metadata,
+    ScanDef,
+    ScanGroup,
+)
 
 from .utils import bec_client
 

@@ -5,7 +5,7 @@ import pathlib
 
 from bec_utils import RedisConnector, ServiceConfig, bec_logger
 
-from bec_client import BECClient
+from bec_client import BECIPythonClient
 
 # pylint: disable=wrong-import-position
 # pylint: disable=protected-access
@@ -20,7 +20,7 @@ CONFIG_PATH = f"{current_path}/../../../bec_config.yaml"
 
 config = ServiceConfig(CONFIG_PATH)
 
-bec = BECClient()
+bec = BECIPythonClient()
 bec.initialize(config, RedisConnector)
 bec.start()
 bec.load_high_level_interface("spec_hli")
