@@ -44,8 +44,16 @@ class BECEmitter(EmitterBase):
         msg = BECMessage.ScanBaselineMessage(
             scanID=scanID, data=sb.sync_storage[scanID]["baseline"]
         ).dumps()
+        pipe = sb.producer.pipeline()
         sb.producer.set(
             MessageEndpoints.public_scan_baseline(scanID=scanID),
             msg,
             expire=1800,
+            pipe=pipe,
         )
+        sb.producer.set_and_publish(
+            MessageEndpoints.scan_baseline(),
+            msg,
+            pipe=pipe,
+        )
+        pipe.execute()

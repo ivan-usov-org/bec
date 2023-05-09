@@ -110,7 +110,6 @@ class SciBecConnector:
                     return
                 session = self.scibec.get_session_by_id(experiment[0]["activeSession"])
                 self.scibec_info["activeSession"] = session
-
             if not beamline_info:
                 logger.warning(f"Could not find a beamline with the name {beamline}")
                 return

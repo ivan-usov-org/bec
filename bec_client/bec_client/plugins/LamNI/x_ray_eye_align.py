@@ -6,13 +6,15 @@ import threading
 import time
 from collections import defaultdict
 from pathlib import Path
+
 import h5py
 import numpy as np
-from bec_utils import bec_logger
-from bec_utils.pdf_writer import PDFWriter
 from typeguard import typechecked
+
 from bec_client.alarm_handler import AlarmBase
 from bec_client.plugins.cSAXS import epics_get, epics_put, fshclose, fshopen
+from bec_utils import bec_logger
+from bec_utils.pdf_writer import PDFWriter
 
 from .lamni_optics_mixin import LamNIOpticsMixin
 
@@ -1018,9 +1020,7 @@ class LamNI(LamNIOpticsMixin):
                 for scan_nr in range(start_scan_number, end_scan_number):
                     self._write_tomo_scan_number(scan_nr, angle, subtomo_number)
 
-    def _write_tomo_scan_number(
-        self, scan_number: int, angle: float, subtomo_number: int
-    ) -> None:
+    def _write_tomo_scan_number(self, scan_number: int, angle: float, subtomo_number: int) -> None:
         tomo_scan_numbers_file = os.path.expanduser(
             "~/Data10/specES1/dat-files/tomography_scannumbers.txt"
         )

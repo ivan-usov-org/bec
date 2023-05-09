@@ -430,7 +430,8 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     device=None,
                     action="open_scan",
                     parameter={
-                        "primary": ["samx"],
+                        "scan_motors": ["samx"],
+                        "readout_priority": {"monitored": ["samx"], "baseline": [], "ignored": []},
                         "num_points": 3,
                         "positions": [[-5.0], [0.0], [5.0]],
                         "scan_name": "grid_scan",
@@ -793,7 +794,8 @@ def test_fermat_scan(scan_msg, reference_scan_list):
                     device=None,
                     action="open_scan",
                     parameter={
-                        "primary": ["samx"],
+                        "scan_motors": ["samx"],
+                        "readout_priority": {"monitored": ["samx"], "baseline": [], "ignored": []},
                         "num_points": 3,
                         "positions": [[-5.0], [0.0], [5.0]],
                         "scan_name": "cont_line_scan",
@@ -998,7 +1000,8 @@ def test_device_rpc():
                     device=None,
                     action="open_scan",
                     parameter={
-                        "primary": [],
+                        "scan_motors": [],
+                        "readout_priority": {"monitored": [], "baseline": [], "ignored": []},
                         "num_points": 1,
                         "positions": [],
                         "scan_name": "acquire",
@@ -1420,7 +1423,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"stream": "primary", "DIID": 2},
+                    metadata={"stream": "primary", "DIID": 2, "response": True},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="lsamrot",
@@ -1432,7 +1435,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"stream": "primary", "DIID": 2},
+                    metadata={"stream": "primary", "DIID": 2, "response": True},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device=None,
@@ -1472,7 +1475,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"stream": "primary", "DIID": 5},
+                    metadata={"stream": "primary", "DIID": 5, "response": True},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="rtx",
@@ -1484,7 +1487,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"stream": "primary", "DIID": 6},
+                    metadata={"stream": "primary", "DIID": 6, "response": True},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="rty",
@@ -1496,7 +1499,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"stream": "primary", "DIID": 7},
+                    metadata={"stream": "primary", "DIID": 7, "response": True},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="lsamx",
@@ -1508,7 +1511,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"stream": "primary", "DIID": 8},
+                    metadata={"stream": "primary", "DIID": 8, "response": True},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="lsamy",
@@ -1520,7 +1523,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"stream": "primary", "DIID": 9},
+                    metadata={"stream": "primary", "DIID": 9, "response": True},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="rtx",
@@ -1532,7 +1535,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"stream": "primary", "DIID": 10},
+                    metadata={"stream": "primary", "DIID": 10, "response": True},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="rty",
@@ -1544,7 +1547,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"stream": "primary", "DIID": 11},
+                    metadata={"stream": "primary", "DIID": 11, "response": True},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="rtx",
@@ -1556,13 +1559,18 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"stream": "primary", "DIID": 12},
+                    metadata={"stream": "primary", "DIID": 12, "response": True},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device=None,
                     action="open_scan",
                     parameter={
-                        "primary": ["rtx", "rty"],
+                        "scan_motors": ["rtx", "rty"],
+                        "readout_priority": {
+                            "monitored": [],
+                            "baseline": [],
+                            "ignored": [],
+                        },
                         "num_points": 2,
                         "positions": [
                             [1.3681828686580249, 2.1508313829565298],
@@ -1860,7 +1868,10 @@ def test_round_scan_fly_sim_scan_core(in_args, reference_positions):
     assert ret == BMessage.DeviceInstructionMessage(
         device="flyer_sim",
         action="kickoff",
-        parameter={"num_pos": None, "positions": reference_positions, "exp_time": 0.1},
+        parameter={
+            "configure": {"num_pos": None, "positions": reference_positions, "exp_time": 0.1},
+            "wait_group": "kickoff",
+        },
         metadata={"stream": "primary", "DIID": 0},
     )
 
@@ -1976,7 +1987,8 @@ def test_list_scan_raises_for_different_lengths():
                     device=None,
                     action="open_scan",
                     parameter={
-                        "primary": [],
+                        "scan_motors": [],
+                        "readout_priority": {"monitored": [], "baseline": [], "ignored": []},
                         "num_points": 3,
                         "positions": [],
                         "scan_name": "time_scan",
@@ -2129,7 +2141,8 @@ def test_time_scan(scan_msg, reference_scan_list):
                     device=None,
                     action="open_scan",
                     parameter={
-                        "primary": ["otf"],
+                        "scan_motors": [],
+                        "readout_priority": {"monitored": [], "baseline": [], "ignored": []},
                         "num_points": 0,
                         "positions": [],
                         "scan_name": "otf_scan",
@@ -2150,34 +2163,67 @@ def test_time_scan(scan_msg, reference_scan_list):
                     metadata={"stream": "baseline", "DIID": 2, "RID": "1234"},
                 ),
                 BMessage.DeviceInstructionMessage(
+                    device="mono",
+                    action="set",
+                    parameter={"value": 700, "wait_group": "flyer"},
+                    metadata={"stream": "primary", "DIID": 3, "RID": "1234"},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=["mono"],
+                    action="wait",
+                    parameter={"type": "move", "wait_group": "flyer"},
+                    metadata={"stream": "primary", "DIID": 4, "RID": "1234"},
+                ),
+                BMessage.DeviceInstructionMessage(
                     device="otf",
                     action="kickoff",
-                    parameter={"e1": 700, "e2": 740, "time": 4},
-                    metadata={"stream": "primary", "DIID": 3, "RID": "1234"},
+                    parameter={
+                        "configure": {"e1": 700, "e2": 740, "time": 4},
+                        "wait_group": "kickoff",
+                    },
+                    metadata={"stream": "primary", "DIID": 5, "RID": "1234"},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=["otf"],
+                    action="wait",
+                    parameter={"type": "move", "wait_group": "kickoff"},
+                    metadata={"stream": "primary", "DIID": 6, "RID": "1234"},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device="otf",
                     action="complete",
                     parameter={},
-                    metadata={"stream": "primary", "DIID": 4, "RID": "1234"},
+                    metadata={"stream": "primary", "DIID": 7, "RID": "1234"},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="read",
+                    parameter={"group": "primary", "wait_group": "readout_primary"},
+                    metadata={"stream": "primary", "DIID": 8, "RID": "1234"},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
-                    metadata={"stream": "primary", "DIID": 5, "RID": "1234"},
+                    metadata={"stream": "primary", "DIID": 9, "RID": "1234"},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=None,
+                    action="wait",
+                    parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
+                    metadata={"stream": "primary", "DIID": 10, "RID": "1234"},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device=None,
                     action="unstage",
                     parameter={},
-                    metadata={"stream": "primary", "DIID": 6, "RID": "1234"},
+                    metadata={"stream": "primary", "DIID": 11, "RID": "1234"},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device=None,
                     action="close_scan",
                     parameter={},
-                    metadata={"stream": "primary", "DIID": 7, "RID": "1234"},
+                    metadata={"stream": "primary", "DIID": 12, "RID": "1234"},
                 ),
             ],
         )

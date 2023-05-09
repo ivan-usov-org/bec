@@ -28,6 +28,7 @@ class CallbackManager:
         self._user_callback = None
         self._request_block_index = collections.defaultdict(lambda: 0)
         self._request_block_id = None
+        self.print_table_data = True
 
     def _process_report_instructions(self, report_instructions: list) -> None:
         scan_type = self._active_request.content["scan_type"]
@@ -68,6 +69,7 @@ class CallbackManager:
                         report_instruction=instr,
                         request=self._active_request,
                         callbacks=self._user_callback,
+                        print_table_data=self.print_table_data,
                     ).run()
                 )
         else:
@@ -97,6 +99,7 @@ class CallbackManager:
                 report_instruction=instr,
                 request=self._active_request,
                 callbacks=self._user_callback,
+                print_table_data=self.print_table_data,
             )
             asyncio.run(self._active_callback.run())
 

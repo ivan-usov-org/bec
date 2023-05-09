@@ -1,7 +1,16 @@
 import numpy as np
 
+
 def get_entry(data, name, default=None):
     return data.get(name, {}).get(name,{}).get("value", default)
+
+def get_entry(data, name, default=None):
+    return data.get(name, {}).get(name, {}).get("value", default)
+
+
+def get_entry(data, name, default=None):
+    return data.get(name, {}).get(name, {}).get("value", default)
+
 
 def NeXus_format(storage, data, device_manager):
     # /entry
@@ -48,7 +57,9 @@ def NeXus_format(storage, data, device_manager):
     source.create_dataset(name="type", data="Synchrotron X-ray Source")
     source.create_dataset(name="name", data="Swiss Light Source")
     source.create_dataset(name="probe", data="x-ray")
-    distance = source.create_dataset(name="distance", data=-33800 - np.asarray(get_entry(data, "samz", 0)))
+    distance = source.create_dataset(
+        name="distance", data=-33800 - np.asarray(get_entry(data, "samz", 0))
+    )
     distance.attrs["units"] = "mm"
     sigma_x = source.create_dataset(name="sigma_x", data=0.202)
     sigma_x.attrs["units"] = "mm"
@@ -79,7 +90,9 @@ def NeXus_format(storage, data, device_manager):
     x_gap.attrs["units"] = "mm"
     x_translation = source.create_dataset(name="x_translation", data=get_entry(data, "sl0ch"))
     x_translation.attrs["units"] = "mm"
-    distance = source.create_dataset(name="distance", data=-21700 - np.asarray(get_entry(data, "samz", 0)))
+    distance = source.create_dataset(
+        name="distance", data=-21700 - np.asarray(get_entry(data, "samz", 0))
+    )
     distance.attrs["units"] = "mm"
 
     slit_1 = instrument.create_group("slit_1")
@@ -94,7 +107,9 @@ def NeXus_format(storage, data, device_manager):
     x_translation.attrs["units"] = "mm"
     height = source.create_dataset(name="x_translation", data=get_entry(data, "sl1ch"))
     height.attrs["units"] = "mm"
-    distance = source.create_dataset(name="distance", data=-7800 - np.asarray(get_entry(data, "samz", 0)))
+    distance = source.create_dataset(
+        name="distance", data=-7800 - np.asarray(get_entry(data, "samz", 0))
+    )
     distance.attrs["units"] = "mm"
 
     mono = instrument.create_group("monochromator")
@@ -102,12 +117,16 @@ def NeXus_format(storage, data, device_manager):
     mokev = data.get("mokev", {})
     if mokev and isinstance(mokev, list):
         mokev = mokev[0]
-    wavelength = mono.create_dataset(name="wavelength", data=12.3984193 / (mokev.get("mokev").get("value") + 1e-9))
+    wavelength = mono.create_dataset(
+        name="wavelength", data=12.3984193 / (mokev.get("mokev").get("value") + 1e-9)
+    )
     wavelength.attrs["units"] = "Angstrom"
     energy = mono.create_dataset(name="energy", data=mokev.get("mokev").get("value"))
     energy.attrs["units"] = "keV"
     mono.create_dataset(name="type", data="Double crystal fixed exit monochromator.")
-    distance = mono.create_dataset(name="distance", data=-5220 - np.asarray(get_entry(data, "samz", 0)))
+    distance = mono.create_dataset(
+        name="distance", data=-5220 - np.asarray(get_entry(data, "samz", 0))
+    )
     distance.attrs["units"] = "mm"
 
     crystal_1 = mono.create_group("crystal_1")
@@ -171,7 +190,9 @@ def NeXus_format(storage, data, device_manager):
     coating_material.attrs["units"] = "NX_CHAR"
     bend_y = mirror.create_dataset(name="bend_y", data="mibd")
     bend_y.attrs["units"] = "NX_DIMENSIONLESS"
-    distance = mirror.create_dataset(name="distance", data=-4370 - np.asarray(get_entry(data, "samz", 0)))
+    distance = mirror.create_dataset(
+        name="distance", data=-4370 - np.asarray(get_entry(data, "samz", 0))
+    )
     distance.attrs["units"] = "mm"
 
     xbpm5 = instrument.create_group("XBPM5")
@@ -214,7 +235,9 @@ def NeXus_format(storage, data, device_manager):
     x_translation.attrs["units"] = "mm"
     height = source.create_dataset(name="x_translation", data=get_entry(data, "sl2cv"))
     height.attrs["units"] = "mm"
-    distance = source.create_dataset(name="distance", data=-3140 - np.asarray(get_entry(data, "samz", 0)))
+    distance = source.create_dataset(
+        name="distance", data=-3140 - np.asarray(get_entry(data, "samz", 0))
+    )
     distance.attrs["units"] = "mm"
 
     slit_3 = instrument.create_group("slit_3")

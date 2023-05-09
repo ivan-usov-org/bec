@@ -91,7 +91,7 @@ class LamNIConfig(DemoConfig, X12SAConfig):
     def write_smaract_motors(self):
         lamni_smaract_motors = [
             ("losax", "A", -1, {"in": -1.442}),
-            ("losay", "B", -1, {"in": -0.168-0.003, "out": 3.8}),
+            ("losay", "B", -1, {"in": -0.168 - 0.003, "out": 3.8}),
             ("losaz", "C", 1, {"in": -1, "out": -3}),
             # ("lcsx", "D", -1, {}),
             # ("lcsy", "E", -1, {}),

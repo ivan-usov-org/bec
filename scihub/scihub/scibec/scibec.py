@@ -168,37 +168,25 @@ class SciBec:
     def get_datasets_by_experiment(self, experiment_id: str):
         headers = {"Content-type": "application/json"}
         params = self.client.make_filter(where={"experimentId": experiment_id})
-        return self.client.get_request(
-            f"{self.url}/datasets", params=params, headers=headers
-        )
+        return self.client.get_request(f"{self.url}/datasets", params=params, headers=headers)
 
     def get_dataset_by_experiment_and_number(self, experiment_id: str, number: int):
         headers = {"Content-type": "application/json"}
-        params = self.client.make_filter(
-            where={"experimentId": experiment_id, "number": number}
-        )
-        return self.client.get_request(
-            f"{self.url}/datasets", params=params, headers=headers
-        )
+        params = self.client.make_filter(where={"experimentId": experiment_id, "number": number})
+        return self.client.get_request(f"{self.url}/datasets", params=params, headers=headers)
 
     def add_dataset(self, data: dict):
         headers = {"Content-type": "application/json"}
-        return self.client.post_request(
-            f"{self.url}/datasets", payload=data, headers=headers
-        )
+        return self.client.post_request(f"{self.url}/datasets", payload=data, headers=headers)
 
     def get_scan_by_scanID(self, scanID):
         headers = {"Content-type": "application/json"}
         params = self.client.make_filter(where={"scanId": scanID})
-        return self.client.get_request(
-            f"{self.url}/scans", params=params, headers=headers
-        )
+        return self.client.get_request(f"{self.url}/scans", params=params, headers=headers)
 
     def add_scan(self, data: dict):
         headers = {"Content-type": "application/json"}
-        return self.client.post_request(
-            f"{self.url}/scans", payload=data, headers=headers
-        )
+        return self.client.post_request(f"{self.url}/scans", payload=data, headers=headers)
 
     def patch_scan(self, scan_id: str, data: dict):
         headers = {"Content-type": "application/json"}
@@ -207,6 +195,11 @@ class SciBec:
             headers=headers,
             payload=data,
         )
+
+    def add_event(self, data: dict, device_id: str, scan_id: str):
+        headers = {"Content-type": "application/json"}
+        payload = {"data": data, "deviceId": device_id, "scanId": scan_id}
+        return self.client.post_request(f"{self.url}/events", payload=payload, headers=headers)
 
     def add_device(self, device_info: dict):
         headers = {"Content-type": "application/json"}
