@@ -1,17 +1,23 @@
-import threading
+from __future__ import annotations
 
+import threading
+from typing import TYPE_CHECKING
 import msgpack
 import requests
 from bec_utils import MessageEndpoints, RedisConnector, bec_logger
 from dotenv import dotenv_values
+import os
 
 logger = bec_logger.logger
 
+if TYPE_CHECKING:
+    from scihub import SciHub
 
 class SciLogConnector:
     token_expiration_time = 86400  # one day
 
-    def __init__(self, connector: RedisConnector) -> None:
+    def __init__(self, scihub: SciHub, connector: RedisConnector) -> None:
+        self.scihub = scihub
         self.connector = connector
         self.producer = self.connector.producer()
         self.host = None
@@ -52,7 +58,11 @@ class SciLogConnector:
             self.set_bec_token(token)
 
     def _load_environment(self):
-        config = dotenv_values()
+        env_base = self.scihub.config.service_config.get("scilog", {}).get("env_file")
+        if not env_base:
+            return
+        env_file = os.path.join(env_base, ".env")
+        config = dotenv_values(env_file)
         self._update_config(**config)
 
     def _update_config(

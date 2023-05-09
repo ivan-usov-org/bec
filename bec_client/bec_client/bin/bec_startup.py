@@ -22,8 +22,8 @@ config = ServiceConfig(CONFIG_PATH)
 
 bec = BECClient()
 bec.initialize(config, RedisConnector)
-bec.start()
 bec.load_high_level_interface("spec_hli")
+bec.start()
 
 dev = bec.device_manager.devices
 scans = bec.scans
@@ -47,4 +47,13 @@ bec._bl_info_register(SLSInfo)
 bec._bl_info_register(OperatorInfo)
 
 # SETUP CLIENT PLUGINS
-# from bec_client.plugins.cSAXS import fshclose, fshopen, fshstatus
+from bec_client.plugins.cSAXS import fshclose, fshopen, fshstatus
+
+bec._ip.prompts.username = "LamNI"
+bec._ip.prompts.status = 1
+
+from bec_client.plugins.LamNI import *
+
+# lamni = LamNI(bec)
+# lamni = MagLamNI(bec)
+lamni = DataDrivenLamNI(bec)

@@ -43,7 +43,7 @@ ppthenc:
   deviceClass: EpicsSignalRO
   deviceConfig:
     name: ppthenc
-    prefix: X12SA-ES2-EC1.VAL
+    read_pv: X12SA-ES2-EC1.VAL
   deviceTags:
     - cSAXS
     - lamni

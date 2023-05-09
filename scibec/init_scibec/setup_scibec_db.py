@@ -98,7 +98,7 @@ class SciBecSetup:
                 "experimentInfo": proposal["info"],
             }
 
-            res = self.scibec.get_experiment(name=title)
+            res = self.scibec.get_experiment(name=title, writeAccount=proposal["ownerGroup"])
             if not res:
                 self.scibec.add_experiment(experiment)
 

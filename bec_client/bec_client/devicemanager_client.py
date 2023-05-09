@@ -202,6 +202,10 @@ class DeviceBase(RPCBase, Device):
         pass
 
     @rpc
+    def stop(self):
+        pass
+
+    @rpc
     def read(self, cached=False, use_readback=True, filter_signal=True):
         if use_readback:
             val = self.parent.producer.get(MessageEndpoints.device_readback(self.name))
@@ -319,7 +323,7 @@ class Positioner(DeviceBase):
 
     @property
     def limits(self):
-        return self._config["deviceConfig"]["limits"]
+        return self._config["deviceConfig"].get("limits", [0, 0])
 
     @limits.setter
     def limits(self, val: list):
