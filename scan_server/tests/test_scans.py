@@ -479,7 +479,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                 BMessage.DeviceInstructionMessage(
                     device=None,
                     action="wait",
-                    parameter={"type": "trigger", "group": "trigger", "time": 0.1},
+                    parameter={"type": "trigger", "group": "trigger", "time": 0},
                     metadata={"stream": "primary", "DIID": 4},
                 ),
                 BMessage.DeviceInstructionMessage(
@@ -539,7 +539,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                 BMessage.DeviceInstructionMessage(
                     device=None,
                     action="wait",
-                    parameter={"type": "trigger", "group": "trigger", "time": 0.1},
+                    parameter={"type": "trigger", "group": "trigger", "time": 0},
                     metadata={"stream": "primary", "DIID": 11},
                 ),
                 BMessage.DeviceInstructionMessage(
@@ -602,7 +602,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     parameter={
                         "type": "trigger",
                         "group": "trigger",
-                        "time": 0.1,
+                        "time": 0,
                     },
                     metadata={"stream": "primary", "DIID": 18},
                 ),
@@ -1869,7 +1869,7 @@ def test_round_scan_fly_sim_scan_core(in_args, reference_positions):
         device="flyer_sim",
         action="kickoff",
         parameter={
-            "configure": {"num_pos": None, "positions": reference_positions, "exp_time": 0.1},
+            "configure": {"num_pos": None, "positions": reference_positions, "exp_time": 0},
             "wait_group": "kickoff",
         },
         metadata={"stream": "primary", "DIID": 0},
