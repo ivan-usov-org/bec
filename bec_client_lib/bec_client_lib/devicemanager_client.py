@@ -15,6 +15,7 @@ from bec_utils import (
 class ScanRequestError(Exception):
     pass
 
+
 class RPCError(Exception):
     pass
 
