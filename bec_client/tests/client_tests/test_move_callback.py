@@ -2,8 +2,8 @@ import collections
 from unittest import mock
 
 import pytest
-from bec_client_lib.tests.utils import bec_client
 from bec_utils import BECMessage
+from bec_utils.tests.utils import bec_client
 
 from bec_client.callbacks.move_device import (
     LiveUpdatesReadbackProgressbar,

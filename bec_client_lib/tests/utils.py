@@ -4,11 +4,12 @@ import os
 import bec_utils
 import pytest
 import yaml
-from bec_client.bec_client import BECClient
-from bec_client_lib.devicemanager_client import DMClient
-from bec_client_lib.scans import Scans
 from bec_utils import BECMessage, ServiceConfig
 from bec_utils.tests.utils import ConnectorMock, create_session_from_config
+
+from bec_client_lib.client import BECClient
+from bec_client_lib.devicemanager_client import DMClient
+from bec_client_lib.scans import Scans
 
 dir_path = os.path.dirname(bec_utils.__file__)
 

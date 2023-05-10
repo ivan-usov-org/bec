@@ -48,11 +48,13 @@ class BECIPythonClient(BECClient, BeamlineMixin):
 
     def _configure_ipython(self):
         self._ip = IPython.get_ipython()
-        if self._ip is not None:
-            self._ip.prompts = BECClientPrompt(ip=self._ip, client=self, username="demo")
-            self._load_magics()
-            self._ip.events.register("post_run_cell", log_console)
-            self._ip.set_custom_exc((Exception,), _ip_exception_handler)  # register your handler
+        if self._ip is None:
+            return
+
+        self._ip.prompts = BECClientPrompt(ip=self._ip, client=self, username="demo")
+        self._load_magics()
+        self._ip.events.register("post_run_cell", log_console)
+        self._ip.set_custom_exc((Exception,), _ip_exception_handler)  # register your handler
 
     def _set_error(self):
         if self._ip is not None:
