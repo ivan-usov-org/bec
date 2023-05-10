@@ -20,7 +20,7 @@ from .signals import SigintHandler
 logger = bec_logger.logger
 
 
-class BECIPythonClient(BECClient, BeamlineMixin):
+class BECIPythonClient(BECClient):
     def __init__(self) -> None:
         pass
 
@@ -32,6 +32,7 @@ class BECIPythonClient(BECClient, BeamlineMixin):
         super().initialize(config, connector_cls)
         # pylint: disable=attribute-defined-outside-init
         self._sighandler = SigintHandler(self)
+        self._beamline_mixin = BeamlineMixin()
         self._ip = None
         self._exit_event = threading.Event()
         self._exit_handler_thread = None
@@ -43,6 +44,9 @@ class BECIPythonClient(BECClient, BeamlineMixin):
         super().start()
         self._start_exit_handler()
         self._configure_ipython()
+
+    def bl_show_all(self):
+        self._beamline_mixin.bl_show_all()
 
     def _set_ipython_prompt_scan_number(self, scan_number: int):
         if self._ip:
