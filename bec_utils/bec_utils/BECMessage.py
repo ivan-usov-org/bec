@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import base64
 import enum
+import inspect
 import json
+import sys
 import time
 from abc import abstractmethod
 from typing import Any, List, Optional, Union
@@ -11,18 +13,12 @@ import msgpack
 import numpy as np
 
 from .logger import bec_logger
+from .numpy_encoder import numpy_decode, numpy_encode
 
 logger = bec_logger.logger
 
 BECCOMPRESSION = "msgpack"
 DEFAULT_VERSION = 1.1
-
-
-def encode_numpy_array(obj):
-    """encode a numpy array to a list"""
-    if isinstance(obj, np.ndarray):
-        return obj.tolist()
-    return obj
 
 
 class BECMessageCompression:
@@ -38,13 +34,13 @@ class BECMessageCompression:
 class MsgpackCompression(BECMessageCompression):
     def loads(self, msg, encode=True, **kwargs) -> dict:
         if not encode:
-            return msgpack.loads(msg, raw=False)
-        return msgpack.loads(base64.b64decode(msg.encode()), raw=False)
+            return msgpack.loads(msg, raw=False, object_hook=numpy_decode)
+        return msgpack.loads(base64.b64decode(msg.encode()), object_hook=numpy_decode)
 
     def dumps(self, msg, encode=True, **kwargs) -> str:
         if not encode:
-            return msgpack.dumps(msg)
-        return base64.b64encode(msgpack.dumps(msg, default=encode_numpy_array)).decode()
+            return msgpack.dumps(msg, default=numpy_encode)
+        return base64.b64encode(msgpack.dumps(msg, default=numpy_encode)).decode()
 
 
 class JsonCompression(BECMessageCompression):
@@ -52,7 +48,7 @@ class JsonCompression(BECMessageCompression):
         return json.loads(msg)
 
     def dumps(self, msg, **kwargs):
-        return json.dumps(msg, default=encode_numpy_array)
+        return json.dumps(msg)
 
 
 class BECStatus(enum.Enum):
@@ -79,6 +75,7 @@ class BECMessage:
         self.content = content
         self.metadata = metadata if metadata is not None else {}
         self.version = version
+        self.compression = BECCOMPRESSION
         self.compression_handler = self._get_compression_handler()
 
     @staticmethod
@@ -100,10 +97,12 @@ class BECMessage:
 
         if version == 1.0:
             if isinstance(msg, bytes):
-                msg = msgpack.loads(msg, raw=False)
+                msg = msgpack.loads(msg, raw=False, object_hook=numpy_decode)
                 if msg["msg_type"] == "bundle_message":
                     return [
-                        cls._validated_return(msgpack.loads(sub_message))
+                        cls._validated_return(
+                            msgpack.loads(sub_message, raw=False, object_hook=numpy_decode)
+                        )
                         for sub_message in msg["content"]["messages"]
                     ]
                 return cls._validated_return(msg)
@@ -118,8 +117,7 @@ class BECMessage:
                 msgs = msg["body"]["content"]["messages"]
                 return [cls.loads(sub_message) for sub_message in msgs]
             return cls._validated_return(msg)
-        else:
-            raise RuntimeError(f"Unsupported BECMessage version {version}.")
+        raise RuntimeError(f"Unsupported BECMessage version {version}.")
 
     def dumps(self):
         """dump BECMessage with msgpack"""
@@ -129,7 +127,7 @@ class BECMessage:
                 "content": self.content,
                 "metadata": self.metadata,
                 "version": self.version,
-                "compression": BECCOMPRESSION,
+                "compression": self.compression,
             }
             return self.compression_handler.dumps(msg, encode=False)
         if self.version == 1.1:
@@ -140,7 +138,7 @@ class BECMessage:
             msg_header = {
                 "msg_type": self.msg_type,
                 "version": self.version,
-                "compression": BECCOMPRESSION,
+                "compression": self.compression,
             }
             msg_body = self.compression_handler.dumps(msg)
             return json.dumps(
@@ -234,6 +232,18 @@ class MessageReader(BECMessage):
     def _validated_return(cls, msg):
         msg_conv = cls(**msg)
         return msg_conv
+
+    @classmethod
+    def loads(cls, msg):
+        msg_json = json.loads(msg)
+        module_members = inspect.getmembers(sys.modules[__name__], inspect.isclass)
+        bec_classes = {mem.msg_type: mem for _, mem in module_members if hasattr(mem, "msg_type")}
+        msg_class = bec_classes[msg_json["msg_type"]]
+        return msg_class.loads(msg)
+
+    @classmethod
+    def dumps(cls, msg):
+        raise NotImplementedError("MessageReader can only be used to load data.")
 
 
 class ScanQueueMessage(BECMessage):
