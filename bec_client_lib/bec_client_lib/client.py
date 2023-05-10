@@ -3,6 +3,8 @@ from __future__ import print_function
 import builtins
 import importlib
 import inspect
+import os
+import pathlib
 import subprocess
 from typing import List
 
@@ -16,6 +18,7 @@ from bec_utils import (
 )
 from bec_utils.connector import ConnectorBase
 from bec_utils.logbook_connector import LogbookConnector
+from bec_utils.redis_connector import RedisConnector
 from rich.console import Console
 from rich.table import Table
 
@@ -42,9 +45,17 @@ class BECClient(BECService, UserScriptsMixin):
     def __repr__(self) -> str:
         return "BECClient\n\nTo get a list of available commands, type `bec.show_all_commands()`"
 
-    def initialize(self, config: ServiceConfig, connector_cls: ConnectorBase):
+    def initialize(self, config: ServiceConfig = None, connector_cls: ConnectorBase = None):
         """initialize the BEC client"""
+        if not config:
+            current_path = pathlib.Path(__file__).parent.parent.resolve()
+            config = ServiceConfig(
+                config_path=os.path.join(current_path, "../bec_config_template.yaml")
+            )
+        if not connector_cls:
+            connector_cls = RedisConnector
         super().__init__(config, connector_cls)
+        self._configure_logger()
         # pylint: disable=attribute-defined-outside-init
         self.device_manager = None
         self.scibec_url = config.scibec
@@ -74,13 +85,16 @@ class BECClient(BECService, UserScriptsMixin):
     def start(self):
         """start the client"""
         if not self._initialized:
-            raise RuntimeError("Client has not been initialized yet.")
+            logger.warning(
+                "Client has not been initialized with 'client.initialize(config, connector_cls)'. Trying to initialize with default values."
+            )
+            self.initialize()
 
         logger.info("Starting new client")
         self._start_device_manager()
         self._start_scan_queue()
         self._start_alarm_handler()
-        self._configure_logger()
+
         self.load_all_user_scripts()
         self.config = ConfigHelper(self.connector)
         self.history = self.queue.queue_storage.storage
