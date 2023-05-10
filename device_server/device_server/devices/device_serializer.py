@@ -1,12 +1,12 @@
 import msgpack
-from bec_utils.BECMessage import encode_numpy_array
+from bec_utils.numpy_encoder import numpy_encode
 from ophyd import Device, PositionerBase, Signal
 
 
 def is_serializable(var) -> bool:
-    """check if an object is json serializable"""
+    """check if an object is serializable"""
     try:
-        msgpack.dumps(var, default=encode_numpy_array)
+        msgpack.dumps(var, default=numpy_encode)
         return True
     except (TypeError, OverflowError):
         return False
