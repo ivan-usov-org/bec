@@ -40,9 +40,6 @@ class BECIPythonClient(BECClient, BeamlineMixin):
 
     def start(self):
         """start the client"""
-        if not self._initialized:
-            raise RuntimeError("Client has not been initialized yet.")
-
         super().start()
         self._start_exit_handler()
         self._configure_ipython()
