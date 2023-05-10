@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+from bec_utils.tests.utils import bec_client
 
 from bec_client_lib.devicemanager_client import Device
 from bec_client_lib.scans import (
@@ -10,8 +11,6 @@ from bec_client_lib.scans import (
     ScanDef,
     ScanGroup,
 )
-
-from .utils import bec_client
 
 # pylint: disable=no-member
 # pylint: disable=missing-function-docstring

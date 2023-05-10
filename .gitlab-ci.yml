@@ -102,7 +102,7 @@ tests-3.9:
   script: 
     - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
     - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices
-    - pip install pytest pytest-random-order pytest-cov pytest-asyncio
+    - pip install pytest pytest-random-order pytest-cov pytest-asyncio pytest-timeout
     - apt-get install -y gcc
     - *install-bec-services    
     - pytest -v --junitxml=report.xml --random-order ./bec_utils/tests ./bec_client_lib/tests ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests ./file_writer/tests
