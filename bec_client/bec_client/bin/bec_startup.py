@@ -22,8 +22,8 @@ config = ServiceConfig(CONFIG_PATH)
 
 bec = BECClient()
 bec.initialize(config, RedisConnector)
-bec.start()
 bec.load_high_level_interface("spec_hli")
+bec.start()
 
 dev = bec.device_manager.devices
 scans = bec.scans

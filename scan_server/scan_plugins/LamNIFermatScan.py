@@ -26,6 +26,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from bec_utils import BECMessage, MessageEndpoints, bec_logger
 
+from scan_server.errors import ScanAbortion
 from scan_server.scans import RequestBase, ScanArgType, ScanBase
 
 MOVEMENT_SCALE_X = np.sin(np.radians(15)) * np.cos(np.radians(30))
@@ -245,9 +246,15 @@ class LamNIFermatScan(ScanBase, LamNIMixin):
         self.stitch_overlap = scan_kwargs.get("stitch_overlap", 1)
         # self.keep_plot = scan_kwargs.get("keep_plot", 0)
         self.optim_trajectory = scan_kwargs.get("optim_trajectory", "corridor")
+        self.optim_trajectory_corridor = scan_kwargs.get("optim_trajectory_corridor")
 
     def initialize(self):
         self.scan_motors = ["rtx", "rty"]
+
+    def _optimize_trajectory(self):
+        self.positions = self.optimize_corridor(
+            self.positions, corridor_size=self.optim_trajectory_corridor
+        )
 
     def prepare_positions(self):
         self._calculate_positions()
@@ -255,6 +262,13 @@ class LamNIFermatScan(ScanBase, LamNIMixin):
         # self._sort_positions()
 
         self.num_pos = len(self.positions)
+        self._check_min_positions()
+
+    def _check_min_positions(self):
+        if self.num_pos < 20:
+            raise ScanAbortion(
+                f"The number of positions must exceed 20. Currently: {self.num_pos}."
+            )
 
     def _lamni_check_pos_in_fov_range_and_circ_fov(self, x, y) -> bool:
         # this function checks if positions are reachable in a scan
@@ -439,10 +453,14 @@ class LamNIFermatScan(ScanBase, LamNIMixin):
                 msg = self.device_manager.producer.get(MessageEndpoints.device_status("rt_scan"))
                 if msg:
                     status = BECMessage.DeviceStatusMessage.loads(msg)
-                    if status.content.get("status", 1) == 0 and self.metadata.get(
-                        "RID"
-                    ) == status.metadata.get("RID"):
+                    status_id = status.content.get("status", 1)
+                    request_id = status.metadata.get("RID")
+                    if status_id == 0 and self.metadata.get("RID") == request_id:
                         break
+                    if status_id == 2 and self.metadata.get("RID") == request_id:
+                        raise ScanAbortion(
+                            f"An error occured during the LamNI readout: {status.metadata.get('error')}"
+                        )
 
                 time.sleep(1)
                 logger.debug("reading monitors")

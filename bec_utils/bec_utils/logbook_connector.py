@@ -45,7 +45,7 @@ class LogbookConnector:
             warnings.simplefilter("ignore")
             logbooks = self.log.get_logbooks(readACL={"inq": [account]})
         if len(logbooks) > 1:
-            raise NotImplementedError
+            logger.warning("Found two logbooks. Taking the first one.")
         self.log.select_logbook(logbooks[0])
 
         # set aliases

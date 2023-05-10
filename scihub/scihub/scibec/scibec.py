@@ -61,8 +61,8 @@ class SciBec:
     def _delete_beamline(self, beamline_id: str):
         return self.client.delete_request(f"{self.url}/beamlines/{beamline_id}")
 
-    def get_experiment(self, name: str) -> dict:
-        params = self.client.make_filter(where={"name": name})
+    def get_experiment(self, name: str, writeAccount: str) -> dict:
+        params = self.client.make_filter(where={"name": name, "writeAccount": writeAccount})
         headers = {"Content-type": "application/json"}
         return self.client.get_request(f"{self.url}/experiments", headers=headers, params=params)
 

@@ -329,7 +329,7 @@ class Positioner(DeviceBase):
 
     @property
     def limits(self):
-        return self._config["deviceConfig"]["limits"]
+        return self._config["deviceConfig"].get("limits", [0, 0])
 
     @limits.setter
     def limits(self, val: list):

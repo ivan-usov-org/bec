@@ -15,7 +15,7 @@ class LamNIOpticsMixin:
             raise ValueError(f"Device {device} has no user parameter definition for {var}.")
         return param.get(var)
 
-    def leyey_out(self):
+    def leye_out(self):
         self.loptics_in()
         fshclose()
         leyey_out = self._get_user_param_safe("leyey", "out")
@@ -119,15 +119,7 @@ class LamNIOpticsMixin:
         distance = -loptz_val + 85.6 + 52
         print(f"The sample is in a distance of {distance:.1f} mm from the FZP.")
 
-        diameters = []
-        diameters[0] = 80e-6
-        diameters[1] = 100e-6
-        diameters[2] = 120e-6
-        diameters[3] = 150e-6
-        diameters[4] = 170e-6
-        diameters[5] = 200e-6
-        diameters[6] = 220e-6
-        diameters[7] = 250e-6
+        diameters = [80e-6, 100e-6, 120e-6, 150e-6, 170e-6, 200e-6, 220e-6, 250e-6]
 
         mokev_val = dev.mokev.read()["mokev"]["value"]
         console = Console()
@@ -147,7 +139,11 @@ class LamNIOpticsMixin:
             beam_size = (
                 -diameter / (focal_distance * 1000) * (focal_distance * 1000 - distance) * 1e6
             )
-            table.add_row(f"{diameter}", f"{focal_distance:.2f} mm", f"{beam_size:.2f} microns")
+            table.add_row(
+                f"{diameter*1e6:.2f} microns",
+                f"{focal_distance:.2f} mm",
+                f"{beam_size:.2f} microns",
+            )
 
         console.print(table)
 

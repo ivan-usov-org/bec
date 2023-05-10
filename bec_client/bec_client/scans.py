@@ -40,6 +40,10 @@ class ScanObject:
         hide_report = hide_report_kwarg or scans._hide_report
 
         metadata = self.client.metadata.copy()
+        if not "sample_name" in metadata:
+            sample_name = self.client.get_global_var("sample_name")
+            if sample_name is not None:
+                metadata["sample_name"] = sample_name
 
         if "md" in kwargs:
             metadata.update(kwargs["md"])

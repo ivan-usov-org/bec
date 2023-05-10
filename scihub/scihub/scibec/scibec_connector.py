@@ -98,15 +98,16 @@ class SciBecConnector:
             experiment_id = beamline_info.get("activeExperiment")
             if experiment_id:
                 experiment = self.scibec.get_experiment_by_id(experiment_id)
+                write_account = experiment[0]["writeAccount"]
+                if write_account[0] == "p":
+                    write_account = write_account.replace("p", "e")
+                self.producer.set(MessageEndpoints.account(), write_account.encode())
+
                 self.scibec_info["activeExperiment"] = experiment
                 if not "activeSession" in experiment[0]:
                     return
                 session = self.scibec.get_session_by_id(experiment[0]["activeSession"])
                 self.scibec_info["activeSession"] = session
-                write_account = experiment[0]["writeAccount"]
-                if write_account[0] == "p":
-                    write_account = write_account.replace("p", "e")
-                self.producer.set(MessageEndpoints.account(), write_account.encode())
             if not beamline_info:
                 logger.warning(f"Could not find a beamline with the name {beamline}")
                 return

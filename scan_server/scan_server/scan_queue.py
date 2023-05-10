@@ -6,6 +6,7 @@ import time
 import uuid
 from enum import Enum
 from typing import List, Optional, Union
+import traceback
 
 from bec_utils import (
     Alarms,
@@ -615,6 +616,18 @@ class RequestBlockQueue:
                 metadata={},
             )
             raise ScanAbortion from limit_error
+        # pylint: disable=broad-except
+        except Exception as exc:
+            content = traceback.format_exc()
+            logger.error(content)
+            self.scan_queue.queue_manager.connector.raise_alarm(
+                severity=Alarms.MAJOR,
+                source=self.active_rb.msg.content,
+                content=content,
+                alarm_type=exc.__class__.__name__,
+                metadata={},
+            )
+            raise ScanAbortion from exc
 
 
 class InstructionQueueItem:

@@ -118,6 +118,10 @@ class Device:
         )
 
     @property
+    def wm(self) -> None:
+        self.parent.devices.wm(self.name)
+
+    @property
     def readout_priority(self) -> ReadoutPriority:
         """get the readout priority for this device"""
         return ReadoutPriority(self._config["acquisitionConfig"]["readoutPriority"])
@@ -247,6 +251,7 @@ class Device:
                 f"{separator}\n"
                 "Details:\n"
                 f"\tStatus: {'enabled' if self.enabled else 'disabled'}\n"
+                f"\tSet enabled: {self.enabled_set}\n"
                 f"\tLast recorded value: {self.read(cached=True)}\n"
                 f"\tDevice class: {self._config.get('deviceClass')}\n"
                 f"\tAcquisition group: {self._config['acquisitionConfig'].get('acquisitionGroup')}\n"
@@ -429,9 +434,17 @@ class DeviceContainer(dict):
         table.add_column("", justify="center")
         table.add_column("readback", justify="center")
         table.add_column("setpoint", justify="center")
+        table.add_column("limits", justify="center")
         dev_read = {dev.name: dev.read(cached=True, filter_signal=False) for dev in device_names}
         readbacks = {}
         setpoints = {}
+        limits = {}
+        for dev in device_names:
+            if "limits" in dev._config.get("deviceConfig", {}):
+                limits[dev.name] = str(dev._config["deviceConfig"]["limits"])
+            else:
+                limits[dev.name] = "[]"
+
         for dev, read in dev_read.items():
             if dev in read:
                 val = read[dev]["value"]
@@ -456,7 +469,7 @@ class DeviceContainer(dict):
             else:
                 setpoints[dev] = "N/A"
         for dev in device_names:
-            table.add_row(dev.name, readbacks[dev.name], setpoints[dev.name])
+            table.add_row(dev.name, readbacks[dev.name], setpoints[dev.name], limits[dev.name])
         console.print(table)
 
     def _add_device(self, name, obj) -> None:
