@@ -25,6 +25,7 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 from bec_utils import BECMessage, MessageEndpoints, bec_logger
+
 from scan_server.errors import ScanAbortion
 from scan_server.scans import RequestBase, ScanArgType, ScanBase
 
@@ -261,6 +262,9 @@ class LamNIFermatScan(ScanBase, LamNIMixin):
         # self._sort_positions()
 
         self.num_pos = len(self.positions)
+        self._check_min_positions()
+
+    def _check_min_positions(self):
         if self.num_pos < 20:
             raise ScanAbortion(
                 f"The number of positions must exceed 20. Currently: {self.num_pos}."
