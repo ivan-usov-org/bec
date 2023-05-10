@@ -1,6 +1,5 @@
-from bec_utils import RedisConnector, ServiceConfig, bec_logger
-
 from bec_client import BECClient
+from bec_utils import RedisConnector, ServiceConfig, bec_logger
 
 logger = bec_logger.logger
 bec_logger.level = bec_logger.LOGLEVEL.SUCCESS
@@ -28,14 +27,6 @@ scans = bec.scans
 
 
 logger.success("Started BECClient")
-from bec_client.plugins.LamNI import *
-
-# lamni = LamNI(bec)
-# dev.rtx.controller.feedback_enable_with_reset()
-# lamni.align.align()
-
-# dev.rtx.controller.feedback_enable_with_reset()
-# scans.lamni_fermat_scan(fov_size=[20, 25], center_x=0, center_y=0, shift_x=0, shift_y=0, angle=10, step=0.5, fov_circular=0, exp_time=0.05)
 
 # scans.round_scan_fly(dev.flyer_sim, 0, 50, 20, 3, exp_time=0.1, relative=True)
 # scans.monitor_scan(dev.samx, -100, 100, relative=False)

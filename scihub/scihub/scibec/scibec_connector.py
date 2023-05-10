@@ -88,9 +88,7 @@ class SciBecConnector:
         try:
             beamline = self.scihub.config.config["scibec"].get("beamline")
             if not beamline:
-                logger.warning(
-                    f"Cannot connect to SciBec without a beamline specified."
-                )
+                logger.warning(f"Cannot connect to SciBec without a beamline specified.")
                 return
             logger.info(f"Connecting to SciBec on {scibec_host}")
             self.scibec = SciBec()
@@ -104,7 +102,7 @@ class SciBecConnector:
                 if write_account[0] == "p":
                     write_account = write_account.replace("p", "e")
                 self.producer.set(MessageEndpoints.account(), write_account.encode())
-                                
+
                 self.scibec_info["activeExperiment"] = experiment
                 if not "activeSession" in experiment[0]:
                     return
