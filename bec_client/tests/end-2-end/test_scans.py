@@ -4,6 +4,7 @@ import time
 
 import numpy as np
 import pytest
+from bec_client_lib.alarm_handler import AlarmBase
 from bec_utils import (
     BECMessage,
     MessageEndpoints,
@@ -13,8 +14,7 @@ from bec_utils import (
 )
 from bec_utils.bec_errors import ScanAbortion, ScanInterruption
 
-from bec_client import BECClient
-from bec_client.alarm_handler import AlarmBase
+from bec_client import BECIPythonClient
 
 logger = bec_logger.logger
 
@@ -29,7 +29,7 @@ CONFIG_PATH = "../ci/test_config.yaml"
 @pytest.fixture(scope="session", autouse=True)
 def client():
     config = ServiceConfig(CONFIG_PATH)
-    bec = BECClient()
+    bec = BECIPythonClient()
     bec.initialize(
         config,
         RedisConnector,
