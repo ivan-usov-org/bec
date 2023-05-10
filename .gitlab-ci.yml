@@ -85,7 +85,7 @@ tests:
     - pip install pytest pytest-random-order pytest-cov pytest-asyncio
     - apt-get install -y gcc
     - *install-bec-services
-    - coverage run --source=./bec_utils/bec_utils,./device_server/device_server,./scan_server/scan_server,./scan_bundler/scan_bundler,./bec_client/bec_client,./file_writer/file_writer,./scihub/scihub --omit=*/bec_client/bec_client/plugins/*,*/bec_client/scripts/* -m pytest -v --junitxml=report.xml --random-order ./bec_utils/tests ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests ./file_writer/tests ./scihub/tests
+    - coverage run --source=./bec_utils/bec_utils,./bec_client_lib/bec_client_lib,./device_server/device_server,./scan_server/scan_server,./scan_bundler/scan_bundler,./bec_client/bec_client,./file_writer/file_writer,./scihub/scihub --omit=*/bec_client/bec_client/plugins/*,*/bec_client/scripts/* -m pytest -v --junitxml=report.xml --random-order ./bec_utils/tests ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests ./file_writer/tests ./scihub/tests ./bec_client_lib/tests
     - coverage report
     - coverage xml
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
@@ -105,7 +105,7 @@ tests-3.9:
     - pip install pytest pytest-random-order pytest-cov pytest-asyncio
     - apt-get install -y gcc
     - *install-bec-services    
-    - pytest -v --junitxml=report.xml --random-order ./bec_utils/tests ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests ./file_writer/tests
+    - pytest -v --junitxml=report.xml --random-order ./bec_utils/tests ./bec_client_lib/tests ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests ./file_writer/tests
 
 tests-3.10:
   extends: "tests-3.9"
