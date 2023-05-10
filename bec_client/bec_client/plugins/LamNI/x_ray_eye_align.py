@@ -129,9 +129,7 @@ class XrayEyeAlign:
         return self.device_manager.devices.lsamrot.readback.read()["lsamrot"]["value"]
 
     def update_fov(self, k: int):
-        self._xray_fov_xy[0] = max(
-            epics_get(f"XOMNYI-XEYE-XWIDTH_X:{k}"), self._xray_fov_xy[0]
-        )
+        self._xray_fov_xy[0] = max(epics_get(f"XOMNYI-XEYE-XWIDTH_X:{k}"), self._xray_fov_xy[0])
         self._xray_fov_xy[1] = max(0, self._xray_fov_xy[0])
 
     @property
@@ -187,12 +185,8 @@ class XrayEyeAlign:
 
         while True:
             if epics_get("XOMNYI-XEYE-SUBMIT:0") == 1:
-                val_x = (
-                    epics_get(f"XOMNYI-XEYE-XVAL_X:{k}") * self.PIXEL_CALIBRATION
-                )  # in mm
-                val_y = (
-                    epics_get(f"XOMNYI-XEYE-YVAL_Y:{k}") * self.PIXEL_CALIBRATION
-                )  # in mm
+                val_x = epics_get(f"XOMNYI-XEYE-XVAL_X:{k}") * self.PIXEL_CALIBRATION  # in mm
+                val_y = epics_get(f"XOMNYI-XEYE-YVAL_Y:{k}") * self.PIXEL_CALIBRATION  # in mm
                 self.alignment_values[k] = [val_x, val_y]
                 print(
                     f"Clicked position {k}: x {self.alignment_values[k][0]}, y {self.alignment_values[k][1]}"
@@ -341,22 +335,14 @@ class XrayEyeAlign:
         ) as alignment_values_file:
             alignment_values_file.write(f"angle\thorizontal\tvertical\n")
             for k in range(2, 11):
-                fovx_offset = (
-                    self.alignment_values[0][0] - self.alignment_values[k][0]
-                ) * 1000
-                fovy_offset = (
-                    self.alignment_values[k][1] - self.alignment_values[0][1]
-                ) * 1000
+                fovx_offset = (self.alignment_values[0][0] - self.alignment_values[k][0]) * 1000
+                fovy_offset = (self.alignment_values[k][1] - self.alignment_values[0][1]) * 1000
                 print(
                     f"Writing to file new alignment: number {k}, value x {fovx_offset}, y {fovy_offset}"
                 )
-                alignment_values_file.write(
-                    f"{(k-2)*45}\t{fovx_offset}\t{fovy_offset}\n"
-                )
+                alignment_values_file.write(f"{(k-2)*45}\t{fovx_offset}\t{fovy_offset}\n")
 
-    def read_xray_eye_correction(
-        self, dir_path=os.path.expanduser("~/Data10/specES1/internal/")
-    ):
+    def read_xray_eye_correction(self, dir_path=os.path.expanduser("~/Data10/specES1/internal/")):
         tomo_fit_xray_eye = np.zeros((2, 3))
         with open(os.path.join(dir_path, "ptychotomoalign_Ax.txt"), "r") as file:
             tomo_fit_xray_eye[0][0] = file.readline()
@@ -393,21 +379,17 @@ class XrayEyeAlign:
     def lamni_compute_additional_correction_xeye_mu(self, angle):
         tomo_fit_xray_eye = self.client.get_global_var("tomo_fit_xray_eye")
         if tomo_fit_xray_eye is None:
-            print(
-                "Not applying any additional correction. No x-ray eye data available.\n"
-            )
+            print("Not applying any additional correction. No x-ray eye data available.\n")
             return (0, 0)
 
         # x amp, phase, offset, y amp, phase, offset
         #  0 0    0 1    0 2     1 0    1 1    1 2
         correction_x = (
-            tomo_fit_xray_eye[0][0]
-            * np.sin(np.radians(angle) + tomo_fit_xray_eye[0][1])
+            tomo_fit_xray_eye[0][0] * np.sin(np.radians(angle) + tomo_fit_xray_eye[0][1])
             + tomo_fit_xray_eye[0][2]
         ) / 1000
         correction_y = (
-            tomo_fit_xray_eye[1][0]
-            * np.sin(np.radians(angle) + tomo_fit_xray_eye[1][1])
+            tomo_fit_xray_eye[1][0] * np.sin(np.radians(angle) + tomo_fit_xray_eye[1][1])
             + tomo_fit_xray_eye[1][2]
         ) / 1000
 
@@ -470,9 +452,7 @@ class XrayEyeAlign:
 
     def compute_additional_correction_2(self, angle):
         if not self.corr_pos_x_2:
-            print(
-                "Not applying any additional secondary correction. No data available.\n"
-            )
+            print("Not applying any additional secondary correction. No data available.\n")
             return (0, 0)
 
         # find index of closest angle
@@ -564,9 +544,7 @@ class LamNI(LamNIOpticsMixin):
         self.check_fofb = val
         self.get_beamline_checks_enabled()
 
-    def set_special_angles(
-        self, angles: list, repeats: int = 20, tolerance: float = 0.5
-    ):
+    def set_special_angles(self, angles: list, repeats: int = 20, tolerance: float = 0.5):
         """Set the special angles for a tomo
 
         Args:
@@ -648,9 +626,7 @@ class LamNI(LamNIOpticsMixin):
 
     @lamni_piezo_range_x.setter
     def lamni_piezo_range_x(self, val: float):
-        if dev.rtx.user_parameter and dev.rtx.user_parameter.get(
-            "large_range_scan", True
-        ):
+        if dev.rtx.user_parameter and dev.rtx.user_parameter.get("large_range_scan", True):
             self.client.set_global_var("lamni_piezo_range_x", val)
             return
         if val > 80:
@@ -666,9 +642,7 @@ class LamNI(LamNIOpticsMixin):
 
     @lamni_piezo_range_y.setter
     def lamni_piezo_range_y(self, val: float):
-        if dev.rtx.user_parameter and dev.rtx.user_parameter.get(
-            "large_range_scan", True
-        ):
+        if dev.rtx.user_parameter and dev.rtx.user_parameter.get("large_range_scan", True):
             self.client.set_global_var("lamni_piezo_range_y", val)
             return
         if val > 80:
@@ -784,9 +758,7 @@ class LamNI(LamNIOpticsMixin):
 
         additional_correction = self.align.compute_additional_correction(angle)
         additional_correction_2 = self.align.compute_additional_correction_2(angle)
-        correction_xeye_mu = self.align.lamni_compute_additional_correction_xeye_mu(
-            angle
-        )
+        correction_xeye_mu = self.align.lamni_compute_additional_correction_xeye_mu(angle)
 
         self._current_scan_list = []
 
@@ -853,9 +825,7 @@ class LamNI(LamNIOpticsMixin):
                 fast_orbit_feedback = dev.sls_fast_orbit_feedback.read(cached=True)
                 if fast_orbit_feedback["value"] != "running":
                     self._beam_is_okay = False
-                    msgs.append(
-                        "Check beam failed: Fast orbit feedback is not running."
-                    )
+                    msgs.append("Check beam failed: Fast orbit feedback is not running.")
         except Exception:
             logger.warning("Failed to check beam.")
         return msgs
@@ -1061,14 +1031,10 @@ class LamNI(LamNIOpticsMixin):
         print(
             f"Piezo range (max 80)  <microns>  =  {self.lamni_piezo_range_x}, {self.lamni_piezo_range_y}"
         )
-        print(
-            f"Stitching number x,y             =  {self.lamni_stitch_x}, {self.lamni_stitch_y}"
-        )
+        print(f"Stitching number x,y             =  {self.lamni_stitch_x}, {self.lamni_stitch_y}")
         print(f"Stitching overlap                =  {self.tomo_stitch_overlap}")
         print(f"Circuilar FOV diam    <microns>  =  {self.tomo_circfov}")
-        print(
-            f"Reconstruction queue name        =  {self.ptycho_reconstruct_foldername}"
-        )
+        print(f"Reconstruction queue name        =  {self.ptycho_reconstruct_foldername}")
         print(
             "For information, fov offset is rotating and finding the ROI, manual shift moves rotation center"
         )
@@ -1084,12 +1050,8 @@ class LamNI(LamNIOpticsMixin):
         if user_input == "y":
             print("good then")
         else:
-            self.tomo_countingtime = self._get_val(
-                "<ctime> s", self.tomo_countingtime, float
-            )
-            self.tomo_shellstep = self._get_val(
-                "<step size> um", self.tomo_shellstep, float
-            )
+            self.tomo_countingtime = self._get_val("<ctime> s", self.tomo_countingtime, float)
+            self.tomo_shellstep = self._get_val("<step size> um", self.tomo_shellstep, float)
             self.lamni_piezo_range_x = self._get_val(
                 "<piezo range X (max 80)> um", self.lamni_piezo_range_x, float
             )
@@ -1098,9 +1060,7 @@ class LamNI(LamNIOpticsMixin):
             )
             self.lamni_stitch_x = self._get_val("<stitch X>", self.lamni_stitch_x, int)
             self.lamni_stitch_y = self._get_val("<stitch Y>", self.lamni_stitch_y, int)
-            self.tomo_circfov = self._get_val(
-                "<circular FOV> um", self.tomo_circfov, float
-            )
+            self.tomo_circfov = self._get_val("<circular FOV> um", self.tomo_circfov, float)
             self.ptycho_reconstruct_foldername = self._get_val(
                 "Reconstruction queue ", self.ptycho_reconstruct_foldername, str
             )
@@ -1110,9 +1070,7 @@ class LamNI(LamNIOpticsMixin):
 
             print(f"The angular step will be {360/tomo_numberofprojections}")
             self.tomo_angle_stepsize = 360 / tomo_numberofprojections * 8
-            print(
-                f"The angular step in a subtomogram it will be {self.tomo_angle_stepsize}"
-            )
+            print(f"The angular step in a subtomogram it will be {self.tomo_angle_stepsize}")
             self.sample_name = self._get_val("sample name", self.sample_name, str)
 
     @staticmethod
@@ -1123,9 +1081,7 @@ class LamNI(LamNIOpticsMixin):
         """write the tomo reconstruct file for the reconstruction queue"""
         bec = builtins.__dict__.get("bec")
         base_path = os.path.expanduser(base_path)
-        ptycho_queue_path = Path(
-            os.path.join(base_path, self.ptycho_reconstruct_foldername)
-        )
+        ptycho_queue_path = Path(os.path.join(base_path, self.ptycho_reconstruct_foldername))
         ptycho_queue_path.mkdir(parents=True, exist_ok=True)
 
         # pylint: disable=undefined-variable
@@ -1174,9 +1130,7 @@ class LamNI(LamNIOpticsMixin):
             f"{'Angular step within sub-tomogram:':<{padding}}{self.tomo_angle_stepsize:>{padding}.2f}\n",
         ]
         content = "".join(content)
-        user_target = os.path.expanduser(
-            f"~/Data10/documentation/tomo_scan_ID_{self.tomo_id}.pdf"
-        )
+        user_target = os.path.expanduser(f"~/Data10/documentation/tomo_scan_ID_{self.tomo_id}.pdf")
         with PDFWriter(user_target) as file:
             file.write(header)
             file.write(content)
@@ -1186,12 +1140,8 @@ class LamNI(LamNIOpticsMixin):
         )
         # status = subprocess.run(f"cp /tmp/spec-e20131-specES1.pdf {user_target}", shell=True)
         msg = bec.logbook.LogbookMessage()
-        logo_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "LamNI_logo.png"
-        )
-        msg.add_file(logo_path).add_text(
-            "".join(content).replace("\n", "</p><p>")
-        ).add_tag(
+        logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "LamNI_logo.png")
+        msg.add_file(logo_path).add_text("".join(content).replace("\n", "</p><p>")).add_tag(
             [
                 "BEC",
                 "tomo_parameters",
@@ -1251,19 +1201,18 @@ class DataDrivenLamNI(LamNI):
         """start a tomo scan"""
         bec = builtins.__dict__.get("bec")
         scans = builtins.__dict__.get("scans")
-                
+
         fname = os.path.expanduser(fname)
 
         if not os.path.exists(fname):
             raise FileNotFoundError(f"Could not find datadriven params file in {fname}.")
-        content= f"Loading tomo parameters from {fname}."
+        content = f"Loading tomo parameters from {fname}."
         logger.warning(content)
-        tags = ["Data_driven_file","BEC"]
+        tags = ["Data_driven_file", "BEC"]
         msg = bec.logbook.LogbookMessage()
         msg.add_text(content).add_tag(tags)
         self.client.logbook.send_logbook_message(msg)
         self._update_tomo_data_from_file(fname)
-
 
         self._current_special_angles = self.special_angles.copy()
 
@@ -1373,18 +1322,12 @@ class DataDrivenLamNI(LamNI):
             self.tomo_data["propagation_distance"] = np.array(
                 [*file["relative_propagation_distance"]]
             ).flatten()
-            self.tomo_data["manual_shift_x"] = np.array(
-                [*file["manual_shift_x"]]
-            ).flatten()
-            self.tomo_data["manual_shift_y"] = np.array(
-                [*file["manual_shift_y"]]
-            ).flatten()
+            self.tomo_data["manual_shift_x"] = np.array([*file["manual_shift_x"]]).flatten()
+            self.tomo_data["manual_shift_y"] = np.array([*file["manual_shift_y"]]).flatten()
             self.tomo_data["subtomo_id"] = np.array([*file["subtomo_id"]]).flatten()
 
         shapes = []
         for data in self.tomo_data.values():
             shapes.append(data.shape)
         if len(set(shapes)) > 1:
-            raise ValueError(
-                f"Tomo data file has entries of inconsistent lengths: {shapes}."
-            )
+            raise ValueError(f"Tomo data file has entries of inconsistent lengths: {shapes}.")
