@@ -75,6 +75,7 @@ repo_update:
     - name: docker:dind
       entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
   script:
+      - git clone https://gitlab.psi.ch/bec/scibec.git
       # spin up redis, mongo and scibec
       - docker-compose -f ./ci/docker-compose.yaml up -d
       - apk update; apk upgrade; apk add curl; apk add git
