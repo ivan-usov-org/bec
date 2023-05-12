@@ -2,6 +2,7 @@ import sys
 import warnings
 
 import msgpack
+from requests.exceptions import HTTPError
 
 from bec_utils import MessageEndpoints, RedisConnector, bec_logger
 
@@ -43,7 +44,11 @@ class LogbookConnector:
         # FIXME the python sdk should not use the ownergroup
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            logbooks = self.log.get_logbooks(readACL={"inq": [account]})
+            try:
+                logbooks = self.log.get_logbooks(readACL={"inq": [account]})
+            except HTTPError:
+                self.producer.set(MessageEndpoints.logbook(), b"")
+                return
         if len(logbooks) > 1:
             logger.warning("Found two logbooks. Taking the first one.")
         self.log.select_logbook(logbooks[0])
