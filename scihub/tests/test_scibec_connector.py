@@ -41,4 +41,5 @@ def test_get_current_session_with_SciBec(SciHubMock):
 def test_get_current_session_without_SciBec(SciHubMock):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     scibec_connector.scibec_info["beamline"] = {"activeSession": "12345"}
+    scibec_connector.scibec = None
     assert scibec_connector.get_current_session() is None
