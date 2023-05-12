@@ -75,6 +75,10 @@ class GrumpyConnector(PlotConnector):
     def get_list_names(self, *args, **kwargs) -> None:
         return self.client.get_list_names()
 
+    # @connection_required
+    # def plot_multiple_plots(self, items, *args, **kwargs) -> None:
+    #     return self.client.plot_multiple_plots(items)
+
     def connect(self):
         self.client = rpc.RPCClient("localhost", 8000)
         try:
