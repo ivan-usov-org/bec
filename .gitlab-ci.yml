@@ -163,6 +163,7 @@ end-2-end:
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
   script:
+    - git clone https://gitlab.psi.ch/bec/scibec.git
     # spin up redis, mongo and scibec
     - docker-compose -f ./ci/docker-compose.yaml up -d
     - apk update; apk upgrade; apk add curl; apk add git; apk add gcc

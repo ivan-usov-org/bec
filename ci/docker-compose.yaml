@@ -10,7 +10,7 @@ services:
     network_mode: host
   scibec-test-server:
     image: scibec-test-server
-    build: ./scibec
+    build: ./scibec/backend/
     network_mode: host
     depends_on:
       - "mongodb-test"
