@@ -75,10 +75,11 @@ repo_update:
     - name: docker:dind
       entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
   script:
+      - apk update; apk upgrade; apk add curl; apk add git; apk add gcc  
       - git clone https://gitlab.psi.ch/bec/scibec.git
       # spin up redis, mongo and scibec
       - docker-compose -f ./ci/docker-compose.yaml up -d
-      - apk update; apk upgrade; apk add curl; apk add git
+      
       - git config --global user.name "ci_update_bot"
       - git config --global user.email "ci_update_bot@bec.ch"
       
@@ -164,11 +165,11 @@ end-2-end:
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
   script:
+    - apk update; apk upgrade; apk add curl; apk add git; apk add gcc
     - git clone https://gitlab.psi.ch/bec/scibec.git
     # spin up redis, mongo and scibec
     - docker-compose -f ./ci/docker-compose.yaml up -d
-    - apk update; apk upgrade; apk add curl; apk add git; apk add gcc
-
+    
     # get ophyd devices repo (needed for the device_server)
     - git clone --branch $OPHYD_DEVICES_BRANCH https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
 
