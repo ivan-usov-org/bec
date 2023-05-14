@@ -13,6 +13,7 @@ from bec_utils import (
 )
 from bec_utils.bec_errors import ServiceConfigError
 from bec_utils.connector import ConnectorBase
+from bec_utils.redis_connector import Alarms, RedisConnector
 
 from .file_writer import NexusFileWriter
 
@@ -37,7 +38,7 @@ class ScanStorage:
 
 
 class FileWriterManager(BECService):
-    def __init__(self, config: ServiceConfig, connector_cls: ConnectorBase) -> None:
+    def __init__(self, config: ServiceConfig, connector_cls: RedisConnector) -> None:
         super().__init__(config, connector_cls, unique_service=True)
         self.file_writer_config = self._service_config.service_config.get("file_writer")
         self.producer = self.connector.producer()
@@ -146,7 +147,14 @@ class FileWriterManager(BECService):
             self.file_writer.write(file_path=file_path, data=storage)
         except Exception as exc:
             content = traceback.format_exc()
-            logger.error(content)
+            logger.error(f"Failed to write to file {file_path}. Error: {content}")
+            self.connector.raise_alarm(
+                severity=Alarms.MINOR,
+                alarm_type="FileWriterError",
+                source="file_writer_manager",
+                content=f"Failed to write to file {file_path}. Error: {content}",
+                metadata=self.scan_storage[scanID].metadata,
+            )
             successful = False
         self.scan_storage.pop(scanID)
         self.producer.set_and_publish(
@@ -156,7 +164,6 @@ class FileWriterManager(BECService):
         if successful:
             logger.success(f"Finished writing file {file_path}.")
             return
-        logger.error(f"Failed to write to file {file_path}.")
 
     def _get_scan_dir(self, scan_bundle, scan_number, leading_zeros=None):
         if leading_zeros is None:
