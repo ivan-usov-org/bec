@@ -250,6 +250,7 @@ class Device:
                 f"{type(self).__name__}(name={self.name}, enabled={self.enabled}):\n"
                 f"{separator}\n"
                 "Details:\n"
+                f"\tDescription: {self._config.get('description', self.name)}\n"
                 f"\tStatus: {'enabled' if self.enabled else 'disabled'}\n"
                 f"\tSet enabled: {self.enabled_set}\n"
                 f"\tLast recorded value: {self.read(cached=True)}\n"
