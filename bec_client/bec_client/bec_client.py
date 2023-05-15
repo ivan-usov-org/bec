@@ -25,7 +25,7 @@ from rich.table import Table
 
 from bec_client.scan_manager import ScanManager
 
-from .alarm_handler import AlarmHandler
+from .alarm_handler import AlarmBase, AlarmHandler
 from .beamline_mixin import BeamlineMixin
 from .bec_magics import BECMagics
 from .callbacks.callback_manager import CallbackManager
@@ -157,6 +157,7 @@ class BECClient(BECService, BeamlineMixin, UserScriptsMixin):
             self._ip.prompts = BECClientPrompt(ip=self._ip, client=self, username="demo")
             self._load_magics()
             self._ip.events.register("post_run_cell", log_console)
+            self._ip.set_custom_exc((Exception,), _ip_exception_handler)  # register your handler
 
     def _configure_logger(self):
         bec_logger.logger.remove()
@@ -256,6 +257,13 @@ class BECClient(BECService, BeamlineMixin, UserScriptsMixin):
         if not doc_string:
             return ""
         return doc_string.strip().split("\n")[0]
+
+
+def _ip_exception_handler(self, etype, evalue, tb, tb_offset=None):
+    if issubclass(etype, AlarmBase):
+        print(f"\x1b[31m BEC alarm:\x1b[0m: {evalue}")
+        return
+    self.showtraceback((etype, evalue, tb), tb_offset=None)  # standard IPython's printout
 
 
 class BECClientPrompt(Prompts):

@@ -40,9 +40,7 @@ def set_event_delayed(event: threading.Event, delay: int) -> None:
 
 def check_alarms(bec):
     """check for alarms and raise them if needed"""
-    for alarm in bec.alarms(severity=Alarms.MINOR):
-        if alarm:
-            raise alarm
+    bec.alarm_handler.raise_alarms()
 
 
 class LiveUpdatesBase(abc.ABC):
