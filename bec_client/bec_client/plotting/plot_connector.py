@@ -58,10 +58,11 @@ class GrumpyConnector(PlotConnector):
         self.client = None
         self._grum_process = None
         self.current_plot = None
+        self._y_selected = None
 
     @connection_required
     def select(self, device: Device, *args, **kwargs) -> None:
-        pass
+        self._y_selected = device.name
 
     @connection_required
     def append_data(self, data: list, *args, **kwargs) -> None:
@@ -74,10 +75,6 @@ class GrumpyConnector(PlotConnector):
     @connection_required
     def get_list_names(self, *args, **kwargs) -> None:
         return self.client.get_list_names()
-
-    # @connection_required
-    # def plot_multiple_plots(self, items, *args, **kwargs) -> None:
-    #     return self.client.plot_multiple_plots(items)
 
     def connect(self):
         self.client = rpc.RPCClient("localhost", 8000)
