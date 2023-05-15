@@ -67,9 +67,11 @@ class AlarmHandler:
         alarm = AlarmBase(
             alarm=msg, alarm_type=msg.content["alarm_type"], severity=severity, handled=False
         )
-        if severity > Alarms.WARNING:
+        if severity > Alarms.MINOR:
             self.alarms_stack.appendleft(alarm)
-        logger.debug(f"{msg.content['source']}: {msg.content['content']}")
+            logger.debug(alarm)
+        else:
+            logger.warning(alarm)
 
     @threadlocked
     def get_unhandled_alarms(self, severity=Alarms.WARNING) -> List:
@@ -101,11 +103,11 @@ class AlarmHandler:
             self.alarms_stack.remove(alarm)
             yield alarm
 
-    def raise_alarms(self, severity=Alarms.MINOR):
+    def raise_alarms(self, severity=Alarms.MAJOR):
         """Raise unhandled alarms with specified severity.
 
         Args:
-            severity (Alarm, optional): Minimum severity. Defaults to Alarms.MINOR.
+            severity (Alarm, optional): Minimum severity. Defaults to Alarms.MAJOR.
 
         Raises:
             alarms: Alarm exception.
