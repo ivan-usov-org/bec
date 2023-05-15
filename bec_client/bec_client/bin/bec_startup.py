@@ -7,6 +7,8 @@ from bec_utils import RedisConnector, ServiceConfig, bec_logger
 
 from bec_client import BECClient
 
+from bec_client.plotting import GrumpyConnector
+
 # pylint: disable=wrong-import-position
 # pylint: disable=protected-access
 # pylint: disable=unused-import
@@ -28,6 +30,7 @@ bec.start()
 dev = bec.device_manager.devices
 scans = bec.scans
 
+bec.plotter = GrumpyConnector()
 ####################### END OF INIT #############################
 #################################################################
 
