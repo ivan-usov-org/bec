@@ -1,5 +1,6 @@
-from bec_client import BECClient
 from bec_utils import RedisConnector, ServiceConfig, bec_logger
+
+from bec_client import BECClient
 
 logger = bec_logger.logger
 bec_logger.level = bec_logger.LOGLEVEL.SUCCESS
@@ -32,20 +33,50 @@ logger.success("Started BECClient")
 # scans.monitor_scan(dev.samx, -100, 100, relative=False)
 
 # from bec_client.plotting import GrumpyConnector
+
 # bec.plotter = GrumpyConnector()
 # bec.plotter.connect()
 
 
 # def basic_plot(data, metadata):
 #     plot_name = f"Scan {metadata['scan_number']}"
+#     scan_motors = metadata.get("scan_report_devices")
+#     if len(scan_motors) == 2:
+#         x = data["data"][scan_motors[0]][scan_motors[0]]["value"]
+#         y = data["data"][scan_motors[1]][scan_motors[1]]["value"]
+#     elif len(scan_motors) == 1:
+#         x = data["data"][scan_motors[0]][scan_motors[0]]["value"]
+#         y = data["data"]["bpm4i"]["bpm4i"]["value"]
 #     if bec.plotter.current_plot != plot_name:
 #         bec.plotter.new_plot(plot_name, {})
-#     x = data["data"]["samx"]["samx"]["value"]
-#     y = data["data"]["bpm3a"]["bpm3a"]["value"]
 #     bec.plotter.append_data([x, y])
 
+# import time
 
-# scans.line_scan(dev.samx, -5, 5, steps=100, exp_time=0.1, relative=False, callback=basic_plot)
+# import numpy as np
+# from matplotlib import pyplot as plt
+
+# plt.ion()
+# # fig = plt.figure("1")
+# fig, ax = plt.subplots(figsize=(10, 8))
+# line, = ax.plot([], [])
+# # plt.plot([])
+# x_data = []
+# y_data = []
+
+# def basic_plot(data, metadata):
+#     scan_motors = metadata.get("scan_report_devices")
+#     x = data["data"][scan_motors[0]][scan_motors[0]]["value"]
+#     y = data["data"]["bpm4i"]["bpm4i"]["value"]
+#     x_data.append(x)
+#     y_data.append(y)
+#     plt.plot(x_data, y_data)
+#     fig.canvas.draw()
+#     fig.canvas.flush_events()
+#     time.sleep(0.01)
+
+scans.line_scan(dev.samy, -5, 5, steps=100, exp_time=0.1, relative=False, callback=basic_plot)
+# scans.line_scan(dev.samy, -5, 5, steps=100, exp_time=0.1, relative=False, callback=basic_plot)
 
 # tomo_scan_sim()
 
