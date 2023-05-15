@@ -15,7 +15,8 @@ class GrumPlotStorage:
 
 _connector = GrumpyConnector()
 _connector.connect()
-_connector.select(dev.bpm4i)
+if _connector.connected:
+    _connector.select(dev.bpm4i)
 _plot_storage = GrumPlotStorage()
 
 
