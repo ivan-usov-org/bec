@@ -1,9 +1,16 @@
 import abc
 import functools
 import subprocess
+import sys
 
-from bec_utils import Device
-from grum import rpc
+from bec_utils import Device, bec_logger
+
+logger = bec_logger.logger
+
+try:
+    from grum import rpc
+except ImportError:
+    logger.warning("Grum will not be used since it's not in modules")
 
 
 class PlotConnectorConnectionError(Exception):
@@ -46,6 +53,8 @@ class PlotConnector(abc.ABC):
         """
 
     def connect(self, *args, **kwargs):
+        if "grum" not in sys.modules:
+            return
         self.connected = True
 
     def new_plot(self, *args, **kwargs):
@@ -53,8 +62,10 @@ class PlotConnector(abc.ABC):
 
 
 class GrumpyConnector(PlotConnector):
-    def __init__(self) -> None:
+    def __init__(self, host="localhost", port=8000) -> None:
         super().__init__()
+        self.host = host
+        self.port = port
         self.client = None
         self._grum_process = None
         self.current_plot = None
@@ -77,12 +88,12 @@ class GrumpyConnector(PlotConnector):
         return self.client.get_list_names()
 
     def connect(self):
-        self.client = rpc.RPCClient("localhost", 8000)
+        self.client = rpc.RPCClient(self.host, self.port)
         try:
             self.client.utils.ping()
         except ConnectionRefusedError:
             self._grum_process = subprocess.Popen(["grum", "-w", "single"])
-            self.client = rpc.RPCClient("localhost", 8000)
+            self.client = rpc.RPCClient(self.host, self.port)
         self._wait_for_connection()
         super().connect()
 
