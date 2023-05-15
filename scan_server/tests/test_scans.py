@@ -10,6 +10,7 @@ from bec_utils.tests.utils import ProducerMock
 
 from scan_plugins.LamNIFermatScan import LamNIFermatScan
 from scan_plugins.otf_scan import OTFScan
+from scan_server.errors import ScanAbortion
 from scan_server.scans import (
     Acquire,
     ContLineScan,
@@ -479,7 +480,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                 BMessage.DeviceInstructionMessage(
                     device=None,
                     action="wait",
-                    parameter={"type": "trigger", "group": "trigger", "time": 0.1},
+                    parameter={"type": "trigger", "group": "trigger", "time": 0},
                     metadata={"stream": "primary", "DIID": 4},
                 ),
                 BMessage.DeviceInstructionMessage(
@@ -539,7 +540,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                 BMessage.DeviceInstructionMessage(
                     device=None,
                     action="wait",
-                    parameter={"type": "trigger", "group": "trigger", "time": 0.1},
+                    parameter={"type": "trigger", "group": "trigger", "time": 0},
                     metadata={"stream": "primary", "DIID": 11},
                 ),
                 BMessage.DeviceInstructionMessage(
@@ -602,7 +603,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     parameter={
                         "type": "trigger",
                         "group": "trigger",
-                        "time": 0.1,
+                        "time": 0,
                     },
                     metadata={"stream": "primary", "DIID": 18},
                 ),
@@ -1747,34 +1748,70 @@ def test_LamNIFermatScan(scan_msg, reference_scan_list):
         metadata=scan_msg.metadata,
     )
     scan.stubs._get_from_rpc = lambda x: 0
-    scan_instructions = list(scan.run())
-    scan_uid = scan_instructions[0].metadata.get("scanID")
-    for ii, instr in enumerate(reference_scan_list):
-        if instr.metadata.get("scanID") is not None:
-            instr.metadata["scanID"] = scan_uid
-        instr.metadata["DIID"] = ii
-        instr.metadata["RID"] = scan.metadata.get("RID")
-        if instr.content["action"] == "rpc":
-            reference_scan_list[ii].content["parameter"]["rpc_id"] = scan_instructions[ii].content[
-                "parameter"
-            ]["rpc_id"]
-        if instr.content["parameter"].get("value"):
-            assert np.isclose(
-                instr.content["parameter"].get("value"),
-                scan_instructions[ii].content["parameter"].get("value"),
-            )
-            instr.content["parameter"]["value"] = scan_instructions[ii].content["parameter"][
-                "value"
-            ]
-        if instr.content["parameter"].get("positions"):
-            assert np.isclose(
-                instr.content["parameter"].get("positions"),
-                scan_instructions[ii].content["parameter"].get("positions"),
-            ).all()
-            instr.content["parameter"]["positions"] = scan_instructions[ii].content["parameter"][
-                "positions"
-            ]
-    assert scan_instructions == reference_scan_list
+    with mock.patch.object(scan, "_check_min_positions") as check_min_pos:
+        scan_instructions = list(scan.run())
+        check_min_pos.assert_called_once()
+        scan_uid = scan_instructions[0].metadata.get("scanID")
+        for ii, instr in enumerate(reference_scan_list):
+            if instr.metadata.get("scanID") is not None:
+                instr.metadata["scanID"] = scan_uid
+            instr.metadata["DIID"] = ii
+            instr.metadata["RID"] = scan.metadata.get("RID")
+            if instr.content["action"] == "rpc":
+                reference_scan_list[ii].content["parameter"]["rpc_id"] = scan_instructions[
+                    ii
+                ].content["parameter"]["rpc_id"]
+            if instr.content["parameter"].get("value"):
+                assert np.isclose(
+                    instr.content["parameter"].get("value"),
+                    scan_instructions[ii].content["parameter"].get("value"),
+                )
+                instr.content["parameter"]["value"] = scan_instructions[ii].content["parameter"][
+                    "value"
+                ]
+            if instr.content["parameter"].get("positions"):
+                assert np.isclose(
+                    instr.content["parameter"].get("positions"),
+                    scan_instructions[ii].content["parameter"].get("positions"),
+                ).all()
+                instr.content["parameter"]["positions"] = scan_instructions[ii].content[
+                    "parameter"
+                ]["positions"]
+        assert scan_instructions == reference_scan_list
+
+
+def test_LamNIFermatScan_min_positions():
+    scan_msg = BMessage.ScanQueueMessage(
+        scan_type="lamni_fermat_scan",
+        parameter={
+            "args": {},
+            "kwargs": {
+                "fov_size": [5],
+                "exp_time": 0.1,
+                "step": 2,
+                "angle": 10,
+                "scan_type": "step",
+            },
+        },
+        queue="primary",
+        metadata={"RID": "1234"},
+    )
+    device_manager = DMMock()
+    device_manager.add_device("lsamx")
+    device_manager.devices["lsamx"]._config["userParameter"] = {"center": 8.1}
+    device_manager.add_device("lsamy")
+    device_manager.devices["lsamy"]._config["userParameter"] = {"center": 10}
+    device_manager.add_device("samx")
+    device_manager.devices["samx"].read_buffer = {"value": 0}
+    device_manager.add_device("samy")
+    device_manager.devices["samy"].read_buffer = {"value": 0}
+    scan = LamNIFermatScan(
+        parameter=scan_msg.content.get("parameter"),
+        device_manager=device_manager,
+        metadata=scan_msg.metadata,
+    )
+    with pytest.raises(ScanAbortion):
+        instructions = list(scan.run())
 
 
 def test_round_scan_fly_sim_get_scan_motors():
@@ -1869,7 +1906,7 @@ def test_round_scan_fly_sim_scan_core(in_args, reference_positions):
         device="flyer_sim",
         action="kickoff",
         parameter={
-            "configure": {"num_pos": None, "positions": reference_positions, "exp_time": 0.1},
+            "configure": {"num_pos": None, "positions": reference_positions, "exp_time": 0},
             "wait_group": "kickoff",
         },
         metadata={"stream": "primary", "DIID": 0},

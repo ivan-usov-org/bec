@@ -139,7 +139,11 @@ class LamNIOpticsMixin:
             beam_size = (
                 -diameter / (focal_distance * 1000) * (focal_distance * 1000 - distance) * 1e6
             )
-            table.add_row(f"{diameter*1e6:.2f} microns", f"{focal_distance:.2f} mm", f"{beam_size:.2f} microns")
+            table.add_row(
+                f"{diameter*1e6:.2f} microns",
+                f"{focal_distance:.2f} mm",
+                f"{beam_size:.2f} microns",
+            )
 
         console.print(table)
 

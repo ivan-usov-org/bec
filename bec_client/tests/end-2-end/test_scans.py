@@ -638,3 +638,13 @@ def test_rpc_calls(client):
     ]
 
     assert dev.samx.dummy_controller._func_without_args_kwargs() is None
+
+
+@pytest.mark.timeout(100)
+def test_burst_scan(client):
+    bec = client
+    wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_burst_scan"})
+    dev = bec.device_manager.devices
+    s = scans.line_scan(dev.samx, 0, 1, burst_at_each_point=2, steps=10, relative=False)
+    assert len(s.scan.data) == 20

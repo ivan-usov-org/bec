@@ -25,6 +25,7 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 from bec_utils import BECMessage, MessageEndpoints, bec_logger
+
 from scan_server.errors import ScanAbortion
 from scan_server.scans import RequestBase, ScanArgType, ScanBase
 
@@ -251,7 +252,9 @@ class LamNIFermatScan(ScanBase, LamNIMixin):
         self.scan_motors = ["rtx", "rty"]
 
     def _optimize_trajectory(self):
-        self.positions = self.optimize_corridor(self.positions, corridor_size=self.optim_trajectory_corridor)
+        self.positions = self.optimize_corridor(
+            self.positions, corridor_size=self.optim_trajectory_corridor
+        )
 
     def prepare_positions(self):
         self._calculate_positions()
@@ -259,8 +262,13 @@ class LamNIFermatScan(ScanBase, LamNIMixin):
         # self._sort_positions()
 
         self.num_pos = len(self.positions)
+        self._check_min_positions()
+
+    def _check_min_positions(self):
         if self.num_pos < 20:
-            raise ScanAbortion(f"The number of positions must exceed 20. Currently: {self.num_pos}.")
+            raise ScanAbortion(
+                f"The number of positions must exceed 20. Currently: {self.num_pos}."
+            )
 
     def _lamni_check_pos_in_fov_range_and_circ_fov(self, x, y) -> bool:
         # this function checks if positions are reachable in a scan
@@ -450,7 +458,9 @@ class LamNIFermatScan(ScanBase, LamNIMixin):
                     if status_id == 0 and self.metadata.get("RID") == request_id:
                         break
                     if status_id == 2 and self.metadata.get("RID") == request_id:
-                        raise ScanAbortion(f"An error occured during the LamNI readout: {status.metadata.get('error')}")
+                        raise ScanAbortion(
+                            f"An error occured during the LamNI readout: {status.metadata.get('error')}"
+                        )
 
                 time.sleep(1)
                 logger.debug("reading monitors")

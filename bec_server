@@ -11,7 +11,7 @@ if [[ "$1" == "start"  ]]; then
 	tmux has-session -t bec 2>/dev/null
 	if [[ $? != 0 ]]; then
 		echo "Starting the BEC server"
-		./start_tmux_session.sh $2
+		./start_tmux_session.sh $2 &>/dev/null
 	else
 		echo "Session already exists."; exit 1
 	fi
@@ -23,7 +23,7 @@ elif [[ "$1" == "stop" ]]; then
 	if [[ $? != 0 ]]; then
 		echo "Session does not exist"; exit 1
 	else
-		tmux kill-session -t bec
+		tmux kill-session -t bec 2>/dev/null
 	fi
 fi
 

@@ -289,7 +289,8 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         )
         self.DIID = 0
         self.pointID = 0
-        self.exp_time = self.caller_kwargs.get("exp_time", 0.1)
+        self.exp_time = self.caller_kwargs.get("exp_time", 0)
+        self.settling_time = self.caller_kwargs.get("settling_time", 0)
 
         self.relative = parameter["kwargs"].get("relative", False)
         self.burst_at_each_point = parameter["kwargs"].get("burst_at_each_point", 1)
@@ -325,7 +326,7 @@ class ScanBase(RequestBase, PathOptimizerMixin):
     def prepare_positions(self):
         self._calculate_positions()
         self._optimize_trajectory()
-        self.num_pos = len(self.positions)
+        self.num_pos = len(self.positions) * self.burst_at_each_point
         yield from self._set_position_offset()
         self._check_limits()
 
@@ -383,7 +384,7 @@ class ScanBase(RequestBase, PathOptimizerMixin):
             yield from self.stubs.wait(
                 wait_type="read", group="primary", wait_group="readout_primary"
             )
-
+        time.sleep(self.settling_time)
         yield from self.stubs.trigger(group="trigger", pointID=self.pointID)
         yield from self.stubs.wait(wait_type="trigger", group="trigger", wait_time=self.exp_time)
         yield from self.stubs.read(
@@ -642,7 +643,7 @@ class Scan(ScanBase):
         ScanArgType.INT,
     ]
     arg_bundle_size = len(arg_input)
-    required_kwargs = ["exp_time", "relative"]
+    required_kwargs = ["relative"]
 
     def __init__(self, *args, parameter=None, **kwargs):
         """
@@ -674,7 +675,7 @@ class Scan(ScanBase):
 class FermatSpiralScan(ScanBase):
     scan_name = "fermat_scan"
     scan_report_hint = "table"
-    required_kwargs = ["exp_time", "step", "relative"]
+    required_kwargs = ["step", "relative"]
     arg_input = [ScanArgType.DEVICE, ScanArgType.FLOAT, ScanArgType.FLOAT]
     arg_bundle_size = len(arg_input)
 
@@ -715,7 +716,7 @@ class FermatSpiralScan(ScanBase):
 class RoundScan(ScanBase):
     scan_name = "round_scan"
     scan_report_hint = "table"
-    required_kwargs = ["exp_time", "relative"]
+    required_kwargs = ["relative"]
     arg_input = [
         ScanArgType.DEVICE,
         ScanArgType.DEVICE,
@@ -758,7 +759,7 @@ class RoundScan(ScanBase):
 class ContLineScan(ScanBase):
     scan_name = "cont_line_scan"
     scan_report_hint = "table"
-    required_kwargs = ["exp_time", "steps", "relative"]
+    required_kwargs = ["steps", "relative"]
     arg_input = [ScanArgType.DEVICE, ScanArgType.FLOAT, ScanArgType.FLOAT]
     arg_bundle_size = len(arg_input)
     scan_type = "step"
@@ -825,7 +826,7 @@ class RoundScanFlySim(ScanBase):
     scan_name = "round_scan_fly"
     scan_report_hint = "table"
     scan_type = "fly"
-    required_kwargs = ["exp_time", "relative"]
+    required_kwargs = ["relative"]
     arg_input = [
         ScanArgType.DEVICE,
         ScanArgType.FLOAT,
@@ -859,7 +860,7 @@ class RoundScanFlySim(ScanBase):
 
     def prepare_positions(self):
         self._calculate_positions()
-        self.num_pos = len(self.positions)
+        self.num_pos = len(self.positions) * self.burst_at_each_point
         self._check_limits()
         yield None
 
@@ -901,7 +902,7 @@ class RoundScanFlySim(ScanBase):
 class RoundROIScan(ScanBase):
     scan_name = "round_roi_scan"
     scan_report_hint = "table"
-    required_kwargs = ["exp_time", "dr", "nth", "relative"]
+    required_kwargs = ["dr", "nth", "relative"]
     arg_input = [ScanArgType.DEVICE, ScanArgType.FLOAT]
     arg_bundle_size = len(arg_input)
 
@@ -937,7 +938,7 @@ class RoundROIScan(ScanBase):
 class ListScan(ScanBase):
     scan_name = "list_scan"
     scan_report_hint = "table"
-    required_kwargs = ["exp_time", "relative"]
+    required_kwargs = ["relative"]
     arg_input = [ScanArgType.DEVICE, ScanArgType.LIST]
     arg_bundle_size = len(arg_input)
 
@@ -969,7 +970,7 @@ class ListScan(ScanBase):
 class TimeScan(ScanBase):
     scan_name = "time_scan"
     scan_report_hint = "table"
-    required_kwargs = ["exp_time", "points", "interval"]
+    required_kwargs = ["points", "interval"]
     arg_input = []
     arg_bundle_size = len(arg_input)
 
@@ -1103,19 +1104,15 @@ class MonitorScan(ScanBase):
 class Acquire(ScanBase):
     scan_name = "acquire"
     scan_report_hint = "table"
-    required_kwargs = ["exp_time"]
+    required_kwargs = []
     arg_input = []
     arg_bundle_size = len(arg_input)
 
     def __init__(self, *args, parameter=None, **kwargs):
         """
-        A scan following a round-roi-like pattern.
+        A simple acquisition at the current position.
 
         Args:
-            *args: motor1, width for motor1, motor2, width for motor2,
-            dr: shell width
-            nth: number of points in the first shell
-            relative: Start from an absolute or relative position
             burst: number of acquisition per point
 
         Returns:
@@ -1164,7 +1161,7 @@ class Acquire(ScanBase):
 class LineScan(ScanBase):
     scan_name = "line_scan"
     scan_report_hint = "table"
-    required_kwargs = ["exp_time", "steps", "relative"]
+    required_kwargs = ["steps", "relative"]
     arg_input = [ScanArgType.DEVICE, ScanArgType.FLOAT, ScanArgType.FLOAT]
     arg_bundle_size = len(arg_input)
 
@@ -1199,7 +1196,7 @@ class LineScan(ScanBase):
 class OpenInteractiveScan(ScanBase):
     scan_name = "open_interactive_scan"
     scan_report_hint = ""
-    required_kwargs = ["exp_time"]
+    required_kwargs = []
     arg_input = [ScanArgType.DEVICE]
     arg_bundle_size = len(arg_input)
 
