@@ -53,8 +53,6 @@ class PlotConnector(abc.ABC):
         """
 
     def connect(self, *args, **kwargs):
-        if "grum" not in sys.modules:
-            return
         self.connected = True
 
     def new_plot(self, *args, **kwargs):
@@ -88,6 +86,8 @@ class GrumpyConnector(PlotConnector):
         return self.client.get_list_names()
 
     def connect(self):
+        if "grum" not in sys.modules:
+            return
         self.client = rpc.RPCClient(self.host, self.port)
         try:
             self.client.utils.ping()
