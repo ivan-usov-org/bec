@@ -216,7 +216,6 @@ end-2-end-light:
 semver:
   stage: Deploy
   script:
-    - apk update; apk upgrade; apk add curl; apk add git
     - git config --global user.name "ci_update_bot"
     - git config --global user.email "ci_update_bot@bec.ch"
     - pip install python-semantic-release
