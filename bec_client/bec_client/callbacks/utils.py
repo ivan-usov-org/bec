@@ -4,10 +4,12 @@ import abc
 import asyncio
 import threading
 import time
-from typing import TYPE_CHECKING
+import traceback
+from typing import TYPE_CHECKING, Callable, List
+
+from bec_utils import Alarms, BECMessage, bec_logger
 
 from bec_client.request_items import RequestItem
-from bec_utils import Alarms, BECMessage, bec_logger
 
 if TYPE_CHECKING:
     from bec_client.bec_client import BECClient
@@ -38,17 +40,25 @@ def set_event_delayed(event: threading.Event, delay: int) -> None:
 
 def check_alarms(bec):
     """check for alarms and raise them if needed"""
-    for alarm in bec.alarms(severity=Alarms.MINOR):
-        if alarm:
-            raise alarm
+    bec.alarm_handler.raise_alarms()
 
 
 class LiveUpdatesBase(abc.ABC):
-    def __init__(self, bec: BECClient, request: BECMessage.ScanQueueMessage) -> None:
+    def __init__(
+        self,
+        bec: BECClient,
+        report_instruction: dict = None,
+        request: BECMessage.ScanQueueMessage = None,
+        callbacks: List[Callable] = None,
+    ) -> None:
         self.bec = bec
         self.request = request
         self.RID = request.metadata["RID"]
         self.scan_queue_request = None
+        self.report_instruction = report_instruction
+        if callbacks is None:
+            self.callbacks = []
+        self.callbacks = callbacks if isinstance(callbacks, list) else [callbacks]
 
     async def wait_for_request_acceptance(self):
         scan_request = ScanRequestMixin(self.bec, self.RID)
@@ -58,6 +68,16 @@ class LiveUpdatesBase(abc.ABC):
     @abc.abstractmethod
     def run(self):
         pass
+
+    def emit_point(self, data: dict, metadata: dict = None):
+        for cb in self.callbacks:
+            if not cb:
+                continue
+            try:
+                cb(data, metadata=metadata)
+            except Exception:
+                content = traceback.format_exc()
+                logger.warning(f"Failed to run callback function: {content}")
 
 
 class ScanRequestMixin:
@@ -92,6 +112,9 @@ class ScanRequestMixin:
         check_alarms(self.bec)
 
         while self.scan_queue_request.accepted is None:
+            await asyncio.sleep(0.01)
+
+        while self.request_storage.storage[0].queue is None:
             await asyncio.sleep(0.01)
 
         if not self.scan_queue_request.accepted[0]:

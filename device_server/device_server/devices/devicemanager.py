@@ -1,5 +1,6 @@
 import inspect
 import traceback
+from functools import reduce
 
 import ophyd
 import ophyd.sim as ops
@@ -13,12 +14,22 @@ from bec_utils import (
     bec_logger,
 )
 from bec_utils.connector import ConnectorBase
-from device_server.devices.config_handler import ConfigHandler
-from device_server.devices.device_serializer import get_device_info
 from ophyd.ophydobj import OphydObject
 from ophyd.signal import EpicsSignalBase
 
+from device_server.devices.config_update_handler import ConfigUpdateHandler
+from device_server.devices.device_serializer import get_device_info
+
 logger = bec_logger.logger
+
+
+def rgetattr(obj, attr, *args):
+    """See https://stackoverflow.com/questions/31174295/getattr-and-setattr-on-nested-objects"""
+
+    def _getattr(obj, attr):
+        return getattr(obj, attr, *args)
+
+    return reduce(_getattr, [obj] + attr.split("."))
 
 
 class DSDevice(Device):
@@ -42,21 +53,20 @@ class DeviceManagerDS(DeviceManagerBase):
     def __init__(
         self,
         connector: ConnectorBase,
-        scibec_url: str,
-        config_handler: ConfigHandler = None,
+        config_update_handler: ConfigUpdateHandler = None,
         status_cb: list = None,
     ):
-        super().__init__(connector, scibec_url, status_cb)
+        super().__init__(connector, status_cb)
         self._config_request_connector = None
         self._device_instructions_connector = None
-        self._config_handler_cls = config_handler
-        self.config_handler = None
+        self._config_update_handler_cls = config_update_handler
+        self.config_update_handler = None
 
     def initialize(self, bootstrap_server) -> None:
-        self.config_handler = (
-            self._config_handler_cls
-            if self._config_handler_cls is not None
-            else ConfigHandler(device_manager=self)
+        self.config_update_handler = (
+            self._config_update_handler_cls
+            if self._config_update_handler_cls is not None
+            else ConfigUpdateHandler(device_manager=self)
         )
         super().initialize(bootstrap_server)
 
@@ -68,8 +78,13 @@ class DeviceManagerDS(DeviceManagerBase):
             module = opd
         elif hasattr(ops, dev_type):
             module = ops
+        elif ":" in dev_type:
+            dev_type_scope = dev_type.split(":")
+            prefix = dev_type_scope[:-1]
+            dev_type = dev_type_scope[-1]
+            module = rgetattr(opd, ".".join(prefix))
         else:
-            TypeError(f"Unknown device class {dev_type}")
+            raise TypeError(f"Unknown device class {dev_type}")
         return getattr(module, dev_type)
 
     def _load_session(self, *_args, **_kwargs):
@@ -78,7 +93,11 @@ class DeviceManagerDS(DeviceManagerBase):
                 name = dev.get("name")
                 enabled = dev.get("enabled")
                 logger.info(f"Adding device {name}: {'ENABLED' if enabled else 'DISABLED'}")
-                self.initialize_device(dev)
+                try:
+                    self.initialize_device(dev)
+                except Exception as exc:
+                    content = traceback.format_exc()
+                    logger.error(f"Failed to initialize device: {dev}: {content}.")
 
     @staticmethod
     def update_config(obj: OphydObject, config: dict) -> None:
@@ -188,6 +207,8 @@ class DeviceManagerDS(DeviceManagerBase):
 
         if "done_moving" in obj.event_types:
             obj.subscribe(self._obj_callback_done_moving, event_type="done_moving", run=False)
+        if "flyer" in obj.event_types:
+            obj.subscribe(self._obj_flyer_callback, event_type="flyer", run=False)
         if hasattr(obj, "motor_is_moving"):
             obj.motor_is_moving.subscribe(self._obj_callback_is_moving, run=opaas_obj.enabled)
 
@@ -281,30 +302,39 @@ class DeviceManagerDS(DeviceManagerBase):
             BECMessage.DeviceStatusMessage(device=device, status=status, metadata=metadata).dumps(),
         )
 
-    def _start_custom_connectors(self, bootstrap_server):
-        self._config_request_connector = self.connector.consumer(
-            MessageEndpoints.device_config_request(),
-            cb=self._device_config_request_callback,
-            parent=self,
-        )
-        self._config_request_connector.start()
+    def _obj_flyer_callback(self, *_args, **kwargs):
+        obj = kwargs["obj"]
+        data = kwargs["value"].get("data")
+        ds_obj = self.devices[obj.root.name]
+        metadata = ds_obj.metadata
+        if "scanID" not in metadata:
+            return
 
-    def _stop_custom_consumer(self) -> None:
-        self._config_request_connector.signal_event.set()
-        self._config_request_connector.join()
+        if not hasattr(ds_obj, "emitted_points"):
+            ds_obj.emitted_points = {}
 
-    def send_config_request_reply(self, accepted, error_msg, metadata):
-        """send a config request reply"""
-        msg = BECMessage.RequestResponseMessage(
-            accepted=accepted, message=error_msg, metadata=metadata
-        )
-        RID = metadata.get("RID")
-        self.producer.set(
-            MessageEndpoints.device_config_request_response(RID), msg.dumps(), expire=60
-        )
+        emitted_points = ds_obj.emitted_points.get(metadata["scanID"], 0)
 
-    @staticmethod
-    def _device_config_request_callback(msg, *, parent, **_kwargs) -> None:
-        msg = BECMessage.DeviceConfigMessage.loads(msg.value)
-        logger.info(f"Received request: {msg}")
-        parent.config_handler.parse_config_request(msg)
+        # make sure all arrays are of equal length
+        max_points = min(len(d) for d in data.values())
+        bundle = BECMessage.BundleMessage()
+        for ii in range(emitted_points, max_points):
+            signals = {}
+            for key, val in data.items():
+                signals[key] = {"value": val[ii]}
+            bundle.append(
+                BECMessage.DeviceMessage(
+                    signals=signals,
+                    metadata={"pointID": ii, **metadata},
+                ).dumps()
+            )
+        ds_obj.emitted_points[metadata["scanID"]] = max_points
+        pipe = self.producer.pipeline()
+        self.producer.send(MessageEndpoints.device_read(obj.root.name), bundle.dumps(), pipe=pipe)
+        msg = BECMessage.DeviceStatusMessage(
+            device=obj.root.name, status=max_points, metadata=metadata
+        )
+        self.producer.set_and_publish(
+            MessageEndpoints.device_progress(obj.root.name), msg.dumps(), pipe=pipe
+        )
+        pipe.execute()

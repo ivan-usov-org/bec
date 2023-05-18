@@ -1,12 +1,12 @@
-import json
-
+import msgpack
+from bec_utils.numpy_encoder import numpy_encode
 from ophyd import Device, PositionerBase, Signal
 
 
 def is_serializable(var) -> bool:
-    """check if an object is json serializable"""
+    """check if an object is serializable"""
     try:
-        json.dumps(var)
+        msgpack.dumps(var, default=numpy_encode)
         return True
     except (TypeError, OverflowError):
         return False
@@ -79,9 +79,14 @@ def get_device_info(obj, device_info):
             sub_devices.append(get_device_info(dev, {}))
     return {
         "device_name": obj.name,
+        "device_attr_name": getattr(obj, "attr_name", ""),
+        "device_dotted_name": getattr(obj, "dotted_name", ""),
         "device_info": {
             "device_base_class": get_device_base_class(obj),
             "signals": signals,
+            "hints": obj.hints,
+            "describe": obj.describe(),
+            "describe_configuration": obj.describe_configuration(),
             "sub_devices": sub_devices,
             "custom_user_access": user_access,
         },

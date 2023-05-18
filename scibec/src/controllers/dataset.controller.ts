@@ -12,24 +12,23 @@ import {
   get,
   getModelSchemaRef,
   patch,
-  put,
   del,
   requestBody,
   response,
 } from '@loopback/rest';
-import {Dataset} from '../models';
-import {DatasetRepository} from '../repositories';
+import { Dataset } from '../models';
+import { DatasetRepository } from '../repositories';
 
 export class DatasetController {
   constructor(
     @repository(DatasetRepository)
-    public datasetRepository : DatasetRepository,
-  ) {}
+    public datasetRepository: DatasetRepository,
+  ) { }
 
   @post('/datasets')
   @response(200, {
     description: 'Dataset model instance',
-    content: {'application/json': {schema: getModelSchemaRef(Dataset)}},
+    content: { 'application/json': { schema: getModelSchemaRef(Dataset) } },
   })
   async create(
     @requestBody({
@@ -50,7 +49,7 @@ export class DatasetController {
   @get('/datasets/count')
   @response(200, {
     description: 'Dataset model count',
-    content: {'application/json': {schema: CountSchema}},
+    content: { 'application/json': { schema: CountSchema } },
   })
   async count(
     @param.where(Dataset) where?: Where<Dataset>,
@@ -65,7 +64,7 @@ export class DatasetController {
       'application/json': {
         schema: {
           type: 'array',
-          items: getModelSchemaRef(Dataset, {includeRelations: true}),
+          items: getModelSchemaRef(Dataset, { includeRelations: true }),
         },
       },
     },
@@ -79,13 +78,13 @@ export class DatasetController {
   @patch('/datasets')
   @response(200, {
     description: 'Dataset PATCH success count',
-    content: {'application/json': {schema: CountSchema}},
+    content: { 'application/json': { schema: CountSchema } },
   })
   async updateAll(
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Dataset, {partial: true}),
+          schema: getModelSchemaRef(Dataset, { partial: true }),
         },
       },
     })
@@ -100,13 +99,13 @@ export class DatasetController {
     description: 'Dataset model instance',
     content: {
       'application/json': {
-        schema: getModelSchemaRef(Dataset, {includeRelations: true}),
+        schema: getModelSchemaRef(Dataset, { includeRelations: true }),
       },
     },
   })
   async findById(
     @param.path.string('id') id: string,
-    @param.filter(Dataset, {exclude: 'where'}) filter?: FilterExcludingWhere<Dataset>
+    @param.filter(Dataset, { exclude: 'where' }) filter?: FilterExcludingWhere<Dataset>
   ): Promise<Dataset> {
     return this.datasetRepository.findById(id, filter);
   }
@@ -120,24 +119,13 @@ export class DatasetController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Dataset, {partial: true}),
+          schema: getModelSchemaRef(Dataset, { partial: true }),
         },
       },
     })
     dataset: Dataset,
   ): Promise<void> {
     await this.datasetRepository.updateById(id, dataset);
-  }
-
-  @put('/datasets/{id}')
-  @response(204, {
-    description: 'Dataset PUT success',
-  })
-  async replaceById(
-    @param.path.string('id') id: string,
-    @requestBody() dataset: Dataset,
-  ): Promise<void> {
-    await this.datasetRepository.replaceById(id, dataset);
   }
 
   @del('/datasets/{id}')

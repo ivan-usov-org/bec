@@ -1,4 +1,3 @@
-import concurrent
 import os
 from unittest import mock
 
@@ -6,6 +5,7 @@ import bec_utils
 import yaml
 from bec_utils import BECMessage
 from bec_utils.tests.utils import ConnectorMock, create_session_from_config
+
 from device_server.devices.devicemanager import DeviceConfigError, DeviceManagerDS
 
 dir_path = os.path.dirname(bec_utils.__file__)
@@ -13,7 +13,7 @@ dir_path = os.path.dirname(bec_utils.__file__)
 
 def test_request_response():
     connector = ConnectorMock("")
-    device_manager = DeviceManagerDS(connector, "")
+    device_manager = DeviceManagerDS(connector)
 
     def get_config_from_mock():
         with open(f"{dir_path}/tests/test_config.yaml", "r") as session_file:
@@ -26,17 +26,17 @@ def test_request_response():
 
     config_reply = BECMessage.RequestResponseMessage(accepted=True, message="")
     with mock.patch.object(device_manager, "connect_device", wraps=mocked_failed_connection):
-        with mock.patch.object(device_manager, "_get_config_from_DB", get_config_from_mock):
+        with mock.patch.object(device_manager, "_get_config", get_config_from_mock):
             with mock.patch.object(
-                device_manager,
+                device_manager.config_helper,
                 "wait_for_config_reply",
                 return_value=config_reply,
             ):
                 device_manager.initialize("")
                 with mock.patch.object(
-                    device_manager, "send_config_request_reply"
+                    device_manager.config_update_handler, "send_config_request_reply"
                 ) as request_reply:
-                    device_manager.config_handler.parse_config_request(
+                    device_manager.config_update_handler.parse_config_request(
                         msg=BECMessage.DeviceConfigMessage(
                             action="update", config={"something": "something"}
                         )

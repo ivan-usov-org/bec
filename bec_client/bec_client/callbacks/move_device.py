@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable, List
 
 import numpy as np
-from bec_client.progressbar import DeviceProgressBar
 from bec_utils import BECMessage, DeviceManagerBase, MessageEndpoints
 
-from .utils import LiveUpdatesBase, ScanRequestMixin, check_alarms
+from bec_client.progressbar import DeviceProgressBar
+
+from .utils import LiveUpdatesBase, check_alarms
 
 if TYPE_CHECKING:
     from bec_client.bec_client import BECClient
@@ -54,19 +55,40 @@ class LiveUpdatesReadbackProgressbar(LiveUpdatesBase):
 
     """
 
-    def __init__(self, bec: BECClient, request: BECMessage.ScanQueueMessage) -> None:
-        super().__init__(bec, request)
-        self.devices = list(request.content["parameter"]["args"].keys())
+    def __init__(
+        self,
+        bec: BECClient,
+        report_instruction: List = None,
+        request: BECMessage.ScanQueueMessage = None,
+        callbacks: List[Callable] = None,
+    ) -> None:
+        super().__init__(
+            bec, report_instruction=report_instruction, request=request, callbacks=callbacks
+        )
+        if report_instruction:
+            self.devices = report_instruction["readback"]["devices"]
+        else:
+            self.devices = list(request.content["parameter"]["args"].keys())
 
     async def core(self):
         data_source = ReadbackDataMixin(self.bec.device_manager, self.devices)
         start_values = data_source.get_device_values()
         await self.wait_for_request_acceptance()
         data_source.wait_for_RID(self.request)
+        if self.report_instruction:
+            self.devices = self.report_instruction["readback"]["devices"]
+            target_values = self.report_instruction["readback"]["end"]
 
-        target_values = [x for xs in self.request.content["parameter"]["args"].values() for x in xs]
-        if self.request.content["parameter"]["kwargs"].get("relative"):
-            target_values = np.asarray(target_values) + np.asarray(start_values)
+            start_instr = self.report_instruction["readback"].get("start")
+            if start_instr:
+                start_values = self.report_instruction["readback"]["start"]
+            data_source = ReadbackDataMixin(self.bec.device_manager, self.devices)
+        else:
+            target_values = [
+                x for xs in self.request.content["parameter"]["args"].values() for x in xs
+            ]
+            if self.request.content["parameter"]["kwargs"].get("relative"):
+                target_values = np.asarray(target_values) + np.asarray(start_values)
 
         with DeviceProgressBar(
             self.devices, start_values=start_values, target_values=target_values

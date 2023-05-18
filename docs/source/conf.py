@@ -7,35 +7,34 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "BEC"
-copyright = "2022, Klaus Wakonig"
+copyright = "2022, Paul Scherrer Institute, Switzerland"
 author = "Klaus Wakonig"
 release = "0.1"
 
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../scan_bundler")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../scan_server")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../bec_client")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../bec_utils")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../file_writer")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../device_server")))
 
-# -- General configuration ---------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
-
-extensions = extensions = [
+extensions = [
+    "sphinx.ext.autodoc",  # Core library for html generation from docstrings
+    "sphinx.ext.autosummary",  # Create neat summary tables
     "sphinx.ext.todo",
-    "sphinx.ext.viewcode",
-    "sphinx.ext.autodoc",
-    "sphinx.ext.coverage",
-    "sphinx.ext.napoleon",
-    "sphinx.ext.autosummary",
+    "recommonmark",
+    "sphinx_copybutton",
 ]
-autosummary_generate = True  # Turn on sphinx.ext.autosummary
-autoclass_content = "both"  # Add __init__ doc (ie. params) to class summaries
-html_show_sourcelink = False  # Remove 'view source code' from top of page (for html, not python)
+autosummary_generate = False  # Turn on sphinx.ext.autosummary
+add_module_names = False  # Remove namespaces from class/method signatures
 autodoc_inherit_docstrings = True  # If no docstring, inherit from base class
 set_type_checking_flag = True  # Enable 'expensive' imports for sphinx_autodoc_typehints
-nbsphinx_allow_errors = True  # Continue through Jupyter errors
-# autodoc_typehints = "description" # Sphinx-native method. Not as good as sphinx_autodoc_typehints
-add_module_names = False  # Remove namespaces from class/method signatures
+autoclass_content = "both"
 
+# Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
@@ -45,5 +44,12 @@ language = "Python"
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 # html_theme = 'alabaster'
-html_theme = "sphinx_rtd_theme"
+html_theme = "pydata_sphinx_theme"
 html_static_path = ["_static"]
+# html_theme_options = {
+#     "switcher": {
+#         "json_url": "https://beamline-experiment-control.readthedocs.io/en/latest/_static/switcher.json",
+#         "version_match": "master",
+#     },
+#     "navbar_start": ["navbar-logo", "version-switcher"],
+# }

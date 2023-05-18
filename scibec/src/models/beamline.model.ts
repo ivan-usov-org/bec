@@ -1,14 +1,10 @@
-import { Entity, hasMany, model, property } from '@loopback/repository';
-import { Session } from './session.model';
+import { hasMany, hasOne, model, property } from '@loopback/repository';
+import { AccessConfig } from './access-config.model';
+import { Experiment } from './experiment.model';
+import { SciBecEntity } from './scibecentity.model';
 
 @model()
-export class Beamline extends Entity {
-  @property({
-    type: 'string',
-    id: true,
-    generated: true,
-  })
-  id?: string;
+export class Beamline extends SciBecEntity {
 
   @property({
     type: 'string',
@@ -16,40 +12,16 @@ export class Beamline extends Entity {
   })
   name: string;
 
-  @property({
-    type: 'string',
-  })
-  ownerGroup?: string;
+  @hasOne(() => AccessConfig, { keyTo: 'beamlineId' })
+  accessConfig?: AccessConfig;
 
-  @property({
-    type: 'array',
-    itemType: 'string',
-  })
-  accessGroups?: string[];
-
-  @property({
-    type: 'date',
-  })
-  createdAt: Date;
+  @hasMany(() => Experiment, { keyTo: 'beamlineId' })
+  experiments?: Experiment[];
 
   @property({
     type: 'string',
   })
-  createdBy: string;
-
-  @property({
-    type: 'string',
-  })
-  activeSession?: string;
-
-  @property({
-    type: 'string',
-  })
-  activeEaccount?: string;
-
-  @hasMany(() => Session, { keyTo: 'beamlineId' })
-  sessions?: Session[];
-
+  activeExperiment?: string;
 
   constructor(data?: Partial<Beamline>) {
     super(data);

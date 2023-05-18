@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable, List
 
 import numpy as np
 from bec_utils import BECMessage, bec_logger
@@ -40,14 +40,24 @@ class LiveUpdatesTable(LiveUpdatesBase):
 
     MAX_DEVICES = 10
 
-    def __init__(self, bec: BECClient, request: BECMessage.ScanQueueMessage) -> None:
-        super().__init__(bec, request)
+    def __init__(
+        self,
+        bec: BECClient,
+        report_instruction: dict = None,
+        request: BECMessage.ScanQueueMessage = None,
+        callbacks: List[Callable] = None,
+        print_table_data=True,
+    ) -> None:
+        super().__init__(
+            bec, report_instruction=report_instruction, request=request, callbacks=callbacks
+        )
         self.scan_queue_request = None
         self.scan_item = None
         self.dev_values = None
         self.point_data = None
         self.point_id = 0
         self.table = None
+        self._print_table_data = print_table_data
 
     async def wait_for_scan_to_start(self):
         """wait until the scan starts"""
@@ -67,21 +77,34 @@ class LiveUpdatesTable(LiveUpdatesBase):
                 flush=True,
             )
             await asyncio.sleep(0.1)
+        while not self.scan_item.scan_number:
+            await asyncio.sleep(0.05)
 
     async def wait_for_scan_item_to_finish(self):
         """wait for scan completion"""
-        while not self.scan_item.end_time or self.scan_item.queue.queue_position is not None:
+        while True:
+            if self.scan_item.end_time:
+                if self.scan_item.open_queue_group:
+                    break
+                if self.scan_item.queue.queue_position is None:
+                    break
             self.check_alarms()
             await asyncio.sleep(0.1)
 
     def check_alarms(self):
         check_alarms(self.bec)
 
+    async def resume(self, request, report_instruction, callbacks):
+        super().__init__(
+            self.bec, request=request, report_instruction=report_instruction, callbacks=callbacks
+        )
+        await self.process_request()
+
     @property
     def devices(self):
         """get the devices for the callback"""
         if self.point_data.metadata["scan_type"] == "step":
-            return self.get_devices_from_request()
+            return self.get_devices_from_scan_data(self.scan_item.data[0])
         if self.point_data.metadata["scan_type"] == "fly":
             devices = list(self.point_data.content["data"].keys())
             if len(devices) > self.MAX_DEVICES:
@@ -89,24 +112,33 @@ class LiveUpdatesTable(LiveUpdatesBase):
             return devices
         return None
 
-    def get_devices_from_request(self) -> list:
+    def get_devices_from_scan_data(self, data: BECMessage.ScanMessage) -> list:
         """extract interesting devices from a scan request"""
         device_manager = self.bec.device_manager
-        scan_devices = self.request.content["parameter"]["args"].keys()
+        scan_devices = data.metadata.get("scan_report_devices")
         primary_devices = device_manager.devices.primary_devices(
             [device_manager.devices[dev] for dev in scan_devices]
         )
-        devices = [dev.name for dev in primary_devices]
+        devices = [hint for dev in primary_devices for hint in dev._hints]
         devices = sort_devices(devices, scan_devices)
         if len(devices) > self.MAX_DEVICES:
             return devices[0 : self.MAX_DEVICES]
         return devices
 
     def _prepare_table(self) -> PrettyTable:
-        header = ["seq. num"]
-        header.extend(self.devices)
-        max_len = max([len(head) for head in header])
+        header = self._get_header()
+        max_len = max(len(head) for head in header)
         return PrettyTable(header, padding=max_len)
+
+    def _get_header(self) -> List:
+        header = ["seq. num"]
+        for dev in self.devices:
+            if dev in self.bec.device_manager.devices:
+                obj = self.bec.device_manager.devices[dev]
+                header.extend(obj._hints)
+            else:
+                header.append(dev)
+        return header
 
     async def update_scan_item(self):
         """get the current scan item"""
@@ -116,30 +148,36 @@ class LiveUpdatesTable(LiveUpdatesBase):
         self.scan_item = self.scan_queue_request.scan
 
     async def core(self):
-        print(f"\nStarting scan {self.scan_item.scan_number}.")
+        req_ID = self.scan_queue_request.requestID
+        while True:
+            request_block = [
+                req for req in self.scan_item.queue.request_blocks if req["RID"] == req_ID
+            ][0]
+            if not request_block["is_scan"]:
+                break
+            if request_block["report_instructions"]:
+                break
+            self.check_alarms()
+
+        await self._run_table_update(self.report_instruction["table_wait"])
+
+    async def _run_table_update(self, target_num_points):
         with ScanProgressBar(
-            scan_number=self.scan_item.scan_number, clear_on_exit=True
+            scan_number=self.scan_item.scan_number, clear_on_exit=self._print_table_data
         ) as progressbar:
             while True:
                 self.check_alarms()
                 self.point_data = self.scan_item.data.get(self.point_id)
                 if self.scan_item.num_points:
                     progressbar.max_points = self.scan_item.num_points
+                    if target_num_points == 0:
+                        target_num_points = self.scan_item.num_points
 
                 progressbar.update(self.point_id)
                 if self.point_data:
-                    if not self.table:
-                        self.dev_values = list(np.zeros_like(self.devices))
-                        self.table = self._prepare_table()
-                        print(self.table.get_header_lines())
-
                     self.point_id += 1
-                    if self.point_id % 100 == 0:
-                        print(self.table.get_header_lines())
-                    for ind, dev in enumerate(self.devices):
-                        signal = self.point_data.content["data"][dev].get(dev)
-                        self.dev_values[ind] = signal.get("value") if signal else -999
-                    print(self.table.get_row(self.point_id, *self.dev_values))
+                    self.print_table_data()
+                    self.emit_point(self.point_data.content, metadata=self.point_data.metadata)
                     progressbar.update(self.point_id)
                 else:
                     logger.debug("waiting for new data point")
@@ -147,25 +185,69 @@ class LiveUpdatesTable(LiveUpdatesBase):
 
                 if not self.scan_item.num_points:
                     continue
-                if self.scan_item.open_scan_defs:
-                    continue
 
-                if self.point_id == self.scan_item.num_points:
+                if self.point_id == target_num_points:
                     break
                 if self.point_id > self.scan_item.num_points:
                     raise RuntimeError("Received more points than expected.")
 
-            await self.wait_for_scan_item_to_finish()
+    def print_table_data(self):
+        if not self._print_table_data:
+            return
 
-            elapsed_time = self.scan_item.end_time - self.scan_item.start_time
-            print(
-                self.table.get_footer(
-                    f"Scan {self.scan_item.scan_number} finished. Scan ID {self.scan_item.scanID}. Elapsed time: {elapsed_time:.2f} s"
-                )
+        if not self.table:
+            self.dev_values = (len(self._get_header()) - 1) * [0]
+            self.table = self._prepare_table()
+            print(self.table.get_header_lines())
+
+        if self.point_id % 100 == 0:
+            print(self.table.get_header_lines())
+        ind = 0
+        for dev in self.devices:
+            if dev in self.bec.device_manager.devices:
+                obj = self.bec.device_manager.devices[dev]
+                for hint in obj._hints:
+                    signal = self.point_data.content["data"].get(dev, {}).get(hint)
+                    self.dev_values[ind] = signal.get("value") if signal else -999
+                    ind += 1
+            else:
+                signal = self.point_data.content["data"].get(dev, {})
+                self.dev_values[ind] = signal.get("value") if signal else -999
+                ind += 1
+        print(self.table.get_row(self.point_id, *self.dev_values))
+
+    def close_table(self):
+        if not self.table:
+            return
+        elapsed_time = self.scan_item.end_time - self.scan_item.start_time
+        print(
+            self.table.get_footer(
+                f"Scan {self.scan_item.scan_number} finished. Scan ID {self.scan_item.scanID}. Elapsed time: {elapsed_time:.2f} s"
             )
+        )
 
-    async def run(self):
+    async def process_request(self):
+        if self.request.content["scan_type"] == "close_scan_def":
+            await self.wait_for_scan_item_to_finish()
+            self.close_table()
+            return
+
         await self.wait_for_request_acceptance()
         await asyncio.wait_for(self.update_scan_item(), timeout=15)
         await self.wait_for_scan_to_start()
+
+        if self.table:
+            self.table = None
+        else:
+            if self._print_table_data:
+                print(f"\nStarting scan {self.scan_item.scan_number}.")
+
         await self.core()
+
+    async def run(self):
+        if self.request.content["scan_type"] == "open_scan_def":
+            await self.wait_for_request_acceptance()
+            return
+        await self.process_request()
+        await self.wait_for_scan_item_to_finish()
+        self.close_table()

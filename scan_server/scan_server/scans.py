@@ -1,8 +1,8 @@
 import ast
 import enum
 import time
-import uuid
 from abc import ABC, abstractmethod
+from typing import List, Tuple
 
 import numpy as np
 from bec_utils import BECMessage, DeviceManagerBase, MessageEndpoints, bec_logger
@@ -173,12 +173,25 @@ class RequestBase(ABC):
         self.scan_motors = []
         self.positions = []
         self._pre_scan_macros = []
+        self._scan_report_devices = None
         self._get_scan_motors()
+        self.readout_priority = {"monitored": [], "baseline": [], "ignored": []}
+        self.update_readout_priority()
         if metadata is None:
             self.metadata = {}
         self.stubs = ScanStubs(
             producer=self.device_manager.producer, device_msg_callback=self.device_msg_metadata
         )
+
+    @property
+    def scan_report_devices(self):
+        if self._scan_report_devices is None:
+            return self.scan_motors
+        return self._scan_report_devices
+
+    @scan_report_devices.setter
+    def scan_report_devices(self, devices: list):
+        self._scan_report_devices = devices
 
     def device_msg_metadata(self):
         default_metadata = {"stream": "primary", "DIID": self.DIID}
@@ -208,6 +221,7 @@ class RequestBase(ABC):
                 self.device_manager.devices[dev]._config["deviceConfig"].get("limits", [0, 0])
             )
             if low_limit >= high_limit:
+                # if both limits are equal or low > high, no restrictions ought to be applied
                 return
             for pos in self.positions:
                 pos_axis = pos[ii]
@@ -226,6 +240,10 @@ class RequestBase(ABC):
             if motor not in self.device_manager.devices:
                 continue
             self.scan_motors.append(motor)
+
+    def update_readout_priority(self):
+        """update the readout priority for this request. Typically the monitored devices should also include the scan motors."""
+        self.readout_priority["monitored"] = self.scan_motors
 
     @abstractmethod
     def run(self):
@@ -271,7 +289,8 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         )
         self.DIID = 0
         self.pointID = 0
-        self.exp_time = self.caller_kwargs.get("exp_time", 0.1)
+        self.exp_time = self.caller_kwargs.get("exp_time", 0)
+        self.settling_time = self.caller_kwargs.get("settling_time", 0)
 
         self.relative = parameter["kwargs"].get("relative", False)
         self.burst_at_each_point = parameter["kwargs"].get("burst_at_each_point", 1)
@@ -307,7 +326,7 @@ class ScanBase(RequestBase, PathOptimizerMixin):
     def prepare_positions(self):
         self._calculate_positions()
         self._optimize_trajectory()
-        self.num_pos = len(self.positions)
+        self.num_pos = len(self.positions) * self.burst_at_each_point
         yield from self._set_position_offset()
         self._check_limits()
 
@@ -316,6 +335,7 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         positions = self.positions if isinstance(self.positions, list) else self.positions.tolist()
         yield from self.stubs.open_scan(
             scan_motors=self.scan_motors,
+            readout_priority=self.readout_priority,
             num_pos=self.num_pos,
             positions=positions,
             scan_name=self.scan_name,
@@ -364,7 +384,7 @@ class ScanBase(RequestBase, PathOptimizerMixin):
             yield from self.stubs.wait(
                 wait_type="read", group="primary", wait_group="readout_primary"
             )
-
+        time.sleep(self.settling_time)
         yield from self.stubs.trigger(group="trigger", pointID=self.pointID)
         yield from self.stubs.wait(wait_type="trigger", group="trigger", wait_time=self.exp_time)
         yield from self.stubs.read(
@@ -424,6 +444,49 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         return params
 
 
+class FlyScanBase(ScanBase):
+    scan_type = "fly"
+
+    def _get_flyer_status(self) -> List:
+        flyer = self.scan_motors[0]
+        producer = self.device_manager.producer
+
+        pipe = producer.pipeline()
+        producer.lrange(MessageEndpoints.device_req_status(self.metadata["RID"]), 0, -1, pipe)
+        producer.get(MessageEndpoints.device_readback(flyer), pipe)
+        return pipe.execute()
+
+    def scan_core(self):
+        yield from self.stubs.kickoff(
+            device=self.scan_motors[0],
+            parameter=self.caller_kwargs,
+        )
+        yield from self.stubs.complete(device=self.scan_motors[0])
+        target_diid = self.DIID - 1
+
+        while True:
+            status = self.stubs.get_req_status(
+                device=self.scan_motors[0], RID=self.metadata["RID"], DIID=target_diid
+            )
+            progress = self.stubs.get_device_progress(
+                device=self.scan_motors[0], RID=self.metadata["RID"]
+            )
+            if progress:
+                self.num_pos = progress
+            if status:
+                break
+            time.sleep(1)
+
+    def _calculate_positions(self) -> None:
+        pass
+
+    def read_scan_motors(self):
+        yield None
+
+    def prepare_positions(self):
+        yield None
+
+
 class ScanStub(RequestBase):
     pass
 
@@ -471,7 +534,6 @@ class DeviceRPC(ScanStub):
 
 
 class Move(RequestBase):
-
     scan_name = "mv"
     arg_input = [ScanArgType.DEVICE, ScanArgType.FLOAT]
     arg_bundle_size = len(arg_input)
@@ -509,12 +571,12 @@ class Move(RequestBase):
         pass
 
     def _set_position_offset(self):
-        if not self.relative:
-            return
         self.start_pos = []
         for dev in self.scan_motors:
             val = yield from self.stubs.send_rpc_and_wait(dev, "read")
             self.start_pos.append(val[dev].get("value"))
+        if not self.relative:
+            return
         self.positions += self.start_pos
 
     def prepare_positions(self):
@@ -522,9 +584,25 @@ class Move(RequestBase):
         yield from self._set_position_offset()
         self._check_limits()
 
+    def scan_report_instructions(self):
+        if not self.scan_report_hint:
+            yield None
+            return
+        yield from self.stubs.scan_report_instruction(
+            {
+                "readback": {
+                    "RID": self.metadata["RID"],
+                    "devices": self.scan_motors,
+                    "start": self.start_pos,
+                    "end": self.positions[0],
+                }
+            }
+        )
+
     def run(self):
         self.initialize()
         yield from self.prepare_positions()
+        yield from self.scan_report_instructions()
         yield from self._at_each_point()
 
 
@@ -565,7 +643,7 @@ class Scan(ScanBase):
         ScanArgType.INT,
     ]
     arg_bundle_size = len(arg_input)
-    required_kwargs = ["exp_time", "relative"]
+    required_kwargs = ["relative"]
 
     def __init__(self, *args, parameter=None, **kwargs):
         """
@@ -597,7 +675,7 @@ class Scan(ScanBase):
 class FermatSpiralScan(ScanBase):
     scan_name = "fermat_scan"
     scan_report_hint = "table"
-    required_kwargs = ["exp_time", "step", "relative"]
+    required_kwargs = ["step", "relative"]
     arg_input = [ScanArgType.DEVICE, ScanArgType.FLOAT, ScanArgType.FLOAT]
     arg_bundle_size = len(arg_input)
 
@@ -638,7 +716,7 @@ class FermatSpiralScan(ScanBase):
 class RoundScan(ScanBase):
     scan_name = "round_scan"
     scan_report_hint = "table"
-    required_kwargs = ["exp_time", "relative"]
+    required_kwargs = ["relative"]
     arg_input = [
         ScanArgType.DEVICE,
         ScanArgType.DEVICE,
@@ -661,7 +739,7 @@ class RoundScan(ScanBase):
         Returns:
 
         Examples:
-            >>> scans.round_scan(dev.motor1, dev.motor2, 0, 50, 5, 3, exp_time=0.1, relative=True)
+            >>> scans.round_scan(dev.motor1, dev.motor2, 0, 25, 5, 3, exp_time=0.1, relative=True)
 
         """
         super().__init__(parameter=parameter, **kwargs)
@@ -681,7 +759,7 @@ class RoundScan(ScanBase):
 class ContLineScan(ScanBase):
     scan_name = "cont_line_scan"
     scan_report_hint = "table"
-    required_kwargs = ["exp_time", "steps", "relative"]
+    required_kwargs = ["steps", "relative"]
     arg_input = [ScanArgType.DEVICE, ScanArgType.FLOAT, ScanArgType.FLOAT]
     arg_bundle_size = len(arg_input)
     scan_type = "step"
@@ -748,7 +826,7 @@ class RoundScanFlySim(ScanBase):
     scan_name = "round_scan_fly"
     scan_report_hint = "table"
     scan_type = "fly"
-    required_kwargs = ["exp_time", "relative"]
+    required_kwargs = ["relative"]
     arg_input = [
         ScanArgType.DEVICE,
         ScanArgType.FLOAT,
@@ -760,7 +838,7 @@ class RoundScanFlySim(ScanBase):
 
     def __init__(self, *args, parameter=None, **kwargs):
         """
-        A scan following a round shell-like pattern.
+        A fly scan following a round shell-like pattern.
 
         Args:
             *args: motor1, motor2, inner ring, outer ring, number of rings, number of positions in the first ring
@@ -777,12 +855,12 @@ class RoundScanFlySim(ScanBase):
         self.axis = []
 
     def _get_scan_motors(self):
-        self.scan_motors = []
+        self.scan_motors = list(self.caller_args.keys())
         self.flyer = list(self.caller_args.keys())[0]
 
     def prepare_positions(self):
         self._calculate_positions()
-        self.num_pos = len(self.positions)
+        self.num_pos = len(self.positions) * self.burst_at_each_point
         self._check_limits()
         yield None
 
@@ -804,15 +882,17 @@ class RoundScanFlySim(ScanBase):
                 "exp_time": self.exp_time,
             },
         )
+        target_DIID = self.DIID - 1
 
         while True:
             yield from self.stubs.read_and_wait(group="primary", wait_group="readout_primary")
             msg = self.device_manager.producer.get(MessageEndpoints.device_status(self.flyer))
             if msg:
                 status = BECMessage.DeviceStatusMessage.loads(msg)
-                if status.content.get("status", 1) == 0 and self.metadata.get(
-                    "RID"
-                ) == status.metadata.get("RID"):
+                device_is_idle = status.content.get("status", 1) == 0
+                matching_RID = self.metadata.get("RID") == status.metadata.get("RID")
+                matching_DIID = target_DIID == status.metadata.get("DIID")
+                if device_is_idle and matching_RID and matching_DIID:
                     break
 
             time.sleep(1)
@@ -822,7 +902,7 @@ class RoundScanFlySim(ScanBase):
 class RoundROIScan(ScanBase):
     scan_name = "round_roi_scan"
     scan_report_hint = "table"
-    required_kwargs = ["exp_time", "dr", "nth", "relative"]
+    required_kwargs = ["dr", "nth", "relative"]
     arg_input = [ScanArgType.DEVICE, ScanArgType.FLOAT]
     arg_bundle_size = len(arg_input)
 
@@ -855,22 +935,184 @@ class RoundROIScan(ScanBase):
         )
 
 
-class Acquire(ScanBase):
-    scan_name = "acquire"
+class ListScan(ScanBase):
+    scan_name = "list_scan"
     scan_report_hint = "table"
-    required_kwargs = ["exp_time"]
+    required_kwargs = ["relative"]
+    arg_input = [ScanArgType.DEVICE, ScanArgType.LIST]
+    arg_bundle_size = len(arg_input)
+
+    def __init__(self, *args, parameter=None, **kwargs):
+        """
+        A scan following the positions specified in a list.
+        Please note that all lists must be of equal length.
+
+        Args:
+            *args: pairs of motors and position lists
+            relative: Start from an absolute or relative position
+            burst: number of acquisition per point
+
+        Returns:
+
+        Examples:
+            >>> scans.list_scan(dev.motor1, [0,1,2,3,4], dev.motor2, [4,3,2,1,0], exp_time=0.1, relative=True)
+
+        """
+        super().__init__(parameter=parameter, **kwargs)
+        self.axis = []
+        if len(set(len(entry[0]) for entry in self.caller_args.values())) != 1:
+            raise ValueError("All position lists must be of equal length.")
+
+    def _calculate_positions(self):
+        self.positions = np.vstack(self.caller_args.values()).T.tolist()
+
+
+class TimeScan(ScanBase):
+    scan_name = "time_scan"
+    scan_report_hint = "table"
+    required_kwargs = ["points", "interval"]
     arg_input = []
     arg_bundle_size = len(arg_input)
 
     def __init__(self, *args, parameter=None, **kwargs):
         """
-        A scan following a round-roi-like pattern.
+        Trigger and readout devices at a fixed interval.
+        Note that the interval time cannot be less than the exposure time.
+        The effective "sleep" time between points is
+            sleep_time = interval - exp_time
 
         Args:
-            *args: motor1, width for motor1, motor2, width for motor2,
-            dr: shell width
-            nth: number of points in the first shell
-            relative: Start from an absolute or relative position
+            points: number of points
+            interval: time interval between points
+            exp_time: exposure time in s
+            burst: number of acquisition per point
+
+        Returns:
+
+        Examples:
+            >>> scans.time_scan(points=10, interval=1.5, exp_time=0.1, relative=True)
+
+        """
+        super().__init__(parameter=parameter, **kwargs)
+        self.axis = []
+        self.points = parameter.get("kwargs", {}).get("points")
+        self.interval = parameter.get("kwargs", {}).get("interval")
+        self.interval -= self.exp_time
+
+    def _calculate_positions(self) -> None:
+        pass
+
+    def prepare_positions(self):
+        self.num_pos = self.points
+        yield None
+
+    def _at_each_point(self, ind=None, pos=None):
+        if ind > 0:
+            yield from self.stubs.wait(
+                wait_type="read", group="primary", wait_group="readout_primary"
+            )
+        yield from self.stubs.trigger(group="trigger", pointID=self.pointID)
+        yield from self.stubs.wait(wait_type="trigger", group="trigger", wait_time=self.exp_time)
+        yield from self.stubs.read(
+            group="primary", wait_group="readout_primary", pointID=self.pointID
+        )
+        yield from self.stubs.wait(wait_type="trigger", group="trigger", wait_time=self.interval)
+        self.pointID += 1
+
+    def scan_core(self):
+        for ind in range(self.num_pos):
+            yield from self._at_each_point(ind)
+
+
+class MonitorScan(ScanBase):
+    scan_name = "monitor_scan"
+    scan_report_hint = "table"
+    required_kwargs = ["relative"]
+    arg_input = [ScanArgType.DEVICE, ScanArgType.FLOAT, ScanArgType.FLOAT]
+    arg_bundle_size = len(arg_input)
+    scan_type = "fly"
+
+    def __init__(self, *args, parameter=None, **kwargs):
+        """
+        Readout all primary devices at each update of the monitored device.
+
+        Args:
+            device:
+            start position:
+            end position:
+
+        Returns:
+
+        Examples:
+            >>> scans.cont_line_scan(dev.motor1, -5, 5, steps=10, exp_time=0.1, relative=True)
+
+        """
+        super().__init__(parameter=parameter, **kwargs)
+        self.axis = []
+
+    def _get_scan_motors(self):
+        self.scan_motors = list(self.caller_args.keys())
+        self.flyer = list(self.caller_args.keys())[0]
+
+    def _calculate_positions(self) -> None:
+        self.positions = np.vstack(self.caller_args.values()).T.tolist()
+
+    def prepare_positions(self):
+        self._calculate_positions()
+        self.num_pos = 0
+        yield from self._set_position_offset()
+        self._check_limits()
+
+    def _get_flyer_status(self) -> List:
+        producer = self.device_manager.producer
+
+        pipe = producer.pipeline()
+        producer.lrange(MessageEndpoints.device_req_status(self.metadata["RID"]), 0, -1, pipe)
+        producer.get(MessageEndpoints.device_readback(self.flyer), pipe)
+        return pipe.execute()
+
+    def scan_core(self):
+        yield from self.stubs.set(
+            device=self.flyer, value=self.positions[0][0], wait_group="scan_motor"
+        )
+        yield from self.stubs.wait(wait_type="move", device=self.flyer, wait_group="scan_motor")
+
+        # send the slow motor on its way
+        yield from self.stubs.set(
+            device=self.flyer,
+            value=self.positions[1][0],
+            wait_group="scan_motor",
+            metadata={"response": True},
+        )
+
+        while True:
+            move_completed, readback = self._get_flyer_status()
+
+            if move_completed:
+                break
+
+            if not readback:
+                continue
+            readback = BECMessage.DeviceMessage.loads(readback).content["signals"]
+            yield from self.stubs.publish_data_as_read(
+                device=self.flyer, data=readback, pointID=self.pointID
+            )
+            self.pointID += 1
+            self.num_pos += 1
+
+
+class Acquire(ScanBase):
+    scan_name = "acquire"
+    scan_report_hint = "table"
+    required_kwargs = []
+    arg_input = []
+    arg_bundle_size = len(arg_input)
+
+    def __init__(self, *args, parameter=None, **kwargs):
+        """
+        A simple acquisition at the current position.
+
+        Args:
             burst: number of acquisition per point
 
         Returns:
@@ -919,7 +1161,7 @@ class Acquire(ScanBase):
 class LineScan(ScanBase):
     scan_name = "line_scan"
     scan_report_hint = "table"
-    required_kwargs = ["exp_time", "steps", "relative"]
+    required_kwargs = ["steps", "relative"]
     arg_input = [ScanArgType.DEVICE, ScanArgType.FLOAT, ScanArgType.FLOAT]
     arg_bundle_size = len(arg_input)
 
@@ -954,7 +1196,7 @@ class LineScan(ScanBase):
 class OpenInteractiveScan(ScanBase):
     scan_name = "open_interactive_scan"
     scan_report_hint = ""
-    required_kwargs = ["exp_time"]
+    required_kwargs = []
     arg_input = [ScanArgType.DEVICE]
     arg_bundle_size = len(arg_input)
 

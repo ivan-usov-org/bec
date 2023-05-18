@@ -1,11 +1,12 @@
-import enum
 import getpass
 import socket
 import threading
 import time
 import uuid
+from dataclasses import asdict, dataclass
 from typing import Any
 
+import psutil
 from rich.console import Console
 from rich.table import Table
 
@@ -14,18 +15,20 @@ from .BECMessage import BECStatus
 from .connector import ConnectorBase
 from .endpoints import MessageEndpoints
 from .logger import bec_logger
+from .service_config import ServiceConfig
 
 logger = bec_logger.logger
 
 
 class BECService:
     def __init__(
-        self, bootstrap_server: list, connector_cls: ConnectorBase, unique_service=False
+        self, config: ServiceConfig, connector_cls: ConnectorBase, unique_service=False
     ) -> None:
         super().__init__()
-        self.bootstrap_server = bootstrap_server
+        self._service_config = config
+        self.bootstrap_server = config.redis
         self._connector_cls = connector_cls
-        self.connector = connector_cls(bootstrap_server)
+        self.connector = connector_cls(self.bootstrap_server)
         self._unique_service = unique_service
         self.producer = self.connector.producer()
         self._service_id = str(uuid.uuid4())
@@ -33,11 +36,14 @@ class BECService:
         self._hostname = socket.gethostname()
         self._service_info_thread = None
         self._service_info_event = threading.Event()
+        self._metrics_emitter_thread = None
+        self._metrics_emitter_event = threading.Event()
         self._services_info = {}
         self._initialize_logger()
         self._check_services()
         self._status = BECStatus.BUSY
         self._start_update_service_info()
+        self._start_metrics_emitter()
 
     def _check_services(self) -> None:
         if not self._unique_service:
@@ -105,6 +111,46 @@ class BECService:
         self._service_info_thread = threading.Thread(target=self._update_service_info, daemon=True)
         self._service_info_thread.start()
 
+    def _start_metrics_emitter(self):
+        self._metrics_emitter_thread = threading.Thread(target=self._get_metrics, daemon=True)
+        self._metrics_emitter_thread.start()
+
+    def _get_metrics(self):
+        proc = psutil.Process()
+        while not self._metrics_emitter_event.is_set():
+            res = proc.as_dict(
+                attrs=[
+                    "name",
+                    "num_threads",
+                    "pid",
+                    "cpu_percent",
+                    "memory_info",
+                    "cmdline",
+                    "cpu_times",
+                    "create_time",
+                    "memory_percent",
+                ]
+            )
+
+            data = asdict(
+                ServiceMetric(
+                    process_name=res["name"],
+                    username=self._user,
+                    hostname=self._hostname,
+                    cpu_percent=res["cpu_percent"],
+                    cpu_times=res["cpu_times"].user,
+                    cmdline=res["cmdline"],
+                    num_threads=res["num_threads"],
+                    pid=res["pid"],
+                    memory_in_mb=res["memory_info"].rss / 1024 / 1024,
+                    memory_used_percent=res["memory_percent"],
+                    create_time=res["create_time"],
+                )
+            )
+            msg = BECMessage.ServiceMetricMessage(name=self.__class__.__name__, metrics=data)
+            self.producer.send(MessageEndpoints.metrics(self._service_id), msg.dumps())
+            time.sleep(1)
+
     def set_global_var(self, name: str, val: Any) -> None:
         """Set a global variable through Redis
 
@@ -161,13 +207,20 @@ class BECService:
             if len(var) > 40:
                 var = var[0:20] + "..., " + var[-20:]
             table.add_row(endpoint, var)
-        console.print(table)
+        with console.capture() as capture:
+            console.print(table)
+        out = capture.get()
+        logger.info(out)
+        print(out)
 
     def shutdown(self):
         """shutdown the BECService"""
         self._service_info_event.set()
         if self._service_info_thread:
             self._service_info_thread.join()
+        self._metrics_emitter_event.set()
+        if self._metrics_emitter_thread:
+            self._metrics_emitter_thread.join()
 
     @property
     def service_status(self):
@@ -184,3 +237,20 @@ class BECService:
                     return
             logger.info(f"Waiting for {name}.")
             time.sleep(0.05)
+
+
+@dataclass
+class ServiceMetric:
+    """Container for keeping performance metrics."""
+
+    pid: int
+    cmdline: list
+    process_name: str
+    username: str
+    hostname: str
+    cpu_percent: float
+    cpu_times: dict
+    num_threads: int
+    memory_in_mb: float
+    memory_used_percent: float
+    create_time: float

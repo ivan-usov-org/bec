@@ -3,7 +3,7 @@ from __future__ import annotations
 import builtins
 import uuid
 from contextlib import ContextDecorator
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 import msgpack
 from bec_utils import BECMessage, MessageEndpoints, bec_logger
@@ -29,7 +29,7 @@ class ScanObject:
         # run must be an anonymous function to allow for multiple doc strings
         self.run = lambda *args, **kwargs: self._run(*args, **kwargs)
 
-    def _run(self, *args, **kwargs):
+    def _run(self, *args, callback: Callable = None, **kwargs):
         if self.client.alarm_handler.alarms_stack:
             logger.warning("The alarm stack is not empty but will be cleared now.")
             self.client.clear_all_alarms()
@@ -40,6 +40,10 @@ class ScanObject:
         hide_report = hide_report_kwarg or scans._hide_report
 
         metadata = self.client.metadata.copy()
+        if not "sample_name" in metadata:
+            sample_name = self.client.get_global_var("sample_name")
+            if sample_name is not None:
+                metadata["sample_name"] = sample_name
 
         if "md" in kwargs:
             metadata.update(kwargs["md"])
@@ -58,8 +62,10 @@ class ScanObject:
         request.metadata["RID"] = requestID
 
         self._send_scan_request(request)
-        scan_report_type = self._get_scan_report_type(hide_report)
-        self.client.callback_manager.process_request(request, scan_report_type)
+
+        if not hide_report:
+            scan_report_type = self._get_scan_report_type(hide_report)
+            self.client.callback_manager.process_request(request, scan_report_type, callback)
 
         return ScanReport.from_request(request, client=self.client)
 
@@ -100,7 +106,6 @@ class Scans:
         self._dataset_id_on_hold_ctx = DatasetIdOnHold(parent=self)
 
     def _import_scans(self):
-
         available_scans = msgpack.loads(
             self.parent.producer.get(MessageEndpoints.available_scans())
         )
@@ -167,8 +172,7 @@ class Scans:
                     raise TypeError(
                         f"{scan_info.get('doc')}\n Argument {ii} must be of type {arg_input[ii%len(arg_input)]}, not {type(arg).__name__}."
                     )
-        else:
-            logger.warning("Could not check arguments against scan input types.")
+
         metadata = {}
         if "md" in kwargs:
             metadata = kwargs.pop("md")
@@ -216,7 +220,7 @@ class Scans:
 
     @property
     def dataset_id_on_hold(self):
-        """Context manager / decorator for hiding the report"""
+        """Context manager / decorator for setting the dataset id on hold"""
         return self._dataset_id_on_hold_ctx
 
 
@@ -269,13 +273,18 @@ class DatasetIdOnHold(ContextDecorator):
     def __init__(self, parent: Scans = None) -> None:
         super().__init__()
         self.parent = parent
+        self._call_count = 0
 
     def __enter__(self):
+        self._call_count += 1
         if self.parent._dataset_id_on_hold is None:
             self.parent._dataset_id_on_hold = True
         return self
 
     def __exit__(self, *exc):
+        self._call_count -= 1
+        if self._call_count:
+            return
         self.parent._dataset_id_on_hold = None
         queue = self.parent.parent.queue
         queue.next_dataset_number += 1

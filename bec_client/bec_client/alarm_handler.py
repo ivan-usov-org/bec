@@ -32,12 +32,16 @@ class AlarmBase(Exception):
         self.handled = True
         return f"An alarm has occured. Severity: {self.severity.name}. Source: {self.alarm.content['source']}.\n{self.alarm_type}.\n\t {self.alarm.content['content']}"
 
+    def __repr__(self) -> str:
+        return f"Severity: {self.severity.name} \nAlarm type: {self.alarm_type} \nSource: {self.alarm.content['source']} \n{self.alarm.content['content']}"
+
 
 class AlarmHandler:
     def __init__(self, connector: RedisConnector) -> None:
         self.connector = connector
         self.alarm_consumer = None
         self.alarms_stack = deque(maxlen=100)
+        self._raised_alarms = deque(maxlen=100)
         self._lock = threading.RLock()
 
     def start(self):
@@ -63,9 +67,11 @@ class AlarmHandler:
         alarm = AlarmBase(
             alarm=msg, alarm_type=msg.content["alarm_type"], severity=severity, handled=False
         )
-        if severity > Alarms.WARNING:
+        if severity > Alarms.MINOR:
             self.alarms_stack.appendleft(alarm)
-        logger.warning(f"{msg.content['source']}: {msg.content['content']}")
+            logger.debug(alarm)
+        else:
+            logger.warning(alarm)
 
     @threadlocked
     def get_unhandled_alarms(self, severity=Alarms.WARNING) -> List:
@@ -97,17 +103,18 @@ class AlarmHandler:
             self.alarms_stack.remove(alarm)
             yield alarm
 
-    def raise_alarms(self, severity=Alarms.MINOR):
+    def raise_alarms(self, severity=Alarms.MAJOR):
         """Raise unhandled alarms with specified severity.
 
         Args:
-            severity (Alarm, optional): Minimum severity. Defaults to Alarms.MINOR.
+            severity (Alarm, optional): Minimum severity. Defaults to Alarms.MAJOR.
 
         Raises:
             alarms: Alarm exception.
         """
         alarms = self.get_unhandled_alarms(severity=severity)
         if len(alarms) > 0:
+            self._raised_alarms.append(alarms[0])
             raise alarms[0]
 
     @threadlocked

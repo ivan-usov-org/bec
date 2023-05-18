@@ -9,10 +9,14 @@ class MessageEndpoints:
     _device_last_read = "internal/devices/last_read"
     _device_readback = "internal/devices/readback"
     _device_req_status = "internal/devices/req_status"
+    _device_progress = "internal/devices/progress"
 
     # device config
     _device_config_request = "internal/devices/config_request"
     _device_config_request_response = "internal/devices/config_request_response"
+    _device_server_config_update = "internal/devices/config_request_response"
+    _device_server_config_update_response = "internal/devices/config_request_response"
+    _device_config_update = "internal/devices/config_update"
     _device_config = "internal/devices/config"
     _device_info = "internal/devices/info"
     _device_staged = "internal/devices/staged"
@@ -33,6 +37,7 @@ class MessageEndpoints:
     _scan_status_list = "scans/scan_status_list"
     _available_scans = "scans/available_scans"
     _scan_segment = "scans/scan_segment"
+    _scan_baseline = "scans/scan_baseline"
     _bluesky_events = "scans/bluesky-events"
     _public_scan_info = Template("public/$scanID/scan_info")
     _public_scan_segment = Template("public/$scanID/scan_segment/$pointID")
@@ -52,10 +57,17 @@ class MessageEndpoints:
 
     # service
     _services_status = "internal/services/status"
+    _metrics = "internal/services/metrics"
 
     # misc
     _public_global_vars = "public/vars"
     _observer = "internal/observer"
+
+    # logbook
+    _logbook = "internal/logbook"
+
+    # experiment
+    _account = "internal/account"
 
     ##########
 
@@ -80,6 +92,10 @@ class MessageEndpoints:
     def device_req_status(cls, device: str):
         return f"{cls._device_req_status}/{device}"
 
+    @classmethod
+    def device_progress(cls, device: str):
+        return f"{cls._device_progress}/{device}"
+
     # device config
     @classmethod
     def device_config_request(cls):
@@ -88,6 +104,18 @@ class MessageEndpoints:
     @classmethod
     def device_config_request_response(cls, RID: str):
         return f"{cls._device_config_request_response}/{RID}"
+
+    @classmethod
+    def device_server_config_request(cls):
+        return cls._device_server_config_update
+
+    @classmethod
+    def device_server_config_request_response(cls, RID: str):
+        return f"{cls._device_server_config_update_response}/{RID}"
+
+    @classmethod
+    def device_config_update(cls):
+        return cls._device_config_update
 
     @classmethod
     def device_config(cls):
@@ -160,6 +188,10 @@ class MessageEndpoints:
     def scan_segment(cls):
         return cls._scan_segment
 
+    @classmethod
+    def scan_baseline(cls):
+        return cls._scan_baseline
+
     # instructions
     @classmethod
     def device_instructions(cls):
@@ -206,9 +238,14 @@ class MessageEndpoints:
     def alarm(cls):
         return cls._alarms
 
+    # service
     @classmethod
     def service_status(cls, service_id: str):
         return f"{cls._services_status}/{service_id}"
+
+    @classmethod
+    def metrics(cls, service_id: str):
+        return f"{cls._metrics}/{service_id}"
 
     # misc
     @classmethod
@@ -218,3 +255,13 @@ class MessageEndpoints:
     @classmethod
     def observer(cls):
         return cls._observer
+
+    # logbook
+    @classmethod
+    def logbook(cls):
+        return cls._logbook
+
+    # experiment
+    @classmethod
+    def account(cls):
+        return cls._account

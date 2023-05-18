@@ -1,9 +1,10 @@
 import time
+
+from rich import box
 from rich.console import Console
 from rich.table import Table
-from rich import box
 
-from bec_client.plugins.cSAXS import fshclose
+from bec_client.plugins.cSAXS import epics_get, epics_put, fshclose
 
 
 class LamNIOpticsMixin:
@@ -14,18 +15,22 @@ class LamNIOpticsMixin:
             raise ValueError(f"Device {device} has no user parameter definition for {var}.")
         return param.get(var)
 
-    def leyey_out(self):
+    def leye_out(self):
         self.loptics_in()
         fshclose()
         leyey_out = self._get_user_param_safe("leyey", "out")
         umv(dev.leyey, leyey_out)
 
         epics_put("XOMNYI-XEYE-ACQ:0", 2)
-        umv(dev.dttrz, 5830, dev.fttrz, 3338)
+        # move rotation stage to zero to avoid problems with wires
+        umv(dev.lsamrot, 0)
+        umv(dev.dttrz, 5854, dev.fttrz, 2395)
 
     def leye_in(self):
         bec.queue.next_dataset_number += 1
-        umv(dev.dttrz, 5830 + 600, dev.fttrz, 3338 + 600)
+        # move rotation stage to zero to avoid problems with wires
+        umv(dev.lsamrot, 0)
+        umv(dev.dttrz, 6419.677, dev.fttrz, 2959.979)
         while True:
             moved_out = (input("Did the flight tube move out? (Y/n)") or "y").lower()
             if moved_out == "y":
@@ -50,12 +55,12 @@ class LamNIOpticsMixin:
         This will disable rt feedback, move the FZP and re-enabled the feedback.
         """
         if "rtx" in dev and dev.rtx.enabled:
-            dev.rtx.feedback_disable()
+            dev.rtx.controller.feedback_disable()
 
         self._lfzp_in()
 
         if "rtx" in dev and dev.rtx.enabled:
-            dev.rtx.feedback_enable_with_reset()
+            dev.rtx.controller.feedback_enable_with_reset()
 
     def loptics_in(self):
         """
@@ -67,7 +72,7 @@ class LamNIOpticsMixin:
     def loptics_out(self):
         """Move out the lamni optics"""
         if "rtx" in dev and dev.rtx.enabled:
-            dev.rtx.feedback_disable()
+            dev.rtx.controller.feedback_disable()
 
         # self.lcs_out()
         self.losa_out()
@@ -77,7 +82,7 @@ class LamNIOpticsMixin:
 
         if "rtx" in dev and dev.rtx.enabled:
             time.sleep(1)
-            dev.rtx.feedback_enable_with_reset()
+            dev.rtx.controller.feedback_enable_with_reset()
 
     def lcs_in(self):
         # umv lcsx -1.852 lcsy -0.095
@@ -114,15 +119,7 @@ class LamNIOpticsMixin:
         distance = -loptz_val + 85.6 + 52
         print(f"The sample is in a distance of {distance:.1f} mm from the FZP.")
 
-        diameters = []
-        diameters[0] = 80e-6
-        diameters[1] = 100e-6
-        diameters[2] = 120e-6
-        diameters[3] = 150e-6
-        diameters[4] = 170e-6
-        diameters[5] = 200e-6
-        diameters[6] = 220e-6
-        diameters[7] = 250e-6
+        diameters = [80e-6, 100e-6, 120e-6, 150e-6, 170e-6, 200e-6, 220e-6, 250e-6]
 
         mokev_val = dev.mokev.read()["mokev"]["value"]
         console = Console()
@@ -142,7 +139,11 @@ class LamNIOpticsMixin:
             beam_size = (
                 -diameter / (focal_distance * 1000) * (focal_distance * 1000 - distance) * 1e6
             )
-            table.add_row(f"{diameter}", f"{focal_distance:.2f} mm", f"{beam_size:.2f} microns")
+            table.add_row(
+                f"{diameter*1e6:.2f} microns",
+                f"{focal_distance:.2f} mm",
+                f"{beam_size:.2f} microns",
+            )
 
         console.print(table)
 

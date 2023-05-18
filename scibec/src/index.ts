@@ -1,4 +1,4 @@
-import {ApplicationConfig, ScibecApplication} from './application';
+import { ApplicationConfig, ScibecApplication } from './application';
 
 export * from './application';
 
@@ -6,6 +6,7 @@ export async function main(options: ApplicationConfig = {}) {
   const app = new ScibecApplication(options);
   await app.boot();
   await app.start();
+  await app.startWebsocket();
 
   const url = app.restServer.url;
   console.log(`Server is running at ${url}`);

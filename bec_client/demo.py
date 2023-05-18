@@ -11,11 +11,7 @@ CONFIG_PATH = "../bec_config.yaml"
 config = ServiceConfig(CONFIG_PATH)
 
 bec = BECClient()
-bec.initialize(
-    config.redis,
-    RedisConnector,
-    config.scibec,
-)
+bec.initialize(config, RedisConnector)
 bec.start()
 bec.load_high_level_interface("spec_hli")
 
@@ -33,11 +29,59 @@ scans = bec.scans
 
 logger.success("Started BECClient")
 
+# scans.round_scan_fly(dev.flyer_sim, 0, 50, 20, 3, exp_time=0.1, relative=True)
+# scans.monitor_scan(dev.samx, -100, 100, relative=False)
+
+# from bec_client.plotting import GrumpyConnector
+
+# bec.plotter = GrumpyConnector()
+# bec.plotter.connect()
+
+
+# def basic_plot(data, metadata):
+#     plot_name = f"Scan {metadata['scan_number']}"
+#     scan_motors = metadata.get("scan_report_devices")
+#     if len(scan_motors) == 2:
+#         x = data["data"][scan_motors[0]][scan_motors[0]]["value"]
+#         y = data["data"][scan_motors[1]][scan_motors[1]]["value"]
+#     elif len(scan_motors) == 1:
+#         x = data["data"][scan_motors[0]][scan_motors[0]]["value"]
+#         y = data["data"]["bpm4i"]["bpm4i"]["value"]
+#     if bec.plotter.current_plot != plot_name:
+#         bec.plotter.new_plot(plot_name, {})
+#     bec.plotter.append_data([x, y])
+
+# import time
+
+# import numpy as np
+# from matplotlib import pyplot as plt
+
+# plt.ion()
+# # fig = plt.figure("1")
+# fig, ax = plt.subplots(figsize=(10, 8))
+# line, = ax.plot([], [])
+# # plt.plot([])
+# x_data = []
+# y_data = []
+
+# def basic_plot(data, metadata):
+#     scan_motors = metadata.get("scan_report_devices")
+#     x = data["data"][scan_motors[0]][scan_motors[0]]["value"]
+#     y = data["data"]["bpm4i"]["bpm4i"]["value"]
+#     x_data.append(x)
+#     y_data.append(y)
+#     plt.plot(x_data, y_data)
+#     fig.canvas.draw()
+#     fig.canvas.flush_events()
+#     time.sleep(0.01)
+
+scans.line_scan(dev.samy, -5, 5, steps=100, exp_time=0.1, relative=False, callback=basic_plot)
+# scans.line_scan(dev.samy, -5, 5, steps=100, exp_time=0.1, relative=False, callback=basic_plot)
 
 # tomo_scan_sim()
 
 # status = scans.fermat_scan(
-#     dev.samx, -10, 10, dev.samy, -10, 10, step=1, exp_time=0.02, relative=False, hide_report=True
+#     dev.samx, -5, 5, dev.samy, -5, 5, step=1, exp_time=0.02, relative=False, hide_report=True
 # )
 # time.sleep(2)
 # status.subscribe()
@@ -79,10 +123,18 @@ logger.success("Started BECClient")
 # scans.umv(dev.samx, 0)
 # scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.02)
 
-# with scans.scan_def:
-#     scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=True)
-#     scans.line_scan(dev.samx, -8, 8, steps=10, exp_time=0.1, relative=True)
 
+# @scans.scan_group
+# def scan_with_decorator():
+#     scans.umv(dev.samx, 5, relative=False)
+#     scans.line_scan(dev.samx, -5, 5, steps=100, exp_time=0.1, relative=True)
+#     scans.umv(dev.samx, 5, relative=False)
+#     scans.line_scan(dev.samx, -5, 5, steps=100, exp_time=0.1, relative=True)
+#     # scans.line_scan(dev.samx, -8, 8, steps=200, exp_time=0.1, relative=True)
+
+
+# with scans.scan_def:
+#     scan_with_decorator()
 # with scans.dataset_id_on_hold:
 #     scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=True)
 #     scans.line_scan(dev.samx, -8, 8, steps=10, exp_time=0.1, relative=True)
@@ -113,8 +165,8 @@ logger.success("Started BECClient")
 
 
 # with scans.scan_group:
-#     scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.02)
-#     scans.umv(dev.samx, 10)
+#     scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.02, relative=True)
+#     scans.umv(dev.samx, 10, relative=True)
 
 # alignment()
 

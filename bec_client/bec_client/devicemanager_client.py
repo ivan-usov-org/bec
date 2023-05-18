@@ -7,6 +7,7 @@ from bec_utils import (
     Device,
     DeviceManagerBase,
     MessageEndpoints,
+    Status,
     bec_logger,
 )
 
@@ -51,7 +52,14 @@ class RPCBase:
 
     def _run(self, *args, **kwargs):
         device, func_call = self._get_rpc_func_name(fcn_name=self.name, use_parent=True)
-        return self._run_rpc_call(device, func_call, args, kwargs)
+        return self._run_rpc_call(device, func_call, *args, **kwargs)
+
+    @property
+    def _hints(self):
+        hints = self._info.get("hints")
+        if not hints:
+            return []
+        return hints.get("fields", [])
 
     @property
     def root(self):
@@ -74,7 +82,7 @@ class RPCBase:
             scan_type="device_rpc",
             parameter=params,
             queue="primary",
-            metadata={"RID": requestID},
+            metadata={"RID": requestID, "response": True},
         )
         self.root.parent.producer.send(MessageEndpoints.scan_queue_request(), msg.dumps())
         queue = self.root.parent.parent.queue
@@ -99,7 +107,12 @@ class RPCBase:
                 f"During an RPC, the following error occured:\n{error['error']}: {error['msg']}.\nTraceback: {error['traceback']}\n The scan will be aborted."
             )
         print(msg.content.get("out"))
-        return msg.content.get("return_val")
+        return_val = msg.content.get("return_val")
+        if not isinstance(return_val, dict):
+            return return_val
+        if return_val.get("type") == "status" and return_val.get("RID"):
+            return Status(self.root.parent.producer, return_val.get("RID"))
+        return return_val
 
     def _get_rpc_func_name(self, fcn_name=None, fcn=None, use_parent=False):
         if not fcn_name:
@@ -124,18 +137,23 @@ class RPCBase:
         if self._info.get("signals"):
             for signal_name in self._info.get("signals"):
                 setattr(self, signal_name, Signal(signal_name, parent=self))
-        if self._info.get("subdevices"):
-            for dev in self._info.get("subdevices"):
+        if self._info.get("sub_devices"):
+            for dev in self._info.get("sub_devices"):
                 base_class = dev["device_info"].get("device_base_class")
                 if base_class == "positioner":
-                    setattr(self, dev.get("name"), Positioner(dev.get("name"), parent=self))
+                    setattr(
+                        self,
+                        dev.get("device_attr_name"),
+                        Positioner(dev.get("device_attr_name"), parent=self),
+                    )
                 elif base_class == "device":
                     setattr(
-                        self, dev.get("name"), Device(dev.get("name"), config=None, parent=self)
+                        self,
+                        dev.get("device_attr_name"),
+                        Device(dev.get("device_attr_name"), config=None, parent=self),
                     )
 
         for user_access_name, descr in self._info.get("custom_user_access", {}).items():
-
             if "type" in descr:
                 self._custom_rpc_methods[user_access_name] = RPCBase(
                     name=user_access_name, info=descr, parent=self
@@ -159,7 +177,9 @@ class RPCBase:
                 )
 
     def update_config(self, update):
-        self.root.parent.send_config_request(action="update", config={self.name: update})
+        self.root.parent.config_helper.send_config_request(
+            action="update", config={self.name: update}
+        )
 
 
 class DeviceBase(RPCBase, Device):
@@ -185,6 +205,10 @@ class DeviceBase(RPCBase, Device):
 
     @rpc
     def trigger(self, rpc_id: str):
+        pass
+
+    @rpc
+    def stop(self):
         pass
 
     @rpc
@@ -305,7 +329,7 @@ class Positioner(DeviceBase):
 
     @property
     def limits(self):
-        return self._config["deviceConfig"]["limits"]
+        return self._config["deviceConfig"].get("limits", [0, 0])
 
     @limits.setter
     def limits(self, val: list):
@@ -342,8 +366,8 @@ class Positioner(DeviceBase):
 
 
 class DMClient(DeviceManagerBase):
-    def __init__(self, parent, scibec_url):
-        super().__init__(parent.connector, scibec_url)
+    def __init__(self, parent):
+        super().__init__(parent.connector)
         self.parent = parent
 
     def _get_device_info(self, device_name) -> BECMessage.DeviceInfoMessage:
@@ -353,6 +377,8 @@ class DMClient(DeviceManagerBase):
         return msg
 
     def _load_session(self, _device_cls=None, *_args):
+        time.sleep(1)
+        self.parent.wait_for_service("DeviceServer")
         if self._is_config_valid():
             for dev in self._session["devices"]:
                 msg = self._get_device_info(dev.get("name"))

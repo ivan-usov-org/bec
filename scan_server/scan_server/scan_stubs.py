@@ -3,7 +3,13 @@ import uuid
 from typing import Callable, List, Union
 
 import numpy as np
-from bec_utils import BECMessage, MessageEndpoints, ProducerConnector, bec_logger
+from bec_utils import (
+    BECMessage,
+    MessageEndpoints,
+    ProducerConnector,
+    Status,
+    bec_logger,
+)
 
 from .errors import DeviceMessageError, ScanAbortion
 
@@ -53,10 +59,10 @@ class ScanStubs:
             "device": device,
             "func": func_name,
             "rpc_id": rpc_id,
-            "args": list(args),
+            "args": args,
             "kwargs": kwargs,
         }
-        yield from self.rpc(device=device, parameter=parameter)
+        yield from self.rpc(device=device, parameter=parameter, metadata={"response": True})
         return self._get_from_rpc(rpc_id)
 
     def _get_from_rpc(self, rpc_id):
@@ -77,7 +83,12 @@ class ScanStubs:
             raise ScanAbortion(error_msg)
 
         logger.debug(msg.content.get("out"))
-        return msg.content.get("return_val")
+        return_val = msg.content.get("return_val")
+        if not isinstance(return_val, dict):
+            return return_val
+        if return_val.get("type") == "status" and return_val.get("RID"):
+            return Status(self.producer, return_val.get("RID"))
+        return return_val
 
     def set_and_wait(self, *, device: List[str], positions: Union[list, np.ndarray]):
         """Set devices to a specific position and wait completion.
@@ -115,6 +126,7 @@ class ScanStubs:
         self,
         *,
         scan_motors: list,
+        readout_priority: dict,
         num_pos: int,
         scan_name: str,
         scan_type: str,
@@ -125,6 +137,7 @@ class ScanStubs:
 
         Args:
             scan_motors (list): List of scan motors.
+            readout_priority (dict): Modification of the readout priority.
             num_pos (int): Number of positions within the scope of this scan.
             positions (list): List of positions for this scan.
             scan_name (str): Scan name.
@@ -135,7 +148,8 @@ class ScanStubs:
             device=None,
             action="open_scan",
             parameter={
-                "primary": scan_motors,
+                "scan_motors": scan_motors,
+                "readout_priority": readout_priority,
                 "num_points": num_pos,
                 "positions": positions,
                 "scan_name": scan_name,
@@ -144,7 +158,7 @@ class ScanStubs:
             metadata=metadata,
         )
 
-    def kickoff(self, *, device: str, parameter: dict = None, metadata=None):
+    def kickoff(self, *, device: str, parameter: dict = None, wait_group="kickoff", metadata=None):
         """Kickoff a fly scan device.
 
         Args:
@@ -152,12 +166,62 @@ class ScanStubs:
             parameter (dict, optional): Additional parameters that should be forwarded to the device. Defaults to {}.
         """
         parameter = parameter if parameter is not None else {}
+        parameter = {"configure": parameter, "wait_group": wait_group}
         yield self._device_msg(
             device=device,
             action="kickoff",
             parameter=parameter,
             metadata=metadata,
         )
+
+    def complete(self, *, device: str, metadata=None):
+        """Complete a fly scan device.
+
+        Args:
+            device (str): Device name of flyer.
+        """
+        yield self._device_msg(
+            device=device,
+            action="complete",
+            parameter={},
+            metadata=metadata,
+        )
+
+    def get_req_status(self, device: str, RID: str, DIID: int):
+        """Check if a device request status matches the given RID and DIID
+
+        Args:
+            device (str): device under inspection
+            RID (str): request ID
+            DIID (int): device instruction ID
+
+        """
+        raw_msg = self.producer.get(MessageEndpoints.device_req_status(device))
+        if not raw_msg:
+            return 0
+        msg = BECMessage.DeviceReqStatusMessage.loads(raw_msg)
+        matching_RID = msg.metadata.get("RID") == RID
+        matching_DIID = msg.metadata.get("DIID") == DIID
+        if matching_DIID and matching_RID:
+            return 1
+        return 0
+
+    def get_device_progress(self, device: str, RID: str):
+        """Get reported device progress
+
+        Args:
+            device (str): Name of the device
+            RID (str): request ID
+
+        """
+        raw_msg = self.producer.get(MessageEndpoints.device_progress(device))
+        if not raw_msg:
+            return None
+        msg = BECMessage.DeviceStatusMessage.loads(raw_msg)
+        matching_RID = msg.metadata.get("RID") == RID
+        if not matching_RID:
+            return None
+        return msg.content["status"]
 
     def close_scan(self):
         """Close the scan."""
@@ -216,7 +280,7 @@ class ScanStubs:
         pointID: int = None,
         group: str = None,
     ):
-        """_summary_
+        """Read from a device / device group.
 
         Args:
             wait_group (str): Wait group.
@@ -234,6 +298,15 @@ class ScanStubs:
             device=device,
             action="read",
             parameter=parameter,
+            metadata=metadata,
+        )
+
+    def publish_data_as_read(self, *, device: str, data: dict, pointID: int):
+        metadata = {"pointID": pointID}
+        yield self._device_msg(
+            device=device,
+            action="publish_data_as_read",
+            parameter={"data": {device: data}},
             metadata=metadata,
         )
 
@@ -283,7 +356,7 @@ class ScanStubs:
         """close a scan group"""
         yield self._device_msg(device=None, action="close_scan_group", parameter={})
 
-    def rpc(self, *, device: str, parameter: dict):
+    def rpc(self, *, device: str, parameter: dict, metadata=None):
         """Perfrom an RPC (remote procedure call) on a device.
 
         Args:
@@ -295,6 +368,17 @@ class ScanStubs:
             device=device,
             action="rpc",
             parameter=parameter,
+            metadata=metadata,
+        )
+
+    def scan_report_instruction(self, instructions: dict):
+        """Scan report instructions
+
+        Args:
+            instructions (dict): Dict containing the scan report instructions
+        """
+        yield self._device_msg(
+            device=None, action="scan_report_instruction", parameter=instructions
         )
 
     def _check_device_and_groups(self, device, group):

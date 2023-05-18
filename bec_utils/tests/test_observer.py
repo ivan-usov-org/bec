@@ -1,9 +1,10 @@
 import os
 from unittest import mock
 
-import bec_utils
 import pytest
 import yaml
+
+import bec_utils
 from bec_utils import BECMessage, MessageEndpoints
 from bec_utils.devicemanager import DeviceManagerBase
 from bec_utils.observer import Observer, ObserverAction, ObserverManager
@@ -92,7 +93,7 @@ def device_manager():
     with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
         dm._session = create_session_from_config(yaml.safe_load(f))
     dm._load_session()
-    with mock.patch.object(dm, "_get_config_from_DB"):
+    with mock.patch.object(dm, "_get_config"):
         dm.initialize("")
     return dm
 
@@ -140,7 +141,6 @@ def test_observer_manager_msg(device_manager):
     ],
 )
 def test_add_observer(device_manager, observer, raises_error):
-
     with mock.patch.object(device_manager.producer, "get", return_value=None) as producer_get:
         observer_manager = ObserverManager(device_manager=device_manager)
         observer_manager.add_observer(observer)

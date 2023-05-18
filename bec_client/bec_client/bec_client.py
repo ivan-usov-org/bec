@@ -9,17 +9,23 @@ import time
 from typing import List
 
 import IPython
-from bec_utils import Alarms, BECService, MessageEndpoints, bec_logger
+from bec_utils import (
+    Alarms,
+    BECService,
+    ConfigHelper,
+    MessageEndpoints,
+    ServiceConfig,
+    bec_logger,
+)
 from bec_utils.connector import ConnectorBase
 from bec_utils.logbook_connector import LogbookConnector
 from IPython.terminal.prompts import Prompts, Token
 from rich.console import Console
 from rich.table import Table
 
-from bec_client.config_helper import ConfigHelper
 from bec_client.scan_manager import ScanManager
 
-from .alarm_handler import AlarmHandler
+from .alarm_handler import AlarmBase, AlarmHandler
 from .beamline_mixin import BeamlineMixin
 from .bec_magics import BECMagics
 from .callbacks.callback_manager import CallbackManager
@@ -42,14 +48,14 @@ class BECClient(BECService, BeamlineMixin, UserScriptsMixin):
         return cls._client
 
     def __repr__(self) -> str:
-        return f"BECClient\n\nTo get a list of available commands, type `bec.show_all_commands()`"
+        return "BECClient\n\nTo get a list of available commands, type `bec.show_all_commands()`"
 
-    def initialize(self, bootstrap_server: list, connector_cls: ConnectorBase, scibec_url: str):
+    def initialize(self, config: ServiceConfig, connector_cls: ConnectorBase):
         """initialize the BEC client"""
-        super().__init__(bootstrap_server, connector_cls)
+        super().__init__(config, connector_cls)
         # pylint: disable=attribute-defined-outside-init
         self.device_manager = None
-        self.scibec_url = scibec_url
+        self.scibec_url = config.scibec
         self._sighandler = SigintHandler(self)
         self._ip = None
         self.queue = None
@@ -63,13 +69,19 @@ class BECClient(BECService, BeamlineMixin, UserScriptsMixin):
         self.callback_manager = CallbackManager(self)
         builtins.bec = self
         self.metadata = {}
-        # self.logbook = LogbookConnector()
+        self.logbook = LogbookConnector(self.connector)
         self._update_username()
+        self.history = None
 
     @property
     def username(self) -> str:
         """get the current username"""
         return self._username
+
+    @property
+    def active_account(self) -> str:
+        """get the currently active target (e)account"""
+        return self.producer.get(MessageEndpoints.account())
 
     def start(self):
         """start the client"""
@@ -84,7 +96,8 @@ class BECClient(BECService, BeamlineMixin, UserScriptsMixin):
         self._start_alarm_handler()
         self._configure_logger()
         self.load_all_user_scripts()
-        self.config = ConfigHelper(self)
+        self.config = ConfigHelper(self.connector)
+        self.history = self.queue.queue_storage.storage
 
     def alarms(self, severity=Alarms.WARNING):
         """get the next alarm with at least the specified severity"""
@@ -143,6 +156,8 @@ class BECClient(BECService, BeamlineMixin, UserScriptsMixin):
         if self._ip is not None:
             self._ip.prompts = BECClientPrompt(ip=self._ip, client=self, username="demo")
             self._load_magics()
+            self._ip.events.register("post_run_cell", log_console)
+            self._ip.set_custom_exc((Exception,), _ip_exception_handler)  # register your handler
 
     def _configure_logger(self):
         bec_logger.logger.remove()
@@ -173,7 +188,7 @@ class BECClient(BECService, BeamlineMixin, UserScriptsMixin):
 
     def _start_device_manager(self):
         logger.info("Starting device manager")
-        self.device_manager = DMClient(self, self.scibec_url)
+        self.device_manager = DMClient(self)
         self.device_manager.initialize(self.bootstrap_server)
         builtins.dev = self.device_manager.devices
 
@@ -244,6 +259,13 @@ class BECClient(BECService, BeamlineMixin, UserScriptsMixin):
         return doc_string.strip().split("\n")[0]
 
 
+def _ip_exception_handler(self, etype, evalue, tb, tb_offset=None):
+    if issubclass(etype, AlarmBase):
+        print(f"\x1b[31m BEC alarm:\x1b[0m: {evalue}")
+        return
+    self.showtraceback((etype, evalue, tb), tb_offset=None)  # standard IPython's printout
+
+
 class BECClientPrompt(Prompts):
     def __init__(self, ip, username, client, status=0):
         self._username = username
@@ -277,3 +299,8 @@ class BECClientPrompt(Prompts):
     @username.setter
     def username(self, value):
         self._username = value
+
+
+def log_console(execution_info):
+    """log the console input"""
+    logger.info(f"[CONSOLE LOG] | {execution_info.info.raw_cell}")

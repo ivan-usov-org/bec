@@ -19,7 +19,7 @@ config_path = clargs.config
 
 config = ServiceConfig(config_path)
 
-sb = ScanBundler(config.redis, RedisConnector, config.scibec)
+sb = ScanBundler(config, RedisConnector)
 
 try:
     event = threading.Event()

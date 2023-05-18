@@ -7,7 +7,7 @@ import ophyd.sim as ops
 import ophyd_devices as opd
 import yaml
 
-DEVICE_SCHEMA = "./device_schema.json"
+DEVICE_SCHEMA = "./openapi_schema.json"
 
 
 class DeviceConfigTest:
@@ -72,9 +72,9 @@ class DeviceConfigTest:
 
     def validate_schema(self) -> None:
         """validate the device config against the json schema"""
-        with open(DEVICE_SCHEMA, "r") as schema_file:
+        with open(DEVICE_SCHEMA, "r", encoding="utf-8") as schema_file:
             content = schema_file.read()
-            schema_content = json.loads(content)
+            schema_content = json.loads(content)["components"]["schemas"]["Device"]
         db_config = self._translate_to_db_config(self.config)
         for dev_name, device in db_config.items():
             try:
@@ -95,11 +95,10 @@ class DeviceConfigTest:
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         "--config",
-        default="./test_lamni_config.yaml",
+        default="../../ophyd_devices/ophyd_devices/epics/db/x07ma_database.yml",
         help="path to the config file",
     )
 

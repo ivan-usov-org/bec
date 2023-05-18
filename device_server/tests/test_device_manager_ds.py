@@ -1,13 +1,17 @@
-import concurrent
 import os
 from unittest import mock
 
+import bec_utils
+import numpy as np
 import pytest
 import yaml
+from bec_utils import BECMessage, MessageEndpoints
+from bec_utils.tests.utils import (
+    ConnectorMock,
+    ProducerMock,
+    create_session_from_config,
+)
 
-import bec_utils
-from bec_utils import BECMessage
-from bec_utils.tests.utils import ConnectorMock, create_session_from_config
 from device_server.devices.devicemanager import DeviceManagerDS
 
 # pylint: disable=missing-function-docstring
@@ -49,7 +53,7 @@ class EpicsDeviceMock(DeviceMock):
 
 
 def load_device_manager():
-    connector = ConnectorMock("")
+    connector = ConnectorMock("", store_data=False)
     device_manager = DeviceManagerDS(connector, "")
     device_manager.producer = connector.producer()
     with open(f"{dir_path}/tests/test_config.yaml", "r") as session_file:
@@ -58,8 +62,14 @@ def load_device_manager():
     return device_manager
 
 
-def test_device_init():
+@pytest.fixture(scope="function")
+def device_manager():
     device_manager = load_device_manager()
+    yield device_manager
+    device_manager.shutdown()
+
+
+def test_device_init(device_manager):
     for dev in device_manager.devices.values():
         if not dev.enabled:
             continue
@@ -70,8 +80,7 @@ def test_device_init():
     "obj,raises_error",
     [(DeviceMock(), True), (DeviceControllerMock(), False), (EpicsDeviceMock(), False)],
 )
-def test_conntect_device(obj, raises_error):
-    device_manager = load_device_manager()
+def test_conntect_device(device_manager, obj, raises_error):
     if raises_error:
         with pytest.raises(ConnectionError):
             device_manager.connect_device(obj)
@@ -81,7 +90,7 @@ def test_conntect_device(obj, raises_error):
 
 def test_disable_unreachable_devices():
     connector = ConnectorMock("")
-    device_manager = DeviceManagerDS(connector, "")
+    device_manager = DeviceManagerDS(connector)
 
     def get_config_from_mock():
         with open(f"{dir_path}/tests/test_config.yaml", "r") as session_file:
@@ -95,20 +104,42 @@ def test_disable_unreachable_devices():
     config_reply = BECMessage.RequestResponseMessage(accepted=True, message="")
 
     with mock.patch.object(device_manager, "connect_device", wraps=mocked_failed_connection):
-        with mock.patch.object(device_manager, "_get_config_from_DB", get_config_from_mock):
+        with mock.patch.object(device_manager, "_get_config", get_config_from_mock):
             with mock.patch.object(
-                device_manager,
+                device_manager.config_helper,
                 "wait_for_config_reply",
                 return_value=config_reply,
             ):
                 device_manager.initialize("")
-                assert device_manager.config_handler is not None
+                assert device_manager.config_update_handler is not None
                 assert device_manager.devices.samx.enabled is False
                 msg = BECMessage.DeviceConfigMessage(
                     action="update", config={"samx": {"enabled": False}}
                 )
-                with mock.patch.object(
-                    device_manager.config_handler, "update_device_key_in_db"
-                ) as update_device_db:
-                    device_manager.config_handler.parse_config_request(msg)
-                    update_device_db.assert_called_once_with(device_name="samx", key="enabled")
+
+
+def test_flyer_event_callback():
+    device_manager = load_device_manager()
+    samx = device_manager.devices.samx
+    samx.metadata = {"scanID": "12345"}
+
+    device_manager._obj_flyer_callback(
+        obj=samx.obj, value={"data": {"idata": np.random.rand(20), "edata": np.random.rand(20)}}
+    )
+    pipe = device_manager.producer.pipeline()
+    bundle, progress = pipe._pipe_buffer[-2:]
+
+    # check producer method
+    assert bundle[0] == "send"
+    assert progress[0] == "set_and_publish"
+
+    # check endpoint
+    assert bundle[1][0] == MessageEndpoints.device_read("samx")
+    assert progress[1][0] == MessageEndpoints.device_progress("samx")
+
+    # check message
+    bundle_msg = BECMessage.DeviceMessage.loads(bundle[1][1])
+    assert len(bundle_msg) == 20
+
+    progress_msg = BECMessage.DeviceStatusMessage.loads(progress[1][1])
+    assert progress_msg.content["status"] == 20

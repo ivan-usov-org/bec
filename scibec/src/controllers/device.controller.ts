@@ -12,24 +12,23 @@ import {
   get,
   getModelSchemaRef,
   patch,
-  put,
   del,
   requestBody,
   response,
 } from '@loopback/rest';
-import {Device} from '../models';
-import {DeviceRepository} from '../repositories';
+import { Device } from '../models';
+import { DeviceRepository } from '../repositories';
 
 export class DeviceController {
   constructor(
     @repository(DeviceRepository)
-    public deviceRepository : DeviceRepository,
-  ) {}
+    public deviceRepository: DeviceRepository,
+  ) { }
 
   @post('/devices')
   @response(200, {
     description: 'Device model instance',
-    content: {'application/json': {schema: getModelSchemaRef(Device)}},
+    content: { 'application/json': { schema: getModelSchemaRef(Device) } },
   })
   async create(
     @requestBody({
@@ -50,7 +49,7 @@ export class DeviceController {
   @get('/devices/count')
   @response(200, {
     description: 'Device model count',
-    content: {'application/json': {schema: CountSchema}},
+    content: { 'application/json': { schema: CountSchema } },
   })
   async count(
     @param.where(Device) where?: Where<Device>,
@@ -65,7 +64,7 @@ export class DeviceController {
       'application/json': {
         schema: {
           type: 'array',
-          items: getModelSchemaRef(Device, {includeRelations: true}),
+          items: getModelSchemaRef(Device, { includeRelations: true }),
         },
       },
     },
@@ -79,13 +78,13 @@ export class DeviceController {
   @patch('/devices')
   @response(200, {
     description: 'Device PATCH success count',
-    content: {'application/json': {schema: CountSchema}},
+    content: { 'application/json': { schema: CountSchema } },
   })
   async updateAll(
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Device, {partial: true}),
+          schema: getModelSchemaRef(Device, { partial: true }),
         },
       },
     })
@@ -100,13 +99,13 @@ export class DeviceController {
     description: 'Device model instance',
     content: {
       'application/json': {
-        schema: getModelSchemaRef(Device, {includeRelations: true}),
+        schema: getModelSchemaRef(Device, { includeRelations: true }),
       },
     },
   })
   async findById(
     @param.path.string('id') id: string,
-    @param.filter(Device, {exclude: 'where'}) filter?: FilterExcludingWhere<Device>
+    @param.filter(Device, { exclude: 'where' }) filter?: FilterExcludingWhere<Device>
   ): Promise<Device> {
     return this.deviceRepository.findById(id, filter);
   }
@@ -120,24 +119,13 @@ export class DeviceController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Device, {partial: true}),
+          schema: getModelSchemaRef(Device, { partial: true }),
         },
       },
     })
     device: Device,
   ): Promise<void> {
     await this.deviceRepository.updateById(id, device);
-  }
-
-  @put('/devices/{id}')
-  @response(204, {
-    description: 'Device PUT success',
-  })
-  async replaceById(
-    @param.path.string('id') id: string,
-    @requestBody() device: Device,
-  ): Promise<void> {
-    await this.deviceRepository.replaceById(id, device);
   }
 
   @del('/devices/{id}')

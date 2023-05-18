@@ -20,7 +20,7 @@ config_path = clargs.config
 
 config = ServiceConfig(config_path)
 
-file_writer = FileWriterManager(config.redis, RedisConnector, config.scibec)
+file_writer = FileWriterManager(config, RedisConnector)
 file_writer.file_writer.configure(layout_file=os.path.abspath("./layout_cSAXS_NXsas.xml"))
 try:
     event = threading.Event()

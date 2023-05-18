@@ -7,8 +7,12 @@ WORKDIR /code
 # copy the content of the local directory to the working directory
 COPY ./scibec/init_scibec ./bec/scibec/init_scibec
 COPY ./bec_utils ./bec/bec_utils/
+COPY ./scihub ./bec/scihub/
 
+
+RUN apk update && apk add gcc libc-dev build-base linux-headers
 RUN pip install -e ./bec/bec_utils/
+RUN pip install -e ./bec/scihub/
 WORKDIR /code/bec/scibec/init_scibec
 
 # command to run on container start
