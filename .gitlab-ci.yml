@@ -221,7 +221,7 @@ semver:
     - pip install python-semantic-release
     # - semantic-release changelog -D version_variable=./semantic_release/__init__.py:__version__
     # - semantic-release version -D version_variable=./semantic_release/__init__.py:__version__
-    - semantic-release publish -D version_variable=./semantic_release/__init__.py:__version__
+    - semantic-release publish -D version_variable=$CI_PROJECT_DIR/semantic_release/__init__.py:__version__
 
 pages:
   stage: Deploy
