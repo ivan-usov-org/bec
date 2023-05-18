@@ -213,6 +213,16 @@ end-2-end-light:
     - docker run --network=host --name end2end_client en2end_client:test  
 
 
+semver:
+  stage: Deploy
+  script:
+    - git config --global user.name "ci_update_bot"
+    - git config --global user.email "ci_update_bot@bec.ch"
+    - pip install python-semantic-release
+    # - semantic-release changelog -D version_variable=./semantic_release/__init__.py:__version__
+    # - semantic-release version -D version_variable=./semantic_release/__init__.py:__version__
+    - semantic-release publish -D version_variable=./semantic_release/__init__.py:__version__
+
 pages:
   stage: Deploy
   needs: ["tests"]
