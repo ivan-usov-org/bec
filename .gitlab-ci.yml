@@ -219,7 +219,7 @@ semver:
     - git config --global user.name "ci_update_bot"
     - git config --global user.email "ci_update_bot@bec.ch"
     - pip install python-semantic-release
-    - semantic-release changelog --post -D version_variable=./semantic_release/__init__.py:__version__
+    - semantic-release changelog --post -D GL_TOKEN=$CI_UPDATES -D version_variable=./semantic_release/__init__.py:__version__
     - semantic-release version -D version_variable=./semantic_release/__init__.py:__version__
     # - semantic-release -v DEBUG publish -D version_variable=$CI_PROJECT_DIR/semantic_release/__init__.py:__version__
 
