@@ -213,6 +213,14 @@ end-2-end-light:
     - docker run --network=host --name end2end_client en2end_client:test  
 
 
+semver:
+  stage: Deploy
+  needs: ["tests", "end-2-end-light", "end-2-end"]
+  script:
+    - pip install python-semantic-release
+    - semantic-release changelog -D version_variable=./semantic_release/__init__.py:__version__
+    - semantic-release version -D version_variable=./semantic_release/__init__.py:__version__
+
 pages:
   stage: Deploy
   needs: ["tests"]
