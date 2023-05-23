@@ -42,9 +42,9 @@ import numpy as np  # not needed but always nice to have
 # from bec_client.plugins.cSAXS.beamline_info import BeamlineInfo
 from bec_client.plugins.SLS.sls_info import OperatorInfo, SLSInfo
 
-# bec._bl_info_register(BeamlineInfo)
-bec._bl_info_register(SLSInfo)
-bec._bl_info_register(OperatorInfo)
+# bec._beamline_mixin._bl_info_register(BeamlineInfo)
+bec._beamline_mixin._bl_info_register(SLSInfo)
+bec._beamline_mixin._bl_info_register(OperatorInfo)
 
 # SETUP CLIENT PLUGINS
 # from bec_client.plugins.cSAXS import fshclose, fshopen, fshstatus
