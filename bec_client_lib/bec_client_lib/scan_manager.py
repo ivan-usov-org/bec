@@ -6,14 +6,14 @@ import time
 import uuid
 from math import inf
 
-from bec_utils import BECMessage, MessageEndpoints, bec_errors, bec_logger
-from bec_utils import timeout as bec_timeout
 from typeguard import typechecked
 
-from bec_client.callbacks.live_table import LiveUpdatesTable
-from bec_client.queue_items import QueueStorage
-from bec_client.request_items import RequestStorage
-from bec_client.scan_items import ScanStorage
+# from bec_client.callbacks.live_table import LiveUpdatesTable
+from bec_client_lib.queue_items import QueueStorage
+from bec_client_lib.request_items import RequestStorage
+from bec_client_lib.scan_items import ScanStorage
+from bec_utils import BECMessage, MessageEndpoints, bec_errors, bec_logger
+from bec_utils import timeout as bec_timeout
 
 logger = bec_logger.logger
 
@@ -103,11 +103,11 @@ class ScanReport:
 
         _wait()
 
-    async def _run_subscription(self):
-        await LiveUpdatesTable(self._client, self.request.request).run()
+    # async def _run_subscription(self):
+    #     await LiveUpdatesTable(self._client, self.request.request).run()
 
-    def subscribe(self):
-        asyncio.run(self._run_subscription())
+    # def subscribe(self):
+    #     asyncio.run(self._run_subscription())
 
     def __repr__(self) -> str:
         separator = "--" * 10

@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Optional
 from bec_utils import BECMessage, bec_logger, threadlocked
 
 if TYPE_CHECKING:
-    from bec_client.scan_manager import ScanManager
+    from bec_client_lib.scan_manager import ScanManager
 
 logger = bec_logger.logger
 
