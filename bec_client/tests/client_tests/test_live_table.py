@@ -3,12 +3,11 @@ import time
 from unittest import mock
 
 import pytest
+from bec_client_lib.tests.utils import bec_client
 from bec_utils import BECMessage
 
 from bec_client.callbacks.live_table import LiveUpdatesTable, sort_devices
 from bec_client.callbacks.utils import ScanRequestMixin
-
-from .utils import bec_client
 
 
 @pytest.mark.timeout(20)

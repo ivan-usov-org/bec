@@ -2,14 +2,13 @@ import collections
 from unittest import mock
 
 import pytest
+from bec_client_lib.tests.utils import bec_client
 from bec_utils import BECMessage
 
 from bec_client.callbacks.move_device import (
     LiveUpdatesReadbackProgressbar,
     ReadbackDataMixin,
 )
-
-from .utils import bec_client
 
 
 @pytest.mark.asyncio

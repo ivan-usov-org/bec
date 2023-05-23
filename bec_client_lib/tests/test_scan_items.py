@@ -1,5 +1,6 @@
 import pytest
-from bec_client.scan_manager import ScanManager
+
+from bec_client_lib.scan_manager import ScanManager
 from bec_utils import BECMessage, MessageEndpoints
 from bec_utils.tests.utils import ConnectorMock
 
