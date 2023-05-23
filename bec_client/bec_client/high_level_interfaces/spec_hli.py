@@ -1,4 +1,4 @@
-from bec_client.scan_manager import ScanReport
+from bec_client_lib.scan_manager import ScanReport
 from bec_utils.devicemanager import Device
 
 # pylint:disable=undefined-variable
