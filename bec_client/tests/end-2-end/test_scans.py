@@ -24,6 +24,7 @@ CONFIG_PATH = "../ci/test_config.yaml"
 # pylint: disable=missing-function-docstring
 # pylint: disable=redefined-outer-name
 # pylint: disable=protected-access
+# pylint: disable=undefined-variable
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -648,3 +649,43 @@ def test_burst_scan(client):
     dev = bec.device_manager.devices
     s = scans.line_scan(dev.samx, 0, 1, burst_at_each_point=2, steps=10, relative=False)
     assert len(s.scan.data) == 20
+
+
+@pytest.mark.timeout(100)
+def test_callback_data_matches_scan_data(client):
+    bec = client
+    wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_callback_data_matches_scan_data"})
+    dev = bec.device_manager.devices
+    reference_container = {"data": [], "metadata": {}}
+
+    def dummy_callback(data, metadata):
+        reference_container["metadata"] = metadata
+        reference_container["data"].append(data)
+
+    s = scans.line_scan(dev.samx, 0, 1, steps=10, relative=False, callback=dummy_callback)
+    assert len(s.scan.data) == 10
+    assert len(reference_container["data"]) == 10
+
+    for ii, msg in enumerate(s.scan.data.values()):
+        assert msg.content == reference_container["data"][ii]
+
+
+@pytest.mark.timeout(100)
+def test_async_callback_data_matches_scan_data(client):
+    bec = client
+    wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_async_callback_data_matches_scan_data"})
+    dev = bec.device_manager.devices
+    reference_container = {"data": [], "metadata": {}}
+
+    def dummy_callback(data, metadata):
+        reference_container["metadata"] = metadata
+        reference_container["data"].append(data)
+
+    s = scans.line_scan(dev.samx, 0, 1, steps=10, relative=False, async_callback=dummy_callback)
+    assert len(s.scan.data) == 10
+    assert len(reference_container["data"]) == 10
+
+    for ii, msg in enumerate(s.scan.data.values()):
+        assert msg.content == reference_container["data"][ii]
