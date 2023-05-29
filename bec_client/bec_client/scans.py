@@ -11,6 +11,7 @@ from bec_utils.connector import ConsumerConnector
 from cytoolz import partition
 from typeguard import typechecked
 
+from .callback_handler import CallbackRegister
 from .devicemanager_client import Device
 from .scan_manager import ScanReport
 
@@ -29,7 +30,7 @@ class ScanObject:
         # run must be an anonymous function to allow for multiple doc strings
         self.run = lambda *args, **kwargs: self._run(*args, **kwargs)
 
-    def _run(self, *args, callback: Callable = None, **kwargs):
+    def _run(self, *args, callback: Callable = None, async_callback: Callable = None, **kwargs):
         if self.client.alarm_handler.alarms_stack:
             logger.warning("The alarm stack is not empty but will be cleared now.")
             self.client.clear_all_alarms()
@@ -63,11 +64,21 @@ class ScanObject:
 
         self._send_scan_request(request)
 
-        if not hide_report:
-            scan_report_type = self._get_scan_report_type(hide_report)
-            self.client.callback_manager.process_request(request, scan_report_type, callback)
+        with CallbackRegister("data_segment", callback, sync=True):
+            with CallbackRegister("data_segment", async_callback, sync=False):
+                if not hide_report:
+                    scan_report_type = self._get_scan_report_type(hide_report)
+                    if scan_report_type:
+                        self.client.live_updates.process_request(
+                            request, scan_report_type, callback
+                        )
+                    report = ScanReport.from_request(request, client=self.client)
+                else:
+                    report = ScanReport.from_request(request, client=self.client)
+                    report.wait()
+                self.client.callbacks.poll()
 
-        return ScanReport.from_request(request, client=self.client)
+        return report
 
     def _get_scan_report_type(self, hide_report) -> str:
         if hide_report:

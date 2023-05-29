@@ -28,7 +28,8 @@ from bec_client.scan_manager import ScanManager
 from .alarm_handler import AlarmBase, AlarmHandler
 from .beamline_mixin import BeamlineMixin
 from .bec_magics import BECMagics
-from .callbacks.callback_manager import CallbackManager
+from .callback_handler import CallbackHandler
+from .callbacks.ipython_live_updates import IPythonLiveUpdates
 from .devicemanager_client import DMClient
 from .scans import Scans
 from .signals import SigintHandler
@@ -66,7 +67,8 @@ class BECClient(BECService, BeamlineMixin, UserScriptsMixin):
         self._hli_funcs = {}
         self._initialized = True
         self.config = None
-        self.callback_manager = CallbackManager(self)
+        self.live_updates = IPythonLiveUpdates(self)
+        self.callbacks = CallbackHandler()
         builtins.bec = self
         self.metadata = {}
         self.logbook = LogbookConnector(self.connector)

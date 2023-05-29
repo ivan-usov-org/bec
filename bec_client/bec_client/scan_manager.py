@@ -44,6 +44,10 @@ class ScanReport:
     @property
     def status(self):
         """returns the current status of the request"""
+        scan_type = self.request.request.content["scan_type"]
+        status = self.queue_item.status
+        if scan_type == "mv" and status == "COMPLETED":
+            return "COMPLETED" if self._get_mv_status() else "RUNNING"
         return self.queue_item.status
 
     @property
@@ -67,30 +71,35 @@ class ScanReport:
                 raise TimeoutError
         return queue_item
 
+    def _get_mv_status(self) -> bool:
+        motors = list(self.request.request.content["parameter"]["args"].keys())
+        request_status = self._client.device_manager.producer.lrange(
+            MessageEndpoints.device_req_status(self.request.requestID), 0, -1
+        )
+        if len(request_status) == len(motors):
+            return True
+        return False
+
     def wait(self, timeout=None):
         """wait until the request is completed"""
 
         @bec_timeout(timeout)
         def _wait():
             sleep_time = 0.1
-            while True:
-                if self.status == "COMPLETED":
-                    break
-                if self.status == "STOPPED":
-                    raise bec_errors.ScanAbortion
-                time.sleep(sleep_time)
-
-            if self.request.request.content["scan_type"] != "mv":
-                return
-
-            while True:
-                motors = list(self.request.request.content["parameter"]["args"].keys())
-                request_status = self._client.device_manager.producer.lrange(
-                    MessageEndpoints.device_req_status(self.request.requestID), 0, -1
-                )
-                if len(request_status) == len(motors):
-                    break
-                time.sleep(sleep_time)
+            scan_type = self.request.request.content["scan_type"]
+            if scan_type == "mv":
+                while True:
+                    if self._get_mv_status():
+                        break
+                    time.sleep(sleep_time)
+            else:
+                while True:
+                    if self.status == "COMPLETED":
+                        break
+                    if self.status == "STOPPED":
+                        raise bec_errors.ScanAbortion
+                    self._client.callbacks.poll()
+                    time.sleep(sleep_time)
 
         _wait()
 

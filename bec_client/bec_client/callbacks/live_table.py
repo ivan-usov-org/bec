@@ -3,7 +3,6 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING, Callable, List
 
-import numpy as np
 from bec_utils import BECMessage, bec_logger
 
 from bec_client.prettytable import PrettyTable
@@ -177,8 +176,10 @@ class LiveUpdatesTable(LiveUpdatesBase):
                 if self.point_data:
                     self.point_id += 1
                     self.print_table_data()
-                    self.emit_point(self.point_data.content, metadata=self.point_data.metadata)
                     progressbar.update(self.point_id)
+
+                    # process sync callbacks
+                    self.bec.callbacks.poll()
                 else:
                     logger.debug("waiting for new data point")
                     await asyncio.sleep(0.1)

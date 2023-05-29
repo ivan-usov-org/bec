@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import builtins
 import threading
 import time
 from collections import deque
@@ -38,11 +39,19 @@ class ScanItem:
         self.start_time = None
         self.end_time = None
         self.scan_report_instructions = []
+        self.callbacks = []
+        self.bec = builtins.__dict__.get("bec")
 
     @property
     def queue(self):
         """get the queue item for the current scan item"""
         return self.scan_manager.queue_storage.find_queue_item_by_ID(self._queueID)
+
+    def emit_data(self, scan_msg: BECMessage.ScanMessage) -> None:
+        self.bec.callbacks.run("data_segment", scan_msg.content, scan_msg.metadata)
+
+    def emit_status(self, scan_status: BECMessage.ScanStatusMessage) -> None:
+        self.bec.callbacks.run("status", scan_status.content, scan_status.metadata)
 
     def __eq__(self, other):
         return self.scanID == other.scanID
@@ -137,6 +146,9 @@ class ScanStorage:
         # add queue group
         scan_item.open_queue_group = scan_status.content["info"].get("queue_group")
 
+        # run status callbacks
+        scan_item.emit_status(scan_status)
+
     def add_scan_segment(self, scan_msg: BECMessage.ScanMessage) -> None:
         """update a scan item with a new scan segment"""
         logger.info(
@@ -147,6 +159,7 @@ class ScanStorage:
                 for scan_item in self.storage:
                     if scan_item.scanID == scan_msg.metadata["scanID"]:
                         scan_item.data[scan_msg.content["point_id"]] = scan_msg
+                        scan_item.emit_data(scan_msg)
                         return
             time.sleep(0.01)
 
