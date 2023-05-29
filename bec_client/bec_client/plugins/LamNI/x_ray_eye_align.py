@@ -9,12 +9,12 @@ from pathlib import Path
 
 import h5py
 import numpy as np
-from typeguard import typechecked
-
-from bec_client.alarm_handler import AlarmBase
-from bec_client.plugins.cSAXS import epics_get, epics_put, fshclose, fshopen
+from bec_client_lib.alarm_handler import AlarmBase
 from bec_utils import bec_logger
 from bec_utils.pdf_writer import PDFWriter
+from typeguard import typechecked
+
+from bec_client.plugins.cSAXS import epics_get, epics_put, fshclose, fshopen
 
 from .lamni_optics_mixin import LamNIOpticsMixin
 

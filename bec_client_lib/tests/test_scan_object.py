@@ -1,11 +1,9 @@
 from unittest import mock
 
 import pytest
-from bec_utils import BECMessage
+from bec_utils.tests.utils import bec_client
 
-from bec_client.scans import ScanObject
-
-from .utils import bec_client
+from bec_client_lib.scans import ScanObject
 
 
 def test_scan_object_raises(bec_client):
@@ -38,7 +36,7 @@ def test_scan_object(bec_client):
     dev = bec_client.device_manager.devices
     with mock.patch.object(bec_client, "alarm_handler"):
         with mock.patch.object(bec_client.live_updates, "process_request"):
-            with mock.patch("bec_client.scan_manager.ScanReport.from_request") as report:
+            with mock.patch("bec_client_lib.scan_manager.ScanReport.from_request") as report:
                 obj._run(dev.samx, -5, 5, dev.samy, -5, 5, step=0.5, exp_time=0.1, relative=False)
                 report().wait.assert_not_called()
 
@@ -57,7 +55,7 @@ def test_scan_object_receives_sample_name(bec_client):
     dev = bec_client.device_manager.devices
     with mock.patch.object(bec_client, "alarm_handler"):
         with mock.patch.object(bec_client.live_updates, "process_request"):
-            with mock.patch("bec_client.scan_manager.ScanReport.from_request") as scan_report:
+            with mock.patch("bec_client_lib.scan_manager.ScanReport.from_request") as scan_report:
                 with mock.patch.object(bec_client, "get_global_var", return_value="test_sample"):
                     obj._run(
                         dev.samx, -5, 5, dev.samy, -5, 5, step=0.5, exp_time=0.1, relative=False
@@ -80,7 +78,7 @@ def test_scan_object_receives_scan_group(bec_client):
     dev = bec_client.device_manager.devices
     with mock.patch.object(bec_client, "alarm_handler"):
         with mock.patch.object(bec_client.live_updates, "process_request"):
-            with mock.patch("bec_client.scan_manager.ScanReport.from_request") as scan_report:
+            with mock.patch("bec_client_lib.scan_manager.ScanReport.from_request") as scan_report:
                 with mock.patch.object(bec_client, "get_global_var", return_value="test_sample"):
                     obj._run(
                         dev.samx, -5, 5, dev.samy, -5, 5, step=0.5, exp_time=0.1, relative=False
@@ -103,7 +101,7 @@ def test_scan_object_receives_scan_def_id(bec_client):
     dev = bec_client.device_manager.devices
     with mock.patch.object(bec_client, "alarm_handler"):
         with mock.patch.object(bec_client.live_updates, "process_request"):
-            with mock.patch("bec_client.scan_manager.ScanReport.from_request") as scan_report:
+            with mock.patch("bec_client_lib.scan_manager.ScanReport.from_request") as scan_report:
                 with mock.patch.object(bec_client, "get_global_var", return_value="test_sample"):
                     obj._run(
                         dev.samx, -5, 5, dev.samy, -5, 5, step=0.5, exp_time=0.1, relative=False
@@ -126,7 +124,7 @@ def test_scan_object_receives_dataset_id_on_hold(bec_client):
     dev = bec_client.device_manager.devices
     with mock.patch.object(bec_client, "alarm_handler"):
         with mock.patch.object(bec_client.live_updates, "process_request"):
-            with mock.patch("bec_client.scan_manager.ScanReport.from_request") as scan_report:
+            with mock.patch("bec_client_lib.scan_manager.ScanReport.from_request") as scan_report:
                 with mock.patch.object(bec_client, "get_global_var", return_value="test_sample"):
                     obj._run(
                         dev.samx, -5, 5, dev.samy, -5, 5, step=0.5, exp_time=0.1, relative=False
