@@ -3,8 +3,7 @@ import enum
 import threading
 import traceback
 from collections import deque
-from contextlib import ContextDecorator
-from typing import Any, Callable
+from typing import Callable
 
 from bec_utils import bec_logger, threadlocked
 
@@ -44,10 +43,16 @@ class CallbackEntry:
 
     @property
     def num_pending_events(self):
+        """number of pending events"""
         return len(self.queue)
 
     @threadlocked
-    def poll(self):
+    def poll(self) -> None:
+        """Run callback.
+
+        Raises:
+            RuntimeError: Raises if attempt is made to run async callbacks manually.
+        """
         if not self.sync:
             raise RuntimeError("Cannot poll on an async callback.")
         args, kwargs = self.queue.popleft()
