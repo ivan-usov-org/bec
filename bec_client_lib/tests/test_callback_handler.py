@@ -1,6 +1,6 @@
 from unittest import mock
 
-from bec_client.callback_handler import CallbackHandler, CallbackRegister
+from bec_client_lib.callback_handler import CallbackHandler, CallbackRegister
 
 
 def test_register_callback():
