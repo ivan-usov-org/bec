@@ -22,6 +22,7 @@ if __name__ == "__main__":
             "rich",
             "pyepics",
             "pylint",
+            "fpdf",
         ],
         scripts=["bec_client/bin/bec"],
     )
