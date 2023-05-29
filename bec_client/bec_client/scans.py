@@ -73,7 +73,6 @@ class ScanObject:
                     report = ScanReport.from_request(request, client=self.client)
                 else:
                     report = ScanReport.from_request(request, client=self.client)
-                    report.wait()
                 self.client.callbacks.poll()
 
         return report
