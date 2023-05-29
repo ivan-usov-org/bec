@@ -64,8 +64,8 @@ class ScanObject:
 
         self._send_scan_request(request)
 
-        with CallbackRegister("data_segment", callback, sync=True):
-            with CallbackRegister("data_segment", async_callback, sync=False):
+        with CallbackRegister("scan_segment", callback, sync=True):
+            with CallbackRegister("scan_segment", async_callback, sync=False):
                 if not hide_report:
                     scan_report_type = self._get_scan_report_type(hide_report)
                     if scan_report_type:

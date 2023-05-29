@@ -11,7 +11,7 @@ logger = bec_logger.logger
 
 
 class EventType(str, enum.Enum):
-    DATA_SEGMENT = "data_segment"
+    SCAN_SEGMENT = "scan_segment"
     SCAN_STATUS = "scan_status"
 
 
@@ -109,14 +109,17 @@ class CallbackHandler:
 
 
 class CallbackRegister:
-    def __init__(self, event_type, callbacks, sync=False) -> None:
+    def __init__(self, event_type, callbacks, sync=False, callback_handler=None) -> None:
         """Context manager callbacks
 
         Args:
             callback_handler (CallbackHandler): Callback handler
         """
-        bec = builtins.__dict__.get("bec")
-        self.callback_handler = bec.callbacks
+        if not callback_handler:
+            bec = builtins.__dict__.get("bec")
+            self.callback_handler = bec.callbacks
+        else:
+            self.callback_handler = callback_handler
         self.event_type = event_type
         if not isinstance(callbacks, list):
             callbacks = [callbacks]

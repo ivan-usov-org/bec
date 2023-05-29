@@ -49,7 +49,7 @@ class ScanItem:
         return self.scan_manager.queue_storage.find_queue_item_by_ID(self._queueID)
 
     def emit_data(self, scan_msg: BECMessage.ScanMessage) -> None:
-        self.bec.callbacks.run("data_segment", scan_msg.content, scan_msg.metadata)
+        self.bec.callbacks.run("scan_segment", scan_msg.content, scan_msg.metadata)
 
     def emit_status(self, scan_status: BECMessage.ScanStatusMessage) -> None:
         self.bec.callbacks.run("status", scan_status.content, scan_status.metadata)
