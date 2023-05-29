@@ -17,6 +17,7 @@ dir_path = os.path.dirname(bec_utils.__file__)
 # pylint: disable=missing-function-docstring
 # pylint: disable=redefined-outer-name
 # pylint: disable=protected-access
+# pylint: disable=attribute-defined-outside-init
 
 
 class ScansMock(Scans):
@@ -101,8 +102,8 @@ def bec_client():
         ConnectorMock,
     )
     device_manager = DMClientMock(client)
-    if not "test_session" in builtins.__dict__:
-        with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
+    if "test_session" not in builtins.__dict__:
+        with open(f"{dir_path}/tests/test_config.yaml", "r", encoding="utf-8") as f:
             builtins.__dict__["test_session"] = create_session_from_config(yaml.safe_load(f))
     device_manager._session = builtins.__dict__["test_session"]
     device_manager.producer = device_manager.connector.producer()
