@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import builtins
+import datetime
 import threading
 import time
 from collections import deque
@@ -55,6 +56,17 @@ class ScanItem:
 
     def __eq__(self, other):
         return self.scanID == other.scanID
+
+    def __repr__(self) -> str:
+        details = (
+            f"\tStart time: {datetime.datetime.fromtimestamp(self.start_time).strftime('%c')}\n"
+            f"\tEnd time: {datetime.datetime.fromtimestamp(self.end_time).strftime('%c')}\n"
+            f"\tElapsed time: {(self.end_time-self.start_time):.1f} s\n"
+            f"\tScan ID: {self.scanID}\n"
+            f"\tScan number: {self.scan_number}\n"
+            f"\tNumber of points: {self.num_points}\n"
+        )
+        return f"ScanItem:\n {details}"
 
 
 class ScanStorage:

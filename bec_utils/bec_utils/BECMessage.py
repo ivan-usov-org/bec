@@ -180,10 +180,10 @@ class BECMessage:
         return self.msg_type == other.msg_type and self.metadata == other.metadata
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.content, self.metadata}))"
+        return f"BECMessage.{self.__class__.__name__}(**{self.content}, metadata={self.metadata})"
 
     def __str__(self):
-        return f"{self.__class__.__name__}({self.content, self.metadata}))"
+        return f"BECMessage.{self.__class__.__name__}(**{self.content}, metadata={self.metadata})"
 
 
 class BundleMessage(BECMessage):
