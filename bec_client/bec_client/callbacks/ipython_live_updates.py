@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 logger = bec_logger.logger
 
 
-class CallbackManager:
+class IPythonLiveUpdates:
     def __init__(self, client: BECClient) -> None:
         self.client = client
         self._interrupted_request = None
@@ -118,7 +118,6 @@ class CallbackManager:
                 # pylint: disable=protected-access
                 self._active_request = request
                 self._user_callback = callbacks
-
                 scan_request = ScanRequestMixin(self.client, request.metadata["RID"])
                 asyncio.run(scan_request.wait())
 
