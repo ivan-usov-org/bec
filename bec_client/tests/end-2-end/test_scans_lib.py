@@ -17,8 +17,8 @@ CONFIG_PATH = "../ci/test_config.yaml"
 # pylint: disable=undefined-variable
 
 
-@pytest.fixture(scope="module", autouse=True)
-def client():
+@pytest.fixture(scope="function")
+def lib_client():
     config = ServiceConfig(CONFIG_PATH)
     bec = BECClient(forced=True)
     bec.initialize(
@@ -34,11 +34,11 @@ def client():
 
 
 @pytest.mark.timeout(100)
-def test_grid_scan(client):
-    bec = client
+def test_grid_scan_lib_client(lib_client):
+    bec = lib_client
     scans = bec.scans
     wait_for_empty_queue(bec)
-    bec.metadata.update({"unit_test": "test_grid_scan"})
+    bec.metadata.update({"unit_test": "test_grid_scan_lib_client"})
     dev = bec.device_manager.devices
     scans.umv(dev.samx, 0, dev.samy, 0, relative=False)
     status = scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.01, relative=True)
@@ -48,11 +48,11 @@ def test_grid_scan(client):
 
 
 @pytest.mark.timeout(100)
-def test_mv_scan(client):
-    bec = client
+def test_mv_scan_lib_client(lib_client):
+    bec = lib_client
     scans = bec.scans
     wait_for_empty_queue(bec)
-    bec.metadata.update({"unit_test": "test_mv_scan"})
+    bec.metadata.update({"unit_test": "test_mv_scan_lib_client"})
     dev = bec.device_manager.devices
     scans.mv(dev.samx, 10, dev.samy, 20, relative=False).wait()
     current_pos_samx = dev.samx.read()["samx"]["value"]

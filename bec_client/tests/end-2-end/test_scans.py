@@ -29,10 +29,10 @@ CONFIG_PATH = "../ci/test_config.yaml"
 # pylint: disable=undefined-variable
 
 
-@pytest.fixture(scope="module", autouse=True)
+@pytest.fixture(scope="function")
 def client():
     config = ServiceConfig(CONFIG_PATH)
-    bec = BECIPythonClient()
+    bec = BECIPythonClient(forced=True)
     bec.initialize(
         config,
         RedisConnector,
