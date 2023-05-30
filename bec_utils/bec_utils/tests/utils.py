@@ -1,5 +1,6 @@
 import builtins
 import os
+import time
 import uuid
 
 import bec_utils
@@ -8,11 +9,13 @@ import yaml
 from bec_client.bec_client import BECIPythonClient
 from bec_client_lib.devicemanager_client import DMClient
 from bec_client_lib.scans import Scans
-from bec_utils import BECMessage, MessageEndpoints, ServiceConfig
+from bec_utils import BECMessage, MessageEndpoints, ServiceConfig, bec_logger
 from bec_utils.connector import ConnectorBase
 from bec_utils.redis_connector import Alarms
 
 dir_path = os.path.dirname(bec_utils.__file__)
+
+logger = bec_logger.logger
 
 # pylint: disable=no-member
 # pylint: disable=missing-function-docstring
