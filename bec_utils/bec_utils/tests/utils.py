@@ -8,7 +8,7 @@ import yaml
 from bec_client.bec_client import BECIPythonClient
 from bec_client_lib.devicemanager_client import DMClient
 from bec_client_lib.scans import Scans
-from bec_utils import BECMessage, ServiceConfig
+from bec_utils import BECMessage, MessageEndpoints, ServiceConfig
 from bec_utils.connector import ConnectorBase
 from bec_utils.redis_connector import Alarms
 
