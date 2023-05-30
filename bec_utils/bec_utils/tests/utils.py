@@ -20,6 +20,20 @@ dir_path = os.path.dirname(bec_utils.__file__)
 # pylint: disable=protected-access
 
 
+def queue_is_empty(queue) -> bool:
+    if not queue:
+        return True
+    if not queue["primary"].get("info"):
+        return True
+    return False
+
+
+def get_queue(bec):
+    return BECMessage.ScanQueueStatusMessage.loads(
+        bec.queue.producer.get(MessageEndpoints.scan_queue_status())
+    )
+
+
 def wait_for_empty_queue(bec):
     while not get_queue(bec):
         time.sleep(1)
