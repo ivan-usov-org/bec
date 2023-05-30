@@ -19,7 +19,7 @@ logger = bec_logger.logger
 
 
 class BECIPythonClient(BECClient):
-    def __init__(self) -> None:
+    def __init__(self, forced=False) -> None:
         pass
 
     def __repr__(self) -> str:

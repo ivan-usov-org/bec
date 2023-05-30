@@ -33,11 +33,11 @@ logger = bec_logger.logger
 
 
 class BECClient(BECService, UserScriptsMixin):
-    def __init__(self) -> None:
+    def __init__(self, forced=False) -> None:
         pass
 
-    def __new__(cls):
-        if not hasattr(cls, "_client"):
+    def __new__(cls, forced=False):
+        if not hasattr(cls, "_client") or forced:
             cls._client = super(BECClient, cls).__new__(cls)
             cls._initialized = False
         return cls._client
@@ -71,6 +71,7 @@ class BECClient(BECService, UserScriptsMixin):
         self._update_username()
         self.history = None
         self.callbacks = CallbackHandler()
+        self.live_updates = None
 
     @property
     def username(self) -> str:
