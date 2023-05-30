@@ -4,6 +4,7 @@ import time
 
 import numpy as np
 import pytest
+from bec_client_lib import BECClient
 from bec_client_lib.alarm_handler import AlarmBase
 from bec_utils import (
     BECMessage,
@@ -27,7 +28,7 @@ CONFIG_PATH = "../ci/test_config.yaml"
 # pylint: disable=undefined-variable
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="module", autouse=True)
 def client():
     config = ServiceConfig(CONFIG_PATH)
     bec = BECIPythonClient()
