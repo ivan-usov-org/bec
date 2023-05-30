@@ -1,21 +1,10 @@
-import _thread
-import threading
 import time
 
 import numpy as np
 import pytest
 from bec_client_lib import BECClient
-from bec_client_lib.alarm_handler import AlarmBase
-from bec_utils import (
-    BECMessage,
-    MessageEndpoints,
-    RedisConnector,
-    ServiceConfig,
-    bec_logger,
-)
-from bec_utils.bec_errors import ScanAbortion, ScanInterruption
-
-from .test_scans import get_queue, queue_is_empty, wait_for_empty_queue
+from bec_utils import RedisConnector, ServiceConfig, bec_logger
+from bec_utils.tests.utils import wait_for_empty_queue
 
 logger = bec_logger.logger
 

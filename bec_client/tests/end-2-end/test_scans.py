@@ -14,6 +14,7 @@ from bec_utils import (
     bec_logger,
 )
 from bec_utils.bec_errors import ScanAbortion, ScanInterruption
+from bec_utils.tests.utils import wait_for_empty_queue
 
 from bec_client import BECIPythonClient
 
@@ -42,31 +43,6 @@ def client():
     time.sleep(5)
     yield bec
     bec.shutdown()
-
-
-def queue_is_empty(queue) -> bool:
-    if not queue:
-        return True
-    if not queue["primary"].get("info"):
-        return True
-    return False
-
-
-def get_queue(bec):
-    return BECMessage.ScanQueueStatusMessage.loads(
-        bec.queue.producer.get(MessageEndpoints.scan_queue_status())
-    )
-
-
-def wait_for_empty_queue(bec):
-    while not get_queue(bec):
-        time.sleep(1)
-    while not queue_is_empty(get_queue(bec).content["queue"]):
-        time.sleep(1)
-        logger.info(bec.queue)
-    while get_queue(bec).content["queue"]["primary"]["status"] != "RUNNING":
-        time.sleep(1)
-        logger.info(bec.queue)
 
 
 @pytest.mark.timeout(100)
