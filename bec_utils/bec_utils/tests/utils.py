@@ -2,10 +2,9 @@ import builtins
 import os
 import uuid
 
+import bec_utils
 import pytest
 import yaml
-
-import bec_utils
 from bec_client.bec_client import BECIPythonClient
 from bec_client_lib.devicemanager_client import DMClient
 from bec_client_lib.scans import Scans
@@ -19,6 +18,17 @@ dir_path = os.path.dirname(bec_utils.__file__)
 # pylint: disable=missing-function-docstring
 # pylint: disable=redefined-outer-name
 # pylint: disable=protected-access
+
+
+def wait_for_empty_queue(bec):
+    while not get_queue(bec):
+        time.sleep(1)
+    while not queue_is_empty(get_queue(bec).content["queue"]):
+        time.sleep(1)
+        logger.info(bec.queue)
+    while get_queue(bec).content["queue"]["primary"]["status"] != "RUNNING":
+        time.sleep(1)
+        logger.info(bec.queue)
 
 
 class ScansMock(Scans):
