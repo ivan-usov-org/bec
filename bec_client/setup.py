@@ -6,7 +6,7 @@ from setuptools import setup
 
 current_path = pathlib.Path(__file__).parent.resolve()
 
-utils = f"{current_path}/../bec_utils/"
+utils = f"{current_path}/../bec_client_lib/"
 bec_client_lib = f"{current_path}/../bec_client_lib/"
 
 if __name__ == "__main__":
