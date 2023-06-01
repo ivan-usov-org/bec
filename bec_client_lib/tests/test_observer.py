@@ -4,13 +4,13 @@ from unittest import mock
 import pytest
 import yaml
 
-import bec_client_lib.core
+import bec_client_lib
 from bec_client_lib.core import BECMessage, MessageEndpoints
 from bec_client_lib.core.devicemanager import DeviceManagerBase
 from bec_client_lib.core.observer import Observer, ObserverAction, ObserverManager
 from bec_client_lib.core.tests.utils import ConnectorMock, create_session_from_config
 
-dir_path = os.path.dirname(bec_client_lib.core.__file__)
+dir_path = os.path.dirname(bec_client_lib.__file__)
 
 
 @pytest.mark.parametrize(
@@ -90,7 +90,7 @@ def test_observer(kwargs, raised_error):
 def device_manager():
     connector = ConnectorMock("")
     dm = DeviceManagerBase(connector, "")
-    with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
+    with open(f"{dir_path}/core/tests/test_config.yaml", "r") as f:
         dm._session = create_session_from_config(yaml.safe_load(f))
     dm._load_session()
     with mock.patch.object(dm, "_get_config"):

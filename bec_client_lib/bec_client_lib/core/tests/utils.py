@@ -7,7 +7,7 @@ import pytest
 import yaml
 
 import bec_client_lib.core
-from bec_client.bec_client import BECIPythonClient
+from bec_client_lib import BECClient
 from bec_client_lib.core import BECMessage, MessageEndpoints, ServiceConfig, bec_logger
 from bec_client_lib.core.connector import ConnectorBase
 from bec_client_lib.core.redis_connector import Alarms
@@ -66,7 +66,7 @@ class ScansMock(Scans):
         pass
 
 
-class ClientMock(BECIPythonClient):
+class ClientMock(BECClient):
     def _load_scans(self):
         self.scans = ScansMock(self)
         builtins.scans = self.scans
