@@ -381,8 +381,11 @@ class DMClient(DeviceManagerBase):
         self.parent.wait_for_service("DeviceServer")
         if self._is_config_valid():
             for dev in self._session["devices"]:
-                msg = self._get_device_info(dev.get("name"))
-                self._add_device(dev, msg)
+                try:
+                    msg = self._get_device_info(dev.get("name"))
+                    self._add_device(dev, msg)
+                except Exception:
+                    logger.error(f"Failed to load device {dev}.")
 
     def _add_device(self, dev: dict, msg: BECMessage.DeviceInfoMessage):
         name = msg.content["device"]
