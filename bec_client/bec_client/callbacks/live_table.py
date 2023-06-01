@@ -3,10 +3,9 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING, Callable, List
 
-from bec_utils import BECMessage, bec_logger
-
 from bec_client.prettytable import PrettyTable
 from bec_client.progressbar import ScanProgressBar
+from bec_client_lib.core import BECMessage, bec_logger
 
 from .utils import LiveUpdatesBase, check_alarms
 

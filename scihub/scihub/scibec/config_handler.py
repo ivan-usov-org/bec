@@ -6,12 +6,12 @@ import traceback
 import uuid
 from typing import TYPE_CHECKING
 
-import bec_utils
+import bec_client_lib
 import msgpack
-from bec_utils import BECMessage, Device, DeviceConfigError, bec_logger
-from bec_utils import DeviceManagerBase as DeviceManager
-from bec_utils import MessageEndpoints
-from bec_utils.connector import ConnectorBase
+from bec_client_lib.core import BECMessage, Device, DeviceConfigError
+from bec_client_lib.core import DeviceManagerBase as DeviceManager
+from bec_client_lib.core import MessageEndpoints, bec_logger
+from bec_client_lib.core.connector import ConnectorBase
 
 from .scibec_validator import SciBecValidator
 
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 logger = bec_logger.logger
 
-dir_path = os.path.abspath(os.path.join(os.path.dirname(bec_utils.__file__), "../../scibec/"))
+dir_path = os.path.abspath(os.path.join(os.path.dirname(bec_client_lib.__file__), "../../scibec/"))
 
 
 class ConfigHandler:

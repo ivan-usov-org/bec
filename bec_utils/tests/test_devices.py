@@ -3,11 +3,11 @@ from unittest import mock
 
 import pytest
 
-import bec_utils
-from bec_utils.devicemanager import DeviceManagerBase
-from bec_utils.tests.utils import ConnectorMock
+import bec_client_lib.core
+from bec_client_lib.core.devicemanager import DeviceManagerBase
+from bec_client_lib.core.tests.utils import ConnectorMock
 
-dir_path = os.path.dirname(bec_utils.__file__)
+dir_path = os.path.dirname(bec_client_lib.coret_lib.core.__file__)
 
 
 @pytest.fixture

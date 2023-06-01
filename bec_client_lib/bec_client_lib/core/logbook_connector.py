@@ -4,7 +4,7 @@ import warnings
 import msgpack
 from requests.exceptions import HTTPError
 
-from bec_utils import MessageEndpoints, RedisConnector, bec_logger
+from bec_client_lib.core import MessageEndpoints, RedisConnector, bec_logger
 
 logger = bec_logger.logger
 

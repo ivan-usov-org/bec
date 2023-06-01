@@ -6,10 +6,11 @@ from contextlib import ContextDecorator
 from typing import TYPE_CHECKING, Callable
 
 import msgpack
-from bec_utils import BECMessage, MessageEndpoints, bec_logger
-from bec_utils.connector import ConsumerConnector
 from cytoolz import partition
 from typeguard import typechecked
+
+from bec_client_lib.core import BECMessage, MessageEndpoints, bec_logger
+from bec_client_lib.core.connector import ConsumerConnector
 
 from .callback_handler import CallbackRegister
 from .devicemanager_client import Device

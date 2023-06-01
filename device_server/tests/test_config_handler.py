@@ -1,14 +1,14 @@
 import os
 from unittest import mock
 
-import bec_utils
 import yaml
-from bec_utils import BECMessage
-from bec_utils.tests.utils import ConnectorMock, create_session_from_config
 
+import bec_client_lib.core
+from bec_client_lib.core import BECMessage
+from bec_client_lib.core.tests.utils import ConnectorMock, create_session_from_config
 from device_server.devices.devicemanager import DeviceConfigError, DeviceManagerDS
 
-dir_path = os.path.dirname(bec_utils.__file__)
+dir_path = os.path.dirname(bec_client_lib.core.__file__)
 
 
 def test_request_response():

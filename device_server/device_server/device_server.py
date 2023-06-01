@@ -8,13 +8,19 @@ from io import StringIO
 from typing import Any
 
 import ophyd
-from bec_utils import Alarms, BECMessage, BECService, MessageEndpoints, bec_logger
-from bec_utils.BECMessage import BECStatus
-from bec_utils.connector import ConnectorBase
-from bec_utils.devicemanager import OnFailure
 from ophyd import Staged
 from ophyd.utils import errors as ophyd_errors
 
+from bec_client_lib.core import (
+    Alarms,
+    BECMessage,
+    BECService,
+    MessageEndpoints,
+    bec_logger,
+)
+from bec_client_lib.core.BECMessage import BECStatus
+from bec_client_lib.core.connector import ConnectorBase
+from bec_client_lib.core.devicemanager import OnFailure
 from device_server.devices import is_serializable, rgetattr
 from device_server.devices.devicemanager import DeviceManagerDS
 

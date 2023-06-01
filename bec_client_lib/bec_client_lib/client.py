@@ -8,7 +8,12 @@ import pathlib
 import subprocess
 from typing import List
 
-from bec_utils import (
+from rich.console import Console
+from rich.table import Table
+
+from bec_client_lib.alarm_handler import AlarmHandler
+from bec_client_lib.callback_handler import CallbackHandler
+from bec_client_lib.core import (
     Alarms,
     BECService,
     ConfigHelper,
@@ -16,14 +21,9 @@ from bec_utils import (
     ServiceConfig,
     bec_logger,
 )
-from bec_utils.connector import ConnectorBase
-from bec_utils.logbook_connector import LogbookConnector
-from bec_utils.redis_connector import RedisConnector
-from rich.console import Console
-from rich.table import Table
-
-from bec_client_lib.alarm_handler import AlarmHandler
-from bec_client_lib.callback_handler import CallbackHandler
+from bec_client_lib.core.connector import ConnectorBase
+from bec_client_lib.core.logbook_connector import LogbookConnector
+from bec_client_lib.core.redis_connector import RedisConnector
 from bec_client_lib.devicemanager_client import DMClient
 from bec_client_lib.scan_manager import ScanManager
 from bec_client_lib.scans import Scans

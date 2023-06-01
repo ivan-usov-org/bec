@@ -8,12 +8,13 @@ from math import inf
 
 from typeguard import typechecked
 
+from bec_client_lib.core import BECMessage, MessageEndpoints, bec_errors, bec_logger
+from bec_client_lib.core import timeout as bec_timeout
+
 # from bec_client.callbacks.live_table import LiveUpdatesTable
 from bec_client_lib.queue_items import QueueStorage
 from bec_client_lib.request_items import RequestStorage
 from bec_client_lib.scan_items import ScanStorage
-from bec_utils import BECMessage, MessageEndpoints, bec_errors, bec_logger
-from bec_utils import timeout as bec_timeout
 
 logger = bec_logger.logger
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bec_utils import BECMessage, MessageEndpoints, bec_logger
+from bec_client_lib.core import BECMessage, MessageEndpoints, bec_logger
 
 from .emitter import EmitterBase
 

@@ -4,7 +4,7 @@ import threading
 from collections import deque
 from typing import TYPE_CHECKING, Deque, Optional
 
-from bec_utils import BECMessage, bec_logger, threadlocked
+from bec_client_lib.core import BECMessage, bec_logger, threadlocked
 
 logger = bec_logger.logger
 

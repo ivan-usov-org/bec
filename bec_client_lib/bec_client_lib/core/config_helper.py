@@ -14,7 +14,7 @@ from .endpoints import MessageEndpoints
 from .logger import bec_logger
 
 if TYPE_CHECKING:
-    from bec_utils import RedisConnector
+    from bec_client_lib.core import RedisConnector
 
 logger = bec_logger.logger
 

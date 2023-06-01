@@ -5,12 +5,12 @@ from unittest import mock
 import pytest
 import yaml
 
-import bec_utils
-from bec_utils import BECMessage
-from bec_utils.devicemanager import DeviceConfigError, DeviceManagerBase
-from bec_utils.tests.utils import ConnectorMock, create_session_from_config
+import bec_client_lib.core
+from bec_client_lib.core import BECMessage
+from bec_client_lib.core.devicemanager import DeviceConfigError, DeviceManagerBase
+from bec_client_lib.core.tests.utils import ConnectorMock, create_session_from_config
 
-dir_path = os.path.dirname(bec_utils.__file__)
+dir_path = os.path.dirname(bec_client_lib.core.__file__)
 
 
 def test_dm_initialize():

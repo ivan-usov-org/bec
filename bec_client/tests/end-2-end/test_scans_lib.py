@@ -2,9 +2,10 @@ import time
 
 import numpy as np
 import pytest
+
 from bec_client_lib import BECClient
-from bec_utils import RedisConnector, ServiceConfig, bec_logger
-from bec_utils.tests.utils import wait_for_empty_queue
+from bec_client_lib.core import RedisConnector, ServiceConfig, bec_logger
+from bec_client_lib.core.tests.utils import wait_for_empty_queue
 
 logger = bec_logger.logger
 

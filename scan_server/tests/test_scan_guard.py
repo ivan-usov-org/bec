@@ -1,9 +1,9 @@
 from unittest import mock
 
 import pytest
-from bec_utils import BECMessage
 from utils import load_ScanServerMock
 
+from bec_client_lib.core import BECMessage
 from scan_server.scan_guard import ScanGuard, ScanRejection
 
 

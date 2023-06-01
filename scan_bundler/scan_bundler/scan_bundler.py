@@ -5,10 +5,10 @@ import traceback
 from concurrent.futures import ThreadPoolExecutor
 from typing import Callable
 
-from bec_utils import BECMessage, BECService
-from bec_utils import DeviceManagerBase as DeviceManager
-from bec_utils import MessageEndpoints, bec_logger
-from bec_utils.connector import ConnectorBase
+from bec_client_lib.core import BECMessage, BECService
+from bec_client_lib.core import DeviceManagerBase as DeviceManager
+from bec_client_lib.core import MessageEndpoints, bec_logger
+from bec_client_lib.core.connector import ConnectorBase
 
 from .bec_emitter import BECEmitter
 from .bluesky_emitter import BlueskyEmitter

@@ -3,17 +3,18 @@ import os
 import time
 import uuid
 
-import bec_utils
 import pytest
 import yaml
+
+import bec_client_lib.core
 from bec_client.bec_client import BECIPythonClient
+from bec_client_lib.core import BECMessage, MessageEndpoints, ServiceConfig, bec_logger
+from bec_client_lib.core.connector import ConnectorBase
+from bec_client_lib.core.redis_connector import Alarms
 from bec_client_lib.devicemanager_client import DMClient
 from bec_client_lib.scans import Scans
-from bec_utils import BECMessage, MessageEndpoints, ServiceConfig, bec_logger
-from bec_utils.connector import ConnectorBase
-from bec_utils.redis_connector import Alarms
 
-dir_path = os.path.dirname(bec_utils.__file__)
+dir_path = os.path.dirname(bec_client_lib.core.__file__)
 
 logger = bec_logger.logger
 

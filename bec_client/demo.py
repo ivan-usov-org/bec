@@ -1,6 +1,5 @@
-from bec_utils import RedisConnector, ServiceConfig, bec_logger
-
 from bec_client import BECClient
+from bec_client_lib.core import RedisConnector, ServiceConfig, bec_logger
 
 logger = bec_logger.logger
 bec_logger.level = bec_logger.LOGLEVEL.SUCCESS
@@ -75,7 +74,49 @@ logger.success("Started BECClient")
 #     fig.canvas.flush_events()
 #     time.sleep(0.01)
 
-scans.line_scan(dev.samy, -5, 5, steps=100, exp_time=0.1, relative=False, callback=basic_plot)
+from bec_client.plugins.XTreme.live_analysis import OTFLiveAnalysis
+
+# cb = OTFLiveAnalysis()
+# scans.line_scan(
+#     dev.samy,
+#     -5,
+#     5,
+#     steps=100,
+#     exp_time=0.1,
+#     relative=False,
+#     callback=cb,
+#     md={"polarization": "plus"},
+# )
+# scans.line_scan(
+#     dev.samy,
+#     5,
+#     -5,
+#     steps=100,
+#     exp_time=0.1,
+#     relative=False,
+#     callback=cb,
+#     md={"polarization": "plus"},
+# )
+# scans.line_scan(
+#     dev.samy,
+#     -5,
+#     5,
+#     steps=100,
+#     exp_time=0.1,
+#     relative=False,
+#     callback=cb,
+#     md={"polarization": "minus"},
+# )
+# scans.line_scan(
+#     dev.samy,
+#     5,
+#     -5,
+#     steps=100,
+#     exp_time=0.1,
+#     relative=False,
+#     callback=cb,
+#     md={"polarization": "minus"},
+# )
 # scans.line_scan(dev.samy, -5, 5, steps=100, exp_time=0.1, relative=False, callback=basic_plot)
 
 # tomo_scan_sim()

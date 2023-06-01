@@ -3,7 +3,7 @@ import argparse
 import msgpack
 import yaml
 
-from bec_utils import MessageEndpoints, RedisConnector
+from bec_client_lib.core import MessageEndpoints, RedisConnector
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument(

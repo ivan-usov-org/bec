@@ -7,7 +7,7 @@ import time
 from collections import deque
 from typing import TYPE_CHECKING, Optional
 
-from bec_utils import BECMessage, bec_logger, threadlocked
+from bec_client_lib.core import BECMessage, bec_logger, threadlocked
 
 if TYPE_CHECKING:
     from bec_client_lib.scan_manager import ScanManager

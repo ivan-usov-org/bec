@@ -3,7 +3,7 @@ import time
 
 import pytest
 
-from bec_utils.timeout import SingletonThreadpool, timeout
+from bec_client_lib.core.timeout import SingletonThreadpool, timeout
 
 
 @pytest.mark.parametrize("timeout_time,sleep_time", [(0.1, 0.5), (0.5, 0.1), (None, 0.1)])

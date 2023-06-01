@@ -1,8 +1,8 @@
 from unittest import mock
 
 import pytest
-from bec_utils.tests.utils import bec_client
 
+from bec_client_lib.core.tests.utils import bec_client
 from bec_client_lib.devicemanager_client import Device
 from bec_client_lib.scans import (
     DatasetIdOnHold,

@@ -4,8 +4,8 @@ import enum
 
 from typeguard import typechecked
 
-from bec_utils import BECMessage, Device, MessageEndpoints
-from bec_utils.devicemanager import DeviceManagerBase
+from bec_client_lib.core import BECMessage, Device, MessageEndpoints
+from bec_client_lib.core.devicemanager import DeviceManagerBase
 
 
 class ObserverAction(str, enum.Enum):

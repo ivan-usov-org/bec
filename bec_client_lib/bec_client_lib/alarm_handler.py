@@ -2,7 +2,7 @@ import threading
 from collections import deque
 from typing import List
 
-from bec_utils import (
+from bec_client_lib.core import (
     Alarms,
     BECMessage,
     MessageEndpoints,

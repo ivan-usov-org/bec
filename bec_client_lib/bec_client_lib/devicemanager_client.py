@@ -2,7 +2,7 @@ import functools
 import time
 import uuid
 
-from bec_utils import (
+from bec_client_lib.core import (
     BECMessage,
     Device,
     DeviceManagerBase,

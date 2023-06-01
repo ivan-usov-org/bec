@@ -1,8 +1,8 @@
 import time
 
 import numpy as np
-from bec_utils import bec_logger
 
+from bec_client_lib.core import bec_logger
 from scan_server.scans import FlyScanBase, ScanArgType, ScanBase
 
 logger = bec_logger.logger

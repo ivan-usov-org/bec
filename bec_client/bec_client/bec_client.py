@@ -4,11 +4,12 @@ import threading
 import time
 
 import IPython
+from IPython.terminal.prompts import Prompts, Token
+
 from bec_client_lib.alarm_handler import AlarmBase
 from bec_client_lib.client import BECClient
-from bec_utils import ServiceConfig, bec_logger
-from bec_utils.connector import ConnectorBase
-from IPython.terminal.prompts import Prompts, Token
+from bec_client_lib.core import ServiceConfig, bec_logger
+from bec_client_lib.core.connector import ConnectorBase
 
 from .beamline_mixin import BeamlineMixin
 from .bec_magics import BECMagics

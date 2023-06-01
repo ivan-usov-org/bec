@@ -2,8 +2,7 @@ import argparse
 import os
 import threading
 
-from bec_utils import RedisConnector, ServiceConfig, bec_logger
-
+from bec_client_lib.core import RedisConnector, ServiceConfig, bec_logger
 from file_writer import FileWriterManager
 
 logger = bec_logger.logger

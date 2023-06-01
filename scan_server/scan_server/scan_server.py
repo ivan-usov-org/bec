@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from bec_utils import Alarms, BECMessage, BECService, BECStatus
-from bec_utils import DeviceManagerBase as DeviceManager
-from bec_utils import MessageEndpoints, ServiceConfig, bec_logger
-from bec_utils.connector import ConnectorBase
+from bec_client_lib.core import Alarms, BECMessage, BECService, BECStatus
+from bec_client_lib.core import DeviceManagerBase as DeviceManager
+from bec_client_lib.core import MessageEndpoints, ServiceConfig, bec_logger
+from bec_client_lib.core.connector import ConnectorBase
 
 from .scan_assembler import ScanAssembler
 from .scan_guard import ScanGuard

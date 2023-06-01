@@ -3,21 +3,21 @@ import time
 from concurrent.futures import wait
 from unittest import mock
 
-import bec_utils
 import pytest
 import yaml
-from bec_utils import BECMessage
-from bec_utils import DeviceManagerBase as DeviceManager
-from bec_utils import MessageEndpoints, ServiceConfig
-from bec_utils.tests.utils import ConnectorMock, create_session_from_config
 
+import bec_client_lib.core
+from bec_client_lib.core import BECMessage
+from bec_client_lib.core import DeviceManagerBase as DeviceManager
+from bec_client_lib.core import MessageEndpoints, ServiceConfig
+from bec_client_lib.core.tests.utils import ConnectorMock, create_session_from_config
 from scan_bundler import ScanBundler
 from scan_bundler.emitter import EmitterBase
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=protected-access
 
-dir_path = os.path.dirname(bec_utils.__file__)
+dir_path = os.path.dirname(bec_client_lib.core.__file__)
 
 
 class MessageMock:

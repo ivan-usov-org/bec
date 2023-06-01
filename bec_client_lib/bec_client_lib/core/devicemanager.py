@@ -7,8 +7,8 @@ from rich.console import Console
 from rich.table import Table
 from typeguard import typechecked
 
-from bec_utils import ConfigHelper
-from bec_utils.connector import ConnectorBase
+from bec_client_lib.core import ConfigHelper
+from bec_client_lib.core.connector import ConnectorBase
 
 from .bec_errors import DeviceConfigError
 from .BECMessage import (

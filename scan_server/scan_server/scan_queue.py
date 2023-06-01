@@ -3,12 +3,15 @@ from __future__ import annotations
 import collections
 import threading
 import time
+import traceback
 import uuid
 from enum import Enum
 from typing import List, Optional, Union
-import traceback
 
-from bec_utils import (
+from rich.console import Console
+from rich.table import Table
+
+from bec_client_lib.core import (
     Alarms,
     BECMessage,
     MessageEndpoints,
@@ -16,8 +19,6 @@ from bec_utils import (
     threadlocked,
     timeout,
 )
-from rich.console import Console
-from rich.table import Table
 
 from .errors import LimitError, ScanAbortion
 from .scan_assembler import ScanAssembler

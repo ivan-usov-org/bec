@@ -7,7 +7,8 @@ from typing import TYPE_CHECKING
 
 import msgpack
 import numpy as np
-from bec_utils import MessageEndpoints, bec_logger
+
+from bec_client_lib.core import MessageEndpoints, bec_logger
 
 from .emitter import EmitterBase
 

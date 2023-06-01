@@ -3,11 +3,11 @@ import json
 import traceback
 import typing
 
+import file_writer_plugins as fwp
 import h5py
 import xmltodict
-from bec_utils import bec_logger
 
-import file_writer_plugins as fwp
+from bec_client_lib.core import bec_logger
 
 from .merged_dicts import merge_dicts
 

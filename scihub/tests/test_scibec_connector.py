@@ -1,9 +1,9 @@
 from unittest import mock
 
 import pytest
-from bec_utils import DeviceManagerBase, ServiceConfig
-from bec_utils.tests.utils import ConnectorMock
 
+from bec_client_lib.core import DeviceManagerBase, ServiceConfig
+from bec_client_lib.core.tests.utils import ConnectorMock
 from scihub import SciHub
 from scihub.scibec import SciBecConnector
 

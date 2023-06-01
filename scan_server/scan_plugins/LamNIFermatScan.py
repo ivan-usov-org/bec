@@ -24,8 +24,8 @@ import time
 
 import matplotlib.pyplot as plt
 import numpy as np
-from bec_utils import BECMessage, MessageEndpoints, bec_logger
 
+from bec_client_lib.core import BECMessage, MessageEndpoints, bec_logger
 from scan_server.errors import ScanAbortion
 from scan_server.scans import RequestBase, ScanArgType, ScanBase
 

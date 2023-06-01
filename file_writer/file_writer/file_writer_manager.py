@@ -3,7 +3,8 @@ import traceback
 from pathlib import Path
 
 import numpy as np
-from bec_utils import (
+
+from bec_client_lib.core import (
     BECMessage,
     BECService,
     DeviceManagerBase,
@@ -11,9 +12,9 @@ from bec_utils import (
     ServiceConfig,
     bec_logger,
 )
-from bec_utils.bec_errors import ServiceConfigError
-from bec_utils.connector import ConnectorBase
-from bec_utils.redis_connector import Alarms, RedisConnector
+from bec_client_lib.core.bec_errors import ServiceConfigError
+from bec_client_lib.core.connector import ConnectorBase
+from bec_client_lib.core.redis_connector import Alarms, RedisConnector
 
 from .file_writer import NexusFileWriter
 

@@ -2,15 +2,15 @@ import traceback
 from unittest import mock
 from unittest.mock import ANY
 
-import bec_utils
 import pytest
-from bec_utils import Alarms, BECMessage, MessageEndpoints, ServiceConfig
-from bec_utils.BECMessage import BECStatus
-from bec_utils.tests.utils import ConnectorMock
 from ophyd import Staged
 from ophyd.utils import errors as ophyd_errors
 from test_device_manager_ds import device_manager, load_device_manager
 
+import bec_client_lib.core
+from bec_client_lib.core import Alarms, BECMessage, MessageEndpoints, ServiceConfig
+from bec_client_lib.core.BECMessage import BECStatus
+from bec_client_lib.core.tests.utils import ConnectorMock
 from device_server import DeviceServer
 from device_server.device_server import InvalidDeviceError
 
@@ -54,7 +54,7 @@ def test_start(device_server_mock):
     device_server.start()
 
     assert device_server.threads
-    assert type(device_server.threads[0]) == bec_utils.tests.utils.ConsumerMock
+    assert type(device_server.threads[0]) == bec_client_lib.core.tests.utils.ConsumerMock
     assert device_server.status == BECStatus.RUNNING
 
 

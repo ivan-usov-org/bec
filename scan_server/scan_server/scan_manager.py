@@ -6,7 +6,8 @@ import os
 from pathlib import Path
 
 import msgpack
-from bec_utils import MessageEndpoints, bec_logger
+
+from bec_client_lib.core import MessageEndpoints, bec_logger
 
 from . import scans as ScanServerScans
 

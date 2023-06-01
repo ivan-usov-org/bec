@@ -1,6 +1,6 @@
 import traceback
 
-from bec_utils import BECMessage, bec_logger
+from bec_client_lib.core import BECMessage, bec_logger
 
 from .errors import ScanAbortion
 from .scans import RequestBase

@@ -3,7 +3,7 @@ from __future__ import annotations
 import traceback
 from typing import TYPE_CHECKING
 
-from bec_utils import (
+from bec_client_lib.core import (
     BECMessage,
     BECStatus,
     DeviceConfigError,

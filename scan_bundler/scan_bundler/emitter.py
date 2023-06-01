@@ -2,7 +2,7 @@ import threading
 import time
 from queue import Queue
 
-from bec_utils import BECMessage
+from bec_client_lib.core import BECMessage
 
 
 class EmitterBase:

@@ -5,11 +5,11 @@ FROM python:3.8
 WORKDIR /code
 
 # copy the content of the local directory to the working directory
-COPY ./bec_utils ./bec/bec_utils/
-COPY ./scibec/init_scibec/demo_config.yaml ./bec/bec_utils/demo_config.yaml
+COPY ./bec_client_lib.core ./bec/bec_client_lib.core/
+COPY ./scibec/init_scibec/demo_config.yaml ./bec/bec_client_lib.core/demo_config.yaml
 
-RUN pip install -e ./bec/bec_utils
+RUN pip install -e ./bec/bec_client_lib.core
 WORKDIR /code/bec/
 
 # command to run on container start
-CMD [ "python", "/code/bec/bec_utils/bec_utils/init_config.py", "--config", "/code/bec/bec_utils/demo_config.yaml"]
+CMD [ "python", "/code/bec/bec_client_lib.core/bec_client_lib.core/init_config.py", "--config", "/code/bec/bec_client_lib.core/demo_config.yaml"]

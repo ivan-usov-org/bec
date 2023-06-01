@@ -1,6 +1,6 @@
 import logging
 
-import bec_utils
+import bec_client_lib.core
 
 from .device_serializer import is_serializable
 from .devicemanager import rgetattr
