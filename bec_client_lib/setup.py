@@ -1,6 +1,4 @@
-import os
 import pathlib
-import subprocess
 
 from setuptools import setup
 
@@ -21,5 +19,7 @@ if __name__ == "__main__":
             "rich",
             "pyepics",
             "pylint",
+            "loguru",
+            "psutil",
         ],
     )
