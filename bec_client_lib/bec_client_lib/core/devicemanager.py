@@ -240,6 +240,9 @@ class Device:
     def __hash__(self):
         return self.name.__hash__()
 
+    def __str__(self):
+        return f"{type(self).__name__}(name={self.name}, enabled={self.enabled})"
+
     def __repr__(self):
         if isinstance(self.parent, DeviceManagerBase):
             config = "".join(
@@ -279,7 +282,10 @@ class DeviceContainer(dict):
                 self[k] = v
 
     def __getattr__(self, attr):
-        return self.get(attr)
+        dev = self.get(attr)
+        if not dev:
+            raise DeviceConfigError(f"Device {attr} does not exist.")
+        return dev
 
     def __setattr__(self, key, value):
         if isinstance(value, Device):
