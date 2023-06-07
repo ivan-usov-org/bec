@@ -65,14 +65,16 @@ class ScanObject:
 
         self._send_scan_request(request)
 
-        with CallbackRegister("scan_segment", callback, sync=True):
-            with CallbackRegister("scan_segment", async_callback, sync=False):
-                if not hide_report and self.client.live_updates:
-                    scan_report_type = self._get_scan_report_type(hide_report)
-                    # call process_requests even if report_type is None
-                    self.client.live_updates.process_request(request, scan_report_type, callback)
-                report = ScanReport.from_request(request, client=self.client)
-                self.client.callbacks.poll()
+        report = ScanReport.from_request(request, client=self.client)
+        report.request.callbacks.register("scan_segment", callback, sync=True)
+        report.request.callbacks.register("scan_segment", async_callback, sync=False)
+
+        if not hide_report and self.client.live_updates:
+            scan_report_type = self._get_scan_report_type(hide_report)
+            # call process_requests even if report_type is None
+            self.client.live_updates.process_request(request, scan_report_type, callback)
+
+        self.client.callbacks.poll()
 
         return report
 
