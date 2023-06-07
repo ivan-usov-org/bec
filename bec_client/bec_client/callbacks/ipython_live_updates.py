@@ -134,7 +134,15 @@ class IPythonLiveUpdates:
                     check_alarms(self.client)
                     if not queue.request_blocks:
                         continue
-
+                    if queue.status == "PENDING" and queue.queue_position > 0:
+                        status = self.client.queue.queue_storage.current_scan_queue.get(
+                            "primary", {}
+                        ).get("status")
+                        print(
+                            f"Scan is enqueued and is waiting for execution. Current position in queue: {queue.queue_position + 1}. Queue status: {status}.",
+                            end="\r",
+                            flush=True,
+                        )
                     available_blocks = self._available_req_blocks(queue, request)
                     req_block = available_blocks[self._request_block_index[req_id]]
                     if req_block["content"]["scan_type"] == "open_scan_def":
@@ -181,4 +189,4 @@ class IPythonLiveUpdates:
     def continue_request(self):
         if not self._interrupted_request:
             return
-        self.process_request(*self._interrupted_request)
+        self.process_request(*self._interrupted_request, self._user_callback)
