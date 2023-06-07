@@ -2,7 +2,6 @@ import time
 
 import numpy as np
 import pytest
-
 from bec_client_lib import BECClient
 from bec_client_lib.core import RedisConnector, ServiceConfig, bec_logger
 from bec_client_lib.core.tests.utils import wait_for_empty_queue
@@ -64,3 +63,23 @@ def test_mv_scan_lib_client(lib_client):
     assert np.isclose(
         current_pos_samy, 20, atol=dev.samy._config["deviceConfig"].get("tolerance", 0.05)
     )
+
+
+def test_async_callback_data_matches_scan_data_lib_client(lib_client):
+    bec = lib_client
+    wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_async_callback_data_matches_scan_data"})
+    dev = bec.device_manager.devices
+    reference_container = {"data": [], "metadata": {}}
+
+    def dummy_callback(data, metadata):
+        reference_container["metadata"] = metadata
+        reference_container["data"].append(data)
+
+    s = scans.line_scan(dev.samx, 0, 1, steps=10, relative=False, async_callback=dummy_callback)
+    s.wait()
+    assert len(s.scan.data) == 10
+    assert len(reference_container["data"]) == 10
+
+    for ii, msg in enumerate(s.scan.data.values()):
+        assert msg.content == reference_container["data"][ii]

@@ -61,6 +61,11 @@ class ScanItem:
             req = self.scan_manager.request_storage.find_request_by_ID(rid)
             req.callbacks.run(event_type, data, metadata)
 
+    def poll_callbacks(self):
+        for rid in self.queue.requestIDs:
+            req = self.scan_manager.request_storage.find_request_by_ID(rid)
+            req.callbacks.poll()
+
     def __eq__(self, other):
         return self.scanID == other.scanID
 

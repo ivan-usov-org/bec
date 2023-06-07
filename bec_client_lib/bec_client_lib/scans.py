@@ -66,8 +66,8 @@ class ScanObject:
         self._send_scan_request(request)
 
         report = ScanReport.from_request(request, client=self.client)
-        report.request.callbacks.register("scan_segment", callback, sync=True)
-        report.request.callbacks.register("scan_segment", async_callback, sync=False)
+        report.request.callbacks.register_many("scan_segment", callback, sync=True)
+        report.request.callbacks.register_many("scan_segment", async_callback, sync=False)
 
         if not hide_report and self.client.live_updates:
             scan_report_type = self._get_scan_report_type(hide_report)

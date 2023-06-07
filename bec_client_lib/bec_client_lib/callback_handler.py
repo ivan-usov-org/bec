@@ -3,7 +3,7 @@ import enum
 import threading
 import traceback
 from collections import deque
-from typing import Callable
+from typing import Callable, List
 
 from bec_client_lib.core import bec_logger, threadlocked
 
@@ -71,6 +71,18 @@ class CallbackHandler:
         callback_id = self.new_id()
         self.callbacks[callback_id] = CallbackEntry(callback_id, event_type, callback, sync)
         return callback_id
+
+    @threadlocked
+    def register_many(self, event_type: str, callbacks: List[Callable], sync=False) -> List[int]:
+        if not isinstance(callbacks, list):
+            callbacks = [callbacks]
+        ids = []
+        for cbk in callbacks:
+            if cbk:
+                ids.append(self.register(event_type, cbk, sync))
+            else:
+                ids.append(-1)
+        return ids
 
     @threadlocked
     def remove(self, id: int) -> int:
