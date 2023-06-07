@@ -4,17 +4,16 @@ import threading
 import time
 
 import IPython
-from IPython.terminal.prompts import Prompts, Token
-
 from bec_client_lib.alarm_handler import AlarmBase
 from bec_client_lib.client import BECClient
 from bec_client_lib.core import ServiceConfig, bec_logger
 from bec_client_lib.core.connector import ConnectorBase
+from IPython.terminal.prompts import Prompts, Token
 
 from .beamline_mixin import BeamlineMixin
 from .bec_magics import BECMagics
 from .callbacks.ipython_live_updates import IPythonLiveUpdates
-from .signals import SigintHandler
+from .signals import ScanInterruption, SigintHandler
 
 logger = bec_logger.logger
 
@@ -102,7 +101,7 @@ class BECIPythonClient(BECClient):
 
 
 def _ip_exception_handler(self, etype, evalue, tb, tb_offset=None):
-    if issubclass(etype, AlarmBase):
+    if issubclass(etype, (AlarmBase, ScanInterruption)):
         print(f"\x1b[31m BEC alarm:\x1b[0m: {evalue}")
         return
     self.showtraceback((etype, evalue, tb), tb_offset=None)  # standard IPython's printout
