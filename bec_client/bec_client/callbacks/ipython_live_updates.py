@@ -13,6 +13,9 @@ from .move_device import LiveUpdatesReadbackProgressbar
 from .utils import ScanRequestMixin, check_alarms
 
 if TYPE_CHECKING:
+    from bec_client_lib.core import BECMessage
+    from bec_client_lib.queue_items import QueueItem
+
     from bec_client import BECClient
 
 logger = bec_logger.logger
@@ -128,36 +131,8 @@ class IPythonLiveUpdates:
                 queue = scan_request.request_storage.storage[-1].queue
                 self._request_block_id = req_id = self._active_request.metadata.get("RID")
 
-                report_instructions = []
-                req_block = {}
                 while queue.status not in ["COMPLETED", "ABORTED", "HALTED"]:
-                    check_alarms(self.client)
-                    if not queue.request_blocks:
-                        continue
-                    if queue.status == "PENDING" and queue.queue_position > 0:
-                        status = self.client.queue.queue_storage.current_scan_queue.get(
-                            "primary", {}
-                        ).get("status")
-                        print(
-                            f"Scan is enqueued and is waiting for execution. Current position in queue: {queue.queue_position + 1}. Queue status: {status}.",
-                            end="\r",
-                            flush=True,
-                        )
-                    available_blocks = self._available_req_blocks(queue, request)
-                    req_block = available_blocks[self._request_block_index[req_id]]
-                    if req_block["content"]["scan_type"] == "open_scan_def":
-                        break
-
-                    report_instructions = req_block["report_instructions"]
-                    if not report_instructions:
-                        continue
-                    self._process_report_instructions(report_instructions)
-
-                    complete_rbl = len(available_blocks) == self._request_block_index[req_id] + 1
-                    if self._active_callback and complete_rbl:
-                        break
-
-                    if not queue.active_request_block:
+                    if self._process_queue(queue, request, req_id):
                         break
 
                 available_blocks = self._available_req_blocks(queue, request)
@@ -170,6 +145,40 @@ class IPythonLiveUpdates:
         except ScanInterruption as scan_interr:
             self._interrupted_request = (request, scan_report_type)
             raise scan_interr
+
+    def _process_queue(
+        self, queue: QueueItem, request: BECMessage.ScanQueueMessage, req_id: str
+    ) -> bool:
+        check_alarms(self.client)
+        if not queue.request_blocks:
+            return False
+        if queue.status == "PENDING" and queue.queue_position > 0:
+            status = self.client.queue.queue_storage.current_scan_queue.get("primary", {}).get(
+                "status"
+            )
+            print(
+                f"Scan is enqueued and is waiting for execution. Current position in queue: {queue.queue_position + 1}. Queue status: {status}.",
+                end="\r",
+                flush=True,
+            )
+        available_blocks = self._available_req_blocks(queue, request)
+        req_block = available_blocks[self._request_block_index[req_id]]
+        if req_block["content"]["scan_type"] == "open_scan_def":
+            return True
+
+        report_instructions = req_block["report_instructions"]
+        if not report_instructions:
+            return False
+        self._process_report_instructions(report_instructions)
+
+        complete_rbl = len(available_blocks) == self._request_block_index[req_id] + 1
+        if self._active_callback and complete_rbl:
+            return True
+
+        if not queue.active_request_block:
+            return True
+
+        return False
 
     def _reset(self):
         self._interrupted_request = None
