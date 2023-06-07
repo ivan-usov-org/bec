@@ -16,7 +16,6 @@ def NeXus_format(storage, data, device_manager):
     control = entry.create_group("control")
     control.attrs["NX_class"] = "NXmonitor"
     control.create_dataset(name="mode", data="monitor")
-    control.create_dataset(name="integral", data=data.get("bpm4s"))
 
     # /entry/data
     if "eiger_4" in device_manager.devices:

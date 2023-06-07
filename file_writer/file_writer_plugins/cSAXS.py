@@ -5,14 +5,6 @@ def get_entry(data, name, default=None):
     return data.get(name, {}).get(name, {}).get("value", default)
 
 
-def get_entry(data, name, default=None):
-    return data.get(name, {}).get(name, {}).get("value", default)
-
-
-def get_entry(data, name, default=None):
-    return data.get(name, {}).get(name, {}).get("value", default)
-
-
 def NeXus_format(storage, data, device_manager):
     # /entry
     entry = storage.create_group("entry")
