@@ -50,9 +50,16 @@ class ScanItem:
 
     def emit_data(self, scan_msg: BECMessage.ScanMessage) -> None:
         self.bec.callbacks.run("scan_segment", scan_msg.content, scan_msg.metadata)
+        self._run_request_callbacks("scan_segment", scan_msg.content, scan_msg.metadata)
 
     def emit_status(self, scan_status: BECMessage.ScanStatusMessage) -> None:
         self.bec.callbacks.run("status", scan_status.content, scan_status.metadata)
+        self._run_request_callbacks("status", scan_status.content, scan_status.metadata)
+
+    def _run_request_callbacks(self, event_type: str, data: dict, metadata: dict):
+        for rid in self.queue.requestIDs:
+            req = self.scan_manager.request_storage.find_request_by_ID(rid)
+            req.callbacks.run(event_type, data, metadata)
 
     def __eq__(self, other):
         return self.scanID == other.scanID

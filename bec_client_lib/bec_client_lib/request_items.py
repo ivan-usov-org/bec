@@ -4,6 +4,7 @@ import threading
 from collections import deque
 from typing import TYPE_CHECKING, Deque, Optional
 
+from bec_client_lib.callback_handler import CallbackHandler
 from bec_client_lib.core import BECMessage, bec_logger, threadlocked
 
 logger = bec_logger.logger
@@ -35,6 +36,7 @@ class RequestItem:
         self.accepted = accepted
         self._decision_pending = decision_pending
         self._scanID = scanID
+        self.callbacks = CallbackHandler()
 
     def update_with_response(self, response: BECMessage.RequestResponseMessage):
         """update the current request item with a RequestResponseMessage / response message"""
