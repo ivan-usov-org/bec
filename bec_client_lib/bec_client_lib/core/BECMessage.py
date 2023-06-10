@@ -22,6 +22,8 @@ DEFAULT_VERSION = 1.1
 
 
 class BECMessageCompression:
+    """Base class for message compression"""
+
     @abstractmethod
     def loads(self, msg, **kwargs) -> dict:
         """load and decompress a message"""
@@ -32,6 +34,8 @@ class BECMessageCompression:
 
 
 class MsgpackCompression(BECMessageCompression):
+    """Message compression using msgpack and base64 encoding"""
+
     def loads(self, msg, encode=True, **kwargs) -> dict:
         if not encode:
             return msgpack.loads(msg, raw=False, object_hook=numpy_decode)
@@ -44,6 +48,8 @@ class MsgpackCompression(BECMessageCompression):
 
 
 class JsonCompression(BECMessageCompression):
+    """Message compression using json"""
+
     def loads(self, msg, **kwargs):
         return json.loads(msg)
 
@@ -52,6 +58,8 @@ class JsonCompression(BECMessageCompression):
 
 
 class BECStatus(enum.Enum):
+    """BEC status enum"""
+
     RUNNING = 2
     BUSY = 1
     IDLE = 0
@@ -59,6 +67,8 @@ class BECStatus(enum.Enum):
 
 
 class BECMessage:
+    """Base class for all BEC messages"""
+
     msg_type: str
     content: dict
     metadata: dict
@@ -187,6 +197,8 @@ class BECMessage:
 
 
 class BundleMessage(BECMessage):
+    """Bundle of BECMessages"""
+
     msg_type = "bundle_message"
 
     def __init__(
@@ -217,6 +229,13 @@ class BundleMessage(BECMessage):
 
 
 class MessageReader(BECMessage):
+    """MessageReader class for loading arbitrary BECMessages
+
+    Examples:
+        >>> msg = MessageReader.loads(input_msg)
+
+    """
+
     def __init__(
         self,
         *,
@@ -247,6 +266,8 @@ class MessageReader(BECMessage):
 
 
 class ScanQueueMessage(BECMessage):
+    """Message type for sending scan requests to the scan queue"""
+
     msg_type = "scan"
 
     def __init__(
@@ -276,6 +297,8 @@ class ScanQueueMessage(BECMessage):
 
 
 class ScanQueueHistoryMessage(BECMessage):
+    """Sent after removal from the active queue. Contains information about the scan."""
+
     msg_type = "queue_history"
 
     def __init__(
@@ -288,10 +311,6 @@ class ScanQueueHistoryMessage(BECMessage):
         metadata: dict = None,
         version: float = DEFAULT_VERSION,
     ) -> None:
-        """
-        Sent after removal from the active queue.
-        """
-
         self.content = {"status": status, "queueID": queueID, "info": info, "queue": queue}
         super().__init__(
             msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
@@ -299,6 +318,8 @@ class ScanQueueHistoryMessage(BECMessage):
 
 
 class ScanStatusMessage(BECMessage):
+    """Message type for sending scan status updates"""
+
     msg_type = "scan_status"
 
     def __init__(
@@ -311,6 +332,18 @@ class ScanStatusMessage(BECMessage):
         metadata: dict = None,
         version: float = DEFAULT_VERSION,
     ) -> None:
+        """
+        Args:
+            scanID(str): unique scan ID
+            status(dict): dictionary containing the current scan status
+            info(dict): dictionary containing additional information about the scan
+            timestamp(float): timestamp of the scan status update. If None, the current time is used.
+            metadata(dict): additional metadata to describe and identify the scan.
+            version(float): BECMessage version
+
+        Examples:
+            >>> ScanStatusMessage(scanID="1234", status={"scan_number": 1, "scan_motors": ["samx", "samy"], "scan_type": "dscan", "scan_status": "RUNNING"}, info={"positions": {"samx": 0.5, "samy": 0.5}})
+        """
         tms = timestamp if timestamp is not None else time.time()
         self.content = {"scanID": scanID, "status": status, "info": info, "timestamp": tms}
         super().__init__(
@@ -325,6 +358,8 @@ class ScanStatusMessage(BECMessage):
 
 
 class ScanQueueModificationMessage(BECMessage):
+    """Message type for sending scan queue modifications"""
+
     msg_type = "scan_queue_modification"
     ACTIONS = ["pause", "deferred_pause", "continue", "abort", "clear", "restart", "halt"]
 
@@ -349,6 +384,8 @@ class ScanQueueModificationMessage(BECMessage):
 
 
 class ScanQueueStatusMessage(BECMessage):
+    """Message type for sending scan queue status updates"""
+
     msg_type = "scan_queue_status"
 
     def __init__(
@@ -370,6 +407,8 @@ class ScanQueueStatusMessage(BECMessage):
 
 
 class RequestResponseMessage(BECMessage):
+    """Message type for sending back decisions on the acceptance of requests"""
+
     msg_type = "request_response"
 
     def __init__(
@@ -395,6 +434,8 @@ class RequestResponseMessage(BECMessage):
 
 
 class DeviceInstructionMessage(BECMessage):
+    """Message type for sending device instructions to the device server"""
+
     msg_type = "device_instruction"
 
     def __init__(
@@ -420,16 +461,21 @@ class DeviceInstructionMessage(BECMessage):
 
 
 class DeviceMessage(BECMessage):
+    """Message type for sending device readings from the device server"""
+
     msg_type = "device_message"
 
     def __init__(
         self, *, signals: dict, metadata: dict = None, version: float = DEFAULT_VERSION
     ) -> None:
         """
+        Device message type for sending device readings from the device server.
 
         Args:
-            signals:
-            metadata:
+            signals: dictionary of device signals
+            metadata: metadata to describe the conditions of the device reading
+        Examples:
+            >>> BECMessage.DeviceMessage(signals={'samx': {'value': 14.999033949016491, 'timestamp': 1686385306.0265112}, 'samx_setpoint': {'value': 15.0, 'timestamp': 1686385306.016806}, 'samx_motor_is_moving': {'value': 0, 'timestamp': 1686385306.026888}}}, metadata={'stream': 'primary', 'DIID': 353, 'RID': 'd3471acc-309d-43b7-8ff8-f986c3fdecf1', 'pointID': 49, 'scanID': '8e234698-358e-402d-a272-73e168a72f66', 'queueID': '7a232746-6c90-44f5-81f5-74ab0ea22d4a'})
         """
         self.content = {"signals": signals}
         super().__init__(
@@ -443,6 +489,8 @@ class DeviceMessage(BECMessage):
 
 
 class DeviceRPCMessage(BECMessage):
+    """Message type for sending device RPC return values from the device server"""
+
     msg_type = "device_rpc_message"
 
     def __init__(
@@ -473,6 +521,8 @@ class DeviceRPCMessage(BECMessage):
 
 
 class DeviceStatusMessage(BECMessage):
+    """Message type for sending device status updates from the device server"""
+
     msg_type = "device_status_message"
 
     def __init__(
@@ -491,6 +541,8 @@ class DeviceStatusMessage(BECMessage):
 
 
 class DeviceReqStatusMessage(BECMessage):
+    """Message type for sending device request status updates from the device server"""
+
     msg_type = "device_req_status_message"
 
     def __init__(
@@ -509,6 +561,8 @@ class DeviceReqStatusMessage(BECMessage):
 
 
 class DeviceInfoMessage(BECMessage):
+    """Message type for sending device info updates from the device server"""
+
     msg_type = "device_info_message"
 
     def __init__(
@@ -528,6 +582,8 @@ class DeviceInfoMessage(BECMessage):
 
 
 class ScanMessage(BECMessage):
+    """Message type for sending scan segment data from the scan bundler"""
+
     msg_type = "scan_message"
 
     def __init__(
@@ -553,6 +609,8 @@ class ScanMessage(BECMessage):
 
 
 class ScanBaselineMessage(BECMessage):
+    """Message type for sending scan baseline data from the scan bundler"""
+
     msg_type = "scan_baseline_message"
 
     def __init__(
@@ -571,6 +629,8 @@ class ScanBaselineMessage(BECMessage):
 
 
 class DeviceConfigMessage(BECMessage):
+    """Message type for sending device config updates"""
+
     msg_type = "device_config_message"
 
     def __init__(
@@ -589,6 +649,8 @@ class DeviceConfigMessage(BECMessage):
 
 
 class LogMessage(BECMessage):
+    """Log message"""
+
     msg_type = "log_message"
 
     def __init__(
@@ -612,6 +674,8 @@ class LogMessage(BECMessage):
 
 
 class AlarmMessage(BECMessage):
+    """Alarm message"""
+
     msg_type = "alarm_message"
 
     def __init__(
@@ -647,6 +711,8 @@ class AlarmMessage(BECMessage):
 
 
 class StatusMessage(BECMessage):
+    """Status message"""
+
     msg_type = "status_message"
 
     def __init__(
@@ -673,6 +739,8 @@ class StatusMessage(BECMessage):
 
 
 class FileMessage(BECMessage):
+    """File message to inform about the status of a file writing operation"""
+
     msg_type = "file_message"
 
     def __init__(
@@ -698,13 +766,14 @@ class FileMessage(BECMessage):
 
 
 class VariableMessage(BECMessage):
+    """Message to inform about a global variable"""
+
     msg_type = "var_message"
 
     def __init__(
         self, *, value: str, metadata: dict = None, version: float = DEFAULT_VERSION
     ) -> None:
         """
-
         Args:
             value: value of the global var
             metadata: status metadata
@@ -717,6 +786,8 @@ class VariableMessage(BECMessage):
 
 
 class ObserverMessage(BECMessage):
+    """Message for observer updates"""
+
     msg_type = "observer_message"
 
     def __init__(
@@ -736,6 +807,8 @@ class ObserverMessage(BECMessage):
 
 
 class ServiceMetricMessage(BECMessage):
+    """Message for service metrics"""
+
     msg_type = "service_metric_message"
 
     def __init__(

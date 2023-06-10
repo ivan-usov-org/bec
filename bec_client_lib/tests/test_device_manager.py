@@ -7,6 +7,7 @@ import yaml
 
 import bec_client_lib
 from bec_client_lib.core import BECMessage
+from bec_client_lib.core.connector import MessageObject
 from bec_client_lib.core.devicemanager import DeviceConfigError, DeviceManagerBase
 from bec_client_lib.core.tests.utils import ConnectorMock, create_session_from_config
 
@@ -76,6 +77,7 @@ def test_config_request_reload():
         (BECMessage.DeviceConfigMessage(action="add", config={}), True),
         (BECMessage.DeviceConfigMessage(action="remove", config={}), True),
         (BECMessage.DeviceConfigMessage(action="reload", config={}), False),
+        (BECMessage.DeviceConfigMessage(action="add", config={"new_device": {}}), False),
     ],
 )
 def test_check_request_validity(msg, raised):
@@ -195,3 +197,19 @@ def test_primary_devices_with_readout_priority(scan_motors_in, readout_priority_
 
     assert len(set(readout_priority_in.get("ignored", [])) & baseline_devices_names) == 0
     assert len(set(readout_priority_in.get("ignored", [])) & primary_device_names) == 0
+
+
+def test_device_config_update_callback():
+    connector = ConnectorMock("")
+    dm = DeviceManagerBase(connector)
+    config_content = None
+    with open(f"{dir_path}/core/tests/test_config.yaml", "r") as f:
+        config_content = yaml.safe_load(f)
+        dm._session = create_session_from_config(config_content)
+    dm._load_session()
+    dev_config_msg = BECMessage.DeviceConfigMessage(action="update", config={"samx": {}})
+    msg = MessageObject(value=dev_config_msg.dumps(), topic="")
+
+    with mock.patch.object(dm, "parse_config_message") as parse_config_message:
+        dm._device_config_update_callback(msg, parent=dm)
+        parse_config_message.assert_called_once_with(dev_config_msg)

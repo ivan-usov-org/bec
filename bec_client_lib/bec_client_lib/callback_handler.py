@@ -11,11 +11,15 @@ logger = bec_logger.logger
 
 
 class EventType(str, enum.Enum):
+    """Event types"""
+
     SCAN_SEGMENT = "scan_segment"
     SCAN_STATUS = "scan_status"
 
 
 class CallbackEntry:
+    """Callback entry class to store callback information"""
+
     def __init__(self, id: int, event_type: EventType, func: Callable, sync: bool) -> None:
         self.id = id
         self.func = func
@@ -26,12 +30,14 @@ class CallbackEntry:
 
     @threadlocked
     def run(self, *args, **kwargs) -> None:
+        """Run the callback function. If sync is True, the callback is run immediately. Otherwise, the callback is added to a queue and exectued in the next poll."""
         if not self.sync:
             self._run_cb(*args, **kwargs)
             return
         self.queue.append((args, kwargs))
 
     def _run_cb(self, *args, **kwargs) -> None:
+        """Run the callback function in a safe way."""
         try:
             self.func(*args, **kwargs)
         except Exception:
@@ -60,6 +66,8 @@ class CallbackEntry:
 
 
 class CallbackHandler:
+    """Callback handler class"""
+
     def __init__(self) -> None:
         self.callbacks = {}
         self.id_counter = 0
@@ -67,6 +75,16 @@ class CallbackHandler:
 
     @threadlocked
     def register(self, event_type: str, callback: Callable, sync=False) -> int:
+        """Register a callback to an event type
+
+        Args:
+            event_type (str): Event type
+            callback (Callable): Callback function
+            sync (bool, optional): Synchronous or async callback. Defaults to False.
+
+        Returns:
+            int: Callback id
+        """
         event_type = EventType(event_type)
         callback_id = self.new_id()
         self.callbacks[callback_id] = CallbackEntry(callback_id, event_type, callback, sync)
@@ -74,6 +92,17 @@ class CallbackHandler:
 
     @threadlocked
     def register_many(self, event_type: str, callbacks: List[Callable], sync=False) -> List[int]:
+        """Register multiple callbacks to an event type
+
+        Args:
+            event_type (str): Event type
+            callbacks (List[Callable]): List of callback functions
+            sync (bool, optional): Synchronous or async callback. Defaults to False.
+
+        Returns:
+            list: List of caallback ids
+        """
+
         if not isinstance(callbacks, list):
             callbacks = [callbacks]
         ids = []
@@ -101,11 +130,13 @@ class CallbackHandler:
             return -1
 
     def new_id(self):
+        """Generate a new callback id"""
         self.id_counter += 1
         return self.id_counter
 
     @threadlocked
     def run(self, event_type: str, *args, **kwargs):
+        """Run all callbacks for a given event type"""
         for cb in self.callbacks.values():
             if event_type != cb.event_type:
                 continue
@@ -113,6 +144,7 @@ class CallbackHandler:
 
     @threadlocked
     def poll(self):
+        """Run all pending callbacks"""
         for callback in self.callbacks.values():
             if not callback.sync:
                 continue
@@ -122,7 +154,7 @@ class CallbackHandler:
 
 class CallbackRegister:
     def __init__(self, event_type, callbacks, sync=False, callback_handler=None) -> None:
-        """Context manager callbacks
+        """Callback register class to register callbacks in a with statement
 
         Args:
             callback_handler (CallbackHandler): Callback handler

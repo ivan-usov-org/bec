@@ -1,14 +1,14 @@
 class ScanAbortion(Exception):
-    pass
+    """Scan abortion exception"""
 
 
 class ScanInterruption(Exception):
-    pass
+    """Scan interruption exception"""
 
 
 class ServiceConfigError(Exception):
-    pass
+    """Service config error"""
 
 
 class DeviceConfigError(Exception):
-    pass
+    """Device config error"""
