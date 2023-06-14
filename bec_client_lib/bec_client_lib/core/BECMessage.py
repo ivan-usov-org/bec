@@ -125,7 +125,11 @@ class BECMessage:
             msg["body"] = compression_handler.loads(msg.get("body"))
             if msg["msg_type"] == "bundle_message":
                 msgs = msg["body"]["content"]["messages"]
-                return [cls.loads(sub_message) for sub_message in msgs]
+                ret = []
+                for sub_message in msgs:
+                    msg_cls = cls.get_message_class(sub_message)
+                    ret.append(msg_cls.loads(sub_message))
+                return ret
             return cls._validated_return(msg)
         raise RuntimeError(f"Unsupported BECMessage version {version}.")
 
@@ -195,6 +199,15 @@ class BECMessage:
     def __str__(self):
         return f"BECMessage.{self.__class__.__name__}(**{self.content}, metadata={self.metadata})"
 
+    @staticmethod
+    def get_message_class(msg: str) -> BECMessage:
+        """get the BECMessage class from the message's msg_type"""
+        msg_json = json.loads(msg)
+        module_members = inspect.getmembers(sys.modules[__name__], inspect.isclass)
+        bec_classes = {mem.msg_type: mem for _, mem in module_members if hasattr(mem, "msg_type")}
+        msg_class = bec_classes[msg_json["msg_type"]]
+        return msg_class
+
 
 class BundleMessage(BECMessage):
     """Bundle of BECMessages"""
@@ -254,10 +267,7 @@ class MessageReader(BECMessage):
 
     @classmethod
     def loads(cls, msg):
-        msg_json = json.loads(msg)
-        module_members = inspect.getmembers(sys.modules[__name__], inspect.isclass)
-        bec_classes = {mem.msg_type: mem for _, mem in module_members if hasattr(mem, "msg_type")}
-        msg_class = bec_classes[msg_json["msg_type"]]
+        msg_class = cls.get_message_class(msg)
         return msg_class.loads(msg)
 
     @classmethod

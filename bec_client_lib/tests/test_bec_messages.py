@@ -70,6 +70,16 @@ def test_bec_message_reader():
     assert res_loaded == msg
 
 
+def test_bec_message_reader_with_bundled_data():
+    sub_msg = BECMessage.DeviceMessage(signals={"samx": {"value": 5.2}}, metadata={"RID": "1234"})
+    msg = BECMessage.BundleMessage()
+    msg.append(sub_msg)
+    msg.append(sub_msg)
+    res = msg.dumps()
+    res_loaded = BECMessage.MessageReader.loads(res)
+    assert res_loaded == [sub_msg, sub_msg]
+
+
 def test_ScanQueueModificationMessage():
     msg = BECMessage.ScanQueueModificationMessage(
         scanID="1234",
