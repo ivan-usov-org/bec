@@ -266,7 +266,6 @@ class DeviceManagerDS(DeviceManagerBase):
         """delete all device data and device info"""
         self.producer.delete(MessageEndpoints.device_status(obj.name), pipe)
         self.producer.delete(MessageEndpoints.device_read(obj.name), pipe)
-        self.producer.delete(MessageEndpoints.device_last_read(obj.name), pipe)
         self.producer.delete(MessageEndpoints.device_info(obj.name), pipe)
 
     def _obj_callback_readback(self, *_args, **kwargs):
