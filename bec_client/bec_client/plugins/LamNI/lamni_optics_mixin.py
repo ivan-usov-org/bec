@@ -1,3 +1,4 @@
+import builtins
 import time
 
 from rich import box
@@ -5,6 +6,11 @@ from rich.console import Console
 from rich.table import Table
 
 from bec_client.plugins.cSAXS import epics_get, epics_put, fshclose
+
+# import builtins to avoid linter errors
+dev = builtins.__dict__.get("dev")
+umv = builtins.__dict__.get("umv")
+bec = builtins.__dict__.get("bec")
 
 
 class LamNIOpticsMixin:
