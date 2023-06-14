@@ -835,3 +835,24 @@ class ServiceMetricMessage(BECMessage):
         super().__init__(
             msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
         )
+
+
+class ProcessedDataMessage(BECMessage):
+    """Message for processed data"""
+
+    msg_type = "processed_data_message"
+
+    def __init__(
+        self, *, data: str, metadata: dict = None, version: float = DEFAULT_VERSION
+    ) -> None:
+        """
+        Message for processed data
+        Args:
+            data (str): processed data
+            metadata (dict, optional): metadata. Defaults to None.
+        """
+
+        self.content = {"data": data}
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )
