@@ -4,8 +4,7 @@
 image: python:3.8
 #commands to run in the Docker container before starting each job.
 variables:
-  #   DOCKER_DRIVER: overlay2
-  DOCKER_BUILDKIT: 0
+  DOCKER_TLS_CERTDIR: ""
 
 # different stages in the pipeline
 stages:
@@ -50,9 +49,10 @@ pylint:
 repo_update:
   stage: RepoUpdates
   needs: []
-  image: docker:20.10.16
+  image: docker:23-dind
   services:
-    - docker:18.09-dind  
+    - name: docker:dind
+      entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
   script:
       # spin up redis, mongo and scibec
       - docker-compose -f ./ci/docker-compose.yaml up -d
@@ -122,9 +122,10 @@ tests-3.11:
 end-2-end:
   stage: End2End
   needs: []
-  image: docker:20.10.16
+  image: docker:23-dind
   services:
-    - docker:18.09-dind
+    - name: docker:dind
+      entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
   artifacts:
     when: on_failure
     paths:
