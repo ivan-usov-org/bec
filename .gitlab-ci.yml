@@ -228,7 +228,7 @@ semver:
     - pip install python-semantic-release
     - export GL_TOKEN=$CI_UPDATES
     #- semantic-release changelog --post -D version_variable=./semantic_release/__init__.py:__version__
-    - semantic-release publish -v DEBUG -D version_variable=./semantic_release/__init__.py:__version__ -D hvcs=gitlab.psi.ch
+    - semantic-release publish -v DEBUG -D version_variable=./semantic_release/__init__.py:__version__ -D hvcs=gitlab
   allow_failure: false
   rules:
     - if: '$CI_COMMIT_REF_NAME == "master"'
