@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.9 (2023-06-19)
+
+### Fix
+
+* Raise when device does not exist; added str dunder for devices ([`12e2d29`](https://gitlab.psi.ch/bec/bec/-/commit/12e2d29dad71c11586cee06cb0688557c3cb4bb2))
+
+### Documentation
+
+* Added more doc strings ([`c8cc156`](https://gitlab.psi.ch/bec/bec/-/commit/c8cc15632d4221877a19296bb7d8b7742c1e4ccd))
+
 ## v0.4.8 (2023-06-19)
 
 ### Fix
