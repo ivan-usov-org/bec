@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.7 (2023-06-19)
+
+### Fix
+
+* Fixed typo ([`f59e73c`](https://gitlab.psi.ch/bec/bec/-/commit/f59e73cbb11c1242115b1b42b97cbeb0f0f6252b))
+* Fixed weird semantic-release syntax ([`eabb210`](https://gitlab.psi.ch/bec/bec/-/commit/eabb210b6e0e68269854026a8a71c07cd9274c04))
+
 ## v0.4.6 (2023-06-19)
 
 ### Fix
