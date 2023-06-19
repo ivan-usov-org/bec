@@ -6,6 +6,15 @@ image: python:3.8
 variables:
   DOCKER_TLS_CERTDIR: ""
 
+workflow:
+  rules:
+      - if:
+        changes: 
+          - ./semantic_release/__init__.py
+          - ./CHANGELOG.md
+        when: never
+      - when: always
+
 # different stages in the pipeline
 stages:
   - Formatter
@@ -22,15 +31,6 @@ stages:
     - pip install -e ./bec_client
     - pip install -e ./file_writer
     - pip install -e ./scihub
-
-workflow:
-  rules:
-      - if:
-        changes: 
-          - ./semantic_release/__init__.py
-          - ./CHANGELOG.md
-        when: never
-      - when: always
 
 formatter:
   stage: Formatter
