@@ -5,14 +5,13 @@ from abc import ABC, abstractmethod
 from typing import List, Tuple
 
 import numpy as np
-from cytoolz import partition
-
 from bec_client_lib.core import (
     BECMessage,
     DeviceManagerBase,
     MessageEndpoints,
     bec_logger,
 )
+from cytoolz import partition
 
 from .errors import LimitError, ScanAbortion
 from .path_optimization import PathOptimizerMixin
@@ -970,7 +969,7 @@ class ListScan(ScanBase):
             raise ValueError("All position lists must be of equal length.")
 
     def _calculate_positions(self):
-        self.positions = np.vstack(self.caller_args.values()).T.tolist()
+        self.positions = np.vstack(tuple(self.caller_args.values())).T.tolist()
 
 
 class TimeScan(ScanBase):
