@@ -8,8 +8,7 @@ variables:
 
 workflow:
   rules:
-      - if:
-        changes: 
+      - changes: 
           - ./semantic_release/__init__.py
           - ./CHANGELOG.md
         when: never
