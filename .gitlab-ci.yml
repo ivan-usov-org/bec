@@ -219,7 +219,7 @@ semver:
   script:
     - git config --global user.name "ci_update_bot"
     - git config --global user.email "ci_update_bot@bec.ch"
-    - git pull
+    - git pull origin master
     # delete all local tags
     - git tag -l | xargs git tag -d
     - git fetch --tags
