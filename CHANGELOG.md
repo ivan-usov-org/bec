@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.8 (2023-06-19)
+
+### Fix
+
+* Removed changelog dependency ([`2be1c67`](https://gitlab.psi.ch/bec/bec/-/commit/2be1c67cbc7a025314a665c6d272ac2874e02fee))
+
 ## v0.4.7 (2023-06-19)
 
 ### Fix
