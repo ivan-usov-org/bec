@@ -1,7 +1,7 @@
 import functools
 import time
 import uuid
-
+from typing import Any
 from bec_client_lib.core import (
     BECMessage,
     Device,
@@ -39,12 +39,23 @@ def rpc(fcn):
 
 
 class RPCBase:
+    """
+    The RPCBase class is the base class for all devices that are controlled via the DeviceManager. It provides a simple
+    interface to perform RPC calls on the device. The RPCBase class is not meant to be used directly, but rather to be subclassed.
+    """
+
     def __init__(self, name: str, info: dict = None, parent=None) -> None:
+        """
+        Args:
+            name (str): The name of the device.
+            info (dict, optional): The device info dictionary. Defaults to None.
+            parent ([type], optional): The parent object. Defaults to None.
+        """
         self.name = name
         self._config = None
         if info is None:
             info = {}
-        self._info = info.get("device_info")
+        self._info = info.get("device_info", {})
         self.parent = parent
         self._custom_rpc_methods = {}
         if self._info:
@@ -65,12 +76,25 @@ class RPCBase:
 
     @property
     def root(self):
+        """Returns the root object of the device tree."""
         parent = self
         while not isinstance(parent.parent, DMClient):
             parent = parent.parent
         return parent
 
-    def _run_rpc_call(self, device, func_call, *args, **kwargs):
+    def _run_rpc_call(self, device, func_call, *args, **kwargs) -> Any:
+        """
+        Runs an RPC call on the device.
+
+        Args:
+            device (str): The device name.
+            func_call (str): The function call.
+            *args: The function arguments.
+            **kwargs: The function keyword arguments.
+
+        Returns:
+            Any: The return value of the RPC call.
+        """
         rpc_id = str(uuid.uuid4())
         requestID = str(uuid.uuid4())  # TODO: move this to the API server
         params = {
