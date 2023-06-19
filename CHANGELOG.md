@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.6 (2023-06-19)
+
+### Fix
+
+* Removed pypi upload ([`0b28025`](https://gitlab.psi.ch/bec/bec/-/commit/0b280253701b5e49ea37512cda6bad888e4b8149))
+
 ## v0.4.5 (2023-06-19)
 
 ### Fix
