@@ -219,7 +219,12 @@ semver:
   script:
     - git config --global user.name "ci_update_bot"
     - git config --global user.email "ci_update_bot@bec.ch"
+
+    # delete all local tags
+    - git tag -l | xargs git tag -d
+    - git fetch --tags
     - git tag
+    
     - pip install python-semantic-release
     - export GL_TOKEN=$CI_UPDATES
     #- semantic-release changelog --post -D version_variable=./semantic_release/__init__.py:__version__
