@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.4 (2023-06-19)
+
+### Fix
+
+* Disabled upload to repository ([`2e56468`](https://gitlab.psi.ch/bec/bec/-/commit/2e564681016b1b369c65087ab447444eca8a2c9a))
+
 ## v0.4.3 (2023-06-19)
 
 ### Fix
