@@ -1,9 +1,9 @@
 from unittest import mock
 
 import pytest
-
 from bec_client_lib.core import DeviceManagerBase, ServiceConfig
 from bec_client_lib.core.tests.utils import ConnectorMock
+
 from scihub import SciHub
 from scihub.scibec import SciBecConnector
 
@@ -17,7 +17,7 @@ class SciHubMocked(SciHub):
 def SciHubMock():
     config = ServiceConfig(
         redis={"host": "dummy", "port": 6379},
-        scibec={"host": "http://localhost", "port": 3030, "beamline": "TestBeamline"},
+        scibec={"host": "http://wrong_localhost", "port": 3030, "beamline": "TestBeamline"},
         config={"file_writer": {"plugin": "default_NeXus_format", "base_path": "./"}},
     )
     scihub_mocked = SciHubMocked(config, ConnectorMock)

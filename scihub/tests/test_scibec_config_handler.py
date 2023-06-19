@@ -1,11 +1,11 @@
 from unittest import mock
 
 import pytest
+from bec_client_lib.core import BECMessage, Device
+from bec_client_lib.core.bec_errors import DeviceConfigError
 from fastjsonschema import JsonSchemaException
 from test_scibec_connector import SciHubMock
 
-from bec_client_lib.core import BECMessage
-from bec_client_lib.core.bec_errors import DeviceConfigError
 from scihub.scibec import SciBecConnector
 
 
@@ -131,106 +131,108 @@ def test_config_handler_set_config_with_scibec(SciHubMock):
 def test_config_handler_update_config(SciHubMock):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     config_handler = scibec_connector.config_handler
+    dev = config_handler.device_manager.devices
+    dev.samx = Device("samx", {})
     msg = BECMessage.DeviceConfigMessage(
         action="update", config={"samx": {"enabled": True}}, metadata={}
     )
-    with mock.patch.object(config_handler.device_manager, "devices") as dev:
-        with mock.patch.object(
-            config_handler, "_update_device_config", return_value=True
-        ) as update_device_config:
-            with mock.patch.object(
-                config_handler, "update_config_in_redis"
-            ) as update_config_in_redis:
-                with mock.patch.object(config_handler, "send_config") as send_config:
-                    with mock.patch.object(
-                        config_handler, "send_config_request_reply"
-                    ) as send_config_request_reply:
-                        config_handler._update_config(msg)
-                        update_device_config.assert_called_once_with(dev["samx"], {"enabled": True})
-                        update_config_in_redis.assert_called_once_with(dev["samx"])
+    with mock.patch.object(
+        config_handler, "_update_device_config", return_value=True
+    ) as update_device_config:
+        with mock.patch.object(config_handler, "update_config_in_redis") as update_config_in_redis:
+            with mock.patch.object(config_handler, "send_config") as send_config:
+                with mock.patch.object(
+                    config_handler, "send_config_request_reply"
+                ) as send_config_request_reply:
+                    config_handler._update_config(msg)
+                    update_device_config.assert_called_once_with(dev["samx"], {"enabled": True})
+                    update_config_in_redis.assert_called_once_with(dev["samx"])
 
-                        send_config.assert_called_once_with(msg)
-                        send_config_request_reply.assert_called_once_with(
-                            accepted=True, error_msg=None, metadata={}
-                        )
+                    send_config.assert_called_once_with(msg)
+                    send_config_request_reply.assert_called_once_with(
+                        accepted=True, error_msg=None, metadata={}
+                    )
 
 
 def test_config_handler_update_config_not_updated(SciHubMock):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     config_handler = scibec_connector.config_handler
+    dev = config_handler.device_manager.devices
+    dev.samx = Device("samx", {})
     msg = BECMessage.DeviceConfigMessage(
         action="update", config={"samx": {"enabled": True}}, metadata={}
     )
-    with mock.patch.object(config_handler.device_manager, "devices") as dev:
-        with mock.patch.object(
-            config_handler, "_update_device_config", return_value=False
-        ) as update_device_config:
-            with mock.patch.object(
-                config_handler, "update_config_in_redis"
-            ) as update_config_in_redis:
-                with mock.patch.object(config_handler, "send_config") as send_config:
-                    with mock.patch.object(
-                        config_handler, "send_config_request_reply"
-                    ) as send_config_request_reply:
-                        config_handler._update_config(msg)
-                        update_device_config.assert_called_once_with(dev["samx"], {"enabled": True})
-                        update_config_in_redis.assert_not_called()
+    with mock.patch.object(
+        config_handler, "_update_device_config", return_value=False
+    ) as update_device_config:
+        with mock.patch.object(config_handler, "update_config_in_redis") as update_config_in_redis:
+            with mock.patch.object(config_handler, "send_config") as send_config:
+                with mock.patch.object(
+                    config_handler, "send_config_request_reply"
+                ) as send_config_request_reply:
+                    config_handler._update_config(msg)
+                    update_device_config.assert_called_once_with(dev["samx"], {"enabled": True})
+                    update_config_in_redis.assert_not_called()
 
-                        send_config.assert_not_called()
-                        send_config_request_reply.assert_not_called()
+                    send_config.assert_not_called()
+                    send_config_request_reply.assert_not_called()
 
 
 def test_config_handler_update_device_config_enable(SciHubMock):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     config_handler = scibec_connector.config_handler
-    with mock.patch.object(config_handler.device_manager, "devices") as dev:
-        with mock.patch.object(config_handler, "_update_device_server") as update_dev_server:
-            with mock.patch.object(
-                config_handler, "_wait_for_device_server_update", return_value=True
-            ) as wait:
-                with mock.patch("scihub.scibec.config_handler.uuid") as uuid:
-                    device = dev["samx"]
-                    rid = str(uuid.uuid4())
-                    config_handler._update_device_config(device, {"enabled": True})
-                    # mock doesn't copy the data, hence the popped result:
-                    update_dev_server.assert_called_once_with(rid, {device.name: {}})
-                    wait.assert_called_once_with(rid)
+    dev = config_handler.device_manager.devices
+    dev.samx = Device("samx", {})
+    with mock.patch.object(config_handler, "_update_device_server") as update_dev_server:
+        with mock.patch.object(
+            config_handler, "_wait_for_device_server_update", return_value=True
+        ) as wait:
+            with mock.patch("scihub.scibec.config_handler.uuid") as uuid:
+                device = dev["samx"]
+                rid = str(uuid.uuid4())
+                config_handler._update_device_config(device, {"enabled": True})
+                # mock doesn't copy the data, hence the popped result:
+                update_dev_server.assert_called_once_with(rid, {device.name: {}})
+                wait.assert_called_once_with(rid)
 
 
 def test_config_handler_update_device_config_deviceConfig(SciHubMock):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     config_handler = scibec_connector.config_handler
-    with mock.patch.object(config_handler.device_manager, "devices") as dev:
-        with mock.patch.object(config_handler, "_update_device_server") as update_dev_server:
-            with mock.patch.object(
-                config_handler, "_wait_for_device_server_update", return_value=True
-            ) as wait:
-                with mock.patch("scihub.scibec.config_handler.uuid") as uuid:
-                    device = dev["samx"]
-                    rid = str(uuid.uuid4())
-                    config_handler._update_device_config(
-                        device, {"deviceConfig": {"something": "to_update"}}
-                    )
-                    # mock doesn't copy the data, hence the popped result:
-                    update_dev_server.assert_called_once_with(rid, {device.name: {}})
-                    wait.assert_called_once_with(rid)
+    dev = config_handler.device_manager.devices
+    dev.samx = Device("samx", {})
+    with mock.patch.object(config_handler, "_update_device_server") as update_dev_server:
+        with mock.patch.object(
+            config_handler, "_wait_for_device_server_update", return_value=True
+        ) as wait:
+            with mock.patch("scihub.scibec.config_handler.uuid") as uuid:
+                device = dev["samx"]
+                rid = str(uuid.uuid4())
+                config_handler._update_device_config(
+                    device, {"deviceConfig": {"something": "to_update"}}
+                )
+                # mock doesn't copy the data, hence the popped result:
+                update_dev_server.assert_called_once_with(rid, {device.name: {}})
+                wait.assert_called_once_with(rid)
 
 
 def test_config_handler_update_device_config_misc(SciHubMock):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     config_handler = scibec_connector.config_handler
-    with mock.patch.object(config_handler.device_manager, "devices") as dev:
-        with mock.patch.object(config_handler, "_validate_update") as validate_update:
-            device = dev["samx"]
-            config_handler._update_device_config(device, {"enabled_set": False})
-            validate_update.assert_called_once_with({"enabled_set": False})
+    dev = config_handler.device_manager.devices
+    dev.samx = Device("samx", {})
+    with mock.patch.object(config_handler, "_validate_update") as validate_update:
+        device = dev["samx"]
+        config_handler._update_device_config(device, {"enabled_set": False})
+        validate_update.assert_called_once_with({"enabled_set": False})
 
 
 def test_config_handler_update_device_config_raise(SciHubMock):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     config_handler = scibec_connector.config_handler
-    with mock.patch.object(config_handler.device_manager, "devices") as dev:
-        with mock.patch.object(config_handler, "_validate_update") as validate_update:
-            device = dev["samx"]
-            with pytest.raises(DeviceConfigError):
-                config_handler._update_device_config(device, {"doesnt_exist": False})
+    dev = config_handler.device_manager.devices
+    dev.samx = Device("samx", {})
+    with mock.patch.object(config_handler, "_validate_update") as validate_update:
+        device = dev["samx"]
+        with pytest.raises(DeviceConfigError):
+            config_handler._update_device_config(device, {"doesnt_exist": False})
