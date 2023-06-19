@@ -30,6 +30,7 @@ workflow:
           - ./semantic_release/__init__.py
           - ./CHANGELOG.md
         when: never
+      - when: always
 
 formatter:
   stage: Formatter
