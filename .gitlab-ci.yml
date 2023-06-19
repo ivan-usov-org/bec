@@ -23,6 +23,14 @@ stages:
     - pip install -e ./file_writer
     - pip install -e ./scihub
 
+workflow:
+  rules:
+      - if:
+        changes: 
+          - ./semantic_release/__init__.py
+          - ./CHANGELOG.md
+        when: never
+
 formatter:
   stage: Formatter
   needs: []
