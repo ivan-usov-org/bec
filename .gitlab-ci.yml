@@ -59,7 +59,7 @@ repo_update:
       - apk update; apk upgrade; apk add curl; apk add git
       - git config --global user.name "ci_update_bot"
       - git config --global user.email "ci_update_bot@bec.ch"
-      - git checkout ${CI_COMMIT_REF_NAME}
+      - git switch ${CI_COMMIT_REF_NAME}
       - git reset --hard origin/${CI_COMMIT_REF_NAME}
       
       # make sure that the API server is healthy and ready
@@ -214,16 +214,24 @@ end-2-end-light:
     - docker run --network=host --name end2end_client en2end_client:test  
 
 
-# semver:
-#   stage: Deploy
-#   script:
-#     - git config --global user.name "ci_update_bot"
-#     - git config --global user.email "ci_update_bot@bec.ch"
-#     - pip install python-semantic-release
-#     - export GL_TOKEN=$CI_UPDATES
-#     - semantic-release changelog --post -D version_variable=./semantic_release/__init__.py:__version__
-#     - semantic-release version -D version_variable=./semantic_release/__init__.py:__version__
-#   allow_failure: true
+semver:
+  stage: Formatter
+  script:
+    - git config --global user.name "ci_update_bot"
+    - git config --global user.email "ci_update_bot@bec.ch"
+
+    # delete all local tags
+    - git tag -l | xargs git tag -d
+    - git fetch --tags
+    - git tag
+    
+    - pip install python-semantic-release
+    - export GL_TOKEN=$CI_UPDATES
+    #- semantic-release changelog --post -D version_variable=./semantic_release/__init__.py:__version__
+    - semantic-release publish -v DEBUG -D version_variable=./semantic_release/__init__.py:__version__
+  allow_failure: false
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "master"'
 
 pages:
   stage: Deploy
