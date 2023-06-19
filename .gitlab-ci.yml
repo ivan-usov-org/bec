@@ -219,11 +219,14 @@ semver:
   script:
     - git config --global user.name "ci_update_bot"
     - git config --global user.email "ci_update_bot@bec.ch"
+    - git tag
     - pip install python-semantic-release
     - export GL_TOKEN=$CI_UPDATES
     #- semantic-release changelog --post -D version_variable=./semantic_release/__init__.py:__version__
     - semantic-release version -v DEBUG -D version_variable=./semantic_release/__init__.py:__version__
   allow_failure: false
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "master"'
 
 pages:
   stage: Deploy
