@@ -1,10 +1,11 @@
 from unittest import mock
 
-from bec_client.plugins.LamNI import LamNI, XrayEyeAlign
 from bec_client_lib.core.devicemanager import Device
 
 # pylint: disable=unused-import
 from bec_client_lib.core.tests.utils import bec_client
+
+from bec_client.plugins.LamNI import LamNI, XrayEyeAlign
 
 # pylint: disable=no-member
 # pylint: disable=missing-function-docstring
@@ -27,6 +28,7 @@ class RTMock(Device):
 
 def test_save_frame(bec_client):
     client = bec_client
+    client.device_manager.devices.xeye = Device("xeye", {})
     lamni = LamNI(client)
     align = XrayEyeAlign(client, lamni)
     with mock.patch("bec_client.plugins.LamNI.x_ray_eye_align.epics_put") as epics_put_mock:
@@ -39,6 +41,7 @@ def test_update_frame(bec_client):
     epics_get = "bec_client.plugins.LamNI.x_ray_eye_align.epics_get"
     fshopen = "bec_client.plugins.LamNI.x_ray_eye_align.fshopen"
     client = bec_client
+    client.device_manager.devices.xeye = Device("xeye", {})
     lamni = LamNI(client)
     align = XrayEyeAlign(client, lamni)
     with mock.patch(epics_put) as epics_put_mock:
@@ -59,6 +62,7 @@ def test_update_frame(bec_client):
 
 def test_disable_rt_feedback(bec_client):
     client = bec_client
+    client.device_manager.devices.xeye = Device("xeye", {})
     lamni = LamNI(client)
     align = XrayEyeAlign(client, lamni)
     client.device_manager.devices.rtx = RTMock("rtx", {})
@@ -71,6 +75,7 @@ def test_disable_rt_feedback(bec_client):
 
 def test_enable_rt_feedback(bec_client):
     client = bec_client
+    client.device_manager.devices.xeye = Device("xeye", {})
     lamni = LamNI(client)
     align = XrayEyeAlign(client, lamni)
     client.device_manager.devices.rtx = RTMock("rtx", {})
@@ -86,6 +91,7 @@ def test_tomo_rotate(bec_client):
 
     client = bec_client
     client.load_high_level_interface("spec_hli")
+    client.device_manager.devices.xeye = Device("xeye", {})
     lamni = LamNI(client)
     align = XrayEyeAlign(client, lamni)
     client.device_manager.devices.lsamrot = RTMock("lsamrot", {})
