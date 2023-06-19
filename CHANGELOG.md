@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.5 (2023-06-19)
+
+### Fix
+
+* Removed build ([`1171e65`](https://gitlab.psi.ch/bec/bec/-/commit/1171e651959df0b07f4e9ce096a8b6e4e77b132b))
+
 ## v0.4.4 (2023-06-19)
 
 ### Fix
