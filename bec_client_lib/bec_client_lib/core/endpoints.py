@@ -69,6 +69,7 @@ class MessageEndpoints:
 
     # data processing
     _processed_data = "public/processed_data"
+    _dap_config = "internal/dap/config"
 
     ##########
 
@@ -641,3 +642,14 @@ class MessageEndpoints:
             str: Endpoint for processed data.
         """
         return f"{cls._processed_data}/{process_id}"
+
+    @classmethod
+    def dap_config(cls) -> str:
+        """
+        Endpoint for DAP configuration. This endpoint is used to publish the DAP configuration
+        using a BECMessage.DAPConfig message.
+
+        Returns:
+            str: Endpoint for DAP configuration.
+        """
+        return cls._dap_config

@@ -856,3 +856,24 @@ class ProcessedDataMessage(BECMessage):
         super().__init__(
             msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
         )
+
+
+class DAPConfigMessage(BECMessage):
+    """Message for DAP configuration"""
+
+    msg_type = "dap_config_message"
+
+    def __init__(
+        self, *, config: dict, metadata: dict = None, version: float = DEFAULT_VERSION
+    ) -> None:
+        """
+        Message for DAP configuration
+        Args:
+            config (dict): DAP configuration
+            metadata (dict, optional): metadata. Defaults to None.
+        """
+
+        self.content = {"config": config}
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )
