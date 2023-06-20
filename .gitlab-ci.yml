@@ -68,7 +68,9 @@ repo_update:
       - apk update; apk upgrade; apk add curl; apk add git
       - git config --global user.name "ci_update_bot"
       - git config --global user.email "ci_update_bot@bec.ch"
-      - git switch ${CI_COMMIT_REF_NAME}
+      
+      # check if ${CI_COMMIT_REF_NAME} is a branch or a tag
+      - if [[ -z $(git ls-remote --heads origin ${CI_COMMIT_REF_NAME}) ]]; then git switch --detach ${CI_COMMIT_REF_NAME}; else git switch ${CI_COMMIT_REF_NAME}; fi
       - git reset --hard origin/${CI_COMMIT_REF_NAME}
       
       # make sure that the API server is healthy and ready
