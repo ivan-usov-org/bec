@@ -7,12 +7,12 @@ variables:
   DOCKER_TLS_CERTDIR: ""
 
 # don't runt the pipeline for release pushes, that is with changes to semantic_release
-workflow:
-  rules:
-      - changes: 
-          - ./semantic_release/__init__.py
-        when: never
-      - when: always
+# workflow:
+#   rules:
+#       - changes: 
+#           - ./semantic_release/__init__.py
+#         when: never
+#       - when: always
 
 # different stages in the pipeline
 stages:
