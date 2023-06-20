@@ -2,6 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## v0.5.0 (2023-06-20)
+
+### Feature
+
+* Added bec data processing service ([`17213da`](https://gitlab.psi.ch/bec/bec/-/commit/17213da46b236cb5ff7155890e4319308350ba4c))
+* Added dap message and endpoint ([`e1aa5e1`](https://gitlab.psi.ch/bec/bec/-/commit/e1aa5e199b10cf9c7570967c01a5f3b48bfe1fc6))
+
+### Documentation
+
+* Add commit message info to readme ([`2d8038b`](https://gitlab.psi.ch/bec/bec/-/commit/2d8038bac7ecb3563025ceddfe08b177f94bdf6c))
+
 ## v0.4.9 (2023-06-19)
 
 ### Fix
