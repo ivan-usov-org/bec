@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import builtins
 import datetime
+import sys
 import threading
 import time
-from collections import deque
+from collections import defaultdict, deque
 from typing import TYPE_CHECKING, Optional
 
 from bec_client_lib.core import BECMessage, bec_logger, threadlocked
@@ -13,6 +14,11 @@ if TYPE_CHECKING:
     from bec_client_lib.scan_manager import ScanManager
 
 logger = bec_logger.logger
+
+try:
+    import pandas as pd
+except ImportError:
+    logger.info("Unable to import `pandas` optional dependency")
 
 
 class ScanItem:
@@ -65,6 +71,21 @@ class ScanItem:
         for rid in self.queue.requestIDs:
             req = self.scan_manager.request_storage.find_request_by_ID(rid)
             req.callbacks.poll()
+
+    def to_pandas(self) -> pd.DataFrame:
+        """convert to pandas dataframe"""
+        if "pandas" not in sys.modules:
+            raise ImportError("Install `pandas` to use to_pandas() method")
+
+        tmp = defaultdict(list)
+        for scan_msg in self.data.values():
+            scan_msg_data = scan_msg.content["data"]
+            for dev, dev_data in scan_msg_data.items():
+                for signal, signal_data in dev_data.items():
+                    for key, value in signal_data.items():
+                        tmp[(dev, signal, key)].append(value)
+
+        return pd.DataFrame(tmp)
 
     def __eq__(self, other):
         return self.scanID == other.scanID

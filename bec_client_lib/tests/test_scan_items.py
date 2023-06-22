@@ -1,7 +1,11 @@
+import sys
+from unittest import mock
+
 import pytest
 
 from bec_client_lib.core import BECMessage, MessageEndpoints
 from bec_client_lib.core.tests.utils import ConnectorMock
+from bec_client_lib.scan_items import ScanItem
 from bec_client_lib.scan_manager import ScanManager, ScanStorage
 
 # pylint: disable=missing-function-docstring
@@ -60,3 +64,43 @@ def test_update_with_queue_status(queue_msg):
         scan_manager.scan_storage.find_scan_by_ID("bfa582aa-f9cd-4258-ab5d-3e5d54d3dde5")
         is not None
     )
+
+
+def test_scan_item_to_pandas():
+    scan_manager = ScanManager(ConnectorMock(""))
+    scan_item = ScanItem(scan_manager, "queueID", [1], ["scanID"], "status")
+    scan_item.data = {
+        0: BECMessage.ScanMessage(
+            point_id=0, scanID="scanID", data={"samx": {"samx": {"value": 1, "timestamp": 0}}}
+        ),
+        1: BECMessage.ScanMessage(
+            point_id=1, scanID="scanID", data={"samx": {"samx": {"value": 2, "timestamp": 0}}}
+        ),
+        2: BECMessage.ScanMessage(
+            point_id=2, scanID="scanID", data={"samx": {"samx": {"value": 3, "timestamp": 0}}}
+        ),
+    }
+
+    df = scan_item.to_pandas()
+    assert df["samx"]["samx"]["value"].tolist() == [1, 2, 3]
+    assert df["samx"]["samx"]["timestamp"].tolist() == [0, 0, 0]
+
+
+def test_scan_item_to_pandas_empty_data():
+    scan_manager = ScanManager(ConnectorMock(""))
+    scan_item = ScanItem(scan_manager, "queueID", [1], ["scanID"], "status")
+    scan_item.data = {}
+
+    df = scan_item.to_pandas()
+    assert df.empty
+
+
+def test_scan_item_to_pandas_raises_without_pandas_installed():
+    """Test that to_pandas raises an ImportError if pandas is not installed."""
+    scan_manager = ScanManager(ConnectorMock(""))
+    scan_item = ScanItem(scan_manager, "queueID", [1], ["scanID"], "status")
+
+    with mock.patch.dict("sys.modules"):
+        del sys.modules["pandas"]
+        with pytest.raises(ImportError):
+            scan_item.to_pandas()

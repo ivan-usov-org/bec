@@ -22,4 +22,5 @@ if __name__ == "__main__":
             "loguru",
             "psutil",
         ],
+        extras_require={"dev": ["pytest", "pytest-random-order", "coverage", "pandas"]},
     )
