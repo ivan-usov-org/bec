@@ -8,9 +8,6 @@ import uuid
 from enum import Enum
 from typing import List, Optional, Union
 
-from rich.console import Console
-from rich.table import Table
-
 from bec_client_lib.core import (
     Alarms,
     BECMessage,
@@ -19,6 +16,8 @@ from bec_client_lib.core import (
     threadlocked,
     timeout,
 )
+from rich.console import Console
+from rich.table import Table
 
 from .errors import LimitError, ScanAbortion
 from .scan_assembler import ScanAssembler
@@ -386,7 +385,6 @@ class ScanQueue:
                 worker=self.queue_manager.parent.scan_worker,
             )
         instruction_queue.append_scan_request(msg)
-        # instruction_queue.queue.update_scan_number(request_block_index=-1)
         if not queue_exists:
             instruction_queue.queue_group = target_group
             if position == -1:
@@ -559,10 +557,6 @@ class RequestBlockQueue:
         """clear all request blocks from the queue"""
         self.request_blocks = []
         self.request_blocks_queue.clear()
-
-    def update_scan_number(self, request_block_index: int) -> None:
-        """update the scan number for a given request block"""
-        self.request_blocks[request_block_index].update_scan_number(self.scan_queue.queue_manager)
 
     def _pull_request_block(self):
         if self.active_rb is not None:
