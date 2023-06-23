@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.2 (2023-06-23)
+
+### Fix
+
+* Fixed scan item for intermediate repr queries ([`a915a69`](https://gitlab.psi.ch/bec/bec/-/commit/a915a6906667cff85ab62e22a9bb0ec8f96a2656))
+* Fixed scan item for intermediate repr queries ([`9decff2`](https://gitlab.psi.ch/bec/bec/-/commit/9decff27a74af7d84f41ddd8f9b3585e1d353a88))
+
 ## v0.6.1 (2023-06-23)
 
 ### Fix
