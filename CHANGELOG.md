@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.1 (2023-06-23)
+
+### Fix
+
+* Fixed monitor scan for numpy v1.25 ([`870c033`](https://gitlab.psi.ch/bec/bec/-/commit/870c03344cd55d22a89d236d88ec60e7677ed20e))
+
+### Documentation
+
+* Improved doc strings for scans ([`25fe364`](https://gitlab.psi.ch/bec/bec/-/commit/25fe3641442f1fe31000685664881aaa01c9cfb3))
+
 ## v0.6.0 (2023-06-22)
 
 ### Feature
