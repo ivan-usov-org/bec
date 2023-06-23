@@ -1071,7 +1071,7 @@ class MonitorScan(ScanBase):
         self.flyer = list(self.caller_args.keys())[0]
 
     def _calculate_positions(self) -> None:
-        self.positions = np.vstack(self.caller_args.values()).T.tolist()
+        self.positions = np.vstack(tuple(self.caller_args.values())).T.tolist()
 
     def prepare_positions(self):
         self._calculate_positions()
