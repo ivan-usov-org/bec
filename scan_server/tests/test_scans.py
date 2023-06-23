@@ -4,12 +4,12 @@ from unittest import mock
 
 import numpy as np
 import pytest
-from scan_plugins.LamNIFermatScan import LamNIFermatScan
-from scan_plugins.otf_scan import OTFScan
-
 from bec_client_lib.core import BECMessage as BMessage
 from bec_client_lib.core.devicemanager import DeviceContainer
 from bec_client_lib.core.tests.utils import ProducerMock
+
+from scan_plugins.LamNIFermatScan import LamNIFermatScan
+from scan_plugins.otf_scan import OTFScan
 from scan_server.errors import ScanAbortion
 from scan_server.scans import (
     Acquire,
@@ -18,6 +18,7 @@ from scan_server.scans import (
     FermatSpiralScan,
     LineScan,
     ListScan,
+    MonitorScan,
     Move,
     RequestBase,
     RoundScanFlySim,
@@ -2276,3 +2277,18 @@ def test_otf_scan(scan_msg, reference_scan_list):
     with mock.patch.object(request.stubs, "get_req_status", return_value=1):
         scan_instructions = list(request.run())
     assert scan_instructions == reference_scan_list
+
+
+def test_monitor_scan():
+    device_manager = DMMock()
+    scan_msg = BMessage.ScanQueueMessage(
+        scan_type="monitor_scan",
+        parameter={
+            "args": {"samx": [-5, 5]},
+            "kwargs": {"relative": True, "exp_time": 0.1},
+        },
+        queue="primary",
+    )
+    request = MonitorScan(device_manager=device_manager, parameter=scan_msg.content["parameter"])
+    request._calculate_positions()
+    assert np.isclose(request.positions, [[-5], [5]]).all()
