@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.3 (2023-06-23)
+
+### Fix
+
+* Fixed typo ([`3cc4418`](https://gitlab.psi.ch/bec/bec/-/commit/3cc44186ab8ada514c7d950bd2acbb5b03ac8e25))
+* Version variable is pulled from semantic release file ([`6669bce`](https://gitlab.psi.ch/bec/bec/-/commit/6669bce3e178ca71d664adf9a7493e7ecad4589d))
+
 ## v0.6.2 (2023-06-23)
 
 ### Fix
