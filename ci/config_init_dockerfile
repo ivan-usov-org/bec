@@ -7,6 +7,7 @@ WORKDIR /code
 # copy the content of the local directory to the working directory
 COPY ./bec_client_lib ./bec/bec_client_lib
 COPY ./scibec/init_scibec/demo_config.yaml ./bec/bec_client_lib/demo_config.yaml
+COPY ./semantic_release ./bec/semantic_release
 
 RUN pip install -e ./bec/bec_client_lib
 WORKDIR /code/bec/

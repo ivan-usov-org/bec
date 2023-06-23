@@ -8,6 +8,7 @@ WORKDIR /code
 COPY ./scibec/init_scibec ./bec/scibec/init_scibec
 COPY ./bec_client_lib ./bec/bec_client_lib/
 COPY ./scihub ./bec/scihub/
+COPY ./semantic_release ./bec/semantic_release/
 
 
 RUN apk update && apk add gcc libc-dev build-base linux-headers
