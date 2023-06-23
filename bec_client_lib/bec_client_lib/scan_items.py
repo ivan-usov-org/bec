@@ -90,16 +90,31 @@ class ScanItem:
     def __eq__(self, other):
         return self.scanID == other.scanID
 
-    def __repr__(self) -> str:
-        details = (
+    def describe(self) -> str:
+        """describe the scan item"""
+        start_time = (
             f"\tStart time: {datetime.datetime.fromtimestamp(self.start_time).strftime('%c')}\n"
-            f"\tEnd time: {datetime.datetime.fromtimestamp(self.end_time).strftime('%c')}\n"
-            f"\tElapsed time: {(self.end_time-self.start_time):.1f} s\n"
-            f"\tScan ID: {self.scanID}\n"
-            f"\tScan number: {self.scan_number}\n"
-            f"\tNumber of points: {self.num_points}\n"
+            if self.start_time
+            else ""
         )
-        return f"ScanItem:\n {details}"
+        end_time = (
+            f"\tEnd time: {datetime.datetime.fromtimestamp(self.end_time).strftime('%c')}\n"
+            if self.end_time
+            else ""
+        )
+        elapsed_time = (
+            f"\tElapsed time: {(self.end_time-self.start_time):.1f} s\n"
+            if self.end_time and self.start_time
+            else ""
+        )
+        scanID = f"\tScan ID: {self.scanID}\n" if self.scanID else ""
+        scan_number = f"\tScan number: {self.scan_number}\n" if self.scan_number else ""
+        num_points = f"\tNumber of points: {self.num_points}\n" if self.num_points else ""
+        details = start_time + end_time + elapsed_time + scanID + scan_number + num_points
+        return details
+
+    def __repr__(self) -> str:
+        return f"ScanItem:\n {self.describe()}"
 
 
 class ScanStorage:
