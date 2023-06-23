@@ -66,7 +66,7 @@ def get_2D_raster_pos(axis, snaked=True):
 def get_fermat_spiral_pos(
     m1_start, m1_stop, m2_start, m2_stop, step=1, spiral_type=0, center=False
 ):
-    """[summary]
+    """get_fermat_spiral_pos calculates and returns the positions for a Fermat spiral scan.
 
     Args:
         m1_start (float): start position motor 1
@@ -78,16 +78,8 @@ def get_fermat_spiral_pos(
         A spiral with spiral_type=2 is the same as spiral_type=0. Defaults to 0.
         center (bool, optional): Add a center point. Defaults to False.
 
-    Raises:
-        TypeError: [description]
-        TypeError: [description]
-        TypeError: [description]
-
     Returns:
-        [type]: [description]
-
-    Yields:
-        [type]: [description]
+        array: calculated positions in the form [[m1, m2], ...]
     """
     positions = []
     phi = 2 * np.pi * ((1 + np.sqrt(5)) / 2.0) + spiral_type * np.pi
@@ -109,6 +101,20 @@ def get_fermat_spiral_pos(
 
 
 def get_round_roi_scan_positions(lx: float, ly: float, dr: float, nth: int, cenx=0, ceny=0):
+    """
+    get_round_roi_scan_positions calculates and returns the positions for a round scan in a rectangular region of interest.
+
+    Args:
+        lx (float): length in x
+        ly (float): length in y
+        dr (float): step size
+        nth (int): number of angles in the inner ring
+        cenx (int, optional): center in x. Defaults to 0.
+        ceny (int, optional): center in y. Defaults to 0.
+
+    Returns:
+        array: calculated positions in the form [[x, y], ...]
+    """
     positions = []
     nr = 1 + int(np.floor(max([lx, ly]) / dr))
     for ir in range(1, nr + 2):
@@ -124,7 +130,8 @@ def get_round_roi_scan_positions(lx: float, ly: float, dr: float, nth: int, cenx
 
 
 def get_round_scan_positions(r_in: float, r_out: float, nr: int, nth: int, cenx=0, ceny=0):
-    """_summary_
+    """
+    get_round_scan_positions calculates and returns the positions for a round scan.
 
     Args:
         r_in (float): inner radius
@@ -135,7 +142,7 @@ def get_round_scan_positions(r_in: float, r_out: float, nr: int, nth: int, cenx=
         ceny (int, optional): center in y. Defaults to 0.
 
     Returns:
-        _type_: _description_
+        array: calculated positions in the form [[x, y], ...]
 
     """
     positions = []
@@ -153,6 +160,10 @@ def get_round_scan_positions(r_in: float, r_out: float, nr: int, nth: int, cenx=
 
 
 class RequestBase(ABC):
+    """
+    Base class for all scan requests.
+    """
+
     scan_name = ""
     scan_report_hint = None
     arg_input = [ScanArgType.DEVICE]
@@ -190,6 +201,7 @@ class RequestBase(ABC):
 
     @property
     def scan_report_devices(self):
+        """devices to be included in the scan report"""
         if self._scan_report_devices is None:
             return self.scan_motors
         return self._scan_report_devices
@@ -209,6 +221,7 @@ class RequestBase(ABC):
         return ast.parse(macro).body[0].name
 
     def run_pre_scan_macros(self):
+        """run pre scan macros if any"""
         macros = self.device_manager.producer.lrange(MessageEndpoints.pre_scan_macros(), 0, -1)
         for macro in macros:
             macro = macro.decode().strip()
@@ -257,20 +270,25 @@ class RequestBase(ABC):
 
 class ScanBase(RequestBase, PathOptimizerMixin):
     """
-    procedure:
-    - initialize
-    - read scan motors (to get start positions)
-    - prepare positions
+    Base class for all scans. The following methods are called in the following order during the scan
+    1. initialize
+        - run_pre_scan_macros
+    2. read_scan_motors
+    3. prepare_positions
         - _calculate_positions
-        - <add relative positions>
+        - _optimize_trajectory
+        - _set_position_offset
         - _check_limits
-    - open scan
-    - stage
-    - run baseline readings
-    - scan core
-    - finalize
-    - unstage
-    - cleanup
+    4. open_scan
+    5. stage
+    6. run_baseline_reading
+    7. scan_core
+    8. finalize
+    9. unstage
+    10. cleanup
+
+    A subclass of ScanBase must implement the following methods:
+    - _calculate_positions
     """
 
     scan_name = ""
@@ -309,10 +327,8 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         if self.scan_name == "":
             raise ValueError("scan_name cannot be empty")
 
-    def initialize(self):
-        super().initialize()
-
     def read_scan_motors(self):
+        """read the scan motors"""
         yield from self.stubs.read_and_wait(device=self.scan_motors, wait_group="scan_motor")
 
     @abstractmethod
@@ -329,6 +345,7 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         return
 
     def prepare_positions(self):
+        """prepare the positions for the scan"""
         self._calculate_positions()
         self._optimize_trajectory()
         self.num_pos = len(self.positions) * self.burst_at_each_point
@@ -348,9 +365,11 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         )
 
     def stage(self):
+        """call the stage procedure"""
         yield from self.stubs.stage()
 
     def run_baseline_reading(self):
+        """perform a reading of all baseline devices"""
         yield from self.stubs.baseline_reading()
 
     def _set_position_offset(self):
@@ -362,25 +381,31 @@ class ScanBase(RequestBase, PathOptimizerMixin):
             self.positions += self.start_pos
 
     def close_scan(self):
+        """close the scan"""
         yield from self.stubs.close_scan()
 
     def scan_core(self):
+        """perform the scan core procedure"""
         for ind, pos in self._get_position():
             for self.burst_index in range(self.burst_at_each_point):
                 yield from self._at_each_point(ind, pos)
             self.burst_index = 0
 
     def return_to_start(self):
+        """return to the start position"""
         yield from self._move_and_wait(self.start_pos)
 
     def finalize(self):
+        """finalize the scan"""
         yield from self.return_to_start()
         yield from self.stubs.wait(wait_type="read", group="primary", wait_group="readout_primary")
 
     def unstage(self):
+        """call the unstage procedure"""
         yield from self.stubs.unstage()
 
     def cleanup(self):
+        """call the cleanup procedure"""
         yield from self.close_scan()
 
     def _at_each_point(self, ind=None, pos=None):
@@ -416,6 +441,7 @@ class ScanBase(RequestBase, PathOptimizerMixin):
             yield (ind, pos)
 
     def run(self):
+        """run the scan. This method is called by the scan server and is the main entry point for the scan."""
         self.initialize()
         yield from self.read_scan_motors()
         yield from self.prepare_positions()
@@ -431,22 +457,6 @@ class ScanBase(RequestBase, PathOptimizerMixin):
     def scan(cls, *args, **kwargs):
         scan = cls(args, **kwargs)
         yield from scan.run()
-
-    @staticmethod
-    def _parameter_bundler(args, bundle_size):
-        """
-
-        Args:
-            args:
-            bundle_size: number of parameters per bundle
-
-        Returns:
-
-        """
-        params = {}
-        for cmds in partition(bundle_size, args):
-            params[cmds[0].name] = cmds[1:]
-        return params
 
 
 class FlyScanBase(ScanBase):
@@ -1042,14 +1052,15 @@ class MonitorScan(ScanBase):
         Readout all primary devices at each update of the monitored device.
 
         Args:
-            device:
-            start position:
-            end position:
+            device: device to be monitored
+            start position: start position of the monitored device
+            end position: end position of the monitored device
 
         Returns:
+            ScanReport
 
         Examples:
-            >>> scans.cont_line_scan(dev.motor1, -5, 5, steps=10, exp_time=0.1, relative=True)
+            >>> scans.monitor_scan(dev.motor1, -5, 5, exp_time=0.1, relative=True)
 
         """
         super().__init__(parameter=parameter, **kwargs)
