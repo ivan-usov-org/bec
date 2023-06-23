@@ -95,7 +95,7 @@ class Device:
 
     def get_device_tags(self) -> List:
         """get the device tags for this device"""
-        return self._config["deviceTags"]
+        return self._config.get("deviceTags", [])
 
     @typechecked
     def set_device_tags(self, val: list):
@@ -112,6 +112,16 @@ class Device:
         if val in self._config["deviceTags"]:
             return None
         self._config["deviceTags"].append(val)
+        return self.parent.config_helper.send_config_request(
+            action="update",
+            config={self.name: {"deviceTags": self._config["deviceTags"]}},
+        )
+
+    def remove_device_tag(self, val: str):
+        """remove a device tag for this device"""
+        if val not in self._config["deviceTags"]:
+            return None
+        self._config["deviceTags"].remove(val)
         return self.parent.config_helper.send_config_request(
             action="update",
             config={self.name: {"deviceTags": self._config["deviceTags"]}},
