@@ -1,7 +1,6 @@
 import traceback
 
 import msgpack
-
 from bec_client_lib.core import BECMessage, MessageEndpoints, bec_logger
 
 logger = bec_logger.logger
@@ -127,7 +126,13 @@ class ScanGuard:
         # pylint: disable=protected-access
         parent._handle_scan_modification_request(msg.value)
 
-    def _send_scan_request_response(self, scan_status, metadata):
+    def _send_scan_request_response(self, scan_status: ScanStatus, metadata: dict):
+        """
+        Send a scan request response message.
+        Args:
+            scan_status: ScanStatus object
+            metadata: Metadata dict
+        """
         sqrr = MessageEndpoints.scan_queue_request_response()
         rrm = BECMessage.RequestResponseMessage(
             accepted=scan_status.accepted, message=scan_status.message, metadata=metadata
@@ -148,11 +153,11 @@ class ScanGuard:
         scan_status = self._is_valid_scan_request(msg)
 
         self._send_scan_request_response(scan_status, msg.metadata)
-
-        if scan_status.accepted:
-            self._append_to_scan_queue(msg)
-        else:
+        if not scan_status.accepted:
             logger.info(f"Request was rejected: {scan_status.message}")
+            return
+
+        self._append_to_scan_queue(msg)
 
     def _handle_scan_modification_request(self, msg):
         """
