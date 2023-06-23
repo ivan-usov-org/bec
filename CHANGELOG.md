@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.4 (2023-06-23)
+
+### Fix
+
+* Added missing remove_device_tag function ([`a0884ce`](https://gitlab.psi.ch/bec/bec/-/commit/a0884cea22ee32026753b0cec449c7003a2b49b5))
+
 ## v0.6.3 (2023-06-23)
 
 ### Fix
