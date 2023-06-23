@@ -1,3 +1,4 @@
+import datetime
 import sys
 import time
 from unittest import mock
@@ -111,8 +112,12 @@ def test_scan_item_to_pandas_raises_without_pandas_installed():
 def test_scan_item_repr():
     scan_manager = ScanManager(ConnectorMock(""))
     scan_item = ScanItem(scan_manager, "queueID", [1], ["scanID"], "status")
-    scan_item.start_time = 1687525866.82652
-    scan_item.end_time = 1687525866.82652 + 10
+    start_time = "Fri Jun 23 15:11:06 2023"
+    # convert to datetime string to timestamp
+    scan_item.start_time = time.mktime(
+        datetime.datetime.strptime(start_time, "%a %b %d %H:%M:%S %Y").timetuple()
+    )
+    scan_item.end_time = scan_item.start_time + 10
     scan_item.num_points = 1
     assert (
         repr(scan_item)
