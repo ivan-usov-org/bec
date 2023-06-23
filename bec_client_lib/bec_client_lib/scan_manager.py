@@ -104,24 +104,11 @@ class ScanReport:
 
         _wait()
 
-    # async def _run_subscription(self):
-    #     await LiveUpdatesTable(self._client, self.request.request).run()
-
-    # def subscribe(self):
-    #     asyncio.run(self._run_subscription())
-
     def __repr__(self) -> str:
         separator = "--" * 10
         details = f"\tStatus: {self.status}\n"
         if self.scan:
-            details += (
-                f"\tStart time: {datetime.datetime.fromtimestamp(self.scan.start_time).strftime('%c')}\n"
-                f"\tEnd time: {datetime.datetime.fromtimestamp(self.scan.end_time).strftime('%c')}\n"
-                f"\tElapsed time: {(self.scan.end_time-self.scan.start_time):.1f} s\n"
-                f"\tScan ID: {self.scan.scanID}\n"
-                f"\tScan number: {self.scan.scan_number}\n"
-                f"\tNumber of points: {self.scan.num_points}\n"
-            )
+            details += self.scan.describe()
         return "ScanReport:\n" f"{separator}\n" f"{details}"
 
 
