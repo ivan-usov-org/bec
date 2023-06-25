@@ -1,8 +1,8 @@
+from __future__ import annotations
+
 import os
 import traceback
 from pathlib import Path
-
-import numpy as np
 
 from bec_client_lib.core import (
     BECMessage,
@@ -13,16 +13,22 @@ from bec_client_lib.core import (
     bec_logger,
 )
 from bec_client_lib.core.bec_errors import ServiceConfigError
-from bec_client_lib.core.connector import ConnectorBase
-from bec_client_lib.core.redis_connector import Alarms, RedisConnector
+from bec_client_lib.core.redis_connector import Alarms, MessageObject, RedisConnector
 
-from .file_writer import NexusFileWriter
+from file_writer.file_writer import NexusFileWriter
 
 logger = bec_logger.logger
 
 
 class ScanStorage:
-    def __init__(self, scan_number: str, scanID: str) -> None:
+    def __init__(self, scan_number: int, scanID: str) -> None:
+        """
+        Helper class to store scan data until it is ready to be written to file.
+
+        Args:
+            scan_number (int): Scan number
+            scanID (str): Scan ID
+        """
         self.scan_number = scan_number
         self.scanID = scanID
         self.scan_segments = {}
@@ -32,14 +38,31 @@ class ScanStorage:
         self.metadata = {}
 
     def append(self, pointID, data):
+        """
+        Append data to the scan storage.
+
+        Args:
+            pointID (int): Point ID
+            data (dict): Data to be stored
+        """
         self.scan_segments[pointID] = data
 
     def ready_to_write(self) -> bool:
+        """
+        Check if the scan is ready to be written to file.
+        """
         return self.scan_finished and (self.num_points == len(self.scan_segments))
 
 
 class FileWriterManager(BECService):
     def __init__(self, config: ServiceConfig, connector_cls: RedisConnector) -> None:
+        """
+        Service to write scan data to file.
+
+        Args:
+            config (ServiceConfig): Service config
+            connector_cls (RedisConnector): Connector class
+        """
         super().__init__(config, connector_cls, unique_service=True)
         self.file_writer_config = self._service_config.service_config.get("file_writer")
         self.producer = self.connector.producer()
@@ -71,7 +94,7 @@ class FileWriterManager(BECService):
         self._scan_status_consumer.start()
 
     @staticmethod
-    def _scan_segment_callback(msg, *, parent):
+    def _scan_segment_callback(msg: MessageObject, *, parent: FileWriterManager):
         msgs = BECMessage.ScanMessage.loads(msg.value)
         for scan_msg in msgs:
             parent.insert_to_scan_storage(scan_msg)
@@ -106,16 +129,17 @@ class FileWriterManager(BECService):
 
     def insert_to_scan_storage(self, msg: BECMessage.ScanMessage) -> None:
         scanID = msg.content.get("scanID")
-        if scanID is not None:
-            if not self.scan_storage.get(scanID):
-                self.scan_storage[scanID] = ScanStorage(
-                    scan_number=msg.metadata.get("scan_number"), scanID=scanID
-                )
-            self.scan_storage[scanID].append(
-                pointID=msg.content.get("point_id"), data=msg.content.get("data")
+        if scanID is None:
+            return
+        if not self.scan_storage.get(scanID):
+            self.scan_storage[scanID] = ScanStorage(
+                scan_number=msg.metadata.get("scan_number"), scanID=scanID
             )
-            logger.debug(msg.content.get("point_id"))
-            self.check_storage_status(scanID=scanID)
+        self.scan_storage[scanID].append(
+            pointID=msg.content.get("point_id"), data=msg.content.get("data")
+        )
+        logger.debug(msg.content.get("point_id"))
+        self.check_storage_status(scanID=scanID)
 
     def update_baseline_reading(self, scanID: str) -> None:
         if not self.scan_storage.get(scanID):
@@ -134,14 +158,24 @@ class FileWriterManager(BECService):
         if self.scan_storage[scanID].ready_to_write():
             self.write_file(scanID)
 
-    def write_file(self, scanID: str):
+    def _create_file_path(self, scan_dir: str, scan_number: int) -> str:
+        data_dir = Path(os.path.join(self.base_path, "bec", "data", scan_dir))
+        data_dir.mkdir(parents=True, exist_ok=True)
+        file_path = os.path.abspath(os.path.join(data_dir, f"S{scan_number:05d}.h5"))
+        return file_path
+
+    def write_file(self, scanID: str) -> None:
+        """
+        Write scan data to file.
+
+        Args:
+            scanID (str): Scan ID
+        """
         storage = self.scan_storage[scanID]
         scan = storage.scan_number
         scan_bundle = 1000
         scan_dir = self._get_scan_dir(scan_bundle, scan, leading_zeros=5)
-        data_dir = Path(os.path.join(self.base_path, "bec", "data", scan_dir))
-        data_dir.mkdir(parents=True, exist_ok=True)
-        file_path = os.path.abspath(os.path.join(data_dir, f"S{storage.scan_number:05d}.h5"))
+        file_path = self._create_file_path(scan_dir, scan)
         successful = True
         try:
             logger.info(f"Starting writing to file {file_path}.")
