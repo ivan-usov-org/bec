@@ -11,6 +11,7 @@ def NeXus_format(storage, data, device_manager):
     entry.attrs["NX_class"] = "NXentry"
     entry.attrs["definition"] = "NXsas"
     entry.attrs["start_time"] = data.get("start_time")
+    entry.attrs["end_time"] = data.get("end_time")
     entry.attrs["version"] = 1.0
 
     # /entry/collection

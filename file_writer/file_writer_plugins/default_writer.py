@@ -5,7 +5,8 @@ def NeXus_format(storage, data, device_manager):
     entry.attrs["version"] = 1.0
 
     # entry.attrs["definition"] = "NXsas"
-    # entry.attrs["start_time"] = data.get("start_time")
+    entry.attrs["start_time"] = data.get("start_time")
+    entry.attrs["end_time"] = data.get("end_time")
 
     # /entry/collection
     collection = entry.create_group("collection")
