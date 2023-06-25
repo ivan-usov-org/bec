@@ -65,6 +65,7 @@ def test_mv_scan_lib_client(lib_client):
     )
 
 
+@pytest.mark.timeout(100)
 def test_async_callback_data_matches_scan_data_lib_client(lib_client):
     bec = lib_client
     wait_for_empty_queue(bec)
@@ -78,6 +79,8 @@ def test_async_callback_data_matches_scan_data_lib_client(lib_client):
 
     s = scans.line_scan(dev.samx, 0, 1, steps=10, relative=False, async_callback=dummy_callback)
     s.wait()
+    while len(reference_container["data"]) < 10:
+        time.sleep(0.1)
     assert len(s.scan.data) == 10
     assert len(reference_container["data"]) == 10
 

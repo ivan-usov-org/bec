@@ -4,8 +4,6 @@ import time
 
 import numpy as np
 import pytest
-
-from bec_client import BECIPythonClient
 from bec_client_lib import BECClient
 from bec_client_lib.alarm_handler import AlarmBase
 from bec_client_lib.core import (
@@ -17,6 +15,8 @@ from bec_client_lib.core import (
 )
 from bec_client_lib.core.bec_errors import ScanAbortion, ScanInterruption
 from bec_client_lib.core.tests.utils import wait_for_empty_queue
+
+from bec_client import BECIPythonClient
 
 logger = bec_logger.logger
 
@@ -661,6 +661,8 @@ def test_async_callback_data_matches_scan_data(client):
         reference_container["data"].append(data)
 
     s = scans.line_scan(dev.samx, 0, 1, steps=10, relative=False, async_callback=dummy_callback)
+    while len(reference_container["data"]) < 10:
+        time.sleep(0.1)
     assert len(s.scan.data) == 10
     assert len(reference_container["data"]) == 10
 
