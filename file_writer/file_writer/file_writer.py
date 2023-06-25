@@ -244,8 +244,12 @@ class NexusFileWriter(FileWriter):
         device_storage["metadata"] = data.metadata
 
         # NeXus needs start_time and end_time in ISO8601 format, so we have to convert it
-        device_storage["start_time"] = datetime.datetime.fromtimestamp(data.start_time).isoformat()
-        device_storage["end_time"] = datetime.datetime.fromtimestamp(data.end_time).isoformat()
+        if data.start_time is not None:
+            device_storage["start_time"] = datetime.datetime.fromtimestamp(
+                data.start_time
+            ).isoformat()
+        if data.end_time is not None:
+            device_storage["end_time"] = datetime.datetime.fromtimestamp(data.end_time).isoformat()
         writer_format = getattr(fwp, self.file_writer_manager.file_writer_config.get("plugin"))
         writer_storage = writer_format(
             HDF5Storage(), device_storage, self.file_writer_manager.device_manager

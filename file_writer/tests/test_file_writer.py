@@ -1,3 +1,4 @@
+import datetime
 import os
 from unittest import mock
 
@@ -136,4 +137,19 @@ def test_write_data_storage(segments, baseline, metadata):
     storage.scan_segments = segments
     storage.baseline = baseline
     storage.metadata = metadata
+    storage.start_time = 1679226971.564235
+    storage.end_time = 1679226971.580867
+
     file_writer.write("./test.h5", storage)
+
+    # open file and check that time stamps are correct
+    with h5py.File("./test.h5", "r") as test_file:
+        assert (
+            test_file["entry"].attrs["start_time"]
+            == datetime.datetime.fromtimestamp(1679226971.564235).isoformat()
+        )
+
+        assert (
+            test_file["entry"].attrs["end_time"]
+            == datetime.datetime.fromtimestamp(1679226971.580867).isoformat()
+        )
