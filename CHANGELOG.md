@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.6 (2023-06-25)
+
+### Fix
+
+* Fixed file writer for empty time stamps ([`bc5fbf6`](https://gitlab.psi.ch/bec/bec/-/commit/bc5fbf651c39c562de2b2568011c47094e155017))
+
 ## v0.6.5 (2023-06-25)
 
 ### Fix
