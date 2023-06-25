@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.5 (2023-06-25)
+
+### Fix
+
+* Fixed timestamps for h5 files; closes #76 ([`36ab89e`](https://gitlab.psi.ch/bec/bec/-/commit/36ab89e51e031697f1611a1a1c5b946d3c7c1c2a))
+
 ## v0.6.4 (2023-06-23)
 
 ### Fix
