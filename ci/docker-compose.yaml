@@ -2,11 +2,11 @@ version: "3.7"
 
 services:
   mongodb-test:
-    image: mongo:5.0.14
+    image: morgana-harbor.psi.ch/bec/mongo:5.0.14
     ports:
       - "27017:27017"
   redis-test:
-    image: redis
+    image: morgana-harbor.psi.ch/bec/redis
     network_mode: host
   scibec-test-server:
     image: scibec-test-server

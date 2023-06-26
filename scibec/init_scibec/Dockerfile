@@ -1,5 +1,5 @@
 # set base image (host OS)
-FROM morgana-harbor.psi.ch/bec/python:3.8
+FROM morgana-harbor.psi.ch/bec/python:3.8-alpine
 
 # set the working directory in the container
 WORKDIR /code
