@@ -97,9 +97,18 @@ class ConfigHelper:
         if not reply.content["accepted"]:
             raise DeviceConfigError(f"Failed to update the config: {reply.content['message']}.")
 
-    def wait_for_config_reply(self, RID: str) -> RequestResponseMessage:
+    def wait_for_config_reply(self, RID: str, timeout=10) -> RequestResponseMessage:
+        """
+        wait for config reply
+
+        Args:
+            RID (str): request id
+            timeout (int, optional): timeout in seconds. Defaults to 10.
+
+        Returns:
+            RequestResponseMessage: reply message
+        """
         start = 0
-        timeout = 10
         while True:
             msg = self.producer.get(MessageEndpoints.device_config_request_response(RID))
             if msg is None:
