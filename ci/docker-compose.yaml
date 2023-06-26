@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   mongodb-test:
-    image: morgana-harbor.psi.ch/bec/mongo:5.0.14
+    image: morgana-harbor.psi.ch/bec/mongo
     ports:
       - "27017:27017"
   redis-test:
