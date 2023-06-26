@@ -1,7 +1,7 @@
 # This file is a template, and might need editing before it works on your project.
 # Official language image. Look for the different tagged releases at:
 # https://hub.docker.com/r/library/python/tags/
-image: python:3.8
+image: $CI_DOCKER_REGISTRY/python:3.8
 #commands to run in the Docker container before starting each job.
 variables:
   DOCKER_TLS_CERTDIR: ""
@@ -68,7 +68,7 @@ pylint:
 repo_update:
   stage: RepoUpdates
   needs: []
-  image: docker:23-dind
+  image: $CI_DOCKER_REGISTRY/docker:23-dind
   services:
     - name: docker:dind
       entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
@@ -116,7 +116,7 @@ tests:
 
 tests-3.9:
   stage: AdditionalTests
-  image: python:3.9
+  image: $CI_DOCKER_REGISTRY/python:3.9
   needs: ["tests"]
   allow_failure: true
   script: 
@@ -130,19 +130,19 @@ tests-3.9:
 tests-3.10:
   extends: "tests-3.9"
   stage: AdditionalTests
-  image: python:3.10
+  image: $CI_DOCKER_REGISTRY/python:3.10
   allow_failure: true
 
 tests-3.11:
   extends: "tests-3.9"
   stage: AdditionalTests
-  image: python:3.11
+  image: $CI_DOCKER_REGISTRY/python:3.11
   allow_failure: true
 
 end-2-end:
   stage: End2End
   needs: []
-  image: docker:23-dind
+  image: $CI_DOCKER_REGISTRY/docker:23-dind
   services:
     - name: docker:dind
       entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
