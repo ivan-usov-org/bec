@@ -246,7 +246,6 @@ semver:
     - git tag -l | xargs git tag -d
     - git fetch --tags
     - git tag
-    
     # build
     - cat $PYPIRC > .pypirc
     - pip install python-semantic-release wheel
