@@ -2,6 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.14 (2023-06-27)
+
+### Fix
+
+* Testing build ([`6849b95`](https://gitlab.psi.ch/bec/bec/-/commit/6849b9583ff0b3c5f4b49180f78b1ef612669145))
+
+### Documentation
+
+* Added scan server readme ([`1663087`](https://gitlab.psi.ch/bec/bec/-/commit/1663087ff8866dff31a6974474b56dd3e73ffb1d))
+* Added readme for bec-client-lib ([`bd39147`](https://gitlab.psi.ch/bec/bec/-/commit/bd391470f86ece1e26b629c75341b2ee2c941da4))
+
 ## v0.6.13 (2023-06-27)
 
 ### Fix
