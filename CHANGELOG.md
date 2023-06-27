@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.9 (2023-06-27)
+
+### Fix
+
+* Fixed build script ([`5bba42a`](https://gitlab.psi.ch/bec/bec/-/commit/5bba42a898c2b8ec5735d1f059012ac60e2222a9))
+
 ## v0.6.8 (2023-06-27)
 
 ### Fix
