@@ -248,14 +248,13 @@ semver:
     - git tag
     
     # build
+    - cat $PYPIRC > .pypirc
     - pip install python-semantic-release wheel
     - export GL_TOKEN=$CI_UPDATES
     - >
       semantic-release publish -v DEBUG 
       -D version_variable=./semantic_release/__init__.py:__version__ 
       -D hvcs=gitlab 
-      -D REPOSITORY_USERNAME=__token__
-      -D REPOSITORY_PASSWORD=$CI_PYPI_TOKEN
       -D build_command="./ci/build_python_services.sh" 
       
   allow_failure: false
