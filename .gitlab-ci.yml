@@ -235,7 +235,7 @@ end-2-end-light:
 
 
 semver:
-  stage: Formatter
+  stage: Deploy
   script:
     - git config --global user.name "ci_update_bot"
     - git config --global user.email "ci_update_bot@bec.ch"
@@ -246,6 +246,7 @@ semver:
     - git tag -l | xargs git tag -d
     - git fetch --tags
     - git tag
+    
     # build
     - pip install python-semantic-release wheel
     - export GL_TOKEN=$CI_UPDATES
