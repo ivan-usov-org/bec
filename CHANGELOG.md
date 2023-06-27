@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.10 (2023-06-27)
+
+### Fix
+
+* Testing build ([`d5fb551`](https://gitlab.psi.ch/bec/bec/-/commit/d5fb5511c79dfc598089d42a184fca26a35e6b3b))
+
 ## v0.6.9 (2023-06-27)
 
 ### Fix
