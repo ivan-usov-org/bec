@@ -1,4 +1,5 @@
 #!/bin/sh
+
 # define all target directories
 declare -a dirs=(
     "bec_client"
