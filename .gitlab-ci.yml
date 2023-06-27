@@ -246,10 +246,23 @@ semver:
     - git fetch --tags
     - git tag
     
-    - pip install python-semantic-release
+    - pip install python-semantic-release wheel
     - export GL_TOKEN=$CI_UPDATES
-    #- semantic-release changelog --post -D version_variable=./semantic_release/__init__.py:__version__
-    - semantic-release publish -v DEBUG -D version_variable=./semantic_release/__init__.py:__version__ -D hvcs=gitlab -D upload_to_repository="" -D upload_to_pypi="" -D build_command=false 
+    - >
+      semantic-release publish -v DEBUG 
+      -D version_variable=./semantic_release/__init__.py:__version__ 
+      -D hvcs=gitlab 
+      -D REPOSITORY_USERNAME=__token__
+      -D REPOSITORY_PASSWORD=$CI_PYPI_TOKEN
+      -D build_command="python ./bec_client/setup.py sdist bdist_wheel && 
+      python ./bec_clien_lib/setup.py sdist bdist_wheel && 
+      python ./scan_server/setup.py sdist bdist_wheel && 
+      python ./device_server/setup.py sdist bdist_wheel && 
+      python ./scan_bundler/setup.py sdist bdist_wheel && 
+      python ./file_writer/setup.py sdist bdist_wheel && 
+      python ./scihub/setup.py sdist bdist_wheel && 
+      python ./data_processing/setup.py sdist bdist_wheel" 
+      
   allow_failure: false
   rules:
     - if: '$CI_COMMIT_REF_NAME == "master"'
