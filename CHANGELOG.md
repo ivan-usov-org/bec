@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.12 (2023-06-27)
+
+### Fix
+
+* Build test ([`899cfab`](https://gitlab.psi.ch/bec/bec/-/commit/899cfaba35fe40457635d3c8b9840da762e4b0ba))
+* Build process with env var ([`3c5f351`](https://gitlab.psi.ch/bec/bec/-/commit/3c5f35166af19faa51fef75aed48a3ded0a186e4))
+
 ## v0.6.11 (2023-06-27)
 
 ### Fix
