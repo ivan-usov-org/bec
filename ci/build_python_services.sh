@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # define all target directories
 declare -a dirs=(
