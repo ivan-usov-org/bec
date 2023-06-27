@@ -254,7 +254,6 @@ semver:
       -D hvcs=gitlab 
       -D REPOSITORY_USERNAME=__token__
       -D REPOSITORY_PASSWORD=$CI_PYPI_TOKEN
-      -D repository="testpypi"
       -D build_command="./ci/build_python_services.sh" 
       
   allow_failure: false
