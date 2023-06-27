@@ -236,6 +236,7 @@ end-2-end-light:
 
 semver:
   stage: Deploy
+  needs: ["tests"]
   script:
     - git config --global user.name "ci_update_bot"
     - git config --global user.email "ci_update_bot@bec.ch"
