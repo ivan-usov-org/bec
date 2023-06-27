@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.7 (2023-06-27)
+
+### Fix
+
+* Fixed and improved setup.cfg files ([`b04a97e`](https://gitlab.psi.ch/bec/bec/-/commit/b04a97edbb4309d0364f19df528401ad29c62c9b))
+
+### Documentation
+
+* Improved config helper doc strings ([`08f6ff4`](https://gitlab.psi.ch/bec/bec/-/commit/08f6ff444e24395ee759f203123d9962441f59dd))
+
 ## v0.6.6 (2023-06-25)
 
 ### Fix
