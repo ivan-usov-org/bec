@@ -255,14 +255,7 @@ semver:
       -D REPOSITORY_USERNAME=__token__
       -D REPOSITORY_PASSWORD=$CI_PYPI_TOKEN
       -D repository="testpypi"
-      -D build_command="python ./bec_client/setup.py sdist bdist_wheel && 
-      python ./bec_clien_lib/setup.py sdist bdist_wheel && 
-      python ./scan_server/setup.py sdist bdist_wheel && 
-      python ./device_server/setup.py sdist bdist_wheel && 
-      python ./scan_bundler/setup.py sdist bdist_wheel && 
-      python ./file_writer/setup.py sdist bdist_wheel && 
-      python ./scihub/setup.py sdist bdist_wheel && 
-      python ./data_processing/setup.py sdist bdist_wheel" 
+      -D build_command="./ci/build_python_services.sh" 
       
   allow_failure: false
   rules:
