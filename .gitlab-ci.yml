@@ -247,9 +247,10 @@ semver:
     - git fetch --tags
     - git tag
     # build
-    - cat $PYPIRC > .pypirc
     - pip install python-semantic-release wheel
     - export GL_TOKEN=$CI_UPDATES
+    - export REPOSITORY_USERNAME=__token__
+    - export REPOSITORY_PASSWORD=$CI_PYPI_TOKEN
     - >
       semantic-release publish -v DEBUG 
       -D version_variable=./semantic_release/__init__.py:__version__ 
