@@ -6,6 +6,7 @@ image: $CI_DOCKER_REGISTRY/python:3.8
 variables:
   DOCKER_TLS_CERTDIR: ""
 
+
 # don't runt the pipeline for release pushes, that is with changes to semantic_release
 # workflow:
 #   rules:
@@ -247,7 +248,7 @@ semver:
     - git tag -l | xargs git tag -d
     - git fetch --tags
     - git tag
-    
+
     # build
     - pip install python-semantic-release wheel
     - export GL_TOKEN=$CI_UPDATES
