@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.13 (2023-06-27)
+
+### Fix
+
+* Added env vars ([`3d33d4b`](https://gitlab.psi.ch/bec/bec/-/commit/3d33d4bc32d2daac29cef6e71d5e0d48aba54f7e))
+
 ## v0.6.12 (2023-06-27)
 
 ### Fix
