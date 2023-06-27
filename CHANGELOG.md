@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.8 (2023-06-27)
+
+### Fix
+
+* Testing release ([`240d402`](https://gitlab.psi.ch/bec/bec/-/commit/240d4020b80f371d3001a59fe55ac1433edb93d9))
+
 ## v0.6.7 (2023-06-27)
 
 ### Fix
