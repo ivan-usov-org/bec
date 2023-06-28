@@ -3,8 +3,7 @@ import uuid
 from typing import Callable, List, Union
 
 import numpy as np
-
-from bec_client_lib.core import (
+from bec_lib.core import (
     BECMessage,
     MessageEndpoints,
     ProducerConnector,

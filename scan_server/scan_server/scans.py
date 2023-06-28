@@ -5,12 +5,7 @@ from abc import ABC, abstractmethod
 from typing import List, Tuple
 
 import numpy as np
-from bec_client_lib.core import (
-    BECMessage,
-    DeviceManagerBase,
-    MessageEndpoints,
-    bec_logger,
-)
+from bec_lib.core import BECMessage, DeviceManagerBase, MessageEndpoints, bec_logger
 from cytoolz import partition
 
 from .errors import LimitError, ScanAbortion

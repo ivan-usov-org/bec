@@ -3,9 +3,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Callable, List
 
 import numpy as np
+from bec_lib.core import BECMessage, DeviceManagerBase, MessageEndpoints
 
 from bec_client.progressbar import DeviceProgressBar
-from bec_client_lib.core import BECMessage, DeviceManagerBase, MessageEndpoints
 
 from .utils import LiveUpdatesBase, check_alarms
 

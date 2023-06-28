@@ -1,6 +1,6 @@
 from unittest import mock
 
-from bec_client_lib.core import BECMessage, MessageEndpoints
+from bec_lib.core import BECMessage, MessageEndpoints
 
 from data_processing.worker_manager import DAPWorkerManager
 

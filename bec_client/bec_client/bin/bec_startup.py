@@ -3,8 +3,9 @@
 ###############################################################
 import pathlib
 
+from bec_lib.core import RedisConnector, ServiceConfig, bec_logger
+
 from bec_client import BECIPythonClient
-from bec_client_lib.core import RedisConnector, ServiceConfig, bec_logger
 
 # pylint: disable=wrong-import-position
 # pylint: disable=protected-access

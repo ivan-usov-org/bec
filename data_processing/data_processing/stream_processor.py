@@ -6,8 +6,8 @@ from collections import deque
 from typing import Any, List, Optional, Tuple
 
 import lmfit
-from bec_client_lib.core import BECMessage, MessageEndpoints
-from bec_client_lib.core.redis_connector import MessageObject, RedisConnector
+from bec_lib.core import BECMessage, MessageEndpoints
+from bec_lib.core.redis_connector import MessageObject, RedisConnector
 
 
 def nested_get(data: str, keys, default=None):

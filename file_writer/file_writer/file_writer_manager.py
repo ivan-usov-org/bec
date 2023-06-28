@@ -4,7 +4,7 @@ import os
 import traceback
 from pathlib import Path
 
-from bec_client_lib.core import (
+from bec_lib.core import (
     BECMessage,
     BECService,
     DeviceManagerBase,
@@ -12,8 +12,8 @@ from bec_client_lib.core import (
     ServiceConfig,
     bec_logger,
 )
-from bec_client_lib.core.bec_errors import ServiceConfigError
-from bec_client_lib.core.redis_connector import Alarms, MessageObject, RedisConnector
+from bec_lib.core.bec_errors import ServiceConfigError
+from bec_lib.core.redis_connector import Alarms, MessageObject, RedisConnector
 
 from file_writer.file_writer import NexusFileWriter
 

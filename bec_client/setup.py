@@ -6,8 +6,7 @@ from setuptools import setup
 
 current_path = pathlib.Path(__file__).parent.resolve()
 
-utils = f"{current_path}/../bec_client_lib/"
-bec_client_lib = f"{current_path}/../bec_client_lib/"
+bec_lib = f"{current_path}/../bec_lib/"
 
 
 def get_version():
@@ -34,10 +33,12 @@ if __name__ == "__main__":
             "pyepics",
             "pylint",
             "fpdf",
+            "h5py",
         ],
         scripts=["bec_client/bin/bec"],
         version=get_version(),
+        extras_require={"dev": ["pytest", "pytest-random-order", "pytest-asyncio", "coverage"]},
     )
-    local_deps = [utils, bec_client_lib]
+    local_deps = [bec_lib]
     for dep in local_deps:
         subprocess.run(f"pip install -e {dep}", shell=True, check=True)

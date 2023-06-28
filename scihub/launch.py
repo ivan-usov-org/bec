@@ -1,7 +1,8 @@
 import argparse
 import threading
 
-from bec_client_lib.core import RedisConnector, ServiceConfig, bec_logger
+from bec_lib.core import RedisConnector, ServiceConfig, bec_logger
+
 from scihub import SciHub
 
 logger = bec_logger.logger

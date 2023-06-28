@@ -5,16 +5,16 @@ import collections
 import time
 from typing import TYPE_CHECKING
 
-from bec_client_lib.core import bec_logger
-from bec_client_lib.core.bec_errors import ScanInterruption
+from bec_lib.core import bec_logger
+from bec_lib.core.bec_errors import ScanInterruption
 
 from .live_table import LiveUpdatesTable
 from .move_device import LiveUpdatesReadbackProgressbar
 from .utils import ScanRequestMixin, check_alarms
 
 if TYPE_CHECKING:
-    from bec_client_lib.core import BECMessage
-    from bec_client_lib.queue_items import QueueItem
+    from bec_lib.core import BECMessage
+    from bec_lib.queue_items import QueueItem
 
     from bec_client import BECClient
 

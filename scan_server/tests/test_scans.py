@@ -4,12 +4,12 @@ from unittest import mock
 
 import numpy as np
 import pytest
-from bec_client_lib.core import BECMessage as BMessage
-from bec_client_lib.core.devicemanager import DeviceContainer
-from bec_client_lib.core.tests.utils import ProducerMock
-
+from bec_lib.core import BECMessage as BMessage
+from bec_lib.core.devicemanager import DeviceContainer
+from bec_lib.core.tests.utils import ProducerMock
 from scan_plugins.LamNIFermatScan import LamNIFermatScan
 from scan_plugins.otf_scan import OTFScan
+
 from scan_server.errors import ScanAbortion
 from scan_server.scans import (
     Acquire,

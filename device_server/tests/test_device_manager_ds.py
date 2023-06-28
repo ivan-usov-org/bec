@@ -1,23 +1,23 @@
 import os
 from unittest import mock
 
+import bec_lib.core
 import numpy as np
 import pytest
 import yaml
-
-import bec_client_lib.core
-from bec_client_lib.core import BECMessage, MessageEndpoints
-from bec_client_lib.core.tests.utils import (
+from bec_lib.core import BECMessage, MessageEndpoints
+from bec_lib.core.tests.utils import (
     ConnectorMock,
     ProducerMock,
     create_session_from_config,
 )
+
 from device_server.devices.devicemanager import DeviceManagerDS
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=protected-access
 
-dir_path = os.path.dirname(bec_client_lib.core.__file__)
+dir_path = os.path.dirname(bec_lib.core.__file__)
 
 
 class ControllerMock:

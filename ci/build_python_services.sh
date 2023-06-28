@@ -3,7 +3,7 @@
 # define all target directories
 declare -a dirs=(
     "bec_client"
-    "bec_client_lib"
+    "bec_lib"
     "scan_server"
     "device_server"
     "scan_bundler"

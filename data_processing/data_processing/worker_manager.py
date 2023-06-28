@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import multiprocessing as mp
 
-from bec_client_lib.core import BECMessage, MessageEndpoints, bec_logger
-from bec_client_lib.core.redis_connector import RedisConnector
+from bec_lib.core import BECMessage, MessageEndpoints, bec_logger
+from bec_lib.core.redis_connector import RedisConnector
 
 from .stream_processor import LmfitProcessor
 

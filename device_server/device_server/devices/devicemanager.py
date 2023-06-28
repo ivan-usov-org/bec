@@ -5,10 +5,7 @@ from functools import reduce
 import ophyd
 import ophyd.sim as ops
 import ophyd_devices as opd
-from ophyd.ophydobj import OphydObject
-from ophyd.signal import EpicsSignalBase
-
-from bec_client_lib.core import (
+from bec_lib.core import (
     BECMessage,
     Device,
     DeviceConfigError,
@@ -16,7 +13,10 @@ from bec_client_lib.core import (
     MessageEndpoints,
     bec_logger,
 )
-from bec_client_lib.core.connector import ConnectorBase
+from bec_lib.core.connector import ConnectorBase
+from ophyd.ophydobj import OphydObject
+from ophyd.signal import EpicsSignalBase
+
 from device_server.devices.config_update_handler import ConfigUpdateHandler
 from device_server.devices.device_serializer import get_device_info
 

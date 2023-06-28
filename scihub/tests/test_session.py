@@ -1,12 +1,12 @@
 import os
 from unittest import mock
 
+import bec_lib.core
 import pytest
 
-import bec_client_lib.core
 from scihub.scibec.scibec import HttpClient, SciBec, SciBecError
 
-dir_path = os.path.dirname(bec_client_lib.core.__file__)
+dir_path = os.path.dirname(bec_lib.core.__file__)
 
 
 def test_make_filter():

@@ -7,8 +7,8 @@ import time
 import traceback
 from typing import TYPE_CHECKING, Callable, List
 
-from bec_client_lib.core import Alarms, BECMessage, bec_logger
-from bec_client_lib.request_items import RequestItem
+from bec_lib.core import Alarms, BECMessage, bec_logger
+from bec_lib.request_items import RequestItem
 
 if TYPE_CHECKING:
     from bec_client.bec_client import BECClient

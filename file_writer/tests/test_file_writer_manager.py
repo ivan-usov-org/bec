@@ -1,18 +1,13 @@
 import os
 from unittest import mock
 
-import bec_client_lib.core
+import bec_lib.core
 import pytest
 import yaml
-from bec_client_lib.core import (
-    BECMessage,
-    DeviceManagerBase,
-    MessageEndpoints,
-    ServiceConfig,
-)
-from bec_client_lib.core.bec_errors import ServiceConfigError
-from bec_client_lib.core.redis_connector import MessageObject
-from bec_client_lib.core.tests.utils import ConnectorMock, create_session_from_config
+from bec_lib.core import BECMessage, DeviceManagerBase, MessageEndpoints, ServiceConfig
+from bec_lib.core.bec_errors import ServiceConfigError
+from bec_lib.core.redis_connector import MessageObject
+from bec_lib.core.tests.utils import ConnectorMock, create_session_from_config
 
 from file_writer import FileWriterManager
 from file_writer.file_writer import FileWriter
@@ -21,7 +16,7 @@ from file_writer.file_writer_manager import ScanStorage
 # pylint: disable=missing-function-docstring
 # pylint: disable=protected-access
 
-dir_path = os.path.dirname(bec_client_lib.core.__file__)
+dir_path = os.path.dirname(bec_lib.core.__file__)
 
 
 def load_FileWriter():

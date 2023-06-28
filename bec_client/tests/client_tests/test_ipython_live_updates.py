@@ -1,9 +1,9 @@
 from unittest import mock
 
 import pytest
-from bec_client_lib.core import BECMessage
-from bec_client_lib.core.tests.utils import bec_client
-from bec_client_lib.queue_items import QueueItem
+from bec_lib.core import BECMessage
+from bec_lib.core.tests.utils import bec_client
+from bec_lib.queue_items import QueueItem
 
 from bec_client.callbacks.ipython_live_updates import IPythonLiveUpdates
 
@@ -30,7 +30,7 @@ def test_live_updates_process_queue_pending(bec_client):
     client.queue.queue_storage.current_scan_queue = {"primary": {"status": "RUNNING"}}
     with mock.patch.object(queue, "_update_with_buffer"):
         with mock.patch(
-            "bec_client_lib.queue_items.QueueItem.queue_position", new_callable=mock.PropertyMock
+            "bec_lib.queue_items.QueueItem.queue_position", new_callable=mock.PropertyMock
         ) as queue_pos:
             queue_pos.return_value = 2
             with mock.patch.object(
@@ -69,7 +69,7 @@ def test_live_updates_process_queue_running(bec_client):
     client.queue.queue_storage.current_scan_queue = {"primary": {"status": "RUNNING"}}
     with mock.patch.object(queue, "_update_with_buffer"):
         with mock.patch(
-            "bec_client_lib.queue_items.QueueItem.queue_position", new_callable=mock.PropertyMock
+            "bec_lib.queue_items.QueueItem.queue_position", new_callable=mock.PropertyMock
         ) as queue_pos:
             queue_pos.return_value = 2
             with mock.patch.object(

@@ -5,7 +5,7 @@ import traceback
 from asyncio.log import logger
 from typing import List
 
-from bec_client_lib.core import (
+from bec_lib.core import (
     Alarms,
     BECMessage,
     Device,

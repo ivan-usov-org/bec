@@ -8,7 +8,7 @@ import uuid
 from enum import Enum
 from typing import List, Optional, Union
 
-from bec_client_lib.core import (
+from bec_lib.core import (
     Alarms,
     BECMessage,
     MessageEndpoints,

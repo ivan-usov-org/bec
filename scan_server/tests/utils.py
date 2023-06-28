@@ -1,11 +1,11 @@
 import os
 
+import bec_lib.core
 import yaml
+from bec_lib.core import DeviceManagerBase as DeviceManager
+from bec_lib.core import MessageEndpoints, ServiceConfig
+from bec_lib.core.tests.utils import ConnectorMock, create_session_from_config
 
-import bec_client_lib.core
-from bec_client_lib.core import DeviceManagerBase as DeviceManager
-from bec_client_lib.core import MessageEndpoints, ServiceConfig
-from bec_client_lib.core.tests.utils import ConnectorMock, create_session_from_config
 from scan_server.scan_assembler import ScanAssembler
 from scan_server.scan_queue import (
     InstructionQueueItem,
@@ -21,7 +21,7 @@ from scan_server.scans import RequestBase
 # pylint: disable=protected-access
 
 # dir_path = os.path.dirname(os.path.realpath(__file__))
-dir_path = os.path.dirname(bec_client_lib.core.__file__)
+dir_path = os.path.dirname(bec_lib.core.__file__)
 
 
 def load_ScanServerMock():

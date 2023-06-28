@@ -1,6 +1,6 @@
 import logging
 
-from bec_client_lib.core import DeviceManagerBase
+from bec_lib.core import DeviceManagerBase
 
 from . import devices
 from .device_server import DeviceServer

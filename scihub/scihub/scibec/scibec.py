@@ -3,8 +3,7 @@ import json
 
 import requests
 import yaml
-
-from bec_client_lib.core.logger import bec_logger
+from bec_lib.core.logger import bec_logger
 
 logger = bec_logger.logger
 

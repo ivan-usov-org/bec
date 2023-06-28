@@ -2,7 +2,7 @@ import signal
 import threading
 import time
 
-from bec_client_lib.core.bec_errors import ScanInterruption
+from bec_lib.core.bec_errors import ScanInterruption
 
 PAUSE_MSG = """
 The Scan Queue is entering a paused state. These are your options for changing

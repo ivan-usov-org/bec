@@ -1,9 +1,9 @@
 from unittest import mock
 
 import pytest
+from bec_lib.core import BECMessage, MessageEndpoints
+from bec_lib.core.tests.utils import ConnectorMock
 
-from bec_client_lib.core import BECMessage, MessageEndpoints
-from bec_client_lib.core.tests.utils import ConnectorMock
 from scan_server.scan_stubs import ScanAbortion, ScanStubs
 
 
