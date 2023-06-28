@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.0 (2023-06-28)
+
+### Feature
+
+* Renamed primary devices to monitored devices; closes #75 ([`1370db4`](https://gitlab.psi.ch/bec/bec/-/commit/1370db4c70b08702c29e3728b8d0c3229d0188f3))
+
 ## v0.7.1 (2023-06-28)
 
 ### Fix
