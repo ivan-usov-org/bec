@@ -3,14 +3,14 @@ import time
 from concurrent.futures import wait
 from unittest import mock
 
-import bec_lib.core
 import pytest
 import yaml
+
+import bec_lib.core
 from bec_lib.core import BECMessage
 from bec_lib.core import DeviceManagerBase as DeviceManager
 from bec_lib.core import MessageEndpoints, ServiceConfig
 from bec_lib.core.tests.utils import ConnectorMock, create_session_from_config
-
 from scan_bundler import ScanBundler
 from scan_bundler.emitter import EmitterBase
 
@@ -492,8 +492,10 @@ def test_initialize_scan_container(scan_msg):
             return
         assert sb.scan_motors[scanID] == scan_motors
         assert sb.sync_storage[scanID] == {"info": scan_info, "status": "open", "sent": set()}
-        assert sb.primary_devices[scanID] == {
-            "devices": sb.device_manager.devices.primary_devices(readout_priority=readout_priority),
+        assert sb.monitored_devices[scanID] == {
+            "devices": sb.device_manager.devices.monitored_devices(
+                readout_priority=readout_priority
+            ),
             "pointID": {},
         }
         assert sb.monitor_devices[scanID] == sb.device_manager.devices.acquisition_group("monitor")
@@ -546,14 +548,16 @@ def test_step_scan_update(scan_msg, pointID, primary):
     sb.sync_storage[scanID] = {"info": {}, "status": "open", "sent": set()}
     scan_motors = list(set(sb.device_manager.devices[m] for m in ["samx", "samy"]))
 
-    primary_devices = sb.primary_devices[scanID] = {
-        "devices": sb.device_manager.devices.primary_devices(scan_motors),
+    monitored_devices = sb.monitored_devices[scanID] = {
+        "devices": sb.device_manager.devices.monitored_devices(scan_motors),
         "pointID": {},
     }
 
     dev = {device: signal}
     if primary:
-        primary_devices["pointID"][pointID] = {dev.name: True for dev in primary_devices["devices"]}
+        monitored_devices["pointID"][pointID] = {
+            dev.name: True for dev in monitored_devices["devices"]
+        }
 
     with mock.patch.object(sb, "_update_monitor_signals") as update_mock:
         with mock.patch.object(sb, "_send_scan_point") as send_mock:
@@ -568,16 +572,16 @@ def test_step_scan_update(scan_msg, pointID, primary):
                 **dev,
             }
 
-            assert primary_devices["pointID"][pointID][device] == True
+            assert monitored_devices["pointID"][pointID][device] == True
 
             if primary:
                 update_mock.assert_called_once()
                 send_mock.assert_called_once()
 
             else:
-                pd_test = {dev.name: False for dev in primary_devices["devices"]}
+                pd_test = {dev.name: False for dev in monitored_devices["devices"]}
                 pd_test["samx"] = True
-                assert primary_devices["pointID"][pointID] == pd_test
+                assert monitored_devices["pointID"][pointID] == pd_test
 
 
 @pytest.mark.parametrize(
@@ -669,11 +673,11 @@ def test_update_monitor_signals():
     pointID = 2
     sb = load_ScanBundlerMock()
     sb.sync_storage[scanID] = {"info": {"scan_type": "fly"}, pointID: {}}
-    sb.primary_devices[scanID] = {
-        "devices": sb.device_manager.devices.primary_devices([]),
+    sb.monitored_devices[scanID] = {
+        "devices": sb.device_manager.devices.monitored_devices([]),
         "pointID": {},
     }
-    num_devices = len(sb.device_manager.devices.primary_devices([]))
+    num_devices = len(sb.device_manager.devices.monitored_devices([]))
     with mock.patch.object(
         sb,
         "_get_last_device_readback",

@@ -3,11 +3,12 @@ import time
 from typing import List
 
 import msgpack
-from bec_lib.core import ConfigHelper
-from bec_lib.core.connector import ConnectorBase
 from rich.console import Console
 from rich.table import Table
 from typeguard import typechecked
+
+from bec_lib.core import ConfigHelper
+from bec_lib.core.connector import ConnectorBase
 
 from .bec_errors import DeviceConfigError
 from .BECMessage import (
@@ -365,7 +366,7 @@ class DeviceContainer(dict):
         ]
 
     @typechecked
-    def primary_devices(self, scan_motors: list = None, readout_priority: dict = None) -> list:
+    def monitored_devices(self, scan_motors: list = None, readout_priority: dict = None) -> list:
         """get a list of all enabled primary devices"""
         devices = self.readout_priority("monitored")
         if scan_motors:
@@ -399,7 +400,7 @@ class DeviceContainer(dict):
         devices = self.enabled_devices
         devices.extend([self.get(dev) for dev in readout_priority.get("baseline", [])])
 
-        excluded_devices = self.primary_devices(scan_motors)
+        excluded_devices = self.monitored_devices(scan_motors)
         excluded_devices.extend(self.async_devices())
         excluded_devices.extend(self.detectors())
         excluded_devices.extend(self.readout_priority("ignored"))
@@ -435,7 +436,7 @@ class DeviceContainer(dict):
         Examples:
             >>> dev.wm('samx')
             >>> dev.wm(['samx', 'samy'])
-            >>> dev.wm(dev.primary_devices())
+            >>> dev.wm(dev.monitored_devices())
             >>> dev.wm(dev.get_devices_with_tags('user motors'))
 
         """

@@ -65,7 +65,7 @@ class ScanWorker(threading.Thread):
         if not instr.content.get("device"):
             group = instr.content["parameter"].get("group")
             if group == "primary":
-                devices = self.device_manager.devices.primary_devices(
+                devices = self.device_manager.devices.monitored_devices(
                     readout_priority=self.readout_priority
                 )
             elif group == "scan_motor":
@@ -316,7 +316,7 @@ class ScanWorker(threading.Thread):
         if devices is None:
             devices = [
                 dev.name
-                for dev in self.device_manager.devices.primary_devices(
+                for dev in self.device_manager.devices.monitored_devices(
                     readout_priority=self.readout_priority
                 )
             ]

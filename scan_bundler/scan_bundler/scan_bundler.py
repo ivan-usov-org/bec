@@ -27,7 +27,7 @@ class ScanBundler(BECService):
         self._start_scan_status_consumer()
 
         self.sync_storage = {}
-        self.primary_devices = {}
+        self.monitored_devices = {}
         self.monitor_devices = {}
         self.baseline_devices = {}
         self.device_storage = {}
@@ -146,8 +146,8 @@ class ScanBundler(BECService):
         self.readout_priority[scanID] = scan_info["readout_priority"]
         if not scanID in self.storage_initialized:
             self.sync_storage[scanID] = {"info": scan_info, "status": "open", "sent": set()}
-            self.primary_devices[scanID] = {
-                "devices": self.device_manager.devices.primary_devices(
+            self.monitored_devices[scanID] = {
+                "devices": self.device_manager.devices.monitored_devices(
                     readout_priority=self.readout_priority[scanID]
                 ),
                 "pointID": {},
@@ -174,27 +174,30 @@ class ScanBundler(BECService):
         with self._lock:
             dev = {device: signal}
             pointID = metadata["pointID"]
-            primary_devices = self.primary_devices[scanID]
+            monitored_devices = self.monitored_devices[scanID]
 
             self.sync_storage[scanID][pointID] = {
                 **self.sync_storage[scanID].get(pointID, {}),
                 **dev,
             }
 
-            if primary_devices["pointID"].get(pointID) is None:
-                primary_devices["pointID"][pointID] = {
-                    dev.name: False for dev in primary_devices["devices"]
+            if monitored_devices["pointID"].get(pointID) is None:
+                monitored_devices["pointID"][pointID] = {
+                    dev.name: False for dev in monitored_devices["devices"]
                 }
-            primary_devices["pointID"][pointID][device] = True
+            monitored_devices["pointID"][pointID][device] = True
 
-            primary_devices_completed = list(primary_devices["pointID"][pointID].values())
+            monitored_devices_completed = list(monitored_devices["pointID"][pointID].values())
 
-            all_primary_devices_completed = bool(
-                all(primary_devices_completed)
-                and (len(primary_devices_completed) == len(self.primary_devices[scanID]["devices"]))
+            all_monitored_devices_completed = bool(
+                all(monitored_devices_completed)
+                and (
+                    len(monitored_devices_completed)
+                    == len(self.monitored_devices[scanID]["devices"])
+                )
             )
 
-            if all_primary_devices_completed and self.sync_storage[scanID].get(pointID):
+            if all_monitored_devices_completed and self.sync_storage[scanID].get(pointID):
                 self._update_monitor_signals(scanID, pointID)
                 self._send_scan_point(scanID, pointID)
 
@@ -306,7 +309,7 @@ class ScanBundler(BECService):
     def _update_monitor_signals(self, scanID, pointID) -> None:
         if self.sync_storage[scanID]["info"]["scan_type"] == "fly":
             # for fly scans, take all primary and monitor signals
-            devices = self.primary_devices[scanID]["devices"]
+            devices = self.monitored_devices[scanID]["devices"]
 
             readings = self._get_last_device_readback(devices)
 
@@ -334,7 +337,7 @@ class ScanBundler(BECService):
         for scanID in remove_scanIDs:
             for storage in [
                 "sync_storage",
-                "primary_devices",
+                "monitored_devices",
                 "monitor_devices",
                 "baseline_devices",
                 "scan_motors",

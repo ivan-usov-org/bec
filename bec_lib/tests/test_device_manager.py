@@ -2,9 +2,10 @@ import os
 from collections import defaultdict
 from unittest import mock
 
-import bec_lib
 import pytest
 import yaml
+
+import bec_lib
 from bec_lib.core import BECMessage
 from bec_lib.core.connector import MessageObject
 from bec_lib.core.devicemanager import (
@@ -155,7 +156,7 @@ def test_show_tags():
         ([], {"baseline": ["samx"]}),
     ],
 )
-def test_primary_devices_are_unique(scan_motors_in, readout_priority_in):
+def test_monitored_devices_are_unique(scan_motors_in, readout_priority_in):
     connector = ConnectorMock("")
     dm = DeviceManagerBase(connector)
     config_content = None
@@ -164,7 +165,7 @@ def test_primary_devices_are_unique(scan_motors_in, readout_priority_in):
         dm._session = create_session_from_config(config_content)
     dm._load_session()
     scan_motors = [dm.devices.get(dev) for dev in scan_motors_in]
-    devices = dm.devices.primary_devices(
+    devices = dm.devices.monitored_devices(
         scan_motors=scan_motors, readout_priority=readout_priority_in
     )
     device_names = set(dev.name for dev in devices)
@@ -180,7 +181,7 @@ def test_primary_devices_are_unique(scan_motors_in, readout_priority_in):
         ([], {"monitored": ["samx", "samy"], "baseline": [], "ignored": ["bpm4i"]}),
     ],
 )
-def test_primary_devices_with_readout_priority(scan_motors_in, readout_priority_in):
+def test_monitored_devices_with_readout_priority(scan_motors_in, readout_priority_in):
     connector = ConnectorMock("")
     dm = DeviceManagerBase(connector)
     config_content = None
@@ -189,13 +190,13 @@ def test_primary_devices_with_readout_priority(scan_motors_in, readout_priority_
         dm._session = create_session_from_config(config_content)
     dm._load_session()
     scan_motors = [dm.devices.get(dev) for dev in scan_motors_in]
-    primary_devices = dm.devices.primary_devices(
+    monitored_devices = dm.devices.monitored_devices(
         scan_motors=scan_motors, readout_priority=readout_priority_in
     )
     baseline_devices = dm.devices.baseline_devices(
         scan_motors=scan_motors, readout_priority=readout_priority_in
     )
-    primary_device_names = set(dev.name for dev in primary_devices)
+    primary_device_names = set(dev.name for dev in monitored_devices)
     baseline_devices_names = set(dev.name for dev in baseline_devices)
 
     assert len(primary_device_names & baseline_devices_names) == 0

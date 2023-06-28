@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 import msgpack
 import numpy as np
+
 from bec_lib.core import MessageEndpoints, bec_logger
 
 from .emitter import EmitterBase
@@ -47,7 +48,7 @@ class BlueskyEmitter(EmitterBase):
     def _get_data_keys(self, scanID):
         sb = self.scan_bundler
         signals = {}
-        for dev in sb.primary_devices[scanID]["devices"]:
+        for dev in sb.monitored_devices[scanID]["devices"]:
             # copied from bluesky/callbacks/stream.py:
             for key, val in dev.signals.items():
                 val = val["value"]
@@ -77,7 +78,8 @@ class BlueskyEmitter(EmitterBase):
                 "samy": {"fields": ["samy"]},
             },
             "object_keys": {
-                dev.name: list(dev.signals.keys()) for dev in sb.primary_devices[scanID]["devices"]
+                dev.name: list(dev.signals.keys())
+                for dev in sb.monitored_devices[scanID]["devices"]
             },
         }
         return doc

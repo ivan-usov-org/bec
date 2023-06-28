@@ -1,8 +1,8 @@
 import time
 
 import numpy as np
-from bec_lib.core import bec_logger
 
+from bec_lib.core import bec_logger
 from scan_server.scans import FlyScanBase, ScanArgType, ScanBase
 
 logger = bec_logger.logger
@@ -156,9 +156,9 @@ class HystScan(ScanBase):
                 device=[self.energy_motor], wait_group="mono", wait_type="move"
             )
 
-            primary_devices = [dev.name for dev in dev.primary_devices([])]
+            monitored_devices = [dev.name for dev in dev.monitored_devices([])]
             yield from self.stubs.read_and_wait(
-                device=[self.flyer, self.scan_motors[0], *primary_devices],
+                device=[self.flyer, self.scan_motors[0], *monitored_devices],
                 wait_group="readout_primary",
                 pointID=self.pointID,
             )

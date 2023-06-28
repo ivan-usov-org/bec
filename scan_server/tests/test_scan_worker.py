@@ -2,9 +2,9 @@ import uuid
 from unittest import mock
 
 import pytest
-from bec_lib.core import BECMessage, MessageEndpoints
 from utils import load_ScanServerMock
 
+from bec_lib.core import BECMessage, MessageEndpoints
 from scan_server.errors import DeviceMessageError, ScanAbortion
 from scan_server.scan_assembler import ScanAssembler
 from scan_server.scan_queue import (
@@ -148,7 +148,7 @@ def test_get_devices_from_instruction(instruction, devices):
     if not instruction.content.get("device"):
         group = instruction.content["parameter"].get("group")
         if group == "primary":
-            assert returned_devices == worker.device_manager.devices.primary_devices(
+            assert returned_devices == worker.device_manager.devices.monitored_devices(
                 worker.scan_motors
             )
         elif group == "scan_motor":
