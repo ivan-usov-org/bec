@@ -22,7 +22,7 @@ def get_version():
 
 if __name__ == "__main__":
     setup(
-        install_requires=["numpy", "cytoolz", "ophyd", "pyepics", "jsonschema"],
+        install_requires=["numpy", "ophyd", "msgpack", "pyyaml"],
         version=get_version(),
     )
     local_deps = [utils, ophyd_devices]

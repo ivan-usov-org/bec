@@ -20,7 +20,7 @@ def get_version():
 
 if __name__ == "__main__":
     setup(
-        install_requires=["numpy", "cytoolz", "rich", "matplotlib"],
+        install_requires=["numpy", "msgpack", "pyyaml", "cytoolz", "rich"],
         version=get_version(),
         extras_require={"dev": ["pytest", "pytest-random-order", "coverage"]},
     )

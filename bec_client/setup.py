@@ -22,17 +22,11 @@ if __name__ == "__main__":
     setup(
         install_requires=[
             "numpy",
-            "msgpack",
             "requests",
             "typeguard<3.0",
-            "pyyaml",
-            "redis",
             "ipython",
-            "cytoolz",
             "rich",
             "pyepics",
-            "pylint",
-            "fpdf",
             "h5py",
         ],
         scripts=["bec_client/bin/bec"],

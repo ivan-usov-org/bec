@@ -13,7 +13,7 @@ but they are executed in a specific order:
 - self.open_scan                         # send an open_scan message including the scan name, the number of points and the scan motor names
 - self.stage                             # stage all devices for the upcoming acquisiton
 - self.run_baseline_readings             # read all devices to get a baseline for the upcoming scan
-- self.scan_core                         # run a loop over all position 
+- self.scan_core                         # run a loop over all position
     - self._at_each_point(ind, pos)      # called at each position with the current index and the target positions as arguments
 - self.finalize                          # clean up the scan, e.g. move back to the start position; wait everything to finish
 - self.unstage                           # unstage all devices that have been staged before
@@ -22,7 +22,6 @@ but they are executed in a specific order:
 
 import time
 
-import matplotlib.pyplot as plt
 import numpy as np
 from bec_lib.core import BECMessage, MessageEndpoints, bec_logger
 

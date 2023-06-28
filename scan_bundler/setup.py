@@ -19,7 +19,7 @@ def get_version():
 
 
 if __name__ == "__main__":
-    setup(install_requires=["numpy"], version=get_version())
+    setup(install_requires=["numpy", "pyyaml", "msgpack"], version=get_version())
     local_deps = [utils]
     for dep in local_deps:
         subprocess.run(f"pip install -e {dep}", shell=True, check=True)
