@@ -101,7 +101,7 @@ tests:
   stage: Unittests
   needs: ["repo_update"]
   script:
-    - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
+    - git clone --branch bec_lib_renaming https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
     - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices
     - pip install pytest pytest-random-order pytest-cov pytest-asyncio pytest-timeout
     - apt-get install -y gcc
@@ -121,7 +121,7 @@ tests-3.9:
   needs: ["tests"]
   allow_failure: true
   script: 
-    - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
+    - git clone --branch bec_lib_renaming https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
     - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices
     - pip install pytest pytest-random-order pytest-cov pytest-asyncio pytest-timeout
     - apt-get install -y gcc
@@ -167,7 +167,7 @@ end-2-end:
     - apk update; apk upgrade; apk add curl; apk add git; apk add gcc
 
     # get ophyd devices repo (needed for the device_server)
-    - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
+    - git clone --branch bec_lib_renaming https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
 
     # make sure that the API server is healthy and ready
     - timeout 120 /bin/sh -c -- 'while true; do res=$(curl -X "GET" --max-time 3 "http://docker:3030/sessions"); if [ ! -z "$res" ]; then exit 0; fi; sleep 1; done;'
@@ -210,7 +210,7 @@ end-2-end-light:
     - apk update; apk upgrade; apk add git
 
     # get ophyd devices repo (needed for the device_server)
-    - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
+    - git clone --branch bec_lib_renaming https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
 
     # initialize the database with the test config
     - docker build -t init_config:test -f ./ci/config_init_dockerfile .
@@ -268,7 +268,7 @@ pages:
   stage: Deploy
   needs: ["tests"]
   script:
-    - git clone https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
+    - git clone --branch bec_lib_renaming https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
     - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices    
     - pip install -r ./docs/source/requirements.txt
     - apt-get install -y gcc
