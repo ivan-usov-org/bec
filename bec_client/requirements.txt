@@ -1,5 +1,0 @@
-numpy
-cytoolz
-msgpack
-ipython
-requests
