@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.0 (2023-06-28)
+
+### Feature
+
+* Renamed bec_client_lib to bec_lib ([`a944e43`](https://gitlab.psi.ch/bec/bec/-/commit/a944e43e1a8db55959a042a8203040fa2c5484ba))
+
+### Documentation
+
+* Updated readme for new bec_lib ([`6e0bf12`](https://gitlab.psi.ch/bec/bec/-/commit/6e0bf12a0ae1885245961461f0bcef09ad13c2ec))
+
 ## v0.6.14 (2023-06-27)
 
 ### Fix
