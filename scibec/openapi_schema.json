@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "scibec",
-    "version": "0.0.1",
+    "version": "1.0.6",
     "description": "scibec",
     "contact": {
       "name": "Klaus Wakonig",
@@ -1699,7 +1699,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AccessAccountPartial"
+                "$ref": "#/components/schemas/ExperimentAccountPartial"
               }
             }
           },
@@ -1719,7 +1719,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AccessAccountWithRelations"
+                  "$ref": "#/components/schemas/ExperimentAccountWithRelations"
                 }
               }
             }
@@ -1792,7 +1792,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AccessAccount"
+                  "$ref": "#/components/schemas/ExperimentAccount"
                 }
               }
             }
@@ -1847,7 +1847,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AccessAccountPartial"
+                "$ref": "#/components/schemas/ExperimentAccountPartial"
               }
             }
           }
@@ -1868,7 +1868,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/AccessAccountWithRelations"
+                    "$ref": "#/components/schemas/ExperimentAccountWithRelations"
                   }
                 }
               }
@@ -2225,7 +2225,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AccessAccountPartial"
+                "$ref": "#/components/schemas/FunctionalAccountPartial"
               }
             }
           },
@@ -2245,7 +2245,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AccessAccountWithRelations"
+                  "$ref": "#/components/schemas/FunctionalAccountWithRelations"
                 }
               }
             }
@@ -2318,7 +2318,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AccessAccount"
+                  "$ref": "#/components/schemas/FunctionalAccount"
                 }
               }
             }
@@ -2373,7 +2373,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AccessAccountPartial"
+                "$ref": "#/components/schemas/FunctionalAccountPartial"
               }
             }
           }
@@ -2394,7 +2394,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/AccessAccountWithRelations"
+                    "$ref": "#/components/schemas/FunctionalAccountWithRelations"
                   }
                 }
               }
@@ -2951,8 +2951,8 @@
   ],
   "components": {
     "schemas": {
-      "AccessAccount": {
-        "title": "AccessAccount",
+      "Session": {
+        "title": "Session",
         "type": "object",
         "properties": {
           "id": {
@@ -3010,35 +3010,23 @@
           "name": {
             "type": "string"
           },
-          "read": {
-            "type": "boolean"
+          "experimentId": {
+            "type": "string",
+            "description": "Session to which this device belongs."
           },
-          "write": {
-            "type": "boolean"
-          },
-          "remote": {
-            "type": "boolean"
-          },
-          "token": {
-            "type": "string"
-          },
-          "isFunctional": {
-            "type": "boolean"
+          "sessionConfig": {
+            "type": "object"
           }
         },
         "required": [
-          "name",
-          "read",
-          "write",
-          "remote",
-          "token"
+          "name"
         ],
         "additionalProperties": false
       },
-      "NewAccessAccount": {
-        "title": "NewAccessAccount",
+      "NewSession": {
+        "title": "NewSession",
         "type": "object",
-        "description": "(tsType: Omit<AccessAccount, 'id'>, schemaOptions: { title: 'NewAccessAccount', exclude: [ 'id' ] })",
+        "description": "(tsType: Omit<Session, 'id'>, schemaOptions: { title: 'NewSession', exclude: [ 'id' ] })",
         "properties": {
           "createACL": {
             "type": "array",
@@ -3092,361 +3080,19 @@
           "name": {
             "type": "string"
           },
-          "read": {
-            "type": "boolean"
+          "experimentId": {
+            "type": "string",
+            "description": "Session to which this device belongs."
           },
-          "write": {
-            "type": "boolean"
-          },
-          "remote": {
-            "type": "boolean"
-          },
-          "token": {
-            "type": "string"
-          },
-          "isFunctional": {
-            "type": "boolean"
+          "sessionConfig": {
+            "type": "object"
           }
         },
         "required": [
-          "name",
-          "read",
-          "write",
-          "remote",
-          "token"
+          "name"
         ],
         "additionalProperties": false,
-        "x-typescript-type": "Omit<AccessAccount, 'id'>"
-      },
-      "AccessAccountWithRelations": {
-        "title": "AccessAccountWithRelations",
-        "type": "object",
-        "description": "(tsType: AccessAccountWithRelations, schemaOptions: { includeRelations: true })",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "createACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can create subentries"
-            }
-          },
-          "readACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can read this entry"
-            }
-          },
-          "updateACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can update this entry"
-            }
-          },
-          "deleteACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can delete this entry"
-            }
-          },
-          "shareACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
-            }
-          },
-          "adminACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can administrate this entry"
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdBy": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "read": {
-            "type": "boolean"
-          },
-          "write": {
-            "type": "boolean"
-          },
-          "remote": {
-            "type": "boolean"
-          },
-          "token": {
-            "type": "string"
-          },
-          "isFunctional": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "name",
-          "read",
-          "write",
-          "remote",
-          "token"
-        ],
-        "additionalProperties": false,
-        "x-typescript-type": "AccessAccountWithRelations"
-      },
-      "AccessAccountPartial": {
-        "title": "AccessAccountPartial",
-        "type": "object",
-        "description": "(tsType: Partial<AccessAccount>, schemaOptions: { partial: true })",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "createACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can create subentries"
-            }
-          },
-          "readACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can read this entry"
-            }
-          },
-          "updateACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can update this entry"
-            }
-          },
-          "deleteACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can delete this entry"
-            }
-          },
-          "shareACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
-            }
-          },
-          "adminACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can administrate this entry"
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdBy": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "read": {
-            "type": "boolean"
-          },
-          "write": {
-            "type": "boolean"
-          },
-          "remote": {
-            "type": "boolean"
-          },
-          "token": {
-            "type": "string"
-          },
-          "isFunctional": {
-            "type": "boolean"
-          }
-        },
-        "additionalProperties": false,
-        "x-typescript-type": "Partial<AccessAccount>"
-      },
-      "AccessConfig": {
-        "title": "AccessConfig",
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "createACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can create subentries"
-            }
-          },
-          "readACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can read this entry"
-            }
-          },
-          "updateACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can update this entry"
-            }
-          },
-          "deleteACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can delete this entry"
-            }
-          },
-          "shareACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
-            }
-          },
-          "adminACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can administrate this entry"
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdBy": {
-            "type": "string"
-          },
-          "targetAccount": {
-            "type": "string"
-          },
-          "beamlineId": {
-            "type": "string",
-            "description": "Beamline to which this config belongs."
-          },
-          "authEnabled": {
-            "type": "boolean"
-          },
-          "activeAccounts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "usePasswords": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "beamlineId",
-          "authEnabled",
-          "usePasswords"
-        ],
-        "additionalProperties": false
-      },
-      "NewAccessConfig": {
-        "title": "NewAccessConfig",
-        "type": "object",
-        "description": "(tsType: Omit<AccessConfig, 'id'>, schemaOptions: { title: 'NewAccessConfig', exclude: [ 'id' ] })",
-        "properties": {
-          "createACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can create subentries"
-            }
-          },
-          "readACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can read this entry"
-            }
-          },
-          "updateACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can update this entry"
-            }
-          },
-          "deleteACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can delete this entry"
-            }
-          },
-          "shareACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
-            }
-          },
-          "adminACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can administrate this entry"
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdBy": {
-            "type": "string"
-          },
-          "targetAccount": {
-            "type": "string"
-          },
-          "beamlineId": {
-            "type": "string",
-            "description": "Beamline to which this config belongs."
-          },
-          "authEnabled": {
-            "type": "boolean"
-          },
-          "activeAccounts": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "usePasswords": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "beamlineId",
-          "authEnabled",
-          "usePasswords"
-        ],
-        "additionalProperties": false,
-        "x-typescript-type": "Omit<AccessConfig, 'id'>"
+        "x-typescript-type": "Omit<Session, 'id'>"
       },
       "DeviceWithRelations": {
         "title": "DeviceWithRelations",
@@ -3621,6 +3267,212 @@
         ],
         "additionalProperties": false,
         "x-typescript-type": "DeviceWithRelations"
+      },
+      "ExperimentAccountWithRelations": {
+        "title": "ExperimentAccountWithRelations",
+        "type": "object",
+        "description": "(tsType: ExperimentAccountWithRelations, schemaOptions: { includeRelations: true })",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "createACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can create subentries"
+            }
+          },
+          "readACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can read this entry"
+            }
+          },
+          "updateACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "deleteACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can delete this entry"
+            }
+          },
+          "shareACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
+            }
+          },
+          "adminACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "read": {
+            "type": "boolean"
+          },
+          "write": {
+            "type": "boolean"
+          },
+          "remote": {
+            "type": "boolean"
+          },
+          "token": {
+            "type": "string"
+          },
+          "isFunctional": {
+            "type": "boolean"
+          },
+          "experimentId": {
+            "type": "string",
+            "description": "Experiment to which this account belongs."
+          },
+          "experiment": {
+            "$ref": "#/components/schemas/ExperimentWithRelations"
+          }
+        },
+        "required": [
+          "name",
+          "read",
+          "write",
+          "remote",
+          "token"
+        ],
+        "additionalProperties": true,
+        "x-typescript-type": "ExperimentAccountWithRelations"
+      },
+      "ExperimentWithRelations": {
+        "title": "ExperimentWithRelations",
+        "type": "object",
+        "description": "(tsType: ExperimentWithRelations, schemaOptions: { includeRelations: true })",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "createACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can create subentries"
+            }
+          },
+          "readACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can read this entry"
+            }
+          },
+          "updateACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "deleteACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can delete this entry"
+            }
+          },
+          "shareACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
+            }
+          },
+          "adminACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "datasets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "beamlineId": {
+            "type": "string"
+          },
+          "writeAccount": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "logbook": {
+            "type": "string"
+          },
+          "samples": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "experimentConfig": {
+            "type": "object"
+          },
+          "experimentInfo": {
+            "type": "object"
+          },
+          "activeSession": {
+            "type": "string"
+          },
+          "experimentAccounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExperimentAccountWithRelations"
+            }
+          },
+          "sessions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SessionWithRelations"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "beamlineId"
+        ],
+        "additionalProperties": false,
+        "x-typescript-type": "ExperimentWithRelations"
       },
       "DatasetWithRelations": {
         "title": "DatasetWithRelations",
@@ -3980,10 +3832,10 @@
         "additionalProperties": false,
         "x-typescript-type": "SessionWithRelations"
       },
-      "ExperimentWithRelations": {
-        "title": "ExperimentWithRelations",
+      "SessionPartial": {
+        "title": "SessionPartial",
         "type": "object",
-        "description": "(tsType: ExperimentWithRelations, schemaOptions: { includeRelations: true })",
+        "description": "(tsType: Partial<Session>, schemaOptions: { partial: true })",
         "properties": {
           "id": {
             "type": "string"
@@ -4040,58 +3892,486 @@
           "name": {
             "type": "string"
           },
-          "datasets": {
+          "experimentId": {
+            "type": "string",
+            "description": "Session to which this device belongs."
+          },
+          "sessionConfig": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "x-typescript-type": "Partial<Session>"
+      },
+      "Scan": {
+        "title": "Scan",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "createACL": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "description": "groups or users who can create subentries"
             }
           },
-          "beamlineId": {
-            "type": "string"
-          },
-          "writeAccount": {
-            "type": "string"
-          },
-          "userId": {
-            "type": "string"
-          },
-          "logbook": {
-            "type": "string"
-          },
-          "samples": {
+          "readACL": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "description": "groups or users who can read this entry"
             }
           },
-          "experimentConfig": {
+          "updateACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "deleteACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can delete this entry"
+            }
+          },
+          "shareACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
+            }
+          },
+          "adminACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "scanType": {
+            "type": "string"
+          },
+          "scanParameter": {
             "type": "object"
           },
-          "experimentInfo": {
+          "userParameter": {
             "type": "object"
           },
-          "activeSession": {
+          "queue": {
             "type": "string"
           },
-          "experimentAccounts": {
+          "scanId": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "queueId": {
+            "type": "string"
+          },
+          "exitStatus": {
+            "type": "string"
+          },
+          "scanNumber": {
+            "type": "number"
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "files": {
+            "type": "object"
+          },
+          "sessionId": {
+            "type": "string"
+          },
+          "datasetId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "NewScan": {
+        "title": "NewScan",
+        "type": "object",
+        "description": "(tsType: Omit<Scan, 'id'>, schemaOptions: { title: 'NewScan', exclude: [ 'id' ] })",
+        "properties": {
+          "createACL": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/AccessAccountWithRelations"
+              "type": "string",
+              "description": "groups or users who can create subentries"
             }
           },
-          "sessions": {
+          "readACL": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/SessionWithRelations"
+              "type": "string",
+              "description": "groups or users who can read this entry"
             }
+          },
+          "updateACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "deleteACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can delete this entry"
+            }
+          },
+          "shareACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
+            }
+          },
+          "adminACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "scanType": {
+            "type": "string"
+          },
+          "scanParameter": {
+            "type": "object"
+          },
+          "userParameter": {
+            "type": "object"
+          },
+          "queue": {
+            "type": "string"
+          },
+          "scanId": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "queueId": {
+            "type": "string"
+          },
+          "exitStatus": {
+            "type": "string"
+          },
+          "scanNumber": {
+            "type": "number"
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "files": {
+            "type": "object"
+          },
+          "sessionId": {
+            "type": "string"
+          },
+          "datasetId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "x-typescript-type": "Omit<Scan, 'id'>"
+      },
+      "ScanPartial": {
+        "title": "ScanPartial",
+        "type": "object",
+        "description": "(tsType: Partial<Scan>, schemaOptions: { partial: true })",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "createACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can create subentries"
+            }
+          },
+          "readACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can read this entry"
+            }
+          },
+          "updateACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "deleteACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can delete this entry"
+            }
+          },
+          "shareACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
+            }
+          },
+          "adminACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "scanType": {
+            "type": "string"
+          },
+          "scanParameter": {
+            "type": "object"
+          },
+          "userParameter": {
+            "type": "object"
+          },
+          "queue": {
+            "type": "string"
+          },
+          "scanId": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "queueId": {
+            "type": "string"
+          },
+          "exitStatus": {
+            "type": "string"
+          },
+          "scanNumber": {
+            "type": "number"
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "files": {
+            "type": "object"
+          },
+          "sessionId": {
+            "type": "string"
+          },
+          "datasetId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "x-typescript-type": "Partial<Scan>"
+      },
+      "FunctionalAccount": {
+        "title": "FunctionalAccount",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "createACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can create subentries"
+            }
+          },
+          "readACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can read this entry"
+            }
+          },
+          "updateACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "deleteACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can delete this entry"
+            }
+          },
+          "shareACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
+            }
+          },
+          "adminACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "read": {
+            "type": "boolean"
+          },
+          "write": {
+            "type": "boolean"
+          },
+          "remote": {
+            "type": "boolean"
+          },
+          "token": {
+            "type": "string"
+          },
+          "isFunctional": {
+            "type": "boolean"
+          },
+          "accessConfigId": {
+            "type": "string",
+            "description": "AccessConfig to which this account belongs."
           }
         },
         "required": [
           "name",
-          "beamlineId"
+          "read",
+          "write",
+          "remote",
+          "token"
         ],
-        "additionalProperties": false,
-        "x-typescript-type": "ExperimentWithRelations"
+        "additionalProperties": true
+      },
+      "NewFunctionalAccount": {
+        "title": "NewFunctionalAccount",
+        "type": "object",
+        "description": "(tsType: Omit<FunctionalAccount, 'id'>, schemaOptions: { title: 'NewFunctionalAccount', exclude: [ 'id' ] })",
+        "properties": {
+          "createACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can create subentries"
+            }
+          },
+          "readACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can read this entry"
+            }
+          },
+          "updateACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "deleteACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can delete this entry"
+            }
+          },
+          "shareACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
+            }
+          },
+          "adminACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "read": {
+            "type": "boolean"
+          },
+          "write": {
+            "type": "boolean"
+          },
+          "remote": {
+            "type": "boolean"
+          },
+          "token": {
+            "type": "string"
+          },
+          "isFunctional": {
+            "type": "boolean"
+          },
+          "accessConfigId": {
+            "type": "string",
+            "description": "AccessConfig to which this account belongs."
+          }
+        },
+        "required": [
+          "name",
+          "read",
+          "write",
+          "remote",
+          "token"
+        ],
+        "additionalProperties": true,
+        "x-typescript-type": "Omit<FunctionalAccount, 'id'>"
       },
       "BeamlineWithRelations": {
         "title": "BeamlineWithRelations",
@@ -4254,7 +4534,7 @@
           "functionalAccounts": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/AccessAccountWithRelations"
+              "$ref": "#/components/schemas/FunctionalAccountWithRelations"
             }
           }
         },
@@ -4266,10 +4546,10 @@
         "additionalProperties": false,
         "x-typescript-type": "AccessConfigWithRelations"
       },
-      "AccessConfigPartial": {
-        "title": "AccessConfigPartial",
+      "FunctionalAccountWithRelations": {
+        "title": "FunctionalAccountWithRelations",
         "type": "object",
-        "description": "(tsType: Partial<AccessConfig>, schemaOptions: { partial: true })",
+        "description": "(tsType: FunctionalAccountWithRelations, schemaOptions: { includeRelations: true })",
         "properties": {
           "id": {
             "type": "string"
@@ -4323,303 +4603,751 @@
           "createdBy": {
             "type": "string"
           },
-          "targetAccount": {
+          "name": {
             "type": "string"
           },
-          "beamlineId": {
-            "type": "string",
-            "description": "Beamline to which this config belongs."
-          },
-          "authEnabled": {
+          "read": {
             "type": "boolean"
           },
-          "activeAccounts": {
+          "write": {
+            "type": "boolean"
+          },
+          "remote": {
+            "type": "boolean"
+          },
+          "token": {
+            "type": "string"
+          },
+          "isFunctional": {
+            "type": "boolean"
+          },
+          "accessConfigId": {
+            "type": "string",
+            "description": "AccessConfig to which this account belongs."
+          },
+          "accessConfig": {
+            "$ref": "#/components/schemas/AccessConfigWithRelations"
+          }
+        },
+        "required": [
+          "name",
+          "read",
+          "write",
+          "remote",
+          "token"
+        ],
+        "additionalProperties": true,
+        "x-typescript-type": "FunctionalAccountWithRelations"
+      },
+      "FunctionalAccountPartial": {
+        "title": "FunctionalAccountPartial",
+        "type": "object",
+        "description": "(tsType: Partial<FunctionalAccount>, schemaOptions: { partial: true })",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "createACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can create subentries"
+            }
+          },
+          "readACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can read this entry"
+            }
+          },
+          "updateACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "deleteACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can delete this entry"
+            }
+          },
+          "shareACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
+            }
+          },
+          "adminACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "read": {
+            "type": "boolean"
+          },
+          "write": {
+            "type": "boolean"
+          },
+          "remote": {
+            "type": "boolean"
+          },
+          "token": {
+            "type": "string"
+          },
+          "isFunctional": {
+            "type": "boolean"
+          },
+          "accessConfigId": {
+            "type": "string",
+            "description": "AccessConfig to which this account belongs."
+          }
+        },
+        "additionalProperties": true,
+        "x-typescript-type": "Partial<FunctionalAccount>"
+      },
+      "Experiment": {
+        "title": "Experiment",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "createACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can create subentries"
+            }
+          },
+          "readACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can read this entry"
+            }
+          },
+          "updateACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "deleteACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can delete this entry"
+            }
+          },
+          "shareACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
+            }
+          },
+          "adminACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "datasets": {
             "type": "array",
             "items": {
               "type": "string"
             }
           },
-          "usePasswords": {
+          "beamlineId": {
+            "type": "string"
+          },
+          "writeAccount": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "logbook": {
+            "type": "string"
+          },
+          "samples": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "experimentConfig": {
+            "type": "object"
+          },
+          "experimentInfo": {
+            "type": "object"
+          },
+          "activeSession": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "beamlineId"
+        ],
+        "additionalProperties": false
+      },
+      "NewExperiment": {
+        "title": "NewExperiment",
+        "type": "object",
+        "description": "(tsType: Omit<Experiment, 'id'>, schemaOptions: { title: 'NewExperiment', exclude: [ 'id' ] })",
+        "properties": {
+          "createACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can create subentries"
+            }
+          },
+          "readACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can read this entry"
+            }
+          },
+          "updateACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "deleteACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can delete this entry"
+            }
+          },
+          "shareACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
+            }
+          },
+          "adminACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "datasets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "beamlineId": {
+            "type": "string"
+          },
+          "writeAccount": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "logbook": {
+            "type": "string"
+          },
+          "samples": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "experimentConfig": {
+            "type": "object"
+          },
+          "experimentInfo": {
+            "type": "object"
+          },
+          "activeSession": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "beamlineId"
+        ],
+        "additionalProperties": false,
+        "x-typescript-type": "Omit<Experiment, 'id'>"
+      },
+      "ExperimentPartial": {
+        "title": "ExperimentPartial",
+        "type": "object",
+        "description": "(tsType: Partial<Experiment>, schemaOptions: { partial: true })",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "createACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can create subentries"
+            }
+          },
+          "readACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can read this entry"
+            }
+          },
+          "updateACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "deleteACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can delete this entry"
+            }
+          },
+          "shareACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
+            }
+          },
+          "adminACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "datasets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "beamlineId": {
+            "type": "string"
+          },
+          "writeAccount": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "logbook": {
+            "type": "string"
+          },
+          "samples": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "experimentConfig": {
+            "type": "object"
+          },
+          "experimentInfo": {
+            "type": "object"
+          },
+          "activeSession": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "x-typescript-type": "Partial<Experiment>"
+      },
+      "ExperimentAccount": {
+        "title": "ExperimentAccount",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "createACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can create subentries"
+            }
+          },
+          "readACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can read this entry"
+            }
+          },
+          "updateACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "deleteACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can delete this entry"
+            }
+          },
+          "shareACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
+            }
+          },
+          "adminACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "read": {
             "type": "boolean"
-          }
-        },
-        "additionalProperties": false,
-        "x-typescript-type": "Partial<AccessConfig>"
-      },
-      "Beamline": {
-        "title": "Beamline",
-        "type": "object",
-        "properties": {
-          "id": {
+          },
+          "write": {
+            "type": "boolean"
+          },
+          "remote": {
+            "type": "boolean"
+          },
+          "token": {
             "type": "string"
           },
-          "createACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can create subentries"
-            }
-          },
-          "readACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can read this entry"
-            }
-          },
-          "updateACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can update this entry"
-            }
-          },
-          "deleteACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can delete this entry"
-            }
-          },
-          "shareACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
-            }
-          },
-          "adminACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can administrate this entry"
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdBy": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "activeExperiment": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "name"
-        ],
-        "additionalProperties": false
-      },
-      "NewBeamline": {
-        "title": "NewBeamline",
-        "type": "object",
-        "description": "(tsType: Omit<Beamline, 'id'>, schemaOptions: { title: 'NewBeamline', exclude: [ 'id' ] })",
-        "properties": {
-          "createACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can create subentries"
-            }
-          },
-          "readACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can read this entry"
-            }
-          },
-          "updateACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can update this entry"
-            }
-          },
-          "deleteACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can delete this entry"
-            }
-          },
-          "shareACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
-            }
-          },
-          "adminACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can administrate this entry"
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdBy": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "activeExperiment": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "name"
-        ],
-        "additionalProperties": false,
-        "x-typescript-type": "Omit<Beamline, 'id'>"
-      },
-      "BeamlinePartial": {
-        "title": "BeamlinePartial",
-        "type": "object",
-        "description": "(tsType: Partial<Beamline>, schemaOptions: { partial: true })",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "createACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can create subentries"
-            }
-          },
-          "readACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can read this entry"
-            }
-          },
-          "updateACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can update this entry"
-            }
-          },
-          "deleteACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can delete this entry"
-            }
-          },
-          "shareACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
-            }
-          },
-          "adminACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can administrate this entry"
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdBy": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "activeExperiment": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false,
-        "x-typescript-type": "Partial<Beamline>"
-      },
-      "Dataset": {
-        "title": "Dataset",
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "createACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can create subentries"
-            }
-          },
-          "readACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can read this entry"
-            }
-          },
-          "updateACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can update this entry"
-            }
-          },
-          "deleteACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can delete this entry"
-            }
-          },
-          "shareACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
-            }
-          },
-          "adminACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can administrate this entry"
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdBy": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "number": {
-            "type": "number"
+          "isFunctional": {
+            "type": "boolean"
           },
           "experimentId": {
+            "type": "string",
+            "description": "Experiment to which this account belongs."
+          }
+        },
+        "required": [
+          "name",
+          "read",
+          "write",
+          "remote",
+          "token"
+        ],
+        "additionalProperties": true
+      },
+      "NewExperimentAccount": {
+        "title": "NewExperimentAccount",
+        "type": "object",
+        "description": "(tsType: Omit<ExperimentAccount, 'id'>, schemaOptions: { title: 'NewExperimentAccount', exclude: [ 'id' ] })",
+        "properties": {
+          "createACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can create subentries"
+            }
+          },
+          "readACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can read this entry"
+            }
+          },
+          "updateACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "deleteACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can delete this entry"
+            }
+          },
+          "shareACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
+            }
+          },
+          "adminACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
             "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "read": {
+            "type": "boolean"
+          },
+          "write": {
+            "type": "boolean"
+          },
+          "remote": {
+            "type": "boolean"
+          },
+          "token": {
+            "type": "string"
+          },
+          "isFunctional": {
+            "type": "boolean"
+          },
+          "experimentId": {
+            "type": "string",
+            "description": "Experiment to which this account belongs."
+          }
+        },
+        "required": [
+          "name",
+          "read",
+          "write",
+          "remote",
+          "token"
+        ],
+        "additionalProperties": true,
+        "x-typescript-type": "Omit<ExperimentAccount, 'id'>"
+      },
+      "ExperimentAccountPartial": {
+        "title": "ExperimentAccountPartial",
+        "type": "object",
+        "description": "(tsType: Partial<ExperimentAccount>, schemaOptions: { partial: true })",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "createACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can create subentries"
+            }
+          },
+          "readACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can read this entry"
+            }
+          },
+          "updateACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "deleteACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can delete this entry"
+            }
+          },
+          "shareACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
+            }
+          },
+          "adminACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "read": {
+            "type": "boolean"
+          },
+          "write": {
+            "type": "boolean"
+          },
+          "remote": {
+            "type": "boolean"
+          },
+          "token": {
+            "type": "string"
+          },
+          "isFunctional": {
+            "type": "boolean"
+          },
+          "experimentId": {
+            "type": "string",
+            "description": "Experiment to which this account belongs."
+          }
+        },
+        "additionalProperties": true,
+        "x-typescript-type": "Partial<ExperimentAccount>"
+      },
+      "Event": {
+        "title": "Event",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "createACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can create subentries"
+            }
+          },
+          "readACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can read this entry"
+            }
+          },
+          "updateACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "deleteACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can delete this entry"
+            }
+          },
+          "shareACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
+            }
+          },
+          "adminACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object"
+          },
+          "deviceId": {
+            "type": "string",
+            "description": "The events device"
+          },
+          "scanId": {
+            "type": "string",
+            "description": "The parent scan"
           }
         },
         "additionalProperties": false
       },
-      "NewDataset": {
-        "title": "NewDataset",
+      "NewEvent": {
+        "title": "NewEvent",
         "type": "object",
-        "description": "(tsType: Omit<Dataset, 'id'>, schemaOptions: { title: 'NewDataset', exclude: [ 'id' ] })",
+        "description": "(tsType: Omit<Event, 'id'>, schemaOptions: { title: 'NewEvent', exclude: [ 'id' ] })",
         "properties": {
           "createACL": {
             "type": "array",
@@ -4670,23 +5398,25 @@
           "createdBy": {
             "type": "string"
           },
-          "name": {
-            "type": "string"
+          "data": {
+            "type": "object"
           },
-          "number": {
-            "type": "number"
+          "deviceId": {
+            "type": "string",
+            "description": "The events device"
           },
-          "experimentId": {
-            "type": "string"
+          "scanId": {
+            "type": "string",
+            "description": "The parent scan"
           }
         },
         "additionalProperties": false,
-        "x-typescript-type": "Omit<Dataset, 'id'>"
+        "x-typescript-type": "Omit<Event, 'id'>"
       },
-      "DatasetPartial": {
-        "title": "DatasetPartial",
+      "EventPartial": {
+        "title": "EventPartial",
         "type": "object",
-        "description": "(tsType: Partial<Dataset>, schemaOptions: { partial: true })",
+        "description": "(tsType: Partial<Event>, schemaOptions: { partial: true })",
         "properties": {
           "id": {
             "type": "string"
@@ -4740,18 +5470,20 @@
           "createdBy": {
             "type": "string"
           },
-          "name": {
-            "type": "string"
+          "data": {
+            "type": "object"
           },
-          "number": {
-            "type": "number"
+          "deviceId": {
+            "type": "string",
+            "description": "The events device"
           },
-          "experimentId": {
-            "type": "string"
+          "scanId": {
+            "type": "string",
+            "description": "The parent scan"
           }
         },
         "additionalProperties": false,
-        "x-typescript-type": "Partial<Dataset>"
+        "x-typescript-type": "Partial<Event>"
       },
       "Device": {
         "title": "Device",
@@ -5209,8 +5941,8 @@
         "additionalProperties": false,
         "x-typescript-type": "Partial<Device>"
       },
-      "Event": {
-        "title": "Event",
+      "Dataset": {
+        "title": "Dataset",
         "type": "object",
         "properties": {
           "id": {
@@ -5265,165 +5997,22 @@
           "createdBy": {
             "type": "string"
           },
-          "data": {
-            "type": "object"
+          "name": {
+            "type": "string"
           },
-          "deviceId": {
-            "type": "string",
-            "description": "The events device"
+          "number": {
+            "type": "number"
           },
-          "scanId": {
-            "type": "string",
-            "description": "The parent scan"
+          "experimentId": {
+            "type": "string"
           }
         },
         "additionalProperties": false
       },
-      "NewEvent": {
-        "title": "NewEvent",
+      "NewDataset": {
+        "title": "NewDataset",
         "type": "object",
-        "description": "(tsType: Omit<Event, 'id'>, schemaOptions: { title: 'NewEvent', exclude: [ 'id' ] })",
-        "properties": {
-          "createACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can create subentries"
-            }
-          },
-          "readACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can read this entry"
-            }
-          },
-          "updateACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can update this entry"
-            }
-          },
-          "deleteACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can delete this entry"
-            }
-          },
-          "shareACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
-            }
-          },
-          "adminACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can administrate this entry"
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdBy": {
-            "type": "string"
-          },
-          "data": {
-            "type": "object"
-          },
-          "deviceId": {
-            "type": "string",
-            "description": "The events device"
-          },
-          "scanId": {
-            "type": "string",
-            "description": "The parent scan"
-          }
-        },
-        "additionalProperties": false,
-        "x-typescript-type": "Omit<Event, 'id'>"
-      },
-      "EventPartial": {
-        "title": "EventPartial",
-        "type": "object",
-        "description": "(tsType: Partial<Event>, schemaOptions: { partial: true })",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "createACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can create subentries"
-            }
-          },
-          "readACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can read this entry"
-            }
-          },
-          "updateACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can update this entry"
-            }
-          },
-          "deleteACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can delete this entry"
-            }
-          },
-          "shareACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
-            }
-          },
-          "adminACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can administrate this entry"
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdBy": {
-            "type": "string"
-          },
-          "data": {
-            "type": "object"
-          },
-          "deviceId": {
-            "type": "string",
-            "description": "The events device"
-          },
-          "scanId": {
-            "type": "string",
-            "description": "The parent scan"
-          }
-        },
-        "additionalProperties": false,
-        "x-typescript-type": "Partial<Event>"
-      },
-      "NewExperimentAccount": {
-        "title": "NewExperimentAccount",
-        "type": "object",
-        "description": "(tsType: Omit<ExperimentAccount, 'id'>, schemaOptions: { title: 'NewExperimentAccount', exclude: [ 'id' ] })",
+        "description": "(tsType: Omit<Dataset, 'id'>, schemaOptions: { title: 'NewDataset', exclude: [ 'id' ] })",
         "properties": {
           "createACL": {
             "type": "array",
@@ -5477,37 +6066,534 @@
           "name": {
             "type": "string"
           },
-          "read": {
-            "type": "boolean"
-          },
-          "write": {
-            "type": "boolean"
-          },
-          "remote": {
-            "type": "boolean"
-          },
-          "token": {
-            "type": "string"
-          },
-          "isFunctional": {
-            "type": "boolean"
+          "number": {
+            "type": "number"
           },
           "experimentId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "x-typescript-type": "Omit<Dataset, 'id'>"
+      },
+      "DatasetPartial": {
+        "title": "DatasetPartial",
+        "type": "object",
+        "description": "(tsType: Partial<Dataset>, schemaOptions: { partial: true })",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "createACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can create subentries"
+            }
+          },
+          "readACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can read this entry"
+            }
+          },
+          "updateACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "deleteACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can delete this entry"
+            }
+          },
+          "shareACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
+            }
+          },
+          "adminACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
             "type": "string",
-            "description": "Experiment to which this account belongs."
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "number": {
+            "type": "number"
+          },
+          "experimentId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "x-typescript-type": "Partial<Dataset>"
+      },
+      "Beamline": {
+        "title": "Beamline",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "createACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can create subentries"
+            }
+          },
+          "readACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can read this entry"
+            }
+          },
+          "updateACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "deleteACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can delete this entry"
+            }
+          },
+          "shareACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
+            }
+          },
+          "adminACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "activeExperiment": {
+            "type": "string"
           }
         },
         "required": [
-          "name",
-          "read",
-          "write",
-          "remote",
-          "token"
+          "name"
         ],
-        "additionalProperties": true,
-        "x-typescript-type": "Omit<ExperimentAccount, 'id'>"
+        "additionalProperties": false
       },
-      "ExperimentAccount": {
+      "NewBeamline": {
+        "title": "NewBeamline",
+        "type": "object",
+        "description": "(tsType: Omit<Beamline, 'id'>, schemaOptions: { title: 'NewBeamline', exclude: [ 'id' ] })",
+        "properties": {
+          "createACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can create subentries"
+            }
+          },
+          "readACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can read this entry"
+            }
+          },
+          "updateACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "deleteACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can delete this entry"
+            }
+          },
+          "shareACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
+            }
+          },
+          "adminACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "activeExperiment": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false,
+        "x-typescript-type": "Omit<Beamline, 'id'>"
+      },
+      "BeamlinePartial": {
+        "title": "BeamlinePartial",
+        "type": "object",
+        "description": "(tsType: Partial<Beamline>, schemaOptions: { partial: true })",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "createACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can create subentries"
+            }
+          },
+          "readACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can read this entry"
+            }
+          },
+          "updateACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "deleteACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can delete this entry"
+            }
+          },
+          "shareACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
+            }
+          },
+          "adminACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "activeExperiment": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "x-typescript-type": "Partial<Beamline>"
+      },
+      "AccessConfig": {
+        "title": "AccessConfig",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "createACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can create subentries"
+            }
+          },
+          "readACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can read this entry"
+            }
+          },
+          "updateACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "deleteACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can delete this entry"
+            }
+          },
+          "shareACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
+            }
+          },
+          "adminACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "targetAccount": {
+            "type": "string"
+          },
+          "beamlineId": {
+            "type": "string",
+            "description": "Beamline to which this config belongs."
+          },
+          "authEnabled": {
+            "type": "boolean"
+          },
+          "activeAccounts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "usePasswords": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "beamlineId",
+          "authEnabled",
+          "usePasswords"
+        ],
+        "additionalProperties": false
+      },
+      "NewAccessConfig": {
+        "title": "NewAccessConfig",
+        "type": "object",
+        "description": "(tsType: Omit<AccessConfig, 'id'>, schemaOptions: { title: 'NewAccessConfig', exclude: [ 'id' ] })",
+        "properties": {
+          "createACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can create subentries"
+            }
+          },
+          "readACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can read this entry"
+            }
+          },
+          "updateACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "deleteACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can delete this entry"
+            }
+          },
+          "shareACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
+            }
+          },
+          "adminACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "targetAccount": {
+            "type": "string"
+          },
+          "beamlineId": {
+            "type": "string",
+            "description": "Beamline to which this config belongs."
+          },
+          "authEnabled": {
+            "type": "boolean"
+          },
+          "activeAccounts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "usePasswords": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "beamlineId",
+          "authEnabled",
+          "usePasswords"
+        ],
+        "additionalProperties": false,
+        "x-typescript-type": "Omit<AccessConfig, 'id'>"
+      },
+      "AccessConfigPartial": {
+        "title": "AccessConfigPartial",
+        "type": "object",
+        "description": "(tsType: Partial<AccessConfig>, schemaOptions: { partial: true })",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "createACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can create subentries"
+            }
+          },
+          "readACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can read this entry"
+            }
+          },
+          "updateACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "deleteACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can delete this entry"
+            }
+          },
+          "shareACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
+            }
+          },
+          "adminACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "targetAccount": {
+            "type": "string"
+          },
+          "beamlineId": {
+            "type": "string",
+            "description": "Beamline to which this config belongs."
+          },
+          "authEnabled": {
+            "type": "boolean"
+          },
+          "activeAccounts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "usePasswords": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false,
+        "x-typescript-type": "Partial<AccessConfig>"
+      },
+      "AccessAccount": {
         "title": "AccessAccount",
         "type": "object",
         "properties": {
@@ -5591,304 +6677,10 @@
         ],
         "additionalProperties": false
       },
-      "Experiment": {
-        "title": "Experiment",
+      "NewAccessAccount": {
+        "title": "NewAccessAccount",
         "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "createACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can create subentries"
-            }
-          },
-          "readACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can read this entry"
-            }
-          },
-          "updateACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can update this entry"
-            }
-          },
-          "deleteACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can delete this entry"
-            }
-          },
-          "shareACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
-            }
-          },
-          "adminACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can administrate this entry"
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdBy": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "datasets": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "beamlineId": {
-            "type": "string"
-          },
-          "writeAccount": {
-            "type": "string"
-          },
-          "userId": {
-            "type": "string"
-          },
-          "logbook": {
-            "type": "string"
-          },
-          "samples": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "experimentConfig": {
-            "type": "object"
-          },
-          "experimentInfo": {
-            "type": "object"
-          },
-          "activeSession": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "beamlineId"
-        ],
-        "additionalProperties": false
-      },
-      "NewExperiment": {
-        "title": "NewExperiment",
-        "type": "object",
-        "description": "(tsType: Omit<Experiment, 'id'>, schemaOptions: { title: 'NewExperiment', exclude: [ 'id' ] })",
-        "properties": {
-          "createACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can create subentries"
-            }
-          },
-          "readACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can read this entry"
-            }
-          },
-          "updateACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can update this entry"
-            }
-          },
-          "deleteACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can delete this entry"
-            }
-          },
-          "shareACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
-            }
-          },
-          "adminACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can administrate this entry"
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdBy": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "datasets": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "beamlineId": {
-            "type": "string"
-          },
-          "writeAccount": {
-            "type": "string"
-          },
-          "userId": {
-            "type": "string"
-          },
-          "logbook": {
-            "type": "string"
-          },
-          "samples": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "experimentConfig": {
-            "type": "object"
-          },
-          "experimentInfo": {
-            "type": "object"
-          },
-          "activeSession": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "beamlineId"
-        ],
-        "additionalProperties": false,
-        "x-typescript-type": "Omit<Experiment, 'id'>"
-      },
-      "ExperimentPartial": {
-        "title": "ExperimentPartial",
-        "type": "object",
-        "description": "(tsType: Partial<Experiment>, schemaOptions: { partial: true })",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "createACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can create subentries"
-            }
-          },
-          "readACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can read this entry"
-            }
-          },
-          "updateACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can update this entry"
-            }
-          },
-          "deleteACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can delete this entry"
-            }
-          },
-          "shareACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
-            }
-          },
-          "adminACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can administrate this entry"
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdBy": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "datasets": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "beamlineId": {
-            "type": "string"
-          },
-          "writeAccount": {
-            "type": "string"
-          },
-          "userId": {
-            "type": "string"
-          },
-          "logbook": {
-            "type": "string"
-          },
-          "samples": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "experimentConfig": {
-            "type": "object"
-          },
-          "experimentInfo": {
-            "type": "object"
-          },
-          "activeSession": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false,
-        "x-typescript-type": "Partial<Experiment>"
-      },
-      "NewFunctionalAccount": {
-        "title": "NewFunctionalAccount",
-        "type": "object",
-        "description": "(tsType: Omit<FunctionalAccount, 'id'>, schemaOptions: { title: 'NewFunctionalAccount', exclude: [ 'id' ] })",
+        "description": "(tsType: Omit<AccessAccount, 'id'>, schemaOptions: { title: 'NewAccessAccount', exclude: [ 'id' ] })",
         "properties": {
           "createACL": {
             "type": "array",
@@ -5956,10 +6748,6 @@
           },
           "isFunctional": {
             "type": "boolean"
-          },
-          "accessConfigId": {
-            "type": "string",
-            "description": "AccessConfig to which this account belongs."
           }
         },
         "required": [
@@ -5969,12 +6757,13 @@
           "remote",
           "token"
         ],
-        "additionalProperties": true,
-        "x-typescript-type": "Omit<FunctionalAccount, 'id'>"
+        "additionalProperties": false,
+        "x-typescript-type": "Omit<AccessAccount, 'id'>"
       },
-      "FunctionalAccount": {
-        "title": "AccessAccount",
+      "AccessAccountWithRelations": {
+        "title": "AccessAccountWithRelations",
         "type": "object",
+        "description": "(tsType: AccessAccountWithRelations, schemaOptions: { includeRelations: true })",
         "properties": {
           "id": {
             "type": "string"
@@ -6054,306 +6843,13 @@
           "remote",
           "token"
         ],
-        "additionalProperties": false
-      },
-      "Scan": {
-        "title": "Scan",
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "createACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can create subentries"
-            }
-          },
-          "readACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can read this entry"
-            }
-          },
-          "updateACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can update this entry"
-            }
-          },
-          "deleteACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can delete this entry"
-            }
-          },
-          "shareACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
-            }
-          },
-          "adminACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can administrate this entry"
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdBy": {
-            "type": "string"
-          },
-          "scanType": {
-            "type": "string"
-          },
-          "scanParameter": {
-            "type": "object"
-          },
-          "userParameter": {
-            "type": "object"
-          },
-          "queue": {
-            "type": "string"
-          },
-          "scanId": {
-            "type": "string"
-          },
-          "requestId": {
-            "type": "string"
-          },
-          "queueId": {
-            "type": "string"
-          },
-          "exitStatus": {
-            "type": "string"
-          },
-          "scanNumber": {
-            "type": "number"
-          },
-          "metadata": {
-            "type": "object"
-          },
-          "files": {
-            "type": "object"
-          },
-          "sessionId": {
-            "type": "string"
-          },
-          "datasetId": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "NewScan": {
-        "title": "NewScan",
-        "type": "object",
-        "description": "(tsType: Omit<Scan, 'id'>, schemaOptions: { title: 'NewScan', exclude: [ 'id' ] })",
-        "properties": {
-          "createACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can create subentries"
-            }
-          },
-          "readACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can read this entry"
-            }
-          },
-          "updateACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can update this entry"
-            }
-          },
-          "deleteACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can delete this entry"
-            }
-          },
-          "shareACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
-            }
-          },
-          "adminACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can administrate this entry"
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdBy": {
-            "type": "string"
-          },
-          "scanType": {
-            "type": "string"
-          },
-          "scanParameter": {
-            "type": "object"
-          },
-          "userParameter": {
-            "type": "object"
-          },
-          "queue": {
-            "type": "string"
-          },
-          "scanId": {
-            "type": "string"
-          },
-          "requestId": {
-            "type": "string"
-          },
-          "queueId": {
-            "type": "string"
-          },
-          "exitStatus": {
-            "type": "string"
-          },
-          "scanNumber": {
-            "type": "number"
-          },
-          "metadata": {
-            "type": "object"
-          },
-          "files": {
-            "type": "object"
-          },
-          "sessionId": {
-            "type": "string"
-          },
-          "datasetId": {
-            "type": "string"
-          }
-        },
         "additionalProperties": false,
-        "x-typescript-type": "Omit<Scan, 'id'>"
+        "x-typescript-type": "AccessAccountWithRelations"
       },
-      "ScanPartial": {
-        "title": "ScanPartial",
+      "AccessAccountPartial": {
+        "title": "AccessAccountPartial",
         "type": "object",
-        "description": "(tsType: Partial<Scan>, schemaOptions: { partial: true })",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "createACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can create subentries"
-            }
-          },
-          "readACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can read this entry"
-            }
-          },
-          "updateACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can update this entry"
-            }
-          },
-          "deleteACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can delete this entry"
-            }
-          },
-          "shareACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
-            }
-          },
-          "adminACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can administrate this entry"
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdBy": {
-            "type": "string"
-          },
-          "scanType": {
-            "type": "string"
-          },
-          "scanParameter": {
-            "type": "object"
-          },
-          "userParameter": {
-            "type": "object"
-          },
-          "queue": {
-            "type": "string"
-          },
-          "scanId": {
-            "type": "string"
-          },
-          "requestId": {
-            "type": "string"
-          },
-          "queueId": {
-            "type": "string"
-          },
-          "exitStatus": {
-            "type": "string"
-          },
-          "scanNumber": {
-            "type": "number"
-          },
-          "metadata": {
-            "type": "object"
-          },
-          "files": {
-            "type": "object"
-          },
-          "sessionId": {
-            "type": "string"
-          },
-          "datasetId": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false,
-        "x-typescript-type": "Partial<Scan>"
-      },
-      "Session": {
-        "title": "Session",
-        "type": "object",
+        "description": "(tsType: Partial<AccessAccount>, schemaOptions: { partial: true })",
         "properties": {
           "id": {
             "type": "string"
@@ -6410,160 +6906,24 @@
           "name": {
             "type": "string"
           },
-          "experimentId": {
-            "type": "string",
-            "description": "Session to which this device belongs."
+          "read": {
+            "type": "boolean"
           },
-          "sessionConfig": {
-            "type": "object"
-          }
-        },
-        "required": [
-          "name"
-        ],
-        "additionalProperties": false
-      },
-      "NewSession": {
-        "title": "NewSession",
-        "type": "object",
-        "description": "(tsType: Omit<Session, 'id'>, schemaOptions: { title: 'NewSession', exclude: [ 'id' ] })",
-        "properties": {
-          "createACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can create subentries"
-            }
+          "write": {
+            "type": "boolean"
           },
-          "readACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can read this entry"
-            }
+          "remote": {
+            "type": "boolean"
           },
-          "updateACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can update this entry"
-            }
-          },
-          "deleteACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can delete this entry"
-            }
-          },
-          "shareACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
-            }
-          },
-          "adminACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can administrate this entry"
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdBy": {
+          "token": {
             "type": "string"
           },
-          "name": {
-            "type": "string"
-          },
-          "experimentId": {
-            "type": "string",
-            "description": "Session to which this device belongs."
-          },
-          "sessionConfig": {
-            "type": "object"
-          }
-        },
-        "required": [
-          "name"
-        ],
-        "additionalProperties": false,
-        "x-typescript-type": "Omit<Session, 'id'>"
-      },
-      "SessionPartial": {
-        "title": "SessionPartial",
-        "type": "object",
-        "description": "(tsType: Partial<Session>, schemaOptions: { partial: true })",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "createACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can create subentries"
-            }
-          },
-          "readACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can read this entry"
-            }
-          },
-          "updateACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can update this entry"
-            }
-          },
-          "deleteACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can delete this entry"
-            }
-          },
-          "shareACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can add users/groups to createACL, readACL and updateACL"
-            }
-          },
-          "adminACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can administrate this entry"
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdBy": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "experimentId": {
-            "type": "string",
-            "description": "Session to which this device belongs."
-          },
-          "sessionConfig": {
-            "type": "object"
+          "isFunctional": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false,
-        "x-typescript-type": "Partial<Session>"
+        "x-typescript-type": "Partial<AccessAccount>"
       },
       "loopback.Count": {
         "type": "object",
@@ -6811,6 +7171,7 @@
         "x-typescript-type": "@loopback/repository#Filter<AccessAccount>"
       },
       "AccessConfig.ScopeFilter": {
+        "type": "object",
         "properties": {
           "offset": {
             "type": "integer",
@@ -6875,7 +7236,11 @@
         "type": "object",
         "properties": {
           "relation": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "beamline",
+              "functionalAccounts"
+            ]
           },
           "scope": {
             "$ref": "#/components/schemas/AccessConfig.ScopeFilter"
@@ -7138,6 +7503,7 @@
         "x-typescript-type": "@loopback/repository#Filter<AccessConfig>"
       },
       "Beamline.ScopeFilter": {
+        "type": "object",
         "properties": {
           "offset": {
             "type": "integer",
@@ -7202,7 +7568,11 @@
         "type": "object",
         "properties": {
           "relation": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "accessConfig",
+              "experiments"
+            ]
           },
           "scope": {
             "$ref": "#/components/schemas/Beamline.ScopeFilter"
@@ -7441,6 +7811,7 @@
         "x-typescript-type": "@loopback/repository#Filter<Beamline>"
       },
       "Dataset.ScopeFilter": {
+        "type": "object",
         "properties": {
           "offset": {
             "type": "integer",
@@ -7505,7 +7876,11 @@
         "type": "object",
         "properties": {
           "relation": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "scans",
+              "experiment"
+            ]
           },
           "scope": {
             "$ref": "#/components/schemas/Dataset.ScopeFilter"
@@ -7752,6 +8127,7 @@
         "x-typescript-type": "@loopback/repository#Filter<Dataset>"
       },
       "Device.ScopeFilter": {
+        "type": "object",
         "properties": {
           "offset": {
             "type": "integer",
@@ -7816,7 +8192,13 @@
         "type": "object",
         "properties": {
           "relation": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "subdevices",
+              "parent",
+              "session",
+              "events"
+            ]
           },
           "scope": {
             "$ref": "#/components/schemas/Device.ScopeFilter"
@@ -8135,6 +8517,7 @@
         "x-typescript-type": "@loopback/repository#Filter<Device>"
       },
       "Event.ScopeFilter": {
+        "type": "object",
         "properties": {
           "offset": {
             "type": "integer",
@@ -8199,7 +8582,11 @@
         "type": "object",
         "properties": {
           "relation": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "device",
+              "scan"
+            ]
           },
           "scope": {
             "$ref": "#/components/schemas/Event.ScopeFilter"
@@ -8446,6 +8833,7 @@
         "x-typescript-type": "@loopback/repository#Filter<Event>"
       },
       "ExperimentAccount.ScopeFilter": {
+        "type": "object",
         "properties": {
           "offset": {
             "type": "integer",
@@ -8510,7 +8898,10 @@
         "type": "object",
         "properties": {
           "relation": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "experiment"
+            ]
           },
           "scope": {
             "$ref": "#/components/schemas/ExperimentAccount.ScopeFilter"
@@ -8753,6 +9144,7 @@
         "x-typescript-type": "@loopback/repository#Filter<ExperimentAccount>"
       },
       "Experiment.ScopeFilter": {
+        "type": "object",
         "properties": {
           "offset": {
             "type": "integer",
@@ -8817,7 +9209,11 @@
         "type": "object",
         "properties": {
           "relation": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "experimentAccounts",
+              "sessions"
+            ]
           },
           "scope": {
             "$ref": "#/components/schemas/Experiment.ScopeFilter"
@@ -9120,6 +9516,7 @@
         "x-typescript-type": "@loopback/repository#Filter<Experiment>"
       },
       "FunctionalAccount.ScopeFilter": {
+        "type": "object",
         "properties": {
           "offset": {
             "type": "integer",
@@ -9184,7 +9581,10 @@
         "type": "object",
         "properties": {
           "relation": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "accessConfig"
+            ]
           },
           "scope": {
             "$ref": "#/components/schemas/FunctionalAccount.ScopeFilter"
@@ -9427,6 +9827,7 @@
         "x-typescript-type": "@loopback/repository#Filter<FunctionalAccount>"
       },
       "Scan.ScopeFilter": {
+        "type": "object",
         "properties": {
           "offset": {
             "type": "integer",
@@ -9491,7 +9892,12 @@
         "type": "object",
         "properties": {
           "relation": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "session",
+              "dataset",
+              "events"
+            ]
           },
           "scope": {
             "$ref": "#/components/schemas/Scan.ScopeFilter"
@@ -9818,6 +10224,7 @@
         "x-typescript-type": "@loopback/repository#Filter<Scan>"
       },
       "Session.ScopeFilter": {
+        "type": "object",
         "properties": {
           "offset": {
             "type": "integer",
@@ -9882,7 +10289,12 @@
         "type": "object",
         "properties": {
           "relation": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "experiment",
+              "scans",
+              "devices"
+            ]
           },
           "scope": {
             "$ref": "#/components/schemas/Session.ScopeFilter"
