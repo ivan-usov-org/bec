@@ -9,8 +9,7 @@ services:
     image: morgana-harbor.psi.ch/bec/redis
     network_mode: host
   scibec-test-server:
-    image: scibec-test-server
-    build: ./scibec
+    image: morgana-harbor.psi.ch/bec/scibec
     network_mode: host
     depends_on:
       - "mongodb-test"
