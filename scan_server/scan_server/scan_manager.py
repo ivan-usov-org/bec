@@ -14,9 +14,7 @@ logger = bec_logger.logger
 
 
 class ScanManager:
-    DEFAULT_PLUGIN_PATH = Path(
-        os.path.dirname(os.path.abspath(__file__)) + "/../scan_plugins"
-    ).resolve()
+    DEFAULT_PLUGIN_PATH = Path(os.path.dirname(os.path.abspath(__file__)) + "/../../").resolve()
 
     def __init__(self, *, parent):
         """
@@ -32,12 +30,17 @@ class ScanManager:
 
     def load_plugins(self):
         """load scan plugins"""
-        plugin_path = self.DEFAULT_PLUGIN_PATH
+        plugin_path = os.environ.get("BEC_PLUGIN_PATH")
+        if not plugin_path:
+            logger.info("BEC_PLUGIN_PATH not set. Using default plugin path.")
+            plugin_path = self.DEFAULT_PLUGIN_PATH
+        else:
+            logger.info(f"Using plugin path {plugin_path}")
+        plugin_path = os.path.join(plugin_path, "scan_server/scan_plugins")
         files = glob.glob(os.path.join(plugin_path, "*.py"))
         for file in files:
             if file.endswith("__init__.py"):
                 continue
-            filename = os.path.basename(file).split(".py")[0]
             module_spec = importlib.util.spec_from_file_location("scan_plugins", file)
             plugin_module = importlib.util.module_from_spec(module_spec)
             module_spec.loader.exec_module(plugin_module)
