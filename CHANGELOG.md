@@ -2,6 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.1 (2023-07-02)
+
+### Fix
+
+* Fixed ipython client startup script for new lib name ([`b2f5f3c`](https://gitlab.psi.ch/bec/bec/-/commit/b2f5f3c2631d749ade619fd32b3f10671f9f3f1c))
+
+### Documentation
+
+* Added data_processing services; changed default python version to 3.9 ([`233f682`](https://gitlab.psi.ch/bec/bec/-/commit/233f68216ff12ce223ea4024fe190e237df21afe))
+* Updated doc with proper semver ([`71aa1d7`](https://gitlab.psi.ch/bec/bec/-/commit/71aa1d715a47a9b42888147611ffc8af8d46714c))
+
 ## v0.8.0 (2023-06-28)
 
 ### Feature
