@@ -19,6 +19,7 @@ To start the services, run
     cd ./scan_bundler; python launch.py --config ../bec_config.yaml
     cd ./file_writer; python launch.py --config ../bec_config.yaml
     cd ./scihub; python launch.py --config ../bec_config.yaml
+    cd ./data_processing; python launch.py --config ../bec_config.yaml
 
 
 where :file:`bec_config.yaml` is a service config file.  

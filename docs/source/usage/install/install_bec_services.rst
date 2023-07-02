@@ -37,3 +37,4 @@ Services can be installed with pip inside "bec" folder:
     pip install -e ./file_writer
     pip install -e ./bec_client
     pip install -e ./scihub
+    pip install -e ./data_processing
