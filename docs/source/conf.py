@@ -3,16 +3,33 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+import datetime
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+import os
+import pathlib
+import sys
 
 project = "BEC"
-copyright = "2022, Paul Scherrer Institute, Switzerland"
+copyright = f"{datetime.datetime.today().year}, Paul Scherrer Institute, Switzerland"
 author = "Klaus Wakonig"
-release = "0.1"
 
-import os
-import sys
+current_path = pathlib.Path(__file__).parent.parent.parent.resolve()
+version_path = f"{current_path}/semantic_release/"
+
+
+def get_version():
+    """load the version from the version file"""
+    version_file = os.path.join(version_path, "__init__.py")
+    with open(version_file, "r", encoding="utf-8") as file:
+        res = file.readline()
+        version = res.split("=")[1]
+    return version.strip().strip('"')
+
+
+release = get_version()
+
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../scan_bundler")))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../scan_server")))
