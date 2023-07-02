@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BEC_CLIENT_PATH=$(pip show bec_client | grep "Location" | cut -d' ' -f2)
+BEC_CLIENT_PATH=$(pip show bec-ipython-client | grep "Location" | cut -d' ' -f2)
 STARTUP_SCRIPT=$BEC_CLIENT_PATH/bec_client/bin/bec_startup.py
 
 
