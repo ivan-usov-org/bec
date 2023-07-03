@@ -292,6 +292,8 @@ class DeviceContainer(dict):
                 self[k] = v
 
     def __getattr__(self, attr):
+        if attr == "__wrapped__":
+            return self.get(attr)
         dev = self.get(attr)
         if not dev:
             raise DeviceConfigError(f"Device {attr} does not exist.")
