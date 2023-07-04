@@ -149,8 +149,19 @@ class IPythonLiveUpdates:
     def _process_queue(
         self, queue: QueueItem, request: BECMessage.ScanQueueMessage, req_id: str
     ) -> bool:
+        """
+        Process the queue and return True if the scan is completed.
+
+        Args:
+            queue(QueueItem): The queue item to process.
+            request(BECMessage.ScanQueueMessage): The request message.
+            req_id(str): The request ID.
+
+        Returns:
+            bool: True if the scan is completed.
+        """
         check_alarms(self.client)
-        if not queue.request_blocks:
+        if not queue.request_blocks or not queue.status:
             return False
         if queue.status == "PENDING" and queue.queue_position > 0:
             status = self.client.queue.queue_storage.current_scan_queue.get("primary", {}).get(

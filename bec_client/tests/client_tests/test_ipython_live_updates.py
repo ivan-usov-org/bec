@@ -90,6 +90,29 @@ def test_live_updates_process_queue_running(bec_client):
                     assert res is True
 
 
+@pytest.mark.timeout(20)
+def test_live_updates_process_queue_without_status(bec_client):
+    client = bec_client
+    client.start()
+    live_updates = IPythonLiveUpdates(client)
+    request_msg = BECMessage.ScanQueueMessage(
+        scan_type="grid_scan",
+        parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
+        queue="primary",
+        metadata={"RID": "something"},
+    )
+    queue = QueueItem(
+        scan_manager=client.queue,
+        queueID="queueID",
+        request_blocks=[request_msg],
+        status=None,
+        active_request_block={},
+        scanID=["scanID"],
+    )
+    with mock.patch.object(queue, "_update_with_buffer"):
+        assert live_updates._process_queue(queue, request_msg, "req_id") is False
+
+
 # @pytest.mark.timeout(20)
 # @pytest.mark.asyncio
 # def test_live_updates_process_instruction_readback(bec_client):
