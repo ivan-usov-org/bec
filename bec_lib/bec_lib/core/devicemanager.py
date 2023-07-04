@@ -292,7 +292,10 @@ class DeviceContainer(dict):
                 self[k] = v
 
     def __getattr__(self, attr):
-        if attr == "__wrapped__":
+        if attr.startswith("__"):
+            # if dunder attributes are would not be caught, they
+            # would raise a DeviceConfigError and kill the
+            # IPython completer
             return self.get(attr)
         dev = self.get(attr)
         if not dev:
