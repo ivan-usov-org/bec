@@ -229,6 +229,10 @@ class DeviceManagerDS(DeviceManagerBase):
             return
         obj.destroy()
 
+    def reset_device(self, obj: DSDevice):
+        """reset a device"""
+        obj.initialized = False
+
     @staticmethod
     def connect_device(obj):
         """establish a connection to a device"""
