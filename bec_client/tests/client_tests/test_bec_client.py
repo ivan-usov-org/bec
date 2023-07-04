@@ -24,7 +24,8 @@ def test_bec_client_initialize():
         scibec={"host": "localhost", "port": 5000},
         mongodb={"host": "localhost", "port": 50001},
     )
-    client.initialize(config, RedisConnector)
+    with mock.patch.object(client, "_load_scans"):
+        client.initialize(config, RedisConnector)
 
 
 def test_bec_client_start():
@@ -34,7 +35,8 @@ def test_bec_client_start():
         scibec={"host": "localhost", "port": 5000},
         mongodb={"host": "localhost", "port": 50001},
     )
-    client.initialize(config, RedisConnector)
+    with mock.patch.object(client, "_load_scans"):
+        client.initialize(config, RedisConnector)
     client.connector = ConnectorMock("")
 
     with mock.patch.object(client, "wait_for_service") as wait_for_service:
