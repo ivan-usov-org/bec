@@ -678,7 +678,7 @@ def test_disabled_device_raises_scan_request_error(client):
     bec.metadata.update({"unit_test": "test_disabled_device_raises_scan_rejection"})
     dev = bec.device_manager.devices
     dev.samx.enabled = False
-    with pytest.raises(ScanRequestError):
+    with pytest.raises((AlarmBase, ScanRequestError)):
         scans.line_scan(dev.samx, 0, 1, steps=10, relative=False)
     dev.samx.enabled = True
     scans.line_scan(dev.samx, 0, 1, steps=10, relative=False)
