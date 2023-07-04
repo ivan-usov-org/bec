@@ -62,8 +62,15 @@ class ConfigUpdateHandler:
                 accepted=accepted, error_msg=error_msg, metadata=msg.metadata
             )
 
-    def send_config_request_reply(self, accepted, error_msg, metadata):
-        """send a config request reply"""
+    def send_config_request_reply(self, accepted: bool, error_msg: str, metadata: dict) -> None:
+        """
+        Sends a config request reply
+
+        Args:
+            accepted (bool): Whether the request was accepted
+            error_msg (str): Error message
+            metadata (dict): Metadata of the request
+        """
         msg = BECMessage.RequestResponseMessage(
             accepted=accepted, message=error_msg, metadata=metadata
         )
@@ -72,7 +79,7 @@ class ConfigUpdateHandler:
             MessageEndpoints.device_config_request_response(RID), msg.dumps(), expire=60
         )
 
-    def _update_config(self, msg):
+    def _update_config(self, msg: BECMessage.DeviceConfigMessage) -> None:
         for dev, dev_config in msg.content["config"].items():
             device = self.device_manager.devices[dev]
             if "deviceConfig" in dev_config:
@@ -84,9 +91,10 @@ class ConfigUpdateHandler:
                     self.device_manager.update_config(device.obj, dev_config["deviceConfig"])
                 except Exception as exc:
                     self.device_manager.update_config(device.obj, old_config)
-                    raise DeviceConfigError(f"Error during object update. {exc}") from exc
+                    raise DeviceConfigError(f"Error during object update. {exc}")
 
             if "enabled" in dev_config:
+                device._config["enabled"] = dev_config["enabled"]
                 if dev_config["enabled"]:
                     # pylint:disable=protected-access
                     if device.obj._destroyed:
@@ -95,3 +103,4 @@ class ConfigUpdateHandler:
                         self.device_manager.initialize_enabled_device(device)
                 else:
                     self.device_manager.disconnect_device(device.obj)
+                    self.device_manager.reset_device(device)
