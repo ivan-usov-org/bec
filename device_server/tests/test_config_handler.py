@@ -2,10 +2,13 @@ import os
 from unittest import mock
 
 import bec_lib.core
+import pytest
 import yaml
 from bec_lib.core import BECMessage
 from bec_lib.core.tests.utils import ConnectorMock, create_session_from_config
+from test_device_manager_ds import device_manager
 
+from device_server.devices.config_update_handler import ConfigUpdateHandler
 from device_server.devices.devicemanager import DeviceConfigError, DeviceManagerDS
 
 dir_path = os.path.dirname(bec_lib.core.__file__)
@@ -42,3 +45,31 @@ def test_request_response():
                         )
                     )
                     request_reply.assert_called_once()
+
+
+def test_config_handler_update_config(device_manager):
+    handler = ConfigUpdateHandler(device_manager)
+
+    msg = BECMessage.DeviceConfigMessage(action="update", config={"samx": {"enabled": False}})
+    handler._update_config(msg)
+    assert device_manager.devices.samx.enabled is False
+    assert device_manager.devices.samx.initialized is False
+    assert device_manager.devices.samx.obj._destroyed is True
+
+    msg = BECMessage.DeviceConfigMessage(action="update", config={"samx": {"enabled": True}})
+    handler._update_config(msg)
+    assert device_manager.devices.samx.enabled is True
+    assert device_manager.devices.samx.initialized is True
+    assert device_manager.devices.samx.obj._destroyed is False
+
+
+def test_config_handler_update_config_raises(device_manager):
+    handler = ConfigUpdateHandler(device_manager)
+
+    msg = BECMessage.DeviceConfigMessage(
+        action="update", config={"samx": {"deviceConfig": {"doesntexist": True}}}
+    )
+    old_config = device_manager.devices.samx._config["deviceConfig"].copy()
+    with pytest.raises(DeviceConfigError):
+        handler._update_config(msg)
+    assert device_manager.devices.samx._config["deviceConfig"] == old_config
