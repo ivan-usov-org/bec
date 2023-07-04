@@ -2,11 +2,9 @@ from unittest import mock
 
 import IPython
 from bec_lib.core import RedisConnector, ServiceConfig
-from bec_lib.core.tests.utils import bec_client
+from bec_lib.core.tests.utils import ConnectorMock, bec_client
 
 from bec_client import BECIPythonClient
-
-CONFIG_PATH = "../ci/test_config.yaml"
 
 
 def test_ipython_device_completion(bec_client):
@@ -21,14 +19,23 @@ def test_ipython_device_completion(bec_client):
 
 def test_bec_client_initialize():
     client = BECIPythonClient()
-    config = ServiceConfig(CONFIG_PATH)
+    config = ServiceConfig(
+        redis={"host": "localhost", "port": 6379},
+        scibec={"host": "localhost", "port": 5000},
+        mongodb={"host": "localhost", "port": 50001},
+    )
     client.initialize(config, RedisConnector)
 
 
 def test_bec_client_start():
     client = BECIPythonClient()
-    config = ServiceConfig(CONFIG_PATH)
+    config = ServiceConfig(
+        redis={"host": "localhost", "port": 6379},
+        scibec={"host": "localhost", "port": 5000},
+        mongodb={"host": "localhost", "port": 50001},
+    )
     client.initialize(config, RedisConnector)
+    client.connector = ConnectorMock("")
 
     with mock.patch.object(client, "wait_for_service") as wait_for_service:
         with mock.patch.object(client, "_start_exit_handler") as start_exit_handler:
