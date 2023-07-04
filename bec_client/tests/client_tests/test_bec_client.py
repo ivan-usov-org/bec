@@ -31,9 +31,9 @@ def test_bec_client_start():
     client.initialize(config, RedisConnector)
 
     with mock.patch.object(client, "wait_for_service") as wait_for_service:
-        with mock.patch.object(client, "_start_exit_handler"):
-            with mock.patch.object(client, "_configure_ipython"):
+        with mock.patch.object(client, "_start_exit_handler") as start_exit_handler:
+            with mock.patch.object(client, "_configure_ipython") as configure_ipython:
                 client.start()
-                client._start_exit_handler.assert_called_once()
-                client._configure_ipython.assert_called_once()
+                start_exit_handler.assert_called_once()
+                configure_ipython.assert_called_once()
                 wait_for_service.assert_called_once_with("DeviceServer")
