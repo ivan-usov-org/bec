@@ -17,6 +17,7 @@ from bec_lib.core.bec_errors import ScanAbortion, ScanInterruption
 from bec_lib.core.tests.utils import wait_for_empty_queue
 
 from bec_client import BECIPythonClient
+from bec_client.callbacks.utils import ScanRequestError
 
 logger = bec_logger.logger
 
@@ -668,3 +669,16 @@ def test_async_callback_data_matches_scan_data(client):
 
     for ii, msg in enumerate(s.scan.data.values()):
         assert msg.content == reference_container["data"][ii]
+
+
+@pytest.mark.timeout(100)
+def test_disabled_device_raises_scan_request_error(client):
+    bec = client
+    wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_disabled_device_raises_scan_rejection"})
+    dev = bec.device_manager.devices
+    dev.samx.enabled = False
+    with pytest.raises(ScanRequestError):
+        scans.line_scan(dev.samx, 0, 1, steps=10, relative=False)
+    dev.samx.enabled = True
+    scans.line_scan(dev.samx, 0, 1, steps=10, relative=False)

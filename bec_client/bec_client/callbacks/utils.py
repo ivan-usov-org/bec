@@ -113,10 +113,10 @@ class ScanRequestMixin:
         while self.scan_queue_request.accepted is None:
             await asyncio.sleep(0.01)
 
-        while self.request_storage.storage[0].queue is None:
-            await asyncio.sleep(0.01)
-
         if not self.scan_queue_request.accepted[0]:
             raise ScanRequestError(
                 f"Scan was rejected by the server: {self.scan_queue_request.response.content.get('message')}"
             )
+
+        while self.scan_queue_request.queue is None:
+            await asyncio.sleep(0.01)
