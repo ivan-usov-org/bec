@@ -54,8 +54,7 @@ class ScanGuard:
         except Exception as error:
             content = traceback.format_exc()
             return ScanStatus(False, str(content))
-        else:
-            return ScanStatus()
+        return ScanStatus()
 
     def _check_valid_request(self, request) -> None:
         if request is None:
