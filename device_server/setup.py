@@ -23,6 +23,7 @@ def get_version():
 if __name__ == "__main__":
     setup(
         install_requires=["numpy", "ophyd", "msgpack", "pyyaml"],
+        extras_require={"dev": ["pytest", "pytest-random-order", "coverage"]},
         version=get_version(),
     )
     local_deps = [utils, ophyd_devices]
