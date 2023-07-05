@@ -23,6 +23,7 @@ if __name__ == "__main__":
         install_requires=["numpy", "msgpack", "pyyaml", "cytoolz", "rich"],
         version=get_version(),
         extras_require={"dev": ["pytest", "pytest-random-order", "coverage"]},
+        entry_points={"console_scripts": ["bec-scan-server = scan_server:main"]},
     )
     local_deps = [utils]
     for dep in local_deps:

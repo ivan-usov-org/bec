@@ -18,7 +18,11 @@ def get_version():
 
 
 if __name__ == "__main__":
-    setup(install_requires=["lmfit"], version=get_version())
+    setup(
+        install_requires=["lmfit"],
+        version=get_version(),
+        entry_points={"console_scripts": ["bec-dap = data_processing:main"]},
+    )
     local_deps = [utils]
     for dep in local_deps:
         subprocess.run(f"pip install -e {dep}", shell=True, check=True)
