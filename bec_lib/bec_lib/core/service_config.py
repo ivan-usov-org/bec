@@ -6,6 +6,15 @@ from .logger import bec_logger
 
 logger = bec_logger.logger
 
+DEFAULT_SERVICE_CONFIG = {
+    "redis": {"host": "localhost", "port": 6379},
+    "mongodb": {"host": "localhost", "port": 27017},
+    "scibec": {"host": "http://[::1]", "port": 3030},
+    "service_config": {
+        "file_writer": {"plugin": "default_NeXus_format", "base_path": "./"},
+    },
+}
+
 
 class ServiceConfig:
     def __init__(
@@ -26,7 +35,9 @@ class ServiceConfig:
 
         self._update_config(service_config=config, scibec=scibec, redis=redis, mongodb=mongodb)
 
-        self.service_config = self.config.get("service_config", {})
+        self.service_config = self.config.get(
+            "service_config", {"file_writer": {"plugin": "default_NeXus_format", "base_path": "./"}}
+        )
 
     def _update_config(self, **kwargs):
         for key, val in kwargs.items():
@@ -36,6 +47,7 @@ class ServiceConfig:
 
     def _load_config(self):
         if not self.config_path:
+            self.config = DEFAULT_SERVICE_CONFIG
             return
         with open(self.config_path, "r") as stream:
             self.config = yaml.safe_load(stream)
