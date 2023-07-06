@@ -3,7 +3,7 @@
 conda_env_name="bec_base_env"
 
 # check if conda is installed
-if ! [ -x "$(command -v conda)" ]; then
+if ! [ -x "$(which conda)" ]; then
     echo "conda is not installed. Please install conda first."
     exit 1
 fi
@@ -32,7 +32,7 @@ do
     source ./${package}_venv/bin/activate
     pip install -q -q -e .
     cd ../
-    echo "\r\rInstalled $package"
+    echo "Installed $package"
 done
 
 
