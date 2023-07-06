@@ -18,7 +18,7 @@ for i in $(seq ${CONDA_SHLVL}); do
     conda deactivate
 done
 
-dependencies=(bec_lib scan_server scan_bundler data_processing file_writer device_server scihub bec_client)
+dependencies=(bec_lib scan_server scan_bundler data_processing file_writer device_server scihub bec_client bec_server)
 
 # loop over all packages and install them
 for package in "${dependencies[@]}"
@@ -32,8 +32,10 @@ do
     source ./${package}_venv/bin/activate
     pip install -q -q -e .
     cd ../
+    deactivate
     echo "Installed $package"
 done
 
+source ./bec_server/bec_server_venv/bin/activate
 
 
