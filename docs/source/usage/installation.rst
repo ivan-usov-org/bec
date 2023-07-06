@@ -12,30 +12,6 @@ Install BEC (test system)
 Prerequisites 
 =============
 
-Python environment
--------------------
-
-Python environment
-^^^^^^^^^^^^^^^^^^
-.. code-block:: bash
-
-    python -m venv ./bec_venv
-    source ./bec_venv/bin/activate
-
-
-Conda environment
-^^^^^^^^^^^^^^^^^^
-
-Instead of using a python environment, you can also use conda
-
-- Linux: https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html
-- macOS: https://docs.conda.io/projects/conda/en/latest/user-guide/install/macos.html
-
-.. code-block:: bash
-    
-    conda create --name bec python=3.8
-    conda activate bec
-
 Redis
 ------
 To install Redis, you can either use conda 
@@ -50,7 +26,52 @@ or install it manually by following the instructions `here <https://redis.io/doc
 
     redis-server
 
-If you prefer to run redis in Docker, you can also follow the instructions in `Start docker containers for MongoDB, SciBec API server, and Redis`_
+If you prefer to run redis in Docker, you can also follow the instructions in `Start docker containers for MongoDB, SciBec API server, and Redis`_ instead of installing it through conda.
+
+
+Python environment
+-------------------
+
+User environment
+^^^^^^^^^^^^^^^^^^
+
+If you want to install the BEC server as a user and not for development purposes, you can create a Python (>= 3.8) environment using
+
+.. code-block:: bash
+
+    python -m venv ./bec_venv
+    source ./bec_venv/bin/activate
+
+and install the BEC server using
+
+.. code-block:: bash
+
+    pip install bec-server
+
+Once installed, you can start the server using
+
+.. code-block:: bash
+
+    bec-server start
+
+
+Development environment
+^^^^^^^^^^^^^^^^^^^^^^^
+
+If you want to install the BEC server for development purposes, make sure you have git and conda installed. Then, run 
+
+.. code-block:: bash
+
+    git clone https://gitlab.psi.ch/bec/bec.git
+    cd bec
+
+    source ./bin/install_bec_dev.sh
+
+Once everything is installed, run
+
+.. code-block:: bash
+
+    bec-server start
 
 
 .. include:: install/install_bec_services.rst
