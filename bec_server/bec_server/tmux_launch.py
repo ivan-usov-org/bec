@@ -1,4 +1,25 @@
+import os
+
 import libtmux
+
+
+def activate_venv(pane, service_name, service_path):
+    """
+    Activate the python environment for a service.
+    """
+
+    # check if the current file was install with pip install -e (editable mode)
+    # if so, the venv is the service directory and it's called <service_name>_venv
+    # otherwise, we simply take the currently running venv
+
+    if "site-packages" in __file__:
+        venv_base_path = os.path.dirname(
+            os.path.dirname(os.path.dirname(__file__.split("site-packages", maxsplit=1)[0]))
+        )
+        pane.send_keys(f"source {venv_base_path}/bin/activate")
+        return
+
+    pane.send_keys(f"source {service_path}/{service_name}_venv/bin/activate")
 
 
 def tmux_launch(bec_path: str, config_path: str, services: dict):
@@ -26,8 +47,13 @@ def tmux_launch(bec_path: str, config_path: str, services: dict):
         else:
             pane = session.attached_window.split_window(vertical=False)
         panes.append(pane)
-        pane.send_keys(f"cd {service_config['path'].substitute(base_path=bec_path)}")
-        pane.send_keys(f"source ./{service}_venv/bin/activate")
+
+        activate_venv(
+            pane,
+            service_name=service,
+            service_path=service_config["path"].substitute(base_path=bec_path),
+        )
+
         if config_path:
             pane.send_keys(f"{service_config['command']} --config {config_path}")
         else:
