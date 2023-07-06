@@ -8,7 +8,10 @@ The following quickstart guide assumes that your system is already installed and
 Create a new configuration
 ***************************
 
+BEC without devices is not of much use. To inform BEC about your devices, you need to create a configuration file. This file is a yaml file that contains all information about your devices. 
 If you already have a list of your devices and their configuration, you can skip this step and continue with `Load, save and update the configuration`_.
+
+.. note:: The configuration file is a yaml file. If you are not familiar with yaml, please have a look at the `yaml documentation <https://yaml.org/>`_.
 
 .. include:: install/create_config.rst
 

@@ -1,11 +1,6 @@
 ##########################
-BEC configuration
+BEC Service Configuration
 ##########################
-
-
-**********************
-Service configuration
-**********************
 
 The template config file (:file:`bec_config_template.yaml`) for BEC services contains the following definitions:
 
@@ -29,14 +24,18 @@ The template config file (:file:`bec_config_template.yaml`) for BEC services con
             plugin: default_NeXus_format
             base_path: ./
 
-The service config file is always passed as command-line argument to a BEC service, e.g. 
+The service config file can always be passed as command-line argument to a single BEC service, e.g. 
 
 .. code-block:: bash
 
-    python launch.py --config ./bec_config.yaml
+    bec-file-writer --config ./bec_config.yaml
 
-During the setup process, you may have created a new config file based on the template file. If the name deviates from :file:`bec_config.yaml`, please make sure to launch the services with the newly created file. 
-In addition, modify the client config as described in the following section.
+or even to the bec-server command, which will then pass the config file to all services:
+
+.. code-block:: bash
+
+    bec-server start --config ./bec_config.yaml
+
 
 **********************
 Client configuration

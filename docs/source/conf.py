@@ -44,6 +44,7 @@ extensions = [
     "sphinx.ext.todo",
     "recommonmark",
     "sphinx_copybutton",
+    "sphinx_toolbox.collapse",
 ]
 autosummary_generate = False  # Turn on sphinx.ext.autosummary
 add_module_names = False  # Remove namespaces from class/method signatures
