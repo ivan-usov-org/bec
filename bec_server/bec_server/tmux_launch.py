@@ -28,7 +28,10 @@ def tmux_launch(bec_path: str, config_path: str, services: dict):
         panes.append(pane)
         pane.send_keys(f"cd {service_config['path'].substitute(base_path=bec_path)}")
         pane.send_keys(f"source ./{service}_venv/bin/activate")
-        pane.send_keys(service_config["command"].substitute(config_path=config_path))
+        if config_path:
+            pane.send_keys(f"{service_config['command']} --config {config_path}")
+        else:
+            pane.send_keys(f"{service_config['command']}")
         session.attached_window.select_layout("tiled")
 
     session.mouse_all_flag = True
