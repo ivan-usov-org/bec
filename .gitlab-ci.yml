@@ -241,9 +241,10 @@ end-2-end-conda:
   image: continuumio/miniconda3
   script:
     - conda config --set always_yes yes --set changeps1 no
-    - conda update -q conda
-    - conda info -a
     - conda create -q -n test-environment python=3.9
+    - conda init bash
+    - source ~/.bashrc 
+    - conda activate myenv 
     - conda activate test-environment
     - conda install -c conda-forge redis
     - redis --daemonize yes
