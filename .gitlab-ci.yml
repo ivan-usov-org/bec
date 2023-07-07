@@ -241,7 +241,7 @@ end-2-end-conda:
   image: continuumio/miniconda3
   script:
     - apt-get update
-    - apt-get install tmux
+    - apt-get install -y tmux
     - conda config --set always_yes yes --set changeps1 no
     - conda create -q -n test-environment python=3.9
     - conda init bash
