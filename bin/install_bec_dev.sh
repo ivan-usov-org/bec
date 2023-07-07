@@ -3,9 +3,9 @@
 conda_env_name="bec_base_env"
 
 # check if conda is installed
-if ! [ -x "$(which conda)" ]; then
+if ! [ "$(which conda)" ]; then
     echo "conda is not installed. Please install conda first."
-    exit 1
+    return
 fi
 
 # check if conda environment exists and install it if not

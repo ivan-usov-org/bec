@@ -36,17 +36,22 @@ def main():
     """
     parser = argparse.ArgumentParser(description="Utility tool managing the BEC server")
     command = parser.add_subparsers(dest="command")
-    command.add_parser("start", help="Start the BEC server")
-    command.add_parser("stop", help="Stop the BEC server")
-    command.add_parser("restart", help="Restart the BEC server")
-    command.add_parser("status", help="Show the status of the BEC server")
-
-    parser.add_argument(
+    start = command.add_parser("start", help="Start the BEC server")
+    start.add_argument(
         "--config",
         type=str,
         default=None,
         help="Path to the BEC service config file",
     )
+    command.add_parser("stop", help="Stop the BEC server")
+    restart = command.add_parser("restart", help="Restart the BEC server")
+    restart.add_argument(
+        "--config",
+        type=str,
+        default=None,
+        help="Path to the BEC service config file",
+    )
+    command.add_parser("status", help="Show the status of the BEC server")
 
     args = parser.parse_args()
     if args.command == "start":
