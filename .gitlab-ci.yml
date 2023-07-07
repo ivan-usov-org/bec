@@ -258,9 +258,9 @@ end-2-end-conda:
     - source ./bin/install_bec_dev.sh
     - bec-server start --config ./ci/test_config.yaml
 
-    - python ./bec_lib/bec_lib/core/init_config.py --config /code/bec/bec_lib/demo_config.yaml
+    - python ./bec_lib/bec_lib/core/init_config.py --config ./scibec/init_scibec/demo_config.yaml
 
-    - pytest -v ./bec_client/tests/end-2-end/test_scans.py::test_func
+    - pytest -v ./bec_client/tests/end-2-end/test_scans.py::test_grid_scan
 
   artifacts:
     when: on_failure
