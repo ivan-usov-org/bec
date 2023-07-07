@@ -45,7 +45,6 @@ BEC
 
         bec-server start
 
-
     To install the BEC client, run
 
     .. code-block:: bash
@@ -73,13 +72,18 @@ BEC
 
         source ./bin/install_bec_dev.sh
 
+    .. note::
+
+        If you need to connect to redis on a different port than the default (6379), you can create a service config file based on the template
+        in ``bec/bec_config_template.yaml`` and pass it to the bec-server using the ``--config`` flag.
+
     Once everything is installed, run
 
     .. code-block:: bash
 
         bec-server start
 
-    and to start the client, run
+    To start the client, run
 
     .. code-block:: bash
 
