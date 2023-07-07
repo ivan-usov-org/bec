@@ -245,15 +245,16 @@ end-2-end-conda:
     - conda init bash
     - source ~/.bashrc 
     - conda activate test-environment
-    
+
     - conda install redis
     - redis-server --daemonize yes
 
     # get ophyd devices repo (needed for the device_server)
     - git clone --branch $OPHYD_DEVICES_BRANCH https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
-    - source ./bin/install_bec_dev.sh
+    - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices
 
-    - bec-server start --config ./ci/config.yaml
+    - source ./bin/install_bec_dev.sh
+    - bec-server start --config ./ci/test_config.yaml
 
   artifacts:
     when: on_failure
