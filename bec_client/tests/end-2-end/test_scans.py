@@ -642,6 +642,8 @@ def test_callback_data_matches_scan_data(client):
         reference_container["data"].append(data)
 
     s = scans.line_scan(dev.samx, 0, 1, steps=10, relative=False, callback=dummy_callback)
+    while len(reference_container["data"]) < 10:
+        time.sleep(0.1)    
     assert len(s.scan.data) == 10
     assert len(reference_container["data"]) == 10
 
@@ -678,7 +680,9 @@ def test_disabled_device_raises_scan_request_error(client):
     bec.metadata.update({"unit_test": "test_disabled_device_raises_scan_rejection"})
     dev = bec.device_manager.devices
     dev.samx.enabled = False
+    time.sleep(1)
     with pytest.raises((AlarmBase, ScanRequestError)):
         scans.line_scan(dev.samx, 0, 1, steps=10, relative=False)
     dev.samx.enabled = True
+    time.sleep(1)
     scans.line_scan(dev.samx, 0, 1, steps=10, relative=False)
