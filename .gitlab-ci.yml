@@ -260,7 +260,7 @@ end-2-end-conda:
 
     - pip install pytest pytest-random-order pytest-cov pytest-asyncio pytest-timeout
     - python ./bec_lib/bec_lib/core/init_config.py --config ./scibec/init_scibec/demo_config.yaml
-
+    - cd ./bec_client
     - pytest -v ./bec_client/tests/end-2-end/test_scans.py::test_grid_scan
 
   artifacts:
