@@ -245,8 +245,9 @@ end-2-end-conda:
     - conda init bash
     - source ~/.bashrc 
     - conda activate test-environment
-    - conda install -c conda-forge redis
-    - redis --daemonize yes
+    
+    - conda install redis
+    - redis-server --daemonize yes
 
     # get ophyd devices repo (needed for the device_server)
     - git clone --branch $OPHYD_DEVICES_BRANCH https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
