@@ -238,7 +238,7 @@ end-2-end-light:
 end-2-end-conda:
   stage: End2End
   needs: []
-  image: miniconda/miniconda3:latest
+  image: continuumio/miniconda3
   script:
     - conda config --set always_yes yes --set changeps1 no
     - conda update -q conda
