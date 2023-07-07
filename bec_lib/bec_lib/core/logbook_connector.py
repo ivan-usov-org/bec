@@ -2,15 +2,16 @@ import sys
 import warnings
 
 import msgpack
-from bec_lib.core import MessageEndpoints, RedisConnector, bec_logger
 from requests.exceptions import HTTPError
+
+from bec_lib.core import MessageEndpoints, RedisConnector, bec_logger
 
 logger = bec_logger.logger
 
 try:
     import scilog
 except ImportError:
-    logger.warning("The logbook cannot be used as the import of scilog failed.")
+    logger.info("Unable to import `scilog` optional dependency")
 
 
 class LogbookConnector:
