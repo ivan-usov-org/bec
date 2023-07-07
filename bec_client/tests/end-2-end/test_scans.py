@@ -643,7 +643,7 @@ def test_callback_data_matches_scan_data(client):
 
     s = scans.line_scan(dev.samx, 0, 1, steps=10, relative=False, callback=dummy_callback)
     while len(reference_container["data"]) < 10:
-        time.sleep(0.1)    
+        time.sleep(0.1)
     assert len(s.scan.data) == 10
     assert len(reference_container["data"]) == 10
 
@@ -664,8 +664,10 @@ def test_async_callback_data_matches_scan_data(client):
         reference_container["data"].append(data)
 
     s = scans.line_scan(dev.samx, 0, 1, steps=10, relative=False, async_callback=dummy_callback)
+
     while len(reference_container["data"]) < 10:
         time.sleep(0.1)
+
     assert len(s.scan.data) == 10
     assert len(reference_container["data"]) == 10
 
