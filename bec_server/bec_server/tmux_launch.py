@@ -22,7 +22,7 @@ def activate_venv(pane, service_name, service_path):
     pane.send_keys(f"source {service_path}/{service_name}_venv/bin/activate")
 
 
-def tmux_launch(bec_path: str, config_path: str, services: dict):
+def tmux_start(bec_path: str, config_path: str, services: dict):
     """
     Launch the BEC server in a tmux session. All services are launched in separate panes.
 
