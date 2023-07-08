@@ -1,11 +1,11 @@
 from unittest import mock
 
-from bec_server.bec_server import main
+from bec_server.launch import main
 
 
 def test_main_start():
-    with mock.patch("bec_server.bec_server.ServiceHandler") as mock_service_handler:
-        with mock.patch("bec_server.bec_server.argparse") as mock_argparse:
+    with mock.patch("bec_server.launch.ServiceHandler") as mock_service_handler:
+        with mock.patch("bec_server.launch.argparse") as mock_argparse:
             mock_argparse.ArgumentParser().parse_args.return_value = mock.MagicMock(
                 command="start", config=None
             )
@@ -15,8 +15,8 @@ def test_main_start():
 
 
 def test_main_stop():
-    with mock.patch("bec_server.bec_server.ServiceHandler") as mock_service_handler:
-        with mock.patch("bec_server.bec_server.argparse") as mock_argparse:
+    with mock.patch("bec_server.launch.ServiceHandler") as mock_service_handler:
+        with mock.patch("bec_server.launch.argparse") as mock_argparse:
             mock_argparse.ArgumentParser().parse_args.return_value = mock.MagicMock(
                 command="stop", config=None
             )
@@ -26,8 +26,8 @@ def test_main_stop():
 
 
 def test_main_restart():
-    with mock.patch("bec_server.bec_server.ServiceHandler") as mock_service_handler:
-        with mock.patch("bec_server.bec_server.argparse") as mock_argparse:
+    with mock.patch("bec_server.launch.ServiceHandler") as mock_service_handler:
+        with mock.patch("bec_server.launch.argparse") as mock_argparse:
             mock_argparse.ArgumentParser().parse_args.return_value = mock.MagicMock(
                 command="restart", config=None
             )
@@ -37,8 +37,8 @@ def test_main_restart():
 
 
 def test_main_start_with_config():
-    with mock.patch("bec_server.bec_server.ServiceHandler") as mock_service_handler:
-        with mock.patch("bec_server.bec_server.argparse") as mock_argparse:
+    with mock.patch("bec_server.launch.ServiceHandler") as mock_service_handler:
+        with mock.patch("bec_server.launch.argparse") as mock_argparse:
             mock_argparse.ArgumentParser().parse_args.return_value = mock.MagicMock(
                 command="start", config="/path/to/config"
             )
@@ -50,8 +50,8 @@ def test_main_start_with_config():
 
 
 def test_main_restart_with_config():
-    with mock.patch("bec_server.bec_server.ServiceHandler") as mock_service_handler:
-        with mock.patch("bec_server.bec_server.argparse") as mock_argparse:
+    with mock.patch("bec_server.launch.ServiceHandler") as mock_service_handler:
+        with mock.patch("bec_server.launch.argparse") as mock_argparse:
             mock_argparse.ArgumentParser().parse_args.return_value = mock.MagicMock(
                 command="restart", config="/path/to/config"
             )
