@@ -1,1 +1,1 @@
-from .bec_server import main
+from bec_server.bec_server import main
