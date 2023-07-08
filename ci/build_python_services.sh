@@ -9,6 +9,8 @@ declare -a dirs=(
     "scan_bundler"
     "file_writer"
     "data_processing"
+    "scihub"
+    "bec_server"
 )
 
 mkdir dist
