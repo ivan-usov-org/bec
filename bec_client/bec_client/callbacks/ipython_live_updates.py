@@ -161,7 +161,7 @@ class IPythonLiveUpdates:
             bool: True if the scan is completed.
         """
         check_alarms(self.client)
-        if not queue.request_blocks or not queue.status:
+        if not queue.request_blocks or not queue.status or queue.queue_position is None:
             return False
         if queue.status == "PENDING" and queue.queue_position > 0:
             status = self.client.queue.queue_storage.current_scan_queue.get("primary", {}).get(
