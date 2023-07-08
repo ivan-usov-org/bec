@@ -2,7 +2,8 @@ import argparse
 import threading
 
 from bec_lib.core import RedisConnector, ServiceConfig, bec_logger
-from data_processing.dap_server import DAPServer
+
+import data_processing
 
 logger = bec_logger.logger
 bec_logger.level = bec_logger.LOGLEVEL.INFO
@@ -23,7 +24,7 @@ def main():
 
     config = ServiceConfig(config_path)
 
-    bec_server = DAPServer(
+    bec_server = data_processing.dap_server.DAPServer(
         config=config,
         connector_cls=RedisConnector,
     )

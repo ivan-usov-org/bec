@@ -22,6 +22,7 @@ if __name__ == "__main__":
         install_requires=["lmfit"],
         version=get_version(),
         entry_points={"console_scripts": ["bec-dap = data_processing:main"]},
+        extras_require={"dev": ["pytest", "pytest-random-order", "coverage"]},
     )
     local_deps = [utils]
     for dep in local_deps:
