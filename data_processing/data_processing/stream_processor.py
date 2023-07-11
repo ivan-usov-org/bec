@@ -6,6 +6,7 @@ from collections import deque
 from typing import Any, List, Optional, Tuple
 
 import lmfit
+import numpy as np
 from bec_lib.core import BECMessage, MessageEndpoints
 from bec_lib.core.redis_connector import MessageObject, RedisConnector
 
@@ -238,7 +239,10 @@ class LmfitProcessor(StreamProcessor):
         result = self.model.fit(self.data["y"], x=self.data["x"])
 
         # add the fit result to the output
-        stream_output = {self.config["output"]: result.best_fit, "input": self.config["input_xy"]}
+        stream_output = {
+            self.config["output"]: {"x": np.asarray(self.data["x"]), "y": result.best_fit},
+            "input": self.config["input_xy"],
+        }
 
         # add the fit parameters to the metadata
         metadata["fit_parameters"] = result.best_values

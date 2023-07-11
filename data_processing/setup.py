@@ -19,7 +19,7 @@ def get_version():
 
 if __name__ == "__main__":
     setup(
-        install_requires=["lmfit"],
+        install_requires=["lmfit", "numpy"],
         version=get_version(),
         entry_points={"console_scripts": ["bec-dap = data_processing:main"]},
         extras_require={"dev": ["pytest", "pytest-random-order", "coverage"]},

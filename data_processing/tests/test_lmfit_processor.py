@@ -36,7 +36,7 @@ def test_LmfitProcessor_process_gaussian():
     data = {"data": {"x": 4, "y": 4}}
     metadata = {}
     result_data, result_metadata = processor.process(data, metadata)
-    assert np.allclose(result_data["gaussian_fit"], processor.data["y"], atol=0.1)
+    assert np.allclose(result_data["gaussian_fit"]["y"], processor.data["y"], atol=0.1)
     assert {"amplitude", "sigma", "center"} & set(result_metadata["fit_parameters"]) == {
         "amplitude",
         "sigma",
