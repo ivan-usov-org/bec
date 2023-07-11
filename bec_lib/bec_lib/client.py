@@ -3,10 +3,11 @@ from __future__ import print_function
 import builtins
 import importlib
 import inspect
-import os
-import pathlib
 import subprocess
 from typing import List
+
+from rich.console import Console
+from rich.table import Table
 
 from bec_lib.alarm_handler import AlarmHandler
 from bec_lib.callback_handler import CallbackHandler
@@ -25,10 +26,18 @@ from bec_lib.devicemanager_client import DMClient
 from bec_lib.scan_manager import ScanManager
 from bec_lib.scans import Scans
 from bec_lib.user_scripts_mixin import UserScriptsMixin
-from rich.console import Console
-from rich.table import Table
 
 logger = bec_logger.logger
+
+DEFAULT_CONFIG = {
+    "redis": {"host": "localhost", "port": 6379},
+    "mongodb": {"host": "localhost", "port": 27017},
+    "scibec": {"host": "localhost", "port": 3030, "beamline": "MyBeamline"},
+    "config": {
+        "file_writer": {"plugin": "default_NeXus_format", "base_path": "./"},
+        "scilog": {"env_file": "./"},
+    },
+}
 
 
 class BECClient(BECService, UserScriptsMixin):
@@ -47,10 +56,8 @@ class BECClient(BECService, UserScriptsMixin):
     def initialize(self, config: ServiceConfig = None, connector_cls: ConnectorBase = None):
         """initialize the BEC client"""
         if not config:
-            current_path = pathlib.Path(__file__).parent.parent.resolve()
-            config = ServiceConfig(
-                config_path=os.path.join(current_path, "../bec_config_template.yaml")
-            )
+            config = ServiceConfig(**DEFAULT_CONFIG)
+
         if not connector_cls:
             connector_cls = RedisConnector
         super().__init__(config, connector_cls)
