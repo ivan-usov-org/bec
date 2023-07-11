@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.10.2 (2023-07-11)
+
+### Fix
+
+* Added missing x coords to lmfit processor ([`ddfe9df`](https://gitlab.psi.ch/bec/bec/-/commit/ddfe9df6a11f506e52f00be59f76b43c910d0504))
+
 ## v0.10.1 (2023-07-11)
 
 ### Fix
