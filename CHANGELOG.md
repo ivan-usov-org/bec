@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.10.1 (2023-07-11)
+
+### Fix
+
+* Fixed relative path in client init; needed for pypi ([`0d9ed33`](https://gitlab.psi.ch/bec/bec/-/commit/0d9ed33a2d63e54ac12bf9cd5dcc6d4250e70bc4))
+
 ## v0.10.0 (2023-07-08)
 
 ### Feature
