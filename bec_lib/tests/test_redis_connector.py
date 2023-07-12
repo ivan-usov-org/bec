@@ -458,10 +458,24 @@ def test_redis_connector_xread(producer):
 
 
 def test_redis_connector_xread_without_id(producer):
-    producer.xread("topic")
+    producer.xread("topic", from_start=True)
     producer.r.xread.assert_called_once_with({"topic:val": "0-0"}, count=None, block=None)
     producer.r.xread.reset_mock()
 
     producer.stream_keys["topic"] = "id"
     producer.xread("topic")
     producer.r.xread.assert_called_once_with({"topic:val": "id"}, count=None, block=None)
+
+
+def test_redis_connector_xread_from_end(producer):
+    producer.xread("topic", from_start=False)
+    last_id = producer.r.xinfo_stream("topic:val")["last-generated-id"]
+    producer.r.xread.assert_called_once_with({"topic:val": last_id}, count=None, block=None)
+
+
+def test_redis_connector_xread_from_new_topic(producer):
+    producer.r.xinfo_stream.side_effect = redis.exceptions.ResponseError(
+        "NOGROUP No such key 'topic:val' or consumer group"
+    )
+    producer.xread("topic", from_start=False)
+    producer.r.xread.assert_called_once_with({"topic:val": "0-0"}, count=None, block=None)
