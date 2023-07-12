@@ -209,6 +209,41 @@ class RedisProducer(ProducerConnector):
             return client.hgetall(f"{topic}:val")
         return client.get(f"{topic}:val")
 
+    def xadd(self, topic: str, msg: dict, max_size=None, pipe=None):
+        """add to stream"""
+        client = pipe if pipe is not None else self.r
+        if max_size:
+            client.xadd(f"{topic}:val", msg, maxlen=max_size)
+        else:
+            client.xadd(f"{topic}:val", msg)
+
+    def xread(self, topic: str, id: str, count: int = None, block: int = None, pipe=None) -> list:
+        """
+        read from stream
+
+        Args:
+            topic (str): redis topic
+            id (str): id to start reading from
+            count (int, optional): number of messages to read. Defaults to None.
+            block (int, optional): block for x milliseconds. Defaults to None.
+            pipe ([Pipeline], optional): redis pipe. Defaults to None.
+
+        Returns:
+            [list]: list of messages
+
+        Examples:
+            >>> redis.xread("test", "0-0")
+            >>> redis.xread("test", "0-0", count=1)
+
+            # read one message at a time
+            >>> key = 0
+            >>> msg = redis.xread("test", key, count=1)
+            >>> key = msg[0][1][0][0]
+            >>> next_msg = redis.xread("test", key, count=1)
+        """
+        client = pipe if pipe is not None else self.r
+        return client.xread({f"{topic}:val": id}, count=count, block=block)
+
 
 class RedisConsumerMixin:
     def _init_topics_and_pattern(self, topics, pattern):

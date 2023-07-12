@@ -2,6 +2,7 @@ from unittest import mock
 
 import pytest
 import redis
+
 from bec_lib.core.BECMessage import AlarmMessage, LogMessage
 from bec_lib.core.connector import ConsumerConnectorError
 from bec_lib.core.endpoints import MessageEndpoints
@@ -439,3 +440,18 @@ def test_redis_consumer_threaded_init(consumer_threaded, topics, pattern):
         assert consumer_threaded.sleep_times == [0.005, 0.1]
         assert consumer_threaded.last_received_msg == 0
         assert consumer_threaded.idle_time == 30
+
+
+def test_redis_connector_xadd(producer):
+    producer.xadd("topic", {"key": "value"})
+    producer.r.xadd.assert_called_once_with("topic:val", {"key": "value"})
+
+
+def test_redis_connector_xadd_with_maxlen(producer):
+    producer.xadd("topic", {"key": "value"}, max_size=100)
+    producer.r.xadd.assert_called_once_with("topic:val", {"key": "value"}, maxlen=100)
+
+
+def test_redis_connector_xread(producer):
+    producer.xread("topic", "id")
+    producer.r.xread.assert_called_once_with({"topic:val": "id"}, count=None, block=None)
