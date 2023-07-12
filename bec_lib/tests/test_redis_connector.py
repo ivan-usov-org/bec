@@ -455,3 +455,13 @@ def test_redis_connector_xadd_with_maxlen(producer):
 def test_redis_connector_xread(producer):
     producer.xread("topic", "id")
     producer.r.xread.assert_called_once_with({"topic:val": "id"}, count=None, block=None)
+
+
+def test_redis_connector_xread_without_id(producer):
+    producer.xread("topic")
+    producer.r.xread.assert_called_once_with({"topic:val": "0-0"}, count=None, block=None)
+    producer.r.xread.reset_mock()
+
+    producer.stream_keys["topic"] = "id"
+    producer.xread("topic")
+    producer.r.xread.assert_called_once_with({"topic:val": "id"}, count=None, block=None)

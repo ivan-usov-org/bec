@@ -117,6 +117,7 @@ class RedisProducer(ProducerConnector):
             self.r = redis_cls(host=host, port=port)
             return
         self.r = redis.Redis(host=host, port=port)
+        self.stream_keys = {}
 
     def send(self, topic: str, msg, pipe=None) -> None:
         """send to redis"""
@@ -217,16 +218,25 @@ class RedisProducer(ProducerConnector):
         else:
             client.xadd(f"{topic}:val", msg)
 
-    def xread(self, topic: str, id: str, count: int = None, block: int = None, pipe=None) -> list:
+    def xread(
+        self,
+        topic: str,
+        id: str = None,
+        count: int = None,
+        block: int = None,
+        pipe=None,
+        from_start=False,
+    ) -> list:
         """
         read from stream
 
         Args:
             topic (str): redis topic
-            id (str): id to start reading from
+            id (str, optional): id to read from. Defaults to None.
             count (int, optional): number of messages to read. Defaults to None.
             block (int, optional): block for x milliseconds. Defaults to None.
-            pipe ([Pipeline], optional): redis pipe. Defaults to None.
+            pipe (Pipeline, optional): redis pipe. Defaults to None.
+            from_start (bool, optional): read from start. Defaults to False.
 
         Returns:
             [list]: list of messages
@@ -242,7 +252,23 @@ class RedisProducer(ProducerConnector):
             >>> next_msg = redis.xread("test", key, count=1)
         """
         client = pipe if pipe is not None else self.r
-        return client.xread({f"{topic}:val": id}, count=count, block=block)
+        if topic not in self.stream_keys:
+            if from_start:
+                self.stream_keys[topic] = "0-0"
+            else:
+                try:
+                    self.stream_keys[topic] = client.xinfo_stream(f"{topic}:val")[
+                        "last-generated-id"
+                    ]
+                except redis.exceptions.ResponseError:
+                    self.stream_keys[topic] = "0-0"
+        if id is None:
+            id = self.stream_keys[topic]
+
+        msg = client.xread({f"{topic}:val": id}, count=count, block=block)
+        if msg:
+            self.stream_keys[topic] = msg[0][1][-1][0]
+        return msg
 
 
 class RedisConsumerMixin:
