@@ -23,7 +23,7 @@ include:
 stages:
   - Formatter
   - RepoUpdates
-  - Unittests
+  - test # must be called test for security/secret-detection to work
   - AdditionalTests
   - End2End
   - Deploy
@@ -102,7 +102,7 @@ repo_update:
       - git push -o ci.skip https://oauth2:$CI_UPDATES@gitlab.psi.ch/bec/bec.git ${CI_COMMIT_REF_NAME}
 
 tests:
-  stage: Unittests
+  stage: test
   needs: ["repo_update"]
   script:
     - git clone --branch $OPHYD_DEVICES_BRANCH https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
