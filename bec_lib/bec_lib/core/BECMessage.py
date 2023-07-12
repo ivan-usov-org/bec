@@ -18,7 +18,7 @@ from .numpy_encoder import numpy_decode, numpy_encode
 logger = bec_logger.logger
 
 BECCOMPRESSION = "msgpack"
-DEFAULT_VERSION = 1.1
+DEFAULT_VERSION = 1.2
 
 
 class BECMessageCompression:
@@ -100,8 +100,11 @@ class BECMessage:
     def loads(cls, msg) -> Optional(BECMessage):
         """load BECMessage from bytes or dict input"""
         try:
-            msg = json.loads(msg)
-            version = msg["version"]
+            if isinstance(msg, bytes) and msg.startswith(b"MSGVERSION_"):
+                version = float(msg[11:14])
+            else:
+                msg = json.loads(msg)
+                version = msg["version"]
         except Exception:
             version = 1.0
 
@@ -131,6 +134,23 @@ class BECMessage:
                     ret.append(msg_cls.loads(sub_message))
                 return ret
             return cls._validated_return(msg)
+        if version == 1.2:
+            declaration, msg_header_body = msg.split(b"_EOH_")
+            _, version, header_length, _ = declaration.split(b"_")
+            header = msg_header_body[: int(header_length)]
+            body = msg_header_body[int(header_length) :]
+            header = json.loads(header.decode())
+            msg_compression = header.get("compression")
+            compression_handler = cls._get_compression_handler(msg_compression)
+            msg_out = {**header, "body": compression_handler.loads(body, encode=False)}
+            if header["msg_type"] == "bundle_message":
+                msgs = msg_out["body"]["content"]["messages"]
+                ret = []
+                for sub_message in msgs:
+                    msg_cls = cls.get_message_class(sub_message)
+                    ret.append(msg_cls.loads(sub_message))
+                return ret
+            return cls._validated_return(msg_out)
         raise RuntimeError(f"Unsupported BECMessage version {version}.")
 
     def dumps(self):
@@ -161,6 +181,23 @@ class BECMessage:
                     "body": msg_body,
                 }
             )
+        if self.version == 1.2:
+            msg = {
+                "content": self.content,
+                "metadata": self.metadata,
+            }
+            msg_header = json.dumps(
+                {
+                    "msg_type": self.msg_type,
+                    "version": self.version,
+                    "compression": self.compression,
+                }
+            ).encode()
+            msg_body = self.compression_handler.dumps(msg, encode=False)
+            if not isinstance(msg_body, bytes):
+                msg_body = msg_body.encode()
+            header = f"MSGVERSION_{self.version}_{len(msg_header)}_{len(msg_body)}_EOH_".encode()
+            return header + msg_header + msg_body
 
     @classmethod
     def _validated_return(cls, msg):
