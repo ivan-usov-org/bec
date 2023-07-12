@@ -4,7 +4,7 @@ import pytest
 from bec_lib.core import BECMessage
 
 
-@pytest.mark.parametrize("version", [1.0, 1.1])
+@pytest.mark.parametrize("version", [1.0, 1.1, 1.2])
 def test_bec_message_compression_version(version):
     msg = BECMessage.DeviceInstructionMessage(
         device="samx",
@@ -77,6 +77,16 @@ def test_bec_message_reader_with_bundled_data():
     msg.append(sub_msg)
     res = msg.dumps()
     res_loaded = BECMessage.MessageReader.loads(res)
+    assert res_loaded == [sub_msg, sub_msg]
+
+
+def test_bundled_message():
+    sub_msg = BECMessage.DeviceMessage(signals={"samx": {"value": 5.2}}, metadata={"RID": "1234"})
+    msg = BECMessage.BundleMessage()
+    msg.append(sub_msg)
+    msg.append(sub_msg)
+    res = msg.dumps()
+    res_loaded = BECMessage.DeviceMessage.loads(res)
     assert res_loaded == [sub_msg, sub_msg]
 
 

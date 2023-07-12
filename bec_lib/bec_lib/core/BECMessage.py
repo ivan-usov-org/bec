@@ -135,7 +135,7 @@ class BECMessage:
                 return ret
             return cls._validated_return(msg)
         if version == 1.2:
-            declaration, msg_header_body = msg.split(b"_EOH_")
+            declaration, msg_header_body = msg.split(b"_EOH_", maxsplit=1)
             _, version, header_length, _ = declaration.split(b"_")
             header = msg_header_body[: int(header_length)]
             body = msg_header_body[int(header_length) :]
@@ -239,7 +239,13 @@ class BECMessage:
     @staticmethod
     def get_message_class(msg: str) -> BECMessage:
         """get the BECMessage class from the message's msg_type"""
-        msg_json = json.loads(msg)
+        if isinstance(msg, bytes) and msg.startswith(b"MSGVERSION_"):
+            declaration, msg_header_body = msg.split(b"_EOH_", maxsplit=1)
+            _, version, header_length, _ = declaration.split(b"_")
+            header = msg_header_body[: int(header_length)]
+            msg_json = json.loads(header.decode())
+        else:
+            msg_json = json.loads(msg)
         module_members = inspect.getmembers(sys.modules[__name__], inspect.isclass)
         bec_classes = {mem.msg_type: mem for _, mem in module_members if hasattr(mem, "msg_type")}
         msg_class = bec_classes[msg_json["msg_type"]]
