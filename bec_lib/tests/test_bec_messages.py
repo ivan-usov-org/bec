@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+
 from bec_lib.core import BECMessage
 
 
@@ -18,7 +19,7 @@ def test_bec_message_compression_version(version):
     assert res_loaded == msg
 
 
-@pytest.mark.parametrize("version", [1.0, 1.1])
+@pytest.mark.parametrize("version", [1.0, 1.1, 1.2])
 def test_bec_message_compression_numpy_ndarray(version):
     msg = BECMessage.DeviceMessage(
         signals={"samx": {"value": np.random.rand(20)}},
@@ -32,7 +33,7 @@ def test_bec_message_compression_numpy_ndarray(version):
     assert res_loaded == msg
 
 
-@pytest.mark.parametrize("version", [1.0, 1.1])
+@pytest.mark.parametrize("version", [1.0, 1.1, 1.2])
 def test_bec_message_compression_numpy_float(version):
     msg = BECMessage.DeviceMessage(
         signals={"samx": {"value": np.float32(5.2)}},
@@ -46,7 +47,7 @@ def test_bec_message_compression_numpy_float(version):
     assert res_loaded == msg
 
 
-@pytest.mark.parametrize("version", [1.0, 1.1])
+@pytest.mark.parametrize("version", [1.0, 1.1, 1.2])
 def test_bec_message_serializer_json(version):
     msg = BECMessage.DeviceMessage(
         signals={"samx": {"value": 5.2}},
