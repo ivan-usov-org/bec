@@ -13,6 +13,7 @@ from bec_lib.core import (
     bec_logger,
 )
 from bec_lib.core.bec_errors import ServiceConfigError
+from bec_lib.core.file_utils import FileWriterMixin
 from bec_lib.core.redis_connector import Alarms, MessageObject, RedisConnector
 
 from file_writer.file_writer import NexusFileWriter
@@ -67,12 +68,12 @@ class FileWriterManager(BECService):
         """
         super().__init__(config, connector_cls, unique_service=True)
         self.file_writer_config = self._service_config.service_config.get("file_writer")
+        self.writer_mixin = FileWriterMixin(self.file_writer_config)
         self.producer = self.connector.producer()
         self._start_device_manager()
         self._start_scan_segment_consumer()
         self._start_scan_status_consumer()
         self.scan_storage = {}
-        self.base_path = self._get_base_path()
         self.file_writer = NexusFileWriter(self)
 
     def _start_device_manager(self):
@@ -105,14 +106,6 @@ class FileWriterManager(BECService):
     def _scan_status_callback(msg, *, parent):
         msg = BECMessage.ScanStatusMessage.loads(msg.value)
         parent.update_scan_storage_with_status(msg)
-
-    def _get_base_path(self):
-        if not self.file_writer_config:
-            raise ServiceConfigError("Service config must contain a file writer definition.")
-        if not self.file_writer_config.get("base_path"):
-            raise ServiceConfigError("File writer config must define a base path.")
-
-        return os.path.expanduser(self.file_writer_config.get("base_path"))
 
     def update_scan_storage_with_status(self, msg: BECMessage.ScanStatusMessage):
         scanID = msg.content.get("scanID")
@@ -167,12 +160,6 @@ class FileWriterManager(BECService):
         if self.scan_storage[scanID].ready_to_write():
             self.write_file(scanID)
 
-    def _create_file_path(self, scan_dir: str, scan_number: int) -> str:
-        data_dir = Path(os.path.join(self.base_path, "bec", "data", scan_dir))
-        data_dir.mkdir(parents=True, exist_ok=True)
-        file_path = os.path.abspath(os.path.join(data_dir, f"S{scan_number:05d}.h5"))
-        return file_path
-
     def write_file(self, scanID: str) -> None:
         """
         Write scan data to file.
@@ -182,9 +169,7 @@ class FileWriterManager(BECService):
         """
         storage = self.scan_storage[scanID]
         scan = storage.scan_number
-        scan_bundle = 1000
-        scan_dir = self._get_scan_dir(scan_bundle, scan, leading_zeros=5)
-        file_path = self._create_file_path(scan_dir, scan)
+        file_path = self.writer_mixin.compile_full_filename(scan, "master.h5")
         successful = True
         try:
             logger.info(f"Starting writing to file {file_path}.")
@@ -208,9 +193,3 @@ class FileWriterManager(BECService):
         if successful:
             logger.success(f"Finished writing file {file_path}.")
             return
-
-    def _get_scan_dir(self, scan_bundle, scan_number, leading_zeros=None):
-        if leading_zeros is None:
-            leading_zeros = len(str(scan_bundle))
-        floor_dir = scan_number // scan_bundle * scan_bundle
-        return f"S{floor_dir:0{leading_zeros}d}-{floor_dir+scan_bundle-1:0{leading_zeros}d}/S{scan_number:0{leading_zeros}d}"

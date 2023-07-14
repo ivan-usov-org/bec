@@ -45,26 +45,6 @@ class FileWriterManagerMock(FileWriterManager):
         pass
 
 
-@pytest.mark.parametrize(
-    "scan_number,bundle,lead,ref_path",
-    [
-        (10, 1000, None, "S0000-0999/S0010"),
-        (2001, 1000, None, "S2000-2999/S2001"),
-        (20, 50, 4, "S0000-0049/S0020"),
-        (20, 50, 5, "S00000-00049/S00020"),
-        (12000, 100, None, "S12000-12099/S12000"),
-        (120, 100, None, "S100-199/S120"),
-        (1200, 1000, 5, "S01000-01999/S01200"),
-    ],
-)
-def test_get_scan_dir(scan_number, bundle, lead, ref_path):
-    file_manager = load_FileWriter()
-    dir_path = file_manager._get_scan_dir(
-        scan_bundle=bundle, scan_number=scan_number, leading_zeros=lead
-    )
-    assert dir_path == ref_path
-
-
 def test_scan_segment_callback():
     file_manager = load_FileWriter()
     msg = BECMessage.ScanMessage(
@@ -91,25 +71,6 @@ def test_scan_status_callback():
     assert file_manager.scan_storage["scanID"].scan_finished is True
 
 
-def test_get_base_path():
-    file_manager = load_FileWriter()
-    assert file_manager._get_base_path() == os.path.expanduser("./")
-
-
-def test_get_base_path_no_base_path():
-    file_manager = load_FileWriter()
-    file_manager.file_writer_config.pop("base_path")
-    with pytest.raises(ServiceConfigError):
-        file_manager._get_base_path()
-
-
-def test_get_base_path_no_file_writer_config():
-    file_manager = load_FileWriter()
-    file_manager.file_writer_config = None
-    with pytest.raises(ServiceConfigError):
-        file_manager._get_base_path()
-
-
 class MockWriter(FileWriter):
     def __init__(self, file_writer_manager):
         super().__init__(file_writer_manager)
@@ -122,7 +83,9 @@ class MockWriter(FileWriter):
 def test_write_file():
     file_manager = load_FileWriter()
     file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
-    with mock.patch.object(file_manager, "_create_file_path") as mock_create_file_path:
+    with mock.patch.object(
+        file_manager.writer_mixin, "compile_full_filename"
+    ) as mock_create_file_path:
         mock_create_file_path.return_value = "path"
         # replace NexusFileWriter with MockWriter
         file_manager.file_writer = MockWriter(file_manager)
@@ -133,22 +96,18 @@ def test_write_file():
 def test_create_file_path():
     file_manager = load_FileWriter()
     file_manager.file_writer_config["base_path"] = "./"
-    # mock Path to avoid creating directories
-    with mock.patch("file_writer.file_writer_manager.Path") as mock_path:
-        with mock.patch("file_writer.file_writer_manager.os") as mock_os:
-            mock_os.path.abspath.return_value = os.path.abspath("./bec/data/scan_dir/S00010.h5")
-            mock_path.return_value = mock_path
-            mock_path.join.return_value = os.path.abspath("./bec/data/scan_dir/S00010.h5")
-            file_path = file_manager._create_file_path("scan_dir", 10)
-            assert file_path == os.path.abspath("./bec/data/scan_dir/S00010.h5")
+    file_path = file_manager.writer_mixin.compile_full_filename(10, "master.h5", create_dir=False)
+    assert file_path == os.path.abspath("./bec/data/S00000-00999/S00010/S00010_master.h5")
 
 
 def test_write_file_raises_alarm_on_error():
     file_manager = load_FileWriter()
     file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
-    with mock.patch.object(file_manager, "_create_file_path") as mock_create_file_path:
+    with mock.patch.object(
+        file_manager.writer_mixin, "compile_full_filename"
+    ) as mock_compile_filename:
         with mock.patch.object(file_manager, "connector") as mock_connector:
-            mock_create_file_path.return_value = "path"
+            mock_compile_filename.return_value = "path"
             # replace NexusFileWriter with MockWriter
             file_manager.file_writer = MockWriter(file_manager)
             file_manager.file_writer.write = mock.Mock(side_effect=Exception("error"))
