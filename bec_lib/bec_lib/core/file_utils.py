@@ -7,6 +7,12 @@ class FileWriterMixin:
     """File writer mixin class"""
 
     def __init__(self, service_config: dict) -> None:
+        """
+        Initialize the file writer mixin class.
+
+        Args:
+            service_config (dict): File writer service config. Must at least contain a base_path.
+        """
         self._base_path = self._get_base_path_from_config(service_config)
 
     def _get_base_path_from_config(self, service_config: str):
