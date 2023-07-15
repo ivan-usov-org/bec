@@ -28,8 +28,10 @@ class ScanWorker(threading.Thread):
     Scan worker receives device instructions and pre-processes them before sending them to the device server
     """
 
-    def __init__(self, *, parent):
-        super().__init__()
+    def __init__(self, *, parent, queue_name: str = "primary"):
+        super().__init__(daemon=True)
+        self.queue_name = queue_name
+        self.name = f"ScanWorker-{queue_name}"
         self.parent = parent
         self.device_manager = self.parent.device_manager
         self.connector = self.parent.connector
@@ -655,7 +657,7 @@ class ScanWorker(threading.Thread):
         try:
             while not self.signal_event.is_set():
                 try:
-                    for queue in self.parent.queue_manager.queues["primary"]:
+                    for queue in self.parent.queue_manager.queues[self.queue_name]:
                         self._process_instructions(queue)
                         if not queue.stopped:
                             queue.append_to_queue_history()
@@ -669,7 +671,7 @@ class ScanWorker(threading.Thread):
                     queue.status = InstructionQueueStatus.STOPPED
                     queue.append_to_queue_history()
                     self.cleanup()
-                    self.parent.queue_manager.queues["primary"].abort()
+                    self.parent.queue_manager.queues[self.queue_name].abort()
                     self.reset()
 
         # pylint: disable=broad-except
@@ -683,7 +685,7 @@ class ScanWorker(threading.Thread):
                 alarm_type=exc.__class__.__name__,
                 metadata={},
             )
-            self.parent.queue_manager.queues["primary"].abort()
+            self.parent.queue_manager.queues[self.queue_name].abort()
             self.reset()
         finally:
             self.connector.shutdown()

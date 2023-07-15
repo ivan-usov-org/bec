@@ -24,7 +24,7 @@ from scan_server.scan_worker import ScanWorker
 
 def get_queuemanager() -> QueueManager:
     k = load_ScanServerMock()
-    return QueueManager(parent=k)
+    return k.queue_manager
 
 
 class RequestBlockQueueMock(RequestBlockQueue):
@@ -77,14 +77,15 @@ def test_queuemanager_add_to_queue_error_send_alarm():
         metadata={"RID": "something"},
     )
     with mock.patch.object(queue_manager, "connector") as connector:
-        queue_manager.add_to_queue(scan_queue="dummy", msg=msg)
-        connector.raise_alarm.assert_called_once_with(
-            severity=Alarms.MAJOR,
-            source=msg.content,
-            content="dummy",
-            alarm_type="KeyError",
-            metadata={"RID": "something"},
-        )
+        with mock.patch.object(queue_manager, "add_queue", side_effects=KeyError):
+            queue_manager.add_to_queue(scan_queue="dummy", msg=msg)
+            connector.raise_alarm.assert_called_once_with(
+                severity=Alarms.MAJOR,
+                source=msg.content,
+                content="dummy",
+                alarm_type="KeyError",
+                metadata={"RID": "something"},
+            )
 
 
 def test_queuemanager_scan_queue_callback():
@@ -309,8 +310,8 @@ def test_remove_queue_item():
     )
     queue_manager.queues = {"primary": ScanQueue(queue_manager, InstructionQueueMock)}
     queue_manager.add_to_queue(scan_queue="primary", msg=msg)
-    queue_manager.queues["primary"].queue[0].queue._scanID = "random"
-    queue_manager.queues["primary"].remove_queue_item(scanID="random")
+    queue_manager.queues["primary"].queue[0].queue.request_blocks[0].scanID = "random"
+    queue_manager.queues["primary"].remove_queue_item(scanID=["random"])
     assert len(queue_manager.queues["primary"].queue) == 0
 
 

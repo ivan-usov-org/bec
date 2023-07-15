@@ -61,9 +61,6 @@ class ScanServerMock(ScanServer):
     def _start_device_manager(self):
         pass
 
-    def _start_scan_server(self):
-        pass
-
     def shutdown(self):
         pass
 

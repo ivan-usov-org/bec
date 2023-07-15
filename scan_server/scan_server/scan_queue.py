@@ -43,9 +43,10 @@ class QueueManager:
         self.producer = parent.producer
         self.num_queues = 1
         self.key = ""
-        self.queues = {"primary": ScanQueue(self)}
+        self.queues = {}
         self._start_scan_queue_consumer()
         self._lock = threading.RLock()
+        self.add_queue("primary")
 
     def add_to_queue(self, scan_queue: str, msg: BECMessage.ScanQueueMessage, position=-1) -> None:
         """Add a new ScanQueueMessage to the queue.
@@ -56,6 +57,7 @@ class QueueManager:
 
         """
         try:
+            self.add_queue(scan_queue)
             self.queues[scan_queue].insert(msg, position=position)
         # pylint: disable=broad-except
         except Exception as exc:
@@ -71,6 +73,13 @@ class QueueManager:
                 alarm_type=exc.__class__.__name__,
                 metadata=msg.metadata,
             )
+
+    @threadlocked
+    def add_queue(self, queue_name: str) -> None:
+        """add a new queue to the queue manager"""
+        if queue_name not in self.queues:
+            self.queues[queue_name] = ScanQueue(self, queue_name=queue_name)
+            self.queues[queue_name].start_worker()
 
     def _start_scan_queue_consumer(self) -> None:
         self._scan_queue_consumer = self.connector.consumer(
@@ -91,7 +100,8 @@ class QueueManager:
         scan_msg = BECMessage.ScanQueueMessage.loads(msg.value)
         logger.info(f"Receiving scan: {scan_msg.content}")
         # instructions = parent.scan_assembler.assemble_device_instructions(scan_msg)
-        parent.add_to_queue("primary", scan_msg)
+        queue = scan_msg.content.get("queue", "primary")
+        parent.add_to_queue(queue, scan_msg)
         parent.send_queue_status()
 
     @staticmethod
@@ -275,9 +285,13 @@ class ScanQueue:
     DEFAULT_QUEUE_STATUS = ScanQueueStatus.RUNNING
 
     def __init__(
-        self, queue_manager: QueueManager, instruction_queue_item_cls: InstructionQueueItem = None
+        self,
+        queue_manager: QueueManager,
+        queue_name="primary",
+        instruction_queue_item_cls: InstructionQueueItem = None,
     ) -> None:
         self.queue = collections.deque()
+        self.queue_name = queue_name
         self.history_queue = collections.deque(maxlen=self.MAX_HISTORY)
         self.active_instruction_queue = None
         self.queue_manager = queue_manager
@@ -289,6 +303,18 @@ class ScanQueue:
         # self.open_instruction_queue = None
         self._status = self.DEFAULT_QUEUE_STATUS
         self.signal_event = threading.Event()
+        self.scan_worker = None
+        self.init_scan_worker()
+
+    def init_scan_worker(self):
+        """init the scan worker"""
+        from .scan_worker import ScanWorker
+
+        self.scan_worker = ScanWorker(parent=self.queue_manager.parent, queue_name=self.queue_name)
+
+    def start_worker(self):
+        """start the scan worker"""
+        self.scan_worker.start()
 
     @property
     def worker_status(self) -> Union[None, InstructionQueueStatus]:
@@ -382,7 +408,7 @@ class ScanQueue:
             instruction_queue = self._instruction_queue_item_cls(
                 parent=self,
                 assembler=self.queue_manager.parent.scan_assembler,
-                worker=self.queue_manager.parent.scan_worker,
+                worker=self.scan_worker,
             )
         instruction_queue.append_scan_request(msg)
         if not queue_exists:

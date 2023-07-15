@@ -30,7 +30,7 @@ class ScanServer(BECService):
         self._start_device_manager()
         self._start_scan_guard()
         self._start_scan_assembler()
-        self._start_scan_server()
+        # self._start_scan_server()
         self._start_alarm_handler()
         self._reset_scan_number()
         self.status = BECStatus.RUNNING
@@ -39,9 +39,9 @@ class ScanServer(BECService):
         self.device_manager = DeviceManager(self.connector)
         self.device_manager.initialize([self.bootstrap_server])
 
-    def _start_scan_server(self):
-        self.scan_worker = ScanWorker(parent=self)
-        self.scan_worker.start()
+    # def _start_scan_server(self):
+    #     self.scan_worker = ScanWorker(parent=self)
+    #     self.scan_worker.start()
 
     def _start_scan_manager(self):
         self.scan_manager = ScanManager(parent=self)
