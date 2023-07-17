@@ -164,6 +164,16 @@ class RPCBase:
         if self._info.get("signals"):
             for signal_name in self._info.get("signals"):
                 setattr(self, signal_name, Signal(signal_name, parent=self))
+                precision = (
+                    self._info.get("describe", {})
+                    .get(f"{self.name}_{signal_name}", {})
+                    .get("precision")
+                )
+                if precision is not None:
+                    getattr(self, signal_name).precision = precision
+        precision = self._info.get("describe", {}).get(self.name, {}).get("precision")
+        if precision is not None:
+            self.precision = precision
         if self._info.get("sub_devices"):
             for dev in self._info.get("sub_devices"):
                 base_class = dev["device_info"].get("device_base_class")
