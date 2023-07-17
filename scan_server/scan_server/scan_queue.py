@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import collections
+import functools
 import threading
 import time
 import traceback
@@ -18,6 +19,18 @@ from .scan_assembler import ScanAssembler
 from .scans import ScanBase
 
 logger = bec_logger.logger
+
+
+def requires_queue(fcn):
+    """Decorator to ensure that the requested queue exists."""
+
+    @functools.wraps(fcn)
+    def wrapper(self, *args, queue="primary", **kwargs):
+        if queue not in self.queues:
+            self.add_queue(queue)
+        return fcn(self, *args, queue=queue, **kwargs)
+
+    return wrapper
 
 
 class InstructionQueueStatus(Enum):
@@ -123,24 +136,28 @@ class QueueManager:
         parameter = scan_mod_msg.content["parameter"]
         getattr(self, f"set_{action}")(scanID=scan_mod_msg.content["scanID"], parameter=parameter)
 
+    @requires_queue
     def set_pause(self, scanID=None, queue="primary", parameter: dict = None) -> None:
         # pylint: disable=unused-argument
         """pause the queue and the currenlty running instruction queue"""
         self.queues[queue].status = ScanQueueStatus.PAUSED
         self.queues[queue].worker_status = InstructionQueueStatus.PAUSED
 
+    @requires_queue
     def set_deferred_pause(self, scanID=None, queue="primary", parameter: dict = None) -> None:
         # pylint: disable=unused-argument
         """pause the queue but continue with the currently running instruction queue until the next checkpoint"""
         self.queues[queue].status = ScanQueueStatus.PAUSED
         self.queues[queue].worker_status = InstructionQueueStatus.DEFERRED_PAUSE
 
+    @requires_queue
     def set_continue(self, scanID=None, queue="primary", parameter: dict = None) -> None:
         # pylint: disable=unused-argument
         """continue with the currently scheduled queue and instruction queue"""
         self.queues[queue].status = ScanQueueStatus.RUNNING
         self.queues[queue].worker_status = InstructionQueueStatus.RUNNING
 
+    @requires_queue
     def set_abort(self, scanID=None, queue="primary", parameter: dict = None) -> None:
         """abort the scan and remove it from the queue. This will leave the queue in a paused state after the cleanup"""
         if self.queues[queue].queue:
@@ -148,6 +165,7 @@ class QueueManager:
         self.queues[queue].worker_status = InstructionQueueStatus.STOPPED
         # self.queues[queue].remove_queue_item(scanID=scanID)
 
+    @requires_queue
     def set_halt(self, scanID=None, queue="primary", parameter: dict = None) -> None:
         """abort the scan and do not perform any cleanup routines"""
         instruction_queue = self.queues[queue].active_instruction_queue
@@ -155,6 +173,7 @@ class QueueManager:
             instruction_queue.return_to_start = False
         self.set_abort(scanID=scanID, queue=queue)
 
+    @requires_queue
     def set_clear(self, scanID=None, queue="primary", parameter: dict = None) -> None:
         # pylint: disable=unused-argument
         """pause the queue and clear all its elements"""
@@ -162,6 +181,7 @@ class QueueManager:
         self.queues[queue].worker_status = InstructionQueueStatus.STOPPED
         self.queues[queue].clear()
 
+    @requires_queue
     def set_restart(self, scanID=None, queue="primary", parameter: dict = None) -> None:
         """abort and restart the currently running scan. The active scan will be aborted."""
         if not scanID:
