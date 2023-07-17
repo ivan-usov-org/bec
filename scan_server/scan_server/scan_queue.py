@@ -46,7 +46,6 @@ class QueueManager:
         self.queues = {}
         self._start_scan_queue_consumer()
         self._lock = threading.RLock()
-        self.add_queue("primary")
 
     def add_to_queue(self, scan_queue: str, msg: BECMessage.ScanQueueMessage, position=-1) -> None:
         """Add a new ScanQueueMessage to the queue.

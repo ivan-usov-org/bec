@@ -9,7 +9,6 @@ from .scan_assembler import ScanAssembler
 from .scan_guard import ScanGuard
 from .scan_manager import ScanManager
 from .scan_queue import QueueManager
-from .scan_worker import ScanWorker
 
 logger = bec_logger.logger
 
@@ -38,10 +37,6 @@ class ScanServer(BECService):
     def _start_device_manager(self):
         self.device_manager = DeviceManager(self.connector)
         self.device_manager.initialize([self.bootstrap_server])
-
-    # def _start_scan_server(self):
-    #     self.scan_worker = ScanWorker(parent=self)
-    #     self.scan_worker.start()
 
     def _start_scan_manager(self):
         self.scan_manager = ScanManager(parent=self)
@@ -102,4 +97,3 @@ class ScanServer(BECService):
 
         self.device_manager.shutdown()
         self.queue_manager.shutdown()
-        self.scan_worker.shutdown()

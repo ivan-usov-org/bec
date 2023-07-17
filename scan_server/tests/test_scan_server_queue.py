@@ -22,8 +22,14 @@ from scan_server.scan_worker import ScanWorker
 # pylint: disable=protected-access
 
 
-def get_queuemanager() -> QueueManager:
+def get_queuemanager(queues: list = None) -> QueueManager:
     k = load_ScanServerMock()
+    if queues is None:
+        queues = ["primary"]
+    if isinstance(queues, str):
+        queues = [queues]
+    for queue in queues:
+        k.queue_manager.add_queue(queue)
     return k.queue_manager
 
 
@@ -52,6 +58,11 @@ class InstructionQueueMock(InstructionQueueItem):
 def test_queuemanager_queue_contains_primary():
     queue_manager = get_queuemanager()
     assert "primary" in queue_manager.queues
+
+
+def test_queuemanager_queue_inits_without_queues():
+    queue_manager = get_queuemanager([])
+    assert len(queue_manager.queues) == 0
 
 
 @pytest.mark.parametrize("queue", [("primary",), ("alignment",)])
