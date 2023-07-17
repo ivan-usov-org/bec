@@ -3,14 +3,14 @@ import time
 from concurrent.futures import wait
 from unittest import mock
 
+import bec_lib.core
 import pytest
 import yaml
-
-import bec_lib.core
 from bec_lib.core import BECMessage
 from bec_lib.core import DeviceManagerBase as DeviceManager
 from bec_lib.core import MessageEndpoints, ServiceConfig
 from bec_lib.core.tests.utils import ConnectorMock, create_session_from_config
+
 from scan_bundler import ScanBundler
 from scan_bundler.emitter import EmitterBase
 
@@ -57,7 +57,7 @@ def test_device_read_callback():
     msg = MessageMock()
     dev_msg = BECMessage.DeviceMessage(
         signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-        metadata={"scanID": "laksjd", "stream": "primary"},
+        metadata={"scanID": "laksjd", "readout_priority": "primary"},
     )
     msg.value = dev_msg.dumps()
     msg.topic = MessageEndpoints.device_read("samx").encode()
@@ -149,7 +149,7 @@ def test_get_scan_status_history(msgs):
 def test_add_device_to_storage_returns_without_scanID():
     msg = BECMessage.DeviceMessage(
         signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-        metadata={"stream": "primary"},
+        metadata={"readout_priority": "primary"},
     )
     sb = load_ScanBundlerMock()
     sb._add_device_to_storage([msg], "samx", timeout_time=1)
@@ -159,7 +159,7 @@ def test_add_device_to_storage_returns_without_scanID():
 def test_add_device_to_storage_returns_without_signal():
     msg = BECMessage.DeviceMessage(
         signals={},
-        metadata={"scanID": "scanID", "stream": "primary"},
+        metadata={"scanID": "scanID", "readout_priority": "primary"},
     )
     sb = load_ScanBundlerMock()
     sb._add_device_to_storage([msg], "samx", timeout_time=1)
@@ -169,7 +169,7 @@ def test_add_device_to_storage_returns_without_signal():
 def test_add_device_to_storage_returns_on_timeout():
     msg = BECMessage.DeviceMessage(
         signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-        metadata={"scanID": "scanID", "stream": "primary"},
+        metadata={"scanID": "scanID", "readout_priority": "primary"},
     )
     sb = load_ScanBundlerMock()
     sb._add_device_to_storage([msg], "samx", timeout_time=1)
@@ -180,7 +180,7 @@ def test_add_device_to_storage_returns_on_timeout():
 def test_add_device_to_storage_returns_without_scan_info(scan_status):
     msg = BECMessage.DeviceMessage(
         signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-        metadata={"scanID": "scanID", "stream": "primary"},
+        metadata={"scanID": "scanID", "readout_priority": "primary"},
     )
     sb = load_ScanBundlerMock()
     sb.sync_storage["scanID"] = {"info": {}}
@@ -195,21 +195,21 @@ def test_add_device_to_storage_returns_without_scan_info(scan_status):
         (
             BECMessage.DeviceMessage(
                 signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-                metadata={"scanID": "scanID", "stream": "primary"},
+                metadata={"scanID": "scanID", "readout_priority": "primary"},
             ),
             "step",
         ),
         (
             BECMessage.DeviceMessage(
                 signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-                metadata={"scanID": "scanID", "stream": "primary"},
+                metadata={"scanID": "scanID", "readout_priority": "primary"},
             ),
             "fly",
         ),
         (
             BECMessage.DeviceMessage(
                 signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-                metadata={"scanID": "scanID", "stream": "primary"},
+                metadata={"scanID": "scanID", "readout_priority": "primary"},
             ),
             "wrong",
         ),
@@ -244,7 +244,7 @@ def test_add_device_to_storage_primary(msg, scan_type):
         (
             BECMessage.DeviceMessage(
                 signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-                metadata={"scanID": "scanID", "stream": "baseline"},
+                metadata={"scanID": "scanID", "readout_priority": "baseline"},
             ),
             "step",
         ),
@@ -325,7 +325,7 @@ def test_scan_queue_callback(queue_msg):
             scanID="6ff7a89a-79e5-43ad-828b-c1e1aeed5803",
             status="closed",
             info={
-                "stream": "primary",
+                "readout_priority": "primary",
                 "DIID": 4,
                 "RID": "a53538b4-79f3-4132-91b5-d044e438f460",
                 "scanID": "3ea07f69-b0ee-44fa-8451-b85824a37397",
@@ -354,7 +354,7 @@ def test_scan_status_callback(scan_msg):
                 scanID="6ff7a89a-79e5-43ad-828b-c1e1aeed5803",
                 status="closed",
                 info={
-                    "stream": "primary",
+                    "readout_priority": "primary",
                     "DIID": 4,
                     "RID": "a53538b4-79f3-4132-91b5-d044e438f460",
                     "scanID": "3ea07f69-b0ee-44fa-8451-b85824a37397",
@@ -370,7 +370,7 @@ def test_scan_status_callback(scan_msg):
                 scanID="6ff7a89a-79e5-43ad-828b-c1e1aeed5803",
                 status="open",
                 info={
-                    "stream": "primary",
+                    "readout_priority": "primary",
                     "DIID": 4,
                     "RID": "a53538b4-79f3-4132-91b5-d044e438f460",
                     "scanID": "3ea07f69-b0ee-44fa-8451-b85824a37397",
@@ -443,7 +443,7 @@ def test_status_modification():
             scanID="6ff7a89a-79e5-43ad-828b-c1e1aeed5803",
             status="closed",
             info={
-                "stream": "primary",
+                "readout_priority": "primary",
                 "DIID": 4,
                 "RID": "a53538b4-79f3-4132-91b5-d044e438f460",
                 "scanID": "3ea07f69-b0ee-44fa-8451-b85824a37397",
@@ -458,7 +458,7 @@ def test_status_modification():
             scanID="6ff7a89a-79e5-43ad-828b-c1e1aeed5803",
             status="open",
             info={
-                "stream": "primary",
+                "readout_priority": "primary",
                 "DIID": 4,
                 "RID": "a53538b4-79f3-4132-91b5-d044e438f460",
                 "scanID": "3ea07f69-b0ee-44fa-8451-b85824a37397",
@@ -515,7 +515,7 @@ def test_initialize_scan_container(scan_msg):
         [
             BECMessage.DeviceMessage(
                 signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-                metadata={"scanID": "adlk-jalskdja", "stream": "primary", "pointID": 23},
+                metadata={"scanID": "adlk-jalskdja", "readout_priority": "primary", "pointID": 23},
             ),
             23,
             True,
@@ -523,7 +523,7 @@ def test_initialize_scan_container(scan_msg):
         [
             BECMessage.DeviceMessage(
                 signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-                metadata={"scanID": "adlk-jalskdjb", "stream": "primary", "pointID": 23},
+                metadata={"scanID": "adlk-jalskdjb", "readout_priority": "primary", "pointID": 23},
             ),
             23,
             False,
@@ -531,7 +531,7 @@ def test_initialize_scan_container(scan_msg):
         [
             BECMessage.DeviceMessage(
                 signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-                metadata={"scanID": "adlk-jalskdjc", "stream": "primary"},
+                metadata={"scanID": "adlk-jalskdjc", "readout_priority": "primary"},
             ),
             23,
             False,
@@ -691,7 +691,7 @@ def test_get_last_device_readback():
     sb = load_ScanBundlerMock()
     dev_msg = BECMessage.DeviceMessage(
         signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-        metadata={"scanID": "laksjd", "stream": "primary"},
+        metadata={"scanID": "laksjd", "readout_priority": "primary"},
     )
     with mock.patch.object(sb, "producer") as producer_mock:
         producer_mock.pipeline().execute.return_value = [dev_msg.dumps()]

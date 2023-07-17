@@ -2,9 +2,9 @@ import uuid
 from unittest import mock
 
 import pytest
+from bec_lib.core import BECMessage, MessageEndpoints
 from utils import load_ScanServerMock
 
-from bec_lib.core import BECMessage, MessageEndpoints
 from scan_server.errors import DeviceMessageError, ScanAbortion
 from scan_server.scan_assembler import ScanAssembler
 from scan_server.scan_queue import (
@@ -80,7 +80,7 @@ class InstructionQueueMock(InstructionQueueItem):
                     "group": "scan_motor",
                     "wait_group": "scan_motor",
                 },
-                metadata={"stream": "primary", "DIID": 3},
+                metadata={"readout_priority": "primary", "DIID": 3},
             ),
             ["samy"],
         ),
@@ -93,7 +93,7 @@ class InstructionQueueMock(InstructionQueueItem):
                     "group": "scan_motor",
                     "wait_group": "scan_motor",
                 },
-                metadata={"stream": "primary", "DIID": 3},
+                metadata={"readout_priority": "primary", "DIID": 3},
             ),
             ["samx", "samy"],
         ),
@@ -106,7 +106,7 @@ class InstructionQueueMock(InstructionQueueItem):
                     "group": "scan_motor",
                     "wait_group": "scan_motor",
                 },
-                metadata={"stream": "primary", "DIID": 3},
+                metadata={"readout_priority": "primary", "DIID": 3},
             ),
             ["samx", "samy"],
         ),
@@ -119,7 +119,7 @@ class InstructionQueueMock(InstructionQueueItem):
                     "group": "primary",
                     "wait_group": "scan_motor",
                 },
-                metadata={"stream": "primary", "DIID": 3},
+                metadata={"readout_priority": "primary", "DIID": 3},
             ),
             ["samx", "samy"],
         ),
@@ -132,7 +132,7 @@ class InstructionQueueMock(InstructionQueueItem):
                     "group": "nogroup",
                     "wait_group": "scan_motor",
                 },
-                metadata={"stream": "primary", "DIID": 3},
+                metadata={"readout_priority": "primary", "DIID": 3},
             ),
             ["samx", "samy"],
         ),
@@ -167,14 +167,14 @@ def test_get_devices_from_instruction(instruction, devices):
                 device="samx",
                 action="set",
                 parameter={"value": 10, "wait_group": "scan_motor"},
-                metadata={"stream": "primary", "DIID": 3},
+                metadata={"readout_priority": "primary", "DIID": 3},
             )
         ),
         BECMessage.DeviceInstructionMessage(
             device="samx",
             action="set",
             parameter={"value": 10, "wait_group": "scan_motor"},
-            metadata={"stream": "primary", "DIID": None},
+            metadata={"readout_priority": "primary", "DIID": None},
         ),
     ],
 )
@@ -199,13 +199,13 @@ def test_add_wait_group_to_existing_wait_group():
         device="samx",
         action="set",
         parameter={"value": 10, "wait_group": "scan_motor"},
-        metadata={"stream": "primary", "DIID": 3},
+        metadata={"readout_priority": "primary", "DIID": 3},
     )
     instr2 = BECMessage.DeviceInstructionMessage(
         device="samx",
         action="set",
         parameter={"value": 10, "wait_group": "scan_motor"},
-        metadata={"stream": "primary", "DIID": 4},
+        metadata={"readout_priority": "primary", "DIID": 4},
     )
     worker = get_scan_worker()
     worker._add_wait_group(instr1)
@@ -225,7 +225,7 @@ def test_add_wait_group_to_existing_wait_group():
                     "group": "scan_motor",
                     "wait_group": "scan_motor",
                 },
-                metadata={"stream": "primary", "DIID": 3},
+                metadata={"readout_priority": "primary", "DIID": 3},
             ),
             "move",
         ),
@@ -238,7 +238,7 @@ def test_add_wait_group_to_existing_wait_group():
                     "group": "scan_motor",
                     "wait_group": "scan_motor",
                 },
-                metadata={"stream": "primary", "DIID": 3},
+                metadata={"readout_priority": "primary", "DIID": 3},
             ),
             "read",
         ),
@@ -251,7 +251,7 @@ def test_add_wait_group_to_existing_wait_group():
                     "group": "scan_motor",
                     "wait_group": "scan_motor",
                 },
-                metadata={"stream": "primary", "DIID": 3},
+                metadata={"readout_priority": "primary", "DIID": 3},
             ),
             "trigger",
         ),
@@ -264,7 +264,7 @@ def test_add_wait_group_to_existing_wait_group():
                     "group": "scan_motor",
                     "wait_group": "scan_motor",
                 },
-                metadata={"stream": "primary", "DIID": 3},
+                metadata={"readout_priority": "primary", "DIID": 3},
             ),
             None,
         ),
@@ -300,7 +300,7 @@ def test_wait_for_devices(instructions, wait_type):
                     device="samx",
                     success=True,
                     metadata={
-                        "stream": "primary",
+                        "readout_priority": "primary",
                         "DIID": 3,
                         "scanID": "scanID",
                         "RID": "requestID",
@@ -313,7 +313,7 @@ def test_wait_for_devices(instructions, wait_type):
                 action="wait",
                 parameter={"type": "move", "wait_group": "scan_motor"},
                 metadata={
-                    "stream": "primary",
+                    "readout_priority": "primary",
                     "DIID": 4,
                     "scanID": "scanID",
                     "RID": "requestID",
@@ -327,7 +327,7 @@ def test_wait_for_devices(instructions, wait_type):
                     device="samx",
                     success=False,
                     metadata={
-                        "stream": "primary",
+                        "readout_priority": "primary",
                         "DIID": 3,
                         "scanID": "scanID",
                         "RID": "request",
@@ -340,7 +340,7 @@ def test_wait_for_devices(instructions, wait_type):
                 action="wait",
                 parameter={"type": "move", "wait_group": "scan_motor"},
                 metadata={
-                    "stream": "primary",
+                    "readout_priority": "primary",
                     "DIID": 4,
                     "scanID": "scanID",
                     "RID": "requestID",
@@ -354,7 +354,7 @@ def test_wait_for_devices(instructions, wait_type):
                     device="samx",
                     success=False,
                     metadata={
-                        "stream": "primary",
+                        "readout_priority": "primary",
                         "DIID": 4,
                         "scanID": "scanID",
                         "RID": "requestID",
@@ -367,7 +367,7 @@ def test_wait_for_devices(instructions, wait_type):
                 action="wait",
                 parameter={"type": "move", "wait_group": "scan_motor"},
                 metadata={
-                    "stream": "primary",
+                    "readout_priority": "primary",
                     "DIID": 4,
                     "scanID": "scanID",
                     "RID": "requestID",
@@ -381,7 +381,7 @@ def test_wait_for_devices(instructions, wait_type):
                     device="samx",
                     success=False,
                     metadata={
-                        "stream": "primary",
+                        "readout_priority": "primary",
                         "DIID": 3,
                         "scanID": "scanID",
                         "RID": "requestID",
@@ -394,7 +394,7 @@ def test_wait_for_devices(instructions, wait_type):
                 action="wait",
                 parameter={"type": "move", "wait_group": "scan_motor"},
                 metadata={
-                    "stream": "primary",
+                    "readout_priority": "primary",
                     "DIID": 4,
                     "scanID": "scanID",
                     "RID": "requestID",
@@ -425,7 +425,7 @@ def test_check_for_failed_movements(device_status, devices, instr, abort):
                 action="set",
                 parameter={"value": 10, "wait_group": "scan_motor"},
                 metadata={
-                    "stream": "primary",
+                    "readout_priority": "primary",
                     "DIID": 3,
                     "scanID": "scanID",
                     "RID": "requestID",
@@ -436,7 +436,7 @@ def test_check_for_failed_movements(device_status, devices, instr, abort):
                 action="wait",
                 parameter={"type": "move", "wait_group": "scan_motor"},
                 metadata={
-                    "stream": "primary",
+                    "readout_priority": "primary",
                     "DIID": 4,
                     "scanID": "scanID",
                     "RID": "requestID",
@@ -446,7 +446,7 @@ def test_check_for_failed_movements(device_status, devices, instr, abort):
                 device="samx",
                 success=False,
                 metadata={
-                    "stream": "primary",
+                    "readout_priority": "primary",
                     "DIID": 3,
                     "scanID": "scanID",
                     "RID": "requestID",
@@ -459,7 +459,7 @@ def test_check_for_failed_movements(device_status, devices, instr, abort):
                 action="set",
                 parameter={"value": 10, "wait_group": "scan_motor"},
                 metadata={
-                    "stream": "primary",
+                    "readout_priority": "primary",
                     "DIID": 3,
                     "scanID": "scanID",
                     "RID": "requestID",
@@ -470,7 +470,7 @@ def test_check_for_failed_movements(device_status, devices, instr, abort):
                 action="wait",
                 parameter={"type": "move", "wait_group": "scan_motor"},
                 metadata={
-                    "stream": "primary",
+                    "readout_priority": "primary",
                     "DIID": 4,
                     "scanID": "scanID",
                     "RID": "requestID",
@@ -480,7 +480,7 @@ def test_check_for_failed_movements(device_status, devices, instr, abort):
                 device="samx",
                 success=True,
                 metadata={
-                    "stream": "primary",
+                    "readout_priority": "primary",
                     "DIID": 3,
                     "scanID": "scanID",
                     "RID": "requestID",
@@ -517,7 +517,7 @@ def test_wait_for_idle(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
                 action="set",
                 parameter={"value": 10, "wait_group": "scan_motor"},
                 metadata={
-                    "stream": "primary",
+                    "readout_priority": "primary",
                     "DIID": 3,
                     "scanID": "scanID",
                     "RID": "requestID",
@@ -528,7 +528,7 @@ def test_wait_for_idle(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
                 action="wait",
                 parameter={"type": "move", "wait_group": "scan_motor"},
                 metadata={
-                    "stream": "primary",
+                    "readout_priority": "primary",
                     "DIID": 4,
                     "scanID": "scanID",
                     "RID": "requestID",
@@ -538,7 +538,7 @@ def test_wait_for_idle(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
                 device="samx",
                 status=0,
                 metadata={
-                    "stream": "primary",
+                    "readout_priority": "primary",
                     "DIID": 3,
                     "scanID": "scanID",
                     "RID": "requestID",
@@ -575,7 +575,7 @@ def test_wait_for_read(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
                 action="set",
                 parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
                 metadata={
-                    "stream": "primary",
+                    "readout_priority": "primary",
                     "DIID": 3,
                     "scanID": "scanID",
                     "RID": "requestID",
@@ -618,7 +618,7 @@ def test_wait_for_device_server():
                 action="set",
                 parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
                 metadata={
-                    "stream": "primary",
+                    "readout_priority": "primary",
                     "DIID": 3,
                     "scanID": "scanID",
                     "RID": "requestID",
@@ -643,7 +643,7 @@ def test_set_devices(instr):
                 action="trigger",
                 parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
                 metadata={
-                    "stream": "primary",
+                    "readout_priority": "primary",
                     "DIID": 3,
                     "scanID": "scanID",
                     "RID": "requestID",
@@ -665,7 +665,7 @@ def test_trigger_devices(instr):
                 action="trigger",
                 parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
                 metadata={
-                    "stream": "primary",
+                    "readout_priority": "primary",
                     "DIID": 3,
                     "scanID": "scanID",
                     "RID": "requestID",
@@ -683,7 +683,7 @@ def test_trigger_devices(instr):
                 action="trigger",
                 parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
                 metadata={
-                    "stream": "primary",
+                    "readout_priority": "primary",
                     "DIID": 3,
                     "scanID": "scanID",
                     "RID": "requestID",
@@ -708,7 +708,7 @@ def test_send_rpc(instr):
                 action="read",
                 parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
                 metadata={
-                    "stream": "primary",
+                    "readout_priority": "primary",
                     "DIID": 3,
                     "scanID": "scanID",
                     "RID": "requestID",
@@ -721,7 +721,7 @@ def test_send_rpc(instr):
                 action="read",
                 parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
                 metadata={
-                    "stream": "primary",
+                    "readout_priority": "primary",
                     "DIID": 3,
                     "scanID": "scanID",
                     "RID": "requestID",
@@ -771,7 +771,7 @@ def test_read_devices(instr):
                 action="trigger",
                 parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
                 metadata={
-                    "stream": "primary",
+                    "readout_priority": "primary",
                     "DIID": 3,
                     "scanID": "scanID",
                     "RID": "requestID",
@@ -779,7 +779,7 @@ def test_read_devices(instr):
             ),
             ["samx"],
             {"value": 10, "wait_group": "scan_motor", "time": 30},
-            {"stream": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+            {"readout_priority": "primary", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
         ),
     ],
 )
@@ -807,7 +807,7 @@ def test_kickoff_devices(instr, devices, parameter, metadata):
                 action="trigger",
                 parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
                 metadata={
-                    "stream": "primary",
+                    "readout_priority": "primary",
                     "DIID": 3,
                     "scanID": "scanID",
                     "RID": "requestID",
@@ -855,7 +855,7 @@ def test_publish_data_as_read():
         action="publish_data_as_read",
         parameter={"data": {}},
         metadata={
-            "stream": "primary",
+            "readout_priority": "primary",
             "DIID": 3,
             "scanID": "scanID",
             "RID": "requestID",
@@ -881,7 +881,7 @@ def test_publish_data_as_read_multiple():
         action="publish_data_as_read",
         parameter={"data": data},
         metadata={
-            "stream": "primary",
+            "readout_priority": "primary",
             "DIID": 3,
             "scanID": "scanID",
             "RID": "requestID",
@@ -915,7 +915,7 @@ def test_check_for_interruption():
                 action="open_scan",
                 parameter={"num_points": 150, "scan_motors": ["samx", "samy"]},
                 metadata={
-                    "stream": "primary",
+                    "readout_priority": "primary",
                     "DIID": 18,
                     "scanID": "12345",
                     "scan_def_id": 100,
@@ -931,7 +931,7 @@ def test_check_for_interruption():
                 device=None,
                 action="open_scan",
                 parameter={"num_points": 150},
-                metadata={"stream": "primary", "DIID": 18, "scanID": "12345", "RID": 11},
+                metadata={"readout_priority": "primary", "DIID": 18, "scanID": "12345", "RID": 11},
             ),
             150,
             True,
@@ -1019,7 +1019,7 @@ def test_initialize_scan_info(msg):
                 device=None,
                 action="close_scan",
                 parameter={},
-                metadata={"stream": "primary", "DIID": 18, "scanID": "12345"},
+                metadata={"readout_priority": "primary", "DIID": 18, "scanID": "12345"},
             ),
             "12345",
             19,
@@ -1030,7 +1030,7 @@ def test_initialize_scan_info(msg):
                 device=None,
                 action="close_scan",
                 parameter={},
-                metadata={"stream": "primary", "DIID": 18, "scanID": "12345"},
+                metadata={"readout_priority": "primary", "DIID": 18, "scanID": "12345"},
             ),
             "0987",
             200,
@@ -1061,7 +1061,7 @@ def test_close_scan(msg, scan_id, max_point_id, exp_num_points):
             device=None,
             action="close_scan",
             parameter={},
-            metadata={"stream": "primary", "DIID": 18, "scanID": "12345"},
+            metadata={"readout_priority": "primary", "DIID": 18, "scanID": "12345"},
         ),
     ],
 )
@@ -1098,11 +1098,11 @@ def test_stage_device(msg):
                 device=None,
                 action="close_scan",
                 parameter={"parameter": "param"},
-                metadata={"stream": "primary", "DIID": 18, "scanID": "12345"},
+                metadata={"readout_priority": "primary", "DIID": 18, "scanID": "12345"},
             ),
             ["samx"],
             {"parameter": "param"},
-            {"stream": "primary", "DIID": 18, "scanID": "12345"},
+            {"readout_priority": "primary", "DIID": 18, "scanID": "12345"},
             False,
         ),
         (None, None, {}, {}, False),
@@ -1217,7 +1217,7 @@ def test_process_instructions(abortion):
                 device=None,
                 action="open_scan",
                 parameter={"readout_priority": {"monitored": [], "baseline": [], "ignored": []}},
-                metadata={"stream": "primary", "DIID": 18, "scanID": "12345"},
+                metadata={"readout_priority": "primary", "DIID": 18, "scanID": "12345"},
             ),
             "_open_scan",
         ),
@@ -1226,7 +1226,7 @@ def test_process_instructions(abortion):
                 device=None,
                 action="close_scan",
                 parameter={},
-                metadata={"stream": "primary", "DIID": 18, "scanID": "12345"},
+                metadata={"readout_priority": "primary", "DIID": 18, "scanID": "12345"},
             ),
             "_close_scan",
         ),
@@ -1236,7 +1236,7 @@ def test_process_instructions(abortion):
                 action="wait",
                 parameter={"type": "move", "wait_group": "scan_motor"},
                 metadata={
-                    "stream": "primary",
+                    "readout_priority": "primary",
                     "DIID": 4,
                     "scanID": "12345",
                     "RID": "123456",
@@ -1249,7 +1249,7 @@ def test_process_instructions(abortion):
                 device=None,
                 action="trigger",
                 parameter={"group": "trigger"},
-                metadata={"stream": "primary", "DIID": 20, "pointID": 0},
+                metadata={"readout_priority": "primary", "DIID": 20, "pointID": 0},
             ),
             "_trigger_devices",
         ),
@@ -1261,7 +1261,7 @@ def test_process_instructions(abortion):
                     "value": 1.3681828686580249,
                     "wait_group": "scan_motor",
                 },
-                metadata={"stream": "primary", "DIID": 24},
+                metadata={"readout_priority": "primary", "DIID": 24},
             ),
             "_set_devices",
         ),
@@ -1273,7 +1273,7 @@ def test_process_instructions(abortion):
                     "group": "primary",
                     "wait_group": "readout_primary",
                 },
-                metadata={"stream": "primary", "DIID": 30, "pointID": 1},
+                metadata={"readout_priority": "primary", "DIID": 30, "pointID": 1},
             ),
             "_read_devices",
         ),
@@ -1282,7 +1282,7 @@ def test_process_instructions(abortion):
                 device=None,
                 action="stage",
                 parameter={},
-                metadata={"stream": "primary", "DIID": 17},
+                metadata={"readout_priority": "primary", "DIID": 17},
             ),
             "_stage_devices",
         ),
@@ -1291,7 +1291,7 @@ def test_process_instructions(abortion):
                 device=None,
                 action="unstage",
                 parameter={},
-                metadata={"stream": "primary", "DIID": 17},
+                metadata={"readout_priority": "primary", "DIID": 17},
             ),
             "_unstage_devices",
         ),
@@ -1306,7 +1306,7 @@ def test_process_instructions(abortion):
                     "args": [],
                     "kwargs": {},
                 },
-                metadata={"stream": "primary", "DIID": 9},
+                metadata={"readout_priority": "primary", "DIID": 9},
             ),
             "_send_rpc",
         ),
@@ -1321,7 +1321,7 @@ def test_process_instructions(abortion):
                 device=None,
                 action="baseline_reading",
                 parameter={},
-                metadata={"stream": "baseline", "DIID": 15},
+                metadata={"readout_priority": "baseline", "DIID": 15},
             ),
             "_baseline_reading",
         ),

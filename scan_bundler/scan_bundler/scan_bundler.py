@@ -293,8 +293,8 @@ class ScanBundler(BECService):
                 if not self.sync_storage[scanID]["info"].get("scan_type"):
                     return
             self.device_storage[device] = signal
-            stream = metadata.get("stream")
-            if stream == "primary":
+            readout_priority = metadata.get("readout_priority")
+            if readout_priority == "primary":
                 if self.sync_storage[scanID]["info"]["scan_type"] == "step":
                     self._step_scan_update(scanID, device, signal, metadata)
                 elif self.sync_storage[scanID]["info"]["scan_type"] == "fly":
@@ -304,7 +304,7 @@ class ScanBundler(BECService):
                         f"Unknown scan type {self.sync_storage[scanID]['info']['scan_type']}"
                     )
 
-            elif stream == "baseline":
+            elif readout_priority == "baseline":
                 self._baseline_update(scanID, device, signal)
 
     def _update_monitor_signals(self, scanID, pointID) -> None:

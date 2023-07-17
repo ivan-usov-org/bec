@@ -241,7 +241,7 @@ class ScanStubs:
             device=None,
             action="baseline_reading",
             parameter={},
-            metadata={"stream": "baseline"},
+            metadata={"readout_priority": "baseline"},
         )
 
     def wait(
