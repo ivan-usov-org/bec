@@ -226,7 +226,7 @@ class RequestBase(ABC):
         self._scan_report_devices = devices
 
     def device_msg_metadata(self):
-        default_metadata = {"readout_priority": "primary", "DIID": self.DIID}
+        default_metadata = {"readout_priority": "monitored", "DIID": self.DIID}
         metadata = {**default_metadata, **self.metadata}
         self.DIID += 1
         return metadata

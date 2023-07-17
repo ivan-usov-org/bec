@@ -294,7 +294,7 @@ class ScanBundler(BECService):
                     return
             self.device_storage[device] = signal
             readout_priority = metadata.get("readout_priority")
-            if readout_priority == "primary":
+            if readout_priority == "monitored":
                 if self.sync_storage[scanID]["info"]["scan_type"] == "step":
                     self._step_scan_update(scanID, device, signal, metadata)
                 elif self.sync_storage[scanID]["info"]["scan_type"] == "fly":
