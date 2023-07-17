@@ -63,6 +63,7 @@ class ScanBundler(BECService):
             pattern=MessageEndpoints.device_read("*"),
             cb=self._device_read_callback,
             parent=self,
+            name="device_read_consumer",
         )
         self._device_read_consumer.start()
 
@@ -72,6 +73,7 @@ class ScanBundler(BECService):
             cb=self._scan_queue_callback,
             group_id="scan_bundler",
             parent=self,
+            name="scan_queue_consumer",
         )
         self._scan_queue_consumer.start()
 
@@ -81,6 +83,7 @@ class ScanBundler(BECService):
             cb=self._scan_status_callback,
             group_id="scan_bundler",
             parent=self,
+            name="scan_status_consumer",
         )
         self._scan_status_consumer.start()
 

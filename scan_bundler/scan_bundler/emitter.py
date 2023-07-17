@@ -13,7 +13,7 @@ class EmitterBase:
 
     def _start_buffered_producer(self):
         self._buffered_producer_thread = threading.Thread(
-            target=self._buffered_publish, daemon=True
+            target=self._buffered_publish, daemon=True, name="buffered_publisher"
         )
         self._buffered_producer_thread.start()
 

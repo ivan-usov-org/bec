@@ -123,11 +123,15 @@ class BECService:
         self._send_service_status()
 
     def _start_update_service_info(self):
-        self._service_info_thread = threading.Thread(target=self._update_service_info, daemon=True)
+        self._service_info_thread = threading.Thread(
+            target=self._update_service_info, daemon=True, name="update_service_info"
+        )
         self._service_info_thread.start()
 
     def _start_metrics_emitter(self):
-        self._metrics_emitter_thread = threading.Thread(target=self._get_metrics, daemon=True)
+        self._metrics_emitter_thread = threading.Thread(
+            target=self._get_metrics, daemon=True, name="metrics_emitter"
+        )
         self._metrics_emitter_thread.start()
 
     def _get_metrics(self):
