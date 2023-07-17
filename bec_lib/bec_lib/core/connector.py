@@ -124,6 +124,7 @@ class ConsumerConnectorThreaded(ConsumerConnector, threading.Thread):
         pattern=None,
         group_id=None,
         event=None,
+        name=None,
         **kwargs,
     ):
         """
@@ -148,7 +149,11 @@ class ConsumerConnectorThreaded(ConsumerConnector, threading.Thread):
             cb=cb,
             **kwargs,
         )
-        super(ConsumerConnector, self).__init__(daemon=True)
+        if name is not None:
+            thread_kwargs = {"name": name, "daemon": True}
+        else:
+            thread_kwargs = {"daemon": True}
+        super(ConsumerConnector, self).__init__(**thread_kwargs)
         self.signal_event = event if event is not None else threading.Event()
 
     def run(self):

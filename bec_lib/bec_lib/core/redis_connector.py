@@ -72,6 +72,7 @@ class RedisConnector(ConnectorBase):
         event=None,
         cb=None,
         threaded=True,
+        name=None,
         **kwargs,
     ):
         if cb is None:
@@ -89,6 +90,7 @@ class RedisConnector(ConnectorBase):
                 event,
                 cb,
                 redis_cls=self.redis_cls,
+                name=name,
                 **kwargs,
             )
             self._threads.append(listener)
@@ -588,6 +590,7 @@ class RedisConsumerThreaded(RedisConsumerMixin, ConsumerConnectorThreaded):
         event=None,
         cb=None,
         redis_cls=None,
+        name=None,
         **kwargs,
     ):
         self.host = host
@@ -602,6 +605,7 @@ class RedisConsumerThreaded(RedisConsumerMixin, ConsumerConnectorThreaded):
             group_id=group_id,
             event=event,
             cb=cb,
+            name=name,
             **kwargs,
         )
 
