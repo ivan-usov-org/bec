@@ -7,6 +7,7 @@ import json
 import sys
 import time
 from abc import abstractmethod
+from copy import deepcopy
 from typing import Any, List, Optional, Union
 
 import msgpack
@@ -404,7 +405,7 @@ class ScanStatusMessage(BECMessage):
         )
 
     def __str__(self):
-        content = self.content.copy()
+        content = deepcopy(self.content)
         if content["info"].get("positions"):
             content["info"]["positions"] = "..."
         return f"{self.__class__.__name__}({content, self.metadata}))"
