@@ -3,6 +3,8 @@ Glossary
 #############
 
 .. glossary::
+    :sorted:
+    
     scanID 
         The ``scanID`` is the unique identifier for a scan. It is a string, typically uuid4, that is generated automatically by the scan server. It is used to uniquely identify a scan, even across multiple experiments and beamlines.
     scan_number
