@@ -14,5 +14,13 @@ Beamline Experiment Control
    usage/installation
    usage/quickstart
    usage/bec_config
+   usage/howto
+   modules
+   usage/glossary
 
 
+Indices and tables
+==================
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

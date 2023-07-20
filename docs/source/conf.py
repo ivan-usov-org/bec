@@ -9,7 +9,6 @@ import datetime
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 import os
 import pathlib
-import sys
 
 project = "BEC"
 copyright = f"{datetime.datetime.today().year}, Paul Scherrer Institute, Switzerland"
@@ -31,26 +30,19 @@ def get_version():
 release = get_version()
 
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../scan_bundler")))
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../scan_server")))
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../bec_client")))
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../bec_utils")))
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../file_writer")))
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../device_server")))
-
 extensions = [
-    "sphinx.ext.autodoc",  # Core library for html generation from docstrings
-    "sphinx.ext.autosummary",  # Create neat summary tables
-    "sphinx.ext.todo",
-    "recommonmark",
-    "sphinx_copybutton",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    # "sphinx.ext.coverage",
+    # "sphinx.ext.napoleon",
     "sphinx_toolbox.collapse",
 ]
-autosummary_generate = False  # Turn on sphinx.ext.autosummary
-add_module_names = False  # Remove namespaces from class/method signatures
-autodoc_inherit_docstrings = True  # If no docstring, inherit from base class
-set_type_checking_flag = True  # Enable 'expensive' imports for sphinx_autodoc_typehints
-autoclass_content = "both"
+
+autosummary_generate = True  # Turn on sphinx.ext.autosummary
+# add_module_names = True  # Remove namespaces from class/method signatures
+# autodoc_inherit_docstrings = True  # If no docstring, inherit from base class
+# set_type_checking_flag = True  # Enable 'expensive' imports for sphinx_autodoc_typehints
+autoclass_content = "both"  # Include both class docstring and __init__
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -61,13 +53,10 @@ language = "Python"
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-# html_theme = 'alabaster'
-html_theme = "pydata_sphinx_theme"
-html_static_path = ["_static"]
+html_theme = "sphinx_rtd_theme"
+# html_theme = "pydata_sphinx_theme"
+# html_static_path = ["_static"]
 # html_theme_options = {
-#     "switcher": {
-#         "json_url": "https://beamline-experiment-control.readthedocs.io/en/latest/_static/switcher.json",
-#         "version_match": "master",
-#     },
-#     "navbar_start": ["navbar-logo", "version-switcher"],
+#     "show_nav_level": 1,
+#     "navbar_align": "left",
 # }
