@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.13.3 (2023-07-21)
+
+### Fix
+
+* Fixed tmux launch ([`e4d7840`](https://gitlab.psi.ch/bec/bec/-/commit/e4d78402c0f0feca7d0731498b3b34701d9bc9a6))
+* Fixed single env install ([`929689c`](https://gitlab.psi.ch/bec/bec/-/commit/929689cb8e7d1fccda0ab2a5a6372e2d48696193))
+* Fixed bec_server install ([`2ebf580`](https://gitlab.psi.ch/bec/bec/-/commit/2ebf580ede20c594951bde73f2a570b744904509))
+
 ## v0.13.2 (2023-07-21)
 
 ### Fix
