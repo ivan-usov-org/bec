@@ -318,6 +318,7 @@ pages:
     - git clone --branch $OPHYD_DEVICES_BRANCH https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
     - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices    
     - pip install -r ./docs/source/requirements.txt
+    - pip install -U sphinx # hack to fix sphinx version
     - apt-get install -y gcc
     - *install-bec-services    
     - cd ./docs/source; make html
