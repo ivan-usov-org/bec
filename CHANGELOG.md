@@ -2,6 +2,21 @@
 
 <!--next-version-placeholder-->
 
+## v0.14.0 (2023-07-21)
+
+### Feature
+
+* Add new functions to save scan to dict and csv ([`effb642`](https://gitlab.psi.ch/bec/bec/-/commit/effb642a4d3a099dd05e0f3b96ac727564e01999))
+
+### Fix
+
+* Fix writer functions ([`fda9d07`](https://gitlab.psi.ch/bec/bec/-/commit/fda9d07e65039e833f51192d4a66a48875c3be46))
+* Code update ([`86b1985`](https://gitlab.psi.ch/bec/bec/-/commit/86b198595db33e1af6b8d2a26151658118b2ebe3))
+
+### Documentation
+
+* Updated build dependencies ([`8dd2116`](https://gitlab.psi.ch/bec/bec/-/commit/8dd21165f2079c64ac4e738d0f84926fd60cf887))
+
 ## v0.13.3 (2023-07-21)
 
 ### Fix
