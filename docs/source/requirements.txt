@@ -3,3 +3,4 @@ sphinx_copybutton
 recommonmark
 sphinx-toolbox
 sphinx_rtd_theme
+bec_server
