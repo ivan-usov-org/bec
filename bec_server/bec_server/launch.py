@@ -28,7 +28,7 @@ def main():
     command.add_parser("status", help="Show the status of the BEC server")
 
     args = parser.parse_args()
-    
+
     if "config" in args:
         config = args.config
     else:
