@@ -30,7 +30,7 @@ do
     python -m venv ./${package}_venv
     conda deactivate    
     source ./${package}_venv/bin/activate
-    pip install -q -q -e .
+    pip install -q -q -e .[dev]
     cd ../
     deactivate
     echo "Installed $package"
