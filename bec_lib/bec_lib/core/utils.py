@@ -21,7 +21,7 @@ def threadlocked(fcn):
     return wrapper
 
 
-def to_csv(
+def scan_to_csv(
     scan_report: ScanReport,
     output_name: str,
     delimiter: str = ",",
