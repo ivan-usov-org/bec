@@ -72,11 +72,11 @@ if [ "$split_env" = true ]; then
 else # install all packages in one virtual environment
     echo "Creating single virtual environment for all packages..."
     conda activate ${conda_env_name}
-    cd ./$package
-    rm -rf ${package}_venv
-    python -m venv ./${package}_venv
-    conda deactivate    
-    source ./${package}_venv/bin/activate
+    rm -rf ./bec_venv
+    python -m venv ./bec_venv
+    conda deactivate
+    source ./bec_venv/bin/activate
+    cd ./bec_server
     pip install -q -q -e .[dev]
     cd ../
     echo "Created virtual environment for all packages"
