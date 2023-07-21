@@ -23,7 +23,7 @@ if __name__ == "__main__":
         install_requires=["numpy", "pyyaml", "h5py", "xmltodict"],
         version=get_version(),
         entry_points={"console_scripts": ["bec-file-writer = file_writer:main"]},
-        extras_require={"dev": ["pytest", "pytest-random-order", "coverage"]},
+        extras_require={"dev": ["pytest", "pytest-random-order", "coverage", "black", "pylint"]},
     )
     local_deps = [utils]
     for dep in local_deps:

@@ -24,7 +24,7 @@ if __name__ == "__main__":
     setup(
         install_requires=["numpy", "ophyd", "msgpack", "pyyaml"],
         entry_points={"console_scripts": ["bec-device-server = device_server:main"]},
-        extras_require={"dev": ["pytest", "pytest-random-order", "coverage"]},
+        extras_require={"dev": ["pytest", "pytest-random-order", "coverage", "black", "pylint"]},
         version=get_version(),
     )
     local_deps = [utils, ophyd_devices]

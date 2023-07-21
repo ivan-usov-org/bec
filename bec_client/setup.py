@@ -31,7 +31,16 @@ if __name__ == "__main__":
         ],
         scripts=["bec_client/bin/bec"],
         version=get_version(),
-        extras_require={"dev": ["pytest", "pytest-random-order", "pytest-asyncio", "coverage"]},
+        extras_require={
+            "dev": [
+                "pytest",
+                "pytest-random-order",
+                "pytest-asyncio",
+                "coverage",
+                "black",
+                "pylint",
+            ]
+        },
     )
     local_deps = [bec_lib]
     for dep in local_deps:

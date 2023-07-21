@@ -31,6 +31,8 @@ if __name__ == "__main__":
             "psutil",
             "fpdf",
         ],
-        extras_require={"dev": ["pytest", "pytest-random-order", "coverage", "pandas"]},
+        extras_require={
+            "dev": ["pytest", "pytest-random-order", "coverage", "pandas", "black", "pylint"]
+        },
         version=get_version(),
     )

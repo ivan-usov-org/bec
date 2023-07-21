@@ -23,7 +23,7 @@ if __name__ == "__main__":
         install_requires=["msgpack", "pyyaml", "fastjsonschema", "python-dotenv"],
         version=get_version(),
         entry_points={"console_scripts": ["bec-scihub = scihub:main"]},
-        extras_require={"dev": ["pytest", "pytest-random-order", "coverage"]},
+        extras_require={"dev": ["pytest", "pytest-random-order", "coverage", "black", "pylint"]},
     )
     local_deps = [utils]
     for dep in local_deps:

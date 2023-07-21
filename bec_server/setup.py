@@ -21,7 +21,16 @@ if __name__ == "__main__":
         entry_points={"console_scripts": ["bec-server = bec_server:main"]},
         install_requires=["libtmux"],
         version=get_version(),
-        extras_require={"dev": ["pytest", "pytest-random-order", "pytest-asyncio", "coverage"]},
+        extras_require={
+            "dev": [
+                "pytest",
+                "pytest-random-order",
+                "pytest-asyncio",
+                "coverage",
+                "black",
+                "pylint",
+            ]
+        },
     )
     bec_deps = [
         "bec_lib",
