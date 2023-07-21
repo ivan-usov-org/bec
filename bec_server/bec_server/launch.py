@@ -28,10 +28,15 @@ def main():
     command.add_parser("status", help="Show the status of the BEC server")
 
     args = parser.parse_args()
+    
+    if "config" in args:
+        config = args.config
+    else:
+        config = None
 
     service_handler = ServiceHandler(
         bec_path=os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-        config_path=args.config,
+        config_path=config,
     )
     if args.command == "start":
         service_handler.start()

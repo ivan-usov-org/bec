@@ -30,6 +30,7 @@ if __name__ == "__main__":
         "scan_bundler",
         "file_writer",
         "data_processing",
+        "device_server",
         "scihub",
     ]
     # check if "[dev]" was requested
