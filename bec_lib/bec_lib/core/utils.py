@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+from typeguard import typechecked
 import functools
 from typing import TYPE_CHECKING
 from collections import defaultdict
@@ -25,6 +25,7 @@ def scan_to_csv(
     scan_report: ScanReport,
     output_name: str,
     delimiter: str = ",",
+    dialect: str = None,
     header: list = None,
     write_metadata: bool = True,
 ) -> None:
@@ -34,31 +35,71 @@ def scan_to_csv(
         scan_report (ScanReport): Scan report object.
         filename (str): Name of the csv file.
         delimiter (str, optional): Delimiter for the csv file. Defaults to ",".
-        header (list, optional): Header for the csv file. Defaults to None.
+        dialect (str, optional): Argument for csv.Dialect. Defaults to None. E.g. 'excel', 'excel_tab' or 'unix_dialect', still takes argument from delimiter, choose delimier='' to omit
+        header (list, optional): Create custom header for the csv file. If None, header is created automatically. Defaults to None.
         write_metadata (bool, optional): If True, the metadata of the scan will be written to the header of csv file. Defaults to True.
 
         Examples:
-            >>> to_csv(scan_report, "./scan.csv")"""
+            >>> to_csv(scan_report, "./scan.csv")
+    """
     scan_dict = scan_to_dict(scan_report, flat=True)
-    header = list(scan_dict["value"].keys()) if header is None else header
-    header[0] = "".join(["#", header[0]])
-    with open(output_name, "w") as file:
-        writer = csv.writer(file, delimiter=delimiter)
-        if write_metadata:
-            scan_metadata = str(scan_report)
-            scan_metadata = ["#" + entry.replace("\t", "") for entry in scan_metadata.split("\n")]
-            for line in scan_metadata:
-                writer.writerow([line])
-            scan_metadata = str(scan_report.scan)
-            scan_metadata = ["#" + entry.replace("\t", "") for entry in scan_metadata.split("\n")]
-            for line in scan_metadata:
-                writer.writerow([line])
-        writer.writerow(["#value"])
-        writer.writerow(header)
-        writer.writerows(zip(*scan_dict["value"].values()))
-        writer.writerow(["#timestamp"])
-        writer.writerow(header)
-        writer.writerows(zip(*scan_dict["timestamp"].values()))
+    data_output = [["#" + entry.replace("\t", "")] for entry in str(scan_report).split("\n")]
+    if write_metadata:
+        data_output.append(["#ScanMetadata"])
+        scan_metadata = scan_report.scan.data[list(scan_report.scan.data.keys())[-1]].metadata
+        for key, value in scan_metadata.items():
+            data_output.append(["".join(["#", key]), value])
+    if header:
+        header_keys = header
+    else:
+        header_keys = []
+        [
+            header_keys.extend([f"{value}_value", f"{time}_timestamp"])
+            for value, time in zip(scan_dict["value"].keys(), scan_dict["timestamp"].keys())
+        ]
+    header_keys[0] = "".join(["#", header_keys[0]])
+    data_output.append(header_keys)
+
+    data = []
+    num_entries = len(list(scan_dict["value"].values())[0])
+    for ii in range(num_entries):
+        sub_list = []
+        for key in scan_dict["value"]:
+            sub_list.extend([scan_dict["value"][key][ii], scan_dict["timestamp"][key][ii]])
+        data.append(sub_list)
+
+    data_output.extend(data)
+
+    _write_csv(
+        output_name=output_name,
+        delimiter=delimiter,
+        dialect=dialect,
+        output=data_output,
+    )
+
+
+@typechecked
+def _write_csv(
+    output_name: str,
+    delimiter: str,
+    output: list,
+    dialect: str = None,
+) -> None:
+    """Write csv file.
+
+    Args:
+        output_name (str): Name of the csv file.
+        delimiter (str): Delimiter for the csv file.
+        dialect (str): Argument for csv.Dialect. Defaults to None. If no None, delimiter input is ignored. Some input examples 'excel', 'excel_tab' or 'unix_dialect'
+        data_dict (dict): Dictionary to be written to csv.
+
+        Examples:
+            >>> _write_csv("./scan.csv", ",", ["#samx", "bpm4i"], True, scan_dict)
+    """
+
+    with open(output_name, "w", encoding="UTF-8") as file:
+        writer = csv.writer(file, delimiter=delimiter, dialect=dialect)
+        writer.writerows(output)
 
 
 def scan_to_dict(scan_report: ScanReport, flat: bool = True) -> dict:
@@ -75,11 +116,11 @@ def scan_to_dict(scan_report: ScanReport, flat: bool = True) -> dict:
         >>> scan_to_dict(scan_report) with scan_report = scans.line_scan(...)
     """
     if flat:
-        scan_dict = {"timestamp": defaultdict(list), "value": defaultdict(list)}
+        scan_dict = {"timestamp": defaultdict(lambda: []), "value": defaultdict(lambda: [])}
     else:
         scan_dict = {
-            "timestamp": defaultdict(lambda: defaultdict(list)),
-            "value": defaultdict(lambda: defaultdict(list)),
+            "timestamp": defaultdict(lambda: defaultdict(lambda: [])),
+            "value": defaultdict(lambda: defaultdict(lambda: [])),
         }
 
     for scan_msg in scan_report.scan.data.values():
