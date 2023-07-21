@@ -20,16 +20,14 @@ def activate_venv(pane, service_name, service_path):
         )
         pane.send_keys(f"source {venv_base_path}/bin/activate")
         return
-    elif os.path.exists(f"{service_path}/{service_name}_venv"):
+    if os.path.exists(f"{service_path}/{service_name}_venv"):
         pane.send_keys(f"source {service_path}/{service_name}_venv/bin/activate")
         return
-    elif os.path.exists(f"{base_dir}/bec_venv"):
+    if os.path.exists(f"{base_dir}/bec_venv"):
         pane.send_keys(f"source {base_dir}/bec_venv/bin/activate")
         return
-    else:
-        raise RuntimeError(
-            f"Could not find a virtual environment for {service_name}. "
-        )
+
+    raise RuntimeError(f"Could not find a virtual environment for {service_name}. ")
 
 
 def tmux_start(bec_path: str, config_path: str, services: dict):
