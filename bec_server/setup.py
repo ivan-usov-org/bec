@@ -32,6 +32,12 @@ if __name__ == "__main__":
         "data_processing",
         "scihub",
     ]
+    # check if "[dev]" was requested
+    if "dev" in os.environ.get("EXTRAS_REQUIRE", ""):
+        suffix = "[dev]"
+    else:
+        suffix = ""
+
     deps = [f"{current_path}/../{dep}/" for dep in bec_deps]
     for dep in deps:
-        subprocess.run(f"pip install -e {dep}", shell=True, check=True)
+        subprocess.run(f"pip install -e {dep}{suffix}", shell=True, check=True)
