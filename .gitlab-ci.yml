@@ -26,6 +26,7 @@ stages:
   - test # must be called test for security/secret-detection to work
   - AdditionalTests
   - End2End
+  - Build
   - Deploy
 
 .install-bec-services: &install-bec-services
@@ -283,7 +284,7 @@ end-2-end-conda:
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
 
 semver:
-  stage: Deploy
+  stage: Build
   needs: ["tests"]
   script:
     - git config --global user.name "ci_update_bot"
@@ -303,7 +304,7 @@ semver:
     - export REPOSITORY_PASSWORD=$CI_PYPI_TOKEN
     - >
       semantic-release publish -v DEBUG 
-      -D version_variable=./semantic_release/__init__.py:__version__ 
+      -D version_variable=./semantic_release/__init__.py:__version__,./bec_client/setup.py:__version__,./bec_lib/setup.py:__version__,./data_processing/setup.py:__version__,./device_server/setup.py:__version__,./file_writer/setup.py:__version__,./scan_bundler/setup.py:__version__,./scan_server/setup.py:__version__,./scihub/setup.py:__version__
       -D hvcs=gitlab 
       -D build_command="./ci/build_python_services.sh" 
       
@@ -313,9 +314,14 @@ semver:
 
 pages:
   stage: Deploy
-  needs: ["tests"]
-  script:
-    - curl -X POST -d "branches=$CI_COMMIT_REF_NAME" -d "token=$RTD_TOKEN" https://readthedocs.org/api/v2/webhook/beamline-experiment-control/221870/
+  needs: ["semver"]
+  variables:
+    TARGET_BRANCH: $CI_COMMIT_REF_NAME
   rules:
+    - if: '$CI_COMMIT_TAG != null'
+      variables:
+        TARGET_BRANCH: $CI_COMMIT_TAG  
     - if: '$CI_COMMIT_REF_NAME == "master"'
     - if: '$CI_COMMIT_REF_NAME == "production"'
+  script:
+    - curl -X POST -d "branches=$CI_COMMIT_REF_NAME" -d "token=$RTD_TOKEN" https://readthedocs.org/api/v2/webhook/beamline-experiment-control/221870/
