@@ -11,6 +11,7 @@ bec_lib = f"{current_path}/../bec_lib/"
 
 __version__ = "0.14.4"
 
+
 def run_install(setup_args: dict, bec_deps: list, editable=False):
     """
     Run the setup function with the given arguments.
@@ -37,8 +38,8 @@ def run_install(setup_args: dict, bec_deps: list, editable=False):
     print(setup_args)
     setup(**setup_args)
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     setup_args = {
         "entry_points": {"console_scripts": ["bec-scan-server = scan_server:main"]},
         "install_requires": [
@@ -51,14 +52,16 @@ if __name__ == "__main__":
             "h5py",
         ],
         "version": __version__,
-        "extras_require": {"dev": [
+        "extras_require": {
+            "dev": [
                 "pytest",
                 "pytest-random-order",
                 "pytest-asyncio",
                 "coverage",
                 "black",
                 "pylint",
-            ]},
+            ]
+        },
     }
     bec_deps = [
         ("bec_lib", "bec_lib", bec_lib),
