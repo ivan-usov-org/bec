@@ -304,7 +304,7 @@ semver:
     - export REPOSITORY_PASSWORD=$CI_PYPI_TOKEN
     - >
       semantic-release publish -v DEBUG 
-      -D version_variable=./semantic_release/__init__.py:__version__,./bec_client/setup.py:__version__,./bec_lib/setup.py:__version__,./data_processing/setup.py:__version__,./device_server/setup.py:__version__,./file_writer/setup.py:__version__,./scan_bundler/setup.py:__version__,./scan_server/setup.py:__version__,./scihub/setup.py:__version__
+      -D version_variable=./semantic_release/__init__.py:__version__,./bec_client/setup.py:__version__,./bec_lib/setup.py:__version__,./data_processing/setup.py:__version__,./device_server/setup.py:__version__,./file_writer/setup.py:__version__,./scan_bundler/setup.py:__version__,./scan_server/setup.py:__version__,./scihub/setup.py:__version__,./bec_server/setup.py:__version__
       -D hvcs=gitlab 
       -D build_command="./ci/build_python_services.sh" 
       
