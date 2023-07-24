@@ -9,9 +9,14 @@ current_path = pathlib.Path(__file__).parent.resolve()
 __version__ = "0.14.2"
 
 
-def run_install(setup_args, bec_deps, editable=False):
+def run_install(setup_args: dict, bec_deps: list, editable=False):
     """
-    Run the setup function with the given arguments. If editable is True, the dependencies are installed in editable mode.
+    Run the setup function with the given arguments.
+
+    Args:
+        setup_args (dict): Arguments for the setup function.
+        bec_deps (list): List of tuples with the dependencies of the BEC server.
+        editable (bool, optional): If True, the dependencies are installed in editable mode. Defaults to False.
     """
     if editable:
         # check if "[dev]" was requested
@@ -32,8 +37,6 @@ def run_install(setup_args, bec_deps, editable=False):
 
 
 if __name__ == "__main__":
-    import sys
-
     bec_deps = [
         ("bec_lib", "bec_lib"),
         ("bec_ipython_client", "bec_client"),
@@ -61,6 +64,5 @@ if __name__ == "__main__":
         },
     }
 
-    editable = bool("-e" in sys.argv)
-    print(f"editable: {editable}")
+    editable = os.path.dirname(os.path.abspath(__file__)).split("/")[-1] == "bec_server"
     run_install(setup_args, bec_deps, editable=editable)
