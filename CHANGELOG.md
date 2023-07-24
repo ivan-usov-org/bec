@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.14.4 (2023-07-24)
+
+### Fix
+
+* Added missing init files ([`1ea9764`](https://gitlab.psi.ch/bec/bec/-/commit/1ea976411d320959a7826e6f09301df90b56517a))
+* Added missing init files ([`29cf132`](https://gitlab.psi.ch/bec/bec/-/commit/29cf132a06ebcec7f1e1a8f084d35da0195d4489))
+* Fixed build for device_server ([`fc90bfb`](https://gitlab.psi.ch/bec/bec/-/commit/fc90bfb9aab5ef42a9c6160be71357f0df5d21bc))
+
 ## v0.14.3 (2023-07-24)
 
 ### Fix
