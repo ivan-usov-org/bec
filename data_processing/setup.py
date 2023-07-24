@@ -7,7 +7,7 @@ current_path = pathlib.Path(__file__).parent.resolve()
 utils = f"{current_path}/../bec_lib/"
 
 
-__version__ = "0.14.1"
+__version__ = "0.14.2"
 
 
 if __name__ == "__main__":

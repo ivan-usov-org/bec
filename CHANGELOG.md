@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.14.2 (2023-07-24)
+
+### Fix
+
+* Fixed version update for bec-server ([`ae4673f`](https://gitlab.psi.ch/bec/bec/-/commit/ae4673fac049e7bff799efb7566ea5a8fba56c57))
+
 ## v0.14.1 (2023-07-24)
 
 ### Fix
