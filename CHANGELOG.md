@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.14.5 (2023-07-24)
+
+### Fix
+
+* Fixed install ([`3f42f2f`](https://gitlab.psi.ch/bec/bec/-/commit/3f42f2f3e1d35e9d6f825a8f9865ab3dabf61be2))
+
 ## v0.14.4 (2023-07-24)
 
 ### Fix
