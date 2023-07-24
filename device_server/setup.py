@@ -10,7 +10,7 @@ utils = f"{current_path}/../bec_lib/"
 
 ophyd_devices = os.getenv("OPHYD_DEVICES_PATH", f"{current_path}/../../ophyd_devices/")
 
-__version__ = "0.14.0"
+__version__ = "0.14.1"
 
 if __name__ == "__main__":
     setup(

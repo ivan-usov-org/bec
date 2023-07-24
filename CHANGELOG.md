@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.14.1 (2023-07-24)
+
+### Fix
+
+* Update version number directly to fix pip install without -e ([`91ffa4b`](https://gitlab.psi.ch/bec/bec/-/commit/91ffa4b3c554ab4f0f038958344b81202e251433))
+
 ## v0.14.0 (2023-07-21)
 
 ### Feature
