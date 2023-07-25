@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.14.7 (2023-07-25)
+
+### Fix
+
+* Fixed build ([`4eccc99`](https://gitlab.psi.ch/bec/bec/-/commit/4eccc996694d9b260d1df40cc5b2c74ccb587dbe))
+
 ## v0.14.6 (2023-07-25)
 
 ### Fix
