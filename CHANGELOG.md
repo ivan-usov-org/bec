@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.14.6 (2023-07-25)
+
+### Fix
+
+* Fixed bec_client install ([`bacda25`](https://gitlab.psi.ch/bec/bec/-/commit/bacda2580a47773bc4bdabc231049fb6470e7445))
+
 ## v0.14.5 (2023-07-24)
 
 ### Fix
