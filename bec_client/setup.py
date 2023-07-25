@@ -41,7 +41,7 @@ def run_install(setup_args: dict, bec_deps: list, editable=False):
 
 if __name__ == "__main__":
     setup_args = {
-        "entry_points": {"console_scripts": ["bec-scan-server = scan_server:main"]},
+        "scripts": ["bec_client/bin/bec"],
         "install_requires": [
             "numpy",
             "requests",
