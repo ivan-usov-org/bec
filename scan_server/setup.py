@@ -1,6 +1,7 @@
 import os
 import pathlib
 import subprocess
+import sys
 
 from setuptools import setup
 
@@ -48,5 +49,8 @@ if __name__ == "__main__":
     bec_deps = [
         ("bec_lib", "bec_lib", bec_lib),
     ]
-    editable = os.path.dirname(os.path.abspath(__file__)).split("/")[-1] == "scan_server"
+    is_local = os.path.dirname(os.path.abspath(__file__)).split("/")[-1] == "scan_server"
+    is_build = "bdist_wheel" in sys.argv
+
+    editable = is_local and not is_build
     run_install(setup_args, bec_deps, editable=editable)

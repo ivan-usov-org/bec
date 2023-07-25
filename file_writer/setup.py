@@ -1,6 +1,7 @@
 import os
 import pathlib
 import subprocess
+import sys
 
 from setuptools import setup
 
@@ -39,12 +40,6 @@ def run_install(setup_args: dict, bec_deps: list, editable=False):
 
 
 if __name__ == "__main__":
-    setup(
-        install_requires=["numpy", "pyyaml", "h5py", "xmltodict"],
-        version=__version__,
-        entry_points={"console_scripts": ["bec-file-writer = file_writer:main"]},
-        extras_require={"dev": ["pytest", "pytest-random-order", "coverage", "black", "pylint"]},
-    )
     setup_args = {
         "entry_points": {"console_scripts": ["bec-file-writer = file_writer:main"]},
         "install_requires": ["numpy", "pyyaml", "h5py", "xmltodict"],
@@ -54,5 +49,8 @@ if __name__ == "__main__":
     bec_deps = [
         ("bec_lib", "bec_lib", bec_lib),
     ]
-    editable = os.path.dirname(os.path.abspath(__file__)).split("/")[-1] == "file_writer"
+    is_local = os.path.dirname(os.path.abspath(__file__)).split("/")[-1] == "file_writer"
+    is_build = "bdist_wheel" in sys.argv
+
+    editable = is_local and not is_build
     run_install(setup_args, bec_deps, editable=editable)
