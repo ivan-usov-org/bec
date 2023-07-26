@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.14.8 (2023-07-26)
+
+### Fix
+
+* Adapt write_to_csv to write multiple scan_reports for context manager ([`7118863`](https://gitlab.psi.ch/bec/bec/-/commit/71188638323f27f0ae7f643a0e8b3ade12579899))
+
 ## v0.14.7 (2023-07-25)
 
 ### Fix
