@@ -1,9 +1,11 @@
 from __future__ import annotations
-from typeguard import typechecked
-import functools
-from typing import TYPE_CHECKING, List, Union
-from collections import defaultdict
+
 import csv
+import functools
+from collections import defaultdict
+from typing import TYPE_CHECKING, List, Union
+
+from typeguard import typechecked
 
 if TYPE_CHECKING:
     from bec_lib.scan_manager import ScanReport
@@ -40,8 +42,8 @@ def scan_to_csv(
         header (list, optional): Create custom header for the csv file. If None, header is created automatically. Defaults to None.
         write_metadata (bool, optional): If True, the metadata of the scan will be written to the header of csv file. Defaults to True.
 
-        Examples:
-            >>> to_csv(scan_report, "./scan.csv")
+    Examples:
+        >>> scan_to_csv(scan_report, "./scan.csv")
     """
     if isinstance(scan_report, ScanReport):
         scan_report = [scan_report]
