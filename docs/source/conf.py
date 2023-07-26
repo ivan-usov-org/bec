@@ -36,12 +36,14 @@ extensions = [
     # "sphinx.ext.coverage",
     "sphinx.ext.napoleon",
     "sphinx_toolbox.collapse",
+    "sphinx_copybutton",
+    "myst_parser",
 ]
 
 autosummary_generate = True  # Turn on sphinx.ext.autosummary
-# add_module_names = True  # Remove namespaces from class/method signatures
-# autodoc_inherit_docstrings = True  # If no docstring, inherit from base class
-# set_type_checking_flag = True  # Enable 'expensive' imports for sphinx_autodoc_typehints
+add_module_names = False  # Remove namespaces from class/method signatures
+autodoc_inherit_docstrings = True  # If no docstring, inherit from base class
+set_type_checking_flag = True  # Enable 'expensive' imports for sphinx_autodoc_typehints
 autoclass_content = "both"  # Include both class docstring and __init__
 
 # Add any paths that contain templates here, relative to this directory.

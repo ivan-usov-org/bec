@@ -3,4 +3,6 @@ sphinx_copybutton
 recommonmark
 sphinx-toolbox
 sphinx_rtd_theme
+sphinx-copybutton
+myst-parser
 bec_server
