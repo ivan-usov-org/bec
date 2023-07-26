@@ -2,9 +2,10 @@ from collections import defaultdict
 from unittest import mock
 import pytest
 import csv
-from bec_lib.core.utils import _write_csv, scan_to_csv, scan_to_dict
+from bec_lib.core.utils import _write_csv, scan_to_dict
 import os
 from bec_lib.core import BECMessage
+from bec_lib.scan_manager import ScanReport
 
 
 def test__write_csv():
@@ -22,21 +23,6 @@ def test__write_csv():
         csvreader = csv.reader(csvfile)
         for row, row_value in zip(csvreader, output):
             assert row == row_value
-
-    with pytest.raises(Exception):
-        _write_csv(
-            output_name="test.csv",
-            delimiter=1,
-            dialect=None,
-            output=output,
-        )
-    with pytest.raises(Exception):
-        _write_csv(
-            output_name="test.csv",
-            delimiter=",",
-            dialect=(2, 4),
-            output=output,
-        )
 
     os.remove("test.csv")
 
@@ -79,21 +65,48 @@ def test_scan_to_dict():
     assert return_dict == output_dict
 
 
-# def test_scan_to_csv():
-#     """Test scan_to_csv function."""
-#     input_dict = create_scan_report()
-#     scanreport_mock = mock.MagicMock()
-#     scanreport_mock.__str__.return_value = "ScanReport:\n--------------------\n\tStatus: COMPLETED\n\tStart time: Fri Jul 21 19:09:07 2023\n\tEnd time: Fri Jul 21 19:09:07 2023\n\tElapsed time: 0.4 s\n\tScan ID: 1984ade5-898e-49a7-8fb6-076d1eecb7fa\n\tScan number: 262\n\tNumber of points: 3\n"
-#     scanreport_mock.scan.data.__getitem__ = input_dict.__getitem__
-#     scanreport_mock.scan.data.values.return_value = input_dict.values()
-#     # # scanreport_mock.scan.data.keys.side_effect = input_dict.keys
-#     # scanreport_mock.scan.data.keys.__contains__.side_effect = input_dict.__contains__
-#     # # scanreport_mock.scan.data.keys.return_value = input_dict.keys()
-#     # scanreport_mock.scan.data.keys.__len__ = input_dict.__len__
-#     # scanreport_mock.scan.data.keys.__iter__ = input_dict.__iter__
-#     with mock.patch("bec_lib.core.utils._write_csv") as mock_write_csv:
-#         scan_to_csv(scanreport_mock, "./test.csv")
-#         mock_write_csv.assert_called_once()
+def test_scan_to_csv():
+    """Test scan_to_csv function."""
+    # input_dict = create_scan_report()
+    scanreport_mock = mock.MagicMock(spec=ScanReport)
+    # scanreport_mock.__str__.return_value = "ScanReport:\n--------------------\n\tStatus: COMPLETED\n\tStart time: Fri Jul 21 19:09:07 2023\n\tEnd time: Fri Jul 21 19:09:07 2023\n\tElapsed time: 0.4 s\n\tScan ID: 1984ade5-898e-49a7-8fb6-076d1eecb7fa\n\tScan number: 262\n\tNumber of points: 3\n"
+    # scanreport_mock.scan.data.__getitem__ = input_dict.__getitem__
+    # scanreport_mock.scan.data.values.return_value = input_dict.values()
+    # # # scanreport_mock.scan.data.keys.side_effect = input_dict.keys
+    # # scanreport_mock.scan.data.keys.__contains__.side_effect = input_dict.__contains__
+    # # # scanreport_mock.scan.data.keys.return_value = input_dict.keys()
+    # # scanreport_mock.scan.data.keys.__len__ = input_dict.__len__
+    # # scanreport_mock.scan.data.keys.__iter__ = input_dict.__iter__
+    # with mock.patch("bec_lib.core.utils._write_csv") as mock_write_csv:
+    #     scan_to_csv(scanreport_mock, "./test.csv")
+    #     mock_write_csv.assert_called_once()
+    with pytest.raises(Exception):
+        _scan_to_csv(
+            scan_report=scanreport_mock,
+            output_name=1234,
+            delimiter=",",
+            dialect=None,
+            header=None,
+            write_metadata=True,
+        )
+    with pytest.raises(Exception):
+        _scan_to_csv(
+            scan_report=[scanreport_mock, scanreport_mock, scanreport_mock],
+            output_name="test.csv",
+            delimiter=",",
+            dialect=None,
+            header=None,
+            write_metadata=True,
+        )
+    with pytest.raises(Exception):
+        _scan_to_csv(
+            scan_report=[scanreport_mock, scanreport_mock, scanreport_mock],
+            output_name="test.csv",
+            delimiter=123,
+            dialect=None,
+            header=None,
+            write_metadata=True,
+        )
 
 
 def create_scan_report():
