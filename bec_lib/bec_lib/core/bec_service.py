@@ -4,7 +4,7 @@ import threading
 import time
 import uuid
 from dataclasses import asdict, dataclass
-from typing import Any
+from typing import Any, Union
 
 import psutil
 from rich.console import Console
@@ -22,11 +22,10 @@ logger = bec_logger.logger
 
 class BECService:
     def __init__(
-        self, config: ServiceConfig, connector_cls: ConnectorBase, unique_service=False
+        self, config: Union[str, ServiceConfig], connector_cls: ConnectorBase, unique_service=False
     ) -> None:
         super().__init__()
-        self._service_config = config
-        self.bootstrap_server = config.redis
+        self._import_config(config)
         self._connector_cls = connector_cls
         self.connector = connector_cls(self.bootstrap_server)
         self._unique_service = unique_service
@@ -45,27 +44,37 @@ class BECService:
         self._start_update_service_info()
         self._start_metrics_emitter()
 
-    def _check_services(self) -> None:
+    def _import_config(self, config: Union[str, ServiceConfig]) -> None:
+        if isinstance(config, str):
+            self._service_config = ServiceConfig(config_path=config)
+        elif isinstance(config, ServiceConfig):
+            self._service_config = config
+        else:
+            raise TypeError("config must be of type str or ServiceConfig")
+
+        self.bootstrap_server = self._service_config.redis
+
+    def _check_services(self, timeout_time=8, sleep_time=0.5) -> None:
         if not self._unique_service:
             return
-
-        timeout_time = 8
         elapsed_time = 0
-        sleep_time = 0.5
-        while True:
-            self._update_existing_services()
-            try:
-                for service_name, msg in self._services_info.items():
-                    if service_name == self.__class__.__name__:
-                        raise RuntimeError(
-                            f"Another instance of {self.__class__.__name__} launched by user {msg.content['info']['user']} is already running on {msg.content['info']['hostname']}"
-                        )
-                break
-            except RuntimeError as service_error:
-                if elapsed_time > timeout_time:
-                    raise RuntimeError from service_error
-                elapsed_time += sleep_time
-                time.sleep(sleep_time)
+        while self._run_service_check(timeout_time, elapsed_time):
+            elapsed_time += sleep_time
+            time.sleep(sleep_time)
+
+    def _run_service_check(self, timeout_time: float, elapsed_time: float) -> bool:
+        self._update_existing_services()
+        try:
+            for service_name, msg in self._services_info.items():
+                if service_name == self.__class__.__name__:
+                    raise RuntimeError(
+                        f"Another instance of {self.__class__.__name__} launched by user {msg.content['info']['user']} is already running on {msg.content['info']['hostname']}"
+                    )
+            return False
+        except RuntimeError as service_error:
+            if elapsed_time > timeout_time:
+                raise RuntimeError from service_error
+        return True
 
     def _initialize_logger(self) -> None:
         bec_logger.configure(
