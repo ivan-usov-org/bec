@@ -38,6 +38,7 @@ extensions = [
     "sphinx_toolbox.collapse",
     "sphinx_copybutton",
     "myst_parser",
+    "sphinx_design",
 ]
 
 autosummary_generate = True  # Turn on sphinx.ext.autosummary
@@ -55,10 +56,10 @@ language = "Python"
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "sphinx_rtd_theme"
-# html_theme = "pydata_sphinx_theme"
+html_theme = "pydata_sphinx_theme"
 # html_static_path = ["_static"]
-# html_theme_options = {
-#     "show_nav_level": 1,
-#     "navbar_align": "left",
-# }
+html_logo = "_static/bec.png"
+html_theme_options = {
+    "show_nav_level": 3,
+    "navbar_align": "content",
+}

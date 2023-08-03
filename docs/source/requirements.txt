@@ -2,7 +2,8 @@ sphinx
 sphinx_copybutton
 recommonmark
 sphinx-toolbox
-sphinx_rtd_theme
+mpl-sphinx-theme
 sphinx-copybutton
 myst-parser
+sphinx-design
 bec_server
