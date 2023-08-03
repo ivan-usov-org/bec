@@ -2,6 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## v0.15.0 (2023-08-03)
+
+### Feature
+
+* Added option to specify config path as service config ([`1a776de`](https://gitlab.psi.ch/bec/bec/-/commit/1a776de8118de7428b0c6b4e3693eaf619651192))
+
+### Documentation
+
+* Updated sphinx conf file to deal with md files; added copy button ([`7f48ce6`](https://gitlab.psi.ch/bec/bec/-/commit/7f48ce6aa1f2000993a4fb31e23a3efa3c122a57))
+* Minor improvements for scan_to_csv docs ([`21d371a`](https://gitlab.psi.ch/bec/bec/-/commit/21d371a80b8009e1df3c9d4148191f05a36a0abf))
+
 ## v0.14.8 (2023-07-26)
 
 ### Fix
