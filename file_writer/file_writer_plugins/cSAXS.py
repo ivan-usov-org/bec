@@ -1,11 +1,45 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
 import numpy as np
 
+if TYPE_CHECKING:
+    from bec_lib.core import DeviceManagerBase
 
-def get_entry(data, name, default=None):
+    from file_writer.file_writer import HDF5Storage
+
+
+def get_entry(data: dict, name: str, default=None) -> Any:
+    """
+    Get an entry from the scan data assuming a <device>.<device>.value structure.
+
+    Args:
+        data (dict): Scan data
+        name (str): Entry name
+        default (Any, optional): Default value. Defaults to None.
+    """
     return data.get(name, {}).get(name, {}).get("value", default)
 
 
-def NeXus_format(storage, data, device_manager):
+def NeXus_format(
+    storage: HDF5Storage,
+    data: dict,
+    file_references: dict,
+    device_manager: DeviceManagerBase,
+) -> HDF5Storage:
+    """
+    Prepare the NeXus file format.
+
+    Args:
+        storage (HDF5Storage): HDF5 storage. Pseudo hdf5 file container that will be written to disk later.
+        data (dict): scan data
+        file_references (dict): File references. Can be used to add external files to the HDF5 file. The path is given relative to the HDF5 file.
+        device_manager (DeviceManagerBase): Device manager. Can be used to check if devices are available.
+
+    Returns:
+        HDF5Storage: Updated HDF5 storage
+    """
     # /entry
     entry = storage.create_group("entry")
     entry.attrs["NX_class"] = "NXentry"

@@ -1,13 +1,15 @@
 import abc
 import datetime
 import json
+import os
 import traceback
 import typing
 
-import file_writer_plugins as fwp
 import h5py
 import xmltodict
 from bec_lib.core import bec_logger
+
+import file_writer_plugins as fwp
 
 from .merged_dicts import merge_dicts
 
@@ -162,6 +164,11 @@ class HDF5Storage:
         self._storage[name] = HDF5Storage(storage_type="softlink", data=target)
         return self._storage[name]
 
+    def create_ext_link(self, name: str, target: str, entry: str):
+        data = {"file": target, "entry": entry}
+        self._storage[name] = HDF5Storage(storage_type="ext_link", data=data)
+        return self._storage[name]
+
 
 class HDF5StorageWriter:
     device_storage = None
@@ -217,6 +224,9 @@ class HDF5StorageWriter:
     def add_softlink(self, name, container, val):
         container[name] = h5py.SoftLink(val._data)
 
+    def add_external_link(self, name, container, val):
+        container[name] = h5py.ExternalLink(val._data.get("file"), val._data.get("entry"))
+
     def add_content(self, container, storage):
         for name, val in storage.items():
             if val._storage_type == "group":
@@ -227,6 +237,8 @@ class HDF5StorageWriter:
                 self.add_hardlink(name, container, val)
             elif val._storage_type == "softlink":
                 self.add_softlink(name, container, val)
+            elif val._storage_type == "ext_link":
+                self.add_external_link(name, container, val)
             else:
                 pass
 
@@ -250,8 +262,15 @@ class NexusFileWriter(FileWriter):
         if data.end_time is not None:
             device_storage["end_time"] = datetime.datetime.fromtimestamp(data.end_time).isoformat()
         writer_format = getattr(fwp, self.file_writer_manager.file_writer_config.get("plugin"))
+        for file_ref in data.file_references.values():
+            rel_path = os.path.relpath(file_ref["path"], os.path.dirname(file_path))
+            file_ref["path"] = rel_path
+
         writer_storage = writer_format(
-            HDF5Storage(), device_storage, self.file_writer_manager.device_manager
+            storage=HDF5Storage(),
+            data=device_storage,
+            file_references=data.file_references,
+            device_manager=self.file_writer_manager.device_manager,
         )
 
         with h5py.File(file_path, "w") as file:

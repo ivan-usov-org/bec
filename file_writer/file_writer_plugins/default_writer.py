@@ -1,4 +1,31 @@
-def NeXus_format(storage, data, device_manager):
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bec_lib.core import DeviceManagerBase
+
+    from file_writer.file_writer import HDF5Storage
+
+
+def NeXus_format(
+    storage: HDF5Storage,
+    data: dict,
+    file_references: dict,
+    device_manager: DeviceManagerBase,
+) -> HDF5Storage:
+    """
+    Prepare the NeXus file format.
+
+    Args:
+        storage (HDF5Storage): HDF5 storage. Pseudo hdf5 file container that will be written to disk later.
+        data (dict): scan data
+        file_references (dict): File references. Can be used to add external files to the HDF5 file.
+        device_manager (DeviceManagerBase): Device manager. Can be used to check if devices are available.
+
+    Returns:
+        HDF5Storage: Updated HDF5 storage
+    """
     # /entry
     entry = storage.create_group("entry")
     entry.attrs["NX_class"] = "NXentry"
@@ -12,6 +39,10 @@ def NeXus_format(storage, data, device_manager):
     collection = entry.create_group("collection")
     collection.attrs["NX_class"] = "NXcollection"
     bec_collection = collection.create_group("bec")
+
+    # REMOVE ME
+    ref = file_references.get("master")
+    entry.create_ext_link("master", ref["path"], "entry/collection")
 
     # /entry/control
     control = entry.create_group("control")
