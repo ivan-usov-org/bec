@@ -64,7 +64,6 @@ class BECClient(BECService, UserScriptsMixin):
         self._configure_logger()
         # pylint: disable=attribute-defined-outside-init
         self.device_manager = None
-        self.scibec_url = config.scibec
         self.queue = None
         self.alarm_handler = None
         self._load_scans()
