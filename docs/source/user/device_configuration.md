@@ -14,6 +14,7 @@ The configuration file is a yaml file. If you are not familiar with yaml, please
 
 ### Load, save and update the configuration
 
+(upload_configuration)=
 #### Upload a new configuration
 
 To upload a new device configuration from the client using a yaml file, please start Redis and the BEC server (if they are not running already) and launch the client using

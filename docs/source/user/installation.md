@@ -31,4 +31,4 @@ and start the client using
     bec
 ```
 
-You are now ready to load your first device configuration. To this end, please follow the instructions given in :doc:`quickstart`.
+You are now ready to load your first device configuration. To this end, please follow the instructions given in the following section.

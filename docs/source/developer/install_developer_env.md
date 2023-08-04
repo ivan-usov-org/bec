@@ -14,7 +14,7 @@ cd bec
 On PSI-maintained systems with pmodules, you can skip the installation of redis and tmux and instead use the existing pmodules for redis and tmux:
 
 ```bash
-module add redis/7.0.2
+module add redis/7.0.12
 module add tmux/3.2
 source ./bin/install_bec_dev.sh -r -t
 ```
@@ -45,4 +45,4 @@ To start the client, run
 bec
 ```
 
-You are now ready to load your first device configuration. To this end, please follow the instructions given in :doc:`quickstart`.
+You are now ready to load your first device configuration. To this end, please follow the instructions given in [Upload a new configuration](#upload_configuration).
