@@ -60,6 +60,6 @@ html_theme = "pydata_sphinx_theme"
 # html_static_path = ["_static"]
 html_logo = "_static/bec.png"
 html_theme_options = {
-    "show_nav_level": 3,
+    "show_nav_level": 1,
     "navbar_align": "content",
 }

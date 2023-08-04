@@ -5,15 +5,10 @@
 :hidden:
 
 install_developer_env
-modules
+reference
 ```
 
 ```{include} install_developer_env.md
 ```
 
 
-## API Reference
-
-```{eval-rst}
-.. include:: modules.rst
-```
