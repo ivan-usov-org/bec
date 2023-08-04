@@ -2,7 +2,7 @@ sphinx
 sphinx_copybutton
 recommonmark
 sphinx-toolbox
-mpl-sphinx-theme
+pydata-sphinx-theme
 sphinx-copybutton
 myst-parser
 sphinx-design
