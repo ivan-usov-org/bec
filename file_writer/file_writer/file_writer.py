@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import abc
 import datetime
 import json
@@ -146,25 +148,69 @@ class NeXusFileXMLWriter(FileWriter, XMLWriter):
 
 
 class HDF5Storage:
+    """
+    The HDF5Storage class is a container used by the HDF5 writer plugins to store data in the correct NeXus format.
+    """
+
     def __init__(self, storage_type: str = "group", data=None) -> None:
         self._storage = {}
         self._storage_type = storage_type
         self.attrs = {}
         self._data = data
 
-    def create_group(self, name: str):
+    def create_group(self, name: str) -> HDF5Storage:
+        """
+        Create a group in the HDF5 storage.
+
+        Args:
+            name (str): Group name
+
+        Returns:
+            HDF5Storage: Group storage
+        """
         self._storage[name] = HDF5Storage(storage_type="group")
         return self._storage[name]
 
-    def create_dataset(self, name: str, data: typing.Any):
+    def create_dataset(self, name: str, data: typing.Any) -> HDF5Storage:
+        """
+        Create a dataset in the HDF5 storage.
+
+        Args:
+            name (str): Dataset name
+            data (typing.Any): Dataset data
+
+        Returns:
+            HDF5Storage: Dataset storage
+        """
         self._storage[name] = HDF5Storage(storage_type="dataset", data=data)
         return self._storage[name]
 
-    def create_soft_link(self, name: str, target: str):
+    def create_soft_link(self, name: str, target: str) -> HDF5Storage:
+        """
+        Create a soft link in the HDF5 storage.
+
+        Args:
+            name (str): Link name
+            target (str): Link target
+
+        Returns:
+            HDF5Storage: Link storage
+        """
         self._storage[name] = HDF5Storage(storage_type="softlink", data=target)
         return self._storage[name]
 
-    def create_ext_link(self, name: str, target: str, entry: str):
+    def create_ext_link(self, name: str, target: str, entry: str) -> HDF5Storage:
+        """
+        Create an external link in the HDF5 storage.
+
+        Args:
+            name (str): Link name
+            target (str): Name of the target file
+            entry (str): Entry within the target file (e.g. entry/instrument/eiger_4)
+
+        Returns:
+            HDF5Storage: Link storage
+        """
         data = {"file": target, "entry": entry}
         self._storage[name] = HDF5Storage(storage_type="ext_link", data=data)
         return self._storage[name]

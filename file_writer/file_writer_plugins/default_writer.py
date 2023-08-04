@@ -40,10 +40,6 @@ def NeXus_format(
     collection.attrs["NX_class"] = "NXcollection"
     bec_collection = collection.create_group("bec")
 
-    # REMOVE ME
-    ref = file_references.get("master")
-    entry.create_ext_link("master", ref["path"], "entry/collection")
-
     # /entry/control
     control = entry.create_group("control")
     control.attrs["NX_class"] = "NXmonitor"
