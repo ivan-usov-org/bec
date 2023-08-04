@@ -5,6 +5,7 @@
 :hidden:
 
 install_developer_env
+glossary
 reference
 ```
 
