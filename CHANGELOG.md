@@ -2,6 +2,30 @@
 
 <!--next-version-placeholder-->
 
+## v0.16.0 (2023-08-04)
+
+### Feature
+
+* Added support for file references and external links in the bec master file ([`9a59bdc`](https://gitlab.psi.ch/bec/bec/-/commit/9a59bdce90110fded772bf4efd84b10e019a7837))
+* Added done entry to filemessage ([`2c62fd7`](https://gitlab.psi.ch/bec/bec/-/commit/2c62fd72b16cc62840daba929c1afd8dc26956d0))
+* Added support for endpoints with and without suffix ([`ce0e54e`](https://gitlab.psi.ch/bec/bec/-/commit/ce0e54e561ad5ef03898e749e7333dc7535bf0d2))
+
+### Fix
+
+* Removed dummy link ([`de2c8ab`](https://gitlab.psi.ch/bec/bec/-/commit/de2c8ab2c51357dd23e9efbf8481fa99adb11326))
+* Removed unnecessary config assignment in client ([`9360570`](https://gitlab.psi.ch/bec/bec/-/commit/93605707bd1ec1efea51407c593b25e0e5b75620))
+
+### Documentation
+
+* Added missing reference file ([`df19570`](https://gitlab.psi.ch/bec/bec/-/commit/df19570c9d658b35a04dbe7112c454793a8a2e54))
+* Added logo ([`3c40a28`](https://gitlab.psi.ch/bec/bec/-/commit/3c40a2856c7678d14517bfcae6fe2c935756f68d))
+* Fixed requirements ([`76e9342`](https://gitlab.psi.ch/bec/bec/-/commit/76e93429f6eb3851c5fabc78ff425e28b3ba2427))
+* Added glossary ([`b54e56f`](https://gitlab.psi.ch/bec/bec/-/commit/b54e56fe8fd7f29b2499770c7c392cdcf7e72fe8))
+* Fixed indent ([`fe07a70`](https://gitlab.psi.ch/bec/bec/-/commit/fe07a702df434714fd500fc983502e106e410bee))
+* Fixed references ([`20254fb`](https://gitlab.psi.ch/bec/bec/-/commit/20254fb628206f934238f40765a3fa5d15c3274c))
+* Updated developer instructions ([`823094a`](https://gitlab.psi.ch/bec/bec/-/commit/823094acb1b06074ef3180d2717986020b911b4f))
+* Redesigned documentation ([`ecf3ee9`](https://gitlab.psi.ch/bec/bec/-/commit/ecf3ee93de1fd0ea0f4694150c8c07fcc21da4b5))
+
 ## v0.15.0 (2023-08-03)
 
 ### Feature
