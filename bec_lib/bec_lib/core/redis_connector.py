@@ -119,8 +119,21 @@ class RedisProducer(ProducerConnector):
         self.r = redis.Redis(host=host, port=port)
         self.stream_keys = {}
 
+    def trim_topic(self, topic: str, suffix: str) -> str:
+        """
+        trim topic to remove suffix
+
+        Args:
+            topic (str): topic to trim
+            suffix (str): suffix to remove
+        """
+        if topic.endswith(suffix):
+            return topic[: -len(suffix)]
+        return topic
+
     def send(self, topic: str, msg, pipe=None) -> None:
         """send to redis"""
+        topic = self.trim_topic(topic, ":sub")
         client = pipe if pipe is not None else self.r
         client.publish(f"{topic}:sub", msg)
 
@@ -133,7 +146,7 @@ class RedisProducer(ProducerConnector):
         If key does not exist, it is created as empty list before
         performing the push operations. When key holds a value that
         is not a list, an error is returned."""
-
+        topic = self.trim_topic(topic, ":val")
         client = pipe if pipe is not None else self.pipeline()
         client.lpush(f"{topic}:val", msgs)
         if max_size:
@@ -144,6 +157,7 @@ class RedisProducer(ProducerConnector):
             client.execute()
 
     def lset(self, topic: str, index: int, msgs: str, pipe=None) -> None:
+        topic = self.trim_topic(topic, ":val")
         client = pipe if pipe is not None else self.r
         return client.lset(f"{topic}:val", index, msgs)
 
@@ -153,7 +167,7 @@ class RedisProducer(ProducerConnector):
         values at the tail of the list stored at key. If key does not exist,
         it is created as empty list before performing the push operation. When
         key holds a value that is not a list, an error is returned."""
-
+        topic = self.trim_topic(topic, ":val")
         client = pipe if pipe is not None else self.r
         return client.rpush(f"{topic}:val", msgs)
 
@@ -164,12 +178,14 @@ class RedisProducer(ProducerConnector):
         of the list stored at key. The offsets start and stop are zero-based indexes,
         with 0 being the first element of the list (the head of the list), 1 being
         the next element and so on."""
-
+        topic = self.trim_topic(topic, ":val")
         client = pipe if pipe is not None else self.r
         return client.lrange(f"{topic}:val", start, end)
 
     def set_and_publish(self, topic: str, msg, pipe=None, expire: int = None) -> None:
         """piped combination of self.publish and self.set"""
+        topic = self.trim_topic(topic, ":val")
+        topic = self.trim_topic(topic, ":sub")
         client = pipe if pipe is not None else self.pipeline()
         client.publish(f"{topic}:sub", msg)
         client.set(f"{topic}:val", msg)
@@ -180,6 +196,7 @@ class RedisProducer(ProducerConnector):
 
     def set(self, topic: str, msg, pipe=None, is_dict=False, expire: int = None) -> None:
         """set redis value"""
+        topic = self.trim_topic(topic, ":val")
         client = pipe if pipe is not None else self.pipeline()
         if is_dict:
             client.hmset(f"{topic}:val", msg)
@@ -205,6 +222,7 @@ class RedisProducer(ProducerConnector):
 
     def get(self, topic: str, pipe=None, is_dict=False):
         """retrieve entry, either via hgetall or get"""
+        topic = self.trim_topic(topic, ":val")
         client = pipe if pipe is not None else self.r
         if is_dict:
             return client.hgetall(f"{topic}:val")
@@ -212,6 +230,7 @@ class RedisProducer(ProducerConnector):
 
     def xadd(self, topic: str, msg: dict, max_size=None, pipe=None):
         """add to stream"""
+        topic = self.trim_topic(topic, ":val")
         client = pipe if pipe is not None else self.r
         if max_size:
             client.xadd(f"{topic}:val", msg, maxlen=max_size)
