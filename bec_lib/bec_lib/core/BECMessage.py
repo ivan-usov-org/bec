@@ -801,19 +801,20 @@ class FileMessage(BECMessage):
         self,
         *,
         file_path: str,
-        successful: bool,
+        done: bool = True,
+        successful: bool = True,
         metadata: dict = None,
         version: float = DEFAULT_VERSION,
     ) -> None:
         """
-
         Args:
-            file_path: path to the written file
-            successful: True if the file writing was successful
-            metadata: status metadata
+            file_path(str): path to the file
+            done(bool): True if the file writing operation is done
+            successful(bool): True if the file writing operation was successful
+            metadata(dict): additional metadata to describe the file
         """
 
-        self.content = {"file_path": file_path, "successful": successful}
+        self.content = {"file_path": file_path, "done": done, "successful": successful}
         super().__init__(
             msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
         )
