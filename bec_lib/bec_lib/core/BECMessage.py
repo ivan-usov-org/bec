@@ -808,10 +808,11 @@ class FileMessage(BECMessage):
     ) -> None:
         """
         Args:
-            file_path(str): path to the file
-            done(bool): True if the file writing operation is done
-            successful(bool): True if the file writing operation was successful
-            metadata(dict): additional metadata to describe the file
+            file_path (str): path to the file
+            done (bool, optional): True if the file writing operation is done. Defaults to True.
+            successful (bool, optional): True if the file writing operation was successful. Defaults to True.
+            metadata (dict, optional): status metadata. Defaults to None.
+            version (float, optional): BECMessage version. Defaults to DEFAULT_VERSION.
         """
 
         self.content = {"file_path": file_path, "done": done, "successful": successful}

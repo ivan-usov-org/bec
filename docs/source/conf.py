@@ -34,6 +34,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     # "sphinx.ext.coverage",
+    "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
     "sphinx_toolbox.collapse",
     "sphinx_copybutton",
