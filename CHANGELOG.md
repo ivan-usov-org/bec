@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.16.2 (2023-08-05)
+
+### Fix
+
+* Fixed check_storage for already removed scan storage items ([`4a4dace`](https://gitlab.psi.ch/bec/bec/-/commit/4a4daceaf4b7c579cb4adead784f9900b675b5dc))
+
 ## v0.16.1 (2023-08-05)
 
 ### Fix
