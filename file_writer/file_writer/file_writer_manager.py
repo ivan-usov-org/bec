@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import threading
 import traceback
 
 from bec_lib.core import (
@@ -9,6 +10,7 @@ from bec_lib.core import (
     MessageEndpoints,
     ServiceConfig,
     bec_logger,
+    threadlocked,
 )
 from bec_lib.core.file_utils import FileWriterMixin
 from bec_lib.core.redis_connector import Alarms, MessageObject, RedisConnector
@@ -65,6 +67,7 @@ class FileWriterManager(BECService):
             connector_cls (RedisConnector): Connector class
         """
         super().__init__(config, connector_cls, unique_service=True)
+        self._lock = threading.RLock()
         self.file_writer_config = self._service_config.service_config.get("file_writer")
         self.writer_mixin = FileWriterMixin(self.file_writer_config)
         self.producer = self.connector.producer()
@@ -201,6 +204,7 @@ class FileWriterManager(BECService):
             }
         return
 
+    @threadlocked
     def check_storage_status(self, scanID: str) -> None:
         """
         Check if the scan storage is ready to be written to file and write it if it is.
