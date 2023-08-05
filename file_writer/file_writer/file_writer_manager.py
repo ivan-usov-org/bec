@@ -212,6 +212,8 @@ class FileWriterManager(BECService):
         Args:
             scanID (str): Scan ID
         """
+        if not self.scan_storage.get(scanID):
+            return
         self.update_baseline_reading(scanID)
         self.update_file_references(scanID)
         if self.scan_storage[scanID].ready_to_write():
