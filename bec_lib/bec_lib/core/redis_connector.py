@@ -1,5 +1,6 @@
 import enum
 import time
+from functools import wraps
 
 import redis
 
@@ -18,6 +19,20 @@ class Alarms(int, enum.Enum):
     WARNING = 0
     MINOR = 1
     MAJOR = 2
+
+
+def catch_connection_error(func):
+    """catch connection errors"""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except redis.exceptions.ConnectionError:
+            print("Failed to connect to redis. Is the server running?")
+            return None
+
+    return wrapper
 
 
 class RedisConnector(ConnectorBase):
@@ -76,24 +91,28 @@ class RedisConnector(ConnectorBase):
             **kwargs,
         )
 
+    @catch_connection_error
     def log_warning(self, msg):
         """send a warning"""
         self._notifications_producer.send(
             MessageEndpoints.log(), LogMessage(log_type="warning", content=msg).dumps()
         )
 
+    @catch_connection_error
     def log_message(self, msg):
         """send a log message"""
         self._notifications_producer.send(
             MessageEndpoints.log(), LogMessage(log_type="log", content=msg).dumps()
         )
 
+    @catch_connection_error
     def log_error(self, msg):
         """send an error as log"""
         self._notifications_producer.send(
             MessageEndpoints.log(), LogMessage(log_type="error", content=msg).dumps()
         )
 
+    @catch_connection_error
     def raise_alarm(
         self, severity: Alarms, alarm_type: str, source: str, content: dict, metadata: dict
     ):
@@ -131,12 +150,14 @@ class RedisProducer(ProducerConnector):
             return topic[: -len(suffix)]
         return topic
 
+    @catch_connection_error
     def send(self, topic: str, msg, pipe=None) -> None:
         """send to redis"""
         topic = self.trim_topic(topic, ":sub")
         client = pipe if pipe is not None else self.r
         client.publish(f"{topic}:sub", msg)
 
+    @catch_connection_error
     def lpush(
         self, topic: str, msgs: str, pipe=None, max_size: int = None, expire: int = None
     ) -> None:
@@ -156,11 +177,13 @@ class RedisProducer(ProducerConnector):
         if not pipe:
             client.execute()
 
+    @catch_connection_error
     def lset(self, topic: str, index: int, msgs: str, pipe=None) -> None:
         topic = self.trim_topic(topic, ":val")
         client = pipe if pipe is not None else self.r
         return client.lset(f"{topic}:val", index, msgs)
 
+    @catch_connection_error
     def rpush(self, topic: str, msgs: str, pipe=None) -> int:
         """O(1) for each element added, so O(N) to add N elements when the
         command is called with multiple arguments. Insert all the specified
@@ -171,6 +194,7 @@ class RedisProducer(ProducerConnector):
         client = pipe if pipe is not None else self.r
         return client.rpush(f"{topic}:val", msgs)
 
+    @catch_connection_error
     def lrange(self, topic: str, start: int, end: int, pipe=None):
         """O(S+N) where S is the distance of start offset from HEAD for small
         lists, from nearest end (HEAD or TAIL) for large lists; and N is the
@@ -182,6 +206,7 @@ class RedisProducer(ProducerConnector):
         client = pipe if pipe is not None else self.r
         return client.lrange(f"{topic}:val", start, end)
 
+    @catch_connection_error
     def set_and_publish(self, topic: str, msg, pipe=None, expire: int = None) -> None:
         """piped combination of self.publish and self.set"""
         topic = self.trim_topic(topic, ":val")
@@ -194,6 +219,7 @@ class RedisProducer(ProducerConnector):
         if not pipe:
             client.execute()
 
+    @catch_connection_error
     def set(self, topic: str, msg, pipe=None, is_dict=False, expire: int = None) -> None:
         """set redis value"""
         topic = self.trim_topic(topic, ":val")
@@ -207,19 +233,23 @@ class RedisProducer(ProducerConnector):
         if not pipe:
             client.execute()
 
+    @catch_connection_error
     def keys(self, pattern: str) -> list:
         """returns all keys matching a pattern"""
         return self.r.keys(pattern)
 
+    @catch_connection_error
     def pipeline(self):
         """create a new pipeline"""
         return self.r.pipeline()
 
+    @catch_connection_error
     def delete(self, topic, pipe=None):
         """delete topic"""
         client = pipe if pipe is not None else self.r
         client.delete(topic)
 
+    @catch_connection_error
     def get(self, topic: str, pipe=None, is_dict=False):
         """retrieve entry, either via hgetall or get"""
         topic = self.trim_topic(topic, ":val")
@@ -228,6 +258,7 @@ class RedisProducer(ProducerConnector):
             return client.hgetall(f"{topic}:val")
         return client.get(f"{topic}:val")
 
+    @catch_connection_error
     def xadd(self, topic: str, msg: dict, max_size=None, pipe=None):
         """add to stream"""
         topic = self.trim_topic(topic, ":val")
@@ -237,6 +268,7 @@ class RedisProducer(ProducerConnector):
         else:
             client.xadd(f"{topic}:val", msg)
 
+    @catch_connection_error
     def xread(
         self,
         topic: str,
@@ -353,6 +385,7 @@ class RedisConsumer(RedisConsumerMixin, ConsumerConnector):
 
         self.initialize_connector()
 
+    @catch_connection_error
     def poll_messages(self) -> None:
         """
         Poll messages from self.connector and call the callback function self.cb
@@ -412,17 +445,21 @@ class RedisConsumerThreaded(RedisConsumerMixin, ConsumerConnectorThreaded):
         Poll messages from self.connector and call the callback function self.cb
 
         """
-        messages = self.pubsub.get_message(ignore_subscribe_messages=True)
-        if messages is not None:
-            if f"{MessageEndpoints.log()}".encode() not in messages["channel"]:
-                # no need to update the update frequency just for logs
-                self.last_received_msg = time.time()
-            msg = MessageObject(topic=messages["channel"], value=messages["data"])
-            self.cb(msg, **self.kwargs)
-        else:
-            sleep_time = int(bool(time.time() - self.last_received_msg > self.idle_time))
-            if self.sleep_times[sleep_time]:
-                time.sleep(self.sleep_times[sleep_time])
+        try:
+            messages = self.pubsub.get_message(ignore_subscribe_messages=True)
+            if messages is not None:
+                if f"{MessageEndpoints.log()}".encode() not in messages["channel"]:
+                    # no need to update the update frequency just for logs
+                    self.last_received_msg = time.time()
+                msg = MessageObject(topic=messages["channel"], value=messages["data"])
+                self.cb(msg, **self.kwargs)
+            else:
+                sleep_time = int(bool(time.time() - self.last_received_msg > self.idle_time))
+                if self.sleep_times[sleep_time]:
+                    time.sleep(self.sleep_times[sleep_time])
+        except redis.exceptions.ConnectionError:
+            print("Failed to connect to redis. Is the server running?")
+            time.sleep(1)
 
     def shutdown(self):
         super().shutdown()
