@@ -5,7 +5,7 @@ import traceback
 from concurrent.futures import ThreadPoolExecutor
 from typing import Callable
 
-from bec_lib.core import BECMessage, BECService
+from bec_lib.core import BECMessage, BECService, BECStatus
 from bec_lib.core import DeviceManagerBase as DeviceManager
 from bec_lib.core import MessageEndpoints, bec_logger
 from bec_lib.core.connector import ConnectorBase
@@ -41,6 +41,7 @@ class ScanBundler(BECService):
         self._lock = threading.Lock()
         self._emitter = []
         self._initialize_emitters()
+        self.status = BECStatus.RUNNING
 
     def _initialize_emitters(self):
         self._emitter = [BECEmitter(self), BlueskyEmitter(self)]
