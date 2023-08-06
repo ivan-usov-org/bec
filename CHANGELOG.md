@@ -2,6 +2,20 @@
 
 <!--next-version-placeholder-->
 
+## v0.16.3 (2023-08-06)
+
+### Fix
+
+* Catch redis connection errors ([`31efa96`](https://gitlab.psi.ch/bec/bec/-/commit/31efa96cec20540a00f0be199e8fda4fa04fdc68))
+* Fixed default arg for initialize ([`b65aba8`](https://gitlab.psi.ch/bec/bec/-/commit/b65aba8a5fcdb8f2f5eeb488725144f46267f074))
+* Wait for bec server should only be done for ipython, not the bec lib ([`9dfe389`](https://gitlab.psi.ch/bec/bec/-/commit/9dfe38943f2b8d6be051612de9f31ad8171f1073))
+* Scanbundler sets status to running ([`d0d46ba`](https://gitlab.psi.ch/bec/bec/-/commit/d0d46ba76b1351f5431d7c93a6d6591c250563d7))
+
+### Documentation
+
+* Updated style; added css ([`6ec5fac`](https://gitlab.psi.ch/bec/bec/-/commit/6ec5facd0cdf0588c6545828c53ccc9e8ed29875))
+* Added simple ophyd description; added file_manager description ([`48cfcb6`](https://gitlab.psi.ch/bec/bec/-/commit/48cfcb6c6242c381aea71d0e1c686d10e3fb2c1b))
+
 ## v0.16.2 (2023-08-05)
 
 ### Fix
