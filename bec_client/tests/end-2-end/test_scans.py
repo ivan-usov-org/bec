@@ -117,8 +117,8 @@ def test_mv_scan(capsys, client):
         current_pos_samy, 20, atol=dev.samy._config["deviceConfig"].get("tolerance", 0.05)
     )
     scans.umv(dev.samx, 10, dev.samy, 20, relative=False)
-    current_pos_samx = dev.samx.read()["samx"]["value"]
-    current_pos_samy = dev.samy.read()["samy"]["value"]
+    current_pos_samx = dev.samx.read(cached=True)["samx"]["value"]
+    current_pos_samy = dev.samy.read(cached=True)["samy"]["value"]
     captured = capsys.readouterr()
     ref_out_samx = f" ━━━━━━━━━━━━━━━ {current_pos_samx:10.2f} /      10.00 / 100 % 0:00:00 0:00:00"
     ref_out_samy = f" ━━━━━━━━━━━━━━━ {current_pos_samy:10.2f} /      20.00 / 100 % 0:00:00 0:00:00"
