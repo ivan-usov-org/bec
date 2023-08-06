@@ -22,13 +22,18 @@ logger = bec_logger.logger
 
 class BECService:
     def __init__(
-        self, config: Union[str, ServiceConfig], connector_cls: ConnectorBase, unique_service=False
+        self,
+        config: Union[str, ServiceConfig],
+        connector_cls: ConnectorBase,
+        unique_service=False,
+        wait_for_server=False,
     ) -> None:
         super().__init__()
         self._import_config(config)
         self._connector_cls = connector_cls
         self.connector = connector_cls(self.bootstrap_server)
         self._unique_service = unique_service
+        self.wait_for_server = wait_for_server
         self.producer = self.connector.producer()
         self._service_id = str(uuid.uuid4())
         self._user = getpass.getuser()
@@ -43,6 +48,7 @@ class BECService:
         self._status = BECStatus.BUSY
         self._start_update_service_info()
         self._start_metrics_emitter()
+        self._wait_for_server()
 
     def _import_config(self, config: Union[str, ServiceConfig]) -> None:
         if isinstance(config, str):
@@ -238,14 +244,26 @@ class BECService:
         return self._services_info
 
     def wait_for_service(self, name, status=BECStatus.RUNNING):
+        logger.info(f"Waiting for {name}.")
         while True:
             service_status_msg = self.service_status.get(name)
             if service_status_msg is not None:
                 service_status = BECStatus(service_status_msg.content["status"])
                 if service_status == status:
-                    return
-            logger.info(f"Waiting for {name}.")
+                    break
             time.sleep(0.05)
+        logger.success(f"{name} is running.")
+
+    def _wait_for_server(self):
+        if not self.wait_for_server:
+            return
+        try:
+            self.wait_for_service("ScanServer", BECStatus.RUNNING)
+            self.wait_for_service("ScanBundler", BECStatus.RUNNING)
+            self.wait_for_service("DeviceServer", BECStatus.RUNNING)
+            logger.success("All BEC services are running.")
+        except KeyboardInterrupt:
+            logger.warning("KeyboardInterrupt received. Stopped waiting for BEC services.")
 
 
 @dataclass

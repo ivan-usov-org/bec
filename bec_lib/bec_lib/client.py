@@ -53,14 +53,26 @@ class BECClient(BECService, UserScriptsMixin):
     def __repr__(self) -> str:
         return "BECClient\n\nTo get a list of available commands, type `bec.show_all_commands()`"
 
-    def initialize(self, config: ServiceConfig = None, connector_cls: ConnectorBase = None):
-        """initialize the BEC client"""
+    def initialize(
+        self,
+        config: ServiceConfig = None,
+        connector_cls: ConnectorBase = None,
+        wait_for_server=False,
+    ) -> None:
+        """
+        Initialize the client.
+
+        Args:
+            config (ServiceConfig, optional): ServiceConfig object. Defaults to None. If None, default config will be used.
+            connector_cls (ConnectorBase, optional): Connector class. Defaults to None. If None, RedisConnector will be used.
+            wait_for_server (bool, optional): Wait for BEC server to be available. Defaults to False.
+        """
         if not config:
             config = ServiceConfig(**DEFAULT_CONFIG)
 
         if not connector_cls:
             connector_cls = RedisConnector
-        super().__init__(config, connector_cls)
+        super().__init__(config, connector_cls, wait_for_server=wait_for_server)
         self._configure_logger()
         # pylint: disable=attribute-defined-outside-init
         self.device_manager = None

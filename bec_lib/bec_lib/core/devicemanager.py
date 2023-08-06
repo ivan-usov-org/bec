@@ -550,7 +550,7 @@ class DeviceManagerBase:
         """
         Initialize the DeviceManager by starting all connectors.
         Args:
-            bootstrap_server: Kafka's bootstrap server
+            bootstrap_server: Redis server address, e.g. 'localhost:6379'
 
         Returns:
 
@@ -563,7 +563,14 @@ class DeviceManagerBase:
             if cb:
                 cb(status)
 
-    def parse_config_message(self, msg: DeviceConfigMessage):
+    def parse_config_message(self, msg: DeviceConfigMessage) -> None:
+        """
+        Parse a config message and update the device config accordingly.
+
+        Args:
+            msg (DeviceConfigMessage): Config message
+
+        """
         action = msg.content["action"]
         config = msg.content["config"]
         if action == "update":
@@ -735,6 +742,13 @@ class DeviceManagerBase:
             self.devices._add_device(dev.get("name"), obj)
 
     def check_request_validity(self, msg: DeviceConfigMessage) -> None:
+        """
+        Check if the config request is valid.
+
+        Args:
+            msg (DeviceConfigMessage): Config message
+
+        """
         if msg.content["action"] not in ["update", "add", "remove", "reload", "set"]:
             raise DeviceConfigError("Action must be either add, remove, update, set or reload.")
         if msg.content["action"] in ["update", "add", "remove", "set"]:
@@ -770,8 +784,6 @@ class DeviceManagerBase:
     def shutdown(self):
         """
         Shutdown all connectors.
-        Returns:
-
         """
         try:
             self.connector.shutdown()
