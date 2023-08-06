@@ -25,7 +25,8 @@ def test_bec_client_initialize():
         mongodb={"host": "localhost", "port": 50001},
     )
     with mock.patch.object(client, "_load_scans"):
-        client.initialize(config, RedisConnector)
+        with mock.patch.object(client, "wait_for_service"):
+            client.initialize(config, RedisConnector)
 
 
 def test_bec_client_start():
@@ -35,14 +36,36 @@ def test_bec_client_start():
         scibec={"host": "localhost", "port": 5000},
         mongodb={"host": "localhost", "port": 50001},
     )
-    with mock.patch.object(client, "_load_scans"):
-        client.initialize(config, RedisConnector)
-    client.connector = ConnectorMock("")
 
     with mock.patch.object(client, "wait_for_service") as wait_for_service:
         with mock.patch.object(client, "_start_exit_handler") as start_exit_handler:
             with mock.patch.object(client, "_configure_ipython") as configure_ipython:
-                client.start()
-                start_exit_handler.assert_called_once()
-                configure_ipython.assert_called_once()
-                wait_for_service.assert_called_once_with("DeviceServer")
+                with mock.patch.object(client, "_load_scans"):
+                    client.initialize(config, mock.MagicMock())
+                    client.connector = ConnectorMock("")
+                    client.start()
+                    start_exit_handler.assert_called_once()
+                    configure_ipython.assert_called_once()
+                    mock.call("ScanBundler") in wait_for_service.call_args_list
+                    mock.call("ScanServer") in wait_for_service.call_args_list
+                    mock.call("DeviceServer") in wait_for_service.call_args_list
+
+
+def test_bec_client_start_without_bec_services():
+    client = BECIPythonClient()
+    config = ServiceConfig(
+        redis={"host": "localhost", "port": 6379},
+        scibec={"host": "localhost", "port": 5000},
+        mongodb={"host": "localhost", "port": 50001},
+    )
+
+    with mock.patch.object(client, "wait_for_service") as wait_for_service:
+        with mock.patch.object(client, "_start_exit_handler") as start_exit_handler:
+            with mock.patch.object(client, "_configure_ipython") as configure_ipython:
+                with mock.patch.object(client, "_load_scans"):
+                    client.initialize(config, mock.MagicMock(), wait_for_server=False)
+                    client.connector = ConnectorMock("")
+                    client.start()
+                    start_exit_handler.assert_called_once()
+                    configure_ipython.assert_called_once()
+                    wait_for_service.assert_not_called()
