@@ -27,7 +27,7 @@ class BECIPythonClient(BECClient):
 
     def initialize(self, config: ServiceConfig, connector_cls: ConnectorBase, wait_for_server=True):
         """initialize the BEC client"""
-        super().initialize(config, connector_cls, wait_for_server=True)
+        super().initialize(config, connector_cls, wait_for_server=wait_for_server)
         # pylint: disable=attribute-defined-outside-init
         self._sighandler = SigintHandler(self)
         self._beamline_mixin = BeamlineMixin()
