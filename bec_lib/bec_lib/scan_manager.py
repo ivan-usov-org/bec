@@ -6,6 +6,8 @@ import time
 import uuid
 from math import inf
 
+from typeguard import typechecked
+
 from bec_lib.core import BECMessage, MessageEndpoints, bec_errors, bec_logger
 from bec_lib.core import timeout as bec_timeout
 
@@ -13,7 +15,6 @@ from bec_lib.core import timeout as bec_timeout
 from bec_lib.queue_items import QueueStorage
 from bec_lib.request_items import RequestStorage
 from bec_lib.scan_items import ScanStorage
-from typeguard import typechecked
 
 logger = bec_logger.logger
 
@@ -262,6 +263,10 @@ class ScanManager:
     @property
     def next_scan_number(self):
         """get the next scan number from redis"""
+        num = self.producer.get(MessageEndpoints.scan_number())
+        if num is None:
+            logger.warning("Failed to retrieve scan number from redis.")
+            return -1
         return int(self.producer.get(MessageEndpoints.scan_number()))
 
     @next_scan_number.setter
