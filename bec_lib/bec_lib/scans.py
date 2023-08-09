@@ -6,10 +6,11 @@ from contextlib import ContextDecorator
 from typing import TYPE_CHECKING, Callable
 
 import msgpack
-from bec_lib.core import BECMessage, MessageEndpoints, bec_logger
-from bec_lib.core.connector import ConsumerConnector
 from cytoolz import partition
 from typeguard import typechecked
+
+from bec_lib.core import BECMessage, MessageEndpoints, bec_logger
+from bec_lib.core.connector import ConsumerConnector
 
 from .callback_handler import CallbackRegister
 from .devicemanager_client import Device
@@ -114,9 +115,11 @@ class Scans:
         self._dataset_id_on_hold_ctx = DatasetIdOnHold(parent=self)
 
     def _import_scans(self):
-        available_scans = msgpack.loads(
-            self.parent.producer.get(MessageEndpoints.available_scans())
-        )
+        msg_raw = self.parent.producer.get(MessageEndpoints.available_scans())
+        if msg_raw is None:
+            logger.warning("No scans available. Are redis and the BEC server running?")
+            return
+        available_scans = msgpack.loads(msg_raw)
         for scan_name, scan_info in available_scans.items():
             self._available_scans[scan_name] = ScanObject(scan_name, scan_info, client=self.parent)
             setattr(
