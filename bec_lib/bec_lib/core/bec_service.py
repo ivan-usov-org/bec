@@ -88,10 +88,10 @@ class BECService:
         )
 
     def _update_existing_services(self):
-        services = [
-            service.decode().split(":", maxsplit=1)[0]
-            for service in self.producer.keys(MessageEndpoints.service_status("*"))
-        ]
+        service_keys = self.producer.keys(MessageEndpoints.service_status("*"))
+        if not service_keys:
+            return
+        services = [service.decode().split(":", maxsplit=1)[0] for service in service_keys]
         msgs = [BECMessage.StatusMessage.loads(self.producer.get(service)) for service in services]
         self._services_info = {msg.content["name"]: msg for msg in msgs}
 
