@@ -1,5 +1,6 @@
 import enum
 import time
+import warnings
 from functools import wraps
 
 import redis
@@ -29,7 +30,7 @@ def catch_connection_error(func):
         try:
             return func(*args, **kwargs)
         except redis.exceptions.ConnectionError:
-            print("Failed to connect to redis. Is the server running?")
+            warnings.warn("Failed to connect to redis. Is the server running?")
             return None
 
     return wrapper
@@ -437,19 +438,12 @@ class RedisConsumer(RedisConsumerMixin, ConsumerConnector):
         Poll messages from self.connector and call the callback function self.cb
 
         """
-        try:
-            messages = self.pubsub.get_message(ignore_subscribe_messages=True)
-            if messages is not None:
-                msg = MessageObject(topic=messages["channel"], value=messages["data"])
-                return self.cb(msg, **self.kwargs)
+        messages = self.pubsub.get_message(ignore_subscribe_messages=True)
+        if messages is not None:
+            msg = MessageObject(topic=messages["channel"], value=messages["data"])
+            return self.cb(msg, **self.kwargs)
 
-            time.sleep(0.01)
-            self.error_message_sent = False
-        except redis.exceptions.ConnectionError:
-            if not self.error_message_sent:
-                print("Failed to connect to redis. Is the server running?")
-                self.error_message_sent = True
-            time.sleep(1)
+        time.sleep(0.01)
         return None
 
     def shutdown(self):
@@ -544,48 +538,42 @@ class RedisStreamConsumerThreaded(RedisConsumerMixin, ConsumerConnectorThreaded)
             else:
                 self.stream_keys[topic] = "0-0"
 
+    @catch_connection_error
     def poll_messages(self) -> None:
         """
         Poll messages from self.connector and call the callback function self.cb
 
         """
-        try:
-            if self.pattern is not None:
-                keys = self.r.keys(self.pattern)
-                topics = [key.decode() for key in keys if key.decode().endswith(":stream")]
-            else:
-                topics = self.topics
-            messages = []
-            if self.newest_only:
-                self.get_newest_message(messages)
-            elif not self.from_start and not self.stream_keys:
-                self.get_newest_message(messages, append=False)
-            else:
-                streams = {f"{topic}": self.get_id(topic) for topic in topics}
-                read_msgs = self.r.xread(streams, count=1)
-                if read_msgs:
-                    for msg in read_msgs:
-                        topic = msg[0].decode()
-                        messages.append((topic, msg[1][0][1]))
-                        self.stream_keys[topic] = msg[1][-1][0]
+        if self.pattern is not None:
+            keys = self.r.keys(self.pattern)
+            topics = [key.decode() for key in keys if key.decode().endswith(":stream")]
+        else:
+            topics = self.topics
+        messages = []
+        if self.newest_only:
+            self.get_newest_message(messages)
+        elif not self.from_start and not self.stream_keys:
+            self.get_newest_message(messages, append=False)
+        else:
+            streams = {f"{topic}": self.get_id(topic) for topic in topics}
+            read_msgs = self.r.xread(streams, count=1)
+            if read_msgs:
+                for msg in read_msgs:
+                    topic = msg[0].decode()
+                    messages.append((topic, msg[1][0][1]))
+                    self.stream_keys[topic] = msg[1][-1][0]
 
-            if messages:
-                if MessageEndpoints.log() not in topics:
-                    # no need to update the update frequency just for logs
-                    self.last_received_msg = time.time()
-                for topic, msg in messages:
-                    msg_obj = MessageObject(topic=topic, value=msg[b"data"])
-                    self.cb(msg_obj, **self.kwargs)
-            else:
-                sleep_time = int(bool(time.time() - self.last_received_msg > self.idle_time))
-                if self.sleep_times[sleep_time]:
-                    time.sleep(self.sleep_times[sleep_time])
-            self.error_message_sent = False
-        except redis.exceptions.ConnectionError:
-            if not self.error_message_sent:
-                print("Failed to connect to redis. Is the server running?")
-                self.error_message_sent = True
-            time.sleep(1)
+        if messages:
+            if MessageEndpoints.log() not in topics:
+                # no need to update the update frequency just for logs
+                self.last_received_msg = time.time()
+            for topic, msg in messages:
+                msg_obj = MessageObject(topic=topic, value=msg[b"data"])
+                self.cb(msg_obj, **self.kwargs)
+        else:
+            sleep_time = int(bool(time.time() - self.last_received_msg > self.idle_time))
+            if self.sleep_times[sleep_time]:
+                time.sleep(self.sleep_times[sleep_time])
 
     def shutdown(self):
         super().shutdown()
@@ -629,29 +617,23 @@ class RedisConsumerThreaded(RedisConsumerMixin, ConsumerConnectorThreaded):
         self.idle_time = 30
         self.error_message_sent = False
 
+    @catch_connection_error
     def poll_messages(self) -> None:
         """
         Poll messages from self.connector and call the callback function self.cb
 
         """
-        try:
-            messages = self.pubsub.get_message(ignore_subscribe_messages=True)
-            if messages is not None:
-                if f"{MessageEndpoints.log()}".encode() not in messages["channel"]:
-                    # no need to update the update frequency just for logs
-                    self.last_received_msg = time.time()
-                msg = MessageObject(topic=messages["channel"], value=messages["data"])
-                self.cb(msg, **self.kwargs)
-            else:
-                sleep_time = int(bool(time.time() - self.last_received_msg > self.idle_time))
-                if self.sleep_times[sleep_time]:
-                    time.sleep(self.sleep_times[sleep_time])
-            self.error_message_sent = False
-        except redis.exceptions.ConnectionError:
-            if not self.error_message_sent:
-                print("Failed to connect to redis. Is the server running?")
-                self.error_message_sent = True
-            time.sleep(1)
+        messages = self.pubsub.get_message(ignore_subscribe_messages=True)
+        if messages is not None:
+            if f"{MessageEndpoints.log()}".encode() not in messages["channel"]:
+                # no need to update the update frequency just for logs
+                self.last_received_msg = time.time()
+            msg = MessageObject(topic=messages["channel"], value=messages["data"])
+            self.cb(msg, **self.kwargs)
+        else:
+            sleep_time = int(bool(time.time() - self.last_received_msg > self.idle_time))
+            if self.sleep_times[sleep_time]:
+                time.sleep(self.sleep_times[sleep_time])
 
     def shutdown(self):
         super().shutdown()
