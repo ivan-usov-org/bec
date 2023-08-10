@@ -23,6 +23,11 @@ class MessageObject:
     def value(self):
         return self._value
 
+    def __eq__(self, ref_val: MessageObject) -> bool:
+        if not isinstance(ref_val, MessageObject):
+            return False
+        return self._value == ref_val.value and self.topic == ref_val.topic
+
 
 class ConnectorBase(abc.ABC):
     """
