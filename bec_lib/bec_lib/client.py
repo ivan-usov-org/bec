@@ -29,16 +29,6 @@ from bec_lib.user_scripts_mixin import UserScriptsMixin
 
 logger = bec_logger.logger
 
-DEFAULT_CONFIG = {
-    "redis": {"host": "localhost", "port": 6379},
-    "mongodb": {"host": "localhost", "port": 27017},
-    "scibec": {"host": "localhost", "port": 3030, "beamline": "MyBeamline"},
-    "config": {
-        "file_writer": {"plugin": "default_NeXus_format", "base_path": "./"},
-        "scilog": {"env_file": "./"},
-    },
-}
-
 
 class BECClient(BECService, UserScriptsMixin):
     def __init__(self, forced=False) -> None:
@@ -68,7 +58,7 @@ class BECClient(BECService, UserScriptsMixin):
             wait_for_server (bool, optional): Wait for BEC server to be available. Defaults to False.
         """
         if not config:
-            config = ServiceConfig(**DEFAULT_CONFIG)
+            config = ServiceConfig()
 
         if not connector_cls:
             connector_cls = RedisConnector
