@@ -330,7 +330,7 @@ class RedisProducer(ProducerConnector):
             >>> redis.xadd("test", {"test": "test"})
             >>> redis.xadd("test", {"test": "test"}, max_size=10)
         """
-        topic = trim_topic(topic, ":val")
+        topic = trim_topic(topic, ":stream")
         if pipe:
             client = pipe
         elif expire:
@@ -339,13 +339,25 @@ class RedisProducer(ProducerConnector):
             client = self.r
 
         if max_size:
-            client.xadd(f"{topic}:val", msg, maxlen=max_size)
+            client.xadd(f"{topic}:stream", msg, maxlen=max_size)
         else:
-            client.xadd(f"{topic}:val", msg)
+            client.xadd(f"{topic}:stream", msg)
         if expire:
-            client.expire(f"{topic}:val", expire)
-        if not pipe or expire:
+            client.expire(f"{topic}:stream", expire)
+        if not pipe and expire:
             client.execute()
+
+    @catch_connection_error
+    def get_last(self, topic: str, pipe=None, key=b"data"):
+        """retrieve last entry from stream"""
+        topic = trim_topic(topic, ":stream")
+        client = pipe if pipe is not None else self.r
+        msg = client.xrevrange(f"{topic}:stream", "+", "-", count=1)
+        if not msg:
+            return None
+        if key is None:
+            return msg[0][1]
+        return msg[0][1].get(key)
 
     @catch_connection_error
     def xread(
@@ -387,7 +399,7 @@ class RedisProducer(ProducerConnector):
                 self.stream_keys[topic] = "0-0"
             else:
                 try:
-                    self.stream_keys[topic] = client.xinfo_stream(f"{topic}:val")[
+                    self.stream_keys[topic] = client.xinfo_stream(f"{topic}:stream")[
                         "last-generated-id"
                     ]
                 except redis.exceptions.ResponseError:
@@ -395,7 +407,7 @@ class RedisProducer(ProducerConnector):
         if id is None:
             id = self.stream_keys[topic]
 
-        msg = client.xread({f"{topic}:val": id}, count=count, block=block)
+        msg = client.xread({f"{topic}:stream": id}, count=count, block=block)
         if msg:
             self.stream_keys[topic] = msg[0][1][-1][0]
         return msg

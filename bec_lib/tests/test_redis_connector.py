@@ -445,40 +445,40 @@ def test_redis_consumer_threaded_init(consumer_threaded, topics, pattern):
 
 def test_redis_connector_xadd(producer):
     producer.xadd("topic", {"key": "value"})
-    producer.r.xadd.assert_called_once_with("topic:val", {"key": "value"})
+    producer.r.xadd.assert_called_once_with("topic:stream", {"key": "value"})
 
 
 def test_redis_connector_xadd_with_maxlen(producer):
     producer.xadd("topic", {"key": "value"}, max_size=100)
-    producer.r.xadd.assert_called_once_with("topic:val", {"key": "value"}, maxlen=100)
+    producer.r.xadd.assert_called_once_with("topic:stream", {"key": "value"}, maxlen=100)
 
 
 def test_redis_connector_xadd_with_expire(producer):
     producer.xadd("topic", {"key": "value"}, expire=100)
-    producer.r.pipeline().xadd.assert_called_once_with("topic:val", {"key": "value"})
-    producer.r.pipeline().expire.assert_called_once_with("topic:val", 100)
+    producer.r.pipeline().xadd.assert_called_once_with("topic:stream", {"key": "value"})
+    producer.r.pipeline().expire.assert_called_once_with("topic:stream", 100)
     producer.r.pipeline().execute.assert_called_once()
 
 
 def test_redis_connector_xread(producer):
     producer.xread("topic", "id")
-    producer.r.xread.assert_called_once_with({"topic:val": "id"}, count=None, block=None)
+    producer.r.xread.assert_called_once_with({"topic:stream": "id"}, count=None, block=None)
 
 
 def test_redis_connector_xread_without_id(producer):
     producer.xread("topic", from_start=True)
-    producer.r.xread.assert_called_once_with({"topic:val": "0-0"}, count=None, block=None)
+    producer.r.xread.assert_called_once_with({"topic:stream": "0-0"}, count=None, block=None)
     producer.r.xread.reset_mock()
 
     producer.stream_keys["topic"] = "id"
     producer.xread("topic")
-    producer.r.xread.assert_called_once_with({"topic:val": "id"}, count=None, block=None)
+    producer.r.xread.assert_called_once_with({"topic:stream": "id"}, count=None, block=None)
 
 
 def test_redis_connector_xread_from_end(producer):
     producer.xread("topic", from_start=False)
     last_id = producer.r.xinfo_stream("topic:val")["last-generated-id"]
-    producer.r.xread.assert_called_once_with({"topic:val": last_id}, count=None, block=None)
+    producer.r.xread.assert_called_once_with({"topic:stream": last_id}, count=None, block=None)
 
 
 def test_redis_connector_xread_from_new_topic(producer):
@@ -486,7 +486,7 @@ def test_redis_connector_xread_from_new_topic(producer):
         "NOGROUP No such key 'topic:val' or consumer group"
     )
     producer.xread("topic", from_start=False)
-    producer.r.xread.assert_called_once_with({"topic:val": "0-0"}, count=None, block=None)
+    producer.r.xread.assert_called_once_with({"topic:stream": "0-0"}, count=None, block=None)
 
 
 def test_redis_consumer_threaded_no_cb_without_messages(consumer_threaded):
