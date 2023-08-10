@@ -1,4 +1,6 @@
 from __future__ import annotations
+import inspect
+from typing import Any, List
 
 import multiprocessing as mp
 
@@ -9,6 +11,12 @@ from .stream_processor import LmfitProcessor
 
 logger = bec_logger.logger
 
+try:
+    import bec_plugins.data_processing as dap_plugins
+except ImportError:
+    dap_plugins = None
+    logger.info("Failed to import bec_plugins.data_processing")
+
 
 class DAPWorkerManager:
     """Data processing worker manager class."""
@@ -18,8 +26,25 @@ class DAPWorkerManager:
         self.producer = connector.producer()
         self._workers = {}
         self._config = {}
+        self._worker_plugins = {}
+        self._update_available_plugins()
         self._update_config()
         self._start_config_consumer()
+
+    def _update_available_plugins(self):
+        """Update the available plugins."""
+        self._worker_plugins["LmfitProcessor"] = LmfitProcessor
+
+        if not dap_plugins:
+            return
+        members = inspect.getmembers(dap_plugins)
+        for name, cls in members:
+            if not inspect.isclass(cls):
+                continue
+            if not hasattr(cls, "run"):
+                continue
+            self._worker_plugins[name] = cls
+            logger.info(f"Loading dap plugin {name}")
 
     def _update_config(self):
         """Get config from redis."""
@@ -51,6 +76,15 @@ class DAPWorkerManager:
         if not msg.content["config"]:
             return
         self._config = msg.content["config"]
+
+        worker_cls = self._config.get("worker_cls")
+        if not worker_cls:
+            logger.error(f"Worker class not found in config: {self._config}")
+            return
+        if worker_cls not in self._worker_plugins:
+            logger.error(f"Worker class not found: {worker_cls}")
+            return
+
         for worker_config in self._config["workers"]:
             # Check if the worker is already running and start it if not
             if worker_config["id"] not in self._workers:
@@ -74,12 +108,14 @@ class DAPWorkerManager:
                 self._workers[worker_id]["worker"].terminate()
                 del self._workers[worker_id]
 
-    def _start_worker(self, config: dict):
+    def _start_worker(self, config: dict, worker_cls: Any):
         """Start a worker."""
         logger.debug(f"Starting worker: {config}")
 
         self._workers[config["id"]] = {
-            "worker": self.run_worker(config["config"]),
+            "worker": self.run_worker(
+                config["config"], worker_cls=worker_cls, connector_host=self.connector.bootstrap
+            ),
             "config": config["config"],
         }
 
@@ -88,11 +124,11 @@ class DAPWorkerManager:
             worker.shutdown()
 
     @staticmethod
-    def run_worker(config: dict) -> mp.Process:
+    def run_worker(config: dict, worker_cls: Any, connector_host: List[str]) -> mp.Process:
         """Run the worker."""
         worker = mp.Process(
-            target=LmfitProcessor.run,
-            kwargs={"config": config, "connector_host": ["localhost:6379"]},
+            target=worker_cls.run,
+            kwargs={"config": config, "connector_host": connector_host},
             daemon=True,
         )
         worker.start()
