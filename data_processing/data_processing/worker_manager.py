@@ -1,8 +1,8 @@
 from __future__ import annotations
-import inspect
-from typing import Any, List
 
+import inspect
 import multiprocessing as mp
+from typing import Any, List
 
 from bec_lib.core import BECMessage, MessageEndpoints, bec_logger
 from bec_lib.core.redis_connector import RedisConnector
@@ -77,18 +77,17 @@ class DAPWorkerManager:
             return
         self._config = msg.content["config"]
 
-        worker_cls = self._config.get("worker_cls")
-        if not worker_cls:
-            logger.error(f"Worker class not found in config: {self._config}")
-            return
-        if worker_cls not in self._worker_plugins:
-            logger.error(f"Worker class not found: {worker_cls}")
-            return
-
         for worker_config in self._config["workers"]:
+            worker_cls = worker_config.get("config", {}).get("worker_cls")
+            if not worker_cls:
+                logger.error(f"Worker class not found in config: {self._config}")
+                continue
+            if worker_cls not in self._worker_plugins:
+                logger.error(f"Worker class not found: {worker_cls}")
+                continue
             # Check if the worker is already running and start it if not
             if worker_config["id"] not in self._workers:
-                self._start_worker(worker_config)
+                self._start_worker(worker_config, worker_cls)
                 continue
 
             # Check if the config has changed
@@ -99,7 +98,7 @@ class DAPWorkerManager:
             # If the config has changed, terminate the worker and start a new one
             logger.debug(f"Restarting worker: {worker_config['id']}")
             self._workers[worker_config["id"]]["worker"].terminate()
-            self._start_worker(worker_config)
+            self._start_worker(worker_config, worker_cls)
 
         # Check if any workers need to be removed
         for worker_id in list(self._workers):

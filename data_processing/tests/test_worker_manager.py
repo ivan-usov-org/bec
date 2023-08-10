@@ -40,6 +40,7 @@ def test_worker_manager_update_config():
             "output": "gaussian_fit_worker_3",
             "input_xy": ["samx.samx.value", "gauss_bpm.gauss_bpm.value"],
             "model": "GaussianModel",
+            "worker_cls": "LmfitProcessor",
         }
         worker_config = {"id": "gaussian_fit_worker_3", "config": config}
         worker_manager.update_config(
@@ -67,6 +68,7 @@ def test_worker_manager_update_config_worker_already_running():
             "output": "gaussian_fit_worker_3",
             "input_xy": ["samx.samx.value", "gauss_bpm.gauss_bpm.value"],
             "model": "GaussianModel",
+            "worker_cls": "LmfitProcessor",
         }
         worker_config = {"id": "gaussian_fit_worker_3", "config": config}
         worker_manager._workers = {"gaussian_fit_worker_3": {"config": config, "worker": None}}
@@ -86,6 +88,7 @@ def test_worker_manager_update_config_worker_already_running_different_config():
             "output": "gaussian_fit_worker_3",
             "input_xy": ["samx.samx.value", "gauss_bpm.gauss_bpm.value"],
             "model": "GaussianModel",
+            "worker_cls": "LmfitProcessor",
         }
         w3_mock = mock.MagicMock()
         worker_config = {"id": "gaussian_fit_worker_3", "config": config}
