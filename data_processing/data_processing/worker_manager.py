@@ -87,7 +87,7 @@ class DAPWorkerManager:
                 continue
             # Check if the worker is already running and start it if not
             if worker_config["id"] not in self._workers:
-                self._start_worker(worker_config, worker_cls)
+                self._start_worker(worker_config, self._worker_plugins[worker_cls])
                 continue
 
             # Check if the config has changed
@@ -98,7 +98,7 @@ class DAPWorkerManager:
             # If the config has changed, terminate the worker and start a new one
             logger.debug(f"Restarting worker: {worker_config['id']}")
             self._workers[worker_config["id"]]["worker"].terminate()
-            self._start_worker(worker_config, worker_cls)
+            self._start_worker(worker_config, self._worker_plugins[worker_cls])
 
         # Check if any workers need to be removed
         for worker_id in list(self._workers):
