@@ -9,10 +9,9 @@ logger = bec_logger.logger
 DEFAULT_SERVICE_CONFIG = {
     "redis": {"host": "localhost", "port": 6379},
     "mongodb": {"host": "localhost", "port": 27017},
-    "scibec": {"host": "localhost", "port": 3030, "beamline": "MyBeamline"},
+    "scibec": {"host": "http://[::1]", "port": 3030},
     "service_config": {
         "file_writer": {"plugin": "default_NeXus_format", "base_path": "./"},
-        "scilog": {"env_file": "./"},
     },
 }
 
