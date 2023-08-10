@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.17.1 (2023-08-10)
+
+### Fix
+
+* Fixed default config ([`8ad8d84`](https://gitlab.psi.ch/bec/bec/-/commit/8ad8d84e00a62306d43862192c8a16b09e17a17b))
+
 ## v0.17.0 (2023-08-10)
 
 ### Feature
