@@ -7,6 +7,14 @@ variables:
   DOCKER_TLS_CERTDIR: ""
   OPHYD_DEVICES_BRANCH: "master"
 
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH
+
+
 include:
   - template: Security/Secret-Detection.gitlab-ci.yml
 
