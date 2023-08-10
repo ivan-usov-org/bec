@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.17.2 (2023-08-10)
+
+### Fix
+
+* Added MessageObject eq dunder ([`563c628`](https://gitlab.psi.ch/bec/bec/-/commit/563c6285092b9d8e33e8c93dea95986b87f5c67a))
+
 ## v0.17.1 (2023-08-10)
 
 ### Fix
