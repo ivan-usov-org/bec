@@ -38,6 +38,10 @@ def unpack_scan_args(scan_args: Dict[str, Any]) -> list:
         list: list of arguments
     """
     args = []
+    if not scan_args:
+        return args
+    if not isinstance(scan_args, dict):
+        return args
     for cmd_name, cmd_args in scan_args.items():
         args.append(cmd_name)
         args.extend(cmd_args)
@@ -577,6 +581,9 @@ class Move(RequestBase):
             *args (Device, float): pairs of device / position arguments
             relative (bool): if True, move relative to current position
 
+        Returns:
+            ScanReport
+
         Examples:
             >>> scans.mv(dev.samx, 1, dev.samy,2)
         """
@@ -637,10 +644,13 @@ class Move(RequestBase):
 
 class UpdatedMove(Move):
     """
-    Move device(s) to an absolute position and show live updates.
+    Move device(s) to an absolute position and show live updates. This is a blocking call. For non-blocking use Move.
     Args:
         *args (Device, float): pairs of device / position arguments
         relative (bool): if True, move relative to current position
+
+    Returns:
+        ScanReport
 
     Examples:
         >>> scans.umv(dev.samx, 1, dev.samy,2)
@@ -693,6 +703,7 @@ class Scan(ScanBase):
             burst_at_each_point (int): number of exposures at each point. Default is 1.
 
         Returns:
+            ScanReport
 
         Examples:
             >>> scans.grid_scan(dev.motor1, -5, 5, 10, dev.motor2, -5, 5, 10, exp_time=0.1, relative=True)
@@ -747,6 +758,7 @@ class FermatSpiralScan(ScanBase):
             optim_trajectory (str): trajectory optimization method. Default is None. Options are "corridor" and "none".
 
         Returns:
+            ScanReport
 
         Examples:
             >>> scans.fermat_scan(dev.motor1, -5, 5, dev.motor2, -5, 5, step=0.5, exp_time=0.1, relative=True, optim_trajectory="corridor")
@@ -799,6 +811,7 @@ class RoundScan(ScanBase):
             burst_at_each_point (int): number of exposures at each point. Default is 1.
 
         Returns:
+            ScanReport
 
         Examples:
             >>> scans.round_scan(dev.motor1, dev.motor2, 0, 25, 5, 3, exp_time=0.1, relative=True)
@@ -848,6 +861,9 @@ class ContLineScan(ScanBase):
             relative (bool): if True, the motors will be moved relative to their current position. Default is False.
             burst_at_each_point (int): number of exposures at each point. Default is 1.
             offset (float): offset in motor units. Default is 100.
+
+        Returns:
+            ScanReport
 
         Examples:
             >>> scans.cont_line_scan(dev.motor1, -5, 5, steps=10, exp_time=0.1, relative=True)
@@ -921,6 +937,7 @@ class RoundScanFlySim(ScanBase):
             burst: number of acquisition per point
 
         Returns:
+            ScanReport
 
         Examples:
             >>> scans.round_scan_fly(dev.flyer_sim, 0, 50, 5, 3, exp_time=0.1, relative=True)
@@ -995,6 +1012,9 @@ class RoundROIScan(ScanBase):
             relative (bool): Start from an absolute or relative position. Default is False.
             burst_at_each_point (int): number of acquisition per point. Default is 1.
 
+        Returns:
+            ScanReport
+
         Examples:
             >>> scans.round_roi_scan(dev.motor1, 20, dev.motor2, 20, dr=2, nth=3, exp_time=0.1, relative=True)
 
@@ -1031,6 +1051,9 @@ class ListScan(ScanBase):
             relative: Start from an absolute or relative position
             burst: number of acquisition per point
 
+        Returns:
+            ScanReport
+
         Examples:
             >>> scans.list_scan(dev.motor1, [0,1,2,3,4], dev.motor2, [4,3,2,1,0], exp_time=0.1, relative=True)
 
@@ -1065,6 +1088,7 @@ class TimeScan(ScanBase):
             burst: number of acquisition per point
 
         Returns:
+            ScanReport
 
         Examples:
             >>> scans.time_scan(points=10, interval=1.5, exp_time=0.1, relative=True)
@@ -1198,6 +1222,7 @@ class Acquire(ScanBase):
             burst: number of acquisition per point
 
         Returns:
+            ScanReport
 
         Examples:
             >>> scans.acquire(exp_time=0.1, relative=True)
@@ -1262,7 +1287,7 @@ class LineScan(ScanBase):
         A line scan for one or more motors.
 
         Args:
-            *args (DEVICE, float, float): pairs of device / start position / end position
+            *args (Device, float, float): pairs of device / start position / end position
             exp_time (float): exposure time in s. Default: 0
             steps (int): number of steps. Default: 10
             relative (bool): if True, the start and end positions are relative to the current position. Default: False
@@ -1308,6 +1333,7 @@ class OpenInteractiveScan(ScanBase):
             burst: number of acquisition per point
 
         Returns:
+            ScanReport
 
         Examples:
             >>> scans.open_interactive_scan(dev.motor1, dev.motor2, exp_time=0.1)
@@ -1350,6 +1376,7 @@ class AddInteractiveScanPoint(ScanBase):
             burst: number of acquisition per point
 
         Returns:
+            ScanReport
 
         Examples:
             >>> scans.interactive_scan_trigger()
@@ -1396,6 +1423,7 @@ class CloseInteractiveScan(ScanBase):
             burst: number of acquisition per point
 
         Returns:
+            ScanReport
 
         Examples:
             >>> scans.close_interactive_scan(dev.motor1, dev.motor2, exp_time=0.1)

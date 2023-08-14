@@ -80,6 +80,24 @@ class DMMock:
         self.devices[name] = DeviceMock(name)
 
 
+def test_unpack_scan_args_empty_dict():
+    scan_args = {}
+    expected_args = []
+    assert unpack_scan_args(scan_args) == expected_args
+
+
+def test_unpack_scan_args_non_dict_input():
+    scan_args = "not a dict"
+    expected_args = []
+    assert unpack_scan_args(scan_args) == expected_args
+
+
+def test_unpack_scan_args_valid_input():
+    scan_args = {"cmd1": [1, 2, 3], "cmd2": ["a", "b", "c"]}
+    expected_args = ["cmd1", 1, 2, 3, "cmd2", "a", "b", "c"]
+    assert unpack_scan_args(scan_args) == expected_args
+
+
 @pytest.mark.parametrize(
     "mv_msg,reference_msg_list",
     [
