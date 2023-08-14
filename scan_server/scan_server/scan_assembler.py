@@ -3,7 +3,7 @@ import traceback
 from bec_lib.core import BECMessage, bec_logger
 
 from .errors import ScanAbortion
-from .scans import RequestBase
+from .scans import RequestBase, unpack_scan_args
 
 logger = bec_logger.logger
 
@@ -38,10 +38,14 @@ class ScanAssembler:
 
         logger.info(f"Preparing instructions of request of type {scan} / {scan_cls.__name__}")
         try:
+            args = unpack_scan_args(msg.content.get("parameter", {}).get("args", []))
+            kwargs = msg.content.get("parameter", {}).get("kwargs", {})
             scan_instance = scan_cls(
+                *args,
                 device_manager=self.device_manager,
                 parameter=msg.content.get("parameter"),
                 metadata=msg.metadata,
+                **kwargs,
             )
             return scan_instance
         except Exception as exc:

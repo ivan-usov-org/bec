@@ -11,6 +11,7 @@ from typeguard import typechecked
 
 from bec_lib.core import BECMessage, MessageEndpoints, bec_logger
 from bec_lib.core.connector import ConsumerConnector
+from bec_lib.core.signature_serializer import dict_to_signature
 
 from .callback_handler import CallbackRegister
 from .devicemanager_client import Device
@@ -128,6 +129,11 @@ class Scans:
                 self._available_scans[scan_name].run,
             )
             setattr(getattr(self, scan_name), "__doc__", scan_info.get("doc"))
+            setattr(
+                getattr(self, scan_name),
+                "__signature__",
+                dict_to_signature(scan_info.get("signature")),
+            )
 
     @staticmethod
     def get_arg_type(in_type: str):

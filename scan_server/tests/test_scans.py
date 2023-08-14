@@ -7,9 +7,9 @@ import pytest
 from bec_lib.core import BECMessage as BMessage
 from bec_lib.core.devicemanager import DeviceContainer
 from bec_lib.core.tests.utils import ProducerMock
+
 from scan_plugins.LamNIFermatScan import LamNIFermatScan
 from scan_plugins.otf_scan import OTFScan
-
 from scan_server.errors import ScanAbortion
 from scan_server.scans import (
     Acquire,
@@ -30,6 +30,7 @@ from scan_server.scans import (
     get_fermat_spiral_pos,
     get_round_roi_scan_positions,
     get_round_scan_positions,
+    unpack_scan_args,
 )
 
 # pylint: disable=missing-function-docstring
@@ -749,8 +750,10 @@ def test_fermat_scan(scan_msg, reference_scan_list):
     device_manager.devices["samx"].read_buffer = {"value": 0}
     device_manager.add_device("samy")
     device_manager.devices["samy"].read_buffer = {"value": 0}
+    args = unpack_scan_args(scan_msg.content.get("parameter").get("args"))
+    kwargs = scan_msg.content.get("parameter").get("kwargs")
     scan = FermatSpiralScan(
-        parameter=scan_msg.content.get("parameter"), device_manager=device_manager
+        *args, parameter=scan_msg.content.get("parameter"), device_manager=device_manager, **kwargs
     )
 
     def offset_mock():
@@ -944,7 +947,11 @@ def test_cont_line_scan(scan_msg, reference_scan_list):
     def offset_mock():
         yield None
 
-    scan = ContLineScan(parameter=scan_msg.content.get("parameter"), device_manager=device_manager)
+    args = unpack_scan_args(scan_msg.content["parameter"]["args"])
+    kwargs = scan_msg.content["parameter"]["kwargs"]
+    scan = ContLineScan(
+        *args, parameter=scan_msg.content.get("parameter"), device_manager=device_manager, **kwargs
+    )
     scan._set_position_offset = offset_mock
 
     readback = collections.deque()
@@ -1068,12 +1075,8 @@ def test_device_rpc():
 )
 def test_acquire(scan_msg, reference_scan_list):
     device_manager = DMMock()
-    parameter = {
-        "args": [],
-        "kwargs": {"exp_time": 1},
-    }
 
-    scan = Acquire(parameter=parameter, device_manager=device_manager)
+    scan = Acquire(exp_time=1, device_manager=device_manager)
     scan_instructions = list(scan.run())
     scan_uid = scan_instructions[0].metadata.get("scanID")
     for ii, _ in enumerate(reference_scan_list):
@@ -1747,6 +1750,7 @@ def test_LamNIFermatScan(scan_msg, reference_scan_list):
         parameter=scan_msg.content.get("parameter"),
         device_manager=device_manager,
         metadata=scan_msg.metadata,
+        **scan_msg.content["parameter"]["kwargs"],
     )
     scan.stubs._get_from_rpc = lambda x: 0
     with mock.patch.object(scan, "_check_min_positions") as check_min_pos:
@@ -1955,11 +1959,15 @@ def test_line_scan_calculate_positions(in_args, reference_positions):
         scan_type="line_scan",
         parameter={
             "args": {"samx": in_args[0], "samy": in_args[1]},
-            "kwargs": {"realtive": True},
+            "kwargs": {"relative": True, "steps": 10},
         },
         queue="primary",
     )
-    request = LineScan(device_manager=device_manager, parameter=scan_msg.content["parameter"])
+    request = LineScan(
+        device_manager=device_manager,
+        parameter=scan_msg.content["parameter"],
+        **scan_msg.content["parameter"]["kwargs"],
+    )
 
     request._calculate_positions()
     assert np.isclose(request.positions, reference_positions).all()
@@ -2154,7 +2162,11 @@ def test_list_scan_raises_for_different_lengths():
 )
 def test_time_scan(scan_msg, reference_scan_list):
     device_manager = DMMock()
-    request = TimeScan(device_manager=device_manager, parameter=scan_msg.content["parameter"])
+    request = TimeScan(
+        device_manager=device_manager,
+        parameter=scan_msg.content["parameter"],
+        **scan_msg.content["parameter"]["kwargs"],
+    )
     scan_instructions = list(request.run())
     assert scan_instructions == reference_scan_list
 
@@ -2289,6 +2301,13 @@ def test_monitor_scan():
         },
         queue="primary",
     )
-    request = MonitorScan(device_manager=device_manager, parameter=scan_msg.content["parameter"])
+    args = unpack_scan_args(scan_msg.content["parameter"]["args"])
+    kwargs = scan_msg.content["parameter"]["kwargs"]
+    request = MonitorScan(
+        *args,
+        device_manager=device_manager,
+        parameter=scan_msg.content["parameter"],
+        **scan_msg.content["parameter"]["kwargs"],
+    )
     request._calculate_positions()
     assert np.isclose(request.positions, [[-5], [5]]).all()

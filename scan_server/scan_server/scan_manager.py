@@ -7,6 +7,7 @@ from pathlib import Path
 
 import msgpack
 from bec_lib.core import MessageEndpoints, bec_logger
+from bec_lib.core.signature_serializer import signature_to_dict
 
 from . import scans as ScanServerScans
 
@@ -81,6 +82,7 @@ class ScanManager:
                 "arg_bundle_size": scan_cls.arg_bundle_size,
                 "scan_report_hint": scan_cls.scan_report_hint,
                 "doc": scan_cls.__doc__ or scan_cls.__init__.__doc__,
+                "signature": signature_to_dict(scan_cls.__init__),
             }
 
     def publish_available_scans(self):

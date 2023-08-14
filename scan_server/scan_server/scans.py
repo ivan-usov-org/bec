@@ -2,7 +2,7 @@ import ast
 import enum
 import time
 from abc import ABC, abstractmethod
-from typing import List, Tuple
+from typing import Any, Dict, List, Tuple
 
 import numpy as np
 from bec_lib.core import BECMessage, DeviceManagerBase, MessageEndpoints, bec_logger
@@ -26,6 +26,22 @@ class ScanArgType(str, enum.Enum):
     STR = "str"
     LIST = "list"
     DICT = "dict"
+
+
+def unpack_scan_args(scan_args: Dict[str, Any]) -> list:
+    """unpack_scan_args unpacks the scan arguments and returns them as a tuple.
+
+    Args:
+        scan_args (Dict[str, Any]): scan arguments
+
+    Returns:
+        list: list of arguments
+    """
+    args = []
+    for cmd_name, cmd_args in scan_args.items():
+        args.append(cmd_name)
+        args.extend(cmd_args)
+    return args
 
 
 def get_2D_raster_pos(axis, snaked=True):
@@ -175,9 +191,9 @@ class RequestBase(ABC):
         **kwargs,
     ) -> None:
         super().__init__()
-        self.parameter = parameter
-        self.caller_args = parameter.get("args", {})
-        self.caller_kwargs = parameter.get("kwargs", {})
+        self.parameter = parameter if parameter is not None else {}
+        self.caller_args = self.parameter.get("args", {})
+        self.caller_kwargs = self.parameter.get("kwargs", {})
         self.metadata = metadata
         self.device_manager = device_manager
         self.DIID = 0
@@ -298,8 +314,13 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         self,
         *args,
         device_manager: DeviceManagerBase = None,
-        parameter=None,
-        metadata=None,
+        parameter: dict = None,
+        exp_time: float = 0,
+        settling_time: float = 0,
+        relative: bool = False,
+        burst_at_each_point: int = 1,
+        optim_trajectory: str = None,
+        metadata: dict = None,
         **kwargs,
     ):
         super().__init__(
@@ -307,12 +328,11 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         )
         self.DIID = 0
         self.pointID = 0
-        self.exp_time = self.caller_kwargs.get("exp_time", 0)
-        self.settling_time = self.caller_kwargs.get("settling_time", 0)
-
-        self.relative = parameter["kwargs"].get("relative", False)
-        self.burst_at_each_point = parameter["kwargs"].get("burst_at_each_point", 1)
-        self.optim_trajectory = parameter["kwargs"].get("optim_trajectory")
+        self.exp_time = exp_time
+        self.settling_time = settling_time
+        self.relative = relative
+        self.burst_at_each_point = burst_at_each_point
+        self.optim_trajectory = optim_trajectory
         self.burst_index = 0
 
         self.start_pos = np.repeat(0, len(self.scan_motors)).tolist()
@@ -550,19 +570,18 @@ class Move(RequestBase):
     scan_report_hint = None
     required_kwargs = ["relative"]
 
-    def __init__(self, *args, parameter=None, **kwargs):
+    def __init__(self, *args, relative=False, **kwargs):
         """
         Move device(s) to an absolute position
         Args:
-            *args: pairs of device / position arguments
-            **kwargs:
+            *args (Device, float): pairs of device / position arguments
+            relative (bool): if True, move relative to current position
 
-        Returns:
         Examples:
             >>> scans.mv(dev.samx, 1, dev.samy,2)
         """
-        super().__init__(parameter=parameter, **kwargs)
-        self.relative = parameter["kwargs"].get("relative", False)
+        super().__init__(**kwargs)
+        self.relative = relative
         self.start_pos = np.repeat(0, len(self.scan_motors)).tolist()
 
     def _calculate_positions(self):
@@ -620,10 +639,9 @@ class UpdatedMove(Move):
     """
     Move device(s) to an absolute position and show live updates.
     Args:
-        *args: pairs of device / position arguments
-        **kwargs:
+        *args (Device, float): pairs of device / position arguments
+        relative (bool): if True, move relative to current position
 
-    Returns:
     Examples:
         >>> scans.umv(dev.samx, 1, dev.samy,2)
     """
@@ -655,14 +673,24 @@ class Scan(ScanBase):
     arg_bundle_size = len(arg_input)
     required_kwargs = ["relative"]
 
-    def __init__(self, *args, parameter=None, **kwargs):
+    def __init__(
+        self,
+        *args,
+        exp_time=0,
+        settling_time=0,
+        relative=False,
+        burst_at_each_point=1,
+        **kwargs,
+    ):
         """
         Scan two motors in a grid.
 
         Args:
-            *args: pairs of device / start position / end position / steps arguments
-            relative: Start from an absolute or relative position
-            burst: number of acquisition per point
+            *args (Device, float, float, int): pairs of device / start / stop / steps arguments
+            exp_time (float): exposure time in seconds. Default is 0.
+            settling_time (float): settling time in seconds. Default is 0.
+            relative (bool): if True, the motors will be moved relative to their current position. Default is False.
+            burst_at_each_point (int): number of exposures at each point. Default is 1.
 
         Returns:
 
@@ -670,7 +698,11 @@ class Scan(ScanBase):
             >>> scans.grid_scan(dev.motor1, -5, 5, 10, dev.motor2, -5, 5, 10, exp_time=0.1, relative=True)
 
         """
-        super().__init__(parameter=parameter, **kwargs)
+        super().__init__(**kwargs)
+        self.relative = relative
+        self.exp_time = exp_time
+        self.settling_time = settling_time
+        self.burst_at_each_point = burst_at_each_point
         self.axis = []
 
     def _calculate_positions(self):
@@ -689,15 +721,30 @@ class FermatSpiralScan(ScanBase):
     arg_input = [ScanArgType.DEVICE, ScanArgType.FLOAT, ScanArgType.FLOAT]
     arg_bundle_size = len(arg_input)
 
-    def __init__(self, *args, parameter=None, **kwargs):
+    def __init__(
+        self,
+        *args,
+        step=0.1,
+        exp_time=0,
+        settling_time=0,
+        relative=False,
+        burst_at_each_point=1,
+        spiral_type=0,
+        optim_trajectory=None,
+        **kwargs,
+    ):
         """
         A scan following Fermat's spiral.
 
         Args:
             *args: pairs of device / start position / end position / steps arguments
-            relative: Start from an absolute or relative position
-            burst: number of acquisition per point
-            optim_trajectory: routine used for the trajectory optimization, e.g. 'corridor'. Default: None
+            step (float): step size in motor units. Default is 0.1.
+            exp_time (float): exposure time in seconds. Default is 0.
+            settling_time (float): settling time in seconds. Default is 0.
+            relative (bool): if True, the motors will be moved relative to their current position. Default is False.
+            burst_at_each_point (int): number of exposures at each point. Default is 1.
+            spiral_type (float): type of spiral to use. Default is 0.
+            optim_trajectory (str): trajectory optimization method. Default is None. Options are "corridor" and "none".
 
         Returns:
 
@@ -705,10 +752,15 @@ class FermatSpiralScan(ScanBase):
             >>> scans.fermat_scan(dev.motor1, -5, 5, dev.motor2, -5, 5, step=0.5, exp_time=0.1, relative=True, optim_trajectory="corridor")
 
         """
-        super().__init__(parameter=parameter, **kwargs)
+        super().__init__(**kwargs)
         self.axis = []
-        self.step = parameter.get("kwargs", {}).get("step", 0.1)
-        self.spiral_type = parameter.get("kwargs", {}).get("spiral_type", 0)
+        self.step = step
+        self.exp_time = exp_time
+        self.settling_time = settling_time
+        self.relative = relative
+        self.burst_at_each_point = burst_at_each_point
+        self.spiral_type = spiral_type
+        self.optim_trajectory = optim_trajectory
 
     def _calculate_positions(self):
         params = list(self.caller_args.values())
@@ -737,14 +789,14 @@ class RoundScan(ScanBase):
     ]
     arg_bundle_size = len(arg_input)
 
-    def __init__(self, *args, parameter=None, **kwargs):
+    def __init__(self, *args, relative=False, burst_at_each_point=1, **kwargs):
         """
         A scan following a round shell-like pattern.
 
         Args:
             *args: motor1, motor2, inner ring, outer ring, number of rings, number of positions in the first ring
-            relative: Start from an absolute or relative position
-            burst: number of acquisition per point
+            relative (bool): if True, the motors will be moved relative to their current position. Default is False.
+            burst_at_each_point (int): number of exposures at each point. Default is 1.
 
         Returns:
 
@@ -752,7 +804,9 @@ class RoundScan(ScanBase):
             >>> scans.round_scan(dev.motor1, dev.motor2, 0, 25, 5, 3, exp_time=0.1, relative=True)
 
         """
-        super().__init__(parameter=parameter, **kwargs)
+        super().__init__(**kwargs)
+        self.relative = relative
+        self.burst_at_each_point = burst_at_each_point
         self.axis = []
 
     def _get_scan_motors(self):
@@ -774,27 +828,38 @@ class ContLineScan(ScanBase):
     arg_bundle_size = len(arg_input)
     scan_type = "step"
 
-    def __init__(self, *args, parameter=None, **kwargs):
+    def __init__(
+        self,
+        *args,
+        exp_time=0,
+        steps=10,
+        relative=False,
+        offset=100,
+        burst_at_each_point=1,
+        **kwargs,
+    ):
         """
         A line scan for one or more motors.
 
         Args:
-            *args: pairs of device / start position / end position
-            exp_time: exposure time in s
-            steps: number of steps (please note: 5 steps == 6 positions)
-            relative: Start from an absolute or relative position
-            burst: number of acquisition per point
-
-        Returns:
+            *args (Device, float, float): pairs of device / start position / end position
+            exp_time (float): exposure time in seconds. Default is 0.
+            steps (int): number of steps. Default is 10.
+            relative (bool): if True, the motors will be moved relative to their current position. Default is False.
+            burst_at_each_point (int): number of exposures at each point. Default is 1.
+            offset (float): offset in motor units. Default is 100.
 
         Examples:
             >>> scans.cont_line_scan(dev.motor1, -5, 5, steps=10, exp_time=0.1, relative=True)
 
         """
-        super().__init__(parameter=parameter, **kwargs)
+        super().__init__(**kwargs)
         self.axis = []
-        self.steps = parameter.get("kwargs", {}).get("steps", 10)
-        self.offset = 100
+        self.exp_time = exp_time
+        self.steps = steps
+        self.relative = relative
+        self.burst_at_each_point = burst_at_each_point
+        self.offset = offset
 
     def _calculate_positions(self) -> None:
         for _, val in self.caller_args.items():
@@ -846,7 +911,7 @@ class RoundScanFlySim(ScanBase):
     ]
     arg_bundle_size = len(arg_input)
 
-    def __init__(self, *args, parameter=None, **kwargs):
+    def __init__(self, *args, **kwargs):
         """
         A fly scan following a round shell-like pattern.
 
@@ -861,7 +926,7 @@ class RoundScanFlySim(ScanBase):
             >>> scans.round_scan_fly(dev.flyer_sim, 0, 50, 5, 3, exp_time=0.1, relative=True)
 
         """
-        super().__init__(parameter=parameter, **kwargs)
+        super().__init__(**kwargs)
         self.axis = []
 
     def _get_scan_motors(self):
@@ -916,27 +981,31 @@ class RoundROIScan(ScanBase):
     arg_input = [ScanArgType.DEVICE, ScanArgType.FLOAT]
     arg_bundle_size = len(arg_input)
 
-    def __init__(self, *args, parameter=None, **kwargs):
+    def __init__(
+        self, *args, dr=1, nth=5, exp_time=0, relative=False, burst_at_each_point=1, **kwargs
+    ):
         """
         A scan following a round-roi-like pattern.
 
         Args:
             *args: motor1, width for motor1, motor2, width for motor2,
-            dr: shell width
-            nth: number of points in the first shell
-            relative: Start from an absolute or relative position
-            burst: number of acquisition per point
-
-        Returns:
+            dr (float): shell width. Default is 1.
+            nth (int): number of points in the first shell. Default is 5.
+            exp_time (float): exposure time in seconds. Default is 0.
+            relative (bool): Start from an absolute or relative position. Default is False.
+            burst_at_each_point (int): number of acquisition per point. Default is 1.
 
         Examples:
             >>> scans.round_roi_scan(dev.motor1, 20, dev.motor2, 20, dr=2, nth=3, exp_time=0.1, relative=True)
 
         """
-        super().__init__(parameter=parameter, **kwargs)
+        super().__init__(**kwargs)
         self.axis = []
-        self.dr = parameter.get("kwargs", {}).get("dr", 1)
-        self.nth = parameter.get("kwargs", {}).get("nth", 5)
+        self.dr = dr
+        self.nt = nth
+        self.exp_time = exp_time
+        self.relative = relative
+        self.burst_at_each_point = burst_at_each_point
 
     def _calculate_positions(self) -> None:
         params = list(self.caller_args.values())
@@ -962,8 +1031,6 @@ class ListScan(ScanBase):
             relative: Start from an absolute or relative position
             burst: number of acquisition per point
 
-        Returns:
-
         Examples:
             >>> scans.list_scan(dev.motor1, [0,1,2,3,4], dev.motor2, [4,3,2,1,0], exp_time=0.1, relative=True)
 
@@ -984,7 +1051,7 @@ class TimeScan(ScanBase):
     arg_input = []
     arg_bundle_size = len(arg_input)
 
-    def __init__(self, *args, parameter=None, **kwargs):
+    def __init__(self, points, interval, *args, **kwargs):
         """
         Trigger and readout devices at a fixed interval.
         Note that the interval time cannot be less than the exposure time.
@@ -1003,10 +1070,10 @@ class TimeScan(ScanBase):
             >>> scans.time_scan(points=10, interval=1.5, exp_time=0.1, relative=True)
 
         """
-        super().__init__(parameter=parameter, **kwargs)
+        super().__init__(**kwargs)
         self.axis = []
-        self.points = parameter.get("kwargs", {}).get("points")
-        self.interval = parameter.get("kwargs", {}).get("interval")
+        self.points = points
+        self.interval = interval
         self.interval -= self.exp_time
 
     def _calculate_positions(self) -> None:
@@ -1042,14 +1109,14 @@ class MonitorScan(ScanBase):
     arg_bundle_size = len(arg_input)
     scan_type = "fly"
 
-    def __init__(self, *args, parameter=None, **kwargs):
+    def __init__(self, device, start: float, stop: float, *args, relative=False, **kwargs):
         """
         Readout all primary devices at each update of the monitored device.
 
         Args:
-            device: device to be monitored
-            start position: start position of the monitored device
-            end position: end position of the monitored device
+            device (Device): monitored device
+            start (float): start position of the monitored device
+            stop (float): stop position of the monitored device
 
         Returns:
             ScanReport
@@ -1058,12 +1125,16 @@ class MonitorScan(ScanBase):
             >>> scans.monitor_scan(dev.motor1, -5, 5, exp_time=0.1, relative=True)
 
         """
-        super().__init__(parameter=parameter, **kwargs)
+        self.device = device
+        self.start = start
+        self.stop = stop
+        super().__init__(**kwargs)
         self.axis = []
+        self.relative = relative
 
     def _get_scan_motors(self):
-        self.scan_motors = list(self.caller_args.keys())
-        self.flyer = list(self.caller_args.keys())[0]
+        self.scan_motors = [self.device]
+        self.flyer = self.device
 
     def _calculate_positions(self) -> None:
         self.positions = np.vstack(tuple(self.caller_args.values())).T.tolist()
@@ -1119,7 +1190,7 @@ class Acquire(ScanBase):
     arg_input = []
     arg_bundle_size = len(arg_input)
 
-    def __init__(self, *args, parameter=None, **kwargs):
+    def __init__(self, *args, exp_time=0, burst_at_each_point=1, **kwargs):
         """
         A simple acquisition at the current position.
 
@@ -1132,7 +1203,9 @@ class Acquire(ScanBase):
             >>> scans.acquire(exp_time=0.1, relative=True)
 
         """
-        super().__init__(parameter=parameter, **kwargs)
+        super().__init__(**kwargs)
+        self.exp_time = exp_time
+        self.burst_at_each_point = burst_at_each_point
         self.axis = []
 
     def _calculate_positions(self) -> None:
@@ -1176,26 +1249,38 @@ class LineScan(ScanBase):
     arg_input = [ScanArgType.DEVICE, ScanArgType.FLOAT, ScanArgType.FLOAT]
     arg_bundle_size = len(arg_input)
 
-    def __init__(self, *args, parameter=None, **kwargs):
+    def __init__(
+        self,
+        *args,
+        exp_time: float = 0,
+        steps: int = None,
+        relative: bool = False,
+        burst_at_each_point: int = 1,
+        **kwargs,
+    ):
         """
         A line scan for one or more motors.
 
         Args:
-            *args: pairs of device / start position / end position
-            exp_time: exposure time in s
-            steps: number of steps (please note: 5 steps == 6 positions)
-            relative: Start from an absolute or relative position
-            burst: number of acquisition per point
+            *args (DEVICE, float, float): pairs of device / start position / end position
+            exp_time (float): exposure time in s. Default: 0
+            steps (int): number of steps. Default: 10
+            relative (bool): if True, the start and end positions are relative to the current position. Default: False
+            burst_at_each_point (int): number of acquisition per point. Default: 1
 
         Returns:
+            ScanReport
 
         Examples:
             >>> scans.line_scan(dev.motor1, -5, 5, dev.motor2, -5, 5, steps=10, exp_time=0.1, relative=True)
 
         """
-        super().__init__(parameter=parameter, **kwargs)
+        super().__init__(**kwargs)
+        self.exp_time = exp_time
+        self.steps = steps
+        self.relative = relative
+        self.burst_at_each_point = burst_at_each_point
         self.axis = []
-        self.steps = parameter.get("kwargs", {}).get("steps", 10)
 
     def _calculate_positions(self) -> None:
         for _, val in self.caller_args.items():
@@ -1211,7 +1296,7 @@ class OpenInteractiveScan(ScanBase):
     arg_input = [ScanArgType.DEVICE]
     arg_bundle_size = len(arg_input)
 
-    def __init__(self, *args, parameter=None, **kwargs):
+    def __init__(self, *args, **kwargs):
         """
         An interactive scan for one or more motors.
 
@@ -1228,7 +1313,7 @@ class OpenInteractiveScan(ScanBase):
             >>> scans.open_interactive_scan(dev.motor1, dev.motor2, exp_time=0.1)
 
         """
-        super().__init__(parameter=parameter, **kwargs)
+        super().__init__(**kwargs)
         self.axis = []
 
     def _calculate_positions(self):
@@ -1253,7 +1338,7 @@ class AddInteractiveScanPoint(ScanBase):
     arg_input = [ScanArgType.DEVICE]
     arg_bundle_size = len(arg_input)
 
-    def __init__(self, *args, parameter=None, **kwargs):
+    def __init__(self, *args, **kwargs):
         """
         An interactive scan for one or more motors.
 
@@ -1270,7 +1355,7 @@ class AddInteractiveScanPoint(ScanBase):
             >>> scans.interactive_scan_trigger()
 
         """
-        super().__init__(parameter=parameter, **kwargs)
+        super().__init__(**kwargs)
         self.axis = []
 
     def _calculate_positions(self):
@@ -1299,7 +1384,7 @@ class CloseInteractiveScan(ScanBase):
     arg_input = []
     arg_bundle_size = len(arg_input)
 
-    def __init__(self, *args, parameter=None, **kwargs):
+    def __init__(self, *args, **kwargs):
         """
         An interactive scan for one or more motors.
 
@@ -1316,7 +1401,7 @@ class CloseInteractiveScan(ScanBase):
             >>> scans.close_interactive_scan(dev.motor1, dev.motor2, exp_time=0.1)
 
         """
-        super().__init__(parameter=parameter, **kwargs)
+        super().__init__(**kwargs)
         self.axis = []
 
     def _calculate_positions(self):
