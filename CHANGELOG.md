@@ -2,6 +2,18 @@
 
 <!--next-version-placeholder-->
 
+## v0.18.0 (2023-08-15)
+
+### Feature
+
+* Scan signature is now exported; simplified scan init ([`f35b04a`](https://gitlab.psi.ch/bec/bec/-/commit/f35b04a676a8c6aa972f031d83cb637b346d5d4f))
+
+### Fix
+
+* Fixed typo in round_roi_scan init; added test ([`75f2217`](https://gitlab.psi.ch/bec/bec/-/commit/75f221758f939c510a7766101cc3faa0250a0b6b))
+* Fixed bug in unpack_scan_args for empty lists ([`a693f84`](https://gitlab.psi.ch/bec/bec/-/commit/a693f84816d9074a3f4664a8530d0b130702f7a2))
+* Added missing file ([`f55a518`](https://gitlab.psi.ch/bec/bec/-/commit/f55a518b9103f93b54c872fb4387956cb783d5b8))
+
 ## v0.17.2 (2023-08-10)
 
 ### Fix
