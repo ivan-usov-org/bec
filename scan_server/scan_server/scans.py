@@ -1022,7 +1022,7 @@ class RoundROIScan(ScanBase):
         super().__init__(**kwargs)
         self.axis = []
         self.dr = dr
-        self.nt = nth
+        self.nth = nth
         self.exp_time = exp_time
         self.relative = relative
         self.burst_at_each_point = burst_at_each_point

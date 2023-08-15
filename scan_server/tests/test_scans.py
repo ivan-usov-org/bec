@@ -21,6 +21,7 @@ from scan_server.scans import (
     MonitorScan,
     Move,
     RequestBase,
+    RoundROIScan,
     RoundScanFlySim,
     Scan,
     ScanBase,
@@ -1151,6 +1152,29 @@ def test_pre_scan_macro():
 def test_round_roi_scan_positions(in_args, reference_positions):
     positions = get_round_roi_scan_positions(*in_args)
     assert np.isclose(positions, reference_positions).all()
+
+
+def test_round_roi_scan():
+    device_manager = DMMock()
+    device_manager.add_device("samx")
+    scan_msg = BMessage.ScanQueueMessage(
+        scan_type="round_roi_scan",
+        parameter={
+            "args": {"samx": (10,), "samy": (10,)},
+            "kwargs": {"dr": 2, "nth": 4, "exp_time": 2, "relative": True},
+        },
+        queue="primary",
+    )
+    args = unpack_scan_args(scan_msg.content["parameter"]["args"])
+    kwargs = scan_msg.content["parameter"]["kwargs"]
+    request = RoundROIScan(
+        *args, device_manager=device_manager, parameter=scan_msg.content["parameter"], **kwargs
+    )
+    assert request.scan_report_devices == ["samx", "samy"]
+    assert request.dr == 2
+    assert request.nth == 4
+    assert request.exp_time == 2
+    assert request.relative is True
 
 
 @pytest.mark.parametrize(
