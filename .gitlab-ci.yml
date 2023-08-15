@@ -83,6 +83,7 @@ repo_update:
   stage: RepoUpdates
   needs: []
   image: $CI_DOCKER_REGISTRY/docker:23-dind
+  allow_failure: true
   services:
     - name: docker:dind
       entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
