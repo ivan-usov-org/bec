@@ -3,6 +3,7 @@ import time
 import numpy as np
 import pytest
 from bec_lib import BECClient
+from bec_lib.alarm_handler import AlarmBase
 from bec_lib.core import RedisConnector, ServiceConfig, bec_logger
 from bec_lib.core.tests.utils import wait_for_empty_queue
 
@@ -63,6 +64,17 @@ def test_mv_scan_lib_client(lib_client):
     assert np.isclose(
         current_pos_samy, 20, atol=dev.samy._config["deviceConfig"].get("tolerance", 0.05)
     )
+
+
+@pytest.mark.timeout(100)
+def test_mv_raises_limit_error(lib_client):
+    bec = lib_client
+    scans = bec.scans
+    wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_mv_raises_limit_error"})
+    dev = bec.device_manager.devices
+    with pytest.raises(AlarmBase) as exc:
+        scans.mv(dev.samx, 1000, relative=False).wait()
 
 
 @pytest.mark.timeout(100)

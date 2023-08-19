@@ -9,7 +9,6 @@ from math import inf
 from typeguard import typechecked
 
 from bec_lib.core import BECMessage, MessageEndpoints, bec_errors, bec_logger
-from bec_lib.core import timeout as bec_timeout
 
 # from bec_client.callbacks.live_table import LiveUpdatesTable
 from bec_lib.queue_items import QueueStorage
@@ -84,25 +83,42 @@ class ScanReport:
     def wait(self, timeout=None):
         """wait until the request is completed"""
 
-        @bec_timeout(timeout)
-        def _wait():
-            sleep_time = 0.1
-            scan_type = self.request.request.content["scan_type"]
-            if scan_type == "mv":
-                while True:
-                    if self._get_mv_status():
-                        break
-                    time.sleep(sleep_time)
-            else:
-                while True:
-                    if self.status == "COMPLETED":
-                        break
-                    if self.status == "STOPPED":
-                        raise bec_errors.ScanAbortion
-                    self._client.callbacks.poll()
-                    time.sleep(sleep_time)
+        def _check_timeout(elapsed_time=0):
+            if timeout is not None:
+                if elapsed_time > timeout:
+                    raise TimeoutError(
+                        f"Timeout reached while waiting for request to complete. Timeout: {timeout} s."
+                    )
 
-        _wait()
+        def _wait_move(sleep_time):
+            elapsed_time = 0
+            while True:
+                if self._get_mv_status():
+                    break
+                self._client.alarm_handler.raise_alarms()
+                time.sleep(sleep_time)
+                elapsed_time += sleep_time
+                _check_timeout(elapsed_time)
+
+        def _wait_scan(sleep_time):
+            elapsed_time = 0
+            while True:
+                if self.status == "COMPLETED":
+                    break
+                if self.status == "STOPPED":
+                    raise bec_errors.ScanAbortion
+                self._client.callbacks.poll()
+                time.sleep(sleep_time)
+                elapsed_time += sleep_time
+                _check_timeout(elapsed_time)
+
+        sleep_time = 0.1
+        scan_type = self.request.request.content["scan_type"]
+
+        if scan_type == "mv":
+            _wait_move(sleep_time)
+        else:
+            _wait_scan(sleep_time)
 
     def __repr__(self) -> str:
         separator = "--" * 10
