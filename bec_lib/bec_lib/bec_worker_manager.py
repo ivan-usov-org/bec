@@ -24,6 +24,10 @@ class BECWorker:
         """Creates a BECWorker object from a dictionary."""
         return cls(**worker_config)
 
+    def __eq__(self, other: BECWorker) -> bool:
+        """Checks if two BECWorker objects are equal."""
+        return self.id == other.id and self.config == other.config
+
 
 class BECWorkerManager:
     """Class to manage BEC workers used for stream-based data anlysis."""
@@ -55,6 +59,17 @@ class BECWorkerManager:
             return {}
         msg = BECMessage.DAPConfigMessage.loads(msg_raw)
         return msg.content["config"]
+
+    def get_worker(self, id: str) -> BECWorker:
+        """Gets a worker from the manager by its id.
+
+        Args:
+            id (str): ID of the worker.
+
+        Returns:
+            BECWorker: BECWorker object.
+        """
+        return [w for w in self._workers if w.id == id][0]
 
     @property
     def workers(self) -> list:
@@ -96,7 +111,7 @@ class BECWorkerManager:
         self.producer.set_and_publish(MessageEndpoints.dap_config(), msg.dumps())
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     from bec_lib.core.redis_connector import RedisConnector
 
     connector = RedisConnector(["localhost:6379"])

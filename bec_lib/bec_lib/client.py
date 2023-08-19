@@ -10,6 +10,7 @@ from rich.console import Console
 from rich.table import Table
 
 from bec_lib.alarm_handler import AlarmHandler
+from bec_lib.bec_worker_manager import BECWorkerManager
 from bec_lib.callback_handler import CallbackHandler
 from bec_lib.core import (
     Alarms,
@@ -79,6 +80,7 @@ class BECClient(BECService, UserScriptsMixin):
         self.history = None
         self.callbacks = CallbackHandler()
         self.live_updates = None
+        self.dap = None
 
     @property
     def username(self) -> str:
@@ -106,6 +108,7 @@ class BECClient(BECService, UserScriptsMixin):
         self.load_all_user_scripts()
         self.config = ConfigHelper(self.connector)
         self.history = self.queue.queue_storage.storage
+        self.dap = BECWorkerManager(self.connector)
 
     def alarms(self, severity=Alarms.WARNING):
         """get the next alarm with at least the specified severity"""
