@@ -100,7 +100,7 @@ repo_update:
       # make sure that the API server is healthy and ready
       - timeout 120 /bin/sh -c -- 'while true; do res=$(curl -X "GET" --max-time 3 "http://docker:3030/sessions"); if [ ! -z "$res" ]; then exit 0; fi; sleep 1; done;'      
 
-      - curl -X "GET" "http://docker:3030/explorer/openapi.json" > ./scibec/openapi_schema.json
+      - curl -X "GET" "http://docker:3030/api/v1/explorer/openapi.json" > ./scibec/openapi_schema.json
 
       - git status -uno
       - git add ./scibec/openapi_schema.json
