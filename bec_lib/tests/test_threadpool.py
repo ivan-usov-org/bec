@@ -1,4 +1,4 @@
-from bec_lib.core.threadpool import SingletonThreadpool
+from bec_lib.core.singleton_threadpool import SingletonThreadpool
 
 
 def test_singleton_threadpool():
