@@ -640,6 +640,7 @@ def test_callback_data_matches_scan_data(client):
     reference_container = {"data": [], "metadata": {}}
 
     def dummy_callback(data, metadata):
+        logger.info(f"callback metadata: {metadata}")
         reference_container["metadata"] = metadata
         reference_container["data"].append(data)
 
@@ -662,6 +663,7 @@ def test_async_callback_data_matches_scan_data(client):
     reference_container = {"data": [], "metadata": {}}
 
     def dummy_callback(data, metadata):
+        logger.info(f"callback metadata: {metadata}")
         reference_container["metadata"] = metadata
         reference_container["data"].append(data)
 
