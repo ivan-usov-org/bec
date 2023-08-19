@@ -1,32 +1,44 @@
 from __future__ import annotations
 
-import asyncio
-import datetime
 import time
 import uuid
 from math import inf
+from typing import TYPE_CHECKING
 
 from typeguard import typechecked
 
 from bec_lib.core import BECMessage, MessageEndpoints, bec_errors, bec_logger
-
-# from bec_client.callbacks.live_table import LiveUpdatesTable
 from bec_lib.queue_items import QueueStorage
 from bec_lib.request_items import RequestStorage
 from bec_lib.scan_items import ScanStorage
 
 logger = bec_logger.logger
 
+if TYPE_CHECKING:
+    from bec_lib.queue_items import QueueItem
+
 
 class ScanReport:
     def __init__(self) -> None:
+        """
+        ScanReport is a class that provides a convenient way to access the status of a scan request.
+        """
         self._client = None
         self.request = None
         self._queue_item = None
 
     @classmethod
-    def from_request(cls, request: BECMessage.ScanQueueMessage, client=None):
-        """create new scan report from request"""
+    def from_request(cls, request: BECMessage.ScanQueueMessage, client=None) -> ScanReport:
+        """
+        Create a ScanReport from a request
+
+        Args:
+            request (BECMessage.ScanQueueMessage): request to create the report from
+            client (BECClient, optional): BECClient instance. Defaults to None.
+
+        Returns:
+            ScanReport: ScanReport instance
+        """
         scan_report = cls()
         scan_report._client = client
 
@@ -52,11 +64,18 @@ class ScanReport:
 
     @property
     def queue_item(self):
+        """get the queue item"""
         if not self._queue_item:
             self._queue_item = self._get_queue_item(timeout=10)
         return self._queue_item
 
-    def _get_queue_item(self, timeout=None):
+    def _get_queue_item(self, timeout=None) -> QueueItem:
+        """
+        get the queue item from the queue storage
+
+        Args:
+            timeout (float, optional): timeout in seconds. Defaults to None.
+        """
         timeout = timeout if timeout is not None else inf
         queue_item = None
         elapsed_time = 0
@@ -72,6 +91,7 @@ class ScanReport:
         return queue_item
 
     def _get_mv_status(self) -> bool:
+        """get the status of a move request"""
         motors = list(self.request.request.content["parameter"]["args"].keys())
         request_status = self._client.device_manager.producer.lrange(
             MessageEndpoints.device_req_status(self.request.requestID), 0, -1
@@ -80,45 +100,81 @@ class ScanReport:
             return True
         return False
 
-    def wait(self, timeout=None):
-        """wait until the request is completed"""
+    def wait(self, timeout: float = None) -> ScanReport:
+        """
+        wait for the request to complete
 
-        def _check_timeout(elapsed_time=0):
-            if timeout is not None:
-                if elapsed_time > timeout:
-                    raise TimeoutError(
-                        f"Timeout reached while waiting for request to complete. Timeout: {timeout} s."
-                    )
+        Args:
+            timeout (float, optional): timeout in seconds. Defaults to None.
 
-        def _wait_move(sleep_time):
-            elapsed_time = 0
-            while True:
-                if self._get_mv_status():
-                    break
-                self._client.alarm_handler.raise_alarms()
-                time.sleep(sleep_time)
-                elapsed_time += sleep_time
-                _check_timeout(elapsed_time)
+        Raises:
+            TimeoutError: if the timeout is reached
 
-        def _wait_scan(sleep_time):
-            elapsed_time = 0
-            while True:
-                if self.status == "COMPLETED":
-                    break
-                if self.status == "STOPPED":
-                    raise bec_errors.ScanAbortion
-                self._client.callbacks.poll()
-                time.sleep(sleep_time)
-                elapsed_time += sleep_time
-                _check_timeout(elapsed_time)
-
+        Returns:
+            ScanReport: ScanReport instance
+        """
         sleep_time = 0.1
         scan_type = self.request.request.content["scan_type"]
 
         if scan_type == "mv":
-            _wait_move(sleep_time)
+            self._wait_move(timeout, sleep_time)
         else:
-            _wait_scan(sleep_time)
+            self._wait_scan(timeout, sleep_time)
+
+        return self
+
+    def _check_timeout(self, timeout: float = None, elapsed_time: float = 0) -> None:
+        """
+        check if the timeout is reached
+
+        Args:
+            timeout (float, optional): timeout in seconds. Defaults to None.
+            elapsed_time (float, optional): elapsed time in seconds. Defaults to 0.
+
+        """
+        if timeout is None:
+            return
+        if elapsed_time > timeout:
+            raise TimeoutError(
+                f"Timeout reached while waiting for request to complete. Timeout: {timeout} s."
+            )
+
+    def _wait_move(self, timeout: float = None, sleep_time: float = 0.1) -> None:
+        """
+        wait for a move request to complete
+
+        Args:
+            timeout (float, optional): timeout in seconds. Defaults to None.
+            sleep_time (float, optional): sleep time in seconds. Defaults to 0.1.
+
+        """
+        elapsed_time = 0
+        while True:
+            if self._get_mv_status():
+                break
+            self._client.alarm_handler.raise_alarms()
+            time.sleep(sleep_time)
+            elapsed_time += sleep_time
+            self._check_timeout(timeout, elapsed_time)
+
+    def _wait_scan(self, timeout: float = None, sleep_time: float = 0.1) -> None:
+        """
+        wait for a scan request to complete
+
+        Args:
+            timeout (float, optional): timeout in seconds. Defaults to None.
+            sleep_time (float, optional): sleep time in seconds. Defaults to 0.1.
+        """
+        elapsed_time = 0
+        while True:
+            if self.status == "COMPLETED":
+                break
+            if self.status == "STOPPED":
+                raise bec_errors.ScanAbortion
+            self._client.callbacks.poll()
+            time.sleep(sleep_time)
+            elapsed_time += sleep_time
+            self._check_timeout(timeout, elapsed_time)
 
     def __repr__(self) -> str:
         separator = "--" * 10
@@ -130,6 +186,14 @@ class ScanReport:
 
 class ScanManager:
     def __init__(self, connector):
+        """
+        ScanManager is a class that provides a convenient way to interact with the scan queue as well
+        as the requests and scans that are currently running or have been completed.
+        It also contains storage container for the queue, requests and scans.
+
+        Args:
+            connector (BECConnector): BECConnector instance
+        """
         self.connector = connector
         self.producer = self.connector.producer()
         self.queue_storage = QueueStorage(scan_manager=self)

@@ -3,9 +3,10 @@ import os
 import time
 import uuid
 
-import bec_lib.core
 import pytest
 import yaml
+
+import bec_lib.core
 from bec_lib import BECClient
 from bec_lib.core import BECMessage, MessageEndpoints, ServiceConfig, bec_logger
 from bec_lib.core.connector import ConnectorBase
@@ -141,7 +142,7 @@ def bec_client():
         dev._info["hints"] = {"fields": [name]}
     client.device_manager = device_manager
     yield client
-    del ClientMock._client
+    ClientMock._client = None
     device_manager.devices.flush()
 
 

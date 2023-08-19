@@ -35,7 +35,7 @@ class BECClient(BECService, UserScriptsMixin):
         pass
 
     def __new__(cls, forced=False):
-        if not hasattr(cls, "_client") or forced:
+        if not hasattr(cls, "_client") or forced or cls._client is None:
             cls._client = super(BECClient, cls).__new__(cls)
             cls._initialized = False
         return cls._client
