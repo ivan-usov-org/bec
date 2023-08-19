@@ -15,5 +15,4 @@ from .devicemanager import (
 from .endpoints import MessageEndpoints
 from .redis_connector import Alarms, RedisConnector
 from .service_config import ServiceConfig
-from .timeout import timeout
 from .utils import threadlocked

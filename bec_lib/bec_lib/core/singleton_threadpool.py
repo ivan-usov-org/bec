@@ -1,4 +1,6 @@
+import asyncio
 import ctypes
+import functools
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as CFTimeoutError
@@ -32,9 +34,11 @@ class SingletonThreadpool:
         return cls._threadpool
 
 
-def timeout(timeout_time: float):
-    """Decorator to raise a TimeoutError if the decorated function does
-    not finish within the specified time.
+def run_with_timeout(timeout_time: float):
+    """Decorator to run a function in a while loop and
+    raise a TimeoutError if the decorated function does
+    not finish within the specified time. It is done by using
+    asyncio. The decorated function must be a coroutine.
 
     Args:
         timeout_time (float): Timeout time in seconds.
@@ -43,39 +47,31 @@ def timeout(timeout_time: float):
         TimeoutError: Raised if the elapsed time > timeout
 
     """
-    threadpool = SingletonThreadpool(max_workers=50)
 
-    def Inner(fcn):
+    def decorator(func: Callable):
+        # check if the function is a coroutine
+        if not asyncio.iscoroutinefunction(func):
+            raise TypeError("Function must be a coroutine.")
+
+        @functools.wraps(func)
         def wrapper(*args, **kwargs):
+            # get the event loop and create a new one if there is none
             try:
-                fcn_future = threadpool.executor.submit(fcn, *args, **kwargs)
-                return fcn_future.result(timeout=timeout_time)
-            finally:
-                if fcn_future.running():
-                    fcn_future.cancel()
+                loop = asyncio.get_event_loop()
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+            # create a future and run the coroutine
+            try:
+                future = asyncio.run_coroutine_threadsafe(func(*args, **kwargs), loop)
+                # get the result of the coroutine
+                result = future.result(timeout=timeout_time)
+                return result
+            except asyncio.TimeoutError:
+                raise TimeoutError(
+                    f"Function {func.__name__} did not finish within {timeout_time} seconds."
+                )
 
         return wrapper
 
-    return Inner
-
-
-set_async_exc = ctypes.pythonapi.PyThreadState_SetAsyncExc
-
-
-def killthread(thread, exc=KeyboardInterrupt):
-    if not thread.is_alive():
-        return
-
-    ident = ctypes.c_long(thread.ident)
-    exc = ctypes.py_object(exc)
-
-    res = set_async_exc(ident, exc)
-    if res == 0:
-        raise ValueError(f"thread {thread} does not exist")
-    elif res > 1:
-        # if return value is greater than one, you are in trouble.
-        # you should call it again with exc=NULL to revert the effect.
-        set_async_exc(ident, None)
-        raise SystemError(
-            f"PyThreadState_SetAsyncExc on thread {thread} failed with return value {res}"
-        )
+    return decorator
