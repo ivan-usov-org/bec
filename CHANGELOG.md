@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.18.1 (2023-08-19)
+
+### Fix
+
+* Removed timeout ([`29df4ac`](https://gitlab.psi.ch/bec/bec/-/commit/29df4ac19ac189f4d7666c2c47c4539cf5e94372))
+* Fixed bug in wait function for aborted move commands ([`019fcda`](https://gitlab.psi.ch/bec/bec/-/commit/019fcdaa074dcb67c84132cb038067dca8578830))
+
 ## v0.18.0 (2023-08-15)
 
 ### Feature
