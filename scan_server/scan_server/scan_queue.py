@@ -8,16 +8,10 @@ import uuid
 from enum import Enum
 from typing import List, Optional, Union
 
-from bec_lib.core import (
-    Alarms,
-    BECMessage,
-    MessageEndpoints,
-    bec_logger,
-    threadlocked,
-    timeout,
-)
 from rich.console import Console
 from rich.table import Table
+
+from bec_lib.core import Alarms, BECMessage, MessageEndpoints, bec_logger, threadlocked
 
 from .errors import LimitError, ScanAbortion
 from .scan_assembler import ScanAssembler
@@ -185,9 +179,15 @@ class QueueManager:
             return None
         return self.queues[queue].queue[0].active_request_block.scanID
 
-    @timeout(10)
     def _wait_for_queue_to_appear_in_history(self, scanID, queue):
+        timeout_time = 10
+        elapsed_time = 0
         while True:
+            if elapsed_time > timeout_time:
+                raise TimeoutError(
+                    f"Scan {scanID} did not appear in history within {timeout_time}s"
+                )
+            elapsed_time += 0.1
             history = self.queues[queue].history_queue
             if len(history) == 0:
                 time.sleep(0.1)
