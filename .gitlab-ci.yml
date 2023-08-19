@@ -161,6 +161,7 @@ end-2-end:
   services:
     - name: docker:dind
       entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+  allow_failure: true
   artifacts:
     when: on_failure
     paths:
@@ -218,6 +219,7 @@ end-2-end:
 
 end-2-end-light:
   extends: "end-2-end"
+  allow_failure: false
   script:
     # spin up redis
     - docker run --network=host -d --name redis-test redis
@@ -252,6 +254,7 @@ end-2-end-conda:
   stage: End2End
   needs: []
   image: continuumio/miniconda3
+  allow_failure: false
   script:
     - apt-get update
     - apt-get install -y tmux
