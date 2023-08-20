@@ -168,6 +168,10 @@ class DeviceManagerDS(DeviceManagerBase):
         if device_access or (device_access is None and config.get("device_mapping")):
             init_kwargs["device_manager"] = self
 
+        signature = inspect.signature(dev_cls)
+        if "device_manager" in signature.parameters:
+            init_kwargs["device_manager"] = self
+
         # initialize the device object
         obj = dev_cls(**init_kwargs, **config)
         self.update_config(obj, config)

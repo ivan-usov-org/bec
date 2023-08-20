@@ -304,6 +304,15 @@ class ScanBase(RequestBase, PathOptimizerMixin):
 
     A subclass of ScanBase must implement the following methods:
     - _calculate_positions
+
+    Attributes:
+        scan_name (str): name of the scan
+        scan_report_hint (str): hint for the scan report
+        scan_type (str): scan type. Can be "step" or "fly"
+        arg_input (list): list of scan argument types
+        arg_bundle_size (int): number of arguments that are bundled together
+        required_kwargs (list): list of required kwargs
+        return_to_start_after_abort (bool): if True, the scan will return to the start position after an abort
     """
 
     scan_name = ""
