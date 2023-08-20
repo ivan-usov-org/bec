@@ -41,7 +41,7 @@ class DAPWorkerManager:
         for name, cls in members:
             if not inspect.isclass(cls):
                 continue
-            if not hasattr(cls, "run"):
+            if not hasattr(cls, "run") or not callable(cls.run):
                 continue
             self._worker_plugins[name] = cls
             logger.info(f"Loading dap plugin {name}")
@@ -52,7 +52,10 @@ class DAPWorkerManager:
         msg = self.producer.get(MessageEndpoints.dap_config())
         if not msg:
             return
-        self.update_config(BECMessage.DAPConfigMessage.loads(msg))
+        config_msg = BECMessage.DAPConfigMessage.loads(msg)
+        if not config_msg:
+            return
+        self.update_config(config_msg)
 
     def _start_config_consumer(self):
         """Get config from redis."""
@@ -107,8 +110,14 @@ class DAPWorkerManager:
                 self._workers[worker_id]["worker"].terminate()
                 del self._workers[worker_id]
 
-    def _start_worker(self, config: dict, worker_cls: Any):
-        """Start a worker."""
+    def _start_worker(self, config: dict, worker_cls: Any) -> None:
+        """
+        Start a worker.
+
+        Args:
+            config (dict): Worker config
+            worker_cls (Any): Worker class
+        """
         logger.debug(f"Starting worker: {config}")
 
         self._workers[config["id"]] = {
@@ -119,8 +128,8 @@ class DAPWorkerManager:
         }
 
     def shutdown(self):
-        for worker in self._workers:
-            worker.shutdown()
+        for worker in self._workers.values():
+            worker["worker"].terminate()
 
     @staticmethod
     def run_worker(config: dict, worker_cls: Any, connector_host: List[str]) -> mp.Process:
