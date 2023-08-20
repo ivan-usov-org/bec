@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.21.0 (2023-08-20)
+
+### Feature
+
+* Inject device_manager based on signature ([`4eb9cf4`](https://gitlab.psi.ch/bec/bec/-/commit/4eb9cf494c805cdf751e459f0b9d0b7aa3ebee91))
+
 ## v0.20.0 (2023-08-20)
 
 ### Feature
