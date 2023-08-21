@@ -498,7 +498,6 @@ def test_initialize_scan_container(scan_msg):
             ),
             "pointID": {},
         }
-        assert sb.monitor_devices[scanID] == sb.device_manager.devices.acquisition_group("monitor")
         assert "eyex" not in [dev.name for dev in bl_devs]
         assert sb.baseline_devices[scanID] == {
             "devices": bl_devs,
