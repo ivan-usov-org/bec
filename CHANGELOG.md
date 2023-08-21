@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.21.1 (2023-08-21)
+
+### Fix
+
+* Fixed bug in device config update ([`940737f`](https://gitlab.psi.ch/bec/bec/-/commit/940737fe6c8295423390a76b784a5984a93c7043))
+
 ## v0.21.0 (2023-08-20)
 
 ### Feature
