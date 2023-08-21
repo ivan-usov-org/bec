@@ -200,7 +200,7 @@ def test_config_handler_update_device_config_deviceConfig(SciHubMock):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     config_handler = scibec_connector.config_handler
     dev = config_handler.device_manager.devices
-    dev.samx = Device("samx", {})
+    dev.samx = Device("samx", {"deviceConfig": {}})
     with mock.patch.object(config_handler, "_update_device_server") as update_dev_server:
         with mock.patch.object(
             config_handler, "_wait_for_device_server_update", return_value=True
@@ -214,6 +214,7 @@ def test_config_handler_update_device_config_deviceConfig(SciHubMock):
                 # mock doesn't copy the data, hence the popped result:
                 update_dev_server.assert_called_once_with(rid, {device.name: {}})
                 wait.assert_called_once_with(rid)
+                assert dev.samx._config == {"deviceConfig": {"something": "to_update"}}
 
 
 def test_config_handler_update_device_config_misc(SciHubMock):

@@ -146,6 +146,7 @@ class ConfigHandler:
             RID = str(uuid.uuid4())
             self._update_device_server(RID, {device.name: dev_config})
             updated = self._wait_for_device_server_update(RID)
+            device._config["deviceConfig"].update(dev_config["deviceConfig"])
             dev_config.pop("deviceConfig")
 
         if "enabled" in dev_config:
