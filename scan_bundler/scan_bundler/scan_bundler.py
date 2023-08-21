@@ -28,7 +28,6 @@ class ScanBundler(BECService):
 
         self.sync_storage = {}
         self.monitored_devices = {}
-        self.monitor_devices = {}
         self.baseline_devices = {}
         self.device_storage = {}
         self.scan_motors = {}
@@ -156,7 +155,6 @@ class ScanBundler(BECService):
                 ),
                 "pointID": {},
             }
-            self.monitor_devices[scanID] = self.device_manager.devices.acquisition_group("monitor")
             self.baseline_devices[scanID] = {
                 "devices": self.device_manager.devices.baseline_devices(
                     readout_priority=self.readout_priority[scanID]
@@ -342,7 +340,6 @@ class ScanBundler(BECService):
             for storage in [
                 "sync_storage",
                 "monitored_devices",
-                "monitor_devices",
                 "baseline_devices",
                 "scan_motors",
                 "readout_priority",
