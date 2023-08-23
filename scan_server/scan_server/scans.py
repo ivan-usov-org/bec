@@ -5,8 +5,9 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Tuple
 
 import numpy as np
-from bec_lib.core import BECMessage, DeviceManagerBase, MessageEndpoints, bec_logger
 from cytoolz import partition
+
+from bec_lib.core import BECMessage, DeviceManagerBase, MessageEndpoints, bec_logger
 
 from .errors import LimitError, ScanAbortion
 from .path_optimization import PathOptimizerMixin
@@ -329,6 +330,8 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         device_manager: DeviceManagerBase = None,
         parameter: dict = None,
         exp_time: float = 0,
+        readout_time: float = 0,
+        acquisition_config: dict = None,
         settling_time: float = 0,
         relative: bool = False,
         burst_at_each_point: int = 1,
@@ -342,6 +345,8 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         self.DIID = 0
         self.pointID = 0
         self.exp_time = exp_time
+        self.readout_time = readout_time
+        self.acquisition_config = acquisition_config
         self.settling_time = settling_time
         self.relative = relative
         self.burst_at_each_point = burst_at_each_point
@@ -354,6 +359,11 @@ class ScanBase(RequestBase, PathOptimizerMixin):
 
         if self.scan_name == "":
             raise ValueError("scan_name cannot be empty")
+
+        if acquisition_config is None or "default" not in acquisition_config:
+            self.acquisition_config = {
+                "default": {"exp_time": self.exp_time, "readout_time": self.readout_time}
+            }
 
     def read_scan_motors(self):
         """read the scan motors"""
