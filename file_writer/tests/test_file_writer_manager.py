@@ -97,7 +97,7 @@ def test_create_file_path():
     file_manager = load_FileWriter()
     file_manager.file_writer_config["base_path"] = "./"
     file_path = file_manager.writer_mixin.compile_full_filename(10, "master.h5", create_dir=False)
-    assert file_path == os.path.abspath("./bec/data/S00000-00999/S00010/S00010_master.h5")
+    assert file_path == os.path.abspath("./data/S00000-00999/S00010/S00010_master.h5")
 
 
 def test_write_file_raises_alarm_on_error():
