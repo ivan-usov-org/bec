@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.22.0 (2023-08-24)
+
+### Feature
+
+* Added acquisition config and readout_time ([`f631759`](https://gitlab.psi.ch/bec/bec/-/commit/f63175941bbf7d9f5448ff58b9ea942bd2e1b9a4))
+
 ## v0.21.1 (2023-08-21)
 
 ### Fix
