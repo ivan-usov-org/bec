@@ -63,7 +63,7 @@ class FileWriterMixin:
         """
         scan_dir = self._get_scan_directory(scan_bundle, scan_number, leading_zeros)
         full_file = os.path.join(
-            self._base_path, "bec", "data", scan_dir, f"S{scan_number:0{leading_zeros}d}_{suffix}"
+            self._base_path, "data", scan_dir, f"S{scan_number:0{leading_zeros}d}_{suffix}"
         )
         if create_dir:
             os.makedirs(os.path.dirname(full_file), exist_ok=True)
