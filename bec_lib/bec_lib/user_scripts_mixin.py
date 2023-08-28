@@ -43,7 +43,9 @@ class UserScriptsMixin:
         if client_plugins:
             plugin_scripts_dir = os.path.join(client_plugins.__path__[0], "scripts")
             if os.path.exists(plugin_scripts_dir):
-                script_files.extend(glob.glob(os.path.abspath(os.path.join(plugin_scripts_dir, "*.py"))))
+                script_files.extend(
+                    glob.glob(os.path.abspath(os.path.join(plugin_scripts_dir, "*.py")))
+                )
 
         for file in script_files:
             self.load_user_script(file)
