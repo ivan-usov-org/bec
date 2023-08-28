@@ -3,9 +3,10 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING, Callable, List
 
+from bec_lib.core import BECMessage, bec_logger
+
 from bec_client.prettytable import PrettyTable
 from bec_client.progressbar import ScanProgressBar
-from bec_lib.core import BECMessage, bec_logger
 
 from .utils import LiveUpdatesBase, check_alarms
 
@@ -117,7 +118,8 @@ class LiveUpdatesTable(LiveUpdatesBase):
         monitored_devices = device_manager.devices.monitored_devices(
             [device_manager.devices[dev] for dev in scan_devices]
         )
-        devices = [hint for dev in monitored_devices for hint in dev._hints]
+        # devices = [hint for dev in monitored_devices for hint in dev._hints]
+        devices = [dev.name for dev in monitored_devices]
         devices = sort_devices(devices, scan_devices)
         if len(devices) > self.MAX_DEVICES:
             return devices[0 : self.MAX_DEVICES]
