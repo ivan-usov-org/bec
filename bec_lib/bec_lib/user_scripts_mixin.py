@@ -15,6 +15,11 @@ from rich.table import Table
 
 logger = bec_logger.logger
 
+try:
+    from bec_plugins import bec_client as client_plugins
+except ImportError:
+    client_plugins = None
+
 
 class UserScriptsMixin:
     def __init__(self) -> None:
@@ -24,8 +29,22 @@ class UserScriptsMixin:
     def load_all_user_scripts(self) -> None:
         """Load all scripts from the `scripts` directory."""
         self.forget_all_user_scripts()
+
+        # load all scripts from the scripts directory
         current_path = pathlib.Path(__file__).parent.resolve()
         script_files = glob.glob(os.path.abspath(os.path.join(current_path, "../scripts/*.py")))
+
+        # load all scripts from the user's script directory in the home directory
+        user_script_dir = os.path.join(os.path.expanduser("~"), "bec", "scripts")
+        if os.path.exists(user_script_dir):
+            script_files.extend(glob.glob(os.path.abspath(os.path.join(user_script_dir, "*.py"))))
+
+        # load scripts from the plugins
+        if client_plugins:
+            plugin_scripts_dir = os.path.join(client_plugins.__path__[0], "scripts")
+            if os.path.exists(plugin_scripts_dir):
+                script_files.extend(glob.glob(os.path.abspath(os.path.join(plugin_scripts_dir, "*.py"))))
+
         for file in script_files:
             self.load_user_script(file)
         builtins.__dict__.update({name: v["cls"] for name, v in self._scripts.items()})
