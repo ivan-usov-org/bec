@@ -26,7 +26,7 @@ class PrettyTable:
         return (
             "|"
             + "|".join(
-                self.aligned_to_center(self.padding, f"{val:{self.format_string[ii]}}")
+                self.aligned_to_center(self.padding, val)
                 for ii, val in enumerate(args)
             )
             + "|"

@@ -211,13 +211,27 @@ class LiveUpdatesTable(LiveUpdatesBase):
                 obj = self.bec.device_manager.devices[dev]
                 for hint in obj._hints:
                     signal = self.point_data.content["data"].get(dev, {}).get(hint)
-                    self.dev_values[ind] = signal.get("value") if signal else -999
+                    if signal is None or signal.get("value") is None:
+                        print_value = "N/A"
+                    else:
+                        try:
+                            precision = getattr(obj, "precision")
+                        except AttributeError:
+                            precision = 2
+                        value = signal.get("value")
+                        print_value = f"{value:.{precision}f}"
+                    self.dev_values[ind] = print_value
                     ind += 1
             else:
                 signal = self.point_data.content["data"].get(dev, {})
-                self.dev_values[ind] = signal.get("value") if signal else -999
+                value = signal.get("value")
+                if value is not None:
+                    print_value = f"{value:.2f}"
+                else:
+                    print_value = "N/A"
+                self.dev_values[ind] = print_value
                 ind += 1
-        print(self.table.get_row(self.point_id, *self.dev_values))
+        print(self.table.get_row(str(self.point_id), *self.dev_values))
 
     def close_table(self):
         if not self.table:
