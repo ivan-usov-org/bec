@@ -25,10 +25,7 @@ class PrettyTable:
     def get_row(self, *args) -> str:
         return (
             "|"
-            + "|".join(
-                self.aligned_to_center(self.padding, val)
-                for ii, val in enumerate(args)
-            )
+            + "|".join(self.aligned_to_center(self.padding, val) for ii, val in enumerate(args))
             + "|"
         )
 
