@@ -2,6 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## v0.23.0 (2023-08-29)
+
+### Feature
+
+* Added device precision ([`4177fe6`](https://gitlab.psi.ch/bec/bec/-/commit/4177fe6038a10e2f285fc18c13ef6a77022b17e5))
+* Added support for user scripts from plugins and home directory ([`cd59267`](https://gitlab.psi.ch/bec/bec/-/commit/cd59267e780586b002cd80c692a0f38c213f999d))
+
+### Fix
+
+* Fixed live table for hinted signals ([`4334567`](https://gitlab.psi.ch/bec/bec/-/commit/43345676533a402fac517fd467c98b46f35658aa))
+
 ## v0.22.0 (2023-08-24)
 
 ### Feature
