@@ -225,9 +225,12 @@ class DeviceServer(BECService):
         if not is_serializable(res):
             if isinstance(res, ophyd.StatusBase):
                 return res
+            elif isinstance(res, list) and instr_params.get("func") in ["stage", "unstage"]:
+                return [obj._staged for obj in res]
             res = None
             self.connector.raise_alarm(
                 severity=Alarms.WARNING,
+                alarm_type="TypeError",
                 source=instr_params,
                 content=f"Return value of rpc call {instr_params} is not serializable.",
                 metadata={},
@@ -257,6 +260,10 @@ class DeviceServer(BECService):
                     "done": res.done,
                     "settle_time": res.settle_time,
                 }
+            elif isinstance(res, list) and isinstance(res[0], ophyd.Staged):
+                res = [str(stage) for stage in res]
+            else:
+                print(f"return value: {res}")
             # send result to client
             self.producer.set(
                 MessageEndpoints.device_rpc(instr_params.get("rpc_id")),
@@ -281,17 +288,19 @@ class DeviceServer(BECService):
             sys.stdout = save_stdout
 
     def _send_rpc_exception(self, exc: Exception, instr: BECMessage.DeviceInstructionMessage):
+        exc_formatted = {
+            "error": exc.__class__.__name__,
+            "msg": exc.args,
+            "traceback": traceback.format_exc(),
+        }
+        logger.info(f"Received exception: {exc_formatted}, {exc}")
         instr_params = instr.content.get("parameter")
         self.producer.set(
             MessageEndpoints.device_rpc(instr_params.get("rpc_id")),
             BECMessage.DeviceRPCMessage(
                 device=instr.content["device"],
                 return_val=None,
-                out={
-                    "error": exc.__class__.__name__,
-                    "msg": exc.args,
-                    "traceback": traceback.format_exc(),
-                },
+                out=exc_formatted,
                 success=False,
             ).dumps(),
         )

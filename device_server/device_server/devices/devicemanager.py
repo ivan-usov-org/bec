@@ -70,6 +70,16 @@ class DeviceManagerDS(DeviceManagerBase):
         )
         super().initialize(bootstrap_server)
 
+    def _reload_action(self) -> None:
+        for dev, obj in self.devices.items():
+            try:
+                obj.obj.destroy()
+            except Exception:
+                logger.warning(f"Failed to destroy {obj.obj.name}")
+                raise RuntimeError
+        self.devices.flush()
+        self._get_config()
+
     def _get_device_class(self, dev_type):
         module = None
         if hasattr(ophyd, dev_type):
