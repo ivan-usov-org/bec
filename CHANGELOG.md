@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.27.0 (2023-08-31)
+
+### Feature
+
+* Added get_last; changed streams to stream suffix ([`e84601f`](https://gitlab.psi.ch/bec/bec/-/commit/e84601f487d4943c63a31f12b42d656dc9a4c690))
+
 ## v0.26.0 (2023-08-31)
 
 ### Feature
