@@ -15,8 +15,13 @@ class BECWorker:
             config (dict): Configuration dictionary for the worker.
         """
         self.id = id
-        self.config = config
+        self._config = config
         self._worker_manager = worker_manager
+
+    @property
+    def config(self) -> dict:
+        """Configuration dictionary for the worker."""
+        return self._config
 
     def to_dict(self) -> dict:
         """Converts the BECWorker object to a dictionary."""
@@ -85,7 +90,10 @@ class BECWorkerManager:
         Returns:
             BECWorker: BECWorker object.
         """
-        return [w for w in self._workers if w.id == id][0]
+        worker = [w for w in self._workers if w.id == id]
+        if len(worker) == 0:
+            raise ValueError(f"Worker with id {id} does not exist.")
+        return worker[0]
 
     @property
     def workers(self) -> list:

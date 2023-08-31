@@ -23,11 +23,15 @@ def worker_manager():
 
 def test_bec_worker():
     """Test BECWorker class."""
-    worker = BECWorker("test", {"test": "test"})
+    manager = mock.MagicMock()
+    worker = BECWorker("test", {"test": "test"}, worker_manager=manager)
     assert worker.id == "test"
     assert worker.config == {"test": "test"}
     assert worker.to_dict() == {"id": "test", "config": {"test": "test"}}
-    assert BECWorker.from_dict({"id": "test", "config": {"test": "test"}}) == worker
+    assert (
+        BECWorker.from_dict({"id": "test", "config": {"test": "test"}}, worker_manager=manager)
+        == worker
+    )
 
 
 def test_bec_worker_manager():
@@ -84,3 +88,18 @@ def test_bec_worker_add_worker(worker_manager):
     ]
     with pytest.raises(ValueError):
         worker_manager.add_worker("test", {"test": "test"})
+
+
+def test_bec_worker_update_worker(worker_manager):
+    worker_manager.update_worker("test", {"test": "test"})
+    assert worker_manager._workers == [
+        BECWorker("test", {"test": "test"}),
+        BECWorker("test2", {"test": "test"}),
+    ]
+    worker_manager.update_worker("test2", {"test": "test2"})
+    assert worker_manager._workers == [
+        BECWorker("test", {"test": "test"}),
+        BECWorker("test2", {"test": "test2"}),
+    ]
+    with pytest.raises(ValueError):
+        worker_manager.update_worker("test3", {"test": "test"})
