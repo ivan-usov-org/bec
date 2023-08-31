@@ -453,6 +453,13 @@ def test_redis_connector_xadd_with_maxlen(producer):
     producer.r.xadd.assert_called_once_with("topic:val", {"key": "value"}, maxlen=100)
 
 
+def test_redis_connector_xadd_with_expire(producer):
+    producer.xadd("topic", {"key": "value"}, expire=100)
+    producer.r.pipeline().xadd.assert_called_once_with("topic:val", {"key": "value"})
+    producer.r.pipeline().expire.assert_called_once_with("topic:val", 100)
+    producer.r.pipeline().execute.assert_called_once()
+
+
 def test_redis_connector_xread(producer):
     producer.xread("topic", "id")
     producer.r.xread.assert_called_once_with({"topic:val": "id"}, count=None, block=None)
