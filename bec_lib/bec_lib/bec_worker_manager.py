@@ -6,7 +6,9 @@ from bec_lib.core import BECMessage, MessageEndpoints, RedisConnector
 class BECWorker:
     """Helper class for remote BEC workers."""
 
-    def __init__(self, id: str, config: dict = None) -> None:
+    def __init__(
+        self, id: str, config: dict = None, worker_manager: BECWorkerManager = None
+    ) -> None:
         """
 
         Args:
@@ -14,19 +16,31 @@ class BECWorker:
         """
         self.id = id
         self.config = config
+        self._worker_manager = worker_manager
 
     def to_dict(self) -> dict:
         """Converts the BECWorker object to a dictionary."""
         return {"id": self.id, "config": self.config}
 
     @classmethod
-    def from_dict(cls, worker_config: dict) -> BECWorker:
+    def from_dict(cls, worker_config: dict, worker_manager: BECWorkerManager) -> BECWorker:
         """Creates a BECWorker object from a dictionary."""
-        return cls(**worker_config)
+        return cls(**worker_config, worker_manager=worker_manager)
+
+    def update_config(self, config: dict) -> None:
+        """Updates the configuration of the worker.
+
+        Args:
+            config (dict): Configuration dictionary for the worker.
+        """
+        self.config.update(config)
 
     def __eq__(self, other: BECWorker) -> bool:
         """Checks if two BECWorker objects are equal."""
         return self.id == other.id and self.config == other.config
+
+    def __repr__(self) -> str:
+        return f"BECWorker(id={self.id}, config={self.config})"
 
 
 class BECWorkerManager:
@@ -49,7 +63,9 @@ class BECWorkerManager:
         if msg_raw is None:
             return
         msg = BECMessage.DAPConfigMessage.loads(msg_raw)
-        self._workers = [BECWorker.from_dict(w) for w in msg.content["config"].get("workers", [])]
+        self._workers = [
+            BECWorker.from_dict(w, self) for w in msg.content["config"].get("workers", [])
+        ]
 
     @property
     def config(self) -> dict:
@@ -75,7 +91,7 @@ class BECWorkerManager:
     def workers(self) -> list:
         """List of workers in the manager."""
         worker_config = self.config.get("workers", [])
-        return [BECWorker.from_dict(w) for w in worker_config]
+        return [BECWorker.from_dict(w, self) for w in worker_config]
 
     @property
     def num_workers(self) -> int:
@@ -93,7 +109,18 @@ class BECWorkerManager:
         # if the worker already exists, raise an error
         if id in [w.id for w in self._workers]:
             raise ValueError(f"Worker with id {id} already exists.")
-        self._workers.append(BECWorker(id, config))
+        self._workers.append(BECWorker(id, config, self))
+        self._update_config()
+
+    def update_worker(self, id: str, config: dict) -> None:
+        """Updates the configuration of a worker.
+
+        Args:
+            id (str): ID of the worker.
+            config (dict): Configuration dictionary for the worker.
+        """
+        worker = self.get_worker(id)
+        worker.update_config(config)
         self._update_config()
 
     def remove_worker(self, id: str) -> None:

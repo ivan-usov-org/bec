@@ -46,6 +46,16 @@ class DAPWorkerManager:
             self._worker_plugins[name] = cls
             logger.info(f"Loading dap plugin {name}")
 
+    #     self._publish_available_plugins()
+
+    # def _publish_available_plugins(self):
+    #     """Publish the available plugins."""
+    #     logger.debug("Publishing available plugins")
+
+    #     # }
+    #     # msg = BECMessage.AvailableResourceMessage(resource={})
+    #     self.producer.publish(MessageEndpoints.dap_available_plugins(), msg.dumps())
+
     def _update_config(self):
         """Get config from redis."""
         logger.debug("Getting config from redis")
