@@ -9,7 +9,7 @@ class MessageEndpoints:
     _device_readback = "internal/devices/readback"
     _device_req_status = "internal/devices/req_status"
     _device_progress = "internal/devices/progress"
-    _device_async_readback = Template("internal/devices/async_readback/$scanID/$name")
+    _device_async_readback = Template("internal/devices/async_readback/$scanID/$device")
 
     # device config
     _device_config_request = "internal/devices/config_request"
