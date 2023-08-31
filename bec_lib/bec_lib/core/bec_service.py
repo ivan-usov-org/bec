@@ -19,6 +19,8 @@ from .service_config import ServiceConfig
 
 logger = bec_logger.logger
 
+SERVICE_CONFIG = None
+
 
 class BECService:
     def __init__(
@@ -57,7 +59,8 @@ class BECService:
             self._service_config = config
         else:
             raise TypeError("config must be of type str or ServiceConfig")
-
+        global SERVICE_CONFIG
+        SERVICE_CONFIG = self._service_config
         self.bootstrap_server = self._service_config.redis
 
     def _check_services(self, timeout_time=8, sleep_time=0.5) -> None:
