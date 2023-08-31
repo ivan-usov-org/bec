@@ -9,6 +9,7 @@ class MessageEndpoints:
     _device_readback = "internal/devices/readback"
     _device_req_status = "internal/devices/req_status"
     _device_progress = "internal/devices/progress"
+    _device_async_readback = Template("internal/devices/async_readback/$scanID/$name")
 
     # device config
     _device_config_request = "internal/devices/config_request"
@@ -252,6 +253,24 @@ class MessageEndpoints:
             str: Endpoint for the device stage status of the specified device.
         """
         return f"{cls._device_staged}/{device}"
+
+    @classmethod
+    def device_async_readback(cls, scanID: str, device: str) -> str:
+        """
+        Endpoint for receiving an async device readback over Redis streams.
+        This endpoint is used by the device server to publish async device
+        readbacks using a BECMessage.DeviceMessage. In addition tp scan metadata,
+        the message metadata contains information on how to concatenate multiple readings.
+        Further keyword arguments for GUI handling might be attached.
+
+        Args:
+            scanID (str): unique scan identifier
+            device (str): Device name, e.g. "mcs".
+
+        Returns:
+            str: Endpoint for the async device readback.
+        """
+        return cls._device_async_readback.substitute(scanID=scanID, device=device)
 
     # scan queue
     @classmethod
