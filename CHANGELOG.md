@@ -2,6 +2,18 @@
 
 <!--next-version-placeholder-->
 
+## v0.24.0 (2023-08-31)
+
+### Feature
+
+* Added global var service config to simplify sharing the config with other classes ([`75f1f9c`](https://gitlab.psi.ch/bec/bec/-/commit/75f1f9cd4ebc6938f2cf47103fb64eef8be57ae3))
+* Added option to update the worker config directly ([`a417fd8`](https://gitlab.psi.ch/bec/bec/-/commit/a417fd8a18cadb4b480da243149c1186f3a07d88))
+* Added available resource endpoint/message ([`5f5c80c`](https://gitlab.psi.ch/bec/bec/-/commit/5f5c80c2866236226dca717de0c67b32f5692ab9))
+
+### Fix
+
+* Fixed worker manager ([`fa62a8a`](https://gitlab.psi.ch/bec/bec/-/commit/fa62a8a9c96da44439ba71ae82d8020c8a2a0de5))
+
 ## v0.23.1 (2023-08-31)
 
 ### Fix
