@@ -177,7 +177,12 @@ class RedisConnector(ConnectorBase):
 
     @catch_connection_error
     def raise_alarm(
-        self, severity: Alarms, alarm_type: str, source: str, content: dict, metadata: dict
+        self,
+        severity: Alarms,
+        alarm_type: str,
+        source: str,
+        content: dict,
+        metadata: dict,
     ):
         """raise an alarm"""
         self._notifications_producer.set_and_publish(
@@ -310,14 +315,18 @@ class RedisProducer(ProducerConnector):
         return client.get(f"{topic}:val")
 
     @catch_connection_error
-    def xadd(self, topic: str, msg: dict, max_size=None, pipe=None):
+    def xadd(self, topic: str, msg: dict, max_size=None, pipe=None, expire: int = None):
         """add to stream"""
         topic = trim_topic(topic, ":val")
-        client = pipe if pipe is not None else self.r
+        client = pipe if pipe is not None else self.pipeline()
         if max_size:
             client.xadd(f"{topic}:val", msg, maxlen=max_size)
         else:
             client.xadd(f"{topic}:val", msg)
+        if expire:
+            client.expire(f"{topic}:val", expire)
+        if not pipe:
+            client.execute()
 
     @catch_connection_error
     def xread(
