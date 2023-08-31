@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.23.1 (2023-08-31)
+
+### Fix
+
+* Removed bec prefix from file path ([`9a3b20f`](https://gitlab.psi.ch/bec/bec/-/commit/9a3b20f085232369c9320bb8f54b93fb6b0b1686))
+
 ## v0.23.0 (2023-08-29)
 
 ### Feature
