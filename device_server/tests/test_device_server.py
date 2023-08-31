@@ -593,3 +593,13 @@ def test_stage_device(device_server_mock, instr):
         if not hasattr(dev_man[dev].obj, "_staged"):
             continue
         assert device_server.device_manager.devices[dev].obj._staged == Staged.no
+
+
+def test_reload_action(device_server_mock):
+    device_server = device_server_mock
+    dm = device_server.device_manager
+    with mock.patch.object(dm.devices.samx.obj, "destroy") as obj_destroy:
+        with mock.patch.object(dm, "_get_config") as get_config:
+            dm._reload_action()
+            obj_destroy.assert_called_once()
+            get_config.assert_called_once()
