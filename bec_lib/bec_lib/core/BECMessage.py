@@ -923,3 +923,24 @@ class DAPConfigMessage(BECMessage):
         super().__init__(
             msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
         )
+
+
+class AvailableResourceMessage(BECMessage):
+    """Message for available resources such as scans, data processing plugins etc"""
+
+    msg_type = "available_resource_message"
+
+    def __init__(
+        self, *, resource: dict, metadata: dict = None, version: float = DEFAULT_VERSION
+    ) -> None:
+        """
+        Message for available resources such as scans, data processing plugins etc
+        Args:
+            ressource (dict): resource description
+            metadata (dict, optional): metadata. Defaults to None.
+        """
+
+        self.content = {"resource": resource}
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )

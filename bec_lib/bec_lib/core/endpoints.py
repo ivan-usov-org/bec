@@ -70,6 +70,7 @@ class MessageEndpoints:
     # data processing
     _processed_data = "public/processed_data"
     _dap_config = "internal/dap/config"
+    _avilable_dap_plugins = "internal/dap/available_plugins"
 
     ##########
 
@@ -654,3 +655,14 @@ class MessageEndpoints:
             str: Endpoint for DAP configuration.
         """
         return cls._dap_config
+
+    @classmethod
+    def dap_available_plugins(cls) -> str:
+        """
+        Endpoint for available DAP plugins. This endpoint is used to publish the available DAP
+        plugins using a BECMessage.AvailableResourceMessage message.
+
+        Returns:
+            str: Endpoint for available DAP plugins.
+        """
+        return cls._avilable_dap_plugins
