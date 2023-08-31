@@ -2,6 +2,19 @@
 
 <!--next-version-placeholder-->
 
+## v0.26.0 (2023-08-31)
+
+### Feature
+
+* Add new endpoint for async device readback ([`5535797`](https://gitlab.psi.ch/bec/bec/-/commit/5535797e1e25121d7a3997d78aa6c43eff17e086))
+
+### Fix
+
+* Fixed xadd for pipelines ([`d19fce7`](https://gitlab.psi.ch/bec/bec/-/commit/d19fce7d21a12eac2f8ac9b083fff464e5d0da9e))
+* Bugfix ([`57c989c`](https://gitlab.psi.ch/bec/bec/-/commit/57c989cfe204a657bcefac2364a6a0ad98a77ff1))
+* Adjust xadd to allow streams to expire ([`33fbded`](https://gitlab.psi.ch/bec/bec/-/commit/33fbdedd3eed52ded4eb53043bc7407997d51e4a))
+* Online changes ([`9b07e0f`](https://gitlab.psi.ch/bec/bec/-/commit/9b07e0f8a2d774a9a6a07ab9faa9167585532dcd))
+
 ## v0.25.0 (2023-08-31)
 
 ### Feature
