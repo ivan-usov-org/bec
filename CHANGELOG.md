@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.25.0 (2023-08-31)
+
+### Feature
+
+* Added support for startup scripts from plugins ([`d35caf5`](https://gitlab.psi.ch/bec/bec/-/commit/d35caf5ae40b5b46f3b2adad139cad66b3091857))
+
 ## v0.24.0 (2023-08-31)
 
 ### Feature
