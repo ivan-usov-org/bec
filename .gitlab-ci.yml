@@ -30,7 +30,6 @@ include:
 # different stages in the pipeline
 stages:
   - Formatter
-  - RepoUpdates
   - test # must be called test for security/secret-detection to work
   - AdditionalTests
   - End2End
@@ -79,41 +78,9 @@ pylint:
     expire_in: 1 week
 
 
-repo_update:
-  stage: RepoUpdates
-  needs: []
-  image: $CI_DOCKER_REGISTRY/docker:23-dind
-  allow_failure: true
-  services:
-    - name: docker:dind
-      entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
-  script:
-      # spin up redis, mongo and scibec
-      - docker-compose -f ./ci/docker-compose.yaml up -d
-      - apk update; apk upgrade; apk add curl; apk add git
-      - git config --global user.name "ci_update_bot"
-      - git config --global user.email "ci_update_bot@bec.ch"
-      
-      # check if ${CI_COMMIT_REF_NAME} is a branch or a tag
-      - if [[ -z $(git ls-remote --heads origin ${CI_COMMIT_REF_NAME}) ]]; then git switch --detach ${CI_COMMIT_REF_NAME}; else git switch ${CI_COMMIT_REF_NAME}; git reset --hard origin/${CI_COMMIT_REF_NAME}; fi
-      
-      # make sure that the API server is healthy and ready
-      - timeout 120 /bin/sh -c -- 'while true; do res=$(curl -X "GET" --max-time 3 "http://docker:3030/sessions"); if [ ! -z "$res" ]; then exit 0; fi; sleep 1; done;'      
-
-      - curl -X "GET" "http://docker:3030/api/v1/explorer/openapi.json" > ./scibec/openapi_schema.json
-
-      - git status -uno
-      - git add ./scibec/openapi_schema.json
-
-      # exit if there are no changes
-      - if [[ -z $(git status -uno --porcelain) ]]; then exit 0; fi
-      - git commit -m 'ci update'
-      - echo ${CI_COMMIT_REF_NAME}
-      - git push -o ci.skip https://oauth2:$CI_UPDATES@gitlab.psi.ch/bec/bec.git ${CI_COMMIT_REF_NAME}
-
 tests:
   stage: test
-  needs: ["repo_update"]
+  needs: []
   script:
     - git clone --branch $OPHYD_DEVICES_BRANCH https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
     - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices
