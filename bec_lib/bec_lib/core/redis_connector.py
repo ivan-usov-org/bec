@@ -412,6 +412,22 @@ class RedisProducer(ProducerConnector):
             self.stream_keys[topic] = msg[0][1][-1][0]
         return msg
 
+    @catch_connection_error
+    def xrange(self, topic: str, min: str, max: str, count: int = None, pipe=None):
+        """
+        read a range from stream
+
+        Args:
+            topic (str): redis topic
+            min (str): min id. Use "-" to read from start
+            max (str): max id. Use "+" to read to end
+            count (int, optional): number of messages to read. Defaults to None.
+            pipe (Pipeline, optional): redis pipe. Defaults to None.
+        """
+        client = pipe if pipe is not None else self.r
+        topic = trim_topic(topic, ":stream")
+        return client.xrange(f"{topic}:stream", min, max, count=count)
+
 
 class RedisConsumerMixin:
     def _init_topics_and_pattern(self, topics, pattern):
