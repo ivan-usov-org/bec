@@ -3,6 +3,7 @@ from __future__ import annotations
 import threading
 import traceback
 
+import numpy as np
 from bec_lib.core import (
     BECMessage,
     BECService,
@@ -34,7 +35,8 @@ class ScanStorage:
         self.scan_segments = {}
         self.scan_finished = False
         self.num_points = None
-        self.baseline = None
+        self.baseline = {}
+        self.async_data = {}
         self.metadata = {}
         self.file_references = {}
         self.start_time = None
@@ -204,6 +206,71 @@ class FileWriterManager(BECService):
             }
         return
 
+    def update_async_data(self, scanID: str) -> None:
+        """
+        Update the async data for the scan.
+        All async data is sent to the endpoint MessageEndpoints.device_async_readback(scanID, device_name)
+        before the scan finishes. This function retrieves the async data and adds them to the scan storage.
+
+        Args:
+            scanID (str): Scan ID
+        """
+
+        if not self.scan_storage.get(scanID):
+            return
+        # get all async devices
+        async_device_keys = self.producer.keys(MessageEndpoints.device_async_readback(scanID, "*"))
+        if not async_device_keys:
+            return
+        for device_key in async_device_keys:
+            key = device_key.decode()
+            device_name = key.split(MessageEndpoints.device_async_readback(scanID, ""))[-1].split(
+                ":"
+            )[0]
+            msgs = self.producer.xrange(key, min="-", max="+")
+            if not msgs:
+                continue
+            self._process_async_data(msgs, scanID, device_name)
+
+    def _process_async_data(self, msgs: list, scanID: str, device_name: str):
+        """
+        Process the async data for the scan and add it to the scan storage. If needed, concatenate the data.
+
+        Args:
+            msgs (list): List of async data messages
+            scanID (str): Scan ID
+            device_name (str): Device name
+        """
+        concat_type = None
+        data = []
+        for msg in msgs:
+            msg = BECMessage.DeviceMessage.loads(msg[1][b"data"])
+            if not concat_type:
+                concat_type = msg.metadata.get("async_update", "append")
+            data.append(msg.content["signals"])
+        if len(data) == 1:
+            self.scan_storage[scanID].async_data[device_name] = data[0]
+            return
+        if concat_type == "extend":
+            # concatenate the dictionaries
+            self.scan_storage[scanID].async_data[device_name] = {}
+            for key in data[0].keys():
+                self.scan_storage[scanID].async_data[device_name][key] = np.concatenate(
+                    [d[key] for d in data]
+                )
+        elif concat_type == "append":
+            # concatenate the lists
+            self.scan_storage[scanID].async_data[device_name] = {}
+            for key in data[0].keys():
+                self.scan_storage[scanID].async_data[device_name][key] = []
+                for d in data:
+                    self.scan_storage[scanID].async_data[device_name][key].append(d[key])
+        elif concat_type == "replace":
+            # replace the dictionaries
+            self.scan_storage[scanID].async_data[device_name] = {}
+            for key in data[0].keys():
+                self.scan_storage[scanID].async_data[device_name][key] = data[-1][key]
+
     @threadlocked
     def check_storage_status(self, scanID: str) -> None:
         """
@@ -217,6 +284,7 @@ class FileWriterManager(BECService):
         self.update_baseline_reading(scanID)
         self.update_file_references(scanID)
         if self.scan_storage[scanID].ready_to_write():
+            self.update_async_data(scanID)
             self.write_file(scanID)
 
     def write_file(self, scanID: str) -> None:

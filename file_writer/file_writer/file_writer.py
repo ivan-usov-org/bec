@@ -36,7 +36,10 @@ class FileWriter(abc.ABC):
     @staticmethod
     def _create_device_data_storage(data):
         device_storage = {}
-        device_storage.update(data.baseline)
+        if data.baseline:
+            device_storage.update(data.baseline)
+        if data.async_data:
+            device_storage.update(data.async_data)
         for point in range(data.num_points):
             for dev in data.scan_segments[point]:
                 if dev not in device_storage:

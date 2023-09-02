@@ -2,11 +2,9 @@ import ast
 import enum
 import time
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 
 import numpy as np
-from cytoolz import partition
-
 from bec_lib.core import BECMessage, DeviceManagerBase, MessageEndpoints, bec_logger
 
 from .errors import LimitError, ScanAbortion
@@ -42,7 +40,7 @@ def unpack_scan_args(scan_args: Dict[str, Any]) -> list:
     if not scan_args:
         return args
     if not isinstance(scan_args, dict):
-        return args
+        return scan_args
     for cmd_name, cmd_args in scan_args.items():
         args.append(cmd_name)
         args.extend(cmd_args)
@@ -1268,6 +1266,7 @@ class Acquire(ScanBase):
         yield from self.stubs.read(
             group="primary", wait_group="readout_primary", pointID=self.pointID
         )
+        self.pointID += 1
 
     def scan_core(self):
         for self.burst_index in range(self.burst_at_each_point):

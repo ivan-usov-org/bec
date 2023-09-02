@@ -965,6 +965,8 @@ def test_open_scan(instr, corr_num_points, scan_id):
                         worker.current_instruction_queue_item.parent.queue_manager,
                         "send_queue_status",
                     ) as queue_status_mock:
+                        active_rb = queue_mock.active_request_block
+                        active_rb.scan_report_instructions = []
                         worker._open_scan(instr)
 
                         if not scan_id:
@@ -976,10 +978,10 @@ def test_open_scan(instr, corr_num_points, scan_id):
                         else:
                             assert worker.scan_id == 111
                             assert worker.scan_motors == ["bpm4i"]
-                        init_mock.assert_called_once_with(
-                            queue_mock.active_request_block, instr, corr_num_points
-                        )
-                        instr_append_mock.assert_called_once_with({"table_wait": corr_num_points})
+                        init_mock.assert_called_once_with(active_rb, instr, corr_num_points)
+                        assert active_rb.scan_report_instructions == [
+                            {"table_wait": corr_num_points}
+                        ]
                         queue_status_mock.assert_called_once()
                         send_mock.assert_called_once_with("open")
 
