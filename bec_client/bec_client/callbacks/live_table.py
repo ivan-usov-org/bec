@@ -38,6 +38,7 @@ class LiveUpdatesTable(LiveUpdatesBase):
     """
 
     MAX_DEVICES = 10
+    REPORT_TYPE = "table_wait"
 
     def __init__(
         self,
@@ -45,7 +46,7 @@ class LiveUpdatesTable(LiveUpdatesBase):
         report_instruction: dict = None,
         request: BECMessage.ScanQueueMessage = None,
         callbacks: List[Callable] = None,
-        print_table_data=True,
+        print_table_data=None,
     ) -> None:
         super().__init__(
             bec, report_instruction=report_instruction, request=request, callbacks=callbacks
@@ -56,7 +57,9 @@ class LiveUpdatesTable(LiveUpdatesBase):
         self.point_data = None
         self.point_id = 0
         self.table = None
-        self._print_table_data = print_table_data
+        self._print_table_data = (
+            print_table_data if print_table_data is not None else self.REPORT_TYPE == "table_wait"
+        )
 
     async def wait_for_scan_to_start(self):
         """wait until the scan starts"""
@@ -159,9 +162,9 @@ class LiveUpdatesTable(LiveUpdatesBase):
                 break
             self.check_alarms()
 
-        await self._run_table_update(self.report_instruction["table_wait"])
+        await self._run_update(self.report_instruction[self.REPORT_TYPE])
 
-    async def _run_table_update(self, target_num_points):
+    async def _run_update(self, target_num_points):
         with ScanProgressBar(
             scan_number=self.scan_item.scan_number, clear_on_exit=self._print_table_data
         ) as progressbar:
@@ -267,4 +270,5 @@ class LiveUpdatesTable(LiveUpdatesBase):
             return
         await self.process_request()
         await self.wait_for_scan_item_to_finish()
-        self.close_table()
+        if self._print_table_data:
+            self.close_table()
