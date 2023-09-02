@@ -25,7 +25,12 @@ class BECIPythonClient(BECClient):
     def __repr__(self) -> str:
         return "BECClient\n\nTo get a list of available commands, type `bec.show_all_commands()`"
 
-    def initialize(self, config: ServiceConfig, connector_cls: ConnectorBase, wait_for_server=True):
+    def initialize(
+        self,
+        config: ServiceConfig = None,
+        connector_cls: ConnectorBase = None,
+        wait_for_server=True,
+    ):
         """initialize the BEC client"""
         super().initialize(config, connector_cls, wait_for_server=wait_for_server)
         # pylint: disable=attribute-defined-outside-init
