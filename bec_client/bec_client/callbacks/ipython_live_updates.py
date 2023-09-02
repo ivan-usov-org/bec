@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from bec_lib.core import bec_logger
 from bec_lib.core.bec_errors import ScanInterruption
 
-from bec_client.callbacks.scan_progess import LiveUpdatesScanProgress
+from bec_client.callbacks.scan_progress import LiveUpdatesScanProgress
 
 from .live_table import LiveUpdatesTable
 from .move_device import LiveUpdatesReadbackProgressbar
