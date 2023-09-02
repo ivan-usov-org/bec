@@ -8,6 +8,8 @@ from typing import TYPE_CHECKING
 from bec_lib.core import bec_logger
 from bec_lib.core.bec_errors import ScanInterruption
 
+from bec_client.callbacks.scan_progess import LiveUpdatesScanProgress
+
 from .live_table import LiveUpdatesTable
 from .move_device import LiveUpdatesReadbackProgressbar
 from .utils import ScanRequestMixin, check_alarms
@@ -75,6 +77,17 @@ class IPythonLiveUpdates:
                         print_table_data=self.print_table_data,
                     ).run()
                 )
+            elif scan_report_type == "scan_progress":
+                asyncio.run(
+                    LiveUpdatesScanProgress(
+                        self.client,
+                        report_instruction=instr,
+                        request=self._active_request,
+                        callbacks=self._user_callback,
+                    ).run()
+                )
+            else:
+                raise ValueError(f"Unknown scan report type: {scan_report_type}")
         else:
             if self._active_callback:
                 if scan_report_type == "readback":
