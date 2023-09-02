@@ -2,6 +2,19 @@
 
 <!--next-version-placeholder-->
 
+## v0.28.0 (2023-09-02)
+
+### Feature
+
+* Added progress bar based on async devices ([`11e5f96`](https://gitlab.psi.ch/bec/bec/-/commit/11e5f96b7575e0a811f45914e99ada6d2c449648))
+* Added scan progress ([`9f6a044`](https://gitlab.psi.ch/bec/bec/-/commit/9f6a044fe316c804e2e4dfc34435c9eb71cd109b))
+* Added xrange ([`f4f38d6`](https://gitlab.psi.ch/bec/bec/-/commit/f4f38d6deab2026177126e58cf1eac20490d9942))
+
+### Fix
+
+* Fixed scan_progress import ([`5eda477`](https://gitlab.psi.ch/bec/bec/-/commit/5eda477723d4dfc0387e0293713ef8e197a58f53))
+* Ipython client should use default service config ([`9b89aec`](https://gitlab.psi.ch/bec/bec/-/commit/9b89aecfdc0449a9d40aae642dccf2408989c6d1))
+
 ## v0.27.0 (2023-08-31)
 
 ### Feature
