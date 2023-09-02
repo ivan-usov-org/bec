@@ -489,6 +489,21 @@ def test_redis_connector_xread_from_new_topic(producer):
     producer.r.xread.assert_called_once_with({"topic:stream": "0-0"}, count=None, block=None)
 
 
+def test_redis_connector_get_last(producer):
+    producer.get_last("topic")
+    producer.r.xrevrange.assert_called_once_with("topic:stream", "+", "-", count=1)
+
+
+def test_redis_xrange(producer):
+    producer.xrange("topic", "start", "end")
+    producer.r.xrange.assert_called_once_with("topic:stream", "start", "end", count=None)
+
+
+def test_redis_xrange_topic_with_suffix(producer):
+    producer.xrange("topic:stream", "start", "end")
+    producer.r.xrange.assert_called_once_with("topic:stream", "start", "end", count=None)
+
+
 def test_redis_consumer_threaded_no_cb_without_messages(consumer_threaded):
     with mock.patch.object(consumer_threaded.pubsub, "get_message", return_value=None):
         consumer_threaded.cb = mock.MagicMock()
