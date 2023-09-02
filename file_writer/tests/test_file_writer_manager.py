@@ -186,3 +186,57 @@ def test_process_async_data_single_entry():
     assert np.isclose(
         file_manager.scan_storage["scanID"].async_data["dev1"]["data"], np.zeros((10, 10))
     ).all()
+
+
+def test_process_async_data_extend():
+    file_manager = load_FileWriter()
+    file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
+    data = [
+        (
+            b"0-0",
+            {
+                b"data": BECMessage.DeviceMessage(
+                    signals={"data": np.zeros((10, 10))}, metadata={"async_update": "extend"}
+                ).dumps()
+            },
+        )
+        for ii in range(10)
+    ]
+    file_manager._process_async_data(data, "scanID", "dev1")
+    assert file_manager.scan_storage["scanID"].async_data["dev1"]["data"].shape == (100, 10)
+
+
+def test_process_async_data_append():
+    file_manager = load_FileWriter()
+    file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
+    data = [
+        (
+            b"0-0",
+            {
+                b"data": BECMessage.DeviceMessage(
+                    signals={"data": np.zeros((10, 10))}, metadata={"async_update": "append"}
+                ).dumps()
+            },
+        )
+        for ii in range(10)
+    ]
+    file_manager._process_async_data(data, "scanID", "dev1")
+    assert len(file_manager.scan_storage["scanID"].async_data["dev1"]["data"]) == 10
+
+
+def test_process_async_data_replace():
+    file_manager = load_FileWriter()
+    file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
+    data = [
+        (
+            b"0-0",
+            {
+                b"data": BECMessage.DeviceMessage(
+                    signals={"data": np.zeros((10, 10))}, metadata={"async_update": "replace"}
+                ).dumps()
+            },
+        )
+        for ii in range(10)
+    ]
+    file_manager._process_async_data(data, "scanID", "dev1")
+    assert file_manager.scan_storage["scanID"].async_data["dev1"]["data"].shape == (10, 10)
