@@ -20,6 +20,12 @@ from ophyd.signal import EpicsSignalBase
 from device_server.devices.config_update_handler import ConfigUpdateHandler
 from device_server.devices.device_serializer import get_device_info
 
+try:
+    from bec_plugins import devices as plugin_devices
+except ImportError:
+    plugin_devices = None
+
+
 logger = bec_logger.logger
 
 
