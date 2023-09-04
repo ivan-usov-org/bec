@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.30.0 (2023-09-04)
+
+### Feature
+
+* Beamline check ([`cae5f61`](https://gitlab.psi.ch/bec/bec/-/commit/cae5f61924744d0358527b074958bdfe102bb2cd))
+* Added preliminary version of bl_checks ([`bfa1d67`](https://gitlab.psi.ch/bec/bec/-/commit/bfa1d678735cc8dcfb303446517254290c7c7921))
+
 ## v0.29.0 (2023-09-04)
 
 ### Feature
