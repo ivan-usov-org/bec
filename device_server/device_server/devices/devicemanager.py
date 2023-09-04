@@ -82,7 +82,9 @@ class DeviceManagerDS(DeviceManagerBase):
 
     def _get_device_class(self, dev_type):
         module = None
-        if hasattr(ophyd, dev_type):
+        if hasattr(plugin_devices, dev_type):
+            module = plugin_devices
+        elif hasattr(ophyd, dev_type):
             module = ophyd
         elif hasattr(opd, dev_type):
             module = opd
@@ -167,10 +169,13 @@ class DeviceManagerDS(DeviceManagerBase):
             device_classes.append(ophyd.Signal)
         if issubclass(dev_cls, EpicsSignalBase):
             device_classes.append(EpicsSignalBase)
+        if issubclass(dev_cls, ophyd.OphydObject):
+            device_classes.append(ophyd.OphydObject)
+
+        # get all init parameters of the device class and its parents
         class_params = set()
         for device_class in device_classes:
             class_params.update(inspect.signature(device_class)._parameters)
-
         class_params_and_config_keys = class_params & config.keys()
 
         init_kwargs = {key: config.pop(key) for key in class_params_and_config_keys}
@@ -183,7 +188,7 @@ class DeviceManagerDS(DeviceManagerBase):
             init_kwargs["device_manager"] = self
 
         # initialize the device object
-        obj = dev_cls(**init_kwargs, **config)
+        obj = dev_cls(**init_kwargs)
         self.update_config(obj, config)
 
         # refresh the device info
