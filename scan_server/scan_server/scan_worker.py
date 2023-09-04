@@ -257,9 +257,6 @@ class ScanWorker(threading.Thread):
         logger.debug("Finished waiting")
         logger.debug(datetime.datetime.now() - start)
 
-    # def _wait_for_trigger(self, instr: DeviceMsg) -> None:
-    #     time.sleep(float(instr.content["parameter"]["time"]))
-
     def _wait_for_stage(self, staged: bool, devices: list, metadata: dict) -> None:
         while True:
             stage_status = self._get_device_status(MessageEndpoints.device_staged, devices)
@@ -307,6 +304,7 @@ class ScanWorker(threading.Thread):
         )
 
     def _wait_for_trigger(self, instr: DeviceMsg) -> None:
+        time.sleep(float(instr.content["parameter"]["time"]))
         devices = [dev.name for dev in self.device_manager.devices.detectors()]
         metadata = self._last_trigger.metadata
         while True:
