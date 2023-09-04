@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.29.0 (2023-09-04)
+
+### Feature
+
+* Added bec_plugins as source for devices ([`bbcdbc0`](https://gitlab.psi.ch/bec/bec/-/commit/bbcdbc0123566f4bea811fb9c873e059b4eb4a7c))
+
+### Fix
+
+* Fixed signal init ([`41282e5`](https://gitlab.psi.ch/bec/bec/-/commit/41282e57678d6a39a1f40fdf828e2fdb2ddc0193))
+
 ## v0.28.0 (2023-09-02)
 
 ### Feature
