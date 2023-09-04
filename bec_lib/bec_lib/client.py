@@ -27,6 +27,7 @@ from bec_lib.devicemanager_client import DMClient
 from bec_lib.scan_manager import ScanManager
 from bec_lib.scans import Scans
 from bec_lib.user_scripts_mixin import UserScriptsMixin
+from bec_lib.bl_checks import BeamlineChecks
 
 logger = bec_logger.logger
 
@@ -81,6 +82,7 @@ class BECClient(BECService, UserScriptsMixin):
         self.callbacks = CallbackHandler()
         self.live_updates = None
         self.dap = None
+        self.bl_checks = None
 
     @property
     def username(self) -> str:
@@ -109,6 +111,8 @@ class BECClient(BECService, UserScriptsMixin):
         self.config = ConfigHelper(self.connector)
         self.history = self.queue.queue_storage.storage
         self.dap = BECWorkerManager(self.connector)
+        self.bl_checks = BeamlineChecks(self)
+        self.bl_checks.start()
 
     def alarms(self, severity=Alarms.WARNING):
         """get the next alarm with at least the specified severity"""
