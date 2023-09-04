@@ -313,7 +313,9 @@ class DeviceServer(BECService):
         for dev in devices:
             obj = self.device_manager.devices.get(dev)
             obj.metadata = instr.metadata
-            obj.obj.trigger()
+            status = obj.obj.trigger()
+            status.__dict__["instruction"] = instr
+            status.add_callback(self._status_callback)
 
     def _kickoff_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
         logger.debug(f"Kickoff device: {instr}")

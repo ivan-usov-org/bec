@@ -47,6 +47,7 @@ class ScanWorker(threading.Thread):
         self.max_point_id = 0
         self._exposure_time = None
         self.current_instruction_queue_item = None
+        self._last_trigger = {}
         self.reset()
 
     @property
@@ -256,8 +257,8 @@ class ScanWorker(threading.Thread):
         logger.debug("Finished waiting")
         logger.debug(datetime.datetime.now() - start)
 
-    def _wait_for_trigger(self, instr: DeviceMsg) -> None:
-        time.sleep(float(instr.content["parameter"]["time"]))
+    # def _wait_for_trigger(self, instr: DeviceMsg) -> None:
+    #     time.sleep(float(instr.content["parameter"]["time"]))
 
     def _wait_for_stage(self, staged: bool, devices: list, metadata: dict) -> None:
         while True:
@@ -294,6 +295,7 @@ class ScanWorker(threading.Thread):
 
     def _trigger_devices(self, instr: DeviceMsg) -> None:
         devices = [dev.name for dev in self.device_manager.devices.detectors()]
+        self._last_trigger = instr
         self.device_manager.producer.send(
             MessageEndpoints.device_instructions(),
             DeviceMsg(
@@ -303,6 +305,28 @@ class ScanWorker(threading.Thread):
                 metadata=instr.metadata,
             ).dumps(),
         )
+
+    def _wait_for_trigger(self, instr: DeviceMsg) -> None:
+        devices = [dev.name for dev in self.device_manager.devices.detectors()]
+        metadata = self._last_trigger.metadata
+        while True:
+            stage_status = self._get_device_status(MessageEndpoints.device_req_status, devices)
+            self._check_for_interruption()
+            device_status = [BECMessage.DeviceReqStatusMessage.loads(dev) for dev in stage_status]
+
+            if None in device_status:
+                continue
+            devices_are_ready = all(
+                bool(dev.content.get("success")) is True for dev in device_status
+            )
+            matching_scanID = all(
+                dev.metadata.get("scanID") == metadata["scanID"] for dev in device_status
+            )
+            matching_DIID = all(
+                dev.metadata.get("DIID") == metadata["DIID"] for dev in device_status
+            )
+            if devices_are_ready and matching_scanID and matching_DIID:
+                break
 
     def _send_rpc(self, instr: DeviceMsg) -> None:
         self.device_manager.producer.send(MessageEndpoints.device_instructions(), instr.dumps())
