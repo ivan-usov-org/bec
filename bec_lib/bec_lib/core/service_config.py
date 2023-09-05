@@ -1,8 +1,14 @@
 import json
+import os
 
 import yaml
 
 from .logger import bec_logger
+
+try:
+    from bec_plugins.utils import load_service_config as plugin_load_service_config
+except ImportError:
+    plugin_load_service_config = None
 
 logger = bec_logger.logger
 
@@ -46,14 +52,28 @@ class ServiceConfig:
             self.config[key] = val
 
     def _load_config(self):
+        if self.config_path:
+            with open(self.config_path, "r") as stream:
+                self.config = yaml.safe_load(stream)
+                logger.info(
+                    f"Loaded new config from disk: {json.dumps(self.config, sort_keys=True, indent=4)}"
+                )
+            return
+        if os.environ.get("BEC_SERVICE_CONFIG"):
+            self.config = json.loads(os.environ.get("BEC_SERVICE_CONFIG"))
+            logger.info(
+                f"Loaded new config from environment: {json.dumps(self.config, sort_keys=True, indent=4)}"
+            )
+            return
+        if plugin_load_service_config:
+            self.config = plugin_load_service_config()
+            logger.info(
+                f"Loaded new config from plugin: {json.dumps(self.config, sort_keys=True, indent=4)}"
+            )
+            return
         if not self.config_path:
             self.config = DEFAULT_SERVICE_CONFIG
             return
-        with open(self.config_path, "r") as stream:
-            self.config = yaml.safe_load(stream)
-            logger.info(
-                f"Loaded new config from disk: {json.dumps(self.config, sort_keys=True, indent=4)}"
-            )
 
     def _load_urls(self, entry: str, required: bool = True):
         config = self.config.get(entry)
