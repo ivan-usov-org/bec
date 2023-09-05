@@ -62,6 +62,8 @@ def NeXus_format(
     # /entry/data
     if "eiger_4" in device_manager.devices:
         entry.create_soft_link(name="data", target="/entry/instrument/eiger_4")
+    elif "eiger9m" in device_manager.devices:
+        entry.create_soft_link(name="data", target="/entry/instrument/eiger9m")
 
     # /entry/sample
     control = entry.create_group("sample")
@@ -371,5 +373,36 @@ def NeXus_format(
         ] = "Orientation defines the number of counterclockwise rotations by 90 deg followed by a transposition to reach the 'cameraman orientation', that is looking towards the beam."
         orientation.create_dataset(name="transpose", data=1)
         orientation.create_dataset(name="rot90", data=3)
+
+    if (
+        "eiger9m" in device_manager.devices
+        and device_manager.devices.eiger9m.enabled
+        and "eiger9m" in file_references
+    ):
+        eiger9m = instrument.create_group("eiger9m")
+        eiger9m.attrs["NX_class"] = "NXdetector"
+        x_pixel_size = eiger9m.create_dataset(name="x_pixel_size", data=75)
+        x_pixel_size.attrs["units"] = "um"
+        y_pixel_size = eiger9m.create_dataset(name="y_pixel_size", data=75)
+        y_pixel_size.attrs["units"] = "um"
+        polar_angle = eiger9m.create_dataset(name="polar_angle", data=0)
+        polar_angle.attrs["units"] = "degrees"
+        azimuthal_angle = eiger9m.create_dataset(name="azimuthal_angle", data=0)
+        azimuthal_angle.attrs["units"] = "degrees"
+        rotation_angle = eiger9m.create_dataset(name="rotation_angle", data=0)
+        rotation_angle.attrs["units"] = "degrees"
+        description = eiger9m.create_dataset(
+            name="description", data="Eiger9M detector, in-house developed, Paul Scherrer Institute"
+        )
+        orientation = eiger9m.create_group("orientation")
+        orientation.attrs[
+            "description"
+        ] = "Orientation defines the number of counterclockwise rotations by 90 deg followed by a transposition to reach the 'cameraman orientation', that is looking towards the beam."
+        orientation.create_dataset(name="transpose", data=1)
+        orientation.create_dataset(name="rot90", data=3)
+        data = eiger9m.create_ext_link("data", file_references["eiger9m"]["path"], "EG9M/data")
+        status = eiger9m.create_ext_link(
+            "status", file_references["eiger9m"]["path"], "EG9M/status"
+        )
 
     return storage
