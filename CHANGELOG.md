@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.31.0 (2023-09-05)
+
+### Feature
+
+* Added support for loading the service config from plugins ([`f3d3679`](https://gitlab.psi.ch/bec/bec/-/commit/f3d3679e216492d8dfaf35ff00f75520652863fc))
+
 ## v0.30.1 (2023-09-05)
 
 ### Fix
