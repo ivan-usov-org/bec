@@ -573,7 +573,7 @@ def test_wait_for_read(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
             BECMessage.DeviceInstructionMessage(
                 device=None,
                 action="set",
-                parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
+                parameter={"value": 10, "wait_group": "scan_motor", "time": 0.1},
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 3,
@@ -591,6 +591,18 @@ def test_wait_for_trigger(instr):
     with mock.patch("time.sleep", return_value=None) as patched_time_sleep:
         with mock.patch.object(worker, "_get_device_status") as status_mock:
             with mock.patch.object(worker, "_check_for_interruption") as interruption_mock:
+                status_mock.return_value = [
+                    BECMessage.DeviceReqStatusMessage(
+                        device="eiger",
+                        success=True,
+                        metadata={
+                            "readout_priority": "monitored",
+                            "DIID": 3,
+                            "scanID": "scanID",
+                            "RID": "requestID",
+                        },
+                    ).dumps(),
+                ]
                 worker._wait_for_trigger(instr)
                 status_mock.assert_called_once_with(MessageEndpoints.device_req_status, ["eiger"])
                 patched_time_sleep.assert_called_once_with(instr.content["parameter"]["time"])
