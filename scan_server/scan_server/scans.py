@@ -333,6 +333,7 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         settling_time: float = 0,
         relative: bool = False,
         burst_at_each_point: int = 1,
+        frames_per_trigger: int = 1,
         optim_trajectory: str = None,
         metadata: dict = None,
         **kwargs,
@@ -348,6 +349,7 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         self.settling_time = settling_time
         self.relative = relative
         self.burst_at_each_point = burst_at_each_point
+        self.frames_per_trigger = frames_per_trigger
         self.optim_trajectory = optim_trajectory
         self.burst_index = 0
 
