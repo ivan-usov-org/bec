@@ -43,6 +43,7 @@ class MessageEndpoints:
     _public_scan_segment = Template("public/$scanID/scan_segment/$pointID")
     _public_scan_baseline = Template("public/$scanID/scan_baseline")
     _public_file = Template("public/$scanID/file/$name")
+    _file_event = "public/file_event"
 
     # instructions
     _device_instructions = "internal/devices/instructions"
@@ -551,6 +552,20 @@ class MessageEndpoints:
             str: Endpoint for public files.
         """
         return cls._public_file.substitute(scanID=scanID, name=name)
+
+    @classmethod
+    def file_event(cls, name: str) -> str:
+        """
+        Endpoint for public file_event. This endpoint is used by the file writer to publish the
+        status of the file writing using a BECMessage.FileMessage message.
+
+        Args:
+            name (str): File name.
+
+        Returns:
+            str: Endpoint for public file_events.
+        """
+        return f"{cls._file_event}/{name}"
 
     # log
     @classmethod
