@@ -19,6 +19,9 @@ def get_entry(data: dict, name: str, default=None) -> Any:
         name (str): Entry name
         default (Any, optional): Default value. Defaults to None.
     """
+    if isinstance(data.get(name), list) and isinstance(data.get(name)[0], dict):
+        return [sub_data.get(name, {}).get("value", default) for sub_data in data.get(name)]
+
     return data.get(name, {}).get(name, {}).get("value", default)
 
 
