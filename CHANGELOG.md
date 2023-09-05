@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.30.1 (2023-09-05)
+
+### Fix
+
+* Added sleep before polling for status ([`c8acaa4`](https://gitlab.psi.ch/bec/bec/-/commit/c8acaa4b71504a8b34c9f05f4ef6af5ab444a424))
+* Removed hard-coded trigger wait; waiting for status instead ([`086c863`](https://gitlab.psi.ch/bec/bec/-/commit/086c8634e30baf4ae1b74ae61bd3f8070c69d320))
+
 ## v0.30.0 (2023-09-04)
 
 ### Feature
