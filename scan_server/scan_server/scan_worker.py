@@ -515,6 +515,7 @@ class ScanWorker(threading.Thread):
                 "scan_number": self.parent.scan_number,
                 "dataset_number": self.parent.dataset_number,
                 "exp_time": self._exposure_time,
+                "frames_per_trigger": active_rb.scan.frames_per_trigger,
                 "settling_time": active_rb.scan.settling_time,
                 "readout_time": active_rb.scan.readout_time,
                 "acquisition_config": active_rb.scan.acquisition_config,
