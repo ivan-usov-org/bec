@@ -945,6 +945,7 @@ class RoundScanFlySim(ScanBase):
     scan_name = "round_scan_fly"
     scan_report_hint = "table"
     scan_type = "fly"
+    pre_move = False
     required_kwargs = ["relative"]
     arg_input = [
         ScanArgType.DEVICE,
