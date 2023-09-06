@@ -176,6 +176,8 @@ class DeviceServer(BECService):
                 self._stage_device(instructions)
             elif action == "unstage":
                 self._unstage_device(instructions)
+            elif action == "pre_scan":
+                self._pre_scan(instructions)
             else:
                 logger.warning(f"Received unknown device instruction: {instructions}")
         except ophyd_errors.LimitError as limit_error:
@@ -349,6 +351,24 @@ class DeviceServer(BECService):
         status = obj.set(val)
         status.__dict__["instruction"] = instr
         status.add_callback(self._status_callback)
+
+    def _pre_scan(self, instr: BECMessage.DeviceInstructionMessage) -> None:
+        devices = instr.content["device"]
+        if not isinstance(devices, list):
+            devices = [devices]
+        pipe = self.producer.pipeline()
+        for dev in devices:
+            obj = self.device_manager.devices.get(dev)
+            obj.metadata = instr.metadata
+            if hasattr(obj.obj, "pre_scan"):
+                obj.obj.pre_scan()
+            dev_msg = BECMessage.DeviceReqStatusMessage(
+                device=dev,
+                success=True,
+                metadata=instr.metadata,
+            ).dumps()
+            self.producer.set_and_publish(MessageEndpoints.device_req_status(dev), dev_msg, pipe)
+        pipe.execute()
 
     def _status_callback(self, status):
         pipe = self.producer.pipeline()

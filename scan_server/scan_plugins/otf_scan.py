@@ -1,8 +1,8 @@
 import time
 
 import numpy as np
-
 from bec_lib.core import bec_logger
+
 from scan_server.scans import FlyScanBase, ScanArgType, ScanBase
 
 logger = bec_logger.logger
@@ -28,6 +28,9 @@ class OTFScan(FlyScanBase):
         self.num_pos = 0
         self.mono = self.caller_kwargs.get("mono", "mono")
         self.otf_device = self.caller_kwargs.get("otf", "otf")
+
+    def pre_scan(self):
+        yield None
 
     def scan_core(self):
         yield from self.stubs.set(

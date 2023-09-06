@@ -321,6 +321,7 @@ class ScanBase(RequestBase, PathOptimizerMixin):
     arg_bundle_size = len(arg_input)
     required_kwargs = ["required"]
     return_to_start_after_abort = True
+    pre_move = True
 
     def __init__(
         self,
@@ -476,6 +477,15 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         for ind, pos in enumerate(self.positions):
             yield (ind, pos)
 
+    def pre_scan(self):
+        """
+        pre scan procedure. This method is called before the scan_core method and can be used to
+        perform additional tasks before the scan is started. This
+        """
+        if self.pre_move and len(self.positions) > 0:
+            yield from self._move_and_wait(self.positions[0])
+        yield from self.stubs.pre_scan()
+
     def run(self):
         """run the scan. This method is called by the scan server and is the main entry point for the scan."""
         self.initialize()
@@ -484,6 +494,7 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         yield from self.open_scan()
         yield from self.stage()
         yield from self.run_baseline_reading()
+        yield from self.pre_scan()
         yield from self.scan_core()
         yield from self.finalize()
         yield from self.unstage()

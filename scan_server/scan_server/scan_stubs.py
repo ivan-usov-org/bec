@@ -235,6 +235,10 @@ class ScanStubs:
         """Unstage all devices"""
         yield self._device_msg(device=None, action="unstage", parameter={})
 
+    def pre_scan(self):
+        """Trigger pre-scan actions on all devices"""
+        yield self._device_msg(device=None, action="pre_scan", parameter={})
+
     def baseline_reading(self):
         """Run the baseline readings."""
         yield self._device_msg(

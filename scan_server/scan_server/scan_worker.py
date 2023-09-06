@@ -326,6 +326,41 @@ class ScanWorker(threading.Thread):
             if devices_are_ready and matching_scanID and matching_DIID:
                 break
 
+    def _pre_scan(self, instr: DeviceMsg) -> None:
+        devices = [dev.name for dev in self.device_manager.devices.enabled_devices]
+        self.device_manager.producer.send(
+            MessageEndpoints.device_instructions(),
+            DeviceMsg(
+                device=devices,
+                action="pre_scan",
+                parameter=instr.content["parameter"],
+                metadata=instr.metadata,
+            ).dumps(),
+        )
+        self._wait_for_pre_scan(instr)
+
+    def _wait_for_pre_scan(self, instr: DeviceMsg) -> None:
+        devices = [dev.name for dev in self.device_manager.devices.enabled_devices]
+        metadata = instr.metadata
+        while True:
+            stage_status = self._get_device_status(MessageEndpoints.device_req_status, devices)
+            self._check_for_interruption()
+            device_status = [BECMessage.DeviceReqStatusMessage.loads(dev) for dev in stage_status]
+
+            if None in device_status:
+                continue
+            devices_are_ready = all(
+                bool(dev.content.get("success")) is True for dev in device_status
+            )
+            matching_scanID = all(
+                dev.metadata.get("scanID") == metadata["scanID"] for dev in device_status
+            )
+            matching_DIID = all(
+                dev.metadata.get("DIID") == metadata["DIID"] for dev in device_status
+            )
+            if devices_are_ready and matching_scanID and matching_DIID:
+                break
+
     def _send_rpc(self, instr: DeviceMsg) -> None:
         self.device_manager.producer.send(MessageEndpoints.device_instructions(), instr.dumps())
 
@@ -661,6 +696,8 @@ class ScanWorker(threading.Thread):
             self._stage_devices(instr)
         elif action == "unstage":
             self._unstage_devices(instr)
+        elif action == "pre_scan":
+            self._pre_scan(instr)
         elif action == "publish_data_as_read":
             self._publish_data_as_read(instr)
         elif action == "scan_report_instruction":
