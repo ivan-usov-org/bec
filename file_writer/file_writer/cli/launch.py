@@ -21,7 +21,7 @@ def main():
     )
     clargs = parser.parse_args()
     config_path = clargs.config
-    config_path = "/sls/X12SA/data/gac-x12saop/bec/config/bec_service_config.yaml"
+    # config_path = "/sls/X12SA/data/gac-x12saop/bec/config/bec_service_config.yaml"
 
     config = ServiceConfig(config_path)
 

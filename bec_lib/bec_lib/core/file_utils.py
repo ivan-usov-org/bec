@@ -22,7 +22,7 @@ class FileWriterMixin:
             raise ServiceConfigError("File writer config must define a base path.")
         return os.path.abspath(os.path.expanduser(service_config.get("base_path")))
 
-    def _get_scan_directory(self, scan_bundle: int, scan_number: int, leading_zeros: int = None):
+    def get_scan_directory(self, scan_number: int, scan_bundle: int, leading_zeros: int = None):
         """
         Get the scan directory for a given scan number and scan bundle.
 
@@ -46,7 +46,12 @@ class FileWriterMixin:
         return f"S{floor_dir:0{leading_zeros}d}-{floor_dir+scan_bundle-1:0{leading_zeros}d}/S{scan_number:0{leading_zeros}d}"
 
     def compile_full_filename(
-        self, scan_number: int, suffix: str, scan_bundle=1000, leading_zeros=5, create_dir=True
+        self,
+        scan_number: int,
+        suffix: str,
+        scan_bundle=1000,
+        leading_zeros=5,
+        create_dir=True,
     ) -> str:
         """
         Compile a full filename for a given scan number and suffix.
@@ -61,9 +66,12 @@ class FileWriterMixin:
         Returns:
             str: Full filename
         """
-        scan_dir = self._get_scan_directory(scan_bundle, scan_number, leading_zeros)
+        scan_dir = self.get_scan_directory(scan_number, scan_bundle, leading_zeros)
         full_file = os.path.join(
-            self._base_path, "data", scan_dir, f"S{scan_number:0{leading_zeros}d}_{suffix}"
+            self._base_path,
+            "data",
+            scan_dir,
+            f"S{scan_number:0{leading_zeros}d}_{suffix}",
         )
         if create_dir:
             os.makedirs(os.path.dirname(full_file), exist_ok=True)
