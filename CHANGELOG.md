@@ -2,6 +2,21 @@
 
 <!--next-version-placeholder-->
 
+## v0.32.0 (2023-09-06)
+
+### Feature
+
+* Added pre_scan ([`7f23482`](https://gitlab.psi.ch/bec/bec/-/commit/7f23482b5cf273f06776e497783f44361a2cb58f))
+
+### Fix
+
+* Removed pre move from fly scan ([`ed095b0`](https://gitlab.psi.ch/bec/bec/-/commit/ed095b00cbebc50ebecaabc696b8aaf4a728270d))
+* Removed pre move from fly scan ([`f8ad2f8`](https://gitlab.psi.ch/bec/bec/-/commit/f8ad2f8a2781fa38000c29b39772132eaa63e4ce))
+
+### Documentation
+
+* Added premove and enforce_sync doc ([`fd38985`](https://gitlab.psi.ch/bec/bec/-/commit/fd38985767ead15678f45ac60d0ee59bb8ee8df6))
+
 ## v0.31.0 (2023-09-05)
 
 ### Feature
