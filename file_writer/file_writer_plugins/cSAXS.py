@@ -63,10 +63,14 @@ def NeXus_format(
     control.create_dataset(name="integral", data=get_entry(data, "bpm4i"))
 
     # /entry/data
+    main_data = entry.create_group("data")
+    main_data.attrs["NX_class"] = "NXdata"
     if "eiger_4" in device_manager.devices:
-        entry.create_soft_link(name="data", target="/entry/instrument/eiger_4")
+        main_data.create_soft_link(name="data", target="/entry/instrument/eiger_4/data")
     elif "eiger9m" in device_manager.devices:
-        entry.create_soft_link(name="data", target="/entry/instrument/eiger9m")
+        main_data.create_soft_link(name="data", target="/entry/instrument/eiger9m/data")
+    elif "pilatus_2" in device_manager.devices:
+        main_data.create_soft_link(name="data", target="/entry/instrument/pilatus_2/data")
 
     # /entry/sample
     control = entry.create_group("sample")
@@ -368,7 +372,8 @@ def NeXus_format(
         rotation_angle = eiger_4.create_dataset(name="rotation_angle", data=0)
         rotation_angle.attrs["units"] = "degrees"
         description = eiger_4.create_dataset(
-            name="description", data="Single-photon counting detector, 320 micron-thick Si chip"
+            name="description",
+            data="Single-photon counting detector, 320 micron-thick Si chip",
         )
         orientation = eiger_4.create_group("orientation")
         orientation.attrs[
@@ -395,7 +400,8 @@ def NeXus_format(
         rotation_angle = eiger9m.create_dataset(name="rotation_angle", data=0)
         rotation_angle.attrs["units"] = "degrees"
         description = eiger9m.create_dataset(
-            name="description", data="Eiger9M detector, in-house developed, Paul Scherrer Institute"
+            name="description",
+            data="Eiger9M detector, in-house developed, Paul Scherrer Institute",
         )
         orientation = eiger9m.create_group("orientation")
         orientation.attrs[
@@ -406,6 +412,38 @@ def NeXus_format(
         data = eiger9m.create_ext_link("data", file_references["eiger9m"]["path"], "EG9M/data")
         status = eiger9m.create_ext_link(
             "status", file_references["eiger9m"]["path"], "EG9M/status"
+        )
+
+    if (
+        "pilatus_2" in device_manager.devices
+        and device_manager.devices.pilatus_2.enabled
+        and "pilatus_2" in file_references
+    ):
+        pilatus_2 = instrument.create_group("pilatus_2")
+        pilatus_2.attrs["NX_class"] = "NXdetector"
+        x_pixel_size = pilatus_2.create_dataset(name="x_pixel_size", data=172)
+        x_pixel_size.attrs["units"] = "um"
+        y_pixel_size = pilatus_2.create_dataset(name="y_pixel_size", data=172)
+        y_pixel_size.attrs["units"] = "um"
+        polar_angle = pilatus_2.create_dataset(name="polar_angle", data=0)
+        polar_angle.attrs["units"] = "degrees"
+        azimuthal_angle = pilatus_2.create_dataset(name="azimuthal_angle", data=0)
+        azimuthal_angle.attrs["units"] = "degrees"
+        rotation_angle = pilatus_2.create_dataset(name="rotation_angle", data=0)
+        rotation_angle.attrs["units"] = "degrees"
+        description = pilatus_2.create_dataset(
+            name="description", data="Pilatus 300K detector, Dectris, Switzerland"
+        )
+        orientation = pilatus_2.create_group("orientation")
+        orientation.attrs[
+            "description"
+        ] = "Orientation defines the number of counterclockwise rotations by 90 deg followed by a transposition to reach the 'cameraman orientation', that is looking towards the beam."
+        orientation.create_dataset(name="transpose", data=1)
+        orientation.create_dataset(name="rot90", data=2)
+        data = pilatus_2.create_ext_link(
+            "data",
+            file_references["pilatus_2"]["path"],
+            "entry/instrument/pilatus_2/data",
         )
 
     return storage
