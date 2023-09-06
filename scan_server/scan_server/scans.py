@@ -508,6 +508,7 @@ class ScanBase(RequestBase, PathOptimizerMixin):
 
 class FlyScanBase(ScanBase):
     scan_type = "fly"
+    pre_move = False
 
     def _get_flyer_status(self) -> List:
         flyer = self.scan_motors[0]
