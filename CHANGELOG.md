@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.34.0 (2023-09-07)
+
+### Feature
+
+* Added progress endpoint and message ([`ad60b78`](https://gitlab.psi.ch/bec/bec/-/commit/ad60b7821a1de36645e2c70023ea73bb7d141e39))
+
+### Fix
+
+* Added missing primary readings to sgalil grid ([`e52390a`](https://gitlab.psi.ch/bec/bec/-/commit/e52390a2269370f6806f93896234bc076a0731f4))
+
 ## v0.33.0 (2023-09-07)
 
 ### Feature
