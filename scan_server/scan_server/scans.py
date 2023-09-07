@@ -210,7 +210,8 @@ class RequestBase(ABC):
         if metadata is None:
             self.metadata = {}
         self.stubs = ScanStubs(
-            producer=self.device_manager.producer, device_msg_callback=self.device_msg_metadata
+            producer=self.device_manager.producer,
+            device_msg_callback=self.device_msg_metadata,
         )
 
     @property
@@ -346,7 +347,11 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         **kwargs,
     ):
         super().__init__(
-            *args, device_manager=device_manager, parameter=parameter, metadata=metadata, **kwargs
+            *args,
+            device_manager=device_manager,
+            parameter=parameter,
+            metadata=metadata,
+            **kwargs,
         )
         self.DIID = 0
         self.pointID = 0
@@ -369,7 +374,10 @@ class ScanBase(RequestBase, PathOptimizerMixin):
 
         if acquisition_config is None or "default" not in acquisition_config:
             self.acquisition_config = {
-                "default": {"exp_time": self.exp_time, "readout_time": self.readout_time}
+                "default": {
+                    "exp_time": self.exp_time,
+                    "readout_time": self.readout_time,
+                }
             }
 
     def read_scan_motors(self):
@@ -485,6 +493,9 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         for ind, pos in enumerate(self.positions):
             yield (ind, pos)
 
+    def scan_report_instructions(self):
+        yield None
+
     def pre_scan(self):
         """
         pre scan procedure. This method is called before the scan_core method and can be used to
@@ -499,6 +510,7 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         self.initialize()
         yield from self.read_scan_motors()
         yield from self.prepare_positions()
+        yield from self.scan_report_instructions()
         yield from self.open_scan()
         yield from self.stage()
         yield from self.run_baseline_reading()
@@ -1037,7 +1049,14 @@ class RoundROIScan(ScanBase):
     arg_bundle_size = len(arg_input)
 
     def __init__(
-        self, *args, dr=1, nth=5, exp_time=0, relative=False, burst_at_each_point=1, **kwargs
+        self,
+        *args,
+        dr=1,
+        nth=5,
+        exp_time=0,
+        relative=False,
+        burst_at_each_point=1,
+        **kwargs,
     ):
         """
         A scan following a round-roi-like pattern.

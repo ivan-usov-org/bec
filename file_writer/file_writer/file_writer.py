@@ -40,7 +40,9 @@ class FileWriter(abc.ABC):
             device_storage.update(data.baseline)
         if data.async_data:
             device_storage.update(data.async_data)
-        for point in range(data.num_points):
+        keys = list(data.scan_segments.keys())
+        keys.sort()
+        for point in keys:
             for dev in data.scan_segments[point]:
                 if dev not in device_storage:
                     device_storage[dev] = [data.scan_segments[point][dev]]

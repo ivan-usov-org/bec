@@ -41,6 +41,7 @@ class ScanStorage:
         self.file_references = {}
         self.start_time = None
         self.end_time = None
+        self.enforce_sync = True
 
     def append(self, pointID, data):
         """
@@ -56,7 +57,9 @@ class ScanStorage:
         """
         Check if the scan is ready to be written to file.
         """
-        return self.scan_finished and (self.num_points == len(self.scan_segments))
+        if self.enforce_sync:
+            return self.scan_finished and (self.num_points == len(self.scan_segments))
+        return self.scan_finished
 
 
 class FileWriterManager(BECService):
@@ -136,6 +139,7 @@ class FileWriterManager(BECService):
                 scan_storage.end_time = msg.content.get("timestamp")
             scan_storage.scan_finished = True
             scan_storage.num_points = msg.content["info"]["num_points"]
+            scan_storage.enforce_sync = msg.content["info"]["enforce_sync"]
             self.check_storage_status(scanID=scanID)
 
     def insert_to_scan_storage(self, msg: BECMessage.ScanMessage) -> None:

@@ -31,6 +31,7 @@ class SgalilGrid(FlyScanBase):
     required_kwargs = []
     arg_input = []
     arg_bundle_size = len(arg_input)
+    enforce_sync = False
 
     def __init__(
         self,
@@ -60,6 +61,7 @@ class SgalilGrid(FlyScanBase):
 
         """
         super().__init__(*args, **kwargs)
+        # TODO swap start_x and end_x & start_y and end_y to always scan in same direction
         self.start_y = start_y
         self.end_y = end_y
         self.interval_y = interval_y
@@ -69,12 +71,18 @@ class SgalilGrid(FlyScanBase):
         self.exp_time = exp_time
         self.readout_time = readout_time
         self.num_pos = int(interval_x * interval_y)
+        self.scan_motors = ["samx", "samy"]
 
     def scan_report_instructions(self):
         if not self.scan_report_hint:
             yield None
             return
-        yield from self.stubs.scan_report_instruction({"progress": ["async_dev1"]})
+        yield from self.stubs.scan_report_instruction({"scan_progress": ["mcs"]})
+
+    def pre_scan(self):
+        yield from self._move_and_wait([self.start_x, self.start_y])
+        yield from self.stubs.pre_scan()
+        # TODO move to start position
 
     def scan_core(self):
         """
@@ -111,7 +119,9 @@ class SgalilGrid(FlyScanBase):
         status_mcs_lines = yield from self.stubs.send_rpc_and_wait(
             "mcs", "num_lines.set", self.interval_x
         )
-
+        status_ddg_fsh_ttlwidth = yield from self.stubs.send_rpc_and_wait(
+            "ddg_mcs", "set_channels", "width", 0
+        )
         status_ddg_mcs_ttlwidth = yield from self.stubs.send_rpc_and_wait(
             "ddg_mcs", "set_channels", "width", 3e-3
         )

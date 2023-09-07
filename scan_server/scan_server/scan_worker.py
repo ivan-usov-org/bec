@@ -173,7 +173,8 @@ class ScanWorker(threading.Thread):
 
         while True:
             device_status = self._get_device_status(
-                MessageEndpoints.device_req_status, [dev for dev, _ in wait_group_devices]
+                MessageEndpoints.device_req_status,
+                [dev for dev, _ in wait_group_devices],
             )
             self._check_for_interruption()
 
@@ -521,6 +522,7 @@ class ScanWorker(threading.Thread):
                 "acquisition_config": active_rb.scan.acquisition_config,
                 "scan_report_hint": active_rb.scan.scan_report_hint,
                 "scan_report_devices": active_rb.scan.scan_report_devices,
+                "enforce_sync": active_rb.scan.enforce_sync,
                 "num_points": num_points,
             }
         )
@@ -602,7 +604,10 @@ class ScanWorker(threading.Thread):
         expire = None if status in ["open", "paused"] else 1800
         pipe = self.device_manager.producer.pipeline()
         self.device_manager.producer.set(
-            MessageEndpoints.public_scan_info(self.current_scanID), msg, pipe=pipe, expire=expire
+            MessageEndpoints.public_scan_info(self.current_scanID),
+            msg,
+            pipe=pipe,
+            expire=expire,
         )
         self.device_manager.producer.set_and_publish(MessageEndpoints.scan_status(), msg, pipe=pipe)
         pipe.execute()

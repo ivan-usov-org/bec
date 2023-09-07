@@ -152,14 +152,16 @@ def NeXus_format(
     mono = instrument.create_group("monochromator")
     mono.attrs["NX_class"] = "NXmonochromator"
     mokev = data.get("mokev", {})
-    if mokev and isinstance(mokev, list):
-        mokev = mokev[0]
-    wavelength = mono.create_dataset(
-        name="wavelength", data=12.3984193 / (mokev.get("mokev").get("value") + 1e-9)
-    )
-    wavelength.attrs["units"] = "Angstrom"
-    energy = mono.create_dataset(name="energy", data=mokev.get("mokev").get("value"))
-    energy.attrs["units"] = "keV"
+    if mokev:
+        if isinstance(mokev, list):
+            mokev = mokev[0]
+        wavelength = mono.create_dataset(
+            name="wavelength",
+            data=12.3984193 / (mokev.get("mokev").get("value") + 1e-9),
+        )
+        wavelength.attrs["units"] = "Angstrom"
+        energy = mono.create_dataset(name="energy", data=mokev.get("mokev").get("value"))
+        energy.attrs["units"] = "keV"
     mono.create_dataset(name="type", data="Double crystal fixed exit monochromator.")
     distance = mono.create_dataset(
         name="distance", data=-5220 - np.asarray(get_entry(data, "samz", 0))
