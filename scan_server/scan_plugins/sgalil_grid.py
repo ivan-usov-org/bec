@@ -148,11 +148,13 @@ class SgalilGrid(FlyScanBase):
                 "readout_time": self.readout_time,
             },
         )
-
-        # while True:
-        #     status = self.stubs.get_req_status(
-        #         device=self.scan_motors[0], RID=self.metadata["RID"], DIID=target_diid
-        #     )
-        #     if status:
-        #         break
-        #     time.sleep(1)
+        target_diid = self.DIID - 1
+        while True:
+            # readout the primary device and wait for the fly scan to finish
+            yield from self.stubs.read_and_wait(group="primary", wait_group="readout_primary")
+            status = self.stubs.get_req_status(
+                device="samx", RID=self.metadata["RID"], DIID=target_diid
+            )
+            if status:
+                break
+            time.sleep(1)
