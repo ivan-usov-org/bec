@@ -64,7 +64,13 @@ def test_scan_status_callback():
     msg = BECMessage.ScanStatusMessage(
         scanID="scanID",
         status="closed",
-        info={"scan_number": 1, "DIID": "DIID", "stream": "stream", "num_points": 1},
+        info={
+            "scan_number": 1,
+            "DIID": "DIID",
+            "stream": "stream",
+            "num_points": 1,
+            "enforce_sync": True,
+        },
     )
     msg_raw = MessageObject(value=msg.dumps(), topic="scan_status")
 

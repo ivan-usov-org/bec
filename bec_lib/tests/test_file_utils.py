@@ -21,7 +21,7 @@ from bec_lib.core.file_utils import FileWriterMixin
 def test_get_scan_dir(scan_number, bundle, lead, ref_path):
     with mock.patch("os.path.expanduser", return_value="/expanded") as mock_expand:
         mixin = FileWriterMixin(service_config={"base_path": "/tmp"})
-        dir_path = mixin._get_scan_directory(
+        dir_path = mixin.get_scan_directory(
             scan_bundle=bundle, scan_number=scan_number, leading_zeros=lead
         )
         assert dir_path == ref_path

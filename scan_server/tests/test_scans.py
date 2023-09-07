@@ -2118,6 +2118,7 @@ def test_list_scan_raises_for_different_lengths():
                     metadata={"readout_priority": "monitored", "DIID": 1},
                 ),
                 None,
+                None,
                 BMessage.DeviceInstructionMessage(
                     device=None,
                     action="open_scan",
@@ -2278,6 +2279,7 @@ def test_time_scan(scan_msg, reference_scan_list):
                 metadata={"RID": "1234"},
             ),
             [
+                None,
                 None,
                 None,
                 BMessage.DeviceInstructionMessage(

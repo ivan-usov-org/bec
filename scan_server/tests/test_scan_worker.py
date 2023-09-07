@@ -1033,6 +1033,8 @@ def test_initialize_scan_info(msg):
             "scan_report_devices": rb.scan.scan_report_devices,
             "num_points": 100,
             "scan_msgs": [],
+            "enforce_sync": True,
+            "frames_per_trigger": 1,
         }
 
 
