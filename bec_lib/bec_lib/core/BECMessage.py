@@ -944,3 +944,33 @@ class AvailableResourceMessage(BECMessage):
         super().__init__(
             msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
         )
+
+
+class ProgressMessage(BECMessage):
+    """Message for communicating the progress of a long running task"""
+
+    msg_type = "progress_message"
+
+    def __init__(
+        self,
+        *,
+        value: float,
+        max_value: float,
+        done: bool,
+        metadata: dict = None,
+        version: float = DEFAULT_VERSION,
+    ) -> None:
+        """
+        Message for communicating the progress of a long running task
+
+        Args:
+            value (float): current progress value
+            max_value (float): maximum progress value
+            done (bool): True if the task is done
+            metadata (dict, optional): metadata. Defaults to None.
+        """
+
+        self.content = {"value": value, "max_value": max_value, "done": done}
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )

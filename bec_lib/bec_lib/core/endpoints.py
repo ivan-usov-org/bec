@@ -62,6 +62,7 @@ class MessageEndpoints:
     # misc
     _public_global_vars = "public/vars"
     _observer = "internal/observer"
+    _progress = "public/progress"
 
     # logbook
     _logbook = "internal/logbook"
@@ -642,6 +643,20 @@ class MessageEndpoints:
             str: Endpoint for observer.
         """
         return cls._observer
+
+    @classmethod
+    def progress(cls, var_name) -> str:
+        """
+        Endpoint for progress. This endpoint is used to publish the current progress
+        using a BECMessage.ProgressMessage message.
+
+        Args:
+            var_name (str): Variable name.
+
+        Returns:
+            str: Endpoint for progress.
+        """
+        return f"{cls._progress}/{var_name}"
 
     # logbook
     @classmethod
