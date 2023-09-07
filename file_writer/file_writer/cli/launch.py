@@ -13,7 +13,9 @@ def main():
     """
     Launch the file writer.
     """
-    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser.add_argument(
         "--config",
         default="",
@@ -21,7 +23,6 @@ def main():
     )
     clargs = parser.parse_args()
     config_path = clargs.config
-    # config_path = "/sls/X12SA/data/gac-x12saop/bec/config/bec_service_config.yaml"
 
     config = ServiceConfig(config_path)
 

@@ -66,11 +66,17 @@ def NeXus_format(
     main_data = entry.create_group("data")
     main_data.attrs["NX_class"] = "NXdata"
     if "eiger_4" in device_manager.devices:
+<<<<<<< HEAD
         main_data.create_soft_link(name="data", target="/entry/instrument/eiger_4/data")
     elif "eiger9m" in device_manager.devices:
         main_data.create_soft_link(name="data", target="/entry/instrument/eiger9m/data")
     elif "pilatus_2" in device_manager.devices:
         main_data.create_soft_link(name="data", target="/entry/instrument/pilatus_2/data")
+=======
+        entry.create_soft_link(name="data", target="/entry/instrument/eiger_4")
+    elif "eiger9m" in device_manager.devices:
+        entry.create_soft_link(name="data", target="/entry/instrument/eiger9m")
+>>>>>>> b1f4fccaaaec9cded2182554900ca48ceeb2fdc3
 
     # /entry/sample
     control = entry.create_group("sample")
@@ -402,8 +408,12 @@ def NeXus_format(
         rotation_angle = eiger9m.create_dataset(name="rotation_angle", data=0)
         rotation_angle.attrs["units"] = "degrees"
         description = eiger9m.create_dataset(
+<<<<<<< HEAD
             name="description",
             data="Eiger9M detector, in-house developed, Paul Scherrer Institute",
+=======
+            name="description", data="Eiger9M detector, in-house developed, Paul Scherrer Institute"
+>>>>>>> b1f4fccaaaec9cded2182554900ca48ceeb2fdc3
         )
         orientation = eiger9m.create_group("orientation")
         orientation.attrs[
@@ -416,6 +426,7 @@ def NeXus_format(
             "status", file_references["eiger9m"]["path"], "EG9M/status"
         )
 
+<<<<<<< HEAD
     if (
         "pilatus_2" in device_manager.devices
         and device_manager.devices.pilatus_2.enabled
@@ -448,4 +459,6 @@ def NeXus_format(
             "entry/instrument/pilatus_2/data",
         )
 
+=======
+>>>>>>> b1f4fccaaaec9cded2182554900ca48ceeb2fdc3
     return storage
