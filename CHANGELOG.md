@@ -2,6 +2,23 @@
 
 <!--next-version-placeholder-->
 
+## v0.33.0 (2023-09-07)
+
+### Feature
+
+* Add sgalilg_grid to scan_plugins and make scantype flyscan scan possible ([`a5ba186`](https://gitlab.psi.ch/bec/bec/-/commit/a5ba186ad14283fae7c5160180a759e29f78137d))
+
+### Fix
+
+* File_writer and scan_ser for falcon and eiger9m and sgalil grid scan ([`cec0b34`](https://gitlab.psi.ch/bec/bec/-/commit/cec0b342f0c518bb37c4403cb55336792a192cec))
+* Online fix for file writer ([`de5ba09`](https://gitlab.psi.ch/bec/bec/-/commit/de5ba09954468bf696e2aa27f00532fe7780ef27))
+* Add file_writer plugin cSAXS and file_event for new file from device ([`0fdf164`](https://gitlab.psi.ch/bec/bec/-/commit/0fdf1647aaf153d480f952ff1515fda2a1a1640d))
+* Add frames_per_trigger to scans and scan server ([`0c66dc3`](https://gitlab.psi.ch/bec/bec/-/commit/0c66dc33593379c7e2bee8499af8d6cecf32b761))
+* Add eiger9m to cSAXS nexus file writer plugin ([`375150c`](https://gitlab.psi.ch/bec/bec/-/commit/375150ce58e00f2b6f53d713ac35cebdb087b6ad))
+* Add file_writer plugin cSAXS and file_event for new file from device ([`b1f4fcc`](https://gitlab.psi.ch/bec/bec/-/commit/b1f4fccaaaec9cded2182554900ca48ceeb2fdc3))
+* Add frames_per_trigger to scans and scan server ([`51c8a54`](https://gitlab.psi.ch/bec/bec/-/commit/51c8a54f01c6b5a0a09c90cb5a21e5640b3cd884))
+* Add eiger9m to cSAXS nexus file writer plugin ([`8ba441f`](https://gitlab.psi.ch/bec/bec/-/commit/8ba441f55fdb9659aff12d2535799f268af1d815))
+
 ## v0.32.0 (2023-09-06)
 
 ### Feature
