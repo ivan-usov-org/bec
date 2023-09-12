@@ -348,10 +348,10 @@ class DeviceManagerDS(DeviceManagerBase):
         # make sure all arrays are of equal length
         max_points = min(len(d) for d in data.values())
         bundle = BECMessage.BundleMessage()
+        signals = {obj.root.name: {}}
         for ii in range(emitted_points, max_points):
-            signals = {}
             for key, val in data.items():
-                signals[key] = {"value": val[ii]}
+                signals[obj.root.name][key] = {"value": val[ii]}
             bundle.append(
                 BECMessage.DeviceMessage(
                     signals=signals,

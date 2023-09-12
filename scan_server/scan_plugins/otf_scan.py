@@ -18,8 +18,17 @@ class OTFScan(FlyScanBase):
     def __init__(self, *args, parameter=None, **kwargs):
         """Scans the energy from e1 to e2 in <time> minutes.
 
+        Args:
+            e1 (float): start energy
+            e2 (float): end energy
+            time (float): time in minutes to go from e1 to e2
+            mode (str): polarization mode. Must be either CIRC +, CIRC - or LINEAR
+            alpha (float): polarization angle for LINEAR polarization mode. Usually either 0 or 90 deg. 
+            offset (float): undulator offset
+
         Examples:
             >>> scans.otf_scan(e1=700, e2=740, time=4)
+            >>> scans.otf_scan(e1=700, e2=740, time=4, mode="LINEAR", alpha=90, offset=1.5)
 
         """
         super().__init__(parameter=parameter, **kwargs)
@@ -27,12 +36,51 @@ class OTFScan(FlyScanBase):
         self.scan_motors = []
         self.num_pos = 0
         self.mono = self.caller_kwargs.get("mono", "mono")
+        self.undulator = self.caller_kwargs.get("undulator", "undulator")
+        self.mode = self.caller_kwargs.get("mode")
+        self.alpha = self.caller_kwargs.get("alpha")
+        self.offset = self.caller_kwargs.get("offset")
         self.otf_device = self.caller_kwargs.get("otf", "otf")
 
     def pre_scan(self):
         yield None
 
+    def _set_polarization(self, mode_val: int):
+        status = yield from self.stubs.send_rpc_and_wait(
+            self.undulator, "pol_mode.set", mode_val
+        )
+        status.wait()
+
+    def _set_polarization_angle(self, angle: float):
+        status = yield from self.stubs.send_rpc_and_wait(
+            self.undulator, "pol_angle.set", angle
+        )
+        status.wait()
+
+    def _set_offset(self, offset: float):
+        status = yield from self.stubs.send_rpc_and_wait(
+            self.undulator, "energy_offset.set", offset
+        )
+        status.wait()
+
     def scan_core(self):
+        mode_val = None
+        if self.mode == "LINEAR":
+            mode_val = 0
+        elif self.mode == "CIRC +":
+            mode_val = 1
+        elif self.mode == "CIRC -":
+            mode_val = 2
+
+        if mode_val is not None:
+            yield from self._set_polarization(mode_val)
+
+        if self.alpha is not None:
+            yield from self._set_polarization_angle(self.alpha)
+
+        if self.offset is not None:
+            yield from self._set_polarization_angle(self.alpha)
+
         yield from self.stubs.set(
             device=self.mono, value=self.caller_kwargs["e1"], wait_group="flyer"
         )

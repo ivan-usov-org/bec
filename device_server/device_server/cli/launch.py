@@ -3,13 +3,9 @@
 # we need to run the startup script before we import anything else. This is
 # to ensure that the epics environment variables are set correctly.
 
-try:
-    from bec_plugins.device_server import startup
-except ImportError:
-    startup = None
 
-if startup is not None:
-    startup.run()
+
+
 
 
 import argparse

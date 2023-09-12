@@ -42,6 +42,9 @@ class FileWriter(abc.ABC):
             device_storage.update(data.async_data)
         keys = list(data.scan_segments.keys())
         keys.sort()
+        remove_keys = (set(keys) & set(device_storage.keys()))
+        for key in remove_keys:
+            device_storage.pop(key, None)
         for point in keys:
             for dev in data.scan_segments[point]:
                 if dev not in device_storage:
