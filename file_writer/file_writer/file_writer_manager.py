@@ -62,7 +62,7 @@ class ScanStorage:
             return True
         if self.enforce_sync:
             return self.scan_finished and (self.num_points == len(self.scan_segments))
-        return self.scan_finished
+        return self.scan_finished and self.scan_number is not None
 
 
 class FileWriterManager(BECService):
@@ -316,13 +316,15 @@ class FileWriterManager(BECService):
         if storage.scan_number is None:
             return
         scan = storage.scan_number
-        file_path = self.writer_mixin.compile_full_filename(scan, "master.h5")
-        self.producer.set_and_publish(
-            MessageEndpoints.public_file(scanID, "master"),
-            BECMessage.FileMessage(file_path=file_path, done=False).dumps(),
-        )
-        successful = True
+
+        file_path = ""
         try:
+            file_path = self.writer_mixin.compile_full_filename(scan, "master.h5")
+            self.producer.set_and_publish(
+                MessageEndpoints.public_file(scanID, "master"),
+                BECMessage.FileMessage(file_path=file_path, done=False).dumps(),
+            )
+            successful = True
             logger.info(f"Starting writing to file {file_path}.")
             self.file_writer.write(file_path=file_path, data=storage)
         # pylint: disable=broad-except
