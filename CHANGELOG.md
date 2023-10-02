@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.34.1 (2023-10-02)
+
+### Fix
+
+* Write files on abort and halt ([`910a92f`](https://gitlab.psi.ch/bec/bec/-/commit/910a92f4784c93119e63c9abad24ec1315718a45))
+
 ## v0.34.0 (2023-09-07)
 
 ### Feature
