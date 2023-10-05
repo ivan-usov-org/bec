@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.34.2 (2023-10-05)
+
+### Fix
+
+* Fixed bug for aborted scans ([`e7d73e5`](https://gitlab.psi.ch/bec/bec/-/commit/e7d73e5b2b2cccb829e401b209605523f6b7dbce))
+
 ## v0.34.1 (2023-10-02)
 
 ### Fix
