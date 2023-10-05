@@ -23,10 +23,8 @@ but they are executed in a specific order:
 import time
 import uuid
 
-from scan_server.scans import FlyScanBase, ScanArgType, ScanAbortion
-from bec_lib.core import MessageEndpoints, BECMessage
-
-from bec_lib.core import bec_logger
+from bec_lib.core import BECMessage, MessageEndpoints, bec_logger
+from scan_server.scans import FlyScanBase, ScanAbortion, ScanArgType
 
 logger = bec_logger.logger
 
@@ -50,7 +48,7 @@ class OwisGrid(FlyScanBase):
         *args,
         exp_time: float = 0.1,
         readout_time: float = 0.1,
-        **kwargs
+        **kwargs,
     ):
         """
         SGalil-based grid scan.
@@ -100,32 +98,38 @@ class OwisGrid(FlyScanBase):
         # Keep the shutter open for longer to allow acquisitions to fly in
         self.shutter_additional_width = 0.15
 
-
         ########### Owis stage parameters
         # scanning related parameters
         self.stepping_y = abs(self.start_y - self.end_y) / interval_y
         self.stepping_x = abs(self.start_x - self.end_x) / interval_x
-        
-        #Standard parameter for owis stages!!
-        self.high_velocity = 10 # mm/s
-        self.high_acc_time = 0.2  # s 
+
+        # Standard parameter for owis stages!!
+        self.high_velocity = 10  # mm/s
+        self.high_acc_time = 0.2  # s
         self.base_velocity = 0.0625
-        self.add_pre_move_time = 0.0 #s
+        self.add_pre_move_time = 0.0  # s
         self.backlash_distance = 0.125
 
         self.sign = 1
-        
-        
-        #Relevant parameters for scan
-        self.target_velocity = self.stepping_y / (self.exp_time+ self.readout_time)
-        self.acc_time = (self.target_velocity -self.base_velocity)/(self.high_velocity-self.base_velocity)*self.high_acc_time
-        self.premove_distance = 0.5*(self.target_velocity+self.base_velocity)*self.acc_time  + self.add_pre_move_time*self.target_velocity
-        self.time_offset_snake = self.backlash_distance/self.target_velocity
 
-        #Checks and set acc_time and premove for the designated scan
+        # Relevant parameters for scan
+        self.target_velocity = self.stepping_y / (self.exp_time + self.readout_time)
+        self.acc_time = (
+            (self.target_velocity - self.base_velocity)
+            / (self.high_velocity - self.base_velocity)
+            * self.high_acc_time
+        )
+        self.premove_distance = (
+            0.5 * (self.target_velocity + self.base_velocity) * self.acc_time
+            + self.add_pre_move_time * self.target_velocity
+        )
+        self.time_offset_snake = self.backlash_distance / self.target_velocity
+
+        # Checks and set acc_time and premove for the designated scan
         if self.target_velocity > self.high_velocity or self.target_velocity < self.base_velocity:
-            raise ScanAbortion(f'Requested velocity of {self.target_velocity} exceeds {self.high_velocity}')
-        
+            raise ScanAbortion(
+                f"Requested velocity of {self.target_velocity} exceeds {self.high_velocity}"
+            )
 
     def scan_report_instructions(self):
         if not self.scan_report_hint:
@@ -158,7 +162,6 @@ class OwisGrid(FlyScanBase):
             self.progress_point = updated_progress
             return self.timeout_progress
 
-
     def scan_core(self):
         """
         This is the main event loop.
@@ -188,30 +191,38 @@ class OwisGrid(FlyScanBase):
 
         # Set width of FSH opening to 0
         status_ddg_fsh_ttlwidth = yield from self.stubs.send_rpc_and_wait(
-            "ddg_fsh", "set_channels", 
-            "width", 0, 
-            channels = ['channelCD'],
+            "ddg_fsh",
+            "set_channels",
+            "width",
+            0,
+            channels=["channelCD"],
         )
         yield from self.stubs.send_rpc_and_wait(
-            "ddg_fsh", "set_channels", 
-            "width", 0, 
-            channels = ['channelEF', "channelGH"],
+            "ddg_fsh",
+            "set_channels",
+            "width",
+            0,
+            channels=["channelEF", "channelGH"],
         )
         time.sleep(0.05)
         trigger_ddg_fsh = yield from self.stubs.send_rpc_and_wait("ddg_fsh", "trigger")
         time.sleep(0.05)
         status_ddg_fsh_ttlwidth = yield from self.stubs.send_rpc_and_wait(
-            "ddg_fsh", "set_channels", 
-            "width", (self.interval_y * (self.exp_time+self.readout_time) + self.shutter_additional_width ), 
-            channels = ['channelCD'],
+            "ddg_fsh",
+            "set_channels",
+            "width",
+            (self.interval_y * (self.exp_time + self.readout_time) + self.shutter_additional_width),
+            channels=["channelCD"],
         )
         status_ddg_fsh_ttlwidth = yield from self.stubs.send_rpc_and_wait(
-            "ddg_fsh", "set_channels", 
-            "width", 0, 
-            channels = ['channelAB'],
+            "ddg_fsh",
+            "set_channels",
+            "width",
+            0,
+            channels=["channelAB"],
         )
-        
-        #Software trigger on 
+
+        # Software trigger on
         status_ddg_mcs_ttldelay = yield from self.stubs.send_rpc_and_wait(
             "ddg_mcs", "set_channels", "delay", 0
         )
@@ -219,77 +230,106 @@ class OwisGrid(FlyScanBase):
         # Set ddg_mcs on ext trigger from ddg_detectors
         status_ddg_mcs_source = yield from self.stubs.send_rpc_and_wait("ddg_mcs", "source.set", 1)
         # Set ddg_detectors and ddg_fsh to software trigger
-        status_ddg_detectors_source = yield from self.stubs.send_rpc_and_wait("ddg_detectors", "source.set", 5)
+        status_ddg_detectors_source = yield from self.stubs.send_rpc_and_wait(
+            "ddg_detectors", "source.set", 5
+        )
         status_ddg_fsh_source = yield from self.stubs.send_rpc_and_wait("ddg_fsh", "source.set", 5)
 
         status_ddg_mcs_source.wait()
         status_ddg_detectors_source.wait()
         status_ddg_fsh_source.wait()
-        
 
-        #Set motor speed
+        # Set motor speed
 
-        status_prepos = yield from self.stubs.send_rpc_and_wait(f'samy', "move", (self.start_y-self.premove_distance))
+        status_prepos = yield from self.stubs.send_rpc_and_wait(
+            f"samy", "move", (self.start_y - self.premove_distance)
+        )
         status_prepos.wait()
-        
-        status_speed = yield from self.stubs.send_rpc_and_wait(f'samy', "velocity.put", self.target_velocity)
-        status_acc = yield from self.stubs.send_rpc_and_wait(f'samy', "acceleration.put", self.acc_time)
+
+        status_speed = yield from self.stubs.send_rpc_and_wait(
+            f"samy", "velocity.put", self.target_velocity
+        )
+        status_acc = yield from self.stubs.send_rpc_and_wait(
+            f"samy", "acceleration.put", self.acc_time
+        )
         # Read out primary devices once at start and once at end of fly scan
         yield from self.stubs.read_and_wait(
             group="primary", wait_group="readout_primary", pointID=self.pointID
         )
         self.pointID += 1
-        start=time.time()
+        start = time.time()
         for ii in range(self.interval_x):
-            #Set speed and acceleration
-            logger.info(f'Start point, run {ii}: {time.time()-start}')
-            status_speed = yield from self.stubs.send_rpc_and_wait(f'samy', "velocity.put", self.target_velocity)
-            logger.info(f'Time passed velocity: {time.time()-start}')
-            status_acc = yield from self.stubs.send_rpc_and_wait(f'samy', "acceleration.put", self.acc_time)
-            logger.info(f'Time passed acceleration: {time.time()-start}')
+            # Set speed and acceleration
+            logger.info(f"Start point, run {ii}: {time.time()-start}")
+            status_speed = yield from self.stubs.send_rpc_and_wait(
+                f"samy", "velocity.put", self.target_velocity
+            )
+            logger.info(f"Time passed velocity: {time.time()-start}")
+            status_acc = yield from self.stubs.send_rpc_and_wait(
+                f"samy", "acceleration.put", self.acc_time
+            )
+            logger.info(f"Time passed acceleration: {time.time()-start}")
             # yield from self.stubs.set(device = 'samy.velocity', value = self.target_velocity)
             # yield from self.stubs.set(device = 'samy.acceleration', value = self.acc_time)
-            #time.sleep(0.01)
+            # time.sleep(0.01)
 
             # Start motion and send triggers
-            yield from self.stubs.set(device = "samy", value =  (self.end_y+(self.sign*self.premove_distance)), wait_group= 'flyer')
+            yield from self.stubs.set(
+                device="samy",
+                value=(self.end_y + (self.sign * self.premove_distance)),
+                wait_group="flyer",
+            )
             trigger_ddg_fsh = yield from self.stubs.send_rpc_and_wait("ddg_fsh", "trigger")
-            #logger.info(self.acc_time)
+            # logger.info(self.acc_time)
             # if ii%2==0:
             time.sleep(self.acc_time)
             # else:
             #     time.sleep(self.acc_time + self.time_offset_snake)
-            logger.info(f'{time.time()-start}, after sleep of {self.acc_time}')
-            trigger_ddg_detectors = yield from self.stubs.send_rpc_and_wait("ddg_detectors", "trigger")
-            #Wait for motion to finish
-            yield from self.stubs.wait(device = "samy", wait_group="flyer", wait_type="move")
-            logger.info(f'Finished Scan after {time.time()-start}')
-            #Step yaxis
-            #yield from self.stubs.set(device =f'samx', value =(self.start_x + ii*self.stepping_x), wait_group = 'flyer')
-            yield from self.stubs.set(device =f'samx', value =(self.start_x - ii*self.stepping_x), wait_group = 'motion')
+            logger.info(f"{time.time()-start}, after sleep of {self.acc_time}")
+            trigger_ddg_detectors = yield from self.stubs.send_rpc_and_wait(
+                "ddg_detectors", "trigger"
+            )
+            # Wait for motion to finish
+            yield from self.stubs.wait(device="samy", wait_group="flyer", wait_type="move")
+            logger.info(f"Finished Scan after {time.time()-start}")
+            # Step yaxis
+            # yield from self.stubs.set(device =f'samx', value =(self.start_x + ii*self.stepping_x), wait_group = 'flyer')
+            yield from self.stubs.set(
+                device=f"samx", value=(self.start_x - ii * self.stepping_x), wait_group="motion"
+            )
 
-            #TODO fly scans -> swapping start and end
+            # TODO fly scans -> swapping start and end
             # stored = self.start_y
             # self.start_y = self.end_y
             # self.end_y = stored
             # self.sign*=(-1)*self.sign
-            logger.info(f'Time before velocity after scan: {time.time()-start}')
-            status_speed = yield from self.stubs.send_rpc_and_wait(f'samy', "velocity.put", self.high_velocity)
-            logger.info(f'Time after velocity: {time.time()-start}')
-            status_acc = yield from self.stubs.send_rpc_and_wait(f'samy', "acceleration.put", self.high_acc_time)
-            logger.info(f'Time after acceleration: {time.time()-start}')
+            logger.info(f"Time before velocity after scan: {time.time()-start}")
+            status_speed = yield from self.stubs.send_rpc_and_wait(
+                f"samy", "velocity.put", self.high_velocity
+            )
+            logger.info(f"Time after velocity: {time.time()-start}")
+            status_acc = yield from self.stubs.send_rpc_and_wait(
+                f"samy", "acceleration.put", self.high_acc_time
+            )
+            logger.info(f"Time after acceleration: {time.time()-start}")
             # yield from self.stubs.set(device = 'samy.velocity', value = self.high_velocity)
             # yield from self.stubs.set(device = 'samy.acceleration', value = self.high_acc_time)
 
             # Move back to start
-            logger.info(f'Start moving back {time.time()-start}')
-            status_prepos = yield from self.stubs.send_rpc_and_wait(f'samy', "move", (self.start_y-self.premove_distance))
-            
-            status_prepos.wait()
-            logger.info(f'Finished moving {time.time()-start}')
+            logger.info(f"Start moving back {time.time()-start}")
+            status_prepos = yield from self.stubs.send_rpc_and_wait(
+                f"samy", "move", (self.start_y - self.premove_distance)
+            )
 
-        status_speed = yield from self.stubs.send_rpc_and_wait(f'samy', "velocity.put", self.high_velocity)
-        status_acc = yield from self.stubs.send_rpc_and_wait(f'samy', "acceleration.put", self.high_acc_time)
+            status_prepos.wait()
+            logger.info(f"Finished moving {time.time()-start}")
+
+        status_speed = yield from self.stubs.send_rpc_and_wait(
+            f"samy", "velocity.put", self.high_velocity
+        )
+        status_acc = yield from self.stubs.send_rpc_and_wait(
+            f"samy", "acceleration.put", self.high_acc_time
+        )
 
         yield from self.stubs.read_and_wait(
             group="primary", wait_group="readout_primary", pointID=self.pointID

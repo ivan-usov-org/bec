@@ -560,7 +560,11 @@ class ScanWorker(threading.Thread):
 
     def _stage_devices(self, instr: DeviceMsg) -> None:
         detectors = [dev.name for dev in self.device_manager.devices.detectors()]
-        devices = [dev.name for dev in self.device_manager.devices.enabled_devices if dev.name not in detectors]
+        devices = [
+            dev.name
+            for dev in self.device_manager.devices.enabled_devices
+            if dev.name not in detectors
+        ]
         for det in detectors:
             self.device_manager.producer.send(
                 MessageEndpoints.device_instructions(),
