@@ -8,13 +8,13 @@ from io import StringIO
 from typing import Any
 
 import ophyd
+from ophyd import Staged
+from ophyd.utils import errors as ophyd_errors
+
 from bec_lib.core import Alarms, BECMessage, BECService, MessageEndpoints, bec_logger
 from bec_lib.core.BECMessage import BECStatus
 from bec_lib.core.connector import ConnectorBase
 from bec_lib.core.devicemanager import OnFailure
-from ophyd import Staged
-from ophyd.utils import errors as ophyd_errors
-
 from device_server.devices import is_serializable, rgetattr
 from device_server.devices.devicemanager import DeviceManagerDS
 
@@ -163,9 +163,7 @@ class DeviceServer(BECService):
             if action == "set":
                 self._set_device(instructions)
             elif action == "read":
-                start = time.time()
                 self._read_device(instructions)
-                logger.info(f"finished read after {time.time()-start}")
             elif action == "rpc":
                 self._run_rpc(instructions)
             elif action == "kickoff":
@@ -175,9 +173,7 @@ class DeviceServer(BECService):
             elif action == "trigger":
                 self._trigger_device(instructions)
             elif action == "stage":
-                start = time.time()
                 self._stage_device(instructions)
-                logger.info(f"finished stage after {time.time()-start}")
             elif action == "unstage":
                 self._unstage_device(instructions)
             elif action == "pre_scan":

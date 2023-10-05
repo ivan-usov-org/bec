@@ -11,6 +11,7 @@ from rich.table import Table
 
 from bec_lib.alarm_handler import AlarmHandler
 from bec_lib.bec_worker_manager import BECWorkerManager
+from bec_lib.bl_checks import BeamlineChecks
 from bec_lib.callback_handler import CallbackHandler
 from bec_lib.core import (
     Alarms,
@@ -27,7 +28,6 @@ from bec_lib.devicemanager_client import DMClient
 from bec_lib.scan_manager import ScanManager
 from bec_lib.scans import Scans
 from bec_lib.user_scripts_mixin import UserScriptsMixin
-from bec_lib.bl_checks import BeamlineChecks
 
 logger = bec_logger.logger
 
@@ -76,7 +76,7 @@ class BECClient(BECService, UserScriptsMixin):
         self.config = None
         builtins.bec = self
         self.metadata = {}
-        self.logbook = LogbookConnector(self.connector)
+        # self.logbook = LogbookConnector(self.connector)
         self._update_username()
         self.history = None
         self.callbacks = CallbackHandler()
