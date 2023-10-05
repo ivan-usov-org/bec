@@ -149,8 +149,9 @@ class FileWriterManager(BECService):
             if not scan_storage.end_time:
                 scan_storage.end_time = msg.content.get("timestamp")
             scan_storage.scan_finished = True
-            scan_storage.num_points = msg.content["info"]["num_points"]
-            scan_storage.enforce_sync = msg.content["info"]["enforce_sync"]
+            if msg.content["info"]:
+                scan_storage.num_points = msg.content["info"]["num_points"]
+                scan_storage.enforce_sync = msg.content["info"]["enforce_sync"]
             self.check_storage_status(scanID=scanID)
 
     def insert_to_scan_storage(self, msg: BECMessage.ScanMessage) -> None:
@@ -309,7 +310,11 @@ class FileWriterManager(BECService):
         Args:
             scanID (str): Scan ID
         """
+        if not self.scan_storage.get(scanID):
+            return
         storage = self.scan_storage[scanID]
+        if storage.scan_number is None:
+            return
         scan = storage.scan_number
         file_path = self.writer_mixin.compile_full_filename(scan, "master.h5")
         self.producer.set_and_publish(

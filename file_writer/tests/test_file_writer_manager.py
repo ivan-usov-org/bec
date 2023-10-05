@@ -100,6 +100,27 @@ def test_write_file():
         assert file_manager.file_writer.write_called is True
 
 
+def test_write_file_invalid_scanID():
+    file_manager = load_FileWriter()
+    file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
+    with mock.patch.object(
+        file_manager.writer_mixin, "compile_full_filename"
+    ) as mock_create_file_path:
+        file_manager.write_file("scanID1")
+        mock_create_file_path.assert_not_called()
+
+
+def test_write_file_invalid_scan_number():
+    file_manager = load_FileWriter()
+    file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
+    file_manager.scan_storage["scanID"].scan_number = None
+    with mock.patch.object(
+        file_manager.writer_mixin, "compile_full_filename"
+    ) as mock_create_file_path:
+        file_manager.write_file("scanID")
+        mock_create_file_path.assert_not_called()
+
+
 def test_create_file_path():
     file_manager = load_FileWriter()
     file_manager.file_writer_config["base_path"] = "./"
