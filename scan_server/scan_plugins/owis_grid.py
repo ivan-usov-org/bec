@@ -21,10 +21,9 @@ but they are executed in a specific order:
 """
 
 import time
-import uuid
 
 from bec_lib.core import BECMessage, MessageEndpoints, bec_logger
-from scan_server.scans import FlyScanBase, ScanAbortion, ScanArgType
+from scan_server.scans import FlyScanBase, ScanAbortion
 
 logger = bec_logger.logger
 
