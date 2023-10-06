@@ -2,6 +2,27 @@
 
 <!--next-version-placeholder-->
 
+## v0.35.0 (2023-10-06)
+
+### Feature
+
+* Grid fly scan with standard epics owis motors ([`552aff5`](https://gitlab.psi.ch/bec/bec/-/commit/552aff5bd9fd0bb61e3f50133d4bbf52cc824857))
+
+### Fix
+
+* Fixed stage instruction for detectors ([`ac7a386`](https://gitlab.psi.ch/bec/bec/-/commit/ac7a386acf62d381ad096d816da6db30bcfa5ce7))
+* Optimize staging of devices in scanserver and device server ([`2c66dbb`](https://gitlab.psi.ch/bec/bec/-/commit/2c66dbbe4667120195151f49acfe5b45527e21b9))
+* Sgalil scan corrections ([`2f8fce5`](https://gitlab.psi.ch/bec/bec/-/commit/2f8fce52207fdbab2a5db562ca7cfa3beb814e41))
+* Adjusted sgalil_grid scan for updated mcs operation ([`b7a722c`](https://gitlab.psi.ch/bec/bec/-/commit/b7a722c0ef4ce14fd6843c368bf076bd1024db23))
+* Online changes e20643, file writer bugfix and add scanabortion check in sgalil_grid ([`195a8dd`](https://gitlab.psi.ch/bec/bec/-/commit/195a8dd7541fa12ff5f4d9c9cc0a70651af805b1))
+* Fixed scan bundler for async fly scans ([`d7a6b0f`](https://gitlab.psi.ch/bec/bec/-/commit/d7a6b0fee010877dfd18cbf23ff55126a399dec9))
+* Enabled scilog ([`64e82c6`](https://gitlab.psi.ch/bec/bec/-/commit/64e82c67782a701f5eeb04a3a9c1ce42832c1fdf))
+* Fixed bl_check repeat ([`62aa0ae`](https://gitlab.psi.ch/bec/bec/-/commit/62aa0aed78c23ea0c117f84ba54d5f267f35eed4))
+* Fixed primary readout for sgalil scan ([`4231d00`](https://gitlab.psi.ch/bec/bec/-/commit/4231d00e19aacc039ee9cc9f4a1f18294ea18ab0))
+* Added missing pre scan to acquire ([`d746093`](https://gitlab.psi.ch/bec/bec/-/commit/d7460938041dac4be45fa39cbdaa957dda5f88ca))
+* Fixed tmux launch for mono environments ([`5be5dda`](https://gitlab.psi.ch/bec/bec/-/commit/5be5dda1cfd3adfadae5e314a8ba87b394e8227a))
+* Fixed scan progress for messages without scanID ([`64f3b13`](https://gitlab.psi.ch/bec/bec/-/commit/64f3b13e9710dbfb207c11fbd683db9cb9462dda))
+
 ## v0.34.2 (2023-10-05)
 
 ### Fix
