@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.35.1 (2023-10-06)
+
+### Fix
+
+* Changed progress update from devicestatus to progress message ([`03595b4`](https://gitlab.psi.ch/bec/bec/-/commit/03595b42f78f45f2c5d2e7bf10e860a3ee5297d4))
+
 ## v0.35.0 (2023-10-06)
 
 ### Feature
