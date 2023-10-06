@@ -235,7 +235,7 @@ class DeviceManagerDS(DeviceManagerBase):
         if "flyer" in obj.event_types:
             obj.subscribe(self._obj_flyer_callback, event_type="flyer", run=False)
         if "progress" in obj.event_types:
-            obj.subscribe(self._obj_callback_progress, event_type="progress", run=False)
+            obj.subscribe(self._obj_progress_callback, event_type="progress", run=False)
         if hasattr(obj, "motor_is_moving"):
             obj.motor_is_moving.subscribe(self._obj_callback_is_moving, run=opaas_obj.enabled)
 
@@ -369,11 +369,12 @@ class DeviceManagerDS(DeviceManagerBase):
         )
         pipe.execute()
 
-    def _obj_callback_progress(self, *_args, obj, value, max_value, done, **kwargs):
+    def _obj_progress_callback(self, *_args, obj, value, max_value, done, **kwargs):
         metadata = self.devices[obj.root.name].metadata
-        msg = BECMessage.DeviceStatusMessage(
-            device=obj.root.name,
-            status={"value": value, "max_value": max_value, "done": done},
+        msg = BECMessage.ProgressMessage(
+            value=value,
+            max_value=max_value,
+            done=done,
             metadata=metadata,
         )
         self.producer.set_and_publish(MessageEndpoints.device_progress(obj.root.name), msg.dumps())

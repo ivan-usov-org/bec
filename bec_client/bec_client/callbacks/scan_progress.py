@@ -1,8 +1,7 @@
 import asyncio
 
-from bec_lib.core import BECMessage, MessageEndpoints, bec_logger
-
 from bec_client.progressbar import ScanProgressBar
+from bec_lib.core import BECMessage, MessageEndpoints, bec_logger
 
 from .live_table import LiveUpdatesTable
 
@@ -32,19 +31,19 @@ class LiveUpdatesScanProgress(LiveUpdatesTable):
             logger.debug("waiting for new data point")
             await asyncio.sleep(0.1)
             return False
-        status = BECMessage.DeviceStatusMessage.loads(status)
+        status = BECMessage.ProgressMessage.loads(status)
         if status.metadata.get("scanID") != self.scan_item.scanID:
             logger.debug("waiting for new data point")
             await asyncio.sleep(0.1)
             return False
 
-        point_id = status.content["status"].get("value")
+        point_id = status.content.get("value")
         if point_id is None:
             logger.debug("waiting for new data point")
             await asyncio.sleep(0.1)
             return False
 
-        max_value = status.content["status"].get("max_value")
+        max_value = status.content.get("max_value")
         if max_value and max_value != progressbar.max_points:
             progressbar.max_points = max_value
 

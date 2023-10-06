@@ -143,3 +143,21 @@ def test_flyer_event_callback():
 
     progress_msg = BECMessage.DeviceStatusMessage.loads(progress[1][1])
     assert progress_msg.content["status"] == 20
+
+
+def test_obj_progress_callback():
+    device_manager = load_device_manager()
+    samx = device_manager.devices.samx
+    samx.metadata = {"scanID": "12345"}
+
+    with mock.patch.object(device_manager, "producer") as mock_producer:
+        device_manager._obj_progress_callback(obj=samx.obj, value=1, max_value=2, done=False)
+        mock_producer.set_and_publish.assert_called_once_with(
+            MessageEndpoints.device_progress("samx"),
+            BECMessage.ProgressMessage(
+                value=1,
+                max_value=2,
+                done=False,
+                metadata={"scanID": "12345"},
+            ).dumps(),
+        )

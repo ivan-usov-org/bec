@@ -147,12 +147,12 @@ class OwisGrid(FlyScanBase):
         if not raw_msg:
             self.timeout_progress += 1
             return self.timeout_progress
-        msg = BECMessage.DeviceStatusMessage.loads(raw_msg)
+        msg = BECMessage.ProgressMessage.loads(raw_msg)
         if not msg:
             self.timeout_progress += 1
             return self.timeout_progress
         # TODO which update is that!
-        updated_progress = int(msg.content["status"]["value"])
+        updated_progress = int(msg.content["value"])
         if updated_progress == int(self.progress_point):
             self.timeout_progress += 1
             return self.timeout_progress
