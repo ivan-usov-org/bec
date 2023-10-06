@@ -1098,22 +1098,55 @@ def test_stage_device(msg):
     with mock.patch.object(worker, "_wait_for_stage") as wait_mock:
         with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
             worker._stage_devices(msg)
+            detectors = [dev.name for dev in worker.device_manager.devices.detectors()]
+            devices = [
+                dev.name
+                for dev in worker.device_manager.devices.enabled_devices
+                if dev.name not in detectors
+            ]
 
             for dev in worker.device_manager.devices.enabled_devices:
                 assert dev.name in worker._staged_devices
-            send_mock.assert_called_once_with(
-                MessageEndpoints.device_instructions(),
-                DeviceMsg(
-                    device=[dev.name for dev in worker.device_manager.devices.enabled_devices],
-                    action="stage",
-                    parameter=msg.content["parameter"],
-                    metadata=msg.metadata,
-                ).dumps(),
+            for detector in detectors:
+                assert (
+                    mock.call(
+                        MessageEndpoints.device_instructions(),
+                        DeviceMsg(
+                            device=detector,
+                            action="stage",
+                            parameter=msg.content["parameter"],
+                            metadata=msg.metadata,
+                        ).dumps(),
+                    )
+                    in send_mock.mock_calls
+                )
+            assert (
+                mock.call(
+                    MessageEndpoints.device_instructions(),
+                    DeviceMsg(
+                        device=devices,
+                        action="stage",
+                        parameter=msg.content["parameter"],
+                        metadata=msg.metadata,
+                    ).dumps(),
+                )
+                in send_mock.mock_calls
             )
-            wait_mock.assert_called_once_with(
-                staged=True,
-                devices=[dev.name for dev in worker.device_manager.devices.enabled_devices],
-                metadata=msg.metadata,
+            assert (
+                mock.call(
+                    staged=True,
+                    devices=devices,
+                    metadata=msg.metadata,
+                )
+                in wait_mock.mock_calls
+            )
+            assert (
+                mock.call(
+                    staged=True,
+                    devices=detectors,
+                    metadata=msg.metadata,
+                )
+                in wait_mock.mock_calls
             )
 
 

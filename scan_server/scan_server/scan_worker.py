@@ -587,6 +587,7 @@ class ScanWorker(threading.Thread):
             ).dumps(),
         )
         self._staged_devices.update(devices)
+        self._wait_for_stage(staged=True, devices=detectors, metadata=instr.metadata)
         self._wait_for_stage(staged=True, devices=devices, metadata=instr.metadata)
 
     def _unstage_devices(

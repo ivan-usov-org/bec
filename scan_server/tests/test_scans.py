@@ -1098,6 +1098,12 @@ def test_device_rpc():
                 ),
                 BMessage.DeviceInstructionMessage(
                     device=None,
+                    action="pre_scan",
+                    parameter={},
+                    metadata={"readout_priority": "monitored", "DIID": 3},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
                     metadata={"pointID": 0, "readout_priority": "monitored", "DIID": 3},
