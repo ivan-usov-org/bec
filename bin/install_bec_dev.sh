@@ -105,7 +105,7 @@ if [ "$split_env" = true ]; then
         python -m venv ./${package}_venv
         conda deactivate
         source ./${package}_venv/bin/activate
-        pip install -q -q -e .[dev]
+        pip install -q -q -e '.[dev]'
         cd ../
         deactivate
         echo "Created virtual environment for $package"
@@ -120,7 +120,7 @@ else # install all packages in one virtual environment
     conda deactivate
     source ./bec_venv/bin/activate
     cd ./bec_server
-    pip install -q -q -e .[dev]
+    pip install -q -q -e '.[dev]'
     cd ../
     echo "Created virtual environment for all packages"
 fi
