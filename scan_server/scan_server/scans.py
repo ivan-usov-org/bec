@@ -297,10 +297,11 @@ class ScanBase(RequestBase, PathOptimizerMixin):
     4. open_scan
     5. stage
     6. run_baseline_reading
-    7. scan_core
-    8. finalize
-    9. unstage
-    10. cleanup
+    7. pre_scan
+    8. scan_core
+    9. finalize
+    10. unstage
+    11. cleanup
 
     A subclass of ScanBase must implement the following methods:
     - _calculate_positions
