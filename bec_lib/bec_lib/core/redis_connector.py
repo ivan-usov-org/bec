@@ -36,19 +36,6 @@ def catch_connection_error(func):
     return wrapper
 
 
-def trim_topic(topic: str, suffix: str) -> str:
-    """
-    trim topic to remove suffix
-
-    Args:
-        topic (str): topic to trim
-        suffix (str): suffix to remove
-    """
-    if topic.endswith(suffix):
-        return topic[: -len(suffix)]
-    return topic
-
-
 class RedisConnector(ConnectorBase):
     def __init__(self, bootstrap: list, redis_cls=None):
         super().__init__(bootstrap)
@@ -209,9 +196,8 @@ class RedisProducer(ProducerConnector):
     @catch_connection_error
     def send(self, topic: str, msg, pipe=None) -> None:
         """send to redis"""
-        topic = trim_topic(topic, ":sub")
         client = pipe if pipe is not None else self.r
-        client.publish(f"{topic}:sub", msg)
+        client.publish(topic, msg)
 
     @catch_connection_error
     def lpush(
@@ -223,21 +209,19 @@ class RedisProducer(ProducerConnector):
         If key does not exist, it is created as empty list before
         performing the push operations. When key holds a value that
         is not a list, an error is returned."""
-        topic = trim_topic(topic, ":val")
         client = pipe if pipe is not None else self.pipeline()
-        client.lpush(f"{topic}:val", msgs)
+        client.lpush(topic, msgs)
         if max_size:
-            client.ltrim(f"{topic}:val", 0, max_size)
+            client.ltrim(topic, 0, max_size)
         if expire:
-            client.expire(f"{topic}:val", expire)
+            client.expire(topic, expire)
         if not pipe:
             client.execute()
 
     @catch_connection_error
     def lset(self, topic: str, index: int, msgs: str, pipe=None) -> None:
-        topic = trim_topic(topic, ":val")
         client = pipe if pipe is not None else self.r
-        return client.lset(f"{topic}:val", index, msgs)
+        return client.lset(topic, index, msgs)
 
     @catch_connection_error
     def rpush(self, topic: str, msgs: str, pipe=None) -> int:
@@ -246,9 +230,8 @@ class RedisProducer(ProducerConnector):
         values at the tail of the list stored at key. If key does not exist,
         it is created as empty list before performing the push operation. When
         key holds a value that is not a list, an error is returned."""
-        topic = trim_topic(topic, ":val")
         client = pipe if pipe is not None else self.r
-        return client.rpush(f"{topic}:val", msgs)
+        return client.rpush(topic, msgs)
 
     @catch_connection_error
     def lrange(self, topic: str, start: int, end: int, pipe=None):
@@ -258,34 +241,30 @@ class RedisProducer(ProducerConnector):
         of the list stored at key. The offsets start and stop are zero-based indexes,
         with 0 being the first element of the list (the head of the list), 1 being
         the next element and so on."""
-        topic = trim_topic(topic, ":val")
         client = pipe if pipe is not None else self.r
-        return client.lrange(f"{topic}:val", start, end)
+        return client.lrange(topic, start, end)
 
     @catch_connection_error
     def set_and_publish(self, topic: str, msg, pipe=None, expire: int = None) -> None:
         """piped combination of self.publish and self.set"""
-        topic = trim_topic(topic, ":val")
-        topic = trim_topic(topic, ":sub")
         client = pipe if pipe is not None else self.pipeline()
-        client.publish(f"{topic}:sub", msg)
-        client.set(f"{topic}:val", msg)
+        client.publish(topic, msg)
+        client.set(topic, msg)
         if expire:
-            client.expire(f"{topic}:val", expire)
+            client.expire(topic, expire)
         if not pipe:
             client.execute()
 
     @catch_connection_error
     def set(self, topic: str, msg, pipe=None, is_dict=False, expire: int = None) -> None:
         """set redis value"""
-        topic = trim_topic(topic, ":val")
         client = pipe if pipe is not None else self.pipeline()
         if is_dict:
-            client.hmset(f"{topic}:val", msg)
+            client.hmset(topic, msg)
         else:
-            client.set(f"{topic}:val", msg)
+            client.set(topic, msg)
         if expire:
-            client.expire(f"{topic}:val", expire)
+            client.expire(topic, expire)
         if not pipe:
             client.execute()
 
@@ -308,11 +287,10 @@ class RedisProducer(ProducerConnector):
     @catch_connection_error
     def get(self, topic: str, pipe=None, is_dict=False):
         """retrieve entry, either via hgetall or get"""
-        topic = trim_topic(topic, ":val")
         client = pipe if pipe is not None else self.r
         if is_dict:
-            return client.hgetall(f"{topic}:val")
-        return client.get(f"{topic}:val")
+            return client.hgetall(topic)
+        return client.get(topic)
 
     @catch_connection_error
     def xadd(self, topic: str, msg: dict, max_size=None, pipe=None, expire: int = None):
@@ -330,7 +308,6 @@ class RedisProducer(ProducerConnector):
             >>> redis.xadd("test", {"test": "test"})
             >>> redis.xadd("test", {"test": "test"}, max_size=10)
         """
-        topic = trim_topic(topic, ":stream")
         if pipe:
             client = pipe
         elif expire:
@@ -339,20 +316,19 @@ class RedisProducer(ProducerConnector):
             client = self.r
 
         if max_size:
-            client.xadd(f"{topic}:stream", msg, maxlen=max_size)
+            client.xadd(topic, msg, maxlen=max_size)
         else:
-            client.xadd(f"{topic}:stream", msg)
+            client.xadd(topic, msg)
         if expire:
-            client.expire(f"{topic}:stream", expire)
+            client.expire(topic, expire)
         if not pipe and expire:
             client.execute()
 
     @catch_connection_error
     def get_last(self, topic: str, pipe=None, key=b"data"):
         """retrieve last entry from stream"""
-        topic = trim_topic(topic, ":stream")
         client = pipe if pipe is not None else self.r
-        msg = client.xrevrange(f"{topic}:stream", "+", "-", count=1)
+        msg = client.xrevrange(topic, "+", "-", count=1)
         if not msg:
             return None
         if key is None:
@@ -399,15 +375,13 @@ class RedisProducer(ProducerConnector):
                 self.stream_keys[topic] = "0-0"
             else:
                 try:
-                    self.stream_keys[topic] = client.xinfo_stream(f"{topic}:stream")[
-                        "last-generated-id"
-                    ]
+                    self.stream_keys[topic] = client.xinfo_stream(topic)["last-generated-id"]
                 except redis.exceptions.ResponseError:
                     self.stream_keys[topic] = "0-0"
         if id is None:
             id = self.stream_keys[topic]
 
-        msg = client.xread({f"{topic}:stream": id}, count=count, block=block)
+        msg = client.xread({topic: id}, count=count, block=block)
         if msg:
             self.stream_keys[topic] = msg[0][1][-1][0]
         return msg
@@ -425,22 +399,17 @@ class RedisProducer(ProducerConnector):
             pipe (Pipeline, optional): redis pipe. Defaults to None.
         """
         client = pipe if pipe is not None else self.r
-        topic = trim_topic(topic, ":stream")
-        return client.xrange(f"{topic}:stream", min, max, count=count)
+        return client.xrange(topic, min, max, count=count)
 
 
 class RedisConsumerMixin:
     def _init_topics_and_pattern(self, topics, pattern):
         if topics:
-            if isinstance(topics, list):
-                topics = [f"{topic}:sub" for topic in topics]
-            else:
-                topics = [f"{topics}:sub"]
+            if not isinstance(topics, list):
+                topics = [topics]
         if pattern:
-            if isinstance(pattern, list):
-                pattern = [f"{pat}:sub" for pat in pattern]
-            else:
-                pattern = [f"{pattern}:sub"]
+            if not isinstance(pattern, list):
+                pattern = [pattern]
         return topics, pattern
 
     def _init_redis_cls(self, redis_cls):
@@ -556,15 +525,11 @@ class RedisStreamConsumerThreaded(RedisConsumerMixin, ConsumerConnectorThreaded)
 
     def _init_topics_and_pattern(self, topics, pattern):
         if topics:
-            if isinstance(topics, list):
-                topics = [f"{trim_topic(topic, ':stream')}:stream" for topic in topics]
-            else:
-                topics = [f"{trim_topic(topics, ':stream')}:stream"]
+            if not isinstance(topics, list):
+                topics = [topics]
         if pattern:
-            if isinstance(pattern, list):
-                pattern = [f"{trim_topic(pat, ':stream')}:stream" for pat in pattern]
-            else:
-                pattern = [f"{trim_topic(pattern, ':stream')}:stream"]
+            if not isinstance(pattern, list):
+                pattern = [pattern]
         return topics, pattern
 
     def get_id(self, topic: str) -> str:
@@ -603,8 +568,7 @@ class RedisStreamConsumerThreaded(RedisConsumerMixin, ConsumerConnectorThreaded)
 
         """
         if self.pattern is not None:
-            keys = self.r.keys(self.pattern)
-            topics = [key.decode() for key in keys if key.decode().endswith(":stream")]
+            topics = [key.decode() for key in self.r.scan_iter(match=self.pattern, _type="stream")]
         else:
             topics = self.topics
         messages = []
@@ -613,7 +577,7 @@ class RedisStreamConsumerThreaded(RedisConsumerMixin, ConsumerConnectorThreaded)
         elif not self.from_start and not self.stream_keys:
             self.get_newest_message(messages, append=False)
         else:
-            streams = {f"{topic}": self.get_id(topic) for topic in topics}
+            streams = {topic: self.get_id(topic) for topic in topics}
             read_msgs = self.r.xread(streams, count=1)
             if read_msgs:
                 for msg in read_msgs:

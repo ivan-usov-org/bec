@@ -146,26 +146,26 @@ def test_redis_connector_raise_alarm(connector, severity, alarm_type, source, co
 @pytest.mark.parametrize("topic , msg", [["topic1", "msg1"], ["topic2", "msg2"]])
 def test_redis_producer_send(producer, topic, msg):
     producer.send(topic, msg)
-    producer.r.publish.assert_called_once_with(f"{topic}:sub", msg)
+    producer.r.publish.assert_called_once_with(topic, msg)
 
     producer.send(topic, msg, pipe=producer.pipeline())
-    producer.r.pipeline().publish.assert_called_once_with(f"{topic}:sub", msg)
+    producer.r.pipeline().publish.assert_called_once_with(topic, msg)
 
 
 @pytest.mark.parametrize(
     "topic, msgs, max_size, expire",
-    [["topic", "msgs", None, None], ["topic", "msgs", 10, None], ["topic", "msgs", None, 100]],
+    [["topic1", "msgs", None, None], ["topic1", "msgs", 10, None], ["topic1", "msgs", None, 100]],
 )
 def test_redis_producer_lpush(producer, topic, msgs, max_size, expire):
     pipe = None
     producer.lpush(topic, msgs, pipe, max_size, expire)
 
-    producer.r.pipeline().lpush.assert_called_once_with(f"{topic}:val", msgs)
+    producer.r.pipeline().lpush.assert_called_once_with(topic, msgs)
 
     if max_size:
-        producer.r.pipeline().ltrim.assert_called_once_with(f"{topic}:val", 0, max_size)
+        producer.r.pipeline().ltrim.assert_called_once_with(topic, 0, max_size)
     if expire:
-        producer.r.pipeline().expire.assert_called_once_with(f"{topic}:val", expire)
+        producer.r.pipeline().expire.assert_called_once_with(topic, expire)
     if not pipe:
         producer.r.pipeline().execute.assert_called_once()
 
@@ -179,10 +179,10 @@ def test_redis_producer_lset(producer, topic, index, msgs, use_pipe):
     ret = producer.lset(topic, index, msgs, pipe)
 
     if pipe:
-        producer.r.pipeline().lset.assert_called_once_with(f"{topic}:val", index, msgs)
+        producer.r.pipeline().lset.assert_called_once_with(topic, index, msgs)
         assert ret == redis.Redis().pipeline().lset()
     else:
-        producer.r.lset.assert_called_once_with(f"{topic}:val", index, msgs)
+        producer.r.lset.assert_called_once_with(topic, index, msgs)
         assert ret == redis.Redis().lset()
 
 
@@ -195,10 +195,10 @@ def test_redis_producer_rpush(producer, topic, msgs, use_pipe):
     ret = producer.rpush(topic, msgs, pipe)
 
     if pipe:
-        producer.r.pipeline().rpush.assert_called_once_with(f"{topic}:val", msgs)
+        producer.r.pipeline().rpush.assert_called_once_with(topic, msgs)
         assert ret == redis.Redis().pipeline().rpush()
     else:
-        producer.r.rpush.assert_called_once_with(f"{topic}:val", msgs)
+        producer.r.rpush.assert_called_once_with(topic, msgs)
         assert ret == redis.Redis().rpush()
 
 
@@ -211,10 +211,10 @@ def test_redis_producer_lrange(producer, topic, start, end, use_pipe):
     ret = producer.lrange(topic, start, end, pipe)
 
     if pipe:
-        producer.r.pipeline().lrange.assert_called_once_with(f"{topic}:val", start, end)
+        producer.r.pipeline().lrange.assert_called_once_with(topic, start, end)
         assert ret == redis.Redis().pipeline().lrange()
     else:
-        producer.r.lrange.assert_called_once_with(f"{topic}:val", start, end)
+        producer.r.lrange.assert_called_once_with(topic, start, end)
         assert ret == redis.Redis().lrange()
 
 
@@ -224,10 +224,10 @@ def test_redis_producer_lrange(producer, topic, start, end, use_pipe):
 def test_redis_producer_set_and_publish(producer, topic, msg, pipe, expire):
     producer.set_and_publish(topic, msg, pipe, expire)
 
-    producer.r.pipeline().publish.assert_called_once_with(f"{topic}:sub", msg)
-    producer.r.pipeline().set.assert_called_once_with(f"{topic}:val", msg)
+    producer.r.pipeline().publish.assert_called_once_with(topic, msg)
+    producer.r.pipeline().set.assert_called_once_with(topic, msg)
     if expire:
-        producer.r.pipeline().expire.assert_called_once_with(f"{topic}:val", expire)
+        producer.r.pipeline().expire.assert_called_once_with(topic, expire)
     if not pipe:
         producer.r.pipeline().execute.assert_called_once()
 
@@ -240,11 +240,11 @@ def test_redis_producer_set(producer, topic, msg, is_dict, expire):
     producer.set(topic, msg, pipe, is_dict, expire)
 
     if is_dict:
-        producer.r.pipeline().hmset.assert_called_once_with(f"{topic}:val", msg)
+        producer.r.pipeline().hmset.assert_called_once_with(topic, msg)
     else:
-        producer.r.pipeline().set.assert_called_once_with(f"{topic}:val", msg)
+        producer.r.pipeline().set.assert_called_once_with(topic, msg)
     if expire:
-        producer.r.pipeline().expire.assert_called_once_with(f"{topic}:val", expire)
+        producer.r.pipeline().expire.assert_called_once_with(topic, expire)
     if not pipe:
         producer.r.pipeline().execute.assert_called_once()
 
@@ -289,20 +289,20 @@ def test_redis_producer_get(producer, topic, use_pipe, is_dict):
     ret = producer.get(topic, pipe, is_dict)
     if is_dict:
         if pipe:
-            producer.pipeline().hgetall.assert_called_once_with(f"{topic}:val")
+            producer.pipeline().hgetall.assert_called_once_with(topic)
             assert ret == redis.Redis().pipeline().hgetall()
 
         else:
-            producer.r.hgetall.assert_called_once_with(f"{topic}:val")
+            producer.r.hgetall.assert_called_once_with(topic)
             assert ret == redis.Redis().hgetall()
 
     else:
         if pipe:
-            producer.pipeline().get.assert_called_once_with(f"{topic}:val")
+            producer.pipeline().get.assert_called_once_with(topic)
             assert ret == redis.Redis().pipeline().get()
 
         else:
-            producer.r.get.assert_called_once_with(f"{topic}:val")
+            producer.r.get.assert_called_once_with(topic)
             assert ret == redis.Redis().get()
 
 
@@ -329,14 +329,14 @@ def test_redis_consumer_init(consumer, topics, pattern):
 
         if topics:
             if isinstance(topics, list):
-                assert consumer.topics == [f"{topic}:sub" for topic in topics]
+                assert consumer.topics == topics
             else:
-                assert consumer.topics == [f"{topics}:sub"]
+                assert consumer.topics == [topics]
         if pattern:
             if isinstance(pattern, list):
-                assert consumer.pattern == [f"{pat}:sub" for pat in pattern]
+                assert consumer.pattern == pattern
             else:
-                assert consumer.pattern == [f"{pattern}:sub"]
+                assert consumer.pattern == [pattern]
 
         assert consumer.r == redis.Redis()
         assert consumer.pubsub == consumer.r.pubsub()
@@ -375,7 +375,7 @@ def test_redis_consumer_shutdown(consumer):
 
 
 def test_redis_consumer_additional_kwargs(connector):
-    cons = connector.consumer(topics="topic", parent="here", cb=lambda *args, **kwargs: ...)
+    cons = connector.consumer(topics="topic1", parent="here", cb=lambda *args, **kwargs: ...)
     assert "parent" in cons.kwargs
 
 
@@ -393,14 +393,14 @@ def test_mixin_init_topics_and_pattern(mixin, topics, pattern):
 
     if topics:
         if isinstance(topics, list):
-            assert ret_topics == [f"{topic}:sub" for topic in topics]
+            assert ret_topics == topics
         else:
-            assert ret_topics == [f"{topics}:sub"]
+            assert ret_topics == [topics]
     if pattern:
         if isinstance(pattern, list):
-            assert ret_pattern == [f"{pat}:sub" for pat in pattern]
+            assert ret_pattern == pattern
         else:
-            assert ret_pattern == [f"{pattern}:sub"]
+            assert ret_pattern == [pattern]
 
 
 def test_mixin_init_redis_cls(mixin, consumer):
@@ -425,14 +425,14 @@ def test_redis_consumer_threaded_init(consumer_threaded, topics, pattern):
 
         if topics:
             if isinstance(topics, list):
-                assert consumer_threaded.topics == [f"{topic}:sub" for topic in topics]
+                assert consumer_threaded.topics == topics
             else:
-                assert consumer_threaded.topics == [f"{topics}:sub"]
+                assert consumer_threaded.topics == [topics]
         if pattern:
             if isinstance(pattern, list):
-                assert consumer_threaded.pattern == [f"{pat}:sub" for pat in pattern]
+                assert consumer_threaded.pattern == pattern
             else:
-                assert consumer_threaded.pattern == [f"{pattern}:sub"]
+                assert consumer_threaded.pattern == [pattern]
 
         assert consumer_threaded.r == redis.Redis()
         assert consumer_threaded.pubsub == consumer_threaded.r.pubsub()
@@ -444,64 +444,64 @@ def test_redis_consumer_threaded_init(consumer_threaded, topics, pattern):
 
 
 def test_redis_connector_xadd(producer):
-    producer.xadd("topic", {"key": "value"})
-    producer.r.xadd.assert_called_once_with("topic:stream", {"key": "value"})
+    producer.xadd("topic1", {"key": "value"})
+    producer.r.xadd.assert_called_once_with("topic1", {"key": "value"})
 
 
 def test_redis_connector_xadd_with_maxlen(producer):
-    producer.xadd("topic", {"key": "value"}, max_size=100)
-    producer.r.xadd.assert_called_once_with("topic:stream", {"key": "value"}, maxlen=100)
+    producer.xadd("topic1", {"key": "value"}, max_size=100)
+    producer.r.xadd.assert_called_once_with("topic1", {"key": "value"}, maxlen=100)
 
 
 def test_redis_connector_xadd_with_expire(producer):
-    producer.xadd("topic", {"key": "value"}, expire=100)
-    producer.r.pipeline().xadd.assert_called_once_with("topic:stream", {"key": "value"})
-    producer.r.pipeline().expire.assert_called_once_with("topic:stream", 100)
+    producer.xadd("topic1", {"key": "value"}, expire=100)
+    producer.r.pipeline().xadd.assert_called_once_with("topic1", {"key": "value"})
+    producer.r.pipeline().expire.assert_called_once_with("topic1", 100)
     producer.r.pipeline().execute.assert_called_once()
 
 
 def test_redis_connector_xread(producer):
-    producer.xread("topic", "id")
-    producer.r.xread.assert_called_once_with({"topic:stream": "id"}, count=None, block=None)
+    producer.xread("topic1", "id")
+    producer.r.xread.assert_called_once_with({"topic1": "id"}, count=None, block=None)
 
 
 def test_redis_connector_xread_without_id(producer):
-    producer.xread("topic", from_start=True)
-    producer.r.xread.assert_called_once_with({"topic:stream": "0-0"}, count=None, block=None)
+    producer.xread("topic1", from_start=True)
+    producer.r.xread.assert_called_once_with({"topic1": "0-0"}, count=None, block=None)
     producer.r.xread.reset_mock()
 
-    producer.stream_keys["topic"] = "id"
-    producer.xread("topic")
-    producer.r.xread.assert_called_once_with({"topic:stream": "id"}, count=None, block=None)
+    producer.stream_keys["topic1"] = "id"
+    producer.xread("topic1")
+    producer.r.xread.assert_called_once_with({"topic1": "id"}, count=None, block=None)
 
 
 def test_redis_connector_xread_from_end(producer):
-    producer.xread("topic", from_start=False)
-    last_id = producer.r.xinfo_stream("topic:stream")["last-generated-id"]
-    producer.r.xread.assert_called_once_with({"topic:stream": last_id}, count=None, block=None)
+    producer.xread("topic1", from_start=False)
+    last_id = producer.r.xinfo_stream("topic1")["last-generated-id"]
+    producer.r.xread.assert_called_once_with({"topic1": last_id}, count=None, block=None)
 
 
 def test_redis_connector_xread_from_new_topic(producer):
     producer.r.xinfo_stream.side_effect = redis.exceptions.ResponseError(
-        "NOGROUP No such key 'topic:stream' or consumer group"
+        "NOGROUP No such key 'topic' or consumer group"
     )
-    producer.xread("topic", from_start=False)
-    producer.r.xread.assert_called_once_with({"topic:stream": "0-0"}, count=None, block=None)
+    producer.xread("topic1", from_start=False)
+    producer.r.xread.assert_called_once_with({"topic1": "0-0"}, count=None, block=None)
 
 
 def test_redis_connector_get_last(producer):
-    producer.get_last("topic")
-    producer.r.xrevrange.assert_called_once_with("topic:stream", "+", "-", count=1)
+    producer.get_last("topic1")
+    producer.r.xrevrange.assert_called_once_with("topic1", "+", "-", count=1)
 
 
 def test_redis_xrange(producer):
-    producer.xrange("topic", "start", "end")
-    producer.r.xrange.assert_called_once_with("topic:stream", "start", "end", count=None)
+    producer.xrange("topic1", "start", "end")
+    producer.r.xrange.assert_called_once_with("topic1", "start", "end", count=None)
 
 
 def test_redis_xrange_topic_with_suffix(producer):
-    producer.xrange("topic:stream", "start", "end")
-    producer.r.xrange.assert_called_once_with("topic:stream", "start", "end", count=None)
+    producer.xrange("topic1", "start", "end")
+    producer.r.xrange.assert_called_once_with("topic1", "start", "end", count=None)
 
 
 def test_redis_consumer_threaded_no_cb_without_messages(consumer_threaded):
@@ -512,12 +512,12 @@ def test_redis_consumer_threaded_no_cb_without_messages(consumer_threaded):
 
 
 def test_redis_consumer_threaded_cb_called_with_messages(consumer_threaded):
-    messages = {"channel": b"topic:sub", "data": '{"key": "value"}'}
+    messages = {"channel": b"topic1", "data": '{"key": "value"}'}
 
     with mock.patch.object(consumer_threaded.pubsub, "get_message", return_value=messages):
         consumer_threaded.cb = mock.MagicMock()
         consumer_threaded.poll_messages()
-        msg = MessageObject(topic=b"topic:sub", value='{"key": "value"}')
+        msg = MessageObject(topic=b"topic1", value='{"key": "value"}')
         consumer_threaded.cb.assert_called_once_with(msg)
 
 
@@ -528,38 +528,38 @@ def test_redis_consumer_threaded_shutdown(consumer_threaded):
 
 def test_redis_stream_consumer_threaded_get_newest_message():
     consumer = RedisStreamConsumerThreaded(
-        "localhost", "1", topics="topic", cb=mock.MagicMock(), redis_cls=mock.MagicMock()
+        "localhost", "1", topics="topic1", cb=mock.MagicMock(), redis_cls=mock.MagicMock()
     )
     consumer.r.xrevrange.return_value = [(b"1691610882756-0", {b"data": b"msg"})]
     msgs = []
     consumer.get_newest_message(msgs)
-    assert "topic:stream" in consumer.stream_keys
-    assert consumer.stream_keys["topic:stream"] == b"1691610882756-0"
+    assert "topic1" in consumer.stream_keys
+    assert consumer.stream_keys["topic1"] == b"1691610882756-0"
 
 
 def test_redis_stream_consumer_threaded_get_newest_message_no_msg():
     consumer = RedisStreamConsumerThreaded(
-        "localhost", "1", topics="topic", cb=mock.MagicMock(), redis_cls=mock.MagicMock()
+        "localhost", "1", topics="topic1", cb=mock.MagicMock(), redis_cls=mock.MagicMock()
     )
     consumer.r.xrevrange.return_value = []
     msgs = []
     consumer.get_newest_message(msgs)
-    assert "topic:stream" in consumer.stream_keys
-    assert consumer.stream_keys["topic:stream"] == "0-0"
+    assert "topic1" in consumer.stream_keys
+    assert consumer.stream_keys["topic1"] == "0-0"
 
 
 def test_redis_stream_consumer_threaded_get_id():
     consumer = RedisStreamConsumerThreaded(
-        "localhost", "1", topics="topic", cb=mock.MagicMock(), redis_cls=mock.MagicMock()
+        "localhost", "1", topics="topic1", cb=mock.MagicMock(), redis_cls=mock.MagicMock()
     )
-    consumer.stream_keys["topic:stream"] = b"1691610882756-0"
-    assert consumer.get_id("topic:stream") == b"1691610882756-0"
+    consumer.stream_keys["topic1"] = b"1691610882756-0"
+    assert consumer.get_id("topic1") == b"1691610882756-0"
     assert consumer.get_id("doesnt_exist") == "0-0"
 
 
 def test_redis_stream_consumer_threaded_poll_messages():
     consumer = RedisStreamConsumerThreaded(
-        "localhost", "1", topics="topic", cb=mock.MagicMock(), redis_cls=mock.MagicMock()
+        "localhost", "1", topics="topic1", cb=mock.MagicMock(), redis_cls=mock.MagicMock()
     )
     with mock.patch.object(
         consumer, "get_newest_message", return_value=None
@@ -573,7 +573,7 @@ def test_redis_stream_consumer_threaded_poll_messages_newest_only():
     consumer = RedisStreamConsumerThreaded(
         "localhost",
         "1",
-        topics="topic",
+        topics="topic1",
         cb=mock.MagicMock(),
         redis_cls=mock.MagicMock(),
         newest_only=True,
@@ -582,34 +582,33 @@ def test_redis_stream_consumer_threaded_poll_messages_newest_only():
     consumer.r.xrevrange.return_value = [(b"1691610882756-0", {b"data": b"msg"})]
     consumer.poll_messages()
     consumer.r.xread.assert_not_called()
-    consumer.cb.assert_called_once_with(MessageObject(topic="topic:stream", value=b"msg"))
+    consumer.cb.assert_called_once_with(MessageObject(topic="topic1", value=b"msg"))
 
 
 def test_redis_stream_consumer_threaded_poll_messages_read():
     consumer = RedisStreamConsumerThreaded(
         "localhost",
         "1",
-        topics="topic",
+        topics="topic1",
         cb=mock.MagicMock(),
         redis_cls=mock.MagicMock(),
     )
-    consumer.stream_keys["topic:stream"] = "0-0"
+    consumer.stream_keys["topic1"] = "0-0"
 
-    msg = [[b"topic:stream", [(b"1691610714612-0", {b"data": b"msg"})]]]
+    msg = [[b"topic1", [(b"1691610714612-0", {b"data": b"msg"})]]]
 
     consumer.r.xread.return_value = msg
     consumer.poll_messages()
-    consumer.r.xread.assert_called_once_with({"topic:stream": "0-0"}, count=1)
-    consumer.cb.assert_called_once_with(MessageObject(topic="topic:stream", value=b"msg"))
+    consumer.r.xread.assert_called_once_with({"topic1": "0-0"}, count=1)
+    consumer.cb.assert_called_once_with(MessageObject(topic="topic1", value=b"msg"))
 
 
 @pytest.mark.parametrize(
     "topics,expected",
     [
-        ("topic", ["topic:stream"]),
-        (["topic"], ["topic:stream"]),
-        (["topic:stream"], ["topic:stream"]),
-        (["topic:stream", "topic2:stream"], ["topic:stream", "topic2:stream"]),
+        ("topic1", ["topic1"]),
+        (["topic1"], ["topic1"]),
+        (["topic1", "topic2"], ["topic1", "topic2"]),
     ],
 )
 def test_redis_stream_consumer_threaded_init_topics(topics, expected):
