@@ -1,6 +1,6 @@
 ## Client usage
 
-### Starting the client
+### Starting the command-line client
 The client can be started by running
 
 ```bash
