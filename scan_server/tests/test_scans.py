@@ -700,6 +700,10 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     metadata={"readout_priority": "monitored", "DIID": 23},
                 ),
                 BMessage.DeviceInstructionMessage(
+                    **{"device": None, "action": "complete", "parameter": {}},
+                    metadata={"readout_priority": "monitored", "DIID": 31},
+                ),
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="unstage",
                     parameter={},
@@ -989,6 +993,10 @@ def test_fermat_scan(scan_msg, reference_scan_list):
                     metadata={"readout_priority": "monitored", "DIID": 16},
                 ),
                 BMessage.DeviceInstructionMessage(
+                    **{"device": None, "action": "complete", "parameter": {}},
+                    metadata={"readout_priority": "monitored", "DIID": 31},
+                ),
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="unstage",
                     parameter={},
@@ -1128,6 +1136,10 @@ def test_device_rpc():
                     action="wait",
                     parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
                     metadata={"readout_priority": "monitored", "DIID": 6},
+                ),
+                BMessage.DeviceInstructionMessage(
+                    **{"device": None, "action": "complete", "parameter": {}},
+                    metadata={"readout_priority": "monitored", "DIID": 31},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device=None,
@@ -1816,6 +1828,10 @@ def test_scan_base_set_position_offset():
                     metadata={"readout_priority": "monitored", "DIID": 16},
                 ),
                 BMessage.DeviceInstructionMessage(
+                    **{"device": None, "action": "complete", "parameter": {}},
+                    metadata={"readout_priority": "monitored", "DIID": 31},
+                ),
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="unstage",
                     parameter={},
@@ -2245,16 +2261,20 @@ def test_list_scan_raises_for_different_lengths():
                     metadata={"readout_priority": "monitored", "DIID": 20},
                 ),
                 BMessage.DeviceInstructionMessage(
+                    **{"device": None, "action": "complete", "parameter": {}},
+                    metadata={"readout_priority": "monitored", "DIID": 21},
+                ),
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="unstage",
                     parameter={},
-                    metadata={"readout_priority": "monitored", "DIID": 21},
+                    metadata={"readout_priority": "monitored", "DIID": 22},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device=None,
                     action="close_scan",
                     parameter={},
-                    metadata={"readout_priority": "monitored", "DIID": 22},
+                    metadata={"readout_priority": "monitored", "DIID": 23},
                 ),
             ],
         )
@@ -2366,16 +2386,20 @@ def test_time_scan(scan_msg, reference_scan_list):
                     metadata={"readout_priority": "monitored", "DIID": 10, "RID": "1234"},
                 ),
                 BMessage.DeviceInstructionMessage(
+                    **{"device": None, "action": "complete", "parameter": {}},
+                    metadata={"readout_priority": "monitored", "DIID": 11, "RID": "1234"},
+                ),
+                BMessage.DeviceInstructionMessage(
                     device=None,
                     action="unstage",
                     parameter={},
-                    metadata={"readout_priority": "monitored", "DIID": 11, "RID": "1234"},
+                    metadata={"readout_priority": "monitored", "DIID": 12, "RID": "1234"},
                 ),
                 BMessage.DeviceInstructionMessage(
                     device=None,
                     action="close_scan",
                     parameter={},
-                    metadata={"readout_priority": "monitored", "DIID": 12, "RID": "1234"},
+                    metadata={"readout_priority": "monitored", "DIID": 13, "RID": "1234"},
                 ),
             ],
         )

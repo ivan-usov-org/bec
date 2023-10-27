@@ -444,15 +444,47 @@ class ScanWorker(threading.Thread):
         )
 
     def _complete_devices(self, instr: DeviceMsg) -> None:
+        if instr.content.get("device") is None:
+            devices = [dev.name for dev in self.device_manager.devices.enabled_devices]
+        else:
+            devices = instr.content.get("device")
         self.device_manager.producer.send(
             MessageEndpoints.device_instructions(),
             DeviceMsg(
-                device=instr.content.get("device"),
+                device=devices,
                 action="complete",
                 parameter=instr.content["parameter"],
                 metadata=instr.metadata,
             ).dumps(),
         )
+        self._wait_for_complete(instr)
+
+    def _wait_for_complete(self, instr: DeviceMsg) -> None:
+        if instr.content.get("device") is None:
+            devices = [dev.name for dev in self.device_manager.devices.enabled_devices]
+        else:
+            devices = instr.content.get("device")
+        metadata = instr.metadata
+        while True:
+            complete_status = self._get_device_status(MessageEndpoints.device_req_status, devices)
+            self._check_for_interruption()
+            device_status = [
+                BECMessage.DeviceReqStatusMessage.loads(dev) for dev in complete_status
+            ]
+
+            if None in device_status:
+                continue
+            devices_are_ready = all(
+                bool(dev.content.get("success")) is True for dev in device_status
+            )
+            matching_scanID = all(
+                dev.metadata.get("scanID") == metadata["scanID"] for dev in device_status
+            )
+            matching_DIID = all(
+                dev.metadata.get("DIID") == metadata["DIID"] for dev in device_status
+            )
+            if devices_are_ready and matching_scanID and matching_DIID:
+                break
 
     def _baseline_reading(self, instr: DeviceMsg) -> None:
         baseline_devices = [

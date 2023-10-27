@@ -453,6 +453,7 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         """finalize the scan"""
         yield from self.return_to_start()
         yield from self.stubs.wait(wait_type="read", group="primary", wait_group="readout_primary")
+        yield from self.stubs.complete(device=None)
 
     def unstage(self):
         """call the unstage procedure"""

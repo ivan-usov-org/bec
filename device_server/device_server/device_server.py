@@ -8,13 +8,13 @@ from io import StringIO
 from typing import Any
 
 import ophyd
-from ophyd import Staged
-from ophyd.utils import errors as ophyd_errors
-
 from bec_lib.core import Alarms, BECMessage, BECService, MessageEndpoints, bec_logger
 from bec_lib.core.BECMessage import BECStatus
 from bec_lib.core.connector import ConnectorBase
 from bec_lib.core.devicemanager import OnFailure
+from ophyd import Staged
+from ophyd.utils import errors as ophyd_errors
+
 from device_server.devices import is_serializable, rgetattr
 from device_server.devices.devicemanager import DeviceManagerDS
 
@@ -333,10 +333,24 @@ class DeviceServer(BECService):
         status.add_callback(self._status_callback)
 
     def _complete_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
-        obj = self.device_manager.devices.get(instr.content["device"]).obj
-        status = obj.complete()
-        status.__dict__["instruction"] = instr
-        status.add_callback(self._status_callback)
+        if instr.content["device"] is None:
+            devices = self.device_manager.devices.enabled_devices
+        else:
+            devices = instr.content["device"]
+            if not isinstance(devices, list):
+                devices = [devices]
+        for dev in devices:
+            obj = self.device_manager.devices.get(dev).obj
+            if not hasattr(obj, "complete"):
+                # if the device does not have a complete method, we assume that it is done
+                status = ophyd.StatusBase()
+                status.obj = obj
+                status.set_finished()
+            else:
+                logger.info(f"Completing device: {dev}")
+                status = obj.complete()
+            status.__dict__["instruction"] = instr
+            status.add_callback(self._status_callback)
 
     def _set_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
         device_obj = self.device_manager.devices.get(instr.content["device"])
