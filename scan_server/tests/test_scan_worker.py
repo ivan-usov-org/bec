@@ -335,6 +335,38 @@ def test_complete_devices(instructions):
 
 
 @pytest.mark.parametrize(
+    "instructions",
+    [
+        (
+            BECMessage.DeviceInstructionMessage(
+                device=None,
+                action="pre_scan",
+                parameter={},
+                metadata={"readout_priority": "monitored", "DIID": 3},
+            )
+        ),
+    ],
+)
+def test_pre_scan(instructions):
+    worker = get_scan_worker()
+    with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
+        with mock.patch.object(worker, "_wait_for_status") as wait_for_status_mock:
+            worker._pre_scan(instructions)
+            devices = [dev.name for dev in worker.device_manager.devices.enabled_devices]
+
+            wait_for_status_mock.assert_called_once_with(devices, instructions.metadata)
+            send_mock.assert_called_once_with(
+                MessageEndpoints.device_instructions(),
+                BECMessage.DeviceInstructionMessage(
+                    device=devices,
+                    action="pre_scan",
+                    parameter={},
+                    metadata=instructions.metadata,
+                ).dumps(),
+            )
+
+
+@pytest.mark.parametrize(
     "device_status,devices,instr,abort",
     [
         (

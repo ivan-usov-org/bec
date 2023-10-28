@@ -324,12 +324,7 @@ class ScanWorker(threading.Thread):
                 metadata=instr.metadata,
             ).dumps(),
         )
-        self._wait_for_pre_scan(instr)
-
-    def _wait_for_pre_scan(self, instr: DeviceMsg) -> None:
-        devices = [dev.name for dev in self.device_manager.devices.enabled_devices]
-        metadata = instr.metadata
-        self._wait_for_status(devices, metadata)
+        self._wait_for_status(devices, instr.metadata)
 
     def _wait_for_status(self, devices, metadata):
         while True:
