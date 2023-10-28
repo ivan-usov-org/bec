@@ -292,6 +292,49 @@ def test_wait_for_devices(instructions, wait_type):
 
 
 @pytest.mark.parametrize(
+    "instructions",
+    [
+        (
+            BECMessage.DeviceInstructionMessage(
+                device="samx",
+                action="complete",
+                parameter={},
+                metadata={"readout_priority": "monitored", "DIID": 3},
+            )
+        ),
+        (
+            BECMessage.DeviceInstructionMessage(
+                device=None,
+                action="complete",
+                parameter={},
+                metadata={"readout_priority": "monitored", "DIID": 3},
+            )
+        ),
+    ],
+)
+def test_complete_devices(instructions):
+    worker = get_scan_worker()
+    with mock.patch.object(worker, "_wait_for_status") as wait_for_status_mock:
+        with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
+            worker._complete_devices(instructions)
+            if instructions.content["device"]:
+                devices = [instructions.content["device"]]
+            else:
+                devices = [dev.name for dev in worker.device_manager.devices.enabled_devices]
+
+            wait_for_status_mock.assert_called_once_with(devices, instructions.metadata)
+            send_mock.assert_called_once_with(
+                MessageEndpoints.device_instructions(),
+                BECMessage.DeviceInstructionMessage(
+                    device=devices,
+                    action="complete",
+                    parameter={},
+                    metadata=instructions.metadata,
+                ).dumps(),
+            )
+
+
+@pytest.mark.parametrize(
     "device_status,devices,instr,abort",
     [
         (
@@ -1400,6 +1443,14 @@ def test_process_instructions(abortion):
                 device=None, action="scan_report_instruction", parameter={}
             ),
             "_process_scan_report_instruction",
+        ),
+        (
+            BECMessage.DeviceInstructionMessage(device=None, action="pre_scan", parameter={}),
+            "_pre_scan",
+        ),
+        (
+            BECMessage.DeviceInstructionMessage(device=None, action="complete", parameter={}),
+            "_complete_devices",
         ),
     ],
 )

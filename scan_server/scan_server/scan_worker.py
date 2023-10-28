@@ -434,6 +434,8 @@ class ScanWorker(threading.Thread):
             devices = [dev.name for dev in self.device_manager.devices.enabled_devices]
         else:
             devices = instr.content.get("device")
+        if not isinstance(devices, list):
+            devices = [devices]
         self.device_manager.producer.send(
             MessageEndpoints.device_instructions(),
             DeviceMsg(
@@ -443,15 +445,7 @@ class ScanWorker(threading.Thread):
                 metadata=instr.metadata,
             ).dumps(),
         )
-        self._wait_for_complete(instr)
-
-    def _wait_for_complete(self, instr: DeviceMsg) -> None:
-        if instr.content.get("device") is None:
-            devices = [dev.name for dev in self.device_manager.devices.enabled_devices]
-        else:
-            devices = instr.content.get("device")
-        metadata = instr.metadata
-        self._wait_for_status(devices, metadata)
+        self._wait_for_status(devices, instr.metadata)
 
     def _baseline_reading(self, instr: DeviceMsg) -> None:
         baseline_devices = [
