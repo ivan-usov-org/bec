@@ -334,7 +334,7 @@ class DeviceServer(BECService):
 
     def _complete_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
         if instr.content["device"] is None:
-            devices = self.device_manager.devices.enabled_devices
+            devices = [dev.name for dev in self.device_manager.devices.enabled_devices]
         else:
             devices = instr.content["device"]
             if not isinstance(devices, list):

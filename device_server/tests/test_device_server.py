@@ -384,6 +384,82 @@ def test_handle_device_instructions_kickoff(device_server_mock, instr):
     [
         BECMessage.DeviceInstructionMessage(
             device="samx",
+            action="complete",
+            parameter={},
+            metadata={"stream": "primary", "DIID": 1, "RID": "test"},
+        ),
+    ],
+)
+def test_handle_device_instructions_complete(device_server_mock, instr):
+    device_server = device_server_mock
+    msg = BECMessage.DeviceInstructionMessage.dumps(instr)
+    instructions = BECMessage.DeviceInstructionMessage.loads(msg)
+
+    with mock.patch.object(device_server, "_complete_device") as complete_mock:
+        device_server.handle_device_instructions(msg)
+        complete_mock.assert_called_once_with(instructions)
+
+
+@pytest.mark.parametrize(
+    "instr",
+    [
+        BECMessage.DeviceInstructionMessage(
+            device="flyer_sim",
+            action="complete",
+            parameter={},
+            metadata={"stream": "primary", "DIID": 1, "RID": "test"},
+        ),
+        BECMessage.DeviceInstructionMessage(
+            device="bpm4i",
+            action="complete",
+            parameter={},
+            metadata={"stream": "primary", "DIID": 1, "RID": "test"},
+        ),
+        BECMessage.DeviceInstructionMessage(
+            device=None,
+            action="complete",
+            parameter={},
+            metadata={"stream": "primary", "DIID": 1, "RID": "test"},
+        ),
+    ],
+)
+def test_complete_device(device_server_mock, instr):
+    device_server = device_server_mock
+    complete_mock = mock.MagicMock()
+    device_server.device_manager.devices.flyer_sim.obj.complete = complete_mock
+    device_server._complete_device(instr)
+    if instr.content["device"] == "flyer_sim" or instr.content["device"] is None:
+        complete_mock.assert_called_once()
+    else:
+        complete_mock.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "instr",
+    [
+        BECMessage.DeviceInstructionMessage(
+            device="samx",
+            action="pre_scan",
+            parameter={},
+            metadata={"stream": "primary", "DIID": 1, "RID": "test"},
+        ),
+    ],
+)
+def test_handle_device_instructions_pre_scan(device_server_mock, instr):
+    device_server = device_server_mock
+    msg = BECMessage.DeviceInstructionMessage.dumps(instr)
+    instructions = BECMessage.DeviceInstructionMessage.loads(msg)
+
+    with mock.patch.object(device_server, "_pre_scan") as pre_scan_mock:
+        device_server.handle_device_instructions(msg)
+        pre_scan_mock.assert_called_once_with(instructions)
+
+
+@pytest.mark.parametrize(
+    "instr",
+    [
+        BECMessage.DeviceInstructionMessage(
+            device="samx",
             action="trigger",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
