@@ -310,6 +310,14 @@ def test_wait_for_devices(instructions, wait_type):
                 metadata={"readout_priority": "monitored", "DIID": 3},
             )
         ),
+        (
+            BECMessage.DeviceInstructionMessage(
+                device=["samx", "samy"],
+                action="complete",
+                parameter={},
+                metadata={"readout_priority": "monitored", "DIID": 3},
+            )
+        ),
     ],
 )
 def test_complete_devices(instructions):
@@ -318,7 +326,9 @@ def test_complete_devices(instructions):
         with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
             worker._complete_devices(instructions)
             if instructions.content["device"]:
-                devices = [instructions.content["device"]]
+                devices = instructions.content["device"]
+                if isinstance(devices, str):
+                    devices = [devices]
             else:
                 devices = [dev.name for dev in worker.device_manager.devices.enabled_devices]
 
