@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.36.1 (2023-10-30)
+
+### Fix
+
+* Add '.[dev]' to bash scripts to avoid escape char in certain shells while install ([`0d5168d`](https://gitlab.psi.ch/bec/bec/-/commit/0d5168dcedf32902ffd866c45d85457c4f22e7e7))
+
 ## v0.36.0 (2023-10-30)
 
 ### Feature
