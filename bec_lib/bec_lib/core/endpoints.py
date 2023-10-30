@@ -121,7 +121,7 @@ class MessageEndpoints:
     def device_req_status(cls, device: str) -> str:
         """
         Endpoint for device request status. This endpoint is used by the device server to publish
-        the device request status using a BECMessage.DeviceRequestStatus message.
+        the device request status using a BECMessage.DeviceReqStatusMessage message.
 
         Args:
             device (str): Device name, e.g. "samx".
