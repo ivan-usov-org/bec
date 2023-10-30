@@ -82,7 +82,7 @@ class BECMessage:
         metadata: dict = None,
         version: float = DEFAULT_VERSION,
     ) -> None:
-        self.msg_type = msg_type
+        self.msg_type = type(self).__name__ if version == 1.3 else msg_type
         self.content = content
         self.metadata = metadata if metadata is not None else {}
         self.version = version
@@ -135,7 +135,7 @@ class BECMessage:
                     ret.append(msg_cls.loads(sub_message))
                 return ret
             return cls._validated_return(msg)
-        if version == 1.2:
+        if version in (1.2, 1.3):
             declaration, msg_header_body = msg.split(b"_EOH_", maxsplit=1)
             _, version, header_length, _ = declaration.split(b"_")
             header = msg_header_body[: int(header_length)]
@@ -144,7 +144,8 @@ class BECMessage:
             msg_compression = header.get("compression")
             compression_handler = cls._get_compression_handler(msg_compression)
             msg_out = {**header, "body": compression_handler.loads(body, encode=False)}
-            if header["msg_type"] == "bundle_message":
+            header_msg_type = "BundleMessage" if version == 1.3 else "bundle_message"
+            if header["msg_type"] == header_msg_type:
                 msgs = msg_out["body"]["content"]["messages"]
                 ret = []
                 for sub_message in msgs:
@@ -182,14 +183,15 @@ class BECMessage:
                     "body": msg_body,
                 }
             )
-        if self.version == 1.2:
+        if self.version in (1.2, 1.3):
             msg = {
                 "content": self.content,
                 "metadata": self.metadata,
             }
+            msg_type = type(self).__name__ if self.version == 1.3 else self.msg_type
             msg_header = json.dumps(
                 {
-                    "msg_type": self.msg_type,
+                    "msg_type": msg_type,
                     "version": self.version,
                     "compression": self.compression,
                 }
@@ -207,10 +209,13 @@ class BECMessage:
             msg_body = msg
         else:
             msg_body = msg.get("body")
-        if cls.msg_type != msg.get("msg_type"):
+        cls_msg_type = cls.__name__ if version == 1.3 else cls.msg_type
+        if cls_msg_type != msg.get("msg_type"):
             logger.warning(f"Invalid message type: {msg.get('msg_type')}")
             return None
         msg_conv = cls(**msg_body.get("content"), metadata=msg_body.get("metadata"))
+        if version == 1.3:
+            msg_conv.msg_type = cls.__name__
         if msg_conv._is_valid():
             return msg_conv
         logger.warning(f"Invalid message: {msg_conv}")
@@ -248,7 +253,12 @@ class BECMessage:
         else:
             msg_json = json.loads(msg)
         module_members = inspect.getmembers(sys.modules[__name__], inspect.isclass)
-        bec_classes = {mem.msg_type: mem for _, mem in module_members if hasattr(mem, "msg_type")}
+        if version == 1.3:
+            bec_classes = {name: mem for name, mem in module_members if issubclass(mem, BECMessage)}
+        else:
+            bec_classes = {
+                mem.msg_type: mem for _, mem in module_members if hasattr(mem, "msg_type")
+            }
         msg_class = bec_classes[msg_json["msg_type"]]
         return msg_class
 
