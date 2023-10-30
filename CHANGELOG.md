@@ -2,6 +2,20 @@
 
 <!--next-version-placeholder-->
 
+## v0.36.0 (2023-10-30)
+
+### Feature
+
+* Added complete call to all devices; closes #93 ([`042e51e`](https://gitlab.psi.ch/bec/bec/-/commit/042e51e857cad3198823c9227e593b15ba1a233f))
+
+### Fix
+
+* Fixed bug in complete for all devices ([`08d34a8`](https://gitlab.psi.ch/bec/bec/-/commit/08d34a8418b768209b0721ac876b76575699ae7e))
+
+### Documentation
+
+* Updated introduction; added scripts and scan defs ([`b9f2eab`](https://gitlab.psi.ch/bec/bec/-/commit/b9f2eab7297fd38085d1d77e0dd66aa070fe051e))
+
 ## v0.35.1 (2023-10-06)
 
 ### Fix
