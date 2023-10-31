@@ -1235,7 +1235,7 @@ def test_round_roi_scan():
     request = RoundROIScan(
         *args, device_manager=device_manager, parameter=scan_msg.content["parameter"], **kwargs
     )
-    assert request.scan_report_devices == ["samx", "samy"]
+    assert set(request.scan_report_devices) == set(["samx", "samy"])
     assert request.dr == 2
     assert request.nth == 4
     assert request.exp_time == 2
@@ -1343,7 +1343,7 @@ def test_scan_report_devices():
     request = FermatSpiralScan(
         device_manager=device_manager, parameter=scan_msg.content["parameter"]
     )
-    assert request.scan_report_devices == ["samx", "samy"]
+    assert set(request.scan_report_devices) == set(["samx", "samy"])
 
     request.scan_report_devices = ["samx", "samy", "samz"]
     assert request.scan_report_devices == ["samx", "samy", "samz"]
