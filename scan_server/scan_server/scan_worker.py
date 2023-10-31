@@ -661,6 +661,17 @@ class ScanWorker(threading.Thread):
                 instr.metadata["queueID"] = queue.queue_id
                 self._instruction_step(instr)
             raise ScanAbortion from exc
+        except Exception as exc:
+            content = traceback.format_exc()
+            logger.error(content)
+            self.connector.raise_alarm(
+                severity=Alarms.MAJOR,
+                source="ScanWorker",
+                content=content,
+                alarm_type=exc.__class__.__name__,
+                metadata={},
+            )
+            raise ScanAbortion from exc
         queue.is_active = False
         queue.status = InstructionQueueStatus.COMPLETED
         self.current_instruction_queue_item = None
