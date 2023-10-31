@@ -347,7 +347,7 @@ class DeviceServer(BECService):
                 status.obj = obj
                 status.set_finished()
             else:
-                logger.info(f"Completing device: {dev}")
+                logger.debug(f"Completing device: {dev}")
                 status = obj.complete()
             status.__dict__["instruction"] = instr
             status.add_callback(self._status_callback)
