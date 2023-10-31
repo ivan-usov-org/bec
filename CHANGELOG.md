@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.36.2 (2023-10-31)
+
+### Fix
+
+* Fixed error that caused the scan worker to shut down instead of raising for scan abortion ([`f1e8bfb`](https://gitlab.psi.ch/bec/bec/-/commit/f1e8bfba80468dc9aa7d057ecb57ef383c215c71))
+* Added device name to flyer readout ([`cd82727`](https://gitlab.psi.ch/bec/bec/-/commit/cd827271bb738ced288450dc79b7dc0316e6b0b9))
+
 ## v0.36.1 (2023-10-30)
 
 ### Fix
