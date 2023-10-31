@@ -354,7 +354,7 @@ class DeviceManagerDS(DeviceManagerBase):
                 signals[key] = {"value": val[ii]}
             bundle.append(
                 BECMessage.DeviceMessage(
-                    signals=signals,
+                    signals={obj.name: signals},
                     metadata={"pointID": ii, **metadata},
                 ).dumps()
             )
