@@ -1,4 +1,5 @@
 import inspect
+import time
 import traceback
 from functools import reduce
 
@@ -349,9 +350,10 @@ class DeviceManagerDS(DeviceManagerBase):
         max_points = min(len(d) for d in data.values())
         bundle = BECMessage.BundleMessage()
         for ii in range(emitted_points, max_points):
+            timestamp = time.time()
             signals = {}
             for key, val in data.items():
-                signals[key] = {"value": val[ii]}
+                signals[key] = {"value": val[ii], "timestamp": timestamp}
             bundle.append(
                 BECMessage.DeviceMessage(
                     signals={obj.name: signals},
