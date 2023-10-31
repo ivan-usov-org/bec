@@ -97,3 +97,7 @@ class ServiceConfig:
     @property
     def mongodb(self):
         return self._load_urls("mongodb", required=False)
+
+    @property
+    def abort_on_ctrl_c(self):
+        return self.service_config.get("abort_on_ctrl_c", True)

@@ -9,9 +9,8 @@ scibec:
   port: 3030
   beamline: TestBeamline
 service_config:
-  general:
-    reset_queue_on_cancel: True
-    enforce_ACLs: False
+  abort_on_ctrl_c: False
+  enforce_ACLs: False
   file_writer:
     plugin: default_NeXus_format
     base_path: ./ 

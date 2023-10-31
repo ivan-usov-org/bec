@@ -114,8 +114,14 @@ class SigintHandler(SignalHandler):
             return
 
         # - Ctrl-C twice within 10 seconds or a direct command (e.g. mv) -> hard pause
+        if self.bec._service_config.abort_on_ctrl_c:
+            print("The scan will be aborted.")
+            threading.Thread(
+                target=self.bec.queue.request_scan_abortion,
+                daemon=True,
+            ).start()
+            raise ScanInterruption("User abort.")
         print("A hard pause will be requested.")
-
         threading.Thread(
             target=self.bec.queue.request_scan_interruption,
             args=(False,),
