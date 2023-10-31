@@ -206,7 +206,11 @@ class RequestBase(ABC):
         self._pre_scan_macros = []
         self._scan_report_devices = None
         self._get_scan_motors()
-        self.readout_priority = {"monitored": monitored, "baseline": [], "ignored": []}
+        self.readout_priority = {
+            "monitored": monitored if monitored is not None else [],
+            "baseline": [],
+            "ignored": [],
+        }
         self.update_readout_priority()
         if metadata is None:
             self.metadata = {}
@@ -219,7 +223,7 @@ class RequestBase(ABC):
     def scan_report_devices(self):
         """devices to be included in the scan report"""
         if self._scan_report_devices is None:
-            return self.scan_motors
+            return self.readout_priority["monitored"]
         return self._scan_report_devices
 
     @scan_report_devices.setter
