@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.37.0 (2023-11-01)
+
+### Feature
+
+* Added option to specify monitored devices per scan; closes #100 ([`d3da613`](https://gitlab.psi.ch/bec/bec/-/commit/d3da613bfdf3721f5c52f5491bf64b01317a4126))
+
+### Fix
+
+* Fixed readout_priority update ([`aee1bda`](https://gitlab.psi.ch/bec/bec/-/commit/aee1bdae1461dd1bb8c0f959c8bce97605074d9d))
+
 ## v0.36.3 (2023-11-01)
 
 ### Fix
