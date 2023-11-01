@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.38.0 (2023-11-01)
+
+### Feature
+
+* Added config option to abort on ctrl_c; closes #95 ([`705daa6`](https://gitlab.psi.ch/bec/bec/-/commit/705daa6d9e9642fdea85adafa12e4946e69bcd6c))
+
 ## v0.37.0 (2023-11-01)
 
 ### Feature
