@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.36.3 (2023-11-01)
+
+### Fix
+
+* Added missing timestamp to flyer update ([`091df2f`](https://gitlab.psi.ch/bec/bec/-/commit/091df2f0a136a78423159faa35308d44f68f535c))
+
 ## v0.36.2 (2023-10-31)
 
 ### Fix
