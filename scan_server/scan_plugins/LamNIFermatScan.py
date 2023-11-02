@@ -207,7 +207,7 @@ class LamNIFermatScan(ScanBase, LamNIMixin):
     arg_input = {}
     arg_bundle_size = None
 
-    def __init__(self, *args, parameter=None, **kwargs):
+    def __init__(self, *args, parameter: dict = None, **kwargs):
         """
         A LamNI scan following Fermat's spiral.
 

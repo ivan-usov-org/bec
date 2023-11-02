@@ -15,7 +15,7 @@ class OTFScan(FlyScanBase):
     arg_input = {}
     arg_bundle_size = len(arg_input)
 
-    def __init__(self, *args, parameter=None, **kwargs):
+    def __init__(self, *args, parameter: dict = None, **kwargs):
         """Scans the energy from e1 to e2 in <time> minutes.
 
         Examples:
@@ -78,7 +78,7 @@ class HystScan(ScanBase):
     scan_type = "step"
     default_ramp_rate = 2
 
-    def __init__(self, *args, parameter=None, **kwargs):
+    def __init__(self, *args, parameter: dict = None, **kwargs):
         """
         A hysteresis scan.
 

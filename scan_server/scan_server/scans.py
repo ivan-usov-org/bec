@@ -190,8 +190,8 @@ class RequestBase(ABC):
         *args,
         device_manager: DeviceManagerBase = None,
         monitored: list = None,
-        parameter=None,
-        metadata=None,
+        parameter: dict = None,
+        metadata: dict = None,
         **kwargs,
     ) -> None:
         super().__init__()
@@ -745,10 +745,10 @@ class Scan(ScanBase):
     def __init__(
         self,
         *args,
-        exp_time=0,
-        settling_time=0,
-        relative=False,
-        burst_at_each_point=1,
+        exp_time: float = 0,
+        settling_time: float = 0,
+        relative: bool = False,
+        burst_at_each_point: int = 1,
         **kwargs,
     ):
         """
@@ -798,13 +798,13 @@ class FermatSpiralScan(ScanBase):
     def __init__(
         self,
         *args,
-        step=0.1,
-        exp_time=0,
-        settling_time=0,
-        relative=False,
-        burst_at_each_point=1,
-        spiral_type=0,
-        optim_trajectory=None,
+        step: float = 0.1,
+        exp_time: float = 0,
+        settling_time: float = 0,
+        relative: bool = False,
+        burst_at_each_point: int = 1,
+        spiral_type: float = 0,
+        optim_trajectory: str = None,
         **kwargs,
     ):
         """
@@ -864,7 +864,7 @@ class RoundScan(ScanBase):
     }
     arg_bundle_size = len(arg_input)
 
-    def __init__(self, *args, relative=False, burst_at_each_point=1, **kwargs):
+    def __init__(self, *args, relative: bool = False, burst_at_each_point: int = 1, **kwargs):
         """
         A scan following a round shell-like pattern.
 
@@ -911,11 +911,11 @@ class ContLineScan(ScanBase):
     def __init__(
         self,
         *args,
-        exp_time=0,
-        steps=10,
-        relative=False,
-        offset=100,
-        burst_at_each_point=1,
+        exp_time: float = 0,
+        steps: int = 10,
+        relative: bool = False,
+        offset: float = 100,
+        burst_at_each_point: int = 1,
         **kwargs,
     ):
         """
@@ -1074,11 +1074,11 @@ class RoundROIScan(ScanBase):
     def __init__(
         self,
         *args,
-        dr=1,
-        nth=5,
-        exp_time=0,
-        relative=False,
-        burst_at_each_point=1,
+        dr: float = 1,
+        nth: int = 5,
+        exp_time: float = 0,
+        relative: bool = False,
+        burst_at_each_point: int = 1,
         **kwargs,
     ):
         """
@@ -1124,7 +1124,7 @@ class ListScan(ScanBase):
     }
     arg_bundle_size = len(arg_input)
 
-    def __init__(self, *args, parameter=None, **kwargs):
+    def __init__(self, *args, parameter: dict = None, **kwargs):
         """
         A scan following the positions specified in a list.
         Please note that all lists must be of equal length.
@@ -1157,7 +1157,14 @@ class TimeScan(ScanBase):
     arg_input = {}
     arg_bundle_size = len(arg_input)
 
-    def __init__(self, points, interval, *args, **kwargs):
+    def __init__(
+        self,
+        points: int,
+        interval: float,
+        exp_time: float = 0,
+        burst_at_each_point: int = 1,
+        **kwargs,
+    ):
         """
         Trigger and readout devices at a fixed interval.
         Note that the interval time cannot be less than the exposure time.
@@ -1180,6 +1187,8 @@ class TimeScan(ScanBase):
         super().__init__(**kwargs)
         self.axis = []
         self.points = points
+        self.exp_time = exp_time
+        self.burst_at_each_point = burst_at_each_point
         self.interval = interval
         self.interval -= self.exp_time
 
@@ -1220,7 +1229,7 @@ class MonitorScan(ScanBase):
     arg_bundle_size = len(arg_input)
     scan_type = "fly"
 
-    def __init__(self, device, start: float, stop: float, *args, relative=False, **kwargs):
+    def __init__(self, device, start: float, stop: float, *args, relative: bool = False, **kwargs):
         """
         Readout all primary devices at each update of the monitored device.
 
@@ -1301,7 +1310,7 @@ class Acquire(ScanBase):
     arg_input = {}
     arg_bundle_size = len(arg_input)
 
-    def __init__(self, *args, exp_time=0, burst_at_each_point=1, **kwargs):
+    def __init__(self, *args, exp_time: float = 0, burst_at_each_point: int = 1, **kwargs):
         """
         A simple acquisition at the current position.
 
