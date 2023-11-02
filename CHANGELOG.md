@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.38.1 (2023-11-02)
+
+### Fix
+
+* Fixed nested get for missing fields ([`9be82f1`](https://gitlab.psi.ch/bec/bec/-/commit/9be82f12c6b42e99c61eeacc6185c663f95c9ab6))
+
 ## v0.38.0 (2023-11-01)
 
 ### Feature
