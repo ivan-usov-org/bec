@@ -2,6 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## v0.39.0 (2023-11-02)
+
+### Feature
+
+* Changed arg_input from list to dict to provide a full signature ([`c7d8b1a`](https://gitlab.psi.ch/bec/bec/-/commit/c7d8b1afd510cbb63f097b74121bb1b7b9e89ffc))
+
+### Fix
+
+* Added missing type hints to scan signatures ([`6b21908`](https://gitlab.psi.ch/bec/bec/-/commit/6b2190899d16d5bc1b1a582ca5f7159f1be6a56d))
+* Removed helper plugin ([`87100ca`](https://gitlab.psi.ch/bec/bec/-/commit/87100caaf07851ce758dfa5e42f5c121eff2b886))
+
 ## v0.38.1 (2023-11-02)
 
 ### Fix
