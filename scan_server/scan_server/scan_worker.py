@@ -327,6 +327,8 @@ class ScanWorker(threading.Thread):
         self._wait_for_status(devices, instr.metadata)
 
     def _wait_for_status(self, devices, metadata):
+        logger_update_delay = 5
+        start = time.time()
         while True:
             status = self._get_device_status(MessageEndpoints.device_req_status, devices)
             self._check_for_interruption()
@@ -345,6 +347,18 @@ class ScanWorker(threading.Thread):
             )
             if devices_are_ready and matching_scanID and matching_DIID:
                 break
+
+            if time.time() - start > logger_update_delay:
+                # report the status of the devices that are not ready yet
+                missing_devices = [
+                    dev.content["device"]
+                    for dev in device_status
+                    if not dev.content["success"]
+                    or dev.metadata.get("scanID") != metadata["scanID"]
+                    or dev.metadata.get("DIID") != metadata["DIID"]
+                ]
+                logger.info(f"Waiting for a status response of: {missing_devices}")
+                time.sleep(1)
 
     def _send_rpc(self, instr: DeviceMsg) -> None:
         self.device_manager.producer.send(MessageEndpoints.device_instructions(), instr.dumps())
