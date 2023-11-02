@@ -23,3 +23,11 @@ def test_nested_get_with_plain_key():
     """
     data = {"a": {"b": 1}}
     assert nested_get(data, "a") == {"b": 1}
+
+
+def test_nested_get_with_missing_key():
+    """
+    Test the nested_get function.
+    """
+    data = {"a": {"b": 1}}
+    assert nested_get(data, "c") == None
