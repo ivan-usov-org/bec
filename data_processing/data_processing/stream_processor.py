@@ -30,6 +30,8 @@ def nested_get(data: str, keys, default=None):
     """
     if "." in keys:
         key, rest = keys.split(".", 1)
+        if key not in data:
+            return default
         return nested_get(data[key], rest, default=default)
     return data.get(keys, default)
 
