@@ -23,6 +23,7 @@ but they are executed in a specific order:
 import time
 
 from bec_lib.core import BECMessage, MessageEndpoints, bec_logger
+
 from scan_server.scans import FlyScanBase, ScanAbortion
 
 logger = bec_logger.logger
@@ -32,7 +33,7 @@ class OwisGrid(FlyScanBase):
     scan_name = "owis_grid"
     scan_report_hint = "scan_progress"
     required_kwargs = []
-    arg_input = []
+    arg_input = {}
     arg_bundle_size = len(arg_input)
     enforce_sync = False
 

@@ -12,7 +12,7 @@ class OTFScan(FlyScanBase):
     scan_name = "otf_scan"
     scan_report_hint = "table"
     required_kwargs = ["e1", "e2", "time"]
-    arg_input = []
+    arg_input = {}
     arg_bundle_size = len(arg_input)
 
     def __init__(self, *args, parameter=None, **kwargs):
@@ -66,14 +66,14 @@ class HystScan(ScanBase):
     scan_name = "hyst_scan"
     scan_report_hint = "table"
     required_kwargs = []
-    arg_input = [
-        ScanArgType.DEVICE,
-        ScanArgType.FLOAT,
-        ScanArgType.FLOAT,
-        ScanArgType.DEVICE,
-        ScanArgType.FLOAT,
-        ScanArgType.FLOAT,
-    ]
+    arg_input = {
+        "field_motor": ScanArgType.DEVICE,
+        "start_field": ScanArgType.FLOAT,
+        "end_field": ScanArgType.FLOAT,
+        "mono": ScanArgType.DEVICE,
+        "energy1": ScanArgType.FLOAT,
+        "energy2": ScanArgType.FLOAT,
+    }
     arg_bundle_size = 3
     scan_type = "step"
     default_ramp_rate = 2

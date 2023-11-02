@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+
 from bec_lib.core.tests.utils import bec_client
 from bec_lib.scans import ScanObject
 
@@ -8,7 +9,11 @@ from bec_lib.scans import ScanObject
 def test_scan_object_raises(bec_client):
     scan_info = {
         "class": "FermatSpiralScan",
-        "arg_input": ["device", "float", "float"],
+        "arg_input": {
+            "device": "device",
+            "start": "float",
+            "stop": "float",
+        },
         "required_kwargs": ["step", "relative"],
         "arg_bundle_size": 3,
         "scan_report_hint": "table",
@@ -24,7 +29,11 @@ def test_scan_object_raises(bec_client):
 def test_scan_object(bec_client):
     scan_info = {
         "class": "FermatSpiralScan",
-        "arg_input": ["device", "float", "float"],
+        "arg_input": {
+            "device": "device",
+            "start": "float",
+            "stop": "float",
+        },
         "required_kwargs": ["step", "relative"],
         "arg_bundle_size": 3,
         "scan_report_hint": "table",
@@ -42,7 +51,11 @@ def test_scan_object(bec_client):
 def test_scan_object_wo_live_updates(bec_client):
     scan_info = {
         "class": "FermatSpiralScan",
-        "arg_input": ["device", "float", "float"],
+        "arg_input": {
+            "device": "device",
+            "start": "float",
+            "stop": "float",
+        },
         "required_kwargs": ["step", "relative"],
         "arg_bundle_size": 3,
         "scan_report_hint": "table",
@@ -61,7 +74,11 @@ def test_scan_object_wo_live_updates(bec_client):
 def test_scan_object_receives_sample_name(bec_client):
     scan_info = {
         "class": "FermatSpiralScan",
-        "arg_input": ["device", "float", "float"],
+        "arg_input": {
+            "device": "device",
+            "start": "float",
+            "stop": "float",
+        },
         "required_kwargs": ["step", "relative"],
         "arg_bundle_size": 3,
         "scan_report_hint": "table",
@@ -80,7 +97,11 @@ def test_scan_object_receives_sample_name(bec_client):
 def test_scan_object_receives_scan_group(bec_client):
     scan_info = {
         "class": "FermatSpiralScan",
-        "arg_input": ["device", "float", "float"],
+        "arg_input": {
+            "device": "device",
+            "start": "float",
+            "stop": "float",
+        },
         "required_kwargs": ["step", "relative"],
         "arg_bundle_size": 3,
         "scan_report_hint": "table",
@@ -100,7 +121,11 @@ def test_scan_object_receives_scan_group(bec_client):
 def test_scan_object_receives_scan_def_id(bec_client):
     scan_info = {
         "class": "FermatSpiralScan",
-        "arg_input": ["device", "float", "float"],
+        "arg_input": {
+            "device": "device",
+            "start": "float",
+            "stop": "float",
+        },
         "required_kwargs": ["step", "relative"],
         "arg_bundle_size": 3,
         "scan_report_hint": "table",
@@ -120,7 +145,11 @@ def test_scan_object_receives_scan_def_id(bec_client):
 def test_scan_object_receives_dataset_id_on_hold(bec_client):
     scan_info = {
         "class": "FermatSpiralScan",
-        "arg_input": ["device", "float", "float"],
+        "arg_input": {
+            "device": "device",
+            "start": "float",
+            "stop": "float",
+        },
         "required_kwargs": ["step", "relative"],
         "arg_bundle_size": 3,
         "scan_report_hint": "table",

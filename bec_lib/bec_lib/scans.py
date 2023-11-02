@@ -173,7 +173,8 @@ class Scans:
         Returns:
             BECMessage.ScanQueueMessage: _description_
         """
-        arg_input = scan_info.get("arg_input", [])
+        arg_input = list(scan_info.get("arg_input", {}).values())
+
         arg_bundle_size = scan_info.get("arg_bundle_size")
         if len(arg_input) > 0:
             if len(args) % len(arg_input) != 0:

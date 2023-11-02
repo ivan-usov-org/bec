@@ -175,7 +175,11 @@ class LamNIMoveToScanCenter(RequestBase, LamNIMixin):
     scan_report_hint = None
     scan_type = "step"
     required_kwargs = []
-    arg_input = [ScanArgType.FLOAT, ScanArgType.FLOAT, ScanArgType.FLOAT]
+    arg_input = {
+        "shift_x": ScanArgType.FLOAT,
+        "shift_y": ScanArgType.FLOAT,
+        "angle": ScanArgType.FLOAT,
+    }
     arg_bundle_size = None
 
     def __init__(self, *args, parameter=None, **kwargs):
@@ -200,7 +204,7 @@ class LamNIFermatScan(ScanBase, LamNIMixin):
     scan_report_hint = "table"
     scan_type = "step"
     required_kwargs = ["fov_size", "exp_time", "step", "angle"]
-    arg_input = []
+    arg_input = {}
     arg_bundle_size = None
 
     def __init__(self, *args, parameter=None, **kwargs):
