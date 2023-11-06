@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.40.0 (2023-11-06)
+
+### Feature
+
+* Added log to report on missing device status updates ([`261497a`](https://gitlab.psi.ch/bec/bec/-/commit/261497ad985bd52ab9db38086cd5421bc03331d2))
+
 ## v0.39.0 (2023-11-02)
 
 ### Feature
