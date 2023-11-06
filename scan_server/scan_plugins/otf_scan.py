@@ -13,7 +13,7 @@ class OTFScan(FlyScanBase):
     scan_report_hint = "table"
     required_kwargs = ["e1", "e2", "time"]
     arg_input = {}
-    arg_bundle_size = len(arg_input)
+    arg_bundle_size = {"bundle": len(arg_input), "min": None, "max": None}
 
     def __init__(self, *args, parameter: dict = None, **kwargs):
         """Scans the energy from e1 to e2 in <time> minutes.
@@ -74,7 +74,7 @@ class HystScan(ScanBase):
         "energy1": ScanArgType.FLOAT,
         "energy2": ScanArgType.FLOAT,
     }
-    arg_bundle_size = 3
+    arg_bundle_size = {"bundle": 3, "min": 1, "max": 1}
     scan_type = "step"
     default_ramp_rate = 2
 

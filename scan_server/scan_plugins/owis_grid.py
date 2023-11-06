@@ -34,7 +34,7 @@ class OwisGrid(FlyScanBase):
     scan_report_hint = "scan_progress"
     required_kwargs = []
     arg_input = {}
-    arg_bundle_size = len(arg_input)
+    arg_bundle_size = {"bundle": len(arg_input), "min": None, "max": None}
     enforce_sync = False
 
     def __init__(

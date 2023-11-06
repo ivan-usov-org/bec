@@ -15,7 +15,7 @@ def test_scan_object_raises(bec_client):
             "stop": "float",
         },
         "required_kwargs": ["step", "relative"],
-        "arg_bundle_size": 3,
+        "arg_bundle_size": {"bundle": 3, "min": 2, "max": 2},
         "scan_report_hint": "table",
         "doc": "\n        A scan following Fermat's spiral.\n\n        Args:\n            *args: pairs of device / start position / end position / steps arguments\n            relative: Start from an absolute or relative position\n            burst: number of acquisition per point\n            optim_trajectory: routine used for the trajectory optimization, e.g. 'corridor'. Default: None\n\n        Returns:\n\n        Examples:\n            >>> scans.fermat_scan(dev.motor1, -5, 5, dev.motor2, -5, 5, step=0.5, exp_time=0.1, relative=True, optim_trajectory=\"corridor\")\n\n        ",
     }
@@ -24,6 +24,61 @@ def test_scan_object_raises(bec_client):
     with mock.patch.object(bec_client, "alarm_handler"):
         with pytest.raises(TypeError):
             obj._run()
+
+
+def test_scan_object_raises_not_enough_bundles(bec_client):
+    scan_info = {
+        "class": "FermatSpiralScan",
+        "arg_input": {
+            "device": "device",
+            "start": "float",
+            "stop": "float",
+        },
+        "required_kwargs": ["step", "relative"],
+        "arg_bundle_size": {"bundle": 3, "min": 2, "max": 2},
+        "scan_report_hint": "table",
+        "doc": "\n        A scan following Fermat's spiral.\n\n        Args:\n            *args: pairs of device / start position / end position / steps arguments\n            relative: Start from an absolute or relative position\n            burst: number of acquisition per point\n            optim_trajectory: routine used for the trajectory optimization, e.g. 'corridor'. Default: None\n\n        Returns:\n\n        Examples:\n            >>> scans.fermat_scan(dev.motor1, -5, 5, dev.motor2, -5, 5, step=0.5, exp_time=0.1, relative=True, optim_trajectory=\"corridor\")\n\n        ",
+    }
+    scan_name = "fermat_scan"
+    obj = ScanObject(scan_name, scan_info, bec_client)
+    dev = bec_client.device_manager.devices
+    with mock.patch.object(bec_client, "alarm_handler"):
+        with pytest.raises(TypeError):
+            obj._run(dev.samx, -5, 5, step=0.5, exp_time=0.1, relative=False)
+
+
+def test_scan_object_raises_too_many_bundles(bec_client):
+    scan_info = {
+        "class": "FermatSpiralScan",
+        "arg_input": {
+            "device": "device",
+            "start": "float",
+            "stop": "float",
+        },
+        "required_kwargs": ["step", "relative"],
+        "arg_bundle_size": {"bundle": 3, "min": 2, "max": 2},
+        "scan_report_hint": "table",
+        "doc": "\n        A scan following Fermat's spiral.\n\n        Args:\n            *args: pairs of device / start position / end position / steps arguments\n            relative: Start from an absolute or relative position\n            burst: number of acquisition per point\n            optim_trajectory: routine used for the trajectory optimization, e.g. 'corridor'. Default: None\n\n        Returns:\n\n        Examples:\n            >>> scans.fermat_scan(dev.motor1, -5, 5, dev.motor2, -5, 5, step=0.5, exp_time=0.1, relative=True, optim_trajectory=\"corridor\")\n\n        ",
+    }
+    scan_name = "fermat_scan"
+    obj = ScanObject(scan_name, scan_info, bec_client)
+    dev = bec_client.device_manager.devices
+    with mock.patch.object(bec_client, "alarm_handler"):
+        with pytest.raises(TypeError):
+            obj._run(
+                dev.samx,
+                -5,
+                5,
+                dev.samy,
+                -5,
+                5,
+                dev.samz,
+                -5,
+                5,
+                step=0.5,
+                exp_time=0.1,
+                relative=False,
+            )
 
 
 def test_scan_object(bec_client):
@@ -35,7 +90,7 @@ def test_scan_object(bec_client):
             "stop": "float",
         },
         "required_kwargs": ["step", "relative"],
-        "arg_bundle_size": 3,
+        "arg_bundle_size": {"bundle": 3, "min": 2, "max": 2},
         "scan_report_hint": "table",
         "doc": "\n        A scan following Fermat's spiral.\n\n        Args:\n            *args: pairs of device / start position / end position / steps arguments\n            relative: Start from an absolute or relative position\n            burst: number of acquisition per point\n            optim_trajectory: routine used for the trajectory optimization, e.g. 'corridor'. Default: None\n\n        Returns:\n\n        Examples:\n            >>> scans.fermat_scan(dev.motor1, -5, 5, dev.motor2, -5, 5, step=0.5, exp_time=0.1, relative=True, optim_trajectory=\"corridor\")\n\n        ",
     }
@@ -57,7 +112,7 @@ def test_scan_object_wo_live_updates(bec_client):
             "stop": "float",
         },
         "required_kwargs": ["step", "relative"],
-        "arg_bundle_size": 3,
+        "arg_bundle_size": {"bundle": 3, "min": 2, "max": 2},
         "scan_report_hint": "table",
         "doc": "\n        A scan following Fermat's spiral.\n\n        Args:\n            *args: pairs of device / start position / end position / steps arguments\n            relative: Start from an absolute or relative position\n            burst: number of acquisition per point\n            optim_trajectory: routine used for the trajectory optimization, e.g. 'corridor'. Default: None\n\n        Returns:\n\n        Examples:\n            >>> scans.fermat_scan(dev.motor1, -5, 5, dev.motor2, -5, 5, step=0.5, exp_time=0.1, relative=True, optim_trajectory=\"corridor\")\n\n        ",
     }
@@ -80,7 +135,7 @@ def test_scan_object_receives_sample_name(bec_client):
             "stop": "float",
         },
         "required_kwargs": ["step", "relative"],
-        "arg_bundle_size": 3,
+        "arg_bundle_size": {"bundle": 3, "min": 2, "max": 2},
         "scan_report_hint": "table",
         "doc": "\n        A scan following Fermat's spiral.\n\n        Args:\n            *args: pairs of device / start position / end position / steps arguments\n            relative: Start from an absolute or relative position\n            burst: number of acquisition per point\n            optim_trajectory: routine used for the trajectory optimization, e.g. 'corridor'. Default: None\n\n        Returns:\n\n        Examples:\n            >>> scans.fermat_scan(dev.motor1, -5, 5, dev.motor2, -5, 5, step=0.5, exp_time=0.1, relative=True, optim_trajectory=\"corridor\")\n\n        ",
     }
@@ -103,7 +158,7 @@ def test_scan_object_receives_scan_group(bec_client):
             "stop": "float",
         },
         "required_kwargs": ["step", "relative"],
-        "arg_bundle_size": 3,
+        "arg_bundle_size": {"bundle": 3, "min": 2, "max": 2},
         "scan_report_hint": "table",
         "doc": "\n        A scan following Fermat's spiral.\n\n        Args:\n            *args: pairs of device / start position / end position / steps arguments\n            relative: Start from an absolute or relative position\n            burst: number of acquisition per point\n            optim_trajectory: routine used for the trajectory optimization, e.g. 'corridor'. Default: None\n\n        Returns:\n\n        Examples:\n            >>> scans.fermat_scan(dev.motor1, -5, 5, dev.motor2, -5, 5, step=0.5, exp_time=0.1, relative=True, optim_trajectory=\"corridor\")\n\n        ",
     }
@@ -127,7 +182,7 @@ def test_scan_object_receives_scan_def_id(bec_client):
             "stop": "float",
         },
         "required_kwargs": ["step", "relative"],
-        "arg_bundle_size": 3,
+        "arg_bundle_size": {"bundle": 3, "min": 2, "max": 2},
         "scan_report_hint": "table",
         "doc": "\n        A scan following Fermat's spiral.\n\n        Args:\n            *args: pairs of device / start position / end position / steps arguments\n            relative: Start from an absolute or relative position\n            burst: number of acquisition per point\n            optim_trajectory: routine used for the trajectory optimization, e.g. 'corridor'. Default: None\n\n        Returns:\n\n        Examples:\n            >>> scans.fermat_scan(dev.motor1, -5, 5, dev.motor2, -5, 5, step=0.5, exp_time=0.1, relative=True, optim_trajectory=\"corridor\")\n\n        ",
     }
@@ -151,7 +206,7 @@ def test_scan_object_receives_dataset_id_on_hold(bec_client):
             "stop": "float",
         },
         "required_kwargs": ["step", "relative"],
-        "arg_bundle_size": 3,
+        "arg_bundle_size": {"bundle": 3, "min": 2, "max": 2},
         "scan_report_hint": "table",
         "doc": "\n        A scan following Fermat's spiral.\n\n        Args:\n            *args: pairs of device / start position / end position / steps arguments\n            relative: Start from an absolute or relative position\n            burst: number of acquisition per point\n            optim_trajectory: routine used for the trajectory optimization, e.g. 'corridor'. Default: None\n\n        Returns:\n\n        Examples:\n            >>> scans.fermat_scan(dev.motor1, -5, 5, dev.motor2, -5, 5, step=0.5, exp_time=0.1, relative=True, optim_trajectory=\"corridor\")\n\n        ",
     }

@@ -175,7 +175,8 @@ class Scans:
         """
         arg_input = list(scan_info.get("arg_input", {}).values())
 
-        arg_bundle_size = scan_info.get("arg_bundle_size")
+        arg_bundle_size = scan_info.get("arg_bundle_size", {})
+        bundle_size = arg_bundle_size.get("bundle")
         if len(arg_input) > 0:
             if len(args) % len(arg_input) != 0:
                 raise TypeError(
@@ -195,9 +196,22 @@ class Scans:
         if "md" in kwargs:
             metadata = kwargs.pop("md")
         params = {
-            "args": Scans._parameter_bundler(args, arg_bundle_size),
+            "args": Scans._parameter_bundler(args, bundle_size),
             "kwargs": kwargs,
         }
+        # check the number of arg bundles against the number of required bundles
+        if bundle_size:
+            num_bundles = len(params["args"])
+            min_bundles = arg_bundle_size.get("min")
+            max_bundles = arg_bundle_size.get("max")
+            if min_bundles and num_bundles < min_bundles:
+                raise TypeError(
+                    f"{scan_info.get('doc')}\n {scan_name} requires at least {min_bundles} bundles of arguments ({num_bundles} given).",
+                )
+            if max_bundles and num_bundles > max_bundles:
+                raise TypeError(
+                    f"{scan_info.get('doc')}\n {scan_name} requires at most {max_bundles} bundles of arguments ({num_bundles} given).",
+                )
         return BECMessage.ScanQueueMessage(
             scan_type=scan_name, parameter=params, queue="primary", metadata=metadata
         )

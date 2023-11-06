@@ -1428,13 +1428,13 @@ def test_request_base_get_scan_motors():
     request._get_scan_motors()
     assert request.scan_motors == ["samx"]
 
-    request.arg_bundle_size = 2
+    request.arg_bundle_size = {"bundle": 2, "min": None, "max": None}
     request.caller_args = {"samz": (-2, 2), "samy": (-1, 2)}
     request._get_scan_motors()
     assert request.scan_motors == ["samz", "samy"]
 
     request.caller_args = {"samx"}
-    request.arg_bundle_size = 0
+    request.arg_bundle_size = {"bundle": 0, "min": None, "max": None}
     request._get_scan_motors()
     assert request.scan_motors == ["samz", "samy", "samx"]
 
