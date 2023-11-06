@@ -74,9 +74,22 @@ class ScanManager:
             if scan_cls.scan_name in self.available_scans:
                 logger.error(f"{scan_cls.scan_name} already exists. Skipping.")
                 continue
+
+            report_classes = [
+                ScanServerScans.RequestBase,
+                ScanServerScans.ScanBase,
+                ScanServerScans.FlyScanBase,
+                ScanServerScans.ScanStubs,
+                ScanServerScans.ScanComponent,
+            ]
+
+            for report_cls in report_classes:
+                if issubclass(scan_cls, report_cls):
+                    base_cls = report_cls.__name__
             self.scan_dict[scan_cls.__name__] = scan_cls
             self.available_scans[scan_cls.scan_name] = {
                 "class": scan_cls.__name__,
+                "base_class": base_cls,
                 "arg_input": scan_cls.arg_input,
                 "required_kwargs": scan_cls.required_kwargs,
                 "arg_bundle_size": scan_cls.arg_bundle_size,
