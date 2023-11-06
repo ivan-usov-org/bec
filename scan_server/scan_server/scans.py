@@ -1425,7 +1425,11 @@ class LineScan(ScanBase):
         self.positions = np.array(list(zip(*self.axis)))
 
 
-class OpenInteractiveScan(ScanBase):
+class ScanComponent(ScanBase):
+    pass
+
+
+class OpenInteractiveScan(ScanComponent):
     scan_name = "open_interactive_scan"
     scan_report_hint = ""
     required_kwargs = []
@@ -1471,7 +1475,7 @@ class OpenInteractiveScan(ScanBase):
         yield from self.run_baseline_reading()
 
 
-class AddInteractiveScanPoint(ScanBase):
+class AddInteractiveScanPoint(ScanComponent):
     scan_name = "interactive_scan_trigger"
     scan_report_hint = ""
     arg_input = {
@@ -1520,7 +1524,7 @@ class AddInteractiveScanPoint(ScanBase):
         yield from self.close_scan()
 
 
-class CloseInteractiveScan(ScanBase):
+class CloseInteractiveScan(ScanComponent):
     scan_name = "close_interactive_scan"
     scan_report_hint = ""
     arg_input = {}
