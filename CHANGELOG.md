@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.41.0 (2023-11-06)
+
+### Feature
+
+* Changed arg_bundle_size from int to dict; closes #111 ([`1a8cc7c`](https://gitlab.psi.ch/bec/bec/-/commit/1a8cc7c448edd3f712cf2fc20070abefad69dd66))
+
+### Fix
+
+* Fixed scan signature for scan defs and group def ([`3589e3e`](https://gitlab.psi.ch/bec/bec/-/commit/3589e3e36fc4222592dcf9912a9be45b8cc91eea))
+
 ## v0.40.0 (2023-11-06)
 
 ### Feature
