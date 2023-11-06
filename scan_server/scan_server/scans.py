@@ -590,6 +590,8 @@ class ScanStub(RequestBase):
 class OpenScanDef(ScanStub):
     scan_name = "open_scan_def"
     scan_report_hint = None
+    arg_input = {}
+    arg_bundle_size = {"bundle": len(arg_input), "min": 0, "max": 0}
 
     def run(self):
         yield from self.stubs.open_scan_def()
@@ -598,6 +600,8 @@ class OpenScanDef(ScanStub):
 class CloseScanDef(ScanStub):
     scan_name = "close_scan_def"
     scan_report_hint = "table"
+    arg_input = {}
+    arg_bundle_size = {"bundle": len(arg_input), "min": 0, "max": 0}
 
     def run(self):
         yield from self.stubs.close_scan_def()
@@ -605,6 +609,8 @@ class CloseScanDef(ScanStub):
 
 class CloseScanGroup(ScanStub):
     scan_name = "close_scan_group"
+    arg_input = {}
+    arg_bundle_size = {"bundle": len(arg_input), "min": 0, "max": 0}
 
     def run(self):
         yield from self.stubs.close_scan_group()
