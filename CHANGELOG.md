@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.42.0 (2023-11-07)
+
+### Feature
+
+* Added scan base class to scan info ([`5ecc189`](https://gitlab.psi.ch/bec/bec/-/commit/5ecc1893439c46578b9da48913f80ff72d7b1fb9))
+
 ## v0.41.0 (2023-11-06)
 
 ### Feature
