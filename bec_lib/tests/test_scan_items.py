@@ -9,7 +9,7 @@ from bec_lib.core import BECMessage, MessageEndpoints
 from bec_lib.core.tests.utils import ConnectorMock
 from bec_lib.queue_items import QueueItem
 from bec_lib.scan_items import ScanItem
-from bec_lib.scan_manager import ScanManager, ScanStorage
+from bec_lib.scan_manager import ScanManager
 
 # pylint: disable=missing-function-docstring
 

@@ -1,12 +1,10 @@
 from unittest import mock
 
 from bec_lib.bl_conditions import (
-    BeamlineCondition,
     FastOrbitFeedbackCondition,
     LightAvailableCondition,
     ShutterCondition,
 )
-from bec_lib.core.devicemanager import Device
 
 
 def test_shutter_condition():

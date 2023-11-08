@@ -7,7 +7,7 @@ import yaml
 import bec_lib
 from bec_lib.core import BECMessage, MessageEndpoints
 from bec_lib.core.devicemanager import DeviceManagerBase
-from bec_lib.core.observer import Observer, ObserverAction, ObserverManager
+from bec_lib.core.observer import Observer, ObserverManager
 from bec_lib.core.tests.utils import ConnectorMock, create_session_from_config
 
 dir_path = os.path.dirname(bec_lib.__file__)
