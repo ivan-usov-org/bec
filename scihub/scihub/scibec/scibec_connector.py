@@ -3,9 +3,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import msgpack
+from requests import ConnectionError
+
 from bec_lib.core import BECMessage, MessageEndpoints, ServiceConfig, bec_logger
 from bec_lib.core.connector import ConnectorBase
-from requests import ConnectionError
 
 from .config_handler import ConfigHandler
 from .scibec import SciBec, SciBecError

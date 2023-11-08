@@ -2,15 +2,15 @@ import traceback
 from unittest import mock
 from unittest.mock import ANY
 
-import bec_lib.core
 import pytest
-from bec_lib.core import Alarms, BECMessage, MessageEndpoints, ServiceConfig
-from bec_lib.core.BECMessage import BECStatus
-from bec_lib.core.tests.utils import ConnectorMock
 from ophyd import Staged
 from ophyd.utils import errors as ophyd_errors
 from test_device_manager_ds import device_manager, load_device_manager
 
+import bec_lib.core
+from bec_lib.core import Alarms, BECMessage, MessageEndpoints, ServiceConfig
+from bec_lib.core.BECMessage import BECStatus
+from bec_lib.core.tests.utils import ConnectorMock
 from device_server import DeviceServer
 from device_server.device_server import InvalidDeviceError
 

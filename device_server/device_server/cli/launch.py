@@ -15,9 +15,8 @@ if startup is not None:
 import argparse
 import threading
 
-from bec_lib.core import RedisConnector, ServiceConfig, bec_logger
-
 import device_server
+from bec_lib.core import RedisConnector, ServiceConfig, bec_logger
 
 logger = bec_logger.logger
 bec_logger.level = bec_logger.LOGLEVEL.INFO

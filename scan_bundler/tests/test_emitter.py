@@ -1,8 +1,8 @@
 from unittest import mock
 
 import pytest
-from bec_lib.core import BECMessage, MessageEndpoints
 
+from bec_lib.core import BECMessage, MessageEndpoints
 from scan_bundler.emitter import EmitterBase
 
 

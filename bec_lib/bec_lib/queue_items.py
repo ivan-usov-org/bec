@@ -5,9 +5,10 @@ import threading
 from collections import deque
 from typing import TYPE_CHECKING, Deque, List, Optional
 
-from bec_lib.core import BECMessage, MessageEndpoints, threadlocked
 from rich.console import Console
 from rich.table import Table
+
+from bec_lib.core import BECMessage, MessageEndpoints, threadlocked
 
 if TYPE_CHECKING:
     from request_items import RequestItem

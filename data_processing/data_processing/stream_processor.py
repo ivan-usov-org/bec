@@ -7,6 +7,7 @@ from typing import Any, List, Optional, Tuple
 
 import lmfit
 import numpy as np
+
 from bec_lib.core import BECMessage, MessageEndpoints
 from bec_lib.core.redis_connector import MessageObject, RedisConnector
 

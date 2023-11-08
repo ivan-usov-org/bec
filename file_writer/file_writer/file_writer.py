@@ -7,11 +7,11 @@ import os
 import traceback
 import typing
 
+import file_writer_plugins as fwp
 import h5py
 import xmltodict
-from bec_lib.core import bec_logger
 
-import file_writer_plugins as fwp
+from bec_lib.core import bec_logger
 
 from .merged_dicts import merge_dicts
 

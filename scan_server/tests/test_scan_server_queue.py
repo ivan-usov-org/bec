@@ -2,10 +2,10 @@ import uuid
 from unittest import mock
 
 import pytest
-from bec_lib.core import Alarms, BECMessage, MessageEndpoints
-from bec_lib.core.redis_connector import MessageObject
 from utils import load_ScanServerMock
 
+from bec_lib.core import Alarms, BECMessage, MessageEndpoints
+from bec_lib.core.redis_connector import MessageObject
 from scan_server.scan_assembler import ScanAssembler
 from scan_server.scan_queue import (
     InstructionQueueItem,

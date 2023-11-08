@@ -2,9 +2,9 @@ import asyncio
 from unittest import mock
 
 import pytest
-from bec_lib.core import BECMessage, MessageEndpoints
 
 from bec_client.callbacks.scan_progress import LiveUpdatesScanProgress
+from bec_lib.core import BECMessage, MessageEndpoints
 
 
 @pytest.mark.asyncio

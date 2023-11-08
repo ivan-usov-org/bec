@@ -4,6 +4,7 @@ import threading
 import traceback
 
 import numpy as np
+
 from bec_lib.core import (
     BECMessage,
     BECService,
@@ -15,7 +16,6 @@ from bec_lib.core import (
 )
 from bec_lib.core.file_utils import FileWriterMixin
 from bec_lib.core.redis_connector import Alarms, MessageObject, RedisConnector
-
 from file_writer.file_writer import NexusFileWriter
 
 logger = bec_logger.logger

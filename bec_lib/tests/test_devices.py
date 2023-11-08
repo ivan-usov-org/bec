@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+
 from bec_lib.core.devicemanager import DeviceManagerBase
 from bec_lib.core.tests.utils import ConnectorMock
 

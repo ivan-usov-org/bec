@@ -1,10 +1,11 @@
 import os
 from unittest import mock
 
-import bec_lib
 import msgpack
 import pytest
 import yaml
+
+import bec_lib
 from bec_lib.core import BECMessage, MessageEndpoints
 from bec_lib.core.bec_errors import DeviceConfigError
 from bec_lib.core.config_helper import ConfigHelper

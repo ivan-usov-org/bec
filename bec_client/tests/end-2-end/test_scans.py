@@ -4,20 +4,14 @@ import time
 
 import numpy as np
 import pytest
-from bec_lib import BECClient
-from bec_lib.alarm_handler import AlarmBase
-from bec_lib.core import (
-    BECMessage,
-    MessageEndpoints,
-    RedisConnector,
-    ServiceConfig,
-    bec_logger,
-)
-from bec_lib.core.bec_errors import ScanAbortion, ScanInterruption
-from bec_lib.core.tests.utils import wait_for_empty_queue
 
 from bec_client import BECIPythonClient
 from bec_client.callbacks.utils import ScanRequestError
+from bec_lib import BECClient
+from bec_lib.alarm_handler import AlarmBase
+from bec_lib.core import BECMessage, MessageEndpoints, RedisConnector, ServiceConfig, bec_logger
+from bec_lib.core.bec_errors import ScanAbortion, ScanInterruption
+from bec_lib.core.tests.utils import wait_for_empty_queue
 
 logger = bec_logger.logger
 

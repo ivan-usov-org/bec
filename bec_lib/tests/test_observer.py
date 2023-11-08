@@ -1,9 +1,10 @@
 import os
 from unittest import mock
 
-import bec_lib
 import pytest
 import yaml
+
+import bec_lib
 from bec_lib.core import BECMessage, MessageEndpoints
 from bec_lib.core.devicemanager import DeviceManagerBase
 from bec_lib.core.observer import Observer, ObserverAction, ObserverManager

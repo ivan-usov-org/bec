@@ -1,18 +1,13 @@
 import os
 
-import bec_lib.core
 import yaml
+
+import bec_lib.core
 from bec_lib.core import DeviceManagerBase as DeviceManager
 from bec_lib.core import MessageEndpoints, ServiceConfig
 from bec_lib.core.tests.utils import ConnectorMock, create_session_from_config
-
 from scan_server.scan_assembler import ScanAssembler
-from scan_server.scan_queue import (
-    InstructionQueueItem,
-    RequestBlock,
-    RequestBlockQueue,
-    ScanQueue,
-)
+from scan_server.scan_queue import InstructionQueueItem, RequestBlock, RequestBlockQueue, ScanQueue
 from scan_server.scan_server import ScanServer
 from scan_server.scan_worker import InstructionQueueStatus
 from scan_server.scans import RequestBase

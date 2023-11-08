@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List
 
 import numpy as np
+
 from bec_lib.core import BECMessage, DeviceManagerBase, MessageEndpoints, bec_logger
 
 from .errors import LimitError, ScanAbortion

@@ -3,14 +3,7 @@ import time
 import uuid
 from typing import Any
 
-from bec_lib.core import (
-    BECMessage,
-    Device,
-    DeviceManagerBase,
-    MessageEndpoints,
-    Status,
-    bec_logger,
-)
+from bec_lib.core import BECMessage, Device, DeviceManagerBase, MessageEndpoints, Status, bec_logger
 
 
 class ScanRequestError(Exception):

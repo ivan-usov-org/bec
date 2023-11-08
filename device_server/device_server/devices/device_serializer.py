@@ -1,6 +1,7 @@
 import msgpack
-from bec_lib.core.numpy_encoder import numpy_encode
 from ophyd import Device, PositionerBase, Signal
+
+from bec_lib.core.numpy_encoder import numpy_encode
 
 
 def is_serializable(var) -> bool:

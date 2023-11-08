@@ -1,10 +1,12 @@
+import csv
+import os
 from collections import defaultdict
 from unittest import mock
+
 import pytest
-import csv
-from bec_lib.core.utils import _write_csv, scan_to_dict
-import os
+
 from bec_lib.core import BECMessage
+from bec_lib.core.utils import _write_csv, scan_to_dict
 from bec_lib.scan_manager import ScanReport
 
 

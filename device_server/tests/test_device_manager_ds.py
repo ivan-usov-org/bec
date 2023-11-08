@@ -1,17 +1,13 @@
 import os
 from unittest import mock
 
-import bec_lib.core
 import numpy as np
 import pytest
 import yaml
-from bec_lib.core import BECMessage, MessageEndpoints
-from bec_lib.core.tests.utils import (
-    ConnectorMock,
-    ProducerMock,
-    create_session_from_config,
-)
 
+import bec_lib.core
+from bec_lib.core import BECMessage, MessageEndpoints
+from bec_lib.core.tests.utils import ConnectorMock, ProducerMock, create_session_from_config
 from device_server.devices.devicemanager import DeviceManagerDS
 
 # pylint: disable=missing-function-docstring

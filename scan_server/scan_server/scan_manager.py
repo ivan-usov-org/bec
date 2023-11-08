@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 
 import msgpack
+
 from bec_lib.core import MessageEndpoints, bec_logger
 from bec_lib.core.signature_serializer import signature_to_dict
 

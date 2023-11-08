@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import enum
 
+from typeguard import typechecked
+
 from bec_lib.core import BECMessage, Device, MessageEndpoints
 from bec_lib.core.devicemanager import DeviceManagerBase
-from typeguard import typechecked
 
 
 class ObserverAction(str, enum.Enum):

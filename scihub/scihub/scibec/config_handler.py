@@ -6,8 +6,9 @@ import traceback
 import uuid
 from typing import TYPE_CHECKING
 
-import bec_lib
 import msgpack
+
+import bec_lib
 from bec_lib.core import BECMessage, Device, DeviceConfigError
 from bec_lib.core import DeviceManagerBase as DeviceManager
 from bec_lib.core import MessageEndpoints, bec_logger

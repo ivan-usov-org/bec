@@ -2,7 +2,6 @@ from unittest import mock
 
 from bec_lib.core import BECMessage, MessageEndpoints
 from bec_lib.core.redis_connector import MessageObject
-
 from data_processing.worker_manager import DAPWorkerManager
 
 

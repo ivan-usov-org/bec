@@ -3,13 +3,8 @@ import uuid
 from typing import Callable, List, Union
 
 import numpy as np
-from bec_lib.core import (
-    BECMessage,
-    MessageEndpoints,
-    ProducerConnector,
-    Status,
-    bec_logger,
-)
+
+from bec_lib.core import BECMessage, MessageEndpoints, ProducerConnector, Status, bec_logger
 
 from .errors import DeviceMessageError, ScanAbortion
 

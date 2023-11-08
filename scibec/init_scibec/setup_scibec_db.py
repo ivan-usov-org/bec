@@ -3,8 +3,9 @@ import getpass
 import json
 
 import requests
-from scihub.scibec import SciBec
 from tqdm import tqdm
+
+from scihub.scibec import SciBec
 
 
 class SciBecSetup:

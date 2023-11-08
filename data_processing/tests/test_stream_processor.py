@@ -1,8 +1,8 @@
 from unittest import mock
 
 import pytest
-from bec_lib.core import BECMessage
 
+from bec_lib.core import BECMessage
 from data_processing.stream_processor import StreamProcessor
 
 

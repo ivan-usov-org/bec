@@ -6,7 +6,6 @@ import numpy as np
 
 if TYPE_CHECKING:
     from bec_lib.core import DeviceManagerBase
-
     from file_writer.file_writer import HDF5Storage
 
 

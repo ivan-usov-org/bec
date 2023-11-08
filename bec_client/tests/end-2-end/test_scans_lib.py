@@ -2,6 +2,7 @@ import time
 
 import numpy as np
 import pytest
+
 from bec_lib import BECClient
 from bec_lib.alarm_handler import AlarmBase
 from bec_lib.core import RedisConnector, ServiceConfig, bec_logger

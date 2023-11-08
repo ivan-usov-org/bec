@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bec_lib.core import DeviceManagerBase
-
     from file_writer.file_writer import HDF5Storage
 
 
