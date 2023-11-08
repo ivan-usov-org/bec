@@ -5,7 +5,8 @@ import traceback
 from collections import deque
 from typing import Callable, List
 
-from bec_lib.core import bec_logger, threadlocked
+from bec_lib.core.logger import bec_logger
+from bec_lib.core.utils import threadlocked
 
 logger = bec_logger.logger
 

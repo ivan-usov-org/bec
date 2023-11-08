@@ -5,15 +5,15 @@ from functools import wraps
 
 import redis
 
-from .BECMessage import AlarmMessage, LogMessage
-from .connector import (
+from bec_lib.core.BECMessage import AlarmMessage, LogMessage
+from bec_lib.core.connector import (
     ConnectorBase,
     ConsumerConnector,
     ConsumerConnectorThreaded,
     MessageObject,
     ProducerConnector,
 )
-from .endpoints import MessageEndpoints
+from bec_lib.core.endpoints import MessageEndpoints
 
 
 class Alarms(int, enum.Enum):

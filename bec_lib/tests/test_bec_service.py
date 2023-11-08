@@ -4,13 +4,11 @@ from unittest import mock
 import pytest
 
 import bec_lib
-from bec_lib.core import (
-    BECMessage,
-    BECService,
-    BECStatus,
-    MessageEndpoints,
-    ServiceConfig,
-)
+from bec_lib.core import BECMessage
+from bec_lib.core.bec_service import BECService
+from bec_lib.core.BECMessage import BECStatus
+from bec_lib.core.endpoints import MessageEndpoints
+from bec_lib.core.service_config import ServiceConfig
 
 # pylint: disable=no-member
 # pylint: disable=missing-function-docstring

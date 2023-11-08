@@ -7,11 +7,11 @@ from typing import TYPE_CHECKING
 
 from loguru import logger as loguru_logger
 
-from . import BECMessage
-from .endpoints import MessageEndpoints
+from bec_lib.core import BECMessage
+from bec_lib.core.endpoints import MessageEndpoints
 
 if TYPE_CHECKING:
-    from .connector import ConnectorBase
+    from bec_lib.core.connector import ConnectorBase
 
 
 class LogLevel(int, enum.Enum):

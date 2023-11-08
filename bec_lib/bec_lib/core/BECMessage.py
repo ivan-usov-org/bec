@@ -13,8 +13,8 @@ from typing import Any, List, Optional, Union
 import msgpack
 import numpy as np
 
-from .logger import bec_logger
-from .numpy_encoder import numpy_decode, numpy_encode
+from bec_lib.core.logger import bec_logger
+from bec_lib.core.numpy_encoder import numpy_decode, numpy_encode
 
 logger = bec_logger.logger
 

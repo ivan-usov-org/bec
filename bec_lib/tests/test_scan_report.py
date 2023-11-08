@@ -2,7 +2,8 @@ from unittest import mock
 
 import pytest
 
-from bec_lib.core import BECMessage, bec_errors
+from bec_lib.core import BECMessage
+from bec_lib.core.bec_errors import ScanAbortion
 from bec_lib.scan_manager import ScanReport
 
 
@@ -76,5 +77,5 @@ def test_scan_report_wait_for_scan_raises():
     with mock.patch.object(report, "_get_mv_status") as get_mv_status:
         get_mv_status.side_effect = [False, False, True]
         report.queue_item.status = "STOPPED"
-        with pytest.raises(bec_errors.ScanAbortion):
+        with pytest.raises(ScanAbortion):
             report._wait_scan(None, 0.1)

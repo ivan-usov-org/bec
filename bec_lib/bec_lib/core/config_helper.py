@@ -8,13 +8,13 @@ from typing import TYPE_CHECKING
 import msgpack
 import yaml
 
-from .bec_errors import DeviceConfigError
-from .BECMessage import DeviceConfigMessage, RequestResponseMessage
-from .endpoints import MessageEndpoints
-from .logger import bec_logger
+from bec_lib.core.bec_errors import DeviceConfigError
+from bec_lib.core.BECMessage import DeviceConfigMessage, RequestResponseMessage
+from bec_lib.core.endpoints import MessageEndpoints
+from bec_lib.core.logger import bec_logger
 
 if TYPE_CHECKING:
-    from bec_lib.core import RedisConnector
+    from bec_lib.core.redis_connector import RedisConnector
 
 logger = bec_logger.logger
 

@@ -7,11 +7,8 @@ from rich.console import Console
 from rich.table import Table
 from typeguard import typechecked
 
-from bec_lib.core import ConfigHelper
-from bec_lib.core.connector import ConnectorBase
-
-from .bec_errors import DeviceConfigError
-from .BECMessage import (
+from bec_lib.core.bec_errors import DeviceConfigError
+from bec_lib.core.BECMessage import (
     BECStatus,
     DeviceConfigMessage,
     DeviceInfoMessage,
@@ -19,9 +16,11 @@ from .BECMessage import (
     DeviceStatusMessage,
     LogMessage,
 )
-from .endpoints import MessageEndpoints
-from .logger import bec_logger
-from .redis_connector import RedisProducer
+from bec_lib.core.config_helper import ConfigHelper
+from bec_lib.core.connector import ConnectorBase
+from bec_lib.core.endpoints import MessageEndpoints
+from bec_lib.core.logger import bec_logger
+from bec_lib.core.redis_connector import RedisProducer
 
 logger = bec_logger.logger
 

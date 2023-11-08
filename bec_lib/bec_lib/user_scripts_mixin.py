@@ -12,7 +12,7 @@ from pylint.reporters import CollectingReporter
 from rich.console import Console
 from rich.table import Table
 
-from bec_lib.core import bec_logger
+from bec_lib.core.logger import bec_logger
 
 logger = bec_logger.logger
 

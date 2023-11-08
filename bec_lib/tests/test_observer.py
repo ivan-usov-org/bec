@@ -5,8 +5,9 @@ import pytest
 import yaml
 
 import bec_lib
-from bec_lib.core import BECMessage, MessageEndpoints
+from bec_lib.core import BECMessage
 from bec_lib.core.devicemanager import DeviceManagerBase
+from bec_lib.core.endpoints import MessageEndpoints
 from bec_lib.core.observer import Observer, ObserverManager
 from bec_lib.tests.utils import ConnectorMock, create_session_from_config
 

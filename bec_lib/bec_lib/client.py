@@ -13,17 +13,14 @@ from bec_lib.alarm_handler import AlarmHandler
 from bec_lib.bec_worker_manager import BECWorkerManager
 from bec_lib.bl_checks import BeamlineChecks
 from bec_lib.callback_handler import CallbackHandler
-from bec_lib.core import (
-    Alarms,
-    BECService,
-    ConfigHelper,
-    MessageEndpoints,
-    ServiceConfig,
-    bec_logger,
-)
+from bec_lib.core.bec_service import BECService
+from bec_lib.core.config_helper import ConfigHelper
 from bec_lib.core.connector import ConnectorBase
+from bec_lib.core.endpoints import MessageEndpoints
 from bec_lib.core.logbook_connector import LogbookConnector
-from bec_lib.core.redis_connector import RedisConnector
+from bec_lib.core.logger import bec_logger
+from bec_lib.core.redis_connector import Alarms, RedisConnector
+from bec_lib.core.service_config import ServiceConfig
 from bec_lib.devicemanager_client import DMClient
 from bec_lib.scan_manager import ScanManager
 from bec_lib.scans import Scans

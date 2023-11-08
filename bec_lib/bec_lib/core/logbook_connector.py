@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING
 import msgpack
 from requests.exceptions import HTTPError
 
-from .endpoints import MessageEndpoints
-from .logger import bec_logger
+from bec_lib.core.endpoints import MessageEndpoints
+from bec_lib.core.logger import bec_logger
 
 logger = bec_logger.logger
 
@@ -18,7 +18,7 @@ except ImportError:
     logger.info("Unable to import `scilog` optional dependency")
 
 if TYPE_CHECKING:
-    from bec_lib.core import RedisConnector
+    from bec_lib.core.redis_connector import RedisConnector
 
 
 class LogbookConnector:

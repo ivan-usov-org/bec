@@ -8,7 +8,9 @@ import time
 from collections import defaultdict, deque
 from typing import TYPE_CHECKING, Optional
 
-from bec_lib.core import BECMessage, bec_logger, threadlocked
+from bec_lib.core import BECMessage
+from bec_lib.core.logger import bec_logger
+from bec_lib.core.utils import threadlocked
 
 if TYPE_CHECKING:
     from bec_lib.scan_manager import ScanManager

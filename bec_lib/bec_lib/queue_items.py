@@ -8,12 +8,14 @@ from typing import TYPE_CHECKING, Deque, List, Optional
 from rich.console import Console
 from rich.table import Table
 
-from bec_lib.core import BECMessage, MessageEndpoints, threadlocked
+from bec_lib.core import BECMessage
+from bec_lib.core.endpoints import MessageEndpoints
+from bec_lib.core.utils import threadlocked
 
 if TYPE_CHECKING:
-    from request_items import RequestItem
-    from scan_items import ScanItem
-    from scan_manager import ScanManager
+    from bec_lib.request_items import RequestItem
+    from bec_lib.scan_items import ScanItem
+    from bec_lib.scan_manager import ScanManager
 
 
 def update_queue(fcn):

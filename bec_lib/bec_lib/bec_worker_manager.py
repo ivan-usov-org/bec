@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from bec_lib.core import BECMessage, MessageEndpoints, RedisConnector
+from bec_lib.core import BECMessage
+from bec_lib.core.endpoints import MessageEndpoints
+from bec_lib.core.redis_connector import RedisConnector
 
 
 class BECWorker:

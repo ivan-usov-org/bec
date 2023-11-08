@@ -2,7 +2,9 @@ import argparse
 import json
 import threading
 
-from bec_lib.core import BECMessage, RedisConnector, ServiceConfig
+from bec_lib.core import BECMessage
+from bec_lib.core.redis_connector import RedisConnector
+from bec_lib.core.service_config import ServiceConfig
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument(

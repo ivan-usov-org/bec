@@ -5,15 +5,17 @@ from collections import deque
 from typing import TYPE_CHECKING, Deque, Optional
 
 from bec_lib.callback_handler import CallbackHandler
-from bec_lib.core import BECMessage, bec_logger, threadlocked
+from bec_lib.core import BECMessage
+from bec_lib.core.logger import bec_logger
+from bec_lib.core.utils import threadlocked
 
 logger = bec_logger.logger
 
 
 if TYPE_CHECKING:
-    from queue_items import QueueItem
-    from scan_items import ScanItem
-    from scan_manager import ScanManager
+    from bec_lib.queue_items import QueueItem
+    from bec_lib.scan_items import ScanItem
+    from bec_lib.scan_manager import ScanManager
 
 
 class RequestItem:

@@ -7,7 +7,10 @@ from typing import TYPE_CHECKING
 
 from typeguard import typechecked
 
-from bec_lib.core import BECMessage, MessageEndpoints, bec_errors, bec_logger
+from bec_lib.core import BECMessage
+from bec_lib.core.bec_errors import ScanAbortion
+from bec_lib.core.endpoints import MessageEndpoints
+from bec_lib.core.logger import bec_logger
 from bec_lib.queue_items import QueueStorage
 from bec_lib.request_items import RequestStorage
 from bec_lib.scan_items import ScanStorage
@@ -170,7 +173,7 @@ class ScanReport:
             if self.status == "COMPLETED":
                 break
             if self.status == "STOPPED":
-                raise bec_errors.ScanAbortion
+                raise ScanAbortion
             self._client.callbacks.poll()
             time.sleep(sleep_time)
             elapsed_time += sleep_time
