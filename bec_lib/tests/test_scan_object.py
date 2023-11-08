@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from bec_lib.core.tests.utils import bec_client
+from bec_lib.tests.utils import bec_client
 from bec_lib.scans import ScanObject
 
 

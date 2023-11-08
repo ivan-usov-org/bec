@@ -6,7 +6,7 @@ import uuid
 import pytest
 import yaml
 
-import bec_lib.core
+import bec_lib
 from bec_lib import BECClient
 from bec_lib.core import BECMessage, MessageEndpoints, ServiceConfig, bec_logger
 from bec_lib.core.connector import ConnectorBase
@@ -14,7 +14,7 @@ from bec_lib.core.redis_connector import Alarms
 from bec_lib.devicemanager_client import DMClient
 from bec_lib.scans import Scans
 
-dir_path = os.path.dirname(bec_lib.core.__file__)
+dir_path = os.path.dirname(bec_lib.__file__)
 
 logger = bec_logger.logger
 

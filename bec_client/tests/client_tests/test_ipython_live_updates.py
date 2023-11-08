@@ -4,7 +4,7 @@ import pytest
 
 from bec_client.callbacks.ipython_live_updates import IPythonLiveUpdates
 from bec_lib.core import BECMessage
-from bec_lib.core.tests.utils import bec_client
+from bec_lib.tests.utils import bec_client
 from bec_lib.queue_items import QueueItem
 
 

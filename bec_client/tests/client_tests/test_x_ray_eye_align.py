@@ -4,7 +4,7 @@ from bec_client.plugins.LamNI import LamNI, XrayEyeAlign
 from bec_lib.core.devicemanager import Device
 
 # pylint: disable=unused-import
-from bec_lib.core.tests.utils import bec_client
+from bec_lib.tests.utils import bec_client
 
 # pylint: disable=no-member
 # pylint: disable=missing-function-docstring

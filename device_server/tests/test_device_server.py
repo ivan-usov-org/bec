@@ -7,10 +7,9 @@ from ophyd import Staged
 from ophyd.utils import errors as ophyd_errors
 from test_device_manager_ds import device_manager, load_device_manager
 
-import bec_lib.core
 from bec_lib.core import Alarms, BECMessage, MessageEndpoints, ServiceConfig
 from bec_lib.core.BECMessage import BECStatus
-from bec_lib.core.tests.utils import ConnectorMock
+from bec_lib.tests.utils import ConnectorMock, ConsumerMock
 from device_server import DeviceServer
 from device_server.device_server import InvalidDeviceError
 
@@ -54,7 +53,7 @@ def test_start(device_server_mock):
     device_server.start()
 
     assert device_server.threads
-    assert type(device_server.threads[0]) == bec_lib.core.tests.utils.ConsumerMock
+    assert isinstance(device_server.threads[0], ConsumerMock)
     assert device_server.status == BECStatus.RUNNING
 
 

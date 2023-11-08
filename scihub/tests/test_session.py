@@ -6,7 +6,7 @@ import pytest
 import bec_lib.core
 from scihub.scibec.scibec import HttpClient, SciBec, SciBecError
 
-dir_path = os.path.dirname(bec_lib.core.__file__)
+dir_path = os.path.dirname(bec_lib.__file__)
 
 
 def test_make_filter():

@@ -28,7 +28,7 @@ def test_config_helper_update_session_with_file():
 def test_config_helper_load_config_from_file():
     connector = mock.MagicMock()
     config_helper = ConfigHelper(connector)
-    config = config_helper._load_config_from_file(f"{dir_path}/core/tests/test_config.yaml")
+    config = config_helper._load_config_from_file(f"{dir_path}/tests/test_config.yaml")
 
 
 def test_config_helper_save_current_session():

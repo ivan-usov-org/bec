@@ -6,7 +6,7 @@ from unittest import mock
 import pytest
 
 from bec_lib.core import BECMessage, MessageEndpoints
-from bec_lib.core.tests.utils import ConnectorMock
+from bec_lib.tests.utils import ConnectorMock
 from bec_lib.queue_items import QueueItem
 from bec_lib.scan_items import ScanItem
 from bec_lib.scan_manager import ScanManager

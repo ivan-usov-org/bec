@@ -5,13 +5,13 @@ import pytest
 import yaml
 from test_device_manager_ds import device_manager
 
-import bec_lib.core
+import bec_lib
 from bec_lib.core import BECMessage
-from bec_lib.core.tests.utils import ConnectorMock, create_session_from_config
+from bec_lib.tests.utils import ConnectorMock, create_session_from_config
 from device_server.devices.config_update_handler import ConfigUpdateHandler
 from device_server.devices.devicemanager import DeviceConfigError, DeviceManagerDS
 
-dir_path = os.path.dirname(bec_lib.core.__file__)
+dir_path = os.path.dirname(bec_lib.__file__)
 
 
 def test_request_response():

@@ -8,7 +8,7 @@ import bec_lib
 from bec_lib.core import BECMessage, MessageEndpoints
 from bec_lib.core.devicemanager import DeviceManagerBase
 from bec_lib.core.observer import Observer, ObserverManager
-from bec_lib.core.tests.utils import ConnectorMock, create_session_from_config
+from bec_lib.tests.utils import ConnectorMock, create_session_from_config
 
 dir_path = os.path.dirname(bec_lib.__file__)
 
@@ -90,7 +90,7 @@ def test_observer(kwargs, raised_error):
 def device_manager():
     connector = ConnectorMock("")
     dm = DeviceManagerBase(connector, "")
-    with open(f"{dir_path}/core/tests/test_config.yaml", "r") as f:
+    with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
         dm._session = create_session_from_config(yaml.safe_load(f))
     dm._load_session()
     with mock.patch.object(dm, "_get_config"):

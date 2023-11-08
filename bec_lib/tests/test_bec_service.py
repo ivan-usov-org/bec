@@ -17,6 +17,8 @@ from bec_lib.core import (
 # pylint: disable=redefined-outer-name
 # pylint: disable=protected-access
 
+dir_path = os.path.dirname(bec_lib.__file__)
+
 
 def test_bec_service_init_with_service_config():
     config = ServiceConfig(redis={"host": "localhost", "port": 6379})
@@ -33,7 +35,7 @@ def test_bec_service_init_raises_for_invalid_config():
 
 def test_bec_service_init_with_service_config_path():
     service = BECService(
-        config=f"{os.path.dirname(bec_lib.__file__)}/core/tests/test_service_config.yaml",
+        config=f"{dir_path}/tests/test_service_config.yaml",
         connector_cls=mock.MagicMock(),
     )
     assert isinstance(service._service_config, ServiceConfig)
@@ -46,7 +48,7 @@ def test_init_runs_service_check():
         BECService, "_update_existing_services", return_value=False
     ) as mock_update_existing_services:
         service = BECService(
-            config=f"{os.path.dirname(bec_lib.__file__)}/core/tests/test_service_config.yaml",
+            config=f"{dir_path}/tests/test_service_config.yaml",
             connector_cls=mock.MagicMock(),
             unique_service=True,
         )
@@ -58,7 +60,7 @@ def test_run_service_check_raises_for_existing_service():
         BECService, "_update_existing_services", return_value=False
     ) as mock_update_existing_services:
         service = BECService(
-            config=f"{os.path.dirname(bec_lib.__file__)}/core/tests/test_service_config.yaml",
+            config=f"{dir_path}/tests/test_service_config.yaml",
             connector_cls=mock.MagicMock(),
             unique_service=True,
         )
@@ -72,7 +74,7 @@ def test_run_service_check_repeats():
         BECService, "_update_existing_services", return_value=False
     ) as mock_update_existing_services:
         service = BECService(
-            config=f"{os.path.dirname(bec_lib.__file__)}/core/tests/test_service_config.yaml",
+            config=f"{dir_path}/tests/test_service_config.yaml",
             connector_cls=mock.MagicMock(),
             unique_service=True,
         )
@@ -85,7 +87,7 @@ def test_bec_service_shutdown():
         BECService, "_update_existing_services", return_value=False
     ) as mock_update_existing_services:
         service = BECService(
-            config=f"{os.path.dirname(bec_lib.__file__)}/core/tests/test_service_config.yaml",
+            config=f"{dir_path}/tests/test_service_config.yaml",
             connector_cls=mock.MagicMock(),
             unique_service=True,
         )
@@ -106,7 +108,7 @@ def test_bec_service_service_status():
         BECService, "_update_existing_services", return_value=False
     ) as mock_update_existing_services:
         service = BECService(
-            config=f"{os.path.dirname(bec_lib.__file__)}/core/tests/test_service_config.yaml",
+            config=f"{dir_path}/tests/test_service_config.yaml",
             connector_cls=mock.MagicMock(),
             unique_service=True,
         )

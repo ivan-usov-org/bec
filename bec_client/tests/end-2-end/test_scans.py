@@ -11,7 +11,7 @@ from bec_lib import BECClient
 from bec_lib.alarm_handler import AlarmBase
 from bec_lib.core import BECMessage, MessageEndpoints, RedisConnector, ServiceConfig, bec_logger
 from bec_lib.core.bec_errors import ScanAbortion, ScanInterruption
-from bec_lib.core.tests.utils import wait_for_empty_queue
+from bec_lib.tests.utils import wait_for_empty_queue
 
 logger = bec_logger.logger
 
