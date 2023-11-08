@@ -1524,7 +1524,7 @@ def test_reset():
 
 def test_cleanup():
     worker = get_scan_worker()
-    with mock.patch.object(worker, "_unstage_devices") as unstage_mock:
+    with mock.patch.object(worker, "unstage_devices") as unstage_mock:
         worker.cleanup()
         unstage_mock.assert_called_once_with(devices=list(worker._staged_devices), cleanup=True)
 
