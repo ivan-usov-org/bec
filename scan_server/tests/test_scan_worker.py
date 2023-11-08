@@ -277,7 +277,7 @@ def test_wait_for_devices(instructions, wait_type):
         with mock.patch.object(worker, "_wait_for_read") as read_mock:
             with mock.patch.object(worker, "_wait_for_trigger") as trigger_mock:
                 if wait_type:
-                    worker._wait_for_devices(instructions)
+                    worker.wait_for_devices(instructions)
 
                 if wait_type == "move":
                     idle_mock.assert_called_once_with(instructions)
@@ -287,7 +287,7 @@ def test_wait_for_devices(instructions, wait_type):
                     trigger_mock.assert_called_once_with(instructions)
                 else:
                     with pytest.raises(DeviceMessageError) as exc_info:
-                        worker._wait_for_devices(instructions)
+                        worker.wait_for_devices(instructions)
                     assert exc_info.value.args[0] == "Unknown wait command"
 
 
@@ -324,7 +324,7 @@ def test_complete_devices(instructions):
     worker = get_scan_worker()
     with mock.patch.object(worker, "_wait_for_status") as wait_for_status_mock:
         with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
-            worker._complete_devices(instructions)
+            worker.complete_devices(instructions)
             if instructions.content["device"]:
                 devices = instructions.content["device"]
                 if isinstance(devices, str):
@@ -361,7 +361,7 @@ def test_pre_scan(instructions):
     worker = get_scan_worker()
     with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
         with mock.patch.object(worker, "_wait_for_status") as wait_for_status_mock:
-            worker._pre_scan(instructions)
+            worker.pre_scan(instructions)
             devices = [dev.name for dev in worker.device_manager.devices.enabled_devices]
 
             wait_for_status_mock.assert_called_once_with(devices, instructions.metadata)
@@ -577,9 +577,8 @@ def test_check_for_failed_movements(device_status, devices, instr, abort):
 def test_wait_for_idle(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
     worker = get_scan_worker()
 
-    with mock.patch(
-        "scan_server.scan_worker.ScanWorker._get_device_status",
-        return_value=[req_msg.dumps()],
+    with mock.patch.object(
+        worker.validate, "get_device_status", return_value=[req_msg.dumps()]
     ) as device_status:
         worker.device_manager.producer._get_buffer[
             MessageEndpoints.device_readback("samx")
@@ -635,8 +634,9 @@ def test_wait_for_idle(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
 def test_wait_for_read(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
     worker = get_scan_worker()
 
-    with mock.patch(
-        "scan_server.scan_worker.ScanWorker._get_device_status",
+    with mock.patch.object(
+        worker.validate,
+        "get_device_status",
         return_value=[req_msg.dumps()],
     ) as device_status:
         with mock.patch.object(worker, "_check_for_interruption") as interruption_mock:
@@ -673,7 +673,7 @@ def test_wait_for_trigger(instr):
     worker = get_scan_worker()
     worker._last_trigger = instr
 
-    with mock.patch.object(worker, "_get_device_status") as status_mock:
+    with mock.patch.object(worker.validate, "get_device_status") as status_mock:
         with mock.patch.object(worker, "_check_for_interruption") as interruption_mock:
             status_mock.return_value = [
                 BECMessage.DeviceReqStatusMessage(
@@ -695,7 +695,7 @@ def test_wait_for_trigger(instr):
 def test_wait_for_stage():
     worker = get_scan_worker()
     devices = ["samx", "samy"]
-    with mock.patch.object(worker, "_get_device_status") as status_mock:
+    with mock.patch.object(worker.validate, "get_device_status") as status_mock:
         with mock.patch.object(worker, "_check_for_interruption") as interruption_mock:
             worker._wait_for_stage(True, devices, {})
             status_mock.assert_called_once_with(MessageEndpoints.device_staged, devices)
@@ -730,7 +730,7 @@ def test_wait_for_device_server():
 def test_set_devices(instr):
     worker = get_scan_worker()
     with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
-        worker._set_devices(instr)
+        worker.set_devices(instr)
         send_mock.assert_called_once_with(MessageEndpoints.device_instructions(), instr.dumps())
 
 
@@ -755,7 +755,7 @@ def test_set_devices(instr):
 def test_trigger_devices(instr):
     worker = get_scan_worker()
     with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
-        worker._trigger_devices(instr)
+        worker.trigger_devices(instr)
         devices = [dev.name for dev in worker.device_manager.devices.detectors()]
 
         send_mock.assert_called_once_with(
@@ -795,7 +795,7 @@ def test_trigger_devices(instr):
 def test_send_rpc(instr):
     worker = get_scan_worker()
     with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
-        worker._send_rpc(instr)
+        worker.send_rpc(instr)
         send_mock.assert_called_once_with(MessageEndpoints.device_instructions(), instr.dumps())
 
 
@@ -838,7 +838,7 @@ def test_read_devices(instr):
     worker.readout_priority.update({"monitored": instr_devices})
     devices = [dev.name for dev in worker._get_devices_from_instruction(instr)]
     with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
-        worker._read_devices(instr)
+        worker.read_devices(instr)
 
         if instr.content.get("device"):
             send_mock.assert_called_once_with(
@@ -886,7 +886,7 @@ def test_read_devices(instr):
 def test_kickoff_devices(instr, devices, parameter, metadata):
     worker = get_scan_worker()
     with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
-        worker._kickoff_devices(instr)
+        worker.kickoff_devices(instr)
         send_mock.assert_called_once_with(
             MessageEndpoints.device_instructions(),
             BECMessage.DeviceInstructionMessage(
@@ -962,7 +962,7 @@ def test_publish_data_as_read():
         },
     )
     with mock.patch.object(worker.device_manager, "producer") as producer_mock:
-        worker._publish_data_as_read(instr)
+        worker.publish_data_as_read(instr)
         msg = BECMessage.DeviceMessage(
             signals=instr.content["parameter"]["data"],
             metadata=instr.metadata,
@@ -988,7 +988,7 @@ def test_publish_data_as_read_multiple():
         },
     )
     with mock.patch.object(worker.device_manager, "producer") as producer_mock:
-        worker._publish_data_as_read(instr)
+        worker.publish_data_as_read(instr)
         mock_calls = []
         for device, dev_data in zip(devices, data):
             msg = BECMessage.DeviceMessage(
@@ -1067,7 +1067,7 @@ def test_open_scan(instr, corr_num_points, scan_id):
                     ) as queue_status_mock:
                         active_rb = queue_mock.active_request_block
                         active_rb.scan_report_instructions = []
-                        worker._open_scan(instr)
+                        worker.open_scan(instr)
 
                         if not scan_id:
                             assert worker.scan_id == instr.metadata.get("scanID")
@@ -1157,7 +1157,7 @@ def test_close_scan(msg, scan_id, max_point_id, exp_num_points):
 
     reset = bool(worker.scan_id == msg.metadata["scanID"])
     with mock.patch.object(worker, "_send_scan_status") as send_scan_status_mock:
-        worker._close_scan(msg, max_point_id=max_point_id)
+        worker.close_scan(msg, max_point_id=max_point_id)
         if reset:
             send_scan_status_mock.assert_called_with("closed")
             assert worker.scan_id == None
@@ -1182,7 +1182,7 @@ def test_stage_device(msg):
 
     with mock.patch.object(worker, "_wait_for_stage") as wait_mock:
         with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
-            worker._stage_devices(msg)
+            worker.stage_devices(msg)
             detectors = [dev.name for dev in worker.device_manager.devices.detectors()]
             devices = [
                 dev.name
@@ -1261,7 +1261,7 @@ def test_unstage_device(msg, devices, parameter, metadata, cleanup):
 
     with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
         with mock.patch.object(worker, "_wait_for_stage") as wait_mock:
-            worker._unstage_devices(msg, devices, cleanup)
+            worker.unstage_devices(msg, devices, cleanup)
 
             send_mock.assert_called_once_with(
                 MessageEndpoints.device_instructions(),
@@ -1364,7 +1364,7 @@ def test_process_instructions(abortion):
                 parameter={"readout_priority": {"monitored": [], "baseline": [], "ignored": []}},
                 metadata={"readout_priority": "monitored", "DIID": 18, "scanID": "12345"},
             ),
-            "_open_scan",
+            "open_scan",
         ),
         (
             BECMessage.DeviceInstructionMessage(
@@ -1373,7 +1373,7 @@ def test_process_instructions(abortion):
                 parameter={},
                 metadata={"readout_priority": "monitored", "DIID": 18, "scanID": "12345"},
             ),
-            "_close_scan",
+            "close_scan",
         ),
         (
             BECMessage.DeviceInstructionMessage(
@@ -1387,7 +1387,7 @@ def test_process_instructions(abortion):
                     "RID": "123456",
                 },
             ),
-            "_wait_for_devices",
+            "wait_for_devices",
         ),
         (
             BECMessage.DeviceInstructionMessage(
@@ -1396,7 +1396,7 @@ def test_process_instructions(abortion):
                 parameter={"group": "trigger"},
                 metadata={"readout_priority": "monitored", "DIID": 20, "pointID": 0},
             ),
-            "_trigger_devices",
+            "trigger_devices",
         ),
         (
             BECMessage.DeviceInstructionMessage(
@@ -1408,7 +1408,7 @@ def test_process_instructions(abortion):
                 },
                 metadata={"readout_priority": "monitored", "DIID": 24},
             ),
-            "_set_devices",
+            "set_devices",
         ),
         (
             BECMessage.DeviceInstructionMessage(
@@ -1420,7 +1420,7 @@ def test_process_instructions(abortion):
                 },
                 metadata={"readout_priority": "monitored", "DIID": 30, "pointID": 1},
             ),
-            "_read_devices",
+            "read_devices",
         ),
         (
             BECMessage.DeviceInstructionMessage(
@@ -1429,7 +1429,7 @@ def test_process_instructions(abortion):
                 parameter={},
                 metadata={"readout_priority": "monitored", "DIID": 17},
             ),
-            "_stage_devices",
+            "stage_devices",
         ),
         (
             BECMessage.DeviceInstructionMessage(
@@ -1438,7 +1438,7 @@ def test_process_instructions(abortion):
                 parameter={},
                 metadata={"readout_priority": "monitored", "DIID": 17},
             ),
-            "_unstage_devices",
+            "unstage_devices",
         ),
         (
             BECMessage.DeviceInstructionMessage(
@@ -1453,13 +1453,13 @@ def test_process_instructions(abortion):
                 },
                 metadata={"readout_priority": "monitored", "DIID": 9},
             ),
-            "_send_rpc",
+            "send_rpc",
         ),
         (
             BECMessage.DeviceInstructionMessage(
                 device="samx", action="kickoff", parameter={}, metadata={}
             ),
-            "_kickoff_devices",
+            "kickoff_devices",
         ),
         (
             BECMessage.DeviceInstructionMessage(
@@ -1468,31 +1468,31 @@ def test_process_instructions(abortion):
                 parameter={},
                 metadata={"readout_priority": "baseline", "DIID": 15},
             ),
-            "_baseline_reading",
+            "baseline_reading",
         ),
         (
             BECMessage.DeviceInstructionMessage(device=None, action="close_scan_def", parameter={}),
-            "_close_scan",
+            "close_scan",
         ),
         (
             BECMessage.DeviceInstructionMessage(
                 device=None, action="publish_data_as_read", parameter={}
             ),
-            "_publish_data_as_read",
+            "publish_data_as_read",
         ),
         (
             BECMessage.DeviceInstructionMessage(
                 device=None, action="scan_report_instruction", parameter={}
             ),
-            "_process_scan_report_instruction",
+            "process_scan_report_instruction",
         ),
         (
             BECMessage.DeviceInstructionMessage(device=None, action="pre_scan", parameter={}),
-            "_pre_scan",
+            "pre_scan",
         ),
         (
             BECMessage.DeviceInstructionMessage(device=None, action="complete", parameter={}),
-            "_complete_devices",
+            "complete_devices",
         ),
     ],
 )

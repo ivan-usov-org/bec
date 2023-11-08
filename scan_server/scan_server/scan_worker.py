@@ -5,15 +5,9 @@ import traceback
 from asyncio.log import logger
 from typing import List
 
-from bec_lib.core import (
-    Alarms,
-    BECMessage,
-    Device,
-    DeviceStatus,
-    MessageEndpoints,
-    bec_logger,
-)
+from bec_lib.core import Alarms, BECMessage, Device, MessageEndpoints, bec_logger
 
+from .device_validation import DeviceValidation
 from .errors import DeviceMessageError, ScanAbortion
 from .scan_queue import InstructionQueueItem, InstructionQueueStatus, RequestBlock
 
@@ -48,10 +42,360 @@ class ScanWorker(threading.Thread):
         self._exposure_time = None
         self.current_instruction_queue_item = None
         self._last_trigger = {}
+        self._groups = {}
+        self.interception_msg = None
         self.reset()
+        self.validate = DeviceValidation(self.device_manager.producer, self)
+
+    def open_scan(self, instr: DeviceMsg) -> None:
+        """
+        Open a new scan and emit a scan status message.
+
+        Args:
+            instr (DeviceMsg): Device instruction received from the scan assembler
+
+        """
+        if not self.scan_id:
+            self.scan_id = instr.metadata.get("scanID")
+            if instr.content["parameter"].get("scan_motors") is not None:
+                self.scan_motors = [
+                    self.device_manager.devices[dev]
+                    for dev in instr.content["parameter"].get("scan_motors")
+                ]
+                self.readout_priority = instr.content["parameter"].get("readout_priority", {})
+            self.scan_type = instr.content["parameter"].get("scan_type")
+
+        if not instr.metadata.get("scan_def_id"):
+            self.max_point_id = 0
+        num_points = self.max_point_id + instr.content["parameter"]["num_points"]
+        if self.max_point_id:
+            num_points += 1
+
+        active_rb = self.current_instruction_queue_item.active_request_block
+
+        self._initialize_scan_info(active_rb, instr, num_points)
+
+        # only append the table_wait if the scan is not using scan_progress
+        if not self.scan_report_instructions or not self.scan_report_instructions[-1].get(
+            "scan_progress"
+        ):
+            self.scan_report_instructions.append({"table_wait": num_points})
+        self.current_instruction_queue_item.parent.queue_manager.send_queue_status()
+
+        self._send_scan_status("open")
+
+    def close_scan(self, instr: DeviceMsg, max_point_id: int) -> None:
+        """
+        Close a scan and emit a scan status message.
+
+        Args:
+            instr (DeviceMsg): Device instruction received from the scan assembler
+            max_point_id (int): Maximum point ID of the scan
+        """
+        scan_id = instr.metadata.get("scanID")
+
+        if self.scan_id != scan_id:
+            return
+
+        # reset the scan ID now that the scan will be closed
+        self.scan_id = None
+
+        scan_info = self.current_scan_info
+        if scan_info.get("scan_type") == "fly":
+            # flyers do not increase the point_id but instead set the num_points directly
+            num_points = self.current_instruction_queue_item.active_request_block.scan.num_pos
+            self.current_scan_info["num_points"] = num_points
+
+        else:
+            # point_id starts at 0
+            scan_info["num_points"] = max_point_id + 1
+
+        self._send_scan_status("closed")
+
+    def wait_for_devices(self, instr: DeviceMsg) -> None:
+        """
+        Wait for devices to become ready. This is a blocking call.
+        Depending on the wait_type, the devices will be checked for different statuses ("idle", "read", "trigger").
+
+        Args:
+            instr (DeviceMsg): DeviceInstructionMessage
+        """
+        wait_type = instr.content["parameter"].get("type")
+
+        if wait_type == "move":
+            self._wait_for_idle(instr)
+        elif wait_type == "read":
+            self._wait_for_read(instr)
+        elif wait_type == "trigger":
+            self._wait_for_trigger(instr)
+        else:
+            logger.error("Unknown wait command")
+            raise DeviceMessageError("Unknown wait command")
+
+    def trigger_devices(self, instr: DeviceMsg) -> None:
+        """
+        Trigger devices by sending a trigger instruction to the device server.
+
+        Args:
+            instr (DeviceInstructionMessage): Device instruction received from the scan assembler
+
+        """
+        devices = [dev.name for dev in self.device_manager.devices.detectors()]
+        self._last_trigger = instr
+        self.device_manager.producer.send(
+            MessageEndpoints.device_instructions(),
+            DeviceMsg(
+                device=devices,
+                action="trigger",
+                parameter=instr.content["parameter"],
+                metadata=instr.metadata,
+            ).dumps(),
+        )
+
+    def set_devices(self, instr: DeviceMsg) -> None:
+        """Send device instruction to set a device to a specific value
+
+        Args:
+            instr (DeviceInstructionMessage): Device instruction received from the scan assembler
+        """
+
+        # send instruction
+        self.device_manager.producer.send(MessageEndpoints.device_instructions(), instr.dumps())
+
+    def read_devices(self, instr: DeviceMsg) -> None:
+        """
+        Read from devices by sending a read instruction to the device server.
+        This call is not blocking. Instead, a separate call to wait_for_devices is needed to wait for the devices to become ready.
+        Args:
+            instr (DeviceInstructionMessage): Device instruction received from the scan assembler
+
+        """
+        if instr.metadata.get("cached"):
+            self._publish_readback(instr)
+            return
+
+        producer = self.device_manager.producer
+
+        devices = instr.content.get("device")
+        if devices is None:
+            devices = [
+                dev.name
+                for dev in self.device_manager.devices.monitored_devices(
+                    readout_priority=self.readout_priority
+                )
+            ]
+        producer.send(
+            MessageEndpoints.device_instructions(),
+            DeviceMsg(
+                device=devices,
+                action="read",
+                parameter=instr.content["parameter"],
+                metadata=instr.metadata,
+            ).dumps(),
+        )
+        return
+
+    def kickoff_devices(self, instr: DeviceMsg) -> None:
+        """
+        Kickoff devices by sending a kickoff instruction to the device server.
+
+        Args:
+            instr (DeviceInstructionMessage): Device instruction received from the scan assembler
+
+        """
+        # logger.info("kickoff")
+        self.device_manager.producer.send(
+            MessageEndpoints.device_instructions(),
+            DeviceMsg(
+                device=instr.content.get("device"),
+                action="kickoff",
+                parameter=instr.content["parameter"],
+                metadata=instr.metadata,
+            ).dumps(),
+        )
+
+    def complete_devices(self, instr: DeviceMsg) -> None:
+        """
+        Complete devices by sending a complete instruction to the device server.
+
+        Args:
+            instr (DeviceInstructionMessage): Device instruction received from the scan assembler
+
+        """
+        if instr.content.get("device") is None:
+            devices = [dev.name for dev in self.device_manager.devices.enabled_devices]
+        else:
+            devices = instr.content.get("device")
+        if not isinstance(devices, list):
+            devices = [devices]
+        self.device_manager.producer.send(
+            MessageEndpoints.device_instructions(),
+            DeviceMsg(
+                device=devices,
+                action="complete",
+                parameter=instr.content["parameter"],
+                metadata=instr.metadata,
+            ).dumps(),
+        )
+        self._wait_for_status(devices, instr.metadata)
+
+    def baseline_reading(self, instr: DeviceMsg) -> None:
+        """
+        Perform a baseline reading by sending a read instruction to the device server.
+
+        Args:
+            instr (DeviceInstructionMessage): Device instruction received from the scan assembler
+
+        """
+        baseline_devices = [
+            dev.name
+            for dev in self.device_manager.devices.baseline_devices(
+                readout_priority=self.readout_priority
+            )
+        ]
+        params = instr.content["parameter"]
+        self.device_manager.producer.send(
+            MessageEndpoints.device_instructions(),
+            DeviceMsg(
+                device=baseline_devices,
+                action="read",
+                parameter=params,
+                metadata=instr.metadata,
+            ).dumps(),
+        )
+
+    def pre_scan(self, instr: DeviceMsg) -> None:
+        """
+        Perform pre-scan actions. This is a blocking call as it waits for devices to become ready again.
+
+        Args:
+            instr (DeviceInstructionMessage): Device instruction received from the scan assembler
+        """
+        devices = [dev.name for dev in self.device_manager.devices.enabled_devices]
+        self.device_manager.producer.send(
+            MessageEndpoints.device_instructions(),
+            DeviceMsg(
+                device=devices,
+                action="pre_scan",
+                parameter=instr.content["parameter"],
+                metadata=instr.metadata,
+            ).dumps(),
+        )
+        self._wait_for_status(devices, instr.metadata)
+
+    def publish_data_as_read(self, instr: DeviceMsg):
+        """
+        Publish data as read by sending a DeviceMessage to the device_read endpoint.
+        This instruction replicates the behaviour of the device server when it receives a read instruction.
+
+        Args:
+            instr (DeviceInstructionMessage): Device instruction received from the scan assembler
+        """
+        producer = self.device_manager.producer
+        data = instr.content["parameter"]["data"]
+        devices = instr.content["device"]
+        if not isinstance(devices, list):
+            devices = [devices]
+        if not isinstance(data, list):
+            data = [data]
+        for device, dev_data in zip(devices, data):
+            msg = BECMessage.DeviceMessage(signals=dev_data, metadata=instr.metadata).dumps()
+            producer.set_and_publish(MessageEndpoints.device_read(device), msg)
+
+    def send_rpc(self, instr: DeviceMsg) -> None:
+        """
+        Send a RPC instruction to the device server.
+
+        Args:
+            instr (DeviceInstructionMessage): Device instruction received from the scan assembler
+
+        """
+        self.device_manager.producer.send(MessageEndpoints.device_instructions(), instr.dumps())
+
+    def process_scan_report_instruction(self, instr):
+        """
+        Process a scan report instruction by appending it to the scan_report_instructions list.
+
+        Args:
+            instr (DeviceInstructionMessage): Device instruction received from the scan assembler
+
+        """
+        self.scan_report_instructions.append(instr.content["parameter"])
+        self.current_instruction_queue_item.parent.queue_manager.send_queue_status()
+
+    def stage_devices(self, instr: DeviceMsg) -> None:
+        """
+        Stage devices by sending a stage instruction to the device server.
+        This is a blocking call as it waits for devices to return again.
+
+        Args:
+            instr (DeviceInstructionMessage): Device instruction received from the scan assembler
+
+        """
+        detectors = [dev.name for dev in self.device_manager.devices.detectors()]
+        devices = [
+            dev.name
+            for dev in self.device_manager.devices.enabled_devices
+            if dev.name not in detectors
+        ]
+        for det in detectors:
+            self.device_manager.producer.send(
+                MessageEndpoints.device_instructions(),
+                DeviceMsg(
+                    device=det,
+                    action="stage",
+                    parameter=instr.content["parameter"],
+                    metadata=instr.metadata,
+                ).dumps(),
+            )
+        self._staged_devices.update(detectors)
+
+        self.device_manager.producer.send(
+            MessageEndpoints.device_instructions(),
+            DeviceMsg(
+                device=devices,
+                action="stage",
+                parameter=instr.content["parameter"],
+                metadata=instr.metadata,
+            ).dumps(),
+        )
+        self._staged_devices.update(devices)
+        self._wait_for_stage(staged=True, devices=detectors, metadata=instr.metadata)
+        self._wait_for_stage(staged=True, devices=devices, metadata=instr.metadata)
+
+    def unstage_devices(self, instr: DeviceMsg = None, devices: list = None, cleanup=False) -> None:
+        """
+        Unstage devices by sending a unstage instruction to the device server.
+        This is a blocking call as it waits for devices to return again.
+
+        Args:
+            instr (DeviceInstructionMessage): Device instruction received from the scan assembler
+            devices (list): List of devices to unstage
+            cleanup (bool): If True, do not wait for devices to return
+
+        """
+        if not devices:
+            devices = [dev.name for dev in self.device_manager.devices.enabled_devices]
+        parameter = {} if not instr else instr.content["parameter"]
+        metadata = {} if not instr else instr.metadata
+        self._staged_devices.difference_update(devices)
+        self.device_manager.producer.send(
+            MessageEndpoints.device_instructions(),
+            DeviceMsg(
+                device=devices,
+                action="unstage",
+                parameter=parameter,
+                metadata=metadata,
+            ).dumps(),
+        )
+        if not cleanup:
+            self._wait_for_stage(staged=False, devices=devices, metadata=metadata)
 
     @property
     def scan_report_instructions(self):
+        """
+        List of scan report instructions
+        """
         req_block = self.current_instruction_queue_item.active_request_block
         return req_block.scan_report_instructions
 
@@ -108,25 +452,6 @@ class ScanWorker(threading.Thread):
         else:
             self._groups[wait_group] = {dev.name: DIID for dev in devices}
 
-    def _wait_for_devices(self, instr: DeviceMsg) -> None:
-        wait_type = instr.content["parameter"].get("type")
-
-        if wait_type == "move":
-            self._wait_for_idle(instr)
-        elif wait_type == "read":
-            self._wait_for_read(instr)
-        elif wait_type == "trigger":
-            self._wait_for_trigger(instr)
-        else:
-            logger.error("Unknown wait command")
-            raise DeviceMessageError("Unknown wait command")
-
-    def _get_device_status(self, msg_cls: MessageEndpoints, devices: list) -> list:
-        pipe = self.device_manager.producer.pipeline()
-        for dev in devices:
-            self.device_manager.producer.get(msg_cls(dev), pipe)
-        return pipe.execute()
-
     def _check_for_failed_movements(self, device_status: list, devices: list, instr: DeviceMsg):
         if all(dev.content["success"] for dev in device_status):
             return
@@ -134,7 +459,7 @@ class ScanWorker(threading.Thread):
         failed_device = devices[ind]
 
         # make sure that this is not an old message
-        matching_DIID = device_status[ind].metadata.get("DIID") == devices[ind][1]
+        matching_DIID = device_status[ind].metadata.get("DIID") >= devices[ind][1]
         matching_RID = device_status[ind].metadata.get("RID") == instr.metadata["RID"]
         if matching_DIID and matching_RID:
             last_pos = BECMessage.DeviceMessage.loads(
@@ -171,39 +496,19 @@ class ScanWorker(threading.Thread):
 
         logger.debug(f"Waiting for devices: {wait_group}")
 
-        while True:
-            device_status = self._get_device_status(
-                MessageEndpoints.device_req_status,
-                [dev for dev, _ in wait_group_devices],
-            )
-            self._check_for_interruption()
-
-            if None in device_status:
-                continue
-
-            device_status = [BECMessage.DeviceReqStatusMessage.loads(dev) for dev in device_status]
-            devices_moved_successfully = all(dev.content["success"] for dev in device_status)
-            matching_scanID = all(
-                dev.metadata.get("scanID") == instr.metadata["scanID"] for dev in device_status
-            )
-            matching_requestID = all(
-                dev.metadata.get("RID") == instr.metadata["RID"] for dev in device_status
-            )
-            matching_DIID = all(
-                dev.metadata.get("DIID") == wait_group_devices[ii][1]
-                for ii, dev in enumerate(device_status)
-            )
-
-            if (
-                devices_moved_successfully
-                and matching_scanID
-                and matching_DIID
-                and matching_requestID
-            ):
-                break
-
-            if not devices_moved_successfully:
-                self._check_for_failed_movements(device_status, wait_group_devices, instr)
+        while not self.validate.devices_are_ready(
+            [dev for dev, _ in wait_group_devices],
+            MessageEndpoints.device_req_status,
+            BECMessage.DeviceReqStatusMessage,
+            instr.metadata,
+            [
+                self.validate.devices_returned_successfully,
+                self.validate.matching_requestID,
+            ],
+            wait_group_devices=wait_group_devices,
+            instruction=instr,
+        ):
+            continue
 
         self._groups[wait_group] = {
             dev: DIID for dev, DIID in self._groups[wait_group].items() if dev not in group_devices
@@ -228,29 +533,17 @@ class ScanWorker(threading.Thread):
 
         logger.debug(f"Waiting for devices: {wait_group}")
 
-        while True:
-            device_status = self._get_device_status(
-                MessageEndpoints.device_status, [dev for dev, _ in wait_group_devices]
-            )
-            self._check_for_interruption()
-            device_status = [BECMessage.DeviceStatusMessage.loads(dev) for dev in device_status]
-
-            if None in device_status:
-                continue
-            devices_are_idle = all(
-                DeviceStatus(dev.content.get("status")) == DeviceStatus.IDLE
-                for dev in device_status
-            )
-            matching_scanID = all(
-                dev.metadata.get("scanID") == instr.metadata["scanID"] for dev in device_status
-            )
-            matching_DIID = all(
-                dev.metadata.get("DIID") == wait_group_devices[ii][1]
-                for ii, dev in enumerate(device_status)
-            )
-            if devices_are_idle and matching_scanID and matching_DIID:
-                break
-            # time.sleep(1e-4)
+        while not self.validate.devices_are_ready(
+            [dev for dev, _ in wait_group_devices],
+            MessageEndpoints.device_status,
+            BECMessage.DeviceStatusMessage,
+            instr.metadata,
+            [
+                self.validate.devices_are_idle,
+            ],
+            wait_group_devices=wait_group_devices,
+        ):
+            continue
 
         self._groups[wait_group] = {
             dev: DIID for dev, DIID in self._groups[wait_group].items() if dev not in group_devices
@@ -259,50 +552,33 @@ class ScanWorker(threading.Thread):
         logger.debug(datetime.datetime.now() - start)
 
     def _wait_for_stage(self, staged: bool, devices: list, metadata: dict) -> None:
-        while True:
-            stage_status = self._get_device_status(MessageEndpoints.device_staged, devices)
-            self._check_for_interruption()
-            device_status = [BECMessage.DeviceStatusMessage.loads(dev) for dev in stage_status]
+        """
+        Wait for devices to become staged/unstaged
 
-            if None in device_status:
-                continue
-            devices_are_ready = all(
-                bool(dev.content.get("status")) == staged for dev in device_status
-            )
-            matching_scanID = all(
-                dev.metadata.get("scanID") == metadata["scanID"] for dev in device_status
-            )
-            matching_DIID = all(
-                dev.metadata.get("DIID") == metadata["DIID"] for dev in device_status
-            )
-            if devices_are_ready and matching_scanID and matching_DIID:
-                break
+        Args:
+            staged (bool): True if devices should be staged, False if they should be unstaged
+            devices (list): List of devices to wait for
+            metadata (dict): Metadata of the instruction
+        """
+
+        stage_validator = (
+            self.validate.devices_are_staged if staged else self.validate.devices_are_unstaged
+        )
+
+        while not self.validate.devices_are_ready(
+            devices,
+            MessageEndpoints.device_staged,
+            BECMessage.DeviceStatusMessage,
+            metadata,
+            [
+                stage_validator,
+                self.validate.matching_requestID,
+            ],
+        ):
+            continue
 
     def _wait_for_device_server(self) -> None:
         self.parent.wait_for_service("DeviceServer")
-
-    def _set_devices(self, instr: DeviceMsg) -> None:
-        """Send device instruction to set a device to a specific value
-
-        Args:
-            instr (DeviceInstructionMessage): Device instruction received from the scan assembler
-        """
-
-        # send instruction
-        self.device_manager.producer.send(MessageEndpoints.device_instructions(), instr.dumps())
-
-    def _trigger_devices(self, instr: DeviceMsg) -> None:
-        devices = [dev.name for dev in self.device_manager.devices.detectors()]
-        self._last_trigger = instr
-        self.device_manager.producer.send(
-            MessageEndpoints.device_instructions(),
-            DeviceMsg(
-                device=devices,
-                action="trigger",
-                parameter=instr.content["parameter"],
-                metadata=instr.metadata,
-            ).dumps(),
-        )
 
     def _wait_for_trigger(self, instr: DeviceMsg) -> None:
         trigger_time = float(instr.content["parameter"]["time"]) * self.current_scan_info.get(
@@ -313,81 +589,25 @@ class ScanWorker(threading.Thread):
         metadata = self._last_trigger.metadata
         self._wait_for_status(devices, metadata)
 
-    def _pre_scan(self, instr: DeviceMsg) -> None:
-        devices = [dev.name for dev in self.device_manager.devices.enabled_devices]
-        self.device_manager.producer.send(
-            MessageEndpoints.device_instructions(),
-            DeviceMsg(
-                device=devices,
-                action="pre_scan",
-                parameter=instr.content["parameter"],
-                metadata=instr.metadata,
-            ).dumps(),
-        )
-        self._wait_for_status(devices, instr.metadata)
-
     def _wait_for_status(self, devices, metadata):
         logger_update_delay = 5
         start = time.time()
-        while True:
-            status = self._get_device_status(MessageEndpoints.device_req_status, devices)
-            self._check_for_interruption()
-            device_status = [BECMessage.DeviceReqStatusMessage.loads(dev) for dev in status]
+        print_status = False
 
-            if None in device_status:
-                continue
-            devices_are_ready = all(
-                bool(dev.content.get("success")) is True for dev in device_status
-            )
-            matching_scanID = all(
-                dev.metadata.get("scanID") == metadata["scanID"] for dev in device_status
-            )
-            matching_DIID = all(
-                dev.metadata.get("DIID") == metadata["DIID"] for dev in device_status
-            )
-            if devices_are_ready and matching_scanID and matching_DIID:
-                break
-
+        while not self.validate.devices_are_ready(
+            devices,
+            MessageEndpoints.device_req_status,
+            BECMessage.DeviceReqStatusMessage,
+            metadata,
+            [
+                self.validate.devices_returned_successfully,
+            ],
+            print_status=print_status,
+        ):
             if time.time() - start > logger_update_delay:
                 # report the status of the devices that are not ready yet
-                missing_devices = [
-                    dev.content["device"]
-                    for dev in device_status
-                    if not dev.content["success"]
-                    or dev.metadata.get("scanID") != metadata["scanID"]
-                    or dev.metadata.get("DIID") != metadata["DIID"]
-                ]
-                logger.info(f"Waiting for a status response of: {missing_devices}")
+                print_status = True
                 time.sleep(1)
-
-    def _send_rpc(self, instr: DeviceMsg) -> None:
-        self.device_manager.producer.send(MessageEndpoints.device_instructions(), instr.dumps())
-
-    def _read_devices(self, instr: DeviceMsg) -> None:
-        if instr.metadata.get("cached"):
-            self._publish_readback(instr)
-            return
-
-        producer = self.device_manager.producer
-
-        devices = instr.content.get("device")
-        if devices is None:
-            devices = [
-                dev.name
-                for dev in self.device_manager.devices.monitored_devices(
-                    readout_priority=self.readout_priority
-                )
-            ]
-        producer.send(
-            MessageEndpoints.device_instructions(),
-            DeviceMsg(
-                device=devices,
-                action="read",
-                parameter=instr.content["parameter"],
-                metadata=instr.metadata,
-            ).dumps(),
-        )
-        return
 
     def _publish_readback(self, instr: DeviceMsg, devices: list = None) -> None:
         producer = self.device_manager.producer
@@ -414,66 +634,6 @@ class ScanWorker(threading.Thread):
             producer.get(MessageEndpoints.device_readback(dev), pipe=pipe)
         return pipe.execute()
 
-    def _publish_data_as_read(self, instr: DeviceMsg):
-        producer = self.device_manager.producer
-        data = instr.content["parameter"]["data"]
-        devices = instr.content["device"]
-        if not isinstance(devices, list):
-            devices = [devices]
-        if not isinstance(data, list):
-            data = [data]
-        for device, dev_data in zip(devices, data):
-            msg = BECMessage.DeviceMessage(signals=dev_data, metadata=instr.metadata).dumps()
-            producer.set_and_publish(MessageEndpoints.device_read(device), msg)
-
-    def _kickoff_devices(self, instr: DeviceMsg) -> None:
-        # logger.info("kickoff")
-        self.device_manager.producer.send(
-            MessageEndpoints.device_instructions(),
-            DeviceMsg(
-                device=instr.content.get("device"),
-                action="kickoff",
-                parameter=instr.content["parameter"],
-                metadata=instr.metadata,
-            ).dumps(),
-        )
-
-    def _complete_devices(self, instr: DeviceMsg) -> None:
-        if instr.content.get("device") is None:
-            devices = [dev.name for dev in self.device_manager.devices.enabled_devices]
-        else:
-            devices = instr.content.get("device")
-        if not isinstance(devices, list):
-            devices = [devices]
-        self.device_manager.producer.send(
-            MessageEndpoints.device_instructions(),
-            DeviceMsg(
-                device=devices,
-                action="complete",
-                parameter=instr.content["parameter"],
-                metadata=instr.metadata,
-            ).dumps(),
-        )
-        self._wait_for_status(devices, instr.metadata)
-
-    def _baseline_reading(self, instr: DeviceMsg) -> None:
-        baseline_devices = [
-            dev.name
-            for dev in self.device_manager.devices.baseline_devices(
-                readout_priority=self.readout_priority
-            )
-        ]
-        params = instr.content["parameter"]
-        self.device_manager.producer.send(
-            MessageEndpoints.device_instructions(),
-            DeviceMsg(
-                device=baseline_devices,
-                action="read",
-                parameter=params,
-                metadata=instr.metadata,
-            ).dumps(),
-        )
-
     def _check_for_interruption(self) -> None:
         if self.status == InstructionQueueStatus.PAUSED:
             self._send_scan_status("paused")
@@ -481,36 +641,6 @@ class ScanWorker(threading.Thread):
             time.sleep(0.1)
         if self.status == InstructionQueueStatus.STOPPED:
             raise ScanAbortion
-
-    def _open_scan(self, instr: DeviceMsg) -> None:
-        if not self.scan_id:
-            self.scan_id = instr.metadata.get("scanID")
-            if instr.content["parameter"].get("scan_motors") is not None:
-                self.scan_motors = [
-                    self.device_manager.devices[dev]
-                    for dev in instr.content["parameter"].get("scan_motors")
-                ]
-                self.readout_priority = instr.content["parameter"].get("readout_priority", {})
-            self.scan_type = instr.content["parameter"].get("scan_type")
-
-        if not instr.metadata.get("scan_def_id"):
-            self.max_point_id = 0
-        num_points = self.max_point_id + instr.content["parameter"]["num_points"]
-        if self.max_point_id:
-            num_points += 1
-
-        active_rb = self.current_instruction_queue_item.active_request_block
-
-        self._initialize_scan_info(active_rb, instr, num_points)
-
-        # only append the table_wait if the scan is not using scan_progress
-        if not self.scan_report_instructions or not self.scan_report_instructions[-1].get(
-            "scan_progress"
-        ):
-            self.scan_report_instructions.append({"table_wait": num_points})
-        self.current_instruction_queue_item.parent.queue_manager.send_queue_status()
-
-        self._send_scan_status("open")
 
     def _initialize_scan_info(self, active_rb: RequestBlock, instr: DeviceMsg, num_points: int):
         metadata = active_rb.metadata
@@ -534,83 +664,6 @@ class ScanWorker(threading.Thread):
         self.current_scan_info["scan_msgs"] = [
             str(scan_msg) for scan_msg in self.current_instruction_queue_item.scan_msgs
         ]
-
-    def _process_scan_report_instruction(self, instr):
-        self.scan_report_instructions.append(instr.content["parameter"])
-        self.current_instruction_queue_item.parent.queue_manager.send_queue_status()
-
-    def _close_scan(self, instr: DeviceMsg, max_point_id: int) -> None:
-        scan_id = instr.metadata.get("scanID")
-
-        if self.scan_id != scan_id:
-            return
-
-        # reset the scan ID now that the scan will be closed
-        self.scan_id = None
-
-        scan_info = self.current_scan_info
-        if scan_info.get("scan_type") == "fly":
-            # flyers do not increase the point_id but instead set the num_points directly
-            num_points = self.current_instruction_queue_item.active_request_block.scan.num_pos
-            self.current_scan_info["num_points"] = num_points
-
-        else:
-            # point_id starts at 0
-            scan_info["num_points"] = max_point_id + 1
-
-        self._send_scan_status("closed")
-
-    def _stage_devices(self, instr: DeviceMsg) -> None:
-        detectors = [dev.name for dev in self.device_manager.devices.detectors()]
-        devices = [
-            dev.name
-            for dev in self.device_manager.devices.enabled_devices
-            if dev.name not in detectors
-        ]
-        for det in detectors:
-            self.device_manager.producer.send(
-                MessageEndpoints.device_instructions(),
-                DeviceMsg(
-                    device=det,
-                    action="stage",
-                    parameter=instr.content["parameter"],
-                    metadata=instr.metadata,
-                ).dumps(),
-            )
-        self._staged_devices.update(detectors)
-
-        self.device_manager.producer.send(
-            MessageEndpoints.device_instructions(),
-            DeviceMsg(
-                device=devices,
-                action="stage",
-                parameter=instr.content["parameter"],
-                metadata=instr.metadata,
-            ).dumps(),
-        )
-        self._staged_devices.update(devices)
-        self._wait_for_stage(staged=True, devices=detectors, metadata=instr.metadata)
-        self._wait_for_stage(staged=True, devices=devices, metadata=instr.metadata)
-
-    def _unstage_devices(
-        self, instr: DeviceMsg = None, devices: list = None, cleanup=False
-    ) -> None:
-        if not devices:
-            devices = [dev.name for dev in self.device_manager.devices.enabled_devices]
-        parameter = {} if not instr else instr.content["parameter"]
-        metadata = {} if not instr else instr.metadata
-        self._staged_devices.difference_update(devices)
-        self.device_manager.producer.send(
-            MessageEndpoints.device_instructions(),
-            DeviceMsg(
-                device=devices,
-                action="unstage",
-                parameter=parameter,
-                metadata=metadata,
-            ).dumps(),
-        )
-        if not cleanup:
-            self._wait_for_stage(staged=False, devices=devices, metadata=metadata)
 
     def _send_scan_status(self, status: str):
         current_scan_info_print = self.current_scan_info.copy()
@@ -709,39 +762,39 @@ class ScanWorker(threading.Thread):
         self._check_for_interruption()
 
         if action == "open_scan":
-            self._open_scan(instr)
+            self.open_scan(instr)
         elif action == "close_scan" and scan_def_id is None:
-            self._close_scan(instr, self.max_point_id)
+            self.close_scan(instr, self.max_point_id)
         elif action == "open_scan_def":
             pass
         elif action == "close_scan_def":
-            self._close_scan(instr, self.max_point_id)
+            self.close_scan(instr, self.max_point_id)
         elif action == "wait":
-            self._wait_for_devices(instr)
+            self.wait_for_devices(instr)
         elif action == "trigger":
-            self._trigger_devices(instr)
+            self.trigger_devices(instr)
         elif action == "set":
-            self._set_devices(instr)
+            self.set_devices(instr)
         elif action == "read":
-            self._read_devices(instr)
+            self.read_devices(instr)
         elif action == "kickoff":
-            self._kickoff_devices(instr)
+            self.kickoff_devices(instr)
         elif action == "complete":
-            self._complete_devices(instr)
+            self.complete_devices(instr)
         elif action == "baseline_reading":
-            self._baseline_reading(instr)
+            self.baseline_reading(instr)
         elif action == "rpc":
-            self._send_rpc(instr)
+            self.send_rpc(instr)
         elif action == "stage":
-            self._stage_devices(instr)
+            self.stage_devices(instr)
         elif action == "unstage":
-            self._unstage_devices(instr)
+            self.unstage_devices(instr)
         elif action == "pre_scan":
-            self._pre_scan(instr)
+            self.pre_scan(instr)
         elif action == "publish_data_as_read":
-            self._publish_data_as_read(instr)
+            self.publish_data_as_read(instr)
         elif action == "scan_report_instruction":
-            self._process_scan_report_instruction(instr)
+            self.process_scan_report_instruction(instr)
 
         else:
             logger.warning(f"Unknown device instruction: {instr}")
@@ -757,7 +810,7 @@ class ScanWorker(threading.Thread):
 
     def cleanup(self):
         """perform cleanup instructions"""
-        self._unstage_devices(devices=list(self._staged_devices), cleanup=True)
+        self.unstage_devices(devices=list(self._staged_devices), cleanup=True)
 
     def run(self):
         try:
