@@ -1,10 +1,14 @@
+from __future__ import annotations
+
 import sys
 import warnings
+from typing import TYPE_CHECKING
 
 import msgpack
 from requests.exceptions import HTTPError
 
-from bec_lib.core import MessageEndpoints, RedisConnector, bec_logger
+from .endpoints import MessageEndpoints
+from .logger import bec_logger
 
 logger = bec_logger.logger
 
@@ -12,6 +16,9 @@ try:
     import scilog
 except ImportError:
     logger.info("Unable to import `scilog` optional dependency")
+
+if TYPE_CHECKING:
+    from bec_lib.core import RedisConnector
 
 
 class LogbookConnector:
