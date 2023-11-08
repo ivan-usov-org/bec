@@ -13,4 +13,4 @@ RUN pip install -e ./bec/bec_lib
 WORKDIR /code/bec/
 
 # command to run on container start
-CMD [ "python", "/code/bec/bec_lib/bec_lib/core/init_config.py", "--config", "/code/bec/bec_lib/demo_config.yaml"]
+CMD [ "python", "/code/bec/bec_lib/util_scripts/init_config.py", "--config", "/code/bec/bec_lib/demo_config.yaml"]
