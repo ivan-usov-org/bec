@@ -15,7 +15,7 @@ from .utils import ScanRequestMixin, check_alarms
 
 if TYPE_CHECKING:
     from bec_client import BECClient
-    from bec_lib import BECMessage
+    from bec_lib import messages
     from bec_lib.queue_items import QueueItem
 
 logger = bec_logger.logger
@@ -158,14 +158,14 @@ class IPythonLiveUpdates:
             raise scan_interr
 
     def _process_queue(
-        self, queue: QueueItem, request: BECMessage.ScanQueueMessage, req_id: str
+        self, queue: QueueItem, request: messages.ScanQueueMessage, req_id: str
     ) -> bool:
         """
         Process the queue and return True if the scan is completed.
 
         Args:
             queue(QueueItem): The queue item to process.
-            request(BECMessage.ScanQueueMessage): The request message.
+            request(messages.ScanQueueMessage): The request message.
             req_id(str): The request ID.
 
         Returns:

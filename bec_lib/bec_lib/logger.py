@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from loguru import logger as loguru_logger
 
-from bec_lib import BECMessage
+from bec_lib import messages
 from bec_lib.endpoints import MessageEndpoints
 
 if TYPE_CHECKING:
@@ -64,7 +64,7 @@ class BECLogger:
         msg["service_name"] = self.service_name
         self.producer.send(
             topic=MessageEndpoints.log(),
-            msg=BECMessage.LogMessage(log_type=msg["record"]["level"]["name"], content=msg).dumps(),
+            msg=messages.LogMessage(log_type=msg["record"]["level"]["name"], content=msg).dumps(),
         )
 
     @property

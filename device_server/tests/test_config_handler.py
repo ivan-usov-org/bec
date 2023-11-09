@@ -6,7 +6,7 @@ import yaml
 from test_device_manager_ds import device_manager
 
 import bec_lib
-from bec_lib import BECMessage
+from bec_lib import messages
 from bec_lib.tests.utils import ConnectorMock, create_session_from_config
 from device_server.devices.config_update_handler import ConfigUpdateHandler
 from device_server.devices.devicemanager import DeviceConfigError, DeviceManagerDS
@@ -27,7 +27,7 @@ def test_request_response():
         if obj.name == "samx":
             raise ConnectionError
 
-    config_reply = BECMessage.RequestResponseMessage(accepted=True, message="")
+    config_reply = messages.RequestResponseMessage(accepted=True, message="")
     with mock.patch.object(device_manager, "connect_device", wraps=mocked_failed_connection):
         with mock.patch.object(device_manager, "_get_config", get_config_from_mock):
             with mock.patch.object(
@@ -40,7 +40,7 @@ def test_request_response():
                     device_manager.config_update_handler, "send_config_request_reply"
                 ) as request_reply:
                     device_manager.config_update_handler.parse_config_request(
-                        msg=BECMessage.DeviceConfigMessage(
+                        msg=messages.DeviceConfigMessage(
                             action="update", config={"something": "something"}
                         )
                     )
@@ -50,13 +50,13 @@ def test_request_response():
 def test_config_handler_update_config(device_manager):
     handler = ConfigUpdateHandler(device_manager)
 
-    msg = BECMessage.DeviceConfigMessage(action="update", config={"samx": {"enabled": False}})
+    msg = messages.DeviceConfigMessage(action="update", config={"samx": {"enabled": False}})
     handler._update_config(msg)
     assert device_manager.devices.samx.enabled is False
     assert device_manager.devices.samx.initialized is False
     assert device_manager.devices.samx.obj._destroyed is True
 
-    msg = BECMessage.DeviceConfigMessage(action="update", config={"samx": {"enabled": True}})
+    msg = messages.DeviceConfigMessage(action="update", config={"samx": {"enabled": True}})
     handler._update_config(msg)
     assert device_manager.devices.samx.enabled is True
     assert device_manager.devices.samx.initialized is True
@@ -66,7 +66,7 @@ def test_config_handler_update_config(device_manager):
 def test_config_handler_update_config_raises(device_manager):
     handler = ConfigUpdateHandler(device_manager)
 
-    msg = BECMessage.DeviceConfigMessage(
+    msg = messages.DeviceConfigMessage(
         action="update", config={"samx": {"deviceConfig": {"doesntexist": True}}}
     )
     old_config = device_manager.devices.samx._config["deviceConfig"].copy()

@@ -1,5 +1,5 @@
 from unittest import mock
-from bec_lib import BECMessage
+from bec_lib import messages
 
 from bec_lib import MessageEndpoints
 from bec_lib.redis_connector import MessageObject
@@ -16,7 +16,7 @@ def test_worker_manager_retrieves_config_on_startup():
             "model": "GaussianModel",
         }
         worker_config = {"id": "gaussian_fit_worker_3", "config": config}
-        connector.producer().get.return_value = BECMessage.DAPConfigMessage(
+        connector.producer().get.return_value = messages.DAPConfigMessage(
             config={"workers": [worker_config]}
         ).dumps()
         worker_manager = DAPWorkerManager(connector)
@@ -44,9 +44,7 @@ def test_worker_manager_update_config():
             "worker_cls": "LmfitProcessor",
         }
         worker_config = {"id": "gaussian_fit_worker_3", "config": config}
-        worker_manager.update_config(
-            BECMessage.DAPConfigMessage(config={"workers": [worker_config]})
-        )
+        worker_manager.update_config(messages.DAPConfigMessage(config={"workers": [worker_config]}))
         mock_start_worker.assert_called_once()
 
 
@@ -55,7 +53,7 @@ def test_worker_manager_update_config_no_workers():
     with mock.patch.object(DAPWorkerManager, "_start_worker") as mock_start_worker:
         connector.producer().get.return_value = None
         worker_manager = DAPWorkerManager(connector)
-        worker_manager.update_config(BECMessage.DAPConfigMessage(config={"workers": []}))
+        worker_manager.update_config(messages.DAPConfigMessage(config={"workers": []}))
         mock_start_worker.assert_not_called()
 
 
@@ -73,9 +71,7 @@ def test_worker_manager_update_config_worker_already_running():
         }
         worker_config = {"id": "gaussian_fit_worker_3", "config": config}
         worker_manager._workers = {"gaussian_fit_worker_3": {"config": config, "worker": None}}
-        worker_manager.update_config(
-            BECMessage.DAPConfigMessage(config={"workers": [worker_config]})
-        )
+        worker_manager.update_config(messages.DAPConfigMessage(config={"workers": [worker_config]}))
         mock_start_worker.assert_not_called()
 
 
@@ -94,9 +90,7 @@ def test_worker_manager_update_config_worker_already_running_different_config():
         w3_mock = mock.MagicMock()
         worker_config = {"id": "gaussian_fit_worker_3", "config": config}
         worker_manager._workers = {"gaussian_fit_worker_3": {"config": {}, "worker": w3_mock}}
-        worker_manager.update_config(
-            BECMessage.DAPConfigMessage(config={"workers": [worker_config]})
-        )
+        worker_manager.update_config(messages.DAPConfigMessage(config={"workers": [worker_config]}))
         mock_start_worker.assert_called_once()
         w3_mock.terminate.assert_called_once()
 
@@ -115,7 +109,7 @@ def test_worker_manager_update_config_remove_outdated_workers():
         w3_mock = mock.MagicMock()
         worker_config = {"id": "gaussian_fit_worker_3", "config": config}
         worker_manager._workers = {"gaussian_fit_worker_3": {"config": {}, "worker": w3_mock}}
-        worker_manager.update_config(BECMessage.DAPConfigMessage(config={"workers": []}))
+        worker_manager.update_config(messages.DAPConfigMessage(config={"workers": []}))
         mock_start_worker.assert_not_called()
         w3_mock.terminate.assert_called_once()
         assert worker_manager._workers == {}
@@ -197,7 +191,7 @@ def test_worker_manager_set_config():
     connector = mock.MagicMock()
 
     worker_manager = DAPWorkerManager(connector)
-    msg = BECMessage.DAPConfigMessage(
+    msg = messages.DAPConfigMessage(
         config={
             "workers": [
                 {

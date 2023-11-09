@@ -9,7 +9,7 @@ import msgpack
 import yaml
 
 from bec_lib.bec_errors import DeviceConfigError
-from bec_lib.BECMessage import DeviceConfigMessage, RequestResponseMessage
+from bec_lib.messages import DeviceConfigMessage, RequestResponseMessage
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
 

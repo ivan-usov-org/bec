@@ -7,7 +7,7 @@ import pytest
 
 from bec_client import BECIPythonClient
 from bec_client.callbacks.utils import ScanRequestError
-from bec_lib import BECClient, BECMessage
+from bec_lib import BECClient, messages
 from bec_lib.alarm_handler import AlarmBase
 from bec_lib import MessageEndpoints, RedisConnector, ServiceConfig, bec_logger
 from bec_lib.bec_errors import ScanAbortion, ScanInterruption
@@ -463,7 +463,7 @@ def test_file_writer(client):
             MessageEndpoints.public_file(scan.scan.scanID, "master")
         )
 
-    file_msg = BECMessage.FileMessage.loads(msg)
+    file_msg = messages.FileMessage.loads(msg)
     assert file_msg.content["successful"]
 
     # currently not working due to access restrictions in docker:

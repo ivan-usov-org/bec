@@ -3,7 +3,7 @@ import time
 import uuid
 from typing import Any
 
-from bec_lib import BECMessage
+from bec_lib import messages
 from bec_lib.logger import bec_logger
 from bec_lib.devicemanager import Device, DeviceManagerBase, Status
 from bec_lib.endpoints import MessageEndpoints
@@ -101,7 +101,7 @@ class RPCBase:
             "args": args,
             "kwargs": kwargs,
         }
-        msg = BECMessage.ScanQueueMessage(
+        msg = messages.ScanQueueMessage(
             scan_type="device_rpc",
             parameter=params,
             queue="primary",
@@ -123,7 +123,7 @@ class RPCBase:
             if msg:
                 break
             time.sleep(0.01)
-        msg = BECMessage.DeviceRPCMessage.loads(msg)
+        msg = messages.DeviceRPCMessage.loads(msg)
         if not msg.content["success"]:
             error = msg.content["out"]
             raise RPCError(
@@ -253,7 +253,7 @@ class DeviceBase(RPCBase, Device):
 
         if not val:
             return None
-        signals = BECMessage.DeviceMessage.loads(val).content["signals"]
+        signals = messages.DeviceMessage.loads(val).content["signals"]
         if filter_signal and signals.get(self.name):
             return signals.get(self.name)
         return signals
@@ -403,8 +403,8 @@ class DMClient(DeviceManagerBase):
         super().__init__(parent.connector)
         self.parent = parent
 
-    def _get_device_info(self, device_name) -> BECMessage.DeviceInfoMessage:
-        msg = BECMessage.DeviceInfoMessage.loads(
+    def _get_device_info(self, device_name) -> messages.DeviceInfoMessage:
+        msg = messages.DeviceInfoMessage.loads(
             self.producer.get(MessageEndpoints.device_info(device_name))
         )
         return msg
@@ -419,7 +419,7 @@ class DMClient(DeviceManagerBase):
                 except Exception:
                     logger.error(f"Failed to load device {dev}.")
 
-    def _add_device(self, dev: dict, msg: BECMessage.DeviceInfoMessage):
+    def _add_device(self, dev: dict, msg: messages.DeviceInfoMessage):
         name = msg.content["device"]
         info = msg.content["info"]
 

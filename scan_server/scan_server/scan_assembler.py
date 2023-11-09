@@ -1,7 +1,6 @@
 import traceback
-from bec_lib import BECMessage
 
-from bec_lib import bec_logger
+from bec_lib import bec_logger, messages
 
 from .errors import ScanAbortion
 from .scans import RequestBase, unpack_scan_args
@@ -20,12 +19,12 @@ class ScanAssembler:
         self.connector = self.parent.connector
         self.scan_manager = self.parent.scan_manager
 
-    def assemble_device_instructions(self, msg: BECMessage.ScanQueueMessage) -> RequestBase:
+    def assemble_device_instructions(self, msg: messages.ScanQueueMessage) -> RequestBase:
         """Assemble the device instructions for a given ScanQueueMessage.
         This will be achieved by calling the specified class (must be a derived class of RequestBase)
 
         Args:
-            msg (BECMessage.ScanQueueMessage): scan queue message for which the instruction should be assembled
+            msg (messages.ScanQueueMessage): scan queue message for which the instruction should be assembled
 
         Raises:
             ScanAbortion: Raised if the scan initialization fails.

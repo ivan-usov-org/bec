@@ -21,7 +21,7 @@ but they are executed in a specific order:
 """
 
 import time
-from bec_lib import BECMessage
+from bec_lib import messages
 
 from bec_lib import MessageEndpoints, bec_logger
 from scan_server.scans import FlyScanBase, ScanAbortion
@@ -148,7 +148,7 @@ class OwisGrid(FlyScanBase):
         if not raw_msg:
             self.timeout_progress += 1
             return self.timeout_progress
-        msg = BECMessage.ProgressMessage.loads(raw_msg)
+        msg = messages.ProgressMessage.loads(raw_msg)
         if not msg:
             self.timeout_progress += 1
             return self.timeout_progress

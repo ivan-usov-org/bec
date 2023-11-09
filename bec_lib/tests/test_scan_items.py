@@ -5,7 +5,7 @@ from unittest import mock
 
 import pytest
 
-from bec_lib import BECMessage
+from bec_lib import messages
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.queue_items import QueueItem
 from bec_lib.scan_items import ScanItem
@@ -18,7 +18,7 @@ from bec_lib.tests.utils import ConnectorMock
 @pytest.mark.parametrize(
     "queue_msg",
     [
-        BECMessage.ScanQueueStatusMessage(
+        messages.ScanQueueStatusMessage(
             queue={
                 "primary": {
                     "info": [
@@ -74,13 +74,13 @@ def test_scan_item_to_pandas():
     scan_manager = ScanManager(ConnectorMock(""))
     scan_item = ScanItem(scan_manager, "queueID", [1], ["scanID"], "status")
     scan_item.data = {
-        0: BECMessage.ScanMessage(
+        0: messages.ScanMessage(
             point_id=0, scanID="scanID", data={"samx": {"samx": {"value": 1, "timestamp": 0}}}
         ),
-        1: BECMessage.ScanMessage(
+        1: messages.ScanMessage(
             point_id=1, scanID="scanID", data={"samx": {"samx": {"value": 2, "timestamp": 0}}}
         ),
-        2: BECMessage.ScanMessage(
+        2: messages.ScanMessage(
             point_id=2, scanID="scanID", data={"samx": {"samx": {"value": 3, "timestamp": 0}}}
         ),
     }
@@ -138,7 +138,7 @@ def test_emit_data():
     scan_item.bec = mock.Mock()
     scan_item.bec.callbacks = mock.Mock()
     scan_item._run_request_callbacks = mock.Mock()
-    msg = BECMessage.ScanMessage(point_id=0, scanID="scanID", data={"samx": {"value": 1}})
+    msg = messages.ScanMessage(point_id=0, scanID="scanID", data={"samx": {"value": 1}})
     scan_item.emit_data(msg)
     scan_item.bec.callbacks.run.assert_called_once_with("scan_segment", msg.content, msg.metadata)
     scan_item._run_request_callbacks.assert_called_once_with(
@@ -152,7 +152,7 @@ def test_emit_status():
     scan_item.bec = mock.Mock()
     scan_item.bec.callbacks = mock.Mock()
     scan_item._run_request_callbacks = mock.Mock()
-    msg = BECMessage.ScanStatusMessage(scanID="scanID", status="status", info={"info": "info"})
+    msg = messages.ScanStatusMessage(scanID="scanID", status="status", info={"info": "info"})
     scan_item.emit_status(msg)
     scan_item.bec.callbacks.run.assert_called_once_with("status", msg.content, msg.metadata)
     scan_item._run_request_callbacks.assert_called_once_with("status", msg.content, msg.metadata)
@@ -216,7 +216,7 @@ def test_scan_item_neq():
 def test_update_with_scan_status_aborted():
     scan_manager = ScanManager(ConnectorMock(""))
     scan_manager.scan_storage.update_with_scan_status(
-        BECMessage.ScanStatusMessage(scanID="", status="aborted", info={"info": "info"})
+        messages.ScanStatusMessage(scanID="", status="aborted", info={"info": "info"})
     )
 
 
@@ -226,7 +226,7 @@ def test_update_with_scan_status_last_scan_number():
     with mock.patch.object(scan_manager.scan_storage, "find_scan_by_ID") as mock_find_scan:
         mock_find_scan.return_value = mock.MagicMock()
         scan_manager.scan_storage.update_with_scan_status(
-            BECMessage.ScanStatusMessage(scanID="scanID", status="aborted", info={"scan_number": 1})
+            messages.ScanStatusMessage(scanID="scanID", status="aborted", info={"scan_number": 1})
         )
         assert scan_manager.scan_storage.last_scan_number == 1
 
@@ -238,7 +238,7 @@ def test_update_with_scan_status_updates_start_time():
         scan_item = mock.MagicMock()
         mock_find_scan.return_value = scan_item
         scan_manager.scan_storage.update_with_scan_status(
-            BECMessage.ScanStatusMessage(
+            messages.ScanStatusMessage(
                 scanID="scanID", status="open", info={"scan_number": 1}, timestamp=10
             )
         )
@@ -252,7 +252,7 @@ def test_update_with_scan_status_does_not_update_start_time():
         mock_find_scan.return_value = scan_item
         scan_item.start_time = 0
         scan_manager.scan_storage.update_with_scan_status(
-            BECMessage.ScanStatusMessage(
+            messages.ScanStatusMessage(
                 scanID="scanID", status="closed", info={"scan_number": 1}, timestamp=10
             )
         )
@@ -266,7 +266,7 @@ def test_update_with_scan_status_updates_end_time():
         scan_item = mock.MagicMock()
         mock_find_scan.return_value = scan_item
         scan_manager.scan_storage.update_with_scan_status(
-            BECMessage.ScanStatusMessage(
+            messages.ScanStatusMessage(
                 scanID="scanID", status="closed", info={"scan_number": 1}, timestamp=10
             )
         )
@@ -280,7 +280,7 @@ def test_update_with_scan_status_does_not_update_end_time():
         mock_find_scan.return_value = scan_item
         scan_item.end_time = 0
         scan_manager.scan_storage.update_with_scan_status(
-            BECMessage.ScanStatusMessage(
+            messages.ScanStatusMessage(
                 scanID="scanID", status="open", info={"scan_number": 1}, timestamp=10
             )
         )
@@ -294,7 +294,7 @@ def test_update_with_scan_status_updates_num_points():
         scan_item = mock.MagicMock()
         mock_find_scan.return_value = scan_item
         scan_manager.scan_storage.update_with_scan_status(
-            BECMessage.ScanStatusMessage(
+            messages.ScanStatusMessage(
                 scanID="scanID",
                 status="closed",
                 info={"scan_number": 1, "num_points": 10},
@@ -312,7 +312,7 @@ def test_update_with_scan_status_updates_scan_number():
         scan_item.scan_number = None
         mock_find_scan.return_value = scan_item
         scan_manager.scan_storage.update_with_scan_status(
-            BECMessage.ScanStatusMessage(
+            messages.ScanStatusMessage(
                 scanID="scanID",
                 status="closed",
                 info={"scan_number": 1, "num_points": 10},
@@ -330,7 +330,7 @@ def test_update_with_scan_status_does_not_update_scan_number():
         scan_item.scan_number = 2
         mock_find_scan.return_value = scan_item
         scan_manager.scan_storage.update_with_scan_status(
-            BECMessage.ScanStatusMessage(
+            messages.ScanStatusMessage(
                 scanID="scanID",
                 status="closed",
                 info={"scan_number": 1, "num_points": 10},
@@ -348,7 +348,7 @@ def test_update_with_scan_status_adds_scan_def_id():
         scan_item.open_scan_defs = set()
         mock_find_scan.return_value = scan_item
         scan_manager.scan_storage.update_with_scan_status(
-            BECMessage.ScanStatusMessage(
+            messages.ScanStatusMessage(
                 scanID="scanID",
                 status="open",
                 info={"scan_number": 1, "num_points": 10, "scan_def_id": "scan_def_id"},
@@ -366,7 +366,7 @@ def test_update_with_scan_status_removes_scan_def_id():
         scan_item.open_scan_defs = set(["scan_def_id"])
         mock_find_scan.return_value = scan_item
         scan_manager.scan_storage.update_with_scan_status(
-            BECMessage.ScanStatusMessage(
+            messages.ScanStatusMessage(
                 scanID="scanID",
                 status="closed",
                 info={"scan_number": 1, "num_points": 10, "scan_def_id": "scan_def_id"},
@@ -383,7 +383,7 @@ def test_add_scan_segment_emits_data():
     scan_item.data = {}
     scan_manager.scan_storage.storage.append(scan_item)
 
-    msg = BECMessage.ScanMessage(
+    msg = messages.ScanMessage(
         point_id=0, scanID="scanID", data={"samx": {"value": 1}}, metadata={"scanID": "scanID"}
     )
     scan_manager.scan_storage.add_scan_segment(msg)

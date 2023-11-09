@@ -3,9 +3,9 @@ from unittest import mock
 import pytest
 
 from bec_client.callbacks.ipython_live_updates import IPythonLiveUpdates
-from bec_lib import BECMessage
-from bec_lib.tests.utils import bec_client
+from bec_lib import messages
 from bec_lib.queue_items import QueueItem
+from bec_lib.tests.utils import bec_client
 
 
 @pytest.mark.timeout(20)
@@ -13,7 +13,7 @@ def test_live_updates_process_queue_pending(bec_client):
     client = bec_client
     client.start()
     live_updates = IPythonLiveUpdates(client)
-    request_msg = BECMessage.ScanQueueMessage(
+    request_msg = messages.ScanQueueMessage(
         scan_type="grid_scan",
         parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
         queue="primary",
@@ -51,7 +51,7 @@ def test_live_updates_process_queue_running(bec_client):
     client = bec_client
     client.start()
     live_updates = IPythonLiveUpdates(client)
-    request_msg = BECMessage.ScanQueueMessage(
+    request_msg = messages.ScanQueueMessage(
         scan_type="grid_scan",
         parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
         queue="primary",
@@ -95,7 +95,7 @@ def test_live_updates_process_queue_without_status(bec_client):
     client = bec_client
     client.start()
     live_updates = IPythonLiveUpdates(client)
-    request_msg = BECMessage.ScanQueueMessage(
+    request_msg = messages.ScanQueueMessage(
         scan_type="grid_scan",
         parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
         queue="primary",
@@ -118,7 +118,7 @@ def test_live_updates_process_queue_without_queue_number(bec_client):
     client = bec_client
     client.start()
     live_updates = IPythonLiveUpdates(client)
-    request_msg = BECMessage.ScanQueueMessage(
+    request_msg = messages.ScanQueueMessage(
         scan_type="grid_scan",
         parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
         queue="primary",
@@ -147,7 +147,7 @@ def test_live_updates_process_queue_without_queue_number(bec_client):
 #     client = bec_client
 #     client.start()
 #     live_updates = IPythonLiveUpdates(client)
-#     request_msg = BECMessage.ScanQueueMessage(
+#     request_msg = messages.ScanQueueMessage(
 #         scan_type="grid_scan",
 #         parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
 #         queue="primary",

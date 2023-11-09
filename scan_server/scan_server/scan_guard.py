@@ -1,5 +1,5 @@
 import traceback
-from bec_lib import BECMessage
+from bec_lib import messages
 
 import msgpack
 
@@ -111,14 +111,14 @@ class ScanGuard:
 
     @staticmethod
     def _scan_queue_request_callback(msg, parent, **_kwargs):
-        content = BECMessage.ScanQueueMessage.loads(msg.value).content
+        content = messages.ScanQueueMessage.loads(msg.value).content
         logger.info(f"Receiving scan request: {content}")
         # pylint: disable=protected-access
         parent._handle_scan_request(msg.value)
 
     @staticmethod
     def _scan_queue_modification_request_callback(msg, parent, **_kwargs):
-        mod_msg = BECMessage.ScanQueueModificationMessage.loads(msg.value)
+        mod_msg = messages.ScanQueueModificationMessage.loads(msg.value)
         if mod_msg is None:
             logger.warning("Failed to parse scan queue modification message.")
             return
@@ -135,7 +135,7 @@ class ScanGuard:
             metadata: Metadata dict
         """
         sqrr = MessageEndpoints.scan_queue_request_response()
-        rrm = BECMessage.RequestResponseMessage(
+        rrm = messages.RequestResponseMessage(
             accepted=scan_status.accepted, message=scan_status.message, metadata=metadata
         ).dumps()
         self.device_manager.producer.send(sqrr, rrm)
@@ -150,7 +150,7 @@ class ScanGuard:
         Returns:
 
         """
-        msg = BECMessage.ScanQueueMessage.loads(msg)
+        msg = messages.ScanQueueMessage.loads(msg)
         scan_status = self._is_valid_scan_request(msg)
 
         self._send_scan_request_response(scan_status, msg.metadata)
@@ -171,7 +171,7 @@ class ScanGuard:
         Returns:
 
         """
-        mod_msg = BECMessage.ScanQueueModificationMessage.loads(msg)
+        mod_msg = messages.ScanQueueModificationMessage.loads(msg)
 
         if mod_msg.content.get("action") == "restart":
             RID = mod_msg.content["parameter"].get("RID")

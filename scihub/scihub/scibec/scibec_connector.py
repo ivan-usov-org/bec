@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from bec_lib import BECMessage
+from bec_lib import messages
 
 import msgpack
 from requests import ConnectionError
@@ -79,7 +79,7 @@ class SciBecConnector:
 
     @staticmethod
     def _device_config_request_callback(msg, *, parent, **_kwargs) -> None:
-        msg = BECMessage.DeviceConfigMessage.loads(msg.value)
+        msg = messages.DeviceConfigMessage.loads(msg.value)
         logger.info(f"Received request: {msg}")
         parent.config_handler.parse_config_request(msg)
 

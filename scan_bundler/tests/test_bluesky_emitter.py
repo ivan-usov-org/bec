@@ -1,5 +1,5 @@
 from unittest import mock
-from bec_lib import BECMessage
+from bec_lib import messages
 
 import msgpack
 import pytest

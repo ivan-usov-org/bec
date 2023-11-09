@@ -3,7 +3,7 @@ import enum
 import time
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List
-from bec_lib import BECMessage
+from bec_lib import messages
 
 import numpy as np
 
@@ -13,8 +13,8 @@ from .errors import LimitError, ScanAbortion
 from .path_optimization import PathOptimizerMixin
 from .scan_stubs import ScanStubs
 
-DeviceMsg = BECMessage.DeviceInstructionMessage
-ScanMsg = BECMessage.ScanQueueMessage
+DeviceMsg = messages.DeviceInstructionMessage
+ScanMsg = messages.ScanQueueMessage
 
 logger = bec_logger.logger
 
@@ -1059,7 +1059,7 @@ class RoundScanFlySim(ScanBase):
             yield from self.stubs.read_and_wait(group="primary", wait_group="readout_primary")
             msg = self.device_manager.producer.get(MessageEndpoints.device_status(self.flyer))
             if msg:
-                status = BECMessage.DeviceStatusMessage.loads(msg)
+                status = messages.DeviceStatusMessage.loads(msg)
                 device_is_idle = status.content.get("status", 1) == 0
                 matching_RID = self.metadata.get("RID") == status.metadata.get("RID")
                 matching_DIID = target_DIID == status.metadata.get("DIID")
@@ -1306,7 +1306,7 @@ class MonitorScan(ScanBase):
 
             if not readback:
                 continue
-            readback = BECMessage.DeviceMessage.loads(readback).content["signals"]
+            readback = messages.DeviceMessage.loads(readback).content["signals"]
             yield from self.stubs.publish_data_as_read(
                 device=self.flyer, data=readback, pointID=self.pointID
             )

@@ -6,7 +6,7 @@ import pytest
 import yaml
 
 import bec_lib
-from bec_lib import BECMessage
+from bec_lib import messages
 from bec_lib.bec_errors import DeviceConfigError
 from bec_lib.config_helper import ConfigHelper
 
@@ -138,7 +138,7 @@ def test_send_config_request():
     config_helper = ConfigHelper(connector)
     with mock.patch.object(config_helper, "wait_for_config_reply") as mock_wait_for_config_reply:
         config_helper.send_config_request(action="update", config={"test": "test"})
-        mock_wait_for_config_reply.return_value = BECMessage.RequestResponseMessage(
+        mock_wait_for_config_reply.return_value = messages.RequestResponseMessage(
             accepted=True, message="test"
         )
         mock_wait_for_config_reply.assert_called_once_with(mock.ANY)
@@ -148,7 +148,7 @@ def test_send_config_request_raises_for_rejected_update():
     connector = mock.MagicMock()
     config_helper = ConfigHelper(connector)
     with mock.patch.object(config_helper, "wait_for_config_reply") as mock_wait_for_config_reply:
-        mock_wait_for_config_reply.return_value = BECMessage.RequestResponseMessage(
+        mock_wait_for_config_reply.return_value = messages.RequestResponseMessage(
             accepted=False, message="test"
         )
         with pytest.raises(DeviceConfigError):
@@ -159,12 +159,12 @@ def test_send_config_request_raises_for_rejected_update():
 def test_wait_for_config_reply():
     connector = mock.MagicMock()
     config_helper = ConfigHelper(connector)
-    connector.producer().get.return_value = BECMessage.RequestResponseMessage(
+    connector.producer().get.return_value = messages.RequestResponseMessage(
         accepted=True, message="test"
     ).dumps()
 
     res = config_helper.wait_for_config_reply("test")
-    assert res == BECMessage.RequestResponseMessage(accepted=True, message="test")
+    assert res == messages.RequestResponseMessage(accepted=True, message="test")
 
 
 def test_wait_for_config_raises_timeout():

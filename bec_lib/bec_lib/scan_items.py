@@ -8,7 +8,7 @@ import time
 from collections import defaultdict, deque
 from typing import TYPE_CHECKING, Optional
 
-from bec_lib import BECMessage
+from bec_lib import messages
 from bec_lib.logger import bec_logger
 from bec_lib.utils import threadlocked
 
@@ -56,11 +56,11 @@ class ScanItem:
         """get the queue item for the current scan item"""
         return self.scan_manager.queue_storage.find_queue_item_by_ID(self._queueID)
 
-    def emit_data(self, scan_msg: BECMessage.ScanMessage) -> None:
+    def emit_data(self, scan_msg: messages.ScanMessage) -> None:
         self.bec.callbacks.run("scan_segment", scan_msg.content, scan_msg.metadata)
         self._run_request_callbacks("scan_segment", scan_msg.content, scan_msg.metadata)
 
-    def emit_status(self, scan_status: BECMessage.ScanStatusMessage) -> None:
+    def emit_status(self, scan_status: messages.ScanStatusMessage) -> None:
         self.bec.callbacks.run("status", scan_status.content, scan_status.metadata)
         self._run_request_callbacks("status", scan_status.content, scan_status.metadata)
 
@@ -158,7 +158,7 @@ class ScanStorage:
                 return scan
         return None
 
-    def update_with_scan_status(self, scan_status: BECMessage.ScanStatusMessage) -> None:
+    def update_with_scan_status(self, scan_status: messages.ScanStatusMessage) -> None:
         """update scan item in storage with a new ScanStatusMessage"""
 
         scanID = scan_status.content["scanID"]
@@ -211,7 +211,7 @@ class ScanStorage:
         # run status callbacks
         scan_item.emit_status(scan_status)
 
-    def add_scan_segment(self, scan_msg: BECMessage.ScanMessage) -> None:
+    def add_scan_segment(self, scan_msg: messages.ScanMessage) -> None:
         """update a scan item with a new scan segment"""
         logger.info(
             f"Received scan segment {scan_msg.content['point_id']} for scan {scan_msg.metadata['scanID']}: "
@@ -231,7 +231,7 @@ class ScanStorage:
         self.storage.append(ScanItem(self.scan_manager, queueID, scan_number, scanID, status))
 
     @threadlocked
-    def update_with_queue_status(self, queue_msg: BECMessage.ScanQueueStatusMessage):
+    def update_with_queue_status(self, queue_msg: messages.ScanQueueStatusMessage):
         """create new scan items based on their existence in the queue info"""
         queue_info = queue_msg.content["queue"]["primary"].get("info")
         for queue_item in queue_info:

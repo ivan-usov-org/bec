@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from bec_lib import BECMessage
+from bec_lib import messages
 from data_processing.stream_processor import StreamProcessor
 
 
@@ -29,7 +29,7 @@ def test_stream_processor_run_forever(stream_processor):
     """
 
     stream_processor.queue.append(
-        BECMessage.ScanMessage(point_id=1, scanID="scanID", data={"x": 1, "y": 1})
+        messages.ScanMessage(point_id=1, scanID="scanID", data={"x": 1, "y": 1})
     )
     with mock.patch.object(StreamProcessor, "_process_data") as mock_process_data:
         mock_process_data.return_value = [
@@ -44,7 +44,7 @@ def test_stream_processor_publishes_bundled_data(stream_processor):
     Test the StreamProcessor class run_forever method and make sure it publishes bundled data.
     """
     stream_processor.queue.append(
-        BECMessage.ScanMessage(point_id=1, scanID="scanID", data={"x": 1, "y": 1})
+        messages.ScanMessage(point_id=1, scanID="scanID", data={"x": 1, "y": 1})
     )
     with mock.patch.object(StreamProcessor, "_process_data") as mock_process_data:
         mock_process_data.return_value = [
@@ -61,7 +61,7 @@ def test_stream_processor_does_not_publish_empty_data(stream_processor):
     Test the StreamProcessor class run_forever method and make sure does not publish empty data.
     """
     stream_processor.queue.append(
-        BECMessage.ScanMessage(point_id=1, scanID="scanID", data={"x": 1, "y": 1})
+        messages.ScanMessage(point_id=1, scanID="scanID", data={"x": 1, "y": 1})
     )
     with mock.patch.object(StreamProcessor, "_process_data") as mock_process_data:
         mock_process_data.return_value = [

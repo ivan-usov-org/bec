@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from bec_lib import BECMessage
+from bec_lib import messages
 
 from bec_lib import MessageEndpoints, bec_logger
 
@@ -27,7 +27,7 @@ class BECEmitter(EmitterBase):
     def _send_bec_scan_point(self, scanID: str, pointID: int) -> None:
         sb = self.scan_bundler
 
-        msg = BECMessage.ScanMessage(
+        msg = messages.ScanMessage(
             point_id=pointID,
             scanID=scanID,
             data=sb.sync_storage[scanID][pointID],
@@ -42,7 +42,7 @@ class BECEmitter(EmitterBase):
     def _send_baseline(self, scanID: str) -> None:
         sb = self.scan_bundler
 
-        msg = BECMessage.ScanBaselineMessage(
+        msg = messages.ScanBaselineMessage(
             scanID=scanID, data=sb.sync_storage[scanID]["baseline"]
         ).dumps()
         pipe = sb.producer.pipeline()

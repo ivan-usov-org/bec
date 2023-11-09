@@ -1,6 +1,6 @@
 import os
 from unittest import mock
-from bec_lib import BECMessage
+from bec_lib import messages
 
 import numpy as np
 import pytest
@@ -49,10 +49,10 @@ class FileWriterManagerMock(FileWriterManager):
 
 def test_scan_segment_callback():
     file_manager = load_FileWriter()
-    msg = BECMessage.ScanMessage(
+    msg = messages.ScanMessage(
         point_id=1, scanID="scanID", data={"data": "data"}, metadata={"scan_number": 1}
     )
-    msg_bundle = BECMessage.BundleMessage()
+    msg_bundle = messages.BundleMessage()
     msg_bundle.append(msg.dumps())
     msg_raw = MessageObject(value=msg_bundle.dumps(), topic="scan_segment")
 
@@ -62,7 +62,7 @@ def test_scan_segment_callback():
 
 def test_scan_status_callback():
     file_manager = load_FileWriter()
-    msg = BECMessage.ScanStatusMessage(
+    msg = messages.ScanStatusMessage(
         scanID="scanID",
         status="closed",
         info={
@@ -148,7 +148,7 @@ def test_update_baseline_reading():
     file_manager = load_FileWriter()
     file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
     with mock.patch.object(file_manager, "producer") as mock_producer:
-        mock_producer.get.return_value = BECMessage.ScanBaselineMessage(
+        mock_producer.get.return_value = messages.ScanBaselineMessage(
             scanID="scanID", data={"data": "data"}
         ).dumps()
         file_manager.update_baseline_reading("scanID")
@@ -208,7 +208,7 @@ def test_process_async_data_single_entry():
     file_manager = load_FileWriter()
     file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
     data = [
-        (b"0-0", {b"data": BECMessage.DeviceMessage(signals={"data": np.zeros((10, 10))}).dumps()}),
+        (b"0-0", {b"data": messages.DeviceMessage(signals={"data": np.zeros((10, 10))}).dumps()}),
     ]
     file_manager._process_async_data(data, "scanID", "dev1")
     assert np.isclose(
@@ -223,7 +223,7 @@ def test_process_async_data_extend():
         (
             b"0-0",
             {
-                b"data": BECMessage.DeviceMessage(
+                b"data": messages.DeviceMessage(
                     signals={"data": np.zeros((10, 10))}, metadata={"async_update": "extend"}
                 ).dumps()
             },
@@ -241,7 +241,7 @@ def test_process_async_data_append():
         (
             b"0-0",
             {
-                b"data": BECMessage.DeviceMessage(
+                b"data": messages.DeviceMessage(
                     signals={"data": np.zeros((10, 10))}, metadata={"async_update": "append"}
                 ).dumps()
             },
@@ -259,7 +259,7 @@ def test_process_async_data_replace():
         (
             b"0-0",
             {
-                b"data": BECMessage.DeviceMessage(
+                b"data": messages.DeviceMessage(
                     signals={"data": np.zeros((10, 10))}, metadata={"async_update": "replace"}
                 ).dumps()
             },
@@ -273,7 +273,7 @@ def test_process_async_data_replace():
 def test_update_scan_storage_with_status_ignores_none():
     file_manager = load_FileWriter()
     file_manager.update_scan_storage_with_status(
-        BECMessage.ScanStatusMessage(
+        messages.ScanStatusMessage(
             scanID=None,
             status="closed",
             info={},

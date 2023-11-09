@@ -5,7 +5,7 @@ from functools import wraps
 
 import redis
 
-from bec_lib.BECMessage import AlarmMessage, LogMessage
+from bec_lib.messages import AlarmMessage, LogMessage
 from bec_lib.connector import (
     ConnectorBase,
     ConsumerConnector,

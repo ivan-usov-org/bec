@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from bec_lib import BECMessage
+from bec_lib import messages
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.redis_connector import RedisConnector
 
@@ -69,7 +69,7 @@ class BECWorkerManager:
         msg_raw = self.producer.get(MessageEndpoints.dap_config())
         if msg_raw is None:
             return
-        msg = BECMessage.DAPConfigMessage.loads(msg_raw)
+        msg = messages.DAPConfigMessage.loads(msg_raw)
         self._workers = [
             BECWorker.from_dict(w, self) for w in msg.content["config"].get("workers", [])
         ]
@@ -80,7 +80,7 @@ class BECWorkerManager:
         msg_raw = self.producer.get(MessageEndpoints.dap_config())
         if msg_raw is None:
             return {}
-        msg = BECMessage.DAPConfigMessage.loads(msg_raw)
+        msg = messages.DAPConfigMessage.loads(msg_raw)
         return msg.content["config"]
 
     def get_worker(self, id: str) -> BECWorker:
@@ -144,7 +144,7 @@ class BECWorkerManager:
 
     def _update_config(self) -> None:
         """Updates the configuration of the manager."""
-        msg = BECMessage.DAPConfigMessage(config={"workers": [w.to_dict() for w in self._workers]})
+        msg = messages.DAPConfigMessage(config={"workers": [w.to_dict() for w in self._workers]})
         self.producer.set_and_publish(MessageEndpoints.dap_config(), msg.dumps())
 
 

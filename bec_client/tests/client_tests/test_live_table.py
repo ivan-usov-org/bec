@@ -6,7 +6,7 @@ import pytest
 
 from bec_client.callbacks.live_table import LiveUpdatesTable, sort_devices
 from bec_client.callbacks.utils import ScanRequestMixin
-from bec_lib import BECMessage
+from bec_lib import messages
 from bec_lib.tests.utils import bec_client
 from bec_lib.scan_items import ScanItem
 
@@ -16,13 +16,13 @@ from bec_lib.scan_items import ScanItem
 async def test_scan_request_mixin(bec_client):
     client = bec_client
     client.start()
-    request_msg = BECMessage.ScanQueueMessage(
+    request_msg = messages.ScanQueueMessage(
         scan_type="grid_scan",
         parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
         queue="primary",
         metadata={"RID": "something"},
     )
-    response_msg = BECMessage.RequestResponseMessage(
+    response_msg = messages.RequestResponseMessage(
         accepted=True, message="", metadata={"RID": "something"}
     )
     request_mixin = ScanRequestMixin(client, "something")
@@ -46,7 +46,7 @@ def test_sort_devices():
     "request_msg,scan_report_devices",
     [
         (
-            BECMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="grid_scan",
                 parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
                 queue="primary",
@@ -55,7 +55,7 @@ def test_sort_devices():
             ["samx"],
         ),
         (
-            BECMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="round_scan",
                 parameter={"args": {"samx": ["samy", 0, 25, 5, 3]}},
                 queue="primary",
@@ -68,7 +68,7 @@ def test_sort_devices():
 def test_get_devices_from_scan_data(bec_client, request_msg, scan_report_devices):
     client = bec_client
     client.start()
-    data = BECMessage.ScanMessage(
+    data = messages.ScanMessage(
         point_id=0, scanID="", data={}, metadata={"scan_report_devices": scan_report_devices}
     )
     live_update = LiveUpdatesTable(client, {"table_wait": 10}, request_msg)
@@ -81,13 +81,13 @@ def test_get_devices_from_scan_data(bec_client, request_msg, scan_report_devices
 async def test_wait_for_request_acceptance(bec_client):
     client = bec_client
     client.start()
-    request_msg = BECMessage.ScanQueueMessage(
+    request_msg = messages.ScanQueueMessage(
         scan_type="grid_scan",
         parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
         queue="primary",
         metadata={"RID": "something"},
     )
-    response_msg = BECMessage.RequestResponseMessage(
+    response_msg = messages.RequestResponseMessage(
         accepted=True, message="", metadata={"RID": "something"}
     )
     client.queue.request_storage.update_with_request(request_msg)
@@ -106,19 +106,19 @@ class ScanItemMock:
 def test_print_table_data(bec_client):
     client = bec_client
     client.start()
-    request_msg = BECMessage.ScanQueueMessage(
+    request_msg = messages.ScanQueueMessage(
         scan_type="grid_scan",
         parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
         queue="primary",
         metadata={"RID": "something"},
     )
-    response_msg = BECMessage.RequestResponseMessage(
+    response_msg = messages.RequestResponseMessage(
         accepted=True, message="", metadata={"RID": "something"}
     )
     client.queue.request_storage.update_with_request(request_msg)
     client.queue.request_storage.update_with_response(response_msg)
     live_update = LiveUpdatesTable(client, {"table_wait": 10}, request_msg)
-    live_update.point_data = BECMessage.ScanMessage(
+    live_update.point_data = messages.ScanMessage(
         point_id=0,
         scanID="",
         data={"samx": {"samx": {"value": 0}}},
@@ -132,19 +132,19 @@ def test_print_table_data(bec_client):
 def test_print_table_data_lamni_flyer(bec_client):
     client = bec_client
     client.start()
-    request_msg = BECMessage.ScanQueueMessage(
+    request_msg = messages.ScanQueueMessage(
         scan_type="grid_scan",
         parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
         queue="primary",
         metadata={"RID": "something"},
     )
-    response_msg = BECMessage.RequestResponseMessage(
+    response_msg = messages.RequestResponseMessage(
         accepted=True, message="", metadata={"RID": "something"}
     )
     client.queue.request_storage.update_with_request(request_msg)
     client.queue.request_storage.update_with_response(response_msg)
     live_update = LiveUpdatesTable(client, {"table_wait": 10}, request_msg)
-    live_update.point_data = BECMessage.ScanMessage(
+    live_update.point_data = messages.ScanMessage(
         point_id=0,
         scanID="",
         data={"lamni_flyer_1": {"value": 0}},
@@ -158,20 +158,20 @@ def test_print_table_data_lamni_flyer(bec_client):
 def test_print_table_data_hinted_value(bec_client):
     client = bec_client
     client.start()
-    request_msg = BECMessage.ScanQueueMessage(
+    request_msg = messages.ScanQueueMessage(
         scan_type="grid_scan",
         parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
         queue="primary",
         metadata={"RID": "something"},
     )
-    response_msg = BECMessage.RequestResponseMessage(
+    response_msg = messages.RequestResponseMessage(
         accepted=True, message="", metadata={"RID": "something"}
     )
     client.queue.request_storage.update_with_request(request_msg)
     client.queue.request_storage.update_with_response(response_msg)
     live_update = LiveUpdatesTable(client, {"table_wait": 10}, request_msg)
     client.device_manager.devices["samx"]._info["hints"] = {"fields": ["samx_hint"]}
-    live_update.point_data = BECMessage.ScanMessage(
+    live_update.point_data = messages.ScanMessage(
         point_id=0,
         scanID="",
         data={"samx": {"samx_hint": {"value": 0}}},

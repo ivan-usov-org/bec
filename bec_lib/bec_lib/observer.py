@@ -4,7 +4,7 @@ import enum
 
 from typeguard import typechecked
 
-from bec_lib import BECMessage
+from bec_lib import messages
 from bec_lib.devicemanager import Device, DeviceManagerBase
 from bec_lib.endpoints import MessageEndpoints
 
@@ -148,7 +148,7 @@ class ObserverManager:
         msg = self.device_manager.producer.get(MessageEndpoints.observer())
         if msg is None:
             return []
-        observer_msg = BECMessage.ObserverMessage.loads(msg)
+        observer_msg = messages.ObserverMessage.loads(msg)
         return [Observer.from_dict(obs) for obs in observer_msg.content["observer"]]
 
     def update_observer(self):

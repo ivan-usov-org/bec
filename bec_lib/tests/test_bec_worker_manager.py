@@ -3,14 +3,14 @@ from unittest import mock
 import pytest
 
 from bec_lib.bec_worker_manager import BECWorker, BECWorkerManager
-from bec_lib import BECMessage
+from bec_lib import messages
 from bec_lib.endpoints import MessageEndpoints
 
 
 @pytest.fixture
 def worker_manager():
     connector = mock.MagicMock()
-    connector.producer().get.return_value = BECMessage.DAPConfigMessage(
+    connector.producer().get.return_value = messages.DAPConfigMessage(
         config={
             "workers": [
                 {"id": "test", "config": {"test": "test"}},
@@ -59,7 +59,7 @@ def test_bec_worker_remove(worker_manager):
 
 def test_bec_worker_update_config(worker_manager):
     worker_manager._update_config()
-    config = BECMessage.DAPConfigMessage(
+    config = messages.DAPConfigMessage(
         config={
             "workers": [
                 {"id": "test", "config": {"test": "test"}},

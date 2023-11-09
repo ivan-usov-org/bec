@@ -232,10 +232,10 @@ class BECMessage:
         return self.msg_type == other.msg_type and self.metadata == other.metadata
 
     def __repr__(self):
-        return f"BECMessage.{self.__class__.__name__}(**{self.content}, metadata={self.metadata})"
+        return f"messages.{self.__class__.__name__}(**{self.content}, metadata={self.metadata})"
 
     def __str__(self):
-        return f"BECMessage.{self.__class__.__name__}(**{self.content}, metadata={self.metadata})"
+        return f"messages.{self.__class__.__name__}(**{self.content}, metadata={self.metadata})"
 
     @staticmethod
     def get_message_class(msg: str) -> BECMessage:

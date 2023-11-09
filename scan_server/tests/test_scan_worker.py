@@ -1,11 +1,10 @@
 import uuid
 from unittest import mock
-from bec_lib import BECMessage
 
 import pytest
 from utils import load_ScanServerMock
 
-from bec_lib import MessageEndpoints
+from bec_lib import MessageEndpoints, messages
 from scan_server.errors import DeviceMessageError, ScanAbortion
 from scan_server.scan_assembler import ScanAssembler
 from scan_server.scan_queue import (
@@ -73,7 +72,7 @@ class InstructionQueueMock(InstructionQueueItem):
     "instruction,devices",
     [
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device="samy",
                 action="wait",
                 parameter={
@@ -86,7 +85,7 @@ class InstructionQueueMock(InstructionQueueItem):
             ["samy"],
         ),
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=["samx", "samy"],
                 action="wait",
                 parameter={
@@ -99,7 +98,7 @@ class InstructionQueueMock(InstructionQueueItem):
             ["samx", "samy"],
         ),
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device="",
                 action="wait",
                 parameter={
@@ -112,7 +111,7 @@ class InstructionQueueMock(InstructionQueueItem):
             ["samx", "samy"],
         ),
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device="",
                 action="wait",
                 parameter={
@@ -125,7 +124,7 @@ class InstructionQueueMock(InstructionQueueItem):
             ["samx", "samy"],
         ),
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device="",
                 action="wait",
                 parameter={
@@ -164,14 +163,14 @@ def test_get_devices_from_instruction(instruction, devices):
     "instructions",
     [
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device="samx",
                 action="set",
                 parameter={"value": 10, "wait_group": "scan_motor"},
                 metadata={"readout_priority": "monitored", "DIID": 3},
             )
         ),
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device="samx",
             action="set",
             parameter={"value": 10, "wait_group": "scan_motor"},
@@ -196,13 +195,13 @@ def test_add_wait_group(instructions):
 
 
 def test_add_wait_group_to_existing_wait_group():
-    instr1 = BECMessage.DeviceInstructionMessage(
+    instr1 = messages.DeviceInstructionMessage(
         device="samx",
         action="set",
         parameter={"value": 10, "wait_group": "scan_motor"},
         metadata={"readout_priority": "monitored", "DIID": 3},
     )
-    instr2 = BECMessage.DeviceInstructionMessage(
+    instr2 = messages.DeviceInstructionMessage(
         device="samx",
         action="set",
         parameter={"value": 10, "wait_group": "scan_motor"},
@@ -218,7 +217,7 @@ def test_add_wait_group_to_existing_wait_group():
     "instructions,wait_type",
     [
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device="samy",
                 action="wait",
                 parameter={
@@ -231,7 +230,7 @@ def test_add_wait_group_to_existing_wait_group():
             "move",
         ),
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device="samy",
                 action="wait",
                 parameter={
@@ -244,7 +243,7 @@ def test_add_wait_group_to_existing_wait_group():
             "read",
         ),
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device="samy",
                 action="wait",
                 parameter={
@@ -257,7 +256,7 @@ def test_add_wait_group_to_existing_wait_group():
             "trigger",
         ),
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device="samy",
                 action="wait",
                 parameter={
@@ -296,7 +295,7 @@ def test_wait_for_devices(instructions, wait_type):
     "instructions",
     [
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device="samx",
                 action="complete",
                 parameter={},
@@ -304,7 +303,7 @@ def test_wait_for_devices(instructions, wait_type):
             )
         ),
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=None,
                 action="complete",
                 parameter={},
@@ -312,7 +311,7 @@ def test_wait_for_devices(instructions, wait_type):
             )
         ),
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=["samx", "samy"],
                 action="complete",
                 parameter={},
@@ -336,7 +335,7 @@ def test_complete_devices(instructions):
             wait_for_status_mock.assert_called_once_with(devices, instructions.metadata)
             send_mock.assert_called_once_with(
                 MessageEndpoints.device_instructions(),
-                BECMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=devices,
                     action="complete",
                     parameter={},
@@ -349,7 +348,7 @@ def test_complete_devices(instructions):
     "instructions",
     [
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=None,
                 action="pre_scan",
                 parameter={},
@@ -368,7 +367,7 @@ def test_pre_scan(instructions):
             wait_for_status_mock.assert_called_once_with(devices, instructions.metadata)
             send_mock.assert_called_once_with(
                 MessageEndpoints.device_instructions(),
-                BECMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=devices,
                     action="pre_scan",
                     parameter={},
@@ -382,7 +381,7 @@ def test_pre_scan(instructions):
     [
         (
             [
-                BECMessage.DeviceReqStatusMessage(
+                messages.DeviceReqStatusMessage(
                     device="samx",
                     success=True,
                     metadata={
@@ -394,7 +393,7 @@ def test_pre_scan(instructions):
                 )
             ],
             [("samx", 4)],
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=["samx"],
                 action="wait",
                 parameter={"type": "move", "wait_group": "scan_motor"},
@@ -409,7 +408,7 @@ def test_pre_scan(instructions):
         ),
         (
             [
-                BECMessage.DeviceReqStatusMessage(
+                messages.DeviceReqStatusMessage(
                     device="samx",
                     success=False,
                     metadata={
@@ -421,7 +420,7 @@ def test_pre_scan(instructions):
                 )
             ],
             [("samx", 4)],
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=["samx"],
                 action="wait",
                 parameter={"type": "move", "wait_group": "scan_motor"},
@@ -436,7 +435,7 @@ def test_pre_scan(instructions):
         ),
         (
             [
-                BECMessage.DeviceReqStatusMessage(
+                messages.DeviceReqStatusMessage(
                     device="samx",
                     success=False,
                     metadata={
@@ -448,7 +447,7 @@ def test_pre_scan(instructions):
                 )
             ],
             [("samx", 4)],
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=["samx"],
                 action="wait",
                 parameter={"type": "move", "wait_group": "scan_motor"},
@@ -463,7 +462,7 @@ def test_pre_scan(instructions):
         ),
         (
             [
-                BECMessage.DeviceReqStatusMessage(
+                messages.DeviceReqStatusMessage(
                     device="samx",
                     success=False,
                     metadata={
@@ -475,7 +474,7 @@ def test_pre_scan(instructions):
                 )
             ],
             [("samx", 4)],
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=["samx"],
                 action="wait",
                 parameter={"type": "move", "wait_group": "scan_motor"},
@@ -496,7 +495,7 @@ def test_check_for_failed_movements(device_status, devices, instr, abort):
         with pytest.raises(ScanAbortion):
             worker.device_manager.producer._get_buffer[
                 MessageEndpoints.device_readback("samx")
-            ] = BECMessage.DeviceMessage(signals={"samx": {"value": 4}}, metadata={}).dumps()
+            ] = messages.DeviceMessage(signals={"samx": {"value": 4}}, metadata={}).dumps()
             worker._check_for_failed_movements(device_status, devices, instr)
     else:
         worker._check_for_failed_movements(device_status, devices, instr)
@@ -506,7 +505,7 @@ def test_check_for_failed_movements(device_status, devices, instr, abort):
     "msg1,msg2,req_msg",
     [
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device="samx",
                 action="set",
                 parameter={"value": 10, "wait_group": "scan_motor"},
@@ -517,7 +516,7 @@ def test_check_for_failed_movements(device_status, devices, instr, abort):
                     "RID": "requestID",
                 },
             ),
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=["samx"],
                 action="wait",
                 parameter={"type": "move", "wait_group": "scan_motor"},
@@ -528,7 +527,7 @@ def test_check_for_failed_movements(device_status, devices, instr, abort):
                     "RID": "requestID",
                 },
             ),
-            BECMessage.DeviceReqStatusMessage(
+            messages.DeviceReqStatusMessage(
                 device="samx",
                 success=False,
                 metadata={
@@ -540,7 +539,7 @@ def test_check_for_failed_movements(device_status, devices, instr, abort):
             ),
         ),
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device="samx",
                 action="set",
                 parameter={"value": 10, "wait_group": "scan_motor"},
@@ -551,7 +550,7 @@ def test_check_for_failed_movements(device_status, devices, instr, abort):
                     "RID": "requestID",
                 },
             ),
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=["samx"],
                 action="wait",
                 parameter={"type": "move", "wait_group": "scan_motor"},
@@ -562,7 +561,7 @@ def test_check_for_failed_movements(device_status, devices, instr, abort):
                     "RID": "requestID",
                 },
             ),
-            BECMessage.DeviceReqStatusMessage(
+            messages.DeviceReqStatusMessage(
                 device="samx",
                 success=True,
                 metadata={
@@ -575,7 +574,7 @@ def test_check_for_failed_movements(device_status, devices, instr, abort):
         ),
     ],
 )
-def test_wait_for_idle(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
+def test_wait_for_idle(msg1, msg2, req_msg: messages.DeviceReqStatusMessage):
     worker = get_scan_worker()
 
     with mock.patch.object(
@@ -583,7 +582,7 @@ def test_wait_for_idle(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
     ) as device_status:
         worker.device_manager.producer._get_buffer[
             MessageEndpoints.device_readback("samx")
-        ] = BECMessage.DeviceMessage(signals={"samx": {"value": 4}}, metadata={}).dumps()
+        ] = messages.DeviceMessage(signals={"samx": {"value": 4}}, metadata={}).dumps()
 
         worker._add_wait_group(msg1)
         if req_msg.content["success"]:
@@ -597,7 +596,7 @@ def test_wait_for_idle(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
     "msg1,msg2,req_msg",
     [
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=["samx"],
                 action="set",
                 parameter={"value": 10, "wait_group": "scan_motor"},
@@ -608,7 +607,7 @@ def test_wait_for_idle(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
                     "RID": "requestID",
                 },
             ),
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=["samx"],
                 action="wait",
                 parameter={"type": "move", "wait_group": "scan_motor"},
@@ -619,7 +618,7 @@ def test_wait_for_idle(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
                     "RID": "requestID",
                 },
             ),
-            BECMessage.DeviceStatusMessage(
+            messages.DeviceStatusMessage(
                 device="samx",
                 status=0,
                 metadata={
@@ -632,7 +631,7 @@ def test_wait_for_idle(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
         ),
     ],
 )
-def test_wait_for_read(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
+def test_wait_for_read(msg1, msg2, req_msg: messages.DeviceReqStatusMessage):
     worker = get_scan_worker()
 
     with mock.patch.object(
@@ -645,7 +644,7 @@ def test_wait_for_read(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
             worker._groups["scan_motor"] = {"samx": 3, "samy": 4}
             worker.device_manager.producer._get_buffer[
                 MessageEndpoints.device_readback("samx")
-            ] = BECMessage.DeviceMessage(signals={"samx": {"value": 4}}, metadata={}).dumps()
+            ] = messages.DeviceMessage(signals={"samx": {"value": 4}}, metadata={}).dumps()
             worker._add_wait_group(msg1)
             worker._wait_for_read(msg2)
             assert worker._groups == {"scan_motor": {"samy": 4}}
@@ -656,7 +655,7 @@ def test_wait_for_read(msg1, msg2, req_msg: BECMessage.DeviceReqStatusMessage):
     "instr",
     [
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=None,
                 action="set",
                 parameter={"time": 0.1},
@@ -677,7 +676,7 @@ def test_wait_for_trigger(instr):
     with mock.patch.object(worker.validate, "get_device_status") as status_mock:
         with mock.patch.object(worker, "_check_for_interruption") as interruption_mock:
             status_mock.return_value = [
-                BECMessage.DeviceReqStatusMessage(
+                messages.DeviceReqStatusMessage(
                     device="eiger",
                     success=True,
                     metadata={
@@ -714,7 +713,7 @@ def test_wait_for_device_server():
     "instr",
     [
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=["samx"],
                 action="set",
                 parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
@@ -739,7 +738,7 @@ def test_set_devices(instr):
     "instr",
     [
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=["samx"],
                 action="trigger",
                 parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
@@ -761,7 +760,7 @@ def test_trigger_devices(instr):
 
         send_mock.assert_called_once_with(
             MessageEndpoints.device_instructions(),
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=devices,
                 action="trigger",
                 parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
@@ -779,7 +778,7 @@ def test_trigger_devices(instr):
     "instr",
     [
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=["samx"],
                 action="trigger",
                 parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
@@ -804,7 +803,7 @@ def test_send_rpc(instr):
     "instr",
     [
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=["samx"],
                 action="read",
                 parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
@@ -817,7 +816,7 @@ def test_send_rpc(instr):
             )
         ),
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=[],
                 action="read",
                 parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
@@ -844,7 +843,7 @@ def test_read_devices(instr):
         if instr.content.get("device"):
             send_mock.assert_called_once_with(
                 MessageEndpoints.device_instructions(),
-                BECMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=["samx"],
                     action="read",
                     parameter=instr.content["parameter"],
@@ -854,7 +853,7 @@ def test_read_devices(instr):
         else:
             send_mock.assert_called_once_with(
                 MessageEndpoints.device_instructions(),
-                BECMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=devices,
                     action="read",
                     parameter=instr.content["parameter"],
@@ -867,7 +866,7 @@ def test_read_devices(instr):
     "instr, devices, parameter, metadata",
     [
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=["samx"],
                 action="trigger",
                 parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
@@ -890,7 +889,7 @@ def test_kickoff_devices(instr, devices, parameter, metadata):
         worker.kickoff_devices(instr)
         send_mock.assert_called_once_with(
             MessageEndpoints.device_instructions(),
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=devices,
                 action="kickoff",
                 parameter=parameter,
@@ -903,7 +902,7 @@ def test_kickoff_devices(instr, devices, parameter, metadata):
     "instr, devices",
     [
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=["samx"],
                 action="trigger",
                 parameter={"value": 10, "wait_group": "scan_motor", "time": 30},
@@ -926,7 +925,7 @@ def test_publish_readback(instr, devices):
 
             get_readback.assert_called_once_with(["samx"])
             pipe = producer_mock.pipeline()
-            msg = BECMessage.DeviceMessage(
+            msg = messages.DeviceMessage(
                 signals={},
                 metadata=instr.metadata,
             ).dumps()
@@ -951,7 +950,7 @@ def test_get_readback():
 
 def test_publish_data_as_read():
     worker = get_scan_worker()
-    instr = BECMessage.DeviceInstructionMessage(
+    instr = messages.DeviceInstructionMessage(
         device=["samx"],
         action="publish_data_as_read",
         parameter={"data": {}},
@@ -964,7 +963,7 @@ def test_publish_data_as_read():
     )
     with mock.patch.object(worker.device_manager, "producer") as producer_mock:
         worker.publish_data_as_read(instr)
-        msg = BECMessage.DeviceMessage(
+        msg = messages.DeviceMessage(
             signals=instr.content["parameter"]["data"],
             metadata=instr.metadata,
         ).dumps()
@@ -977,7 +976,7 @@ def test_publish_data_as_read_multiple():
     worker = get_scan_worker()
     data = [{"samx": {}}, {"samy": {}}]
     devices = ["samx", "samy"]
-    instr = BECMessage.DeviceInstructionMessage(
+    instr = messages.DeviceInstructionMessage(
         device=devices,
         action="publish_data_as_read",
         parameter={"data": data},
@@ -992,7 +991,7 @@ def test_publish_data_as_read_multiple():
         worker.publish_data_as_read(instr)
         mock_calls = []
         for device, dev_data in zip(devices, data):
-            msg = BECMessage.DeviceMessage(
+            msg = messages.DeviceMessage(
                 signals=dev_data,
                 metadata=instr.metadata,
             ).dumps()
@@ -1011,7 +1010,7 @@ def test_check_for_interruption():
     "instr, corr_num_points, scan_id",
     [
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=None,
                 action="open_scan",
                 parameter={"num_points": 150, "scan_motors": ["samx", "samy"]},
@@ -1028,7 +1027,7 @@ def test_check_for_interruption():
             False,
         ),
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=None,
                 action="open_scan",
                 parameter={"num_points": 150},
@@ -1090,7 +1089,7 @@ def test_open_scan(instr, corr_num_points, scan_id):
 @pytest.mark.parametrize(
     "msg",
     [
-        BECMessage.ScanQueueMessage(
+        messages.ScanQueueMessage(
             scan_type="grid_scan",
             parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}, "num_points": 100},
             queue="primary",
@@ -1128,7 +1127,7 @@ def test_initialize_scan_info(msg):
     "msg,scan_id,max_point_id,exp_num_points",
     [
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=None,
                 action="close_scan",
                 parameter={},
@@ -1139,7 +1138,7 @@ def test_initialize_scan_info(msg):
             20,
         ),
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=None,
                 action="close_scan",
                 parameter={},
@@ -1170,7 +1169,7 @@ def test_close_scan(msg, scan_id, max_point_id, exp_num_points):
 @pytest.mark.parametrize(
     "msg",
     [
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device=None,
             action="close_scan",
             parameter={},
@@ -1240,7 +1239,7 @@ def test_stage_device(msg):
     "msg, devices, parameter, metadata, cleanup",
     [
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=None,
                 action="close_scan",
                 parameter={"parameter": "param"},
@@ -1359,7 +1358,7 @@ def test_process_instructions(abortion):
     "msg,method",
     [
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=None,
                 action="open_scan",
                 parameter={"readout_priority": {"monitored": [], "baseline": [], "ignored": []}},
@@ -1368,7 +1367,7 @@ def test_process_instructions(abortion):
             "open_scan",
         ),
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=None,
                 action="close_scan",
                 parameter={},
@@ -1377,7 +1376,7 @@ def test_process_instructions(abortion):
             "close_scan",
         ),
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=["samx"],
                 action="wait",
                 parameter={"type": "move", "wait_group": "scan_motor"},
@@ -1391,7 +1390,7 @@ def test_process_instructions(abortion):
             "wait_for_devices",
         ),
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=None,
                 action="trigger",
                 parameter={"group": "trigger"},
@@ -1400,7 +1399,7 @@ def test_process_instructions(abortion):
             "trigger_devices",
         ),
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device="samx",
                 action="set",
                 parameter={
@@ -1412,7 +1411,7 @@ def test_process_instructions(abortion):
             "set_devices",
         ),
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=None,
                 action="read",
                 parameter={
@@ -1424,7 +1423,7 @@ def test_process_instructions(abortion):
             "read_devices",
         ),
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=None,
                 action="stage",
                 parameter={},
@@ -1433,7 +1432,7 @@ def test_process_instructions(abortion):
             "stage_devices",
         ),
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=None,
                 action="unstage",
                 parameter={},
@@ -1442,7 +1441,7 @@ def test_process_instructions(abortion):
             "unstage_devices",
         ),
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device="samx",
                 action="rpc",
                 parameter={
@@ -1457,13 +1456,13 @@ def test_process_instructions(abortion):
             "send_rpc",
         ),
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device="samx", action="kickoff", parameter={}, metadata={}
             ),
             "kickoff_devices",
         ),
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=None,
                 action="baseline_reading",
                 parameter={},
@@ -1472,27 +1471,27 @@ def test_process_instructions(abortion):
             "baseline_reading",
         ),
         (
-            BECMessage.DeviceInstructionMessage(device=None, action="close_scan_def", parameter={}),
+            messages.DeviceInstructionMessage(device=None, action="close_scan_def", parameter={}),
             "close_scan",
         ),
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=None, action="publish_data_as_read", parameter={}
             ),
             "publish_data_as_read",
         ),
         (
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device=None, action="scan_report_instruction", parameter={}
             ),
             "process_scan_report_instruction",
         ),
         (
-            BECMessage.DeviceInstructionMessage(device=None, action="pre_scan", parameter={}),
+            messages.DeviceInstructionMessage(device=None, action="pre_scan", parameter={}),
             "pre_scan",
         ),
         (
-            BECMessage.DeviceInstructionMessage(device=None, action="complete", parameter={}),
+            messages.DeviceInstructionMessage(device=None, action="complete", parameter={}),
             "complete_devices",
         ),
     ],

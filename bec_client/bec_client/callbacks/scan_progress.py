@@ -1,7 +1,7 @@
 import asyncio
 
 from bec_client.progressbar import ScanProgressBar
-from bec_lib import BECMessage
+from bec_lib import messages
 from bec_lib import MessageEndpoints, bec_logger
 
 from .live_table import LiveUpdatesTable
@@ -32,7 +32,7 @@ class LiveUpdatesScanProgress(LiveUpdatesTable):
             logger.debug("waiting for new data point")
             await asyncio.sleep(0.1)
             return False
-        status = BECMessage.ProgressMessage.loads(status)
+        status = messages.ProgressMessage.loads(status)
         if status.metadata.get("scanID") != self.scan_item.scanID:
             logger.debug("waiting for new data point")
             await asyncio.sleep(0.1)

@@ -8,12 +8,11 @@ import traceback
 import uuid
 from enum import Enum
 from typing import List, Optional, Union
-from bec_lib import BECMessage
 
 from rich.console import Console
 from rich.table import Table
 
-from bec_lib import Alarms, MessageEndpoints, bec_logger, threadlocked
+from bec_lib import Alarms, MessageEndpoints, bec_logger, messages, threadlocked
 
 from .errors import LimitError, ScanAbortion
 from .scan_assembler import ScanAssembler
@@ -61,12 +60,12 @@ class QueueManager:
         self._start_scan_queue_consumer()
         self._lock = threading.RLock()
 
-    def add_to_queue(self, scan_queue: str, msg: BECMessage.ScanQueueMessage, position=-1) -> None:
+    def add_to_queue(self, scan_queue: str, msg: messages.ScanQueueMessage, position=-1) -> None:
         """Add a new ScanQueueMessage to the queue.
 
         Args:
             scan_queue (str): the queue that should receive the new message
-            msg (BECMessage.ScanQueueMessage): ScanQueueMessage
+            msg (messages.ScanQueueMessage): ScanQueueMessage
 
         """
         try:
@@ -110,7 +109,7 @@ class QueueManager:
 
     @staticmethod
     def _scan_queue_callback(msg, parent, **_kwargs) -> None:
-        scan_msg = BECMessage.ScanQueueMessage.loads(msg.value)
+        scan_msg = messages.ScanQueueMessage.loads(msg.value)
         logger.info(f"Receiving scan: {scan_msg.content}")
         # instructions = parent.scan_assembler.assemble_device_instructions(scan_msg)
         queue = scan_msg.content.get("queue", "primary")
@@ -119,18 +118,18 @@ class QueueManager:
 
     @staticmethod
     def _scan_queue_modification_callback(msg, parent, **_kwargs):
-        scan_mod_msg = BECMessage.ScanQueueModificationMessage.loads(msg.value)
+        scan_mod_msg = messages.ScanQueueModificationMessage.loads(msg.value)
         logger.info(f"Receiving scan modification: {scan_mod_msg.content}")
         if scan_mod_msg:
             parent.scan_interception(scan_mod_msg)
             parent.send_queue_status()
 
     @threadlocked
-    def scan_interception(self, scan_mod_msg: BECMessage.ScanQueueModificationMessage) -> None:
+    def scan_interception(self, scan_mod_msg: messages.ScanQueueModificationMessage) -> None:
         """handle a scan interception by compiling the requested method name and forwarding the request.
 
         Args:
-            scan_mod_msg (BECMessage.ScanQueueModificationMessage): ScanQueueModificationMessage
+            scan_mod_msg (messages.ScanQueueModificationMessage): ScanQueueModificationMessage
 
         """
         action = scan_mod_msg.content["action"]
@@ -240,7 +239,7 @@ class QueueManager:
             logger.info(f"\n {queue}")
         self.producer.set_and_publish(
             MessageEndpoints.scan_queue_status(),
-            BECMessage.ScanQueueStatusMessage(queue=queue_export).dumps(),
+            messages.ScanQueueStatusMessage(queue=queue_export).dumps(),
         )
 
     def describe_queue(self) -> list:
@@ -409,7 +408,7 @@ class ScanQueue:
             except IndexError:
                 time.sleep(0.01)
 
-    def insert(self, msg: BECMessage.ScanQueueMessage, position=-1, **_kwargs):
+    def insert(self, msg: messages.ScanQueueMessage, position=-1, **_kwargs):
         """insert a new message to the queue"""
         target_group = msg.metadata.get("queue_group")
         scan_def_id = msg.metadata.get("scan_def_id")
@@ -579,7 +578,7 @@ class RequestBlockQueue:
         """get the list of scan numbers for all request blocks"""
         return [rb.scan_number for rb in self.request_blocks]
 
-    def append(self, msg: BECMessage.ScanQueueMessage) -> None:
+    def append(self, msg: messages.ScanQueueMessage) -> None:
         """append a new scan queue message"""
         request_block = RequestBlock(msg, self.assembler, parent=self)
         self._update_scan_def_id(request_block)
@@ -789,7 +788,7 @@ class InstructionQueueItem:
 
     def append_to_queue_history(self):
         """append a new queue item to the redis history buffer"""
-        msg = BECMessage.ScanQueueHistoryMessage(
+        msg = messages.ScanQueueHistoryMessage(
             status=self.status.name, queueID=self.queue_id, info=self.describe()
         )
         self.parent.queue_manager.producer.lpush(
@@ -806,7 +805,7 @@ class InstructionQueueItem:
 
     def _get_next(
         self, queue="instructions", raise_stopiteration=True
-    ) -> Optional(BECMessage.DeviceInstructionMessage):
+    ) -> Optional(messages.DeviceInstructionMessage):
         try:
             instr = next(self.queue)
             # instr = next(self.__getattribute__(queue))

@@ -16,13 +16,13 @@ import { Scan } from '../models';
 import { ScanRepository } from '../repositories';
 
 
-export interface BECMessage {
+export interface messages {
   msg_type: string,
   metadata: Object
   content: Object
 }
 
-export interface ScanQueueRequest extends BECMessage {
+export interface ScanQueueRequest extends messages {
   content: {
     scan_type: string,
     parameter: Object,

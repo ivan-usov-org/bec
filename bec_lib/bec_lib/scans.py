@@ -9,13 +9,13 @@ import msgpack
 from cytoolz import partition
 from typeguard import typechecked
 
-from bec_lib import BECMessage
+from bec_lib import messages
 from bec_lib.connector import ConsumerConnector
+from bec_lib.devicemanager_client import Device
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
-from bec_lib.signature_serializer import dict_to_signature
-from bec_lib.devicemanager_client import Device
 from bec_lib.scan_manager import ScanReport
+from bec_lib.signature_serializer import dict_to_signature
 
 if TYPE_CHECKING:
     from bec_lib.client import BECClient
@@ -84,7 +84,7 @@ class ScanObject:
             return None
         return self.scan_info.get("scan_report_hint")
 
-    def _start_consumer(self, request: BECMessage.ScanQueueMessage) -> ConsumerConnector:
+    def _start_consumer(self, request: messages.ScanQueueMessage) -> ConsumerConnector:
         consumer = self.client.device_manager.connector.consumer(
             [
                 MessageEndpoints.device_readback(dev)
@@ -95,7 +95,7 @@ class ScanObject:
         )
         return consumer
 
-    def _send_scan_request(self, request: BECMessage.ScanQueueMessage) -> None:
+    def _send_scan_request(self, request: messages.ScanQueueMessage) -> None:
         self.client.device_manager.producer.send(
             MessageEndpoints.scan_queue_request(), request.dumps()
         )
@@ -158,7 +158,7 @@ class Scans:
     @staticmethod
     def prepare_scan_request(
         scan_name: str, scan_info: dict, *args, **kwargs
-    ) -> BECMessage.ScanQueueMessage:
+    ) -> messages.ScanQueueMessage:
         """Prepare scan request message with given scan arguments
 
         Args:
@@ -171,7 +171,7 @@ class Scans:
             TypeError: Raised if an argument is not of the required type as specified in scan_info.
 
         Returns:
-            BECMessage.ScanQueueMessage: _description_
+            messages.ScanQueueMessage: _description_
         """
         arg_input = list(scan_info.get("arg_input", {}).values())
 
@@ -212,7 +212,7 @@ class Scans:
                 raise TypeError(
                     f"{scan_info.get('doc')}\n {scan_name} requires at most {max_bundles} bundles of arguments ({num_bundles} given).",
                 )
-        return BECMessage.ScanQueueMessage(
+        return messages.ScanQueueMessage(
             scan_type=scan_name, parameter=params, queue="primary", metadata=metadata
         )
 

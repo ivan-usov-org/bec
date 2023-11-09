@@ -6,7 +6,7 @@ import pytest
 import yaml
 
 import bec_lib
-from bec_lib import BECMessage
+from bec_lib import messages
 from bec_lib.connector import MessageObject
 from bec_lib.devicemanager import (
     Device,
@@ -31,9 +31,9 @@ def test_dm_initialize():
 @pytest.mark.parametrize(
     "msg",
     [
-        (BECMessage.DeviceConfigMessage(action="update", config={})),
-        (BECMessage.DeviceConfigMessage(action="add", config={})),
-        (BECMessage.DeviceConfigMessage(action="remove", config={})),
+        (messages.DeviceConfigMessage(action="update", config={})),
+        (messages.DeviceConfigMessage(action="add", config={})),
+        (messages.DeviceConfigMessage(action="remove", config={})),
     ],
 )
 def test_parse_config_request(msg):
@@ -48,16 +48,16 @@ def test_config_request_update():
     with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
         dm._session = create_session_from_config(yaml.safe_load(f))
     dm._load_session()
-    msg = BECMessage.DeviceConfigMessage(action="update", config={})
+    msg = messages.DeviceConfigMessage(action="update", config={})
     dm.parse_config_message(msg)
 
-    msg = BECMessage.DeviceConfigMessage(
+    msg = messages.DeviceConfigMessage(
         action="update", config={"samx": {"deviceConfig": {"tolerance": 1}}}
     )
     dm.parse_config_message(msg)
     assert dm.devices.samx._config["deviceConfig"]["tolerance"] == 1
 
-    msg = BECMessage.DeviceConfigMessage(action="update", config={"samx": {"enabled": False}})
+    msg = messages.DeviceConfigMessage(action="update", config={"samx": {"enabled": False}})
     dm.parse_config_message(msg)
     assert dm.devices.samx._config["enabled"] is False
 
@@ -69,7 +69,7 @@ def test_config_request_reload():
         dm._session = create_session_from_config(yaml.safe_load(f))
     dm._load_session()
 
-    msg = BECMessage.DeviceConfigMessage(action="reload", config=None)
+    msg = messages.DeviceConfigMessage(action="reload", config=None)
     with mock.patch.object(dm, "_get_config") as get_config:
         dm.parse_config_message(msg)
         assert len(dm.devices) == 0
@@ -79,11 +79,11 @@ def test_config_request_reload():
 @pytest.mark.parametrize(
     "msg,raised",
     [
-        (BECMessage.DeviceConfigMessage(action="wrong_action", config={}), True),
-        (BECMessage.DeviceConfigMessage(action="add", config={}), True),
-        (BECMessage.DeviceConfigMessage(action="remove", config={}), True),
-        (BECMessage.DeviceConfigMessage(action="reload", config={}), False),
-        (BECMessage.DeviceConfigMessage(action="add", config={"new_device": {}}), False),
+        (messages.DeviceConfigMessage(action="wrong_action", config={}), True),
+        (messages.DeviceConfigMessage(action="add", config={}), True),
+        (messages.DeviceConfigMessage(action="remove", config={}), True),
+        (messages.DeviceConfigMessage(action="reload", config={}), False),
+        (messages.DeviceConfigMessage(action="add", config={"new_device": {}}), False),
     ],
 )
 def test_check_request_validity(msg, raised):
@@ -213,7 +213,7 @@ def test_device_config_update_callback():
         config_content = yaml.safe_load(f)
         dm._session = create_session_from_config(config_content)
     dm._load_session()
-    dev_config_msg = BECMessage.DeviceConfigMessage(action="update", config={"samx": {}})
+    dev_config_msg = messages.DeviceConfigMessage(action="update", config={"samx": {}})
     msg = MessageObject(value=dev_config_msg.dumps(), topic="")
 
     with mock.patch.object(dm, "parse_config_message") as parse_config_message:

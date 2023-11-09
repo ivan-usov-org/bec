@@ -1,9 +1,9 @@
 ## External data sources
 Large data sources typically have their own data pipeline, optimized for their specific use case and data throughput. Yet, it is often desirable to use the BEC to be informed and potentially link to these external data sources.
-As of now, only external data sources that are based on HDF5 files are supported. BEC can be informed about new HDF5 files by emitting a [FileMessage](#bec_lib.BECMessage.FileMessage) to the [public_file endpoint](#bec_lib.endpoints.MessageEndpoints.public_file), e.g.
+As of now, only external data sources that are based on HDF5 files are supported. BEC can be informed about new HDF5 files by emitting a [FileMessage](#bec_lib.messages.FileMessage) to the [public_file endpoint](#bec_lib.endpoints.MessageEndpoints.public_file), e.g.
 
 ```python
-from bec_lib import MessageEndpoints, BECMessage, RedisConnector
+from bec_lib import MessageEndpoints, messages, RedisConnector
 
 scanID = "scan id of the current scan"
 
@@ -11,7 +11,7 @@ scanID = "scan id of the current scan"
 producer = RedisConnector(["localhost:6379"]).producer()
 
 # prepare the message
-msg = BECMessage.FileMessage(file_path="/path/to/file.h5", done=False)
+msg = messages.FileMessage(file_path="/path/to/file.h5", done=False)
 
 # send the message using the scanID and a user-friendly but unique name to describe the source (e.g. "eiger")
 producer.set_and_publish(

@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Deque, List, Optional
 from rich.console import Console
 from rich.table import Table
 
-from bec_lib import BECMessage
+from bec_lib import messages
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.utils import threadlocked
 
@@ -123,7 +123,7 @@ class QueueStorage:
             history *= -1
 
         return [
-            BECMessage.ScanQueueHistoryMessage.loads(msg)
+            messages.ScanQueueHistoryMessage.loads(msg)
             for msg in self.scan_manager.producer.lrange(
                 MessageEndpoints.scan_queue_history(),
                 0,
@@ -134,7 +134,7 @@ class QueueStorage:
     @property
     def current_scan_queue(self) -> dict:
         """get the current scan queue from redis"""
-        msg = BECMessage.ScanQueueStatusMessage.loads(
+        msg = messages.ScanQueueStatusMessage.loads(
             self.scan_manager.producer.get(MessageEndpoints.scan_queue_status())
         )
         if msg:
@@ -176,7 +176,7 @@ class QueueStorage:
         return queue_tables
 
     @threadlocked
-    def update_with_status(self, queue_msg: BECMessage.ScanQueueStatusMessage) -> None:
+    def update_with_status(self, queue_msg: messages.ScanQueueStatusMessage) -> None:
         """update a queue item with a new ScanQueueStatusMessage / queue message"""
         self.current_scan_queue = queue_msg.content["queue"]
         queue_info = queue_msg.content["queue"]["primary"].get("info")

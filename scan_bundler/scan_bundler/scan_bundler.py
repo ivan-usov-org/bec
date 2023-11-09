@@ -4,7 +4,7 @@ import time
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 from typing import Callable
-from bec_lib import BECMessage
+from bec_lib import messages
 
 from bec_lib import BECService, BECStatus
 from bec_lib import DeviceManagerBase as DeviceManager
@@ -91,7 +91,7 @@ class ScanBundler(BECService):
     def _device_read_callback(msg, parent, **_kwargs):
         # pylint: disable=protected-access
         dev = msg.topic.decode().split(MessageEndpoints._device_read + "/")[-1].split(":sub")[0]
-        msgs = BECMessage.DeviceMessage.loads(msg.value)
+        msgs = messages.DeviceMessage.loads(msg.value)
         logger.debug(f"Received reading from device {dev}")
         if not isinstance(msgs, list):
             msgs = [msgs]
@@ -100,16 +100,16 @@ class ScanBundler(BECService):
 
     @staticmethod
     def _scan_queue_callback(msg, parent, **_kwargs):
-        msg = BECMessage.ScanQueueStatusMessage.loads(msg.value)
+        msg = messages.ScanQueueStatusMessage.loads(msg.value)
         logger.trace(msg)
         parent.current_queue = msg.content["queue"]["primary"].get("info")
 
     @staticmethod
     def _scan_status_callback(msg, parent, **_kwargs):
-        msg = BECMessage.ScanStatusMessage.loads(msg.value)
+        msg = messages.ScanStatusMessage.loads(msg.value)
         parent.handle_scan_status_message(msg)
 
-    def handle_scan_status_message(self, msg: BECMessage.ScanStatusMessage) -> None:
+    def handle_scan_status_message(self, msg: messages.ScanStatusMessage) -> None:
         """handle scan status messages"""
         logger.info(f"Received new scan status: {msg}")
         scanID = msg.content["scanID"]
@@ -121,7 +121,7 @@ class ScanBundler(BECService):
         if msg.content.get("status") != "open":
             self._scan_status_modification(msg)
 
-    def _scan_status_modification(self, msg: BECMessage.ScanStatusMessage):
+    def _scan_status_modification(self, msg: messages.ScanStatusMessage):
         status = msg.content.get("status")
         if status not in ["closed", "aborted", "paused", "halted"]:
             logger.error(f"Unknown scan status {status}")
@@ -139,7 +139,7 @@ class ScanBundler(BECService):
             if scanID not in self.scanID_history:
                 self.scanID_history.append(scanID)
 
-    def _initialize_scan_container(self, scan_msg: BECMessage.ScanStatusMessage):
+    def _initialize_scan_container(self, scan_msg: messages.ScanStatusMessage):
         if scan_msg.content.get("status") != "open":
             return
 
@@ -272,7 +272,7 @@ class ScanBundler(BECService):
 
     def _get_scan_status_history(self, length):
         return [
-            BECMessage.ScanStatusMessage.loads(msg)
+            messages.ScanStatusMessage.loads(msg)
             for msg in self.producer.lrange(
                 MessageEndpoints.scan_status() + "_list", length * -1, -1
             )
@@ -352,7 +352,7 @@ class ScanBundler(BECService):
             self.producer.get(MessageEndpoints.device_readback(dev.name), pipe)
         read_raw = pipe.execute()
 
-        return [BECMessage.DeviceMessage.loads(read).content["signals"] for read in read_raw]
+        return [messages.DeviceMessage.loads(read).content["signals"] for read in read_raw]
 
     def cleanup_storage(self):
         """remove old scanIDs to free memory"""

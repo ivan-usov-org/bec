@@ -2,7 +2,7 @@ import threading
 from collections import deque
 from typing import List
 
-from bec_lib import BECMessage
+from bec_lib import messages
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
 from bec_lib.redis_connector import Alarms, RedisConnector
@@ -17,7 +17,7 @@ class AlarmException(Exception):
 
 class AlarmBase(Exception):
     def __init__(
-        self, alarm: BECMessage.AlarmMessage, alarm_type: str, severity: Alarms, handled=False
+        self, alarm: messages.AlarmMessage, alarm_type: str, severity: Alarms, handled=False
     ) -> None:
         self.alarm = alarm
         self.severity = severity
@@ -50,15 +50,15 @@ class AlarmHandler:
 
     @staticmethod
     def _alarm_consumer_callback(msg, *, parent, **_kwargs):
-        msg = BECMessage.AlarmMessage.loads(msg.value)
+        msg = messages.AlarmMessage.loads(msg.value)
         parent.add_alarm(msg)
 
     @threadlocked
-    def add_alarm(self, msg: BECMessage.AlarmMessage):
+    def add_alarm(self, msg: messages.AlarmMessage):
         """Add a new alarm message to the stack.
 
         Args:
-            msg (BECMessage.AlarmMessage): Alarm message that should be added
+            msg (messages.AlarmMessage): Alarm message that should be added
         """
         severity = Alarms(msg.content["severity"])
         alarm = AlarmBase(

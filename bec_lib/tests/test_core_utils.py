@@ -5,9 +5,9 @@ from unittest import mock
 
 import pytest
 
-from bec_lib import BECMessage
-from bec_lib.utils import _write_csv, scan_to_dict
+from bec_lib import messages
 from bec_lib.scan_manager import ScanReport
+from bec_lib.utils import _write_csv, scan_to_dict
 
 
 def test__write_csv():
@@ -113,7 +113,7 @@ def test_scan_to_csv():
 
 def create_scan_report():
     return {
-        0: BECMessage.ScanMessage(
+        0: messages.ScanMessage(
             **{
                 "point_id": 0,
                 "scanID": "661efd43-49e5-4cc8-946e-d1c0e826f262",
@@ -150,11 +150,11 @@ def create_scan_report():
                 "scan_report_hint": "table",
                 "scan_report_devices": ["samx"],
                 "scan_msgs": [
-                    "BECMessage.ScanQueueMessage(**{'scan_type': 'line_scan', 'parameter': {'args': {'samx': [-5, 5]}, 'kwargs': {'steps': 3, 'exp_time': 0.001, 'relative': True}}, 'queue': 'primary'}, metadata={'sample_name': 'temp', 'exp_time': 0.02, 'RID': 'b4d74aa3-62f7-4444-abea-67dc33e75f34'})"
+                    "messages.ScanQueueMessage(**{'scan_type': 'line_scan', 'parameter': {'args': {'samx': [-5, 5]}, 'kwargs': {'steps': 3, 'exp_time': 0.001, 'relative': True}}, 'queue': 'primary'}, metadata={'sample_name': 'temp', 'exp_time': 0.02, 'RID': 'b4d74aa3-62f7-4444-abea-67dc33e75f34'})"
                 ],
             }
         ),
-        1: BECMessage.ScanMessage(
+        1: messages.ScanMessage(
             **{
                 "point_id": 1,
                 "scanID": "661efd43-49e5-4cc8-946e-d1c0e826f262",
@@ -191,11 +191,11 @@ def create_scan_report():
                 "scan_report_hint": "table",
                 "scan_report_devices": ["samx"],
                 "scan_msgs": [
-                    "BECMessage.ScanQueueMessage(**{'scan_type': 'line_scan', 'parameter': {'args': {'samx': [-5, 5]}, 'kwargs': {'steps': 3, 'exp_time': 0.001, 'relative': True}}, 'queue': 'primary'}, metadata={'sample_name': 'temp', 'exp_time': 0.02, 'RID': 'b4d74aa3-62f7-4444-abea-67dc33e75f34'})"
+                    "messages.ScanQueueMessage(**{'scan_type': 'line_scan', 'parameter': {'args': {'samx': [-5, 5]}, 'kwargs': {'steps': 3, 'exp_time': 0.001, 'relative': True}}, 'queue': 'primary'}, metadata={'sample_name': 'temp', 'exp_time': 0.02, 'RID': 'b4d74aa3-62f7-4444-abea-67dc33e75f34'})"
                 ],
             }
         ),
-        2: BECMessage.ScanMessage(
+        2: messages.ScanMessage(
             **{
                 "point_id": 2,
                 "scanID": "661efd43-49e5-4cc8-946e-d1c0e826f262",
@@ -232,7 +232,7 @@ def create_scan_report():
                 "scan_report_hint": "table",
                 "scan_report_devices": ["samx"],
                 "scan_msgs": [
-                    "BECMessage.ScanQueueMessage(**{'scan_type': 'line_scan', 'parameter': {'args': {'samx': [-5, 5]}, 'kwargs': {'steps': 3, 'exp_time': 0.001, 'relative': True}}, 'queue': 'primary'}, metadata={'sample_name': 'temp', 'exp_time': 0.02, 'RID': 'b4d74aa3-62f7-4444-abea-67dc33e75f34'})"
+                    "messages.ScanQueueMessage(**{'scan_type': 'line_scan', 'parameter': {'args': {'samx': [-5, 5]}, 'kwargs': {'steps': 3, 'exp_time': 0.001, 'relative': True}}, 'queue': 'primary'}, metadata={'sample_name': 'temp', 'exp_time': 0.02, 'RID': 'b4d74aa3-62f7-4444-abea-67dc33e75f34'})"
                 ],
             }
         ),

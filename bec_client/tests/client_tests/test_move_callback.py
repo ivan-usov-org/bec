@@ -4,14 +4,14 @@ from unittest import mock
 import pytest
 
 from bec_client.callbacks.move_device import LiveUpdatesReadbackProgressbar, ReadbackDataMixin
-from bec_lib import BECMessage
+from bec_lib import messages
 from bec_lib.tests.utils import bec_client
 
 
 @pytest.mark.asyncio
 async def test_move_callback(bec_client):
     client = bec_client
-    request = BECMessage.ScanQueueMessage(
+    request = messages.ScanQueueMessage(
         scan_type="umv",
         parameter={"args": {"samx": [10]}, "kwargs": {"relative": True}},
         metadata={"RID": "something"},
@@ -25,7 +25,7 @@ async def test_move_callback(bec_client):
         return readback[0]
 
     req_done = collections.deque()
-    msg_acc = BECMessage.DeviceReqStatusMessage(
+    msg_acc = messages.DeviceReqStatusMessage(
         device="samx", success=True, metadata={"RID": "something"}
     ).dumps()
     req_done.extend([[None], [None], [None], [msg_acc]])
@@ -48,7 +48,7 @@ async def test_move_callback(bec_client):
 @pytest.mark.asyncio
 async def test_move_callback_with_report_instruction(bec_client):
     client = bec_client
-    request = BECMessage.ScanQueueMessage(
+    request = messages.ScanQueueMessage(
         scan_type="umv",
         parameter={"args": {"samx": [10]}, "kwargs": {"relative": True}},
         metadata={"RID": "something"},
@@ -70,7 +70,7 @@ async def test_move_callback_with_report_instruction(bec_client):
         return readback[0]
 
     req_done = collections.deque()
-    msg_acc = BECMessage.DeviceReqStatusMessage(
+    msg_acc = messages.DeviceReqStatusMessage(
         device="samx", success=True, metadata={"RID": "something"}
     ).dumps()
     req_done.extend([[None], [None], [None], [msg_acc]])

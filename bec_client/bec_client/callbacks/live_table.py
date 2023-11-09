@@ -5,8 +5,7 @@ from typing import TYPE_CHECKING, Callable, List
 
 from bec_client.prettytable import PrettyTable
 from bec_client.progressbar import ScanProgressBar
-from bec_lib import BECMessage
-from bec_lib import bec_logger
+from bec_lib import bec_logger, messages
 
 from .utils import LiveUpdatesBase, check_alarms
 
@@ -29,7 +28,7 @@ class LiveUpdatesTable(LiveUpdatesBase):
 
     Args:
         bec (BECClient): client instance
-        request (BECMessage.ScanQueueMessage): The scan request that should be monitored
+        request (messages.ScanQueueMessage): The scan request that should be monitored
 
     Raises:
         TimeoutError: Raised if no queue item is added before reaching a predefined timeout.
@@ -44,7 +43,7 @@ class LiveUpdatesTable(LiveUpdatesBase):
         self,
         bec: BECClient,
         report_instruction: dict = None,
-        request: BECMessage.ScanQueueMessage = None,
+        request: messages.ScanQueueMessage = None,
         callbacks: List[Callable] = None,
         print_table_data=None,
     ) -> None:
@@ -114,7 +113,7 @@ class LiveUpdatesTable(LiveUpdatesBase):
             return devices
         return None
 
-    def get_devices_from_scan_data(self, data: BECMessage.ScanMessage) -> list:
+    def get_devices_from_scan_data(self, data: messages.ScanMessage) -> list:
         """extract interesting devices from a scan request"""
         device_manager = self.bec.device_manager
         scan_devices = data.metadata.get("scan_report_devices")

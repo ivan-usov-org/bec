@@ -4,7 +4,7 @@ import time
 from abc import ABC, abstractmethod
 from collections import deque
 from typing import Any, List, Optional, Tuple
-from bec_lib import BECMessage
+from bec_lib import messages
 
 import lmfit
 import numpy as np
@@ -114,13 +114,13 @@ class StreamProcessor(ABC):
 
         # for multiple results, publish them as a bundle
         if isinstance(result, list) and len(result) > 1:
-            msg_bundle = BECMessage.BundleMessage()
+            msg_bundle = messages.BundleMessage()
             for data, metadata in result:
-                msg = BECMessage.ProcessedDataMessage(data=data, metadata=metadata).dumps()
+                msg = messages.ProcessedDataMessage(data=data, metadata=metadata).dumps()
                 msg_bundle.append(msg)
             self._publish_result(msg_bundle.dumps())
         else:
-            msg = BECMessage.ProcessedDataMessage(data=result[0][0], metadata=result[0][1]).dumps()
+            msg = messages.ProcessedDataMessage(data=result[0][0], metadata=result[0][1]).dumps()
             self._publish_result(msg)
 
     def start(self):
@@ -128,7 +128,7 @@ class StreamProcessor(ABC):
         while True:
             self._run_forever()
 
-    def _process_data(self, data: BECMessage.BECMessage) -> List[Tuple[dict, dict]]:
+    def _process_data(self, data: messages.BECMessage) -> List[Tuple[dict, dict]]:
         """Process data."""
         if not isinstance(data, list):
             data = [data]
@@ -147,9 +147,9 @@ class StreamProcessor(ABC):
     @staticmethod
     def _set_data(msg: MessageObject, parent: StreamProcessor):
         """Set data to the parent."""
-        parent.queue.append(BECMessage.MessageReader.loads(msg.value))
+        parent.queue.append(messages.MessageReader.loads(msg.value))
 
-    def _publish_result(self, msg: BECMessage.BECMessage):
+    def _publish_result(self, msg: messages.BECMessage):
         """Publish the result."""
         self.producer.set_and_publish(
             MessageEndpoints.processed_data(self.config["output"]),

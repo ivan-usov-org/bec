@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Callable, List
-from bec_lib import BECMessage
+from bec_lib import messages
 
 import numpy as np
 
@@ -37,7 +37,7 @@ class ReadbackDataMixin:
         """wait for the readback's metadata to match the request ID"""
         while True:
             msgs = [
-                BECMessage.DeviceMessage.loads(
+                messages.DeviceMessage.loads(
                     self.device_manager.producer.get(MessageEndpoints.device_readback(dev))
                 )
                 for dev in self.devices
@@ -60,7 +60,7 @@ class LiveUpdatesReadbackProgressbar(LiveUpdatesBase):
         self,
         bec: BECClient,
         report_instruction: List = None,
-        request: BECMessage.ScanQueueMessage = None,
+        request: messages.ScanQueueMessage = None,
         callbacks: List[Callable] = None,
     ) -> None:
         super().__init__(
@@ -102,7 +102,7 @@ class LiveUpdatesReadbackProgressbar(LiveUpdatesBase):
                 progress.update(values=values)
 
                 req_done_msgs = data_source.get_request_done_msgs()
-                msgs = [BECMessage.DeviceReqStatusMessage.loads(msg) for msg in req_done_msgs]
+                msgs = [messages.DeviceReqStatusMessage.loads(msg) for msg in req_done_msgs]
                 request_ids = [
                     msg.metadata["RID"] if (msg and msg.metadata.get("RID")) else None
                     for msg in msgs

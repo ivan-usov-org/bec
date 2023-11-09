@@ -6,7 +6,7 @@ import threading
 import time
 import traceback
 from typing import TYPE_CHECKING, Callable, List
-from bec_lib import BECMessage
+from bec_lib import messages
 
 from bec_lib import Alarms, bec_logger
 from bec_lib.request_items import RequestItem
@@ -48,7 +48,7 @@ class LiveUpdatesBase(abc.ABC):
         self,
         bec: BECClient,
         report_instruction: dict = None,
-        request: BECMessage.ScanQueueMessage = None,
+        request: messages.ScanQueueMessage = None,
         callbacks: List[Callable] = None,
     ) -> None:
         self.bec = bec

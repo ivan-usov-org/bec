@@ -8,7 +8,7 @@ import yaml
 
 import bec_lib
 from bec_lib import BECClient
-from bec_lib import BECMessage
+from bec_lib import messages
 from bec_lib.connector import ConnectorBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
@@ -36,7 +36,7 @@ def queue_is_empty(queue) -> bool:
 
 
 def get_queue(bec):
-    return BECMessage.ScanQueueStatusMessage.loads(
+    return messages.ScanQueueStatusMessage.loads(
         bec.queue.producer.get(MessageEndpoints.scan_queue_status())
     )
 
@@ -86,7 +86,7 @@ class ClientMock(BECClient):
 
 
 class DMClientMock(DMClient):
-    def _get_device_info(self, device_name) -> BECMessage.DeviceInfoMessage:
+    def _get_device_info(self, device_name) -> messages.DeviceInfoMessage:
         session_info = self.get_device(device_name)
         device_base_class = (
             "positioner"
@@ -118,7 +118,7 @@ class DMClientMock(DMClient):
             "device_info": {"device_base_class": device_base_class, "signals": signals},
             "custom_user_acces": {},
         }
-        return BECMessage.DeviceInfoMessage(device=device_name, info=dev_info, metadata={})
+        return messages.DeviceInfoMessage(device=device_name, info=dev_info, metadata={})
 
     def get_device(self, device_name):
         for dev in self._session["devices"]:

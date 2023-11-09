@@ -10,8 +10,8 @@ import psutil
 from rich.console import Console
 from rich.table import Table
 
-from bec_lib import BECMessage
-from bec_lib.BECMessage import BECStatus
+from bec_lib import messages
+from bec_lib.messages import BECStatus
 from bec_lib.connector import ConnectorBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
@@ -95,7 +95,7 @@ class BECService:
         if not service_keys:
             return
         services = [service.decode().split(":", maxsplit=1)[0] for service in service_keys]
-        msgs = [BECMessage.StatusMessage.loads(self.producer.get(service)) for service in services]
+        msgs = [messages.StatusMessage.loads(self.producer.get(service)) for service in services]
         self._services_info = {msg.content["name"]: msg for msg in msgs if msg is not None}
 
     def _update_service_info(self):
@@ -107,7 +107,7 @@ class BECService:
     def _send_service_status(self):
         self.producer.set_and_publish(
             topic=MessageEndpoints.service_status(self._service_id),
-            msg=BECMessage.StatusMessage(
+            msg=messages.StatusMessage(
                 name=self.__class__.__name__,
                 status=self.status,
                 info={"user": self._user, "hostname": self._hostname, "timestamp": time.time()},
@@ -169,7 +169,7 @@ class BECService:
                     create_time=res["create_time"],
                 )
             )
-            msg = BECMessage.ServiceMetricMessage(name=self.__class__.__name__, metrics=data)
+            msg = messages.ServiceMetricMessage(name=self.__class__.__name__, metrics=data)
             self.producer.send(MessageEndpoints.metrics(self._service_id), msg.dumps())
             time.sleep(1)
 
@@ -182,7 +182,7 @@ class BECService:
 
         """
         self.producer.set(
-            MessageEndpoints.global_vars(name), BECMessage.VariableMessage(value=val).dumps()
+            MessageEndpoints.global_vars(name), messages.VariableMessage(value=val).dumps()
         )
 
     def get_global_var(self, name: str) -> Any:
@@ -194,9 +194,7 @@ class BECService:
         Returns:
             Any: Value of the variable
         """
-        msg = BECMessage.VariableMessage.loads(
-            self.producer.get(MessageEndpoints.global_vars(name))
-        )
+        msg = messages.VariableMessage.loads(self.producer.get(MessageEndpoints.global_vars(name)))
         if msg:
             return msg.content.get("value")
         return None

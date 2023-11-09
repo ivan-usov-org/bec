@@ -1,5 +1,5 @@
 from unittest import mock
-from bec_lib import BECMessage
+from bec_lib import messages
 
 import msgpack
 import pytest
@@ -14,7 +14,7 @@ from scan_server.scan_guard import ScanGuard, ScanRejection, ScanStatus
     "scan_queue_msg",
     [
         (
-            BECMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="fermat_scan",
                 parameter={
                     "args": {"samx": (-5, 5), "samy": (-5, 5)},
@@ -24,7 +24,7 @@ from scan_server.scan_guard import ScanGuard, ScanRejection, ScanStatus
             )
         ),
         (
-            BECMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="device_rpc",
                 parameter={
                     "device": "samy",
@@ -35,7 +35,7 @@ from scan_server.scan_guard import ScanGuard, ScanRejection, ScanStatus
             )
         ),
         (
-            BECMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="device_rpc",
                 parameter={
                     "device": ["samy"],
@@ -52,7 +52,7 @@ def test_check_motors_movable_enabled(scan_queue_msg):
 
     sg = ScanGuard(parent=k)
     sg._check_motors_movable(scan_queue_msg)
-    config_reply = BECMessage.RequestResponseMessage(accepted=True, message="")
+    config_reply = messages.RequestResponseMessage(accepted=True, message="")
     with mock.patch.object(
         k.device_manager.config_helper, "wait_for_config_reply", return_value=config_reply
     ):
@@ -75,7 +75,7 @@ def test_device_rpc_is_valid(device, func, is_valid):
     "scan_queue_msg,valid",
     [
         (
-            BECMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="fermat_scan",
                 parameter={
                     "args": {"samx": (-5, 5), "samy": (-5, 5)},
@@ -86,7 +86,7 @@ def test_device_rpc_is_valid(device, func, is_valid):
             True,
         ),
         (
-            BECMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="device_rpc",
                 parameter={
                     "device": "samy",
@@ -98,7 +98,7 @@ def test_device_rpc_is_valid(device, func, is_valid):
             True,
         ),
         (
-            BECMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="device_rpc",
                 parameter={
                     "device": ["samy"],
@@ -115,7 +115,7 @@ def test_valid_request(scan_queue_msg, valid):
     k = load_ScanServerMock()
 
     sg = ScanGuard(parent=k)
-    config_reply = BECMessage.RequestResponseMessage(accepted=True, message="")
+    config_reply = messages.RequestResponseMessage(accepted=True, message="")
     with mock.patch.object(
         k.device_manager.config_helper, "wait_for_config_reply", return_value=config_reply
     ):
@@ -134,7 +134,7 @@ def test_check_valid_scan_raises_for_unknown_scan():
     sg.producer = mock.MagicMock()
     sg.producer.get.return_value = msgpack.dumps({"fermat_scan": "fermat_scan"})
 
-    request = BECMessage.ScanQueueMessage(
+    request = messages.ScanQueueMessage(
         scan_type="unknown_scan",
         parameter={
             "args": {"samx": (-5, 5), "samy": (-5, 5)},
@@ -154,7 +154,7 @@ def test_check_valid_scan_accepts_known_scan():
     sg.producer = mock.MagicMock()
     sg.producer.get.return_value = msgpack.dumps({"fermat_scan": "fermat_scan"})
 
-    request = BECMessage.ScanQueueMessage(
+    request = messages.ScanQueueMessage(
         scan_type="fermat_scan",
         parameter={
             "args": {"samx": (-5, 5), "samy": (-5, 5)},
@@ -172,7 +172,7 @@ def test_check_valid_scan_device_rpc():
     sg = ScanGuard(parent=k)
     sg.producer = mock.MagicMock()
     sg.producer.get.return_value = msgpack.dumps({"device_rpc": "device_rpc"})
-    request = BECMessage.ScanQueueMessage(
+    request = messages.ScanQueueMessage(
         scan_type="device_rpc",
         parameter={
             "device": "samy",
@@ -193,7 +193,7 @@ def test_check_valid_scan_device_rpc_raises():
     sg = ScanGuard(parent=k)
     sg.producer = mock.MagicMock()
     sg.producer.get.return_value = msgpack.dumps({"device_rpc": "device_rpc"})
-    request = BECMessage.ScanQueueMessage(
+    request = messages.ScanQueueMessage(
         scan_type="device_rpc",
         parameter={
             "device": "samy",
@@ -215,7 +215,7 @@ def test_handle_scan_modification_request():
     k = load_ScanServerMock()
 
     sg = ScanGuard(parent=k)
-    msg = BECMessage.ScanQueueModificationMessage(
+    msg = messages.ScanQueueModificationMessage(
         scanID="scanID",
         action="abort",
         parameter={},
@@ -233,7 +233,7 @@ def test_handle_scan_modification_request_restart():
     k = load_ScanServerMock()
 
     sg = ScanGuard(parent=k)
-    msg = BECMessage.ScanQueueModificationMessage(
+    msg = messages.ScanQueueModificationMessage(
         scanID="scanID",
         action="restart",
         parameter={"RID": "RID"},
@@ -249,7 +249,7 @@ def test_append_to_scan_queue():
     k = load_ScanServerMock()
 
     sg = ScanGuard(parent=k)
-    msg = BECMessage.ScanQueueMessage(
+    msg = messages.ScanQueueMessage(
         scan_type="fermat_scan",
         parameter={
             "args": {"samx": (-5, 5), "samy": (-5, 5)},
@@ -269,7 +269,7 @@ def test_scan_queue_request_callback():
     k = load_ScanServerMock()
 
     sg = ScanGuard(parent=k)
-    msg = BECMessage.ScanQueueMessage(
+    msg = messages.ScanQueueMessage(
         scan_type="fermat_scan",
         parameter={
             "args": {"samx": (-5, 5), "samy": (-5, 5)},
@@ -287,7 +287,7 @@ def test_scan_queue_modification_request_callback():
     k = load_ScanServerMock()
 
     sg = ScanGuard(parent=k)
-    msg = BECMessage.ScanQueueModificationMessage(
+    msg = messages.ScanQueueModificationMessage(
         scanID="scanID",
         action="abort",
         parameter={},
@@ -303,7 +303,7 @@ def test_scan_queue_modification_request_callback_wrong_msg():
     k = load_ScanServerMock()
 
     sg = ScanGuard(parent=k)
-    msg = BECMessage.ScanQueueMessage(
+    msg = messages.ScanQueueMessage(
         scan_type="fermat_scan",
         parameter={
             "args": {"samx": (-5, 5), "samy": (-5, 5)},
@@ -325,7 +325,7 @@ def test_send_scan_request_response():
         sg._send_scan_request_response(ScanStatus(), {"RID": "RID"})
         send.assert_called_once_with(
             MessageEndpoints.scan_queue_request_response(),
-            BECMessage.RequestResponseMessage(
+            messages.RequestResponseMessage(
                 accepted=True,
                 message="",
                 metadata={"RID": "RID"},
@@ -337,7 +337,7 @@ def test_handle_scan_request():
     k = load_ScanServerMock()
 
     sg = ScanGuard(parent=k)
-    msg = BECMessage.ScanQueueMessage(
+    msg = messages.ScanQueueMessage(
         scan_type="fermat_scan",
         parameter={
             "args": {"samx": (-5, 5), "samy": (-5, 5)},
@@ -356,7 +356,7 @@ def test_handle_scan_request_rejected():
     k = load_ScanServerMock()
 
     sg = ScanGuard(parent=k)
-    msg = BECMessage.ScanQueueMessage(
+    msg = messages.ScanQueueMessage(
         scan_type="fermat_scan",
         parameter={
             "args": {"samx": (-5, 5), "samy": (-5, 5)},
@@ -375,7 +375,7 @@ def test_is_valid_scan_request_returns_scan_status_on_error():
     k = load_ScanServerMock()
 
     sg = ScanGuard(parent=k)
-    msg = BECMessage.ScanQueueMessage(
+    msg = messages.ScanQueueMessage(
         scan_type="fermat_scan",
         parameter={
             "args": {"samx": (-5, 5), "samy": (-5, 5)},

@@ -1,6 +1,6 @@
 import os
 from unittest import mock
-from bec_lib import BECMessage
+from bec_lib import messages
 
 import numpy as np
 import pytest
@@ -98,7 +98,7 @@ def test_disable_unreachable_devices():
         if obj.name == "samx":
             raise ConnectionError
 
-    config_reply = BECMessage.RequestResponseMessage(accepted=True, message="")
+    config_reply = messages.RequestResponseMessage(accepted=True, message="")
 
     with mock.patch.object(device_manager, "connect_device", wraps=mocked_failed_connection):
         with mock.patch.object(device_manager, "_get_config", get_config_from_mock):
@@ -110,7 +110,7 @@ def test_disable_unreachable_devices():
                 device_manager.initialize("")
                 assert device_manager.config_update_handler is not None
                 assert device_manager.devices.samx.enabled is False
-                msg = BECMessage.DeviceConfigMessage(
+                msg = messages.DeviceConfigMessage(
                     action="update", config={"samx": {"enabled": False}}
                 )
 
@@ -135,10 +135,10 @@ def test_flyer_event_callback():
     assert progress[1][0] == MessageEndpoints.device_progress("samx")
 
     # check message
-    bundle_msg = BECMessage.DeviceMessage.loads(bundle[1][1])
+    bundle_msg = messages.DeviceMessage.loads(bundle[1][1])
     assert len(bundle_msg) == 20
 
-    progress_msg = BECMessage.DeviceStatusMessage.loads(progress[1][1])
+    progress_msg = messages.DeviceStatusMessage.loads(progress[1][1])
     assert progress_msg.content["status"] == 20
 
 
@@ -151,7 +151,7 @@ def test_obj_progress_callback():
         device_manager._obj_progress_callback(obj=samx.obj, value=1, max_value=2, done=False)
         mock_producer.set_and_publish.assert_called_once_with(
             MessageEndpoints.device_progress("samx"),
-            BECMessage.ProgressMessage(
+            messages.ProgressMessage(
                 value=1,
                 max_value=2,
                 done=False,

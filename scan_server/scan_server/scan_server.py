@@ -1,5 +1,5 @@
 from __future__ import annotations
-from bec_lib import BECMessage
+from bec_lib import messages
 
 from bec_lib import Alarms, BECService, BECStatus
 from bec_lib import DeviceManagerBase as DeviceManager
@@ -67,7 +67,7 @@ class ScanServer(BECService):
 
     @staticmethod
     def _alarm_callback(msg, parent: ScanServer, **_kwargs):
-        msg = BECMessage.AlarmMessage.loads(msg.value)
+        msg = messages.AlarmMessage.loads(msg.value)
         queue = msg.metadata.get("queue", "primary")
         if Alarms(msg.content["severity"]) == Alarms.MAJOR:
             # shouldn't this be specific to a single queue?

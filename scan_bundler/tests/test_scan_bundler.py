@@ -7,7 +7,7 @@ import pytest
 import yaml
 
 import bec_lib
-from bec_lib import BECMessage
+from bec_lib import messages
 from bec_lib import DeviceManagerBase as DeviceManager
 from bec_lib import MessageEndpoints, ServiceConfig
 from bec_lib.tests.utils import ConnectorMock, create_session_from_config
@@ -55,7 +55,7 @@ class ScanBundlerMock(ScanBundler):
 def test_device_read_callback():
     scan_bundler = load_ScanBundlerMock()
     msg = MessageMock()
-    dev_msg = BECMessage.DeviceMessage(
+    dev_msg = messages.DeviceMessage(
         signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
         metadata={"scanID": "laksjd", "readout_priority": "monitored"},
     )
@@ -75,7 +75,7 @@ def test_device_read_callback():
             "adlk-jalskdjs",
             "adlk-jalskdjs",
             [
-                BECMessage.ScanStatusMessage(
+                messages.ScanStatusMessage(
                     scanID="adlk-jalskdjs",
                     status="open",
                     info={
@@ -92,7 +92,7 @@ def test_device_read_callback():
             "adlk-jalskdjs",
             "",
             [
-                BECMessage.ScanStatusMessage(
+                messages.ScanStatusMessage(
                     scanID="adlk-jalskdjs",
                     status="open",
                     info={
@@ -122,7 +122,7 @@ def test_wait_for_scanID(scanID, storageID, scan_msg):
     "msgs",
     [
         [
-            BECMessage.ScanStatusMessage(
+            messages.ScanStatusMessage(
                 scanID="scanID",
                 status="open",
                 info={
@@ -147,7 +147,7 @@ def test_get_scan_status_history(msgs):
 
 
 def test_add_device_to_storage_returns_without_scanID():
-    msg = BECMessage.DeviceMessage(
+    msg = messages.DeviceMessage(
         signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
         metadata={"readout_priority": "monitored"},
     )
@@ -157,7 +157,7 @@ def test_add_device_to_storage_returns_without_scanID():
 
 
 def test_add_device_to_storage_returns_without_signal():
-    msg = BECMessage.DeviceMessage(
+    msg = messages.DeviceMessage(
         signals={},
         metadata={"scanID": "scanID", "readout_priority": "monitored"},
     )
@@ -167,7 +167,7 @@ def test_add_device_to_storage_returns_without_signal():
 
 
 def test_add_device_to_storage_returns_on_timeout():
-    msg = BECMessage.DeviceMessage(
+    msg = messages.DeviceMessage(
         signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
         metadata={"scanID": "scanID", "readout_priority": "monitored"},
     )
@@ -178,7 +178,7 @@ def test_add_device_to_storage_returns_on_timeout():
 
 @pytest.mark.parametrize("scan_status", ["aborted", "closed"])
 def test_add_device_to_storage_returns_without_scan_info(scan_status):
-    msg = BECMessage.DeviceMessage(
+    msg = messages.DeviceMessage(
         signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
         metadata={"scanID": "scanID", "readout_priority": "monitored"},
     )
@@ -193,21 +193,21 @@ def test_add_device_to_storage_returns_without_scan_info(scan_status):
     "msg,scan_type",
     [
         (
-            BECMessage.DeviceMessage(
+            messages.DeviceMessage(
                 signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
                 metadata={"scanID": "scanID", "readout_priority": "monitored"},
             ),
             "step",
         ),
         (
-            BECMessage.DeviceMessage(
+            messages.DeviceMessage(
                 signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
                 metadata={"scanID": "scanID", "readout_priority": "monitored"},
             ),
             "fly",
         ),
         (
-            BECMessage.DeviceMessage(
+            messages.DeviceMessage(
                 signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
                 metadata={"scanID": "scanID", "readout_priority": "monitored"},
             ),
@@ -242,7 +242,7 @@ def test_add_device_to_storage_primary(msg, scan_type):
     "msg,scan_type",
     [
         (
-            BECMessage.DeviceMessage(
+            messages.DeviceMessage(
                 signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
                 metadata={"scanID": "scanID", "readout_priority": "baseline"},
             ),
@@ -263,7 +263,7 @@ def test_add_device_to_storage_baseline(msg, scan_type):
 @pytest.mark.parametrize(
     "queue_msg",
     [
-        BECMessage.ScanQueueStatusMessage(
+        messages.ScanQueueStatusMessage(
             queue={
                 "primary": {
                     "info": [
@@ -321,7 +321,7 @@ def test_scan_queue_callback(queue_msg):
 @pytest.mark.parametrize(
     "scan_msg",
     [
-        BECMessage.ScanStatusMessage(
+        messages.ScanStatusMessage(
             scanID="6ff7a89a-79e5-43ad-828b-c1e1aeed5803",
             status="closed",
             info={
@@ -350,7 +350,7 @@ def test_scan_status_callback(scan_msg):
     "scan_msg, sync_storage",
     [
         [
-            BECMessage.ScanStatusMessage(
+            messages.ScanStatusMessage(
                 scanID="6ff7a89a-79e5-43ad-828b-c1e1aeed5803",
                 status="closed",
                 info={
@@ -366,7 +366,7 @@ def test_scan_status_callback(scan_msg):
             [],
         ],
         [
-            BECMessage.ScanStatusMessage(
+            messages.ScanStatusMessage(
                 scanID="6ff7a89a-79e5-43ad-828b-c1e1aeed5803",
                 status="open",
                 info={
@@ -408,7 +408,7 @@ def test_status_modification():
     scanID = "test_scanID"
     scan_bundler = load_ScanBundlerMock()
     scan_bundler.sync_storage[scanID] = {"status": "open"}
-    msg = BECMessage.ScanStatusMessage(
+    msg = messages.ScanStatusMessage(
         scanID=scanID,
         status="closed",
         info={
@@ -422,7 +422,7 @@ def test_status_modification():
     assert scan_bundler.sync_storage[scanID]["status"] == "closed"
 
     scanID = "scanID_not_available"
-    msg = BECMessage.ScanStatusMessage(
+    msg = messages.ScanStatusMessage(
         scanID=scanID,
         status="closed",
         info={
@@ -439,7 +439,7 @@ def test_status_modification():
 @pytest.mark.parametrize(
     "scan_msg",
     [
-        BECMessage.ScanStatusMessage(
+        messages.ScanStatusMessage(
             scanID="6ff7a89a-79e5-43ad-828b-c1e1aeed5803",
             status="closed",
             info={
@@ -454,7 +454,7 @@ def test_status_modification():
                 "num_points": 143,
             },
         ),
-        BECMessage.ScanStatusMessage(
+        messages.ScanStatusMessage(
             scanID="6ff7a89a-79e5-43ad-828b-c1e1aeed5803",
             status="open",
             info={
@@ -512,7 +512,7 @@ def test_initialize_scan_container(scan_msg):
     "scan_msg, pointID, primary",
     [
         [
-            BECMessage.DeviceMessage(
+            messages.DeviceMessage(
                 signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
                 metadata={
                     "scanID": "adlk-jalskdja",
@@ -524,7 +524,7 @@ def test_initialize_scan_container(scan_msg):
             True,
         ],
         [
-            BECMessage.DeviceMessage(
+            messages.DeviceMessage(
                 signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
                 metadata={
                     "scanID": "adlk-jalskdjb",
@@ -536,7 +536,7 @@ def test_initialize_scan_container(scan_msg):
             False,
         ],
         [
-            BECMessage.DeviceMessage(
+            messages.DeviceMessage(
                 signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
                 metadata={"scanID": "adlk-jalskdjc", "readout_priority": "monitored"},
             ),
@@ -696,7 +696,7 @@ def test_update_monitor_signals():
 
 def test_get_last_device_readback():
     sb = load_ScanBundlerMock()
-    dev_msg = BECMessage.DeviceMessage(
+    dev_msg = messages.DeviceMessage(
         signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
         metadata={"scanID": "laksjd", "readout_priority": "monitored"},
     )

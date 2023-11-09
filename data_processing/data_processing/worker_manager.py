@@ -3,9 +3,8 @@ from __future__ import annotations
 import inspect
 import multiprocessing as mp
 from typing import Any, List
-from bec_lib import BECMessage
 
-from bec_lib import MessageEndpoints, bec_logger
+from bec_lib import MessageEndpoints, bec_logger, messages
 from bec_lib.redis_connector import RedisConnector
 
 from .stream_processor import LmfitProcessor
@@ -54,7 +53,7 @@ class DAPWorkerManager:
     #     logger.debug("Publishing available plugins")
 
     #     # }
-    #     # msg = BECMessage.AvailableResourceMessage(resource={})
+    #     # msg = messages.AvailableResourceMessage(resource={})
     #     self.producer.publish(MessageEndpoints.dap_available_plugins(), msg.dumps())
 
     def _update_config(self):
@@ -63,7 +62,7 @@ class DAPWorkerManager:
         msg = self.producer.get(MessageEndpoints.dap_config())
         if not msg:
             return
-        config_msg = BECMessage.DAPConfigMessage.loads(msg)
+        config_msg = messages.DAPConfigMessage.loads(msg)
         if not config_msg:
             return
         self.update_config(config_msg)
@@ -77,14 +76,14 @@ class DAPWorkerManager:
         self.consumer.start()
 
     @staticmethod
-    def _set_config(msg: BECMessage.BECMessage, parent: DAPWorkerManager) -> None:
+    def _set_config(msg: messages.BECMessage, parent: DAPWorkerManager) -> None:
         """Set config to the parent."""
-        msg = BECMessage.DAPConfigMessage.loads(msg.value)
+        msg = messages.DAPConfigMessage.loads(msg.value)
         if not msg:
             return
         parent.update_config(msg)
 
-    def update_config(self, msg: BECMessage.DAPConfigMessage):
+    def update_config(self, msg: messages.DAPConfigMessage):
         """Update the config."""
         logger.debug(f"Updating config: {msg.content}")
         if not msg.content["config"]:

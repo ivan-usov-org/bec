@@ -5,7 +5,7 @@ import pytest
 import yaml
 
 import bec_lib
-from bec_lib import BECMessage
+from bec_lib import messages
 from bec_lib.devicemanager import DeviceManagerBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.observer import Observer, ObserverManager
@@ -107,7 +107,7 @@ def test_observer_manager_None(device_manager):
 
 
 def test_observer_manager_msg(device_manager):
-    msg = BECMessage.ObserverMessage(
+    msg = messages.ObserverMessage(
         observer=[
             {
                 "name": "test_observer",

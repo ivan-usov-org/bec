@@ -2,7 +2,7 @@ import argparse
 import json
 import threading
 
-from bec_lib import BECMessage
+from bec_lib import messages
 from bec_lib.redis_connector import RedisConnector
 from bec_lib.service_config import ServiceConfig
 
@@ -25,7 +25,7 @@ config = ServiceConfig(config_path)
 
 
 def channel_callback(msg, **kwargs):
-    msg = BECMessage.MessageReader.loads(msg.value)
+    msg = messages.MessageReader.loads(msg.value)
     out = {"msg_type": msg.msg_type, "content": msg.content, "metadata": msg.metadata}
     print(json.dumps(out, indent=4, default=lambda o: "<not serializable object>"))
 

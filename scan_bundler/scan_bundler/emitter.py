@@ -2,7 +2,7 @@ import threading
 import time
 from queue import Queue
 
-from bec_lib import BECMessage
+from bec_lib import messages
 
 
 class EmitterBase:
@@ -17,7 +17,7 @@ class EmitterBase:
         )
         self._buffered_producer_thread.start()
 
-    def add_message(self, msg: BECMessage.BECMessage, endpoint: str, public: str = None):
+    def add_message(self, msg: messages.BECMessage, endpoint: str, public: str = None):
         self._send_buffer.put((msg, endpoint, public))
 
     def _buffered_publish(self):
@@ -38,7 +38,7 @@ class EmitterBase:
             return
 
         pipe = self.producer.pipeline()
-        msgs = BECMessage.BundleMessage()
+        msgs = messages.BundleMessage()
         _, endpoint, _ = msgs_to_send[0]
         for msg, endpoint, public in msgs_to_send:
             msg_dump = msg.dumps()

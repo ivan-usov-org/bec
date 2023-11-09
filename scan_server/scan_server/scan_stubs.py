@@ -1,7 +1,7 @@
 import time
 import uuid
 from typing import Callable, List, Union
-from bec_lib import BECMessage
+from bec_lib import messages
 
 import numpy as np
 
@@ -9,7 +9,7 @@ from bec_lib import MessageEndpoints, ProducerConnector, Status, bec_logger
 
 from .errors import DeviceMessageError, ScanAbortion
 
-DeviceMsg = BECMessage.DeviceInstructionMessage
+DeviceMsg = messages.DeviceInstructionMessage
 logger = bec_logger.logger
 
 
@@ -67,7 +67,7 @@ class ScanStubs:
             if msg:
                 break
             time.sleep(0.001)
-        msg = BECMessage.DeviceRPCMessage.loads(msg)
+        msg = messages.DeviceRPCMessage.loads(msg)
         if not msg.content["success"]:
             error = msg.content["out"]
             if isinstance(error, dict) and {"error", "msg", "traceback"}.issubset(
@@ -195,7 +195,7 @@ class ScanStubs:
         raw_msg = self.producer.get(MessageEndpoints.device_req_status(device))
         if not raw_msg:
             return 0
-        msg = BECMessage.DeviceReqStatusMessage.loads(raw_msg)
+        msg = messages.DeviceReqStatusMessage.loads(raw_msg)
         matching_RID = msg.metadata.get("RID") == RID
         matching_DIID = msg.metadata.get("DIID") == DIID
         if matching_DIID and matching_RID:
@@ -213,7 +213,7 @@ class ScanStubs:
         raw_msg = self.producer.get(MessageEndpoints.device_progress(device))
         if not raw_msg:
             return None
-        msg = BECMessage.DeviceStatusMessage.loads(raw_msg)
+        msg = messages.DeviceStatusMessage.loads(raw_msg)
         matching_RID = msg.metadata.get("RID") == RID
         if not matching_RID:
             return None

@@ -5,7 +5,7 @@ import traceback
 from asyncio.log import logger
 from typing import List
 
-from bec_lib import Alarms, BECMessage, Device, MessageEndpoints, bec_logger
+from bec_lib import Alarms, Device, MessageEndpoints, bec_logger, messages
 
 from .device_validation import DeviceValidation
 from .errors import DeviceMessageError, ScanAbortion
@@ -13,8 +13,8 @@ from .scan_queue import InstructionQueueItem, InstructionQueueStatus, RequestBlo
 
 logger = bec_logger.logger
 
-DeviceMsg = BECMessage.DeviceInstructionMessage
-ScanStatusMsg = BECMessage.ScanStatusMessage
+DeviceMsg = messages.DeviceInstructionMessage
+ScanStatusMsg = messages.ScanStatusMessage
 
 
 class ScanWorker(threading.Thread):
@@ -299,7 +299,7 @@ class ScanWorker(threading.Thread):
         if not isinstance(data, list):
             data = [data]
         for device, dev_data in zip(devices, data):
-            msg = BECMessage.DeviceMessage(signals=dev_data, metadata=instr.metadata).dumps()
+            msg = messages.DeviceMessage(signals=dev_data, metadata=instr.metadata).dumps()
             producer.set_and_publish(MessageEndpoints.device_read(device), msg)
 
     def send_rpc(self, instr: DeviceMsg) -> None:
@@ -462,7 +462,7 @@ class ScanWorker(threading.Thread):
         matching_DIID = device_status[ind].metadata.get("DIID") >= devices[ind][1]
         matching_RID = device_status[ind].metadata.get("RID") == instr.metadata["RID"]
         if matching_DIID and matching_RID:
-            last_pos = BECMessage.DeviceMessage.loads(
+            last_pos = messages.DeviceMessage.loads(
                 self.device_manager.producer.get(MessageEndpoints.device_readback(failed_device[0]))
             ).content["signals"][failed_device[0]]["value"]
             self.connector.raise_alarm(
@@ -499,7 +499,7 @@ class ScanWorker(threading.Thread):
         while not self.validate.devices_are_ready(
             [dev for dev, _ in wait_group_devices],
             MessageEndpoints.device_req_status,
-            BECMessage.DeviceReqStatusMessage,
+            messages.DeviceReqStatusMessage,
             instr.metadata,
             [
                 self.validate.devices_returned_successfully,
@@ -536,7 +536,7 @@ class ScanWorker(threading.Thread):
         while not self.validate.devices_are_ready(
             [dev for dev, _ in wait_group_devices],
             MessageEndpoints.device_status,
-            BECMessage.DeviceStatusMessage,
+            messages.DeviceStatusMessage,
             instr.metadata,
             [
                 self.validate.devices_are_idle,
@@ -568,7 +568,7 @@ class ScanWorker(threading.Thread):
         while not self.validate.devices_are_ready(
             devices,
             MessageEndpoints.device_staged,
-            BECMessage.DeviceStatusMessage,
+            messages.DeviceStatusMessage,
             metadata,
             [
                 stage_validator,
@@ -597,7 +597,7 @@ class ScanWorker(threading.Thread):
         while not self.validate.devices_are_ready(
             devices,
             MessageEndpoints.device_req_status,
-            BECMessage.DeviceReqStatusMessage,
+            messages.DeviceReqStatusMessage,
             metadata,
             [
                 self.validate.devices_returned_successfully,
@@ -618,7 +618,7 @@ class ScanWorker(threading.Thread):
         readouts = self._get_readback(devices)
         pipe = producer.pipeline()
         for readout, device in zip(readouts, devices):
-            msg = BECMessage.DeviceMessage(signals=readout, metadata=instr.metadata).dumps()
+            msg = messages.DeviceMessage(signals=readout, metadata=instr.metadata).dumps()
             producer.set_and_publish(
                 MessageEndpoints.device_read(device),
                 msg,

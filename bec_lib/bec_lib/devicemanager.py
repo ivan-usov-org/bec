@@ -8,7 +8,7 @@ from rich.table import Table
 from typeguard import typechecked
 
 from bec_lib.bec_errors import DeviceConfigError
-from bec_lib.BECMessage import (
+from bec_lib.messages import (
     BECStatus,
     DeviceConfigMessage,
     DeviceInfoMessage,

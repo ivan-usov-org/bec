@@ -1,6 +1,6 @@
 from unittest import mock
 
-from bec_lib import BECMessage
+from bec_lib import messages
 
 from test_scan_bundler import load_ScanBundlerMock
 
@@ -34,7 +34,7 @@ def test_send_bec_scan_point():
     pointID = 2
     sb.sync_storage[scanID] = {"info": {}, "status": "open", "sent": set()}
     sb.sync_storage[scanID][pointID] = {}
-    msg = BECMessage.ScanMessage(
+    msg = messages.ScanMessage(
         point_id=pointID,
         scanID=scanID,
         data=sb.sync_storage[scanID][pointID],
@@ -56,7 +56,7 @@ def test_send_baseline_BEC():
     scanID = "lkajsdlkj"
     sb.sync_storage[scanID] = {"info": {}, "status": "open", "sent": set()}
     sb.sync_storage[scanID]["baseline"] = {}
-    msg = BECMessage.ScanBaselineMessage(
+    msg = messages.ScanBaselineMessage(
         scanID=scanID, data=sb.sync_storage[scanID]["baseline"]
     ).dumps()
     with mock.patch.object(sb, "producer") as producer:

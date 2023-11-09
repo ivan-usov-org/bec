@@ -2,7 +2,7 @@ import inspect
 import time
 import traceback
 from functools import reduce
-from bec_lib import BECMessage
+from bec_lib import messages
 
 import ophyd
 import ophyd.sim as ops
@@ -48,7 +48,7 @@ class DSDevice(Device):
 
     def initialize_device_buffer(self, producer):
         """initialize the device read and readback buffer on redis with a new reading"""
-        dev_msg = BECMessage.DeviceMessage(signals=self.obj.read(), metadata={}).dumps()
+        dev_msg = messages.DeviceMessage(signals=self.obj.read(), metadata={}).dumps()
         pipe = producer.pipeline()
         producer.set_and_publish(MessageEndpoints.device_readback(self.name), dev_msg, pipe=pipe)
         producer.set(topic=MessageEndpoints.device_read(self.name), msg=dev_msg, pipe=pipe)
@@ -290,7 +290,7 @@ class DeviceManagerDS(DeviceManagerBase):
         interface = get_device_info(obj, {})
         self.producer.set(
             MessageEndpoints.device_info(obj.name),
-            BECMessage.DeviceInfoMessage(device=obj.name, info=interface).dumps(),
+            messages.DeviceInfoMessage(device=obj.name, info=interface).dumps(),
             pipe,
         )
 
@@ -306,7 +306,7 @@ class DeviceManagerDS(DeviceManagerBase):
             name = obj.root.name
             signals = obj.read()
             metadata = self.devices.get(obj.root.name).metadata
-            dev_msg = BECMessage.DeviceMessage(signals=signals, metadata=metadata).dumps()
+            dev_msg = messages.DeviceMessage(signals=signals, metadata=metadata).dumps()
             pipe = self.producer.pipeline()
             self.producer.set_and_publish(MessageEndpoints.device_readback(name), dev_msg, pipe)
             pipe.execute()
@@ -317,7 +317,7 @@ class DeviceManagerDS(DeviceManagerBase):
         metadata = self.devices[device].metadata
         self.producer.send(
             MessageEndpoints.device_status(device),
-            BECMessage.DeviceStatusMessage(device=device, status=status, metadata=metadata).dumps(),
+            messages.DeviceStatusMessage(device=device, status=status, metadata=metadata).dumps(),
         )
 
     def _obj_callback_done_moving(self, *args, **kwargs):
@@ -330,7 +330,7 @@ class DeviceManagerDS(DeviceManagerBase):
         metadata = self.devices[device].metadata
         self.producer.set(
             MessageEndpoints.device_status(kwargs["obj"].root.name),
-            BECMessage.DeviceStatusMessage(device=device, status=status, metadata=metadata).dumps(),
+            messages.DeviceStatusMessage(device=device, status=status, metadata=metadata).dumps(),
         )
 
     def _obj_flyer_callback(self, *_args, **kwargs):
@@ -348,14 +348,14 @@ class DeviceManagerDS(DeviceManagerBase):
 
         # make sure all arrays are of equal length
         max_points = min(len(d) for d in data.values())
-        bundle = BECMessage.BundleMessage()
+        bundle = messages.BundleMessage()
         for ii in range(emitted_points, max_points):
             timestamp = time.time()
             signals = {}
             for key, val in data.items():
                 signals[key] = {"value": val[ii], "timestamp": timestamp}
             bundle.append(
-                BECMessage.DeviceMessage(
+                messages.DeviceMessage(
                     signals={obj.name: signals},
                     metadata={"pointID": ii, **metadata},
                 ).dumps()
@@ -363,7 +363,7 @@ class DeviceManagerDS(DeviceManagerBase):
         ds_obj.emitted_points[metadata["scanID"]] = max_points
         pipe = self.producer.pipeline()
         self.producer.send(MessageEndpoints.device_read(obj.root.name), bundle.dumps(), pipe=pipe)
-        msg = BECMessage.DeviceStatusMessage(
+        msg = messages.DeviceStatusMessage(
             device=obj.root.name, status=max_points, metadata=metadata
         )
         self.producer.set_and_publish(
@@ -373,7 +373,7 @@ class DeviceManagerDS(DeviceManagerBase):
 
     def _obj_progress_callback(self, *_args, obj, value, max_value, done, **kwargs):
         metadata = self.devices[obj.root.name].metadata
-        msg = BECMessage.ProgressMessage(
+        msg = messages.ProgressMessage(
             value=value,
             max_value=max_value,
             done=done,

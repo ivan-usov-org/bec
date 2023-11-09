@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from bec_lib import BECMessage
+from bec_lib import messages
 from bec_lib.bec_errors import ScanAbortion
 from bec_lib.scan_manager import ScanReport
 
@@ -10,7 +10,7 @@ from bec_lib.scan_manager import ScanReport
 def test_scan_report_wait_mv():
     report = ScanReport()
     report.request = mock.MagicMock()
-    report.request.request = BECMessage.ScanQueueMessage(scan_type="mv", parameter={})
+    report.request.request = messages.ScanQueueMessage(scan_type="mv", parameter={})
     with mock.patch.object(report, "_wait_move") as wait_move:
         report.wait()
         wait_move.assert_called_once_with(None, 0.1)
@@ -19,7 +19,7 @@ def test_scan_report_wait_mv():
 def test_scan_report_wait_mv_timeout():
     report = ScanReport()
     report.request = mock.MagicMock()
-    report.request.request = BECMessage.ScanQueueMessage(scan_type="mv", parameter={})
+    report.request.request = messages.ScanQueueMessage(scan_type="mv", parameter={})
     with mock.patch.object(report, "_wait_move") as wait_move:
         report.wait(10)
         wait_move.assert_called_once_with(10, 0.1)
@@ -28,7 +28,7 @@ def test_scan_report_wait_mv_timeout():
 def test_scan_report_wait_scan():
     report = ScanReport()
     report.request = mock.MagicMock()
-    report.request.request = BECMessage.ScanQueueMessage(scan_type="line_scan", parameter={})
+    report.request.request = messages.ScanQueueMessage(scan_type="line_scan", parameter={})
     with mock.patch.object(report, "_wait_scan") as wait_scan:
         report.wait()
         wait_scan.assert_called_once_with(None, 0.1)
@@ -48,7 +48,7 @@ def test_scan_report_wait_move():
     report = ScanReport()
     report.request = mock.MagicMock()
     report._client = mock.MagicMock()
-    report.request.request = BECMessage.ScanQueueMessage(scan_type="mv", parameter={})
+    report.request.request = messages.ScanQueueMessage(scan_type="mv", parameter={})
     with mock.patch.object(report, "_get_mv_status") as get_mv_status:
         get_mv_status.side_effect = [False, False, True]
         report._wait_move(None, 0.1)
@@ -61,7 +61,7 @@ def test_scan_report_wait_for_scan():
     report.request = mock.MagicMock()
     report._client = mock.MagicMock()
     report._queue_item = mock.MagicMock()
-    report.request.request = BECMessage.ScanQueueMessage(scan_type="mv", parameter={})
+    report.request.request = messages.ScanQueueMessage(scan_type="mv", parameter={})
     with mock.patch.object(report, "_get_mv_status") as get_mv_status:
         get_mv_status.side_effect = [False, False, True]
         report.queue_item.status = "COMPLETED"
@@ -73,7 +73,7 @@ def test_scan_report_wait_for_scan_raises():
     report.request = mock.MagicMock()
     report._client = mock.MagicMock()
     report._queue_item = mock.MagicMock()
-    report.request.request = BECMessage.ScanQueueMessage(scan_type="mv", parameter={})
+    report.request.request = messages.ScanQueueMessage(scan_type="mv", parameter={})
     with mock.patch.object(report, "_get_mv_status") as get_mv_status:
         get_mv_status.side_effect = [False, False, True]
         report.queue_item.status = "STOPPED"

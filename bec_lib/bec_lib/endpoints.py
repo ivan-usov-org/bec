@@ -82,7 +82,7 @@ class MessageEndpoints:
     def device_status(cls, device: str):
         """
         Endpoint for device status. This endpoint is used by the device server to publish
-        the device status using a BECMessage.DeviceStatus message.
+        the device status using a messages.DeviceStatus message.
 
         Args:
             device (str): Device name, e.g. "samx".
@@ -93,7 +93,7 @@ class MessageEndpoints:
     def device_read(cls, device: str) -> str:
         """
         Endpoint for device readings. This endpoint is used by the device server to publish
-        the device readings using a BECMessage.DeviceMessage message.
+        the device readings using a messages.DeviceMessage message.
 
         Args:
             device (str): Device name, e.g. "samx".
@@ -107,7 +107,7 @@ class MessageEndpoints:
     def device_readback(cls, device: str) -> str:
         """
         Endpoint for device readbacks. This endpoint is used by the device server to publish
-        the device readbacks using a BECMessage.DeviceMessage message.
+        the device readbacks using a messages.DeviceMessage message.
 
         Args:
             device (str): Device name, e.g. "samx".
@@ -121,7 +121,7 @@ class MessageEndpoints:
     def device_req_status(cls, device: str) -> str:
         """
         Endpoint for device request status. This endpoint is used by the device server to publish
-        the device request status using a BECMessage.DeviceReqStatusMessage message.
+        the device request status using a messages.DeviceReqStatusMessage message.
 
         Args:
             device (str): Device name, e.g. "samx".
@@ -135,7 +135,7 @@ class MessageEndpoints:
     def device_progress(cls, device: str) -> str:
         """
         Endpoint for device progress. This endpoint is used by the device server to publish
-        the device progress using a BECMessage.DeviceStatus message.
+        the device progress using a messages.DeviceStatus message.
 
         Args:
             device (str): Device name, e.g. "samx".
@@ -151,7 +151,7 @@ class MessageEndpoints:
         """
         Endpoint for device config request. This endpoint can be used to
         request a modification to the device config. The request is sent using
-        a BECMessage.DeviceConfigMessage message.
+        a messages.DeviceConfigMessage message.
 
         Returns:
             str: Endpoint for device config request.
@@ -164,7 +164,7 @@ class MessageEndpoints:
         Endpoint for device config request response. This endpoint is used by the
         device server and scihub connector to inform about whether the device config
         request was accepted or rejected. The response is sent using a
-        BECMessage.DeviceConfigMessage message.
+        messages.DeviceConfigMessage message.
 
         Args:
             RID (str): Request ID.
@@ -180,7 +180,7 @@ class MessageEndpoints:
         Endpoint for device server config request. This endpoint can be used to
         request changes to config. Typically used by the scihub connector following a
         device config request and validate a new configuration with the device server.
-        The request is sent using a BECMessage.DeviceConfigMessage message.
+        The request is sent using a messages.DeviceConfigMessage message.
 
         Returns:
             str: Endpoint for device server config request.
@@ -192,7 +192,7 @@ class MessageEndpoints:
         """
         Endpoint for device server config request response. This endpoint is used by the
         device server to inform about whether a new configuration was accepted or rejected.
-        The response is sent using a BECMessage.DeviceConfigMessage message.
+        The response is sent using a messages.DeviceConfigMessage message.
 
         Args:
             RID (str): Request ID.
@@ -207,7 +207,7 @@ class MessageEndpoints:
         """
         Endpoint for device config update. This endpoint is used by the scihub connector
         to inform about a change to the device config. The update is sent using a
-        BECMessage.DeviceConfigMessage message.
+        messages.DeviceConfigMessage message.
 
         Returns:
             str: Endpoint for device config update.
@@ -230,7 +230,7 @@ class MessageEndpoints:
     def device_info(cls, device: str) -> str:
         """
         Endpoint for device info. This endpoint is used by the device server to publish
-        the device info using a BECMessage.DeviceInfo message.
+        the device info using a messages.DeviceInfo message.
 
         Args:
             device (str): Device name, e.g. "samx".
@@ -244,7 +244,7 @@ class MessageEndpoints:
     def device_staged(cls, device: str) -> str:
         """
         Endpoint for the device stage status. This endpoint is used by the device server
-        to publish the device stage status using a BECMessage.DeviceStatus message.
+        to publish the device stage status using a messages.DeviceStatus message.
         A device is staged when it is ready to be used in a scan. A DeviceStatus of 1 means
         that the device is staged, 0 means that the device is not staged.
 
@@ -261,7 +261,7 @@ class MessageEndpoints:
         """
         Endpoint for receiving an async device readback over Redis streams.
         This endpoint is used by the device server to publish async device
-        readbacks using a BECMessage.DeviceMessage. In addition tp scan metadata,
+        readbacks using a messages.DeviceMessage. In addition tp scan metadata,
         the message metadata contains information on how to concatenate multiple readings.
         Further keyword arguments for GUI handling might be attached.
 
@@ -279,7 +279,7 @@ class MessageEndpoints:
     def scan_queue_modification(cls) -> str:
         """
         Endpoint for scan queue modification. This endpoint is used to publish accepted
-        scan queue modifications using a BECMessage.ScanQueueModification message.
+        scan queue modifications using a messages.ScanQueueModification message.
 
         Returns:
             str: Endpoint for scan queue modification.
@@ -290,7 +290,7 @@ class MessageEndpoints:
     def scan_queue_modification_request(cls) -> str:
         """
         Endpoint for scan queue modification request. This endpoint is used to request
-        a scan queue modification using a BECMessage.ScanQueueModification message.
+        a scan queue modification using a messages.ScanQueueModification message.
         If accepted, the modification is published using the scan_queue_modification
         endpoint.
 
@@ -303,7 +303,7 @@ class MessageEndpoints:
     def scan_queue_insert(cls) -> str:
         """
         Endpoint for scan queue inserts. This endpoint is used to publish accepted
-        scans using a BECMessage.ScanQueueMessage message.
+        scans using a messages.ScanQueueMessage message.
         The message will be picked up by the scan queue manager and inserted into the
         scan queue.
 
@@ -316,7 +316,7 @@ class MessageEndpoints:
     def scan_queue_request(cls) -> str:
         """
         Endpoint for scan queue request. This endpoint is used to request the new scans.
-        The request is sent using a BECMessage.ScanQueueMessage message.
+        The request is sent using a messages.ScanQueueMessage message.
 
         Returns:
             str: Endpoint for scan queue request.
@@ -328,7 +328,7 @@ class MessageEndpoints:
         """
         Endpoint for scan queue request response. This endpoint is used to publish the
         information on whether the scan request was accepted or rejected. The response
-        is sent using a ``BECMessage.ScanQueueRequestResponse`` message.
+        is sent using a ``messages.ScanQueueRequestResponse`` message.
 
         Returns:
             str: Endpoint for scan queue request response.
@@ -340,7 +340,7 @@ class MessageEndpoints:
     def scan_queue_status(cls) -> str:
         """
         Endpoint for scan queue status. This endpoint is used to publish the scan queue
-        status using a BECMessage.ScanQueueStatus message.
+        status using a messages.ScanQueueStatus message.
 
         Returns:
             str: Endpoint for scan queue status.
@@ -351,7 +351,7 @@ class MessageEndpoints:
     def scan_queue_history(cls) -> str:
         """
         Endpoint for scan queue history. This endpoint is used to keep track of the
-        scan queue history using a BECMessage.ScanQueueHistory message. The endpoint is
+        scan queue history using a messages.ScanQueueHistory message. The endpoint is
         connected to a redis list.
 
         Returns:
@@ -386,7 +386,7 @@ class MessageEndpoints:
     def scan_status(cls) -> str:
         """
         Endpoint for scan status. This endpoint is used to publish the scan status using
-        a BECMessage.ScanStatusMessage message.
+        a messages.ScanStatusMessage message.
 
         Returns:
             str: Endpoint for scan status.
@@ -399,7 +399,7 @@ class MessageEndpoints:
         Endpoint for available scans. This endpoint is used to publish the available scans
         using a direct msgpack dump of a dictionary containing the available scans.
 
-        #TODO: Change this to a BECMessage.AvailableScans message.
+        #TODO: Change this to a messages.AvailableScans message.
 
         Returns:
             str: Endpoint for available scans.
@@ -421,7 +421,7 @@ class MessageEndpoints:
     def scan_segment(cls) -> str:
         """
         Endpoint for scan segment. This endpoint is used by the scan bundler to publish
-        the scan segment using a BECMessage.ScanMessage message.
+        the scan segment using a messages.ScanMessage message.
 
         Returns:
             str: Endpoint for scan segments.
@@ -432,7 +432,7 @@ class MessageEndpoints:
     def scan_baseline(cls) -> str:
         """
         Endpoint for scan baseline readings. This endpoint is used by the scan bundler to
-        publish the scan baseline readings using a BECMessage.ScanBaselineMessage message.
+        publish the scan baseline readings using a messages.ScanBaselineMessage message.
 
         Returns:
             str: Endpoint for scan baseline readings.
@@ -444,7 +444,7 @@ class MessageEndpoints:
     def device_instructions(cls) -> str:
         """
         Endpoint for device instructions. This endpoint is used by the scan server to
-        publish the device instructions using a BECMessage.DeviceInstructions message.
+        publish the device instructions using a messages.DeviceInstructions message.
         The device instructions are used to instruct the device server to perform
         certain actions, e.g. to move a motor.
 
@@ -457,7 +457,7 @@ class MessageEndpoints:
     def device_rpc(cls, rpc_id: str) -> str:
         """
         Endpoint for device rpc. This endpoint is used by the device server to publish
-        the result of a device rpc using a BECMessage.DeviceRPCResponse message.
+        the result of a device rpc using a messages.DeviceRPCResponse message.
 
         Args:
             rpc_id (str): RPC ID.
@@ -493,7 +493,7 @@ class MessageEndpoints:
     def public_scan_info(cls, scanID: str) -> str:
         """
         Endpoint for scan info. This endpoint is used by the scan worker to publish the
-        scan info using a BECMessage.ScanInfo message. In contrast to the scan_info endpoint,
+        scan info using a messages.ScanInfo message. In contrast to the scan_info endpoint,
         this endpoint is specific to a scan and has a retentioni time of 30 minutes.
 
         Args:
@@ -509,7 +509,7 @@ class MessageEndpoints:
     def public_scan_segment(cls, scanID: str, pointID: int) -> str:
         """
         Endpoint for public scan segments. This endpoint is used by the scan bundler to
-        publish the scan segment using a BECMessage.ScanMessage message. In contrast to the
+        publish the scan segment using a messages.ScanMessage message. In contrast to the
         scan_segment endpoint, this endpoint is specific to a scan and has a retention time
         of 30 minutes.
 
@@ -527,7 +527,7 @@ class MessageEndpoints:
     def public_scan_baseline(cls, scanID: str) -> str:
         """
         Endpoint for public scan baseline readings. This endpoint is used by the scan bundler
-        to publish the scan baseline readings using a BECMessage.ScanBaselineMessage message.
+        to publish the scan baseline readings using a messages.ScanBaselineMessage message.
         In contrast to the scan_baseline endpoint, this endpoint is specific to a scan and has
         a retention time of 30 minutes.
 
@@ -543,7 +543,7 @@ class MessageEndpoints:
     def public_file(cls, scanID: str, name: str) -> str:
         """
         Endpoint for public file. This endpoint is used by the file writer to publish the
-        status of the file writing using a BECMessage.FileMessage message.
+        status of the file writing using a messages.FileMessage message.
 
         Args:
             scanID (str): Scan ID.
@@ -558,7 +558,7 @@ class MessageEndpoints:
     def file_event(cls, name: str) -> str:
         """
         Endpoint for public file_event. This endpoint is used by the file writer to publish the
-        status of the file writing using a BECMessage.FileMessage message.
+        status of the file writing using a messages.FileMessage message.
 
         Args:
             name (str): File name.
@@ -573,7 +573,7 @@ class MessageEndpoints:
     def log(cls) -> str:
         """
         Endpoint for log. This endpoint is used by the redis connector to publish logs using
-        a BECMessage.LogMessage message.
+        a messages.LogMessage message.
 
         Returns:
             str: Endpoint for log.
@@ -584,7 +584,7 @@ class MessageEndpoints:
     def alarm(cls) -> str:
         """
         Endpoint for alarms. This endpoint is used by the redis connector to publish alarms
-        using a BECMessage.AlarmMessage message.
+        using a messages.AlarmMessage message.
 
         Returns:
             str: Endpoint for alarms.
@@ -596,7 +596,7 @@ class MessageEndpoints:
     def service_status(cls, service_id: str) -> str:
         """
         Endpoint for service status. This endpoint is used by all BEC services to publish
-        their status using a BECMessage.StatusMessage message.
+        their status using a messages.StatusMessage message.
         The status message also contains the service info such as user, host, etc.
 
         Args:
@@ -608,7 +608,7 @@ class MessageEndpoints:
     def metrics(cls, service_id: str) -> str:
         """
         Endpoint for metrics. This endpoint is used by all BEC services to publish their
-        performance metrics using a BECMessage.ServiceMetricMessage message.
+        performance metrics using a messages.ServiceMetricMessage message.
 
         Args:
             service_id (str): Service ID, typically a uuid4 string.
@@ -623,7 +623,7 @@ class MessageEndpoints:
     def global_vars(cls, var_name: str) -> str:
         """
         Endpoint for global variables. This endpoint is used to publish global variables
-        using a BECMessage.VariableMessage message.
+        using a messages.VariableMessage message.
 
         Args:
             var_name (str): Variable name.
@@ -648,7 +648,7 @@ class MessageEndpoints:
     def progress(cls, var_name) -> str:
         """
         Endpoint for progress. This endpoint is used to publish the current progress
-        using a BECMessage.ProgressMessage message.
+        using a messages.ProgressMessage message.
 
         Args:
             var_name (str): Variable name.
@@ -684,7 +684,7 @@ class MessageEndpoints:
     def processed_data(cls, process_id: str) -> str:
         """
         Endpoint for processed data. This endpoint is used to publish new processed data
-        streams using a BECMessage.ProcessedData message.
+        streams using a messages.ProcessedData message.
 
         Args:
             process_id (str): Process ID, typically a uuid4 string.
@@ -698,7 +698,7 @@ class MessageEndpoints:
     def dap_config(cls) -> str:
         """
         Endpoint for DAP configuration. This endpoint is used to publish the DAP configuration
-        using a BECMessage.DAPConfig message.
+        using a messages.DAPConfig message.
 
         Returns:
             str: Endpoint for DAP configuration.
@@ -709,7 +709,7 @@ class MessageEndpoints:
     def dap_available_plugins(cls) -> str:
         """
         Endpoint for available DAP plugins. This endpoint is used to publish the available DAP
-        plugins using a BECMessage.AvailableResourceMessage message.
+        plugins using a messages.AvailableResourceMessage message.
 
         Returns:
             str: Endpoint for available DAP plugins.

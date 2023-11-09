@@ -5,7 +5,7 @@ from collections import deque
 from typing import TYPE_CHECKING, Deque, Optional
 
 from bec_lib.callback_handler import CallbackHandler
-from bec_lib import BECMessage
+from bec_lib import messages
 from bec_lib.logger import bec_logger
 from bec_lib.utils import threadlocked
 
@@ -40,14 +40,14 @@ class RequestItem:
         self._scanID = scanID
         self.callbacks = CallbackHandler()
 
-    def update_with_response(self, response: BECMessage.RequestResponseMessage):
+    def update_with_response(self, response: messages.RequestResponseMessage):
         """update the current request item with a RequestResponseMessage / response message"""
         self.response = response
         self._decision_pending = False
         self.requestID = response.metadata["RID"]
         self.accepted = [response.content["accepted"]]
 
-    def update_with_request(self, request: BECMessage.ScanQueueMessage):
+    def update_with_request(self, request: messages.ScanQueueMessage):
         """update the current request item with a ScanQueueMessage / request message"""
         self.request = request
         self.requestID = request.metadata["RID"]
@@ -68,7 +68,7 @@ class RequestItem:
         self._decision_pending = val
 
     @classmethod
-    def from_response(cls, scan_manager: ScanManager, response: BECMessage.RequestResponseMessage):
+    def from_response(cls, scan_manager: ScanManager, response: messages.RequestResponseMessage):
         """initialize a request item from a RequestReponseMessage / response message"""
         scan_req = cls(
             scan_manager=scan_manager,
@@ -80,7 +80,7 @@ class RequestItem:
         return scan_req
 
     @classmethod
-    def from_request(cls, scan_manager: ScanManager, request: BECMessage.ScanQueueMessage):
+    def from_request(cls, scan_manager: ScanManager, request: messages.ScanQueueMessage):
         """initialize a request item from a ScanQueueMessage / request message"""
         scan_req = cls(
             scan_manager=scan_manager, requestID=request.metadata["RID"], request=request
@@ -120,7 +120,7 @@ class RequestStorage:
         return None
 
     @threadlocked
-    def update_with_response(self, response_msg: BECMessage.RequestResponseMessage) -> None:
+    def update_with_response(self, response_msg: messages.RequestResponseMessage) -> None:
         """create or update request item based on a new RequestResponseMessage"""
         request_item = self.find_request_by_ID(response_msg.metadata.get("RID"))
         if request_item:
@@ -133,7 +133,7 @@ class RequestStorage:
         logger.debug("Scan queue request does not exist. Creating from response.")
 
     @threadlocked
-    def update_with_request(self, request_msg: BECMessage.ScanQueueMessage) -> None:
+    def update_with_request(self, request_msg: messages.ScanQueueMessage) -> None:
         """create or update request item based on a new ScanQueueMessage (i.e. request message)"""
         if not request_msg.metadata:
             return

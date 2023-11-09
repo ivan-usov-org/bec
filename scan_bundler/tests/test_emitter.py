@@ -1,5 +1,5 @@
 from unittest import mock
-from bec_lib import BECMessage
+from bec_lib import messages
 
 import pytest
 
@@ -14,7 +14,7 @@ from scan_bundler.emitter import EmitterBase
         (
             [
                 (
-                    BECMessage.ScanMessage(point_id=1, scanID="scanID", data={}, metadata={}),
+                    messages.ScanMessage(point_id=1, scanID="scanID", data={}, metadata={}),
                     "endpoint",
                     None,
                 )
@@ -23,12 +23,12 @@ from scan_bundler.emitter import EmitterBase
         (
             [
                 (
-                    BECMessage.ScanMessage(point_id=1, scanID="scanID", data={}, metadata={}),
+                    messages.ScanMessage(point_id=1, scanID="scanID", data={}, metadata={}),
                     "endpoint",
                     None,
                 ),
                 (
-                    BECMessage.ScanMessage(point_id=2, scanID="scanID", data={}, metadata={}),
+                    messages.ScanMessage(point_id=2, scanID="scanID", data={}, metadata={}),
                     "endpoint",
                     None,
                 ),
@@ -37,12 +37,12 @@ from scan_bundler.emitter import EmitterBase
         (
             [
                 (
-                    BECMessage.ScanMessage(point_id=1, scanID="scanID", data={}, metadata={}),
+                    messages.ScanMessage(point_id=1, scanID="scanID", data={}, metadata={}),
                     "endpoint",
                     "public_endpoint",
                 ),
                 (
-                    BECMessage.ScanMessage(point_id=2, scanID="scanID", data={}, metadata={}),
+                    messages.ScanMessage(point_id=2, scanID="scanID", data={}, metadata={}),
                     "endpoint",
                     "public_endpoint",
                 ),
@@ -64,7 +64,7 @@ def test_publish_data(msgs):
                 return
 
             pipe = producer.pipeline()
-            msgs_bundle = BECMessage.BundleMessage()
+            msgs_bundle = messages.BundleMessage()
             _, endpoint, _ = msgs[0]
             for msg, endpoint, public in msgs:
                 msg_dump = msg.dumps()
@@ -81,12 +81,12 @@ def test_publish_data(msgs):
     "msg,endpoint,public",
     [
         (
-            BECMessage.ScanMessage(point_id=1, scanID="scanID", data={}, metadata={}),
+            messages.ScanMessage(point_id=1, scanID="scanID", data={}, metadata={}),
             "endpoint",
             None,
         ),
         (
-            BECMessage.ScanMessage(point_id=1, scanID="scanID", data={}, metadata={}),
+            messages.ScanMessage(point_id=1, scanID="scanID", data={}, metadata={}),
             "endpoint",
             "public",
         ),

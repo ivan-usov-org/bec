@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import threading
 import traceback
-from bec_lib import BECMessage
 
 import numpy as np
 
@@ -12,6 +11,7 @@ from bec_lib import (
     MessageEndpoints,
     ServiceConfig,
     bec_logger,
+    messages,
     threadlocked,
 )
 from bec_lib.file_utils import FileWriterMixin
@@ -107,21 +107,21 @@ class FileWriterManager(BECService):
 
     @staticmethod
     def _scan_segment_callback(msg: MessageObject, *, parent: FileWriterManager):
-        msgs = BECMessage.ScanMessage.loads(msg.value)
+        msgs = messages.ScanMessage.loads(msg.value)
         for scan_msg in msgs:
             parent.insert_to_scan_storage(scan_msg)
 
     @staticmethod
     def _scan_status_callback(msg, *, parent):
-        msg = BECMessage.ScanStatusMessage.loads(msg.value)
+        msg = messages.ScanStatusMessage.loads(msg.value)
         parent.update_scan_storage_with_status(msg)
 
-    def update_scan_storage_with_status(self, msg: BECMessage.ScanStatusMessage) -> None:
+    def update_scan_storage_with_status(self, msg: messages.ScanStatusMessage) -> None:
         """
         Update the scan storage with the scan status.
 
         Args:
-            msg (BECMessage.ScanStatusMessage): Scan status message
+            msg (messages.ScanStatusMessage): Scan status message
         """
         scanID = msg.content.get("scanID")
         if scanID is None:
@@ -154,12 +154,12 @@ class FileWriterManager(BECService):
                 scan_storage.enforce_sync = msg.content["info"]["enforce_sync"]
             self.check_storage_status(scanID=scanID)
 
-    def insert_to_scan_storage(self, msg: BECMessage.ScanMessage) -> None:
+    def insert_to_scan_storage(self, msg: messages.ScanMessage) -> None:
         """
         Insert scan data to the scan storage.
 
         Args:
-            msg (BECMessage.ScanMessage): Scan message
+            msg (messages.ScanMessage): Scan message
         """
         scanID = msg.content.get("scanID")
         if scanID is None:
@@ -186,7 +186,7 @@ class FileWriterManager(BECService):
         if self.scan_storage[scanID].baseline:
             return
         msg = self.producer.get(MessageEndpoints.public_scan_baseline(scanID))
-        baseline = BECMessage.ScanBaselineMessage.loads(msg)
+        baseline = messages.ScanBaselineMessage.loads(msg)
         if not baseline:
             return
         self.scan_storage[scanID].baseline = baseline.content["data"]
@@ -213,7 +213,7 @@ class FileWriterManager(BECService):
         if not file_msgs:
             return
         for name, msg in zip(names, file_msgs):
-            file_msg = BECMessage.FileMessage.loads(msg)
+            file_msg = messages.FileMessage.loads(msg)
             self.scan_storage[scanID].file_references[name] = {
                 "path": file_msg.content["file_path"],
                 "done": file_msg.content["done"],
@@ -260,7 +260,7 @@ class FileWriterManager(BECService):
         concat_type = None
         data = []
         for msg in msgs:
-            msg = BECMessage.DeviceMessage.loads(msg[1][b"data"])
+            msg = messages.DeviceMessage.loads(msg[1][b"data"])
             if not concat_type:
                 concat_type = msg.metadata.get("async_update", "append")
             data.append(msg.content["signals"])
@@ -322,7 +322,7 @@ class FileWriterManager(BECService):
             file_path = self.writer_mixin.compile_full_filename(scan, "master.h5")
             self.producer.set_and_publish(
                 MessageEndpoints.public_file(scanID, "master"),
-                BECMessage.FileMessage(file_path=file_path, done=False).dumps(),
+                messages.FileMessage(file_path=file_path, done=False).dumps(),
             )
             successful = True
             logger.info(f"Starting writing to file {file_path}.")
@@ -343,7 +343,7 @@ class FileWriterManager(BECService):
         self.scan_storage.pop(scanID)
         self.producer.set_and_publish(
             MessageEndpoints.public_file(scanID, "master"),
-            BECMessage.FileMessage(file_path=file_path, successful=successful).dumps(),
+            messages.FileMessage(file_path=file_path, successful=successful).dumps(),
         )
         if successful:
             logger.success(f"Finished writing file {file_path}.")

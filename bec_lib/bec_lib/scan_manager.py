@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from typeguard import typechecked
 
-from bec_lib import BECMessage
+from bec_lib import messages
 from bec_lib.bec_errors import ScanAbortion
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
@@ -31,12 +31,12 @@ class ScanReport:
         self._queue_item = None
 
     @classmethod
-    def from_request(cls, request: BECMessage.ScanQueueMessage, client=None) -> ScanReport:
+    def from_request(cls, request: messages.ScanQueueMessage, client=None) -> ScanReport:
         """
         Create a ScanReport from a request
 
         Args:
-            request (BECMessage.ScanQueueMessage): request to create the report from
+            request (messages.ScanQueueMessage): request to create the report from
             client (BECClient, optional): BECClient instance. Defaults to None.
 
         Returns:
@@ -236,7 +236,7 @@ class ScanManager:
         self._scan_status_consumer.start()
         self._scan_segment_consumer.start()
 
-    def update_with_queue_status(self, queue: BECMessage.ScanQueueStatusMessage) -> None:
+    def update_with_queue_status(self, queue: messages.ScanQueueStatusMessage) -> None:
         """update storage with a new queue status message"""
         self.queue_storage.update_with_status(queue)
         self.scan_storage.update_with_queue_status(queue)
@@ -258,7 +258,7 @@ class ScanManager:
         logger.info(f"Requesting {action}")
         return self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
-            BECMessage.ScanQueueModificationMessage(
+            messages.ScanQueueModificationMessage(
                 scanID=scanID, action=action, parameter={}
             ).dumps(),
         )
@@ -275,7 +275,7 @@ class ScanManager:
         logger.info("Requesting scan abortion")
         self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
-            BECMessage.ScanQueueModificationMessage(
+            messages.ScanQueueModificationMessage(
                 scanID=scanID, action="abort", parameter={}
             ).dumps(),
         )
@@ -292,7 +292,7 @@ class ScanManager:
         logger.info("Requesting scan halt")
         self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
-            BECMessage.ScanQueueModificationMessage(
+            messages.ScanQueueModificationMessage(
                 scanID=scanID, action="halt", parameter={}
             ).dumps(),
         )
@@ -309,7 +309,7 @@ class ScanManager:
         logger.info("Requesting scan continuation")
         self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
-            BECMessage.ScanQueueModificationMessage(
+            messages.ScanQueueModificationMessage(
                 scanID=scanID, action="continue", parameter={}
             ).dumps(),
         )
@@ -319,7 +319,7 @@ class ScanManager:
         logger.info("Requesting a queue reset")
         self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
-            BECMessage.ScanQueueModificationMessage(
+            messages.ScanQueueModificationMessage(
                 scanID=None, action="clear", parameter={}
             ).dumps(),
         )
@@ -335,7 +335,7 @@ class ScanManager:
 
         self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
-            BECMessage.ScanQueueModificationMessage(
+            messages.ScanQueueModificationMessage(
                 scanID=scanID,
                 action="restart",
                 parameter={"position": position, "RID": requestID},
@@ -371,30 +371,30 @@ class ScanManager:
 
     @staticmethod
     def _scan_queue_status_callback(msg, *, parent: ScanManager, **_kwargs) -> None:
-        queue_status = BECMessage.ScanQueueStatusMessage.loads(msg.value)
+        queue_status = messages.ScanQueueStatusMessage.loads(msg.value)
         if not queue_status:
             return
         parent.update_with_queue_status(queue_status)
 
     @staticmethod
     def _scan_queue_request_callback(msg, *, parent: ScanManager, **_kwargs) -> None:
-        request = BECMessage.ScanQueueMessage.loads(msg.value)
+        request = messages.ScanQueueMessage.loads(msg.value)
         parent.request_storage.update_with_request(request)
 
     @staticmethod
     def _scan_queue_request_response_callback(msg, *, parent: ScanManager, **_kwargs) -> None:
-        response = BECMessage.RequestResponseMessage.loads(msg.value)
+        response = messages.RequestResponseMessage.loads(msg.value)
         logger.debug(response)
         parent.request_storage.update_with_response(response)
 
     @staticmethod
     def _scan_status_callback(msg, *, parent: ScanManager, **_kwargs) -> None:
-        scan = BECMessage.ScanStatusMessage.loads(msg.value)
+        scan = messages.ScanStatusMessage.loads(msg.value)
         parent.scan_storage.update_with_scan_status(scan)
 
     @staticmethod
     def _scan_segment_callback(msg, *, parent: ScanManager, **_kwargs) -> None:
-        scan_msgs = BECMessage.ScanMessage.loads(msg.value)
+        scan_msgs = messages.ScanMessage.loads(msg.value)
         if not isinstance(scan_msgs, list):
             scan_msgs = [scan_msgs]
         for scan_msg in scan_msgs:

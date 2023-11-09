@@ -1,5 +1,5 @@
 from unittest import mock
-from bec_lib import BECMessage
+from bec_lib import messages
 
 import pytest
 
@@ -15,7 +15,7 @@ from scan_server.scan_stubs import ScanAbortion, ScanStubs
             "rtx",
             None,
             None,
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device="rtx",
                 action="kickoff",
                 parameter={"configure": {}, "wait_group": "kickoff"},
@@ -26,7 +26,7 @@ from scan_server.scan_stubs import ScanAbortion, ScanStubs
             "rtx",
             {"num_pos": 5, "positions": [1, 2, 3, 4, 5], "exp_time": 2},
             None,
-            BECMessage.DeviceInstructionMessage(
+            messages.DeviceInstructionMessage(
                 device="rtx",
                 action="kickoff",
                 parameter={
@@ -49,11 +49,11 @@ def test_kickoff(device, parameter, metadata, reference_msg):
     "msg,raised_error",
     [
         (
-            BECMessage.DeviceRPCMessage(device="samx", return_val="", out="", success=True),
+            messages.DeviceRPCMessage(device="samx", return_val="", out="", success=True),
             None,
         ),
         (
-            BECMessage.DeviceRPCMessage(
+            messages.DeviceRPCMessage(
                 device="samx",
                 return_val="",
                 out={
@@ -66,7 +66,7 @@ def test_kickoff(device, parameter, metadata, reference_msg):
             ScanAbortion,
         ),
         (
-            BECMessage.DeviceRPCMessage(
+            messages.DeviceRPCMessage(
                 device="samx",
                 return_val="",
                 out="",

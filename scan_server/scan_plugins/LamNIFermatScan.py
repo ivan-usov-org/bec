@@ -21,7 +21,7 @@ but they are executed in a specific order:
 """
 
 import time
-from bec_lib import BECMessage
+from bec_lib import messages
 
 import numpy as np
 
@@ -456,7 +456,7 @@ class LamNIFermatScan(ScanBase, LamNIMixin):
                 yield from self.stubs.read_and_wait(group="primary", wait_group="readout_primary")
                 msg = self.device_manager.producer.get(MessageEndpoints.device_status("rt_scan"))
                 if msg:
-                    status = BECMessage.DeviceStatusMessage.loads(msg)
+                    status = messages.DeviceStatusMessage.loads(msg)
                     status_id = status.content.get("status", 1)
                     request_id = status.metadata.get("RID")
                     if status_id == 0 and self.metadata.get("RID") == request_id:

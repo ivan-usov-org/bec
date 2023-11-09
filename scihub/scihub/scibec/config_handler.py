@@ -5,7 +5,7 @@ import time
 import traceback
 import uuid
 from typing import TYPE_CHECKING
-from bec_lib import BECMessage
+from bec_lib import messages
 
 import msgpack
 
@@ -33,7 +33,7 @@ class ConfigHandler:
         self.producer = connector.producer()
         self.validator = SciBecValidator(os.path.join(dir_path, "openapi_schema.json"))
 
-    def parse_config_request(self, msg: BECMessage.DeviceConfigMessage) -> None:
+    def parse_config_request(self, msg: messages.DeviceConfigMessage) -> None:
         """Processes a config request. If successful, it emits a config reply
 
         Args:
@@ -53,13 +53,13 @@ class ConfigHandler:
             content = traceback.format_exc()
             self.send_config_request_reply(accepted=False, error_msg=content, metadata=msg.metadata)
 
-    def send_config(self, msg: BECMessage.DeviceConfigMessage) -> None:
+    def send_config(self, msg: messages.DeviceConfigMessage) -> None:
         """broadcast a new config"""
         self.producer.send(MessageEndpoints.device_config_update(), msg.dumps())
 
     def send_config_request_reply(self, accepted, error_msg, metadata):
         """send a config request reply"""
-        msg = BECMessage.RequestResponseMessage(
+        msg = messages.RequestResponseMessage(
             accepted=accepted, message=error_msg, metadata=metadata
         )
         RID = metadata.get("RID")
@@ -67,7 +67,7 @@ class ConfigHandler:
             MessageEndpoints.device_config_request_response(RID), msg.dumps(), expire=60
         )
 
-    def _set_config(self, msg: BECMessage.DeviceConfigMessage):
+    def _set_config(self, msg: messages.DeviceConfigMessage):
         config = msg.content["config"]
         scibec = self.scibec_connector.scibec
         logger.debug(self.scibec_connector.scibec_info)
@@ -82,7 +82,7 @@ class ConfigHandler:
                 self.validator.validate_device(device)
         self.scibec_connector.set_redis_config(list(config.values()))
         self.send_config_request_reply(accepted=True, error_msg=None, metadata=msg.metadata)
-        reload_msg = BECMessage.DeviceConfigMessage(action="reload", config={})
+        reload_msg = messages.DeviceConfigMessage(action="reload", config={})
         self.send_config(reload_msg)
 
     def _convert_to_db_config(self, name: str, config: dict) -> None:
@@ -92,7 +92,7 @@ class ConfigHandler:
         config.pop("status")
         config["name"] = name
 
-    def _reload_config(self, msg: BECMessage.DeviceConfigMessage):
+    def _reload_config(self, msg: messages.DeviceConfigMessage):
         # if we have a connection to SciBec, pull the data before forwarding the reload request
         if self.scibec_connector.scibec:
             self.scibec_connector.update_session()
@@ -103,7 +103,7 @@ class ConfigHandler:
         # self.device_manager._get_config()
         # self.device_manager.update_status(BECStatus.RUNNING)
 
-    def _update_config(self, msg: BECMessage.DeviceConfigMessage):
+    def _update_config(self, msg: messages.DeviceConfigMessage):
         updated = False
         dev_configs = msg.content["config"]
 
@@ -121,7 +121,7 @@ class ConfigHandler:
             self.send_config_request_reply(accepted=True, error_msg=None, metadata=msg.metadata)
 
     def _update_device_server(self, RID: str, config: dict) -> None:
-        msg = BECMessage.DeviceConfigMessage(action="update", config=config, metadata={"RID": RID})
+        msg = messages.DeviceConfigMessage(action="update", config=config, metadata={"RID": RID})
         self.producer.send(MessageEndpoints.device_server_config_request(), msg.dumps())
 
     def _wait_for_device_server_update(self, RID: str) -> bool:
@@ -130,7 +130,7 @@ class ConfigHandler:
         elapsed_time = 0
         while True:
             raw_msg = self.producer.get(MessageEndpoints.device_server_config_request_response(RID))
-            msg = BECMessage.RequestResponseMessage.loads(raw_msg)
+            msg = messages.RequestResponseMessage.loads(raw_msg)
             if msg:
                 return msg.content["accepted"]
 

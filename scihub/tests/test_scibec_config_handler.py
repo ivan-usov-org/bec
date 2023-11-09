@@ -1,5 +1,5 @@
 from unittest import mock
-from bec_lib import BECMessage
+from bec_lib import messages
 
 import pytest
 from fastjsonschema import JsonSchemaException
@@ -13,7 +13,7 @@ from scihub.scibec import SciBecConnector
 def test_parse_config_request_update(SciHubMock):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     config_handler = scibec_connector.config_handler
-    msg = BECMessage.DeviceConfigMessage(
+    msg = messages.DeviceConfigMessage(
         action="update", config={"samx": {"enabled": True}}, metadata={}
     )
     with mock.patch.object(config_handler, "_update_config") as update_config, mock.patch.object(
@@ -27,7 +27,7 @@ def test_parse_config_request_update(SciHubMock):
 def test_parse_config_request_reload(SciHubMock):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     config_handler = scibec_connector.config_handler
-    msg = BECMessage.DeviceConfigMessage(action="reload", config={}, metadata={})
+    msg = messages.DeviceConfigMessage(action="reload", config={}, metadata={})
     with mock.patch.object(config_handler, "_reload_config") as reload_config, mock.patch.object(
         config_handler.device_manager, "check_request_validity"
     ) as req_validity:
@@ -39,7 +39,7 @@ def test_parse_config_request_reload(SciHubMock):
 def test_parse_config_request_set(SciHubMock):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     config_handler = scibec_connector.config_handler
-    msg = BECMessage.DeviceConfigMessage(
+    msg = messages.DeviceConfigMessage(
         action="set", config={"samx": {"enabled": True}}, metadata={}
     )
     with mock.patch.object(config_handler, "_set_config") as set_config, mock.patch.object(
@@ -53,7 +53,7 @@ def test_parse_config_request_set(SciHubMock):
 def test_parse_config_request_exception(SciHubMock):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     config_handler = scibec_connector.config_handler
-    msg = BECMessage.DeviceConfigMessage(
+    msg = messages.DeviceConfigMessage(
         action="update", config={"samx": {"enabled": True}}, metadata={}
     )
     with mock.patch.object(config_handler, "send_config_request_reply") as req_reply:
@@ -66,7 +66,7 @@ def test_parse_config_request_exception(SciHubMock):
 def test_config_handler_reload_config(SciHubMock):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     config_handler = scibec_connector.config_handler
-    msg = BECMessage.DeviceConfigMessage(action="reload", config={}, metadata={})
+    msg = messages.DeviceConfigMessage(action="reload", config={}, metadata={})
     with mock.patch.object(config_handler, "send_config_request_reply") as req_reply:
         with mock.patch.object(config_handler, "send_config") as send:
             config_handler.parse_config_request(msg)
@@ -76,7 +76,7 @@ def test_config_handler_reload_config(SciHubMock):
 def test_config_handler_reload_config_with_scibec(SciHubMock):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     config_handler = scibec_connector.config_handler
-    msg = BECMessage.DeviceConfigMessage(action="reload", config={}, metadata={})
+    msg = messages.DeviceConfigMessage(action="reload", config={}, metadata={})
     with mock.patch.object(config_handler, "send_config_request_reply") as req_reply:
         with mock.patch.object(scibec_connector, "scibec"):
             with mock.patch.object(scibec_connector, "update_session") as update_session:
@@ -89,7 +89,7 @@ def test_config_handler_reload_config_with_scibec(SciHubMock):
 def test_config_handler_set_config(SciHubMock):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     config_handler = scibec_connector.config_handler
-    msg = BECMessage.DeviceConfigMessage(
+    msg = messages.DeviceConfigMessage(
         action="set", config={"samx": {"status": {"enabled": True}}}, metadata={}
     )
     with mock.patch.object(config_handler.validator, "validate_device") as validator:
@@ -102,7 +102,7 @@ def test_config_handler_set_config(SciHubMock):
 def test_config_handler_set_invalid_config_raises(SciHubMock):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     config_handler = scibec_connector.config_handler
-    msg = BECMessage.DeviceConfigMessage(
+    msg = messages.DeviceConfigMessage(
         action="set", config={"samx": {"status": {"enabled": True}}}, metadata={}
     )
     with pytest.raises(JsonSchemaException):
@@ -114,7 +114,7 @@ def test_config_handler_set_invalid_config_raises(SciHubMock):
 def test_config_handler_set_config_with_scibec(SciHubMock):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     config_handler = scibec_connector.config_handler
-    msg = BECMessage.DeviceConfigMessage(
+    msg = messages.DeviceConfigMessage(
         action="set", config={"samx": {"enabled": True}}, metadata={}
     )
     scibec_connector.scibec_info = {"beamline": {"info": [], "activeExperiment": "12345"}}
@@ -134,7 +134,7 @@ def test_config_handler_update_config(SciHubMock):
     config_handler = scibec_connector.config_handler
     dev = config_handler.device_manager.devices
     dev.samx = Device("samx", {})
-    msg = BECMessage.DeviceConfigMessage(
+    msg = messages.DeviceConfigMessage(
         action="update", config={"samx": {"enabled": True}}, metadata={}
     )
     with mock.patch.object(
@@ -160,7 +160,7 @@ def test_config_handler_update_config_not_updated(SciHubMock):
     config_handler = scibec_connector.config_handler
     dev = config_handler.device_manager.devices
     dev.samx = Device("samx", {})
-    msg = BECMessage.DeviceConfigMessage(
+    msg = messages.DeviceConfigMessage(
         action="update", config={"samx": {"enabled": True}}, metadata={}
     )
     with mock.patch.object(

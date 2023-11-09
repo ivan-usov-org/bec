@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 import redis
 
-from bec_lib.BECMessage import AlarmMessage, LogMessage
+from bec_lib.messages import AlarmMessage, LogMessage
 from bec_lib.connector import ConsumerConnectorError
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.redis_connector import (

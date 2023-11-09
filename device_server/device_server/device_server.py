@@ -6,14 +6,14 @@ import traceback
 from concurrent.futures import ThreadPoolExecutor
 from io import StringIO
 from typing import Any
-from bec_lib import BECMessage
+from bec_lib import messages
 
 import ophyd
 from ophyd import Staged
 from ophyd.utils import errors as ophyd_errors
 
 from bec_lib import Alarms, BECService, MessageEndpoints, bec_logger
-from bec_lib.BECMessage import BECStatus
+from bec_lib.messages import BECStatus
 from bec_lib.connector import ConnectorBase
 from bec_lib.devicemanager import OnFailure
 from device_server.devices import is_serializable, rgetattr
@@ -101,7 +101,7 @@ class DeviceServer(BECService):
     @staticmethod
     def consumer_interception_callback(msg, *, parent, **_kwargs) -> None:
         """callback for receiving scan modifications / interceptions"""
-        mvalue = BECMessage.ScanQueueModificationMessage.loads(msg.value)
+        mvalue = messages.ScanQueueModificationMessage.loads(msg.value)
         if mvalue is None:
             logger.warning("Failed to parse scan queue modification message.")
             return
@@ -121,7 +121,7 @@ class DeviceServer(BECService):
                 dev.obj.stop()
         self.status = BECStatus.RUNNING
 
-    def _assert_device_is_enabled(self, instructions: BECMessage.DeviceInstructionMessage) -> None:
+    def _assert_device_is_enabled(self, instructions: messages.DeviceInstructionMessage) -> None:
         devices = instructions.content["device"]
 
         if isinstance(devices, str):
@@ -131,7 +131,7 @@ class DeviceServer(BECService):
             if not self.device_manager.devices[dev].enabled:
                 raise DisabledDeviceError(f"Cannot access disabled device {dev}.")
 
-    def _assert_device_is_valid(self, instructions: BECMessage.DeviceInstructionMessage) -> None:
+    def _assert_device_is_valid(self, instructions: messages.DeviceInstructionMessage) -> None:
         devices = instructions.content["device"]
         if not devices:
             raise InvalidDeviceError("At least one device must be specified.")
@@ -151,7 +151,7 @@ class DeviceServer(BECService):
         """
         action = None
         try:
-            instructions = BECMessage.DeviceInstructionMessage.loads(msg)
+            instructions = messages.DeviceInstructionMessage.loads(msg)
             if not instructions.content["device"]:
                 return
             action = instructions.content["action"]
@@ -240,7 +240,7 @@ class DeviceServer(BECService):
             )
         return res
 
-    def _run_rpc(self, instr: BECMessage.DeviceInstructionMessage) -> None:
+    def _run_rpc(self, instr: messages.DeviceInstructionMessage) -> None:
         save_stdout = sys.stdout
         result = StringIO()
         sys.stdout = result
@@ -270,7 +270,7 @@ class DeviceServer(BECService):
             # send result to client
             self.producer.set(
                 MessageEndpoints.device_rpc(instr_params.get("rpc_id")),
-                BECMessage.DeviceRPCMessage(
+                messages.DeviceRPCMessage(
                     device=instr.content["device"],
                     return_val=res,
                     out=result.getvalue(),
@@ -290,7 +290,7 @@ class DeviceServer(BECService):
         finally:
             sys.stdout = save_stdout
 
-    def _send_rpc_exception(self, exc: Exception, instr: BECMessage.DeviceInstructionMessage):
+    def _send_rpc_exception(self, exc: Exception, instr: messages.DeviceInstructionMessage):
         exc_formatted = {
             "error": exc.__class__.__name__,
             "msg": exc.args,
@@ -300,7 +300,7 @@ class DeviceServer(BECService):
         instr_params = instr.content.get("parameter")
         self.producer.set(
             MessageEndpoints.device_rpc(instr_params.get("rpc_id")),
-            BECMessage.DeviceRPCMessage(
+            messages.DeviceRPCMessage(
                 device=instr.content["device"],
                 return_val=None,
                 out=exc_formatted,
@@ -308,7 +308,7 @@ class DeviceServer(BECService):
             ).dumps(),
         )
 
-    def _trigger_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
+    def _trigger_device(self, instr: messages.DeviceInstructionMessage) -> None:
         logger.debug(f"Trigger device: {instr}")
         devices = instr.content["device"]
         if not isinstance(devices, list):
@@ -320,7 +320,7 @@ class DeviceServer(BECService):
             status.__dict__["instruction"] = instr
             status.add_callback(self._status_callback)
 
-    def _kickoff_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
+    def _kickoff_device(self, instr: messages.DeviceInstructionMessage) -> None:
         logger.debug(f"Kickoff device: {instr}")
         obj = self.device_manager.devices.get(instr.content["device"]).obj
         kickoff_args = inspect.getfullargspec(obj.kickoff).args
@@ -333,7 +333,7 @@ class DeviceServer(BECService):
         status.__dict__["instruction"] = instr
         status.add_callback(self._status_callback)
 
-    def _complete_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
+    def _complete_device(self, instr: messages.DeviceInstructionMessage) -> None:
         if instr.content["device"] is None:
             devices = [dev.name for dev in self.device_manager.devices.enabled_devices]
         else:
@@ -353,7 +353,7 @@ class DeviceServer(BECService):
             status.__dict__["instruction"] = instr
             status.add_callback(self._status_callback)
 
-    def _set_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
+    def _set_device(self, instr: messages.DeviceInstructionMessage) -> None:
         device_obj = self.device_manager.devices.get(instr.content["device"])
         if not device_obj.enabled_set:
             raise DisabledDeviceError(
@@ -367,7 +367,7 @@ class DeviceServer(BECService):
         status.__dict__["instruction"] = instr
         status.add_callback(self._status_callback)
 
-    def _pre_scan(self, instr: BECMessage.DeviceInstructionMessage) -> None:
+    def _pre_scan(self, instr: messages.DeviceInstructionMessage) -> None:
         devices = instr.content["device"]
         if not isinstance(devices, list):
             devices = [devices]
@@ -377,7 +377,7 @@ class DeviceServer(BECService):
             obj.metadata = instr.metadata
             if hasattr(obj.obj, "pre_scan"):
                 obj.obj.pre_scan()
-            dev_msg = BECMessage.DeviceReqStatusMessage(
+            dev_msg = messages.DeviceReqStatusMessage(
                 device=dev,
                 success=True,
                 metadata=instr.metadata,
@@ -391,7 +391,7 @@ class DeviceServer(BECService):
             device_name = status.device.root.name
         else:
             device_name = status.obj.root.name
-        dev_msg = BECMessage.DeviceReqStatusMessage(
+        dev_msg = messages.DeviceReqStatusMessage(
             device=device_name,
             success=status.success,
             metadata=status.instruction.metadata,
@@ -411,7 +411,7 @@ class DeviceServer(BECService):
 
         pipe.execute()
 
-    def _read_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
+    def _read_device(self, instr: messages.DeviceInstructionMessage) -> None:
         # check performance -- we might have to change it to a background thread
         devices = instr.content["device"]
         if not isinstance(devices, list):
@@ -442,7 +442,7 @@ class DeviceServer(BECService):
                 elif ds_dev.on_failure == OnFailure.BUFFER:
                     # if possible, fall back to past readings
                     logger.warning(f"Failed to read {dev}. Trying to load an old value.")
-                    old_msg = BECMessage.DeviceMessage.loads(
+                    old_msg = messages.DeviceMessage.loads(
                         self.producer.get(MessageEndpoints.device_read(dev))
                     )
                     if not old_msg:
@@ -451,19 +451,17 @@ class DeviceServer(BECService):
 
             self.producer.set_and_publish(
                 MessageEndpoints.device_read(dev),
-                BECMessage.DeviceMessage(signals=signals, metadata=instr.metadata).dumps(),
+                messages.DeviceMessage(signals=signals, metadata=instr.metadata).dumps(),
                 pipe,
             )
             self.producer.set_and_publish(
                 MessageEndpoints.device_readback(dev),
-                BECMessage.DeviceMessage(signals=signals, metadata=instr.metadata).dumps(),
+                messages.DeviceMessage(signals=signals, metadata=instr.metadata).dumps(),
                 pipe,
             )
             self.producer.set(
                 MessageEndpoints.device_status(dev),
-                BECMessage.DeviceStatusMessage(
-                    device=dev, status=0, metadata=instr.metadata
-                ).dumps(),
+                messages.DeviceStatusMessage(device=dev, status=0, metadata=instr.metadata).dumps(),
                 pipe,
             )
         pipe.execute()
@@ -471,7 +469,7 @@ class DeviceServer(BECService):
             f"Elapsed time for reading and updating status info: {(time.time()-start)*1000} ms"
         )
 
-    def _stage_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
+    def _stage_device(self, instr: messages.DeviceInstructionMessage) -> None:
         devices = instr.content["device"]
         if not isinstance(devices, list):
             devices = [devices]
@@ -487,14 +485,12 @@ class DeviceServer(BECService):
                 self.device_manager.devices[dev].obj.stage()
             self.producer.set(
                 MessageEndpoints.device_staged(dev),
-                BECMessage.DeviceStatusMessage(
-                    device=dev, status=1, metadata=instr.metadata
-                ).dumps(),
+                messages.DeviceStatusMessage(device=dev, status=1, metadata=instr.metadata).dumps(),
                 pipe,
             )
         pipe.execute()
 
-    def _unstage_device(self, instr: BECMessage.DeviceInstructionMessage) -> None:
+    def _unstage_device(self, instr: messages.DeviceInstructionMessage) -> None:
         devices = instr.content["device"]
         if not isinstance(devices, list):
             devices = [devices]
@@ -510,9 +506,7 @@ class DeviceServer(BECService):
                     logger.debug(f"Device {obj.name} was already unstaged.")
             self.producer.set(
                 MessageEndpoints.device_staged(dev),
-                BECMessage.DeviceStatusMessage(
-                    device=dev, status=0, metadata=instr.metadata
-                ).dumps(),
+                messages.DeviceStatusMessage(device=dev, status=0, metadata=instr.metadata).dumps(),
                 pipe,
             )
         pipe.execute()

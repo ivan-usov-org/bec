@@ -1,6 +1,6 @@
 import uuid
 from unittest import mock
-from bec_lib import BECMessage
+from bec_lib import messages
 
 import pytest
 from utils import load_ScanServerMock
@@ -69,7 +69,7 @@ def test_queuemanager_queue_inits_without_queues():
 @pytest.mark.parametrize("queue", [("primary",), ("alignment",)])
 def test_queuemanager_add_to_queue(queue):
     queue_manager = get_queuemanager()
-    msg = BECMessage.ScanQueueMessage(
+    msg = messages.ScanQueueMessage(
         scan_type="mv",
         parameter={"args": {"samx": (1,)}, "kwargs": {}},
         queue=queue,
@@ -82,7 +82,7 @@ def test_queuemanager_add_to_queue(queue):
 
 def test_queuemanager_add_to_queue_error_send_alarm():
     queue_manager = get_queuemanager()
-    msg = BECMessage.ScanQueueMessage(
+    msg = messages.ScanQueueMessage(
         scan_type="mv",
         parameter={"args": {"samx": (1,)}, "kwargs": {}},
         queue="primary",
@@ -102,7 +102,7 @@ def test_queuemanager_add_to_queue_error_send_alarm():
 
 def test_queuemanager_scan_queue_callback():
     queue_manager = get_queuemanager()
-    msg = BECMessage.ScanQueueMessage(
+    msg = messages.ScanQueueMessage(
         scan_type="mv",
         parameter={"args": {"samx": (1,)}, "kwargs": {}},
         queue="primary",
@@ -118,7 +118,7 @@ def test_queuemanager_scan_queue_callback():
 
 def test_scan_queue_modification_callback():
     queue_manager = get_queuemanager()
-    msg = BECMessage.ScanQueueModificationMessage(
+    msg = messages.ScanQueueModificationMessage(
         scanID="dummy",
         action="halt",
         parameter={},
@@ -135,7 +135,7 @@ def test_scan_queue_modification_callback():
 def test_scan_interception_halt():
     queue_manager = get_queuemanager()
     queue_manager.queues = {"primary": ScanQueue(queue_manager, InstructionQueueMock)}
-    msg = BECMessage.ScanQueueModificationMessage(
+    msg = messages.ScanQueueModificationMessage(
         scanID="dummy",
         action="halt",
         parameter={},
@@ -202,7 +202,7 @@ def test_set_continue():
 def test_set_abort():
     queue_manager = get_queuemanager()
     queue_manager.producer.message_sent = []
-    msg = BECMessage.ScanQueueMessage(
+    msg = messages.ScanQueueMessage(
         scan_type="mv",
         parameter={"args": {"samx": (1,)}, "kwargs": {}},
         queue="primary",
@@ -250,7 +250,7 @@ def test_set_clear_sends_message():
 def test_set_restart():
     queue_manager = get_queuemanager()
     queue_manager.queues = {"primary": ScanQueue(queue_manager, InstructionQueueMock)}
-    msg = BECMessage.ScanQueueMessage(
+    msg = messages.ScanQueueMessage(
         scan_type="mv",
         parameter={"args": {"samx": (1,)}, "kwargs": {}},
         queue="primary",
@@ -268,7 +268,7 @@ def test_set_restart():
 
 def test_request_block():
     scan_server = load_ScanServerMock()
-    msg = BECMessage.ScanQueueMessage(
+    msg = messages.ScanQueueMessage(
         scan_type="mv",
         parameter={"args": {"samx": (1,)}, "kwargs": {}},
         queue="primary",
@@ -281,7 +281,7 @@ def test_request_block():
     "scan_queue_msg",
     [
         (
-            BECMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="mv",
                 parameter={"args": {"samx": (1,)}, "kwargs": {}},
                 queue="primary",
@@ -289,7 +289,7 @@ def test_request_block():
             )
         ),
         (
-            BECMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="grid_scan",
                 parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
                 queue="primary",
@@ -314,7 +314,7 @@ def test_request_block_scan_number(scan_queue_msg):
 def test_remove_queue_item():
     queue_manager = get_queuemanager()
     # queue_manager.queues = {"primary": ScanQueueMock(queue_manager)}
-    msg = BECMessage.ScanQueueMessage(
+    msg = messages.ScanQueueMessage(
         scan_type="mv",
         parameter={"args": {"samx": (1,)}, "kwargs": {}},
         queue="primary",
@@ -330,7 +330,7 @@ def test_remove_queue_item():
 def test_set_clear():
     queue_manager = get_queuemanager()
     queue_manager.queues = {"primary": ScanQueue(queue_manager, InstructionQueueMock)}
-    msg = BECMessage.ScanQueueMessage(
+    msg = messages.ScanQueueMessage(
         scan_type="mv",
         parameter={"args": {"samx": (1,)}, "kwargs": {}},
         queue="primary",
@@ -359,7 +359,7 @@ def test_request_block_queue_scanIDs():
 
 def test_request_block_queue_append():
     req_block_queue = RequestBlockQueue(mock.MagicMock(), mock.MagicMock())
-    msg = BECMessage.ScanQueueMessage(
+    msg = messages.ScanQueueMessage(
         scan_type="mv",
         parameter={"args": {"samx": (1,)}, "kwargs": {}},
         queue="primary",
@@ -377,7 +377,7 @@ def test_request_block_queue_append():
     "scan_queue_msg,scanID",
     [
         (
-            BECMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="mv",
                 parameter={"args": {"samx": (1,)}, "kwargs": {}},
                 queue="primary",
@@ -386,7 +386,7 @@ def test_request_block_queue_append():
             None,
         ),
         (
-            BECMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="grid_scan",
                 parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
                 queue="primary",
@@ -395,7 +395,7 @@ def test_request_block_queue_append():
             "scanID1",
         ),
         (
-            BECMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="grid_scan",
                 parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
                 queue="primary",
@@ -432,7 +432,7 @@ def test_append_request_block():
     "scan_queue_msg,scanID",
     [
         (
-            BECMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="grid_scan",
                 parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
                 queue="primary",
@@ -441,7 +441,7 @@ def test_append_request_block():
             "scanID1",
         ),
         (
-            BECMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="grid_scan",
                 parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
                 queue="primary",
@@ -472,7 +472,7 @@ def test_update_point_id(scan_queue_msg, scanID):
     "scan_queue_msg,is_scan",
     [
         (
-            BECMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="mv",
                 parameter={"args": {"samx": (1,)}, "kwargs": {}},
                 queue="primary",
@@ -481,7 +481,7 @@ def test_update_point_id(scan_queue_msg, scanID):
             False,
         ),
         (
-            BECMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="grid_scan",
                 parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
                 queue="primary",
@@ -490,7 +490,7 @@ def test_update_point_id(scan_queue_msg, scanID):
             True,
         ),
         (
-            BECMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="grid_scan",
                 parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
                 queue="primary",
@@ -499,7 +499,7 @@ def test_update_point_id(scan_queue_msg, scanID):
             True,
         ),
         (
-            BECMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="grid_scan",
                 parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
                 queue="primary",
@@ -530,7 +530,7 @@ def test_increase_scan_number(scan_queue_msg, is_scan):
 
 def test_pull_request_block_non_empyt_rb():
     req_block_queue = RequestBlockQueue(mock.MagicMock(), mock.MagicMock())
-    scan_queue_msg = BECMessage.ScanQueueMessage(
+    scan_queue_msg = messages.ScanQueueMessage(
         scan_type="grid_scan",
         parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
         queue="primary",
@@ -554,7 +554,7 @@ def test_pull_request_block_empyt_rb():
 def test_queue_manager_get_active_scanID():
     queue_manager = get_queuemanager()
     queue_manager.queues = {"primary": ScanQueue(queue_manager, InstructionQueueMock)}
-    msg = BECMessage.ScanQueueMessage(
+    msg = messages.ScanQueueMessage(
         scan_type="mv",
         parameter={"args": {"samx": (1,)}, "kwargs": {}},
         queue="primary",
@@ -575,7 +575,7 @@ def test_queue_manager_get_active_scanID_returns_None():
 def test_queue_manager_get_active_scanID_wo_rbl_returns_None():
     queue_manager = get_queuemanager()
     queue_manager.queues = {"primary": ScanQueue(queue_manager, InstructionQueueMock)}
-    msg = BECMessage.ScanQueueMessage(
+    msg = messages.ScanQueueMessage(
         scan_type="mv",
         parameter={"args": {"samx": (1,)}, "kwargs": {}},
         queue="primary",
@@ -587,7 +587,7 @@ def test_queue_manager_get_active_scanID_wo_rbl_returns_None():
 
 def test_request_block_queue_next():
     req_block_queue = RequestBlockQueue(mock.MagicMock(), mock.MagicMock())
-    msg = BECMessage.ScanQueueMessage(
+    msg = messages.ScanQueueMessage(
         scan_type="mv",
         parameter={"args": {"samx": (1,)}, "kwargs": {}},
         queue="primary",
@@ -603,7 +603,7 @@ def test_request_block_queue_next():
 
 def test_request_block_queue_next_raises_stopiteration():
     req_block_queue = RequestBlockQueue(mock.MagicMock(), mock.MagicMock())
-    msg = BECMessage.ScanQueueMessage(
+    msg = messages.ScanQueueMessage(
         scan_type="mv",
         parameter={"args": {"samx": (1,)}, "kwargs": {}},
         queue="primary",
@@ -620,7 +620,7 @@ def test_request_block_queue_next_raises_stopiteration():
 
 def test_request_block_queue_next_updates_pointID():
     req_block_queue = RequestBlockQueue(mock.MagicMock(), mock.MagicMock())
-    msg = BECMessage.ScanQueueMessage(
+    msg = messages.ScanQueueMessage(
         scan_type="mv",
         parameter={"args": {"samx": (1,)}, "kwargs": {}},
         queue="primary",

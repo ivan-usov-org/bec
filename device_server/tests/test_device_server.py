@@ -1,7 +1,7 @@
 import traceback
 from unittest import mock
 from unittest.mock import ANY
-from bec_lib import BECMessage
+from bec_lib import messages
 
 import pytest
 from ophyd import Staged
@@ -9,7 +9,7 @@ from ophyd.utils import errors as ophyd_errors
 from test_device_manager_ds import device_manager, load_device_manager
 
 from bec_lib import Alarms, MessageEndpoints, ServiceConfig
-from bec_lib.BECMessage import BECStatus
+from bec_lib.messages import BECStatus
 from bec_lib.tests.utils import ConnectorMock, ConsumerMock
 from device_server import DeviceServer
 from device_server.device_server import InvalidDeviceError
@@ -77,13 +77,13 @@ def test_stop(device_server_mock):
 @pytest.mark.parametrize(
     "instr",
     [
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device="samx",
             action="read",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
         ),
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device=["samx", "samy"],
             action="read",
             parameter={},
@@ -124,25 +124,25 @@ def test_stop_devices(device_server_mock):
 @pytest.mark.parametrize(
     "instr",
     [
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device="eiger",
             action="stage",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
         ),
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device=["samx", "samy"],
             action="stage",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
         ),
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device="motor2_disabled",
             action="stage",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
         ),
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device="motor1_disabled",
             action="stage",
             parameter={},
@@ -169,19 +169,19 @@ def test_assert_device_is_enabled(device_server_mock, instr):
 @pytest.mark.parametrize(
     "instr",
     [
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device="samx",
             action="stage",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
         ),
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device="not_a_valid_device",
             action="stage",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
         ),
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device=None,
             action="stage",
             parameter={},
@@ -213,7 +213,7 @@ def test_assert_device_is_valid(device_server_mock, instr):
 @pytest.mark.parametrize(
     "instr",
     [
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device="samx",
             action="set",
             parameter={},
@@ -223,8 +223,8 @@ def test_assert_device_is_valid(device_server_mock, instr):
 )
 def test_handle_device_instructions_set(device_server_mock, instr):
     device_server = device_server_mock
-    msg = BECMessage.DeviceInstructionMessage.dumps(instr)
-    instructions = BECMessage.DeviceInstructionMessage.loads(msg)
+    msg = messages.DeviceInstructionMessage.dumps(instr)
+    instructions = messages.DeviceInstructionMessage.loads(msg)
 
     with mock.patch.object(device_server, "_assert_device_is_valid") as assert_device_is_valid_mock:
         with mock.patch.object(
@@ -246,7 +246,7 @@ def test_handle_device_instructions_set(device_server_mock, instr):
 @pytest.mark.parametrize(
     "instr",
     [
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device="samx",
             action="set",
             parameter={},
@@ -256,8 +256,8 @@ def test_handle_device_instructions_set(device_server_mock, instr):
 )
 def test_handle_device_instructions_exception(device_server_mock, instr):
     device_server = device_server_mock
-    msg = BECMessage.DeviceInstructionMessage.dumps(instr)
-    instructions = BECMessage.DeviceInstructionMessage.loads(msg)
+    msg = messages.DeviceInstructionMessage.dumps(instr)
+    instructions = messages.DeviceInstructionMessage.loads(msg)
 
     with mock.patch.object(device_server, "_assert_device_is_valid") as valid_mock:
         with mock.patch.object(device_server.connector, "log_error") as log_mock:
@@ -279,7 +279,7 @@ def test_handle_device_instructions_exception(device_server_mock, instr):
 @pytest.mark.parametrize(
     "instr",
     [
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device="samx",
             action="set",
             parameter={},
@@ -289,8 +289,8 @@ def test_handle_device_instructions_exception(device_server_mock, instr):
 )
 def test_handle_device_instructions_limit_error(device_server_mock, instr):
     device_server = device_server_mock
-    msg = BECMessage.DeviceInstructionMessage.dumps(instr)
-    instructions = BECMessage.DeviceInstructionMessage.loads(msg)
+    msg = messages.DeviceInstructionMessage.dumps(instr)
+    instructions = messages.DeviceInstructionMessage.loads(msg)
 
     with mock.patch.object(device_server.connector, "raise_alarm") as alarm_mock:
         with mock.patch.object(device_server, "_set_device") as set_mock:
@@ -309,7 +309,7 @@ def test_handle_device_instructions_limit_error(device_server_mock, instr):
 @pytest.mark.parametrize(
     "instr",
     [
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device="samx",
             action="read",
             parameter={},
@@ -319,8 +319,8 @@ def test_handle_device_instructions_limit_error(device_server_mock, instr):
 )
 def test_handle_device_instructions_read(device_server_mock, instr):
     device_server = device_server_mock
-    msg = BECMessage.DeviceInstructionMessage.dumps(instr)
-    instructions = BECMessage.DeviceInstructionMessage.loads(msg)
+    msg = messages.DeviceInstructionMessage.dumps(instr)
+    instructions = messages.DeviceInstructionMessage.loads(msg)
 
     with mock.patch.object(device_server, "_read_device") as read_mock:
         device_server.handle_device_instructions(msg)
@@ -330,7 +330,7 @@ def test_handle_device_instructions_read(device_server_mock, instr):
 @pytest.mark.parametrize(
     "instr",
     [
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device="samx",
             action="rpc",
             parameter={},
@@ -340,8 +340,8 @@ def test_handle_device_instructions_read(device_server_mock, instr):
 )
 def test_handle_device_instructions_rpc(device_server_mock, instr):
     device_server = device_server_mock
-    msg = BECMessage.DeviceInstructionMessage.dumps(instr)
-    instructions = BECMessage.DeviceInstructionMessage.loads(msg)
+    msg = messages.DeviceInstructionMessage.dumps(instr)
+    instructions = messages.DeviceInstructionMessage.loads(msg)
     with mock.patch.object(device_server, "_assert_device_is_valid") as assert_device_is_valid_mock:
         with mock.patch.object(
             device_server, "_assert_device_is_enabled"
@@ -361,7 +361,7 @@ def test_handle_device_instructions_rpc(device_server_mock, instr):
 @pytest.mark.parametrize(
     "instr",
     [
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device="samx",
             action="kickoff",
             parameter={},
@@ -371,8 +371,8 @@ def test_handle_device_instructions_rpc(device_server_mock, instr):
 )
 def test_handle_device_instructions_kickoff(device_server_mock, instr):
     device_server = device_server_mock
-    msg = BECMessage.DeviceInstructionMessage.dumps(instr)
-    instructions = BECMessage.DeviceInstructionMessage.loads(msg)
+    msg = messages.DeviceInstructionMessage.dumps(instr)
+    instructions = messages.DeviceInstructionMessage.loads(msg)
 
     with mock.patch.object(device_server, "_kickoff_device") as kickoff_mock:
         device_server.handle_device_instructions(msg)
@@ -382,7 +382,7 @@ def test_handle_device_instructions_kickoff(device_server_mock, instr):
 @pytest.mark.parametrize(
     "instr",
     [
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device="samx",
             action="complete",
             parameter={},
@@ -392,8 +392,8 @@ def test_handle_device_instructions_kickoff(device_server_mock, instr):
 )
 def test_handle_device_instructions_complete(device_server_mock, instr):
     device_server = device_server_mock
-    msg = BECMessage.DeviceInstructionMessage.dumps(instr)
-    instructions = BECMessage.DeviceInstructionMessage.loads(msg)
+    msg = messages.DeviceInstructionMessage.dumps(instr)
+    instructions = messages.DeviceInstructionMessage.loads(msg)
 
     with mock.patch.object(device_server, "_complete_device") as complete_mock:
         device_server.handle_device_instructions(msg)
@@ -403,19 +403,19 @@ def test_handle_device_instructions_complete(device_server_mock, instr):
 @pytest.mark.parametrize(
     "instr",
     [
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device="flyer_sim",
             action="complete",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
         ),
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device="bpm4i",
             action="complete",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
         ),
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device=None,
             action="complete",
             parameter={},
@@ -437,7 +437,7 @@ def test_complete_device(device_server_mock, instr):
 @pytest.mark.parametrize(
     "instr",
     [
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device="samx",
             action="pre_scan",
             parameter={},
@@ -447,8 +447,8 @@ def test_complete_device(device_server_mock, instr):
 )
 def test_handle_device_instructions_pre_scan(device_server_mock, instr):
     device_server = device_server_mock
-    msg = BECMessage.DeviceInstructionMessage.dumps(instr)
-    instructions = BECMessage.DeviceInstructionMessage.loads(msg)
+    msg = messages.DeviceInstructionMessage.dumps(instr)
+    instructions = messages.DeviceInstructionMessage.loads(msg)
 
     with mock.patch.object(device_server, "_pre_scan") as pre_scan_mock:
         device_server.handle_device_instructions(msg)
@@ -458,7 +458,7 @@ def test_handle_device_instructions_pre_scan(device_server_mock, instr):
 @pytest.mark.parametrize(
     "instr",
     [
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device="samx",
             action="trigger",
             parameter={},
@@ -468,8 +468,8 @@ def test_handle_device_instructions_pre_scan(device_server_mock, instr):
 )
 def test_handle_device_instructions_trigger(device_server_mock, instr):
     device_server = device_server_mock
-    msg = BECMessage.DeviceInstructionMessage.dumps(instr)
-    instructions = BECMessage.DeviceInstructionMessage.loads(msg)
+    msg = messages.DeviceInstructionMessage.dumps(instr)
+    instructions = messages.DeviceInstructionMessage.loads(msg)
 
     with mock.patch.object(device_server, "_trigger_device") as trigger_mock:
         device_server.handle_device_instructions(msg)
@@ -479,7 +479,7 @@ def test_handle_device_instructions_trigger(device_server_mock, instr):
 @pytest.mark.parametrize(
     "instr",
     [
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device="samx",
             action="stage",
             parameter={},
@@ -489,8 +489,8 @@ def test_handle_device_instructions_trigger(device_server_mock, instr):
 )
 def test_handle_device_instructions_stage(device_server_mock, instr):
     device_server = device_server_mock
-    msg = BECMessage.DeviceInstructionMessage.dumps(instr)
-    instructions = BECMessage.DeviceInstructionMessage.loads(msg)
+    msg = messages.DeviceInstructionMessage.dumps(instr)
+    instructions = messages.DeviceInstructionMessage.loads(msg)
 
     with mock.patch.object(device_server, "_stage_device") as stage_mock:
         device_server.handle_device_instructions(msg)
@@ -500,7 +500,7 @@ def test_handle_device_instructions_stage(device_server_mock, instr):
 @pytest.mark.parametrize(
     "instr",
     [
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device="samx",
             action="unstage",
             parameter={},
@@ -510,8 +510,8 @@ def test_handle_device_instructions_stage(device_server_mock, instr):
 )
 def test_handle_device_instructions_unstage(device_server_mock, instr):
     device_server = device_server_mock
-    msg = BECMessage.DeviceInstructionMessage.dumps(instr)
-    instructions = BECMessage.DeviceInstructionMessage.loads(msg)
+    msg = messages.DeviceInstructionMessage.dumps(instr)
+    instructions = messages.DeviceInstructionMessage.loads(msg)
 
     with mock.patch.object(device_server, "_unstage_device") as unstage_mock:
         device_server.handle_device_instructions(msg)
@@ -521,13 +521,13 @@ def test_handle_device_instructions_unstage(device_server_mock, instr):
 @pytest.mark.parametrize(
     "instr",
     [
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device="eiger",
             action="trigger",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
         ),
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device=["samx", "samy"],
             action="trigger",
             parameter={},
@@ -552,7 +552,7 @@ def test_trigger_device(device_server_mock, instr):
 @pytest.mark.parametrize(
     "instr",
     [
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device="flyer_sim",
             action="kickoff",
             parameter={},
@@ -572,7 +572,7 @@ def test_kickoff_device(device_server_mock, instr):
 @pytest.mark.parametrize(
     "instr",
     [
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device="samx",
             action="set",
             parameter={"value": 5},
@@ -591,7 +591,7 @@ def test_set_device(device_server_mock, instr):
         ]
         if res:
             break
-    msg = BECMessage.DeviceReqStatusMessage.loads(res[0]["msg"])
+    msg = messages.DeviceReqStatusMessage.loads(res[0]["msg"])
     assert msg.metadata["RID"] == "test"
     assert msg.content["success"]
 
@@ -599,13 +599,13 @@ def test_set_device(device_server_mock, instr):
 @pytest.mark.parametrize(
     "instr",
     [
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device="samx",
             action="read",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
         ),
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device=["samx", "samy"],
             action="read",
             parameter={},
@@ -625,28 +625,26 @@ def test_read_device(device_server_mock, instr):
             for msg in device_server.producer.message_sent
             if msg["queue"] == MessageEndpoints.device_read(device)
         ]
-        assert (
-            BECMessage.DeviceMessage.loads(res[-1]["msg"]).metadata["RID"] == instr.metadata["RID"]
-        )
-        assert BECMessage.DeviceMessage.loads(res[-1]["msg"]).metadata["stream"] == "primary"
+        assert messages.DeviceMessage.loads(res[-1]["msg"]).metadata["RID"] == instr.metadata["RID"]
+        assert messages.DeviceMessage.loads(res[-1]["msg"]).metadata["stream"] == "primary"
 
 
 @pytest.mark.parametrize(
     "instr",
     [
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device="samx",
             action="stage",
             parameter={},
             metadata={"stream": "primary", "DIID": 1},
         ),
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device=["samx", "samy"],
             action="stage",
             parameter={},
             metadata={"stream": "primary", "DIID": 1},
         ),
-        BECMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device="ring_current_sim",
             action="stage",
             parameter={},

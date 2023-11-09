@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from bec_lib import BECMessage
+from bec_lib import messages
 
 from bec_lib import MessageEndpoints, bec_logger
 
@@ -47,7 +47,7 @@ class SciBecMetadataHandler:
 
     @staticmethod
     def _handle_scan_status(msg, *, parent, **_kwargs) -> None:
-        msg = BECMessage.ScanStatusMessage.loads(msg.value)
+        msg = messages.ScanStatusMessage.loads(msg.value)
         try:
             scan = parent.update_scan_data(msg)
         except Exception:
@@ -94,14 +94,14 @@ class SciBecMetadataHandler:
 
     @staticmethod
     def _handle_scan_data(msg, *, parent, **_kwargs) -> None:
-        msg = BECMessage.ScanMessage.loads(msg.value)
+        msg = messages.ScanMessage.loads(msg.value)
 
     @staticmethod
     def _handle_baseline_data(msg, *, parent, **_kwargs) -> None:
-        msg = BECMessage.ScanBaselineMessage.loads(msg.value)
+        msg = messages.ScanBaselineMessage.loads(msg.value)
 
     def update_event_data(self, scan_info: dict) -> None:
         baseline_data = self.scibec_connector.producer.get(
             MessageEndpoints.public_scan_baseline(scan_info[0]["scanId"])
         )
-        baseline_data = BECMessage.ScanBaselineMessage.loads(baseline_data)
+        baseline_data = messages.ScanBaselineMessage.loads(baseline_data)

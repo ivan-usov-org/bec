@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import traceback
 from typing import TYPE_CHECKING
-from bec_lib import BECMessage
+from bec_lib import messages
 
 from bec_lib import BECStatus, DeviceConfigError, MessageEndpoints, bec_logger
 
@@ -30,11 +30,11 @@ class ConfigUpdateHandler:
 
     @staticmethod
     def _device_config_callback(msg, *, parent, **_kwargs) -> None:
-        msg = BECMessage.DeviceConfigMessage.loads(msg.value)
+        msg = messages.DeviceConfigMessage.loads(msg.value)
         logger.info(f"Received request: {msg}")
         parent.parse_config_request(msg)
 
-    def parse_config_request(self, msg: BECMessage.DeviceConfigMessage) -> None:
+    def parse_config_request(self, msg: messages.DeviceConfigMessage) -> None:
         """Processes a config request. If successful, it emits a config reply
 
         Args:
@@ -66,7 +66,7 @@ class ConfigUpdateHandler:
             error_msg (str): Error message
             metadata (dict): Metadata of the request
         """
-        msg = BECMessage.RequestResponseMessage(
+        msg = messages.RequestResponseMessage(
             accepted=accepted, message=error_msg, metadata=metadata
         )
         RID = metadata.get("RID")
@@ -74,7 +74,7 @@ class ConfigUpdateHandler:
             MessageEndpoints.device_config_request_response(RID), msg.dumps(), expire=60
         )
 
-    def _update_config(self, msg: BECMessage.DeviceConfigMessage) -> None:
+    def _update_config(self, msg: messages.DeviceConfigMessage) -> None:
         for dev, dev_config in msg.content["config"].items():
             device = self.device_manager.devices[dev]
             if "deviceConfig" in dev_config:

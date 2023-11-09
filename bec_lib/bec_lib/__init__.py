@@ -1,5 +1,5 @@
 from bec_lib.bec_service import BECService
-from bec_lib.BECMessage import BECStatus
+from bec_lib.messages import BECStatus
 from bec_lib.client import BECClient
 from bec_lib.config_helper import ConfigHelper
 from bec_lib.connector import ProducerConnector

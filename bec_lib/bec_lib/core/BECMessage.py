@@ -1,1 +1,1 @@
-from bec_lib.BECMessage import *
+from bec_lib.messages import *
