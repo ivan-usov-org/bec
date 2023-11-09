@@ -4,10 +4,10 @@ from unittest import mock
 import pytest
 
 import bec_lib
-from bec_lib import BECMessage
+from bec_lib import messages
 from bec_lib.bec_service import BECService
-from bec_lib.BECMessage import BECStatus
 from bec_lib.endpoints import MessageEndpoints
+from bec_lib.messages import BECStatus
 from bec_lib.service_config import ServiceConfig
 
 # pylint: disable=no-member
@@ -121,8 +121,8 @@ def test_bec_service_update_existing_services():
         f'{MessageEndpoints.service_status("service2")}:val'.encode(),
     ]
     service_msgs = [
-        BECMessage.StatusMessage(name="service1", status=BECStatus.RUNNING, info={}, metadata={}),
-        BECMessage.StatusMessage(name="service2", status=BECStatus.IDLE, info={}, metadata={}),
+        messages.StatusMessage(name="service1", status=BECStatus.RUNNING, info={}, metadata={}),
+        messages.StatusMessage(name="service2", status=BECStatus.IDLE, info={}, metadata={}),
     ]
     connector_cls = mock.MagicMock()
     connector_cls().producer().keys.return_value = service_keys
@@ -144,7 +144,7 @@ def test_bec_service_update_existing_services_ignores_wrong_msgs():
         f'{MessageEndpoints.service_status("service2")}:val'.encode(),
     ]
     service_msgs = [
-        BECMessage.StatusMessage(name="service1", status=BECStatus.RUNNING, info={}, metadata={}),
+        messages.StatusMessage(name="service1", status=BECStatus.RUNNING, info={}, metadata={}),
         None,
     ]
     connector_cls = mock.MagicMock()
