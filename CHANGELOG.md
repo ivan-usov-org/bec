@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.42.1 (2023-11-09)
+
+### Fix
+
+* Fixed bec service update routine for missing messages; closes #114 ([`dc37058`](https://gitlab.psi.ch/bec/bec/-/commit/dc370584c9265b4fc28e79bd2bd9609c826668f8))
+
 ## v0.42.0 (2023-11-07)
 
 ### Feature
