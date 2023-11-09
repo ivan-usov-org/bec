@@ -96,7 +96,7 @@ class BECService:
             return
         services = [service.decode().split(":", maxsplit=1)[0] for service in service_keys]
         msgs = [BECMessage.StatusMessage.loads(self.producer.get(service)) for service in services]
-        self._services_info = {msg.content["name"]: msg for msg in msgs}
+        self._services_info = {msg.content["name"]: msg for msg in msgs if msg is not None}
 
     def _update_service_info(self):
         while not self._service_info_event.is_set():

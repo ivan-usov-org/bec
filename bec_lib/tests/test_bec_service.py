@@ -4,7 +4,13 @@ from unittest import mock
 import pytest
 
 import bec_lib
-from bec_lib.core import BECService, ServiceConfig
+from bec_lib.core import (
+    BECMessage,
+    BECService,
+    BECStatus,
+    MessageEndpoints,
+    ServiceConfig,
+)
 
 # pylint: disable=no-member
 # pylint: disable=missing-function-docstring
@@ -107,3 +113,46 @@ def test_bec_service_service_status():
         mock_update_existing_services.reset_mock()
         status = service.service_status
         mock_update_existing_services.assert_called_once()
+
+
+def test_bec_service_update_existing_services():
+    service_keys = [
+        f'{MessageEndpoints.service_status("service1")}:val'.encode(),
+        f'{MessageEndpoints.service_status("service2")}:val'.encode(),
+    ]
+    service_msgs = [
+        BECMessage.StatusMessage(name="service1", status=BECStatus.RUNNING, info={}, metadata={}),
+        BECMessage.StatusMessage(name="service2", status=BECStatus.IDLE, info={}, metadata={}),
+    ]
+    connector_cls = mock.MagicMock()
+    connector_cls().producer().keys.return_value = service_keys
+    connector_cls().producer().get.side_effect = [msg.dumps() for msg in service_msgs]
+    service = BECService(
+        config=f"{os.path.dirname(bec_lib.__file__)}/core/tests/test_service_config.yaml",
+        connector_cls=connector_cls,
+        unique_service=True,
+    )
+    assert service._services_info == {
+        "service1": service_msgs[0],
+        "service2": service_msgs[1],
+    }
+
+
+def test_bec_service_update_existing_services_ignores_wrong_msgs():
+    service_keys = [
+        f'{MessageEndpoints.service_status("service1")}:val'.encode(),
+        f'{MessageEndpoints.service_status("service2")}:val'.encode(),
+    ]
+    service_msgs = [
+        BECMessage.StatusMessage(name="service1", status=BECStatus.RUNNING, info={}, metadata={}),
+        None,
+    ]
+    connector_cls = mock.MagicMock()
+    connector_cls().producer().keys.return_value = service_keys
+    connector_cls().producer().get.side_effect = [service_msgs[0].dumps(), None]
+    service = BECService(
+        config=f"{os.path.dirname(bec_lib.__file__)}/core/tests/test_service_config.yaml",
+        connector_cls=connector_cls,
+        unique_service=True,
+    )
+    assert service._services_info == {"service1": service_msgs[0]}
