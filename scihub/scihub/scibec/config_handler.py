@@ -5,14 +5,15 @@ import time
 import traceback
 import uuid
 from typing import TYPE_CHECKING
+from bec_lib import BECMessage
 
 import msgpack
 
 import bec_lib
-from bec_lib.core import BECMessage, Device, DeviceConfigError
-from bec_lib.core import DeviceManagerBase as DeviceManager
-from bec_lib.core import MessageEndpoints, bec_logger
-from bec_lib.core.connector import ConnectorBase
+from bec_lib import Device, DeviceConfigError
+from bec_lib import DeviceManagerBase as DeviceManager
+from bec_lib import MessageEndpoints, bec_logger
+from bec_lib.connector import ConnectorBase
 
 from .scibec_validator import SciBecValidator
 

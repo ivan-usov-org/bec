@@ -5,8 +5,8 @@ from unittest import mock
 
 import pytest
 
-from bec_lib.core import BECMessage
-from bec_lib.core.utils import _write_csv, scan_to_dict
+from bec_lib import BECMessage
+from bec_lib.utils import _write_csv, scan_to_dict
 from bec_lib.scan_manager import ScanReport
 
 
@@ -79,7 +79,7 @@ def test_scan_to_csv():
     # # # scanreport_mock.scan.data.keys.return_value = input_dict.keys()
     # # scanreport_mock.scan.data.keys.__len__ = input_dict.__len__
     # # scanreport_mock.scan.data.keys.__iter__ = input_dict.__iter__
-    # with mock.patch("bec_lib.core.utils._write_csv") as mock_write_csv:
+    # with mock.patch("bec_lib.utils._write_csv") as mock_write_csv:
     #     scan_to_csv(scanreport_mock, "./test.csv")
     #     mock_write_csv.assert_called_once()
     with pytest.raises(Exception):

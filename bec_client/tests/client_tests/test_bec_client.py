@@ -3,7 +3,7 @@ from unittest import mock
 import IPython
 
 from bec_client import BECIPythonClient
-from bec_lib.core import RedisConnector, ServiceConfig
+from bec_lib import RedisConnector, ServiceConfig
 from bec_lib.tests.utils import ConnectorMock, bec_client
 
 

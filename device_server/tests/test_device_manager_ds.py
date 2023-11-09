@@ -1,12 +1,13 @@
 import os
 from unittest import mock
+from bec_lib import BECMessage
 
 import numpy as np
 import pytest
 import yaml
 
 import bec_lib
-from bec_lib.core import BECMessage, MessageEndpoints
+from bec_lib import MessageEndpoints
 from bec_lib.tests.utils import ConnectorMock, ProducerMock, create_session_from_config
 from device_server.devices.devicemanager import DeviceManagerDS
 

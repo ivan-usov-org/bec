@@ -8,12 +8,12 @@ import yaml
 
 import bec_lib
 from bec_lib import BECClient
-from bec_lib.core import BECMessage
-from bec_lib.core.connector import ConnectorBase
-from bec_lib.core.endpoints import MessageEndpoints
-from bec_lib.core.logger import bec_logger
-from bec_lib.core.redis_connector import Alarms
-from bec_lib.core.service_config import ServiceConfig
+from bec_lib import BECMessage
+from bec_lib.connector import ConnectorBase
+from bec_lib.endpoints import MessageEndpoints
+from bec_lib.logger import bec_logger
+from bec_lib.redis_connector import Alarms
+from bec_lib.service_config import ServiceConfig
 from bec_lib.devicemanager_client import DMClient
 from bec_lib.scans import Scans
 

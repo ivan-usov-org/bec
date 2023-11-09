@@ -2,6 +2,7 @@ import inspect
 import time
 import traceback
 from functools import reduce
+from bec_lib import BECMessage
 
 import ophyd
 import ophyd.sim as ops
@@ -9,15 +10,14 @@ import ophyd_devices as opd
 from ophyd.ophydobj import OphydObject
 from ophyd.signal import EpicsSignalBase
 
-from bec_lib.core import (
-    BECMessage,
+from bec_lib import (
     Device,
     DeviceConfigError,
     DeviceManagerBase,
     MessageEndpoints,
     bec_logger,
 )
-from bec_lib.core.connector import ConnectorBase
+from bec_lib.connector import ConnectorBase
 from device_server.devices.config_update_handler import ConfigUpdateHandler
 from device_server.devices.device_serializer import get_device_info
 

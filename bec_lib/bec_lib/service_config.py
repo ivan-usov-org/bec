@@ -3,7 +3,7 @@ import os
 
 import yaml
 
-from bec_lib.core.logger import bec_logger
+from bec_lib.logger import bec_logger
 
 try:
     from bec_plugins.utils import load_service_config as plugin_load_service_config

@@ -3,10 +3,10 @@ import time
 import uuid
 from typing import Any
 
-from bec_lib.core import BECMessage
-from bec_lib.core.logger import bec_logger
-from bec_lib.core.devicemanager import Device, DeviceManagerBase, Status
-from bec_lib.core.endpoints import MessageEndpoints
+from bec_lib import BECMessage
+from bec_lib.logger import bec_logger
+from bec_lib.devicemanager import Device, DeviceManagerBase, Status
+from bec_lib.endpoints import MessageEndpoints
 
 
 class ScanRequestError(Exception):

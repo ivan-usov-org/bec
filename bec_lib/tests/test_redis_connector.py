@@ -3,10 +3,10 @@ from unittest import mock
 import pytest
 import redis
 
-from bec_lib.core.BECMessage import AlarmMessage, LogMessage
-from bec_lib.core.connector import ConsumerConnectorError
-from bec_lib.core.endpoints import MessageEndpoints
-from bec_lib.core.redis_connector import (
+from bec_lib.BECMessage import AlarmMessage, LogMessage
+from bec_lib.connector import ConsumerConnectorError
+from bec_lib.endpoints import MessageEndpoints
+from bec_lib.redis_connector import (
     Alarms,
     MessageObject,
     RedisConnector,
@@ -20,35 +20,35 @@ from bec_lib.core.redis_connector import (
 
 @pytest.fixture
 def producer():
-    with mock.patch("bec_lib.core.redis_connector.redis.Redis"):
+    with mock.patch("bec_lib.redis_connector.redis.Redis"):
         prod = RedisProducer("localhost", 1)
         yield prod
 
 
 @pytest.fixture
 def connector():
-    with mock.patch("bec_lib.core.redis_connector.redis.Redis"):
+    with mock.patch("bec_lib.redis_connector.redis.Redis"):
         connector = RedisConnector("localhost:1")
         yield connector
 
 
 @pytest.fixture
 def consumer():
-    with mock.patch("bec_lib.core.redis_connector.redis.Redis"):
+    with mock.patch("bec_lib.redis_connector.redis.Redis"):
         consumer = RedisConsumer("localhost", "1", topics="topics")
         yield consumer
 
 
 @pytest.fixture
 def consumer_threaded():
-    with mock.patch("bec_lib.core.redis_connector.redis.Redis"):
+    with mock.patch("bec_lib.redis_connector.redis.Redis"):
         consumer_threaded = RedisConsumerThreaded("localhost", "1", topics="topics")
         yield consumer_threaded
 
 
 @pytest.fixture
 def mixin():
-    with mock.patch("bec_lib.core.redis_connector.redis.Redis"):
+    with mock.patch("bec_lib.redis_connector.redis.Redis"):
         mixin = RedisConsumerMixin
         yield mixin
 
@@ -322,7 +322,7 @@ def use_pipe_fcn(producer, use_pipe):
     ],
 )
 def test_redis_consumer_init(consumer, topics, pattern):
-    with mock.patch("bec_lib.core.redis_connector.redis.Redis"):
+    with mock.patch("bec_lib.redis_connector.redis.Redis"):
         consumer = RedisConsumer(
             "localhost", "1", topics, pattern, redis_cls=redis.Redis, cb=lambda *args, **kwargs: ...
         )
@@ -418,7 +418,7 @@ def test_mixin_init_redis_cls(mixin, consumer):
     ],
 )
 def test_redis_consumer_threaded_init(consumer_threaded, topics, pattern):
-    with mock.patch("bec_lib.core.redis_connector.redis.Redis"):
+    with mock.patch("bec_lib.redis_connector.redis.Redis"):
         consumer_threaded = RedisConsumerThreaded(
             "localhost", "1", topics, pattern, redis_cls=redis.Redis, cb=lambda *args, **kwargs: ...
         )

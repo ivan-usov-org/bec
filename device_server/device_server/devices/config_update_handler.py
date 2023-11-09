@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import traceback
 from typing import TYPE_CHECKING
+from bec_lib import BECMessage
 
-from bec_lib.core import BECMessage, BECStatus, DeviceConfigError, MessageEndpoints, bec_logger
+from bec_lib import BECStatus, DeviceConfigError, MessageEndpoints, bec_logger
 
 if TYPE_CHECKING:
     from devicemanager import DeviceManagerDS

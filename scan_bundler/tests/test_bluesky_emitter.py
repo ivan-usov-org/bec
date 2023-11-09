@@ -1,10 +1,11 @@
 from unittest import mock
+from bec_lib import BECMessage
 
 import msgpack
 import pytest
 from test_scan_bundler import load_ScanBundlerMock
 
-from bec_lib.core import BECMessage, MessageEndpoints
+from bec_lib import MessageEndpoints
 from scan_bundler.bluesky_emitter import BlueskyEmitter
 
 

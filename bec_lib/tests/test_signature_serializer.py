@@ -1,6 +1,6 @@
 import inspect
 
-from bec_lib.core.signature_serializer import dict_to_signature, signature_to_dict
+from bec_lib.signature_serializer import dict_to_signature, signature_to_dict
 
 
 def test_signature_serializer():

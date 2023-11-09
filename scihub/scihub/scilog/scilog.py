@@ -8,7 +8,7 @@ import msgpack
 import requests
 from dotenv import dotenv_values
 
-from bec_lib.core import MessageEndpoints, RedisConnector, bec_logger
+from bec_lib import MessageEndpoints, RedisConnector, bec_logger
 
 logger = bec_logger.logger
 

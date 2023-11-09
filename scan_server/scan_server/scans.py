@@ -3,10 +3,11 @@ import enum
 import time
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List
+from bec_lib import BECMessage
 
 import numpy as np
 
-from bec_lib.core import BECMessage, DeviceManagerBase, MessageEndpoints, bec_logger
+from bec_lib import DeviceManagerBase, MessageEndpoints, bec_logger
 
 from .errors import LimitError, ScanAbortion
 from .path_optimization import PathOptimizerMixin

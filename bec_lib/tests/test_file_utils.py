@@ -2,8 +2,8 @@ from unittest import mock
 
 import pytest
 
-from bec_lib.core.bec_errors import ServiceConfigError
-from bec_lib.core.file_utils import FileWriterMixin
+from bec_lib.bec_errors import ServiceConfigError
+from bec_lib.file_utils import FileWriterMixin
 
 
 @pytest.mark.parametrize(

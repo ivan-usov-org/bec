@@ -5,8 +5,8 @@ from unittest import mock
 
 import pytest
 
-from bec_lib.core import BECMessage
-from bec_lib.core.endpoints import MessageEndpoints
+from bec_lib import BECMessage
+from bec_lib.endpoints import MessageEndpoints
 from bec_lib.queue_items import QueueItem
 from bec_lib.scan_items import ScanItem
 from bec_lib.scan_manager import ScanManager

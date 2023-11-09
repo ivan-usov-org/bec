@@ -1,8 +1,9 @@
 import traceback
+from bec_lib import BECMessage
 
 import msgpack
 
-from bec_lib.core import BECMessage, MessageEndpoints, bec_logger
+from bec_lib import MessageEndpoints, bec_logger
 
 logger = bec_logger.logger
 

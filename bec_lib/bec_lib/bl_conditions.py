@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from bec_lib.core.devicemanager import Device
+from bec_lib.devicemanager import Device
 
 
 class BeamlineCondition(ABC):

@@ -8,11 +8,12 @@ import traceback
 import uuid
 from enum import Enum
 from typing import List, Optional, Union
+from bec_lib import BECMessage
 
 from rich.console import Console
 from rich.table import Table
 
-from bec_lib.core import Alarms, BECMessage, MessageEndpoints, bec_logger, threadlocked
+from bec_lib import Alarms, MessageEndpoints, bec_logger, threadlocked
 
 from .errors import LimitError, ScanAbortion
 from .scan_assembler import ScanAssembler

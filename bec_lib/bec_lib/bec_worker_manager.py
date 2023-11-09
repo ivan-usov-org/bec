@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from bec_lib.core import BECMessage
-from bec_lib.core.endpoints import MessageEndpoints
-from bec_lib.core.redis_connector import RedisConnector
+from bec_lib import BECMessage
+from bec_lib.endpoints import MessageEndpoints
+from bec_lib.redis_connector import RedisConnector
 
 
 class BECWorker:
@@ -149,7 +149,7 @@ class BECWorkerManager:
 
 
 if __name__ == "__main__":  # pragma: no cover
-    from bec_lib.core.redis_connector import RedisConnector
+    from bec_lib.redis_connector import RedisConnector
 
     connector = RedisConnector(["localhost:6379"])
     manager = BECWorkerManager(connector)

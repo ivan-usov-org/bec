@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from bec_lib import BECMessage
 
 import msgpack
 from requests import ConnectionError
 
-from bec_lib.core import BECMessage, MessageEndpoints, ServiceConfig, bec_logger
-from bec_lib.core.connector import ConnectorBase
+from bec_lib import MessageEndpoints, ServiceConfig, bec_logger
+from bec_lib.connector import ConnectorBase
 
 from .config_handler import ConfigHandler
 from .scibec import SciBec, SciBecError

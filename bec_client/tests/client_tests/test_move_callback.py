@@ -4,7 +4,7 @@ from unittest import mock
 import pytest
 
 from bec_client.callbacks.move_device import LiveUpdatesReadbackProgressbar, ReadbackDataMixin
-from bec_lib.core import BECMessage
+from bec_lib import BECMessage
 from bec_lib.tests.utils import bec_client
 
 

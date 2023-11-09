@@ -1,10 +1,11 @@
 import uuid
 from unittest import mock
+from bec_lib import BECMessage
 
 import pytest
 from utils import load_ScanServerMock
 
-from bec_lib.core import BECMessage, MessageEndpoints
+from bec_lib import MessageEndpoints
 from scan_server.errors import DeviceMessageError, ScanAbortion
 from scan_server.scan_assembler import ScanAssembler
 from scan_server.scan_queue import (

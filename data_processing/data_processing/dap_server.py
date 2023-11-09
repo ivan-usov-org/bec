@@ -1,6 +1,6 @@
-from bec_lib.core import BECService
-from bec_lib.core.connector import ConnectorBase
-from bec_lib.core.service_config import ServiceConfig
+from bec_lib import BECService
+from bec_lib.connector import ConnectorBase
+from bec_lib.service_config import ServiceConfig
 
 from .worker_manager import DAPWorkerManager
 

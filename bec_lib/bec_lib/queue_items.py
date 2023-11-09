@@ -8,9 +8,9 @@ from typing import TYPE_CHECKING, Deque, List, Optional
 from rich.console import Console
 from rich.table import Table
 
-from bec_lib.core import BECMessage
-from bec_lib.core.endpoints import MessageEndpoints
-from bec_lib.core.utils import threadlocked
+from bec_lib import BECMessage
+from bec_lib.endpoints import MessageEndpoints
+from bec_lib.utils import threadlocked
 
 if TYPE_CHECKING:
     from bec_lib.request_items import RequestItem

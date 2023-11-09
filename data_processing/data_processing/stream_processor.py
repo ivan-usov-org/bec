@@ -4,12 +4,13 @@ import time
 from abc import ABC, abstractmethod
 from collections import deque
 from typing import Any, List, Optional, Tuple
+from bec_lib import BECMessage
 
 import lmfit
 import numpy as np
 
-from bec_lib.core import BECMessage, MessageEndpoints
-from bec_lib.core.redis_connector import MessageObject, RedisConnector
+from bec_lib import MessageEndpoints
+from bec_lib.redis_connector import MessageObject, RedisConnector
 
 
 def nested_get(data: str, keys, default=None):

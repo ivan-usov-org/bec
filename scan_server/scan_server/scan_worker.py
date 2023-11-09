@@ -5,7 +5,7 @@ import traceback
 from asyncio.log import logger
 from typing import List
 
-from bec_lib.core import Alarms, BECMessage, Device, MessageEndpoints, bec_logger
+from bec_lib import Alarms, BECMessage, Device, MessageEndpoints, bec_logger
 
 from .device_validation import DeviceValidation
 from .errors import DeviceMessageError, ScanAbortion

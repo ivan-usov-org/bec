@@ -4,11 +4,12 @@ import time
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 from typing import Callable
+from bec_lib import BECMessage
 
-from bec_lib.core import BECMessage, BECService, BECStatus
-from bec_lib.core import DeviceManagerBase as DeviceManager
-from bec_lib.core import MessageEndpoints, bec_logger
-from bec_lib.core.connector import ConnectorBase
+from bec_lib import BECService, BECStatus
+from bec_lib import DeviceManagerBase as DeviceManager
+from bec_lib import MessageEndpoints, bec_logger
+from bec_lib.connector import ConnectorBase
 
 from .bec_emitter import BECEmitter
 from .bluesky_emitter import BlueskyEmitter

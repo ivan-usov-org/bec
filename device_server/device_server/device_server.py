@@ -6,15 +6,16 @@ import traceback
 from concurrent.futures import ThreadPoolExecutor
 from io import StringIO
 from typing import Any
+from bec_lib import BECMessage
 
 import ophyd
 from ophyd import Staged
 from ophyd.utils import errors as ophyd_errors
 
-from bec_lib.core import Alarms, BECMessage, BECService, MessageEndpoints, bec_logger
-from bec_lib.core.BECMessage import BECStatus
-from bec_lib.core.connector import ConnectorBase
-from bec_lib.core.devicemanager import OnFailure
+from bec_lib import Alarms, BECService, MessageEndpoints, bec_logger
+from bec_lib.BECMessage import BECStatus
+from bec_lib.connector import ConnectorBase
+from bec_lib.devicemanager import OnFailure
 from device_server.devices import is_serializable, rgetattr
 from device_server.devices.devicemanager import DeviceManagerDS
 

@@ -3,9 +3,10 @@ from __future__ import annotations
 import inspect
 import multiprocessing as mp
 from typing import Any, List
+from bec_lib import BECMessage
 
-from bec_lib.core import BECMessage, MessageEndpoints, bec_logger
-from bec_lib.core.redis_connector import RedisConnector
+from bec_lib import MessageEndpoints, bec_logger
+from bec_lib.redis_connector import RedisConnector
 
 from .stream_processor import LmfitProcessor
 

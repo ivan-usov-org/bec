@@ -10,12 +10,12 @@ import psutil
 from rich.console import Console
 from rich.table import Table
 
-from bec_lib.core import BECMessage
-from bec_lib.core.BECMessage import BECStatus
-from bec_lib.core.connector import ConnectorBase
-from bec_lib.core.endpoints import MessageEndpoints
-from bec_lib.core.logger import bec_logger
-from bec_lib.core.service_config import ServiceConfig
+from bec_lib import BECMessage
+from bec_lib.BECMessage import BECStatus
+from bec_lib.connector import ConnectorBase
+from bec_lib.endpoints import MessageEndpoints
+from bec_lib.logger import bec_logger
+from bec_lib.service_config import ServiceConfig
 
 logger = bec_logger.logger
 

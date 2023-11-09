@@ -1,7 +1,8 @@
 import asyncio
 
 from bec_client.progressbar import ScanProgressBar
-from bec_lib.core import BECMessage, MessageEndpoints, bec_logger
+from bec_lib import BECMessage
+from bec_lib import MessageEndpoints, bec_logger
 
 from .live_table import LiveUpdatesTable
 

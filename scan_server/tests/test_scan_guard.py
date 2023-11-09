@@ -1,11 +1,12 @@
 from unittest import mock
+from bec_lib import BECMessage
 
 import msgpack
 import pytest
 from utils import load_ScanServerMock
 
-from bec_lib.core import BECMessage, MessageEndpoints
-from bec_lib.core.redis_connector import MessageObject
+from bec_lib import MessageEndpoints
+from bec_lib.redis_connector import MessageObject
 from scan_server.scan_guard import ScanGuard, ScanRejection, ScanStatus
 
 

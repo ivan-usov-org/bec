@@ -3,8 +3,8 @@ from unittest import mock
 import pytest
 
 from bec_lib.bec_worker_manager import BECWorker, BECWorkerManager
-from bec_lib.core import BECMessage
-from bec_lib.core.endpoints import MessageEndpoints
+from bec_lib import BECMessage
+from bec_lib.endpoints import MessageEndpoints
 
 
 @pytest.fixture

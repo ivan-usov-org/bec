@@ -6,9 +6,9 @@ import pytest
 import yaml
 
 import bec_lib
-from bec_lib.core import BECMessage
-from bec_lib.core.connector import MessageObject
-from bec_lib.core.devicemanager import (
+from bec_lib import BECMessage
+from bec_lib.connector import MessageObject
+from bec_lib.devicemanager import (
     Device,
     DeviceConfigError,
     DeviceContainer,

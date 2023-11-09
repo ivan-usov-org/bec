@@ -1,5 +1,5 @@
 from bec_client import BECIPythonClient
-from bec_lib.core import RedisConnector, ServiceConfig, bec_logger
+from bec_lib import RedisConnector, ServiceConfig, bec_logger
 
 logger = bec_logger.logger
 bec_logger.level = bec_logger.LOGLEVEL.SUCCESS

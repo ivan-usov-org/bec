@@ -2,11 +2,11 @@ import threading
 from collections import deque
 from typing import List
 
-from bec_lib.core import BECMessage
-from bec_lib.core.endpoints import MessageEndpoints
-from bec_lib.core.logger import bec_logger
-from bec_lib.core.redis_connector import Alarms, RedisConnector
-from bec_lib.core.utils import threadlocked
+from bec_lib import BECMessage
+from bec_lib.endpoints import MessageEndpoints
+from bec_lib.logger import bec_logger
+from bec_lib.redis_connector import Alarms, RedisConnector
+from bec_lib.utils import threadlocked
 
 logger = bec_logger.logger
 

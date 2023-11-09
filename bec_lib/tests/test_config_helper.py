@@ -6,9 +6,9 @@ import pytest
 import yaml
 
 import bec_lib
-from bec_lib.core import BECMessage
-from bec_lib.core.bec_errors import DeviceConfigError
-from bec_lib.core.config_helper import ConfigHelper
+from bec_lib import BECMessage
+from bec_lib.bec_errors import DeviceConfigError
+from bec_lib.config_helper import ConfigHelper
 
 dir_path = os.path.dirname(bec_lib.__file__)
 

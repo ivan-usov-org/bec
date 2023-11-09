@@ -1,14 +1,15 @@
 import os
 from unittest import mock
+from bec_lib import BECMessage
 
 import numpy as np
 import pytest
 import yaml
 
-import bec_lib.core
-from bec_lib.core import BECMessage, DeviceManagerBase, MessageEndpoints, ServiceConfig
-from bec_lib.core.bec_errors import ServiceConfigError
-from bec_lib.core.redis_connector import MessageObject
+import bec_lib
+from bec_lib import DeviceManagerBase, MessageEndpoints, ServiceConfig
+from bec_lib.bec_errors import ServiceConfigError
+from bec_lib.redis_connector import MessageObject
 from bec_lib.tests.utils import ConnectorMock, create_session_from_config
 from file_writer import FileWriterManager
 from file_writer.file_writer import FileWriter

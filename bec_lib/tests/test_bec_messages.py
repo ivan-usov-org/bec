@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from bec_lib.core import BECMessage
+from bec_lib import BECMessage
 
 
 @pytest.mark.parametrize("version", [1.0, 1.1, 1.2])

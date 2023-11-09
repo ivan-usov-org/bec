@@ -5,7 +5,7 @@ import abc
 import threading
 import traceback
 
-from bec_lib.core.logger import bec_logger
+from bec_lib.logger import bec_logger
 
 logger = bec_logger.logger
 

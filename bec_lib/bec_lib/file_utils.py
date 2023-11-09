@@ -1,6 +1,6 @@
 import os
 
-from bec_lib.core.bec_errors import ServiceConfigError
+from bec_lib.bec_errors import ServiceConfigError
 
 
 class FileWriterMixin:

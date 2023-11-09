@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 
-import bec_lib.core
+import bec_lib
 from scihub.scibec.scibec import HttpClient, SciBec, SciBecError
 
 dir_path = os.path.dirname(bec_lib.__file__)

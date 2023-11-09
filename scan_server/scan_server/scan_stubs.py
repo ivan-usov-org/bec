@@ -1,10 +1,11 @@
 import time
 import uuid
 from typing import Callable, List, Union
+from bec_lib import BECMessage
 
 import numpy as np
 
-from bec_lib.core import BECMessage, MessageEndpoints, ProducerConnector, Status, bec_logger
+from bec_lib import MessageEndpoints, ProducerConnector, Status, bec_logger
 
 from .errors import DeviceMessageError, ScanAbortion
 

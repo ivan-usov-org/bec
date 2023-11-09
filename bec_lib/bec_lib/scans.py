@@ -9,11 +9,11 @@ import msgpack
 from cytoolz import partition
 from typeguard import typechecked
 
-from bec_lib.core import BECMessage
-from bec_lib.core.connector import ConsumerConnector
-from bec_lib.core.endpoints import MessageEndpoints
-from bec_lib.core.logger import bec_logger
-from bec_lib.core.signature_serializer import dict_to_signature
+from bec_lib import BECMessage
+from bec_lib.connector import ConsumerConnector
+from bec_lib.endpoints import MessageEndpoints
+from bec_lib.logger import bec_logger
+from bec_lib.signature_serializer import dict_to_signature
 from bec_lib.devicemanager_client import Device
 from bec_lib.scan_manager import ScanReport
 

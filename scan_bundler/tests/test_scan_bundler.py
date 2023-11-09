@@ -7,9 +7,9 @@ import pytest
 import yaml
 
 import bec_lib
-from bec_lib.core import BECMessage
-from bec_lib.core import DeviceManagerBase as DeviceManager
-from bec_lib.core import MessageEndpoints, ServiceConfig
+from bec_lib import BECMessage
+from bec_lib import DeviceManagerBase as DeviceManager
+from bec_lib import MessageEndpoints, ServiceConfig
 from bec_lib.tests.utils import ConnectorMock, create_session_from_config
 from scan_bundler import ScanBundler
 from scan_bundler.emitter import EmitterBase

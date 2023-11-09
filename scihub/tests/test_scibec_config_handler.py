@@ -1,11 +1,12 @@
 from unittest import mock
+from bec_lib import BECMessage
 
 import pytest
 from fastjsonschema import JsonSchemaException
 from test_scibec_connector import SciHubMock
 
-from bec_lib.core import BECMessage, Device
-from bec_lib.core.bec_errors import DeviceConfigError
+from bec_lib import Device
+from bec_lib.bec_errors import DeviceConfigError
 from scihub.scibec import SciBecConnector
 
 

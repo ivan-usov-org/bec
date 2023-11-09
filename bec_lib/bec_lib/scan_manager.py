@@ -7,10 +7,10 @@ from typing import TYPE_CHECKING
 
 from typeguard import typechecked
 
-from bec_lib.core import BECMessage
-from bec_lib.core.bec_errors import ScanAbortion
-from bec_lib.core.endpoints import MessageEndpoints
-from bec_lib.core.logger import bec_logger
+from bec_lib import BECMessage
+from bec_lib.bec_errors import ScanAbortion
+from bec_lib.endpoints import MessageEndpoints
+from bec_lib.logger import bec_logger
 from bec_lib.queue_items import QueueStorage
 from bec_lib.request_items import RequestStorage
 from bec_lib.scan_items import ScanStorage
