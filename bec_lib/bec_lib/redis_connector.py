@@ -1,11 +1,12 @@
-import enum
+from __future__ import annotations
+
 import time
 import warnings
 from functools import wraps
+from typing import TYPE_CHECKING
 
 import redis
 
-from bec_lib.messages import AlarmMessage, LogMessage
 from bec_lib.connector import (
     ConnectorBase,
     ConsumerConnector,
@@ -14,12 +15,10 @@ from bec_lib.connector import (
     ProducerConnector,
 )
 from bec_lib.endpoints import MessageEndpoints
+from bec_lib.messages import AlarmMessage, LogMessage
 
-
-class Alarms(int, enum.Enum):
-    WARNING = 0
-    MINOR = 1
-    MAJOR = 2
+if TYPE_CHECKING:
+    from bec_lib.alarm_handler import Alarms
 
 
 def catch_connection_error(func):

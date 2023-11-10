@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import enum
 import threading
 from collections import deque
 from typing import TYPE_CHECKING, List
@@ -7,7 +8,6 @@ from typing import TYPE_CHECKING, List
 from bec_lib import messages
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
-from bec_lib.redis_connector import Alarms
 from bec_lib.utils import threadlocked
 
 if TYPE_CHECKING:
@@ -15,6 +15,12 @@ if TYPE_CHECKING:
 
 
 logger = bec_logger.logger
+
+
+class Alarms(int, enum.Enum):
+    WARNING = 0
+    MINOR = 1
+    MAJOR = 2
 
 
 class AlarmException(Exception):

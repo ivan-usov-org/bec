@@ -14,8 +14,9 @@ from bec_lib import (
     messages,
     threadlocked,
 )
+from bec_lib.alarm_handler import Alarms
 from bec_lib.file_utils import FileWriterMixin
-from bec_lib.redis_connector import Alarms, MessageObject, RedisConnector
+from bec_lib.redis_connector import MessageObject, RedisConnector
 from file_writer.file_writer import NexusFileWriter
 
 logger = bec_logger.logger

@@ -19,7 +19,7 @@ from bec_lib.scans import Scans
 from bec_lib.service_config import ServiceConfig
 
 if TYPE_CHECKING:
-    from bec_lib.redis_connector import Alarms
+    from bec_lib.alarm_handler import Alarms
 
 dir_path = os.path.dirname(bec_lib.__file__)
 

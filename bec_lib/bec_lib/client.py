@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, List
 from rich.console import Console
 from rich.table import Table
 
-from bec_lib.alarm_handler import AlarmHandler
+from bec_lib.alarm_handler import AlarmHandler, Alarms
 from bec_lib.bec_service import BECService
 from bec_lib.bec_worker_manager import BECWorkerManager
 from bec_lib.bl_checks import BeamlineChecks
@@ -19,7 +19,7 @@ from bec_lib.devicemanager_client import DMClient
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logbook_connector import LogbookConnector
 from bec_lib.logger import bec_logger
-from bec_lib.redis_connector import Alarms, RedisConnector
+from bec_lib.redis_connector import RedisConnector
 from bec_lib.scan_manager import ScanManager
 from bec_lib.scans import Scans
 from bec_lib.service_config import ServiceConfig

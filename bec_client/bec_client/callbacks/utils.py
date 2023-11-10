@@ -6,9 +6,8 @@ import threading
 import time
 import traceback
 from typing import TYPE_CHECKING, Callable, List
-from bec_lib import messages
 
-from bec_lib import Alarms, bec_logger
+from bec_lib import bec_logger, messages
 from bec_lib.request_items import RequestItem
 
 if TYPE_CHECKING:
