@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 import enum
+from typing import TYPE_CHECKING
 
 from typeguard import typechecked
 
 from bec_lib import messages
-from bec_lib.devicemanager import Device, DeviceManagerBase
+from bec_lib.devicemanager import Device
 from bec_lib.endpoints import MessageEndpoints
+
+if TYPE_CHECKING:
+    from bec_lib.devicemanager import DeviceManagerBase
 
 
 class ObserverAction(str, enum.Enum):

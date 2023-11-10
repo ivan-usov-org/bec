@@ -1,21 +1,26 @@
+from __future__ import annotations
+
 import getpass
 import socket
 import threading
 import time
 import uuid
 from dataclasses import asdict, dataclass
-from typing import Any, Union
+from typing import TYPE_CHECKING, Any, Union
 
 import psutil
 from rich.console import Console
 from rich.table import Table
 
 from bec_lib import messages
-from bec_lib.messages import BECStatus
-from bec_lib.connector import ConnectorBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
+from bec_lib.messages import BECStatus
 from bec_lib.service_config import ServiceConfig
+
+if TYPE_CHECKING:
+    from bec_lib.connector import ConnectorBase
+
 
 logger = bec_logger.logger
 

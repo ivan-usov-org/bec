@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import enum
 import time
-from typing import List
+from typing import TYPE_CHECKING, List
 
 import msgpack
 from rich.console import Console
@@ -8,6 +10,9 @@ from rich.table import Table
 from typeguard import typechecked
 
 from bec_lib.bec_errors import DeviceConfigError
+from bec_lib.config_helper import ConfigHelper
+from bec_lib.endpoints import MessageEndpoints
+from bec_lib.logger import bec_logger
 from bec_lib.messages import (
     BECStatus,
     DeviceConfigMessage,
@@ -16,11 +21,10 @@ from bec_lib.messages import (
     DeviceStatusMessage,
     LogMessage,
 )
-from bec_lib.config_helper import ConfigHelper
-from bec_lib.connector import ConnectorBase
-from bec_lib.endpoints import MessageEndpoints
-from bec_lib.logger import bec_logger
-from bec_lib.redis_connector import RedisProducer
+
+if TYPE_CHECKING:
+    from bec_lib.connector import ConnectorBase
+    from bec_lib.redis_connector import RedisProducer
 
 logger = bec_logger.logger
 

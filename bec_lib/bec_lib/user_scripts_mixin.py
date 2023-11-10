@@ -1,18 +1,22 @@
+from __future__ import annotations
+
 import builtins
 import glob
 import importlib
 import inspect
 import os
 import pathlib
-from typing import List
+from typing import TYPE_CHECKING, List
 
 from pylint import lint
-from pylint.message import Message
 from pylint.reporters import CollectingReporter
 from rich.console import Console
 from rich.table import Table
 
 from bec_lib.logger import bec_logger
+
+if TYPE_CHECKING:
+    from pylint.message import Message
 
 logger = bec_logger.logger
 

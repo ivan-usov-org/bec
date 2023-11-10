@@ -1,12 +1,18 @@
+from __future__ import annotations
+
 import threading
 from collections import deque
-from typing import List
+from typing import TYPE_CHECKING, List
 
 from bec_lib import messages
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
-from bec_lib.redis_connector import Alarms, RedisConnector
+from bec_lib.redis_connector import Alarms
 from bec_lib.utils import threadlocked
+
+if TYPE_CHECKING:
+    from bec_lib.redis_connector import RedisConnector
+
 
 logger = bec_logger.logger
 

@@ -10,7 +10,6 @@ from cytoolz import partition
 from typeguard import typechecked
 
 from bec_lib import messages
-from bec_lib.connector import ConsumerConnector
 from bec_lib.devicemanager_client import Device
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
@@ -19,6 +18,7 @@ from bec_lib.signature_serializer import dict_to_signature
 
 if TYPE_CHECKING:
     from bec_lib.client import BECClient
+    from bec_lib.connector import ConsumerConnector
 
 logger = bec_logger.logger
 
