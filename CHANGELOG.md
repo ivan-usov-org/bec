@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.42.2 (2023-11-10)
+
+### Fix
+
+* Bec_service test ([`97d3d1f`](https://gitlab.psi.ch/bec/bec/-/commit/97d3d1f18f07101a860952f40a96b7cfd633fb3c))
+* Resolve a circular import in logbook_connector ([`8efd02c`](https://gitlab.psi.ch/bec/bec/-/commit/8efd02cda483aaa29cdb6bbb9867a67037a25111))
+
 ## v0.42.1 (2023-11-09)
 
 ### Fix
