@@ -7,7 +7,9 @@ from typing import TYPE_CHECKING
 
 from loguru import logger as loguru_logger
 
-from bec_lib import messages
+# TODO: Importing bec_lib, instead of `from bec_lib.messages import LogMessage`, avoids potential
+# logger <-> messages circular import. But there could be a better solution.
+import bec_lib
 from bec_lib.endpoints import MessageEndpoints
 
 if TYPE_CHECKING:
@@ -64,7 +66,9 @@ class BECLogger:
         msg["service_name"] = self.service_name
         self.producer.send(
             topic=MessageEndpoints.log(),
-            msg=messages.LogMessage(log_type=msg["record"]["level"]["name"], content=msg).dumps(),
+            msg=bec_lib.messages.LogMessage(
+                log_type=msg["record"]["level"]["name"], content=msg
+            ).dumps(),
         )
 
     @property
