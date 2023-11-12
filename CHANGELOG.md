@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.42.3 (2023-11-12)
+
+### Fix
+
+* Added missing init file ([`109453c`](https://gitlab.psi.ch/bec/bec/-/commit/109453c1ccb3ebc8506e57f549549f99b38e4c8f))
+
 ## v0.42.2 (2023-11-10)
 
 ### Fix
