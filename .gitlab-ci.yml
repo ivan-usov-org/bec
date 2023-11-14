@@ -76,6 +76,29 @@ pylint:
     paths:
       - ./pylint/
     expire_in: 1 week
+    
+pylint-check:
+  stage: Formatter
+  needs: []
+  before_script:
+    - pip install pylint pylint-exit anybadge
+  script:
+    # Identify changed Python files
+    - CHANGED_FILES=$(git diff --name-only $CI_COMMIT_BEFORE_SHA $CI_COMMIT_SHA | grep '\.py$' || true)
+    - if [ -z "$CHANGED_FILES" ]; then echo "No Python files changed."; exit 0; fi
+
+    # Run pylint only on changed files
+    - mkdir ./pylint
+    - pylint $CHANGED_FILES --output-format=text . | tee ./pylint/pylint_changed_files.log || pylint-exit $?
+    - PYLINT_SCORE=$(sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' ./pylint/pylint_changed_files.log)
+    - echo "Pylint score is $PYLINT_SCORE"
+
+    # Fail the job if the pylint score is below 9
+    - if [ $(echo "$PYLINT_SCORE < 9" | bc -l) -eq 1 ]; then exit 1; fi
+  artifacts:
+    paths:
+      - ./pylint/
+    expire_in: 1 week
 
 
 tests:
