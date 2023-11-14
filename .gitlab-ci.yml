@@ -87,7 +87,11 @@ pylint-check:
     - apt-get install -y bc
   script:
     # Identify changed Python files
-    - CHANGED_FILES=$(git diff --name-only $CI_COMMIT_BEFORE_SHA $CI_COMMIT_SHA | grep '\.py$' || true)
+    - if [ -n "$CI_MERGE_REQUEST_SOURCE_BRANCH_SHA" ]; then
+        CHANGED_FILES=$(git diff --name-only $CI_MERGE_REQUEST_SOURCE_BRANCH_SHA $CI_COMMIT_SHA | grep '\.py$' || true);
+      else
+        CHANGED_FILES=$(git diff --name-only $CI_COMMIT_BEFORE_SHA $CI_COMMIT_SHA | grep '\.py$' || true);
+      fi
     - if [ -z "$CHANGED_FILES" ]; then echo "No Python files changed."; exit 0; fi
 
     # Run pylint only on changed files
@@ -97,7 +101,7 @@ pylint-check:
     - echo "Pylint score is $PYLINT_SCORE"
 
     # Fail the job if the pylint score is below 9
-    - if [ "$(echo "$PYLINT_SCORE < 9" | bc)" -eq 1 ]; then exit 1; fi
+    - if [ "$(echo "$PYLINT_SCORE < 9" | bc)" -eq 1 ]; then echo "Your pylint score is below the acceptable threshold (9)."; exit 1; fi
   artifacts:
     paths:
       - ./pylint/
