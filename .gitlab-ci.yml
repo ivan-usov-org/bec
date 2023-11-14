@@ -94,7 +94,7 @@ pylint-check:
     - echo "Pylint score is $PYLINT_SCORE"
 
     # Fail the job if the pylint score is below 9
-    - if [ $(echo "$PYLINT_SCORE < 9" | bc -l) -eq 1 ]; then exit 1; fi
+    - if [ $PYLINT_SCORE -lt 9 ]; then exit 1; fi
   artifacts:
     paths:
       - ./pylint/
