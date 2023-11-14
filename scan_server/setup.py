@@ -46,11 +46,11 @@ if __name__ == "__main__":
         "version": __version__,
         "extras_require": {"dev": ["pytest", "pytest-random-order", "coverage", "black", "pylint"]},
     }
-    bec_deps_in = [
+    bec_deps = [
         ("bec_lib", "bec_lib", bec_lib),
     ]
     is_local = os.path.dirname(os.path.abspath(__file__)).split("/")[-1] == "scan_server"
     is_build = "bdist_wheel" in sys.argv
 
-    editable = is_local and not is_build
-    run_install(setup_args_in, bec_deps_in, editable=editable)
+    editable_in = is_local and not is_build
+    run_install(setup_args_in, bec_deps, editable=editable_in)

@@ -82,6 +82,8 @@ pylint-check:
   needs: []
   before_script:
     - pip install pylint pylint-exit anybadge
+    - apt-get update
+    - apt-get install -y bc
   script:
     # Identify changed Python files
     - CHANGED_FILES=$(git diff --name-only $CI_COMMIT_BEFORE_SHA $CI_COMMIT_SHA | grep '\.py$' || true)
@@ -94,7 +96,7 @@ pylint-check:
     - echo "Pylint score is $PYLINT_SCORE"
 
     # Fail the job if the pylint score is below 9
-    - if [ $PYLINT_SCORE -lt 9 ]; then exit 1; fi
+    - if [ "$(echo "$PYLINT_SCORE < 9" | bc)" -eq 1 ]; then exit 1; fi
   artifacts:
     paths:
       - ./pylint/
