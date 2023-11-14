@@ -88,8 +88,8 @@ pylint-check:
   script:
     # Identify changed Python files
     - if [ "$CI_PIPELINE_SOURCE" == "merge_request_event" ]; then
-        SOURCE_BRANCH_COMMIT_SHA=$(git rev-parse $CI_COMMIT_REF_NAME);
-        CHANGED_FILES=$(git diff --name-only $SOURCE_BRANCH_COMMIT_SHA $CI_COMMIT_SHA | grep '\.py$' || true);
+        TARGET_BRANCH_COMMIT_SHA=$(git rev-parse $CI_MERGE_REQUEST_TARGET_BRANCH_NAME);
+        CHANGED_FILES=$(git diff --name-only $SOURCE_BRANCH_COMMIT_SHA $TARGET_BRANCH_COMMIT_SHA | grep '\.py$' || true);
       else
         CHANGED_FILES=$(git diff --name-only $CI_COMMIT_BEFORE_SHA $CI_COMMIT_SHA | grep '\.py$' || true);
       fi
