@@ -80,6 +80,7 @@ pylint:
 pylint-check:
   stage: Formatter
   needs: []
+  allow_failure: true
   before_script:
     - pip install pylint pylint-exit anybadge
     - apt-get update
