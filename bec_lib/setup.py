@@ -21,5 +21,6 @@ if __name__ == "__main__":
         extras_require={
             "dev": ["pytest", "pytest-random-order", "coverage", "pandas", "black", "pylint"]
         },
+        package_data={"bec_lib.tests": ["*.yaml"]},
         version=__version__,
     )
