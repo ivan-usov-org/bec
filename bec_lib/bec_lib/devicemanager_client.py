@@ -11,11 +11,11 @@ from bec_lib.logger import bec_logger
 
 
 class ScanRequestError(Exception):
-    pass
+    """Exception raised when a scan request is rejected."""
 
 
 class RPCError(Exception):
-    pass
+    """Exception raised when an RPC call fails."""
 
 
 logger = bec_logger.logger
@@ -38,8 +38,9 @@ def rpc(fcn):
 
 class RPCBase:
     """
-    The RPCBase class is the base class for all devices that are controlled via the DeviceManager. It provides a simple
-    interface to perform RPC calls on the device. The RPCBase class is not meant to be used directly, but rather to be subclassed.
+    The RPCBase class is the base class for all devices that are controlled via
+    the DeviceManager. It provides a simple interface to perform RPC calls on the
+    device. The RPCBase class is not meant to be used directly, but rather to be subclassed.
     """
 
     def __init__(self, name: str, info: dict = None, parent=None) -> None:
@@ -59,6 +60,9 @@ class RPCBase:
         if self._info:
             self._parse_info()
 
+        # the following lambda is needed to support customized RPC methods with
+        # doc strings and function signatures.
+        # pylint: disable=unnecessary-lambda
         self.run = lambda *args, **kwargs: self._run(*args, **kwargs)
 
     def _run(self, *args, **kwargs):
@@ -94,7 +98,7 @@ class RPCBase:
             Any: The return value of the RPC call.
         """
         rpc_id = str(uuid.uuid4())
-        requestID = str(uuid.uuid4())  # TODO: move this to the API server
+        request_id = str(uuid.uuid4())  # TODO: move this to the API server
         params = {
             "device": device,
             "rpc_id": rpc_id,
@@ -106,18 +110,19 @@ class RPCBase:
             scan_type="device_rpc",
             parameter=params,
             queue="primary",
-            metadata={"RID": requestID, "response": True},
+            metadata={"RID": request_id, "response": True},
         )
         self.root.parent.producer.send(MessageEndpoints.scan_queue_request(), msg.dumps())
         queue = self.root.parent.parent.queue
-        while queue.request_storage.find_request_by_ID(requestID) is None:
+        while queue.request_storage.find_request_by_ID(request_id) is None:
             time.sleep(0.1)
-        scan_queue_request = queue.request_storage.find_request_by_ID(requestID)
+        scan_queue_request = queue.request_storage.find_request_by_ID(request_id)
         while scan_queue_request.decision_pending:
             time.sleep(0.1)
         if not all(scan_queue_request.accepted):
             raise ScanRequestError(
-                f"Function call was rejected by the server: {scan_queue_request.response.content['message']}"
+                "Function call was rejected by the server:"
+                f" {scan_queue_request.response.content['message']}"
             )
         while True:
             msg = self.root.parent.producer.get(MessageEndpoints.device_rpc(rpc_id))
@@ -128,7 +133,8 @@ class RPCBase:
         if not msg.content["success"]:
             error = msg.content["out"]
             raise RPCError(
-                f"During an RPC, the following error occured:\n{error['error']}: {error['msg']}.\nTraceback: {error['traceback']}\n The scan will be aborted."
+                f"During an RPC, the following error occured:\n{error['error']}:"
+                f" {error['msg']}.\nTraceback: {error['traceback']}\n The scan will be aborted."
             )
         if msg.content.get("out"):
             print(msg.content.get("out"))
@@ -211,7 +217,14 @@ class RPCBase:
                     self._custom_rpc_methods[user_access_name],
                 )
 
-    def update_config(self, update):
+    def update_config(self, update: dict) -> None:
+        """
+        Updates the device configuration.
+
+        Args:
+            update (dict): The update dictionary.
+
+        """
         self.root.parent.config_helper.send_config_request(
             action="update", config={self.name: update}
         )
@@ -231,20 +244,26 @@ class DeviceBase(RPCBase, Device):
 
     @property
     def enabled(self):
+        # pylint: disable=protected-access
         return self.root._config["enabled"]
 
     @enabled.setter
     def enabled(self, val):
+        # pylint: disable=protected-access
         self.update_config({"enabled": val})
         self.root._config["enabled"] = val
 
     @rpc
     def trigger(self, rpc_id: str):
-        pass
+        """
+        Triggers the device.
+        """
 
     @rpc
     def stop(self):
-        pass
+        """
+        Stops the device.
+        """
 
     @rpc
     def read(self, cached=False, use_readback=True, filter_signal=True):
@@ -262,23 +281,36 @@ class DeviceBase(RPCBase, Device):
 
     @rpc
     def read_configuration(self):
-        pass
+        """
+        Reads the device configuration.
+        """
 
     @rpc
     def describe(self):
-        pass
+        """
+        Describes the device and yields information about the device's signals, including
+        the signal's name, source, shape, data type, precision etc.
+        """
 
     @rpc
     def stage(self):
-        pass
+        """
+        Stages the device. This method should normally not be called directly, but rather
+        via the scan server.
+        """
 
     @rpc
     def unstage(self):
-        pass
+        """
+        Unstages the device. This method should normally not be called directly, but rather
+        via the scan server.
+        """
 
     @rpc
     def summary(self):
-        pass
+        """
+        Provides a summary of the device, all associated signals and their type.
+        """
 
 
 class Signal(DeviceBase):
