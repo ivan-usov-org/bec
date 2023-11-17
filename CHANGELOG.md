@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.42.4 (2023-11-17)
+
+### Fix
+
+* Removed redundant name in config output ([`5a81c21`](https://gitlab.psi.ch/bec/bec/-/commit/5a81c2134593b702fcd6f2645e952caa7cdaf2d2))
+
 ## v0.42.3 (2023-11-12)
 
 ### Fix
