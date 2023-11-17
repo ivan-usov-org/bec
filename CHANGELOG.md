@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.42.5 (2023-11-17)
+
+### Fix
+
+* Fixed creation of nested device components; needed for DynamicComponents ([`407f990`](https://gitlab.psi.ch/bec/bec/-/commit/407f99049091f78efc3b8fac6bb7046cc0a6b623))
+
 ## v0.42.4 (2023-11-17)
 
 ### Fix
