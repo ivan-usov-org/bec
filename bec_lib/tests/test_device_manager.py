@@ -1,3 +1,4 @@
+# pylint: skip-file
 import os
 from collections import defaultdict
 from unittest import mock
