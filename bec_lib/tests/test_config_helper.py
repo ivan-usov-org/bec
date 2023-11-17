@@ -87,7 +87,6 @@ def test_config_helper_save_current_session():
         config_helper.save_current_session("test.yaml")
         out_data = {
             "pinz": {
-                "name": "pinz",
                 "deviceClass": "SynAxisOPAAS",
                 "deviceTags": ["user motors"],
                 "status": {"enabled": True, "enabled_set": True},
@@ -108,7 +107,6 @@ def test_config_helper_save_current_session():
                 "onFailure": "retry",
             },
             "transd": {
-                "name": "transd",
                 "deviceClass": "SynAxisMonitor",
                 "deviceTags": ["beamline"],
                 "status": {"enabled": True, "enabled_set": True},

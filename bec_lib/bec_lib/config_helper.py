@@ -9,9 +9,9 @@ import msgpack
 import yaml
 
 from bec_lib.bec_errors import DeviceConfigError
-from bec_lib.messages import DeviceConfigMessage, RequestResponseMessage
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
+from bec_lib.messages import DeviceConfigMessage, RequestResponseMessage
 
 if TYPE_CHECKING:
     from bec_lib.redis_connector import RedisConnector
@@ -64,6 +64,7 @@ class ConfigHelper:
             dev.pop("createdAt", None)
             dev.pop("createdBy", None)
             dev.pop("sessionId", None)
+            name = dev.pop("name")
             enabled = dev.pop("enabled", None)
             config = {"status": {"enabled": enabled}}
 
@@ -71,7 +72,7 @@ class ConfigHelper:
             if enabled_set is not None:
                 config["status"]["enabled_set"] = enabled_set
             config.update(dev)
-            out[dev["name"]] = config
+            out[name] = config
 
         with open(file_path, "w") as file:
             file.write(yaml.dump(out))
