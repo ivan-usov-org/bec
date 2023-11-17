@@ -6,16 +6,15 @@ import traceback
 from concurrent.futures import ThreadPoolExecutor
 from io import StringIO
 from typing import Any
-from bec_lib import messages
 
 import ophyd
+from bec_lib import Alarms, BECService, MessageEndpoints, bec_logger, messages
+from bec_lib.connector import ConnectorBase
+from bec_lib.devicemanager import OnFailure
+from bec_lib.messages import BECStatus
 from ophyd import Staged
 from ophyd.utils import errors as ophyd_errors
 
-from bec_lib import Alarms, BECService, MessageEndpoints, bec_logger
-from bec_lib.messages import BECStatus
-from bec_lib.connector import ConnectorBase
-from bec_lib.devicemanager import OnFailure
 from device_server.devices import is_serializable, rgetattr
 from device_server.devices.devicemanager import DeviceManagerDS
 
@@ -265,8 +264,6 @@ class DeviceServer(BECService):
                 }
             elif isinstance(res, list) and isinstance(res[0], ophyd.Staged):
                 res = [str(stage) for stage in res]
-            else:
-                print(f"return value: {res}")
             # send result to client
             self.producer.set(
                 MessageEndpoints.device_rpc(instr_params.get("rpc_id")),

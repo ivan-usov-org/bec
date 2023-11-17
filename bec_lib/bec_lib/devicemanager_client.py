@@ -1,12 +1,13 @@
 import functools
 import time
+import traceback
 import uuid
 from typing import Any
 
 from bec_lib import messages
-from bec_lib.logger import bec_logger
 from bec_lib.devicemanager import Device, DeviceManagerBase, Status
 from bec_lib.endpoints import MessageEndpoints
+from bec_lib.logger import bec_logger
 
 
 class ScanRequestError(Exception):
@@ -129,7 +130,8 @@ class RPCBase:
             raise RPCError(
                 f"During an RPC, the following error occured:\n{error['error']}: {error['msg']}.\nTraceback: {error['traceback']}\n The scan will be aborted."
             )
-        print(msg.content.get("out"))
+        if msg.content.get("out"):
+            print(msg.content.get("out"))
         return_val = msg.content.get("return_val")
         if not isinstance(return_val, dict):
             return return_val
@@ -177,13 +179,13 @@ class RPCBase:
                     setattr(
                         self,
                         dev.get("device_attr_name"),
-                        Positioner(dev.get("device_attr_name"), parent=self),
+                        Positioner(dev.get("device_attr_name"), info=dev, parent=self),
                     )
                 elif base_class == "device":
                     setattr(
                         self,
                         dev.get("device_attr_name"),
-                        Device(dev.get("device_attr_name"), config=None, parent=self),
+                        DeviceBase(dev.get("device_attr_name"), info=dev, parent=self),
                     )
 
         for user_access_name, descr in self._info.get("custom_user_access", {}).items():
@@ -416,8 +418,9 @@ class DMClient(DeviceManagerBase):
                 try:
                     msg = self._get_device_info(dev.get("name"))
                     self._add_device(dev, msg)
-                except Exception:
-                    logger.error(f"Failed to load device {dev}.")
+                except Exception as exc:
+                    content = traceback.format_exc()
+                    logger.error(f"Failed to load device {dev}: {content}")
 
     def _add_device(self, dev: dict, msg: messages.DeviceInfoMessage):
         name = msg.content["device"]
