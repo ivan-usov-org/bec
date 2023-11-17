@@ -29,6 +29,20 @@ eiger:
 ####################### User motors ########################
 ############################################################
 
+
+dyn_signals:
+  acquisitionConfig:
+    acquisitionGroup: motor
+    readoutPriority: baseline
+    schedule: sync
+  deviceClass: sim:sim:SynDynamicComponents
+  deviceConfig:
+    labels: dyn_signals
+    name: dyn_signals
+  status:
+    enabled: true
+    enabled_set: true
+
 eyefoc:
   acquisitionConfig:
     acquisitionGroup: motor

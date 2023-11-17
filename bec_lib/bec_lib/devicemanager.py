@@ -421,13 +421,17 @@ class DeviceContainer(dict):
         """get a list of all devices that have the specified tags"""
         if not isinstance(tags, list):
             tags = [tags]
-        return [dev for _, dev in self.items() if set(tags) & set(dev._config["deviceTags"])]
+        return [
+            dev for _, dev in self.items() if set(tags) & set(dev._config.get("deviceTags", []))
+        ]
 
     def show_tags(self) -> List:
         """returns a list of used tags in the current config"""
         tags = set()
         for _, dev in self.items():
-            tags.update(dev._config["deviceTags"])
+            dev_tags = dev._config.get("deviceTags")
+            if dev_tags:
+                tags.update(dev_tags)
         return list(tags)
 
     @typechecked

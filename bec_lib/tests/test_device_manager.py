@@ -120,7 +120,10 @@ def test_get_devices_with_tags():
     dm._load_session()
     available_tags = defaultdict(lambda: [])
     for dev_name, dev in config_content.items():
-        for tag in dev["deviceTags"]:
+        tags = dev.get("deviceTags")
+        if tags is None:
+            continue
+        for tag in tags:
             available_tags[tag].append(dev_name)
 
     for tag, devices in available_tags.items():
@@ -141,7 +144,10 @@ def test_show_tags():
     dm._load_session()
     available_tags = defaultdict(lambda: [])
     for dev_name, dev in config_content.items():
-        for tag in dev["deviceTags"]:
+        tags = dev.get("deviceTags")
+        if tags is None:
+            continue
+        for tag in tags:
             available_tags[tag].append(dev_name)
 
     assert set(dm.devices.show_tags()) == set(available_tags.keys())

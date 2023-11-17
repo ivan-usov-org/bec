@@ -91,6 +91,108 @@ class ClientMock(BECClient):
 
 class DMClientMock(DMClient):
     def _get_device_info(self, device_name) -> messages.DeviceInfoMessage:
+        device_info = {
+            "dyn_signals": messages.DeviceInfoMessage(
+                device="dyn_signals",
+                info={
+                    "device_info": {
+                        "device_base_class": "device",
+                        "signals": [],
+                        "hints": {"fields": []},
+                        "describe": {
+                            "dyn_signals_messages_message1": {
+                                "source": "SIM:dyn_signals_messages_message1",
+                                "dtype": "integer",
+                                "shape": [],
+                                "precision": 3,
+                            },
+                            "dyn_signals_messages_message2": {
+                                "source": "SIM:dyn_signals_messages_message2",
+                                "dtype": "integer",
+                                "shape": [],
+                                "precision": 3,
+                            },
+                            "dyn_signals_messages_message3": {
+                                "source": "SIM:dyn_signals_messages_message3",
+                                "dtype": "integer",
+                                "shape": [],
+                                "precision": 3,
+                            },
+                            "dyn_signals_messages_message4": {
+                                "source": "SIM:dyn_signals_messages_message4",
+                                "dtype": "integer",
+                                "shape": [],
+                                "precision": 3,
+                            },
+                            "dyn_signals_messages_message5": {
+                                "source": "SIM:dyn_signals_messages_message5",
+                                "dtype": "integer",
+                                "shape": [],
+                                "precision": 3,
+                            },
+                        },
+                        "describe_configuration": {},
+                        "sub_devices": [
+                            {
+                                "device_name": "dyn_signals_messages",
+                                "device_attr_name": "messages",
+                                "device_dotted_name": "messages",
+                                "device_info": {
+                                    "device_base_class": "device",
+                                    "signals": [
+                                        "message1",
+                                        "message2",
+                                        "message3",
+                                        "message4",
+                                        "message5",
+                                    ],
+                                    "hints": {"fields": []},
+                                    "describe": {
+                                        "dyn_signals_messages_message1": {
+                                            "source": "SIM:dyn_signals_messages_message1",
+                                            "dtype": "integer",
+                                            "shape": [],
+                                            "precision": 3,
+                                        },
+                                        "dyn_signals_messages_message2": {
+                                            "source": "SIM:dyn_signals_messages_message2",
+                                            "dtype": "integer",
+                                            "shape": [],
+                                            "precision": 3,
+                                        },
+                                        "dyn_signals_messages_message3": {
+                                            "source": "SIM:dyn_signals_messages_message3",
+                                            "dtype": "integer",
+                                            "shape": [],
+                                            "precision": 3,
+                                        },
+                                        "dyn_signals_messages_message4": {
+                                            "source": "SIM:dyn_signals_messages_message4",
+                                            "dtype": "integer",
+                                            "shape": [],
+                                            "precision": 3,
+                                        },
+                                        "dyn_signals_messages_message5": {
+                                            "source": "SIM:dyn_signals_messages_message5",
+                                            "dtype": "integer",
+                                            "shape": [],
+                                            "precision": 3,
+                                        },
+                                    },
+                                    "describe_configuration": {},
+                                    "sub_devices": [],
+                                    "custom_user_access": {},
+                                },
+                            }
+                        ],
+                        "custom_user_access": {},
+                    }
+                },
+            )
+        }
+        if device_name in device_info:
+            return device_info[device_name]
+
         session_info = self.get_device(device_name)
         device_base_class = (
             "positioner"
@@ -122,6 +224,7 @@ class DMClientMock(DMClient):
             "device_info": {"device_base_class": device_base_class, "signals": signals},
             "custom_user_acces": {},
         }
+
         return messages.DeviceInfoMessage(device=device_name, info=dev_info, metadata={})
 
     def get_device(self, device_name):
