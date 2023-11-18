@@ -1,13 +1,15 @@
 import time
 
-from bec_lib import messages, endpoints, logger
+from bec_lib import messages, MessageEndpoints, bec_logger
 
 from scan_server.scans import FlyScanBase, ScanAbortion
 
-logger = logger.bec_logger
+logger = bec_logger.logger
 
 
 class OwisGrid(FlyScanBase):
+    """Owis-based grid scan."""
+
     scan_name = "owis_grid"
     scan_report_hint = "scan_progress"
     required_kwargs = []
@@ -47,7 +49,8 @@ class OwisGrid(FlyScanBase):
 
         """
         super().__init__(*args, **kwargs)
-        # Always scan from positive  x & y to negative x & y
+
+        # Enforce scanning from positive to negative
         if start_y > end_y:
             self.start_y = start_y
             self.end_y = end_y
@@ -60,6 +63,7 @@ class OwisGrid(FlyScanBase):
         else:
             self.start_x = end_x
             self.end_x = start_x
+        # set scan parameter
         self.interval_y = interval_y
         self.interval_x = interval_x
         self.exp_time = exp_time
@@ -82,13 +86,13 @@ class OwisGrid(FlyScanBase):
         self.stepping_x = abs(self.start_x - self.end_x) / interval_x
 
         # Standard parameter for owis stages!!
-        self.high_velocity = 10  # mm/s
-        self.high_acc_time = 0.2  # s
-        self.base_velocity = 0.0625
-        self.add_pre_move_time = 0.0  # s
-        self.backlash_distance = 0.125
-
+        self.high_velocity = self.device_manager.devices.samy.velocity.get()
+        self.high_acc_time = self.device_manager.devices.samy.acceleration.get()
+        self.base_velocity = self.device_manager.devices.samy.base_velocity.get()
         self.sign = 1
+
+        # Add offset time if needed, in s
+        self.add_pre_move_time = 0.0
 
         # Relevant parameters for scan
         self.target_velocity = self.stepping_y / (self.exp_time + self.readout_time)
@@ -101,7 +105,6 @@ class OwisGrid(FlyScanBase):
             0.5 * (self.target_velocity + self.base_velocity) * self.acc_time
             + self.add_pre_move_time * self.target_velocity
         )
-        self.time_offset_snake = self.backlash_distance / self.target_velocity
 
         # Checks and set acc_time and premove for the designated scan
         if self.target_velocity > self.high_velocity or self.target_velocity < self.base_velocity:
@@ -118,7 +121,6 @@ class OwisGrid(FlyScanBase):
     def pre_scan(self):
         yield from self._move_and_wait([self.start_x, self.start_y])
         yield from self.stubs.pre_scan()
-        # TODO move to start position
 
     def scan_progress(self) -> int:
         """Timeout of the progress bar. This gets updated in the frequency of scan segments"""
