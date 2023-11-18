@@ -52,6 +52,11 @@ class Status:
         self._producer = producer
         self._RID = RID
 
+    def __eq__(self, __value: object) -> bool:
+        if isinstance(__value, Status):
+            return self._RID == __value._RID
+        return False
+
     def wait(self, timeout=None):
         """wait until the request is completed"""
         sleep_time_step = 0.1
@@ -263,21 +268,17 @@ class Device:
             )
             separator = "--" * 10
             return (
-                f"{type(self).__name__}(name={self.name}, enabled={self.enabled}):\n"
-                f"{separator}\n"
-                "Details:\n"
-                f"\tDescription: {self._config.get('description', self.name)}\n"
-                f"\tStatus: {'enabled' if self.enabled else 'disabled'}\n"
-                f"\tSet enabled: {self.enabled_set}\n"
-                f"\tLast recorded value: {self.read(cached=True)}\n"
-                f"\tDevice class: {self._config.get('deviceClass')}\n"
-                f"\tAcquisition group: {self._config['acquisitionConfig'].get('acquisitionGroup')}\n"
-                f"\tAcquisition readoutPriority: {self._config['acquisitionConfig'].get('readoutPriority')}\n"
-                f"\tDevice tags: {self._config.get('deviceTags', [])}\n"
-                f"\tUser parameter: {self._config.get('userParameter')}\n"
-                f"{separator}\n"
-                "Config:\n"
-                f"{config}"
+                f"{type(self).__name__}(name={self.name},"
+                f" enabled={self.enabled}):\n{separator}\nDetails:\n\tDescription:"
+                f" {self._config.get('description', self.name)}\n\tStatus:"
+                f" {'enabled' if self.enabled else 'disabled'}\n\tSet enabled:"
+                f" {self.enabled_set}\n\tLast recorded value: {self.read(cached=True)}\n\tDevice"
+                f" class: {self._config.get('deviceClass')}\n\tAcquisition group:"
+                f" {self._config['acquisitionConfig'].get('acquisitionGroup')}\n\tAcquisition"
+                " readoutPriority:"
+                f" {self._config['acquisitionConfig'].get('readoutPriority')}\n\tDevice tags:"
+                f" {self._config.get('deviceTags', [])}\n\tUser parameter:"
+                f" {self._config.get('userParameter')}\n{separator}\nConfig:\n{config}"
             )
         return f"{type(self).__name__}(name={self.name}, enabled={self.enabled})"
 
