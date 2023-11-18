@@ -277,24 +277,6 @@ class Device:
         return f"{type(self).__name__}(name={self.name}, enabled={self.enabled})"
 
     def __repr__(self):
-        if isinstance(self.parent, DeviceManagerBase):
-            config = "".join(
-                [f"\t{key}: {val}\n" for key, val in self._config.get("deviceConfig").items()]
-            )
-            separator = "--" * 10
-            return (
-                f"{type(self).__name__}(name={self.name},"
-                f" enabled={self.enabled}):\n{separator}\nDetails:\n\tDescription:"
-                f" {self._config.get('description', self.name)}\n\tStatus:"
-                f" {'enabled' if self.enabled else 'disabled'}\n\tSet enabled:"
-                f" {self.enabled_set}\n\tLast recorded value: {self.read(cached=True)}\n\tDevice"
-                f" class: {self._config.get('deviceClass')}\n\tAcquisition group:"
-                f" {self._config['acquisitionConfig'].get('acquisitionGroup')}\n\tAcquisition"
-                " readoutPriority:"
-                f" {self._config['acquisitionConfig'].get('readoutPriority')}\n\tDevice tags:"
-                f" {self._config.get('deviceTags', [])}\n\tUser parameter:"
-                f" {self._config.get('userParameter')}\n{separator}\nConfig:\n{config}"
-            )
         return f"{type(self).__name__}(name={self.name}, enabled={self.enabled})"
 
 

@@ -27,11 +27,7 @@ def rpc(fcn):
     @functools.wraps(fcn)
     def wrapper(self, *args, **kwargs):
         # pylint: disable=protected-access
-        device, func_call = self._get_rpc_func_name(fcn=fcn)
-
-        if kwargs.get("cached", False):
-            return fcn(self, *args, **kwargs)
-        return self._run_rpc_call(device, func_call, *args, **kwargs)
+        return self._run(*args, fcn=fcn, **kwargs)
 
     return wrapper
 
@@ -65,8 +61,11 @@ class RPCBase:
         # pylint: disable=unnecessary-lambda
         self.run = lambda *args, **kwargs: self._run(*args, **kwargs)
 
-    def _run(self, *args, **kwargs):
-        device, func_call = self._get_rpc_func_name(fcn_name=self.name, use_parent=True)
+    def _run(self, *args, fcn=None, cached=False, **kwargs):
+        device, func_call = self._get_rpc_func_name(fcn=fcn)
+
+        if cached:
+            return fcn(self, *args, **kwargs)
         return self._run_rpc_call(device, func_call, *args, **kwargs)
 
     @property
@@ -307,8 +306,19 @@ class DeviceBase(RPCBase, Device):
         Stops the device.
         """
 
-    @rpc
-    def read(self, cached=False, use_readback=True, filter_signal=True):
+    def read(self, cached=True, use_readback=True):
+        """
+        Reads the device.
+
+        Args:
+            cached (bool, optional): If True, the cached value is returned. Defaults to True.
+            use_readback (bool, optional): If True, the readback value is returned, otherwise the read value. Defaults to True.
+
+        Returns:
+            dict: The device signals.
+        """
+        if not cached:
+            return self._run(cached=cached, fcn=self.read)
         if use_readback:
             val = self.parent.producer.get(MessageEndpoints.device_readback(self.name))
         else:
@@ -317,8 +327,6 @@ class DeviceBase(RPCBase, Device):
         if not val:
             return None
         signals = messages.DeviceMessage.loads(val).content["signals"]
-        if filter_signal and signals.get(self.name):
-            return signals.get(self.name)
         return signals
 
     @rpc
@@ -353,6 +361,27 @@ class DeviceBase(RPCBase, Device):
         """
         Provides a summary of the device, all associated signals and their type.
         """
+
+    def __repr__(self):
+        if isinstance(self.parent, DeviceManagerBase):
+            config = "".join(
+                [f"\t{key}: {val}\n" for key, val in self._config.get("deviceConfig").items()]
+            )
+            separator = "--" * 10
+            return (
+                f"{type(self).__name__}(name={self.name},"
+                f" enabled={self.enabled}):\n{separator}\nDetails:\n\tDescription:"
+                f" {self._config.get('description', self.name)}\n\tStatus:"
+                f" {'enabled' if self.enabled else 'disabled'}\n\tSet enabled:"
+                f" {self.enabled_set}\n\tLast recorded value: {self.read(cached=True)}\n\tDevice"
+                f" class: {self._config.get('deviceClass')}\n\tAcquisition group:"
+                f" {self._config['acquisitionConfig'].get('acquisitionGroup')}\n\tAcquisition"
+                " readoutPriority:"
+                f" {self._config['acquisitionConfig'].get('readoutPriority')}\n\tDevice tags:"
+                f" {self._config.get('deviceTags', [])}\n\tUser parameter:"
+                f" {self._config.get('userParameter')}\n{separator}\nConfig:\n{config}"
+            )
+        return f"{type(self).__name__}(name={self.name}, enabled={self.enabled})"
 
 
 class Signal(DeviceBase):
