@@ -5,7 +5,7 @@ import time
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 from io import StringIO
-from typing import Any
+from typing import Any, List
 
 import ophyd
 from bec_lib import Alarms, BECService, MessageEndpoints, bec_logger, messages
@@ -246,24 +246,29 @@ class DeviceServer(BECService):
         try:
             instr_params = instr.content.get("parameter")
             self._assert_device_is_enabled(instr)
-            rpc_var = rgetattr(
-                self.device_manager.devices[instr.content["device"]].obj,
-                instr_params.get("func"),
-            )
-            res = self._get_result_from_rpc(rpc_var, instr_params)
-            if isinstance(res, ophyd.StatusBase):
-                res.__dict__["instruction"] = instr
-                res.add_callback(self._status_callback)
-                res = {
-                    "type": "status",
-                    "RID": instr.metadata.get("RID"),
-                    "success": res.success,
-                    "timeout": res.timeout,
-                    "done": res.done,
-                    "settle_time": res.settle_time,
-                }
-            elif isinstance(res, list) and isinstance(res[0], ophyd.Staged):
-                res = [str(stage) for stage in res]
+            if instr_params.get("func") == "read" or instr_params.get("func").endswith(".read"):
+                res = self._read_and_update_devices([instr.content["device"]], instr.metadata)
+                if isinstance(res, list) and len(res) == 1:
+                    res = res[0]
+            else:
+                rpc_var = rgetattr(
+                    self.device_manager.devices[instr.content["device"]].obj,
+                    instr_params.get("func"),
+                )
+                res = self._get_result_from_rpc(rpc_var, instr_params)
+                if isinstance(res, ophyd.StatusBase):
+                    res.__dict__["instruction"] = instr
+                    res.add_callback(self._status_callback)
+                    res = {
+                        "type": "status",
+                        "RID": instr.metadata.get("RID"),
+                        "success": res.success,
+                        "timeout": res.timeout,
+                        "done": res.done,
+                        "settle_time": res.settle_time,
+                    }
+                elif isinstance(res, list) and isinstance(res[0], ophyd.Staged):
+                    res = [str(stage) for stage in res]
             # send result to client
             self.producer.set(
                 MessageEndpoints.device_rpc(instr_params.get("rpc_id")),
@@ -414,13 +419,18 @@ class DeviceServer(BECService):
         if not isinstance(devices, list):
             devices = [devices]
 
+        self._read_and_update_devices(devices, instr.metadata)
+
+    def _read_and_update_devices(self, devices: List[str], metadata: dict) -> list:
         start = time.time()
         pipe = self.producer.pipeline()
+        signal_container = []
         for dev in devices:
-            self.device_manager.devices.get(dev).metadata = instr.metadata
+            self.device_manager.devices.get(dev).metadata = metadata
             obj = self.device_manager.devices.get(dev).obj
             try:
                 signals = obj.read()
+                signal_container.append(signals)
             except Exception as exc:
                 self.device_manager.connector.raise_alarm(
                     severity=Alarms.WARNING,
@@ -448,23 +458,24 @@ class DeviceServer(BECService):
 
             self.producer.set_and_publish(
                 MessageEndpoints.device_read(dev),
-                messages.DeviceMessage(signals=signals, metadata=instr.metadata).dumps(),
+                messages.DeviceMessage(signals=signals, metadata=metadata).dumps(),
                 pipe,
             )
             self.producer.set_and_publish(
                 MessageEndpoints.device_readback(dev),
-                messages.DeviceMessage(signals=signals, metadata=instr.metadata).dumps(),
+                messages.DeviceMessage(signals=signals, metadata=metadata).dumps(),
                 pipe,
             )
             self.producer.set(
                 MessageEndpoints.device_status(dev),
-                messages.DeviceStatusMessage(device=dev, status=0, metadata=instr.metadata).dumps(),
+                messages.DeviceStatusMessage(device=dev, status=0, metadata=metadata).dumps(),
                 pipe,
             )
         pipe.execute()
         logger.debug(
             f"Elapsed time for reading and updating status info: {(time.time()-start)*1000} ms"
         )
+        return signal_container
 
     def _stage_device(self, instr: messages.DeviceInstructionMessage) -> None:
         devices = instr.content["device"]
