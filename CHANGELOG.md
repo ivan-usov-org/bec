@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.42.6 (2023-11-18)
+
+### Fix
+
+* Include all needed files in packaged distro ([`2b3eddc`](https://gitlab.psi.ch/bec/bec/-/commit/2b3eddcff62d3a8085f2f8d1a5826020ecd87107))
+
 ## v0.42.5 (2023-11-17)
 
 ### Fix
