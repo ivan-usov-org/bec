@@ -113,12 +113,14 @@ class OwisGrid(FlyScanBase):
             )
 
     def scan_report_instructions(self):
+        """Scan report instructions for the progress bar, yields from mcs card"""
         if not self.scan_report_hint:
             yield None
             return
         yield from self.stubs.scan_report_instruction({"scan_progress": ["mcs"]})
 
     def pre_scan(self):
+        """Pre scan instructions, move to start position"""
         yield from self._move_and_wait([self.start_x, self.start_y])
         yield from self.stubs.pre_scan()
 
@@ -132,7 +134,6 @@ class OwisGrid(FlyScanBase):
         if not msg:
             self.timeout_progress += 1
             return self.timeout_progress
-        # TODO which update is that!
         updated_progress = int(msg.content["value"])
         if updated_progress == int(self.progress_point):
             self.timeout_progress += 1
@@ -143,12 +144,10 @@ class OwisGrid(FlyScanBase):
             return self.timeout_progress
 
     def scan_core(self):
-        """
-        This is the main event loop.
-        """
+        """This is the main event loop."""
 
-        # set up the delay generators
-        status_ddg_detectors_burst = yield from self.stubs.send_rpc_and_wait(
+        # Start acquisition with 10ms delay to allow fast shutter to open
+        yield from self.stubs.send_rpc_and_wait(
             "ddg_detectors",
             "burst_enable",
             count=self.interval_y,
@@ -156,7 +155,7 @@ class OwisGrid(FlyScanBase):
             period=(self.exp_time + self.readout_time),
             config="first",
         )
-        status_ddg_mcs_burst = yield from self.stubs.send_rpc_and_wait(
+        yield from self.stubs.send_rpc_and_wait(
             "ddg_mcs",
             "burst_enable",
             count=self.interval_y,
@@ -165,12 +164,10 @@ class OwisGrid(FlyScanBase):
             config="first",
         )
 
-        status_ddg_fsh_ttlwidth = yield from self.stubs.send_rpc_and_wait(
-            "ddg_fsh", "burst_disable"
-        )
+        yield from self.stubs.send_rpc_and_wait("ddg_fsh", "burst_disable")
 
-        # Set width of FSH opening to 0
-        status_ddg_fsh_ttlwidth = yield from self.stubs.send_rpc_and_wait(
+        # Set width of signals from ddg fsh to 0, except the one to the MCS card
+        yield from self.stubs.send_rpc_and_wait(
             "ddg_fsh",
             "set_channels",
             "width",
@@ -184,17 +181,22 @@ class OwisGrid(FlyScanBase):
             0,
             channels=["channelEF", "channelGH"],
         )
+        # Trigger MCS card to enable the acquisition
         time.sleep(0.05)
-        trigger_ddg_fsh = yield from self.stubs.send_rpc_and_wait("ddg_fsh", "trigger")
+        yield from self.stubs.send_rpc_and_wait("ddg_fsh", "trigger")
         time.sleep(0.05)
-        status_ddg_fsh_ttlwidth = yield from self.stubs.send_rpc_and_wait(
+
+        # Set width of signal to fast shutter to appropriate value for single lines
+        yield from self.stubs.send_rpc_and_wait(
             "ddg_fsh",
             "set_channels",
             "width",
             (self.interval_y * (self.exp_time + self.readout_time) + self.shutter_additional_width),
             channels=["channelCD"],
         )
-        status_ddg_fsh_ttlwidth = yield from self.stubs.send_rpc_and_wait(
+
+        # Set width of signal to MCS card to 0 --> It is already enabled
+        yield from self.stubs.send_rpc_and_wait(
             "ddg_fsh",
             "set_channels",
             "width",
@@ -202,10 +204,8 @@ class OwisGrid(FlyScanBase):
             channels=["channelAB"],
         )
 
-        # Software trigger on
-        status_ddg_mcs_ttldelay = yield from self.stubs.send_rpc_and_wait(
-            "ddg_mcs", "set_channels", "delay", 0
-        )
+        # remove delay for signals of ddg_mcs
+        yield from self.stubs.send_rpc_and_wait("ddg_mcs", "set_channels", "delay", 0)
 
         # Set ddg_mcs on ext trigger from ddg_detectors
         status_ddg_mcs_source = yield from self.stubs.send_rpc_and_wait("ddg_mcs", "source.set", 1)
@@ -215,23 +215,22 @@ class OwisGrid(FlyScanBase):
         )
         status_ddg_fsh_source = yield from self.stubs.send_rpc_and_wait("ddg_fsh", "source.set", 5)
 
+        # Wait for a signal from all ddgs, this ensures that all commands before were executed
         status_ddg_mcs_source.wait()
         status_ddg_detectors_source.wait()
         status_ddg_fsh_source.wait()
 
-        # Set motor speed
-
+        # Prepare motors
+        # Move to start position (taking premove_distance for acceleration into account)
         status_prepos = yield from self.stubs.send_rpc_and_wait(
             f"samy", "move", (self.start_y - self.premove_distance)
         )
         status_prepos.wait()
 
-        status_speed = yield from self.stubs.send_rpc_and_wait(
-            f"samy", "velocity.put", self.target_velocity
-        )
-        status_acc = yield from self.stubs.send_rpc_and_wait(
-            f"samy", "acceleration.put", self.acc_time
-        )
+        # Set speed and acceleration for scan
+        yield from self.stubs.send_rpc_and_wait(f"samy", "velocity.put", self.target_velocity)
+        yield from self.stubs.send_rpc_and_wait(f"samy", "acceleration.put", self.acc_time)
+
         # Read out primary devices once at start and once at end of fly scan
         yield from self.stubs.read_and_wait(
             group="primary", wait_group="readout_primary", pointID=self.pointID
