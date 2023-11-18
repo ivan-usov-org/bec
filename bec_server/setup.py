@@ -38,7 +38,7 @@ def run_install(setup_args: dict, bec_deps: list, editable=False):
 
 
 if __name__ == "__main__":
-    bec_deps = [
+    bec_deps_in = [
         ("bec_lib", "bec_lib"),
         ("bec_ipython_client", "bec_client"),
         ("bec_scan_server", "scan_server"),
@@ -49,7 +49,7 @@ if __name__ == "__main__":
         ("bec_scihub", "scihub"),
     ]
 
-    setup_args = {
+    setup_args_in = {
         "entry_points": {"console_scripts": ["bec-server = bec_server:main"]},
         "install_requires": ["libtmux"],
         "version": __version__,
@@ -68,5 +68,5 @@ if __name__ == "__main__":
     is_local = os.path.dirname(os.path.abspath(__file__)).split("/")[-1] == "bec_server"
     is_build = "bdist_wheel" in sys.argv
 
-    editable = is_local and not is_build
-    run_install(setup_args, bec_deps, editable=editable)
+    editable_in = is_local and not is_build
+    run_install(setup_args_in, bec_deps_in, editable=editable_in)

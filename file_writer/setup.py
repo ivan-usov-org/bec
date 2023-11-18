@@ -40,17 +40,17 @@ def run_install(setup_args: dict, bec_deps: list, editable=False):
 
 
 if __name__ == "__main__":
-    setup_args = {
+    setup_args_in = {
         "entry_points": {"console_scripts": ["bec-file-writer = file_writer:main"]},
         "install_requires": ["numpy", "pyyaml", "h5py", "xmltodict"],
         "version": __version__,
         "extras_require": {"dev": ["pytest", "pytest-random-order", "coverage", "black", "pylint"]},
     }
-    bec_deps = [
+    bec_deps_in = [
         ("bec_lib", "bec_lib", bec_lib),
     ]
     is_local = os.path.dirname(os.path.abspath(__file__)).split("/")[-1] == "file_writer"
     is_build = "bdist_wheel" in sys.argv
 
-    editable = is_local and not is_build
-    run_install(setup_args, bec_deps, editable=editable)
+    editable_in = is_local and not is_build
+    run_install(setup_args_in, bec_deps_in, editable=editable_in)
