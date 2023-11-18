@@ -138,7 +138,7 @@ tests-3.9:
     - pip install pytest pytest-random-order pytest-cov pytest-asyncio pytest-timeout
     - apt-get install -y gcc
     - *install-bec-services-dev
-    - pytest -v --junitxml=report.xml --random-order ./data_processing/tests ./bec_lib/tests ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests ./file_writer/tests
+    - pytest -v --junitxml=report.xml --random-order ./data_processing/tests ./bec_lib/tests ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests ./file_writer/tests ./scihub/tests
 
 tests-3.10:
   extends: "tests-3.9"
