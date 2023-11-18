@@ -84,21 +84,24 @@ class RPCBase:
             parent = parent.parent
         return parent
 
-    def _run_rpc_call(self, device, func_call, *args, **kwargs) -> Any:
+    def _prepare_rpc_msg(
+        self, rpc_id: str, request_id: str, device: str, func_call: str, *args, **kwargs
+    ) -> messages.ScanQueueMessage:
         """
-        Runs an RPC call on the device.
+        Prepares an RPC message.
 
         Args:
+            rpc_id (str): The RPC ID.
+            request_id (str): The request ID.
             device (str): The device name.
             func_call (str): The function call.
             *args: The function arguments.
             **kwargs: The function keyword arguments.
 
         Returns:
-            Any: The return value of the RPC call.
+            messages.ScanQueueMessage: The RPC message.
         """
-        rpc_id = str(uuid.uuid4())
-        request_id = str(uuid.uuid4())  # TODO: move this to the API server
+
         params = {
             "device": device,
             "rpc_id": rpc_id,
@@ -112,7 +115,27 @@ class RPCBase:
             queue="primary",
             metadata={"RID": request_id, "response": True},
         )
-        self.root.parent.producer.send(MessageEndpoints.scan_queue_request(), msg.dumps())
+        return msg
+
+    def _handle_rpc_response(self, msg: messages.DeviceRPCMessage) -> Any:
+        if not msg.content["success"]:
+            error = msg.content["out"]
+            if not isinstance(error, dict):
+                error = {"error": "Exception", "msg": error, "traceback": ""}
+            raise RPCError(
+                f"During an RPC, the following error occured:\n{error['error']}:"
+                f" {error['msg']}.\nTraceback: {error['traceback']}\n The scan will be aborted."
+            )
+        if msg.content.get("out"):
+            print(msg.content.get("out"))
+        return_val = msg.content.get("return_val")
+        if not isinstance(return_val, dict):
+            return return_val
+        if return_val.get("type") == "status" and return_val.get("RID"):
+            return Status(self.root.parent.producer, return_val.get("RID"))
+        return return_val
+
+    def _get_rpc_response(self, request_id, rpc_id) -> Any:
         queue = self.root.parent.parent.queue
         while queue.request_storage.find_request_by_ID(request_id) is None:
             time.sleep(0.1)
@@ -130,19 +153,38 @@ class RPCBase:
                 break
             time.sleep(0.01)
         msg = messages.DeviceRPCMessage.loads(msg)
-        if not msg.content["success"]:
-            error = msg.content["out"]
-            raise RPCError(
-                f"During an RPC, the following error occured:\n{error['error']}:"
-                f" {error['msg']}.\nTraceback: {error['traceback']}\n The scan will be aborted."
-            )
-        if msg.content.get("out"):
-            print(msg.content.get("out"))
-        return_val = msg.content.get("return_val")
-        if not isinstance(return_val, dict):
-            return return_val
-        if return_val.get("type") == "status" and return_val.get("RID"):
-            return Status(self.root.parent.producer, return_val.get("RID"))
+
+        return self._handle_rpc_response(msg)
+
+    def _run_rpc_call(self, device, func_call, *args, **kwargs) -> Any:
+        """
+        Runs an RPC call on the device. This method is used internally by the RPC decorator.
+        If a call is interrupted by the user, the a stop signal is sent to this device.
+
+        Args:
+            device (str): The device name.
+            func_call (str): The function call.
+            *args: The function arguments.
+            **kwargs: The function keyword arguments.
+
+        Returns:
+            Any: The return value of the RPC call.
+        """
+        try:
+            # prepare RPC message
+            rpc_id = str(uuid.uuid4())
+            request_id = str(uuid.uuid4())
+            msg = self._prepare_rpc_msg(rpc_id, request_id, device, func_call, *args, **kwargs)
+
+            # send RPC message
+            self.root.parent.producer.send(MessageEndpoints.scan_queue_request(), msg.dumps())
+
+            # wait for RPC response
+            return_val = self._get_rpc_response(request_id, rpc_id)
+        except KeyboardInterrupt as exc:
+            self.root.stop()
+            raise RPCError("User interruption during RPC call.") from exc
+
         return return_val
 
     def _get_rpc_func_name(self, fcn_name=None, fcn=None, use_parent=False):
@@ -330,15 +372,21 @@ class Signal(DeviceBase):
 
     @rpc
     def get(self):
-        pass
+        """
+        Gets the signal value.
+        """
 
     @rpc
     def put(self, val):
-        pass
+        """
+        Puts the signal value.
+        """
 
     @rpc
     def set(self, val):
-        pass
+        """
+        Sets the signal value.
+        """
 
     @rpc
     def value(self):
@@ -348,6 +396,7 @@ class Signal(DeviceBase):
     def limits(self):
         pass
 
+    @rpc
     def low_limit(self):
         pass
 
