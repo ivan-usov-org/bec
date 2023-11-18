@@ -486,20 +486,15 @@ class DMClient(DeviceManagerBase):
         super().__init__(parent.connector)
         self.parent = parent
 
-    def _get_device_info(self, device_name) -> messages.DeviceInfoMessage:
-        msg = messages.DeviceInfoMessage.loads(
-            self.producer.get(MessageEndpoints.device_info(device_name))
-        )
-        return msg
-
     def _load_session(self, _device_cls=None, *_args):
         time.sleep(1)
         if self._is_config_valid():
             for dev in self._session["devices"]:
+                # pylint: disable=broad-except
                 try:
                     msg = self._get_device_info(dev.get("name"))
                     self._add_device(dev, msg)
-                except Exception as exc:
+                except Exception:
                     content = traceback.format_exc()
                     logger.error(f"Failed to load device {dev}: {content}")
 
@@ -521,5 +516,6 @@ class DMClient(DeviceManagerBase):
         else:
             logger.error(f"Trying to add new device {name} of type {base_class}")
 
+        # pylint: disable=protected-access
         obj._config = dev
         self.devices._add_device(name, obj)

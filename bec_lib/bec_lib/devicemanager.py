@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import enum
 import time
+import warnings
 from typing import TYPE_CHECKING, List
 
 import msgpack
@@ -9,6 +10,7 @@ from rich.console import Console
 from rich.table import Table
 from typeguard import typechecked
 
+from bec_lib import messages
 from bec_lib.bec_errors import DeviceConfigError
 from bec_lib.config_helper import ConfigHelper
 from bec_lib.endpoints import MessageEndpoints
@@ -30,18 +32,24 @@ logger = bec_logger.logger
 
 
 class DeviceStatus(enum.Enum):
+    """Device status"""
+
     IDLE = 0
     RUNNING = 1
     BUSY = 2
 
 
 class OnFailure(str, enum.Enum):
+    """On failure behaviour for devices"""
+
     RAISE = "raise"
     BUFFER = "buffer"
     RETRY = "retry"
 
 
 class ReadoutPriority(str, enum.Enum):
+    """Readout priority for devices"""
+
     MONITORED = "monitored"
     BASELINE = "baseline"
     IGNORED = "ignored"
@@ -49,6 +57,13 @@ class ReadoutPriority(str, enum.Enum):
 
 class Status:
     def __init__(self, producer: RedisProducer, RID: str) -> None:
+        """
+        Status object for RPC calls
+
+        Args:
+            producer (RedisProducer): Redis producer
+            RID (str): Request ID
+        """
         self._producer = producer
         self._RID = RID
 
@@ -324,6 +339,9 @@ class DeviceContainer(dict):
         del self.__dict__[key]
 
     def flush(self) -> None:
+        """
+        Remove all devices from the device manager
+        """
         self.clear()
         self.__dict__.clear()
 
@@ -346,6 +364,11 @@ class DeviceContainer(dict):
         Returns:
             list: List of devices that belong to the specified device group
         """
+        warnings.warn(
+            "The method `acquisition_group` is deprecated and will be removed in the future.",
+            DeprecationWarning,
+        )
+        # pylint: disable=protected-access
         return [
             dev
             for _, dev in self.items()
@@ -362,14 +385,16 @@ class DeviceContainer(dict):
             list: List of devices that belong to the specified acquisition readoutPriority
         """
         val = ReadoutPriority(readout_priority)
+        # pylint: disable=protected-access
         return [
             dev
             for _, dev in self.items()
-            if dev._config["acquisitionConfig"]["readoutPriority"] == str(readout_priority)
+            if dev._config["acquisitionConfig"]["readoutPriority"] == val
         ]
 
     def async_devices(self) -> list:
         """get a list of all synchronous devices"""
+        # pylint: disable=protected-access
         return [
             dev for _, dev in self.items() if dev._config["acquisitionConfig"]["schedule"] != "sync"
         ]
@@ -402,7 +427,15 @@ class DeviceContainer(dict):
 
     @typechecked
     def baseline_devices(self, scan_motors: list = None, readout_priority: dict = None) -> list:
-        """get a list of all enabled baseline devices"""
+        """
+        Get a list of all enabled baseline devices
+        Args:
+            scan_motors(list): list of scan motors
+            readout_priority(dict): readout priority
+
+        Returns:
+            list: list of baseline devices
+        """
         if not readout_priority:
             readout_priority = {}
 
@@ -419,7 +452,15 @@ class DeviceContainer(dict):
         return [dev for dev in set(devices) if dev not in excluded_devices]
 
     def get_devices_with_tags(self, tags: List) -> List:
-        """get a list of all devices that have the specified tags"""
+        """
+        Get a list of all devices with the specified tags
+        Args:
+            tags (List): List of tags
+
+        Returns:
+            List: List of devices with the specified tags
+        """
+        # pylint: disable=protected-access
         if not isinstance(tags, list):
             tags = [tags]
         return [
@@ -430,6 +471,7 @@ class DeviceContainer(dict):
         """returns a list of used tags in the current config"""
         tags = set()
         for _, dev in self.items():
+            # pylint: disable=protected-access
             dev_tags = dev._config.get("deviceTags")
             if dev_tags:
                 tags.update(dev_tags)
@@ -438,6 +480,11 @@ class DeviceContainer(dict):
     @typechecked
     def detectors(self) -> list:
         """get a list of all enabled detectors"""
+        warnings.warn(
+            "The method `detectors` is deprecated and will be removed in the future.",
+            DeprecationWarning,
+        )
+
         return [dev for dev in self.enabled_devices if dev in self.acquisition_group("detector")]
 
     def wm(self, device_names: List[str]):
@@ -470,6 +517,7 @@ class DeviceContainer(dict):
         setpoints = {}
         limits = {}
         for dev in device_names:
+            # pylint: disable=protected-access
             if "limits" in dev._config.get("deviceConfig", {}):
                 limits[dev.name] = str(dev._config["deviceConfig"]["limits"])
             else:
@@ -512,7 +560,7 @@ class DeviceContainer(dict):
         Returns:
 
         """
-        self.__setattr__(name, obj)
+        self[name] = obj
 
     def describe(self) -> list:
         """
@@ -522,17 +570,35 @@ class DeviceContainer(dict):
         """
         return [dev.describe() for name, dev in self.devices.items()]
 
-    def show_all(self) -> None:
+    def show_all(self, console: Console = None) -> None:
         """print all devices"""
-        print(
-            [
-                (name, dev._config["acquisitionConfig"]["acquisitionGroup"])
-                for name, dev in self.items()
-            ]
-        )
+
+        if console is None:
+            console = Console()
+        table = Table()
+        table.add_column("Device", justify="center")
+        table.add_column("Description", justify="center")
+        table.add_column("Status", justify="center")
+        table.add_column("Set enabled", justify="center")
+        table.add_column("Device class", justify="center")
+        table.add_column("Readout priority", justify="center")
+        table.add_column("Device tags", justify="center")
+
+        # pylint: disable=protected-access
+        for dev in self.values():
+            table.add_row(
+                dev.name,
+                dev._config.get("description", dev.name),
+                "enabled" if dev.enabled else "disabled",
+                str(dev.enabled_set),
+                dev._config.get("deviceClass"),
+                dev._config["acquisitionConfig"].get("readoutPriority"),
+                str(dev._config.get("deviceTags", [])),
+            )
+        console.print(table)
 
     def __repr__(self) -> str:
-        return f"Device container."
+        return "Device container."
 
 
 class DeviceManagerBase:
@@ -579,6 +645,7 @@ class DeviceManagerBase:
             msg (DeviceConfigMessage): Config message
 
         """
+        # pylint: disable=protected-access
         action = msg.content["action"]
         config = msg.content["config"]
         if action == "update":
@@ -623,6 +690,7 @@ class DeviceManagerBase:
     def _add_action(self, config) -> None:
         for dev in config:
             obj = self._create_device(dev)
+            # pylint: disable=protected-access
             self.devices._add_device(dev.get("name"), obj)
 
     def _reload_action(self) -> None:
@@ -644,9 +712,6 @@ class DeviceManagerBase:
         Returns:
 
         """
-        # self._connector_base_consumer["log"] = self.connector.consumer(
-        #     MessageEndpoints.log(), cb=self._log_callback, parent=self
-        # )
         self._connector_base_consumer["device_config_update"] = self.connector.consumer(
             MessageEndpoints.device_config_update(),
             cb=self._device_config_update_callback,
@@ -730,7 +795,6 @@ class DeviceManagerBase:
         Returns:
 
         """
-        pass
 
     def _stop_custom_consumer(self) -> None:
         """
@@ -738,10 +802,10 @@ class DeviceManagerBase:
         Returns:
 
         """
-        pass
 
     def _create_device(self, dev: dict, *args) -> Device:
         obj = self._device_cls(dev.get("name"), *args, parent=self)
+        # pylint: disable=protected-access
         obj._config = dev
         return obj
 
@@ -757,6 +821,12 @@ class DeviceManagerBase:
             obj = self._create_device(dev, args)
             # pylint: disable=protected-access
             self.devices._add_device(dev.get("name"), obj)
+
+    def _get_device_info(self, device_name) -> messages.DeviceInfoMessage:
+        msg = messages.DeviceInfoMessage.loads(
+            self.producer.get(MessageEndpoints.device_info(device_name))
+        )
+        return msg
 
     def check_request_validity(self, msg: DeviceConfigMessage) -> None:
         """
@@ -792,11 +862,6 @@ class DeviceManagerBase:
         if not isinstance(self._config, dict):
             return False
         return True
-
-    def get_device_info(self, device_name: str, key: str):
-        raw_msg = self.producer.get(MessageEndpoints.device_info(device_name))
-        msg = DeviceInfoMessage.loads(raw_msg)
-        return msg.content["info"].get(key)
 
     def shutdown(self):
         """

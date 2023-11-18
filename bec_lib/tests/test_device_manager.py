@@ -5,6 +5,8 @@ from unittest import mock
 
 import pytest
 import yaml
+from rich.console import Console
+from rich.table import Table
 
 import bec_lib
 from bec_lib import messages
@@ -370,3 +372,41 @@ def test_device_container_wm_with_user_setpoint():
         devs.test, "read", return_value={"test": {"value": 1}, "test_user_setpoint": {"value": 1}}
     ) as read:
         devs.wm("test")
+
+
+def test_show_all():
+    # Create a mock Console object
+    console = mock.MagicMock()
+
+    # Create a DeviceContainer with some mock Devices
+    devs = DeviceContainer()
+    devs["dev1"] = Device(
+        "dev1",
+        {
+            "description": "Device 1",
+            "enabled": True,
+            "enabled_set": True,
+            "deviceClass": "Class1",
+            "acquisitionConfig": {"readoutPriority": "high"},
+            "deviceTags": ["tag1", "tag2"],
+        },
+    )
+    devs["dev2"] = Device(
+        "dev2",
+        {
+            "description": "Device 2",
+            "enabled": False,
+            "enabled_set": False,
+            "deviceClass": "Class2",
+            "acquisitionConfig": {"readoutPriority": "low"},
+            "deviceTags": ["tag3", "tag4"],
+        },
+    )
+
+    # Call show_all with the mock Console
+    devs.show_all(console)
+
+    # check that the device names were printed
+    console.print.assert_any_call("dev1")
+    # Check that Console.print was called with a Table containing the correct data
+    console.print.assert_called_once()
