@@ -1,10 +1,11 @@
+# pylint: skip-file
 import uuid
 from unittest import mock
 
 import pytest
+from bec_lib import MessageEndpoints, messages
 from utils import load_ScanServerMock
 
-from bec_lib import MessageEndpoints, messages
 from scan_server.errors import DeviceMessageError, ScanAbortion
 from scan_server.scan_assembler import ScanAssembler
 from scan_server.scan_queue import (
@@ -567,6 +568,40 @@ def test_check_for_failed_movements(device_status, devices, instr, abort):
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 3,
+                    "scanID": "scanID",
+                    "RID": "requestID",
+                },
+            ),
+        ),
+        (
+            messages.DeviceInstructionMessage(
+                device="samx",
+                action="set",
+                parameter={"value": 10, "wait_group": "scan_motor"},
+                metadata={
+                    "readout_priority": "monitored",
+                    "DIID": 3,
+                    "scanID": "scanID",
+                    "RID": "requestID",
+                },
+            ),
+            messages.DeviceInstructionMessage(
+                device=["samx"],
+                action="wait",
+                parameter={"type": "move", "wait_group": "scan_motor"},
+                metadata={
+                    "readout_priority": "monitored",
+                    "DIID": 4,
+                    "scanID": "scanID",
+                    "RID": "requestID",
+                },
+            ),
+            messages.DeviceReqStatusMessage(
+                device="samx",
+                success=True,
+                metadata={
+                    "readout_priority": "monitored",
+                    "DIID": 5,
                     "scanID": "scanID",
                     "RID": "requestID",
                 },
