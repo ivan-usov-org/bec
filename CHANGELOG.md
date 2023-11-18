@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.42.8 (2023-11-18)
+
+### Fix
+
+* Fixed ctrl c behaviour for rpc calls; closes #119 ([`9986a72`](https://gitlab.psi.ch/bec/bec/-/commit/9986a7292629668b6f398bee411bada04b535adc))
+* Added status eq dunder ([`f1327d4`](https://gitlab.psi.ch/bec/bec/-/commit/f1327d409117f91f17917d6fe30a1dae8e4cbb90))
+
 ## v0.42.7 (2023-11-18)
 
 ### Fix
