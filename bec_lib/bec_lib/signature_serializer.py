@@ -14,7 +14,10 @@ def serialize_dtype(dtype: type) -> Any:
         str: String representation of the data type
     """
     if hasattr(dtype, "__name__"):
-        return dtype.__name__
+        name = dtype.__name__
+        # changed in python 3.10. Refactor this when we upgrade
+        if name != "Literal":
+            return name
     if hasattr(dtype, "__module__"):
         if dtype.__module__ == "typing":
             return {"Literal": dtype.__args__}
