@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.42.7 (2023-11-18)
+
+### Fix
+
+* Fixed signature serializer for py >3.9 ([`6281716`](https://gitlab.psi.ch/bec/bec/-/commit/6281716b2974a7b074aa4b6ef465427f3603937e))
+* Fixed signature serializer for typing.Literal ([`5d4cd1c`](https://gitlab.psi.ch/bec/bec/-/commit/5d4cd1c1918b4f417b9ebb51e5a12b5692bd7384))
+
 ## v0.42.6 (2023-11-18)
 
 ### Fix
