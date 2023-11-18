@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 from scan_plugins.LamNIFermatScan import LamNIFermatScan
 from scan_plugins.otf_scan import OTFScan
+from scan_plugins.owis_grid import OwisGrid
 
 from bec_lib import messages as BMessage
 from bec_lib.devicemanager import DeviceContainer
@@ -1395,7 +1396,8 @@ def test_request_base_check_limits():
                     request._check_limits()
                 assert (
                     exc_info.value.args[0]
-                    == f"Target position {pos} for motor {dev} is outside of range: [{low_limit}, {high_limit}]"
+                    == f"Target position {pos} for motor {dev} is outside of range: [{low_limit},"
+                    f" {high_limit}]"
                 )
             else:
                 request._check_limits()
@@ -2415,6 +2417,58 @@ def test_otf_scan(scan_msg, reference_scan_list):
     with mock.patch.object(request.stubs, "get_req_status", return_value=1):
         scan_instructions = list(request.run())
     assert scan_instructions == reference_scan_list
+
+
+@pytest.mark.parametrize(
+    "scan_msg",
+    [
+        BMessage.ScanQueueMessage(
+            scan_type="owis_grid",
+            parameter={
+                "args": {
+                    "start_y": 0,
+                    "end_y": 1,
+                    "interval_y": 10,
+                    "start_x": 0,
+                    "end_x": 1,
+                    "interval_x": 5,
+                },
+                "kwargs": {"exp_time": 0.1, "readout_time": 3e-3},
+            },
+            queue="primary",
+            metadata={"RID": "1234"},
+        )
+    ],
+)
+def test_owis_grid(scan_msg):
+    dm = mock.MagicMock()
+    dm.devices.samy.velocity.get.return_value = 10
+    dm.devices.samy.acceleration.get.return_value = 0.2
+    dm.devices.samy.base_velocity.get.return_value = 0.0625
+    request = OwisGrid(*scan_msg.content["parameter"]["args"].values(), device_manager=dm)
+    request.high_velocity = 10
+    request.high_acc_time = 0.2
+    request.base_velocity = 0.0625
+    # pylint: disable=protected-access
+    request.stubs._get_from_rpc = lambda x: mock.MagicMock()
+    with mock.patch.object(request.stubs, "get_req_status", return_value=1):
+        scan_instructions = list(request.run())
+        assert request.pointID == scan_msg.content["parameter"]["args"]["interval_x"]
+        assert np.isclose(
+            request.target_velocity,
+            (
+                (
+                    scan_msg.content["parameter"]["args"]["end_y"]
+                    - scan_msg.content["parameter"]["args"]["start_y"]
+                )
+                / scan_msg.content["parameter"]["args"]["interval_y"]
+            )
+            / (
+                scan_msg.content["parameter"]["kwargs"]["exp_time"]
+                + scan_msg.content["parameter"]["kwargs"]["readout_time"]
+            ),
+            rtol=1e-2,
+        )
 
 
 def test_monitor_scan():

@@ -102,6 +102,20 @@ class OwisGrid(FlyScanBase):
         # Keep the shutter open for longer to allow acquisitions to fly in
         self.shutter_additional_width = 0.15
 
+        # Scan related variables
+        self.sign = 1
+        # add offset time if needed
+        self.add_pre_move_time = 0.0
+
+        self.stepping_x = None
+        self.stepping_y = None
+        self.high_velocity = None
+        self.high_acc_time = None
+        self.base_velocity = None
+        self.target_velocity = None
+        self.acc_time = None
+        self.premove_distance = None
+
     def compute_scan_params(self):
         """Compute scan parameters. This includes the velocity, acceleration and premove distance."""
 
@@ -114,10 +128,6 @@ class OwisGrid(FlyScanBase):
         yield from self.stubs.send_rpc_and_wait("samy", "velocity.get", self.high_velocity)
         yield from self.stubs.send_rpc_and_wait("samy", "acceleration.get", self.high_acc_time)
         yield from self.stubs.send_rpc_and_wait("samy", "base_velocity.get", self.base_velocity)
-        self.sign = 1
-
-        # Add offset time if needed, in s
-        self.add_pre_move_time = 0.0
 
         # Relevant parameters for scan
         self.target_velocity = self.stepping_y / (self.exp_time + self.readout_time)
@@ -172,7 +182,7 @@ class OwisGrid(FlyScanBase):
         """This is the main event loop."""
 
         # Compute scan parameters including velocity, acceleration and premove distance
-        self.compute_scan_params()
+        yield from self.compute_scan_params()
 
         # Start acquisition with 10ms delay to allow fast shutter to open
         yield from self.stubs.send_rpc_and_wait(
