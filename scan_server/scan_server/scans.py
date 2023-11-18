@@ -2,12 +2,10 @@ import ast
 import enum
 import time
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List
-from bec_lib import messages
+from typing import Any, Dict, List, Literal
 
 import numpy as np
-
-from bec_lib import DeviceManagerBase, MessageEndpoints, bec_logger
+from bec_lib import DeviceManagerBase, MessageEndpoints, bec_logger, messages
 
 from .errors import LimitError, ScanAbortion
 from .path_optimization import PathOptimizerMixin
@@ -267,7 +265,8 @@ class RequestBase(ABC):
                 pos_axis = pos[ii]
                 if not low_limit <= pos_axis <= high_limit:
                     raise LimitError(
-                        f"Target position {pos} for motor {dev} is outside of range: [{low_limit}, {high_limit}]"
+                        f"Target position {pos} for motor {dev} is outside of range: [{low_limit},"
+                        f" {high_limit}]"
                     )
 
     def _get_scan_motors(self):
@@ -354,7 +353,7 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         relative: bool = False,
         burst_at_each_point: int = 1,
         frames_per_trigger: int = 1,
-        optim_trajectory: str = None,
+        optim_trajectory: Literal["corridor", None] = None,
         monitored: list = None,
         metadata: dict = None,
         **kwargs,
@@ -815,7 +814,7 @@ class FermatSpiralScan(ScanBase):
         relative: bool = False,
         burst_at_each_point: int = 1,
         spiral_type: float = 0,
-        optim_trajectory: str = None,
+        optim_trajectory: Literal["corridor", None] = None,
         **kwargs,
     ):
         """
