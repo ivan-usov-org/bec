@@ -2,6 +2,15 @@
 
 <!--next-version-placeholder-->
 
+## v0.42.10 (2023-11-19)
+
+### Fix
+
+* Fixed rpc func name compilation ([`c576669`](https://gitlab.psi.ch/bec/bec/-/commit/c57666949582663124f8b7b02f1707f41164f35c))
+* Changes related to new read signature ([`80ee353`](https://gitlab.psi.ch/bec/bec/-/commit/80ee35371291831e5a9a3be3a7d9a09fadf710c2))
+* Fixed readback data mixin ([`a396f12`](https://gitlab.psi.ch/bec/bec/-/commit/a396f12ec434359ba8735ad466d6fbd75a74aca1))
+* Read through rpc updates the redis entries ([`52f9a4e`](https://gitlab.psi.ch/bec/bec/-/commit/52f9a4eceef70b1fb9df428ff9740eac7a45ea2f))
+
 ## v0.42.9 (2023-11-19)
 
 ### Fix
