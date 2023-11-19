@@ -2448,8 +2448,11 @@ def test_owis_grid(scan_msg):
     request.base_velocity = 0.0625
     # pylint: disable=protected-access
     request.stubs._get_from_rpc = lambda x: mock.MagicMock()
-    with mock.patch.object(request.stubs, "get_req_status", return_value=1):
+    with mock.patch.object(request.stubs, "get_req_status", return_value=1), mock.patch.object(
+        request, "get_initial_motor_properties"
+    ) as mock_get_init_motor_properties:
         scan_instructions = list(request.run())
+        mock_get_init_motor_properties.assert_called_once()
         assert request.pointID == scan_msg.content["parameter"]["args"]["interval_x"]
         assert np.isclose(
             request.target_velocity,

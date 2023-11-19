@@ -116,6 +116,11 @@ class OwisGrid(FlyScanBase):
         self.acc_time = None
         self.premove_distance = None
 
+    def get_initial_motor_properties(self):
+        self.high_velocity = yield from self.stubs.send_rpc_and_wait("samy", "velocity.get")
+        self.high_acc_time = yield from self.stubs.send_rpc_and_wait("samy", "acceleration.get")
+        self.base_velocity = yield from self.stubs.send_rpc_and_wait("samy", "base_velocity.get")
+
     def compute_scan_params(self):
         """Compute scan parameters. This includes the velocity, acceleration and premove distance."""
 
@@ -125,9 +130,7 @@ class OwisGrid(FlyScanBase):
         self.stepping_x = abs(self.start_x - self.end_x) / self.interval_x
 
         # Get current velocity, acceleration and base_velocity
-        yield from self.stubs.send_rpc_and_wait("samy", "velocity.get", self.high_velocity)
-        yield from self.stubs.send_rpc_and_wait("samy", "acceleration.get", self.high_acc_time)
-        yield from self.stubs.send_rpc_and_wait("samy", "base_velocity.get", self.base_velocity)
+        yield from self.get_initial_motor_properties()
 
         # Relevant parameters for scan
         self.target_velocity = self.stepping_y / (self.exp_time + self.readout_time)
