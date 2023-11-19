@@ -92,6 +92,78 @@ class ClientMock(BECClient):
 class DMClientMock(DMClient):
     def _get_device_info(self, device_name) -> messages.DeviceInfoMessage:
         device_info = {
+            "samx": messages.DeviceInfoMessage(
+                device="samx",
+                info={
+                    "device_info": {
+                        "device_base_class": "positioner",
+                        "signals": [
+                            "readback",
+                            "setpoint",
+                            "motor_is_moving",
+                            "velocity",
+                            "acceleration",
+                            "high_limit_travel",
+                            "low_limit_travel",
+                            "unused",
+                        ],
+                        "hints": {"fields": ["samx"]},
+                        "describe": {
+                            "samx": {
+                                "source": "SIM:samx",
+                                "dtype": "integer",
+                                "shape": [],
+                                "precision": 3,
+                            },
+                            "samx_setpoint": {
+                                "source": "SIM:samx_setpoint",
+                                "dtype": "integer",
+                                "shape": [],
+                                "precision": 3,
+                            },
+                            "samx_motor_is_moving": {
+                                "source": "SIM:samx_motor_is_moving",
+                                "dtype": "integer",
+                                "shape": [],
+                                "precision": 3,
+                            },
+                        },
+                        "describe_configuration": {
+                            "samx_velocity": {
+                                "source": "SIM:samx_velocity",
+                                "dtype": "integer",
+                                "shape": [],
+                            },
+                            "samx_acceleration": {
+                                "source": "SIM:samx_acceleration",
+                                "dtype": "integer",
+                                "shape": [],
+                            },
+                        },
+                        "sub_devices": [],
+                        "custom_user_access": {
+                            "dummy_controller": {
+                                "_func_with_args": {"type": "func", "doc": None},
+                                "_func_with_args_and_kwargs": {"type": "func", "doc": None},
+                                "_func_with_kwargs": {"type": "func", "doc": None},
+                                "_func_without_args_kwargs": {"type": "func", "doc": None},
+                                "controller_show_all": {
+                                    "type": "func",
+                                    "doc": (
+                                        "dummy controller show all\n\n        Raises:\n           "
+                                        " in: _description_\n            LimitError:"
+                                        " _description_\n\n        Returns:\n            _type_:"
+                                        " _description_\n        "
+                                    ),
+                                },
+                                "some_var": {"type": "int"},
+                            },
+                            "sim_state": {"type": "dict"},
+                            "speed": {"type": "int"},
+                        },
+                    }
+                },
+            ),
             "dyn_signals": messages.DeviceInfoMessage(
                 device="dyn_signals",
                 info={
@@ -188,7 +260,7 @@ class DMClientMock(DMClient):
                         "custom_user_access": {},
                     }
                 },
-            )
+            ),
         }
         if device_name in device_info:
             return device_info[device_name]

@@ -137,10 +137,10 @@ class RPCBase:
     def _get_rpc_response(self, request_id, rpc_id) -> Any:
         queue = self.root.parent.parent.queue
         while queue.request_storage.find_request_by_ID(request_id) is None:
-            time.sleep(0.1)
+            time.sleep(0.01)
         scan_queue_request = queue.request_storage.find_request_by_ID(request_id)
         while scan_queue_request.decision_pending:
-            time.sleep(0.1)
+            time.sleep(0.01)
         if not all(scan_queue_request.accepted):
             raise ScanRequestError(
                 "Function call was rejected by the server:"
@@ -186,10 +186,13 @@ class RPCBase:
 
         return return_val
 
-    def _get_rpc_func_name(self, fcn_name=None, fcn=None, use_parent=False):
-        if not fcn_name:
-            fcn_name = fcn.__name__
-        full_func_call = ".".join([self._compile_function_path(use_parent=use_parent), fcn_name])
+    def _get_rpc_func_name(self, fcn=None, use_parent=False):
+        func_call = [self._compile_function_path(use_parent=use_parent)]
+
+        if fcn:
+            func_call.append(fcn.__name__)
+
+        full_func_call = ".".join(func_call)
         device = full_func_call.split(".", maxsplit=1)[0]
         func_call = ".".join(full_func_call.split(".")[1:])
         return (device, func_call)
