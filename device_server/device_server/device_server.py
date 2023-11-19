@@ -164,7 +164,7 @@ class DeviceServer(RPCMixin, BECService):
             elif action == "read":
                 self._read_device(instructions)
             elif action == "rpc":
-                self._run_rpc(instructions)
+                self.run_rpc(instructions)
             elif action == "kickoff":
                 self._kickoff_device(instructions)
             elif action == "complete":

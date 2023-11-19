@@ -14,6 +14,29 @@ logger = bec_logger.logger
 class RPCMixin:
     """Mixin for handling RPC calls"""
 
+    def run_rpc(self, instr: messages.DeviceInstructionMessage) -> None:
+        """
+        Run RPC call and send result to client. RPC calls also capture stdout and
+        stderr and send it to the client.
+
+        Args:
+            instr: DeviceInstructionMessage
+
+        """
+        result = StringIO()
+        with redirect_stdout(result):
+            try:
+                instr_params = instr.content.get("parameter")
+                device = instr.content["device"]
+                self._assert_device_is_enabled(instr)
+                res = self._process_rpc_instruction(instr)
+                # send result to client
+                self._send_rpc_result_to_client(device, instr_params, res, result)
+                logger.trace(res)
+            except Exception as exc:  # pylint: disable=broad-except
+                # send error to client
+                self._send_rpc_exception(exc, instr)
+
     def _get_result_from_rpc(self, rpc_var: Any, instr_params: dict) -> Any:
         if callable(rpc_var):
             args = tuple(instr_params.get("args", ()))
@@ -44,23 +67,9 @@ class RPCMixin:
             )
         return res
 
-    def _run_rpc(self, instr: messages.DeviceInstructionMessage) -> None:
-        result = StringIO()
-        with redirect_stdout(result):
-            try:
-                instr_params = instr.content.get("parameter")
-                self._assert_device_is_enabled(instr)
-                res = self._process_rpc_instruction(instr, instr_params)
-                # send result to client
-                self._send_rpc_result_to_client(instr, instr_params, res, result)
-                logger.trace(res)
-            except Exception as exc:  # pylint: disable=broad-except
-                # send error to client
-                self._send_rpc_exception(exc, instr)
-
     def _send_rpc_result_to_client(
         self,
-        instr: messages.DeviceInstructionMessage,
+        device: str,
         instr_params: dict,
         res: Any,
         result: StringIO,
@@ -68,7 +77,7 @@ class RPCMixin:
         self.producer.set(
             MessageEndpoints.device_rpc(instr_params.get("rpc_id")),
             messages.DeviceRPCMessage(
-                device=instr.content["device"],
+                device=device,
                 return_val=res,
                 out=result.getvalue(),
                 success=True,
@@ -76,32 +85,35 @@ class RPCMixin:
             expire=1800,
         )
 
-    def _process_rpc_instruction(
-        self, instr: messages.DeviceInstructionMessage, instr_params: dict
-    ) -> Any:
+    def _process_rpc_instruction(self, instr: messages.DeviceInstructionMessage) -> Any:
+        # handle ophyd read. This is a special case because we also want to update the
+        # buffered value in redis
+        instr_params = instr.content.get("parameter")
         if instr_params.get("func") == "read" or instr_params.get("func").endswith(".read"):
             res = self._read_and_update_devices([instr.content["device"]], instr.metadata)
             if isinstance(res, list) and len(res) == 1:
                 res = res[0]
-        else:
-            rpc_var = rgetattr(
-                self.device_manager.devices[instr.content["device"]].obj,
-                instr_params.get("func"),
-            )
-            res = self._get_result_from_rpc(rpc_var, instr_params)
-            if isinstance(res, ophyd.StatusBase):
-                res.__dict__["instruction"] = instr
-                res.add_callback(self._status_callback)
-                res = {
-                    "type": "status",
-                    "RID": instr.metadata.get("RID"),
-                    "success": res.success,
-                    "timeout": res.timeout,
-                    "done": res.done,
-                    "settle_time": res.settle_time,
-                }
-            elif isinstance(res, list) and isinstance(res[0], ophyd.Staged):
-                res = [str(stage) for stage in res]
+            return res
+
+        # handle other ophyd methods
+        rpc_var = rgetattr(
+            self.device_manager.devices[instr.content["device"]].obj,
+            instr_params.get("func"),
+        )
+        res = self._get_result_from_rpc(rpc_var, instr_params)
+        if isinstance(res, ophyd.StatusBase):
+            res.__dict__["instruction"] = instr
+            res.add_callback(self._status_callback)
+            res = {
+                "type": "status",
+                "RID": instr.metadata.get("RID"),
+                "success": res.success,
+                "timeout": res.timeout,
+                "done": res.done,
+                "settle_time": res.settle_time,
+            }
+        elif isinstance(res, list) and isinstance(res[0], ophyd.Staged):
+            res = [str(stage) for stage in res]
         return res
 
     def _send_rpc_exception(self, exc: Exception, instr: messages.DeviceInstructionMessage):
