@@ -284,7 +284,7 @@ class OwisGrid(FlyScanBase):
                 value=(self.end_y + (self.sign * self.premove_distance)),
                 wait_group="flyer",
             )
-            # Trigger fash shutter, open them right away
+            # Trigger fast shutter, open them right away
             yield from self.stubs.send_rpc_and_wait("ddg_fsh", "trigger")
 
             time.sleep(self.acc_time)
