@@ -2442,9 +2442,6 @@ def test_otf_scan(scan_msg, reference_scan_list):
 )
 def test_owis_grid(scan_msg):
     dm = mock.MagicMock()
-    dm.devices.samy.velocity.get.return_value = 10
-    dm.devices.samy.acceleration.get.return_value = 0.2
-    dm.devices.samy.base_velocity.get.return_value = 0.0625
     request = OwisGrid(*scan_msg.content["parameter"]["args"].values(), device_manager=dm)
     request.high_velocity = 10
     request.high_acc_time = 0.2
