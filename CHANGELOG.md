@@ -2,6 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## v0.42.9 (2023-11-19)
+
+### Fix
+
+* Clean up  __init__ ([`ab9a5e3`](https://gitlab.psi.ch/bec/bec/-/commit/ab9a5e3fa516dbb599400f2cf796169af98ec5e2))
+
+### Documentation
+
+* Fix typo ([`77f4072`](https://gitlab.psi.ch/bec/bec/-/commit/77f407233421bd4838e8d22f53b3342cd67e47e1))
+* Add module docstring ([`81d40a2`](https://gitlab.psi.ch/bec/bec/-/commit/81d40a233148a34ab7fa71c16afc7ab361632e36))
+
 ## v0.42.8 (2023-11-18)
 
 ### Fix
