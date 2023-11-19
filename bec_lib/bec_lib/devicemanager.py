@@ -494,7 +494,7 @@ class DeviceContainer(dict):
         table.add_column("readback", justify="center")
         table.add_column("setpoint", justify="center")
         table.add_column("limits", justify="center")
-        dev_read = {dev.name: dev.read(cached=True, filter_signal=False) for dev in device_names}
+        dev_read = {dev.name: dev.read(cached=True) for dev in device_names}
         readbacks = {}
         setpoints = {}
         limits = {}

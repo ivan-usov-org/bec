@@ -306,13 +306,14 @@ class DeviceBase(RPCBase, Device):
         Stops the device.
         """
 
-    def read(self, cached=True, use_readback=True):
+    def read(self, cached=True, use_readback=True, filter_to_hints=False):
         """
         Reads the device.
 
         Args:
             cached (bool, optional): If True, the cached value is returned. Defaults to True.
             use_readback (bool, optional): If True, the readback value is returned, otherwise the read value. Defaults to True.
+            filter_to_hints (bool, optional): If True, the readback value is filtered to the hinted values. Defaults to False.
 
         Returns:
             dict: The device signals.
@@ -327,6 +328,8 @@ class DeviceBase(RPCBase, Device):
         if not val:
             return None
         signals = messages.DeviceMessage.loads(val).content["signals"]
+        if filter_to_hints:
+            signals = {key: val for key, val in signals.items() if key in self._hints}
         return signals
 
     @rpc

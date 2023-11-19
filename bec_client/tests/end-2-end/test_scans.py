@@ -4,14 +4,20 @@ import time
 
 import numpy as np
 import pytest
+from bec_lib import (
+    BECClient,
+    MessageEndpoints,
+    RedisConnector,
+    ServiceConfig,
+    bec_logger,
+    messages,
+)
+from bec_lib.alarm_handler import AlarmBase
+from bec_lib.bec_errors import ScanAbortion, ScanInterruption
+from bec_lib.tests.utils import wait_for_empty_queue
 
 from bec_client import BECIPythonClient
 from bec_client.callbacks.utils import ScanRequestError
-from bec_lib import BECClient, messages
-from bec_lib.alarm_handler import AlarmBase
-from bec_lib import MessageEndpoints, RedisConnector, ServiceConfig, bec_logger
-from bec_lib.bec_errors import ScanAbortion, ScanInterruption
-from bec_lib.tests.utils import wait_for_empty_queue
 
 logger = bec_logger.logger
 
@@ -102,8 +108,8 @@ def test_mv_scan(capsys, client):
     bec.metadata.update({"unit_test": "test_mv_scan"})
     dev = bec.device_manager.devices
     scans.mv(dev.samx, 10, dev.samy, 20, relative=False).wait()
-    current_pos_samx = dev.samx.read(cached=True)["value"]
-    current_pos_samy = dev.samy.read(cached=True)["value"]
+    current_pos_samx = dev.samx.read(cached=True)["samx"]["value"]
+    current_pos_samy = dev.samy.read(cached=True)["samy"]["value"]
     assert np.isclose(
         current_pos_samx, 10, atol=dev.samx._config["deviceConfig"].get("tolerance", 0.05)
     )
@@ -111,8 +117,8 @@ def test_mv_scan(capsys, client):
         current_pos_samy, 20, atol=dev.samy._config["deviceConfig"].get("tolerance", 0.05)
     )
     scans.umv(dev.samx, 10, dev.samy, 20, relative=False)
-    current_pos_samx = dev.samx.read(cached=True)["value"]
-    current_pos_samy = dev.samy.read(cached=True)["value"]
+    current_pos_samx = dev.samx.read(cached=True)["samx"]["value"]
+    current_pos_samy = dev.samy.read(cached=True)["samy"]["value"]
     captured = capsys.readouterr()
     ref_out_samx = f" ━━━━━━━━━━━━━━━ {current_pos_samx:10.2f} /      10.00 / 100 % 0:00:00 0:00:00"
     ref_out_samy = f" ━━━━━━━━━━━━━━━ {current_pos_samy:10.2f} /      20.00 / 100 % 0:00:00 0:00:00"
@@ -489,7 +495,7 @@ def test_scan_def_callback(capsys, client):
     with scans.scan_def:
         scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=False)
         scans.umv(dev.samy, 5, relative=False)
-        current_pos_samy = dev.samy.read(cached=True)["value"]
+        current_pos_samy = dev.samy.read(cached=True)["samy"]["value"]
         captured = capsys.readouterr()
         assert f"Starting scan {scan_number}" in captured.out
         ref_out_samy = (
