@@ -1,16 +1,15 @@
 import traceback
 from unittest import mock
 from unittest.mock import ANY
-from bec_lib import messages
 
 import pytest
+from bec_lib import Alarms, MessageEndpoints, ServiceConfig, messages
+from bec_lib.messages import BECStatus
+from bec_lib.tests.utils import ConnectorMock, ConsumerMock
 from ophyd import Staged
 from ophyd.utils import errors as ophyd_errors
 from test_device_manager_ds import device_manager, load_device_manager
 
-from bec_lib import Alarms, MessageEndpoints, ServiceConfig
-from bec_lib.messages import BECStatus
-from bec_lib.tests.utils import ConnectorMock, ConsumerMock
 from device_server import DeviceServer
 from device_server.device_server import InvalidDeviceError
 
@@ -349,7 +348,7 @@ def test_handle_device_instructions_rpc(device_server_mock, instr):
             with mock.patch.object(
                 device_server, "_update_device_metadata"
             ) as update_device_metadata_mock:
-                with mock.patch.object(device_server, "_run_rpc") as rpc_mock:
+                with mock.patch.object(device_server, "run_rpc") as rpc_mock:
                     device_server.handle_device_instructions(msg)
                     rpc_mock.assert_called_once_with(instructions)
 
