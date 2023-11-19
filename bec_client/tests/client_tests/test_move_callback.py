@@ -2,10 +2,19 @@ import collections
 from unittest import mock
 
 import pytest
-
-from bec_client.callbacks.move_device import LiveUpdatesReadbackProgressbar, ReadbackDataMixin
-from bec_lib import messages
+from bec_lib import MessageEndpoints, messages
 from bec_lib.tests.utils import bec_client
+
+from bec_client.callbacks.move_device import (
+    LiveUpdatesReadbackProgressbar,
+    ReadbackDataMixin,
+)
+
+
+@pytest.fixture
+def readback_data_mixin(bec_client):
+    with mock.patch.object(bec_client.device_manager, "producer"):
+        yield ReadbackDataMixin(bec_client.device_manager, ["samx", "samy"])
 
 
 @pytest.mark.asyncio
@@ -90,3 +99,72 @@ async def test_move_callback_with_report_instruction(bec_client):
                         await LiveUpdatesReadbackProgressbar(
                             bec=client, report_instruction=report_instruction, request=request
                         ).run()
+
+
+def test_readback_data_mixin(readback_data_mixin):
+    readback_data_mixin.device_manager.producer.get.side_effect = [
+        messages.DeviceMessage(
+            signals={"samx": {"value": 10}, "samx_setpoint": {"value": 20}},
+            metadata={"device": "samx"},
+        ).dumps(),
+        messages.DeviceMessage(
+            signals={"samy": {"value": 10}, "samy_setpoint": {"value": 20}},
+            metadata={"device": "samy"},
+        ).dumps(),
+    ]
+    res = readback_data_mixin.get_device_values()
+    assert res == [10, 10]
+
+
+def test_readback_data_mixin_multiple_hints(readback_data_mixin):
+    readback_data_mixin.device_manager.devices.samx._info["hints"]["fields"] = [
+        "samx_setpoint",
+        "samx",
+    ]
+    readback_data_mixin.device_manager.producer.get.side_effect = [
+        messages.DeviceMessage(
+            signals={"samx": {"value": 10}, "samx_setpoint": {"value": 20}},
+            metadata={"device": "samx"},
+        ).dumps(),
+        messages.DeviceMessage(
+            signals={"samy": {"value": 10}, "samy_setpoint": {"value": 20}},
+            metadata={"device": "samy"},
+        ).dumps(),
+    ]
+    res = readback_data_mixin.get_device_values()
+    assert res == [20, 10]
+
+
+def test_readback_data_mixin_multiple_no_hints(readback_data_mixin):
+    readback_data_mixin.device_manager.devices.samx._info["hints"]["fields"] = []
+    readback_data_mixin.device_manager.producer.get.side_effect = [
+        messages.DeviceMessage(
+            signals={"samx": {"value": 10}, "samx_setpoint": {"value": 20}},
+            metadata={"device": "samx"},
+        ).dumps(),
+        messages.DeviceMessage(
+            signals={"samy": {"value": 10}, "samy_setpoint": {"value": 20}},
+            metadata={"device": "samy"},
+        ).dumps(),
+    ]
+    res = readback_data_mixin.get_device_values()
+    assert res == [10, 10]
+
+
+def test_get_request_done_msgs(readback_data_mixin):
+    res = readback_data_mixin.get_request_done_msgs()
+    readback_data_mixin.device_manager.producer.pipeline.assert_called_once()
+    assert (
+        mock.call(
+            MessageEndpoints.device_req_status("samx"),
+            readback_data_mixin.device_manager.producer.pipeline.return_value,
+        )
+        in readback_data_mixin.device_manager.producer.get.call_args_list
+    )
+    assert (
+        mock.call(
+            MessageEndpoints.device_req_status("samy"),
+            readback_data_mixin.device_manager.producer.pipeline.return_value,
+        )
+        in readback_data_mixin.device_manager.producer.get.call_args_list
+    )

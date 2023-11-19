@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Callable, List
-from bec_lib import messages
 
 import numpy as np
+from bec_lib import DeviceManagerBase, MessageEndpoints, messages
 
 from bec_client.progressbar import DeviceProgressBar
-from bec_lib import DeviceManagerBase, MessageEndpoints
 
 from .utils import LiveUpdatesBase, check_alarms
 
@@ -21,10 +20,20 @@ class ReadbackDataMixin:
 
     def get_device_values(self):
         """get the current device values"""
-        return [
-            self.device_manager.devices[dev].read(cached=True, use_readback=True).get("value")
-            for dev in self.devices
-        ]
+        values = []
+        for dev in self.devices:
+            val = self.device_manager.devices[dev].read(cached=True)
+            if not val:
+                values.append(np.nan)
+                continue
+            # pylint: disable=protected-access
+            hints = self.device_manager.devices[dev]._hints
+            # if we have hints, use them to get the value, otherwise just use the first value
+            if hints:
+                values.append(val.get(hints[0]).get("value"))
+            else:
+                values.append(val.get(list(val.keys())[0]).get("value"))
+        return values
 
     def get_request_done_msgs(self):
         """get all request-done messages"""
