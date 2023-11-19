@@ -407,6 +407,8 @@ def test_show_all():
     devs.show_all(console)
 
     # check that the device names were printed
-    console.print.assert_any_call("dev1")
+    table = console.print.call_args[0][0]
+    assert len(table.rows) == 2
+    assert list(table.columns[0].cells) == ["dev1", "dev2"]
     # Check that Console.print was called with a Table containing the correct data
     console.print.assert_called_once()
