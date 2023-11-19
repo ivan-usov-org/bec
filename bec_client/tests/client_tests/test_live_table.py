@@ -3,12 +3,12 @@ import time
 from unittest import mock
 
 import pytest
+from bec_lib import messages
+from bec_lib.scan_items import ScanItem
+from bec_lib.tests.utils import bec_client
 
 from bec_client.callbacks.live_table import LiveUpdatesTable, sort_devices
 from bec_client.callbacks.utils import ScanRequestMixin
-from bec_lib import messages
-from bec_lib.tests.utils import bec_client
-from bec_lib.scan_items import ScanItem
 
 
 @pytest.mark.timeout(20)
@@ -171,6 +171,7 @@ def test_print_table_data_hinted_value(bec_client):
     client.queue.request_storage.update_with_response(response_msg)
     live_update = LiveUpdatesTable(client, {"table_wait": 10}, request_msg)
     client.device_manager.devices["samx"]._info["hints"] = {"fields": ["samx_hint"]}
+    client.device_manager.devices["samx"].precision = 3
     live_update.point_data = messages.ScanMessage(
         point_id=0,
         scanID="",
@@ -182,4 +183,35 @@ def test_print_table_data_hinted_value(bec_client):
     with mock.patch.object(live_update, "table") as mocked_table:
         live_update.dev_values = (len(live_update._get_header()) - 1) * [0]
         live_update.print_table_data()
-        mocked_table.get_row.assert_called_with("0", "0.00")
+        mocked_table.get_row.assert_called_with("0", "0.000")
+
+
+def test_print_table_data_hinted_value_with_precision(bec_client):
+    client = bec_client
+    client.start()
+    request_msg = messages.ScanQueueMessage(
+        scan_type="grid_scan",
+        parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
+        queue="primary",
+        metadata={"RID": "something"},
+    )
+    response_msg = messages.RequestResponseMessage(
+        accepted=True, message="", metadata={"RID": "something"}
+    )
+    client.queue.request_storage.update_with_request(request_msg)
+    client.queue.request_storage.update_with_response(response_msg)
+    live_update = LiveUpdatesTable(client, {"table_wait": 10}, request_msg)
+    client.device_manager.devices["samx"]._info["hints"] = {"fields": ["samx_hint"]}
+    client.device_manager.devices["samx"].precision = 2
+    live_update.point_data = messages.ScanMessage(
+        point_id=0,
+        scanID="",
+        data={"samx": {"samx_hint": {"value": 0}}},
+        metadata={"scan_report_devices": ["samx"], "scan_type": "fly"},
+    )
+    live_update.scan_item = ScanItemMock(data=[live_update.point_data])
+
+    with mock.patch.object(live_update, "table") as mocked_table:
+        live_update.dev_values = (len(live_update._get_header()) - 1) * [0]
+        live_update.print_table_data()
+        mocked_table.get_row.assert_called_with("0", f"{0:.2f}")
