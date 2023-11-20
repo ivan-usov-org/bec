@@ -11,9 +11,6 @@ from .errors import LimitError, ScanAbortion
 from .path_optimization import PathOptimizerMixin
 from .scan_stubs import ScanStubs
 
-DeviceMsg = messages.DeviceInstructionMessage
-ScanMsg = messages.ScanQueueMessage
-
 logger = bec_logger.logger
 
 

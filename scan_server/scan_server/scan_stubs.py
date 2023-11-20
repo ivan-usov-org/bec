@@ -9,7 +9,6 @@ from bec_lib import MessageEndpoints, ProducerConnector, Status, bec_logger
 
 from .errors import DeviceMessageError, ScanAbortion
 
-DeviceMsg = messages.DeviceInstructionMessage
 logger = bec_logger.logger
 
 
@@ -28,7 +27,7 @@ class ScanStubs:
 
     def _device_msg(self, **kwargs):
         """"""
-        msg = DeviceMsg(**kwargs)
+        msg = messages.DeviceInstructionMessage(**kwargs)
         msg.metadata = {**self.device_msg_metadata(), **msg.metadata}
         return msg
 

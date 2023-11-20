@@ -16,7 +16,7 @@ from scan_server.scan_queue import (
     RequestBlockQueue,
     ScanQueue,
 )
-from scan_server.scan_worker import DeviceMsg, ScanWorker
+from scan_server.scan_worker import ScanWorker
 
 
 def get_scan_worker() -> ScanWorker:
@@ -1231,7 +1231,7 @@ def test_stage_device(msg):
                 assert (
                     mock.call(
                         MessageEndpoints.device_instructions(),
-                        DeviceMsg(
+                        messages.DeviceInstructionMessage(
                             device=detector,
                             action="stage",
                             parameter=msg.content["parameter"],
@@ -1243,7 +1243,7 @@ def test_stage_device(msg):
             assert (
                 mock.call(
                     MessageEndpoints.device_instructions(),
-                    DeviceMsg(
+                    messages.DeviceInstructionMessage(
                         device=devices,
                         action="stage",
                         parameter=msg.content["parameter"],
@@ -1300,7 +1300,7 @@ def test_unstage_device(msg, devices, parameter, metadata, cleanup):
 
             send_mock.assert_called_once_with(
                 MessageEndpoints.device_instructions(),
-                DeviceMsg(
+                messages.DeviceInstructionMessage(
                     device=devices,
                     action="unstage",
                     parameter=parameter,
