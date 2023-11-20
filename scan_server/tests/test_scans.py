@@ -8,7 +8,7 @@ from scan_plugins.LamNIFermatScan import LamNIFermatScan
 from scan_plugins.otf_scan import OTFScan
 from scan_plugins.owis_grid import OwisGrid
 
-from bec_lib import messages as BMessage
+from bec_lib import messages
 from bec_lib.devicemanager import DeviceContainer
 from bec_lib.tests.utils import ProducerMock
 from scan_server.errors import ScanAbortion
@@ -103,19 +103,19 @@ def test_unpack_scan_args_valid_input():
     "mv_msg,reference_msg_list",
     [
         (
-            BMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="mv",
                 parameter={"args": {"samx": (1,), "samy": (2,)}, "kwargs": {}},
                 queue="primary",
             ),
             [
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={"value": 1, "wait_group": "scan_motor"},
                     metadata={"readout_priority": "monitored", "DIID": 0, "response": True},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="samy",
                     action="set",
                     parameter={"value": 2, "wait_group": "scan_motor"},
@@ -124,7 +124,7 @@ def test_unpack_scan_args_valid_input():
             ],
         ),
         (
-            BMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="mv",
                 parameter={
                     "args": {"samx": (1,), "samy": (2,), "samz": (3,)},
@@ -133,19 +133,19 @@ def test_unpack_scan_args_valid_input():
                 queue="primary",
             ),
             [
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={"value": 1, "wait_group": "scan_motor"},
                     metadata={"readout_priority": "monitored", "DIID": 0, "response": True},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="samy",
                     action="set",
                     parameter={"value": 2, "wait_group": "scan_motor"},
                     metadata={"readout_priority": "monitored", "DIID": 1, "response": True},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="samz",
                     action="set",
                     parameter={"value": 3, "wait_group": "scan_motor"},
@@ -154,13 +154,13 @@ def test_unpack_scan_args_valid_input():
             ],
         ),
         (
-            BMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="mv",
                 parameter={"args": {"samx": (1,)}, "kwargs": {}},
                 queue="primary",
             ),
             [
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={"value": 1, "wait_group": "scan_motor"},
@@ -193,14 +193,14 @@ def test_scan_move(mv_msg, reference_msg_list):
     "mv_msg,reference_msg_list",
     [
         (
-            BMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="umv",
                 parameter={"args": {"samx": (1,), "samy": (2,)}, "kwargs": {}},
                 queue="primary",
                 metadata={"RID": "0bab7ee3-b384-4571-b...0fff984c05"},
             ),
             [
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="scan_report_instruction",
                     parameter={
@@ -217,7 +217,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                         "RID": "0bab7ee3-b384-4571-b...0fff984c05",
                     },
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={"value": 1.0, "wait_group": "scan_motor"},
@@ -227,7 +227,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                         "RID": "0bab7ee3-b384-4571-b...0fff984c05",
                     },
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="samy",
                     action="set",
                     parameter={"value": 2.0, "wait_group": "scan_motor"},
@@ -237,7 +237,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                         "RID": "0bab7ee3-b384-4571-b...0fff984c05",
                     },
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="samx",
                     action="wait",
                     parameter={"type": "move", "wait_group": "scan_motor"},
@@ -247,7 +247,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                         "RID": "0bab7ee3-b384-4571-b...0fff984c05",
                     },
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="samy",
                     action="wait",
                     parameter={"type": "move", "wait_group": "scan_motor"},
@@ -260,7 +260,7 @@ def test_scan_move(mv_msg, reference_msg_list):
             ],
         ),
         (
-            BMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="umv",
                 parameter={
                     "args": {"samx": (1,), "samy": (2,), "samz": (3,)},
@@ -270,7 +270,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                 metadata={"RID": "0bab7ee3-b384-4571-b...0fff984c05"},
             ),
             [
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="scan_report_instruction",
                     parameter={
@@ -287,7 +287,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                         "RID": "0bab7ee3-b384-4571-b...0fff984c05",
                     },
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={"value": 1.0, "wait_group": "scan_motor"},
@@ -297,7 +297,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                         "RID": "0bab7ee3-b384-4571-b...0fff984c05",
                     },
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="samy",
                     action="set",
                     parameter={"value": 2.0, "wait_group": "scan_motor"},
@@ -307,7 +307,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                         "RID": "0bab7ee3-b384-4571-b...0fff984c05",
                     },
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="samz",
                     action="set",
                     parameter={"value": 3.0, "wait_group": "scan_motor"},
@@ -317,7 +317,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                         "RID": "0bab7ee3-b384-4571-b...0fff984c05",
                     },
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="samx",
                     action="wait",
                     parameter={"type": "move", "wait_group": "scan_motor"},
@@ -327,7 +327,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                         "RID": "0bab7ee3-b384-4571-b...0fff984c05",
                     },
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="samy",
                     action="wait",
                     parameter={"type": "move", "wait_group": "scan_motor"},
@@ -337,7 +337,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                         "RID": "0bab7ee3-b384-4571-b...0fff984c05",
                     },
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="samz",
                     action="wait",
                     parameter={"type": "move", "wait_group": "scan_motor"},
@@ -350,14 +350,14 @@ def test_scan_move(mv_msg, reference_msg_list):
             ],
         ),
         (
-            BMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="umv",
                 parameter={"args": {"samx": (1,)}, "kwargs": {}},
                 queue="primary",
                 metadata={"RID": "0bab7ee3-b384-4571-b...0fff984c05"},
             ),
             [
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="scan_report_instruction",
                     parameter={
@@ -374,7 +374,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                         "RID": "0bab7ee3-b384-4571-b...0fff984c05",
                     },
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={"value": 1.0, "wait_group": "scan_motor"},
@@ -384,7 +384,7 @@ def test_scan_move(mv_msg, reference_msg_list):
                         "RID": "0bab7ee3-b384-4571-b...0fff984c05",
                     },
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="samx",
                     action="wait",
                     parameter={"type": "move", "wait_group": "scan_motor"},
@@ -425,13 +425,13 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
     "scan_msg,reference_scan_list",
     [
         (
-            BMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="grid_scan",
                 parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
                 queue="primary",
             ),
             [
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=["samx"],
                     action="read",
                     parameter={
@@ -439,7 +439,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 3},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=["samx"],
                     action="wait",
                     parameter={
@@ -448,7 +448,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 4},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="open_scan",
                     parameter={
@@ -461,19 +461,19 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 0},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="stage",
                     parameter={},
                     metadata={"readout_priority": "monitored", "DIID": 1},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="baseline_reading",
                     parameter={},
                     metadata={"readout_priority": "baseline", "DIID": 1},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     **{
                         "device": "samx",
                         "action": "set",
@@ -481,7 +481,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 8},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     **{
                         "device": None,
                         "action": "wait",
@@ -493,11 +493,11 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 9},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     **{"device": None, "action": "pre_scan", "parameter": {}},
                     metadata={"readout_priority": "monitored", "DIID": 7},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={
@@ -506,7 +506,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 1},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={
@@ -516,19 +516,19 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 2},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
                     metadata={"pointID": 0, "readout_priority": "monitored", "DIID": 3},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "trigger", "group": "trigger", "time": 0},
                     metadata={"readout_priority": "monitored", "DIID": 4},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={
@@ -537,7 +537,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     },
                     metadata={"pointID": 0, "readout_priority": "monitored", "DIID": 5},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={
@@ -547,7 +547,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 6},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={
@@ -556,7 +556,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 7},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={
@@ -566,7 +566,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 8},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={
@@ -576,19 +576,19 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 9},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
                     metadata={"pointID": 1, "readout_priority": "monitored", "DIID": 10},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "trigger", "group": "trigger", "time": 0},
                     metadata={"readout_priority": "monitored", "DIID": 11},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={
@@ -597,7 +597,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     },
                     metadata={"pointID": 1, "readout_priority": "monitored", "DIID": 12},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={
@@ -607,7 +607,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 13},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={
@@ -616,7 +616,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 14},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={
@@ -626,7 +626,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 15},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={
@@ -636,13 +636,13 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 16},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
                     metadata={"pointID": 2, "readout_priority": "monitored", "DIID": 17},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={
@@ -652,7 +652,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 18},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={
@@ -661,7 +661,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     },
                     metadata={"pointID": 2, "readout_priority": "monitored", "DIID": 19},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={
@@ -671,7 +671,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 20},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={
@@ -680,7 +680,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 21},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={
@@ -690,7 +690,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 22},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={
@@ -700,17 +700,17 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 23},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     **{"device": None, "action": "complete", "parameter": {}},
                     metadata={"readout_priority": "monitored", "DIID": 31},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="unstage",
                     parameter={},
                     metadata={"readout_priority": "monitored", "DIID": 24},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="close_scan",
                     parameter={},
@@ -746,7 +746,7 @@ def test_scan_scan(scan_msg, reference_scan_list):
     "scan_msg,reference_scan_list",
     [
         (
-            BMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="fermat_scan",
                 parameter={
                     "args": {"samx": (-5, 5), "samy": (-5, 5)},
@@ -768,7 +768,7 @@ def test_scan_scan(scan_msg, reference_scan_list):
             ],
         ),
         (
-            BMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="fermat_scan",
                 parameter={
                     "args": {"samx": (-5, 5), "samy": (-5, 5)},
@@ -819,13 +819,13 @@ def test_fermat_scan(scan_msg, reference_scan_list):
     "scan_msg,reference_scan_list",
     [
         (
-            BMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="cont_line_scan",
                 parameter={"args": {"samx": (-5, 5)}, "kwargs": {"steps": 3, "exp_time": 0.1}},
                 queue="primary",
             ),
             [
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=["samx"],
                     action="read",
                     parameter={
@@ -833,7 +833,7 @@ def test_fermat_scan(scan_msg, reference_scan_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 3},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=["samx"],
                     action="wait",
                     parameter={
@@ -842,7 +842,7 @@ def test_fermat_scan(scan_msg, reference_scan_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 4},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="open_scan",
                     parameter={
@@ -855,19 +855,19 @@ def test_fermat_scan(scan_msg, reference_scan_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 0},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="stage",
                     parameter={},
                     metadata={"readout_priority": "monitored", "DIID": 1},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="baseline_reading",
                     parameter={},
                     metadata={"readout_priority": "baseline", "DIID": 1},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     **{
                         "device": "samx",
                         "action": "set",
@@ -875,7 +875,7 @@ def test_fermat_scan(scan_msg, reference_scan_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 5},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     **{
                         "device": None,
                         "action": "wait",
@@ -887,11 +887,11 @@ def test_fermat_scan(scan_msg, reference_scan_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 6},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     **{"device": None, "action": "pre_scan", "parameter": {}},
                     metadata={"readout_priority": "monitored", "DIID": 7},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={
@@ -900,7 +900,7 @@ def test_fermat_scan(scan_msg, reference_scan_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 1},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={
@@ -910,7 +910,7 @@ def test_fermat_scan(scan_msg, reference_scan_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 2},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={
@@ -919,13 +919,13 @@ def test_fermat_scan(scan_msg, reference_scan_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 7},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
                     metadata={"pointID": 0, "readout_priority": "monitored", "DIID": 8},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={
@@ -934,13 +934,13 @@ def test_fermat_scan(scan_msg, reference_scan_list):
                     },
                     metadata={"pointID": 0, "readout_priority": "monitored", "DIID": 9},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
                     metadata={"pointID": 1, "readout_priority": "monitored", "DIID": 10},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={
@@ -949,13 +949,13 @@ def test_fermat_scan(scan_msg, reference_scan_list):
                     },
                     metadata={"pointID": 1, "readout_priority": "monitored", "DIID": 11},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
                     metadata={"pointID": 2, "readout_priority": "monitored", "DIID": 12},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={
@@ -964,7 +964,7 @@ def test_fermat_scan(scan_msg, reference_scan_list):
                     },
                     metadata={"pointID": 2, "readout_priority": "monitored", "DIID": 13},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={
@@ -973,7 +973,7 @@ def test_fermat_scan(scan_msg, reference_scan_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 14},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={
@@ -983,7 +983,7 @@ def test_fermat_scan(scan_msg, reference_scan_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 15},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={
@@ -993,17 +993,17 @@ def test_fermat_scan(scan_msg, reference_scan_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 16},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     **{"device": None, "action": "complete", "parameter": {}},
                     metadata={"readout_priority": "monitored", "DIID": 31},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="unstage",
                     parameter={},
                     metadata={"readout_priority": "monitored", "DIID": 17},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="close_scan",
                     parameter={},
@@ -1061,7 +1061,7 @@ def test_device_rpc():
     scan = DeviceRPC(parameter=parameter, device_manager=device_manager)
     scan_instructions = list(scan.run())
     assert scan_instructions == [
-        BMessage.DeviceInstructionMessage(
+        messages.DeviceInstructionMessage(
             device="samx",
             action="rpc",
             parameter=parameter,
@@ -1074,13 +1074,13 @@ def test_device_rpc():
     "scan_msg,reference_scan_list",
     [
         (
-            BMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="acquire",
                 parameter={"args": [], "kwargs": {"exp_time": 1.0}},
                 queue="primary",
             ),
             [
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="open_scan",
                     parameter={
@@ -1093,37 +1093,37 @@ def test_device_rpc():
                     },
                     metadata={"readout_priority": "monitored", "DIID": 0},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="stage",
                     parameter={},
                     metadata={"readout_priority": "monitored", "DIID": 1},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="baseline_reading",
                     parameter={},
                     metadata={"readout_priority": "baseline", "DIID": 2},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="pre_scan",
                     parameter={},
                     metadata={"readout_priority": "monitored", "DIID": 3},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
                     metadata={"pointID": 0, "readout_priority": "monitored", "DIID": 3},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "trigger", "group": "trigger", "time": 1},
                     metadata={"readout_priority": "monitored", "DIID": 4},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={
@@ -1132,23 +1132,23 @@ def test_device_rpc():
                     },
                     metadata={"pointID": 0, "readout_priority": "monitored", "DIID": 5},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
                     metadata={"readout_priority": "monitored", "DIID": 6},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     **{"device": None, "action": "complete", "parameter": {}},
                     metadata={"readout_priority": "monitored", "DIID": 31},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="unstage",
                     parameter={},
                     metadata={"readout_priority": "monitored", "DIID": 17},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="close_scan",
                     parameter={},
@@ -1178,7 +1178,7 @@ def test_pre_scan_macro():
     device_manager = DMMock()
     device_manager.add_device("samx")
     macros = [inspect.getsource(pre_scan_macro).encode()]
-    scan_msg = BMessage.ScanQueueMessage(
+    scan_msg = messages.ScanQueueMessage(
         scan_type="fermat_scan",
         parameter={
             "args": {"samx": (-5, 5), "samy": (-5, 5)},
@@ -1223,7 +1223,7 @@ def test_round_roi_scan_positions(in_args, reference_positions):
 def test_round_roi_scan():
     device_manager = DMMock()
     device_manager.add_device("samx")
-    scan_msg = BMessage.ScanQueueMessage(
+    scan_msg = messages.ScanQueueMessage(
         scan_type="round_roi_scan",
         parameter={
             "args": {"samx": (10,), "samy": (10,)},
@@ -1316,7 +1316,7 @@ def test_get_func_name_from_macro():
     device_manager = DMMock()
     device_manager.add_device("samx")
     macros = [inspect.getsource(pre_scan_macro).encode()]
-    scan_msg = BMessage.ScanQueueMessage(
+    scan_msg = messages.ScanQueueMessage(
         scan_type="fermat_scan",
         parameter={
             "args": {"samx": (-5, 5), "samy": (-5, 5)},
@@ -1333,7 +1333,7 @@ def test_get_func_name_from_macro():
 def test_scan_report_devices():
     device_manager = DMMock()
     device_manager.add_device("samx")
-    scan_msg = BMessage.ScanQueueMessage(
+    scan_msg = messages.ScanQueueMessage(
         scan_type="fermat_scan",
         parameter={
             "args": {"samx": (-5, 5), "samy": (-5, 5)},
@@ -1358,7 +1358,7 @@ def test_request_base_check_limits():
     device_manager = DMMock()
     device_manager.add_device("samx")
     device_manager.add_device("samy")
-    scan_msg = BMessage.ScanQueueMessage(
+    scan_msg = messages.ScanQueueMessage(
         scan_type="fermat_scan",
         parameter={
             "args": {"samx": (-5, 5), "samy": (-5, 5)},
@@ -1413,7 +1413,7 @@ def test_request_base_get_scan_motors():
     device_manager = DMMock()
     device_manager.add_device("samx")
     device_manager.add_device("samz")
-    scan_msg = BMessage.ScanQueueMessage(
+    scan_msg = messages.ScanQueueMessage(
         scan_type="fermat_scan",
         parameter={
             "args": {"samx": (-5, 5)},
@@ -1451,7 +1451,7 @@ def test_scan_base_init():
         def _calculate_positions(self):
             pass
 
-    scan_msg = BMessage.ScanQueueMessage(
+    scan_msg = messages.ScanQueueMessage(
         scan_type="",
         parameter={
             "args": {"samx": (-5, 5), "samy": (-5, 5)},
@@ -1470,7 +1470,7 @@ def test_scan_base_set_position_offset():
     device_manager = DMMock()
     device_manager.add_device("samx")
 
-    scan_msg = BMessage.ScanQueueMessage(
+    scan_msg = messages.ScanQueueMessage(
         scan_type="fermat_scan",
         parameter={
             "args": {"samx": (-5, 5), "samy": (-5, 5)},
@@ -1499,7 +1499,7 @@ def test_scan_base_set_position_offset():
     "scan_msg,reference_scan_list",
     [
         (
-            BMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="lamni_fermat_scan",
                 parameter={
                     "args": {},
@@ -1515,19 +1515,19 @@ def test_scan_base_set_position_offset():
                 metadata={"RID": "1234"},
             ),
             [
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=["rtx", "rty"],
                     action="read",
                     parameter={"wait_group": "scan_motor"},
                     metadata={"readout_priority": "monitored", "DIID": 0},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=["rtx", "rty"],
                     action="wait",
                     parameter={"type": "read", "wait_group": "scan_motor"},
                     metadata={"readout_priority": "monitored", "DIID": 1},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="rtx",
                     action="rpc",
                     parameter={
@@ -1539,7 +1539,7 @@ def test_scan_base_set_position_offset():
                     },
                     metadata={"readout_priority": "monitored", "DIID": 2, "response": True},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="lsamrot",
                     action="rpc",
                     parameter={
@@ -1551,7 +1551,7 @@ def test_scan_base_set_position_offset():
                     },
                     metadata={"readout_priority": "monitored", "DIID": 2, "response": True},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="scan_report_instruction",
                     parameter={
@@ -1567,19 +1567,19 @@ def test_scan_base_set_position_offset():
                         "DIID": 0,
                     },
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="lsamrot",
                     action="set",
                     parameter={"value": 10, "wait_group": "scan_motor"},
                     metadata={"readout_priority": "monitored", "DIID": 3},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=["lsamrot"],
                     action="wait",
                     parameter={"type": "move", "wait_group": "scan_motor"},
                     metadata={"readout_priority": "monitored", "DIID": 4},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="rtx",
                     action="rpc",
                     parameter={
@@ -1591,7 +1591,7 @@ def test_scan_base_set_position_offset():
                     },
                     metadata={"readout_priority": "monitored", "DIID": 5, "response": True},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="rtx",
                     action="rpc",
                     parameter={
@@ -1603,7 +1603,7 @@ def test_scan_base_set_position_offset():
                     },
                     metadata={"readout_priority": "monitored", "DIID": 6, "response": True},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="rty",
                     action="rpc",
                     parameter={
@@ -1615,7 +1615,7 @@ def test_scan_base_set_position_offset():
                     },
                     metadata={"readout_priority": "monitored", "DIID": 7, "response": True},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="lsamx",
                     action="rpc",
                     parameter={
@@ -1627,7 +1627,7 @@ def test_scan_base_set_position_offset():
                     },
                     metadata={"readout_priority": "monitored", "DIID": 8, "response": True},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="lsamy",
                     action="rpc",
                     parameter={
@@ -1639,7 +1639,7 @@ def test_scan_base_set_position_offset():
                     },
                     metadata={"readout_priority": "monitored", "DIID": 9, "response": True},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="rtx",
                     action="rpc",
                     parameter={
@@ -1651,7 +1651,7 @@ def test_scan_base_set_position_offset():
                     },
                     metadata={"readout_priority": "monitored", "DIID": 10, "response": True},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="rty",
                     action="rpc",
                     parameter={
@@ -1663,7 +1663,7 @@ def test_scan_base_set_position_offset():
                     },
                     metadata={"readout_priority": "monitored", "DIID": 11, "response": True},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="rtx",
                     action="rpc",
                     parameter={
@@ -1675,7 +1675,7 @@ def test_scan_base_set_position_offset():
                     },
                     metadata={"readout_priority": "monitored", "DIID": 12, "response": True},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="open_scan",
                     parameter={
@@ -1695,19 +1695,19 @@ def test_scan_base_set_position_offset():
                     },
                     metadata={"readout_priority": "monitored", "DIID": 13},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="stage",
                     parameter={},
                     metadata={"readout_priority": "monitored", "DIID": 14},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="baseline_reading",
                     parameter={},
                     metadata={"readout_priority": "baseline", "DIID": 15},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="rtx",
                     action="set",
                     parameter={
@@ -1716,7 +1716,7 @@ def test_scan_base_set_position_offset():
                     },
                     metadata={"readout_priority": "monitored", "DIID": 17},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="rty",
                     action="set",
                     parameter={
@@ -1725,25 +1725,25 @@ def test_scan_base_set_position_offset():
                     },
                     metadata={"readout_priority": "monitored", "DIID": 18},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
                     metadata={"readout_priority": "monitored", "DIID": 19},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
                     metadata={"readout_priority": "monitored", "DIID": 20, "pointID": 0},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "trigger", "group": "trigger", "time": 0.1},
                     metadata={"readout_priority": "monitored", "DIID": 21},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={
@@ -1752,7 +1752,7 @@ def test_scan_base_set_position_offset():
                     },
                     metadata={"readout_priority": "monitored", "DIID": 22, "pointID": 0},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={
@@ -1762,7 +1762,7 @@ def test_scan_base_set_position_offset():
                     },
                     metadata={"readout_priority": "monitored", "DIID": 23},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="rtx",
                     action="set",
                     parameter={
@@ -1771,7 +1771,7 @@ def test_scan_base_set_position_offset():
                     },
                     metadata={"readout_priority": "monitored", "DIID": 24},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="rty",
                     action="set",
                     parameter={
@@ -1780,31 +1780,31 @@ def test_scan_base_set_position_offset():
                     },
                     metadata={"readout_priority": "monitored", "DIID": 25},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
                     metadata={"readout_priority": "monitored", "DIID": 26},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
                     metadata={"readout_priority": "monitored", "DIID": 27},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
                     metadata={"readout_priority": "monitored", "DIID": 28, "pointID": 1},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "trigger", "group": "trigger", "time": 0.1},
                     metadata={"readout_priority": "monitored", "DIID": 29},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={
@@ -1813,7 +1813,7 @@ def test_scan_base_set_position_offset():
                     },
                     metadata={"readout_priority": "monitored", "DIID": 30, "pointID": 1},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={
@@ -1823,23 +1823,23 @@ def test_scan_base_set_position_offset():
                     },
                     metadata={"readout_priority": "monitored", "DIID": 31},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
                     metadata={"readout_priority": "monitored", "DIID": 16},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     **{"device": None, "action": "complete", "parameter": {}},
                     metadata={"readout_priority": "monitored", "DIID": 31},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="unstage",
                     parameter={},
                     metadata={"readout_priority": "monitored", "DIID": 17},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="close_scan",
                     parameter={},
@@ -1899,7 +1899,7 @@ def test_LamNIFermatScan(scan_msg, reference_scan_list):
 
 
 def test_LamNIFermatScan_min_positions():
-    scan_msg = BMessage.ScanQueueMessage(
+    scan_msg = messages.ScanQueueMessage(
         scan_type="lamni_fermat_scan",
         parameter={
             "args": {},
@@ -1935,7 +1935,7 @@ def test_LamNIFermatScan_min_positions():
 def test_round_scan_fly_sim_get_scan_motors():
     device_manager = DMMock()
     device_manager.add_device("flyer_sim")
-    scan_msg = BMessage.ScanQueueMessage(
+    scan_msg = messages.ScanQueueMessage(
         scan_type="round_scan_fly",
         parameter={
             "args": {"flyer_sim": (0, 50, 5, 3)},
@@ -1955,7 +1955,7 @@ def test_round_scan_fly_sim_get_scan_motors():
 def test_round_scan_fly_sim_prepare_positions():
     device_manager = DMMock()
     device_manager.add_device("flyer_sim")
-    scan_msg = BMessage.ScanQueueMessage(
+    scan_msg = messages.ScanQueueMessage(
         scan_type="round_scan_fly",
         parameter={
             "args": {"flyer_sim": (0, 50, 5, 3)},
@@ -1984,7 +1984,7 @@ def test_round_scan_fly_sim_prepare_positions():
 def test_round_scan_fly_sim_calculate_positions(in_args, reference_positions):
     device_manager = DMMock()
     device_manager.add_device("flyer_sim")
-    scan_msg = BMessage.ScanQueueMessage(
+    scan_msg = messages.ScanQueueMessage(
         scan_type="round_scan_fly",
         parameter={
             "args": {"flyer_sim": in_args},
@@ -2006,7 +2006,7 @@ def test_round_scan_fly_sim_calculate_positions(in_args, reference_positions):
 def test_round_scan_fly_sim_scan_core(in_args, reference_positions):
     device_manager = DMMock()
     device_manager.add_device("flyer_sim")
-    scan_msg = BMessage.ScanQueueMessage(
+    scan_msg = messages.ScanQueueMessage(
         scan_type="round_scan_fly",
         parameter={
             "args": {"flyer_sim": in_args},
@@ -2020,7 +2020,7 @@ def test_round_scan_fly_sim_scan_core(in_args, reference_positions):
     request.positions = np.array(reference_positions)
 
     ret = next(request.scan_core())
-    assert ret == BMessage.DeviceInstructionMessage(
+    assert ret == messages.DeviceInstructionMessage(
         device="flyer_sim",
         action="kickoff",
         parameter={
@@ -2068,7 +2068,7 @@ def test_round_scan_fly_sim_scan_core(in_args, reference_positions):
 )
 def test_line_scan_calculate_positions(in_args, reference_positions):
     device_manager = DMMock()
-    scan_msg = BMessage.ScanQueueMessage(
+    scan_msg = messages.ScanQueueMessage(
         scan_type="line_scan",
         parameter={
             "args": {"samx": in_args[0], "samy": in_args[1]},
@@ -2088,7 +2088,7 @@ def test_line_scan_calculate_positions(in_args, reference_positions):
 
 def test_list_scan_calculate_positions():
     device_manager = DMMock()
-    scan_msg = BMessage.ScanQueueMessage(
+    scan_msg = messages.ScanQueueMessage(
         scan_type="list_scan",
         parameter={
             "args": {"samx": [[0, 1, 2, 3, 4]], "samy": [[0, 1, 2, 3, 4]]},
@@ -2104,7 +2104,7 @@ def test_list_scan_calculate_positions():
 
 def test_list_scan_raises_for_different_lengths():
     device_manager = DMMock()
-    scan_msg = BMessage.ScanQueueMessage(
+    scan_msg = messages.ScanQueueMessage(
         scan_type="list_scan",
         parameter={
             "args": {"samx": [[0, 1, 2, 3, 4]], "samy": [[0, 1, 2, 3]]},
@@ -2120,7 +2120,7 @@ def test_list_scan_raises_for_different_lengths():
     "scan_msg,reference_scan_list",
     [
         (
-            BMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="time_scan",
                 parameter={
                     "args": {},
@@ -2129,13 +2129,13 @@ def test_list_scan_raises_for_different_lengths():
                 queue="primary",
             ),
             [
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=[],
                     action="read",
                     parameter={"wait_group": "scan_motor"},
                     metadata={"readout_priority": "monitored", "DIID": 0},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=[],
                     action="wait",
                     parameter={"type": "read", "wait_group": "scan_motor"},
@@ -2143,7 +2143,7 @@ def test_list_scan_raises_for_different_lengths():
                 ),
                 None,
                 None,
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="open_scan",
                     parameter={
@@ -2156,123 +2156,123 @@ def test_list_scan_raises_for_different_lengths():
                     },
                     metadata={"readout_priority": "monitored", "DIID": 2},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="stage",
                     parameter={},
                     metadata={"readout_priority": "monitored", "DIID": 3},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="baseline_reading",
                     parameter={},
                     metadata={"readout_priority": "baseline", "DIID": 4},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     **{"device": None, "action": "pre_scan", "parameter": {}},
                     metadata={"readout_priority": "monitored", "DIID": 5},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
                     metadata={"readout_priority": "monitored", "DIID": 6, "pointID": 0},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "trigger", "time": 0.1, "group": "trigger"},
                     metadata={"readout_priority": "monitored", "DIID": 7},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "readout_primary"},
                     metadata={"readout_priority": "monitored", "DIID": 8, "pointID": 0},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "trigger", "time": 0.9, "group": "trigger"},
                     metadata={"readout_priority": "monitored", "DIID": 9},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
                     metadata={"readout_priority": "monitored", "DIID": 10},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
                     metadata={"readout_priority": "monitored", "DIID": 11, "pointID": 1},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "trigger", "time": 0.1, "group": "trigger"},
                     metadata={"readout_priority": "monitored", "DIID": 12},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "readout_primary"},
                     metadata={"readout_priority": "monitored", "DIID": 13, "pointID": 1},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "trigger", "time": 0.9, "group": "trigger"},
                     metadata={"readout_priority": "monitored", "DIID": 14},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
                     metadata={"readout_priority": "monitored", "DIID": 15},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
                     metadata={"readout_priority": "monitored", "DIID": 16, "pointID": 2},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "trigger", "time": 0.1, "group": "trigger"},
                     metadata={"readout_priority": "monitored", "DIID": 17},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "readout_primary"},
                     metadata={"readout_priority": "monitored", "DIID": 18, "pointID": 2},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "trigger", "time": 0.9, "group": "trigger"},
                     metadata={"readout_priority": "monitored", "DIID": 19},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
                     metadata={"readout_priority": "monitored", "DIID": 20},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     **{"device": None, "action": "complete", "parameter": {}},
                     metadata={"readout_priority": "monitored", "DIID": 21},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="unstage",
                     parameter={},
                     metadata={"readout_priority": "monitored", "DIID": 22},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="close_scan",
                     parameter={},
@@ -2297,7 +2297,7 @@ def test_time_scan(scan_msg, reference_scan_list):
     "scan_msg,reference_scan_list",
     [
         (
-            BMessage.ScanQueueMessage(
+            messages.ScanQueueMessage(
                 scan_type="otf_scan",
                 parameter={
                     "args": {},
@@ -2310,7 +2310,7 @@ def test_time_scan(scan_msg, reference_scan_list):
                 None,
                 None,
                 None,
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="open_scan",
                     parameter={
@@ -2323,32 +2323,32 @@ def test_time_scan(scan_msg, reference_scan_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 0, "RID": "1234"},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="stage",
                     parameter={},
                     metadata={"readout_priority": "monitored", "DIID": 1, "RID": "1234"},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="baseline_reading",
                     parameter={},
                     metadata={"readout_priority": "baseline", "DIID": 2, "RID": "1234"},
                 ),
                 None,
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="mono",
                     action="set",
                     parameter={"value": 700, "wait_group": "flyer"},
                     metadata={"readout_priority": "monitored", "DIID": 3, "RID": "1234"},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=["mono"],
                     action="wait",
                     parameter={"type": "move", "wait_group": "flyer"},
                     metadata={"readout_priority": "monitored", "DIID": 4, "RID": "1234"},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="otf",
                     action="kickoff",
                     parameter={
@@ -2357,47 +2357,47 @@ def test_time_scan(scan_msg, reference_scan_list):
                     },
                     metadata={"readout_priority": "monitored", "DIID": 5, "RID": "1234"},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=["otf"],
                     action="wait",
                     parameter={"type": "move", "wait_group": "kickoff"},
                     metadata={"readout_priority": "monitored", "DIID": 6, "RID": "1234"},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device="otf",
                     action="complete",
                     parameter={},
                     metadata={"readout_priority": "monitored", "DIID": 7, "RID": "1234"},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "readout_primary"},
                     metadata={"readout_priority": "monitored", "DIID": 8, "RID": "1234"},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
                     metadata={"readout_priority": "monitored", "DIID": 9, "RID": "1234"},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
                     metadata={"readout_priority": "monitored", "DIID": 10, "RID": "1234"},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     **{"device": None, "action": "complete", "parameter": {}},
                     metadata={"readout_priority": "monitored", "DIID": 11, "RID": "1234"},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="unstage",
                     parameter={},
                     metadata={"readout_priority": "monitored", "DIID": 12, "RID": "1234"},
                 ),
-                BMessage.DeviceInstructionMessage(
+                messages.DeviceInstructionMessage(
                     device=None,
                     action="close_scan",
                     parameter={},
@@ -2422,7 +2422,7 @@ def test_otf_scan(scan_msg, reference_scan_list):
 @pytest.mark.parametrize(
     "scan_msg",
     [
-        BMessage.ScanQueueMessage(
+        messages.ScanQueueMessage(
             scan_type="owis_grid",
             parameter={
                 "args": {
@@ -2473,7 +2473,7 @@ def test_owis_grid(scan_msg):
 
 def test_monitor_scan():
     device_manager = DMMock()
-    scan_msg = BMessage.ScanQueueMessage(
+    scan_msg = messages.ScanQueueMessage(
         scan_type="monitor_scan",
         parameter={
             "args": {"samx": [-5, 5]},
