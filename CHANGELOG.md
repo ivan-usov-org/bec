@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.44.0 (2023-11-21)
+
+### Feature
+
+* Added GUI config endpoint ([`67903a4`](https://gitlab.psi.ch/bec/bec/-/commit/67903a47bdcace6fcb9043aa6ad2bcb512260e12))
+
 ## v0.43.0 (2023-11-21)
 
 ### Feature
