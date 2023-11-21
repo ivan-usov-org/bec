@@ -166,27 +166,16 @@ class BECMessage:
             }
             return self.compression_handler.dumps(msg, encode=False)
         if self.version == 1.1:
-            msg = {
-                "content": self.content,
-                "metadata": self.metadata,
-            }
+            msg = {"content": self.content, "metadata": self.metadata}
             msg_header = {
                 "msg_type": self.msg_type,
                 "version": self.version,
                 "compression": self.compression,
             }
             msg_body = self.compression_handler.dumps(msg)
-            return json.dumps(
-                {
-                    **msg_header,
-                    "body": msg_body,
-                }
-            )
+            return json.dumps({**msg_header, "body": msg_body})
         if self.version == 1.2:
-            msg = {
-                "content": self.content,
-                "metadata": self.metadata,
-            }
+            msg = {"content": self.content, "metadata": self.metadata}
             msg_header = json.dumps(
                 {
                     "msg_type": self.msg_type,
@@ -971,6 +960,27 @@ class ProgressMessage(BECMessage):
         """
 
         self.content = {"value": value, "max_value": max_value, "done": done}
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )
+
+
+class GUIConfigMessage(BECMessage):
+    """Message for GUI configuration"""
+
+    msg_type = "gui_config_message"
+
+    def __init__(
+        self, *, config: dict, metadata: dict = None, version: float = DEFAULT_VERSION
+    ) -> None:
+        """
+        Message for GUI configuration
+        Args:
+            config (dict): GUI configuration
+            metadata (dict, optional): metadata. Defaults to None.
+        """
+
+        self.content = {"config": config}
         super().__init__(
             msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
         )

@@ -75,6 +75,9 @@ class MessageEndpoints:
     _dap_config = "internal/dap/config"
     _avilable_dap_plugins = "internal/dap/available_plugins"
 
+    # GUI
+    _gui_config = "public/gui/config"
+
     ##########
 
     # devices feedback
@@ -715,3 +718,15 @@ class MessageEndpoints:
             str: Endpoint for available DAP plugins.
         """
         return cls._avilable_dap_plugins
+
+    # GUI
+    @classmethod
+    def gui_config(cls, gui_id: str) -> str:
+        """
+        Endpoint for GUI configuration. This endpoint is used to publish the GUI configuration
+        using a messages.GUIConfigMessage message.
+
+        Returns:
+            str: Endpoint for GUI configuration.
+        """
+        return f"{cls._gui_config}/{gui_id}"
