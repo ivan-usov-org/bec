@@ -15,62 +15,60 @@ from bec_lib import RedisConnector, ServiceConfig, bec_logger
 
 logger = bec_logger.logger
 
-try:
-    from bec_plugins.bec_client import startup
-except ImportError:
-    startup = None
+if __name__ == "__main__":
+    try:
+        from bec_plugins.bec_client import startup
+    except ImportError:
+        startup = None
 
-args = sys.argv[1:]
+    args = sys.argv[1:]
 
-if startup:
-    # check if pre-startup.py script exists
-    file_name = os.path.join(os.path.dirname(startup.__file__), "pre_startup.py")
-    if os.path.isfile(file_name):
-        with open(file_name, "r", encoding="utf-8") as file:
-            # exec the pre-startup.py script and pass the arguments
-            # pylint: disable=exec-used
-            exec(file.read(), globals(), locals())
+    if startup:
+        # check if pre-startup.py script exists
+        file_name = os.path.join(os.path.dirname(startup.__file__), "pre_startup.py")
+        if os.path.isfile(file_name):
+            with open(file_name, "r", encoding="utf-8") as file:
+                # exec the pre-startup.py script and pass the arguments
+                # pylint: disable=exec-used
+                exec(file.read(), globals(), locals())
 
+    # check if config was defined in pre-startup.py
+    if not "config" in locals():
+        config = ServiceConfig()
 
-# check if config was defined in pre-startup.py
-if not "config" in locals():
-    config = ServiceConfig()
+    bec = BECIPythonClient()
+    bec.initialize(config, RedisConnector)
+    bec.load_high_level_interface("spec_hli")
+    bec.start()
 
-bec = BECIPythonClient()
-bec.initialize(config, RedisConnector)
-bec.load_high_level_interface("spec_hli")
-bec.start()
+    dev = bec.device_manager.devices
+    scans = bec.scans
 
-dev = bec.device_manager.devices
-scans = bec.scans
+    ####################### END OF INIT #############################
+    #################################################################
 
-####################### END OF INIT #############################
-#################################################################
+    # MODIFY THE SECTIONS BELOW TO CUSTOMIZE THE BEC
 
+    ################################################################
+    ################################################################
+    import numpy as np  # not needed but always nice to have
 
-# MODIFY THE SECTIONS BELOW TO CUSTOMIZE THE BEC
+    bec._ip.prompts.status = 1
 
-################################################################
-################################################################
-import numpy as np  # not needed but always nice to have
+    # SETUP BEAMLINE INFO
+    # from bec_client.plugins.cSAXS.beamline_info import BeamlineInfo
+    from bec_client.plugins.SLS.sls_info import OperatorInfo, SLSInfo
 
-bec._ip.prompts.status = 1
+    # bec._beamline_mixin._bl_info_register(BeamlineInfo)
+    bec._beamline_mixin._bl_info_register(SLSInfo)
+    bec._beamline_mixin._bl_info_register(OperatorInfo)
 
-# SETUP BEAMLINE INFO
-# from bec_client.plugins.cSAXS.beamline_info import BeamlineInfo
-from bec_client.plugins.SLS.sls_info import OperatorInfo, SLSInfo
+    if startup:
+        # check if post-startup.py script exists
+        file_name = os.path.join(os.path.dirname(startup.__file__), "post_startup.py")
+        if os.path.isfile(file_name):
+            with open(file_name, "r", encoding="utf-8") as file:
+                # pylint: disable=exec-used
+                exec(file.read())
 
-# bec._beamline_mixin._bl_info_register(BeamlineInfo)
-bec._beamline_mixin._bl_info_register(SLSInfo)
-bec._beamline_mixin._bl_info_register(OperatorInfo)
-
-
-if startup:
-    # check if post-startup.py script exists
-    file_name = os.path.join(os.path.dirname(startup.__file__), "post_startup.py")
-    if os.path.isfile(file_name):
-        with open(file_name, "r", encoding="utf-8") as file:
-            # pylint: disable=exec-used
-            exec(file.read())
-
-bec_logger.level = bec_logger.LOGLEVEL.SUCCESS
+    bec_logger.level = bec_logger.LOGLEVEL.SUCCESS
