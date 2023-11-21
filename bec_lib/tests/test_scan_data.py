@@ -101,6 +101,8 @@ def test_scan_data_device_data_dict_operations(scan_data):
         }.items()
     )
 
+    assert len(scan_data.samx.setpoint) == 10
+
 
 def test_scan_data_signal_dict_operations(scan_data):
     assert (
@@ -115,6 +117,8 @@ def test_scan_data_signal_dict_operations(scan_data):
     assert dict(scan_data.samx.setpoint.items()) == dict(
         {ii: {"value": ii, "timestamp": ii} for ii in range(10)}.items()
     )
+
+    assert len(scan_data.samx.setpoint) == 10
 
 
 def test_scan_data_dict_operations(scan_data):
@@ -137,3 +141,5 @@ def test_scan_data_dict_operations(scan_data):
 
     assert "samx" in scan_data
     assert "not_a_device" not in scan_data
+
+    assert len(scan_data) == 10

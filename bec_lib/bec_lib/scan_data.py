@@ -84,6 +84,9 @@ class SignalData:
     def __repr__(self) -> str:
         return f"{self.data}"
 
+    def __len__(self) -> int:
+        return len(self.data)
+
 
 class DeviceData(dict):
     """
@@ -213,3 +216,6 @@ class ScanData(dict):
 
     def __repr__(self) -> str:
         return f"{dict(self.devices)}"
+
+    def __len__(self) -> int:
+        return len(self.messages)
