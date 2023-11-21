@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Optional
 
 from bec_lib import messages
 from bec_lib.logger import bec_logger
+from bec_lib.scan_data import ScanData
 from bec_lib.utils import threadlocked
 
 if TYPE_CHECKING:
@@ -41,7 +42,7 @@ class ScanItem:
         self.scan_number = scan_number
         self.scanID = scanID
         self.status = status
-        self.data = {}
+        self.data = ScanData()
         self.open_scan_defs = set()
         self.open_queue_group = None
         self.num_points = None
@@ -80,13 +81,12 @@ class ScanItem:
             raise ImportError("Install `pandas` to use to_pandas() method")
 
         tmp = defaultdict(list)
-        for scan_msg in self.data.values():
+        for scan_msg in self.data.messages.values():
             scan_msg_data = scan_msg.content["data"]
             for dev, dev_data in scan_msg_data.items():
                 for signal, signal_data in dev_data.items():
                     for key, value in signal_data.items():
                         tmp[(dev, signal, key)].append(value)
-
         return pd.DataFrame(tmp)
 
     def __eq__(self, other):
@@ -214,13 +214,14 @@ class ScanStorage:
     def add_scan_segment(self, scan_msg: messages.ScanMessage) -> None:
         """update a scan item with a new scan segment"""
         logger.info(
-            f"Received scan segment {scan_msg.content['point_id']} for scan {scan_msg.metadata['scanID']}: "
+            f"Received scan segment {scan_msg.content['point_id']} for scan"
+            f" {scan_msg.metadata['scanID']}: "
         )
         while True:
             with self._lock:
                 for scan_item in self.storage:
                     if scan_item.scanID == scan_msg.metadata["scanID"]:
-                        scan_item.data[scan_msg.content["point_id"]] = scan_msg
+                        scan_item.data.set(scan_msg.content["point_id"], scan_msg)
                         scan_item.emit_data(scan_msg)
                         return
             time.sleep(0.01)

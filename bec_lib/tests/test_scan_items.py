@@ -8,6 +8,7 @@ import pytest
 from bec_lib import messages
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.queue_items import QueueItem
+from bec_lib.scan_data import ScanData
 from bec_lib.scan_items import ScanItem
 from bec_lib.scan_manager import ScanManager
 from bec_lib.tests.utils import ConnectorMock
@@ -57,7 +58,7 @@ from bec_lib.tests.utils import ConnectorMock
                     "status": "RUNNING",
                 }
             }
-        ),
+        )
     ],
 )
 def test_update_with_queue_status(queue_msg):
@@ -73,7 +74,8 @@ def test_update_with_queue_status(queue_msg):
 def test_scan_item_to_pandas():
     scan_manager = ScanManager(ConnectorMock(""))
     scan_item = ScanItem(scan_manager, "queueID", [1], ["scanID"], "status")
-    scan_item.data = {
+    scan_item.data = ScanData()
+    data = {
         0: messages.ScanMessage(
             point_id=0, scanID="scanID", data={"samx": {"samx": {"value": 1, "timestamp": 0}}}
         ),
@@ -84,6 +86,8 @@ def test_scan_item_to_pandas():
             point_id=2, scanID="scanID", data={"samx": {"samx": {"value": 3, "timestamp": 0}}}
         ),
     }
+    for ii, msg in data.items():
+        scan_item.data.set(ii, msg)
 
     df = scan_item.to_pandas()
     assert df["samx"]["samx"]["value"].tolist() == [1, 2, 3]
@@ -93,7 +97,7 @@ def test_scan_item_to_pandas():
 def test_scan_item_to_pandas_empty_data():
     scan_manager = ScanManager(ConnectorMock(""))
     scan_item = ScanItem(scan_manager, "queueID", [1], ["scanID"], "status")
-    scan_item.data = {}
+    scan_item.data = ScanData()
 
     df = scan_item.to_pandas()
     assert df.empty
@@ -122,7 +126,9 @@ def test_scan_item_repr():
     scan_item.num_points = 1
     assert (
         repr(scan_item)
-        == "ScanItem:\n \tStart time: Fri Jun 23 15:11:06 2023\n\tEnd time: Fri Jun 23 15:11:16 2023\n\tElapsed time: 10.0 s\n\tScan ID: ['scanID']\n\tScan number: [1]\n\tNumber of points: 1\n"
+        == "ScanItem:\n \tStart time: Fri Jun 23 15:11:06 2023\n\tEnd time: Fri Jun 23 15:11:16"
+        " 2023\n\tElapsed time: 10.0 s\n\tScan ID: ['scanID']\n\tScan number: [1]\n\tNumber of"
+        " points: 1\n"
     )
 
 
@@ -380,7 +386,7 @@ def test_add_scan_segment_emits_data():
     scan_manager = ScanManager(ConnectorMock(""))
     scan_item = mock.MagicMock()
     scan_item.scanID = "scanID"
-    scan_item.data = {}
+    scan_item.data = ScanData()
     scan_manager.scan_storage.storage.append(scan_item)
 
     msg = messages.ScanMessage(
@@ -388,4 +394,4 @@ def test_add_scan_segment_emits_data():
     )
     scan_manager.scan_storage.add_scan_segment(msg)
     scan_item.emit_data.assert_called_once_with(msg)
-    assert scan_item.data == {0: msg}
+    assert scan_item.data.messages == {0: msg}

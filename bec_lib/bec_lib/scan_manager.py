@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+import traceback
 import uuid
 from math import inf
 from typing import TYPE_CHECKING
@@ -184,7 +185,7 @@ class ScanReport:
         details = f"\tStatus: {self.status}\n"
         if self.scan:
             details += self.scan.describe()
-        return "ScanReport:\n" f"{separator}\n" f"{details}"
+        return f"ScanReport:\n{separator}\n{details}"
 
 
 class ScanManager:
@@ -219,15 +220,11 @@ class ScanManager:
             parent=self,
         )
         self._scan_status_consumer = self.connector.consumer(
-            topics=MessageEndpoints.scan_status(),
-            cb=self._scan_status_callback,
-            parent=self,
+            topics=MessageEndpoints.scan_status(), cb=self._scan_status_callback, parent=self
         )
 
         self._scan_segment_consumer = self.connector.consumer(
-            topics=MessageEndpoints.scan_segment(),
-            cb=self._scan_segment_callback,
-            parent=self,
+            topics=MessageEndpoints.scan_segment(), cb=self._scan_segment_callback, parent=self
         )
 
         self._scan_queue_consumer.start()
@@ -336,9 +333,7 @@ class ScanManager:
         self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
             messages.ScanQueueModificationMessage(
-                scanID=scanID,
-                action="restart",
-                parameter={"position": position, "RID": requestID},
+                scanID=scanID, action="restart", parameter={"position": position, "RID": requestID}
             ).dumps(),
         )
         return requestID
@@ -350,7 +345,7 @@ class ScanManager:
         if num is None:
             logger.warning("Failed to retrieve scan number from redis.")
             return -1
-        return int(self.producer.get(MessageEndpoints.scan_number()))
+        return int(num)
 
     @next_scan_number.setter
     @typechecked
