@@ -2,10 +2,8 @@ import time
 
 import numpy as np
 import pytest
-
-from bec_lib import BECClient
+from bec_lib import BECClient, RedisConnector, ServiceConfig, bec_logger
 from bec_lib.alarm_handler import AlarmBase
-from bec_lib import RedisConnector, ServiceConfig, bec_logger
 from bec_lib.tests.utils import wait_for_empty_queue
 
 logger = bec_logger.logger
@@ -23,10 +21,7 @@ CONFIG_PATH = "../ci/test_config.yaml"
 def lib_client():
     config = ServiceConfig(CONFIG_PATH)
     bec = BECClient(forced=True)
-    bec.initialize(
-        config,
-        RedisConnector,
-    )
+    bec.initialize(config, RedisConnector)
     bec.start()
     bec.queue.request_queue_reset()
     bec.queue.request_scan_continuation()
@@ -100,5 +95,5 @@ def test_async_callback_data_matches_scan_data_lib_client(lib_client):
     assert len(s.scan.data) == 10
     assert len(reference_container["data"]) == 10
 
-    for ii, msg in enumerate(s.scan.data.values()):
+    for ii, msg in enumerate(s.scan.data.messages.values()):
         assert msg.content == reference_container["data"][ii]
