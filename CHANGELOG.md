@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.43.0 (2023-11-21)
+
+### Feature
+
+* Added scan_data to simplify the access to the scan storage ([`6cfff5a`](https://gitlab.psi.ch/bec/bec/-/commit/6cfff5a529650094aa602d3669d96a7637bb79a1))
+
+### Fix
+
+* Fixed scan_data len dunder ([`b037b91`](https://gitlab.psi.ch/bec/bec/-/commit/b037b91c53b1bbc40224f712bc10787e981add39))
+
 ## v0.42.10 (2023-11-19)
 
 ### Fix
