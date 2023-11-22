@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.44.1 (2023-11-22)
+
+### Fix
+
+* Fixed startup script by adding main guard ([`f6b5e9e`](https://gitlab.psi.ch/bec/bec/-/commit/f6b5e9e3c708162eb9f07c118e0226d5395f7f20))
+
 ## v0.44.0 (2023-11-21)
 
 ### Feature
