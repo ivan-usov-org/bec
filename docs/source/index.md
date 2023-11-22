@@ -29,9 +29,14 @@ Information for developers of BEC.
 
 
 ```{toctree}
-:maxdepth: 2
+---
+numbered: true
+maxdepth: 2
+---
 
 introduction/introduction
 user/user
 developer/developer
-```
+
+
+

@@ -1,4 +1,3 @@
-
 (architecture)=
 ## Architecture
 
@@ -6,7 +5,7 @@ BEC is an event-driven system with Redis as the central component for message pa
 
 ```{figure} ../assets/bec_architecture.png
 Architecture diagram. BEC relies on a service-oriented backend server with multiple smaller services and Redis as a central message broker and in-memory database. Moreover, any client can be considered as another service to the entire system with access to the same message broker instance. 
-````
+```
 
 ### Scan Server
 The Scan Server acts as the primary interface for user requests, tasked with the choreography of the data acquisition. The primary components are:
