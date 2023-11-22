@@ -55,6 +55,9 @@ stages:
     - pip install -e ./scihub
     - pip install -e ./data_processing
 
+.uninstall-bec-services: &uninstall-bec-services
+    - pip uninstall -y bec-lib bec-device-server bec-scan-server bec-scan-bundler bec-ipython-client bec-file-writer bec-scihub bec-dap ophyd-devices
+
 formatter:
   stage: Formatter
   needs: []
@@ -151,6 +154,37 @@ tests-3.11:
   stage: AdditionalTests
   image: $CI_DOCKER_REGISTRY/python:3.11
   allow_failure: true
+
+bec-server-install-3.8:
+  stage: AdditionalTests
+  image: $CI_DOCKER_REGISTRY/python:3.8
+  needs: []
+  allow_failure: false
+  script:
+    - git clone --branch $OPHYD_DEVICES_BRANCH https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
+    - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices
+    - apt-get install -y gcc
+    - pip install -e ./bec_server
+    - *uninstall-bec-services
+    - pip install ./bec_server 
+
+bec-server-install-3.9:
+  extends: "bec-server-install-3.8"
+  stage: AdditionalTests
+  image: $CI_DOCKER_REGISTRY/python:3.9
+  allow_failure: false
+
+bec-server-install-3.10:
+  extends: "bec-server-install-3.8"
+  stage: AdditionalTests
+  image: $CI_DOCKER_REGISTRY/python:3.10
+  allow_failure: false
+
+bec-server-install-3.11:
+  extends: "bec-server-install-3.8"
+  stage: AdditionalTests
+  image: $CI_DOCKER_REGISTRY/python:3.11
+  allow_failure: false
 
 end-2-end:
   stage: End2End
