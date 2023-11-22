@@ -33,7 +33,7 @@ Thank you for considering contributing to BEC! Contributions are essential for i
 
 5. Write tests for new features or fixed bugs.
 
-6. Follow [Conventional Commit Messages](#) when writing commit messages. This helps us automatically generate a changelog. For example:
+6. Follow [Conventional Commit Messages](https://www.conventionalcommits.org/en/v1.0.0/) when writing commit messages. This helps us automatically generate a changelog. For example:
 
     ```bash
     git commit -m "feat: add new feature"
