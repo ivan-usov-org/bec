@@ -2,6 +2,20 @@
 
 <!--next-version-placeholder-->
 
+## v0.44.2 (2023-11-23)
+
+### Fix
+
+* Fixed config_init path to config file. again. ([`6b714ef`](https://gitlab.psi.ch/bec/bec/-/commit/6b714ef375dd2e9599d462b4091194fbec264f94))
+* Fixed config_init path to config file ([`e1a2429`](https://gitlab.psi.ch/bec/bec/-/commit/e1a2429fac8756832bcc9937262fb72a8aace592))
+* Fixed packaging of demo_config and openapi_schema ([`7f8b1b1`](https://gitlab.psi.ch/bec/bec/-/commit/7f8b1b1bbe8dee285b71e221161f0c86ad49dd01))
+
+### Documentation
+
+* Fixed link to conventionalcommits ([`6731a55`](https://gitlab.psi.ch/bec/bec/-/commit/6731a559422f7760a39fe160f22298022174bff1))
+* Added placeholder for developer doc ([`f5a9f7d`](https://gitlab.psi.ch/bec/bec/-/commit/f5a9f7dfa6ebf9d23b53fa33764f684228690c11))
+* Fixed page navigation ([`033c535`](https://gitlab.psi.ch/bec/bec/-/commit/033c53529e4947422968b258d26347c74b983d3d))
+
 ## v0.44.1 (2023-11-22)
 
 ### Fix
