@@ -271,7 +271,7 @@ end-2-end-conda:
     - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices
 
     - source ./bin/install_bec_dev.sh
-    - python ./bec_lib/util_scripts/init_config.py --config ./bec_lib/configs/demo_config.yaml
+    - python ./bec_lib/util_scripts/init_config.py --config ./bec_lib/bec_lib/configs/demo_config.yaml
 
     - bec-server start --config ./ci/test_config.yaml
 
