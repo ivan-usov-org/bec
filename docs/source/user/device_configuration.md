@@ -1,16 +1,65 @@
 ## Device configuration
 ### Create a new configuration
 
-BEC without devices is not of much use. To inform BEC about your devices, you need to create a configuration file. This file is a yaml file that contains all information about your devices.
-If you already have a list of your devices and their configuration, you can skip this step and continue with [Load, save and update the configuration].
+BEC without devices is not of much use. 
+To inform BEC about your devices, you need to create a configuration file. 
+This file is a yaml file that contains all information about your devices.
+If you already have a list of your devices and their configuration, you can skip this step and move on to the next one - *Load, save and update the configuration*.
 
 ```{note}
 The configuration file is a yaml file. If you are not familiar with yaml, please have a look at the [yaml documentation](https://yaml.org/).
 ```
 
-```{eval-rst}
-.. include:: install/create_config.rst
+To allow our uses an easy first impression of BEC, we have prepared a demo config with a couple of simulated devices. 
+
+Below is an example for two device that are available through the install package: ophyd_devices. 
+A simulated motor (samx) and a monitor:
 ```
+samx:
+  acquisitionConfig:
+    acquisitionGroup: motor
+    readoutPriority: baseline
+    schedule: sync
+  deviceClass: SynAxisOPAAS
+  deviceConfig:
+    delay: 1
+    labels: samx
+    limits:
+    - -50
+    - 50
+    name: samx
+    speed: 100
+    tolerance: 0.01
+    update_frequency: 400
+  deviceTags:
+  - user motors
+  status:
+    enabled: true
+    enabled_set: true
+gauss_bpm:
+  acquisitionConfig:
+    acquisitionGroup: monitor
+    readoutPriority: monitored
+    schedule: sync
+  deviceClass: SynGaussBEC
+  deviceConfig:
+    labels: gauss_bpm
+    name: gauss_bpm
+    tolerance: 0.5
+  deviceTags:
+  - beamline
+  status:
+    enabled: true
+    enabled_set: true
+
+```
+*We are currently in the process of refactoring the device config.
+In case the example below is not working anymore, please open an issue within the [bec repository](https://gitlab.psi.ch/bec)*
+```{eval-rst}
+.. include:: usage/install/create_config.rst
+```
+
+
 
 ### Load, save and update the configuration
 
