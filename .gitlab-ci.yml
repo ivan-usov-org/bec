@@ -266,7 +266,6 @@ end-2-end-conda-packaged:
     - redis-server --daemonize yes
 
     - pip install wheel
-    - mkdir ./dist
     - source ./ci/build_python_services.sh
     - pip install ./dist/*.tar.gz
 
