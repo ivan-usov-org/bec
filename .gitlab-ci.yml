@@ -257,7 +257,7 @@ end-2-end-conda-packaged:
     - apt-get update
     - apt-get install -y tmux
     - conda config --set always_yes yes --set changeps1 no
-    - conda create -q -n test-environment python=3.9
+    - conda create -q -n test-environment python=3.8
     - conda init bash
     - source ~/.bashrc
     - conda activate test-environment
