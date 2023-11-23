@@ -1,4 +1,4 @@
-While there is already a config file available for simulated devices (`scibec/init_scibec/demo_config.yaml`), you can create new configs based on templates using:
+While there is already a config file available for simulated devices (`bec_lib/configs/demo_config.yaml`), you can create new configs based on templates using:
 
 .. code-block:: bash
 

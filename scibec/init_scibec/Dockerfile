@@ -17,4 +17,4 @@ RUN pip install -e ./bec/scihub/
 WORKDIR /code/bec/scibec/init_scibec
 
 # command to run on container start
-CMD [ "python", "/code/bec/scibec/init_scibec/update_sessions.py", "--config", "/code/bec/scibec/init_scibec/demo_config.yaml"]
+CMD [ "python", "/code/bec/scibec/init_scibec/update_sessions.py", "--config", "/code/bec/bec_lib/configs/demo_config.yaml"]

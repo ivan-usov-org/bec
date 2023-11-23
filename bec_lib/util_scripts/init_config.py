@@ -8,15 +8,9 @@ from bec_lib.redis_connector import RedisConnector
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument(
-    "--config",
-    default="./init_scibec/demo_config.yaml",
-    help="path to the config file",
+    "--config", default="./bec_lib/configs/demo_config.yaml", help="path to the config file"
 )
-parser.add_argument(
-    "--redis",
-    default="localhost:6379",
-    help="redis host and port",
-)
+parser.add_argument("--redis", default="localhost:6379", help="redis host and port")
 
 clargs = parser.parse_args()
 connector = RedisConnector(clargs.redis)
