@@ -30,6 +30,10 @@ def catch_connection_error(func):
             return func(*args, **kwargs)
         except redis.exceptions.ConnectionError:
             warnings.warn("Failed to connect to redis. Is the server running?")
+            try:
+                return func(*args, **kwargs)
+            except redis.exceptions.ConnectionError:
+                warnings.warn("Failed to connect to redis. Is the server running?")
             return None
 
     return wrapper
@@ -163,12 +167,7 @@ class RedisConnector(ConnectorBase):
 
     @catch_connection_error
     def raise_alarm(
-        self,
-        severity: Alarms,
-        alarm_type: str,
-        source: str,
-        content: dict,
-        metadata: dict,
+        self, severity: Alarms, alarm_type: str, source: str, content: dict, metadata: dict
     ):
         """raise an alarm"""
         self._notifications_producer.set_and_publish(
