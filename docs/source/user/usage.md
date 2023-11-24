@@ -124,7 +124,7 @@ samx_data = s.scan.data['gauss_bpm']['gauss_bpm'].val
 ```
 
 ### Plot the scan data manually
-Alternatively, you may install `pandas` as an additional dependency to directly import the data to a `pandas dataframe`. 
+Alternatively, you may install `pandas` as an additional dependency to directly import the data to a pandas dataframe. 
 If on top, `matplotlib` is installed in the environment and imported `import matplotlib.pyplot as plt` within the BEC's IPython shell, you may directly plot the data from the ipython shell.
 
 ```python
