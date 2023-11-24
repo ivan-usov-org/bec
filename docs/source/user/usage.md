@@ -1,13 +1,21 @@
 ## Client usage
 
+In the previous sections, you have succesfully started BEC and also already interacted with the client interface to update the device configuration. 
+This section aims to introduce the client (command line interace) further.
+
 ### Starting the command-line client
 The client can be started by running
 
-```bash
+```{code-block} bash
 bec
 ```
+from a terminal where the `bec_venv` is activated.
+The initial environment was created in [installation](#user.installation), and needs to be activated within the shall that you like to start the client. 
+```{code-block} bash
+source ./bec_venv/bin/activate
+`````` 
 
-### Interface
+### Client interface
 The client interface is based on the [IPython](https://ipython.org/) interactive shell. As seen in the screenshot below, the prompt is prefixed with, e.g. `demo [4/522] >>`. The prefix contains the name of the current session (demo), the current cell number (4) and the next scan number (522).
 
 
@@ -96,7 +104,7 @@ scans.umv(dev.samx, 5, dev.samy, 10, relative=False)
 All currently available scans are accessible through `scans.`, e.g.
 
 ```python
-s = scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=False)
+s = scans.line_scan(dev.samx, -5, 5, steps=50, exp_time=0.1, relative=False)
 ```
 
 ### Inspect the scan data
@@ -104,12 +112,35 @@ s = scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=False)
 The return value of a scan is a python object of type `ScanReport`. All data is stored in `<scan_report>.scan.data`, e.g.
 
 ```python
-s = scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=False)
-print(s.scan.data) # print the scan data
+s = scans.line_scan(dev.samx, -5, 5, steps=50, exp_time=0.1, relative=False)
+print(s.scan.data) # access to all of the data
+```
+Typically, only specific motors are of interest. 
+A convenient access pattern `data[*device*][*hinted_signal*].valis` implemented, that allows you to quickly access the data directly.
+For example to access the data of `samx` and the above added device `gauss_bpm`, you may do the following:
+```python
+samx_data = s.scan.data['samx']['samx'].val
+samx_data = s.scan.data['gauss_bpm']['gauss_bpm'].val
 ```
 
-### Create a new script
-How to write a script
+### Plot the scan data manually
+Alternatively, you may install `pandas` as an additional dependency to directly import the data to a `pandas dataframe`. 
+If on top, `matplotlib` is installed in the environment and imported `import matplotlib.pyplot as plt` within the BEC's IPython shell, you may directly plot the data from the ipython shell.
+
+```python
+df = s.scan.to_pandas()
+df.plot(x=('samx','samx','value'),y=('gauss_bpm','gauss_bpm','value'),kind='scatter')
+plt.show()
+```
+This will plot the following curve from the device `gauss_bpm`, which simulated a gaussian signal.
+```{image} ../assets/gauss_scatter_plot.png
+:align: center
+:alt: tab completion for finding devices
+:width: 800
+```
+
+
+### How to write a script
 -----------------------
 
 Scripts are user defined functions that can be executed from the BEC console. They are stored in the ``scripts`` folder and can be edited with any text editor. 

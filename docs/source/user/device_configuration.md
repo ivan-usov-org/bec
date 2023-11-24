@@ -4,132 +4,112 @@
 BEC without devices is not of much use. 
 To inform BEC about your devices, you need to create a configuration file. 
 This file is a yaml file that contains all information about your devices.
-If you already have a list of your devices and their configuration, you can skip this step and move on to the next one - *Load, save and update the configuration*.
+If you already have a list of your devices and their configuration, you can skip the following step and move on to explore how you can - *Load, save and update the configuration*.
 
 ```{note}
 The configuration file is a yaml file. If you are not familiar with yaml, please have a look at the [yaml documentation](https://yaml.org/).
 ```
 
-To allow our uses an easy first impression of BEC, we have prepared a demo config with a couple of simulated devices. 
+But don't worry, we have prepared a device config with simulated devices for you, which allows us to explore BEC right away.
 
-Below is an example for two device that are available through the install package: ophyd_devices. 
-A simulated motor (samx) and a monitor:
+### Load demo device configuration for simulation
+You can load the demo config `demo_config.yaml` directly in the command line interface via: 
+
+```{code-block} python
+bec.config.load_demo_config()
 ```
-samx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
-  deviceClass: SynAxisOPAAS
-  deviceConfig:
-    delay: 1
-    labels: samx
-    limits:
-    - -50
-    - 50
-    name: samx
-    speed: 100
-    tolerance: 0.01
-    update_frequency: 400
-  deviceTags:
-  - user motors
-  status:
-    enabled: true
-    enabled_set: true
+Once loaded, the device config will be stored on the running Redis server, and remain intact even after restarting the client or the server.
+With the demo config loaded, we can now explore the conventional way of loading a device config into BEC. 
+
+### Export the current configuration
+
+To save the current session to disk, use
+
+```{code-block} python
+bec.config.save_current_session("./config_saved.yaml")
+```
+which will save a file `config_saved.yaml` in directory in which the client is running.
+To modify and add a new device to the config, open `config_saved.yaml` with a suitable editor, for instance *VSCode*, and add a new device to the device config. 
+For this, you may use the device gauss_bpm which is shown below. 
+For more information about fields within the device config, you can check out the section [Ophyd](#developer.ophyd) in our developer guide.
+``` {code-block} yaml
 gauss_bpm:
   acquisitionConfig:
     acquisitionGroup: monitor
     readoutPriority: monitored
     schedule: sync
-  deviceClass: SynGaussBEC
+  deviceClass: sim:sim:SynGaussBEC
   deviceConfig:
     labels: gauss_bpm
     name: gauss_bpm
-    tolerance: 0.5
+    sigma: 1
+    noise: 'uniform'
+    noise_multiplier: 0.4
   deviceTags:
   - beamline
   status:
     enabled: true
     enabled_set: true
-
 ```
-*We are currently in the process of refactoring the device config.
-In case the example below is not working anymore, please open an issue within the [bec repository](https://gitlab.psi.ch/bec)*
-```{eval-rst}
-.. include:: usage/install/create_config.rst
-```
+### Upload a new device configuration
 
-
-
-### Load, save and update the configuration
-
-(upload_configuration)=
-#### Upload a new configuration
-
-To upload a new device configuration from the client using a yaml file, please start Redis and the BEC server (if they are not running already) and launch the client using
-
-```{code-block} bash
-bec
-```
-
-Once the client started, run the following command to update the session with a new device configuration file:
-
+From the client, you can now run the follow command to update the session with a new device configuration file.
+You can now reload the config from the BEC client.
 ```{code-block} python
 bec.config.update_session_with_file(<my-config.yaml>)
 ```
+In our case, `<my-config.yaml>` could be for example the stored and updated config `config_saved.yaml` from above.
+Throughout these steps, you have exported and imported a device config, and in addition also extended the config with a new device.
 
-where `<my-config.yaml>` is the full path to your device config file, e.g. `/sls/x12sa/Data10/e12345/bec/my_config.yaml`.
+### Update the configuration
+We can update the device config from the command line interface. 
+This allows us for instance to enable/disable, set limits or store user_parameter (e.g. in/out positions) in the config file that will be hosted, and if wanted, also exported with the device config.  
 
-#### Export the current configuration
-
-To save the current session to disk, use
-
-```python
-bec.config.save_current_session("./config_saved.yaml") # this will save a file bec_client/config_saved.yaml
-```
-
-#### Update the configuration
-
-##### Enable / disable a device
+#### Enable / disable a device
 
 To disable a device (e.g. samx), use
 
-```python
-dev.samx.enabled=False # this disabled the device samx on all services and MongoDB
+```{code-block} python
+dev.samx.enabled=False 
 ```
+The device `samx` is now disabled on all services as well as for the BEC database (MongoDB). 
 
-##### Update the device config
+#### Update the device config
 
 To update the device config, use
 
-```python
+```{code-block}  python
 dev.samx.set_device_config({"tolerance":0.02})
 ```
+ which will update the tolerance window for the motor to reach its target position. 
+ Keep in mind though, that the parameter exposed through the device_config must be configurable in the [ophyd_device](#developer.ophyd) of the bespoken device.
 
-Set or update the user parameters
+#### Set or update the user parameters
 
 To set the device's user parameters (such as in/out positions), use
 
-```python
+```{code-block}  python
 dev.samx.set_user_parameter({"in": 2.6, "out": 0.2})
 ```
 
 If instead you only want to update the user parameters, use
 
-```python
+```{code-block} python
 dev.samx.update_user_parameter({"in":2.8})
 ```
 
 ```{hint}
-The user parameters can be seen as a python dictionary. Therefore, the above commands are equivalent to updating a python dictionary using
+The user parameters can be seen as a python dictionary. Therefore, the above commands are equivalent to updating a python dictionary.
+```
+See the following example:
 
 ```python
-user_parameter = {"in": 2.6, "out": 0.2}    # equivalent to set_user_parameter
-print(f"Set user parameter: {user_parameter}")
+my_user_parameter = {"in": 2.6, "out": 0.2}    # equivalent to set_user_parameter
+print(f"Set user parameter: {my_user_parameter}")
 
 
-user_parameter.update({"in": 2.8})          # equivalent to update_user_parameter
-print(f"Updated user parameter: {user_parameter}")
+my_user_parameter.update({"in": 2.8})          # equivalent to update_user_parameter
+print(f"Updated user parameter: {my_user_parameter}")
 ```
 
 This will output:
