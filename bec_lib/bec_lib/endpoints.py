@@ -85,7 +85,7 @@ class MessageEndpoints:
     def device_status(cls, device: str):
         """
         Endpoint for device status. This endpoint is used by the device server to publish
-        the device status using a messages.DeviceStatus message.
+        the device status using a messages.DeviceStatusMessage message.
 
         Args:
             device (str): Device name, e.g. "samx".
@@ -138,7 +138,7 @@ class MessageEndpoints:
     def device_progress(cls, device: str) -> str:
         """
         Endpoint for device progress. This endpoint is used by the device server to publish
-        the device progress using a messages.DeviceStatus message.
+        the device progress using a messages.ProgressMessage message.
 
         Args:
             device (str): Device name, e.g. "samx".
@@ -167,7 +167,7 @@ class MessageEndpoints:
         Endpoint for device config request response. This endpoint is used by the
         device server and scihub connector to inform about whether the device config
         request was accepted or rejected. The response is sent using a
-        messages.DeviceConfigMessage message.
+        messages.RequestResponseMessage message.
 
         Args:
             RID (str): Request ID.
@@ -195,7 +195,7 @@ class MessageEndpoints:
         """
         Endpoint for device server config request response. This endpoint is used by the
         device server to inform about whether a new configuration was accepted or rejected.
-        The response is sent using a messages.DeviceConfigMessage message.
+        The response is sent using a messages.RequestResponseMessage message.
 
         Args:
             RID (str): Request ID.
@@ -233,7 +233,7 @@ class MessageEndpoints:
     def device_info(cls, device: str) -> str:
         """
         Endpoint for device info. This endpoint is used by the device server to publish
-        the device info using a messages.DeviceInfo message.
+        the device info using a messages.DeviceInfoMessage message.
 
         Args:
             device (str): Device name, e.g. "samx".
@@ -247,7 +247,7 @@ class MessageEndpoints:
     def device_staged(cls, device: str) -> str:
         """
         Endpoint for the device stage status. This endpoint is used by the device server
-        to publish the device stage status using a messages.DeviceStatus message.
+        to publish the device stage status using a messages.DeviceStatusMessage message.
         A device is staged when it is ready to be used in a scan. A DeviceStatus of 1 means
         that the device is staged, 0 means that the device is not staged.
 
@@ -282,7 +282,7 @@ class MessageEndpoints:
     def scan_queue_modification(cls) -> str:
         """
         Endpoint for scan queue modification. This endpoint is used to publish accepted
-        scan queue modifications using a messages.ScanQueueModification message.
+        scan queue modifications using a messages.ScanQueueModificationMessage message.
 
         Returns:
             str: Endpoint for scan queue modification.
@@ -293,7 +293,7 @@ class MessageEndpoints:
     def scan_queue_modification_request(cls) -> str:
         """
         Endpoint for scan queue modification request. This endpoint is used to request
-        a scan queue modification using a messages.ScanQueueModification message.
+        a scan queue modification using a messages.ScanQueueModificationMessage message.
         If accepted, the modification is published using the scan_queue_modification
         endpoint.
 
@@ -331,7 +331,7 @@ class MessageEndpoints:
         """
         Endpoint for scan queue request response. This endpoint is used to publish the
         information on whether the scan request was accepted or rejected. The response
-        is sent using a ``messages.ScanQueueRequestResponse`` message.
+        is sent using a messages.RequestResponseMessage message.
 
         Returns:
             str: Endpoint for scan queue request response.
@@ -343,7 +343,7 @@ class MessageEndpoints:
     def scan_queue_status(cls) -> str:
         """
         Endpoint for scan queue status. This endpoint is used to publish the scan queue
-        status using a messages.ScanQueueStatus message.
+        status using a messages.ScanQueueStatusMessage message.
 
         Returns:
             str: Endpoint for scan queue status.
@@ -354,7 +354,7 @@ class MessageEndpoints:
     def scan_queue_history(cls) -> str:
         """
         Endpoint for scan queue history. This endpoint is used to keep track of the
-        scan queue history using a messages.ScanQueueHistory message. The endpoint is
+        scan queue history using a messages.ScanQueueHistoryMessage message. The endpoint is
         connected to a redis list.
 
         Returns:
@@ -447,7 +447,7 @@ class MessageEndpoints:
     def device_instructions(cls) -> str:
         """
         Endpoint for device instructions. This endpoint is used by the scan server to
-        publish the device instructions using a messages.DeviceInstructions message.
+        publish the device instructions using a messages.DeviceInstructionMessage message.
         The device instructions are used to instruct the device server to perform
         certain actions, e.g. to move a motor.
 
@@ -460,7 +460,7 @@ class MessageEndpoints:
     def device_rpc(cls, rpc_id: str) -> str:
         """
         Endpoint for device rpc. This endpoint is used by the device server to publish
-        the result of a device rpc using a messages.DeviceRPCResponse message.
+        the result of a device rpc using a messages.DeviceRPCMessage message.
 
         Args:
             rpc_id (str): RPC ID.
@@ -496,7 +496,7 @@ class MessageEndpoints:
     def public_scan_info(cls, scanID: str) -> str:
         """
         Endpoint for scan info. This endpoint is used by the scan worker to publish the
-        scan info using a messages.ScanInfo message. In contrast to the scan_info endpoint,
+        scan info using a messages.ScanStatusMessage message. In contrast to the scan_info endpoint,
         this endpoint is specific to a scan and has a retentioni time of 30 minutes.
 
         Args:
@@ -639,8 +639,8 @@ class MessageEndpoints:
     @classmethod
     def observer(cls) -> str:
         """
-        Endpoint for observer. This endpoint is used to keep track of observer states.
-        This endpoint is currently not used.
+        Endpoint for observer. This endpoint is used to keep track of observer states using a.
+        messages.ObserverMessage message. This endpoint is currently not used.
 
         Returns:
             str: Endpoint for observer.
@@ -687,7 +687,7 @@ class MessageEndpoints:
     def processed_data(cls, process_id: str) -> str:
         """
         Endpoint for processed data. This endpoint is used to publish new processed data
-        streams using a messages.ProcessedData message.
+        streams using a messages.ProcessedDataMessage message.
 
         Args:
             process_id (str): Process ID, typically a uuid4 string.
@@ -701,7 +701,7 @@ class MessageEndpoints:
     def dap_config(cls) -> str:
         """
         Endpoint for DAP configuration. This endpoint is used to publish the DAP configuration
-        using a messages.DAPConfig message.
+        using a messages.DAPConfigMessage message.
 
         Returns:
             str: Endpoint for DAP configuration.
