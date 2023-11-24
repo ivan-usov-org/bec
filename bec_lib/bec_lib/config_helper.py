@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import json
+import os
 import time
 import uuid
 from typing import TYPE_CHECKING
 
 import msgpack
 import yaml
+import bec_lib
 
 from bec_lib.bec_errors import DeviceConfigError
 from bec_lib.endpoints import MessageEndpoints
@@ -120,3 +122,9 @@ class ConfigHelper:
                     raise DeviceConfigError("Timeout reached whilst waiting for config reply.")
                 continue
             return RequestResponseMessage.loads(msg)
+
+    def load_demo_config(self):
+        """Load BEC device demo_config.yaml for simulation."""
+        dir_path = os.path.abspath(os.path.join(os.path.dirname(bec_lib.__file__), "./configs/"))
+        fpath = os.path.join(dir_path, "demo_config.yaml")
+        self.update_session_with_file(fpath)

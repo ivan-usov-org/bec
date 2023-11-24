@@ -13,6 +13,16 @@ from bec_lib.config_helper import ConfigHelper
 dir_path = os.path.dirname(bec_lib.__file__)
 
 
+def test_load_demo_config():
+    connector = mock.MagicMock()
+    config_helper = ConfigHelper(connector)
+    with mock.patch.object(config_helper, "update_session_with_file") as mock_update:
+        config_helper.load_demo_config()
+        dirpath = os.path.dirname(bec_lib.__file__)
+        fpath = os.path.join(dirpath, "configs/demo_config.yaml")
+        mock_update.assert_called_once_with(fpath)
+
+
 def test_config_helper_update_session_with_file():
     connector = mock.MagicMock()
     config_helper = ConfigHelper(connector)
