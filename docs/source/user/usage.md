@@ -116,7 +116,7 @@ s = scans.line_scan(dev.samx, -5, 5, steps=50, exp_time=0.1, relative=False)
 print(s.scan.data) # access to all of the data
 ```
 Typically, only specific motors are of interest. 
-A convenient access pattern `data[*device*][*hinted_signal*].valis` implemented, that allows you to quickly access the data directly.
+A convenient access pattern `data[device][hinted_signal].val` is implemented, that allows you to quickly access the data directly.
 For example to access the data of `samx` and the above added device `gauss_bpm`, you may do the following:
 ```python
 samx_data = s.scan.data['samx']['samx'].val
