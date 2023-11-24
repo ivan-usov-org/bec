@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.45.0 (2023-11-24)
+
+### Feature
+
+* Add load_demo_config method ([`20dfc64`](https://gitlab.psi.ch/bec/bec/-/commit/20dfc6497266bb0dde52cd71bd4e88ce7f364571))
+
 ## v0.44.2 (2023-11-23)
 
 ### Fix
