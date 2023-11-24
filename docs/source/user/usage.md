@@ -119,20 +119,20 @@ Typically, only specific motors are of interest.
 A convenient access pattern `data[device][hinted_signal].val` is implemented, that allows you to quickly access the data directly.
 For example to access the data of `samx` and the above added device `gauss_bpm`, you may do the following:
 ```python
-samx_data = s.scan.data['samx']['samx'].val
-samx_data = s.scan.data['gauss_bpm']['gauss_bpm'].val
+samx_data = s.scan.data.samx.samx.val # or s.scan.data['samx']['samx'].val 
+gauss_bpm_data = s.scan.data.gauss_bpm.gauss_bpm.val # or s.scan.data['gauss_bpm']['gauss_bpm'].val
 ```
 
 ### Plot the scan data manually
 Alternatively, you may install `pandas` as an additional dependency to directly import the data to a pandas dataframe. 
-If on top, `matplotlib` is installed in the environment and imported `import matplotlib.pyplot as plt` within the BEC's IPython shell, you may directly plot the data from the ipython shell.
+If on top, `matplotlib` is installed in the environment and imported `import matplotlib.pyplot as plt` within the BEC's IPython shell, you may directly plot the data from the shell.
 
 ```python
 df = s.scan.to_pandas()
 df.plot(x=('samx','samx','value'),y=('gauss_bpm','gauss_bpm','value'),kind='scatter')
 plt.show()
 ```
-This will plot the following curve from the device `gauss_bpm`, which simulated a gaussian signal.
+This will plot the following curve from the device `gauss_bpm`, which simulates a gaussian signal.
 ```{image} ../assets/gauss_scatter_plot.png
 :align: center
 :alt: tab completion for finding devices
