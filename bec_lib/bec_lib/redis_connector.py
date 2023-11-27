@@ -30,6 +30,7 @@ def catch_connection_error(func):
             return func(*args, **kwargs)
         except redis.exceptions.ConnectionError:
             warnings.warn("Failed to connect to redis. Is the server running?")
+            time.sleep(0.1)
             return None
 
     return wrapper
