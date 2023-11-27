@@ -2,6 +2,23 @@
 
 <!--next-version-placeholder-->
 
+## v0.45.1 (2023-11-27)
+
+### Fix
+
+* Add short delay in case of connection error ([`95106d6`](https://gitlab.psi.ch/bec/bec/-/commit/95106d6136d2d0a6fb476a422d970dcf830519de))
+
+### Documentation
+
+* Update docstrings for endpoints ([`945297d`](https://gitlab.psi.ch/bec/bec/-/commit/945297d4ac4be12c204546f5568a89eb4efb148b))
+* Include comments upon merge request ([`e3c3607`](https://gitlab.psi.ch/bec/bec/-/commit/e3c3607fef0cb1238b9d3a60a61b3576a5660c14))
+* Fix style ([`cb531c2`](https://gitlab.psi.ch/bec/bec/-/commit/cb531c2de16ea41a31c3bf80a31b463c5fbae28d))
+* Remove typo ([`e017900`](https://gitlab.psi.ch/bec/bec/-/commit/e01790062b93a132a6581cd023f215b87e30fc8e))
+* Add gauss_scatter_plot ([`bf138ca`](https://gitlab.psi.ch/bec/bec/-/commit/bf138ca380261e2dcaf6659fceb9ab8f6daa4129))
+* Reviewed user documentation ([`15316ca`](https://gitlab.psi.ch/bec/bec/-/commit/15316caedb0ffa9846b199cc795e3bea3e031386))
+* Refactor device configuration.md ([`12bd969`](https://gitlab.psi.ch/bec/bec/-/commit/12bd969d59dafde22cdd1fd1d0b6c15a16629a52))
+* Update user guide for installation ([`aa5a245`](https://gitlab.psi.ch/bec/bec/-/commit/aa5a245b46b46255b78b4f5d1a71898f6c2257bf))
+
 ## v0.45.0 (2023-11-24)
 
 ### Feature
