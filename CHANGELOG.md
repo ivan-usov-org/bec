@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.45.2 (2023-11-27)
+
+### Fix
+
+* Fixed stop instruction for halt ([`6eb1081`](https://gitlab.psi.ch/bec/bec/-/commit/6eb10810d6de19bbeb9170fd78259864c3ca682c))
+
 ## v0.45.1 (2023-11-27)
 
 ### Fix
