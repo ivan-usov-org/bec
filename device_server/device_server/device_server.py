@@ -64,7 +64,7 @@ class DeviceServer(RPCMixin, BECService):
                 event=consumer_stop,
                 cb=self.instructions_callback,
                 parent=self,
-            ),
+            )
         ]
         for thread in self.threads:
             thread.start()
@@ -104,7 +104,7 @@ class DeviceServer(RPCMixin, BECService):
             logger.warning("Failed to parse scan queue modification message.")
             return
         logger.info(f"Receiving: {mvalue.content}")
-        if mvalue.content.get("action") in ["pause", "abort"]:
+        if mvalue.content.get("action") in ["pause", "abort", "halt"]:
             parent.stop_devices()
 
     def stop_devices(self) -> None:
@@ -279,9 +279,7 @@ class DeviceServer(RPCMixin, BECService):
             if hasattr(obj.obj, "pre_scan"):
                 obj.obj.pre_scan()
             dev_msg = messages.DeviceReqStatusMessage(
-                device=dev,
-                success=True,
-                metadata=instr.metadata,
+                device=dev, success=True, metadata=instr.metadata
             ).dumps()
             self.producer.set_and_publish(MessageEndpoints.device_req_status(dev), dev_msg, pipe)
         pipe.execute()
@@ -293,9 +291,7 @@ class DeviceServer(RPCMixin, BECService):
         else:
             device_name = status.obj.root.name
         dev_msg = messages.DeviceReqStatusMessage(
-            device=device_name,
-            success=status.success,
-            metadata=status.instruction.metadata,
+            device=device_name, success=status.success, metadata=status.instruction.metadata
         ).dumps()
         logger.debug(f"req status for device {device_name}: {status.success}")
         self.producer.set_and_publish(

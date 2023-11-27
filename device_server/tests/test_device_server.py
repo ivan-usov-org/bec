@@ -5,6 +5,7 @@ from unittest.mock import ANY
 import pytest
 from bec_lib import Alarms, MessageEndpoints, ServiceConfig, messages
 from bec_lib.messages import BECStatus
+from bec_lib.redis_connector import MessageObject
 from bec_lib.tests.utils import ConnectorMock, ConsumerMock
 from ophyd import Staged
 from ophyd.utils import errors as ophyd_errors
@@ -121,6 +122,81 @@ def test_stop_devices(device_server_mock):
 
 
 @pytest.mark.parametrize(
+    "msg,stop_called",
+    [
+        (
+            MessageObject(
+                messages.ScanQueueModificationMessage(
+                    scanID="scanID",
+                    action="pause",
+                    parameter={},
+                    metadata={"stream": "primary", "DIID": 1, "RID": "test"},
+                ).dumps(),
+                "test",
+            ),
+            True,
+        ),
+        (
+            MessageObject(
+                messages.ScanQueueModificationMessage(
+                    scanID="scanID",
+                    action="abort",
+                    parameter={},
+                    metadata={"stream": "primary", "DIID": 1, "RID": "test"},
+                ).dumps(),
+                "test",
+            ),
+            True,
+        ),
+        (
+            MessageObject(
+                messages.ScanQueueModificationMessage(
+                    scanID="scanID",
+                    action="halt",
+                    parameter={},
+                    metadata={"stream": "primary", "DIID": 1, "RID": "test"},
+                ).dumps(),
+                "test",
+            ),
+            True,
+        ),
+        (
+            MessageObject(
+                messages.ScanQueueModificationMessage(
+                    scanID="scanID",
+                    action="resume",
+                    parameter={},
+                    metadata={"stream": "primary", "DIID": 1, "RID": "test"},
+                ).dumps(),
+                "test",
+            ),
+            False,
+        ),
+        (
+            MessageObject(
+                messages.ScanQueueModificationMessage(
+                    scanID="scanID",
+                    action="deferred_pause",
+                    parameter={},
+                    metadata={"stream": "primary", "DIID": 1, "RID": "test"},
+                ).dumps(),
+                "test",
+            ),
+            False,
+        ),
+    ],
+)
+def test_consumer_interception_callback(device_server_mock, msg, stop_called):
+    device_server = device_server_mock
+    with mock.patch.object(device_server, "stop_devices") as stop:
+        device_server.consumer_interception_callback(msg, parent=device_server)
+        if stop_called:
+            stop.assert_called_once()
+        else:
+            stop.assert_not_called()
+
+
+@pytest.mark.parametrize(
     "instr",
     [
         messages.DeviceInstructionMessage(
@@ -217,7 +293,7 @@ def test_assert_device_is_valid(device_server_mock, instr):
             action="set",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
-        ),
+        )
     ],
 )
 def test_handle_device_instructions_set(device_server_mock, instr):
@@ -250,7 +326,7 @@ def test_handle_device_instructions_set(device_server_mock, instr):
             action="set",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
-        ),
+        )
     ],
 )
 def test_handle_device_instructions_exception(device_server_mock, instr):
@@ -283,7 +359,7 @@ def test_handle_device_instructions_exception(device_server_mock, instr):
             action="set",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
-        ),
+        )
     ],
 )
 def test_handle_device_instructions_limit_error(device_server_mock, instr):
@@ -313,7 +389,7 @@ def test_handle_device_instructions_limit_error(device_server_mock, instr):
             action="read",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
-        ),
+        )
     ],
 )
 def test_handle_device_instructions_read(device_server_mock, instr):
@@ -334,7 +410,7 @@ def test_handle_device_instructions_read(device_server_mock, instr):
             action="rpc",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
-        ),
+        )
     ],
 )
 def test_handle_device_instructions_rpc(device_server_mock, instr):
@@ -365,7 +441,7 @@ def test_handle_device_instructions_rpc(device_server_mock, instr):
             action="kickoff",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
-        ),
+        )
     ],
 )
 def test_handle_device_instructions_kickoff(device_server_mock, instr):
@@ -386,7 +462,7 @@ def test_handle_device_instructions_kickoff(device_server_mock, instr):
             action="complete",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
-        ),
+        )
     ],
 )
 def test_handle_device_instructions_complete(device_server_mock, instr):
@@ -441,7 +517,7 @@ def test_complete_device(device_server_mock, instr):
             action="pre_scan",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
-        ),
+        )
     ],
 )
 def test_handle_device_instructions_pre_scan(device_server_mock, instr):
@@ -462,7 +538,7 @@ def test_handle_device_instructions_pre_scan(device_server_mock, instr):
             action="trigger",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
-        ),
+        )
     ],
 )
 def test_handle_device_instructions_trigger(device_server_mock, instr):
@@ -483,7 +559,7 @@ def test_handle_device_instructions_trigger(device_server_mock, instr):
             action="stage",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
-        ),
+        )
     ],
 )
 def test_handle_device_instructions_stage(device_server_mock, instr):
@@ -504,7 +580,7 @@ def test_handle_device_instructions_stage(device_server_mock, instr):
             action="unstage",
             parameter={},
             metadata={"stream": "primary", "DIID": 1, "RID": "test"},
-        ),
+        )
     ],
 )
 def test_handle_device_instructions_unstage(device_server_mock, instr):
@@ -632,10 +708,7 @@ def test_read_device(device_server_mock, instr):
     "instr",
     [
         messages.DeviceInstructionMessage(
-            device="samx",
-            action="stage",
-            parameter={},
-            metadata={"stream": "primary", "DIID": 1},
+            device="samx", action="stage", parameter={}, metadata={"stream": "primary", "DIID": 1}
         ),
         messages.DeviceInstructionMessage(
             device=["samx", "samy"],
