@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.46.0 (2023-11-28)
+
+### Feature
+
+* Added version flag to bec cli ([`438e625`](https://gitlab.psi.ch/bec/bec/-/commit/438e6258dfd9806227d9ae89f2ae892c557e386a))
+
 ## v0.45.4 (2023-11-28)
 
 ### Fix
