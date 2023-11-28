@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.45.4 (2023-11-28)
+
+### Fix
+
+* Fixed device read for nested devices; closes #134 ([`eda60c5`](https://gitlab.psi.ch/bec/bec/-/commit/eda60c529afea248104279b3152ef9cfcb44b228))
+
 ## v0.45.3 (2023-11-28)
 
 ### Fix
