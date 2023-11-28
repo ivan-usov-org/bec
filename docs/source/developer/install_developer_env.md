@@ -127,5 +127,5 @@ bec-server start --config my_new_bec_config.yaml
 and finally also to the client
 
 ```bash
-bec
+bec --config my_new_bec_config.yaml
 ```
