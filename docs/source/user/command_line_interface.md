@@ -120,7 +120,9 @@ There are also multiple ways plot and investigate the data, for this please expl
 This also includes live plotting of data.
 
 BEC has various different type of scans, for instance `scans.grid_scan`, `scans.list_scan`, which you can explore in the simulation. 
-What can be very convenient, is using the syntax below to print out the docstring signature of the implemented scan, which typically also gives an example on its usage:
+
+#### Explore docstring documentation 
+What can be very convenient while exploring built-in scans, is using the [Ipython syntax](https://ipython.readthedocs.io/en/stable/interactive/tutorial.html) `?` to print out all sort of useful information about an object, e.g. for `scans.list_scan` 
 
 ```ipython
 demo [3/31] ❯❯ scans.list_scan?
@@ -142,15 +144,17 @@ Examples:
 File:      ~/work_psi_awi/bec_workspace/bec/bec_lib/bec_lib/scans.py
 Type:      function
 ```
-
+The shell printout provides information about the scan signature, parameters, as well as a syntax example at the bottom.
 
 ### How to write a script
 -----------------------
 
-Scripts are user defined functions that can be executed from the BEC console. 
+Scripts are user defined functions that can be executed from the BEC console (CLI). 
 They are stored in the ``scripts`` folder and can be edited with any text editor. 
-The scripts are loaded automatically on startup of the BEC console but can also be reloaded by typing ``bec.load_all_user_scripts()`` in the BEC console.
-This command will load scripts from 3 locations: `~/bec/scripts/.`, `bec/bec_lib/scripts/.` and the beamline plugins directory, e.g. `/csaxs-bec/bec_plugins/scripts/.`
+The scripts are loaded automatically on startup of the BEC console but can also be reloaded by typing ``bec.load_all_user_scripts()`` in the command-line.
+This command will load scripts from three locations: `~/bec/scripts/.`, `bec/bec_lib/scripts/.` and the beamline plugin directory, e.g. `/csaxs-bec/bec_plugins/scripts/.`
+
+
 An example of a user script could be a function to move a specific motor to a predefined position:
 
 ```python 
@@ -195,7 +199,8 @@ However, sometimes it is necessary to run a sequence of functions as if it were 
 For example, we might want to run a grid scan (2D scan) with our sample motor stages but move the sample position in z after each 2D scan. 
 Normally, this would create multiple output files that one would need to merge together later. 
 
-This is where the scan definition comes in; it allows us to run a sequence of functions as if it were a scan, resulting in a single `scan_number`, a single `scanID` and a single output file. 
+This is where the scan definition comes in. 
+It allows us to run a sequence of functions as if it were a scan, resulting in a single `scan_number`, a single `scanID` and a single output file. 
 
 ```python
 
