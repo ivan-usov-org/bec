@@ -1,15 +1,23 @@
+(developer.contributing)=
 ## Contributing
 
-Thank you for considering contributing to BEC! Contributions are essential for improving the project and helping it grow. We welcome your bug reports, feature requests, documentation improvements, and code contributions.
+Thank you for considering contributing to BEC! Contributions are essential for improving the project and helping it grow. 
 
 ### How to Contribute
+
+We welcome your bug reports and feature requests via [GitLab issues](https://gitlab.psi.ch/bec/bec/-/issues?sort=created_date&state=opened), as well as contribution for documentation improvements, and code extensions or improvements.
 
 #### Reporting Bugs or Requesting Features:
 
 - Before submitting a bug report or feature request, please check the [issue tracker](https://gitlab.psi.ch/bec/bec/issues) to avoid duplication.
-- If the issue or feature hasn't been reported, open a new issue with a clear title and description. Be sure to provide steps to reproduce for bugs.
+- If the issue or feature hasn't been reported, open a new issue with a clear title and description. Be sure to provide steps to reproduce bugs, including _package version_ of the deployed BEC services (e.g. `bec_lib`) and information of your operating system, which will increase chances of reproducing and fixing the reported bug.
 
 #### Contributing Code:
+
+If you are keen on contributing new code developments to BEC, please follow the guidelines on how to push code changes back into the [BEC repository](https://gitlab.psi.ch/bec).
+To start with, you will first have to clone the repository to your local system as described in the [installation guide for developers](#developer.install_developer_env) and create a `bec_venv` with the developer (_[dev]_) extensions.
+
+Afterwards, you may follow this step-by-step guide to suggest your code improvements:
 
 1. Create a new branch for your changes:
 
@@ -31,7 +39,8 @@ Thank you for considering contributing to BEC! Contributions are essential for i
     pylint your_module_or_package
     ```
 
-5. Write tests for new features or fixed bugs.
+5. Write tests for new features or fixed bugs, and add them to the test folder. 
+We use [pytest](https://github.com/pytest-dev/pytest) within our team to test code. 
 
 6. Follow [Conventional Commit Messages](https://www.conventionalcommits.org/en/v1.0.0/) when writing commit messages. This helps us automatically generate a changelog. For example:
 
