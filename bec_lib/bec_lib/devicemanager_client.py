@@ -83,6 +83,11 @@ class RPCBase:
             parent = parent.parent
         return parent
 
+    @property
+    def full_name(self):
+        """Returns the full name of the device."""
+        return self._compile_function_path().replace(".", "_")
+
     def _prepare_rpc_msg(
         self, rpc_id: str, request_id: str, device: str, func_call: str, *args, **kwargs
     ) -> messages.ScanQueueMessage:
@@ -243,11 +248,7 @@ class RPCBase:
                 self._custom_rpc_methods[user_access_name] = RPCBase(
                     name=user_access_name, info=descr, parent=self
                 )
-                setattr(
-                    self,
-                    user_access_name,
-                    self._custom_rpc_methods[user_access_name].run,
-                )
+                setattr(self, user_access_name, self._custom_rpc_methods[user_access_name].run)
                 setattr(getattr(self, user_access_name), "__doc__", descr.get("doc"))
             else:
                 self._custom_rpc_methods[user_access_name] = RPCBase(
@@ -255,11 +256,7 @@ class RPCBase:
                     info={"device_info": {"custom_user_access": descr}},
                     parent=self,
                 )
-                setattr(
-                    self,
-                    user_access_name,
-                    self._custom_rpc_methods[user_access_name],
-                )
+                setattr(self, user_access_name, self._custom_rpc_methods[user_access_name])
 
     def update_config(self, update: dict) -> None:
         """
@@ -324,16 +321,16 @@ class DeviceBase(RPCBase, Device):
         if not cached:
             return self._run(cached=cached, fcn=self.read)
         if use_readback:
-            val = self.parent.producer.get(MessageEndpoints.device_readback(self.name))
+            val = self.root.parent.producer.get(MessageEndpoints.device_readback(self.root.name))
         else:
-            val = self.parent.producer.get(MessageEndpoints.device_read(self.name))
+            val = self.root.parent.producer.get(MessageEndpoints.device_read(self.root.name))
 
         if not val:
             return None
         signals = messages.DeviceMessage.loads(val).content["signals"]
         if filter_to_hints:
             signals = {key: val for key, val in signals.items() if key in self._hints}
-        return signals
+        return {key: val for key, val in signals.items() if key.startswith(self.full_name)}
 
     @rpc
     def read_configuration(self):

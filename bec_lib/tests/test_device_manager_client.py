@@ -6,6 +6,7 @@ import pytest
 from bec_lib import messages
 from bec_lib.devicemanager import Status
 from bec_lib.devicemanager_client import RPCError
+from bec_lib.endpoints import MessageEndpoints
 from bec_lib.tests.utils import bec_client
 
 
@@ -19,6 +20,72 @@ def test_nested_device_root(dev):
     assert dev.dyn_signals.messages.name == "messages"
     assert dev.dyn_signals.root == dev.dyn_signals
     assert dev.dyn_signals.messages.root == dev.dyn_signals
+
+
+def test_read(dev):
+    with mock.patch.object(dev.samx.root.parent.producer, "get") as mock_get:
+        mock_get.return_value = messages.DeviceMessage(
+            signals={
+                "samx": {"value": 0, "timestamp": 1701105880.1711318},
+                "samx_setpoint": {"value": 0, "timestamp": 1701105880.1693492},
+                "samx_motor_is_moving": {"value": 0, "timestamp": 1701105880.16935},
+            },
+            metadata={"scan_id": "scan_id", "scan_type": "scan_type"},
+        ).dumps()
+        res = dev.samx.read()
+        mock_get.assert_called_once_with(MessageEndpoints.device_readback("samx"))
+        assert res == {
+            "samx": {"value": 0, "timestamp": 1701105880.1711318},
+            "samx_setpoint": {"value": 0, "timestamp": 1701105880.1693492},
+            "samx_motor_is_moving": {"value": 0, "timestamp": 1701105880.16935},
+        }
+
+
+def test_read_filtered_hints(dev):
+    with mock.patch.object(dev.samx.root.parent.producer, "get") as mock_get:
+        mock_get.return_value = messages.DeviceMessage(
+            signals={
+                "samx": {"value": 0, "timestamp": 1701105880.1711318},
+                "samx_setpoint": {"value": 0, "timestamp": 1701105880.1693492},
+                "samx_motor_is_moving": {"value": 0, "timestamp": 1701105880.16935},
+            },
+            metadata={"scan_id": "scan_id", "scan_type": "scan_type"},
+        ).dumps()
+        res = dev.samx.read(filter_to_hints=True)
+        mock_get.assert_called_once_with(MessageEndpoints.device_readback("samx"))
+        assert res == {"samx": {"value": 0, "timestamp": 1701105880.1711318}}
+
+
+def test_read_use_read(dev):
+    with mock.patch.object(dev.samx.root.parent.producer, "get") as mock_get:
+        data = {
+            "samx": {"value": 0, "timestamp": 1701105880.1711318},
+            "samx_setpoint": {"value": 0, "timestamp": 1701105880.1693492},
+            "samx_motor_is_moving": {"value": 0, "timestamp": 1701105880.16935},
+        }
+        mock_get.return_value = messages.DeviceMessage(
+            signals=data, metadata={"scan_id": "scan_id", "scan_type": "scan_type"}
+        ).dumps()
+        res = dev.samx.read(use_readback=False)
+        mock_get.assert_called_once_with(MessageEndpoints.device_read("samx"))
+        assert res == data
+
+
+def test_read_nested_device(dev):
+    with mock.patch.object(dev.dyn_signals.root.parent.producer, "get") as mock_get:
+        data = {
+            "dyn_signals_messages_message1": {"value": 0, "timestamp": 1701105880.0716832},
+            "dyn_signals_messages_message2": {"value": 0, "timestamp": 1701105880.071722},
+            "dyn_signals_messages_message3": {"value": 0, "timestamp": 1701105880.071739},
+            "dyn_signals_messages_message4": {"value": 0, "timestamp": 1701105880.071753},
+            "dyn_signals_messages_message5": {"value": 0, "timestamp": 1701105880.071766},
+        }
+        mock_get.return_value = messages.DeviceMessage(
+            signals=data, metadata={"scan_id": "scan_id", "scan_type": "scan_type"}
+        ).dumps()
+        res = dev.dyn_signals.messages.read()
+        mock_get.assert_called_once_with(MessageEndpoints.device_readback("dyn_signals"))
+        assert res == data
 
 
 def test_run_rpc_call(dev):
@@ -84,12 +151,7 @@ def test_handle_rpc_response_raises(dev):
 
 
 def test_handle_rpc_response_returns_dict(dev):
-    msg = messages.DeviceRPCMessage(
-        device="samx",
-        return_val={"a": "b"},
-        out="done",
-        success=True,
-    )
+    msg = messages.DeviceRPCMessage(device="samx", return_val={"a": "b"}, out="done", success=True)
     assert dev.samx._handle_rpc_response(msg) == {"a": "b"}
 
 
