@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.46.1 (2023-11-28)
+
+### Fix
+
+* Fixed ctrl-c behaviour for report.wait; closes #138 ([`728b43c`](https://gitlab.psi.ch/bec/bec/-/commit/728b43c3f98c26dd337bdfff8bb4afc2fd684b80))
+
 ## v0.46.0 (2023-11-28)
 
 ### Feature
