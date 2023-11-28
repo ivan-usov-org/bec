@@ -98,14 +98,60 @@ class DMClientMock(DMClient):
                     "device_info": {
                         "device_base_class": "positioner",
                         "signals": [
-                            "readback",
-                            "setpoint",
-                            "motor_is_moving",
-                            "velocity",
-                            "acceleration",
-                            "high_limit_travel",
-                            "low_limit_travel",
-                            "unused",
+                            {
+                                "component_name": "readback",
+                                "obj_name": device_name,
+                                "kind_int": 5,
+                                "kind_str": "Kind.hinted",
+                            },
+                            {
+                                "component_name": "setpoint",
+                                "obj_name": f"{device_name}_setpoint",
+                                "kind_int": 1,
+                                "kind_str": "Kind.normal",
+                            },
+                            {
+                                "component_name": "motor_is_moving",
+                                "obj_name": f"{device_name}_motor_is_moving",
+                                "kind_int": 1,
+                                "kind_str": "Kind.normal",
+                            },
+                            {
+                                "component_name": "readback",
+                                "obj_name": device_name,
+                                "kind_int": 5,
+                                "kind_str": "Kind.hinted",
+                            },
+                            {
+                                "component_name": "velocity",
+                                "obj_name": f"{device_name}_velocity",
+                                "kind_int": 2,
+                                "kind_str": "Kind.config",
+                            },
+                            {
+                                "component_name": "acceleration",
+                                "obj_name": f"{device_name}_acceleration",
+                                "kind_int": 2,
+                                "kind_str": "Kind.config",
+                            },
+                            {
+                                "component_name": "high_limit_travel",
+                                "obj_name": f"{device_name}_high_limit_travel",
+                                "kind_int": 2,
+                                "kind_str": "Kind.config",
+                            },
+                            {
+                                "component_name": "low_limit_travel",
+                                "obj_name": f"{device_name}_low_limit_travel",
+                                "kind_int": 2,
+                                "kind_str": "Kind.config",
+                            },
+                            {
+                                "component_name": "unused",
+                                "obj_name": f"{device_name}_unused",
+                                "kind_int": 0,
+                                "kind_str": "Kind.omitted",
+                            },
                         ],
                         "hints": {"fields": ["samx"]},
                         "describe": {
@@ -212,11 +258,36 @@ class DMClientMock(DMClient):
                                 "device_info": {
                                     "device_base_class": "device",
                                     "signals": [
-                                        "message1",
-                                        "message2",
-                                        "message3",
-                                        "message4",
-                                        "message5",
+                                        {
+                                            "component_name": "message1",
+                                            "obj_name": "dyn_signals_messages_message1",
+                                            "kind_int": 1,
+                                            "kind_str": "Kind.normal",
+                                        },
+                                        {
+                                            "component_name": "message2",
+                                            "obj_name": "dyn_signals_messages_message2",
+                                            "kind_int": 1,
+                                            "kind_str": "Kind.normal",
+                                        },
+                                        {
+                                            "component_name": "message3",
+                                            "obj_name": "dyn_signals_messages_message3",
+                                            "kind_int": 1,
+                                            "kind_str": "Kind.normal",
+                                        },
+                                        {
+                                            "component_name": "message4",
+                                            "obj_name": "dyn_signals_messages_message4",
+                                            "kind_int": 1,
+                                            "kind_str": "Kind.normal",
+                                        },
+                                        {
+                                            "component_name": "message5",
+                                            "obj_name": "dyn_signals_messages_message5",
+                                            "kind_int": 1,
+                                            "kind_str": "Kind.normal",
+                                        },
                                     ],
                                     "hints": {"fields": []},
                                     "describe": {
@@ -273,23 +344,99 @@ class DMClientMock(DMClient):
         )
         if device_base_class == "positioner":
             signals = [
-                "readback",
-                "setpoint",
-                "motor_is_moving",
-                "velocity",
-                "acceleration",
-                "high_limit_travel",
-                "low_limit_travel",
-                "unused",
+                {
+                    "component_name": "readback",
+                    "obj_name": device_name,
+                    "kind_int": 5,
+                    "kind_str": "Kind.hinted",
+                },
+                {
+                    "component_name": "setpoint",
+                    "obj_name": f"{device_name}_setpoint",
+                    "kind_int": 1,
+                    "kind_str": "Kind.normal",
+                },
+                {
+                    "component_name": "motor_is_moving",
+                    "obj_name": f"{device_name}_motor_is_moving",
+                    "kind_int": 1,
+                    "kind_str": "Kind.normal",
+                },
+                {
+                    "component_name": "readback",
+                    "obj_name": device_name,
+                    "kind_int": 5,
+                    "kind_str": "Kind.hinted",
+                },
+                {
+                    "component_name": "velocity",
+                    "obj_name": f"{device_name}_velocity",
+                    "kind_int": 2,
+                    "kind_str": "Kind.config",
+                },
+                {
+                    "component_name": "acceleration",
+                    "obj_name": f"{device_name}_acceleration",
+                    "kind_int": 2,
+                    "kind_str": "Kind.config",
+                },
+                {
+                    "component_name": "high_limit_travel",
+                    "obj_name": f"{device_name}_high_limit_travel",
+                    "kind_int": 2,
+                    "kind_str": "Kind.config",
+                },
+                {
+                    "component_name": "low_limit_travel",
+                    "obj_name": f"{device_name}_low_limit_travel",
+                    "kind_int": 2,
+                    "kind_str": "Kind.config",
+                },
+                {
+                    "component_name": "unused",
+                    "obj_name": f"{device_name}_unused",
+                    "kind_int": 0,
+                    "kind_str": "Kind.omitted",
+                },
             ]
         elif device_base_class == "signal":
             signals = [
-                "readback",
-                "velocity",
-                "acceleration",
-                "high_limit_travel",
-                "low_limit_travel",
-                "unused",
+                {
+                    "component_name": "readback",
+                    "obj_name": device_name,
+                    "kind_int": 5,
+                    "kind_str": "Kind.hinted",
+                },
+                {
+                    "component_name": "velocity",
+                    "obj_name": f"{device_name}_velocity",
+                    "kind_int": 2,
+                    "kind_str": "Kind.config",
+                },
+                {
+                    "component_name": "acceleration",
+                    "obj_name": f"{device_name}_acceleration",
+                    "kind_int": 2,
+                    "kind_str": "Kind.config",
+                },
+                {
+                    "component_name": "high_limit_travel",
+                    "obj_name": f"{device_name}_high_limit_travel",
+                    "kind_int": 2,
+                    "kind_str": "Kind.config",
+                },
+                {
+                    "component_name": "low_limit_travel",
+                    "obj_name": f"{device_name}_low_limit_travel",
+                    "kind_int": 2,
+                    "kind_str": "Kind.config",
+                },
+                {
+                    "component_name": "unused",
+                    "obj_name": f"{device_name}_unused",
+                    "kind_int": 0,
+                    "kind_str": "Kind.omitted",
+                },
             ]
         dev_info = {
             "device_name": device_name,
@@ -319,7 +466,7 @@ def bec_client():
     device_manager._session = builtins.__dict__["test_session"]
     device_manager.producer = device_manager.connector.producer()
     client.wait_for_service = lambda service_name: None
-    device_manager._load_session()
+    device_manager._load_session(idle_time=0)
     for name, dev in device_manager.devices.items():
         dev._info["hints"] = {"fields": [name]}
     client.device_manager = device_manager

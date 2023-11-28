@@ -39,14 +39,16 @@ class RPCBase:
     device. The RPCBase class is not meant to be used directly, but rather to be subclassed.
     """
 
-    def __init__(self, name: str, info: dict = None, parent=None) -> None:
+    def __init__(self, name: str, info: dict = None, parent=None, signal_info: dict = None) -> None:
         """
         Args:
-            name (str): The name of the device.
+            name (dict): The name of the device.
             info (dict, optional): The device info dictionary. Defaults to None.
             parent ([type], optional): The parent object. Defaults to None.
+            signal_info (dict, optional): The signal info dictionary. Defaults to None.
         """
         self.name = name
+        self._signal_info = signal_info
         self._config = None
         if info is None:
             info = {}
@@ -74,6 +76,18 @@ class RPCBase:
         if not hints:
             return []
         return hints.get("fields", [])
+
+    @property
+    def enabled(self):
+        """Returns True if the device is enabled, otherwise False."""
+        # pylint: disable=protected-access
+        return self.root._config["enabled"]
+
+    @enabled.setter
+    def enabled(self, val):
+        # pylint: disable=protected-access
+        self.update_config({"enabled": val})
+        self.root._config["enabled"] = val
 
     @property
     def root(self):
@@ -215,8 +229,13 @@ class RPCBase:
 
     def _parse_info(self):
         if self._info.get("signals"):
-            for signal_name in self._info.get("signals"):
-                setattr(self, signal_name, Signal(signal_name, parent=self))
+            for signal_info in self._info.get("signals"):
+                signal_name = signal_info.get("component_name")
+                setattr(
+                    self,
+                    signal_name,
+                    Signal(name=signal_name, signal_info=signal_info, parent=self),
+                )
                 precision = (
                     self._info.get("describe", {})
                     .get(f"{self.name}_{signal_name}", {})
@@ -271,39 +290,11 @@ class RPCBase:
         )
 
 
-class DeviceBase(RPCBase, Device):
-    """
-    Device (bluesky interface):
-    * trigger
-    * read
-    * describe
-    * stage
-    * unstage
-    * pause
-    * resume
-    """
-
-    @property
-    def enabled(self):
-        # pylint: disable=protected-access
-        return self.root._config["enabled"]
-
-    @enabled.setter
-    def enabled(self, val):
-        # pylint: disable=protected-access
-        self.update_config({"enabled": val})
-        self.root._config["enabled"] = val
-
+class OphydInterfaceBase(RPCBase):
     @rpc
     def trigger(self, rpc_id: str):
         """
         Triggers the device.
-        """
-
-    @rpc
-    def stop(self):
-        """
-        Stops the device.
         """
 
     def read(self, cached=True, use_readback=True, filter_to_hints=False):
@@ -318,6 +309,12 @@ class DeviceBase(RPCBase, Device):
         Returns:
             dict: The device signals.
         """
+        is_signal = self._signal_info is not None
+        if cached and is_signal:
+            # for signals, we have to check if the signal is hinted or not. If it is not hinted, we
+            # have to read the signal from the device through rpc.
+            cached = self._signal_info["kind_str"] in ["normal", "hinted"]
+
         if not cached:
             return self._run(cached=cached, fcn=self.read)
         if use_readback:
@@ -330,6 +327,8 @@ class DeviceBase(RPCBase, Device):
         signals = messages.DeviceMessage.loads(val).content["signals"]
         if filter_to_hints:
             signals = {key: val for key, val in signals.items() if key in self._hints}
+        if self._signal_info:
+            return signals.get(self._signal_info.get("obj_name"))
         return {key: val for key, val in signals.items() if key.startswith(self.full_name)}
 
     @rpc
@@ -343,6 +342,47 @@ class DeviceBase(RPCBase, Device):
         """
         Describes the device and yields information about the device's signals, including
         the signal's name, source, shape, data type, precision etc.
+        """
+
+    @rpc
+    def describe_configuration(self):
+        """Describes the device configuration."""
+
+    @rpc
+    def get(self):
+        """
+        Gets the device value.
+        """
+
+    @rpc
+    def put(self, value: Any):
+        """
+        Puts the device value.
+        """
+
+
+class DeviceBase(OphydInterfaceBase, Device):
+    """
+    Device (bluesky interface):
+    * trigger
+    * read
+    * describe
+    * stage
+    * unstage
+    * pause
+    * resume
+    """
+
+    @rpc
+    def configure(self, config: dict):
+        """
+        Configures the device.
+        """
+
+    @rpc
+    def stop(self):
+        """
+        Stops the device.
         """
 
     @rpc
@@ -387,92 +427,9 @@ class DeviceBase(RPCBase, Device):
         return f"{type(self).__name__}(name={self.name}, enabled={self.enabled})"
 
 
-class Signal(DeviceBase):
-    """
-    Signal:
-    * trigger
-    * get
-    * put
-    * set
-    * value
-    * read
-    * describe
-    * limits
-    * low limit
-    * high limit
-    """
-
-    @rpc
-    def get(self):
-        """
-        Gets the signal value.
-        """
-
-    @rpc
-    def put(self, val):
-        """
-        Puts the signal value.
-        """
-
+class AdjustableMixin:
     @rpc
     def set(self, val):
-        """
-        Sets the signal value.
-        """
-
-    @rpc
-    def value(self):
-        pass
-
-    @rpc
-    def limits(self):
-        pass
-
-    @rpc
-    def low_limit(self):
-        pass
-
-    @rpc
-    def high_limit(self):
-        pass
-
-
-class Positioner(DeviceBase):
-    """
-    Positioner:
-    * trigger
-    * read
-    * set
-    * stop
-    * settle_time
-    * timeout
-    * egu
-    * limits
-    * low_limit
-    * high_limit
-    * move
-    * position
-    * moving
-    """
-
-    @rpc
-    def set(self, val):
-        pass
-
-    @rpc
-    def stop(self):
-        pass
-
-    @rpc
-    def settle_time(self):
-        pass
-
-    @rpc
-    def timeout(self):
-        pass
-
-    @rpc
-    def egu(self):
         pass
 
     @property
@@ -501,6 +458,45 @@ class Positioner(DeviceBase):
         limits = [self.low_limit, val]
         self.update_config({"deviceConfig": {"limits": limits}})
 
+
+class Signal(AdjustableMixin, OphydInterfaceBase):
+    pass
+
+
+class Positioner(AdjustableMixin, DeviceBase):
+    """
+    Positioner:
+    * trigger
+    * read
+    * set
+    * stop
+    * settle_time
+    * timeout
+    * egu
+    * limits
+    * low_limit
+    * high_limit
+    * move
+    * position
+    * moving
+    """
+
+    @rpc
+    def stop(self):
+        pass
+
+    @rpc
+    def settle_time(self):
+        pass
+
+    @rpc
+    def timeout(self):
+        pass
+
+    @rpc
+    def egu(self):
+        pass
+
     def move(self, val: float, relative=False):
         return self.parent.parent.scans.mv(self, val, relative=relative)
 
@@ -518,8 +514,8 @@ class DMClient(DeviceManagerBase):
         super().__init__(parent.connector)
         self.parent = parent
 
-    def _load_session(self, _device_cls=None, *_args):
-        time.sleep(1)
+    def _load_session(self, idle_time=1, _device_cls=None, *_args):
+        time.sleep(idle_time)
         if self._is_config_valid():
             for dev in self._session["devices"]:
                 # pylint: disable=broad-except
@@ -538,13 +534,13 @@ class DMClient(DeviceManagerBase):
 
         if base_class == "device":
             logger.info(f"Adding new device {name}")
-            obj = DeviceBase(name, info, parent=self)
+            obj = DeviceBase(name, info=info, parent=self)
         elif base_class == "positioner":
             logger.info(f"Adding new positioner {name}")
-            obj = Positioner(name, info, parent=self)
+            obj = Positioner(name, info=info, parent=self)
         elif base_class == "signal":
             logger.info(f"Adding new signal {name}")
-            obj = Signal(name, info, parent=self)
+            obj = Signal(name, info=info, parent=self)
         else:
             logger.error(f"Trying to add new device {name} of type {base_class}")
 

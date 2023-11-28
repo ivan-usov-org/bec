@@ -1,7 +1,6 @@
 import msgpack
-from ophyd import Device, PositionerBase, Signal
-
 from bec_lib.numpy_encoder import numpy_encode
+from ophyd import Device, PositionerBase, Signal
 
 
 def is_serializable(var) -> bool:
@@ -73,7 +72,14 @@ def get_device_info(obj, device_info):
     if hasattr(obj, "component_names"):
         for component_name in obj.component_names:
             if get_device_base_class(getattr(obj, component_name)) == "signal":
-                signals.append(component_name)
+                signals.append(
+                    {
+                        "component_name": component_name,
+                        "obj_name": getattr(obj, component_name).name,
+                        "kind_int": getattr(obj, component_name).kind,
+                        "kind_str": str(getattr(obj, component_name).kind),
+                    }
+                )
     sub_devices = []
     if hasattr(obj, "walk_subdevices"):
         for _, dev in obj.walk_subdevices():

@@ -68,19 +68,12 @@ class RPCMixin:
         return res
 
     def _send_rpc_result_to_client(
-        self,
-        device: str,
-        instr_params: dict,
-        res: Any,
-        result: StringIO,
+        self, device: str, instr_params: dict, res: Any, result: StringIO
     ):
         self.producer.set(
             MessageEndpoints.device_rpc(instr_params.get("rpc_id")),
             messages.DeviceRPCMessage(
-                device=device,
-                return_val=res,
-                out=result.getvalue(),
-                success=True,
+                device=device, return_val=res, out=result.getvalue(), success=True
             ).dumps(),
             expire=1800,
         )
@@ -89,7 +82,7 @@ class RPCMixin:
         # handle ophyd read. This is a special case because we also want to update the
         # buffered value in redis
         instr_params = instr.content.get("parameter")
-        if instr_params.get("func") == "read" or instr_params.get("func").endswith(".read"):
+        if instr_params.get("func") == "read":  # or instr_params.get("func").endswith(".read"):
             res = self._read_and_update_devices([instr.content["device"]], instr.metadata)
             if isinstance(res, list) and len(res) == 1:
                 res = res[0]
@@ -97,8 +90,7 @@ class RPCMixin:
 
         # handle other ophyd methods
         rpc_var = rgetattr(
-            self.device_manager.devices[instr.content["device"]].obj,
-            instr_params.get("func"),
+            self.device_manager.devices[instr.content["device"]].obj, instr_params.get("func")
         )
         res = self._get_result_from_rpc(rpc_var, instr_params)
         if isinstance(res, ophyd.StatusBase):
@@ -127,9 +119,6 @@ class RPCMixin:
         self.producer.set(
             MessageEndpoints.device_rpc(instr_params.get("rpc_id")),
             messages.DeviceRPCMessage(
-                device=instr.content["device"],
-                return_val=None,
-                out=exc_formatted,
-                success=False,
+                device=instr.content["device"], return_val=None, out=exc_formatted, success=False
             ).dumps(),
         )

@@ -112,8 +112,7 @@ class Device:
         """set the device config for this device"""
         self._config["deviceConfig"].update(val)
         return self.parent.config_helper.send_config_request(
-            action="update",
-            config={self.name: {"deviceConfig": self._config["deviceConfig"]}},
+            action="update", config={self.name: {"deviceConfig": self._config["deviceConfig"]}}
         )
 
     def get_device_tags(self) -> List:
@@ -125,8 +124,7 @@ class Device:
         """set the device tags for this device"""
         self._config["deviceTags"] = val
         return self.parent.config_helper.send_config_request(
-            action="update",
-            config={self.name: {"deviceTags": self._config["deviceTags"]}},
+            action="update", config={self.name: {"deviceTags": self._config["deviceTags"]}}
         )
 
     @typechecked
@@ -136,8 +134,7 @@ class Device:
             return None
         self._config["deviceTags"].append(val)
         return self.parent.config_helper.send_config_request(
-            action="update",
-            config={self.name: {"deviceTags": self._config["deviceTags"]}},
+            action="update", config={self.name: {"deviceTags": self._config["deviceTags"]}}
         )
 
     def remove_device_tag(self, val: str):
@@ -146,8 +143,7 @@ class Device:
             return None
         self._config["deviceTags"].remove(val)
         return self.parent.config_helper.send_config_request(
-            action="update",
-            config={self.name: {"deviceTags": self._config["deviceTags"]}},
+            action="update", config={self.name: {"deviceTags": self._config["deviceTags"]}}
         )
 
     @property
@@ -182,8 +178,7 @@ class Device:
             val = OnFailure(val)
         self._config["onFailure"] = val
         return self.parent.config_helper.send_config_request(
-            action="update",
-            config={self.name: {"onFailure": self._config["onFailure"]}},
+            action="update", config={self.name: {"onFailure": self._config["onFailure"]}}
         )
 
     @property
@@ -221,14 +216,14 @@ class Device:
             return DeviceMessage.loads(val).content["signals"].get(self.name)
         return DeviceMessage.loads(val).content["signals"]
 
-    def readback(self, filter_readback=True):
-        """get the last readback value from a device"""
-        val = self.parent.producer.get(MessageEndpoints.device_readback(self.name))
-        if not val:
-            return None
-        if filter_readback:
-            return DeviceMessage.loads(val).content["signals"].get(self.name)
-        return DeviceMessage.loads(val).content["signals"]
+    # def readback(self, filter_readback=True):
+    #     """get the last readback value from a device"""
+    #     val = self.parent.producer.get(MessageEndpoints.device_readback(self.name))
+    #     if not val:
+    #         return None
+    #     if filter_readback:
+    #         return DeviceMessage.loads(val).content["signals"].get(self.name)
+    #     return DeviceMessage.loads(val).content["signals"]
 
     @property
     def device_status(self):
