@@ -34,6 +34,10 @@ To modify and add a new device to the config, open `config_saved.yaml` with a su
 For this, you may use the device gauss_bpm which is shown below. 
 For more information about fields within the device config, you can check out the section [Ophyd](#developer.ophyd) in our developer guide.
 ``` {code-block} yaml
+---
+name: user.devices.add_gauss_bpm
+---
+
 gauss_bpm:
   acquisitionConfig:
     acquisitionGroup: monitor

@@ -27,12 +27,15 @@ Typically, only specific motors are of interest.
 A convenient access pattern `s.scan.data.device.hinted_signal.val` is implemented, that allows you to quickly access the data directly.
 For example to access the data of `samx` and the above added device `gauss_bpm`, you may do the following:
 ```python
-samx_data = s.scan.data.samx.samx.val # or s.scan.data['samx']['samx'].val 
-gauss_bpm_data = s.scan.data.gauss_bpm.gauss_bpm.val # or s.scan.data['gauss_bpm']['gauss_bpm'].val
+samx_data = s.scan.data.samx.samx.val 
+# or samx_data = s.scan.data['samx']['samx'].val
+
+gauss_bpm_data = s.scan.data.gauss_bpm.gauss_bpm.val 
+# or s.scan.data['gauss_bpm']['gauss_bpm'].val
 ```
 You may now use the given data to manipulate it as you see fit.
 Keep in mind though, these manipulations only happen locally for yourself in the IPython shell. 
-They will not be forwarded to the BEC data in Redis, thus, your modification will not stored in the h5file. 
+They will not be forwarded to the BEC data in Redis, thus, your modification won't be stored in the raw data file (HDF5 file). 
 
 ### Plot the scan data on your own
 You may install `pandas` as an additional dependency to directly export the data to a panda's dataframe. 
@@ -43,7 +46,7 @@ df = s.scan.to_pandas()
 df.plot(x=('samx','samx','value'),y=('gauss_bpm','gauss_bpm','value'),kind='scatter')
 plt.show()
 ```
-This will plot the following curve from the device `gauss_bpm`, which simulates a gaussian signal and was potentially added by you to the demo device config in the section [devices](user.devices.add_gauss_bpm).
+This will plot the following curve from the device `gauss_bpm`, which simulates a gaussian signal and was potentially added by you to the demo device config in the section [devices](#user.devices.add_gauss_bpm).
 
 ```{image} ../assets/gauss_scatter_plot.png
 :align: center
