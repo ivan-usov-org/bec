@@ -19,16 +19,24 @@ The scan queue holds the scan instructions and is responsible for scheduling the
 The scan worker executes the scan instructions and if necessary publishes device instructions to Redis. While it does not read out the devices, it potentially waits for devices to complete their operations before continuing with the scan.
 
 ### Device Server
-This service provides a thin layer on top of Bluesky’s Ophyd library to support remote procedure calls (RPC) through Redis. It listens to device instructions sent to Redis and performs the specified operations on Ophyd objects. The available Ophyd objects are determined by loading a device configuration, either through the client, e.g., through yaml files, or from the connected database. Providing Ophyd objects through a service layer also facilitates sharing access to devices that require a direct socket connection, bypassing the EPICS layer. 
+This service provides a thin layer on top of Bluesky’s Ophyd library to support remote procedure calls (RPC) through Redis. 
+It listens to device instructions sent to Redis and performs the specified operations on [Ophyd objects](#developer.ophyd). 
+The available Ophyd objects are determined by loading a device configuration, either through the client, e.g., through yaml files, or from the connected database. 
+Providing Ophyd objects through a service layer also facilitates sharing access to devices that require a direct socket connection, bypassing the EPICS layer. 
 
 ### Scan Bundler
-Data streams in a control system are inherently asynchronous. Yet, to simplify the user feedback and data analysis, asynchronous readouts are often synchronized afterwards. The Scan Bundler creates such synchronization barriers based on metadata entries of the individual readouts (e.g., point IDs or time stamps) and broadcasts these synchronized readings as a new data stream to the BEC system. 
+Data streams in a control system are inherently asynchronous. 
+Yet, to simplify the user feedback and data analysis, asynchronous readouts are often synchronized afterwards. 
+The Scan Bundler creates such synchronization barriers based on metadata entries of the individual readouts (e.g., point IDs or time stamps) and broadcasts these synchronized readings as a new data stream to the BEC system. 
 
 ### Filer Writer
-Beyond simply writing [NeXus](http://www.nexusformat.org)-compatible metadata entries to disk, the file writer also adds external links to the NeXus master file to any other large data file, such as detector files. The internal NeXus structure can be adjusted using customizable plugins to comply with a desired NeXus application definition. 
+Beyond simply writing [HDF5 files](https://portal.hdfgroup.org/hdf5/develop/) with [NeXus](http://www.nexusformat.org)-compatible metadata entries to disk, the file writer also adds external links to the NeXus master file to any other large data file, such as detector files. 
+The internal NeXus structure can be adjusted using customizable plugins to comply with a desired NeXus application definition. 
 
 ### SciHub connector
-A service to connect a BEC instance to external cloud services such as an electronic logbook ([SciLog](https://github.com/paulscherrerinstitute/scilog)), a data catalogue and archiving solution ([SciCat](https://scicatproject.github.io)) and the BEC database. 
+A service to connect a BEC instance to external cloud services such as an electronic logbook [SciLog](https://scilog.psi.ch) ([SciLog GitHub](https://github.com/paulscherrerinstitute/scilog)), a data catalogue and archiving solution [SciCat](https://discovery.psi.ch) ( [SciCat project](https://scicatproject.github.io)) and the BEC database. 
 
 ### Data Analysis Pipeline
-While simple data processing routines such as live data fitting using e.g., [LMfit](https://lmfit.github.io/lmfit-py/), can be performed directly on the server, more computationally expensive operations can be controlled e.g., through [Slurm](https://slurm.schedmd.com) jobs. Alternatively, any process with access to Redis can react to live events and trigger analysis pipelines. Results or metadata thereof can be fed back into the BEC and potentially used to dynamically adjust the data acquisition. 
+While simple data processing routines such as live data fitting using e.g., [LMfit](https://lmfit.github.io/lmfit-py/), can be performed directly on the server, more computationally expensive operations can be controlled e.g., through [Slurm](https://slurm.schedmd.com) jobs. 
+Alternatively, any process with access to Redis can react to live events and trigger analysis pipelines.
+Results or metadata thereof can be fed back into the BEC and potentially used to dynamically adjust the data acquisition. 
