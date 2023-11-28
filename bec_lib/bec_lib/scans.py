@@ -13,7 +13,7 @@ from bec_lib import messages
 from bec_lib.devicemanager_client import Device
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
-from bec_lib.scan_manager import ScanReport
+from bec_lib.scan_report import ScanReport
 from bec_lib.signature_serializer import dict_to_signature
 
 if TYPE_CHECKING:
@@ -123,11 +123,7 @@ class Scans:
         available_scans = msgpack.loads(msg_raw)
         for scan_name, scan_info in available_scans.items():
             self._available_scans[scan_name] = ScanObject(scan_name, scan_info, client=self.parent)
-            setattr(
-                self,
-                scan_name,
-                self._available_scans[scan_name].run,
-            )
+            setattr(self, scan_name, self._available_scans[scan_name].run)
             setattr(getattr(self, scan_name), "__doc__", scan_info.get("doc"))
             setattr(
                 getattr(self, scan_name),
@@ -180,25 +176,25 @@ class Scans:
         if len(arg_input) > 0:
             if len(args) % len(arg_input) != 0:
                 raise TypeError(
-                    f"{scan_info.get('doc')}\n {scan_name} takes multiples of {len(arg_input)} arguments ({len(args)} given).",
+                    f"{scan_info.get('doc')}\n {scan_name} takes multiples of"
+                    f" {len(arg_input)} arguments ({len(args)} given)."
                 )
             if not all(req_kwarg in kwargs for req_kwarg in scan_info.get("required_kwargs")):
                 raise TypeError(
-                    f"{scan_info.get('doc')}\n Not all required keyword arguments have been specified. The required arguments are: {scan_info.get('required_kwargs')}"
+                    f"{scan_info.get('doc')}\n Not all required keyword arguments have been"
+                    f" specified. The required arguments are: {scan_info.get('required_kwargs')}"
                 )
             for ii, arg in enumerate(args):
                 if not isinstance(arg, Scans.get_arg_type(arg_input[ii % len(arg_input)])):
                     raise TypeError(
-                        f"{scan_info.get('doc')}\n Argument {ii} must be of type {arg_input[ii%len(arg_input)]}, not {type(arg).__name__}."
+                        f"{scan_info.get('doc')}\n Argument {ii} must be of type"
+                        f" {arg_input[ii%len(arg_input)]}, not {type(arg).__name__}."
                     )
 
         metadata = {}
         if "md" in kwargs:
             metadata = kwargs.pop("md")
-        params = {
-            "args": Scans._parameter_bundler(args, bundle_size),
-            "kwargs": kwargs,
-        }
+        params = {"args": Scans._parameter_bundler(args, bundle_size), "kwargs": kwargs}
         # check the number of arg bundles against the number of required bundles
         if bundle_size:
             num_bundles = len(params["args"])
@@ -206,11 +202,13 @@ class Scans:
             max_bundles = arg_bundle_size.get("max")
             if min_bundles and num_bundles < min_bundles:
                 raise TypeError(
-                    f"{scan_info.get('doc')}\n {scan_name} requires at least {min_bundles} bundles of arguments ({num_bundles} given).",
+                    f"{scan_info.get('doc')}\n {scan_name} requires at least {min_bundles} bundles"
+                    f" of arguments ({num_bundles} given)."
                 )
             if max_bundles and num_bundles > max_bundles:
                 raise TypeError(
-                    f"{scan_info.get('doc')}\n {scan_name} requires at most {max_bundles} bundles of arguments ({num_bundles} given).",
+                    f"{scan_info.get('doc')}\n {scan_name} requires at most {max_bundles} bundles"
+                    f" of arguments ({num_bundles} given)."
                 )
         return messages.ScanQueueMessage(
             scan_type=scan_name, parameter=params, queue="primary", metadata=metadata

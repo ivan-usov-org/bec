@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, List, Union
 from typeguard import typechecked
 
 if TYPE_CHECKING:
-    from bec_lib.scan_manager import ScanReport
+    from bec_lib.scan_report import ScanReport
 
 
 def threadlocked(fcn):
@@ -61,20 +61,10 @@ def scan_to_csv(
     data_output.extend(header_out)
     data_output.extend(body_out)
 
-    _write_csv(
-        output_name=output_name,
-        delimiter=delimiter,
-        dialect=dialect,
-        output=data_output,
-    )
+    _write_csv(output_name=output_name, delimiter=delimiter, dialect=dialect, output=data_output)
 
 
-def _write_csv(
-    output_name: str,
-    delimiter: str,
-    output: list,
-    dialect: str = None,
-) -> None:
+def _write_csv(output_name: str, delimiter: str, output: list, dialect: str = None) -> None:
     """Write csv file.
 
     Args:
@@ -93,9 +83,7 @@ def _write_csv(
 
 
 def _extract_scan_data(
-    scan_report: ScanReport,
-    header: list = None,
-    write_metadata: bool = True,
+    scan_report: ScanReport, header: list = None, write_metadata: bool = True
 ) -> tuple:
     """Extract scan data from scan report.
 
