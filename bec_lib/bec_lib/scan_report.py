@@ -9,6 +9,7 @@ from bec_lib.bec_errors import ScanAbortion
 from bec_lib.endpoints import MessageEndpoints
 
 if TYPE_CHECKING:
+    from bec_lib.client import BECClient
     from bec_lib.queue_items import QueueItem
 
 
@@ -21,7 +22,9 @@ class ScanReport:
         self._queue_item = None
 
     @classmethod
-    def from_request(cls, request: messages.ScanQueueMessage, client=None) -> ScanReport:
+    def from_request(
+        cls, request: messages.ScanQueueMessage, client: BECClient = None
+    ) -> ScanReport:
         """
         Create a ScanReport from a request
 
@@ -108,11 +111,14 @@ class ScanReport:
         """
         sleep_time = 0.1
         scan_type = self.request.request.content["scan_type"]
-
-        if scan_type == "mv":
-            self._wait_move(timeout, sleep_time)
-        else:
-            self._wait_scan(timeout, sleep_time)
+        try:
+            if scan_type == "mv":
+                self._wait_move(timeout, sleep_time)
+            else:
+                self._wait_scan(timeout, sleep_time)
+        except KeyboardInterrupt as exc:
+            self._client.queue.request_scan_abortion()
+            raise ScanAbortion("Aborted by user.") from exc
 
         return self
 
