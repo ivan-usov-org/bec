@@ -1,3 +1,4 @@
+(user.installation)=
 ## Installation
 If you are using BEC at the beamline, there is a good chance that BEC is already installed. Please contact your beamline responsible for further information.  
 If you need to install BEC yourself, the following section will guide you through this.
@@ -44,6 +45,8 @@ Redis will automatically dump data on disk into the file `dump.rdb`, up to a few
 
 4. Start the BEC server
 
+Now you can go back to the terminal where the bec_venv is still activated and start the bec-server.
+
 ```{code-block} bash
 bec-server start
 ```
@@ -56,4 +59,4 @@ More detailed information about Redis and the BEC server can be found in [archit
 bec
 ```
 BEC is running now and you would be ready to load your first device configuration. 
-To this end, please follow the instructions given in the section [Device configuration](#user.device_configuration).
+To this end, please follow the instructions given in the section [devices](#user.devices).

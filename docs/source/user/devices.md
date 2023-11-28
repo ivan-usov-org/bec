@@ -1,18 +1,19 @@
-## Device configuration
-### Create a new configuration
+(user.devices)=
+## Devices
+### Create a new device config
 
 BEC without devices is not of much use. 
-To inform BEC about your devices, you need to create a configuration file. 
+To inform BEC about your devices, you need to create a config file. 
 This file is a yaml file that contains all information about your devices.
-If you already have a list of your devices and their configuration, you can skip the following step and move on to explore how you can - *Load, save and update the configuration*.
+If you already have a list of your devices and their config, you can skip the following step and move on to explore how you can - *Load, save and update the config*.
 
 ```{note}
-The configuration file is a yaml file. If you are not familiar with yaml, please have a look at the [yaml documentation](https://yaml.org/).
+The config file is a yaml file. If you are not familiar with yaml, please have a look at the [yaml documentation](https://yaml.org/).
 ```
 
 But don't worry, we have prepared a device config with simulated devices for you, which allows us to explore BEC right away.
 
-### Load demo device configuration for simulation
+#### Load demo device config for simulation
 You can load the demo config `demo_config.yaml` directly in the command line interface via: 
 
 ```{code-block} python
@@ -21,7 +22,7 @@ bec.config.load_demo_config()
 Once loaded, the device config will be stored on the running Redis server, and remain intact even after restarting the client or the server.
 With the demo config loaded, we can now explore the conventional way of loading a device config into BEC. 
 
-### Export the current configuration
+#### Export the current device config
 
 To save the current session to disk, use
 
@@ -51,9 +52,9 @@ gauss_bpm:
     enabled: true
     enabled_set: true
 ```
-### Upload a new device configuration
+#### Upload a new device config
 
-From the client, you can now run the follow command to update the session with a new device configuration file.
+From the client, you can now run the follow command to update the session with a new device config file.
 You can now reload the config from the BEC client.
 ```{code-block} python
 bec.config.update_session_with_file(<my-config.yaml>)
@@ -61,7 +62,7 @@ bec.config.update_session_with_file(<my-config.yaml>)
 In our case, `<my-config.yaml>` could be for example the stored and updated config `config_saved.yaml` from above.
 Throughout these steps, you have exported and imported a device config, and in addition also extended the config with a new device.
 
-### Update the configuration
+### Update the device config
 We can update the device config from the command line interface. 
 This allows us for instance to enable/disable, set limits or store user_parameter (e.g. in/out positions) in the config file that will be hosted, and if wanted, also exported with the device config.  
 
@@ -99,17 +100,15 @@ dev.samx.update_user_parameter({"in":2.8})
 ```
 
 ```{hint}
-The user parameters can be seen as a python dictionary. Therefore, the above commands are equivalent to updating a python dictionary.
-```
-See the following example:
+The user parameters can be seen as a python dictionary. Therefore, the above commands are equivalent to updating a python dictionary using
 
 ```python
-my_user_parameter = {"in": 2.6, "out": 0.2}    # equivalent to set_user_parameter
-print(f"Set user parameter: {my_user_parameter}")
+user_parameter = {"in": 2.6, "out": 0.2}    # equivalent to set_user_parameter
+print(f"Set user parameter: {user_parameter}")
 
 
-my_user_parameter.update({"in": 2.8})          # equivalent to update_user_parameter
-print(f"Updated user parameter: {my_user_parameter}")
+user_parameter.update({"in": 2.8})          # equivalent to update_user_parameter
+print(f"Updated user parameter: {user_parameter}")
 ```
 
 This will output:
