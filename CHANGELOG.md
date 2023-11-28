@@ -2,6 +2,18 @@
 
 <!--next-version-placeholder-->
 
+## v0.47.0 (2023-11-28)
+
+### Feature
+
+* Added support for starting the bec client with a config ([`0379031`](https://gitlab.psi.ch/bec/bec/-/commit/0379031fa7653e3cb647ef35cab95426bf5b1130))
+
+### Documentation
+
+* Fixed link; minor changes ([`6acbb66`](https://gitlab.psi.ch/bec/bec/-/commit/6acbb66ed7472fb369623e2ad55cc2c1835886ed))
+* Fixed typos and links in user section ([`dc0d611`](https://gitlab.psi.ch/bec/bec/-/commit/dc0d611ddc88f5c35922fd5366e20e51c34e1053))
+* Refactoring of user section ([`487582d`](https://gitlab.psi.ch/bec/bec/-/commit/487582d0a124b01c40c8b324f169e92f3d74d978))
+
 ## v0.46.1 (2023-11-28)
 
 ### Fix
