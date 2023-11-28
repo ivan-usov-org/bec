@@ -8,7 +8,7 @@ s = scans.line_scan(dev.samx, -5, 5, steps=50, exp_time=0.1, relative=False)
 ```
 
 ```{note}
-scan data is also automatically stored in a h5 file structure. 
+scan data is also automatically stored in a [HDF5 file structure](https://portal.hdfgroup.org/hdf5/develop/index.html) (h5 file). 
 The internal layout of the h5 file is customizable by the beamline.
 Please contact your beamline contact for more information about this.
 ```
