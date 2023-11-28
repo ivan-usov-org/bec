@@ -4,8 +4,9 @@
 import os
 import sys
 
-from bec_client import BECIPythonClient
 from bec_lib import RedisConnector, ServiceConfig, bec_logger
+
+from bec_client import BECIPythonClient
 
 # pylint: disable=wrong-import-position
 # pylint: disable=protected-access
@@ -23,7 +24,16 @@ if __name__ == "__main__":
 
     args = sys.argv[1:]
 
-    if startup:
+    if "--config" in args:
+        config_file = args[args.index("--config") + 1]
+        if not os.path.isfile(config_file):
+            raise FileNotFoundError("Config file not found.")
+        print("Using config file: ", config_file)
+        config = ServiceConfig(config_file)
+        args.remove("--config")
+        args.remove(config_file)
+
+    if startup and not "config" in locals():
         # check if pre-startup.py script exists
         file_name = os.path.join(os.path.dirname(startup.__file__), "pre_startup.py")
         if os.path.isfile(file_name):
