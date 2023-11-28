@@ -1,8 +1,9 @@
 (user.installation)=
 ## Installation
-If you are using BEC at the beamline, there is a good chance that BEC is already installed. Please contact your beamline responsible for further information.  
-If you need to install BEC yourself, the following section will guide you through this.
 
+If you are using BEC at the beamline, there is a good chance that BEC is already installed.
+Please contact your beamline responsible for further information.  
+If you need to install BEC yourself, the following section will guide you through this.
 
 **Requirements:**
 

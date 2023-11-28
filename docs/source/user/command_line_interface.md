@@ -5,7 +5,7 @@ In the previous sections, you have succesfully started BEC and also already inte
 This section aims to explore the CLI capabilities further.
 
 ### Start-up
-The CLI can be started from a terminal after activating the [previously installed bec_venv](#user.installation) using the shell command within the directory where `bec_venv` is installed.
+The CLI can be started from a terminal after activating the [previously installed bec_venv](#user.installation) using the shell command within the directory where ``bec_venv`` is installed.
 ```{code-block} bash
 source ./bec_venv/bin/activate
 ```
@@ -15,11 +15,11 @@ bec
 
 ### Client interface
 The CLI is based on the [IPython](https://ipython.org/) interactive shell. 
-As seen in the screenshot below, the prompt is prefixed with, e.g. `demo [4/522] >>`. 
+As seen in the screenshot below, the prompt is prefixed with, e.g. ``demo [4/522] >>``. 
 The prefix contains the name of the current session (*demo*), the current cell number (*4*) and the next scan number (*522*).
 
 ### Device access
-Devices are grouped in `dev`. 
+Devices are grouped in ``dev``. 
 This allows users to use tab-completion for finding devices.
 
 ```{image} ../assets/tab-complete-devices.png
@@ -29,12 +29,12 @@ This allows users to use tab-completion for finding devices.
 ```
 
 ```{hint}
-`dev` is imported as a builtin. As a result, you can access `dev` from everywhere. `dev` itself is just an alias for `bec.device_manager.devices`.
+``dev`` is imported as a builtin. As a result, you can access ``dev`` from everywhere. ``dev`` itself is just an alias for ``bec.device_manager.devices``.
 ```
 
 ### Inspect a device
 
-To inspect the device samx, you can simply type `dev.samx` and you'll get a printout of the relevant information about this device.
+To inspect the device samx, you can simply type ``dev.samx`` and you'll get a printout of the relevant information about this device.
 ```ipython
 demo [1/31] ❯❯ dev.samx
 Out[1]:
@@ -83,7 +83,7 @@ scans.mv(dev.samx, 5, relative=False)
 ```
 
 ```{note}
-Be aware of benefits and risks of executing a non-blocking command. A `CTRL-C` will not stop its motion, but it needs to be explicitly called via `dev.samx.stop()`.
+Be aware of benefits and risks of executing a non-blocking command. A ``CTRL-C`` will not stop its motion, but it needs to be explicitly called via ``dev.samx.stop()`` ``%abort`` or ``%halt``.
 ```
 However, it can be made a blocking call by
 
@@ -116,7 +116,8 @@ You may in addition, scan multiple axis simultaneously, e.g.
 scans.line_scan(dev.samx, -5, 5, dev.samy, -5, 5, steps=50, exp_time=0.1, relative=False)
 ```
 which would be a diagonal trajectory in the xy plane, assuming that samx and samy are in an rectangular coordinate system.
-There are also multiple ways plot and investigate the data, for this please explore [data access and (live) plotting](#user.data_access_and_plotting).
+There are also multiple ways plot and investigate the data, for this please explore [data access and plotting](#user.data_access_and_plotting). 
+This also includes live plotting of data.
 
 BEC has various different type of scans, for instance `scans.grid_scan`, `scans.list_scan`, which you can explore in the simulation. 
 What can be very convenient, is using the syntax below to print out the docstring signature of the implemented scan, which typically also gives an example on its usage:
@@ -149,7 +150,7 @@ Type:      function
 Scripts are user defined functions that can be executed from the BEC console. 
 They are stored in the ``scripts`` folder and can be edited with any text editor. 
 The scripts are loaded automatically on startup of the BEC console but can also be reloaded by typing ``bec.load_all_user_scripts()`` in the BEC console.
-This command will load scripts from three location: `~/scripts/.`, `/bec_plugins/scripts/.` and `/bec_client/scripts/.`
+This command will load scripts from 3 locations: `~/bec/scripts/.`, `bec/bec_lib/scripts/.` and the beamline plugins directory, e.g. `/csaxs-bec/bec_plugins/scripts/.`
 An example of a user script could be a function to move a specific motor to a predefined position:
 
 ```python 

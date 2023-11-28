@@ -1,10 +1,10 @@
 (user.devices)=
 ## Devices
+BEC without devices is not of much use. 
+To inform BEC about your devices, you need to create a device config file.
 ### Create a new device config
 
-BEC without devices is not of much use. 
-To inform BEC about your devices, you need to create a config file. 
-This file is a yaml file that contains all information about your devices.
+The device config is a yaml file that contains all information about your devices.
 If you already have a list of your devices and their config, you can skip the following step and move on to explore how you can - *Load, save and update the config*.
 
 ```{note}
@@ -14,7 +14,7 @@ The config file is a yaml file. If you are not familiar with yaml, please have a
 But don't worry, we have prepared a device config with simulated devices for you, which allows us to explore BEC right away.
 
 #### Load demo device config for simulation
-You can load the demo config `demo_config.yaml` directly in the command line interface via: 
+You can load the demo config `demo_config.yaml` directly in the command-line interface via: 
 
 ```{code-block} python
 bec.config.load_demo_config()
@@ -83,7 +83,7 @@ To update the device config, use
 dev.samx.set_device_config({"tolerance":0.02})
 ```
  which will update the tolerance window for the motor to reach its target position. 
- Keep in mind though, that the parameter exposed through the device_config must be configurable in the [ophyd_device](#developer.ophyd) of the bespoken device.
+ Keep in mind though, that the parameter exposed through the device_config must be configurable in the [ophyd_device](#developer.ophyd_device) of the bespoken device.
 
 #### Set or update the user parameters
 

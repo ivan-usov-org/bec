@@ -1,3 +1,4 @@
+(developer.ophyd)=
 ## Ophyd 
 
 [Ophyd](https://nsls-ii.github.io/ophyd/) is the hardware abstraction layer developed by NSLS-II and used by BEC to communicate with the hardware. It is a Python library that provides a uniform interface to different hardware components. Ophyd is used to control the hardware and to read out the data. It is also used to create a virtual representation of the hardware in the form of devices and signals.
@@ -52,6 +53,7 @@ The on failure parameter specifies the behavior of the device in case of a failu
 * **description** \
 The description contains the description of the device. It is used to provide additional information about the device.
 
+(developer.ophyd_device)=
 ## Ophyd devices
 As Ophyd provides a uniform interface to different hardware components, only a few commands are needed to control the hardware. The following section explains the available commands that are used by BEC:
 
