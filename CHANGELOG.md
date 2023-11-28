@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.45.3 (2023-11-28)
+
+### Fix
+
+* Fixed import in spec_hli ([`d5bc55a`](https://gitlab.psi.ch/bec/bec/-/commit/d5bc55aa8b047fafb59900394292e62d1a5c1b05))
+* Added missing file ([`e82604c`](https://gitlab.psi.ch/bec/bec/-/commit/e82604cab5c48e228dbdd0016725c0d3ddc3c659))
+
 ## v0.45.2 (2023-11-27)
 
 ### Fix
