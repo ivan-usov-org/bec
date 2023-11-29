@@ -348,11 +348,20 @@ class OphydInterfaceBase(RPCBase):
     def describe_configuration(self):
         """Describes the device configuration."""
 
-    @rpc
-    def get(self):
+    def get(self, cached=True):
         """
         Gets the device value.
         """
+
+        is_signal = self._signal_info is not None
+        if not cached or not is_signal:
+            return self._run(cached=False, fcn=self.get)
+
+        ret = self.read()
+        if ret is None:
+            return None
+
+        return ret.get("value")
 
     @rpc
     def put(self, value: Any):

@@ -104,6 +104,9 @@ class RPCMixin:
                 "done": res.done,
                 "settle_time": res.settle_time,
             }
+        elif isinstance(res, tuple) and hasattr(res, "_asdict") and hasattr(res, "_fields"):
+            # convert namedtuple to dict
+            res = res._asdict()
         elif isinstance(res, list) and isinstance(res[0], ophyd.Staged):
             res = [str(stage) for stage in res]
         return res
