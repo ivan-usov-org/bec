@@ -117,8 +117,8 @@ def test_bec_service_service_status():
 
 def test_bec_service_update_existing_services():
     service_keys = [
-        f'{MessageEndpoints.service_status("service1")}:val'.encode(),
-        f'{MessageEndpoints.service_status("service2")}:val'.encode(),
+        MessageEndpoints.service_status("service1").encode(),
+        MessageEndpoints.service_status("service2").encode(),
     ]
     service_msgs = [
         messages.StatusMessage(name="service1", status=BECStatus.RUNNING, info={}, metadata={}),
@@ -140,8 +140,8 @@ def test_bec_service_update_existing_services():
 
 def test_bec_service_update_existing_services_ignores_wrong_msgs():
     service_keys = [
-        f'{MessageEndpoints.service_status("service1")}:val'.encode(),
-        f'{MessageEndpoints.service_status("service2")}:val'.encode(),
+        MessageEndpoints.service_status("service1").encode(),
+        MessageEndpoints.service_status("service2").encode(),
     ]
     service_msgs = [
         messages.StatusMessage(name="service1", status=BECStatus.RUNNING, info={}, metadata={}),

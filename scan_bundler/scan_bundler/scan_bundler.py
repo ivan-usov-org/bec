@@ -4,11 +4,10 @@ import time
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 from typing import Callable
-from bec_lib import messages
 
 from bec_lib import BECService, BECStatus
 from bec_lib import DeviceManagerBase as DeviceManager
-from bec_lib import MessageEndpoints, bec_logger
+from bec_lib import MessageEndpoints, bec_logger, messages
 from bec_lib.connector import ConnectorBase
 
 from .bec_emitter import BECEmitter
@@ -90,7 +89,7 @@ class ScanBundler(BECService):
     @staticmethod
     def _device_read_callback(msg, parent, **_kwargs):
         # pylint: disable=protected-access
-        dev = msg.topic.decode().split(MessageEndpoints._device_read + "/")[-1].split(":sub")[0]
+        dev = msg.topic.decode().split(MessageEndpoints._device_read + "/")[-1]
         msgs = messages.DeviceMessage.loads(msg.value)
         logger.debug(f"Received reading from device {dev}")
         if not isinstance(msgs, list):

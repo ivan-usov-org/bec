@@ -1,13 +1,12 @@
 import os
 from unittest import mock
-from bec_lib import messages
 
 import numpy as np
 import pytest
 import yaml
 
 import bec_lib
-from bec_lib import DeviceManagerBase, MessageEndpoints, ServiceConfig
+from bec_lib import DeviceManagerBase, MessageEndpoints, ServiceConfig, messages
 from bec_lib.bec_errors import ServiceConfigError
 from bec_lib.redis_connector import MessageObject
 from bec_lib.tests.utils import ConnectorMock, create_session_from_config
@@ -191,7 +190,7 @@ def test_update_async_data():
     file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
     with mock.patch.object(file_manager, "producer") as mock_producer:
         with mock.patch.object(file_manager, "_process_async_data") as mock_process:
-            key = f"{MessageEndpoints.device_async_readback('scanID', 'dev1')}:stream"
+            key = MessageEndpoints.device_async_readback("scanID", "dev1")
             mock_producer.keys.return_value = [
                 key.encode(),
             ]

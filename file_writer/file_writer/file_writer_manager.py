@@ -208,8 +208,8 @@ class FileWriterManager(BECService):
         if not msgs:
             return
 
-        # extract name from 'public/<scanID>/file/<name>:val'
-        names = [msg.decode().split(":val")[0].split("/")[-1] for msg in msgs]
+        # extract name from 'public/<scanID>/file/<name>'
+        names = [msg.decode().split("/")[-1] for msg in msgs]
         file_msgs = [self.producer.get(msg.decode()) for msg in msgs]
         if not file_msgs:
             return

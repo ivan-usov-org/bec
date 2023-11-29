@@ -211,7 +211,7 @@ class BECService:
             name (str): Name of the variable
 
         """
-        self.producer.delete(MessageEndpoints.global_vars(name) + ":val")
+        self.producer.delete(MessageEndpoints.global_vars(name))
 
     def global_vars(self) -> str:
         """Get all available global variables"""
@@ -219,7 +219,7 @@ class BECService:
         available_keys = self.producer.keys(MessageEndpoints.global_vars("*"))
 
         def get_endpoint_from_topic(topic: str) -> str:
-            return topic.decode().split(MessageEndpoints.global_vars(""))[-1].split(":val")[0]
+            return topic.decode().split(MessageEndpoints.global_vars(""))[-1]
 
         endpoints = [get_endpoint_from_topic(k) for k in available_keys]
 
