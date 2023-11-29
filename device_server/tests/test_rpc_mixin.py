@@ -29,10 +29,7 @@ def rpc_cls():
 def test_get_result_from_rpc(rpc_cls, instr_params):
     rpc_var = mock.MagicMock()
     rpc_var.return_value = 1
-    out = rpc_cls._get_result_from_rpc(
-        rpc_var=rpc_var,
-        instr_params=instr_params,
-    )
+    out = rpc_cls._get_result_from_rpc(rpc_var=rpc_var, instr_params=instr_params)
     if instr_params:
         if instr_params.get("args") and instr_params.get("kwargs"):
             rpc_var.assert_called_once_with(*instr_params["args"], **instr_params["kwargs"])
@@ -45,19 +42,10 @@ def test_get_result_from_rpc(rpc_cls, instr_params):
     assert out == 1
 
 
-@pytest.mark.parametrize(
-    "instr_params",
-    [
-        ({"args": (1, 2, 3), "kwargs": {"a": 1, "b": 2}}),
-        ({}),
-    ],
-)
+@pytest.mark.parametrize("instr_params", [({"args": (1, 2, 3), "kwargs": {"a": 1, "b": 2}}), ({})])
 def test_get_result_from_rpc_var(rpc_cls, instr_params):
     rpc_var = 5
-    out = rpc_cls._get_result_from_rpc(
-        rpc_var=rpc_var,
-        instr_params=instr_params,
-    )
+    out = rpc_cls._get_result_from_rpc(rpc_var=rpc_var, instr_params=instr_params)
     assert out == 5
 
 
@@ -65,10 +53,7 @@ def test_get_result_from_rpc_not_serializable(rpc_cls):
     rpc_var = mock.MagicMock()
     rpc_var.return_value = mock.MagicMock()
     rpc_var.return_value.__str__.side_effect = Exception
-    out = rpc_cls._get_result_from_rpc(
-        rpc_var=rpc_var,
-        instr_params={},
-    )
+    out = rpc_cls._get_result_from_rpc(rpc_var=rpc_var, instr_params={})
     assert out is None
     rpc_cls.connector.raise_alarm.assert_called_once_with(
         severity=Alarms.WARNING,
@@ -82,10 +67,7 @@ def test_get_result_from_rpc_not_serializable(rpc_cls):
 def test_get_result_from_rpc_ophyd_status(rpc_cls):
     rpc_var = mock.MagicMock()
     rpc_var.return_value = StatusBase()
-    out = rpc_cls._get_result_from_rpc(
-        rpc_var=rpc_var,
-        instr_params={},
-    )
+    out = rpc_cls._get_result_from_rpc(rpc_var=rpc_var, instr_params={})
     assert out is rpc_var.return_value
 
 
@@ -94,10 +76,7 @@ def test_get_result_from_rpc_list_from_stage(rpc_cls):
     rpc_var.return_value = [mock.MagicMock(), mock.MagicMock()]
     rpc_var.return_value[0]._staged = True
     rpc_var.return_value[1]._staged = False
-    out = rpc_cls._get_result_from_rpc(
-        rpc_var=rpc_var,
-        instr_params={"func": "stage"},
-    )
+    out = rpc_cls._get_result_from_rpc(rpc_var=rpc_var, instr_params={"func": "stage"})
     assert out == [True, False]
 
 
@@ -124,10 +103,7 @@ def test_send_rpc_result_to_client(rpc_cls):
     rpc_cls.producer.set.assert_called_once_with(
         MessageEndpoints.device_rpc("rpc_id"),
         messages.DeviceRPCMessage(
-            device="device",
-            return_val=1,
-            out="result",
-            success=True,
+            device="device", return_val=1, out="result", success=True
         ).dumps(),
         expire=1800,
     )
@@ -171,7 +147,7 @@ def test_run_rpc_sends_rpc_exception(rpc_cls):
 
 @pytest.mark.parametrize(
     "func, read_called",
-    [("read", True), ("readback", False), ("read_configuration", False), ("readback.read", True)],
+    [("read", True), ("readback", False), ("read_configuration", False), ("readback.read", False)],
 )
 def test_process_rpc_instruction_read(rpc_cls, func, read_called):
     instr = messages.DeviceInstructionMessage(

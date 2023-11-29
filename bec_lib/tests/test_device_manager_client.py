@@ -88,6 +88,31 @@ def test_read_nested_device(dev):
         assert res == data
 
 
+@pytest.mark.parametrize(
+    "kind,cached", [("normal", True), ("hinted", True), ("config", False), ("omitted", False)]
+)
+def test_read_kind_hinted(dev, kind, cached):
+    with mock.patch.object(dev.samx.readback, "_run") as mock_run:
+        with mock.patch.object(dev.samx.root.parent.producer, "get") as mock_get:
+            data = {
+                "samx": {"value": 0, "timestamp": 1701105880.1711318},
+                "samx_setpoint": {"value": 0, "timestamp": 1701105880.1693492},
+                "samx_motor_is_moving": {"value": 0, "timestamp": 1701105880.16935},
+            }
+            mock_get.return_value = messages.DeviceMessage(
+                signals=data, metadata={"scan_id": "scan_id", "scan_type": "scan_type"}
+            ).dumps()
+            dev.samx.readback._signal_info["kind_str"] = f"Kind.{kind}"
+            res = dev.samx.readback.read()
+            if cached:
+                mock_get.assert_called_once_with(MessageEndpoints.device_readback("samx"))
+                mock_run.assert_not_called()
+                assert res == {"value": 0, "timestamp": 1701105880.1711318}
+            else:
+                mock_run.assert_called_once_with(cached=False, fcn=dev.samx.readback.read)
+                mock_get.assert_not_called()
+
+
 def test_run_rpc_call(dev):
     with mock.patch.object(dev.samx.setpoint, "_get_rpc_response") as mock_rpc:
         dev.samx.setpoint.set(1)

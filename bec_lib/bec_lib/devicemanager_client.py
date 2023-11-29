@@ -313,7 +313,7 @@ class OphydInterfaceBase(RPCBase):
         if cached and is_signal:
             # for signals, we have to check if the signal is hinted or not. If it is not hinted, we
             # have to read the signal from the device through rpc.
-            cached = self._signal_info["kind_str"] in ["normal", "hinted"]
+            cached = any(kind in self._signal_info["kind_str"] for kind in ["normal", "hinted"])
 
         if not cached:
             return self._run(cached=cached, fcn=self.read)

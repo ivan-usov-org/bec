@@ -18,6 +18,7 @@ bec.load_high_level_interface("spec_hli")
 dev = bec.device_manager.devices
 scans = bec.scans
 
+# dev.samx.readback.read()
 
 # from bec_client.plugins.cSAXS import *
 # from bec_client.plugins import LamNI
@@ -75,7 +76,7 @@ logger.success("Started BECClient")
 #     fig.canvas.flush_events()
 #     time.sleep(0.01)
 
-from bec_client.plugins.XTreme.live_analysis import OTFLiveAnalysis
+# from bec_client.plugins.XTreme.live_analysis import OTFLiveAnalysis
 
 # cb = OTFLiveAnalysis()
 # scans.line_scan(
