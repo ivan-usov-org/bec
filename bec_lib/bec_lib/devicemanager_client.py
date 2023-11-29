@@ -2,6 +2,7 @@ import functools
 import time
 import traceback
 import uuid
+from collections import namedtuple
 from typing import Any
 
 from bec_lib import messages
@@ -355,7 +356,11 @@ class OphydInterfaceBase(RPCBase):
 
         is_signal = self._signal_info is not None
         if not cached or not is_signal:
-            return self._run(cached=False, fcn=self.get)
+            res = self._run(cached=False, fcn=self.get)
+            if isinstance(res, dict) and res.get("type") == "namedtuple":
+                par = namedtuple(self.name, res.get("fields"))
+                return par(**res.get("values"))
+            return res
 
         ret = self.read()
         if ret is None:
