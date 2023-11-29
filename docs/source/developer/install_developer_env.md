@@ -1,5 +1,5 @@
 (developer.install_developer_env)=
-## Install developer environment
+# Install developer environment
 
 If your goal is to install BEC in an environment for code development purposes, this section will guide you through the steps. 
 In contrast to a deployed production system of BEC, this installation will allow you to edit the code base of BEC actively while you are operating the system.
