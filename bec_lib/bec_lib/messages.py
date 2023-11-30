@@ -984,3 +984,50 @@ class GUIConfigMessage(BECMessage):
         super().__init__(
             msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
         )
+
+
+class GUIDataMessage(BECMessage):
+    """Message for GUI data"""
+
+    msg_type = "gui_data_message"
+
+    def __init__(
+        self, *, data: dict, metadata: dict = None, version: float = DEFAULT_VERSION
+    ) -> None:
+        """
+        Message for GUI data
+        Args:
+            data (dict): GUI data
+            metadata (dict, optional): metadata. Defaults to None.
+        """
+
+        self.content = {"data": data}
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )
+
+
+class GUIInstructionMessage(BECMessage):
+    """Message for GUI instructions"""
+
+    msg_type = "gui_instruction_message"
+
+    def __init__(
+        self,
+        *,
+        action: str,
+        parameter: dict,
+        metadata: dict = None,
+        version: float = DEFAULT_VERSION,
+    ) -> None:
+        """
+        Message for GUI instructions
+        Args:
+            instruction (str): GUI instruction
+            metadata (dict, optional): metadata. Defaults to None.
+        """
+
+        self.content = {"action": action, "parameter": parameter}
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )

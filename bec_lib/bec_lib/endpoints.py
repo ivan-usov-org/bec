@@ -76,6 +76,8 @@ class MessageEndpoints:
 
     # GUI
     _gui_config = "public/gui/config"
+    _gui_data = "public/gui/data"
+    _gui_instructions = "public/gui/instruction"
 
     ##########
 
@@ -714,3 +716,25 @@ class MessageEndpoints:
             str: Endpoint for GUI configuration.
         """
         return f"{cls._gui_config}/{gui_id}"
+
+    @classmethod
+    def gui_data(cls, gui_id: str) -> str:
+        """
+        Endpoint for GUI data. This endpoint is used to publish the GUI data using a
+        messages.GUIDataMessage message.
+
+        Returns:
+            str: Endpoint for GUI data.
+        """
+        return f"{cls._gui_data}/{gui_id}"
+
+    @classmethod
+    def gui_instructions(cls, gui_id: str) -> str:
+        """
+        Endpoint for GUI instructions. This endpoint is used to publish the GUI instructions
+        using a messages.GUIInstructionMessage message.
+
+        Returns:
+            str: Endpoint for GUI instructions.
+        """
+        return f"{cls._gui_instructions}/{gui_id}"
