@@ -117,7 +117,8 @@ class BECPlotter:
         )
 
         self._process = None
-        self._data = [{"x": None, "y": []}]
+        self._xdata = None
+        self._ydata = {}
         self._data_changed = False
         self._config_changed = False
 
@@ -179,10 +180,11 @@ class BECPlotter:
             xdata (List[float]): The xdata to set.
         """
 
-        # check if xdata is set to a custom endpoint. If not, update the config
-        # update config
+        self._set_source_to_redis("x")
 
         # update data
+        self._xdata = {"action": "set", "data": xdata}
+        self._data_changed = True
 
     @typechecked
     def set_ydata(self, ydata: List[float], axis: int = 0) -> None:
@@ -193,6 +195,26 @@ class BECPlotter:
             ydata (List[float]): The ydata to set.
             axis (int, optional): The axis to set the ydata for. Defaults to 0.
         """
+        self._set_source_to_redis("y", axis)
+
+        # update data
+        self._ydata[axis] = {"action": "set", "data": ydata}
+        self._data_changed = True
+
+    def _set_source_to_redis(self, axis: str, axis_id: int = 0) -> None:
+        """
+        Set the source of the data to redis.
+
+        Args:
+            axis (str): The axis to set the source for.
+            axis_id (int, optional): The axis id to set the source for. Defaults to 0.
+        """
+        config = self._config["plot_data"][0][axis]["signals"][axis_id]
+        if config["source"] != "redis" or config["endpoint"] != MessageEndpoints.gui_data(
+            self._plot_id
+        ):
+            config.update({"source": "redis", "endpoint": MessageEndpoints.gui_data(self._plot_id)})
+            self._config_changed = True
 
     @typechecked
     def append_xdata(self, xdata: Union[float, List[float]]) -> None:
@@ -203,6 +225,11 @@ class BECPlotter:
             xdata (Union[float,List[float]]): The xdata to append.
 
         """
+        self._set_source_to_redis("x")
+
+        # update data
+        self._xdata = {"action": "append", "data": xdata}
+        self._data_changed = True
 
     @typechecked
     def append_ydata(self, ydata: Union[float, List[float]], axis: int = 0) -> None:
@@ -213,6 +240,39 @@ class BECPlotter:
             ydata (Union[float,List[float]]): The ydata to append.
             axis (int, optional): The axis to append the ydata for. Defaults to 0.
         """
+        self._set_source_to_redis("y", axis)
+
+        # update data
+        self._ydata[axis] = {"action": "append", "data": ydata}
+        self._data_changed = True
+
+    @typechecked
+    def set_xydata(self, xdata: List[float], ydata: List[float], axis: int = 0) -> None:
+        """
+        Set the xdata and ydata of the figure.
+
+        Args:
+            xdata (List[float]): The xdata to set.
+            ydata (List[float]): The ydata to set.
+            axis (int, optional): The axis to set the ydata for. Defaults to 0.
+        """
+        self.set_xdata(xdata)
+        self.set_ydata(ydata, axis)
+
+    @typechecked
+    def append_xydata(
+        self, xdata: Union[float, List[float]], ydata: Union[float, List[float]]
+    ) -> None:
+        """
+        Append the xdata and ydata to the figure. If xdata or ydata is a list, it the existing data will be extended
+        by xdata or ydata.
+
+        Args:
+            xdata (Union[float,List[float]]): The xdata to append.
+            ydata (Union[float,List[float]]): The ydata to append.
+        """
+        self.append_xdata(xdata)
+        self.append_ydata(ydata)
 
     def clear(self) -> None:
         """
@@ -229,8 +289,11 @@ class BECPlotter:
             self.plot_connector.set_plot_config(self._plot_id, self._config)
             self._config_changed = False
         if self._data_changed:
-            self.plot_connector.send_data(self._plot_id, self._data)
+            data = {"x": self._xdata, "y": self._ydata}
+            self.plot_connector.send_data(self._plot_id, data)
             self._data_changed = False
+            self._xdata = None
+            self._ydata = None
 
     def show(self) -> None:
         """
