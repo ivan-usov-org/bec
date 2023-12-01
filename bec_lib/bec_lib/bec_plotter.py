@@ -1,4 +1,6 @@
 import builtins
+import json
+import select
 
 # import multiprocessing
 import subprocess
@@ -15,6 +17,7 @@ from bec_lib import BECClient, MessageEndpoints, messages
 DEFAULT_CONFIG = {
     "plot_settings": {
         "background_color": "white",
+        "axis_width": 2,
         "num_columns": 5,
         "colormap": "plasma",
         "scan_types": False,
@@ -299,7 +302,7 @@ class BECPlotter:
         """
         Show the figure.
         """
-        if self._process is None:
+        if self._process is None or self._process.poll() is not None:
             self._start_plot_process()
 
     def close(self) -> None:
@@ -318,7 +321,8 @@ class BECPlotter:
         """
 
         self._process = subprocess.Popen(
-            f"python {self._widget_path} --plot_id {self._plot_id} --config {self._config}",
+            f"python {self._widget_path} --id {self._plot_id} --config"
+            f" '{json.dumps(self._config)}'",
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -341,14 +345,22 @@ class BECPlotter:
     #     monitor.show()
     #     sys.exit(app.exec_())
 
-    # def print_log(self) -> None:
-    #     """
-    #     Print the log of the plot process.
-    #     """
-    #     if self._process is None:
-    #         return
-    #     _, stderr = self._process.communicate()
-    #     print(stderr.decode())
+    def print_log(self) -> None:
+        """
+        Print the log of the plot process.
+        """
+        if self._process is None:
+            return
+        stderr_output = []
+        while self._process.poll() is None:
+            readylist, _, _ = select.select([self._process.stderr], [], [], 0.1)
+            if not readylist:
+                return
+            line = self._process.stderr.readline()
+            if not line:
+                break
+            stderr_output.append(line.decode("utf-8"))
+        print(stderr_output)
 
     def __del__(self) -> None:
         self.close()
