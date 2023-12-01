@@ -14,8 +14,7 @@ class MessageEndpoints:
     # device config
     _device_config_request = "internal/devices/config_request"
     _device_config_request_response = "internal/devices/config_request_response"
-    _device_server_config_update = "internal/devices/config_request_response"
-    _device_server_config_update_response = "internal/devices/config_request_response"
+    _device_server_config_update = "internal/devices/device_server_config_update"
     _device_config_update = "internal/devices/config_update"
     _device_config = "internal/devices/config"
     _device_info = "internal/devices/info"
@@ -189,21 +188,6 @@ class MessageEndpoints:
             str: Endpoint for device server config request.
         """
         return cls._device_server_config_update
-
-    @classmethod
-    def device_server_config_request_response(cls, RID: str) -> str:
-        """
-        Endpoint for device server config request response. This endpoint is used by the
-        device server to inform about whether a new configuration was accepted or rejected.
-        The response is sent using a messages.RequestResponseMessage message.
-
-        Args:
-            RID (str): Request ID.
-
-        Returns:
-            str: Endpoint for device server config request response.
-        """
-        return f"{cls._device_server_config_update_response}/{RID}"
 
     @classmethod
     def device_config_update(cls) -> str:

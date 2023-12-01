@@ -6,9 +6,8 @@ import traceback
 import uuid
 from typing import TYPE_CHECKING
 
-import msgpack
-
 import bec_lib
+import msgpack
 from bec_lib import Device, DeviceConfigError
 from bec_lib import DeviceManagerBase as DeviceManager
 from bec_lib import MessageEndpoints, bec_logger, messages
@@ -128,7 +127,7 @@ class ConfigHandler:
         time_step = 0.05
         elapsed_time = 0
         while True:
-            raw_msg = self.producer.get(MessageEndpoints.device_server_config_request_response(RID))
+            raw_msg = self.producer.get(MessageEndpoints.device_config_request_response(RID))
             msg = messages.RequestResponseMessage.loads(raw_msg)
             if msg:
                 return msg.content["accepted"]
