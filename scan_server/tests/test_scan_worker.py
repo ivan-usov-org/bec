@@ -1396,7 +1396,7 @@ def test_process_instructions(abortion):
             messages.DeviceInstructionMessage(
                 device=None,
                 action="open_scan",
-                parameter={"readout_priority": {"monitored": [], "baseline": [], "ignored": []}},
+                parameter={"readout_priority": {"monitored": [], "baseline": [], "on_request": []}},
                 metadata={"readout_priority": "monitored", "DIID": 18, "scanID": "12345"},
             ),
             "open_scan",

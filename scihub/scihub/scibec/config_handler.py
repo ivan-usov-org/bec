@@ -84,10 +84,11 @@ class ConfigHandler:
         self.send_config(reload_msg)
 
     def _convert_to_db_config(self, name: str, config: dict) -> None:
-        config["enabled"] = config["status"]["enabled"]
-        if config["status"].get("enabled_set"):
-            config["enabled_set"] = config["status"].get("enabled_set")
-        config.pop("status")
+        # config["enabled"] = config["status"]["enabled"]  #
+        # if config["status"].get("enabled_set"):  #
+        #     config["enabled_set"] = config["status"].get("enabled_set")  #
+        # config.pop("status")  #
+        config.pop("deviceType", None)
         config["name"] = name
 
     def _reload_config(self, msg: messages.DeviceConfigMessage):
@@ -161,11 +162,10 @@ class ConfigHandler:
             return updated
 
         available_keys = [
-            "enabled_set",
+            "readOnly",
             "userParameter",
             "onFailure",
             "deviceTags",
-            "acquisitionConfig",
         ]
         for key in dev_config:
             if key not in available_keys:

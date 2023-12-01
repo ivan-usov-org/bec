@@ -7,7 +7,7 @@ import pytest
 
 from bec_lib import messages
 from bec_lib.scan_report import ScanReport
-from bec_lib.utils import _write_csv, scan_to_dict
+from bec_lib.utils import _write_csv, scan_to_dict, scan_to_csv
 
 
 def test__write_csv():
@@ -78,7 +78,7 @@ def test_scan_to_csv():
     #     scan_to_csv(scanreport_mock, "./test.csv")
     #     mock_write_csv.assert_called_once()
     with pytest.raises(Exception):
-        _scan_to_csv(
+        scan_to_csv(
             scan_report=scanreport_mock,
             output_name=1234,
             delimiter=",",
@@ -87,7 +87,7 @@ def test_scan_to_csv():
             write_metadata=True,
         )
     with pytest.raises(Exception):
-        _scan_to_csv(
+        scan_to_csv(
             scan_report=[scanreport_mock, scanreport_mock, scanreport_mock],
             output_name="test.csv",
             delimiter=",",
@@ -96,7 +96,7 @@ def test_scan_to_csv():
             write_metadata=True,
         )
     with pytest.raises(Exception):
-        _scan_to_csv(
+        scan_to_csv(
             scan_report=[scanreport_mock, scanreport_mock, scanreport_mock],
             output_name="test.csv",
             delimiter=123,

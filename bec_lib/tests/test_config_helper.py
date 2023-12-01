@@ -54,7 +54,7 @@ def test_config_helper_save_current_session():
                 "name": "pinz",
                 "sessionId": "648c817d67d3c7cd6a354df2",
                 "enabled": True,
-                "enabled_set": True,
+                "readOnly": False,
                 "deviceClass": "SynAxisOPAAS",
                 "deviceTags": ["user motors"],
                 "deviceConfig": {
@@ -66,11 +66,7 @@ def test_config_helper_save_current_session():
                     "tolerance": 0.01,
                     "update_frequency": 400,
                 },
-                "acquisitionConfig": {
-                    "acquisitionGroup": "motor",
-                    "readoutPriority": "baseline",
-                    "schedule": "sync",
-                },
+                "readoutPriority": "baseline",
                 "onFailure": "retry",
             },
             {
@@ -80,15 +76,11 @@ def test_config_helper_save_current_session():
                 "name": "transd",
                 "sessionId": "648c817d67d3c7cd6a354df2",
                 "enabled": True,
-                "enabled_set": True,
+                "readOnly": False,
                 "deviceClass": "SynAxisMonitor",
                 "deviceTags": ["beamline"],
                 "deviceConfig": {"labels": "transd", "name": "transd", "tolerance": 0.5},
-                "acquisitionConfig": {
-                    "acquisitionGroup": "monitor",
-                    "readoutPriority": "monitored",
-                    "schedule": "sync",
-                },
+                "readoutPriority": "monitored",
                 "onFailure": "retry",
             },
         ]
@@ -99,7 +91,8 @@ def test_config_helper_save_current_session():
             "pinz": {
                 "deviceClass": "SynAxisOPAAS",
                 "deviceTags": ["user motors"],
-                "status": {"enabled": True, "enabled_set": True},
+                "enabled": True,
+                "readOnly": False,
                 "deviceConfig": {
                     "delay": 1,
                     "labels": "pinz",
@@ -109,23 +102,16 @@ def test_config_helper_save_current_session():
                     "tolerance": 0.01,
                     "update_frequency": 400,
                 },
-                "acquisitionConfig": {
-                    "acquisitionGroup": "motor",
-                    "readoutPriority": "baseline",
-                    "schedule": "sync",
-                },
+                "readoutPriority": "baseline",
                 "onFailure": "retry",
             },
             "transd": {
                 "deviceClass": "SynAxisMonitor",
                 "deviceTags": ["beamline"],
-                "status": {"enabled": True, "enabled_set": True},
+                "enabled": True,
+                "readOnly": False,
                 "deviceConfig": {"labels": "transd", "name": "transd", "tolerance": 0.5},
-                "acquisitionConfig": {
-                    "acquisitionGroup": "monitor",
-                    "readoutPriority": "monitored",
-                    "schedule": "sync",
-                },
+                "readoutPriority": "monitored",
                 "onFailure": "retry",
             },
         }

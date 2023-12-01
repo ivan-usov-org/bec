@@ -80,7 +80,11 @@ def test_device_read_callback():
                     status="open",
                     info={
                         "scan_motors": ["samx"],
-                        "readout_priority": {"monitored": ["samx"], "baseline": [], "ignored": []},
+                        "readout_priority": {
+                            "monitored": ["samx"],
+                            "baseline": [],
+                            "on_request": [],
+                        },
                         "queueID": "my-queue-ID",
                         "scan_number": 5,
                         "scan_type": "step",
@@ -97,7 +101,11 @@ def test_device_read_callback():
                     status="open",
                     info={
                         "scan_motors": ["samx"],
-                        "readout_priority": {"monitored": ["samx"], "baseline": [], "ignored": []},
+                        "readout_priority": {
+                            "monitored": ["samx"],
+                            "baseline": [],
+                            "on_request": [],
+                        },
                         "queueID": "my-queue-ID",
                         "scan_number": 5,
                         "scan_type": "step",
@@ -279,7 +287,7 @@ def test_add_device_to_storage_baseline(msg, scan_type):
                                     "readout_priority": {
                                         "monitored": ["samx", "samy"],
                                         "baseline": [],
-                                        "ignored": [],
+                                        "on_request": [],
                                     },
                                     "is_scan": True,
                                     "scan_number": 25,
@@ -450,7 +458,11 @@ def test_status_modification():
                 "queueID": "84e5bc19-e2fc-4b03-b706-004420322813",
                 "scan_number": 5,
                 "scan_motors": ["samx", "samy"],
-                "readout_priority": {"monitored": ["samx", "samy"], "baseline": [], "ignored": []},
+                "readout_priority": {
+                    "monitored": ["samx", "samy"],
+                    "baseline": [],
+                    "on_request": [],
+                },
                 "num_points": 143,
             },
         ),
@@ -468,7 +480,7 @@ def test_status_modification():
                 "readout_priority": {
                     "monitored": ["samx", "samy", "eyex", "bpm3a"],
                     "baseline": [],
-                    "ignored": [],
+                    "on_request": [],
                 },
                 "num_points": 143,
             },

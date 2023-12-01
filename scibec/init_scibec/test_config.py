@@ -86,10 +86,11 @@ class DeviceConfigTest:
     def _translate_to_db_config(config) -> dict:
         db_config = config.copy()
         for name, device in db_config.items():
-            device["enabled"] = device["status"]["enabled"]
-            if device["status"].get("enabled_set"):
-                device["enabled_set"] = device["status"].get("enabled_set")
-            device.pop("status")
+            device["enabled"] = device["enabled"]
+            device["readOnly"] = device["readOnly"]
+            # if device["status"].get("enabled_set"):
+            #     device["enabled_set"] = device["status"].get("enabled_set")
+            # device.pop("status")
             device["name"] = name
         return db_config
 

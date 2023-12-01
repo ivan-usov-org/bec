@@ -185,9 +185,9 @@ def test_monitored_devices_are_unique(scan_motors_in, readout_priority_in):
     "scan_motors_in,readout_priority_in",
     [
         ([], {}),
-        ([], {"monitored": ["samx"], "baseline": [], "ignored": []}),
-        ([], {"monitored": [], "baseline": ["samx"], "ignored": []}),
-        ([], {"monitored": ["samx", "samy"], "baseline": [], "ignored": ["bpm4i"]}),
+        ([], {"monitored": ["samx"], "baseline": [], "on_request": []}),
+        ([], {"monitored": [], "baseline": ["samx"], "on_request": []}),
+        ([], {"monitored": ["samx", "samy"], "baseline": [], "on_request": ["bpm4i"]}),
     ],
 )
 def test_monitored_devices_with_readout_priority(scan_motors_in, readout_priority_in):
@@ -210,8 +210,8 @@ def test_monitored_devices_with_readout_priority(scan_motors_in, readout_priorit
 
     assert len(primary_device_names & baseline_devices_names) == 0
 
-    assert len(set(readout_priority_in.get("ignored", [])) & baseline_devices_names) == 0
-    assert len(set(readout_priority_in.get("ignored", [])) & primary_device_names) == 0
+    assert len(set(readout_priority_in.get("on_request", [])) & baseline_devices_names) == 0
+    assert len(set(readout_priority_in.get("on_request", [])) & primary_device_names) == 0
 
 
 def test_device_config_update_callback():
@@ -309,13 +309,13 @@ def test_device_wm():
 
 def test_readout_priority():
     parent = mock.MagicMock()
-    device = Device("test", {"acquisitionConfig": {"readoutPriority": "baseline"}}, parent=parent)
+    device = Device("test", {"readoutPriority": "baseline"}, parent=parent)
     assert device.readout_priority == "baseline"
 
 
 def test_set_readout_priority():
     parent = mock.MagicMock()
-    device = Device("test", {"acquisitionConfig": {"readoutPriority": "baseline"}}, parent=parent)
+    device = Device("test", {"readoutPriority": "baseline"}, parent=parent)
     device.readout_priority = "monitored"
     assert device.readout_priority == "monitored"
     parent.config_helper.send_config_request.assert_called_once()
@@ -335,17 +335,17 @@ def test_set_on_failure():
     parent.config_helper.send_config_request.assert_called_once()
 
 
-def test_enabled_set():
+def test_read_only():
     parent = mock.MagicMock()
-    device = Device("test", {"enabled_set": True}, parent=parent)
-    assert device.enabled_set is True
+    device = Device("test", {"read_only": False}, parent=parent)
+    assert device.read_only is False
 
 
-def test_set_enabled_set():
+def test_set_read_only():
     parent = mock.MagicMock()
-    device = Device("test", {"enabled_set": True}, parent=parent)
-    device.enabled_set = False
-    assert device.enabled_set is False
+    device = Device("test", {"read_only": False}, parent=parent)
+    device.read_only = True
+    assert device.read_only is True
     parent.config_helper.send_config_request.assert_called_once()
 
 
@@ -385,9 +385,9 @@ def test_show_all():
         {
             "description": "Device 1",
             "enabled": True,
-            "enabled_set": True,
+            "read_only": False,
             "deviceClass": "Class1",
-            "acquisitionConfig": {"readoutPriority": "high"},
+            "readoutPriority": "high",
             "deviceTags": ["tag1", "tag2"],
         },
     )
@@ -396,9 +396,9 @@ def test_show_all():
         {
             "description": "Device 2",
             "enabled": False,
-            "enabled_set": False,
+            "read_only": True,
             "deviceClass": "Class2",
-            "acquisitionConfig": {"readoutPriority": "low"},
+            "readoutPriority": "low",
             "deviceTags": ["tag3", "tag4"],
         },
     )

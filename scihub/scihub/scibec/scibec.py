@@ -39,7 +39,8 @@ class SciBec:
             return None
         if len(beamline) > 1:
             logger.warning(
-                f"Found more than one entry for beamline {beamline}. Only the first entry will be considered."
+                f"Found more than one entry for beamline {beamline}. Only the first entry will be"
+                " considered."
             )
         return beamline[0]
 
@@ -245,10 +246,10 @@ class SciBec:
         session = self.add_session(experiment["id"], session_name)
         self.set_current_session(experiment["id"], session["id"])
         for name, device in data.items():
-            device["enabled"] = device["status"]["enabled"]
-            if device["status"].get("enabled_set"):
-                device["enabled_set"] = device["status"].get("enabled_set")
-            device.pop("status")
+            # device["enabled"] = device["enabled"]
+            # if device["status"].get("enabled_set"):
+            #     device["enabled_set"] = device["status"].get("enabled_set")
+            # device.pop("status")
             device["name"] = name
             device["sessionId"] = session["id"]
             self.add_device(device)

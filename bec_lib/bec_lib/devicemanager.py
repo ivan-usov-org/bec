@@ -1,16 +1,16 @@
 from __future__ import annotations
 
 import enum
+import re
 import time
-import warnings
 from typing import TYPE_CHECKING, List
+import warnings
 
 import msgpack
 from rich.console import Console
 from rich.table import Table
 from typeguard import typechecked
 
-from bec_lib import messages
 from bec_lib.bec_errors import DeviceConfigError
 from bec_lib.config_helper import ConfigHelper
 from bec_lib.endpoints import MessageEndpoints
@@ -50,9 +50,21 @@ class OnFailure(str, enum.Enum):
 class ReadoutPriority(str, enum.Enum):
     """Readout priority for devices"""
 
-    MONITORED = "monitored"
+    ON_REQUEST = "on_request"
     BASELINE = "baseline"
-    IGNORED = "ignored"
+    MONITORED = "monitored"
+    ASYNC = "async"
+    CONTINUOUS = "continuous"
+
+
+class DeviceType(str, enum.Enum):
+    """Device type"""
+
+    POSITIONER = "positioner"
+    DETECTOR = "detector"
+    MONITOR = "monitor"
+    CONTROLLER = "controller"
+    MISC = "misc"
 
 
 class Status:
@@ -148,22 +160,39 @@ class Device:
 
     @property
     def wm(self) -> None:
+        """get the current position of a device"""
         self.parent.devices.wm(self.name)
+
+    @property
+    def device_type(self) -> DeviceType:
+        """get the device type for this device"""
+        return DeviceType(self._config["deviceType"])
+
+    @device_type.setter
+    def device_type(self, val: DeviceType):
+        """set the device type for this device"""
+        if not isinstance(val, DeviceType):
+            val = DeviceType(val)
+        self._config["deviceType"] = val
+        return self.parent.config_helper.send_config_request(
+            action="update",
+            config={self.name: {"deviceType": val}},
+        )
 
     @property
     def readout_priority(self) -> ReadoutPriority:
         """get the readout priority for this device"""
-        return ReadoutPriority(self._config["acquisitionConfig"]["readoutPriority"])
+        return ReadoutPriority(self._config["readoutPriority"])
 
     @readout_priority.setter
     def readout_priority(self, val: ReadoutPriority):
         """set the readout priority for this device"""
         if not isinstance(val, ReadoutPriority):
             val = ReadoutPriority(val)
-        self._config["acquisitionConfig"]["readoutPriority"] = val
+        self._config["readoutPriority"] = val
         return self.parent.config_helper.send_config_request(
             action="update",
-            config={self.name: {"acquisitionConfig": self._config["acquisitionConfig"]}},
+            config={self.name: {"readoutPriority": val}},
         )
 
     @property
@@ -195,16 +224,16 @@ class Device:
         )
 
     @property
-    def enabled_set(self):
+    def read_only(self):
         """Whether or not the device can be set"""
-        return self._config.get("enabled_set", True)
+        return self._config.get("readOnly", False)
 
-    @enabled_set.setter
-    def enabled_set(self, value):
-        """Whether or not the device can be set"""
-        self._config["enabled_set"] = value
+    @read_only.setter
+    def read_only(self, value):
+        """Whether or not the device is read only"""
+        self._config["readOnly"] = value
         self.parent.config_helper.send_config_request(
-            action="update", config={self.name: {"enabled_set": value}}
+            action="update", config={self.name: {"readOnly": value}}
         )
 
     def read(self, cached, filter_readback=True):
@@ -250,12 +279,17 @@ class Device:
 
     @typechecked
     def set_user_parameter(self, val: dict):
+        """set the user parameter for this device"""
         self.parent.config_helper.send_config_request(
             action="update", config={self.name: {"userParameter": val}}
         )
 
     @typechecked
     def update_user_parameter(self, val: dict):
+        """update the user parameter for this device
+        Args:
+            val (dict): New user parameter
+        """
         param = self.user_parameter
         param.update(val)
         self.set_user_parameter(param)
@@ -332,49 +366,23 @@ class DeviceContainer(dict):
         """get a list of disabled devices"""
         return [dev for _, dev in self.items() if not dev.enabled]
 
-    def acquisition_group(self, acquisition_group: str) -> list:
-        """get all devices that belong to the specified acquisition group
-
-        Args:
-            acquisition_group (str): Acquisition group (e.g. monitor, detector, motor, status)
-
-        Returns:
-            list: List of devices that belong to the specified device group
-        """
-        warnings.warn(
-            "The method `acquisition_group` is deprecated and will be removed in the future.",
-            DeprecationWarning,
-        )
-        # pylint: disable=protected-access
-        return [
-            dev
-            for _, dev in self.items()
-            if dev._config["acquisitionConfig"]["acquisitionGroup"] == acquisition_group
-        ]
-
     def readout_priority(self, readout_priority: ReadoutPriority) -> list:
         """get all devices with the specified readout proprity
 
         Args:
-            readout_priority (str): Readout priority (e.g. monitored, baseline, ignored)
+            readout_priority (str): Readout priority (e.g.  on_request, baseline, monitored, async, continuous)
 
         Returns:
             list: List of devices that belong to the specified acquisition readoutPriority
         """
         val = ReadoutPriority(readout_priority)
         # pylint: disable=protected-access
-        return [
-            dev
-            for _, dev in self.items()
-            if dev._config["acquisitionConfig"]["readoutPriority"] == val
-        ]
+        return [dev for _, dev in self.items() if dev._config["readoutPriority"] == val]
 
     def async_devices(self) -> list:
         """get a list of all synchronous devices"""
         # pylint: disable=protected-access
-        return [
-            dev for _, dev in self.items() if dev._config["acquisitionConfig"]["schedule"] != "sync"
-        ]
+        return self.readout_priority(ReadoutPriority.ASYNC)
 
     @typechecked
     def monitored_devices(self, scan_motors: list = None, readout_priority: dict = None) -> list:
@@ -394,11 +402,11 @@ class DeviceContainer(dict):
 
         devices.extend([self.get(dev) for dev in readout_priority.get("monitored", [])])
 
-        excluded_devices = self.acquisition_group("detector")
-        excluded_devices.extend(self.async_devices())
+        excluded_devices = self.async_devices()
         excluded_devices.extend(self.disabled_devices)
         excluded_devices.extend([self.get(dev) for dev in readout_priority.get("baseline", [])])
-        excluded_devices.extend([self.get(dev) for dev in readout_priority.get("ignored", [])])
+        excluded_devices.extend([self.get(dev) for dev in readout_priority.get("on_request", [])])
+        excluded_devices.extend([self.get(dev) for dev in readout_priority.get("continuous", [])])
 
         return [dev for dev in set(devices) if dev not in excluded_devices]
 
@@ -421,10 +429,9 @@ class DeviceContainer(dict):
 
         excluded_devices = self.monitored_devices(scan_motors)
         excluded_devices.extend(self.async_devices())
-        excluded_devices.extend(self.detectors())
-        excluded_devices.extend(self.readout_priority("ignored"))
+        excluded_devices.extend(self.readout_priority("on_request"))
         excluded_devices.extend([self.get(dev) for dev in readout_priority.get("monitored", [])])
-        excluded_devices.extend([self.get(dev) for dev in readout_priority.get("ignored", [])])
+        excluded_devices.extend([self.get(dev) for dev in readout_priority.get("continuous", [])])
 
         return [dev for dev in set(devices) if dev not in excluded_devices]
 
@@ -461,8 +468,16 @@ class DeviceContainer(dict):
             "The method `detectors` is deprecated and will be removed in the future.",
             DeprecationWarning,
         )
+        detectors = [
+            getattr(self, dev)
+            for dev in self
+            if re.search(
+                "det", getattr(self, dev).__dict__["_config"]["deviceClass"], re.IGNORECASE
+            )
+            is not None
+        ]
 
-        return [dev for dev in self.enabled_devices if dev in self.acquisition_group("detector")]
+        return detectors
 
     def wm(self, device_names: List[str]):
         """Get the current position of one or more devices.
@@ -556,7 +571,7 @@ class DeviceContainer(dict):
         table.add_column("Device", justify="center")
         table.add_column("Description", justify="center")
         table.add_column("Status", justify="center")
-        table.add_column("Set enabled", justify="center")
+        table.add_column("ReadOnly", justify="center")
         table.add_column("Device class", justify="center")
         table.add_column("Readout priority", justify="center")
         table.add_column("Device tags", justify="center")
@@ -567,7 +582,7 @@ class DeviceContainer(dict):
                 dev.name,
                 dev._config.get("description", dev.name),
                 "enabled" if dev.enabled else "disabled",
-                str(dev.enabled_set),
+                str(dev.read_only),
                 dev._config.get("deviceClass"),
                 dev._config["acquisitionConfig"].get("readoutPriority"),
                 str(dev._config.get("deviceTags", [])),
@@ -610,6 +625,10 @@ class DeviceManagerBase:
         self._get_config()
 
     def update_status(self, status: BECStatus):
+        """Update the status of the device manager
+        Args:
+            status (BECStatus): New status
+        """
         for cb in self._status_cb:
             if cb:
                 cb(status)
@@ -637,8 +656,8 @@ class DeviceManagerBase:
                     self.devices[dev]._config["enabled"] = config[dev]["enabled"]
                     status = "enabled" if self.devices[dev].enabled else "disabled"
                     logger.info(f"Device {dev} has been {status}.")
-                if "enabled_set" in config[dev]:
-                    self.devices[dev]._config["enabled_set"] = config[dev]["enabled_set"]
+                if "read_only" in config[dev]:
+                    self.devices[dev]._config["read_only"] = config[dev]["read_only"]
                 if "userParameter" in config[dev]:
                     self.devices[dev]._config["userParameter"] = config[dev]["userParameter"]
                 if "onFailure" in config[dev]:
@@ -799,10 +818,8 @@ class DeviceManagerBase:
             # pylint: disable=protected-access
             self.devices._add_device(dev.get("name"), obj)
 
-    def _get_device_info(self, device_name) -> messages.DeviceInfoMessage:
-        msg = messages.DeviceInfoMessage.loads(
-            self.producer.get(MessageEndpoints.device_info(device_name))
-        )
+    def _get_device_info(self, device_name) -> DeviceInfoMessage:
+        msg = DeviceInfoMessage.loads(self.producer.get(MessageEndpoints.device_info(device_name)))
         return msg
 
     def check_request_validity(self, msg: DeviceConfigMessage) -> None:

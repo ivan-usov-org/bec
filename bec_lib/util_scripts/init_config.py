@@ -19,10 +19,6 @@ producer = connector.producer()
 with open(clargs.config, "r", encoding="utf-8") as stream:
     data = yaml.safe_load(stream)
 for name, device in data.items():
-    device["enabled"] = device["status"]["enabled"]
-    if device["status"].get("enabled_set"):
-        device["enabled_set"] = device["status"].get("enabled_set")
-    device.pop("status")
     device["name"] = name
 config_data = list(data.values())
 producer.set(MessageEndpoints.device_config(), msgpack.dumps(config_data))

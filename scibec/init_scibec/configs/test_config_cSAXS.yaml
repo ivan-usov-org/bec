@@ -1,8 +1,5 @@
 ppth:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: phase plate angle
   deviceClass: EpicsMotor
   deviceConfig:
@@ -13,14 +10,10 @@ ppth:
     - lamni
     - phase plates
   onFailure: buffer
-  status:
-    enabled: true
-    enabled_set: true  
+  enabled: true
+  readOnly: false  
 ppx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: phase plate
   deviceClass: EpicsMotor
   deviceConfig:
@@ -31,14 +24,10 @@ ppx:
     - lamni
     - phase plates
   onFailure: buffer
-  status:
-    enabled: true
-    enabled_set: true  
+  enabled: true
+  readOnly: false  
 ppthenc:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: phase plate encoder
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -54,10 +43,7 @@ ppthenc:
     enabled_set: false 
 
 FBPMDX:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: FOFB reference
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -72,10 +58,7 @@ FBPMDX:
     enabled: true
     enabled_set: false
 FBPMDY:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: FOFB reference
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -90,10 +73,7 @@ FBPMDY:
     enabled: true
     enabled_set: false
 FBPMUX:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: FOFB reference
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -108,10 +88,7 @@ FBPMUX:
     enabled: true
     enabled_set: false
 FBPMUY:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: FOFB reference
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -126,10 +103,7 @@ FBPMUY:
     enabled: true
     enabled_set: false
 XASYM:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: FOFB reference
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -144,10 +118,7 @@ XASYM:
     enabled: true
     enabled_set: false
 XSYM:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: FOFB reference
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -162,10 +133,7 @@ XSYM:
     enabled: true
     enabled_set: false
 YASYM:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: FOFB reference
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -180,10 +148,7 @@ YASYM:
     enabled: true
     enabled_set: false
 YSYM:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: FOFB reference
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -198,10 +163,7 @@ YSYM:
     enabled: true
     enabled_set: false
 aptrx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: ES aperture horizontal movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -214,10 +176,7 @@ aptrx:
     enabled: true
     enabled_set: false
 aptry:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: ES aperture vertical movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -230,10 +189,7 @@ aptry:
     enabled: true
     enabled_set: false
 bm1trx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: FrontEnd XBPM 1 horizontal movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -247,10 +203,7 @@ bm1trx:
     enabled: true
     enabled_set: false
 bm1try:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: FrontEnd XBPM 1 vertical movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -264,10 +217,7 @@ bm1try:
     enabled: true
     enabled_set: false
 bm2trx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: FrontEnd XBPM 2 horizontal movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -281,10 +231,7 @@ bm2trx:
     enabled: true
     enabled_set: false
 bm2try:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: FrontEnd XBPM 2 vertical movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -298,10 +245,7 @@ bm2try:
     enabled: true
     enabled_set: false
 bm3trx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: OpticsHutch XBPM 1 horizontal movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -315,10 +259,7 @@ bm3trx:
     enabled: true
     enabled_set: false
 bm3try:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: OpticsHutch XBPM 1 vertical movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -332,10 +273,7 @@ bm3try:
     enabled: true
     enabled_set: false
 bm4trx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: OpticsHutch XBPM 2 horizontal movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -349,10 +287,7 @@ bm4trx:
     enabled: true
     enabled_set: false
 bm4try:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: OpticsHutch XBPM 2 vertical movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -366,10 +301,7 @@ bm4try:
     enabled: true
     enabled_set: false
 bm5trx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: OpticsHutch XBPM 3 horizontal movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -383,10 +315,7 @@ bm5trx:
     enabled: true
     enabled_set: false
 bm5try:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: OpticsHutch XBPM 3 vertical movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -400,10 +329,7 @@ bm5try:
     enabled: true
     enabled_set: false
 bpm1:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: "XBPM 1: Somewhere around mono (VME)"
   deviceClass: XbpmCsaxsOp
   deviceConfig:
@@ -417,10 +343,7 @@ bpm1:
     enabled: true
     enabled_set: false
 bpm1i:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Some VME XBPM...
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -435,10 +358,7 @@ bpm1i:
     enabled: true
     enabled_set: false
 bpm2:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: "XBPM 2: Somewhere around mono (VME)"
   deviceClass: XbpmCsaxsOp
   deviceConfig:
@@ -452,10 +372,7 @@ bpm2:
     enabled: true
     enabled_set: false
 bpm2i:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Some VME  XBPM...
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -470,10 +387,7 @@ bpm2i:
     enabled: true
     enabled_set: false
 # bpm3:
-#   acquisitionConfig:
-#     acquisitionGroup: monitor
-#     readoutPriority: baseline
-#     schedule: sync
+#   readoutPriority: baseline
 #   description: "XBPM 3: White beam AH501 before mono"
 #   deviceClass: QuadEM
 #   deviceConfig:
@@ -487,10 +401,7 @@ bpm2i:
 #     enabled: true
 #     enabled_set: false
 bpm3a:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: "XBPM 3: White beam AH501 before mono"
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -505,10 +416,7 @@ bpm3a:
     enabled: true
     enabled_set: false
 bpm3b:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: "XBPM 3: White beam AH501 before mono"
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -523,10 +431,7 @@ bpm3b:
     enabled: true
     enabled_set: false
 bpm3c:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: "XBPM 3: White beam AH501 before mono"
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -541,10 +446,7 @@ bpm3c:
     enabled: true
     enabled_set: false
 bpm3d:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: "XBPM 3: White beam AH501 before mono"
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -559,10 +461,7 @@ bpm3d:
     enabled: true
     enabled_set: false
 bpm4i:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: "XBPM 4: integrated counts"
   deviceClass: Bpm4i
   deviceConfig:
@@ -576,10 +475,7 @@ bpm4i:
     enabled: true
     enabled_set: false    
 bpm4a:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: "XBPM 4: VME between mono and mirror"
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -594,10 +490,7 @@ bpm4a:
     enabled: true
     enabled_set: false
 bpm4b:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: "XBPM 4: VME between mono and mirror"
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -612,10 +505,7 @@ bpm4b:
     enabled: true
     enabled_set: false
 bpm4c:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: "XBPM 4: VME between mono and mirror"
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -630,10 +520,7 @@ bpm4c:
     enabled: true
     enabled_set: false
 bpm4d:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: "XBPM 4: VME between mono and mirror"
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -648,10 +535,7 @@ bpm4d:
     enabled: true
     enabled_set: false
 # bpm5:
-#   acquisitionConfig:
-#     acquisitionGroup: monitor
-#     readoutPriority: baseline
-#     schedule: sync
+#   readoutPriority: baseline
 #   description: "XBPM 5: AH501 past the mirror"
 #   deviceClass: QuadEM
 #   deviceConfig:
@@ -665,10 +549,7 @@ bpm4d:
 #     enabled: true
 #     enabled_set: false
 bpm5a:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: "XBPM 5: AH501 past the mirror"
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -683,10 +564,7 @@ bpm5a:
     enabled: true
     enabled_set: false
 bpm5b:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: "XBPM 5: AH501 past the mirror"
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -701,10 +579,7 @@ bpm5b:
     enabled: true
     enabled_set: false
 bpm5c:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: "XBPM 5: AH501 past the mirror"
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -719,10 +594,7 @@ bpm5c:
     enabled: true
     enabled_set: false
 bpm5d:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: "XBPM 5: AH501 past the mirror"
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -737,10 +609,7 @@ bpm5d:
     enabled: true
     enabled_set: false
 # bpm6:
-#   acquisitionConfig:
-#     acquisitionGroup: monitor
-#     readoutPriority: baseline
-#     schedule: sync
+#   readoutPriority: baseline
 #   description: "XBPM 6: Xbox, not commissioned"
 #   deviceClass: QuadEM
 #   deviceConfig:
@@ -754,10 +623,7 @@ bpm5d:
 #     enabled: true
 #     enabled_set: false
 bpm6a:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: "XBPM 6: Xbox, not commissioned"
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -772,10 +638,7 @@ bpm6a:
     enabled: true
     enabled_set: false
 bpm6b:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: "XBPM 6: Xbox, not commissioned"
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -790,10 +653,7 @@ bpm6b:
     enabled: true
     enabled_set: false
 bpm6c:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: "XBPM 6: Xbox, not commissioned"
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -808,10 +668,7 @@ bpm6c:
     enabled: true
     enabled_set: false
 bpm6d:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: "XBPM 6: Xbox, not commissioned"
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -826,10 +683,7 @@ bpm6d:
     enabled: true
     enabled_set: false
 bs1x:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Beam stop 1 x
   deviceClass: EpicsMotor
   deviceConfig:
@@ -843,10 +697,7 @@ bs1x:
     enabled: true
     enabled_set: false
 bs1y:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Beam stop 1 y
   deviceClass: EpicsMotor
   deviceConfig:
@@ -860,10 +711,7 @@ bs1y:
     enabled: true
     enabled_set: false
 bs2x:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Beam stop 2 x
   deviceClass: EpicsMotor
   deviceConfig:
@@ -877,10 +725,7 @@ bs2x:
     enabled: true
     enabled_set: false
 bs2y:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Beam stop 2 y
   deviceClass: EpicsMotor
   deviceConfig:
@@ -894,10 +739,7 @@ bs2y:
     enabled: true
     enabled_set: false
 curr:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: SLS ring current
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -911,10 +753,7 @@ curr:
     enabled: true
     enabled_set: false
 cyb:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Some scaler...
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -928,10 +767,7 @@ cyb:
     enabled: true
     enabled_set: false
 dettrx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Detector tower motion
   deviceClass: EpicsMotor
   deviceConfig:
@@ -945,10 +781,7 @@ dettrx:
     enabled: true
     enabled_set: false
 di2trx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: FrontEnd diaphragm 2 horizontal movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -961,10 +794,7 @@ di2trx:
     enabled: true
     enabled_set: false
 di2try:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: FrontEnd diaphragm 2 vertical movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -977,10 +807,7 @@ di2try:
     enabled: true
     enabled_set: false
 diode:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Some scaler...
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -994,10 +821,7 @@ diode:
     enabled: true
     enabled_set: false
 dtpush:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Detector tower tilt pusher
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1011,10 +835,7 @@ dtpush:
     enabled: true
     enabled_set: false
 dtth:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Detector tower tilt rotation
   deviceClass: PmDetectorRotation
   deviceConfig:
@@ -1028,10 +849,7 @@ dtth:
     enabled: true
     enabled_set: false
 dttrx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Detector tower motion
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1045,10 +863,7 @@ dttrx:
     enabled: true
     enabled_set: false
 dttry:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Detector tower motion, no encoder
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1062,10 +877,7 @@ dttry:
     enabled: true
     enabled_set: false
 dttrz:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Detector tower motion
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1079,10 +891,7 @@ dttrz:
     enabled: true
     enabled_set: false
 ebtrx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Exposure box 2 horizontal movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1096,10 +905,7 @@ ebtrx:
     enabled: true
     enabled_set: false
 ebtry:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Exposure box 2 vertical movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1113,10 +919,7 @@ ebtry:
     enabled: true
     enabled_set: false
 ebtrz:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Exposure box 2 axial movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1130,10 +933,7 @@ ebtrz:
     enabled: true
     enabled_set: false
 eyecenx:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: X-ray eye intensit math
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -1148,10 +948,7 @@ eyecenx:
     enabled: true
     enabled_set: false
 eyeceny:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: X-ray eye intensit math
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -1166,10 +963,7 @@ eyeceny:
     enabled: true
     enabled_set: false
 eyefoc:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: X-ray eye focusing motor
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1183,10 +977,7 @@ eyefoc:
     enabled: true
     enabled_set: false
 eyeint:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: X-ray eye intensit math
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -1201,10 +992,7 @@ eyeint:
     enabled: true
     enabled_set: false
 eyex:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: X-ray eye motion
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1218,10 +1006,7 @@ eyex:
     enabled: true
     enabled_set: false
 eyey:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: X-ray eye motion
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1235,10 +1020,7 @@ eyey:
     enabled: true
     enabled_set: false
 fal0:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Some scaler...
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -1252,10 +1034,7 @@ fal0:
     enabled: true
     enabled_set: false
 fal1:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Some scaler...
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -1269,10 +1048,7 @@ fal1:
     enabled: true
     enabled_set: false
 fal2:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Some scaler...
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -1286,10 +1062,7 @@ fal2:
     enabled: true
     enabled_set: false
 fi1try:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: OpticsHutch filter 1 movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1303,10 +1076,7 @@ fi1try:
     enabled: true
     enabled_set: false
 fi2try:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: OpticsHutch filter 2 movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1320,10 +1090,7 @@ fi2try:
     enabled: true
     enabled_set: false
 fi3try:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: OpticsHutch filter 3 movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1337,10 +1104,7 @@ fi3try:
     enabled: true
     enabled_set: false
 ftp:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Flight tube pressure
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -1355,10 +1119,7 @@ ftp:
     enabled: true
     enabled_set: false
 fttrx1:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Dunno these motors???
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1372,10 +1133,7 @@ fttrx1:
     enabled: true
     enabled_set: false
 fttrx2:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Dunno these motors???
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1389,10 +1147,7 @@ fttrx2:
     enabled: true
     enabled_set: false
 fttry1:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Dunno these motors???
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1406,10 +1161,7 @@ fttry1:
     enabled: true
     enabled_set: false
 fttry2:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Dunno these motors???
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1423,10 +1175,7 @@ fttry2:
     enabled: true
     enabled_set: false
 fttrz:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Dunno these motors???
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1440,10 +1189,7 @@ fttrz:
     enabled: true
     enabled_set: false
 idgap:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Undulator gap size [mm]
   deviceClass: InsertionDevice
   deviceConfig:
@@ -1456,10 +1202,7 @@ idgap:
     enabled: true
     enabled_set: false
 led:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Some scaler...
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -1473,10 +1216,7 @@ led:
     enabled: true
     enabled_set: false
 mibd1:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Mirror bender 1
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1490,10 +1230,7 @@ mibd1:
     enabled: true
     enabled_set: false
 mibd2:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Mirror bender 2
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1507,10 +1244,7 @@ mibd2:
     enabled: true
     enabled_set: false
 micfoc:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Microscope focusing motor
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1523,10 +1257,7 @@ micfoc:
     enabled: true
     enabled_set: false
 mitrx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Mirror horizontal movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1540,10 +1271,7 @@ mitrx:
     enabled: true
     enabled_set: false
 mitry1:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Mirror vertical movement 1
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1557,10 +1285,7 @@ mitry1:
     enabled: true
     enabled_set: false
 mitry2:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Mirror vertical movement 2
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1574,10 +1299,7 @@ mitry2:
     enabled: true
     enabled_set: false
 mitry3:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Mirror vertical movement 3
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1591,10 +1313,7 @@ mitry3:
     enabled: true
     enabled_set: false
 mobd:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Monochromator bender virtual motor
   deviceClass: PmMonoBender
   deviceConfig:
@@ -1608,10 +1327,7 @@ mobd:
     enabled: true
     enabled_set: false
 mobdai:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Monochromator bender inner motor
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1625,10 +1341,7 @@ mobdai:
     enabled: true
     enabled_set: false
 mobdbo:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Monochromator bender outer motor
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1642,10 +1355,7 @@ mobdbo:
     enabled: true
     enabled_set: false
 mobdco:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Monochromator bender outer motor
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1659,10 +1369,7 @@ mobdco:
     enabled: true
     enabled_set: false
 mobddi:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Monochromator bender inner motor
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1676,10 +1383,7 @@ mobddi:
     enabled: true
     enabled_set: false
 mokev:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Monochromator energy in keV
   deviceClass: EnergyKev
   deviceConfig:
@@ -1694,10 +1398,7 @@ mokev:
     enabled: true
     enabled_set: false
 mopush1:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Monochromator crystal 1 angle
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -1712,10 +1413,7 @@ mopush1:
     enabled: true
     enabled_set: false
 mopush2:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Monochromator crystal 2 angle
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -1730,10 +1428,7 @@ mopush2:
     enabled: true
     enabled_set: false
 moroll1:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Monochromator crystal 1 roll
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1747,10 +1442,7 @@ moroll1:
     enabled: true
     enabled_set: false
 moroll2:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Monochromator crystal 2 roll movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1764,10 +1456,7 @@ moroll2:
     enabled: true
     enabled_set: false
 moth1:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Monochromator Theta 1
   deviceClass: MonoTheta1
   deviceConfig:
@@ -1782,10 +1471,7 @@ moth1:
     enabled: true
     enabled_set: false
 moth1e:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Monochromator crystal 1 theta encoder
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -1800,10 +1486,7 @@ moth1e:
     enabled: true
     enabled_set: false
 moth2:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Monochromator Theta 2
   deviceClass: MonoTheta2
   deviceConfig:
@@ -1818,10 +1501,7 @@ moth2:
     enabled: true
     enabled_set: false
 moth2e:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Monochromator crystal 2 theta encoder
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -1836,10 +1516,7 @@ moth2e:
     enabled: true
     enabled_set: false
 motrx2:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Monochromator crystal 2 horizontal movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1853,10 +1530,7 @@ motrx2:
     enabled: true
     enabled_set: false
 motry:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: OpticsHutch optical table vertical movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1870,10 +1544,7 @@ motry:
     enabled: true
     enabled_set: false
 motry2:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Monochromator crystal 2 vertical movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1887,10 +1558,7 @@ motry2:
     enabled: true
     enabled_set: false
 motrz1:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Monochromator crystal 1 axial movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1904,10 +1572,7 @@ motrz1:
     enabled: true
     enabled_set: false
 motrz1e:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Monochromator crystal 1 axial movement encoder
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -1922,10 +1587,7 @@ motrz1e:
     enabled: true
     enabled_set: false
 moyaw2:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Monochromator crystal 2 yaw movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1939,10 +1601,7 @@ moyaw2:
     enabled: true
     enabled_set: false
 samx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Sample motion
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1955,10 +1614,7 @@ samx:
     enabled: true
     enabled_set: false
 samy:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Sample motion
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1971,10 +1627,7 @@ samy:
     enabled: true
     enabled_set: false
 sec:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Some scaler...
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -1988,10 +1641,7 @@ sec:
     enabled: true
     enabled_set: false
 sl0h:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: FrontEnd slit virtual movement
   deviceClass: SlitH
   deviceConfig:
@@ -2004,10 +1654,7 @@ sl0h:
     enabled: true
     enabled_set: false
 sl0trxi:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: FrontEnd slit inner blade movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -2020,10 +1667,7 @@ sl0trxi:
     enabled: true
     enabled_set: false
 sl0trxo:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: FrontEnd slit outer blade movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -2036,10 +1680,7 @@ sl0trxo:
     enabled: true
     enabled_set: false
 sl1h:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: OpticsHutch slit virtual movement
   deviceClass: SlitH
   deviceConfig:
@@ -2052,10 +1693,7 @@ sl1h:
     enabled: true
     enabled_set: false
 sl1trxi:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: OpticsHutch slit inner blade movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -2068,10 +1706,7 @@ sl1trxi:
     enabled: true
     enabled_set: false
 sl1trxo:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: OpticsHutch slit outer blade movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -2084,10 +1719,7 @@ sl1trxo:
     enabled: true
     enabled_set: false
 sl1tryb:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: OpticsHutch slit bottom blade movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -2100,10 +1732,7 @@ sl1tryb:
     enabled: true
     enabled_set: false
 sl1tryt:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: OpticsHutch slit top blade movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -2116,10 +1745,7 @@ sl1tryt:
     enabled: true
     enabled_set: false
 sl1v:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: OpticsHutch slit virtual movement
   deviceClass: SlitV
   deviceConfig:
@@ -2132,10 +1758,7 @@ sl1v:
     enabled: true
     enabled_set: false
 sl2h:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: OpticsHutch slit 2 virtual movement
   deviceClass: SlitH
   deviceConfig:
@@ -2148,10 +1771,7 @@ sl2h:
     enabled: true
     enabled_set: false
 sl2trxi:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: OpticsHutch slit 2 inner blade movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -2164,10 +1784,7 @@ sl2trxi:
     enabled: true
     enabled_set: false
 sl2trxo:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: OpticsHutch slit 2 outer blade movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -2180,10 +1797,7 @@ sl2trxo:
     enabled: true
     enabled_set: false
 sl2tryb:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: OpticsHutch slit 2 bottom blade movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -2196,10 +1810,7 @@ sl2tryb:
     enabled: true
     enabled_set: false
 sl2tryt:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: OpticsHutch slit 2 top blade movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -2212,10 +1823,7 @@ sl2tryt:
     enabled: true
     enabled_set: false
 sl2v:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: OpticsHutch slit 2 virtual movement
   deviceClass: SlitV
   deviceConfig:
@@ -2228,10 +1836,7 @@ sl2v:
     enabled: true
     enabled_set: false
 strox:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Girder virtual pitch
   deviceClass: GirderMotorPITCH
   deviceConfig:
@@ -2244,10 +1849,7 @@ strox:
     enabled: true
     enabled_set: false
 stroy:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Girder virtual yaw
   deviceClass: GirderMotorYAW
   deviceConfig:
@@ -2260,10 +1862,7 @@ stroy:
     enabled: true
     enabled_set: false
 stroz:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Girder virtual roll
   deviceClass: GirderMotorROLL
   deviceConfig:
@@ -2276,10 +1875,7 @@ stroz:
     enabled: true
     enabled_set: false
 sttrx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Girder X translation
   deviceClass: GirderMotorX1
   deviceConfig:
@@ -2292,10 +1888,7 @@ sttrx:
     enabled: true
     enabled_set: false
 sttry:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Girder Y translation
   deviceClass: GirderMotorY1
   deviceConfig:
@@ -2308,10 +1901,7 @@ sttry:
     enabled: true
     enabled_set: false
 transd:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: Transmission diode
   deviceClass: EpicsSignalRO
   deviceConfig:

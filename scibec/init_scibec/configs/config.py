@@ -58,18 +58,15 @@ class DemoConfig(ConfigBase):
         for m in detectors:
             out[m] = dict(
                 {
-                    "status": {"enabled": True, "enabled_set": True},
+                    "enabled": True,
+                    "readOnly": False,
                     "deviceClass": "SynSLSDetector",
                     "deviceConfig": {
                         "name": m,
                         "labels": m,
                         "device_access": True,
                     },
-                    "acquisitionConfig": {
-                        "schedule": "sync",
-                        "acquisitionGroup": "detector",
-                        "readoutPriority": "monitored",
-                    },
+                    "readoutPriority": "monitored",
                     "deviceTags": ["detector"],
                 }
             )
@@ -101,7 +98,8 @@ class DemoConfig(ConfigBase):
         for m in user_motors:
             out[m] = dict(
                 {
-                    "status": {"enabled": True, "enabled_set": True},
+                    "enabled": True,
+                    "readOnly": False,
                     "deviceClass": "SynAxisOPAAS",
                     "deviceConfig": {
                         "name": m,
@@ -112,18 +110,15 @@ class DemoConfig(ConfigBase):
                         "limits": [-50, 50],
                         "tolerance": 0.01,
                     },
-                    "acquisitionConfig": {
-                        "schedule": "sync",
-                        "acquisitionGroup": "motor",
-                        "readoutPriority": "baseline",
-                    },
+                    "readoutPriority": "baseline",
                     "deviceTags": ["user motors"],
                 }
             )
 
         out["flyer_sim"] = dict(
             {
-                "status": {"enabled": True, "enabled_set": True},
+                "enabled": True,
+                "readOnly": False,
                 "deviceClass": "SynFlyer",
                 "deviceConfig": {
                     "name": "flyer_sim",
@@ -133,11 +128,7 @@ class DemoConfig(ConfigBase):
                     "update_frequency": 400,
                     "device_access": True,
                 },
-                "acquisitionConfig": {
-                    "schedule": "flyer",
-                    "acquisitionGroup": "motor",
-                    "readoutPriority": "baseline",
-                },
+                "readoutPriority": "baseline",
                 "deviceTags": ["flyer"],
             }
         )
@@ -197,14 +188,11 @@ class DemoConfig(ConfigBase):
         for m in beamline_monitor:
             out[m] = dict(
                 {
-                    "status": {"enabled": True, "enabled_set": True},
+                    "enabled": True,
+                    "readOnly": False,
                     "deviceClass": "SynAxisMonitor",
                     "deviceConfig": {"name": m, "labels": m, "tolerance": 0.5},
-                    "acquisitionConfig": {
-                        "schedule": "sync",
-                        "acquisitionGroup": "monitor",
-                        "readoutPriority": "monitored",
-                    },
+                    "readoutPriority": "monitored",
                     "deviceTags": ["beamline"],
                 }
             )
@@ -360,7 +348,8 @@ class DemoConfig(ConfigBase):
         for m in beamline_motors:
             out[m] = dict(
                 {
-                    "status": {"enabled": True, "enabled_set": True},
+                    "enabled": True,
+                    "readOnly": False,
                     "deviceClass": "SynAxisOPAAS",
                     "deviceConfig": {
                         "name": m,
@@ -369,11 +358,7 @@ class DemoConfig(ConfigBase):
                         "speed": 100,
                         "update_frequency": 400,
                     },
-                    "acquisitionConfig": {
-                        "schedule": "sync",
-                        "acquisitionGroup": "motor",
-                        "readoutPriority": "baseline",
-                    },
+                    "readoutPriority": "baseline",
                     "deviceTags": ["beamline"],
                 }
             )
@@ -386,17 +371,14 @@ class DemoConfig(ConfigBase):
         for m in read_only_signals:
             out[m] = dict(
                 {
-                    "status": {"enabled": True, "enabled_set": True},
+                    "enabled": True,
+                    "readOnly": False,
                     "deviceClass": "SynSignalRO",
                     "deviceConfig": {
                         "name": m,
                         "labels": m,
                     },
-                    "acquisitionConfig": {
-                        "schedule": "sync",
-                        "acquisitionGroup": "monitor",
-                        "readoutPriority": "monitored",
-                    },
+                    "readoutPriority": "monitored",
                     "deviceTags": ["beamline"],
                 }
             )
@@ -414,7 +396,8 @@ class TestConfig(DemoConfig):
         for m in ["motor1_disabled", "motor2_disabled"]:
             out[m] = dict(
                 {
-                    "status": {"enabled": False, "enabled_set": True},
+                    "enabled": False,
+                    "readOnly": False,
                     "deviceClass": "SynAxisOPAAS",
                     "deviceConfig": {
                         "name": m,
@@ -425,18 +408,15 @@ class TestConfig(DemoConfig):
                         "limits": [-50, 50],
                         "tolerance": 0.01,
                     },
-                    "acquisitionConfig": {
-                        "schedule": "sync",
-                        "acquisitionGroup": "motor",
-                        "readoutPriority": "baseline",
-                    },
+                    "readoutPriority": "baseline",
                     "deviceTags": ["user motors"],
                 }
             )
         for m in ["motor1_disabled_set", "motor2_disabled_set"]:
             out[m] = dict(
                 {
-                    "status": {"enabled": True, "enabled_set": False},
+                    "enabled": True,
+                    "readOnly": True,
                     "deviceClass": "SynAxisOPAAS",
                     "deviceConfig": {
                         "name": m,
@@ -447,11 +427,7 @@ class TestConfig(DemoConfig):
                         "limits": [-50, 50],
                         "tolerance": 0.01,
                     },
-                    "acquisitionConfig": {
-                        "schedule": "sync",
-                        "acquisitionGroup": "motor",
-                        "readoutPriority": "baseline",
-                    },
+                    "readoutPriority": "baseline",
                     "deviceTags": ["user motors"],
                 }
             )
@@ -483,7 +459,8 @@ class X12SAConfig(ConfigBase):
         for name, pv, is_string in x12sa_status:
             out[name] = dict(
                 {
-                    "status": {"enabled": True, "enabled_set": False},
+                    "enabled": True,
+                    "readOnly": True,
                     "deviceClass": "EpicsSignalRO",
                     "deviceConfig": {
                         "read_pv": pv,
@@ -491,11 +468,7 @@ class X12SAConfig(ConfigBase):
                         "auto_monitor": True,
                         "string": is_string,
                     },
-                    "acquisitionConfig": {
-                        "schedule": "sync",
-                        "acquisitionGroup": "status",
-                        "readoutPriority": "ignored",
-                    },
+                    "readoutPriority": "on_request",
                     "deviceTags": ["X12SA status"],
                 }
             )
@@ -517,7 +490,8 @@ class X12SAConfig(ConfigBase):
         for name, pv, is_string in sls_status:
             out[name] = dict(
                 {
-                    "status": {"enabled": True, "enabled_set": False},
+                    "enabled": True,
+                    "readOnly": True,
                     "deviceClass": "EpicsSignalRO",
                     "deviceConfig": {
                         "read_pv": pv,
@@ -525,18 +499,15 @@ class X12SAConfig(ConfigBase):
                         "auto_monitor": True,
                         "string": is_string,
                     },
-                    "acquisitionConfig": {
-                        "schedule": "sync",
-                        "acquisitionGroup": "monitor",
-                        "readoutPriority": "baseline",
-                    },
+                    "readoutPriority": "baseline",
                     "onFailure": "buffer",
                     "deviceTags": ["SLS status"],
                 }
             )
 
         out["sls_ring_current"] = {
-            "status": {"enabled": True, "enabled_set": False},
+            "enabled": True,
+            "readOnly": True,
             "deviceClass": "EpicsSignalRO",
             "deviceConfig": {
                 "read_pv": "ARIDI-PCT:CURRENT",
@@ -544,24 +515,20 @@ class X12SAConfig(ConfigBase):
                 "auto_monitor": True,
                 "string": False,
             },
-            "acquisitionConfig": {
-                "schedule": "sync",
-                "acquisitionGroup": "monitor",
-                "readoutPriority": "monitored",
-            },
+            "readoutPriority": "monitored",
             "onFailure": "buffer",
             "deviceTags": ["SLS status"],
         }
 
         out["sls_operator"] = dict(
             {
-                "status": {"enabled": True, "enabled_set": False},
+                "enabled": True,
+                "readOnly": True,
                 "deviceClass": "SLSOperatorMessages",
                 "deviceConfig": {"name": "sls_operator"},
                 "acquisitionConfig": {
                     "schedule": "sync",
-                    "acquisitionGroup": "status",
-                    "readoutPriority": "ignored",
+                    "readoutPriority": "on_request",
                 },
                 "onFailure": "buffer",
                 "deviceTags": ["SLS status"],
@@ -569,14 +536,11 @@ class X12SAConfig(ConfigBase):
         )
         out["sls_info"] = dict(
             {
-                "status": {"enabled": True, "enabled_set": False},
+                "enabled": True,
+                "readOnly": True,
                 "deviceClass": "SLSInfo",
                 "deviceConfig": {"name": "sls_info"},
-                "acquisitionConfig": {
-                    "schedule": "sync",
-                    "acquisitionGroup": "status",
-                    "readoutPriority": "ignored",
-                },
+                "readoutPriority": "on_request",
                 "onFailure": "buffer",
                 "deviceTags": ["SLS status"],
             }

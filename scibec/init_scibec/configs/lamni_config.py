@@ -31,7 +31,8 @@ class LamNIConfig(DemoConfig, X12SAConfig):
         for m in lamni_galil_motors:
             out[m[0]] = dict(
                 {
-                    "status": {"enabled": True, "enabled_set": True},
+                    "enabled": True,
+                    "readOnly": False,
                     "deviceClass": "GalilMotor",
                     "deviceConfig": {
                         "axis_Id": m[1],
@@ -45,11 +46,7 @@ class LamNIConfig(DemoConfig, X12SAConfig):
                         "device_access": True,
                         "device_mapping": {"rt": "rtx"},
                     },
-                    "acquisitionConfig": {
-                        "schedule": "sync",
-                        "acquisitionGroup": "motor",
-                        "readoutPriority": "baseline",
-                    },
+                    "readoutPriority": "baseline",
                     "deviceTags": ["lamni"],
                 }
             )
@@ -66,7 +63,8 @@ class LamNIConfig(DemoConfig, X12SAConfig):
         for m in lamni_rt_motors:
             out[m[0]] = dict(
                 {
-                    "status": {"enabled": True, "enabled_set": True},
+                    "enabled": True,
+                    "readOnly": False,
                     "deviceClass": "RtLamniMotor",
                     "deviceConfig": {
                         "axis_Id": m[1],
@@ -78,11 +76,7 @@ class LamNIConfig(DemoConfig, X12SAConfig):
                         "sign": m[2],
                         "device_access": True,
                     },
-                    "acquisitionConfig": {
-                        "schedule": "sync",
-                        "acquisitionGroup": "motor",
-                        "readoutPriority": "baseline",
-                    },
+                    "readoutPriority": "baseline",
                     "deviceTags": ["lamni"],
                 }
             )
@@ -101,7 +95,8 @@ class LamNIConfig(DemoConfig, X12SAConfig):
         for m in lamni_smaract_motors:
             out[m[0]] = dict(
                 {
-                    "status": {"enabled": True, "enabled_set": True},
+                    "enabled": True,
+                    "readOnly": False,
                     "deviceClass": "SmaractMotor",
                     "deviceConfig": {
                         "axis_Id": m[1],
@@ -113,11 +108,7 @@ class LamNIConfig(DemoConfig, X12SAConfig):
                         "sign": m[2],
                         "tolerance": 0.05,
                     },
-                    "acquisitionConfig": {
-                        "schedule": "sync",
-                        "acquisitionGroup": "motor",
-                        "readoutPriority": "baseline",
-                    },
+                    "readoutPriority": "baseline",
                     "deviceTags": ["lamni"],
                 }
             )
@@ -129,14 +120,11 @@ class LamNIConfig(DemoConfig, X12SAConfig):
         out = {
             "eiger1p5m": {
                 "description": "Eiger 1.5M in vacuum detector, in-house developed, PSI",
-                "status": {"enabled": True, "enabled_set": True},
+                "enabled": True,
+                "readOnly": False,
                 "deviceClass": "Eiger1p5MDetector",
                 "deviceConfig": {"device_access": True, "name": "eiger1p5m"},
-                "acquisitionConfig": {
-                    "schedule": "sync",
-                    "acquisitionGroup": "detector",
-                    "readoutPriority": "monitored",
-                },
+                "readoutPriority": "monitored",
                 "deviceTags": ["detector"],
             }
         }

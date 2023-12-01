@@ -44,7 +44,7 @@ class DeviceMock:
         self.name = name
         self.read_buffer = None
         self._config = {"deviceConfig": {"limits": [-50, 50]}, "userParameter": None}
-        self._enabled_set = True
+        self._read_only = False
         self._enabled = True
 
     def read(self):
@@ -54,12 +54,12 @@ class DeviceMock:
         return self.read_buffer
 
     @property
-    def enabled_set(self) -> bool:
-        return self._enabled_set
+    def read_only(self) -> bool:
+        return self._read_only
 
-    @enabled_set.setter
-    def enabled_set(self, val: bool):
-        self._enabled_set = val
+    @read_only.setter
+    def read_only(self, val: bool):
+        self._read_only = val
 
     @property
     def enabled(self) -> bool:
@@ -453,7 +453,11 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     action="open_scan",
                     parameter={
                         "scan_motors": ["samx"],
-                        "readout_priority": {"monitored": ["samx"], "baseline": [], "ignored": []},
+                        "readout_priority": {
+                            "monitored": ["samx"],
+                            "baseline": [],
+                            "on_request": [],
+                        },
                         "num_points": 3,
                         "positions": [[-5.0], [0.0], [5.0]],
                         "scan_name": "grid_scan",

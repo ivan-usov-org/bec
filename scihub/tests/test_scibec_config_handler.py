@@ -225,8 +225,8 @@ def test_config_handler_update_device_config_misc(SciHubMock):
     dev.samx = Device("samx", {})
     with mock.patch.object(config_handler, "_validate_update") as validate_update:
         device = dev["samx"]
-        config_handler._update_device_config(device, {"enabled_set": False})
-        validate_update.assert_called_once_with({"enabled_set": False})
+        config_handler._update_device_config(device, {"readOnly": True})
+        validate_update.assert_called_once_with({"readOnly": True})
 
 
 def test_config_handler_update_device_config_raise(SciHubMock):

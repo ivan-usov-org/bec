@@ -14,12 +14,8 @@ def device_config():
         "name": "eiger",
         "sessionId": "569ea788-09d7-44fc-a140-b0b34a2b7f6f",
         "enabled": True,
-        "enabled_set": True,
-        "acquisitionConfig": {
-            "acquisitionGroup": "detectors",
-            "schedule": "sync",
-            "readoutPriority": "monitored",
-        },
+        "readOnly": False,
+        "readoutPriority": "monitored",
         "deviceClass": "SynSLSDetector",
         "deviceConfig": {"device_access": True, "labels": "eiger", "name": "eiger"},
         "deviceTags": ["detector"],
@@ -56,10 +52,8 @@ def test_device_enable_set(device_config):
     dm = DeviceManagerBase(connector)
     obj = dm._create_device(device_config, ())
     with mock.patch.object(obj.parent.config_helper, "send_config_request") as config_req:
-        obj.enabled_set = True
-        config_req.assert_called_once_with(
-            action="update", config={obj.name: {"enabled_set": True}}
-        )
+        obj.read_only = False
+        config_req.assert_called_once_with(action="update", config={obj.name: {"readOnly": False}})
 
 
 @pytest.mark.parametrize(

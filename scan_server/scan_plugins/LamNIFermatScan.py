@@ -98,8 +98,8 @@ class LamNIMixin:
         coarse_move_req_x = np.abs(lsamx_current - move_x)
         coarse_move_req_y = np.abs(lsamy_current - move_y)
 
-        self.device_manager.devices.lsamx.enabled_set = True
-        self.device_manager.devices.lsamy.enabled_set = True
+        self.device_manager.devices.lsamx.read_only = False
+        self.device_manager.devices.lsamy.read_only = False
 
         if (
             np.abs(y_drift) > 150
@@ -128,12 +128,14 @@ class LamNIMixin:
         x_drift2 = x_center_expect * 1000 - rtx_current
         y_drift2 = y_center_expect * 1000 - rty_current
         logger.info(
-            f"Uncompensated drift of setup after first iteration is x={x_drift2:.3f}, y={y_drift2:.3f}"
+            f"Uncompensated drift of setup after first iteration is x={x_drift2:.3f},"
+            f" y={y_drift2:.3f}"
         )
 
         if np.abs(x_drift2) > 5 or np.abs(y_drift2) > 5:
             logger.info(
-                f"Compensating second iteration {[val/1000 for val in lamni_to_stage_coordinates(x_drift2,y_drift2)]}"
+                "Compensating second iteration"
+                f" {[val/1000 for val in lamni_to_stage_coordinates(x_drift2,y_drift2)]}"
             )
             move_x = (
                 x_stage
@@ -155,18 +157,20 @@ class LamNIMixin:
             rty_current = yield from self.stubs.send_rpc_and_wait("rty", "readback.get")
 
             logger.info(
-                f"New scan center interferometer after second iteration {rtx_current:.3f}, {rty_current:.3f} microns"
+                f"New scan center interferometer after second iteration {rtx_current:.3f},"
+                f" {rty_current:.3f} microns"
             )
             x_drift2 = x_center_expect * 1000 - rtx_current
             y_drift2 = y_center_expect * 1000 - rty_current
             logger.info(
-                f"Uncompensated drift of setup after second iteration is x={x_drift2:.3f}, y={y_drift2:.3f}"
+                f"Uncompensated drift of setup after second iteration is x={x_drift2:.3f},"
+                f" y={y_drift2:.3f}"
             )
         else:
             logger.info("No second iteration required")
 
-        self.device_manager.devices.lsamx.enabled_set = False
-        self.device_manager.devices.lsamy.enabled_set = False
+        self.device_manager.devices.lsamx.read_only = True
+        self.device_manager.devices.lsamy.read_only = True
 
         yield from self.stubs.send_rpc_and_wait("rtx", "controller.feedback_enable_without_reset")
 
@@ -363,7 +367,8 @@ class LamNIFermatScan(ScanBase, LamNIMixin):
             self.stitch_x, self.stitch_y, self.angle
         )
         logger.info(
-            f"Total shift [mm] {_shfitx+x_stitch_shift/1000+self.shift_x}, {_shfity+y_stitch_shift/1000+self.shift_y}"
+            f"Total shift [mm] {_shfitx+x_stitch_shift/1000+self.shift_x},"
+            f" {_shfity+y_stitch_shift/1000+self.shift_y}"
         )
         return (
             _shfitx + x_stitch_shift / 1000 + self.shift_x,
@@ -463,7 +468,8 @@ class LamNIFermatScan(ScanBase, LamNIMixin):
                         break
                     if status_id == 2 and self.metadata.get("RID") == request_id:
                         raise ScanAbortion(
-                            f"An error occured during the LamNI readout: {status.metadata.get('error')}"
+                            "An error occured during the LamNI readout:"
+                            f" {status.metadata.get('error')}"
                         )
 
                 time.sleep(1)

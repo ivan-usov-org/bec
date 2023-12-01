@@ -5,10 +5,8 @@
 ############################################################
 
 eiger:
-  acquisitionConfig:
-    acquisitionGroup: detector
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: detector
   deviceClass: SynSLSDetector
   deviceConfig:
     device_access: true
@@ -31,10 +29,8 @@ eiger:
 
 
 dyn_signals:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: monitor
   deviceClass: sim:sim:SynDynamicComponents
   deviceConfig:
     labels: dyn_signals
@@ -44,10 +40,8 @@ dyn_signals:
     enabled_set: true
 
 eyefoc:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -65,10 +59,8 @@ eyefoc:
     enabled: true
     enabled_set: true
 eyex:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -86,10 +78,8 @@ eyex:
     enabled: true
     enabled_set: true
 eyey:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -107,10 +97,8 @@ eyey:
     enabled: true
     enabled_set: true
 flyer_sim:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: flyer
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynFlyer
   deviceConfig:
     delay: 1
@@ -125,10 +113,8 @@ flyer_sim:
     enabled: true
     enabled_set: true
 hrox:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -146,10 +132,8 @@ hrox:
     enabled: true
     enabled_set: true
 hroy:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -167,10 +151,8 @@ hroy:
     enabled: true
     enabled_set: true
 hroz:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -188,10 +170,8 @@ hroz:
     enabled: true
     enabled_set: true
 hx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -209,10 +189,8 @@ hx:
     enabled: true
     enabled_set: true
 hy:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -230,10 +208,8 @@ hy:
     enabled: true
     enabled_set: true
 hz:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -251,10 +227,8 @@ hz:
     enabled: true
     enabled_set: true
 mbsx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -272,10 +246,8 @@ mbsx:
     enabled: true
     enabled_set: true
 mbsy:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -293,10 +265,8 @@ mbsy:
     enabled: true
     enabled_set: true
 pinx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -314,10 +284,8 @@ pinx:
     enabled: true
     enabled_set: true
 piny:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -335,10 +303,8 @@ piny:
     enabled: true
     enabled_set: true
 pinz:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -356,10 +322,8 @@ pinz:
     enabled: true
     enabled_set: true
 samx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -377,10 +341,8 @@ samx:
     enabled: true
     enabled_set: true
 samy:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -398,10 +360,8 @@ samy:
     enabled: true
     enabled_set: true
 samz:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -429,10 +389,8 @@ samz:
 ############################################################
 
 bpm3a:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm3a
@@ -444,10 +402,8 @@ bpm3a:
     enabled: true
     enabled_set: true
 bpm3b:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm3b
@@ -459,10 +415,8 @@ bpm3b:
     enabled: true
     enabled_set: true
 bpm3c:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm3c
@@ -474,10 +428,8 @@ bpm3c:
     enabled: true
     enabled_set: true
 bpm3d:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm3d
@@ -489,10 +441,8 @@ bpm3d:
     enabled: true
     enabled_set: true
 bpm3i:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm3i
@@ -504,10 +454,8 @@ bpm3i:
     enabled: true
     enabled_set: true
 bpm3x:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm3x
@@ -519,10 +467,8 @@ bpm3x:
     enabled: true
     enabled_set: true
 bpm3y:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm3y
@@ -534,10 +480,8 @@ bpm3y:
     enabled: true
     enabled_set: true
 bpm3z:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm3z
@@ -549,10 +493,8 @@ bpm3z:
     enabled: true
     enabled_set: true
 bpm4a:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm4a
@@ -564,10 +506,8 @@ bpm4a:
     enabled: true
     enabled_set: true
 bpm4b:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm4b
@@ -579,10 +519,8 @@ bpm4b:
     enabled: true
     enabled_set: true
 bpm4c:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm4c
@@ -594,10 +532,8 @@ bpm4c:
     enabled: true
     enabled_set: true
 bpm4d:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm4d
@@ -609,10 +545,8 @@ bpm4d:
     enabled: true
     enabled_set: true
 bpm4i:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm4i
@@ -624,10 +558,8 @@ bpm4i:
     enabled: true
     enabled_set: true
 bpm4s:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm4s
@@ -639,10 +571,8 @@ bpm4s:
     enabled: true
     enabled_set: true
 bpm4x:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm4x
@@ -654,10 +584,8 @@ bpm4x:
     enabled: true
     enabled_set: true
 bpm4xf:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm4xf
@@ -669,10 +597,8 @@ bpm4xf:
     enabled: true
     enabled_set: true
 bpm4xm:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm4xm
@@ -684,10 +610,8 @@ bpm4xm:
     enabled: true
     enabled_set: true
 bpm4y:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm4y
@@ -699,10 +623,8 @@ bpm4y:
     enabled: true
     enabled_set: true
 bpm4yf:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm4yf
@@ -714,10 +636,8 @@ bpm4yf:
     enabled: true
     enabled_set: true
 bpm4ym:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm4ym
@@ -729,10 +649,8 @@ bpm4ym:
     enabled: true
     enabled_set: true
 bpm4z:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm4z
@@ -744,10 +662,8 @@ bpm4z:
     enabled: true
     enabled_set: true
 bpm5a:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm5a
@@ -759,10 +675,8 @@ bpm5a:
     enabled: true
     enabled_set: true
 bpm5b:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm5b
@@ -774,10 +688,8 @@ bpm5b:
     enabled: true
     enabled_set: true
 bpm5c:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm5c
@@ -789,10 +701,8 @@ bpm5c:
     enabled: true
     enabled_set: true
 bpm5d:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm5d
@@ -804,10 +714,8 @@ bpm5d:
     enabled: true
     enabled_set: true
 bpm5i:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm5i
@@ -819,10 +727,8 @@ bpm5i:
     enabled: true
     enabled_set: true
 bpm5x:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm5x
@@ -834,10 +740,8 @@ bpm5x:
     enabled: true
     enabled_set: true
 bpm5y:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm5y
@@ -849,10 +753,8 @@ bpm5y:
     enabled: true
     enabled_set: true
 bpm5z:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm5z
@@ -864,10 +766,8 @@ bpm5z:
     enabled: true
     enabled_set: true
 bpm6a:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm6a
@@ -879,10 +779,8 @@ bpm6a:
     enabled: true
     enabled_set: true
 bpm6b:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm6b
@@ -894,10 +792,8 @@ bpm6b:
     enabled: true
     enabled_set: true
 bpm6c:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm6c
@@ -909,10 +805,8 @@ bpm6c:
     enabled: true
     enabled_set: true
 bpm6d:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm6d
@@ -924,10 +818,8 @@ bpm6d:
     enabled: true
     enabled_set: true
 bpm6i:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm6i
@@ -939,10 +831,8 @@ bpm6i:
     enabled: true
     enabled_set: true
 bpm6x:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm6x
@@ -954,10 +844,8 @@ bpm6x:
     enabled: true
     enabled_set: true
 bpm6y:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm6y
@@ -969,10 +857,8 @@ bpm6y:
     enabled: true
     enabled_set: true
 bpm6z:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: bpm6z
@@ -984,10 +870,8 @@ bpm6z:
     enabled: true
     enabled_set: true
 curr:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: curr
@@ -999,10 +883,8 @@ curr:
     enabled: true
     enabled_set: true
 diode:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: diode
@@ -1014,10 +896,8 @@ diode:
     enabled: true
     enabled_set: true
 ebpmdx:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: ebpmdx
@@ -1029,10 +909,8 @@ ebpmdx:
     enabled: true
     enabled_set: true
 ebpmdy:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: ebpmdy
@@ -1044,10 +922,8 @@ ebpmdy:
     enabled: true
     enabled_set: true
 ebpmux:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: ebpmux
@@ -1059,10 +935,8 @@ ebpmux:
     enabled: true
     enabled_set: true
 ebpmuy:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: ebpmuy
@@ -1074,10 +948,8 @@ ebpmuy:
     enabled: true
     enabled_set: true
 ftp:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: ftp
@@ -1089,10 +961,8 @@ ftp:
     enabled: true
     enabled_set: true
 temp:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: temp
@@ -1104,10 +974,8 @@ temp:
     enabled: true
     enabled_set: true
 transd:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     labels: transd
@@ -1129,10 +997,8 @@ transd:
 ############################################################
 
 aptrx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1146,10 +1012,8 @@ aptrx:
     enabled: true
     enabled_set: true
 aptry:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1163,10 +1027,8 @@ aptry:
     enabled: true
     enabled_set: true
 bim2x:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1180,10 +1042,8 @@ bim2x:
     enabled: true
     enabled_set: true
 bim2y:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1197,10 +1057,8 @@ bim2y:
     enabled: true
     enabled_set: true
 bm1trx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1214,10 +1072,8 @@ bm1trx:
     enabled: true
     enabled_set: true
 bm1try:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1231,10 +1087,8 @@ bm1try:
     enabled: true
     enabled_set: true
 bm2trx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1248,10 +1102,8 @@ bm2trx:
     enabled: true
     enabled_set: true
 bm2try:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1265,10 +1117,8 @@ bm2try:
     enabled: true
     enabled_set: true
 bm3trx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1282,10 +1132,8 @@ bm3trx:
     enabled: true
     enabled_set: true
 bm3try:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1299,10 +1147,8 @@ bm3try:
     enabled: true
     enabled_set: true
 bm4trx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1316,10 +1162,8 @@ bm4trx:
     enabled: true
     enabled_set: true
 bm4try:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1333,10 +1177,8 @@ bm4try:
     enabled: true
     enabled_set: true
 bm5trx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1350,10 +1192,8 @@ bm5trx:
     enabled: true
     enabled_set: true
 bm5try:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1367,10 +1207,8 @@ bm5try:
     enabled: true
     enabled_set: true
 bm6trx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1384,10 +1222,8 @@ bm6trx:
     enabled: true
     enabled_set: true
 bm6try:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1401,10 +1237,8 @@ bm6try:
     enabled: true
     enabled_set: true
 bpm4r:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1418,10 +1252,8 @@ bpm4r:
     enabled: true
     enabled_set: true
 bpm5r:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1435,10 +1267,8 @@ bpm5r:
     enabled: true
     enabled_set: true
 bs1x:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1452,10 +1282,8 @@ bs1x:
     enabled: true
     enabled_set: true
 bs1y:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1469,10 +1297,8 @@ bs1y:
     enabled: true
     enabled_set: true
 bs2x:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1486,10 +1312,8 @@ bs2x:
     enabled: true
     enabled_set: true
 bs2y:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1503,10 +1327,8 @@ bs2y:
     enabled: true
     enabled_set: true
 burstn:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1520,10 +1342,8 @@ burstn:
     enabled: true
     enabled_set: true
 burstr:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1537,10 +1357,8 @@ burstr:
     enabled: true
     enabled_set: true
 ddg1a:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1554,10 +1372,8 @@ ddg1a:
     enabled: true
     enabled_set: true
 ddg1b:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1571,10 +1387,8 @@ ddg1b:
     enabled: true
     enabled_set: true
 ddg1c:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1588,10 +1402,8 @@ ddg1c:
     enabled: true
     enabled_set: true
 ddg1d:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1605,10 +1417,8 @@ ddg1d:
     enabled: true
     enabled_set: true
 ddg1e:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1622,10 +1432,8 @@ ddg1e:
     enabled: true
     enabled_set: true
 ddg1f:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1639,10 +1447,8 @@ ddg1f:
     enabled: true
     enabled_set: true
 ddg1g:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1656,10 +1462,8 @@ ddg1g:
     enabled: true
     enabled_set: true
 ddg1h:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1673,10 +1477,8 @@ ddg1h:
     enabled: true
     enabled_set: true
 dettrx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1690,10 +1492,8 @@ dettrx:
     enabled: true
     enabled_set: true
 di2trx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1707,10 +1507,8 @@ di2trx:
     enabled: true
     enabled_set: true
 di2try:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1724,10 +1522,8 @@ di2try:
     enabled: true
     enabled_set: true
 dtpush:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1741,10 +1537,8 @@ dtpush:
     enabled: true
     enabled_set: true
 dtth:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1758,10 +1552,8 @@ dtth:
     enabled: true
     enabled_set: true
 dttrx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1775,10 +1567,8 @@ dttrx:
     enabled: true
     enabled_set: true
 dttry:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1792,10 +1582,8 @@ dttry:
     enabled: true
     enabled_set: true
 dttrz:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1809,10 +1597,8 @@ dttrz:
     enabled: true
     enabled_set: true
 ebcsx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1826,10 +1612,8 @@ ebcsx:
     enabled: true
     enabled_set: true
 ebcsy:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1843,10 +1627,8 @@ ebcsy:
     enabled: true
     enabled_set: true
 ebfi1:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1860,10 +1642,8 @@ ebfi1:
     enabled: true
     enabled_set: true
 ebfi2:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1877,10 +1657,8 @@ ebfi2:
     enabled: true
     enabled_set: true
 ebfi3:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1894,10 +1672,8 @@ ebfi3:
     enabled: true
     enabled_set: true
 ebfi4:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1911,10 +1687,8 @@ ebfi4:
     enabled: true
     enabled_set: true
 ebfzpx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1928,10 +1702,8 @@ ebfzpx:
     enabled: true
     enabled_set: true
 ebfzpy:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1945,10 +1717,8 @@ ebfzpy:
     enabled: true
     enabled_set: true
 ebtrx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1962,10 +1732,8 @@ ebtrx:
     enabled: true
     enabled_set: true
 ebtry:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1979,10 +1747,8 @@ ebtry:
     enabled: true
     enabled_set: true
 ebtrz:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -1996,10 +1762,8 @@ ebtrz:
     enabled: true
     enabled_set: true
 fi1try:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2013,10 +1777,8 @@ fi1try:
     enabled: true
     enabled_set: true
 fi2try:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2030,10 +1792,8 @@ fi2try:
     enabled: true
     enabled_set: true
 fi3try:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2047,10 +1807,8 @@ fi3try:
     enabled: true
     enabled_set: true
 fsh1x:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2064,10 +1822,8 @@ fsh1x:
     enabled: true
     enabled_set: true
 fsh2x:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2081,10 +1837,8 @@ fsh2x:
     enabled: true
     enabled_set: true
 ftrans:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2098,10 +1852,8 @@ ftrans:
     enabled: true
     enabled_set: true
 fttrx1:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2115,10 +1867,8 @@ fttrx1:
     enabled: true
     enabled_set: true
 fttrx2:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2132,10 +1882,8 @@ fttrx2:
     enabled: true
     enabled_set: true
 fttry1:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2149,10 +1897,8 @@ fttry1:
     enabled: true
     enabled_set: true
 fttry2:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2166,10 +1912,8 @@ fttry2:
     enabled: true
     enabled_set: true
 fttrz:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2183,10 +1927,8 @@ fttrz:
     enabled: true
     enabled_set: true
 idgap:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2200,10 +1942,8 @@ idgap:
     enabled: true
     enabled_set: true
 mibd:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2217,10 +1957,8 @@ mibd:
     enabled: true
     enabled_set: true
 mibd1:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2234,10 +1972,8 @@ mibd1:
     enabled: true
     enabled_set: true
 mibd2:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2251,10 +1987,8 @@ mibd2:
     enabled: true
     enabled_set: true
 miroll:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2268,10 +2002,8 @@ miroll:
     enabled: true
     enabled_set: true
 mith:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2285,10 +2017,8 @@ mith:
     enabled: true
     enabled_set: true
 mitrx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2302,10 +2032,8 @@ mitrx:
     enabled: true
     enabled_set: true
 mitry:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2319,10 +2047,8 @@ mitry:
     enabled: true
     enabled_set: true
 mitry1:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2336,10 +2062,8 @@ mitry1:
     enabled: true
     enabled_set: true
 mitry2:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2353,10 +2077,8 @@ mitry2:
     enabled: true
     enabled_set: true
 mitry3:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2370,10 +2092,8 @@ mitry3:
     enabled: true
     enabled_set: true
 mobd:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2387,10 +2107,8 @@ mobd:
     enabled: true
     enabled_set: true
 mobdai:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2404,10 +2122,8 @@ mobdai:
     enabled: true
     enabled_set: true
 mobdbo:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2421,10 +2137,8 @@ mobdbo:
     enabled: true
     enabled_set: true
 mobdco:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2438,10 +2152,8 @@ mobdco:
     enabled: true
     enabled_set: true
 mobddi:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2455,10 +2167,8 @@ mobddi:
     enabled: true
     enabled_set: true
 mokev:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2472,10 +2182,8 @@ mokev:
     enabled: true
     enabled_set: true
 mopush1:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2489,10 +2197,8 @@ mopush1:
     enabled: true
     enabled_set: true
 mopush2:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2506,10 +2212,8 @@ mopush2:
     enabled: true
     enabled_set: true
 moroll1:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2523,10 +2227,8 @@ moroll1:
     enabled: true
     enabled_set: true
 moroll2:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2540,10 +2242,8 @@ moroll2:
     enabled: true
     enabled_set: true
 moth1:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2557,10 +2257,8 @@ moth1:
     enabled: true
     enabled_set: true
 moth1e:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2574,10 +2272,8 @@ moth1e:
     enabled: true
     enabled_set: true
 moth2:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2591,10 +2287,8 @@ moth2:
     enabled: true
     enabled_set: true
 moth2e:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2608,10 +2302,8 @@ moth2e:
     enabled: true
     enabled_set: true
 motrx2:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2625,10 +2317,8 @@ motrx2:
     enabled: true
     enabled_set: true
 motry:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2642,10 +2332,8 @@ motry:
     enabled: true
     enabled_set: true
 motry2:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2659,10 +2347,8 @@ motry2:
     enabled: true
     enabled_set: true
 motrz1:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2676,10 +2362,8 @@ motrz1:
     enabled: true
     enabled_set: true
 motrz1e:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2693,10 +2377,8 @@ motrz1e:
     enabled: true
     enabled_set: true
 moyaw2:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2710,10 +2392,8 @@ moyaw2:
     enabled: true
     enabled_set: true
 sl0ch:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2727,10 +2407,8 @@ sl0ch:
     enabled: true
     enabled_set: true
 sl0trxi:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2744,10 +2422,8 @@ sl0trxi:
     enabled: true
     enabled_set: true
 sl0trxo:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2761,10 +2437,8 @@ sl0trxo:
     enabled: true
     enabled_set: true
 sl0wh:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2778,10 +2452,8 @@ sl0wh:
     enabled: true
     enabled_set: true
 sl1ch:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2795,10 +2467,8 @@ sl1ch:
     enabled: true
     enabled_set: true
 sl1cv:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2812,10 +2482,8 @@ sl1cv:
     enabled: true
     enabled_set: true
 sl1trxi:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2829,10 +2497,8 @@ sl1trxi:
     enabled: true
     enabled_set: true
 sl1trxo:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2846,10 +2512,8 @@ sl1trxo:
     enabled: true
     enabled_set: true
 sl1tryb:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2863,10 +2527,8 @@ sl1tryb:
     enabled: true
     enabled_set: true
 sl1tryt:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2880,10 +2542,8 @@ sl1tryt:
     enabled: true
     enabled_set: true
 sl1wh:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2897,10 +2557,8 @@ sl1wh:
     enabled: true
     enabled_set: true
 sl1wv:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2914,10 +2572,8 @@ sl1wv:
     enabled: true
     enabled_set: true
 sl2ch:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2931,10 +2587,8 @@ sl2ch:
     enabled: true
     enabled_set: true
 sl2cv:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2948,10 +2602,8 @@ sl2cv:
     enabled: true
     enabled_set: true
 sl2trxi:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2965,10 +2617,8 @@ sl2trxi:
     enabled: true
     enabled_set: true
 sl2trxo:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2982,10 +2632,8 @@ sl2trxo:
     enabled: true
     enabled_set: true
 sl2tryb:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -2999,10 +2647,8 @@ sl2tryb:
     enabled: true
     enabled_set: true
 sl2tryt:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3016,10 +2662,8 @@ sl2tryt:
     enabled: true
     enabled_set: true
 sl2wh:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3033,10 +2677,8 @@ sl2wh:
     enabled: true
     enabled_set: true
 sl2wv:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3050,10 +2692,8 @@ sl2wv:
     enabled: true
     enabled_set: true
 sl3ch:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3067,10 +2707,8 @@ sl3ch:
     enabled: true
     enabled_set: true
 sl3cv:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3084,10 +2722,8 @@ sl3cv:
     enabled: true
     enabled_set: true
 sl3trxi:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3101,10 +2737,8 @@ sl3trxi:
     enabled: true
     enabled_set: true
 sl3trxo:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3118,10 +2752,8 @@ sl3trxo:
     enabled: true
     enabled_set: true
 sl3tryb:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3135,10 +2767,8 @@ sl3tryb:
     enabled: true
     enabled_set: true
 sl3tryt:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3152,10 +2782,8 @@ sl3tryt:
     enabled: true
     enabled_set: true
 sl3wh:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3169,10 +2797,8 @@ sl3wh:
     enabled: true
     enabled_set: true
 sl3wv:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3186,10 +2812,8 @@ sl3wv:
     enabled: true
     enabled_set: true
 sl4ch:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3203,10 +2827,8 @@ sl4ch:
     enabled: true
     enabled_set: true
 sl4cv:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3220,10 +2842,8 @@ sl4cv:
     enabled: true
     enabled_set: true
 sl4trxi:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3237,10 +2857,8 @@ sl4trxi:
     enabled: true
     enabled_set: true
 sl4trxo:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3254,10 +2872,8 @@ sl4trxo:
     enabled: true
     enabled_set: true
 sl4tryb:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3271,10 +2887,8 @@ sl4tryb:
     enabled: true
     enabled_set: true
 sl4tryt:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3288,10 +2902,8 @@ sl4tryt:
     enabled: true
     enabled_set: true
 sl4wh:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3305,10 +2917,8 @@ sl4wh:
     enabled: true
     enabled_set: true
 sl4wv:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3322,10 +2932,8 @@ sl4wv:
     enabled: true
     enabled_set: true
 sl5ch:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3339,10 +2947,8 @@ sl5ch:
     enabled: true
     enabled_set: true
 sl5cv:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3356,10 +2962,8 @@ sl5cv:
     enabled: true
     enabled_set: true
 sl5trxi:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3373,10 +2977,8 @@ sl5trxi:
     enabled: true
     enabled_set: true
 sl5trxo:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3390,10 +2992,8 @@ sl5trxo:
     enabled: true
     enabled_set: true
 sl5tryb:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3407,10 +3007,8 @@ sl5tryb:
     enabled: true
     enabled_set: true
 sl5tryt:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3424,10 +3022,8 @@ sl5tryt:
     enabled: true
     enabled_set: true
 sl5wh:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3441,10 +3037,8 @@ sl5wh:
     enabled: true
     enabled_set: true
 sl5wv:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3458,10 +3052,8 @@ sl5wv:
     enabled: true
     enabled_set: true
 strox:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3475,10 +3067,8 @@ strox:
     enabled: true
     enabled_set: true
 stroy:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3492,10 +3082,8 @@ stroy:
     enabled: true
     enabled_set: true
 stroz:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3509,10 +3097,8 @@ stroz:
     enabled: true
     enabled_set: true
 sttrx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3526,10 +3112,8 @@ sttrx:
     enabled: true
     enabled_set: true
 sttry:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3553,10 +3137,8 @@ sttry:
 ############################################################
 
 ring_current_sim:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
+  deviceType: monitor
   deviceClass: SynSignalRO
   deviceConfig:
     labels: ring_current_sim
@@ -3577,10 +3159,8 @@ ring_current_sim:
 ############################################################
 
 motor1_disabled:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3598,10 +3178,8 @@ motor1_disabled:
     enabled: false
     enabled_set: true
 motor1_disabled_set:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3619,10 +3197,8 @@ motor1_disabled_set:
     enabled: true
     enabled_set: false
 motor2_disabled:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
@@ -3640,10 +3216,8 @@ motor2_disabled:
     enabled: false
     enabled_set: true
 motor2_disabled_set:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1

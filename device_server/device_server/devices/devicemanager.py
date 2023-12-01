@@ -145,7 +145,8 @@ class DeviceManagerDS(DeviceManagerBase):
                     continue
                 if not hasattr(obj, config_key):
                     raise DeviceConfigError(
-                        f"Unknown config parameter {config_key} for device of type {obj.__class__.__name__}."
+                        f"Unknown config parameter {config_key} for device of type"
+                        f" {obj.__class__.__name__}."
                     )
 
                 config_attr = getattr(obj, config_key)
@@ -165,7 +166,7 @@ class DeviceManagerDS(DeviceManagerBase):
         """
         name = dev.get("name")
         enabled = dev.get("enabled")
-        enabled_set = dev.get("enabled_set", True)
+        read_only = dev.get("read_only", False)
 
         dev_cls = self._get_device_class(dev["deviceClass"])
         config = dev["deviceConfig"].copy()
@@ -274,7 +275,8 @@ class DeviceManagerDS(DeviceManagerBase):
             return
 
         logger.error(
-            f"Device {obj.name} does not implement the socket controller interface nor wait_for_connection and cannot be turned on."
+            f"Device {obj.name} does not implement the socket controller interface nor"
+            " wait_for_connection and cannot be turned on."
         )
         raise ConnectionError(f"Failed to establish a connection to device {obj.name}")
 

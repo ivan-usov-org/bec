@@ -112,7 +112,7 @@ class DeviceServer(RPCMixin, BECService):
         logger.info("Stopping devices after receiving 'abort' request.")
         self.status = BECStatus.BUSY
         for dev in self.device_manager.devices.enabled_devices:
-            if not dev.enabled_set:
+            if dev.read_only:
                 # don't stop devices that we haven't set
                 continue
             if hasattr(dev.obj, "stop"):
@@ -256,7 +256,7 @@ class DeviceServer(RPCMixin, BECService):
 
     def _set_device(self, instr: messages.DeviceInstructionMessage) -> None:
         device_obj = self.device_manager.devices.get(instr.content["device"])
-        if not device_obj.enabled_set:
+        if device_obj.read_only:
             raise DisabledDeviceError(
                 f"Setting the device {device_obj.name} is currently disabled."
             )

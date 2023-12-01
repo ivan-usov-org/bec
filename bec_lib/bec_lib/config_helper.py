@@ -67,12 +67,6 @@ class ConfigHelper:
             dev.pop("createdBy", None)
             dev.pop("sessionId", None)
             name = dev.pop("name")
-            enabled = dev.pop("enabled", None)
-            config = {"status": {"enabled": enabled}}
-
-            enabled_set = dev.pop("enabled_set", None)
-            if enabled_set is not None:
-                config["status"]["enabled_set"] = enabled_set
             config.update(dev)
             out[name] = config
 

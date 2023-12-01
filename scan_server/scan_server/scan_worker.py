@@ -2,6 +2,7 @@ import datetime
 import threading
 import time
 import traceback
+import re
 from asyncio.log import logger
 from typing import List
 
@@ -471,7 +472,10 @@ class ScanWorker(threading.Thread):
             self.connector.raise_alarm(
                 severity=Alarms.MAJOR,
                 source=instr.content,
-                content=f"Movement of device {failed_device[0]} failed whilst trying to reach the target position. Last recorded position: {last_pos}",
+                content=(
+                    f"Movement of device {failed_device[0]} failed whilst trying to reach the"
+                    f" target position. Last recorded position: {last_pos}"
+                ),
                 alarm_type="MovementFailed",
                 metadata=instr.metadata,
             )

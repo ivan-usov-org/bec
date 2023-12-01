@@ -206,7 +206,7 @@ class RequestBase(ABC):
         self.readout_priority = {
             "monitored": monitored if monitored is not None else [],
             "baseline": [],
-            "ignored": [],
+            "on_request": [],
         }
         self.update_readout_priority()
         if metadata is None:

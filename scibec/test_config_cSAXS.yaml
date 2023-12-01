@@ -1,7 +1,4 @@
 FBPMDX:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    schedule: sync
   description: FOFB reference
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -12,9 +9,6 @@ FBPMDX:
     enabled: true
     enabled_set: false
 FBPMDY:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    schedule: sync
   description: FOFB reference
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -25,9 +19,6 @@ FBPMDY:
     enabled: true
     enabled_set: false
 FBPMUX:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    schedule: sync
   description: FOFB reference
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -38,9 +29,6 @@ FBPMUX:
     enabled: true
     enabled_set: false
 FBPMUY:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    schedule: sync
   description: FOFB reference
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -51,9 +39,6 @@ FBPMUY:
     enabled: true
     enabled_set: false
 XASYM:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    schedule: sync
   description: FOFB reference
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -64,9 +49,6 @@ XASYM:
     enabled: true
     enabled_set: false
 XSYM:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    schedule: sync
   description: FOFB reference
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -77,9 +59,6 @@ XSYM:
     enabled: true
     enabled_set: false
 YASYM:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    schedule: sync
   description: FOFB reference
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -90,9 +69,6 @@ YASYM:
     enabled: true
     enabled_set: false
 YSYM:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    schedule: sync
   description: FOFB reference
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -103,9 +79,6 @@ YSYM:
     enabled: true
     enabled_set: false
 aptrx:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: ES aperture horizontal movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -116,9 +89,6 @@ aptrx:
     enabled: true
     enabled_set: false
 aptry:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: ES aperture vertical movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -129,9 +99,6 @@ aptry:
     enabled: true
     enabled_set: false
 bm1trx:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: FrontEnd XBPM 1 horizontal movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -142,9 +109,6 @@ bm1trx:
     enabled: true
     enabled_set: false
 bm1try:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: FrontEnd XBPM 1 vertical movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -155,9 +119,6 @@ bm1try:
     enabled: true
     enabled_set: false
 bm2trx:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: FrontEnd XBPM 2 horizontal movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -168,9 +129,6 @@ bm2trx:
     enabled: true
     enabled_set: false
 bm2try:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: FrontEnd XBPM 2 vertical movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -181,9 +139,6 @@ bm2try:
     enabled: true
     enabled_set: false
 bm3trx:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: OpticsHutch XBPM 1 horizontal movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -194,9 +149,6 @@ bm3trx:
     enabled: true
     enabled_set: false
 bm3try:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: OpticsHutch XBPM 1 vertical movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -207,9 +159,6 @@ bm3try:
     enabled: true
     enabled_set: false
 bm4trx:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: OpticsHutch XBPM 2 horizontal movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -220,9 +169,6 @@ bm4trx:
     enabled: true
     enabled_set: false
 bm4try:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: OpticsHutch XBPM 2 vertical movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -233,9 +179,6 @@ bm4try:
     enabled: true
     enabled_set: false
 bm5trx:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: OpticsHutch XBPM 3 horizontal movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -246,9 +189,6 @@ bm5trx:
     enabled: true
     enabled_set: false
 bm5try:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: OpticsHutch XBPM 3 vertical movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -259,9 +199,6 @@ bm5try:
     enabled: true
     enabled_set: false
 bpm3:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    schedule: sync
   description: 'XBPM 3: White beam before mono'
   deviceClass: QuadEM
   deviceConfig:
@@ -272,9 +209,6 @@ bpm3:
     enabled: true
     enabled_set: false
 bpm5:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    schedule: sync
   description: 'XBPM 5: After mirror'
   deviceClass: QuadEM
   deviceConfig:
@@ -285,9 +219,6 @@ bpm5:
     enabled: true
     enabled_set: false
 bpm6:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    schedule: sync
   description: 'XBPM 6: Not commissioned'
   deviceClass: QuadEM
   deviceConfig:
@@ -298,9 +229,6 @@ bpm6:
     enabled: true
     enabled_set: false
 bs1x:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Dunno these motors???
   deviceClass: EpicsMotor
   deviceConfig:
@@ -311,9 +239,6 @@ bs1x:
     enabled: true
     enabled_set: false
 bs1y:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Dunno these motors???
   deviceClass: EpicsMotor
   deviceConfig:
@@ -324,9 +249,6 @@ bs1y:
     enabled: true
     enabled_set: false
 bs2x:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Dunno these motors???
   deviceClass: EpicsMotor
   deviceConfig:
@@ -337,9 +259,6 @@ bs2x:
     enabled: true
     enabled_set: false
 bs2y:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Dunno these motors???
   deviceClass: EpicsMotor
   deviceConfig:
@@ -350,9 +269,6 @@ bs2y:
     enabled: true
     enabled_set: false
 curr:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    schedule: sync
   description: SLS ring current
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -363,9 +279,6 @@ curr:
     enabled: true
     enabled_set: false
 cyb:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    schedule: sync
   description: Some scaler...
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -376,9 +289,6 @@ cyb:
     enabled: true
     enabled_set: false
 dettrx:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Detector tower motion
   deviceClass: EpicsMotor
   deviceConfig:
@@ -389,9 +299,6 @@ dettrx:
     enabled: true
     enabled_set: false
 di2trx:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: FrontEnd diaphragm 2 horizontal movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -402,9 +309,6 @@ di2trx:
     enabled: true
     enabled_set: false
 di2try:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: FrontEnd diaphragm 2 vertical movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -415,9 +319,6 @@ di2try:
     enabled: true
     enabled_set: false
 diode:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    schedule: sync
   description: Some scaler...
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -428,9 +329,6 @@ diode:
     enabled: true
     enabled_set: false
 dtpush:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Detector tower motion
   deviceClass: EpicsMotor
   deviceConfig:
@@ -441,9 +339,6 @@ dtpush:
     enabled: true
     enabled_set: false
 dttrx:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Detector tower motion
   deviceClass: EpicsMotor
   deviceConfig:
@@ -454,9 +349,6 @@ dttrx:
     enabled: true
     enabled_set: false
 dttry:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Detector tower motion, no encoder
   deviceClass: EpicsMotor
   deviceConfig:
@@ -467,9 +359,6 @@ dttry:
     enabled: true
     enabled_set: false
 dttrz:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Detector tower motion
   deviceClass: EpicsMotor
   deviceConfig:
@@ -480,9 +369,6 @@ dttrz:
     enabled: true
     enabled_set: false
 ebtrx:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Exposure box 2 horizontal movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -493,9 +379,6 @@ ebtrx:
     enabled: true
     enabled_set: false
 ebtry:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Exposure box 2 vertical movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -506,9 +389,6 @@ ebtry:
     enabled: true
     enabled_set: false
 ebtrz:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Exposure box 2 axial movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -519,9 +399,6 @@ ebtrz:
     enabled: true
     enabled_set: false
 eyecenx:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    schedule: sync
   description: X-ray eye intensit math
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -532,9 +409,6 @@ eyecenx:
     enabled: true
     enabled_set: false
 eyeceny:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    schedule: sync
   description: X-ray eye intensit math
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -545,9 +419,6 @@ eyeceny:
     enabled: true
     enabled_set: false
 eyefoc:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: X-ray eye focusing motor
   deviceClass: EpicsMotor
   deviceConfig:
@@ -558,9 +429,6 @@ eyefoc:
     enabled: true
     enabled_set: false
 eyeint:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    schedule: sync
   description: X-ray eye intensit math
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -571,9 +439,6 @@ eyeint:
     enabled: true
     enabled_set: false
 eyex:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: X-ray eye motion
   deviceClass: EpicsMotor
   deviceConfig:
@@ -584,9 +449,6 @@ eyex:
     enabled: true
     enabled_set: false
 eyey:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: X-ray eye motion
   deviceClass: EpicsMotor
   deviceConfig:
@@ -597,9 +459,6 @@ eyey:
     enabled: true
     enabled_set: false
 fi1try:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: OpticsHutch filter 1 movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -610,9 +469,6 @@ fi1try:
     enabled: true
     enabled_set: false
 fi2try:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: OpticsHutch filter 2 movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -623,9 +479,6 @@ fi2try:
     enabled: true
     enabled_set: false
 fi3try:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: OpticsHutch filter 3 movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -636,9 +489,6 @@ fi3try:
     enabled: true
     enabled_set: false
 ftp:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    schedule: sync
   description: Flight tube pressure
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -649,9 +499,6 @@ ftp:
     enabled: true
     enabled_set: false
 fttrx1:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Dunno these motors???
   deviceClass: EpicsMotor
   deviceConfig:
@@ -662,9 +509,6 @@ fttrx1:
     enabled: true
     enabled_set: false
 fttrx2:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Dunno these motors???
   deviceClass: EpicsMotor
   deviceConfig:
@@ -675,9 +519,6 @@ fttrx2:
     enabled: true
     enabled_set: false
 fttry1:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Dunno these motors???
   deviceClass: EpicsMotor
   deviceConfig:
@@ -688,9 +529,6 @@ fttry1:
     enabled: true
     enabled_set: false
 fttry2:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Dunno these motors???
   deviceClass: EpicsMotor
   deviceConfig:
@@ -701,9 +539,6 @@ fttry2:
     enabled: true
     enabled_set: false
 fttrz:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Dunno these motors???
   deviceClass: EpicsMotor
   deviceConfig:
@@ -714,9 +549,6 @@ fttrz:
     enabled: true
     enabled_set: false
 idgap:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    schedule: sync
   description: Undulator gap size [mm]
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -727,9 +559,6 @@ idgap:
     enabled: true
     enabled_set: false
 led:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    schedule: sync
   description: Some scaler...
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -740,9 +569,6 @@ led:
     enabled: true
     enabled_set: false
 mibd1:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Mirror bender 1
   deviceClass: EpicsMotor
   deviceConfig:
@@ -753,9 +579,6 @@ mibd1:
     enabled: true
     enabled_set: false
 mibd2:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Mirror bender 2
   deviceClass: EpicsMotor
   deviceConfig:
@@ -766,9 +589,6 @@ mibd2:
     enabled: true
     enabled_set: false
 micfoc:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Microscope focusing motor
   deviceClass: EpicsMotor
   deviceConfig:
@@ -779,9 +599,6 @@ micfoc:
     enabled: true
     enabled_set: false
 mitrx:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Mirror horizontal movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -792,9 +609,6 @@ mitrx:
     enabled: true
     enabled_set: false
 mitry1:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Mirror vertical movement 1
   deviceClass: EpicsMotor
   deviceConfig:
@@ -805,9 +619,6 @@ mitry1:
     enabled: true
     enabled_set: false
 mitry2:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Mirror vertical movement 2
   deviceClass: EpicsMotor
   deviceConfig:
@@ -818,9 +629,6 @@ mitry2:
     enabled: true
     enabled_set: false
 mitry3:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Mirror vertical movement 3
   deviceClass: EpicsMotor
   deviceConfig:
@@ -831,9 +639,6 @@ mitry3:
     enabled: true
     enabled_set: false
 mobdai:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Monochromator ??? inner motor
   deviceClass: EpicsMotor
   deviceConfig:
@@ -844,9 +649,6 @@ mobdai:
     enabled: true
     enabled_set: false
 mobdbo:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Monochromator ??? outer motor
   deviceClass: EpicsMotor
   deviceConfig:
@@ -857,9 +659,6 @@ mobdbo:
     enabled: true
     enabled_set: false
 mobdco:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Monochromator ??? outer motor
   deviceClass: EpicsMotor
   deviceConfig:
@@ -870,9 +669,6 @@ mobdco:
     enabled: true
     enabled_set: false
 mobddi:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Monochromator ??? inner motor
   deviceClass: EpicsMotor
   deviceConfig:
@@ -883,9 +679,6 @@ mobddi:
     enabled: true
     enabled_set: false
 monot:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    schedule: sync
   description: Monochromator temperature
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -896,9 +689,6 @@ monot:
     enabled: true
     enabled_set: false
 mopush1:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Monochromator crystal 1 angle
   deviceClass: EpicsMotor
   deviceConfig:
@@ -909,9 +699,6 @@ mopush1:
     enabled: true
     enabled_set: false
 mopush2:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Monochromator crystal 2 angle
   deviceClass: EpicsMotor
   deviceConfig:
@@ -922,9 +709,6 @@ mopush2:
     enabled: true
     enabled_set: false
 moroll1:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Monochromator crystal 1 roll
   deviceClass: EpicsMotor
   deviceConfig:
@@ -935,9 +719,6 @@ moroll1:
     enabled: true
     enabled_set: false
 moroll2:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Monochromator crystal 2 roll movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -948,9 +729,6 @@ moroll2:
     enabled: true
     enabled_set: false
 motrx2:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Monochromator crystal 2 horizontal movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -961,9 +739,6 @@ motrx2:
     enabled: true
     enabled_set: false
 motry:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: OpticsHutch optical table vertical movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -974,9 +749,6 @@ motry:
     enabled: true
     enabled_set: false
 motry2:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Monochromator crystal 2 vertical movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -987,9 +759,6 @@ motry2:
     enabled: true
     enabled_set: false
 motrz1:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Monochromator crystal 1 axial movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1000,9 +769,6 @@ motrz1:
     enabled: true
     enabled_set: false
 moyaw2:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Monochromator crystal 2 yaw movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1013,9 +779,6 @@ moyaw2:
     enabled: true
     enabled_set: false
 samx:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Sample motion
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1026,9 +789,6 @@ samx:
     enabled: true
     enabled_set: false
 samy:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: Sample motion
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1039,9 +799,6 @@ samy:
     enabled: true
     enabled_set: false
 sec:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    schedule: sync
   description: Some scaler...
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -1052,9 +809,6 @@ sec:
     enabled: true
     enabled_set: false
 sl0h:
-  acquisitionConfig:
-    acquisitionGroup: epicsDevice
-    schedule: sync
   description: FrontEnd slit virtual movement
   deviceClass: SlitH
   deviceConfig:
@@ -1065,9 +819,6 @@ sl0h:
     enabled: true
     enabled_set: false
 sl0trxi:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: FrontEnd slit inner blade movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1078,9 +829,6 @@ sl0trxi:
     enabled: true
     enabled_set: false
 sl0trxo:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: FrontEnd slit outer blade movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1091,9 +839,6 @@ sl0trxo:
     enabled: true
     enabled_set: false
 sl1h:
-  acquisitionConfig:
-    acquisitionGroup: epicsDevice
-    schedule: sync
   description: OpticsHutch slit virtual movement
   deviceClass: SlitH
   deviceConfig:
@@ -1104,9 +849,6 @@ sl1h:
     enabled: true
     enabled_set: false
 sl1trxi:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: OpticsHutch slit inner blade movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1117,9 +859,6 @@ sl1trxi:
     enabled: true
     enabled_set: false
 sl1trxo:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: OpticsHutch slit outer blade movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1130,9 +869,6 @@ sl1trxo:
     enabled: true
     enabled_set: false
 sl1tryb:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: OpticsHutch slit bottom blade movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1143,9 +879,6 @@ sl1tryb:
     enabled: true
     enabled_set: false
 sl1tryt:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: OpticsHutch slit top blade movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1156,9 +889,6 @@ sl1tryt:
     enabled: true
     enabled_set: false
 sl1v:
-  acquisitionConfig:
-    acquisitionGroup: epicsDevice
-    schedule: sync
   description: OpticsHutch slit virtual movement
   deviceClass: SlitV
   deviceConfig:
@@ -1169,9 +899,6 @@ sl1v:
     enabled: true
     enabled_set: false
 sl2h:
-  acquisitionConfig:
-    acquisitionGroup: epicsDevice
-    schedule: sync
   description: OpticsHutch slit 2 virtual movement
   deviceClass: SlitH
   deviceConfig:
@@ -1182,9 +909,6 @@ sl2h:
     enabled: true
     enabled_set: false
 sl2trxi:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: OpticsHutch slit 2 inner blade movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1195,9 +919,6 @@ sl2trxi:
     enabled: true
     enabled_set: false
 sl2trxo:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: OpticsHutch slit 2 outer blade movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1208,9 +929,6 @@ sl2trxo:
     enabled: true
     enabled_set: false
 sl2tryb:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: OpticsHutch slit 2 bottom blade movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1221,9 +939,6 @@ sl2tryb:
     enabled: true
     enabled_set: false
 sl2tryt:
-  acquisitionConfig:
-    acquisitionGroup: beamlineMotor
-    schedule: sync
   description: OpticsHutch slit 2 top blade movement
   deviceClass: EpicsMotor
   deviceConfig:
@@ -1234,9 +949,6 @@ sl2tryt:
     enabled: true
     enabled_set: false
 sl2v:
-  acquisitionConfig:
-    acquisitionGroup: epicsDevice
-    schedule: sync
   description: OpticsHutch slit 2 virtual movement
   deviceClass: SlitV
   deviceConfig:
@@ -1247,9 +959,6 @@ sl2v:
     enabled: true
     enabled_set: false
 transd:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    schedule: sync
   description: Transmission diode
   deviceClass: EpicsSignalRO
   deviceConfig:
