@@ -207,13 +207,13 @@ class RequestBase(ABC):
             "monitored": monitored if monitored is not None else [],
             "baseline": [],
             "on_request": [],
+            "async": [],
         }
         self.update_readout_priority()
         if metadata is None:
             self.metadata = {}
         self.stubs = ScanStubs(
-            producer=self.device_manager.producer,
-            device_msg_callback=self.device_msg_metadata,
+            producer=self.device_manager.producer, device_msg_callback=self.device_msg_metadata
         )
 
     @property
@@ -384,10 +384,7 @@ class ScanBase(RequestBase, PathOptimizerMixin):
 
         if acquisition_config is None or "default" not in acquisition_config:
             self.acquisition_config = {
-                "default": {
-                    "exp_time": self.exp_time,
-                    "readout_time": self.readout_time,
-                }
+                "default": {"exp_time": self.exp_time, "readout_time": self.readout_time}
             }
 
     def read_scan_motors(self):
@@ -551,10 +548,7 @@ class FlyScanBase(ScanBase):
         return pipe.execute()
 
     def scan_core(self):
-        yield from self.stubs.kickoff(
-            device=self.scan_motors[0],
-            parameter=self.caller_kwargs,
-        )
+        yield from self.stubs.kickoff(device=self.scan_motors[0], parameter=self.caller_kwargs)
         yield from self.stubs.complete(device=self.scan_motors[0])
         target_diid = self.DIID - 1
 
@@ -616,12 +610,7 @@ class CloseScanGroup(ScanStub):
 
 class DeviceRPC(ScanStub):
     scan_name = "device_rpc"
-    arg_input = [
-        ScanArgType.DEVICE,
-        ScanArgType.STR,
-        ScanArgType.LIST,
-        ScanArgType.DICT,
-    ]
+    arg_input = [ScanArgType.DEVICE, ScanArgType.STR, ScanArgType.LIST, ScanArgType.DICT]
     arg_bundle_size = {"bundle": len(arg_input), "min": 1, "max": 1}
     scan_report_hint = None
 
@@ -728,9 +717,7 @@ class UpdatedMove(Move):
     def _at_each_point(self, pos=None):
         for ii, motor in enumerate(self.scan_motors):
             yield from self.stubs.set(
-                device=motor,
-                value=self.positions[0][ii],
-                wait_group="scan_motor",
+                device=motor, value=self.positions[0][ii], wait_group="scan_motor"
             )
 
         for motor in self.scan_motors:
@@ -966,9 +953,7 @@ class ContLineScan(ScanBase):
         yield from self._move_and_wait(self.positions[0] - self.offset)
         # send the slow motor on its way
         yield from self.stubs.set(
-            device=self.scan_motors[0],
-            value=self.positions[-1][0],
-            wait_group="scan_motor",
+            device=self.scan_motors[0], value=self.positions[-1][0], wait_group="scan_motor"
         )
 
         while self.pointID < len(self.positions[:]):
@@ -1125,10 +1110,7 @@ class ListScan(ScanBase):
     scan_name = "list_scan"
     scan_report_hint = "table"
     required_kwargs = ["relative"]
-    arg_input = {
-        "device": ScanArgType.DEVICE,
-        "positions": ScanArgType.LIST,
-    }
+    arg_input = {"device": ScanArgType.DEVICE, "positions": ScanArgType.LIST}
     arg_bundle_size = {"bundle": len(arg_input), "min": 1, "max": None}
 
     def __init__(self, *args, parameter: dict = None, **kwargs):
@@ -1431,9 +1413,7 @@ class OpenInteractiveScan(ScanComponent):
     scan_name = "open_interactive_scan"
     scan_report_hint = ""
     required_kwargs = []
-    arg_input = {
-        "device": ScanArgType.DEVICE,
-    }
+    arg_input = {"device": ScanArgType.DEVICE}
     arg_bundle_size = {"bundle": len(arg_input), "min": 1, "max": None}
 
     def __init__(self, *args, **kwargs):
@@ -1476,9 +1456,7 @@ class OpenInteractiveScan(ScanComponent):
 class AddInteractiveScanPoint(ScanComponent):
     scan_name = "interactive_scan_trigger"
     scan_report_hint = ""
-    arg_input = {
-        "device": ScanArgType.DEVICE,
-    }
+    arg_input = {"device": ScanArgType.DEVICE}
     arg_bundle_size = {"bundle": len(arg_input), "min": 1, "max": None}
 
     def __init__(self, *args, **kwargs):
