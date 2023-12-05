@@ -1,9 +1,9 @@
 import os
 from unittest import mock
 
+import bec_lib
 import pytest
 
-import bec_lib
 from scihub.scibec.scibec import HttpClient, SciBec, SciBecError
 
 dir_path = os.path.dirname(bec_lib.__file__)
@@ -19,9 +19,15 @@ def test_load_from_file():
     file_path = f"{dir_path}/tests/test_config.yaml"
     scibec = SciBec()
     config = scibec.load_config_from_file(file_path)
-    assert {"acquisitionConfig", "deviceClass", "deviceTags", "deviceConfig", "status"} == set(
-        config["samx"].keys()
-    )
+    assert {
+        "deviceClass",
+        "deviceTags",
+        "deviceConfig",
+        "enabled",
+        "readOnly",
+        "readoutPriority",
+        "deviceType",
+    } == set(config["samx"].keys())
 
 
 def test_get_beamlines():

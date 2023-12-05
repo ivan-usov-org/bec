@@ -1,12 +1,11 @@
 from unittest import mock
-from bec_lib import messages
 
 import pytest
+from bec_lib import Device, messages
+from bec_lib.bec_errors import DeviceConfigError
 from fastjsonschema import JsonSchemaException
 from test_scibec_connector import SciHubMock
 
-from bec_lib import Device
-from bec_lib.bec_errors import DeviceConfigError
 from scihub.scibec import SciBecConnector
 
 
@@ -90,7 +89,7 @@ def test_config_handler_set_config(SciHubMock):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     config_handler = scibec_connector.config_handler
     msg = messages.DeviceConfigMessage(
-        action="set", config={"samx": {"status": {"enabled": True}}}, metadata={}
+        action="set", config={"samx": {"enabled": True}}, metadata={}
     )
     with mock.patch.object(config_handler.validator, "validate_device") as validator:
         with mock.patch.object(config_handler, "send_config_request_reply") as req_reply:
