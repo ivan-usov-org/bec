@@ -2928,7 +2928,6 @@ sttry:
 ring_current_sim:
   readoutPriority: monitored
   deviceType: monitor
-  deviceType: monitor
   deviceClass: SynSignalRO
   deviceConfig:
     labels: ring_current_sim
