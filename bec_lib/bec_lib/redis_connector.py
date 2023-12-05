@@ -39,16 +39,19 @@ def catch_connection_error(func):
 class RedisConnector(ConnectorBase):
     def __init__(self, bootstrap: list, redis_cls=None):
         super().__init__(bootstrap)
-        self.redis_cls = redis_cls
-        self.host, self.port = (
+        host, port = (
             bootstrap[0].split(":") if isinstance(bootstrap, list) else bootstrap.split(":")
         )
-        self._notifications_producer = RedisProducer(
-            host=self.host, port=self.port, redis_cls=self.redis_cls
-        )
+
+        if redis_cls is None:
+            self.r = redis.Redis(host=host, port=port)
+        else:
+            self.r = redis_cls(host=host, port=port)
+
+        self._notifications_producer = RedisProducer(self.r)
 
     def producer(self, **kwargs):
-        return RedisProducer(host=self.host, port=self.port, redis_cls=self.redis_cls)
+        return RedisProducer(self.r)
 
     # pylint: disable=too-many-arguments
     def consumer(
@@ -68,26 +71,22 @@ class RedisConnector(ConnectorBase):
             if topics is None and pattern is None:
                 raise ValueError("Topics must be set for threaded consumer")
             listener = RedisConsumerThreaded(
-                self.host,
-                self.port,
+                self.r,
                 topics,
                 pattern,
                 event,
                 cb,
-                redis_cls=self.redis_cls,
                 name=name,
                 **kwargs,
             )
             self._threads.append(listener)
             return listener
         return RedisConsumer(
-            self.host,
-            self.port,
+            self.r,
             topics,
             pattern,
             event,
             cb,
-            redis_cls=self.redis_cls,
             **kwargs,
         )
 
@@ -121,13 +120,11 @@ class RedisConnector(ConnectorBase):
         if topics is None and pattern is None:
             raise ValueError("Topics must be set for stream consumer.")
         listener = RedisStreamConsumerThreaded(
-            self.host,
-            self.port,
+            self.r,
             topics,
             pattern,
             event,
             cb,
-            redis_cls=self.redis_cls,
             from_start=from_start,
             newest_only=newest_only,
             **kwargs,
@@ -179,12 +176,8 @@ class RedisConnector(ConnectorBase):
 
 
 class RedisProducer(ProducerConnector):
-    def __init__(self, host: str, port: int, redis_cls=None) -> None:
-        # pylint: disable=invalid-name
-        if redis_cls:
-            self.r = redis_cls(host=host, port=port)
-            return
-        self.r = redis.Redis(host=host, port=port)
+    def __init__(self, r) -> None:
+        self.r = r
         self.stream_keys = {}
 
     @catch_connection_error
@@ -406,13 +399,6 @@ class RedisConsumerMixin:
                 pattern = [pattern]
         return topics, pattern
 
-    def _init_redis_cls(self, redis_cls):
-        # pylint: disable=invalid-name
-        if redis_cls:
-            self.r = redis_cls(host=self.host, port=self.port)
-        else:
-            self.r = redis.Redis(host=self.host, port=self.port)
-
     @catch_connection_error
     def initialize_connector(self) -> None:
         if self.pattern is not None:
@@ -425,22 +411,18 @@ class RedisConsumer(RedisConsumerMixin, ConsumerConnector):
     # pylint: disable=too-many-arguments
     def __init__(
         self,
-        host,
-        port,
+        r,
         topics=None,
         pattern=None,
         event=None,
         cb=None,
-        redis_cls=None,
         **kwargs,
     ):
-        self.host = host
-        self.port = port
+        self.r = r
 
-        bootstrap_server = "".join([host, ":", port])
         topics, pattern = self._init_topics_and_pattern(topics, pattern)
         super().__init__(
-            bootstrap_server=bootstrap_server,
+            bootstrap_server=None,
             topics=topics,
             pattern=pattern,
             event=event,
@@ -448,7 +430,6 @@ class RedisConsumer(RedisConsumerMixin, ConsumerConnector):
             **kwargs,
         )
         self.error_message_sent = False
-        self._init_redis_cls(redis_cls)
         self.pubsub = self.r.pubsub()
         self.initialize_connector()
 
@@ -475,34 +456,28 @@ class RedisStreamConsumerThreaded(RedisConsumerMixin, ConsumerConnectorThreaded)
     # pylint: disable=too-many-arguments
     def __init__(
         self,
-        host,
-        port,
+        r,
         topics=None,
         pattern=None,
         event=None,
         cb=None,
-        redis_cls=None,
         from_start=False,
         newest_only=False,
         **kwargs,
     ):
-        self.host = host
-        self.port = port
+        self.r = r
         self.from_start = from_start
         self.newest_only = newest_only
 
-        bootstrap_server = "".join([host, ":", port])
         topics, pattern = self._init_topics_and_pattern(topics, pattern)
         super().__init__(
-            bootstrap_server=bootstrap_server,
+            bootstrap_server=None,
             topics=topics,
             pattern=pattern,
             event=event,
             cb=cb,
             **kwargs,
         )
-
-        self._init_redis_cls(redis_cls)
 
         self.sleep_times = [0.005, 0.1]
         self.last_received_msg = 0
@@ -583,23 +558,19 @@ class RedisConsumerThreaded(RedisConsumerMixin, ConsumerConnectorThreaded):
     # pylint: disable=too-many-arguments
     def __init__(
         self,
-        host,
-        port,
+        r,
         topics=None,
         pattern=None,
         event=None,
         cb=None,
-        redis_cls=None,
         name=None,
         **kwargs,
     ):
-        self.host = host
-        self.port = port
+        self.r = r
 
-        bootstrap_server = "".join([host, ":", port])
         topics, pattern = self._init_topics_and_pattern(topics, pattern)
         super().__init__(
-            bootstrap_server=bootstrap_server,
+            bootstrap_server=None,
             topics=topics,
             pattern=pattern,
             event=event,
@@ -608,7 +579,6 @@ class RedisConsumerThreaded(RedisConsumerMixin, ConsumerConnectorThreaded):
             **kwargs,
         )
 
-        self._init_redis_cls(redis_cls)
         self.pubsub = self.r.pubsub()
 
         self.sleep_times = [0.005, 0.1]
