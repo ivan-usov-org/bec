@@ -3,8 +3,8 @@ from __future__ import annotations
 import enum
 import re
 import time
-from typing import TYPE_CHECKING, List
 import warnings
+from typing import TYPE_CHECKING, List
 
 import msgpack
 from rich.console import Console
@@ -175,8 +175,7 @@ class Device:
             val = DeviceType(val)
         self._config["deviceType"] = val
         return self.parent.config_helper.send_config_request(
-            action="update",
-            config={self.name: {"deviceType": val}},
+            action="update", config={self.name: {"deviceType": val}}
         )
 
     @property
@@ -191,8 +190,7 @@ class Device:
             val = ReadoutPriority(val)
         self._config["readoutPriority"] = val
         return self.parent.config_helper.send_config_request(
-            action="update",
-            config={self.name: {"readoutPriority": val}},
+            action="update", config={self.name: {"readoutPriority": val}}
         )
 
     @property
@@ -291,6 +289,8 @@ class Device:
             val (dict): New user parameter
         """
         param = self.user_parameter
+        if param is None:
+            param = {}
         param.update(val)
         self.set_user_parameter(param)
 
@@ -584,7 +584,7 @@ class DeviceContainer(dict):
                 "enabled" if dev.enabled else "disabled",
                 str(dev.read_only),
                 dev._config.get("deviceClass"),
-                dev._config["acquisitionConfig"].get("readoutPriority"),
+                dev._config.get("readoutPriority"),
                 str(dev._config.get("deviceTags", [])),
             )
         console.print(table)

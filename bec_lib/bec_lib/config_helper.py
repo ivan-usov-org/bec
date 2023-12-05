@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING
 
 import msgpack
 import yaml
-import bec_lib
 
+import bec_lib
 from bec_lib.bec_errors import DeviceConfigError
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
@@ -67,8 +67,7 @@ class ConfigHelper:
             dev.pop("createdBy", None)
             dev.pop("sessionId", None)
             name = dev.pop("name")
-            config.update(dev)
-            out[name] = config
+            out[name] = dev
 
         with open(file_path, "w") as file:
             file.write(yaml.dump(out))

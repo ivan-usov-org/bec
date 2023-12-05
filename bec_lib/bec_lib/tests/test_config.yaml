@@ -14,10 +14,8 @@ eiger:
     name: eiger
   deviceTags:
   - detector
-  status:
-    enabled: true
-    enabled_set: true
-
+  enabled: true
+  readOnly: false
 
 ############## Cameras and detectors end here ##############
 
@@ -35,9 +33,8 @@ dyn_signals:
   deviceConfig:
     labels: dyn_signals
     name: dyn_signals
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 
 eyefoc:
   readoutPriority: baseline
@@ -55,9 +52,8 @@ eyefoc:
     update_frequency: 400
   deviceTags:
   - user motors
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 eyex:
   readoutPriority: baseline
   deviceType: positioner
@@ -74,9 +70,8 @@ eyex:
     update_frequency: 400
   deviceTags:
   - user motors
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 eyey:
   readoutPriority: baseline
   deviceType: positioner
@@ -93,9 +88,8 @@ eyey:
     update_frequency: 400
   deviceTags:
   - user motors
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 flyer_sim:
   readoutPriority: baseline
   deviceType: positioner
@@ -109,9 +103,8 @@ flyer_sim:
     update_frequency: 400
   deviceTags:
   - flyer
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 hrox:
   readoutPriority: baseline
   deviceType: positioner
@@ -128,9 +121,8 @@ hrox:
     update_frequency: 400
   deviceTags:
   - user motors
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 hroy:
   readoutPriority: baseline
   deviceType: positioner
@@ -147,9 +139,8 @@ hroy:
     update_frequency: 400
   deviceTags:
   - user motors
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 hroz:
   readoutPriority: baseline
   deviceType: positioner
@@ -166,9 +157,8 @@ hroz:
     update_frequency: 400
   deviceTags:
   - user motors
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 hx:
   readoutPriority: baseline
   deviceType: positioner
@@ -185,9 +175,8 @@ hx:
     update_frequency: 400
   deviceTags:
   - user motors
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 hy:
   readoutPriority: baseline
   deviceType: positioner
@@ -204,9 +193,8 @@ hy:
     update_frequency: 400
   deviceTags:
   - user motors
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 hz:
   readoutPriority: baseline
   deviceType: positioner
@@ -223,9 +211,8 @@ hz:
     update_frequency: 400
   deviceTags:
   - user motors
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 mbsx:
   readoutPriority: baseline
   deviceType: positioner
@@ -242,9 +229,8 @@ mbsx:
     update_frequency: 400
   deviceTags:
   - user motors
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 mbsy:
   readoutPriority: baseline
   deviceType: positioner
@@ -261,9 +247,8 @@ mbsy:
     update_frequency: 400
   deviceTags:
   - user motors
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 pinx:
   readoutPriority: baseline
   deviceType: positioner
@@ -280,9 +265,8 @@ pinx:
     update_frequency: 400
   deviceTags:
   - user motors
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 piny:
   readoutPriority: baseline
   deviceType: positioner
@@ -299,9 +283,8 @@ piny:
     update_frequency: 400
   deviceTags:
   - user motors
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 pinz:
   readoutPriority: baseline
   deviceType: positioner
@@ -318,9 +301,8 @@ pinz:
     update_frequency: 400
   deviceTags:
   - user motors
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 samx:
   readoutPriority: baseline
   deviceType: positioner
@@ -337,9 +319,8 @@ samx:
     update_frequency: 400
   deviceTags:
   - user motors
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 samy:
   readoutPriority: baseline
   deviceType: positioner
@@ -356,9 +337,8 @@ samy:
     update_frequency: 400
   deviceTags:
   - user motors
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 samz:
   readoutPriority: baseline
   deviceType: positioner
@@ -375,9 +355,8 @@ samz:
     update_frequency: 400
   deviceTags:
   - user motors
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 
 
 ################### User motors end here ###################
@@ -398,9 +377,8 @@ bpm3a:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm3b:
   readoutPriority: monitored
   deviceType: monitor
@@ -411,9 +389,8 @@ bpm3b:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm3c:
   readoutPriority: monitored
   deviceType: monitor
@@ -424,9 +401,8 @@ bpm3c:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm3d:
   readoutPriority: monitored
   deviceType: monitor
@@ -437,9 +413,8 @@ bpm3d:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm3i:
   readoutPriority: monitored
   deviceType: monitor
@@ -450,9 +425,8 @@ bpm3i:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm3x:
   readoutPriority: monitored
   deviceType: monitor
@@ -463,9 +437,8 @@ bpm3x:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm3y:
   readoutPriority: monitored
   deviceType: monitor
@@ -476,9 +449,8 @@ bpm3y:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm3z:
   readoutPriority: monitored
   deviceType: monitor
@@ -489,9 +461,8 @@ bpm3z:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm4a:
   readoutPriority: monitored
   deviceType: monitor
@@ -502,9 +473,8 @@ bpm4a:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm4b:
   readoutPriority: monitored
   deviceType: monitor
@@ -515,9 +485,8 @@ bpm4b:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm4c:
   readoutPriority: monitored
   deviceType: monitor
@@ -528,9 +497,8 @@ bpm4c:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm4d:
   readoutPriority: monitored
   deviceType: monitor
@@ -541,9 +509,8 @@ bpm4d:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm4i:
   readoutPriority: monitored
   deviceType: monitor
@@ -554,9 +521,8 @@ bpm4i:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm4s:
   readoutPriority: monitored
   deviceType: monitor
@@ -567,9 +533,8 @@ bpm4s:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm4x:
   readoutPriority: monitored
   deviceType: monitor
@@ -580,9 +545,8 @@ bpm4x:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm4xf:
   readoutPriority: monitored
   deviceType: monitor
@@ -593,9 +557,8 @@ bpm4xf:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm4xm:
   readoutPriority: monitored
   deviceType: monitor
@@ -606,9 +569,8 @@ bpm4xm:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm4y:
   readoutPriority: monitored
   deviceType: monitor
@@ -619,9 +581,8 @@ bpm4y:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm4yf:
   readoutPriority: monitored
   deviceType: monitor
@@ -632,9 +593,8 @@ bpm4yf:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm4ym:
   readoutPriority: monitored
   deviceType: monitor
@@ -645,9 +605,8 @@ bpm4ym:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm4z:
   readoutPriority: monitored
   deviceType: monitor
@@ -658,9 +617,8 @@ bpm4z:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm5a:
   readoutPriority: monitored
   deviceType: monitor
@@ -671,9 +629,8 @@ bpm5a:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm5b:
   readoutPriority: monitored
   deviceType: monitor
@@ -684,9 +641,8 @@ bpm5b:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm5c:
   readoutPriority: monitored
   deviceType: monitor
@@ -697,9 +653,8 @@ bpm5c:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm5d:
   readoutPriority: monitored
   deviceType: monitor
@@ -710,9 +665,8 @@ bpm5d:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm5i:
   readoutPriority: monitored
   deviceType: monitor
@@ -723,9 +677,8 @@ bpm5i:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm5x:
   readoutPriority: monitored
   deviceType: monitor
@@ -736,9 +689,8 @@ bpm5x:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm5y:
   readoutPriority: monitored
   deviceType: monitor
@@ -749,9 +701,8 @@ bpm5y:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm5z:
   readoutPriority: monitored
   deviceType: monitor
@@ -762,9 +713,8 @@ bpm5z:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm6a:
   readoutPriority: monitored
   deviceType: monitor
@@ -775,9 +725,8 @@ bpm6a:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm6b:
   readoutPriority: monitored
   deviceType: monitor
@@ -788,9 +737,8 @@ bpm6b:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm6c:
   readoutPriority: monitored
   deviceType: monitor
@@ -801,9 +749,8 @@ bpm6c:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm6d:
   readoutPriority: monitored
   deviceType: monitor
@@ -814,9 +761,8 @@ bpm6d:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm6i:
   readoutPriority: monitored
   deviceType: monitor
@@ -827,9 +773,8 @@ bpm6i:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm6x:
   readoutPriority: monitored
   deviceType: monitor
@@ -840,9 +785,8 @@ bpm6x:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm6y:
   readoutPriority: monitored
   deviceType: monitor
@@ -853,9 +797,8 @@ bpm6y:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm6z:
   readoutPriority: monitored
   deviceType: monitor
@@ -866,9 +809,8 @@ bpm6z:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 curr:
   readoutPriority: monitored
   deviceType: monitor
@@ -879,9 +821,8 @@ curr:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 diode:
   readoutPriority: monitored
   deviceType: monitor
@@ -892,9 +833,8 @@ diode:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ebpmdx:
   readoutPriority: monitored
   deviceType: monitor
@@ -905,9 +845,8 @@ ebpmdx:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ebpmdy:
   readoutPriority: monitored
   deviceType: monitor
@@ -918,9 +857,8 @@ ebpmdy:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ebpmux:
   readoutPriority: monitored
   deviceType: monitor
@@ -931,9 +869,8 @@ ebpmux:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ebpmuy:
   readoutPriority: monitored
   deviceType: monitor
@@ -944,9 +881,8 @@ ebpmuy:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ftp:
   readoutPriority: monitored
   deviceType: monitor
@@ -957,9 +893,8 @@ ftp:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 temp:
   readoutPriority: monitored
   deviceType: monitor
@@ -970,9 +905,8 @@ temp:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 transd:
   readoutPriority: monitored
   deviceType: monitor
@@ -983,9 +917,8 @@ transd:
     tolerance: 0.5
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 
 
 ################ Beamline monitors end here ################
@@ -1008,9 +941,8 @@ aptrx:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 aptry:
   readoutPriority: baseline
   deviceType: positioner
@@ -1023,9 +955,8 @@ aptry:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bim2x:
   readoutPriority: baseline
   deviceType: positioner
@@ -1038,9 +969,8 @@ bim2x:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bim2y:
   readoutPriority: baseline
   deviceType: positioner
@@ -1053,9 +983,8 @@ bim2y:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bm1trx:
   readoutPriority: baseline
   deviceType: positioner
@@ -1068,9 +997,8 @@ bm1trx:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bm1try:
   readoutPriority: baseline
   deviceType: positioner
@@ -1083,9 +1011,8 @@ bm1try:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bm2trx:
   readoutPriority: baseline
   deviceType: positioner
@@ -1098,9 +1025,8 @@ bm2trx:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bm2try:
   readoutPriority: baseline
   deviceType: positioner
@@ -1113,9 +1039,8 @@ bm2try:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bm3trx:
   readoutPriority: baseline
   deviceType: positioner
@@ -1128,9 +1053,8 @@ bm3trx:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bm3try:
   readoutPriority: baseline
   deviceType: positioner
@@ -1143,9 +1067,8 @@ bm3try:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bm4trx:
   readoutPriority: baseline
   deviceType: positioner
@@ -1158,9 +1081,8 @@ bm4trx:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bm4try:
   readoutPriority: baseline
   deviceType: positioner
@@ -1173,9 +1095,8 @@ bm4try:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bm5trx:
   readoutPriority: baseline
   deviceType: positioner
@@ -1188,9 +1109,8 @@ bm5trx:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bm5try:
   readoutPriority: baseline
   deviceType: positioner
@@ -1203,9 +1123,8 @@ bm5try:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bm6trx:
   readoutPriority: baseline
   deviceType: positioner
@@ -1218,9 +1137,8 @@ bm6trx:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bm6try:
   readoutPriority: baseline
   deviceType: positioner
@@ -1233,9 +1151,8 @@ bm6try:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm4r:
   readoutPriority: baseline
   deviceType: positioner
@@ -1248,9 +1165,8 @@ bpm4r:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bpm5r:
   readoutPriority: baseline
   deviceType: positioner
@@ -1263,9 +1179,8 @@ bpm5r:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bs1x:
   readoutPriority: baseline
   deviceType: positioner
@@ -1278,9 +1193,8 @@ bs1x:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bs1y:
   readoutPriority: baseline
   deviceType: positioner
@@ -1293,9 +1207,8 @@ bs1y:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bs2x:
   readoutPriority: baseline
   deviceType: positioner
@@ -1308,9 +1221,8 @@ bs2x:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 bs2y:
   readoutPriority: baseline
   deviceType: positioner
@@ -1323,9 +1235,8 @@ bs2y:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 burstn:
   readoutPriority: baseline
   deviceType: positioner
@@ -1338,9 +1249,8 @@ burstn:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 burstr:
   readoutPriority: baseline
   deviceType: positioner
@@ -1353,9 +1263,8 @@ burstr:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ddg1a:
   readoutPriority: baseline
   deviceType: positioner
@@ -1368,9 +1277,8 @@ ddg1a:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ddg1b:
   readoutPriority: baseline
   deviceType: positioner
@@ -1383,9 +1291,8 @@ ddg1b:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ddg1c:
   readoutPriority: baseline
   deviceType: positioner
@@ -1398,9 +1305,8 @@ ddg1c:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ddg1d:
   readoutPriority: baseline
   deviceType: positioner
@@ -1413,9 +1319,8 @@ ddg1d:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ddg1e:
   readoutPriority: baseline
   deviceType: positioner
@@ -1428,9 +1333,8 @@ ddg1e:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ddg1f:
   readoutPriority: baseline
   deviceType: positioner
@@ -1443,9 +1347,8 @@ ddg1f:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ddg1g:
   readoutPriority: baseline
   deviceType: positioner
@@ -1458,9 +1361,8 @@ ddg1g:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ddg1h:
   readoutPriority: baseline
   deviceType: positioner
@@ -1473,9 +1375,8 @@ ddg1h:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 dettrx:
   readoutPriority: baseline
   deviceType: positioner
@@ -1488,9 +1389,8 @@ dettrx:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 di2trx:
   readoutPriority: baseline
   deviceType: positioner
@@ -1503,9 +1403,8 @@ di2trx:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 di2try:
   readoutPriority: baseline
   deviceType: positioner
@@ -1518,9 +1417,8 @@ di2try:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 dtpush:
   readoutPriority: baseline
   deviceType: positioner
@@ -1533,9 +1431,8 @@ dtpush:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 dtth:
   readoutPriority: baseline
   deviceType: positioner
@@ -1548,9 +1445,8 @@ dtth:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 dttrx:
   readoutPriority: baseline
   deviceType: positioner
@@ -1563,9 +1459,8 @@ dttrx:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 dttry:
   readoutPriority: baseline
   deviceType: positioner
@@ -1578,9 +1473,8 @@ dttry:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 dttrz:
   readoutPriority: baseline
   deviceType: positioner
@@ -1593,9 +1487,8 @@ dttrz:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ebcsx:
   readoutPriority: baseline
   deviceType: positioner
@@ -1608,9 +1501,8 @@ ebcsx:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ebcsy:
   readoutPriority: baseline
   deviceType: positioner
@@ -1623,9 +1515,8 @@ ebcsy:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ebfi1:
   readoutPriority: baseline
   deviceType: positioner
@@ -1638,9 +1529,8 @@ ebfi1:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ebfi2:
   readoutPriority: baseline
   deviceType: positioner
@@ -1653,9 +1543,8 @@ ebfi2:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ebfi3:
   readoutPriority: baseline
   deviceType: positioner
@@ -1668,9 +1557,8 @@ ebfi3:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ebfi4:
   readoutPriority: baseline
   deviceType: positioner
@@ -1683,9 +1571,8 @@ ebfi4:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ebfzpx:
   readoutPriority: baseline
   deviceType: positioner
@@ -1698,9 +1585,8 @@ ebfzpx:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ebfzpy:
   readoutPriority: baseline
   deviceType: positioner
@@ -1713,9 +1599,8 @@ ebfzpy:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ebtrx:
   readoutPriority: baseline
   deviceType: positioner
@@ -1728,9 +1613,8 @@ ebtrx:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ebtry:
   readoutPriority: baseline
   deviceType: positioner
@@ -1743,9 +1627,8 @@ ebtry:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ebtrz:
   readoutPriority: baseline
   deviceType: positioner
@@ -1758,9 +1641,8 @@ ebtrz:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 fi1try:
   readoutPriority: baseline
   deviceType: positioner
@@ -1773,9 +1655,8 @@ fi1try:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 fi2try:
   readoutPriority: baseline
   deviceType: positioner
@@ -1788,9 +1669,8 @@ fi2try:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 fi3try:
   readoutPriority: baseline
   deviceType: positioner
@@ -1803,9 +1683,8 @@ fi3try:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 fsh1x:
   readoutPriority: baseline
   deviceType: positioner
@@ -1818,9 +1697,8 @@ fsh1x:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 fsh2x:
   readoutPriority: baseline
   deviceType: positioner
@@ -1833,9 +1711,8 @@ fsh2x:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ftrans:
   readoutPriority: baseline
   deviceType: positioner
@@ -1848,9 +1725,8 @@ ftrans:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 fttrx1:
   readoutPriority: baseline
   deviceType: positioner
@@ -1863,9 +1739,8 @@ fttrx1:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 fttrx2:
   readoutPriority: baseline
   deviceType: positioner
@@ -1878,9 +1753,8 @@ fttrx2:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 fttry1:
   readoutPriority: baseline
   deviceType: positioner
@@ -1893,9 +1767,8 @@ fttry1:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 fttry2:
   readoutPriority: baseline
   deviceType: positioner
@@ -1908,9 +1781,8 @@ fttry2:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 fttrz:
   readoutPriority: baseline
   deviceType: positioner
@@ -1923,9 +1795,8 @@ fttrz:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 idgap:
   readoutPriority: baseline
   deviceType: positioner
@@ -1938,9 +1809,8 @@ idgap:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 mibd:
   readoutPriority: baseline
   deviceType: positioner
@@ -1953,9 +1823,8 @@ mibd:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 mibd1:
   readoutPriority: baseline
   deviceType: positioner
@@ -1968,9 +1837,8 @@ mibd1:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 mibd2:
   readoutPriority: baseline
   deviceType: positioner
@@ -1983,9 +1851,8 @@ mibd2:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 miroll:
   readoutPriority: baseline
   deviceType: positioner
@@ -1998,9 +1865,8 @@ miroll:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 mith:
   readoutPriority: baseline
   deviceType: positioner
@@ -2013,9 +1879,8 @@ mith:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 mitrx:
   readoutPriority: baseline
   deviceType: positioner
@@ -2028,9 +1893,8 @@ mitrx:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 mitry:
   readoutPriority: baseline
   deviceType: positioner
@@ -2043,9 +1907,8 @@ mitry:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 mitry1:
   readoutPriority: baseline
   deviceType: positioner
@@ -2058,9 +1921,8 @@ mitry1:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 mitry2:
   readoutPriority: baseline
   deviceType: positioner
@@ -2073,9 +1935,8 @@ mitry2:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 mitry3:
   readoutPriority: baseline
   deviceType: positioner
@@ -2088,9 +1949,8 @@ mitry3:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 mobd:
   readoutPriority: baseline
   deviceType: positioner
@@ -2103,9 +1963,8 @@ mobd:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 mobdai:
   readoutPriority: baseline
   deviceType: positioner
@@ -2118,9 +1977,8 @@ mobdai:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 mobdbo:
   readoutPriority: baseline
   deviceType: positioner
@@ -2133,9 +1991,8 @@ mobdbo:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 mobdco:
   readoutPriority: baseline
   deviceType: positioner
@@ -2148,9 +2005,8 @@ mobdco:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 mobddi:
   readoutPriority: baseline
   deviceType: positioner
@@ -2163,9 +2019,8 @@ mobddi:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 mokev:
   readoutPriority: baseline
   deviceType: positioner
@@ -2178,9 +2033,8 @@ mokev:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 mopush1:
   readoutPriority: baseline
   deviceType: positioner
@@ -2193,9 +2047,8 @@ mopush1:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 mopush2:
   readoutPriority: baseline
   deviceType: positioner
@@ -2208,9 +2061,8 @@ mopush2:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 moroll1:
   readoutPriority: baseline
   deviceType: positioner
@@ -2223,9 +2075,8 @@ moroll1:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 moroll2:
   readoutPriority: baseline
   deviceType: positioner
@@ -2238,9 +2089,8 @@ moroll2:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 moth1:
   readoutPriority: baseline
   deviceType: positioner
@@ -2253,9 +2103,8 @@ moth1:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 moth1e:
   readoutPriority: baseline
   deviceType: positioner
@@ -2268,9 +2117,8 @@ moth1e:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 moth2:
   readoutPriority: baseline
   deviceType: positioner
@@ -2283,9 +2131,8 @@ moth2:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 moth2e:
   readoutPriority: baseline
   deviceType: positioner
@@ -2298,9 +2145,8 @@ moth2e:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 motrx2:
   readoutPriority: baseline
   deviceType: positioner
@@ -2313,9 +2159,8 @@ motrx2:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 motry:
   readoutPriority: baseline
   deviceType: positioner
@@ -2328,9 +2173,8 @@ motry:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 motry2:
   readoutPriority: baseline
   deviceType: positioner
@@ -2343,9 +2187,8 @@ motry2:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 motrz1:
   readoutPriority: baseline
   deviceType: positioner
@@ -2358,9 +2201,8 @@ motrz1:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 motrz1e:
   readoutPriority: baseline
   deviceType: positioner
@@ -2373,9 +2215,8 @@ motrz1e:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 moyaw2:
   readoutPriority: baseline
   deviceType: positioner
@@ -2388,9 +2229,8 @@ moyaw2:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl0ch:
   readoutPriority: baseline
   deviceType: positioner
@@ -2403,9 +2243,8 @@ sl0ch:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl0trxi:
   readoutPriority: baseline
   deviceType: positioner
@@ -2418,9 +2257,8 @@ sl0trxi:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl0trxo:
   readoutPriority: baseline
   deviceType: positioner
@@ -2433,9 +2271,8 @@ sl0trxo:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl0wh:
   readoutPriority: baseline
   deviceType: positioner
@@ -2448,9 +2285,8 @@ sl0wh:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl1ch:
   readoutPriority: baseline
   deviceType: positioner
@@ -2463,9 +2299,8 @@ sl1ch:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl1cv:
   readoutPriority: baseline
   deviceType: positioner
@@ -2478,9 +2313,8 @@ sl1cv:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl1trxi:
   readoutPriority: baseline
   deviceType: positioner
@@ -2493,9 +2327,8 @@ sl1trxi:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl1trxo:
   readoutPriority: baseline
   deviceType: positioner
@@ -2508,9 +2341,8 @@ sl1trxo:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl1tryb:
   readoutPriority: baseline
   deviceType: positioner
@@ -2523,9 +2355,8 @@ sl1tryb:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl1tryt:
   readoutPriority: baseline
   deviceType: positioner
@@ -2538,9 +2369,8 @@ sl1tryt:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl1wh:
   readoutPriority: baseline
   deviceType: positioner
@@ -2553,9 +2383,8 @@ sl1wh:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl1wv:
   readoutPriority: baseline
   deviceType: positioner
@@ -2568,9 +2397,8 @@ sl1wv:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl2ch:
   readoutPriority: baseline
   deviceType: positioner
@@ -2583,9 +2411,8 @@ sl2ch:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl2cv:
   readoutPriority: baseline
   deviceType: positioner
@@ -2598,9 +2425,8 @@ sl2cv:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl2trxi:
   readoutPriority: baseline
   deviceType: positioner
@@ -2613,9 +2439,8 @@ sl2trxi:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl2trxo:
   readoutPriority: baseline
   deviceType: positioner
@@ -2628,9 +2453,8 @@ sl2trxo:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl2tryb:
   readoutPriority: baseline
   deviceType: positioner
@@ -2643,9 +2467,8 @@ sl2tryb:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl2tryt:
   readoutPriority: baseline
   deviceType: positioner
@@ -2658,9 +2481,8 @@ sl2tryt:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl2wh:
   readoutPriority: baseline
   deviceType: positioner
@@ -2673,9 +2495,8 @@ sl2wh:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl2wv:
   readoutPriority: baseline
   deviceType: positioner
@@ -2688,9 +2509,8 @@ sl2wv:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl3ch:
   readoutPriority: baseline
   deviceType: positioner
@@ -2703,9 +2523,8 @@ sl3ch:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl3cv:
   readoutPriority: baseline
   deviceType: positioner
@@ -2718,9 +2537,8 @@ sl3cv:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl3trxi:
   readoutPriority: baseline
   deviceType: positioner
@@ -2733,9 +2551,8 @@ sl3trxi:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl3trxo:
   readoutPriority: baseline
   deviceType: positioner
@@ -2748,9 +2565,8 @@ sl3trxo:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl3tryb:
   readoutPriority: baseline
   deviceType: positioner
@@ -2763,9 +2579,8 @@ sl3tryb:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl3tryt:
   readoutPriority: baseline
   deviceType: positioner
@@ -2778,9 +2593,8 @@ sl3tryt:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl3wh:
   readoutPriority: baseline
   deviceType: positioner
@@ -2793,9 +2607,8 @@ sl3wh:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl3wv:
   readoutPriority: baseline
   deviceType: positioner
@@ -2808,9 +2621,8 @@ sl3wv:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl4ch:
   readoutPriority: baseline
   deviceType: positioner
@@ -2823,9 +2635,8 @@ sl4ch:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl4cv:
   readoutPriority: baseline
   deviceType: positioner
@@ -2838,9 +2649,8 @@ sl4cv:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl4trxi:
   readoutPriority: baseline
   deviceType: positioner
@@ -2853,9 +2663,8 @@ sl4trxi:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl4trxo:
   readoutPriority: baseline
   deviceType: positioner
@@ -2868,9 +2677,8 @@ sl4trxo:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl4tryb:
   readoutPriority: baseline
   deviceType: positioner
@@ -2883,9 +2691,8 @@ sl4tryb:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl4tryt:
   readoutPriority: baseline
   deviceType: positioner
@@ -2898,9 +2705,8 @@ sl4tryt:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl4wh:
   readoutPriority: baseline
   deviceType: positioner
@@ -2913,9 +2719,8 @@ sl4wh:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl4wv:
   readoutPriority: baseline
   deviceType: positioner
@@ -2928,9 +2733,8 @@ sl4wv:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl5ch:
   readoutPriority: baseline
   deviceType: positioner
@@ -2943,9 +2747,8 @@ sl5ch:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl5cv:
   readoutPriority: baseline
   deviceType: positioner
@@ -2958,9 +2761,8 @@ sl5cv:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl5trxi:
   readoutPriority: baseline
   deviceType: positioner
@@ -2973,9 +2775,8 @@ sl5trxi:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl5trxo:
   readoutPriority: baseline
   deviceType: positioner
@@ -2988,9 +2789,8 @@ sl5trxo:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl5tryb:
   readoutPriority: baseline
   deviceType: positioner
@@ -3003,9 +2803,8 @@ sl5tryb:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl5tryt:
   readoutPriority: baseline
   deviceType: positioner
@@ -3018,9 +2817,8 @@ sl5tryt:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl5wh:
   readoutPriority: baseline
   deviceType: positioner
@@ -3033,9 +2831,8 @@ sl5wh:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sl5wv:
   readoutPriority: baseline
   deviceType: positioner
@@ -3048,9 +2845,8 @@ sl5wv:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 strox:
   readoutPriority: baseline
   deviceType: positioner
@@ -3063,9 +2859,8 @@ strox:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 stroy:
   readoutPriority: baseline
   deviceType: positioner
@@ -3078,9 +2873,8 @@ stroy:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 stroz:
   readoutPriority: baseline
   deviceType: positioner
@@ -3093,9 +2887,8 @@ stroz:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sttrx:
   readoutPriority: baseline
   deviceType: positioner
@@ -3108,9 +2901,8 @@ sttrx:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 sttry:
   readoutPriority: baseline
   deviceType: positioner
@@ -3123,9 +2915,8 @@ sttry:
     update_frequency: 400
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 
 
 ################# Beamline motors end here #################
@@ -3145,9 +2936,8 @@ ring_current_sim:
     name: ring_current_sim
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 
 
 ################ Read-only signals end here ################
@@ -3174,9 +2964,8 @@ motor1_disabled:
     update_frequency: 400
   deviceTags:
   - user motors
-  status:
-    enabled: false
-    enabled_set: true
+  enabled: false
+  readOnly: false
 motor1_disabled_set:
   readoutPriority: baseline
   deviceType: positioner
@@ -3193,9 +2982,8 @@ motor1_disabled_set:
     update_frequency: 400
   deviceTags:
   - user motors
-  status:
-    enabled: true
-    enabled_set: false
+  enabled: true
+  readOnly: true
 motor2_disabled:
   readoutPriority: baseline
   deviceType: positioner
@@ -3212,9 +3000,8 @@ motor2_disabled:
     update_frequency: 400
   deviceTags:
   - user motors
-  status:
-    enabled: false
-    enabled_set: true
+  enabled: false
+  readOnly: false
 motor2_disabled_set:
   readoutPriority: baseline
   deviceType: positioner
@@ -3231,9 +3018,8 @@ motor2_disabled_set:
     update_frequency: 400
   deviceTags:
   - user motors
-  status:
-    enabled: true
-    enabled_set: false
+  enabled: true
+  readOnly: true
 
 
 ################ Disabled devices end here #################

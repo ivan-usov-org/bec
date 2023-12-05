@@ -158,12 +158,7 @@ def test_show_tags():
 
 @pytest.mark.parametrize(
     "scan_motors_in,readout_priority_in",
-    [
-        ([], {}),
-        (["samx"], {}),
-        ([], {"monitored": ["samx"]}),
-        ([], {"baseline": ["samx"]}),
-    ],
+    [([], {}), (["samx"], {}), ([], {"monitored": ["samx"]}), ([], {"baseline": ["samx"]})],
 )
 def test_monitored_devices_are_unique(scan_motors_in, readout_priority_in):
     connector = ConnectorMock("")
@@ -385,7 +380,7 @@ def test_show_all():
         {
             "description": "Device 1",
             "enabled": True,
-            "read_only": False,
+            "readOnly": False,
             "deviceClass": "Class1",
             "readoutPriority": "high",
             "deviceTags": ["tag1", "tag2"],
@@ -396,7 +391,7 @@ def test_show_all():
         {
             "description": "Device 2",
             "enabled": False,
-            "read_only": True,
+            "readOnly": True,
             "deviceClass": "Class2",
             "readoutPriority": "low",
             "deviceTags": ["tag3", "tag4"],

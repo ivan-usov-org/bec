@@ -338,9 +338,7 @@ class DMClientMock(DMClient):
 
         session_info = self.get_device(device_name)
         device_base_class = (
-            "positioner"
-            if session_info["acquisitionConfig"]["acquisitionGroup"] in ["motor"]
-            else "signal"
+            "positioner" if session_info["deviceClass"] == "SynAxisOPAAS" else "signal"
         )
         if device_base_class == "positioner":
             signals = [
@@ -611,7 +609,7 @@ def create_session_from_config(config: dict) -> dict:
             "name": name,
             "sessionId": session_id,
             "enabled": conf["enabled"],
-            "read_only": conf["read_only"],
+            "read_only": conf["readOnly"],
         }
         dev_conf.update(conf)
         device_configs.append(dev_conf)

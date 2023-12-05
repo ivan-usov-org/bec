@@ -75,18 +75,24 @@ def test_device_set_user_parameter(device_config, val, raised_error):
 
 
 @pytest.mark.parametrize(
-    "val,raised_error", [({"in": 5}, None), ({"in": 5, "out": 10}, None), ({"5", "4"}, TypeError)]
+    "user_param,val,out,raised_error",
+    [
+        ({"in": 2, "out": 5}, {"in": 5}, {"in": 5, "out": 5}, None),
+        ({"in": 2, "out": 5}, {"in": 5, "out": 10}, {"in": 5, "out": 10}, None),
+        ({"in": 2, "out": 5}, {"5", "4"}, None, TypeError),
+        (None, {"in": 5}, {"in": 5}, None),
+    ],
 )
-def test_device_update_user_parameter(device_config, val, raised_error):
+def test_device_update_user_parameter(device_config, user_param, val, out, raised_error):
     connector = ConnectorMock("")
     dm = DeviceManagerBase(connector)
     obj = dm._create_device(device_config, ())
-    obj._config["userParameter"] = {"in": 2, "out": 5}
+    obj._config["userParameter"] = user_param
     with mock.patch.object(obj.parent.config_helper, "send_config_request") as config_req:
         if raised_error is None:
             obj.update_user_parameter(val)
             config_req.assert_called_once_with(
-                action="update", config={obj.name: {"userParameter": obj._config["userParameter"]}}
+                action="update", config={obj.name: {"userParameter": out}}
             )
         else:
             with pytest.raises(raised_error):
