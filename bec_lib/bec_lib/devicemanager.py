@@ -664,10 +664,10 @@ class DeviceManagerBase:
                     self.devices[dev]._config["onFailure"] = config[dev]["onFailure"]
                 if "deviceTags" in config[dev]:
                     self.devices[dev]._config["deviceTags"] = config[dev]["deviceTags"]
-                if "acquisitionConfig" in config[dev]:
-                    self.devices[dev]._config["acquisitionConfig"] = config[dev][
-                        "acquisitionConfig"
-                    ]
+                if "readoutPriority" in config[dev]:
+                    self.devices[dev]._config["readoutPriority"] = config[dev]["readoutPriority"]
+                if "deviceType" in config[dev]:
+                    self.devices[dev]._config["deviceType"] = config[dev]["deviceType"]
 
         elif action == "add":
             self.update_status(BECStatus.BUSY)
