@@ -55,7 +55,6 @@ class RedisConnector(ConnectorBase):
         self,
         topics=None,
         pattern=None,
-        group_id=None,
         event=None,
         cb=None,
         threaded=True,
@@ -73,7 +72,6 @@ class RedisConnector(ConnectorBase):
                 self.port,
                 topics,
                 pattern,
-                group_id,
                 event,
                 cb,
                 redis_cls=self.redis_cls,
@@ -87,7 +85,6 @@ class RedisConnector(ConnectorBase):
             self.port,
             topics,
             pattern,
-            group_id,
             event,
             cb,
             redis_cls=self.redis_cls,
@@ -98,7 +95,6 @@ class RedisConnector(ConnectorBase):
         self,
         topics=None,
         pattern=None,
-        group_id=None,
         event=None,
         cb=None,
         from_start=False,
@@ -111,7 +107,6 @@ class RedisConnector(ConnectorBase):
         Args:
             topics (str, list): topics to subscribe to
             pattern (str, list): pattern to subscribe to
-            group_id (str): group id
             event (threading.Event): event to stop the consumer
             cb (function): callback function
             from_start (bool): read from start. Defaults to False.
@@ -130,7 +125,6 @@ class RedisConnector(ConnectorBase):
             self.port,
             topics,
             pattern,
-            group_id,
             event,
             cb,
             redis_cls=self.redis_cls,
@@ -435,7 +429,6 @@ class RedisConsumer(RedisConsumerMixin, ConsumerConnector):
         port,
         topics=None,
         pattern=None,
-        group_id=None,
         event=None,
         cb=None,
         redis_cls=None,
@@ -450,7 +443,6 @@ class RedisConsumer(RedisConsumerMixin, ConsumerConnector):
             bootstrap_server=bootstrap_server,
             topics=topics,
             pattern=pattern,
-            group_id=group_id,
             event=event,
             cb=cb,
             **kwargs,
@@ -487,7 +479,6 @@ class RedisStreamConsumerThreaded(RedisConsumerMixin, ConsumerConnectorThreaded)
         port,
         topics=None,
         pattern=None,
-        group_id=None,
         event=None,
         cb=None,
         redis_cls=None,
@@ -506,7 +497,6 @@ class RedisStreamConsumerThreaded(RedisConsumerMixin, ConsumerConnectorThreaded)
             bootstrap_server=bootstrap_server,
             topics=topics,
             pattern=pattern,
-            group_id=group_id,
             event=event,
             cb=cb,
             **kwargs,
@@ -522,15 +512,6 @@ class RedisStreamConsumerThreaded(RedisConsumerMixin, ConsumerConnectorThreaded)
 
     def initialize_connector(self) -> None:
         pass
-
-    def _init_topics_and_pattern(self, topics, pattern):
-        if topics:
-            if not isinstance(topics, list):
-                topics = [topics]
-        if pattern:
-            if not isinstance(pattern, list):
-                pattern = [pattern]
-        return topics, pattern
 
     def get_id(self, topic: str) -> str:
         """
@@ -606,7 +587,6 @@ class RedisConsumerThreaded(RedisConsumerMixin, ConsumerConnectorThreaded):
         port,
         topics=None,
         pattern=None,
-        group_id=None,
         event=None,
         cb=None,
         redis_cls=None,
@@ -622,7 +602,6 @@ class RedisConsumerThreaded(RedisConsumerMixin, ConsumerConnectorThreaded):
             bootstrap_server=bootstrap_server,
             topics=topics,
             pattern=pattern,
-            group_id=group_id,
             event=event,
             cb=cb,
             name=name,

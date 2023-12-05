@@ -70,7 +70,6 @@ class ConsumerConnector(abc.ABC):
         cb,
         topics=None,
         pattern=None,
-        group_id=None,
         event=None,
         **kwargs,
     ):
@@ -89,7 +88,6 @@ class ConsumerConnector(abc.ABC):
         self.bootstrap = bootstrap_server
         self.topics = topics
         self.pattern = pattern
-        self.group_id = group_id
         self.connector = None
         self.cb = cb
         self.kwargs = kwargs
@@ -122,7 +120,6 @@ class ConsumerConnectorThreaded(ConsumerConnector, threading.Thread):
         cb,
         topics=None,
         pattern=None,
-        group_id=None,
         event=None,
         name=None,
         **kwargs,
@@ -144,7 +141,6 @@ class ConsumerConnectorThreaded(ConsumerConnector, threading.Thread):
             bootstrap_server=bootstrap_server,
             topics=topics,
             pattern=pattern,
-            group_id=group_id,
             event=event,
             cb=cb,
             **kwargs,
