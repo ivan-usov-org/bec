@@ -2,6 +2,32 @@
 
 <!--next-version-placeholder-->
 
+## v0.48.0 (2023-12-05)
+
+### Feature
+
+* Added support for namedtuple serialization for rpc ([`fd00974`](https://gitlab.psi.ch/bec/bec/-/commit/fd00974b05112a7c85eea412a1be89fee3b74822))
+
+### Fix
+
+* Fixed cached readout for .get; closes #137 ([`4fc35ca`](https://gitlab.psi.ch/bec/bec/-/commit/4fc35cadc161c1b39fc5a891ab7150f9b043b9f0))
+* Fixed bug in readout for hinted and normal signals ([`bcd2433`](https://gitlab.psi.ch/bec/bec/-/commit/bcd243361af8eccd0771bc6950fcc3f86689c664))
+* Made rpc interface more consistent with ophyd ([`e0e3a71`](https://gitlab.psi.ch/bec/bec/-/commit/e0e3a7158cee84c56f4ce82657e36ff88b18a36b))
+
+### Documentation
+
+* Fixed paragraph level ([`01bba51`](https://gitlab.psi.ch/bec/bec/-/commit/01bba51da191e07d3ada050a78e031248cb4dd50))
+* Improved introduction ([`1c82e80`](https://gitlab.psi.ch/bec/bec/-/commit/1c82e80960d27e85b73e1f308f06f44ec5a54316))
+* Cleanup developer docs; remove usage folder ([`329e30b`](https://gitlab.psi.ch/bec/bec/-/commit/329e30b722843d66396e3e4bd8fc0d12660a6f06))
+* Resolved threadl small typo in install ([`3236d1e`](https://gitlab.psi.ch/bec/bec/-/commit/3236d1ea725ce78b13828cdf6588e5c836983ef7))
+* Split ophyd and ophyd_devices ([`173eb26`](https://gitlab.psi.ch/bec/bec/-/commit/173eb26b0c7469413075bb3766edd4f0ae626866))
+* Review install_developer_env ([`5e3c10a`](https://gitlab.psi.ch/bec/bec/-/commit/5e3c10aca6517e5e4aa5eb00fc585e07f091b48c))
+* Review contributing section ([`f4ffff3`](https://gitlab.psi.ch/bec/bec/-/commit/f4ffff3414baa62446e2810cbd389111d8d53183))
+* Reviewd architecture section ([`1ac315d`](https://gitlab.psi.ch/bec/bec/-/commit/1ac315dc61094eee3d84f8cc2b3cf5b6331b04ba))
+* Review developer page ([`c35e0be`](https://gitlab.psi.ch/bec/bec/-/commit/c35e0be40d13724d684109dcaea827a14d2a6dae))
+* Rem typo and add link in data_access ([`b5c7453`](https://gitlab.psi.ch/bec/bec/-/commit/b5c7453445c565e99703436b88420d7b8f98d197))
+* Rem typos in cli section ([`ede65af`](https://gitlab.psi.ch/bec/bec/-/commit/ede65af1c3c189bca137567096537709332c2b18))
+
 ## v0.47.0 (2023-11-28)
 
 ### Feature
