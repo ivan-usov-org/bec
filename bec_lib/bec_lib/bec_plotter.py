@@ -320,6 +320,7 @@ class BECPlotter:
         Start the plot in a new process.
         """
 
+        # pylint: disable=subprocess-run-check
         self._process = subprocess.Popen(
             f"python {self._widget_path} --id {self._plot_id} --config"
             f" '{json.dumps(self._config)}'",
@@ -366,12 +367,12 @@ class BECPlotter:
         self.close()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     plotter = BECPlotter("test")
 
     plotter.set_xlabel("xlabel")
     plotter.set_ylabel("ylabel")
-    plotter.set_xydata(x=[1, 2, 3], y=[1, 2, 3])
+    plotter.set_xydata(xdata=[1, 2, 3], ydata=[1, 2, 3])
     plotter.refresh()
 
     # or just
