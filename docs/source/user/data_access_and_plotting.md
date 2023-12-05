@@ -1,5 +1,5 @@
 (user.data_access_and_plotting)= 
-## Data Acess and Plotting
+# Data Acess and Plotting
 
 Let's recapture how to do a scan, and explore the data contained within it. 
 
@@ -16,7 +16,7 @@ Please contact your beamline contact for more information about this.
 Nevertheless, all data that we can access via Redis, is also exposed throughout the client. 
 Below is an example how to access it. 
 
-### Inspect the scan data
+## Inspect the scan data
 
 The return value of a scan is a python object of type `ScanReport`. All data is stored in `<scan_report>.scan.data`, e.g.
 
@@ -37,7 +37,7 @@ You may now use the given data to manipulate it as you see fit.
 Keep in mind though, these manipulations only happen locally for yourself in the IPython shell. 
 They will not be forwarded to the BEC data in Redis, thus, your modification won't be stored in the raw data file (HDF5 file). 
 
-### Plot the scan data on your own
+## Plot the scan data on your own
 You may install `pandas` as an additional dependency to directly export the data to a panda's dataframe. 
 If on top, `matplotlib` is installed in the environment and imported `import matplotlib.pyplot as plt`, one may use the built-in plotting capabilities of pandas to plot from the shell.
 

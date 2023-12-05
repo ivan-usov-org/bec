@@ -1,2 +1,3 @@
-## BEC GUI and Live Plotting
+(developer.bec_gui)=
+# BEC GUI and Live Plotting
 Coming soon...

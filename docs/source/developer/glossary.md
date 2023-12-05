@@ -1,4 +1,5 @@
-## Glossary
+(developer.glossary)=
+# Glossary
 
 ```{glossary}
 :sorted:

@@ -1,22 +1,11 @@
 (developer)=
 # Developer
-This is the developer/expert part of the documentation.
-It provides an access point to get to know the underlying architecture of BEC, options to customize BEC to specific needs of beamlines/setups (BEC plugins), pointers for integrating a device at the beamline, as well as how to take part in developments of the core services.
-
-Therefore, it aims to cover some of the following topics
-
-- Software architecture of BEC
-- How to contribute
-- Installation guide for developers
-- How to built a GUI interfaces
-- BEC and ophyd - integrating a new device
-- BEC's event system
-
-within the sections below:
+Welcome to the developer/expert section of the BEC documentation! This section serves as a comprehensive resource for developers looking to delve into the underlying architecture of BEC (Beamline Experiment Control). Whether you are customizing BEC for specific beamlines or setups, exploring BEC plugins, integrating devices at the beamline, or actively participating in the development of core services, this documentation is tailored to meet your needs.
 
 ```{toctree}
 ---
-maxdepth: 2
+maxdepth: 1
+hidden: true
 ---
 
 architecture/
@@ -32,6 +21,31 @@ ophyd_devices/
 external_sources/
 glossary/
 reference/
+```
+
+***
+**Developer Documentation for BEC**
+
+Here, we aim to provide you with all the essential information to kickstart your journey with BEC. From understanding the intricate architecture to contributing effectively to the project, we've got you covered. Explore the following key topics:
+
+* [Architecture](#developer.architecture): Gain insights into the underlying structure of BEC.
+* [Contributing](#developer.contributing): Learn how to actively participate and contribute to the development of BEC.
+* [Installing Developer Environment](#developer.install_developer_env): Set up your developer environment to work with BEC.
+* [BEC Command Line Interface (CLI)](#developer.bec_cli): Explore the command-line tool and customize its behaviour.
+* [BEC Graphical User Interface (GUI)](#developer.bec_gui): Learn how to use the graphical user interface to interact with BEC and explore how to create your own GUIs.
+* [BEC Configuration](#developer.bec_config): Learn about the different ways of customizing BEC to your needs.
+* [Data Access](#developer.data_access): Explore different ways of accessing data acquired with BEC.
+* [Event Data](#developer.data_access): Explore the handling of event data in BEC to streamline your data analysis and live feedback.
+* [Ophyd](#developer.ophyd): Familiarize yourself with Ophyd, the underlying library for device control in BEC.
+* [Ophyd Devices](#developer.ophyd_devices): Learn how to integrate and work with Ophyd devices in the BEC context.
+* [External Sources](#developer.external_sources): Understand how to incorporate external data sources into your BEC workflow.
+* [Glossary](#developer.glossary): Refer to a glossary of terms used throughout the BEC documentation.
+* [Reference](#developer.reference): Access a comprehensive reference of all BEC classes, functions, and methods.
+
+
+We invite you to embark on your BEC development journey, empowering you to contribute to this dynamic project and tailor it to the unique requirements of your experiments. Happy coding!
+
+
 
 
 

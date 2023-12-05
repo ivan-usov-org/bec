@@ -1,2 +1,3 @@
-## BEC CLI
+(developer.bec_cli)=
+# BEC CLI
 Coming soon...
