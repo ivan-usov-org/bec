@@ -166,6 +166,8 @@ class ConfigHandler:
             "userParameter",
             "onFailure",
             "deviceTags",
+            "deviceType",
+            "readoutPriority",
         ]
         for key in dev_config:
             if key not in available_keys:
