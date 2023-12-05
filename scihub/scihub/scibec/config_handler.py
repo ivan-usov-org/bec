@@ -84,11 +84,9 @@ class ConfigHandler:
         self.send_config(reload_msg)
 
     def _convert_to_db_config(self, name: str, config: dict) -> None:
-        # config["enabled"] = config["status"]["enabled"]  #
-        # if config["status"].get("enabled_set"):  #
-        #     config["enabled_set"] = config["status"].get("enabled_set")  #
-        # config.pop("status")  #
         config.pop("deviceType", None)
+        if config.get("deviceConfig") is None:
+            config["deviceConfig"] = {}
         config["name"] = name
 
     def _reload_config(self, msg: messages.DeviceConfigMessage):
