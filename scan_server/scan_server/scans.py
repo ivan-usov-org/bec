@@ -1007,7 +1007,7 @@ class RoundScanFlySim(ScanBase):
         self.axis = []
 
     def _get_scan_motors(self):
-        self.scan_motors = list(self.caller_args.keys())
+        self.scan_motors = []
         self.flyer = list(self.caller_args.keys())[0]
 
     def prepare_positions(self):

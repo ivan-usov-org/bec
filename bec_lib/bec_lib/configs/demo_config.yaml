@@ -89,7 +89,7 @@ eyey:
   enabled: true
   readOnly: false
 flyer_sim:
-  readoutPriority: baseline
+  readoutPriority: on_request
   deviceType: positioner
   deviceClass: SynFlyer
   deviceConfig:
