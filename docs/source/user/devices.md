@@ -77,7 +77,17 @@ To disable a device (e.g. samx), use
 ```{code-block} python
 dev.samx.enabled=False 
 ```
-The device `samx` is now disabled on all services as well as for the BEC database (MongoDB). 
+The device `samx` is now disabled on all services as well as for the BEC database (MongoDB) if connected. 
+
+### Set the readout priority
+
+To change the readout priority of a device (e.g. samx), use
+
+```{code-block} python
+dev.samx.readout_priority = "monitored" 
+```
+
+Possible values are `monitored`, `baseline`, `on_request`, `async` and `continuous`. More details on the readout priority and the different modes can be found in the [developer guide](#developer.ophyd_device).
 
 ### Update the device config
 

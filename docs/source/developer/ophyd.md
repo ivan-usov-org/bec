@@ -11,22 +11,18 @@ An example of an ophyd device based on EPICS is a single PV, e.g. the synchrotro
 
 ```yaml
 curr:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
+  deviceType: monitor
   description: SLS ring current
   deviceClass: EpicsSignalRO
   deviceConfig:
     auto_monitor: true
-    name: curr
     read_pv: ARIDI-PCT:CURRENT
   deviceTags:
     - cSAXS
   onFailure: buffer
-  status:
-    enabled: true
-    enabled_set: false
+  enabled: true
+  readOnly: True
 ```
 
 The following sections explain the different parts of the device configuration in more detail.
@@ -34,15 +30,21 @@ The following sections explain the different parts of the device configuration i
 * **deviceClass** \
 The device class specifies the type of the device. In the example above, the device class is `EpicsSignalRO`, which is a read-only signal based on EPICS. Another example is `EpicsMotor` for motors based on EPICS. For a full list of available device classes, please refer to the [Ophyd documentation](https://nsls-ii.github.io/ophyd/architecture.html#device-classes) and the [Ophyd devices repository](https://gitlab.psi.ch/bec/ophyd_devices).
 
+* **deviceType** \
+The device type specifies the type of the device. In the example above, the device type is `monitor`. The device type is used to group devices and to filter devices. The available device types are `positioner`, `detector`, `monitor`, `controller`, `misc`. 
+
 * **deviceConfig** \
-The device config contains the configuration of the device. In the example above, the device config contains the name of the device (`name`) and the read PV (`read_pv`). The read PV is the PV that is read out by the device. In this case, the read PV is `ARIDI-PCT:CURRENT`. The device config can contain any configuration parameter that is supported by the device class. 
+The device config contains the configuration of the device. In the example above, the device config contains the read PV (`read_pv`). The read PV is the PV that is read out by the device. In this case, the read PV is `ARIDI-PCT:CURRENT`. The device config can contain any configuration parameter that is supported by the device class. 
 The device is constructed by passing the device config to the device class. In the example above, the device is constructed by calling `EpicsSignalRO(name='curr', read_pv='ARIDI-PCT:CURRENT', auto_monitor=True)`.
 
-* **acquisitionConfig** \
-The acquisition config contains the configuration of the acquisition. It must contain the acquisition group (`acquisitionGroup`) and the readout priority (`readoutPriority`). The acquisition group specifies the group to which the device belongs. The readout priority specifies the priority with which the device is read out. The readout priority can be either `ignored`, `baseline` or `monitored`. The ignored priority is used for devices that should not be read out during the scan. The baseline priority is used for devices that are read out at the beginning of the scan and whose value does not change during the scan. The monitored priority is used for devices that are read out during the scan and whose value may change during the scan. 
+* **readoutPriority** \
+The readout priority specifies the priority with which the device is read out. For BEC controlled readouts, set the readout priority either to `on_request`, `baseline` or `monitored`. The ignored priority is used for devices that should not be read out during the scan. The baseline priority is used for devices that are read out at the beginning of the scan and whose value does not change during the scan. The monitored priority is used for devices that are read out during the scan and whose value may change during the scan. If the readout of the device is asynchronous to the monitored devices, set the readout priority to `async`. For devices that are read out continuously, set the readout priority to `continuous`. 
 
-* **status** \
-The status contains the status of the device. It must contain the enabled status (`enabled`) and the enabled set status (`enabled_set`). The enabled status specifies whether the device is enabled. The enabled set status specifies whether the device is readonly. 
+* **enabled** \
+The enabled status specifies whether the device is enabled. 
+
+* **readOnly** \
+The read only status specifies whether the device is read only. If the device is read only, the device cannot be written to.
 
 * **deviceTags** \
 The device tags contain the tags of the device. The tags are used to group devices and to filter devices.
