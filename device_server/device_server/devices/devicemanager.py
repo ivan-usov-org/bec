@@ -169,7 +169,9 @@ class DeviceManagerDS(DeviceManagerBase):
         read_only = dev.get("read_only", False)
 
         dev_cls = self._get_device_class(dev["deviceClass"])
-        config = dev["deviceConfig"].copy()
+        device_config = dev.get("deviceConfig")
+        device_config = device_config if device_config is not None else {}
+        config = device_config.copy()
         config["name"] = name
 
         # pylint: disable=protected-access
