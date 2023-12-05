@@ -2,22 +2,22 @@ import inspect
 import time
 import traceback
 from functools import reduce
-from bec_lib import messages
 
 import ophyd
 import ophyd.sim as ops
 import ophyd_devices as opd
-from ophyd.ophydobj import OphydObject
-from ophyd.signal import EpicsSignalBase
-
 from bec_lib import (
     Device,
     DeviceConfigError,
     DeviceManagerBase,
     MessageEndpoints,
     bec_logger,
+    messages,
 )
 from bec_lib.connector import ConnectorBase
+from ophyd.ophydobj import OphydObject
+from ophyd.signal import EpicsSignalBase
+
 from device_server.devices.config_update_handler import ConfigUpdateHandler
 from device_server.devices.device_serializer import get_device_info
 
@@ -170,6 +170,7 @@ class DeviceManagerDS(DeviceManagerBase):
 
         dev_cls = self._get_device_class(dev["deviceClass"])
         config = dev["deviceConfig"].copy()
+        config["name"] = name
 
         # pylint: disable=protected-access
         device_classes = [dev_cls]
@@ -358,8 +359,7 @@ class DeviceManagerDS(DeviceManagerBase):
                 signals[key] = {"value": val[ii], "timestamp": timestamp}
             bundle.append(
                 messages.DeviceMessage(
-                    signals={obj.name: signals},
-                    metadata={"pointID": ii, **metadata},
+                    signals={obj.name: signals}, metadata={"pointID": ii, **metadata}
                 ).dumps()
             )
         ds_obj.emitted_points[metadata["scanID"]] = max_points
@@ -376,9 +376,6 @@ class DeviceManagerDS(DeviceManagerBase):
     def _obj_progress_callback(self, *_args, obj, value, max_value, done, **kwargs):
         metadata = self.devices[obj.root.name].metadata
         msg = messages.ProgressMessage(
-            value=value,
-            max_value=max_value,
-            done=done,
-            metadata=metadata,
+            value=value, max_value=max_value, done=done, metadata=metadata
         )
         self.producer.set_and_publish(MessageEndpoints.device_progress(obj.root.name), msg.dumps())
