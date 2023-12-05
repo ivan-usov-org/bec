@@ -1,5 +1,3 @@
-
-
 ############################################################
 ################## Cameras and detectors ###################
 ############################################################
@@ -10,48 +8,39 @@ eiger:
   deviceClass: SynSLSDetector
   deviceConfig:
     device_access: true
-    labels: eiger
-    name: eiger
   deviceTags:
-  - detector
+    - detector
   enabled: true
   readOnly: false
 
 ############## Cameras and detectors end here ##############
-
-
-
-############################################################
-####################### User motors ########################
-############################################################
-
 
 dyn_signals:
   readoutPriority: baseline
   deviceType: monitor
   deviceClass: sim:sim:SynDynamicComponents
   deviceConfig:
-    labels: dyn_signals
-    name: dyn_signals
   enabled: true
   readOnly: false
+
+############################################################
+####################### User motors ########################
+############################################################
 
 eyefoc:
   readoutPriority: baseline
   deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
-    delay: 1
-    labels: eyefoc
+    delay: 1    
     limits:
-    - -50
-    - 50
-    name: eyefoc
+      - -50
+      - 50
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-  - user motors
+    - user motors
   enabled: true
   readOnly: false
 eyex:
@@ -60,16 +49,14 @@ eyex:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: eyex
     limits:
-    - -50
-    - 50
-    name: eyex
+      - -50
+      - 50
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-  - user motors
+    - user motors
   enabled: true
   readOnly: false
 eyey:
@@ -77,17 +64,15 @@ eyey:
   deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
-    delay: 1
-    labels: eyey
+    delay: 1    
     limits:
-    - -50
-    - 50
-    name: eyey
+      - -50
+      - 50
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-  - user motors
+    - user motors
   enabled: true
   readOnly: false
 flyer_sim:
@@ -95,14 +80,12 @@ flyer_sim:
   deviceType: positioner
   deviceClass: SynFlyer
   deviceConfig:
-    delay: 1
+    delay: 1    
     device_access: true
-    labels: flyer_sim
-    name: flyer_sim
     speed: 100
     update_frequency: 400
   deviceTags:
-  - flyer
+    - flyer
   enabled: true
   readOnly: false
 hrox:
@@ -110,17 +93,15 @@ hrox:
   deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
-    delay: 1
-    labels: hrox
+    delay: 1    
     limits:
-    - -50
-    - 50
-    name: hrox
+      - -50
+      - 50
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-  - user motors
+    - user motors
   enabled: true
   readOnly: false
 hroy:
@@ -128,17 +109,15 @@ hroy:
   deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
-    delay: 1
-    labels: hroy
+    delay: 1    
     limits:
-    - -50
-    - 50
-    name: hroy
+      - -50
+      - 50
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-  - user motors
+    - user motors
   enabled: true
   readOnly: false
 hroz:
@@ -146,17 +125,15 @@ hroz:
   deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
-    delay: 1
-    labels: hroz
+    delay: 1    
     limits:
-    - -50
-    - 50
-    name: hroz
+      - -50
+      - 50
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-  - user motors
+    - user motors
   enabled: true
   readOnly: false
 hx:
@@ -164,17 +141,15 @@ hx:
   deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
-    delay: 1
-    labels: hx
+    delay: 1    
     limits:
-    - -50
-    - 50
-    name: hx
+      - -50
+      - 50
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-  - user motors
+    - user motors
   enabled: true
   readOnly: false
 hy:
@@ -183,16 +158,14 @@ hy:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: hy
     limits:
-    - -50
-    - 50
-    name: hy
+      - -50
+      - 50
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-  - user motors
+    - user motors
   enabled: true
   readOnly: false
 hz:
@@ -200,17 +173,15 @@ hz:
   deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
-    delay: 1
-    labels: hz
+    delay: 1    
     limits:
-    - -50
-    - 50
-    name: hz
+      - -50
+      - 50
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-  - user motors
+    - user motors
   enabled: true
   readOnly: false
 mbsx:
@@ -218,17 +189,15 @@ mbsx:
   deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
-    delay: 1
-    labels: mbsx
+    delay: 1    
     limits:
-    - -50
-    - 50
-    name: mbsx
+      - -50
+      - 50
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-  - user motors
+    - user motors
   enabled: true
   readOnly: false
 mbsy:
@@ -237,16 +206,14 @@ mbsy:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: mbsy
     limits:
-    - -50
-    - 50
-    name: mbsy
+      - -50
+      - 50
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-  - user motors
+    - user motors
   enabled: true
   readOnly: false
 pinx:
@@ -254,17 +221,15 @@ pinx:
   deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
-    delay: 1
-    labels: pinx
+    delay: 1    
     limits:
-    - -50
-    - 50
-    name: pinx
+      - -50
+      - 50
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-  - user motors
+    - user motors
   enabled: true
   readOnly: false
 piny:
@@ -272,17 +237,15 @@ piny:
   deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
-    delay: 1
-    labels: piny
+    delay: 1    
     limits:
-    - -50
-    - 50
-    name: piny
+      - -50
+      - 50
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-  - user motors
+    - user motors
   enabled: true
   readOnly: false
 pinz:
@@ -290,17 +253,15 @@ pinz:
   deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
-    delay: 1
-    labels: pinz
+    delay: 1    
     limits:
-    - -50
-    - 50
-    name: pinz
+      - -50
+      - 50
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-  - user motors
+    - user motors
   enabled: true
   readOnly: false
 samx:
@@ -308,17 +269,15 @@ samx:
   deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
-    delay: 1
-    labels: samx
+    delay: 1    
     limits:
-    - -50
-    - 50
-    name: samx
+      - -50
+      - 50
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-  - user motors
+    - user motors
   enabled: true
   readOnly: false
 samy:
@@ -326,17 +285,15 @@ samy:
   deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
-    delay: 1
-    labels: samy
+    delay: 1    
     limits:
-    - -50
-    - 50
-    name: samy
+      - -50
+      - 50
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-  - user motors
+    - user motors
   enabled: true
   readOnly: false
 samz:
@@ -344,24 +301,19 @@ samz:
   deviceType: positioner
   deviceClass: SynAxisOPAAS
   deviceConfig:
-    delay: 1
-    labels: samz
+    delay: 1    
     limits:
-    - -50
-    - 50
-    name: samz
+      - -50
+      - 50
     speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-  - user motors
+    - user motors
   enabled: true
   readOnly: false
 
-
 ################### User motors end here ###################
-
-
 
 ############################################################
 #################### Beamline monitors #####################
@@ -372,11 +324,9 @@ bpm3a:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm3a
-    name: bpm3a
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm3b:
@@ -384,11 +334,9 @@ bpm3b:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm3b
-    name: bpm3b
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm3c:
@@ -396,11 +344,9 @@ bpm3c:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm3c
-    name: bpm3c
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm3d:
@@ -408,11 +354,9 @@ bpm3d:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm3d
-    name: bpm3d
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm3i:
@@ -420,11 +364,9 @@ bpm3i:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm3i
-    name: bpm3i
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm3x:
@@ -432,11 +374,9 @@ bpm3x:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm3x
-    name: bpm3x
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm3y:
@@ -444,11 +384,9 @@ bpm3y:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm3y
-    name: bpm3y
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm3z:
@@ -456,11 +394,9 @@ bpm3z:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm3z
-    name: bpm3z
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm4a:
@@ -468,11 +404,9 @@ bpm4a:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm4a
-    name: bpm4a
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm4b:
@@ -480,11 +414,9 @@ bpm4b:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm4b
-    name: bpm4b
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm4c:
@@ -492,11 +424,9 @@ bpm4c:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm4c
-    name: bpm4c
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm4d:
@@ -504,11 +434,9 @@ bpm4d:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm4d
-    name: bpm4d
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm4i:
@@ -516,11 +444,9 @@ bpm4i:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm4i
-    name: bpm4i
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm4s:
@@ -528,11 +454,9 @@ bpm4s:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm4s
-    name: bpm4s
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm4x:
@@ -540,11 +464,9 @@ bpm4x:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm4x
-    name: bpm4x
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm4xf:
@@ -552,11 +474,9 @@ bpm4xf:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm4xf
-    name: bpm4xf
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm4xm:
@@ -564,11 +484,9 @@ bpm4xm:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm4xm
-    name: bpm4xm
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm4y:
@@ -576,11 +494,9 @@ bpm4y:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm4y
-    name: bpm4y
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm4yf:
@@ -588,11 +504,9 @@ bpm4yf:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm4yf
-    name: bpm4yf
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm4ym:
@@ -600,11 +514,9 @@ bpm4ym:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm4ym
-    name: bpm4ym
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm4z:
@@ -612,11 +524,9 @@ bpm4z:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm4z
-    name: bpm4z
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm5a:
@@ -624,11 +534,9 @@ bpm5a:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm5a
-    name: bpm5a
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm5b:
@@ -636,11 +544,9 @@ bpm5b:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm5b
-    name: bpm5b
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm5c:
@@ -648,11 +554,9 @@ bpm5c:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm5c
-    name: bpm5c
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm5d:
@@ -660,11 +564,9 @@ bpm5d:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm5d
-    name: bpm5d
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm5i:
@@ -672,11 +574,9 @@ bpm5i:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm5i
-    name: bpm5i
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm5x:
@@ -684,11 +584,9 @@ bpm5x:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm5x
-    name: bpm5x
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm5y:
@@ -696,11 +594,9 @@ bpm5y:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm5y
-    name: bpm5y
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm5z:
@@ -708,11 +604,9 @@ bpm5z:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm5z
-    name: bpm5z
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm6a:
@@ -720,11 +614,9 @@ bpm6a:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm6a
-    name: bpm6a
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm6b:
@@ -732,11 +624,9 @@ bpm6b:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm6b
-    name: bpm6b
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm6c:
@@ -744,11 +634,9 @@ bpm6c:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm6c
-    name: bpm6c
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm6d:
@@ -756,11 +644,9 @@ bpm6d:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm6d
-    name: bpm6d
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm6i:
@@ -768,11 +654,9 @@ bpm6i:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm6i
-    name: bpm6i
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm6x:
@@ -780,11 +664,9 @@ bpm6x:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm6x
-    name: bpm6x
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm6y:
@@ -792,11 +674,9 @@ bpm6y:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm6y
-    name: bpm6y
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm6z:
@@ -804,11 +684,9 @@ bpm6z:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: bpm6z
-    name: bpm6z
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 curr:
@@ -816,11 +694,9 @@ curr:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: curr
-    name: curr
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 diode:
@@ -828,11 +704,9 @@ diode:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: diode
-    name: diode
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 ebpmdx:
@@ -840,11 +714,9 @@ ebpmdx:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: ebpmdx
-    name: ebpmdx
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 ebpmdy:
@@ -852,11 +724,9 @@ ebpmdy:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: ebpmdy
-    name: ebpmdy
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 ebpmux:
@@ -864,11 +734,9 @@ ebpmux:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: ebpmux
-    name: ebpmux
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 ebpmuy:
@@ -876,11 +744,9 @@ ebpmuy:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: ebpmuy
-    name: ebpmuy
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 ftp:
@@ -888,11 +754,9 @@ ftp:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: ftp
-    name: ftp
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 temp:
@@ -900,11 +764,9 @@ temp:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: temp
-    name: temp
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 transd:
@@ -912,18 +774,13 @@ transd:
   deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
-    labels: transd
-    name: transd
     tolerance: 0.5
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 
-
 ################ Beamline monitors end here ################
-
-
 
 ############################################################
 ##################### Beamline motors ######################
@@ -935,12 +792,10 @@ aptrx:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: aptrx
-    name: aptrx
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 aptry:
@@ -949,12 +804,10 @@ aptry:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: aptry
-    name: aptry
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bim2x:
@@ -963,12 +816,10 @@ bim2x:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: bim2x
-    name: bim2x
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bim2y:
@@ -977,12 +828,10 @@ bim2y:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: bim2y
-    name: bim2y
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bm1trx:
@@ -991,12 +840,10 @@ bm1trx:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: bm1trx
-    name: bm1trx
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bm1try:
@@ -1005,12 +852,10 @@ bm1try:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: bm1try
-    name: bm1try
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bm2trx:
@@ -1019,12 +864,10 @@ bm2trx:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: bm2trx
-    name: bm2trx
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bm2try:
@@ -1033,12 +876,10 @@ bm2try:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: bm2try
-    name: bm2try
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bm3trx:
@@ -1047,12 +888,10 @@ bm3trx:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: bm3trx
-    name: bm3trx
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bm3try:
@@ -1061,12 +900,10 @@ bm3try:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: bm3try
-    name: bm3try
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bm4trx:
@@ -1075,12 +912,10 @@ bm4trx:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: bm4trx
-    name: bm4trx
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bm4try:
@@ -1089,12 +924,10 @@ bm4try:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: bm4try
-    name: bm4try
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bm5trx:
@@ -1103,12 +936,10 @@ bm5trx:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: bm5trx
-    name: bm5trx
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bm5try:
@@ -1117,12 +948,10 @@ bm5try:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: bm5try
-    name: bm5try
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bm6trx:
@@ -1131,12 +960,10 @@ bm6trx:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: bm6trx
-    name: bm6trx
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bm6try:
@@ -1145,12 +972,10 @@ bm6try:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: bm6try
-    name: bm6try
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm4r:
@@ -1159,12 +984,10 @@ bpm4r:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: bpm4r
-    name: bpm4r
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bpm5r:
@@ -1173,12 +996,10 @@ bpm5r:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: bpm5r
-    name: bpm5r
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bs1x:
@@ -1187,12 +1008,10 @@ bs1x:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: bs1x
-    name: bs1x
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bs1y:
@@ -1201,12 +1020,10 @@ bs1y:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: bs1y
-    name: bs1y
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bs2x:
@@ -1215,12 +1032,10 @@ bs2x:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: bs2x
-    name: bs2x
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 bs2y:
@@ -1229,12 +1044,10 @@ bs2y:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: bs2y
-    name: bs2y
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 burstn:
@@ -1243,12 +1056,10 @@ burstn:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: burstn
-    name: burstn
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 burstr:
@@ -1257,12 +1068,10 @@ burstr:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: burstr
-    name: burstr
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 ddg1a:
@@ -1271,12 +1080,10 @@ ddg1a:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: ddg1a
-    name: ddg1a
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 ddg1b:
@@ -1285,12 +1092,10 @@ ddg1b:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: ddg1b
-    name: ddg1b
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 ddg1c:
@@ -1299,12 +1104,10 @@ ddg1c:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: ddg1c
-    name: ddg1c
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 ddg1d:
@@ -1313,12 +1116,10 @@ ddg1d:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: ddg1d
-    name: ddg1d
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 ddg1e:
@@ -1327,12 +1128,10 @@ ddg1e:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: ddg1e
-    name: ddg1e
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 ddg1f:
@@ -1341,12 +1140,10 @@ ddg1f:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: ddg1f
-    name: ddg1f
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 ddg1g:
@@ -1355,12 +1152,10 @@ ddg1g:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: ddg1g
-    name: ddg1g
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 ddg1h:
@@ -1369,12 +1164,10 @@ ddg1h:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: ddg1h
-    name: ddg1h
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 dettrx:
@@ -1383,12 +1176,10 @@ dettrx:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: dettrx
-    name: dettrx
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 di2trx:
@@ -1397,12 +1188,10 @@ di2trx:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: di2trx
-    name: di2trx
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 di2try:
@@ -1411,12 +1200,10 @@ di2try:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: di2try
-    name: di2try
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 dtpush:
@@ -1425,12 +1212,10 @@ dtpush:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: dtpush
-    name: dtpush
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 dtth:
@@ -1439,12 +1224,10 @@ dtth:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: dtth
-    name: dtth
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 dttrx:
@@ -1453,12 +1236,10 @@ dttrx:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: dttrx
-    name: dttrx
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 dttry:
@@ -1467,12 +1248,10 @@ dttry:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: dttry
-    name: dttry
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 dttrz:
@@ -1481,12 +1260,10 @@ dttrz:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: dttrz
-    name: dttrz
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 ebcsx:
@@ -1495,12 +1272,10 @@ ebcsx:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: ebcsx
-    name: ebcsx
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 ebcsy:
@@ -1509,12 +1284,10 @@ ebcsy:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: ebcsy
-    name: ebcsy
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 ebfi1:
@@ -1523,12 +1296,10 @@ ebfi1:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: ebfi1
-    name: ebfi1
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 ebfi2:
@@ -1537,12 +1308,10 @@ ebfi2:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: ebfi2
-    name: ebfi2
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 ebfi3:
@@ -1551,12 +1320,10 @@ ebfi3:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: ebfi3
-    name: ebfi3
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 ebfi4:
@@ -1565,12 +1332,10 @@ ebfi4:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: ebfi4
-    name: ebfi4
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 ebfzpx:
@@ -1579,12 +1344,10 @@ ebfzpx:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: ebfzpx
-    name: ebfzpx
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 ebfzpy:
@@ -1593,12 +1356,10 @@ ebfzpy:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: ebfzpy
-    name: ebfzpy
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 ebtrx:
@@ -1607,12 +1368,10 @@ ebtrx:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: ebtrx
-    name: ebtrx
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 ebtry:
@@ -1621,12 +1380,10 @@ ebtry:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: ebtry
-    name: ebtry
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 ebtrz:
@@ -1635,12 +1392,10 @@ ebtrz:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: ebtrz
-    name: ebtrz
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 fi1try:
@@ -1649,12 +1404,10 @@ fi1try:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: fi1try
-    name: fi1try
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 fi2try:
@@ -1663,12 +1416,10 @@ fi2try:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: fi2try
-    name: fi2try
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 fi3try:
@@ -1677,12 +1428,10 @@ fi3try:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: fi3try
-    name: fi3try
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 fsh1x:
@@ -1691,12 +1440,10 @@ fsh1x:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: fsh1x
-    name: fsh1x
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 fsh2x:
@@ -1705,12 +1452,10 @@ fsh2x:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: fsh2x
-    name: fsh2x
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 ftrans:
@@ -1719,12 +1464,10 @@ ftrans:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: ftrans
-    name: ftrans
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 fttrx1:
@@ -1733,12 +1476,10 @@ fttrx1:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: fttrx1
-    name: fttrx1
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 fttrx2:
@@ -1747,12 +1488,10 @@ fttrx2:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: fttrx2
-    name: fttrx2
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 fttry1:
@@ -1761,12 +1500,10 @@ fttry1:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: fttry1
-    name: fttry1
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 fttry2:
@@ -1775,12 +1512,10 @@ fttry2:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: fttry2
-    name: fttry2
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 fttrz:
@@ -1789,12 +1524,10 @@ fttrz:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: fttrz
-    name: fttrz
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 idgap:
@@ -1803,12 +1536,10 @@ idgap:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: idgap
-    name: idgap
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 mibd:
@@ -1817,12 +1548,10 @@ mibd:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: mibd
-    name: mibd
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 mibd1:
@@ -1831,12 +1560,10 @@ mibd1:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: mibd1
-    name: mibd1
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 mibd2:
@@ -1845,12 +1572,10 @@ mibd2:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: mibd2
-    name: mibd2
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 miroll:
@@ -1859,12 +1584,10 @@ miroll:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: miroll
-    name: miroll
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 mith:
@@ -1873,12 +1596,10 @@ mith:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: mith
-    name: mith
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 mitrx:
@@ -1887,12 +1608,10 @@ mitrx:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: mitrx
-    name: mitrx
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 mitry:
@@ -1901,12 +1620,10 @@ mitry:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: mitry
-    name: mitry
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 mitry1:
@@ -1915,12 +1632,10 @@ mitry1:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: mitry1
-    name: mitry1
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 mitry2:
@@ -1929,12 +1644,10 @@ mitry2:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: mitry2
-    name: mitry2
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 mitry3:
@@ -1943,12 +1656,10 @@ mitry3:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: mitry3
-    name: mitry3
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 mobd:
@@ -1957,12 +1668,10 @@ mobd:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: mobd
-    name: mobd
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 mobdai:
@@ -1971,12 +1680,10 @@ mobdai:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: mobdai
-    name: mobdai
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 mobdbo:
@@ -1985,12 +1692,10 @@ mobdbo:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: mobdbo
-    name: mobdbo
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 mobdco:
@@ -1999,12 +1704,10 @@ mobdco:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: mobdco
-    name: mobdco
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 mobddi:
@@ -2013,12 +1716,10 @@ mobddi:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: mobddi
-    name: mobddi
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 mokev:
@@ -2027,12 +1728,10 @@ mokev:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: mokev
-    name: mokev
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 mopush1:
@@ -2041,12 +1740,10 @@ mopush1:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: mopush1
-    name: mopush1
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 mopush2:
@@ -2055,12 +1752,10 @@ mopush2:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: mopush2
-    name: mopush2
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 moroll1:
@@ -2069,12 +1764,10 @@ moroll1:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: moroll1
-    name: moroll1
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 moroll2:
@@ -2083,12 +1776,10 @@ moroll2:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: moroll2
-    name: moroll2
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 moth1:
@@ -2097,12 +1788,10 @@ moth1:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: moth1
-    name: moth1
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 moth1e:
@@ -2111,12 +1800,10 @@ moth1e:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: moth1e
-    name: moth1e
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 moth2:
@@ -2125,12 +1812,10 @@ moth2:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: moth2
-    name: moth2
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 moth2e:
@@ -2139,12 +1824,10 @@ moth2e:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: moth2e
-    name: moth2e
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 motrx2:
@@ -2153,12 +1836,10 @@ motrx2:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: motrx2
-    name: motrx2
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 motry:
@@ -2167,12 +1848,10 @@ motry:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: motry
-    name: motry
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 motry2:
@@ -2181,12 +1860,10 @@ motry2:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: motry2
-    name: motry2
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 motrz1:
@@ -2195,12 +1872,10 @@ motrz1:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: motrz1
-    name: motrz1
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 motrz1e:
@@ -2209,12 +1884,10 @@ motrz1e:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: motrz1e
-    name: motrz1e
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 moyaw2:
@@ -2223,12 +1896,10 @@ moyaw2:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: moyaw2
-    name: moyaw2
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl0ch:
@@ -2237,12 +1908,10 @@ sl0ch:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl0ch
-    name: sl0ch
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl0trxi:
@@ -2251,12 +1920,10 @@ sl0trxi:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl0trxi
-    name: sl0trxi
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl0trxo:
@@ -2265,12 +1932,10 @@ sl0trxo:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl0trxo
-    name: sl0trxo
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl0wh:
@@ -2279,12 +1944,10 @@ sl0wh:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl0wh
-    name: sl0wh
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl1ch:
@@ -2293,12 +1956,10 @@ sl1ch:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl1ch
-    name: sl1ch
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl1cv:
@@ -2307,12 +1968,10 @@ sl1cv:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl1cv
-    name: sl1cv
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl1trxi:
@@ -2321,12 +1980,10 @@ sl1trxi:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl1trxi
-    name: sl1trxi
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl1trxo:
@@ -2335,12 +1992,10 @@ sl1trxo:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl1trxo
-    name: sl1trxo
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl1tryb:
@@ -2349,12 +2004,10 @@ sl1tryb:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl1tryb
-    name: sl1tryb
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl1tryt:
@@ -2363,12 +2016,10 @@ sl1tryt:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl1tryt
-    name: sl1tryt
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl1wh:
@@ -2377,12 +2028,10 @@ sl1wh:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl1wh
-    name: sl1wh
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl1wv:
@@ -2391,12 +2040,10 @@ sl1wv:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl1wv
-    name: sl1wv
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl2ch:
@@ -2405,12 +2052,10 @@ sl2ch:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl2ch
-    name: sl2ch
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl2cv:
@@ -2419,12 +2064,10 @@ sl2cv:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl2cv
-    name: sl2cv
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl2trxi:
@@ -2433,12 +2076,10 @@ sl2trxi:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl2trxi
-    name: sl2trxi
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl2trxo:
@@ -2447,12 +2088,10 @@ sl2trxo:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl2trxo
-    name: sl2trxo
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl2tryb:
@@ -2461,12 +2100,10 @@ sl2tryb:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl2tryb
-    name: sl2tryb
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl2tryt:
@@ -2475,12 +2112,10 @@ sl2tryt:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl2tryt
-    name: sl2tryt
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl2wh:
@@ -2489,12 +2124,10 @@ sl2wh:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl2wh
-    name: sl2wh
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl2wv:
@@ -2503,12 +2136,10 @@ sl2wv:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl2wv
-    name: sl2wv
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl3ch:
@@ -2517,12 +2148,10 @@ sl3ch:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl3ch
-    name: sl3ch
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl3cv:
@@ -2531,12 +2160,10 @@ sl3cv:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl3cv
-    name: sl3cv
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl3trxi:
@@ -2545,12 +2172,10 @@ sl3trxi:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl3trxi
-    name: sl3trxi
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl3trxo:
@@ -2559,12 +2184,10 @@ sl3trxo:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl3trxo
-    name: sl3trxo
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl3tryb:
@@ -2573,12 +2196,10 @@ sl3tryb:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl3tryb
-    name: sl3tryb
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl3tryt:
@@ -2587,12 +2208,10 @@ sl3tryt:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl3tryt
-    name: sl3tryt
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl3wh:
@@ -2601,12 +2220,10 @@ sl3wh:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl3wh
-    name: sl3wh
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl3wv:
@@ -2615,12 +2232,10 @@ sl3wv:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl3wv
-    name: sl3wv
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl4ch:
@@ -2629,12 +2244,10 @@ sl4ch:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl4ch
-    name: sl4ch
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl4cv:
@@ -2643,12 +2256,10 @@ sl4cv:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl4cv
-    name: sl4cv
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl4trxi:
@@ -2657,12 +2268,10 @@ sl4trxi:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl4trxi
-    name: sl4trxi
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl4trxo:
@@ -2671,12 +2280,10 @@ sl4trxo:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl4trxo
-    name: sl4trxo
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl4tryb:
@@ -2685,12 +2292,10 @@ sl4tryb:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl4tryb
-    name: sl4tryb
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl4tryt:
@@ -2699,12 +2304,10 @@ sl4tryt:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl4tryt
-    name: sl4tryt
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl4wh:
@@ -2713,12 +2316,10 @@ sl4wh:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl4wh
-    name: sl4wh
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl4wv:
@@ -2727,12 +2328,10 @@ sl4wv:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl4wv
-    name: sl4wv
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl5ch:
@@ -2741,12 +2340,10 @@ sl5ch:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl5ch
-    name: sl5ch
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl5cv:
@@ -2755,12 +2352,10 @@ sl5cv:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl5cv
-    name: sl5cv
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl5trxi:
@@ -2769,12 +2364,10 @@ sl5trxi:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl5trxi
-    name: sl5trxi
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl5trxo:
@@ -2783,12 +2376,10 @@ sl5trxo:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl5trxo
-    name: sl5trxo
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl5tryb:
@@ -2797,12 +2388,10 @@ sl5tryb:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl5tryb
-    name: sl5tryb
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl5tryt:
@@ -2811,12 +2400,10 @@ sl5tryt:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl5tryt
-    name: sl5tryt
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl5wh:
@@ -2825,12 +2412,10 @@ sl5wh:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl5wh
-    name: sl5wh
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sl5wv:
@@ -2839,12 +2424,10 @@ sl5wv:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sl5wv
-    name: sl5wv
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 strox:
@@ -2853,12 +2436,10 @@ strox:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: strox
-    name: strox
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 stroy:
@@ -2867,12 +2448,10 @@ stroy:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: stroy
-    name: stroy
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 stroz:
@@ -2881,12 +2460,10 @@ stroz:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: stroz
-    name: stroz
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sttrx:
@@ -2895,12 +2472,10 @@ sttrx:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sttrx
-    name: sttrx
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 sttry:
@@ -2909,19 +2484,14 @@ sttry:
   deviceClass: SynAxisOPAAS
   deviceConfig:
     delay: 1
-    labels: sttry
-    name: sttry
     speed: 100
     update_frequency: 400
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
 
-
 ################# Beamline motors end here #################
-
-
 
 ############################################################
 #################### Read-only signals #####################
@@ -2932,16 +2502,11 @@ ring_current_sim:
   deviceType: monitor
   deviceClass: SynSignalRO
   deviceConfig:
-    labels: ring_current_sim
-    name: ring_current_sim
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
   readOnly: false
-
-
 ################ Read-only signals end here ################
-
 
 
 ############################################################
