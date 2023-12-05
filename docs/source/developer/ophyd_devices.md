@@ -1,5 +1,5 @@
 (developer.ophyd_device)=
-## Ophyd devices
+# Ophyd devices
 As Ophyd provides a uniform interface to different hardware components, only a few commands are needed to control the hardware. The following section explains the available commands that are used by BEC:
 
 * **stage** \
