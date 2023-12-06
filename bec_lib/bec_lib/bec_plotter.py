@@ -328,23 +328,6 @@ class BECPlotter:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
-        # from bec_widgets.widgets.monitor import BECMonitor
-
-        # self._process = multiprocessing.Process(
-        #     target=self._plot, args=(BECMonitor, self._plot_id, self._config)
-        # )
-        # self._process.start()
-
-    # @staticmethod
-    # def _plot(plot_cls, plot_id, config):
-    #     from bec_widgets.bec_dispatcher import bec_dispatcher
-
-    #     client = bec_dispatcher.client
-    #     client.start()
-    #     app = QApplication(sys.argv)
-    #     monitor = plot_cls(config=config, client=client)
-    #     monitor.show()
-    #     sys.exit(app.exec_())
 
     def print_log(self) -> None:
         """
@@ -353,15 +336,15 @@ class BECPlotter:
         if self._process is None:
             return
         stderr_output = []
-        while self._process.poll() is None:
+        while self._process.poll() is not None:
             readylist, _, _ = select.select([self._process.stderr], [], [], 0.1)
             if not readylist:
-                return
+                break
             line = self._process.stderr.readline()
             if not line:
                 break
             stderr_output.append(line.decode("utf-8"))
-        print(stderr_output)
+        print("".join(stderr_output))
 
     def __del__(self) -> None:
         self.close()
