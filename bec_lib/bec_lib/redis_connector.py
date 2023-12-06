@@ -37,8 +37,16 @@ def catch_connection_error(func):
 
 
 class RedisConnector(ConnectorBase):
-    def __init__(self, bootstrap: list, redis_cls=None):
-        super().__init__(bootstrap)
+    def __init__(self, bootstrap=None, redis_cls=None):
+        super().__init__("")
+        self.r = None
+        self._notifications_producer = None
+        self._initialized = False
+
+        if bootstrap is not None:
+            self.initialize(bootstrap, redis_cls=redis_cls)
+
+    def initialize(self, bootstrap: list, redis_cls=None):
         host, port = (
             bootstrap[0].split(":") if isinstance(bootstrap, list) else bootstrap.split(":")
         )
@@ -49,8 +57,12 @@ class RedisConnector(ConnectorBase):
             self.r = redis_cls(host=host, port=port)
 
         self._notifications_producer = RedisProducer(self.r)
+        self._initialized = True
 
     def producer(self, **kwargs):
+        if not self._initialized:
+            raise ValueError("RedisConnector is not initialized.")
+
         return RedisProducer(self.r)
 
     # pylint: disable=too-many-arguments
@@ -64,6 +76,9 @@ class RedisConnector(ConnectorBase):
         name=None,
         **kwargs,
     ):
+        if not self._initialized:
+            raise ValueError("RedisConnector is not initialized.")
+
         if cb is None:
             raise ValueError("The callback function must be specified.")
 
@@ -111,6 +126,9 @@ class RedisConnector(ConnectorBase):
             from_start (bool): read from start. Defaults to False.
             newest_only (bool): read only the newest message. Defaults to False.
         """
+        if not self._initialized:
+            raise ValueError("RedisConnector is not initialized.")
+
         if cb is None:
             raise ValueError("The callback function must be specified.")
 
@@ -135,6 +153,9 @@ class RedisConnector(ConnectorBase):
     @catch_connection_error
     def log_warning(self, msg):
         """send a warning"""
+        if not self._initialized:
+            raise ValueError("RedisConnector is not initialized.")
+
         self._notifications_producer.send(
             MessageEndpoints.log(), LogMessage(log_type="warning", content=msg).dumps()
         )
@@ -142,6 +163,9 @@ class RedisConnector(ConnectorBase):
     @catch_connection_error
     def log_message(self, msg):
         """send a log message"""
+        if not self._initialized:
+            raise ValueError("RedisConnector is not initialized.")
+
         self._notifications_producer.send(
             MessageEndpoints.log(), LogMessage(log_type="log", content=msg).dumps()
         )
@@ -149,6 +173,9 @@ class RedisConnector(ConnectorBase):
     @catch_connection_error
     def log_error(self, msg):
         """send an error as log"""
+        if not self._initialized:
+            raise ValueError("RedisConnector is not initialized.")
+
         self._notifications_producer.send(
             MessageEndpoints.log(), LogMessage(log_type="error", content=msg).dumps()
         )
@@ -163,6 +190,9 @@ class RedisConnector(ConnectorBase):
         metadata: dict,
     ):
         """raise an alarm"""
+        if not self._initialized:
+            raise ValueError("RedisConnector is not initialized.")
+
         self._notifications_producer.set_and_publish(
             MessageEndpoints.alarm(),
             AlarmMessage(
@@ -173,6 +203,9 @@ class RedisConnector(ConnectorBase):
                 metadata=metadata,
             ).dumps(),
         )
+
+
+redis_connector = RedisConnector()
 
 
 class RedisProducer(ProducerConnector):

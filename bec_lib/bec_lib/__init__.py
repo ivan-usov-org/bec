@@ -14,6 +14,6 @@ from bec_lib.devicemanager import (
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
 from bec_lib.messages import BECStatus
-from bec_lib.redis_connector import RedisConnector
+from bec_lib.redis_connector import RedisConnector, redis_connector
 from bec_lib.service_config import ServiceConfig
 from bec_lib.utils import threadlocked

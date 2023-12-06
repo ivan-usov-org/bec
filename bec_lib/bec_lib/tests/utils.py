@@ -586,6 +586,9 @@ class ConnectorMock(ConnectorBase):
         super().__init__(bootstrap_server)
         self.store_data = store_data
 
+    def initialize(self, config: ServiceConfig):
+        pass
+
     def consumer(self, *args, **kwargs) -> ConsumerMock:
         return ConsumerMock()
 
