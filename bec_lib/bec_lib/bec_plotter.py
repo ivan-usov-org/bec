@@ -335,6 +335,9 @@ class BECPlotter:
         """
         if self._process is None:
             return
+        print(self._get_stderr_output())
+
+    def _get_stderr_output(self) -> str:
         stderr_output = []
         while self._process.poll() is not None:
             readylist, _, _ = select.select([self._process.stderr], [], [], 0.1)
@@ -344,7 +347,7 @@ class BECPlotter:
             if not line:
                 break
             stderr_output.append(line.decode("utf-8"))
-        print("".join(stderr_output))
+        return "".join(stderr_output)
 
     def __del__(self) -> None:
         self.close()

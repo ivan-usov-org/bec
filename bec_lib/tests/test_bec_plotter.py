@@ -216,3 +216,31 @@ def test_bec_plotter_append_xydata(plotter):
         assert plotter._data_changed is True
         assert plotter._ydata == {0: {"action": "append", "data": [1, 2, 3]}}
         assert plotter._data_changed is True
+
+
+def test_bec_plotter_print_log(plotter):
+    with mock.patch.object(plotter, "_get_stderr_output") as get_stderr_output:
+        plotter._process = mock.MagicMock()
+        plotter.print_log()
+        get_stderr_output.assert_called_once()
+
+
+def test_bec_plotter_print_log_not_called(plotter):
+    with mock.patch.object(plotter, "_get_stderr_output") as get_stderr_output:
+        plotter.print_log()
+        get_stderr_output.assert_not_called()
+
+
+def test_bec_plotter_get_stderr_output(plotter):
+    plotter._process = mock.MagicMock()
+    plotter._process.poll.return_value = [1, None]
+    with mock.patch("bec_lib.bec_plotter.select") as select:
+        select.select.side_effect = [
+            (mock.MagicMock(), None, None),
+            (mock.MagicMock(), None, None),
+            (None, None, None),
+        ]
+        plotter._process.stderr.readline.side_effect = [b"test", b"2", None]
+        out = plotter._get_stderr_output()
+        plotter._process.stderr.readline.call_count == 2
+    assert out == "test2"
