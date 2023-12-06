@@ -2,7 +2,6 @@ import inspect
 import time
 import traceback
 from functools import reduce
-from bec_lib import messages
 
 import ophyd
 import ophyd.sim as ops
@@ -16,8 +15,9 @@ from bec_lib import (
     DeviceManagerBase,
     MessageEndpoints,
     bec_logger,
+    messages,
 )
-from bec_lib.connector import ConnectorBase
+from bec_lib import RedisConnector
 from device_server.devices.config_update_handler import ConfigUpdateHandler
 from device_server.devices.device_serializer import get_device_info
 
@@ -59,7 +59,7 @@ class DSDevice(Device):
 class DeviceManagerDS(DeviceManagerBase):
     def __init__(
         self,
-        connector: ConnectorBase,
+        connector: RedisConnector,
         config_update_handler: ConfigUpdateHandler = None,
         status_cb: list = None,
     ):

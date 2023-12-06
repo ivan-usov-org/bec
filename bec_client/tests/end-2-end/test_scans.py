@@ -4,13 +4,13 @@ import time
 
 import numpy as np
 import pytest
+
+from bec_client import BECIPythonClient
+from bec_client.callbacks.utils import ScanRequestError
 from bec_lib import BECClient, MessageEndpoints, RedisConnector, ServiceConfig, bec_logger, messages
 from bec_lib.alarm_handler import AlarmBase
 from bec_lib.bec_errors import ScanAbortion, ScanInterruption
 from bec_lib.tests.utils import wait_for_empty_queue
-
-from bec_client import BECIPythonClient
-from bec_client.callbacks.utils import ScanRequestError
 
 logger = bec_logger.logger
 
@@ -27,7 +27,7 @@ CONFIG_PATH = "../ci/test_config.yaml"
 def client():
     config = ServiceConfig(CONFIG_PATH)
     bec = BECIPythonClient(forced=True)
-    bec.initialize(config, RedisConnector)
+    bec.initialize(config, RedisConnector(config.redis))
     bec.start()
     bec.queue.request_queue_reset()
     bec.queue.request_scan_continuation()

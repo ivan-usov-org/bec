@@ -19,7 +19,7 @@ from bec_lib.messages import BECStatus
 from bec_lib.service_config import ServiceConfig
 
 if TYPE_CHECKING:
-    from bec_lib.connector import ConnectorBase
+    from bec_lib import RedisConnector
 
 
 logger = bec_logger.logger
@@ -31,14 +31,13 @@ class BECService:
     def __init__(
         self,
         config: Union[str, ServiceConfig],
-        connector_cls: ConnectorBase,
+        connector: RedisConnector,
         unique_service=False,
         wait_for_server=False,
     ) -> None:
         super().__init__()
         self._import_config(config)
-        self._connector_cls = connector_cls
-        self.connector = connector_cls(self.bootstrap_server)
+        self.connector = connector
         self._unique_service = unique_service
         self.wait_for_server = wait_for_server
         self.producer = self.connector.producer()
@@ -91,9 +90,7 @@ class BECService:
         return True
 
     def _initialize_logger(self) -> None:
-        bec_logger.configure(
-            self.bootstrap_server, self._connector_cls, service_name=self.__class__.__name__
-        )
+        bec_logger.configure(self.connector, service_name=self.__class__.__name__)
 
     def _update_existing_services(self):
         service_keys = self.producer.keys(MessageEndpoints.service_status("*"))

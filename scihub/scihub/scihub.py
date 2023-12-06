@@ -1,12 +1,12 @@
 from bec_lib import BECService, ServiceConfig
-from bec_lib.connector import ConnectorBase
+from bec_lib import RedisConnector
 from scihub.scibec import SciBecConnector
 from scihub.scilog import SciLogConnector
 
 
 class SciHub(BECService):
-    def __init__(self, config: ServiceConfig, connector_cls: ConnectorBase) -> None:
-        super().__init__(config, connector_cls, unique_service=True)
+    def __init__(self, config: ServiceConfig, connector: RedisConnector) -> None:
+        super().__init__(config, connector, unique_service=True)
         self.config = config
         self.scibec_connector = None
         self.scilog_connector = None

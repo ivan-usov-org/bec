@@ -22,10 +22,11 @@ def main():
     config_path = clargs.config
 
     config = ServiceConfig(config_path)
+    connector = RedisConnector(config.redis)
 
     bec_server = scan_server.scan_server.ScanServer(
         config=config,
-        connector_cls=RedisConnector,
+        connector=connector,
     )
     try:
         event = threading.Event()

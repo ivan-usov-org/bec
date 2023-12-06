@@ -20,7 +20,7 @@ def SciHubMock():
         scibec={"host": "http://wrong_localhost", "port": 3030, "beamline": "TestBeamline"},
         config={"file_writer": {"plugin": "default_NeXus_format", "base_path": "./"}},
     )
-    scihub_mocked = SciHubMocked(config, ConnectorMock)
+    scihub_mocked = SciHubMocked(config, ConnectorMock(config.redis))
     yield scihub_mocked
     scihub_mocked.shutdown()
 

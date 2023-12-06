@@ -1,10 +1,8 @@
 from __future__ import annotations
-from bec_lib import messages
 
 from bec_lib import Alarms, BECService, BECStatus
 from bec_lib import DeviceManagerBase as DeviceManager
-from bec_lib import MessageEndpoints, ServiceConfig, bec_logger
-from bec_lib.connector import ConnectorBase
+from bec_lib import MessageEndpoints, RedisConnector, ServiceConfig, bec_logger, messages
 
 from .scan_assembler import ScanAssembler
 from .scan_guard import ScanGuard
@@ -22,8 +20,8 @@ class ScanServer(BECService):
     scan_assembler = None
     scan_manager = None
 
-    def __init__(self, config: ServiceConfig, connector_cls: ConnectorBase):
-        super().__init__(config, connector_cls, unique_service=True)
+    def __init__(self, config: ServiceConfig, connector: RedisConnector):
+        super().__init__(config, connector, unique_service=True)
         self.producer = self.connector.producer()
         self._start_scan_manager()
         self._start_queue_manager()

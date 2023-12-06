@@ -42,9 +42,8 @@ class WorkerMock:
 class ScanServerMock(ScanServer):
     def __init__(self, device_manager, connector) -> None:
         self.device_manager = device_manager
-        super().__init__(
-            ServiceConfig(redis={"host": "dummy", "port": 6379}), connector_cls=ConnectorMock
-        )
+        config = ServiceConfig(redis={"host": "dummy", "port": 6379})
+        super().__init__(config, ConnectorMock(config.redis))
         self.scan_worker = WorkerMock()
 
     def _start_metrics_emitter(self):

@@ -7,8 +7,7 @@ from typing import Callable
 
 from bec_lib import BECService, BECStatus
 from bec_lib import DeviceManagerBase as DeviceManager
-from bec_lib import MessageEndpoints, bec_logger, messages
-from bec_lib.connector import ConnectorBase
+from bec_lib import MessageEndpoints, RedisConnector, bec_logger, messages
 
 from .bec_emitter import BECEmitter
 from .bluesky_emitter import BlueskyEmitter
@@ -17,8 +16,8 @@ logger = bec_logger.logger
 
 
 class ScanBundler(BECService):
-    def __init__(self, config, connector_cls: ConnectorBase) -> None:
-        super().__init__(config, connector_cls, unique_service=True)
+    def __init__(self, config, connector: RedisConnector) -> None:
+        super().__init__(config, connector, unique_service=True)
 
         self.device_manager = None
         self._start_device_manager()

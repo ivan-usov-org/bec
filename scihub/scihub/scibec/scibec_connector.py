@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from bec_lib import messages
 
 import msgpack
 from requests import ConnectionError
 
-from bec_lib import MessageEndpoints, ServiceConfig, bec_logger
-from bec_lib.connector import ConnectorBase
+from bec_lib import MessageEndpoints, RedisConnector, ServiceConfig, bec_logger, messages
 
 from .config_handler import ConfigHandler
 from .scibec import SciBec, SciBecError
@@ -20,7 +18,7 @@ logger = bec_logger.logger
 
 
 class SciBecConnector:
-    def __init__(self, scihub: SciHub, connector: ConnectorBase) -> None:
+    def __init__(self, scihub: SciHub, connector: RedisConnector) -> None:
         self.scihub = scihub
         self.connector = connector
         self.producer = connector.producer()

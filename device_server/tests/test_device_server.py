@@ -3,14 +3,14 @@ from unittest import mock
 from unittest.mock import ANY
 
 import pytest
-from bec_lib import Alarms, MessageEndpoints, ServiceConfig, messages
-from bec_lib.messages import BECStatus
-from bec_lib.redis_connector import MessageObject
-from bec_lib.tests.utils import ConnectorMock, ConsumerMock
 from ophyd import Staged
 from ophyd.utils import errors as ophyd_errors
 from test_device_manager_ds import device_manager, load_device_manager
 
+from bec_lib import Alarms, MessageEndpoints, ServiceConfig, messages
+from bec_lib.messages import BECStatus
+from bec_lib.redis_connector import MessageObject
+from bec_lib.tests.utils import ConnectorMock, ConsumerMock
 from device_server import DeviceServer
 from device_server.device_server import InvalidDeviceError
 
@@ -33,9 +33,9 @@ def load_DeviceServerMock():
 
 
 class DeviceServerMock(DeviceServer):
-    def __init__(self, device_manager, connector_cls) -> None:
+    def __init__(self, device_manager, connector) -> None:
         config = ServiceConfig(redis={"host": "dummy", "port": 6379})
-        super().__init__(config, connector_cls=ConnectorMock)
+        super().__init__(config, connector=ConnectorMock(config.redis))
         self.device_manager = device_manager
 
     def _start_device_manager(self):

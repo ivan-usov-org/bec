@@ -36,8 +36,9 @@ def main():
     config_path = clargs.config
 
     config = ServiceConfig(config_path)
+    connector = RedisConnector(config.redis)
 
-    s = device_server.DeviceServer(config, RedisConnector)
+    s = device_server.DeviceServer(config, connector)
     try:
         event = threading.Event()
         s.start()

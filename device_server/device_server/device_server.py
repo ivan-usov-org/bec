@@ -6,13 +6,12 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import List
 
 import ophyd
-from bec_lib import Alarms, BECService, MessageEndpoints, bec_logger, messages
-from bec_lib.connector import ConnectorBase
-from bec_lib.devicemanager import OnFailure
-from bec_lib.messages import BECStatus
 from ophyd import Staged
 from ophyd.utils import errors as ophyd_errors
 
+from bec_lib import Alarms, BECService, MessageEndpoints, RedisConnector, bec_logger, messages
+from bec_lib.devicemanager import OnFailure
+from bec_lib.messages import BECStatus
 from device_server.devices.devicemanager import DeviceManagerDS
 from device_server.rpc_mixin import RPCMixin
 
@@ -34,8 +33,8 @@ class DeviceServer(RPCMixin, BECService):
     This class is intended to provide a thin wrapper around ophyd and the devicemanager. It acts as the entry point for other services
     """
 
-    def __init__(self, config, connector_cls: ConnectorBase) -> None:
-        super().__init__(config, connector_cls, unique_service=True)
+    def __init__(self, config, connector: RedisConnector) -> None:
+        super().__init__(config, connector, unique_service=True)
         self._tasks = []
         self.device_manager = None
         self.threads = []

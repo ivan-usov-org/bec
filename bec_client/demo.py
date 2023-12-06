@@ -1,6 +1,5 @@
-from bec_lib import RedisConnector, ServiceConfig, bec_logger
-
 from bec_client import BECIPythonClient
+from bec_lib import RedisConnector, ServiceConfig, bec_logger
 
 logger = bec_logger.logger
 bec_logger.level = bec_logger.LOGLEVEL.SUCCESS
@@ -11,7 +10,7 @@ bec_logger.level = bec_logger.LOGLEVEL.SUCCESS
 # config = ServiceConfig(CONFIG_PATH)
 
 bec = BECIPythonClient()
-# bec.initialize(config, RedisConnector)
+# bec.initialize(config, RedisConnector(config.redis))
 bec.start()
 bec.load_high_level_interface("spec_hli")
 

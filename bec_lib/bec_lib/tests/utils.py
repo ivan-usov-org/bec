@@ -455,10 +455,10 @@ class DMClientMock(DMClient):
 @pytest.fixture()
 def bec_client():
     client = ClientMock()
-    client.initialize(
-        ServiceConfig(redis={"host": "host", "port": 123}, scibec={"host": "host", "port": 123}),
-        ConnectorMock,
+    config = ServiceConfig(
+        redis={"host": "host", "port": 123}, scibec={"host": "host", "port": 123}
     )
+    client.initialize(config, ConnectorMock(config.redis))
     device_manager = DMClientMock(client)
     if "test_session" not in builtins.__dict__:
         with open(f"{dir_path}/tests/test_config.yaml", "r", encoding="utf-8") as f:

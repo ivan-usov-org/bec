@@ -6,10 +6,9 @@ import time
 import IPython
 from IPython.terminal.prompts import Prompts, Token
 
+from bec_lib import RedisConnector, ServiceConfig, bec_logger
 from bec_lib.alarm_handler import AlarmBase
 from bec_lib.client import BECClient
-from bec_lib import ServiceConfig, bec_logger
-from bec_lib.connector import ConnectorBase
 
 from .beamline_mixin import BeamlineMixin
 from .bec_magics import BECMagics
@@ -27,13 +26,10 @@ class BECIPythonClient(BECClient):
         return "BECClient\n\nTo get a list of available commands, type `bec.show_all_commands()`"
 
     def initialize(
-        self,
-        config: ServiceConfig = None,
-        connector_cls: ConnectorBase = None,
-        wait_for_server=True,
+        self, config: ServiceConfig = None, connector: RedisConnector = None, wait_for_server=True
     ):
         """initialize the BEC client"""
-        super().initialize(config, connector_cls, wait_for_server=wait_for_server)
+        super().initialize(config, connector, wait_for_server=wait_for_server)
         # pylint: disable=attribute-defined-outside-init
         self._sighandler = SigintHandler(self)
         self._beamline_mixin = BeamlineMixin()

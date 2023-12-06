@@ -37,7 +37,7 @@ class FileWriterManagerMock(FileWriterManager):
             redis={"host": "dummy", "port": 6379},
             config={"file_writer": {"plugin": "default_NeXus_format", "base_path": "./"}},
         )
-        super().__init__(config=config, connector_cls=ConnectorMock)
+        super().__init__(config=config, connector=ConnectorMock(config.redis))
 
     def _start_device_manager(self):
         pass

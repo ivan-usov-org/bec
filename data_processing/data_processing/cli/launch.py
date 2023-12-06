@@ -22,11 +22,9 @@ def main():
     config_path = clargs.config
 
     config = ServiceConfig(config_path)
+    connector = RedisConnector(config.redis)
 
-    bec_server = data_processing.dap_server.DAPServer(
-        config=config,
-        connector_cls=RedisConnector,
-    )
+    bec_server = data_processing.dap_server.DAPServer(config, connector)
     try:
         event = threading.Event()
         # pylint: disable=E1102

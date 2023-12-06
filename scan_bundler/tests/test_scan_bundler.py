@@ -7,9 +7,8 @@ import pytest
 import yaml
 
 import bec_lib
-from bec_lib import messages
 from bec_lib import DeviceManagerBase as DeviceManager
-from bec_lib import MessageEndpoints, ServiceConfig
+from bec_lib import MessageEndpoints, ServiceConfig, messages
 from bec_lib.tests.utils import ConnectorMock, create_session_from_config
 from scan_bundler import ScanBundler
 from scan_bundler.emitter import EmitterBase
@@ -36,10 +35,9 @@ def load_ScanBundlerMock():
 
 
 class ScanBundlerMock(ScanBundler):
-    def __init__(self, device_manager, connector_cls) -> None:
-        super().__init__(
-            ServiceConfig(redis={"host": "dummy", "port": 6379}), connector_cls=ConnectorMock
-        )
+    def __init__(self, device_manager, connector) -> None:
+        config = ServiceConfig(redis={"host": "dummy", "port": 6379})
+        super().__init__(config, connector=ConnectorMock(config.redis))
         self.device_manager = device_manager
 
     def _start_device_manager(self):

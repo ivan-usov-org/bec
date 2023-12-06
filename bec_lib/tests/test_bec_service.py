@@ -20,7 +20,7 @@ dir_path = os.path.dirname(bec_lib.__file__)
 
 def test_bec_service_init_with_service_config():
     config = ServiceConfig(redis={"host": "localhost", "port": 6379})
-    service = BECService(config=config, connector_cls=mock.MagicMock())
+    service = BECService(config=config, connector=mock.MagicMock())
     assert service._service_config == config
     assert service.bootstrap_server == "localhost:6379"
     assert service._unique_service is False
@@ -28,13 +28,13 @@ def test_bec_service_init_with_service_config():
 
 def test_bec_service_init_raises_for_invalid_config():
     with pytest.raises(TypeError):
-        BECService(config=mock.MagicMock(), connector_cls=mock.MagicMock())
+        BECService(config=mock.MagicMock(), connector=mock.MagicMock())
 
 
 def test_bec_service_init_with_service_config_path():
     service = BECService(
         config=f"{dir_path}/tests/test_service_config.yaml",
-        connector_cls=mock.MagicMock(),
+        connector=mock.MagicMock(),
     )
     assert isinstance(service._service_config, ServiceConfig)
     assert service.bootstrap_server == "localhost:6379"
@@ -47,7 +47,7 @@ def test_init_runs_service_check():
     ) as mock_update_existing_services:
         service = BECService(
             config=f"{dir_path}/tests/test_service_config.yaml",
-            connector_cls=mock.MagicMock(),
+            connector=mock.MagicMock(),
             unique_service=True,
         )
         mock_update_existing_services.assert_called_once()
@@ -59,7 +59,7 @@ def test_run_service_check_raises_for_existing_service():
     ) as mock_update_existing_services:
         service = BECService(
             config=f"{dir_path}/tests/test_service_config.yaml",
-            connector_cls=mock.MagicMock(),
+            connector=mock.MagicMock(),
             unique_service=True,
         )
         service._services_info = {"BECService": mock.MagicMock()}
@@ -73,7 +73,7 @@ def test_run_service_check_repeats():
     ) as mock_update_existing_services:
         service = BECService(
             config=f"{dir_path}/tests/test_service_config.yaml",
-            connector_cls=mock.MagicMock(),
+            connector=mock.MagicMock(),
             unique_service=True,
         )
         service._services_info = {"BECService": mock.MagicMock()}
@@ -86,7 +86,7 @@ def test_bec_service_shutdown():
     ) as mock_update_existing_services:
         service = BECService(
             config=f"{dir_path}/tests/test_service_config.yaml",
-            connector_cls=mock.MagicMock(),
+            connector=mock.MagicMock(),
             unique_service=True,
         )
         service._service_info_event = mock.MagicMock()
@@ -107,7 +107,7 @@ def test_bec_service_service_status():
     ) as mock_update_existing_services:
         service = BECService(
             config=f"{dir_path}/tests/test_service_config.yaml",
-            connector_cls=mock.MagicMock(),
+            connector=mock.MagicMock(),
             unique_service=True,
         )
         mock_update_existing_services.reset_mock()
@@ -124,12 +124,12 @@ def test_bec_service_update_existing_services():
         messages.StatusMessage(name="service1", status=BECStatus.RUNNING, info={}, metadata={}),
         messages.StatusMessage(name="service2", status=BECStatus.IDLE, info={}, metadata={}),
     ]
-    connector_cls = mock.MagicMock()
-    connector_cls().producer().keys.return_value = service_keys
-    connector_cls().producer().get.side_effect = [msg.dumps() for msg in service_msgs]
+    connector = mock.MagicMock()
+    connector.producer().keys.return_value = service_keys
+    connector.producer().get.side_effect = [msg.dumps() for msg in service_msgs]
     service = BECService(
         config=f"{os.path.dirname(bec_lib.__file__)}/tests/test_service_config.yaml",
-        connector_cls=connector_cls,
+        connector=connector,
         unique_service=True,
     )
     assert service._services_info == {
@@ -147,12 +147,12 @@ def test_bec_service_update_existing_services_ignores_wrong_msgs():
         messages.StatusMessage(name="service1", status=BECStatus.RUNNING, info={}, metadata={}),
         None,
     ]
-    connector_cls = mock.MagicMock()
-    connector_cls().producer().keys.return_value = service_keys
-    connector_cls().producer().get.side_effect = [service_msgs[0].dumps(), None]
+    connector = mock.MagicMock()
+    connector.producer().keys.return_value = service_keys
+    connector.producer().get.side_effect = [service_msgs[0].dumps(), None]
     service = BECService(
         config=f"{os.path.dirname(bec_lib.__file__)}/tests/test_service_config.yaml",
-        connector_cls=connector_cls,
+        connector=connector,
         unique_service=True,
     )
     assert service._services_info == {"service1": service_msgs[0]}

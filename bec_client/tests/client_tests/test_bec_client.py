@@ -26,7 +26,7 @@ def test_bec_client_initialize():
     )
     with mock.patch.object(client, "_load_scans"):
         with mock.patch.object(client, "wait_for_service"):
-            client.initialize(config, RedisConnector)
+            client.initialize(config, RedisConnector(config.redis))
 
 
 def test_bec_client_start():

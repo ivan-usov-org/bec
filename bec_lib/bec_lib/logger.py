@@ -13,7 +13,7 @@ import bec_lib
 from bec_lib.endpoints import MessageEndpoints
 
 if TYPE_CHECKING:
-    from bec_lib.connector import ConnectorBase
+    from bec_lib import RedisConnector
 
 
 class LogLevel(int, enum.Enum):
@@ -34,7 +34,6 @@ class BECLogger:
     def __init__(self) -> None:
         if hasattr(self, "_configured"):
             return
-        self.bootstrap_server = None
         self.connector = None
         self.service_name = None
         self.producer = None
@@ -49,11 +48,8 @@ class BECLogger:
             cls._initialized = False
         return cls._logger
 
-    def configure(
-        self, bootstrap_server: list, connector_cls: ConnectorBase, service_name: str
-    ) -> None:
-        self.bootstrap_server = bootstrap_server
-        self.connector = connector_cls(bootstrap_server)
+    def configure(self, connector: RedisConnector, service_name: str) -> None:
+        self.connector = connector
         self.service_name = service_name
         self.producer = self.connector.producer()
         self._configured = True

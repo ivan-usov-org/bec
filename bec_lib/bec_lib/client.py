@@ -19,14 +19,13 @@ from bec_lib.devicemanager_client import DMClient
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logbook_connector import LogbookConnector
 from bec_lib.logger import bec_logger
-from bec_lib.redis_connector import RedisConnector
 from bec_lib.scan_manager import ScanManager
 from bec_lib.scans import Scans
 from bec_lib.service_config import ServiceConfig
 from bec_lib.user_scripts_mixin import UserScriptsMixin
 
 if TYPE_CHECKING:
-    from bec_lib.connector import ConnectorBase
+    from bec_lib.connector import RedisConnector
 
 logger = bec_logger.logger
 
@@ -47,7 +46,7 @@ class BECClient(BECService, UserScriptsMixin):
     def initialize(
         self,
         config: ServiceConfig = None,
-        connector_cls: ConnectorBase = None,
+        connector: RedisConnector = None,
         wait_for_server=False,
     ) -> None:
         """
@@ -55,15 +54,13 @@ class BECClient(BECService, UserScriptsMixin):
 
         Args:
             config (ServiceConfig, optional): ServiceConfig object. Defaults to None. If None, default config will be used.
-            connector_cls (ConnectorBase, optional): Connector class. Defaults to None. If None, RedisConnector will be used.
+            connector (RedisConnector, optional): Connector instance
             wait_for_server (bool, optional): Wait for BEC server to be available. Defaults to False.
         """
         if not config:
             config = ServiceConfig()
 
-        if not connector_cls:
-            connector_cls = RedisConnector
-        super().__init__(config, connector_cls, wait_for_server=wait_for_server)
+        super().__init__(config, connector, wait_for_server=wait_for_server)
         self._configure_logger()
         # pylint: disable=attribute-defined-outside-init
         self.device_manager = None
@@ -97,7 +94,7 @@ class BECClient(BECService, UserScriptsMixin):
         """start the client"""
         if not self._initialized:
             logger.warning(
-                "Client has not been initialized with 'client.initialize(config, connector_cls)'. Trying to initialize with default values."
+                "Client has not been initialized with 'client.initialize(config, connector)'. Trying to initialize with default values."
             )
             self.initialize()
 

@@ -6,12 +6,12 @@ import traceback
 import uuid
 from typing import TYPE_CHECKING
 
-import bec_lib
 import msgpack
+
+import bec_lib
 from bec_lib import Device, DeviceConfigError
 from bec_lib import DeviceManagerBase as DeviceManager
-from bec_lib import MessageEndpoints, bec_logger, messages
-from bec_lib.connector import ConnectorBase
+from bec_lib import MessageEndpoints, RedisConnector, bec_logger, messages
 
 from .scibec_validator import SciBecValidator
 
@@ -24,7 +24,7 @@ dir_path = os.path.abspath(os.path.join(os.path.dirname(bec_lib.__file__), "./co
 
 
 class ConfigHandler:
-    def __init__(self, scibec_connector: SciBecConnector, connector: ConnectorBase) -> None:
+    def __init__(self, scibec_connector: SciBecConnector, connector: RedisConnector) -> None:
         self.scibec_connector = scibec_connector
         self.device_manager = DeviceManager(connector)
         self.device_manager.initialize(scibec_connector.config.redis)

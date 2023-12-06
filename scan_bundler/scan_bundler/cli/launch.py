@@ -22,8 +22,9 @@ def main():
     config_path = clargs.config
 
     config = ServiceConfig(config_path)
+    connector = RedisConnector(config.redis)
 
-    sb = scan_bundler.ScanBundler(config, RedisConnector)
+    sb = scan_bundler.ScanBundler(config, connector)
 
     try:
         event = threading.Event()

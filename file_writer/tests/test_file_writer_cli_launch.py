@@ -6,6 +6,7 @@ from file_writer.cli.launch import main
 def test_main():
     with mock.patch("file_writer.cli.launch.argparse.ArgumentParser") as mock_parser:
         with mock.patch("file_writer.cli.launch.ServiceConfig") as mock_config:
+            mock_config.return_value.redis = "dummy:6379"
             with mock.patch("file_writer.FileWriterManager") as mock_file_writer:
                 with mock.patch("file_writer.cli.launch.threading.Event") as mock_event:
                     main()
@@ -18,6 +19,7 @@ def test_main():
 def test_main_shutdown():
     with mock.patch("file_writer.cli.launch.argparse.ArgumentParser") as mock_parser:
         with mock.patch("file_writer.cli.launch.ServiceConfig") as mock_config:
+            mock_config.return_value.redis = "dummy:6379"
             with mock.patch("file_writer.FileWriterManager") as mock_file_writer:
                 with mock.patch("file_writer.cli.launch.threading.Event") as mock_event:
                     mock_event.return_value.wait.side_effect = KeyboardInterrupt()

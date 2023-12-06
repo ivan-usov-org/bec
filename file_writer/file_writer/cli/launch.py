@@ -23,8 +23,9 @@ def main():
     config_path = clargs.config
 
     config = ServiceConfig(config_path)
+    connector = RedisConnector(config.redis)
 
-    file_writer_manager = file_writer.FileWriterManager(config, RedisConnector)
+    file_writer_manager = file_writer.FileWriterManager(config, connector)
     file_writer_manager.file_writer.configure(
         layout_file=os.path.abspath("./layout_cSAXS_NXsas.xml")
     )

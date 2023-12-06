@@ -6,6 +6,7 @@ from scan_bundler.cli.launch import main
 def test_main():
     with mock.patch("scan_bundler.cli.launch.argparse.ArgumentParser") as mock_parser:
         with mock.patch("scan_bundler.cli.launch.ServiceConfig") as mock_config:
+            mock_config.return_value.redis = "dummy:6379"
             with mock.patch("scan_bundler.ScanBundler") as mock_scan_bundler:
                 with mock.patch("scan_bundler.cli.launch.threading.Event") as mock_event:
                     main()
@@ -18,6 +19,7 @@ def test_main():
 def test_main_shutdown():
     with mock.patch("scan_bundler.cli.launch.argparse.ArgumentParser") as mock_parser:
         with mock.patch("scan_bundler.cli.launch.ServiceConfig") as mock_config:
+            mock_config.return_value.redis = "dummy:6379"
             with mock.patch("scan_bundler.ScanBundler") as mock_scan_bundler:
                 with mock.patch("scan_bundler.cli.launch.threading.Event") as mock_event:
                     mock_event.return_value.wait.side_effect = KeyboardInterrupt()

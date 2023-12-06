@@ -4,9 +4,8 @@
 import os
 import sys
 
-from bec_lib import RedisConnector, ServiceConfig, bec_logger
-
 from bec_client import BECIPythonClient
+from bec_lib import RedisConnector, ServiceConfig, bec_logger
 
 # pylint: disable=wrong-import-position
 # pylint: disable=protected-access
@@ -46,8 +45,10 @@ if __name__ == "__main__":
     if not "config" in locals():
         config = ServiceConfig()
 
+    connector = RedisConnector(config.redis)
+
     bec = BECIPythonClient()
-    bec.initialize(config, RedisConnector)
+    bec.initialize(config, connector)
     bec.load_high_level_interface("spec_hli")
     bec.start()
 

@@ -25,7 +25,7 @@ from bec_lib.messages import (
 )
 
 if TYPE_CHECKING:
-    from bec_lib.connector import ConnectorBase
+    from bec_lib import RedisConnector
     from bec_lib.redis_connector import RedisProducer
 
 logger = bec_logger.logger
@@ -592,7 +592,7 @@ class DeviceManagerBase:
     _device_cls = Device
     _status_cb = []
 
-    def __init__(self, connector: ConnectorBase, status_cb: list = None) -> None:
+    def __init__(self, connector: RedisConnector, status_cb: list = None) -> None:
         self.connector = connector
         self.config_helper = ConfigHelper(self.connector)
         self._status_cb = status_cb if isinstance(status_cb, list) else [status_cb]

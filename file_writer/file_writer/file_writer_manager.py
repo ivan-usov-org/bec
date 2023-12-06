@@ -67,15 +67,15 @@ class ScanStorage:
 
 
 class FileWriterManager(BECService):
-    def __init__(self, config: ServiceConfig, connector_cls: RedisConnector) -> None:
+    def __init__(self, config: ServiceConfig, connector: RedisConnector) -> None:
         """
         Service to write scan data to file.
 
         Args:
             config (ServiceConfig): Service config
-            connector_cls (RedisConnector): Connector class
+            connector (RedisConnector): Connector
         """
-        super().__init__(config, connector_cls, unique_service=True)
+        super().__init__(config, connector, unique_service=True)
         self._lock = threading.RLock()
         self.file_writer_config = self._service_config.service_config.get("file_writer")
         self.writer_mixin = FileWriterMixin(self.file_writer_config)

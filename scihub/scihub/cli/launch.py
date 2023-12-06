@@ -23,8 +23,9 @@ def main():
     config_path = clargs.config
 
     config = ServiceConfig(config_path)
+    connector = RedisConnector(config.redis)
 
-    sh = scihub.SciHub(config, RedisConnector)
+    sh = scihub.SciHub(config, connector)
 
     try:
         event = threading.Event()
