@@ -85,17 +85,25 @@ def test_config_handler_reload_config_with_scibec(SciHubMock):
                     update_session.assert_called_once()
 
 
-def test_config_handler_set_config(SciHubMock):
+@pytest.mark.parametrize(
+    "config, expected",
+    [
+        ({"samx": {"enabled": True}}, {"name": "samx", "enabled": True}),
+        (
+            {"samx": {"enabled": True, "deviceConfig": None}},
+            {"name": "samx", "enabled": True, "deviceConfig": {}},
+        ),
+    ],
+)
+def test_config_handler_set_config(SciHubMock, config, expected):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     config_handler = scibec_connector.config_handler
-    msg = messages.DeviceConfigMessage(
-        action="set", config={"samx": {"enabled": True}}, metadata={}
-    )
+    msg = messages.DeviceConfigMessage(action="set", config=config, metadata={})
     with mock.patch.object(config_handler.validator, "validate_device") as validator:
         with mock.patch.object(config_handler, "send_config_request_reply") as req_reply:
             config_handler._set_config(msg)
             req_reply.assert_called_once_with(accepted=True, error_msg=None, metadata={})
-            validator.assert_called_once_with({"enabled": True, "name": "samx"})
+            validator.assert_called_once_with(expected)
 
 
 def test_config_handler_set_invalid_config_raises(SciHubMock):

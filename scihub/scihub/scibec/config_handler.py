@@ -85,7 +85,7 @@ class ConfigHandler:
 
     def _convert_to_db_config(self, name: str, config: dict) -> None:
         config.pop("deviceType", None)
-        if config.get("deviceConfig") is None:
+        if "deviceConfig" in config and config["deviceConfig"] is None:
             config["deviceConfig"] = {}
         config["name"] = name
 
