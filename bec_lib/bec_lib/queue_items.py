@@ -3,7 +3,7 @@ from __future__ import annotations
 import functools
 import threading
 from collections import deque
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from rich.console import Console
 from rich.table import Table
@@ -94,7 +94,7 @@ class QueueItem:
         self.scanIDs = queue_item.get("scanID")
 
     @property
-    def queue_position(self) -> Optional(int):
+    def queue_position(self) -> int | None:
         """get the current queue position"""
         current_queue = self.scan_manager.queue_storage.current_scan_queue
         for queue_group in current_queue.values():
@@ -188,7 +188,7 @@ class QueueStorage:
             self.storage.append(QueueItem(scan_manager=self.scan_manager, **queue_item))
 
     @threadlocked
-    def find_queue_item_by_ID(self, queueID: str) -> Optional(QueueItem):
+    def find_queue_item_by_ID(self, queueID: str) -> QueueItem | None:
         """find a queue item based on its queueID"""
         for queue_item in self.storage:
             if queue_item.queueID == queueID:
@@ -196,7 +196,7 @@ class QueueStorage:
         return None
 
     @threadlocked
-    def find_queue_item_by_requestID(self, requestID: str) -> Optional(QueueItem):
+    def find_queue_item_by_requestID(self, requestID: str) -> QueueItem | None:
         """find a queue item based on its requestID"""
         for queue_item in self.storage:
             if requestID in queue_item.requestIDs:
@@ -204,7 +204,7 @@ class QueueStorage:
         return None
 
     @threadlocked
-    def find_queue_item_by_scanID(self, scanID: str) -> Optional(QueueItem):
+    def find_queue_item_by_scanID(self, scanID: str) -> QueueItem | None:
         """find a queue item based on its scanID"""
         for queue_item in self.storage:
             if scanID in queue_item.scans:

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import builtins
 import importlib
 import json
@@ -8,7 +10,6 @@ import subprocess
 
 # import sys
 import uuid
-from typing import Union
 
 # from qtpy.QtWidgets import QApplication
 from typeguard import typechecked
@@ -218,12 +219,12 @@ class BECPlotter:
             self._config_changed = True
 
     @typechecked
-    def append_xdata(self, xdata: Union[float, list[float]]) -> None:
+    def append_xdata(self, xdata: float | list[float]) -> None:
         """
         Append the xdata to the figure. If xdata is a list, it the existing data will be extended by xdata.
 
         Args:
-            xdata (Union[float, list[float]]): The xdata to append.
+            xdata (float | list[float]): The xdata to append.
 
         """
         self._set_source_to_redis("x")
@@ -233,12 +234,12 @@ class BECPlotter:
         self._data_changed = True
 
     @typechecked
-    def append_ydata(self, ydata: Union[float, list[float]], axis: int = 0) -> None:
+    def append_ydata(self, ydata: float | list[float], axis: int = 0) -> None:
         """
         Append the ydata to the figure. If ydata is a list, it the existing data will be extended by ydata.
 
         Args:
-            ydata (Union[float, list[float]]): The ydata to append.
+            ydata (float | list[float]): The ydata to append.
             axis (int, optional): The axis to append the ydata for. Defaults to 0.
         """
         self._set_source_to_redis("y", axis)
@@ -261,16 +262,14 @@ class BECPlotter:
         self.set_ydata(ydata, axis)
 
     @typechecked
-    def append_xydata(
-        self, xdata: Union[float, list[float]], ydata: Union[float, list[float]]
-    ) -> None:
+    def append_xydata(self, xdata: float | list[float], ydata: float | list[float]) -> None:
         """
         Append the xdata and ydata to the figure. If xdata or ydata is a list, it the existing data will be extended
         by xdata or ydata.
 
         Args:
-            xdata (Union[float, list[float]]): The xdata to append.
-            ydata (Union[float, list[float]]): The ydata to append.
+            xdata (float | list[float]): The xdata to append.
+            ydata (float | list[float]): The ydata to append.
         """
         self.append_xdata(xdata)
         self.append_ydata(ydata)

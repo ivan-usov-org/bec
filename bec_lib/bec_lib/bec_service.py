@@ -6,7 +6,7 @@ import threading
 import time
 import uuid
 from dataclasses import asdict, dataclass
-from typing import TYPE_CHECKING, Any, Union
+from typing import TYPE_CHECKING, Any
 
 import psutil
 from rich.console import Console
@@ -30,7 +30,7 @@ SERVICE_CONFIG = None
 class BECService:
     def __init__(
         self,
-        config: Union[str, ServiceConfig],
+        config: str | ServiceConfig,
         connector_cls: ConnectorBase,
         unique_service=False,
         wait_for_server=False,
@@ -57,7 +57,7 @@ class BECService:
         self._start_metrics_emitter()
         self._wait_for_server()
 
-    def _import_config(self, config: Union[str, ServiceConfig]) -> None:
+    def _import_config(self, config: str | ServiceConfig) -> None:
         if isinstance(config, str):
             self._service_config = ServiceConfig(config_path=config)
         elif isinstance(config, ServiceConfig):

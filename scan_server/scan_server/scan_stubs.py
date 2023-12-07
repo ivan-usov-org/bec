@@ -1,7 +1,8 @@
+from __future__ import annotations
+
 import time
 import uuid
 from collections.abc import Callable
-from typing import Union
 
 import numpy as np
 
@@ -85,12 +86,12 @@ class ScanStubs:
             return Status(self.producer, return_val.get("RID"))
         return return_val
 
-    def set_and_wait(self, *, device: list[str], positions: Union[list, np.ndarray]):
+    def set_and_wait(self, *, device: list[str], positions: list | np.ndarray):
         """Set devices to a specific position and wait completion.
 
         Args:
             device (list[str]): List of device names.
-            positions (Union[list, np.ndarray]): Target position.
+            positions (list | np.ndarray): Target position.
 
         """
         if not isinstance(positions, list) and not isinstance(positions, np.ndarray):
@@ -247,7 +248,7 @@ class ScanStubs:
         self,
         *,
         wait_type: str,
-        device: Union[list[str], str] = None,
+        device: list[str] | str = None,
         group: str = None,
         wait_group: str = None,
         wait_time: float = None,
@@ -256,7 +257,7 @@ class ScanStubs:
 
         Args:
             wait_type (str): wait type
-            device (Union[list[str], str], optional): List of device names. Defaults to None.
+            device (list[str] | str, optional): List of device names. Defaults to None.
             group (str, optional): Device group that can be used instead of the device argument. Defaults to None.
             wait_group (str, optional): Wait group. Defaults to None.
             wait_time (float, optional): Wait time (for wait_type="trigger"). Defaults to None.

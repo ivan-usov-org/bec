@@ -3,7 +3,7 @@ from __future__ import annotations
 import csv
 import functools
 from collections import defaultdict
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 from typeguard import typechecked
 
@@ -25,11 +25,11 @@ def threadlocked(fcn):
 
 @typechecked
 def scan_to_csv(
-    scan_report: Union[ScanReport, list[ScanReport]],
+    scan_report: ScanReport | list[ScanReport],
     output_name: str,
     delimiter: str = ",",
-    dialect: Union[str, None] = None,
-    header: Union[list, None] = None,
+    dialect: str | None = None,
+    header: list | None = None,
     write_metadata: bool = True,
 ) -> None:
     """Convert scan data to a csv file.

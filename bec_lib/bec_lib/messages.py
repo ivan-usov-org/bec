@@ -8,7 +8,7 @@ import sys
 import time
 from abc import abstractmethod
 from copy import deepcopy
-from typing import Any, Optional, Union
+from typing import Any
 
 import msgpack
 import numpy as np
@@ -98,7 +98,7 @@ class BECMessage:
         raise RuntimeError(f"Unsupported compression type {compression}.")
 
     @classmethod
-    def loads(cls, msg) -> Optional(BECMessage):
+    def loads(cls, msg) -> BECMessage | None:
         """load BECMessage from bytes or dict input"""
         try:
             if isinstance(msg, bytes) and msg.startswith(b"MSGVERSION_"):
@@ -700,7 +700,7 @@ class LogMessage(BECMessage):
         self,
         *,
         log_type: str,
-        content: Union[dict, str],
+        content: dict | str,
         metadata: dict = None,
         version: float = DEFAULT_VERSION,
     ) -> None:

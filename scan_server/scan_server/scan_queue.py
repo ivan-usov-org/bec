@@ -7,7 +7,6 @@ import time
 import traceback
 import uuid
 from enum import Enum
-from typing import Optional, Union
 
 from rich.console import Console
 from rich.table import Table
@@ -336,7 +335,7 @@ class ScanQueue:
         self.scan_worker.start()
 
     @property
-    def worker_status(self) -> Union[None, InstructionQueueStatus]:
+    def worker_status(self) -> InstructionQueueStatus | None:
         """current status of the instruction queue"""
         if len(self.queue) > 0:
             return self.queue[0].status
@@ -455,7 +454,7 @@ class ScanQueue:
         if self.active_instruction_queue is not None:
             self.active_instruction_queue.abort()
 
-    def get_scan(self, scanID: str) -> Union[None, InstructionQueueItem]:
+    def get_scan(self, scanID: str) -> InstructionQueueItem | None:
         """get the instruction queue item based on its scanID"""
         queue_found = None
         for queue in self.history_queue + self.queue:
@@ -805,7 +804,7 @@ class InstructionQueueItem:
 
     def _get_next(
         self, queue="instructions", raise_stopiteration=True
-    ) -> Optional(messages.DeviceInstructionMessage):
+    ) -> messages.DeviceInstructionMessage | None:
         try:
             instr = next(self.queue)
             # instr = next(self.__getattribute__(queue))

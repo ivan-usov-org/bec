@@ -6,7 +6,7 @@ import sys
 import threading
 import time
 from collections import defaultdict, deque
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from bec_lib import messages
 from bec_lib.logger import bec_logger
@@ -137,21 +137,21 @@ class ScanStorage:
         return scan_queue["primary"].get("info")[0]
 
     @property
-    def current_scan(self) -> Optional(ScanItem):
+    def current_scan(self) -> ScanItem | None:
         """get the current scan item"""
         if not self.current_scanID:
             return None
         return self.find_scan_by_ID(scanID=self.current_scanID[0])
 
     @property
-    def current_scanID(self) -> Optional(str):
+    def current_scanID(self) -> str | None:
         """get the current scanID"""
         if self.current_scan_info is None:
             return None
         return self.current_scan_info.get("scanID")
 
     @threadlocked
-    def find_scan_by_ID(self, scanID: str) -> Optional(ScanItem):
+    def find_scan_by_ID(self, scanID: str) -> ScanItem | None:
         """find a scan item based on its scanID"""
         for scan in self.storage:
             if scanID == scan.scanID:

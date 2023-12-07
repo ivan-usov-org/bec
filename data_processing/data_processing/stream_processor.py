@@ -3,7 +3,6 @@ from __future__ import annotations
 import time
 from abc import ABC, abstractmethod
 from collections import deque
-from typing import Any, Optional
 
 import lmfit
 import numpy as np
@@ -200,7 +199,7 @@ class LmfitProcessor(StreamProcessor):
 
         return model()
 
-    def process(self, data: dict, metadata: dict) -> Optional[tuple[dict, dict]]:
+    def process(self, data: dict, metadata: dict) -> tuple[dict, dict] | None:
         """
         Process data and return the result.
 

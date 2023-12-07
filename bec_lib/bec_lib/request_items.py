@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import threading
 from collections import deque
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from bec_lib import messages
 from bec_lib.callback_handler import CallbackHandler
@@ -88,7 +88,7 @@ class RequestItem:
         return scan_req
 
     @property
-    def scan(self) -> Optional(ScanItem):
+    def scan(self) -> ScanItem | None:
         """get the scan item for the given request item"""
         queue_item = self.scan_manager.queue_storage.find_queue_item_by_requestID(self.requestID)
         if not queue_item:
@@ -112,7 +112,7 @@ class RequestStorage:
         self.scan_manager = scan_manager
 
     @threadlocked
-    def find_request_by_ID(self, requestID: str) -> Optional(RequestItem):
+    def find_request_by_ID(self, requestID: str) -> RequestItem | None:
         """find a request item based on its requestID"""
         for request in self.storage:
             if request.requestID == requestID:
