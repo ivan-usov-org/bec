@@ -1,11 +1,15 @@
 (developer.ophyd)=
 # Ophyd 
 
-[Ophyd](https://nsls-ii.github.io/ophyd/) is the hardware abstraction layer developed by NSLS-II and used by BEC to communicate with the hardware. It is a Python library that provides a uniform interface to different hardware components. Ophyd is used to control the hardware and to read out the data. It is also used to create a virtual representation of the hardware in the form of devices and signals.
+[Ophyd](https://nsls-ii.github.io/ophyd/) is the hardware abstraction layer developed by NSLS-II and used by BEC to communicate with the hardware. 
+It is a Python library that provides a uniform interface to different hardware components. 
+Ophyd is used to control the hardware and to read out the data. 
+It is also used to create a virtual representation of the hardware in the form of `devices` and `signals`.
 
 It can be used to test the hardware without spinning up BEC, simply by importing the ophyd library.
 
-Within BEC, ophyd objects are created dynamically on the devices server, following the specifications given in the device configuration. As explained in the [device configuration](#device-configuration) section, the device configuration can be loaded from and stored to a yaml file and contains all necessary information about the devices. 
+Within BEC, ophyd objects are created dynamically on the devices server, following the specifications given in the device configuration. 
+As explained in the [device configuration](#developer.bec_config) section, the device configuration can be loaded from and stored to a yaml file and contains all necessary information about the devices. 
 
 An example of an ophyd device based on EPICS is a single PV, e.g. the synchrotron's ring current: 
 
@@ -54,3 +58,29 @@ The on failure parameter specifies the behavior of the device in case of a failu
 
 * **description** \
 The description contains the description of the device. It is used to provide additional information about the device.
+
+## Ophyd device
+to be added..
+
+### PositionerBase
+to be added..
+
+### OphydFlyer
+to be added..
+
+### ADBase
+to be added..
+
+## Components
+to be added..
+
+### Epics PV
+to be added..
+
+### Custom Signals
+to be added..
+
+### Kind
+to be added..
+
+
