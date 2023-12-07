@@ -2,6 +2,20 @@
 
 <!--next-version-placeholder-->
 
+## v0.49.0 (2023-12-07)
+
+### Feature
+
+* Added first version of bec_plotter ([`6c485c7`](https://gitlab.psi.ch/bec/bec/-/commit/6c485c7fcdcd2cbea3b5486c5df531c215e4fa13))
+* Added gui endpoints and messages ([`6472e4e`](https://gitlab.psi.ch/bec/bec/-/commit/6472e4ef94b8100405e1c2e0011fd0a8c698a300))
+
+### Fix
+
+* Removed hard-coded link to widgets ([`3a99554`](https://gitlab.psi.ch/bec/bec/-/commit/3a99554b7e5310606a968c5e71eb7942d1381aaa))
+* Fixed print_log; added tests ([`9028693`](https://gitlab.psi.ch/bec/bec/-/commit/9028693a3cd8ebc81ac6dc4832edc52732cd6444))
+* Fixed show for manually closed figures ([`b68f38e`](https://gitlab.psi.ch/bec/bec/-/commit/b68f38e866a1a4806e7cc79c840cabfebbd27d38))
+* Added missing set and append functions ([`716f80e`](https://gitlab.psi.ch/bec/bec/-/commit/716f80e2ca6d6383f8dc630680e54984d3375da6))
+
 ## v0.48.0 (2023-12-05)
 
 ### Feature
