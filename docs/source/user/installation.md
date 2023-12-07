@@ -8,7 +8,7 @@ If you need to install BEC yourself, the following section will guide you throug
 **Requirements:**
 
 ---
-- python (>=3.8)
+- python (>=3.9)
 - redis
 - tmux (=3.2)
 ---

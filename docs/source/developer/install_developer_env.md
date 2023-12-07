@@ -12,7 +12,7 @@ In that sense, installing BEC in _[dev]_ mode, is the right choice in case you l
 **Requirements:**
 
 ---
-- python (>=3.8)
+- python (>=3.9)
 - [redis](https://redis.io)
 - tmux (=3.2)
 ---

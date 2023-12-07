@@ -48,7 +48,7 @@ while getopts "hsc:rt" o; do
     esac
 done
 
-conda_deps=(python=3.8)
+conda_deps=(python=3.9)
 
 # check if tmux should be installed
 if [ "$skip_tmux" = false ]; then
@@ -126,7 +126,3 @@ else # install all packages in one virtual environment
     cd ../
     echo "Created virtual environment for all packages"
 fi
-
-
-
-
