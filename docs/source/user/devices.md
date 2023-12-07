@@ -29,7 +29,7 @@ To save the current session to disk, use
 ```{code-block} python
 bec.config.save_current_session("./config_saved.yaml")
 ```
-which will save a file `config_saved.yaml` in directory in which the client is running.
+which will save a file `config_saved.yaml` in the directory in which the client is running.
 To modify and add a new device to the config, open `config_saved.yaml` with a suitable editor, for instance *VSCode*, and add a new device to the device config. 
 For this, you may use the device gauss_bpm which is shown below. 
 For more information about fields within the device config, you can check out the section [Ophyd](#developer.ophyd) in our developer guide.

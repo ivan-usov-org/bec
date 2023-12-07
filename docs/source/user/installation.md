@@ -8,9 +8,9 @@ If you need to install BEC yourself, the following section will guide you throug
 **Requirements:**
 
 ---
-- python (>=3.9)
-- redis
-- tmux (=3.2)
+- [python](https://www.python.org) (>=3.9)
+- [redis](https://redis.io)
+- [tmux](https://github.com/tmux/tmux/wiki) (=3.2)
 ---
 
 On a PSI-system, requirements are available via pmodules. If you run BEC on your own system, make sure to install the required packages. 

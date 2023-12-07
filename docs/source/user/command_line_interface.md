@@ -205,15 +205,15 @@ It allows us to run a sequence of functions as if it were a scan, resulting in a
 ```python
 
     @scans.scan_def
-    def overnight_scan():
+    def custom_grid_scan():
         open_shutter()
-        samx_in()
+        umv(dev.samz, 0) # move to samz to start position (absolut)
         for i in range(10):
-            scans.grid_scan(dev.samy, 0, 10, steps=100, exp_time=1, relative=False)
-        samx_out()
+            scans.grid_scan(dev.samx, 0, 10, 10, dev.samy, 0, 10, 10, exp_time=0.1, relative=False)
+            umvr(dev.samz, 0.1) # move samz + 0.1mm after each grid scan
         close_shutter()
 ```
 
-By adding the decorator ``@scans.scan_def`` to the function definition, we mark this function as a scan definition.
+By adding the decorator ``@scans.scan_def`` to the function definition, we mark this function as a scan definition. 
 
 
