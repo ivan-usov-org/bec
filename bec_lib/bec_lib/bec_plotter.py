@@ -1,4 +1,5 @@
 import builtins
+import importlib
 import json
 import select
 
@@ -124,9 +125,6 @@ class BECPlotter:
         self._ydata = {}
         self._data_changed = False
         self._config_changed = False
-
-        # FIXME: this is a hack to get the path to the widget but it should be done in a better way
-        self._widget_path = "../../bec-widgets/bec_widgets/widgets/monitor/monitor.py"
 
     @typechecked
     def set_xlabel(self, xlabel: str) -> None:
@@ -319,14 +317,15 @@ class BECPlotter:
         """
         Start the plot in a new process.
         """
-
         # pylint: disable=subprocess-run-check
+        monitor_module = importlib.import_module("bec_widgets.widgets.monitor.monitor")
+        monitor_path = monitor_module.__file__
+
+        command = (
+            f"python {monitor_path} --id {self._plot_id} --config '{json.dumps(self._config)}'"
+        )
         self._process = subprocess.Popen(
-            f"python {self._widget_path} --id {self._plot_id} --config"
-            f" '{json.dumps(self._config)}'",
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
 
     def print_log(self) -> None:
