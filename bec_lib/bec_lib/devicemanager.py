@@ -4,7 +4,7 @@ import enum
 import re
 import time
 import warnings
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING, Union
 
 import msgpack
 from rich.console import Console
@@ -127,7 +127,7 @@ class Device:
             action="update", config={self.name: {"deviceConfig": self._config["deviceConfig"]}}
         )
 
-    def get_device_tags(self) -> List:
+    def get_device_tags(self) -> list:
         """get the device tags for this device"""
         return self._config.get("deviceTags", [])
 
@@ -464,14 +464,14 @@ class DeviceContainer(dict):
 
         return [dev for dev in set(devices) if dev not in excluded_devices]
 
-    def get_devices_with_tags(self, tags: List) -> List:
+    def get_devices_with_tags(self, tags: list) -> list:
         """
         Get a list of all devices with the specified tags
         Args:
-            tags (List): List of tags
+            tags (list): List of tags
 
         Returns:
-            List: List of devices with the specified tags
+            list: List of devices with the specified tags
         """
         # pylint: disable=protected-access
         if not isinstance(tags, list):
@@ -480,7 +480,7 @@ class DeviceContainer(dict):
             dev for _, dev in self.items() if set(tags) & set(dev._config.get("deviceTags", []))
         ]
 
-    def show_tags(self) -> List:
+    def show_tags(self) -> list:
         """returns a list of used tags in the current config"""
         tags = set()
         for _, dev in self.items():
@@ -494,11 +494,11 @@ class DeviceContainer(dict):
         """get a list of all enabled detectors"""
         return self.get_device_type_devices(DeviceType.DETECTOR)
 
-    def wm(self, device_names: List[str]):
+    def wm(self, device_names: list[str]):
         """Get the current position of one or more devices.
 
         Args:
-            device_names (List[str]): List of device names
+            device_names (list[str]): List of device names
 
         Examples:
             >>> dev.wm('samx')

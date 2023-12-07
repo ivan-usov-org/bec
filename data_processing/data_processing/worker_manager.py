@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import inspect
 import multiprocessing as mp
-from typing import Any, List
+from typing import Any
 
 from bec_lib import MessageEndpoints, bec_logger, messages
 from bec_lib.redis_connector import RedisConnector
@@ -142,7 +142,7 @@ class DAPWorkerManager:
             worker["worker"].terminate()
 
     @staticmethod
-    def run_worker(config: dict, worker_cls: Any, connector_host: List[str]) -> mp.Process:
+    def run_worker(config: dict, worker_cls: Any, connector_host: list[str]) -> mp.Process:
         """Run the worker."""
         worker = mp.Process(
             target=worker_cls.run,

@@ -3,7 +3,7 @@ from __future__ import annotations
 import enum
 import threading
 from collections import deque
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 from bec_lib import messages
 from bec_lib.endpoints import MessageEndpoints
@@ -83,7 +83,7 @@ class AlarmHandler:
             logger.warning(alarm)
 
     @threadlocked
-    def get_unhandled_alarms(self, severity=Alarms.WARNING) -> List:
+    def get_unhandled_alarms(self, severity=Alarms.WARNING) -> list:
         """Get all unhandled alarms equal or above a minimum severity.
 
         Args:

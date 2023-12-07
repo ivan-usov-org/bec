@@ -1,6 +1,6 @@
 import abc
 import asyncio
-from typing import Any, List, Tuple
+from typing import Any
 
 import numpy as np
 import rich.progress
@@ -58,7 +58,7 @@ class ProgressBarBase(abc.ABC):
         self._tasks = []
 
     @property
-    def columns(self) -> Tuple[rich.progress.ProgressColumn, ...]:
+    def columns(self) -> tuple[rich.progress.ProgressColumn, ...]:
         """Columns used for a new Progress instance:
            - a text column for the description (TextColumn)
            - the bar itself (BarColumn)
@@ -68,7 +68,7 @@ class ProgressBarBase(abc.ABC):
         Override in subclasses to customize the progress bar appearance.
 
         Returns:
-            Tuple[rich.progress.ProgressColumn, ...]: columns
+            tuple[rich.progress.ProgressColumn, ...]: columns
         """
         return rich.progress.Progress.get_default_columns()
 
@@ -129,7 +129,7 @@ class ScanProgressBar(ProgressBarBase):
         self.scan_number = scan_number
 
     @property
-    def columns(self) -> Tuple:
+    def columns(self) -> tuple:
         return (
             rich.progress.TextColumn("[progress.description]{task.description}"),
             rich.progress.BarColumn(),
@@ -172,9 +172,9 @@ class ScanProgressBar(ProgressBarBase):
 class DeviceProgressBar(ProgressBarBase):
     def __init__(
         self,
-        devices: List[str],
-        target_values: List[float],
-        start_values: List[float] = None,
+        devices: list[str],
+        target_values: list[float],
+        start_values: list[float] = None,
         clear_on_exit: bool = False,
     ) -> None:
         self.target_values = target_values

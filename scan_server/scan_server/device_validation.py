@@ -1,4 +1,4 @@
-from typing import Callable, List
+from collections.abc import Callable
 
 from bec_lib import DeviceStatus, MessageEndpoints, bec_logger, messages
 
@@ -36,18 +36,18 @@ class DeviceValidation:
         endpoint,
         message_cls,
         metadata,
-        checks: List[Callable] = None,
+        checks: list[Callable] = None,
         print_status=False,
         **kwargs,
     ) -> bool:
         """Wait for devices to reach a certain state.
 
         Args:
-            devices (List[str]): List of device IDs to wait for.
+            devices (list[str]): List of device IDs to wait for.
             endpoint (MessageEndpoints): Endpoint to check for device status.
             message_cls (BECMessage): Class of BECMessage to expect.
             metadata (dict): Metadata of the instruction.
-            checks (List[Callable], optional): List of checks to perform on the device status. Defaults to None.
+            checks (list[Callable], optional): List of checks to perform on the device status. Defaults to None.
 
         Returns:
             bool: True if all checks are successful, False otherwise.
@@ -79,14 +79,14 @@ class DeviceValidation:
 
     # pylint: disable=invalid-name
     def matching_scanID(
-        self, metadata: dict, response: List[messages.BECMessage], **kwargs
+        self, metadata: dict, response: list[messages.BECMessage], **kwargs
     ) -> bool:
         """
         Check if the scanID in the response matches the scanID in the instruction
 
         Args:
             metadata (dict): Metadata of the instruction
-            response (List[messages.BECMessage]): List of BECMessage objects
+            response (list[messages.BECMessage]): List of BECMessage objects
 
         Returns:
             bool: True if the scanID matches, False otherwise
@@ -97,7 +97,7 @@ class DeviceValidation:
     def matching_DIID(
         self,
         metadata: dict,
-        response: List[messages.BECMessage],
+        response: list[messages.BECMessage],
         wait_group_devices: list = None,
         **kwargs,
     ) -> bool:
@@ -105,7 +105,7 @@ class DeviceValidation:
 
         Args:
             metadata (dict): Metadata of the instruction
-            response (List[messages.BECMessage]): List of BECMessage objects
+            response (list[messages.BECMessage]): List of BECMessage objects
 
         Returns:
             bool: True if the DIID matches, False otherwise
@@ -117,13 +117,13 @@ class DeviceValidation:
         )
 
     def matching_requestID(
-        self, metadata: dict, response: List[messages.BECMessage], **kwargs
+        self, metadata: dict, response: list[messages.BECMessage], **kwargs
     ) -> bool:
         """Check if the RID in the response matches the RID in the instruction
 
         Args:
             metadata (dict): Metadata of the instruction
-            response (List[messages.BECMessage]): List of BECMessage objects
+            response (list[messages.BECMessage]): List of BECMessage objects
 
         Returns:
             bool: True if the RID matches, False otherwise
@@ -133,7 +133,7 @@ class DeviceValidation:
     def devices_returned_successfully(
         self,
         metadata: dict,
-        response: List[messages.BECMessage],
+        response: list[messages.BECMessage],
         wait_group_devices=None,
         instruction=None,
         **kwargs,
@@ -141,7 +141,7 @@ class DeviceValidation:
         """Check if all devices returned successfully
 
         Args:
-            response (List[messages.BECMessage]): List of BECMessage objects
+            response (list[messages.BECMessage]): List of BECMessage objects
 
         Returns:
             bool: True if all devices moved successfully, False otherwise
@@ -154,12 +154,12 @@ class DeviceValidation:
         return moved_successfully
 
     def devices_are_staged(
-        self, metadata: dict, response: List[messages.BECMessage], **kwargs
+        self, metadata: dict, response: list[messages.BECMessage], **kwargs
     ) -> bool:
         """Check if all devices moved successfully
 
         Args:
-            response (List[messages.BECMessage]): List of BECMessage objects
+            response (list[messages.BECMessage]): List of BECMessage objects
 
         Returns:
             bool: True if all devices moved successfully, False otherwise
@@ -167,12 +167,12 @@ class DeviceValidation:
         return all(bool(dev.content.get("status")) == True for dev in response)
 
     def devices_are_unstaged(
-        self, metadata: dict, response: List[messages.BECMessage], **kwargs
+        self, metadata: dict, response: list[messages.BECMessage], **kwargs
     ) -> bool:
         """Check if all devices moved successfully
 
         Args:
-            response (List[messages.BECMessage]): List of BECMessage objects
+            response (list[messages.BECMessage]): List of BECMessage objects
 
         Returns:
             bool: True if all devices moved successfully, False otherwise
@@ -180,12 +180,12 @@ class DeviceValidation:
         return all(bool(dev.content.get("status")) == False for dev in response)
 
     def devices_are_idle(
-        self, metadata: dict, response: List[messages.BECMessage], **kwargs
+        self, metadata: dict, response: list[messages.BECMessage], **kwargs
     ) -> bool:
         """Check if all devices are idle
 
         Args:
-            response (List[messages.BECMessage]): List of BECMessage objects
+            response (list[messages.BECMessage]): List of BECMessage objects
 
         Returns:
             bool: True if all devices are idle, False otherwise

@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Callable, List
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from bec_client.prettytable import PrettyTable
 from bec_client.progressbar import ScanProgressBar
@@ -44,7 +45,7 @@ class LiveUpdatesTable(LiveUpdatesBase):
         bec: BECClient,
         report_instruction: dict = None,
         request: messages.ScanQueueMessage = None,
-        callbacks: List[Callable] = None,
+        callbacks: list[Callable] = None,
         print_table_data=None,
     ) -> None:
         super().__init__(
@@ -132,7 +133,7 @@ class LiveUpdatesTable(LiveUpdatesBase):
         max_len = max(len(head) for head in header)
         return PrettyTable(header, padding=max_len)
 
-    def _get_header(self) -> List:
+    def _get_header(self) -> list:
         header = ["seq. num"]
         for dev in self.devices:
             if dev in self.bec.device_manager.devices:

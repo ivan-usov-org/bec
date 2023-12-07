@@ -1,9 +1,8 @@
 import collections
 from functools import reduce
-from typing import List
 
 
-def get_merged_flat_dicts(input_dicts: List[dict]):
+def get_merged_flat_dicts(input_dicts: list[dict]):
     """merge dicts into a single flat dict"""
     res = collections.defaultdict(list)
     for input_dict in input_dicts:
@@ -36,11 +35,11 @@ def nested_update(target: dict, update: dict):
     return target
 
 
-def merge_dicts(input_dicts: List[dict]) -> dict:
+def merge_dicts(input_dicts: list[dict]) -> dict:
     """Merge dicts of the same structure into a single dict with values as list
 
     Args:
-        input_dicts (List[dict]): List of input dicts
+        input_dicts (list[dict]): List of input dicts
 
     Returns:
         dict: Merged dict

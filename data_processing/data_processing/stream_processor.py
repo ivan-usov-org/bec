@@ -3,13 +3,12 @@ from __future__ import annotations
 import time
 from abc import ABC, abstractmethod
 from collections import deque
-from typing import Any, List, Optional, Tuple
-from bec_lib import messages
+from typing import Any, Optional
 
 import lmfit
 import numpy as np
 
-from bec_lib import MessageEndpoints
+from bec_lib import MessageEndpoints, messages
 from bec_lib.redis_connector import MessageObject, RedisConnector
 
 
@@ -72,7 +71,7 @@ class StreamProcessor(ABC):
         self.data = None
 
     @abstractmethod
-    def process(self, data: dict, metadata: dict) -> Tuple[dict, dict]:
+    def process(self, data: dict, metadata: dict) -> tuple[dict, dict]:
         """
         Process data and return the result.
 
@@ -81,7 +80,7 @@ class StreamProcessor(ABC):
             metadata (dict): Metadata associated with the data.
 
         Returns:
-            Tuple[dict, dict]: Tuple containing the processed data and metadata.
+            tuple[dict, dict]: Tuple containing the processed data and metadata.
         """
 
     @property
@@ -128,7 +127,7 @@ class StreamProcessor(ABC):
         while True:
             self._run_forever()
 
-    def _process_data(self, data: messages.BECMessage) -> List[Tuple[dict, dict]]:
+    def _process_data(self, data: messages.BECMessage) -> list[tuple[dict, dict]]:
         """Process data."""
         if not isinstance(data, list):
             data = [data]
@@ -201,7 +200,7 @@ class LmfitProcessor(StreamProcessor):
 
         return model()
 
-    def process(self, data: dict, metadata: dict) -> Optional[Tuple[dict, dict]]:
+    def process(self, data: dict, metadata: dict) -> Optional[tuple[dict, dict]]:
         """
         Process data and return the result.
 
@@ -210,7 +209,7 @@ class LmfitProcessor(StreamProcessor):
             metadata (dict): Metadata associated with the data.
 
         Returns:
-            Tuple[dict, dict]: Tuple containing the processed data and metadata. Returns None if no data is provided or if the fit is skipped.
+            tuple[dict, dict]: Tuple containing the processed data and metadata. Returns None if no data is provided or if the fit is skipped.
         """
 
         if not data:

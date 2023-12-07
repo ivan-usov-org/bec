@@ -7,7 +7,7 @@ import time
 import traceback
 import uuid
 from enum import Enum
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 from rich.console import Console
 from rich.table import Table
@@ -564,17 +564,17 @@ class RequestBlockQueue:
         self.scan_def_ids = {}
 
     @property
-    def scanID(self) -> List[str]:
+    def scanID(self) -> list[str]:
         """get the scanIDs for all request blocks"""
         return [rb.scanID for rb in self.request_blocks]
 
     @property
-    def is_scan(self) -> List[bool]:
+    def is_scan(self) -> list[bool]:
         """check if the request blocks describe scans"""
         return [rb.is_scan for rb in self.request_blocks]
 
     @property
-    def scan_number(self) -> List[int]:
+    def scan_number(self) -> list[int]:
         """get the list of scan numbers for all request blocks"""
         return [rb.scan_number for rb in self.request_blocks]
 
@@ -704,7 +704,7 @@ class InstructionQueueItem:
         self._return_to_start = None
 
     @property
-    def scan_number(self) -> List[int]:
+    def scan_number(self) -> list[int]:
         """get the scan numbers for the elements in this instruction queue"""
         return self.queue.scan_number
 
@@ -734,12 +734,12 @@ class InstructionQueueItem:
         return len(self.queue.scan_def_ids) == 0
 
     @property
-    def scanID(self) -> List[str]:
+    def scanID(self) -> list[str]:
         """get the scanIDs"""
         return self.queue.scanID
 
     @property
-    def is_scan(self) -> List[bool]:
+    def is_scan(self) -> list[bool]:
         """check whether the InstructionQueue contains scan."""
         return self.queue.is_scan
 

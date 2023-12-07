@@ -2,8 +2,8 @@ import collections
 import threading
 import time
 import traceback
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
-from typing import Callable
 
 from bec_lib import BECService, BECStatus
 from bec_lib import DeviceManagerBase as DeviceManager

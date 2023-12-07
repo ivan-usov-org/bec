@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import builtins
 import uuid
+from collections.abc import Callable
 from contextlib import ContextDecorator
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 
 import msgpack
 from cytoolz import partition

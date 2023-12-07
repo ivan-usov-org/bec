@@ -3,7 +3,7 @@ from __future__ import annotations
 import functools
 import threading
 from collections import deque
-from typing import TYPE_CHECKING, Deque, List, Optional
+from typing import TYPE_CHECKING, Optional
 
 from rich.console import Console
 from rich.table import Table
@@ -38,7 +38,7 @@ class QueueItem:
         request_blocks: list,
         status: str,
         active_request_block: dict,
-        scanID: List(str),
+        scanID: list(str),
         **_kwargs,
     ) -> None:
         self.scan_manager = scan_manager
@@ -50,7 +50,7 @@ class QueueItem:
 
     @property
     @update_queue
-    def scans(self) -> List[ScanItem]:
+    def scans(self) -> list[ScanItem]:
         """get the scans items assigned to the current queue item"""
         return [self.scan_manager.scan_storage.find_scan_by_ID(scanID) for scanID in self.scanIDs]
 
@@ -61,7 +61,7 @@ class QueueItem:
 
     @property
     @update_queue
-    def requests(self) -> List[RequestItem]:
+    def requests(self) -> list[RequestItem]:
         """get the request items assigned to the current queue item"""
         return [
             self.scan_manager.request_storage.find_request_by_ID(requestID)
@@ -110,7 +110,7 @@ class QueueStorage:
     """stores queue items"""
 
     def __init__(self, scan_manager: ScanManager, maxlen=50) -> None:
-        self.storage: Deque[QueueItem] = deque(maxlen=maxlen)
+        self.storage: deque[QueueItem] = deque(maxlen=maxlen)
         self._lock = threading.RLock()
         self.scan_manager = scan_manager
         self._current_scan_queue = None

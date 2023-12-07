@@ -1,6 +1,7 @@
 import builtins
 import inspect
-from typing import Any, Callable, List, Literal
+from collections.abc import Callable
+from typing import Any, Literal
 
 
 def serialize_dtype(dtype: type) -> Any:
@@ -75,12 +76,12 @@ def signature_to_dict(func: Callable, include_class_obj=False) -> dict:
     return out
 
 
-def dict_to_signature(params: List[dict]) -> inspect.Signature:
+def dict_to_signature(params: list[dict]) -> inspect.Signature:
     """
     Convert a dictionary representation of a function signature to a signature object.
 
     Args:
-        params (List[dict]): List of dictionaries representing the function signature
+        params (list[dict]): List of dictionaries representing the function signature
 
     Returns:
         inspect.Signature: Signature object

@@ -3,7 +3,6 @@ import threading
 import time
 import traceback
 from asyncio.log import logger
-from typing import List
 
 from bec_lib import Alarms, Device, MessageEndpoints, bec_logger, messages
 
@@ -400,14 +399,14 @@ class ScanWorker(threading.Thread):
 
     def _get_devices_from_instruction(
         self, instr: messages.DeviceInstructionMessage
-    ) -> List[Device]:
+    ) -> list[Device]:
         """Extract devices from instruction message
 
         Args:
             instr (DeviceInstructionMessage): DeviceInstructionMessage
 
         Returns:
-            List[Device]: List of devices
+            list[Device]: List of devices
         """
         devices = []
         if not instr.content.get("device"):

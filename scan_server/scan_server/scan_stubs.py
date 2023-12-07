@@ -1,11 +1,11 @@
 import time
 import uuid
-from typing import Callable, List, Union
-from bec_lib import messages
+from collections.abc import Callable
+from typing import Union
 
 import numpy as np
 
-from bec_lib import MessageEndpoints, ProducerConnector, Status, bec_logger
+from bec_lib import MessageEndpoints, ProducerConnector, Status, bec_logger, messages
 
 from .errors import DeviceMessageError, ScanAbortion
 
@@ -85,11 +85,11 @@ class ScanStubs:
             return Status(self.producer, return_val.get("RID"))
         return return_val
 
-    def set_and_wait(self, *, device: List[str], positions: Union[list, np.ndarray]):
+    def set_and_wait(self, *, device: list[str], positions: Union[list, np.ndarray]):
         """Set devices to a specific position and wait completion.
 
         Args:
-            device (List[str]): List of device names.
+            device (list[str]): List of device names.
             positions (Union[list, np.ndarray]): Target position.
 
         """
@@ -247,7 +247,7 @@ class ScanStubs:
         self,
         *,
         wait_type: str,
-        device: Union[List[str], str] = None,
+        device: Union[list[str], str] = None,
         group: str = None,
         wait_group: str = None,
         wait_time: float = None,
@@ -256,7 +256,7 @@ class ScanStubs:
 
         Args:
             wait_type (str): wait type
-            device (Union[List[str], str], optional): List of device names. Defaults to None.
+            device (Union[list[str], str], optional): List of device names. Defaults to None.
             group (str, optional): Device group that can be used instead of the device argument. Defaults to None.
             wait_group (str, optional): Wait group. Defaults to None.
             wait_time (float, optional): Wait time (for wait_type="trigger"). Defaults to None.

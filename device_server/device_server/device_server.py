@@ -3,7 +3,6 @@ import threading
 import time
 import traceback
 from concurrent.futures import ThreadPoolExecutor
-from typing import List
 
 import ophyd
 from bec_lib import Alarms, BECService, MessageEndpoints, bec_logger, messages
@@ -316,7 +315,7 @@ class DeviceServer(RPCMixin, BECService):
 
         self._read_and_update_devices(devices, instr.metadata)
 
-    def _read_and_update_devices(self, devices: List[str], metadata: dict) -> list:
+    def _read_and_update_devices(self, devices: list[str], metadata: dict) -> list:
         start = time.time()
         pipe = self.producer.pipeline()
         signal_container = []

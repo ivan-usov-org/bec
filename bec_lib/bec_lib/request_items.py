@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import threading
 from collections import deque
-from typing import TYPE_CHECKING, Deque, Optional
+from typing import TYPE_CHECKING, Optional
 
-from bec_lib.callback_handler import CallbackHandler
 from bec_lib import messages
+from bec_lib.callback_handler import CallbackHandler
 from bec_lib.logger import bec_logger
 from bec_lib.utils import threadlocked
 
@@ -107,7 +107,7 @@ class RequestStorage:
     """stores request items"""
 
     def __init__(self, scan_manager: ScanManager, maxlen=50) -> None:
-        self.storage: Deque[RequestItem] = deque(maxlen=maxlen)
+        self.storage: deque[RequestItem] = deque(maxlen=maxlen)
         self._lock = threading.RLock()
         self.scan_manager = scan_manager
 

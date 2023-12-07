@@ -4,7 +4,7 @@ import builtins
 import importlib
 import inspect
 import subprocess
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 from rich.console import Console
 from rich.table import Table
@@ -135,7 +135,7 @@ class BECClient(BECService, UserScriptsMixin):
         return self.producer.lrange(MessageEndpoints.pre_scan_macros(), 0, -1)
 
     @pre_scan_hooks.setter
-    def pre_scan_hooks(self, hooks: List):
+    def pre_scan_hooks(self, hooks: list):
         self.producer.delete(MessageEndpoints.pre_scan_macros())
         for hook in hooks:
             self.producer.lpush(MessageEndpoints.pre_scan_macros(), hook)

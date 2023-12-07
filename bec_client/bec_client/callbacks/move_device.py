@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable, List
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 import numpy as np
-from bec_lib import DeviceManagerBase, MessageEndpoints, messages
 
 from bec_client.progressbar import DeviceProgressBar
+from bec_lib import DeviceManagerBase, MessageEndpoints, messages
 
 from .utils import LiveUpdatesBase, check_alarms
 
@@ -68,9 +69,9 @@ class LiveUpdatesReadbackProgressbar(LiveUpdatesBase):
     def __init__(
         self,
         bec: BECClient,
-        report_instruction: List = None,
+        report_instruction: list = None,
         request: messages.ScanQueueMessage = None,
-        callbacks: List[Callable] = None,
+        callbacks: list[Callable] = None,
     ) -> None:
         super().__init__(
             bec, report_instruction=report_instruction, request=request, callbacks=callbacks

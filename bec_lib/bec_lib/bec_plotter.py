@@ -8,7 +8,7 @@ import subprocess
 
 # import sys
 import uuid
-from typing import List, Union
+from typing import Union
 
 # from qtpy.QtWidgets import QApplication
 from typeguard import typechecked
@@ -173,12 +173,12 @@ class BECPlotter:
         self._config_changed = True
 
     @typechecked
-    def set_xdata(self, xdata: List[float]) -> None:
+    def set_xdata(self, xdata: list[float]) -> None:
         """
         Set the xdata of the figure.
 
         Args:
-            xdata (List[float]): The xdata to set.
+            xdata (list[float]): The xdata to set.
         """
 
         self._set_source_to_redis("x")
@@ -188,12 +188,12 @@ class BECPlotter:
         self._data_changed = True
 
     @typechecked
-    def set_ydata(self, ydata: List[float], axis: int = 0) -> None:
+    def set_ydata(self, ydata: list[float], axis: int = 0) -> None:
         """
         Set the ydata of the figure.
 
         Args:
-            ydata (List[float]): The ydata to set.
+            ydata (list[float]): The ydata to set.
             axis (int, optional): The axis to set the ydata for. Defaults to 0.
         """
         self._set_source_to_redis("y", axis)
@@ -218,12 +218,12 @@ class BECPlotter:
             self._config_changed = True
 
     @typechecked
-    def append_xdata(self, xdata: Union[float, List[float]]) -> None:
+    def append_xdata(self, xdata: Union[float, list[float]]) -> None:
         """
         Append the xdata to the figure. If xdata is a list, it the existing data will be extended by xdata.
 
         Args:
-            xdata (Union[float,List[float]]): The xdata to append.
+            xdata (Union[float, list[float]]): The xdata to append.
 
         """
         self._set_source_to_redis("x")
@@ -233,12 +233,12 @@ class BECPlotter:
         self._data_changed = True
 
     @typechecked
-    def append_ydata(self, ydata: Union[float, List[float]], axis: int = 0) -> None:
+    def append_ydata(self, ydata: Union[float, list[float]], axis: int = 0) -> None:
         """
         Append the ydata to the figure. If ydata is a list, it the existing data will be extended by ydata.
 
         Args:
-            ydata (Union[float,List[float]]): The ydata to append.
+            ydata (Union[float, list[float]]): The ydata to append.
             axis (int, optional): The axis to append the ydata for. Defaults to 0.
         """
         self._set_source_to_redis("y", axis)
@@ -248,13 +248,13 @@ class BECPlotter:
         self._data_changed = True
 
     @typechecked
-    def set_xydata(self, xdata: List[float], ydata: List[float], axis: int = 0) -> None:
+    def set_xydata(self, xdata: list[float], ydata: list[float], axis: int = 0) -> None:
         """
         Set the xdata and ydata of the figure.
 
         Args:
-            xdata (List[float]): The xdata to set.
-            ydata (List[float]): The ydata to set.
+            xdata (list[float]): The xdata to set.
+            ydata (list[float]): The ydata to set.
             axis (int, optional): The axis to set the ydata for. Defaults to 0.
         """
         self.set_xdata(xdata)
@@ -262,15 +262,15 @@ class BECPlotter:
 
     @typechecked
     def append_xydata(
-        self, xdata: Union[float, List[float]], ydata: Union[float, List[float]]
+        self, xdata: Union[float, list[float]], ydata: Union[float, list[float]]
     ) -> None:
         """
         Append the xdata and ydata to the figure. If xdata or ydata is a list, it the existing data will be extended
         by xdata or ydata.
 
         Args:
-            xdata (Union[float,List[float]]): The xdata to append.
-            ydata (Union[float,List[float]]): The ydata to append.
+            xdata (Union[float, list[float]]): The xdata to append.
+            ydata (Union[float, list[float]]): The ydata to append.
         """
         self.append_xdata(xdata)
         self.append_ydata(ydata)

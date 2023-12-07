@@ -2,9 +2,10 @@ import ast
 import enum
 import time
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Literal
+from typing import Any, Literal
 
 import numpy as np
+
 from bec_lib import DeviceManagerBase, MessageEndpoints, bec_logger, messages
 
 from .errors import LimitError, ScanAbortion
@@ -24,11 +25,11 @@ class ScanArgType(str, enum.Enum):
     DICT = "dict"
 
 
-def unpack_scan_args(scan_args: Dict[str, Any]) -> list:
+def unpack_scan_args(scan_args: dict[str, Any]) -> list:
     """unpack_scan_args unpacks the scan arguments and returns them as a tuple.
 
     Args:
-        scan_args (Dict[str, Any]): scan arguments
+        scan_args (dict[str, Any]): scan arguments
 
     Returns:
         list: list of arguments
@@ -538,7 +539,7 @@ class FlyScanBase(ScanBase):
     scan_type = "fly"
     pre_move = False
 
-    def _get_flyer_status(self) -> List:
+    def _get_flyer_status(self) -> list:
         flyer = self.scan_motors[0]
         producer = self.device_manager.producer
 
@@ -1254,7 +1255,7 @@ class MonitorScan(ScanBase):
         yield from self._set_position_offset()
         self._check_limits()
 
-    def _get_flyer_status(self) -> List:
+    def _get_flyer_status(self) -> list:
         producer = self.device_manager.producer
 
         pipe = producer.pipeline()

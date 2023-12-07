@@ -4,7 +4,6 @@ import functools
 import threading
 import time
 from collections import deque
-from typing import Tuple
 from uuid import uuid4
 
 from typeguard import typechecked
@@ -68,7 +67,7 @@ def _run_with_bl_checks(bl_checks, fcn, *args, **kwargs):
         bl_checks._levels.pop()
 
 
-def _run_on_failure(bl_checks, fcn, *args, **kwargs) -> Tuple:
+def _run_on_failure(bl_checks, fcn, *args, **kwargs) -> tuple:
     try:
         res = fcn(*args, **kwargs)
         return (True, res)

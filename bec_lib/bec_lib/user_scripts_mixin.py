@@ -6,7 +6,7 @@ import importlib
 import inspect
 import os
 import pathlib
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 from pylint import lint
 from pylint.reporters import CollectingReporter
@@ -100,7 +100,7 @@ class UserScriptsMixin:
             table.add_row(name, content.get("fname"))
         console.print(table)
 
-    def _load_script_module(self, file) -> List:
+    def _load_script_module(self, file) -> list:
         module_spec = importlib.util.spec_from_file_location("scripts", file)
         plugin_module = importlib.util.module_from_spec(module_spec)
         module_spec.loader.exec_module(plugin_module)

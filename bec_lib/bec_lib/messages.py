@@ -8,7 +8,7 @@ import sys
 import time
 from abc import abstractmethod
 from copy import deepcopy
-from typing import Any, List, Optional, Union
+from typing import Any, Optional, Union
 
 import msgpack
 import numpy as np
@@ -836,7 +836,7 @@ class ObserverMessage(BECMessage):
     msg_type = "observer_message"
 
     def __init__(
-        self, *, observer: List[dict], metadata: dict = None, version: float = DEFAULT_VERSION
+        self, *, observer: list[dict], metadata: dict = None, version: float = DEFAULT_VERSION
     ) -> None:
         """
 

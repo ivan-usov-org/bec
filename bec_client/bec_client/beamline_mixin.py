@@ -1,5 +1,4 @@
 from abc import abstractmethod
-from typing import Type
 
 from rich import style
 from rich.console import Console
@@ -31,7 +30,7 @@ class BeamlineMixin:
         for call in self._bl_calls:
             call.show()
 
-    def _bl_info_register(self, bl_info: Type[BeamlineShowInfo]) -> None:
+    def _bl_info_register(self, bl_info: type[BeamlineShowInfo]) -> None:
         """Register a beamline info class
 
         Args:

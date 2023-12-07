@@ -3,7 +3,7 @@ import enum
 import threading
 import traceback
 from collections import deque
-from typing import Callable, List
+from collections.abc import Callable
 
 from bec_lib.logger import bec_logger
 from bec_lib.utils import threadlocked
@@ -92,12 +92,12 @@ class CallbackHandler:
         return callback_id
 
     @threadlocked
-    def register_many(self, event_type: str, callbacks: List[Callable], sync=False) -> List[int]:
+    def register_many(self, event_type: str, callbacks: list[Callable], sync=False) -> list[int]:
         """Register multiple callbacks to an event type
 
         Args:
             event_type (str): Event type
-            callbacks (List[Callable]): List of callback functions
+            callbacks (list[Callable]): List of callback functions
             sync (bool, optional): Synchronous or async callback. Defaults to False.
 
         Returns:
