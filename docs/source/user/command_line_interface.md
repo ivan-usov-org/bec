@@ -61,6 +61,66 @@ Config:
 	update_frequency: 400
 ```
 
+#### Read interface
+
+To read from a device, execute 
+```ipython
+demo [1/50] ❯❯ dev.samx.read()
+Out[1]:
+{'samx': {'value': 0, 'timestamp': 1701942802.6418009},
+'samx_setpoint': {'value': 0, 'timestamp': 1701942802.641365},
+'samx_motor_is_moving': {'value': 0, 'timestamp': 1701942802.641365}}
+```
+in the command-line. 
+This returns a dictionary containing signals of the device `samx` of type `kind='normal'` or `kind='hinted'`. 
+For more details on `device`, `signal` and `kind`, refer to [ophyd](#developer.ophyd).
+
+In general, ophyd distinguishes different signals of a deviceClass by an attribute called `kind`.
+Possible values are: `hinted/normal/config/omitted`.  
+Configuration signals (`kind='config'`) are accessible via:
+```ipython
+demo [4/50] ❯❯ dev.samx.read_configuration()
+Out[4]:
+{'samx_velocity': {'value': 1, 'timestamp': 1701942802.641421},
+'samx_acceleration': {'value': 1, 'timestamp': 1701942802.641428}}
+```
+
+Devices are initialized within the [BEC device config](#user.devices). 
+In there, we include `device_config` to define paramters that are commonly used for this type of device. 
+For example, we use the field `limits` to specify software limits for motors and also store limits set via the command-line interface 
+Read the device_config via
+```ipython
+demo [5/50] ❯❯ dev.samx.get_device_config()
+Out[5]:
+{'delay': 1,
+'labels': 'samx',
+'limits': [-50, 50],
+'name': 'samx',
+'speed': 100,
+'tolerance': 0.01,
+'update_frequency': 400}
+```
+and to update parameters from the device_config, please check [set_device_config()](#user.devices.update_device_config).
+
+#### Get interface
+
+Besides directly reading specific signals from the ophyd class, you can also retrieve all signals from the `deviceClass` for `samx` via `get`. 
+This includes all signals of any `kind`:
+```ipython
+demo [13/50] ❯❯ signals = dev.samx.get()
+demo [14/50] ❯❯ signals
+Out[14]: samx(readback=0, setpoint=0, motor_is_moving=0, velocity=1, acceleration=1, high_limit_travel=50, low_limit_travel=-50, unused=1)
+demo [15/50] ❯❯ signals.readback
+Out[15]: 0
+```
+
+The return object of `dev.samx.get()` is a [namedtuple](https://docs.python.org/3/library/collections.html) with an access pattern similar to class attributes/properties: `signals.readback`.
+```{note}
+By adding `dev.samx.get(cached=False)`, we can force a readback from all deviceClass signals.
+However, device may take time to report their latest values.
+Therefore, the default is `cached=True`, which means that we use the last readback of the signal stored in redis, which gets automatically updated by the device upon change (in general). 
+```
+
 ### Move a motor
 
 A very common operation in the beginning is to be able to move a device. 
