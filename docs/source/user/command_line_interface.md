@@ -164,6 +164,27 @@ scans.umv(dev.samx, 5, dev.samy, 10, relative=False)
 ```
 ````
 
+#### Update motor limits
+In order to move motors in a safe manner, you can add software limits to a motor. 
+The following command, For example, changes the limits of `samx` to `-50 (low)` and `50 (high)`
+``` ipython
+dev.samx.limits = [-50, 50]
+```
+You may also directly access the low and high limits via `dev.samx.low_limit = -50` and `dev.samx.high_limit=50`.
+Both access patterns are identical.
+Software limits are updated in the device_config, however, when done via command-line this only updates the current device_config session in redis.
+To make sure that limits are stored after reloading the device BEC config, you need to update the device config on disk, please check [bec.config.save_current_session()](#user.devices.export_device_config).
+
+As per default, software limits for motors are set to the values specified in the [BEC device config](#developer.ophyd), subfield device_config. 
+
+````{note}
+If no software limits are specified, the motor will be initialized without software limits. 
+This is equivalent to having identical values for high and low limits, e.g. 
+```python
+dev.samx.limits = [0, 0]
+```
+````
+
 ### Run a scan
 
 All currently available scans are accessible through `scans.`, e.g.
