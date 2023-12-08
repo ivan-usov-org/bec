@@ -127,9 +127,9 @@ tests:
       junit: report.xml
       cobertura: coverage.xml
 
-tests-3.9:
+tests-3.10:
   stage: AdditionalTests
-  image: $CI_DOCKER_REGISTRY/python:3.9
+  image: $CI_DOCKER_REGISTRY/python:3.10
   needs: ["tests"]
   allow_failure: true
   script:
@@ -140,16 +140,16 @@ tests-3.9:
     - *install-bec-services-dev
     - pytest -v --junitxml=report.xml --random-order ./data_processing/tests ./bec_lib/tests ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests ./file_writer/tests ./scihub/tests
 
-tests-3.10:
-  extends: "tests-3.9"
-  stage: AdditionalTests
-  image: $CI_DOCKER_REGISTRY/python:3.10
-  allow_failure: true
-
 tests-3.11:
-  extends: "tests-3.9"
+  extends: "tests-3.10"
   stage: AdditionalTests
   image: $CI_DOCKER_REGISTRY/python:3.11
+  allow_failure: true
+
+tests-3.12:
+  extends: "tests-3.10"
+  stage: AdditionalTests
+  image: $CI_DOCKER_REGISTRY/python:3.12
   allow_failure: true
 
 end-2-end:
