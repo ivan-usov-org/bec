@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.49.1 (2023-12-08)
+
+### Fix
+
+* Fixed .get inconsistencies ([`83af812`](https://gitlab.psi.ch/bec/bec/-/commit/83af8127da11c80a47e05e375080c89bcc76716e))
+
 ## v0.49.0 (2023-12-07)
 
 ### Feature
