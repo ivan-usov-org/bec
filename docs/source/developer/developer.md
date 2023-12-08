@@ -17,7 +17,6 @@ bec_config/
 data_access/
 event_data/
 ophyd/
-ophyd_devices/
 external_sources/
 glossary/
 reference/
@@ -36,8 +35,7 @@ Here, we aim to provide you with all the essential information to kickstart your
 * [BEC Configuration](#developer.bec_config): Learn about the different ways of customizing BEC to your needs.
 * [Data Access](#developer.data_access): Explore different ways of accessing data acquired with BEC.
 * [Event Data](#developer.data_access): Explore the handling of event data in BEC to streamline your data analysis and live feedback.
-* [Ophyd](#developer.ophyd): Familiarize yourself with Ophyd, the underlying library for device control in BEC.
-* [Ophyd Devices](#developer.ophyd_devices): Learn how to integrate and work with Ophyd devices in the BEC context.
+* [Ophyd](#developer.ophyd): Familiarize yourself with Ophyd, the underlying library for device control in BEC, and learn how to integrate and work with Ophyd devices in the BEC context.
 * [External Sources](#developer.external_sources): Understand how to incorporate external data sources into your BEC workflow.
 * [BEC Plugins](#developer.bec_plugins): Learn how to create and use plugins to extend BEC's functionality and tailor it to your needs.
 * [Glossary](#developer.glossary): Refer to a glossary of terms used throughout the BEC documentation.
