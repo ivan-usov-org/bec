@@ -329,7 +329,7 @@ class ScanWorker(threading.Thread):
             instr (DeviceInstructionMessage): Device instruction received from the scan assembler
 
         """
-        async_devices = [dev.name for dev in self.device_manager.devices.async_devices]
+        async_devices = [dev.name for dev in self.device_manager.devices.async_devices()]
         devices = [
             dev.name
             for dev in self.device_manager.devices.enabled_devices

@@ -1206,33 +1206,34 @@ def test_close_scan(msg, scan_id, max_point_id, exp_num_points):
     [
         messages.DeviceInstructionMessage(
             device=None,
-            action="close_scan",
+            action="stage",
             parameter={},
-            metadata={"readout_priority": "monitored", "DIID": 18, "scanID": "12345"},
+            metadata={"readout_priority": "async", "DIID": 18, "scanID": "12345"},
         ),
     ],
 )
 def test_stage_device(msg):
     worker = get_scan_worker()
+    worker.device_manager.devices["eiger"]._config["readoutPriority"] = "async"
 
     with mock.patch.object(worker, "_wait_for_stage") as wait_mock:
         with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
             worker.stage_devices(msg)
-            detectors = [dev.name for dev in worker.device_manager.devices.detectors()]
+            async_devices = [dev.name for dev in worker.device_manager.devices.async_devices()]
             devices = [
                 dev.name
                 for dev in worker.device_manager.devices.enabled_devices
-                if dev.name not in detectors
+                if dev.name not in async_devices
             ]
 
             for dev in worker.device_manager.devices.enabled_devices:
                 assert dev.name in worker._staged_devices
-            for detector in detectors:
+            for async_dev in async_devices:
                 assert (
                     mock.call(
                         MessageEndpoints.device_instructions(),
                         messages.DeviceInstructionMessage(
-                            device=detector,
+                            device=async_dev,
                             action="stage",
                             parameter=msg.content["parameter"],
                             metadata=msg.metadata,
@@ -1263,7 +1264,7 @@ def test_stage_device(msg):
             assert (
                 mock.call(
                     staged=True,
-                    devices=detectors,
+                    devices=async_devices,
                     metadata=msg.metadata,
                 )
                 in wait_mock.mock_calls
