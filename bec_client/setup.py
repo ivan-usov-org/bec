@@ -46,7 +46,7 @@ if __name__ == "__main__":
         "install_requires": [
             "numpy",
             "requests",
-            "typeguard<3.0",
+            "typeguard",
             "ipython",
             "rich",
             "pyepics",

@@ -50,8 +50,8 @@ class Observer:
     def limits(self):
         return self._limits
 
-    @limits.setter
     @typechecked
+    @limits.setter
     def limits(self, val: list):
         self._limits = val
 
@@ -59,8 +59,8 @@ class Observer:
     def low_limit(self):
         return self.limits[0]
 
-    @low_limit.setter
     @typechecked
+    @low_limit.setter
     def low_limit(self, val: float):
         self.limits[0] = val
 
@@ -68,8 +68,8 @@ class Observer:
     def high_limit(self):
         return self.limits[1]
 
-    @high_limit.setter
     @typechecked
+    @high_limit.setter
     def high_limit(self, val: float):
         self.limits[1] = val
 

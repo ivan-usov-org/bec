@@ -62,8 +62,8 @@ class XrayEyeAlign:
             return 0.0
         return val[0] / 1000
 
-    @tomo_fovx_offset.setter
     @typechecked
+    @tomo_fovx_offset.setter
     def tomo_fovx_offset(self, val: float):
         val_old = self.client.get_global_var("tomo_fov_offset")
         if val_old is None:
@@ -77,8 +77,8 @@ class XrayEyeAlign:
             return 0.0
         return val[1] / 1000
 
-    @tomo_fovy_offset.setter
     @typechecked
+    @tomo_fovy_offset.setter
     def tomo_fovy_offset(self, val: float):
         val_old = self.client.get_global_var("tomo_fov_offset")
         if val_old is None:
@@ -667,8 +667,8 @@ class LamNI(LamNIOpticsMixin):
             return 0
         return val
 
-    @lamni_stitch_x.setter
     @typechecked
+    @lamni_stitch_x.setter
     def lamni_stitch_x(self, val: int):
         self.client.set_global_var("lamni_stitch_x", val)
 
@@ -679,8 +679,8 @@ class LamNI(LamNIOpticsMixin):
             return 0
         return val
 
-    @lamni_stitch_y.setter
     @typechecked
+    @lamni_stitch_y.setter
     def lamni_stitch_y(self, val: int):
         self.client.set_global_var("lamni_stitch_y", val)
 
@@ -724,8 +724,8 @@ class LamNI(LamNIOpticsMixin):
             return "bec_test_sample"
         return val
 
-    @sample_name.setter
     @typechecked
+    @sample_name.setter
     def sample_name(self, val: str):
         self.client.set_global_var("sample_name", val)
 

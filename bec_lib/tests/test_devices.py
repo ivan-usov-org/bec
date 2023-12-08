@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+from typeguard import TypeCheckError
 
 from bec_lib.devicemanager import DeviceManagerBase
 from bec_lib.tests.utils import ConnectorMock
@@ -57,7 +58,8 @@ def test_device_enable_set(device_config):
 
 
 @pytest.mark.parametrize(
-    "val,raised_error", [({"in": 5}, None), ({"in": 5, "out": 10}, None), ({"5", "4"}, TypeError)]
+    "val,raised_error",
+    [({"in": 5}, None), ({"in": 5, "out": 10}, None), ({"5", "4"}, TypeCheckError)],
 )
 def test_device_set_user_parameter(device_config, val, raised_error):
     connector = ConnectorMock("")
@@ -79,7 +81,7 @@ def test_device_set_user_parameter(device_config, val, raised_error):
     [
         ({"in": 2, "out": 5}, {"in": 5}, {"in": 5, "out": 5}, None),
         ({"in": 2, "out": 5}, {"in": 5, "out": 10}, {"in": 5, "out": 10}, None),
-        ({"in": 2, "out": 5}, {"5", "4"}, None, TypeError),
+        ({"in": 2, "out": 5}, {"5", "4"}, None, TypeCheckError),
         (None, {"in": 5}, {"in": 5}, None),
     ],
 )

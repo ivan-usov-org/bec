@@ -28,8 +28,8 @@ def scan_to_csv(
     scan_report: Union[ScanReport, List[ScanReport]],
     output_name: str,
     delimiter: str = ",",
-    dialect: str = None,
-    header: list = None,
+    dialect: Union[str, None] = None,
+    header: Union[list, None] = None,
     write_metadata: bool = True,
 ) -> None:
     """Convert scan data to a csv file.

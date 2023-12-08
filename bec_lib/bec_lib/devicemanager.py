@@ -4,7 +4,7 @@ import enum
 import re
 import time
 import warnings
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Union
 
 import msgpack
 from rich.console import Console
@@ -398,7 +398,9 @@ class DeviceContainer(dict):
         return self.readout_priority(ReadoutPriority.ASYNC)
 
     @typechecked
-    def monitored_devices(self, scan_motors: list = None, readout_priority: dict = None) -> list:
+    def monitored_devices(
+        self, scan_motors: Union[list, None] = None, readout_priority: Union[dict, None] = None
+    ) -> list:
         """get a list of all enabled primary devices"""
         devices = self.readout_priority(ReadoutPriority.MONITORED)
         if scan_motors:
@@ -425,7 +427,9 @@ class DeviceContainer(dict):
         return [dev for dev in set(devices) if dev not in excluded_devices]
 
     @typechecked
-    def baseline_devices(self, scan_motors: list = None, readout_priority: dict = None) -> list:
+    def baseline_devices(
+        self, scan_motors: Union[list, None] = None, readout_priority: Union[dict, None] = None
+    ) -> list:
         """
         Get a list of all enabled baseline devices
         Args:
