@@ -107,7 +107,7 @@ def test_read_kind_hinted(dev, kind, cached):
             if cached:
                 mock_get.assert_called_once_with(MessageEndpoints.device_readback("samx"))
                 mock_run.assert_not_called()
-                assert res == {"value": 0, "timestamp": 1701105880.1711318}
+                assert res == {"samx": {"value": 0, "timestamp": 1701105880.1711318}}
             else:
                 mock_run.assert_called_once_with(cached=False, fcn=dev.samx.readback.read)
                 mock_get.assert_not_called()

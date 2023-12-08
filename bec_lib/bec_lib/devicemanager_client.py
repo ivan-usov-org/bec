@@ -329,7 +329,8 @@ class OphydInterfaceBase(RPCBase):
         if filter_to_hints:
             signals = {key: val for key, val in signals.items() if key in self._hints}
         if self._signal_info:
-            return signals.get(self._signal_info.get("obj_name"))
+            obj_name = self._signal_info.get("obj_name")
+            return {obj_name: signals.get(obj_name, {})}
         return {key: val for key, val in signals.items() if key.startswith(self.full_name)}
 
     @rpc
@@ -365,8 +366,8 @@ class OphydInterfaceBase(RPCBase):
         ret = self.read()
         if ret is None:
             return None
-
-        return ret.get("value")
+        # return ret
+        return ret.get(self._signal_info.get("obj_name"), {}).get("value")
 
     @rpc
     def put(self, value: Any):
