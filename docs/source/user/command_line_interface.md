@@ -1,7 +1,7 @@
 (user.command_line_interface)=
 ## Command-Line Interface (CLI)
 
-In the previous sections, you have succesfully started BEC and also already interacted with the CLI to update the device configuration. 
+In the previous sections, you have succesfully started BEC and also already interacted with the CLI to update the BEC device configuration. 
 This section aims to explore the CLI capabilities further.
 
 ### Start-up
@@ -64,6 +64,7 @@ Config:
 #### Read interface
 
 To read from a device, execute 
+
 ```ipython
 demo [1/50] ❯❯ dev.samx.read()
 Out[1]:
@@ -71,13 +72,21 @@ Out[1]:
 'samx_setpoint': {'value': 0, 'timestamp': 1701942802.641365},
 'samx_motor_is_moving': {'value': 0, 'timestamp': 1701942802.641365}}
 ```
+
 in the command-line. 
-This returns a dictionary containing signals of the device `samx` of type `kind='normal'` or `kind='hinted'`. 
+This returns a dictionary containing signals of the device `samx` of `kind` `normal` or `hinted`. 
 For more details on `device`, `signal` and `kind`, refer to [ophyd](#developer.ophyd).
+
+```{note}
+By adding `cached=False`, as an additional argument, e.g. `dev.samx.read(cached=False)`, we can force a readback from the signals.
+However, devices may take time to report their latest values.
+Therefore, the default is `cached=True`, which means that we use the last readback of the signal stored in redis which gets automatically updated by the device upon change. 
+```
 
 In general, ophyd distinguishes different signals of a deviceClass by an attribute called `kind`.
 Possible values are: `hinted/normal/config/omitted`.  
 Configuration signals (`kind='config'`) are accessible via:
+
 ```ipython
 demo [4/50] ❯❯ dev.samx.read_configuration()
 Out[4]:
@@ -85,10 +94,15 @@ Out[4]:
 'samx_acceleration': {'value': 1, 'timestamp': 1701942802.641428}}
 ```
 
-Devices are initialized within the [BEC device config](#user.devices). 
-In there, we include `device_config` to define paramters that are commonly used for this type of device. 
-For example, we use the field `limits` to specify software limits for motors and also store limits set via the command-line interface 
-Read the device_config via
+How devices are initialized is determined by their `deviceConfig` (see also [BEC device config](#user.devices)).
+The current deviceConfig, e.g. for the device `samx` can be retrieved  either by simply typing 
+
+``` ipython
+dev.samx
+``` 
+
+or directly by retrieving the deviceConfig through
+
 ```ipython
 demo [5/50] ❯❯ dev.samx.get_device_config()
 Out[5]:
@@ -100,7 +114,8 @@ Out[5]:
 'tolerance': 0.01,
 'update_frequency': 400}
 ```
-and to update parameters from the device_config, please check [set_device_config()](#user.devices.update_device_config).
+
+To update the deviceConfig, please check [set_device_config()](#user.devices.update_device_config).
 
 #### Get interface
 
@@ -115,11 +130,6 @@ Out[15]: 0
 ```
 
 The return object of `dev.samx.get()` is a [namedtuple](https://docs.python.org/3/library/collections.html) with an access pattern similar to class attributes/properties: `signals.readback`.
-```{note}
-By adding `dev.samx.get(cached=False)`, we can force a readback from all deviceClass signals.
-However, device may take time to report their latest values.
-Therefore, the default is `cached=True`, which means that we use the last readback of the signal stored in redis, which gets automatically updated by the device upon change (in general). 
-```
 
 ### Move a motor
 
@@ -165,15 +175,18 @@ scans.umv(dev.samx, 5, dev.samy, 10, relative=False)
 ````
 
 #### Update motor limits
+
 In order to move motors in a safe manner, you can add software limits to a motor. 
 The following command, For example, changes the limits of `samx` to `-50 (low)` and `50 (high)`
+
 ``` ipython
 dev.samx.limits = [-50, 50]
 ```
+
 You may also directly access the low and high limits via `dev.samx.low_limit = -50` and `dev.samx.high_limit=50`.
 Both access patterns are identical.
 Software limits are updated in the device_config, however, when done via command-line this only updates the current device_config session in redis.
-To make sure that limits are stored after reloading the device BEC config, you need to update the device config on disk, please check [bec.config.save_current_session()](#user.devices.export_device_config).
+To make sure that limits are stored after reloading the device BEC config, you need to update the deviceConfig on disk, please check [bec.config.save_current_session()](#user.devices.export_device_config).
 
 As per default, software limits for motors are set to the values specified in the [BEC device config](#developer.ophyd), subfield device_config. 
 
