@@ -2,7 +2,6 @@ import datetime
 import threading
 import time
 import traceback
-import re
 from asyncio.log import logger
 from typing import List
 
@@ -330,13 +329,13 @@ class ScanWorker(threading.Thread):
             instr (DeviceInstructionMessage): Device instruction received from the scan assembler
 
         """
-        detectors = [dev.name for dev in self.device_manager.devices.detectors()]
+        async_devices = [dev.name for dev in self.device_manager.devices.async_devices]
         devices = [
             dev.name
             for dev in self.device_manager.devices.enabled_devices
-            if dev.name not in detectors
+            if dev.name not in async_devices
         ]
-        for det in detectors:
+        for det in async_devices:
             self.device_manager.producer.send(
                 MessageEndpoints.device_instructions(),
                 messages.DeviceInstructionMessage(
@@ -346,7 +345,7 @@ class ScanWorker(threading.Thread):
                     metadata=instr.metadata,
                 ).dumps(),
             )
-        self._staged_devices.update(detectors)
+        self._staged_devices.update(async_devices)
 
         self.device_manager.producer.send(
             MessageEndpoints.device_instructions(),
@@ -358,7 +357,7 @@ class ScanWorker(threading.Thread):
             ).dumps(),
         )
         self._staged_devices.update(devices)
-        self._wait_for_stage(staged=True, devices=detectors, metadata=instr.metadata)
+        self._wait_for_stage(staged=True, devices=async_devices, metadata=instr.metadata)
         self._wait_for_stage(staged=True, devices=devices, metadata=instr.metadata)
 
     def unstage_devices(

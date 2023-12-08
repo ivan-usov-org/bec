@@ -379,6 +379,19 @@ class DeviceContainer(dict):
         # pylint: disable=protected-access
         return [dev for _, dev in self.items() if dev._config["readoutPriority"] == val]
 
+    def get_device_type_devices(self, device_type: DeviceType) -> list:
+        """get all devices with the specified device type
+
+        Args:
+            device_type (str): device type (e.g. POSITIONER, DETECTOR, MONITOR, CONTROLLER, MISC)
+
+        Returns:
+            list: List of devices that belong to the specified acquisition readoutPriority
+        """
+        val = DeviceType(device_type)
+        # pylint: disable=protected-access
+        return [dev for _, dev in self.items() if dev._config["deviceType"] == val]
+
     def async_devices(self) -> list:
         """get a list of all synchronous devices"""
         # pylint: disable=protected-access
@@ -387,7 +400,7 @@ class DeviceContainer(dict):
     @typechecked
     def monitored_devices(self, scan_motors: list = None, readout_priority: dict = None) -> list:
         """get a list of all enabled primary devices"""
-        devices = self.readout_priority("monitored")
+        devices = self.readout_priority(ReadoutPriority.MONITORED)
         if scan_motors:
             if not isinstance(scan_motors, list):
                 scan_motors = [scan_motors]
@@ -407,6 +420,7 @@ class DeviceContainer(dict):
         excluded_devices.extend([self.get(dev) for dev in readout_priority.get("baseline", [])])
         excluded_devices.extend([self.get(dev) for dev in readout_priority.get("on_request", [])])
         excluded_devices.extend([self.get(dev) for dev in readout_priority.get("continuous", [])])
+        excluded_devices.extend([self.get(dev) for dev in readout_priority.get("async", [])])
 
         return [dev for dev in set(devices) if dev not in excluded_devices]
 
@@ -421,17 +435,27 @@ class DeviceContainer(dict):
         Returns:
             list: list of baseline devices
         """
+        devices = self.readout_priority(ReadoutPriority.BASELINE)
+        if scan_motors:
+            if not isinstance(scan_motors, list):
+                scan_motors = [scan_motors]
+            for scan_motor in scan_motors:
+                if not scan_motor in devices:
+                    if isinstance(scan_motor, Device):
+                        devices.append(scan_motor)
+                    else:
+                        devices.append(self.get(scan_motor))
         if not readout_priority:
             readout_priority = {}
 
-        devices = self.enabled_devices
         devices.extend([self.get(dev) for dev in readout_priority.get("baseline", [])])
 
-        excluded_devices = self.monitored_devices(scan_motors)
-        excluded_devices.extend(self.async_devices())
-        excluded_devices.extend(self.readout_priority("on_request"))
+        excluded_devices = scan_motors
+        excluded_devices.extend(self.disabled_devices)
         excluded_devices.extend([self.get(dev) for dev in readout_priority.get("monitored", [])])
+        excluded_devices.extend([self.get(dev) for dev in readout_priority.get("on_request", [])])
         excluded_devices.extend([self.get(dev) for dev in readout_priority.get("continuous", [])])
+        excluded_devices.extend([self.get(dev) for dev in readout_priority.get("async", [])])
 
         return [dev for dev in set(devices) if dev not in excluded_devices]
 
@@ -464,20 +488,7 @@ class DeviceContainer(dict):
     @typechecked
     def detectors(self) -> list:
         """get a list of all enabled detectors"""
-        warnings.warn(
-            "The method `detectors` is deprecated and will be removed in the future.",
-            DeprecationWarning,
-        )
-        detectors = [
-            getattr(self, dev)
-            for dev in self
-            if re.search(
-                "det", getattr(self, dev).__dict__["_config"]["deviceClass"], re.IGNORECASE
-            )
-            is not None
-        ]
-
-        return detectors
+        return self.get_device_type_devices(DeviceType.DETECTOR)
 
     def wm(self, device_names: List[str]):
         """Get the current position of one or more devices.

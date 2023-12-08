@@ -209,6 +209,60 @@ def test_monitored_devices_with_readout_priority(scan_motors_in, readout_priorit
     assert len(set(readout_priority_in.get("on_request", [])) & primary_device_names) == 0
 
 
+@pytest.mark.parametrize(
+    "scan_motors_in,readout_priority_in",
+    [
+        ([], {}),
+        ([], {"monitored": ["samx"], "baseline": [], "on_request": []}),
+        ([], {"monitored": [], "baseline": ["samx"], "on_request": []}),
+        ([], {"monitored": ["samx", "samy"], "baseline": [], "on_request": ["bpm4i"]}),
+        (
+            [],
+            {
+                "monitored": ["samx", "samy"],
+                "baseline": [],
+                "on_request": ["bpm4i"],
+                "async": ["bpm3i"],
+            },
+        ),
+        (
+            [],
+            {
+                "monitored": ["samx", "samy"],
+                "baseline": [],
+                "on_request": ["bpm4i"],
+                "async": ["bpm3i"],
+                "continuous": ["bpm2i"],
+            },
+        ),
+    ],
+)
+def test_baseline_devices(scan_motors_in, readout_priority_in):
+    connector = ConnectorMock("")
+    dm = DeviceManagerBase(connector)
+    config_content = None
+    with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
+        config_content = yaml.safe_load(f)
+        dm._session = create_session_from_config(config_content)
+    dm._load_session()
+    scan_motors = [dm.devices.get(dev) for dev in scan_motors_in]
+    monitored_devices = dm.devices.monitored_devices(
+        scan_motors=scan_motors, readout_priority=readout_priority_in
+    )
+    baseline_devices = dm.devices.baseline_devices(
+        scan_motors=scan_motors, readout_priority=readout_priority_in
+    )
+    primary_device_names = set(dev.name for dev in monitored_devices)
+    baseline_devices_names = set(dev.name for dev in baseline_devices)
+
+    assert len(primary_device_names & baseline_devices_names) == 0
+
+    assert len(set(readout_priority_in.get("on_request", [])) & baseline_devices_names) == 0
+    assert len(set(readout_priority_in.get("on_request", [])) & primary_device_names) == 0
+    assert len(set(readout_priority_in.get("async", [])) & primary_device_names) == 0
+    assert len(set(readout_priority_in.get("continuous", [])) & primary_device_names) == 0
+
+
 def test_device_config_update_callback():
     connector = ConnectorMock("")
     dm = DeviceManagerBase(connector)
