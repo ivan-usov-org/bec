@@ -445,12 +445,13 @@ class DeviceContainer(dict):
                         devices.append(scan_motor)
                     else:
                         devices.append(self.get(scan_motor))
+            excluded_devices = scan_motors
+        else:
+            excluded_devices = []
         if not readout_priority:
             readout_priority = {}
 
         devices.extend([self.get(dev) for dev in readout_priority.get("baseline", [])])
-
-        excluded_devices = scan_motors
         excluded_devices.extend(self.disabled_devices)
         excluded_devices.extend([self.get(dev) for dev in readout_priority.get("monitored", [])])
         excluded_devices.extend([self.get(dev) for dev in readout_priority.get("on_request", [])])
