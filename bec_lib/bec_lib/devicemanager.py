@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import enum
 import time
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING
 
 import msgpack
 from rich.console import Console
