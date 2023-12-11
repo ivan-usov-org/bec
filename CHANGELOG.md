@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.50.1 (2023-12-11)
+
+### Fix
+
+* Fixed decorator order and raised error for new typeguard version ([`8b610c2`](https://gitlab.psi.ch/bec/bec/-/commit/8b610c2ee88229122991892490b053fae3454b20))
+
 ## v0.50.0 (2023-12-11)
 
 ### Feature
