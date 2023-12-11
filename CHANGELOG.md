@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.49.2 (2023-12-11)
+
+### Fix
+
+* Added wheel for bec server install ([`7f51416`](https://gitlab.psi.ch/bec/bec/-/commit/7f514168c027031d8dacd4b7ec539c78a468b543))
+
+### Documentation
+
+* Updated install information for bec dev ([`6ede847`](https://gitlab.psi.ch/bec/bec/-/commit/6ede847b3e02593241420c37425659429729f823))
+
 ## v0.49.1 (2023-12-08)
 
 ### Fix
