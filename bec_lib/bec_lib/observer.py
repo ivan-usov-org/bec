@@ -50,8 +50,8 @@ class Observer:
     def limits(self):
         return self._limits
 
-    @typechecked
     @limits.setter
+    @typechecked
     def limits(self, val: list):
         self._limits = val
 
@@ -59,8 +59,8 @@ class Observer:
     def low_limit(self):
         return self.limits[0]
 
-    @typechecked
     @low_limit.setter
+    @typechecked
     def low_limit(self, val: float):
         self.limits[0] = val
 
@@ -68,8 +68,8 @@ class Observer:
     def high_limit(self):
         return self.limits[1]
 
-    @typechecked
     @high_limit.setter
+    @typechecked
     def high_limit(self, val: float):
         self.limits[1] = val
 
@@ -84,7 +84,8 @@ class Observer:
     def _check_limits(self, limits, low_limit, high_limit):
         if limits is not None and (low_limit is not None or high_limit is not None):
             raise AttributeError(
-                "Ambiguous condition: Limits are set multiple times. Use either limits or low_limit/high_limit."
+                "Ambiguous condition: Limits are set multiple times. Use either limits or"
+                " low_limit/high_limit."
             )
         if limits is not None:
             self.limits = limits
@@ -132,14 +133,16 @@ class ObserverManager:
         self._observer = self._get_installed_observer()
 
     @typechecked
-    def add_observer(self, observer: Observer, ignore_existing=False):
+    def add_observer(self, observer: Observer, ignore_existing: bool = False):
         if not hasattr(self.device_manager.devices, observer.device):
             AttributeError(
-                f"The specified observer uses device {observer.device} which is currently not configured."
+                f"The specified observer uses device {observer.device} which is currently not"
+                " configured."
             )
         if self._is_device_observed(observer.device) and not ignore_existing:
             raise AttributeError(
-                f"Device {observer.device} is already being observed. If you want to add an additional observer for this device, use 'ignore_existing=True'."
+                f"Device {observer.device} is already being observed. If you want to add an"
+                " additional observer for this device, use 'ignore_existing=True'."
             )
         self._observer.append(observer)
         self.update_observer()

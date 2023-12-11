@@ -3,6 +3,7 @@ from unittest import mock
 
 import pytest
 import yaml
+from typeguard import TypeCheckError
 
 import bec_lib
 from bec_lib import messages
@@ -64,7 +65,7 @@ dir_path = os.path.dirname(bec_lib.__file__)
                 "on_resume": "restart",
                 "limits": 20,
             },
-            TypeError,
+            TypeCheckError,
         ),
         (
             {

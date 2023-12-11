@@ -490,7 +490,6 @@ class DeviceContainer(dict):
                 tags.update(dev_tags)
         return list(tags)
 
-    @typechecked
     def detectors(self) -> list:
         """get a list of all enabled detectors"""
         return self.get_device_type_devices(DeviceType.DETECTOR)

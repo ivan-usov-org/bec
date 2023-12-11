@@ -173,8 +173,8 @@ class ScanManager:
             return -1
         return int(num)
 
-    @typechecked
     @next_scan_number.setter
+    @typechecked
     def next_scan_number(self, val: int):
         """set the next scan number in redis"""
         return self.producer.set(MessageEndpoints.scan_number(), val)
@@ -184,8 +184,8 @@ class ScanManager:
         """get the next dataset number from redis"""
         return int(self.producer.get(MessageEndpoints.dataset_number()))
 
-    @typechecked
     @next_dataset_number.setter
+    @typechecked
     def next_dataset_number(self, val: int):
         """set the next dataset number in redis"""
         return self.producer.set(MessageEndpoints.dataset_number(), val)
