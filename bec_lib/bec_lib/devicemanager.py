@@ -1,10 +1,8 @@
 from __future__ import annotations
 
 import enum
-import re
 import time
-import warnings
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Union
 
 import msgpack
 from rich.console import Console
@@ -390,7 +388,7 @@ class DeviceContainer(dict):
         """
         val = DeviceType(device_type)
         # pylint: disable=protected-access
-        return [dev for _, dev in self.items() if dev._config["deviceType"] == val]
+        return [dev for _, dev in self.items() if dev._config.get("deviceType") == val]
 
     def async_devices(self) -> list:
         """get a list of all synchronous devices"""

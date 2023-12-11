@@ -39,22 +39,16 @@ name: user.devices.add_gauss_bpm
 ---
 
 gauss_bpm:
-  acquisitionConfig:
-    acquisitionGroup: monitor
-    readoutPriority: monitored
-    schedule: sync
+  readoutPriority: monitored
   deviceClass: sim:sim:SynGaussBEC
   deviceConfig:
-    labels: gauss_bpm
-    name: gauss_bpm
     sigma: 1
     noise: 'uniform'
     noise_multiplier: 0.4
   deviceTags:
   - beamline
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: False
 ```
 ### Upload a new device config
 

@@ -17,6 +17,7 @@ from bec_lib.devicemanager import (
     DeviceContainer,
     DeviceManagerBase,
     Status,
+    DeviceType,
 )
 from bec_lib.tests.utils import ConnectorMock, create_session_from_config
 
@@ -360,6 +361,24 @@ def test_readout_priority():
     parent = mock.MagicMock()
     device = Device("test", {"readoutPriority": "baseline"}, parent=parent)
     assert device.readout_priority == "baseline"
+
+
+@pytest.mark.parametrize(
+    "device_config, deviceType_in_config",
+    [
+        ({"readoutPriority": "baseline"}, False),
+        ({"deviceType": "monitor", "readoutPriority": "baseline"}, True),
+    ],
+)
+def test_get_device_type_devices(device_config, deviceType_in_config):
+    parent = mock.MagicMock()
+    device = Device("test", device_config, parent=parent)
+    devs = DeviceContainer()
+    devs["test"] = device
+    if deviceType_in_config is True:
+        assert devs.get_device_type_devices(DeviceType.MONITOR) == [device]
+    else:
+        assert devs.get_device_type_devices(DeviceType.MONITOR) == []
 
 
 def test_set_readout_priority():
