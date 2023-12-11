@@ -8,7 +8,7 @@ if __name__ == "__main__":
             "numpy",
             "msgpack",
             "requests",
-            "typeguard>=3",
+            "typeguard>=4.0.1",
             "pyyaml",
             "redis",
             "cytoolz",
