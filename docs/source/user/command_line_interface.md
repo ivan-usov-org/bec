@@ -36,26 +36,23 @@ This allows users to use tab-completion for finding devices.
 
 To inspect the device samx, you can simply type ``dev.samx`` and you'll get a printout of the relevant information about this device.
 ```ipython
-demo [1/31] ❯❯ dev.samx
+demo [1/3] ❯❯ dev.samx
 Out[1]:
 Positioner(name=samx, enabled=True):
 --------------------
 Details:
 	Description: samx
 	Status: enabled
-	Set enabled: True
-	Last recorded value: {'samx': {'value': 0.02237977124951616, 'timestamp': 1701081400.226357}, 'samx_setpoint': {'value': 0.022316991706485642, 'timestamp': 1701081400.161551}, 'samx_motor_is_moving': {'value': 0, 'timestamp': 1701081400.226239}}
+	Read only: False
+	Last recorded value: {'samx': {'value': -0.0011717217935431634, 'timestamp': 1702306192.450343}, 'samx_setpoint': {'value': 0, 'timestamp': 1702306192.382011}, 'samx_motor_is_moving': {'value': 0, 'timestamp': 1702306192.450175}}
 	Device class: SynAxisOPAAS
-	Acquisition group: motor
-	Acquisition readoutPriority: baseline
+	readoutPriority: baseline
 	Device tags: ['user motors']
 	User parameter: None
 --------------------
 Config:
 	delay: 1
-	labels: samx
 	limits: [-50, 50]
-	name: samx
 	speed: 100
 	tolerance: 0.01
 	update_frequency: 400
@@ -63,7 +60,13 @@ Config:
 
 #### Read interface
 
-To read from a device, execute 
+While the device inspection as seen above is an easy way to quickly glance at the current state of a device, it cannot be used programmatically, i.e. within a script. 
+For reading from a device, we provide two interfaces: `.read` and `.get`.
+Devices are composed of signals, each of their own `kind` with possible values `hinted/normal/config/omitted`. 
+It is the `kind` attribute that determines what signals are read out by using e.g. `dev.samx.read()`.
+For more details on `device`, `signal` and `kind`, refer to [ophyd](#developer.ophyd).
+
+To read out `hinted` and `normal` signals from a device, use
 
 ```ipython
 demo [1/50] ❯❯ dev.samx.read()
@@ -73,19 +76,7 @@ Out[1]:
 'samx_motor_is_moving': {'value': 0, 'timestamp': 1701942802.641365}}
 ```
 
-in the command-line. 
-This returns a dictionary containing signals of the device `samx` of `kind` `normal` or `hinted`. 
-For more details on `device`, `signal` and `kind`, refer to [ophyd](#developer.ophyd).
-
-```{note}
-By adding `cached=False`, as an additional argument, e.g. `dev.samx.read(cached=False)`, we can force a readback from the signals.
-However, devices may take time to report their latest values.
-Therefore, the default is `cached=True`, which means that we use the last readback of the signal stored in redis which gets automatically updated by the device upon change. 
-```
-
-In general, ophyd distinguishes different signals of a deviceClass by an attribute called `kind`.
-Possible values are: `hinted/normal/config/omitted`.  
-Configuration signals (`kind='config'`) are accessible via:
+and
 
 ```ipython
 demo [4/50] ❯❯ dev.samx.read_configuration()
@@ -94,7 +85,64 @@ Out[4]:
 'samx_acceleration': {'value': 1, 'timestamp': 1701942802.641428}}
 ```
 
-How devices are initialized is determined by their `deviceConfig` (see also [BEC device config](#user.devices)).
+to read the `config` signals.
+In both cases, a nested dictionary is returned with value/timestamp pairs for each signal. 
+The current position of `samx` is accessed `dev.samx.read()['samx']['value']`.
+
+```{note}
+For `hinted` and `normal` signals, the default behaviour is to read the last reported value from redis, i.e. `cached=True`.
+However, we can force a readback by using `dev.samx.read(cached=False)` which will introduce additional overhead. 
+Signals of type `config` are currently not stored in redis, thus a readback from the device is always forced.
+```
+
+In addition, we can read for instance the readback or setpoint value from samx by
+
+```ipython
+demo [14/3] ❯❯ dev.samx.readback.read()
+Out[14]: {'samx': {'value': -0.0011717217935431634, 'timestamp': 1702306192.450343}}
+demo [17/3] ❯❯ dev.samx.setpoint.read()
+Out[17]: {'samx_setpoint': {'value': 0, 'timestamp': 1702306192.382011}}
+demo [18/3] ❯❯ dev.samx.velocity.read()
+Out[18]: {'samx_velocity': {'value': 1, 'timestamp': 1702306158.257976}}
+```
+
+which again returns a nested dictionary, however, this time only for the requested signal. 
+
+```{note}
+The keys in the returned dictionary are composed of `<devicename>_<signalname>`. 
+However, for positioners the signal name <readback> is typically ommited, i,e. see `dev.samx.readback.read()`.
+```
+
+#### Get interface
+
+We also provide a more convenient access pattern to values of the devices. 
+Similar to `.read()` you may call
+
+``` ipython
+demo [20/3] ❯❯ dev.samx.readback.get()
+Out[20]: -0.0011717217935431634
+```
+
+which will return the value of the readback directly.
+You can also retrieve all signals from `samx` via `get`. 
+
+```ipython
+demo [13/50] ❯❯ signals = dev.samx.get()
+demo [14/50] ❯❯ signals
+Out[14]: samx(readback=0, setpoint=0, motor_is_moving=0, velocity=1, acceleration=1, high_limit_travel=50, low_limit_travel=-50, unused=1)
+```
+
+which includes all different `kind` of signals from the device.
+The return object of `dev.samx.get()` is a [namedtuple](https://docs.python.org/3/library/collections.html) with an access pattern similar to class attributes/properties: `signals.readback`.
+
+```{warning}
+We recommend not using `dev.samx.get()` due to the fact that it forces a readback from all signals. 
+This may take a significant amount of time.
+```
+
+### DeviceConfig
+
+Besides signals, devices are initialized based on their `deviceConfig` (see also [BEC device config](#user.devices)).
 The current deviceConfig, e.g. for the device `samx` can be retrieved  either by simply typing 
 
 ``` ipython
@@ -117,19 +165,6 @@ Out[5]:
 
 To update the deviceConfig, please check [set_device_config()](#user.devices.update_device_config).
 
-#### Get interface
-
-Besides directly reading specific signals from the ophyd class, you can also retrieve all signals from the `deviceClass` for `samx` via `get`. 
-This includes all signals of any `kind`:
-```ipython
-demo [13/50] ❯❯ signals = dev.samx.get()
-demo [14/50] ❯❯ signals
-Out[14]: samx(readback=0, setpoint=0, motor_is_moving=0, velocity=1, acceleration=1, high_limit_travel=50, low_limit_travel=-50, unused=1)
-demo [15/50] ❯❯ signals.readback
-Out[15]: 0
-```
-
-The return object of `dev.samx.get()` is a [namedtuple](https://docs.python.org/3/library/collections.html) with an access pattern similar to class attributes/properties: `signals.readback`.
 
 ### Move a motor
 

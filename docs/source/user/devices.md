@@ -83,6 +83,7 @@ dev.samx.readout_priority = "monitored"
 
 Possible values are `monitored`, `baseline`, `on_request`, `async` and `continuous`. More details on the readout priority and the different modes can be found in the [developer guide](#developer.ophyd_device).
 
+(user.devices.update_device_config)=
 ### Update the device config
 
 To update the device config, use
