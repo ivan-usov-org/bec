@@ -2,6 +2,23 @@
 
 <!--next-version-placeholder-->
 
+## v0.50.2 (2023-12-11)
+
+### Fix
+
+* Remove redundant imports ([`4a27b9a`](https://gitlab.psi.ch/bec/bec/-/commit/4a27b9a1ecde763e913774f8c23b308f79e7a181))
+* Fix devicemanger get_deviceType_devices bug and add test ([`4aa9ba4`](https://gitlab.psi.ch/bec/bec/-/commit/4aa9ba4a8ef26fef2ad51ef72cd600ce624b7542))
+
+### Documentation
+
+* Update user docs, read and get; closes #125, #150 ([`6cf5cfa`](https://gitlab.psi.ch/bec/bec/-/commit/6cf5cfa7a5456fb899fd649b89b2c22293d2a3d8))
+* Fix docs, merge ophyd_devices into ophyd in developer documentation ([`26dabe6`](https://gitlab.psi.ch/bec/bec/-/commit/26dabe6f31333e8417ad569b484c80e1e4026f23))
+* Address merge comments ([`c288a4e`](https://gitlab.psi.ch/bec/bec/-/commit/c288a4ee5341502abc08fd2d163462e1c8d95cbd))
+* Add fields to developer.ophyd as fillers ([`3c64df3`](https://gitlab.psi.ch/bec/bec/-/commit/3c64df327af16485d68dc2d8d2b1a312af67f932))
+* Update docs, change software limits for  motor ([`e2a41c8`](https://gitlab.psi.ch/bec/bec/-/commit/e2a41c8b12e74debfe68a3d44424bde5a5841984))
+* Add docs for read and get interface access; closes #125 ([`fad8662`](https://gitlab.psi.ch/bec/bec/-/commit/fad86626a4ff3d2b11a1c3dc2cf34baeb0bb5777))
+* Fix typos, add links to requirements ([`ab7a9fa`](https://gitlab.psi.ch/bec/bec/-/commit/ab7a9faf747cc8b4954050186113bdb2ab1ee4a7))
+
 ## v0.50.1 (2023-12-11)
 
 ### Fix
