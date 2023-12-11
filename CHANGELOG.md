@@ -2,6 +2,33 @@
 
 <!--next-version-placeholder-->
 
+## v0.50.0 (2023-12-11)
+
+### Feature
+
+* Relaxed rules on deviceConfig schema; removed need for adding name ([`26d3f45`](https://gitlab.psi.ch/bec/bec/-/commit/26d3f45c7838c0cc60b649b3051ee5ce4e758ad5))
+* Removed acquisition group and status from device config ([`5f48362`](https://gitlab.psi.ch/bec/bec/-/commit/5f4836266761f880e98e0798d0046d477a4b1e43))
+
+### Fix
+
+* Fix baseline_update ([`c39bdc1`](https://gitlab.psi.ch/bec/bec/-/commit/c39bdc13b536e49909584c2398dd6ec595e67d27))
+* Fixed bug and tests ([`beb0651`](https://gitlab.psi.ch/bec/bec/-/commit/beb065124d0fcac7df4469a76a552ff057bd6a52))
+* Clean up device_manager and scan_worker, add tests for baseline_devices; closes #144, #98 ([`7d5c03b`](https://gitlab.psi.ch/bec/bec/-/commit/7d5c03b7b9a8683d59773fc0b7e5f0830e563519))
+* Fixed update for deviceConfig ([`1b81ffb`](https://gitlab.psi.ch/bec/bec/-/commit/1b81ffb3323ed560f1791587f612b8dfb254f6c4))
+* Fixed devicemanager for missing deviceConfig ([`daa0e8e`](https://gitlab.psi.ch/bec/bec/-/commit/daa0e8e5e24518839b68dfebaca74f579ca49a9f))
+* Added implicit ophyd device name assignment ([`6b497e2`](https://gitlab.psi.ch/bec/bec/-/commit/6b497e2536a993a4ba870a146a5fc824408907bc))
+* Fixed fly scan sim ([`50fc302`](https://gitlab.psi.ch/bec/bec/-/commit/50fc30216bd44ec46118fba5e37def56b859c8a5))
+* Fixed config update in config handler ([`cdbaf0c`](https://gitlab.psi.ch/bec/bec/-/commit/cdbaf0c6c4132af326ece5feb35ba302efa84c72))
+* Fixed config update in devicemanager ([`46d1cf9`](https://gitlab.psi.ch/bec/bec/-/commit/46d1cf97dffbc14f97eddfdc6dac0161e5861216))
+* Fixed demo config ([`ab399cc`](https://gitlab.psi.ch/bec/bec/-/commit/ab399cc934f186d286595bfd325fe7d78f31351e))
+* Allow empty signals ([`cdd1d0c`](https://gitlab.psi.ch/bec/bec/-/commit/cdd1d0cba0816692faeec9bd74ea97b4043579d3))
+* Fixed scan server after config refactoring ([`9397918`](https://gitlab.psi.ch/bec/bec/-/commit/939791889f9403c597ce7cbcb5f5c401ae6747a1))
+* Fixed bec_lib after refactoring ([`9317220`](https://gitlab.psi.ch/bec/bec/-/commit/93172203b6292dfe8399fb47a277263002f94f01))
+
+### Documentation
+
+* Update documentation to new config structure ([`f38ddc3`](https://gitlab.psi.ch/bec/bec/-/commit/f38ddc3854611d8bf63a776749d418af870511d3))
+
 ## v0.49.2 (2023-12-11)
 
 ### Fix
