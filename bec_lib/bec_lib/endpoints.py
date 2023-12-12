@@ -6,6 +6,7 @@ class MessageEndpoints:
     # devices feedback
     _device_status = "internal/devices/status"
     _device_read = "internal/devices/read"
+    _device_read_configuration = "internal/devices/read_configuration"
     _device_readback = "internal/devices/readback"
     _device_req_status = "internal/devices/req_status"
     _device_progress = "internal/devices/progress"
@@ -106,6 +107,20 @@ class MessageEndpoints:
             str: Endpoint for device readings of the specified device.
         """
         return f"{cls._device_read}/{device}"
+
+    @classmethod
+    def device_read_configuration(cls, device: str) -> str:
+        """
+        Endpoint for device configuration readings. This endpoint is used by the device server
+        to publish the device configuration readings using a messages.DeviceMessage message.
+
+        Args:
+            device (str): Device name, e.g. "samx".
+
+        Returns:
+            str: Endpoint for device configuration readings of the specified device.
+        """
+        return f"{cls._device_read_configuration}/{device}"
 
     @classmethod
     def device_readback(cls, device: str) -> str:
