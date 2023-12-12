@@ -4,11 +4,10 @@ import time
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 from typing import Callable
-from bec_lib import messages
 
 from bec_lib import BECService, BECStatus
 from bec_lib import DeviceManagerBase as DeviceManager
-from bec_lib import MessageEndpoints, bec_logger
+from bec_lib import MessageEndpoints, bec_logger, messages
 from bec_lib.connector import ConnectorBase
 
 from .bec_emitter import BECEmitter
@@ -335,6 +334,8 @@ class ScanBundler(BECService):
 
             elif readout_priority == "baseline":
                 self._baseline_update(scanID, device, signal)
+            else:
+                logger.info(f"Received device message with unknown readout priority {readout_priority}")
 
     def _update_monitor_signals(self, scanID, pointID) -> None:
         if self.sync_storage[scanID]["info"]["scan_type"] == "fly":
