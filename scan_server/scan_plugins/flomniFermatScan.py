@@ -43,14 +43,27 @@ class FlomniFermatScan(ScanBase):
     arg_bundle_size = {"bundle": len(arg_input), "min": None, "max": None}
     flip_axes = False
 
-    def __init__(self, fovx:float, fovy:float, cenx:float, ceny: float, exp_time:float, step:float, zshift:float, angle:float=None, corridor_size:float=3, parameter: dict = None, **kwargs):
+    def __init__(
+        self,
+        fovx: float,
+        fovy: float,
+        cenx: float,
+        ceny: float,
+        exp_time: float,
+        step: float,
+        zshift: float,
+        angle: float = None,
+        corridor_size: float = 3,
+        parameter: dict = None,
+        **kwargs,
+    ):
         """
         A flomni scan following Fermat's spiral.
 
-        Args: 
+        Args:
             fovx(float) [um]: Fov in the piezo plane (i.e. piezo range). Max 200 um
             fovy(float) [um]: Fov in the piezo plane (i.e. piezo range). Max 100 um
-            cenx(float) [mm]: center position in x. 
+            cenx(float) [mm]: center position in x.
             ceny(float) [mm]: center position in y.
             exp_time(float) [s]: exposure time
             step(float) [um]: stepsize
@@ -86,7 +99,6 @@ class FlomniFermatScan(ScanBase):
         if self.zshift < -100:
             logger.warning("The zshift is smaller than -100 um. It will be limited to -100 um.")
             self.zshift = -100
-
 
     def initialize(self):
         self.scan_motors = []
@@ -124,13 +136,20 @@ class FlomniFermatScan(ScanBase):
 
     def _prepare_setup_part2(self):
         yield from self.stubs.wait(wait_type="move", device="fsamroy", wait_group="flomni_rotation")
-        yield from self.stubs.set(device="rtx", value=self.positions[0][0], wait_group="prepare_setup_part2")
-        yield from self.stubs.set(device="rtz", value=self.positions[0][2], wait_group="prepare_setup_part2")
+        yield from self.stubs.set(
+            device="rtx", value=self.positions[0][0], wait_group="prepare_setup_part2"
+        )
+        yield from self.stubs.set(
+            device="rtz", value=self.positions[0][2], wait_group="prepare_setup_part2"
+        )
         yield from self.stubs.send_rpc_and_wait("rtx", "controller.laser_tracker_on")
-        yield from self.stubs.wait(wait_type="move", device=["rtx", "rtz"], wait_group="prepare_setup_part2")
+        yield from self.stubs.wait(
+            wait_type="move", device=["rtx", "rtz"], wait_group="prepare_setup_part2"
+        )
         yield from self._transfer_positions_to_flomni()
-        yield from self.stubs.send_rpc_and_wait("rtx", "controller.move_samx_to_scan_region", self.fovx, self.cenx)
-
+        yield from self.stubs.send_rpc_and_wait(
+            "rtx", "controller.move_samx_to_scan_region", self.fovx, self.cenx
+        )
 
     def flomni_rotation(self, angle):
         # get last setpoint (cannot be based on pos get because they will deviate slightly)
@@ -202,14 +221,22 @@ class FlomniFermatScan(ScanBase):
             radius = step * 0.57 * np.sqrt(ii)
             # FOV is restructed below at check pos in range
             if abs(radius * np.sin(ii * phi)) > length_axis1 / 2:
-               continue
+                continue
             if abs(radius * np.cos(ii * phi)) > length_axis2 / 2:
-               continue
+                continue
             x = radius * np.sin(ii * phi)
             y = radius * np.cos(ii * phi)
             positions.append([x + self.cenx, y + self.ceny, z_pos])
-        left_lower_corner = [min(m1_start, m1_stop) + self.cenx, min(m2_start, m2_stop) + self.ceny, z_pos]
-        right_upper_corner = [max(m1_start, m1_stop) + self.cenx, max(m2_start, m2_stop) + self.ceny, z_pos]
+        left_lower_corner = [
+            min(m1_start, m1_stop) + self.cenx,
+            min(m2_start, m2_stop) + self.ceny,
+            z_pos,
+        ]
+        right_upper_corner = [
+            max(m1_start, m1_stop) + self.cenx,
+            max(m2_start, m2_stop) + self.ceny,
+            z_pos,
+        ]
         positions.append(left_lower_corner)
         positions.append(right_upper_corner)
         return np.array(positions)
@@ -229,7 +256,8 @@ class FlomniFermatScan(ScanBase):
                     break
                 if status_id == 2 and self.metadata.get("RID") == request_id:
                     raise ScanAbortion(
-                        f"An error occured during the flomni readout: {status.metadata.get('error')}"
+                        "An error occured during the flomni readout:"
+                        f" {status.metadata.get('error')}"
                     )
 
             time.sleep(1)
