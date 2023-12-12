@@ -264,7 +264,7 @@ class FlomniSampleTransferMixin:
         fsamx_in = dev.fsamx.user_parameter.get("in")
         if not np.isclose(dev.fsamx.readback.get(), fsamx_in, 0.2):
             raise FlomniError("fsamx not in position. Aborting.")
-        
+
         fheater_in = dev.fheater.user_parameter.get("in")
         umv(dev.fheater, fheater_in)
 
@@ -292,7 +292,7 @@ class FlomniSampleTransferMixin:
             raise FlomniError("Ftray is not at the 'IN' position. Aborting.")
 
     def ftransfer_flomni_stage_in(self):
-        sample_in_position = bool(float(dev.flomni_samples.sample_placed.sample0.get())
+        sample_in_position = bool(float(dev.flomni_samples.sample_placed.sample0.get()))
         if not sample_in_position:
             raise FlomniError("There is no sample in the sample stage. Aborting.")
         self.reset_correction()
