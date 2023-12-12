@@ -268,7 +268,6 @@ class FlomniSampleTransferMixin:
         fheater_in = dev.fheater.user_parameter.get("in")
         umv(dev.fheater, fheater_in)
 
-
     def ensure_gripper_up(self):
         axis_id = dev.ftransy._config["deviceConfig"].get("axis_Id")
         axis_id_numeric = self.axis_id_to_numeric(axis_id)

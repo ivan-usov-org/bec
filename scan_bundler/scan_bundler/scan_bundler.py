@@ -335,7 +335,9 @@ class ScanBundler(BECService):
             elif readout_priority == "baseline":
                 self._baseline_update(scanID, device, signal)
             else:
-                logger.info(f"Received device message with unknown readout priority {readout_priority}")
+                logger.info(
+                    f"Received device message with unknown readout priority {readout_priority}"
+                )
 
     def _update_monitor_signals(self, scanID, pointID) -> None:
         if self.sync_storage[scanID]["info"]["scan_type"] == "fly":
