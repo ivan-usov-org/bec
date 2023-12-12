@@ -261,7 +261,7 @@ class Device:
 
     @typechecked
     def update_user_parameter(self, val: dict):
-        param = self.user_parameter
+        param = self.user_parameter if self.user_parameter is not None else {}
         param.update(val)
         self.set_user_parameter(param)
 
