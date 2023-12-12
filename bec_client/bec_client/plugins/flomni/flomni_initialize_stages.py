@@ -4,8 +4,9 @@ import os
 import time
 
 import numpy as np
-from bec_lib import bec_logger
 from typeguard import typechecked
+
+from bec_lib import bec_logger
 
 logger = bec_logger.logger
 
@@ -264,10 +265,9 @@ class FlomniSampleTransferMixin:
         fsamx_in = dev.fsamx.user_parameter.get("in")
         if not np.isclose(dev.fsamx.readback.get(), fsamx_in, 0.2):
             raise FlomniError("fsamx not in position. Aborting.")
-        
+
         fheater_in = dev.fheater.user_parameter.get("in")
         umv(dev.fheater, fheater_in)
-
 
     def ensure_gripper_up(self):
         axis_id = dev.ftransy._config["deviceConfig"].get("axis_Id")
@@ -293,7 +293,7 @@ class FlomniSampleTransferMixin:
             raise FlomniError("Ftray is not at the 'IN' position. Aborting.")
 
     def ftransfer_flomni_stage_in(self):
-        sample_in_position = bool(float(dev.flomni_samples.sample_placed.sample0.get())
+        sample_in_position = bool(float(dev.flomni_samples.sample_placed.sample0.get()))
         if not sample_in_position:
             raise FlomniError("There is no sample in the sample stage. Aborting.")
         self.reset_correction()
