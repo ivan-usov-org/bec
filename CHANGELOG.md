@@ -2,6 +2,26 @@
 
 <!--next-version-placeholder-->
 
+## v0.51.0 (2023-12-14)
+
+### Feature
+
+* Added message endpoint for read_configuration ([`3faf40a`](https://gitlab.psi.ch/bec/bec/-/commit/3faf40a218716bfa1c4271b01d9f516f93e03807))
+
+### Fix
+
+* Fixed readout for omitted signals ([`532d142`](https://gitlab.psi.ch/bec/bec/-/commit/532d142860ddac19dc1581db895514608dcfb65f))
+* Fixed bug in config readout ([`4a640e5`](https://gitlab.psi.ch/bec/bec/-/commit/4a640e5ea05e7842fbfda851d79b97af0a801720))
+* Fixed read and read_config for cached readouts ([`ba2a797`](https://gitlab.psi.ch/bec/bec/-/commit/ba2a797dfbd67b98b931b5f299bf53a2f4ed71a2))
+* Added read_config on init ([`3529108`](https://gitlab.psi.ch/bec/bec/-/commit/352910812487104a87b8d95dc37d1c2164574074))
+* Fixed rpc calls for read_configuration ([`3a475e7`](https://gitlab.psi.ch/bec/bec/-/commit/3a475e7e6e0cf46420bfe99a7b9747110d608412))
+* Added option to read configuration from redis ([`f7acd4c`](https://gitlab.psi.ch/bec/bec/-/commit/f7acd4cb0646a660676fd5561d23c00bc7157fcc))
+* Fixed ctrl c for rpc calls for unresponsive backends ([`6341059`](https://gitlab.psi.ch/bec/bec/-/commit/6341059dd068daf5fd6cce4947901cc3c3dcbe31))
+
+### Documentation
+
+* Updated docs for cached config readouts ([`c33a66e`](https://gitlab.psi.ch/bec/bec/-/commit/c33a66ef00e096eb94f01b9205c2594fa5c81673))
+
 ## v0.50.2 (2023-12-11)
 
 ### Fix
