@@ -103,7 +103,7 @@ def test_read_kind_hinted(dev, kind, cached):
                 signals=data, metadata={"scan_id": "scan_id", "scan_type": "scan_type"}
             ).dumps()
             dev.samx.readback._signal_info["kind_str"] = f"Kind.{kind}"
-            res = dev.samx.readback.read()
+            res = dev.samx.readback.read(cached=cached)
             if cached:
                 mock_get.assert_called_once_with(MessageEndpoints.device_readback("samx"))
                 mock_run.assert_not_called()
@@ -146,12 +146,12 @@ def test_get_rpc_func_name_readback_get(dev, kind, cached):
                 metadata={"scan_id": "scan_id", "scan_type": "scan_type"},
             ).dumps()
             dev.samx.readback._signal_info["kind_str"] = f"Kind.{kind}"
-            dev.samx.readback.get()
+            dev.samx.readback.get(cached=cached)
             if cached:
                 mock_get.assert_called_once_with(MessageEndpoints.device_readback("samx"))
                 mock_rpc.assert_not_called()
             else:
-                mock_rpc.assert_called_once_with(cached=False, fcn=dev.samx.readback.read)
+                mock_rpc.assert_called_once_with(cached=False, fcn=dev.samx.readback.get)
                 mock_get.assert_not_called()
 
 
