@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 from bec_lib import Alarms, MessageEndpoints, messages
-from ophyd import StatusBase
+from ophyd import Device, Kind, Signal, StatusBase
 
 from device_server.rpc_mixin import RPCMixin
 
@@ -145,17 +145,47 @@ def test_run_rpc_sends_rpc_exception(rpc_cls):
         _send_rpc_exception.assert_called_once_with(mock.ANY, instr)
 
 
+@pytest.fixture()
+def dev_mock():
+    dev_mock = mock.MagicMock()
+    dev_mock.obj = mock.MagicMock(spec=Device)
+    dev_mock.obj.readback = mock.MagicMock(spec=Signal)
+    dev_mock.obj.readback.kind = Kind.hinted
+    dev_mock.obj.user_setpoint = mock.MagicMock(spec=Signal)
+    dev_mock.obj.user_setpoint.kind = Kind.normal
+    dev_mock.obj.velocity = mock.MagicMock(spec=Signal)
+    dev_mock.obj.velocity.kind = Kind.config
+    dev_mock.obj.notused = mock.MagicMock(spec=Signal)
+    dev_mock.obj.notused.kind = Kind.omitted
+    return dev_mock
+
+
 @pytest.mark.parametrize(
     "func, read_called",
-    [("read", True), ("readback", False), ("read_configuration", False), ("readback.read", False)],
+    [
+        ("read", True),
+        ("read_configuration", False),
+        ("readback.read_configuration", False),
+        ("readback.read", True),
+        ("user_setpoint.read", True),
+        ("user_setpoint.read_configuration", False),
+        ("velocity.read", False),
+        ("velocity.read_configuration", False),
+        ("notused.read", False),
+        ("notused.read_configuration", False),
+    ],
 )
-def test_process_rpc_instruction_read(rpc_cls, func, read_called):
+def test_process_rpc_instruction_read(rpc_cls, dev_mock, func, read_called):
     instr = messages.DeviceInstructionMessage(
         device="device", action="rpc", parameter={"rpc_id": "rpc_id", "func": func}
     )
+    rpc_cls.device_manager.devices = {"device": dev_mock}
     rpc_cls._read_and_update_devices = mock.MagicMock()
+    rpc_cls._read_config_and_update_devices = mock.MagicMock()
     rpc_cls._process_rpc_instruction(instr)
     if read_called:
         rpc_cls._read_and_update_devices.assert_called_once_with(["device"], {})
+        rpc_cls._read_config_and_update_devices.assert_not_called()
     else:
         rpc_cls._read_and_update_devices.assert_not_called()
+        rpc_cls._read_config_and_update_devices.assert_called_once_with(["device"], {})

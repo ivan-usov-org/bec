@@ -4,6 +4,7 @@ from unittest.mock import ANY
 
 import pytest
 from bec_lib import Alarms, MessageEndpoints, ServiceConfig, messages
+from bec_lib.devicemanager import OnFailure
 from bec_lib.messages import BECStatus
 from bec_lib.redis_connector import MessageObject
 from bec_lib.tests.utils import ConnectorMock, ConsumerMock
@@ -702,6 +703,87 @@ def test_read_device(device_server_mock, instr):
         ]
         assert messages.DeviceMessage.loads(res[-1]["msg"]).metadata["RID"] == instr.metadata["RID"]
         assert messages.DeviceMessage.loads(res[-1]["msg"]).metadata["stream"] == "primary"
+
+
+@pytest.mark.parametrize("devices", [["samx", "samy"], ["samx"]])
+def test_read_config_and_update_devices(device_server_mock, devices):
+    device_server = device_server_mock
+    device_server._read_config_and_update_devices(devices, metadata={"RID": "test"})
+    for device in devices:
+        res = [
+            msg
+            for msg in device_server.producer.message_sent
+            if msg["queue"] == MessageEndpoints.device_read_configuration(device)
+        ]
+        config = device_server.device_manager.devices[device].obj.read_configuration()
+        msg = messages.DeviceMessage.loads(res[-1]["msg"])
+        assert msg.content["signals"].keys() == config.keys()
+        assert res[-1]["queue"] == MessageEndpoints.device_read_configuration(device)
+
+
+def test_read_and_update_devices_exception(device_server_mock):
+    device_server = device_server_mock
+    samx_obj = device_server.device_manager.devices.samx.obj
+    with pytest.raises(Exception):
+        with mock.patch.object(device_server, "_retry_obj_method") as mock_retry:
+            with mock.patch.object(samx_obj, "read") as read_mock:
+                read_mock.side_effect = Exception
+                mock_retry.side_effect = Exception
+                device_server._read_and_update_devices(["samx"], metadata={"RID": "test"})
+                mock_retry.assert_called_once_with("samx", samx_obj, "read", Exception())
+
+
+def test_read_config_and_update_devices_exception(device_server_mock):
+    device_server = device_server_mock
+    samx_obj = device_server.device_manager.devices.samx.obj
+    with pytest.raises(Exception):
+        with mock.patch.object(device_server, "_retry_obj_method") as mock_retry:
+            with mock.patch.object(samx_obj, "read_configuration") as read_config:
+                read_config.side_effect = Exception
+                mock_retry.side_effect = Exception
+                device_server._read_config_and_update_devices(["samx"], metadata={"RID": "test"})
+                mock_retry.assert_called_once_with(
+                    "samx", samx_obj, "read_configuration", Exception()
+                )
+
+
+def test_retry_obj_method_raise(device_server_mock):
+    device_server = device_server_mock
+    samx = device_server.device_manager.devices.samx
+    with mock.patch.object(samx.obj, "read_configuration") as read_config:
+        read_config.side_effect = Exception
+        samx._config["onFailure"] = "raise"
+        with pytest.raises(Exception):
+            device_server._retry_obj_method("samx", samx.obj, "read_configuration", Exception())
+
+
+def test_retry_obj_method_retry(device_server_mock):
+    device_server = device_server_mock
+    samx = device_server.device_manager.devices.samx
+    signals_before = samx.obj.read_configuration()
+    samx._config["onFailure"] = "retry"
+    signals = device_server._retry_obj_method("samx", samx.obj, "read_configuration", Exception())
+    assert signals.keys() == signals_before.keys()
+
+
+@pytest.mark.parametrize("instr", ["read", "read_configuration", "unknown_method"])
+def test_retry_obj_method_buffer(device_server_mock, instr):
+    device_server = device_server_mock
+    samx = device_server.device_manager.devices.samx
+    samx._config["onFailure"] = "buffer"
+    if instr not in ["read", "read_configuration"]:
+        with pytest.raises(ValueError):
+            device_server._retry_obj_method("samx", samx.obj, instr, Exception())
+        return
+
+    signals_before = getattr(samx.obj, instr)()
+    device_server.producer = mock.MagicMock()
+    device_server.producer.get.return_value = messages.DeviceMessage(
+        signals=signals_before, metadata={"RID": "test", "stream": "primary"}
+    ).dumps()
+
+    signals = device_server._retry_obj_method("samx", samx.obj, instr, Exception())
+    assert signals.keys() == signals_before.keys()
 
 
 @pytest.mark.parametrize(

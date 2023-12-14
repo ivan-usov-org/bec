@@ -82,8 +82,36 @@ class RPCMixin:
         # handle ophyd read. This is a special case because we also want to update the
         # buffered value in redis
         instr_params = instr.content.get("parameter")
-        if instr_params.get("func") == "read":  # or instr_params.get("func").endswith(".read"):
-            res = self._read_and_update_devices([instr.content["device"]], instr.metadata)
+        if instr_params.get("func") == "read" or instr_params.get("func").endswith(".read"):
+            if instr_params.get("func") == "read":
+                obj = self.device_manager.devices[instr.content["device"]].obj
+            else:
+                obj = rgetattr(
+                    self.device_manager.devices[instr.content["device"]].obj,
+                    instr_params.get("func").split(".read")[0],
+                )
+            if isinstance(obj, ophyd.Device) or (
+                isinstance(obj, ophyd.Signal)
+                and obj.kind not in [ophyd.Kind.omitted, ophyd.Kind.config]
+            ):
+                res = self._read_and_update_devices([instr.content["device"]], instr.metadata)
+                if isinstance(res, list) and len(res) == 1:
+                    res = res[0]
+                return res
+            if isinstance(obj, ophyd.Signal) and obj.kind in [
+                ophyd.Kind.omitted,
+                ophyd.Kind.config,
+            ]:
+                res = self._read_config_and_update_devices(
+                    [instr.content["device"]], instr.metadata
+                )
+                if isinstance(res, list) and len(res) == 1:
+                    res = res[0]
+                return res
+        if instr_params.get("func") == "read_configuration" or instr_params.get("func").endswith(
+            ".read_configuration"
+        ):
+            res = self._read_config_and_update_devices([instr.content["device"]], instr.metadata)
             if isinstance(res, list) and len(res) == 1:
                 res = res[0]
             return res

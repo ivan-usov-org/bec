@@ -9,7 +9,7 @@ from bec_lib import Alarms, BECService, MessageEndpoints, bec_logger, messages
 from bec_lib.connector import ConnectorBase
 from bec_lib.devicemanager import OnFailure
 from bec_lib.messages import BECStatus
-from ophyd import Staged
+from ophyd import OphydObject, Staged
 from ophyd.utils import errors as ophyd_errors
 
 from device_server.devices.devicemanager import DeviceManagerDS
@@ -326,29 +326,7 @@ class DeviceServer(RPCMixin, BECService):
                 signals = obj.read()
                 signal_container.append(signals)
             except Exception as exc:
-                self.device_manager.connector.raise_alarm(
-                    severity=Alarms.WARNING,
-                    alarm_type="Warning",
-                    source="DeviceServer",
-                    content=f"Failed to read device {dev}.",
-                    metadata={},
-                )
-                ds_dev = self.device_manager.devices.get(dev)
-                if ds_dev.on_failure == OnFailure.RAISE:
-                    raise exc
-
-                if ds_dev.on_failure == OnFailure.RETRY:
-                    # try to read it again, may have been only a glitch
-                    signals = obj.read()
-                elif ds_dev.on_failure == OnFailure.BUFFER:
-                    # if possible, fall back to past readings
-                    logger.warning(f"Failed to read {dev}. Trying to load an old value.")
-                    old_msg = messages.DeviceMessage.loads(
-                        self.producer.get(MessageEndpoints.device_read(dev))
-                    )
-                    if not old_msg:
-                        raise exc
-                    signals = old_msg.content["signals"]
+                signals = self._retry_obj_method(dev, obj, "read", exc)
 
             self.producer.set_and_publish(
                 MessageEndpoints.device_read(dev),
@@ -370,6 +348,64 @@ class DeviceServer(RPCMixin, BECService):
             f"Elapsed time for reading and updating status info: {(time.time()-start)*1000} ms"
         )
         return signal_container
+
+    def _read_config_and_update_devices(self, devices: list[str], metadata: dict) -> list:
+        start = time.time()
+        pipe = self.producer.pipeline()
+        signal_container = []
+        for dev in devices:
+            self.device_manager.devices.get(dev).metadata = metadata
+            obj = self.device_manager.devices.get(dev).obj
+            try:
+                signals = obj.read_configuration()
+                signal_container.append(signals)
+            except Exception as exc:
+                signals = self._retry_obj_method(dev, obj, "read_configuration", exc)
+            self.producer.set_and_publish(
+                MessageEndpoints.device_read_configuration(dev),
+                messages.DeviceMessage(signals=signals, metadata=metadata).dumps(),
+                pipe,
+            )
+        pipe.execute()
+        logger.debug(
+            f"Elapsed time for reading and updating status info: {(time.time()-start)*1000} ms"
+        )
+        return signal_container
+
+    def _retry_obj_method(self, device: str, obj: OphydObject, method: str, exc: Exception) -> dict:
+        self.device_manager.connector.raise_alarm(
+            severity=Alarms.WARNING,
+            alarm_type="Warning",
+            source="DeviceServer",
+            content=f"Failed to run {method} on device {device}.",
+            metadata={},
+        )
+        ds_dev = self.device_manager.devices.get(device)
+        if ds_dev.on_failure == OnFailure.RAISE:
+            raise exc
+
+        if ds_dev.on_failure == OnFailure.RETRY:
+            # try to read it again, may have been only a glitch
+            signals = getattr(obj, method)()
+        elif ds_dev.on_failure == OnFailure.BUFFER:
+            # if possible, fall back to past readings
+            logger.warning(
+                f"Failed to run {method} on device {device}. Trying to load an old value."
+            )
+            if method == "read":
+                old_msg = messages.DeviceMessage.loads(
+                    self.producer.get(MessageEndpoints.device_read(device))
+                )
+            elif method == "read_configuration":
+                old_msg = messages.DeviceMessage.loads(
+                    self.producer.get(MessageEndpoints.device_read_configuration(device))
+                )
+            else:
+                raise ValueError(f"Unknown method {method}.")
+            if not old_msg:
+                raise exc
+            signals = old_msg.content["signals"]
+        return signals
 
     def _stage_device(self, instr: messages.DeviceInstructionMessage) -> None:
         devices = instr.content["device"]
