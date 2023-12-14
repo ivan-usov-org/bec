@@ -313,22 +313,30 @@ class OphydInterfaceBase(RPCBase):
         Returns:
             dict: The device signals.
         """
+        is_config_signal = False
         is_signal = self._signal_info is not None
-        if cached and is_signal:
-            # for signals, we have to check if the signal is hinted or not. If it is not hinted, we
-            # have to read the signal from the device through rpc.
-            cached = any(kind in self._signal_info["kind_str"] for kind in ["normal", "hinted"])
+        if is_signal:
+            kind = self._signal_info.get("kind_str")
+            if kind == "Kind.config":
+                is_config_signal = True
+            elif kind == "Kind.omitted":
+                cached = False
 
         if not cached:
-            return self._run(cached=cached, fcn=self.read)
-        if use_readback:
-            val = self.root.parent.producer.get(MessageEndpoints.device_readback(self.root.name))
+            signals = self._run(cached=cached, fcn=self.read)
         else:
-            val = self.root.parent.producer.get(MessageEndpoints.device_read(self.root.name))
+            if is_config_signal:
+                return self.read_configuration(cached=cached)
+            if use_readback:
+                val = self.root.parent.producer.get(
+                    MessageEndpoints.device_readback(self.root.name)
+                )
+            else:
+                val = self.root.parent.producer.get(MessageEndpoints.device_read(self.root.name))
 
-        if not val:
-            return None
-        signals = messages.DeviceMessage.loads(val).content["signals"]
+            if not val:
+                return None
+            signals = messages.DeviceMessage.loads(val).content["signals"]
         if filter_to_hints:
             signals = {key: val for key, val in signals.items() if key in self._hints}
         if self._signal_info:
@@ -344,14 +352,27 @@ class OphydInterfaceBase(RPCBase):
             cached (bool, optional): If True, the cached value is returned. Defaults to True.
         """
 
+        is_config_signal = False
+        is_signal = self._signal_info is not None
+        if is_signal:
+            kind = self._signal_info.get("kind_str")
+            if kind == "Kind.config":
+                is_config_signal = True
+            elif kind == "Kind.omitted":
+                cached = False
+
         if not cached:
-            return self._run(cached=False, fcn=self.read_configuration)
-        val = self.root.parent.producer.get(
-            MessageEndpoints.device_read_configuration(self.root.name)
-        )
-        if not val:
-            return None
-        signals = messages.DeviceMessage.loads(val).content["signals"]
+            signals = self._run(cached=False, fcn=self.read_configuration)
+        else:
+            if not is_config_signal:
+                return self.read(cached=True)
+
+            val = self.root.parent.producer.get(
+                MessageEndpoints.device_read_configuration(self.root.name)
+            )
+            if not val:
+                return None
+            signals = messages.DeviceMessage.loads(val).content["signals"]
         if self._signal_info:
             obj_name = self._signal_info.get("obj_name")
             return {obj_name: signals.get(obj_name, {})}
@@ -384,7 +405,6 @@ class OphydInterfaceBase(RPCBase):
         ret = self.read()
         if ret is None:
             return None
-        # return ret
         return ret.get(self._signal_info.get("obj_name"), {}).get("value")
 
     @rpc
