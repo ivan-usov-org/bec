@@ -113,6 +113,52 @@ def test_read_kind_hinted(dev, kind, cached):
                 mock_get.assert_not_called()
 
 
+@pytest.mark.parametrize(
+    "is_signal,is_config_signal,method",
+    [
+        (True, False, "read"),
+        (False, True, "read_configuration"),
+        (False, False, "read_configuration"),
+    ],
+)
+def test_read_configuration_not_cached(dev, is_signal, is_config_signal, method):
+    with mock.patch.object(
+        dev.samx.readback, "_get_rpc_signal_info", return_value=(is_signal, is_config_signal, False)
+    ):
+        with mock.patch.object(dev.samx.readback, "_run") as mock_run:
+            dev.samx.readback.read_configuration(cached=False)
+            mock_run.assert_called_once_with(cached=False, fcn=getattr(dev.samx.readback, method))
+
+
+@pytest.mark.parametrize(
+    "is_signal,is_config_signal,method",
+    [(True, False, "read"), (False, True, "redis"), (False, False, "redis")],
+)
+def test_read_configuration_cached(dev, is_signal, is_config_signal, method):
+    with mock.patch.object(
+        dev.samx.readback, "_get_rpc_signal_info", return_value=(is_signal, is_config_signal, True)
+    ):
+        with mock.patch.object(dev.samx.root.parent.producer, "get") as mock_get:
+            mock_get.return_value = messages.DeviceMessage(
+                signals={
+                    "samx": {"value": 0, "timestamp": 1701105880.1711318},
+                    "samx_setpoint": {"value": 0, "timestamp": 1701105880.1693492},
+                    "samx_motor_is_moving": {"value": 0, "timestamp": 1701105880.16935},
+                },
+                metadata={"scan_id": "scan_id", "scan_type": "scan_type"},
+            ).dumps()
+            with mock.patch.object(dev.samx.readback, "read") as mock_read:
+                dev.samx.readback.read_configuration(cached=True)
+                if method == "redis":
+                    mock_get.assert_called_once_with(
+                        MessageEndpoints.device_read_configuration("samx")
+                    )
+                    mock_read.assert_not_called()
+                else:
+                    mock_read.assert_called_once_with(cached=True)
+                    mock_get.assert_not_called()
+
+
 def test_run_rpc_call(dev):
     with mock.patch.object(dev.samx.setpoint, "_get_rpc_response") as mock_rpc:
         dev.samx.setpoint.set(1)
