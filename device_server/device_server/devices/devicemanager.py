@@ -6,6 +6,9 @@ from functools import reduce
 import ophyd
 import ophyd.sim as ops
 import ophyd_devices as opd
+from ophyd.ophydobj import OphydObject
+from ophyd.signal import EpicsSignalBase
+
 from bec_lib import (
     Device,
     DeviceConfigError,
@@ -15,9 +18,6 @@ from bec_lib import (
     messages,
 )
 from bec_lib.connector import ConnectorBase
-from ophyd.ophydobj import OphydObject
-from ophyd.signal import EpicsSignalBase
-
 from device_server.devices.config_update_handler import ConfigUpdateHandler
 from device_server.devices.device_serializer import get_device_info
 
@@ -49,9 +49,15 @@ class DSDevice(Device):
     def initialize_device_buffer(self, producer):
         """initialize the device read and readback buffer on redis with a new reading"""
         dev_msg = messages.DeviceMessage(signals=self.obj.read(), metadata={}).dumps()
+        dev_config_msg = messages.DeviceMessage(
+            signals=self.obj.read_configuration(), metadata={}
+        ).dumps()
         pipe = producer.pipeline()
         producer.set_and_publish(MessageEndpoints.device_readback(self.name), dev_msg, pipe=pipe)
         producer.set(topic=MessageEndpoints.device_read(self.name), msg=dev_msg, pipe=pipe)
+        producer.set_and_publish(
+            MessageEndpoints.device_read_configuration(self.name), dev_config_msg, pipe=pipe
+        )
         pipe.execute()
         self.initialized = True
 
