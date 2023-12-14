@@ -30,7 +30,7 @@ dyn_signals:
 eyefoc:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1    
     limits:
@@ -46,7 +46,7 @@ eyefoc:
 eyex:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     limits:
@@ -62,7 +62,7 @@ eyex:
 eyey:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1    
     limits:
@@ -91,7 +91,7 @@ flyer_sim:
 hrox:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1    
     limits:
@@ -107,7 +107,7 @@ hrox:
 hroy:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1    
     limits:
@@ -123,7 +123,7 @@ hroy:
 hroz:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1    
     limits:
@@ -139,7 +139,7 @@ hroz:
 hx:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1    
     limits:
@@ -155,7 +155,7 @@ hx:
 hy:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     limits:
@@ -171,7 +171,7 @@ hy:
 hz:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1    
     limits:
@@ -187,7 +187,7 @@ hz:
 mbsx:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1    
     limits:
@@ -203,7 +203,7 @@ mbsx:
 mbsy:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     limits:
@@ -219,7 +219,7 @@ mbsy:
 pinx:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1    
     limits:
@@ -235,7 +235,7 @@ pinx:
 piny:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1    
     limits:
@@ -251,7 +251,7 @@ piny:
 pinz:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1    
     limits:
@@ -267,7 +267,7 @@ pinz:
 samx:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1    
     limits:
@@ -283,7 +283,7 @@ samx:
 samy:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1    
     limits:
@@ -299,7 +299,7 @@ samy:
 samz:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1    
     limits:
@@ -789,7 +789,7 @@ transd:
 aptrx:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -801,7 +801,7 @@ aptrx:
 aptry:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -813,7 +813,7 @@ aptry:
 bim2x:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -825,7 +825,7 @@ bim2x:
 bim2y:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -837,7 +837,7 @@ bim2y:
 bm1trx:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -849,7 +849,7 @@ bm1trx:
 bm1try:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -861,7 +861,7 @@ bm1try:
 bm2trx:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -873,7 +873,7 @@ bm2trx:
 bm2try:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -885,7 +885,7 @@ bm2try:
 bm3trx:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -897,7 +897,7 @@ bm3trx:
 bm3try:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -909,7 +909,7 @@ bm3try:
 bm4trx:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -921,7 +921,7 @@ bm4trx:
 bm4try:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -933,7 +933,7 @@ bm4try:
 bm5trx:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -945,7 +945,7 @@ bm5trx:
 bm5try:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -957,7 +957,7 @@ bm5try:
 bm6trx:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -969,7 +969,7 @@ bm6trx:
 bm6try:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -981,7 +981,7 @@ bm6try:
 bpm4r:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -993,7 +993,7 @@ bpm4r:
 bpm5r:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1005,7 +1005,7 @@ bpm5r:
 bs1x:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1017,7 +1017,7 @@ bs1x:
 bs1y:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1029,7 +1029,7 @@ bs1y:
 bs2x:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1041,7 +1041,7 @@ bs2x:
 bs2y:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1053,7 +1053,7 @@ bs2y:
 burstn:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1065,7 +1065,7 @@ burstn:
 burstr:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1077,7 +1077,7 @@ burstr:
 ddg1a:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1089,7 +1089,7 @@ ddg1a:
 ddg1b:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1101,7 +1101,7 @@ ddg1b:
 ddg1c:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1113,7 +1113,7 @@ ddg1c:
 ddg1d:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1125,7 +1125,7 @@ ddg1d:
 ddg1e:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1137,7 +1137,7 @@ ddg1e:
 ddg1f:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1149,7 +1149,7 @@ ddg1f:
 ddg1g:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1161,7 +1161,7 @@ ddg1g:
 ddg1h:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1173,7 +1173,7 @@ ddg1h:
 dettrx:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1185,7 +1185,7 @@ dettrx:
 di2trx:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1197,7 +1197,7 @@ di2trx:
 di2try:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1209,7 +1209,7 @@ di2try:
 dtpush:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1221,7 +1221,7 @@ dtpush:
 dtth:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1233,7 +1233,7 @@ dtth:
 dttrx:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1245,7 +1245,7 @@ dttrx:
 dttry:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1257,7 +1257,7 @@ dttry:
 dttrz:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1269,7 +1269,7 @@ dttrz:
 ebcsx:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1281,7 +1281,7 @@ ebcsx:
 ebcsy:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1293,7 +1293,7 @@ ebcsy:
 ebfi1:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1305,7 +1305,7 @@ ebfi1:
 ebfi2:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1317,7 +1317,7 @@ ebfi2:
 ebfi3:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1329,7 +1329,7 @@ ebfi3:
 ebfi4:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1341,7 +1341,7 @@ ebfi4:
 ebfzpx:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1353,7 +1353,7 @@ ebfzpx:
 ebfzpy:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1365,7 +1365,7 @@ ebfzpy:
 ebtrx:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1377,7 +1377,7 @@ ebtrx:
 ebtry:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1389,7 +1389,7 @@ ebtry:
 ebtrz:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1401,7 +1401,7 @@ ebtrz:
 fi1try:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1413,7 +1413,7 @@ fi1try:
 fi2try:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1425,7 +1425,7 @@ fi2try:
 fi3try:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1437,7 +1437,7 @@ fi3try:
 fsh1x:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1449,7 +1449,7 @@ fsh1x:
 fsh2x:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1461,7 +1461,7 @@ fsh2x:
 ftrans:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1473,7 +1473,7 @@ ftrans:
 fttrx1:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1485,7 +1485,7 @@ fttrx1:
 fttrx2:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1497,7 +1497,7 @@ fttrx2:
 fttry1:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1509,7 +1509,7 @@ fttry1:
 fttry2:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1521,7 +1521,7 @@ fttry2:
 fttrz:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1533,7 +1533,7 @@ fttrz:
 idgap:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1545,7 +1545,7 @@ idgap:
 mibd:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1557,7 +1557,7 @@ mibd:
 mibd1:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1569,7 +1569,7 @@ mibd1:
 mibd2:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1581,7 +1581,7 @@ mibd2:
 miroll:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1593,7 +1593,7 @@ miroll:
 mith:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1605,7 +1605,7 @@ mith:
 mitrx:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1617,7 +1617,7 @@ mitrx:
 mitry:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1629,7 +1629,7 @@ mitry:
 mitry1:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1641,7 +1641,7 @@ mitry1:
 mitry2:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1653,7 +1653,7 @@ mitry2:
 mitry3:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1665,7 +1665,7 @@ mitry3:
 mobd:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1677,7 +1677,7 @@ mobd:
 mobdai:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1689,7 +1689,7 @@ mobdai:
 mobdbo:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1701,7 +1701,7 @@ mobdbo:
 mobdco:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1713,7 +1713,7 @@ mobdco:
 mobddi:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1725,7 +1725,7 @@ mobddi:
 mokev:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1737,7 +1737,7 @@ mokev:
 mopush1:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1749,7 +1749,7 @@ mopush1:
 mopush2:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1761,7 +1761,7 @@ mopush2:
 moroll1:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1773,7 +1773,7 @@ moroll1:
 moroll2:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1785,7 +1785,7 @@ moroll2:
 moth1:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1797,7 +1797,7 @@ moth1:
 moth1e:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1809,7 +1809,7 @@ moth1e:
 moth2:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1821,7 +1821,7 @@ moth2:
 moth2e:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1833,7 +1833,7 @@ moth2e:
 motrx2:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1845,7 +1845,7 @@ motrx2:
 motry:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1857,7 +1857,7 @@ motry:
 motry2:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1869,7 +1869,7 @@ motry2:
 motrz1:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1881,7 +1881,7 @@ motrz1:
 motrz1e:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1893,7 +1893,7 @@ motrz1e:
 moyaw2:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1905,7 +1905,7 @@ moyaw2:
 sl0ch:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1917,7 +1917,7 @@ sl0ch:
 sl0trxi:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1929,7 +1929,7 @@ sl0trxi:
 sl0trxo:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1941,7 +1941,7 @@ sl0trxo:
 sl0wh:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1953,7 +1953,7 @@ sl0wh:
 sl1ch:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1965,7 +1965,7 @@ sl1ch:
 sl1cv:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1977,7 +1977,7 @@ sl1cv:
 sl1trxi:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -1989,7 +1989,7 @@ sl1trxi:
 sl1trxo:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2001,7 +2001,7 @@ sl1trxo:
 sl1tryb:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2013,7 +2013,7 @@ sl1tryb:
 sl1tryt:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2025,7 +2025,7 @@ sl1tryt:
 sl1wh:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2037,7 +2037,7 @@ sl1wh:
 sl1wv:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2049,7 +2049,7 @@ sl1wv:
 sl2ch:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2061,7 +2061,7 @@ sl2ch:
 sl2cv:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2073,7 +2073,7 @@ sl2cv:
 sl2trxi:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2085,7 +2085,7 @@ sl2trxi:
 sl2trxo:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2097,7 +2097,7 @@ sl2trxo:
 sl2tryb:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2109,7 +2109,7 @@ sl2tryb:
 sl2tryt:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2121,7 +2121,7 @@ sl2tryt:
 sl2wh:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2133,7 +2133,7 @@ sl2wh:
 sl2wv:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2145,7 +2145,7 @@ sl2wv:
 sl3ch:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2157,7 +2157,7 @@ sl3ch:
 sl3cv:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2169,7 +2169,7 @@ sl3cv:
 sl3trxi:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2181,7 +2181,7 @@ sl3trxi:
 sl3trxo:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2193,7 +2193,7 @@ sl3trxo:
 sl3tryb:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2205,7 +2205,7 @@ sl3tryb:
 sl3tryt:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2217,7 +2217,7 @@ sl3tryt:
 sl3wh:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2229,7 +2229,7 @@ sl3wh:
 sl3wv:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2241,7 +2241,7 @@ sl3wv:
 sl4ch:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2253,7 +2253,7 @@ sl4ch:
 sl4cv:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2265,7 +2265,7 @@ sl4cv:
 sl4trxi:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2277,7 +2277,7 @@ sl4trxi:
 sl4trxo:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2289,7 +2289,7 @@ sl4trxo:
 sl4tryb:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2301,7 +2301,7 @@ sl4tryb:
 sl4tryt:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2313,7 +2313,7 @@ sl4tryt:
 sl4wh:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2325,7 +2325,7 @@ sl4wh:
 sl4wv:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2337,7 +2337,7 @@ sl4wv:
 sl5ch:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2349,7 +2349,7 @@ sl5ch:
 sl5cv:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2361,7 +2361,7 @@ sl5cv:
 sl5trxi:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2373,7 +2373,7 @@ sl5trxi:
 sl5trxo:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2385,7 +2385,7 @@ sl5trxo:
 sl5tryb:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2397,7 +2397,7 @@ sl5tryb:
 sl5tryt:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2409,7 +2409,7 @@ sl5tryt:
 sl5wh:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2421,7 +2421,7 @@ sl5wh:
 sl5wv:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2433,7 +2433,7 @@ sl5wv:
 strox:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2445,7 +2445,7 @@ strox:
 stroy:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2457,7 +2457,7 @@ stroy:
 stroz:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2469,7 +2469,7 @@ stroz:
 sttrx:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100
@@ -2481,7 +2481,7 @@ sttrx:
 sttry:
   readoutPriority: baseline
   deviceType: positioner
-  deviceClass: SynAxisOPAAS
+  deviceClass: SimPositioner
   deviceConfig:
     delay: 1
     speed: 100

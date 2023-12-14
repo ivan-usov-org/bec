@@ -45,7 +45,7 @@ Details:
 	Status: enabled
 	Read only: False
 	Last recorded value: {'samx': {'value': -0.0011717217935431634, 'timestamp': 1702306192.450343}, 'samx_setpoint': {'value': 0, 'timestamp': 1702306192.382011}, 'samx_motor_is_moving': {'value': 0, 'timestamp': 1702306192.450175}}
-	Device class: SynAxisOPAAS
+	Device class: SimPositioner
 	readoutPriority: baseline
 	Device tags: ['user motors']
 	User parameter: None

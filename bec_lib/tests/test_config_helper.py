@@ -55,7 +55,7 @@ def test_config_helper_save_current_session():
                 "sessionId": "648c817d67d3c7cd6a354df2",
                 "enabled": True,
                 "readOnly": False,
-                "deviceClass": "SynAxisOPAAS",
+                "deviceClass": "SimPositioner",
                 "deviceTags": ["user motors"],
                 "deviceConfig": {
                     "delay": 1,
@@ -89,7 +89,7 @@ def test_config_helper_save_current_session():
         config_helper.save_current_session("test.yaml")
         out_data = {
             "pinz": {
-                "deviceClass": "SynAxisOPAAS",
+                "deviceClass": "SimPositioner",
                 "deviceTags": ["user motors"],
                 "enabled": True,
                 "readOnly": False,

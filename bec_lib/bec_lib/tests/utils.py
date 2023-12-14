@@ -338,7 +338,7 @@ class DMClientMock(DMClient):
 
         session_info = self.get_device(device_name)
         device_base_class = (
-            "positioner" if session_info["deviceClass"] == "SynAxisOPAAS" else "signal"
+            "positioner" if session_info["deviceClass"] == "SimPositioner" else "signal"
         )
         if device_base_class == "positioner":
             signals = [
