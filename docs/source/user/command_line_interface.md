@@ -90,9 +90,10 @@ In both cases, a nested dictionary is returned with value/timestamp pairs for ea
 The current position of `samx` is accessed `dev.samx.read()['samx']['value']`.
 
 ```{note}
-For `hinted` and `normal` signals, the default behaviour is to read the last reported value from redis, i.e. `cached=True`.
-However, we can force a readback by using `dev.samx.read(cached=False)` which will introduce additional overhead. 
-Signals of type `config` are currently not stored in redis, thus a readback from the device is always forced.
+The default behaviour for `.read` and `.read_configuration` is to read the last recorded value from redis, i.e. `cached=True`.
+However, we can force an update by using `dev.samx.read(cached=False)` which will introduce additional overhead. 
+Signals of type `omitted` are currently not stored in redis, nor are they read from the device using e.g.`dev.samx.read()` and therefore must
+be read out directly using e.g. `dev.samx.my_omitted_signal.read()`.
 ```
 
 In addition, we can read for instance the readback or setpoint value from samx by
@@ -137,7 +138,6 @@ The return object of `dev.samx.get()` is a [namedtuple](https://docs.python.org/
 
 ```{warning}
 We recommend not using `dev.samx.get()` due to the fact that it forces a readback from all signals. 
-This may take a significant amount of time.
 ```
 
 ### DeviceConfig
