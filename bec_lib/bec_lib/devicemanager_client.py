@@ -175,7 +175,7 @@ class RPCBase:
 
         return self._handle_rpc_response(msg)
 
-    def _run_rpc_call(self, device, func_call, *args, **kwargs) -> Any:
+    def _run_rpc_call(self, device, func_call, *args, wait_for_rpc_response=True, **kwargs) -> Any:
         """
         Runs an RPC call on the device. This method is used internally by the RPC decorator.
         If a call is interrupted by the user, the a stop signal is sent to this device.
@@ -184,6 +184,7 @@ class RPCBase:
             device (str): The device name.
             func_call (str): The function call.
             *args: The function arguments.
+            wait_for_rpc_response (bool, optional): If True, the method waits for the RPC response. Defaults to True.
             **kwargs: The function keyword arguments.
 
         Returns:
@@ -199,9 +200,11 @@ class RPCBase:
             self.root.parent.producer.send(MessageEndpoints.scan_queue_request(), msg.dumps())
 
             # wait for RPC response
+            if not wait_for_rpc_response:
+                return None
             return_val = self._get_rpc_response(request_id, rpc_id)
         except KeyboardInterrupt as exc:
-            self.root.stop()
+            self.root.stop(wait_for_rpc_response=False)
             raise RPCError("User interruption during RPC call.") from exc
 
         return return_val
