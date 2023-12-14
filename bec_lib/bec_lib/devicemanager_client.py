@@ -336,11 +336,26 @@ class OphydInterfaceBase(RPCBase):
             return {obj_name: signals.get(obj_name, {})}
         return {key: val for key, val in signals.items() if key.startswith(self.full_name)}
 
-    @rpc
-    def read_configuration(self):
+    def read_configuration(self, cached=True):
         """
         Reads the device configuration.
+
+        Args:
+            cached (bool, optional): If True, the cached value is returned. Defaults to True.
         """
+
+        if not cached:
+            return self._run(cached=False, fcn=self.read_configuration)
+        val = self.root.parent.producer.get(
+            MessageEndpoints.device_read_configuration(self.root.name)
+        )
+        if not val:
+            return None
+        signals = messages.DeviceMessage.loads(val).content["signals"]
+        if self._signal_info:
+            obj_name = self._signal_info.get("obj_name")
+            return {obj_name: signals.get(obj_name, {})}
+        return {key: val for key, val in signals.items() if key.startswith(self.full_name)}
 
     @rpc
     def describe(self):
