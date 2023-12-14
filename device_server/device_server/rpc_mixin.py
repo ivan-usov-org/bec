@@ -78,6 +78,18 @@ class RPCMixin:
             expire=1800,
         )
 
+    def _rpc_read_and_return(self, instr: messages.DeviceInstructionMessage) -> Any:
+        res = self._read_and_update_devices([instr.content["device"]], instr.metadata)
+        if isinstance(res, list) and len(res) == 1:
+            res = res[0]
+        return res
+
+    def _rpc_read_configuration_and_return(self, instr: messages.DeviceInstructionMessage) -> Any:
+        res = self._read_config_and_update_devices([instr.content["device"]], instr.metadata)
+        if isinstance(res, list) and len(res) == 1:
+            res = res[0]
+        return res
+
     def _process_rpc_instruction(self, instr: messages.DeviceInstructionMessage) -> Any:
         # handle ophyd read. This is a special case because we also want to update the
         # buffered value in redis
@@ -90,31 +102,19 @@ class RPCMixin:
                     self.device_manager.devices[instr.content["device"]].obj,
                     instr_params.get("func").split(".read")[0],
                 )
-            if isinstance(obj, ophyd.Device) or (
-                isinstance(obj, ophyd.Signal)
-                and obj.kind not in [ophyd.Kind.omitted, ophyd.Kind.config]
-            ):
-                res = self._read_and_update_devices([instr.content["device"]], instr.metadata)
-                if isinstance(res, list) and len(res) == 1:
-                    res = res[0]
-                return res
-            if isinstance(obj, ophyd.Signal) and obj.kind in [
-                ophyd.Kind.omitted,
-                ophyd.Kind.config,
-            ]:
-                res = self._read_config_and_update_devices(
-                    [instr.content["device"]], instr.metadata
-                )
-                if isinstance(res, list) and len(res) == 1:
-                    res = res[0]
-                return res
+            if isinstance(obj, ophyd.Device):
+                return self._rpc_read_and_return(instr)
+            if isinstance(obj, ophyd.Signal):
+                if obj.kind not in [ophyd.Kind.omitted, ophyd.Kind.config]:
+                    return self._rpc_read_and_return(instr)
+                if obj.kind == ophyd.Kind.config:
+                    return self._rpc_read_configuration_and_return(instr)
+                if obj.kind == ophyd.Kind.omitted:
+                    return obj.read()
         if instr_params.get("func") == "read_configuration" or instr_params.get("func").endswith(
             ".read_configuration"
         ):
-            res = self._read_config_and_update_devices([instr.content["device"]], instr.metadata)
-            if isinstance(res, list) and len(res) == 1:
-                res = res[0]
-            return res
+            return self._rpc_read_configuration_and_return(instr)
 
         # handle other ophyd methods
         rpc_var = rgetattr(
