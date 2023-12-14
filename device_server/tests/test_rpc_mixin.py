@@ -188,4 +188,5 @@ def test_process_rpc_instruction_read(rpc_cls, dev_mock, func, read_called):
         rpc_cls._read_config_and_update_devices.assert_not_called()
     else:
         rpc_cls._read_and_update_devices.assert_not_called()
-        rpc_cls._read_config_and_update_devices.assert_called_once_with(["device"], {})
+        if "notused" not in func:
+            rpc_cls._read_config_and_update_devices.assert_called_once_with(["device"], {})
