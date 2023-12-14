@@ -362,9 +362,10 @@ class OphydInterfaceBase(RPCBase):
                 cached = False
 
         if not cached:
-            signals = self._run(cached=False, fcn=self.read_configuration)
+            fcn = self.read_configuration if (not is_signal or is_config_signal) else self.read
+            signals = self._run(cached=False, fcn=fcn)
         else:
-            if not is_config_signal:
+            if is_signal and not is_config_signal:
                 return self.read(cached=True)
 
             val = self.root.parent.producer.get(
