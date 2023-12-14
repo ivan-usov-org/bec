@@ -313,14 +313,7 @@ class OphydInterfaceBase(RPCBase):
         Returns:
             dict: The device signals.
         """
-        is_config_signal = False
-        is_signal = self._signal_info is not None
-        if is_signal:
-            kind = self._signal_info.get("kind_str")
-            if kind == "Kind.config":
-                is_config_signal = True
-            elif kind == "Kind.omitted":
-                cached = False
+        _, is_config_signal, cached = self._get_rpc_signal_info(cached)
 
         if not cached:
             signals = self._run(cached=cached, fcn=self.read)
@@ -339,10 +332,7 @@ class OphydInterfaceBase(RPCBase):
             signals = messages.DeviceMessage.loads(val).content["signals"]
         if filter_to_hints:
             signals = {key: val for key, val in signals.items() if key in self._hints}
-        if self._signal_info:
-            obj_name = self._signal_info.get("obj_name")
-            return {obj_name: signals.get(obj_name, {})}
-        return {key: val for key, val in signals.items() if key.startswith(self.full_name)}
+        return self._filter_rpc_signals(signals)
 
     def read_configuration(self, cached=True):
         """
@@ -352,14 +342,7 @@ class OphydInterfaceBase(RPCBase):
             cached (bool, optional): If True, the cached value is returned. Defaults to True.
         """
 
-        is_config_signal = False
-        is_signal = self._signal_info is not None
-        if is_signal:
-            kind = self._signal_info.get("kind_str")
-            if kind == "Kind.config":
-                is_config_signal = True
-            elif kind == "Kind.omitted":
-                cached = False
+        is_signal, is_config_signal, cached = self._get_rpc_signal_info(cached)
 
         if not cached:
             fcn = self.read_configuration if (not is_signal or is_config_signal) else self.read
@@ -374,10 +357,25 @@ class OphydInterfaceBase(RPCBase):
             if not val:
                 return None
             signals = messages.DeviceMessage.loads(val).content["signals"]
+
+        return self._filter_rpc_signals(signals)
+
+    def _filter_rpc_signals(self, signals):
         if self._signal_info:
             obj_name = self._signal_info.get("obj_name")
             return {obj_name: signals.get(obj_name, {})}
         return {key: val for key, val in signals.items() if key.startswith(self.full_name)}
+
+    def _get_rpc_signal_info(self, cached: bool):
+        is_config_signal = False
+        is_signal = self._signal_info is not None
+        if is_signal:
+            kind = self._signal_info.get("kind_str")
+            if kind == "Kind.config":
+                is_config_signal = True
+            elif kind == "Kind.omitted":
+                cached = False
+        return is_signal, is_config_signal, cached
 
     @rpc
     def describe(self):
