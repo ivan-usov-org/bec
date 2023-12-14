@@ -86,6 +86,12 @@ if ! conda env list | grep -q ${conda_env_name}; then
     echo "Creating conda environment ${conda_env_name}..."
     conda create --name ${conda_env_name} ${conda_deps[@]}
 fi
+# check if the conda environment has the correct dependencies. If not, install them.
+conda activate ${conda_env_name}
+if ! conda list | grep -q ${conda_deps[@]}; then
+    echo "Installing conda dependencies..."
+    conda install -y ${conda_deps[@]}
+fi
 
 for i in $(seq ${CONDA_SHLVL}); do
     conda deactivate
@@ -105,7 +111,7 @@ if [ "$split_env" = true ]; then
         python -m venv ./${package}_venv
         conda deactivate
         source ./${package}_venv/bin/activate
-        pip install wheel
+        pip install -q -q wheel
         pip install -q -q -e '.[dev]'
         cd ../
         deactivate
@@ -121,7 +127,7 @@ else # install all packages in one virtual environment
     conda deactivate
     source ./bec_venv/bin/activate
     cd ./bec_server
-    pip install wheel
+    pip install -q -q wheel
     pip install -q -q -e '.[dev]'
     cd ../
     echo "Created virtual environment for all packages"
