@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import builtins
 import enum
 import time
 from typing import TYPE_CHECKING
@@ -9,6 +10,7 @@ from rich.console import Console
 from rich.table import Table
 from typeguard import typechecked
 
+from bec_lib import messages
 from bec_lib.bec_errors import DeviceConfigError
 from bec_lib.config_helper import ConfigHelper
 from bec_lib.endpoints import MessageEndpoints
@@ -657,6 +659,7 @@ class DeviceManagerBase:
         # pylint: disable=protected-access
         action = msg.content["action"]
         config = msg.content["config"]
+        self.update_status(BECStatus.BUSY)
         if action == "update":
             for dev in config:
                 if "deviceConfig" in config[dev]:
@@ -683,18 +686,31 @@ class DeviceManagerBase:
                     self.devices[dev]._config["deviceType"] = config[dev]["deviceType"]
 
         elif action == "add":
-            self.update_status(BECStatus.BUSY)
             self._add_action(config)
-            self.update_status(BECStatus.RUNNING)
         elif action == "reload":
-            self.update_status(BECStatus.BUSY)
             logger.info("Reloading config.")
             self._reload_action()
-            self.update_status(BECStatus.RUNNING)
         elif action == "remove":
-            self.update_status(BECStatus.BUSY)
             self._remove_action(config)
-            self.update_status(BECStatus.RUNNING)
+        self.update_status(BECStatus.RUNNING)
+        self._acknowledge_config_request(msg)
+
+    def _acknowledge_config_request(self, msg: DeviceConfigMessage) -> None:
+        """
+        Acknowledge a config request by sending a response message.
+        Args:
+            msg (DeviceConfigMessage): Config message
+
+        Returns:
+
+        """
+        self.producer.lpush(
+            MessageEndpoints.service_response(msg.metadata["RID"]),
+            messages.ServiceResponseMessage(
+                response={"accepted": True, "service": builtins.__BEC_SERVICE__.__class__.__name__}
+            ).dumps(),
+            expire=100,
+        )
 
     def _add_action(self, config) -> None:
         for dev in config:

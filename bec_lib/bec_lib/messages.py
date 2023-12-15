@@ -1031,3 +1031,24 @@ class GUIInstructionMessage(BECMessage):
         super().__init__(
             msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
         )
+
+
+class ServiceResponseMessage(BECMessage):
+    """Message for service responses"""
+
+    msg_type = "service_response_message"
+
+    def __init__(
+        self, *, response: dict, metadata: dict = None, version: float = DEFAULT_VERSION
+    ) -> None:
+        """
+        Message for service responses
+        Args:
+            response (dict): service response
+            metadata (dict, optional): metadata. Defaults to None.
+        """
+
+        self.content = {"response": response}
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )

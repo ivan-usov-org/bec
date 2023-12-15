@@ -58,6 +58,7 @@ class MessageEndpoints:
     # service
     _services_status = "internal/services/status"
     _metrics = "internal/services/metrics"
+    _service_response = "internal/services/response"
 
     # misc
     _public_global_vars = "public/vars"
@@ -621,6 +622,20 @@ class MessageEndpoints:
             str: Endpoint for metrics.
         """
         return f"{cls._metrics}/{service_id}"
+
+    @classmethod
+    def service_response(cls, RID: str) -> str:
+        """
+        Endpoint for service response. This endpoint is used by all BEC services to publish
+        the result of a service request using a messages.ServiceResponseMessage message.
+
+        Args:
+            RID (str): Request ID.
+
+        Returns:
+            str: Endpoint for service response.
+        """
+        return f"{cls._service_response}/{RID}"
 
     # misc
     @classmethod

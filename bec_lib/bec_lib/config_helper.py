@@ -10,6 +10,7 @@ import msgpack
 import yaml
 
 import bec_lib
+from bec_lib import messages
 from bec_lib.bec_errors import DeviceConfigError
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
@@ -93,6 +94,40 @@ class ConfigHelper:
         if not reply.content["accepted"]:
             raise DeviceConfigError(f"Failed to update the config: {reply.content['message']}.")
 
+        # wait for the device server and scan server to acknowledge the config change
+        self.wait_for_service_response(RID)
+
+    def wait_for_service_response(self, RID: str, timeout=10) -> messages.ServiceResponseMessage:
+        """
+        wait for service response
+
+        Args:
+            RID (str): request id
+            timeout (int, optional): timeout in seconds. Defaults to 10.
+
+        Returns:
+            ServiceResponseMessage: reply message
+        """
+        elapsed_time = 0
+        max_time = timeout
+        while True:
+            res = self.producer.lrange(MessageEndpoints.service_response(RID), 0, -1)
+            if not res:
+                time.sleep(0.005)
+                elapsed_time += 0.005
+                continue
+            service_messages = [messages.ServiceResponseMessage.loads(msg) for msg in res]
+            ack_services = [
+                msg.content["response"]["service"] for msg in service_messages if msg is not None
+            ]
+            if set(["DeviceServer", "ScanServer"]).issubset(set(ack_services)):
+                print(f"Config change acknowledged by all services: {ack_services}")
+                break
+            if elapsed_time > max_time:
+                raise DeviceConfigError(
+                    "Timeout reached whilst waiting for config change to be acknowledged."
+                )
+
     def wait_for_config_reply(self, RID: str, timeout=10) -> RequestResponseMessage:
         """
         wait for config reply
@@ -108,8 +143,8 @@ class ConfigHelper:
         while True:
             msg = self.producer.get(MessageEndpoints.device_config_request_response(RID))
             if msg is None:
-                time.sleep(0.1)
-                start += 0.1
+                time.sleep(0.01)
+                start += 0.01
 
                 if start > timeout:
                     raise DeviceConfigError("Timeout reached whilst waiting for config reply.")
