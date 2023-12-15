@@ -694,9 +694,9 @@ class ScanWorker(threading.Thread):
         queue.is_active = True
         try:
             for instr in queue:
+                self._check_for_interruption()
                 if instr is None:
                     continue
-                self._check_for_interruption()
                 self._exposure_time = getattr(queue.active_request_block.scan, "exp_time", None)
                 self._instruction_step(instr)
         except ScanAbortion as exc:
@@ -749,6 +749,8 @@ class ScanWorker(threading.Thread):
             self.open_scan(instr)
         elif action == "close_scan" and scan_def_id is None:
             self.close_scan(instr, self.max_point_id)
+        elif action == "close_scan" and scan_def_id is not None:
+            pass
         elif action == "open_scan_def":
             pass
         elif action == "close_scan_def":

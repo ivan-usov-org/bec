@@ -282,7 +282,8 @@ class ScanDef(ContextDecorator):
         return self
 
     def __exit__(self, *exc):
-        self.parent.close_scan_def()
+        if exc[0] is None:
+            self.parent.close_scan_def()
         self.parent._scan_def_id = None
 
 

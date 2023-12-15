@@ -5,18 +5,20 @@ import collections
 import time
 from typing import TYPE_CHECKING
 
-from bec_client.callbacks.scan_progress import LiveUpdatesScanProgress
 from bec_lib import bec_logger
 from bec_lib.bec_errors import ScanInterruption
+
+from bec_client.callbacks.scan_progress import LiveUpdatesScanProgress
 
 from .live_table import LiveUpdatesTable
 from .move_device import LiveUpdatesReadbackProgressbar
 from .utils import ScanRequestMixin, check_alarms
 
 if TYPE_CHECKING:
-    from bec_client import BECClient
     from bec_lib import messages
     from bec_lib.queue_items import QueueItem
+
+    from bec_client import BECClient
 
 logger = bec_logger.logger
 
@@ -155,6 +157,7 @@ class IPythonLiveUpdates:
 
         except ScanInterruption as scan_interr:
             self._interrupted_request = (request, scan_report_type)
+            self._reset(forced=True)
             raise scan_interr
 
     def _process_queue(
@@ -179,7 +182,8 @@ class IPythonLiveUpdates:
                 "status"
             )
             print(
-                f"Scan is enqueued and is waiting for execution. Current position in queue: {queue.queue_position + 1}. Queue status: {status}.",
+                "Scan is enqueued and is waiting for execution. Current position in queue:"
+                f" {queue.queue_position + 1}. Queue status: {status}.",
                 end="\r",
                 flush=True,
             )
@@ -202,12 +206,12 @@ class IPythonLiveUpdates:
 
         return False
 
-    def _reset(self):
+    def _reset(self, forced=False):
         self._interrupted_request = None
 
         self._user_callback = None
         self._processed_instructions = 0
-        scan_closed = self._active_request.content["scan_type"] == "close_scan_def"
+        scan_closed = forced or (self._active_request.content["scan_type"] == "close_scan_def")
         self._active_request = None
 
         if self.client.scans._scan_def_id and not scan_closed:

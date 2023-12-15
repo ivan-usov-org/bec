@@ -8,10 +8,9 @@ import traceback
 import uuid
 from enum import Enum
 
+from bec_lib import Alarms, MessageEndpoints, bec_logger, messages, threadlocked
 from rich.console import Console
 from rich.table import Table
-
-from bec_lib import Alarms, MessageEndpoints, bec_logger, messages, threadlocked
 
 from .errors import LimitError, ScanAbortion
 from .scan_assembler import ScanAssembler
@@ -94,9 +93,7 @@ class QueueManager:
 
     def _start_scan_queue_consumer(self) -> None:
         self._scan_queue_consumer = self.connector.consumer(
-            MessageEndpoints.scan_queue_insert(),
-            cb=self._scan_queue_callback,
-            parent=self,
+            MessageEndpoints.scan_queue_insert(), cb=self._scan_queue_callback, parent=self
         )
         self._scan_queue_modification_consumer = self.connector.consumer(
             MessageEndpoints.scan_queue_modification(),
@@ -622,6 +619,8 @@ class RequestBlockQueue:
     def increase_scan_number(self) -> None:
         """increase the scan number counter"""
         rbl = self.active_rb
+        if rbl is None:
+            return
         if not rbl.is_scan and rbl.scan_def_id is None:
             return
         if rbl.scan_def_id is None or rbl.msg.content["scan_type"] == "close_scan_def":
@@ -745,6 +744,7 @@ class InstructionQueueItem:
     def abort(self) -> None:
         """abort and clear all the instructions from the instruction queue"""
         self.instructions = iter([])
+        # self.queue.request_blocks_queue.clear()
 
     def append_scan_request(self, msg):
         """append a scan message to the instruction queue"""
@@ -826,14 +826,16 @@ class InstructionQueueItem:
         except StopIteration:
             if not self.scan_macros_complete:
                 logger.info(
-                    f"Waiting for new instructions or scan macro to be closed (scan def ids: {self.queue.scan_def_ids})"
+                    "Waiting for new instructions or scan macro to be closed (scan def ids:"
+                    f" {self.queue.scan_def_ids})"
                 )
                 time.sleep(0.1)
             elif self.queue_group is not None and not self.queue_group_is_closed:
                 self.queue.active_rb = None
                 self.parent.queue_manager.send_queue_status()
                 logger.info(
-                    f"Waiting for new instructions or queue group to be closed (group id: {self.queue_group})"
+                    "Waiting for new instructions or queue group to be closed (group id:"
+                    f" {self.queue_group})"
                 )
                 time.sleep(0.1)
             else:
