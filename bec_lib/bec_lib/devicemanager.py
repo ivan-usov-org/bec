@@ -704,9 +704,12 @@ class DeviceManagerBase:
         Returns:
 
         """
+        if not msg.metadata.get("RID"):
+            return
         self.producer.lpush(
             MessageEndpoints.service_response(msg.metadata["RID"]),
             messages.ServiceResponseMessage(
+                # pylint: disable=no-member
                 response={"accepted": True, "service": builtins.__BEC_SERVICE__.__class__.__name__}
             ).dumps(),
             expire=100,
