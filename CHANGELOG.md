@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.52.1 (2023-12-15)
+
+### Fix
+
+* Fixed config_ack for incomplete messages ([`16c0a1d`](https://gitlab.psi.ch/bec/bec/-/commit/16c0a1d4d4d023239afb12862a5732ec5187cf6f))
+* Added service acknowledgement for config updates; closes #79 ([`bc1c43e`](https://gitlab.psi.ch/bec/bec/-/commit/bc1c43e2da1775b191dd168ab96599a4ada425cc))
+
 ## v0.52.0 (2023-12-15)
 
 ### Feature
