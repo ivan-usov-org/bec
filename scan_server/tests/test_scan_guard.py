@@ -1,12 +1,11 @@
 from unittest import mock
-from bec_lib import messages
 
 import msgpack
 import pytest
+from bec_lib import MessageEndpoints, messages
+from bec_lib.redis_connector import MessageObject
 from utils import load_ScanServerMock
 
-from bec_lib import MessageEndpoints
-from bec_lib.redis_connector import MessageObject
 from scan_server.scan_guard import ScanGuard, ScanRejection, ScanStatus
 
 
@@ -16,32 +15,21 @@ from scan_server.scan_guard import ScanGuard, ScanRejection, ScanStatus
         (
             messages.ScanQueueMessage(
                 scan_type="fermat_scan",
-                parameter={
-                    "args": {"samx": (-5, 5), "samy": (-5, 5)},
-                    "kwargs": {"step": 3},
-                },
+                parameter={"args": {"samx": (-5, 5), "samy": (-5, 5)}, "kwargs": {"step": 3}},
                 queue="primary",
             )
         ),
         (
             messages.ScanQueueMessage(
                 scan_type="device_rpc",
-                parameter={
-                    "device": "samy",
-                    "args": {},
-                    "kwargs": {},
-                },
+                parameter={"device": "samy", "args": {}, "kwargs": {}},
                 queue="primary",
             )
         ),
         (
             messages.ScanQueueMessage(
                 scan_type="device_rpc",
-                parameter={
-                    "device": ["samy"],
-                    "args": {},
-                    "kwargs": {},
-                },
+                parameter={"device": ["samy"], "args": {}, "kwargs": {}},
                 queue="primary",
             )
         ),
@@ -56,11 +44,12 @@ def test_check_motors_movable_enabled(scan_queue_msg):
     with mock.patch.object(
         k.device_manager.config_helper, "wait_for_config_reply", return_value=config_reply
     ):
-        k.device_manager.devices["samx"].enabled = True
-        k.device_manager.devices["samy"].enabled = False
-        with pytest.raises(ScanRejection) as scan_rejection:
-            sg._check_motors_movable(scan_queue_msg)
-        assert "Device samy is not enabled." in scan_rejection.value.args
+        with mock.patch.object(k.device_manager.config_helper, "wait_for_service_response"):
+            k.device_manager.devices["samx"].enabled = True
+            k.device_manager.devices["samy"].enabled = False
+            with pytest.raises(ScanRejection) as scan_rejection:
+                sg._check_motors_movable(scan_queue_msg)
+            assert "Device samy is not enabled." in scan_rejection.value.args
 
 
 @pytest.mark.parametrize("device,func,is_valid", [("samx", "read", True)])
@@ -77,10 +66,7 @@ def test_device_rpc_is_valid(device, func, is_valid):
         (
             messages.ScanQueueMessage(
                 scan_type="fermat_scan",
-                parameter={
-                    "args": {"samx": (-5, 5), "samy": (-5, 5)},
-                    "kwargs": {"step": 3},
-                },
+                parameter={"args": {"samx": (-5, 5), "samy": (-5, 5)}, "kwargs": {"step": 3}},
                 queue="primary",
             ),
             True,
@@ -88,11 +74,7 @@ def test_device_rpc_is_valid(device, func, is_valid):
         (
             messages.ScanQueueMessage(
                 scan_type="device_rpc",
-                parameter={
-                    "device": "samy",
-                    "args": {},
-                    "kwargs": {},
-                },
+                parameter={"device": "samy", "args": {}, "kwargs": {}},
                 queue="primary",
             ),
             True,
@@ -100,11 +82,7 @@ def test_device_rpc_is_valid(device, func, is_valid):
         (
             messages.ScanQueueMessage(
                 scan_type="device_rpc",
-                parameter={
-                    "device": ["samy"],
-                    "args": {},
-                    "kwargs": {},
-                },
+                parameter={"device": ["samy"], "args": {}, "kwargs": {}},
                 queue="primary",
             ),
             True,
@@ -119,12 +97,13 @@ def test_valid_request(scan_queue_msg, valid):
     with mock.patch.object(
         k.device_manager.config_helper, "wait_for_config_reply", return_value=config_reply
     ):
-        with mock.patch.object(sg, "_check_valid_scan") as valid_scan:
-            k.device_manager.devices["samx"].enabled = True
-            k.device_manager.devices["samy"].enabled = True
-            status = sg._is_valid_scan_request(scan_queue_msg)
-            valid_scan.assert_called_once_with(scan_queue_msg)
-            assert status.accepted == valid
+        with mock.patch.object(k.device_manager.config_helper, "wait_for_service_response"):
+            with mock.patch.object(sg, "_check_valid_scan") as valid_scan:
+                k.device_manager.devices["samx"].enabled = True
+                k.device_manager.devices["samy"].enabled = True
+                status = sg._is_valid_scan_request(scan_queue_msg)
+                valid_scan.assert_called_once_with(scan_queue_msg)
+                assert status.accepted == valid
 
 
 def test_check_valid_scan_raises_for_unknown_scan():
@@ -136,10 +115,7 @@ def test_check_valid_scan_raises_for_unknown_scan():
 
     request = messages.ScanQueueMessage(
         scan_type="unknown_scan",
-        parameter={
-            "args": {"samx": (-5, 5), "samy": (-5, 5)},
-            "kwargs": {"step": 3},
-        },
+        parameter={"args": {"samx": (-5, 5), "samy": (-5, 5)}, "kwargs": {"step": 3}},
         queue="primary",
     )
 
@@ -156,10 +132,7 @@ def test_check_valid_scan_accepts_known_scan():
 
     request = messages.ScanQueueMessage(
         scan_type="fermat_scan",
-        parameter={
-            "args": {"samx": (-5, 5), "samy": (-5, 5)},
-            "kwargs": {"step": 3},
-        },
+        parameter={"args": {"samx": (-5, 5), "samy": (-5, 5)}, "kwargs": {"step": 3}},
         queue="primary",
     )
 
@@ -174,12 +147,7 @@ def test_check_valid_scan_device_rpc():
     sg.producer.get.return_value = msgpack.dumps({"device_rpc": "device_rpc"})
     request = messages.ScanQueueMessage(
         scan_type="device_rpc",
-        parameter={
-            "device": "samy",
-            "func": "read",
-            "args": {},
-            "kwargs": {},
-        },
+        parameter={"device": "samy", "func": "read", "args": {}, "kwargs": {}},
         queue="primary",
     )
     with mock.patch.object(sg, "_device_rpc_is_valid") as rpc_valid:
@@ -195,12 +163,7 @@ def test_check_valid_scan_device_rpc_raises():
     sg.producer.get.return_value = msgpack.dumps({"device_rpc": "device_rpc"})
     request = messages.ScanQueueMessage(
         scan_type="device_rpc",
-        parameter={
-            "device": "samy",
-            "func": "read",
-            "args": {},
-            "kwargs": {},
-        },
+        parameter={"device": "samy", "func": "read", "args": {}, "kwargs": {}},
         queue="primary",
     )
     with pytest.raises(ScanRejection) as scan_rejection:
@@ -216,17 +179,11 @@ def test_handle_scan_modification_request():
 
     sg = ScanGuard(parent=k)
     msg = messages.ScanQueueModificationMessage(
-        scanID="scanID",
-        action="abort",
-        parameter={},
-        metadata={"RID": "RID"},
+        scanID="scanID", action="abort", parameter={}, metadata={"RID": "RID"}
     )
     with mock.patch.object(sg.device_manager.producer, "send") as send:
         sg._handle_scan_modification_request(msg.dumps())
-        send.assert_called_once_with(
-            MessageEndpoints.scan_queue_modification(),
-            msg.dumps(),
-        )
+        send.assert_called_once_with(MessageEndpoints.scan_queue_modification(), msg.dumps())
 
 
 def test_handle_scan_modification_request_restart():
@@ -234,10 +191,7 @@ def test_handle_scan_modification_request_restart():
 
     sg = ScanGuard(parent=k)
     msg = messages.ScanQueueModificationMessage(
-        scanID="scanID",
-        action="restart",
-        parameter={"RID": "RID"},
-        metadata={"RID": "new_RID"},
+        scanID="scanID", action="restart", parameter={"RID": "RID"}, metadata={"RID": "new_RID"}
     )
     with mock.patch.object(sg, "_send_scan_request_response") as send_response:
         with mock.patch("scan_server.scan_guard.ScanStatus") as scan_status:
@@ -251,18 +205,12 @@ def test_append_to_scan_queue():
     sg = ScanGuard(parent=k)
     msg = messages.ScanQueueMessage(
         scan_type="fermat_scan",
-        parameter={
-            "args": {"samx": (-5, 5), "samy": (-5, 5)},
-            "kwargs": {"step": 3},
-        },
+        parameter={"args": {"samx": (-5, 5), "samy": (-5, 5)}, "kwargs": {"step": 3}},
         queue="primary",
     )
     with mock.patch.object(sg.device_manager.producer, "send") as send:
         sg._append_to_scan_queue(msg)
-        send.assert_called_once_with(
-            MessageEndpoints.scan_queue_insert(),
-            msg.dumps(),
-        )
+        send.assert_called_once_with(MessageEndpoints.scan_queue_insert(), msg.dumps())
 
 
 def test_scan_queue_request_callback():
@@ -271,10 +219,7 @@ def test_scan_queue_request_callback():
     sg = ScanGuard(parent=k)
     msg = messages.ScanQueueMessage(
         scan_type="fermat_scan",
-        parameter={
-            "args": {"samx": (-5, 5), "samy": (-5, 5)},
-            "kwargs": {"step": 3},
-        },
+        parameter={"args": {"samx": (-5, 5), "samy": (-5, 5)}, "kwargs": {"step": 3}},
         queue="primary",
     )
     msg_obj = MessageObject(msg.dumps(), MessageEndpoints.scan_queue_request())
@@ -288,10 +233,7 @@ def test_scan_queue_modification_request_callback():
 
     sg = ScanGuard(parent=k)
     msg = messages.ScanQueueModificationMessage(
-        scanID="scanID",
-        action="abort",
-        parameter={},
-        metadata={"RID": "RID"},
+        scanID="scanID", action="abort", parameter={}, metadata={"RID": "RID"}
     )
     msg_obj = MessageObject(msg.dumps(), MessageEndpoints.scan_queue_modification())
     with mock.patch.object(sg, "_handle_scan_modification_request") as handle:
@@ -305,10 +247,7 @@ def test_scan_queue_modification_request_callback_wrong_msg():
     sg = ScanGuard(parent=k)
     msg = messages.ScanQueueMessage(
         scan_type="fermat_scan",
-        parameter={
-            "args": {"samx": (-5, 5), "samy": (-5, 5)},
-            "kwargs": {"step": 3},
-        },
+        parameter={"args": {"samx": (-5, 5), "samy": (-5, 5)}, "kwargs": {"step": 3}},
         queue="primary",
     )
     msg_obj = MessageObject(msg.dumps(), MessageEndpoints.scan_queue_modification())
@@ -326,9 +265,7 @@ def test_send_scan_request_response():
         send.assert_called_once_with(
             MessageEndpoints.scan_queue_request_response(),
             messages.RequestResponseMessage(
-                accepted=True,
-                message="",
-                metadata={"RID": "RID"},
+                accepted=True, message="", metadata={"RID": "RID"}
             ).dumps(),
         )
 
@@ -339,10 +276,7 @@ def test_handle_scan_request():
     sg = ScanGuard(parent=k)
     msg = messages.ScanQueueMessage(
         scan_type="fermat_scan",
-        parameter={
-            "args": {"samx": (-5, 5), "samy": (-5, 5)},
-            "kwargs": {"step": 3},
-        },
+        parameter={"args": {"samx": (-5, 5), "samy": (-5, 5)}, "kwargs": {"step": 3}},
         queue="primary",
     )
     with mock.patch.object(sg, "_is_valid_scan_request") as valid:
@@ -358,10 +292,7 @@ def test_handle_scan_request_rejected():
     sg = ScanGuard(parent=k)
     msg = messages.ScanQueueMessage(
         scan_type="fermat_scan",
-        parameter={
-            "args": {"samx": (-5, 5), "samy": (-5, 5)},
-            "kwargs": {"step": 3},
-        },
+        parameter={"args": {"samx": (-5, 5), "samy": (-5, 5)}, "kwargs": {"step": 3}},
         queue="primary",
     )
     with mock.patch.object(sg, "_is_valid_scan_request") as valid:
@@ -377,10 +308,7 @@ def test_is_valid_scan_request_returns_scan_status_on_error():
     sg = ScanGuard(parent=k)
     msg = messages.ScanQueueMessage(
         scan_type="fermat_scan",
-        parameter={
-            "args": {"samx": (-5, 5), "samy": (-5, 5)},
-            "kwargs": {"step": 3},
-        },
+        parameter={"args": {"samx": (-5, 5), "samy": (-5, 5)}, "kwargs": {"step": 3}},
         queue="primary",
     )
     with mock.patch.object(sg, "_check_valid_scan") as valid:
