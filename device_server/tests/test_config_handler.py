@@ -1,13 +1,13 @@
 import os
 from unittest import mock
 
+import bec_lib
 import pytest
 import yaml
-from test_device_manager_ds import device_manager
-
-import bec_lib
 from bec_lib import messages
 from bec_lib.tests.utils import ConnectorMock, create_session_from_config
+from test_device_manager_ds import device_manager
+
 from device_server.devices.config_update_handler import ConfigUpdateHandler
 from device_server.devices.devicemanager import DeviceConfigError, DeviceManagerDS
 
@@ -31,20 +31,19 @@ def test_request_response():
     with mock.patch.object(device_manager, "connect_device", wraps=mocked_failed_connection):
         with mock.patch.object(device_manager, "_get_config", get_config_from_mock):
             with mock.patch.object(
-                device_manager.config_helper,
-                "wait_for_config_reply",
-                return_value=config_reply,
+                device_manager.config_helper, "wait_for_config_reply", return_value=config_reply
             ):
-                device_manager.initialize("")
-                with mock.patch.object(
-                    device_manager.config_update_handler, "send_config_request_reply"
-                ) as request_reply:
-                    device_manager.config_update_handler.parse_config_request(
-                        msg=messages.DeviceConfigMessage(
-                            action="update", config={"something": "something"}
+                with mock.patch.object(device_manager.config_helper, "wait_for_service_response"):
+                    device_manager.initialize("")
+                    with mock.patch.object(
+                        device_manager.config_update_handler, "send_config_request_reply"
+                    ) as request_reply:
+                        device_manager.config_update_handler.parse_config_request(
+                            msg=messages.DeviceConfigMessage(
+                                action="update", config={"something": "something"}
+                            )
                         )
-                    )
-                    request_reply.assert_called_once()
+                        request_reply.assert_called_once()
 
 
 def test_config_handler_update_config(device_manager):

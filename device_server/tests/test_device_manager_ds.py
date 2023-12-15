@@ -1,14 +1,13 @@
 import os
 from unittest import mock
-from bec_lib import messages
 
+import bec_lib
 import numpy as np
 import pytest
 import yaml
-
-import bec_lib
-from bec_lib import MessageEndpoints
+from bec_lib import MessageEndpoints, messages
 from bec_lib.tests.utils import ConnectorMock, ProducerMock, create_session_from_config
+
 from device_server.devices.devicemanager import DeviceManagerDS
 
 # pylint: disable=missing-function-docstring
@@ -103,16 +102,15 @@ def test_disable_unreachable_devices():
     with mock.patch.object(device_manager, "connect_device", wraps=mocked_failed_connection):
         with mock.patch.object(device_manager, "_get_config", get_config_from_mock):
             with mock.patch.object(
-                device_manager.config_helper,
-                "wait_for_config_reply",
-                return_value=config_reply,
+                device_manager.config_helper, "wait_for_config_reply", return_value=config_reply
             ):
-                device_manager.initialize("")
-                assert device_manager.config_update_handler is not None
-                assert device_manager.devices.samx.enabled is False
-                msg = messages.DeviceConfigMessage(
-                    action="update", config={"samx": {"enabled": False}}
-                )
+                with mock.patch.object(device_manager.config_helper, "wait_for_service_response"):
+                    device_manager.initialize("")
+                    assert device_manager.config_update_handler is not None
+                    assert device_manager.devices.samx.enabled is False
+                    msg = messages.DeviceConfigMessage(
+                        action="update", config={"samx": {"enabled": False}}
+                    )
 
 
 def test_flyer_event_callback():
@@ -152,9 +150,6 @@ def test_obj_progress_callback():
         mock_producer.set_and_publish.assert_called_once_with(
             MessageEndpoints.device_progress("samx"),
             messages.ProgressMessage(
-                value=1,
-                max_value=2,
-                done=False,
-                metadata={"scanID": "12345"},
+                value=1, max_value=2, done=False, metadata={"scanID": "12345"}
             ).dumps(),
         )
