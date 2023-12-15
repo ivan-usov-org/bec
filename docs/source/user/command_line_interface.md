@@ -32,6 +32,23 @@ This allows users to use tab-completion for finding devices.
 ``dev`` is imported as a builtin. As a result, you can access ``dev`` from everywhere. ``dev`` itself is just an alias for ``bec.device_manager.devices``.
 ```
 
+To get a quick glance at all available devices, you can type
+    
+```ipython
+demo [1/3] ❯❯ dev.show_all()
+```
+
+If you want to the current position, setpoint and limits of some device, you can use the ``wm`` command, e.g.
+    
+```{image} ../assets/wm-devices.png
+:align: center
+:alt: tab completion for finding devices
+:width: 400
+```
+
+The ``wm`` command can receive multiple devices as strings, e.g. ``dev.wm(["samx, "samy"])`` or  a single device, e.g. ``dev.wm("samx")``. It also supports regular expressions, e.g. ``dev.wm("sam*")``. Instead of strings, you can also pass the device objects directly, e.g. ``dev.wm([dev.samx, dev.samy])``.
+
+
 ### Inspect a device
 
 To inspect the device samx, you can simply type ``dev.samx`` and you'll get a printout of the relevant information about this device.
@@ -56,6 +73,12 @@ Config:
 	speed: 100
 	tolerance: 0.01
 	update_frequency: 400
+```
+
+If you just want to see the current position, setpoint and limits of a device, you can simply type
+    
+```ipython
+demo [1/3] ❯❯ dev.samx.wm
 ```
 
 #### Read interface

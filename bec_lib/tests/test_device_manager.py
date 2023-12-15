@@ -422,6 +422,7 @@ def test_device_container_wm():
     devs["test"] = Device("test", {})
     with mock.patch.object(devs.test, "read", return_value={"test": {"value": 1}}) as read:
         devs.wm("test")
+        devs.wm("tes*")
 
 
 def test_device_container_wm_with_setpoint():

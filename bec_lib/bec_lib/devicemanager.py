@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import builtins
 import enum
+import re
 import time
 from typing import TYPE_CHECKING
 
@@ -494,25 +495,44 @@ class DeviceContainer(dict):
         """get a list of all enabled detectors"""
         return self.get_device_type_devices(DeviceType.DETECTOR)
 
-    def wm(self, device_names: list[str]):
+    def _expand_device_name(self, device_name: str) -> list[str]:
+        try:
+            regex = re.compile(device_name)
+        except re.error:
+            return [device_name]
+        return [dev for dev in self.keys() if regex.match(dev)]
+
+    def wm(self, device_names: list[str | Device | None] = None, *args):
         """Get the current position of one or more devices.
 
         Args:
-            device_names (list[str]): List of device names
+            device_names (list): List of device names or Device objects
 
         Examples:
+            >>> dev.wm()
+            >>> dev.wm('sam*')
             >>> dev.wm('samx')
             >>> dev.wm(['samx', 'samy'])
             >>> dev.wm(dev.monitored_devices())
             >>> dev.wm(dev.get_devices_with_tags('user motors'))
 
         """
-        if not isinstance(device_names, list):
-            device_names = [device_names]
-        if len(device_names) == 0:
-            return
-        if not isinstance(device_names[0], Device):
-            device_names = [self.__dict__[dev] for dev in device_names]
+        if not device_names:
+            device_names = self.values()
+        else:
+            expanded_devices = []
+            if not isinstance(device_names, list):
+                device_names = [device_names]
+            if len(device_names) == 0:
+                return
+
+            for dev in device_names:
+                if isinstance(dev, Device):
+                    expanded_devices.append(dev)
+                else:
+                    devs = self._expand_device_name(dev)
+                    expanded_devices.extend([self.__dict__[dev] for dev in devs])
+            device_names = expanded_devices
         console = Console()
         table = Table()
         table.add_column("", justify="center")
