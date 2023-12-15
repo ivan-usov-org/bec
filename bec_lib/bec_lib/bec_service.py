@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import builtins
 import getpass
 import socket
 import threading
@@ -82,7 +83,9 @@ class BECService:
             for service_name, msg in self._services_info.items():
                 if service_name == self.__class__.__name__:
                     raise RuntimeError(
-                        f"Another instance of {self.__class__.__name__} launched by user {msg.content['info']['user']} is already running on {msg.content['info']['hostname']}"
+                        f"Another instance of {self.__class__.__name__} launched by user"
+                        f" {msg.content['info']['user']} is already running on"
+                        f" {msg.content['info']['hostname']}"
                     )
             return False
         except RuntimeError as service_error:
@@ -131,6 +134,7 @@ class BECService:
         self._send_service_status()
 
     def _start_update_service_info(self):
+        builtins.__BEC_SERVICE__ = self
         self._service_info_thread = threading.Thread(
             target=self._update_service_info, daemon=True, name="update_service_info"
         )
