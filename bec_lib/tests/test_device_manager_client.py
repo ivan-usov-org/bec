@@ -5,7 +5,7 @@ import pytest
 
 from bec_lib import messages
 from bec_lib.devicemanager import Status
-from bec_lib.devicemanager_client import RPCError
+from bec_lib.devicemanager_client import AdjustableMixin, RPCError
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.tests.utils import bec_client
 
@@ -252,3 +252,48 @@ def test_run_rpc_call_calls_stop_on_keyboardinterrupt(dev):
                 dev.samx.setpoint.set(1)
         mock_rpc.assert_called_once()
         mock_stop.assert_called_once()
+
+
+def test_adjustable_mixin_limits():
+    adj = AdjustableMixin()
+    adj.root = mock.MagicMock()
+    adj.root.parent.producer.get.return_value = messages.DeviceMessage(
+        signals={"low": -12, "high": 12}, metadata={}
+    ).dumps()
+    assert adj.limits == [-12, 12]
+
+
+def test_adjustable_mixin_limits_missing():
+    adj = AdjustableMixin()
+    adj.root = mock.MagicMock()
+    adj.root.parent.producer.get.return_value = None
+    assert adj.limits == [0, 0]
+
+
+def test_adjustable_mixin_set_limits():
+    adj = AdjustableMixin()
+    adj.update_config = mock.MagicMock()
+    adj.limits = [-12, 12]
+    adj.update_config.assert_called_once_with({"deviceConfig": {"limits": [-12, 12]}})
+
+
+def test_adjustable_mixin_set_low_limit():
+    adj = AdjustableMixin()
+    adj.update_config = mock.MagicMock()
+    adj.root = mock.MagicMock()
+    adj.root.parent.producer.get.return_value = messages.DeviceMessage(
+        signals={"low": -12, "high": 12}, metadata={}
+    ).dumps()
+    adj.low_limit = -20
+    adj.update_config.assert_called_once_with({"deviceConfig": {"limits": [-20, 12]}})
+
+
+def test_adjustable_mixin_set_high_limit():
+    adj = AdjustableMixin()
+    adj.update_config = mock.MagicMock()
+    adj.root = mock.MagicMock()
+    adj.root.parent.producer.get.return_value = messages.DeviceMessage(
+        signals={"low": -12, "high": 12}, metadata={}
+    ).dumps()
+    adj.high_limit = 20
+    adj.update_config.assert_called_once_with({"deviceConfig": {"limits": [-12, 20]}})

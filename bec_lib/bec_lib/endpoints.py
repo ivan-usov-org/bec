@@ -8,6 +8,7 @@ class MessageEndpoints:
     _device_read = "internal/devices/read"
     _device_read_configuration = "internal/devices/read_configuration"
     _device_readback = "internal/devices/readback"
+    _device_limits = "internal/devices/limits"
     _device_req_status = "internal/devices/req_status"
     _device_progress = "internal/devices/progress"
     _device_async_readback = Template("internal/devices/async_readback/$scanID/$device")
@@ -136,6 +137,20 @@ class MessageEndpoints:
             str: Endpoint for device readbacks of the specified device.
         """
         return f"{cls._device_readback}/{device}"
+
+    @classmethod
+    def device_limits(cls, device: str) -> str:
+        """
+        Endpoint for device limits. This endpoint is used by the device server to publish
+        the device limits using a messages.DeviceMessage message.
+
+        Args:
+            device (str): Device name, e.g. "samx".
+
+        Returns:
+            str: Endpoint for device limits of the specified device.
+        """
+        return f"{cls._device_limits}/{device}"
 
     @classmethod
     def device_req_status(cls, device: str) -> str:

@@ -6,9 +6,6 @@ from functools import reduce
 import ophyd
 import ophyd.sim as ops
 import ophyd_devices as opd
-from ophyd.ophydobj import OphydObject
-from ophyd.signal import EpicsSignalBase
-
 from bec_lib import (
     Device,
     DeviceConfigError,
@@ -18,6 +15,9 @@ from bec_lib import (
     messages,
 )
 from bec_lib.connector import ConnectorBase
+from ophyd.ophydobj import OphydObject
+from ophyd.signal import EpicsSignalBase
+
 from device_server.devices.config_update_handler import ConfigUpdateHandler
 from device_server.devices.device_serializer import get_device_info
 
@@ -52,12 +52,25 @@ class DSDevice(Device):
         dev_config_msg = messages.DeviceMessage(
             signals=self.obj.read_configuration(), metadata={}
         ).dumps()
+        if hasattr(self.obj, "low_limit_travel") and hasattr(self.obj, "high_limit_travel"):
+            limits = {
+                "low": self.obj.low_limit_travel.get(),
+                "high": self.obj.high_limit_travel.get(),
+            }
+        else:
+            limits = None
         pipe = producer.pipeline()
         producer.set_and_publish(MessageEndpoints.device_readback(self.name), dev_msg, pipe=pipe)
         producer.set(topic=MessageEndpoints.device_read(self.name), msg=dev_msg, pipe=pipe)
         producer.set_and_publish(
             MessageEndpoints.device_read_configuration(self.name), dev_config_msg, pipe=pipe
         )
+        if limits is not None:
+            producer.set_and_publish(
+                MessageEndpoints.device_limits(self.name),
+                messages.DeviceMessage(signals=limits).dumps(),
+                pipe=pipe,
+            )
         pipe.execute()
         self.initialized = True
 

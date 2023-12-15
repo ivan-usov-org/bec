@@ -91,6 +91,19 @@ class RPCBase:
         self.root._config["enabled"] = val
 
     @property
+    def read_only(self):
+        """Whether or not the device can be set"""
+        return self.root._config.get("readOnly", False)
+
+    @read_only.setter
+    def read_only(self, value):
+        """Whether or not the device is read only"""
+        self.root._config["readOnly"] = value
+        self.root.parent.config_helper.send_config_request(
+            action="update", config={self.name: {"readOnly": value}}
+        )
+
+    @property
     def root(self):
         """Returns the root object of the device tree."""
         parent = self
@@ -480,11 +493,25 @@ class DeviceBase(OphydInterfaceBase, Device):
 class AdjustableMixin:
     @rpc
     def set(self, val):
+        """
+        Sets the device value.
+        """
         pass
 
     @property
     def limits(self):
-        return self._config["deviceConfig"].get("limits", [0, 0])
+        """
+        Returns the device limits.
+        """
+        limit_msg = self.root.parent.producer.get(MessageEndpoints.device_limits(self.root.name))
+        if not limit_msg:
+            return [0, 0]
+        limit_msg = messages.DeviceMessage.loads(limit_msg)
+        limits = [
+            limit_msg.content["signals"].get("low", 0),
+            limit_msg.content["signals"].get("high", 0),
+        ]
+        return limits
 
     @limits.setter
     def limits(self, val: list):
@@ -492,6 +519,9 @@ class AdjustableMixin:
 
     @property
     def low_limit(self):
+        """
+        Returns the low limit.
+        """
         return self.limits[0]
 
     @low_limit.setter
@@ -501,6 +531,9 @@ class AdjustableMixin:
 
     @property
     def high_limit(self):
+        """
+        Returns the high limit.
+        """
         return self.limits[1]
 
     @high_limit.setter
