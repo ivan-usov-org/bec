@@ -118,36 +118,37 @@ def test_config_helper_save_current_session():
         mock_open().write.assert_called_once_with(yaml.dump(out_data))
 
 
-def test_send_config_request_raises_with_empty_config():
+@pytest.fixture
+def config_helper():
     connector = mock.MagicMock()
-    config_helper = ConfigHelper(connector)
-    with mock.patch.object(config_helper, "wait_for_config_reply") as mock_wait_for_config_reply:
-        with pytest.raises(DeviceConfigError):
-            config_helper.send_config_request(action="update")
-            mock_wait_for_config_reply.assert_called_once_with(mock.ANY)
+    config_helper_inst = ConfigHelper(connector)
+    with mock.patch.object(config_helper_inst, "wait_for_config_reply"):
+        with mock.patch.object(config_helper_inst, "wait_for_service_response"):
+            yield config_helper_inst
 
 
-def test_send_config_request():
-    connector = mock.MagicMock()
-    config_helper = ConfigHelper(connector)
-    with mock.patch.object(config_helper, "wait_for_config_reply") as mock_wait_for_config_reply:
+def test_send_config_request_raises_with_empty_config(config_helper):
+    with pytest.raises(DeviceConfigError):
+        config_helper.send_config_request(action="update")
+        config_helper.wait_for_config_reply.assert_called_once_with(mock.ANY)
+
+
+def test_send_config_request(config_helper):
+    config_helper.send_config_request(action="update", config={"test": "test"})
+    config_helper.wait_for_config_reply.return_value = messages.RequestResponseMessage(
+        accepted=True, message="test"
+    )
+    config_helper.wait_for_config_reply.assert_called_once_with(mock.ANY)
+    config_helper.wait_for_service_response.assert_called_once_with(mock.ANY)
+
+
+def test_send_config_request_raises_for_rejected_update(config_helper):
+    config_helper.wait_for_config_reply.return_value = messages.RequestResponseMessage(
+        accepted=False, message="test"
+    )
+    with pytest.raises(DeviceConfigError):
         config_helper.send_config_request(action="update", config={"test": "test"})
-        mock_wait_for_config_reply.return_value = messages.RequestResponseMessage(
-            accepted=True, message="test"
-        )
-        mock_wait_for_config_reply.assert_called_once_with(mock.ANY)
-
-
-def test_send_config_request_raises_for_rejected_update():
-    connector = mock.MagicMock()
-    config_helper = ConfigHelper(connector)
-    with mock.patch.object(config_helper, "wait_for_config_reply") as mock_wait_for_config_reply:
-        mock_wait_for_config_reply.return_value = messages.RequestResponseMessage(
-            accepted=False, message="test"
-        )
-        with pytest.raises(DeviceConfigError):
-            config_helper.send_config_request(action="update", config={"test": "test"})
-            mock_wait_for_config_reply.assert_called_once_with(mock.ANY)
+        config_helper.wait_for_config_reply.assert_called_once_with(mock.ANY)
 
 
 def test_wait_for_config_reply():

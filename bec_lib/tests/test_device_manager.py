@@ -16,8 +16,8 @@ from bec_lib.devicemanager import (
     DeviceConfigError,
     DeviceContainer,
     DeviceManagerBase,
-    Status,
     DeviceType,
+    Status,
 )
 from bec_lib.tests.utils import ConnectorMock, create_session_from_config
 
