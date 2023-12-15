@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.52.2 (2023-12-15)
+
+### Fix
+
+* Fixed wm behaviour ([`4ea93dc`](https://gitlab.psi.ch/bec/bec/-/commit/4ea93dcd48a893e95e65a69c91b485d96c49df12))
+
 ## v0.52.1 (2023-12-15)
 
 ### Fix
