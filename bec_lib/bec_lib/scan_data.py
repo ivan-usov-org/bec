@@ -94,14 +94,14 @@ class DeviceData(dict):
     """
 
     def __init__(self):
-        self.signals = collections.defaultdict(SignalData)
+        self.__signals = collections.defaultdict(SignalData)
         super().__init__()
 
     def __getitem__(self, key: Any) -> Any:
-        if key in self.signals:
-            return self.signals[key]
+        if key in self.__signals:
+            return self.__signals[key]
         if isinstance(key, int):
-            return {signal: val.get(key) for signal, val in self.signals.items()}
+            return {signal: val.get(key) for signal, val in self.__signals.items()}
         return self.get(key)
 
     def __setattr__(self, attr: Any, value: Any) -> None:
@@ -116,31 +116,31 @@ class DeviceData(dict):
         del self.__dict__[__key]
 
     def get(self, index: Any) -> Any:
-        if index in self.signals:
-            return self.signals[index]
+        if index in self.__signals:
+            return self.__signals[index]
         if isinstance(index, int):
-            return {signal: val.get(index) for signal, val in self.signals.items()}
-        return self.signals.get(index)
+            return {signal: val.get(index) for signal, val in self.__signals.items()}
+        return self.__signals.get(index)
 
     def set(self, index: Any, signals: dict) -> None:
         for signal, signal_data in signals.items():
-            self.signals[signal].set(index, signal_data)
-            self.__setattr__(signal, self.signals[signal])
+            self.__signals[signal].set(index, signal_data)
+            self.__setattr__(signal, self.__signals[signal])
 
     def __repr__(self) -> str:
-        return f"{dict(self.signals)}"
+        return f"{dict(self.__signals)}"
 
     def __eq__(self, ref_data: object) -> bool:
-        return {name: self.signals[name].data for name in self.signals} == ref_data
+        return {name: self.__signals[name].data for name in self.__signals} == ref_data
 
     def keys(self) -> dict_keys:
-        return self.signals.keys()
+        return self.__signals.keys()
 
     def items(self) -> dict_items:
-        return self.signals.items()
+        return self.__signals.items()
 
     def values(self) -> dict_values:
-        return self.signals.values()
+        return self.__signals.values()
 
 
 class ScanData(dict):
