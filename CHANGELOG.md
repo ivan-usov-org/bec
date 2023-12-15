@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.52.0 (2023-12-15)
+
+### Feature
+
+* Added channel monitor as cli script ([`31cc15f`](https://gitlab.psi.ch/bec/bec/-/commit/31cc15f204ded7d368ef384cdb04448c18c5bc3f))
+
 ## v0.51.0 (2023-12-14)
 
 ### Feature
