@@ -80,5 +80,3 @@ if __name__ == "__main__":
             with open(file_name, "r", encoding="utf-8") as file:
                 # pylint: disable=exec-used
                 exec(file.read())
-
-    bec_logger.level = bec_logger.LOGLEVEL.SUCCESS
