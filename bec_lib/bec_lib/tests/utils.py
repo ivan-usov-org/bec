@@ -31,7 +31,7 @@ logger = bec_logger.logger
 # pylint: disable=protected-access
 
 
-def queue_is_empty(queue) -> bool:
+def queue_is_empty(queue) -> bool:  # pragma: no cover
     if not queue:
         return True
     if not queue["primary"].get("info"):
@@ -39,13 +39,13 @@ def queue_is_empty(queue) -> bool:
     return False
 
 
-def get_queue(bec):
+def get_queue(bec):  # pragma: no cover
     return messages.ScanQueueStatusMessage.loads(
         bec.queue.producer.get(MessageEndpoints.scan_queue_status())
     )
 
 
-def wait_for_empty_queue(bec):
+def wait_for_empty_queue(bec):  # pragma: no cover
     while not get_queue(bec):
         time.sleep(1)
     while not queue_is_empty(get_queue(bec).content["queue"]):
@@ -473,7 +473,7 @@ def bec_client():
     device_manager.devices.flush()
 
 
-class PipelineMock:
+class PipelineMock:  # pragma: no cover
     _pipe_buffer = []
     _producer = None
 
@@ -492,7 +492,7 @@ class PipelineMock:
         return res
 
 
-class ConsumerMock:
+class ConsumerMock:  # pragma: no cover
     def __init__(self) -> None:
         self.signal_event = SignalMock()
 
@@ -503,7 +503,7 @@ class ConsumerMock:
         pass
 
 
-class SignalMock:
+class SignalMock:  # pragma: no cover
     def __init__(self) -> None:
         self.is_set = False
 
@@ -511,7 +511,7 @@ class SignalMock:
         self.is_set = True
 
 
-class ProducerMock:
+class ProducerMock:  # pragma: no cover
     def __init__(self, store_data=True) -> None:
         self.message_sent = []
         self._get_buffer = {}
@@ -579,7 +579,7 @@ class ProducerMock:
             return
 
 
-class ConnectorMock(ConnectorBase):
+class ConnectorMock(ConnectorBase):  # pragma: no cover
     def __init__(self, bootstrap_server: list, store_data=True):
         super().__init__(bootstrap_server)
         self.store_data = store_data
