@@ -169,3 +169,30 @@ def test_wait_for_config_raises_timeout():
 
     with pytest.raises(DeviceConfigError):
         config_helper.wait_for_config_reply("test", timeout=0.3)
+
+
+def test_wait_for_service_response():
+    connector = mock.MagicMock()
+    config_helper = ConfigHelper(connector)
+    connector.producer().lrange.side_effect = [
+        [],
+        [
+            messages.ServiceResponseMessage(
+                response={"service": "DeviceServer"}, metadata={"RID": "test"}
+            ).dumps(),
+            messages.ServiceResponseMessage(
+                response={"service": "ScanServer"}, metadata={"RID": "test"}
+            ).dumps(),
+        ],
+    ]
+
+    config_helper.wait_for_service_response("test", timeout=0.3)
+
+
+def test_wait_for_service_response_raises_timeout():
+    connector = mock.MagicMock()
+    config_helper = ConfigHelper(connector)
+    connector.producer().lrange.return_value = []
+
+    with pytest.raises(DeviceConfigError):
+        config_helper.wait_for_service_response("test", timeout=0.3)
