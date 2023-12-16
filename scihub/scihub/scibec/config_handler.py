@@ -80,7 +80,7 @@ class ConfigHandler:
                 self.validator.validate_device(device)
         self.scibec_connector.set_redis_config(list(config.values()))
         self.send_config_request_reply(accepted=True, error_msg=None, metadata=msg.metadata)
-        reload_msg = messages.DeviceConfigMessage(action="reload", config={})
+        reload_msg = messages.DeviceConfigMessage(action="reload", config={}, metadata=msg.metadata)
         self.send_config(reload_msg)
 
     def _convert_to_db_config(self, name: str, config: dict) -> None:
