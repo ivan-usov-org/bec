@@ -2,6 +2,15 @@
 
 <!--next-version-placeholder-->
 
+## v0.52.3 (2023-12-16)
+
+### Fix
+
+* Fixed log level init ([`5280dad`](https://gitlab.psi.ch/bec/bec/-/commit/5280dadc0640eaf1d3fbdf2fd6b1ce37a9f8f8ff))
+* Fixed bug in alarambase that would prohibit error propagation ([`4c88bc6`](https://gitlab.psi.ch/bec/bec/-/commit/4c88bc687d90acbd41d0312cda42d1c049dd9423))
+* Fixed timeout error in config_helper ([`6e75ca7`](https://gitlab.psi.ch/bec/bec/-/commit/6e75ca73bdd11740bcb5fd71c8157d8d66f05b53))
+* Removed bec logger overwrite that prohibited log outputs ([`acbcb69`](https://gitlab.psi.ch/bec/bec/-/commit/acbcb69eb22900ca6679d6b059189761a34f4ece))
+
 ## v0.52.2 (2023-12-15)
 
 ### Fix
