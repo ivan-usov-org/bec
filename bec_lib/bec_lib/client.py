@@ -97,7 +97,8 @@ class BECClient(BECService, UserScriptsMixin):
         """start the client"""
         if not self._initialized:
             logger.warning(
-                "Client has not been initialized with 'client.initialize(config, connector_cls)'. Trying to initialize with default values."
+                "Client has not been initialized with 'client.initialize(config, connector_cls)'."
+                " Trying to initialize with default values."
             )
             self.initialize()
 
@@ -163,8 +164,9 @@ class BECClient(BECService, UserScriptsMixin):
 
     def _configure_logger(self):
         bec_logger.logger.remove()
-        bec_logger.add_file_log(bec_logger.LOGLEVEL.INFO)
+        bec_logger.add_file_log(bec_logger.LOGLEVEL.DEBUG)
         bec_logger.add_sys_stderr(bec_logger.LOGLEVEL.SUCCESS)
+        bec_logger.add_console_log()
 
     def _start_device_manager(self):
         logger.info("Starting device manager")
