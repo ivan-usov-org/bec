@@ -115,6 +115,10 @@ class ConfigHelper:
             if not res:
                 time.sleep(0.005)
                 elapsed_time += 0.005
+                if elapsed_time > max_time:
+                    raise DeviceConfigError(
+                        "Timeout reached whilst waiting for config change to be acknowledged."
+                    )
                 continue
             service_messages = [messages.ServiceResponseMessage.loads(msg) for msg in res]
             ack_services = [
@@ -123,10 +127,6 @@ class ConfigHelper:
             if set(["DeviceServer", "ScanServer"]).issubset(set(ack_services)):
                 print(f"Config change acknowledged by all services: {ack_services}")
                 break
-            if elapsed_time > max_time:
-                raise DeviceConfigError(
-                    "Timeout reached whilst waiting for config change to be acknowledged."
-                )
 
     def wait_for_config_reply(self, RID: str, timeout=10) -> RequestResponseMessage:
         """
