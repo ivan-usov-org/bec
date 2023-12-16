@@ -4,12 +4,11 @@ import threading
 import time
 
 import IPython
-from IPython.terminal.prompts import Prompts, Token
-
+from bec_lib import ServiceConfig, bec_logger
 from bec_lib.alarm_handler import AlarmBase
 from bec_lib.client import BECClient
-from bec_lib import ServiceConfig, bec_logger
 from bec_lib.connector import ConnectorBase
+from IPython.terminal.prompts import Prompts, Token
 
 from .beamline_mixin import BeamlineMixin
 from .bec_magics import BECMagics
@@ -150,4 +149,4 @@ class BECClientPrompt(Prompts):
 
 def log_console(execution_info):
     """log the console input"""
-    logger.info(f"[CONSOLE LOG] | {execution_info.info.raw_cell}")
+    logger.log("CONSOLE_LOG", f"{execution_info.info.raw_cell}")
