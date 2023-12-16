@@ -27,9 +27,18 @@ DEFAULT_CONFIG = {
     "plot_data": [
         {
             "plot_name": "BPM4i plots vs samx",
-            "x": {"label": "Motor Y", "signals": [{"name": "samx"}]},
-            "y": {"label": "bpm4i", "signals": [{"name": "bpm4i"}]},
-        }
+            "x_label": "Motor Y",
+            "y_label": "bpm4i",
+            "sources": [
+                {
+                    "type": "scan_segment",
+                    "signals": {
+                        "x": [{"name": "samx"}],
+                        "y": [{"name": "bpm4i"}],
+                    },
+                },
+            ],
+        },
     ],
 }
 
@@ -128,14 +137,15 @@ class BECPlotter:
         self._config_changed = False
 
     @typechecked
-    def set_xlabel(self, xlabel: str) -> None:
+    def set_xlabel(self, xlabel: str, axis: int = 0) -> None:
         """
         Set the xlabel of the figure.
 
         Args:
             xlabel (str): The xlabel to set.
+            axis (int, optional): The axis to set the xlabel for. Defaults to 0.
         """
-        self._config["plot_data"][0]["x"]["label"] = xlabel
+        self._config["plot_data"][axis]["x_label"] = xlabel
         self._config_changed = True
 
     @typechecked
@@ -147,31 +157,38 @@ class BECPlotter:
             ylabel (str): The ylabel to set.
             axis (int, optional): The axis to set the ylabel for. Defaults to 0.
         """
-        self._config["plot_data"][0]["y"]["label"] = ylabel
+        self._config["plot_data"][axis]["y_label"] = ylabel
         self._config_changed = True
 
     @typechecked
-    def set_xsource(self, source: str) -> None:
+    def set_xsource(self, source: str, axis: int = 0, source_type: int = 0) -> None:
         """
         Set the source of the xdata of the figure.
 
         Args:
             source (str): The source to set. Must be either a valid device name
+            axis (int, optimal): The axis to change the xsource. Defaults to 0.
+            source_type (int, optional): The type of the source. Defaults to 0.
         """
-        self._config["plot_data"][0]["x"]["signals"][0]["name"] = source
+        self._config["plot_data"][axis]["sources"][source_type]["signals"]["x"][0]["name"] = source
         self._config_changed = True
 
     @typechecked
-    def set_ysource(self, source: str, axis: int = 0) -> None:
+    def set_ysource(self, source: str, axis: int = 0, source_type: int = 0, curve: int = 0) -> None:
         """
         Set the source of the ydata of the figure.
 
         Args:
             source (str): The source to set. Must be either a valid device name
             axis (int, optional): The axis to set the ydata for. Defaults to 0.
+            source_type (int, optional): The type of the source. Defaults to 0.
+            curve (int, optional): The curve of the source. Defaults to 0.
         """
-        self._config["plot_data"][0]["y"]["signals"][axis]["name"] = source
+        self._config["plot_data"][axis]["sources"][source_type]["signals"]["y"][curve][
+            "name"
+        ] = source
         self._config_changed = True
+        print(f"ysource changed to {source}")
 
     @typechecked
     def set_xdata(self, xdata: list[float]) -> None:
@@ -285,10 +302,13 @@ class BECPlotter:
         Refresh the figure. This call is indempotent, i.e. multiple calls to refresh will not have any effect
         if the data has not changed.
         """
+        print("refreshing")
         if self._config_changed:
             self.plot_connector.set_plot_config(self._plot_id, self._config)
             self._config_changed = False
+            print(f"config changed to {self._config}")
         if self._data_changed:
+            print("Data Changed")
             data = {"x": self._xdata, "y": self._ydata}
             self.plot_connector.send_data(self._plot_id, data)
             self._data_changed = False
