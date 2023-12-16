@@ -35,7 +35,7 @@ class ScanObject:
 
     def _run(self, *args, callback: Callable = None, async_callback: Callable = None, **kwargs):
         if self.client.alarm_handler.alarms_stack:
-            logger.warning("The alarm stack is not empty but will be cleared now.")
+            logger.info("The alarm stack is not empty but will be cleared now.")
             self.client.clear_all_alarms()
         scans = self.client.scans
 
