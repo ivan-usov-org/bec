@@ -98,24 +98,34 @@ def test_config_handler_reload_config_with_scibec(SciHubMock):
 def test_config_handler_set_config(SciHubMock, config, expected):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     config_handler = scibec_connector.config_handler
-    msg = messages.DeviceConfigMessage(action="set", config=config, metadata={})
+    msg = messages.DeviceConfigMessage(action="set", config=config, metadata={"RID": "12345"})
     with mock.patch.object(config_handler.validator, "validate_device") as validator:
         with mock.patch.object(config_handler, "send_config_request_reply") as req_reply:
-            config_handler._set_config(msg)
-            req_reply.assert_called_once_with(accepted=True, error_msg=None, metadata={})
-            validator.assert_called_once_with(expected)
+            with mock.patch.object(config_handler, "send_config") as send_config:
+                config_handler._set_config(msg)
+                req_reply.assert_called_once_with(
+                    accepted=True, error_msg=None, metadata={"RID": "12345"}
+                )
+                validator.assert_called_once_with(expected)
+                send_config.assert_called_once_with(
+                    messages.DeviceConfigMessage(
+                        action="reload", config={}, metadata={"RID": "12345"}
+                    )
+                )
 
 
 def test_config_handler_set_invalid_config_raises(SciHubMock):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     config_handler = scibec_connector.config_handler
     msg = messages.DeviceConfigMessage(
-        action="set", config={"samx": {"status": {"enabled": True}}}, metadata={}
+        action="set", config={"samx": {"status": {"enabled": True}}}, metadata={"RID": "12345"}
     )
     with pytest.raises(JsonSchemaException):
         with mock.patch.object(config_handler, "send_config_request_reply") as req_reply:
             config_handler._set_config(msg)
-            req_reply.assert_called_once_with(accepted=True, error_msg=None, metadata={})
+            req_reply.assert_called_once_with(
+                accepted=True, error_msg=None, metadata={"RID": "12345"}
+            )
 
 
 def test_config_handler_set_config_with_scibec(SciHubMock):
