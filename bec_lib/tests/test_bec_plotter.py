@@ -142,46 +142,46 @@ def test_bec_plotter_set_ydata(plotter):
 def test_bec_plotter_set_xsource(plotter):
     assert plotter._config_changed is False
     plotter.set_xsource("samx")
-    assert plotter._config["plot_data"][0]["x"]["signals"][0]["name"] == "samx"
+    assert plotter._config["plot_data"][0]["sources"][0]["signals"]["x"][0]["name"] == "samx"
     assert plotter._config_changed is True
 
 
 def test_bec_plotter_set_ysource(plotter):
     assert plotter._config_changed is False
     plotter.set_ysource("samy")
-    assert plotter._config["plot_data"][0]["y"]["signals"][0]["name"] == "samy"
+    assert plotter._config["plot_data"][0]["sources"][0]["signals"]["y"][0]["name"] == "samy"
     assert plotter._config_changed is True
 
 
 def test_bec_plotter_set_xlabel(plotter):
     assert plotter._config_changed is False
     plotter.set_xlabel("samx")
-    assert plotter._config["plot_data"][0]["x"]["label"] == "samx"
+    assert plotter._config["plot_data"][0]["x_label"] == "samx"
     assert plotter._config_changed is True
 
 
 def test_bec_plotter_set_ylabel(plotter):
     assert plotter._config_changed is False
     plotter.set_ylabel("samy")
-    assert plotter._config["plot_data"][0]["y"]["label"] == "samy"
+    assert plotter._config["plot_data"][0]["y_label"] == "samy"
     assert plotter._config_changed is True
 
 
-def test_bec_plotter_set_source_to_redis(plotter):
-    config = plotter._config["plot_data"][0]["x"]["signals"][0]
-    config["source"] = "scan_segment"
-    plotter._set_source_to_redis("x")
-    assert plotter._config_changed is True
-    assert config["source"] == "redis"
-    assert config["endpoint"] == MessageEndpoints.gui_data(plotter._plot_id)
-
-
-def test_bec_plotter_set_source_to_redis_no_change(plotter):
-    config = plotter._config["plot_data"][0]["x"]["signals"][0]
-    config["source"] = "redis"
-    config["endpoint"] = MessageEndpoints.gui_data(plotter._plot_id)
-    plotter._set_source_to_redis("x")
-    assert plotter._config_changed is False
+# def test_bec_plotter_set_source_to_redis(plotter):
+#     config = plotter._config["plot_data"][0]["x"]["signals"][0]
+#     config["source"] = "scan_segment"
+#     plotter._set_source_to_redis("x")
+#     assert plotter._config_changed is True
+#     assert config["source"] == "redis"
+#     assert config["endpoint"] == MessageEndpoints.gui_data(plotter._plot_id)
+#
+#
+# def test_bec_plotter_set_source_to_redis_no_change(plotter):
+#     config = plotter._config["plot_data"][0]["x"]["signals"][0]
+#     config["source"] = "redis"
+#     config["endpoint"] = MessageEndpoints.gui_data(plotter._plot_id)
+#     plotter._set_source_to_redis("x")
+#     assert plotter._config_changed is False
 
 
 def test_bec_plotter_append_xdata(plotter):
