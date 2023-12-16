@@ -50,6 +50,7 @@ class BECLogger:
         self._log_level = LogLevel.INFO
         self.level = self._log_level
         self._configured = False
+        self.logger.level("CONSOLE_LOG", no=21, color="<yellow>", icon="📣")
 
     def __new__(cls):
         if not hasattr(cls, "_logger"):
@@ -74,7 +75,6 @@ class BECLogger:
         self.service_name = service_name
         self.producer = self.connector.producer()
         self._configured = True
-        self.logger.level("CONSOLE_LOG", no=21, color="<yellow>", icon="📣")
         self._update_sinks()
 
     def _logger_callback(self, msg):
