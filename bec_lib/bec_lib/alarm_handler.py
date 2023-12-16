@@ -38,11 +38,17 @@ class AlarmBase(Exception):
         super().__init__(self.alarm.content)
 
     def __str__(self) -> str:
-        self.handled = True
-        return f"An alarm has occured. Severity: {self.severity.name}. Source: {self.alarm.content['source']}.\n{self.alarm_type}.\n\t {self.alarm.content['content']}"
+        return (
+            f"An alarm has occured. Severity: {self.severity.name}. Source:"
+            f" {self.alarm.content['source']}.\n{self.alarm_type}.\n\t"
+            f" {self.alarm.content['content']}"
+        )
 
     def __repr__(self) -> str:
-        return f"Severity: {self.severity.name} \nAlarm type: {self.alarm_type} \nSource: {self.alarm.content['source']} \n{self.alarm.content['content']}"
+        return (
+            f"Severity: {self.severity.name} \nAlarm type: {self.alarm_type} \nSource:"
+            f" {self.alarm.content['source']} \n{self.alarm.content['content']}"
+        )
 
 
 class AlarmHandler:
@@ -56,7 +62,10 @@ class AlarmHandler:
     def start(self):
         """start the alarm handler and its subscriptions"""
         self.alarm_consumer = self.connector.consumer(
-            topics=MessageEndpoints.alarm(), cb=self._alarm_consumer_callback, parent=self
+            topics=MessageEndpoints.alarm(),
+            name="AlarmHandler",
+            cb=self._alarm_consumer_callback,
+            parent=self,
         )
         self.alarm_consumer.start()
 
@@ -123,8 +132,9 @@ class AlarmHandler:
         """
         alarms = self.get_unhandled_alarms(severity=severity)
         if len(alarms) > 0:
-            self._raised_alarms.append(alarms[0])
-            raise alarms[0]
+            alarm = alarms.pop(0)
+            self._raised_alarms.append(alarm)
+            raise alarm
 
     @threadlocked
     def clear(self):
