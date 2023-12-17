@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.52.4 (2023-12-17)
+
+### Fix
+
+* Fixed config update ([`377e820`](https://gitlab.psi.ch/bec/bec/-/commit/377e82085c704fd2052f2bc3ad01fd1fe686a1c7))
+* Fixed config update ([`76d1e06`](https://gitlab.psi.ch/bec/bec/-/commit/76d1e063794cadcf2dbfeefaa3fc0de9b04a7019))
+
 ## v0.52.3 (2023-12-16)
 
 ### Fix
