@@ -1,10 +1,11 @@
 from unittest import mock
 
-from bec_client.plugins.LamNI import LamNI, XrayEyeAlign
-from bec_lib.device import Device
+from bec_lib.device import DeviceBase
 
 # pylint: disable=unused-import
 from bec_lib.tests.utils import bec_client
+
+from bec_client.plugins.LamNI import LamNI, XrayEyeAlign
 
 # pylint: disable=no-member
 # pylint: disable=missing-function-docstring
@@ -20,14 +21,14 @@ class RTControllerMock:
         pass
 
 
-class RTMock(Device):
+class RTMock(DeviceBase):
     controller = RTControllerMock()
     enabled = True
 
 
 def test_save_frame(bec_client):
     client = bec_client
-    client.device_manager.devices.xeye = Device("xeye", {})
+    client.device_manager.devices.xeye = DeviceBase(name="xeye", config={})
     lamni = LamNI(client)
     align = XrayEyeAlign(client, lamni)
     with mock.patch("bec_client.plugins.LamNI.x_ray_eye_align.epics_put") as epics_put_mock:
@@ -40,7 +41,7 @@ def test_update_frame(bec_client):
     epics_get = "bec_client.plugins.LamNI.x_ray_eye_align.epics_get"
     fshopen = "bec_client.plugins.LamNI.x_ray_eye_align.fshopen"
     client = bec_client
-    client.device_manager.devices.xeye = Device("xeye", {})
+    client.device_manager.devices.xeye = DeviceBase(name="xeye", config={})
     lamni = LamNI(client)
     align = XrayEyeAlign(client, lamni)
     with mock.patch(epics_put) as epics_put_mock:
@@ -61,10 +62,10 @@ def test_update_frame(bec_client):
 
 def test_disable_rt_feedback(bec_client):
     client = bec_client
-    client.device_manager.devices.xeye = Device("xeye", {})
+    client.device_manager.devices.xeye = DeviceBase(name="xeye", config={})
     lamni = LamNI(client)
     align = XrayEyeAlign(client, lamni)
-    client.device_manager.devices.rtx = RTMock("rtx", {})
+    client.device_manager.devices.rtx = RTMock(name="rtx", config={})
     with mock.patch.object(
         align.device_manager.devices.rtx.controller, "feedback_disable"
     ) as fdb_disable:
@@ -74,10 +75,10 @@ def test_disable_rt_feedback(bec_client):
 
 def test_enable_rt_feedback(bec_client):
     client = bec_client
-    client.device_manager.devices.xeye = Device("xeye", {})
+    client.device_manager.devices.xeye = DeviceBase(name="xeye", config={})
     lamni = LamNI(client)
     align = XrayEyeAlign(client, lamni)
-    client.device_manager.devices.rtx = RTMock("rtx", {})
+    client.device_manager.devices.rtx = RTMock(name="rtx", config={})
     with mock.patch.object(
         align.device_manager.devices.rtx.controller, "feedback_enable_with_reset"
     ) as fdb_enable:
@@ -90,10 +91,10 @@ def test_tomo_rotate(bec_client):
 
     client = bec_client
     client.load_high_level_interface("spec_hli")
-    client.device_manager.devices.xeye = Device("xeye", {})
+    client.device_manager.devices.xeye = DeviceBase(name="xeye", config={})
     lamni = LamNI(client)
     align = XrayEyeAlign(client, lamni)
-    client.device_manager.devices.lsamrot = RTMock("lsamrot", {})
+    client.device_manager.devices.lsamrot = RTMock(name="lsamrot", config={})
     with mock.patch.object(builtins, "umv") as umv:
         align.tomo_rotate(5)
         umv.assert_called_once_with(client.device_manager.devices.lsamrot, 5)
