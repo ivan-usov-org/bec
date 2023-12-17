@@ -35,6 +35,7 @@ class ScanServer(BECService):
         self.status = BECStatus.RUNNING
 
     def _start_device_manager(self):
+        self.wait_for_service("DeviceServer")
         self.device_manager = DeviceManager(self)
         self.device_manager.initialize([self.bootstrap_server])
 

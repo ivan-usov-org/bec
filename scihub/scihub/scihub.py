@@ -16,6 +16,7 @@ class SciHub(BECService):
         self.status = BECStatus.RUNNING
 
     def _start_scibec_connector(self):
+        self.wait_for_service("DeviceServer")
         self.scibec_connector = SciBecConnector(self, self.connector)
 
     def _start_scilog_connector(self):

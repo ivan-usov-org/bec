@@ -87,6 +87,7 @@ class FileWriterManager(BECService):
         self.file_writer = NexusFileWriter(self)
 
     def _start_device_manager(self):
+        self.wait_for_service("DeviceServer")
         self.device_manager = DeviceManagerBase(self)
         self.device_manager.initialize([self.bootstrap_server])
 
