@@ -70,7 +70,6 @@ def test_mv_raises_limit_error(lib_client):
     bec.metadata.update({"unit_test": "test_mv_raises_limit_error"})
     dev = bec.device_manager.devices
     dev.samx.limits = [-50, 50]
-    time.sleep(5)
     with pytest.raises(AlarmBase) as exc:
         scans.mv(dev.samx, 1000, relative=False).wait()
 

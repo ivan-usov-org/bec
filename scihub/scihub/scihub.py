@@ -1,5 +1,6 @@
-from bec_lib import BECService, ServiceConfig
+from bec_lib import BECService, BECStatus, ServiceConfig
 from bec_lib.connector import ConnectorBase
+
 from scihub.scibec import SciBecConnector
 from scihub.scilog import SciLogConnector
 
@@ -12,6 +13,7 @@ class SciHub(BECService):
         self.scilog_connector = None
         self._start_scibec_connector()
         self._start_scilog_connector()
+        self.status = BECStatus.RUNNING
 
     def _start_scibec_connector(self):
         self.scibec_connector = SciBecConnector(self, self.connector)

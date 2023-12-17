@@ -275,6 +275,7 @@ class BECService:
             self.wait_for_service("ScanServer", BECStatus.RUNNING)
             self.wait_for_service("ScanBundler", BECStatus.RUNNING)
             self.wait_for_service("DeviceServer", BECStatus.RUNNING)
+            self.wait_for_service("SciHub", BECStatus.RUNNING)
             logger.success("All BEC services are running.")
         except KeyboardInterrupt:
             logger.warning("KeyboardInterrupt received. Stopped waiting for BEC services.")
