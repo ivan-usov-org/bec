@@ -4,7 +4,6 @@ import threading
 import traceback
 
 import numpy as np
-
 from bec_lib import (
     BECService,
     DeviceManagerBase,
@@ -17,6 +16,7 @@ from bec_lib import (
 from bec_lib.alarm_handler import Alarms
 from bec_lib.file_utils import FileWriterMixin
 from bec_lib.redis_connector import MessageObject, RedisConnector
+
 from file_writer.file_writer import NexusFileWriter
 
 logger = bec_logger.logger
@@ -87,22 +87,18 @@ class FileWriterManager(BECService):
         self.file_writer = NexusFileWriter(self)
 
     def _start_device_manager(self):
-        self.device_manager = DeviceManagerBase(self.connector)
+        self.device_manager = DeviceManagerBase(self)
         self.device_manager.initialize([self.bootstrap_server])
 
     def _start_scan_segment_consumer(self):
         self._scan_segment_consumer = self.connector.consumer(
-            pattern=MessageEndpoints.scan_segment(),
-            cb=self._scan_segment_callback,
-            parent=self,
+            pattern=MessageEndpoints.scan_segment(), cb=self._scan_segment_callback, parent=self
         )
         self._scan_segment_consumer.start()
 
     def _start_scan_status_consumer(self):
         self._scan_status_consumer = self.connector.consumer(
-            MessageEndpoints.scan_status(),
-            cb=self._scan_status_callback,
-            parent=self,
+            MessageEndpoints.scan_status(), cb=self._scan_status_callback, parent=self
         )
         self._scan_status_consumer.start()
 

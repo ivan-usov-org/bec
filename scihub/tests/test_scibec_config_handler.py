@@ -1,7 +1,7 @@
 from unittest import mock
 
 import pytest
-from bec_lib import Device, messages
+from bec_lib import DeviceBase, messages
 from bec_lib.bec_errors import DeviceConfigError
 from fastjsonschema import JsonSchemaException
 from test_scibec_connector import SciHubMock
@@ -150,7 +150,7 @@ def test_config_handler_update_config(SciHubMock):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     config_handler = scibec_connector.config_handler
     dev = config_handler.device_manager.devices
-    dev.samx = Device("samx", {})
+    dev.samx = DeviceBase(name="samx", config={})
     msg = messages.DeviceConfigMessage(
         action="update", config={"samx": {"enabled": True}}, metadata={}
     )
@@ -176,7 +176,7 @@ def test_config_handler_update_config_not_updated(SciHubMock):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     config_handler = scibec_connector.config_handler
     dev = config_handler.device_manager.devices
-    dev.samx = Device("samx", {})
+    dev.samx = DeviceBase(name="samx", config={})
     msg = messages.DeviceConfigMessage(
         action="update", config={"samx": {"enabled": True}}, metadata={}
     )
@@ -200,7 +200,7 @@ def test_config_handler_update_device_config_enable(SciHubMock):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     config_handler = scibec_connector.config_handler
     dev = config_handler.device_manager.devices
-    dev.samx = Device("samx", {})
+    dev.samx = DeviceBase(name="samx", config={})
     with mock.patch.object(config_handler, "_update_device_server") as update_dev_server:
         with mock.patch.object(
             config_handler, "_wait_for_device_server_update", return_value=True
@@ -218,7 +218,7 @@ def test_config_handler_update_device_config_deviceConfig(SciHubMock):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     config_handler = scibec_connector.config_handler
     dev = config_handler.device_manager.devices
-    dev.samx = Device("samx", {"deviceConfig": {}})
+    dev.samx = DeviceBase(name="samx", config={"deviceConfig": {}})
     with mock.patch.object(config_handler, "_update_device_server") as update_dev_server:
         with mock.patch.object(
             config_handler, "_wait_for_device_server_update", return_value=True
@@ -239,7 +239,7 @@ def test_config_handler_update_device_config_misc(SciHubMock):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     config_handler = scibec_connector.config_handler
     dev = config_handler.device_manager.devices
-    dev.samx = Device("samx", {})
+    dev.samx = DeviceBase(name="samx", config={})
     with mock.patch.object(config_handler, "_validate_update") as validate_update:
         device = dev["samx"]
         config_handler._update_device_config(device, {"readOnly": True})
@@ -250,7 +250,7 @@ def test_config_handler_update_device_config_raise(SciHubMock):
     scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     config_handler = scibec_connector.config_handler
     dev = config_handler.device_manager.devices
-    dev.samx = Device("samx", {})
+    dev.samx = DeviceBase(name="samx", config={})
     with mock.patch.object(config_handler, "_validate_update") as validate_update:
         device = dev["samx"]
         with pytest.raises(DeviceConfigError):

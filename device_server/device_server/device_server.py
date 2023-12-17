@@ -94,7 +94,7 @@ class DeviceServer(RPCMixin, BECService):
             devices = [devices]
         for dev in devices:
             device_root = dev.split(".")[0]
-            self.device_manager.devices.get(device_root).metadata[dev] = instr.metadata
+            self.device_manager.devices.get(device_root).metadata = instr.metadata
 
     @staticmethod
     def consumer_interception_callback(msg, *, parent, **_kwargs) -> None:
@@ -324,7 +324,7 @@ class DeviceServer(RPCMixin, BECService):
         signal_container = []
         for dev in devices:
             device_root = dev.split(".")[0]
-            self.device_manager.devices.get(device_root).metadata[dev] = metadata
+            self.device_manager.devices.get(device_root).metadata = metadata
             obj = self.device_manager.devices.get(device_root).obj
             try:
                 signals = obj.read()

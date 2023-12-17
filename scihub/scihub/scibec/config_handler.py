@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 import bec_lib
 import msgpack
-from bec_lib import Device, DeviceConfigError
+from bec_lib import DeviceConfigError
 from bec_lib import DeviceManagerBase as DeviceManager
 from bec_lib import MessageEndpoints, bec_logger, messages
 from bec_lib.connector import ConnectorBase
@@ -16,6 +16,8 @@ from bec_lib.connector import ConnectorBase
 from .scibec_validator import SciBecValidator
 
 if TYPE_CHECKING:
+    from bec_lib.device import DeviceBase
+
     from scihub.scibec.scibec_connector import SciBecConnector
 
 logger = bec_logger.logger
@@ -26,7 +28,7 @@ dir_path = os.path.abspath(os.path.join(os.path.dirname(bec_lib.__file__), "./co
 class ConfigHandler:
     def __init__(self, scibec_connector: SciBecConnector, connector: ConnectorBase) -> None:
         self.scibec_connector = scibec_connector
-        self.device_manager = DeviceManager(connector)
+        self.device_manager = DeviceManager(self.scibec_connector.scihub)
         self.device_manager.initialize(scibec_connector.config.redis)
         self.producer = connector.producer()
         self.validator = SciBecValidator(os.path.join(dir_path, "openapi_schema.json"))
@@ -139,7 +141,7 @@ class ConfigHandler:
             time.sleep(time_step)
             elapsed_time += time_step
 
-    def _update_device_config(self, device: Device, dev_config) -> bool:
+    def _update_device_config(self, device: DeviceBase, dev_config) -> bool:
         updated = False
         if "deviceConfig" in dev_config:
             RID = str(uuid.uuid4())

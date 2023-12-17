@@ -1,15 +1,15 @@
 import os
 from unittest import mock
 
+import bec_lib
 import numpy as np
 import pytest
 import yaml
-
-import bec_lib
 from bec_lib import DeviceManagerBase, MessageEndpoints, ServiceConfig, messages
 from bec_lib.bec_errors import ServiceConfigError
 from bec_lib.redis_connector import MessageObject
 from bec_lib.tests.utils import ConnectorMock, create_session_from_config
+
 from file_writer import FileWriterManager
 from file_writer.file_writer import FileWriter
 from file_writer.file_writer_manager import ScanStorage
@@ -21,13 +21,14 @@ dir_path = os.path.dirname(bec_lib.__file__)
 
 
 def load_FileWriter():
-    connector = ConnectorMock("")
-    device_manager = DeviceManagerBase(connector, "")
-    device_manager.producer = connector.producer()
+    service_mock = mock.MagicMock()
+    service_mock.connector = ConnectorMock("")
+    device_manager = DeviceManagerBase(service_mock, "")
+    device_manager.producer = service_mock.connector.producer()
     with open(f"{dir_path}/tests/test_config.yaml", "r") as session_file:
         device_manager._session = create_session_from_config(yaml.safe_load(session_file))
     device_manager._load_session()
-    return FileWriterManagerMock(device_manager, connector)
+    return FileWriterManagerMock(device_manager, service_mock.connector)
 
 
 class FileWriterManagerMock(FileWriterManager):
@@ -191,12 +192,8 @@ def test_update_async_data():
     with mock.patch.object(file_manager, "producer") as mock_producer:
         with mock.patch.object(file_manager, "_process_async_data") as mock_process:
             key = MessageEndpoints.device_async_readback("scanID", "dev1")
-            mock_producer.keys.return_value = [
-                key.encode(),
-            ]
-            data = [
-                (b"0-0", b'{"data": "data"}'),
-            ]
+            mock_producer.keys.return_value = [key.encode()]
+            data = [(b"0-0", b'{"data": "data"}')]
             mock_producer.xrange.return_value = data
             file_manager.update_async_data("scanID")
             mock_producer.xrange.assert_called_once_with(key, min="-", max="+")
@@ -207,7 +204,7 @@ def test_process_async_data_single_entry():
     file_manager = load_FileWriter()
     file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
     data = [
-        (b"0-0", {b"data": messages.DeviceMessage(signals={"data": np.zeros((10, 10))}).dumps()}),
+        (b"0-0", {b"data": messages.DeviceMessage(signals={"data": np.zeros((10, 10))}).dumps()})
     ]
     file_manager._process_async_data(data, "scanID", "dev1")
     assert np.isclose(
@@ -272,11 +269,7 @@ def test_process_async_data_replace():
 def test_update_scan_storage_with_status_ignores_none():
     file_manager = load_FileWriter()
     file_manager.update_scan_storage_with_status(
-        messages.ScanStatusMessage(
-            scanID=None,
-            status="closed",
-            info={},
-        )
+        messages.ScanStatusMessage(scanID=None, status="closed", info={})
     )
     assert file_manager.scan_storage == {}
 

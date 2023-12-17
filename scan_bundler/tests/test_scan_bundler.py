@@ -1,16 +1,12 @@
 import os
-import time
-from concurrent.futures import wait
 from unittest import mock
 
+import bec_lib
 import pytest
 import yaml
+from bec_lib import DeviceManagerBase, MessageEndpoints, ServiceConfig, messages
+from bec_lib.tests.utils import ConnectorMock, create_session_from_config, get_device_info_mock
 
-import bec_lib
-from bec_lib import messages
-from bec_lib import DeviceManagerBase as DeviceManager
-from bec_lib import MessageEndpoints, ServiceConfig
-from bec_lib.tests.utils import ConnectorMock, create_session_from_config
 from scan_bundler import ScanBundler
 from scan_bundler.emitter import EmitterBase
 
@@ -20,19 +16,30 @@ from scan_bundler.emitter import EmitterBase
 dir_path = os.path.dirname(bec_lib.__file__)
 
 
+class ScanBundlerDeviceManagerMock(DeviceManagerBase):
+    def _get_device_info(self, device_name) -> messages.DeviceInfoMessage:
+        return get_device_info_mock(device_name, self.get_device(device_name)["deviceClass"])
+
+    def get_device(self, device_name):
+        for dev in self._session["devices"]:
+            if dev["name"] == device_name:
+                return dev
+
+
 class MessageMock:
     value = None
     topic: str = ""
 
 
 def load_ScanBundlerMock():
-    connector = ConnectorMock("")
-    device_manager = DeviceManager(connector, "")
-    device_manager.producer = connector.producer()
+    service_mock = mock.MagicMock()
+    service_mock.connector = ConnectorMock("")
+    device_manager = ScanBundlerDeviceManagerMock(service_mock, "")
+    device_manager.producer = service_mock.connector.producer()
     with open(f"{dir_path}/tests/test_config.yaml", "r") as session_file:
         device_manager._session = create_session_from_config(yaml.safe_load(session_file))
     device_manager._load_session()
-    return ScanBundlerMock(device_manager, connector)
+    return ScanBundlerMock(device_manager, service_mock.connector)
 
 
 class ScanBundlerMock(ScanBundler):
@@ -166,8 +173,7 @@ def test_add_device_to_storage_returns_without_scanID():
 
 def test_add_device_to_storage_returns_without_signal():
     msg = messages.DeviceMessage(
-        signals={},
-        metadata={"scanID": "scanID", "readout_priority": "monitored"},
+        signals={}, metadata={"scanID": "scanID", "readout_priority": "monitored"}
     )
     sb = load_ScanBundlerMock()
     sb._add_device_to_storage([msg], "samx", timeout_time=1)
@@ -255,7 +261,7 @@ def test_add_device_to_storage_primary(msg, scan_type):
                 metadata={"scanID": "scanID", "readout_priority": "baseline"},
             ),
             "step",
-        ),
+        )
     ],
 )
 def test_add_device_to_storage_baseline(msg, scan_type):
@@ -315,7 +321,7 @@ def test_add_device_to_storage_baseline(msg, scan_type):
                     "status": "RUNNING",
                 }
             }
-        ),
+        )
     ],
 )
 def test_scan_queue_callback(queue_msg):
@@ -341,7 +347,7 @@ def test_scan_queue_callback(queue_msg):
                 "primary": ["samx", "samy"],
                 "num_points": 143,
             },
-        ),
+        )
     ],
 )
 def test_scan_status_callback(scan_msg):
@@ -419,12 +425,7 @@ def test_status_modification():
     msg = messages.ScanStatusMessage(
         scanID=scanID,
         status="closed",
-        info={
-            "primary": ["samx"],
-            "queueID": "my-queue-ID",
-            "scan_number": 5,
-            "scan_type": "step",
-        },
+        info={"primary": ["samx"], "queueID": "my-queue-ID", "scan_number": 5, "scan_type": "step"},
     )
     scan_bundler._scan_status_modification(msg)
     assert scan_bundler.sync_storage[scanID]["status"] == "closed"
@@ -433,12 +434,7 @@ def test_status_modification():
     msg = messages.ScanStatusMessage(
         scanID=scanID,
         status="closed",
-        info={
-            "primary": ["samx"],
-            "queueID": "my-queue-ID",
-            "scan_number": 5,
-            "scan_type": "step",
-        },
+        info={"primary": ["samx"], "queueID": "my-queue-ID", "scan_number": 5, "scan_type": "step"},
     )
     scan_bundler._scan_status_modification(msg)
     assert scan_bundler.sync_storage[scanID]["info"] == {}
@@ -625,13 +621,7 @@ def test_cleanup_storage(scanID, storage, remove):
             assert scanID in sb.storage_initialized
 
 
-@pytest.mark.parametrize(
-    "scanID,pointID,sent",
-    [
-        ("lkasjd", 1, True),
-        ("alskjd", 2, False),
-    ],
-)
+@pytest.mark.parametrize("scanID,pointID,sent", [("lkasjd", 1, True), ("alskjd", 2, False)])
 def test_send_scan_point(scanID, pointID, sent):
     sb = load_ScanBundlerMock()
     sb.sync_storage[scanID] = {"sent": set([1])}
@@ -698,9 +688,7 @@ def test_update_monitor_signals():
     }
     num_devices = len(sb.device_manager.devices.monitored_devices([]))
     with mock.patch.object(
-        sb,
-        "_get_last_device_readback",
-        return_value=[{"value": 400} for _ in range(num_devices)],
+        sb, "_get_last_device_readback", return_value=[{"value": 400} for _ in range(num_devices)]
     ):
         sb._update_monitor_signals(scanID, pointID)
         assert sb.sync_storage[scanID][pointID]["bpm3a"] == {"value": 400}

@@ -4,7 +4,7 @@ from unittest.mock import ANY
 
 import pytest
 from bec_lib import Alarms, MessageEndpoints, ServiceConfig, messages
-from bec_lib.devicemanager import OnFailure
+from bec_lib.device import OnFailure
 from bec_lib.messages import BECStatus
 from bec_lib.redis_connector import MessageObject
 from bec_lib.tests.utils import ConnectorMock, ConsumerMock

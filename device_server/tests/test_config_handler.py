@@ -15,8 +15,9 @@ dir_path = os.path.dirname(bec_lib.__file__)
 
 
 def test_request_response():
-    connector = ConnectorMock("")
-    device_manager = DeviceManagerDS(connector)
+    service_mock = mock.MagicMock()
+    service_mock.connector = ConnectorMock("")
+    device_manager = DeviceManagerDS(service_mock)
 
     def get_config_from_mock():
         with open(f"{dir_path}/tests/test_config.yaml", "r") as session_file:

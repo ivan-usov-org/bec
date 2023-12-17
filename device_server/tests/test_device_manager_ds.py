@@ -49,9 +49,10 @@ class EpicsDeviceMock(DeviceMock):
 
 
 def load_device_manager():
-    connector = ConnectorMock("", store_data=False)
-    device_manager = DeviceManagerDS(connector, "")
-    device_manager.producer = connector.producer()
+    service_mock = mock.MagicMock()
+    service_mock.connector = ConnectorMock("", store_data=False)
+    device_manager = DeviceManagerDS(service_mock, "")
+    device_manager.producer = service_mock.connector.producer()
     with open(f"{dir_path}/tests/test_config.yaml", "r") as session_file:
         device_manager._session = create_session_from_config(yaml.safe_load(session_file))
     device_manager._load_session()
@@ -85,8 +86,9 @@ def test_conntect_device(device_manager, obj, raises_error):
 
 
 def test_disable_unreachable_devices():
-    connector = ConnectorMock("")
-    device_manager = DeviceManagerDS(connector)
+    service_mock = mock.MagicMock()
+    service_mock.connector = ConnectorMock("")
+    device_manager = DeviceManagerDS(service_mock)
 
     def get_config_from_mock():
         with open(f"{dir_path}/tests/test_config.yaml", "r") as session_file:

@@ -5,9 +5,7 @@ import traceback
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 
-from bec_lib import BECService, BECStatus
-from bec_lib import DeviceManagerBase as DeviceManager
-from bec_lib import MessageEndpoints, bec_logger, messages
+from bec_lib import BECService, BECStatus, DeviceManagerBase, MessageEndpoints, bec_logger, messages
 from bec_lib.connector import ConnectorBase
 
 from .bec_emitter import BECEmitter
@@ -54,7 +52,7 @@ class ScanBundler(BECService):
                 logger.error(f"Failed to run emitter: {content}")
 
     def _start_device_manager(self):
-        self.device_manager = DeviceManager(self.connector)
+        self.device_manager = DeviceManagerBase(self)
         self.device_manager.initialize(self.bootstrap_server)
 
     def _start_device_read_consumer(self):
