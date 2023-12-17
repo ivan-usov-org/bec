@@ -5,6 +5,7 @@ import bec_lib
 import pytest
 import yaml
 from bec_lib import DeviceManagerBase, MessageEndpoints, ServiceConfig, messages
+from bec_lib.messages import BECStatus
 from bec_lib.tests.utils import ConnectorMock, create_session_from_config, get_device_info_mock
 
 from scan_bundler import ScanBundler
@@ -56,6 +57,9 @@ class ScanBundlerMock(ScanBundler):
         pass
 
     def _start_update_service_info(self):
+        pass
+
+    def wait_for_service(self, name, status=BECStatus.RUNNING):
         pass
 
 

@@ -5,6 +5,7 @@ import pytest
 import yaml
 from bec_lib import DeviceManagerBase as DeviceManager
 from bec_lib import MessageEndpoints, ServiceConfig
+from bec_lib.messages import BECStatus
 from bec_lib.tests.utils import ConnectorMock, create_session_from_config, dm, dm_with_devices
 
 from scan_server.scan_assembler import ScanAssembler
@@ -53,6 +54,9 @@ class ScanServerMock(ScanServer):
         pass
 
     def shutdown(self):
+        pass
+
+    def wait_for_service(self, name, status=BECStatus.RUNNING):
         pass
 
     @property

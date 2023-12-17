@@ -7,6 +7,7 @@ import pytest
 import yaml
 from bec_lib import DeviceManagerBase, MessageEndpoints, ServiceConfig, messages
 from bec_lib.bec_errors import ServiceConfigError
+from bec_lib.messages import BECStatus
 from bec_lib.redis_connector import MessageObject
 from bec_lib.tests.utils import ConnectorMock, create_session_from_config
 
@@ -44,6 +45,9 @@ class FileWriterManagerMock(FileWriterManager):
         pass
 
     def shutdown(self):
+        pass
+
+    def wait_for_service(self, name, status=BECStatus.RUNNING):
         pass
 
 

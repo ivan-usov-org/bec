@@ -1,15 +1,19 @@
 from unittest import mock
 
 import pytest
-
 from bec_lib import DeviceManagerBase, ServiceConfig
+from bec_lib.messages import BECStatus
 from bec_lib.tests.utils import ConnectorMock
+
 from scihub import SciHub
 from scihub.scibec import SciBecConnector
 
 
 class SciHubMocked(SciHub):
     def _start_metrics_emitter(self):
+        pass
+
+    def wait_for_service(self, name, status=BECStatus.RUNNING):
         pass
 
 
