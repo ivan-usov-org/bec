@@ -1,11 +1,12 @@
 import os
 
-import yaml
-
 import bec_lib
+import pytest
+import yaml
 from bec_lib import DeviceManagerBase as DeviceManager
 from bec_lib import MessageEndpoints, ServiceConfig
-from bec_lib.tests.utils import ConnectorMock, create_session_from_config
+from bec_lib.tests.utils import ConnectorMock, create_session_from_config, dm, dm_with_devices
+
 from scan_server.scan_assembler import ScanAssembler
 from scan_server.scan_queue import InstructionQueueItem, RequestBlock, RequestBlockQueue, ScanQueue
 from scan_server.scan_server import ScanServer
@@ -19,14 +20,9 @@ from scan_server.scans import RequestBase
 dir_path = os.path.dirname(bec_lib.__file__)
 
 
-def load_ScanServerMock():
-    connector = ConnectorMock("")
-    device_manager = DeviceManager(connector, "")
-    device_manager.producer = connector.producer()
-    with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
-        device_manager._session = create_session_from_config(yaml.safe_load(f))
-    device_manager._load_session()
-    return ScanServerMock(device_manager, connector)
+@pytest.fixture
+def scan_server_mock(dm_with_devices):
+    return ScanServerMock(dm_with_devices, dm_with_devices.connector)
 
 
 class WorkerMock:

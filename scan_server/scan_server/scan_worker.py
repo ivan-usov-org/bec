@@ -4,7 +4,7 @@ import time
 import traceback
 from asyncio.log import logger
 
-from bec_lib import Alarms, Device, MessageEndpoints, bec_logger, messages
+from bec_lib import Alarms, DeviceBase, MessageEndpoints, bec_logger, messages
 
 from .device_validation import DeviceValidation
 from .errors import DeviceMessageError, ScanAbortion
@@ -253,10 +253,7 @@ class ScanWorker(threading.Thread):
         self.device_manager.producer.send(
             MessageEndpoints.device_instructions(),
             messages.DeviceInstructionMessage(
-                device=baseline_devices,
-                action="read",
-                parameter=params,
-                metadata=instr.metadata,
+                device=baseline_devices, action="read", parameter=params, metadata=instr.metadata
             ).dumps(),
         )
 
@@ -380,10 +377,7 @@ class ScanWorker(threading.Thread):
         self.device_manager.producer.send(
             MessageEndpoints.device_instructions(),
             messages.DeviceInstructionMessage(
-                device=devices,
-                action="unstage",
-                parameter=parameter,
-                metadata=metadata,
+                device=devices, action="unstage", parameter=parameter, metadata=metadata
             ).dumps(),
         )
         if not cleanup:
@@ -399,7 +393,7 @@ class ScanWorker(threading.Thread):
 
     def _get_devices_from_instruction(
         self, instr: messages.DeviceInstructionMessage
-    ) -> list[Device]:
+    ) -> list[DeviceBase]:
         """Extract devices from instruction message
 
         Args:
@@ -506,10 +500,7 @@ class ScanWorker(threading.Thread):
             MessageEndpoints.device_req_status,
             messages.DeviceReqStatusMessage,
             instr.metadata,
-            [
-                self.validate.devices_returned_successfully,
-                self.validate.matching_requestID,
-            ],
+            [self.validate.devices_returned_successfully, self.validate.matching_requestID],
             wait_group_devices=wait_group_devices,
             instruction=instr,
         ):
@@ -543,9 +534,7 @@ class ScanWorker(threading.Thread):
             MessageEndpoints.device_status,
             messages.DeviceStatusMessage,
             instr.metadata,
-            [
-                self.validate.devices_are_idle,
-            ],
+            [self.validate.devices_are_idle],
             wait_group_devices=wait_group_devices,
         ):
             continue
@@ -575,10 +564,7 @@ class ScanWorker(threading.Thread):
             MessageEndpoints.device_staged,
             messages.DeviceStatusMessage,
             metadata,
-            [
-                stage_validator,
-                self.validate.matching_requestID,
-            ],
+            [stage_validator, self.validate.matching_requestID],
         ):
             continue
 
@@ -604,9 +590,7 @@ class ScanWorker(threading.Thread):
             MessageEndpoints.device_req_status,
             messages.DeviceReqStatusMessage,
             metadata,
-            [
-                self.validate.devices_returned_successfully,
-            ],
+            [self.validate.devices_returned_successfully],
             print_status=print_status,
         ):
             if time.time() - start > logger_update_delay:
@@ -626,11 +610,7 @@ class ScanWorker(threading.Thread):
         pipe = producer.pipeline()
         for readout, device in zip(readouts, devices):
             msg = messages.DeviceMessage(signals=readout, metadata=instr.metadata).dumps()
-            producer.set_and_publish(
-                MessageEndpoints.device_read(device),
-                msg,
-                pipe,
-            )
+            producer.set_and_publish(MessageEndpoints.device_read(device), msg, pipe)
         return pipe.execute()
 
     def _get_readback(self, devices: list) -> list:
@@ -682,17 +662,12 @@ class ScanWorker(threading.Thread):
             f"New scan status: {self.current_scanID} / {status} / {current_scan_info_print}"
         )
         msg = messages.ScanStatusMessage(
-            scanID=self.current_scanID,
-            status=status,
-            info=self.current_scan_info,
+            scanID=self.current_scanID, status=status, info=self.current_scan_info
         ).dumps()
         expire = None if status in ["open", "paused"] else 1800
         pipe = self.device_manager.producer.pipeline()
         self.device_manager.producer.set(
-            MessageEndpoints.public_scan_info(self.current_scanID),
-            msg,
-            pipe=pipe,
-            expire=expire,
+            MessageEndpoints.public_scan_info(self.current_scanID), msg, pipe=pipe, expire=expire
         )
         self.device_manager.producer.set_and_publish(MessageEndpoints.scan_status(), msg, pipe=pipe)
         pipe.execute()

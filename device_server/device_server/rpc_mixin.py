@@ -94,12 +94,13 @@ class RPCMixin:
         # handle ophyd read. This is a special case because we also want to update the
         # buffered value in redis
         instr_params = instr.content.get("parameter")
+        device_root = instr.content["device"].split(".")[0]
         if instr_params.get("func") == "read" or instr_params.get("func").endswith(".read"):
             if instr_params.get("func") == "read":
-                obj = self.device_manager.devices[instr.content["device"]].obj
+                obj = self.device_manager.devices[device_root].obj
             else:
                 obj = rgetattr(
-                    self.device_manager.devices[instr.content["device"]].obj,
+                    self.device_manager.devices[device_root].obj,
                     instr_params.get("func").split(".read")[0],
                 )
             if isinstance(obj, ophyd.Device):
@@ -117,9 +118,7 @@ class RPCMixin:
             return self._rpc_read_configuration_and_return(instr)
 
         # handle other ophyd methods
-        rpc_var = rgetattr(
-            self.device_manager.devices[instr.content["device"]].obj, instr_params.get("func")
-        )
+        rpc_var = rgetattr(self.device_manager.devices[device_root].obj, instr_params.get("func"))
         res = self._get_result_from_rpc(rpc_var, instr_params)
         if isinstance(res, ophyd.StatusBase):
             res.__dict__["instruction"] = instr

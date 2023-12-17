@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bec_lib.devicemanager import Device
+    from bec_lib.device import Device
 
 
 class BeamlineCondition(ABC):

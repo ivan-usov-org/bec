@@ -1,12 +1,12 @@
 import uuid
 from unittest import mock
-from bec_lib import messages
 
 import pytest
-from utils import load_ScanServerMock
-
-from bec_lib import Alarms, MessageEndpoints
+from bec_lib import Alarms, MessageEndpoints, messages
 from bec_lib.redis_connector import MessageObject
+from bec_lib.tests.utils import dm, dm_with_devices
+from utils import scan_server_mock
+
 from scan_server.scan_assembler import ScanAssembler
 from scan_server.scan_queue import (
     InstructionQueueItem,
@@ -23,15 +23,19 @@ from scan_server.scan_worker import ScanWorker
 # pylint: disable=protected-access
 
 
-def get_queuemanager(queues: list = None) -> QueueManager:
-    k = load_ScanServerMock()
-    if queues is None:
-        queues = ["primary"]
-    if isinstance(queues, str):
-        queues = [queues]
-    for queue in queues:
-        k.queue_manager.add_queue(queue)
-    return k.queue_manager
+@pytest.fixture
+def queuemanager_mock(scan_server_mock) -> QueueManager:
+    def _get_queuemanager(queues=None):
+        scan_server = scan_server_mock
+        if queues is None:
+            queues = ["primary"]
+        if isinstance(queues, str):
+            queues = [queues]
+        for queue in queues:
+            scan_server.queue_manager.add_queue(queue)
+        return scan_server.queue_manager
+
+    yield _get_queuemanager
 
 
 class RequestBlockQueueMock(RequestBlockQueue):
@@ -56,19 +60,19 @@ class InstructionQueueMock(InstructionQueueItem):
         self.queue.append(msg)
 
 
-def test_queuemanager_queue_contains_primary():
-    queue_manager = get_queuemanager()
+def test_queuemanager_queue_contains_primary(queuemanager_mock):
+    queue_manager = queuemanager_mock()
     assert "primary" in queue_manager.queues
 
 
-def test_queuemanager_queue_inits_without_queues():
-    queue_manager = get_queuemanager([])
+def test_queuemanager_queue_inits_without_queues(queuemanager_mock):
+    queue_manager = queuemanager_mock([])
     assert len(queue_manager.queues) == 0
 
 
 @pytest.mark.parametrize("queue", [("primary",), ("alignment",)])
-def test_queuemanager_add_to_queue(queue):
-    queue_manager = get_queuemanager()
+def test_queuemanager_add_to_queue(queuemanager_mock, queue):
+    queue_manager = queuemanager_mock()
     msg = messages.ScanQueueMessage(
         scan_type="mv",
         parameter={"args": {"samx": (1,)}, "kwargs": {}},
@@ -80,8 +84,8 @@ def test_queuemanager_add_to_queue(queue):
     assert queue_manager.queues[queue].queue.popleft().scan_msgs[0] == msg
 
 
-def test_queuemanager_add_to_queue_error_send_alarm():
-    queue_manager = get_queuemanager()
+def test_queuemanager_add_to_queue_error_send_alarm(queuemanager_mock):
+    queue_manager = queuemanager_mock()
     msg = messages.ScanQueueMessage(
         scan_type="mv",
         parameter={"args": {"samx": (1,)}, "kwargs": {}},
@@ -100,8 +104,8 @@ def test_queuemanager_add_to_queue_error_send_alarm():
             )
 
 
-def test_queuemanager_scan_queue_callback():
-    queue_manager = get_queuemanager()
+def test_queuemanager_scan_queue_callback(queuemanager_mock):
+    queue_manager = queuemanager_mock()
     msg = messages.ScanQueueMessage(
         scan_type="mv",
         parameter={"args": {"samx": (1,)}, "kwargs": {}},
@@ -116,13 +120,10 @@ def test_queuemanager_scan_queue_callback():
             send_queue_status.assert_called_once()
 
 
-def test_scan_queue_modification_callback():
-    queue_manager = get_queuemanager()
+def test_scan_queue_modification_callback(queuemanager_mock):
+    queue_manager = queuemanager_mock()
     msg = messages.ScanQueueModificationMessage(
-        scanID="dummy",
-        action="halt",
-        parameter={},
-        metadata={"RID": "something"},
+        scanID="dummy", action="halt", parameter={}, metadata={"RID": "something"}
     )
     obj = MessageObject(msg.dumps(), "scan_queue_modification")
     with mock.patch.object(queue_manager, "scan_interception") as scan_interception:
@@ -132,29 +133,26 @@ def test_scan_queue_modification_callback():
             send_queue_status.assert_called_once()
 
 
-def test_scan_interception_halt():
-    queue_manager = get_queuemanager()
+def test_scan_interception_halt(queuemanager_mock):
+    queue_manager = queuemanager_mock()
     queue_manager.queues = {"primary": ScanQueue(queue_manager, InstructionQueueMock)}
     msg = messages.ScanQueueModificationMessage(
-        scanID="dummy",
-        action="halt",
-        parameter={},
-        metadata={"RID": "something"},
+        scanID="dummy", action="halt", parameter={}, metadata={"RID": "something"}
     )
     with mock.patch.object(queue_manager, "set_halt") as set_halt:
         queue_manager.scan_interception(msg)
         set_halt.assert_called_once_with(scanID="dummy", parameter={})
 
 
-def test_set_halt():
-    queue_manager = get_queuemanager()
+def test_set_halt(queuemanager_mock):
+    queue_manager = queuemanager_mock()
     with mock.patch.object(queue_manager, "set_abort") as set_abort:
         queue_manager.set_halt(scanID="dummy", parameter={})
         set_abort.assert_called_once_with(scanID="dummy", queue="primary")
 
 
-def test_set_halt_disables_return_to_start():
-    queue_manager = get_queuemanager()
+def test_set_halt_disables_return_to_start(queuemanager_mock):
+    queue_manager = queuemanager_mock()
     queue_manager.queues = {"primary": ScanQueue(queue_manager, InstructionQueueMock)}
     queue_manager.queues["primary"].active_instruction_queue = InstructionQueueMock(
         queue_manager.queues["primary"], mock.MagicMock(), mock.MagicMock()
@@ -166,8 +164,8 @@ def test_set_halt_disables_return_to_start():
         assert queue_manager.queues["primary"].active_instruction_queue.return_to_start == False
 
 
-def test_set_pause():
-    queue_manager = get_queuemanager()
+def test_set_pause(queuemanager_mock):
+    queue_manager = queuemanager_mock()
     queue_manager.producer.message_sent = []
     queue_manager.set_pause(queue="primary")
     assert queue_manager.queues["primary"].status == ScanQueueStatus.PAUSED
@@ -177,8 +175,8 @@ def test_set_pause():
     )
 
 
-def test_set_deferred_pause():
-    queue_manager = get_queuemanager()
+def test_set_deferred_pause(queuemanager_mock):
+    queue_manager = queuemanager_mock()
     queue_manager.producer.message_sent = []
     queue_manager.set_deferred_pause(queue="primary")
     assert queue_manager.queues["primary"].status == ScanQueueStatus.PAUSED
@@ -188,8 +186,8 @@ def test_set_deferred_pause():
     )
 
 
-def test_set_continue():
-    queue_manager = get_queuemanager()
+def test_set_continue(queuemanager_mock):
+    queue_manager = queuemanager_mock()
     queue_manager.producer.message_sent = []
     queue_manager.set_continue(queue="primary")
     assert queue_manager.queues["primary"].status == ScanQueueStatus.RUNNING
@@ -199,8 +197,8 @@ def test_set_continue():
     )
 
 
-def test_set_abort():
-    queue_manager = get_queuemanager()
+def test_set_abort(queuemanager_mock):
+    queue_manager = queuemanager_mock()
     queue_manager.producer.message_sent = []
     msg = messages.ScanQueueMessage(
         scan_type="mv",
@@ -218,16 +216,16 @@ def test_set_abort():
     )
 
 
-def test_set_abort_with_empty_queue():
-    queue_manager = get_queuemanager()
+def test_set_abort_with_empty_queue(queuemanager_mock):
+    queue_manager = queuemanager_mock()
     queue_manager.producer.message_sent = []
     queue_manager.set_abort(queue="primary")
     assert queue_manager.queues["primary"].status == ScanQueueStatus.RUNNING
     assert len(queue_manager.producer.message_sent) == 0
 
 
-def test_set_clear_sends_message():
-    queue_manager = get_queuemanager()
+def test_set_clear_sends_message(queuemanager_mock):
+    queue_manager = queuemanager_mock()
     queue_manager.producer.message_sent = []
     setter_mock = mock.Mock(wraps=ScanQueue.worker_status.fset)
     # pylint: disable=assignment-from-no-return
@@ -247,8 +245,8 @@ def test_set_clear_sends_message():
         )
 
 
-def test_set_restart():
-    queue_manager = get_queuemanager()
+def test_set_restart(queuemanager_mock):
+    queue_manager = queuemanager_mock()
     queue_manager.queues = {"primary": ScanQueue(queue_manager, InstructionQueueMock)}
     msg = messages.ScanQueueMessage(
         scan_type="mv",
@@ -266,8 +264,8 @@ def test_set_restart():
             scan_msg_wait.assert_called_once_with("new_scanID", "primary")
 
 
-def test_request_block():
-    scan_server = load_ScanServerMock()
+def test_request_block(scan_server_mock):
+    scan_server = scan_server_mock
     msg = messages.ScanQueueMessage(
         scan_type="mv",
         parameter={"args": {"samx": (1,)}, "kwargs": {}},
@@ -298,8 +296,8 @@ def test_request_block():
         ),
     ],
 )
-def test_request_block_scan_number(scan_queue_msg):
-    scan_server = load_ScanServerMock()
+def test_request_block_scan_number(scan_server_mock, scan_queue_msg):
+    scan_server = scan_server_mock
     request_block = RequestBlock(scan_queue_msg, assembler=ScanAssembler(parent=scan_server))
     if not request_block.is_scan:
         assert request_block.scan_number is None
@@ -311,8 +309,8 @@ def test_request_block_scan_number(scan_queue_msg):
             assert request_block.scan_number == 5
 
 
-def test_remove_queue_item():
-    queue_manager = get_queuemanager()
+def test_remove_queue_item(queuemanager_mock):
+    queue_manager = queuemanager_mock()
     # queue_manager.queues = {"primary": ScanQueueMock(queue_manager)}
     msg = messages.ScanQueueMessage(
         scan_type="mv",
@@ -327,8 +325,8 @@ def test_remove_queue_item():
     assert len(queue_manager.queues["primary"].queue) == 0
 
 
-def test_set_clear():
-    queue_manager = get_queuemanager()
+def test_set_clear(queuemanager_mock):
+    queue_manager = queuemanager_mock()
     queue_manager.queues = {"primary": ScanQueue(queue_manager, InstructionQueueMock)}
     msg = messages.ScanQueueMessage(
         scan_type="mv",
@@ -551,8 +549,8 @@ def test_pull_request_block_empyt_rb():
             rbqs.assert_not_called()
 
 
-def test_queue_manager_get_active_scanID():
-    queue_manager = get_queuemanager()
+def test_queue_manager_get_active_scanID(queuemanager_mock):
+    queue_manager = queuemanager_mock()
     queue_manager.queues = {"primary": ScanQueue(queue_manager, InstructionQueueMock)}
     msg = messages.ScanQueueMessage(
         scan_type="mv",
@@ -566,14 +564,14 @@ def test_queue_manager_get_active_scanID():
     assert queue_manager._get_active_scanID("primary") == "scanID"
 
 
-def test_queue_manager_get_active_scanID_returns_None():
-    queue_manager = get_queuemanager()
+def test_queue_manager_get_active_scanID_returns_None(queuemanager_mock):
+    queue_manager = queuemanager_mock()
     queue_manager.queues = {"primary": ScanQueue(queue_manager, InstructionQueueMock)}
     assert queue_manager._get_active_scanID("primary") == None
 
 
-def test_queue_manager_get_active_scanID_wo_rbl_returns_None():
-    queue_manager = get_queuemanager()
+def test_queue_manager_get_active_scanID_wo_rbl_returns_None(queuemanager_mock):
+    queue_manager = queuemanager_mock()
     queue_manager.queues = {"primary": ScanQueue(queue_manager, InstructionQueueMock)}
     msg = messages.ScanQueueMessage(
         scan_type="mv",

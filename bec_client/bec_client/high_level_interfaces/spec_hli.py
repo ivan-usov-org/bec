@@ -1,4 +1,4 @@
-from bec_lib.devicemanager import Device
+from bec_lib.device import DeviceBase
 from bec_lib.scan_report import ScanReport
 
 # pylint:disable=undefined-variable
@@ -6,7 +6,7 @@ from bec_lib.scan_report import ScanReport
 
 
 def dscan(
-    motor1: Device, m1_from: float, m1_to: float, steps: int, exp_time: float, **kwargs
+    motor1: DeviceBase, m1_from: float, m1_to: float, steps: int, exp_time: float, **kwargs
 ) -> ScanReport:
     """Relative line scan with one device.
 
@@ -29,10 +29,10 @@ def dscan(
 
 
 def d2scan(
-    motor1: Device,
+    motor1: DeviceBase,
     m1_from: float,
     m1_to: float,
-    motor2: Device,
+    motor2: DeviceBase,
     m2_from: float,
     m2_to: float,
     steps: int,

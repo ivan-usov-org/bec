@@ -7,11 +7,11 @@ from contextlib import ContextDecorator
 from typing import TYPE_CHECKING
 
 import msgpack
-from cytoolz import partition
+from toolz import partition
 from typeguard import typechecked
 
 from bec_lib import messages
-from bec_lib.devicemanager_client import Device
+from bec_lib.device import DeviceBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
 from bec_lib.scan_report import ScanReport
@@ -149,7 +149,7 @@ class Scans:
         if in_type == "dict":
             return dict
         if in_type == "device":
-            return Device
+            return DeviceBase
         raise TypeError(f"Unknown type {in_type}")
 
     @staticmethod

@@ -11,7 +11,7 @@ if __name__ == "__main__":
             "typeguard>=4.0.1",
             "pyyaml",
             "redis",
-            "cytoolz",
+            "toolz",
             "rich",
             "pylint",
             "loguru",

@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 import ophyd
 from bec_lib import Alarms, BECService, MessageEndpoints, bec_logger, messages
 from bec_lib.connector import ConnectorBase
-from bec_lib.devicemanager import OnFailure
+from bec_lib.device import OnFailure
 from bec_lib.messages import BECStatus
 from ophyd import OphydObject, Staged
 from ophyd.utils import errors as ophyd_errors
@@ -49,7 +49,7 @@ class DeviceServer(RPCMixin, BECService):
         self._start_device_manager()
 
     def _start_device_manager(self):
-        self.device_manager = DeviceManagerDS(self.connector, status_cb=self.update_status)
+        self.device_manager = DeviceManagerDS(self, status_cb=self.update_status)
         self.device_manager.initialize(self.bootstrap_server)
 
     def start(self) -> None:
@@ -93,7 +93,8 @@ class DeviceServer(RPCMixin, BECService):
         if not isinstance(devices, list):
             devices = [devices]
         for dev in devices:
-            self.device_manager.devices.get(dev).metadata = instr.metadata
+            device_root = dev.split(".")[0]
+            self.device_manager.devices.get(device_root).metadata[dev] = instr.metadata
 
     @staticmethod
     def consumer_interception_callback(msg, *, parent, **_kwargs) -> None:
@@ -125,6 +126,7 @@ class DeviceServer(RPCMixin, BECService):
             devices = [devices]
 
         for dev in devices:
+            dev = dev.split(".")[0]
             if not self.device_manager.devices[dev].enabled:
                 raise DisabledDeviceError(f"Cannot access disabled device {dev}.")
 
@@ -135,6 +137,7 @@ class DeviceServer(RPCMixin, BECService):
         if isinstance(devices, str):
             devices = [devices]
         for dev in devices:
+            dev = dev.split(".")[0]
             if dev not in self.device_manager.devices:
                 raise InvalidDeviceError(f"There is no device with the name {dev}.")
 
@@ -320,8 +323,9 @@ class DeviceServer(RPCMixin, BECService):
         pipe = self.producer.pipeline()
         signal_container = []
         for dev in devices:
-            self.device_manager.devices.get(dev).metadata = metadata
-            obj = self.device_manager.devices.get(dev).obj
+            device_root = dev.split(".")[0]
+            self.device_manager.devices.get(device_root).metadata[dev] = metadata
+            obj = self.device_manager.devices.get(device_root).obj
             try:
                 signals = obj.read()
                 signal_container.append(signals)
@@ -329,18 +333,20 @@ class DeviceServer(RPCMixin, BECService):
                 signals = self._retry_obj_method(dev, obj, "read", exc)
 
             self.producer.set_and_publish(
-                MessageEndpoints.device_read(dev),
+                MessageEndpoints.device_read(device_root),
                 messages.DeviceMessage(signals=signals, metadata=metadata).dumps(),
                 pipe,
             )
             self.producer.set_and_publish(
-                MessageEndpoints.device_readback(dev),
+                MessageEndpoints.device_readback(device_root),
                 messages.DeviceMessage(signals=signals, metadata=metadata).dumps(),
                 pipe,
             )
             self.producer.set(
-                MessageEndpoints.device_status(dev),
-                messages.DeviceStatusMessage(device=dev, status=0, metadata=metadata).dumps(),
+                MessageEndpoints.device_status(device_root),
+                messages.DeviceStatusMessage(
+                    device=device_root, status=0, metadata=metadata
+                ).dumps(),
                 pipe,
             )
         pipe.execute()
@@ -380,7 +386,8 @@ class DeviceServer(RPCMixin, BECService):
             content=f"Failed to run {method} on device {device}.",
             metadata={},
         )
-        ds_dev = self.device_manager.devices.get(device)
+        device_root = device.split(".")[0]
+        ds_dev = self.device_manager.devices.get(device_root)
         if ds_dev.on_failure == OnFailure.RAISE:
             raise exc
 
@@ -390,15 +397,15 @@ class DeviceServer(RPCMixin, BECService):
         elif ds_dev.on_failure == OnFailure.BUFFER:
             # if possible, fall back to past readings
             logger.warning(
-                f"Failed to run {method} on device {device}. Trying to load an old value."
+                f"Failed to run {method} on device {device_root}. Trying to load an old value."
             )
             if method == "read":
                 old_msg = messages.DeviceMessage.loads(
-                    self.producer.get(MessageEndpoints.device_read(device))
+                    self.producer.get(MessageEndpoints.device_read(device_root))
                 )
             elif method == "read_configuration":
                 old_msg = messages.DeviceMessage.loads(
-                    self.producer.get(MessageEndpoints.device_read_configuration(device))
+                    self.producer.get(MessageEndpoints.device_read_configuration(device_root))
                 )
             else:
                 raise ValueError(f"Unknown method {method}.")

@@ -5,6 +5,7 @@ import os
 import time
 import uuid
 from typing import TYPE_CHECKING
+from unittest import mock
 
 import pytest
 import yaml
@@ -29,6 +30,22 @@ logger = bec_logger.logger
 # pylint: disable=missing-function-docstring
 # pylint: disable=redefined-outer-name
 # pylint: disable=protected-access
+
+
+@pytest.fixture
+def dm():
+    service_mock = mock.MagicMock()
+    service_mock.connector = ConnectorMock("")
+    dev_manager = DMClientMock(service_mock)
+    yield dev_manager
+
+
+@pytest.fixture
+def dm_with_devices(dm):
+    with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
+        dm._session = create_session_from_config(yaml.safe_load(f))
+    dm._load_session()
+    yield dm
 
 
 def queue_is_empty(queue) -> bool:  # pragma: no cover
@@ -89,360 +106,368 @@ class ClientMock(BECClient):
         pass
 
 
-class DMClientMock(DMClient):
-    def _get_device_info(self, device_name) -> messages.DeviceInfoMessage:
-        device_info = {
-            "samx": messages.DeviceInfoMessage(
-                device="samx",
-                info={
-                    "device_info": {
-                        "device_base_class": "positioner",
-                        "signals": [
-                            {
-                                "component_name": "readback",
-                                "obj_name": device_name,
-                                "kind_int": 5,
-                                "kind_str": "Kind.hinted",
-                            },
-                            {
-                                "component_name": "setpoint",
-                                "obj_name": f"{device_name}_setpoint",
-                                "kind_int": 1,
-                                "kind_str": "Kind.normal",
-                            },
-                            {
-                                "component_name": "motor_is_moving",
-                                "obj_name": f"{device_name}_motor_is_moving",
-                                "kind_int": 1,
-                                "kind_str": "Kind.normal",
-                            },
-                            {
-                                "component_name": "readback",
-                                "obj_name": device_name,
-                                "kind_int": 5,
-                                "kind_str": "Kind.hinted",
-                            },
-                            {
-                                "component_name": "velocity",
-                                "obj_name": f"{device_name}_velocity",
-                                "kind_int": 2,
-                                "kind_str": "Kind.config",
-                            },
-                            {
-                                "component_name": "acceleration",
-                                "obj_name": f"{device_name}_acceleration",
-                                "kind_int": 2,
-                                "kind_str": "Kind.config",
-                            },
-                            {
-                                "component_name": "high_limit_travel",
-                                "obj_name": f"{device_name}_high_limit_travel",
-                                "kind_int": 2,
-                                "kind_str": "Kind.config",
-                            },
-                            {
-                                "component_name": "low_limit_travel",
-                                "obj_name": f"{device_name}_low_limit_travel",
-                                "kind_int": 2,
-                                "kind_str": "Kind.config",
-                            },
-                            {
-                                "component_name": "unused",
-                                "obj_name": f"{device_name}_unused",
-                                "kind_int": 0,
-                                "kind_str": "Kind.omitted",
-                            },
-                        ],
-                        "hints": {"fields": ["samx"]},
-                        "describe": {
-                            "samx": {
-                                "source": "SIM:samx",
-                                "dtype": "integer",
-                                "shape": [],
-                                "precision": 3,
-                            },
-                            "samx_setpoint": {
-                                "source": "SIM:samx_setpoint",
-                                "dtype": "integer",
-                                "shape": [],
-                                "precision": 3,
-                            },
-                            "samx_motor_is_moving": {
-                                "source": "SIM:samx_motor_is_moving",
-                                "dtype": "integer",
-                                "shape": [],
-                                "precision": 3,
-                            },
+def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessage:
+    device_info = {
+        "samx": messages.DeviceInfoMessage(
+            device="samx",
+            info={
+                "device_info": {
+                    "device_base_class": "positioner",
+                    "signals": [
+                        {
+                            "component_name": "readback",
+                            "obj_name": device_name,
+                            "kind_int": 5,
+                            "kind_str": "Kind.hinted",
                         },
-                        "describe_configuration": {
-                            "samx_velocity": {
-                                "source": "SIM:samx_velocity",
-                                "dtype": "integer",
-                                "shape": [],
-                            },
-                            "samx_acceleration": {
-                                "source": "SIM:samx_acceleration",
-                                "dtype": "integer",
-                                "shape": [],
-                            },
+                        {
+                            "component_name": "setpoint",
+                            "obj_name": f"{device_name}_setpoint",
+                            "kind_int": 1,
+                            "kind_str": "Kind.normal",
                         },
-                        "sub_devices": [],
-                        "custom_user_access": {
-                            "dummy_controller": {
-                                "_func_with_args": {"type": "func", "doc": None},
-                                "_func_with_args_and_kwargs": {"type": "func", "doc": None},
-                                "_func_with_kwargs": {"type": "func", "doc": None},
-                                "_func_without_args_kwargs": {"type": "func", "doc": None},
-                                "controller_show_all": {
-                                    "type": "func",
-                                    "doc": (
-                                        "dummy controller show all\n\n        Raises:\n           "
-                                        " in: _description_\n            LimitError:"
-                                        " _description_\n\n        Returns:\n            _type_:"
-                                        " _description_\n        "
-                                    ),
-                                },
-                                "some_var": {"type": "int"},
-                            },
-                            "sim_state": {"type": "dict"},
-                            "speed": {"type": "int"},
+                        {
+                            "component_name": "motor_is_moving",
+                            "obj_name": f"{device_name}_motor_is_moving",
+                            "kind_int": 1,
+                            "kind_str": "Kind.normal",
                         },
-                    }
-                },
-            ),
-            "dyn_signals": messages.DeviceInfoMessage(
-                device="dyn_signals",
-                info={
-                    "device_info": {
-                        "device_base_class": "device",
-                        "signals": [],
-                        "hints": {"fields": []},
-                        "describe": {
-                            "dyn_signals_messages_message1": {
-                                "source": "SIM:dyn_signals_messages_message1",
-                                "dtype": "integer",
-                                "shape": [],
-                                "precision": 3,
-                            },
-                            "dyn_signals_messages_message2": {
-                                "source": "SIM:dyn_signals_messages_message2",
-                                "dtype": "integer",
-                                "shape": [],
-                                "precision": 3,
-                            },
-                            "dyn_signals_messages_message3": {
-                                "source": "SIM:dyn_signals_messages_message3",
-                                "dtype": "integer",
-                                "shape": [],
-                                "precision": 3,
-                            },
-                            "dyn_signals_messages_message4": {
-                                "source": "SIM:dyn_signals_messages_message4",
-                                "dtype": "integer",
-                                "shape": [],
-                                "precision": 3,
-                            },
-                            "dyn_signals_messages_message5": {
-                                "source": "SIM:dyn_signals_messages_message5",
-                                "dtype": "integer",
-                                "shape": [],
-                                "precision": 3,
-                            },
+                        {
+                            "component_name": "readback",
+                            "obj_name": device_name,
+                            "kind_int": 5,
+                            "kind_str": "Kind.hinted",
                         },
-                        "describe_configuration": {},
-                        "sub_devices": [
-                            {
-                                "device_name": "dyn_signals_messages",
+                        {
+                            "component_name": "velocity",
+                            "obj_name": f"{device_name}_velocity",
+                            "kind_int": 2,
+                            "kind_str": "Kind.config",
+                        },
+                        {
+                            "component_name": "acceleration",
+                            "obj_name": f"{device_name}_acceleration",
+                            "kind_int": 2,
+                            "kind_str": "Kind.config",
+                        },
+                        {
+                            "component_name": "high_limit_travel",
+                            "obj_name": f"{device_name}_high_limit_travel",
+                            "kind_int": 2,
+                            "kind_str": "Kind.config",
+                        },
+                        {
+                            "component_name": "low_limit_travel",
+                            "obj_name": f"{device_name}_low_limit_travel",
+                            "kind_int": 2,
+                            "kind_str": "Kind.config",
+                        },
+                        {
+                            "component_name": "unused",
+                            "obj_name": f"{device_name}_unused",
+                            "kind_int": 0,
+                            "kind_str": "Kind.omitted",
+                        },
+                    ],
+                    "hints": {"fields": ["samx"]},
+                    "describe": {
+                        "samx": {
+                            "source": "SIM:samx",
+                            "dtype": "integer",
+                            "shape": [],
+                            "precision": 3,
+                        },
+                        "samx_setpoint": {
+                            "source": "SIM:samx_setpoint",
+                            "dtype": "integer",
+                            "shape": [],
+                            "precision": 3,
+                        },
+                        "samx_motor_is_moving": {
+                            "source": "SIM:samx_motor_is_moving",
+                            "dtype": "integer",
+                            "shape": [],
+                            "precision": 3,
+                        },
+                    },
+                    "describe_configuration": {
+                        "samx_velocity": {
+                            "source": "SIM:samx_velocity",
+                            "dtype": "integer",
+                            "shape": [],
+                        },
+                        "samx_acceleration": {
+                            "source": "SIM:samx_acceleration",
+                            "dtype": "integer",
+                            "shape": [],
+                        },
+                    },
+                    "sub_devices": [],
+                    "custom_user_access": {
+                        "dummy_controller": {
+                            "_func_with_args": {"type": "func", "doc": None},
+                            "_func_with_args_and_kwargs": {"type": "func", "doc": None},
+                            "_func_with_kwargs": {"type": "func", "doc": None},
+                            "_func_without_args_kwargs": {"type": "func", "doc": None},
+                            "controller_show_all": {
+                                "type": "func",
+                                "doc": (
+                                    "dummy controller show all\n\n        Raises:\n           "
+                                    " in: _description_\n            LimitError:"
+                                    " _description_\n\n        Returns:\n            _type_:"
+                                    " _description_\n        "
+                                ),
+                            },
+                            "some_var": {"type": "int"},
+                        },
+                        "sim_state": {"type": "dict"},
+                        "speed": {"type": "int"},
+                    },
+                }
+            },
+        ),
+        "dyn_signals": messages.DeviceInfoMessage(
+            device="dyn_signals",
+            info={
+                "device_info": {
+                    "device_dotted_name": "dyn_signals",
+                    "device_attr_name": "dyn_signals",
+                    "device_base_class": "device",
+                    "signals": [],
+                    "hints": {"fields": []},
+                    "describe": {
+                        "dyn_signals_messages_message1": {
+                            "source": "SIM:dyn_signals_messages_message1",
+                            "dtype": "integer",
+                            "shape": [],
+                            "precision": 3,
+                        },
+                        "dyn_signals_messages_message2": {
+                            "source": "SIM:dyn_signals_messages_message2",
+                            "dtype": "integer",
+                            "shape": [],
+                            "precision": 3,
+                        },
+                        "dyn_signals_messages_message3": {
+                            "source": "SIM:dyn_signals_messages_message3",
+                            "dtype": "integer",
+                            "shape": [],
+                            "precision": 3,
+                        },
+                        "dyn_signals_messages_message4": {
+                            "source": "SIM:dyn_signals_messages_message4",
+                            "dtype": "integer",
+                            "shape": [],
+                            "precision": 3,
+                        },
+                        "dyn_signals_messages_message5": {
+                            "source": "SIM:dyn_signals_messages_message5",
+                            "dtype": "integer",
+                            "shape": [],
+                            "precision": 3,
+                        },
+                    },
+                    "describe_configuration": {},
+                    "sub_devices": [
+                        {
+                            "device_name": "dyn_signals_messages",
+                            "device_info": {
                                 "device_attr_name": "messages",
                                 "device_dotted_name": "messages",
-                                "device_info": {
-                                    "device_base_class": "device",
-                                    "signals": [
-                                        {
-                                            "component_name": "message1",
-                                            "obj_name": "dyn_signals_messages_message1",
-                                            "kind_int": 1,
-                                            "kind_str": "Kind.normal",
-                                        },
-                                        {
-                                            "component_name": "message2",
-                                            "obj_name": "dyn_signals_messages_message2",
-                                            "kind_int": 1,
-                                            "kind_str": "Kind.normal",
-                                        },
-                                        {
-                                            "component_name": "message3",
-                                            "obj_name": "dyn_signals_messages_message3",
-                                            "kind_int": 1,
-                                            "kind_str": "Kind.normal",
-                                        },
-                                        {
-                                            "component_name": "message4",
-                                            "obj_name": "dyn_signals_messages_message4",
-                                            "kind_int": 1,
-                                            "kind_str": "Kind.normal",
-                                        },
-                                        {
-                                            "component_name": "message5",
-                                            "obj_name": "dyn_signals_messages_message5",
-                                            "kind_int": 1,
-                                            "kind_str": "Kind.normal",
-                                        },
-                                    ],
-                                    "hints": {"fields": []},
-                                    "describe": {
-                                        "dyn_signals_messages_message1": {
-                                            "source": "SIM:dyn_signals_messages_message1",
-                                            "dtype": "integer",
-                                            "shape": [],
-                                            "precision": 3,
-                                        },
-                                        "dyn_signals_messages_message2": {
-                                            "source": "SIM:dyn_signals_messages_message2",
-                                            "dtype": "integer",
-                                            "shape": [],
-                                            "precision": 3,
-                                        },
-                                        "dyn_signals_messages_message3": {
-                                            "source": "SIM:dyn_signals_messages_message3",
-                                            "dtype": "integer",
-                                            "shape": [],
-                                            "precision": 3,
-                                        },
-                                        "dyn_signals_messages_message4": {
-                                            "source": "SIM:dyn_signals_messages_message4",
-                                            "dtype": "integer",
-                                            "shape": [],
-                                            "precision": 3,
-                                        },
-                                        "dyn_signals_messages_message5": {
-                                            "source": "SIM:dyn_signals_messages_message5",
-                                            "dtype": "integer",
-                                            "shape": [],
-                                            "precision": 3,
-                                        },
+                                "device_base_class": "device",
+                                "signals": [
+                                    {
+                                        "component_name": "message1",
+                                        "obj_name": "dyn_signals_messages_message1",
+                                        "kind_int": 1,
+                                        "kind_str": "Kind.normal",
                                     },
-                                    "describe_configuration": {},
-                                    "sub_devices": [],
-                                    "custom_user_access": {},
+                                    {
+                                        "component_name": "message2",
+                                        "obj_name": "dyn_signals_messages_message2",
+                                        "kind_int": 1,
+                                        "kind_str": "Kind.normal",
+                                    },
+                                    {
+                                        "component_name": "message3",
+                                        "obj_name": "dyn_signals_messages_message3",
+                                        "kind_int": 1,
+                                        "kind_str": "Kind.normal",
+                                    },
+                                    {
+                                        "component_name": "message4",
+                                        "obj_name": "dyn_signals_messages_message4",
+                                        "kind_int": 1,
+                                        "kind_str": "Kind.normal",
+                                    },
+                                    {
+                                        "component_name": "message5",
+                                        "obj_name": "dyn_signals_messages_message5",
+                                        "kind_int": 1,
+                                        "kind_str": "Kind.normal",
+                                    },
+                                ],
+                                "hints": {"fields": []},
+                                "describe": {
+                                    "dyn_signals_messages_message1": {
+                                        "source": "SIM:dyn_signals_messages_message1",
+                                        "dtype": "integer",
+                                        "shape": [],
+                                        "precision": 3,
+                                    },
+                                    "dyn_signals_messages_message2": {
+                                        "source": "SIM:dyn_signals_messages_message2",
+                                        "dtype": "integer",
+                                        "shape": [],
+                                        "precision": 3,
+                                    },
+                                    "dyn_signals_messages_message3": {
+                                        "source": "SIM:dyn_signals_messages_message3",
+                                        "dtype": "integer",
+                                        "shape": [],
+                                        "precision": 3,
+                                    },
+                                    "dyn_signals_messages_message4": {
+                                        "source": "SIM:dyn_signals_messages_message4",
+                                        "dtype": "integer",
+                                        "shape": [],
+                                        "precision": 3,
+                                    },
+                                    "dyn_signals_messages_message5": {
+                                        "source": "SIM:dyn_signals_messages_message5",
+                                        "dtype": "integer",
+                                        "shape": [],
+                                        "precision": 3,
+                                    },
                                 },
-                            }
-                        ],
-                        "custom_user_access": {},
-                    }
-                },
-            ),
-        }
-        if device_name in device_info:
-            return device_info[device_name]
+                                "describe_configuration": {},
+                                "sub_devices": [],
+                                "custom_user_access": {},
+                            },
+                        }
+                    ],
+                    "custom_user_access": {},
+                }
+            },
+        ),
+    }
+    if device_name in device_info:
+        return device_info[device_name]
 
-        session_info = self.get_device(device_name)
-        device_base_class = (
-            "positioner" if session_info["deviceClass"] == "SimPositioner" else "signal"
-        )
-        if device_base_class == "positioner":
-            signals = [
-                {
-                    "component_name": "readback",
-                    "obj_name": device_name,
-                    "kind_int": 5,
-                    "kind_str": "Kind.hinted",
-                },
-                {
-                    "component_name": "setpoint",
-                    "obj_name": f"{device_name}_setpoint",
-                    "kind_int": 1,
-                    "kind_str": "Kind.normal",
-                },
-                {
-                    "component_name": "motor_is_moving",
-                    "obj_name": f"{device_name}_motor_is_moving",
-                    "kind_int": 1,
-                    "kind_str": "Kind.normal",
-                },
-                {
-                    "component_name": "readback",
-                    "obj_name": device_name,
-                    "kind_int": 5,
-                    "kind_str": "Kind.hinted",
-                },
-                {
-                    "component_name": "velocity",
-                    "obj_name": f"{device_name}_velocity",
-                    "kind_int": 2,
-                    "kind_str": "Kind.config",
-                },
-                {
-                    "component_name": "acceleration",
-                    "obj_name": f"{device_name}_acceleration",
-                    "kind_int": 2,
-                    "kind_str": "Kind.config",
-                },
-                {
-                    "component_name": "high_limit_travel",
-                    "obj_name": f"{device_name}_high_limit_travel",
-                    "kind_int": 2,
-                    "kind_str": "Kind.config",
-                },
-                {
-                    "component_name": "low_limit_travel",
-                    "obj_name": f"{device_name}_low_limit_travel",
-                    "kind_int": 2,
-                    "kind_str": "Kind.config",
-                },
-                {
-                    "component_name": "unused",
-                    "obj_name": f"{device_name}_unused",
-                    "kind_int": 0,
-                    "kind_str": "Kind.omitted",
-                },
-            ]
-        elif device_base_class == "signal":
-            signals = [
-                {
-                    "component_name": "readback",
-                    "obj_name": device_name,
-                    "kind_int": 5,
-                    "kind_str": "Kind.hinted",
-                },
-                {
-                    "component_name": "velocity",
-                    "obj_name": f"{device_name}_velocity",
-                    "kind_int": 2,
-                    "kind_str": "Kind.config",
-                },
-                {
-                    "component_name": "acceleration",
-                    "obj_name": f"{device_name}_acceleration",
-                    "kind_int": 2,
-                    "kind_str": "Kind.config",
-                },
-                {
-                    "component_name": "high_limit_travel",
-                    "obj_name": f"{device_name}_high_limit_travel",
-                    "kind_int": 2,
-                    "kind_str": "Kind.config",
-                },
-                {
-                    "component_name": "low_limit_travel",
-                    "obj_name": f"{device_name}_low_limit_travel",
-                    "kind_int": 2,
-                    "kind_str": "Kind.config",
-                },
-                {
-                    "component_name": "unused",
-                    "obj_name": f"{device_name}_unused",
-                    "kind_int": 0,
-                    "kind_str": "Kind.omitted",
-                },
-            ]
-        dev_info = {
-            "device_name": device_name,
-            "device_info": {"device_base_class": device_base_class, "signals": signals},
-            "custom_user_acces": {},
-        }
+    device_base_class = "positioner" if device_class == "SimPositioner" else "signal"
+    if device_base_class == "positioner":
+        signals = [
+            {
+                "component_name": "readback",
+                "obj_name": device_name,
+                "kind_int": 5,
+                "kind_str": "Kind.hinted",
+            },
+            {
+                "component_name": "setpoint",
+                "obj_name": f"{device_name}_setpoint",
+                "kind_int": 1,
+                "kind_str": "Kind.normal",
+            },
+            {
+                "component_name": "motor_is_moving",
+                "obj_name": f"{device_name}_motor_is_moving",
+                "kind_int": 1,
+                "kind_str": "Kind.normal",
+            },
+            {
+                "component_name": "readback",
+                "obj_name": device_name,
+                "kind_int": 5,
+                "kind_str": "Kind.hinted",
+            },
+            {
+                "component_name": "velocity",
+                "obj_name": f"{device_name}_velocity",
+                "kind_int": 2,
+                "kind_str": "Kind.config",
+            },
+            {
+                "component_name": "acceleration",
+                "obj_name": f"{device_name}_acceleration",
+                "kind_int": 2,
+                "kind_str": "Kind.config",
+            },
+            {
+                "component_name": "high_limit_travel",
+                "obj_name": f"{device_name}_high_limit_travel",
+                "kind_int": 2,
+                "kind_str": "Kind.config",
+            },
+            {
+                "component_name": "low_limit_travel",
+                "obj_name": f"{device_name}_low_limit_travel",
+                "kind_int": 2,
+                "kind_str": "Kind.config",
+            },
+            {
+                "component_name": "unused",
+                "obj_name": f"{device_name}_unused",
+                "kind_int": 0,
+                "kind_str": "Kind.omitted",
+            },
+        ]
+    elif device_base_class == "signal":
+        signals = [
+            {
+                "component_name": "readback",
+                "obj_name": device_name,
+                "kind_int": 5,
+                "kind_str": "Kind.hinted",
+            },
+            {
+                "component_name": "velocity",
+                "obj_name": f"{device_name}_velocity",
+                "kind_int": 2,
+                "kind_str": "Kind.config",
+            },
+            {
+                "component_name": "acceleration",
+                "obj_name": f"{device_name}_acceleration",
+                "kind_int": 2,
+                "kind_str": "Kind.config",
+            },
+            {
+                "component_name": "high_limit_travel",
+                "obj_name": f"{device_name}_high_limit_travel",
+                "kind_int": 2,
+                "kind_str": "Kind.config",
+            },
+            {
+                "component_name": "low_limit_travel",
+                "obj_name": f"{device_name}_low_limit_travel",
+                "kind_int": 2,
+                "kind_str": "Kind.config",
+            },
+            {
+                "component_name": "unused",
+                "obj_name": f"{device_name}_unused",
+                "kind_int": 0,
+                "kind_str": "Kind.omitted",
+            },
+        ]
+    dev_info = {
+        "device_name": device_name,
+        "device_info": {
+            "device_dotted_name": device_name,
+            "device_attr_name": device_name,
+            "device_base_class": device_base_class,
+            "signals": signals,
+        },
+        "custom_user_acces": {},
+    }
 
-        return messages.DeviceInfoMessage(device=device_name, info=dev_info, metadata={})
+    return messages.DeviceInfoMessage(device=device_name, info=dev_info, metadata={})
+
+
+class DMClientMock(DMClient):
+    def _get_device_info(self, device_name) -> messages.DeviceInfoMessage:
+        return get_device_info_mock(device_name, self.get_device(device_name)["deviceClass"])
 
     def get_device(self, device_name):
         for dev in self._session["devices"]:

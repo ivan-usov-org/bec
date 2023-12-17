@@ -2,9 +2,9 @@ from unittest import mock
 
 import pytest
 
-from bec_lib.tests.utils import bec_client
-from bec_lib.devicemanager_client import Device
+from bec_lib.device import DeviceBase
 from bec_lib.scans import DatasetIdOnHold, HideReport, Metadata, ScanDef, ScanGroup
+from bec_lib.tests.utils import bec_client
 
 # pylint: disable=no-member
 # pylint: disable=missing-function-docstring
@@ -111,7 +111,7 @@ def test_parameter_bundler(bec_client):
         ("boolean", bool),
         ("str", str),
         ("dict", dict),
-        ("device", Device),
+        ("device", DeviceBase),
     ],
 )
 def test_get_arg_type(bec_client, in_type, out):

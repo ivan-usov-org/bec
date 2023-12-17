@@ -1,9 +1,8 @@
 from __future__ import annotations
-from bec_lib import messages
 
 from bec_lib import Alarms, BECService, BECStatus
 from bec_lib import DeviceManagerBase as DeviceManager
-from bec_lib import MessageEndpoints, ServiceConfig, bec_logger
+from bec_lib import MessageEndpoints, ServiceConfig, bec_logger, messages
 from bec_lib.connector import ConnectorBase
 
 from .scan_assembler import ScanAssembler
@@ -36,7 +35,7 @@ class ScanServer(BECService):
         self.status = BECStatus.RUNNING
 
     def _start_device_manager(self):
-        self.device_manager = DeviceManager(self.connector)
+        self.device_manager = DeviceManager(self)
         self.device_manager.initialize([self.bootstrap_server])
 
     def _start_scan_manager(self):
@@ -53,9 +52,7 @@ class ScanServer(BECService):
 
     def _start_alarm_handler(self):
         self._alarm_consumer = self.connector.consumer(
-            MessageEndpoints.alarm(),
-            cb=self._alarm_callback,
-            parent=self,
+            MessageEndpoints.alarm(), cb=self._alarm_callback, parent=self
         )
         self._alarm_consumer.start()
 

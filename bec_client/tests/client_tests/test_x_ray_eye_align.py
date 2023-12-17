@@ -1,7 +1,7 @@
 from unittest import mock
 
 from bec_client.plugins.LamNI import LamNI, XrayEyeAlign
-from bec_lib.devicemanager import Device
+from bec_lib.device import Device
 
 # pylint: disable=unused-import
 from bec_lib.tests.utils import bec_client

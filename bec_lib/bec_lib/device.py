@@ -1,25 +1,26 @@
+import enum
 import functools
 import time
-import traceback
 import uuid
 from collections import namedtuple
 from typing import Any
 
+from typeguard import typechecked
+
 from bec_lib import messages
-from bec_lib.devicemanager import Device, DeviceManagerBase, Status
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
+from bec_lib.redis_connector import RedisProducer
 
-
-class ScanRequestError(Exception):
-    """Exception raised when a scan request is rejected."""
+logger = bec_logger.logger
 
 
 class RPCError(Exception):
     """Exception raised when an RPC call fails."""
 
 
-logger = bec_logger.logger
+class ScanRequestError(Exception):
+    """Exception raised when a scan request is rejected."""
 
 
 def rpc(fcn):
@@ -33,14 +34,97 @@ def rpc(fcn):
     return wrapper
 
 
-class RPCBase:
+class DeviceType(str, enum.Enum):
+    """Device type"""
+
+    POSITIONER = "positioner"
+    DETECTOR = "detector"
+    MONITOR = "monitor"
+    CONTROLLER = "controller"
+    MISC = "misc"
+
+
+class DeviceStatus(enum.Enum):
+    """Device status"""
+
+    IDLE = 0
+    RUNNING = 1
+    BUSY = 2
+
+
+class OnFailure(str, enum.Enum):
+    """On failure behaviour for devices"""
+
+    RAISE = "raise"
+    BUFFER = "buffer"
+    RETRY = "retry"
+
+
+class ReadoutPriority(str, enum.Enum):
+    """Readout priority for devices"""
+
+    ON_REQUEST = "on_request"
+    BASELINE = "baseline"
+    MONITORED = "monitored"
+    ASYNC = "async"
+    CONTINUOUS = "continuous"
+
+
+class Status:
+    def __init__(self, producer: RedisProducer, RID: str) -> None:
+        """
+        Status object for RPC calls
+
+        Args:
+            producer (RedisProducer): Redis producer
+            RID (str): Request ID
+        """
+        self._producer = producer
+        self._RID = RID
+
+    def __eq__(self, __value: object) -> bool:
+        if isinstance(__value, Status):
+            return self._RID == __value._RID
+        return False
+
+    def wait(self, timeout=None):
+        """wait until the request is completed"""
+        sleep_time_step = 0.1
+        sleep_count = 0
+
+        def _sleep(sleep_time):
+            nonlocal sleep_count
+            nonlocal timeout
+            time.sleep(sleep_time)
+            sleep_count += sleep_time
+            if timeout is not None and sleep_count > timeout:
+                raise TimeoutError()
+
+        while True:
+            request_status = self._producer.lrange(
+                MessageEndpoints.device_req_status(self._RID), 0, -1
+            )
+            if request_status:
+                break
+            _sleep(sleep_time_step)
+
+
+class DeviceBase:
     """
-    The RPCBase class is the base class for all devices that are controlled via
+    The DeviceBase class is the base class for all devices that are controlled via
     the DeviceManager. It provides a simple interface to perform RPC calls on the
-    device. The RPCBase class is not meant to be used directly, but rather to be subclassed.
+    device. The DeviceBase class is not meant to be used directly, but rather to be subclassed.
     """
 
-    def __init__(self, name: str, info: dict = None, parent=None, signal_info: dict = None) -> None:
+    def __init__(
+        self,
+        *,
+        name: str,
+        info: dict = None,
+        config: dict = None,
+        parent=None,
+        signal_info: dict = None,
+    ) -> None:
         """
         Args:
             name (dict): The name of the device.
@@ -50,7 +134,7 @@ class RPCBase:
         """
         self.name = name
         self._signal_info = signal_info
-        self._config = None
+        self._config = config
         if info is None:
             info = {}
         self._info = info.get("device_info", {})
@@ -78,6 +162,10 @@ class RPCBase:
             return []
         return hints.get("fields", [])
 
+    def get_device_config(self):
+        """get the device config for this device"""
+        return self._config["deviceConfig"]
+
     @property
     def enabled(self):
         """Returns True if the device is enabled, otherwise False."""
@@ -91,23 +179,13 @@ class RPCBase:
         self.root._config["enabled"] = val
 
     @property
-    def read_only(self):
-        """Whether or not the device can be set"""
-        return self.root._config.get("readOnly", False)
-
-    @read_only.setter
-    def read_only(self, value):
-        """Whether or not the device is read only"""
-        self.root._config["readOnly"] = value
-        self.root.parent.config_helper.send_config_request(
-            action="update", config={self.name: {"readOnly": value}}
-        )
-
-    @property
     def root(self):
         """Returns the root object of the device tree."""
+        # pylint: disable=import-outside-toplevel
+        from bec_lib.devicemanager import DeviceManagerBase
+
         parent = self
-        while not isinstance(parent.parent, DMClient):
+        while not isinstance(parent.parent, DeviceManagerBase):
             parent = parent.parent
         return parent
 
@@ -234,12 +312,15 @@ class RPCBase:
         return (device, func_call)
 
     def _compile_function_path(self, use_parent=False) -> str:
+        # pylint: disable=import-outside-toplevel
+        from bec_lib.devicemanager import DeviceManagerBase
+
         if use_parent:
             parent = self.parent
         else:
             parent = self
         func_call = []
-        while not isinstance(parent, DMClient):
+        while not isinstance(parent, DeviceManagerBase):
             func_call.append(parent.name)
             parent = parent.parent
         return ".".join(func_call[::-1])
@@ -266,28 +347,21 @@ class RPCBase:
         if self._info.get("sub_devices"):
             for dev in self._info.get("sub_devices"):
                 base_class = dev["device_info"].get("device_base_class")
+                attr_name = dev["device_info"].get("device_attr_name")
                 if base_class == "positioner":
-                    setattr(
-                        self,
-                        dev.get("device_attr_name"),
-                        Positioner(dev.get("device_attr_name"), info=dev, parent=self),
-                    )
+                    setattr(self, attr_name, Positioner(name=attr_name, info=dev, parent=self))
                 elif base_class == "device":
-                    setattr(
-                        self,
-                        dev.get("device_attr_name"),
-                        DeviceBase(dev.get("device_attr_name"), info=dev, parent=self),
-                    )
+                    setattr(self, attr_name, Device(name=attr_name, info=dev, parent=self))
 
         for user_access_name, descr in self._info.get("custom_user_access", {}).items():
             if "type" in descr:
-                self._custom_rpc_methods[user_access_name] = RPCBase(
+                self._custom_rpc_methods[user_access_name] = DeviceBase(
                     name=user_access_name, info=descr, parent=self
                 )
                 setattr(self, user_access_name, self._custom_rpc_methods[user_access_name].run)
                 setattr(getattr(self, user_access_name), "__doc__", descr.get("doc"))
             else:
-                self._custom_rpc_methods[user_access_name] = RPCBase(
+                self._custom_rpc_methods[user_access_name] = DeviceBase(
                     name=user_access_name,
                     info={"device_info": {"custom_user_access": descr}},
                     parent=self,
@@ -306,8 +380,184 @@ class RPCBase:
             action="update", config={self.name: update}
         )
 
+    @typechecked
+    def set_device_config(self, val: dict):
+        """set the device config for this device"""
+        self._config["deviceConfig"].update(val)
+        return self.parent.config_helper.send_config_request(
+            action="update", config={self.name: {"deviceConfig": self._config["deviceConfig"]}}
+        )
 
-class OphydInterfaceBase(RPCBase):
+    def get_device_tags(self) -> list:
+        """get the device tags for this device"""
+        return self._config.get("deviceTags", [])
+
+    @typechecked
+    def set_device_tags(self, val: list):
+        """set the device tags for this device"""
+        self._config["deviceTags"] = val
+        return self.parent.config_helper.send_config_request(
+            action="update", config={self.name: {"deviceTags": self._config["deviceTags"]}}
+        )
+
+    @typechecked
+    def add_device_tag(self, val: str):
+        """add a device tag for this device"""
+        if val in self._config["deviceTags"]:
+            return None
+        self._config["deviceTags"].append(val)
+        return self.parent.config_helper.send_config_request(
+            action="update", config={self.name: {"deviceTags": self._config["deviceTags"]}}
+        )
+
+    def remove_device_tag(self, val: str):
+        """remove a device tag for this device"""
+        if val not in self._config["deviceTags"]:
+            return None
+        self._config["deviceTags"].remove(val)
+        return self.parent.config_helper.send_config_request(
+            action="update", config={self.name: {"deviceTags": self._config["deviceTags"]}}
+        )
+
+    @property
+    def wm(self) -> None:
+        """get the current position of a device"""
+        self.parent.devices.wm(self.name)
+
+    @property
+    def device_type(self) -> DeviceType:
+        """get the device type for this device"""
+        return DeviceType(self._config["deviceType"])
+
+    @device_type.setter
+    def device_type(self, val: DeviceType):
+        """set the device type for this device"""
+        if not isinstance(val, DeviceType):
+            val = DeviceType(val)
+        self._config["deviceType"] = val
+        return self.parent.config_helper.send_config_request(
+            action="update", config={self.name: {"deviceType": val}}
+        )
+
+    @property
+    def readout_priority(self) -> ReadoutPriority:
+        """get the readout priority for this device"""
+        return ReadoutPriority(self._config["readoutPriority"])
+
+    @readout_priority.setter
+    def readout_priority(self, val: ReadoutPriority):
+        """set the readout priority for this device"""
+        if not isinstance(val, ReadoutPriority):
+            val = ReadoutPriority(val)
+        self._config["readoutPriority"] = val
+        return self.parent.config_helper.send_config_request(
+            action="update", config={self.name: {"readoutPriority": val}}
+        )
+
+    @property
+    def on_failure(self) -> OnFailure:
+        """get the failure behaviour for this device"""
+        return OnFailure(self._config["onFailure"])
+
+    @on_failure.setter
+    def on_failure(self, val: OnFailure):
+        """set the failure behaviour for this device"""
+        if not isinstance(val, OnFailure):
+            val = OnFailure(val)
+        self._config["onFailure"] = val
+        return self.parent.config_helper.send_config_request(
+            action="update", config={self.name: {"onFailure": self._config["onFailure"]}}
+        )
+
+    @property
+    def read_only(self):
+        """Whether or not the device can be set"""
+        return self._config.get("readOnly", False)
+
+    @read_only.setter
+    def read_only(self, value):
+        """Whether or not the device is read only"""
+        self._config["readOnly"] = value
+        self.parent.config_helper.send_config_request(
+            action="update", config={self.name: {"readOnly": value}}
+        )
+
+    def read(self, cached, filter_readback=True):
+        """get the last reading from a device"""
+        val = self.parent.producer.get(MessageEndpoints.device_read(self.name))
+        if not val:
+            return None
+        if filter_readback:
+            return messages.DeviceMessage.loads(val).content["signals"].get(self.name)
+        return messages.DeviceMessage.loads(val).content["signals"]
+
+    # def readback(self, filter_readback=True):
+    #     """get the last readback value from a device"""
+    #     val = self.parent.producer.get(MessageEndpoints.device_readback(self.name))
+    #     if not val:
+    #         return None
+    #     if filter_readback:
+    #         return DeviceMessage.loads(val).content["signals"].get(self.name)
+    #     return DeviceMessage.loads(val).content["signals"]
+
+    # @property
+    # def device_status(self):
+    #     """get the current status of the device"""
+    #     val = self.parent.producer.get(MessageEndpoints.device_status(self.name))
+    #     if val is None:
+    #         return val
+    #     val = DeviceStatusMessage.loads(val)
+    #     return val.content.get("status")
+
+    # @property
+    # def signals(self):
+    #     """get the last signals from a device"""
+    #     val = self.parent.producer.get(MessageEndpoints.device_read(self.name))
+    #     if val is None:
+    #         return None
+    #     self._signals = DeviceMessage.loads(val).content["signals"]
+    #     return self._signals
+
+    @property
+    def user_parameter(self) -> dict:
+        """get the user parameter for this device"""
+        return self._config.get("userParameter")
+
+    @typechecked
+    def set_user_parameter(self, val: dict):
+        """set the user parameter for this device"""
+        self.parent.config_helper.send_config_request(
+            action="update", config={self.name: {"userParameter": val}}
+        )
+
+    @typechecked
+    def update_user_parameter(self, val: dict):
+        """update the user parameter for this device
+        Args:
+            val (dict): New user parameter
+        """
+        param = self.user_parameter
+        if param is None:
+            param = {}
+        param.update(val)
+        self.set_user_parameter(param)
+
+    def __eq__(self, other):
+        if isinstance(other, DeviceBase):
+            return other.name == self.name
+        return False
+
+    def __hash__(self):
+        return self.name.__hash__()
+
+    def __str__(self):
+        return f"{type(self).__name__}(name={self.name}, enabled={self.enabled})"
+
+    def __repr__(self):
+        return f"{type(self).__name__}(name={self.name}, enabled={self.enabled})"
+
+
+class OphydInterfaceBase(DeviceBase):
     @rpc
     def trigger(self, rpc_id: str):
         """
@@ -426,7 +676,7 @@ class OphydInterfaceBase(RPCBase):
         """
 
 
-class DeviceBase(OphydInterfaceBase, Device):
+class Device(OphydInterfaceBase):
     """
     Device (bluesky interface):
     * trigger
@@ -471,6 +721,9 @@ class DeviceBase(OphydInterfaceBase, Device):
         """
 
     def __repr__(self):
+        # pylint: disable=import-outside-toplevel
+        from bec_lib.devicemanager import DeviceManagerBase
+
         if isinstance(self.parent, DeviceManagerBase):
             config = "".join(
                 [f"\t{key}: {val}\n" for key, val in self._config.get("deviceConfig").items()]
@@ -546,7 +799,7 @@ class Signal(AdjustableMixin, OphydInterfaceBase):
     pass
 
 
-class Positioner(AdjustableMixin, DeviceBase):
+class Positioner(AdjustableMixin, Device):
     """
     Positioner:
     * trigger
@@ -590,43 +843,3 @@ class Positioner(AdjustableMixin, DeviceBase):
     @rpc
     def moving(self):
         pass
-
-
-class DMClient(DeviceManagerBase):
-    def __init__(self, parent):
-        super().__init__(parent.connector)
-        self.parent = parent
-
-    def _load_session(self, idle_time=1, _device_cls=None, *_args):
-        time.sleep(idle_time)
-        if self._is_config_valid():
-            for dev in self._session["devices"]:
-                # pylint: disable=broad-except
-                try:
-                    msg = self._get_device_info(dev.get("name"))
-                    self._add_device(dev, msg)
-                except Exception:
-                    content = traceback.format_exc()
-                    logger.error(f"Failed to load device {dev}: {content}")
-
-    def _add_device(self, dev: dict, msg: messages.DeviceInfoMessage):
-        name = msg.content["device"]
-        info = msg.content["info"]
-
-        base_class = info["device_info"]["device_base_class"]
-
-        if base_class == "device":
-            logger.info(f"Adding new device {name}")
-            obj = DeviceBase(name, info=info, parent=self)
-        elif base_class == "positioner":
-            logger.info(f"Adding new positioner {name}")
-            obj = Positioner(name, info=info, parent=self)
-        elif base_class == "signal":
-            logger.info(f"Adding new signal {name}")
-            obj = Signal(name, info=info, parent=self)
-        else:
-            logger.error(f"Trying to add new device {name} of type {base_class}")
-
-        # pylint: disable=protected-access
-        obj._config = dev
-        self.devices._add_device(name, obj)

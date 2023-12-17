@@ -7,7 +7,8 @@ import ophyd
 import ophyd.sim as ops
 import ophyd_devices as opd
 from bec_lib import (
-    Device,
+    BECService,
+    DeviceBase,
     DeviceConfigError,
     DeviceManagerBase,
     MessageEndpoints,
@@ -39,9 +40,9 @@ def rgetattr(obj, attr, *args):
     return reduce(_getattr, [obj] + attr.split("."))
 
 
-class DSDevice(Device):
+class DSDevice(DeviceBase):
     def __init__(self, name, obj, config, parent=None):
-        super().__init__(name, config, parent=parent)
+        super().__init__(name=name, config=config, parent=parent)
         self.obj = obj
         self.metadata = {}
         self.initialized = False
@@ -78,11 +79,11 @@ class DSDevice(Device):
 class DeviceManagerDS(DeviceManagerBase):
     def __init__(
         self,
-        connector: ConnectorBase,
+        service: BECService,
         config_update_handler: ConfigUpdateHandler = None,
         status_cb: list = None,
     ):
-        super().__init__(connector, status_cb)
+        super().__init__(service, status_cb)
         self._config_request_connector = None
         self._device_instructions_connector = None
         self._config_update_handler_cls = config_update_handler
@@ -228,7 +229,7 @@ class DeviceManagerDS(DeviceManagerBase):
         pipe.execute()
 
         # insert the created device obj into the device manager
-        opaas_obj = DSDevice(name, obj, config=dev, parent=self)
+        opaas_obj = DSDevice(name=name, obj=obj, config=dev, parent=self)
 
         # pylint:disable=protected-access # this function is shared with clients and it is currently not foreseen that clients add new devices
         self.devices._add_device(name, opaas_obj)

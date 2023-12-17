@@ -27,6 +27,16 @@ dyn_signals:
 ####################### User motors ########################
 ############################################################
 
+hexapod:
+  readoutPriority: baseline
+  deviceType: positioner
+  deviceClass: SynDeviceOPAAS
+  deviceConfig:
+  deviceTags:
+    - user motors
+  enabled: true
+  readOnly: false
+
 eyefoc:
   readoutPriority: baseline
   deviceType: positioner

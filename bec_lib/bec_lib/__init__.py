@@ -4,14 +4,8 @@ from bec_lib.channel_monitor import channel_monitor_launch
 from bec_lib.client import BECClient
 from bec_lib.config_helper import ConfigHelper
 from bec_lib.connector import ProducerConnector
-from bec_lib.devicemanager import (
-    Device,
-    DeviceConfigError,
-    DeviceContainer,
-    DeviceManagerBase,
-    DeviceStatus,
-    Status,
-)
+from bec_lib.device import DeviceBase, DeviceStatus, Status
+from bec_lib.devicemanager import DeviceConfigError, DeviceContainer, DeviceManagerBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
 from bec_lib.messages import BECStatus

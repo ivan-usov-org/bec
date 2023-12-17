@@ -10,7 +10,7 @@ from bec_lib import messages
 from bec_lib.devicemanager import DeviceManagerBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.observer import Observer, ObserverManager
-from bec_lib.tests.utils import ConnectorMock, create_session_from_config
+from bec_lib.tests.utils import ConnectorMock, create_session_from_config, dm, dm_with_devices
 
 dir_path = os.path.dirname(bec_lib.__file__)
 
@@ -89,12 +89,8 @@ def test_observer(kwargs, raised_error):
 
 
 @pytest.fixture()
-def device_manager():
-    connector = ConnectorMock("")
-    dm = DeviceManagerBase(connector, "")
-    with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
-        dm._session = create_session_from_config(yaml.safe_load(f))
-    dm._load_session()
+def device_manager(dm_with_devices):
+    dm = dm_with_devices
     with mock.patch.object(dm, "_get_config"):
         dm.initialize("")
     return dm
