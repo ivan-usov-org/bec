@@ -168,6 +168,8 @@ end-2-end:
       - DeviceServer.log
       - BECClient.log
       - FileWriterManager.log
+      - SciHub.log
+      - DAPServer.log
     expire_in: 1 week
 
   rules:
@@ -211,6 +213,8 @@ end-2-end:
     - docker cp device_server:/code/bec/device_server/DeviceServer.log $CI_PROJECT_DIR/DeviceServer.log
     - docker cp file_writer:/code/bec/file_writer/FileWriterManager.log $CI_PROJECT_DIR/FileWriterManager.log
     - docker cp end2end_client:/code/bec/bec_client/BECClient.log $CI_PROJECT_DIR/BECClient.log
+    - docker cp end2end_client:/code/bec/scihub/SciHub.log $CI_PROJECT_DIR/SciHub.log
+    - docker cp end2end_client:/code/bec/dap_server/DAPServer.log $CI_PROJECT_DIR/DAPServer.log
 
 # end-2-end-scibec:
 #   extends: "end-2-end"
@@ -287,6 +291,8 @@ end-2-end-conda:
       - DeviceServer.log
       - BECClient.log
       - FileWriterManager.log
+      - SciHub.log
+      - DAPServer.log
     expire_in: 1 week
 
   rules:
