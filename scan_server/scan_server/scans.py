@@ -208,6 +208,7 @@ class RequestBase(ABC):
             "baseline": [],
             "on_request": [],
             "async": [],
+            "triggering_master": "bec",
         }
         self.update_readout_priority()
         if metadata is None:
@@ -1005,6 +1006,7 @@ class RoundScanFlySim(ScanBase):
         """
         super().__init__(**kwargs)
         self.axis = []
+        self.readout_priority["triggering_master"] = self.flyer
 
     def _get_scan_motors(self):
         self.scan_motors = []

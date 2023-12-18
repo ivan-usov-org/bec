@@ -21,11 +21,10 @@ but they are executed in a specific order:
 """
 
 import time
-from bec_lib import messages
 
 import numpy as np
+from bec_lib import MessageEndpoints, bec_logger, messages
 
-from bec_lib import MessageEndpoints, bec_logger
 from scan_server.errors import ScanAbortion
 from scan_server.scans import RequestBase, ScanArgType, ScanBase
 
@@ -255,6 +254,7 @@ class LamNIFermatScan(ScanBase, LamNIMixin):
         # self.keep_plot = scan_kwargs.get("keep_plot", 0)
         self.optim_trajectory = scan_kwargs.get("optim_trajectory", "corridor")
         self.optim_trajectory_corridor = scan_kwargs.get("optim_trajectory_corridor")
+        self.readout_priority["triggering_master"] = "rt_scan"
 
     def initialize(self):
         self.scan_motors = ["rtx", "rty"]

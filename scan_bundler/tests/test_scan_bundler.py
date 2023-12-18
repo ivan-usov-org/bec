@@ -236,6 +236,12 @@ def test_add_device_to_storage_primary(msg, scan_type):
     sb.sync_storage["scanID"]["status"] = "open"
     sb.storage_initialized.add("scanID")
     sb.monitored_devices["scanID"] = {"devices": [sb.device_manager.devices.samx], "pointID": {}}
+    sb.readout_priority["scanID"] = {
+        "monitored": [],
+        "baseline": [],
+        "on_request": [],
+        "triggering_master": "bec",
+    }
     if scan_type == "step":
         with mock.patch.object(sb, "_step_scan_update") as step_update:
             sb._add_device_to_storage([msg], "samx", timeout_time=1)
@@ -262,6 +268,45 @@ def test_add_device_to_storage_primary(msg, scan_type):
                 signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
                 metadata={"scanID": "scanID"},
             ),
+            "fly",
+        ),
+        (
+            messages.DeviceMessage(
+                signals={
+                    "flyer": {"flyer": 0.51, "flyer_setpoint": 0.5, "flyer_motor_is_moving": 0}
+                },
+                metadata={"scanID": "scanID"},
+            ),
+            "fly",
+        ),
+    ],
+)
+def test_add_device_to_storage_primary_flyer(msg, scan_type):
+    sb = load_ScanBundlerMock()
+    sb.sync_storage["scanID"] = {"info": {"scan_type": scan_type}}
+    sb.sync_storage["scanID"]["status"] = "open"
+    sb.storage_initialized.add("scanID")
+    sb.monitored_devices["scanID"] = {"devices": [sb.device_manager.devices.samx], "pointID": {}}
+    sb.readout_priority["scanID"] = {
+        "monitored": [],
+        "baseline": [],
+        "on_request": [],
+        "triggering_master": "flyer",
+    }
+    with mock.patch.object(sb, "_fly_scan_update") as fly_update:
+        sb._add_device_to_storage([msg], "samx", timeout_time=1)
+        fly_update.assert_called_once_with("scanID", "samx", msg.content["signals"], msg.metadata)
+    return
+
+
+@pytest.mark.parametrize(
+    "msg,scan_type",
+    [
+        (
+            messages.DeviceMessage(
+                signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
+                metadata={"scanID": "scanID"},
+            ),
             "step",
         )
     ],
@@ -275,6 +320,12 @@ def test_add_device_to_storage_baseline(msg, scan_type):
     sb.baseline_devices["scanID"] = {
         "done": {"samx": False},
         "devices": [sb.device_manager.devices.samx],
+    }
+    sb.readout_priority["scanID"] = {
+        "monitored": [],
+        "baseline": [],
+        "on_request": [],
+        "triggering_master": "bec",
     }
     with mock.patch.object(sb, "_baseline_update") as baseline_update:
         sb._add_device_to_storage([msg], "samx", timeout_time=1)

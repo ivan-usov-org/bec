@@ -321,7 +321,10 @@ class ScanBundler(BECService):
                     return
             self.device_storage[device] = signal
             dev_obj = self.device_manager.devices.get(device)
-            if dev_obj in self.monitored_devices[scanID]["devices"]:
+            device_is_triggering_master = (
+                self.readout_priority[scanID].get("triggering_master") == device
+            )
+            if dev_obj in self.monitored_devices[scanID]["devices"] or device_is_triggering_master:
                 if self.sync_storage[scanID]["info"]["scan_type"] == "step":
                     self._step_scan_update(scanID, device, signal, metadata)
                 elif self.sync_storage[scanID]["info"]["scan_type"] == "fly":
@@ -333,6 +336,8 @@ class ScanBundler(BECService):
 
             elif dev_obj in self.baseline_devices[scanID]["devices"]:
                 self._baseline_update(scanID, device, signal)
+            else:
+                logger.warning(f"Received reading from unknown device {device}")
 
     def _update_monitor_signals(self, scanID, pointID) -> None:
         if self.sync_storage[scanID]["info"]["scan_type"] == "fly":
@@ -342,7 +347,8 @@ class ScanBundler(BECService):
             readings = self._get_last_device_readback(devices)
 
             for read, dev in zip(readings, devices):
-                self.sync_storage[scanID][pointID][dev.name] = read
+                if dev.name not in self.sync_storage[scanID][pointID]:
+                    self.sync_storage[scanID][pointID][dev.name] = read
 
     def _get_last_device_readback(self, devices: list) -> list:
         pipe = self.producer.pipeline()

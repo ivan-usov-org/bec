@@ -1,8 +1,8 @@
 import time
 
 import numpy as np
-
 from bec_lib import bec_logger
+
 from scan_server.scans import FlyScanBase, ScanArgType, ScanBase
 
 logger = bec_logger.logger
@@ -28,6 +28,7 @@ class OTFScan(FlyScanBase):
         self.num_pos = 0
         self.mono = self.caller_kwargs.get("mono", "mono")
         self.otf_device = self.caller_kwargs.get("otf", "otf")
+        self.readout_priority["triggering_master"] = self.otf_device
 
     def pre_scan(self):
         yield None
@@ -136,9 +137,7 @@ class HystScan(ScanBase):
         status.wait()
         # send the slow motor on its way
         yield from self.stubs.set(
-            device=self.flyer,
-            value=self.flyer_positions[1],
-            wait_group="flyer",
+            device=self.flyer, value=self.flyer_positions[1], wait_group="flyer"
         )
 
         flyer_done = False
