@@ -153,6 +153,7 @@ class ScanData(dict):
     def __init__(self, *args, **kwargs):
         self.devices = collections.defaultdict(DeviceData)
         self.messages = collections.defaultdict()
+        self.baseline_message = []
         super().__init__(*args, **kwargs)
 
     def get(self, index: Any) -> Any:
@@ -196,11 +197,30 @@ class ScanData(dict):
 
         """
         if not isinstance(index, int):
-            raise TypeError("ScanData can only store ScanMessages with integer indices (pointID).")
+            raise TypeError(
+                "ScanData.set can only store ScanMessages with integer indices (pointID)."
+            )
         if not isinstance(message, messages.ScanMessage):
             raise TypeError("ScanData can only store ScanMessages")
 
         self.messages[index] = message
+        for dev, dev_data in message.content["data"].items():
+            self.devices[dev].set(index, dev_data)
+            self.__setattr__(dev, self.devices[dev])
+
+    def set_baseline(self, message: messages.ScanBaselineMessage) -> None:
+        """
+        Set the baseline data to the given message.
+
+        Args:
+            message(messages.ScanBaselineMessage): the message to store
+
+        """
+        if not isinstance(message, messages.ScanBaselineMessage):
+            raise TypeError("ScanData.set_baseline can only store ScanBaselineMessages")
+
+        self.baseline_message.append(message)
+        index = len(self.baseline_message) - 1
         for dev, dev_data in message.content["data"].items():
             self.devices[dev].set(index, dev_data)
             self.__setattr__(dev, self.devices[dev])

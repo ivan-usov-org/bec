@@ -395,3 +395,17 @@ def test_add_scan_segment_emits_data():
     scan_manager.scan_storage.add_scan_segment(msg)
     scan_item.emit_data.assert_called_once_with(msg)
     assert scan_item.data.messages == {0: msg}
+
+
+def test_add_baseline_data():
+    scan_manager = ScanManager(ConnectorMock(""))
+    scan_item = mock.MagicMock()
+    scan_item.scanID = "scanID"
+    scan_item.data = ScanData()
+    scan_manager.scan_storage.storage.append(scan_item)
+
+    msg = messages.ScanBaselineMessage(
+        scanID="scanID", data={"samx": {"value": 1}}, metadata={"scanID": "scanID"}
+    )
+    scan_manager.scan_storage.add_baseline(msg)
+    assert scan_item.data.baseline_message == [msg]

@@ -226,6 +226,17 @@ class ScanStorage:
                         return
             time.sleep(0.01)
 
+    def add_baseline(self, baseline_msg: messages.ScanBaselineMessage) -> None:
+        """update a scan item with a new baseline"""
+        logger.info(f"Received baseline data for scan {baseline_msg.content['scanID']}: ")
+        while True:
+            with self._lock:
+                for scan_item in self.storage:
+                    if scan_item.scanID == baseline_msg.content["scanID"]:
+                        scan_item.data.set_baseline(baseline_msg)
+                        return
+            time.sleep(0.01)
+
     @threadlocked
     def add_scan_item(self, queueID: str, scan_number: list, scanID: list, status: str):
         """append new scan item to scan storage"""
