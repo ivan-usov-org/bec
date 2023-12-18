@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.52.8 (2023-12-18)
+
+### Fix
+
+* Fixed scan def cleanup ([`4be4252`](https://gitlab.psi.ch/bec/bec/-/commit/4be425277b561b9228982bc55d7f3980cf2bf98f))
+
 ## v0.52.7 (2023-12-18)
 
 ### Fix
