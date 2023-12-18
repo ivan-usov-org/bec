@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.52.6 (2023-12-18)
+
+### Fix
+
+* Fixed limit update for epics pvs; closes #113 ([`fce2520`](https://gitlab.psi.ch/bec/bec/-/commit/fce2520e38c80b1d2c01349b5f0d02d8eaf2a3bd))
+
 ## v0.52.5 (2023-12-18)
 
 ### Fix
