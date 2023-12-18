@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.52.5 (2023-12-18)
+
+### Fix
+
+* Fixed scan data namespace clash; closes #141 ([`8c4cee8`](https://gitlab.psi.ch/bec/bec/-/commit/8c4cee824bd0a2d623fd65f63f7a91347c79076d))
+
 ## v0.52.4 (2023-12-17)
 
 ### Fix
