@@ -48,9 +48,9 @@ class BECWidgetsConnector:
     A class to connect to the BEC widgets.
     """
 
-    def __init__(self, bec_client: BECClient = None) -> None:
+    def __init__(self, gui_id: str, bec_client: BECClient = None) -> None:
         self._client = bec_client
-
+        self.gui_id = gui_id
         # TODO replace with a global producer
         if self._client is None:
             if "bec" in builtins.__dict__:
@@ -127,7 +127,7 @@ class BECPlotter:
         )  # Generate a unique id for the plot to be used in redis
         self._config = default_config if default_config is not None else DEFAULT_CONFIG
         self.plot_connector = (
-            widget_connector if widget_connector is not None else BECWidgetsConnector()
+            widget_connector if widget_connector is not None else BECWidgetsConnector(self._plot_id)
         )
 
         self._process = None
@@ -137,58 +137,61 @@ class BECPlotter:
         self._config_changed = False
 
     @typechecked
-    def set_xlabel(self, xlabel: str, axis: int = 0) -> None:
+    def set_xlabel(self, xlabel: str, subplot: int = 0) -> None:
         """
         Set the xlabel of the figure.
 
         Args:
             xlabel (str): The xlabel to set.
-            axis (int, optional): The axis to set the xlabel for. Defaults to 0.
+            subplot (int, optional): The subplot to set the xlabel for. Defaults to 0.
         """
-        self._config["plot_data"][axis]["x_label"] = xlabel
+        self._config["plot_data"][subplot]["x_label"] = xlabel
         self._config_changed = True
 
     @typechecked
-    def set_ylabel(self, ylabel: str, axis: int = 0) -> None:
+    def set_ylabel(self, ylabel: str, subplot: int = 0) -> None:
         """
         Set the ylabel of the figure.
 
         Args:
             ylabel (str): The ylabel to set.
-            axis (int, optional): The axis to set the ylabel for. Defaults to 0.
+            subplot (int, optional): The subplot to set the ylabel for. Defaults to 0.
         """
-        self._config["plot_data"][axis]["y_label"] = ylabel
+        self._config["plot_data"][subplot]["y_label"] = ylabel
         self._config_changed = True
 
     @typechecked
-    def set_xsource(self, source: str, axis: int = 0, source_type: int = 0) -> None:
+    def set_xsource(self, source: str, subplot: int = 0, source_order: int = 0) -> None:
         """
         Set the source of the xdata of the figure.
 
         Args:
             source (str): The source to set. Must be either a valid device name
-            axis (int, optimal): The axis to change the xsource. Defaults to 0.
-            source_type (int, optional): The type of the source. Defaults to 0.
+            subplot (int, optimal): The subplot to change the xsource. Defaults to 0.
+            source_order (int, optional): Which source to be changed. Defaults to 0.
         """
-        self._config["plot_data"][axis]["sources"][source_type]["signals"]["x"][0]["name"] = source
+        self._config["plot_data"][subplot]["sources"][source_order]["signals"]["x"][0][
+            "name"
+        ] = source
         self._config_changed = True
 
     @typechecked
-    def set_ysource(self, source: str, axis: int = 0, source_type: int = 0, curve: int = 0) -> None:
+    def set_ysource(
+        self, source: str, subplot: int = 0, source_order: int = 0, curve: int = 0
+    ) -> None:
         """
         Set the source of the ydata of the figure.
 
         Args:
             source (str): The source to set. Must be either a valid device name
-            axis (int, optional): The axis to set the ydata for. Defaults to 0.
-            source_type (int, optional): The type of the source. Defaults to 0.
+            subplot (int, optional): The subplot to set the ydata for. Defaults to 0.
+            source_order (int, optional): Which source to be changed. Defaults to 0.
             curve (int, optional): The curve of the source. Defaults to 0.
         """
-        self._config["plot_data"][axis]["sources"][source_type]["signals"]["y"][curve][
+        self._config["plot_data"][subplot]["sources"][source_order]["signals"]["y"][curve][
             "name"
         ] = source
         self._config_changed = True
-        print(f"ysource changed to {source}")
 
     @typechecked
     def set_xdata(self, xdata: list[float]) -> None:
@@ -302,13 +305,10 @@ class BECPlotter:
         Refresh the figure. This call is indempotent, i.e. multiple calls to refresh will not have any effect
         if the data has not changed.
         """
-        print("refreshing")
         if self._config_changed:
             self.plot_connector.set_plot_config(self._plot_id, self._config)
             self._config_changed = False
-            print(f"config changed to {self._config}")
         if self._data_changed:
-            print("Data Changed")
             data = {"x": self._xdata, "y": self._ydata}
             self.plot_connector.send_data(self._plot_id, data)
             self._data_changed = False
