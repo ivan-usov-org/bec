@@ -5,7 +5,6 @@ from abc import ABC, abstractmethod
 from typing import Any, Literal
 
 import numpy as np
-
 from bec_lib import DeviceManagerBase, MessageEndpoints, bec_logger, messages
 
 from .errors import LimitError, ScanAbortion
@@ -229,7 +228,7 @@ class RequestBase(ABC):
         self._scan_report_devices = devices
 
     def device_msg_metadata(self):
-        default_metadata = {"readout_priority": "monitored", "DIID": self.DIID}
+        default_metadata = {"DIID": self.DIID}
         metadata = {**default_metadata, **self.metadata}
         self.DIID += 1
         return metadata

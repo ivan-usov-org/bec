@@ -5,7 +5,6 @@ import uuid
 from collections.abc import Callable
 
 import numpy as np
-
 from bec_lib import MessageEndpoints, ProducerConnector, Status, bec_logger, messages
 
 from .errors import DeviceMessageError, ScanAbortion
@@ -73,7 +72,10 @@ class ScanStubs:
             if isinstance(error, dict) and {"error", "msg", "traceback"}.issubset(
                 set(error.keys())
             ):
-                error_msg = f"During an RPC, the following error occured:\n{error['error']}: {error['msg']}.\nTraceback: {error['traceback']}\n The scan will be aborted."
+                error_msg = (
+                    f"During an RPC, the following error occured:\n{error['error']}:"
+                    f" {error['msg']}.\nTraceback: {error['traceback']}\n The scan will be aborted."
+                )
             else:
                 error_msg = "During an RPC, an error occured"
             raise ScanAbortion(error_msg)
@@ -164,10 +166,7 @@ class ScanStubs:
         parameter = parameter if parameter is not None else {}
         parameter = {"configure": parameter, "wait_group": wait_group}
         yield self._device_msg(
-            device=device,
-            action="kickoff",
-            parameter=parameter,
-            metadata=metadata,
+            device=device, action="kickoff", parameter=parameter, metadata=metadata
         )
 
     def complete(self, *, device: str, metadata=None):
@@ -176,12 +175,7 @@ class ScanStubs:
         Args:
             device (str): Device name of flyer.
         """
-        yield self._device_msg(
-            device=device,
-            action="complete",
-            parameter={},
-            metadata=metadata,
-        )
+        yield self._device_msg(device=device, action="complete", parameter={}, metadata=metadata)
 
     def get_req_status(self, device: str, RID: str, DIID: int):
         """Check if a device request status matches the given RID and DIID
@@ -237,12 +231,7 @@ class ScanStubs:
 
     def baseline_reading(self):
         """Run the baseline readings."""
-        yield self._device_msg(
-            device=None,
-            action="baseline_reading",
-            parameter={},
-            metadata={"readout_priority": "baseline"},
-        )
+        yield self._device_msg(device=None, action="baseline_reading", parameter={}, metadata={})
 
     def wait(
         self,
@@ -266,20 +255,9 @@ class ScanStubs:
         self._check_device_and_groups(device, group)
         parameter = {"type": wait_type, "time": wait_time, "group": group, "wait_group": wait_group}
         self._exclude_nones(parameter)
-        yield self._device_msg(
-            device=device,
-            action="wait",
-            parameter=parameter,
-        )
+        yield self._device_msg(device=device, action="wait", parameter=parameter)
 
-    def read(
-        self,
-        *,
-        wait_group: str,
-        device: list = None,
-        pointID: int = None,
-        group: str = None,
-    ):
+    def read(self, *, wait_group: str, device: list = None, pointID: int = None, group: str = None):
         """Read from a device / device group.
 
         Args:
@@ -294,12 +272,7 @@ class ScanStubs:
         metadata = {"pointID": pointID}
         self._exclude_nones(parameter)
         self._exclude_nones(metadata)
-        yield self._device_msg(
-            device=device,
-            action="read",
-            parameter=parameter,
-            metadata=metadata,
-        )
+        yield self._device_msg(device=device, action="read", parameter=parameter, metadata=metadata)
 
     def publish_data_as_read(self, *, device: str, data: dict, pointID: int):
         metadata = {"pointID": pointID}
@@ -319,10 +292,7 @@ class ScanStubs:
 
         """
         yield self._device_msg(
-            device=None,
-            action="trigger",
-            parameter={"group": group},
-            metadata={"pointID": pointID},
+            device=None, action="trigger", parameter={"group": group}, metadata={"pointID": pointID}
         )
 
     def set(self, *, device: str, value: float, wait_group: str, metadata=None):
@@ -337,10 +307,7 @@ class ScanStubs:
         yield self._device_msg(
             device=device,
             action="set",
-            parameter={
-                "value": value,
-                "wait_group": wait_group,
-            },
+            parameter={"value": value, "wait_group": wait_group},
             metadata=metadata,
         )
 
@@ -364,12 +331,7 @@ class ScanStubs:
             parameter (dict): parameters used for this rpc instructions.
 
         """
-        yield self._device_msg(
-            device=device,
-            action="rpc",
-            parameter=parameter,
-            metadata=metadata,
-        )
+        yield self._device_msg(device=device, action="rpc", parameter=parameter, metadata=metadata)
 
     def scan_report_instruction(self, instructions: dict):
         """Scan report instructions

@@ -113,13 +113,13 @@ def test_unpack_scan_args_valid_input():
                     device="samx",
                     action="set",
                     parameter={"value": 1, "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 0, "response": True},
+                    metadata={"DIID": 0, "response": True},
                 ),
                 messages.DeviceInstructionMessage(
                     device="samy",
                     action="set",
                     parameter={"value": 2, "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 1, "response": True},
+                    metadata={"DIID": 1, "response": True},
                 ),
             ],
         ),
@@ -134,19 +134,19 @@ def test_unpack_scan_args_valid_input():
                     device="samx",
                     action="set",
                     parameter={"value": 1, "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 0, "response": True},
+                    metadata={"DIID": 0, "response": True},
                 ),
                 messages.DeviceInstructionMessage(
                     device="samy",
                     action="set",
                     parameter={"value": 2, "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 1, "response": True},
+                    metadata={"DIID": 1, "response": True},
                 ),
                 messages.DeviceInstructionMessage(
                     device="samz",
                     action="set",
                     parameter={"value": 3, "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 2, "response": True},
+                    metadata={"DIID": 2, "response": True},
                 ),
             ],
         ),
@@ -159,7 +159,7 @@ def test_unpack_scan_args_valid_input():
                     device="samx",
                     action="set",
                     parameter={"value": 1, "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 0, "response": True},
+                    metadata={"DIID": 0, "response": True},
                 )
             ],
         ),
@@ -206,51 +206,31 @@ def test_scan_move(mv_msg, reference_msg_list):
                             "end": [1.0, 2.0],
                         }
                     },
-                    metadata={
-                        "readout_priority": "monitored",
-                        "DIID": 0,
-                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
-                    },
+                    metadata={"DIID": 0, "RID": "0bab7ee3-b384-4571-b...0fff984c05"},
                 ),
                 messages.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={"value": 1.0, "wait_group": "scan_motor"},
-                    metadata={
-                        "readout_priority": "monitored",
-                        "DIID": 1,
-                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
-                    },
+                    metadata={"DIID": 1, "RID": "0bab7ee3-b384-4571-b...0fff984c05"},
                 ),
                 messages.DeviceInstructionMessage(
                     device="samy",
                     action="set",
                     parameter={"value": 2.0, "wait_group": "scan_motor"},
-                    metadata={
-                        "readout_priority": "monitored",
-                        "DIID": 2,
-                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
-                    },
+                    metadata={"DIID": 2, "RID": "0bab7ee3-b384-4571-b...0fff984c05"},
                 ),
                 messages.DeviceInstructionMessage(
                     device="samx",
                     action="wait",
                     parameter={"type": "move", "wait_group": "scan_motor"},
-                    metadata={
-                        "readout_priority": "monitored",
-                        "DIID": 3,
-                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
-                    },
+                    metadata={"DIID": 3, "RID": "0bab7ee3-b384-4571-b...0fff984c05"},
                 ),
                 messages.DeviceInstructionMessage(
                     device="samy",
                     action="wait",
                     parameter={"type": "move", "wait_group": "scan_motor"},
-                    metadata={
-                        "readout_priority": "monitored",
-                        "DIID": 4,
-                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
-                    },
+                    metadata={"DIID": 4, "RID": "0bab7ee3-b384-4571-b...0fff984c05"},
                 ),
             ],
         ),
@@ -273,71 +253,43 @@ def test_scan_move(mv_msg, reference_msg_list):
                             "end": [1.0, 2.0, 3.0],
                         }
                     },
-                    metadata={
-                        "readout_priority": "monitored",
-                        "DIID": 0,
-                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
-                    },
+                    metadata={"DIID": 0, "RID": "0bab7ee3-b384-4571-b...0fff984c05"},
                 ),
                 messages.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={"value": 1.0, "wait_group": "scan_motor"},
-                    metadata={
-                        "readout_priority": "monitored",
-                        "DIID": 1,
-                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
-                    },
+                    metadata={"DIID": 1, "RID": "0bab7ee3-b384-4571-b...0fff984c05"},
                 ),
                 messages.DeviceInstructionMessage(
                     device="samy",
                     action="set",
                     parameter={"value": 2.0, "wait_group": "scan_motor"},
-                    metadata={
-                        "readout_priority": "monitored",
-                        "DIID": 2,
-                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
-                    },
+                    metadata={"DIID": 2, "RID": "0bab7ee3-b384-4571-b...0fff984c05"},
                 ),
                 messages.DeviceInstructionMessage(
                     device="samz",
                     action="set",
                     parameter={"value": 3.0, "wait_group": "scan_motor"},
-                    metadata={
-                        "readout_priority": "monitored",
-                        "DIID": 3,
-                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
-                    },
+                    metadata={"DIID": 3, "RID": "0bab7ee3-b384-4571-b...0fff984c05"},
                 ),
                 messages.DeviceInstructionMessage(
                     device="samx",
                     action="wait",
                     parameter={"type": "move", "wait_group": "scan_motor"},
-                    metadata={
-                        "readout_priority": "monitored",
-                        "DIID": 4,
-                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
-                    },
+                    metadata={"DIID": 4, "RID": "0bab7ee3-b384-4571-b...0fff984c05"},
                 ),
                 messages.DeviceInstructionMessage(
                     device="samy",
                     action="wait",
                     parameter={"type": "move", "wait_group": "scan_motor"},
-                    metadata={
-                        "readout_priority": "monitored",
-                        "DIID": 5,
-                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
-                    },
+                    metadata={"DIID": 5, "RID": "0bab7ee3-b384-4571-b...0fff984c05"},
                 ),
                 messages.DeviceInstructionMessage(
                     device="samz",
                     action="wait",
                     parameter={"type": "move", "wait_group": "scan_motor"},
-                    metadata={
-                        "readout_priority": "monitored",
-                        "DIID": 6,
-                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
-                    },
+                    metadata={"DIID": 6, "RID": "0bab7ee3-b384-4571-b...0fff984c05"},
                 ),
             ],
         ),
@@ -360,31 +312,19 @@ def test_scan_move(mv_msg, reference_msg_list):
                             "end": [1.0],
                         }
                     },
-                    metadata={
-                        "readout_priority": "monitored",
-                        "DIID": 0,
-                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
-                    },
+                    metadata={"DIID": 0, "RID": "0bab7ee3-b384-4571-b...0fff984c05"},
                 ),
                 messages.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={"value": 1.0, "wait_group": "scan_motor"},
-                    metadata={
-                        "readout_priority": "monitored",
-                        "DIID": 1,
-                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
-                    },
+                    metadata={"DIID": 1, "RID": "0bab7ee3-b384-4571-b...0fff984c05"},
                 ),
                 messages.DeviceInstructionMessage(
                     device="samx",
                     action="wait",
                     parameter={"type": "move", "wait_group": "scan_motor"},
-                    metadata={
-                        "readout_priority": "monitored",
-                        "DIID": 2,
-                        "RID": "0bab7ee3-b384-4571-b...0fff984c05",
-                    },
+                    metadata={"DIID": 2, "RID": "0bab7ee3-b384-4571-b...0fff984c05"},
                 ),
             ],
         ),
@@ -427,13 +367,13 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     device=["samx"],
                     action="read",
                     parameter={"wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 3},
+                    metadata={"DIID": 3},
                 ),
                 messages.DeviceInstructionMessage(
                     device=["samx"],
                     action="wait",
                     parameter={"type": "read", "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 4},
+                    metadata={"DIID": 4},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
@@ -451,19 +391,13 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                         "scan_name": "grid_scan",
                         "scan_type": "step",
                     },
-                    metadata={"readout_priority": "monitored", "DIID": 0},
+                    metadata={"DIID": 0},
                 ),
                 messages.DeviceInstructionMessage(
-                    device=None,
-                    action="stage",
-                    parameter={},
-                    metadata={"readout_priority": "monitored", "DIID": 1},
+                    device=None, action="stage", parameter={}, metadata={"DIID": 1}
                 ),
                 messages.DeviceInstructionMessage(
-                    device=None,
-                    action="baseline_reading",
-                    parameter={},
-                    metadata={"readout_priority": "baseline", "DIID": 1},
+                    device=None, action="baseline_reading", parameter={}, metadata={"DIID": 1}
                 ),
                 messages.DeviceInstructionMessage(
                     **{
@@ -471,7 +405,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                         "action": "set",
                         "parameter": {"value": -5.0, "wait_group": "scan_motor"},
                     },
-                    metadata={"readout_priority": "monitored", "DIID": 8},
+                    metadata={"DIID": 8},
                 ),
                 messages.DeviceInstructionMessage(
                     **{
@@ -483,41 +417,40 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                             "wait_group": "scan_motor",
                         },
                     },
-                    metadata={"readout_priority": "monitored", "DIID": 9},
+                    metadata={"DIID": 9},
                 ),
                 messages.DeviceInstructionMessage(
-                    **{"device": None, "action": "pre_scan", "parameter": {}},
-                    metadata={"readout_priority": "monitored", "DIID": 7},
+                    **{"device": None, "action": "pre_scan", "parameter": {}}, metadata={"DIID": 7}
                 ),
                 messages.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={"value": -5.0, "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 1},
+                    metadata={"DIID": 1},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 2},
+                    metadata={"DIID": 2},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
-                    metadata={"pointID": 0, "readout_priority": "monitored", "DIID": 3},
+                    metadata={"pointID": 0, "DIID": 3},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "trigger", "group": "trigger", "time": 0},
-                    metadata={"readout_priority": "monitored", "DIID": 4},
+                    metadata={"DIID": 4},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "readout_primary"},
-                    metadata={"pointID": 0, "readout_priority": "monitored", "DIID": 5},
+                    metadata={"pointID": 0, "DIID": 5},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
@@ -527,43 +460,43 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                         "group": "scan_motor",
                         "wait_group": "readout_primary",
                     },
-                    metadata={"readout_priority": "monitored", "DIID": 6},
+                    metadata={"DIID": 6},
                 ),
                 messages.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={"value": 0.0, "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 7},
+                    metadata={"DIID": 7},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 8},
+                    metadata={"DIID": 8},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
-                    metadata={"readout_priority": "monitored", "DIID": 9},
+                    metadata={"DIID": 9},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
-                    metadata={"pointID": 1, "readout_priority": "monitored", "DIID": 10},
+                    metadata={"pointID": 1, "DIID": 10},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "trigger", "group": "trigger", "time": 0},
-                    metadata={"readout_priority": "monitored", "DIID": 11},
+                    metadata={"DIID": 11},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "readout_primary"},
-                    metadata={"pointID": 1, "readout_priority": "monitored", "DIID": 12},
+                    metadata={"pointID": 1, "DIID": 12},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
@@ -573,43 +506,43 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                         "group": "scan_motor",
                         "wait_group": "readout_primary",
                     },
-                    metadata={"readout_priority": "monitored", "DIID": 13},
+                    metadata={"DIID": 13},
                 ),
                 messages.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={"value": 5.0, "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 14},
+                    metadata={"DIID": 14},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 15},
+                    metadata={"DIID": 15},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
-                    metadata={"readout_priority": "monitored", "DIID": 16},
+                    metadata={"DIID": 16},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
-                    metadata={"pointID": 2, "readout_priority": "monitored", "DIID": 17},
+                    metadata={"pointID": 2, "DIID": 17},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "trigger", "group": "trigger", "time": 0},
-                    metadata={"readout_priority": "monitored", "DIID": 18},
+                    metadata={"DIID": 18},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "readout_primary"},
-                    metadata={"pointID": 2, "readout_priority": "monitored", "DIID": 19},
+                    metadata={"pointID": 2, "DIID": 19},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
@@ -619,41 +552,34 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                         "group": "scan_motor",
                         "wait_group": "readout_primary",
                     },
-                    metadata={"readout_priority": "monitored", "DIID": 20},
+                    metadata={"DIID": 20},
                 ),
                 messages.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={"value": 0.0, "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 21},
+                    metadata={"DIID": 21},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 22},
+                    metadata={"DIID": 22},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
-                    metadata={"readout_priority": "monitored", "DIID": 23},
+                    metadata={"DIID": 23},
                 ),
                 messages.DeviceInstructionMessage(
-                    **{"device": None, "action": "complete", "parameter": {}},
-                    metadata={"readout_priority": "monitored", "DIID": 31},
+                    **{"device": None, "action": "complete", "parameter": {}}, metadata={"DIID": 31}
                 ),
                 messages.DeviceInstructionMessage(
-                    device=None,
-                    action="unstage",
-                    parameter={},
-                    metadata={"readout_priority": "monitored", "DIID": 24},
+                    device=None, action="unstage", parameter={}, metadata={"DIID": 24}
                 ),
                 messages.DeviceInstructionMessage(
-                    device=None,
-                    action="close_scan",
-                    parameter={},
-                    metadata={"readout_priority": "monitored", "DIID": 25},
+                    device=None, action="close_scan", parameter={}, metadata={"DIID": 25}
                 ),
             ],
         )
@@ -765,13 +691,13 @@ def test_fermat_scan(scan_msg, reference_scan_list):
                     device=["samx"],
                     action="read",
                     parameter={"wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 3},
+                    metadata={"DIID": 3},
                 ),
                 messages.DeviceInstructionMessage(
                     device=["samx"],
                     action="wait",
                     parameter={"type": "read", "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 4},
+                    metadata={"DIID": 4},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
@@ -789,19 +715,13 @@ def test_fermat_scan(scan_msg, reference_scan_list):
                         "scan_name": "cont_line_scan",
                         "scan_type": "step",
                     },
-                    metadata={"readout_priority": "monitored", "DIID": 0},
+                    metadata={"DIID": 0},
                 ),
                 messages.DeviceInstructionMessage(
-                    device=None,
-                    action="stage",
-                    parameter={},
-                    metadata={"readout_priority": "monitored", "DIID": 1},
+                    device=None, action="stage", parameter={}, metadata={"DIID": 1}
                 ),
                 messages.DeviceInstructionMessage(
-                    device=None,
-                    action="baseline_reading",
-                    parameter={},
-                    metadata={"readout_priority": "baseline", "DIID": 1},
+                    device=None, action="baseline_reading", parameter={}, metadata={"DIID": 1}
                 ),
                 messages.DeviceInstructionMessage(
                     **{
@@ -809,7 +729,7 @@ def test_fermat_scan(scan_msg, reference_scan_list):
                         "action": "set",
                         "parameter": {"value": -5.0, "wait_group": "scan_motor"},
                     },
-                    metadata={"readout_priority": "monitored", "DIID": 5},
+                    metadata={"DIID": 5},
                 ),
                 messages.DeviceInstructionMessage(
                     **{
@@ -821,99 +741,91 @@ def test_fermat_scan(scan_msg, reference_scan_list):
                             "wait_group": "scan_motor",
                         },
                     },
-                    metadata={"readout_priority": "monitored", "DIID": 6},
+                    metadata={"DIID": 6},
                 ),
                 messages.DeviceInstructionMessage(
-                    **{"device": None, "action": "pre_scan", "parameter": {}},
-                    metadata={"readout_priority": "monitored", "DIID": 7},
+                    **{"device": None, "action": "pre_scan", "parameter": {}}, metadata={"DIID": 7}
                 ),
                 messages.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={"value": -105.0, "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 1},
+                    metadata={"DIID": 1},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 2},
+                    metadata={"DIID": 2},
                 ),
                 messages.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={"value": 5.0, "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 7},
+                    metadata={"DIID": 7},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
-                    metadata={"pointID": 0, "readout_priority": "monitored", "DIID": 8},
+                    metadata={"pointID": 0, "DIID": 8},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "primary"},
-                    metadata={"pointID": 0, "readout_priority": "monitored", "DIID": 9},
+                    metadata={"pointID": 0, "DIID": 9},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
-                    metadata={"pointID": 1, "readout_priority": "monitored", "DIID": 10},
+                    metadata={"pointID": 1, "DIID": 10},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "primary"},
-                    metadata={"pointID": 1, "readout_priority": "monitored", "DIID": 11},
+                    metadata={"pointID": 1, "DIID": 11},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
-                    metadata={"pointID": 2, "readout_priority": "monitored", "DIID": 12},
+                    metadata={"pointID": 2, "DIID": 12},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "primary"},
-                    metadata={"pointID": 2, "readout_priority": "monitored", "DIID": 13},
+                    metadata={"pointID": 2, "DIID": 13},
                 ),
                 messages.DeviceInstructionMessage(
                     device="samx",
                     action="set",
                     parameter={"value": 0.0, "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 14},
+                    metadata={"DIID": 14},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 15},
+                    metadata={"DIID": 15},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
-                    metadata={"readout_priority": "monitored", "DIID": 16},
+                    metadata={"DIID": 16},
                 ),
                 messages.DeviceInstructionMessage(
-                    **{"device": None, "action": "complete", "parameter": {}},
-                    metadata={"readout_priority": "monitored", "DIID": 31},
+                    **{"device": None, "action": "complete", "parameter": {}}, metadata={"DIID": 31}
                 ),
                 messages.DeviceInstructionMessage(
-                    device=None,
-                    action="unstage",
-                    parameter={},
-                    metadata={"readout_priority": "monitored", "DIID": 17},
+                    device=None, action="unstage", parameter={}, metadata={"DIID": 17}
                 ),
                 messages.DeviceInstructionMessage(
-                    device=None,
-                    action="close_scan",
-                    parameter={},
-                    metadata={"readout_priority": "monitored", "DIID": 18},
+                    device=None, action="close_scan", parameter={}, metadata={"DIID": 18}
                 ),
             ],
         )
@@ -968,10 +880,7 @@ def test_device_rpc():
     scan_instructions = list(scan.run())
     assert scan_instructions == [
         messages.DeviceInstructionMessage(
-            device="samx",
-            action="rpc",
-            parameter=parameter,
-            metadata={"readout_priority": "monitored", "DIID": 0},
+            device="samx", action="rpc", parameter=parameter, metadata={"DIID": 0}
         )
     ]
 
@@ -1002,65 +911,49 @@ def test_device_rpc():
                         "scan_name": "acquire",
                         "scan_type": "step",
                     },
-                    metadata={"readout_priority": "monitored", "DIID": 0},
+                    metadata={"DIID": 0},
                 ),
                 messages.DeviceInstructionMessage(
-                    device=None,
-                    action="stage",
-                    parameter={},
-                    metadata={"readout_priority": "monitored", "DIID": 1},
+                    device=None, action="stage", parameter={}, metadata={"DIID": 1}
                 ),
                 messages.DeviceInstructionMessage(
-                    device=None,
-                    action="baseline_reading",
-                    parameter={},
-                    metadata={"readout_priority": "baseline", "DIID": 2},
+                    device=None, action="baseline_reading", parameter={}, metadata={"DIID": 2}
                 ),
                 messages.DeviceInstructionMessage(
-                    device=None,
-                    action="pre_scan",
-                    parameter={},
-                    metadata={"readout_priority": "monitored", "DIID": 3},
+                    device=None, action="pre_scan", parameter={}, metadata={"DIID": 3}
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
-                    metadata={"pointID": 0, "readout_priority": "monitored", "DIID": 3},
+                    metadata={"pointID": 0, "DIID": 3},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "trigger", "group": "trigger", "time": 1},
-                    metadata={"readout_priority": "monitored", "DIID": 4},
+                    metadata={"DIID": 4},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "readout_primary"},
-                    metadata={"pointID": 0, "readout_priority": "monitored", "DIID": 5},
+                    metadata={"pointID": 0, "DIID": 5},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
-                    metadata={"readout_priority": "monitored", "DIID": 6},
+                    metadata={"DIID": 6},
                 ),
                 messages.DeviceInstructionMessage(
-                    **{"device": None, "action": "complete", "parameter": {}},
-                    metadata={"readout_priority": "monitored", "DIID": 31},
+                    **{"device": None, "action": "complete", "parameter": {}}, metadata={"DIID": 31}
                 ),
                 messages.DeviceInstructionMessage(
-                    device=None,
-                    action="unstage",
-                    parameter={},
-                    metadata={"readout_priority": "monitored", "DIID": 17},
+                    device=None, action="unstage", parameter={}, metadata={"DIID": 17}
                 ),
                 messages.DeviceInstructionMessage(
-                    device=None,
-                    action="close_scan",
-                    parameter={},
-                    metadata={"readout_priority": "monitored", "DIID": 18},
+                    device=None, action="close_scan", parameter={}, metadata={"DIID": 18}
                 ),
             ],
         )
@@ -1406,13 +1299,13 @@ def test_scan_base_set_position_offset():
                     device=["rtx", "rty"],
                     action="read",
                     parameter={"wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 0},
+                    metadata={"DIID": 0},
                 ),
                 messages.DeviceInstructionMessage(
                     device=["rtx", "rty"],
                     action="wait",
                     parameter={"type": "read", "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 1},
+                    metadata={"DIID": 1},
                 ),
                 messages.DeviceInstructionMessage(
                     device="rtx",
@@ -1424,7 +1317,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"readout_priority": "monitored", "DIID": 2, "response": True},
+                    metadata={"DIID": 2, "response": True},
                 ),
                 messages.DeviceInstructionMessage(
                     device="lsamrot",
@@ -1436,7 +1329,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"readout_priority": "monitored", "DIID": 2, "response": True},
+                    metadata={"DIID": 2, "response": True},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
@@ -1449,19 +1342,19 @@ def test_scan_base_set_position_offset():
                             "end": [10],
                         }
                     },
-                    metadata={"readout_priority": "monitored", "DIID": 0},
+                    metadata={"DIID": 0},
                 ),
                 messages.DeviceInstructionMessage(
                     device="lsamrot",
                     action="set",
                     parameter={"value": 10, "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 3},
+                    metadata={"DIID": 3},
                 ),
                 messages.DeviceInstructionMessage(
                     device=["lsamrot"],
                     action="wait",
                     parameter={"type": "move", "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 4},
+                    metadata={"DIID": 4},
                 ),
                 messages.DeviceInstructionMessage(
                     device="rtx",
@@ -1473,7 +1366,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"readout_priority": "monitored", "DIID": 5, "response": True},
+                    metadata={"DIID": 5, "response": True},
                 ),
                 messages.DeviceInstructionMessage(
                     device="rtx",
@@ -1485,7 +1378,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"readout_priority": "monitored", "DIID": 6, "response": True},
+                    metadata={"DIID": 6, "response": True},
                 ),
                 messages.DeviceInstructionMessage(
                     device="rty",
@@ -1497,7 +1390,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"readout_priority": "monitored", "DIID": 7, "response": True},
+                    metadata={"DIID": 7, "response": True},
                 ),
                 messages.DeviceInstructionMessage(
                     device="lsamx",
@@ -1509,7 +1402,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"readout_priority": "monitored", "DIID": 8, "response": True},
+                    metadata={"DIID": 8, "response": True},
                 ),
                 messages.DeviceInstructionMessage(
                     device="lsamy",
@@ -1521,7 +1414,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"readout_priority": "monitored", "DIID": 9, "response": True},
+                    metadata={"DIID": 9, "response": True},
                 ),
                 messages.DeviceInstructionMessage(
                     device="rtx",
@@ -1533,7 +1426,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"readout_priority": "monitored", "DIID": 10, "response": True},
+                    metadata={"DIID": 10, "response": True},
                 ),
                 messages.DeviceInstructionMessage(
                     device="rty",
@@ -1545,7 +1438,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"readout_priority": "monitored", "DIID": 11, "response": True},
+                    metadata={"DIID": 11, "response": True},
                 ),
                 messages.DeviceInstructionMessage(
                     device="rtx",
@@ -1557,7 +1450,7 @@ def test_scan_base_set_position_offset():
                         "args": (),
                         "kwargs": {},
                     },
-                    metadata={"readout_priority": "monitored", "DIID": 12, "response": True},
+                    metadata={"DIID": 12, "response": True},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
@@ -1578,55 +1471,49 @@ def test_scan_base_set_position_offset():
                         "scan_name": "lamni_fermat_scan",
                         "scan_type": "step",
                     },
-                    metadata={"readout_priority": "monitored", "DIID": 13},
+                    metadata={"DIID": 13},
                 ),
                 messages.DeviceInstructionMessage(
-                    device=None,
-                    action="stage",
-                    parameter={},
-                    metadata={"readout_priority": "monitored", "DIID": 14},
+                    device=None, action="stage", parameter={}, metadata={"DIID": 14}
                 ),
                 messages.DeviceInstructionMessage(
-                    device=None,
-                    action="baseline_reading",
-                    parameter={},
-                    metadata={"readout_priority": "baseline", "DIID": 15},
+                    device=None, action="baseline_reading", parameter={}, metadata={"DIID": 15}
                 ),
                 messages.DeviceInstructionMessage(
                     device="rtx",
                     action="set",
                     parameter={"value": 1.3681828686580249, "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 17},
+                    metadata={"DIID": 17},
                 ),
                 messages.DeviceInstructionMessage(
                     device="rty",
                     action="set",
                     parameter={"value": 2.1508313829565298, "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 18},
+                    metadata={"DIID": 18},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 19},
+                    metadata={"DIID": 19},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
-                    metadata={"readout_priority": "monitored", "DIID": 20, "pointID": 0},
+                    metadata={"DIID": 20, "pointID": 0},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "trigger", "group": "trigger", "time": 0.1},
-                    metadata={"readout_priority": "monitored", "DIID": 21},
+                    metadata={"DIID": 21},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "readout_primary"},
-                    metadata={"readout_priority": "monitored", "DIID": 22, "pointID": 0},
+                    metadata={"DIID": 22, "pointID": 0},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
@@ -1636,49 +1523,49 @@ def test_scan_base_set_position_offset():
                         "group": "scan_motor",
                         "wait_group": "readout_primary",
                     },
-                    metadata={"readout_priority": "monitored", "DIID": 23},
+                    metadata={"DIID": 23},
                 ),
                 messages.DeviceInstructionMessage(
                     device="rtx",
                     action="set",
                     parameter={"value": -0.7700589354581364, "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 24},
+                    metadata={"DIID": 24},
                 ),
                 messages.DeviceInstructionMessage(
                     device="rty",
                     action="set",
                     parameter={"value": -0.8406005210092851, "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 25},
+                    metadata={"DIID": 25},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 26},
+                    metadata={"DIID": 26},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
-                    metadata={"readout_priority": "monitored", "DIID": 27},
+                    metadata={"DIID": 27},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
-                    metadata={"readout_priority": "monitored", "DIID": 28, "pointID": 1},
+                    metadata={"DIID": 28, "pointID": 1},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "trigger", "group": "trigger", "time": 0.1},
-                    metadata={"readout_priority": "monitored", "DIID": 29},
+                    metadata={"DIID": 29},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "readout_primary"},
-                    metadata={"readout_priority": "monitored", "DIID": 30, "pointID": 1},
+                    metadata={"DIID": 30, "pointID": 1},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
@@ -1688,29 +1575,22 @@ def test_scan_base_set_position_offset():
                         "group": "scan_motor",
                         "wait_group": "readout_primary",
                     },
-                    metadata={"readout_priority": "monitored", "DIID": 31},
+                    metadata={"DIID": 31},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
-                    metadata={"readout_priority": "monitored", "DIID": 16},
+                    metadata={"DIID": 16},
                 ),
                 messages.DeviceInstructionMessage(
-                    **{"device": None, "action": "complete", "parameter": {}},
-                    metadata={"readout_priority": "monitored", "DIID": 31},
+                    **{"device": None, "action": "complete", "parameter": {}}, metadata={"DIID": 31}
                 ),
                 messages.DeviceInstructionMessage(
-                    device=None,
-                    action="unstage",
-                    parameter={},
-                    metadata={"readout_priority": "monitored", "DIID": 17},
+                    device=None, action="unstage", parameter={}, metadata={"DIID": 17}
                 ),
                 messages.DeviceInstructionMessage(
-                    device=None,
-                    action="close_scan",
-                    parameter={},
-                    metadata={"readout_priority": "monitored", "DIID": 18},
+                    device=None, action="close_scan", parameter={}, metadata={"DIID": 18}
                 ),
             ],
         )
@@ -1882,7 +1762,7 @@ def test_round_scan_fly_sim_scan_core(in_args, reference_positions):
             "configure": {"num_pos": None, "positions": reference_positions, "exp_time": 0},
             "wait_group": "kickoff",
         },
-        metadata={"readout_priority": "monitored", "DIID": 0},
+        metadata={"DIID": 0},
     )
 
 
@@ -1988,13 +1868,13 @@ def test_list_scan_raises_for_different_lengths():
                     device=[],
                     action="read",
                     parameter={"wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 0},
+                    metadata={"DIID": 0},
                 ),
                 messages.DeviceInstructionMessage(
                     device=[],
                     action="wait",
                     parameter={"type": "read", "wait_group": "scan_motor"},
-                    metadata={"readout_priority": "monitored", "DIID": 1},
+                    metadata={"DIID": 1},
                 ),
                 None,
                 None,
@@ -2014,129 +1894,115 @@ def test_list_scan_raises_for_different_lengths():
                         "scan_name": "time_scan",
                         "scan_type": "step",
                     },
-                    metadata={"readout_priority": "monitored", "DIID": 2},
+                    metadata={"DIID": 2},
                 ),
                 messages.DeviceInstructionMessage(
-                    device=None,
-                    action="stage",
-                    parameter={},
-                    metadata={"readout_priority": "monitored", "DIID": 3},
+                    device=None, action="stage", parameter={}, metadata={"DIID": 3}
                 ),
                 messages.DeviceInstructionMessage(
-                    device=None,
-                    action="baseline_reading",
-                    parameter={},
-                    metadata={"readout_priority": "baseline", "DIID": 4},
+                    device=None, action="baseline_reading", parameter={}, metadata={"DIID": 4}
                 ),
                 messages.DeviceInstructionMessage(
-                    **{"device": None, "action": "pre_scan", "parameter": {}},
-                    metadata={"readout_priority": "monitored", "DIID": 5},
+                    **{"device": None, "action": "pre_scan", "parameter": {}}, metadata={"DIID": 5}
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
-                    metadata={"readout_priority": "monitored", "DIID": 6, "pointID": 0},
+                    metadata={"DIID": 6, "pointID": 0},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "trigger", "time": 0.1, "group": "trigger"},
-                    metadata={"readout_priority": "monitored", "DIID": 7},
+                    metadata={"DIID": 7},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "readout_primary"},
-                    metadata={"readout_priority": "monitored", "DIID": 8, "pointID": 0},
+                    metadata={"DIID": 8, "pointID": 0},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "trigger", "time": 0.9, "group": "trigger"},
-                    metadata={"readout_priority": "monitored", "DIID": 9},
+                    metadata={"DIID": 9},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
-                    metadata={"readout_priority": "monitored", "DIID": 10},
+                    metadata={"DIID": 10},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
-                    metadata={"readout_priority": "monitored", "DIID": 11, "pointID": 1},
+                    metadata={"DIID": 11, "pointID": 1},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "trigger", "time": 0.1, "group": "trigger"},
-                    metadata={"readout_priority": "monitored", "DIID": 12},
+                    metadata={"DIID": 12},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "readout_primary"},
-                    metadata={"readout_priority": "monitored", "DIID": 13, "pointID": 1},
+                    metadata={"DIID": 13, "pointID": 1},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "trigger", "time": 0.9, "group": "trigger"},
-                    metadata={"readout_priority": "monitored", "DIID": 14},
+                    metadata={"DIID": 14},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
-                    metadata={"readout_priority": "monitored", "DIID": 15},
+                    metadata={"DIID": 15},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
-                    metadata={"readout_priority": "monitored", "DIID": 16, "pointID": 2},
+                    metadata={"DIID": 16, "pointID": 2},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "trigger", "time": 0.1, "group": "trigger"},
-                    metadata={"readout_priority": "monitored", "DIID": 17},
+                    metadata={"DIID": 17},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "readout_primary"},
-                    metadata={"readout_priority": "monitored", "DIID": 18, "pointID": 2},
+                    metadata={"DIID": 18, "pointID": 2},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "trigger", "time": 0.9, "group": "trigger"},
-                    metadata={"readout_priority": "monitored", "DIID": 19},
+                    metadata={"DIID": 19},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
-                    metadata={"readout_priority": "monitored", "DIID": 20},
+                    metadata={"DIID": 20},
                 ),
                 messages.DeviceInstructionMessage(
-                    **{"device": None, "action": "complete", "parameter": {}},
-                    metadata={"readout_priority": "monitored", "DIID": 21},
+                    **{"device": None, "action": "complete", "parameter": {}}, metadata={"DIID": 21}
                 ),
                 messages.DeviceInstructionMessage(
-                    device=None,
-                    action="unstage",
-                    parameter={},
-                    metadata={"readout_priority": "monitored", "DIID": 22},
+                    device=None, action="unstage", parameter={}, metadata={"DIID": 22}
                 ),
                 messages.DeviceInstructionMessage(
-                    device=None,
-                    action="close_scan",
-                    parameter={},
-                    metadata={"readout_priority": "monitored", "DIID": 23},
+                    device=None, action="close_scan", parameter={}, metadata={"DIID": 23}
                 ),
             ],
         )
@@ -2183,32 +2049,29 @@ def test_time_scan(scan_msg, reference_scan_list):
                         "scan_name": "otf_scan",
                         "scan_type": "fly",
                     },
-                    metadata={"readout_priority": "monitored", "DIID": 0, "RID": "1234"},
+                    metadata={"DIID": 0, "RID": "1234"},
                 ),
                 messages.DeviceInstructionMessage(
-                    device=None,
-                    action="stage",
-                    parameter={},
-                    metadata={"readout_priority": "monitored", "DIID": 1, "RID": "1234"},
+                    device=None, action="stage", parameter={}, metadata={"DIID": 1, "RID": "1234"}
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="baseline_reading",
                     parameter={},
-                    metadata={"readout_priority": "baseline", "DIID": 2, "RID": "1234"},
+                    metadata={"DIID": 2, "RID": "1234"},
                 ),
                 None,
                 messages.DeviceInstructionMessage(
                     device="mono",
                     action="set",
                     parameter={"value": 700, "wait_group": "flyer"},
-                    metadata={"readout_priority": "monitored", "DIID": 3, "RID": "1234"},
+                    metadata={"DIID": 3, "RID": "1234"},
                 ),
                 messages.DeviceInstructionMessage(
                     device=["mono"],
                     action="wait",
                     parameter={"type": "move", "wait_group": "flyer"},
-                    metadata={"readout_priority": "monitored", "DIID": 4, "RID": "1234"},
+                    metadata={"DIID": 4, "RID": "1234"},
                 ),
                 messages.DeviceInstructionMessage(
                     device="otf",
@@ -2217,53 +2080,53 @@ def test_time_scan(scan_msg, reference_scan_list):
                         "configure": {"e1": 700, "e2": 740, "time": 4},
                         "wait_group": "kickoff",
                     },
-                    metadata={"readout_priority": "monitored", "DIID": 5, "RID": "1234"},
+                    metadata={"DIID": 5, "RID": "1234"},
                 ),
                 messages.DeviceInstructionMessage(
                     device=["otf"],
                     action="wait",
                     parameter={"type": "move", "wait_group": "kickoff"},
-                    metadata={"readout_priority": "monitored", "DIID": 6, "RID": "1234"},
+                    metadata={"DIID": 6, "RID": "1234"},
                 ),
                 messages.DeviceInstructionMessage(
                     device="otf",
                     action="complete",
                     parameter={},
-                    metadata={"readout_priority": "monitored", "DIID": 7, "RID": "1234"},
+                    metadata={"DIID": 7, "RID": "1234"},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "readout_primary"},
-                    metadata={"readout_priority": "monitored", "DIID": 8, "RID": "1234"},
+                    metadata={"DIID": 8, "RID": "1234"},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
-                    metadata={"readout_priority": "monitored", "DIID": 9, "RID": "1234"},
+                    metadata={"DIID": 9, "RID": "1234"},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="wait",
                     parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
-                    metadata={"readout_priority": "monitored", "DIID": 10, "RID": "1234"},
+                    metadata={"DIID": 10, "RID": "1234"},
                 ),
                 messages.DeviceInstructionMessage(
                     **{"device": None, "action": "complete", "parameter": {}},
-                    metadata={"readout_priority": "monitored", "DIID": 11, "RID": "1234"},
+                    metadata={"DIID": 11, "RID": "1234"},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="unstage",
                     parameter={},
-                    metadata={"readout_priority": "monitored", "DIID": 12, "RID": "1234"},
+                    metadata={"DIID": 12, "RID": "1234"},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="close_scan",
                     parameter={},
-                    metadata={"readout_priority": "monitored", "DIID": 13, "RID": "1234"},
+                    metadata={"DIID": 13, "RID": "1234"},
                 ),
             ],
         )

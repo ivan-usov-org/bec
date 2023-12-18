@@ -68,7 +68,7 @@ def test_device_read_callback():
     msg = MessageMock()
     dev_msg = messages.DeviceMessage(
         signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-        metadata={"scanID": "laksjd", "readout_priority": "monitored"},
+        metadata={"scanID": "laksjd"},
     )
     msg.value = dev_msg.dumps()
     msg.topic = MessageEndpoints.device_read("samx").encode()
@@ -167,8 +167,7 @@ def test_get_scan_status_history(msgs):
 
 def test_add_device_to_storage_returns_without_scanID():
     msg = messages.DeviceMessage(
-        signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-        metadata={"readout_priority": "monitored"},
+        signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}}, metadata={}
     )
     sb = load_ScanBundlerMock()
     sb._add_device_to_storage([msg], "samx", timeout_time=1)
@@ -176,9 +175,7 @@ def test_add_device_to_storage_returns_without_scanID():
 
 
 def test_add_device_to_storage_returns_without_signal():
-    msg = messages.DeviceMessage(
-        signals={}, metadata={"scanID": "scanID", "readout_priority": "monitored"}
-    )
+    msg = messages.DeviceMessage(signals={}, metadata={"scanID": "scanID"})
     sb = load_ScanBundlerMock()
     sb._add_device_to_storage([msg], "samx", timeout_time=1)
     assert "samx" not in sb.device_storage
@@ -187,7 +184,7 @@ def test_add_device_to_storage_returns_without_signal():
 def test_add_device_to_storage_returns_on_timeout():
     msg = messages.DeviceMessage(
         signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-        metadata={"scanID": "scanID", "readout_priority": "monitored"},
+        metadata={"scanID": "scanID"},
     )
     sb = load_ScanBundlerMock()
     sb._add_device_to_storage([msg], "samx", timeout_time=1)
@@ -198,7 +195,7 @@ def test_add_device_to_storage_returns_on_timeout():
 def test_add_device_to_storage_returns_without_scan_info(scan_status):
     msg = messages.DeviceMessage(
         signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-        metadata={"scanID": "scanID", "readout_priority": "monitored"},
+        metadata={"scanID": "scanID"},
     )
     sb = load_ScanBundlerMock()
     sb.sync_storage["scanID"] = {"info": {}}
@@ -213,21 +210,21 @@ def test_add_device_to_storage_returns_without_scan_info(scan_status):
         (
             messages.DeviceMessage(
                 signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-                metadata={"scanID": "scanID", "readout_priority": "monitored"},
+                metadata={"scanID": "scanID"},
             ),
             "step",
         ),
         (
             messages.DeviceMessage(
                 signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-                metadata={"scanID": "scanID", "readout_priority": "monitored"},
+                metadata={"scanID": "scanID"},
             ),
             "fly",
         ),
         (
             messages.DeviceMessage(
                 signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-                metadata={"scanID": "scanID", "readout_priority": "monitored"},
+                metadata={"scanID": "scanID"},
             ),
             "wrong",
         ),
@@ -238,6 +235,7 @@ def test_add_device_to_storage_primary(msg, scan_type):
     sb.sync_storage["scanID"] = {"info": {"scan_type": scan_type}}
     sb.sync_storage["scanID"]["status"] = "open"
     sb.storage_initialized.add("scanID")
+    sb.monitored_devices["scanID"] = {"devices": [sb.device_manager.devices.samx], "pointID": {}}
     if scan_type == "step":
         with mock.patch.object(sb, "_step_scan_update") as step_update:
             sb._add_device_to_storage([msg], "samx", timeout_time=1)
@@ -262,7 +260,7 @@ def test_add_device_to_storage_primary(msg, scan_type):
         (
             messages.DeviceMessage(
                 signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-                metadata={"scanID": "scanID", "readout_priority": "baseline"},
+                metadata={"scanID": "scanID"},
             ),
             "step",
         )
@@ -273,9 +271,14 @@ def test_add_device_to_storage_baseline(msg, scan_type):
     sb.sync_storage["scanID"] = {"info": {"scan_type": scan_type}}
     sb.sync_storage["scanID"]["status"] = "open"
     sb.storage_initialized.add("scanID")
-    with mock.patch.object(sb, "_baseline_update") as step_update:
+    sb.monitored_devices["scanID"] = {"devices": [], "pointID": {}}
+    sb.baseline_devices["scanID"] = {
+        "done": {"samx": False},
+        "devices": [sb.device_manager.devices.samx],
+    }
+    with mock.patch.object(sb, "_baseline_update") as baseline_update:
         sb._add_device_to_storage([msg], "samx", timeout_time=1)
-        step_update.assert_called_once_with("scanID", "samx", msg.content["signals"])
+        baseline_update.assert_called_once_with("scanID", "samx", msg.content["signals"])
 
 
 @pytest.mark.parametrize(
@@ -343,7 +346,6 @@ def test_scan_queue_callback(queue_msg):
             scanID="6ff7a89a-79e5-43ad-828b-c1e1aeed5803",
             status="closed",
             info={
-                "readout_priority": "monitored",
                 "DIID": 4,
                 "RID": "a53538b4-79f3-4132-91b5-d044e438f460",
                 "scanID": "3ea07f69-b0ee-44fa-8451-b85824a37397",
@@ -372,7 +374,6 @@ def test_scan_status_callback(scan_msg):
                 scanID="6ff7a89a-79e5-43ad-828b-c1e1aeed5803",
                 status="closed",
                 info={
-                    "readout_priority": "monitored",
                     "DIID": 4,
                     "RID": "a53538b4-79f3-4132-91b5-d044e438f460",
                     "scanID": "3ea07f69-b0ee-44fa-8451-b85824a37397",
@@ -388,7 +389,6 @@ def test_scan_status_callback(scan_msg):
                 scanID="6ff7a89a-79e5-43ad-828b-c1e1aeed5803",
                 status="open",
                 info={
-                    "readout_priority": "monitored",
                     "DIID": 4,
                     "RID": "a53538b4-79f3-4132-91b5-d044e438f460",
                     "scanID": "3ea07f69-b0ee-44fa-8451-b85824a37397",
@@ -451,7 +451,6 @@ def test_status_modification():
             scanID="6ff7a89a-79e5-43ad-828b-c1e1aeed5803",
             status="closed",
             info={
-                "readout_priority": "monitored",
                 "DIID": 4,
                 "RID": "a53538b4-79f3-4132-91b5-d044e438f460",
                 "scanID": "3ea07f69-b0ee-44fa-8451-b85824a37397",
@@ -470,7 +469,6 @@ def test_status_modification():
             scanID="6ff7a89a-79e5-43ad-828b-c1e1aeed5803",
             status="open",
             info={
-                "readout_priority": "monitored",
                 "DIID": 4,
                 "RID": "a53538b4-79f3-4132-91b5-d044e438f460",
                 "scanID": "3ea07f69-b0ee-44fa-8451-b85824a37397",
@@ -526,11 +524,7 @@ def test_initialize_scan_container(scan_msg):
         [
             messages.DeviceMessage(
                 signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-                metadata={
-                    "scanID": "adlk-jalskdja",
-                    "readout_priority": "monitored",
-                    "pointID": 23,
-                },
+                metadata={"scanID": "adlk-jalskdja", "pointID": 23},
             ),
             23,
             True,
@@ -538,11 +532,7 @@ def test_initialize_scan_container(scan_msg):
         [
             messages.DeviceMessage(
                 signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-                metadata={
-                    "scanID": "adlk-jalskdjb",
-                    "readout_priority": "monitored",
-                    "pointID": 23,
-                },
+                metadata={"scanID": "adlk-jalskdjb", "pointID": 23},
             ),
             23,
             False,
@@ -550,7 +540,7 @@ def test_initialize_scan_container(scan_msg):
         [
             messages.DeviceMessage(
                 signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-                metadata={"scanID": "adlk-jalskdjc", "readout_priority": "monitored"},
+                metadata={"scanID": "adlk-jalskdjc"},
             ),
             23,
             False,
@@ -702,7 +692,7 @@ def test_get_last_device_readback():
     sb = load_ScanBundlerMock()
     dev_msg = messages.DeviceMessage(
         signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-        metadata={"scanID": "laksjd", "readout_priority": "monitored"},
+        metadata={"scanID": "laksjd"},
     )
     with mock.patch.object(sb, "producer") as producer_mock:
         producer_mock.pipeline().execute.return_value = [dev_msg.dumps()]
