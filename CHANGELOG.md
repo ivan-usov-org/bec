@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.52.7 (2023-12-18)
+
+### Fix
+
+* Fixed import of device manager ([`f162633`](https://gitlab.psi.ch/bec/bec/-/commit/f1626336b271b8a231ca46e175ae845ba4071eb6))
+* Service should wait for device info ([`67b292f`](https://gitlab.psi.ch/bec/bec/-/commit/67b292fa0d5ab67cf945db6d12a1f92db642d3a3))
+* Wait for scihub server to become ready ([`77232ac`](https://gitlab.psi.ch/bec/bec/-/commit/77232ac75f12acc9a754a2b5dcd76fa922340b7b))
+
 ## v0.52.6 (2023-12-18)
 
 ### Fix
