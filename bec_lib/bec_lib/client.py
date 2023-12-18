@@ -15,7 +15,7 @@ from bec_lib.bec_worker_manager import BECWorkerManager
 from bec_lib.bl_checks import BeamlineChecks
 from bec_lib.callback_handler import CallbackHandler
 from bec_lib.config_helper import ConfigHelper
-from bec_lib.devicemanager_client import DMClient
+from bec_lib.devicemanager import DeviceManagerBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logbook_connector import LogbookConnector
 from bec_lib.logger import bec_logger
@@ -170,7 +170,7 @@ class BECClient(BECService, UserScriptsMixin):
 
     def _start_device_manager(self):
         logger.info("Starting device manager")
-        self.device_manager = DMClient(self)
+        self.device_manager = DeviceManagerBase(self)
         self.device_manager.initialize(self.bootstrap_server)
         builtins.dev = self.device_manager.devices
 

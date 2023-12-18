@@ -13,7 +13,7 @@ import yaml
 import bec_lib
 from bec_lib import BECClient, messages
 from bec_lib.connector import ConnectorBase
-from bec_lib.devicemanager_client import DMClient
+from bec_lib.devicemanager import DeviceManagerBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
 from bec_lib.scans import Scans
@@ -465,7 +465,7 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
     return messages.DeviceInfoMessage(device=device_name, info=dev_info, metadata={})
 
 
-class DMClientMock(DMClient):
+class DMClientMock(DeviceManagerBase):
     def _get_device_info(self, device_name) -> messages.DeviceInfoMessage:
         return get_device_info_mock(device_name, self.get_device(device_name)["deviceClass"])
 
