@@ -9,7 +9,7 @@ WORKDIR /code
 COPY . ./bec
 
 WORKDIR /code/bec/scan_server
-RUN pip install -e .
+RUN pip install -e . -e ../bec_lib --config-settings editable_mode=strict
 
 # command to run on container start
 CMD [ "python", "launch.py", "--config", "/code/bec/ci/test_config.yaml"]

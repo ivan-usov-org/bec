@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bec-dap"
+version = "1.2.1"
+description = "BEC service for data processing"
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "bec_lib",
+    "lmfit",
+    "numpy",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "coverage",
+    "pylint",
+    "pytest",
+    "pytest-random-order",
+]
+
+[project.scripts]
+bec-dap = "data_processing:main"
+
+[project.urls]
+"Bug Tracker" = "https://gitlab.psi.ch/bec/bec/issues"
+Homepage = "https://gitlab.psi.ch/bec/bec"
+
+[tool.setuptools.packages]
+find = {}

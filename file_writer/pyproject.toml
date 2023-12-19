@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bec-file-writer"
+version = "1.2.1"
+description = "BEC service for writing metadata files"
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "bec_lib",
+    "h5py",
+    "numpy",
+    "pyyaml",
+    "xmltodict",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "coverage",
+    "pylint",
+    "pytest",
+    "pytest-random-order",
+]
+
+[project.scripts]
+bec-file-writer = "file_writer:main"
+
+[project.urls]
+"Bug Tracker" = "https://gitlab.psi.ch/bec/bec/issues"
+Homepage = "https://gitlab.psi.ch/bec/bec"
+
+[tool.setuptools.packages]
+find = {}
+
+[tool.setuptools.package-data]
+"file_writer_plugins" = ["*.xml"]

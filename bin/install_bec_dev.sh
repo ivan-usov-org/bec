@@ -106,14 +106,25 @@ if [ "$split_env" = true ]; then
     do
         echo "Creating virtual environment for $package..."
         conda activate ${conda_env_name}
-        cd ./$package
-        rm -rf ${package}_venv
-        python -m venv ./${package}_venv
+        rm -rf ${package}/${package}_venv
+        python -m venv ${package}/${package}_venv
         conda deactivate
-        source ./${package}_venv/bin/activate
-        pip install -q -q wheel
-        pip install -q -q -e '.[dev]'
-        cd ../
+        source ${package}/${package}_venv/bin/activate
+        pip install -q wheel
+
+        if [ $package != "bec_lib" ]; then
+            pip install -q -e bec_lib[dev] --config-settings editable_mode=strict
+        fi
+
+        if [ $package == "device_server" ] || [ $package == "bec_server" ]; then
+            pip install -q -e ${OPHYD_DEVICES_PATH}[dev] --config-settings editable_mode=strict
+        fi
+
+        if [ $package == "bec_server" ]; then
+            pip install -q -e scan_server[dev] -e scan_bundler[dev] -e data_processing[dev] -e file_writer[dev] -e device_server[dev] -e scihub[dev] -e bec_client[dev] --config-settings editable_mode=strict
+        fi
+
+        pip install -q -e ${package}[dev] --config-settings editable_mode=strict
         deactivate
         echo "Created virtual environment for $package"
     done
@@ -126,9 +137,10 @@ else # install all packages in one virtual environment
     python -m venv ./bec_venv
     conda deactivate
     source ./bec_venv/bin/activate
-    cd ./bec_server
-    pip install -q -q wheel
-    pip install -q -q -e '.[dev]'
-    cd ../
+    pip install -q wheel
+    pip install -q -e bec_lib[dev] --config-settings editable_mode=strict
+    pip install -q -e ${OPHYD_DEVICES_PATH}[dev]
+    pip install -q -e scan_server[dev] -e scan_bundler[dev] -e data_processing[dev] -e file_writer[dev] -e device_server[dev] -e scihub[dev] -e bec_client[dev] -e bec_server[dev] --config-settings editable_mode=strict
+
     echo "Created virtual environment for all packages"
 fi

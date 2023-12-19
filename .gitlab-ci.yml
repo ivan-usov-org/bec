@@ -37,23 +37,14 @@ stages:
   - Deploy
 
 .install-bec-services: &install-bec-services
-    - pip install -e ./device_server
-    - pip install -e ./scan_server
-    - pip install -e ./scan_bundler
-    - pip install -e ./bec_client
-    - pip install -e ./file_writer
-    - pip install -e ./scihub
-    - pip install -e ./data_processing
+    - pip install -e ./bec_lib --config-settings editable_mode=strict
+    - pip install -e $OPHYD_DEVICES_PATH
+    - pip install -e ./device_server -e ./scan_server -e ./scan_bundler -e ./bec_client -e ./file_writer -e ./scihub -e ./data_processing --config-settings editable_mode=strict
 
 .install-bec-services-dev: &install-bec-services-dev
-    - pip install -e ./bec_lib[dev]
-    - pip install -e ./device_server
-    - pip install -e ./scan_server
-    - pip install -e ./scan_bundler
-    - pip install -e ./bec_client
-    - pip install -e ./file_writer
-    - pip install -e ./scihub
-    - pip install -e ./data_processing
+    - pip install -e ./bec_lib[dev] --config-settings editable_mode=strict
+    - pip install -e $OPHYD_DEVICES_PATH
+    - pip install -e ./device_server -e ./scan_server -e ./scan_bundler -e ./bec_client -e ./file_writer -e ./scihub -e ./data_processing --config-settings editable_mode=strict
 
 formatter:
   stage: Formatter
@@ -343,7 +334,8 @@ semver:
     - export REPOSITORY_PASSWORD=$CI_PYPI_TOKEN
     - >
       semantic-release publish -v DEBUG
-      -D version_variable=./semantic_release/__init__.py:__version__,./bec_client/setup.py:__version__,./bec_lib/setup.py:__version__,./data_processing/setup.py:__version__,./device_server/setup.py:__version__,./file_writer/setup.py:__version__,./scan_bundler/setup.py:__version__,./scan_server/setup.py:__version__,./scihub/setup.py:__version__,./bec_server/setup.py:__version__
+      -D version_variable=./semantic_release/__init__.py:__version__
+      -D version_toml=./bec_client/pyproject.toml:project.version,./bec_lib/pyproject.toml:project.version,./data_processing/pyproject.toml:project.version,./device_server/pyproject.toml:project.version,./file_writer/pyproject.toml:project.version,./scan_bundler/pyproject.toml:project.version,./scan_server/pyproject.toml:project.version,./scihub/pyproject.toml:project.version,./bec_server/pyproject.toml:project.version
       -D hvcs=gitlab
       -D build_command="./ci/build_python_services.sh"
 

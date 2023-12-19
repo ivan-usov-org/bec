@@ -10,7 +10,7 @@ COPY ./bec_lib ./bec/bec_lib
 COPY ./bec_lib/bec_lib/configs/demo_config.yaml ./bec/bec_lib/demo_config.yaml
 COPY ./semantic_release ./bec/semantic_release
 
-RUN pip install -e ./bec/bec_lib
+RUN pip install -e ./bec/bec_lib  --config-settings editable_mode=strict
 WORKDIR /code/bec/
 
 # command to run on container start

@@ -1,6 +1,16 @@
 #!/bin/bash
 
-BEC_CLIENT_PATH=$(pip show bec-ipython-client | grep "Location" | cut -d' ' -f2)
+# NOTE: pip 23.0 (2023-01-30) fixes a bug that would display the wrong path for editable installs
+# https://pip.pypa.io/en/stable/news/#id115
+# it doesn't seem to be an issue without pyproject.toml
+editable_path=$(pip show bec-ipython-client | grep "Editable project location" | cut -d' ' -f4)
+
+if [ -n "$editable_path" ]; then
+    BEC_CLIENT_PATH=$editable_path
+else
+    BEC_CLIENT_PATH=$(pip show bec-ipython-client | grep "Location" | cut -d' ' -f2)
+fi
+
 STARTUP_SCRIPT=$BEC_CLIENT_PATH/bec_client/bin/bec_startup.py
 
 # --version flag

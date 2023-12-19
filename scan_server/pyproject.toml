@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bec-scan-server"
+version = "1.2.1"
+description = "BEC scan server"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "bec_lib",
+    "cytoolz",
+    "msgpack",
+    "numpy",
+    "pyyaml",
+    "rich",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "coverage",
+    "pylint",
+    "pytest",
+    "pytest-random-order",
+]
+
+[project.scripts]
+bec-scan-server = "scan_server:main"
+
+[project.urls]
+"Bug Tracker" = "https://gitlab.psi.ch/bec/bec/issues"
+Homepage = "https://gitlab.psi.ch/bec/bec"
+
+[tool.setuptools.packages]
+find = {}

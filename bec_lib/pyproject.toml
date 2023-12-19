@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bec-lib"
+version = "1.2.1"
+description = "BEC library"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "cytoolz",
+    "fastjsonschema",
+    "fpdf",
+    "lmfit",
+    "loguru",
+    "msgpack",
+    "numpy",
+    "psutil",
+    "pylint",
+    "pyyaml",
+    "redis",
+    "requests",
+    "rich",
+    "typeguard>=4.0.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "coverage",
+    "pandas",
+    "pylint",
+    "pytest",
+    "pytest-random-order",
+]
+
+[project.scripts]
+bec-channel-monitor = "bec_lib:channel_monitor_launch"
+
+[project.urls]
+"Bug Tracker" = "https://gitlab.psi.ch/bec/bec/issues"
+Homepage = "https://gitlab.psi.ch/bec/bec"
+
+[tool.setuptools.packages]
+find = {}
+
+[tool.setuptools.package-data]
+"bec_lib.tests" = ["*.yaml"]
+"bec_lib.configs" = ["*.yaml", "*.json"]

@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bec-ipython-client"
+version = "1.2.1"
+description = "BEC IPython client"
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "bec_lib",
+    "h5py",
+    "ipython",
+    "numpy",
+    "pyepics",
+    "requests",
+    "rich",
+    "typeguard",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "coverage",
+    "pylint",
+    "pytest",
+    "pytest-asyncio",
+    "pytest-random-order",
+]
+
+[project.urls]
+"Bug Tracker" = "https://gitlab.psi.ch/bec/bec/issues"
+Homepage = "https://gitlab.psi.ch/bec/bec"
+
+[tool.setuptools.packages]
+find = {}
