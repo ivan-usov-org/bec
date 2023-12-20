@@ -20,7 +20,9 @@ def test_nexus_file_xml_writer():
     file_manager = load_FileWriter()
     file_writer = NeXusFileXMLWriter(file_manager)
     file_writer.configure(
-        layout_file=os.path.abspath(os.path.join(dir_path, "../layout_cSAXS_NXsas.xml"))
+        layout_file=os.path.abspath(
+            os.path.join(dir_path, "../file_writer_plugins/layout_cSAXS_NXsas.xml")
+        )
     )
     with mock.patch.object(
         file_writer, "_create_device_data_storage", return_value={"samx": [0, 1, 2]}
