@@ -125,7 +125,9 @@ tests:
   artifacts:
     reports:
       junit: report.xml
-      cobertura: coverage.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
 
 tests-3.10:
   stage: AdditionalTests
@@ -215,7 +217,7 @@ end-2-end:
     - docker cp end2end_client:/code/bec/bec_client/BECClient.log $CI_PROJECT_DIR/BECClient.log
     - docker cp scihub:/code/bec/scihub/SciHub.log $CI_PROJECT_DIR/SciHub.log
     - docker cp dap:/code/bec/data_processing/DAPServer.log $CI_PROJECT_DIR/DAPServer.log
-    
+
 # end-2-end-scibec:
 #   extends: "end-2-end"
 #   allow_failure: true
