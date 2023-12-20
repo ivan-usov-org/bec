@@ -1,17 +1,13 @@
+# pylint: disable = missing-module-docstring
 from __future__ import annotations
 
 import builtins
 import importlib
 import json
 import select
-
-# import multiprocessing
 import subprocess
-
-# import sys
 import uuid
 
-# from qtpy.QtWidgets import QApplication
 from typeguard import typechecked
 
 from bec_lib import BECClient, MessageEndpoints, messages
@@ -37,6 +33,15 @@ DEFAULT_CONFIG = {
                         "y": [{"name": "bpm4i"}],
                     },
                 },
+                # {
+                #     "type": "redis",
+                #     "endpoint": "<redis_endpoint>",
+                #     "update": "append",
+                #     "signals": {
+                #         "x": [{"name": "tag_x"}],
+                #         "y": [{"name": "tag_y1"}, {"name": "tag_y2"}],
+                #     },
+                # },
             ],
         },
     ],
@@ -90,7 +95,9 @@ class BECWidgetsConnector:
             data (dict): The data to send.
         """
         msg = messages.GUIDataMessage(data=data)
-        self._producer.xadd(MessageEndpoints.gui_data(plot_id), {"data": msg.dumps()})
+        self._producer.set_and_publish(topic=MessageEndpoints.gui_data(plot_id), msg=msg.dumps())
+        # TODO bec_dispatcher can only handle set_and_publish ATM
+        # self._producer.xadd(topic=MessageEndpoints.gui_data(plot_id),msg= {"data": msg})
 
     def clear(self, plot_id: str) -> None:
         """
@@ -122,16 +129,15 @@ class BECPlotter:
             bec_client (BECClient, optional): The BECClient to use. Defaults to None.
         """
         self.name = name
-        self._plot_id = (
-            plot_id if plot_id is not None else str(uuid.uuid4())
-        )  # Generate a unique id for the plot to be used in redis
+        # Generate a unique id for the plot to be used in redis
+        self._plot_id = plot_id if plot_id is not None else str(uuid.uuid4())
         self._config = default_config if default_config is not None else DEFAULT_CONFIG
         self.plot_connector = (
             widget_connector if widget_connector is not None else BECWidgetsConnector(self._plot_id)
         )
 
         self._process = None
-        self._xdata = None
+        self._xdata = {}
         self._ydata = {}
         self._data_changed = False
         self._config_changed = False
@@ -194,105 +200,167 @@ class BECPlotter:
         self._config_changed = True
 
     @typechecked
-    def set_xdata(self, xdata: list[float]) -> None:
+    def set_xdata(
+        self, data: list[float], tag: str = "x_default_tag", subplot_index: int = 0
+    ) -> None:
         """
-        Set the xdata of the figure.
+        Set the xdata of the figure using a specified tag.
+
+        Args:
+            data (list[float]): The xdata to set.
+            tag (str): A tag to identify the xdata set in the config. Defaults to 'x_default_tag'.
+            subplot_index (int, optional): The index of the subplot. Defaults to 0.
+        """
+        self._set_source_to_redis("x", tag, subplot_index)
+        self._xdata = {"action": "set", "data": data, "tag": tag}
+        self._data_changed = True
+
+    @typechecked
+    def set_ydata(
+        self, data: list[float], tag: str = "y_default_tag", subplot_index: int = 0
+    ) -> None:
+        """
+        Set the ydata of the figure for a specific curve, identified by a tag.
+
+        Args:
+            data (list[float]): The ydata to set for the curve.
+            tag (str): A tag for the ydata set. Defaults to 'y_default_tag'.
+            subplot_index (int, optional): The index of the subplot. Defaults to 0.
+        """
+        self._set_source_to_redis("y", tag, subplot_index)
+        self._ydata[tag] = {"action": "set", "data": data}
+        self._data_changed = True
+
+    @typechecked
+    def set_xydata(
+        self,
+        xdata: list[float],
+        ydata: list[float],
+        xtag: str = "x_default_tag",
+        ytag: str = "y_default_tag",
+        subplot_index: int = 0,
+    ) -> None:
+        """
+        Set both xdata and ydata of the figure.
 
         Args:
             xdata (list[float]): The xdata to set.
-        """
-
-        self._set_source_to_redis("x")
-
-        # update data
-        self._xdata = {"action": "set", "data": xdata}
-        self._data_changed = True
-
-    @typechecked
-    def set_ydata(self, ydata: list[float], axis: int = 0) -> None:
-        """
-        Set the ydata of the figure.
-
-        Args:
             ydata (list[float]): The ydata to set.
-            axis (int, optional): The axis to set the ydata for. Defaults to 0.
+            xtag (str): A tag for the xdata set. Defaults to 'x_default_tag'.
+            ytag (str): A tag for the ydata set. Defaults to 'y_default_tag'.
+            subplot_index (int, optional): The index of the subplot. Defaults to 0.
         """
-        self._set_source_to_redis("y", axis)
+        if len(xdata) != len(ydata):
+            print("Error: The lengths of x and y data do not match.")
+            return
 
-        # update data
-        self._ydata[axis] = {"action": "set", "data": ydata}
-        self._data_changed = True
+        self.set_xdata(xdata, xtag, subplot_index)
+        self.set_ydata(ydata, ytag, subplot_index)
 
-    def _set_source_to_redis(self, axis: str, axis_id: int = 0) -> None:
+    def _set_source_to_redis(self, axis: str, tag: str = "tag", subplot_index: int = 0) -> None:
         """
-        Set the source of the data to redis.
+        Ensure a 'redis' source exists in the configuration with the correct signals for the specified axis and subplot.
 
         Args:
-            axis (str): The axis to set the source for.
-            axis_id (int, optional): The axis id to set the source for. Defaults to 0.
+            axis (str): The axis ('x' or 'y') to set the source for. Defaults to 'tag'.
+            subplot_index (int, optional): The index of the subplot. Defaults to 0.
         """
-        config = self._config["plot_data"][0][axis]["signals"][axis_id]
-        if config["source"] != "redis" or config["endpoint"] != MessageEndpoints.gui_data(
-            self._plot_id
-        ):
-            config.update({"source": "redis", "endpoint": MessageEndpoints.gui_data(self._plot_id)})
-            self._config_changed = True
+        redis_source = next(
+            (
+                src
+                for src in self._config["plot_data"][subplot_index]["sources"]
+                if src.get("type") == "redis"
+            ),
+            None,
+        )
+
+        if not redis_source:
+            redis_signals = {
+                "x": [{"name": tag}] if axis == "x" else [],
+                "y": [{"name": tag}] if axis == "y" else [],
+            }
+            redis_source = {
+                "type": "redis",
+                "endpoint": MessageEndpoints.gui_data(self._plot_id),
+                "update": "append",
+                "signals": redis_signals,
+            }
+            self._config["plot_data"][subplot_index]["sources"].append(redis_source)
+        else:
+            if axis == "x":
+                redis_source["signals"]["x"] = [{"name": tag}]
+            elif axis == "y":
+                if not any(d["name"] == tag for d in redis_source["signals"]["y"]):
+                    redis_source["signals"]["y"].append({"name": tag})
+
+        self._config_changed = True
+        print(f"Config Changed:{self._config}")
 
     @typechecked
-    def append_xdata(self, xdata: float | list[float]) -> None:
+    def append_xdata(
+        self, xdata: float | list[float], tag: str = "x_default_tag", subplot_index: int = 0
+    ) -> None:
         """
-        Append the xdata to the figure. If xdata is a list, it the existing data will be extended by xdata.
+        Append xdata to the figure.
 
         Args:
             xdata (float | list[float]): The xdata to append.
-
+            subplot_index (int, optional): The index of the subplot. Defaults to 0.
         """
-        self._set_source_to_redis("x")
-
-        # update data
-        self._xdata = {"action": "append", "data": xdata}
+        self._set_source_to_redis("x", tag, subplot_index)
+        self._xdata = {"action": "append", "data": xdata, "tag": tag}
         self._data_changed = True
 
     @typechecked
-    def append_ydata(self, ydata: float | list[float], axis: int = 0) -> None:
+    def append_ydata(
+        self, data: float | list[float], tag: str = "y_default_tag", subplot_index: int = 0
+    ) -> None:
         """
-        Append the ydata to the figure. If ydata is a list, it the existing data will be extended by ydata.
+        Append ydata to a specific curve in the figure, identified by a tag.
 
         Args:
-            ydata (float | list[float]): The ydata to append.
-            axis (int, optional): The axis to append the ydata for. Defaults to 0.
+            data (float | list[float]): The ydata to append to the curve.
+            tag (str): A tag for the ydata set.
+            subplot_index (int, optional): The index of the subplot. Defaults to 0.
         """
-        self._set_source_to_redis("y", axis)
-
-        # update data
-        self._ydata[axis] = {"action": "append", "data": ydata}
+        self._set_source_to_redis("y", tag, subplot_index)
+        self._ydata[tag] = {"action": "append", "data": data}
         self._data_changed = True
 
     @typechecked
-    def set_xydata(self, xdata: list[float], ydata: list[float], axis: int = 0) -> None:
-        """
-        Set the xdata and ydata of the figure.
-
-        Args:
-            xdata (list[float]): The xdata to set.
-            ydata (list[float]): The ydata to set.
-            axis (int, optional): The axis to set the ydata for. Defaults to 0.
-        """
-        self.set_xdata(xdata)
-        self.set_ydata(ydata, axis)
-
-    @typechecked
-    def append_xydata(self, xdata: float | list[float], ydata: float | list[float]) -> None:
+    def append_xydata(
+        self,
+        xdata: list[float],
+        ydata: list[float],
+        xtag: str = "x_default_tag",
+        ytag: str = "y_default_tag",
+        subplot_index: int = 0,
+    ) -> None:
         """
         Append the xdata and ydata to the figure. If xdata or ydata is a list, it the existing data will be extended
         by xdata or ydata.
 
         Args:
-            xdata (float | list[float]): The xdata to append.
-            ydata (float | list[float]): The ydata to append.
+            xdata (list[float]): The xdata to set.
+            ydata (list[float]): The ydata to set.
+            xtag (str): A tag for the xdata set. Defaults to 'x_default_tag'.
+            ytag (str): A tag for the ydata set. Defaults to 'y_default_tag'.
+            subplot_index (int, optional): The index of the subplot. Defaults to 0.
         """
-        self.append_xdata(xdata)
-        self.append_ydata(ydata)
+        if len(xdata) != len(ydata):
+            print("Error: The lengths of x and y data do not match.")
+            return
+
+        self.append_xdata(xdata, xtag, subplot_index)
+        self.append_ydata(ydata, ytag, subplot_index)
+
+    def get_buffer_data(self):
+        """Prints buffer data from BECPlotter."""
+        print(70 * "-")
+        print(f"xdata:{self._xdata}")
+        print(70 * "-")
+        print(f"ydata:{self._ydata}")
+        print(70 * "-")
 
     def clear(self) -> None:
         """
@@ -302,18 +370,28 @@ class BECPlotter:
 
     def refresh(self) -> None:
         """
-        Refresh the figure. This call is indempotent, i.e. multiple calls to refresh will not have any effect
-        if the data has not changed.
+        Refresh the figure. Ensure data lengths match for each ydata set.
         """
         if self._config_changed:
             self.plot_connector.set_plot_config(self._plot_id, self._config)
             self._config_changed = False
+
         if self._data_changed:
-            data = {"x": self._xdata, "y": self._ydata}
-            self.plot_connector.send_data(self._plot_id, data)
-            self._data_changed = False
-            self._xdata = None
-            self._ydata = None
+            x_length = len(self._xdata.get("data", []))
+            valid_ydata = {
+                tag: ydata
+                for tag, ydata in self._ydata.items()
+                if len(ydata.get("data", [])) == x_length
+            }
+
+            if valid_ydata:
+                data = {"x": self._xdata, "y": self._ydata}
+                self.plot_connector.send_data(self._plot_id, data)
+                self._data_changed = False
+                self._xdata = {}
+                self._ydata = {}
+            else:
+                print("Error: The lengths of x and y data do not match for all curves.")
 
     def show(self) -> None:
         """
