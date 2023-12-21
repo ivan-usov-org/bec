@@ -482,15 +482,15 @@ class DeviceBase:
             action="update", config={self.name: {"readOnly": value}}
         )
 
-    def read(self, cached, filter_readback=True):
-        """get the last reading from a device"""
-        val = self.parent.producer.get(MessageEndpoints.device_read(self.name))
-        if not val:
-            return None
-        if filter_readback:
-            return messages.DeviceMessage.loads(val).content["signals"].get(self.name)
-        return messages.DeviceMessage.loads(val).content["signals"]
-
+    # def read(self, cached, filter_readback=True):
+    #     """get the last reading from a device"""
+    #     val = self.parent.producer.get(MessageEndpoints.device_read(self.name))
+    #     if not val:
+    #         return None
+    #     if filter_readback:
+    #         return messages.DeviceMessage.loads(val).content["signals"].get(self.name)
+    #     return messages.DeviceMessage.loads(val).content["signals"]
+    #
     # def readback(self, filter_readback=True):
     #     """get the last readback value from a device"""
     #     val = self.parent.producer.get(MessageEndpoints.device_readback(self.name))
