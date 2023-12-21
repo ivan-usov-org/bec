@@ -509,14 +509,14 @@ class DeviceBase:
     #     val = DeviceStatusMessage.loads(val)
     #     return val.content.get("status")
 
-    # @property
-    # def signals(self):
-    #     """get the last signals from a device"""
-    #     val = self.parent.producer.get(MessageEndpoints.device_read(self.name))
-    #     if val is None:
-    #         return None
-    #     self._signals = DeviceMessage.loads(val).content["signals"]
-    #     return self._signals
+    @property
+    def signals(self):
+        """get the last signals from a device"""
+        val = self.parent.producer.get(MessageEndpoints.device_read(self.name))
+        if val is None:
+            return None
+        self._signals = messages.DeviceMessage.loads(val).content["signals"]
+        return self._signals
 
     @property
     def user_parameter(self) -> dict:
