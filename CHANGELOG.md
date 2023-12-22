@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.52.9 (2023-12-22)
+
+### Fix
+
+* Read commented in DeviceBase ([`2365dff`](https://gitlab.psi.ch/bec/bec/-/commit/2365dff4a6a02d27e6cb1e28d3fd2b9dc7cb78b7))
+* Wrong reference for 'monitor' - changed from DeviceBase to Device ([`17cc883`](https://gitlab.psi.ch/bec/bec/-/commit/17cc883355c21299a062fd5bf1490d0f033f0414))
+
 ## v0.52.8 (2023-12-18)
 
 ### Fix
