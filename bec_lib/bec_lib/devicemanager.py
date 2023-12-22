@@ -18,7 +18,7 @@ from typeguard import typechecked
 from bec_lib import messages
 from bec_lib.bec_errors import DeviceConfigError
 from bec_lib.config_helper import ConfigHelper
-from bec_lib.device import DeviceBase, DeviceType, Positioner, ReadoutPriority, Signal, Device
+from bec_lib.device import Device, DeviceBase, DeviceType, Positioner, ReadoutPriority, Signal
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
 from bec_lib.messages import (
@@ -605,7 +605,7 @@ class DeviceManagerBase:
         if dev_name in self.devices:
             self.devices.pop(dev_name)
 
-    def _load_session(self, idle_time=1, _device_cls=None, *_args):
+    def _load_session(self, idle_time=1, _device_cls=None):
         time.sleep(idle_time)
         if self._is_config_valid():
             for dev in self._session["devices"]:

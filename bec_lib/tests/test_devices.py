@@ -4,7 +4,16 @@ import pytest
 from typeguard import TypeCheckError
 
 from bec_lib import messages
-from bec_lib.device import DeviceBase, DeviceType, RPCError, Status, AdjustableMixin
+from bec_lib.device import (
+    AdjustableMixin,
+    Device,
+    DeviceBase,
+    DeviceType,
+    Positioner,
+    RPCError,
+    Signal,
+    Status,
+)
 from bec_lib.devicemanager import DeviceContainer, DeviceManagerBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.tests.utils import ConnectorMock, bec_client, get_device_info_mock
@@ -486,7 +495,7 @@ def test_set_read_only():
 
 def test_device_container_wm():
     devs = DeviceContainer()
-    devs["test"] = DeviceBase(name="test", config={})
+    devs["test"] = Device(name="test", config={}, parent=mock.MagicMock())
     with mock.patch.object(devs.test, "read", return_value={"test": {"value": 1}}) as read:
         devs.wm("test")
         devs.wm("tes*")
@@ -494,7 +503,7 @@ def test_device_container_wm():
 
 def test_device_container_wm_with_setpoint():
     devs = DeviceContainer()
-    devs["test"] = DeviceBase(name="test", config={})
+    devs["test"] = Device(name="test", config={}, parent=mock.MagicMock())
     with mock.patch.object(
         devs.test, "read", return_value={"test": {"value": 1}, "test_setpoint": {"value": 1}}
     ) as read:
@@ -503,11 +512,33 @@ def test_device_container_wm_with_setpoint():
 
 def test_device_container_wm_with_user_setpoint():
     devs = DeviceContainer()
-    devs["test"] = DeviceBase(name="test", config={})
+    devs["test"] = Device(name="test", config={}, parent=mock.MagicMock())
     with mock.patch.object(
         devs.test, "read", return_value={"test": {"value": 1}, "test_user_setpoint": {"value": 1}}
     ) as read:
         devs.wm("test")
+
+
+@pytest.mark.parametrize("device_cls", [Device, Signal, Positioner])
+def test_device_has_describe_method(device_cls):
+    devs = DeviceContainer()
+    parent = mock.MagicMock(spec=DeviceManagerBase)
+    devs["test"] = device_cls(name="test", config={}, parent=parent)
+    assert hasattr(devs.test, "describe")
+    with mock.patch.object(devs.test, "_run_rpc_call") as mock_rpc:
+        devs.test.describe()
+        mock_rpc.assert_called_once_with("test", "describe")
+
+
+@pytest.mark.parametrize("device_cls", [Device, Signal, Positioner])
+def test_device_has_describe_configuration_method(device_cls):
+    devs = DeviceContainer()
+    parent = mock.MagicMock(spec=DeviceManagerBase)
+    devs["test"] = device_cls(name="test", config={}, parent=parent)
+    assert hasattr(devs.test, "describe_configuration")
+    with mock.patch.object(devs.test, "_run_rpc_call") as mock_rpc:
+        devs.test.describe_configuration()
+        mock_rpc.assert_called_once_with("test", "describe_configuration")
 
 
 def test_show_all():
