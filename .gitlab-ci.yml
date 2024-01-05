@@ -37,14 +37,14 @@ stages:
   - Deploy
 
 .install-bec-services: &install-bec-services
-    - pip install -e ./bec_lib --config-settings editable_mode=strict
+    - pip install -e ./bec_lib
     - pip install -e $OPHYD_DEVICES_PATH
-    - pip install -e ./device_server -e ./scan_server -e ./scan_bundler -e ./bec_client -e ./file_writer -e ./scihub -e ./data_processing --config-settings editable_mode=strict
+    - pip install -e ./device_server -e ./scan_server -e ./scan_bundler -e ./bec_client -e ./file_writer -e ./scihub -e ./data_processing
 
 .install-bec-services-dev: &install-bec-services-dev
-    - pip install -e ./bec_lib[dev] --config-settings editable_mode=strict
+    - pip install -e ./bec_lib[dev]
     - pip install -e $OPHYD_DEVICES_PATH
-    - pip install -e ./device_server -e ./scan_server -e ./scan_bundler -e ./bec_client -e ./file_writer -e ./scihub -e ./data_processing --config-settings editable_mode=strict
+    - pip install -e ./device_server -e ./scan_server -e ./scan_bundler -e ./bec_client -e ./file_writer -e ./scihub -e ./data_processing
 
 formatter:
   stage: Formatter

@@ -113,18 +113,18 @@ if [ "$split_env" = true ]; then
         pip install -q wheel
 
         if [ $package != "bec_lib" ]; then
-            pip install -q -e bec_lib[dev] --config-settings editable_mode=strict
+            pip install -q -e bec_lib[dev]
         fi
 
         if [ $package == "device_server" ] || [ $package == "bec_server" ]; then
-            pip install -q -e ${OPHYD_DEVICES_PATH}[dev] --config-settings editable_mode=strict
+            pip install -q -e ${OPHYD_DEVICES_PATH}[dev]
         fi
 
         if [ $package == "bec_server" ]; then
-            pip install -q -e scan_server[dev] -e scan_bundler[dev] -e data_processing[dev] -e file_writer[dev] -e device_server[dev] -e scihub[dev] -e bec_client[dev] --config-settings editable_mode=strict
+            pip install -q -e scan_server[dev] -e scan_bundler[dev] -e data_processing[dev] -e file_writer[dev] -e device_server[dev] -e scihub[dev] -e bec_client[dev]
         fi
 
-        pip install -q -e ${package}[dev] --config-settings editable_mode=strict
+        pip install -q -e ${package}[dev]
         deactivate
         echo "Created virtual environment for $package"
     done
@@ -138,9 +138,9 @@ else # install all packages in one virtual environment
     conda deactivate
     source ./bec_venv/bin/activate
     pip install -q wheel
-    pip install -q -e bec_lib[dev] --config-settings editable_mode=strict
+    pip install -q -e bec_lib[dev]
     pip install -q -e ${OPHYD_DEVICES_PATH}[dev]
-    pip install -q -e scan_server[dev] -e scan_bundler[dev] -e data_processing[dev] -e file_writer[dev] -e device_server[dev] -e scihub[dev] -e bec_client[dev] -e bec_server[dev] --config-settings editable_mode=strict
+    pip install -q -e scan_server[dev] -e scan_bundler[dev] -e data_processing[dev] -e file_writer[dev] -e device_server[dev] -e scihub[dev] -e bec_client[dev] -e bec_server[dev]
 
     echo "Created virtual environment for all packages"
 fi

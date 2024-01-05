@@ -9,7 +9,7 @@ WORKDIR /code
 COPY . ./bec
 
 WORKDIR /code/bec/bec_client
-RUN pip install -e . -e ../bec_lib --config-settings editable_mode=strict
+RUN pip install -e . -e ../bec_lib
 RUN pip install pytest pytest-timeout pytest-random-order
 
 # command to run on container start

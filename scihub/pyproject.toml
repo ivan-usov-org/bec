@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=61"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "bec-scihub"
@@ -35,5 +35,5 @@ bec-scihub = "scihub:main"
 "Bug Tracker" = "https://gitlab.psi.ch/bec/bec/issues"
 Homepage = "https://gitlab.psi.ch/bec/bec"
 
-[tool.setuptools.packages]
-find = {}
+[tool.hatch.build.targets.wheel]
+include = ["*"]

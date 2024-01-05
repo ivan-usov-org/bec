@@ -13,7 +13,7 @@ RUN mv ./bec/ophyd_devices ./ophyd_devices
 
 WORKDIR /code/bec/device_server
 RUN file="$(ls /code/bec/device_server)" && echo $file
-RUN pip install -e . -e ../../ophyd_devices -e ../bec_lib  --config-settings editable_mode=strict
+RUN pip install -e . -e ../../ophyd_devices -e ../bec_lib
 
 # command to run on container start
 CMD [ "python", "launch.py", "--config", "/code/bec/ci/test_config.yaml"]

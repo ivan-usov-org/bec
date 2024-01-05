@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=61"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "bec-lib"
@@ -47,9 +47,5 @@ bec-channel-monitor = "bec_lib:channel_monitor_launch"
 "Bug Tracker" = "https://gitlab.psi.ch/bec/bec/issues"
 Homepage = "https://gitlab.psi.ch/bec/bec"
 
-[tool.setuptools.packages]
-find = {}
-
-[tool.setuptools.package-data]
-"bec_lib.tests" = ["*.yaml"]
-"bec_lib.configs" = ["*.yaml", "*.json"]
+[tool.hatch.build.targets.wheel]
+include = ["*"]
