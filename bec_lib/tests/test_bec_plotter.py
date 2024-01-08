@@ -112,6 +112,12 @@ def test_bec_plotter_clear(plotter):
         mock_clear.assert_called_once_with(plotter._plot_id)
 
 
+def test_bec_plotter_config_dialog(plotter):
+    with mock.patch.object(plotter.plot_connector, "config_dialog") as mock_config_dialog:
+        plotter.config_dialog()
+        mock_config_dialog.assert_called_once_with(plotter._plot_id)
+
+
 def test_bec_plotter_close(plotter):
     with mock.patch.object(plotter.plot_connector, "close") as mock_close:
         process = mock.MagicMock()

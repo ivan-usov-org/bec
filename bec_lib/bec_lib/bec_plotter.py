@@ -6,6 +6,7 @@ import importlib
 import json
 import select
 import subprocess
+import time
 import uuid
 
 from typeguard import typechecked
@@ -84,6 +85,16 @@ class BECWidgetsConnector:
             plot_id (str): The id of the plot.
         """
         msg = messages.GUIInstructionMessage(action="close", parameter={})
+        self._producer.set_and_publish(MessageEndpoints.gui_instructions(plot_id), msg.dumps())
+
+    def config_dialog(self, plot_id: str) -> None:
+        """
+        Open the config dialog.
+
+        Args:
+            plot_id (str): The id of the plot.
+        """
+        msg = messages.GUIInstructionMessage(action="config_dialog", parameter={})
         self._producer.set_and_publish(MessageEndpoints.gui_instructions(plot_id), msg.dumps())
 
     def send_data(self, plot_id: str, data: dict) -> None:
@@ -368,6 +379,12 @@ class BECPlotter:
         """
         self.plot_connector.clear(self._plot_id)
 
+    def config_dialog(self) -> None:
+        """
+        Clear the figure.
+        """
+        self.plot_connector.config_dialog(self._plot_id)
+
     def refresh(self) -> None:
         """
         Refresh the figure. Ensure data lengths match for each ydata set.
@@ -376,6 +393,7 @@ class BECPlotter:
             self.plot_connector.set_plot_config(self._plot_id, self._config)
             self._config_changed = False
 
+        time.sleep(0.1)
         if self._data_changed:
             x_length = len(self._xdata.get("data", []))
             valid_ydata = {
