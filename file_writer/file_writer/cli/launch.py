@@ -26,7 +26,7 @@ def main():
 
     file_writer_manager = file_writer.FileWriterManager(config, RedisConnector)
     file_writer_manager.file_writer.configure(
-        layout_file=os.path.abspath("./file_writer_plugins/layout_cSAXS_NXsas.xml")
+        layout_file=os.path.abspath("./layout_cSAXS_NXsas.xml")
     )
     try:
         event = threading.Event()
