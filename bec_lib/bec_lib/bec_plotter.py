@@ -305,7 +305,6 @@ class BECPlotter:
                     redis_source["signals"]["y"].append({"name": tag})
 
         self._config_changed = True
-        print(f"Config Changed:{self._config}")
 
     @typechecked
     def append_xdata(
