@@ -59,11 +59,7 @@ To keep things simple, we have compiled all dependencies within the `setup.py` f
 Note, you need to install the package in editable mode (with `-e` flag), to allow changes to the code base.
 
 ```bash
-pip install wheel
 pip install -e './bec_server/.[dev]'
-```
-```{warning}
-On newer versions of pip (pip>22.3.1) wheel must be installed manually before installing the BEC server! If not, it will crash with an import error within pip. Should you run into problems, please run `pip cache purge` twice before repeating the commands above.  
 ```
 ```{note}
 The extension [dev] will install additional dependencies, which are useful for code development such as for instance `pytest`, `black`.

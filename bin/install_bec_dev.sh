@@ -110,7 +110,6 @@ if [ "$split_env" = true ]; then
         python -m venv ${package}/${package}_venv
         conda deactivate
         source ${package}/${package}_venv/bin/activate
-        pip install -q wheel
 
         if [ $package != "bec_lib" ]; then
             pip install -q -e bec_lib[dev]
@@ -137,7 +136,6 @@ else # install all packages in one virtual environment
     python -m venv ./bec_venv
     conda deactivate
     source ./bec_venv/bin/activate
-    pip install -q wheel
     pip install -q -e bec_lib[dev]
     pip install -q -e ${OPHYD_DEVICES_PATH}[dev]
     pip install -q -e scan_server[dev] -e scan_bundler[dev] -e data_processing[dev] -e file_writer[dev] -e device_server[dev] -e scihub[dev] -e bec_client[dev] -e bec_server[dev]
