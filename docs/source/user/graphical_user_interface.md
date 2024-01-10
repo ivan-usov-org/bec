@@ -55,6 +55,3 @@ plotter.config_dialog()
 
 ### Example of BECPlotter usage
 ![BECPlotter example](../_static/gif/bec_plotter.gif)
-
-[//]: # ()
-[//]: # (#TODO how to upload gif???)

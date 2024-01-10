@@ -235,7 +235,7 @@ class BECPlotter:
 
         Args:
             data (list[float]): The ydata to set for the curve.
-            tag (str): A tag for the ydata set. Defaults to 'y_default_tag'.
+            tag (str): A tag to identify the ydata set in the config and in plot legend. Defaults to 'y_default_tag'.
             subplot_index (int, optional): The index of the subplot. Defaults to 0.
         """
         self._set_source_to_redis("y", tag, subplot_index)
@@ -257,8 +257,8 @@ class BECPlotter:
         Args:
             xdata (list[float]): The xdata to set.
             ydata (list[float]): The ydata to set.
-            xtag (str): A tag for the xdata set. Defaults to 'x_default_tag'.
-            ytag (str): A tag for the ydata set. Defaults to 'y_default_tag'.
+            xtag (str): A tag to identify the xdata set in the config. Defaults to 'x_default_tag'.
+            ytag (str): A tag to identify the ydata set in the config and in plot legend. Defaults to 'y_default_tag'.
             subplot_index (int, optional): The index of the subplot. Defaults to 0.
         """
         if len(xdata) != len(ydata):
@@ -315,6 +315,7 @@ class BECPlotter:
 
         Args:
             xdata (float | list[float]): The xdata to append.
+            tag (str): A tag to identify the xdata set in the config. Defaults to 'x_default_tag'.
             subplot_index (int, optional): The index of the subplot. Defaults to 0.
         """
         self._set_source_to_redis("x", tag, subplot_index)
@@ -330,7 +331,7 @@ class BECPlotter:
 
         Args:
             data (float | list[float]): The ydata to append to the curve.
-            tag (str): A tag for the ydata set.
+            tag (str): A tag to identify the ydata set in the config and in plot legend. Defaults to 'y_default_tag'.
             subplot_index (int, optional): The index of the subplot. Defaults to 0.
         """
         self._set_source_to_redis("y", tag, subplot_index)
