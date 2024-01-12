@@ -2,6 +2,21 @@
 
 <!--next-version-placeholder-->
 
+## v0.53.0 (2024-01-12)
+
+### Feature
+
+* GUI config dialog for BECMonitor can be opened from bec IPYTHON client ([`bceb55d`](https://gitlab.psi.ch/bec/bec/-/commit/bceb55d18880f773cb9cabd265e53793b211a3f5))
+
+### Fix
+
+* Bec_plotter.py fixed redis source format for new config style ([`6ce1e3a`](https://gitlab.psi.ch/bec/bec/-/commit/6ce1e3a4845db248a89617573fb30350554364da))
+* Bec_plotter.py live monitoring fixed to new config structure of BECMonitor ([`6dca909`](https://gitlab.psi.ch/bec/bec/-/commit/6dca90902c7ac8938c64ee2a2f00d2bd54c00c0b))
+
+### Documentation
+
+* BECPlotter docs updated in GUI section ([`6bf51ab`](https://gitlab.psi.ch/bec/bec/-/commit/6bf51abeeac9684c1ef78077f2f8abcf7133ee06))
+
 ## v0.52.9 (2023-12-22)
 
 ### Fix
