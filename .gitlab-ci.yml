@@ -302,9 +302,14 @@ end-2-end-conda:
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
 
-trigger_job:
+trigger_bec-widgets:
   trigger:
     project: bec/bec-widgets
+    strategy: depend
+
+trigger_ophyd-devices:
+  trigger:
+    project: bec/ophyd_devices
     strategy: depend
 
 semver:
