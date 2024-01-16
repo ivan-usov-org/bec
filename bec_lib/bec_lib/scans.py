@@ -10,9 +10,7 @@ import msgpack
 from toolz import partition
 from typeguard import typechecked
 
-from bec_lib.core import BECMessage, MessageEndpoints, bec_logger
-from bec_lib.core.connector import ConsumerConnector
-from bec_lib.core.utils import scan_to_csv
+from bec_lib.utils import scan_to_csv
 
 from bec_lib import messages
 from bec_lib.device import DeviceBase
@@ -45,6 +43,7 @@ class ScanObject:
 
         # handle reserved kwargs:
         hide_report_kwarg = kwargs.get("hide_report", False)
+        # pylint: disable=protected-access
         hide_report = hide_report_kwarg or scans._hide_report
 
         metadata = self.client.metadata.copy()
@@ -55,7 +54,7 @@ class ScanObject:
 
         if "md" in kwargs:
             metadata.update(kwargs["md"])
-
+        # pylint: disable=protected-access
         if scans._scan_group:
             metadata["queue_group"] = scans._scan_group
         if scans._scan_def_id:
