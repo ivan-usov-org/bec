@@ -1,4 +1,5 @@
 import os
+import shutil
 from unittest import mock
 
 import msgpack
@@ -35,10 +36,14 @@ def test_config_helper_update_session_with_file():
             mock_send_config_request.assert_called_once_with(action="set", config={"test": "test"})
 
 
-def test_config_helper_load_config_from_file():
+@pytest.mark.parametrize("config_file", ["test.yaml", "test.yml"])
+def test_config_helper_load_config_from_file(config_file, tmp_path):
+    orig_cfg_file = f"{dir_path}/tests/test_config.yaml"
+    test_cfg_file = tmp_path / config_file
+    shutil.copyfile(orig_cfg_file, test_cfg_file)
     connector = mock.MagicMock()
     config_helper = ConfigHelper(connector)
-    config = config_helper._load_config_from_file(f"{dir_path}/tests/test_config.yaml")
+    config = config_helper._load_config_from_file(test_cfg_file)
 
 
 def test_config_helper_save_current_session():

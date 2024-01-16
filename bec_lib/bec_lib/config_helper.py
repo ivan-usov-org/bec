@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import pathlib
 import time
 import uuid
 from typing import TYPE_CHECKING
@@ -39,7 +40,7 @@ class ConfigHelper:
 
     def _load_config_from_file(self, file_path: str) -> dict:
         data = {}
-        if not file_path.endswith(".yaml"):
+        if pathlib.Path(file_path).suffix not in (".yaml", ".yml"):
             raise NotImplementedError
 
         with open(file_path, "r", encoding="utf-8") as stream:
