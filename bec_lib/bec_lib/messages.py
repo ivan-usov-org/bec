@@ -325,10 +325,11 @@ class ScanQueueMessage(BECMessage):
         """
         Sent by the API server / user to the scan_queue topic. It will be consumed by the scan server.
         Args:
-            scan_type: one of the registered scan types; either scan stubs (set, read, ...) or scans (dscan, ct, ...)
-            parameter: required parameters for the given scan_stype
-            queue: either "primary" or "interception"
-            metadata: additional metadata to describe the scan
+            scan_type (str): one of the registered scan types; either scan stubs (set, read, ...) or scans (dscan, ct, ...)
+            parameter (dict): required parameters for the given scan_stype
+            queue (str): either "primary" or "interception"
+            metadata (dict, optional): additional metadata to describe the scan
+            version (float, optional): BECMessage version; defaults to DEFAULT_VERSION
         Examples:
             >>> ScanQueueMessage(scan_type="dscan", parameter={"motor1": "samx", "from_m1:": -5, "to_m1": 5, "steps_m1": 10, "motor2": "samy", "from_m2": -5, "to_m2": 5, "steps_m2": 10, "exp_time": 0.1})
         """
@@ -354,6 +355,16 @@ class ScanQueueHistoryMessage(BECMessage):
         metadata: dict = None,
         version: float = DEFAULT_VERSION,
     ) -> None:
+        """
+        Sent by the API server / user to the scan_queue topic. It will be consumed by the scan server.
+        Args:
+            status(str):  current scan status
+            queueID(str): unique queue ID
+            info(dict): dictionary containing additional information about the scan
+            queue (str): either "primary" or "interception"
+            metadata (dict, optional): additional metadata to describe the scan
+            version (float, optional): BECMessage version; defaults to DEFAULT_VERSION
+        """
         self.content = {"status": status, "queueID": queueID, "info": info, "queue": queue}
         super().__init__(
             msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
@@ -380,9 +391,9 @@ class ScanStatusMessage(BECMessage):
             scanID(str): unique scan ID
             status(dict): dictionary containing the current scan status
             info(dict): dictionary containing additional information about the scan
-            timestamp(float): timestamp of the scan status update. If None, the current time is used.
-            metadata(dict): additional metadata to describe and identify the scan.
-            version(float): BECMessage version
+            timestamp(float, optional): timestamp of the scan status update. If None, the current time is used.
+            metadata(dict, optional): additional metadata to describe and identify the scan.
+            version(float, optional): BECMessage version, defaults to DEFAULT_VERSION
 
         Examples:
             >>> ScanStatusMessage(scanID="1234", status={"scan_number": 1, "scan_motors": ["samx", "samy"], "scan_type": "dscan", "scan_status": "RUNNING"}, info={"positions": {"samx": 0.5, "samy": 0.5}})
@@ -415,6 +426,15 @@ class ScanQueueModificationMessage(BECMessage):
         metadata: dict = None,
         version: float = DEFAULT_VERSION,
     ) -> None:
+        """
+        Args:
+            scanID(str): unique scan ID
+            action(str): one of the actions defined in ACTIONS
+                         ("pause", "deferred_pause", "continue", "abort", "clear", "restart", "halt")
+            parameter(dict): additional parameters for the action
+            metadata(dict, optional): additional metadata to describe and identify the scan.
+            version(float, optional): BECMessage version, defaults to DEFAULT_VERSION
+        """
         self.content = {"scanID": scanID, "action": action, "parameter": parameter}
         super().__init__(
             msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
@@ -434,6 +454,12 @@ class ScanQueueStatusMessage(BECMessage):
     def __init__(
         self, *, queue: dict, metadata: dict = None, version: float = DEFAULT_VERSION
     ) -> None:
+        """
+        Args:
+            queue(dict): dictionary containing the current queue status
+            metadata(dict, optional): additional metadata to describe and identify the scan.
+            version(float, optional): BECMessage version, defaults to DEFAULT_VERSION
+        """
         self.content = {"queue": queue}
         super().__init__(
             msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
@@ -465,9 +491,10 @@ class RequestResponseMessage(BECMessage):
         """
         Message type for sending back decisions on the acceptance of requests.
         Args:
-            accepted: True if the request was accepted
-            message: String describing the decision, e.g. "Invalid request"
-            metadata: additional metadata to describe and identify the request / response
+            accepted (bool): True if the request was accepted
+            message (str): String describing the decision, e.g. "Invalid request"
+            metadata (dict, optional): additional metadata to describe and identify the request / response
+            version (float, optional): BECMessage version, defaults to DEFAULT_VERSION
         """
 
         self.content = {"accepted": accepted, "message": message}
@@ -491,11 +518,12 @@ class DeviceInstructionMessage(BECMessage):
         version: float = DEFAULT_VERSION,
     ) -> None:
         """
-
         Args:
-            device:
-            action:
-            parameter:
+            device (str): device name
+            action (str): device action, e.g. method call
+            parameter (dict): device action parameter
+            metadata (dict, optional): metadata to describe the conditions of the device instruction
+            version (float, optional): BECMessage version, defaults to DEFAULT_VERSION
         """
         self.content = {"device": device, "action": action, "parameter": parameter}
         super().__init__(
@@ -512,11 +540,10 @@ class DeviceMessage(BECMessage):
         self, *, signals: dict, metadata: dict = None, version: float = DEFAULT_VERSION
     ) -> None:
         """
-        Device message type for sending device readings from the device server.
-
         Args:
-            signals: dictionary of device signals
-            metadata: metadata to describe the conditions of the device reading
+            signals (dict): dictionary of device signals
+            metadata (dict, optional): metadata to describe the conditions of the device reading
+            version (float, optional): BECMessage version, defaults to DEFAULT_VERSION
         Examples:
             >>> BECMessage.DeviceMessage(signals={'samx': {'value': 14.999033949016491, 'timestamp': 1686385306.0265112}, 'samx_setpoint': {'value': 15.0, 'timestamp': 1686385306.016806}, 'samx_motor_is_moving': {'value': 0, 'timestamp': 1686385306.026888}}}, metadata={'stream': 'primary', 'DIID': 353, 'RID': 'd3471acc-309d-43b7-8ff8-f986c3fdecf1', 'pointID': 49, 'scanID': '8e234698-358e-402d-a272-73e168a72f66', 'queueID': '7a232746-6c90-44f5-81f5-74ab0ea22d4a'})
         """
@@ -547,10 +574,13 @@ class DeviceRPCMessage(BECMessage):
         version: float = DEFAULT_VERSION,
     ) -> None:
         """
-
         Args:
-            signals:
-            metadata:
+            device (str): device name
+            return_val (Any): return value of the RPC call
+            out (str): output of the RPC call
+            success (bool, optional): True if the RPC call was successful
+            metadata (dict, optional): metadata to describe the conditions of the device RPC call
+            version (float, optional): BECMessage version, defaults to DEFAULT_VERSION
         """
         self.content = {"device": device, "return_val": return_val, "out": out, "success": success}
         super().__init__(
@@ -572,10 +602,11 @@ class DeviceStatusMessage(BECMessage):
         self, *, device: str, status: int, metadata: dict = None, version: float = DEFAULT_VERSION
     ) -> None:
         """
-
         Args:
-            signals:
-            metadata:
+            device (str): device name
+            status (int): device status
+            metadata (dict, optional): additional metadata to describe the conditions of the device status
+            version (float, optional): BECMessage version, defaults to DEFAULT_VERSION
         """
         self.content = {"device": device, "status": status}
         super().__init__(
@@ -592,10 +623,11 @@ class DeviceReqStatusMessage(BECMessage):
         self, *, device: str, success: bool, metadata: dict = None, version: float = DEFAULT_VERSION
     ) -> None:
         """
-
         Args:
-            signals:
-            metadata:
+            device (str): device name
+            success (bool): True if the request was successful
+            metadata (dict, optional): additional metadata to describe the conditions of the device request status
+            version (float, optional): BECMessage version, defaults to DEFAULT_VERSION
         """
         self.content = {"device": device, "success": success}
         super().__init__(
@@ -612,11 +644,11 @@ class DeviceInfoMessage(BECMessage):
         self, *, device: str, info: dict, metadata: dict = None, version: float = DEFAULT_VERSION
     ) -> None:
         """
-
         Args:
-            device:
-            info:
-            metadata:
+            device (str): device name
+            info (dict): device info as dictionary
+            metadata (dict, optional): additional metadata to describe the conditions of the device info
+            version (float, optional): BECMessage version, defaults to DEFAULT_VERSION
         """
         self.content = {"device": device, "info": info}
         super().__init__(
@@ -639,11 +671,12 @@ class ScanMessage(BECMessage):
         version: float = DEFAULT_VERSION,
     ) -> None:
         """
-
         Args:
-            point_id:
-            scanID:
-            data:
+            point_id (int): point ID from scan segment
+            scanID (int): scan ID
+            data (dict): scan segment data
+            metadata (dict, optional): additional metadata to describe the conditions of the scan segment
+            version (float, optional): BECMessage version, defaults to DEFAULT_VERSION
         """
         self.content = {"point_id": point_id, "scanID": scanID, "data": data}
         super().__init__(
@@ -660,10 +693,11 @@ class ScanBaselineMessage(BECMessage):
         self, *, scanID: int, data: dict, metadata: dict = None, version: float = DEFAULT_VERSION
     ) -> None:
         """
-
         Args:
-            scanID:
-            data:
+            scanID (int): scan ID
+            data (dict): scan baseline data
+            metadata (dict, optional): additional metadata to describe the conditions of the scan baseline
+            version (float, optional): BECMessage version, defaults to DEFAULT_VERSION
         """
         self.content = {"scanID": scanID, "data": data}
         super().__init__(
@@ -680,10 +714,11 @@ class DeviceConfigMessage(BECMessage):
         self, *, action: str, config: dict, metadata: dict = None, version: float = DEFAULT_VERSION
     ) -> None:
         """
-
         Args:
-            action: add, update or reload
-            config: device config (add, update) or None (reload)
+            action (str): add, update or reload #TODO is_valid function?
+            config (dict): device config (add, update) or None (reload)
+            metadata (dict, optional): additional metadata to describe the conditions of the device config
+            version (float, optional): BECMessage version, defaults to DEFAULT_VERSION
         """
         self.content = {"action": action, "config": config}
         super().__init__(
@@ -705,10 +740,11 @@ class LogMessage(BECMessage):
         version: float = DEFAULT_VERSION,
     ) -> None:
         """
-
         Args:
-            type: log, warning or error
-            content: log's content
+            log_type (str): log, warning or error
+            content (dict or str): log's content
+            metadata (dict, optional):
+            version (float, optional): BECMessage version. Defaults to DEFAULT_VERSION.
         """
         self.content = {"log_type": log_type, "content": content}
         super().__init__(
@@ -740,7 +776,8 @@ class AlarmMessage(BECMessage):
             severity (int): severity level (1-3)
             source (str): source of the problem (where did it occur?)
             content (dict): problem description (what happened?)
-            metadata (dict, optional)
+            metadata (dict, optional): Additional metadata.
+            version (float, optional): BECMessage version. Defaults to DEFAULT_VERSION.
         """
         self.content = {
             "severity": severity,
@@ -768,10 +805,16 @@ class StatusMessage(BECMessage):
         version: float = DEFAULT_VERSION,
     ) -> None:
         """
-
         Args:
-            status: error, off, idle or running
-            metadata: status metadata
+            name (str): name of the status
+            status (BECStatus): value of the BECStatus enum
+            (RUNNING = 2
+            BUSY = 1
+            IDLE = 0
+            ERROR = -1))
+            info (dict): status info
+            metadata (dict, optional): additional metadata
+            version (float, optional): BECMessage version. Defaults to DEFAULT_VERSION.
         """
         if not isinstance(status, BECMessage):
             status = BECStatus(status)
@@ -820,8 +863,9 @@ class VariableMessage(BECMessage):
     ) -> None:
         """
         Args:
-            value: value of the global var
-            metadata: status metadata
+            value (str): name of the global variable
+            metadata (dict, optional): additional metadata
+            version (float, optional): BECMessage version. Defaults to DEFAULT_VERSION.
         """
 
         self.content = {"value": value}
@@ -839,10 +883,10 @@ class ObserverMessage(BECMessage):
         self, *, observer: list[dict], metadata: dict = None, version: float = DEFAULT_VERSION
     ) -> None:
         """
-
         Args:
-            observer: list of observer descriptions
-            metadata: status metadata
+            observer (list[dict]): list of observer descriptions (dictionaries)
+            metadata (dict, optional): additional metadata
+            version (float, optional): BECMessage version. Defaults to DEFAULT_VERSION.
         """
 
         self.content = {"observer": observer}
@@ -860,10 +904,11 @@ class ServiceMetricMessage(BECMessage):
         self, *, name: str, metrics: dict, metadata: dict = None, version: float = DEFAULT_VERSION
     ) -> None:
         """
-
         Args:
-            observer: list of observer descriptions
-            metadata: status metadata
+            name (str): name of the service
+            metrics (dict): dictionary with service metrics
+            metadata (dict, optional): additional metadata
+            version (float, optional): BECMessage version. Defaults to DEFAULT_VERSION.
         """
 
         self.content = {"name": name, "metrics": metrics}
@@ -885,6 +930,7 @@ class ProcessedDataMessage(BECMessage):
         Args:
             data (str): processed data
             metadata (dict, optional): metadata. Defaults to None.
+            version (float, optional): BECMessage version. Defaults to DEFAULT_VERSION.
         """
 
         self.content = {"data": data}
@@ -906,6 +952,7 @@ class DAPConfigMessage(BECMessage):
         Args:
             config (dict): DAP configuration
             metadata (dict, optional): metadata. Defaults to None.
+            version (float, optional): BECMessage version. Defaults to DEFAULT_VERSION.
         """
 
         self.content = {"config": config}
@@ -927,6 +974,7 @@ class AvailableResourceMessage(BECMessage):
         Args:
             ressource (dict): resource description
             metadata (dict, optional): metadata. Defaults to None.
+            version (float, optional): BECMessage version. Defaults to DEFAULT_VERSION.
         """
 
         self.content = {"resource": resource}
@@ -957,6 +1005,7 @@ class ProgressMessage(BECMessage):
             max_value (float): maximum progress value
             done (bool): True if the task is done
             metadata (dict, optional): metadata. Defaults to None.
+            version (float, optional): BECMessage version. Defaults to DEFAULT_VERSION.
         """
 
         self.content = {"value": value, "max_value": max_value, "done": done}
@@ -978,6 +1027,7 @@ class GUIConfigMessage(BECMessage):
         Args:
             config (dict): GUI configuration
             metadata (dict, optional): metadata. Defaults to None.
+            version (float, optional): BECMessage version. Defaults to DEFAULT_VERSION.
         """
 
         self.content = {"config": config}
@@ -999,6 +1049,7 @@ class GUIDataMessage(BECMessage):
         Args:
             data (dict): GUI data
             metadata (dict, optional): metadata. Defaults to None.
+            version (float, optional): BECMessage version. Defaults to DEFAULT_VERSION.
         """
 
         self.content = {"data": data}
@@ -1025,6 +1076,7 @@ class GUIInstructionMessage(BECMessage):
         Args:
             instruction (str): GUI instruction
             metadata (dict, optional): metadata. Defaults to None.
+            version (float, optional): BECMessage version. Defaults to DEFAULT_VERSION.
         """
 
         self.content = {"action": action, "parameter": parameter}
@@ -1046,6 +1098,7 @@ class ServiceResponseMessage(BECMessage):
         Args:
             response (dict): service response
             metadata (dict, optional): metadata. Defaults to None.
+            version (float, optional): BECMessage version. Defaults to DEFAULT_VERSION.
         """
 
         self.content = {"response": response}
