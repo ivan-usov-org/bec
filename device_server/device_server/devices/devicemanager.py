@@ -64,7 +64,9 @@ class DSDevice(DeviceBase):
         producer.set_and_publish(MessageEndpoints.device_readback(self.name), dev_msg, pipe=pipe)
         producer.set(topic=MessageEndpoints.device_read(self.name), msg=dev_msg, pipe=pipe)
         producer.set_and_publish(
-            MessageEndpoints.device_read_configuration(self.name), dev_config_msg, pipe=pipe
+            MessageEndpoints.device_read_configuration(self.name),
+            dev_config_msg,
+            pipe=pipe,
         )
         if limits is not None:
             producer.set_and_publish(
@@ -108,23 +110,24 @@ class DeviceManagerDS(DeviceManagerBase):
         self._get_config()
 
     def _get_device_class(self, dev_type):
-        module = None
-        if hasattr(plugin_devices, dev_type):
-            module = plugin_devices
-        elif hasattr(ophyd, dev_type):
-            module = ophyd
-        elif hasattr(opd, dev_type):
-            module = opd
-        elif hasattr(ops, dev_type):
-            module = ops
-        elif ":" in dev_type:
-            dev_type_scope = dev_type.split(":")
-            prefix = dev_type_scope[:-1]
-            dev_type = dev_type_scope[-1]
-            module = rgetattr(opd, ".".join(prefix))
+        """Return the class object from 'dev_type' string in the form '[module:][submodule:]class_name'
+
+        The class is looked after in ophyd devices[.module][.submodule] first, if it is not
+        present plugin_devices, ophyd, ophyd_devices.sim are searched too
+        """
+        submodule, _, class_name = dev_type.rpartition(":")
+        if submodule:
+            submodule = f".{submodule.replace(':', '.')}"
+        for parent_module in (opd, plugin_devices, ophyd, ops):
+            try:
+                module = __import__(f"{parent_module.__name__}{submodule}", fromlist=[""])
+            except ModuleNotFoundError:
+                continue
+            else:
+                break
         else:
             raise TypeError(f"Unknown device class {dev_type}")
-        return getattr(module, dev_type)
+        return getattr(module, class_name)
 
     def _load_session(self, *_args, **_kwargs):
         if self._is_config_valid():
