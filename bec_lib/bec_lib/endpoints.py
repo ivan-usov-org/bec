@@ -22,6 +22,9 @@ class MessageEndpoints:
     _device_info = "internal/devices/info"
     _device_staged = "internal/devices/staged"
 
+    # device monitoring
+    _device_monitor = "internal/devices/monitor"
+
     # scan queue
     _scan_queue_modification = "internal/queue/queue_modification"
     _scan_queue_modification_request = "internal/queue/queue_modification_request"
@@ -86,7 +89,7 @@ class MessageEndpoints:
 
     # devices feedback
     @classmethod
-    def device_status(cls, device: str):
+    def device_status(cls, device: str) -> str:
         """
         Endpoint for device status. This endpoint is used by the device server to publish
         the device status using a messages.DeviceStatusMessage message.
@@ -293,6 +296,25 @@ class MessageEndpoints:
             str: Endpoint for the async device readback.
         """
         return cls._device_async_readback.substitute(scanID=scanID, device=device)
+
+    @classmethod
+    def device_monitor(cls, device: str) -> str:
+        """
+        Endpoint for device monitoring.
+        This endpoint is used to publish image or wavefrom data from a monitor. An
+        example can be a 2D area dertector or a 1D waveform (XRF), for which we
+        forward a subset from the data to the monitoring endpoing for visualization
+        purposes. Details on shape and type of data need to be specified in
+        dtype/dshape of the dev.<device>.describe() method.
+        #TODO: Add here information that it should be a RedisStream?
+
+        Args:
+            device (str): Device name, e.g. "eiger".
+
+        Returns:
+            str: Endpoint for device monitor of the specified device.
+        """
+        return f"{cls._device_monitor}/{device}"
 
     # scan queue
     @classmethod

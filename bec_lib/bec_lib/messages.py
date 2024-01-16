@@ -656,6 +656,34 @@ class DeviceInfoMessage(BECMessage):
         )
 
 
+class DeviceMonitorMessage(BECMessage):
+    """Message type for sending device monitor updates from the device server"""
+
+    msg_type = "device_monitor_message"
+
+    def __init__(
+        self,
+        *,
+        device: str,
+        data: list,
+        datatype: dict,
+        metadata: dict = None,
+        version: float = DEFAULT_VERSION,
+    ) -> None:
+        """
+        Args:
+            device (str): device name
+            data (list): dictionary with device monitor data, #TODO should this be a list or better dictionary?
+            datatype (dict): dictionary with information about the data type and shape, from dev.describe
+            metadata (dict, optional): additional metadata to describe the conditions of the device monitor
+            version (float, optional): BECMessage version, defaults to DEFAULT_VERSION
+        """
+        self.content = {"device": device, "data": data, "datatype": datatype}
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )
+
+
 class ScanMessage(BECMessage):
     """Message type for sending scan segment data from the scan bundler"""
 
