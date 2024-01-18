@@ -43,13 +43,11 @@ def run_install(setup_args: dict, bec_deps: list, editable=False):
 if __name__ == "__main__":
     setup_args_in = {
         "entry_points": {"console_scripts": ["bec-scihub = scihub:main"]},
-        "install_requires": ["msgpack", "pyyaml", "fastjsonschema", "python-dotenv"],
+        "install_requires": ["msgpack", "pyyaml", "fastjsonschema", "python-dotenv", "py-scibec"],
         "version": __version__,
         "extras_require": {"dev": ["pytest", "pytest-random-order", "coverage", "black", "pylint"]},
     }
-    bec_deps_in = [
-        ("bec_lib", "bec_lib", bec_lib),
-    ]
+    bec_deps_in = [("bec_lib", "bec_lib", bec_lib)]
     is_local = os.path.dirname(os.path.abspath(__file__)).split("/")[-1] == "scihub"
     is_build = "bdist_wheel" in sys.argv
 
