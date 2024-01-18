@@ -35,12 +35,13 @@ def scan_to_csv(
     """Convert scan data to a csv file.
 
     Args:
-        scan_report (ScanReport): Scan report object.
-        filename (str): Name of the csv file.
-        delimiter (str, optional): Delimiter for the csv file. Defaults to ",".
-        dialect (str, optional): Argument for csv.Dialect. Defaults to None. E.g. 'excel', 'excel_tab' or 'unix_dialect', still takes argument from delimiter, choose delimier='' to omit
-        header (list, optional): Create custom header for the csv file. If None, header is created automatically. Defaults to None.
-        write_metadata (bool, optional): If True, the metadata of the scan will be written to the header of csv file. Defaults to True.
+        scan_report (ScanReport):       Scan report object.
+        filename (str):                 Name of the csv file.
+        delimiter (str, optional):      Delimiter for the csv file. Defaults to ",".
+        dialect (str, optional):        Argument for csv.Dialect. Defaults to csv.writer default, e.g. 'excel'.
+                                        Other options 'excel-tab' or 'unix', still takes argument from delimiter, choose delimier='' to omit
+        header (list, optional):        Create custom header for the csv file. If None, header is created automatically. Defaults to None.
+        write_metadata (bool, optional):If True, the metadata of the scan will be written to the header of csv file. Defaults to True.
 
     Examples:
         >>> scan_to_csv(scan_report, "./scan.csv")
@@ -70,7 +71,7 @@ def _write_csv(output_name: str, delimiter: str, output: list, dialect: str = No
     Args:
         output_name (str): Name of the csv file.
         delimiter (str): Delimiter for the csv file.
-        dialect (str): Argument for csv.Dialect. Defaults to None. If no None, delimiter input is ignored. Some input examples 'excel', 'excel_tab' or 'unix_dialect'
+        dialect (str): Argument for csv.Dialect. Defaults to None. If no None, delimiter input is ignored. Some input examples 'excel', 'excel-tab' or 'unix'
         data_dict (dict): Dictionary to be written to csv.
 
         Examples:
@@ -98,9 +99,11 @@ def _extract_scan_data(
     scan_dict = scan_to_dict(scan_report, flat=True)
 
     header_tmp = [["#" + entry.replace("\t", "")] for entry in str(scan_report).split("\n")]
+    scan_metadata = scan_report.scan.data.messages[
+        list(scan_report.scan.data.messages.keys())[-1]
+    ].metadata
     if write_metadata:
         header_tmp.append(["#ScanMetadata"])
-        scan_metadata = scan_report.scan.data[list(scan_report.scan.data.keys())[-1]].metadata
         for key, value in scan_metadata.items():
             header_tmp.append(["".join(["#", key]), value])
     if header:
@@ -147,15 +150,13 @@ def scan_to_dict(scan_report: ScanReport, flat: bool = True) -> dict:
             "value": defaultdict(lambda: defaultdict(lambda: [])),
         }
 
-    for scan_msg in scan_report.scan.data.values():
-        scan_msg_data = scan_msg.content["data"]
-        for dev, dev_data in scan_msg_data.items():
-            for signal, signal_data in dev_data.items():
-                if flat:
-                    scan_dict["timestamp"][signal].append(signal_data["timestamp"])
-                    scan_dict["value"][signal].append(signal_data["value"])
-                else:
-                    scan_dict["timestamp"][dev][signal].append(signal_data["timestamp"])
-                    scan_dict["value"][dev][signal].append(signal_data["value"])
+    for dev, dev_data in scan_report.scan.data.items():
+        for signal, signal_data in dev_data.items():
+            if flat:
+                scan_dict["timestamp"][signal] = signal_data["timestamp"]
+                scan_dict["value"][signal] = signal_data["value"]
+            else:
+                scan_dict["timestamp"][dev][signal] = signal_data["timestamp"]
+                scan_dict["value"][dev][signal] = signal_data["value"]
 
     return scan_dict

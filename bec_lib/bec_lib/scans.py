@@ -27,6 +27,8 @@ logger = bec_logger.logger
 
 
 class ScanObject:
+    """ScanObject is a class for scans"""
+
     def __init__(self, scan_name: str, scan_info: dict, client: BECClient = None) -> None:
         self.scan_name = scan_name
         self.scan_info = scan_info
@@ -87,11 +89,13 @@ class ScanObject:
         return report
 
     def _get_scan_report_type(self, hide_report) -> str:
+        """get the scan report type"""
         if hide_report:
             return None
         return self.scan_info.get("scan_report_hint")
 
     def _start_consumer(self, request: messages.ScanQueueMessage) -> ConsumerConnector:
+        """Start a consumer for the given request"""
         consumer = self.client.device_manager.connector.consumer(
             [
                 MessageEndpoints.device_readback(dev)
@@ -103,12 +107,15 @@ class ScanObject:
         return consumer
 
     def _send_scan_request(self, request: messages.ScanQueueMessage) -> None:
+        """Send a scan request to the scan server"""
         self.client.device_manager.producer.send(
             MessageEndpoints.scan_queue_request(), request.dumps()
         )
 
 
 class Scans:
+    """Scans is a class for available scans in BEC"""
+
     def __init__(self, parent):
         self.parent = parent
         self._available_scans = {}
@@ -124,6 +131,7 @@ class Scans:
         self._scan_export = None
 
     def _import_scans(self):
+        """Import scans from the scan server"""
         msg_raw = self.parent.producer.get(MessageEndpoints.available_scans())
         if msg_raw is None:
             logger.warning("No scans available. Are redis and the BEC server running?")
@@ -267,6 +275,8 @@ class Scans:
 
 
 class ScanGroup(ContextDecorator):
+    """ScanGroup is a ContextDecorator for defining a scan group"""
+
     def __init__(self, parent: Scans = None) -> None:
         super().__init__()
         self.parent = parent
@@ -282,6 +292,8 @@ class ScanGroup(ContextDecorator):
 
 
 class ScanDef(ContextDecorator):
+    """ScanDef is a ContextDecorator for defining a new scan"""
+
     def __init__(self, parent: Scans = None) -> None:
         super().__init__()
         self.parent = parent
@@ -299,6 +311,8 @@ class ScanDef(ContextDecorator):
 
 
 class HideReport(ContextDecorator):
+    """HideReport is a ContextDecorator for hiding the report"""
+
     def __init__(self, parent: Scans = None) -> None:
         super().__init__()
         self.parent = parent
@@ -313,6 +327,8 @@ class HideReport(ContextDecorator):
 
 
 class DatasetIdOnHold(ContextDecorator):
+    """DatasetIdOnHold is a ContextDecorator for setting the dataset id on hold"""
+
     def __init__(self, parent: Scans = None) -> None:
         super().__init__()
         self.parent = parent
@@ -365,21 +381,37 @@ class ScanExport:
             output_file (str): Output file name
         """
         self.output_file = output_file
-        self.client = self._get_client()
-        self.client.scans._scan_export = self
+        self.client = None
         self.scans = None
+
+    def _check_abort_on_ctrl_c(self):
+        """Check if scan should be aborted on Ctrl-C"""
+        # pylint: disable=protected-access
+        if not self.client._service_config.abort_on_ctrl_c:
+            raise RuntimeError(
+                "ScanExport context manager can only be used if abort_on_ctrl_c is set to True"
+            )
 
     def _get_client(self):
         return builtins.__dict__["bec"]
 
     def __enter__(self):
         self.scans = []
+        self.client = self._get_client()
+        self.client.scans._scan_export = self
+        self._check_abort_on_ctrl_c()
         return self
+
+    def _export_to_csv(self):
+        scan_to_csv(self.scans, self.output_file)
 
     def __exit__(self, *exc):
         try:
             for scan in self.scans:
                 scan.wait()
         finally:
-            scan_to_csv(self.scans, self.output_file)
-            self.scans = None
+            try:
+                self._export_to_csv()
+                self.scans = None
+            except:
+                logger.warning("Could not export scans to csv file.")
