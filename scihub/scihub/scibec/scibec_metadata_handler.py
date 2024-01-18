@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from bec_lib import messages
 
-from bec_lib import MessageEndpoints, bec_logger
+from bec_lib import MessageEndpoints, bec_logger, messages
 
 logger = bec_logger.logger
 
@@ -16,92 +15,139 @@ class SciBecMetadataHandler:
         self.scibec_connector = scibec_connector
         self._scan_status_consumer = None
         self._start_scan_subscription()
-        self._scan_segment_subscription = None
-        self._start_scan_segment_subscription()
-        self._baseline_subscription = None
-        self._start_baseline_subscription()
+        self._file_subscription = None
+        self._start_file_subscription()
 
     def _start_scan_subscription(self):
         self._scan_status_consumer = self.scibec_connector.connector.consumer(
-            MessageEndpoints.scan_status(),
-            cb=self._handle_scan_status,
-            parent=self,
+            MessageEndpoints.scan_status(), cb=self._handle_scan_status, parent=self
         )
         self._scan_status_consumer.start()
 
-    def _start_scan_segment_subscription(self):
-        self._scan_segment_subscription = self.scibec_connector.connector.consumer(
-            MessageEndpoints.scan_segment(),
-            cb=self._handle_scan_data,
-            parent=self,
+    def _start_file_subscription(self):
+        self._file_subscription = self.scibec_connector.connector.consumer(
+            MessageEndpoints.file_content(), cb=self._handle_file_content, parent=self
         )
-        self._scan_segment_subscription.start()
-
-    def _start_baseline_subscription(self):
-        self._baseline_subscription = self.scibec_connector.connector.consumer(
-            MessageEndpoints.scan_baseline(),
-            cb=self._handle_baseline_data,
-            parent=self,
-        )
-        self._baseline_subscription.start()
+        self._file_subscription.start()
 
     @staticmethod
     def _handle_scan_status(msg, *, parent, **_kwargs) -> None:
         msg = messages.ScanStatusMessage.loads(msg.value)
         try:
-            scan = parent.update_scan_data(msg)
-        except Exception:
+            scan = parent.update_scan_status(msg)
+        except Exception as exc:
+            logger.exception(f"Failed to update scan status: {exc}")
             logger.warning("Failed to write to SciBec")
             return
 
         # if msg.content["status"] != "open":
         #     parent.update_event_data(scan)
 
-    def update_scan_data(self, msg) -> dict:
+    def update_scan_status(self, msg) -> dict:
+        """
+        Update the scan status in SciBec
+
+        Args:
+            msg(messages.ScanStatusMessage): The message containing the scan data
+
+        Returns:
+            dict: The updated scan data
+        """
         scibec = self.scibec_connector.scibec
         scibec_info = self.scibec_connector.scibec_info
-        session_id = scibec_info["activeSession"][0]["id"]
-        experiment_id = scibec_info["activeSession"][0]["experimentId"]
+        experiment_id = scibec_info["activeExperiment"]["id"]
+        # session_id = scibec_info["activeSession"][0]["id"]
+        # experiment_id = scibec_info["activeSession"][0]["experimentId"]
         logger.debug(f"Received new scan status {msg}")
-        scan = scibec.get_scan_by_scanID(msg.content["scanID"])
+        scan = scibec.scan.scan_controller_find(
+            query_params={"filter": {"where": {"scanId": msg.content["scanID"]}}}
+        ).body
         if not scan:
             info = msg.content["info"]
             dataset_number = info.get("dataset_number")
-            dataset = scibec.get_dataset_by_experiment_and_number(experiment_id, dataset_number)
-            if not dataset:
-                dataset_data = {"experimentId": experiment_id, "number": dataset_number}
-                dataset = scibec.add_dataset(dataset_data)
-            if isinstance(dataset, list):
+            dataset = scibec.dataset.dataset_controller_find(
+                query_params={
+                    "filter": {"where": {"number": dataset_number, "experimentId": experiment_id}}
+                }
+            ).body
+            if dataset:
                 dataset = dataset[0]
+            else:
+                dataset = scibec.dataset.dataset_controller_create(
+                    body=scibec.models.Dataset(
+                        **{
+                            "readACL": scibec_info["activeExperiment"]["readACL"],
+                            "writeACL": scibec_info["activeExperiment"]["readACL"],
+                            "owner": scibec_info["activeExperiment"]["owner"],
+                            "number": dataset_number,
+                            "experimentId": experiment_id,
+                            "name": info.get("dataset_name", ""),
+                        }
+                    )
+                ).body
+
             scan_data = {
+                "readACL": scibec_info["activeExperiment"]["readACL"],
+                "writeACL": scibec_info["activeExperiment"]["readACL"],
+                "owner": scibec_info["activeExperiment"]["owner"],
                 "scanType": info.get("scan_name", ""),
                 "scanId": info.get("scanID", ""),
                 "queueId": info.get("queueID", ""),
                 "requestId": info.get("RID", ""),
                 "exitStatus": msg.content["status"],
-                "queue": info.get("stream", ""),
+                # "queue": info.get("stream", ""),
                 "metadata": info,
-                "sessionId": session_id,
+                # "sessionId": session_id,
                 "datasetId": dataset["id"],
                 "scanNumber": info.get("scan_number", 0),
             }
-            scan = scibec.add_scan(scan_data)
+            scan = scibec.scan.scan_controller_create(body=scibec.models.Scan(**scan_data)).body
+            # scan = scibec.add_scan(scan_data)
         else:
             info = msg.content["info"]
-            update_data = {"metadata": info, "exitStatus": msg.content["status"]}
-            scibec.patch_scan(scan[0]["id"], update_data)
+            scan = scibec.scan.scan_controller_update_by_id(
+                path_params={"id": scan[0]["id"]},
+                body={"metadata": info, "exitStatus": msg.content["status"]},
+            )
         return scan
 
     @staticmethod
-    def _handle_scan_data(msg, *, parent, **_kwargs) -> None:
-        msg = messages.ScanMessage.loads(msg.value)
+    def _handle_file_content(msg, *, parent, **_kwargs) -> None:
+        msg = messages.FileContentMessage.loads(msg.value)
+        logger.debug(f"Received new file content {msg}")
+        if not msg:
+            return
+        parent.update_scan_data(**msg.content)
 
-    @staticmethod
-    def _handle_baseline_data(msg, *, parent, **_kwargs) -> None:
-        msg = messages.ScanBaselineMessage.loads(msg.value)
+    def update_scan_data(self, file_path: str, data: dict):
+        """
+        Update the scan data in SciBec
 
-    def update_event_data(self, scan_info: dict) -> None:
-        baseline_data = self.scibec_connector.producer.get(
-            MessageEndpoints.public_scan_baseline(scan_info[0]["scanId"])
+        Args:
+            file_path(str): The path to the original NeXuS file
+            data(dict): The scan data
+        """
+        scibec = self.scibec_connector.scibec
+        scan = scibec.scan.scan_controller_find(
+            query_params={"filter": {"where": {"scanId": data["metadata"]["scanID"]}}}
+        ).body
+        if not scan:
+            logger.warning(
+                f"Could not find scan with scanID {data['metadata']['scanID']}. Cannot write scan"
+                " data to SciBec."
+            )
+            return
+        scan = scan[0]
+        scibec.scan_data.scan_data_controller_create_many(
+            body=scibec.models.ScanData(
+                **{
+                    "readACL": scan["readACL"],
+                    "writeACL": scan["readACL"],
+                    "owner": scan["owner"],
+                    "scanId": scan["id"],
+                    "filePath": file_path,
+                    "data": data,
+                }
+            )
         )
-        baseline_data = messages.ScanBaselineMessage.loads(baseline_data)
+        logger.info(f"Wrote scan data to SciBec for scanID {data['metadata']['scanID']}")

@@ -1,16 +1,18 @@
 from __future__ import annotations
 
+import os
 from typing import TYPE_CHECKING
-from bec_lib import messages
 
 import msgpack
-from requests import ConnectionError
-
-from bec_lib import MessageEndpoints, ServiceConfig, bec_logger
+from bec_lib import MessageEndpoints, bec_logger, messages
 from bec_lib.connector import ConnectorBase
+from dotenv import dotenv_values
+from py_scibec import SciBecCore
+from py_scibec.exceptions import ApiException
+
+from scihub.repeated_timer import RepeatedTimer
 
 from .config_handler import ConfigHandler
-from .scibec import SciBec, SciBecError
 from .scibec_metadata_handler import SciBecMetadataHandler
 
 if TYPE_CHECKING:
@@ -19,49 +21,115 @@ if TYPE_CHECKING:
 logger = bec_logger.logger
 
 
+class SciBecConnectorError(Exception):
+    pass
+
+
 class SciBecConnector:
+    token_expiration_time = 86400  # one day
+
     def __init__(self, scihub: SciHub, connector: ConnectorBase) -> None:
         self.scihub = scihub
         self.connector = connector
         self.producer = connector.producer()
         self.scibec = None
+        self.host = None
+        self.target_bl = None
+        self.ingestor = None
+        self.ingestor_secret = None
+        self.ro_user = None
+        self.ro_user_secret = None
+        self._env_configured = False
         self.scibec_info = {}
         self.connect_to_scibec()
-        self.update_session()
         self.config_handler = ConfigHandler(self, connector)
 
         self._config_request_handler = None
         self._metadata_handler = None
         self._start_config_request_handler()
         self._start_metadata_handler()
+        self._start_scibec_account_update()
 
     @property
     def config(self):
         """get the current service config"""
         return self.scihub.config
 
-    def get_current_session(self):
-        if not self.scibec or not self.scibec_info.get("beamline"):
-            return None
-        if not self.scibec_info["beamline"]["activeExperiment"]:
-            return None
-        experiment = self.scibec.get_experiment_by_id(
-            self.scibec_info["beamline"]["activeExperiment"]
-        )
-        if not experiment:
-            return None
-        session_id = experiment[0].get("activeSession")
-        if not session_id:
-            return None
-        self.scibec_info["activeSession"] = self.scibec.get_session_by_id(
-            session_id, include_devices=True
-        )
-        return self.scibec_info["activeSession"]
+    def _load_environment(self):
+        env_base = self.scihub.config.service_config.get("scibec", {}).get("env_file", "")
+        env_file = os.path.join(env_base, ".env")
+        if not os.path.exists(env_file):
+            # check if there is an env file in the parent directory
+            current_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+            env_file = os.path.join(current_dir, ".env")
+            if not os.path.exists(env_file):
+                return
 
-    def update_session(self):
-        session = self.get_current_session()
-        if session:
-            self.set_redis_config(session[0]["devices"])
+        config = dotenv_values(env_file)
+        self._update_config(**config)
+
+    def _update_config(
+        # pylint: disable=invalid-name
+        self,
+        SCIBEC_HOST: str = None,
+        SCIBEC_TARGET: str = None,
+        SCIBEC_INGESTOR: str = None,
+        SCIBEC_INGESTOR_SECRET: str = None,
+        SCIBEC_RO_USER: str = None,
+        SCIBEC_RO_USER_SECRET: str = None,
+        **kwargs,
+    ) -> None:
+        self.host = SCIBEC_HOST
+        self.target_bl = SCIBEC_TARGET
+        self.ingestor = SCIBEC_INGESTOR
+        self.ingestor_secret = SCIBEC_INGESTOR_SECRET
+        self.ro_user = SCIBEC_RO_USER
+        self.ro_user_secret = SCIBEC_RO_USER_SECRET
+
+        if (
+            self.host
+            and self.target_bl
+            and self.ingestor
+            and self.ingestor_secret
+            and self.ro_user
+            and self.ro_user_secret
+        ):
+            self._env_configured = True
+
+    def _start_scibec_account_update(self) -> None:
+        """
+        Start a repeated timer to update the scibec account in redis
+        """
+        if not self._env_configured:
+            return
+        if not self.scibec:
+            return
+        try:
+            self._scibec_account_update()
+        except ApiException as exc:
+            logger.warning(f"Could not connect to SciBec: {exc}")
+            return
+        self._scibec_account_thread = RepeatedTimer(
+            self.token_expiration_time, self._scibec_account_update
+        )
+
+    def _scibec_account_update(self):
+        """
+        Update the scibec account in redis
+        """
+        logger.info("Updating SciBec account.")
+        token = self.scibec.get_new_token(username=self.ro_user, password=self.ro_user_secret)
+        if token:
+            self.set_scibec_account(token)
+
+    def set_scibec_account(self, token: str) -> None:
+        """
+        Set the scibec account in redis
+        """
+        self.producer.set(
+            MessageEndpoints.scibec(),
+            messages.CredentialsMessage(credentials={"url": self.host, "token": f"Bearer {token}"}),
+        )
 
     def set_redis_config(self, config):
         self.producer.set(MessageEndpoints.device_config(), msgpack.dumps(config))
@@ -84,38 +152,51 @@ class SciBecConnector:
         parent.config_handler.parse_config_request(msg)
 
     def connect_to_scibec(self):
-        scibec_host = self.scihub.config.scibec
-        if not self.scihub.config.scibec:
+        """
+        Connect to SciBec and set the producer to the write account
+        """
+        self._load_environment()
+        if not self._env_configured:
+            logger.warning("No environment file found. Cannot connect to SciBec.")
             return
         try:
-            beamline = self.scihub.config.config["scibec"].get("beamline")
-            if not beamline:
-                logger.warning(f"Cannot connect to SciBec without a beamline specified.")
-                return
-            logger.info(f"Connecting to SciBec on {scibec_host}")
-            self.scibec = SciBec()
-            self.scibec.url = scibec_host
-            beamline_info = self.scibec.get_beamline(beamline)
+            logger.info(f"Connecting to SciBec on {self.host}")
+            self.scibec = SciBecCore(host=self.host)
+            self.scibec.login(username=self.ingestor, password=self.ingestor_secret)
+            beamline_info = self.scibec.beamline.beamline_controller_find(
+                query_params={"filter": {"where": {"name": self.target_bl}}}
+            )
+            if not beamline_info.body:
+                raise SciBecConnectorError(
+                    f"Could not find a beamline with the name {self.target_bl}"
+                )
+            beamline_info = beamline_info.body[0]
             self.scibec_info["beamline"] = beamline_info
             experiment_id = beamline_info.get("activeExperiment")
-            if experiment_id:
-                experiment = self.scibec.get_experiment_by_id(experiment_id)
-                write_account = experiment[0]["writeAccount"]
-                if write_account[0] == "p":
-                    write_account = write_account.replace("p", "e")
-                self.producer.set(MessageEndpoints.account(), write_account.encode())
 
-                self.scibec_info["activeExperiment"] = experiment
-                if not "activeSession" in experiment[0]:
-                    return
-                session = self.scibec.get_session_by_id(experiment[0]["activeSession"])
-                self.scibec_info["activeSession"] = session
-            if not beamline_info:
-                logger.warning(f"Could not find a beamline with the name {beamline}")
-                return
-        except (ConnectionError, SciBecError) as exc:
+            if not experiment_id:
+                raise SciBecConnectorError(
+                    f"Could not find an active experiment on {self.target_bl}"
+                )
+
+            experiment = self.scibec.experiment.experiment_controller_find_by_id(
+                path_params={"id": experiment_id}
+            )
+
+            if not experiment:
+                raise SciBecConnectorError(
+                    f"Could not find an experiment with the id {experiment_id}"
+                )
+            experiment = experiment.body
+            self.scibec_info["activeExperiment"] = experiment
+            write_account = experiment["writeAccount"]
+            if write_account[0] == "p":
+                write_account = write_account.replace("p", "e")
+            self.producer.set(MessageEndpoints.account(), write_account.encode())
+
+        except (ApiException, SciBecConnectorError) as exc:
             self.scibec = None
-            return
+            logger.warning(f"Could not connect to SciBec: {exc}")
 
     def shutdown(self):
         pass
