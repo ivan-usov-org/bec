@@ -307,11 +307,17 @@ trigger_bec-widgets:
     project: bec/bec-widgets
     strategy: depend
   allow_failure: true
+  rules:
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
 
 trigger_ophyd-devices:
   trigger:
     project: bec/ophyd_devices
     strategy: depend
+  rules:
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
 
 semver:
   stage: Build
