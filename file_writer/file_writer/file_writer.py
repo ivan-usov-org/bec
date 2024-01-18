@@ -10,8 +10,7 @@ import typing
 import file_writer_plugins as fwp
 import h5py
 import xmltodict
-
-from bec_lib import bec_logger
+from bec_lib import MessageEndpoints, bec_logger, messages
 
 from .merged_dicts import merge_dicts
 
@@ -294,7 +293,7 @@ class HDF5StorageWriter:
                 pass
 
     @classmethod
-    def write_to_file(cls, writer_storage, device_storage, file):
+    def write(cls, writer_storage, device_storage, file):
         writer = cls()
         writer.device_storage = device_storage
         writer.add_content(file, writer_storage)
@@ -323,9 +322,15 @@ class NexusFileWriter(FileWriter):
             file_references=data.file_references,
             device_manager=self.file_writer_manager.device_manager,
         )
+        file_data = {}
+        for key, val in device_storage.items():
+            file_data[key] = val if not isinstance(val, list) else merge_dicts(val)
+        msg_data = {"file_path": file_path, "data": file_data}
+        msg = messages.FileContentMessage(**msg_data).dumps()
+        self.file_writer_manager.producer.set_and_publish(MessageEndpoints.file_content(), msg)
 
         with h5py.File(file_path, "w") as file:
-            HDF5StorageWriter.write_to_file(writer_storage._storage, device_storage, file)
+            HDF5StorageWriter.write(writer_storage._storage, device_storage, file)
 
 
 def dict_to_storage(storage, data):
