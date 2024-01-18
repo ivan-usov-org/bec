@@ -131,7 +131,9 @@ class SciBecConnector:
         """
         self.producer.set(
             MessageEndpoints.scibec(),
-            messages.CredentialsMessage(credentials={"url": self.host, "token": f"Bearer {token}"}),
+            messages.CredentialsMessage(
+                credentials={"url": self.host, "token": f"Bearer {token}"}
+            ).dumps(),
         )
 
     def set_redis_config(self, config):
