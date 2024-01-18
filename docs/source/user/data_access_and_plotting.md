@@ -3,7 +3,7 @@
 
 Let's recapture how to do a scan, and explore the data contained within it. 
 
-```python
+```ipython
 s = scans.line_scan(dev.samx, -5, 5, steps=50, exp_time=0.1, relative=False)
 ```
 
@@ -35,10 +35,10 @@ gauss_bpm_data = s.scan.data.gauss_bpm.gauss_bpm.val
 ```
 You may now use the given data to manipulate it as you see fit.
 Keep in mind though, these manipulations only happen locally for yourself in the IPython shell. 
-They will not be forwarded to the BEC data in Redis, thus, your modification won't be stored in the raw data file (HDF5 file). 
+They will not be forwarded to the BEC data in Redis, thus, your modification won't be stored in the raw data file (HDF5 file).
 
 ## Plot the scan data on your own
-You may install `pandas` as an additional dependency to directly export the data to a panda's dataframe. 
+You can install `pandas` as an additional dependency to directly export the data to a panda's dataframe. 
 If on top, `matplotlib` is installed in the environment and imported `import matplotlib.pyplot as plt`, one may use the built-in plotting capabilities of pandas to plot from the shell.
 
 ```python
@@ -52,4 +52,19 @@ This will plot the following curve from the device `gauss_bpm`, which simulates 
 :align: center
 :alt: tab completion for finding devices
 :width: 800
+```
+## Export scan data from client
+BEC consistently saves data in h5 format, adhering to the NX standard. 
+Accessing data through h5 files is recommended, which also includes links to large detector data from secondary data services. 
+Additionally, we offer a straightforward method to export scan data to `csv` using the client interface:
+
+```ipython
+with scans.scan_export("<path_to_output_file.csv>"):
+    scans.line_scan(dev.samx, -5, 5, steps=50, exp_time=0.1, relative=False)
+    scans.grid_scan(dev.samx, -5, 5, 50, dev.samy, -1, 1, 10, exp_time=0.1, relative=False)
+```
+Executing this will output the scan data to <path_to_output_file.csv>
+
+```Note
+Large data from 2D detectors are usually processing by backend services and are, therefore, not available for client-based export.
 ```
