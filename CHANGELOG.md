@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.54.0 (2024-01-18)
+
+### Feature
+
+* **config:** Allow both .yaml and .yml files as valid config files ([`a1ca26d`](https://gitlab.psi.ch/bec/bec/-/commit/a1ca26dbd21823ae21eef359b8592a8c8749d300))
+
 ## v0.53.0 (2024-01-12)
 
 ### Feature
