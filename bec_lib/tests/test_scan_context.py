@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 
 from bec_lib.device import DeviceBase
-from bec_lib.scans import DatasetIdOnHold, HideReport, Metadata, ScanDef, ScanGroup
+from bec_lib.scans import DatasetIdOnHold, HideReport, Metadata, ScanDef, ScanExport, ScanGroup
 from bec_lib.tests.utils import bec_client
 
 # pylint: disable=no-member
@@ -87,6 +87,24 @@ def test_scan_group_cm(bec_client):
         assert isinstance(client.scans._scan_group, str)
 
     assert client.scans._scan_group is None
+
+
+@pytest.mark.parametrize("abort_on_ctrl_c", [True, False])
+def test_scan_export_cm(abort_on_ctrl_c):
+    scan_export = ScanExport("temp")
+    scan_export._get_client = mock.MagicMock()
+    scan_export._get_client.return_value = mock_client = mock.MagicMock()
+    mock_client._service_config = mock_abort = mock.PropertyMock()
+    mock_abort.abort_on_ctrl_c = abort_on_ctrl_c
+    scan_export._export_to_csv = mock_to_csv = mock.MagicMock()
+    if not abort_on_ctrl_c:
+        with pytest.raises(RuntimeError):
+            with scan_export:
+                ...  # Do nothing
+    else:
+        with scan_export:
+            ...  # Do nothgin
+        assert mock_to_csv.call_count == 1
 
 
 def test_parameter_bundler(bec_client):

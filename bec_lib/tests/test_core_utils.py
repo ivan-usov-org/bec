@@ -6,6 +6,7 @@ from unittest import mock
 import pytest
 
 from bec_lib import messages
+from bec_lib.scan_items import ScanItem
 from bec_lib.scan_report import ScanReport
 from bec_lib.utils import _write_csv, scan_to_dict, scan_to_csv
 
@@ -27,36 +28,34 @@ def test__write_csv():
 def test_scan_to_dict():
     """Test scan_to_dict function."""
 
-    input_dict = input_dict = create_scan_report()
+    # input_dict = input_dict = create_scan_report()
+    scan_manager_mock = mock.MagicMock()
+    scan_item = ScanItem(
+        scan_manager=scan_manager_mock, queueID="test", scan_number=[1], scanID=["tmp"], status="OK"
+    )
+    for scan_msg in create_scan_messages().values():
+        scan_item.data.set(scan_msg.content["point_id"], scan_msg)
 
     output_dict = {
-        "timestamp": defaultdict(
-            list,
-            {
-                "bpm4i": [1689340694.3702202, 1689340694.3702202, 1689340694.3702202],
-                "samx": [1689957983.5892477, 1689957983.6680737, 1689957983.747301],
-                "samx_setpoint": [1689957983.5038617, 1689957983.607795, 1689957983.6842027],
-                "samx_motor_is_moving": [
-                    1689957983.5894659,
-                    1689957983.6683168,
-                    1689957983.7475493,
-                ],
-            },
-        ),
-        "value": defaultdict(
-            list,
-            {
-                "bpm4i": [0.8140756084557457, 0.980531184880259, 0.8360317021600272],
-                "samx": [-2.997623536163973, 2.0203129364662855, 7.01317320459588],
-                "samx_setpoint": [-2.9878629905097327, 2.0121370094902673, 7.012137009490267],
-                "samx_motor_is_moving": [0, 0, 0],
-            },
-        ),
+        "timestamp": {
+            "bpm4i": [1689340694.3702202, 1689340694.3702202, 1689340694.3702202],
+            "samx": [1689957983.5892477, 1689957983.6680737, 1689957983.747301],
+            "samx_setpoint": [1689957983.5038617, 1689957983.607795, 1689957983.6842027],
+            "samx_motor_is_moving": [1689957983.5894659, 1689957983.6683168, 1689957983.7475493],
+        },
+        "value": {
+            "bpm4i": [0.8140756084557457, 0.980531184880259, 0.8360317021600272],
+            "samx": [-2.997623536163973, 2.0203129364662855, 7.01317320459588],
+            "samx_setpoint": [-2.9878629905097327, 2.0121370094902673, 7.012137009490267],
+            "samx_motor_is_moving": [0, 0, 0],
+        },
     }
 
     scanreport_mock = mock.MagicMock()
-    scanreport_mock.scan.data.__getitem__ = input_dict.__getitem__
-    scanreport_mock.scan.data.values.return_value = input_dict.values()
+    # scanreport_mock.scan.return_value = scan_item
+    scanreport_mock.scan = scan_item
+    # scanreport_mock.scan.data.__getitem__ = scan_item.data.__getitem__
+    # scanreport_mock.scan.data.values.return_value = scan_item.data.values()
 
     return_dict = scan_to_dict(scanreport_mock, flat=True)
     assert return_dict == output_dict
@@ -106,7 +105,7 @@ def test_scan_to_csv():
         )
 
 
-def create_scan_report():
+def create_scan_messages():
     return {
         0: messages.ScanMessage(
             **{
