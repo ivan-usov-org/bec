@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 import os
-import threading
 from typing import TYPE_CHECKING
 
 import msgpack
 import requests
+from bec_lib import MessageEndpoints, RedisConnector, bec_logger
 from dotenv import dotenv_values
 
-from bec_lib import MessageEndpoints, RedisConnector, bec_logger
+from scihub.repeated_timer import RepeatedTimer
 
 logger = bec_logger.logger
 
@@ -73,6 +73,7 @@ class SciLogConnector:
         SCILOG_DEFAULT_HOST: str = None,
         SCILOG_USER: str = None,
         SCILOG_USER_SECRET: str = None,
+        **kwargs,
     ) -> None:
         self.host = SCILOG_DEFAULT_HOST
         self.user = SCILOG_USER
@@ -84,31 +85,3 @@ class SciLogConnector:
     def shutdown(self):
         if self._scilog_thread:
             self._scilog_thread.stop()
-
-
-class RepeatedTimer:
-    def __init__(self, interval, function, *args, **kwargs):
-        self._timer = None
-        self.interval = interval
-        self.function = function
-        self.args = args
-        self.kwargs = kwargs
-        self.is_running = False
-        self.start()
-
-    def _run(self):
-        self.is_running = False
-        self.start()
-        self.function(*self.args, **self.kwargs)
-
-    def start(self):
-        """start the timer"""
-        if not self.is_running:
-            self._timer = threading.Timer(self.interval, self._run)
-            self._timer.start()
-            self.is_running = True
-
-    def stop(self):
-        """stop the timer"""
-        self._timer.cancel()
-        self.is_running = False
