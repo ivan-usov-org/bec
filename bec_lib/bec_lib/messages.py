@@ -885,6 +885,28 @@ class FileMessage(BECMessage):
         )
 
 
+class FileContentMessage(BECMessage):
+    """File content message to inform about the content of a file"""
+
+    msg_type = "file_content_message"
+
+    def __init__(
+        self, *, file_path: str, data: dict, metadata: dict = None, version: float = DEFAULT_VERSION
+    ) -> None:
+        """
+        Args:
+            file_path (str): path to the file
+            data (str): content of the file
+            metadata (dict, optional): status metadata. Defaults to None.
+            version (float, optional): BECMessage version. Defaults to DEFAULT_VERSION.
+        """
+
+        self.content = {"file_path": file_path, "data": data}
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )
+
+
 class VariableMessage(BECMessage):
     """Message to inform about a global variable"""
 
@@ -1134,6 +1156,27 @@ class ServiceResponseMessage(BECMessage):
         """
 
         self.content = {"response": response}
+        super().__init__(
+            msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
+        )
+
+
+class CredentialsMessage(BECMessage):
+    """Message for credentials"""
+
+    msg_type = "credentials_message"
+
+    def __init__(
+        self, *, credentials: dict, metadata: dict = None, version: float = DEFAULT_VERSION
+    ) -> None:
+        """
+        Message for credentials
+        Args:
+            credentials (dict): credentials
+            metadata (dict, optional): metadata. Defaults to None.
+        """
+
+        self.content = {"credentials": credentials}
         super().__init__(
             msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
         )
