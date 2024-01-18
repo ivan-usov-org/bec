@@ -5,13 +5,13 @@ from unittest import mock
 import h5py
 import numpy as np
 import pytest
-from file_writer_plugins.cSAXS import NeXus_format as cSAXS_Nexus_format
 from test_file_writer_manager import load_FileWriter
 
 import file_writer
 from file_writer import NexusFileWriter, NeXusFileXMLWriter
 from file_writer.file_writer import HDF5Storage
 from file_writer.file_writer_manager import ScanStorage
+from file_writer_plugins.cSAXS import NeXus_format as cSAXS_Nexus_format
 
 dir_path = os.path.dirname(file_writer.__file__)
 
@@ -48,12 +48,23 @@ def test_nexus_file_writer():
     file_manager = load_FileWriter()
     file_writer = NexusFileWriter(file_manager)
     with mock.patch.object(
-        file_writer, "_create_device_data_storage", return_value={"samx": [0, 1, 2]}
+        file_writer,
+        "_create_device_data_storage",
+        return_value={
+            "samx": [
+                {"samx": {"value": 0}},
+                {"samx": {"value": 1}},
+                {"samx": {"value": 2}},
+                {"samx": {"value": 3}},
+                {"samx": {"value": 4}},
+            ]
+        },
     ):
-        file_writer.write("./test.h5", ScanStorage("2", "scanID-string"))
+        file_writer.write("./test.h5", ScanStorage(2, "scanID-string"))
     with h5py.File("./test.h5", "r") as test_file:
         assert list(test_file) == ["entry"]
         assert list(test_file["entry"]) == ["collection", "control", "instrument", "sample"]
+        assert np.allclose(test_file["entry/collection/bec/samx/samx/value"][...], [0, 1, 2, 3, 4])
         # assert list(test_file["entry"]["sample"]) == ["x_translation"]
         # assert test_file["entry"]["sample"].attrs["NX_class"] == "NXsample"
         # assert test_file["entry"]["sample"]["x_translation"].attrs["units"] == "mm"
@@ -124,7 +135,9 @@ def test_create_device_data_storage():
                 "scan_report_hint": "table",
                 "scan_report_devices": ["samx"],
                 "scan_msgs": [
-                    "ScanQueueMessage(({'scan_type': 'monitor_scan', 'parameter': {'args': {'samx': [-100, 100]}, 'kwargs': {'relative': False}}, 'queue': 'primary'}, {'RID': '5ee455b8-d0ef-452d-b54a-e7cea5cea19e'})))"
+                    "ScanQueueMessage(({'scan_type': 'monitor_scan', 'parameter': {'args': {'samx':"
+                    " [-100, 100]}, 'kwargs': {'relative': False}}, 'queue': 'primary'}, {'RID':"
+                    " '5ee455b8-d0ef-452d-b54a-e7cea5cea19e'})))"
                 ],
             },
         )
