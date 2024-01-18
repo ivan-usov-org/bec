@@ -41,11 +41,14 @@ class SciBecConnector:
         self.ro_user_secret = None
         self._env_configured = False
         self.scibec_info = {}
-        self.connect_to_scibec()
-        self.config_handler = ConfigHandler(self, connector)
-
         self._config_request_handler = None
         self._metadata_handler = None
+        self.config_handler = None
+        self._start(connector)
+
+    def _start(self, connector: ConnectorBase):
+        self.connect_to_scibec()
+        self.config_handler = ConfigHandler(self, connector)
         self._start_config_request_handler()
         self._start_metadata_handler()
         self._start_scibec_account_update()
@@ -160,43 +163,46 @@ class SciBecConnector:
             logger.warning("No environment file found. Cannot connect to SciBec.")
             return
         try:
-            logger.info(f"Connecting to SciBec on {self.host}")
-            self.scibec = SciBecCore(host=self.host)
-            self.scibec.login(username=self.ingestor, password=self.ingestor_secret)
-            beamline_info = self.scibec.beamline.beamline_controller_find(
-                query_params={"filter": {"where": {"name": self.target_bl}}}
-            )
-            if not beamline_info.body:
-                raise SciBecConnectorError(
-                    f"Could not find a beamline with the name {self.target_bl}"
-                )
-            beamline_info = beamline_info.body[0]
-            self.scibec_info["beamline"] = beamline_info
-            experiment_id = beamline_info.get("activeExperiment")
-
-            if not experiment_id:
-                raise SciBecConnectorError(
-                    f"Could not find an active experiment on {self.target_bl}"
-                )
-
-            experiment = self.scibec.experiment.experiment_controller_find_by_id(
-                path_params={"id": experiment_id}
-            )
-
-            if not experiment:
-                raise SciBecConnectorError(
-                    f"Could not find an experiment with the id {experiment_id}"
-                )
-            experiment = experiment.body
-            self.scibec_info["activeExperiment"] = experiment
-            write_account = experiment["writeAccount"]
-            if write_account[0] == "p":
-                write_account = write_account.replace("p", "e")
-            self.producer.set(MessageEndpoints.account(), write_account.encode())
+            self._update_scibec_instance()
+            self._update_experiment_info()
+            self._update_eaccount_in_redis()
 
         except (ApiException, SciBecConnectorError) as exc:
             self.scibec = None
             logger.warning(f"Could not connect to SciBec: {exc}")
+
+    def _update_scibec_instance(self):
+        logger.info(f"Connecting to SciBec on {self.host}")
+        self.scibec = SciBecCore(host=self.host)
+        self.scibec.login(username=self.ingestor, password=self.ingestor_secret)
+
+    def _update_experiment_info(self):
+        beamline_info = self.scibec.beamline.beamline_controller_find(
+            query_params={"filter": {"where": {"name": self.target_bl}}}
+        )
+        if not beamline_info.body:
+            raise SciBecConnectorError(f"Could not find a beamline with the name {self.target_bl}")
+        beamline_info = beamline_info.body[0]
+        self.scibec_info["beamline"] = beamline_info
+        experiment_id = beamline_info.get("activeExperiment")
+
+        if not experiment_id:
+            raise SciBecConnectorError(f"Could not find an active experiment on {self.target_bl}")
+
+        experiment = self.scibec.experiment.experiment_controller_find_by_id(
+            path_params={"id": experiment_id}
+        )
+
+        if not experiment:
+            raise SciBecConnectorError(f"Could not find an experiment with the id {experiment_id}")
+        experiment = experiment.body
+        self.scibec_info["activeExperiment"] = experiment
+
+    def _update_eaccount_in_redis(self):
+        write_account = self.scibec_info["activeExperiment"]["writeAccount"]
+        if write_account[0] == "p":
+            write_account = write_account.replace("p", "e")
+        self.producer.set(MessageEndpoints.account(), write_account.encode())
 
     def shutdown(self):
         pass
