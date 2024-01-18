@@ -48,6 +48,7 @@ class MessageEndpoints:
     _public_scan_baseline = Template("public/$scanID/scan_baseline")
     _public_file = Template("public/$scanID/file/$name")
     _file_event = "public/file_event"
+    _file_content = "internal/file_content"
 
     # instructions
     _device_instructions = "internal/devices/instructions"
@@ -71,6 +72,9 @@ class MessageEndpoints:
 
     # logbook
     _logbook = "internal/logbook"
+
+    # scibec
+    _scibec = "internal/scibec"
 
     # experiment
     _account = "internal/account"
@@ -610,6 +614,17 @@ class MessageEndpoints:
         """
         return f"{cls._file_event}/{name}"
 
+    @classmethod
+    def file_content(cls) -> str:
+        """
+        Endpoint for file content. This endpoint is used by the file writer to publish the
+        file content using a messages.FileContentMessage message.
+
+        Returns:
+            str: Endpoint for file content.
+        """
+        return cls._file_content
+
     # log
     @classmethod
     def log(cls) -> str:
@@ -725,6 +740,18 @@ class MessageEndpoints:
             str: Endpoint for logbook.
         """
         return cls._logbook
+
+    # scibec
+    @classmethod
+    def scibec(cls) -> str:
+        """
+        Endpoint for scibec. This endpoint is used to publish scibec info such as
+        url, user and token using a direct msgpack dump of a dictionary.
+
+        Returns:
+            str: Endpoint for scibec.
+        """
+        return cls._scibec
 
     # experiment
     @classmethod
