@@ -245,6 +245,11 @@ class RedisProducer(ProducerConnector):
         return client.lrange(topic, start, end)
 
     @catch_connection_error
+    def brpop(self, *topics: str, timeout=0, pipe=None):
+        client = pipe if pipe is not None else self.r
+        return client.brpop(topics, timeout)
+
+    @catch_connection_error
     def set_and_publish(self, topic: str, msg, pipe=None, expire: int = None) -> None:
         """piped combination of self.publish and self.set"""
         client = pipe if pipe is not None else self.pipeline()

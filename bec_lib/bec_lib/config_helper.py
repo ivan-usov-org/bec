@@ -109,34 +109,31 @@ class ConfigHelper:
         Returns:
             ServiceResponseMessage: reply message
         """
-        elapsed_time = 0
         max_time = timeout
+        ack_services = set()
         while True:
-            res = self.producer.lrange(MessageEndpoints.service_response(RID), 0, -1)
-            if not res:
-                time.sleep(0.005)
-                elapsed_time += 0.005
-            else:
-                service_messages = [messages.ServiceResponseMessage.loads(msg) for msg in res]
-                ack_services = [
-                    msg.content["response"]["service"]
-                    for msg in service_messages
-                    if msg is not None
-                ]
-                if set(["DeviceServer", "ScanServer"]).issubset(set(ack_services)):
-                    break
-            if elapsed_time > max_time:
-                if res:
-                    service_messages = [messages.ServiceResponseMessage.loads(msg) for msg in res]
+            try:
+                _, msg = self.producer.brpop(
+                    MessageEndpoints.service_response(RID), timeout=max_time
+                )
+            except TypeError:
+                # in case of timeout, brpop does not return the expected tuple
+                if ack_services:
                     raise DeviceConfigError(
                         "Timeout reached whilst waiting for config change to be acknowledged."
-                        f" Received {service_messages}."
+                        f" Received from {ack_services}."
+                    )
+                else:
+                    raise DeviceConfigError(
+                        "Timeout reached whilst waiting for config change to be acknowledged. No"
+                        " messages received."
                     )
 
-                raise DeviceConfigError(
-                    "Timeout reached whilst waiting for config change to be acknowledged. No"
-                    " messages received."
-                )
+            service_message = messages.ServiceResponseMessage.loads(msg)
+            ack_services.add(service_message.content["response"]["service"])
+
+            if set(["DeviceServer", "ScanServer"]).issubset(set(ack_services)):
+                break
 
     def wait_for_config_reply(self, RID: str, timeout=10) -> RequestResponseMessage:
         """
