@@ -325,7 +325,7 @@ class ScanQueueMessage(BECMessage):
         """
         Sent by the API server / user to the scan_queue topic. It will be consumed by the scan server.
         Args:
-            scan_type (str): one of the registered scan types; either scan stubs (set, read, ...) or scans (dscan, ct, ...)
+            scan_type (str): one of the registered scan types; either rpc calls or scan types defined in the scan server
             parameter (dict): required parameters for the given scan_stype
             queue (str): either "primary" or "interception"
             metadata (dict, optional): additional metadata to describe the scan
