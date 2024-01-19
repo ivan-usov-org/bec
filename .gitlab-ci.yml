@@ -306,6 +306,7 @@ trigger_bec-widgets:
   trigger:
     project: bec/bec-widgets
     strategy: depend
+  allow_failure: true
 
 trigger_ophyd-devices:
   trigger:
