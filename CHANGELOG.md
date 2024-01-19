@@ -2,6 +2,22 @@
 
 <!--next-version-placeholder-->
 
+## v0.55.0 (2024-01-19)
+
+### Feature
+
+* Add sub for monitor, and callback; closes #158 ([`4767272`](https://gitlab.psi.ch/bec/bec/-/commit/4767272778693d8abd2db81aecf77ebd5d5f3109))
+* Add monitor endpoint, device_monitor,  and DeviceMonitor message ([`0a292b0`](https://gitlab.psi.ch/bec/bec/-/commit/0a292b0363479c288be029be35b8560b79a69d29))
+
+### Fix
+
+* Add valid check for actions in DeviceConfigMessage ([`3a52b19`](https://gitlab.psi.ch/bec/bec/-/commit/3a52b1914534c373057e419eb6cec247575929a5))
+
+### Documentation
+
+* Updated scanqueuemessage doc string ([`fd89d86`](https://gitlab.psi.ch/bec/bec/-/commit/fd89d8648f84c8029e141b646b99b2c9c13a68e1))
+* Reviewed docstring of BECMessages ([`a4be91f`](https://gitlab.psi.ch/bec/bec/-/commit/a4be91f37c43de4d19101578a94a62d629309427))
+
 ## v0.54.0 (2024-01-18)
 
 ### Feature
