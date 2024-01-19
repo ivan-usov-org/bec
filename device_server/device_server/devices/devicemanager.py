@@ -1,7 +1,10 @@
 import inspect
 import time
 import traceback
+import sys
 from functools import reduce
+import numpy as np
+from typeguard import typechecked
 
 import ophyd
 import ophyd.sim as ops
@@ -258,6 +261,8 @@ class DeviceManagerDS(DeviceManagerBase):
         elif "value" in obj.event_types:
             obj.subscribe(self._obj_callback_readback, run=opaas_obj.enabled)
 
+        if "monitor" in obj.event_types:
+            obj.subscribe(self._obj_callback_monitor, run=False)
         if "done_moving" in obj.event_types:
             obj.subscribe(self._obj_callback_done_moving, event_type="done_moving", run=False)
         if "flyer" in obj.event_types:
@@ -328,8 +333,7 @@ class DeviceManagerDS(DeviceManagerBase):
         self.producer.delete(MessageEndpoints.device_read(obj.name), pipe)
         self.producer.delete(MessageEndpoints.device_info(obj.name), pipe)
 
-    def _obj_callback_readback(self, *_args, **kwargs):
-        obj = kwargs["obj"]
+    def _obj_callback_readback(self, *_args, obj: OphydObject, **kwargs):
         if obj.connected:
             name = obj.root.name
             signals = obj.read()
@@ -338,6 +342,36 @@ class DeviceManagerDS(DeviceManagerBase):
             pipe = self.producer.pipeline()
             self.producer.set_and_publish(MessageEndpoints.device_readback(name), dev_msg, pipe)
             pipe.execute()
+
+    @typechecked
+    def _obj_callback_monitor(self, *_args, obj: OphydObject, value: np.ndarray, **kwargs):
+        """
+        Callback for ophyd monitor events. Sends the data to redis.
+        Introduces a check of the data size, and incoporates a limit which is defined in max_size (in MB)
+
+        Args:
+            obj (OphydObject): ophyd object
+            value (np.ndarray): data from ophyd device
+
+        """
+        # Convert sizes from bytes to MB
+        dsize = len(value.tobytes()) / 1e6
+        max_size = 100
+        if dsize > max_size:
+            logger.warning(
+                f"Data size of single message is too large to send, current max_size {max_size}."
+            )
+            return
+        if obj.connected:
+            name = obj.root.name
+            metadata = self.devices[name].metadata
+            msg = messages.DeviceMonitorMessage(device=name, data=value, metadata=metadata).dumps()
+            stream_msg = {"data": msg}
+            self.producer.xadd(
+                MessageEndpoints.device_monitor(name),
+                stream_msg,
+                max_size=min(100, int(max_size // dsize)),
+            )
 
     def _obj_callback_acq_done(self, *_args, **kwargs):
         device = kwargs["obj"].root.name
