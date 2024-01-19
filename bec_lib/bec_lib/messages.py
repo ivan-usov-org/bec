@@ -666,7 +666,6 @@ class DeviceMonitorMessage(BECMessage):
         *,
         device: str,
         data: list,
-        datatype: dict,
         metadata: dict = None,
         version: float = DEFAULT_VERSION,
     ) -> None:
@@ -674,11 +673,10 @@ class DeviceMonitorMessage(BECMessage):
         Args:
             device (str): device name
             data (list): dictionary with device monitor data, #TODO should this be a list or better dictionary?
-            datatype (dict): dictionary with information about the data type and shape, from dev.describe
             metadata (dict, optional): additional metadata to describe the conditions of the device monitor
             version (float, optional): BECMessage version, defaults to DEFAULT_VERSION
         """
-        self.content = {"device": device, "data": data, "datatype": datatype}
+        self.content = {"device": device, "data": data}
         super().__init__(
             msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
         )
