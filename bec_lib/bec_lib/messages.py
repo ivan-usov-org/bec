@@ -665,7 +665,7 @@ class DeviceMonitorMessage(BECMessage):
         self,
         *,
         device: str,
-        data: list,
+        data: np.ndarray,
         metadata: dict = None,
         version: float = DEFAULT_VERSION,
     ) -> None:
