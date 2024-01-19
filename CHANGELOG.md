@@ -2,6 +2,19 @@
 
 <!--next-version-placeholder-->
 
+## v0.56.0 (2024-01-19)
+
+### Feature
+
+* Upgraded to new scibec structure ([`b72894a`](https://gitlab.psi.ch/bec/bec/-/commit/b72894a5f6d2d013fe66df28ca7de29e89125890))
+* Added filecontent message ([`cade103`](https://gitlab.psi.ch/bec/bec/-/commit/cade10350cb4b83ee4819f81c178548cf5694a4b))
+* Added file content and credential messages ([`416dd7e`](https://gitlab.psi.ch/bec/bec/-/commit/416dd7e1138ce37955fdb7fbfdfd1854771afc2a))
+* Added scibec and file content endpoint ([`b366414`](https://gitlab.psi.ch/bec/bec/-/commit/b366414e5ca66b37c309fae7cc33651e989db0fe))
+
+### Fix
+
+* Fixed scibec readonly token update ([`b6ce07e`](https://gitlab.psi.ch/bec/bec/-/commit/b6ce07e65bbcacb36f1cec716db03ffaaff2a009))
+
 ## v0.55.0 (2024-01-19)
 
 ### Feature
