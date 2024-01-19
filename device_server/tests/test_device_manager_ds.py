@@ -155,3 +155,25 @@ def test_obj_progress_callback():
                 value=1, max_value=2, done=False, metadata={"scanID": "12345"}
             ).dumps(),
         )
+
+
+@pytest.mark.parametrize(
+    "value", [np.empty(shape=(10, 10)), np.empty(shape=(100, 100)), np.empty(shape=(1000, 1000))]
+)
+def test_obj_monitor_callback(value):
+    device_manager = load_device_manager()
+    eiger = device_manager.devices.eiger
+    eiger.metadata = {"scanID": "12345"}
+    value_size = len(value.tobytes()) / 1e6  # MB
+    max_size = 100
+    with mock.patch.object(device_manager, "producer") as mock_producer:
+        device_manager._obj_callback_monitor(obj=eiger.obj, value=value)
+        mock_producer.xadd.assert_called_once_with(
+            MessageEndpoints.device_monitor(eiger.name),
+            {
+                "data": messages.DeviceMonitorMessage(
+                    device=eiger.name, data=value, metadata={"scanID": "12345"}
+                ).dumps()
+            },
+            max_size=int(min(100, max_size / value_size)),
+        )
