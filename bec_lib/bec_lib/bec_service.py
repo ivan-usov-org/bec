@@ -110,7 +110,7 @@ class BECService:
         while not self._service_info_event.is_set():
             logger.trace("Updating service info")
             self._send_service_status()
-            time.sleep(3)
+            self._service_info_event.wait(timeout=3)
 
     def _send_service_status(self):
         self.producer.set_and_publish(
@@ -180,7 +180,7 @@ class BECService:
             )
             msg = messages.ServiceMetricMessage(name=self.__class__.__name__, metrics=data)
             self.producer.send(MessageEndpoints.metrics(self._service_id), msg.dumps())
-            time.sleep(1)
+            self._metrics_emitter_event.wait(timeout=1)
 
     def set_global_var(self, name: str, val: Any) -> None:
         """Set a global variable through Redis
