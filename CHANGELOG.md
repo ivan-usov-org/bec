@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.56.3 (2024-01-23)
+
+### Fix
+
+* Disabled config updates on scibec ([`78b5cd6`](https://gitlab.psi.ch/bec/bec/-/commit/78b5cd66d1391fd855d1913b1a1ea655c86787a6))
+* Add 'add' to message again ([`d99230a`](https://gitlab.psi.ch/bec/bec/-/commit/d99230a45fefa412c5b2678c554575b1b27afc13))
+* Bugfix for deviceConfigMessage validation ([`1c2a7d1`](https://gitlab.psi.ch/bec/bec/-/commit/1c2a7d1850911ee9a8c45f04dea0622d056785a7))
+
 ## v0.56.2 (2024-01-23)
 
 ### Fix
