@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.56.1 (2024-01-23)
+
+### Fix
+
+* **service:** Use thread termination event to wait instead of time.sleep ([`fd39c7c`](https://gitlab.psi.ch/bec/bec/-/commit/fd39c7c667d3f06cc411501feaf6a9e614071516))
+
 ## v0.56.0 (2024-01-19)
 
 ### Feature
