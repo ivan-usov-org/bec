@@ -735,14 +735,14 @@ class DeviceConfigMessage(BECMessage):
     """Message type for sending device config updates"""
 
     msg_type = "device_config_message"
-    ACTIONS = ["add", "update", "reload"]
+    ACTIONS = ["set", "update", "reload"]
 
     def __init__(
         self, *, action: str, config: dict, metadata: dict = None, version: float = DEFAULT_VERSION
     ) -> None:
         """
         Args:
-            action (str): add, update or reload
+            action (str): set, update or reload
             config (dict): device config (add, update) or None (reload)
             metadata (dict, optional): additional metadata to describe the conditions of the device config
             version (float, optional): BECMessage version, defaults to DEFAULT_VERSION
@@ -751,11 +751,6 @@ class DeviceConfigMessage(BECMessage):
         super().__init__(
             msg_type=self.msg_type, content=self.content, metadata=metadata, version=version
         )
-
-    def _is_valid(self) -> bool:
-        if not self.content.get("action") in self.ACTIONS:
-            return False
-        return True
 
 
 class LogMessage(BECMessage):
