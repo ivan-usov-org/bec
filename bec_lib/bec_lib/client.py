@@ -182,10 +182,12 @@ class BECClient(BECService, UserScriptsMixin):
     def shutdown(self):
         """shutdown the client and all its components"""
         super().shutdown()
-        self.device_manager.shutdown()
-        self.queue.shutdown()
-        self.alarm_handler.shutdown()
-        print("done")
+        if self.device_manager:
+            self.device_manager.shutdown()
+        if self.queue:
+            self.queue.shutdown()
+        if self.alarm_handler:
+            self.alarm_handler.shutdown()
 
     def _print_available_commands(self, title: str, data: tuple) -> None:
         console = Console()
