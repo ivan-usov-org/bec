@@ -1,10 +1,19 @@
 import _thread
+import os
 import threading
 import time
 
 import numpy as np
 import pytest
-from bec_lib import BECClient, MessageEndpoints, RedisConnector, ServiceConfig, bec_logger, messages
+from bec_lib import (
+    BECClient,
+    MessageEndpoints,
+    RedisConnector,
+    ServiceConfig,
+    bec_logger,
+    configs,
+    messages,
+)
 from bec_lib.alarm_handler import AlarmBase
 from bec_lib.bec_errors import ScanAbortion, ScanInterruption
 from bec_lib.tests.utils import wait_for_empty_queue
@@ -682,3 +691,18 @@ def test_disabled_device_raises_scan_request_error(client):
     dev.samx.enabled = True
     time.sleep(1)
     scans.line_scan(dev.samx, 0, 1, steps=10, relative=False)
+
+
+@pytest.mark.timeout(100)
+def test_update_config(client):
+    bec = client
+    wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_update_config"})
+    demo_config_path = os.path.join(os.path.dirname(configs.__file__), "demo_config.yaml")
+    config = bec.config._load_config_from_file(demo_config_path)
+    config.pop("samx")
+    bec.config.send_config_request(action="set", config=config)
+    time.sleep(1)
+    assert "samx" not in bec.device_manager.devices
+    config = bec.config._load_config_from_file(demo_config_path)
+    bec.config.send_config_request(action="set", config=config)
