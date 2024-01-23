@@ -73,13 +73,13 @@ class ConfigHandler:
         logger.debug(self.scibec_connector.scibec_info)
         experiment = self.scibec_connector.scibec_info.get("beamline", {}).get("activeExperiment")
 
-        if scibec and experiment:
-            scibec.set_session_data(experiment, config)
-            self.scibec_connector.update_session()
-        else:
-            for name, device in config.items():
-                self._convert_to_db_config(name, device)
-                self.validator.validate_device(device)
+        # if scibec and experiment:
+        #     scibec.set_session_data(experiment, config)
+        #     self.scibec_connector.update_session()
+        # else:
+        for name, device in config.items():
+            self._convert_to_db_config(name, device)
+            self.validator.validate_device(device)
         self.scibec_connector.set_redis_config(list(config.values()))
         self.send_config_request_reply(accepted=True, error_msg=None, metadata=msg.metadata)
         reload_msg = messages.DeviceConfigMessage(action="reload", config={}, metadata=msg.metadata)
