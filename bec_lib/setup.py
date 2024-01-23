@@ -17,6 +17,7 @@ if __name__ == "__main__":
             "loguru",
             "psutil",
             "fpdf",
+            "fastjsonschema",
         ],
         extras_require={
             "dev": ["pytest", "pytest-random-order", "coverage", "pandas", "black", "pylint"]

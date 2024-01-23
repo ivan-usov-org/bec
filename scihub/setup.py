@@ -43,7 +43,7 @@ def run_install(setup_args: dict, bec_deps: list, editable=False):
 if __name__ == "__main__":
     setup_args_in = {
         "entry_points": {"console_scripts": ["bec-scihub = scihub:main"]},
-        "install_requires": ["msgpack", "pyyaml", "fastjsonschema", "python-dotenv", "py-scibec"],
+        "install_requires": ["msgpack", "python-dotenv", "py-scibec"],
         "version": __version__,
         "extras_require": {"dev": ["pytest", "pytest-random-order", "coverage", "black", "pylint"]},
     }

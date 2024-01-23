@@ -6,18 +6,17 @@ import traceback
 import uuid
 from typing import TYPE_CHECKING
 
-import bec_lib
 import msgpack
+
+import bec_lib
 from bec_lib import DeviceConfigError
 from bec_lib import DeviceManagerBase as DeviceManager
 from bec_lib import MessageEndpoints, bec_logger, messages
 from bec_lib.connector import ConnectorBase
-
-from .scibec_validator import SciBecValidator
+from bec_lib.scibec_validator import SciBecValidator
 
 if TYPE_CHECKING:
     from bec_lib.device import DeviceBase
-
     from scihub.scibec.scibec_connector import SciBecConnector
 
 logger = bec_logger.logger
