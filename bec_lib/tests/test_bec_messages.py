@@ -176,13 +176,20 @@ def test_ScanBaselineMessage():
     assert res_loaded == msg
 
 
-def test_DeviceConfigMessage():
+@pytest.mark.parametrize(
+    "action,valid",
+    [("add", True), ("set", True), ("update", True), ("reload", True), ("wrong_action", False)],
+)
+def test_DeviceConfigMessage(action, valid):
     msg = messages.DeviceConfigMessage(
-        action="add", config={"device": "samx"}, metadata={"RID": "1234"}
+        action=action, config={"device": "samx"}, metadata={"RID": "1234"}
     )
     res = msg.dumps()
     res_loaded = messages.DeviceConfigMessage.loads(res)
-    assert res_loaded == msg
+    if valid:
+        assert res_loaded == msg
+    else:
+        assert res_loaded is None
 
 
 def test_LogMessage():
