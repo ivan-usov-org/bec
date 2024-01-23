@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.56.2 (2024-01-23)
+
+### Fix
+
+* Fixed client shutdown; closes #168 ([`869215b`](https://gitlab.psi.ch/bec/bec/-/commit/869215bdc28bf8f4a90ea9ca0a9c017d26fe7d9b))
+
 ## v0.56.1 (2024-01-23)
 
 ### Fix
