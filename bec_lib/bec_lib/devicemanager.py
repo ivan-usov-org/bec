@@ -448,7 +448,7 @@ class DeviceManagerBase:
             MessageEndpoints.service_response(msg.metadata["RID"]),
             messages.ServiceResponseMessage(
                 # pylint: disable=no-member
-                response={"accepted": True, "service": builtins.__BEC_SERVICE__.__class__.__name__}
+                response={"accepted": True, "service": self._service.__class__.__name__}
             ).dumps(),
             expire=100,
         )

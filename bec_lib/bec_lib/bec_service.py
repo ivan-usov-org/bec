@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import builtins
 import getpass
 import socket
 import threading
@@ -134,7 +133,6 @@ class BECService:
         self._send_service_status()
 
     def _start_update_service_info(self):
-        builtins.__BEC_SERVICE__ = self
         self._service_info_thread = threading.Thread(
             target=self._update_service_info, daemon=True, name="update_service_info"
         )
