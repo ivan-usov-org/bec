@@ -265,7 +265,6 @@ def test_limit_error(client):
 
     aborted_scan = False
     dev.samx.limits = [-50, 50]
-    time.sleep(10)
     try:
         scans.umv(dev.samx, 500, relative=False)
     except AlarmBase as alarm:
