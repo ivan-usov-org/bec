@@ -1,10 +1,15 @@
 import json
+import os
 
 import fastjsonschema
 
+import bec_lib
+
 
 class SciBecValidator:
-    def __init__(self, schema_path: str) -> None:
+    def __init__(self, schema_path: str = None) -> None:
+        if not schema_path:
+            schema_path = f"{os.path.dirname(bec_lib.__file__)}/configs/openapi_schema.json"
         self.schema = self._load_schema(schema_path)
         self.device_schema = self.schema["components"]["schemas"]["Device"]
         self.device_validate = fastjsonschema.compile(self.device_schema)
