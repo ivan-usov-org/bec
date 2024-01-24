@@ -81,7 +81,7 @@ class SignalData:
     def val_to_dict(self) -> dict:
         return {k: v.get("value") for k, v in self.data.items()}
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         return f"{self.data}"
 
     def __len__(self) -> int:
@@ -127,7 +127,7 @@ class DeviceData(dict):
             self.__signals[signal].set(index, signal_data)
             self.__setattr__(signal, self.__signals[signal])
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         return f"{dict(self.__signals)}"
 
     def __eq__(self, ref_data: object) -> bool:
@@ -214,7 +214,7 @@ class ScanData(dict):
     def values(self) -> dict_values:
         return self.devices.values()
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         return f"{dict(self.devices)}"
 
     def __len__(self) -> int:

@@ -45,7 +45,7 @@ class CallbackEntry:
             content = traceback.format_exc()
             logger.warning(f"Failed to run callback function: {content}")
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         return f"<CallbackEntry>: (event_type: {self.event_type}, function: {self.func.__name__}, sync: {self.sync}, pending events: {self.num_pending_events})"
 
     @property

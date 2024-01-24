@@ -47,7 +47,7 @@ def numpy_encode(obj, chain=None):
     elif isinstance(obj, (np.bool_, np.number)):
         return {b"nd": False, b"type": obj.dtype.str, b"data": obj.data}
     elif isinstance(obj, complex):
-        return {b"complex": True, b"data": obj.__repr__()}
+        return {b"complex": True, b"data": repr(obj)}
     else:
         return obj if chain is None else chain(obj)
 

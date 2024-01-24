@@ -50,7 +50,7 @@ class BECWorker:
         """Checks if two BECWorker objects are equal."""
         return self.id == other.id and self.config == other.config
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         return f"BECWorker(id={self.id}, config={self.config})"
 
 

@@ -114,7 +114,7 @@ def test_scan_item_to_pandas_raises_without_pandas_installed():
             scan_item.to_pandas()
 
 
-def test_scan_item_repr():
+def test_scan_item_str():
     scan_manager = ScanManager(ConnectorMock(""))
     scan_item = ScanItem(scan_manager, "queueID", [1], ["scanID"], "status")
     start_time = "Fri Jun 23 15:11:06 2023"
@@ -125,17 +125,17 @@ def test_scan_item_repr():
     scan_item.end_time = scan_item.start_time + 10
     scan_item.num_points = 1
     assert (
-        repr(scan_item)
+        str(scan_item)
         == "ScanItem:\n \tStart time: Fri Jun 23 15:11:06 2023\n\tEnd time: Fri Jun 23 15:11:16"
         " 2023\n\tElapsed time: 10.0 s\n\tScan ID: ['scanID']\n\tScan number: [1]\n\tNumber of"
         " points: 1\n"
     )
 
 
-def test_scan_item_repr_plain():
+def test_scan_item_str_plain():
     scan_manager = ScanManager(ConnectorMock(""))
     scan_item = ScanItem(scan_manager, "queueID", [1], ["scanID"], "status")
-    assert repr(scan_item) == "ScanItem:\n \tScan ID: ['scanID']\n\tScan number: [1]\n"
+    assert str(scan_item) == "ScanItem:\n \tScan ID: ['scanID']\n\tScan number: [1]\n"
 
 
 def test_emit_data():

@@ -44,12 +44,6 @@ class AlarmBase(Exception):
             f" {self.alarm.content['content']}"
         )
 
-    def __repr__(self) -> str:
-        return (
-            f"Severity: {self.severity.name} \nAlarm type: {self.alarm_type} \nSource:"
-            f" {self.alarm.content['source']} \n{self.alarm.content['content']}"
-        )
-
 
 class AlarmHandler:
     def __init__(self, connector: RedisConnector) -> None:

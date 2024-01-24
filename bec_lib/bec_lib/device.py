@@ -566,9 +566,6 @@ class DeviceBase:
     def __str__(self):
         return f"{type(self).__name__}(name={self.name}, enabled={self.enabled})"
 
-    def __repr__(self):
-        return f"{type(self).__name__}(name={self.name}, enabled={self.enabled})"
-
 
 class OphydInterfaceBase(DeviceBase):
     @rpc
@@ -733,7 +730,7 @@ class Device(OphydInterfaceBase):
         Provides a summary of the device, all associated signals and their type.
         """
 
-    def __repr__(self):
+    def __str__(self):
         # pylint: disable=import-outside-toplevel
         from bec_lib.devicemanager import DeviceManagerBase
 

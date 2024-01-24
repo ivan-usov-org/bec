@@ -22,7 +22,7 @@ class BECIPythonClient(BECClient):
     def __init__(self, forced=False) -> None:
         pass
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         return "BECClient\n\nTo get a list of available commands, type `bec.show_all_commands()`"
 
     def initialize(
@@ -64,6 +64,11 @@ class BECIPythonClient(BECClient):
         self._load_magics()
         self._ip.events.register("post_run_cell", log_console)
         self._ip.set_custom_exc((Exception,), _ip_exception_handler)  # register your handler
+        # represent objects using __str__, if overwritten, otherwise use __repr__
+        self._ip.display_formatter.formatters["text/plain"].for_type(
+            object,
+            lambda o, p, cycle: o.__str__ is object.__str__ and p.text(repr(o)) or p.text(str(o)),
+        )
 
     def _set_error(self):
         if self._ip is not None:

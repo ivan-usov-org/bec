@@ -175,7 +175,7 @@ class ScanReport:
             elapsed_time += sleep_time
             self._check_timeout(timeout, elapsed_time)
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         separator = "--" * 10
         details = f"\tStatus: {self.status}\n"
         if self.scan:

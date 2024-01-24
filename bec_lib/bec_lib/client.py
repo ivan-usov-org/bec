@@ -41,7 +41,7 @@ class BECClient(BECService, UserScriptsMixin):
             cls._initialized = False
         return cls._client
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         return "BECClient\n\nTo get a list of available commands, type `bec.show_all_commands()`"
 
     def initialize(

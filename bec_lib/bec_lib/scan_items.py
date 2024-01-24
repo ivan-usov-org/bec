@@ -119,7 +119,7 @@ class ScanItem:
         details = start_time + end_time + elapsed_time + scanID + scan_number + num_points
         return details
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         return f"ScanItem:\n {self.describe()}"
 
 

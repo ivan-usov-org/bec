@@ -346,7 +346,7 @@ class DeviceContainer(dict):
             )
         console.print(table)
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         return "Device container."
 
 
