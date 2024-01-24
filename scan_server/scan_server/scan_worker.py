@@ -136,7 +136,7 @@ class ScanWorker(threading.Thread):
             instr (DeviceInstructionMessage): Device instruction received from the scan assembler
 
         """
-        devices = [dev.name for dev in self.device_manager.devices.detectors()]
+        devices = [dev.name for dev in self.device_manager.devices.get_software_triggered_devices()]
         self._last_trigger = instr
         self.device_manager.producer.send(
             MessageEndpoints.device_instructions(),
@@ -147,6 +147,7 @@ class ScanWorker(threading.Thread):
                 metadata=instr.metadata,
             ).dumps(),
         )
+        logger.debug(f"Triggered devices: {devices}")
 
     def set_devices(self, instr: messages.DeviceInstructionMessage) -> None:
         """Send device instruction to set a device to a specific value
@@ -576,7 +577,7 @@ class ScanWorker(threading.Thread):
             "frames_per_trigger", 1
         )
         time.sleep(trigger_time)
-        devices = [dev.name for dev in self.device_manager.devices.detectors()]
+        devices = [dev.name for dev in self.device_manager.devices.get_software_triggered_devices()]
         metadata = self._last_trigger.metadata
         self._wait_for_status(devices, metadata)
 

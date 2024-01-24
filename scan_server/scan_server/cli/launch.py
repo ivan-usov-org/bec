@@ -5,7 +5,7 @@ import scan_server
 from bec_lib import RedisConnector, ServiceConfig, bec_logger
 
 logger = bec_logger.logger
-bec_logger.level = bec_logger.LOGLEVEL.INFO
+bec_logger.level = bec_logger.LOGLEVEL.DEBUG
 
 
 def main():

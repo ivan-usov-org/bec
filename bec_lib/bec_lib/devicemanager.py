@@ -206,10 +206,10 @@ class DeviceContainer(dict):
                 tags.update(dev_tags)
         return list(tags)
 
-    def detectors(self) -> list:
-        """get a list of all enabled detectors"""
-        # TODO add here get_software_triggered_devices
-        return []
+    def get_software_triggered_devices(self) -> list:
+        """get a list of all devices that should receive a software trigger detectors"""
+        # pylint: disable=protected-access
+        return [dev for _, dev in self.items() if dev._config.get("softwareTrigger", False) is True]
 
     def _expand_device_name(self, device_name: str) -> list[str]:
         try:

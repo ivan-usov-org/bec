@@ -11,6 +11,7 @@ eiger:
     - detector
   enabled: true
   readOnly: false
+  softwareTrigger: true
 
 ############## Cameras and detectors end here ##############
 

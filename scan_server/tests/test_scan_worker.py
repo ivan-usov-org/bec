@@ -648,46 +648,45 @@ def test_wait_for_read(scan_worker_mock, msg1, msg2, req_msg: messages.DeviceReq
             interruption_mock.assert_called_once()
 
 
-# TODO add again test after introducing softwareTrigger as parameter to deviceConfig
-# @pytest.mark.parametrize(
-#     "instr",
-#     [
-#         (
-#             messages.DeviceInstructionMessage(
-#                 device=None,
-#                 action="set",
-#                 parameter={"time": 0.1},
-#                 metadata={
-#                     "readout_priority": "monitored",
-#                     "DIID": 3,
-#                     "scanID": "scanID",
-#                     "RID": "requestID",
-#                 },
-#             )
-#         )
-#     ],
-# )
-# def test_wait_for_trigger(scan_worker_mock, instr):
-#     worker = scan_worker_mock
-#     worker._last_trigger = instr
+@pytest.mark.parametrize(
+    "instr",
+    [
+        (
+            messages.DeviceInstructionMessage(
+                device=None,
+                action="set",
+                parameter={"time": 0.1},
+                metadata={
+                    "readout_priority": "monitored",
+                    "DIID": 3,
+                    "scanID": "scanID",
+                    "RID": "requestID",
+                },
+            )
+        )
+    ],
+)
+def test_wait_for_trigger(scan_worker_mock, instr):
+    worker = scan_worker_mock
+    worker._last_trigger = instr
 
-#     with mock.patch.object(worker.validate, "get_device_status") as status_mock:
-#         with mock.patch.object(worker, "_check_for_interruption") as interruption_mock:
-#             status_mock.return_value = [
-#                 messages.DeviceReqStatusMessage(
-#                     device="eiger",
-#                     success=True,
-#                     metadata={
-#                         "readout_priority": "monitored",
-#                         "DIID": 3,
-#                         "scanID": "scanID",
-#                         "RID": "requestID",
-#                     },
-#                 ).dumps()
-#             ]
-#             worker._wait_for_trigger(instr)
-#             status_mock.assert_called_once_with(MessageEndpoints.device_req_status, ["eiger"])
-#             interruption_mock.assert_called_once()
+    with mock.patch.object(worker.validate, "get_device_status") as status_mock:
+        with mock.patch.object(worker, "_check_for_interruption") as interruption_mock:
+            status_mock.return_value = [
+                messages.DeviceReqStatusMessage(
+                    device="eiger",
+                    success=True,
+                    metadata={
+                        "readout_priority": "monitored",
+                        "DIID": 3,
+                        "scanID": "scanID",
+                        "RID": "requestID",
+                    },
+                ).dumps()
+            ]
+            worker._wait_for_trigger(instr)
+            status_mock.assert_called_once_with(MessageEndpoints.device_req_status, ["eiger"])
+            interruption_mock.assert_called_once()
 
 
 def test_wait_for_stage(scan_worker_mock):
@@ -754,7 +753,9 @@ def test_trigger_devices(scan_worker_mock, instr):
     worker = scan_worker_mock
     with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
         worker.trigger_devices(instr)
-        devices = [dev.name for dev in worker.device_manager.devices.detectors()]
+        devices = [
+            dev.name for dev in worker.device_manager.devices.get_software_triggered_devices()
+        ]
 
         send_mock.assert_called_once_with(
             MessageEndpoints.device_instructions(),
