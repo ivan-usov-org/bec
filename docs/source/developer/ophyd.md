@@ -27,6 +27,7 @@ curr:
   onFailure: buffer
   enabled: true
   readOnly: True
+  softwareTrigger: False
 ```
 
 The following sections explain the different parts of the device configuration in more detail.
@@ -45,7 +46,10 @@ The readout priority specifies the priority with which the device is read out. F
 The enabled status specifies whether the device is enabled. 
 
 * **readOnly** \
-The read only status specifies whether the device is read only. If the device is read only, the device cannot be written to.
+The read only indicates if the device is read-only. When set to true, writing to the device is disabled. It's optional in the device configuration and defaults to false.
+
+* **softwareTrigger** \
+The software trigger determines if BEC should explicitly invoke the device's trigger method during a scan. It's an optional parameter in the device configuration, defaulting to false
 
 * **deviceTags** \
 The device tags contain the tags of the device. The tags are used to group devices and to filter devices.
