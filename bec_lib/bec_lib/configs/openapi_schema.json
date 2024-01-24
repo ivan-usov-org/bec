@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "scibec",
-    "version": "1.7.4",
+    "version": "1.14.1",
     "description": "scibec",
     "contact": {
       "name": "Klaus Wakonig",
@@ -1475,328 +1475,6 @@
         "operationId": "DeviceController.find"
       }
     },
-    "/events/count": {
-      "get": {
-        "x-controller-name": "EventController",
-        "x-operation-name": "count",
-        "tags": [
-          "EventController"
-        ],
-        "security": [
-          {
-            "jwt": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Event model count",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/loopback.Count"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "where",
-            "in": "query",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "title": "Event.WhereFilter",
-                  "additionalProperties": true,
-                  "x-typescript-type": "@loopback/repository#Where<Event>"
-                }
-              }
-            }
-          }
-        ],
-        "operationId": "EventController.count"
-      }
-    },
-    "/events/{id}": {
-      "put": {
-        "x-controller-name": "EventController",
-        "x-operation-name": "replaceById",
-        "tags": [
-          "EventController"
-        ],
-        "security": [
-          {
-            "jwt": []
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Event PUT success"
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "string"
-            },
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Event"
-              }
-            }
-          },
-          "x-parameter-index": 1
-        },
-        "operationId": "EventController.replaceById"
-      },
-      "patch": {
-        "x-controller-name": "EventController",
-        "x-operation-name": "updateById",
-        "tags": [
-          "EventController"
-        ],
-        "security": [
-          {
-            "jwt": []
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Event PATCH success"
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "string"
-            },
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/EventPartial"
-              }
-            }
-          },
-          "x-parameter-index": 1
-        },
-        "operationId": "EventController.updateById"
-      },
-      "get": {
-        "x-controller-name": "EventController",
-        "x-operation-name": "findById",
-        "tags": [
-          "EventController"
-        ],
-        "security": [
-          {
-            "jwt": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Event model instance",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EventWithRelations"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "string"
-            },
-            "required": true
-          },
-          {
-            "name": "filter",
-            "in": "query",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Event.Filter"
-                }
-              }
-            }
-          }
-        ],
-        "operationId": "EventController.findById"
-      },
-      "delete": {
-        "x-controller-name": "EventController",
-        "x-operation-name": "deleteById",
-        "tags": [
-          "EventController"
-        ],
-        "security": [
-          {
-            "jwt": []
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Event DELETE success"
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "string"
-            },
-            "required": true
-          }
-        ],
-        "operationId": "EventController.deleteById"
-      }
-    },
-    "/events": {
-      "post": {
-        "x-controller-name": "EventController",
-        "x-operation-name": "create",
-        "tags": [
-          "EventController"
-        ],
-        "security": [
-          {
-            "jwt": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Event model instance",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Event"
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewEvent"
-              }
-            }
-          }
-        },
-        "operationId": "EventController.create"
-      },
-      "patch": {
-        "x-controller-name": "EventController",
-        "x-operation-name": "updateAll",
-        "tags": [
-          "EventController"
-        ],
-        "security": [
-          {
-            "jwt": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Event PATCH success count",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/loopback.Count"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "where",
-            "in": "query",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "title": "Event.WhereFilter",
-                  "additionalProperties": true,
-                  "x-typescript-type": "@loopback/repository#Where<Event>"
-                }
-              }
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/EventPartial"
-              }
-            }
-          }
-        },
-        "operationId": "EventController.updateAll"
-      },
-      "get": {
-        "x-controller-name": "EventController",
-        "x-operation-name": "find",
-        "tags": [
-          "EventController"
-        ],
-        "security": [
-          {
-            "jwt": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Array of Event model instances",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/EventWithRelations"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "filter",
-            "in": "query",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Event.Filter1"
-                }
-              }
-            }
-          }
-        ],
-        "operationId": "EventController.find"
-      }
-    },
     "/experiment-accounts/count": {
       "get": {
         "x-controller-name": "ExperimentAccountController",
@@ -3007,6 +2685,364 @@
         "operationId": "NXEntityController.find"
       }
     },
+    "/scan-data/count": {
+      "get": {
+        "x-controller-name": "ScanDataController",
+        "x-operation-name": "count",
+        "tags": [
+          "ScanDataController"
+        ],
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ScanData model count",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/loopback.Count"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "where",
+            "in": "query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "ScanData.WhereFilter",
+                  "additionalProperties": true,
+                  "x-typescript-type": "@loopback/repository#Where<ScanData>"
+                }
+              }
+            }
+          }
+        ],
+        "operationId": "ScanDataController.count"
+      }
+    },
+    "/scan-data/many": {
+      "post": {
+        "x-controller-name": "ScanDataController",
+        "x-operation-name": "createMany",
+        "tags": [
+          "ScanDataController"
+        ],
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ScanData model instance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewScanDataMany"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewScanData"
+              }
+            }
+          }
+        },
+        "operationId": "ScanDataController.createMany"
+      }
+    },
+    "/scan-data/{id}": {
+      "put": {
+        "x-controller-name": "ScanDataController",
+        "x-operation-name": "replaceById",
+        "tags": [
+          "ScanDataController"
+        ],
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "ScanData PUT success"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScanData"
+              }
+            }
+          },
+          "x-parameter-index": 1
+        },
+        "operationId": "ScanDataController.replaceById"
+      },
+      "patch": {
+        "x-controller-name": "ScanDataController",
+        "x-operation-name": "updateById",
+        "tags": [
+          "ScanDataController"
+        ],
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "ScanData PATCH success"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScanDataPartial"
+              }
+            }
+          },
+          "x-parameter-index": 1
+        },
+        "operationId": "ScanDataController.updateById"
+      },
+      "get": {
+        "x-controller-name": "ScanDataController",
+        "x-operation-name": "findById",
+        "tags": [
+          "ScanDataController"
+        ],
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ScanData model instance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScanDataWithRelations"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScanData.Filter"
+                }
+              }
+            }
+          }
+        ],
+        "operationId": "ScanDataController.findById"
+      },
+      "delete": {
+        "x-controller-name": "ScanDataController",
+        "x-operation-name": "deleteById",
+        "tags": [
+          "ScanDataController"
+        ],
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "ScanData DELETE success"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "operationId": "ScanDataController.deleteById"
+      }
+    },
+    "/scan-data": {
+      "post": {
+        "x-controller-name": "ScanDataController",
+        "x-operation-name": "create",
+        "tags": [
+          "ScanDataController"
+        ],
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ScanData model instance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScanData"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewScanData"
+              }
+            }
+          }
+        },
+        "operationId": "ScanDataController.create"
+      },
+      "patch": {
+        "x-controller-name": "ScanDataController",
+        "x-operation-name": "updateAll",
+        "tags": [
+          "ScanDataController"
+        ],
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ScanData PATCH success count",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/loopback.Count"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "where",
+            "in": "query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "ScanData.WhereFilter",
+                  "additionalProperties": true,
+                  "x-typescript-type": "@loopback/repository#Where<ScanData>"
+                }
+              }
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScanDataPartial"
+              }
+            }
+          }
+        },
+        "operationId": "ScanDataController.updateAll"
+      },
+      "get": {
+        "x-controller-name": "ScanDataController",
+        "x-operation-name": "find",
+        "tags": [
+          "ScanDataController"
+        ],
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of ScanData model instances",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScanDataWithRelations"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "filter",
+            "in": "query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScanData.Filter1"
+                }
+              }
+            }
+          }
+        ],
+        "operationId": "ScanDataController.find"
+      }
+    },
     "/scans/count": {
       "get": {
         "x-controller-name": "ScanController",
@@ -3738,7 +3774,7 @@
   },
   "servers": [
     {
-      "url": "/"
+      "url": "https://bec.development.psi.ch/api/v1"
     }
   ],
   "components": {
@@ -3965,131 +4001,6 @@
         "additionalProperties": false,
         "x-typescript-type": "Omit<Session, 'id'>"
       },
-      "DeviceWithRelations": {
-        "title": "DeviceWithRelations",
-        "type": "object",
-        "description": "(tsType: DeviceWithRelations, schemaOptions: { includeRelations: true })",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "readACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can read this entry"
-            }
-          },
-          "writeACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can update this entry"
-            }
-          },
-          "owner": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can administrate this entry"
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdBy": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "parentId": {
-            "type": "string"
-          },
-          "sessionId": {
-            "type": "string",
-            "description": "Session to which this device belongs."
-          },
-          "enabled": {
-            "type": "boolean",
-            "description": "True if the device should be enabled."
-          },
-          "readOnly": {
-            "type": "boolean",
-            "description": "True if the device is read-only."
-          },
-          "deviceClass": {
-            "type": "string",
-            "description": "Ophyd device class"
-          },
-          "deviceTags": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "User-defined tags for easier access and grouping."
-            }
-          },
-          "deviceConfig": {
-            "type": "object",
-            "description": "Device config, including the ophyd init arguments. Must at least contain name and label."
-          },
-          "readoutPriority": {
-            "type": "string",
-            "description": "Readout priority. \"on_request\" will only read the device when requested. \"baseline\" will read the device once at the beginning of the session. \"monitored\" will read the device at every trigger from BEC. \"async\" will read the device asynchronously. \"continuous\" will read the device at its self-defined frequency, beyond a single scan.",
-            "enum": [
-              "on_request",
-              "baseline",
-              "monitored",
-              "async",
-              "continuous"
-            ]
-          },
-          "onFailure": {
-            "type": "string",
-            "description": "Defines how device failures are handled. \"raise\" raises an error immediately. \"buffer\" will try fall back to old values, should this not be possible, an error will be raised. \"retry\" will retry once before raising an error.",
-            "enum": [
-              "raise",
-              "retry",
-              "buffer"
-            ]
-          },
-          "userParameter": {
-            "type": "object",
-            "description": "Additional fields for user settings such as in and out positions."
-          },
-          "subdevices": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DeviceWithRelations"
-            }
-          },
-          "parent": {
-            "$ref": "#/components/schemas/DeviceWithRelations"
-          },
-          "session": {
-            "$ref": "#/components/schemas/SessionWithRelations"
-          },
-          "events": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/EventWithRelations"
-            }
-          }
-        },
-        "required": [
-          "name",
-          "enabled",
-          "deviceClass",
-          "deviceConfig",
-          "readoutPriority"
-        ],
-        "additionalProperties": false,
-        "x-typescript-type": "DeviceWithRelations"
-      },
       "DatasetWithRelations": {
         "title": "DatasetWithRelations",
         "type": "object",
@@ -4148,10 +4059,10 @@
         "additionalProperties": false,
         "x-typescript-type": "DatasetWithRelations"
       },
-      "EventWithRelations": {
-        "title": "EventWithRelations",
+      "ScanDataWithRelations": {
+        "title": "ScanDataWithRelations",
         "type": "object",
-        "description": "(tsType: EventWithRelations, schemaOptions: { includeRelations: true })",
+        "description": "(tsType: ScanDataWithRelations, schemaOptions: { includeRelations: true })",
         "properties": {
           "id": {
             "type": "string"
@@ -4184,29 +4095,25 @@
           "createdBy": {
             "type": "string"
           },
+          "name": {
+            "type": "string"
+          },
           "data": {
             "type": "object"
           },
-          "deviceId": {
-            "type": "string",
-            "description": "The events device"
+          "filePath": {
+            "type": "string"
           },
           "scanId": {
             "type": "string",
             "description": "The parent scan"
           },
-          "nxData": {
-            "type": "object"
-          },
-          "device": {
-            "$ref": "#/components/schemas/DeviceWithRelations"
-          },
           "scan": {
             "$ref": "#/components/schemas/ScanWithRelations"
           }
         },
-        "additionalProperties": false,
-        "x-typescript-type": "EventWithRelations"
+        "additionalProperties": true,
+        "x-typescript-type": "ScanDataWithRelations"
       },
       "ScanWithRelations": {
         "title": "ScanWithRelations",
@@ -4253,9 +4160,6 @@
           "userParameter": {
             "type": "object"
           },
-          "queue": {
-            "type": "string"
-          },
           "scanId": {
             "type": "string"
           },
@@ -4295,10 +4199,10 @@
           "experiment": {
             "$ref": "#/components/schemas/ExperimentWithRelations"
           },
-          "events": {
+          "scanData": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/EventWithRelations"
+              "$ref": "#/components/schemas/ScanDataWithRelations"
             }
           }
         },
@@ -4475,6 +4379,129 @@
         "additionalProperties": false,
         "x-typescript-type": "ExperimentWithRelations"
       },
+      "DeviceWithRelations": {
+        "title": "DeviceWithRelations",
+        "type": "object",
+        "description": "(tsType: DeviceWithRelations, schemaOptions: { includeRelations: true })",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "readACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can read this entry"
+            }
+          },
+          "writeACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "owner": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "string"
+          },
+          "sessionId": {
+            "type": "string",
+            "description": "Session to which this device belongs."
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "True if the device should be enabled."
+          },
+          "readOnly": {
+            "type": "boolean",
+            "description": "True if the device is read-only."
+          },
+          "softwareTrigger": {
+            "type": "boolean",
+            "description": "True if the device should receive a trigger call from BEC."
+          },
+          "deviceClass": {
+            "type": "string",
+            "description": "Ophyd device class"
+          },
+          "deviceTags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "User-defined tags for easier access and grouping."
+            }
+          },
+          "deviceConfig": {
+            "type": "object",
+            "description": "Device config, including the ophyd init arguments. Must at least contain name and label."
+          },
+          "readoutPriority": {
+            "type": "string",
+            "description": "Readout priority. \"on_request\" will only read the device when requested. \"baseline\" will read the device once at the beginning of the session. \"monitored\" will read the device at every trigger from BEC. \"async\" will read the device asynchronously. \"continuous\" will read the device at its self-defined frequency, beyond a single scan.",
+            "enum": [
+              "on_request",
+              "baseline",
+              "monitored",
+              "async",
+              "continuous"
+            ]
+          },
+          "onFailure": {
+            "type": "string",
+            "description": "Defines how device failures are handled. \"raise\" raises an error immediately. \"buffer\" will try fall back to old values, should this not be possible, an error will be raised. \"retry\" will retry once before raising an error.",
+            "enum": [
+              "raise",
+              "retry",
+              "buffer"
+            ]
+          },
+          "userParameter": {
+            "type": "object",
+            "description": "Additional fields for user settings such as in and out positions."
+          },
+          "subdevices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeviceWithRelations"
+            }
+          },
+          "parent": {
+            "$ref": "#/components/schemas/DeviceWithRelations"
+          },
+          "session": {
+            "$ref": "#/components/schemas/SessionWithRelations"
+          }
+        },
+        "required": [
+          "name",
+          "enabled",
+          "deviceClass",
+          "deviceConfig",
+          "readoutPriority"
+        ],
+        "additionalProperties": false,
+        "x-typescript-type": "DeviceWithRelations"
+      },
       "SessionWithRelations": {
         "title": "SessionWithRelations",
         "type": "object",
@@ -4637,9 +4664,6 @@
           "userParameter": {
             "type": "object"
           },
-          "queue": {
-            "type": "string"
-          },
           "scanId": {
             "type": "string"
           },
@@ -4714,9 +4738,6 @@
           },
           "userParameter": {
             "type": "object"
-          },
-          "queue": {
-            "type": "string"
           },
           "scanId": {
             "type": "string"
@@ -4797,9 +4818,6 @@
           "userParameter": {
             "type": "object"
           },
-          "queue": {
-            "type": "string"
-          },
           "scanId": {
             "type": "string"
           },
@@ -4833,6 +4851,160 @@
         },
         "additionalProperties": false,
         "x-typescript-type": "Partial<Scan>"
+      },
+      "ScanData": {
+        "title": "ScanData",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "readACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can read this entry"
+            }
+          },
+          "writeACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "owner": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object"
+          },
+          "filePath": {
+            "type": "string"
+          },
+          "scanId": {
+            "type": "string",
+            "description": "The parent scan"
+          }
+        },
+        "additionalProperties": true
+      },
+      "NewScanData": {
+        "title": "NewScanData",
+        "type": "object",
+        "description": "(tsType: Omit<ScanData, 'id'>, schemaOptions: { title: 'NewScanData', exclude: [ 'id' ] })",
+        "properties": {
+          "readACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can read this entry"
+            }
+          },
+          "writeACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "owner": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object"
+          },
+          "filePath": {
+            "type": "string"
+          },
+          "scanId": {
+            "type": "string",
+            "description": "The parent scan"
+          }
+        },
+        "additionalProperties": true,
+        "x-typescript-type": "Omit<ScanData, 'id'>"
+      },
+      "ScanDataPartial": {
+        "title": "ScanDataPartial",
+        "type": "object",
+        "description": "(tsType: Partial<ScanData>, schemaOptions: { partial: true })",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "readACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can read this entry"
+            }
+          },
+          "writeACL": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can update this entry"
+            }
+          },
+          "owner": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "groups or users who can administrate this entry"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object"
+          },
+          "filePath": {
+            "type": "string"
+          },
+          "scanId": {
+            "type": "string",
+            "description": "The parent scan"
+          }
+        },
+        "additionalProperties": true,
+        "x-typescript-type": "Partial<ScanData>"
       },
       "NXEntity": {
         "title": "NXEntity",
@@ -4883,6 +5055,7 @@
           "description": {
             "type": "string"
           },
+          "data": {},
           "NXclass": {
             "type": "string"
           },
@@ -4943,6 +5116,7 @@
           "description": {
             "type": "string"
           },
+          "data": {},
           "NXclass": {
             "type": "string"
           },
@@ -5006,11 +5180,16 @@
           "description": {
             "type": "string"
           },
+          "data": {},
           "NXclass": {
             "type": "string"
           },
           "parentId": {
             "type": "string"
+          },
+          "scanId": {
+            "type": "string",
+            "description": "The parent scan"
           },
           "subentries": {
             "type": "array",
@@ -5068,11 +5247,16 @@
           "description": {
             "type": "string"
           },
+          "data": {},
           "NXclass": {
             "type": "string"
           },
           "parentId": {
             "type": "string"
+          },
+          "scanId": {
+            "type": "string",
+            "description": "The parent scan"
           },
           "subentries": {
             "type": "array",
@@ -5134,6 +5318,7 @@
           "description": {
             "type": "string"
           },
+          "data": {},
           "NXclass": {
             "type": "string"
           },
@@ -5210,6 +5395,7 @@
           "description": {
             "type": "string"
           },
+          "data": {},
           "NXclass": {
             "type": "string"
           },
@@ -6030,163 +6216,6 @@
         "additionalProperties": true,
         "x-typescript-type": "Partial<ExperimentAccount>"
       },
-      "Event": {
-        "title": "Event",
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "readACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can read this entry"
-            }
-          },
-          "writeACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can update this entry"
-            }
-          },
-          "owner": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can administrate this entry"
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdBy": {
-            "type": "string"
-          },
-          "data": {
-            "type": "object"
-          },
-          "deviceId": {
-            "type": "string",
-            "description": "The events device"
-          },
-          "scanId": {
-            "type": "string",
-            "description": "The parent scan"
-          },
-          "nxData": {
-            "type": "object"
-          }
-        },
-        "additionalProperties": false
-      },
-      "NewEvent": {
-        "title": "NewEvent",
-        "type": "object",
-        "description": "(tsType: Omit<Event, 'id'>, schemaOptions: { title: 'NewEvent', exclude: [ 'id' ] })",
-        "properties": {
-          "readACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can read this entry"
-            }
-          },
-          "writeACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can update this entry"
-            }
-          },
-          "owner": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can administrate this entry"
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdBy": {
-            "type": "string"
-          },
-          "data": {
-            "type": "object"
-          },
-          "deviceId": {
-            "type": "string",
-            "description": "The events device"
-          },
-          "scanId": {
-            "type": "string",
-            "description": "The parent scan"
-          },
-          "nxData": {
-            "type": "object"
-          }
-        },
-        "additionalProperties": false,
-        "x-typescript-type": "Omit<Event, 'id'>"
-      },
-      "EventPartial": {
-        "title": "EventPartial",
-        "type": "object",
-        "description": "(tsType: Partial<Event>, schemaOptions: { partial: true })",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "readACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can read this entry"
-            }
-          },
-          "writeACL": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can update this entry"
-            }
-          },
-          "owner": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "groups or users who can administrate this entry"
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdBy": {
-            "type": "string"
-          },
-          "data": {
-            "type": "object"
-          },
-          "deviceId": {
-            "type": "string",
-            "description": "The events device"
-          },
-          "scanId": {
-            "type": "string",
-            "description": "The parent scan"
-          },
-          "nxData": {
-            "type": "object"
-          }
-        },
-        "additionalProperties": false,
-        "x-typescript-type": "Partial<Event>"
-      },
       "Device": {
         "title": "Device",
         "type": "object",
@@ -6242,6 +6271,10 @@
           "readOnly": {
             "type": "boolean",
             "description": "True if the device is read-only."
+          },
+          "softwareTrigger": {
+            "type": "boolean",
+            "description": "True if the device should receive a trigger call from BEC."
           },
           "deviceClass": {
             "type": "string",
@@ -6345,6 +6378,10 @@
           "readOnly": {
             "type": "boolean",
             "description": "True if the device is read-only."
+          },
+          "softwareTrigger": {
+            "type": "boolean",
+            "description": "True if the device should receive a trigger call from BEC."
           },
           "deviceClass": {
             "type": "string",
@@ -6452,6 +6489,10 @@
           "readOnly": {
             "type": "boolean",
             "description": "True if the device is read-only."
+          },
+          "softwareTrigger": {
+            "type": "boolean",
+            "description": "True if the device should receive a trigger call from BEC."
           },
           "deviceClass": {
             "type": "string",
@@ -8382,8 +8423,7 @@
             "enum": [
               "subdevices",
               "parent",
-              "session",
-              "events"
+              "session"
             ]
           },
           "scope": {
@@ -8462,6 +8502,9 @@
                   "readOnly": {
                     "type": "boolean"
                   },
+                  "softwareTrigger": {
+                    "type": "boolean"
+                  },
                   "deviceClass": {
                     "type": "boolean"
                   },
@@ -8500,6 +8543,7 @@
                     "sessionId",
                     "enabled",
                     "readOnly",
+                    "softwareTrigger",
                     "deviceClass",
                     "deviceTags",
                     "deviceConfig",
@@ -8608,6 +8652,9 @@
                   "readOnly": {
                     "type": "boolean"
                   },
+                  "softwareTrigger": {
+                    "type": "boolean"
+                  },
                   "deviceClass": {
                     "type": "boolean"
                   },
@@ -8646,6 +8693,7 @@
                     "sessionId",
                     "enabled",
                     "readOnly",
+                    "softwareTrigger",
                     "deviceClass",
                     "deviceTags",
                     "deviceConfig",
@@ -8677,306 +8725,6 @@
         },
         "additionalProperties": false,
         "x-typescript-type": "@loopback/repository#Filter<Device>"
-      },
-      "Event.ScopeFilter": {
-        "type": "object",
-        "properties": {
-          "offset": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "limit": {
-            "type": "integer",
-            "minimum": 1,
-            "example": 100
-          },
-          "skip": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "order": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              }
-            ]
-          },
-          "where": {
-            "type": "object",
-            "additionalProperties": true
-          },
-          "fields": {
-            "oneOf": [
-              {
-                "type": "object",
-                "properties": {},
-                "additionalProperties": true
-              },
-              {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                },
-                "uniqueItems": true
-              }
-            ]
-          },
-          "include": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {},
-              "additionalProperties": true
-            }
-          }
-        },
-        "additionalProperties": false,
-        "title": "Event.ScopeFilter"
-      },
-      "Event.IncludeFilter.Items": {
-        "title": "Event.IncludeFilter.Items",
-        "type": "object",
-        "properties": {
-          "relation": {
-            "type": "string",
-            "enum": [
-              "device",
-              "scan"
-            ]
-          },
-          "scope": {
-            "$ref": "#/components/schemas/Event.ScopeFilter"
-          }
-        }
-      },
-      "Event.Filter": {
-        "type": "object",
-        "title": "Event.Filter",
-        "properties": {
-          "offset": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "limit": {
-            "type": "integer",
-            "minimum": 1,
-            "example": 100
-          },
-          "skip": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "order": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              }
-            ]
-          },
-          "fields": {
-            "oneOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "boolean"
-                  },
-                  "readACL": {
-                    "type": "boolean"
-                  },
-                  "writeACL": {
-                    "type": "boolean"
-                  },
-                  "owner": {
-                    "type": "boolean"
-                  },
-                  "createdAt": {
-                    "type": "boolean"
-                  },
-                  "createdBy": {
-                    "type": "boolean"
-                  },
-                  "data": {
-                    "type": "boolean"
-                  },
-                  "deviceId": {
-                    "type": "boolean"
-                  },
-                  "scanId": {
-                    "type": "boolean"
-                  },
-                  "nxData": {
-                    "type": "boolean"
-                  }
-                },
-                "additionalProperties": false
-              },
-              {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "enum": [
-                    "id",
-                    "readACL",
-                    "writeACL",
-                    "owner",
-                    "createdAt",
-                    "createdBy",
-                    "data",
-                    "deviceId",
-                    "scanId",
-                    "nxData"
-                  ],
-                  "example": "id"
-                },
-                "uniqueItems": true
-              }
-            ],
-            "title": "Event.Fields"
-          },
-          "include": {
-            "title": "Event.IncludeFilter",
-            "type": "array",
-            "items": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/Event.IncludeFilter.Items"
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            }
-          }
-        },
-        "additionalProperties": false,
-        "x-typescript-type": "@loopback/repository#Filter<Event>"
-      },
-      "Event.Filter1": {
-        "type": "object",
-        "title": "Event.Filter",
-        "properties": {
-          "offset": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "limit": {
-            "type": "integer",
-            "minimum": 1,
-            "example": 100
-          },
-          "skip": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "order": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              }
-            ]
-          },
-          "where": {
-            "title": "Event.WhereFilter",
-            "type": "object",
-            "additionalProperties": true
-          },
-          "fields": {
-            "oneOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "boolean"
-                  },
-                  "readACL": {
-                    "type": "boolean"
-                  },
-                  "writeACL": {
-                    "type": "boolean"
-                  },
-                  "owner": {
-                    "type": "boolean"
-                  },
-                  "createdAt": {
-                    "type": "boolean"
-                  },
-                  "createdBy": {
-                    "type": "boolean"
-                  },
-                  "data": {
-                    "type": "boolean"
-                  },
-                  "deviceId": {
-                    "type": "boolean"
-                  },
-                  "scanId": {
-                    "type": "boolean"
-                  },
-                  "nxData": {
-                    "type": "boolean"
-                  }
-                },
-                "additionalProperties": false
-              },
-              {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "enum": [
-                    "id",
-                    "readACL",
-                    "writeACL",
-                    "owner",
-                    "createdAt",
-                    "createdBy",
-                    "data",
-                    "deviceId",
-                    "scanId",
-                    "nxData"
-                  ],
-                  "example": "id"
-                },
-                "uniqueItems": true
-              }
-            ],
-            "title": "Event.Fields"
-          },
-          "include": {
-            "title": "Event.IncludeFilter",
-            "type": "array",
-            "items": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/Event.IncludeFilter.Items"
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            }
-          }
-        },
-        "additionalProperties": false,
-        "x-typescript-type": "@loopback/repository#Filter<Event>"
       },
       "ExperimentAccount.ScopeFilter": {
         "type": "object",
@@ -10046,6 +9794,9 @@
                   "description": {
                     "type": "boolean"
                   },
+                  "data": {
+                    "type": "boolean"
+                  },
                   "NXclass": {
                     "type": "boolean"
                   },
@@ -10072,6 +9823,7 @@
                     "name",
                     "type",
                     "description",
+                    "data",
                     "NXclass",
                     "parentId",
                     "scanId"
@@ -10168,6 +9920,9 @@
                   "description": {
                     "type": "boolean"
                   },
+                  "data": {
+                    "type": "boolean"
+                  },
                   "NXclass": {
                     "type": "boolean"
                   },
@@ -10194,6 +9949,7 @@
                     "name",
                     "type",
                     "description",
+                    "data",
                     "NXclass",
                     "parentId",
                     "scanId"
@@ -10222,6 +9978,290 @@
         },
         "additionalProperties": false,
         "x-typescript-type": "@loopback/repository#Filter<NXEntity>"
+      },
+      "NewScanDataMany": {
+        "type": "object",
+        "title": "NewScanDataMany",
+        "properties": {
+          "count": {
+            "type": "number"
+          }
+        }
+      },
+      "ScanData.ScopeFilter": {
+        "type": "object",
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "example": 100
+          },
+          "skip": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "order": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "where": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "fields": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": true
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "uniqueItems": true
+              }
+            ]
+          },
+          "include": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            }
+          }
+        },
+        "additionalProperties": false,
+        "title": "ScanData.ScopeFilter"
+      },
+      "ScanData.IncludeFilter.Items": {
+        "title": "ScanData.IncludeFilter.Items",
+        "type": "object",
+        "properties": {
+          "relation": {
+            "type": "string",
+            "enum": [
+              "scan"
+            ]
+          },
+          "scope": {
+            "$ref": "#/components/schemas/ScanData.ScopeFilter"
+          }
+        }
+      },
+      "ScanData.Filter": {
+        "type": "object",
+        "title": "ScanData.Filter",
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "example": 100
+          },
+          "skip": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "order": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "fields": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "boolean"
+                  },
+                  "readACL": {
+                    "type": "boolean"
+                  },
+                  "writeACL": {
+                    "type": "boolean"
+                  },
+                  "owner": {
+                    "type": "boolean"
+                  },
+                  "createdAt": {
+                    "type": "boolean"
+                  },
+                  "createdBy": {
+                    "type": "boolean"
+                  },
+                  "name": {
+                    "type": "boolean"
+                  },
+                  "data": {
+                    "type": "boolean"
+                  },
+                  "filePath": {
+                    "type": "boolean"
+                  },
+                  "scanId": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "example": "id"
+                },
+                "uniqueItems": true
+              }
+            ],
+            "title": "ScanData.Fields"
+          },
+          "include": {
+            "title": "ScanData.IncludeFilter",
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ScanData.IncludeFilter.Items"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        "additionalProperties": false,
+        "x-typescript-type": "@loopback/repository#Filter<ScanData>"
+      },
+      "ScanData.Filter1": {
+        "type": "object",
+        "title": "ScanData.Filter",
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "example": 100
+          },
+          "skip": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "order": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "where": {
+            "title": "ScanData.WhereFilter",
+            "type": "object",
+            "additionalProperties": true
+          },
+          "fields": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "boolean"
+                  },
+                  "readACL": {
+                    "type": "boolean"
+                  },
+                  "writeACL": {
+                    "type": "boolean"
+                  },
+                  "owner": {
+                    "type": "boolean"
+                  },
+                  "createdAt": {
+                    "type": "boolean"
+                  },
+                  "createdBy": {
+                    "type": "boolean"
+                  },
+                  "name": {
+                    "type": "boolean"
+                  },
+                  "data": {
+                    "type": "boolean"
+                  },
+                  "filePath": {
+                    "type": "boolean"
+                  },
+                  "scanId": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "example": "id"
+                },
+                "uniqueItems": true
+              }
+            ],
+            "title": "ScanData.Fields"
+          },
+          "include": {
+            "title": "ScanData.IncludeFilter",
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ScanData.IncludeFilter.Items"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        "additionalProperties": false,
+        "x-typescript-type": "@loopback/repository#Filter<ScanData>"
       },
       "Scan.ScopeFilter": {
         "type": "object",
@@ -10294,7 +10334,7 @@
               "session",
               "dataset",
               "experiment",
-              "events"
+              "scanData"
             ]
           },
           "scope": {
@@ -10364,9 +10404,6 @@
                   "userParameter": {
                     "type": "boolean"
                   },
-                  "queue": {
-                    "type": "boolean"
-                  },
                   "scanId": {
                     "type": "boolean"
                   },
@@ -10414,7 +10451,6 @@
                     "scanType",
                     "scanParameter",
                     "userParameter",
-                    "queue",
                     "scanId",
                     "requestId",
                     "queueId",
@@ -10518,9 +10554,6 @@
                   "userParameter": {
                     "type": "boolean"
                   },
-                  "queue": {
-                    "type": "boolean"
-                  },
                   "scanId": {
                     "type": "boolean"
                   },
@@ -10568,7 +10601,6 @@
                     "scanType",
                     "scanParameter",
                     "userParameter",
-                    "queue",
                     "scanId",
                     "requestId",
                     "queueId",

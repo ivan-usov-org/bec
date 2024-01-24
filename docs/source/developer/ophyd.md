@@ -17,7 +17,6 @@ An example of an ophyd device based on EPICS is a single PV, e.g. the synchrotro
 ```yaml
 curr:
   readoutPriority: baseline
-  deviceType: monitor
   description: SLS ring current
   deviceClass: EpicsSignalRO
   deviceConfig:
@@ -34,9 +33,6 @@ The following sections explain the different parts of the device configuration i
 
 * **deviceClass** \
 The device class specifies the type of the device. In the example above, the device class is `EpicsSignalRO`, which is a read-only signal based on EPICS. Another example is `EpicsMotor` for motors based on EPICS. For a full list of available device classes, please refer to the [Ophyd documentation](https://nsls-ii.github.io/ophyd/architecture.html#device-classes) and the [Ophyd devices repository](https://gitlab.psi.ch/bec/ophyd_devices).
-
-* **deviceType** \
-The device type specifies the type of the device. In the example above, the device type is `monitor`. The device type is used to group devices and to filter devices. The available device types are `positioner`, `detector`, `monitor`, `controller`, `misc`. 
 
 * **deviceConfig** \
 The device config contains the configuration of the device. In the example above, the device config contains the read PV (`read_pv`). The read PV is the PV that is read out by the device. In this case, the read PV is `ARIDI-PCT:CURRENT`. The device config can contain any configuration parameter that is supported by the device class. 

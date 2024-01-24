@@ -4,7 +4,6 @@
 
 eiger:
   readoutPriority: monitored
-  deviceType: detector
   deviceClass: SynSLSDetector
   deviceConfig:
     device_access: true
@@ -17,7 +16,6 @@ eiger:
 
 dyn_signals:
   readoutPriority: baseline
-  deviceType: monitor
   deviceClass: sim:sim:SynDynamicComponents
   deviceConfig:
   enabled: true
@@ -29,7 +27,6 @@ dyn_signals:
 
 hexapod:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SynDeviceOPAAS
   deviceConfig:
   deviceTags:
@@ -39,7 +36,6 @@ hexapod:
 
 eyefoc:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1    
@@ -55,7 +51,6 @@ eyefoc:
   readOnly: false
 eyex:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -71,7 +66,6 @@ eyex:
   readOnly: false
 eyey:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1    
@@ -87,7 +81,6 @@ eyey:
   readOnly: false
 flyer_sim:
   readoutPriority: on_request
-  deviceType: positioner
   deviceClass: SynFlyer
   deviceConfig:
     delay: 1    
@@ -100,7 +93,6 @@ flyer_sim:
   readOnly: false
 hrox:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1    
@@ -116,7 +108,6 @@ hrox:
   readOnly: false
 hroy:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1    
@@ -132,7 +123,6 @@ hroy:
   readOnly: false
 hroz:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1    
@@ -148,7 +138,6 @@ hroz:
   readOnly: false
 hx:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1    
@@ -164,7 +153,6 @@ hx:
   readOnly: false
 hy:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -180,7 +168,6 @@ hy:
   readOnly: false
 hz:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1    
@@ -196,7 +183,6 @@ hz:
   readOnly: false
 mbsx:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1    
@@ -212,7 +198,6 @@ mbsx:
   readOnly: false
 mbsy:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -228,7 +213,6 @@ mbsy:
   readOnly: false
 pinx:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1    
@@ -244,7 +228,6 @@ pinx:
   readOnly: false
 piny:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1    
@@ -260,7 +243,6 @@ piny:
   readOnly: false
 pinz:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1    
@@ -276,7 +258,6 @@ pinz:
   readOnly: false
 samx:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1    
@@ -292,7 +273,6 @@ samx:
   readOnly: false
 samy:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1    
@@ -308,7 +288,6 @@ samy:
   readOnly: false
 samz:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1    
@@ -329,9 +308,19 @@ samz:
 #################### Beamline monitors #####################
 ############################################################
 
+gauss_bpm:
+  readoutPriority: monitored
+  deviceClass: sim:sim:SynGaussBEC
+  deviceConfig:
+    sigma: 1
+    noise: 'uniform'
+    noise_multiplier: 0.4
+  deviceTags:
+  - beamline
+  enabled: true
+  readOnly: False
 bpm3a:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -341,7 +330,6 @@ bpm3a:
   readOnly: false
 bpm3b:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -351,7 +339,6 @@ bpm3b:
   readOnly: false
 bpm3c:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -361,7 +348,6 @@ bpm3c:
   readOnly: false
 bpm3d:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -371,7 +357,6 @@ bpm3d:
   readOnly: false
 bpm3i:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -381,7 +366,6 @@ bpm3i:
   readOnly: false
 bpm3x:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -391,7 +375,6 @@ bpm3x:
   readOnly: false
 bpm3y:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -401,7 +384,6 @@ bpm3y:
   readOnly: false
 bpm3z:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -411,7 +393,6 @@ bpm3z:
   readOnly: false
 bpm4a:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -421,7 +402,6 @@ bpm4a:
   readOnly: false
 bpm4b:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -431,7 +411,6 @@ bpm4b:
   readOnly: false
 bpm4c:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -441,7 +420,6 @@ bpm4c:
   readOnly: false
 bpm4d:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -451,7 +429,6 @@ bpm4d:
   readOnly: false
 bpm4i:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -461,7 +438,6 @@ bpm4i:
   readOnly: false
 bpm4s:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -471,7 +447,6 @@ bpm4s:
   readOnly: false
 bpm4x:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -481,7 +456,6 @@ bpm4x:
   readOnly: false
 bpm4xf:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -491,7 +465,6 @@ bpm4xf:
   readOnly: false
 bpm4xm:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -501,7 +474,6 @@ bpm4xm:
   readOnly: false
 bpm4y:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -511,7 +483,6 @@ bpm4y:
   readOnly: false
 bpm4yf:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -521,7 +492,6 @@ bpm4yf:
   readOnly: false
 bpm4ym:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -531,7 +501,6 @@ bpm4ym:
   readOnly: false
 bpm4z:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -541,7 +510,6 @@ bpm4z:
   readOnly: false
 bpm5a:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -551,7 +519,6 @@ bpm5a:
   readOnly: false
 bpm5b:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -561,7 +528,6 @@ bpm5b:
   readOnly: false
 bpm5c:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -571,7 +537,6 @@ bpm5c:
   readOnly: false
 bpm5d:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -581,7 +546,6 @@ bpm5d:
   readOnly: false
 bpm5i:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -591,7 +555,6 @@ bpm5i:
   readOnly: false
 bpm5x:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -601,7 +564,6 @@ bpm5x:
   readOnly: false
 bpm5y:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -611,7 +573,6 @@ bpm5y:
   readOnly: false
 bpm5z:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -621,7 +582,6 @@ bpm5z:
   readOnly: false
 bpm6a:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -631,7 +591,6 @@ bpm6a:
   readOnly: false
 bpm6b:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -641,7 +600,6 @@ bpm6b:
   readOnly: false
 bpm6c:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -651,7 +609,6 @@ bpm6c:
   readOnly: false
 bpm6d:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -661,7 +618,6 @@ bpm6d:
   readOnly: false
 bpm6i:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -671,7 +627,6 @@ bpm6i:
   readOnly: false
 bpm6x:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -681,7 +636,6 @@ bpm6x:
   readOnly: false
 bpm6y:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -691,7 +645,6 @@ bpm6y:
   readOnly: false
 bpm6z:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -701,7 +654,6 @@ bpm6z:
   readOnly: false
 curr:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -711,7 +663,6 @@ curr:
   readOnly: false
 diode:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -721,7 +672,6 @@ diode:
   readOnly: false
 ebpmdx:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -731,7 +681,6 @@ ebpmdx:
   readOnly: false
 ebpmdy:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -741,7 +690,6 @@ ebpmdy:
   readOnly: false
 ebpmux:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -751,7 +699,6 @@ ebpmux:
   readOnly: false
 ebpmuy:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -761,7 +708,6 @@ ebpmuy:
   readOnly: false
 ftp:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -771,7 +717,6 @@ ftp:
   readOnly: false
 temp:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -781,7 +726,6 @@ temp:
   readOnly: false
 transd:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynAxisMonitor
   deviceConfig:
     tolerance: 0.5
@@ -798,7 +742,6 @@ transd:
 
 aptrx:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -810,7 +753,6 @@ aptrx:
   readOnly: false
 aptry:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -822,7 +764,6 @@ aptry:
   readOnly: false
 bim2x:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -834,7 +775,6 @@ bim2x:
   readOnly: false
 bim2y:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -846,7 +786,6 @@ bim2y:
   readOnly: false
 bm1trx:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -858,7 +797,6 @@ bm1trx:
   readOnly: false
 bm1try:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -870,7 +808,6 @@ bm1try:
   readOnly: false
 bm2trx:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -882,7 +819,6 @@ bm2trx:
   readOnly: false
 bm2try:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -894,7 +830,6 @@ bm2try:
   readOnly: false
 bm3trx:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -906,7 +841,6 @@ bm3trx:
   readOnly: false
 bm3try:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -918,7 +852,6 @@ bm3try:
   readOnly: false
 bm4trx:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -930,7 +863,6 @@ bm4trx:
   readOnly: false
 bm4try:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -942,7 +874,6 @@ bm4try:
   readOnly: false
 bm5trx:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -954,7 +885,6 @@ bm5trx:
   readOnly: false
 bm5try:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -966,7 +896,6 @@ bm5try:
   readOnly: false
 bm6trx:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -978,7 +907,6 @@ bm6trx:
   readOnly: false
 bm6try:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -990,7 +918,6 @@ bm6try:
   readOnly: false
 bpm4r:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1002,7 +929,6 @@ bpm4r:
   readOnly: false
 bpm5r:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1014,7 +940,6 @@ bpm5r:
   readOnly: false
 bs1x:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1026,7 +951,6 @@ bs1x:
   readOnly: false
 bs1y:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1038,7 +962,6 @@ bs1y:
   readOnly: false
 bs2x:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1050,7 +973,6 @@ bs2x:
   readOnly: false
 bs2y:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1062,7 +984,6 @@ bs2y:
   readOnly: false
 burstn:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1074,7 +995,6 @@ burstn:
   readOnly: false
 burstr:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1086,7 +1006,6 @@ burstr:
   readOnly: false
 ddg1a:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1098,7 +1017,6 @@ ddg1a:
   readOnly: false
 ddg1b:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1110,7 +1028,6 @@ ddg1b:
   readOnly: false
 ddg1c:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1122,7 +1039,6 @@ ddg1c:
   readOnly: false
 ddg1d:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1134,7 +1050,6 @@ ddg1d:
   readOnly: false
 ddg1e:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1146,7 +1061,6 @@ ddg1e:
   readOnly: false
 ddg1f:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1158,7 +1072,6 @@ ddg1f:
   readOnly: false
 ddg1g:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1170,7 +1083,6 @@ ddg1g:
   readOnly: false
 ddg1h:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1182,7 +1094,6 @@ ddg1h:
   readOnly: false
 dettrx:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1194,7 +1105,6 @@ dettrx:
   readOnly: false
 di2trx:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1206,7 +1116,6 @@ di2trx:
   readOnly: false
 di2try:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1218,7 +1127,6 @@ di2try:
   readOnly: false
 dtpush:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1230,7 +1138,6 @@ dtpush:
   readOnly: false
 dtth:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1242,7 +1149,6 @@ dtth:
   readOnly: false
 dttrx:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1254,7 +1160,6 @@ dttrx:
   readOnly: false
 dttry:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1266,7 +1171,6 @@ dttry:
   readOnly: false
 dttrz:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1278,7 +1182,6 @@ dttrz:
   readOnly: false
 ebcsx:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1290,7 +1193,6 @@ ebcsx:
   readOnly: false
 ebcsy:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1302,7 +1204,6 @@ ebcsy:
   readOnly: false
 ebfi1:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1314,7 +1215,6 @@ ebfi1:
   readOnly: false
 ebfi2:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1326,7 +1226,6 @@ ebfi2:
   readOnly: false
 ebfi3:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1338,7 +1237,6 @@ ebfi3:
   readOnly: false
 ebfi4:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1350,7 +1248,6 @@ ebfi4:
   readOnly: false
 ebfzpx:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1362,7 +1259,6 @@ ebfzpx:
   readOnly: false
 ebfzpy:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1374,7 +1270,6 @@ ebfzpy:
   readOnly: false
 ebtrx:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1386,7 +1281,6 @@ ebtrx:
   readOnly: false
 ebtry:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1398,7 +1292,6 @@ ebtry:
   readOnly: false
 ebtrz:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1410,7 +1303,6 @@ ebtrz:
   readOnly: false
 fi1try:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1422,7 +1314,6 @@ fi1try:
   readOnly: false
 fi2try:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1434,7 +1325,6 @@ fi2try:
   readOnly: false
 fi3try:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1446,7 +1336,6 @@ fi3try:
   readOnly: false
 fsh1x:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1458,7 +1347,6 @@ fsh1x:
   readOnly: false
 fsh2x:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1470,7 +1358,6 @@ fsh2x:
   readOnly: false
 ftrans:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1482,7 +1369,6 @@ ftrans:
   readOnly: false
 fttrx1:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1494,7 +1380,6 @@ fttrx1:
   readOnly: false
 fttrx2:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1506,7 +1391,6 @@ fttrx2:
   readOnly: false
 fttry1:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1518,7 +1402,6 @@ fttry1:
   readOnly: false
 fttry2:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1530,7 +1413,6 @@ fttry2:
   readOnly: false
 fttrz:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1542,7 +1424,6 @@ fttrz:
   readOnly: false
 idgap:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1554,7 +1435,6 @@ idgap:
   readOnly: false
 mibd:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1566,7 +1446,6 @@ mibd:
   readOnly: false
 mibd1:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1578,7 +1457,6 @@ mibd1:
   readOnly: false
 mibd2:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1590,7 +1468,6 @@ mibd2:
   readOnly: false
 miroll:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1602,7 +1479,6 @@ miroll:
   readOnly: false
 mith:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1614,7 +1490,6 @@ mith:
   readOnly: false
 mitrx:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1626,7 +1501,6 @@ mitrx:
   readOnly: false
 mitry:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1638,7 +1512,6 @@ mitry:
   readOnly: false
 mitry1:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1650,7 +1523,6 @@ mitry1:
   readOnly: false
 mitry2:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1662,7 +1534,6 @@ mitry2:
   readOnly: false
 mitry3:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1674,7 +1545,6 @@ mitry3:
   readOnly: false
 mobd:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1686,7 +1556,6 @@ mobd:
   readOnly: false
 mobdai:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1698,7 +1567,6 @@ mobdai:
   readOnly: false
 mobdbo:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1710,7 +1578,6 @@ mobdbo:
   readOnly: false
 mobdco:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1722,7 +1589,6 @@ mobdco:
   readOnly: false
 mobddi:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1734,7 +1600,6 @@ mobddi:
   readOnly: false
 mokev:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1746,7 +1611,6 @@ mokev:
   readOnly: false
 mopush1:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1758,7 +1622,6 @@ mopush1:
   readOnly: false
 mopush2:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1770,7 +1633,6 @@ mopush2:
   readOnly: false
 moroll1:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1782,7 +1644,6 @@ moroll1:
   readOnly: false
 moroll2:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1794,7 +1655,6 @@ moroll2:
   readOnly: false
 moth1:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1806,7 +1666,6 @@ moth1:
   readOnly: false
 moth1e:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1818,7 +1677,6 @@ moth1e:
   readOnly: false
 moth2:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1830,7 +1688,6 @@ moth2:
   readOnly: false
 moth2e:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1842,7 +1699,6 @@ moth2e:
   readOnly: false
 motrx2:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1854,7 +1710,6 @@ motrx2:
   readOnly: false
 motry:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1866,7 +1721,6 @@ motry:
   readOnly: false
 motry2:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1878,7 +1732,6 @@ motry2:
   readOnly: false
 motrz1:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1890,7 +1743,6 @@ motrz1:
   readOnly: false
 motrz1e:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1902,7 +1754,6 @@ motrz1e:
   readOnly: false
 moyaw2:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1914,7 +1765,6 @@ moyaw2:
   readOnly: false
 sl0ch:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1926,7 +1776,6 @@ sl0ch:
   readOnly: false
 sl0trxi:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1938,7 +1787,6 @@ sl0trxi:
   readOnly: false
 sl0trxo:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1950,7 +1798,6 @@ sl0trxo:
   readOnly: false
 sl0wh:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1962,7 +1809,6 @@ sl0wh:
   readOnly: false
 sl1ch:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1974,7 +1820,6 @@ sl1ch:
   readOnly: false
 sl1cv:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1986,7 +1831,6 @@ sl1cv:
   readOnly: false
 sl1trxi:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -1998,7 +1842,6 @@ sl1trxi:
   readOnly: false
 sl1trxo:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2010,7 +1853,6 @@ sl1trxo:
   readOnly: false
 sl1tryb:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2022,7 +1864,6 @@ sl1tryb:
   readOnly: false
 sl1tryt:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2034,7 +1875,6 @@ sl1tryt:
   readOnly: false
 sl1wh:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2046,7 +1886,6 @@ sl1wh:
   readOnly: false
 sl1wv:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2058,7 +1897,6 @@ sl1wv:
   readOnly: false
 sl2ch:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2070,7 +1908,6 @@ sl2ch:
   readOnly: false
 sl2cv:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2082,7 +1919,6 @@ sl2cv:
   readOnly: false
 sl2trxi:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2094,7 +1930,6 @@ sl2trxi:
   readOnly: false
 sl2trxo:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2106,7 +1941,6 @@ sl2trxo:
   readOnly: false
 sl2tryb:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2118,7 +1952,6 @@ sl2tryb:
   readOnly: false
 sl2tryt:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2130,7 +1963,6 @@ sl2tryt:
   readOnly: false
 sl2wh:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2142,7 +1974,6 @@ sl2wh:
   readOnly: false
 sl2wv:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2154,7 +1985,6 @@ sl2wv:
   readOnly: false
 sl3ch:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2166,7 +1996,6 @@ sl3ch:
   readOnly: false
 sl3cv:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2178,7 +2007,6 @@ sl3cv:
   readOnly: false
 sl3trxi:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2190,7 +2018,6 @@ sl3trxi:
   readOnly: false
 sl3trxo:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2202,7 +2029,6 @@ sl3trxo:
   readOnly: false
 sl3tryb:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2214,7 +2040,6 @@ sl3tryb:
   readOnly: false
 sl3tryt:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2226,7 +2051,6 @@ sl3tryt:
   readOnly: false
 sl3wh:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2238,7 +2062,6 @@ sl3wh:
   readOnly: false
 sl3wv:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2250,7 +2073,6 @@ sl3wv:
   readOnly: false
 sl4ch:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2262,7 +2084,6 @@ sl4ch:
   readOnly: false
 sl4cv:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2274,7 +2095,6 @@ sl4cv:
   readOnly: false
 sl4trxi:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2286,7 +2106,6 @@ sl4trxi:
   readOnly: false
 sl4trxo:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2298,7 +2117,6 @@ sl4trxo:
   readOnly: false
 sl4tryb:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2310,7 +2128,6 @@ sl4tryb:
   readOnly: false
 sl4tryt:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2322,7 +2139,6 @@ sl4tryt:
   readOnly: false
 sl4wh:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2334,7 +2150,6 @@ sl4wh:
   readOnly: false
 sl4wv:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2346,7 +2161,6 @@ sl4wv:
   readOnly: false
 sl5ch:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2358,7 +2172,6 @@ sl5ch:
   readOnly: false
 sl5cv:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2370,7 +2183,6 @@ sl5cv:
   readOnly: false
 sl5trxi:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2382,7 +2194,6 @@ sl5trxi:
   readOnly: false
 sl5trxo:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2394,7 +2205,6 @@ sl5trxo:
   readOnly: false
 sl5tryb:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2406,7 +2216,6 @@ sl5tryb:
   readOnly: false
 sl5tryt:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2418,7 +2227,6 @@ sl5tryt:
   readOnly: false
 sl5wh:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2430,7 +2238,6 @@ sl5wh:
   readOnly: false
 sl5wv:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2442,7 +2249,6 @@ sl5wv:
   readOnly: false
 strox:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2454,7 +2260,6 @@ strox:
   readOnly: false
 stroy:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2466,7 +2271,6 @@ stroy:
   readOnly: false
 stroz:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2478,7 +2282,6 @@ stroz:
   readOnly: false
 sttrx:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2490,7 +2293,6 @@ sttrx:
   readOnly: false
 sttry:
   readoutPriority: baseline
-  deviceType: positioner
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
@@ -2509,7 +2311,6 @@ sttry:
 
 ring_current_sim:
   readoutPriority: monitored
-  deviceType: monitor
   deviceClass: SynSignalRO
   deviceConfig:
   deviceTags:

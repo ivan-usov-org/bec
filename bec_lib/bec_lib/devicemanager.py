@@ -18,7 +18,7 @@ from typeguard import typechecked
 from bec_lib import messages
 from bec_lib.bec_errors import DeviceConfigError
 from bec_lib.config_helper import ConfigHelper
-from bec_lib.device import Device, DeviceBase, DeviceType, Positioner, ReadoutPriority, Signal
+from bec_lib.device import Device, DeviceBase, Positioner, ReadoutPriority, Signal
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
 from bec_lib.messages import (
@@ -107,19 +107,6 @@ class DeviceContainer(dict):
         val = ReadoutPriority(readout_priority)
         # pylint: disable=protected-access
         return [dev for _, dev in self.items() if dev._config["readoutPriority"] == val]
-
-    def get_device_type_devices(self, device_type: DeviceType) -> list:
-        """get all devices with the specified device type
-
-        Args:
-            device_type (str): device type (e.g. POSITIONER, DETECTOR, MONITOR, CONTROLLER, MISC)
-
-        Returns:
-            list: List of devices that belong to the specified acquisition readoutPriority
-        """
-        val = DeviceType(device_type)
-        # pylint: disable=protected-access
-        return [dev for _, dev in self.items() if dev._config.get("deviceType") == val]
 
     def async_devices(self) -> list:
         """get a list of all synchronous devices"""
@@ -221,7 +208,8 @@ class DeviceContainer(dict):
 
     def detectors(self) -> list:
         """get a list of all enabled detectors"""
-        return self.get_device_type_devices(DeviceType.DETECTOR)
+        # TODO add here get_software_triggered_devices
+        return []
 
     def _expand_device_name(self, device_name: str) -> list[str]:
         try:
@@ -432,8 +420,6 @@ class DeviceManagerBase:
                     self.devices[dev]._config["deviceTags"] = config[dev]["deviceTags"]
                 if "readoutPriority" in config[dev]:
                     self.devices[dev]._config["readoutPriority"] = config[dev]["readoutPriority"]
-                if "deviceType" in config[dev]:
-                    self.devices[dev]._config["deviceType"] = config[dev]["deviceType"]
 
         elif action == "add":
             self._add_action(config)

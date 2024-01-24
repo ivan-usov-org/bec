@@ -34,16 +34,6 @@ def rpc(fcn):
     return wrapper
 
 
-class DeviceType(str, enum.Enum):
-    """Device type"""
-
-    POSITIONER = "positioner"
-    DETECTOR = "detector"
-    MONITOR = "monitor"
-    CONTROLLER = "controller"
-    MISC = "misc"
-
-
 class DeviceStatus(enum.Enum):
     """Device status"""
 
@@ -423,21 +413,6 @@ class DeviceBase:
     def wm(self) -> None:
         """get the current position of a device"""
         self.parent.devices.wm(self.name)
-
-    @property
-    def device_type(self) -> DeviceType:
-        """get the device type for this device"""
-        return DeviceType(self._config["deviceType"])
-
-    @device_type.setter
-    def device_type(self, val: DeviceType):
-        """set the device type for this device"""
-        if not isinstance(val, DeviceType):
-            val = DeviceType(val)
-        self._config["deviceType"] = val
-        return self.parent.config_helper.send_config_request(
-            action="update", config={self.name: {"deviceType": val}}
-        )
 
     @property
     def readout_priority(self) -> ReadoutPriority:

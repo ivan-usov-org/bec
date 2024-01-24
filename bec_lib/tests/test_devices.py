@@ -8,7 +8,6 @@ from bec_lib.device import (
     AdjustableMixin,
     Device,
     DeviceBase,
-    DeviceType,
     Positioner,
     RPCError,
     Signal,
@@ -437,24 +436,6 @@ def test_readout_priority():
     parent = mock.MagicMock()
     device = DeviceBase(name="test", config={"readoutPriority": "baseline"}, parent=parent)
     assert device.readout_priority == "baseline"
-
-
-@pytest.mark.parametrize(
-    "device_config, deviceType_in_config",
-    [
-        ({"readoutPriority": "baseline"}, False),
-        ({"deviceType": "monitor", "readoutPriority": "baseline"}, True),
-    ],
-)
-def test_get_device_type_devices(device_config, deviceType_in_config):
-    parent = mock.MagicMock()
-    device = DeviceBase(name="test", config=device_config, parent=parent)
-    devs = DeviceContainer()
-    devs["test"] = device
-    if deviceType_in_config is True:
-        assert devs.get_device_type_devices(DeviceType.MONITOR) == [device]
-    else:
-        assert devs.get_device_type_devices(DeviceType.MONITOR) == []
 
 
 def test_set_readout_priority():

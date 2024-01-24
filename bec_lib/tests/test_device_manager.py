@@ -12,7 +12,7 @@ import bec_lib
 from bec_lib import messages
 from bec_lib.connector import MessageObject
 from bec_lib.device import Device, Status
-from bec_lib.devicemanager import DeviceConfigError, DeviceContainer, DeviceManagerBase, DeviceType
+from bec_lib.devicemanager import DeviceConfigError, DeviceContainer, DeviceManagerBase
 from bec_lib.tests.utils import (
     ConnectorMock,
     DMClientMock,
