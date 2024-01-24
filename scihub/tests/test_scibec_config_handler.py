@@ -17,6 +17,7 @@ def config_handler(SciHubMock):
     with mock.patch.object(scibec_connector, "_start_config_request_handler"):
         with mock.patch.object(scibec_connector, "_start_metadata_handler"):
             with mock.patch.object(scibec_connector, "_start_scibec_account_update"):
+                scibec_connector.scibec = None
                 yield scibec_connector.config_handler
 
 
