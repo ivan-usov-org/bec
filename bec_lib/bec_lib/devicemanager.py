@@ -420,6 +420,8 @@ class DeviceManagerBase:
                     self.devices[dev]._config["deviceTags"] = config[dev]["deviceTags"]
                 if "readoutPriority" in config[dev]:
                     self.devices[dev]._config["readoutPriority"] = config[dev]["readoutPriority"]
+                if "softwareTrigger" in config[dev]:
+                    self.devices[dev]._config["softwareTrigger"] = config[dev]["softwareTrigger"]
 
         elif action == "add":
             self._add_action(config)

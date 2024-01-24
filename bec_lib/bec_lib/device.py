@@ -450,12 +450,25 @@ class DeviceBase:
         return self._config.get("readOnly", False)
 
     @read_only.setter
-    def read_only(self, value):
+    def read_only(self, value: bool):
         """Whether or not the device is read only"""
         self.parent.config_helper.send_config_request(
             action="update", config={self.name: {"readOnly": value}}
         )
         self._config["readOnly"] = value
+
+    @property
+    def software_trigger(self):
+        """Whether or not the device can be software triggered"""
+        return self._config.get("softwareTrigger", False)
+
+    @software_trigger.setter
+    def software_trigger(self, value: bool):
+        """Whether or not the device can be software triggered"""
+        self.parent.config_helper.send_config_request(
+            action="update", config={self.name: {"softwareTrigger": value}}
+        )
+        self._config["softwareTrigger"] = value
 
     # def read(self, cached, filter_readback=True):
     #     """get the last reading from a device"""
