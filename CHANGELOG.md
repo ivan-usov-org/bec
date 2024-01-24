@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.57.2 (2024-01-24)
+
+### Fix
+
+* Fixed scihub error handling ([`a58b23d`](https://gitlab.psi.ch/bec/bec/-/commit/a58b23d1007f01ae2b892c49904382d896696d4a))
+
+### Documentation
+
+* Added ophyd-test to documentation ([`5809882`](https://gitlab.psi.ch/bec/bec/-/commit/58098821e950ed15e70c558cb389766ff3165779))
+
 ## v0.57.1 (2024-01-24)
 
 ### Fix
