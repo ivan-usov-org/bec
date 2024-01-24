@@ -56,6 +56,20 @@ The on failure parameter specifies the behavior of the device in case of a failu
 * **description** \
 The description contains the description of the device. It is used to provide additional information about the device.
 
+(developer.ophyd.config_validation)=
+## Validation of the device config
+To avoid errors during loading of the device config, the device config should be validated before loading it. This can be done by installing the `ophyd_devices` package and running the following command:
+
+```bash
+ophyd_test --config ./path/to/my/config/file.yaml
+```
+
+This will perform a static validation of the device config and will print any errors that are found. For checking if the devices can be created and connect successfully, an additional flag can be passed:
+
+```bash
+ophyd_test --config ./path/to/my/config/file.yaml --connect
+``` 
+
 (developer.ophyd.ophyd_device)=
 ## Ophyd devices
 As Ophyd provides a uniform interface to different hardware components, only a few commands are needed to control the hardware. The following section explains the available commands that are used by BEC:
