@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.57.1 (2024-01-24)
+
+### Fix
+
+* Remove deviceType from device config and backend; closes #171 ([`3cb7ae7`](https://gitlab.psi.ch/bec/bec/-/commit/3cb7ae7cf97b1772e8c4f614bf67c87eeb36724f))
+
 ## v0.57.0 (2024-01-24)
 
 ### Feature
