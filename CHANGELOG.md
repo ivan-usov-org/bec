@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.57.0 (2024-01-24)
+
+### Feature
+
+* Made some methods staticmethods to simplify their access ([`bbddd50`](https://gitlab.psi.ch/bec/bec/-/commit/bbddd50f5eb5aa53e8e65b5d2b139dc74fa24ed3))
+
+### Fix
+
+* Added default schema ([`0f8875d`](https://gitlab.psi.ch/bec/bec/-/commit/0f8875d1faaf2ee5629d5096bb5e1660dd045f80))
+
 ## v0.56.3 (2024-01-23)
 
 ### Fix
