@@ -1,7 +1,9 @@
 import _thread
 import os
+import os
 import threading
 import time
+from unittest.mock import PropertyMock
 
 import numpy as np
 import pytest
@@ -692,6 +694,32 @@ def test_disabled_device_raises_scan_request_error(client):
     dev.samx.enabled = True
     time.sleep(1)
     scans.line_scan(dev.samx, 0, 1, steps=10, relative=False)
+
+
+# @pytest.fixture(scope="function")
+@pytest.mark.timeout(100)
+@pytest.mark.parametrize("abort_on_ctrl_c", [True, False])
+def test_context_manager_export(tmp_path, client, abort_on_ctrl_c):
+    bec = client
+    scans = bec.scans
+    wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_line_scan"})
+    dev = bec.device_manager.devices
+    bec._service_config = PropertyMock()
+    bec._service_config.abort_on_ctrl_c = abort_on_ctrl_c
+    if not abort_on_ctrl_c:
+        with pytest.raises(RuntimeError):
+            with scans.scan_export(os.path.join(tmp_path, "test.csv")):
+                scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.01, relative=True)
+                scans.grid_scan(
+                    dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.01, relative=True
+                )
+    else:
+        with scans.scan_export(os.path.join(tmp_path, "test.csv")):
+            scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.01, relative=True)
+            scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.01, relative=True)
+
+        assert len(list(tmp_path.iterdir())) == 1
 
 
 @pytest.mark.timeout(100)

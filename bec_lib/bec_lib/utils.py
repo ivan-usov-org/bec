@@ -46,7 +46,7 @@ def scan_to_csv(
     Examples:
         >>> scan_to_csv(scan_report, "./scan.csv")
     """
-    if isinstance(scan_report, ScanReport):
+    if not isinstance(scan_report, list):
         scan_report = [scan_report]
     header_out = []
     body_out = []
