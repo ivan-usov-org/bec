@@ -452,10 +452,10 @@ class DeviceBase:
     @read_only.setter
     def read_only(self, value):
         """Whether or not the device is read only"""
-        self._config["readOnly"] = value
         self.parent.config_helper.send_config_request(
             action="update", config={self.name: {"readOnly": value}}
         )
+        self._config["readOnly"] = value
 
     # def read(self, cached, filter_readback=True):
     #     """get the last reading from a device"""

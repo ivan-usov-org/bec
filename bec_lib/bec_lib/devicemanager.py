@@ -410,8 +410,8 @@ class DeviceManagerBase:
                     self.devices[dev]._config["enabled"] = config[dev]["enabled"]
                     status = "enabled" if self.devices[dev].enabled else "disabled"
                     logger.info(f"Device {dev} has been {status}.")
-                if "read_only" in config[dev]:
-                    self.devices[dev]._config["read_only"] = config[dev]["read_only"]
+                if "readOnly" in config[dev]:
+                    self.devices[dev]._config["readOnly"] = config[dev]["readOnly"]
                 if "userParameter" in config[dev]:
                     self.devices[dev]._config["userParameter"] = config[dev]["userParameter"]
                 if "onFailure" in config[dev]:
