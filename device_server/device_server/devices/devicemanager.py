@@ -1,14 +1,19 @@
+from __future__ import annotations
+
 import inspect
+import sys
 import time
 import traceback
-import sys
 from functools import reduce
-import numpy as np
-from typeguard import typechecked
 
+import numpy as np
 import ophyd
 import ophyd.sim as ops
 import ophyd_devices as opd
+from ophyd.ophydobj import OphydObject
+from ophyd.signal import EpicsSignalBase
+from typeguard import typechecked
+
 from bec_lib import (
     BECService,
     DeviceBase,
@@ -19,9 +24,6 @@ from bec_lib import (
     messages,
 )
 from bec_lib.connector import ConnectorBase
-from ophyd.ophydobj import OphydObject
-from ophyd.signal import EpicsSignalBase
-
 from device_server.devices.config_update_handler import ConfigUpdateHandler
 from device_server.devices.device_serializer import get_device_info
 
@@ -67,9 +69,7 @@ class DSDevice(DeviceBase):
         producer.set_and_publish(MessageEndpoints.device_readback(self.name), dev_msg, pipe=pipe)
         producer.set(topic=MessageEndpoints.device_read(self.name), msg=dev_msg, pipe=pipe)
         producer.set_and_publish(
-            MessageEndpoints.device_read_configuration(self.name),
-            dev_config_msg,
-            pipe=pipe,
+            MessageEndpoints.device_read_configuration(self.name), dev_config_msg, pipe=pipe
         )
         if limits is not None:
             producer.set_and_publish(
@@ -112,11 +112,18 @@ class DeviceManagerDS(DeviceManagerBase):
         self.devices.flush()
         self._get_config()
 
-    def _get_device_class(self, dev_type):
-        """Return the class object from 'dev_type' string in the form '[module:][submodule:]class_name'
-
+    @staticmethod
+    def _get_device_class(dev_type: str) -> type:
+        """
+        Return the class object from 'dev_type' string in the form '[module:][submodule:]class_name'
         The class is looked after in ophyd devices[.module][.submodule] first, if it is not
         present plugin_devices, ophyd, ophyd_devices.sim are searched too
+
+        Args:
+            dev_type (str): device type string
+
+        Returns:
+            type: class object
         """
         submodule, _, class_name = dev_type.rpartition(":")
         if submodule:
@@ -183,18 +190,20 @@ class DeviceManagerDS(DeviceManagerBase):
                 else:
                     setattr(obj, config_key, config_value)
 
-    def initialize_device(self, dev: dict) -> DSDevice:
+    @staticmethod
+    def construct_device_obj(dev: dict, device_manager: DeviceManagerDS) -> (OphydObject, dict):
         """
-        Prepares a device for later usage.
-        This includes inspecting the device class signature,
-        initializing the object, refreshing the device info and buffer,
-        as well as adding subscriptions.
+        Construct a device object from a device config dictionary.
+
+        Args:
+            dev (dict): device config dictionary
+            device_manager (DeviceManagerDS): device manager instance
+
+        Returns:
+            (OphydObject, dict): device object and updated config dictionary
         """
         name = dev.get("name")
-        enabled = dev.get("enabled")
-        read_only = dev.get("read_only", False)
-
-        dev_cls = self._get_device_class(dev["deviceClass"])
+        dev_cls = DeviceManagerDS._get_device_class(dev["deviceClass"])
         device_config = dev.get("deviceConfig")
         device_config = device_config if device_config is not None else {}
         config = device_config.copy()
@@ -218,14 +227,27 @@ class DeviceManagerDS(DeviceManagerBase):
         init_kwargs = {key: config.pop(key) for key in class_params_and_config_keys}
         device_access = config.pop("device_access", None)
         if device_access or (device_access is None and config.get("device_mapping")):
-            init_kwargs["device_manager"] = self
+            init_kwargs["device_manager"] = device_manager
 
         signature = inspect.signature(dev_cls)
         if "device_manager" in signature.parameters:
-            init_kwargs["device_manager"] = self
+            init_kwargs["device_manager"] = device_manager
 
         # initialize the device object
         obj = dev_cls(**init_kwargs)
+        return obj, config
+
+    def initialize_device(self, dev: dict) -> DSDevice:
+        """
+        Prepares a device for later usage.
+        This includes inspecting the device class signature,
+        initializing the object, refreshing the device info and buffer,
+        as well as adding subscriptions.
+        """
+        name = dev.get("name")
+        enabled = dev.get("enabled")
+
+        obj, config = self.construct_device_obj(dev, device_manager=self)
         self.update_config(obj, config)
 
         # refresh the device info
