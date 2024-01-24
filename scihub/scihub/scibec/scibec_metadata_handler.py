@@ -54,6 +54,8 @@ class SciBecMetadataHandler:
             dict: The updated scan data
         """
         scibec = self.scibec_connector.scibec
+        if not scibec:
+            return
         scibec_info = self.scibec_connector.scibec_info
         experiment_id = scibec_info["activeExperiment"]["id"]
         # session_id = scibec_info["activeSession"][0]["id"]
@@ -114,10 +116,15 @@ class SciBecMetadataHandler:
     @staticmethod
     def _handle_file_content(msg, *, parent, **_kwargs) -> None:
         msg = messages.FileContentMessage.loads(msg.value)
-        logger.debug(f"Received new file content {msg}")
-        if not msg:
+        try:
+            logger.debug(f"Received new file content {msg}")
+            if not msg.content["data"]:
+                return
+            parent.update_scan_data(**msg.content)
+        except Exception as exc:
+            logger.exception(f"Failed to update scan data: {exc}")
+            logger.warning("Failed to write to SciBec")
             return
-        parent.update_scan_data(**msg.content)
 
     def update_scan_data(self, file_path: str, data: dict):
         """
@@ -128,6 +135,8 @@ class SciBecMetadataHandler:
             data(dict): The scan data
         """
         scibec = self.scibec_connector.scibec
+        if not scibec:
+            return
         scan = scibec.scan.scan_controller_find(
             query_params={"filter": {"where": {"scanId": data["metadata"]["scanID"]}}}
         ).body
