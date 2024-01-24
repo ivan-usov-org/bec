@@ -2,6 +2,22 @@
 
 <!--next-version-placeholder-->
 
+## v0.58.0 (2024-01-24)
+
+### Feature
+
+* Added context manager for scan export ([`00e4fbf`](https://gitlab.psi.ch/bec/bec/-/commit/00e4fbfe4567bb75151f310703ac22f4bb2eb483))
+
+### Fix
+
+* Fixed scan_to_csv export and scan_export cm ([`07654ec`](https://gitlab.psi.ch/bec/bec/-/commit/07654ec0432201d44a4311d09efa62084f65c49e))
+* Fixed cm exit ([`09d231a`](https://gitlab.psi.ch/bec/bec/-/commit/09d231a783036b71e8a9d9edfaa7408ae8b69fd7))
+* Fixed context manager ([`52a2cdc`](https://gitlab.psi.ch/bec/bec/-/commit/52a2cdc8d1596e988d4a7f18acef4a179fc820ad))
+
+### Documentation
+
+* Updated the docs ([`979e1d6`](https://gitlab.psi.ch/bec/bec/-/commit/979e1d6b84beb6223384a2996b1fb2acdfa00d41))
+
 ## v0.57.2 (2024-01-24)
 
 ### Fix
