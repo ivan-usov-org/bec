@@ -62,6 +62,7 @@ class MessageEndpoints:
 
     # service
     _services_status = "internal/services/status"
+    _service_log_level = "internal/services/log_level"
     _metrics = "internal/services/metrics"
     _service_response = "internal/services/response"
 
@@ -660,6 +661,17 @@ class MessageEndpoints:
             service_id (str): Service ID, typically a uuid4 string.
         """
         return f"{cls._services_status}/{service_id}"
+
+    @classmethod
+    def service_log_level(cls, service_name: str) -> str:
+        """
+        Endpoint for service log level. This endpoint is used by all BEC services to publish
+        their log level using a messages.LogLevelMessage message.
+
+        Args:
+            service_name (str): Service name, e.g. "DeviceServer".
+        """
+        return f"{cls._service_log_level}/{service_name}"
 
     @classmethod
     def metrics(cls, service_id: str) -> str:

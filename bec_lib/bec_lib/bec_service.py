@@ -50,6 +50,7 @@ class BECService:
         self._service_info_event = threading.Event()
         self._metrics_emitter_thread = None
         self._metrics_emitter_event = threading.Event()
+        self._service_log_level_thread = None
         self._services_info = {}
         self._initialize_logger()
         self._check_services()
@@ -57,6 +58,15 @@ class BECService:
         self._start_update_service_info()
         self._start_metrics_emitter()
         self._wait_for_server()
+        self._start_log_level_subscriber()
+
+    def _start_log_level_subscriber(self):
+        self._service_log_level_thread = self.connector.consumer(
+            topics=MessageEndpoints.service_log_level(self.__class__.__name__),
+            cb=self._parse_log_level_msg,
+            parent=self,
+        )
+        self._service_log_level_thread.start()
 
     def _import_config(self, config: str | ServiceConfig) -> None:
         if isinstance(config, str):
@@ -97,6 +107,7 @@ class BECService:
         bec_logger.configure(
             self.bootstrap_server, self._connector_cls, service_name=self.__class__.__name__
         )
+        self._set_log_level(self.__class__.__name__, int(bec_logger.level))
 
     def _update_existing_services(self):
         service_keys = self.producer.keys(MessageEndpoints.service_status("*"))
@@ -279,6 +290,59 @@ class BECService:
             logger.success("All BEC services are running.")
         except KeyboardInterrupt:
             logger.warning("KeyboardInterrupt received. Stopped waiting for BEC services.")
+
+    @staticmethod
+    def _parse_log_level_msg(msg, *, parent):
+        try:
+            lvl = int(msg.value)
+            parent._update_log_level(lvl)
+        except Exception as e:
+            logger.error(f"Failed to update log level: {e}")
+
+    def _update_log_level(self, level: int):
+        bec_logger.level = level
+
+    def _set_log_level(self, service: str, level: int):
+        self.producer.set(MessageEndpoints.service_log_level(service), int(level))
+
+    def set_log_level(self, service: str, level: int):
+        """
+        Set the log level of a service. The log levels are loguru levels, i.e.
+        5: TRACE (logger.trace())
+        10: DEBUG (logger.debug())
+        20: INFO (logger.info())
+        25: SUCCESS (logger.success())
+        30: WARNING (logger.warning())
+        40: ERROR (logger.error())
+        50: CRITICAL (logger.critical())
+
+
+        Args:
+            service (str): Name of the service
+            level (int): Debug level
+        """
+        self.producer.set_and_publish(MessageEndpoints.service_log_level(service), int(level))
+
+    def get_log_level(self, service: str) -> int:
+        """
+        Get the log level of a service. The log levels are loguru levels, i.e.
+        5: TRACE (logger.trace())
+        10: DEBUG (logger.debug())
+        20: INFO (logger.info())
+        25: SUCCESS (logger.success())
+        30: WARNING (logger.warning())
+        40: ERROR (logger.error())
+        50: CRITICAL (logger.critical())
+
+        Args:
+            service (str): Name of the service
+
+        Returns:
+            int: Log level
+        """
+
+        log_level = self.producer.get(MessageEndpoints.service_log_level(service))
+        return log_level
 
 
 @dataclass
