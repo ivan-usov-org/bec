@@ -36,7 +36,7 @@ async def test_move_callback(bec_client):
     req_done = collections.deque()
     msg_acc = messages.DeviceReqStatusMessage(
         device="samx", success=True, metadata={"RID": "something"}
-    ).dumps()
+    )
     req_done.extend([[None], [None], [None], [msg_acc]])
 
     def mock_req_msg(*args):
@@ -81,7 +81,7 @@ async def test_move_callback_with_report_instruction(bec_client):
     req_done = collections.deque()
     msg_acc = messages.DeviceReqStatusMessage(
         device="samx", success=True, metadata={"RID": "something"}
-    ).dumps()
+    )
     req_done.extend([[None], [None], [None], [msg_acc]])
 
     def mock_req_msg(*args):
@@ -106,11 +106,11 @@ def test_readback_data_mixin(readback_data_mixin):
         messages.DeviceMessage(
             signals={"samx": {"value": 10}, "samx_setpoint": {"value": 20}},
             metadata={"device": "samx"},
-        ).dumps(),
+        ),
         messages.DeviceMessage(
             signals={"samy": {"value": 10}, "samy_setpoint": {"value": 20}},
             metadata={"device": "samy"},
-        ).dumps(),
+        ),
     ]
     res = readback_data_mixin.get_device_values()
     assert res == [10, 10]
@@ -125,11 +125,11 @@ def test_readback_data_mixin_multiple_hints(readback_data_mixin):
         messages.DeviceMessage(
             signals={"samx": {"value": 10}, "samx_setpoint": {"value": 20}},
             metadata={"device": "samx"},
-        ).dumps(),
+        ),
         messages.DeviceMessage(
             signals={"samy": {"value": 10}, "samy_setpoint": {"value": 20}},
             metadata={"device": "samy"},
-        ).dumps(),
+        ),
     ]
     res = readback_data_mixin.get_device_values()
     assert res == [20, 10]
@@ -141,11 +141,11 @@ def test_readback_data_mixin_multiple_no_hints(readback_data_mixin):
         messages.DeviceMessage(
             signals={"samx": {"value": 10}, "samx_setpoint": {"value": 20}},
             metadata={"device": "samx"},
-        ).dumps(),
+        ),
         messages.DeviceMessage(
             signals={"samy": {"value": 10}, "samy_setpoint": {"value": 20}},
             metadata={"device": "samy"},
-        ).dumps(),
+        ),
     ]
     res = readback_data_mixin.get_device_values()
     assert res == [10, 10]

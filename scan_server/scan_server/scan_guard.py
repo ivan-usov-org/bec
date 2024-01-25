@@ -63,9 +63,9 @@ class ScanGuard:
             raise ScanRejection("Invalid request.")
 
     def _check_valid_scan(self, request) -> None:
-        avail_scans = msgpack.loads(self.producer.get(MessageEndpoints.available_scans()))
+        avail_scans = self.producer.get(MessageEndpoints.available_scans())
         scan_type = request.content.get("scan_type")
-        if scan_type not in avail_scans:
+        if scan_type not in avail_scans.resource:
             raise ScanRejection(f"Unknown scan type {scan_type}.")
 
         if scan_type == "device_rpc":
@@ -111,14 +111,14 @@ class ScanGuard:
 
     @staticmethod
     def _scan_queue_request_callback(msg, parent, **_kwargs):
-        content = messages.ScanQueueMessage.loads(msg.value).content
+        content = msg.value.content
         logger.info(f"Receiving scan request: {content}")
         # pylint: disable=protected-access
         parent._handle_scan_request(msg.value)
 
     @staticmethod
     def _scan_queue_modification_request_callback(msg, parent, **_kwargs):
-        mod_msg = messages.ScanQueueModificationMessage.loads(msg.value)
+        mod_msg = msg.value
         if mod_msg is None:
             logger.warning("Failed to parse scan queue modification message.")
             return
@@ -136,8 +136,10 @@ class ScanGuard:
         """
         sqrr = MessageEndpoints.scan_queue_request_response()
         rrm = messages.RequestResponseMessage(
-            accepted=scan_status.accepted, message=scan_status.message, metadata=metadata
-        ).dumps()
+            accepted=scan_status.accepted,
+            message=scan_status.message,
+            metadata=metadata,
+        )
         self.device_manager.producer.send(sqrr, rrm)
 
     def _handle_scan_request(self, msg):
@@ -150,7 +152,6 @@ class ScanGuard:
         Returns:
 
         """
-        msg = messages.ScanQueueMessage.loads(msg)
         scan_status = self._is_valid_scan_request(msg)
 
         self._send_scan_request_response(scan_status, msg.metadata)
@@ -171,7 +172,7 @@ class ScanGuard:
         Returns:
 
         """
-        mod_msg = messages.ScanQueueModificationMessage.loads(msg)
+        mod_msg = msg
 
         if mod_msg.content.get("action") == "restart":
             RID = mod_msg.content["parameter"].get("RID")
@@ -180,10 +181,10 @@ class ScanGuard:
                 self._send_scan_request_response(ScanStatus(), mod_msg.metadata)
 
         sqm = MessageEndpoints.scan_queue_modification()
-        self.device_manager.producer.send(sqm, mod_msg.dumps())
+        self.device_manager.producer.send(sqm, mod_msg)
 
     def _append_to_scan_queue(self, msg):
         logger.info("Appending new scan to queue")
-        msg = msg.dumps()
+        msg = msg
         sqi = MessageEndpoints.scan_queue_insert()
         self.device_manager.producer.send(sqi, msg)

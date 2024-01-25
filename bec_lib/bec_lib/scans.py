@@ -108,9 +108,7 @@ class ScanObject:
 
     def _send_scan_request(self, request: messages.ScanQueueMessage) -> None:
         """Send a scan request to the scan server"""
-        self.client.device_manager.producer.send(
-            MessageEndpoints.scan_queue_request(), request.dumps()
-        )
+        self.client.device_manager.producer.send(MessageEndpoints.scan_queue_request(), request)
 
 
 class Scans:
@@ -132,12 +130,11 @@ class Scans:
 
     def _import_scans(self):
         """Import scans from the scan server"""
-        msg_raw = self.parent.producer.get(MessageEndpoints.available_scans())
-        if msg_raw is None:
+        available_scans = self.parent.producer.get(MessageEndpoints.available_scans())
+        if available_scans is None:
             logger.warning("No scans available. Are redis and the BEC server running?")
             return
-        available_scans = msgpack.loads(msg_raw)
-        for scan_name, scan_info in available_scans.items():
+        for scan_name, scan_info in available_scans.resource.items():
             self._available_scans[scan_name] = ScanObject(scan_name, scan_info, client=self.parent)
             setattr(self, scan_name, self._available_scans[scan_name].run)
             setattr(getattr(self, scan_name), "__doc__", scan_info.get("doc"))

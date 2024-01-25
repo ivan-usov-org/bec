@@ -84,9 +84,7 @@ class BECLogger:
         msg["service_name"] = self.service_name
         self.producer.send(
             topic=MessageEndpoints.log(),
-            msg=bec_lib.messages.LogMessage(
-                log_type=msg["record"]["level"]["name"], content=msg
-            ).dumps(),
+            msg=bec_lib.messages.LogMessage(log_type=msg["record"]["level"]["name"], log_msg=msg),
         )
 
     def format(self, level: LogLevel = None) -> str:

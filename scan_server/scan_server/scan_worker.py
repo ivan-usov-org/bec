@@ -145,7 +145,7 @@ class ScanWorker(threading.Thread):
                 action="trigger",
                 parameter=instr.content["parameter"],
                 metadata=instr.metadata,
-            ).dumps(),
+            ),
         )
         logger.debug(f"Triggered devices: {devices}")
 
@@ -157,7 +157,7 @@ class ScanWorker(threading.Thread):
         """
 
         # send instruction
-        self.device_manager.producer.send(MessageEndpoints.device_instructions(), instr.dumps())
+        self.device_manager.producer.send(MessageEndpoints.device_instructions(), instr)
 
     def read_devices(self, instr: messages.DeviceInstructionMessage) -> None:
         """
@@ -188,7 +188,7 @@ class ScanWorker(threading.Thread):
                 action="read",
                 parameter=instr.content["parameter"],
                 metadata=instr.metadata,
-            ).dumps(),
+            ),
         )
         return
 
@@ -208,7 +208,7 @@ class ScanWorker(threading.Thread):
                 action="kickoff",
                 parameter=instr.content["parameter"],
                 metadata=instr.metadata,
-            ).dumps(),
+            ),
         )
 
     def complete_devices(self, instr: messages.DeviceInstructionMessage) -> None:
@@ -232,7 +232,7 @@ class ScanWorker(threading.Thread):
                 action="complete",
                 parameter=instr.content["parameter"],
                 metadata=instr.metadata,
-            ).dumps(),
+            ),
         )
         self._wait_for_status(devices, instr.metadata)
 
@@ -255,7 +255,7 @@ class ScanWorker(threading.Thread):
             MessageEndpoints.device_instructions(),
             messages.DeviceInstructionMessage(
                 device=baseline_devices, action="read", parameter=params, metadata=instr.metadata
-            ).dumps(),
+            ),
         )
 
     def pre_scan(self, instr: messages.DeviceInstructionMessage) -> None:
@@ -273,7 +273,7 @@ class ScanWorker(threading.Thread):
                 action="pre_scan",
                 parameter=instr.content["parameter"],
                 metadata=instr.metadata,
-            ).dumps(),
+            ),
         )
         self._wait_for_status(devices, instr.metadata)
 
@@ -293,7 +293,7 @@ class ScanWorker(threading.Thread):
         if not isinstance(data, list):
             data = [data]
         for device, dev_data in zip(devices, data):
-            msg = messages.DeviceMessage(signals=dev_data, metadata=instr.metadata).dumps()
+            msg = messages.DeviceMessage(signals=dev_data, metadata=instr.metadata)
             producer.set_and_publish(MessageEndpoints.device_read(device), msg)
 
     def send_rpc(self, instr: messages.DeviceInstructionMessage) -> None:
@@ -304,7 +304,7 @@ class ScanWorker(threading.Thread):
             instr (DeviceInstructionMessage): Device instruction received from the scan assembler
 
         """
-        self.device_manager.producer.send(MessageEndpoints.device_instructions(), instr.dumps())
+        self.device_manager.producer.send(MessageEndpoints.device_instructions(), instr)
 
     def process_scan_report_instruction(self, instr):
         """
@@ -340,7 +340,7 @@ class ScanWorker(threading.Thread):
                     action="stage",
                     parameter=instr.content["parameter"],
                     metadata=instr.metadata,
-                ).dumps(),
+                ),
             )
         self._staged_devices.update(async_devices)
 
@@ -351,7 +351,7 @@ class ScanWorker(threading.Thread):
                 action="stage",
                 parameter=instr.content["parameter"],
                 metadata=instr.metadata,
-            ).dumps(),
+            ),
         )
         self._staged_devices.update(devices)
         self._wait_for_stage(staged=True, devices=async_devices, metadata=instr.metadata)
@@ -379,7 +379,7 @@ class ScanWorker(threading.Thread):
             MessageEndpoints.device_instructions(),
             messages.DeviceInstructionMessage(
                 device=devices, action="unstage", parameter=parameter, metadata=metadata
-            ).dumps(),
+            ),
         )
         if not cleanup:
             self._wait_for_stage(staged=False, devices=devices, metadata=metadata)
@@ -459,9 +459,10 @@ class ScanWorker(threading.Thread):
         matching_DIID = device_status[ind].metadata.get("DIID") >= devices[ind][1]
         matching_RID = device_status[ind].metadata.get("RID") == instr.metadata["RID"]
         if matching_DIID and matching_RID:
-            last_pos = messages.DeviceMessage.loads(
-                self.device_manager.producer.get(MessageEndpoints.device_readback(failed_device[0]))
-            ).content["signals"][failed_device[0]]["value"]
+            last_pos_msg = self.device_manager.producer.get(
+                MessageEndpoints.device_readback(failed_device[0])
+            )
+            last_pos = last_pos_msg.content["signals"][failed_device[0]]["value"]
             self.connector.raise_alarm(
                 severity=Alarms.MAJOR,
                 source=instr.content,
@@ -610,7 +611,7 @@ class ScanWorker(threading.Thread):
         readouts = self._get_readback(devices)
         pipe = producer.pipeline()
         for readout, device in zip(readouts, devices):
-            msg = messages.DeviceMessage(signals=readout, metadata=instr.metadata).dumps()
+            msg = messages.DeviceMessage(signals=readout, metadata=instr.metadata)
             producer.set_and_publish(MessageEndpoints.device_read(device), msg, pipe)
         return pipe.execute()
 
@@ -620,7 +621,7 @@ class ScanWorker(threading.Thread):
         pipe = producer.pipeline()
         for dev in devices:
             producer.get(MessageEndpoints.device_readback(dev), pipe=pipe)
-        return pipe.execute()
+        return producer.execute_pipeline(pipe)
 
     def _check_for_interruption(self) -> None:
         if self.status == InstructionQueueStatus.PAUSED:
@@ -664,7 +665,7 @@ class ScanWorker(threading.Thread):
         )
         msg = messages.ScanStatusMessage(
             scanID=self.current_scanID, status=status, info=self.current_scan_info
-        ).dumps()
+        )
         expire = None if status in ["open", "paused"] else 1800
         pipe = self.device_manager.producer.pipeline()
         self.device_manager.producer.set(

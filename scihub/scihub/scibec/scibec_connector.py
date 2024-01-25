@@ -134,9 +134,7 @@ class SciBecConnector:
         """
         self.producer.set(
             MessageEndpoints.scibec(),
-            messages.CredentialsMessage(
-                credentials={"url": self.host, "token": f"Bearer {token}"}
-            ).dumps(),
+            messages.CredentialsMessage(credentials={"url": self.host, "token": f"Bearer {token}"}),
         )
 
     def set_redis_config(self, config):
@@ -155,9 +153,8 @@ class SciBecConnector:
 
     @staticmethod
     def _device_config_request_callback(msg, *, parent, **_kwargs) -> None:
-        msg = messages.DeviceConfigMessage.loads(msg.value)
         logger.info(f"Received request: {msg}")
-        parent.config_handler.parse_config_request(msg)
+        parent.config_handler.parse_config_request(msg.value)
 
     def connect_to_scibec(self):
         """

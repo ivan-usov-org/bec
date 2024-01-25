@@ -122,21 +122,16 @@ class QueueStorage:
         if history < 0:
             history *= -1
 
-        return [
-            messages.ScanQueueHistoryMessage.loads(msg)
-            for msg in self.scan_manager.producer.lrange(
-                MessageEndpoints.scan_queue_history(),
-                0,
-                history,
-            )
-        ]
+        return self.scan_manager.producer.lrange(
+            MessageEndpoints.scan_queue_history(),
+            0,
+            history,
+        )
 
     @property
     def current_scan_queue(self) -> dict:
         """get the current scan queue from redis"""
-        msg = messages.ScanQueueStatusMessage.loads(
-            self.scan_manager.producer.get(MessageEndpoints.scan_queue_status())
-        )
+        msg = self.scan_manager.producer.get(MessageEndpoints.scan_queue_status())
         if msg:
             self._current_scan_queue = msg.content["queue"]
         return self._current_scan_queue

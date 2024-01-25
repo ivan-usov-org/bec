@@ -41,15 +41,13 @@ class ReadbackDataMixin:
         pipe = self.device_manager.producer.pipeline()
         for dev in self.devices:
             self.device_manager.producer.get(MessageEndpoints.device_req_status(dev), pipe)
-        return pipe.execute()
+        return self.device_manager.producer.execute_pipeline(pipe)
 
     def wait_for_RID(self, request):
         """wait for the readback's metadata to match the request ID"""
         while True:
             msgs = [
-                messages.DeviceMessage.loads(
-                    self.device_manager.producer.get(MessageEndpoints.device_readback(dev))
-                )
+                self.device_manager.producer.get(MessageEndpoints.device_readback(dev))
                 for dev in self.devices
             ]
             if all(msg.metadata.get("RID") == request.metadata["RID"] for msg in msgs if msg):
@@ -111,8 +109,7 @@ class LiveUpdatesReadbackProgressbar(LiveUpdatesBase):
                 values = data_source.get_device_values()
                 progress.update(values=values)
 
-                req_done_msgs = data_source.get_request_done_msgs()
-                msgs = [messages.DeviceReqStatusMessage.loads(msg) for msg in req_done_msgs]
+                msgs = data_source.get_request_done_msgs()
                 request_ids = [
                     msg.metadata["RID"] if (msg and msg.metadata.get("RID")) else None
                     for msg in msgs

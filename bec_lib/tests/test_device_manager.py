@@ -246,7 +246,7 @@ def test_baseline_devices(dm_with_devices, scan_motors_in, readout_priority_in):
 def test_device_config_update_callback(dm_with_devices):
     dm = dm_with_devices
     dev_config_msg = messages.DeviceConfigMessage(action="update", config={"samx": {}})
-    msg = MessageObject(value=dev_config_msg.dumps(), topic="")
+    msg = MessageObject(value=dev_config_msg, topic="")
 
     with mock.patch.object(dm, "parse_config_message") as parse_config_message:
         dm._device_config_update_callback(msg, parent=dm)

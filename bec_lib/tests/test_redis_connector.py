@@ -1,12 +1,14 @@
+from dataclasses import dataclass, field
 from unittest import mock
 
 import pytest
 import redis
 
+import bec_lib.messages as bec_messages
 from bec_lib.alarm_handler import Alarms
 from bec_lib.connector import ConsumerConnectorError
 from bec_lib.endpoints import MessageEndpoints
-from bec_lib.messages import AlarmMessage, LogMessage
+from bec_lib.messages import AlarmMessage, BECMessage, LogMessage
 from bec_lib.redis_connector import (
     MessageObject,
     RedisConnector,
@@ -16,6 +18,7 @@ from bec_lib.redis_connector import (
     RedisProducer,
     RedisStreamConsumerThreaded,
 )
+from bec_lib.serialization import MsgpackSerialization
 
 
 @pytest.fixture
@@ -96,7 +99,7 @@ def test_redis_connector_log_warning(connector):
 
     connector.log_warning("msg")
     connector._notifications_producer.send.assert_called_once_with(
-        MessageEndpoints.log(), LogMessage(log_type="warning", content="msg").dumps()
+        MessageEndpoints.log(), LogMessage(log_type="warning", log_msg="msg")
     )
 
 
@@ -105,7 +108,7 @@ def test_redis_connector_log_message(connector):
 
     connector.log_message("msg")
     connector._notifications_producer.send.assert_called_once_with(
-        MessageEndpoints.log(), LogMessage(log_type="log", content="msg").dumps()
+        MessageEndpoints.log(), LogMessage(log_type="log", log_msg="msg")
     )
 
 
@@ -114,7 +117,7 @@ def test_redis_connector_log_error(connector):
 
     connector.log_error("msg")
     connector._notifications_producer.send.assert_called_once_with(
-        MessageEndpoints.log(), LogMessage(log_type="error", content="msg").dumps()
+        MessageEndpoints.log(), LogMessage(log_type="error", log_msg="msg")
     )
 
 
@@ -139,17 +142,34 @@ def test_redis_connector_raise_alarm(connector, severity, alarm_type, source, co
             source=source,
             content=content,
             metadata=metadata,
-        ).dumps(),
+        ),
     )
 
 
-@pytest.mark.parametrize("topic , msg", [["topic1", "msg1"], ["topic2", "msg2"]])
+@dataclass(eq=False)
+class TestMessage(BECMessage):
+    msg_type = "test_message"
+    msg: str
+    # have to add this field here,
+    # could be inherited but it requires Python 3.10
+    # and 'kw_only=True'
+    metadata: dict = field(default_factory=lambda: {})
+
+
+# register at BEC messages module level, to be able to
+# find it when using "loads()"
+bec_messages.TestMessage = TestMessage
+
+
+@pytest.mark.parametrize(
+    "topic , msg", [["topic1", TestMessage("msg1")], ["topic2", TestMessage("msg2")]]
+)
 def test_redis_producer_send(producer, topic, msg):
     producer.send(topic, msg)
-    producer.r.publish.assert_called_once_with(topic, msg)
+    producer.r.publish.assert_called_once_with(topic, MsgpackSerialization.dumps(msg))
 
     producer.send(topic, msg, pipe=producer.pipeline())
-    producer.r.pipeline().publish.assert_called_once_with(topic, msg)
+    producer.r.pipeline().publish.assert_called_once_with(topic, MsgpackSerialization.dumps(msg))
 
 
 @pytest.mark.parametrize(
@@ -161,6 +181,28 @@ def test_redis_producer_lpush(producer, topic, msgs, max_size, expire):
     producer.lpush(topic, msgs, pipe, max_size, expire)
 
     producer.r.pipeline().lpush.assert_called_once_with(topic, msgs)
+
+    if max_size:
+        producer.r.pipeline().ltrim.assert_called_once_with(topic, 0, max_size)
+    if expire:
+        producer.r.pipeline().expire.assert_called_once_with(topic, expire)
+    if not pipe:
+        producer.r.pipeline().execute.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    "topic, msgs, max_size, expire",
+    [
+        ["topic1", TestMessage("msgs"), None, None],
+        ["topic1", TestMessage("msgs"), 10, None],
+        ["topic1", TestMessage("msgs"), None, 100],
+    ],
+)
+def test_redis_producer_lpush_BECMessage(producer, topic, msgs, max_size, expire):
+    pipe = None
+    producer.lpush(topic, msgs, pipe, max_size, expire)
+
+    producer.r.pipeline().lpush.assert_called_once_with(topic, MsgpackSerialization.dumps(msgs))
 
     if max_size:
         producer.r.pipeline().ltrim.assert_called_once_with(topic, 0, max_size)
@@ -187,6 +229,25 @@ def test_redis_producer_lset(producer, topic, index, msgs, use_pipe):
 
 
 @pytest.mark.parametrize(
+    "topic , index , msgs, use_pipe",
+    [["topic1", 1, TestMessage("msg1"), True], ["topic2", 4, TestMessage("msg2"), False]],
+)
+def test_redis_producer_lset_BECMessage(producer, topic, index, msgs, use_pipe):
+    pipe = use_pipe_fcn(producer, use_pipe)
+
+    ret = producer.lset(topic, index, msgs, pipe)
+
+    if pipe:
+        producer.r.pipeline().lset.assert_called_once_with(
+            topic, index, MsgpackSerialization.dumps(msgs)
+        )
+        assert ret == redis.Redis().pipeline().lset()
+    else:
+        producer.r.lset.assert_called_once_with(topic, index, MsgpackSerialization.dumps(msgs))
+        assert ret == redis.Redis().lset()
+
+
+@pytest.mark.parametrize(
     "topic, msgs, use_pipe", [["topic1", "msg1", True], ["topic2", "msg2", False]]
 )
 def test_redis_producer_rpush(producer, topic, msgs, use_pipe):
@@ -203,6 +264,23 @@ def test_redis_producer_rpush(producer, topic, msgs, use_pipe):
 
 
 @pytest.mark.parametrize(
+    "topic, msgs, use_pipe",
+    [["topic1", TestMessage("msg1"), True], ["topic2", TestMessage("msg2"), False]],
+)
+def test_redis_producer_rpush_BECMessage(producer, topic, msgs, use_pipe):
+    pipe = use_pipe_fcn(producer, use_pipe)
+
+    ret = producer.rpush(topic, msgs, pipe)
+
+    if pipe:
+        producer.r.pipeline().rpush.assert_called_once_with(topic, MsgpackSerialization.dumps(msgs))
+        assert ret == redis.Redis().pipeline().rpush()
+    else:
+        producer.r.rpush.assert_called_once_with(topic, MsgpackSerialization.dumps(msgs))
+        assert ret == redis.Redis().rpush()
+
+
+@pytest.mark.parametrize(
     "topic, start, end, use_pipe", [["topic1", 0, 4, True], ["topic2", 3, 7, False]]
 )
 def test_redis_producer_lrange(producer, topic, start, end, use_pipe):
@@ -215,7 +293,7 @@ def test_redis_producer_lrange(producer, topic, start, end, use_pipe):
         assert ret == redis.Redis().pipeline().lrange()
     else:
         producer.r.lrange.assert_called_once_with(topic, start, end)
-        assert ret == redis.Redis().lrange()
+        assert ret == []
 
 
 @pytest.mark.parametrize(
@@ -232,21 +310,16 @@ def test_redis_producer_set_and_publish(producer, topic, msg, pipe, expire):
         producer.r.pipeline().execute.assert_called_once()
 
 
-@pytest.mark.parametrize(
-    "topic, msg, is_dict, expire", [["topic1", "msg1", True, None], ["topic2", "msg2", False, 400]]
-)
-def test_redis_producer_set(producer, topic, msg, is_dict, expire):
+@pytest.mark.parametrize("topic, msg, expire", [["topic1", "msg1", None], ["topic2", "msg2", 400]])
+def test_redis_producer_set(producer, topic, msg, expire):
     pipe = None
-    producer.set(topic, msg, pipe, is_dict, expire)
 
-    if is_dict:
-        producer.r.pipeline().hmset.assert_called_once_with(topic, msg)
+    producer.set(topic, msg, pipe, expire)
+
+    if pipe:
+        producer.r.pipeline().set.assert_called_once_with(topic, msg, ex=expire)
     else:
-        producer.r.pipeline().set.assert_called_once_with(topic, msg)
-    if expire:
-        producer.r.pipeline().expire.assert_called_once_with(topic, expire)
-    if not pipe:
-        producer.r.pipeline().execute.assert_called_once()
+        producer.r.set.assert_called_once_with(topic, msg, ex=expire)
 
 
 @pytest.mark.parametrize("pattern", ["samx", "samy"])
@@ -275,35 +348,22 @@ def test_redis_producer_delete(producer, topic, use_pipe):
 
 
 @pytest.mark.parametrize(
-    "topic, use_pipe, is_dict",
+    "topic, use_pipe",
     [
-        ["topic1", True, True],
-        ["topic2", False, True],
-        ["topic3", True, False],
-        ["topic4", False, False],
+        ["topic1", True],
+        ["topic2", False],
     ],
 )
-def test_redis_producer_get(producer, topic, use_pipe, is_dict):
+def test_redis_producer_get(producer, topic, use_pipe):
     pipe = use_pipe_fcn(producer, use_pipe)
 
-    ret = producer.get(topic, pipe, is_dict)
-    if is_dict:
-        if pipe:
-            producer.pipeline().hgetall.assert_called_once_with(topic)
-            assert ret == redis.Redis().pipeline().hgetall()
-
-        else:
-            producer.r.hgetall.assert_called_once_with(topic)
-            assert ret == redis.Redis().hgetall()
-
+    ret = producer.get(topic, pipe)
+    if pipe:
+        producer.pipeline().get.assert_called_once_with(topic)
+        assert ret == redis.Redis().pipeline().get()
     else:
-        if pipe:
-            producer.pipeline().get.assert_called_once_with(topic)
-            assert ret == redis.Redis().pipeline().get()
-
-        else:
-            producer.r.get.assert_called_once_with(topic)
-            assert ret == redis.Redis().get()
+        producer.r.get.assert_called_once_with(topic)
+        assert ret == redis.Redis().get()
 
 
 def use_pipe_fcn(producer, use_pipe):
@@ -358,15 +418,24 @@ def test_redis_consumer_initialize_connector(consumer, pattern, topics):
 
 
 def test_redis_consumer_poll_messages(consumer):
+    cb_fcn_has_been_called = False
+
     def cb_fcn(msg, **kwargs):
+        nonlocal cb_fcn_has_been_called
+        cb_fcn_has_been_called = True
         print(msg)
 
     consumer.cb = cb_fcn
 
+    test_msg = TestMessage("test")
+    consumer.pubsub.get_message.return_value = {
+        "channel": "",
+        "data": MsgpackSerialization.dumps(test_msg),
+    }
     ret = consumer.poll_messages()
-
-    assert ret == None
     consumer.pubsub.get_message.assert_called_once_with(ignore_subscribe_messages=True)
+
+    assert cb_fcn_has_been_called
 
 
 def test_redis_consumer_shutdown(consumer):
@@ -512,13 +581,13 @@ def test_redis_consumer_threaded_no_cb_without_messages(consumer_threaded):
 
 
 def test_redis_consumer_threaded_cb_called_with_messages(consumer_threaded):
-    messages = {"channel": b"topic1", "data": '{"key": "value"}'}
+    message = {"channel": b"topic1", "data": MsgpackSerialization.dumps(TestMessage("test"))}
 
-    with mock.patch.object(consumer_threaded.pubsub, "get_message", return_value=messages):
+    with mock.patch.object(consumer_threaded.pubsub, "get_message", return_value=message):
         consumer_threaded.cb = mock.MagicMock()
         consumer_threaded.poll_messages()
-        msg = MessageObject(topic=b"topic1", value='{"key": "value"}')
-        consumer_threaded.cb.assert_called_once_with(msg)
+        msg_object = MessageObject("topic1", TestMessage("test"))
+        consumer_threaded.cb.assert_called_once_with(msg_object)
 
 
 def test_redis_consumer_threaded_shutdown(consumer_threaded):

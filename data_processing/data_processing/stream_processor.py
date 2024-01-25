@@ -114,11 +114,11 @@ class StreamProcessor(ABC):
         if isinstance(result, list) and len(result) > 1:
             msg_bundle = messages.BundleMessage()
             for data, metadata in result:
-                msg = messages.ProcessedDataMessage(data=data, metadata=metadata).dumps()
+                msg = messages.ProcessedDataMessage(data=data, metadata=metadata)
                 msg_bundle.append(msg)
-            self._publish_result(msg_bundle.dumps())
+            self._publish_result(msg_bundle)
         else:
-            msg = messages.ProcessedDataMessage(data=result[0][0], metadata=result[0][1]).dumps()
+            msg = messages.ProcessedDataMessage(data=result[0][0], metadata=result[0][1])
             self._publish_result(msg)
 
     def start(self):
@@ -145,7 +145,7 @@ class StreamProcessor(ABC):
     @staticmethod
     def _set_data(msg: MessageObject, parent: StreamProcessor):
         """Set data to the parent."""
-        parent.queue.append(messages.MessageReader.loads(msg.value))
+        parent.queue.append(msg.value)
 
     def _publish_result(self, msg: messages.BECMessage):
         """Publish the result."""

@@ -135,10 +135,10 @@ def test_flyer_event_callback():
     assert progress[1][0] == MessageEndpoints.device_progress("samx")
 
     # check message
-    bundle_msg = messages.DeviceMessage.loads(bundle[1][1])
+    bundle_msg = bundle[1][1]
     assert len(bundle_msg) == 20
 
-    progress_msg = messages.DeviceStatusMessage.loads(progress[1][1])
+    progress_msg = progress[1][1]
     assert progress_msg.content["status"] == 20
 
 
@@ -153,7 +153,7 @@ def test_obj_progress_callback():
             MessageEndpoints.device_progress("samx"),
             messages.ProgressMessage(
                 value=1, max_value=2, done=False, metadata={"scanID": "12345"}
-            ).dumps(),
+            ),
         )
 
 
@@ -173,7 +173,7 @@ def test_obj_monitor_callback(value):
             {
                 "data": messages.DeviceMonitorMessage(
                     device=eiger.name, data=value, metadata={"scanID": "12345"}
-                ).dumps()
+                )
             },
             max_size=int(min(100, max_size / value_size)),
         )

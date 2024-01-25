@@ -18,7 +18,7 @@ def test_worker_manager_retrieves_config_on_startup():
         worker_config = {"id": "gaussian_fit_worker_3", "config": config}
         connector.producer().get.return_value = messages.DAPConfigMessage(
             config={"workers": [worker_config]}
-        ).dumps()
+        )
         worker_manager = DAPWorkerManager(connector)
         mock_update_config.assert_called_once()
 
@@ -207,14 +207,14 @@ def test_worker_manager_set_config():
             ]
         }
     )
-    msg_obj = MessageObject(msg.dumps(), MessageEndpoints.dap_config())
+    msg_obj = MessageObject(MessageEndpoints.dap_config(), msg)
     with mock.patch.object(worker_manager, "update_config") as mock_update_config:
-        msg_obj = MessageObject(msg.dumps(), MessageEndpoints.dap_config())
+        msg_obj = MessageObject(MessageEndpoints.dap_config(), msg)
         worker_manager._set_config(msg_obj, worker_manager)
         mock_update_config.assert_called_once_with(msg)
 
         mock_update_config.reset_mock()
-        msg_obj = MessageObject(None, MessageEndpoints.dap_config())
+        msg_obj = MessageObject(MessageEndpoints.dap_config(), None)
         worker_manager._set_config(msg_obj, worker_manager)
         mock_update_config.assert_not_called()
 

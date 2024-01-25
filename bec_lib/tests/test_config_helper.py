@@ -161,7 +161,7 @@ def test_wait_for_config_reply():
     config_helper = ConfigHelper(connector)
     connector.producer().get.return_value = messages.RequestResponseMessage(
         accepted=True, message="test"
-    ).dumps()
+    )
 
     res = config_helper.wait_for_config_reply("test")
     assert res == messages.RequestResponseMessage(accepted=True, message="test")
@@ -184,10 +184,10 @@ def test_wait_for_service_response():
         [
             messages.ServiceResponseMessage(
                 response={"service": "DeviceServer"}, metadata={"RID": "test"}
-            ).dumps(),
+            ),
             messages.ServiceResponseMessage(
                 response={"service": "ScanServer"}, metadata={"RID": "test"}
-            ).dumps(),
+            ),
         ],
     ]
 

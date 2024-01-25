@@ -66,10 +66,9 @@ class BECWorkerManager:
 
     def _get_workers(self) -> None:
         """Gets the workers from redis."""
-        msg_raw = self.producer.get(MessageEndpoints.dap_config())
-        if msg_raw is None:
+        msg = self.producer.get(MessageEndpoints.dap_config())
+        if msg is None:
             return
-        msg = messages.DAPConfigMessage.loads(msg_raw)
         self._workers = [
             BECWorker.from_dict(w, self) for w in msg.content["config"].get("workers", [])
         ]
@@ -77,10 +76,9 @@ class BECWorkerManager:
     @property
     def config(self) -> dict:
         """Configuration dictionary for the manager."""
-        msg_raw = self.producer.get(MessageEndpoints.dap_config())
-        if msg_raw is None:
+        msg = self.producer.get(MessageEndpoints.dap_config())
+        if msg is None:
             return {}
-        msg = messages.DAPConfigMessage.loads(msg_raw)
         return msg.content["config"]
 
     def get_worker(self, id: str) -> BECWorker:
@@ -145,7 +143,7 @@ class BECWorkerManager:
     def _update_config(self) -> None:
         """Updates the configuration of the manager."""
         msg = messages.DAPConfigMessage(config={"workers": [w.to_dict() for w in self._workers]})
-        self.producer.set_and_publish(MessageEndpoints.dap_config(), msg.dumps())
+        self.producer.set_and_publish(MessageEndpoints.dap_config(), msg)
 
 
 if __name__ == "__main__":  # pragma: no cover

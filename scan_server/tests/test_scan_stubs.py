@@ -79,7 +79,7 @@ def test_kickoff(device, parameter, metadata, reference_msg):
 def test_rpc_raises_scan_abortion(msg, raised_error):
     connector = ConnectorMock("")
     stubs = ScanStubs(connector.producer())
-    msg = msg.dumps()
+    msg = msg
     with mock.patch.object(stubs.producer, "get", return_value=msg) as prod_get:
         if raised_error is None:
             stubs._get_from_rpc("rpc-id")

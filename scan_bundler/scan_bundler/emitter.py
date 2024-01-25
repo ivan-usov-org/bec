@@ -41,7 +41,7 @@ class EmitterBase:
         msgs = messages.BundleMessage()
         _, endpoint, _ = msgs_to_send[0]
         for msg, endpoint, public in msgs_to_send:
-            msg_dump = msg.dumps()
+            msg_dump = msg
             msgs.append(msg_dump)
             if public:
                 self.producer.set(
@@ -50,7 +50,7 @@ class EmitterBase:
                     pipe=pipe,
                     expire=1800,
                 )
-        self.producer.send(endpoint, msgs.dumps(), pipe=pipe)
+        self.producer.send(endpoint, msgs, pipe=pipe)
         pipe.execute()
 
     def on_init(self, scanID: str):

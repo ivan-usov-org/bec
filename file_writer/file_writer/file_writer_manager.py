@@ -105,13 +105,13 @@ class FileWriterManager(BECService):
 
     @staticmethod
     def _scan_segment_callback(msg: MessageObject, *, parent: FileWriterManager):
-        msgs = messages.ScanMessage.loads(msg.value)
+        msgs = msg.value
         for scan_msg in msgs:
             parent.insert_to_scan_storage(scan_msg)
 
     @staticmethod
     def _scan_status_callback(msg, *, parent):
-        msg = messages.ScanStatusMessage.loads(msg.value)
+        msg = msg.value
         parent.update_scan_storage_with_status(msg)
 
     def update_scan_storage_with_status(self, msg: messages.ScanStatusMessage) -> None:
@@ -183,8 +183,7 @@ class FileWriterManager(BECService):
             return
         if self.scan_storage[scanID].baseline:
             return
-        msg = self.producer.get(MessageEndpoints.public_scan_baseline(scanID))
-        baseline = messages.ScanBaselineMessage.loads(msg)
+        baseline = self.producer.get(MessageEndpoints.public_scan_baseline(scanID))
         if not baseline:
             return
         self.scan_storage[scanID].baseline = baseline.content["data"]
@@ -210,8 +209,7 @@ class FileWriterManager(BECService):
         file_msgs = [self.producer.get(msg.decode()) for msg in msgs]
         if not file_msgs:
             return
-        for name, msg in zip(names, file_msgs):
-            file_msg = messages.FileMessage.loads(msg)
+        for name, file_msg in zip(names, file_msgs):
             self.scan_storage[scanID].file_references[name] = {
                 "path": file_msg.content["file_path"],
                 "done": file_msg.content["done"],
@@ -258,7 +256,7 @@ class FileWriterManager(BECService):
         concat_type = None
         data = []
         for msg in msgs:
-            msg = messages.DeviceMessage.loads(msg[1][b"data"])
+            msg = msg[1][b"data"]
             if not concat_type:
                 concat_type = msg.metadata.get("async_update", "append")
             data.append(msg.content["signals"])
@@ -320,7 +318,7 @@ class FileWriterManager(BECService):
             file_path = self.writer_mixin.compile_full_filename(scan, "master.h5")
             self.producer.set_and_publish(
                 MessageEndpoints.public_file(scanID, "master"),
-                messages.FileMessage(file_path=file_path, done=False).dumps(),
+                messages.FileMessage(file_path=file_path, done=False),
             )
             successful = True
             logger.info(f"Starting writing to file {file_path}.")
@@ -341,7 +339,7 @@ class FileWriterManager(BECService):
         self.scan_storage.pop(scanID)
         self.producer.set_and_publish(
             MessageEndpoints.public_file(scanID, "master"),
-            messages.FileMessage(file_path=file_path, successful=successful).dumps(),
+            messages.FileMessage(file_path=file_path, successful=successful),
         )
         if successful:
             logger.success(f"Finished writing file {file_path}.")

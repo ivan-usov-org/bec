@@ -112,7 +112,7 @@ def test_queuemanager_scan_queue_callback(queuemanager_mock):
         queue="primary",
         metadata={"RID": "something"},
     )
-    obj = MessageObject(msg.dumps(), "scan_queue")
+    obj = MessageObject("scan_queue", msg)
     with mock.patch.object(queue_manager, "add_to_queue") as add_to_queue:
         with mock.patch.object(queue_manager, "send_queue_status") as send_queue_status:
             queue_manager._scan_queue_callback(obj, queue_manager)
@@ -125,7 +125,7 @@ def test_scan_queue_modification_callback(queuemanager_mock):
     msg = messages.ScanQueueModificationMessage(
         scanID="dummy", action="halt", parameter={}, metadata={"RID": "something"}
     )
-    obj = MessageObject(msg.dumps(), "scan_queue_modification")
+    obj = MessageObject("scan_queue_modification", msg)
     with mock.patch.object(queue_manager, "scan_interception") as scan_interception:
         with mock.patch.object(queue_manager, "send_queue_status") as send_queue_status:
             queue_manager._scan_queue_modification_callback(obj, queue_manager)

@@ -271,7 +271,6 @@ class DeviceBase:
             if msg:
                 break
             time.sleep(0.01)
-        msg = messages.DeviceRPCMessage.loads(msg)
 
         return self._handle_rpc_response(msg)
 
@@ -297,7 +296,7 @@ class DeviceBase:
             msg = self._prepare_rpc_msg(rpc_id, request_id, device, func_call, *args, **kwargs)
 
             # send RPC message
-            self.root.parent.producer.send(MessageEndpoints.scan_queue_request(), msg.dumps())
+            self.root.parent.producer.send(MessageEndpoints.scan_queue_request(), msg)
 
             # wait for RPC response
             if not wait_for_rpc_response:
@@ -602,7 +601,7 @@ class OphydInterfaceBase(DeviceBase):
 
             if not val:
                 return None
-            signals = messages.DeviceMessage.loads(val).content["signals"]
+            signals = val.content["signals"]
         if filter_to_hints:
             signals = {key: val for key, val in signals.items() if key in self._hints}
         return self._filter_rpc_signals(signals)
@@ -629,7 +628,7 @@ class OphydInterfaceBase(DeviceBase):
             )
             if not val:
                 return None
-            signals = messages.DeviceMessage.loads(val).content["signals"]
+            signals = val.content["signals"]
 
         return self._filter_rpc_signals(signals)
 
@@ -770,7 +769,6 @@ class AdjustableMixin:
         limit_msg = self.root.parent.producer.get(MessageEndpoints.device_limits(self.root.name))
         if not limit_msg:
             return [0, 0]
-        limit_msg = messages.DeviceMessage.loads(limit_msg)
         limits = [
             limit_msg.content["signals"].get("low", 0),
             limit_msg.content["signals"].get("high", 0),

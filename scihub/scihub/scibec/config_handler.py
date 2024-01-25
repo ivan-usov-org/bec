@@ -54,7 +54,7 @@ class ConfigHandler:
 
     def send_config(self, msg: messages.DeviceConfigMessage) -> None:
         """broadcast a new config"""
-        self.producer.send(MessageEndpoints.device_config_update(), msg.dumps())
+        self.producer.send(MessageEndpoints.device_config_update(), msg)
 
     def send_config_request_reply(self, accepted, error_msg, metadata):
         """send a config request reply"""
@@ -62,9 +62,7 @@ class ConfigHandler:
             accepted=accepted, message=error_msg, metadata=metadata
         )
         RID = metadata.get("RID")
-        self.producer.set(
-            MessageEndpoints.device_config_request_response(RID), msg.dumps(), expire=60
-        )
+        self.producer.set(MessageEndpoints.device_config_request_response(RID), msg, expire=60)
 
     def _set_config(self, msg: messages.DeviceConfigMessage):
         config = msg.content["config"]
@@ -119,15 +117,14 @@ class ConfigHandler:
 
     def _update_device_server(self, RID: str, config: dict) -> None:
         msg = messages.DeviceConfigMessage(action="update", config=config, metadata={"RID": RID})
-        self.producer.send(MessageEndpoints.device_server_config_request(), msg.dumps())
+        self.producer.send(MessageEndpoints.device_server_config_request(), msg)
 
     def _wait_for_device_server_update(self, RID: str, timeout_time=10) -> bool:
         timeout = timeout_time
         time_step = 0.05
         elapsed_time = 0
         while True:
-            raw_msg = self.producer.get(MessageEndpoints.device_config_request_response(RID))
-            msg = messages.RequestResponseMessage.loads(raw_msg)
+            msg = self.producer.get(MessageEndpoints.device_config_request_response(RID))
             if msg:
                 return msg.content["accepted"]
 
@@ -181,8 +178,7 @@ class ConfigHandler:
         self.validator.validate_device_patch(update)
 
     def update_config_in_redis(self, device):
-        raw_msg = self.device_manager.producer.get(MessageEndpoints.device_config())
-        config = msgpack.loads(raw_msg)
+        config = msgpack.loads(self.device_manager.producer.get(MessageEndpoints.device_config()))
         index = next(
             index for index, dev_conf in enumerate(config) if dev_conf["name"] == device.name
         )

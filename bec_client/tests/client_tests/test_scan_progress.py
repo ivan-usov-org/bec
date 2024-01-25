@@ -31,7 +31,7 @@ async def test_update_progressbar_continues_when_scanID_doesnt_match():
 
     bec.producer.get.return_value = messages.ProgressMessage(
         value=1, max_value=10, done=False, metadata={"scanID": "scanID"}
-    ).dumps()
+    )
     res = await live_update._update_progressbar(progressbar, "async_dev1")
     assert res is False
 
@@ -47,7 +47,7 @@ async def test_update_progressbar_continues_when_msg_specifies_no_value():
 
     bec.producer.get.return_value = messages.ProgressMessage(
         value=None, max_value=None, done=None, metadata={"scanID": "scanID"}
-    ).dumps()
+    )
     res = await live_update._update_progressbar(progressbar, "async_dev1")
     assert res is False
 
@@ -63,7 +63,7 @@ async def test_update_progressbar_updates_max_value():
 
     bec.producer.get.return_value = messages.ProgressMessage(
         value=10, max_value=20, done=False, metadata={"scanID": "scanID"}
-    ).dumps()
+    )
     res = await live_update._update_progressbar(progressbar, "async_dev1")
     assert res is False
     assert progressbar.max_points == 20
@@ -81,6 +81,6 @@ async def test_update_progressbar_returns_true_when_max_value_is_reached():
 
     bec.producer.get.return_value = messages.ProgressMessage(
         value=10, max_value=10, done=True, metadata={"scanID": "scanID"}
-    ).dumps()
+    )
     res = await live_update._update_progressbar(progressbar, "async_dev1")
     assert res is True

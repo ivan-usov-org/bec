@@ -81,9 +81,7 @@ class ScanManager:
         logger.info(f"Requesting {action}")
         return self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
-            messages.ScanQueueModificationMessage(
-                scanID=scanID, action=action, parameter={}
-            ).dumps(),
+            messages.ScanQueueModificationMessage(scanID=scanID, action=action, parameter={}),
         )
 
     def request_scan_abortion(self, scanID=None):
@@ -98,9 +96,7 @@ class ScanManager:
         logger.info("Requesting scan abortion")
         self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
-            messages.ScanQueueModificationMessage(
-                scanID=scanID, action="abort", parameter={}
-            ).dumps(),
+            messages.ScanQueueModificationMessage(scanID=scanID, action="abort", parameter={}),
         )
 
     def request_scan_halt(self, scanID=None):
@@ -115,9 +111,7 @@ class ScanManager:
         logger.info("Requesting scan halt")
         self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
-            messages.ScanQueueModificationMessage(
-                scanID=scanID, action="halt", parameter={}
-            ).dumps(),
+            messages.ScanQueueModificationMessage(scanID=scanID, action="halt", parameter={}),
         )
 
     def request_scan_continuation(self, scanID=None):
@@ -132,9 +126,7 @@ class ScanManager:
         logger.info("Requesting scan continuation")
         self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
-            messages.ScanQueueModificationMessage(
-                scanID=scanID, action="continue", parameter={}
-            ).dumps(),
+            messages.ScanQueueModificationMessage(scanID=scanID, action="continue", parameter={}),
         )
 
     def request_queue_reset(self):
@@ -142,9 +134,7 @@ class ScanManager:
         logger.info("Requesting a queue reset")
         self.producer.send(
             MessageEndpoints.scan_queue_modification_request(),
-            messages.ScanQueueModificationMessage(
-                scanID=None, action="clear", parameter={}
-            ).dumps(),
+            messages.ScanQueueModificationMessage(scanID=None, action="clear", parameter={}),
         )
 
     def request_scan_restart(self, scanID=None, requestID=None, replace=True) -> str:
@@ -160,7 +150,7 @@ class ScanManager:
             MessageEndpoints.scan_queue_modification_request(),
             messages.ScanQueueModificationMessage(
                 scanID=scanID, action="restart", parameter={"position": position, "RID": requestID}
-            ).dumps(),
+            ),
         )
         return requestID
 
@@ -192,30 +182,30 @@ class ScanManager:
 
     @staticmethod
     def _scan_queue_status_callback(msg, *, parent: ScanManager, **_kwargs) -> None:
-        queue_status = messages.ScanQueueStatusMessage.loads(msg.value)
+        queue_status = msg.value
         if not queue_status:
             return
         parent.update_with_queue_status(queue_status)
 
     @staticmethod
     def _scan_queue_request_callback(msg, *, parent: ScanManager, **_kwargs) -> None:
-        request = messages.ScanQueueMessage.loads(msg.value)
+        request = msg.value
         parent.request_storage.update_with_request(request)
 
     @staticmethod
     def _scan_queue_request_response_callback(msg, *, parent: ScanManager, **_kwargs) -> None:
-        response = messages.RequestResponseMessage.loads(msg.value)
+        response = msg.value
         logger.debug(response)
         parent.request_storage.update_with_response(response)
 
     @staticmethod
     def _scan_status_callback(msg, *, parent: ScanManager, **_kwargs) -> None:
-        scan = messages.ScanStatusMessage.loads(msg.value)
+        scan = msg.value
         parent.scan_storage.update_with_scan_status(scan)
 
     @staticmethod
     def _scan_segment_callback(msg, *, parent: ScanManager, **_kwargs) -> None:
-        scan_msgs = messages.ScanMessage.loads(msg.value)
+        scan_msgs = msg.value
         if not isinstance(scan_msgs, list):
             scan_msgs = [scan_msgs]
         for scan_msg in scan_msgs:

@@ -74,7 +74,7 @@ class RPCMixin:
             MessageEndpoints.device_rpc(instr_params.get("rpc_id")),
             messages.DeviceRPCMessage(
                 device=device, return_val=res, out=result.getvalue(), success=True
-            ).dumps(),
+            ),
             expire=1800,
         )
 
@@ -167,5 +167,5 @@ class RPCMixin:
             MessageEndpoints.device_rpc(instr_params.get("rpc_id")),
             messages.DeviceRPCMessage(
                 device=instr.content["device"], return_val=None, out=exc_formatted, success=False
-            ).dumps(),
+            ),
         )

@@ -56,9 +56,7 @@ def queue_is_empty(queue) -> bool:  # pragma: no cover
 
 
 def get_queue(bec):  # pragma: no cover
-    return messages.ScanQueueStatusMessage.loads(
-        bec.queue.producer.get(MessageEndpoints.scan_queue_status())
-    )
+    return bec.queue.producer.get(MessageEndpoints.scan_queue_status())
 
 
 def wait_for_empty_queue(bec):  # pragma: no cover

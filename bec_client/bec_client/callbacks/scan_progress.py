@@ -32,7 +32,6 @@ class LiveUpdatesScanProgress(LiveUpdatesTable):
             logger.debug("waiting for new data point")
             await asyncio.sleep(0.1)
             return False
-        status = messages.ProgressMessage.loads(status)
         if status.metadata.get("scanID") != self.scan_item.scanID:
             logger.debug("waiting for new data point")
             await asyncio.sleep(0.1)

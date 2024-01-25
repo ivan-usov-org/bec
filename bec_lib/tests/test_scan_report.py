@@ -89,21 +89,13 @@ def test_scan_report_aborts_on_ctrl_c(scan_report):
     [
         ([], False),
         (
-            [
-                messages.DeviceRPCMessage(
-                    device="samx", return_val=5, out="done", success=True
-                ).dumps()
-            ],
+            [messages.DeviceRPCMessage(device="samx", return_val=5, out="done", success=True)],
             False,
         ),
         (
             [
-                messages.DeviceRPCMessage(
-                    device="samx", return_val=5, out="done", success=True
-                ).dumps(),
-                messages.DeviceRPCMessage(
-                    device="samy", return_val=5, out="done", success=True
-                ).dumps(),
+                messages.DeviceRPCMessage(device="samx", return_val=5, out="done", success=True),
+                messages.DeviceRPCMessage(device="samy", return_val=5, out="done", success=True),
             ],
             True,
         ),

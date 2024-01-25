@@ -152,10 +152,9 @@ class ObserverManager:
 
     def _get_installed_observer(self):
         # get current observer list from Redis
-        msg = self.device_manager.producer.get(MessageEndpoints.observer())
-        if msg is None:
+        observer_msg = self.device_manager.producer.get(MessageEndpoints.observer())
+        if observer_msg is None:
             return []
-        observer_msg = messages.ObserverMessage.loads(msg)
         return [Observer.from_dict(obs) for obs in observer_msg.content["observer"]]
 
     def update_observer(self):

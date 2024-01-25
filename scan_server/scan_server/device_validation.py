@@ -28,7 +28,7 @@ class DeviceValidation:
         pipe = self.producer.pipeline()
         for dev in devices:
             self.producer.get(endpoint(dev), pipe)
-        return pipe.execute()
+        return self.producer.execute_pipeline(pipe)
 
     def devices_are_ready(
         self,
@@ -61,7 +61,7 @@ class DeviceValidation:
         checks = default_checks + checks
         device_status = self.get_device_status(endpoint, devices)
         self.worker._check_for_interruption()
-        device_status = [message_cls.loads(dev) for dev in device_status]
+        device_status = [dev for dev in device_status]
 
         if None in device_status:
             return False

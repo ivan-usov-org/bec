@@ -17,7 +17,7 @@ msg = messages.FileMessage(file_path="/path/to/file.h5", done=False)
 # send the message using the scanID and a user-friendly but unique name to describe the source (e.g. "eiger")
 producer.set_and_publish(
     MessageEndpoints.public_file(scanID, "eiger"),
-    msg.dumps(),
+    msg,
 )
 ```
 

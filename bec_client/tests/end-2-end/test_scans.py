@@ -121,8 +121,8 @@ def test_mv_scan(capsys, client):
     current_pos_samx = dev.samx.read(cached=True)["samx"]["value"]
     current_pos_samy = dev.samy.read(cached=True)["samy"]["value"]
     captured = capsys.readouterr()
-    ref_out_samx = f" ━━━━━━━━━━━━━━━ {current_pos_samx:10.2f} /      10.00 / 100 % 0:00:00 0:00:00"
-    ref_out_samy = f" ━━━━━━━━━━━━━━━ {current_pos_samy:10.2f} /      20.00 / 100 % 0:00:00 0:00:00"
+    ref_out_samx = f"━━━━━━━━━━━━━━━ {current_pos_samx:10.2f} /      10.00 / 100 % 0:00:00 0:00:00"
+    ref_out_samy = f"━━━━━━━━━━━━━━━ {current_pos_samy:10.2f} /      20.00 / 100 % 0:00:00 0:00:00"
     assert ref_out_samx in captured.out
     assert ref_out_samy in captured.out
 
@@ -470,7 +470,7 @@ def test_file_writer(client):
             MessageEndpoints.public_file(scan.scan.scanID, "master")
         )
 
-    file_msg = messages.FileMessage.loads(msg)
+    file_msg = msg
     assert file_msg.content["successful"]
 
     # currently not working due to access restrictions in docker:
@@ -500,7 +500,7 @@ def test_scan_def_callback(capsys, client):
         captured = capsys.readouterr()
         assert f"Starting scan {scan_number}" in captured.out
         ref_out_samy = (
-            f" ━━━━━━━━━━━━━━━ {current_pos_samy:10.2f} /       5.00 / 100 % 0:00:00 0:00:00"
+            f"━━━━━━━━━━━━━━━ {current_pos_samy:10.2f} /       5.00 / 100 % 0:00:00 0:00:00"
         )
         assert ref_out_samy in captured.out
         scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=False)

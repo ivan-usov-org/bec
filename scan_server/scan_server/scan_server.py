@@ -65,7 +65,7 @@ class ScanServer(BECService):
 
     @staticmethod
     def _alarm_callback(msg, parent: ScanServer, **_kwargs):
-        msg = messages.AlarmMessage.loads(msg.value)
+        msg = msg.value
         queue = msg.metadata.get("queue", "primary")
         if Alarms(msg.content["severity"]) == Alarms.MAJOR:
             # shouldn't this be specific to a single queue?

@@ -54,10 +54,8 @@ class DSDevice(DeviceBase):
 
     def initialize_device_buffer(self, producer):
         """initialize the device read and readback buffer on redis with a new reading"""
-        dev_msg = messages.DeviceMessage(signals=self.obj.read(), metadata={}).dumps()
-        dev_config_msg = messages.DeviceMessage(
-            signals=self.obj.read_configuration(), metadata={}
-        ).dumps()
+        dev_msg = messages.DeviceMessage(signals=self.obj.read(), metadata={})
+        dev_config_msg = messages.DeviceMessage(signals=self.obj.read_configuration(), metadata={})
         if hasattr(self.obj, "low_limit_travel") and hasattr(self.obj, "high_limit_travel"):
             limits = {
                 "low": self.obj.low_limit_travel.get(),
@@ -74,7 +72,7 @@ class DSDevice(DeviceBase):
         if limits is not None:
             producer.set_and_publish(
                 MessageEndpoints.device_limits(self.name),
-                messages.DeviceMessage(signals=limits).dumps(),
+                messages.DeviceMessage(signals=limits),
                 pipe=pipe,
             )
         pipe.execute()
@@ -350,7 +348,7 @@ class DeviceManagerDS(DeviceManagerBase):
         interface = get_device_info(obj, {})
         self.producer.set(
             MessageEndpoints.device_info(obj.name),
-            messages.DeviceInfoMessage(device=obj.name, info=interface).dumps(),
+            messages.DeviceInfoMessage(device=obj.name, info=interface),
             pipe,
         )
 
@@ -365,7 +363,7 @@ class DeviceManagerDS(DeviceManagerBase):
             name = obj.root.name
             signals = obj.read()
             metadata = self.devices.get(obj.root.name).metadata
-            dev_msg = messages.DeviceMessage(signals=signals, metadata=metadata).dumps()
+            dev_msg = messages.DeviceMessage(signals=signals, metadata=metadata)
             pipe = self.producer.pipeline()
             self.producer.set_and_publish(MessageEndpoints.device_readback(name), dev_msg, pipe)
             pipe.execute()
@@ -392,7 +390,7 @@ class DeviceManagerDS(DeviceManagerBase):
         if obj.connected:
             name = obj.root.name
             metadata = self.devices[name].metadata
-            msg = messages.DeviceMonitorMessage(device=name, data=value, metadata=metadata).dumps()
+            msg = messages.DeviceMonitorMessage(device=name, data=value, metadata=metadata)
             stream_msg = {"data": msg}
             self.producer.xadd(
                 MessageEndpoints.device_monitor(name),
@@ -406,7 +404,7 @@ class DeviceManagerDS(DeviceManagerBase):
         metadata = self.devices[device].metadata
         self.producer.send(
             MessageEndpoints.device_status(device),
-            messages.DeviceStatusMessage(device=device, status=status, metadata=metadata).dumps(),
+            messages.DeviceStatusMessage(device=device, status=status, metadata=metadata),
         )
 
     def _obj_callback_done_moving(self, *args, **kwargs):
@@ -419,7 +417,7 @@ class DeviceManagerDS(DeviceManagerBase):
         metadata = self.devices[device].metadata
         self.producer.set(
             MessageEndpoints.device_status(kwargs["obj"].root.name),
-            messages.DeviceStatusMessage(device=device, status=status, metadata=metadata).dumps(),
+            messages.DeviceStatusMessage(device=device, status=status, metadata=metadata),
         )
 
     def _obj_flyer_callback(self, *_args, **kwargs):
@@ -446,16 +444,16 @@ class DeviceManagerDS(DeviceManagerBase):
             bundle.append(
                 messages.DeviceMessage(
                     signals={obj.name: signals}, metadata={"pointID": ii, **metadata}
-                ).dumps()
+                )
             )
         ds_obj.emitted_points[metadata["scanID"]] = max_points
         pipe = self.producer.pipeline()
-        self.producer.send(MessageEndpoints.device_read(obj.root.name), bundle.dumps(), pipe=pipe)
+        self.producer.send(MessageEndpoints.device_read(obj.root.name), bundle, pipe=pipe)
         msg = messages.DeviceStatusMessage(
             device=obj.root.name, status=max_points, metadata=metadata
         )
         self.producer.set_and_publish(
-            MessageEndpoints.device_progress(obj.root.name), msg.dumps(), pipe=pipe
+            MessageEndpoints.device_progress(obj.root.name), msg, pipe=pipe
         )
         pipe.execute()
 
@@ -464,4 +462,4 @@ class DeviceManagerDS(DeviceManagerBase):
         msg = messages.ProgressMessage(
             value=value, max_value=max_value, done=done, metadata=metadata
         )
-        self.producer.set_and_publish(MessageEndpoints.device_progress(obj.root.name), msg.dumps())
+        self.producer.set_and_publish(MessageEndpoints.device_progress(obj.root.name), msg)

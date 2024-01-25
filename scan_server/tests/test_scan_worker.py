@@ -305,7 +305,7 @@ def test_complete_devices(scan_worker_mock, instructions):
                 MessageEndpoints.device_instructions(),
                 messages.DeviceInstructionMessage(
                     device=devices, action="complete", parameter={}, metadata=instructions.metadata
-                ).dumps(),
+                ),
             )
 
 
@@ -334,7 +334,7 @@ def test_pre_scan(scan_worker_mock, instructions):
                 MessageEndpoints.device_instructions(),
                 messages.DeviceInstructionMessage(
                     device=devices, action="pre_scan", parameter={}, metadata=instructions.metadata
-                ).dumps(),
+                ),
             )
 
 
@@ -457,7 +457,7 @@ def test_check_for_failed_movements(scan_worker_mock, device_status, devices, in
     if abort:
         with pytest.raises(ScanAbortion):
             worker.device_manager.producer._get_buffer[MessageEndpoints.device_readback("samx")] = (
-                messages.DeviceMessage(signals={"samx": {"value": 4}}, metadata={}).dumps()
+                messages.DeviceMessage(signals={"samx": {"value": 4}}, metadata={})
             )
             worker._check_for_failed_movements(device_status, devices, instr)
     else:
@@ -576,10 +576,10 @@ def test_wait_for_idle(scan_worker_mock, msg1, msg2, req_msg: messages.DeviceReq
     worker.device_manager.producer = ProducerMock()
 
     with mock.patch.object(
-        worker.validate, "get_device_status", return_value=[req_msg.dumps()]
+        worker.validate, "get_device_status", return_value=[req_msg]
     ) as device_status:
         worker.device_manager.producer._get_buffer[MessageEndpoints.device_readback("samx")] = (
-            messages.DeviceMessage(signals={"samx": {"value": 4}}, metadata={}).dumps()
+            messages.DeviceMessage(signals={"samx": {"value": 4}}, metadata={})
         )
 
         worker._add_wait_group(msg1)
@@ -634,13 +634,13 @@ def test_wait_for_read(scan_worker_mock, msg1, msg2, req_msg: messages.DeviceReq
     worker.device_manager.producer = ProducerMock()
 
     with mock.patch.object(
-        worker.validate, "get_device_status", return_value=[req_msg.dumps()]
+        worker.validate, "get_device_status", return_value=[req_msg]
     ) as device_status:
         with mock.patch.object(worker, "_check_for_interruption") as interruption_mock:
             assert worker._groups == {}
             worker._groups["scan_motor"] = {"samx": 3, "samy": 4}
             worker.device_manager.producer._get_buffer[MessageEndpoints.device_readback("samx")] = (
-                messages.DeviceMessage(signals={"samx": {"value": 4}}, metadata={}).dumps()
+                messages.DeviceMessage(signals={"samx": {"value": 4}}, metadata={})
             )
             worker._add_wait_group(msg1)
             worker._wait_for_read(msg2)
@@ -682,7 +682,7 @@ def test_wait_for_trigger(scan_worker_mock, instr):
                         "scanID": "scanID",
                         "RID": "requestID",
                     },
-                ).dumps()
+                )
             ]
             worker._wait_for_trigger(instr)
             status_mock.assert_called_once_with(MessageEndpoints.device_req_status, ["eiger"])
@@ -728,7 +728,7 @@ def test_set_devices(scan_worker_mock, instr):
     worker = scan_worker_mock
     with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
         worker.set_devices(instr)
-        send_mock.assert_called_once_with(MessageEndpoints.device_instructions(), instr.dumps())
+        send_mock.assert_called_once_with(MessageEndpoints.device_instructions(), instr)
 
 
 @pytest.mark.parametrize(
@@ -769,7 +769,7 @@ def test_trigger_devices(scan_worker_mock, instr):
                     "scanID": "scanID",
                     "RID": "requestID",
                 },
-            ).dumps(),
+            ),
         )
 
 
@@ -795,7 +795,7 @@ def test_send_rpc(scan_worker_mock, instr):
     worker = scan_worker_mock
     with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
         worker.send_rpc(instr)
-        send_mock.assert_called_once_with(MessageEndpoints.device_instructions(), instr.dumps())
+        send_mock.assert_called_once_with(MessageEndpoints.device_instructions(), instr)
 
 
 @pytest.mark.parametrize(
@@ -847,7 +847,7 @@ def test_read_devices(scan_worker_mock, instr):
                     action="read",
                     parameter=instr.content["parameter"],
                     metadata=instr.metadata,
-                ).dumps(),
+                ),
             )
         else:
             send_mock.assert_called_once_with(
@@ -857,7 +857,7 @@ def test_read_devices(scan_worker_mock, instr):
                     action="read",
                     parameter=instr.content["parameter"],
                     metadata=instr.metadata,
-                ).dumps(),
+                ),
             )
 
 
@@ -890,7 +890,7 @@ def test_kickoff_devices(scan_worker_mock, instr, devices, parameter, metadata):
             MessageEndpoints.device_instructions(),
             messages.DeviceInstructionMessage(
                 device=devices, action="kickoff", parameter=parameter, metadata=metadata
-            ).dumps(),
+            ),
         )
 
 
@@ -921,7 +921,7 @@ def test_publish_readback(scan_worker_mock, instr, devices):
 
             get_readback.assert_called_once_with(["samx"])
             pipe = producer_mock.pipeline()
-            msg = messages.DeviceMessage(signals={}, metadata=instr.metadata).dumps()
+            msg = messages.DeviceMessage(signals={}, metadata=instr.metadata)
 
             producer_mock.set_and_publish.assert_called_once_with(
                 MessageEndpoints.device_read("samx"), msg, pipe
@@ -938,7 +938,7 @@ def test_get_readback(scan_worker_mock):
         producer_mock.get.assert_called_once_with(
             MessageEndpoints.device_readback("samx"), pipe=pipe
         )
-        pipe.execute.assert_called_once()
+        producer_mock.execute_pipeline.assert_called_once()
 
 
 def test_publish_data_as_read(scan_worker_mock):
@@ -958,7 +958,7 @@ def test_publish_data_as_read(scan_worker_mock):
         worker.publish_data_as_read(instr)
         msg = messages.DeviceMessage(
             signals=instr.content["parameter"]["data"], metadata=instr.metadata
-        ).dumps()
+        )
         producer_mock.set_and_publish.assert_called_once_with(
             MessageEndpoints.device_read("samx"), msg
         )
@@ -983,7 +983,7 @@ def test_publish_data_as_read_multiple(scan_worker_mock):
         worker.publish_data_as_read(instr)
         mock_calls = []
         for device, dev_data in zip(devices, data):
-            msg = messages.DeviceMessage(signals=dev_data, metadata=instr.metadata).dumps()
+            msg = messages.DeviceMessage(signals=dev_data, metadata=instr.metadata)
             mock_calls.append(mock.call(MessageEndpoints.device_read(device), msg))
         assert producer_mock.set_and_publish.mock_calls == mock_calls
 
@@ -1191,7 +1191,7 @@ def test_stage_device(scan_worker_mock, msg):
                             action="stage",
                             parameter=msg.content["parameter"],
                             metadata=msg.metadata,
-                        ).dumps(),
+                        ),
                     )
                     in send_mock.mock_calls
                 )
@@ -1203,7 +1203,7 @@ def test_stage_device(scan_worker_mock, msg):
                         action="stage",
                         parameter=msg.content["parameter"],
                         metadata=msg.metadata,
-                    ).dumps(),
+                    ),
                 )
                 in send_mock.mock_calls
             )
@@ -1249,7 +1249,7 @@ def test_unstage_device(scan_worker_mock, msg, devices, parameter, metadata, cle
                 MessageEndpoints.device_instructions(),
                 messages.DeviceInstructionMessage(
                     device=devices, action="unstage", parameter=parameter, metadata=metadata
-                ).dumps(),
+                ),
             )
             if cleanup:
                 wait_mock.assert_not_called()

@@ -70,8 +70,8 @@ def test_device_read_callback():
         signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
         metadata={"scanID": "laksjd", "readout_priority": "monitored"},
     )
-    msg.value = dev_msg.dumps()
-    msg.topic = MessageEndpoints.device_read("samx").encode()
+    msg.value = dev_msg
+    msg.topic = MessageEndpoints.device_read("samx")
 
     with mock.patch.object(scan_bundler, "_add_device_to_storage") as add_dev:
         scan_bundler._device_read_callback(msg, scan_bundler)
@@ -157,9 +157,7 @@ def test_wait_for_scanID(scanID, storageID, scan_msg):
 )
 def test_get_scan_status_history(msgs):
     sb = load_ScanBundlerMock()
-    with mock.patch.object(
-        sb.producer, "lrange", return_value=[msg.dumps() for msg in msgs]
-    ) as lrange:
+    with mock.patch.object(sb.producer, "lrange", return_value=[msg for msg in msgs]) as lrange:
         res = sb._get_scan_status_history(5)
         lrange.assert_called_once_with(MessageEndpoints.scan_status() + "_list", -5, -1)
         assert res == msgs
@@ -331,7 +329,7 @@ def test_add_device_to_storage_baseline(msg, scan_type):
 def test_scan_queue_callback(queue_msg):
     sb = load_ScanBundlerMock()
     msg = MessageMock()
-    msg.value = queue_msg.dumps()
+    msg.value = queue_msg
     sb._scan_queue_callback(msg, sb)
     assert sb.current_queue == queue_msg.content["queue"]["primary"].get("info")
 
@@ -357,7 +355,7 @@ def test_scan_queue_callback(queue_msg):
 def test_scan_status_callback(scan_msg):
     sb = load_ScanBundlerMock()
     msg = MessageMock()
-    msg.value = scan_msg.dumps()
+    msg.value = scan_msg
 
     with mock.patch.object(sb, "handle_scan_status_message") as handle_scan_status_message_mock:
         sb._scan_status_callback(msg, sb)
@@ -705,7 +703,7 @@ def test_get_last_device_readback():
         metadata={"scanID": "laksjd", "readout_priority": "monitored"},
     )
     with mock.patch.object(sb, "producer") as producer_mock:
-        producer_mock.pipeline().execute.return_value = [dev_msg.dumps()]
+        producer_mock.execute_pipeline.return_value = [dev_msg]
         ret = sb._get_last_device_readback([sb.device_manager.devices.samx])
         assert producer_mock.get.mock_calls == [
             mock.call(MessageEndpoints.device_readback("samx"), producer_mock.pipeline())

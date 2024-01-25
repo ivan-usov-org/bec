@@ -11,7 +11,7 @@ def channel_callback(msg, **_kwargs):
     """
     Callback for channel monitor.
     """
-    msg = messages.MessageReader.loads(msg.value)
+    msg = msg.value
     out = {"msg_type": msg.msg_type, "content": msg.content, "metadata": msg.metadata}
     print(json.dumps(out, indent=4, default=lambda o: "<not serializable object>"))
 

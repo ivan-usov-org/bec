@@ -6,6 +6,7 @@ import threading
 import traceback
 
 from bec_lib.logger import bec_logger
+from bec_lib.messages import BECMessage
 
 logger = bec_logger.logger
 
@@ -15,12 +16,12 @@ class ConsumerConnectorError(Exception):
 
 
 class MessageObject:
-    def __init__(self, value, topic) -> None:
+    def __init__(self, topic: str, value: BECMessage) -> None:
         self.topic = topic
         self._value = value
 
     @property
-    def value(self):
+    def value(self) -> BECMessage:
         return self._value
 
     def __eq__(self, ref_val: MessageObject) -> bool:
@@ -57,9 +58,13 @@ class ConnectorBase(abc.ABC):
     def send_log(self, msg):
         raise NotImplementedError
 
+    def poll_messages(self):
+        """Poll for new messages, receive them and execute callbacks"""
+        pass
+
 
 class ProducerConnector(abc.ABC):
-    def send(self, topic: str, msg) -> None:
+    def send(self, topic: str, msg: BECMessage) -> None:
         raise NotImplementedError
 
 
@@ -109,10 +114,7 @@ class ConsumerConnector(abc.ABC):
         Poll messages from self.connector and call the callback function self.cb
 
         """
-        messages = self.connector.poll(10.0)
-        for _, values in messages.items():
-            for msg in values:
-                self.cb(msg, **self.kwargs)
+        raise NotImplementedError()
 
 
 class ConsumerConnectorThreaded(ConsumerConnector, threading.Thread):

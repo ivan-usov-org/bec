@@ -67,14 +67,14 @@ def test_publish_data(msgs):
             msgs_bundle = messages.BundleMessage()
             _, endpoint, _ = msgs[0]
             for msg, endpoint, public in msgs:
-                msg_dump = msg.dumps()
+                msg_dump = msg
                 msgs_bundle.append(msg_dump)
                 if public:
                     producer.set.assert_has_calls(
                         producer.set(public, msg_dump, pipe=pipe, expire=1800)
                     )
 
-            producer.send.assert_called_with(endpoint, msgs_bundle.dumps(), pipe=pipe)
+            producer.send.assert_called_with(endpoint, msgs_bundle, pipe=pipe)
 
 
 @pytest.mark.parametrize(

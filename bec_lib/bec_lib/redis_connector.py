@@ -15,7 +15,8 @@ from bec_lib.connector import (
     ProducerConnector,
 )
 from bec_lib.endpoints import MessageEndpoints
-from bec_lib.messages import AlarmMessage, LogMessage
+from bec_lib.messages import BECMessage, AlarmMessage, LogMessage
+from bec_lib.serialization import MsgpackSerialization
 
 if TYPE_CHECKING:
     from bec_lib.alarm_handler import Alarms
@@ -145,21 +146,21 @@ class RedisConnector(ConnectorBase):
     def log_warning(self, msg):
         """send a warning"""
         self._notifications_producer.send(
-            MessageEndpoints.log(), LogMessage(log_type="warning", content=msg).dumps()
+            MessageEndpoints.log(), LogMessage(log_type="warning", log_msg=msg)
         )
 
     @catch_connection_error
     def log_message(self, msg):
         """send a log message"""
         self._notifications_producer.send(
-            MessageEndpoints.log(), LogMessage(log_type="log", content=msg).dumps()
+            MessageEndpoints.log(), LogMessage(log_type="log", log_msg=msg)
         )
 
     @catch_connection_error
     def log_error(self, msg):
         """send an error as log"""
         self._notifications_producer.send(
-            MessageEndpoints.log(), LogMessage(log_type="error", content=msg).dumps()
+            MessageEndpoints.log(), LogMessage(log_type="error", log_msg=msg)
         )
 
     @catch_connection_error
@@ -180,7 +181,7 @@ class RedisConnector(ConnectorBase):
                 source=source,
                 content=content,
                 metadata=metadata,
-            ).dumps(),
+            ),
         )
 
 
@@ -193,15 +194,26 @@ class RedisProducer(ProducerConnector):
         self.r = redis.Redis(host=host, port=port)
         self.stream_keys = {}
 
+    def execute_pipeline(self, pipeline):
+        """Execute the pipeline and returns the results with decoded BECMessages"""
+        ret = []
+        results = pipeline.execute()
+        for res in results:
+            try:
+                ret.append(MsgpackSerialization.loads(res))
+            except RuntimeError:
+                ret.append(res)
+        return ret
+
     @catch_connection_error
-    def send(self, topic: str, msg, pipe=None) -> None:
+    def send(self, topic: str, msg: BECMessage, pipe=None) -> None:
         """send to redis"""
         client = pipe if pipe is not None else self.r
-        client.publish(topic, msg)
+        client.publish(topic, MsgpackSerialization.dumps(msg))
 
     @catch_connection_error
     def lpush(
-        self, topic: str, msgs: str, pipe=None, max_size: int = None, expire: int = None
+        self, topic: str, msg: str, pipe=None, max_size: int = None, expire: int = None
     ) -> None:
         """Time complexity: O(1) for each element added, so O(N) to
         add N elements when the command is called with multiple arguments.
@@ -210,7 +222,9 @@ class RedisProducer(ProducerConnector):
         performing the push operations. When key holds a value that
         is not a list, an error is returned."""
         client = pipe if pipe is not None else self.pipeline()
-        client.lpush(topic, msgs)
+        if isinstance(msg, BECMessage):
+            msg = MsgpackSerialization.dumps(msg)
+        client.lpush(topic, msg)
         if max_size:
             client.ltrim(topic, 0, max_size)
         if expire:
@@ -219,19 +233,23 @@ class RedisProducer(ProducerConnector):
             client.execute()
 
     @catch_connection_error
-    def lset(self, topic: str, index: int, msgs: str, pipe=None) -> None:
+    def lset(self, topic: str, index: int, msg: str, pipe=None) -> None:
         client = pipe if pipe is not None else self.r
-        return client.lset(topic, index, msgs)
+        if isinstance(msg, BECMessage):
+            msg = MsgpackSerialization.dumps(msg)
+        return client.lset(topic, index, msg)
 
     @catch_connection_error
-    def rpush(self, topic: str, msgs: str, pipe=None) -> int:
+    def rpush(self, topic: str, msg: str, pipe=None) -> int:
         """O(1) for each element added, so O(N) to add N elements when the
         command is called with multiple arguments. Insert all the specified
         values at the tail of the list stored at key. If key does not exist,
         it is created as empty list before performing the push operation. When
         key holds a value that is not a list, an error is returned."""
         client = pipe if pipe is not None else self.r
-        return client.rpush(topic, msgs)
+        if isinstance(msg, BECMessage):
+            msg = MsgpackSerialization.dumps(msg)
+        return client.rpush(topic, msg)
 
     @catch_connection_error
     def lrange(self, topic: str, start: int, end: int, pipe=None):
@@ -242,12 +260,25 @@ class RedisProducer(ProducerConnector):
         with 0 being the first element of the list (the head of the list), 1 being
         the next element and so on."""
         client = pipe if pipe is not None else self.r
-        return client.lrange(topic, start, end)
+        cmd_result = client.lrange(topic, start, end)
+        if pipe:
+            return cmd_result
+        else:
+            # in case of command executed in a pipe, use 'execute_pipeline' method
+            ret = []
+            for msg in cmd_result:
+                try:
+                    ret.append(MsgpackSerialization.loads(msg))
+                except RuntimeError:
+                    ret.append(msg)
+            return ret
 
     @catch_connection_error
     def set_and_publish(self, topic: str, msg, pipe=None, expire: int = None) -> None:
         """piped combination of self.publish and self.set"""
         client = pipe if pipe is not None else self.pipeline()
+        if isinstance(msg, BECMessage):
+            msg = MsgpackSerialization.dumps(msg)
         client.publish(topic, msg)
         client.set(topic, msg)
         if expire:
@@ -256,17 +287,12 @@ class RedisProducer(ProducerConnector):
             client.execute()
 
     @catch_connection_error
-    def set(self, topic: str, msg, pipe=None, is_dict=False, expire: int = None) -> None:
+    def set(self, topic: str, msg, pipe=None, expire: int = None) -> None:
         """set redis value"""
-        client = pipe if pipe is not None else self.pipeline()
-        if is_dict:
-            client.hmset(topic, msg)
-        else:
-            client.set(topic, msg)
-        if expire:
-            client.expire(topic, expire)
-        if not pipe:
-            client.execute()
+        client = pipe if pipe is not None else self.r
+        if isinstance(msg, BECMessage):
+            msg = MsgpackSerialization.dumps(msg)
+        client.set(topic, msg, ex=expire)
 
     @catch_connection_error
     def keys(self, pattern: str) -> list:
@@ -285,12 +311,17 @@ class RedisProducer(ProducerConnector):
         client.delete(topic)
 
     @catch_connection_error
-    def get(self, topic: str, pipe=None, is_dict=False):
+    def get(self, topic: str, pipe=None):
         """retrieve entry, either via hgetall or get"""
         client = pipe if pipe is not None else self.r
-        if is_dict:
-            return client.hgetall(topic)
-        return client.get(topic)
+        data = client.get(topic)
+        if pipe:
+            return data
+        else:
+            try:
+                return MsgpackSerialization.loads(data)
+            except RuntimeError:
+                return data
 
     @catch_connection_error
     def xadd(self, topic: str, msg: dict, max_size=None, pipe=None, expire: int = None):
@@ -464,11 +495,13 @@ class RedisConsumer(RedisConsumerMixin, ConsumerConnector):
     def poll_messages(self) -> None:
         """
         Poll messages from self.connector and call the callback function self.cb
-
         """
-        messages = self.pubsub.get_message(ignore_subscribe_messages=True)
-        if messages is not None:
-            msg = MessageObject(topic=messages["channel"], value=messages["data"])
+        message = self.pubsub.get_message(ignore_subscribe_messages=True)
+        if message is not None:
+            msg = MessageObject(
+                topic=message["channel"],
+                value=MsgpackSerialization.loads(message["data"]),
+            )
             return self.cb(msg, **self.kwargs)
 
         time.sleep(0.01)
@@ -590,7 +623,11 @@ class RedisStreamConsumerThreaded(RedisConsumerMixin, ConsumerConnectorThreaded)
                 # no need to update the update frequency just for logs
                 self.last_received_msg = time.time()
             for topic, msg in messages:
-                msg_obj = MessageObject(topic=topic, value=msg[b"data"])
+                try:
+                    msg = MsgpackSerialization.loads(msg[b"data"])
+                except RuntimeError:
+                    msg = msg[b"data"]
+                msg_obj = MessageObject(topic=topic, value=msg)
                 self.cb(msg_obj, **self.kwargs)
         else:
             sleep_time = int(bool(time.time() - self.last_received_msg > self.idle_time))
@@ -642,13 +679,17 @@ class RedisConsumerThreaded(RedisConsumerMixin, ConsumerConnectorThreaded):
         """
         Poll messages from self.connector and call the callback function self.cb
 
+        Note: pubsub messages are supposed to be BECMessage objects only
         """
         messages = self.pubsub.get_message(ignore_subscribe_messages=True)
         if messages is not None:
             if f"{MessageEndpoints.log()}".encode() not in messages["channel"]:
                 # no need to update the update frequency just for logs
                 self.last_received_msg = time.time()
-            msg = MessageObject(topic=messages["channel"], value=messages["data"])
+            msg = MessageObject(
+                topic=messages["channel"].decode(),
+                value=MsgpackSerialization.loads(messages["data"]),
+            )
             self.cb(msg, **self.kwargs)
         else:
             sleep_time = int(bool(time.time() - self.last_received_msg > self.idle_time))

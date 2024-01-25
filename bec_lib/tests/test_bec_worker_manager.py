@@ -17,7 +17,7 @@ def worker_manager():
                 {"id": "test2", "config": {"test": "test"}},
             ]
         }
-    ).dumps()
+    )
     yield BECWorkerManager(connector)
 
 
@@ -66,7 +66,7 @@ def test_bec_worker_update_config(worker_manager):
                 {"id": "test2", "config": {"test": "test"}},
             ]
         }
-    ).dumps()
+    )
     worker_manager.producer.set_and_publish.assert_called_once_with(
         MessageEndpoints.dap_config(), config
     )

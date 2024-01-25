@@ -102,7 +102,7 @@ class BECService:
         if not service_keys:
             return
         services = [service.decode().split(":", maxsplit=1)[0] for service in service_keys]
-        msgs = [messages.StatusMessage.loads(self.producer.get(service)) for service in services]
+        msgs = [self.producer.get(service) for service in services]
         self._services_info = {msg.content["name"]: msg for msg in msgs if msg is not None}
 
     def _update_service_info(self):
@@ -118,7 +118,7 @@ class BECService:
                 name=self.__class__.__name__,
                 status=self.status,
                 info={"user": self._user, "hostname": self._hostname, "timestamp": time.time()},
-            ).dumps(),
+            ),
             expire=6,
         )
 
@@ -177,7 +177,7 @@ class BECService:
                 )
             )
             msg = messages.ServiceMetricMessage(name=self.__class__.__name__, metrics=data)
-            self.producer.send(MessageEndpoints.metrics(self._service_id), msg.dumps())
+            self.producer.send(MessageEndpoints.metrics(self._service_id), msg)
             self._metrics_emitter_event.wait(timeout=1)
 
     def set_global_var(self, name: str, val: Any) -> None:
@@ -188,9 +188,7 @@ class BECService:
             val (Any): Value of the variable
 
         """
-        self.producer.set(
-            MessageEndpoints.global_vars(name), messages.VariableMessage(value=val).dumps()
-        )
+        self.producer.set(MessageEndpoints.global_vars(name), messages.VariableMessage(value=val))
 
     def get_global_var(self, name: str) -> Any:
         """Get a global variable from Redis
@@ -201,7 +199,7 @@ class BECService:
         Returns:
             Any: Value of the variable
         """
-        msg = messages.VariableMessage.loads(self.producer.get(MessageEndpoints.global_vars(name)))
+        msg = self.producer.get(MessageEndpoints.global_vars(name))
         if msg:
             return msg.content.get("value")
         return None

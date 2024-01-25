@@ -56,9 +56,7 @@ def test_send_baseline_BEC():
     scanID = "lkajsdlkj"
     sb.sync_storage[scanID] = {"info": {}, "status": "open", "sent": set()}
     sb.sync_storage[scanID]["baseline"] = {}
-    msg = messages.ScanBaselineMessage(
-        scanID=scanID, data=sb.sync_storage[scanID]["baseline"]
-    ).dumps()
+    msg = messages.ScanBaselineMessage(scanID=scanID, data=sb.sync_storage[scanID]["baseline"])
     with mock.patch.object(sb, "producer") as producer:
         bec_emitter._send_baseline(scanID)
         pipe = producer.pipeline()

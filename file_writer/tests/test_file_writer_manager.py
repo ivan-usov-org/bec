@@ -57,8 +57,8 @@ def test_scan_segment_callback():
         point_id=1, scanID="scanID", data={"data": "data"}, metadata={"scan_number": 1}
     )
     msg_bundle = messages.BundleMessage()
-    msg_bundle.append(msg.dumps())
-    msg_raw = MessageObject(value=msg_bundle.dumps(), topic="scan_segment")
+    msg_bundle.append(msg)
+    msg_raw = MessageObject(value=msg_bundle, topic="scan_segment")
 
     file_manager._scan_segment_callback(msg_raw, parent=file_manager)
     assert file_manager.scan_storage["scanID"].scan_segments[1] == {"data": "data"}
@@ -77,7 +77,7 @@ def test_scan_status_callback():
             "enforce_sync": True,
         },
     )
-    msg_raw = MessageObject(value=msg.dumps(), topic="scan_status")
+    msg_raw = MessageObject(value=msg, topic="scan_status")
 
     file_manager._scan_status_callback(msg_raw, parent=file_manager)
     assert file_manager.scan_storage["scanID"].scan_finished is True
@@ -154,7 +154,7 @@ def test_update_baseline_reading():
     with mock.patch.object(file_manager, "producer") as mock_producer:
         mock_producer.get.return_value = messages.ScanBaselineMessage(
             scanID="scanID", data={"data": "data"}
-        ).dumps()
+        )
         file_manager.update_baseline_reading("scanID")
         assert file_manager.scan_storage["scanID"].baseline == {"data": "data"}
         mock_producer.get.assert_called_once_with(MessageEndpoints.public_scan_baseline("scanID"))
@@ -207,9 +207,7 @@ def test_update_async_data():
 def test_process_async_data_single_entry():
     file_manager = load_FileWriter()
     file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
-    data = [
-        (b"0-0", {b"data": messages.DeviceMessage(signals={"data": np.zeros((10, 10))}).dumps()})
-    ]
+    data = [(b"0-0", {b"data": messages.DeviceMessage(signals={"data": np.zeros((10, 10))})})]
     file_manager._process_async_data(data, "scanID", "dev1")
     assert np.isclose(
         file_manager.scan_storage["scanID"].async_data["dev1"]["data"], np.zeros((10, 10))
@@ -225,7 +223,7 @@ def test_process_async_data_extend():
             {
                 b"data": messages.DeviceMessage(
                     signals={"data": np.zeros((10, 10))}, metadata={"async_update": "extend"}
-                ).dumps()
+                )
             },
         )
         for ii in range(10)
@@ -243,7 +241,7 @@ def test_process_async_data_append():
             {
                 b"data": messages.DeviceMessage(
                     signals={"data": np.zeros((10, 10))}, metadata={"async_update": "append"}
-                ).dumps()
+                )
             },
         )
         for ii in range(10)
@@ -261,7 +259,7 @@ def test_process_async_data_replace():
             {
                 b"data": messages.DeviceMessage(
                     signals={"data": np.zeros((10, 10))}, metadata={"async_update": "replace"}
-                ).dumps()
+                )
             },
         )
         for ii in range(10)

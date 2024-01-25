@@ -54,15 +54,12 @@ class DAPWorkerManager:
 
     #     # }
     #     # msg = messages.AvailableResourceMessage(resource={})
-    #     self.producer.publish(MessageEndpoints.dap_available_plugins(), msg.dumps())
+    #     self.producer.publish(MessageEndpoints.dap_available_plugins(), msg)
 
     def _update_config(self):
         """Get config from redis."""
         logger.debug("Getting config from redis")
-        msg = self.producer.get(MessageEndpoints.dap_config())
-        if not msg:
-            return
-        config_msg = messages.DAPConfigMessage.loads(msg)
+        config_msg = self.producer.get(MessageEndpoints.dap_config())
         if not config_msg:
             return
         self.update_config(config_msg)
@@ -78,7 +75,7 @@ class DAPWorkerManager:
     @staticmethod
     def _set_config(msg: messages.BECMessage, parent: DAPWorkerManager) -> None:
         """Set config to the parent."""
-        msg = messages.DAPConfigMessage.loads(msg.value)
+        msg = msg.value
         if not msg:
             return
         parent.update_config(msg)

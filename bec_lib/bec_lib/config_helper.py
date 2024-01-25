@@ -87,7 +87,7 @@ class ConfigHelper:
         RID = str(uuid.uuid4())
         self.producer.send(
             MessageEndpoints.device_config_request(),
-            DeviceConfigMessage(action=action, config=config, metadata={"RID": RID}).dumps(),
+            DeviceConfigMessage(action=action, config=config, metadata={"RID": RID}),
         )
 
         reply = self.wait_for_config_reply(RID)
@@ -112,12 +112,11 @@ class ConfigHelper:
         elapsed_time = 0
         max_time = timeout
         while True:
-            res = self.producer.lrange(MessageEndpoints.service_response(RID), 0, -1)
-            if not res:
+            service_messages = self.producer.lrange(MessageEndpoints.service_response(RID), 0, -1)
+            if not service_messages:
                 time.sleep(0.005)
                 elapsed_time += 0.005
             else:
-                service_messages = [messages.ServiceResponseMessage.loads(msg) for msg in res]
                 ack_services = [
                     msg.content["response"]["service"]
                     for msg in service_messages
@@ -126,8 +125,7 @@ class ConfigHelper:
                 if set(["DeviceServer", "ScanServer"]).issubset(set(ack_services)):
                     break
             if elapsed_time > max_time:
-                if res:
-                    service_messages = [messages.ServiceResponseMessage.loads(msg) for msg in res]
+                if service_messages:
                     raise DeviceConfigError(
                         "Timeout reached whilst waiting for config change to be acknowledged."
                         f" Received {service_messages}."
@@ -159,7 +157,7 @@ class ConfigHelper:
                 if start > timeout:
                     raise DeviceConfigError("Timeout reached whilst waiting for config reply.")
                 continue
-            return RequestResponseMessage.loads(msg)
+            return msg
 
     def load_demo_config(self):
         """Load BEC device demo_config.yaml for simulation."""

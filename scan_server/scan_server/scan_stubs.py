@@ -67,7 +67,6 @@ class ScanStubs:
             if msg:
                 break
             time.sleep(0.001)
-        msg = messages.DeviceRPCMessage.loads(msg)
         if not msg.content["success"]:
             error = msg.content["out"]
             if isinstance(error, dict) and {"error", "msg", "traceback"}.issubset(
@@ -192,10 +191,9 @@ class ScanStubs:
             DIID (int): device instruction ID
 
         """
-        raw_msg = self.producer.get(MessageEndpoints.device_req_status(device))
-        if not raw_msg:
+        msg = self.producer.get(MessageEndpoints.device_req_status(device))
+        if not msg:
             return 0
-        msg = messages.DeviceReqStatusMessage.loads(raw_msg)
         matching_RID = msg.metadata.get("RID") == RID
         matching_DIID = msg.metadata.get("DIID") == DIID
         if matching_DIID and matching_RID:
@@ -210,10 +208,9 @@ class ScanStubs:
             RID (str): request ID
 
         """
-        raw_msg = self.producer.get(MessageEndpoints.device_progress(device))
-        if not raw_msg:
+        msg = self.producer.get(MessageEndpoints.device_progress(device))
+        if not msg:
             return None
-        msg = messages.DeviceStatusMessage.loads(raw_msg)
         matching_RID = msg.metadata.get("RID") == RID
         if not matching_RID:
             return None

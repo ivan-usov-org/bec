@@ -546,7 +546,7 @@ class FlyScanBase(ScanBase):
         pipe = producer.pipeline()
         producer.lrange(MessageEndpoints.device_req_status(self.metadata["RID"]), 0, -1, pipe)
         producer.get(MessageEndpoints.device_readback(flyer), pipe)
-        return pipe.execute()
+        return producer.execute_pipeline(pipe)
 
     def scan_core(self):
         yield from self.stubs.kickoff(device=self.scan_motors[0], parameter=self.caller_kwargs)
@@ -1039,9 +1039,8 @@ class RoundScanFlySim(ScanBase):
 
         while True:
             yield from self.stubs.read_and_wait(group="primary", wait_group="readout_primary")
-            msg = self.device_manager.producer.get(MessageEndpoints.device_status(self.flyer))
-            if msg:
-                status = messages.DeviceStatusMessage.loads(msg)
+            status = self.device_manager.producer.get(MessageEndpoints.device_status(self.flyer))
+            if status:
                 device_is_idle = status.content.get("status", 1) == 0
                 matching_RID = self.metadata.get("RID") == status.metadata.get("RID")
                 matching_DIID = target_DIID == status.metadata.get("DIID")
@@ -1261,7 +1260,7 @@ class MonitorScan(ScanBase):
         pipe = producer.pipeline()
         producer.lrange(MessageEndpoints.device_req_status(self.metadata["RID"]), 0, -1, pipe)
         producer.get(MessageEndpoints.device_readback(self.flyer), pipe)
-        return pipe.execute()
+        return producer.execute_pipeline(pipe)
 
     def scan_core(self):
         yield from self.stubs.set(
@@ -1285,7 +1284,7 @@ class MonitorScan(ScanBase):
 
             if not readback:
                 continue
-            readback = messages.DeviceMessage.loads(readback).content["signals"]
+            readback = readback.content["signals"]
             yield from self.stubs.publish_data_as_read(
                 device=self.flyer, data=readback, pointID=self.pointID
             )

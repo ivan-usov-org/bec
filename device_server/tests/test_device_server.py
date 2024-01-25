@@ -127,61 +127,61 @@ def test_stop_devices(device_server_mock):
     [
         (
             MessageObject(
+                "test",
                 messages.ScanQueueModificationMessage(
                     scanID="scanID",
                     action="pause",
                     parameter={},
                     metadata={"stream": "primary", "DIID": 1, "RID": "test"},
-                ).dumps(),
-                "test",
+                ),
             ),
             True,
         ),
         (
             MessageObject(
+                "test",
                 messages.ScanQueueModificationMessage(
                     scanID="scanID",
                     action="abort",
                     parameter={},
                     metadata={"stream": "primary", "DIID": 1, "RID": "test"},
-                ).dumps(),
-                "test",
+                ),
             ),
             True,
         ),
         (
             MessageObject(
+                "test",
                 messages.ScanQueueModificationMessage(
                     scanID="scanID",
                     action="halt",
                     parameter={},
                     metadata={"stream": "primary", "DIID": 1, "RID": "test"},
-                ).dumps(),
-                "test",
+                ),
             ),
             True,
         ),
         (
             MessageObject(
+                "test",
                 messages.ScanQueueModificationMessage(
                     scanID="scanID",
                     action="resume",
                     parameter={},
                     metadata={"stream": "primary", "DIID": 1, "RID": "test"},
-                ).dumps(),
-                "test",
+                ),
             ),
             False,
         ),
         (
             MessageObject(
+                "test",
                 messages.ScanQueueModificationMessage(
                     scanID="scanID",
                     action="deferred_pause",
                     parameter={},
                     metadata={"stream": "primary", "DIID": 1, "RID": "test"},
-                ).dumps(),
-                "test",
+                ),
             ),
             False,
         ),
@@ -287,7 +287,7 @@ def test_assert_device_is_valid(device_server_mock, instr):
 
 
 @pytest.mark.parametrize(
-    "instr",
+    "instructions",
     [
         messages.DeviceInstructionMessage(
             device="samx",
@@ -297,10 +297,8 @@ def test_assert_device_is_valid(device_server_mock, instr):
         )
     ],
 )
-def test_handle_device_instructions_set(device_server_mock, instr):
+def test_handle_device_instructions_set(device_server_mock, instructions):
     device_server = device_server_mock
-    msg = messages.DeviceInstructionMessage.dumps(instr)
-    instructions = messages.DeviceInstructionMessage.loads(msg)
 
     with mock.patch.object(device_server, "_assert_device_is_valid") as assert_device_is_valid_mock:
         with mock.patch.object(
@@ -310,7 +308,7 @@ def test_handle_device_instructions_set(device_server_mock, instr):
                 device_server, "_update_device_metadata"
             ) as update_device_metadata_mock:
                 with mock.patch.object(device_server, "_set_device") as set_mock:
-                    device_server.handle_device_instructions(msg)
+                    device_server.handle_device_instructions(instructions)
 
                     assert_device_is_valid_mock.assert_called_once_with(instructions)
                     assert_device_is_enabled_mock.assert_called_once_with(instructions)
@@ -320,7 +318,7 @@ def test_handle_device_instructions_set(device_server_mock, instr):
 
 
 @pytest.mark.parametrize(
-    "instr",
+    "instructions",
     [
         messages.DeviceInstructionMessage(
             device="samx",
@@ -330,19 +328,17 @@ def test_handle_device_instructions_set(device_server_mock, instr):
         )
     ],
 )
-def test_handle_device_instructions_exception(device_server_mock, instr):
+def test_handle_device_instructions_exception(device_server_mock, instructions):
     device_server = device_server_mock
-    msg = messages.DeviceInstructionMessage.dumps(instr)
-    instructions = messages.DeviceInstructionMessage.loads(msg)
 
     with mock.patch.object(device_server, "_assert_device_is_valid") as valid_mock:
         with mock.patch.object(device_server.connector, "log_error") as log_mock:
             with mock.patch.object(device_server.connector, "raise_alarm") as alarm_mock:
                 valid_mock.side_effect = Exception("Exception")
-                device_server.handle_device_instructions(msg)
+                device_server.handle_device_instructions(instructions)
 
                 valid_mock.assert_called_once_with(instructions)
-                log_mock.assert_called_once_with({"source": msg, "message": ANY})
+                log_mock.assert_called_once_with({"source": instructions, "message": ANY})
                 alarm_mock.assert_called_once_with(
                     severity=Alarms.MAJOR,
                     source=instructions.content,
@@ -353,7 +349,7 @@ def test_handle_device_instructions_exception(device_server_mock, instr):
 
 
 @pytest.mark.parametrize(
-    "instr",
+    "instructions",
     [
         messages.DeviceInstructionMessage(
             device="samx",
@@ -363,15 +359,13 @@ def test_handle_device_instructions_exception(device_server_mock, instr):
         )
     ],
 )
-def test_handle_device_instructions_limit_error(device_server_mock, instr):
+def test_handle_device_instructions_limit_error(device_server_mock, instructions):
     device_server = device_server_mock
-    msg = messages.DeviceInstructionMessage.dumps(instr)
-    instructions = messages.DeviceInstructionMessage.loads(msg)
 
     with mock.patch.object(device_server.connector, "raise_alarm") as alarm_mock:
         with mock.patch.object(device_server, "_set_device") as set_mock:
             set_mock.side_effect = ophyd_errors.LimitError("Wrong limits")
-            device_server.handle_device_instructions(msg)
+            device_server.handle_device_instructions(instructions)
 
             alarm_mock.assert_called_once_with(
                 severity=Alarms.MAJOR,
@@ -383,7 +377,7 @@ def test_handle_device_instructions_limit_error(device_server_mock, instr):
 
 
 @pytest.mark.parametrize(
-    "instr",
+    "instructions",
     [
         messages.DeviceInstructionMessage(
             device="samx",
@@ -393,18 +387,16 @@ def test_handle_device_instructions_limit_error(device_server_mock, instr):
         )
     ],
 )
-def test_handle_device_instructions_read(device_server_mock, instr):
+def test_handle_device_instructions_read(device_server_mock, instructions):
     device_server = device_server_mock
-    msg = messages.DeviceInstructionMessage.dumps(instr)
-    instructions = messages.DeviceInstructionMessage.loads(msg)
 
     with mock.patch.object(device_server, "_read_device") as read_mock:
-        device_server.handle_device_instructions(msg)
+        device_server.handle_device_instructions(instructions)
         read_mock.assert_called_once_with(instructions)
 
 
 @pytest.mark.parametrize(
-    "instr",
+    "instructions",
     [
         messages.DeviceInstructionMessage(
             device="samx",
@@ -414,10 +406,8 @@ def test_handle_device_instructions_read(device_server_mock, instr):
         )
     ],
 )
-def test_handle_device_instructions_rpc(device_server_mock, instr):
+def test_handle_device_instructions_rpc(device_server_mock, instructions):
     device_server = device_server_mock
-    msg = messages.DeviceInstructionMessage.dumps(instr)
-    instructions = messages.DeviceInstructionMessage.loads(msg)
     with mock.patch.object(device_server, "_assert_device_is_valid") as assert_device_is_valid_mock:
         with mock.patch.object(
             device_server, "_assert_device_is_enabled"
@@ -426,7 +416,7 @@ def test_handle_device_instructions_rpc(device_server_mock, instr):
                 device_server, "_update_device_metadata"
             ) as update_device_metadata_mock:
                 with mock.patch.object(device_server, "run_rpc") as rpc_mock:
-                    device_server.handle_device_instructions(msg)
+                    device_server.handle_device_instructions(instructions)
                     rpc_mock.assert_called_once_with(instructions)
 
                     assert_device_is_valid_mock.assert_called_once_with(instructions)
@@ -435,7 +425,7 @@ def test_handle_device_instructions_rpc(device_server_mock, instr):
 
 
 @pytest.mark.parametrize(
-    "instr",
+    "instructions",
     [
         messages.DeviceInstructionMessage(
             device="samx",
@@ -445,18 +435,16 @@ def test_handle_device_instructions_rpc(device_server_mock, instr):
         )
     ],
 )
-def test_handle_device_instructions_kickoff(device_server_mock, instr):
+def test_handle_device_instructions_kickoff(device_server_mock, instructions):
     device_server = device_server_mock
-    msg = messages.DeviceInstructionMessage.dumps(instr)
-    instructions = messages.DeviceInstructionMessage.loads(msg)
 
     with mock.patch.object(device_server, "_kickoff_device") as kickoff_mock:
-        device_server.handle_device_instructions(msg)
+        device_server.handle_device_instructions(instructions)
         kickoff_mock.assert_called_once_with(instructions)
 
 
 @pytest.mark.parametrize(
-    "instr",
+    "instructions",
     [
         messages.DeviceInstructionMessage(
             device="samx",
@@ -466,13 +454,11 @@ def test_handle_device_instructions_kickoff(device_server_mock, instr):
         )
     ],
 )
-def test_handle_device_instructions_complete(device_server_mock, instr):
+def test_handle_device_instructions_complete(device_server_mock, instructions):
     device_server = device_server_mock
-    msg = messages.DeviceInstructionMessage.dumps(instr)
-    instructions = messages.DeviceInstructionMessage.loads(msg)
 
     with mock.patch.object(device_server, "_complete_device") as complete_mock:
-        device_server.handle_device_instructions(msg)
+        device_server.handle_device_instructions(instructions)
         complete_mock.assert_called_once_with(instructions)
 
 
@@ -511,7 +497,7 @@ def test_complete_device(device_server_mock, instr):
 
 
 @pytest.mark.parametrize(
-    "instr",
+    "instructions",
     [
         messages.DeviceInstructionMessage(
             device="samx",
@@ -521,18 +507,16 @@ def test_complete_device(device_server_mock, instr):
         )
     ],
 )
-def test_handle_device_instructions_pre_scan(device_server_mock, instr):
+def test_handle_device_instructions_pre_scan(device_server_mock, instructions):
     device_server = device_server_mock
-    msg = messages.DeviceInstructionMessage.dumps(instr)
-    instructions = messages.DeviceInstructionMessage.loads(msg)
 
     with mock.patch.object(device_server, "_pre_scan") as pre_scan_mock:
-        device_server.handle_device_instructions(msg)
+        device_server.handle_device_instructions(instructions)
         pre_scan_mock.assert_called_once_with(instructions)
 
 
 @pytest.mark.parametrize(
-    "instr",
+    "instructions",
     [
         messages.DeviceInstructionMessage(
             device="samx",
@@ -542,18 +526,16 @@ def test_handle_device_instructions_pre_scan(device_server_mock, instr):
         )
     ],
 )
-def test_handle_device_instructions_trigger(device_server_mock, instr):
+def test_handle_device_instructions_trigger(device_server_mock, instructions):
     device_server = device_server_mock
-    msg = messages.DeviceInstructionMessage.dumps(instr)
-    instructions = messages.DeviceInstructionMessage.loads(msg)
 
     with mock.patch.object(device_server, "_trigger_device") as trigger_mock:
-        device_server.handle_device_instructions(msg)
+        device_server.handle_device_instructions(instructions)
         trigger_mock.assert_called_once_with(instructions)
 
 
 @pytest.mark.parametrize(
-    "instr",
+    "instructions",
     [
         messages.DeviceInstructionMessage(
             device="samx",
@@ -563,18 +545,16 @@ def test_handle_device_instructions_trigger(device_server_mock, instr):
         )
     ],
 )
-def test_handle_device_instructions_stage(device_server_mock, instr):
+def test_handle_device_instructions_stage(device_server_mock, instructions):
     device_server = device_server_mock
-    msg = messages.DeviceInstructionMessage.dumps(instr)
-    instructions = messages.DeviceInstructionMessage.loads(msg)
 
     with mock.patch.object(device_server, "_stage_device") as stage_mock:
-        device_server.handle_device_instructions(msg)
+        device_server.handle_device_instructions(instructions)
         stage_mock.assert_called_once_with(instructions)
 
 
 @pytest.mark.parametrize(
-    "instr",
+    "instructions",
     [
         messages.DeviceInstructionMessage(
             device="samx",
@@ -584,13 +564,11 @@ def test_handle_device_instructions_stage(device_server_mock, instr):
         )
     ],
 )
-def test_handle_device_instructions_unstage(device_server_mock, instr):
+def test_handle_device_instructions_unstage(device_server_mock, instructions):
     device_server = device_server_mock
-    msg = messages.DeviceInstructionMessage.dumps(instr)
-    instructions = messages.DeviceInstructionMessage.loads(msg)
 
     with mock.patch.object(device_server, "_unstage_device") as unstage_mock:
-        device_server.handle_device_instructions(msg)
+        device_server.handle_device_instructions(instructions)
         unstage_mock.assert_called_once_with(instructions)
 
 
@@ -667,7 +645,7 @@ def test_set_device(device_server_mock, instr):
         ]
         if res:
             break
-    msg = messages.DeviceReqStatusMessage.loads(res[0]["msg"])
+    msg = res[0]["msg"]
     assert msg.metadata["RID"] == "test"
     assert msg.content["success"]
 
@@ -701,8 +679,8 @@ def test_read_device(device_server_mock, instr):
             for msg in device_server.producer.message_sent
             if msg["queue"] == MessageEndpoints.device_read(device)
         ]
-        assert messages.DeviceMessage.loads(res[-1]["msg"]).metadata["RID"] == instr.metadata["RID"]
-        assert messages.DeviceMessage.loads(res[-1]["msg"]).metadata["stream"] == "primary"
+        assert res[-1]["msg"].metadata["RID"] == instr.metadata["RID"]
+        assert res[-1]["msg"].metadata["stream"] == "primary"
 
 
 @pytest.mark.parametrize("devices", [["samx", "samy"], ["samx"]])
@@ -716,7 +694,7 @@ def test_read_config_and_update_devices(device_server_mock, devices):
             if msg["queue"] == MessageEndpoints.device_read_configuration(device)
         ]
         config = device_server.device_manager.devices[device].obj.read_configuration()
-        msg = messages.DeviceMessage.loads(res[-1]["msg"])
+        msg = res[-1]["msg"]
         assert msg.content["signals"].keys() == config.keys()
         assert res[-1]["queue"] == MessageEndpoints.device_read_configuration(device)
 
@@ -780,7 +758,7 @@ def test_retry_obj_method_buffer(device_server_mock, instr):
     device_server.producer = mock.MagicMock()
     device_server.producer.get.return_value = messages.DeviceMessage(
         signals=signals_before, metadata={"RID": "test", "stream": "primary"}
-    ).dumps()
+    )
 
     signals = device_server._retry_obj_method("samx", samx.obj, instr, Exception())
     assert signals.keys() == signals_before.keys()

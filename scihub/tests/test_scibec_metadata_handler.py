@@ -20,7 +20,7 @@ def test_handle_scan_status(md_handler):
         md_handler._handle_scan_status(
             MessageObject(value=msg, topic="scan_status"), parent=md_handler
         )
-        mock_update_scan_status.assert_called_once_with(messages.ScanStatusMessage.loads(msg))
+        mock_update_scan_status.assert_called_once_with(msg)
 
 
 def test_handle_scan_status_ignores_errors(md_handler):
@@ -32,7 +32,7 @@ def test_handle_scan_status_ignores_errors(md_handler):
             md_handler._handle_scan_status(
                 MessageObject(value=msg, topic="scan_status"), parent=md_handler
             )
-            mock_update_scan_status.assert_called_once_with(messages.ScanStatusMessage.loads(msg))
+            mock_update_scan_status.assert_called_once_with(msg)
             mock_logger.exception.assert_called_once_with(
                 f"Failed to update scan status: {Exception('test')}"
             )

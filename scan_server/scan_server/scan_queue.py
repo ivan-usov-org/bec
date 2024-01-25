@@ -105,7 +105,7 @@ class QueueManager:
 
     @staticmethod
     def _scan_queue_callback(msg, parent, **_kwargs) -> None:
-        scan_msg = messages.ScanQueueMessage.loads(msg.value)
+        scan_msg = msg.value
         logger.info(f"Receiving scan: {scan_msg.content}")
         # instructions = parent.scan_assembler.assemble_device_instructions(scan_msg)
         queue = scan_msg.content.get("queue", "primary")
@@ -114,7 +114,7 @@ class QueueManager:
 
     @staticmethod
     def _scan_queue_modification_callback(msg, parent, **_kwargs):
-        scan_mod_msg = messages.ScanQueueModificationMessage.loads(msg.value)
+        scan_mod_msg = msg.value
         logger.info(f"Receiving scan modification: {scan_mod_msg.content}")
         if scan_mod_msg:
             parent.scan_interception(scan_mod_msg)
@@ -235,7 +235,7 @@ class QueueManager:
             logger.info(f"\n {queue}")
         self.producer.set_and_publish(
             MessageEndpoints.scan_queue_status(),
-            messages.ScanQueueStatusMessage(queue=queue_export).dumps(),
+            messages.ScanQueueStatusMessage(queue=queue_export),
         )
 
     def describe_queue(self) -> list:
@@ -536,7 +536,7 @@ class RequestBlock:
     def describe(self):
         """prepare a dictionary that summarizes the request block"""
         return {
-            "msg": self.msg.dumps(),
+            "msg": self.msg,
             "RID": self.RID,
             "scan_motors": self.scan_motors,
             "readout_priority": self.readout_priority,
@@ -791,7 +791,7 @@ class InstructionQueueItem:
             status=self.status.name, queueID=self.queue_id, info=self.describe()
         )
         self.parent.queue_manager.producer.lpush(
-            MessageEndpoints.scan_queue_history(), msg.dumps(), max_size=100
+            MessageEndpoints.scan_queue_history(), msg, max_size=100
         )
 
     def __iter__(self):

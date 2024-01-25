@@ -92,7 +92,7 @@ def test_send_rpc_exception(rpc_cls):
             return_val=None,
             out={"error": "Exception", "msg": (), "traceback": "NoneType: None\n"},
             success=False,
-        ).dumps(),
+        ),
     )
 
 
@@ -102,9 +102,7 @@ def test_send_rpc_result_to_client(rpc_cls):
     rpc_cls._send_rpc_result_to_client("device", {"rpc_id": "rpc_id"}, 1, result)
     rpc_cls.producer.set.assert_called_once_with(
         MessageEndpoints.device_rpc("rpc_id"),
-        messages.DeviceRPCMessage(
-            device="device", return_val=1, out="result", success=True
-        ).dumps(),
+        messages.DeviceRPCMessage(device="device", return_val=1, out="result", success=True),
         expire=1800,
     )
 

@@ -88,8 +88,8 @@ class ScanBundler(BECService):
     @staticmethod
     def _device_read_callback(msg, parent, **_kwargs):
         # pylint: disable=protected-access
-        dev = msg.topic.decode().split(MessageEndpoints._device_read + "/")[-1]
-        msgs = messages.DeviceMessage.loads(msg.value)
+        dev = msg.topic.split(MessageEndpoints._device_read + "/")[-1]
+        msgs = msg.value
         logger.debug(f"Received reading from device {dev}")
         if not isinstance(msgs, list):
             msgs = [msgs]
@@ -98,13 +98,13 @@ class ScanBundler(BECService):
 
     @staticmethod
     def _scan_queue_callback(msg, parent, **_kwargs):
-        msg = messages.ScanQueueStatusMessage.loads(msg.value)
+        msg = msg.value
         logger.trace(msg)
         parent.current_queue = msg.content["queue"]["primary"].get("info")
 
     @staticmethod
     def _scan_status_callback(msg, parent, **_kwargs):
-        msg = messages.ScanStatusMessage.loads(msg.value)
+        msg = msg.value
         parent.handle_scan_status_message(msg)
 
     def handle_scan_status_message(self, msg: messages.ScanStatusMessage) -> None:
@@ -269,12 +269,7 @@ class ScanBundler(BECService):
             }
 
     def _get_scan_status_history(self, length):
-        return [
-            messages.ScanStatusMessage.loads(msg)
-            for msg in self.producer.lrange(
-                MessageEndpoints.scan_status() + "_list", length * -1, -1
-            )
-        ]
+        return self.producer.lrange(MessageEndpoints.scan_status() + "_list", length * -1, -1)
 
     def _wait_for_scanID(self, scanID, timeout_time=10):
         elapsed_time = 0
@@ -348,9 +343,7 @@ class ScanBundler(BECService):
         pipe = self.producer.pipeline()
         for dev in devices:
             self.producer.get(MessageEndpoints.device_readback(dev.name), pipe)
-        read_raw = pipe.execute()
-
-        return [messages.DeviceMessage.loads(read).content["signals"] for read in read_raw]
+        return [msg.content["signals"] for msg in self.producer.execute_pipeline(pipe)]
 
     def cleanup_storage(self):
         """remove old scanIDs to free memory"""

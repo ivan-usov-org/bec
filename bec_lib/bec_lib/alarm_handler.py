@@ -65,8 +65,7 @@ class AlarmHandler:
 
     @staticmethod
     def _alarm_consumer_callback(msg, *, parent, **_kwargs):
-        msg = messages.AlarmMessage.loads(msg.value)
-        parent.add_alarm(msg)
+        parent.add_alarm(msg.value)
 
     @threadlocked
     def add_alarm(self, msg: messages.AlarmMessage):

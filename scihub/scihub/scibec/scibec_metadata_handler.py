@@ -32,7 +32,7 @@ class SciBecMetadataHandler:
 
     @staticmethod
     def _handle_scan_status(msg, *, parent, **_kwargs) -> None:
-        msg = messages.ScanStatusMessage.loads(msg.value)
+        msg = msg.value
         try:
             scan = parent.update_scan_status(msg)
         except Exception as exc:
@@ -115,7 +115,7 @@ class SciBecMetadataHandler:
 
     @staticmethod
     def _handle_file_content(msg, *, parent, **_kwargs) -> None:
-        msg = messages.FileContentMessage.loads(msg.value)
+        msg = msg.value
         try:
             logger.debug(f"Received new file content {msg}")
             if not msg.content["data"]:

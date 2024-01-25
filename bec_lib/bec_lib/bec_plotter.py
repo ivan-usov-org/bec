@@ -75,7 +75,7 @@ class BECWidgetsConnector:
             config (dict): The config to set.
         """
         msg = messages.GUIConfigMessage(config=config)
-        self._producer.set_and_publish(MessageEndpoints.gui_config(plot_id), msg.dumps())
+        self._producer.set_and_publish(MessageEndpoints.gui_config(plot_id), msg)
 
     def close(self, plot_id: str) -> None:
         """
@@ -85,7 +85,7 @@ class BECWidgetsConnector:
             plot_id (str): The id of the plot.
         """
         msg = messages.GUIInstructionMessage(action="close", parameter={})
-        self._producer.set_and_publish(MessageEndpoints.gui_instructions(plot_id), msg.dumps())
+        self._producer.set_and_publish(MessageEndpoints.gui_instructions(plot_id), msg)
 
     def config_dialog(self, plot_id: str) -> None:
         """
@@ -95,7 +95,7 @@ class BECWidgetsConnector:
             plot_id (str): The id of the plot.
         """
         msg = messages.GUIInstructionMessage(action="config_dialog", parameter={})
-        self._producer.set_and_publish(MessageEndpoints.gui_instructions(plot_id), msg.dumps())
+        self._producer.set_and_publish(MessageEndpoints.gui_instructions(plot_id), msg)
 
     def send_data(self, plot_id: str, data: dict) -> None:
         """
@@ -106,7 +106,7 @@ class BECWidgetsConnector:
             data (dict): The data to send.
         """
         msg = messages.GUIDataMessage(data=data)
-        self._producer.set_and_publish(topic=MessageEndpoints.gui_data(plot_id), msg=msg.dumps())
+        self._producer.set_and_publish(topic=MessageEndpoints.gui_data(plot_id), msg=msg)
         # TODO bec_dispatcher can only handle set_and_publish ATM
         # self._producer.xadd(topic=MessageEndpoints.gui_data(plot_id),msg= {"data": msg})
 
@@ -118,7 +118,7 @@ class BECWidgetsConnector:
             plot_id (str): The id of the plot.
         """
         msg = messages.GUIInstructionMessage(action="clear", parameter={})
-        self._producer.set_and_publish(MessageEndpoints.gui_instructions(plot_id), msg.dumps())
+        self._producer.set_and_publish(MessageEndpoints.gui_instructions(plot_id), msg)
 
 
 class BECPlotter:

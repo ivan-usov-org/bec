@@ -29,15 +29,14 @@ class ConfigUpdateHandler:
 
     @staticmethod
     def _device_config_callback(msg, *, parent, **_kwargs) -> None:
-        msg = messages.DeviceConfigMessage.loads(msg.value)
         logger.info(f"Received request: {msg}")
-        parent.parse_config_request(msg)
+        parent.parse_config_request(msg.value)
 
     def parse_config_request(self, msg: messages.DeviceConfigMessage) -> None:
         """Processes a config request. If successful, it emits a config reply
 
         Args:
-            msg (BMessage.DeviceConfigMessage): Config request
+            msg (BECMessage.DeviceConfigMessage): Config request
 
         """
         error_msg = ""
@@ -70,7 +69,7 @@ class ConfigUpdateHandler:
         )
         RID = metadata.get("RID")
         self.device_manager.producer.set(
-            MessageEndpoints.device_config_request_response(RID), msg.dumps(), expire=60
+            MessageEndpoints.device_config_request_response(RID), msg, expire=60
         )
 
     def _update_config(self, msg: messages.DeviceConfigMessage) -> None:

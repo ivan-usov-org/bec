@@ -39,7 +39,7 @@ def test_read(dev):
                 "samx_motor_is_moving": {"value": 0, "timestamp": 1701105880.16935},
             },
             metadata={"scan_id": "scan_id", "scan_type": "scan_type"},
-        ).dumps()
+        )
         res = dev.samx.read()
         mock_get.assert_called_once_with(MessageEndpoints.device_readback("samx"))
         assert res == {
@@ -58,7 +58,7 @@ def test_read_filtered_hints(dev):
                 "samx_motor_is_moving": {"value": 0, "timestamp": 1701105880.16935},
             },
             metadata={"scan_id": "scan_id", "scan_type": "scan_type"},
-        ).dumps()
+        )
         res = dev.samx.read(filter_to_hints=True)
         mock_get.assert_called_once_with(MessageEndpoints.device_readback("samx"))
         assert res == {"samx": {"value": 0, "timestamp": 1701105880.1711318}}
@@ -73,7 +73,7 @@ def test_read_use_read(dev):
         }
         mock_get.return_value = messages.DeviceMessage(
             signals=data, metadata={"scan_id": "scan_id", "scan_type": "scan_type"}
-        ).dumps()
+        )
         res = dev.samx.read(use_readback=False)
         mock_get.assert_called_once_with(MessageEndpoints.device_read("samx"))
         assert res == data
@@ -90,7 +90,7 @@ def test_read_nested_device(dev):
         }
         mock_get.return_value = messages.DeviceMessage(
             signals=data, metadata={"scan_id": "scan_id", "scan_type": "scan_type"}
-        ).dumps()
+        )
         res = dev.dyn_signals.messages.read()
         mock_get.assert_called_once_with(MessageEndpoints.device_readback("dyn_signals"))
         assert res == data
@@ -109,7 +109,7 @@ def test_read_kind_hinted(dev, kind, cached):
             }
             mock_get.return_value = messages.DeviceMessage(
                 signals=data, metadata={"scan_id": "scan_id", "scan_type": "scan_type"}
-            ).dumps()
+            )
             dev.samx.readback._signal_info["kind_str"] = f"Kind.{kind}"
             res = dev.samx.readback.read(cached=cached)
             if cached:
@@ -154,7 +154,7 @@ def test_read_configuration_cached(dev, is_signal, is_config_signal, method):
                     "samx_motor_is_moving": {"value": 0, "timestamp": 1701105880.16935},
                 },
                 metadata={"scan_id": "scan_id", "scan_type": "scan_type"},
-            ).dumps()
+            )
             with mock.patch.object(dev.samx.readback, "read") as mock_read:
                 dev.samx.readback.read_configuration(cached=True)
                 if method == "redis":
@@ -198,7 +198,7 @@ def test_get_rpc_func_name_readback_get(dev, kind, cached):
                     "samx_motor_is_moving": {"value": 0, "timestamp": 1701105880.16935},
                 },
                 metadata={"scan_id": "scan_id", "scan_type": "scan_type"},
-            ).dumps()
+            )
             dev.samx.readback._signal_info["kind_str"] = f"Kind.{kind}"
             dev.samx.readback.get(cached=cached)
             if cached:
@@ -571,7 +571,7 @@ def test_adjustable_mixin_limits():
     adj.root = mock.MagicMock()
     adj.root.parent.producer.get.return_value = messages.DeviceMessage(
         signals={"low": -12, "high": 12}, metadata={}
-    ).dumps()
+    )
     assert adj.limits == [-12, 12]
 
 
@@ -595,7 +595,7 @@ def test_adjustable_mixin_set_low_limit():
     adj.root = mock.MagicMock()
     adj.root.parent.producer.get.return_value = messages.DeviceMessage(
         signals={"low": -12, "high": 12}, metadata={}
-    ).dumps()
+    )
     adj.low_limit = -20
     adj.update_config.assert_called_once_with({"deviceConfig": {"limits": [-20, 12]}})
 
@@ -606,6 +606,6 @@ def test_adjustable_mixin_set_high_limit():
     adj.root = mock.MagicMock()
     adj.root.parent.producer.get.return_value = messages.DeviceMessage(
         signals={"low": -12, "high": 12}, metadata={}
-    ).dumps()
+    )
     adj.high_limit = 20
     adj.update_config.assert_called_once_with({"deviceConfig": {"limits": [-12, 20]}})

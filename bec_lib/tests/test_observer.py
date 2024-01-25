@@ -114,7 +114,7 @@ def test_observer_manager_msg(device_manager):
                 "limits": [380, None],
             }
         ]
-    ).dumps()
+    )
     with mock.patch.object(device_manager.producer, "get", return_value=msg) as producer_get:
         observer_manager = ObserverManager(device_manager=device_manager)
         producer_get.assert_called_once_with(MessageEndpoints.observer())

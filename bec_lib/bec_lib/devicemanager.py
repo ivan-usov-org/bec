@@ -449,7 +449,7 @@ class DeviceManagerBase:
             messages.ServiceResponseMessage(
                 # pylint: disable=no-member
                 response={"accepted": True, "service": self._service.__class__.__name__}
-            ).dumps(),
+            ),
             expire=100,
         )
 
@@ -497,7 +497,6 @@ class DeviceManagerBase:
         Returns:
 
         """
-        msg = LogMessage.loads(msg.value)
         logger.info(f"Received log message: {str(msg)}")
 
     @staticmethod
@@ -511,9 +510,8 @@ class DeviceManagerBase:
         Returns:
 
         """
-        msg = DeviceConfigMessage.loads(msg.value)
         logger.info(f"Received new config: {str(msg)}")
-        parent.parse_config_message(msg)
+        parent.parse_config_message(msg.value)
 
     def _get_config(self):
         self._session["devices"] = self._get_redis_device_config()
@@ -606,7 +604,7 @@ class DeviceManagerBase:
                     logger.error(f"Failed to load device {dev}: {content}")
 
     def _get_device_info(self, device_name) -> DeviceInfoMessage:
-        msg = DeviceInfoMessage.loads(self.producer.get(MessageEndpoints.device_info(device_name)))
+        msg = self.producer.get(MessageEndpoints.device_info(device_name))
         return msg
 
     def check_request_validity(self, msg: DeviceConfigMessage) -> None:
