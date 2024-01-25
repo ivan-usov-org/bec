@@ -8,7 +8,7 @@ import yaml
 from bec_lib import DeviceBase, messages
 from bec_lib.bec_errors import DeviceConfigError
 from bec_lib.tests.utils import ConnectorMock
-from bec_lib.device import ReadoutPriority
+from bec_lib.device import ReadoutPriority, OnFailure
 from fastjsonschema import JsonSchemaException
 from test_scibec_connector import SciBecMock, SciHubMock
 
@@ -282,6 +282,9 @@ def test_config_handler_update_device_config_available_keys(config_handler, avai
     elif available_key in ["readoutPriority"]:
         init = ReadoutPriority.BASELINE
         dev.samx = DeviceBase(name="samx", config={available_key: init})
+    elif available_key in ["onFailure"]:
+        init = OnFailure.BUFFER
+        dev.samx = DeviceBase(name="samx", config={available_key: init})
     elif available_key in ["deviceTags"]:
         init = ["something"]
         dev.samx = DeviceBase(name="samx", config={available_key: init})
@@ -302,6 +305,9 @@ def test_config_handler_update_device_config_available_keys(config_handler, avai
                     config_handler._update_device_config(device, {available_key: update})
                 elif available_key in ["readoutPriority"]:
                     update = ReadoutPriority.MONITORED
+                    config_handler._update_device_config(device, {available_key: update})
+                elif available_key in ["readoutPriority"]:
+                    update = OnFailure.RETRY
                     config_handler._update_device_config(device, {available_key: update})
                 elif available_key in ["deviceTags"]:
                     update = ["something"]
