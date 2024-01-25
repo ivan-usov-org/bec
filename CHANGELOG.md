@@ -2,6 +2,20 @@
 
 <!--next-version-placeholder-->
 
+## v0.59.0 (2024-01-25)
+
+### Feature
+
+* Add softwareTrigger to dev._config ([`675e74b`](https://gitlab.psi.ch/bec/bec/-/commit/675e74b42e2038d219e59e5b24b5a94ae6d4ca54))
+
+### Fix
+
+* Fix configupdate for readOnly ([`371175a`](https://gitlab.psi.ch/bec/bec/-/commit/371175a2959d3c668a660f7cce87fa27fbc12769))
+
+### Documentation
+
+* Complement documentation ([`356374e`](https://gitlab.psi.ch/bec/bec/-/commit/356374e59ccc2653e979fefd0bc8b571717ed126))
+
 ## v0.58.1 (2024-01-25)
 
 ### Fix
