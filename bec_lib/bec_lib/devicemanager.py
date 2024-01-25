@@ -323,6 +323,7 @@ class DeviceContainer(dict):
         table.add_column("Description", justify="center")
         table.add_column("Status", justify="center")
         table.add_column("ReadOnly", justify="center")
+        table.add_column("SoftwareTrigger", justify="center")
         table.add_column("Device class", justify="center")
         table.add_column("Readout priority", justify="center")
         table.add_column("Device tags", justify="center")
@@ -334,6 +335,7 @@ class DeviceContainer(dict):
                 dev._config.get("description", dev.name),
                 "enabled" if dev.enabled else "disabled",
                 str(dev.read_only),
+                str(dev.software_trigger),
                 dev._config.get("deviceClass"),
                 dev._config.get("readoutPriority"),
                 str(dev._config.get("deviceTags", [])),
