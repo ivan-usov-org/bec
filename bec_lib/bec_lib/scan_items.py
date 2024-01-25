@@ -68,11 +68,15 @@ class ScanItem:
     def _run_request_callbacks(self, event_type: str, data: dict, metadata: dict):
         for rid in self.queue.requestIDs:
             req = self.scan_manager.request_storage.find_request_by_ID(rid)
+            if req is None:
+                continue
             req.callbacks.run(event_type, data, metadata)
 
     def poll_callbacks(self):
         for rid in self.queue.requestIDs:
             req = self.scan_manager.request_storage.find_request_by_ID(rid)
+            if req is None:
+                continue
             req.callbacks.poll()
 
     def to_pandas(self) -> pd.DataFrame:

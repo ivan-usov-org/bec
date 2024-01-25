@@ -93,6 +93,7 @@ class ScanRequestMixin:
         start = time.time()
         while self.request_storage.find_request_by_ID(self.RID) is None:
             await asyncio.sleep(0.1)
+            check_alarms(self.bec)
         logger.debug(f"Waiting for request ID finished after {time.time()-start} s.")
         return self.request_storage.find_request_by_ID(self.RID)
 
@@ -102,6 +103,7 @@ class ScanRequestMixin:
         start = time.time()
         while self.scan_queue_request.decision_pending:
             await asyncio.sleep(0.1)
+            check_alarms(self.bec)
         logger.debug(f"Waiting for decision finished after {time.time()-start} s.")
 
     async def wait(self):
@@ -113,11 +115,14 @@ class ScanRequestMixin:
 
         while self.scan_queue_request.accepted is None:
             await asyncio.sleep(0.01)
+            check_alarms(self.bec)
 
         if not self.scan_queue_request.accepted[0]:
             raise ScanRequestError(
-                f"Scan was rejected by the server: {self.scan_queue_request.response.content.get('message')}"
+                "Scan was rejected by the server:"
+                f" {self.scan_queue_request.response.content.get('message')}"
             )
 
         while self.scan_queue_request.queue is None:
             await asyncio.sleep(0.01)
+            check_alarms(self.bec)
