@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.58.1 (2024-01-25)
+
+### Fix
+
+* Minor client improvements ([`b58aa12`](https://gitlab.psi.ch/bec/bec/-/commit/b58aa12c16dc2a9c8adde4685ce5e90ccc95cfc7))
+
 ## v0.58.0 (2024-01-24)
 
 ### Feature
