@@ -165,6 +165,7 @@ class ConfigHandler:
             "onFailure",
             "deviceTags",
             "readoutPriority",
+            "softwareTrigger",
         ]
         for key in dev_config:
             if key not in available_keys:
