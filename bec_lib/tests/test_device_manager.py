@@ -119,6 +119,22 @@ def test_get_devices_with_tags(dm):
     assert len(dm.devices.get_devices_with_tags("someting")) == 0
 
 
+def test_get_software_triggered_devices(dm):
+    config_content = None
+    with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
+        config_content = yaml.safe_load(f)
+        dm._session = create_session_from_config(config_content)
+    dm._load_session()
+    # Only eiger has softwareTrigger set to True in test_config.yaml
+    software_triggered_devices = []
+    for dev_name, dev_cfg in config_content.items():
+        if dev_cfg.get("softwareTrigger", None):
+            software_triggered_devices.append(dm.devices.get(dev_name))
+
+    dev_list = dm.devices.get_software_triggered_devices()
+    assert software_triggered_devices == dev_list
+
+
 def test_show_tags(dm):
     config_content = None
     with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
