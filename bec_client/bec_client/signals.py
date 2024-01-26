@@ -69,8 +69,7 @@ class SignalHandler:
         self.released = True
         return True
 
-    def handle_signals(self):
-        ...
+    def handle_signals(self): ...
 
 
 class SigintHandler(SignalHandler):

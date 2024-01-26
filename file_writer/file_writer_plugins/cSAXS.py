@@ -377,9 +377,9 @@ def NeXus_format(
             data="Single-photon counting detector, 320 micron-thick Si chip",
         )
         orientation = eiger_4.create_group("orientation")
-        orientation.attrs[
-            "description"
-        ] = "Orientation defines the number of counterclockwise rotations by 90 deg followed by a transposition to reach the 'cameraman orientation', that is looking towards the beam."
+        orientation.attrs["description"] = (
+            "Orientation defines the number of counterclockwise rotations by 90 deg followed by a transposition to reach the 'cameraman orientation', that is looking towards the beam."
+        )
         orientation.create_dataset(name="transpose", data=1)
         orientation.create_dataset(name="rot90", data=3)
 
@@ -405,9 +405,9 @@ def NeXus_format(
             data="Eiger9M detector, in-house developed, Paul Scherrer Institute",
         )
         orientation = eiger9m.create_group("orientation")
-        orientation.attrs[
-            "description"
-        ] = "Orientation defines the number of counterclockwise rotations by 90 deg followed by a transposition to reach the 'cameraman orientation', that is looking towards the beam."
+        orientation.attrs["description"] = (
+            "Orientation defines the number of counterclockwise rotations by 90 deg followed by a transposition to reach the 'cameraman orientation', that is looking towards the beam."
+        )
         orientation.create_dataset(name="transpose", data=1)
         orientation.create_dataset(name="rot90", data=3)
         data = eiger9m.create_ext_link("data", file_references["eiger9m"]["path"], "EG9M/data")
@@ -436,9 +436,9 @@ def NeXus_format(
             name="description", data="Pilatus 300K detector, Dectris, Switzerland"
         )
         orientation = pilatus_2.create_group("orientation")
-        orientation.attrs[
-            "description"
-        ] = "Orientation defines the number of counterclockwise rotations by 90 deg followed by a transposition to reach the 'cameraman orientation', that is looking towards the beam."
+        orientation.attrs["description"] = (
+            "Orientation defines the number of counterclockwise rotations by 90 deg followed by a transposition to reach the 'cameraman orientation', that is looking towards the beam."
+        )
         orientation.create_dataset(name="transpose", data=1)
         orientation.create_dataset(name="rot90", data=2)
         data = pilatus_2.create_ext_link(

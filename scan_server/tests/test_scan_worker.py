@@ -456,9 +456,9 @@ def test_check_for_failed_movements(scan_worker_mock, device_status, devices, in
     worker.device_manager.producer = ProducerMock()
     if abort:
         with pytest.raises(ScanAbortion):
-            worker.device_manager.producer._get_buffer[
-                MessageEndpoints.device_readback("samx")
-            ] = messages.DeviceMessage(signals={"samx": {"value": 4}}, metadata={}).dumps()
+            worker.device_manager.producer._get_buffer[MessageEndpoints.device_readback("samx")] = (
+                messages.DeviceMessage(signals={"samx": {"value": 4}}, metadata={}).dumps()
+            )
             worker._check_for_failed_movements(device_status, devices, instr)
     else:
         worker._check_for_failed_movements(device_status, devices, instr)
@@ -578,9 +578,9 @@ def test_wait_for_idle(scan_worker_mock, msg1, msg2, req_msg: messages.DeviceReq
     with mock.patch.object(
         worker.validate, "get_device_status", return_value=[req_msg.dumps()]
     ) as device_status:
-        worker.device_manager.producer._get_buffer[
-            MessageEndpoints.device_readback("samx")
-        ] = messages.DeviceMessage(signals={"samx": {"value": 4}}, metadata={}).dumps()
+        worker.device_manager.producer._get_buffer[MessageEndpoints.device_readback("samx")] = (
+            messages.DeviceMessage(signals={"samx": {"value": 4}}, metadata={}).dumps()
+        )
 
         worker._add_wait_group(msg1)
         if req_msg.content["success"]:
@@ -639,9 +639,9 @@ def test_wait_for_read(scan_worker_mock, msg1, msg2, req_msg: messages.DeviceReq
         with mock.patch.object(worker, "_check_for_interruption") as interruption_mock:
             assert worker._groups == {}
             worker._groups["scan_motor"] = {"samx": 3, "samy": 4}
-            worker.device_manager.producer._get_buffer[
-                MessageEndpoints.device_readback("samx")
-            ] = messages.DeviceMessage(signals={"samx": {"value": 4}}, metadata={}).dumps()
+            worker.device_manager.producer._get_buffer[MessageEndpoints.device_readback("samx")] = (
+                messages.DeviceMessage(signals={"samx": {"value": 4}}, metadata={}).dumps()
+            )
             worker._add_wait_group(msg1)
             worker._wait_for_read(msg2)
             assert worker._groups == {"scan_motor": {"samy": 4}}

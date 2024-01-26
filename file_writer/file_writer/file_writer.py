@@ -25,12 +25,10 @@ class FileWriter(abc.ABC):
     def __init__(self, file_writer_manager):
         self.file_writer_manager = file_writer_manager
 
-    def configure(self, *args, **kwargs):
-        ...
+    def configure(self, *args, **kwargs): ...
 
     @abc.abstractmethod
-    def write(self, file_path: str, data):
-        ...
+    def write(self, file_path: str, data): ...
 
     @staticmethod
     def _create_device_data_storage(data):

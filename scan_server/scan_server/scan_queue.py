@@ -779,9 +779,9 @@ class InstructionQueueItem:
             "request_blocks": request_blocks,
             "scan_number": self.scan_number,
             "status": self.status.name,
-            "active_request_block": self.active_request_block.describe()
-            if self.active_request_block
-            else None,
+            "active_request_block": (
+                self.active_request_block.describe() if self.active_request_block else None
+            ),
         }
         return content
 
