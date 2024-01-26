@@ -10,10 +10,6 @@ import numpy as np
 import ophyd
 import ophyd.sim as ops
 import ophyd_devices as opd
-from ophyd.ophydobj import OphydObject
-from ophyd.signal import EpicsSignalBase
-from typeguard import typechecked
-
 from bec_lib import (
     BECService,
     DeviceBase,
@@ -24,6 +20,10 @@ from bec_lib import (
     messages,
 )
 from bec_lib.connector import ConnectorBase
+from ophyd.ophydobj import OphydObject
+from ophyd.signal import EpicsSignalBase
+from typeguard import typechecked
+
 from device_server.devices.config_update_handler import ConfigUpdateHandler
 from device_server.devices.device_serializer import get_device_info
 
@@ -316,7 +316,7 @@ class DeviceManagerDS(DeviceManagerBase):
         obj.initialized = False
 
     @staticmethod
-    def connect_device(obj):
+    def connect_device(obj, wait_for_all=False):
         """establish a connection to a device"""
         if obj.connected:
             return
@@ -324,7 +324,10 @@ class DeviceManagerDS(DeviceManagerBase):
             obj.controller.on()
             return
         if hasattr(obj, "wait_for_connection"):
-            obj.wait_for_connection(timeout=10)
+            try:
+                obj.wait_for_connection(all_signals=wait_for_all, timeout=10)
+            except TypeError:
+                obj.wait_for_connection(timeout=10)
             return
 
         logger.error(
