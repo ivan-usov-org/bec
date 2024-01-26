@@ -8,6 +8,7 @@ from pathlib import Path
 import msgpack
 
 from bec_lib import MessageEndpoints, bec_logger
+from bec_lib.messages import AvailableResourceMessage
 from bec_lib.signature_serializer import signature_to_dict
 
 from . import scans as ScanServerScans
@@ -102,5 +103,6 @@ class ScanManager:
     def publish_available_scans(self):
         """send all available scans to the broker"""
         self.parent.producer.set(
-            MessageEndpoints.available_scans(), msgpack.dumps(self.available_scans)
+            MessageEndpoints.available_scans(),
+            AvailableResourceMessage(resource=self.available_scans),
         )
