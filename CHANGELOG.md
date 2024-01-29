@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.59.1 (2024-01-29)
+
+### Fix
+
+* Fixed bug in device limit update ([`c347a84`](https://gitlab.psi.ch/bec/bec/-/commit/c347a84ad17c23f20866d90c019b7c705e52110a))
+
 ## v0.59.0 (2024-01-25)
 
 ### Feature
