@@ -313,7 +313,7 @@ class DeviceServer(RPCMixin, BECService):
         is_config_set = content["action"] == "set" and obj.kind == Kind.config
         is_rpc_set = (
             content["action"] == "rpc"
-            and ".set" in content["parameter"]["func"]
+            and (".set" in content["parameter"]["func"] or ".put" in content["parameter"]["func"])
             and obj.kind == Kind.config
         )
         if is_config_set:
