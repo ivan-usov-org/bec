@@ -167,8 +167,10 @@ class DeviceManagerDS(DeviceManagerBase):
                 # first handle the ophyd exceptions...
                 if config_key == "limits":
                     if hasattr(obj, "low_limit_travel") and hasattr(obj, "high_limit_travel"):
-                        obj.low_limit_travel.set(config_value[0])
-                        obj.high_limit_travel.set(config_value[1])
+                        low_limit_status = obj.low_limit_travel.set(config_value[0])
+                        high_limit_status = obj.high_limit_travel.set(config_value[1])
+                        low_limit_status.wait()
+                        high_limit_status.wait()
                         continue
                 if config_key == "labels":
                     if not config_value:

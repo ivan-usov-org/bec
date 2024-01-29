@@ -2,9 +2,8 @@ from __future__ import annotations
 
 import traceback
 from typing import TYPE_CHECKING
-from bec_lib import messages
 
-from bec_lib import BECStatus, DeviceConfigError, MessageEndpoints, bec_logger
+from bec_lib import BECStatus, DeviceConfigError, MessageEndpoints, bec_logger, messages
 
 if TYPE_CHECKING:
     from devicemanager import DeviceManagerDS
@@ -87,6 +86,16 @@ class ConfigUpdateHandler:
                 except Exception as exc:
                     self.device_manager.update_config(device.obj, old_config)
                     raise DeviceConfigError(f"Error during object update. {exc}")
+
+                if "limits" in dev_config["deviceConfig"]:
+                    limits = {
+                        "low": device.obj.low_limit_travel.get(),
+                        "high": device.obj.high_limit_travel.get(),
+                    }
+                    self.device_manager.producer.set_and_publish(
+                        MessageEndpoints.device_limits(device.name),
+                        messages.DeviceMessage(signals=limits).dumps(),
+                    )
 
             if "enabled" in dev_config:
                 device._config["enabled"] = dev_config["enabled"]
