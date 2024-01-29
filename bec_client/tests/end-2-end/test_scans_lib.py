@@ -96,3 +96,21 @@ def test_async_callback_data_matches_scan_data_lib_client(lib_client):
 
     for ii, msg in enumerate(s.scan.data.messages.values()):
         assert msg.content == reference_container["data"][ii]
+
+
+@pytest.mark.timeout(100)
+def test_config_updates(lib_client):
+    bec = lib_client
+    wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_config_updates"})
+    dev = bec.device_manager.devices
+    dev.samx.limits = [-80, 80]
+    dev.samx.limits == [-80, 80]
+    dev.samx.limits = [-50, 50]
+    dev.samx.limits == [-50, 50]
+
+    dev.samx.velocity = 10
+    dev.samx.velocity.read()["samx_velocity"]["value"] == 10
+    dev.samx.velocity.read(cached=False)["samx_velocity"]["value"] == 10
+    dev.samx.read_configuration()["samx_velocity"]["value"] == 10
+    dev.samx.read_configuration(cached=False)["samx_velocity"]["value"] == 10
