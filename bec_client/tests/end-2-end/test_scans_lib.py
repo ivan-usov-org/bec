@@ -105,12 +105,12 @@ def test_config_updates(lib_client):
     bec.metadata.update({"unit_test": "test_config_updates"})
     dev = bec.device_manager.devices
     dev.samx.limits = [-80, 80]
-    dev.samx.limits == [-80, 80]
+    assert dev.samx.limits == [-80, 80]
     dev.samx.limits = [-50, 50]
-    dev.samx.limits == [-50, 50]
+    assert dev.samx.limits == [-50, 50]
 
     dev.samx.velocity.set(10)
-    dev.samx.velocity.read()["samx_velocity"]["value"] == 10
-    dev.samx.velocity.read(cached=False)["samx_velocity"]["value"] == 10
-    dev.samx.read_configuration()["samx_velocity"]["value"] == 10
-    dev.samx.read_configuration(cached=False)["samx_velocity"]["value"] == 10
+    assert dev.samx.velocity.read()["samx_velocity"]["value"] == 10
+    assert dev.samx.velocity.read(cached=False)["samx_velocity"]["value"] == 10
+    assert dev.samx.read_configuration()["samx_velocity"]["value"] == 10
+    assert dev.samx.read_configuration(cached=False)["samx_velocity"]["value"] == 10
