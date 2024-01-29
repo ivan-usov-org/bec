@@ -290,9 +290,10 @@ class DeviceServer(RPCMixin, BECService):
     def _status_callback(self, status):
         pipe = self.producer.pipeline()
         if hasattr(status, "device"):
-            device_name = status.device.root.name
+            obj = status.device
         else:
-            device_name = status.obj.root.name
+            obj = status.obj
+        device_name = obj.root.name
         dev_msg = messages.DeviceReqStatusMessage(
             device=device_name, success=status.success, metadata=status.instruction.metadata
         ).dumps()
@@ -309,16 +310,16 @@ class DeviceServer(RPCMixin, BECService):
                 expire=18000,
             )
         content = status.instruction.content
-        is_config_set = content["action"] == "set" and status.obj.kind == Kind.config
+        is_config_set = content["action"] == "set" and obj.kind == Kind.config
         is_rpc_set = (
             content["action"] == "rpc"
             and ".set" in content["parameter"]["func"]
-            and status.obj.kind == Kind.config
+            and obj.kind == Kind.config
         )
         if is_config_set:
-            self._update_read_configuration(status.obj, status.instruction.metadata, pipe)
+            self._update_read_configuration(obj, status.instruction.metadata, pipe)
         elif is_rpc_set:
-            self._update_read_configuration(status.obj, status.instruction.metadata, pipe)
+            self._update_read_configuration(obj, status.instruction.metadata, pipe)
 
         pipe.execute()
 
