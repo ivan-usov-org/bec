@@ -9,9 +9,10 @@ from bec_lib import Alarms, BECService, MessageEndpoints, bec_logger, messages
 from bec_lib.connector import ConnectorBase
 from bec_lib.device import OnFailure
 from bec_lib.messages import BECStatus
-from ophyd import OphydObject, Staged
+from ophyd import Kind, OphydObject, Staged
 from ophyd.utils import errors as ophyd_errors
 
+from device_server.devices import rgetattr
 from device_server.devices.devicemanager import DeviceManagerDS
 from device_server.rpc_mixin import RPCMixin
 
@@ -307,8 +308,27 @@ class DeviceServer(RPCMixin, BECService):
                 pipe,
                 expire=18000,
             )
+        content = status.instruction.content
+        is_config_set = content["action"] == "set" and status.obj.kind == Kind.config
+        is_rpc_set = (
+            content["action"] == "rpc"
+            and ".set" in content["parameter"]["func"]
+            and status.obj.kind == Kind.config
+        )
+        if is_config_set:
+            self._update_read_configuration(status.obj, status.instruction.metadata, pipe)
+        elif is_rpc_set:
+            self._update_read_configuration(status.obj, status.instruction.metadata, pipe)
 
         pipe.execute()
+
+    def _update_read_configuration(self, obj: OphydObject, metadata: dict, pipe) -> None:
+        dev_config_msg = messages.DeviceMessage(
+            signals=obj.root.read_configuration(), metadata=metadata
+        ).dumps()
+        self.producer.set_and_publish(
+            MessageEndpoints.device_read_configuration(obj.root.name), dev_config_msg, pipe
+        )
 
     def _read_device(self, instr: messages.DeviceInstructionMessage) -> None:
         # check performance -- we might have to change it to a background thread
