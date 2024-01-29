@@ -109,7 +109,7 @@ def test_config_updates(lib_client):
     dev.samx.limits = [-50, 50]
     dev.samx.limits == [-50, 50]
 
-    dev.samx.velocity = 10
+    dev.samx.velocity.set(10)
     dev.samx.velocity.read()["samx_velocity"]["value"] == 10
     dev.samx.velocity.read(cached=False)["samx_velocity"]["value"] == 10
     dev.samx.read_configuration()["samx_velocity"]["value"] == 10
