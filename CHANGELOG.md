@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.59.3 (2024-01-30)
+
+### Fix
+
+* Fixed rpc calls on device properties ([`f778302`](https://gitlab.psi.ch/bec/bec/-/commit/f77830296605e64c66b9ae3c8c9d760db720fe23))
+
 ## v0.59.2 (2024-01-30)
 
 ### Fix
