@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.59.2 (2024-01-30)
+
+### Fix
+
+* Added put as trigger for an update of the config cache ([`5f19da9`](https://gitlab.psi.ch/bec/bec/-/commit/5f19da921eafab72d0f64f437e4d49fa7afff988))
+* Fixed status callback for cbs where the device is passed on ([`d110711`](https://gitlab.psi.ch/bec/bec/-/commit/d1107119da4b40f0ed119ed578593a75b49f1f38))
+* Fixed rpc configuration updates to also update the cache ([`e4ef9b7`](https://gitlab.psi.ch/bec/bec/-/commit/e4ef9b725fc29502b175a20df2adf0c418024db7))
+
 ## v0.59.1 (2024-01-29)
 
 ### Fix
