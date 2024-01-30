@@ -62,8 +62,8 @@ class ScanItem:
         self._run_request_callbacks("scan_segment", scan_msg.content, scan_msg.metadata)
 
     def emit_status(self, scan_status: messages.ScanStatusMessage) -> None:
-        self.bec.callbacks.run("status", scan_status.content, scan_status.metadata)
-        self._run_request_callbacks("status", scan_status.content, scan_status.metadata)
+        self.bec.callbacks.run("scan_status", scan_status.content, scan_status.metadata)
+        self._run_request_callbacks("scan_status", scan_status.content, scan_status.metadata)
 
     def _run_request_callbacks(self, event_type: str, data: dict, metadata: dict):
         for rid in self.queue.requestIDs:
