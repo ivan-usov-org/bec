@@ -114,3 +114,7 @@ def test_config_updates(lib_client):
     assert dev.samx.velocity.read(cached=False)["samx_velocity"]["value"] == 10
     assert dev.samx.read_configuration()["samx_velocity"]["value"] == 10
     assert dev.samx.read_configuration(cached=False)["samx_velocity"]["value"] == 10
+
+    assert dev.samx.dummy_controller.some_var == 10
+    dev.samx.dummy_controller.some_var = 20
+    assert dev.samx.dummy_controller.some_var == 20

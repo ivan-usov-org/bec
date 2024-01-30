@@ -130,6 +130,7 @@ class DeviceBase:
         self._info = info.get("device_info", {})
         self.parent = parent
         self._custom_rpc_methods = {}
+        self._property_container = set()
         if self._info:
             self._parse_info()
 
@@ -144,6 +145,24 @@ class DeviceBase:
         if cached:
             return fcn(self, *args, **kwargs)
         return self._run_rpc_call(device, func_call, *args, **kwargs)
+
+    def __getattr__(self, name: str) -> Any:
+        if name in self._property_container:
+            return object.__getattribute__(self, "_run")(fcn=name, cached=False)
+        return object.__getattribute__(self, name)
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        try:
+            container = object.__getattribute__(self, "_property_container")
+        except AttributeError:
+            return super().__setattr__(name, value)
+
+        if name in container:
+            return object.__getattribute__(self, "_run")(
+                value, fcn=name, cached=False, _set_property=True
+            )
+
+        super().__setattr__(name, value)
 
     @property
     def _hints(self):
@@ -294,7 +313,10 @@ class DeviceBase:
         func_call = [self._compile_function_path(use_parent=use_parent)]
 
         if fcn:
-            func_call.append(fcn.__name__)
+            if isinstance(fcn, str):
+                func_call.append(fcn)
+            else:
+                func_call.append(fcn.__name__)
 
         full_func_call = ".".join(func_call)
         device = full_func_call.split(".", maxsplit=1)[0]
@@ -345,11 +367,14 @@ class DeviceBase:
 
         for user_access_name, descr in self._info.get("custom_user_access", {}).items():
             if "type" in descr:
-                self._custom_rpc_methods[user_access_name] = DeviceBase(
-                    name=user_access_name, info=descr, parent=self
-                )
-                setattr(self, user_access_name, self._custom_rpc_methods[user_access_name].run)
-                setattr(getattr(self, user_access_name), "__doc__", descr.get("doc"))
+                if descr["type"] == "func":
+                    self._custom_rpc_methods[user_access_name] = DeviceBase(
+                        name=user_access_name, info=descr, parent=self
+                    )
+                    setattr(self, user_access_name, self._custom_rpc_methods[user_access_name].run)
+                    setattr(getattr(self, user_access_name), "__doc__", descr.get("doc"))
+                else:
+                    self._property_container.add(user_access_name)
             else:
                 self._custom_rpc_methods[user_access_name] = DeviceBase(
                     name=user_access_name,

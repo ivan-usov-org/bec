@@ -116,6 +116,18 @@ class RPCMixin:
             ".read_configuration"
         ):
             return self._rpc_read_configuration_and_return(instr)
+        if instr_params.get("kwargs", {}).get("_set_property"):
+            sub_access = instr_params.get("func").split(".")
+            property_name = sub_access[-1]
+            if len(sub_access) > 1:
+                sub_access = sub_access[0:-1]
+            else:
+                sub_access = []
+            obj = self.device_manager.devices[device_root].obj
+            if sub_access:
+                obj = rgetattr(obj, ".".join(sub_access))
+            setattr(obj, property_name, instr_params.get("args")[0])
+            return None
 
         # handle other ophyd methods
         rpc_var = rgetattr(self.device_manager.devices[device_root].obj, instr_params.get("func"))
