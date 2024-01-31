@@ -62,7 +62,7 @@ class RPCMixin:
                 severity=Alarms.WARNING,
                 alarm_type="TypeError",
                 source=instr_params,
-                content=f"Return value of rpc call {instr_params} is not serializable.",
+                msg=f"Return value of rpc call {instr_params} is not serializable.",
                 metadata={},
             )
         return res

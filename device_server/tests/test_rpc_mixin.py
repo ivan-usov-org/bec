@@ -59,7 +59,7 @@ def test_get_result_from_rpc_not_serializable(rpc_cls):
         severity=Alarms.WARNING,
         alarm_type="TypeError",
         source={},
-        content="Return value of rpc call {} is not serializable.",
+        msg="Return value of rpc call {} is not serializable.",
         metadata={},
     )
 

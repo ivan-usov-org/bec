@@ -79,7 +79,7 @@ class QueueManager:
             self.connector.raise_alarm(
                 severity=Alarms.MAJOR,
                 source=msg.content,
-                content=content,
+                msg=content,
                 alarm_type=exc.__class__.__name__,
                 metadata=msg.metadata,
             )
@@ -649,7 +649,7 @@ class RequestBlockQueue:
             self.scan_queue.queue_manager.connector.raise_alarm(
                 severity=Alarms.MAJOR,
                 source=self.active_rb.msg.content,
-                content=limit_error.args[0],
+                msg=limit_error.args[0],
                 alarm_type=limit_error.__class__.__name__,
                 metadata={},
             )
@@ -661,7 +661,7 @@ class RequestBlockQueue:
             self.scan_queue.queue_manager.connector.raise_alarm(
                 severity=Alarms.MAJOR,
                 source=self.active_rb.msg.content,
-                content=content,
+                msg=content,
                 alarm_type=exc.__class__.__name__,
                 metadata={},
             )

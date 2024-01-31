@@ -188,7 +188,7 @@ class DeviceServer(RPCMixin, BECService):
             self.connector.raise_alarm(
                 severity=Alarms.MAJOR,
                 source=instructions.content,
-                content=content,
+                msg=content,
                 alarm_type=limit_error.__class__.__name__,
                 metadata=instructions.metadata,
             )
@@ -202,7 +202,7 @@ class DeviceServer(RPCMixin, BECService):
                 self.connector.raise_alarm(
                     severity=Alarms.MAJOR,
                     source=instructions.content,
-                    content=content,
+                    msg=content,
                     alarm_type=exc.__class__.__name__,
                     metadata=instructions.metadata,
                 )
@@ -402,7 +402,7 @@ class DeviceServer(RPCMixin, BECService):
             severity=Alarms.WARNING,
             alarm_type="Warning",
             source="DeviceServer",
-            content=f"Failed to run {method} on device {device}.",
+            msg=f"Failed to run {method} on device {device}.",
             metadata={},
         )
         device_root = device.split(".")[0]

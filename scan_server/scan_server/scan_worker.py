@@ -466,7 +466,7 @@ class ScanWorker(threading.Thread):
             self.connector.raise_alarm(
                 severity=Alarms.MAJOR,
                 source=instr.content,
-                content=(
+                msg=(
                     f"Movement of device {failed_device[0]} failed whilst trying to reach the"
                     f" target position. Last recorded position: {last_pos}"
                 ),
@@ -720,7 +720,7 @@ class ScanWorker(threading.Thread):
             self.connector.raise_alarm(
                 severity=Alarms.MAJOR,
                 source="ScanWorker",
-                content=content,
+                msg=content,
                 alarm_type=exc.__class__.__name__,
                 metadata={},
             )
@@ -828,7 +828,7 @@ class ScanWorker(threading.Thread):
             self.connector.raise_alarm(
                 severity=Alarms.MAJOR,
                 source="ScanWorker",
-                content=content,
+                msg=content,
                 alarm_type=exc.__class__.__name__,
                 metadata={},
             )

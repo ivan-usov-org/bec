@@ -418,7 +418,7 @@ class AlarmMessage(BECMessage):
     Args:
         severity (int): severity level (1-3)
         source (str): source of the problem (where did it occur?)
-        content (dict): problem description (what happened?)
+        msg (str): problem description (what happened?)
         metadata (dict, optional): Additional metadata.
     """
 
@@ -426,7 +426,7 @@ class AlarmMessage(BECMessage):
     severity: int
     alarm_type: str
     source: str
-    content: dict
+    msg: str
     metadata: dict = field(default_factory=dict)
 
 

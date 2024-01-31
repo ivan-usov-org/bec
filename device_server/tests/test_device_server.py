@@ -342,7 +342,7 @@ def test_handle_device_instructions_exception(device_server_mock, instructions):
                 alarm_mock.assert_called_once_with(
                     severity=Alarms.MAJOR,
                     source=instructions.content,
-                    content=ANY,  # could you set this to anything? or how do i find the traceback?
+                    msg=ANY,  # could you set this to anything? or how do i find the traceback?
                     alarm_type="Exception",
                     metadata=instructions.metadata,
                 )
@@ -370,7 +370,7 @@ def test_handle_device_instructions_limit_error(device_server_mock, instructions
             alarm_mock.assert_called_once_with(
                 severity=Alarms.MAJOR,
                 source=instructions.content,
-                content=ANY,
+                msg=ANY,
                 alarm_type="LimitError",
                 metadata=instructions.metadata,
             )

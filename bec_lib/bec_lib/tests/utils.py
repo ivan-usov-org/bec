@@ -616,7 +616,7 @@ class ConnectorMock(ConnectorBase):  # pragma: no cover
         return ProducerMock(self.store_data)
 
     def raise_alarm(
-        self, severity: Alarms, alarm_type: str, source: str, content: dict, metadata: dict
+        self, severity: Alarms, alarm_type: str, source: str, msg: dict, metadata: dict
     ):
         pass
 

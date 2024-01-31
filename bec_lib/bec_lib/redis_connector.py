@@ -169,7 +169,7 @@ class RedisConnector(ConnectorBase):
         severity: Alarms,
         alarm_type: str,
         source: str,
-        content: dict,
+        msg: str,
         metadata: dict,
     ):
         """raise an alarm"""
@@ -179,7 +179,7 @@ class RedisConnector(ConnectorBase):
                 severity=severity,
                 alarm_type=alarm_type,
                 source=source,
-                content=content,
+                msg=msg,
                 metadata=metadata,
             ),
         )

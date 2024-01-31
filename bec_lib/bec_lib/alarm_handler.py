@@ -41,7 +41,7 @@ class AlarmBase(Exception):
         return (
             f"An alarm has occured. Severity: {self.severity.name}. Source:"
             f" {self.alarm.content['source']}.\n{self.alarm_type}.\n\t"
-            f" {self.alarm.content['content']}"
+            f" {self.alarm.content['msg']}"
         )
 
 

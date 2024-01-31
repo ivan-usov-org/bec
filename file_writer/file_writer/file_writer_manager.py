@@ -332,7 +332,7 @@ class FileWriterManager(BECService):
                 severity=Alarms.MINOR,
                 alarm_type="FileWriterError",
                 source="file_writer_manager",
-                content=f"Failed to write to file {file_path}. Error: {content}",
+                msg=f"Failed to write to file {file_path}. Error: {content}",
                 metadata=self.scan_storage[scanID].metadata,
             )
             successful = False

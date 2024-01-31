@@ -98,7 +98,7 @@ def test_queuemanager_add_to_queue_error_send_alarm(queuemanager_mock):
             connector.raise_alarm.assert_called_once_with(
                 severity=Alarms.MAJOR,
                 source=msg.content,
-                content="dummy",
+                msg="dummy",
                 alarm_type="KeyError",
                 metadata={"RID": "something"},
             )

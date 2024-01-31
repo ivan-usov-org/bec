@@ -122,17 +122,17 @@ def test_redis_connector_log_error(connector):
 
 
 @pytest.mark.parametrize(
-    "severity, alarm_type, source, content, metadata",
+    "severity, alarm_type, source, msg, metadata",
     [
-        [Alarms.MAJOR, "alarm", "source", {"content": "content1"}, {"metadata": "metadata1"}],
-        [Alarms.MINOR, "alarm", "source", {"content": "content1"}, {"metadata": "metadata1"}],
-        [Alarms.WARNING, "alarm", "source", {"content": "content1"}, {"metadata": "metadata1"}],
+        [Alarms.MAJOR, "alarm", "source", "content1", {"metadata": "metadata1"}],
+        [Alarms.MINOR, "alarm", "source", "content1", {"metadata": "metadata1"}],
+        [Alarms.WARNING, "alarm", "source", "content1", {"metadata": "metadata1"}],
     ],
 )
-def test_redis_connector_raise_alarm(connector, severity, alarm_type, source, content, metadata):
+def test_redis_connector_raise_alarm(connector, severity, alarm_type, source, msg, metadata):
     connector._notifications_producer.set_and_publish = mock.MagicMock()
 
-    connector.raise_alarm(severity, alarm_type, source, content, metadata)
+    connector.raise_alarm(severity, alarm_type, source, msg, metadata)
 
     connector._notifications_producer.set_and_publish.assert_called_once_with(
         MessageEndpoints.alarm(),
@@ -140,7 +140,7 @@ def test_redis_connector_raise_alarm(connector, severity, alarm_type, source, co
             severity=severity,
             alarm_type=alarm_type,
             source=source,
-            content=content,
+            msg=msg,
             metadata=metadata,
         ),
     )

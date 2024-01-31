@@ -182,7 +182,7 @@ def test_AlarmMessage():
         severity=2,
         alarm_type="major",
         source="system",
-        content={"error": "An error occurred"},
+        msg="An error occurred",
         metadata={"RID": "1234"},
     )
     res = MsgpackSerialization.dumps(msg)
