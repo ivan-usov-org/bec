@@ -213,7 +213,7 @@ class RequestBase(ABC):
         if metadata is None:
             self.metadata = {}
         self.stubs = ScanStubs(
-            producer=self.device_manager.producer, device_msg_callback=self.device_msg_metadata
+            connector=self.device_manager.connector, device_msg_callback=self.device_msg_metadata
         )
 
     @property
@@ -239,7 +239,7 @@ class RequestBase(ABC):
 
     def run_pre_scan_macros(self):
         """run pre scan macros if any"""
-        macros = self.device_manager.producer.lrange(MessageEndpoints.pre_scan_macros(), 0, -1)
+        macros = self.device_manager.connector.lrange(MessageEndpoints.pre_scan_macros(), 0, -1)
         for macro in macros:
             macro = macro.decode().strip()
             func_name = self._get_func_name_from_macro(macro)
@@ -558,12 +558,12 @@ class SyncFlyScanBase(ScanBase, ABC):
 
     def _get_flyer_status(self) -> list:
         flyer = self.scan_motors[0]
-        producer = self.device_manager.producer
+        connector = self.device_manager.connector
 
-        pipe = producer.pipeline()
-        producer.lrange(MessageEndpoints.device_req_status(self.metadata["RID"]), 0, -1, pipe)
-        producer.get(MessageEndpoints.device_readback(flyer), pipe)
-        return producer.execute_pipeline(pipe)
+        pipe = connector.pipeline()
+        connector.lrange(MessageEndpoints.device_req_status(self.metadata["RID"]), 0, -1, pipe)
+        connector.get(MessageEndpoints.device_readback(flyer), pipe)
+        return connector.execute_pipeline(pipe)
 
     @abstractmethod
     def scan_core(self):
@@ -1098,7 +1098,7 @@ class RoundScanFlySim(SyncFlyScanBase):
 
         while True:
             yield from self.stubs.read_and_wait(group="primary", wait_group="readout_primary")
-            status = self.device_manager.producer.get(MessageEndpoints.device_status(self.flyer))
+            status = self.device_manager.connector.get(MessageEndpoints.device_status(self.flyer))
             if status:
                 device_is_idle = status.content.get("status", 1) == 0
                 matching_RID = self.metadata.get("RID") == status.metadata.get("RID")
@@ -1318,12 +1318,12 @@ class MonitorScan(ScanBase):
         self._check_limits()
 
     def _get_flyer_status(self) -> list:
-        producer = self.device_manager.producer
+        connector = self.device_manager.connector
 
-        pipe = producer.pipeline()
-        producer.lrange(MessageEndpoints.device_req_status(self.metadata["RID"]), 0, -1, pipe)
-        producer.get(MessageEndpoints.device_readback(self.flyer), pipe)
-        return producer.execute_pipeline(pipe)
+        pipe = connector.pipeline()
+        connector.lrange(MessageEndpoints.device_req_status(self.metadata["RID"]), 0, -1, pipe)
+        connector.get(MessageEndpoints.device_readback(self.flyer), pipe)
+        return connector.execute_pipeline(pipe)
 
     def scan_core(self):
         yield from self.stubs.set(

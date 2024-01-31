@@ -27,24 +27,18 @@ class ScanGuard:
         self.parent = parent
         self.device_manager = self.parent.device_manager
         self.connector = self.parent.connector
-        self.producer = self.connector.producer()
-        self._start_scan_queue_request_consumer()
 
-    def _start_scan_queue_request_consumer(self):
-        self._scan_queue_request_consumer = self.connector.consumer(
+        self.connector.register(
             MessageEndpoints.scan_queue_request(),
             cb=self._scan_queue_request_callback,
             parent=self,
         )
 
-        self._scan_queue_modification_request_consumer = self.connector.consumer(
+        self.connector.register(
             MessageEndpoints.scan_queue_modification_request(),
             cb=self._scan_queue_modification_request_callback,
             parent=self,
         )
-
-        self._scan_queue_request_consumer.start()
-        self._scan_queue_modification_request_consumer.start()
 
     def _is_valid_scan_request(self, request) -> ScanStatus:
         try:
@@ -63,7 +57,7 @@ class ScanGuard:
             raise ScanRejection("Invalid request.")
 
     def _check_valid_scan(self, request) -> None:
-        avail_scans = self.producer.get(MessageEndpoints.available_scans())
+        avail_scans = self.connector.get(MessageEndpoints.available_scans())
         scan_type = request.content.get("scan_type")
         if scan_type not in avail_scans.resource:
             raise ScanRejection(f"Unknown scan type {scan_type}.")
@@ -140,7 +134,7 @@ class ScanGuard:
             message=scan_status.message,
             metadata=metadata,
         )
-        self.device_manager.producer.send(sqrr, rrm)
+        self.device_manager.connector.send(sqrr, rrm)
 
     def _handle_scan_request(self, msg):
         """
@@ -181,10 +175,10 @@ class ScanGuard:
                 self._send_scan_request_response(ScanStatus(), mod_msg.metadata)
 
         sqm = MessageEndpoints.scan_queue_modification()
-        self.device_manager.producer.send(sqm, mod_msg)
+        self.device_manager.connector.send(sqm, mod_msg)
 
     def _append_to_scan_queue(self, msg):
         logger.info("Appending new scan to queue")
         msg = msg
         sqi = MessageEndpoints.scan_queue_insert()
-        self.device_manager.producer.send(sqi, msg)
+        self.device_manager.connector.send(sqi, msg)

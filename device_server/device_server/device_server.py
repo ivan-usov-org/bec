@@ -18,7 +18,7 @@ from device_server.rpc_mixin import RPCMixin
 
 logger = bec_logger.logger
 
-consumer_stop = threading.Event()
+register_stop = threading.Event()
 
 
 class DisabledDeviceError(Exception):
@@ -38,14 +38,10 @@ class DeviceServer(RPCMixin, BECService):
         super().__init__(config, connector_cls, unique_service=True)
         self._tasks = []
         self.device_manager = None
-        self.threads = []
-        self.sig_thread = None
-        self.sig_thread = self.connector.consumer(
+        self.connector.register(
             MessageEndpoints.scan_queue_modification(),
-            cb=self.consumer_interception_callback,
-            parent=self,
+            cb=self.register_interception_callback,
         )
-        self.sig_thread.start()
         self.executor = ThreadPoolExecutor(max_workers=4)
         self._start_device_manager()
 
@@ -55,19 +51,16 @@ class DeviceServer(RPCMixin, BECService):
 
     def start(self) -> None:
         """start the device server"""
-        if consumer_stop.is_set():
-            consumer_stop.clear()
+        if register_stop.is_set():
+            register_stop.clear()
 
-        self.threads = [
-            self.connector.consumer(
-                MessageEndpoints.device_instructions(),
-                event=consumer_stop,
-                cb=self.instructions_callback,
-                parent=self,
-            )
-        ]
-        for thread in self.threads:
-            thread.start()
+        self.connector.register(
+            MessageEndpoints.device_instructions(),
+            event=register_stop,
+            cb=self.instructions_callback,
+            parent=self,
+        )
+
         self.status = BECStatus.RUNNING
 
     def update_status(self, status: BECStatus):
@@ -76,17 +69,13 @@ class DeviceServer(RPCMixin, BECService):
 
     def stop(self) -> None:
         """stop the device server"""
-        consumer_stop.set()
-        for thread in self.threads:
-            thread.join()
+        register_stop.set()
         self.status = BECStatus.IDLE
 
     def shutdown(self) -> None:
         """shutdown the device server"""
         super().shutdown()
         self.stop()
-        self.sig_thread.signal_event.set()
-        self.sig_thread.join()
         self.device_manager.shutdown()
 
     def _update_device_metadata(self, instr) -> None:
@@ -97,8 +86,7 @@ class DeviceServer(RPCMixin, BECService):
             device_root = dev.split(".")[0]
             self.device_manager.devices.get(device_root).metadata = instr.metadata
 
-    @staticmethod
-    def consumer_interception_callback(msg, *, parent, **_kwargs) -> None:
+    def register_interception_callback(self, msg, **_kwargs) -> None:
         """callback for receiving scan modifications / interceptions"""
         mvalue = msg.value
         if mvalue is None:
@@ -106,7 +94,7 @@ class DeviceServer(RPCMixin, BECService):
             return
         logger.info(f"Receiving: {mvalue.content}")
         if mvalue.content.get("action") in ["pause", "abort", "halt"]:
-            parent.stop_devices()
+            self.stop_devices()
 
     def stop_devices(self) -> None:
         """stop all enabled devices"""
@@ -279,7 +267,7 @@ class DeviceServer(RPCMixin, BECService):
         devices = instr.content["device"]
         if not isinstance(devices, list):
             devices = [devices]
-        pipe = self.producer.pipeline()
+        pipe = self.connector.pipeline()
         for dev in devices:
             obj = self.device_manager.devices.get(dev)
             obj.metadata = instr.metadata
@@ -288,11 +276,11 @@ class DeviceServer(RPCMixin, BECService):
             dev_msg = messages.DeviceReqStatusMessage(
                 device=dev, success=True, metadata=instr.metadata
             )
-            self.producer.set_and_publish(MessageEndpoints.device_req_status(dev), dev_msg, pipe)
+            self.connector.set_and_publish(MessageEndpoints.device_req_status(dev), dev_msg, pipe)
         pipe.execute()
 
     def _status_callback(self, status):
-        pipe = self.producer.pipeline()
+        pipe = self.connector.pipeline()
         if hasattr(status, "device"):
             obj = status.device
         else:
@@ -302,12 +290,12 @@ class DeviceServer(RPCMixin, BECService):
             device=device_name, success=status.success, metadata=status.instruction.metadata
         )
         logger.debug(f"req status for device {device_name}: {status.success}")
-        self.producer.set_and_publish(
+        self.connector.set_and_publish(
             MessageEndpoints.device_req_status(device_name), dev_msg, pipe
         )
         response = status.instruction.metadata.get("response")
         if response:
-            self.producer.lpush(
+            self.connector.lpush(
                 MessageEndpoints.device_req_status(status.instruction.metadata["RID"]),
                 dev_msg,
                 pipe,
@@ -328,7 +316,7 @@ class DeviceServer(RPCMixin, BECService):
         dev_config_msg = messages.DeviceMessage(
             signals=obj.root.read_configuration(), metadata=metadata
         )
-        self.producer.set_and_publish(
+        self.connector.set_and_publish(
             MessageEndpoints.device_read_configuration(obj.root.name), dev_config_msg, pipe
         )
 
@@ -342,7 +330,7 @@ class DeviceServer(RPCMixin, BECService):
 
     def _read_and_update_devices(self, devices: list[str], metadata: dict) -> list:
         start = time.time()
-        pipe = self.producer.pipeline()
+        pipe = self.connector.pipeline()
         signal_container = []
         for dev in devices:
             device_root = dev.split(".")[0]
@@ -354,17 +342,17 @@ class DeviceServer(RPCMixin, BECService):
             except Exception as exc:
                 signals = self._retry_obj_method(dev, obj, "read", exc)
 
-            self.producer.set_and_publish(
+            self.connector.set_and_publish(
                 MessageEndpoints.device_read(device_root),
                 messages.DeviceMessage(signals=signals, metadata=metadata),
                 pipe,
             )
-            self.producer.set_and_publish(
+            self.connector.set_and_publish(
                 MessageEndpoints.device_readback(device_root),
                 messages.DeviceMessage(signals=signals, metadata=metadata),
                 pipe,
             )
-            self.producer.set(
+            self.connector.set(
                 MessageEndpoints.device_status(device_root),
                 messages.DeviceStatusMessage(device=device_root, status=0, metadata=metadata),
                 pipe,
@@ -377,7 +365,7 @@ class DeviceServer(RPCMixin, BECService):
 
     def _read_config_and_update_devices(self, devices: list[str], metadata: dict) -> list:
         start = time.time()
-        pipe = self.producer.pipeline()
+        pipe = self.connector.pipeline()
         signal_container = []
         for dev in devices:
             self.device_manager.devices.get(dev).metadata = metadata
@@ -387,7 +375,7 @@ class DeviceServer(RPCMixin, BECService):
                 signal_container.append(signals)
             except Exception as exc:
                 signals = self._retry_obj_method(dev, obj, "read_configuration", exc)
-            self.producer.set_and_publish(
+            self.connector.set_and_publish(
                 MessageEndpoints.device_read_configuration(dev),
                 messages.DeviceMessage(signals=signals, metadata=metadata),
                 pipe,
@@ -420,9 +408,11 @@ class DeviceServer(RPCMixin, BECService):
                 f"Failed to run {method} on device {device_root}. Trying to load an old value."
             )
             if method == "read":
-                old_msg = self.producer.get(MessageEndpoints.device_read(device_root))
+                old_msg = self.connector.get(MessageEndpoints.device_read(device_root))
             elif method == "read_configuration":
-                old_msg = self.producer.get(MessageEndpoints.device_read_configuration(device_root))
+                old_msg = self.connector.get(
+                    MessageEndpoints.device_read_configuration(device_root)
+                )
             else:
                 raise ValueError(f"Unknown method {method}.")
             if not old_msg:
@@ -435,7 +425,7 @@ class DeviceServer(RPCMixin, BECService):
         if not isinstance(devices, list):
             devices = [devices]
 
-        pipe = self.producer.pipeline()
+        pipe = self.connector.pipeline()
         for dev in devices:
             obj = self.device_manager.devices[dev].obj
             if hasattr(obj, "_staged"):
@@ -444,7 +434,7 @@ class DeviceServer(RPCMixin, BECService):
                     logger.info(f"Device {obj.name} was already staged and will be first unstaged.")
                     self.device_manager.devices[dev].obj.unstage()
                 self.device_manager.devices[dev].obj.stage()
-            self.producer.set(
+            self.connector.set(
                 MessageEndpoints.device_staged(dev),
                 messages.DeviceStatusMessage(device=dev, status=1, metadata=instr.metadata),
                 pipe,
@@ -456,7 +446,7 @@ class DeviceServer(RPCMixin, BECService):
         if not isinstance(devices, list):
             devices = [devices]
 
-        pipe = self.producer.pipeline()
+        pipe = self.connector.pipeline()
         for dev in devices:
             obj = self.device_manager.devices[dev].obj
             if hasattr(obj, "_staged"):
@@ -465,7 +455,7 @@ class DeviceServer(RPCMixin, BECService):
                     self.device_manager.devices[dev].obj.unstage()
                 else:
                     logger.debug(f"Device {obj.name} was already unstaged.")
-            self.producer.set(
+            self.connector.set(
                 MessageEndpoints.device_staged(dev),
                 messages.DeviceStatusMessage(device=dev, status=0, metadata=instr.metadata),
                 pipe,

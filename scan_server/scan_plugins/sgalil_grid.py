@@ -106,7 +106,7 @@ class SgalilGrid(AsyncFlyScanBase):
 
     def scan_progress(self) -> int:
         """Timeout of the progress bar. This gets updated in the frequency of scan segments"""
-        msg = self.device_manager.producer.get(MessageEndpoints.device_progress("mcs"))
+        msg = self.device_manager.connector.get(MessageEndpoints.device_progress("mcs"))
         if not msg:
             self.timeout_progress += 1
             return self.timeout_progress

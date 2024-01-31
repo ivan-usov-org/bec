@@ -26,7 +26,6 @@ logger = bec_logger.logger
 class ConfigHelper:
     def __init__(self, connector: RedisConnector, service_name: str = None) -> None:
         self.connector = connector
-        self.producer = connector.producer()
         self._service_name = service_name
 
     def update_session_with_file(self, file_path: str, save_recovery: bool = True) -> None:
@@ -71,7 +70,7 @@ class ConfigHelper:
         print(f"Config was written to {file_path}.")
 
     def _save_config_to_file(self, file_path: str, raise_on_error: bool = True) -> bool:
-        config = self.producer.get(MessageEndpoints.device_config())
+        config = self.connector.get(MessageEndpoints.device_config())
         if not config:
             if raise_on_error:
                 raise DeviceConfigError("No config found in the session.")
@@ -99,7 +98,7 @@ class ConfigHelper:
         if action in ["update", "add", "set"] and not config:
             raise DeviceConfigError(f"Config cannot be empty for an {action} request.")
         RID = str(uuid.uuid4())
-        self.producer.send(
+        self.connector.send(
             MessageEndpoints.device_config_request(),
             DeviceConfigMessage(action=action, config=config, metadata={"RID": RID}),
         )
@@ -145,7 +144,7 @@ class ConfigHelper:
         elapsed_time = 0
         max_time = timeout
         while True:
-            service_messages = self.producer.lrange(MessageEndpoints.service_response(RID), 0, -1)
+            service_messages = self.connector.lrange(MessageEndpoints.service_response(RID), 0, -1)
             if not service_messages:
                 time.sleep(0.005)
                 elapsed_time += 0.005
@@ -185,7 +184,7 @@ class ConfigHelper:
         """
         start = 0
         while True:
-            msg = self.producer.get(MessageEndpoints.device_config_request_response(RID))
+            msg = self.connector.get(MessageEndpoints.device_config_request_response(RID))
             if msg is None:
                 time.sleep(0.01)
                 start += 0.01

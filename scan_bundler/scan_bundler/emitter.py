@@ -6,16 +6,16 @@ from bec_lib import messages
 
 
 class EmitterBase:
-    def __init__(self, producer) -> None:
+    def __init__(self, connector) -> None:
         self._send_buffer = Queue()
-        self.producer = producer
-        self._start_buffered_producer()
+        self.connector = connector
+        self._start_buffered_connector()
 
-    def _start_buffered_producer(self):
-        self._buffered_producer_thread = threading.Thread(
+    def _start_buffered_connector(self):
+        self._buffered_connector_thread = threading.Thread(
             target=self._buffered_publish, daemon=True, name="buffered_publisher"
         )
-        self._buffered_producer_thread.start()
+        self._buffered_connector_thread.start()
 
     def add_message(self, msg: messages.BECMessage, endpoint: str, public: str = None):
         self._send_buffer.put((msg, endpoint, public))
@@ -37,20 +37,20 @@ class EmitterBase:
             time.sleep(0.1)
             return
 
-        pipe = self.producer.pipeline()
+        pipe = self.connector.pipeline()
         msgs = messages.BundleMessage()
         _, endpoint, _ = msgs_to_send[0]
         for msg, endpoint, public in msgs_to_send:
             msg_dump = msg
             msgs.append(msg_dump)
             if public:
-                self.producer.set(
+                self.connector.set(
                     public,
                     msg_dump,
                     pipe=pipe,
                     expire=1800,
                 )
-        self.producer.send(endpoint, msgs, pipe=pipe)
+        self.connector.send(endpoint, msgs, pipe=pipe)
         pipe.execute()
 
     def on_init(self, scanID: str):

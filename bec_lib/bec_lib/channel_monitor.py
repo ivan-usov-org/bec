@@ -16,11 +16,11 @@ def channel_callback(msg, **_kwargs):
     print(json.dumps(out, indent=4, default=lambda o: "<not serializable object>"))
 
 
-def _start_consumer(config_path, topic):
+def _start_register(config_path, topic):
     config = ServiceConfig(config_path)
     connector = RedisConnector(config.redis)
-    consumer = connector.consumer(topics=topic, cb=channel_callback)
-    consumer.start()
+    register = connector.register(topics=topic, cb=channel_callback)
+    register.start()
     event = threading.Event()
     event.wait()
 
@@ -38,4 +38,4 @@ def channel_monitor_launch():
     config_path = clargs.config
     topic = clargs.channel
 
-    _start_consumer(config_path, topic)
+    _start_register(config_path, topic)

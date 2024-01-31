@@ -5,7 +5,9 @@ import uuid
 from collections.abc import Callable
 
 import numpy as np
-from bec_lib import MessageEndpoints, ProducerConnector, Status, bec_logger, messages
+
+from bec_lib import MessageEndpoints, Status, bec_logger, messages
+from bec_lib.connector import ConnectorBase
 
 from .errors import DeviceMessageError, ScanAbortion
 
@@ -13,8 +15,8 @@ logger = bec_logger.logger
 
 
 class ScanStubs:
-    def __init__(self, producer: ProducerConnector, device_msg_callback: Callable = None) -> None:
-        self.producer = producer
+    def __init__(self, connector: ConnectorBase, device_msg_callback: Callable = None) -> None:
+        self.connector = connector
         self.device_msg_metadata = (
             device_msg_callback if device_msg_callback is not None else lambda: {}
         )
@@ -62,7 +64,7 @@ class ScanStubs:
 
     def _get_from_rpc(self, rpc_id):
         while True:
-            msg = self.producer.get(MessageEndpoints.device_rpc(rpc_id))
+            msg = self.connector.get(MessageEndpoints.device_rpc(rpc_id))
             if msg:
                 break
             time.sleep(0.001)
@@ -81,7 +83,7 @@ class ScanStubs:
         if not isinstance(return_val, dict):
             return return_val
         if return_val.get("type") == "status" and return_val.get("RID"):
-            return Status(self.producer, return_val.get("RID"))
+            return Status(self.connector, return_val.get("RID"))
         return return_val
 
     def set_and_wait(self, *, device: list[str], positions: list | np.ndarray):
@@ -182,7 +184,7 @@ class ScanStubs:
             DIID (int): device instruction ID
 
         """
-        msg = self.producer.get(MessageEndpoints.device_req_status(device))
+        msg = self.connector.get(MessageEndpoints.device_req_status(device))
         if not msg:
             return 0
         matching_RID = msg.metadata.get("RID") == RID
@@ -199,7 +201,7 @@ class ScanStubs:
             RID (str): request ID
 
         """
-        msg = self.producer.get(MessageEndpoints.device_progress(device))
+        msg = self.connector.get(MessageEndpoints.device_progress(device))
         if not msg:
             return None
         matching_RID = msg.metadata.get("RID") == RID

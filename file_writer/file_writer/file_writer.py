@@ -325,7 +325,7 @@ class NexusFileWriter(FileWriter):
             file_data[key] = val if not isinstance(val, list) else merge_dicts(val)
         msg_data = {"file_path": file_path, "data": file_data}
         msg = messages.FileContentMessage(**msg_data)
-        self.file_writer_manager.producer.set_and_publish(MessageEndpoints.file_content(), msg)
+        self.file_writer_manager.connector.set_and_publish(MessageEndpoints.file_content(), msg)
 
         with h5py.File(file_path, "w") as file:
             HDF5StorageWriter.write(writer_storage._storage, device_storage, file)

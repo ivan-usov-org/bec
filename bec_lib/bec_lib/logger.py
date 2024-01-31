@@ -45,7 +45,6 @@ class BECLogger:
         self.bootstrap_server = None
         self.connector = None
         self.service_name = None
-        self.producer = None
         self.logger = loguru_logger
         self._log_level = LogLevel.INFO
         self.level = self._log_level
@@ -73,7 +72,6 @@ class BECLogger:
         self.bootstrap_server = bootstrap_server
         self.connector = connector_cls(bootstrap_server)
         self.service_name = service_name
-        self.producer = self.connector.producer()
         self._configured = True
         self._update_sinks()
 
@@ -82,7 +80,7 @@ class BECLogger:
             return
         msg = json.loads(msg)
         msg["service_name"] = self.service_name
-        self.producer.send(
+        self.connector.send(
             topic=MessageEndpoints.log(),
             msg=bec_lib.messages.LogMessage(log_type=msg["record"]["level"]["name"], log_msg=msg),
         )

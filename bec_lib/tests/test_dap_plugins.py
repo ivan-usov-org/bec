@@ -349,7 +349,7 @@ def dap(dap_plugin_message):
     }
     client = mock.MagicMock()
     client.service_status = dap_services
-    client.producer.get.return_value = dap_plugin_message
+    client.connector.get.return_value = dap_plugin_message
     dap_plugins = DAPPlugins(client)
     yield dap_plugins
 
@@ -367,7 +367,7 @@ def test_dap_plugins_construction(dap):
 def test_dap_plugin_fit(dap):
     with mock.patch.object(dap.GaussianModel, "_wait_for_dap_response") as mock_wait:
         dap.GaussianModel.fit()
-        dap._parent.producer.set_and_publish.assert_called_once()
+        dap._parent.connector.set_and_publish.assert_called_once()
         mock_wait.assert_called_once()
 
 
@@ -380,7 +380,7 @@ def test_dap_auto_run(dap):
 
 
 def test_dap_wait_for_dap_response_waits_for_RID(dap):
-    dap._parent.producer.get.return_value = messages.DAPResponseMessage(
+    dap._parent.connector.get.return_value = messages.DAPResponseMessage(
         success=True, data={}, metadata={"RID": "wrong_ID"}
     )
     with pytest.raises(TimeoutError):
@@ -388,7 +388,7 @@ def test_dap_wait_for_dap_response_waits_for_RID(dap):
 
 
 def test_dap_wait_for_dap_respnse_returns(dap):
-    dap._parent.producer.get.return_value = messages.DAPResponseMessage(
+    dap._parent.connector.get.return_value = messages.DAPResponseMessage(
         success=True, data={}, metadata={"RID": "1234"}
     )
     val = dap.GaussianModel._wait_for_dap_response(request_id="1234", timeout=0.1)
@@ -429,11 +429,11 @@ def test_dap_select_raises_on_wrong_device(dap):
 
 
 def test_dap_get_data(dap):
-    dap._parent.producer.get_last.return_value = messages.ProcessedDataMessage(
+    dap._parent.connector.get_last.return_value = messages.ProcessedDataMessage(
         data=[{"x": [1, 2, 3], "y": [4, 5, 6]}, {"fit_parameters": {"amplitude": 1}}]
     )
     data = dap.GaussianModel.get_data()
-    dap._parent.producer.get_last.assert_called_once_with(
+    dap._parent.connector.get_last.assert_called_once_with(
         MessageEndpoints.processed_data("GaussianModel")
     )
 
@@ -443,13 +443,13 @@ def test_dap_get_data(dap):
 
 def test_dap_update_dap_config_not_called_without_device(dap):
     dap.GaussianModel._update_dap_config(request_id="1234")
-    dap._parent.producer.set_and_publish.assert_not_called()
+    dap._parent.connector.set_and_publish.assert_not_called()
 
 
 def test_dap_update_dap_config(dap):
     dap.GaussianModel._plugin_config["selected_device"] = ["samx", "samx"]
     dap.GaussianModel._update_dap_config(request_id="1234")
-    dap._parent.producer.set_and_publish.assert_called_with(
+    dap._parent.connector.set_and_publish.assert_called_with(
         MessageEndpoints.dap_request(),
         messages.DAPRequestMessage(
             dap_cls="LmfitService1D",

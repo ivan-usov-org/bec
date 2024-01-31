@@ -41,7 +41,6 @@ class BECService:
         self.connector = connector_cls(self.bootstrap_server)
         self._unique_service = unique_service
         self.wait_for_server = wait_for_server
-        self.producer = self.connector.producer()
         self.__service_id = str(uuid.uuid4())
         self._user = getpass.getuser()
         self._hostname = socket.gethostname()
@@ -110,11 +109,11 @@ class BECService:
         )
 
     def _update_existing_services(self):
-        service_keys = self.producer.keys(MessageEndpoints.service_status("*"))
+        service_keys = self.connector.keys(MessageEndpoints.service_status("*"))
         if not service_keys:
             return
         services = [service.decode().split(":", maxsplit=1)[0] for service in service_keys]
-        msgs = [self.producer.get(service) for service in services]
+        msgs = [self.connector.get(service) for service in services]
         self._services_info = {msg.content["name"]: msg for msg in msgs if msg is not None}
 
     def _update_service_info(self):
@@ -124,7 +123,7 @@ class BECService:
             self._service_info_event.wait(timeout=3)
 
     def _send_service_status(self):
-        self.producer.set_and_publish(
+        self.connector.set_and_publish(
             topic=MessageEndpoints.service_status(self._service_id),
             msg=messages.StatusMessage(
                 name=self._service_name,
@@ -189,7 +188,7 @@ class BECService:
                 )
             )
             msg = messages.ServiceMetricMessage(name=self.__class__.__name__, metrics=data)
-            self.producer.send(MessageEndpoints.metrics(self._service_id), msg)
+            self.connector.send(MessageEndpoints.metrics(self._service_id), msg)
             self._metrics_emitter_event.wait(timeout=1)
 
     def set_global_var(self, name: str, val: Any) -> None:
@@ -200,7 +199,7 @@ class BECService:
             val (Any): Value of the variable
 
         """
-        self.producer.set(MessageEndpoints.global_vars(name), messages.VariableMessage(value=val))
+        self.connector.set(MessageEndpoints.global_vars(name), messages.VariableMessage(value=val))
 
     def get_global_var(self, name: str) -> Any:
         """Get a global variable from Redis
@@ -211,7 +210,7 @@ class BECService:
         Returns:
             Any: Value of the variable
         """
-        msg = self.producer.get(MessageEndpoints.global_vars(name))
+        msg = self.connector.get(MessageEndpoints.global_vars(name))
         if msg:
             return msg.content.get("value")
         return None
@@ -223,12 +222,12 @@ class BECService:
             name (str): Name of the variable
 
         """
-        self.producer.delete(MessageEndpoints.global_vars(name))
+        self.connector.delete(MessageEndpoints.global_vars(name))
 
     def global_vars(self) -> str:
         """Get all available global variables"""
         # sadly, this cannot be a property as it causes side effects with IPython's tab completion
-        available_keys = self.producer.keys(MessageEndpoints.global_vars("*"))
+        available_keys = self.connector.keys(MessageEndpoints.global_vars("*"))
 
         def get_endpoint_from_topic(topic: str) -> str:
             return topic.decode().split(MessageEndpoints.global_vars(""))[-1]
@@ -252,6 +251,7 @@ class BECService:
 
     def shutdown(self):
         """shutdown the BECService"""
+        self.connector.shutdown()
         self._service_info_event.set()
         if self._service_info_thread:
             self._service_info_thread.join()

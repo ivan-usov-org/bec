@@ -23,7 +23,7 @@ def test_nested_device_root(dev):
 
 
 def test_read(dev):
-    with mock.patch.object(dev.samx.root.parent.producer, "get") as mock_get:
+    with mock.patch.object(dev.samx.root.parent.connector, "get") as mock_get:
         mock_get.return_value = messages.DeviceMessage(
             signals={
                 "samx": {"value": 0, "timestamp": 1701105880.1711318},
@@ -42,7 +42,7 @@ def test_read(dev):
 
 
 def test_read_filtered_hints(dev):
-    with mock.patch.object(dev.samx.root.parent.producer, "get") as mock_get:
+    with mock.patch.object(dev.samx.root.parent.connector, "get") as mock_get:
         mock_get.return_value = messages.DeviceMessage(
             signals={
                 "samx": {"value": 0, "timestamp": 1701105880.1711318},
@@ -57,7 +57,7 @@ def test_read_filtered_hints(dev):
 
 
 def test_read_use_read(dev):
-    with mock.patch.object(dev.samx.root.parent.producer, "get") as mock_get:
+    with mock.patch.object(dev.samx.root.parent.connector, "get") as mock_get:
         data = {
             "samx": {"value": 0, "timestamp": 1701105880.1711318},
             "samx_setpoint": {"value": 0, "timestamp": 1701105880.1693492},
@@ -72,7 +72,7 @@ def test_read_use_read(dev):
 
 
 def test_read_nested_device(dev):
-    with mock.patch.object(dev.dyn_signals.root.parent.producer, "get") as mock_get:
+    with mock.patch.object(dev.dyn_signals.root.parent.connector, "get") as mock_get:
         data = {
             "dyn_signals_messages_message1": {"value": 0, "timestamp": 1701105880.0716832},
             "dyn_signals_messages_message2": {"value": 0, "timestamp": 1701105880.071722},
@@ -93,7 +93,7 @@ def test_read_nested_device(dev):
 )
 def test_read_kind_hinted(dev, kind, cached):
     with mock.patch.object(dev.samx.readback, "_run") as mock_run:
-        with mock.patch.object(dev.samx.root.parent.producer, "get") as mock_get:
+        with mock.patch.object(dev.samx.root.parent.connector, "get") as mock_get:
             data = {
                 "samx": {"value": 0, "timestamp": 1701105880.1711318},
                 "samx_setpoint": {"value": 0, "timestamp": 1701105880.1693492},
@@ -138,7 +138,7 @@ def test_read_configuration_cached(dev, is_signal, is_config_signal, method):
     with mock.patch.object(
         dev.samx.readback, "_get_rpc_signal_info", return_value=(is_signal, is_config_signal, True)
     ):
-        with mock.patch.object(dev.samx.root.parent.producer, "get") as mock_get:
+        with mock.patch.object(dev.samx.root.parent.connector, "get") as mock_get:
             mock_get.return_value = messages.DeviceMessage(
                 signals={
                     "samx": {"value": 0, "timestamp": 1701105880.1711318},
@@ -182,7 +182,7 @@ def test_get_rpc_func_name_read(dev):
 )
 def test_get_rpc_func_name_readback_get(dev, kind, cached):
     with mock.patch.object(dev.samx.readback, "_run") as mock_rpc:
-        with mock.patch.object(dev.samx.root.parent.producer, "get") as mock_get:
+        with mock.patch.object(dev.samx.root.parent.connector, "get") as mock_get:
             mock_get.return_value = messages.DeviceMessage(
                 signals={
                     "samx": {"value": 0, "timestamp": 1701105880.1711318},
@@ -219,9 +219,7 @@ def test_handle_rpc_response_returns_status(dev, bec_client):
     msg = messages.DeviceRPCMessage(
         device="samx", return_val={"type": "status", "RID": "request_id"}, out="done", success=True
     )
-    assert dev.samx._handle_rpc_response(msg) == Status(
-        bec_client.device_manager.producer, "request_id"
-    )
+    assert dev.samx._handle_rpc_response(msg) == Status(bec_client.device_manager, "request_id")
 
 
 def test_handle_rpc_response_raises(dev):
@@ -348,7 +346,7 @@ def test_device_update_user_parameter(device_obj, user_param, val, out, raised_e
 
 
 def test_status_wait():
-    producer = mock.MagicMock()
+    connector = mock.MagicMock()
 
     def lrange_mock(*args, **kwargs):
         yield False
@@ -358,8 +356,8 @@ def test_status_wait():
         return next(lmock)
 
     lmock = lrange_mock()
-    producer.lrange = get_lrange
-    status = Status(producer, "test")
+    connector.lrange = get_lrange
+    status = Status(connector, "test")
     status.wait()
 
 
@@ -561,7 +559,7 @@ def test_show_all():
 def test_adjustable_mixin_limits():
     adj = AdjustableMixin()
     adj.root = mock.MagicMock()
-    adj.root.parent.producer.get.return_value = messages.DeviceMessage(
+    adj.root.parent.connector.get.return_value = messages.DeviceMessage(
         signals={"low": -12, "high": 12}, metadata={}
     )
     assert adj.limits == [-12, 12]
@@ -570,7 +568,7 @@ def test_adjustable_mixin_limits():
 def test_adjustable_mixin_limits_missing():
     adj = AdjustableMixin()
     adj.root = mock.MagicMock()
-    adj.root.parent.producer.get.return_value = None
+    adj.root.parent.connector.get.return_value = None
     assert adj.limits == [0, 0]
 
 
@@ -585,7 +583,7 @@ def test_adjustable_mixin_set_low_limit():
     adj = AdjustableMixin()
     adj.update_config = mock.MagicMock()
     adj.root = mock.MagicMock()
-    adj.root.parent.producer.get.return_value = messages.DeviceMessage(
+    adj.root.parent.connector.get.return_value = messages.DeviceMessage(
         signals={"low": -12, "high": 12}, metadata={}
     )
     adj.low_limit = -20
@@ -596,7 +594,7 @@ def test_adjustable_mixin_set_high_limit():
     adj = AdjustableMixin()
     adj.update_config = mock.MagicMock()
     adj.root = mock.MagicMock()
-    adj.root.parent.producer.get.return_value = messages.DeviceMessage(
+    adj.root.parent.connector.get.return_value = messages.DeviceMessage(
         signals={"low": -12, "high": 12}, metadata={}
     )
     adj.high_limit = 20

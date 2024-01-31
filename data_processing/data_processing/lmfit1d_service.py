@@ -148,7 +148,7 @@ class LmfitService1D(DAPServiceBase):
             out = self.process()
             if out:
                 stream_output, metadata = out
-                self.client.producer.xadd(
+                self.client.connector.xadd(
                     MessageEndpoints.processed_data(self.model.__class__.__name__),
                     msg={
                         "data": MsgpackSerialization.dumps(

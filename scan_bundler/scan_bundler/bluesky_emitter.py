@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 class BlueskyEmitter(EmitterBase):
     def __init__(self, scan_bundler: ScanBundler) -> None:
-        super().__init__(scan_bundler.producer)
+        super().__init__(scan_bundler.connector)
         self.scan_bundler = scan_bundler
         self.bluesky_metadata = {}
 
@@ -27,7 +27,7 @@ class BlueskyEmitter(EmitterBase):
         self.bluesky_metadata[scanID] = {}
         doc = self._get_run_start_document(scanID)
         self.bluesky_metadata[scanID]["start"] = doc
-        self.producer.raw_send(MessageEndpoints.bluesky_events(), msgpack.dumps(("start", doc)))
+        self.connector.raw_send(MessageEndpoints.bluesky_events(), msgpack.dumps(("start", doc)))
         self.send_descriptor_document(scanID)
 
     def _get_run_start_document(self, scanID) -> dict:
@@ -71,7 +71,7 @@ class BlueskyEmitter(EmitterBase):
         """Bluesky only: send descriptor document"""
         doc = self._get_descriptor_document(scanID)
         self.bluesky_metadata[scanID]["descriptor"] = doc
-        self.producer.raw_send(
+        self.connector.raw_send(
             MessageEndpoints.bluesky_events(), msgpack.dumps(("descriptor", doc))
         )
 
@@ -85,7 +85,7 @@ class BlueskyEmitter(EmitterBase):
                 logger.warning(f"Failed to remove {scanID} from {storage}.")
 
     def send_bluesky_scan_point(self, scanID, pointID) -> None:
-        self.producer.raw_send(
+        self.connector.raw_send(
             MessageEndpoints.bluesky_events(),
             msgpack.dumps(("event", self._prepare_bluesky_event_data(scanID, pointID))),
         )

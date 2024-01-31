@@ -91,7 +91,7 @@ class BECClient(BECService, UserScriptsMixin):
     @property
     def active_account(self) -> str:
         """get the currently active target (e)account"""
-        return self.producer.get(MessageEndpoints.account())
+        return self.connector.get(MessageEndpoints.account())
 
     def start(self):
         """start the client"""
@@ -133,13 +133,13 @@ class BECClient(BECService, UserScriptsMixin):
     @property
     def pre_scan_hooks(self):
         """currently stored pre-scan hooks"""
-        return self.producer.lrange(MessageEndpoints.pre_scan_macros(), 0, -1)
+        return self.connector.lrange(MessageEndpoints.pre_scan_macros(), 0, -1)
 
     @pre_scan_hooks.setter
     def pre_scan_hooks(self, hooks: list):
-        self.producer.delete(MessageEndpoints.pre_scan_macros())
+        self.connector.delete(MessageEndpoints.pre_scan_macros())
         for hook in hooks:
-            self.producer.lpush(MessageEndpoints.pre_scan_macros(), hook)
+            self.connector.lpush(MessageEndpoints.pre_scan_macros(), hook)
 
     def _load_scans(self):
         self.scans = Scans(self)

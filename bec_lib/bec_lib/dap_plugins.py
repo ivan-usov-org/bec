@@ -38,7 +38,7 @@ class DAPPlugins:
             service for service in available_services if service.startswith("DAPServer/")
         ]
         for service in dap_services:
-            available_plugins = self._parent.producer.get(
+            available_plugins = self._parent.connector.get(
                 MessageEndpoints.dap_available_plugins(service)
             )
             if available_plugins is None:

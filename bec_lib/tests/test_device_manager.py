@@ -91,15 +91,14 @@ def test_get_config_calls_load(dm):
         dm, "_get_redis_device_config", return_value={"devices": [{}]}
     ) as get_redis_config:
         with mock.patch.object(dm, "_load_session") as load_session:
-            with mock.patch.object(dm, "producer") as producer:
-                dm._get_config()
-                get_redis_config.assert_called_once()
-                load_session.assert_called_once()
+            dm._get_config()
+            get_redis_config.assert_called_once()
+            load_session.assert_called_once()
 
 
 def test_get_redis_device_config(dm):
-    with mock.patch.object(dm, "producer") as producer:
-        producer.get.return_value = messages.AvailableResourceMessage(resource={"devices": [{}]})
+    with mock.patch.object(dm, "connector") as connector:
+        connector.get.return_value = messages.AvailableResourceMessage(resource={"devices": [{}]})
         assert dm._get_redis_device_config() == {"devices": [{}]}
 
 

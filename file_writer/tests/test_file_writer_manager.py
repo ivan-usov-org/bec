@@ -25,7 +25,7 @@ def load_FileWriter():
     service_mock = mock.MagicMock()
     service_mock.connector = ConnectorMock("")
     device_manager = DeviceManagerBase(service_mock, "")
-    device_manager.producer = service_mock.connector.producer()
+    device_manager.connector = service_mock.connector
     with open(f"{dir_path}/tests/test_config.yaml", "r") as session_file:
         device_manager._session = create_session_from_config(yaml.safe_load(session_file))
     device_manager._load_session()
@@ -152,13 +152,13 @@ def test_write_file_raises_alarm_on_error():
 def test_update_baseline_reading():
     file_manager = load_FileWriter()
     file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
-    with mock.patch.object(file_manager, "producer") as mock_producer:
-        mock_producer.get.return_value = messages.ScanBaselineMessage(
+    with mock.patch.object(file_manager, "connector") as mock_connector:
+        mock_connector.get.return_value = messages.ScanBaselineMessage(
             scanID="scanID", data={"data": "data"}
         )
         file_manager.update_baseline_reading("scanID")
         assert file_manager.scan_storage["scanID"].baseline == {"data": "data"}
-        mock_producer.get.assert_called_once_with(MessageEndpoints.public_scan_baseline("scanID"))
+        mock_connector.get.assert_called_once_with(MessageEndpoints.public_scan_baseline("scanID"))
 
 
 def test_scan_storage_append():
@@ -178,30 +178,30 @@ def test_scan_storage_ready_to_write():
 
 def test_update_file_references():
     file_manager = load_FileWriter()
-    with mock.patch.object(file_manager, "producer") as mock_producer:
+    with mock.patch.object(file_manager, "connector") as mock_connector:
         file_manager.update_file_references("scanID")
-        mock_producer.keys.assert_not_called()
+        mock_connector.keys.assert_not_called()
 
 
 def test_update_file_references_gets_keys():
     file_manager = load_FileWriter()
     file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
-    with mock.patch.object(file_manager, "producer") as mock_producer:
+    with mock.patch.object(file_manager, "connector") as mock_connector:
         file_manager.update_file_references("scanID")
-        mock_producer.keys.assert_called_once_with(MessageEndpoints.public_file("scanID", "*"))
+        mock_connector.keys.assert_called_once_with(MessageEndpoints.public_file("scanID", "*"))
 
 
 def test_update_async_data():
     file_manager = load_FileWriter()
     file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
-    with mock.patch.object(file_manager, "producer") as mock_producer:
+    with mock.patch.object(file_manager, "connector") as mock_connector:
         with mock.patch.object(file_manager, "_process_async_data") as mock_process:
             key = MessageEndpoints.device_async_readback("scanID", "dev1")
-            mock_producer.keys.return_value = [key.encode()]
+            mock_connector.keys.return_value = [key.encode()]
             data = [(b"0-0", b'{"data": "data"}')]
-            mock_producer.xrange.return_value = data
+            mock_connector.xrange.return_value = data
             file_manager.update_async_data("scanID")
-            mock_producer.xrange.assert_called_once_with(key, min="-", max="+")
+            mock_connector.xrange.assert_called_once_with(key, min="-", max="+")
             mock_process.assert_called_once_with(data, "scanID", "dev1")
 
 

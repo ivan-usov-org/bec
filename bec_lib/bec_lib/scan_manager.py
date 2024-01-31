@@ -25,44 +25,31 @@ class ScanManager:
             connector (BECConnector): BECConnector instance
         """
         self.connector = connector
-        self.producer = self.connector.producer()
         self.queue_storage = QueueStorage(scan_manager=self)
         self.request_storage = RequestStorage(scan_manager=self)
         self.scan_storage = ScanStorage(scan_manager=self)
 
-        self._scan_queue_consumer = self.connector.consumer(
+        self.connector.register(
             topics=MessageEndpoints.scan_queue_status(),
             cb=self._scan_queue_status_callback,
-            parent=self,
         )
-        self._scan_queue_request_consumer = self.connector.consumer(
+        self.connector.register(
             topics=MessageEndpoints.scan_queue_request(),
             cb=self._scan_queue_request_callback,
-            parent=self,
         )
-        self._scan_queue_request_response_consumer = self.connector.consumer(
+        self.connector.register(
             topics=MessageEndpoints.scan_queue_request_response(),
             cb=self._scan_queue_request_response_callback,
-            parent=self,
         )
-        self._scan_status_consumer = self.connector.consumer(
-            topics=MessageEndpoints.scan_status(), cb=self._scan_status_callback, parent=self
-        )
-
-        self._scan_segment_consumer = self.connector.consumer(
-            topics=MessageEndpoints.scan_segment(), cb=self._scan_segment_callback, parent=self
+        self.connector.register(
+            topics=MessageEndpoints.scan_status(), cb=self._scan_status_callback
         )
 
-        self._baseline_consumer = self.connector.consumer(
-            topics=MessageEndpoints.scan_baseline(), cb=self._baseline_callback, parent=self
+        self.connector.register(
+            topics=MessageEndpoints.scan_segment(), cb=self._scan_segment_callback
         )
 
-        self._scan_queue_consumer.start()
-        self._scan_queue_request_consumer.start()
-        self._scan_queue_request_response_consumer.start()
-        self._scan_status_consumer.start()
-        self._scan_segment_consumer.start()
-        self._baseline_consumer.start()
+        self.connector.register(topics=MessageEndpoints.scan_baseline(), cb=self._baseline_callback)
 
     def update_with_queue_status(self, queue: messages.ScanQueueStatusMessage) -> None:
         """update storage with a new queue status message"""
@@ -84,7 +71,7 @@ class ScanManager:
 
         action = "deferred_pause" if deferred_pause else "pause"
         logger.info(f"Requesting {action}")
-        return self.producer.send(
+        return self.connector.send(
             MessageEndpoints.scan_queue_modification_request(),
             messages.ScanQueueModificationMessage(scanID=scanID, action=action, parameter={}),
         )
@@ -99,7 +86,7 @@ class ScanManager:
         if scanID is None:
             scanID = self.scan_storage.current_scanID
         logger.info("Requesting scan abortion")
-        self.producer.send(
+        self.connector.send(
             MessageEndpoints.scan_queue_modification_request(),
             messages.ScanQueueModificationMessage(scanID=scanID, action="abort", parameter={}),
         )
@@ -114,7 +101,7 @@ class ScanManager:
         if scanID is None:
             scanID = self.scan_storage.current_scanID
         logger.info("Requesting scan halt")
-        self.producer.send(
+        self.connector.send(
             MessageEndpoints.scan_queue_modification_request(),
             messages.ScanQueueModificationMessage(scanID=scanID, action="halt", parameter={}),
         )
@@ -129,7 +116,7 @@ class ScanManager:
         if scanID is None:
             scanID = self.scan_storage.current_scanID
         logger.info("Requesting scan continuation")
-        self.producer.send(
+        self.connector.send(
             MessageEndpoints.scan_queue_modification_request(),
             messages.ScanQueueModificationMessage(scanID=scanID, action="continue", parameter={}),
         )
@@ -137,7 +124,7 @@ class ScanManager:
     def request_queue_reset(self):
         """request a scan queue reset"""
         logger.info("Requesting a queue reset")
-        self.producer.send(
+        self.connector.send(
             MessageEndpoints.scan_queue_modification_request(),
             messages.ScanQueueModificationMessage(scanID=None, action="clear", parameter={}),
         )
@@ -151,7 +138,7 @@ class ScanManager:
         logger.info("Requesting to abort and repeat a scan")
         position = "replace" if replace else "append"
 
-        self.producer.send(
+        self.connector.send(
             MessageEndpoints.scan_queue_modification_request(),
             messages.ScanQueueModificationMessage(
                 scanID=scanID, action="restart", parameter={"position": position, "RID": requestID}
@@ -162,7 +149,7 @@ class ScanManager:
     @property
     def next_scan_number(self):
         """get the next scan number from redis"""
-        num = self.producer.get(MessageEndpoints.scan_number())
+        num = self.connector.get(MessageEndpoints.scan_number())
         if num is None:
             logger.warning("Failed to retrieve scan number from redis.")
             return -1
@@ -172,63 +159,51 @@ class ScanManager:
     @typechecked
     def next_scan_number(self, val: int):
         """set the next scan number in redis"""
-        return self.producer.set(MessageEndpoints.scan_number(), val)
+        return self.connector.set(MessageEndpoints.scan_number(), val)
 
     @property
     def next_dataset_number(self):
         """get the next dataset number from redis"""
-        return int(self.producer.get(MessageEndpoints.dataset_number()))
+        return int(self.connector.get(MessageEndpoints.dataset_number()))
 
     @next_dataset_number.setter
     @typechecked
     def next_dataset_number(self, val: int):
         """set the next dataset number in redis"""
-        return self.producer.set(MessageEndpoints.dataset_number(), val)
+        return self.connector.set(MessageEndpoints.dataset_number(), val)
 
-    @staticmethod
-    def _scan_queue_status_callback(msg, *, parent: ScanManager, **_kwargs) -> None:
+    def _scan_queue_status_callback(self, msg, **_kwargs) -> None:
         queue_status = msg.value
         if not queue_status:
             return
-        parent.update_with_queue_status(queue_status)
+        self.update_with_queue_status(queue_status)
 
-    @staticmethod
-    def _scan_queue_request_callback(msg, *, parent: ScanManager, **_kwargs) -> None:
+    def _scan_queue_request_callback(self, msg, **_kwargs) -> None:
         request = msg.value
-        parent.request_storage.update_with_request(request)
+        self.request_storage.update_with_request(request)
 
-    @staticmethod
-    def _scan_queue_request_response_callback(msg, *, parent: ScanManager, **_kwargs) -> None:
+    def _scan_queue_request_response_callback(self, msg, **_kwargs) -> None:
         response = msg.value
         logger.debug(response)
-        parent.request_storage.update_with_response(response)
+        self.request_storage.update_with_response(response)
 
-    @staticmethod
-    def _scan_status_callback(msg, *, parent: ScanManager, **_kwargs) -> None:
+    def _scan_status_callback(self, msg, **_kwargs) -> None:
         scan = msg.value
-        parent.scan_storage.update_with_scan_status(scan)
+        self.scan_storage.update_with_scan_status(scan)
 
-    @staticmethod
-    def _scan_segment_callback(msg, *, parent: ScanManager, **_kwargs) -> None:
+    def _scan_segment_callback(self, msg, **_kwargs) -> None:
         scan_msgs = msg.value
         if not isinstance(scan_msgs, list):
             scan_msgs = [scan_msgs]
         for scan_msg in scan_msgs:
-            parent.scan_storage.add_scan_segment(scan_msg)
+            self.scan_storage.add_scan_segment(scan_msg)
 
-    @staticmethod
-    def _baseline_callback(msg, *, parent: ScanManager, **_kwargs) -> None:
+    def _baseline_callback(self, msg, **_kwargs) -> None:
         msg = msg.value
-        parent.scan_storage.add_scan_baseline(msg)
+        self.scan_storage.add_scan_baseline(msg)
 
     def __str__(self) -> str:
         return "\n".join(self.queue_storage.describe_queue())
 
     def shutdown(self):
-        """stop the scan manager's threads"""
-        self._scan_queue_consumer.shutdown()
-        self._scan_queue_request_consumer.shutdown()
-        self._scan_queue_request_response_consumer.shutdown()
-        self._scan_status_consumer.shutdown()
-        self._scan_segment_consumer.shutdown()
-        self._baseline_consumer.shutdown()
+        pass

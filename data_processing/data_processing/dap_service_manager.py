@@ -11,7 +11,6 @@ class DAPServiceManager:
 
     def __init__(self, services: list) -> None:
         self.connector = None
-        self.producer = None
         self._started = False
         self.client = None
         self._dap_request_thread = None
@@ -24,13 +23,11 @@ class DAPServiceManager:
         """
         Start the dap request consumer.
         """
-        self._dap_request_thread = self.connector.consumer(
-            topics=MessageEndpoints.dap_request(), cb=self._dap_request_callback, parent=self
+        self.connector.register(
+            topics=MessageEndpoints.dap_request(), cb=self._dap_request_callback
         )
-        self._dap_request_thread.start()
 
-    @staticmethod
-    def _dap_request_callback(msg: MessageObject, *, parent: DAPServiceManager) -> None:
+    def _dap_request_callback(self, msg: MessageObject) -> None:
         """
         Callback function for dap request consumer.
 
@@ -41,7 +38,7 @@ class DAPServiceManager:
         dap_request_msg = messages.DAPRequestMessage.loads(msg.value)
         if not dap_request_msg:
             return
-        parent.process_dap_request(dap_request_msg)
+        self.process_dap_request(dap_request_msg)
 
     def process_dap_request(self, dap_request_msg: messages.DAPRequestMessage) -> None:
         """
@@ -153,7 +150,7 @@ class DAPServiceManager:
         dap_response_msg = messages.DAPResponseMessage(
             success=success, data=data, error=error, dap_request=dap_request_msg, metadata=metadata
         )
-        self.producer.set_and_publish(
+        self.connector.set_and_publish(
             MessageEndpoints.dap_response(metadata.get("RID")), dap_response_msg, expire=60
         )
 
@@ -168,7 +165,6 @@ class DAPServiceManager:
             return
         self.client = client
         self.connector = client.connector
-        self.producer = self.connector.producer()
         self._start_dap_request_consumer()
         self.update_available_dap_services()
         self.publish_available_services()
@@ -264,12 +260,12 @@ class DAPServiceManager:
         """send all available dap services to the broker"""
         msg = messages.AvailableResourceMessage(resource=self.available_dap_services)
         # pylint: disable=protected-access
-        self.producer.set(
+        self.connector.set(
             MessageEndpoints.dap_available_plugins(f"DAPServer/{self.client._service_id}"), msg
         )
 
     def shutdown(self) -> None:
         if not self._started:
             return
-        self._dap_request_thread.stop()
+        self.connector.shutdown()
         self._started = False

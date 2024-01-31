@@ -105,6 +105,6 @@ def test_scan_report_get_mv_status(scan_report, lrange_return, expected):
     scan_report.request.request = messages.ScanQueueMessage(
         scan_type="mv", parameter={"args": {"samx": [5], "samy": [5]}}
     )
-    with mock.patch.object(scan_report._client.device_manager.producer, "lrange") as mock_lrange:
+    with mock.patch.object(scan_report._client.device_manager.connector, "lrange") as mock_lrange:
         mock_lrange.return_value = lrange_return
         assert scan_report._get_mv_status() == expected

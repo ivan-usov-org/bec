@@ -78,7 +78,7 @@ class DAPPluginObjectBase:
                 converted_kwargs[key] = val
         kwargs = converted_kwargs
         request_id = str(uuid.uuid4())
-        self._client.producer.set_and_publish(
+        self._client.connector.set_and_publish(
             MessageEndpoints.dap_request(),
             messages.DAPRequestMessage(
                 dap_cls=self._plugin_info["class"],
@@ -110,7 +110,7 @@ class DAPPluginObjectBase:
         while True:
             if time.time() - start_time > timeout:
                 raise TimeoutError("Timeout waiting for DAP response.")
-            response = self._client.producer.get(MessageEndpoints.dap_response(request_id))
+            response = self._client.connector.get(MessageEndpoints.dap_response(request_id))
             if not response:
                 time.sleep(0.005)
                 continue
@@ -128,7 +128,7 @@ class DAPPluginObjectBase:
             return
         self._plugin_config["class_args"] = self._plugin_info.get("class_args")
         self._plugin_config["class_kwargs"] = self._plugin_info.get("class_kwargs")
-        self._client.producer.set_and_publish(
+        self._client.connector.set_and_publish(
             MessageEndpoints.dap_request(),
             messages.DAPRequestMessage(
                 dap_cls=self._plugin_info["class"],
@@ -149,7 +149,7 @@ class DAPPluginObject(DAPPluginObjectBase):
         """
         Get the data from last run.
         """
-        msg = self._client.producer.get_last(MessageEndpoints.processed_data(self._service_name))
+        msg = self._client.connector.get_last(MessageEndpoints.processed_data(self._service_name))
         if not msg:
             return None
         return self._convert_result(msg)

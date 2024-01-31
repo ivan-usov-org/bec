@@ -22,7 +22,6 @@ class SciLogConnector:
     def __init__(self, scihub: SciHub, connector: RedisConnector) -> None:
         self.scihub = scihub
         self.connector = connector
-        self.producer = self.connector.producer()
         self.host = None
         self.user = None
         self.user_secret = None
@@ -44,7 +43,7 @@ class SciLogConnector:
 
     def set_bec_token(self, token: str) -> None:
         """set the scilog token in redis"""
-        self.producer.set(
+        self.connector.set(
             MessageEndpoints.logbook(),
             msgpack.dumps({"url": self.host, "user": self.user, "token": f"Bearer {token}"}),
         )

@@ -8,12 +8,12 @@ from bec_lib.endpoints import MessageEndpoints
 
 if TYPE_CHECKING:
     from bec_lib import messages
-    from bec_lib.redis_connector import RedisProducer
+    from bec_lib.connector import ConnectorBase
 
 
 class AsyncDataHandler:
-    def __init__(self, producer: RedisProducer):
-        self.producer = producer
+    def __init__(self, connector: ConnectorBase):
+        self.connector = connector
 
     def get_async_data_for_scan(self, scan_id: str) -> dict[list]:
         """
@@ -25,7 +25,9 @@ class AsyncDataHandler:
         Returns:
             dict[list]: the async data for the scan sorted by device name
         """
-        async_device_keys = self.producer.keys(MessageEndpoints.device_async_readback(scan_id, "*"))
+        async_device_keys = self.connector.keys(
+            MessageEndpoints.device_async_readback(scan_id, "*")
+        )
         async_data = {}
         for device_key in async_device_keys:
             key = device_key.decode()
@@ -50,7 +52,7 @@ class AsyncDataHandler:
             list: the async data for the device
         """
         key = MessageEndpoints.device_async_readback(scan_id, device_name)
-        msgs = self.producer.xrange(key, min="-", max="+")
+        msgs = self.connector.xrange(key, min="-", max="+")
         if not msgs:
             return []
         return self.process_async_data(msgs)

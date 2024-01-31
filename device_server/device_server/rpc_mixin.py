@@ -70,7 +70,7 @@ class RPCMixin:
     def _send_rpc_result_to_client(
         self, device: str, instr_params: dict, res: Any, result: StringIO
     ):
-        self.producer.set(
+        self.connector.set(
             MessageEndpoints.device_rpc(instr_params.get("rpc_id")),
             messages.DeviceRPCMessage(
                 device=device, return_val=res, out=result.getvalue(), success=True
@@ -175,7 +175,7 @@ class RPCMixin:
         }
         logger.info(f"Received exception: {exc_formatted}, {exc}")
         instr_params = instr.content.get("parameter")
-        self.producer.set(
+        self.connector.set(
             MessageEndpoints.device_rpc(instr_params.get("rpc_id")),
             messages.DeviceRPCMessage(
                 device=instr.content["device"], return_val=None, out=exc_formatted, success=False

@@ -80,10 +80,13 @@ class FileWriterManager(BECService):
         self._lock = threading.RLock()
         self.file_writer_config = self._service_config.service_config.get("file_writer")
         self.writer_mixin = FileWriterMixin(self.file_writer_config)
-        self.producer = self.connector.producer()
         self._start_device_manager()
-        self._start_scan_segment_consumer()
-        self._start_scan_status_consumer()
+        self.connector.register(
+            patterns=MessageEndpoints.scan_segment(), cb=self._scan_segment_callback, parent=self
+        )
+        self.connector.register(
+            MessageEndpoints.scan_status(), cb=self._scan_status_callback, parent=self
+        )
         self.scan_storage = {}
         self.file_writer = NexusFileWriter(self)
 
@@ -92,20 +95,7 @@ class FileWriterManager(BECService):
         self.device_manager = DeviceManagerBase(self)
         self.device_manager.initialize([self.bootstrap_server])
 
-    def _start_scan_segment_consumer(self):
-        self._scan_segment_consumer = self.connector.consumer(
-            pattern=MessageEndpoints.scan_segment(), cb=self._scan_segment_callback, parent=self
-        )
-        self._scan_segment_consumer.start()
-
-    def _start_scan_status_consumer(self):
-        self._scan_status_consumer = self.connector.consumer(
-            MessageEndpoints.scan_status(), cb=self._scan_status_callback, parent=self
-        )
-        self._scan_status_consumer.start()
-
-    @staticmethod
-    def _scan_segment_callback(msg: MessageObject, *, parent: FileWriterManager):
+    def _scan_segment_callback(self, msg: MessageObject, *, parent: FileWriterManager):
         msgs = msg.value
         for scan_msg in msgs:
             parent.insert_to_scan_storage(scan_msg)
@@ -188,7 +178,7 @@ class FileWriterManager(BECService):
             return
         if self.scan_storage[scanID].baseline:
             return
-        baseline = self.producer.get(MessageEndpoints.public_scan_baseline(scanID))
+        baseline = self.connector.get(MessageEndpoints.public_scan_baseline(scanID))
         if not baseline:
             return
         self.scan_storage[scanID].baseline = baseline.content["data"]
@@ -205,13 +195,13 @@ class FileWriterManager(BECService):
         """
         if not self.scan_storage.get(scanID):
             return
-        msgs = self.producer.keys(MessageEndpoints.public_file(scanID, "*"))
+        msgs = self.connector.keys(MessageEndpoints.public_file(scanID, "*"))
         if not msgs:
             return
 
         # extract name from 'public/<scanID>/file/<name>'
         names = [msg.decode().split("/")[-1] for msg in msgs]
-        file_msgs = [self.producer.get(msg.decode()) for msg in msgs]
+        file_msgs = [self.connector.get(msg.decode()) for msg in msgs]
         if not file_msgs:
             return
         for name, file_msg in zip(names, file_msgs):
@@ -236,7 +226,7 @@ class FileWriterManager(BECService):
         if not self.scan_storage.get(scanID):
             return
         # get all async devices
-        async_device_keys = self.producer.keys(MessageEndpoints.device_async_readback(scanID, "*"))
+        async_device_keys = self.connector.keys(MessageEndpoints.device_async_readback(scanID, "*"))
         if not async_device_keys:
             return
         for device_key in async_device_keys:
@@ -244,7 +234,7 @@ class FileWriterManager(BECService):
             device_name = key.split(MessageEndpoints.device_async_readback(scanID, ""))[-1].split(
                 ":"
             )[0]
-            msgs = self.producer.xrange(key, min="-", max="+")
+            msgs = self.connector.xrange(key, min="-", max="+")
             if not msgs:
                 continue
             self._process_async_data(msgs, scanID, device_name)
@@ -298,7 +288,7 @@ class FileWriterManager(BECService):
 
         try:
             file_path = self.writer_mixin.compile_full_filename(scan, file_suffix)
-            self.producer.set_and_publish(
+            self.connector.set_and_publish(
                 MessageEndpoints.public_file(scanID, "master"),
                 messages.FileMessage(file_path=file_path, done=False),
             )
@@ -319,7 +309,7 @@ class FileWriterManager(BECService):
             )
             successful = False
         self.scan_storage.pop(scanID)
-        self.producer.set_and_publish(
+        self.connector.set_and_publish(
             MessageEndpoints.public_file(scanID, "master"),
             messages.FileMessage(file_path=file_path, successful=successful),
         )

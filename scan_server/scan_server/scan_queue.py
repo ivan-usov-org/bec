@@ -51,11 +51,10 @@ class QueueManager:
     def __init__(self, parent) -> None:
         self.parent = parent
         self.connector = parent.connector
-        self.producer = parent.producer
         self.num_queues = 1
         self.key = ""
         self.queues = {}
-        self._start_scan_queue_consumer()
+        self._start_scan_queue_register()
         self._lock = threading.RLock()
 
     def add_to_queue(self, scan_queue: str, msg: messages.ScanQueueMessage, position=-1) -> None:
@@ -91,17 +90,15 @@ class QueueManager:
             self.queues[queue_name] = ScanQueue(self, queue_name=queue_name)
             self.queues[queue_name].start_worker()
 
-    def _start_scan_queue_consumer(self) -> None:
-        self._scan_queue_consumer = self.connector.consumer(
+    def _start_scan_queue_register(self) -> None:
+        self.connector.register(
             MessageEndpoints.scan_queue_insert(), cb=self._scan_queue_callback, parent=self
         )
-        self._scan_queue_modification_consumer = self.connector.consumer(
+        self.connector.register(
             MessageEndpoints.scan_queue_modification(),
             cb=self._scan_queue_modification_callback,
             parent=self,
         )
-        self._scan_queue_consumer.start()
-        self._scan_queue_modification_consumer.start()
 
     @staticmethod
     def _scan_queue_callback(msg, parent, **_kwargs) -> None:
@@ -233,7 +230,7 @@ class QueueManager:
         logger.info("New scan queue:")
         for queue in self.describe_queue():
             logger.info(f"\n {queue}")
-        self.producer.set_and_publish(
+        self.connector.set_and_publish(
             MessageEndpoints.scan_queue_status(),
             messages.ScanQueueStatusMessage(queue=queue_export),
         )
@@ -685,7 +682,7 @@ class InstructionQueueItem:
         self.instructions = []
         self.parent = parent
         self.queue = RequestBlockQueue(instruction_queue=self, assembler=assembler)
-        self.producer = self.parent.queue_manager.producer
+        self.connector = self.parent.queue_manager.connector
         self._is_scan = False
         self.is_active = False  # set to true while a worker is processing the instructions
         self.completed = False
@@ -790,7 +787,7 @@ class InstructionQueueItem:
         msg = messages.ScanQueueHistoryMessage(
             status=self.status.name, queueID=self.queue_id, info=self.describe()
         )
-        self.parent.queue_manager.producer.lpush(
+        self.parent.queue_manager.connector.lpush(
             MessageEndpoints.scan_queue_history(), msg, max_size=100
         )
 

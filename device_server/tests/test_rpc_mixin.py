@@ -13,7 +13,7 @@ from device_server.rpc_mixin import RPCMixin
 def rpc_cls():
     rpc_mixin = RPCMixin()
     rpc_mixin.connector = mock.MagicMock()
-    rpc_mixin.producer = mock.MagicMock()
+    rpc_mixin.connector = mock.MagicMock()
     rpc_mixin.device_manager = mock.MagicMock()
     yield rpc_mixin
 
@@ -93,7 +93,7 @@ def test_get_result_from_rpc_list_from_stage(rpc_cls):
 
 def test_send_rpc_exception(rpc_cls, instr):
     rpc_cls._send_rpc_exception(Exception(), instr)
-    rpc_cls.producer.set.assert_called_once_with(
+    rpc_cls.connector.set.assert_called_once_with(
         MessageEndpoints.device_rpc("rpc_id"),
         messages.DeviceRPCMessage(
             device="device",
@@ -108,7 +108,7 @@ def test_send_rpc_result_to_client(rpc_cls):
     result = mock.MagicMock()
     result.getvalue.return_value = "result"
     rpc_cls._send_rpc_result_to_client("device", {"rpc_id": "rpc_id"}, 1, result)
-    rpc_cls.producer.set.assert_called_once_with(
+    rpc_cls.connector.set.assert_called_once_with(
         MessageEndpoints.device_rpc("rpc_id"),
         messages.DeviceRPCMessage(device="device", return_val=1, out="result", success=True),
         expire=1800,

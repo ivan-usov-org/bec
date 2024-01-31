@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 from bec_lib import messages
 from bec_lib.devicemanager import DeviceContainer
-from bec_lib.tests.utils import ProducerMock
+from bec_lib.tests.utils import ConnectorMock
 
 from scan_plugins.LamNIFermatScan import LamNIFermatScan
 from scan_plugins.otf_scan import OTFScan
@@ -80,7 +80,7 @@ class DeviceMock:
 
 class DMMock:
     devices = DeviceContainer()
-    producer = ProducerMock()
+    connector = ConnectorMock()
 
     def add_device(self, name):
         self.devices[name] = DeviceMock(name)
@@ -1099,7 +1099,7 @@ def test_pre_scan_macro():
         device_manager=device_manager, parameter=scan_msg.content["parameter"]
     )
     with mock.patch.object(
-        request.device_manager.producer,
+        request.device_manager.connector,
         "lrange",
         new_callable=mock.PropertyMock,
         return_value=macros,

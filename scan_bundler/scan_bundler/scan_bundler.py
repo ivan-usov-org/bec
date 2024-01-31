@@ -20,9 +20,23 @@ class ScanBundler(BECService):
 
         self.device_manager = None
         self._start_device_manager()
-        self._start_device_read_consumer()
-        self._start_scan_queue_consumer()
-        self._start_scan_status_consumer()
+        self.connector.register(
+            patterns=MessageEndpoints.device_read("*"),
+            cb=self._device_read_callback,
+            name="device_read_register",
+        )
+        self.connector.register(
+            MessageEndpoints.scan_queue_status(),
+            cb=self._scan_queue_callback,
+            group_id="scan_bundler",
+            name="scan_queue_register",
+        )
+        self.connector.register(
+            MessageEndpoints.scan_status(),
+            cb=self._scan_status_callback,
+            group_id="scan_bundler",
+            name="scan_status_register",
+        )
 
         self.sync_storage = {}
         self.monitored_devices = {}
@@ -56,56 +70,24 @@ class ScanBundler(BECService):
         self.device_manager = DeviceManagerBase(self)
         self.device_manager.initialize(self.bootstrap_server)
 
-    def _start_device_read_consumer(self):
-        self._device_read_consumer = self.connector.consumer(
-            pattern=MessageEndpoints.device_read("*"),
-            cb=self._device_read_callback,
-            parent=self,
-            name="device_read_consumer",
-        )
-        self._device_read_consumer.start()
-
-    def _start_scan_queue_consumer(self):
-        self._scan_queue_consumer = self.connector.consumer(
-            MessageEndpoints.scan_queue_status(),
-            cb=self._scan_queue_callback,
-            group_id="scan_bundler",
-            parent=self,
-            name="scan_queue_consumer",
-        )
-        self._scan_queue_consumer.start()
-
-    def _start_scan_status_consumer(self):
-        self._scan_status_consumer = self.connector.consumer(
-            MessageEndpoints.scan_status(),
-            cb=self._scan_status_callback,
-            group_id="scan_bundler",
-            parent=self,
-            name="scan_status_consumer",
-        )
-        self._scan_status_consumer.start()
-
-    @staticmethod
-    def _device_read_callback(msg, parent, **_kwargs):
+    def _device_read_callback(self, msg, **_kwargs):
         # pylint: disable=protected-access
         dev = msg.topic.split(MessageEndpoints._device_read + "/")[-1]
         msgs = msg.value
         logger.debug(f"Received reading from device {dev}")
         if not isinstance(msgs, list):
             msgs = [msgs]
-        task = parent.executor.submit(parent._add_device_to_storage, msgs, dev)
-        parent.executor_tasks.append(task)
+        task = self.executor.submit(self._add_device_to_storage, msgs, dev)
+        self.executor_tasks.append(task)
 
-    @staticmethod
-    def _scan_queue_callback(msg, parent, **_kwargs):
+    def _scan_queue_callback(self, msg, **_kwargs):
         msg = msg.value
         logger.trace(msg)
-        parent.current_queue = msg.content["queue"]["primary"].get("info")
+        self.current_queue = msg.content["queue"]["primary"].get("info")
 
-    @staticmethod
-    def _scan_status_callback(msg, parent, **_kwargs):
+    def _scan_status_callback(self, msg, **_kwargs):
         msg = msg.value
-        parent.handle_scan_status_message(msg)
+        self.handle_scan_status_message(msg)
 
     def handle_scan_status_message(self, msg: messages.ScanStatusMessage) -> None:
         """handle scan status messages"""
@@ -270,7 +252,7 @@ class ScanBundler(BECService):
             }
 
     def _get_scan_status_history(self, length):
-        return self.producer.lrange(MessageEndpoints.scan_status() + "_list", length * -1, -1)
+        return self.connector.lrange(MessageEndpoints.scan_status() + "_list", length * -1, -1)
 
     def _wait_for_scanID(self, scanID, timeout_time=10):
         elapsed_time = 0
@@ -344,10 +326,10 @@ class ScanBundler(BECService):
                 self.sync_storage[scanID][pointID][dev.name] = read
 
     def _get_last_device_readback(self, devices: list) -> list:
-        pipe = self.producer.pipeline()
+        pipe = self.connector.pipeline()
         for dev in devices:
-            self.producer.get(MessageEndpoints.device_readback(dev.name), pipe)
-        return [msg.content["signals"] for msg in self.producer.execute_pipeline(pipe)]
+            self.connector.get(MessageEndpoints.device_readback(dev.name), pipe)
+        return [msg.content["signals"] for msg in self.connector.execute_pipeline(pipe)]
 
     def cleanup_storage(self):
         """remove old scanIDs to free memory"""

@@ -16,17 +16,11 @@ class ConfigUpdateHandler:
     def __init__(self, device_manager: DeviceManagerDS) -> None:
         self.device_manager = device_manager
         self.connector = self.device_manager.connector
-        self._config_request_handler = None
-
-        self._start_config_handler()
-
-    def _start_config_handler(self) -> None:
-        self._config_request_handler = self.connector.consumer(
+        self.connector.register(
             MessageEndpoints.device_server_config_request(),
             cb=self._device_config_callback,
             parent=self,
         )
-        self._config_request_handler.start()
 
     @staticmethod
     def _device_config_callback(msg, *, parent, **_kwargs) -> None:
@@ -74,7 +68,7 @@ class ConfigUpdateHandler:
             accepted=accepted, message=error_msg, metadata=metadata
         )
         RID = metadata.get("RID")
-        self.device_manager.producer.set(
+        self.device_manager.connector.set(
             MessageEndpoints.device_config_request_response(RID), msg, expire=60
         )
 
@@ -97,7 +91,7 @@ class ConfigUpdateHandler:
                         "low": device.obj.low_limit_travel.get(),
                         "high": device.obj.high_limit_travel.get(),
                     }
-                    self.device_manager.producer.set_and_publish(
+                    self.device_manager.connector.set_and_publish(
                         MessageEndpoints.device_limits(device.name),
                         messages.DeviceMessage(signals=limits),
                     )

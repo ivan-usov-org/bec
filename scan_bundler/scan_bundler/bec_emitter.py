@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 class BECEmitter(EmitterBase):
     def __init__(self, scan_bundler: ScanBundler) -> None:
-        super().__init__(scan_bundler.producer)
+        super().__init__(scan_bundler.connector)
         self.scan_bundler = scan_bundler
 
     def on_scan_point_emit(self, scanID: str, pointID: int):
@@ -46,9 +46,16 @@ class BECEmitter(EmitterBase):
             data=sb.sync_storage[scanID]["baseline"],
             metadata=sb.sync_storage[scanID]["info"],
         )
-        pipe = sb.producer.pipeline()
-        sb.producer.set(
-            MessageEndpoints.public_scan_baseline(scanID=scanID), msg, expire=1800, pipe=pipe
+        pipe = sb.connector.pipeline()
+        sb.connector.set(
+            MessageEndpoints.public_scan_baseline(scanID=scanID),
+            msg,
+            expire=1800,
+            pipe=pipe,
         )
-        sb.producer.set_and_publish(MessageEndpoints.scan_baseline(), msg, pipe=pipe)
+        sb.connector.set_and_publish(
+            MessageEndpoints.scan_baseline(),
+            msg,
+            pipe=pipe,
+        )
         pipe.execute()

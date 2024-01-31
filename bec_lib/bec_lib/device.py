@@ -10,7 +10,7 @@ from typeguard import typechecked
 from bec_lib import messages
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
-from bec_lib.redis_connector import RedisProducer
+from bec_lib.redis_connector import RedisConnector
 
 logger = bec_logger.logger
 
@@ -61,15 +61,15 @@ class ReadoutPriority(str, enum.Enum):
 
 
 class Status:
-    def __init__(self, producer: RedisProducer, RID: str) -> None:
+    def __init__(self, connector: RedisConnector, RID: str) -> None:
         """
         Status object for RPC calls
 
         Args:
-            producer (RedisProducer): Redis producer
+            connector (RedisConnector): Redis connector
             RID (str): Request ID
         """
-        self._producer = producer
+        self._connector = connector
         self._RID = RID
 
     def __eq__(self, __value: object) -> bool:
@@ -91,7 +91,7 @@ class Status:
                 raise TimeoutError()
 
         while True:
-            request_status = self._producer.lrange(
+            request_status = self._connector.lrange(
                 MessageEndpoints.device_req_status(self._RID), 0, -1
             )
             if request_status:
@@ -251,7 +251,7 @@ class DeviceBase:
         if not isinstance(return_val, dict):
             return return_val
         if return_val.get("type") == "status" and return_val.get("RID"):
-            return Status(self.root.parent.producer, return_val.get("RID"))
+            return Status(self.root.parent.connector, return_val.get("RID"))
         return return_val
 
     def _get_rpc_response(self, request_id, rpc_id) -> Any:
@@ -267,7 +267,7 @@ class DeviceBase:
                 f" {scan_queue_request.response.content['message']}"
             )
         while True:
-            msg = self.root.parent.producer.get(MessageEndpoints.device_rpc(rpc_id))
+            msg = self.root.parent.connector.get(MessageEndpoints.device_rpc(rpc_id))
             if msg:
                 break
             time.sleep(0.01)
@@ -296,7 +296,7 @@ class DeviceBase:
             msg = self._prepare_rpc_msg(rpc_id, request_id, device, func_call, *args, **kwargs)
 
             # send RPC message
-            self.root.parent.producer.send(MessageEndpoints.scan_queue_request(), msg)
+            self.root.parent.connector.send(MessageEndpoints.scan_queue_request(), msg)
 
             # wait for RPC response
             if not wait_for_rpc_response:
@@ -496,7 +496,7 @@ class DeviceBase:
 
     # def read(self, cached, filter_readback=True):
     #     """get the last reading from a device"""
-    #     val = self.parent.producer.get(MessageEndpoints.device_read(self.name))
+    #     val = self.parent.connector.get(MessageEndpoints.device_read(self.name))
     #     if not val:
     #         return None
     #     if filter_readback:
@@ -505,7 +505,7 @@ class DeviceBase:
     #
     # def readback(self, filter_readback=True):
     #     """get the last readback value from a device"""
-    #     val = self.parent.producer.get(MessageEndpoints.device_readback(self.name))
+    #     val = self.parent.connector.get(MessageEndpoints.device_readback(self.name))
     #     if not val:
     #         return None
     #     if filter_readback:
@@ -515,7 +515,7 @@ class DeviceBase:
     # @property
     # def device_status(self):
     #     """get the current status of the device"""
-    #     val = self.parent.producer.get(MessageEndpoints.device_status(self.name))
+    #     val = self.parent.connector.get(MessageEndpoints.device_status(self.name))
     #     if val is None:
     #         return val
     #     val = DeviceStatusMessage.loads(val)
@@ -524,7 +524,7 @@ class DeviceBase:
     # @property
     # def signals(self):
     #     """get the last signals from a device"""
-    #     val = self.parent.producer.get(MessageEndpoints.device_read(self.name))
+    #     val = self.parent.connector.get(MessageEndpoints.device_read(self.name))
     #     if val is None:
     #         return None
     #     self._signals = DeviceMessage.loads(val).content["signals"]
@@ -593,11 +593,11 @@ class OphydInterfaceBase(DeviceBase):
             if is_config_signal:
                 return self.read_configuration(cached=cached)
             if use_readback:
-                val = self.root.parent.producer.get(
+                val = self.root.parent.connector.get(
                     MessageEndpoints.device_readback(self.root.name)
                 )
             else:
-                val = self.root.parent.producer.get(MessageEndpoints.device_read(self.root.name))
+                val = self.root.parent.connector.get(MessageEndpoints.device_read(self.root.name))
 
             if not val:
                 return None
@@ -623,7 +623,7 @@ class OphydInterfaceBase(DeviceBase):
             if is_signal and not is_config_signal:
                 return self.read(cached=True)
 
-            val = self.root.parent.producer.get(
+            val = self.root.parent.connector.get(
                 MessageEndpoints.device_read_configuration(self.root.name)
             )
             if not val:
@@ -766,7 +766,7 @@ class AdjustableMixin:
         """
         Returns the device limits.
         """
-        limit_msg = self.root.parent.producer.get(MessageEndpoints.device_limits(self.root.name))
+        limit_msg = self.root.parent.connector.get(MessageEndpoints.device_limits(self.root.name))
         if not limit_msg:
             return [0, 0]
         limits = [

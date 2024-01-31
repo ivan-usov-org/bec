@@ -48,23 +48,21 @@ class AlarmBase(Exception):
 class AlarmHandler:
     def __init__(self, connector: RedisConnector) -> None:
         self.connector = connector
-        self.alarm_consumer = None
         self.alarms_stack = deque(maxlen=100)
         self._raised_alarms = deque(maxlen=100)
         self._lock = threading.RLock()
 
     def start(self):
         """start the alarm handler and its subscriptions"""
-        self.alarm_consumer = self.connector.consumer(
+        self.connector.register(
             topics=MessageEndpoints.alarm(),
             name="AlarmHandler",
-            cb=self._alarm_consumer_callback,
+            cb=self._alarm_register_callback,
             parent=self,
         )
-        self.alarm_consumer.start()
 
     @staticmethod
-    def _alarm_consumer_callback(msg, *, parent, **_kwargs):
+    def _alarm_register_callback(msg, *, parent, **_kwargs):
         parent.add_alarm(msg.value)
 
     @threadlocked
@@ -136,4 +134,4 @@ class AlarmHandler:
 
     def shutdown(self):
         """shutdown the alarm handler"""
-        self.alarm_consumer.shutdown()
+        self.connector.shutdown()

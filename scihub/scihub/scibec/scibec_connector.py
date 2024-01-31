@@ -31,7 +31,6 @@ class SciBecConnector:
     def __init__(self, scihub: SciHub, connector: ConnectorBase) -> None:
         self.scihub = scihub
         self.connector = connector
-        self.producer = connector.producer()
         self.scibec = None
         self.host = None
         self.target_bl = None
@@ -132,25 +131,24 @@ class SciBecConnector:
         """
         Set the scibec account in redis
         """
-        self.producer.set(
+        self.connector.set(
             MessageEndpoints.scibec(),
             messages.CredentialsMessage(credentials={"url": self.host, "token": f"Bearer {token}"}),
         )
 
     def set_redis_config(self, config):
         msg = messages.AvailableResourceMessage(resource=config)
-        self.producer.set(MessageEndpoints.device_config(), msg)
+        self.connector.set(MessageEndpoints.device_config(), msg)
 
     def _start_metadata_handler(self) -> None:
         self._metadata_handler = SciBecMetadataHandler(self)
 
     def _start_config_request_handler(self) -> None:
-        self._config_request_handler = self.connector.consumer(
+        self._config_request_handler = self.connector.register(
             MessageEndpoints.device_config_request(),
             cb=self._device_config_request_callback,
             parent=self,
         )
-        self._config_request_handler.start()
 
     @staticmethod
     def _device_config_request_callback(msg, *, parent, **_kwargs) -> None:
@@ -159,7 +157,7 @@ class SciBecConnector:
 
     def connect_to_scibec(self):
         """
-        Connect to SciBec and set the producer to the write account
+        Connect to SciBec and set the connector to the write account
         """
         self._load_environment()
         if not self._env_configured:
@@ -205,7 +203,7 @@ class SciBecConnector:
         write_account = self.scibec_info["activeExperiment"]["writeAccount"]
         if write_account[0] == "p":
             write_account = write_account.replace("p", "e")
-        self.producer.set(MessageEndpoints.account(), write_account.encode())
+        self.connector.set(MessageEndpoints.account(), write_account.encode())
 
     def shutdown(self):
         """

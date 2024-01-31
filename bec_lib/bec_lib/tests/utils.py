@@ -56,7 +56,7 @@ def queue_is_empty(queue) -> bool:  # pragma: no cover
 
 
 def get_queue(bec):  # pragma: no cover
-    return bec.queue.producer.get(MessageEndpoints.scan_queue_status())
+    return bec.queue.connector.get(MessageEndpoints.scan_queue_status())
 
 
 def wait_for_empty_queue(bec):  # pragma: no cover
@@ -484,7 +484,6 @@ def bec_client():
         with open(f"{dir_path}/tests/test_config.yaml", "r", encoding="utf-8") as f:
             builtins.__dict__["test_session"] = create_session_from_config(yaml.safe_load(f))
     device_manager._session = builtins.__dict__["test_session"]
-    device_manager.producer = device_manager.connector.producer()
     client.wait_for_service = lambda service_name: None
     device_manager._load_session()
     for name, dev in device_manager.devices.items():
@@ -497,35 +496,21 @@ def bec_client():
 
 class PipelineMock:  # pragma: no cover
     _pipe_buffer = []
-    _producer = None
+    _connector = None
 
-    def __init__(self, producer) -> None:
-        self._producer = producer
+    def __init__(self, connector) -> None:
+        self._connector = connector
 
     def execute(self):
-        if not self._producer.store_data:
+        if not self._connector.store_data:
             self._pipe_buffer = []
             return []
         res = [
-            getattr(self._producer, method)(*args, **kwargs)
+            getattr(self._connector, method)(*args, **kwargs)
             for method, args, kwargs in self._pipe_buffer
         ]
         self._pipe_buffer = []
         return res
-
-
-class ConsumerMock:  # pragma: no cover
-    def __init__(self) -> None:
-        self.signal_event = SignalMock()
-
-    def start(self):
-        pass
-
-    def join(self):
-        pass
-
-    def shutdown(self):
-        pass
 
 
 class SignalMock:  # pragma: no cover
@@ -536,11 +521,35 @@ class SignalMock:  # pragma: no cover
         self.is_set = True
 
 
-class ProducerMock:  # pragma: no cover
-    def __init__(self, store_data=True) -> None:
+class ConnectorMock(ConnectorBase):  # pragma: no cover
+    def __init__(self, bootstrap_server="localhost:0000", store_data=True):
+        super().__init__(bootstrap_server)
         self.message_sent = []
         self._get_buffer = {}
         self.store_data = store_data
+
+    def raise_alarm(
+        self, severity: Alarms, alarm_type: str, source: str, msg: dict, metadata: dict
+    ):
+        pass
+
+    def log_error(self, *args, **kwargs):
+        pass
+
+    def shutdown(self):
+        pass
+
+    def register(self, *args, **kwargs):
+        pass
+
+    def set(self, *args, **kwargs):
+        pass
+
+    def set_and_publish(self, *args, **kwargs):
+        pass
+
+    def keys(self, *args, **kwargs):
+        return []
 
     def set(self, topic, msg, pipe=None, expire: int = None):
         if pipe:
@@ -592,9 +601,6 @@ class ProducerMock:  # pragma: no cover
         self._get_buffer.pop(topic, None)
         return val
 
-    def keys(self, pattern: str) -> list:
-        return []
-
     def pipeline(self):
         return PipelineMock(self)
 
@@ -607,29 +613,6 @@ class ProducerMock:  # pragma: no cover
         if pipe:
             pipe._pipe_buffer.append(("lrange", (topic, index, msgs), {}))
             return
-
-
-class ConnectorMock(ConnectorBase):  # pragma: no cover
-    def __init__(self, bootstrap_server: list, store_data=True):
-        super().__init__(bootstrap_server)
-        self.store_data = store_data
-
-    def consumer(self, *args, **kwargs) -> ConsumerMock:
-        return ConsumerMock()
-
-    def producer(self, *args, **kwargs):
-        return ProducerMock(self.store_data)
-
-    def raise_alarm(
-        self, severity: Alarms, alarm_type: str, source: str, msg: dict, metadata: dict
-    ):
-        pass
-
-    def log_error(self, *args, **kwargs):
-        pass
-
-    def shutdown(self):
-        pass
 
 
 def create_session_from_config(config: dict) -> dict:

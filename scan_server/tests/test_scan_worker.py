@@ -4,7 +4,7 @@ from unittest import mock
 
 import pytest
 from bec_lib import MessageEndpoints, messages
-from bec_lib.tests.utils import ProducerMock, dm, dm_with_devices
+from bec_lib.tests.utils import ConnectorMock, dm, dm_with_devices
 from utils import scan_server_mock
 
 from scan_server.errors import DeviceMessageError, ScanAbortion
@@ -22,7 +22,7 @@ from scan_server.scan_worker import ScanWorker
 
 @pytest.fixture
 def scan_worker_mock(scan_server_mock) -> ScanWorker:
-    scan_server_mock.device_manager.producer = mock.MagicMock()
+    scan_server_mock.device_manager.connector = mock.MagicMock()
     scan_worker = ScanWorker(parent=scan_server_mock)
     yield scan_worker
 
@@ -295,7 +295,7 @@ def test_wait_for_devices(scan_worker_mock, instructions, wait_type):
 def test_complete_devices(scan_worker_mock, instructions):
     worker = scan_worker_mock
     with mock.patch.object(worker, "_wait_for_status") as wait_for_status_mock:
-        with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
+        with mock.patch.object(worker.device_manager.connector, "send") as send_mock:
             worker.complete_devices(instructions)
             if instructions.content["device"]:
                 devices = instructions.content["device"]
@@ -328,7 +328,7 @@ def test_complete_devices(scan_worker_mock, instructions):
 )
 def test_pre_scan(scan_worker_mock, instructions):
     worker = scan_worker_mock
-    with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
+    with mock.patch.object(worker.device_manager.connector, "send") as send_mock:
         with mock.patch.object(worker, "_wait_for_status") as wait_for_status_mock:
             worker.pre_scan(instructions)
             devices = [dev.name for dev in worker.device_manager.devices.enabled_devices]
@@ -457,12 +457,12 @@ def test_pre_scan(scan_worker_mock, instructions):
 )
 def test_check_for_failed_movements(scan_worker_mock, device_status, devices, instr, abort):
     worker = scan_worker_mock
-    worker.device_manager.producer = ProducerMock()
+    worker.device_manager.connector = ConnectorMock()
     if abort:
         with pytest.raises(ScanAbortion):
-            worker.device_manager.producer._get_buffer[MessageEndpoints.device_readback("samx")] = (
-                messages.DeviceMessage(signals={"samx": {"value": 4}}, metadata={})
-            )
+            worker.device_manager.connector._get_buffer[
+                MessageEndpoints.device_readback("samx")
+            ] = messages.DeviceMessage(signals={"samx": {"value": 4}}, metadata={})
             worker._check_for_failed_movements(device_status, devices, instr)
     else:
         worker._check_for_failed_movements(device_status, devices, instr)
@@ -577,12 +577,12 @@ def test_check_for_failed_movements(scan_worker_mock, device_status, devices, in
 )
 def test_wait_for_idle(scan_worker_mock, msg1, msg2, req_msg: messages.DeviceReqStatusMessage):
     worker = scan_worker_mock
-    worker.device_manager.producer = ProducerMock()
+    worker.device_manager.connector = ConnectorMock()
 
     with mock.patch.object(
         worker.validate, "get_device_status", return_value=[req_msg]
     ) as device_status:
-        worker.device_manager.producer._get_buffer[MessageEndpoints.device_readback("samx")] = (
+        worker.device_manager.connector._get_buffer[MessageEndpoints.device_readback("samx")] = (
             messages.DeviceMessage(signals={"samx": {"value": 4}}, metadata={})
         )
 
@@ -635,7 +635,7 @@ def test_wait_for_idle(scan_worker_mock, msg1, msg2, req_msg: messages.DeviceReq
 )
 def test_wait_for_read(scan_worker_mock, msg1, msg2, req_msg: messages.DeviceReqStatusMessage):
     worker = scan_worker_mock
-    worker.device_manager.producer = ProducerMock()
+    worker.device_manager.connector = ConnectorMock()
 
     with mock.patch.object(
         worker.validate, "get_device_status", return_value=[req_msg]
@@ -643,9 +643,9 @@ def test_wait_for_read(scan_worker_mock, msg1, msg2, req_msg: messages.DeviceReq
         with mock.patch.object(worker, "_check_for_interruption") as interruption_mock:
             assert worker._groups == {}
             worker._groups["scan_motor"] = {"samx": 3, "samy": 4}
-            worker.device_manager.producer._get_buffer[MessageEndpoints.device_readback("samx")] = (
-                messages.DeviceMessage(signals={"samx": {"value": 4}}, metadata={})
-            )
+            worker.device_manager.connector._get_buffer[
+                MessageEndpoints.device_readback("samx")
+            ] = messages.DeviceMessage(signals={"samx": {"value": 4}}, metadata={})
             worker._add_wait_group(msg1)
             worker._wait_for_read(msg2)
             assert worker._groups == {"scan_motor": {"samy": 4}}
@@ -730,7 +730,7 @@ def test_wait_for_device_server(scan_worker_mock):
 )
 def test_set_devices(scan_worker_mock, instr):
     worker = scan_worker_mock
-    with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
+    with mock.patch.object(worker.device_manager.connector, "send") as send_mock:
         worker.set_devices(instr)
         send_mock.assert_called_once_with(MessageEndpoints.device_instructions(), instr)
 
@@ -755,7 +755,7 @@ def test_set_devices(scan_worker_mock, instr):
 )
 def test_trigger_devices(scan_worker_mock, instr):
     worker = scan_worker_mock
-    with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
+    with mock.patch.object(worker.device_manager.connector, "send") as send_mock:
         worker.trigger_devices(instr)
         devices = [
             dev.name for dev in worker.device_manager.devices.get_software_triggered_devices()
@@ -797,7 +797,7 @@ def test_trigger_devices(scan_worker_mock, instr):
 )
 def test_send_rpc(scan_worker_mock, instr):
     worker = scan_worker_mock
-    with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
+    with mock.patch.object(worker.device_manager.connector, "send") as send_mock:
         worker.send_rpc(instr)
         send_mock.assert_called_once_with(MessageEndpoints.device_instructions(), instr)
 
@@ -840,7 +840,7 @@ def test_read_devices(scan_worker_mock, instr):
         instr_devices = []
     worker.readout_priority.update({"monitored": instr_devices})
     devices = [dev.name for dev in worker._get_devices_from_instruction(instr)]
-    with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
+    with mock.patch.object(worker.device_manager.connector, "send") as send_mock:
         worker.read_devices(instr)
 
         if instr.content.get("device"):
@@ -888,7 +888,7 @@ def test_read_devices(scan_worker_mock, instr):
 )
 def test_kickoff_devices(scan_worker_mock, instr, devices, parameter, metadata):
     worker = scan_worker_mock
-    with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
+    with mock.patch.object(worker.device_manager.connector, "send") as send_mock:
         worker.kickoff_devices(instr)
         send_mock.assert_called_once_with(
             MessageEndpoints.device_instructions(),
@@ -920,29 +920,27 @@ def test_kickoff_devices(scan_worker_mock, instr, devices, parameter, metadata):
 def test_publish_readback(scan_worker_mock, instr, devices):
     worker = scan_worker_mock
     with mock.patch.object(worker, "_get_readback", return_value=[{}]) as get_readback:
-        with mock.patch.object(worker.device_manager, "producer") as producer_mock:
+        with mock.patch.object(worker.device_manager, "connector") as connector_mock:
             worker._publish_readback(instr)
 
             get_readback.assert_called_once_with(["samx"])
-            pipe = producer_mock.pipeline()
+            pipe = connector_mock.pipeline()
             msg = messages.DeviceMessage(signals={}, metadata=instr.metadata)
-
-            producer_mock.set_and_publish.assert_called_once_with(
+            connector_mock.set_and_publish.assert_called_once_with(
                 MessageEndpoints.device_read("samx"), msg, pipe
             )
-            pipe.execute.assert_called_once()
 
 
 def test_get_readback(scan_worker_mock):
     worker = scan_worker_mock
     devices = ["samx"]
-    with mock.patch.object(worker.device_manager, "producer") as producer_mock:
+    with mock.patch.object(worker.device_manager, "connector") as connector_mock:
         worker._get_readback(devices)
-        pipe = producer_mock.pipeline()
-        producer_mock.get.assert_called_once_with(
+        pipe = connector_mock.pipeline()
+        connector_mock.get.assert_called_once_with(
             MessageEndpoints.device_readback("samx"), pipe=pipe
         )
-        producer_mock.execute_pipeline.assert_called_once()
+        connector_mock.execute_pipeline.assert_called_once()
 
 
 def test_publish_data_as_read(scan_worker_mock):
@@ -958,12 +956,12 @@ def test_publish_data_as_read(scan_worker_mock):
             "RID": "requestID",
         },
     )
-    with mock.patch.object(worker.device_manager, "producer") as producer_mock:
+    with mock.patch.object(worker.device_manager, "connector") as connector_mock:
         worker.publish_data_as_read(instr)
         msg = messages.DeviceMessage(
             signals=instr.content["parameter"]["data"], metadata=instr.metadata
         )
-        producer_mock.set_and_publish.assert_called_once_with(
+        connector_mock.set_and_publish.assert_called_once_with(
             MessageEndpoints.device_read("samx"), msg
         )
 
@@ -983,13 +981,13 @@ def test_publish_data_as_read_multiple(scan_worker_mock):
             "RID": "requestID",
         },
     )
-    with mock.patch.object(worker.device_manager, "producer") as producer_mock:
+    with mock.patch.object(worker.device_manager, "connector") as connector_mock:
         worker.publish_data_as_read(instr)
         mock_calls = []
         for device, dev_data in zip(devices, data):
             msg = messages.DeviceMessage(signals=dev_data, metadata=instr.metadata)
             mock_calls.append(mock.call(MessageEndpoints.device_read(device), msg))
-        assert producer_mock.set_and_publish.mock_calls == mock_calls
+        assert connector_mock.set_and_publish.mock_calls == mock_calls
 
 
 def test_check_for_interruption(scan_worker_mock):
@@ -1048,7 +1046,7 @@ def test_open_scan(scan_worker_mock, instr, corr_num_points, scan_id):
     if "pointID" in instr.metadata:
         worker.max_point_id = instr.metadata["pointID"]
 
-    assert worker.parent.producer.get(MessageEndpoints.scan_number()) == None
+    assert worker.parent.connector.get(MessageEndpoints.scan_number()) == None
 
     with mock.patch.object(worker, "current_instruction_queue_item") as queue_mock:
         with mock.patch.object(worker, "_initialize_scan_info") as init_mock:
@@ -1181,7 +1179,7 @@ def test_stage_device(scan_worker_mock, msg):
     worker.device_manager.devices["eiger"]._config["readoutPriority"] = "async"
 
     with mock.patch.object(worker, "_wait_for_stage") as wait_mock:
-        with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
+        with mock.patch.object(worker.device_manager.connector, "send") as send_mock:
             worker.stage_devices(msg)
             async_devices = [dev.name for dev in worker.device_manager.devices.async_devices()]
             devices = [
@@ -1251,7 +1249,7 @@ def test_unstage_device(scan_worker_mock, msg, devices, parameter, metadata, cle
     if not devices:
         devices = [dev.name for dev in worker.device_manager.devices.enabled_devices]
 
-    with mock.patch.object(worker.device_manager.producer, "send") as send_mock:
+    with mock.patch.object(worker.device_manager.connector, "send") as send_mock:
         with mock.patch.object(worker, "_wait_for_stage") as wait_mock:
             worker.unstage_devices(msg, devices, cleanup)
 
@@ -1270,12 +1268,12 @@ def test_unstage_device(scan_worker_mock, msg, devices, parameter, metadata, cle
 @pytest.mark.parametrize("status,expire", [("open", None), ("closed", 1800), ("aborted", 1800)])
 def test_send_scan_status(scan_worker_mock, status, expire):
     worker = scan_worker_mock
-    worker.device_manager.producer = ProducerMock()
+    worker.device_manager.connector = ConnectorMock()
     worker.current_scanID = str(uuid.uuid4())
     worker._send_scan_status(status)
     scan_info_msgs = [
         msg
-        for msg in worker.device_manager.producer.message_sent
+        for msg in worker.device_manager.connector.message_sent
         if msg["queue"] == MessageEndpoints.public_scan_info(scanID=worker.current_scanID)
     ]
     assert len(scan_info_msgs) == 1

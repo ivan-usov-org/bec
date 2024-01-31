@@ -13,7 +13,7 @@ def test_channel_monitor_callback():
         mock_print.assert_called_once()
 
 
-def test_channel_monitor_start_consumer():
+def test_channel_monitor_start_register():
     with mock.patch("bec_lib.channel_monitor.argparse") as mock_argparse:
         with mock.patch("bec_lib.channel_monitor.ServiceConfig") as mock_config:
             with mock.patch("bec_lib.channel_monitor.RedisConnector") as mock_connector:
@@ -26,6 +26,6 @@ def test_channel_monitor_start_consumer():
                     mock_config.return_value = mock.MagicMock()
                     mock_connector.return_value = mock.MagicMock()
                     channel_monitor_launch()
-                    mock_connector().consumer.assert_called_once()
-                    mock_connector().consumer.return_value.start.assert_called_once()
+                    mock_connector().register.assert_called_once()
+                    mock_connector().register.return_value.start.assert_called_once()
                     mock_threading.Event().wait.assert_called_once()

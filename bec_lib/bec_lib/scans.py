@@ -100,9 +100,9 @@ class ScanObject:
             return None
         return self.scan_info.get("scan_report_hint")
 
-    def _start_consumer(self, request: messages.ScanQueueMessage) -> ConsumerConnector:
-        """Start a consumer for the given request"""
-        consumer = self.client.device_manager.connector.consumer(
+    def _start_register(self, request: messages.ScanQueueMessage) -> ConsumerConnector:
+        """Start a register for the given request"""
+        register = self.client.device_manager.connector.register(
             [
                 MessageEndpoints.device_readback(dev)
                 for dev in request.content["parameter"]["args"].keys()
@@ -110,11 +110,11 @@ class ScanObject:
             threaded=False,
             cb=(lambda msg: msg),
         )
-        return consumer
+        return register
 
     def _send_scan_request(self, request: messages.ScanQueueMessage) -> None:
         """Send a scan request to the scan server"""
-        self.client.device_manager.producer.send(MessageEndpoints.scan_queue_request(), request)
+        self.client.device_manager.connector.send(MessageEndpoints.scan_queue_request(), request)
 
 
 class Scans:
@@ -136,7 +136,7 @@ class Scans:
 
     def _import_scans(self):
         """Import scans from the scan server"""
-        available_scans = self.parent.producer.get(MessageEndpoints.available_scans())
+        available_scans = self.parent.connector.get(MessageEndpoints.available_scans())
         if available_scans is None:
             logger.warning("No scans available. Are redis and the BEC server running?")
             return

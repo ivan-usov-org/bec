@@ -14,7 +14,9 @@ logger = bec_logger.logger
 
 DEFAULT_SERVICE_CONFIG = {
     "redis": {"host": "localhost", "port": 6379},
-    "service_config": {"file_writer": {"plugin": "default_NeXus_format", "base_path": "./"}},
+    "service_config": {
+        "file_writer": {"plugin": "default_NeXus_format", "base_path": os.path.dirname(__file__)}
+    },
 }
 
 
@@ -32,7 +34,7 @@ class ServiceConfig:
         self._update_config(service_config=config, redis=redis)
 
         self.service_config = self.config.get(
-            "service_config", {"file_writer": {"plugin": "default_NeXus_format", "base_path": "./"}}
+            "service_config", DEFAULT_SERVICE_CONFIG["service_config"]
         )
 
     def _update_config(self, **kwargs):

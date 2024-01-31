@@ -6,7 +6,8 @@ import threading
 import traceback
 
 from bec_lib.logger import bec_logger
-from bec_lib.messages import BECMessage
+from bec_lib.messages import BECMessage, LogMessage
+from bec_lib.endpoints import MessageEndpoints
 
 logger = bec_logger.logger
 
@@ -33,154 +34,98 @@ class MessageObject:
         return f"MessageObject(topic={self.topic}, value={self._value})"
 
 
-class ConnectorBase(abc.ABC):
-    """
-    ConnectorBase implements producer and consumer clients for communicating with a broker.
-    One ought to inherit from this base class and provide at least customized producer and consumer methods.
+class StoreInterface(abc.ABC):
+    """StoreBase defines the interface for storing data"""
 
-    """
-
-    def __init__(self, bootstrap_server: list):
-        self.bootstrap = bootstrap_server
-        self._threads = []
-
-    def producer(self, **kwargs) -> ProducerConnector:
-        raise NotImplementedError
-
-    def consumer(self, **kwargs) -> ConsumerConnectorThreaded:
-        raise NotImplementedError
-
-    def shutdown(self):
-        for t in self._threads:
-            t.signal_event.set()
-            t.join()
-
-    def raise_warning(self, msg):
-        raise NotImplementedError
-
-    def send_log(self, msg):
-        raise NotImplementedError
-
-    def poll_messages(self):
-        """Poll for new messages, receive them and execute callbacks"""
+    def __init__(self, store):
         pass
 
+    def pipeline(self):
+        pass
 
-class ProducerConnector(abc.ABC):
+    def execute_pipeline(self):
+        pass
+
+    def lpush(
+        self, topic: str, msg: str, pipe=None, max_size: int = None, expire: int = None
+    ) -> None:
+        raise NotImplementedError
+
+    def lset(self, topic: str, index: int, msg: str, pipe=None) -> None:
+        raise NotImplementedError
+
+    def rpush(self, topic: str, msg: str, pipe=None) -> int:
+        raise NotImplementedError
+
+    def lrange(self, topic: str, start: int, end: int, pipe=None):
+        raise NotImplementedError
+
+    def set(self, topic: str, msg, pipe=None, expire: int = None) -> None:
+        raise NotImplementedError
+
+    def keys(self, pattern: str) -> list:
+        raise NotImplementedError
+
+    def delete(self, topic, pipe=None):
+        raise NotImplementedError
+
+    def get(self, topic: str, pipe=None):
+        raise NotImplementedError
+
+    def xadd(self, topic: str, msg: dict, max_size=None, pipe=None, expire: int = None):
+        raise NotImplementedError
+
+    def xread(
+        self,
+        topic: str,
+        id: str = None,
+        count: int = None,
+        block: int = None,
+        pipe=None,
+        from_start=False,
+    ) -> list:
+        raise NotImplementedError
+
+    def xrange(self, topic: str, min: str, max: str, count: int = None, pipe=None):
+        raise NotImplementedError
+
+
+class PubSubInterface(abc.ABC):
     def raw_send(self, topic: str, msg: bytes) -> None:
         raise NotImplementedError
 
     def send(self, topic: str, msg: BECMessage) -> None:
         raise NotImplementedError
 
-
-class ConsumerConnector(abc.ABC):
-    def __init__(
-        self, bootstrap_server, cb, topics=None, pattern=None, group_id=None, event=None, **kwargs
-    ):
-        """
-        ConsumerConnector class defines the communication with the broker for consuming messages.
-        An implementation ought to inherit from this class and implement the initialize_connector and poll_messages methods.
-
-        Args:
-            bootstrap_server: list of bootstrap servers, e.g. ["localhost:9092", "localhost:9093"]
-            topics: the topic(s) to which the connector should attach
-            event: external event to trigger start and stop of the connector
-            cb: callback function; will be triggered from within poll_messages
-            kwargs: additional keyword arguments
-
-        """
-        self.bootstrap = bootstrap_server
-        self.topics = topics
-        self.pattern = pattern
-        self.group_id = group_id
-        self.connector = None
-        self.cb = cb
-        self.kwargs = kwargs
-
-        if not self.topics and not self.pattern:
-            raise ConsumerConnectorError("Either a topic or a patter must be specified.")
-
-    def initialize_connector(self) -> None:
-        """
-        initialize the connector instance self.connector
-        The connector will be initialized once the thread is started
-        """
+    def register(self, topics=None, pattern=None, cb=None, start_thread=True, **kwargs):
         raise NotImplementedError
 
-    def poll_messages(self) -> None:
-        """
-        Poll messages from self.connector and call the callback function self.cb
+    def poll_messages(self, timeout=None):
+        """Poll for new messages, receive them and execute callbacks"""
+        raise NotImplementedError
 
-        """
-        raise NotImplementedError()
-
-
-class ConsumerConnectorThreaded(ConsumerConnector, threading.Thread):
-    def __init__(
-        self,
-        bootstrap_server,
-        cb,
-        topics=None,
-        pattern=None,
-        group_id=None,
-        event=None,
-        name=None,
-        **kwargs,
-    ):
-        """
-        ConsumerConnectorThreaded class defines the threaded communication with the broker for consuming messages.
-        An implementation ought to inherit from this class and implement the initialize_connector and poll_messages methods.
-        Once started, the connector is expected to poll new messages until the signal_event is set.
-
-        Args:
-            bootstrap_server: list of bootstrap servers, e.g. ["localhost:9092", "localhost:9093"]
-            topics: the topic(s) to which the connector should attach
-            event: external event to trigger start and stop of the connector
-            cb: callback function; will be triggered from within poll_messages
-            kwargs: additional keyword arguments
-
-        """
-        super().__init__(
-            bootstrap_server=bootstrap_server,
-            topics=topics,
-            pattern=pattern,
-            group_id=group_id,
-            event=event,
-            cb=cb,
-            **kwargs,
-        )
-        if name is not None:
-            thread_kwargs = {"name": name, "daemon": True}
-        else:
-            thread_kwargs = {"daemon": True}
-        super(ConsumerConnector, self).__init__(**thread_kwargs)
-        self.signal_event = event if event is not None else threading.Event()
-
-    def run(self):
-        self.initialize_connector()
-
-        while True:
-            try:
-                self.poll_messages()
-            except Exception as e:
-                logger.error(traceback.format_exc())
-                _thread.interrupt_main()
-                raise e
-            finally:
-                if self.signal_event.is_set():
-                    self.shutdown()
-                    break
+    def run_messages_loop(self):
+        raise NotImplementedError
 
     def shutdown(self):
-        self.signal_event.set()
+        raise NotImplementedError
 
-    # def stop(self) -> None:
-    #     """
-    #     Stop consumer
-    #     Returns:
 
-    #     """
-    #     self.signal_event.set()
-    #     self.connector.close()
-    #     self.join()
+class ConnectorBase(PubSubInterface, StoreInterface):
+    def raise_warning(self, msg):
+        raise NotImplementedError
+
+    def log_warning(self, msg):
+        """send a warning"""
+        self.send(MessageEndpoints.log(), LogMessage(log_type="warning", log_msg=msg))
+
+    def log_message(self, msg):
+        """send a log message"""
+        self.send(MessageEndpoints.log(), LogMessage(log_type="log", log_msg=msg))
+
+    def log_error(self, msg):
+        """send an error as log"""
+        self.send(MessageEndpoints.log(), LogMessage(log_type="error", log_msg=msg))
+
+    def set_and_publish(self, topic: str, msg, pipe=None, expire: int = None) -> None:
+        raise NotImplementedError

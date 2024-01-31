@@ -463,11 +463,11 @@ def test_file_writer(client):
         md={"datasetID": 325},
     )
     assert len(scan.scan.data) == 100
-    msg = bec.device_manager.producer.get(MessageEndpoints.public_file(scan.scan.scanID, "master"))
+    msg = bec.device_manager.connector.get(MessageEndpoints.public_file(scan.scan.scanID, "master"))
     while True:
         if msg:
             break
-        msg = bec.device_manager.producer.get(
+        msg = bec.device_manager.connector.get(
             MessageEndpoints.public_file(scan.scan.scanID, "master")
         )
 

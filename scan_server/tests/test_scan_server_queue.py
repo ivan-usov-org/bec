@@ -166,40 +166,40 @@ def test_set_halt_disables_return_to_start(queuemanager_mock):
 
 def test_set_pause(queuemanager_mock):
     queue_manager = queuemanager_mock()
-    queue_manager.producer.message_sent = []
+    queue_manager.connector.message_sent = []
     queue_manager.set_pause(queue="primary")
     assert queue_manager.queues["primary"].status == ScanQueueStatus.PAUSED
-    assert len(queue_manager.producer.message_sent) == 1
+    assert len(queue_manager.connector.message_sent) == 1
     assert (
-        queue_manager.producer.message_sent[0].get("queue") == MessageEndpoints.scan_queue_status()
+        queue_manager.connector.message_sent[0].get("queue") == MessageEndpoints.scan_queue_status()
     )
 
 
 def test_set_deferred_pause(queuemanager_mock):
     queue_manager = queuemanager_mock()
-    queue_manager.producer.message_sent = []
+    queue_manager.connector.message_sent = []
     queue_manager.set_deferred_pause(queue="primary")
     assert queue_manager.queues["primary"].status == ScanQueueStatus.PAUSED
-    assert len(queue_manager.producer.message_sent) == 1
+    assert len(queue_manager.connector.message_sent) == 1
     assert (
-        queue_manager.producer.message_sent[0].get("queue") == MessageEndpoints.scan_queue_status()
+        queue_manager.connector.message_sent[0].get("queue") == MessageEndpoints.scan_queue_status()
     )
 
 
 def test_set_continue(queuemanager_mock):
     queue_manager = queuemanager_mock()
-    queue_manager.producer.message_sent = []
+    queue_manager.connector.message_sent = []
     queue_manager.set_continue(queue="primary")
     assert queue_manager.queues["primary"].status == ScanQueueStatus.RUNNING
-    assert len(queue_manager.producer.message_sent) == 1
+    assert len(queue_manager.connector.message_sent) == 1
     assert (
-        queue_manager.producer.message_sent[0].get("queue") == MessageEndpoints.scan_queue_status()
+        queue_manager.connector.message_sent[0].get("queue") == MessageEndpoints.scan_queue_status()
     )
 
 
 def test_set_abort(queuemanager_mock):
     queue_manager = queuemanager_mock()
-    queue_manager.producer.message_sent = []
+    queue_manager.connector.message_sent = []
     msg = messages.ScanQueueMessage(
         scan_type="mv",
         parameter={"args": {"samx": (1,)}, "kwargs": {}},
@@ -210,23 +210,23 @@ def test_set_abort(queuemanager_mock):
     queue_manager.add_to_queue(scan_queue="primary", msg=msg)
     queue_manager.set_abort(queue="primary")
     assert queue_manager.queues["primary"].status == ScanQueueStatus.PAUSED
-    assert len(queue_manager.producer.message_sent) == 2
+    assert len(queue_manager.connector.message_sent) == 2
     assert (
-        queue_manager.producer.message_sent[0].get("queue") == MessageEndpoints.scan_queue_status()
+        queue_manager.connector.message_sent[0].get("queue") == MessageEndpoints.scan_queue_status()
     )
 
 
 def test_set_abort_with_empty_queue(queuemanager_mock):
     queue_manager = queuemanager_mock()
-    queue_manager.producer.message_sent = []
+    queue_manager.connector.message_sent = []
     queue_manager.set_abort(queue="primary")
     assert queue_manager.queues["primary"].status == ScanQueueStatus.RUNNING
-    assert len(queue_manager.producer.message_sent) == 0
+    assert len(queue_manager.connector.message_sent) == 0
 
 
 def test_set_clear_sends_message(queuemanager_mock):
     queue_manager = queuemanager_mock()
-    queue_manager.producer.message_sent = []
+    queue_manager.connector.message_sent = []
     setter_mock = mock.Mock(wraps=ScanQueue.worker_status.fset)
     # pylint: disable=assignment-from-no-return
     # pylint: disable=too-many-function-args
@@ -238,9 +238,9 @@ def test_set_clear_sends_message(queuemanager_mock):
         mock_property.fset.assert_called_once_with(
             queue_manager.queues["primary"], InstructionQueueStatus.STOPPED
         )
-        assert len(queue_manager.producer.message_sent) == 1
+        assert len(queue_manager.connector.message_sent) == 1
         assert (
-            queue_manager.producer.message_sent[0].get("queue")
+            queue_manager.connector.message_sent[0].get("queue")
             == MessageEndpoints.scan_queue_status()
         )
 

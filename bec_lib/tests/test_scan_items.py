@@ -63,7 +63,7 @@ from bec_lib.tests.utils import ConnectorMock
 )
 def test_update_with_queue_status(queue_msg):
     scan_manager = ScanManager(ConnectorMock(""))
-    scan_manager.producer._get_buffer[MessageEndpoints.scan_queue_status()] = queue_msg
+    scan_manager.connector._get_buffer[MessageEndpoints.scan_queue_status()] = queue_msg
     scan_manager.update_with_queue_status(queue_msg)
     assert (
         scan_manager.scan_storage.find_scan_by_ID("bfa582aa-f9cd-4258-ab5d-3e5d54d3dde5")

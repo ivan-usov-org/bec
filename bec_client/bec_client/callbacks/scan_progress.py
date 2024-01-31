@@ -27,7 +27,7 @@ class LiveUpdatesScanProgress(LiveUpdatesTable):
         Update the progressbar based on the device status message. Returns True if the scan is finished.
         """
         self.check_alarms()
-        status = self.bec.producer.get(MessageEndpoints.device_progress(device_names[0]))
+        status = self.bec.connector.get(MessageEndpoints.device_progress(device_names[0]))
         if not status:
             logger.debug("waiting for new data point")
             await asyncio.sleep(0.1)

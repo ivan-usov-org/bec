@@ -7,7 +7,7 @@ from bec_lib import Alarms, MessageEndpoints, ServiceConfig, messages
 from bec_lib.device import OnFailure
 from bec_lib.messages import BECStatus
 from bec_lib.redis_connector import MessageObject
-from bec_lib.tests.utils import ConnectorMock, ConsumerMock
+from bec_lib.tests.utils import ConnectorMock
 from ophyd import Staged
 from ophyd.utils import errors as ophyd_errors
 from test_device_manager_ds import device_manager, load_device_manager
@@ -54,8 +54,6 @@ def test_start(device_server_mock):
 
     device_server.start()
 
-    assert device_server.threads
-    assert isinstance(device_server.threads[0], ConsumerMock)
     assert device_server.status == BECStatus.RUNNING
 
 
@@ -187,10 +185,10 @@ def test_stop_devices(device_server_mock):
         ),
     ],
 )
-def test_consumer_interception_callback(device_server_mock, msg, stop_called):
+def test_register_interception_callback(device_server_mock, msg, stop_called):
     device_server = device_server_mock
     with mock.patch.object(device_server, "stop_devices") as stop:
-        device_server.consumer_interception_callback(msg, parent=device_server)
+        device_server.register_interception_callback(msg, parent=device_server)
         if stop_called:
             stop.assert_called_once()
         else:
@@ -640,7 +638,7 @@ def test_set_device(device_server_mock, instr):
     while True:
         res = [
             msg
-            for msg in device_server.producer.message_sent
+            for msg in device_server.connector.message_sent
             if msg["queue"] == MessageEndpoints.device_req_status("samx")
         ]
         if res:
@@ -676,7 +674,7 @@ def test_read_device(device_server_mock, instr):
     for device in devices:
         res = [
             msg
-            for msg in device_server.producer.message_sent
+            for msg in device_server.connector.message_sent
             if msg["queue"] == MessageEndpoints.device_read(device)
         ]
         assert res[-1]["msg"].metadata["RID"] == instr.metadata["RID"]
@@ -690,7 +688,7 @@ def test_read_config_and_update_devices(device_server_mock, devices):
     for device in devices:
         res = [
             msg
-            for msg in device_server.producer.message_sent
+            for msg in device_server.connector.message_sent
             if msg["queue"] == MessageEndpoints.device_read_configuration(device)
         ]
         config = device_server.device_manager.devices[device].obj.read_configuration()
@@ -755,8 +753,8 @@ def test_retry_obj_method_buffer(device_server_mock, instr):
         return
 
     signals_before = getattr(samx.obj, instr)()
-    device_server.producer = mock.MagicMock()
-    device_server.producer.get.return_value = messages.DeviceMessage(
+    device_server.connector = mock.MagicMock()
+    device_server.connector.get.return_value = messages.DeviceMessage(
         signals=signals_before, metadata={"RID": "test", "stream": "primary"}
     )
 

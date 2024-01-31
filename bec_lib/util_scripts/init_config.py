@@ -14,7 +14,6 @@ parser.add_argument("--redis", default="localhost:6379", help="redis host and po
 
 clargs = parser.parse_args()
 connector = RedisConnector(clargs.redis)
-producer = connector.producer()
 
 with open(clargs.config, "r", encoding="utf-8") as stream:
     data = yaml.safe_load(stream)
@@ -22,4 +21,4 @@ for name, device in data.items():
     device["name"] = name
 config_data = list(data.values())
 msg = messages.AvailableResourceMessage(resource=config_data)
-producer.set(MessageEndpoints.device_config(), msg)
+connector.set(MessageEndpoints.device_config(), msg)

@@ -38,16 +38,16 @@ class ReadbackDataMixin:
 
     def get_request_done_msgs(self):
         """get all request-done messages"""
-        pipe = self.device_manager.producer.pipeline()
+        pipe = self.device_manager.connector.pipeline()
         for dev in self.devices:
-            self.device_manager.producer.get(MessageEndpoints.device_req_status(dev), pipe)
-        return self.device_manager.producer.execute_pipeline(pipe)
+            self.device_manager.connector.get(MessageEndpoints.device_req_status(dev), pipe)
+        return self.device_manager.connector.execute_pipeline(pipe)
 
     def wait_for_RID(self, request):
         """wait for the readback's metadata to match the request ID"""
         while True:
             msgs = [
-                self.device_manager.producer.get(MessageEndpoints.device_readback(dev))
+                self.device_manager.connector.get(MessageEndpoints.device_readback(dev))
                 for dev in self.devices
             ]
             if all(msg.metadata.get("RID") == request.metadata["RID"] for msg in msgs if msg):

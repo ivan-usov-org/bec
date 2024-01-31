@@ -12,7 +12,7 @@ from scan_server.scan_guard import ScanGuard, ScanRejection, ScanStatus
 @pytest.fixture
 def scan_guard_mock(scan_server_mock):
     sg = ScanGuard(parent=scan_server_mock)
-    sg.device_manager.producer = mock.MagicMock()
+    sg.device_manager.connector = mock.MagicMock()
     yield sg
 
 
@@ -113,8 +113,8 @@ def test_valid_request(scan_server_mock, scan_queue_msg, valid):
 
 def test_check_valid_scan_raises_for_unknown_scan(scan_guard_mock):
     sg = scan_guard_mock
-    sg.producer = mock.MagicMock()
-    sg.producer.get.return_value = messages.AvailableResourceMessage(
+    sg.connector = mock.MagicMock()
+    sg.connector.get.return_value = messages.AvailableResourceMessage(
         resource={"fermat_scan": "fermat_scan"}
     )
 
@@ -130,8 +130,8 @@ def test_check_valid_scan_raises_for_unknown_scan(scan_guard_mock):
 
 def test_check_valid_scan_accepts_known_scan(scan_guard_mock):
     sg = scan_guard_mock
-    sg.producer = mock.MagicMock()
-    sg.producer.get.return_value = messages.AvailableResourceMessage(
+    sg.connector = mock.MagicMock()
+    sg.connector.get.return_value = messages.AvailableResourceMessage(
         resource={"fermat_scan": "fermat_scan"}
     )
 
@@ -146,8 +146,8 @@ def test_check_valid_scan_accepts_known_scan(scan_guard_mock):
 
 def test_check_valid_scan_device_rpc(scan_guard_mock):
     sg = scan_guard_mock
-    sg.producer = mock.MagicMock()
-    sg.producer.get.return_value = messages.AvailableResourceMessage(
+    sg.connector = mock.MagicMock()
+    sg.connector.get.return_value = messages.AvailableResourceMessage(
         resource={"device_rpc": "device_rpc"}
     )
     request = messages.ScanQueueMessage(
@@ -162,8 +162,8 @@ def test_check_valid_scan_device_rpc(scan_guard_mock):
 
 def test_check_valid_scan_device_rpc_raises(scan_guard_mock):
     sg = scan_guard_mock
-    sg.producer = mock.MagicMock()
-    sg.producer.get.return_value = messages.AvailableResourceMessage(
+    sg.connector = mock.MagicMock()
+    sg.connector.get.return_value = messages.AvailableResourceMessage(
         resource={"device_rpc": "device_rpc"}
     )
     request = messages.ScanQueueMessage(
@@ -184,7 +184,7 @@ def test_handle_scan_modification_request(scan_guard_mock):
     msg = messages.ScanQueueModificationMessage(
         scanID="scanID", action="abort", parameter={}, metadata={"RID": "RID"}
     )
-    with mock.patch.object(sg.device_manager.producer, "send") as send:
+    with mock.patch.object(sg.device_manager.connector, "send") as send:
         sg._handle_scan_modification_request(msg)
         send.assert_called_once_with(MessageEndpoints.scan_queue_modification(), msg)
 
@@ -207,7 +207,7 @@ def test_append_to_scan_queue(scan_guard_mock):
         parameter={"args": {"samx": (-5, 5), "samy": (-5, 5)}, "kwargs": {"step": 3}},
         queue="primary",
     )
-    with mock.patch.object(sg.device_manager.producer, "send") as send:
+    with mock.patch.object(sg.device_manager.connector, "send") as send:
         sg._append_to_scan_queue(msg)
         send.assert_called_once_with(MessageEndpoints.scan_queue_insert(), msg)
 
@@ -251,7 +251,7 @@ def test_scan_queue_modification_request_callback(scan_guard_mock):
 
 def test_send_scan_request_response(scan_guard_mock):
     sg = scan_guard_mock
-    with mock.patch.object(sg.device_manager.producer, "send") as send:
+    with mock.patch.object(sg.device_manager.connector, "send") as send:
         sg._send_scan_request_response(ScanStatus(), {"RID": "RID"})
         send.assert_called_once_with(
             MessageEndpoints.scan_queue_request_response(),

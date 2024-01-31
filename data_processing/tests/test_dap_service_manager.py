@@ -72,7 +72,7 @@ def test_DAPServiceManager_init(service_manager):
 def test_DAPServiceManager_request_callback(service_manager, msg, process_called):
     msg_obj = MessageObject(value=msg, topic="topic")
     with mock.patch.object(service_manager, "process_dap_request") as mock_process_dap_request:
-        service_manager._dap_request_callback(msg_obj, parent=service_manager)
+        service_manager._dap_request_callback(msg_obj)
         if process_called:
             mock_process_dap_request.assert_called_once_with(msg)
 

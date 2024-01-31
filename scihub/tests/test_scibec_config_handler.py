@@ -334,7 +334,7 @@ def test_config_handler_update_device_config_available_keys(config_handler, avai
 
 def test_config_handler_wait_for_device_server_update(config_handler):
     RID = "12345"
-    with mock.patch.object(config_handler.producer, "get") as mock_get:
+    with mock.patch.object(config_handler.connector, "get") as mock_get:
         mock_get.side_effect = [
             None,
             None,
@@ -346,7 +346,7 @@ def test_config_handler_wait_for_device_server_update(config_handler):
 
 def test_config_handler_wait_for_device_server_update_timeout(config_handler):
     RID = "12345"
-    with mock.patch.object(config_handler.producer, "get", return_value=None) as mock_get:
+    with mock.patch.object(config_handler.connector, "get", return_value=None) as mock_get:
         with pytest.raises(TimeoutError):
             config_handler._wait_for_device_server_update(RID, timeout_time=0.1)
             mock_get.assert_called()

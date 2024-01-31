@@ -57,16 +57,16 @@ def test_send_baseline_BEC():
     sb.sync_storage[scanID] = {"info": {}, "status": "open", "sent": set()}
     sb.sync_storage[scanID]["baseline"] = {}
     msg = messages.ScanBaselineMessage(scanID=scanID, data=sb.sync_storage[scanID]["baseline"])
-    with mock.patch.object(sb, "producer") as producer:
+    with mock.patch.object(sb, "connector") as connector:
         bec_emitter._send_baseline(scanID)
-        pipe = producer.pipeline()
-        producer.set.assert_called_once_with(
+        pipe = connector.pipeline()
+        connector.set.assert_called_once_with(
             MessageEndpoints.public_scan_baseline(scanID),
             msg,
             expire=1800,
             pipe=pipe,
         )
-        producer.set_and_publish.assert_called_once_with(
+        connector.set_and_publish.assert_called_once_with(
             MessageEndpoints.scan_baseline(),
             msg,
             pipe=pipe,

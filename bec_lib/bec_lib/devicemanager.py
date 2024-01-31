@@ -370,8 +370,7 @@ class DeviceManagerBase:
     _request_config_parsed = None  # parsed config request
     _response = None  # response message
 
-    _connector_base_consumer = {}
-    producer = None
+    _connector_base_register = {}
     config_helper = None
     _device_cls = DeviceBase
     _status_cb = []
@@ -464,7 +463,7 @@ class DeviceManagerBase:
         """
         if not msg.metadata.get("RID"):
             return
-        self.producer.lpush(
+        self.connector.lpush(
             MessageEndpoints.service_response(msg.metadata["RID"]),
             messages.ServiceResponseMessage(
                 # pylint: disable=no-member
@@ -487,24 +486,19 @@ class DeviceManagerBase:
             self._remove_device(dev)
 
     def _start_connectors(self, bootstrap_server) -> None:
-        self._start_base_consumer()
-        self.producer = self.connector.producer()
-        self._start_custom_connectors(bootstrap_server)
+        self._start_base_register()
 
-    def _start_base_consumer(self) -> None:
+    def _start_base_register(self) -> None:
         """
         Start consuming messages for all base topics. This method will be called upon startup.
         Returns:
 
         """
-        self._connector_base_consumer["device_config_update"] = self.connector.consumer(
+        self.connector.register(
             MessageEndpoints.device_config_update(),
             cb=self._device_config_update_callback,
             parent=self,
         )
-
-        # self._connector_base_consumer["log"].start()
-        self._connector_base_consumer["device_config_update"].start()
 
     @staticmethod
     def _log_callback(msg, *, parent, **kwargs) -> None:
@@ -541,47 +535,10 @@ class DeviceManagerBase:
         self._load_session()
 
     def _get_redis_device_config(self) -> list:
-        devices = self.producer.get(MessageEndpoints.device_config())
+        devices = self.connector.get(MessageEndpoints.device_config())
         if not devices:
             return []
         return devices.content["resource"]
-
-    def _stop_base_consumer(self):
-        """
-        Stop all base consumers by setting the corresponding event
-        Returns:
-
-        """
-        if self.connector is not None:
-            for _, con in self._connector_base_consumer.items():
-                con.signal_event.set()
-                con.join()
-
-    def _stop_consumer(self):
-        """
-        Stop all consumers
-        Returns:
-
-        """
-        self._stop_base_consumer()
-        self._stop_custom_consumer()
-
-    def _start_custom_connectors(self, bootstrap_server) -> None:
-        """
-        Override this method in a derived class to start custom connectors upon initialization.
-        Args:
-            bootstrap_server: Kafka bootstrap server
-
-        Returns:
-
-        """
-
-    def _stop_custom_consumer(self) -> None:
-        """
-        Stop all custom consumers. Override this method in a derived class.
-        Returns:
-
-        """
 
     def _add_device(self, dev: dict, msg: messages.DeviceInfoMessage):
         name = msg.content["device"]
@@ -621,8 +578,7 @@ class DeviceManagerBase:
                     logger.error(f"Failed to load device {dev}: {content}")
 
     def _get_device_info(self, device_name) -> DeviceInfoMessage:
-        msg = self.producer.get(MessageEndpoints.device_info(device_name))
-        return msg
+        return self.connector.get(MessageEndpoints.device_info(device_name))
 
     def check_request_validity(self, msg: DeviceConfigMessage) -> None:
         """
@@ -663,10 +619,7 @@ class DeviceManagerBase:
         """
         Shutdown all connectors.
         """
-        try:
-            self.connector.shutdown()
-        except RuntimeError as runtime_error:
-            logger.error(f"Failed to shutdown connector. {runtime_error}")
+        self.connector.shutdown()
 
     def __del__(self):
         self.shutdown()

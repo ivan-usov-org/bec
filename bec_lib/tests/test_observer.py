@@ -97,9 +97,9 @@ def device_manager(dm_with_devices):
 
 
 def test_observer_manager_None(device_manager):
-    with mock.patch.object(device_manager.producer, "get", return_value=None) as producer_get:
+    with mock.patch.object(device_manager.connector, "get", return_value=None) as connector_get:
         observer_manager = ObserverManager(device_manager=device_manager)
-        producer_get.assert_called_once_with(MessageEndpoints.observer())
+        connector_get.assert_called_once_with(MessageEndpoints.observer())
         assert len(observer_manager._observer) == 0
 
 
@@ -115,9 +115,9 @@ def test_observer_manager_msg(device_manager):
             }
         ]
     )
-    with mock.patch.object(device_manager.producer, "get", return_value=msg) as producer_get:
+    with mock.patch.object(device_manager.connector, "get", return_value=msg) as connector_get:
         observer_manager = ObserverManager(device_manager=device_manager)
-        producer_get.assert_called_once_with(MessageEndpoints.observer())
+        connector_get.assert_called_once_with(MessageEndpoints.observer())
         assert len(observer_manager._observer) == 1
 
 
@@ -139,7 +139,7 @@ def test_observer_manager_msg(device_manager):
     ],
 )
 def test_add_observer(device_manager, observer, raises_error):
-    with mock.patch.object(device_manager.producer, "get", return_value=None) as producer_get:
+    with mock.patch.object(device_manager.connector, "get", return_value=None) as connector_get:
         observer_manager = ObserverManager(device_manager=device_manager)
         observer_manager.add_observer(observer)
         with pytest.raises(AttributeError):
@@ -185,7 +185,7 @@ def test_add_observer_existing_device(device_manager, observer, raises_error):
             "limits": [380, None],
         }
     )
-    with mock.patch.object(device_manager.producer, "get", return_value=None) as producer_get:
+    with mock.patch.object(device_manager.connector, "get", return_value=None) as connector_get:
         observer_manager = ObserverManager(device_manager=device_manager)
         observer_manager.add_observer(default_observer)
         if raises_error:

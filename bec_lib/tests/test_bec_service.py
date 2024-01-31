@@ -124,8 +124,8 @@ def test_bec_service_update_existing_services():
         messages.StatusMessage(name="service2", status=BECStatus.IDLE, info={}, metadata={}),
     ]
     connector_cls = mock.MagicMock()
-    connector_cls().producer().keys.return_value = service_keys
-    connector_cls().producer().get.side_effect = [msg for msg in service_msgs]
+    connector_cls().keys.return_value = service_keys
+    connector_cls().get.side_effect = [msg for msg in service_msgs]
     service = BECService(
         config=f"{os.path.dirname(bec_lib.__file__)}/tests/test_service_config.yaml",
         connector_cls=connector_cls,
@@ -144,8 +144,8 @@ def test_bec_service_update_existing_services_ignores_wrong_msgs():
         None,
     ]
     connector_cls = mock.MagicMock()
-    connector_cls().producer().keys.return_value = service_keys
-    connector_cls().producer().get.side_effect = [service_msgs[0], None]
+    connector_cls().keys.return_value = service_keys
+    connector_cls().get.side_effect = [service_msgs[0], None]
     service = BECService(
         config=f"{os.path.dirname(bec_lib.__file__)}/tests/test_service_config.yaml",
         connector_cls=connector_cls,

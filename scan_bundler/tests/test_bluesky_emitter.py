@@ -13,7 +13,7 @@ from scan_bundler.bluesky_emitter import BlueskyEmitter
 def test_run_start_document(scanID):
     sb = load_ScanBundlerMock()
     bls_emitter = BlueskyEmitter(sb)
-    with mock.patch.object(bls_emitter.producer, "raw_send") as send:
+    with mock.patch.object(bls_emitter.connector, "raw_send") as send:
         with mock.patch.object(bls_emitter, "send_descriptor_document") as send_descr:
             with mock.patch.object(
                 bls_emitter, "_get_run_start_document", return_value={}
@@ -45,7 +45,7 @@ def test_send_descriptor_document():
     bls_emitter = BlueskyEmitter(sb)
     scanID = "lkajsdl"
     bls_emitter.bluesky_metadata[scanID] = {}
-    with mock.patch.object(bls_emitter.producer, "raw_send") as send:
+    with mock.patch.object(bls_emitter.connector, "raw_send") as send:
         with mock.patch.object(
             bls_emitter, "_get_descriptor_document", return_value={}
         ) as get_descr:

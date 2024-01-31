@@ -138,6 +138,6 @@ def test_scibec_update_experiment_info(SciBecMock):
 
 def test_update_eaccount_in_redis(SciBecMock):
     SciBecMock.scibec_info = {"activeExperiment": {"writeAccount": "p12345"}}
-    with mock.patch.object(SciBecMock, "producer") as mock_producer:
+    with mock.patch.object(SciBecMock, "connector") as mock_connector:
         SciBecMock._update_eaccount_in_redis()
-        mock_producer.set.assert_called_once_with(MessageEndpoints.account(), b"e12345")
+        mock_connector.set.assert_called_once_with(MessageEndpoints.account(), b"e12345")

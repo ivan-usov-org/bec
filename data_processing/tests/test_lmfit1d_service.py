@@ -134,7 +134,7 @@ def test_LmfitService1D_process_until_finished(lmfit_service):
             lmfit_service.process_until_finished(event)
             assert get_data.call_count == 2
             assert process.call_count == 2
-            assert lmfit_service.client.producer.xadd.call_count == 2
+            assert lmfit_service.client.connector.xadd.call_count == 2
 
 
 def test_LmfitService1D_configure(lmfit_service):

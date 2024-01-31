@@ -46,7 +46,7 @@ class ScanItem:
         self.data = ScanData()
         self.async_data = {}
         self.baseline = ScanData()
-        self._async_data_handler = AsyncDataHandler(scan_manager.producer)
+        self._async_data_handler = AsyncDataHandler(scan_manager.connector)
         self.open_scan_defs = set()
         self.open_queue_group = None
         self.num_points = None

@@ -458,7 +458,7 @@ class LamNIFermatScan(ScanBase, LamNIMixin):
             yield from self.stubs.kickoff(device="rtx")
             while True:
                 yield from self.stubs.read_and_wait(group="primary", wait_group="readout_primary")
-                msg = self.device_manager.producer.get(MessageEndpoints.device_status("rt_scan"))
+                msg = self.device_manager.connector.get(MessageEndpoints.device_status("rt_scan"))
                 if msg:
                     status = msg
                     status_id = status.content.get("status", 1)

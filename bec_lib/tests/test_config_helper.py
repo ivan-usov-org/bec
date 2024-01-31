@@ -49,7 +49,7 @@ def test_config_helper_save_current_session():
     connector = mock.MagicMock()
 
     config_helper = ConfigHelper(connector)
-    connector.producer().get.return_value = messages.AvailableResourceMessage(
+    connector.get.return_value = messages.AvailableResourceMessage(
         resource=[
             {
                 "id": "648c817f67d3c7cd6a354e8e",
@@ -158,9 +158,7 @@ def test_send_config_request_raises_for_rejected_update(config_helper):
 def test_wait_for_config_reply():
     connector = mock.MagicMock()
     config_helper = ConfigHelper(connector)
-    connector.producer().get.return_value = messages.RequestResponseMessage(
-        accepted=True, message="test"
-    )
+    connector.get.return_value = messages.RequestResponseMessage(accepted=True, message="test")
 
     res = config_helper.wait_for_config_reply("test")
     assert res == messages.RequestResponseMessage(accepted=True, message="test")
@@ -169,7 +167,7 @@ def test_wait_for_config_reply():
 def test_wait_for_config_raises_timeout():
     connector = mock.MagicMock()
     config_helper = ConfigHelper(connector)
-    connector.producer().get.return_value = None
+    connector.get.return_value = None
 
     with pytest.raises(DeviceConfigError):
         config_helper.wait_for_config_reply("test", timeout=0.3)
@@ -178,7 +176,7 @@ def test_wait_for_config_raises_timeout():
 def test_wait_for_service_response():
     connector = mock.MagicMock()
     config_helper = ConfigHelper(connector)
-    connector.producer().lrange.side_effect = [
+    connector.lrange.side_effect = [
         [],
         [
             messages.ServiceResponseMessage(
@@ -196,7 +194,7 @@ def test_wait_for_service_response():
 def test_wait_for_service_response_raises_timeout():
     connector = mock.MagicMock()
     config_helper = ConfigHelper(connector)
-    connector.producer().lrange.return_value = []
+    connector.lrange.return_value = []
 
     with pytest.raises(DeviceConfigError):
         config_helper.wait_for_service_response("test", timeout=0.3)

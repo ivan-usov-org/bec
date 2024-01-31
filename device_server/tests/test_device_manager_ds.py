@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 import yaml
 from bec_lib import MessageEndpoints, messages
-from bec_lib.tests.utils import ConnectorMock, ProducerMock, create_session_from_config
+from bec_lib.tests.utils import ConnectorMock, create_session_from_config
 
 from device_server.devices.devicemanager import DeviceManagerDS
 
@@ -52,7 +52,7 @@ def load_device_manager():
     service_mock = mock.MagicMock()
     service_mock.connector = ConnectorMock("", store_data=False)
     device_manager = DeviceManagerDS(service_mock, "")
-    device_manager.producer = service_mock.connector.producer()
+    device_manager.connector = service_mock.connector
     device_manager.config_update_handler = mock.MagicMock()
     with open(f"{dir_path}/tests/test_config.yaml", "r") as session_file:
         device_manager._session = create_session_from_config(yaml.safe_load(session_file))
@@ -133,10 +133,10 @@ def test_flyer_event_callback():
     device_manager._obj_flyer_callback(
         obj=samx.obj, value={"data": {"idata": np.random.rand(20), "edata": np.random.rand(20)}}
     )
-    pipe = device_manager.producer.pipeline()
+    pipe = device_manager.connector.pipeline()
     bundle, progress = pipe._pipe_buffer[-2:]
 
-    # check producer method
+    # check connector method
     assert bundle[0] == "send"
     assert progress[0] == "set_and_publish"
 
@@ -157,9 +157,9 @@ def test_obj_progress_callback():
     samx = device_manager.devices.samx
     samx.metadata = {"scanID": "12345"}
 
-    with mock.patch.object(device_manager, "producer") as mock_producer:
+    with mock.patch.object(device_manager, "connector") as mock_connector:
         device_manager._obj_progress_callback(obj=samx.obj, value=1, max_value=2, done=False)
-        mock_producer.set_and_publish.assert_called_once_with(
+        mock_connector.set_and_publish.assert_called_once_with(
             MessageEndpoints.device_progress("samx"),
             messages.ProgressMessage(
                 value=1, max_value=2, done=False, metadata={"scanID": "12345"}
@@ -176,9 +176,9 @@ def test_obj_monitor_callback(value):
     eiger.metadata = {"scanID": "12345"}
     value_size = len(value.tobytes()) / 1e6  # MB
     max_size = 100
-    with mock.patch.object(device_manager, "producer") as mock_producer:
+    with mock.patch.object(device_manager, "connector") as mock_connector:
         device_manager._obj_callback_monitor(obj=eiger.obj, value=value)
-        mock_producer.xadd.assert_called_once_with(
+        mock_connector.xadd.assert_called_once_with(
             MessageEndpoints.device_monitor(eiger.name),
             {
                 "data": messages.DeviceMonitorMessage(

@@ -26,9 +26,9 @@ dir_path = os.path.abspath(os.path.join(os.path.dirname(bec_lib.__file__), "./co
 class ConfigHandler:
     def __init__(self, scibec_connector: SciBecConnector, connector: ConnectorBase) -> None:
         self.scibec_connector = scibec_connector
+        self.connector = connector
         self.device_manager = DeviceManager(self.scibec_connector.scihub)
         self.device_manager.initialize(scibec_connector.config.redis)
-        self.producer = connector.producer()
         self.validator = SciBecValidator(os.path.join(dir_path, "openapi_schema.json"))
 
     def parse_config_request(self, msg: messages.DeviceConfigMessage) -> None:
@@ -53,7 +53,7 @@ class ConfigHandler:
 
     def send_config(self, msg: messages.DeviceConfigMessage) -> None:
         """broadcast a new config"""
-        self.producer.send(MessageEndpoints.device_config_update(), msg)
+        self.connector.send(MessageEndpoints.device_config_update(), msg)
 
     def send_config_request_reply(self, accepted, error_msg, metadata):
         """send a config request reply"""
@@ -61,7 +61,7 @@ class ConfigHandler:
             accepted=accepted, message=error_msg, metadata=metadata
         )
         RID = metadata.get("RID")
-        self.producer.set(MessageEndpoints.device_config_request_response(RID), msg, expire=60)
+        self.connector.set(MessageEndpoints.device_config_request_response(RID), msg, expire=60)
 
     def _set_config(self, msg: messages.DeviceConfigMessage):
         config = msg.content["config"]
@@ -127,14 +127,14 @@ class ConfigHandler:
 
     def _update_device_server(self, RID: str, config: dict, action="update") -> None:
         msg = messages.DeviceConfigMessage(action=action, config=config, metadata={"RID": RID})
-        self.producer.send(MessageEndpoints.device_server_config_request(), msg)
+        self.connector.send(MessageEndpoints.device_server_config_request(), msg)
 
     def _wait_for_device_server_update(self, RID: str, timeout_time=10) -> bool:
         timeout = timeout_time
         time_step = 0.05
         elapsed_time = 0
         while True:
-            msg = self.producer.get(MessageEndpoints.device_config_request_response(RID))
+            msg = self.connector.get(MessageEndpoints.device_config_request_response(RID))
             if msg:
                 return msg.content["accepted"], msg
 
@@ -188,11 +188,11 @@ class ConfigHandler:
         self.validator.validate_device_patch(update)
 
     def update_config_in_redis(self, device):
-        config = self.device_manager.producer.get(MessageEndpoints.device_config())
+        config = self.device_manager.connector.get(MessageEndpoints.device_config())
         config = config.content["resource"]
         index = next(
             index for index, dev_conf in enumerate(config) if dev_conf["name"] == device.name
         )
         config[index] = device._config
         msg = messages.AvailableResourceMessage(resource=config)
-        self.device_manager.producer.set(MessageEndpoints.device_config(), msg)
+        self.device_manager.connector.set(MessageEndpoints.device_config(), msg)

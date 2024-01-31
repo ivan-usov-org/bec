@@ -24,7 +24,6 @@ if TYPE_CHECKING:
 class LogbookConnector:
     def __init__(self, connector: RedisConnector) -> None:
         self.connector = connector
-        self.producer = connector.producer()
         self.connected = False
         self._scilog_module = None
         self._connect()
@@ -34,12 +33,12 @@ class LogbookConnector:
         if "scilog" not in sys.modules:
             return
 
-        msg = self.producer.get(MessageEndpoints.logbook())
+        msg = self.connector.get(MessageEndpoints.logbook())
         if not msg:
             return
         msg = msgpack.loads(msg)
 
-        account = self.producer.get(MessageEndpoints.account())
+        account = self.connector.get(MessageEndpoints.account())
         if not account:
             return
         account = account.decode()
@@ -54,7 +53,7 @@ class LogbookConnector:
             try:
                 logbooks = self.log.get_logbooks(readACL={"inq": [account]})
             except HTTPError:
-                self.producer.set(MessageEndpoints.logbook(), b"")
+                self.connector.set(MessageEndpoints.logbook(), b"")
                 return
         if len(logbooks) > 1:
             logger.warning("Found two logbooks. Taking the first one.")

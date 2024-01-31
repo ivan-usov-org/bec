@@ -15,22 +15,20 @@ if TYPE_CHECKING:
 class SciBecMetadataHandler:
     def __init__(self, scibec_connector: SciBecConnector) -> None:
         self.scibec_connector = scibec_connector
-        self._scan_status_consumer = None
+        self._scan_status_register = None
         self._start_scan_subscription()
         self._file_subscription = None
         self._start_file_subscription()
 
     def _start_scan_subscription(self):
-        self._scan_status_consumer = self.scibec_connector.connector.consumer(
+        self._scan_status_register = self.scibec_connector.connector.register(
             MessageEndpoints.scan_status(), cb=self._handle_scan_status, parent=self
         )
-        self._scan_status_consumer.start()
 
     def _start_file_subscription(self):
-        self._file_subscription = self.scibec_connector.connector.consumer(
+        self._file_subscription = self.scibec_connector.connector.register(
             MessageEndpoints.file_content(), cb=self._handle_file_content, parent=self
         )
-        self._file_subscription.start()
 
     @staticmethod
     def _handle_scan_status(msg, *, parent, **_kwargs) -> None:
@@ -171,7 +169,7 @@ class SciBecMetadataHandler:
         """
         Shutdown the metadata handler
         """
-        if self._scan_status_consumer:
-            self._scan_status_consumer.shutdown()
+        if self._scan_status_register:
+            self._scan_status_register.shutdown()
         if self._file_subscription:
             self._file_subscription.shutdown()

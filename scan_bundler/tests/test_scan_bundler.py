@@ -36,7 +36,7 @@ def load_ScanBundlerMock():
     service_mock = mock.MagicMock()
     service_mock.connector = ConnectorMock("")
     device_manager = ScanBundlerDeviceManagerMock(service_mock, "")
-    device_manager.producer = service_mock.connector.producer()
+    device_manager.connector = service_mock.connector
     with open(f"{dir_path}/tests/test_config.yaml", "r") as session_file:
         device_manager._session = create_session_from_config(yaml.safe_load(session_file))
     device_manager._load_session()
@@ -74,7 +74,7 @@ def test_device_read_callback():
     msg.topic = MessageEndpoints.device_read("samx")
 
     with mock.patch.object(scan_bundler, "_add_device_to_storage") as add_dev:
-        scan_bundler._device_read_callback(msg, scan_bundler)
+        scan_bundler._device_read_callback(msg)
         add_dev.assert_called_once_with([dev_msg], "samx")
 
 
@@ -157,7 +157,7 @@ def test_wait_for_scanID(scanID, storageID, scan_msg):
 )
 def test_get_scan_status_history(msgs):
     sb = load_ScanBundlerMock()
-    with mock.patch.object(sb.producer, "lrange", return_value=[msg for msg in msgs]) as lrange:
+    with mock.patch.object(sb.connector, "lrange", return_value=[msg for msg in msgs]) as lrange:
         res = sb._get_scan_status_history(5)
         lrange.assert_called_once_with(MessageEndpoints.scan_status() + "_list", -5, -1)
         assert res == msgs
@@ -371,7 +371,7 @@ def test_scan_queue_callback(queue_msg):
     sb = load_ScanBundlerMock()
     msg = MessageMock()
     msg.value = queue_msg
-    sb._scan_queue_callback(msg, sb)
+    sb._scan_queue_callback(msg)
     assert sb.current_queue == queue_msg.content["queue"]["primary"].get("info")
 
 
@@ -399,7 +399,7 @@ def test_scan_status_callback(scan_msg):
     msg.value = scan_msg
 
     with mock.patch.object(sb, "handle_scan_status_message") as handle_scan_status_message_mock:
-        sb._scan_status_callback(msg, sb)
+        sb._scan_status_callback(msg)
         handle_scan_status_message_mock.assert_called_once_with(scan_msg)
 
 
@@ -744,10 +744,10 @@ def test_get_last_device_readback():
         signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
         metadata={"scanID": "laksjd", "readout_priority": "monitored"},
     )
-    with mock.patch.object(sb, "producer") as producer_mock:
-        producer_mock.execute_pipeline.return_value = [dev_msg]
+    with mock.patch.object(sb, "connector") as connector_mock:
+        connector_mock.execute_pipeline.return_value = [dev_msg]
         ret = sb._get_last_device_readback([sb.device_manager.devices.samx])
-        assert producer_mock.get.mock_calls == [
-            mock.call(MessageEndpoints.device_readback("samx"), producer_mock.pipeline())
+        assert connector_mock.get.mock_calls == [
+            mock.call(MessageEndpoints.device_readback("samx"), connector_mock.pipeline())
         ]
         assert ret == [dev_msg.content["signals"]]

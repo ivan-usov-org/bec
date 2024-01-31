@@ -23,7 +23,6 @@ class ScanServer(BECService):
 
     def __init__(self, config: ServiceConfig, connector_cls: ConnectorBase):
         super().__init__(config, connector_cls, unique_service=True)
-        self.producer = self.connector.producer()
         self._start_scan_manager()
         self._start_queue_manager()
         self._start_device_manager()
@@ -52,15 +51,12 @@ class ScanServer(BECService):
         self.scan_guard = ScanGuard(parent=self)
 
     def _start_alarm_handler(self):
-        self._alarm_consumer = self.connector.consumer(
-            MessageEndpoints.alarm(), cb=self._alarm_callback, parent=self
-        )
-        self._alarm_consumer.start()
+        self.connector.register(MessageEndpoints.alarm(), cb=self._alarm_callback, parent=self)
 
     def _reset_scan_number(self):
-        if self.producer.get(MessageEndpoints.scan_number()) is None:
+        if self.connector.get(MessageEndpoints.scan_number()) is None:
             self.scan_number = 1
-        if self.producer.get(MessageEndpoints.dataset_number()) is None:
+        if self.connector.get(MessageEndpoints.dataset_number()) is None:
             self.dataset_number = 1
 
     @staticmethod
@@ -74,25 +70,24 @@ class ScanServer(BECService):
     @property
     def scan_number(self) -> int:
         """get the current scan number"""
-        return int(self.producer.get(MessageEndpoints.scan_number()))
+        return int(self.connector.get(MessageEndpoints.scan_number()))
 
     @scan_number.setter
     def scan_number(self, val: int):
         """set the current scan number"""
-        self.producer.set(MessageEndpoints.scan_number(), val)
+        self.connector.set(MessageEndpoints.scan_number(), val)
 
     @property
     def dataset_number(self) -> int:
         """get the current dataset number"""
-        return int(self.producer.get(MessageEndpoints.dataset_number()))
+        return int(self.connector.get(MessageEndpoints.dataset_number()))
 
     @dataset_number.setter
     def dataset_number(self, val: int):
         """set the current dataset number"""
-        self.producer.set(MessageEndpoints.dataset_number(), val)
+        self.connector.set(MessageEndpoints.dataset_number(), val)
 
     def shutdown(self) -> None:
         """shutdown the scan server"""
-
         self.device_manager.shutdown()
         self.queue_manager.shutdown()

@@ -10,8 +10,8 @@ class DeviceValidation:
     Mixin class for validation methods
     """
 
-    def __init__(self, producer, worker):
-        self.producer = producer
+    def __init__(self, connector, worker):
+        self.connector = connector
         self.worker = worker
 
     def get_device_status(self, endpoint: MessageEndpoints, devices: list) -> list:
@@ -25,10 +25,10 @@ class DeviceValidation:
         Returns:
             list: List of BECMessage objects
         """
-        pipe = self.producer.pipeline()
+        pipe = self.connector.pipeline()
         for dev in devices:
-            self.producer.get(endpoint(dev), pipe)
-        return self.producer.execute_pipeline(pipe)
+            self.connector.get(endpoint(dev), pipe)
+        return self.connector.execute_pipeline(pipe)
 
     def devices_are_ready(
         self,

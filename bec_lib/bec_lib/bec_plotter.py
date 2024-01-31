@@ -54,14 +54,14 @@ class BECWidgetsConnector:
     def __init__(self, gui_id: str, bec_client: BECClient = None) -> None:
         self._client = bec_client
         self.gui_id = gui_id
-        # TODO replace with a global producer
+        # TODO replace with a global connector
         if self._client is None:
             if "bec" in builtins.__dict__:
                 self._client = builtins.bec
             else:
                 self._client = BECClient()
                 self._client.start()
-        self._producer = self._client.connector.producer()
+        self._connector = self._client.connector
 
     def set_plot_config(self, plot_id: str, config: dict) -> None:
         """
@@ -72,7 +72,7 @@ class BECWidgetsConnector:
             config (dict): The config to set.
         """
         msg = messages.GUIConfigMessage(config=config)
-        self._producer.set_and_publish(MessageEndpoints.gui_config(plot_id), msg)
+        self._connector.set_and_publish(MessageEndpoints.gui_config(plot_id), msg)
 
     def close(self, plot_id: str) -> None:
         """
@@ -82,7 +82,7 @@ class BECWidgetsConnector:
             plot_id (str): The id of the plot.
         """
         msg = messages.GUIInstructionMessage(action="close", parameter={})
-        self._producer.set_and_publish(MessageEndpoints.gui_instructions(plot_id), msg)
+        self._connector.set_and_publish(MessageEndpoints.gui_instructions(plot_id), msg)
 
     def config_dialog(self, plot_id: str) -> None:
         """
@@ -92,7 +92,7 @@ class BECWidgetsConnector:
             plot_id (str): The id of the plot.
         """
         msg = messages.GUIInstructionMessage(action="config_dialog", parameter={})
-        self._producer.set_and_publish(MessageEndpoints.gui_instructions(plot_id), msg)
+        self._connector.set_and_publish(MessageEndpoints.gui_instructions(plot_id), msg)
 
     def send_data(self, plot_id: str, data: dict) -> None:
         """
@@ -103,9 +103,9 @@ class BECWidgetsConnector:
             data (dict): The data to send.
         """
         msg = messages.GUIDataMessage(data=data)
-        self._producer.set_and_publish(topic=MessageEndpoints.gui_data(plot_id), msg=msg)
+        self._connector.set_and_publish(topic=MessageEndpoints.gui_data(plot_id), msg=msg)
         # TODO bec_dispatcher can only handle set_and_publish ATM
-        # self._producer.xadd(topic=MessageEndpoints.gui_data(plot_id),msg= {"data": msg})
+        # self._connector.xadd(topic=MessageEndpoints.gui_data(plot_id),msg= {"data": msg})
 
     def clear(self, plot_id: str) -> None:
         """
@@ -115,7 +115,7 @@ class BECWidgetsConnector:
             plot_id (str): The id of the plot.
         """
         msg = messages.GUIInstructionMessage(action="clear", parameter={})
-        self._producer.set_and_publish(MessageEndpoints.gui_instructions(plot_id), msg)
+        self._connector.set_and_publish(MessageEndpoints.gui_instructions(plot_id), msg)
 
 
 class BECPlotter:

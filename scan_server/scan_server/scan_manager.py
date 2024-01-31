@@ -101,7 +101,7 @@ class ScanManager:
 
     def publish_available_scans(self):
         """send all available scans to the broker"""
-        self.parent.producer.set(
+        self.parent.connector.set(
             MessageEndpoints.available_scans(),
             AvailableResourceMessage(resource=self.available_scans),
         )

@@ -5,6 +5,8 @@ __version__ = "1.12.1"
 if __name__ == "__main__":
     setup(
         install_requires=[
+            "hiredis",
+            "louie",
             "numpy",
             "scipy",
             "msgpack",
@@ -22,7 +24,16 @@ if __name__ == "__main__":
             "lmfit",
         ],
         extras_require={
-            "dev": ["pytest", "pytest-random-order", "coverage", "pandas", "black", "pylint"]
+            "dev": [
+                "pytest",
+                "pytest-random-order",
+                "pytest-redis",
+                "pytest-timeout",
+                "coverage",
+                "pandas",
+                "black",
+                "pylint",
+            ]
         },
         entry_points={"console_scripts": ["bec-channel-monitor = bec_lib:channel_monitor_launch"]},
         package_data={"bec_lib.tests": ["*.yaml"], "bec_lib.configs": ["*.yaml", "*.json"]},
