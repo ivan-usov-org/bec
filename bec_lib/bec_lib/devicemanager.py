@@ -209,7 +209,11 @@ class DeviceContainer(dict):
     def get_software_triggered_devices(self) -> list:
         """get a list of all devices that should receive a software trigger detectors"""
         # pylint: disable=protected-access
-        return [dev for _, dev in self.items() if dev._config.get("softwareTrigger", False) is True]
+        devices = [
+            dev for _, dev in self.items() if dev._config.get("softwareTrigger", False) is True
+        ]
+        excluded_devices = self.disabled_devices
+        return [dev for dev in set(devices) if dev not in excluded_devices]
 
     def _expand_device_name(self, device_name: str) -> list[str]:
         try:
