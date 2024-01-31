@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.59.4 (2024-01-31)
+
+### Fix
+
+* Fixed event name for scan status callbacks ([`ed43260`](https://gitlab.psi.ch/bec/bec/-/commit/ed43260b60297d4e6b8dddc8c853b53b653c9ce1))
+
 ## v0.59.3 (2024-01-30)
 
 ### Fix
