@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.59.5 (2024-01-31)
+
+### Fix
+
+* Fixed get_software_triggered_devices to excluded disabled devices, complement test case ([`37e74dc`](https://gitlab.psi.ch/bec/bec/-/commit/37e74dc206e906a15d19a261fc768b86d70cfdc1))
+
 ## v0.59.4 (2024-01-31)
 
 ### Fix
