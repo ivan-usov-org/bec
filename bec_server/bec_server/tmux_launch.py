@@ -8,9 +8,10 @@ def activate_venv(pane, service_name, service_path):
     Activate the python environment for a service.
     """
 
-    # check if the current file was install with pip install -e (editable mode)
+    # check if the current file was installed with pip install -e (editable mode)
     # if so, the venv is the service directory and it's called <service_name>_venv
-    # otherwise, we simply take the currently running venv
+    # otherwise, we simply take the currently running venv ;
+    # in case of no venv, maybe it is running within a Conda environment
 
     base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
@@ -25,6 +26,9 @@ def activate_venv(pane, service_name, service_path):
         return
     if os.path.exists(f"{base_dir}/bec_venv"):
         pane.send_keys(f"source {base_dir}/bec_venv/bin/activate")
+        return
+    if os.getenv("CONDA_PREFIX"):
+        pane.send_keys(f"conda activate {os.path.basename(os.environ['CONDA_PREFIX'])}")
         return
 
 
