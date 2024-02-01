@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import builtins
 import inspect
 import operator
@@ -24,13 +25,25 @@ def serialize_dtype(dtype: type) -> Any:
     if hasattr(dtype, "__name__"):
         name = dtype.__name__
         # changed in python 3.10. Refactor this when we upgrade
-        if name != "Literal":
+        if name not in ["Literal", "Union"]:
             return name
     if hasattr(dtype, "__module__"):
         if dtype.__module__ == "typing":
-            return {"Literal": dtype.__args__}
+            if dtype.__class__.__name__ == "_UnionGenericAlias":
+                return " | ".join([serialize_dtype(x) for x in dtype.__args__])
+            if dtype.__class__.__name__ == "_LiteralGenericAlias":
+                return {"Literal": dtype.__args__}
     if isinstance(dtype, str):
+        if sys.version_info[:3] >= (3, 10):
+            return dtype
+        # remove this when we upgrade to python 3.10
+        ####
+        if dtype.startswith("typing.Literal["):
+            return {"Literal": ast.literal_eval(dtype[15:-1])}
+        if dtype.startswith("Literal["):
+            return {"Literal": ast.literal_eval(dtype[8:-1])}
         return dtype
+        ####
     raise ValueError(f"Unknown dtype {dtype}")
 
 
