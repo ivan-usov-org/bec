@@ -1,7 +1,14 @@
+from __future__ import annotations
+
 import builtins
 import inspect
+import operator
+import sys
 from collections.abc import Callable
-from typing import Any, Literal
+from typing import Any, ForwardRef, Literal, Union
+
+from bec_lib.device import DeviceBase
+from bec_lib.scan_items import ScanItem
 
 
 def serialize_dtype(dtype: type) -> Any:
@@ -22,6 +29,8 @@ def serialize_dtype(dtype: type) -> Any:
     if hasattr(dtype, "__module__"):
         if dtype.__module__ == "typing":
             return {"Literal": dtype.__args__}
+    if isinstance(dtype, str):
+        return dtype
     raise ValueError(f"Unknown dtype {dtype}")
 
 
@@ -39,13 +48,55 @@ def deserialize_dtype(dtype: Any) -> type:
         # pylint: disable=protected-access
         return inspect._empty
     if isinstance(dtype, dict):
-        # bodge needed for python 3.8
         if "Literal" in dtype:
-            literal = Literal["dummy"]
+            # remove this when we upgrade to python 3.10
+
+            #### remove this section
+            literal = Literal[str(dtype)]
             literal.__args__ = dtype["Literal"]
             return literal
+            #### remove this section
+
+            #### add this section when we upgrade to python 3.10
+            # return Literal[*dtype["Literal"]]
+            #### add this section when we upgrade to python 3.10
+
         raise ValueError(f"Unknown dtype {dtype}")
-    return builtins.__dict__.get(dtype)
+    if isinstance(dtype, str) and "|" in dtype:
+        # remove this when we upgrade to python 3.10
+        if sys.version_info[:3] < (3, 10):
+            union = Union[int, str]
+            union.__args__ = [deserialize_dtype(x.strip()) for x in dtype.split("|")]
+            return union
+        return operator.or_(*[deserialize_dtype(x.strip()) for x in dtype.split("|")])
+
+    builtin_type = builtins.__dict__.get(dtype)
+    if builtin_type:
+        return builtin_type
+    if dtype == "DeviceBase":
+        return DeviceBase
+    if dtype == "ScanItem":
+        return ScanItem
+
+
+def _union_operator(val1, val2):
+    if sys.version_info[:3] >= (3, 10):
+        return operator.or_(val1, val2)
+    return Union[ForwardRef(str(val1)), ForwardRef(str(val1))]
+
+
+def list_to_operator_or(values: list, union: Union = None) -> Union:
+    next_val = values.pop(0)
+    if len(values) == 0:
+        return next_val
+
+    if union is None:
+        union = _union_operator(next_val, values.pop(0))
+
+    if len(values) == 0:
+        return union
+
+    return _union_operator(union, list_to_operator_or(values, union))
 
 
 def signature_to_dict(func: Callable, include_class_obj=False) -> dict:
