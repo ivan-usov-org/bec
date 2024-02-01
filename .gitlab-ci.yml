@@ -46,14 +46,10 @@ stages:
     - pip install -e ./data_processing
 
 .install-bec-services-dev: &install-bec-services-dev
+    - pip install wheel
+    - pip install -e ./bec_server[dev]
+    - pip install -e ./bec_client[dev]
     - pip install -e ./bec_lib[dev]
-    - pip install -e ./device_server
-    - pip install -e ./scan_server
-    - pip install -e ./scan_bundler
-    - pip install -e ./bec_client
-    - pip install -e ./file_writer
-    - pip install -e ./scihub
-    - pip install -e ./data_processing
 
 formatter:
   stage: Formatter
@@ -301,6 +297,82 @@ end-2-end-conda:
     - if: '$CI_PIPELINE_SOURCE == "pipeline"'     
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
+
+end-2-end-conda-39:
+  stage: End2End
+  needs: []
+  image: continuumio/miniconda3
+  allow_failure: false
+  variables:
+    PYTHON_VERSION: "3.9"
+  script:
+    - apt-get update
+    - apt-get install -y tmux
+    - conda config --set always_yes yes --set changeps1 no
+    - conda create -q -n test-environment python=$PYTHON_VERSION
+    - conda init bash
+    - source ~/.bashrc
+    - conda activate test-environment
+
+    - conda install redis
+    - redis-server --daemonize yes
+
+    # get ophyd devices repo (needed for the device_server)
+    - git clone --branch $OPHYD_DEVICES_BRANCH https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
+    - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices
+
+    - *install-bec-services-dev
+    - python ./bec_lib/util_scripts/init_config.py --config ./bec_lib/bec_lib/configs/demo_config.yaml
+
+    - bec-server start --config ./ci/test_config.yaml
+
+    - pip install pytest pytest-random-order pytest-cov pytest-asyncio pytest-timeout
+    - cd ./bec_client
+    - pytest -v ./tests/end-2-end/test_scans.py
+
+  artifacts:
+    when: on_failure
+    paths:
+      - ScanServer.log
+      - ScanBundler.log
+      - DeviceServer.log
+      - BECClient.log
+      - BECIPythonClient.log
+      - FileWriterManager.log
+      - SciHub.log
+      - DAPServer.log
+    expire_in: 1 week
+
+  rules:
+    - if: '$E2E_FULL == "1"'
+
+end-2-end-conda-310:
+  stage: End2End
+  extends: "end-2-end-conda-39"
+  allow_failure: false
+  variables:
+    PYTHON_VERSION: "3.10"
+
+end-2-end-conda-311:
+  stage: End2End
+  extends: "end-2-end-conda-39"
+  allow_failure: false
+  variables:
+    PYTHON_VERSION: "3.11"
+
+end-2-end-conda-312:
+  stage: End2End
+  extends: "end-2-end-conda-39"
+  allow_failure: false
+  variables:
+    PYTHON_VERSION: "3.12"
+
+end-2-end-conda-313:
+  stage: End2End
+  extends: "end-2-end-conda-39"
+  allow_failure: true
+  variables:
+    PYTHON_VERSION: "3.13"
 
 trigger_bec-widgets:
   trigger:
