@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.60.0 (2024-02-01)
+
+### Feature
+
+* **run environment:** Allow to run service using the current Conda environment, if any ([`4b3bb4a`](https://gitlab.psi.ch/bec/bec/-/commit/4b3bb4a2a87d2d3024637500ad00e13dca80cac2))
+
 ## v0.59.6 (2024-02-01)
 
 ### Fix
