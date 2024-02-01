@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.59.6 (2024-02-01)
+
+### Fix
+
+* Fixed scibec login update ([`f1d8faf`](https://gitlab.psi.ch/bec/bec/-/commit/f1d8fafeaf3fd961fb4e3fa07a845a037fc27d1b))
+
 ## v0.59.5 (2024-01-31)
 
 ### Fix
