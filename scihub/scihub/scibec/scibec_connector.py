@@ -109,9 +109,11 @@ class SciBecConnector:
             return
         try:
             self._scibec_account_update()
+            self.scibec.login(username=self.ingestor, password=self.ingestor_secret)
         except ApiException as exc:
             logger.warning(f"Could not connect to SciBec: {exc}")
             return
+        logger.info("Starting SciBec account update timer.")
         self._scibec_account_thread = RepeatedTimer(
             self.token_expiration_time, self._scibec_account_update
         )
