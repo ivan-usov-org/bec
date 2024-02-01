@@ -5,7 +5,7 @@ import inspect
 import operator
 import sys
 from collections.abc import Callable
-from typing import Any, ForwardRef, Literal, Union
+from typing import Any, Literal, Union
 
 from bec_lib.device import DeviceBase
 from bec_lib.scan_items import ScanItem
@@ -77,26 +77,6 @@ def deserialize_dtype(dtype: Any) -> type:
         return DeviceBase
     if dtype == "ScanItem":
         return ScanItem
-
-
-def _union_operator(val1, val2):
-    if sys.version_info[:3] >= (3, 10):
-        return operator.or_(val1, val2)
-    return Union[ForwardRef(str(val1)), ForwardRef(str(val1))]
-
-
-def list_to_operator_or(values: list, union: Union = None) -> Union:
-    next_val = values.pop(0)
-    if len(values) == 0:
-        return next_val
-
-    if union is None:
-        union = _union_operator(next_val, values.pop(0))
-
-    if len(values) == 0:
-        return union
-
-    return _union_operator(union, list_to_operator_or(values, union))
 
 
 def signature_to_dict(func: Callable, include_class_obj=False) -> dict:
