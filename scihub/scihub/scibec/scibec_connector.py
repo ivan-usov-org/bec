@@ -9,6 +9,7 @@ from bec_lib.connector import ConnectorBase
 from dotenv import dotenv_values
 from py_scibec import SciBecCore
 from py_scibec.exceptions import ApiException
+from urllib3.exceptions import MaxRetryError
 
 from scihub.repeated_timer import RepeatedTimer
 
@@ -111,7 +112,7 @@ class SciBecConnector:
         try:
             self._scibec_account_update()
             self.scibec.login(username=self.ingestor, password=self.ingestor_secret)
-        except ApiException as exc:
+        except Exception as exc:
             logger.warning(f"Could not connect to SciBec: {exc}")
             return
         logger.info("Starting SciBec account update timer.")
@@ -169,7 +170,7 @@ class SciBecConnector:
             self._update_experiment_info()
             self._update_eaccount_in_redis()
 
-        except (ApiException, SciBecConnectorError) as exc:
+        except (ApiException, SciBecConnectorError, MaxRetryError) as exc:
             self.scibec = None
             logger.warning(f"Could not connect to SciBec: {exc}")
 
