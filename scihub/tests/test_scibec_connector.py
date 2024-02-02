@@ -31,6 +31,7 @@ def SciHubMock():
     )
     scihub_mocked = SciHubMocked(config, ConnectorMock)
     yield scihub_mocked
+    scihub_mocked.shutdown()
 
 
 @pytest.fixture()

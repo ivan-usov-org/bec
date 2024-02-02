@@ -24,5 +24,7 @@ class SciHub(BECService):
 
     def shutdown(self):
         super().shutdown()
-        self.scibec_connector.shutdown()
-        self.scilog_connector.shutdown()
+        if self.scibec_connector:
+            self.scibec_connector.shutdown()
+        if self.scilog_connector:
+            self.scilog_connector.shutdown()

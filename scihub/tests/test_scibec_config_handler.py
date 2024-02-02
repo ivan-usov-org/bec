@@ -2,19 +2,18 @@
 import os
 from unittest import mock
 
-import pytest
 import bec_lib
+import pytest
 import yaml
 from bec_lib import DeviceBase, messages
 from bec_lib.bec_errors import DeviceConfigError
+from bec_lib.device import OnFailure, ReadoutPriority
 from bec_lib.tests.utils import ConnectorMock
-from bec_lib.device import ReadoutPriority, OnFailure
 from fastjsonschema import JsonSchemaException
 from test_scibec_connector import SciBecMock, SciHubMock
 
 from scihub import SciHub
 from scihub.scibec import ConfigHandler, SciBecConnector
-
 
 dir_path = os.path.dirname(bec_lib.__file__)
 
@@ -27,6 +26,7 @@ def config_handler(SciHubMock):
             with mock.patch.object(scibec_connector, "_start_scibec_account_update"):
                 scibec_connector.scibec = None
                 yield scibec_connector.config_handler
+                scibec_connector.shutdown()
 
 
 def create_available_keys_fixture():
@@ -316,7 +316,27 @@ def test_config_handler_update_device_config_available_keys(config_handler, avai
                     update = ""
                     config_handler._update_device_config(device, {available_key: update})
                 # mock doesn't copy the data, hence the popped result:
-                if available_key is "deviceConfig":
+                if available_key == "deviceConfig":
                     update_dev_server.assert_called_once_with(rid, {device.name: {}})
                     wait.assert_called_once_with(rid)
                 assert dev.samx._config == {available_key: update}
+
+
+def test_config_handler_wait_for_device_server_update(config_handler):
+    RID = "12345"
+    with mock.patch.object(config_handler.producer, "get") as mock_get:
+        mock_get.side_effect = [
+            None,
+            None,
+            None,
+            messages.RequestResponseMessage(accepted=True, message="").dumps(),
+        ]
+        config_handler._wait_for_device_server_update(RID)
+
+
+def test_config_handler_wait_for_device_server_update_timeout(config_handler):
+    RID = "12345"
+    with mock.patch.object(config_handler.producer, "get") as mock_get:
+        with pytest.raises(TimeoutError):
+            config_handler._wait_for_device_server_update(RID, timeout_time=0.1)
+            mock_get.assert_called()

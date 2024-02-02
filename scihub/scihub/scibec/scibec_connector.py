@@ -44,6 +44,7 @@ class SciBecConnector:
         self._config_request_handler = None
         self._metadata_handler = None
         self.config_handler = None
+        self._scibec_account_thread = None
         self._start(connector)
 
     def _start(self, connector: ConnectorBase):
@@ -209,4 +210,12 @@ class SciBecConnector:
         self.producer.set(MessageEndpoints.account(), write_account.encode())
 
     def shutdown(self):
-        pass
+        """
+        Shutdown the SciBec connector
+        """
+        if self._scibec_account_thread:
+            self._scibec_account_thread.stop()
+        if self._config_request_handler:
+            self._config_request_handler.shutdown()
+        if self._metadata_handler:
+            self._metadata_handler.shutdown()
