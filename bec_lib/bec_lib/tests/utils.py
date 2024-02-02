@@ -7,10 +7,9 @@ import uuid
 from typing import TYPE_CHECKING
 from unittest import mock
 
+import bec_lib
 import pytest
 import yaml
-
-import bec_lib
 from bec_lib import BECClient, messages
 from bec_lib.connector import ConnectorBase
 from bec_lib.devicemanager import DeviceManagerBase
@@ -527,6 +526,9 @@ class ConsumerMock:  # pragma: no cover
     def join(self):
         pass
 
+    def shutdown(self):
+        pass
+
 
 class SignalMock:  # pragma: no cover
     def __init__(self) -> None:
@@ -621,6 +623,9 @@ class ConnectorMock(ConnectorBase):  # pragma: no cover
         pass
 
     def log_error(self, *args, **kwargs):
+        pass
+
+    def shutdown(self):
         pass
 
 
