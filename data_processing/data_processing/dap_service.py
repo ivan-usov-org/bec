@@ -25,67 +25,58 @@ class DAPError(Exception):
 
 
 class DAPServiceBase(abc.ABC):
+    """
+    Base class for data processing services.
+    """
+
     AUTO_FIT_SUPPORTED = False
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(self, *args, bec_client: BECClient, **kwargs) -> None:
+        super().__init__()
+        self.client = bec_client
         self.scans = None
 
-    @abc.abstractmethod
+    def on_scan_status_update(self, status: dict, metadata: dict):
+        """
+        Override this method to process a continuous dap request.
+        The underlying service manager will call this method when a
+        scan status update is received.
+
+        Args:
+            status (dict): Scan status
+            metadata (dict): Scan metadata
+        """
+
+    def configure(self, *args, **kwargs):
+        """
+        Configure the service using the provided parameters by the user.
+        The process request's config dictionary will be passed to this method.
+        """
+
     def process(self):
-        pass
-
-    def describe(self):
-        pass
-
-    # @classmethod
-    # def run(cls, scans, msg_content: dict):
-    #     inst = cls(**msg_content)
-    #     inst.scans = scans
-    #     inst.process()
-
-    # @classmethod
-    # def params(self):
-    #     ...
-
-
-class LmfitService(DAPServiceBase):
-    def __init__(self, model: str, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.model = self._get_model(model)
-        self.scan_id = None
-
-    def _get_model(self, model: str) -> lmfit.Model:
-        """Get the model from the config and convert it to an lmfit model."""
-
-        if isinstance(model, str):
-            model = getattr(lmfit.models, model, None)
-        if not model:
-            raise ValueError(f"Unknown model {model}")
-
-        return model
-
-    # @classmethod
-    # def params(cls):
-    #     ...
+        """
+        Process the data and return the result. Ensure that the return value
+        is a tuple of (stream_output, metadata) and that it is serializable.
+        """
 
 
 class LmfitService1D(DAPServiceBase):
+    """
+    Lmfit service for 1D data.
+    """
+
     AUTO_FIT_SUPPORTED = True
 
-    def __init__(self, client: BECClient, model: str, *args, continuous: bool = False, **kwargs):
+    def __init__(self, model: str, *args, continuous: bool = False, **kwargs):
         """
-        Gaussian fit service.
+        Initialize the lmfit service. This is a multiplexer service that provides
+        access to multiple lmfit models.
 
         Args:
-            scan_id (str): Scan ID
-            device_x (str): Device name for x
-            signal_x (str): Signal name for x
-            device_y (str): Device name for y
-            signal_y (str): Signal name for y
-            parameters (dict): Fit parameters
+            model (str): Model name
+            continuous (bool, optional): Continuous processing. Defaults to False.
         """
-        super().__init__()
+        super().__init__(*args, **kwargs)
         self.scan_id = None
         self.device_x = None
         self.signal_x = None
@@ -94,7 +85,6 @@ class LmfitService1D(DAPServiceBase):
         self.parameters = None
         self.current_scan_item = None
         self.finished_id = None
-        self.client = client
         self.model = getattr(lmfit.models, model)()
         self.finish_event = None
         self.data = None
@@ -175,6 +165,7 @@ class LmfitService1D(DAPServiceBase):
 
     def configure(
         self,
+        *args,
         scan_item: ScanItem | str = None,
         device_x: DeviceBase | str = None,
         signal_x: DeviceBase | str = None,
@@ -184,7 +175,7 @@ class LmfitService1D(DAPServiceBase):
         **kwargs,
     ):
         """
-        Process a scan segment.
+
 
         Args:
             scan_item (ScanItem): Scan item or scan ID

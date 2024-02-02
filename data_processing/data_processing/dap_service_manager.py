@@ -4,8 +4,7 @@ import inspect
 
 from bec_lib import BECClient, MessageEndpoints, bec_logger, messages
 from bec_lib.lmfit_serializer import serialize_lmfit_params
-from bec_lib.redis_connector import MessageObject, RedisConnector
-from bec_lib.scan_manager import ScanManager
+from bec_lib.redis_connector import MessageObject
 from bec_lib.signature_serializer import signature_to_dict
 
 from data_processing import dap_service as dap_plugins
@@ -206,7 +205,7 @@ class DAPServiceManager:
                     model.__name__: {
                         "class": name,
                         "user_friendly_name": model.__name__,
-                        "doc": service_cls.__doc__ or service_cls.__init__.__doc__,
+                        "doc": service_cls.configure.__doc__ or service_cls.__init__.__doc__,
                         "signature": signature_to_dict(service_cls.configure),
                         "auto_fit_supported": getattr(service_cls, "AUTO_FIT_SUPPORTED", False),
                         "params": serialize_lmfit_params(
@@ -230,6 +229,6 @@ class DAPServiceManager:
                 }
 
     def publish_available_services(self):
-        """send all available scans to the broker"""
+        """send all available dap services to the broker"""
         msg = messages.AvailableResourceMessage(resource=self.available_dap_services).dumps()
         self.producer.set(MessageEndpoints.dap_available_plugins(), msg)
