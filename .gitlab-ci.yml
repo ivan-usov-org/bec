@@ -362,3 +362,11 @@ pages:
   script:
     - curl -X POST -d "branches=$CI_COMMIT_REF_NAME" -d "token=$RTD_TOKEN" https://readthedocs.org/api/v2/webhook/beamline-experiment-control/221870/
     - curl -X POST -d "branches=$CI_COMMIT_REF_NAME" -d "token=$RTD_TOKEN_BEC" https://readthedocs.org/api/v2/webhook/bec/246899/
+
+dev-pages:
+  stage: Deploy
+  rules:
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+  script:
+    - curl -X POST -d "branches=development" -d "token=$RTD_TOKEN" https://readthedocs.org/api/v2/webhook/beamline-experiment-control/221870/
+    - curl -X POST -d "branches=development" -d "token=$RTD_TOKEN_BEC" https://readthedocs.org/api/v2/webhook/bec/246899/
