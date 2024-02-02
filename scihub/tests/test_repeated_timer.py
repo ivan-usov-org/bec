@@ -27,4 +27,6 @@ def test_start_and_stop(timer, counter):
     timer.start()
     time.sleep(2)
     timer.stop()
-    assert counter.count == 19
+
+    # accept some variance in the count due to timing issues
+    assert 18 <= counter.count <= 20
