@@ -1,43 +1,81 @@
 # BEC 
 
-Beamline Experiment Control (BEC)
+BEC is a **B**eamline **E**xperiment **C**ontrol system that relies on multiple small services for orchestrating and steering the experiment at large research facilities. The usage of small services allows for a more modular system and facilitates the long-term maintainability. 
+
+The system is designed to be deployed at large research facilities where the interoperability with other systems is a key requirement. As shown in the figure below, the system can be connected to other services such as an electronic logbook, a data catalogue / archiving solution or a data processing pipeline. More services can be added easily by using the provided bec library.  
 
 
 ## Documentation
 
-The documentation is hosted here: https://beamline-experiment-control.readthedocs.io/
+The documentation is hosted here: https://beamline-experiment-control.readthedocs.io/ and here: https://bec.readthedocs.io/
 
 ## Contributing
 
-All commits should use the Angular commit scheme:
+Thank you for considering contributing to BEC! Contributions are essential for improving the project and helping it grow. 
+We welcome your bug reports and feature requests via [GitLab issues](https://gitlab.psi.ch/bec/bec/-/issues?sort=created_date&state=opened), as well as contribution for documentation improvements, and code extensions or improvements.
 
-> #### <a name="commit-header"></a>Angular Commit Message Header
-> 
-> ```
-> <type>(<scope>): <short summary>
->   │       │             │
->   │       │             └─⫸ Summary in present tense. Not capitalized. No period at the end.
->   │       │
->   │       └─⫸ Commit Scope: animations|bazel|benchpress|common|compiler|compiler-cli|core|
->   │                          elements|forms|http|language-service|localize|platform-browser|
->   │                          platform-browser-dynamic|platform-server|router|service-worker|
->   │                          upgrade|zone.js|packaging|changelog|docs-infra|migrations|ngcc|ve|
->   │                          devtools
->   │
->   └─⫸ Commit Type: build|ci|docs|feat|fix|perf|refactor|test
-> ```
-> 
-> The `<type>` and `<summary>` fields are mandatory, the `(<scope>)` field is optional.
+### Reporting Bugs or Requesting Features:
 
-> ##### Type
-> 
-> Must be one of the following:
-> 
-> * **build**: Changes that affect the build system or external dependencies (example scopes: gulp, broccoli, npm)
-> * **ci**: Changes to our CI configuration files and scripts (examples: CircleCi, SauceLabs)
-> * **docs**: Documentation only changes
-> * **feat**: A new feature
-> * **fix**: A bug fix
-> * **perf**: A code change that improves performance
-> * **refactor**: A code change that neither fixes a bug nor adds a feature
-> * **test**: Adding missing tests or correcting existing tests
+- Before submitting a bug report or feature request, please check the [issue tracker](https://gitlab.psi.ch/bec/bec/issues) to avoid duplication.
+- If the issue or feature hasn't been reported, open a new issue with a clear title and description. Be sure to provide steps to reproduce bugs, including _package version_ of the deployed BEC services (e.g. `bec_lib`) and information of your operating system, which will increase chances of reproducing and fixing the reported bug.
+
+### Contributing Code:
+
+If you are keen on contributing new code developments to BEC, please follow the guidelines on how to push code changes back into the [BEC repository](https://gitlab.psi.ch/bec).
+To start with, you will first have to clone the repository to your local system as described in the [installation guide for developers](#developer.install_developer_env) and create a `bec_venv` with the developer (_[dev]_) extensions.
+
+Afterwards, you may follow this step-by-step guide to suggest your code improvements:
+
+1. Create a new branch for your changes:
+
+    ```bash
+    git checkout -b feature/your-feature
+    ```
+
+2. Make your changes.
+
+3. Use Black to format your code:
+
+    ```bash
+    black --line-length=100 --skip-magic-trailing-comma --experimental-string-processing .
+    ```
+
+4. Run Pylint on your code to ensure it meets coding standards:
+
+    ```bash
+    pylint your_module_or_package
+    ```
+
+5. Write tests for new features or fixed bugs, and add them to the test folder. 
+We use [pytest](https://github.com/pytest-dev/pytest) within our team to test code. 
+
+6. Follow [Conventional Commit Messages](https://www.conventionalcommits.org/en/v1.0.0/) when writing commit messages. This helps us automatically generate a changelog. For example:
+
+    ```bash
+    git commit -m "feat: add new feature"
+    ```
+
+    or
+
+    ```bash
+    git commit -m "fix: fix bug"
+    ```
+
+    or
+
+    ```bash
+    git commit -m "docs: update documentation"
+    ```
+
+7. Push your commits to the remote branch:
+
+    ```bash
+    git push origin feature/your-feature
+    ```
+
+8. Open a merge request on GitLab. Be sure to include a clear title and description of your changes. If your merge request fixes an issue, include `closes #123` in the description to automatically close the issue when the merge request is merged.
+
+### Contributing Documentation:
+
+- Improvements to documentation are always appreciated! If you find a typo or think something could be explained better, please open an issue or merge request.
+- If you are adding new documentation, please follow the same steps as contributing code above.
