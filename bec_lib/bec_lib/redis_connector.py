@@ -15,7 +15,7 @@ from bec_lib.connector import (
     ProducerConnector,
 )
 from bec_lib.endpoints import MessageEndpoints
-from bec_lib.messages import BECMessage, AlarmMessage, LogMessage
+from bec_lib.messages import AlarmMessage, BECMessage, LogMessage
 from bec_lib.serialization import MsgpackSerialization
 
 if TYPE_CHECKING:
@@ -164,23 +164,12 @@ class RedisConnector(ConnectorBase):
         )
 
     @catch_connection_error
-    def raise_alarm(
-        self,
-        severity: Alarms,
-        alarm_type: str,
-        source: str,
-        msg: str,
-        metadata: dict,
-    ):
+    def raise_alarm(self, severity: Alarms, alarm_type: str, source: str, msg: str, metadata: dict):
         """raise an alarm"""
         self._notifications_producer.set_and_publish(
             MessageEndpoints.alarm(),
             AlarmMessage(
-                severity=severity,
-                alarm_type=alarm_type,
-                source=source,
-                msg=msg,
-                metadata=metadata,
+                severity=severity, alarm_type=alarm_type, source=source, msg=msg, metadata=metadata
             ),
         )
 
@@ -412,7 +401,11 @@ class RedisProducer(ProducerConnector):
                 self.stream_keys[topic] = "0-0"
             else:
                 try:
-                    self.stream_keys[topic] = client.xinfo_stream(topic)["last-generated-id"]
+                    msg = self.r.xrevrange(topic, "+", "-", count=1)
+                    if msg:
+                        self.stream_keys[topic] = msg[0][0]
+                        return msg
+                    self.stream_keys[topic] = "0-0"
                 except redis.exceptions.ResponseError:
                     self.stream_keys[topic] = "0-0"
         if id is None:
@@ -505,8 +498,7 @@ class RedisConsumer(RedisConsumerMixin, ConsumerConnector):
         message = self.pubsub.get_message(ignore_subscribe_messages=True)
         if message is not None:
             msg = MessageObject(
-                topic=message["channel"],
-                value=MsgpackSerialization.loads(message["data"]),
+                topic=message["channel"], value=MsgpackSerialization.loads(message["data"])
             )
             return self.cb(msg, **self.kwargs)
 
