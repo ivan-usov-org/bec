@@ -82,7 +82,7 @@ pylint:
       - ./pylint/
     expire_in: 1 week
   rules:
-    - if: '$CI_COMMIT_BRANCH == "development"'
+    - if: '$CI_COMMIT_REF_NAME == "development"'
       when: never    
 
 pylint-check:
@@ -116,7 +116,7 @@ pylint-check:
       - ./pylint/
     expire_in: 1 week
   rules:
-    - if: $CI_COMMIT_BRANCH == "development"
+    - if: $CI_COMMIT_REF_NAME == "development"
       when: never    
 
 
@@ -140,7 +140,7 @@ tests:
         coverage_format: cobertura
         path: coverage.xml
   rules:
-    - if: $CI_COMMIT_BRANCH == "development"
+    - if: $CI_COMMIT_REF_NAME == "development"
       when: never        
 
 tests-3.10:
@@ -156,7 +156,7 @@ tests-3.10:
     - *install-bec-services-dev
     - pytest -v --junitxml=report.xml --random-order ./data_processing/tests ./bec_lib/tests ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests ./file_writer/tests ./scihub/tests
   rules:
-    - if: $CI_COMMIT_BRANCH == "development"
+    - if: $CI_COMMIT_REF_NAME == "development"
       when: never
 
 tests-3.11:
@@ -369,7 +369,7 @@ dev-pages:
   stage: Deploy
   needs: ["formatter"]
   rules:
-    - if: $CI_COMMIT_BRANCH == "development"
+    - if: $CI_COMMIT_REF_NAME == "development"
   script:
     - git config --global user.name "ci_update_bot"
     - git config --global user.email "ci_update_bot@bec.ch"
