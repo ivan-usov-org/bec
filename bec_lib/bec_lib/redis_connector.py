@@ -399,7 +399,7 @@ class RedisProducer(ProducerConnector):
         if topic not in self.stream_keys:
             if from_start:
                 self.stream_keys[topic] = "0-0"
-            else:
+            elif id is None:
                 try:
                     msg = self.r.xrevrange(topic, "+", "-", count=1)
                     if msg:

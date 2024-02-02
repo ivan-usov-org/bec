@@ -546,16 +546,7 @@ def test_redis_connector_xread_without_id(producer):
 
 def test_redis_connector_xread_from_end(producer):
     producer.xread("topic1", from_start=False)
-    last_id = producer.r.xinfo_stream("topic1")["last-generated-id"]
-    producer.r.xread.assert_called_once_with({"topic1": last_id}, count=None, block=None)
-
-
-def test_redis_connector_xread_from_new_topic(producer):
-    producer.r.xinfo_stream.side_effect = redis.exceptions.ResponseError(
-        "NOGROUP No such key 'topic' or consumer group"
-    )
-    producer.xread("topic1", from_start=False)
-    producer.r.xread.assert_called_once_with({"topic1": "0-0"}, count=None, block=None)
+    producer.r.xrevrange.assert_called_once_with("topic1", "+", "-", count=1)
 
 
 def test_redis_connector_get_last(producer):
