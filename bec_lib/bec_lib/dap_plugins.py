@@ -170,9 +170,11 @@ class DAPPlugins:
     def _import_dap_plugins(self):
         msg_raw = self._parent.producer.get(MessageEndpoints.dap_available_plugins())
         if msg_raw is None:
-            logger.warning("No scans available. Are redis and the BEC server running?")
+            logger.warning("No plugins available. Are redis and the BEC server running?")
             return
         available_plugins = messages.AvailableResourceMessage.loads(msg_raw)
+        if not available_plugins:
+            return
         for plugin_name, plugin_info in available_plugins.content["resource"].items():
             try:
                 name = plugin_info["user_friendly_name"]
