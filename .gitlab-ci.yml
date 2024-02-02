@@ -62,7 +62,7 @@ formatter:
     - pip install black
     - black --check --diff --color --line-length=100 ./
   rules:
-    - if: $CI_COMMIT_BRANCH == "development"
+    - if: '$CI_COMMIT_BRANCH == "development"'
       when: never
     - if: $CI_COMMIT_BRANCH
 
@@ -82,7 +82,7 @@ pylint:
       - ./pylint/
     expire_in: 1 week
   rules:
-    - if: $CI_COMMIT_BRANCH == "development"
+    - if: '$CI_COMMIT_BRANCH == "development"'
       when: never    
 
 pylint-check:
