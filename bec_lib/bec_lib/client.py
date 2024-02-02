@@ -15,6 +15,7 @@ from bec_lib.bec_worker_manager import BECWorkerManager
 from bec_lib.bl_checks import BeamlineChecks
 from bec_lib.callback_handler import CallbackHandler
 from bec_lib.config_helper import ConfigHelper
+from bec_lib.dap_plugins import DAPPlugins
 from bec_lib.devicemanager import DeviceManagerBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logbook_connector import LogbookConnector
@@ -110,7 +111,7 @@ class BECClient(BECService, UserScriptsMixin):
         self.load_all_user_scripts()
         self.config = ConfigHelper(self.connector)
         self.history = self.queue.queue_storage.storage
-        self.dap = BECWorkerManager(self.connector)
+        self.dap = DAPPlugins(self)
         self.bl_checks = BeamlineChecks(self)
         self.bl_checks.start()
 
