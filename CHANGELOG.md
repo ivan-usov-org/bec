@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.60.1 (2024-02-02)
+
+### Fix
+
+* Fixed serializer for 3.9 ([`5c6f250`](https://gitlab.psi.ch/bec/bec/-/commit/5c6f250950438deccfe61dadaf6f2224ebae6243))
+* Fixed signature serializer for union operator; cleanup ([`4dd682b`](https://gitlab.psi.ch/bec/bec/-/commit/4dd682b3e7aaae1c40ed775554496c674f44658e))
+
 ## v0.60.0 (2024-02-01)
 
 ### Feature
