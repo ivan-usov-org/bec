@@ -34,7 +34,9 @@ class SciLogConnector:
     def get_token(self) -> str:
         """get a new scilog token"""
         response = requests.post(
-            f"{self.host}/users/login", json={"principal": self.user, "password": self.user_secret}
+            f"{self.host}/users/login",
+            json={"principal": self.user, "password": self.user_secret},
+            timeout=5,
         )
         if response.ok:
             return response.json()["token"]

@@ -6,9 +6,8 @@ import traceback
 import uuid
 from typing import TYPE_CHECKING
 
-import msgpack
-
 import bec_lib
+import msgpack
 from bec_lib import DeviceConfigError
 from bec_lib import DeviceManagerBase as DeviceManager
 from bec_lib import MessageEndpoints, bec_logger, messages
@@ -17,6 +16,7 @@ from bec_lib.scibec_validator import SciBecValidator
 
 if TYPE_CHECKING:
     from bec_lib.device import DeviceBase
+
     from scihub.scibec.scibec_connector import SciBecConnector
 
 logger = bec_logger.logger
@@ -121,8 +121,8 @@ class ConfigHandler:
         msg = messages.DeviceConfigMessage(action="update", config=config, metadata={"RID": RID})
         self.producer.send(MessageEndpoints.device_server_config_request(), msg.dumps())
 
-    def _wait_for_device_server_update(self, RID: str) -> bool:
-        timeout = 10
+    def _wait_for_device_server_update(self, RID: str, timeout_time=10) -> bool:
+        timeout = timeout_time
         time_step = 0.05
         elapsed_time = 0
         while True:

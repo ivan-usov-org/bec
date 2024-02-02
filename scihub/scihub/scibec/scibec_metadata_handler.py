@@ -160,3 +160,12 @@ class SciBecMetadataHandler:
             )
         )
         logger.info(f"Wrote scan data to SciBec for scanID {data['metadata']['scanID']}")
+
+    def shutdown(self):
+        """
+        Shutdown the metadata handler
+        """
+        if self._scan_status_consumer:
+            self._scan_status_consumer.shutdown()
+        if self._file_subscription:
+            self._file_subscription.shutdown()
