@@ -5,8 +5,8 @@ import enum
 import time
 import warnings
 from copy import deepcopy
-from dataclasses import dataclass, fields, field, MISSING
-from typing import Any
+from dataclasses import MISSING, dataclass, field, fields
+from typing import Any, Literal
 
 import numpy as np
 
@@ -22,6 +22,7 @@ class BECStatus(enum.Enum):
 
 @dataclass
 class BECMessage:
+
     def __post_init__(self):
         # in case "metadata" is passed None as keyword arg, for example
         for f in fields(self):
@@ -48,6 +49,8 @@ class BECMessage:
         except AssertionError:
             return False
 
+        # remove the pylint disable when we upgrade to python 3.10. dataclasses will support kw_only
+        # pylint: disable=no-member
         return self.msg_type == other.msg_type and self.metadata == other.metadata
 
     def __str__(self):
@@ -169,15 +172,7 @@ class ScanQueueModificationMessage(BECMessage):
         metadata(dict, optional): additional metadata to describe and identify the scan.
     """
 
-    ACTIONS = [
-        "pause",
-        "deferred_pause",
-        "continue",
-        "abort",
-        "clear",
-        "restart",
-        "halt",
-    ]
+    ACTIONS = ["pause", "deferred_pause", "continue", "abort", "clear", "restart", "halt"]
     msg_type = "scan_queue_modification"
     scanID: str
     action: str
@@ -551,6 +546,46 @@ class DAPConfigMessage(BECMessage):
 
 
 @dataclass(eq=False)
+class DAPRequestMessage(BECMessage):
+    """Message for DAP requests
+    Args:
+        dap_cls (str): DAP class name
+        dap_type (Literal["continuous", "on_demand"]): DAP type. Either "continuous" or "on_demand"
+        config (dict): DAP configuration
+        metadata (dict, optional): metadata. Defaults to None.
+    """
+
+    msg_type = "dap_request_message"
+    dap_cls: str
+    dap_type: Literal["continuous", "on_demand"]
+    config: dict
+    metadata: dict = field(default_factory=dict)
+
+    def _is_valid(self) -> bool:
+        if self.dap_type not in ["continuous", "on_demand"]:
+            return False
+        return True
+
+
+@dataclass(eq=False)
+class DAPResponseMessage(BECMessage):
+    """
+    Message for DAP responses
+    Args:
+        success (bool): True if the request was successful
+        data (dict, optional): DAP data. Defaults to None.
+        error (dict, optional): DAP error. Defaults to None.
+        dap_request (dict, optional): DAP request. Defaults to None.
+        metadata (dict, optional): metadata. Defaults to None.
+    """
+
+    msg_type = "dap_response_message"
+    success: bool
+    data: dict = field(default_factory=dict)
+    error: dict = field(default_factory=dict)
+    dap_request: dict = field(default_factory=dict)
+
+
 class AvailableResourceMessage(BECMessage):
     """Message for available resources such as scans, data processing plugins etc
     Args:

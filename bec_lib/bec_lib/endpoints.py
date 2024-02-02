@@ -82,7 +82,9 @@ class MessageEndpoints:
     # data processing
     _processed_data = "public/processed_data"
     _dap_config = "internal/dap/config"
-    _avilable_dap_plugins = "internal/dap/available_plugins"
+    _available_dap_plugins = "internal/dap/available_plugins"
+    _dap_request = "internal/dap/request"
+    _dap_response = "internal/dap/response"
 
     # GUI
     _gui_config = "public/gui/config"
@@ -797,7 +799,32 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for available DAP plugins.
         """
-        return cls._avilable_dap_plugins
+        return cls._available_dap_plugins
+
+    @classmethod
+    def dap_request(cls) -> str:
+        """
+        Endpoint for DAP request. This endpoint is used to request a DAP using a
+        messages.DAPRequestMessage message.
+
+        Returns:
+            str: Endpoint for DAP request.
+        """
+        return cls._dap_request
+
+    @classmethod
+    def dap_response(cls, RID: str) -> str:
+        """
+        Endpoint for DAP response. This endpoint is used to publish the DAP response using a
+        messages.DAPResponseMessage message.
+
+        Args:
+            RID (str): Request ID.
+
+        Returns:
+            str: Endpoint for DAP response.
+        """
+        return f"{cls._dap_response}/{RID}"
 
     # GUI
     @classmethod
