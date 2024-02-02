@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.60.2 (2024-02-02)
+
+### Fix
+
+* Fixed scihub shutdown procedure ([`dfc6dd4`](https://gitlab.psi.ch/bec/bec/-/commit/dfc6dd4aaba1d5a9fcda51b2e8d30e9a431f237f))
+
 ## v0.60.1 (2024-02-02)
 
 ### Fix
