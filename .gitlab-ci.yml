@@ -359,7 +359,7 @@ dev-pages:
     - git checkout "$CI_COMMIT_REF_NAME"
     - git reset --hard origin/"$CI_COMMIT_REF_NAME"
     - git tag -f development "$CI_COMMIT_REF_NAME"
-    - git push --no-ci --force origin development
+    - git push --force origin development
 
     - curl -X POST -d "branches=development" -d "token=$RTD_TOKEN" https://readthedocs.org/api/v2/webhook/beamline-experiment-control/221870/
     - curl -X POST -d "branches=development" -d "token=$RTD_TOKEN_BEC" https://readthedocs.org/api/v2/webhook/bec/246899/
