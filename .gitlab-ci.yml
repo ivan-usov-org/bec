@@ -12,6 +12,8 @@ workflow:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
       when: never
+    - if: $CI_COMMIT_BRANCH == "development"
+      when: never
     - if: $CI_COMMIT_BRANCH
 
 
@@ -356,9 +358,7 @@ dev-pages:
   script:
     - git config --global user.name "ci_update_bot"
     - git config --global user.email "ci_update_bot@bec.ch"
-    - git checkout "$CI_COMMIT_REF_NAME"
-    - git reset --hard origin/"$CI_COMMIT_REF_NAME"
-    - git tag -f development "$CI_COMMIT_REF_NAME"
+    - git tag -f development "$CI_COMMIT_SHA"
     - git push --force origin development
 
     - curl -X POST -d "branches=development" -d "token=$RTD_TOKEN" https://readthedocs.org/api/v2/webhook/beamline-experiment-control/221870/
