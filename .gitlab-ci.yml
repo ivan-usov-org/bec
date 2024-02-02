@@ -61,10 +61,6 @@ formatter:
   script:
     - pip install black
     - black --check --diff --color --line-length=100 ./
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "development"'
-      when: never
-    - if: $CI_COMMIT_BRANCH
 
 pylint:
   stage: Formatter
@@ -80,10 +76,7 @@ pylint:
   artifacts:
     paths:
       - ./pylint/
-    expire_in: 1 week
-  rules:
-    - if: '$CI_COMMIT_REF_NAME == "development"'
-      when: never    
+    expire_in: 1 week  
 
 pylint-check:
   stage: Formatter
@@ -115,9 +108,6 @@ pylint-check:
     paths:
       - ./pylint/
     expire_in: 1 week
-  rules:
-    - if: $CI_COMMIT_REF_NAME == "development"
-      when: never    
 
 
 tests:
@@ -138,10 +128,7 @@ tests:
       junit: report.xml
       coverage_report:
         coverage_format: cobertura
-        path: coverage.xml
-  rules:
-    - if: $CI_COMMIT_REF_NAME == "development"
-      when: never        
+        path: coverage.xml   
 
 tests-3.10:
   stage: AdditionalTests
@@ -155,9 +142,6 @@ tests-3.10:
     - apt-get install -y gcc
     - *install-bec-services-dev
     - pytest -v --junitxml=report.xml --random-order ./data_processing/tests ./bec_lib/tests ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests ./file_writer/tests ./scihub/tests
-  rules:
-    - if: $CI_COMMIT_REF_NAME == "development"
-      when: never
 
 tests-3.11:
   extends: "tests-3.10"
