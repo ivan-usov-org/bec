@@ -98,7 +98,9 @@ class DAPServiceManager:
         dap_instance.configure(**dap_config)
         self.continuous_dap = {
             "id": self.client.callbacks.register(
-                event_type="scan_status", callback=dap_instance.on_scan_status_update
+                # pylint: disable=protected-access
+                event_type="scan_status",
+                callback=dap_instance._process_scan_status_update,
             ),
             "instance": dap_instance,
         }

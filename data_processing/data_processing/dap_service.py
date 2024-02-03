@@ -35,6 +35,32 @@ class DAPServiceBase(abc.ABC):
         super().__init__()
         self.client = bec_client
         self.scans = None
+        self.scan_id = None
+        self.current_scan_item = None
+
+    def _update_scan_id_and_item(self, status: dict):
+        """
+        Update the scan ID and the current scan item with the provided scan status.
+
+        Args:
+            status (dict): Scan status
+        """
+        scan_id = status.get("scanID")
+        if scan_id != self.scan_id:
+            self.current_scan_item = self.client.queue.scan_storage.find_scan_by_ID(scan_id)
+        self.scan_id = scan_id
+
+    def _process_scan_status_update(self, status: dict, metadata: dict):
+        """
+        Process a scan status update. This method is called by the service manager and
+        should not be overridden or invoked directly.
+
+        Args:
+            status (dict): Scan status
+            metadata (dict): Scan metadata
+        """
+        self._update_scan_id_and_item(status)
+        self.on_scan_status_update(status, metadata)
 
     def on_scan_status_update(self, status: dict, metadata: dict):
         """
@@ -45,6 +71,11 @@ class DAPServiceBase(abc.ABC):
         Args:
             status (dict): Scan status
             metadata (dict): Scan metadata
+
+        Example:
+            >>> def on_scan_status_update(self, status: dict, metadata: dict):
+            >>>     if status.get("status") == "closed":
+            >>>         self.process()
         """
 
     def configure(self, *args, **kwargs):
@@ -126,11 +157,6 @@ class LmfitService1D(DAPServiceBase):
             data (dict): Scan segment data
             metadata (dict): Scan segment metadata
         """
-        scan_id = status.get("scanID")
-        if scan_id != self.scan_id:
-            self.current_scan_item = self.client.queue.scan_storage.find_scan_by_ID(scan_id)
-        self.scan_id = scan_id
-
         if self.finish_event is None:
             self.finish_event = threading.Event()
             threading.Thread(target=self.process_until_finished, args=(self.finish_event,)).start()
