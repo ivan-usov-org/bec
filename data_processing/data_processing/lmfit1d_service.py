@@ -63,7 +63,7 @@ class LmfitService1D(DAPServiceBase):
                 "SplineModel",
             ]:
                 models.append(model_cls)
-        return models
+        return set(models)
 
     @classmethod
     def get_provided_services(cls):
