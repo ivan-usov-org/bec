@@ -281,3 +281,36 @@ def test_ScanQueueHistoryMessage():
     res = MsgpackSerialization.dumps(msg)
     res_loaded = MsgpackSerialization.loads(res)
     assert res_loaded == msg
+
+
+def test_DAPResponseMessage():
+    msg = messages.DAPResponseMessage(success=True, data={}, metadata={"RID": "1234"})
+    res = msg.dumps()
+    res_loaded = messages.DAPResponseMessage.loads(res)
+    assert res_loaded == msg
+
+
+def test_DAPRequestMessage():
+    msg = messages.DAPRequestMessage(
+        dap_cls="dap_cls",
+        dap_type="continuous",
+        config={"config": "value"},
+        metadata={"RID": "1234"},
+    )
+    res = msg.dumps()
+    res_loaded = messages.DAPRequestMessage.loads(res)
+    assert res_loaded == msg
+
+
+def test_FileContentMessage():
+    msg = messages.FileContentMessage(file_path="/path/to/file", data={}, metadata={"RID": "1234"})
+    res = msg.dumps()
+    res_loaded = messages.FileContentMessage.loads(res)
+    assert res_loaded == msg
+
+
+def test_CredentialsMessage():
+    msg = messages.CredentialsMessage(credentials={"username": "user", "password": "pass"})
+    res = msg.dumps()
+    res_loaded = messages.CredentialsMessage.loads(res)
+    assert res_loaded == msg

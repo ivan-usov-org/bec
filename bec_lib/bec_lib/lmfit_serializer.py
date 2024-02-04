@@ -19,7 +19,6 @@ def serialize_param_object(param: Parameter) -> dict:
         "max": param.max,
         "expr": param.expr,
         "brute_step": param.brute_step,
-        "user_data": param.user_data,
     }
     return obj
 
@@ -54,5 +53,6 @@ def deserialize_param_object(obj: dict) -> Parameter:
     """
     param = Parameters()
     for k, v in obj.items():
+        v.pop("name")
         param.add(k, **v)
     return param
