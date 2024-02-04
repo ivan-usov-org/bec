@@ -18,6 +18,7 @@ if __name__ == "__main__":
             "psutil",
             "fpdf",
             "fastjsonschema",
+            "lmfit",
         ],
         extras_require={
             "dev": ["pytest", "pytest-random-order", "coverage", "pandas", "black", "pylint"]
