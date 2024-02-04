@@ -42,7 +42,6 @@ class BECService:
         self._unique_service = unique_service
         self.wait_for_server = wait_for_server
         self.producer = self.connector.producer()
-        self._service_id = str(uuid.uuid4())
         self._user = getpass.getuser()
         self._hostname = socket.gethostname()
         self._service_info_thread = None
@@ -56,6 +55,10 @@ class BECService:
         self._start_update_service_info()
         self._start_metrics_emitter()
         self._wait_for_server()
+
+    @property
+    def _service_id(self) -> str:
+        return str(uuid.uuid4())
 
     def _import_config(self, config: str | ServiceConfig) -> None:
         if isinstance(config, str):
@@ -115,7 +118,9 @@ class BECService:
         self.producer.set_and_publish(
             topic=MessageEndpoints.service_status(self._service_id),
             msg=messages.StatusMessage(
-                name=self.__class__.__name__,
+                name=self.__class__.__name__
+                if self._unique_service
+                else f"{self.__class__.__name__}/{self._service_id}",
                 status=self.status,
                 info={"user": self._user, "hostname": self._hostname, "timestamp": time.time()},
             ),
