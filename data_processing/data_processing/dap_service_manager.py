@@ -270,7 +270,10 @@ class DAPServiceManager:
     def publish_available_services(self):
         """send all available dap services to the broker"""
         msg = messages.AvailableResourceMessage(resource=self.available_dap_services).dumps()
-        self.producer.set(MessageEndpoints.dap_available_plugins(), msg)
+        # pylint: disable=protected-access
+        self.producer.set(
+            MessageEndpoints.dap_available_plugins(f"DAPServer/{self.client._service_id}"), msg
+        )
 
     def shutdown(self) -> None:
         if not self._started:

@@ -791,15 +791,18 @@ class MessageEndpoints:
         return cls._dap_config
 
     @classmethod
-    def dap_available_plugins(cls) -> str:
+    def dap_available_plugins(cls, plugin_id: str) -> str:
         """
         Endpoint for available DAP plugins. This endpoint is used to publish the available DAP
         plugins using a messages.AvailableResourceMessage message.
 
+        Args:
+            plugin_id (str): Plugin ID.
+
         Returns:
             str: Endpoint for available DAP plugins.
         """
-        return cls._available_dap_plugins
+        return f"{cls._available_dap_plugins}/{plugin_id}"
 
     @classmethod
     def dap_request(cls) -> str:

@@ -24,12 +24,14 @@ class DAPPluginObject:
         plugin_info: dict,
         client: BECClient = None,
         auto_fit_supported: bool = False,
+        service_info: dict = None,
     ) -> None:
         self._service_name = service_name
         self._plugin_info = plugin_info
         self._client = client
         self._auto_fit_supported = auto_fit_supported
         self._plugin_config = {}
+        self._service_info = service_info
 
         # run must be an anonymous function to allow for multiple doc strings
         self.fit = lambda *args, **kwargs: self._fit(*args, **kwargs)
@@ -171,29 +173,46 @@ class DAPPlugins:
         self._auto_fit = False
         self._selected_device = None
 
+    def refresh(self):
+        self._import_dap_plugins()
+
     def _import_dap_plugins(self):
-        msg_raw = self._parent.producer.get(MessageEndpoints.dap_available_plugins())
-        if msg_raw is None:
-            logger.warning("No plugins available. Are redis and the BEC server running?")
+        available_services = self._parent.service_status
+        if not available_services:
+            # not sure how we got here...
             return
-        available_plugins = messages.AvailableResourceMessage.loads(msg_raw)
-        if not available_plugins:
-            return
-        for plugin_name, plugin_info in available_plugins.content["resource"].items():
-            try:
-                name = plugin_info["user_friendly_name"]
-                auto_fit_supported = plugin_info.get("auto_fit_supported", False)
-                self._available_dap_plugins[name] = DAPPluginObject(
-                    name, plugin_info, client=self._parent, auto_fit_supported=auto_fit_supported
-                )
-                self._set_plugin(
-                    name,
-                    plugin_info.get("class_doc"),
-                    plugin_info.get("fit_doc"),
-                    plugin_info.get("signature"),
-                )
-            except Exception as e:
-                logger.error(f"Error importing plugin {plugin_name}: {e}")
+        dap_services = [
+            service for service in available_services if service.startswith("DAPServer/")
+        ]
+        for service in dap_services:
+            msg_raw = self._parent.producer.get(MessageEndpoints.dap_available_plugins(service))
+            if msg_raw is None:
+                logger.warning("No plugins available. Are redis and the BEC server running?")
+                return
+            available_plugins = messages.AvailableResourceMessage.loads(msg_raw)
+            if not available_plugins:
+                return
+            for plugin_name, plugin_info in available_plugins.content["resource"].items():
+                try:
+                    if plugin_name in self._available_dap_plugins:
+                        continue
+                    name = plugin_info["user_friendly_name"]
+                    auto_fit_supported = plugin_info.get("auto_fit_supported", False)
+                    self._available_dap_plugins[name] = DAPPluginObject(
+                        name,
+                        plugin_info,
+                        client=self._parent,
+                        auto_fit_supported=auto_fit_supported,
+                        service_info=available_services[service].content,
+                    )
+                    self._set_plugin(
+                        name,
+                        plugin_info.get("class_doc"),
+                        plugin_info.get("fit_doc"),
+                        plugin_info.get("signature"),
+                    )
+                except Exception as e:
+                    logger.error(f"Error importing plugin {plugin_name}: {e}")
 
     def _set_plugin(
         self, plugin_name: str, class_doc_string: str, fit_doc_string: str, signature: dict
