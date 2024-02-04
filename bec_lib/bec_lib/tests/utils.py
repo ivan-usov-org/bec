@@ -548,11 +548,16 @@ class ProducerMock:  # pragma: no cover
             return
         self.message_sent.append({"queue": topic, "msg": msg, "expire": expire})
 
-    def send(self, topic, msg, pipe=None):
+    def raw_send(self, topic, msg, pipe=None):
         if pipe:
             pipe._pipe_buffer.append(("send", (topic, msg), {}))
             return
         self.message_sent.append({"queue": topic, "msg": msg})
+
+    def send(self, topic, msg, pipe=None):
+        if not isinstance(msg, messages.BECMessage):
+            raise TypeError("Message must be a BECMessage")
+        return self.raw_send(topic, msg, pipe)
 
     def set_and_publish(self, topic, msg, pipe=None, expire: int = None):
         if pipe:

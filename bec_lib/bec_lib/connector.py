@@ -64,6 +64,9 @@ class ConnectorBase(abc.ABC):
 
 
 class ProducerConnector(abc.ABC):
+    def raw_send(self, topic: str, msg: bytes) -> None:
+        raise NotImplementedError
+
     def send(self, topic: str, msg: BECMessage) -> None:
         raise NotImplementedError
 

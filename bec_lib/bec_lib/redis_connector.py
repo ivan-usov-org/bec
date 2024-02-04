@@ -206,10 +206,16 @@ class RedisProducer(ProducerConnector):
         return ret
 
     @catch_connection_error
+    def raw_send(self, topic: str, msg: bytes, pipe=None):
+        """send to redis without any check on message type"""
+        client = pipe if pipe is not None else self.r
+        client.publish(topic, msg)
+
     def send(self, topic: str, msg: BECMessage, pipe=None) -> None:
         """send to redis"""
-        client = pipe if pipe is not None else self.r
-        client.publish(topic, MsgpackSerialization.dumps(msg))
+        if not isinstance(msg, BECMessage):
+            raise TypeError(f"Message {msg} is not a BECMessage")
+        self.raw_send(topic, MsgpackSerialization.dumps(msg), pipe)
 
     @catch_connection_error
     def lpush(
