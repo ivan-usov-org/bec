@@ -4,15 +4,7 @@ import pytest
 from typeguard import TypeCheckError
 
 from bec_lib import messages
-from bec_lib.device import (
-    AdjustableMixin,
-    Device,
-    DeviceBase,
-    Positioner,
-    RPCError,
-    Signal,
-    Status,
-)
+from bec_lib.device import AdjustableMixin, Device, DeviceBase, Positioner, RPCError, Signal, Status
 from bec_lib.devicemanager import DeviceContainer, DeviceManagerBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.tests.utils import ConnectorMock, bec_client, get_device_info_mock

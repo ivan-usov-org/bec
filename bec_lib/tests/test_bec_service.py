@@ -33,8 +33,7 @@ def test_bec_service_init_raises_for_invalid_config():
 
 def test_bec_service_init_with_service_config_path():
     service = BECService(
-        config=f"{dir_path}/tests/test_service_config.yaml",
-        connector_cls=mock.MagicMock(),
+        config=f"{dir_path}/tests/test_service_config.yaml", connector_cls=mock.MagicMock()
     )
     assert isinstance(service._service_config, ServiceConfig)
     assert service.bootstrap_server == "localhost:6379"
@@ -132,10 +131,7 @@ def test_bec_service_update_existing_services():
         connector_cls=connector_cls,
         unique_service=True,
     )
-    assert service._services_info == {
-        "service1": service_msgs[0],
-        "service2": service_msgs[1],
-    }
+    assert service._services_info == {"service1": service_msgs[0], "service2": service_msgs[1]}
 
 
 def test_bec_service_update_existing_services_ignores_wrong_msgs():

@@ -20,7 +20,15 @@ class DAPError(Exception):
 
 class DAPServiceBase(abc.ABC):
     """
-    Base class for data processing services.
+    Base class for data processing services. For most services, the user should
+    override the configure and process methods. The configure method is called
+    when the service is initialized and the process method is called when the
+    service is requested to process data. The process method should return a
+    tuple of (stream_output, metadata) and the return value should be serializable.
+
+    For services that require continuous data processing, the user should override
+    the on_scan_status_update method. The underlying service manager will call this
+    method when a scan status update is received.
     """
 
     AUTO_FIT_SUPPORTED = False

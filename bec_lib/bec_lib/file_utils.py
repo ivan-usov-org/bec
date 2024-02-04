@@ -46,12 +46,7 @@ class FileWriterMixin:
         return f"S{floor_dir:0{leading_zeros}d}-{floor_dir+scan_bundle-1:0{leading_zeros}d}/S{scan_number:0{leading_zeros}d}"
 
     def compile_full_filename(
-        self,
-        scan_number: int,
-        suffix: str,
-        scan_bundle=1000,
-        leading_zeros=5,
-        create_dir=True,
+        self, scan_number: int, suffix: str, scan_bundle=1000, leading_zeros=5, create_dir=True
     ) -> str:
         """
         Compile a full filename for a given scan number and suffix.
@@ -68,10 +63,7 @@ class FileWriterMixin:
         """
         scan_dir = self.get_scan_directory(scan_number, scan_bundle, leading_zeros)
         full_file = os.path.join(
-            self._base_path,
-            "data",
-            scan_dir,
-            f"S{scan_number:0{leading_zeros}d}_{suffix}",
+            self._base_path, "data", scan_dir, f"S{scan_number:0{leading_zeros}d}_{suffix}"
         )
         if create_dir:
             os.makedirs(os.path.dirname(full_file), exist_ok=True)

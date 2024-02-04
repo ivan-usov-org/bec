@@ -122,11 +122,7 @@ class QueueStorage:
         if history < 0:
             history *= -1
 
-        return self.scan_manager.producer.lrange(
-            MessageEndpoints.scan_queue_history(),
-            0,
-            history,
-        )
+        return self.scan_manager.producer.lrange(MessageEndpoints.scan_queue_history(), 0, history)
 
     @property
     def current_scan_queue(self) -> dict:

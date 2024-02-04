@@ -15,7 +15,7 @@ class DAPServer(BECClient):
         super().__init__()
         self.config = config
         self.connector_cls = connector_cls
-        self._dap_server = None
+        self._dap_service_manager = None
         self._provided_services = (
             provided_services if isinstance(provided_services, list) else [provided_services]
         )
@@ -33,9 +33,9 @@ class DAPServer(BECClient):
         bec_logger.level = bec_logger.LOGLEVEL.INFO
 
     def _start_dap_serivce(self):
-        self._dap_server = DAPServiceManager(self._provided_services)
-        self._dap_server.start(self)
+        self._dap_service_manager = DAPServiceManager(self._provided_services)
+        self._dap_service_manager.start(self)
 
     def shutdown(self):
-        self._dap_server.shutdown()
+        self._dap_service_manager.shutdown()
         super().shutdown()

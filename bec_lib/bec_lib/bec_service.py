@@ -118,9 +118,11 @@ class BECService:
         self.producer.set_and_publish(
             topic=MessageEndpoints.service_status(self._service_id),
             msg=messages.StatusMessage(
-                name=self.__class__.__name__
-                if self._unique_service
-                else f"{self.__class__.__name__}/{self._service_id}",
+                name=(
+                    self.__class__.__name__
+                    if self._unique_service
+                    else f"{self.__class__.__name__}/{self._service_id}"
+                ),
                 status=self.status,
                 info={"user": self._user, "hostname": self._hostname, "timestamp": time.time()},
             ),

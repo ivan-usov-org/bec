@@ -150,10 +150,7 @@ if __name__ == "__main__":  # pragma: no cover
     connector = RedisConnector(["localhost:6379"])
     manager = BECWorkerManager(connector)
     manager.remove_worker("px_dap_worker")
-    config = {
-        "worker_cls": "SaxsImagingProcessor",
-        "output": "px_dap_worker",
-    }
+    config = {"worker_cls": "SaxsImagingProcessor", "output": "px_dap_worker"}
     # config = {
     #     "worker_cls": "LmfitProcessor",
     #     "stream": MessageEndpoints.scan_segment(),

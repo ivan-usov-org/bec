@@ -29,10 +29,7 @@ DEFAULT_CONFIG = {
             "sources": [
                 {
                     "type": "scan_segment",
-                    "signals": {
-                        "x": [{"name": "samx"}],
-                        "y": [{"name": "bpm4i"}],
-                    },
+                    "signals": {"x": [{"name": "samx"}], "y": [{"name": "bpm4i"}]},
                 },
                 # {
                 #     "type": "redis",
@@ -44,7 +41,7 @@ DEFAULT_CONFIG = {
                 #     },
                 # },
             ],
-        },
+        }
     ],
 }
 

@@ -73,14 +73,7 @@ class ProducerConnector(abc.ABC):
 
 class ConsumerConnector(abc.ABC):
     def __init__(
-        self,
-        bootstrap_server,
-        cb,
-        topics=None,
-        pattern=None,
-        group_id=None,
-        event=None,
-        **kwargs,
+        self, bootstrap_server, cb, topics=None, pattern=None, group_id=None, event=None, **kwargs
     ):
         """
         ConsumerConnector class defines the communication with the broker for consuming messages.

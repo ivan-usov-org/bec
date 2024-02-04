@@ -647,11 +647,7 @@ def test_redis_stream_consumer_threaded_poll_messages_newest_only():
 
 def test_redis_stream_consumer_threaded_poll_messages_read():
     consumer = RedisStreamConsumerThreaded(
-        "localhost",
-        "1",
-        topics="topic1",
-        cb=mock.MagicMock(),
-        redis_cls=mock.MagicMock(),
+        "localhost", "1", topics="topic1", cb=mock.MagicMock(), redis_cls=mock.MagicMock()
     )
     consumer.stream_keys["topic1"] = "0-0"
 
@@ -673,10 +669,6 @@ def test_redis_stream_consumer_threaded_poll_messages_read():
 )
 def test_redis_stream_consumer_threaded_init_topics(topics, expected):
     consumer = RedisStreamConsumerThreaded(
-        "localhost",
-        "1",
-        topics=topics,
-        cb=mock.MagicMock(),
-        redis_cls=mock.MagicMock(),
+        "localhost", "1", topics=topics, cb=mock.MagicMock(), redis_cls=mock.MagicMock()
     )
     assert consumer.topics == expected
