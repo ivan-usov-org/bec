@@ -1,13 +1,7 @@
 from __future__ import annotations
 
-import inspect
-
 from bec_lib import BECClient, MessageEndpoints, bec_logger, messages
-from bec_lib.lmfit_serializer import serialize_lmfit_params
 from bec_lib.redis_connector import MessageObject
-from bec_lib.signature_serializer import signature_to_dict
-
-from data_processing import dap_service as dap_plugins
 
 logger = bec_logger.logger
 
@@ -15,7 +9,7 @@ logger = bec_logger.logger
 class DAPServiceManager:
     """Base class for data processing services."""
 
-    def __init__(self) -> None:
+    def __init__(self, services: list) -> None:
         self.connector = None
         self.producer = None
         self._started = False
@@ -24,6 +18,7 @@ class DAPServiceManager:
         self.available_dap_services = {}
         self.dap_services = {}
         self.continuous_dap = None
+        self.services = services
 
     def _start_dap_request_consumer(self) -> None:
         """
@@ -184,53 +179,101 @@ class DAPServiceManager:
         """
         Update the available dap services.
         """
-        members = inspect.getmembers(dap_plugins)
+        for service in self.services:
+            self.dap_services[service.__name__] = service
+            provided_services = service.get_provided_services()
+            self._validate_provided_services(provided_services)
+            self.available_dap_services.update(service.get_provided_services())
 
-        for name, service_cls in members:
-            if name in ["DAPServiceBase", "LmfitService"]:
-                continue
-            try:
-                is_service = issubclass(service_cls, dap_plugins.DAPServiceBase)
-            except TypeError:
-                is_service = False
+        # members = inspect.getmembers(dap_plugins)
 
-            if not is_service:
-                logger.debug(f"Ignoring {name}")
-                continue
-            if name in self.available_dap_services:
-                logger.error(f"{service_cls.scan_name} already exists. Skipping.")
-                continue
+        # for name, service_cls in members:
+        #     if name in ["DAPServiceBase", "LmfitService"]:
+        #         continue
+        #     try:
+        #         is_service = issubclass(service_cls, dap_plugins.DAPServiceBase)
+        #     except TypeError:
+        #         is_service = False
 
-            self.dap_services[name] = service_cls
-            if hasattr(service_cls, "available_models"):
-                services = {
-                    model.__name__: {
-                        "class": name,
-                        "user_friendly_name": model.__name__,
-                        "doc": service_cls.configure.__doc__ or service_cls.__init__.__doc__,
-                        "signature": signature_to_dict(service_cls.configure),
-                        "auto_fit_supported": getattr(service_cls, "AUTO_FIT_SUPPORTED", False),
-                        "params": serialize_lmfit_params(
-                            service_cls.get_model(model)().make_params()
-                        ),
-                        "class_args": [],
-                        "class_kwargs": {"model": model.__name__},
-                    }
-                    for model in service_cls.available_models()
-                }
+        #     if not is_service:
+        #         logger.debug(f"Ignoring {name}")
+        #         continue
+        #     if name in self.available_dap_services:
+        #         logger.error(f"{service_cls.scan_name} already exists. Skipping.")
+        #         continue
 
-                self.available_dap_services.update(services)
-            else:
-                self.available_dap_services[name] = {
-                    "class": name,
-                    "user_friendly_name": name,
-                    "doc": service_cls.__doc__ or service_cls.__init__.__doc__,
-                    "signature": signature_to_dict(service_cls.configure),
-                    "params": serialize_lmfit_params(service_cls.get_model().make_params()),
-                    "auto_fit_supported": getattr(service_cls, "AUTO_FIT_SUPPORTED", False),
-                }
+        #     self.dap_services[name] = service_cls
+        #     provided_services = service_cls.get_provided_services()
+        #     self._validate_provided_services(provided_services)
+        #     self.available_dap_services.update(service_cls.get_provided_services())
+
+    def _validate_provided_services(self, provided_services: dict) -> None:
+        """
+        Validate the provided services.
+        {
+                "class": cls.__name__,
+                "user_friendly_name": model.__name__,
+                "class_doc": cls.public_doc_string(model),
+                "fit_doc": cls.get_fit_doc(model),
+                "signature": cls.get_signature(),
+                "auto_fit_supported": getattr(cls, "AUTO_FIT_SUPPORTED", False),
+                "params": serialize_lmfit_params(
+                    cls.get_model(model)().make_params()
+                ),
+                "class_args": [],
+                "class_kwargs": {"model": model.__name__},
+            }
+
+        Args:
+            provided_services (dict): Provided services
+        """
+        for service_name, service in provided_services.items():
+            if not isinstance(service, dict):
+                raise ValueError(f"Invalid service {service_name}: {service}. Must be a dict.")
+            if "class" not in service:
+                raise ValueError(
+                    f"Invalid service {service_name}: {service}. Must have a class key."
+                )
+            if "user_friendly_name" not in service:
+                raise ValueError(
+                    f"Invalid service {service_name}: {service}. Must have a user_friendly_name key."
+                )
+            if "class_doc" not in service:
+                raise ValueError(
+                    f"Invalid service {service_name}: {service}. Must have a class_doc key."
+                )
+            if "fit_doc" not in service:
+                raise ValueError(
+                    f"Invalid service {service_name}: {service}. Must have a fit_doc key."
+                )
+            if "signature" not in service:
+                raise ValueError(
+                    f"Invalid service {service_name}: {service}. Must have a signature key."
+                )
+            if "auto_fit_supported" not in service:
+                raise ValueError(
+                    f"Invalid service {service_name}: {service}. Must have an auto_fit_supported key."
+                )
+            if "params" not in service:
+                raise ValueError(
+                    f"Invalid service {service_name}: {service}. Must have a params key."
+                )
+            if "class_args" not in service:
+                raise ValueError(
+                    f"Invalid service {service_name}: {service}. Must have a class_args key."
+                )
+            if "class_kwargs" not in service:
+                raise ValueError(
+                    f"Invalid service {service_name}: {service}. Must have a class_kwargs key."
+                )
 
     def publish_available_services(self):
         """send all available dap services to the broker"""
         msg = messages.AvailableResourceMessage(resource=self.available_dap_services).dumps()
         self.producer.set(MessageEndpoints.dap_available_plugins(), msg)
+
+    def shutdown(self) -> None:
+        if not self._started:
+            return
+        self._dap_request_thread.stop()
+        self._started = False

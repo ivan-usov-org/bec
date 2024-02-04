@@ -54,8 +54,12 @@ class DAPPluginObject:
         response = self._wait_for_dap_response(request_id)
         return response.content["data"]
 
-    def _wait_for_dap_response(self, request_id: str):
+    def _wait_for_dap_response(self, request_id: str, timeout: float = 5.0):
+        start_time = time.time()
+
         while True:
+            if time.time() - start_time > timeout:
+                raise TimeoutError("Timeout waiting for DAP response.")
             response = self._client.producer.get(MessageEndpoints.dap_response(request_id))
             if not response:
                 time.sleep(0.005)
@@ -182,11 +186,19 @@ class DAPPlugins:
                 self._available_dap_plugins[name] = DAPPluginObject(
                     name, plugin_info, client=self._parent, auto_fit_supported=auto_fit_supported
                 )
-                self._set_plugin(name, plugin_info.get("doc"), plugin_info.get("signature"))
+                self._set_plugin(
+                    name,
+                    plugin_info.get("class_doc"),
+                    plugin_info.get("fit_doc"),
+                    plugin_info.get("signature"),
+                )
             except Exception as e:
                 logger.error(f"Error importing plugin {plugin_name}: {e}")
 
-    def _set_plugin(self, plugin_name: str, doc_string: str, signature: dict):
+    def _set_plugin(
+        self, plugin_name: str, class_doc_string: str, fit_doc_string: str, signature: dict
+    ):
         setattr(self, plugin_name, self._available_dap_plugins[plugin_name])
-        setattr(getattr(self, plugin_name).fit, "__doc__", doc_string)
+        setattr(getattr(self, plugin_name), "__doc__", class_doc_string)
+        setattr(getattr(self, plugin_name).fit, "__doc__", fit_doc_string)
         setattr(getattr(self, plugin_name).fit, "__signature__", dict_to_signature(signature))
