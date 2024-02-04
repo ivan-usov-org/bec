@@ -8,7 +8,6 @@ from bec_lib import messages
 from bec_lib.device import DeviceBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
-from bec_lib.scan_items import ScanItem
 from bec_lib.signature_serializer import dict_to_signature
 
 logger = bec_logger.logger
@@ -140,13 +139,11 @@ class DAPPluginObject:
         """
         Get the currently set fit parameters.
         """
-        pass
 
     def set_params(self, params: dict):
         """
         Set the fit parameters.
         """
-        pass
 
     def _update_dap_config(self, request_id: str = None):
         if not self._plugin_config.get("selected_device"):
