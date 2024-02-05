@@ -50,14 +50,7 @@ def test_scan_to_dict():
             "samx_motor_is_moving": [0, 0, 0],
         },
     }
-
-    scanreport_mock = mock.MagicMock()
-    # scanreport_mock.scan.return_value = scan_item
-    scanreport_mock.scan = scan_item
-    # scanreport_mock.scan.data.__getitem__ = scan_item.data.__getitem__
-    # scanreport_mock.scan.data.values.return_value = scan_item.data.values()
-
-    return_dict = scan_to_dict(scanreport_mock, flat=True)
+    return_dict = scan_to_dict(scan_item, flat=True)
     assert return_dict == output_dict
 
 

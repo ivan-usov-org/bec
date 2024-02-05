@@ -9,6 +9,7 @@ from typeguard import typechecked
 
 if TYPE_CHECKING:
     from bec_lib.scan_report import ScanReport
+    from bec_lib.scan_items import ScanItem
 
 
 def threadlocked(fcn):
@@ -25,7 +26,7 @@ def threadlocked(fcn):
 
 @typechecked
 def scan_to_csv(
-    scan_report: ScanReport | list[ScanReport],
+    scan_report: ScanReport | ScanItem | list[ScanReport] | list[ScanItem],
     output_name: str,
     delimiter: str = ",",
     dialect: str | None = None,
@@ -35,7 +36,7 @@ def scan_to_csv(
     """Convert scan data to a csv file.
 
     Args:
-        scan_report (ScanReport):       Scan report object.
+        scan_report (ScanReport/Item):  (list of) ScanReport or ScanItem object(s).
         filename (str):                 Name of the csv file.
         delimiter (str, optional):      Delimiter for the csv file. Defaults to ",".
         dialect (str, optional):        Argument for csv.Dialect. Defaults to csv.writer default, e.g. 'excel'.
@@ -48,13 +49,17 @@ def scan_to_csv(
     """
     if not isinstance(scan_report, list):
         scan_report = [scan_report]
+
     header_out = []
     body_out = []
     data_output = []
 
-    for scan_rep in scan_report:
+    for ii, scan_rep in enumerate(scan_report):
+        if hasattr(scan_rep, "scan"):
+            scan_rep = scan_rep.scan
+        header_out.append([f"#{ii}"])
         header_tmp, body_tmp = _extract_scan_data(
-            scan_report=scan_rep, header=header, write_metadata=write_metadata
+            scan_item=scan_rep, header=header, write_metadata=write_metadata
         )
         header_out.extend(header_tmp[:-1])
         body_out.extend(body_tmp)
@@ -84,24 +89,23 @@ def _write_csv(output_name: str, delimiter: str, output: list, dialect: str = No
 
 
 def _extract_scan_data(
-    scan_report: ScanReport, header: list = None, write_metadata: bool = True
+    scan_item: ScanItem, header: list = None, write_metadata: bool = True
 ) -> tuple:
     """Extract scan data from scan report.
 
     Args:
-        scan_report (ScanReport): Scan report object.
+        scan_item (ScanItem): ScanItem object.
         header (list, optional): Create custom header for the csv file. If None, header is created automatically. Defaults to None.
         write_metadata (bool, optional): If True, the metadata of the scan will be written to the header of csv file. Defaults to True.
 
     Returns:
         (tuple): Tuple of header and body of the csv file.
     """
-    scan_dict = scan_to_dict(scan_report, flat=True)
+    scan_dict = scan_to_dict(scan_item, flat=True)
 
-    header_tmp = [["#" + entry.replace("\t", "")] for entry in str(scan_report).split("\n")]
-    scan_metadata = scan_report.scan.data.messages[
-        list(scan_report.scan.data.messages.keys())[-1]
-    ].metadata
+    header_tmp = [["#" + entry.replace("\t", "")] for entry in str(scan_item).split("\n")]
+    header_tmp.insert(1, ["#ScanStatus", scan_item.status])
+    scan_metadata = scan_item.data.messages[list(scan_item.data.messages.keys())[-1]].metadata
     if write_metadata:
         header_tmp.append(["#ScanMetadata"])
         for key, value in scan_metadata.items():
@@ -110,6 +114,7 @@ def _extract_scan_data(
         header_keys = header
     else:
         header_keys = ["scan_number", "dataset_number"]
+        # pylint: disable=expression-not-assigned
         [
             header_keys.extend([f"{value}_value", f"{time}_timestamp"])
             for value, time in zip(scan_dict["value"].keys(), scan_dict["timestamp"].keys())
@@ -129,11 +134,11 @@ def _extract_scan_data(
     return header_tmp, body_tmp
 
 
-def scan_to_dict(scan_report: ScanReport, flat: bool = True) -> dict:
+def scan_to_dict(scan_item: ScanItem, flat: bool = True) -> dict:
     """Convert scan data to a dictionary.
 
     Args:
-        scan_report (ScanReport): Scan report object.
+        scan_item (ScanItem): ScanItem object.
         flat (bool, optional): If True, the dictionary will be flat. Defaults to True.
 
     Returns:
@@ -150,7 +155,7 @@ def scan_to_dict(scan_report: ScanReport, flat: bool = True) -> dict:
             "value": defaultdict(lambda: defaultdict(lambda: [])),
         }
 
-    for dev, dev_data in scan_report.scan.data.items():
+    for dev, dev_data in scan_item.data.items():
         for signal, signal_data in dev_data.items():
             if flat:
                 scan_dict["timestamp"][signal] = signal_data["timestamp"]
