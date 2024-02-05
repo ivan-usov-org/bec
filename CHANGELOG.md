@@ -2,6 +2,19 @@
 
 <!--next-version-placeholder-->
 
+## v0.60.3 (2024-02-05)
+
+### Fix
+
+* Scan_to_csv can handle ScanReport and ScanItem, runs on multiple scans; closes #80, #104 ([`1ff19a1`](https://gitlab.psi.ch/bec/bec/-/commit/1ff19a156d9614fb1d9583c28d8181341ad5ebb4))
+
+### Documentation
+
+* Fixed docstrings ([`f1e8662`](https://gitlab.psi.ch/bec/bec/-/commit/f1e86627773659b76b8cff199709611d23a0c558))
+* Complement documentation ([`b4ac84a`](https://gitlab.psi.ch/bec/bec/-/commit/b4ac84a960db767eed0d6686ab242d52e7c3ac06))
+* Updated landing page readme ([`c30eb2e`](https://gitlab.psi.ch/bec/bec/-/commit/c30eb2e67e89542d87a7aef8d7e445165f827239))
+* Added references to the user guide ([`a25c4b2`](https://gitlab.psi.ch/bec/bec/-/commit/a25c4b2bb0ef7d98ef72c0bfefd6b435d4bb1db0))
+
 ## v0.60.2 (2024-02-02)
 
 ### Fix
