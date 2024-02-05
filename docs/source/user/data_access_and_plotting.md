@@ -53,18 +53,35 @@ This will plot the following curve from the device `gauss_bpm`, which simulates 
 :alt: tab completion for finding devices
 :width: 800
 ```
+
+## Accessing scan data from the history
+The BEC client maintains a local history of the 50 most recent scans since the client's startup. 
+You can easily retrieve scan data from `bec.history`, which is a Python `list`, as demonstrated in the example below, where we fetch data from the latest scan:
+```ipython
+scan_data = bec.history[-1].scan
+```
+
 ## Export scan data from client
-BEC consistently saves data in h5 format, adhering to the NX standard. 
-Accessing data through h5 files is recommended, which also includes links to large detector data from secondary data services. 
-Additionally, we offer a straightforward method to export scan data to `csv` using the client interface:
+BEC consistently saves data in h5 format, following the NX standard. 
+It is recommended to access data through h5 files, as they also contain links to large detector data from secondary data services. 
+Additionally, we provide a straightforward method to export scan data to `csv` using the client interface:
 
 ```ipython
 with scans.scan_export("<path_to_output_file.csv>"):
     scans.line_scan(dev.samx, -5, 5, steps=50, exp_time=0.1, relative=False)
     scans.grid_scan(dev.samx, -5, 5, 50, dev.samy, -1, 1, 10, exp_time=0.1, relative=False)
 ```
-Executing this will output the scan data to <path_to_output_file.csv>
 
-```Note
+Running this code will generate the scan data output in `<path_to_output_file.csv>`. 
+Additionally, you can directly import the export function `scan_to_csv`, enabling you to export scan data from previously conducted scans:
+
+``` ipython
+from bec_lib.utils import scan_to_csv
+
+scan_data = bec.history[-1].scan
+scan_to_csv(scan_data, "<path_to_output_file.csv>")
+```
+
+```{note}
 Large data from 2D detectors are usually processing by backend services and are, therefore, not available for client-based export.
 ```
