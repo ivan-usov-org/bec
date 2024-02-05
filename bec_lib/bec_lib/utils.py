@@ -36,13 +36,13 @@ def scan_to_csv(
     """Convert scan data to a csv file.
 
     Args:
-        scan_report (ScanReport/Item):  (list of) ScanReport or ScanItem object(s).
-        filename (str):                 Name of the csv file.
-        delimiter (str, optional):      Delimiter for the csv file. Defaults to ",".
-        dialect (str, optional):        Argument for csv.Dialect. Defaults to csv.writer default, e.g. 'excel'.
-                                        Other options 'excel-tab' or 'unix', still takes argument from delimiter, choose delimier='' to omit
-        header (list, optional):        Create custom header for the csv file. If None, header is created automatically. Defaults to None.
-        write_metadata (bool, optional):If True, the metadata of the scan will be written to the header of csv file. Defaults to True.
+        scan_report (ScanReport | ScanItem):    ScanReport or ScanItem object(s). Can be a list of ScanReports, ScanItems
+        filename (str):                         Name of the csv file.
+        delimiter (str, optional):              Delimiter for the csv file. Defaults to ",".
+        dialect (str, optional):                Argument for csv.Dialect. Defaults to csv.writer default, e.g. 'excel'.
+                                                Other options 'excel-tab' or 'unix', still takes argument from delimiter, choose delimier='' to omit
+        header (list, optional):                Create custom header for the csv file. If None, header is created automatically. Defaults to None.
+        write_metadata (bool, optional):        If True, the metadata of the scan will be written to the header of csv file. Defaults to True.
 
     Examples:
         >>> scan_to_csv(scan_report, "./scan.csv")
