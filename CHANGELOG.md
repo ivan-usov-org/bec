@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.61.0 (2024-02-06)
+
+### Feature
+
+* **ipython:** Represent objects using '__str__' rather than '__repr__' ([`1e2af9a`](https://gitlab.psi.ch/bec/bec/-/commit/1e2af9ae519382fe490162dff60b1056b9f50fdf))
+
+### Fix
+
+* **flake8:** Apply flake8 to fix inconsistencies ([`2eafba9`](https://gitlab.psi.ch/bec/bec/-/commit/2eafba951ae7180131bebf705466cdb2968bddba))
+
 ## v0.60.3 (2024-02-05)
 
 ### Fix
