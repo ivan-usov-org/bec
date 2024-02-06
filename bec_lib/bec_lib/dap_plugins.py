@@ -4,6 +4,8 @@ import time
 import uuid
 from typing import TYPE_CHECKING
 
+from typeguard import typechecked
+
 from bec_lib import messages
 from bec_lib.device import DeviceBase
 from bec_lib.endpoints import MessageEndpoints
@@ -22,20 +24,20 @@ class DAPPluginObject:
         service_name: str,
         plugin_info: dict,
         client: BECClient = None,
-        auto_fit_supported: bool = False,
+        auto_run_supported: bool = False,
         service_info: dict = None,
     ) -> None:
         self._service_name = service_name
         self._plugin_info = plugin_info
         self._client = client
-        self._auto_fit_supported = auto_fit_supported
+        self._auto_run_supported = auto_run_supported
         self._plugin_config = {}
         self._service_info = service_info
 
         # run must be an anonymous function to allow for multiple doc strings
-        self.fit = lambda *args, **kwargs: self._fit(*args, **kwargs)
+        self._user_run = lambda *args, **kwargs: self._run(*args, **kwargs)
 
-    def _fit(self, *args, **kwargs):
+    def _run(self, *args, **kwargs):
         request_id = str(uuid.uuid4())
         self._client.producer.set_and_publish(
             MessageEndpoints.dap_request(),
@@ -78,17 +80,16 @@ class DAPPluginObject:
             raise RuntimeError(response.content["error"])
 
     @property
-    def auto_fit(self):
+    def auto_run(self):
         """
-        Set to True to automatically fit the model to the data.
+        Set to True to start a continously running worker.
         """
-        return self._plugin_config.get("auto_fit", False)
+        return self._plugin_config.get("auto_run", False)
 
-    @auto_fit.setter
-    def auto_fit(self, val: bool):
-        if not isinstance(val, bool):
-            raise TypeError("auto_fit must be a boolean.")
-        self._plugin_config["auto_fit"] = val
+    @auto_run.setter
+    @typechecked
+    def auto_run(self, val: bool):
+        self._plugin_config["auto_run"] = val
         request_id = str(uuid.uuid4())
         self._update_dap_config(request_id=request_id)
 
@@ -127,23 +128,13 @@ class DAPPluginObject:
 
     def get_data(self):
         """
-        Get the data from last fit.
+        Get the data from last run.
         """
         msg = self._client.producer.get_last(MessageEndpoints.processed_data(self._service_name))
         if not msg:
             return None
         msg = messages.ProcessedDataMessage.loads(msg)
         return msg.content["data"]
-
-    def get_params(self):
-        """
-        Get the currently set fit parameters.
-        """
-
-    def set_params(self, params: dict):
-        """
-        Set the fit parameters.
-        """
 
     def _update_dap_config(self, request_id: str = None):
         if not self._plugin_config.get("selected_device"):
@@ -162,15 +153,24 @@ class DAPPluginObject:
 
 
 class DAPPlugins:
+    """
+    DAPPlugins is a class that provides access to all available DAP plugins.
+    """
+
     def __init__(self, parent):
         self._parent = parent
         self._available_dap_plugins = {}
         self._import_dap_plugins()
         self._selected_model = None
-        self._auto_fit = False
+        self._auto_run = False
         self._selected_device = None
 
     def refresh(self):
+        """
+        Refresh the list of available DAP plugins. This is useful if new plugins have been added after
+        the client has been initialized. This method is called automatically when the client is initialized.
+        A call to this method is indempotent, meaning it can be called multiple times without side effects.
+        """
         self._import_dap_plugins()
 
     def _import_dap_plugins(self):
@@ -194,27 +194,36 @@ class DAPPlugins:
                     if plugin_name in self._available_dap_plugins:
                         continue
                     name = plugin_info["user_friendly_name"]
-                    auto_fit_supported = plugin_info.get("auto_fit_supported", False)
+                    auto_run_supported = plugin_info.get("auto_run_supported", False)
                     self._available_dap_plugins[name] = DAPPluginObject(
                         name,
                         plugin_info,
                         client=self._parent,
-                        auto_fit_supported=auto_fit_supported,
+                        auto_run_supported=auto_run_supported,
                         service_info=available_services[service].content,
                     )
                     self._set_plugin(
                         name,
                         plugin_info.get("class_doc"),
-                        plugin_info.get("fit_doc"),
+                        plugin_info.get("run_doc"),
+                        plugin_info.get("run_name"),
                         plugin_info.get("signature"),
                     )
+                # pylint: disable=broad-except
                 except Exception as e:
                     logger.error(f"Error importing plugin {plugin_name}: {e}")
 
     def _set_plugin(
-        self, plugin_name: str, class_doc_string: str, fit_doc_string: str, signature: dict
+        self,
+        plugin_name: str,
+        class_doc_string: str,
+        run_doc_string: str,
+        run_name: str,
+        signature: dict,
     ):
+        # pylint disable=protected-access
         setattr(self, plugin_name, self._available_dap_plugins[plugin_name])
         setattr(getattr(self, plugin_name), "__doc__", class_doc_string)
-        setattr(getattr(self, plugin_name).fit, "__doc__", fit_doc_string)
-        setattr(getattr(self, plugin_name).fit, "__signature__", dict_to_signature(signature))
+        setattr(getattr(self, plugin_name), run_name, getattr(self, plugin_name)._user_run)
+        setattr(getattr(self, plugin_name)._user_run, "__doc__", run_doc_string)
+        setattr(getattr(self, plugin_name)._user_run, "__signature__", dict_to_signature(signature))

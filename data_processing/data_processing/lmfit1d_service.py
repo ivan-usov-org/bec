@@ -72,9 +72,10 @@ class LmfitService1D(DAPServiceBase):
                 "class": cls.__name__,
                 "user_friendly_name": model.__name__,
                 "class_doc": cls.get_class_doc_string(model),
-                "fit_doc": cls.get_fit_doc_string(model),
+                "run_doc": cls.get_run_doc_string(model),
+                "run_name": cls.get_user_friendly_run_name(),
                 "signature": cls.get_signature(),
-                "auto_fit_supported": getattr(cls, "AUTO_FIT_SUPPORTED", False),
+                "auto_run_supported": getattr(cls, "AUTO_FIT_SUPPORTED", False),
                 "params": serialize_lmfit_params(cls.get_model(model)().make_params()),
                 "class_args": [],
                 "class_kwargs": {"model": model.__name__},
@@ -92,11 +93,18 @@ class LmfitService1D(DAPServiceBase):
         return model.__doc__ or model.__init__.__doc__
 
     @classmethod
-    def get_fit_doc_string(cls, model: str, *args, **kwargs):
+    def get_run_doc_string(cls, model: str, *args, **kwargs):
         """
         Get the fit doc string.
         """
         return cls.get_class_doc_string(model) + cls.configure.__doc__
+
+    @classmethod
+    def get_user_friendly_run_name(cls):
+        """
+        Get the user friendly run name.
+        """
+        return "fit"
 
     @staticmethod
     def get_model(model: str) -> lmfit.Model:
@@ -248,11 +256,11 @@ class LmfitService1D(DAPServiceBase):
         # get the event data
         if not scan_item.data:
             return None
-        x = scan_item.data.get(device_x).get(signal_x).get("value")
+        x = scan_item.data.get(device_x, {}).get(signal_x, {}).get("value")
         if not x:
             logger.warning(f"Failed to find signal {device_x}.{signal_x}")
             return None
-        y = scan_item.data.get(device_y).get(signal_y).get("value")
+        y = scan_item.data.get(device_y, {}).get(signal_y, {}).get("value")
         if not y:
             logger.warning(f"Failed to find signal {device_y}.{signal_y}")
             return None

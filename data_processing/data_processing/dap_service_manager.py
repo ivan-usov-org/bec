@@ -18,7 +18,7 @@ class DAPServiceManager:
         self.available_dap_services = {}
         self.dap_services = {}
         self.continuous_dap = None
-        self.services = services
+        self.services = services if isinstance(services, list) else [services]
 
     def _start_dap_request_consumer(self) -> None:
         """
@@ -174,6 +174,7 @@ class DAPServiceManager:
         self._start_dap_request_consumer()
         self.update_available_dap_services()
         self.publish_available_services()
+        self._started = True
 
     def update_available_dap_services(self):
         """
@@ -230,42 +231,36 @@ class DAPServiceManager:
         for service_name, service in provided_services.items():
             if not isinstance(service, dict):
                 raise ValueError(f"Invalid service {service_name}: {service}. Must be a dict.")
-            if "class" not in service:
-                raise ValueError(
-                    f"Invalid service {service_name}: {service}. Must have a class key."
-                )
-            if "user_friendly_name" not in service:
-                raise ValueError(
-                    f"Invalid service {service_name}: {service}. Must have a user_friendly_name key."
-                )
-            if "class_doc" not in service:
-                raise ValueError(
-                    f"Invalid service {service_name}: {service}. Must have a class_doc key."
-                )
-            if "fit_doc" not in service:
-                raise ValueError(
-                    f"Invalid service {service_name}: {service}. Must have a fit_doc key."
-                )
-            if "signature" not in service:
-                raise ValueError(
-                    f"Invalid service {service_name}: {service}. Must have a signature key."
-                )
-            if "auto_fit_supported" not in service:
-                raise ValueError(
-                    f"Invalid service {service_name}: {service}. Must have an auto_fit_supported key."
-                )
-            if "params" not in service:
-                raise ValueError(
-                    f"Invalid service {service_name}: {service}. Must have a params key."
-                )
-            if "class_args" not in service:
-                raise ValueError(
-                    f"Invalid service {service_name}: {service}. Must have a class_args key."
-                )
-            if "class_kwargs" not in service:
-                raise ValueError(
-                    f"Invalid service {service_name}: {service}. Must have a class_kwargs key."
-                )
+            self._check_service_keys_exists(
+                service,
+                [
+                    "class",
+                    "user_friendly_name",
+                    "class_doc",
+                    "run_doc",
+                    "run_name",
+                    "signature",
+                    "auto_run_supported",
+                    "params",
+                    "class_args",
+                    "class_kwargs",
+                ],
+            )
+
+    def _check_service_keys_exists(self, service: dict, keys: list) -> bool:
+        """
+        Check if the service keys exists.
+
+        Args:
+            service (dict): Service
+            keys (list): Keys
+
+        Returns:
+            bool: True if the keys exists
+        """
+        for key in keys:
+            if key not in service:
+                raise ValueError(f"Invalid service {service}. Must have a {key} key.")
 
     def publish_available_services(self):
         """send all available dap services to the broker"""

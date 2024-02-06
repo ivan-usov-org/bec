@@ -33,9 +33,9 @@ class DAPServiceBase(abc.ABC):
 
     AUTO_FIT_SUPPORTED = False
 
-    def __init__(self, *args, bec_client: BECClient, **kwargs) -> None:
+    def __init__(self, *args, client: BECClient, **kwargs) -> None:
         super().__init__()
-        self.client = bec_client
+        self.client = client
         self.scans = None
         self.scan_id = None
         self.current_scan_item = None
@@ -48,11 +48,18 @@ class DAPServiceBase(abc.ABC):
         return cls.configure.__doc__ or cls.__init__.__doc__
 
     @classmethod
-    def get_fit_doc_string(cls, *args, **kwargs):
+    def get_run_doc_string(cls, *args, **kwargs):
         """
         Get the fit doc string.
         """
         return cls.configure.__doc__
+
+    @classmethod
+    def get_user_friendly_run_name(cls):
+        """
+        Get the user friendly run name.
+        """
+        return "run"
 
     @classmethod
     def describe_service(cls, *args, **kwargs):
@@ -63,10 +70,11 @@ class DAPServiceBase(abc.ABC):
             "class": cls.__name__,
             "user_friendly_name": cls.get_user_friendly_name(),
             "class_doc": cls.get_class_doc_string(),
-            "fit_doc": cls.get_fit_doc_string(),
+            "run_doc": cls.get_run_doc_string(),
+            "run_name": cls.get_user_friendly_run_name(),
             "signature": cls.get_signature(),
             "params": cls.get_parameters(),
-            "auto_fit_supported": getattr(cls, "AUTO_FIT_SUPPORTED", False),
+            "auto_run_supported": getattr(cls, "AUTO_FIT_SUPPORTED", False),
             "class_args": [],
             "class_kwargs": {},
         }
