@@ -465,7 +465,7 @@ class ScanQueueStatusMessage(BECMessage):
     def _is_valid(self) -> bool:
         if (
             not isinstance(self.content["queue"], dict)
-            or not "primary" in self.content["queue"]
+            or "primary" not in self.content["queue"]
             or not isinstance(self.content["queue"]["primary"], dict)
         ):
             return False

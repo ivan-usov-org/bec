@@ -1,12 +1,8 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from bec_lib import messages
 from bec_lib.endpoints import MessageEndpoints
-
-if TYPE_CHECKING:
-    from bec_lib.redis_connector import RedisConnector
+from bec_lib.redis_connector import RedisConnector
 
 
 class BECWorker:
@@ -153,8 +149,6 @@ class BECWorkerManager:
 
 
 if __name__ == "__main__":  # pragma: no cover
-    from bec_lib.redis_connector import RedisConnector
-
     connector = RedisConnector(["localhost:6379"])
     manager = BECWorkerManager(connector)
     manager.remove_worker("px_dap_worker")

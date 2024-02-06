@@ -1,14 +1,10 @@
 from __future__ import annotations
 
 import builtins
-import enum
-import functools
 import re
 import time
 import traceback
-import uuid
-from collections import namedtuple
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import msgpack
 from rich.console import Console
@@ -25,8 +21,6 @@ from bec_lib.messages import (
     BECStatus,
     DeviceConfigMessage,
     DeviceInfoMessage,
-    DeviceMessage,
-    DeviceStatusMessage,
     LogMessage,
 )
 
@@ -123,12 +117,12 @@ class DeviceContainer(dict):
             if not isinstance(scan_motors, list):
                 scan_motors = [scan_motors]
             for scan_motor in scan_motors:
-                if not scan_motor in devices:
+                if scan_motor not in devices:
                     if isinstance(scan_motor, DeviceBase):
                         devices.append(scan_motor)
                     else:
                         devices.append(self.get(scan_motor))
-        if not readout_priority:
+        if readout_priority is None:
             readout_priority = {}
 
         devices.extend([self.get(dev) for dev in readout_priority.get("monitored", [])])
@@ -160,7 +154,7 @@ class DeviceContainer(dict):
             if not isinstance(scan_motors, list):
                 scan_motors = [scan_motors]
             for scan_motor in scan_motors:
-                if not scan_motor in devices:
+                if scan_motor not in devices:
                     if isinstance(scan_motor, DeviceBase):
                         devices.append(scan_motor)
                     else:
@@ -168,7 +162,7 @@ class DeviceContainer(dict):
             excluded_devices = scan_motors
         else:
             excluded_devices = []
-        if not readout_priority:
+        if readout_priority is None:
             readout_priority = {}
 
         devices.extend([self.get(dev) for dev in readout_priority.get("baseline", [])])
