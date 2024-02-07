@@ -16,6 +16,9 @@ def main():
     start.add_argument(
         "--config", type=str, default=None, help="Path to the BEC service config file"
     )
+    start.add_argument(
+        "--no-tmux", action="store_true", default=False, help="Do not start processes in tmux"
+    )
     command.add_parser("stop", help="Stop the BEC server")
     restart = command.add_parser("restart", help="Restart the BEC server")
     restart.add_argument(
@@ -24,15 +27,16 @@ def main():
     command.add_parser("attach", help="Open the currently running BEC server session")
 
     args = parser.parse_args()
-
-    if "config" in args:
+    try:
+        # 'stop' has no config
         config = args.config
-    else:
+    except AttributeError:
         config = None
 
     service_handler = ServiceHandler(
         bec_path=os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
         config_path=config,
+        no_tmux=args.no_tmux if "no_tmux" in args else False,
     )
     if args.command == "start":
         service_handler.start()

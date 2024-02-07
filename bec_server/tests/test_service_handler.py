@@ -1,4 +1,3 @@
-import sys
 from unittest import mock
 
 from bec_server.service_handler import ServiceHandler

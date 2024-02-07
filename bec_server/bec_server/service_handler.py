@@ -2,6 +2,7 @@ import sys
 from string import Template
 
 from bec_server.tmux_launch import tmux_start, tmux_stop
+from bec_server.subprocess_launch import subprocess_start, subprocess_stop
 
 
 class bcolors:
@@ -44,7 +45,7 @@ class ServiceHandler:
         "data_processing": {"path": Template("$base_path/data_processing"), "command": "bec-dap"},
     }
 
-    def __init__(self, bec_path: str, config_path: str):
+    def __init__(self, bec_path: str, config_path: str, no_tmux: bool = False):
         """
 
         Args:
@@ -54,10 +55,14 @@ class ServiceHandler:
         """
         self.bec_path = bec_path
         self.config_path = config_path
+        self.no_tmux = no_tmux
 
         self._detect_available_interfaces()
 
     def _detect_available_interfaces(self):
+        if self.no_tmux:
+            self.interface = None
+            return
         # check if we are on MacOS and if so, check if we have iTerm2 installed
         if sys.platform == "darwin":
             try:
@@ -83,6 +88,9 @@ class ServiceHandler:
             )
         elif self.interface == "iterm2":
             pass
+        else:
+            # no tmux
+            return subprocess_start(self.bec_path, self.config_path, self.SERVICES)
 
     def stop(self):
         """
@@ -93,6 +101,8 @@ class ServiceHandler:
             tmux_stop()
         elif self.interface == "iterm2":
             pass
+        else:
+            subprocess_stop()
 
     def restart(self):
         """
