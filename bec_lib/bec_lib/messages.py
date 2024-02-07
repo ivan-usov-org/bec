@@ -103,7 +103,7 @@ class ScanQueueMessage(BECMessage):
             >>> ScanQueueMessage(scan_type="dscan", parameter={"motor1": "samx", "from_m1:": -5, "to_m1": 5, "steps_m1": 10, "motor2": "samy", "from_m2": -5, "to_m2": 5, "steps_m2": 10, "exp_time": 0.1})
     """
 
-    msg_type = "scan"
+    msg_type = "scan_queue_message"
     scan_type: str
     parameter: dict
     queue: str = field(default="primary")
