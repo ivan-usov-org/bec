@@ -36,7 +36,7 @@ class SignalData:
         """return a list of timestamps of the signal data"""
         return [self.data.get(index, {}).get("timestamp") for index in sorted(self.data.keys())]
 
-    def get(self, index: Any) -> dict:
+    def get(self, index: Any, default=None) -> dict:
         """
         Get the signal data at the given index.
 
@@ -47,12 +47,12 @@ class SignalData:
             dict: the signal data at the given index
         """
         if isinstance(index, int):
-            return self.data.get(index)
+            return self.data.get(index, default)
         if index in ["val", "value"]:
             return self.val
         if index == "timestamp":
             return self.timestamps
-        return self.get(index)
+        return self.get(index, default)
 
     def set(self, index: Any, device_data: dict) -> None:
         """
@@ -115,12 +115,12 @@ class DeviceData(dict):
         super().__delitem__(__key)
         del self.__dict__[__key]
 
-    def get(self, index: Any) -> Any:
+    def get(self, index: Any, default=None) -> Any:
         if index in self.__signals:
             return self.__signals[index]
         if isinstance(index, int):
             return {signal: val.get(index) for signal, val in self.__signals.items()}
-        return self.__signals.get(index)
+        return self.__signals.get(index, default)
 
     def set(self, index: Any, signals: dict) -> None:
         for signal, signal_data in signals.items():
@@ -155,12 +155,12 @@ class ScanData(dict):
         self.messages = collections.defaultdict()
         super().__init__(*args, **kwargs)
 
-    def get(self, index: Any) -> Any:
+    def get(self, index: Any, default=None) -> Any:
         if index in self.devices:
-            return self.devices.get(index)
+            return self.devices.get(index, default)
         if isinstance(index, int) and index in self.messages:
             return self.messages.get(index)
-        return self.devices.get(index)
+        return self.devices.get(index, default)
 
     def __getitem__(self, key: Any) -> Any:
         if key in self.devices:
