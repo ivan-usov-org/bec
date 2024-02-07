@@ -2,16 +2,16 @@
 import os
 from unittest import mock
 
-import bec_lib
 import pytest
 import yaml
+from fastjsonschema import JsonSchemaException
+from test_scibec_connector import SciBecMock, SciHubMock
+
+import bec_lib
 from bec_lib import DeviceBase, messages
 from bec_lib.bec_errors import DeviceConfigError
 from bec_lib.device import OnFailure, ReadoutPriority
 from bec_lib.tests.utils import ConnectorMock
-from fastjsonschema import JsonSchemaException
-from test_scibec_connector import SciBecMock, SciHubMock
-
 from scihub import SciHub
 from scihub.scibec import ConfigHandler, SciBecConnector
 
@@ -329,7 +329,7 @@ def test_config_handler_wait_for_device_server_update(config_handler):
             None,
             None,
             None,
-            messages.RequestResponseMessage(accepted=True, message="").dumps(),
+            messages.RequestResponseMessage(accepted=True, message=""),
         ]
         config_handler._wait_for_device_server_update(RID)
 

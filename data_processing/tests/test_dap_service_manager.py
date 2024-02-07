@@ -1,9 +1,9 @@
 from unittest import mock
 
 import pytest
+
 from bec_lib import MessageEndpoints, messages
 from bec_lib.redis_connector import MessageObject
-
 from data_processing.dap_service import DAPServiceBase
 from data_processing.dap_service_manager import DAPServiceManager
 
@@ -70,7 +70,7 @@ def test_DAPServiceManager_init(service_manager):
     ],
 )
 def test_DAPServiceManager_request_callback(service_manager, msg, process_called):
-    msg_obj = MessageObject(value=msg.dumps(), topic="topic")
+    msg_obj = MessageObject(value=msg, topic="topic")
     with mock.patch.object(service_manager, "process_dap_request") as mock_process_dap_request:
         service_manager._dap_request_callback(msg_obj, parent=service_manager)
         if process_called:

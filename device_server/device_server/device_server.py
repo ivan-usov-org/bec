@@ -326,7 +326,7 @@ class DeviceServer(RPCMixin, BECService):
     def _update_read_configuration(self, obj: OphydObject, metadata: dict, pipe) -> None:
         dev_config_msg = messages.DeviceMessage(
             signals=obj.root.read_configuration(), metadata=metadata
-        ).dumps()
+        )
         self.producer.set_and_publish(
             MessageEndpoints.device_read_configuration(obj.root.name), dev_config_msg, pipe
         )

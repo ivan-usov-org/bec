@@ -149,14 +149,10 @@ class DAPServiceManager:
             metadata (dict, optional): Metadata. Defaults to None.
         """
         dap_response_msg = messages.DAPResponseMessage(
-            success=success,
-            data=data,
-            error=error,
-            dap_request=dap_request_msg.dumps(),
-            metadata=metadata,
+            success=success, data=data, error=error, dap_request=dap_request_msg, metadata=metadata
         )
         self.producer.set_and_publish(
-            MessageEndpoints.dap_response(metadata.get("RID")), dap_response_msg.dumps(), expire=60
+            MessageEndpoints.dap_response(metadata.get("RID")), dap_response_msg, expire=60
         )
 
     def start(self, client: BECClient) -> None:
@@ -264,7 +260,7 @@ class DAPServiceManager:
 
     def publish_available_services(self):
         """send all available dap services to the broker"""
-        msg = messages.AvailableResourceMessage(resource=self.available_dap_services).dumps()
+        msg = messages.AvailableResourceMessage(resource=self.available_dap_services)
         # pylint: disable=protected-access
         self.producer.set(
             MessageEndpoints.dap_available_plugins(f"DAPServer/{self.client._service_id}"), msg

@@ -1,9 +1,9 @@
 from unittest import mock
 
 import pytest
+
 from bec_lib import MessageEndpoints, messages
 from bec_lib.redis_connector import MessageObject
-
 from scihub.scibec.scibec_metadata_handler import SciBecMetadataHandler
 
 
@@ -15,7 +15,7 @@ def md_handler():
 
 def test_handle_scan_status(md_handler):
     # pylint: disable=protected-access
-    msg = messages.ScanStatusMessage(scanID="scanID", status={}, info={}).dumps()
+    msg = messages.ScanStatusMessage(scanID="scanID", status={}, info={})
     with mock.patch.object(md_handler, "update_scan_status") as mock_update_scan_status:
         md_handler._handle_scan_status(
             MessageObject(value=msg, topic="scan_status"), parent=md_handler
@@ -25,7 +25,7 @@ def test_handle_scan_status(md_handler):
 
 def test_handle_scan_status_ignores_errors(md_handler):
     # pylint: disable=protected-access
-    msg = messages.ScanStatusMessage(scanID="scanID", status={}, info={}).dumps()
+    msg = messages.ScanStatusMessage(scanID="scanID", status={}, info={})
     with mock.patch("scihub.scibec.scibec_metadata_handler.logger") as mock_logger:
         with mock.patch.object(md_handler, "update_scan_status") as mock_update_scan_status:
             mock_update_scan_status.side_effect = Exception("test")
@@ -40,7 +40,7 @@ def test_handle_scan_status_ignores_errors(md_handler):
 
 def test_update_scan_status_returns_without_scibec(md_handler):
     # pylint: disable=protected-access
-    msg = messages.ScanStatusMessage(scanID="scanID", status={}, info={}).dumps()
+    msg = messages.ScanStatusMessage(scanID="scanID", status={}, info={})
     md_handler.scibec_connector.scibec = None
     md_handler.update_scan_status(msg)
 
@@ -91,7 +91,7 @@ def test_update_scan_status_patch(md_handler):
 def test_handle_file_content(md_handler):
     # pylint: disable=protected-access
     msg = messages.FileContentMessage(file_path="my_file.h5", data={"data": {}})
-    msg_raw = MessageObject(value=msg.dumps(), topic="file_content")
+    msg_raw = MessageObject(value=msg, topic="file_content")
     with mock.patch.object(md_handler, "update_scan_data") as mock_update_scan_data:
         md_handler._handle_file_content(msg_raw, parent=md_handler)
         mock_update_scan_data.assert_called_once_with(**msg.content)
@@ -100,7 +100,7 @@ def test_handle_file_content(md_handler):
 def test_handle_file_content_ignores_errors(md_handler):
     # pylint: disable=protected-access
     msg = messages.FileContentMessage(file_path="my_file.h5", data={"data": {}})
-    msg_raw = MessageObject(value=msg.dumps(), topic="file_content")
+    msg_raw = MessageObject(value=msg, topic="file_content")
     with mock.patch("scihub.scibec.scibec_metadata_handler.logger") as mock_logger:
         with mock.patch.object(md_handler, "update_scan_data") as mock_update_scan_data:
             mock_update_scan_data.side_effect = Exception("test")

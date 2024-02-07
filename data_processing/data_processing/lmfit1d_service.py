@@ -7,9 +7,9 @@ from typing import TYPE_CHECKING
 
 import lmfit
 import numpy as np
+
 from bec_lib import DeviceBase, MessageEndpoints, bec_logger, messages
 from bec_lib.lmfit_serializer import serialize_lmfit_params
-
 from data_processing.dap_service import DAPError, DAPServiceBase
 
 if TYPE_CHECKING:
@@ -150,9 +150,7 @@ class LmfitService1D(DAPServiceBase):
                 self.client.producer.xadd(
                     MessageEndpoints.processed_data(self.model.__class__.__name__),
                     msg={
-                        "data": messages.ProcessedDataMessage(
-                            data=stream_output, metadata=metadata
-                        ).dumps()
+                        "data": messages.ProcessedDataMessage(data=stream_output, metadata=metadata)
                     },
                 )
             time.sleep(0.1)

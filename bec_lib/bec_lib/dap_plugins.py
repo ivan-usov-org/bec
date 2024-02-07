@@ -51,7 +51,7 @@ class DAPPluginObject:
                     "class_kwargs": self._plugin_info.get("class_kwargs"),
                 },
                 metadata={"RID": request_id},
-            ).dumps(),
+            ),
         )
 
         response = self._wait_for_dap_response(request_id)
@@ -67,10 +67,10 @@ class DAPPluginObject:
             if not response:
                 time.sleep(0.005)
 
-            response = messages.DAPResponseMessage.loads(response)
-            if not response:
-                time.sleep(0.005)
-                continue
+            # response = messages.DAPResponseMessage.loads(response)
+            # if not response:
+            #     time.sleep(0.005)
+            #     continue
             if response.metadata["RID"] != request_id:
                 time.sleep(0.005)
                 continue
@@ -148,7 +148,7 @@ class DAPPluginObject:
                 dap_type="continuous",
                 config=self._plugin_config,
                 metadata={"RID": request_id},
-            ).dumps(),
+            ),
         )
 
 

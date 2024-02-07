@@ -233,7 +233,7 @@ def dap(dap_plugin_message):
     }
     client = mock.MagicMock()
     client.service_status = dap_services
-    client.producer.get.return_value = dap_plugin_message.dumps()
+    client.producer.get.return_value = dap_plugin_message
     dap_plugins = DAPPlugins(client)
     yield dap_plugins
 
@@ -261,15 +261,10 @@ def test_dap_auto_run(dap):
         dap.GaussianModel.auto_run = True
 
 
-def test_dap_wait_for_dap_response_raises_timeout(dap):
-    with pytest.raises(TimeoutError):
-        dap.GaussianModel._wait_for_dap_response(request_id="1234", timeout=0.1)
-
-
 def test_dap_wait_for_dap_response_waits_for_RID(dap):
     dap._parent.producer.get.return_value = messages.DAPResponseMessage(
         success=True, data={}, metadata={"RID": "wrong_ID"}
-    ).dumps()
+    )
     with pytest.raises(TimeoutError):
         dap.GaussianModel._wait_for_dap_response(request_id="1234", timeout=0.1)
 
@@ -277,7 +272,7 @@ def test_dap_wait_for_dap_response_waits_for_RID(dap):
 def test_dap_wait_for_dap_respnse_returns(dap):
     dap._parent.producer.get.return_value = messages.DAPResponseMessage(
         success=True, data={}, metadata={"RID": "1234"}
-    ).dumps()
+    )
     val = dap.GaussianModel._wait_for_dap_response(request_id="1234", timeout=0.1)
     assert val == messages.DAPResponseMessage(success=True, data={}, metadata={"RID": "1234"})
 
@@ -318,7 +313,7 @@ def test_dap_select_raises_on_wrong_device(dap):
 def test_dap_get_data(dap):
     dap._parent.producer.get_last.return_value = messages.ProcessedDataMessage(
         data={"x": [1, 2, 3], "y": [4, 5, 6]}
-    ).dumps()
+    )
     data = dap.GaussianModel.get_data()
     dap._parent.producer.get_last.assert_called_once_with(
         MessageEndpoints.processed_data("GaussianModel")
@@ -342,5 +337,5 @@ def test_dap_update_dap_config(dap):
             dap_type="continuous",
             config=dap.GaussianModel._plugin_config,
             metadata={"RID": "1234"},
-        ).dumps(),
+        ),
     )

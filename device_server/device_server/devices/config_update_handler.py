@@ -93,7 +93,7 @@ class ConfigUpdateHandler:
                     }
                     self.device_manager.producer.set_and_publish(
                         MessageEndpoints.device_limits(device.name),
-                        messages.DeviceMessage(signals=limits).dumps(),
+                        messages.DeviceMessage(signals=limits),
                     )
 
             if "enabled" in dev_config:
