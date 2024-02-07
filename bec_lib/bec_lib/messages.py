@@ -584,8 +584,10 @@ class DAPResponseMessage(BECMessage):
     data: dict = field(default_factory=dict)
     error: dict = field(default_factory=dict)
     dap_request: dict = field(default_factory=dict)
+    metadata: dict = field(default_factory=dict)
 
 
+@dataclass(eq=False)
 class AvailableResourceMessage(BECMessage):
     """Message for available resources such as scans, data processing plugins etc
     Args:
