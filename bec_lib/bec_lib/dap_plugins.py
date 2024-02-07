@@ -10,6 +10,7 @@ from bec_lib import messages
 from bec_lib.device import DeviceBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
+from bec_lib.scan_items import ScanItem
 from bec_lib.signature_serializer import dict_to_signature
 
 logger = bec_logger.logger
@@ -38,6 +39,20 @@ class DAPPluginObject:
         self._user_run = lambda *args, **kwargs: self._run(*args, **kwargs)
 
     def _run(self, *args, **kwargs):
+        converted_args = []
+        for arg in args:
+            if isinstance(arg, ScanItem):
+                converted_args.append(arg.scanID)
+            else:
+                converted_args.append(arg)
+        args = converted_args
+        converted_kwargs = {}
+        for key, val in kwargs.items():
+            if isinstance(val, ScanItem):
+                converted_kwargs[key] = val.scanID
+            else:
+                converted_kwargs[key] = val
+        kwargs = converted_kwargs
         request_id = str(uuid.uuid4())
         self._client.producer.set_and_publish(
             MessageEndpoints.dap_request(),
@@ -66,11 +81,8 @@ class DAPPluginObject:
             response = self._client.producer.get(MessageEndpoints.dap_response(request_id))
             if not response:
                 time.sleep(0.005)
+                continue
 
-            # response = messages.DAPResponseMessage.loads(response)
-            # if not response:
-            #     time.sleep(0.005)
-            #     continue
             if response.metadata["RID"] != request_id:
                 time.sleep(0.005)
                 continue
@@ -133,7 +145,6 @@ class DAPPluginObject:
         msg = self._client.producer.get_last(MessageEndpoints.processed_data(self._service_name))
         if not msg:
             return None
-        msg = messages.ProcessedDataMessage.loads(msg)
         return msg.content["data"]
 
     def _update_dap_config(self, request_id: str = None):
@@ -182,12 +193,11 @@ class DAPPlugins:
             service for service in available_services if service.startswith("DAPServer/")
         ]
         for service in dap_services:
-            msg_raw = self._parent.producer.get(MessageEndpoints.dap_available_plugins(service))
-            if msg_raw is None:
+            available_plugins = self._parent.producer.get(
+                MessageEndpoints.dap_available_plugins(service)
+            )
+            if available_plugins is None:
                 logger.warning("No plugins available. Are redis and the BEC server running?")
-                return
-            available_plugins = messages.AvailableResourceMessage.loads(msg_raw)
-            if not available_plugins:
                 return
             for plugin_name, plugin_info in available_plugins.content["resource"].items():
                 try:
