@@ -83,7 +83,7 @@ class DAPServiceManager:
             self.client.callbacks.remove(self.continuous_dap["id"])
 
         dap_config = dap_request_msg.content["config"]
-        if not dap_config.get("auto_fit"):
+        if not dap_config.get("auto_run"):
             return
 
         config = dap_request_msg.content["config"]
