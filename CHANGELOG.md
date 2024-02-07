@@ -2,6 +2,21 @@
 
 <!--next-version-placeholder-->
 
+## v1.0.0 (2024-02-07)
+
+### Fix
+
+* **messages:** Set msg_type of ScanQueueMessage to "scan_queue_message" ([`8b125a0`](https://gitlab.psi.ch/bec/bec/-/commit/8b125a05b95084c676552c483b4d35eaa45724a2))
+* **AlarmMessage:** Content member (dict) changed to msg (str) ([`3d087ef`](https://gitlab.psi.ch/bec/bec/-/commit/3d087ef87d1480ff4c96873e658441a833f477c6))
+* **global var:** Remove builtins.__BEC_SERVICE__ ([`80fddc5`](https://gitlab.psi.ch/bec/bec/-/commit/80fddc5a4c3ec16d0ac464c79dcfba6bf449242e))
+* **scan_manager:** Publish available scans using a BECMessage ([`ac5fafc`](https://gitlab.psi.ch/bec/bec/-/commit/ac5fafc7fa30dc8006edb7554c9e261c30edc9a0))
+
+### Breaking
+
+* content member (dict) changed to msg (str) ([`3d087ef`](https://gitlab.psi.ch/bec/bec/-/commit/3d087ef87d1480ff4c96873e658441a833f477c6))
+* messages refactoring, new serialization module ([`8bbfd10`](https://gitlab.psi.ch/bec/bec/-/commit/8bbfd10ca7db4b8376478a421633fe3e94cd9f0e))
+* remove builtins.__BEC_SERVICE__ ([`80fddc5`](https://gitlab.psi.ch/bec/bec/-/commit/80fddc5a4c3ec16d0ac464c79dcfba6bf449242e))
+
 ## v0.61.0 (2024-02-06)
 
 ### Feature
