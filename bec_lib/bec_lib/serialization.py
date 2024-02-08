@@ -39,17 +39,32 @@ def encode_bec_message_v12(msg):
 
 
 def decode_bec_message_v12(raw_bytes):
-    declaration, msg_header_body = raw_bytes.split(b"_EOH_", maxsplit=1)
-    _, version, header_length, _ = declaration.split(b"_")
-    header = msg_header_body[: int(header_length)]
-    body = msg_header_body[int(header_length) :]
-    header = json.loads(header.decode())
-    msg_body = msgpack.loads(body)
-    msg_class = get_message_class(header.pop("msg_type"))
-    msg = msg_class(**header, **msg_body)
-    # shouldn't this be checked when the msg is used? or when the message is created?
-    if msg._is_valid():
-        return msg
+    try:
+        # kept for the record:
+        # offset = MsgpackSerialization.ext_type_offset_to_data[raw_bytes[0]]
+        # (was not so easy to find from msgpack doc)
+        if raw_bytes.startswith(b"BECMSG"):
+            version = float(raw_bytes[7:10])
+            if version < 1.2:
+                raise RuntimeError(f"Unsupported BECMessage version {version}")
+    except Exception as exception:
+        raise RuntimeError("Failed to decode BECMessage") from exception
+    else:
+        try:
+            declaration, msg_header_body = raw_bytes.split(b"_EOH_", maxsplit=1)
+            _, version, header_length, _ = declaration.split(b"_")
+            header = msg_header_body[: int(header_length)]
+            body = msg_header_body[int(header_length) :]
+            header = json.loads(header.decode())
+            msg_body = msgpack.loads(body)
+            msg_class = get_message_class(header.pop("msg_type"))
+            msg = msg_class(**header, **msg_body)
+        except Exception as exception:
+            raise RuntimeError("Failed to decode BECMessage") from exception
+        else:
+            # shouldn't this be checked when the msg is used? or when the message is created?
+            if msg._is_valid():
+                return msg
 
 
 def encode_bec_status(status):
@@ -233,28 +248,17 @@ class MsgpackSerialization(SerializationInterface):
     ext_type_offset_to_data = {199: 3, 200: 4, 201: 6}
 
     @staticmethod
-    def loads(msg, version=None) -> dict:
+    def loads(msg) -> dict:
         with pause_gc():
-            if version is None:
-                try:
-                    if isinstance(msg, bytes):
-                        if len(msg) < 10:
-                            raise RuntimeError("Invalid BEC message")
-                        offset = MsgpackSerialization.ext_type_offset_to_data[msg[0]]
-                        if msg[offset:].startswith(b"BECMSG"):
-                            version = float(msg[offset + 7 : offset + 7 + 3])
-                    else:
-                        msg = json.loads(msg)
-                        version = msg["version"]
-                except Exception:
-                    version = 1.0
-            if version == 1.2:
+            try:
                 msg = msgpack.loads(msg)
-                if msg is not None:
+            except Exception as exception:
+                raise RuntimeError("Failed to decode BECMessage") from exception
+            else:
+                if isinstance(msg, BECMessage):
                     if msg.msg_type == "bundle_message":
                         return msg.messages
                 return msg
-            raise RuntimeError(f"Unsupported BECMessage version {version}.")
 
     @staticmethod
     def dumps(msg, version=None) -> str:

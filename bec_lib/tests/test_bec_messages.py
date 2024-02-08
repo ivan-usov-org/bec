@@ -20,14 +20,9 @@ def test_bec_message_msgpack_serialization_version(version):
     else:
         res = MsgpackSerialization.dumps(msg)
         print(res)
-    v12res = b'\xc7z\x01BECMSG_1.2_34_67_EOH_{"msg_type": "device_instruction"}\x84\xa6device\xa4samx\xa6action\xa3set\xa9parameter\x81\xa3set\xcb?\xe0\x00\x00\x00\x00\x00\x00\xa8metadata\x81\xa3RID\xa41234'
-    if version is not None and version < 1.2:
-        with pytest.raises(RuntimeError) as exception:
-            MsgpackSerialization.loads(v12res, version=version)
-        assert "Unsupported BECMessage version" in str(exception.value)
-    else:
+        v12res = b'\xc7z\x01BECMSG_1.2_34_67_EOH_{"msg_type": "device_instruction"}\x84\xa6device\xa4samx\xa6action\xa3set\xa9parameter\x81\xa3set\xcb?\xe0\x00\x00\x00\x00\x00\x00\xa8metadata\x81\xa3RID\xa41234'
         assert res == v12res
-        res_loaded = MsgpackSerialization.loads(res, version=version)
+        res_loaded = MsgpackSerialization.loads(res)
         assert res_loaded == msg
 
 
