@@ -319,13 +319,13 @@ class RedisProducer(ProducerConnector):
                 return data
 
     @catch_connection_error
-    def xadd(self, topic: str, msg: dict, max_size=None, pipe=None, expire: int = None):
+    def xadd(self, topic: str, msg_dict: dict, max_size=None, pipe=None, expire: int = None):
         """
         add to stream
 
         Args:
             topic (str): redis topic
-            msg (dict): message to add
+            msg_dict (dict): message to add
             max_size (int, optional): max size of stream. Defaults to None.
             pipe (Pipeline, optional): redis pipe. Defaults to None.
             expire (int, optional): expire time. Defaults to None.
@@ -341,35 +341,36 @@ class RedisProducer(ProducerConnector):
         else:
             client = self.r
 
+        for key, msg in msg_dict.items():
+            msg_dict[key] = MsgpackSerialization.dumps(msg)
+
         if max_size:
-            client.xadd(topic, msg, maxlen=max_size)
+            client.xadd(topic, msg_dict, maxlen=max_size)
         else:
-            client.xadd(topic, msg)
+            client.xadd(topic, msg_dict)
         if expire:
             client.expire(topic, expire)
         if not pipe and expire:
             client.execute()
 
     @catch_connection_error
-    def get_last(self, topic: str, pipe=None, key=b"data"):
+    def get_last(self, topic: str, key="data"):
         """retrieve last entry from stream"""
-        client = pipe if pipe is not None else self.r
-        msg = client.xrevrange(topic, "+", "-", count=1)
-        if not msg:
+        client = self.r
+        try:
+            _, msg_dict = client.xrevrange(topic, "+", "-", count=1)[0]
+        except TypeError:
             return None
-        if key is None:
-            return msg[0][1]
-        return msg[0][1].get(key)
+        else:
+            msg_dict = {k.decode(): MsgpackSerialization.loads(msg) for k, msg in msg_dict.items()}
+
+            if key is None:
+                return msg_dict
+            return msg_dict.get(key)
 
     @catch_connection_error
     def xread(
-        self,
-        topic: str,
-        id: str = None,
-        count: int = None,
-        block: int = None,
-        pipe=None,
-        from_start=False,
+        self, topic: str, id: str = None, count: int = None, block: int = None, from_start=False
     ) -> list:
         """
         read from stream
@@ -395,7 +396,7 @@ class RedisProducer(ProducerConnector):
             >>> key = msg[0][1][0][0]
             >>> next_msg = redis.xread("test", key, count=1)
         """
-        client = pipe if pipe is not None else self.r
+        client = self.r
         if topic not in self.stream_keys:
             if from_start:
                 self.stream_keys[topic] = "0-0"
@@ -411,13 +412,18 @@ class RedisProducer(ProducerConnector):
         if id is None:
             id = self.stream_keys[topic]
 
-        msg = client.xread({topic: id}, count=count, block=block)
-        if msg:
-            self.stream_keys[topic] = msg[0][1][-1][0]
-        return msg
+        msgs = []
+        for reading in client.xread({topic: id}, count=count, block=block):
+            for topic, record in reading:
+                for index, msg_dict in record:
+                    msgs.append(
+                        {k.decode(): MsgpackSerialization.loads(msg) for k, msg in msg_dict.items()}
+                    )
+                self.stream_keys[topic] = index
+        return msgs
 
     @catch_connection_error
-    def xrange(self, topic: str, min: str, max: str, count: int = None, pipe=None):
+    def xrange(self, topic: str, min: str, max: str, count: int = None):
         """
         read a range from stream
 
@@ -426,10 +432,15 @@ class RedisProducer(ProducerConnector):
             min (str): min id. Use "-" to read from start
             max (str): max id. Use "+" to read to end
             count (int, optional): number of messages to read. Defaults to None.
-            pipe (Pipeline, optional): redis pipe. Defaults to None.
         """
-        client = pipe if pipe is not None else self.r
-        return client.xrange(topic, min, max, count=count)
+        client = self.r
+        msgs = []
+        for reading in client.xrange(topic, min, max, count=count):
+            for index, msg_dict in record:
+                msgs.append(
+                    {k.decode(): MsgpackSerialization.loads(msg) for k, msg in msg_dict.items()}
+                )
+        return msgs
 
 
 class RedisConsumerMixin:

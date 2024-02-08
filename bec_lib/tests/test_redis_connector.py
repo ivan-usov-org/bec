@@ -137,11 +137,7 @@ def test_redis_connector_raise_alarm(connector, severity, alarm_type, source, ms
     connector._notifications_producer.set_and_publish.assert_called_once_with(
         MessageEndpoints.alarm(),
         AlarmMessage(
-            severity=severity,
-            alarm_type=alarm_type,
-            source=source,
-            msg=msg,
-            metadata=metadata,
+            severity=severity, alarm_type=alarm_type, source=source, msg=msg, metadata=metadata
         ),
     )
 
@@ -347,13 +343,7 @@ def test_redis_producer_delete(producer, topic, use_pipe):
         producer.r.delete.assert_called_once_with(topic)
 
 
-@pytest.mark.parametrize(
-    "topic, use_pipe",
-    [
-        ["topic1", True],
-        ["topic2", False],
-    ],
-)
+@pytest.mark.parametrize("topic, use_pipe", [["topic1", True], ["topic2", False]])
 def test_redis_producer_get(producer, topic, use_pipe):
     pipe = use_pipe_fcn(producer, use_pipe)
 
@@ -514,17 +504,30 @@ def test_redis_consumer_threaded_init(consumer_threaded, topics, pattern):
 
 def test_redis_connector_xadd(producer):
     producer.xadd("topic1", {"key": "value"})
-    producer.r.xadd.assert_called_once_with("topic1", {"key": "value"})
+    producer.r.xadd.assert_called_once_with("topic1", {"key": MsgpackSerialization.dumps("value")})
+
+    test_msg = TestMessage("test")
+    producer.xadd("topic1", {"data": test_msg})
+    producer.r.xadd.assert_called_with("topic1", {"data": MsgpackSerialization.dumps(test_msg)})
+    producer.r.xrevrange.return_value = [
+        (b"1707391599960-0", {b"data": MsgpackSerialization.dumps(test_msg)})
+    ]
+    msg = producer.get_last("topic1")
+    assert msg == test_msg
 
 
 def test_redis_connector_xadd_with_maxlen(producer):
     producer.xadd("topic1", {"key": "value"}, max_size=100)
-    producer.r.xadd.assert_called_once_with("topic1", {"key": "value"}, maxlen=100)
+    producer.r.xadd.assert_called_once_with(
+        "topic1", {"key": MsgpackSerialization.dumps("value")}, maxlen=100
+    )
 
 
 def test_redis_connector_xadd_with_expire(producer):
     producer.xadd("topic1", {"key": "value"}, expire=100)
-    producer.r.pipeline().xadd.assert_called_once_with("topic1", {"key": "value"})
+    producer.r.pipeline().xadd.assert_called_once_with(
+        "topic1", {"key": MsgpackSerialization.dumps("value")}
+    )
     producer.r.pipeline().expire.assert_called_once_with("topic1", 100)
     producer.r.pipeline().execute.assert_called_once()
 
@@ -546,12 +549,23 @@ def test_redis_connector_xread_without_id(producer):
 
 def test_redis_connector_xread_from_end(producer):
     producer.xread("topic1", from_start=False)
-    producer.r.xrevrange.assert_called_once_with("topic1", "+", "-", count=1)
+    producer.r.xread.assert_called_once_with({"topic1": "$"}, count=None, block=None)
+
+
+def test_redis_connector_xread_from_new_topic(producer):
+    producer.xread("topic1", from_start=False)
+    producer.r.xread.assert_called_once_with({"topic1": "$"}, count=None, block=None)
 
 
 def test_redis_connector_get_last(producer):
-    producer.get_last("topic1")
+    producer.r.xrevrange.return_value = [
+        (b"1707391599960-0", {b"key": MsgpackSerialization.dumps("value")})
+    ]
+    msg = producer.get_last("topic1")
     producer.r.xrevrange.assert_called_once_with("topic1", "+", "-", count=1)
+    assert msg is None  # no key given, default is b'data'
+    assert producer.get_last("topic1", "key") == "value"
+    assert producer.get_last("topic1", None) == {"key": "value"}
 
 
 def test_redis_xrange(producer):
