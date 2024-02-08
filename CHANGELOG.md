@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.1.1 (2024-02-08)
+
+### Fix
+
+* Bugfix for .put and cached readback, ([`880eb77`](https://gitlab.psi.ch/bec/bec/-/commit/880eb77fd0a065cadde14bc33294b069d16fd0c6))
+
 ## v1.1.0 (2024-02-08)
 
 ### Feature
