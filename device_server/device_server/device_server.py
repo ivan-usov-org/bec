@@ -310,19 +310,13 @@ class DeviceServer(RPCMixin, BECService):
                 expire=18000,
             )
         content = status.instruction.content
-        if obj.kind == Kind.config:
-            is_config_set = content["action"] == "set"
-            is_rpc_set = content["action"] == "rpc" and (".set" in content["parameter"]["func"])
-            if is_config_set:
+        is_config_set = content["action"] == "set"
+        is_rpc_set = content["action"] == "rpc" and (".set" in content["parameter"]["func"])
+
+        if is_config_set or is_rpc_set:
+            if obj.kind == Kind.config:
                 self._update_read_configuration(obj, status.instruction.metadata, pipe)
-            elif is_rpc_set:
-                self._update_read_configuration(obj, status.instruction.metadata, pipe)
-        elif obj.kind in [Kind.normal, Kind.hinted]:
-            is_config_set = content["action"] == "set"
-            is_rpc_set = content["action"] == "rpc" and (".set" in content["parameter"]["func"])
-            if is_config_set:
-                self._read_device(status.instruction)
-            elif is_rpc_set:
+            elif obj.kind in [Kind.normal, Kind.hinted]:
                 self._read_device(status.instruction)
         pipe.execute()
 
