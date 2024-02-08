@@ -6,11 +6,8 @@ from collections.abc import Callable
 from contextlib import ContextDecorator
 from typing import TYPE_CHECKING
 
-import msgpack
 from toolz import partition
 from typeguard import typechecked
-
-from bec_lib.utils import scan_to_csv
 
 from bec_lib import messages
 from bec_lib.device import DeviceBase
@@ -18,6 +15,7 @@ from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
 from bec_lib.scan_report import ScanReport
 from bec_lib.signature_serializer import dict_to_signature
+from bec_lib.utils import scan_to_csv
 
 if TYPE_CHECKING:
     from bec_lib.client import BECClient

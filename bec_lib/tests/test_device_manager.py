@@ -97,6 +97,12 @@ def test_get_config_calls_load(dm):
                 load_session.assert_called_once()
 
 
+def test_get_redis_device_config(dm):
+    with mock.patch.object(dm, "producer") as producer:
+        producer.get.return_value = messages.AvailableResourceMessage(resource={"devices": [{}]})
+        assert dm._get_redis_device_config() == {"devices": [{}]}
+
+
 def test_get_devices_with_tags(dm):
     config_content = None
     with open(f"{dir_path}/tests/test_config.yaml", "r") as f:

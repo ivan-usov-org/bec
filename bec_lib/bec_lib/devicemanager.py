@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-import builtins
 import re
 import time
 import traceback
 from typing import TYPE_CHECKING
 
-import msgpack
 from rich.console import Console
 from rich.table import Table
 from typeguard import typechecked
@@ -17,12 +15,7 @@ from bec_lib.config_helper import ConfigHelper
 from bec_lib.device import Device, DeviceBase, Positioner, ReadoutPriority, Signal
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
-from bec_lib.messages import (
-    BECStatus,
-    DeviceConfigMessage,
-    DeviceInfoMessage,
-    LogMessage,
-)
+from bec_lib.messages import BECStatus, DeviceConfigMessage, DeviceInfoMessage
 
 if TYPE_CHECKING:
     from bec_lib import BECService
@@ -519,14 +512,11 @@ class DeviceManagerBase:
             logger.warning("No config available.")
         self._load_session()
 
-    def _set_redis_device_config(self, devices: list) -> None:
-        self.producer.set(MessageEndpoints.device_config(), msgpack.dumps(devices))
-
     def _get_redis_device_config(self) -> list:
         devices = self.producer.get(MessageEndpoints.device_config())
         if not devices:
             return []
-        return msgpack.loads(devices)
+        return devices.content["resource"]
 
     def _stop_base_consumer(self):
         """

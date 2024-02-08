@@ -2,7 +2,6 @@ import os
 import shutil
 from unittest import mock
 
-import msgpack
 import pytest
 import yaml
 
@@ -50,8 +49,8 @@ def test_config_helper_save_current_session():
     connector = mock.MagicMock()
 
     config_helper = ConfigHelper(connector)
-    connector.producer().get.return_value = msgpack.dumps(
-        [
+    connector.producer().get.return_value = messages.AvailableResourceMessage(
+        resource=[
             {
                 "id": "648c817f67d3c7cd6a354e8e",
                 "createdAt": "2023-06-16T15:36:31.215Z",

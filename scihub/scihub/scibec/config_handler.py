@@ -7,7 +7,6 @@ import uuid
 from typing import TYPE_CHECKING
 
 import bec_lib
-import msgpack
 from bec_lib import DeviceConfigError
 from bec_lib import DeviceManagerBase as DeviceManager
 from bec_lib import MessageEndpoints, bec_logger, messages
@@ -16,7 +15,6 @@ from bec_lib.scibec_validator import SciBecValidator
 
 if TYPE_CHECKING:
     from bec_lib.device import DeviceBase
-
     from scihub.scibec.scibec_connector import SciBecConnector
 
 logger = bec_logger.logger
@@ -178,9 +176,11 @@ class ConfigHandler:
         self.validator.validate_device_patch(update)
 
     def update_config_in_redis(self, device):
-        config = msgpack.loads(self.device_manager.producer.get(MessageEndpoints.device_config()))
+        config = self.device_manager.producer.get(MessageEndpoints.device_config())
+        config = config.content["resource"]
         index = next(
             index for index, dev_conf in enumerate(config) if dev_conf["name"] == device.name
         )
         config[index] = device._config
-        self.device_manager.producer.set(MessageEndpoints.device_config(), msgpack.dumps(config))
+        msg = messages.AvailableResourceMessage(resource=config)
+        self.device_manager.producer.set(MessageEndpoints.device_config(), msg)

@@ -7,7 +7,6 @@ import time
 import uuid
 from typing import TYPE_CHECKING
 
-import msgpack
 import yaml
 
 import bec_lib
@@ -60,8 +59,10 @@ class ConfigHelper:
         Args:
             file_path (str): Full path to the yaml file.
         """
-        msg_raw = self.producer.get(MessageEndpoints.device_config())
-        config = msgpack.loads(msg_raw)
+        config = self.producer.get(MessageEndpoints.device_config())
+        if not config:
+            raise DeviceConfigError("No config found in the current session.")
+        config = config.content["resource"]
         out = {}
         for dev in config:
             dev.pop("id", None)

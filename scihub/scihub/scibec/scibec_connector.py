@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING
 
-import msgpack
 from bec_lib import MessageEndpoints, bec_logger, messages
 from bec_lib.connector import ConnectorBase
 from dotenv import dotenv_values
@@ -139,7 +138,8 @@ class SciBecConnector:
         )
 
     def set_redis_config(self, config):
-        self.producer.set(MessageEndpoints.device_config(), msgpack.dumps(config))
+        msg = messages.AvailableResourceMessage(resource=config)
+        self.producer.set(MessageEndpoints.device_config(), msg)
 
     def _start_metadata_handler(self) -> None:
         self._metadata_handler = SciBecMetadataHandler(self)
