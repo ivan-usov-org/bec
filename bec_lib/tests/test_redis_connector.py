@@ -549,12 +549,7 @@ def test_redis_connector_xread_without_id(producer):
 
 def test_redis_connector_xread_from_end(producer):
     producer.xread("topic1", from_start=False)
-    producer.r.xread.assert_called_once_with({"topic1": "$"}, count=None, block=None)
-
-
-def test_redis_connector_xread_from_new_topic(producer):
-    producer.xread("topic1", from_start=False)
-    producer.r.xread.assert_called_once_with({"topic1": "$"}, count=None, block=None)
+    producer.r.xrevrange.assert_called_once_with("topic1", "+", "-", count=1)
 
 
 def test_redis_connector_get_last(producer):

@@ -380,7 +380,6 @@ class RedisProducer(ProducerConnector):
             id (str, optional): id to read from. Defaults to None.
             count (int, optional): number of messages to read. Defaults to None.
             block (int, optional): block for x milliseconds. Defaults to None.
-            pipe (Pipeline, optional): redis pipe. Defaults to None.
             from_start (bool, optional): read from start. Defaults to False.
 
         Returns:
@@ -397,30 +396,36 @@ class RedisProducer(ProducerConnector):
             >>> next_msg = redis.xread("test", key, count=1)
         """
         client = self.r
+        if from_start:
+            self.stream_keys[topic] = "0-0"
         if topic not in self.stream_keys:
-            if from_start:
-                self.stream_keys[topic] = "0-0"
-            elif id is None:
+            if id is None:
                 try:
                     msg = self.r.xrevrange(topic, "+", "-", count=1)
                     if msg:
                         self.stream_keys[topic] = msg[0][0]
-                        return msg
+                        out = {}
+                        for key, val in msg[0][1].items():
+                            out[key.decode()] = MsgpackSerialization.loads(val)
+                        return [out]
                     self.stream_keys[topic] = "0-0"
                 except redis.exceptions.ResponseError:
                     self.stream_keys[topic] = "0-0"
         if id is None:
             id = self.stream_keys[topic]
 
-        msgs = []
-        for reading in client.xread({topic: id}, count=count, block=block):
-            for topic, record in reading:
-                for index, msg_dict in record:
-                    msgs.append(
-                        {k.decode(): MsgpackSerialization.loads(msg) for k, msg in msg_dict.items()}
-                    )
+        msg = client.xread({topic: id}, count=count, block=block)
+        return self._decode_stream_messages_xread(msg)
+
+    def _decode_stream_messages_xread(self, msg):
+        out = []
+        for topic, msgs in msg:
+            for index, record in msgs:
+                out.append(
+                    {k.decode(): MsgpackSerialization.loads(msg) for k, msg in record.items()}
+                )
                 self.stream_keys[topic] = index
-        return msgs
+        return out if out else None
 
     @catch_connection_error
     def xrange(self, topic: str, min: str, max: str, count: int = None):
