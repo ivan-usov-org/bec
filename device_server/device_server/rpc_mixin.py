@@ -132,6 +132,18 @@ class RPCMixin:
         # handle other ophyd methods
         rpc_var = rgetattr(self.device_manager.devices[device_root].obj, instr_params.get("func"))
         res = self._get_result_from_rpc(rpc_var, instr_params)
+        if instr_params.get("func") == "put" or instr_params.get("func").endswith(".put"):
+            if instr_params.get("func") == "put":
+                obj = self.device_manager.devices[device_root].obj
+            else:
+                obj = rgetattr(
+                    self.device_manager.devices[device_root].obj,
+                    instr_params.get("func").split(".put")[0],
+                )
+            if obj.kind == ophyd.Kind.config:
+                return self._rpc_read_configuration_and_return(instr)
+            if obj.kind in [ophyd.Kind.normal, ophyd.Kind.hinted]:
+                return self._rpc_read_and_return(instr)
         if isinstance(res, ophyd.StatusBase):
             res.__dict__["instruction"] = instr
             res.add_callback(self._status_callback)
