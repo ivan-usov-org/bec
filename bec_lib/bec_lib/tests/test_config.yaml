@@ -2329,5 +2329,29 @@ motor2_disabled_set:
   readOnly: true
 
 
-################ Disabled devices end here #################
+######### DeviceProxy and SimCamera for delayed init tests ##########
 
+# proxy_cam_test:
+#   readoutPriority: monitored
+#   deviceClass: SimCamera
+#   deviceConfig:
+#     device_access: true
+#   deviceTags:
+#     - detector
+#   enabled: true
+#   readOnly: false
+#   softwareTrigger: false
+# sim_proxy_test:
+#   readoutPriority: on_request
+#   deviceClass: SlitProxy
+#   deviceConfig:
+#     proxy_cam_test:
+#       signal_name: image
+#       center_offset: [0, 0] # [x,y]
+#       covariance: [[1000, 500], [200, 1000]] # [[x,x],[y,y]]
+#       pixel_size: 0.01
+#       ref_motors: [samx, samy]
+#       slit_width: [1, 1]
+#       motor_dir: [0, 1] # x:0 , y:1, z:2 coordinates
+#   enabled: true
+#   readOnly: false

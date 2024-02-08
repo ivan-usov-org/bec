@@ -74,6 +74,15 @@ def test_device_init(device_manager):
         assert dev.initialized is True
 
 
+# def test_device_proxy_init(device_manager):
+#     assert "sim_proxy_test" in device_manager.devices.keys()
+#     assert "proxy_cam_test" in device_manager.devices.keys()
+#     assert "image" in device_manager.devices["proxy_cam_test"].obj.registered_proxies.values()
+#     assert (
+#         "sim_proxy_test" in device_manager.devices["proxy_cam_test"].obj.registered_proxies.keys()
+#     )
+
+
 @pytest.mark.parametrize(
     "obj,raises_error",
     [(DeviceMock(), True), (DeviceControllerMock(), False), (EpicsDeviceMock(), False)],

@@ -39,8 +39,9 @@ class ConfigHelper:
         if save_recovery:
             time_stamp = f"{datetime.datetime.now():%Y-%m-%d_%H-%M-%S}"
             fname = f"recovery_config_{time_stamp}.yaml"
-            self._save_config_to_file(fname)
-            print(f"A recovery config was written to {fname}.")
+            success = self._save_config_to_file(fname, raise_on_error=False)
+            if success:
+                print(f"A recovery config was written to {fname}.")
         config = self._load_config_from_file(file_path)
         self.send_config_request(action="set", config=config)
 
@@ -69,10 +70,12 @@ class ConfigHelper:
         self._save_config_to_file(file_path)
         print(f"Config was written to {file_path}.")
 
-    def _save_config_to_file(self, file_path: str) -> None:
+    def _save_config_to_file(self, file_path: str, raise_on_error: bool = True) -> bool:
         config = self.producer.get(MessageEndpoints.device_config())
         if not config:
-            raise DeviceConfigError("No config found in the session.")
+            if raise_on_error:
+                raise DeviceConfigError("No config found in the session.")
+            return False
         config = config.content["resource"]
         out = {}
         for dev in config:
@@ -85,6 +88,7 @@ class ConfigHelper:
 
         with open(file_path, "w") as file:
             file.write(yaml.dump(out))
+        return True
 
     def send_config_request(self, action: str = "update", config=None) -> None:
         """

@@ -131,6 +131,7 @@ class DeviceManagerDS(DeviceManagerBase):
         return getattr(module, class_name)
 
     def _load_session(self, *_args, **_kwargs):
+        delayed_init = []
         if not self._is_config_valid():
             self._reset_config()
             return
@@ -142,8 +143,20 @@ class DeviceManagerDS(DeviceManagerBase):
                 enabled = dev.get("enabled")
                 logger.info(f"Adding device {name}: {'ENABLED' if enabled else 'DISABLED'}")
                 try:
+                    dev_cls = self._get_device_class(dev.get("deviceClass"))
+                    if issubclass(dev_cls, opd.DeviceProxy):
+                        delayed_init.append(dev)
+                        continue
                     self.initialize_device(dev)
                 except ConnectionError:
+                    msg = traceback.format_exc()
+                    self.failed_devices[name] = msg
+
+            for dev in delayed_init:
+                try:
+                    name = dev.get("name")
+                    self.initialize_delayed_devices(dev)
+                except (ConnectionError, DeviceConfigError):
                     msg = traceback.format_exc()
                     self.failed_devices[name] = msg
             self.config_update_handler.handle_failed_device_inits()
@@ -157,17 +170,36 @@ class DeviceManagerDS(DeviceManagerBase):
                 f"Failed to initialize device: {dev}: {content}. The config will be reset."
             ) from exc
 
-    #     if failed_devices:
-    #         logger.error(
-    #             f"Failed to initialize devices: {failed_devices}. The config will be reset."
-    #         )
-    #         self._disable_devices(failed_devices)
+    def initialize_delayed_devices(self, dev: dict) -> None:
+        """Initialize delayed device after all other devices have been initialized."""
+        name = dev.get("name")
+        enabled = dev.get("enabled")
+        logger.info(f"Adding device {name}: {'ENABLED' if enabled else 'DISABLED'}")
+        self.initialize_device(dev)
 
-    # def _disable_devices(self, devices: list) -> None:
-    #     msg = messages.DeviceConfigMessage(
-    #         action="update", config={name: {"enabled": False} for name in devices}
-    #     )
-    #     self.producer.send(MessageEndpoints.device_config_request(), msg)
+        obj_lookup = self.devices.get(name).obj.lookup
+        for key in obj_lookup.keys():
+            signal_name = obj_lookup[key].get("signal_name")
+            if key not in self.devices:
+                raise DeviceConfigError(
+                    f"Failed to init DeviceProxy {name}, no device {key} found in device manager."
+                )
+            dev_obj = self.devices[key].obj
+            registered_proxies = dev_obj.registered_proxies
+            if not hasattr(dev_obj, signal_name):
+                raise DeviceConfigError(
+                    f"Failed to init DeviceProxy {name}, no signal {signal_name} found for device {key}."
+                )
+            if key not in registered_proxies:
+                self.devices[key].obj._registered_proxies.update({name: signal_name})
+                continue
+            if key in registered_proxies and signal_name not in registered_proxies[key]:
+                self.devices[key].obj._registered_proxies.update({name: signal_name})
+                continue
+            if key in registered_proxies.keys() and signal_name in registered_proxies[key]:
+                raise RuntimeError(
+                    f"Failed to init DeviceProxy {name}, device {key} already has a registered DeviceProxy for {signal_name}. Only one DeviceProxy can be active per signal."
+                )
 
     def _reset_config(self):
         current_config = self._session["devices"]
@@ -193,8 +225,8 @@ class DeviceManagerDS(DeviceManagerBase):
             config (dict): Config dictionary
 
         """
-        if hasattr(obj, "update_config"):
-            obj.update_config(config)
+        if hasattr(obj, "_update_device_config"):
+            obj._update_device_config(config)
         else:
             for config_key, config_value in config.items():
                 # first handle the ophyd exceptions...
@@ -313,6 +345,9 @@ class DeviceManagerDS(DeviceManagerBase):
 
         obj = opaas_obj.obj
         # add subscriptions
+        if not hasattr(obj, "event_types"):
+            return opaas_obj
+
         if "readback" in obj.event_types:
             obj.subscribe(self._obj_callback_readback, run=opaas_obj.enabled)
         elif "value" in obj.event_types:

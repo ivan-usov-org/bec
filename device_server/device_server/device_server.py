@@ -254,6 +254,10 @@ class DeviceServer(RPCMixin, BECService):
             else:
                 logger.debug(f"Completing device: {dev}")
                 status = obj.complete()
+            if status is None:
+                raise InvalidDeviceError(
+                    f"The complete method of device {dev} does not return a DeviceStatus object."
+                )
             status.__dict__["instruction"] = instr
             status.add_callback(self._status_callback)
 

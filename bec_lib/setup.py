@@ -6,6 +6,7 @@ if __name__ == "__main__":
     setup(
         install_requires=[
             "numpy",
+            "scipy",
             "msgpack",
             "requests",
             "typeguard>=4.0.1",
