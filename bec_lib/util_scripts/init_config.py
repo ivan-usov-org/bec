@@ -1,8 +1,8 @@
 import argparse
 
-import msgpack
 import yaml
 
+from bec_lib import messages
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.redis_connector import RedisConnector
 
@@ -21,4 +21,5 @@ with open(clargs.config, "r", encoding="utf-8") as stream:
 for name, device in data.items():
     device["name"] = name
 config_data = list(data.values())
-producer.set(MessageEndpoints.device_config(), msgpack.dumps(config_data))
+msg = messages.AvailableResourceMessage(resource=config_data)
+producer.set(MessageEndpoints.device_config(), msg)
