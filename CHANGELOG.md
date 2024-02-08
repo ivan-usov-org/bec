@@ -2,6 +2,31 @@
 
 <!--next-version-placeholder-->
 
+## v1.1.0 (2024-02-08)
+
+### Feature
+
+* Lmfit serializer ([`ed679bb`](https://gitlab.psi.ch/bec/bec/-/commit/ed679bb6650dcd7d77ebbe16212745ac985eeba8))
+* Dap services ([`2b08662`](https://gitlab.psi.ch/bec/bec/-/commit/2b08662c08baf89ecbbd051a428914b78bbbcd97))
+* Added dap endpoints and messages ([`6dc09cf`](https://gitlab.psi.ch/bec/bec/-/commit/6dc09cf6e5ea26f8b64e266776322cbee19550bc))
+
+### Fix
+
+* Fixed support for scan items as args ([`b15e38b`](https://gitlab.psi.ch/bec/bec/-/commit/b15e38bd39511e09ed4e456843e54e755a1c10ce))
+* Fixed typo ([`4c8dd55`](https://gitlab.psi.ch/bec/bec/-/commit/4c8dd5570cde952a24b60ac4a9eb6227d2b5d364))
+* Preliminary fix for missing xadd serialization ([`11b8326`](https://gitlab.psi.ch/bec/bec/-/commit/11b8326393e0b21f0f2ad140c826af18619193f0))
+* Fixed scan_data for .get default values ([`aa403c4`](https://gitlab.psi.ch/bec/bec/-/commit/aa403c4a53a7c2462d623097a2f3275f2e7c1c90))
+* Fixed dataclass for availableresourcemessage ([`cfc5237`](https://gitlab.psi.ch/bec/bec/-/commit/cfc5237025806d91eb32f2ebe135e2ddb55e8c1a))
+* Fixed multiple model imports ([`a5f1447`](https://gitlab.psi.ch/bec/bec/-/commit/a5f1447c8734f88734f9828753f7bfd567128b8e))
+* Fixed plugin handling for multiple service provider ([`ef4b66f`](https://gitlab.psi.ch/bec/bec/-/commit/ef4b66fd928600e40c06880cba807e667b1b4ed2))
+* Fixed support for multiple dap services ([`e2595bc`](https://gitlab.psi.ch/bec/bec/-/commit/e2595bc22535de384d2747bbb5d4c225507f2a11))
+* Accept args, kwargs in new client ([`47f4ecf`](https://gitlab.psi.ch/bec/bec/-/commit/47f4ecff540e03004ad16afaa6d11150efd0d3ba))
+* Use service id property for status updates ([`5d33146`](https://gitlab.psi.ch/bec/bec/-/commit/5d33146b0cf7e6f9f23f98275e2697459d3692dd))
+* Fixed dap loading ([`0c71b5f`](https://gitlab.psi.ch/bec/bec/-/commit/0c71b5f7c2c7d198ced36de9ced40bf99287025a))
+* Fixed xread ([`f1219ae`](https://gitlab.psi.ch/bec/bec/-/commit/f1219ae0f051a872bdbb6e5d5e68c8e8b16232ea))
+* Fixed xread when no id is specified ([`4a42277`](https://gitlab.psi.ch/bec/bec/-/commit/4a4227731ffeb117f4a5b8fb5f3ce6045f1f8eb8))
+* Improved error handling for scihub ([`5d8028d`](https://gitlab.psi.ch/bec/bec/-/commit/5d8028db6bb9c510a8738ddba1545797b07dd7eb))
+
 ## v1.0.0 (2024-02-07)
 
 ### Fix
