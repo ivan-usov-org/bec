@@ -8,7 +8,35 @@ import pytest
 from bec_lib import messages
 from bec_lib.scan_items import ScanItem
 from bec_lib.scan_report import ScanReport
-from bec_lib.utils import _write_csv, scan_to_dict, scan_to_csv
+from bec_lib.utils import _write_csv, scan_to_dict, scan_to_csv, user_access
+
+
+class class_mock:
+    USER_ACCESS = []
+
+    @user_access
+    def _func_decorated_not_in_user_access(self, *args, **kwargs):
+        return None
+
+    @user_access
+    def _func_decorated_in_user_access(self, *args, **kwargs):
+        return None
+
+    def _func_not_decorated_not_in_user_access(self, *args, **kwargs):
+        return None
+
+
+@pytest.fixture(scope="class")
+def class_factory():
+    yield class_mock()
+
+
+def test_user_access(class_factory):
+    """Test user_access function."""
+    assert class_factory.USER_ACCESS == [
+        "_func_decorated_not_in_user_access",
+        "_func_decorated_in_user_access",
+    ]
 
 
 def test__write_csv():

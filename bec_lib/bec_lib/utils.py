@@ -12,6 +12,45 @@ if TYPE_CHECKING:
     from bec_lib.scan_items import ScanItem
 
 
+class user_access:
+
+    def __init__(self, meth):
+        """
+        Decorator to mark <device_class> methods to be accessible from the bec client
+
+        Args:
+            meth: method to be marked as accessible
+
+        Examples:
+            >>> @user_access
+            >>> def my_method(self, *args, **kwargs):
+            >>>     return fcn(self, *args, **kwargs)
+
+        """
+        self.meth = meth
+
+    def __set_name__(self, owner, name):
+        """Write registered method into the owner class USER_ACCESS list for the bec_client"""
+        if not hasattr(owner, "USER_ACCESS"):
+            owner.USER_ACCESS = []
+        if name not in owner.USER_ACCESS:
+            owner.USER_ACCESS.append(name)
+
+        setattr(owner, name, self.meth)
+
+
+# def client_access(fcn):
+#     """Decorator to mark <device_class> methods to be accessible from the bec client"""
+
+#     @functools.wraps(fcn)
+#     def wrapper(self, *args, **kwargs):
+#         return fcn(self, *args, **kwargs)
+
+#     setattr(wrapper, "__client_access", True)
+
+#     return wrapper
+
+
 def threadlocked(fcn):
     """Ensure that the thread acquires and releases the lock."""
 
