@@ -66,6 +66,18 @@ def decode_bec_status(value):
     return BECStatus(int.from_bytes(value, "big"))
 
 
+def encode_set(obj):
+    if isinstance(obj, set):
+        return {"__msgpack__": {"type": "set", "data": list(obj)}}
+    return obj
+
+
+def decode_set(obj):
+    if isinstance(obj, dict) and "__msgpack__" in obj and obj["__msgpack__"]["type"] == "set":
+        return set(obj["__msgpack__"]["data"])
+    return obj
+
+
 class MsgpackExt:
     """Encapsulates msgpack dumps/loads with extensions"""
 
@@ -115,6 +127,12 @@ class MsgpackExt:
         # order matters
         self.register_ext_type(encode_bec_status, decode_bec_status)
         self.register_ext_type(encode_bec_message_v12, decode_bec_message_v12)
+
+    def register_set_encoder(self):
+        """
+        Register codec for set
+        """
+        self.register_object_hook(encode_set, decode_set)
 
     def _default(self, obj):
         for encoder, exttype in self._encoder:
@@ -167,6 +185,7 @@ class MsgpackExt:
 msgpack = MsgpackExt()
 msgpack.register_numpy()
 msgpack.register_bec_message()
+msgpack.register_set_encoder()
 
 
 class SerializationInterface:
