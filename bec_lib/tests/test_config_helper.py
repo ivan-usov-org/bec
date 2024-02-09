@@ -81,7 +81,7 @@ def test_config_helper_save_current_session():
                 "sessionId": "648c817d67d3c7cd6a354df2",
                 "enabled": True,
                 "readOnly": False,
-                "deviceClass": "SynAxisMonitor",
+                "deviceClass": "SimMonitor",
                 "deviceTags": ["beamline"],
                 "deviceConfig": {"labels": "transd", "name": "transd", "tolerance": 0.5},
                 "readoutPriority": "monitored",
@@ -110,7 +110,7 @@ def test_config_helper_save_current_session():
                 "onFailure": "retry",
             },
             "transd": {
-                "deviceClass": "SynAxisMonitor",
+                "deviceClass": "SimMonitor",
                 "deviceTags": ["beamline"],
                 "enabled": True,
                 "readOnly": False,

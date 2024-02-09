@@ -302,414 +302,368 @@ samz:
 
 bpm3a:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm3b:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm3c:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm3d:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm3i:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm3x:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm3y:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm3z:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm4a:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm4b:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm4c:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm4d:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm4i:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm4s:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm4x:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm4xf:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm4xm:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm4y:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm4yf:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm4ym:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm4z:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm5a:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm5b:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm5c:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm5d:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm5i:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm5x:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm5y:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm5z:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm6a:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm6b:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm6c:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm6d:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm6i:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm6x:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm6y:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 bpm6z:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 curr:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 diode:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 ebpmdx:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 ebpmdy:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 ebpmux:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 ebpmuy:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 ftp:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 temp:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
   readOnly: false
 transd:
   readoutPriority: monitored
-  deviceClass: SynAxisMonitor
+  deviceClass: SimMonitor
   deviceConfig:
-    tolerance: 0.5
   deviceTags:
     - beamline
   enabled: true
