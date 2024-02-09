@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v1.1.2 (2024-02-09)
+
+### Fix
+
+* Fixed xread decoding ([`c684a76`](https://gitlab.psi.ch/bec/bec/-/commit/c684a76a5eff0bf478121dcde25e9e4447e839dc))
+* Fixed init config script ([`f0f9fe3`](https://gitlab.psi.ch/bec/bec/-/commit/f0f9fe304f24cb61053ce12d785b82745a14210e))
+* Removed outdated msgpack packing ([`15f8e21`](https://gitlab.psi.ch/bec/bec/-/commit/15f8e213053a635da4ed8d54bcb562a690e71517))
+* **redis_connector:** Encode/decode stream data ([`a7bafa6`](https://gitlab.psi.ch/bec/bec/-/commit/a7bafa6a0c99395068ef090d149732b4fa4f5eb5))
+* **serialization:** Move BECMessage check in .loads() in the BEC message decoder ([`de8333b`](https://gitlab.psi.ch/bec/bec/-/commit/de8333b164033ff0c0a300278e5494f5cc8f7879))
+
 ## v1.1.1 (2024-02-08)
 
 ### Fix
