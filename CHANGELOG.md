@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.0 (2024-02-09)
+
+### Feature
+
+* **bec_lib.utils:** Add user_access decorator to bec_lib.utils. ([`0b309ce`](https://gitlab.psi.ch/bec/bec/-/commit/0b309ce8887b40cf907b19421adbbd47f30a8207))
+
 ## v1.1.3 (2024-02-09)
 
 ### Fix
