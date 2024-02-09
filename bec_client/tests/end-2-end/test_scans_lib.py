@@ -140,6 +140,7 @@ def test_dap_fit(lib_client):
     dev = bec.device_manager.devices
     scans = bec.scans
 
+    dev.bpm4i.sim.set_sim_type("gauss")
     params = dev.bpm4i.sim.get_sim_params()
     params.update({"noise": "uniform", "noise_multiplier": 10, "cen": 5})
     dev.bpm4i.sim.set_sim_params(params)
