@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.1.3 (2024-02-09)
+
+### Fix
+
+* **serializer:** Fixed serialization for set ([`bcd2e06`](https://gitlab.psi.ch/bec/bec/-/commit/bcd2e06449923b0f2f92f64703a70e6de99e72d2))
+
 ## v1.1.2 (2024-02-09)
 
 ### Fix
