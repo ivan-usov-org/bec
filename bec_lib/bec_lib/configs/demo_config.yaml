@@ -4,7 +4,7 @@
 
 eiger:
   readoutPriority: monitored
-  deviceClass: SynSLSDetector
+  deviceClass: SimCamera
   deviceConfig:
     device_access: true
   deviceTags:
@@ -2256,7 +2256,7 @@ sttry:
 
 ring_current_sim:
   readoutPriority: monitored
-  deviceClass: SynSignalRO
+  deviceClass: ReadOnlySignal
   deviceConfig:
   deviceTags:
     - beamline

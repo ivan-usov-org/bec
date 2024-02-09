@@ -264,7 +264,7 @@ def device_config():
         "enabled": True,
         "readOnly": False,
         "readoutPriority": "monitored",
-        "deviceClass": "SynSLSDetector",
+        "deviceClass": "SimCamera",
         "deviceConfig": {"device_access": True, "labels": "eiger", "name": "eiger"},
         "deviceTags": ["detector"],
     }
