@@ -1,24 +1,17 @@
 from __future__ import annotations
 
-import collections
 import contextlib
-import dataclasses
-import enum
 import gc
 import inspect
 import json
-import sys
-import time
 from abc import abstractmethod
-from copy import deepcopy
 
 import msgpack as msgpack_module
-import numpy as np
 
-from bec_lib.logger import bec_logger
-from bec_lib import numpy_encoder
 from bec_lib import messages as messages_module
-from bec_lib.messages import BECStatus, BECMessage
+from bec_lib import numpy_encoder
+from bec_lib.logger import bec_logger
+from bec_lib.messages import BECMessage, BECStatus
 
 logger = bec_logger.logger
 
@@ -29,11 +22,7 @@ def encode_bec_message_v12(msg):
 
     msg_version = 1.2
     msg_body = msgpack.dumps(msg.__dict__)
-    msg_header = json.dumps(
-        {
-            "msg_type": msg.msg_type,
-        }
-    ).encode()
+    msg_header = json.dumps({"msg_type": msg.msg_type}).encode()
     header = f"BECMSG_{msg_version}_{len(msg_header)}_{len(msg_body)}_EOH_".encode()
     return header + msg_header + msg_body
 
@@ -49,22 +38,22 @@ def decode_bec_message_v12(raw_bytes):
                 raise RuntimeError(f"Unsupported BECMessage version {version}")
     except Exception as exception:
         raise RuntimeError("Failed to decode BECMessage") from exception
-    else:
-        try:
-            declaration, msg_header_body = raw_bytes.split(b"_EOH_", maxsplit=1)
-            _, version, header_length, _ = declaration.split(b"_")
-            header = msg_header_body[: int(header_length)]
-            body = msg_header_body[int(header_length) :]
-            header = json.loads(header.decode())
-            msg_body = msgpack.loads(body)
-            msg_class = get_message_class(header.pop("msg_type"))
-            msg = msg_class(**header, **msg_body)
-        except Exception as exception:
-            raise RuntimeError("Failed to decode BECMessage") from exception
-        else:
-            # shouldn't this be checked when the msg is used? or when the message is created?
-            if msg._is_valid():
-                return msg
+
+    try:
+        declaration, msg_header_body = raw_bytes.split(b"_EOH_", maxsplit=1)
+        _, version, header_length, _ = declaration.split(b"_")
+        header = msg_header_body[: int(header_length)]
+        body = msg_header_body[int(header_length) :]
+        header = json.loads(header.decode())
+        msg_body = msgpack.loads(body)
+        msg_class = get_message_class(header.pop("msg_type"))
+        msg = msg_class(**header, **msg_body)
+    except Exception as exception:
+        raise RuntimeError("Failed to decode BECMessage") from exception
+
+    # shouldn't this be checked when the msg is used? or when the message is created?
+    if msg._is_valid():
+        return msg
 
 
 def encode_bec_status(status):
@@ -136,8 +125,7 @@ class MsgpackExt:
                 continue
             if exttype is not None:
                 return msgpack_module.ExtType(exttype, result)
-            else:
-                return result
+            return result
         raise TypeError("Unknown type: %r" % (obj,))
 
     def _ext_hooks(self, code, data):
@@ -174,16 +162,6 @@ class MsgpackExt:
             raw=raw,
             strict_map_key=strict_map_key,
         )
-
-    # def Unpacker(self, raw=True, max_buffer_size=0) -> msgpack.Unpacker:
-    #    """Streaming unpacker."""
-    #    return msgpack.Unpacker(
-    #        raw=raw,
-    #        max_buffer_size=max_buffer_size,
-    #        ext_hook=self._ext_hooks,
-    #        object_hook=self._object_hook,
-    #        strict_map_key=False,
-    #    )
 
 
 msgpack = MsgpackExt()
@@ -264,5 +242,4 @@ class MsgpackSerialization(SerializationInterface):
     def dumps(msg, version=None) -> str:
         if version is None or version == 1.2:
             return msgpack.dumps(msg)
-        else:
-            raise RuntimeError(f"Unsupported BECMessage version {version}.")
+        raise RuntimeError(f"Unsupported BECMessage version {version}.")
