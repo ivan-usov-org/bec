@@ -198,12 +198,14 @@ end-2-end:
     - docker build -t scan_server:test -f ./scan_server/Dockerfile --build-arg PY_VERSION=3.9 .
     - docker build -t device_server:test -f ./device_server/Dockerfile --build-arg PY_VERSION=3.9 .
     - docker build -t file_writer:test -f ./file_writer/Dockerfile --build-arg PY_VERSION=3.9 .
+    - docker build -t data_processing:test -f ./data_processing/Dockerfile --build-arg PY_VERSION=3.9 .
 
     # run scan_bundler, scan_server, device_server and file_writer
     - docker run --network=host -d --name device_server device_server:test
     - docker run --network=host -d --name scan_server scan_server:test
     - docker run --network=host -d --name scan_bundler scan_bundler:test
     - docker run --network=host -d --name file_writer file_writer:test
+    - docker run --network=host -d --name data_processing data_processing:test
 
     # build and run the tests
     - docker build -t en2end_client:test -f ./bec_client/tests/Dockerfile --build-arg PY_VERSION=3.9 .
@@ -217,7 +219,7 @@ end-2-end:
     - docker cp file_writer:/code/bec/file_writer/FileWriterManager.log $CI_PROJECT_DIR/FileWriterManager.log
     - docker cp end2end_client:/code/bec/bec_client/BECClient.log $CI_PROJECT_DIR/BECClient.log
     - docker cp scihub:/code/bec/scihub/SciHub.log $CI_PROJECT_DIR/SciHub.log
-    - docker cp dap:/code/bec/data_processing/DAPServer.log $CI_PROJECT_DIR/DAPServer.log
+    - docker cp data_processing:/code/bec/data_processing/DAPServer.log $CI_PROJECT_DIR/DAPServer.log
 
 # end-2-end-scibec:
 #   extends: "end-2-end"
