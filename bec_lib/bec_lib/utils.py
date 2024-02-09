@@ -39,18 +39,6 @@ class user_access:
         setattr(owner, name, self.meth)
 
 
-# def client_access(fcn):
-#     """Decorator to mark <device_class> methods to be accessible from the bec client"""
-
-#     @functools.wraps(fcn)
-#     def wrapper(self, *args, **kwargs):
-#         return fcn(self, *args, **kwargs)
-
-#     setattr(wrapper, "__client_access", True)
-
-#     return wrapper
-
-
 def threadlocked(fcn):
     """Ensure that the thread acquires and releases the lock."""
 

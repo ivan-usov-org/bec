@@ -1,6 +1,5 @@
 import csv
 import os
-from collections import defaultdict
 from unittest import mock
 
 import pytest
@@ -84,19 +83,7 @@ def test_scan_to_dict():
 
 def test_scan_to_csv():
     """Test scan_to_csv function."""
-    # input_dict = create_scan_report()
     scanreport_mock = mock.MagicMock(spec=ScanReport)
-    # scanreport_mock.__str__.return_value = "ScanReport:\n--------------------\n\tStatus: COMPLETED\n\tStart time: Fri Jul 21 19:09:07 2023\n\tEnd time: Fri Jul 21 19:09:07 2023\n\tElapsed time: 0.4 s\n\tScan ID: 1984ade5-898e-49a7-8fb6-076d1eecb7fa\n\tScan number: 262\n\tNumber of points: 3\n"
-    # scanreport_mock.scan.data.__getitem__ = input_dict.__getitem__
-    # scanreport_mock.scan.data.values.return_value = input_dict.values()
-    # # # scanreport_mock.scan.data.keys.side_effect = input_dict.keys
-    # # scanreport_mock.scan.data.keys.__contains__.side_effect = input_dict.__contains__
-    # # # scanreport_mock.scan.data.keys.return_value = input_dict.keys()
-    # # scanreport_mock.scan.data.keys.__len__ = input_dict.__len__
-    # # scanreport_mock.scan.data.keys.__iter__ = input_dict.__iter__
-    # with mock.patch("bec_lib.utils._write_csv") as mock_write_csv:
-    #     scan_to_csv(scanreport_mock, "./test.csv")
-    #     mock_write_csv.assert_called_once()
     with pytest.raises(Exception):
         scan_to_csv(
             scan_report=scanreport_mock,
