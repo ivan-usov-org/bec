@@ -130,3 +130,23 @@ def test_config_updates(lib_client):
     assert dev.samx.dummy_controller.some_var == 10
     dev.samx.dummy_controller.some_var = 20
     assert dev.samx.dummy_controller.some_var == 20
+
+
+@pytest.mark.timeout(100)
+def test_dap_fit(lib_client):
+    bec = lib_client
+    wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_dap_fit"})
+    dev = bec.device_manager.devices
+    scans = bec.scans
+
+    params = dev.bpm4i.sim.get_sim_params()
+    params.update({"noise": "uniform", "noise_multiplier": 10, "cen": 5})
+    dev.bpm4i.sim.set_sim_params(params)
+
+    res = scans.line_scan(dev.samx, 0, 8, steps=50, relative=False)
+    res.wait()
+
+    fit = bec.dap.GaussianModel.fit(res.scan, "samx", "samx", "bpm4i", "bpm4i")
+
+    assert np.isclose(fit[1]["fit_parameters"]["center"], 5, atol=0.5)
