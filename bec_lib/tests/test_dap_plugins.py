@@ -4,7 +4,8 @@ from unittest import mock
 import pytest
 
 from bec_lib import MessageEndpoints, messages
-from bec_lib.dap_plugins import DAPPluginObject, DAPPlugins
+from bec_lib.dap_plugin_objects import DAPPluginObject, DAPPluginObjectAutoRun, LmfitService1D
+from bec_lib.dap_plugins import DAPPlugins
 from bec_lib.device import DeviceBase
 
 
@@ -217,6 +218,118 @@ def dap_plugin_message():
                     "class_args": [],
                     "class_kwargs": {"model": "StepModel"},
                 },
+                "Ptychography": {
+                    "class": "PtychographyDAP",
+                    "user_friendly_name": "ptycho",
+                    "class_doc": "A model based on a Gaussian or normal distribution lineshape.\n\n    The model has three Parameters: `amplitude`, `center`, and `sigma`.\n    In addition, parameters `fwhm` and `height` are included as\n    constraints to report full width at half maximum and maximum peak\n    height, respectively.\n\n    .. math::\n\n        f(x; A, \\mu, \\sigma) = \\frac{A}{\\sigma\\sqrt{2\\pi}} e^{[{-{(x-\\mu)^2}/{{2\\sigma}^2}}]}\n\n    where the parameter `amplitude` corresponds to :math:`A`, `center` to\n    :math:`\\mu`, and `sigma` to :math:`\\sigma`. The full width at half\n    maximum is :math:`2\\sigma\\sqrt{2\\ln{2}}`, approximately\n    :math:`2.3548\\sigma`.\n\n    For more information, see: https://en.wikipedia.org/wiki/Normal_distribution\n\n    ",
+                    "run_doc": "A model based on a Gaussian or normal distribution lineshape.\n\n    The model has three Parameters: `amplitude`, `center`, and `sigma`.\n    In addition, parameters `fwhm` and `height` are included as\n    constraints to report full width at half maximum and maximum peak\n    height, respectively.\n\n    .. math::\n\n        f(x; A, \\mu, \\sigma) = \\frac{A}{\\sigma\\sqrt{2\\pi}} e^{[{-{(x-\\mu)^2}/{{2\\sigma}^2}}]}\n\n    where the parameter `amplitude` corresponds to :math:`A`, `center` to\n    :math:`\\mu`, and `sigma` to :math:`\\sigma`. The full width at half\n    maximum is :math:`2\\sigma\\sqrt{2\\ln{2}}`, approximately\n    :math:`2.3548\\sigma`.\n\n    For more information, see: https://en.wikipedia.org/wiki/Normal_distribution\n\n    \n        Args:\n            scan_item (ScanItem): Scan item or scan ID\n            device_x (DeviceBase | str): Device name for x\n            signal_x (DeviceBase | str): Signal name for x\n            device_y (DeviceBase | str): Device name for y\n            signal_y (DeviceBase | str): Signal name for y\n            parameters (dict): Fit parameters\n        ",
+                    "run_name": "fit",
+                    "signature": [
+                        {
+                            "name": "args",
+                            "kind": "VAR_POSITIONAL",
+                            "default": "_empty",
+                            "annotation": "_empty",
+                        },
+                        {
+                            "name": "scan_item",
+                            "kind": "KEYWORD_ONLY",
+                            "default": None,
+                            "annotation": "ScanItem | str",
+                        },
+                        {
+                            "name": "device_x",
+                            "kind": "KEYWORD_ONLY",
+                            "default": None,
+                            "annotation": "DeviceBase | str",
+                        },
+                        {
+                            "name": "signal_x",
+                            "kind": "KEYWORD_ONLY",
+                            "default": None,
+                            "annotation": "DeviceBase | str",
+                        },
+                        {
+                            "name": "device_y",
+                            "kind": "KEYWORD_ONLY",
+                            "default": None,
+                            "annotation": "DeviceBase | str",
+                        },
+                        {
+                            "name": "signal_y",
+                            "kind": "KEYWORD_ONLY",
+                            "default": None,
+                            "annotation": "DeviceBase | str",
+                        },
+                        {
+                            "name": "parameters",
+                            "kind": "KEYWORD_ONLY",
+                            "default": None,
+                            "annotation": "dict",
+                        },
+                        {
+                            "name": "kwargs",
+                            "kind": "VAR_KEYWORD",
+                            "default": "_empty",
+                            "annotation": "_empty",
+                        },
+                    ],
+                    "auto_fit_supported": True,
+                    "params": {
+                        "amplitude": {
+                            "name": "amplitude",
+                            "value": 1.0,
+                            "vary": True,
+                            "min": -inf,
+                            "max": inf,
+                            "expr": None,
+                            "brute_step": None,
+                            "user_data": None,
+                        },
+                        "center": {
+                            "name": "center",
+                            "value": 0.0,
+                            "vary": True,
+                            "min": -inf,
+                            "max": inf,
+                            "expr": None,
+                            "brute_step": None,
+                            "user_data": None,
+                        },
+                        "sigma": {
+                            "name": "sigma",
+                            "value": 1.0,
+                            "vary": True,
+                            "min": 0,
+                            "max": inf,
+                            "expr": None,
+                            "brute_step": None,
+                            "user_data": None,
+                        },
+                        "fwhm": {
+                            "name": "fwhm",
+                            "value": 2.35482,
+                            "vary": False,
+                            "min": -inf,
+                            "max": inf,
+                            "expr": "2.3548200*sigma",
+                            "brute_step": None,
+                            "user_data": None,
+                        },
+                        "height": {
+                            "name": "height",
+                            "value": 0.3989423,
+                            "vary": False,
+                            "min": -inf,
+                            "max": inf,
+                            "expr": "0.3989423*amplitude/max(1e-15, sigma)",
+                            "brute_step": None,
+                            "user_data": None,
+                        },
+                    },
+                    "class_args": [],
+                    "class_kwargs": {"model": "GaussianModel"},
+                },
             }
         }
     )
@@ -230,6 +343,9 @@ def dap(dap_plugin_message):
         "DAPServer/LmfitService1D": messages.StatusMessage(
             name="LmfitService1D", status=1, info={}
         ),
+        "DAPServer/PtychographyDAP": messages.StatusMessage(
+            name="PtychographyDAP", status=1, info={}
+        ),
     }
     client = mock.MagicMock()
     client.service_status = dap_services
@@ -241,9 +357,11 @@ def dap(dap_plugin_message):
 def test_dap_plugins_construction(dap):
     assert hasattr(dap, "GaussianModel")
     assert hasattr(dap, "StepModel")
+    assert hasattr(dap, "ptycho")
     # pylint: disable=no-member
-    assert isinstance(dap.GaussianModel, DAPPluginObject)
+    assert isinstance(dap.GaussianModel, LmfitService1D)
     assert isinstance(dap.StepModel, DAPPluginObject)
+    assert isinstance(dap.ptycho, DAPPluginObject)
 
 
 def test_dap_plugin_fit(dap):
