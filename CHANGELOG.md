@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.1 (2024-02-10)
+
+### Fix
+
+* **compat python 3.11:** Ensure "kind" test works for numbers too ([`697ae59`](https://gitlab.psi.ch/bec/bec/-/commit/697ae59a6671aba27c098460e0d4ab59de62187d))
+
 ## v1.2.0 (2024-02-09)
 
 ### Feature
