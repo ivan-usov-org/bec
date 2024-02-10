@@ -29,6 +29,9 @@ class MessageObject:
             return False
         return self._value == ref_val.value and self.topic == ref_val.topic
 
+    def __str__(self):
+        return f"MessageObject(topic={self.topic}, value={self._value})"
+
 
 class ConnectorBase(abc.ABC):
     """
