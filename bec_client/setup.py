@@ -58,15 +58,15 @@ if __name__ == "__main__":
                 "pytest",
                 "pytest-random-order",
                 "pytest-asyncio",
+                "pytest-timeout",
+                "flaky",
                 "coverage",
                 "black",
                 "pylint",
             ]
         },
     }
-    bec_deps_in = [
-        ("bec_lib", "bec_lib", bec_lib),
-    ]
+    bec_deps_in = [("bec_lib", "bec_lib", bec_lib)]
     is_local = os.path.dirname(os.path.abspath(__file__)).split("/")[-1] == "bec_client"
     is_build = "bdist_wheel" in sys.argv
 
