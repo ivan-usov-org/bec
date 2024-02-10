@@ -27,7 +27,7 @@ curr:
   onFailure: buffer
   enabled: true
   readOnly: true
-  softwareTrigger: talse
+  softwareTrigger: false
 ```
 
 The following sections explain the different parts of the device configuration in more detail.
