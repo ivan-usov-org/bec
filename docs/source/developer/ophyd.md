@@ -26,8 +26,8 @@ curr:
     - cSAXS
   onFailure: buffer
   enabled: true
-  readOnly: True
-  softwareTrigger: False
+  readOnly: true
+  softwareTrigger: talse
 ```
 
 The following sections explain the different parts of the device configuration in more detail.
@@ -40,7 +40,7 @@ The device config contains the configuration of the device. In the example above
 The device is constructed by passing the device config to the device class. In the example above, the device is constructed by calling `EpicsSignalRO(name='curr', read_pv='ARIDI-PCT:CURRENT', auto_monitor=True)`.
 
 * **readoutPriority** \
-The readout priority specifies the priority with which the device is read out. For BEC controlled readouts, set the readout priority either to `on_request`, `baseline` or `monitored`. The ignored priority is used for devices that should not be read out during the scan. The baseline priority is used for devices that are read out at the beginning of the scan and whose value does not change during the scan. The monitored priority is used for devices that are read out during the scan and whose value may change during the scan. If the readout of the device is asynchronous to the monitored devices, set the readout priority to `async`. For devices that are read out continuously, set the readout priority to `continuous`. 
+The readout priority specifies the priority with which the device is read out. For BEC controlled readouts, set the readout priority either to `on_request`, `baseline` or `monitored`. The "on_request" priority is used for devices that should not be read out during the scan, yet are configured to be read out manually. The baseline priority is used for devices that are read out at the beginning of the scan and whose value does not change during the scan. The monitored priority is used for devices that are read out during the scan and whose value may change during the scan. If the readout of the device is asynchronous to the monitored devices, set the readout priority to `async`. For devices that are read out continuously, set the readout priority to `continuous`. 
 
 * **enabled** \
 The enabled status specifies whether the device is enabled. 
