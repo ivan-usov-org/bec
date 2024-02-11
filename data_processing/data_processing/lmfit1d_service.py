@@ -165,6 +165,8 @@ class LmfitService1D(DAPServiceBase):
         signal_x: DeviceBase | str = None,
         device_y: DeviceBase | str = None,
         signal_y: DeviceBase | str = None,
+        x_min: float = None,
+        x_max: float = None,
         parameters: dict = None,
         **kwargs,
     ):
@@ -175,6 +177,8 @@ class LmfitService1D(DAPServiceBase):
             signal_x (DeviceBase | str): Signal name for x
             device_y (DeviceBase | str): Device name for y
             signal_y (DeviceBase | str): Signal name for y
+            x_min (float): Minimum x value
+            x_max (float): Maximum x value
             parameters (dict): Fit parameters
         """
         # we only receive scan IDs from the client. However, users may
@@ -209,19 +213,28 @@ class LmfitService1D(DAPServiceBase):
                 return
             if not self.device_x or not self.signal_x or not self.device_y or not self.signal_y:
                 raise DAPError("Device and signal names are required")
-            self.data = self.get_data_from_current_scan(scan_item=scan_item)
+            self.data = self.get_data_from_current_scan(
+                scan_item=scan_item, x_min=x_min, x_max=x_max
+            )
 
-    def get_data_from_current_scan(self, scan_item: ScanItem, devices: dict = None) -> dict | None:
+    def get_data_from_current_scan(
+        self, scan_item: ScanItem, devices: dict = None, x_min: float = None, x_max: float = None
+    ) -> dict | None:
         """
         Get the data from the current scan.
 
         Args:
             scan_item (ScanItem): Scan item
             devices (dict): Device names for x and y axes. If not provided, the default values will be used.
+            x_min (float): Minimum x value
+            x_max (float): Maximum x value
 
         Returns:
-            dict: Data for the x and y axes
+            dict: Data for the x and y axes, limited to the specified range
         """
+
+        MIN_DATA_POINTS = 3
+
         if not scan_item:
             logger.warning("Failed to access scan item")
             return None
@@ -266,9 +279,26 @@ class LmfitService1D(DAPServiceBase):
             logger.warning(f"Failed to find signal {device_y}.{signal_y}")
             return None
 
-        # check if the data is long enough to fit
-        if len(x) < 3 or len(y) < 3:
+        if len(x) < MIN_DATA_POINTS or len(y) < MIN_DATA_POINTS:
             return None
+
+        # limit the data to the specified range
+        if x_min is None:
+            x_min = -np.inf
+        if x_max is None:
+            x_max = np.inf
+
+        x = np.asarray(x)
+        y = np.asarray(y)
+
+        indices = np.where((x >= x_min) & (x <= x_max))
+        x = x[indices]
+        y = y[indices]
+
+        # check if the filtered data is still long enough to fit
+        if len(x) < MIN_DATA_POINTS or len(y) < MIN_DATA_POINTS:
+            return None
+
         return {"x": x, "y": y}
 
     def process(self) -> tuple[dict, dict]:
