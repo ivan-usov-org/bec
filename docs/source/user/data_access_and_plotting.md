@@ -54,6 +54,33 @@ This will plot the following curve from the device `gauss_bpm`, which simulates 
 :width: 800
 ```
 
+## Fit the scan data
+You can use the builtin models to fit the data. All models are available in the `bec.dap` namespace. As an example, we can fit the data with a Gaussian model and select the `samx` and `bpm4i` devices with their respective (readback) signals `samx` and `bpm4i`:
+```python
+s = scans.line_scan(dev.samx, -5, 5, steps=50, exp_time=0.1, relative=False)
+res = bec.dap.GaussianModel.fit(s.scan, "samx", "samx", "bpm4i", "bpm4i")
+```
+The result of the fit is stored in the `res` object which contains the fit parameters and the fit result.
+You can further optimize the fit by limiting the fit range, e.g. 
+```python
+res = bec.dap.GaussianModel.fit(scan_report.scan, "samx", "samx", "bpm4i", "bpm4i", x_min=-2, x_max=2)
+```
+
+To display the fit, you can use the `plot` method of the `res` object:
+```python
+res.plot()
+```
+
+Often, a fit is simply a means to find the optimal position of a motor. Therefore, the fit result can be used to move the motor to the optimal position, e.g. to the center position of the Gaussian:
+
+```python
+umv(dev.samx, res.center)
+```
+
+
+
+
+
 ## Accessing scan data from the history
 The BEC client maintains a local history of the 50 most recent scans since the client's startup. 
 You can easily retrieve scan data from `bec.history`, which is a Python `list`, as demonstrated in the example below, where we fetch data from the latest scan:
