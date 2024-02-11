@@ -86,7 +86,8 @@ class DAPPlugins:
     ):
         # pylint disable=protected-access
         setattr(self, plugin_name, self._available_dap_plugins[plugin_name])
-        setattr(getattr(self, plugin_name), "__doc__", class_doc_string)
-        setattr(getattr(self, plugin_name), run_name, getattr(self, plugin_name)._user_run)
-        setattr(getattr(self, plugin_name)._user_run, "__doc__", run_doc_string)
-        setattr(getattr(self, plugin_name)._user_run, "__signature__", dict_to_signature(signature))
+        plugin = getattr(self, plugin_name)
+        setattr(plugin, "__doc__", class_doc_string)
+        setattr(plugin, run_name, plugin._user_run)
+        setattr(plugin._user_run, "__doc__", run_doc_string)
+        setattr(plugin._user_run, "__signature__", dict_to_signature(signature))

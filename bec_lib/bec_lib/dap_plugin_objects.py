@@ -4,6 +4,8 @@ import time
 import uuid
 from typing import TYPE_CHECKING
 
+import lmfit
+import numpy as np
 from typeguard import typechecked
 
 from bec_lib import messages
@@ -20,6 +22,8 @@ class DAPPluginObjectBase:
     Base class for DAP plugin objects. This class should not be used directly. Instead, use one of the derived classes.
     """
 
+    _result_cls = None
+
     def __init__(
         self,
         service_name: str,
@@ -35,6 +39,7 @@ class DAPPluginObjectBase:
             client (BECClient, optional): The BEC client. Defaults to None.
             auto_run_supported (bool, optional): Whether the plugin supports auto run. Defaults to False.
             service_info (dict, optional): Information about the service. Defaults to None.
+            result_cls (type, optional): The class to use for the result of the plugin. Defaults to None.
         """
         self._service_name = service_name
         self._plugin_info = plugin_info
@@ -78,7 +83,13 @@ class DAPPluginObjectBase:
         )
 
         response = self._wait_for_dap_response(request_id)
-        return response.content["data"]
+        return self._convert_result(response)
+
+    def _convert_result(self, result: messages.BECMessage):
+        if not callable(self._result_cls):
+            return result.content["data"]
+        # pylint: disable=not-callable
+        return self._result_cls(result.content["data"], self._plugin_info["user_friendly_name"])
 
     def _wait_for_dap_response(self, request_id: str, timeout: float = 5.0):
         start_time = time.time()
@@ -128,7 +139,7 @@ class DAPPluginObject(DAPPluginObjectBase):
         msg = self._client.producer.get_last(MessageEndpoints.processed_data(self._service_name))
         if not msg:
             return None
-        return msg.content["data"]
+        return self._convert_result(msg)
 
 
 class DAPPluginObjectAutoRun(DAPPluginObject):
@@ -152,10 +163,93 @@ class DAPPluginObjectAutoRun(DAPPluginObject):
         self._update_dap_config(request_id=request_id)
 
 
+class LmfitService1DResult:
+    """
+    Result of fitting 1D data using lmfit.
+    """
+
+    def __init__(self, result: list[dict], model_name: str = None):
+        self._data = result[0]
+        self._report = result[1]
+        self._model = model_name
+        if "amplitude" in self.params:
+            self.amplitude = self.params["amplitude"]
+        if "center" in self.params:
+            self.center = self.params["center"]
+        if "sigma" in self.params:
+            self.sigma = self.params["sigma"]
+
+    @property
+    def params(self):
+        """
+        The parameters of the fit.
+        """
+        return self._report["fit_parameters"]
+
+    @property
+    def data(self):
+        """
+        The data from the fit.
+        """
+        return self._data
+
+    @property
+    def report(self):
+        """
+        The report of the fit.
+        """
+        return self._report
+
+    def eval(self, x: np.ndarray):
+        """
+        Evaluate the fit at the given x values.
+
+        Args:
+            x (array_like): The x values to evaluate the fit at.
+
+        Returns:
+            array_like: The y values of the fit at the given x values.
+        """
+        if not isinstance(x, np.ndarray):
+            x = np.array(x)
+        model = getattr(lmfit.models, self._model)()
+        params = model.make_params(**self.params)
+        return {"x": x, "y": model.eval(params=params, x=x)}
+
+    @property
+    def min(self):
+        """
+        Get the minimum value of the fit.
+
+        Returns:
+            float: The minimum value of the fit.
+        """
+        # get the index of the minimum value
+        min_index = np.argmin(self._data["y"])
+        return {"x": self._data["x"][min_index], "y": self._data["y"][min_index]}
+
+    @property
+    def max(self):
+        """
+        Get the maximum value of the fit.
+
+        Returns:
+            float: The maximum value of the fit.
+        """
+        # get the index of the maximum value
+        max_index = np.argmax(self._data["y"])
+        return {"x": self._data["x"][max_index], "y": self._data["y"][max_index]}
+
+    def __str__(self) -> str:
+        return f"{self._model} fit result: \n Params: {self.params} \n Min: {self.min} \n Max: {self.max}"
+
+
 class LmfitService1D(DAPPluginObjectAutoRun):
     """
     Plugin for fitting 1D data using lmfit.
     """
+
+    _result_cls = LmfitService1DResult
 
     def select(self, device: DeviceBase | str, signal: str = None):
         """
