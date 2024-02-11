@@ -11,7 +11,6 @@ from rich.table import Table
 
 from bec_lib.alarm_handler import AlarmHandler, Alarms
 from bec_lib.bec_service import BECService
-from bec_lib.bec_worker_manager import BECWorkerManager
 from bec_lib.bl_checks import BeamlineChecks
 from bec_lib.callback_handler import CallbackHandler
 from bec_lib.config_helper import ConfigHelper
