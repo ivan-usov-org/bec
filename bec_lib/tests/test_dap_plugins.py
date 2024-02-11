@@ -430,14 +430,15 @@ def test_dap_select_raises_on_wrong_device(dap):
 
 def test_dap_get_data(dap):
     dap._parent.producer.get_last.return_value = messages.ProcessedDataMessage(
-        data={"x": [1, 2, 3], "y": [4, 5, 6]}
+        data=[{"x": [1, 2, 3], "y": [4, 5, 6]}, {"fit_parameters": {"amplitude": 1}}]
     )
     data = dap.GaussianModel.get_data()
     dap._parent.producer.get_last.assert_called_once_with(
         MessageEndpoints.processed_data("GaussianModel")
     )
 
-    assert data == {"x": [1, 2, 3], "y": [4, 5, 6]}
+    assert data.data == {"x": [1, 2, 3], "y": [4, 5, 6]}
+    assert data.amplitude == 1
 
 
 def test_dap_update_dap_config_not_called_without_device(dap):

@@ -150,4 +150,4 @@ def test_dap_fit(lib_client):
 
     fit = bec.dap.GaussianModel.fit(res.scan, "samx", "samx", "bpm4i", "bpm4i")
 
-    assert np.isclose(fit[1]["fit_parameters"]["center"], 5, atol=0.5)
+    assert np.isclose(fit.center, 5, atol=0.5)
