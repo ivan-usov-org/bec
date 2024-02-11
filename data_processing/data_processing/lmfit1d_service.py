@@ -188,6 +188,7 @@ class LmfitService1D(DAPServiceBase):
         scan_id = scan_item
         if scan_id != self.scan_id or not self.current_scan_item:
             scan_item = self.client.queue.scan_storage.find_scan_by_ID(scan_id)
+            self.scan_id = scan_id
         else:
             scan_item = self.current_scan_item
 
@@ -290,6 +291,14 @@ class LmfitService1D(DAPServiceBase):
 
         # add the fit parameters to the metadata
         metadata = {}
+        metadata["input"] = {
+            "scan_id": self.scan_id,
+            "device_x": self.device_x,
+            "signal_x": self.signal_x,
+            "device_y": self.device_y,
+            "signal_y": self.signal_y,
+            "parameters": self.parameters,
+        }
         metadata["fit_parameters"] = result.best_values
         metadata["fit_summary"] = result.summary()
         logger.info(f"fit summary: {metadata['fit_summary']}")
