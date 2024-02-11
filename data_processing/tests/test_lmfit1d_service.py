@@ -1,6 +1,7 @@
 from unittest import mock
 
 import lmfit
+import numpy as np
 import pytest
 
 from data_processing.dap_service import DAPError
@@ -66,7 +67,8 @@ def test_LmfitService1D_get_data_from_current_scan(lmfit_service):
         "device_y": {"signal_y": {"value": [4, 5, 6], "timestamp": 0}},
     }
     data = lmfit_service.get_data_from_current_scan(scan_item)
-    assert data == {"x": [1, 2, 3], "y": [4, 5, 6]}
+    assert all(data["x"] == np.array([1, 2, 3]))
+    assert all(data["y"] == np.array([4, 5, 6]))
 
 
 @pytest.mark.parametrize(
