@@ -53,9 +53,9 @@ class PluginStructure:
         self.create_dir("bec_plugins/bec_client")
         self.create_init_file("bec_plugins/bec_client")
 
-        # hli
-        self.create_dir("bec_plugins/bec_client/hli")
-        self.create_init_file("bec_plugins/bec_client/hli")
+        # high level interface
+        self.create_dir("bec_plugins/bec_client/high_level_interface")
+        self.create_init_file("bec_plugins/bec_client/high_level_interface")
 
         # plugins
         self.create_dir("bec_plugins/bec_client/plugins")
@@ -75,13 +75,17 @@ class PluginStructure:
         self.create_dir("bec_plugins/device_server")
         self.create_init_file("bec_plugins/device_server")
 
-    def add_ophyd_devices(self):
-        self.create_dir("bec_plugins/ophyd_devices")
-        self.create_init_file("bec_plugins/ophyd_devices")
+    def add_devices(self):
+        self.create_dir("bec_plugins/devices")
+        self.create_init_file("bec_plugins/devices")
 
     def add_device_configs(self):
         self.create_dir("bec_plugins/device_configs")
         self.create_init_file("bec_plugins/device_configs")
+
+    def add_dap_services(self):
+        self.create_dir("bec_plugins/dap_services")
+        self.create_init_file("bec_plugins/dap_services")
 
     def add_bin(self):
         self.create_dir("bin")
@@ -93,7 +97,7 @@ if __name__ == "__main__":
     struc.copy_setup_files()
     struc.add_scan_server()
     struc.add_client()
-    struc.add_device_server()
+    struc.add_devices()
     struc.add_ophyd_devices()
     struc.add_bin()
 

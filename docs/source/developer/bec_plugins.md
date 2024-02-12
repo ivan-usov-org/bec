@@ -21,7 +21,7 @@ python ./<path_to_bec>/bec/bec_lib/util_scripts/create_plugin_structure.py <path
 beamline_XX_plugins/
 ├── bec_plugins/
 │   ├── bec_client/
-│   │   ├── hli/
+│   │   ├── high_level_interface/
 │   │   │   ├── __init__.py
 │   │   │   └── custom_hli.py
 │   │   ├── plugins/
@@ -34,15 +34,18 @@ beamline_XX_plugins/
 │   │   │   ├── post_startup.py
 │   │   │   └── pre_startup.py
 │   │   └── __init__.py
-│   ├── device_server/
-│   │   ├── __init__.py
-│   │   └── startup.py
 │   ├── scan_server/
 │   │   ├── scan_plugins/
 │   │   │   ├── __init__.py
-│   │   │   └── CustomScan.py
+│   │   │   └── custom_scan.py
 │   │   └── __init__.py
-│   ├── ophyd_devices/
+│   ├── device_server/
+│   │   ├── __init__.py
+│   │   └── startup.py
+│   ├── dap_services/
+│   │   ├── __init__.py
+│   │   └── custom_dap.py
+│   ├── devices/
 │   │   ├── __init__.py
 │   │   └── custom_XX_device.py
 │   └── device_configs/
@@ -58,7 +61,7 @@ beamline_XX_plugins/
 beamline_XX_plugins
   bec_plugins
     bec_client
-      hli
+      high_level_interface
         __init__.py
         custom_hli.py
       plugins
@@ -71,15 +74,18 @@ beamline_XX_plugins
         post_startup.py
         pre_startup.py
       __init__.py
-    device_server
-      __init__.py
-      startup.py
     scan_server
       scan_plugins
         __init__.py
-        CustomScan.py
+        custom_scan.py
       __init__.py
-    ophyd_devices
+    device_server
+      __init__.py
+      startup.py
+    dap_services
+      __init__.py
+      custom_dap.py
+    devices
       __init__.py
       custom_XX_device.py
     device_configs
