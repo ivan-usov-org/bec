@@ -288,6 +288,7 @@ class LmfitService1D(DAPServiceBase):
         if x_max is None:
             x_max = np.inf
 
+        x_original = np.asarray(x)
         x = np.asarray(x)
         y = np.asarray(y)
 
@@ -299,7 +300,12 @@ class LmfitService1D(DAPServiceBase):
         if len(x) < MIN_DATA_POINTS or len(y) < MIN_DATA_POINTS:
             return None
 
-        return {"x": x, "y": y}
+        return {
+            "x": x,
+            "y": y,
+            "x_original": x_original,
+            "x_lim": (x_min is not None or x_max is not None),
+        }
 
     def process(self) -> tuple[dict, dict]:
         """
@@ -316,8 +322,14 @@ class LmfitService1D(DAPServiceBase):
         # if self.parameters:
         result = self.model.fit(y, x=x)
 
+        # if the fit was only on a subset of the data, add the original x values to the output
+        if self.data["x_lim"]:
+            y_out = np.asarray(self.model.eval(**result.best_values, x=self.data["x_original"]))
+        else:
+            y_out = np.asarray(result.best_fit)
+
         # add the fit result to the output
-        stream_output = {"x": np.asarray(x), "y": result.best_fit}
+        stream_output = {"x": self.data["x_original"], "y": y_out}
 
         # add the fit parameters to the metadata
         metadata = {}
