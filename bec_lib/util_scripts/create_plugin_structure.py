@@ -98,7 +98,8 @@ if __name__ == "__main__":
     struc.add_scan_server()
     struc.add_client()
     struc.add_devices()
-    struc.add_ophyd_devices()
+    struc.add_device_configs()
+    struc.add_dap_services()
     struc.add_bin()
 
     print(f"Plugin structure created in {sys.argv[1]}")

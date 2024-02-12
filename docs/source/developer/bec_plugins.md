@@ -101,7 +101,7 @@ Within the root directory of your repository, place the [setup files](#setup_fil
 * `bec_client`: Contains plugins that are used by the BEC client. This includes plugins to customize the startup procedure, adding helper classes and functions to the CLI or adding aliases to the CLI to simplify the usage of BEC.
 * `device_server`: Contains plugins that are used by the device server.
 * `scan_server`: Contains plugins that are used by the scan server. This includes plugins to add new scan types. 
-* `ophyd_devices`: Contains plugins that are used to add support for new devices that are not covered by the shared ophyd_devices package.
+* `devices`: Contains plugins that are used to add support for new devices that are not covered by the shared ophyd_devices package.
 * `device_configs`: Contains the configuration files for the devices. 
 
 
