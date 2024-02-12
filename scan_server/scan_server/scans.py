@@ -5,7 +5,6 @@ from abc import ABC, abstractmethod
 from typing import Any, Literal
 
 import numpy as np
-
 from bec_lib import DeviceManagerBase, MessageEndpoints, bec_logger, messages
 
 from .errors import LimitError, ScanAbortion
@@ -859,7 +858,19 @@ class RoundScan(ScanBase):
     }
     arg_bundle_size = {"bundle": len(arg_input), "min": 1, "max": 1}
 
-    def __init__(self, *args, relative: bool = False, burst_at_each_point: int = 1, **kwargs):
+    def __init__(
+        self,
+        motor_1,
+        motor2,
+        inner_ring: float,
+        outer_ring: float,
+        number_of_rings: int,
+        pos_in_first_ring: int,
+        *args,
+        relative: bool = False,
+        burst_at_each_point: int = 1,
+        **kwargs,
+    ):
         """
         A scan following a round shell-like pattern.
 

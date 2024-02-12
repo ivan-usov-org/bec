@@ -14,6 +14,8 @@ from scan_plugins.owis_grid import OwisGrid
 from scan_server.errors import ScanAbortion
 from scan_server.scans import (
     Acquire,
+    AddInteractiveScanPoint,
+    CloseInteractiveScan,
     ContLineScan,
     DeviceRPC,
     FermatSpiralScan,
@@ -21,8 +23,10 @@ from scan_server.scans import (
     ListScan,
     MonitorScan,
     Move,
+    OpenInteractiveScan,
     RequestBase,
     RoundROIScan,
+    RoundScan,
     RoundScanFlySim,
     Scan,
     ScanBase,
@@ -2350,3 +2354,394 @@ def test_monitor_scan():
     )
     request._calculate_positions()
     assert np.isclose(request.positions, [[-5], [5]]).all()
+
+
+def test_monitor_scan_run():
+    device_manager = DMMock()
+    scan_msg = messages.ScanQueueMessage(
+        scan_type="monitor_scan",
+        parameter={"args": {"samx": [-5, 5]}, "kwargs": {"relative": True, "exp_time": 0.1}},
+        queue="primary",
+    )
+    args = unpack_scan_args(scan_msg.content["parameter"]["args"])
+    kwargs = scan_msg.content["parameter"]["kwargs"]
+    request = MonitorScan(
+        *args,
+        device_manager=device_manager,
+        parameter=scan_msg.content["parameter"],
+        **scan_msg.content["parameter"]["kwargs"],
+    )
+    with mock.patch.object(request, "_get_flyer_status") as flyer_status:
+        with mock.patch.object(request, "_check_limits") as check_limits:
+            with mock.patch.object(request, "_set_position_offset") as position_offset:
+                flyer_status.side_effect = [
+                    (None, None),
+                    (None, None),
+                    (None, messages.DeviceMessage(signals={"rb1": {"value": 1}})),
+                    (True, None),
+                ]
+                ref_list = list(request.run())
+                assert ref_list == [
+                    messages.DeviceInstructionMessage(
+                        device=["samx"],
+                        action="read",
+                        parameter={"wait_group": "scan_motor"},
+                        metadata={"readout_priority": "monitored", "DIID": 0},
+                    ),
+                    messages.DeviceInstructionMessage(
+                        device=["samx"],
+                        action="wait",
+                        parameter={"type": "read", "wait_group": "scan_motor"},
+                        metadata={"readout_priority": "monitored", "DIID": 1},
+                    ),
+                    None,
+                    messages.DeviceInstructionMessage(
+                        device=None,
+                        action="open_scan",
+                        parameter={
+                            "scan_motors": ["samx"],
+                            "readout_priority": {
+                                "monitored": ["samx"],
+                                "baseline": [],
+                                "on_request": [],
+                                "async": [],
+                            },
+                            "num_points": 0,
+                            "positions": [[-5], [5]],
+                            "scan_name": "monitor_scan",
+                            "scan_type": "fly",
+                        },
+                        metadata={"readout_priority": "monitored", "DIID": 2},
+                    ),
+                    messages.DeviceInstructionMessage(
+                        device=None,
+                        action="stage",
+                        parameter={},
+                        metadata={"readout_priority": "monitored", "DIID": 3},
+                    ),
+                    messages.DeviceInstructionMessage(
+                        device=None,
+                        action="baseline_reading",
+                        parameter={},
+                        metadata={"readout_priority": "baseline", "DIID": 4},
+                    ),
+                    messages.DeviceInstructionMessage(
+                        device="samx",
+                        action="set",
+                        parameter={"value": -5, "wait_group": "scan_motor"},
+                        metadata={"readout_priority": "monitored", "DIID": 5},
+                    ),
+                    messages.DeviceInstructionMessage(
+                        device=None,
+                        action="wait",
+                        parameter={
+                            "type": "move",
+                            "group": "scan_motor",
+                            "wait_group": "scan_motor",
+                        },
+                        metadata={"readout_priority": "monitored", "DIID": 6},
+                    ),
+                    messages.DeviceInstructionMessage(
+                        device=None,
+                        action="pre_scan",
+                        parameter={},
+                        metadata={"readout_priority": "monitored", "DIID": 7},
+                    ),
+                    messages.DeviceInstructionMessage(
+                        device="samx",
+                        action="set",
+                        parameter={"value": -5, "wait_group": "scan_motor"},
+                        metadata={"readout_priority": "monitored", "DIID": 8},
+                    ),
+                    messages.DeviceInstructionMessage(
+                        device="samx",
+                        action="wait",
+                        parameter={"type": "move", "wait_group": "scan_motor"},
+                        metadata={"readout_priority": "monitored", "DIID": 9},
+                    ),
+                    messages.DeviceInstructionMessage(
+                        device="samx",
+                        action="set",
+                        parameter={"value": 5, "wait_group": "scan_motor"},
+                        metadata={"readout_priority": "monitored", "DIID": 10, "response": True},
+                    ),
+                    messages.DeviceInstructionMessage(
+                        device="samx",
+                        action="publish_data_as_read",
+                        parameter={"data": {"samx": {"rb1": {"value": 1}}}},
+                        metadata={"readout_priority": "monitored", "DIID": 11, "pointID": 0},
+                    ),
+                    messages.DeviceInstructionMessage(
+                        device="samx",
+                        action="set",
+                        parameter={"value": 0, "wait_group": "scan_motor"},
+                        metadata={"readout_priority": "monitored", "DIID": 12},
+                    ),
+                    messages.DeviceInstructionMessage(
+                        device=None,
+                        action="wait",
+                        parameter={
+                            "type": "move",
+                            "group": "scan_motor",
+                            "wait_group": "scan_motor",
+                        },
+                        metadata={"readout_priority": "monitored", "DIID": 13},
+                    ),
+                    messages.DeviceInstructionMessage(
+                        device=None,
+                        action="wait",
+                        parameter={
+                            "type": "read",
+                            "group": "primary",
+                            "wait_group": "readout_primary",
+                        },
+                        metadata={"readout_priority": "monitored", "DIID": 14},
+                    ),
+                    messages.DeviceInstructionMessage(
+                        device=None,
+                        action="complete",
+                        parameter={},
+                        metadata={"readout_priority": "monitored", "DIID": 15},
+                    ),
+                    messages.DeviceInstructionMessage(
+                        device=None,
+                        action="unstage",
+                        parameter={},
+                        metadata={"readout_priority": "monitored", "DIID": 16},
+                    ),
+                    messages.DeviceInstructionMessage(
+                        device=None,
+                        action="close_scan",
+                        parameter={},
+                        metadata={"readout_priority": "monitored", "DIID": 17},
+                    ),
+                ]
+
+
+def test_OpenInteractiveScan():
+    device_manager = DMMock()
+    scan_msg = messages.ScanQueueMessage(
+        scan_type="open_interactive_scan",
+        parameter={"args": {"samx": []}, "kwargs": {"relative": True, "exp_time": 0.1}},
+        queue="primary",
+    )
+    args = unpack_scan_args(scan_msg.content["parameter"]["args"])
+    kwargs = scan_msg.content["parameter"]["kwargs"]
+    request = OpenInteractiveScan(
+        *args,
+        device_manager=device_manager,
+        parameter=scan_msg.content["parameter"],
+        **scan_msg.content["parameter"]["kwargs"],
+    )
+    ref_list = list(request.run())
+    assert ref_list == [
+        messages.DeviceInstructionMessage(
+            device=None,
+            action="open_scan_def",
+            parameter={},
+            metadata={"readout_priority": "monitored", "DIID": 0},
+        ),
+        messages.DeviceInstructionMessage(
+            device=["samx"],
+            action="read",
+            parameter={"wait_group": "scan_motor"},
+            metadata={"readout_priority": "monitored", "DIID": 1},
+        ),
+        messages.DeviceInstructionMessage(
+            device=["samx"],
+            action="wait",
+            parameter={"type": "read", "wait_group": "scan_motor"},
+            metadata={"readout_priority": "monitored", "DIID": 2},
+        ),
+        messages.DeviceInstructionMessage(
+            device=None,
+            action="open_scan",
+            parameter={
+                "scan_motors": ["samx"],
+                "readout_priority": {
+                    "monitored": ["samx"],
+                    "baseline": [],
+                    "on_request": [],
+                    "async": [],
+                },
+                "num_points": None,
+                "positions": [],
+                "scan_name": "open_interactive_scan",
+                "scan_type": "step",
+            },
+            metadata={"readout_priority": "monitored", "DIID": 3},
+        ),
+        messages.DeviceInstructionMessage(
+            device=None,
+            action="stage",
+            parameter={},
+            metadata={"readout_priority": "monitored", "DIID": 4},
+        ),
+        messages.DeviceInstructionMessage(
+            device=None,
+            action="baseline_reading",
+            parameter={},
+            metadata={"readout_priority": "baseline", "DIID": 5},
+        ),
+    ]
+
+
+def test_AddInteractiveScanPointn():
+    device_manager = DMMock()
+    scan_msg = messages.ScanQueueMessage(
+        scan_type="interactive_scan_trigger",
+        parameter={"args": {"samx": []}, "kwargs": {"relative": True, "exp_time": 0.1}},
+        queue="primary",
+    )
+    args = unpack_scan_args(scan_msg.content["parameter"]["args"])
+    kwargs = scan_msg.content["parameter"]["kwargs"]
+    request = AddInteractiveScanPoint(
+        *args,
+        device_manager=device_manager,
+        parameter=scan_msg.content["parameter"],
+        **scan_msg.content["parameter"]["kwargs"],
+    )
+    ref_list = list(request.run())
+    assert ref_list == [
+        messages.DeviceInstructionMessage(
+            device=None,
+            action="open_scan",
+            parameter={
+                "scan_motors": ["samx"],
+                "readout_priority": {
+                    "monitored": ["samx"],
+                    "baseline": [],
+                    "on_request": [],
+                    "async": [],
+                },
+                "num_points": None,
+                "positions": [],
+                "scan_name": "interactive_scan_trigger",
+                "scan_type": "step",
+            },
+            metadata={"readout_priority": "monitored", "DIID": 0},
+        ),
+        messages.DeviceInstructionMessage(
+            device=None,
+            action="trigger",
+            parameter={"group": "trigger"},
+            metadata={"readout_priority": "monitored", "DIID": 1, "pointID": 0},
+        ),
+        messages.DeviceInstructionMessage(
+            device=None,
+            action="wait",
+            parameter={"type": "trigger", "time": 0.1, "group": "trigger"},
+            metadata={"readout_priority": "monitored", "DIID": 2},
+        ),
+        messages.DeviceInstructionMessage(
+            device=None,
+            action="read",
+            parameter={"group": "primary", "wait_group": "readout_primary"},
+            metadata={"readout_priority": "monitored", "DIID": 3, "pointID": 0},
+        ),
+        messages.DeviceInstructionMessage(
+            device=None,
+            action="wait",
+            parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
+            metadata={"readout_priority": "monitored", "DIID": 4},
+        ),
+        messages.DeviceInstructionMessage(
+            device=None,
+            action="close_scan",
+            parameter={},
+            metadata={"readout_priority": "monitored", "DIID": 5},
+        ),
+    ]
+
+
+def test_CloseInteractiveScan():
+    device_manager = DMMock()
+    device_manager.add_device("samx")
+    scan_msg = messages.ScanQueueMessage(
+        scan_type="close_interactive_scan",
+        parameter={"args": {"samx": []}, "kwargs": {"relative": True, "exp_time": 0.1}},
+        queue="primary",
+    )
+    args = unpack_scan_args(scan_msg.content["parameter"]["args"])
+    kwargs = scan_msg.content["parameter"]["kwargs"]
+    request = CloseInteractiveScan(
+        *args,
+        device_manager=device_manager,
+        parameter=scan_msg.content["parameter"],
+        **scan_msg.content["parameter"]["kwargs"],
+    )
+    ref_list = list(request.run())
+    assert ref_list == [
+        messages.DeviceInstructionMessage(
+            device="samx",
+            action="set",
+            parameter={"value": 0, "wait_group": "scan_motor"},
+            metadata={"readout_priority": "monitored", "DIID": 0},
+        ),
+        messages.DeviceInstructionMessage(
+            device=None,
+            action="wait",
+            parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
+            metadata={"readout_priority": "monitored", "DIID": 1},
+        ),
+        messages.DeviceInstructionMessage(
+            device=None,
+            action="wait",
+            parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
+            metadata={"readout_priority": "monitored", "DIID": 2},
+        ),
+        messages.DeviceInstructionMessage(
+            device=None,
+            action="complete",
+            parameter={},
+            metadata={"readout_priority": "monitored", "DIID": 3},
+        ),
+        messages.DeviceInstructionMessage(
+            device=None,
+            action="unstage",
+            parameter={},
+            metadata={"readout_priority": "monitored", "DIID": 4},
+        ),
+        messages.DeviceInstructionMessage(
+            device=None,
+            action="close_scan",
+            parameter={},
+            metadata={"readout_priority": "monitored", "DIID": 5},
+        ),
+        messages.DeviceInstructionMessage(
+            device=None,
+            action="close_scan_def",
+            parameter={},
+            metadata={"readout_priority": "monitored", "DIID": 6},
+        ),
+    ]
+
+
+def test_RoundScan():
+    device_manager = DMMock()
+    scan_msg = messages.ScanQueueMessage(
+        scan_type="round_scan",
+        parameter={
+            "args": {"samx": ["samy", 1, 2, 1, 3]},
+            "kwargs": {"relative": True, "steps": 10},
+        },
+        queue="primary",
+    )
+    #     "motor_1": ScanArgType.DEVICE,
+    # "motor_2": ScanArgType.DEVICE,
+    # "inner_ring": ScanArgType.FLOAT,
+    # "outer_ring": ScanArgType.FLOAT,
+    # "number_of_rings": ScanArgType.INT,
+    # "number_of_positions_in_first_ring": ScanArgType.INT,
+    args = unpack_scan_args(scan_msg.content["parameter"]["args"])
+    request = RoundScan(
+        *args,
+        device_manager=device_manager,
+        parameter=scan_msg.content["parameter"],
+        **scan_msg.content["parameter"]["kwargs"],
+    )
+
+    with mock.patch.object(request, "_check_limits") as check_limits:
+        with mock.patch.object(request, "_set_position_offset") as position_offset:
+            ref = list(request.run())
+            assert len(ref) == 88
