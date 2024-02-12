@@ -2,6 +2,25 @@
 
 <!--next-version-placeholder-->
 
+## v1.3.0 (2024-02-12)
+
+### Feature
+
+* **dap:** Added option to filter x range before fitting data ([`7068c1f`](https://gitlab.psi.ch/bec/bec/-/commit/7068c1f738d9876ef13cb62d797ba15fada3bd98))
+* **dap:** Added input_data and plot options ([`c4029a0`](https://gitlab.psi.ch/bec/bec/-/commit/c4029a098db66baf1741bf4bcc1bbd71d14aca7f))
+* **DAP:** Added option to customize results based on the dap service ([`dd48519`](https://gitlab.psi.ch/bec/bec/-/commit/dd4851941c14b1ace0227ab3ff28b50826c22f89))
+* Added support for customized dap plugins objects ([`cf8430f`](https://gitlab.psi.ch/bec/bec/-/commit/cf8430f8787c8028d518c17fea5f00aba6e94093))
+
+### Fix
+
+* **dap:** Added input into to the dap metadata ([`0156f61`](https://gitlab.psi.ch/bec/bec/-/commit/0156f611f110f5ae31e163b9630d19a4112e98d0))
+
+### Documentation
+
+* **dap:** Added data fitting to user docs ([`b881b08`](https://gitlab.psi.ch/bec/bec/-/commit/b881b081726c659056c5120e0a71e09d41ef8881))
+* Fixed typo ophyd.md ([`c1f4b38`](https://gitlab.psi.ch/bec/bec/-/commit/c1f4b388032689cf4f2d9492f6e49d32851b6035))
+* **ophyd:** Fixed ophyd config description ([`6a272de`](https://gitlab.psi.ch/bec/bec/-/commit/6a272dede1d23ac7af9bb158105b2d5eb2c7445b))
+
 ## v1.2.1 (2024-02-10)
 
 ### Fix
