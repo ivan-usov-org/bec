@@ -97,6 +97,7 @@ if __name__ == "__main__":
     struc.copy_setup_files()
     struc.add_scan_server()
     struc.add_client()
+    struc.add_device_server()
     struc.add_devices()
     struc.add_device_configs()
     struc.add_dap_services()
