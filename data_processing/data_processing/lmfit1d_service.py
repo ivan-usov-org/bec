@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 import lmfit
 import numpy as np
 from bec_lib import DeviceBase, MessageEndpoints, bec_logger, messages
-from bec_lib.lmfit_serializer import serialize_lmfit_params
+from bec_lib.lmfit_serializer import deserialize_param_object, serialize_lmfit_params
 from bec_lib.serialization import MsgpackSerialization
 
 from data_processing.dap_service import DAPError, DAPServiceBase
@@ -167,7 +167,9 @@ class LmfitService1D(DAPServiceBase):
         signal_y: DeviceBase | str = None,
         x_min: float = None,
         x_max: float = None,
-        parameters: dict = None,
+        amplitude: lmfit.Parameter = None,
+        center: lmfit.Parameter = None,
+        sigma: lmfit.Parameter = None,
         **kwargs,
     ):
         """
@@ -196,6 +198,8 @@ class LmfitService1D(DAPServiceBase):
         else:
             scan_item = self.current_scan_item
 
+        self.parameters = {}
+
         if device_x:
             self.device_x = device_x
         if signal_x:
@@ -204,8 +208,14 @@ class LmfitService1D(DAPServiceBase):
             self.device_y = device_y
         if signal_y:
             self.signal_y = signal_y
-        if parameters:
-            self.parameters = parameters
+        if amplitude:
+            self.parameters["amplitude"] = amplitude
+        if center:
+            self.parameters["center"] = center
+        if sigma:
+            self.parameters["sigma"] = sigma
+
+        self.parameters = deserialize_param_object(self.parameters)
 
         if not self.continuous:
             if not scan_item:
@@ -319,8 +329,10 @@ class LmfitService1D(DAPServiceBase):
         y = self.data["y"]
 
         # fit the data
-        # if self.parameters:
-        result = self.model.fit(y, x=x)
+        if self.parameters:
+            result = self.model.fit(y, x=x, params=self.parameters)
+        else:
+            result = self.model.fit(y, x=x)
 
         # if the fit was only on a subset of the data, add the original x values to the output
         if self.data["x_lim"]:
@@ -339,7 +351,7 @@ class LmfitService1D(DAPServiceBase):
             "signal_x": self.signal_x,
             "device_y": self.device_y,
             "signal_y": self.signal_y,
-            "parameters": self.parameters,
+            "parameters": serialize_lmfit_params(self.parameters),
         }
         metadata["fit_parameters"] = result.best_values
         metadata["fit_summary"] = result.summary()

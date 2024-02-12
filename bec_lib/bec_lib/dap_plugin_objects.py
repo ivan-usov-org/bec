@@ -12,6 +12,7 @@ from typeguard import typechecked
 from bec_lib import messages
 from bec_lib.device import DeviceBase
 from bec_lib.endpoints import MessageEndpoints
+from bec_lib.lmfit_serializer import serialize_param_object
 from bec_lib.scan_items import ScanItem
 
 if TYPE_CHECKING:
@@ -71,6 +72,8 @@ class DAPPluginObjectBase:
         for key, val in kwargs.items():
             if isinstance(val, ScanItem):
                 converted_kwargs[key] = val.scanID
+            elif isinstance(val, lmfit.Parameter):
+                converted_kwargs[key] = serialize_param_object(val)
             else:
                 converted_kwargs[key] = val
         kwargs = converted_kwargs
@@ -303,6 +306,23 @@ class LmfitService1D(DAPPluginObjectAutoRun):
 
     _result_cls = LmfitService1DResult
 
+    def __init__(
+        self,
+        service_name: str,
+        plugin_info: dict,
+        client: BECClient = None,
+        auto_run_supported: bool = False,
+        service_info: dict = None,
+    ) -> None:
+        super().__init__(
+            service_name,
+            plugin_info,
+            client=client,
+            auto_run_supported=auto_run_supported,
+            service_info=service_info,
+        )
+        self._params = None
+
     def select(self, device: DeviceBase | str, signal: str = None):
         """
         Select the device and signal to use for fitting.
@@ -335,3 +355,26 @@ class LmfitService1D(DAPPluginObjectAutoRun):
 
         request_id = str(uuid.uuid4())
         self._update_dap_config(request_id=request_id)
+
+    def get_params(self) -> lmfit.Parameters:
+        """
+        Create a set of parameters for the model.
+
+        Returns:
+            lmfit.Parameters: The parameters available for the model.
+        """
+        if not self._params:
+            model = getattr(lmfit.models, self._plugin_info["user_friendly_name"])()
+            self._params = model.make_params()
+        return self._params
+
+    def reset_params(self):
+        """
+        Reset the parameters to the default values.
+        """
+        self._params = None
+
+    def _run(self, *args, **kwargs):
+        if self._params:
+            return super()._run(*args, **self._params, **kwargs)
+        return super()._run(*args, **kwargs)
