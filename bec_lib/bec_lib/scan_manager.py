@@ -53,11 +53,16 @@ class ScanManager:
             topics=MessageEndpoints.scan_segment(), cb=self._scan_segment_callback, parent=self
         )
 
+        self._baseline_consumer = self.connector.consumer(
+            topics=MessageEndpoints.scan_baseline(), cb=self._baseline_callback, parent=self
+        )
+
         self._scan_queue_consumer.start()
         self._scan_queue_request_consumer.start()
         self._scan_queue_request_response_consumer.start()
         self._scan_status_consumer.start()
         self._scan_segment_consumer.start()
+        self._baseline_consumer.start()
 
     def update_with_queue_status(self, queue: messages.ScanQueueStatusMessage) -> None:
         """update storage with a new queue status message"""
@@ -211,6 +216,11 @@ class ScanManager:
         for scan_msg in scan_msgs:
             parent.scan_storage.add_scan_segment(scan_msg)
 
+    @staticmethod
+    def _baseline_callback(msg, *, parent: ScanManager, **_kwargs) -> None:
+        msg = msg.value
+        parent.scan_storage.add_scan_baseline(msg)
+
     def __str__(self) -> str:
         return "\n".join(self.queue_storage.describe_queue())
 
@@ -221,3 +231,4 @@ class ScanManager:
         self._scan_queue_request_response_consumer.shutdown()
         self._scan_status_consumer.shutdown()
         self._scan_segment_consumer.shutdown()
+        self._baseline_consumer.shutdown()
