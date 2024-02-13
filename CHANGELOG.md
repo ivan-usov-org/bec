@@ -2,6 +2,20 @@
 
 <!--next-version-placeholder-->
 
+## v1.4.0 (2024-02-13)
+
+### Feature
+
+* Added support for customized lmfit params ([`f175fd7`](https://gitlab.psi.ch/bec/bec/-/commit/f175fd7c55b82dbb0d8b080ee8a93cd8be52d816))
+
+### Fix
+
+* **dap:** Output fit is fitted to full scope, not only the trimmed ([`58f3cb1`](https://gitlab.psi.ch/bec/bec/-/commit/58f3cb17209acbae58720bcb1d6e8ec3bac28162))
+
+### Documentation
+
+* **plugins:** Added plugin docs ([`c14c526`](https://gitlab.psi.ch/bec/bec/-/commit/c14c526a85a9e67e1bca866fcae749975acc5f30))
+
 ## v1.3.0 (2024-02-12)
 
 ### Feature
