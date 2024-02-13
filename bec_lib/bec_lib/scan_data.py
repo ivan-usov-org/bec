@@ -148,8 +148,6 @@ class ScanData(dict):
     ScanData is a container for storing scan data.
     """
 
-    min_buffer_size = 50
-
     def __init__(self, *args, **kwargs):
         self.devices = collections.defaultdict(DeviceData)
         self.messages = collections.defaultdict()
