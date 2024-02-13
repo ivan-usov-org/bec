@@ -2,6 +2,18 @@
 
 <!--next-version-placeholder-->
 
+## v1.5.0 (2024-02-13)
+
+### Feature
+
+* **scan_data:** Added baseline data ([`41bf2d1`](https://gitlab.psi.ch/bec/bec/-/commit/41bf2d1bd4d139f801d36d8cb4a0f9c837ac5d09))
+
+### Fix
+
+* **bluesky_emitter:** Fixed device info access ([`06b2373`](https://gitlab.psi.ch/bec/bec/-/commit/06b2373fea588433026079ed3d0a5b140d3f57f9))
+* **scan_bundler:** Added metadata to baseline reading ([`9294562`](https://gitlab.psi.ch/bec/bec/-/commit/9294562f3bb377531f2fc558a655e8f7016feb38))
+* **scan_manager:** Added baseline consumer ([`ce9681c`](https://gitlab.psi.ch/bec/bec/-/commit/ce9681c1859fd56c82bab206c8886f2851e4cc5d))
+
 ## v1.4.0 (2024-02-13)
 
 ### Feature
