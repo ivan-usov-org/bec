@@ -177,6 +177,7 @@ end-2-end:
 
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"' 
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
   script:
@@ -302,6 +303,7 @@ end-2-end-conda:
 
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'     
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
 
