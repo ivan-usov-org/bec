@@ -9,6 +9,7 @@ from collections import defaultdict, deque
 from typing import TYPE_CHECKING
 
 from bec_lib import messages
+from bec_lib.baseline_data import BaselineData
 from bec_lib.logger import bec_logger
 from bec_lib.scan_data import ScanData
 from bec_lib.utils import threadlocked
@@ -43,6 +44,7 @@ class ScanItem:
         self.scanID = scanID
         self.status = status
         self.data = ScanData()
+        self.baseline = BaselineData()
         self.open_scan_defs = set()
         self.open_queue_group = None
         self.num_points = None
@@ -227,6 +229,17 @@ class ScanStorage:
                     if scan_item.scanID == scan_msg.metadata["scanID"]:
                         scan_item.data.set(scan_msg.content["point_id"], scan_msg)
                         scan_item.emit_data(scan_msg)
+                        return
+            time.sleep(0.01)
+
+    def add_scan_baseline(self, scan_msg: messages.ScanBaselineMessage) -> None:
+        """update a scan item with a new scan baseline"""
+        logger.info(f"Received scan baseline for scan {scan_msg.metadata['scanID']}: ")
+        while True:
+            with self._lock:
+                for scan_item in self.storage:
+                    if scan_item.scanID == scan_msg.metadata["scanID"]:
+                        scan_item.baseline.set(scan_msg)
                         return
             time.sleep(0.01)
 
