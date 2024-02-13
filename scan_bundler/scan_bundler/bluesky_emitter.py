@@ -2,12 +2,9 @@ from __future__ import annotations
 
 import time
 import uuid
-from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
 import msgpack
-import numpy as np
-
 from bec_lib import MessageEndpoints, bec_logger
 
 from .emitter import EmitterBase
@@ -50,18 +47,7 @@ class BlueskyEmitter(EmitterBase):
         signals = {}
         for dev in sb.monitored_devices[scanID]["devices"]:
             # copied from bluesky/callbacks/stream.py:
-            for key, val in dev.signals.items():
-                val = val["value"]
-                # String key
-                if isinstance(val, str):
-                    key_desc = {"dtype": "string", "shape": []}
-                # Iterable
-                elif isinstance(val, Iterable):
-                    key_desc = {"dtype": "array", "shape": np.shape(val)}
-                # Number
-                else:
-                    key_desc = {"dtype": "number", "shape": []}
-                signals[key] = key_desc
+            signals[dev.name] = sb.device_manager.devices[dev.name]._info.get("describe", {})
         return signals
 
     def _get_descriptor_document(self, scanID) -> dict:
@@ -73,12 +59,9 @@ class BlueskyEmitter(EmitterBase):
             "uid": str(uuid.uuid4()),
             "configuration": {},
             "name": "primary",
-            "hints": {
-                "samx": {"fields": ["samx"]},
-                "samy": {"fields": ["samy"]},
-            },
+            "hints": {"samx": {"fields": ["samx"]}, "samy": {"fields": ["samy"]}},
             "object_keys": {
-                dev.name: list(dev.signals.keys())
+                dev.name: [val["obj_name"] for val in dev._info.get("signals", {})]
                 for dev in sb.monitored_devices[scanID]["devices"]
             },
         }
@@ -95,9 +78,7 @@ class BlueskyEmitter(EmitterBase):
     def cleanup_storage(self, scanID):
         """remove old scanIDs to free memory"""
 
-        for storage in [
-            "bluesky_metadata",
-        ]:
+        for storage in ["bluesky_metadata"]:
             try:
                 getattr(self, storage).pop(scanID)
             except KeyError:
