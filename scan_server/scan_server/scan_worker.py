@@ -656,6 +656,39 @@ class ScanWorker(threading.Thread):
             str(scan_msg) for scan_msg in self.current_instruction_queue_item.scan_msgs
         ]
 
+        self.current_scan_info["readout_priority"] = {
+            "monitored": [
+                dev.name
+                for dev in self.device_manager.devices.monitored_devices(
+                    readout_priority=self.readout_priority
+                )
+            ],
+            "baseline": [
+                dev.name
+                for dev in self.device_manager.devices.baseline_devices(
+                    readout_priority=self.readout_priority
+                )
+            ],
+            "async": [
+                dev.name
+                for dev in self.device_manager.devices.async_devices(
+                    readout_priority=self.readout_priority
+                )
+            ],
+            "continuous": [
+                dev.name
+                for dev in self.device_manager.devices.continuous_devices(
+                    readout_priority=self.readout_priority
+                )
+            ],
+            "on_request": [
+                dev.name
+                for dev in self.device_manager.devices.on_request_devices(
+                    readout_priority=self.readout_priority
+                )
+            ],
+        }
+
     def _send_scan_status(self, status: str):
         current_scan_info_print = self.current_scan_info.copy()
         if current_scan_info_print.get("positions", []):
