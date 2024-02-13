@@ -95,17 +95,48 @@ class DeviceContainer(dict):
         # pylint: disable=protected-access
         return [dev for _, dev in self.items() if dev._config["readoutPriority"] == val]
 
-    def async_devices(self) -> list:
+    def _filter_devices(
+        self, readout_priority: ReadoutPriority, readout_priority_mod: dict, devices: list = None
+    ) -> list:
+        """filter devices by readout priority"""
+        if devices is None:
+            devices = []
+
+        devices.extend(self.readout_priority(readout_priority))
+
+        if readout_priority_mod is None:
+            readout_priority_mod = {}
+
+        excluded_readout_priority = [
+            str(x.name).lower() for x in ReadoutPriority if x != readout_priority
+        ]
+        excluded_devices = []
+        for priority in excluded_readout_priority:
+            excluded_devices.extend(self.get(dev) for dev in readout_priority_mod.get(priority, []))
+
+        return [dev for dev in set(devices) if dev not in excluded_devices]
+
+    def async_devices(self, readout_priority: dict | None = None) -> list:
         """get a list of all synchronous devices"""
         # pylint: disable=protected-access
-        return self.readout_priority(ReadoutPriority.ASYNC)
+        return self._filter_devices(ReadoutPriority.ASYNC, readout_priority)
+
+    def continuous_devices(self, readout_priority: dict | None = None) -> list:
+        """get a list of all continuous devices"""
+        # pylint: disable=protected-access
+        return self._filter_devices(ReadoutPriority.CONTINUOUS, readout_priority)
+
+    def on_request_devices(self, readout_priority: dict | None = None) -> list:
+        """get a list of all on request devices"""
+        # pylint: disable=protected-access
+        return self._filter_devices(ReadoutPriority.ON_REQUEST, readout_priority)
 
     @typechecked
     def monitored_devices(
         self, scan_motors: list | None = None, readout_priority: dict | None = None
     ) -> list:
         """get a list of all enabled primary devices"""
-        devices = self.readout_priority(ReadoutPriority.MONITORED)
+        devices = []
         if scan_motors:
             if not isinstance(scan_motors, list):
                 scan_motors = [scan_motors]
@@ -115,19 +146,8 @@ class DeviceContainer(dict):
                         devices.append(scan_motor)
                     else:
                         devices.append(self.get(scan_motor))
-        if readout_priority is None:
-            readout_priority = {}
 
-        devices.extend([self.get(dev) for dev in readout_priority.get("monitored", [])])
-
-        excluded_devices = self.async_devices()
-        excluded_devices.extend(self.disabled_devices)
-        excluded_devices.extend([self.get(dev) for dev in readout_priority.get("baseline", [])])
-        excluded_devices.extend([self.get(dev) for dev in readout_priority.get("on_request", [])])
-        excluded_devices.extend([self.get(dev) for dev in readout_priority.get("continuous", [])])
-        excluded_devices.extend([self.get(dev) for dev in readout_priority.get("async", [])])
-
-        return [dev for dev in set(devices) if dev not in excluded_devices]
+        return self._filter_devices(ReadoutPriority.MONITORED, readout_priority, devices)
 
     @typechecked
     def baseline_devices(
