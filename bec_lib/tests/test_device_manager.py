@@ -238,8 +238,15 @@ def test_baseline_devices(dm_with_devices, scan_motors_in, readout_priority_in):
     baseline_devices = dm.devices.baseline_devices(
         scan_motors=scan_motors, readout_priority=readout_priority_in
     )
+    async_devices = dm.devices.async_devices(readout_priority=readout_priority_in)
+    continuous_devices = dm.devices.continuous_devices(readout_priority=readout_priority_in)
+    on_request_devices = dm.devices.on_request_devices(readout_priority=readout_priority_in)
+
     primary_device_names = set(dev.name for dev in monitored_devices)
     baseline_devices_names = set(dev.name for dev in baseline_devices)
+    async_devices_names = set(dev.name for dev in async_devices)
+    continuous_devices_names = set(dev.name for dev in continuous_devices)
+    on_request_devices_names = set(dev.name for dev in on_request_devices)
 
     assert len(primary_device_names & baseline_devices_names) == 0
 
@@ -247,6 +254,35 @@ def test_baseline_devices(dm_with_devices, scan_motors_in, readout_priority_in):
     assert len(set(readout_priority_in.get("on_request", [])) & primary_device_names) == 0
     assert len(set(readout_priority_in.get("async", [])) & primary_device_names) == 0
     assert len(set(readout_priority_in.get("continuous", [])) & primary_device_names) == 0
+
+    assert (
+        set(primary_device_names).intersection(
+            set(baseline_devices_names),
+            set(async_devices_names),
+            set(continuous_devices_names),
+            set(on_request_devices_names),
+        )
+    ) == set()
+
+    assert (
+        set(baseline_devices_names).intersection(
+            set(async_devices_names),
+            set(continuous_devices_names),
+            set(on_request_devices_names),
+            set(primary_device_names),
+        )
+        == set()
+    )
+
+    assert (
+        set(async_devices_names).intersection(
+            set(continuous_devices_names),
+            set(on_request_devices_names),
+            set(primary_device_names),
+            set(baseline_devices_names),
+        )
+        == set()
+    )
 
 
 def test_device_config_update_callback(dm_with_devices):
