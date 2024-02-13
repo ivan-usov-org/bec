@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from bec_lib import messages
 
-from bec_lib import MessageEndpoints, bec_logger
+from bec_lib import MessageEndpoints, bec_logger, messages
 
 from .emitter import EmitterBase
 
@@ -42,17 +41,14 @@ class BECEmitter(EmitterBase):
     def _send_baseline(self, scanID: str) -> None:
         sb = self.scan_bundler
 
-        msg = messages.ScanBaselineMessage(scanID=scanID, data=sb.sync_storage[scanID]["baseline"])
+        msg = messages.ScanBaselineMessage(
+            scanID=scanID,
+            data=sb.sync_storage[scanID]["baseline"],
+            metadata=sb.sync_storage[scanID]["info"],
+        )
         pipe = sb.producer.pipeline()
         sb.producer.set(
-            MessageEndpoints.public_scan_baseline(scanID=scanID),
-            msg,
-            expire=1800,
-            pipe=pipe,
+            MessageEndpoints.public_scan_baseline(scanID=scanID), msg, expire=1800, pipe=pipe
         )
-        sb.producer.set_and_publish(
-            MessageEndpoints.scan_baseline(),
-            msg,
-            pipe=pipe,
-        )
+        sb.producer.set_and_publish(MessageEndpoints.scan_baseline(), msg, pipe=pipe)
         pipe.execute()
