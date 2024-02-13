@@ -54,6 +54,14 @@ class ScanObject:
 
         if "md" in kwargs:
             metadata.update(kwargs["md"])
+
+        if "file_suffix" in kwargs:
+            # ensure that file_suffix is only containing alphanumeric characters
+            suffix = kwargs.pop("file_suffix")
+            if not suffix.isalnum() or not suffix.isascii():
+                raise ValueError("file_suffix must only contain alphanumeric ASCII characters.")
+            metadata["file_suffix"] = suffix
+
         # pylint: disable=protected-access
         if scans._scan_group:
             metadata["queue_group"] = scans._scan_group

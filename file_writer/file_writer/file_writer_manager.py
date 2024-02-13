@@ -314,8 +314,11 @@ class FileWriterManager(BECService):
         scan = storage.scan_number
 
         file_path = ""
+        custom_suffix = storage.metadata.get("file_suffix")
+        file_suffix = f"master_{custom_suffix}.h5" if custom_suffix else "master.h5"
+
         try:
-            file_path = self.writer_mixin.compile_full_filename(scan, "master.h5")
+            file_path = self.writer_mixin.compile_full_filename(scan, file_suffix)
             self.producer.set_and_publish(
                 MessageEndpoints.public_file(scanID, "master"),
                 messages.FileMessage(file_path=file_path, done=False),
