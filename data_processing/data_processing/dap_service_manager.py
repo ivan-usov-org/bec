@@ -53,6 +53,8 @@ class DAPServiceManager:
         logger.info(f"Processing dap request {dap_request_msg}")
         try:
             dap_cls = self._get_dap_cls(dap_request_msg)
+            if not dap_cls:
+                return
             dap_type = dap_request_msg.content["dap_type"]
             result = None
             if dap_type == "continuous":
@@ -128,7 +130,7 @@ class DAPServiceManager:
         dap_cls = dap_request_msg.content["dap_cls"]
         if dap_cls in self.dap_services:
             return self.dap_services[dap_cls]
-        raise ValueError(f"Unknown dap class {dap_cls}")
+        # raise ValueError(f"Unknown dap class {dap_cls}")
 
     def send_dap_response(
         self,

@@ -1,9 +1,9 @@
 from unittest import mock
 
 import pytest
-
 from bec_lib import MessageEndpoints, messages
 from bec_lib.redis_connector import MessageObject
+
 from data_processing.dap_service import DAPServiceBase
 from data_processing.dap_service_manager import DAPServiceManager
 
@@ -80,11 +80,6 @@ def test_DAPServiceManager_request_callback(service_manager, msg, process_called
 @pytest.mark.parametrize(
     "msg, raised_exception, error_msg",
     [
-        (
-            messages.DAPRequestMessage(dap_cls="dap_cls", dap_type="on_demand", config={}),
-            True,
-            "Unknown dap class dap_cls",
-        ),
         (
             messages.DAPRequestMessage(
                 dap_cls="ServiceMock",
