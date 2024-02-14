@@ -224,7 +224,17 @@ def test_monitored_devices_with_readout_priority(
                 "baseline": [],
                 "on_request": ["bpm4i"],
                 "async": ["bpm3i"],
-                "continuous": ["bpm2i"],
+                "continuous": ["bpm6i"],
+            },
+        ),
+        (
+            [],
+            {
+                "monitored": ["samx"],
+                "baseline": ["samy"],
+                "on_request": ["bpm4i"],
+                "async": ["bpm3i"],
+                "continuous": ["bpm6i"],
             },
         ),
     ],
@@ -247,6 +257,22 @@ def test_baseline_devices(dm_with_devices, scan_motors_in, readout_priority_in):
     async_devices_names = set(dev.name for dev in async_devices)
     continuous_devices_names = set(dev.name for dev in continuous_devices)
     on_request_devices_names = set(dev.name for dev in on_request_devices)
+
+    primary_device_names.intersection(readout_priority_in.get("monitored", [])) == set(
+        readout_priority_in.get("monitored", [])
+    )
+    baseline_devices_names.intersection(readout_priority_in.get("baseline", [])) == set(
+        readout_priority_in.get("baseline", [])
+    )
+    async_devices_names.intersection(readout_priority_in.get("async", [])) == set(
+        readout_priority_in.get("async", [])
+    )
+    continuous_devices_names.intersection(readout_priority_in.get("continuous", [])) == set(
+        readout_priority_in.get("continuous", [])
+    )
+    on_request_devices_names.intersection(readout_priority_in.get("on_request", [])) == set(
+        readout_priority_in.get("on_request", [])
+    )
 
     assert len(primary_device_names & baseline_devices_names) == 0
 

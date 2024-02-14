@@ -102,10 +102,15 @@ class DeviceContainer(dict):
         if devices is None:
             devices = []
 
-        devices.extend(self.readout_priority(readout_priority))
-
         if readout_priority_mod is None:
             readout_priority_mod = {}
+
+        devices = [self.get(dev) if isinstance(dev, str) else dev for dev in devices]
+
+        devices.extend(self.readout_priority(readout_priority))
+        devices.extend(
+            [self.get(dev) for dev in readout_priority_mod.get(readout_priority.name.lower(), [])]
+        )
 
         excluded_readout_priority = [
             str(x.name).lower() for x in ReadoutPriority if x != readout_priority

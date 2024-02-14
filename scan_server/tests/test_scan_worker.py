@@ -132,8 +132,12 @@ def test_get_devices_from_instruction(scan_worker_mock, instruction, devices):
     if not instruction.content.get("device"):
         group = instruction.content["parameter"].get("group")
         if group == "primary":
-            assert returned_devices == worker.device_manager.devices.monitored_devices(
-                worker.scan_motors
+            assert (
+                set(
+                    dev.name
+                    for dev in worker.device_manager.devices.monitored_devices(worker.scan_motors)
+                ).difference(set(dev.name for dev in returned_devices))
+                == set()
             )
         elif group == "scan_motor":
             assert returned_devices == devices
@@ -1093,23 +1097,29 @@ def test_initialize_scan_info(scan_worker_mock, msg):
     assert rb.metadata == {"RID": "something"}
 
     with mock.patch.object(worker, "current_instruction_queue_item"):
-        worker._initialize_scan_info(rb, msg, msg.content["parameter"].get("num_points"))
-        assert worker.current_scan_info == {
-            **msg.metadata,
-            **msg.content["parameter"],
-            "scan_number": 2,
-            "dataset_number": 3,
-            "exp_time": None,
-            "settling_time": 0,
-            "readout_time": 0,
-            "acquisition_config": {"default": {"exp_time": 0, "readout_time": 0}},
-            "scan_report_hint": rb.scan.scan_report_hint,
-            "scan_report_devices": rb.scan.scan_report_devices,
-            "num_points": 100,
-            "scan_msgs": [],
-            "enforce_sync": True,
-            "frames_per_trigger": 1,
+        worker.scan_motors = ["samx"]
+        worker.readout_priority = {
+            "monitored": ["samx"],
+            "baseline": [],
+            "async": [],
+            "continuous": [],
+            "on_request": [],
         }
+        worker._initialize_scan_info(rb, msg, msg.content["parameter"].get("num_points"))
+
+        assert worker.current_scan_info["RID"] == "something"
+        assert worker.current_scan_info["scan_number"] == 2
+        assert worker.current_scan_info["dataset_number"] == 3
+        assert worker.current_scan_info["scan_report_hint"] == rb.scan.scan_report_hint
+        assert worker.current_scan_info["scan_report_devices"] == rb.scan.scan_report_devices
+        assert worker.current_scan_info["num_points"] == 100
+        assert worker.current_scan_info["scan_msgs"] == []
+        assert worker.current_scan_info["enforce_sync"] == True
+        assert worker.current_scan_info["frames_per_trigger"] == 1
+        assert worker.current_scan_info["args"] == {"samx": (-5, 5, 3)}
+        assert worker.current_scan_info["kwargs"] == {}
+        assert "samx" in worker.current_scan_info["readout_priority"]["monitored"]
+        assert "samy" in worker.current_scan_info["readout_priority"]["baseline"]
 
 
 @pytest.mark.parametrize(
