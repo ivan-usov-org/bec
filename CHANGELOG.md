@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.6.0 (2024-02-14)
+
+### Feature
+
+* **file_writer:** Added support for user-defined file suffixes ([`505df05`](https://gitlab.psi.ch/bec/bec/-/commit/505df053c1b5801cc86e5e6d1f3e58a94edeaf22))
+
 ## v1.5.1 (2024-02-14)
 
 ### Fix
