@@ -2,6 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## v1.7.0 (2024-02-14)
+
+### Feature
+
+* **scan_worker:** Emitted readout priority contains all devices, not just the modification ([`21187ad`](https://gitlab.psi.ch/bec/bec/-/commit/21187adb48495422aa9c0f0adbeeaa23b2d6c8a5))
+* **devicemanager:** Added filter methods for continuous and on_request devices ([`708aaff`](https://gitlab.psi.ch/bec/bec/-/commit/708aaff918e7e858c3c1070057a17cedab248c88))
+
+### Fix
+
+* **devicemanager:** Fixed bug after refactoring ([`37a58ef`](https://gitlab.psi.ch/bec/bec/-/commit/37a58ef5ce83a1c1a4a483c07e08e4f5dd437dda))
+
 ## v1.6.0 (2024-02-14)
 
 ### Feature
