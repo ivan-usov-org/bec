@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.5.1 (2024-02-14)
+
+### Fix
+
+* **dap:** Dap service should now raise on unknown dap service cls; another provider may be responsible for it ([`85969f5`](https://gitlab.psi.ch/bec/bec/-/commit/85969f5d5393166996dbabbeefc06ef464576ee5))
+
 ## v1.5.0 (2024-02-13)
 
 ### Feature
