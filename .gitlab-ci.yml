@@ -19,7 +19,7 @@ include:
   - template: Security/Secret-Detection.gitlab-ci.yml
 
 
-# don't runt the pipeline for release pushes, that is with changes to semantic_release
+# don't run the pipeline for release pushes, that is with changes to semantic_release
 # workflow:
 #   rules:
 #       - changes:
@@ -113,7 +113,9 @@ tests:
     - git clone --branch $OPHYD_DEVICES_BRANCH https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
     - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices
     - pip install pytest pytest-random-order pytest-cov pytest-asyncio pytest-timeout
+    - apt-get update
     - apt-get install -y gcc
+    - apt-get install -y redis
     - *install-bec-services-dev
     - coverage run --source=./data_processing/data_processing,./bec_lib/bec_lib,./device_server/device_server,./scan_server/scan_server,./scan_bundler/scan_bundler,./bec_client/bec_client,./file_writer/file_writer,./scihub/scihub --omit=*/bec_client/bec_client/plugins/*,*/bec_client/scripts/* -m pytest -v --junitxml=report.xml --random-order ./data_processing/tests ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests ./file_writer/tests ./scihub/tests ./bec_lib/tests
     - coverage report
@@ -135,7 +137,9 @@ tests-3.10:
     - git clone --branch $OPHYD_DEVICES_BRANCH https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
     - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices
     - pip install pytest pytest-random-order pytest-cov pytest-asyncio pytest-timeout
+    - apt-get update
     - apt-get install -y gcc
+    - apt-get install -y redis
     - *install-bec-services-dev
     - pytest -v --junitxml=report.xml --random-order ./data_processing/tests ./bec_lib/tests ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests ./file_writer/tests ./scihub/tests
 
