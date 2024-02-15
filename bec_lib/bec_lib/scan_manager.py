@@ -203,7 +203,12 @@ class ScanManager:
         self.scan_storage.add_scan_baseline(msg)
 
     def __str__(self) -> str:
-        return "\n".join(self.queue_storage.describe_queue())
+        try:
+            return "\n".join(self.queue_storage.describe_queue())
+        except Exception:
+            # queue_storage.describe_queue() can fail,
+            # for example if there is no current scan queue (None)
+            return super().__str__()
 
     def shutdown(self):
         pass
