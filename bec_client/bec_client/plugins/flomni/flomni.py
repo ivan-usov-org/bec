@@ -1,11 +1,17 @@
 import builtins
 import datetime
 import os
+import subprocess
 import time
+from pathlib import Path
+from bec_lib.pdf_writer import PDFWriter
 
 import numpy as np
-from bec_lib import bec_logger
 from typeguard import typechecked
+
+from bec_client.plugins.flomni.flomni_optics_mixin import FlomniOpticsMixin
+from bec_client.plugins.flomni.x_ray_eye_align import XrayEyeAlign
+from bec_lib import bec_logger
 
 logger = bec_logger.logger
 
@@ -185,6 +191,8 @@ class FlomniInitStagesMixin:
 
         self.set_limits()
 
+        self._align_setup()
+
     def set_limits(self):
         dev.ftransy.limits = [-100, 0]
         dev.ftransz.limits = [0, 145]
@@ -207,7 +215,7 @@ class FlomniInitStagesMixin:
         dev.ftracky.limits = [2.2, 2.8]
         dev.ftrackz.limits = [4.5, 5.5]
 
-    def align_setup(self):
+    def _align_setup(self):
         # positions for optics out and 50 mm distance to sample
         umv(dev.ftrackz, 4.73, dev.ftracky, 2.5170, dev.foptx, -14.3, dev.fopty, 3.87)
 
@@ -305,6 +313,27 @@ class FlomniSampleTransferMixin:
         umv(dev.fsamx, fsamx_in)
         dev.fsamx.limits = [fsamx_in - 0.4, fsamx_in + 0.4]
 
+    def laser_tracker_on(self):
+        dev.rtx.controller.laser_tracker_on()
+
+    def laser_tracker_off(self):
+        dev.rtx.controller.laser_tracker_off()
+
+    def rt_feedback_disable(self):
+        self.device_manager.devices.rtx.controller.feedback_disable()
+
+    def rt_feedback_enable_with_reset(self):
+        self.device_manager.devices.rtx.controller.feedback_enable_with_reset()
+
+    def rt_feedback_enable_without_reset(self):
+        self.device_manager.devices.rtx.controller.feedback_enable_without_reset()
+
+    def lights_off(self):
+        self.device_manager.devices.fsamx.controller.lights_off()
+
+    def lights_on(self):
+        self.device_manager.devices.fsamx.controller.lights_on()
+
     def ftransfer_flomni_stage_out(self):
         target_pos = -162
         if np.isclose(dev.fsamx.readback.get(), target_pos, 0.01):
@@ -312,7 +341,7 @@ class FlomniSampleTransferMixin:
 
         umv(dev.fsamroy, 0)
 
-        # TODO: disable rt feedback!!
+        self.rt_feedback_disable()
 
         self.ensure_fheater_up()
 
@@ -320,7 +349,7 @@ class FlomniSampleTransferMixin:
 
         self.check_tray_in()
 
-        # TODO: laser track on
+        self.laser_tracker_off()
         time.sleep(0.05)
         fsamy_in = dev.fsamy.user_parameter.get("in")
         if fsamy_in is None:
@@ -329,9 +358,9 @@ class FlomniSampleTransferMixin:
             )
         umv(dev.fsamy, fsamy_in)
         time.sleep(0.05)
-        # TODO: laser track on
+        self.laser_tracker_on()
         time.sleep(0.05)
-        # TODO: laser track off
+        self.laser_tracker_off()
         time.sleep(0.05)
 
         self.drive_axis_to_limit(dev.fsamx, "forward")
@@ -449,6 +478,13 @@ class FlomniSampleTransferMixin:
 
         # TODO: flomni_stage_in if position == 0
         # bec.queue.next_dataset_number += 1
+
+    def sample_get_name(self, position: int = 0) -> str:
+        """
+        Get the name of the sample currently in the given position.
+        """
+        signal_name = getattr(dev.flomni_samples.sample_names, f"sample{position}")
+        return signal_name.get()
 
     def ftransfer_sample_change(self, new_sample_position: int):
         self.check_tray_in()
@@ -756,8 +792,14 @@ class FlomniAlignmentMixin:
         self.corr_angle_y_2 = []
 
         if use_default_correction:
-            self.read_additional_correction_y(self.default_correction_file)
-            logger.info(f"Applying default correction from {self.default_correction_file}")
+            try:
+                self.read_additional_correction_y(self.default_correction_file)
+                logger.info(f"Applying default correction from {self.default_correction_file}")
+            except FileNotFoundError:
+                logger.warning(
+                    f"Could not find default correction file {self.default_correction_file}."
+                )
+                logger.warning("Not applying any correction.")
 
     def reset_tomo_alignment_fit(self):
         self.client.delete_global_var("tomo_alignment_fit")
@@ -905,10 +947,13 @@ class FlomniAlignmentMixin:
         return additional_correction_shift
 
 
-class Flomni(FlomniInitStagesMixin, FlomniSampleTransferMixin, FlomniAlignmentMixin):
+class Flomni(
+    FlomniInitStagesMixin, FlomniSampleTransferMixin, FlomniAlignmentMixin, FlomniOpticsMixin
+):
     def __init__(self, client):
         super().__init__()
         self.client = client
+        self.device_manager = client.device_manager
         self.check_shutter = True
         self.check_light_available = True
         self.check_fofb = True
@@ -925,6 +970,19 @@ class Flomni(FlomniInitStagesMixin, FlomniSampleTransferMixin, FlomniAlignmentMi
         self.corr_angle_y = []
         self.corr_pos_y_2 = []
         self.corr_angle_y_2 = []
+        self._align = None
+
+    def start_x_ray_eye_alignment(self):
+        self._align = XrayEyeAlign(self.client, self)
+        try:
+            self._align.align()
+        except KeyboardInterrupt as exc:
+            fsamx_in = self._get_user_param_safe(dev.fsamx, "in")
+            if np.isclose(fsamx_in, dev.fsamx.readback.get(), 0.5):
+                print("Stopping alignment. Returning to fsamx in position.")
+                self.rt_feedback_disable()
+                umv(dev.fsamx, fsamx_in)
+            raise exc
 
     def drive_axis_to_limit(self, device, direction):
         axis_id = device._config["deviceConfig"].get("axis_Id")
@@ -1102,15 +1160,7 @@ class Flomni(FlomniInitStagesMixin, FlomniSampleTransferMixin, FlomniAlignmentMi
 
     @property
     def sample_name(self):
-        val = self.client.get_global_var("sample_name")
-        if val is None:
-            return "bec_test_sample"
-        return val
-
-    @sample_name.setter
-    @typechecked
-    def sample_name(self, val: str):
-        self.client.set_global_var("sample_name", val)
+        return self.sample_get_name(0)
 
     def write_to_spec_log(self, content):
         try:
@@ -1135,6 +1185,164 @@ class Flomni(FlomniInitStagesMixin, FlomniSampleTransferMixin, FlomniAlignmentMi
             self.client.logbook.send_logbook_message(msg)
         except Exception:
             logger.warning("Failed to write to scilog.")
+
+    def sub_tomo_scan(self, subtomo_number, start_angle=None):
+        """
+        Performs a sub tomogram scan.
+        Args:
+            subtomo_number (int): The sub tomogram number.
+            start_angle (float, optional): The start angle of the scan. Defaults to None.
+        """
+        dev = builtins.__dict__.get("dev")
+        bec = builtins.__dict__.get("bec")
+        if self.tomo_id > 0:
+            tags = ["BEC_subtomo", self.sample_name, f"tomo_id_{self.tomo_id}"]
+        else:
+            tags = ["BEC_subtomo", self.sample_name]
+        self.write_to_scilog(
+            f"Starting subtomo: {subtomo_number}. First scan number: {bec.queue.next_scan_number}.",
+            tags,
+        )
+
+        if start_angle is None:
+            if subtomo_number == 1:
+                start_angle = 0
+            elif subtomo_number == 2:
+                start_angle = self.tomo_angle_stepsize / 8.0 * 4
+            elif subtomo_number == 3:
+                start_angle = self.tomo_angle_stepsize / 8.0 * 2
+            elif subtomo_number == 4:
+                start_angle = self.tomo_angle_stepsize / 8.0 * 6
+            elif subtomo_number == 5:
+                start_angle = self.tomo_angle_stepsize / 8.0 * 1
+            elif subtomo_number == 6:
+                start_angle = self.tomo_angle_stepsize / 8.0 * 5
+            elif subtomo_number == 7:
+                start_angle = self.tomo_angle_stepsize / 8.0 * 3
+            elif subtomo_number == 8:
+                start_angle = self.tomo_angle_stepsize / 8.0 * 7
+
+        # _tomo_shift_angles (potential global variable)
+        _tomo_shift_angles = 0
+        angle_end = start_angle + 180
+        for angle in np.linspace(
+            start_angle + _tomo_shift_angles,
+            angle_end,
+            num=int(180 / self.tomo_angle_stepsize) + 1,
+            endpoint=True,
+        ):
+            successful = False
+            error_caught = False
+            if 0 <= angle < 180.05:
+                print(f"Starting LamNI scan for angle {angle}")
+                while not successful:
+                    self._start_beam_check()
+                    if not self.special_angles:
+                        self._current_special_angles = []
+                    if self._current_special_angles:
+                        next_special_angle = self._current_special_angles[0]
+                        if np.isclose(angle, next_special_angle, atol=0.5):
+                            self._current_special_angles.pop(0)
+                            num_repeats = self.special_angle_repeats
+                    else:
+                        num_repeats = 1
+                    try:
+                        start_scan_number = bec.queue.next_scan_number
+                        for i in range(num_repeats):
+                            self._at_each_angle(angle)
+                        error_caught = False
+                    except AlarmBase as exc:
+                        if exc.alarm_type == "TimeoutError":
+                            bec.queue.request_queue_reset()
+                            time.sleep(2)
+                            error_caught = True
+                        else:
+                            raise exc
+
+                    if self._was_beam_okay() and not error_caught:
+                        successful = True
+                    else:
+                        self._wait_for_beamline_checks()
+                end_scan_number = bec.queue.next_scan_number
+                for scan_nr in range(start_scan_number, end_scan_number):
+                    self._write_tomo_scan_number(scan_nr, angle, subtomo_number)
+
+    def tomo_scan(self, subtomo_start=1, start_angle=None):
+        """start a tomo scan"""
+        bec = builtins.__dict__.get("bec")
+        scans = builtins.__dict__.get("scans")
+        self._current_special_angles = self.special_angles.copy()
+
+        if subtomo_start == 1 and start_angle is None:
+            # pylint: disable=undefined-variable
+                self.tomo_id = self.add_sample_database(
+                self.sample_name,
+                str(datetime.date.today()),
+                bec.active_account.decode(),
+                bec.queue.next_scan_number,
+                "flomni",
+                "test additional info",
+                "BEC",
+            )
+            self.write_pdf_report()
+        with scans.dataset_id_on_hold:
+            for ii in range(subtomo_start, 9):
+                self.sub_tomo_scan(ii, start_angle=start_angle)
+                start_angle = None
+
+    def add_sample_database(
+        self,
+        samplename,
+        date,
+        eaccount,
+        scan_number,
+        setup,
+        sample_additional_info,
+        user,
+    ):
+        """Add a sample to the omny sample database. This also retrieves the tomo id."""
+        subprocess.run(
+            f"wget --user=omny --password=samples -q -O /tmp/currsamplesnr.txt 'https://omny.web.psi.ch/samples/newmeasurement.php?sample={samplename}&date={date}&eaccount={eaccount}&scannr={scan_number}&setup={setup}&additional={sample_additional_info}&user={user}'",
+            shell=True,
+        )
+        with open("/tmp/currsamplesnr.txt") as tomo_number_file:
+            tomo_number = int(tomo_number_file.read())
+        return tomo_number
+
+    def _at_each_angle(self, angle: float) -> None:
+        if "flomni_at_each_angle" in builtins.__dict__:
+            flomni_at_each_angle(self, angle)
+            return
+
+        self.tomo_scan_projection(angle)
+        self.tomo_reconstruct()
+
+    def tomo_reconstruct(self, base_path="~/Data10/specES1"):
+        """write the tomo reconstruct file for the reconstruction queue"""
+        bec = builtins.__dict__.get("bec")
+        base_path = os.path.expanduser(base_path)
+        ptycho_queue_path = Path(os.path.join(base_path, self.ptycho_reconstruct_foldername))
+        ptycho_queue_path.mkdir(parents=True, exist_ok=True)
+
+        # pylint: disable=undefined-variable
+        last_scan_number = bec.queue.next_scan_number - 1
+        ptycho_queue_file = os.path.abspath(
+            os.path.join(ptycho_queue_path, f"scan_{last_scan_number:05d}.dat")
+        )
+        with open(ptycho_queue_file, "w") as queue_file:
+            scans = " ".join([str(scan) for scan in self._current_scan_list])
+            queue_file.write(f"p.scan_number {scans}\n")
+            queue_file.write(f"p.check_nextscan_started 1\n")
+
+    def _write_tomo_scan_number(self, scan_number: int, angle: float, subtomo_number: int) -> None:
+        tomo_scan_numbers_file = os.path.expanduser(
+            "~/Data10/specES1/dat-files/tomography_scannumbers.txt"
+        )
+        with open(tomo_scan_numbers_file, "a+") as out_file:
+            # pylint: disable=undefined-variable
+            out_file.write(
+                f"{scan_number} {angle} {dev.lsamrot.read()['lsamrot']['value']:.3f} {self.tomo_id} {subtomo_number} {0} {'lamni'}\n"
+            )
 
     def tomo_scan_projection(self, angle: float):
         scans = builtins.__dict__.get("scans")
@@ -1228,8 +1436,69 @@ class Flomni(FlomniInitStagesMixin, FlomniSampleTransferMixin, FlomniAlignmentMi
     def _get_val(msg: str, default_value, data_type):
         return data_type(input(f"{msg} ({default_value}): ") or default_value)
 
+    def write_pdf_report(self):
+        """create and write the pdf report with the current flomni settings"""
+        dev = builtins.__dict__.get("dev")
+        header = ""
+        # header = (
+        #     " \n" * 3
+        #     + "  :::            :::       :::   :::   ::::    ::: ::::::::::: \n"
+        #     + "  :+:          :+: :+:    :+:+: :+:+:  :+:+:   :+:     :+:     \n"
+        #     + "  +:+         +:+   +:+  +:+ +:+:+ +:+ :+:+:+  +:+     +:+     \n"
+        #     + "  +#+        +#++:++#++: +#+  +:+  +#+ +#+ +:+ +#+     +#+     \n"
+        #     + "  +#+        +#+     +#+ +#+       +#+ +#+  +#+#+#     +#+     \n"
+        #     + "  #+#        #+#     #+# #+#       #+# #+#   #+#+#     #+#     \n"
+        #     + "  ########## ###     ### ###       ### ###    #### ########### \n"
+        # )
+        padding = 20
+        fovxy = f"{self.fovx:.2f}/{self.fovy:.2f}"
+        stitching = f"{self.stitch_x:.2f}/{self.stitch_y:.2f}"
+        dataset_id = str(self.client.queue.next_dataset_number)
+        content = [
+            f"{'Sample Name:':<{padding}}{self.sample_name:>{padding}}\n",
+            f"{'Measurement ID:':<{padding}}{str(self.tomo_id):>{padding}}\n",
+            f"{'Dataset ID:':<{padding}}{dataset_id:>{padding}}\n",
+            f"{'Sample Info:':<{padding}}{'Sample Info':>{padding}}\n",
+            f"{'e-account:':<{padding}}{str(self.client.username):>{padding}}\n",
+            f"{'Number of projections:':<{padding}}{int(180 / self.tomo_angle_stepsize * 8):>{padding}}\n",
+            f"{'First scan number:':<{padding}}{self.client.queue.next_scan_number:>{padding}}\n",
+            f"{'Last scan number approx.:':<{padding}}{self.client.queue.next_scan_number + int(180 / self.tomo_angle_stepsize * 8) + 10:>{padding}}\n",
+            f"{'Current photon energy:':<{padding}}{dev.mokev.read()['mokev']['value']:>{padding}.4f}\n",
+            f"{'Exposure time:':<{padding}}{self.tomo_countingtime:>{padding}.2f}\n",
+            f"{'Fermat spiral step size:':<{padding}}{self.tomo_shellstep:>{padding}.2f}\n",
+            f"{'FOV:':<{padding}}{fovxy:>{padding}}\n",
+            f"{'Stitching:':<{padding}}{stitching:>{padding}}\n",
+            f"{'Number of individual sub-tomograms:':<{padding}}{8:>{padding}}\n",
+            f"{'Angular step within sub-tomogram:':<{padding}}{self.tomo_angle_stepsize:>{padding}.2f}\n",
+        ]
+        content = "".join(content)
+        user_target = os.path.expanduser(f"~/Data10/documentation/tomo_scan_ID_{self.tomo_id}.pdf")
+        with PDFWriter(user_target) as file:
+            file.write(header)
+            file.write(content)
+        subprocess.run(
+            "xterm /work/sls/spec/local/XOMNY/bin/upload/upload_last_pon.sh &",
+            shell=True,
+        )
+        # status = subprocess.run(f"cp /tmp/spec-e20131-specES1.pdf {user_target}", shell=True)
+        msg = bec.logbook.LogbookMessage()
+        logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "LamNI_logo.png")
+        msg.add_file(logo_path).add_text("".join(content).replace("\n", "</p><p>")).add_tag(
+            [
+                "BEC",
+                "tomo_parameters",
+                f"dataset_id_{dataset_id}",
+                "LamNI",
+                self.sample_name,
+            ]
+        )
+        self.client.logbook.send_logbook_message(msg)
+
+
 
 if __name__ == "__main__":
+    import builtins
+
     from bec_client import BECIPythonClient
 
     bec = BECIPythonClient()
@@ -1237,10 +1506,9 @@ if __name__ == "__main__":
     bec.load_high_level_interface("spec_hli")
     scans = bec.scans
     dev = bec.device_manager.devices
+    builtins.__dict__["scans"] = scans
+    builtins.__dict__["dev"] = dev
+    builtins.__dict__["bec"] = bec
+    builtins.__dict__["umv"] = umv
     flomni = Flomni(bec)
-    # flomni.ftransfer_sample_change(12)
-    dev.rtx.controller.feedback_enable_with_reset()
-    flomni.tomo_scan_projection(0)
-    # flomni.ftransfer_gripper_open()
-    # time.sleep(2)
-    # flomni.ftransfer_gripper_close()
+    flomni.start_x_ray_eye_alignment()
