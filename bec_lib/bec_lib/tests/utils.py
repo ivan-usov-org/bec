@@ -614,6 +614,9 @@ class ConnectorMock(ConnectorBase):  # pragma: no cover
             pipe._pipe_buffer.append(("lrange", (topic, index, msgs), {}))
             return
 
+    def producer(self):
+        return self
+
 
 def create_session_from_config(config: dict) -> dict:
     device_configs = []
