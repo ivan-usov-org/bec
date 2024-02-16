@@ -118,18 +118,21 @@ def test_config_updates(lib_client):
     dev.samx.velocity.put(5)
     assert dev.samx.velocity.get() == 5
 
-    dev.samx.velocity.set(10)
+    dev.samx.velocity.set(10).wait()
     assert dev.samx.velocity.get() == 10
 
     dev.samx.setpoint.put(5)
     assert dev.samx.setpoint.get() == 5
 
-    dev.samx.setpoint.set(10)
+    dev.samx.setpoint.set(10).wait()
     assert dev.samx.setpoint.get() == 10
 
     assert dev.samx.dummy_controller.some_var == 10
     dev.samx.dummy_controller.some_var = 20
     assert dev.samx.dummy_controller.some_var == 20
+
+    val = dev.samx.readback.get()
+    assert np.isclose(val, dev.samx.position, atol=0.05)
 
 
 @pytest.mark.timeout(100)

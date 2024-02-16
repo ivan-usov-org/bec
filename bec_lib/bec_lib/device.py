@@ -845,6 +845,7 @@ class Positioner(AdjustableMixin, Device):
     def move(self, val: float, relative=False):
         return self.parent.parent.scans.mv(self, val, relative=relative)
 
+    @property
     @rpc
     def position(self):
         pass
