@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.7.1 (2024-02-16)
+
+### Fix
+
+* **bec_lib.device:** Made device.position a property to be compliant with ophyd ([`4060b86`](https://gitlab.psi.ch/bec/bec/-/commit/4060b8651b99e3e86e440bcd02d148722ea5403b))
+
 ## v1.7.0 (2024-02-14)
 
 ### Feature
