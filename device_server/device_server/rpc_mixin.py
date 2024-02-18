@@ -163,7 +163,7 @@ class RPCMixin:
                 "fields": res._fields,
                 "values": res._asdict(),
             }
-        elif isinstance(res, list) and isinstance(res[0], ophyd.Staged):
+        elif isinstance(res, list) and res and isinstance(res[0], ophyd.Staged):
             res = [str(stage) for stage in res]
         return res
 

@@ -1,9 +1,10 @@
 # pylint: skip-file
+from collections import namedtuple
 from unittest import mock
 
 import pytest
 from bec_lib import Alarms, MessageEndpoints, messages
-from ophyd import Device, Kind, Signal, StatusBase
+from ophyd import Device, Kind, Signal, Staged, StatusBase
 
 from device_server.rpc_mixin import RPCMixin
 
@@ -15,6 +16,16 @@ def rpc_cls():
     rpc_mixin.producer = mock.MagicMock()
     rpc_mixin.device_manager = mock.MagicMock()
     yield rpc_mixin
+
+
+@pytest.fixture
+def instr():
+    yield messages.DeviceInstructionMessage(
+        device="device",
+        action="rpc",
+        parameter={"rpc_id": "rpc_id", "func": "trigger"},
+        metadata={"RID": "RID"},
+    )
 
 
 @pytest.mark.parametrize(
@@ -80,10 +91,7 @@ def test_get_result_from_rpc_list_from_stage(rpc_cls):
     assert out == [True, False]
 
 
-def test_send_rpc_exception(rpc_cls):
-    instr = messages.DeviceInstructionMessage(
-        device="device", action="rpc", parameter={"rpc_id": "rpc_id"}
-    )
+def test_send_rpc_exception(rpc_cls, instr):
     rpc_cls._send_rpc_exception(Exception(), instr)
     rpc_cls.producer.set.assert_called_once_with(
         MessageEndpoints.device_rpc("rpc_id"),
@@ -107,10 +115,7 @@ def test_send_rpc_result_to_client(rpc_cls):
     )
 
 
-def test_run_rpc(rpc_cls):
-    instr = messages.DeviceInstructionMessage(
-        device="device", action="rpc", parameter={"rpc_id": "rpc_id"}
-    )
+def test_run_rpc(rpc_cls, instr):
     rpc_cls._assert_device_is_enabled = mock.MagicMock()
     with mock.patch.object(
         rpc_cls, "_process_rpc_instruction"
@@ -122,14 +127,11 @@ def test_run_rpc(rpc_cls):
         rpc_cls._assert_device_is_enabled.assert_called_once_with(instr)
         _process_rpc_instruction.assert_called_once_with(instr)
         _send_rpc_result_to_client.assert_called_once_with(
-            "device", {"rpc_id": "rpc_id"}, 1, mock.ANY
+            "device", {"rpc_id": "rpc_id", "func": "trigger"}, 1, mock.ANY
         )
 
 
-def test_run_rpc_sends_rpc_exception(rpc_cls):
-    instr = messages.DeviceInstructionMessage(
-        device="device", action="rpc", parameter={"rpc_id": "rpc_id"}
-    )
+def test_run_rpc_sends_rpc_exception(rpc_cls, instr):
     rpc_cls._assert_device_is_enabled = mock.MagicMock()
     with mock.patch.object(
         rpc_cls, "_process_rpc_instruction"
@@ -173,18 +175,80 @@ def dev_mock():
         ("notused.read_configuration", False),
     ],
 )
-def test_process_rpc_instruction_read(rpc_cls, dev_mock, func, read_called):
-    instr = messages.DeviceInstructionMessage(
-        device="device", action="rpc", parameter={"rpc_id": "rpc_id", "func": func}
-    )
+def test_process_rpc_instruction_read(rpc_cls, dev_mock, instr, func, read_called):
+    instr.content["parameter"]["func"] = func
     rpc_cls.device_manager.devices = {"device": dev_mock}
     rpc_cls._read_and_update_devices = mock.MagicMock()
     rpc_cls._read_config_and_update_devices = mock.MagicMock()
     rpc_cls._process_rpc_instruction(instr)
     if read_called:
-        rpc_cls._read_and_update_devices.assert_called_once_with(["device"], {})
+        rpc_cls._read_and_update_devices.assert_called_once_with(["device"], instr.metadata)
         rpc_cls._read_config_and_update_devices.assert_not_called()
     else:
         rpc_cls._read_and_update_devices.assert_not_called()
         if "notused" not in func:
-            rpc_cls._read_config_and_update_devices.assert_called_once_with(["device"], {})
+            rpc_cls._read_config_and_update_devices.assert_called_once_with(
+                ["device"], instr.metadata
+            )
+
+
+def test_process_rpc_instruction_with_status_return(rpc_cls, dev_mock, instr):
+    rpc_cls.device_manager.devices = {"device": dev_mock}
+    rpc_cls._status_callback = mock.MagicMock()
+    with mock.patch.object(rpc_cls, "_get_result_from_rpc") as rpc_result:
+        status = StatusBase()
+        rpc_result.return_value = status
+        res = rpc_cls._process_rpc_instruction(instr)
+        assert res == {
+            "type": "status",
+            "RID": "RID",
+            "success": status.success,
+            "timeout": status.timeout,
+            "done": status.done,
+            "settle_time": status.settle_time,
+        }
+
+
+def test_process_rpc_instruction_with_namedtuple_return(rpc_cls, dev_mock, instr):
+    rpc_cls.device_manager.devices = {"device": dev_mock}
+    with mock.patch.object(rpc_cls, "_get_result_from_rpc") as rpc_result:
+        point_type = namedtuple("Point", ["x", "y"])
+        point_tuple = point_type(5, 6)
+        rpc_result.return_value = point_tuple
+        res = rpc_cls._process_rpc_instruction(instr)
+        assert res == {
+            "type": "namedtuple",
+            "RID": instr.metadata.get("RID"),
+            "fields": point_tuple._fields,
+            "values": point_tuple._asdict(),
+        }
+
+
+@pytest.mark.parametrize(
+    "return_val,result",
+    [([], []), ([1, 2, 3], [1, 2, 3]), ([Staged.no, Staged.yes], ["Staged.no", "Staged.yes"])],
+)
+def test_process_rpc_instruction_with_list_return(rpc_cls, dev_mock, instr, return_val, result):
+    rpc_cls.device_manager.devices = {"device": dev_mock}
+    with mock.patch.object(rpc_cls, "_get_result_from_rpc") as rpc_result:
+        rpc_result.return_value = return_val
+        res = rpc_cls._process_rpc_instruction(instr)
+        assert res == result
+
+
+def test_process_rpc_instruction_set_attribute(rpc_cls, dev_mock, instr):
+    instr.content["parameter"]["kwargs"] = {"_set_property": True}
+    instr.content["parameter"]["args"] = [5]
+    instr.content["parameter"]["func"] = "attr_value"
+    rpc_cls.device_manager.devices = {"device": dev_mock}
+    rpc_cls._process_rpc_instruction(instr)
+    rpc_cls.device_manager.devices["device"].obj.attr_value == 5
+
+
+def test_process_rpc_instruction_set_attribute_on_sub_device(rpc_cls, dev_mock, instr):
+    instr.content["parameter"]["kwargs"] = {"_set_property": True}
+    instr.content["parameter"]["args"] = [5]
+    instr.content["parameter"]["func"] = "user_setpoint.attr_value"
+    rpc_cls.device_manager.devices = {"device": dev_mock}
+    rpc_cls._process_rpc_instruction(instr)
+    rpc_cls.device_manager.devices["device"].obj.user_setpoint.attr_value == 5
