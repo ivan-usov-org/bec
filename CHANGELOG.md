@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.7.3 (2024-02-19)
+
+### Fix
+
+* **rpc:** Fixed rpc calls with empty list as return value ([`a781369`](https://gitlab.psi.ch/bec/bec/-/commit/a781369e469a1196b7e88c6fa3593ee40439ec1e))
+
 ## v1.7.2 (2024-02-19)
 
 ### Fix
