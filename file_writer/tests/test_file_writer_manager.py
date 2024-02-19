@@ -207,7 +207,7 @@ def test_update_async_data():
 def test_process_async_data_single_entry():
     file_manager = load_FileWriter()
     file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
-    data = [(b"0-0", {b"data": messages.DeviceMessage(signals={"data": np.zeros((10, 10))})})]
+    data = [{"data": messages.DeviceMessage(signals={"data": np.zeros((10, 10))})}]
     file_manager._process_async_data(data, "scanID", "dev1")
     assert np.isclose(
         file_manager.scan_storage["scanID"].async_data["dev1"]["data"], np.zeros((10, 10))
@@ -218,32 +218,29 @@ def test_process_async_data_extend():
     file_manager = load_FileWriter()
     file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
     data = [
-        (
-            b"0-0",
-            {
-                b"data": messages.DeviceMessage(
-                    signals={"data": np.zeros((10, 10))}, metadata={"async_update": "extend"}
-                )
-            },
-        )
+        {
+            "data": messages.DeviceMessage(
+                signals={"data": {"value": np.zeros((10, 10))}}, metadata={"async_update": "extend"}
+            )
+        }
         for ii in range(10)
     ]
     file_manager._process_async_data(data, "scanID", "dev1")
-    assert file_manager.scan_storage["scanID"].async_data["dev1"]["data"].shape == (100, 10)
+    assert file_manager.scan_storage["scanID"].async_data["dev1"]["data"]["value"].shape == (
+        100,
+        10,
+    )
 
 
 def test_process_async_data_append():
     file_manager = load_FileWriter()
     file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
     data = [
-        (
-            b"0-0",
-            {
-                b"data": messages.DeviceMessage(
-                    signals={"data": np.zeros((10, 10))}, metadata={"async_update": "append"}
-                )
-            },
-        )
+        {
+            "data": messages.DeviceMessage(
+                signals={"data": {"value": np.zeros((10, 10))}}, metadata={"async_update": "append"}
+            )
+        }
         for ii in range(10)
     ]
     file_manager._process_async_data(data, "scanID", "dev1")
@@ -254,18 +251,16 @@ def test_process_async_data_replace():
     file_manager = load_FileWriter()
     file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
     data = [
-        (
-            b"0-0",
-            {
-                b"data": messages.DeviceMessage(
-                    signals={"data": np.zeros((10, 10))}, metadata={"async_update": "replace"}
-                )
-            },
-        )
+        {
+            "data": messages.DeviceMessage(
+                signals={"data": {"value": np.zeros((10, 10))}},
+                metadata={"async_update": "replace"},
+            )
+        }
         for ii in range(10)
     ]
     file_manager._process_async_data(data, "scanID", "dev1")
-    assert file_manager.scan_storage["scanID"].async_data["dev1"]["data"].shape == (10, 10)
+    assert file_manager.scan_storage["scanID"].async_data["dev1"]["data"]["value"].shape == (10, 10)
 
 
 def test_update_scan_storage_with_status_ignores_none():
