@@ -186,17 +186,15 @@ class ScanData(dict):
 
     def set(self, index: Any, message: messages.BECMessage) -> None:
         """
-        Set the scan data at the given index to the given message.
+        Set the scan data at the given index to the values in the given content.
 
         Args:
             index(int): the index of the scan point
-            message(messages.ScanMessage): the message to store
+            content(dict): the content to store
 
         """
         if not isinstance(index, int):
-            raise TypeError("ScanData can only store ScanMessages with integer indices (pointID).")
-        if not isinstance(message, messages.ScanMessage):
-            raise TypeError("ScanData can only store ScanMessages")
+            raise TypeError("ScanData can only store data with integer indices.")
 
         self.messages[index] = message
         for dev, dev_data in message.content["data"].items():

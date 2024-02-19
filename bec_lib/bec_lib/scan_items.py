@@ -9,7 +9,7 @@ from collections import defaultdict, deque
 from typing import TYPE_CHECKING
 
 from bec_lib import messages
-from bec_lib.baseline_data import BaselineData
+from bec_lib.async_data import AsyncDataHandler
 from bec_lib.logger import bec_logger
 from bec_lib.scan_data import ScanData
 from bec_lib.utils import threadlocked
@@ -44,7 +44,9 @@ class ScanItem:
         self.scanID = scanID
         self.status = status
         self.data = ScanData()
-        self.baseline = BaselineData()
+        self.async_data = {}
+        self.baseline = ScanData()
+        self._async_data_handler = AsyncDataHandler(scan_manager.producer)
         self.open_scan_defs = set()
         self.open_queue_group = None
         self.num_points = None
@@ -94,6 +96,11 @@ class ScanItem:
                     for key, value in signal_data.items():
                         tmp[(dev, signal, key)].append(value)
         return pd.DataFrame(tmp)
+
+    def _update_async_data(self):
+        self.async_data = self._async_data_handler.get_async_data_for_scan(self.scanID)
+        # msg = messages.ScanMessage(point_id=0, scanID=self.scanID, data=data)
+        # self.async_data.set(0, msg)
 
     def __eq__(self, other):
         return self.scanID == other.scanID
@@ -214,6 +221,11 @@ class ScanStorage:
         # add queue group
         scan_item.open_queue_group = scan_status.content["info"].get("queue_group")
 
+        # update async data
+        if scan_status.content.get("status") != "open":
+            # pylint: disable=protected-access
+            scan_item._update_async_data()
+
         # run status callbacks
         scan_item.emit_status(scan_status)
 
@@ -239,7 +251,8 @@ class ScanStorage:
             with self._lock:
                 for scan_item in self.storage:
                     if scan_item.scanID == scan_msg.metadata["scanID"]:
-                        scan_item.baseline.set(scan_msg)
+                        point = len(scan_item.baseline)
+                        scan_item.baseline.set(point, scan_msg)
                         return
             time.sleep(0.01)
 
