@@ -90,6 +90,7 @@ class MessageEndpoints:
     _gui_config = "public/gui/config"
     _gui_data = "public/gui/data"
     _gui_instructions = "public/gui/instruction"
+    _gui_instruction_response = "public/gui/instruction_response"
 
     ##########
 
@@ -862,3 +863,14 @@ class MessageEndpoints:
             str: Endpoint for GUI instructions.
         """
         return f"{cls._gui_instructions}/{gui_id}"
+
+    @classmethod
+    def gui_instruction_response(cls, RID: str) -> str:
+        """
+        Endpoint for GUI instruction response. This endpoint is used to publish the GUI instruction response
+        using a messages.RequestResponseMessage message.
+
+        Returns:
+            str: Endpoint for GUI instruction response.
+        """
+        return f"{cls._gui_instruction_response}/{RID}"
