@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v1.7.2 (2024-02-19)
+
+### Fix
+
+* **endpoints:** Added gui_instruction_response endpoint ([`9a838bb`](https://gitlab.psi.ch/bec/bec/-/commit/9a838bbe8e7fab974982654bdc9f69a14edf7a20))
+* **live_table:** Fixed live table for string values ([`3b04d31`](https://gitlab.psi.ch/bec/bec/-/commit/3b04d319f9f8d56a8e8c2d6fec9802cc7e747ad3))
+
 ## v1.7.1 (2024-02-16)
 
 ### Fix
