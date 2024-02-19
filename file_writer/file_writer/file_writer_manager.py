@@ -14,6 +14,7 @@ from bec_lib import (
     threadlocked,
 )
 from bec_lib.alarm_handler import Alarms
+from bec_lib.async_data import AsyncDataHandler
 from bec_lib.file_utils import FileWriterMixin
 from bec_lib.redis_connector import MessageObject, RedisConnector
 
@@ -253,35 +254,9 @@ class FileWriterManager(BECService):
             scanID (str): Scan ID
             device_name (str): Device name
         """
-        concat_type = None
-        data = []
-        for msg in msgs:
-            msg = msg[1][b"data"]
-            if not concat_type:
-                concat_type = msg.metadata.get("async_update", "append")
-            data.append(msg.content["signals"])
-        if len(data) == 1:
-            self.scan_storage[scanID].async_data[device_name] = data[0]
-            return
-        if concat_type == "extend":
-            # concatenate the dictionaries
-            self.scan_storage[scanID].async_data[device_name] = {}
-            for key in data[0].keys():
-                self.scan_storage[scanID].async_data[device_name][key] = np.concatenate(
-                    [d[key] for d in data]
-                )
-        elif concat_type == "append":
-            # concatenate the lists
-            self.scan_storage[scanID].async_data[device_name] = {}
-            for key in data[0].keys():
-                self.scan_storage[scanID].async_data[device_name][key] = []
-                for d in data:
-                    self.scan_storage[scanID].async_data[device_name][key].append(d[key])
-        elif concat_type == "replace":
-            # replace the dictionaries
-            self.scan_storage[scanID].async_data[device_name] = {}
-            for key in data[0].keys():
-                self.scan_storage[scanID].async_data[device_name][key] = data[-1][key]
+        self.scan_storage[scanID].async_data[device_name] = AsyncDataHandler.process_async_data(
+            msgs
+        )
 
     @threadlocked
     def check_storage_status(self, scanID: str) -> None:
