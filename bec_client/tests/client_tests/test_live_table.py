@@ -2,6 +2,7 @@ import threading
 import time
 from unittest import mock
 
+import numpy as np
 import pytest
 from bec_lib import messages
 from bec_lib.scan_items import ScanItem
@@ -11,9 +12,8 @@ from bec_client.callbacks.live_table import LiveUpdatesTable, sort_devices
 from bec_client.callbacks.utils import ScanRequestMixin
 
 
-@pytest.mark.timeout(20)
-@pytest.mark.asyncio
-async def test_scan_request_mixin(bec_client):
+@pytest.fixture
+def client_with_grid_scan(bec_client):
     client = bec_client
     client.start()
     request_msg = messages.ScanQueueMessage(
@@ -22,6 +22,13 @@ async def test_scan_request_mixin(bec_client):
         queue="primary",
         metadata={"RID": "something"},
     )
+    yield client, request_msg
+
+
+@pytest.mark.timeout(20)
+@pytest.mark.asyncio
+async def test_scan_request_mixin(client_with_grid_scan):
+    client, request_msg = client_with_grid_scan
     response_msg = messages.RequestResponseMessage(
         accepted=True, message="", metadata={"RID": "something"}
     )
@@ -78,15 +85,8 @@ def test_get_devices_from_scan_data(bec_client, request_msg, scan_report_devices
 
 @pytest.mark.timeout(20)
 @pytest.mark.asyncio
-async def test_wait_for_request_acceptance(bec_client):
-    client = bec_client
-    client.start()
-    request_msg = messages.ScanQueueMessage(
-        scan_type="grid_scan",
-        parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
-        queue="primary",
-        metadata={"RID": "something"},
-    )
+async def test_wait_for_request_acceptance(client_with_grid_scan):
+    client, request_msg = client_with_grid_scan
     response_msg = messages.RequestResponseMessage(
         accepted=True, message="", metadata={"RID": "something"}
     )
@@ -103,15 +103,8 @@ class ScanItemMock:
         self.metadata = {}
 
 
-def test_print_table_data(bec_client):
-    client = bec_client
-    client.start()
-    request_msg = messages.ScanQueueMessage(
-        scan_type="grid_scan",
-        parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
-        queue="primary",
-        metadata={"RID": "something"},
-    )
+def test_print_table_data(client_with_grid_scan):
+    client, request_msg = client_with_grid_scan
     response_msg = messages.RequestResponseMessage(
         accepted=True, message="", metadata={"RID": "something"}
     )
@@ -129,15 +122,8 @@ def test_print_table_data(bec_client):
     live_update.print_table_data()
 
 
-def test_print_table_data_lamni_flyer(bec_client):
-    client = bec_client
-    client.start()
-    request_msg = messages.ScanQueueMessage(
-        scan_type="grid_scan",
-        parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
-        queue="primary",
-        metadata={"RID": "something"},
-    )
+def test_print_table_data_lamni_flyer(client_with_grid_scan):
+    client, request_msg = client_with_grid_scan
     response_msg = messages.RequestResponseMessage(
         accepted=True, message="", metadata={"RID": "something"}
     )
@@ -155,15 +141,8 @@ def test_print_table_data_lamni_flyer(bec_client):
     live_update.print_table_data()
 
 
-def test_print_table_data_hinted_value(bec_client):
-    client = bec_client
-    client.start()
-    request_msg = messages.ScanQueueMessage(
-        scan_type="grid_scan",
-        parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
-        queue="primary",
-        metadata={"RID": "something"},
-    )
+def test_print_table_data_hinted_value(client_with_grid_scan):
+    client, request_msg = client_with_grid_scan
     response_msg = messages.RequestResponseMessage(
         accepted=True, message="", metadata={"RID": "something"}
     )
@@ -186,15 +165,8 @@ def test_print_table_data_hinted_value(bec_client):
         mocked_table.get_row.assert_called_with("0", "0.000")
 
 
-def test_print_table_data_hinted_value_with_precision(bec_client):
-    client = bec_client
-    client.start()
-    request_msg = messages.ScanQueueMessage(
-        scan_type="grid_scan",
-        parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
-        queue="primary",
-        metadata={"RID": "something"},
-    )
+def test_print_table_data_hinted_value_with_precision(client_with_grid_scan):
+    client, request_msg = client_with_grid_scan
     response_msg = messages.RequestResponseMessage(
         accepted=True, message="", metadata={"RID": "something"}
     )
@@ -215,3 +187,44 @@ def test_print_table_data_hinted_value_with_precision(bec_client):
         live_update.dev_values = (len(live_update._get_header()) - 1) * [0]
         live_update.print_table_data()
         mocked_table.get_row.assert_called_with("0", f"{0:.2f}")
+
+
+@pytest.mark.parametrize(
+    "value,expected",
+    [
+        (0, "0.00"),
+        (1, "1.00"),
+        (0.000, "0.00"),
+        (True, "1.00"),
+        (False, "0.00"),
+        ("True", "True"),
+        ("False", "False"),
+        ("0", "0"),
+        ("1", "1"),
+        ((0, 1), "(0, 1)"),
+        ({"value": 0}, "{'value': 0}"),
+        (np.array([0, 1]), "[0 1]"),
+        ({1, 2}, "{1, 2}"),
+    ],
+)
+def test_print_table_data_variants(client_with_grid_scan, value, expected):
+    client, request_msg = client_with_grid_scan
+    response_msg = messages.RequestResponseMessage(
+        accepted=True, message="", metadata={"RID": "something"}
+    )
+    client.queue.request_storage.update_with_request(request_msg)
+    client.queue.request_storage.update_with_response(response_msg)
+    live_update = LiveUpdatesTable(client, {"table_wait": 10}, request_msg)
+    live_update.point_data = messages.ScanMessage(
+        point_id=0,
+        scanID="",
+        data={"lamni_flyer_1": {"value": value}},
+        metadata={"scan_report_devices": ["samx"], "scan_type": "fly"},
+    )
+    live_update.scan_item = ScanItemMock(data=[live_update.point_data])
+
+    live_update.print_table_data()
+    with mock.patch.object(live_update, "table") as mocked_table:
+        live_update.dev_values = (len(live_update._get_header()) - 1) * [value]
+        live_update.print_table_data()
+        mocked_table.get_row.assert_called_with("0", expected)

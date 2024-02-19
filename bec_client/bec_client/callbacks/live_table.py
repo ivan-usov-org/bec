@@ -4,9 +4,10 @@ import asyncio
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
+from bec_lib import bec_logger, messages
+
 from bec_client.prettytable import PrettyTable
 from bec_client.progressbar import ScanProgressBar
-from bec_lib import bec_logger, messages
 
 from .utils import LiveUpdatesBase, check_alarms
 
@@ -222,14 +223,20 @@ class LiveUpdatesTable(LiveUpdatesBase):
                         except AttributeError:
                             precision = 2
                         value = signal.get("value")
-                        print_value = f"{value:.{precision}f}"
+                        if isinstance(value, (int, float)):
+                            print_value = f"{value:.{precision}f}"
+                        else:
+                            print_value = str(value)
                     self.dev_values[ind] = print_value
                     ind += 1
             else:
                 signal = self.point_data.content["data"].get(dev, {})
                 value = signal.get("value")
                 if value is not None:
-                    print_value = f"{value:.2f}"
+                    if isinstance(value, (int, float)):
+                        print_value = f"{value:.2f}"
+                    else:
+                        print_value = str(value)
                 else:
                     print_value = "N/A"
                 self.dev_values[ind] = print_value
