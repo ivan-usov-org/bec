@@ -441,10 +441,10 @@ class RedisProducer(ProducerConnector):
         client = self.r
         msgs = []
         for reading in client.xrange(topic, min, max, count=count):
-            for index, msg_dict in record:
-                msgs.append(
-                    {k.decode(): MsgpackSerialization.loads(msg) for k, msg in msg_dict.items()}
-                )
+            index, msg_dict = reading
+            msgs.append(
+                {k.decode(): MsgpackSerialization.loads(msg) for k, msg in msg_dict.items()}
+            )
         return msgs
 
 
