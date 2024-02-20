@@ -5,6 +5,7 @@ import pytest
 
 from bec_lib import messages
 from bec_lib.async_data import AsyncDataHandler
+from bec_lib.endpoints import MessageEndpoints
 
 
 @pytest.fixture
@@ -82,3 +83,34 @@ def test_process_async_data_single(async_data):
     ]
     res = async_data.process_async_data(data)
     assert res["data"]["value"].shape == (10, 10)
+
+
+def test_get_async_data_for_scan():
+    producer = mock.MagicMock()
+    async_data = AsyncDataHandler(producer)
+    producer.keys.return_value = [
+        MessageEndpoints.device_async_readback("scanID", "samx").encode(),
+        MessageEndpoints.device_async_readback("scanID", "samy").encode(),
+    ]
+    with mock.patch.object(async_data, "get_async_data_for_device") as mock_get:
+        async_data.get_async_data_for_scan("scanID")
+        assert mock_get.call_count == 2
+
+
+def test_get_async_data_for_device():
+    producer = mock.MagicMock()
+    async_data = AsyncDataHandler(producer)
+    producer.xrange.return_value = [
+        {
+            "data": messages.DeviceMessage(
+                signals={"data": {"value": np.zeros((10, 10))}}, metadata={}
+            )
+        }
+    ]
+    res = async_data.get_async_data_for_device("scanID", "samx")
+    assert res["data"]["value"].shape == (10, 10)
+    assert len(res) == 1
+    assert producer.xrange.call_count == 1
+    producer.xrange.assert_called_with(
+        MessageEndpoints.device_async_readback("scanID", "samx"), min="-", max="+"
+    )
