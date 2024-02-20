@@ -2,6 +2,20 @@
 
 <!--next-version-placeholder-->
 
+## v1.8.0 (2024-02-20)
+
+### Feature
+
+* **bec_lib:** Added async data handler ([`da46c27`](https://gitlab.psi.ch/bec/bec/-/commit/da46c278425fe31aa2a597c9d55065653ae63fbd))
+
+### Fix
+
+* **bec_lib:** Fixed typo in xrange ([`0fe0a6e`](https://gitlab.psi.ch/bec/bec/-/commit/0fe0a6e119ed01ebb38ac0b07c05d7f42a19ecf3))
+
+### Documentation
+
+* **developer:** Added instructions on how to set up vscode ([`94d63e6`](https://gitlab.psi.ch/bec/bec/-/commit/94d63e60b754a926e953208b325b943aa2c387e8))
+
 ## v1.7.3 (2024-02-19)
 
 ### Fix
