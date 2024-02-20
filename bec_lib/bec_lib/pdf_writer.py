@@ -70,7 +70,7 @@ class PDFWriter:
         self._pdf.output(self.file, "F")
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     header = (
         " \n" * 3
         + "  :::            :::       :::   :::   ::::    ::: ::::::::::: \n"
