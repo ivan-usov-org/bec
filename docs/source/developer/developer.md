@@ -11,6 +11,7 @@ hidden: true
 architecture/
 contributing/
 install_developer_env/
+vscode/
 bec_cli/
 bec_gui/
 bec_config/
@@ -30,6 +31,7 @@ Here, we aim to provide you with all the essential information to kickstart your
 * [Architecture](#developer.architecture): Gain insights into the underlying structure of BEC.
 * [Contributing](#developer.contributing): Learn how to actively participate and contribute to the development of BEC.
 * [Installing Developer Environment](#developer.install_developer_env): Set up your developer environment to work with BEC.
+* [Developing with Visual Studio Code](#developer.vscode): Learn how to set up Visual Studio Code for developing Python applications and how to use it to work with BEC.
 * [BEC Command Line Interface (CLI)](#developer.bec_cli): Explore the command-line tool and customize its behaviour.
 * [BEC Graphical User Interface (GUI)](#developer.bec_gui): Learn how to use the graphical user interface to interact with BEC and explore how to create your own GUIs.
 * [BEC Configuration](#developer.bec_config): Learn about the different ways of customizing BEC to your needs.
