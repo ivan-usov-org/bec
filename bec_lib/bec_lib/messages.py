@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import dataclasses
 import enum
 import time
 import warnings
@@ -54,6 +53,7 @@ class BECMessage:
         return self.msg_type == other.msg_type and self.metadata == other.metadata
 
     def __str__(self):
+        # pylint: disable=no-member
         return f"messages.{self.__class__.__name__}(**{self.content}, metadata={self.metadata})"
 
     def loads(self):
