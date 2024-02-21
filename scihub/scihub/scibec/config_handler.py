@@ -15,6 +15,7 @@ from bec_lib.scibec_validator import SciBecValidator
 
 if TYPE_CHECKING:
     from bec_lib.device import DeviceBase
+
     from scihub.scibec.scibec_connector import SciBecConnector
 
 logger = bec_logger.logger
@@ -76,8 +77,21 @@ class ConfigHandler:
             self._convert_to_db_config(name, device)
             self.validator.validate_device(device)
         self.scibec_connector.set_redis_config(list(config.values()))
-        self.send_config_request_reply(accepted=True, error_msg=None, metadata=msg.metadata)
+        RID = str(uuid.uuid4())
+        self._update_device_server(RID, config, action="set")
+        accepted, server_response_msg = self._wait_for_device_server_update(RID, timeout_time=20)
+        if "failed_devices" in server_response_msg.metadata:
+            msg.metadata["failed_devices"] = server_response_msg.metadata["failed_devices"]
         reload_msg = messages.DeviceConfigMessage(action="reload", config={}, metadata=msg.metadata)
+        if accepted:
+            self.send_config_request_reply(accepted=accepted, error_msg=None, metadata=msg.metadata)
+            self.send_config(reload_msg)
+            return
+        self.send_config_request_reply(
+            accepted=accepted,
+            error_msg=f"{server_response_msg.message} Error during loading. The config will be flushed",
+            metadata=msg.metadata,
+        )
         self.send_config(reload_msg)
 
     def _convert_to_db_config(self, name: str, config: dict) -> None:
@@ -113,8 +127,8 @@ class ConfigHandler:
             self.send_config(msg)
             self.send_config_request_reply(accepted=True, error_msg=None, metadata=msg.metadata)
 
-    def _update_device_server(self, RID: str, config: dict) -> None:
-        msg = messages.DeviceConfigMessage(action="update", config=config, metadata={"RID": RID})
+    def _update_device_server(self, RID: str, config: dict, action="update") -> None:
+        msg = messages.DeviceConfigMessage(action=action, config=config, metadata={"RID": RID})
         self.producer.send(MessageEndpoints.device_server_config_request(), msg)
 
     def _wait_for_device_server_update(self, RID: str, timeout_time=10) -> bool:
@@ -124,7 +138,7 @@ class ConfigHandler:
         while True:
             msg = self.producer.get(MessageEndpoints.device_config_request_response(RID))
             if msg:
-                return msg.content["accepted"]
+                return msg.content["accepted"], msg
 
             if elapsed_time > timeout:
                 raise TimeoutError(
@@ -139,7 +153,7 @@ class ConfigHandler:
         if "deviceConfig" in dev_config:
             RID = str(uuid.uuid4())
             self._update_device_server(RID, {device.name: dev_config})
-            updated = self._wait_for_device_server_update(RID)
+            updated, _ = self._wait_for_device_server_update(RID)
             device._config["deviceConfig"].update(dev_config["deviceConfig"])
             dev_config.pop("deviceConfig")
 
@@ -148,7 +162,7 @@ class ConfigHandler:
             device._config["enabled"] = dev_config["enabled"]
             RID = str(uuid.uuid4())
             self._update_device_server(RID, {device.name: dev_config})
-            updated = self._wait_for_device_server_update(RID)
+            updated, _ = self._wait_for_device_server_update(RID)
             dev_config.pop("enabled")
 
         if not dev_config:
