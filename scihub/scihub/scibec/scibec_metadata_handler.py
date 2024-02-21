@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import time
 from typing import TYPE_CHECKING
 
 from bec_lib import MessageEndpoints, bec_logger, messages
+from bec_lib.serialization import json_ext
 
 logger = bec_logger.logger
 
@@ -147,6 +149,8 @@ class SciBecMetadataHandler:
             )
             return
         scan = scan[0]
+        data_bec = {key: json_ext.dumps(value) for key, value in data.items()}
+        start = time.time()
         scibec.scan_data.scan_data_controller_create_many(
             body=scibec.models.ScanData(
                 **{
@@ -155,11 +159,13 @@ class SciBecMetadataHandler:
                     "owner": scan["owner"],
                     "scanId": scan["id"],
                     "filePath": file_path,
-                    "data": data,
+                    "data": data_bec,
                 }
             )
         )
-        logger.info(f"Wrote scan data to SciBec for scanID {data['metadata']['scanID']}")
+        logger.info(
+            f"Wrote scan data to SciBec for scanID {data['metadata']['scanID']} in {time.time() - start} seconds."
+        )
 
     def shutdown(self):
         """
