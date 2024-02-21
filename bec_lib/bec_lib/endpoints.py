@@ -19,6 +19,7 @@ class MessageEndpoints:
     _device_server_config_update = "internal/devices/device_server_config_update"
     _device_config_update = "internal/devices/config_update"
     _device_config = "internal/devices/config"
+    _device_config_history = "internal/devices/config_history"
     _device_info = "internal/devices/info"
     _device_staged = "internal/devices/staged"
 
@@ -255,6 +256,18 @@ class MessageEndpoints:
             str: Endpoint for device config.
         """
         return cls._device_config
+
+    @classmethod
+    def device_config_history(cls) -> str:
+        """
+        Endpoint for device config history. This endpoint is used to keep track of the
+        device config history using a messages.AvailableResourceMessage message. The endpoint is
+        connected to a redis list.
+
+        Returns:
+            str: Endpoint for device config history.
+        """
+        return cls._device_config_history
 
     @classmethod
     def device_info(cls, device: str) -> str:
