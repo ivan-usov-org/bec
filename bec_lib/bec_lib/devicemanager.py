@@ -393,7 +393,10 @@ class DeviceManagerBase:
 
         """
         self._start_connectors(bootstrap_server)
-        self._get_config()
+        try:
+            self._get_config()
+        except DeviceConfigError as dev_conf_error:
+            logger.error(f"Failed to initialize DeviceManager. {dev_conf_error}")
 
     def update_status(self, status: BECStatus):
         """Update the status of the device manager
@@ -444,7 +447,6 @@ class DeviceManagerBase:
         elif action == "add":
             self._add_action(config)
         elif action == "reload":
-            logger.info("Reloading config.")
             self._reload_action()
         elif action == "remove":
             self._remove_action(config)
@@ -476,6 +478,7 @@ class DeviceManagerBase:
             self._add_device(dev, config)
 
     def _reload_action(self) -> None:
+        logger.info("Reloading config.")
         self.devices.flush()
         self._get_config()
 
@@ -606,8 +609,7 @@ class DeviceManagerBase:
         if dev_name in self.devices:
             self.devices.pop(dev_name)
 
-    def _load_session(self, idle_time=1, _device_cls=None):
-        time.sleep(idle_time)
+    def _load_session(self, _device_cls=None):
         if self._is_config_valid():
             for dev in self._session["devices"]:
                 # pylint: disable=broad-except
