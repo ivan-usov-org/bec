@@ -170,7 +170,7 @@ class SciBecConnector:
             self._update_experiment_info()
             self._update_eaccount_in_redis()
 
-        except (ApiException, SciBecConnectorError, MaxRetryError) as exc:
+        except Exception as exc:
             self.scibec = None
             logger.warning(f"Could not connect to SciBec: {exc}")
 
