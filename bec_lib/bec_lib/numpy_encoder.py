@@ -85,6 +85,58 @@ def numpy_decode(obj, chain=None):
         return obj if chain is None else chain(obj)
 
 
+def numpy_encode_list(obj, chain=None):
+    """
+    Data encoder for serializing numpy data types.
+    """
+
+    if isinstance(obj, np.ndarray):
+        # If the dtype is structured, store the interface description;
+        # otherwise, store the corresponding array protocol type string:
+        if obj.dtype.kind in ("V", "O"):
+            kind = bytes(obj.dtype.kind, "ascii")
+            descr = obj.dtype.descr
+        else:
+            kind = ""
+            descr = obj.dtype.str
+
+        return {"nd": True, "type": descr, "kind": kind, "shape": obj.shape, "data": obj.tolist()}
+    if isinstance(obj, (np.bool_, np.number)):
+        return {"nd": False, "type": obj.dtype.str, "data": obj.data}
+    if isinstance(obj, complex):
+        return {"complex": True, "data": repr(obj)}
+
+    return obj if chain is None else chain(obj)
+
+
+def numpy_decode_list(obj, chain=None):
+    """
+    Decoder for deserializing numpy data types.
+    """
+
+    try:
+        if "nd" in obj:
+            if obj["nd"] is True:
+                # Check if 'kind' is in obj to enable decoding of data
+                # serialized with older versions or data that had dtype == 'O':
+                if "kind" in obj and obj["kind"] == "V":
+                    descr = [
+                        tuple(tostr(t) if type(t) is bytes else t for t in d) for d in obj["type"]
+                    ]
+                elif "kind" in obj and obj["kind"] == "O":
+                    return np.array(obj["data"])
+                else:
+                    descr = obj["type"]
+                return np.array(obj["data"], dtype=_unpack_dtype(descr)).reshape(obj["shape"])
+            descr = obj["type"]
+            return np.array(obj["data"], dtype=_unpack_dtype(descr))[0]
+        if "complex" in obj:
+            return complex(tostr(obj["data"]))
+        return obj if chain is None else chain(obj)
+    except KeyError:
+        return obj if chain is None else chain(obj)
+
+
 def _unpack_dtype(dtype):
     """
     Unpack dtype descr, recursively unpacking nested structured dtypes.

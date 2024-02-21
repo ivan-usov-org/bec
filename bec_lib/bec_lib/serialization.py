@@ -78,8 +78,8 @@ def decode_set(obj):
     return obj
 
 
-class MsgpackExt:
-    """Encapsulates msgpack dumps/loads with extensions"""
+class SerializationRegistry:
+    """Registry for serialization codecs"""
 
     def __init__(self):
         self._encoder = []
@@ -98,7 +98,7 @@ class MsgpackExt:
         """
         exttype = len(self._ext_decoder)
         if exttype in self._ext_decoder:
-            ValueError("ExtType %d already used" % exttype)
+            raise ValueError("ExtType %d already used" % exttype)
         self._encoder.append((encoder, exttype))
         self._ext_decoder[exttype] = decoder
 
@@ -114,11 +114,16 @@ class MsgpackExt:
         self._encoder.append((encoder, None))
         self._object_hook_decoder.append(decoder)
 
-    def register_numpy(self):
+    def register_numpy(self, use_list=False):
         """
         Register BEC custom numpy encoder as a codec.
         """
-        self.register_object_hook(numpy_encoder.numpy_encode, numpy_encoder.numpy_decode)
+        if use_list:
+            self.register_object_hook(
+                numpy_encoder.numpy_encode_list, numpy_encoder.numpy_decode_list
+            )
+        else:
+            self.register_object_hook(numpy_encoder.numpy_encode, numpy_encoder.numpy_decode)
 
     def register_bec_message(self):
         """
@@ -133,6 +138,10 @@ class MsgpackExt:
         Register codec for set
         """
         self.register_object_hook(encode_set, decode_set)
+
+
+class MsgpackExt(SerializationRegistry):
+    """Encapsulates msgpack dumps/loads with extensions"""
 
     def _default(self, obj):
         for encoder, exttype in self._encoder:
@@ -181,6 +190,46 @@ class MsgpackExt:
             strict_map_key=strict_map_key,
         )
 
+
+class JsonExt(SerializationRegistry):
+    """Encapsulates JSON dumps/loads with extensions"""
+
+    def _default(self, obj):
+        for encoder, _ in self._encoder:
+            result = encoder(obj)
+            if result is obj:
+                # Nothing was done, assume this encoder does not support this
+                # object kind
+                continue
+            return result
+
+    def _ext_hooks(self, data):
+        for decoder in self._object_hook_decoder:
+            try:
+                result = decoder(data)
+            except TypeError:
+                continue
+            if data is not result:
+                # In case the input is not the same as the output,
+                # consider it found the good decoder and it worked
+                break
+        else:
+            return data
+        return result
+
+    def dumps(self, obj):
+        """Serialize object `obj` and return serialized JSON string."""
+        return json.dumps(obj, default=self._default)
+
+    def loads(self, json_str):
+        """Deserialize JSON string `json_str` and return the deserialized object."""
+        return json.loads(json_str, object_hook=self._ext_hooks)
+
+
+json_ext = JsonExt()
+json_ext.register_numpy(use_list=True)
+json_ext.register_bec_message()
+json_ext.register_set_encoder()
 
 msgpack = MsgpackExt()
 msgpack.register_numpy()
