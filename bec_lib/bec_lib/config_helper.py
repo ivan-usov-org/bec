@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 import json
 import os
 import pathlib
@@ -27,13 +28,18 @@ class ConfigHelper:
         self.connector = connector
         self.producer = connector.producer()
 
-    def update_session_with_file(self, file_path: str, reload=True):
+    def update_session_with_file(self, file_path: str, save_recovery: bool = True) -> None:
         """Update the current session with a yaml file from disk.
 
         Args:
             file_path (str): Full path to the yaml file.
-            reload (bool, optional): Send a reload request to all services. Defaults to True.
+            save_recovery (bool, optional): Save the current session before updating. Defaults to True.
         """
+        if save_recovery:
+            time_stamp = f"{datetime.datetime.now():%Y-%m-%d_%H-%M-%S}"
+            fname = f"recovery_config_{time_stamp}.yaml"
+            self._save_config_to_file(fname)
+            print(f"A recovery config was written to {fname}.")
         config = self._load_config_from_file(file_path)
         self.send_config_request(action="set", config=config)
 
@@ -59,9 +65,13 @@ class ConfigHelper:
         Args:
             file_path (str): Full path to the yaml file.
         """
+        self._save_config_to_file(file_path)
+        print(f"Config was written to {file_path}.")
+
+    def _save_config_to_file(self, file_path: str) -> None:
         config = self.producer.get(MessageEndpoints.device_config())
         if not config:
-            raise DeviceConfigError("No config found in the current session.")
+            raise DeviceConfigError("No config found in the session.")
         config = config.content["resource"]
         out = {}
         for dev in config:
@@ -74,8 +84,6 @@ class ConfigHelper:
 
         with open(file_path, "w") as file:
             file.write(yaml.dump(out))
-
-        print(f"Config was written to {file_path}.")
 
     def send_config_request(self, action: str = "update", config=None) -> None:
         """
@@ -94,8 +102,17 @@ class ConfigHelper:
         reply = self.wait_for_config_reply(RID)
 
         if not reply.content["accepted"]:
-            raise DeviceConfigError(f"Failed to update the config: {reply.content['message']}.")
-
+            raise DeviceConfigError(
+                f"Failed to update the config: {reply.content['message']}. The old config will be kept in the device config history."
+            )
+        if "failed_devices" in reply.metadata:
+            print("Failed to update the config for some devices.")
+            for dev in reply.metadata["failed_devices"]:
+                print(f"Device {dev} failed to update:\n {reply.metadata['failed_devices'][dev]}.")
+            devices = [dev for dev in reply.metadata["failed_devices"]]
+            raise DeviceConfigError(
+                f"Failed to update the config for some devices. The following devices were disabled: {devices}."
+            )
         # wait for the device server and scan server to acknowledge the config change
         self.wait_for_service_response(RID)
 
