@@ -91,6 +91,7 @@ class DeviceManagerDS(DeviceManagerBase):
         self._device_instructions_connector = None
         self._config_update_handler_cls = config_update_handler
         self.config_update_handler = None
+        self.failed_devices = []
 
     def initialize(self, bootstrap_server) -> None:
         self.config_update_handler = (
@@ -101,14 +102,7 @@ class DeviceManagerDS(DeviceManagerBase):
         super().initialize(bootstrap_server)
 
     def _reload_action(self) -> None:
-        for dev, obj in self.devices.items():
-            try:
-                obj.obj.destroy()
-            except Exception:
-                logger.warning(f"Failed to destroy {obj.obj.name}")
-                raise RuntimeError
-        self.devices.flush()
-        self._get_config()
+        pass
 
     @staticmethod
     def _get_device_class(dev_type: str) -> type:
@@ -138,16 +132,58 @@ class DeviceManagerDS(DeviceManagerBase):
         return getattr(module, class_name)
 
     def _load_session(self, *_args, **_kwargs):
-        if self._is_config_valid():
+        if not self._is_config_valid():
+            self._reset_config()
+            return
+
+        try:
+            self.failed_devices = {}
             for dev in self._session["devices"]:
                 name = dev.get("name")
                 enabled = dev.get("enabled")
                 logger.info(f"Adding device {name}: {'ENABLED' if enabled else 'DISABLED'}")
                 try:
                     self.initialize_device(dev)
-                except Exception as exc:
-                    content = traceback.format_exc()
-                    logger.error(f"Failed to initialize device: {dev}: {content}.")
+                except ConnectionError:
+                    msg = traceback.format_exc()
+                    self.failed_devices[name] = msg
+            self.config_update_handler.handle_failed_device_inits()
+        except Exception as exc:
+            content = traceback.format_exc()
+            logger.error(
+                f"Failed to initialize device: {dev}: {content}. The config will be reset."
+            )
+            self._reset_config()
+            raise DeviceConfigError(
+                f"Failed to initialize device: {dev}: {content}. The config will be reset."
+            ) from exc
+
+    #     if failed_devices:
+    #         logger.error(
+    #             f"Failed to initialize devices: {failed_devices}. The config will be reset."
+    #         )
+    #         self._disable_devices(failed_devices)
+
+    # def _disable_devices(self, devices: list) -> None:
+    #     msg = messages.DeviceConfigMessage(
+    #         action="update", config={name: {"enabled": False} for name in devices}
+    #     )
+    #     self.producer.send(MessageEndpoints.device_config_request(), msg)
+
+    def _reset_config(self):
+        current_config = self._session["devices"]
+        if current_config:
+            # store the current config in the history
+            current_config_msg = messages.AvailableResourceMessage(
+                resource=current_config, metadata={"removed_at": time.time()}
+            )
+            self.producer.lpush(
+                MessageEndpoints.device_config_history(), current_config_msg, max_size=50
+            )
+        msg = messages.AvailableResourceMessage(resource=[])
+        self.producer.set(MessageEndpoints.device_config(), msg)
+        reload_msg = messages.DeviceConfigMessage(action="reload", config={})
+        self.producer.send(MessageEndpoints.device_config_update(), reload_msg)
 
     @staticmethod
     def update_config(obj: OphydObject, config: dict) -> None:
@@ -266,15 +302,15 @@ class DeviceManagerDS(DeviceManagerBase):
             return opaas_obj
 
         # update device buffer for enabled devices
-        try:
-            self.initialize_enabled_device(opaas_obj)
+        # try:
+        self.initialize_enabled_device(opaas_obj)
         # pylint:disable=broad-except
-        except Exception:
-            error_traceback = traceback.format_exc()
-            logger.error(
-                f"{error_traceback}. Failed to stage {opaas_obj.name}. The device will be disabled."
-            )
-            opaas_obj.enabled = False
+        # except Exception:
+        #     error_traceback = traceback.format_exc()
+        #     logger.error(
+        #         f"{error_traceback}. Failed to stage {opaas_obj.name}. The device will be disabled."
+        #     )
+        #     opaas_obj.enabled = False
 
         obj = opaas_obj.obj
         # add subscriptions
@@ -318,23 +354,27 @@ class DeviceManagerDS(DeviceManagerBase):
     @staticmethod
     def connect_device(obj, wait_for_all=False):
         """establish a connection to a device"""
-        if obj.connected:
-            return
-        if hasattr(obj, "controller"):
-            obj.controller.on()
-            return
-        if hasattr(obj, "wait_for_connection"):
-            try:
-                obj.wait_for_connection(all_signals=wait_for_all, timeout=10)
-            except TypeError:
-                obj.wait_for_connection(timeout=10)
-            return
-
-        logger.error(
-            f"Device {obj.name} does not implement the socket controller interface nor"
-            " wait_for_connection and cannot be turned on."
-        )
-        raise ConnectionError(f"Failed to establish a connection to device {obj.name}")
+        try:
+            if obj.connected:
+                return
+            if hasattr(obj, "controller"):
+                obj.controller.on()
+                return
+            if hasattr(obj, "wait_for_connection"):
+                try:
+                    obj.wait_for_connection(all_signals=wait_for_all, timeout=10)
+                except TypeError:
+                    obj.wait_for_connection(timeout=10)
+                return
+            logger.error(
+                f"Device {obj.name} does not implement the socket controller interface nor"
+                " wait_for_connection and cannot be turned on."
+            )
+            raise ConnectionError(f"Failed to establish a connection to device {obj.name}")
+        except Exception:
+            error_traceback = traceback.format_exc()
+            logger.error(f"{error_traceback}. Failed to connect to {obj.name}.")
+            raise ConnectionError(f"Failed to establish a connection to device {obj.name}")
 
     def publish_device_info(self, obj: OphydObject, pipe=None) -> None:
         """

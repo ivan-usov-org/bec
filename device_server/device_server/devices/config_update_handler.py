@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import traceback
 from typing import TYPE_CHECKING
 
@@ -47,6 +48,11 @@ class ConfigUpdateHandler:
                 self._update_config(msg)
             if msg.content["action"] == "add":
                 raise NotImplementedError
+            if msg.content["action"] == "set":
+                self._set_config(msg)
+                if self.device_manager.failed_devices:
+                    msg.metadata["failed_devices"] = self.device_manager.failed_devices
+
         except DeviceConfigError as dev_conf_error:
             error_msg = traceback.format_exc()
             accepted = False
@@ -107,3 +113,35 @@ class ConfigUpdateHandler:
                 else:
                     self.device_manager.disconnect_device(device.obj)
                     self.device_manager.reset_device(device)
+
+    def _set_config(self, msg: messages.DeviceConfigMessage) -> None:
+        for _, obj in self.device_manager.devices.items():
+            try:
+                obj.obj.destroy()
+            except Exception:
+                logger.warning(f"Failed to destroy {obj.obj.name}")
+                raise RuntimeError
+        self.device_manager.devices.flush()
+        self.device_manager._get_config()
+        if self.device_manager.failed_devices:
+            self.handle_failed_device_inits()
+        return
+
+    def handle_failed_device_inits(self):
+        if self.device_manager.failed_devices:
+            msg = messages.DeviceConfigMessage(
+                action="update",
+                config={name: {"enabled": False} for name in self.device_manager.failed_devices},
+            )
+            self._update_config(msg)
+            self.force_update_config_in_redis()
+        return
+
+    def force_update_config_in_redis(self):
+        config = []
+        for name, device in self.device_manager.devices.items():
+            device_config = copy.deepcopy(device._config)
+            device_config["name"] = name
+            config.append(device_config)
+        msg = messages.AvailableResourceMessage(resource=config)
+        self.device_manager.producer.set(MessageEndpoints.device_config(), msg)
