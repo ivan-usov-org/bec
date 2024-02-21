@@ -20,12 +20,11 @@ from bec_lib import (
     messages,
 )
 from bec_lib.connector import ConnectorBase
+from device_server.devices.config_update_handler import ConfigUpdateHandler
+from device_server.devices.device_serializer import get_device_info
 from ophyd.ophydobj import OphydObject
 from ophyd.signal import EpicsSignalBase
 from typeguard import typechecked
-
-from device_server.devices.config_update_handler import ConfigUpdateHandler
-from device_server.devices.device_serializer import get_device_info
 
 try:
     from bec_plugins import devices as plugin_devices

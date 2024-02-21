@@ -48,8 +48,8 @@ class ConfigUpdateHandler:
                 self._update_config(msg)
             if msg.content["action"] == "add":
                 raise NotImplementedError
-            if msg.content["action"] == "set":
-                self._set_config(msg)
+            if msg.content["action"] == "reload":
+                self._reload_config()
                 if self.device_manager.failed_devices:
                     msg.metadata["failed_devices"] = self.device_manager.failed_devices
 
@@ -114,7 +114,7 @@ class ConfigUpdateHandler:
                     self.device_manager.disconnect_device(device.obj)
                     self.device_manager.reset_device(device)
 
-    def _set_config(self, msg: messages.DeviceConfigMessage) -> None:
+    def _reload_config(self) -> None:
         for _, obj in self.device_manager.devices.items():
             try:
                 obj.obj.destroy()

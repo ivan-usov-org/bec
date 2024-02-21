@@ -53,6 +53,7 @@ def load_device_manager():
     service_mock.connector = ConnectorMock("", store_data=False)
     device_manager = DeviceManagerDS(service_mock, "")
     device_manager.producer = service_mock.connector.producer()
+    device_manager.config_update_handler = mock.MagicMock()
     with open(f"{dir_path}/tests/test_config.yaml", "r") as session_file:
         device_manager._session = create_session_from_config(yaml.safe_load(session_file))
     device_manager._load_session()

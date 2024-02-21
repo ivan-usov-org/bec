@@ -2,16 +2,16 @@
 import os
 from unittest import mock
 
+import bec_lib
 import pytest
 import yaml
-from fastjsonschema import JsonSchemaException
-from test_scibec_connector import SciBecMock, SciHubMock
-
-import bec_lib
 from bec_lib import DeviceBase, messages
 from bec_lib.bec_errors import DeviceConfigError
 from bec_lib.device import OnFailure, ReadoutPriority
 from bec_lib.tests.utils import ConnectorMock
+from fastjsonschema import JsonSchemaException
+from test_scibec_connector import SciBecMock, SciHubMock
+
 from scihub import SciHub
 from scihub.scibec import ConfigHandler, SciBecConnector
 
@@ -20,7 +20,8 @@ dir_path = os.path.dirname(bec_lib.__file__)
 
 @pytest.fixture()
 def config_handler(SciHubMock):
-    scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
+    with mock.patch("scihub.scibec.scibec_connector.os.path.exists", return_value=False):
+        scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
     with mock.patch.object(scibec_connector, "_start_config_request_handler"):
         with mock.patch.object(scibec_connector, "_start_metadata_handler"):
             with mock.patch.object(scibec_connector, "_start_scibec_account_update"):
@@ -126,17 +127,22 @@ def test_config_handler_set_config(config_handler, config, expected):
     msg = messages.DeviceConfigMessage(action="set", config=config, metadata={"RID": "12345"})
     with mock.patch.object(config_handler.validator, "validate_device") as validator:
         with mock.patch.object(config_handler, "send_config_request_reply") as req_reply:
-            with mock.patch.object(config_handler, "send_config") as send_config:
-                config_handler._set_config(msg)
-                req_reply.assert_called_once_with(
-                    accepted=True, error_msg=None, metadata={"RID": "12345"}
-                )
-                validator.assert_called_once_with(expected)
-                send_config.assert_called_once_with(
-                    messages.DeviceConfigMessage(
-                        action="reload", config={}, metadata={"RID": "12345"}
+            with mock.patch.object(
+                config_handler,
+                "_wait_for_device_server_update",
+                return_value=(True, mock.MagicMock()),
+            ) as wait:
+                with mock.patch.object(config_handler, "send_config") as send_config:
+                    config_handler._set_config(msg)
+                    req_reply.assert_called_once_with(
+                        accepted=True, error_msg=None, metadata={"RID": "12345"}
                     )
-                )
+                    validator.assert_called_once_with(expected)
+                    send_config.assert_called_once_with(
+                        messages.DeviceConfigMessage(
+                            action="reload", config={}, metadata={"RID": "12345"}
+                        )
+                    )
 
 
 def test_config_handler_set_invalid_config_raises(config_handler):
@@ -222,7 +228,7 @@ def test_config_handler_update_device_config_enable(config_handler):
     dev.samx = DeviceBase(name="samx", config={})
     with mock.patch.object(config_handler, "_update_device_server") as update_dev_server:
         with mock.patch.object(
-            config_handler, "_wait_for_device_server_update", return_value=True
+            config_handler, "_wait_for_device_server_update", return_value=(True, mock.MagicMock())
         ) as wait:
             with mock.patch("scihub.scibec.config_handler.uuid") as uuid:
                 device = dev["samx"]
@@ -238,7 +244,7 @@ def test_config_handler_update_device_config_deviceConfig(config_handler):
     dev.samx = DeviceBase(name="samx", config={"deviceConfig": {}})
     with mock.patch.object(config_handler, "_update_device_server") as update_dev_server:
         with mock.patch.object(
-            config_handler, "_wait_for_device_server_update", return_value=True
+            config_handler, "_wait_for_device_server_update", return_value=(True, mock.MagicMock())
         ) as wait:
             with mock.patch("scihub.scibec.config_handler.uuid") as uuid:
                 device = dev["samx"]
@@ -292,7 +298,7 @@ def test_config_handler_update_device_config_available_keys(config_handler, avai
         dev.samx = DeviceBase(name="samx", config={})
     with mock.patch.object(config_handler, "_update_device_server") as update_dev_server:
         with mock.patch.object(
-            config_handler, "_wait_for_device_server_update", return_value=True
+            config_handler, "_wait_for_device_server_update", return_value=(True, mock.MagicMock())
         ) as wait:
             with mock.patch("scihub.scibec.config_handler.uuid") as uuid:
                 device = dev["samx"]

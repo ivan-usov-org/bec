@@ -50,17 +50,18 @@ def test_request_response():
 def test_config_handler_update_config(device_manager):
     handler = ConfigUpdateHandler(device_manager)
 
-    msg = messages.DeviceConfigMessage(action="update", config={"samx": {"enabled": False}})
+    # bpm4i doesn't have a controller, so it should be destroyed
+    msg = messages.DeviceConfigMessage(action="update", config={"bpm4i": {"enabled": False}})
     handler._update_config(msg)
-    assert device_manager.devices.samx.enabled is False
-    assert device_manager.devices.samx.initialized is False
-    assert device_manager.devices.samx.obj._destroyed is True
+    assert device_manager.devices.bpm4i.enabled is False
+    assert device_manager.devices.bpm4i.initialized is False
+    assert device_manager.devices.bpm4i.obj._destroyed is True
 
-    msg = messages.DeviceConfigMessage(action="update", config={"samx": {"enabled": True}})
+    msg = messages.DeviceConfigMessage(action="update", config={"bpm4i": {"enabled": True}})
     handler._update_config(msg)
-    assert device_manager.devices.samx.enabled is True
-    assert device_manager.devices.samx.initialized is True
-    assert device_manager.devices.samx.obj._destroyed is False
+    assert device_manager.devices.bpm4i.enabled is True
+    assert device_manager.devices.bpm4i.initialized is True
+    assert device_manager.devices.bpm4i.obj._destroyed is False
 
 
 def test_config_handler_update_config_raises(device_manager):
@@ -73,3 +74,34 @@ def test_config_handler_update_config_raises(device_manager):
     with pytest.raises(DeviceConfigError):
         handler._update_config(msg)
     assert device_manager.devices.samx._config["deviceConfig"] == old_config
+
+
+def test_reload_action(device_manager):
+    handler = ConfigUpdateHandler(device_manager)
+    dm = handler.device_manager
+    with mock.patch.object(dm.devices.samx.obj, "destroy") as obj_destroy:
+        with mock.patch.object(dm, "_get_config") as get_config:
+            handler._reload_config()
+            obj_destroy.assert_called_once()
+            get_config.assert_called_once()
+
+
+def test_parse_config_request_update(device_manager):
+    handler = ConfigUpdateHandler(device_manager)
+    msg = messages.DeviceConfigMessage(
+        action="update", config={"samx": {"deviceConfig": {"doesntexist": True}}}
+    )
+    with mock.patch.object(handler, "_update_config") as update_config:
+        handler.parse_config_request(msg)
+        update_config.assert_called_once_with(msg)
+
+
+def test_parse_config_request_reload(device_manager):
+    handler = ConfigUpdateHandler(device_manager)
+    dm = handler.device_manager
+    dm.failed_devices = ["samx"]
+    msg = messages.DeviceConfigMessage(action="reload", config={})
+    with mock.patch.object(handler, "_reload_config") as reload_config:
+        handler.parse_config_request(msg)
+        reload_config.assert_called_once()
+        assert msg.metadata["failed_devices"] == ["samx"]

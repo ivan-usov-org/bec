@@ -486,7 +486,7 @@ def bec_client():
     device_manager._session = builtins.__dict__["test_session"]
     device_manager.producer = device_manager.connector.producer()
     client.wait_for_service = lambda service_name: None
-    device_manager._load_session(idle_time=0)
+    device_manager._load_session()
     for name, dev in device_manager.devices.items():
         dev._info["hints"] = {"fields": [name]}
     client.device_manager = device_manager
@@ -565,7 +565,7 @@ class ProducerMock:  # pragma: no cover
             return
         self.message_sent.append({"queue": topic, "msg": msg, "expire": expire})
 
-    def lpush(self, topic, msg, pipe=None):
+    def lpush(self, topic, msg, pipe=None, max_size=None):
         if pipe:
             pipe._pipe_buffer.append(("lpush", (topic, msg), {}))
             return

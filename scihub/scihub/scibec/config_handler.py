@@ -78,7 +78,7 @@ class ConfigHandler:
             self.validator.validate_device(device)
         self.scibec_connector.set_redis_config(list(config.values()))
         RID = str(uuid.uuid4())
-        self._update_device_server(RID, config, action="set")
+        self._update_device_server(RID, config, action="reload")
         accepted, server_response_msg = self._wait_for_device_server_update(RID, timeout_time=20)
         if "failed_devices" in server_response_msg.metadata:
             msg.metadata["failed_devices"] = server_response_msg.metadata["failed_devices"]
