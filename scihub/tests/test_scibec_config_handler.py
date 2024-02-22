@@ -135,12 +135,16 @@ def test_config_handler_set_config(config_handler, config, expected):
                 with mock.patch.object(config_handler, "send_config") as send_config:
                     config_handler._set_config(msg)
                     req_reply.assert_called_once_with(
-                        accepted=True, error_msg=None, metadata={"RID": "12345"}
+                        accepted=True,
+                        error_msg=None,
+                        metadata={"RID": "12345", "updated_config": True},
                     )
                     validator.assert_called_once_with(expected)
                     send_config.assert_called_once_with(
                         messages.DeviceConfigMessage(
-                            action="reload", config={}, metadata={"RID": "12345"}
+                            action="reload",
+                            config={},
+                            metadata={"RID": "12345", "updated_config": True},
                         )
                     )
 
