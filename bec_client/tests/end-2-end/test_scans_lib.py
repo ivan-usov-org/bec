@@ -303,12 +303,36 @@ def test_dap_fit(lib_client):
             True,
             [],
         ),
+        (
+            {
+                "hexapod": {
+                    "deviceClass": "SynDeviceOPAAS",
+                    "deviceConfig": {},
+                    "deviceTags": ["user motors"],
+                    "readoutPriority": "baseline",
+                    "enabled": True,
+                    "readOnly": False,
+                },
+                "eyefoc": {
+                    "deviceClass": "WrongDeviceClass",
+                    "deviceConfig": {},
+                    "readoutPriority": "baseline",
+                    "deviceTags": ["user motors"],
+                    "enabled": True,
+                    "readOnly": False,
+                },
+            },
+            True,
+            True,
+            [],
+        ),
     ],
     ids=[
         "invalid_config_missing_readoutPriority",
         "valid_config_no_error",
-        "invalid_device_class",
+        "invalid_device_class_connection_error",
         "invalid_device_class_init",
+        "invalid_device_class",
     ],
 )
 def test_config_reload(lib_client, config, raises_error, deletes_config, disabled_device):
