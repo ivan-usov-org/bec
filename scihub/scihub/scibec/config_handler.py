@@ -69,14 +69,12 @@ class ConfigHandler:
         logger.debug(self.scibec_connector.scibec_info)
         experiment = self.scibec_connector.scibec_info.get("beamline", {}).get("activeExperiment")
 
-        # if scibec and experiment:
-        #     scibec.set_session_data(experiment, config)
-        #     self.scibec_connector.update_session()
-        # else:
+        msg.metadata["updated_config"] = False
         for name, device in config.items():
             self._convert_to_db_config(name, device)
             self.validator.validate_device(device)
         self.scibec_connector.set_redis_config(list(config.values()))
+        msg.metadata["updated_config"] = True
         RID = str(uuid.uuid4())
         self._update_device_server(RID, config, action="reload")
         accepted, server_response_msg = self._wait_for_device_server_update(RID, timeout_time=20)
