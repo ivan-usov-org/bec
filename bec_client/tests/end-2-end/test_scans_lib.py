@@ -1,8 +1,12 @@
+import os
+import threading
 import time
 
+import bec_lib
 import numpy as np
 import pytest
-from bec_lib import BECClient, RedisConnector, ServiceConfig, bec_logger
+import yaml
+from bec_lib import BECClient, DeviceConfigError, RedisConnector, ServiceConfig, bec_logger
 from bec_lib.alarm_handler import AlarmBase
 from bec_lib.tests.utils import wait_for_empty_queue
 
@@ -17,8 +21,27 @@ CONFIG_PATH = "../ci/test_config.yaml"
 # pylint: disable=undefined-variable
 
 
+@pytest.fixture()
+def threads_check():
+    current_threads = set(
+        th
+        for th in threading.enumerate()
+        if "loguru" not in th.name and th is not threading.main_thread()
+    )
+    yield
+    threads_after = set(
+        th
+        for th in threading.enumerate()
+        if "loguru" not in th.name and th is not threading.main_thread()
+    )
+    additional_threads = threads_after - current_threads
+    assert (
+        len(additional_threads) == 0
+    ), f"Test creates {len(additional_threads)} threads that are not cleaned: {additional_threads}"
+
+
 @pytest.fixture(scope="function")
-def lib_client():
+def lib_client(threads_check):
     config = ServiceConfig(CONFIG_PATH)
     bec = BECClient(forced=True)
     bec.initialize(config, RedisConnector)
@@ -154,3 +177,166 @@ def test_dap_fit(lib_client):
     fit = bec.dap.GaussianModel.fit(res.scan, "samx", "samx", "bpm4i", "bpm4i")
 
     assert np.isclose(fit.center, 5, atol=0.5)
+
+
+# eyefoc:
+#   readoutPriority: baseline
+#   deviceClass: SimPositioner
+#   deviceConfig:
+#     delay: 1
+#     limits:
+#       - -50
+#       - 50
+#     speed: 100
+#     tolerance: 0.01
+#     update_frequency: 400
+#   deviceTags:
+#     - user motors
+#   enabled: true
+#   readOnly: false
+
+
+@pytest.mark.timeout(100)
+@pytest.mark.parametrize(
+    "config, raises_error, deletes_config, disabled_device",
+    [
+        (
+            {
+                "hexapod": {
+                    "deviceClass": "SynDeviceOPAAS",
+                    "deviceConfig": {},
+                    "deviceTags": ["user motors"],
+                    "readoutPriority": "baseline",
+                    "enabled": True,
+                    "readOnly": False,
+                },
+                "eyefoc": {
+                    "deviceClass": "SimPositioner",
+                    "deviceConfig": {
+                        "delay": 1,
+                        "limits": [-50, 50],
+                        "speed": 100,
+                        "tolerance": 0.01,
+                        "update_frequency": 400,
+                    },
+                    "deviceTags": ["user motors"],
+                    "enabled": True,
+                    "readOnly": False,
+                },
+            },
+            True,
+            False,
+            [],
+        ),
+        (
+            {
+                "hexapod": {
+                    "deviceClass": "SynDeviceOPAAS",
+                    "deviceConfig": {},
+                    "deviceTags": ["user motors"],
+                    "readoutPriority": "baseline",
+                    "enabled": True,
+                    "readOnly": False,
+                },
+                "eyefoc": {
+                    "deviceClass": "SimPositioner",
+                    "deviceConfig": {
+                        "delay": 1,
+                        "limits": [-50, 50],
+                        "speed": 100,
+                        "tolerance": 0.01,
+                        "update_frequency": 400,
+                    },
+                    "readoutPriority": "baseline",
+                    "deviceTags": ["user motors"],
+                    "enabled": True,
+                    "readOnly": False,
+                },
+            },
+            False,
+            False,
+            [],
+        ),
+        (
+            {
+                "hexapod": {
+                    "deviceClass": "SynDeviceOPAAS",
+                    "deviceConfig": {},
+                    "deviceTags": ["user motors"],
+                    "readoutPriority": "baseline",
+                    "enabled": True,
+                    "readOnly": False,
+                },
+                "eyefoc": {
+                    "deviceClass": "utils:bec_utils:DeviceClassConnectionError",
+                    "deviceConfig": {},
+                    "readoutPriority": "baseline",
+                    "deviceTags": ["user motors"],
+                    "enabled": True,
+                    "readOnly": False,
+                },
+            },
+            True,
+            False,
+            ["eyefoc"],
+        ),
+        (
+            {
+                "hexapod": {
+                    "deviceClass": "SynDeviceOPAAS",
+                    "deviceConfig": {},
+                    "deviceTags": ["user motors"],
+                    "readoutPriority": "baseline",
+                    "enabled": True,
+                    "readOnly": False,
+                },
+                "eyefoc": {
+                    "deviceClass": "utils:bec_utils:DeviceClassInitError",
+                    "deviceConfig": {},
+                    "readoutPriority": "baseline",
+                    "deviceTags": ["user motors"],
+                    "enabled": True,
+                    "readOnly": False,
+                },
+            },
+            True,
+            True,
+            [],
+        ),
+    ],
+    ids=[
+        "invalid_config_missing_readoutPriority",
+        "valid_config_no_error",
+        "invalid_device_class",
+        "invalid_device_class_init",
+    ],
+)
+def test_config_reload(lib_client, config, raises_error, deletes_config, disabled_device):
+    bec = lib_client
+    wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_config_reload"})
+    try:
+        # write new config to disk
+        with open("./e2e_runtime_config_test.yaml", "w") as f:
+            f.write(yaml.dump(config))
+        num_devices = len(bec.device_manager.devices)
+        if raises_error:
+            with pytest.raises(DeviceConfigError):
+                bec.config.update_session_with_file("./e2e_runtime_config_test.yaml")
+            if deletes_config:
+                assert len(bec.device_manager.devices) == 0
+            elif disabled_device:
+                assert len(bec.device_manager.devices) == 2
+            else:
+                assert len(bec.device_manager.devices) == num_devices
+        else:
+            bec.config.update_session_with_file("./e2e_runtime_config_test.yaml")
+            assert len(bec.device_manager.devices) == 2
+        for dev in disabled_device:
+            assert bec.device_manager.devices[dev].enabled is False
+    finally:
+        test_device_config = os.path.join(
+            os.path.dirname(os.path.abspath(bec_lib.tests.__file__)), "test_config.yaml"
+        )
+        bec.config.update_session_with_file(test_device_config)
+    # bec.config.load_demo_config()
