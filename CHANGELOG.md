@@ -2,6 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## v1.9.0 (2024-02-22)
+
+### Feature
+
+* **bec_lib:** Added json serializer ([`25366c0`](https://gitlab.psi.ch/bec/bec/-/commit/25366c09638cf4e005ee4a75d64cf8f9eeba00ca))
+
+### Fix
+
+* **scihub:** Fixed data serialization before upload to scibec ([`eae1d61`](https://gitlab.psi.ch/bec/bec/-/commit/eae1d617d6c44a933e7e86ea86e35d380d323f6a))
+* **scihub:** Fixed error handling ([`fd3cb02`](https://gitlab.psi.ch/bec/bec/-/commit/fd3cb025c50c61f3384d44abc8c234371952d731))
+
 ## v1.8.0 (2024-02-20)
 
 ### Feature
