@@ -380,7 +380,7 @@ class DeviceManagerBase:
         self._service = service
         self.parent = service  # for backwards compatibility; will be removed in the future
         self.connector = self._service.connector
-        self.config_helper = ConfigHelper(self.connector)
+        self.config_helper = ConfigHelper(self.connector, self._service._service_name)
         self._status_cb = status_cb if isinstance(status_cb, list) else [status_cb]
 
     def initialize(self, bootstrap_server) -> None:
@@ -468,7 +468,7 @@ class DeviceManagerBase:
             MessageEndpoints.service_response(msg.metadata["RID"]),
             messages.ServiceResponseMessage(
                 # pylint: disable=no-member
-                response={"accepted": True, "service": self._service.__class__.__name__}
+                response={"accepted": True, "service": self._service._service_name}
             ),
             expire=100,
         )
