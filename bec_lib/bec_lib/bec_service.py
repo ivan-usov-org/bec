@@ -42,7 +42,7 @@ class BECService:
         self._unique_service = unique_service
         self.wait_for_server = wait_for_server
         self.producer = self.connector.producer()
-        self._service_id = str(uuid.uuid4())
+        self.__service_id = str(uuid.uuid4())
         self._user = getpass.getuser()
         self._hostname = socket.gethostname()
         self._service_info_thread = None
@@ -64,6 +64,10 @@ class BECService:
             if self._unique_service
             else f"{self.__class__.__name__}/{self._service_id}"
         )
+
+    @property
+    def _service_id(self):
+        return self.__service_id
 
     def _import_config(self, config: str | ServiceConfig) -> None:
         if isinstance(config, str):
