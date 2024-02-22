@@ -24,9 +24,10 @@ logger = bec_logger.logger
 
 
 class ConfigHelper:
-    def __init__(self, connector: RedisConnector) -> None:
+    def __init__(self, connector: RedisConnector, service_name: str = None) -> None:
         self.connector = connector
         self.producer = connector.producer()
+        self._service_name = service_name
 
     def update_session_with_file(self, file_path: str, save_recovery: bool = True) -> None:
         """Update the current session with a yaml file from disk.
@@ -101,20 +102,30 @@ class ConfigHelper:
 
         reply = self.wait_for_config_reply(RID)
 
-        if not reply.content["accepted"]:
+        if not reply.content["accepted"] and not reply.metadata.get("updated_config"):
             raise DeviceConfigError(
-                f"Failed to update the config: {reply.content['message']}. The old config will be kept in the device config history."
+                f"Failed to update the config: {reply.content['message']}. No devices were updated."
             )
-        if "failed_devices" in reply.metadata:
-            print("Failed to update the config for some devices.")
-            for dev in reply.metadata["failed_devices"]:
-                print(f"Device {dev} failed to update:\n {reply.metadata['failed_devices'][dev]}.")
-            devices = [dev for dev in reply.metadata["failed_devices"]]
-            raise DeviceConfigError(
-                f"Failed to update the config for some devices. The following devices were disabled: {devices}."
-            )
-        # wait for the device server and scan server to acknowledge the config change
-        self.wait_for_service_response(RID)
+        try:
+            if not reply.content["accepted"] and reply.metadata.get("updated_config"):
+                raise DeviceConfigError(
+                    f"Failed to update the config: {reply.content['message']}. The old config will be kept in the device config history."
+                )
+
+            if "failed_devices" in reply.metadata:
+                print("Failed to update the config for some devices.")
+                for dev in reply.metadata["failed_devices"]:
+                    print(
+                        f"Device {dev} failed to update:\n {reply.metadata['failed_devices'][dev]}."
+                    )
+                devices = [dev for dev in reply.metadata["failed_devices"]]
+
+                raise DeviceConfigError(
+                    f"Failed to update the config for some devices. The following devices were disabled: {devices}."
+                )
+        finally:
+            # wait for the device server and scan server to acknowledge the config change
+            self.wait_for_service_response(RID)
 
     def wait_for_service_response(self, RID: str, timeout=10) -> messages.ServiceResponseMessage:
         """
@@ -140,7 +151,10 @@ class ConfigHelper:
                     for msg in service_messages
                     if msg is not None
                 ]
-                if set(["DeviceServer", "ScanServer"]).issubset(set(ack_services)):
+                checked_services = set(["DeviceServer", "ScanServer"])
+                if self._service_name:
+                    checked_services.add(self._service_name)
+                if checked_services.issubset(set(ack_services)):
                     break
             if elapsed_time > max_time:
                 if service_messages:
