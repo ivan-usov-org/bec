@@ -108,7 +108,7 @@ class BECClient(BECService, UserScriptsMixin):
         self._start_alarm_handler()
 
         self.load_all_user_scripts()
-        self.config = ConfigHelper(self.connector)
+        self.config = self.device_manager.config_helper
         self.history = self.queue.queue_storage.storage
         self.dap = DAPPlugins(self)
         self.bl_checks = BeamlineChecks(self)
@@ -188,6 +188,8 @@ class BECClient(BECService, UserScriptsMixin):
             self.queue.shutdown()
         if self.alarm_handler:
             self.alarm_handler.shutdown()
+        if self.bl_checks:
+            self.bl_checks.stop()
 
     def _print_available_commands(self, title: str, data: tuple) -> None:
         console = Console()

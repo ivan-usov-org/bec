@@ -182,6 +182,7 @@ class BeamlineChecks:
 
         self._beam_check_thread = threading.Thread(target=self._check_beam, daemon=True)
         self._beam_check_thread.start()
+        self._started = True
 
     def stop(self):
         """Stop the beamline checks"""
