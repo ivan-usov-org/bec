@@ -1028,7 +1028,7 @@ class ContLineScan(ScanBase):
                 raise ScanAbortion(f"Skipped point {self.pointID + 1}")
 
 
-class RoundScanFlySim(ScanBase):
+class RoundScanFlySim(SyncFlyScanBase):
     scan_name = "round_scan_fly"
     scan_report_hint = "table"
     scan_type = "fly"
@@ -1065,6 +1065,10 @@ class RoundScanFlySim(ScanBase):
     def _get_scan_motors(self):
         self.scan_motors = []
         self.flyer = list(self.caller_args.keys())[0]
+
+    @property
+    def monitor_sync(self):
+        return self.flyer
 
     def prepare_positions(self):
         self._calculate_positions()
@@ -1261,7 +1265,7 @@ class TimeScan(ScanBase):
             yield from self._at_each_point(ind)
 
 
-class MonitorScan(ScanBase):
+class MonitorScan(SyncFlyScanBase):
     scan_name = "monitor_scan"
     scan_report_hint = "table"
     required_kwargs = ["relative"]
@@ -1299,6 +1303,10 @@ class MonitorScan(ScanBase):
     def _get_scan_motors(self):
         self.scan_motors = [self.device]
         self.flyer = self.device
+
+    @property
+    def monitor_sync(self):
+        return self.flyer
 
     def _calculate_positions(self) -> None:
         self.positions = np.vstack(tuple(self.caller_args.values())).T.tolist()
