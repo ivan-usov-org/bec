@@ -4,16 +4,24 @@ import os
 import subprocess
 import time
 from pathlib import Path
-from bec_lib.pdf_writer import PDFWriter
 
 import numpy as np
+from bec_lib import bec_logger
+from bec_lib.alarm_handler import AlarmBase
+from bec_lib.pdf_writer import PDFWriter
 from typeguard import typechecked
 
+from bec_client.plugins.cSAXS import cSAXSBeamlineChecks
 from bec_client.plugins.flomni.flomni_optics_mixin import FlomniOpticsMixin
 from bec_client.plugins.flomni.x_ray_eye_align import XrayEyeAlign
-from bec_lib import bec_logger
 
 logger = bec_logger.logger
+
+if builtins.__dict__.get("bec") is not None:
+    bec = builtins.__dict__.get("bec")
+    dev = builtins.__dict__.get("dev")
+    umv = builtins.__dict__.get("umv")
+    umvr = builtins.__dict__.get("umvr")
 
 
 class FlomniInitError(Exception):
@@ -25,6 +33,7 @@ class FlomniError(Exception):
 
 
 class FlomniInitStagesMixin:
+
     def flomni_init_stages(self):
         self.drive_axis_to_limit(dev.ftransy, "forward")
         dev.ftransy.limits = [-100, 0]
@@ -948,7 +957,11 @@ class FlomniAlignmentMixin:
 
 
 class Flomni(
-    FlomniInitStagesMixin, FlomniSampleTransferMixin, FlomniAlignmentMixin, FlomniOpticsMixin
+    FlomniInitStagesMixin,
+    FlomniSampleTransferMixin,
+    FlomniAlignmentMixin,
+    FlomniOpticsMixin,
+    cSAXSBeamlineChecks,
 ):
     def __init__(self, client):
         super().__init__()
@@ -1275,7 +1288,7 @@ class Flomni(
 
         if subtomo_start == 1 and start_angle is None:
             # pylint: disable=undefined-variable
-                self.tomo_id = self.add_sample_database(
+            self.tomo_id = self.add_sample_database(
                 self.sample_name,
                 str(datetime.date.today()),
                 bec.active_account.decode(),
@@ -1291,14 +1304,7 @@ class Flomni(
                 start_angle = None
 
     def add_sample_database(
-        self,
-        samplename,
-        date,
-        eaccount,
-        scan_number,
-        setup,
-        sample_additional_info,
-        user,
+        self, samplename, date, eaccount, scan_number, setup, sample_additional_info, user
     ):
         """Add a sample to the omny sample database. This also retrieves the tomo id."""
         subprocess.run(
@@ -1311,6 +1317,7 @@ class Flomni(
 
     def _at_each_angle(self, angle: float) -> None:
         if "flomni_at_each_angle" in builtins.__dict__:
+            # pylint: disable=undefined-variable
             flomni_at_each_angle(self, angle)
             return
 
@@ -1477,23 +1484,15 @@ class Flomni(
             file.write(header)
             file.write(content)
         subprocess.run(
-            "xterm /work/sls/spec/local/XOMNY/bin/upload/upload_last_pon.sh &",
-            shell=True,
+            "xterm /work/sls/spec/local/XOMNY/bin/upload/upload_last_pon.sh &", shell=True
         )
         # status = subprocess.run(f"cp /tmp/spec-e20131-specES1.pdf {user_target}", shell=True)
         msg = bec.logbook.LogbookMessage()
         logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "LamNI_logo.png")
         msg.add_file(logo_path).add_text("".join(content).replace("\n", "</p><p>")).add_tag(
-            [
-                "BEC",
-                "tomo_parameters",
-                f"dataset_id_{dataset_id}",
-                "LamNI",
-                self.sample_name,
-            ]
+            ["BEC", "tomo_parameters", f"dataset_id_{dataset_id}", "LamNI", self.sample_name]
         )
         self.client.logbook.send_logbook_message(msg)
-
 
 
 if __name__ == "__main__":
