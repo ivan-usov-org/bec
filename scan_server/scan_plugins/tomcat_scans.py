@@ -33,20 +33,12 @@ class AeroSingleScan(FlyScanBase):
         self.scanPsoDist = self.caller_kwargs.get("psodist")
         #self.scanDaqPts  = self.caller_kwargs.get("daqpoints")
 
-    def scan_report_instructions(self):
-        """Scan report instructions for the progress bar, yields from mcs card"""
-        if not self.scan_report_hint:
-            yield None
-            return
-        yield from self.stubs.scan_report_instruction({"scan_progress": ["es1_roty1"]})
-
     def pre_scan(self):
         st = yield from self.stubs.send_rpc_and_wait("es1_roty", "move", self.scanStart)
         st.wait()
         yield from self.stubs.pre_scan()
 
     def scan_core(self):
-        #yield from self.stubs.rpc(, parameter={}|self, *, device: str, parameter: dict, metadata=None):
         # Refresh the PSO distance array        
         st = yield from self.stubs.send_rpc_and_wait('es1_psod', 'dstDistanceArr.set', self.scanPsoDist)
         st.wait()
@@ -59,12 +51,11 @@ class AeroSingleScan(FlyScanBase):
 
         print("Start moving")
         # Start the actual movement
-        #yield from self.stubs.set_and_wait(device=["es1_roty"], positions=[self.scanEnd])
-        yield from self.stubs.set(device="es1_roty", value=self.scanEnd, wait_group="flyer")
+        yield from self.stubs.kickoff(device='es1_roty', parameter={'target': self.scanEnd},)
+        #yield from self.stubs.set(device='es1_roty', value=self.scanEnd, wait_group="flyer")
         target_diid = self.DIID - 1
-
+        
         # Wait for motion to finish
-        #yield from self.stubs.wait(device="es1_roty", wait_group="flyer", wait_type="move")
         while True:
             yield from self.stubs.read_and_wait(group="primary", wait_group="readout_primary")
             status = self.stubs.get_req_status(device='es1_roty', RID=self.metadata["RID"], DIID=target_diid)

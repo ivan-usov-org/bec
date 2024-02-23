@@ -214,7 +214,7 @@ class ScanStubs:
         matching_RID = msg.metadata.get("RID") == RID
         if not matching_RID:
             return None
-        return msg.content["status"]
+        return msg.content["value"]
 
     def close_scan(self):
         """Close the scan."""
