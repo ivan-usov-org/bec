@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.11.0 (2024-02-23)
+
+### Feature
+
+* Add Ophyd DeviceProxy to backend for simulation framework, delayed init of proxies ([`d37c5e7`](https://gitlab.psi.ch/bec/bec/-/commit/d37c5e739120baad5ffef22888ba264a74663e63))
+
 ## v1.10.0 (2024-02-23)
 
 ### Feature
