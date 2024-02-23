@@ -1265,7 +1265,7 @@ class TimeScan(ScanBase):
             yield from self._at_each_point(ind)
 
 
-class MonitorScan(SyncFlyScanBase):
+class MonitorScan(ScanBase):
     scan_name = "monitor_scan"
     scan_report_hint = "table"
     required_kwargs = ["relative"]
