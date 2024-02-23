@@ -317,7 +317,9 @@ class ScanBundler(BECService):
                     return
             self.device_storage[device] = signal
             readout_priority = metadata.get("readout_priority")
-            if readout_priority == "monitored":
+            device_is_monitor_sync = self.sync_storage[scanID]["info"]["monitor_sync"] == device
+            dev_obj = self.device_manager.devices.get(device)
+            if dev_obj in self.monitored_devices[scanID]["devices"] or device_is_monitor_sync:
                 if self.sync_storage[scanID]["info"]["scan_type"] == "step":
                     self._step_scan_update(scanID, device, signal, metadata)
                 elif self.sync_storage[scanID]["info"]["scan_type"] == "fly":
@@ -326,9 +328,10 @@ class ScanBundler(BECService):
                     raise RuntimeError(
                         f"Unknown scan type {self.sync_storage[scanID]['info']['scan_type']}"
                     )
-
             elif readout_priority == "baseline":
                 self._baseline_update(scanID, device, signal)
+            else:
+                logger.warning(f"Received reading from unknown device {device}")
 
     def _update_monitor_signals(self, scanID, pointID) -> None:
         if self.sync_storage[scanID]["info"]["scan_type"] == "fly":
