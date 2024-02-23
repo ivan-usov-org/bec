@@ -7,7 +7,7 @@ from setuptools import setup
 
 current_path = pathlib.Path(__file__).parent.resolve()
 
-__version__ = "1.11.0"
+__version__ = "1.11.1"
 
 
 def run_install(setup_args: dict, bec_deps: list, editable=False):

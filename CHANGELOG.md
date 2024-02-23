@@ -2,6 +2,15 @@
 
 <!--next-version-placeholder-->
 
+## v1.11.1 (2024-02-23)
+
+### Fix
+
+* **scan_bundler:** Fixed scan bundler update ([`2e5b147`](https://gitlab.psi.ch/bec/bec/-/commit/2e5b147a2c9ccd6ca7169f45f0431ed1df902b0f))
+* **scan_server:** Reverted changes to monitor scan ([`636e060`](https://gitlab.psi.ch/bec/bec/-/commit/636e0609f2d05ea079661872858084b3f9b3847e))
+* **file_writer:** Fixed data update ([`16f8f30`](https://gitlab.psi.ch/bec/bec/-/commit/16f8f30ea6fc15173abbfccee65b869018659bca))
+* **scan_server:** Fixed inheritance for flyers ([`5f80220`](https://gitlab.psi.ch/bec/bec/-/commit/5f80220fa2d062112dd5770b3485dd478ead63f8))
+
 ## v1.11.0 (2024-02-23)
 
 ### Feature
