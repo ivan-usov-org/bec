@@ -4,6 +4,7 @@ import threading
 import traceback
 
 import numpy as np
+
 from bec_lib import (
     BECService,
     DeviceManagerBase,
@@ -17,7 +18,6 @@ from bec_lib.alarm_handler import Alarms
 from bec_lib.async_data import AsyncDataHandler
 from bec_lib.file_utils import FileWriterMixin
 from bec_lib.redis_connector import MessageObject, RedisConnector
-
 from file_writer.file_writer import NexusFileWriter
 
 logger = bec_logger.logger
@@ -148,9 +148,13 @@ class FileWriterManager(BECService):
             if not scan_storage.end_time:
                 scan_storage.end_time = msg.content.get("timestamp")
             scan_storage.scan_finished = True
-            if msg.content["info"]:
-                scan_storage.num_points = msg.content["info"]["num_points"]
-                scan_storage.enforce_sync = msg.content["info"]["enforce_sync"]
+            info = msg.content.get("info")
+            if info:
+                scan_storage.num_points = info["num_points"]
+                if info["scan_type"] == "step":
+                    scan_storage.enforce_sync = True
+                else:
+                    scan_storage.enforce_sync = info["monitor_sync"] == "bec"
             self.check_storage_status(scanID=scanID)
 
     def insert_to_scan_storage(self, msg: messages.ScanMessage) -> None:

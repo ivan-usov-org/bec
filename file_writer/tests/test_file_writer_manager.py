@@ -73,6 +73,7 @@ def test_scan_status_callback():
             "scan_number": 1,
             "DIID": "DIID",
             "stream": "stream",
+            "scan_type": "step",
             "num_points": 1,
             "enforce_sync": True,
         },
