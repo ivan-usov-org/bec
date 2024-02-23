@@ -2,6 +2,25 @@
 
 <!--next-version-placeholder-->
 
+## v1.10.0 (2024-02-23)
+
+### Feature
+
+* **scihub:** Added config reply handler for device_server updates ([`29a1d19`](https://gitlab.psi.ch/bec/bec/-/commit/29a1d19504d6cbfb4a4601106d5341aadb0f43f7))
+* **device_server:** Connection errors and init errors are separated and forwarded ([`c2214b8`](https://gitlab.psi.ch/bec/bec/-/commit/c2214b86468a2ac590ee3fd5eda19734dbac1c26))
+* **bec_lib:** Report on failed devices; save recovery file to disk ([`8062503`](https://gitlab.psi.ch/bec/bec/-/commit/806250300e472a780329e6438c1891565481d8f7))
+* **bec_lib:** Added config history endpoint ([`ee7ecef`](https://gitlab.psi.ch/bec/bec/-/commit/ee7ecef8d52320356f2190620bc3e42fa37db304))
+
+### Fix
+
+* **bec_lib:** Fixed service init ([`b09b5ff`](https://gitlab.psi.ch/bec/bec/-/commit/b09b5ff7cddd0d13c6c4a2d55d00914b131e59fd))
+* **bec_lib:** Fix after refactoring ([`0337f13`](https://gitlab.psi.ch/bec/bec/-/commit/0337f13d0453ca1fac77413d757746f2bc06eb95))
+* **scihub:** Added updated config flag to detect failed validations ([`3a133bf`](https://gitlab.psi.ch/bec/bec/-/commit/3a133bf7d44a9578587e5bbee484183a21e9cc7c))
+* **bec_lib:** Fixed config helper for failed config updates ([`f603419`](https://gitlab.psi.ch/bec/bec/-/commit/f6034191f5763495130cab25edc5d600d0da274d))
+* **bec_lib:** Fixed bl_checks cleanup ([`05b00da`](https://gitlab.psi.ch/bec/bec/-/commit/05b00dadbbabffc5efd32e9621336e335564db76))
+* **bec_lib:** Fixed service id assignment ([`3826d41`](https://gitlab.psi.ch/bec/bec/-/commit/3826d410527177acce339e307a17c2943a921aa4))
+* **bec_lib:** Save guard device manager init ([`fcbc240`](https://gitlab.psi.ch/bec/bec/-/commit/fcbc2402e437a756c11b09f5d1ce9a5351a0cc54))
+
 ## v1.9.0 (2024-02-22)
 
 ### Feature
