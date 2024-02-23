@@ -5,8 +5,6 @@ import inspect
 import os
 from pathlib import Path
 
-import msgpack
-
 from bec_lib import MessageEndpoints, bec_logger
 from bec_lib.messages import AvailableResourceMessage
 from bec_lib.signature_serializer import signature_to_dict
@@ -80,7 +78,8 @@ class ScanManager:
             report_classes = [
                 ScanServerScans.RequestBase,
                 ScanServerScans.ScanBase,
-                ScanServerScans.FlyScanBase,
+                ScanServerScans.AsyncFlyScanBase,
+                ScanServerScans.SyncFlyScanBase,
                 ScanServerScans.ScanStubs,
                 ScanServerScans.ScanComponent,
             ]

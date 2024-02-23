@@ -22,14 +22,14 @@ but they are executed in a specific order:
 
 import time
 
-from bec_lib import messages, MessageEndpoints, bec_logger
+from bec_lib import MessageEndpoints, bec_logger, messages
 
-from scan_server.scans import FlyScanBase, ScanAbortion
+from scan_server.scans import AsyncFlyScanBase, ScanAbortion
 
 logger = bec_logger.logger
 
 
-class OwisGrid(FlyScanBase):
+class OwisGrid(AsyncFlyScanBase):
     """Owis-based grid scan."""
 
     scan_name = "owis_grid"
@@ -37,7 +37,6 @@ class OwisGrid(FlyScanBase):
     required_kwargs = []
     arg_input = {}
     arg_bundle_size = {"bundle": len(arg_input), "min": None, "max": None}
-    enforce_sync = False
 
     def __init__(
         self,
@@ -205,18 +204,10 @@ class OwisGrid(FlyScanBase):
 
         # Set width of signals from ddg fsh to 0, except the one to the MCS card
         yield from self.stubs.send_rpc_and_wait(
-            "ddg_fsh",
-            "set_channels",
-            "width",
-            0,
-            channels=["channelCD"],
+            "ddg_fsh", "set_channels", "width", 0, channels=["channelCD"]
         )
         yield from self.stubs.send_rpc_and_wait(
-            "ddg_fsh",
-            "set_channels",
-            "width",
-            0,
-            channels=["channelEF", "channelGH"],
+            "ddg_fsh", "set_channels", "width", 0, channels=["channelEF", "channelGH"]
         )
         # Trigger MCS card to enable the acquisition
         time.sleep(0.05)
@@ -234,11 +225,7 @@ class OwisGrid(FlyScanBase):
 
         # Set width of signal to MCS card to 0 --> It is already enabled
         yield from self.stubs.send_rpc_and_wait(
-            "ddg_fsh",
-            "set_channels",
-            "width",
-            0,
-            channels=["channelAB"],
+            "ddg_fsh", "set_channels", "width", 0, channels=["channelAB"]
         )
 
         # remove delay for signals of ddg_mcs

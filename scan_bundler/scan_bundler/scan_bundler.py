@@ -208,7 +208,8 @@ class ScanBundler(BECService):
         with self._lock:
             dev = {device: signal}
             pointID = metadata["pointID"]
-            if self.sync_storage[scanID].get("info", {}).get("enforce_sync") is False:
+            if self.sync_storage[scanID].get("info", {}).get("monitor_sync", "bec") == "bec":
+                # For monitor sync with BEC, we use the pointID as the key for the sync_storage.
                 monitored_devices = self.monitored_devices[scanID]
 
                 self.sync_storage[scanID][pointID] = {

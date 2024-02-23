@@ -1114,7 +1114,7 @@ def test_initialize_scan_info(scan_worker_mock, msg):
         assert worker.current_scan_info["scan_report_devices"] == rb.scan.scan_report_devices
         assert worker.current_scan_info["num_points"] == 100
         assert worker.current_scan_info["scan_msgs"] == []
-        assert worker.current_scan_info["enforce_sync"] == True
+        assert worker.current_scan_info["monitor_sync"] == "bec"
         assert worker.current_scan_info["frames_per_trigger"] == 1
         assert worker.current_scan_info["args"] == {"samx": (-5, 5, 3)}
         assert worker.current_scan_info["kwargs"] == {}

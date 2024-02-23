@@ -334,9 +334,9 @@ class ScanBase(RequestBase, PathOptimizerMixin):
     # perform pre-move action before the pre_scan trigger is sent
     pre_move = True
 
-    # synchronize primary readings with the scan motor readings. Set to False if the master device
-    # does not provide single readouts or are too fast to be synchronized with primary readings
-    enforce_sync = True
+    # # synchronize primary readings with the scan motor readings. Set to False if the master device
+    # # does not provide single readouts or are too fast to be synchronized with primary readings
+    # enforce_sync = True
 
     def __init__(
         self,
@@ -386,6 +386,18 @@ class ScanBase(RequestBase, PathOptimizerMixin):
             self.acquisition_config = {
                 "default": {"exp_time": self.exp_time, "readout_time": self.readout_time}
             }
+
+    @property
+    def monitor_sync(self):
+        """
+        monitor_sync is a property that defines how monitored devices are synchronized.
+        It can be either bec or the name of the device. If set to bec, the scan bundler
+        will synchronize scan segments based on the bec triggered readouts. If set to a device name,
+        the scan bundler will synchronize based on the readouts of the device, i.e. upon
+        receiving a new readout of the device, cached monitored readings will be added
+        to the scan segment.
+        """
+        return "bec"
 
     def read_scan_motors(self):
         """read the scan motors"""
@@ -534,7 +546,13 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         yield from scan.run()
 
 
-class FlyScanBase(ScanBase):
+class SyncFlyScanBase(ScanBase, ABC):
+    """
+    Fly scan base class for all synchronous fly scans. A synchronous fly scan is a scan where the flyer is
+    synced with the monitored devices.
+    Classes inheriting from SyncFlyScanBase must at least implement the scan_core method and the monitor_sync property.
+    """
+
     scan_type = "fly"
     pre_move = False
 
@@ -547,23 +565,37 @@ class FlyScanBase(ScanBase):
         producer.get(MessageEndpoints.device_readback(flyer), pipe)
         return producer.execute_pipeline(pipe)
 
+    @abstractmethod
     def scan_core(self):
-        yield from self.stubs.kickoff(device=self.scan_motors[0], parameter=self.caller_kwargs)
-        yield from self.stubs.complete(device=self.scan_motors[0])
-        target_diid = self.DIID - 1
+        """perform the scan core procedure"""
+        ############################################
+        # Example of how to kickoff and wait for a flyer:
+        ############################################
 
-        while True:
-            status = self.stubs.get_req_status(
-                device=self.scan_motors[0], RID=self.metadata["RID"], DIID=target_diid
-            )
-            progress = self.stubs.get_device_progress(
-                device=self.scan_motors[0], RID=self.metadata["RID"]
-            )
-            if progress:
-                self.num_pos = progress
-            if status:
-                break
-            time.sleep(1)
+        # yield from self.stubs.kickoff(device=self.scan_motors[0], parameter=self.caller_kwargs)
+        # yield from self.stubs.complete(device=self.scan_motors[0])
+        # target_diid = self.DIID - 1
+
+        # while True:
+        #     status = self.stubs.get_req_status(
+        #         device=self.scan_motors[0], RID=self.metadata["RID"], DIID=target_diid
+        #     )
+        #     progress = self.stubs.get_device_progress(
+        #         device=self.scan_motors[0], RID=self.metadata["RID"]
+        #     )
+        #     if progress:
+        #         self.num_pos = progress
+        #     if status:
+        #         break
+        #     time.sleep(1)
+
+    @property
+    @abstractmethod
+    def monitor_sync(self) -> str:
+        """
+        monitor_sync is the flyer that will be used to synchronize the monitor readings in the scan bundler.
+        The return value should be the name of the flyer device.
+        """
 
     def _calculate_positions(self) -> None:
         pass
@@ -573,6 +605,18 @@ class FlyScanBase(ScanBase):
 
     def prepare_positions(self):
         yield None
+
+
+class AsyncFlyScanBase(SyncFlyScanBase):
+    """
+    Fly scan base class for all asynchronous fly scans. An asynchronous fly scan is a scan where the flyer is
+    not synced with the monitored devices.
+    Classes inheriting from AsyncFlyScanBase must at least implement the scan_core method.
+    """
+
+    @property
+    def monitor_sync(self):
+        return "bec"
 
 
 class ScanStub(RequestBase):

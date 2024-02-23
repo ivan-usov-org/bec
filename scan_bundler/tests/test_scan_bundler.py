@@ -660,6 +660,7 @@ def test_fly_scan_update(scanID, device, signal, metadata):
     sb.sync_storage[scanID] = {}
     with mock.patch.object(sb, "_update_monitor_signals") as update_signals:
         with mock.patch.object(sb, "_send_scan_point") as send_point:
+            sb.sync_storage[scanID]["info"] = {"monitor_sync": "flyer"}
             sb._fly_scan_update(scanID, device, signal, metadata)
             pointID = metadata.get("pointID")
             if pointID:

@@ -21,21 +21,20 @@ but they are executed in a specific order:
 """
 
 import time
-from bec_lib import messages
 
-from bec_lib import MessageEndpoints, bec_logger
-from scan_server.scans import FlyScanBase
+from bec_lib import MessageEndpoints, bec_logger, messages
+
+from scan_server.scans import AsyncFlyScanBase
 
 logger = bec_logger.logger
 
 
-class SgalilGrid(FlyScanBase):
+class SgalilGrid(AsyncFlyScanBase):
     scan_name = "sgalil_grid"
     scan_report_hint = "scan_progress"
     required_kwargs = []
     arg_input = {}
     arg_bundle_size = {"bundle": len(arg_input), "min": None, "max": None}
-    enforce_sync = False
 
     def __init__(
         self,
@@ -147,11 +146,7 @@ class SgalilGrid(FlyScanBase):
         status_ddg_fsh_burst = yield from self.stubs.send_rpc_and_wait("ddg_fsh", "burst_disable")
         # Set width of FSH opening to 0
         status_ddg_fsh_ttlwidth = yield from self.stubs.send_rpc_and_wait(
-            "ddg_fsh",
-            "set_channels",
-            "width",
-            0,
-            channels=["channelCD"],
+            "ddg_fsh", "set_channels", "width", 0, channels=["channelCD"]
         )
 
         # TODO disable fsh ddg bc SGalil trigger it directly

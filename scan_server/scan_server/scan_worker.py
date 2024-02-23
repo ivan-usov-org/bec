@@ -648,7 +648,7 @@ class ScanWorker(threading.Thread):
                 "acquisition_config": active_rb.scan.acquisition_config,
                 "scan_report_hint": active_rb.scan.scan_report_hint,
                 "scan_report_devices": active_rb.scan.scan_report_devices,
-                "enforce_sync": active_rb.scan.enforce_sync,
+                "monitor_sync": active_rb.scan.monitor_sync,
                 "num_points": num_points,
             }
         )
