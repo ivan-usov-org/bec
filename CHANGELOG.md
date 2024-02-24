@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.12.1 (2024-02-24)
+
+### Fix
+
+* **scan_server:** Fixed expected message type for device progress update ([`1236069`](https://gitlab.psi.ch/bec/bec/-/commit/1236069b3604607288f9f0e1dccd3994d014f928))
+
 ## v1.12.0 (2024-02-24)
 
 ### Feature
