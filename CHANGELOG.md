@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.12.0 (2024-02-24)
+
+### Feature
+
+* Added flomni scan and user scripts ([`c376de8`](https://gitlab.psi.ch/bec/bec/-/commit/c376de8e8436380f65ba96b2e88572077830f1d9))
+
 ## v1.11.1 (2024-02-23)
 
 ### Fix
