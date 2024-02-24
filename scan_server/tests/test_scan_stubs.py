@@ -1,11 +1,17 @@
 from unittest import mock
-from bec_lib import messages
 
 import pytest
-
-from bec_lib import MessageEndpoints
+from bec_lib import MessageEndpoints, messages
 from bec_lib.tests.utils import ConnectorMock
+
+from scan_server.errors import DeviceMessageError
 from scan_server.scan_stubs import ScanAbortion, ScanStubs
+
+
+@pytest.fixture
+def stubs():
+    connector = ConnectorMock("")
+    yield ScanStubs(connector.producer())
 
 
 @pytest.mark.parametrize(
@@ -38,9 +44,7 @@ from scan_server.scan_stubs import ScanAbortion, ScanStubs
         ),
     ],
 )
-def test_kickoff(device, parameter, metadata, reference_msg):
-    connector = ConnectorMock("")
-    stubs = ScanStubs(connector.producer())
+def test_kickoff(stubs, device, parameter, metadata, reference_msg):
     msg = list(stubs.kickoff(device=device, parameter=parameter, metadata=metadata))
     assert msg[0] == reference_msg
 
@@ -48,37 +52,23 @@ def test_kickoff(device, parameter, metadata, reference_msg):
 @pytest.mark.parametrize(
     "msg,raised_error",
     [
-        (
-            messages.DeviceRPCMessage(device="samx", return_val="", out="", success=True),
-            None,
-        ),
+        (messages.DeviceRPCMessage(device="samx", return_val="", out="", success=True), None),
         (
             messages.DeviceRPCMessage(
                 device="samx",
                 return_val="",
-                out={
-                    "error": "TypeError",
-                    "msg": "some weird error",
-                    "traceback": "traceback",
-                },
+                out={"error": "TypeError", "msg": "some weird error", "traceback": "traceback"},
                 success=False,
             ),
             ScanAbortion,
         ),
         (
-            messages.DeviceRPCMessage(
-                device="samx",
-                return_val="",
-                out="",
-                success=False,
-            ),
+            messages.DeviceRPCMessage(device="samx", return_val="", out="", success=False),
             ScanAbortion,
         ),
     ],
 )
-def test_rpc_raises_scan_abortion(msg, raised_error):
-    connector = ConnectorMock("")
-    stubs = ScanStubs(connector.producer())
+def test_rpc_raises_scan_abortion(stubs, msg, raised_error):
     msg = msg
     with mock.patch.object(stubs.producer, "get", return_value=msg) as prod_get:
         if raised_error is None:
@@ -88,3 +78,36 @@ def test_rpc_raises_scan_abortion(msg, raised_error):
                 stubs._get_from_rpc("rpc-id")
 
         prod_get.assert_called_with(MessageEndpoints.device_rpc("rpc-id"))
+
+
+@pytest.mark.parametrize(
+    "msg, ret_value, raised_error",
+    [
+        (messages.ProgressMessage(value=10, max_value=100, done=False), None, False),
+        (
+            messages.ProgressMessage(
+                value=10, max_value=100, done=False, metadata={"RID": "wrong"}
+            ),
+            None,
+            False,
+        ),
+        (
+            messages.ProgressMessage(value=10, max_value=100, done=False, metadata={"RID": "rid"}),
+            10,
+            False,
+        ),
+        (
+            messages.DeviceStatusMessage(device="samx", status="enabled", metadata={"RID": "rid"}),
+            None,
+            True,
+        ),
+    ],
+)
+def test_device_progress(stubs, msg, ret_value, raised_error):
+    if raised_error:
+        with pytest.raises(DeviceMessageError):
+            with mock.patch.object(stubs.producer, "get", return_value=msg):
+                assert stubs.get_device_progress(device="samx", RID="rid") == ret_value
+        return
+    with mock.patch.object(stubs.producer, "get", return_value=msg):
+        assert stubs.get_device_progress(device="samx", RID="rid") == ret_value
