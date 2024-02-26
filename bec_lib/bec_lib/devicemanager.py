@@ -115,7 +115,7 @@ class DeviceContainer(dict):
         excluded_readout_priority = [
             str(x.name).lower() for x in ReadoutPriority if x != readout_priority
         ]
-        excluded_devices = []
+        excluded_devices = self.disabled_devices
         for priority in excluded_readout_priority:
             excluded_devices.extend(self.get(dev) for dev in readout_priority_mod.get(priority, []))
 

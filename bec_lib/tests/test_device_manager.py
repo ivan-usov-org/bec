@@ -318,3 +318,9 @@ def test_device_config_update_callback(dm_with_devices):
     with mock.patch.object(dm, "parse_config_message") as parse_config_message:
         dm._device_config_update_callback(msg, parent=dm)
         parse_config_message.assert_called_once_with(dev_config_msg)
+
+
+def test_disabled_device_not_in_monitored(dm_with_devices):
+    assert "motor1_disabled" in dm_with_devices.devices
+    monitored_devices = dm_with_devices.devices.monitored_devices()
+    assert "motor1_disabled" not in [dev.name for dev in monitored_devices]
