@@ -2260,7 +2260,7 @@ ring_current_sim:
 ############################################################
 
 motor1_disabled:
-  readoutPriority: baseline
+  readoutPriority: monitored
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
