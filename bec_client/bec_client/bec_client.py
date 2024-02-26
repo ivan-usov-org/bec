@@ -131,13 +131,17 @@ class BECClientPrompt(Prompts):
             status_led = Token.PromptNum
         else:
             status_led = Token.Prompt
+        try:
+            next_scan_number = str(self.client.queue.next_scan_number)
+        except Exception:
+            next_scan_number = "?"
         return [
             (status_led, "\u2022"),
             (Token.Prompt, " " + self.username),
             (Token.Prompt, " ["),
             (Token.PromptNum, str(self.shell.execution_count)),
             (Token.Prompt, "/"),
-            (Token.PromptNum, str(self.client.queue.next_scan_number)),
+            (Token.PromptNum, next_scan_number),
             (Token.Prompt, "] "),
             (Token.Prompt, "❯❯ "),
         ]

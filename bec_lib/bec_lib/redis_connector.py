@@ -4,6 +4,7 @@ import collections
 import queue
 import sys
 import threading
+import time
 import warnings
 from functools import wraps
 from typing import TYPE_CHECKING
@@ -11,7 +12,9 @@ from typing import TYPE_CHECKING
 import louie
 import redis
 import redis.client
+import redis.exceptions
 
+from bec_lib.logger import bec_logger
 from bec_lib.connector import ConnectorBase, MessageObject
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.messages import AlarmMessage, BECMessage, LogMessage
@@ -19,20 +22,6 @@ from bec_lib.serialization import MsgpackSerialization
 
 if TYPE_CHECKING:
     from bec_lib.alarm_handler import Alarms
-
-
-def catch_connection_error(func):
-    """catch connection errors"""
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except redis.exceptions.ConnectionError:
-            warnings.warn("Failed to connect to redis. Is the server running?")
-            return None
-
-    return wrapper
 
 
 class RedisConnector(ConnectorBase):
@@ -73,22 +62,18 @@ class RedisConnector(ConnectorBase):
         self._pubsub_conn.close()
         self._redis_conn.close()
 
-    @catch_connection_error
     def log_warning(self, msg):
         """send a warning"""
         self.send(MessageEndpoints.log(), LogMessage(log_type="warning", log_msg=msg))
 
-    @catch_connection_error
     def log_message(self, msg):
         """send a log message"""
         self.send(MessageEndpoints.log(), LogMessage(log_type="log", log_msg=msg))
 
-    @catch_connection_error
     def log_error(self, msg):
         """send an error as log"""
         self.send(MessageEndpoints.log(), LogMessage(log_type="error", log_msg=msg))
 
-    @catch_connection_error
     def raise_alarm(
         self,
         severity: Alarms,
@@ -111,7 +96,6 @@ class RedisConnector(ConnectorBase):
         """Create a new pipeline"""
         return self._redis_conn.pipeline()
 
-    @catch_connection_error
     def execute_pipeline(self, pipeline):
         """Execute the pipeline and returns the results with decoded BECMessages"""
         ret = []
@@ -123,7 +107,6 @@ class RedisConnector(ConnectorBase):
                 ret.append(res)
         return ret
 
-    @catch_connection_error
     def raw_send(self, topic: str, msg: bytes, pipe=None):
         """send to redis without any check on message type"""
         client = pipe if pipe is not None else self._redis_conn
@@ -173,12 +156,19 @@ class RedisConnector(ConnectorBase):
         """
         Start a listening coroutine to deal with redis events and wait for completion
         """
+        error = False
         while not self._stop_events_listener_thread.is_set():
             try:
                 msg = pubsub.get_message(timeout=1)
+            except redis.exceptions.ConnectionError:
+                if not error:
+                    error = True
+                    bec_logger.logger.error("Failed to connect to redis. Is the server running?")
+                time.sleep(1)
             except Exception:
                 sys.excepthook(*sys.exc_info())
             else:
+                error = False
                 if msg is not None:
                     self._messages_queue.put(msg)
 
@@ -224,7 +214,6 @@ class RedisConnector(ConnectorBase):
         while self.poll_messages():
             ...
 
-    @catch_connection_error
     def lpush(
         self, topic: str, msg: str, pipe=None, max_size: int = None, expire: int = None
     ) -> None:
@@ -245,14 +234,12 @@ class RedisConnector(ConnectorBase):
         if not pipe:
             client.execute()
 
-    @catch_connection_error
     def lset(self, topic: str, index: int, msg: str, pipe=None) -> None:
         client = pipe if pipe is not None else self._redis_conn
         if isinstance(msg, BECMessage):
             msg = MsgpackSerialization.dumps(msg)
         return client.lset(topic, index, msg)
 
-    @catch_connection_error
     def rpush(self, topic: str, msg: str, pipe=None) -> int:
         """O(1) for each element added, so O(N) to add N elements when the
         command is called with multiple arguments. Insert all the specified
@@ -264,7 +251,6 @@ class RedisConnector(ConnectorBase):
             msg = MsgpackSerialization.dumps(msg)
         return client.rpush(topic, msg)
 
-    @catch_connection_error
     def lrange(self, topic: str, start: int, end: int, pipe=None):
         """O(S+N) where S is the distance of start offset from HEAD for small
         lists, from nearest end (HEAD or TAIL) for large lists; and N is the
@@ -297,7 +283,6 @@ class RedisConnector(ConnectorBase):
         if not pipe:
             client.execute()
 
-    @catch_connection_error
     def set(self, topic: str, msg, pipe=None, expire: int = None) -> None:
         """set redis value"""
         client = pipe if pipe is not None else self._redis_conn
@@ -305,18 +290,15 @@ class RedisConnector(ConnectorBase):
             msg = MsgpackSerialization.dumps(msg)
         client.set(topic, msg, ex=expire)
 
-    @catch_connection_error
     def keys(self, pattern: str) -> list:
         """returns all keys matching a pattern"""
         return self._redis_conn.keys(pattern)
 
-    @catch_connection_error
     def delete(self, topic, pipe=None):
         """delete topic"""
         client = pipe if pipe is not None else self._redis_conn
         client.delete(topic)
 
-    @catch_connection_error
     def get(self, topic: str, pipe=None):
         """retrieve entry, either via hgetall or get"""
         client = pipe if pipe is not None else self._redis_conn
@@ -329,7 +311,6 @@ class RedisConnector(ConnectorBase):
             except RuntimeError:
                 return data
 
-    @catch_connection_error
     def xadd(self, topic: str, msg_dict: dict, max_size=None, pipe=None, expire: int = None):
         """
         add to stream
@@ -364,7 +345,6 @@ class RedisConnector(ConnectorBase):
         if not pipe and expire:
             client.execute()
 
-    @catch_connection_error
     def get_last(self, topic: str, key="data"):
         """retrieve last entry from stream"""
         client = self._redis_conn
@@ -379,7 +359,6 @@ class RedisConnector(ConnectorBase):
                 return msg_dict
             return msg_dict.get(key)
 
-    @catch_connection_error
     def xread(
         self,
         topic: str,
@@ -443,7 +422,6 @@ class RedisConnector(ConnectorBase):
                 self.stream_keys[topic] = index
         return out if out else None
 
-    @catch_connection_error
     def xrange(self, topic: str, min: str, max: str, count: int = None):
         """
         read a range from stream

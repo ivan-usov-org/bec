@@ -119,7 +119,12 @@ class BECService:
     def _update_service_info(self):
         while not self._service_info_event.is_set():
             logger.trace("Updating service info")
-            self._send_service_status()
+            try:
+                self._send_service_status()
+            except Exception:
+                # exception is not explicitely specified,
+                # because it depends on the underlying connector
+                pass
             self._service_info_event.wait(timeout=3)
 
     def _send_service_status(self):
@@ -188,7 +193,12 @@ class BECService:
                 )
             )
             msg = messages.ServiceMetricMessage(name=self.__class__.__name__, metrics=data)
-            self.connector.send(MessageEndpoints.metrics(self._service_id), msg)
+            try:
+                self.connector.send(MessageEndpoints.metrics(self._service_id), msg)
+            except Exception:
+                # exception is not explicitely specified,
+                # because it depends on the underlying connector
+                pass
             self._metrics_emitter_event.wait(timeout=1)
 
     def set_global_var(self, name: str, val: Any) -> None:

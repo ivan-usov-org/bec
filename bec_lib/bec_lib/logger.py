@@ -80,10 +80,19 @@ class BECLogger:
             return
         msg = json.loads(msg)
         msg["service_name"] = self.service_name
-        self.connector.send(
-            topic=MessageEndpoints.log(),
-            msg=bec_lib.messages.LogMessage(log_type=msg["record"]["level"]["name"], log_msg=msg),
-        )
+        try:
+            self.connector.send(
+                topic=MessageEndpoints.log(),
+                msg=bec_lib.messages.LogMessage(
+                    log_type=msg["record"]["level"]["name"], log_msg=msg
+                ),
+            )
+        except Exception:
+            # connector disconnected?
+            # just ignore the error here...
+            # Exception is not explicitely specified,
+            # because it depends on the connector
+            pass
 
     def format(self, level: LogLevel = None) -> str:
         """
