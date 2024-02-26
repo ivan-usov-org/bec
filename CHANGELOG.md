@@ -2,6 +2,15 @@
 
 <!--next-version-placeholder-->
 
+## v1.12.2 (2024-02-26)
+
+### Fix
+
+* **disconnection:** Mitigate effects on disconnection from redis ([`4d73cf8`](https://gitlab.psi.ch/bec/bec/-/commit/4d73cf8a071493ec997ca08efc8518672c7f5034))
+* **redis_connector:** Add producer(), consumer() for compatibility with old code ([`f60a012`](https://gitlab.psi.ch/bec/bec/-/commit/f60a012ef6453742bb8c830e479325bfb9254b87))
+* **scan_manager:** Ensure robustness in __str__ ([`db53b1f`](https://gitlab.psi.ch/bec/bec/-/commit/db53b1f5dc73279c6764d1f4dd875f32304d1f5d))
+* **tests:** Ensure redis is installed ([`bbd036e`](https://gitlab.psi.ch/bec/bec/-/commit/bbd036e769bb6093d1890fceb23e005baa644888))
+
 ## v1.12.1 (2024-02-24)
 
 ### Fix
