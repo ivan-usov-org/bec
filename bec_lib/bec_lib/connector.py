@@ -100,11 +100,11 @@ class PubSubInterface(abc.ABC):
     def register(self, topics=None, pattern=None, cb=None, start_thread=True, **kwargs):
         raise NotImplementedError
 
-    def poll_messages(self, timeout=None):
-        """Poll for new messages, receive them and execute callbacks"""
+    def unregister(self, topics=None, pattern=None, cb=None):
         raise NotImplementedError
 
-    def run_messages_loop(self):
+    def poll_messages(self, timeout=None):
+        """Poll for new messages, receive them and execute callbacks"""
         raise NotImplementedError
 
     def shutdown(self):

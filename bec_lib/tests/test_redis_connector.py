@@ -3,6 +3,7 @@ from unittest import mock
 
 import pytest
 import redis
+import time
 
 import bec_lib.messages as bec_messages
 from bec_lib.alarm_handler import Alarms
@@ -40,7 +41,6 @@ def connected_connector(redis_proc):
     [["topics", True], ["topics", False], [None, True], [None, False]],
 )
 def test_redis_connector_register(connected_connector, threaded, topics):
-    breakpoint()
     connector = connected_connector
     if topics is None:
         with pytest.raises(TypeError):
@@ -55,24 +55,50 @@ def test_redis_connector_register(connected_connector, threaded, topics):
             assert connector._events_listener_thread is not None
 
 
-def test_redis_connector_register_identical(capsys, redisdb, connected_connector):
+def test_redis_connector_unregister(redisdb, connected_connector):
     connector = connected_connector
 
-    received_event1 = mock.Mock(spec=[])
-    received_event2 = mock.Mock(spec=[])
+    on_msg_received = mock.Mock()
+    received_event = mock.Mock(
+        spec=[], side_effect=lambda msg_obj: on_msg_received(msg_obj.value.msg)
+    )
 
-    connector.register(topics="topic1", cb=received_event1, start_thread=False)
-    connector.register(topics="topic1", cb=received_event1, start_thread=False)
-    connector.register(topics="topic1", cb=received_event2, start_thread=False)
-    connector.register(topics="topic2", cb=received_event1, start_thread=False)
+    connector.register(topics=["topic1", "topic2"], cb=received_event, start_thread=False)
 
     connector.send("topic1", TestMessage("topic1"))
     connector.poll_messages(timeout=1)
-    assert received_event1.call_count == 1
-    assert received_event2.call_count == 1
+    on_msg_received.assert_called_once_with("topic1")
     connector.send("topic2", TestMessage("topic2"))
     connector.poll_messages(timeout=1)
-    assert received_event1.call_count == 2
+    on_msg_received.assert_called_with("topic2")
+
+    connector.unregister("topic1", cb=received_event)
+
+    on_msg_received.reset_mock()
+    connector.send("topic1", TestMessage("topic1"))
+    connector.send("topic2", TestMessage("topic2"))
+    connector.poll_messages(timeout=1)
+    on_msg_received.assert_called_once_with("topic2")
+
+    on_msg_received.reset_mock()
+    connector.unregister("topic2", cb=received_event)
+    connector.send("topic1", TestMessage("topic1"))
+    connector.send("topic2", TestMessage("topic2"))
+    assert on_msg_received.call_count == 0
+    assert redisdb.execute_command("PUBSUB CHANNELS") == []
+    assert len(connector._topics_cb) == 0
+
+    connector.register(topics=["topic1", "topic2"], cb=received_event, start_thread=False)
+
+    connector.send("topic1", TestMessage("topic1"))
+    connector.poll_messages(timeout=1)
+    on_msg_received.assert_called_once_with("topic1")
+    connector.send("topic2", TestMessage("topic2"))
+    connector.poll_messages(timeout=1)
+    on_msg_received.assert_called_with("topic2")
+    connector.unregister(topics=["topic1", "topic2"])
+    assert redisdb.execute_command("PUBSUB CHANNELS") == []
+    assert len(connector._topics_cb) == 0
 
 def test_redis_connector_register_identical(capsys, redisdb, connected_connector):
     connector = connected_connector
