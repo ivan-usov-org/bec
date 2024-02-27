@@ -629,9 +629,6 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
                     self._messages_queue.put(msg)
 
     def _handle_message(self, msg):
-        if msg["type"].endswith("subscribe"):
-            # ignore subscribe messages
-            return False
         channel = msg["channel"].decode()
         if msg["pattern"] is not None:
             callbacks = self._topics_cb[msg["pattern"].decode()]
@@ -641,12 +638,15 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
         for cb_ref, kwargs in callbacks:
             cb = cb_ref()
             if cb:
-                try:
-                    cb(msg, **kwargs)
-                # pylint: disable=broad-except
-                except Exception:
-                    sys.excepthook(*sys.exc_info())
+                self._execute_callback(cb, msg, kwargs)
         return True
+
+    def _execute_callback(self, cb, msg, kwargs):
+        try:
+            cb(msg, **kwargs)
+        # pylint: disable=broad-except
+        except Exception:
+            sys.excepthook(*sys.exc_info())
 
     def poll_messages(self, timeout=None) -> None:
         while True:
