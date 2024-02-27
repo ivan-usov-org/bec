@@ -1,8 +1,5 @@
 fheater:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: phase plate angle
   deviceClass: FlomniGalilMotor
   deviceConfig:
@@ -11,19 +8,13 @@ fheater:
     limits:
     - -15
     - 0
-    name: fheater
     port: 8082
     sign: -1
-  name: fheater
   onFailure: buffer
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 feyex:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: phase plate angle
   deviceClass: FlomniGalilMotor
   deviceConfig:
@@ -32,22 +23,16 @@ feyex:
     limits:
     - -30
     - -1
-    name: feyex
     port: 8082
     sign: 1
-  name: feyex
   onFailure: buffer
   userParameter:
     in: -16.267
     out: -1
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 feyey:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: phase plate angle
   deviceClass: FlomniGalilMotor
   deviceConfig:
@@ -56,21 +41,15 @@ feyey:
     limits:
     - -1
     - -10
-    name: feyey
     port: 8082
     sign: 1
-  name: feyey
   onFailure: buffer
   userParameter:
     in: -10.467
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 foptx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: phase plate angle
   deviceClass: FlomniGalilMotor
   deviceConfig:
@@ -79,21 +58,15 @@ foptx:
     limits:
     - -17
     - -12
-    name: foptx
     port: 8082
     sign: 1
-  name: foptx
   onFailure: buffer
   userParameter:
     in: -13.761
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 fopty:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: phase plate angle
   deviceClass: FlomniGalilMotor
   deviceConfig:
@@ -102,22 +75,16 @@ fopty:
     limits:
     - 0
     - 4
-    name: fopty
     port: 8082
     sign: 1
-  name: fopty
   onFailure: buffer
   userParameter:
     in: 0.552
     out: 0.752
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 foptz:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: phase plate angle
   deviceClass: FlomniGalilMotor
   deviceConfig:
@@ -126,21 +93,15 @@ foptz:
     limits:
     - 0
     - 27
-    name: foptz
     port: 8082
     sign: 1
-  name: foptz
   onFailure: buffer
   userParameter:
     in: 23
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 fosax:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: phase plate angle
   deviceClass: SmaractMotor
   deviceConfig:
@@ -149,22 +110,16 @@ fosax:
     limits:
     - 10.2
     - 10.6
-    name: fosax
     port: 3334
     sign: -1
-  name: fosax
   onFailure: buffer
   userParameter:
     in: 9.124
     out: 5.3
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 fosay:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: phase plate angle
   deviceClass: SmaractMotor
   deviceConfig:
@@ -173,21 +128,15 @@ fosay:
     limits:
     - -3.1
     - -2.9
-    name: fosay
     port: 3334
     sign: -1
-  name: fosay
   onFailure: buffer
   userParameter:
     in: 0.367
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 fosaz:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: phase plate angle
   deviceClass: SmaractMotor
   deviceConfig:
@@ -196,22 +145,16 @@ fosaz:
     limits:
     - -6
     - -4
-    name: fosaz
     port: 3334
     sign: 1
-  name: fosaz
   onFailure: buffer
   userParameter:
     in: 8.5
     out: 6
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 fsamroy:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: phase plate angle
   deviceClass: FuprGalilMotor
   deviceConfig:
@@ -220,19 +163,13 @@ fsamroy:
     limits:
     - -5
     - 365
-    name: fsamroy
     port: 8084
     sign: -1
-  name: fsamroy
   onFailure: buffer
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 fsamx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: phase plate angle
   deviceClass: FlomniGalilMotor
   deviceConfig:
@@ -241,21 +178,15 @@ fsamx:
     limits:
     - -162
     - 0
-    name: fsamx
     port: 8081
     sign: 1
-  name: fsamx
   onFailure: buffer
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
   userParameter:
     in: -1.1
 fsamy:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: phase plate angle
   deviceClass: FlomniGalilMotor
   deviceConfig:
@@ -264,21 +195,15 @@ fsamy:
     limits:
     - 2
     - 3.1
-    name: fsamy
     port: 8081
     sign: 1
-  name: fsamy
   onFailure: buffer
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
   userParameter:
     in: 2.75
 ftracky:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: phase plate angle
   deviceClass: FlomniGalilMotor
   deviceConfig:
@@ -287,19 +212,13 @@ ftracky:
     limits:
     - 2.2
     - 2.8
-    name: ftracky
     port: 8082
     sign: 1
-  name: ftracky
   onFailure: buffer
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ftrackz:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: phase plate angle
   deviceClass: FlomniGalilMotor
   deviceConfig:
@@ -308,19 +227,13 @@ ftrackz:
     limits:
     - 4.5
     - 5.5
-    name: ftrackz
     port: 8082
     sign: 1
-  name: ftrackz
   onFailure: buffer
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ftransx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: phase plate angle
   deviceClass: FlomniGalilMotor
   deviceConfig:
@@ -329,19 +242,13 @@ ftransx:
     limits:
     - 0
     - 50
-    name: ftransx
     port: 8081
     sign: 1
-  name: ftransx
   onFailure: buffer
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ftransy:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: phase plate angle
   deviceClass: FlomniGalilMotor
   deviceConfig:
@@ -350,19 +257,13 @@ ftransy:
     limits:
     - -100
     - 0
-    name: ftransy
     port: 8081
     sign: 1
-  name: ftransy
   onFailure: buffer
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ftransz:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: phase plate angle
   deviceClass: FlomniGalilMotor
   deviceConfig:
@@ -371,19 +272,13 @@ ftransz:
     limits:
     - 0
     - 145
-    name: ftransz
     port: 8081
     sign: 1
-  name: ftransz
   onFailure: buffer
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 ftray:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: phase plate angle
   deviceClass: FlomniGalilMotor
   deviceConfig:
@@ -392,77 +287,54 @@ ftray:
     limits:
     - -200
     - 0
-    name: ftray
     port: 8081
     sign: -1
-  name: ftray
   onFailure: buffer
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 
 flomni_samples:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: baseline
-    schedule: sync
+  readoutPriority: baseline
   description: phase plate angle
   deviceClass: FlomniSampleStorage
   deviceConfig:
-    name: flomni_samples
   onFailure: buffer
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 
 rtx:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: ignored
-    schedule: sync
+  readoutPriority: on_request
   description: flomni rt
   deviceClass: RtFlomniMotor
   deviceConfig:
     axis_Id: A
     host: mpc2844.psi.ch
-    name: rtx
     port: 2222
     sign: 1
   onFailure: buffer
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 rty:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: ignored
-    schedule: sync
+  readoutPriority: on_request
   description: flomni rt
   deviceClass: RtFlomniMotor
   deviceConfig:
     axis_Id: B
     host: mpc2844.psi.ch
-    name: rty
     port: 2222
     sign: 1
   onFailure: buffer
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
 rtz:
-  acquisitionConfig:
-    acquisitionGroup: motor
-    readoutPriority: ignored
-    schedule: sync
+  readoutPriority: on_request
   description: flomni rt
   deviceClass: RtFlomniMotor
   deviceConfig:
     axis_Id: C
     host: mpc2844.psi.ch
-    name: rtz
     port: 2222
     sign: 1
   onFailure: buffer
-  status:
-    enabled: true
-    enabled_set: true
+  enabled: true
+  readOnly: false
