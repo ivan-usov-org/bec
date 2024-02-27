@@ -1177,25 +1177,38 @@ def test_close_scan(scan_worker_mock, msg, scan_id, max_point_id, exp_num_points
 def test_stage_device(scan_worker_mock, msg):
     worker = scan_worker_mock
     worker.device_manager.devices["eiger"]._config["readoutPriority"] = "async"
+    worker.device_manager.devices["flyer_sim"]._config["readoutPriority"] = "on_request"
 
     with mock.patch.object(worker, "_wait_for_stage") as wait_mock:
         with mock.patch.object(worker.device_manager.connector, "send") as send_mock:
             worker.stage_devices(msg)
-            async_devices = [dev.name for dev in worker.device_manager.devices.async_devices()]
+            on_request_device_names = [
+                dev.name for dev in worker.device_manager.devices.on_request_devices()
+            ]
+
+            async_devices = worker.device_manager.devices.async_devices()
+            async_device_names = [dev.name for dev in async_devices]
+            excluded_devices = async_devices
+            excluded_devices.extend(worker.device_manager.devices.on_request_devices())
+            excluded_devices.extend(worker.device_manager.devices.continuous_devices())
             devices = [
                 dev.name
                 for dev in worker.device_manager.devices.enabled_devices
-                if dev.name not in async_devices
+                if dev not in excluded_devices
             ]
 
-            for dev in worker.device_manager.devices.enabled_devices:
+            for dev in [
+                *worker.device_manager.devices.monitored_devices(),
+                *worker.device_manager.devices.baseline_devices(),
+                *worker.device_manager.devices.async_devices(),
+            ]:
                 assert dev.name in worker._staged_devices
             for async_dev in async_devices:
                 assert (
                     mock.call(
                         MessageEndpoints.device_instructions(),
                         messages.DeviceInstructionMessage(
-                            device=async_dev,
+                            device=async_dev.name,
                             action="stage",
                             parameter=msg.content["parameter"],
                             metadata=msg.metadata,
@@ -1220,9 +1233,11 @@ def test_stage_device(scan_worker_mock, msg):
                 in wait_mock.mock_calls
             )
             assert (
-                mock.call(staged=True, devices=async_devices, metadata=msg.metadata)
+                mock.call(staged=True, devices=async_device_names, metadata=msg.metadata)
                 in wait_mock.mock_calls
             )
+            for dev in on_request_device_names:
+                assert dev not in worker._staged_devices
 
 
 @pytest.mark.parametrize(

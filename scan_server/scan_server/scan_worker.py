@@ -326,36 +326,42 @@ class ScanWorker(threading.Thread):
             instr (DeviceInstructionMessage): Device instruction received from the scan assembler
 
         """
-        async_devices = [dev.name for dev in self.device_manager.devices.async_devices()]
-        devices = [
+        async_devices = self.device_manager.devices.async_devices()
+        async_device_names = [dev.name for dev in async_devices]
+        excluded_devices = async_devices
+        excluded_devices.extend(self.device_manager.devices.on_request_devices())
+        excluded_devices.extend(self.device_manager.devices.continuous_devices())
+        stage_device_names_without_async = [
             dev.name
             for dev in self.device_manager.devices.enabled_devices
-            if dev.name not in async_devices
+            if dev not in excluded_devices
         ]
         for det in async_devices:
             self.device_manager.connector.send(
                 MessageEndpoints.device_instructions(),
                 messages.DeviceInstructionMessage(
-                    device=det,
+                    device=det.name,
                     action="stage",
                     parameter=instr.content["parameter"],
                     metadata=instr.metadata,
                 ),
             )
-        self._staged_devices.update(async_devices)
+        self._staged_devices.update(async_device_names)
 
         self.device_manager.connector.send(
             MessageEndpoints.device_instructions(),
             messages.DeviceInstructionMessage(
-                device=devices,
+                device=stage_device_names_without_async,
                 action="stage",
                 parameter=instr.content["parameter"],
                 metadata=instr.metadata,
             ),
         )
-        self._staged_devices.update(devices)
-        self._wait_for_stage(staged=True, devices=async_devices, metadata=instr.metadata)
-        self._wait_for_stage(staged=True, devices=devices, metadata=instr.metadata)
+        self._staged_devices.update(stage_device_names_without_async)
+        self._wait_for_stage(staged=True, devices=async_device_names, metadata=instr.metadata)
+        self._wait_for_stage(
+            staged=True, devices=stage_device_names_without_async, metadata=instr.metadata
+        )
 
     def unstage_devices(
         self, instr: messages.DeviceInstructionMessage = None, devices: list = None, cleanup=False
