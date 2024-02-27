@@ -1,7 +1,7 @@
 (developer.install_developer_env)=
 # Install developer environment
 
-If your goal is to install BEC in an environment for code development purposes, this section will guide you through the steps. 
+If your goal is to install BEC in an environment for code development purposes, this section will guide you through the steps.
 In contrast to a deployed production system of BEC, this installation will allow you to edit the code base of BEC actively while you are operating the system.
 In that sense, installing BEC in _[dev]_ mode, is the right choice in case you like to:
 
@@ -12,13 +12,13 @@ In that sense, installing BEC in _[dev]_ mode, is the right choice in case you l
 **Requirements:**
 
 ---
-- [python](https://www.python.org) (>=3.9)
+- [python](https://www.python.org) (>=3.10)
 - [redis](https://redis.io)
 - [tmux](https://github.com/tmux/tmux/wiki) (=3.2)
 ---
 
 
-On a PSI-system, requirements are available via pmodules. If you run BEC on your own system, make sure to install the required packages. 
+On a PSI-system, requirements are available via pmodules. If you run BEC on your own system, make sure to install the required packages.
 
 **Step-by-Step Guide**
 The first step is to clone the repository
@@ -37,10 +37,11 @@ cd bec
 
 2. Satisfy requirements
 
-On PSI-maintained systems with pmodules, you can simply load psi-python39/2021.11 and tmux/3.2 via
+On PSI-maintained systems with pmodules, you can simply load psi-python311/2024.02 and tmux/3.2 via
 
-```{code-block} bash 
-module add psi-python39/2021.11
+```{code-block} bash
+module use unstable
+module add psi-python311/2024.02
 module add tmux/3.2
 ```
 
@@ -55,7 +56,7 @@ source ./bec_venv/bin/activate
 
 4. Install BEC
 
-To keep things simple, we have compiled all dependencies within the `setup.py` from `bec_server`. 
+To keep things simple, we have compiled all dependencies within the `setup.py` from `bec_server`.
 Note, you need to install the package in editable mode (with `-e` flag), to allow changes to the code base.
 
 ```bash
@@ -63,14 +64,14 @@ pip install wheel
 pip install -e './bec_server/.[dev]'
 ```
 ```{warning}
-On newer versions of pip (pip>22.3.1) wheel must be installed manually before installing the BEC server! If not, it will crash with an import error within pip. Should you run into problems, please run `pip cache purge` twice before repeating the commands above.  
+On newer versions of pip (pip>22.3.1) wheel must be installed manually before installing the BEC server! If not, it will crash with an import error within pip. Should you run into problems, please run `pip cache purge` twice before repeating the commands above.
 ```
 ```{note}
 The extension [dev] will install additional dependencies, which are useful for code development such as for instance `pytest`, `black`.
 ```
 5. Start Redis
 
-Open a new terminal, and start Redis. 
+Open a new terminal, and start Redis.
 Make sure that you've either loaded the pmodule or installed Redis on your system.
 ```
 module add redis/7.0.12
@@ -86,7 +87,7 @@ Redis will create a `dump.rdb`, where it regularly stores data on disk. Make sur
 6. Start BEC server
 
 Now we can start the BEC server.
-Make sure that you activate the `bec_venv` created above, and that `tmux/3.2` is availabe, e.g. loaded via pmodule. 
+Make sure that you activate the `bec_venv` created above, and that `tmux/3.2` is availabe, e.g. loaded via pmodule.
 Then you can start the BEC server
 ```bash
 bec-server start
@@ -97,7 +98,7 @@ You may open the tmux session to look at the different BEC services via
 ```bash
 tmux attach -t bec
 ```
-and exit the tmux session again via `CTRL+B+D`. 
+and exit the tmux session again via `CTRL+B+D`.
 Both commands are also highlighted in your command-line interface.
 
 ```{note}
@@ -110,19 +111,19 @@ Strictly speaking, you do not need to install tmux. However, if you do not use t
 bec
 ```
 
-You are now ready to load your first device configuration. 
+You are now ready to load your first device configuration.
 To this end, please follow the instructions given in [bec_config](#developer.bec_config).
 
 8. Start services with different port
 
-It could be the case, that port `6379` is already occupied or that you have to run multiple Redis server on the same system. 
+It could be the case, that port `6379` is already occupied or that you have to run multiple Redis server on the same system.
 If this is the case, you can also spin up the system with a modified configuration, e.g. on port `xxxx`.
 The redis-server can be passed on a specific port.
 
 ```bash
 redis-server --port xxxx
 ```
-In addition, you will have to start the bec-server with a customized config. 
+In addition, you will have to start the bec-server with a customized config.
 Please check the example file ``bec/bec_config_template.yaml`` to create a custom config and specify port `xxxx` and pass it to the bec-server upon start
 
 ``` bash

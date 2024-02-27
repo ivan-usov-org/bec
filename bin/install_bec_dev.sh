@@ -48,7 +48,7 @@ while getopts "hsc:rt" o; do
     esac
 done
 
-conda_deps=(python=3.9)
+conda_deps=(python=3.10)
 
 # check if tmux should be installed
 if [ "$skip_tmux" = false ]; then

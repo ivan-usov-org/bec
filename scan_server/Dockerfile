@@ -1,5 +1,5 @@
 # set base image (host OS)
-ARG PY_VERSION=3.9
+ARG PY_VERSION=3.10
 FROM morgana-harbor.psi.ch/bec/python:${PY_VERSION}
 
 # set the working directory in the container
