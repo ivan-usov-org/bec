@@ -86,6 +86,28 @@ def test_redis_connector_register(
             cb_mock.assert_called_with(msg_object, a=1)
 
 
+
+def test_redis_connector_register_identical(connected_connector):
+    connector = connected_connector
+    redisdb = connector._redis_conn
+
+    received_event1 = mock.Mock(spec=[])
+    received_event2 = mock.Mock(spec=[])
+
+    connector.register(topics="topic1", cb=received_event1, start_thread=False)
+    connector.register(topics="topic1", cb=received_event1, start_thread=False)
+    connector.register(topics="topic1", cb=received_event2, start_thread=False)
+    connector.register(topics="topic2", cb=received_event1, start_thread=False)
+
+    connector.send("topic1", TestMessage("topic1"))
+    connector.poll_messages(timeout=1)
+    assert received_event1.call_count == 1
+    assert received_event2.call_count == 1
+    connector.send("topic2", TestMessage("topic2"))
+    connector.poll_messages(timeout=1)
+    assert received_event1.call_count == 2
+
+
 def test_redis_register_poll_messages(connected_connector):
     connector = connected_connector
     cb_fcn_has_been_called = False

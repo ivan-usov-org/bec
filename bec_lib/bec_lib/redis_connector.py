@@ -563,6 +563,7 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
         # make a weakref from the callable, using louie;
         # it can create safe refs for simple functions as well as methods
         cb_ref = louie.saferef.safe_ref(cb)
+        item = (cb_ref, kwargs)
 
         if topics is None and patterns is None:
             raise ValueError("topics and patterns cannot be both None")
@@ -574,7 +575,8 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
 
             self._pubsub_conn.psubscribe(patterns)
             for pattern in patterns:
-                self._topics_cb[pattern].append((cb_ref, kwargs))
+                if item not in self._topics_cb[pattern]:
+                    self._topics_cb[pattern].append(item)
         else:
             topics = self._convert_endpointinfo_to_str(topics)
             if not isinstance(topics, list):
@@ -582,7 +584,8 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
 
             self._pubsub_conn.subscribe(topics)
             for topic in topics:
-                self._topics_cb[topic].append((cb_ref, kwargs))
+                if item not in self._topics_cb[topic]:
+                    self._topics_cb[topic].append(item)
 
         if start_thread and self._events_dispatcher_thread is None:
             # start dispatcher thread
