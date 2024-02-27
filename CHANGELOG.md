@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.12.4 (2024-02-27)
+
+### Fix
+
+* **bec_lib:** Exclude disabled devices in device filters ([`388baae`](https://gitlab.psi.ch/bec/bec/-/commit/388baae9f117120f4f3db29e0c0db03cbb78b54c))
+
 ## v1.12.3 (2024-02-27)
 
 ### Fix
