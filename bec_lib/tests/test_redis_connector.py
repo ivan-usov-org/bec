@@ -55,6 +55,44 @@ def test_redis_connector_register(connected_connector, threaded, topics):
             assert connector._events_listener_thread is not None
 
 
+def test_redis_connector_register_identical(capsys, redisdb, connected_connector):
+    connector = connected_connector
+
+    received_event1 = mock.Mock(spec=[])
+    received_event2 = mock.Mock(spec=[])
+
+    connector.register(topics="topic1", cb=received_event1, start_thread=False)
+    connector.register(topics="topic1", cb=received_event1, start_thread=False)
+    connector.register(topics="topic1", cb=received_event2, start_thread=False)
+    connector.register(topics="topic2", cb=received_event1, start_thread=False)
+
+    connector.send("topic1", TestMessage("topic1"))
+    connector.poll_messages(timeout=1)
+    assert received_event1.call_count == 1
+    assert received_event2.call_count == 1
+    connector.send("topic2", TestMessage("topic2"))
+    connector.poll_messages(timeout=1)
+    assert received_event1.call_count == 2
+
+def test_redis_connector_register_identical(capsys, redisdb, connected_connector):
+    connector = connected_connector
+
+    received_event1 = mock.Mock(spec=[])
+    received_event2 = mock.Mock(spec=[])
+
+    connector.register(topics="topic1", cb=received_event1, start_thread=False)
+    connector.register(topics="topic1", cb=received_event1, start_thread=False)
+    connector.register(topics="topic1", cb=received_event2, start_thread=False)
+    connector.register(topics="topic2", cb=received_event1, start_thread=False)
+
+    connector.send("topic1", TestMessage("topic1"))
+    connector.poll_messages(timeout=1)
+    assert received_event1.call_count == 1
+    assert received_event2.call_count == 1
+    connector.send("topic2", TestMessage("topic2"))
+    connector.poll_messages(timeout=1)
+    assert received_event1.call_count == 2
+
 def test_redis_connector_log_warning(connector):
     with mock.patch.object(connector, "send", return_value=None):
         connector.log_warning("msg")
