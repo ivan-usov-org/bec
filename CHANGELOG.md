@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.12.3 (2024-02-27)
+
+### Fix
+
+* **scan_server:** Stage should only include monitored, baseline and async devices ([`05a83bd`](https://gitlab.psi.ch/bec/bec/-/commit/05a83bd4ac1fe898863f24bac1a139da0836a46a))
+
 ## v1.12.2 (2024-02-26)
 
 ### Fix
