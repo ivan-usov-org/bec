@@ -64,7 +64,7 @@ class ScanServer(BECService):
         msg = msg.value
         queue = msg.metadata.get("queue", "primary")
         if Alarms(msg.content["severity"]) == Alarms.MAJOR:
-            # shouldn't this be specific to a single queue?
+            logger.info(f"Received alarm: {msg}")
             parent.queue_manager.set_abort(queue=queue)
 
     @property

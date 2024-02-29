@@ -125,6 +125,7 @@ class QueueManager:
             scan_mod_msg (messages.ScanQueueModificationMessage): ScanQueueModificationMessage
 
         """
+        logger.info(f"Scan interception: {scan_mod_msg}")
         action = scan_mod_msg.content["action"]
         parameter = scan_mod_msg.content["parameter"]
         getattr(self, f"set_{action}")(scanID=scan_mod_msg.content["scanID"], parameter=parameter)
@@ -170,6 +171,7 @@ class QueueManager:
     def set_clear(self, scanID=None, queue="primary", parameter: dict = None) -> None:
         # pylint: disable=unused-argument
         """pause the queue and clear all its elements"""
+        logger.info("clearing queue")
         self.queues[queue].status = ScanQueueStatus.PAUSED
         self.queues[queue].worker_status = InstructionQueueStatus.STOPPED
         self.queues[queue].clear()
@@ -227,6 +229,8 @@ class QueueManager:
     def send_queue_status(self) -> None:
         """send the current queue to redis"""
         queue_export = self.export_queue()
+        if not queue_export:
+            return
         logger.info("New scan queue:")
         for queue in self.describe_queue():
             logger.info(f"\n {queue}")
@@ -372,39 +376,53 @@ class ScanQueue:
 
     def __next__(self):
         while not self.signal_event.is_set():
-            try:
-                if self.active_instruction_queue is not None and len(self.queue) > 0:
-                    self.queue.popleft()
-                    self.queue_manager.send_queue_status()
+            updated = self._next_instruction_queue()
+            if updated:
+                return self.active_instruction_queue
 
-                if self.status != ScanQueueStatus.PAUSED:
-                    if len(self.queue) == 0:
-                        self.active_instruction_queue = None
+    def _next_instruction_queue(self) -> bool:
+        """get the next instruction queue from the queue. If no update is available, it will return False."""
+        try:
+            aiq = self.active_instruction_queue
+            if (
+                aiq is not None
+                and len(self.queue) > 0
+                and self.queue[0].status != InstructionQueueStatus.PENDING
+            ):
+                self.queue.popleft()
+                self.queue_manager.send_queue_status()
+
+            if self.status != ScanQueueStatus.PAUSED:
+                if len(self.queue) == 0:
+                    if aiq is None:
                         time.sleep(0.1)
-                        continue
-
-                    self.active_instruction_queue = self.queue[0]
-                    self.history_queue.append(self.active_instruction_queue)
-                    return self.active_instruction_queue
-
-                while self.status == ScanQueueStatus.PAUSED:
-                    if len(self.queue) == 0:
-                        # we don't need to pause if there is no scan enqueued
-                        self.status = ScanQueueStatus.RUNNING
-                    time.sleep(0.1)
+                        return False
+                    self.active_instruction_queue = None
+                    time.sleep(0.01)
+                    return False
 
                 self.active_instruction_queue = self.queue[0]
                 self.history_queue.append(self.active_instruction_queue)
-                # self.active_instruction_queue
-                return self.active_instruction_queue
+                return True
 
-            except IndexError:
-                time.sleep(0.01)
+            while self.status == ScanQueueStatus.PAUSED:
+                if len(self.queue) == 0:
+                    # we don't need to pause if there is no scan enqueued
+                    self.status = ScanQueueStatus.RUNNING
+                time.sleep(0.1)
+
+            self.active_instruction_queue = self.queue[0]
+            self.history_queue.append(self.active_instruction_queue)
+            return True
+        except IndexError:
+            time.sleep(0.01)
+        return False
 
     def insert(self, msg: messages.ScanQueueMessage, position=-1, **_kwargs):
         """insert a new message to the queue"""
         target_group = msg.metadata.get("queue_group")
         scan_def_id = msg.metadata.get("scan_def_id")
+        logger.debug(f"Inserting new queue message {msg}")
         instruction_queue = None
         queue_exists = False
         if scan_def_id is not None:
@@ -445,6 +463,7 @@ class ScanQueue:
 
     def abort(self) -> None:
         """abort the current queue item"""
+        logger.debug("Aborting scan.")
         if self.active_instruction_queue is not None:
             self.active_instruction_queue.abort()
 

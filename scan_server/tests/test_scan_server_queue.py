@@ -1,3 +1,4 @@
+import threading
 import uuid
 from unittest import mock
 
@@ -337,6 +338,32 @@ def test_set_clear(queuemanager_mock):
     queue_manager.add_to_queue(scan_queue="primary", msg=msg)
     queue_manager.set_clear(queue="primary")
     assert len(queue_manager.queues["primary"].queue) == 0
+
+
+def test_scan_queue_next_instruction_queue(queuemanager_mock):
+    queue_manager = queuemanager_mock()
+    queue = ScanQueue(queue_manager, InstructionQueueMock)
+    assert queue._next_instruction_queue() is False
+
+
+def test_scan_queue_next_instruction_queue_pops(queuemanager_mock):
+    queue_manager = queuemanager_mock()
+    queue = ScanQueue(queue_manager, InstructionQueueMock)
+    queue.queue.append(InstructionQueueItem(queue, mock.MagicMock(), mock.MagicMock()))
+    queue.queue[0].status = InstructionQueueStatus.RUNNING
+    queue.active_instruction_queue = queue.queue[0]
+    assert queue._next_instruction_queue() is False
+    assert len(queue.queue) == 0
+
+
+def test_scan_queue_next_instruction_queue_does_not_pop(queuemanager_mock):
+    queue_manager = queuemanager_mock()
+    queue = ScanQueue(queue_manager, InstructionQueueMock)
+    queue.queue.append(InstructionQueueItem(queue, mock.MagicMock(), mock.MagicMock()))
+    queue.queue[0].status = InstructionQueueStatus.PENDING
+    queue.active_instruction_queue = queue.queue[0]
+    assert queue._next_instruction_queue() is True
+    assert len(queue.queue) == 1
 
 
 class RequestBlockMock(RequestBlock):
