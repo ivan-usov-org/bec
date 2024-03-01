@@ -49,19 +49,20 @@ class BlueskyEmitter(EmitterBase):
         sb = self.scan_bundler
         signals = {}
         for dev in sb.monitored_devices[scanID]["devices"]:
-            # copied from bluesky/callbacks/stream.py:
-            for key, val in dev.signals.items():
-                val = val["value"]
-                # String key
-                if isinstance(val, str):
-                    key_desc = {"dtype": "string", "shape": []}
-                # Iterable
-                elif isinstance(val, Iterable):
-                    key_desc = {"dtype": "array", "shape": np.shape(val)}
-                # Number
-                else:
-                    key_desc = {"dtype": "number", "shape": []}
-                signals[key] = key_desc
+            if hasattr(dev, 'signals'):
+                # copied from bluesky/callbacks/stream.py:
+                for key, val in dev.signals.items():
+                    val = val["value"]
+                    # String key
+                    if isinstance(val, str):
+                        key_desc = {"dtype": "string", "shape": []}
+                    # Iterable
+                    elif isinstance(val, Iterable):
+                        key_desc = {"dtype": "array", "shape": np.shape(val)}
+                    # Number
+                    else:
+                        key_desc = {"dtype": "number", "shape": []}
+                    signals[key] = key_desc
         return signals
 
     def _get_descriptor_document(self, scanID) -> dict:
@@ -78,7 +79,7 @@ class BlueskyEmitter(EmitterBase):
                 "samy": {"fields": ["samy"]},
             },
             "object_keys": {
-                dev.name: list(dev.signals.keys())
+                dev.name: list(dev.signals.keys()) if hasattr(dev, 'signals') else []
                 for dev in sb.monitored_devices[scanID]["devices"]
             },
         }
