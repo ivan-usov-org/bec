@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.12.5 (2024-03-01)
+
+### Fix
+
+* **scan_server:** Fixed queue pop for pending requests ([`14f94cd`](https://gitlab.psi.ch/bec/bec/-/commit/14f94cd96071feb0885b010af7576532baea553e))
+
 ## v1.12.4 (2024-02-27)
 
 ### Fix
