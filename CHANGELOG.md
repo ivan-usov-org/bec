@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.12.6 (2024-03-01)
+
+### Fix
+
+* Fix dap test, cleanup redudant config values ([`4f63fef`](https://gitlab.psi.ch/bec/bec/-/commit/4f63fef18c512eadbf339629e9780b82d878ea37))
+
 ## v1.12.5 (2024-03-01)
 
 ### Fix
