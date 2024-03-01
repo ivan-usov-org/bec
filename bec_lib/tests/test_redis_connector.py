@@ -6,14 +6,26 @@ import redis
 
 import bec_lib.messages as bec_messages
 from bec_lib.alarm_handler import Alarms
-from bec_lib.connector import ConsumerConnectorError
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.messages import AlarmMessage, BECMessage, LogMessage
-from bec_lib.redis_connector import (
-    MessageObject,
-    RedisConnector,
-)
+from bec_lib.redis_connector import RedisConnector
 from bec_lib.serialization import MsgpackSerialization
+
+
+@dataclass(eq=False)
+class TestMessage(BECMessage):
+    __test__ = False  # just for pytest to ignore this class
+    msg_type = "test_message"
+    msg: str
+    # have to add this field here,
+    # could be inherited but it requires Python 3.10
+    # and 'kw_only=True'
+    metadata: dict = field(default_factory=lambda: {})
+
+
+# register at BEC messages module level, to be able to
+# find it when using "loads()"
+bec_messages.TestMessage = TestMessage
 
 
 @pytest.fixture
@@ -24,35 +36,6 @@ def connector():
             yield connector
         finally:
             connector.shutdown()
-
-
-@pytest.fixture
-def connected_connector(redis_proc):
-    connector = RedisConnector(f"localhost:{redis_proc.port}")
-    try:
-        yield connector
-    finally:
-        connector.shutdown()
-
-
-@pytest.mark.parametrize(
-    "topics, threaded",
-    [["topics", True], ["topics", False], [None, True], [None, False]],
-)
-def test_redis_connector_register(connected_connector, threaded, topics):
-    breakpoint()
-    connector = connected_connector
-    if topics is None:
-        with pytest.raises(TypeError):
-            ret = connector.register(
-                topics=topics, cb=lambda *args, **kwargs: ..., start_thread=threaded
-            )
-    else:
-        ret = connector.register(
-            topics=topics, cb=lambda *args, **kwargs: ..., start_thread=threaded
-        )
-        if threaded:
-            assert connector._events_listener_thread is not None
 
 
 def test_redis_connector_log_warning(connector):
@@ -94,29 +77,9 @@ def test_redis_connector_raise_alarm(connector, severity, alarm_type, source, ms
         connector.set_and_publish.assert_called_once_with(
             MessageEndpoints.alarm(),
             AlarmMessage(
-                severity=severity,
-                alarm_type=alarm_type,
-                source=source,
-                msg=msg,
-                metadata=metadata,
+                severity=severity, alarm_type=alarm_type, source=source, msg=msg, metadata=metadata
             ),
         )
-
-
-@dataclass(eq=False)
-class TestMessage(BECMessage):
-    __test__ = False  # just for pytest to ignore this class
-    msg_type = "test_message"
-    msg: str
-    # have to add this field here,
-    # could be inherited but it requires Python 3.10
-    # and 'kw_only=True'
-    metadata: dict = field(default_factory=lambda: {})
-
-
-# register at BEC messages module level, to be able to
-# find it when using "loads()"
-bec_messages.TestMessage = TestMessage
 
 
 @pytest.mark.parametrize(
@@ -134,11 +97,7 @@ def test_redis_connector_send(connector, topic, msg):
 
 @pytest.mark.parametrize(
     "topic, msgs, max_size, expire",
-    [
-        ["topic1", "msgs", None, None],
-        ["topic1", "msgs", 10, None],
-        ["topic1", "msgs", None, 100],
-    ],
+    [["topic1", "msgs", None, None], ["topic1", "msgs", 10, None], ["topic1", "msgs", None, 100]],
 )
 def test_redis_connector_lpush(connector, topic, msgs, max_size, expire):
     pipe = None
@@ -179,8 +138,7 @@ def test_redis_connector_lpush_BECMessage(connector, topic, msgs, max_size, expi
 
 
 @pytest.mark.parametrize(
-    "topic , index , msgs, use_pipe",
-    [["topic1", 1, "msg1", True], ["topic2", 4, "msg2", False]],
+    "topic , index , msgs, use_pipe", [["topic1", 1, "msg1", True], ["topic2", 4, "msg2", False]]
 )
 def test_redis_connector_lset(connector, topic, index, msgs, use_pipe):
     pipe = use_pipe_fcn(connector, use_pipe)
@@ -197,10 +155,7 @@ def test_redis_connector_lset(connector, topic, index, msgs, use_pipe):
 
 @pytest.mark.parametrize(
     "topic , index , msgs, use_pipe",
-    [
-        ["topic1", 1, TestMessage("msg1"), True],
-        ["topic2", 4, TestMessage("msg2"), False],
-    ],
+    [["topic1", 1, TestMessage("msg1"), True], ["topic2", 4, TestMessage("msg2"), False]],
 )
 def test_redis_connector_lset_BECMessage(connector, topic, index, msgs, use_pipe):
     pipe = use_pipe_fcn(connector, use_pipe)
@@ -351,100 +306,9 @@ def test_redis_connector_get(connector, topic, use_pipe):
         assert ret == redis.Redis().get()
 
 
-@pytest.mark.parametrize(
-    "subscribed_topics, subscribed_patterns, msgs",
-    [
-        ["topics1", None, ["topics1"]],
-        [["topics1", "topics2"], None, ["topics1", "topics2"]],
-        [None, "pattern1", ["pattern1"]],
-        [None, ["patt*", "top*"], ["pattern1", "topics1"]],
-    ],
-)
-def test_redis_connector_register(
-    redisdb, connected_connector, subscribed_topics, subscribed_patterns, msgs
-):
-    connector = connected_connector
-    test_msg = TestMessage("test")
-    cb_mock = mock.Mock(spec=[])  # spec is here to remove all attributes
-    if subscribed_topics:
-        connector.register(
-            subscribed_topics, subscribed_patterns, cb=cb_mock, start_thread=False, a=1
-        )
-        for msg in msgs:
-            connector.send(msg, TestMessage(msg))
-            connector.poll_messages()
-            msg_object = MessageObject(msg, TestMessage(msg))
-            cb_mock.assert_called_with(msg_object, a=1)
-    if subscribed_patterns:
-        connector.register(
-            subscribed_topics, subscribed_patterns, cb=cb_mock, start_thread=False, a=1
-        )
-        for msg in msgs:
-            connector.send(msg, TestMessage(msg))
-            connector.poll_messages()
-            msg_object = MessageObject(msg, TestMessage(msg))
-            cb_mock.assert_called_with(msg_object, a=1)
-
-
-def test_redis_register_poll_messages(redisdb, connected_connector):
-    connector = connected_connector
-    cb_fcn_has_been_called = False
-
-    def cb_fcn(msg, **kwargs):
-        nonlocal cb_fcn_has_been_called
-        cb_fcn_has_been_called = True
-        assert kwargs["a"] == 1
-
-    test_msg = TestMessage("test")
-    connector.register("test", cb=cb_fcn, a=1, start_thread=False)
-    redisdb.publish("test", MsgpackSerialization.dumps(test_msg))
-
-    connector.poll_messages(timeout=1)
-
-    assert cb_fcn_has_been_called
-
-    with pytest.raises(TimeoutError):
-        connector.poll_messages(timeout=0.1)
-
-
-def test_redis_connector_xadd(connector):
-    connector.xadd("topic1", {"key": "value"})
-    connector._redis_conn.xadd.assert_called_once_with("topic1", {"key": "value"})
-
-
-def test_redis_connector_xadd_with_maxlen(connector):
-    connector.xadd("topic1", {"key": "value"}, max_size=100)
-    connector._redis_conn.xadd.assert_called_once_with("topic1", {"key": "value"}, maxlen=100)
-
-
-def test_redis_connector_xadd_with_expire(connector):
-    connector.xadd("topic1", {"key": "value"}, expire=100)
-    connector._redis_conn.pipeline().xadd.assert_called_once_with("topic1", {"key": "value"})
-    connector._redis_conn.pipeline().expire.assert_called_once_with("topic1", 100)
-    connector._redis_conn.pipeline().execute.assert_called_once()
-
-
 def test_redis_connector_xread(connector):
     connector.xread("topic1", "id")
     connector._redis_conn.xread.assert_called_once_with({"topic1": "id"}, count=None, block=None)
-
-
-def test_redis_connector_xadd(connector):
-    connector.xadd("topic1", {"key": "value"})
-    connector._redis_conn.xadd.assert_called_once_with(
-        "topic1", {"key": MsgpackSerialization.dumps("value")}
-    )
-
-    test_msg = TestMessage("test")
-    connector.xadd("topic1", {"data": test_msg})
-    connector._redis_conn.xadd.assert_called_with(
-        "topic1", {"data": MsgpackSerialization.dumps(test_msg)}
-    )
-    connector._redis_conn.xrevrange.return_value = [
-        (b"1707391599960-0", {b"data": MsgpackSerialization.dumps(test_msg)})
-    ]
-    msg = connector.get_last("topic1")
-    assert msg == test_msg
 
 
 def test_redis_connector_xadd_with_maxlen(connector):
@@ -463,35 +327,9 @@ def test_redis_connector_xadd_with_expire(connector):
     connector._redis_conn.pipeline().execute.assert_called_once()
 
 
-def test_redis_connector_xread(connector):
-    connector.xread("topic1", "id")
-    connector._redis_conn.xread.assert_called_once_with({"topic1": "id"}, count=None, block=None)
-
-
-def test_redis_connector_xread_without_id(connector):
-    connector.xread("topic1", from_start=True)
-    connector._redis_conn.xread.assert_called_once_with({"topic1": "0-0"}, count=None, block=None)
-    connector._redis_conn.xread.reset_mock()
-
-    connector.stream_keys["topic1"] = "id"
-    connector.xread("topic1")
-    connector._redis_conn.xread.assert_called_once_with({"topic1": "id"}, count=None, block=None)
-
-
 def test_redis_connector_xread_from_end(connector):
     connector.xread("topic1", from_start=False)
     connector._redis_conn.xrevrange.assert_called_once_with("topic1", "+", "-", count=1)
-
-
-def test_redis_connector_get_last(connector):
-    connector._redis_conn.xrevrange.return_value = [
-        (b"1707391599960-0", {b"key": MsgpackSerialization.dumps("value")})
-    ]
-    msg = connector.get_last("topic1")
-    connector._redis_conn.xrevrange.assert_called_once_with("topic1", "+", "-", count=1)
-    assert msg is None  # no key given, default is b'data'
-    assert connector.get_last("topic1", "key") == "value"
-    assert connector.get_last("topic1", None) == {"key": "value"}
 
 
 def test_redis_connector_xread_without_id(connector):

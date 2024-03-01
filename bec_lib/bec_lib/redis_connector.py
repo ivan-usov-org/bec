@@ -1,3 +1,9 @@
+"""
+This module provides a connector to a redis server. It is a wrapper around the
+redis library providing a simple interface to send and receive messages from a
+redis server.
+"""
+
 from __future__ import annotations
 
 import collections
@@ -6,6 +12,7 @@ import sys
 import threading
 import time
 import warnings
+from dataclasses import dataclass
 from functools import wraps
 from typing import TYPE_CHECKING
 
@@ -48,8 +55,270 @@ def check_topic(func):
     return wrapper
 
 
-class RedisConnector(ConnectorBase):
+@dataclass
+class StreamTopicInfo:
+    topic: str | list[str]
+    stream_id: int
+    id: str
+    newest_only: bool
+    from_start: bool
+    cb: callable
+    kwargs: dict
+
+
+class StreamRegisterMixin:
+    """
+    Mixin to add stream registration capabilities to a connector
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._stream_topics_cb = collections.defaultdict(list)
+        self._stream_events_listener_thread = None
+        self._stream_events_dispatcher_thread = None
+        self._stream_messages_queue = queue.Queue()
+        self._stop_stream_events_listener_thread = threading.Event()
+        self._custom_stream_listeners = {}
+        self.__stream_counter = 0
+
+    def _stream_counter(self):
+        self.__stream_counter += 1
+        return self.__stream_counter
+
+    def register_stream(
+        self,
+        topic: str = None,
+        pattern: str = None,
+        cb: callable = None,
+        from_start=False,
+        newest_only=False,
+        start_thread=True,
+        **kwargs,
+    ):
+        """
+        Register a callback for a stream topic or pattern
+
+        Args:
+            topic (str, optional): topic. Defaults to None.
+            pattern (str, optional): pattern. Defaults to None.
+            cb (callable, optional): callback. Defaults to None.
+            from_start (bool, optional): read from start. Defaults to False.
+            newest_only (bool, optional): read newest only. Defaults to False.
+            start_thread (bool, optional): start the dispatcher thread. Defaults to True.
+            **kwargs: additional keyword arguments to be transmitted to the callback
+
+        Examples:
+            >>> def my_callback(msg, **kwargs):
+            ...     print(msg)
+            ...
+            >>> connector.register_stream("test", my_callback)
+            >>> connector.register_stream(topic="test", cb=my_callback)
+            >>> connector.register_stream(pattern="test:*", cb=my_callback)
+            >>> connector.register_stream(pattern="test:*", cb=my_callback, start_thread=False)
+            >>> connector.register_stream(pattern="test:*", cb=my_callback, start_thread=False, my_arg="test")
+        """
+
+        if topic is None and pattern is None:
+            raise ValueError("topic and pattern cannot be both None")
+
+        if newest_only and from_start:
+            raise ValueError("newest_only and from_start cannot be both True")
+
+        if not cb:
+            raise ValueError("Callback cb cannot be None")
+
+        # make a weakref from the callable, using louie;
+        # it can create safe refs for simple functions as well as methods
+        cb_ref = louie.saferef.safe_ref(cb)
+
+        if pattern is not None:
+            stream_topic = pattern
+        else:
+            stream_topic = topic
+
+        if newest_only:
+            # if newest_only is True, we need to provide a separate callback for each topic,
+            # directly calling the callback. This is because we need to have a backpressure
+            # mechanism in place, and we cannot rely on the dispatcher thread to handle it.
+            self._add_direct_stream_listener(stream_topic, cb_ref, **kwargs)
+            return
+
+        if self._stream_events_listener_thread is None:
+            # create the thread that will get all messages for this connector;
+            self._stream_events_listener_thread = threading.Thread(
+                target=self._get_stream_messages_loop
+            )
+            self._stream_events_listener_thread.start()
+        stream_id = self._stream_counter()
+        self._stream_topics_cb[stream_topic].append(
+            StreamTopicInfo(
+                id="0-0",
+                topic=stream_topic,
+                stream_id=stream_id,
+                newest_only=newest_only,
+                from_start=from_start,
+                cb=cb_ref,
+                kwargs=kwargs,
+            )
+        )
+
+        if start_thread and self._stream_events_dispatcher_thread is None:
+            # start dispatcher thread
+            self._stream_events_dispatcher_thread = threading.Thread(
+                target=self._dispatch_stream_events
+            )
+            self._stream_events_dispatcher_thread.start()
+        return stream_id
+
+    def _add_direct_stream_listener(self, topic, cb, **kwargs) -> int:
+        """
+        Add a direct listener for a topic. This is used when newest_only is True.
+
+        Args:
+            topic (str): topic
+            cb (callable): callback
+            kwargs (dict): additional keyword arguments to be transmitted to the callback
+
+        Returns:
+            int: stream id
+        """
+        stream_id = self._stream_counter()
+        info = StreamTopicInfo(
+            id="0-0",
+            topic=topic,
+            stream_id=stream_id,
+            newest_only=True,
+            from_start=False,
+            cb=cb,
+            kwargs=kwargs,
+        )
+        thread = threading.Thread(target=self._direct_stream_listener, args=(info,), daemon=True)
+        self._custom_stream_listeners[stream_id] = {"info": info, "thread": thread}
+        thread.start()
+
+        return stream_id
+
+    def _direct_stream_listener(self, info: StreamTopicInfo):
+        while True:
+            msg = self.xread(info.topic, count=1, block=1000)
+            if not msg:
+                time.sleep(0.1)
+                continue
+            cb = info.cb()
+            if not cb:
+                return
+            try:
+                cb(msg[0], **info.kwargs)
+            # pylint: disable=broad-except
+            except Exception:
+                sys.excepthook(*sys.exc_info())
+
+    def _dispatch_stream_events(self):
+        while self.poll_stream_messages():
+            ...
+
+    def _get_stream_topics(self) -> dict:
+        stream_topics = {}
+        for topic, subscriber in self._stream_topics_cb.items():
+            for info in subscriber:
+                stream_topics[topic] = info.id
+        return stream_topics
+
+    def _get_stream_messages_loop(self) -> None:
+        """
+        Get stream messages loop. This method is run in a separate thread and listens
+        for messages from the redis server.
+        """
+        error = False
+        while not self._stop_stream_events_listener_thread.is_set():
+            try:
+                stream_topics = self._get_stream_topics()
+                if not stream_topics:
+                    continue
+                msg = self._redis_conn.xread(streams=stream_topics, block=1000)
+                print(stream_topics)
+
+            except redis.exceptions.ConnectionError:
+                if not error:
+                    error = True
+                    bec_logger.logger.error("Failed to connect to redis. Is the server running?")
+                time.sleep(1)
+            # pylint: disable=broad-except
+            except Exception:
+                sys.excepthook(*sys.exc_info())
+            else:
+                error = False
+                if msg is not None:
+                    self._stream_messages_queue.put(msg)
+
+    def poll_stream_messages(self, timeout=None) -> None:
+        """
+        Poll for new messages, receive them and execute callbacks
+
+        Args:
+            timeout ([type], optional): timeout in seconds. Defaults to None.
+        """
+        while True:
+            try:
+                msg = self._stream_messages_queue.get(timeout=timeout)
+            except queue.Empty as exc:
+                raise TimeoutError(
+                    f"{self}: poll_stream_messages: did not receive a message within {timeout} seconds"
+                ) from exc
+            if msg is StopIteration:
+                return False
+            if self._handle_stream_message(msg):
+                return True
+
+    def _handle_stream_message(self, msg):
+        if not msg:
+            return False
+        for topic, msgs in msg:
+            callbacks = self._stream_topics_cb[topic.decode()]
+            for index, record in msgs:
+                msg_dict = {
+                    k.decode(): MsgpackSerialization.loads(msg) for k, msg in record.items()
+                }
+                for info in callbacks:
+                    info.id = index
+                    cb = info.cb()
+                    if cb:
+                        try:
+                            cb(msg_dict, **info.kwargs)
+                        # pylint: disable=broad-except
+                        except Exception:
+                            sys.excepthook(*sys.exc_info())
+        return True
+
+    def shutdown(self):
+        """
+        Shutdown the connector
+        """
+        super().shutdown()
+        if self._stream_events_listener_thread:
+            self._stop_stream_events_listener_thread.set()
+            self._stream_events_listener_thread.join()
+            self._stream_events_listener_thread = None
+        if self._stream_events_dispatcher_thread:
+            self._stream_messages_queue.put(StopIteration)
+            self._stream_events_dispatcher_thread.join()
+            self._stream_events_dispatcher_thread = None
+
+
+class RedisConnector(StreamRegisterMixin, ConnectorBase):
+    """
+    Redis connector class. This class is a wrapper around the redis library providing
+    a simple interface to send and receive messages from a redis server.
+    """
+
     def __init__(self, bootstrap: list, redis_cls=None):
+        """
+        Initialize the connector
+
+        Args:
+            bootstrap (list): list of strings in the form "host:port"
+            redis_cls (redis.client, optional): redis client class. Defaults to None.
+        """
         super().__init__(bootstrap)
         self.host, self.port = (
             bootstrap[0].split(":") if isinstance(bootstrap, list) else bootstrap.split(":")
@@ -74,6 +343,10 @@ class RedisConnector(ConnectorBase):
         self.stream_keys = {}
 
     def shutdown(self):
+        """
+        Shutdown the connector
+        """
+        super().shutdown()
         if self._events_listener_thread:
             self._stop_events_listener_thread.set()
             self._events_listener_thread.join()
@@ -82,35 +355,70 @@ class RedisConnector(ConnectorBase):
             self._messages_queue.put(StopIteration)
             self._events_dispatcher_thread.join()
             self._events_dispatcher_thread = None
+
         # release all connections
         self._pubsub_conn.close()
         self._redis_conn.close()
 
     def log_warning(self, msg):
-        """send a warning"""
+        """
+        send a warning
+
+        Args:
+            msg (str): warning message
+        """
         self.send(MessageEndpoints.log(), LogMessage(log_type="warning", log_msg=msg))
 
     def log_message(self, msg):
-        """send a log message"""
+        """
+        send a message as log
+
+        Args:
+            msg (str): message
+        """
         self.send(MessageEndpoints.log(), LogMessage(log_type="log", log_msg=msg))
 
     def log_error(self, msg):
-        """send an error as log"""
+        """
+        send an error as log
+
+        Args:
+            msg (str): error message
+        """
         self.send(MessageEndpoints.log(), LogMessage(log_type="error", log_msg=msg))
 
     def raise_alarm(self, severity: Alarms, alarm_type: str, source: str, msg: str, metadata: dict):
-        """raise an alarm"""
+        """
+        Raise an alarm
+
+        Args:
+            severity (Alarms): alarm severity
+            alarm_type (str): alarm type
+            source (str): source
+            msg (str): message
+            metadata (dict): metadata
+        """
         alarm_msg = AlarmMessage(
             severity=severity, alarm_type=alarm_type, source=source, msg=msg, metadata=metadata
         )
         self.set_and_publish(MessageEndpoints.alarm(), alarm_msg)
 
-    def pipeline(self):
+    def pipeline(self) -> redis.client.Pipeline:
         """Create a new pipeline"""
         return self._redis_conn.pipeline()
 
-    def execute_pipeline(self, pipeline):
-        """Execute the pipeline and returns the results with decoded BECMessages"""
+    def execute_pipeline(self, pipeline) -> list:
+        """
+        Execute a pipeline and return the results
+
+        Args:
+            pipeline (Pipeline): redis pipeline
+
+        Returns:
+            list: list of results
+        """
+        if not isinstance(pipeline, redis.client.Pipeline):
+            raise TypeError(f"Expected a redis Pipeline, got {type(pipeline)}")
         ret = []
         results = pipeline.execute()
         for res in results:
@@ -121,22 +429,56 @@ class RedisConnector(ConnectorBase):
         return ret
 
     def raw_send(self, topic: str, msg: bytes, pipe=None):
-        """send to redis without any check on message type"""
+        """
+        Send a message to a topic. This is the raw version of send, it does not
+        check the message type. Use this method if you want to send a message
+        that is not a BECMessage.
+
+        Args:
+            topic (str): topic
+            msg (bytes): message
+            pipe (Pipeline, optional): redis pipe. Defaults to None.
+        """
         client = pipe if pipe is not None else self._redis_conn
         client.publish(topic, msg)
 
     @check_topic
     def send(self, topic: str, msg: BECMessage, pipe=None) -> None:
-        """send to redis"""
+        """
+        Send a message to a topic
+
+        Args:
+            topic (str): topic
+            msg (BECMessage): message
+            pipe (Pipeline, optional): redis pipe. Defaults to None.
+        """
         if not isinstance(msg, BECMessage):
             raise TypeError(f"Message {msg} is not a BECMessage")
         self.raw_send(topic, MsgpackSerialization.dumps(msg), pipe)
 
     def register(self, topics=None, patterns=None, cb=None, start_thread=True, **kwargs):
+        """
+        Register a callback for a topic or a pattern
+
+        Args:
+            topics (str, list, optional): topic or list of topics. Defaults to None.
+            patterns (str, list, optional): pattern or list of patterns. Defaults to None.
+            cb (callable, optional): callback. Defaults to None.
+            start_thread (bool, optional): start the dispatcher thread. Defaults to True.
+            **kwargs: additional keyword arguments to be transmitted to the callback
+
+        Examples:
+            >>> def my_callback(msg, **kwargs):
+            ...     print(msg)
+            ...
+            >>> connector.register("test", my_callback)
+            >>> connector.register(topics="test", cb=my_callback)
+            >>> connector.register(patterns="test:*", cb=my_callback)
+            >>> connector.register(patterns="test:*", cb=my_callback, start_thread=False)
+            >>> connector.register(patterns="test:*", cb=my_callback, start_thread=False, my_arg="test")
+        """
         if self._events_listener_thread is None:
             # create the thread that will get all messages for this connector;
-            # under the hood, it uses asyncio - this lets the possibility to stop
-            # the loop on demand
             self._events_listener_thread = threading.Thread(
                 target=self._get_messages_loop, args=(self._pubsub_conn,)
             )
@@ -144,6 +486,9 @@ class RedisConnector(ConnectorBase):
         # make a weakref from the callable, using louie;
         # it can create safe refs for simple functions as well as methods
         cb_ref = louie.saferef.safe_ref(cb)
+
+        if topics is None and patterns is None:
+            raise ValueError("topics and patterns cannot be both None")
 
         if patterns is not None:
             if isinstance(patterns, str):
@@ -168,12 +513,16 @@ class RedisConnector(ConnectorBase):
 
         if start_thread and self._events_dispatcher_thread is None:
             # start dispatcher thread
-            self._events_dispatcher_thread = threading.Thread(target=self.dispatch_events)
+            self._events_dispatcher_thread = threading.Thread(target=self._dispatch_events)
             self._events_dispatcher_thread.start()
 
-    def _get_messages_loop(self, pubsub) -> None:
+    def _get_messages_loop(self, pubsub: redis.client.PubSub) -> None:
         """
-        Start a listening coroutine to deal with redis events and wait for completion
+        Get messages loop. This method is run in a separate thread and listens
+        for messages from the redis server.
+
+        Args:
+            pubsub (redis.client.PubSub): pubsub object
         """
         error = False
         while not self._stop_events_listener_thread.is_set():
@@ -184,6 +533,7 @@ class RedisConnector(ConnectorBase):
                     error = True
                     bec_logger.logger.error("Failed to connect to redis. Is the server running?")
                 time.sleep(1)
+            # pylint: disable=broad-except
             except Exception:
                 sys.excepthook(*sys.exc_info())
             else:
@@ -206,6 +556,7 @@ class RedisConnector(ConnectorBase):
             if cb:
                 try:
                     cb(msg, **kwargs)
+                # pylint: disable=broad-except
                 except Exception:
                     sys.excepthook(*sys.exc_info())
         return True
@@ -214,19 +565,16 @@ class RedisConnector(ConnectorBase):
         while True:
             try:
                 msg = self._messages_queue.get(timeout=timeout)
-            except queue.Empty:
+            except queue.Empty as exc:
                 raise TimeoutError(
                     f"{self}: poll_messages: did not receive a message within {timeout} seconds"
-                )
-            else:
-                if msg is StopIteration:
-                    return False
-                if self._handle_message(msg):
-                    return True
-                else:
-                    continue
+                ) from exc
+            if msg is StopIteration:
+                return False
+            if self._handle_message(msg):
+                return True
 
-    def dispatch_events(self):
+    def _dispatch_events(self):
         while self.poll_messages():
             ...
 
@@ -373,20 +721,28 @@ class RedisConnector(ConnectorBase):
         if not pipe and expire:
             client.execute()
 
-    @check_topic
-    def get_last(self, topic: str, key="data"):
-        """retrieve last entry from stream"""
+    def get_last(self, topic: str, key=None):
+        """
+        Get last message from stream. Repeated calls will return
+        the same message until a new message is added to the stream.
+
+        Args:
+            topic (str): redis topic
+            key (str, optional): key to retrieve. Defaults to None. If None, the whole message is returned.
+        """
         client = self._redis_conn
         try:
-            _, msg_dict = client.xrevrange(topic, "+", "-", count=1)[0]
+            res = client.xrevrange(topic, "+", "-", count=1)
+            if not res:
+                return None
+            _, msg_dict = res[0]
         except TypeError:
             return None
-        else:
-            msg_dict = {k.decode(): MsgpackSerialization.loads(msg) for k, msg in msg_dict.items()}
+        msg_dict = {k.decode(): MsgpackSerialization.loads(msg) for k, msg in msg_dict.items()}
 
-            if key is None:
-                return msg_dict
-            return msg_dict.get(key)
+        if key is None:
+            return msg_dict
+        return msg_dict.get(key)
 
     @check_topic
     def xread(
@@ -398,7 +754,7 @@ class RedisConnector(ConnectorBase):
         Args:
             topic (str): redis topic
             id (str, optional): id to read from. Defaults to None.
-            count (int, optional): number of messages to read. Defaults to None.
+            count (int, optional): number of messages to read. Defaults to None, which means all.
             block (int, optional): block for x milliseconds. Defaults to None.
             from_start (bool, optional): read from start. Defaults to False.
 
@@ -423,7 +779,7 @@ class RedisConnector(ConnectorBase):
                 try:
                     msg = client.xrevrange(topic, "+", "-", count=1)
                     if msg:
-                        self.stream_keys[topic] = msg[0][0]
+                        self.stream_keys[topic] = msg[0][0].decode()
                         out = {}
                         for key, val in msg[0][1].items():
                             out[key.decode()] = MsgpackSerialization.loads(val)
@@ -444,7 +800,7 @@ class RedisConnector(ConnectorBase):
                 out.append(
                     {k.decode(): MsgpackSerialization.loads(msg) for k, msg in record.items()}
                 )
-                self.stream_keys[topic] = index
+                self.stream_keys[topic.decode()] = index
         return out if out else None
 
     @check_topic
@@ -457,15 +813,18 @@ class RedisConnector(ConnectorBase):
             min (str): min id. Use "-" to read from start
             max (str): max id. Use "+" to read to end
             count (int, optional): number of messages to read. Defaults to None.
+
+        Returns:
+            [list]: list of messages or None
         """
         client = self._redis_conn
         msgs = []
         for reading in client.xrange(topic, min, max, count=count):
-            index, msg_dict = reading
+            _, msg_dict = reading
             msgs.append(
                 {k.decode(): MsgpackSerialization.loads(msg) for k, msg in msg_dict.items()}
             )
-        return msgs
+        return msgs if msgs else None
 
     def producer(self):
         """Return itself as a producer, to be compatible with old code"""

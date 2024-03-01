@@ -27,12 +27,12 @@ if __name__ == "__main__":
             "dev": [
                 "pytest",
                 "pytest-random-order",
-                "pytest-redis",
                 "pytest-timeout",
                 "coverage",
                 "pandas",
                 "black",
                 "pylint",
+                "fakeredis",
             ]
         },
         entry_points={"console_scripts": ["bec-channel-monitor = bec_lib:channel_monitor_launch"]},

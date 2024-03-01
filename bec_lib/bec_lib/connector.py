@@ -1,13 +1,10 @@
 from __future__ import annotations
 
-import _thread
 import abc
-import threading
-import traceback
 
+from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
 from bec_lib.messages import BECMessage, LogMessage
-from bec_lib.endpoints import MessageEndpoints
 
 logger = bec_logger.logger
 
@@ -43,7 +40,7 @@ class StoreInterface(abc.ABC):
     def pipeline(self):
         pass
 
-    def execute_pipeline(self):
+    def execute_pipeline(self, pipeline):
         pass
 
     def lpush(
@@ -72,7 +69,7 @@ class StoreInterface(abc.ABC):
     def get(self, topic: str, pipe=None):
         raise NotImplementedError
 
-    def xadd(self, topic: str, msg: dict, max_size=None, pipe=None, expire: int = None):
+    def xadd(self, topic: str, msg_dict: dict, max_size=None, pipe=None, expire: int = None):
         raise NotImplementedError
 
     def xread(
@@ -97,7 +94,7 @@ class PubSubInterface(abc.ABC):
     def send(self, topic: str, msg: BECMessage) -> None:
         raise NotImplementedError
 
-    def register(self, topics=None, pattern=None, cb=None, start_thread=True, **kwargs):
+    def register(self, topics=None, patterns=None, cb=None, start_thread=True, **kwargs):
         raise NotImplementedError
 
     def poll_messages(self, timeout=None):
@@ -108,7 +105,7 @@ class PubSubInterface(abc.ABC):
         raise NotImplementedError
 
     def shutdown(self):
-        raise NotImplementedError
+        """Shutdown the connector"""
 
 
 class ConnectorBase(PubSubInterface, StoreInterface):
