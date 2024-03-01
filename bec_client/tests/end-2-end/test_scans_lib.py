@@ -157,42 +157,28 @@ def test_config_updates(lib_client):
     assert np.isclose(val, dev.samx.position, atol=0.05)
 
 
-# @pytest.mark.timeout(100)
-# def test_dap_fit(lib_client):
-#     bec = lib_client
-#     wait_for_empty_queue(bec)
-#     bec.metadata.update({"unit_test": "test_dap_fit"})
-#     dev = bec.device_manager.devices
-#     scans = bec.scans
+@pytest.mark.timeout(100)
+def test_dap_fit(lib_client):
+    bec = lib_client
+    wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_dap_fit"})
+    dev = bec.device_manager.devices
+    scans = bec.scans
 
-#     dev.bpm4i.sim.sim_select_model("GaussianModel")
-#     params = dev.bpm4i.sim.sim_params
-#     params.update({"noise": "uniform", "noise_multiplier": 10, "center": 5})
-#     dev.bpm4i.sim.sim_params = params
+    dev.bpm4i.sim.sim_select_model("GaussianModel")
+    params = dev.bpm4i.sim.sim_params
+    params.update(
+        {"noise": "uniform", "noise_multiplier": 10, "center": 5, "sigma": 1, "amplitude": 200}
+    )
+    dev.bpm4i.sim.sim_params = params
+    time.sleep(1)
 
-#     res = scans.line_scan(dev.samx, 0, 8, steps=50, relative=False)
-#     res.wait()
+    res = scans.line_scan(dev.samx, 0, 8, steps=50, relative=False)
+    res.wait()
 
-#     fit = bec.dap.GaussianModel.fit(res.scan, "samx", "samx", "bpm4i", "bpm4i")
+    fit = bec.dap.GaussianModel.fit(res.scan, "samx", "samx", "bpm4i", "bpm4i")
 
-#     assert np.isclose(fit.center, 5, atol=0.5)
-
-
-# eyefoc:
-#   readoutPriority: baseline
-#   deviceClass: SimPositioner
-#   deviceConfig:
-#     delay: 1
-#     limits:
-#       - -50
-#       - 50
-#     speed: 100
-#     tolerance: 0.01
-#     update_frequency: 400
-#   deviceTags:
-#     - user motors
-#   enabled: true
-#   readOnly: false
+    assert np.isclose(fit.center, 5, atol=0.5)
 
 
 @pytest.mark.timeout(100)

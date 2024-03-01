@@ -34,7 +34,6 @@ eyefoc:
     limits:
       - -50
       - 50
-    speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
@@ -49,7 +48,6 @@ eyex:
     limits:
       - -50
       - 50
-    speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
@@ -64,7 +62,6 @@ eyey:
     limits:
       - -50
       - 50
-    speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
@@ -77,7 +74,6 @@ flyer_sim:
   deviceConfig:
     delay: 1    
     device_access: true
-    speed: 100
     update_frequency: 400
   deviceTags:
     - flyer
@@ -91,7 +87,6 @@ hrox:
     limits:
       - -50
       - 50
-    speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
@@ -106,7 +101,6 @@ hroy:
     limits:
       - -50
       - 50
-    speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
@@ -121,7 +115,6 @@ hroz:
     limits:
       - -50
       - 50
-    speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
@@ -136,7 +129,6 @@ hx:
     limits:
       - -50
       - 50
-    speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
@@ -151,7 +143,6 @@ hy:
     limits:
       - -50
       - 50
-    speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
@@ -166,7 +157,6 @@ hz:
     limits:
       - -50
       - 50
-    speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
@@ -181,7 +171,6 @@ mbsx:
     limits:
       - -50
       - 50
-    speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
@@ -196,7 +185,6 @@ mbsy:
     limits:
       - -50
       - 50
-    speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
@@ -211,7 +199,6 @@ pinx:
     limits:
       - -50
       - 50
-    speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
@@ -226,7 +213,6 @@ piny:
     limits:
       - -50
       - 50
-    speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
@@ -241,7 +227,6 @@ pinz:
     limits:
       - -50
       - 50
-    speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
@@ -256,7 +241,6 @@ samx:
     limits:
       - -50
       - 50
-    speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
@@ -271,7 +255,6 @@ samy:
     limits:
       - -50
       - 50
-    speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
@@ -286,7 +269,6 @@ samz:
     limits:
       - -50
       - 50
-    speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
@@ -680,7 +662,6 @@ aptrx:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -691,7 +672,6 @@ aptry:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -702,7 +682,6 @@ bim2x:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -713,7 +692,6 @@ bim2y:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -724,7 +702,6 @@ bm1trx:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -735,7 +712,6 @@ bm1try:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -746,7 +722,6 @@ bm2trx:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -757,7 +732,6 @@ bm2try:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -768,7 +742,6 @@ bm3trx:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -779,7 +752,6 @@ bm3try:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -790,7 +762,6 @@ bm4trx:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -801,7 +772,6 @@ bm4try:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -812,7 +782,6 @@ bm5trx:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -823,7 +792,6 @@ bm5try:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -834,7 +802,6 @@ bm6trx:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -845,7 +812,6 @@ bm6try:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -856,7 +822,6 @@ bpm4r:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -867,7 +832,6 @@ bpm5r:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -878,7 +842,6 @@ bs1x:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -889,7 +852,6 @@ bs1y:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -900,7 +862,6 @@ bs2x:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -911,7 +872,6 @@ bs2y:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -922,7 +882,6 @@ burstn:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -933,7 +892,6 @@ burstr:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -944,7 +902,6 @@ ddg1a:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -955,7 +912,6 @@ ddg1b:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -966,7 +922,6 @@ ddg1c:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -977,7 +932,6 @@ ddg1d:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -988,7 +942,6 @@ ddg1e:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -999,7 +952,6 @@ ddg1f:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1010,7 +962,6 @@ ddg1g:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1021,7 +972,6 @@ ddg1h:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1032,7 +982,6 @@ dettrx:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1043,7 +992,6 @@ di2trx:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1054,7 +1002,6 @@ di2try:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1065,7 +1012,6 @@ dtpush:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1076,7 +1022,6 @@ dtth:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1087,7 +1032,6 @@ dttrx:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1098,7 +1042,6 @@ dttry:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1109,7 +1052,6 @@ dttrz:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1120,7 +1062,6 @@ ebcsx:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1131,7 +1072,6 @@ ebcsy:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1142,7 +1082,6 @@ ebfi1:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1153,7 +1092,6 @@ ebfi2:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1164,7 +1102,6 @@ ebfi3:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1175,7 +1112,6 @@ ebfi4:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1186,7 +1122,6 @@ ebfzpx:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1197,7 +1132,6 @@ ebfzpy:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1208,7 +1142,6 @@ ebtrx:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1219,7 +1152,6 @@ ebtry:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1230,7 +1162,6 @@ ebtrz:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1241,7 +1172,6 @@ fi1try:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1252,7 +1182,6 @@ fi2try:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1263,7 +1192,6 @@ fi3try:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1274,7 +1202,6 @@ fsh1x:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1285,7 +1212,6 @@ fsh2x:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1296,7 +1222,6 @@ ftrans:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1307,7 +1232,6 @@ fttrx1:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1318,7 +1242,6 @@ fttrx2:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1329,7 +1252,6 @@ fttry1:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1340,7 +1262,6 @@ fttry2:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1351,7 +1272,6 @@ fttrz:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1362,7 +1282,6 @@ idgap:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1373,7 +1292,6 @@ mibd:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1384,7 +1302,6 @@ mibd1:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1395,7 +1312,6 @@ mibd2:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1406,7 +1322,6 @@ miroll:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1417,7 +1332,6 @@ mith:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1428,7 +1342,6 @@ mitrx:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1439,7 +1352,6 @@ mitry:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1450,7 +1362,6 @@ mitry1:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1461,7 +1372,6 @@ mitry2:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1472,7 +1382,6 @@ mitry3:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1483,7 +1392,6 @@ mobd:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1494,7 +1402,6 @@ mobdai:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1505,7 +1412,6 @@ mobdbo:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1516,7 +1422,6 @@ mobdco:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1527,7 +1432,6 @@ mobddi:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1538,7 +1442,6 @@ mokev:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1549,7 +1452,6 @@ mopush1:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1560,7 +1462,6 @@ mopush2:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1571,7 +1472,6 @@ moroll1:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1582,7 +1482,6 @@ moroll2:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1593,7 +1492,6 @@ moth1:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1604,7 +1502,6 @@ moth1e:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1615,7 +1512,6 @@ moth2:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1626,7 +1522,6 @@ moth2e:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1637,7 +1532,6 @@ motrx2:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1648,7 +1542,6 @@ motry:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1659,7 +1552,6 @@ motry2:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1670,7 +1562,6 @@ motrz1:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1681,7 +1572,6 @@ motrz1e:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1692,7 +1582,6 @@ moyaw2:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1703,7 +1592,6 @@ sl0ch:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1714,7 +1602,6 @@ sl0trxi:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1725,7 +1612,6 @@ sl0trxo:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1736,7 +1622,6 @@ sl0wh:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1747,7 +1632,6 @@ sl1ch:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1758,7 +1642,6 @@ sl1cv:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1769,7 +1652,6 @@ sl1trxi:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1780,7 +1662,6 @@ sl1trxo:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1791,7 +1672,6 @@ sl1tryb:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1802,7 +1682,6 @@ sl1tryt:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1813,7 +1692,6 @@ sl1wh:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1824,7 +1702,6 @@ sl1wv:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1835,7 +1712,6 @@ sl2ch:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1846,7 +1722,6 @@ sl2cv:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1857,7 +1732,6 @@ sl2trxi:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1868,7 +1742,6 @@ sl2trxo:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1879,7 +1752,6 @@ sl2tryb:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1890,7 +1762,6 @@ sl2tryt:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1901,7 +1772,6 @@ sl2wh:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1912,7 +1782,6 @@ sl2wv:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1923,7 +1792,6 @@ sl3ch:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1934,7 +1802,6 @@ sl3cv:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1945,7 +1812,6 @@ sl3trxi:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1956,7 +1822,6 @@ sl3trxo:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1967,7 +1832,6 @@ sl3tryb:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1978,7 +1842,6 @@ sl3tryt:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -1989,7 +1852,6 @@ sl3wh:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -2000,7 +1862,6 @@ sl3wv:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -2011,7 +1872,6 @@ sl4ch:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -2022,7 +1882,6 @@ sl4cv:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -2033,7 +1892,6 @@ sl4trxi:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -2044,7 +1902,6 @@ sl4trxo:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -2055,7 +1912,6 @@ sl4tryb:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -2066,7 +1922,6 @@ sl4tryt:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -2077,7 +1932,6 @@ sl4wh:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -2088,7 +1942,6 @@ sl4wv:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -2099,7 +1952,6 @@ sl5ch:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -2110,7 +1962,6 @@ sl5cv:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -2121,7 +1972,6 @@ sl5trxi:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -2132,7 +1982,6 @@ sl5trxo:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -2143,7 +1992,6 @@ sl5tryb:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -2154,7 +2002,6 @@ sl5tryt:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -2165,7 +2012,6 @@ sl5wh:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -2176,7 +2022,6 @@ sl5wv:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -2187,7 +2032,6 @@ strox:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -2198,7 +2042,6 @@ stroy:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -2209,7 +2052,6 @@ stroz:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -2220,7 +2062,6 @@ sttrx:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -2231,7 +2072,6 @@ sttry:
   deviceClass: SimPositioner
   deviceConfig:
     delay: 1
-    speed: 100
     update_frequency: 400
   deviceTags:
     - beamline
@@ -2269,7 +2109,6 @@ motor1_disabled:
     - -50
     - 50
     name: motor1_disabled
-    speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
@@ -2286,7 +2125,6 @@ motor1_disabled_set:
     - -50
     - 50
     name: motor1_disabled_set
-    speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
@@ -2303,7 +2141,6 @@ motor2_disabled:
     - -50
     - 50
     name: motor2_disabled
-    speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
@@ -2320,7 +2157,6 @@ motor2_disabled_set:
     - -50
     - 50
     name: motor2_disabled_set
-    speed: 100
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
