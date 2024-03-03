@@ -165,39 +165,48 @@ def test_set_halt_disables_return_to_start(queuemanager_mock):
         assert queue_manager.queues["primary"].active_instruction_queue.return_to_start == False
 
 
+def wait_to_reach_state(queue_manager, queue, state):
+    while queue_manager.queues[queue].status != state:
+        pass
+
+
+@pytest.mark.timeout(5)
 def test_set_pause(queuemanager_mock):
     queue_manager = queuemanager_mock()
     queue_manager.connector.message_sent = []
     queue_manager.set_pause(queue="primary")
-    assert queue_manager.queues["primary"].status == ScanQueueStatus.PAUSED
+    wait_to_reach_state(queue_manager, "primary", ScanQueueStatus.PAUSED)
     assert len(queue_manager.connector.message_sent) == 1
     assert (
         queue_manager.connector.message_sent[0].get("queue") == MessageEndpoints.scan_queue_status()
     )
 
 
+@pytest.mark.timeout(5)
 def test_set_deferred_pause(queuemanager_mock):
     queue_manager = queuemanager_mock()
     queue_manager.connector.message_sent = []
     queue_manager.set_deferred_pause(queue="primary")
-    assert queue_manager.queues["primary"].status == ScanQueueStatus.PAUSED
+    wait_to_reach_state(queue_manager, "primary", ScanQueueStatus.PAUSED)
     assert len(queue_manager.connector.message_sent) == 1
     assert (
         queue_manager.connector.message_sent[0].get("queue") == MessageEndpoints.scan_queue_status()
     )
 
 
+@pytest.mark.timeout(5)
 def test_set_continue(queuemanager_mock):
     queue_manager = queuemanager_mock()
     queue_manager.connector.message_sent = []
     queue_manager.set_continue(queue="primary")
-    assert queue_manager.queues["primary"].status == ScanQueueStatus.RUNNING
+    wait_to_reach_state(queue_manager, "primary", ScanQueueStatus.RUNNING)
     assert len(queue_manager.connector.message_sent) == 1
     assert (
         queue_manager.connector.message_sent[0].get("queue") == MessageEndpoints.scan_queue_status()
     )
 
 
+@pytest.mark.timeout(5)
 def test_set_abort(queuemanager_mock):
     queue_manager = queuemanager_mock()
     queue_manager.connector.message_sent = []
@@ -210,21 +219,23 @@ def test_set_abort(queuemanager_mock):
     queue_manager.queues = {"primary": ScanQueue(queue_manager, InstructionQueueMock)}
     queue_manager.add_to_queue(scan_queue="primary", msg=msg)
     queue_manager.set_abort(queue="primary")
-    assert queue_manager.queues["primary"].status == ScanQueueStatus.PAUSED
+    wait_to_reach_state(queue_manager, "primary", ScanQueueStatus.PAUSED)
     assert len(queue_manager.connector.message_sent) == 2
     assert (
         queue_manager.connector.message_sent[0].get("queue") == MessageEndpoints.scan_queue_status()
     )
 
 
+@pytest.mark.timeout(5)
 def test_set_abort_with_empty_queue(queuemanager_mock):
     queue_manager = queuemanager_mock()
     queue_manager.connector.message_sent = []
     queue_manager.set_abort(queue="primary")
-    assert queue_manager.queues["primary"].status == ScanQueueStatus.RUNNING
+    wait_to_reach_state(queue_manager, "primary", ScanQueueStatus.RUNNING)
     assert len(queue_manager.connector.message_sent) == 0
 
 
+@pytest.mark.timeout(5)
 def test_set_clear_sends_message(queuemanager_mock):
     queue_manager = queuemanager_mock()
     queue_manager.connector.message_sent = []
@@ -234,8 +245,7 @@ def test_set_clear_sends_message(queuemanager_mock):
     mock_property = ScanQueue.worker_status.setter(setter_mock)
     with mock.patch.object(ScanQueue, "worker_status", mock_property):
         queue_manager.set_clear(queue="primary")
-
-        assert queue_manager.queues["primary"].status == ScanQueueStatus.PAUSED
+        wait_to_reach_state(queue_manager, "primary", ScanQueueStatus.PAUSED)
         mock_property.fset.assert_called_once_with(
             queue_manager.queues["primary"], InstructionQueueStatus.STOPPED
         )
