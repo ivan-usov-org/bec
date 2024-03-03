@@ -3,8 +3,6 @@ from __future__ import annotations
 import threading
 import traceback
 
-import numpy as np
-
 from bec_lib import (
     BECService,
     DeviceManagerBase,
