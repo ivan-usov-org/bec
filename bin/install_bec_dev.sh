@@ -64,7 +64,7 @@ fi
 # check if redis should be installed
 if [ "$skip_redis" = false ]; then
     # add redis to dependencies
-    conda_deps+=(redis)
+    conda_deps+=(redis-server)
 else
     # check if redis is installed
     if ! [ "$(which redis-server)" ]; then
@@ -88,28 +88,16 @@ if ! conda env list | grep -q ${conda_env_name}; then
 fi
 # check if the conda environment has the correct dependencies. If not, install them.
 conda activate ${conda_env_name}
-if ! conda list | grep -q ${conda_deps[@]}; then
-    echo "Installing conda dependencies..."
-    conda install -y ${conda_deps[@]}
-fi
-
-for i in $(seq ${CONDA_SHLVL}); do
-    conda deactivate
-done
-
-dependencies=(bec_lib scan_server scan_bundler data_processing file_writer device_server scihub bec_client bec_server)
-
 
 # split virtual environment into separate environments for each package
 if [ "$split_env" = true ]; then
+    dependencies=(bec_lib scan_server scan_bundler data_processing file_writer device_server scihub bec_client bec_server)
     for package in "${dependencies[@]}"
     do
         echo "Creating virtual environment for $package..."
-        conda activate ${conda_env_name}
         cd ./$package
         rm -rf ${package}_venv
         python -m venv ./${package}_venv
-        conda deactivate
         source ./${package}_venv/bin/activate
         pip install -q -q wheel
         pip install -q -q -e '.[dev]'
@@ -121,10 +109,8 @@ if [ "$split_env" = true ]; then
     return
 else # install all packages in one virtual environment
     echo "Creating single virtual environment for all packages..."
-    conda activate ${conda_env_name}
     rm -rf ./bec_venv
     python -m venv ./bec_venv
-    conda deactivate
     source ./bec_venv/bin/activate
     cd ./bec_server
     pip install -q -q wheel

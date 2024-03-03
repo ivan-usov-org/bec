@@ -17,7 +17,7 @@ except ImportError:
 logger = bec_logger.logger
 
 DEFAULT_SERVICE_CONFIG = {
-    "redis": {"host": "localhost", "port": 6379},
+    "redis": {"host": os.environ.get("BEC_REDIS_HOST", "localhost"), "port": 6379},
     "service_config": {
         "file_writer": {"plugin": "default_NeXus_format", "base_path": os.path.dirname(__file__)}
     },

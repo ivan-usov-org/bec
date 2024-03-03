@@ -174,46 +174,13 @@ end-2-end:
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
   script:
-    # spin up redis
-    - docker run --network=host -d --name redis-test redis
-    - apk update; apk upgrade; apk add git
-
-    # get ophyd devices repo (needed for the device_server)
-    - git clone --branch $OPHYD_DEVICES_BRANCH https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
-
-    # initialize the database with the test config
-    - docker build -t init_config:test -f ./ci/config_init_dockerfile --build-arg PY_VERSION=3.10 .
-    - docker run --network=host --name init_config init_config:test
-    - docker build -t scihub:test -f ./scihub/Dockerfile --build-arg PY_VERSION=3.10 .
-    - docker run --network=host -d --name scihub scihub:test
-
-    # build scan_bundler, scan_server, device_server and file_writer
-    - docker build -t scan_bundler:test -f ./scan_bundler/Dockerfile --build-arg PY_VERSION=3.10 .
-    - docker build -t scan_server:test -f ./scan_server/Dockerfile --build-arg PY_VERSION=3.10 .
-    - docker build -t device_server:test -f ./device_server/Dockerfile --build-arg PY_VERSION=3.10 .
-    - docker build -t file_writer:test -f ./file_writer/Dockerfile --build-arg PY_VERSION=3.10 .
-    - docker build -t data_processing:test -f ./data_processing/Dockerfile --build-arg PY_VERSION=3.10 .
-
-    # run scan_bundler, scan_server, device_server and file_writer
-    - docker run --network=host -d --name device_server device_server:test
-    - docker run --network=host -d --name scan_server scan_server:test
-    - docker run --network=host -d --name scan_bundler scan_bundler:test
-    - docker run --network=host -d --name file_writer file_writer:test
-    - docker run --network=host -d --name data_processing data_processing:test
-
     # build and run the tests
-    - docker build -t en2end_client:test -f ./bec_client/tests/Dockerfile --build-arg PY_VERSION=3.10 .
-    - docker run --network=host --name end2end_client en2end_client:test
+    - docker build -t end2end_client:test -f ./ci/Dockerfile.run_pytest --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=bec_client .
+    - docker run --network=host --name end2end_client end2end_client:test
 
   after_script:
     # copy the log files to the project directory in order to be reachable by git artifacts
-    - docker cp scan_server:/code/bec/scan_server/ScanServer.log $CI_PROJECT_DIR/ScanServer.log
-    - docker cp scan_bundler:/code/bec/scan_bundler/ScanBundler.log $CI_PROJECT_DIR/ScanBundler.log
-    - docker cp device_server:/code/bec/device_server/DeviceServer.log $CI_PROJECT_DIR/DeviceServer.log
-    - docker cp file_writer:/code/bec/file_writer/FileWriterManager.log $CI_PROJECT_DIR/FileWriterManager.log
-    - docker cp end2end_client:/code/bec/bec_client/BECClient.log $CI_PROJECT_DIR/BECClient.log
-    - docker cp scihub:/code/bec/scihub/SciHub.log $CI_PROJECT_DIR/SciHub.log
-    - docker cp data_processing:/code/bec/data_processing/DAPServer.log $CI_PROJECT_DIR/DAPServer.log
+    - docker cp end2end_client:/code/bec/test_files/. $CI_PROJECT_DIR
 
 # end-2-end-scibec:
 #   extends: "end-2-end"
@@ -251,6 +218,67 @@ end-2-end:
 #     - docker build -t en2end_client:test -f ./bec_client/tests/Dockerfile .
 #     - docker run --network=host --name end2end_client en2end_client:test
 
+end-2-end-services_on_multi_hosts:
+  stage: End2End
+  needs: []
+  services:
+    - redis
+  variables:
+    STORAGE_DRIVER: vfs
+  #  CI_DEBUG_SERVICES: "true"
+  image: alpine:latest
+  allow_failure: false
+  script:
+    # download buildah & podman
+    - apk add buildah
+    - apk add podman
+    # build containers
+    # /!\ build-arg is interpreted differently by podman,
+    # have to use buildah here
+    - buildah bud --network=host -t device_server_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=device_server 
+    - buildah bud --network=host -t scan_server_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=scan_server 
+    - buildah bud --network=host -t scan_bundler_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=scan_bundler 
+    - buildah bud --network=host -t file_writer_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=file_writer 
+    - buildah bud --network=host -t dap_server_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=data_processing
+    - buildah bud --network=host -t scihub_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=scihub
+    # default service is bec_client
+    - buildah bud --network=host -t end2end_client_test -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10
+
+    # now for the run phase...
+    - REDIS_IP=$(cat /etc/hosts | awk '{if ($2 == "redis") print $1;}')
+    # Just checking that the IP is reachable from outside the container
+    - ping -w 2 $REDIS_IP
+    # declare env var for containers to find redis
+    - export BEC_REDIS_HOST=$REDIS_IP
+    # run servers
+    - podman run -d --network=host --env BEC_REDIS_HOST --name device_server device_server_vm bec-device-server
+    - podman run -d --network=host --env BEC_REDIS_HOST --name scan_server scan_server_vm bec-scan-server
+    - podman run -d --network=host --env BEC_REDIS_HOST --name scan_bundler scan_bundler_vm bec-scan-bundler
+    - podman run -d --network=host --env BEC_REDIS_HOST --name file_writer file_writer_vm bec-file-writer
+    - podman run -d --network=host --env BEC_REDIS_HOST --name dap dap_server_vm bec-dap
+    - podman run -d --network=host --env BEC_REDIS_HOST --name scihub scihub_vm bec-scihub
+    # start end-to-end test, using previously started servers and previously running redis instance 
+    - podman run --network=host --env BEC_REDIS_HOST --name end2end_test end2end_client_test pytest --bec-redis-host $BEC_REDIS_HOST -v --random-order tests/end-2-end || true
+    # copy the log files to the project directory in order to be reachable by git artifacts
+    - podman cp device_server:/code/bec/device_server/DeviceServer.log $CI_PROJECT_DIR/
+    - podman cp scan_server:/code/bec/scan_server/ScanServer.log $CI_PROJECT_DIR/
+    - podman cp scan_bundler:/code/bec/scan_bundler/ScanBundler.log $CI_PROJECT_DIR/
+    - podman cp file_writer:/code/bec/file_writer/FileWriterManager.log $CI_PROJECT_DIR/
+    - podman cp scihub:/code/bec/scihub/SciHub.log $CI_PROJECT_DIR/
+    - podman cp dap:/code/bec/data_processing/DAPServer.log $CI_PROJECT_DIR/
+    - podman cp end2end_test:/code/bec/bec_client/BECClient.log $CI_PROJECT_DIR/
+
+  artifacts:
+    when: on_failure
+    paths:
+      - ./*.log
+    expire_in: 1 week
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'     
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
+
 
 end-2-end-conda:
   stage: End2End
@@ -259,39 +287,28 @@ end-2-end-conda:
   allow_failure: false
   script:
     - apt-get update
-    - apt-get install -y tmux
+    - conda config --prepend channels conda-forge
+    - conda config --set channel_priority strict
     - conda config --set always_yes yes --set changeps1 no
     - conda create -q -n test-environment python=3.10
     - conda init bash
     - source ~/.bashrc
     - conda activate test-environment
 
-    - conda install redis
-    - redis-server --daemonize yes
-
     # get ophyd devices repo (needed for the device_server)
     - git clone --branch $OPHYD_DEVICES_BRANCH https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
     - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices
 
-    - source ./bin/install_bec_dev.sh
-    - python ./bec_lib/util_scripts/init_config.py --config ./bec_lib/bec_lib/configs/demo_config.yaml
+    - source ./bin/install_bec_dev.sh -t
 
-    - bec-server start --config ./ci/test_config.yaml
-
-    - pip install pytest pytest-random-order pytest-cov pytest-timeout pytest-retry
     - cd ./bec_client
-    - pytest -v ./tests/end-2-end/test_scans.py::test_grid_scan
+    - pip install .[dev]
+    - pytest --start-servers -v ./tests/end-2-end/test_scans.py::test_grid_scan
 
   artifacts:
     when: on_failure
     paths:
-      - ScanServer.log
-      - ScanBundler.log
-      - DeviceServer.log
-      - BECClient.log
-      - FileWriterManager.log
-      - SciHub.log
-      - DAPServer.log
+      - ./*.log
     expire_in: 1 week
 
   rules:
@@ -324,24 +341,16 @@ end-2-end-conda-310:
     - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices
 
     - *install-bec-services-dev
-    - python ./bec_lib/util_scripts/init_config.py --config ./bec_lib/bec_lib/configs/demo_config.yaml
 
     - bec-server start --config ./ci/test_config.yaml
 
-    - pip install pytest pytest-random-order pytest-cov pytest-timeout
     - cd ./bec_client
     - pytest -v ./tests/end-2-end/test_scans.py
 
   artifacts:
     when: on_failure
     paths:
-      - ScanServer.log
-      - ScanBundler.log
-      - DeviceServer.log
-      - BECClient.log
-      - FileWriterManager.log
-      - SciHub.log
-      - DAPServer.log
+      - ./*.log
     expire_in: 1 week
 
   rules:

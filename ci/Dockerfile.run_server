@@ -2,14 +2,23 @@
 ARG PY_VERSION=3.10
 FROM morgana-harbor.psi.ch/bec/python:${PY_VERSION}
 
+ARG BEC_SERVICE=bec_client
+
+RUN apt update
+RUN apt install git -y
+
 # set the working directory in the container
 WORKDIR /code
 
 # copy the content of the local opaas directory to the working directory
 COPY . ./bec
 
-WORKDIR /code/bec/bec_client
+ENV OPHYD_DEVICES_PATH=/code/bec/ophyd_devices
+
+WORKDIR /code/bec
+RUN git clone https://gitlab.psi.ch/bec/ophyd_devices
+WORKDIR /code/bec/ophyd_devices
+RUN pip install -e .
+WORKDIR /code/bec/${BEC_SERVICE}
 RUN pip install -e .[dev]
 
-# command to run on container start
-CMD [ "pytest", "-v", "--random-order", "./tests/end-2-end"]
