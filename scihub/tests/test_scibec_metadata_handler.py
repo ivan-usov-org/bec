@@ -1,9 +1,10 @@
 from unittest import mock
 
+import numpy as np
 import pytest
-
 from bec_lib import MessageEndpoints, messages
 from bec_lib.redis_connector import MessageObject
+
 from scihub.scibec.scibec_metadata_handler import SciBecMetadataHandler
 
 
@@ -151,3 +152,60 @@ def test_update_scan_data(md_handler):
             }
         )
     )
+
+
+def test_update_scan_data_exceeding_limit(md_handler):
+    # pylint: disable=protected-access
+    scibec = mock.Mock()
+    md_handler.MAX_DATA_SIZE = 1000
+    md_handler.scibec_connector.scibec = scibec
+    type(scibec.scan.scan_controller_find()).body = mock.PropertyMock(
+        return_value=[
+            {"id": "id", "readACL": ["readACL"], "writeACL": ["writeACL"], "owner": "owner"}
+        ]
+    )
+    data_block = {f"key_{i}": {"signal": list(range(100))} for i in range(10)}
+    data_block.update({"metadata": {"scanID": "scanID"}})
+    md_handler.update_scan_data(file_path="my_file.h5", data=data_block)
+    num_calls = scibec.scan_data.scan_data_controller_create_many.call_count
+    assert num_calls == 5
+
+
+@pytest.mark.parametrize(
+    "data, expected_result",
+    [
+        (
+            {"int": 123, "float": 3.14, "str": "hello", "bool": True},
+            {"int": 123, "float": 3.14, "str": "hello", "bool": True},
+        ),
+        (
+            {"nested": {"int": 123, "float": 3.14, "str": "hello", "bool": True}},
+            {"nested": {"int": 123, "float": 3.14, "str": "hello", "bool": True}},
+        ),
+        ([1, 2, 3, 4, 5], [1, 2, 3, 4, 5]),
+        ((1, 2, 3, 4, 5), (1, 2, 3, 4, 5)),
+        ({1, 2, 3, 4, 5}, {1, 2, 3, 4, 5}),
+        (
+            np.array([1, 2, 3, 4, 5]),
+            '{"nd": true, "type": "<i8", "kind": "", "shape": [5], "data": [1, 2, 3, 4, 5]}',
+        ),
+        # Integer types
+        ({"signal": np.int8(123)}, {"signal": 123}),
+        ({"signal": np.int16(123)}, {"signal": 123}),
+        ({"signal": np.int32(123)}, {"signal": 123}),
+        ({"signal": np.int64(123)}, {"signal": 123}),
+        ({"signal": np.uint8(123)}, {"signal": 123}),
+        ({"signal": np.uint16(123)}, {"signal": 123}),
+        ({"signal": np.uint32(123)}, {"signal": 123}),
+        ({"signal": np.uint64(123)}, {"signal": 123}),
+        # Float types
+        ({"signal": np.float16(3.14)}, {"signal": np.float16(3.14).tolist()}),
+        ({"signal": np.float32(3.14)}, {"signal": np.float32(3.14).tolist()}),
+        ({"signal": np.float64(3.14)}, {"signal": np.float64(3.14).tolist()}),
+        ({"signal": np.str_("hello")}, {"signal": "hello"}),
+        ({"signal": np.bool_(True)}, {"signal": True}),
+    ],
+)
+def test_serialize_special_data(md_handler, data, expected_result):
+    # pylint: disable=protected-access
+    assert md_handler.serialize_special_data(data) == expected_result

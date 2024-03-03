@@ -1,18 +1,28 @@
 from __future__ import annotations
 
+import json
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from bec_lib import MessageEndpoints, bec_logger, messages
+import numpy as np
+from bec_lib import MessageEndpoints, bec_logger
 from bec_lib.serialization import json_ext
 
 logger = bec_logger.logger
 
 if TYPE_CHECKING:
+    from bec_lib import messages
+
     from scihub.scibec import SciBecConnector
 
 
 class SciBecMetadataHandler:
+    """
+    The SciBecMetadataHandler class is responsible for handling metadata sent to SciBec.
+    """
+
+    MAX_DATA_SIZE = 1e6  # max data size for the backend; currently set to 1 MB
+
     def __init__(self, scibec_connector: SciBecConnector) -> None:
         self.scibec_connector = scibec_connector
         self._scan_status_register = None
@@ -43,7 +53,7 @@ class SciBecMetadataHandler:
         # if msg.content["status"] != "open":
         #     parent.update_event_data(scan)
 
-    def update_scan_status(self, msg) -> dict:
+    def update_scan_status(self, msg: messages.ScanStatusMessage) -> dict:
         """
         Update the scan status in SciBec
 
@@ -126,6 +136,33 @@ class SciBecMetadataHandler:
             logger.warning("Failed to write to SciBec")
             return
 
+    def serialize_special_data(self, data: Any) -> dict:
+        """
+        Serialize special data in the scan data.
+        This method is recursively called for each key in the data dictionary and
+        checks if the data is serializable. If not, the data is serialized using
+        the json_ext.dumps method.
+
+        Args:
+            data(dict): The scan data
+
+        Returns:
+            dict: The serialized scan data
+        """
+        if isinstance(data, (int, float, str, bool)):
+            return data
+        if isinstance(data, dict):
+            return {key: self.serialize_special_data(value) for key, value in data.items()}
+        if isinstance(data, list):
+            return [self.serialize_special_data(item) for item in data]
+        if isinstance(data, tuple):
+            return tuple(self.serialize_special_data(item) for item in data)
+        if isinstance(data, set):
+            return {self.serialize_special_data(item) for item in data}
+        if isinstance(data, np.generic):
+            return self.serialize_special_data(data.tolist())
+        return json_ext.dumps(data)
+
     def update_scan_data(self, file_path: str, data: dict):
         """
         Update the scan data in SciBec
@@ -147,23 +184,85 @@ class SciBecMetadataHandler:
             )
             return
         scan = scan[0]
-        data_bec = {key: json_ext.dumps(value) for key, value in data.items()}
+        data_bec = self.serialize_special_data(data)
+        data_size = len(json.dumps(data_bec)) / self.MAX_DATA_SIZE
+
         start = time.time()
-        scibec.scan_data.scan_data_controller_create_many(
-            body=scibec.models.ScanData(
-                **{
-                    "readACL": scan["readACL"],
-                    "writeACL": scan["readACL"],
-                    "owner": scan["owner"],
-                    "scanId": scan["id"],
-                    "filePath": file_path,
-                    "data": data_bec,
-                }
+        logger.info(f"Data size: {data_size} MB")
+        if data_size > 1:
+            logger.info(
+                f"Data size is larger than {self.MAX_DATA_SIZE/1e6} MB. Splitting data into chunks."
             )
-        )
+            self._write_scan_data_chunks(file_path, data_bec, scan)
+        else:
+
+            scibec.scan_data.scan_data_controller_create_many(
+                body=scibec.models.ScanData(
+                    **{
+                        "readACL": scan["readACL"],
+                        "writeACL": scan["readACL"],
+                        "owner": scan["owner"],
+                        "scanId": scan["id"],
+                        "filePath": file_path,
+                        "data": data_bec,
+                    }
+                )
+            )
         logger.info(
             f"Wrote scan data to SciBec for scanID {data['metadata']['scanID']} in {time.time() - start} seconds."
         )
+
+    def _write_scan_data_chunks(self, file_path: str, data_bec: dict, scan: dict):
+        """
+        Write the scan data to SciBec in chunks. This method is called if the scan data is larger
+        than 1 MB. The method loops through all keys in the data dictionary and creates chunks of
+        max 1 MB size. The chunks are then written to SciBec.
+
+        Args:
+            file_path(str): The path to the original NeXuS file
+            data_bec(dict): The serialized scan data
+            scan(dict): The scan data
+        """
+        scibec = self.scibec_connector.scibec
+        if not scibec:
+            return
+        chunk = {}
+        for key, value in data_bec.items():
+            if len(json.dumps({key: value})) > self.MAX_DATA_SIZE:
+                logger.warning(
+                    f"Data size of key {key} is larger than {self.MAX_DATA_SIZE/1e6} MB. Cannot write this key to SciBec."
+                )
+                continue
+            if len(json.dumps(chunk)) + len(json.dumps({key: value})) > self.MAX_DATA_SIZE:
+                scibec.scan_data.scan_data_controller_create_many(
+                    body=scibec.models.ScanData(
+                        **{
+                            "readACL": scan["readACL"],
+                            "writeACL": scan["readACL"],
+                            "owner": scan["owner"],
+                            "scanId": scan["id"],
+                            "filePath": file_path,
+                            "data": chunk,
+                        }
+                    )
+                )
+                chunk = {}
+            chunk[key] = value
+
+        # Write the last chunk
+        if chunk:
+            scibec.scan_data.scan_data_controller_create_many(
+                body=scibec.models.ScanData(
+                    **{
+                        "readACL": scan["readACL"],
+                        "writeACL": scan["readACL"],
+                        "owner": scan["owner"],
+                        "scanId": scan["id"],
+                        "filePath": file_path,
+                        "data": chunk,
+                    }
+                )
+            )
 
     def shutdown(self):
         """
