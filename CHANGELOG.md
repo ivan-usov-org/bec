@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.12.7 (2024-03-04)
+
+### Fix
+
+* **scihub:** Fixed scibec upload for large scans ([`2b680ee`](https://gitlab.psi.ch/bec/bec/-/commit/2b680eee1ea51c1875ef8e1fea9f3135a3e52899))
+
 ## v1.12.6 (2024-03-01)
 
 ### Fix
