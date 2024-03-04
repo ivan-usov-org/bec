@@ -18,7 +18,6 @@ from bec_lib import (
 from bec_lib.alarm_handler import AlarmBase
 from bec_lib.bec_errors import ScanAbortion, ScanInterruption
 from bec_lib.tests.utils import wait_for_empty_queue
-from flaky import flaky
 
 from bec_client import BECIPythonClient
 from bec_client.callbacks.utils import ScanRequestError
@@ -101,7 +100,7 @@ def test_line_scan(capsys, client):
     assert "finished. Scan ID" in captured.out
 
 
-@flaky  # marked as flaky as the simulation might return a new readback value within the tolerance
+@pytest.mark.flaky  # marked as flaky as the simulation might return a new readback value within the tolerance
 @pytest.mark.timeout(100)
 def test_mv_scan(capsys, client):
     bec = client

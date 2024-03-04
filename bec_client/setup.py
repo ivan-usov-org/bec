@@ -59,7 +59,7 @@ if __name__ == "__main__":
                 "pytest-random-order",
                 "pytest-asyncio",
                 "pytest-timeout",
-                "flaky",
+                "pytest-retry",
                 "coverage",
                 "black",
                 "pylint",
