@@ -17,7 +17,7 @@ The core of the simulation provides a range of devices that allow the simulation
 For example, the readback of the `SimMonitor` device can be configured to return values calculated based on a range of models from [LMFIT](https://lmfit.github.io/lmfit-py/builtin_models.html), together with a reference position defined by a motor. For `SimCamera`, we have implemented two custom readback functions allowing simulation of a multivariate Gaussian or constant readback. Noise can be added to all signals, and we also allow hot, dead, or fluctuating pixels to be added to the readback of `SimCamera`.
 
 ## Simulation Frameworks
-To more realistically mimic the behavior of a beamline, we have introduced a new type of device called a `DeviceProxy`. We have provided two examples for `SimCamera`. The first, H5ImageReplayProxy, allows you to replay data from an existing h5 file. This proxy is configured through the deviceConfig, specifying the h5 file location and the entry with the images composed as an array with dimensions (slice, x, y). The simulation will wrap if your scan exceeds the number of images in the file and play them from the start. Notably, this proxy implements the replay capability within the scope of BEC scans. The second simulation, `SlitProxy`, allows the linking of single or multiple motors' positions to be taken into account when computing the readback for `SimCamera`, e.g., slit widths.
+To mimic the behavior of a beamline more realistically, we provide an additional device type called `DeviceProxy` with two examples for `SimCamera`. The first, H5ImageReplayProxy, allows you to replay data from an existing h5 file. This proxy is configured through the deviceConfig, specifying the h5 file location and the entry with the images composed as an array with dimensions (slice, x, y). The simulation will wrap if your scan exceeds the number of images in the file and play them from the start. Notably, this proxy implements the replay capability within the scope of BEC scans. The second simulation, `SlitProxy`, allows the linking of single or multiple motors' positions to be taken into account when computing the readback for `SimCamera`, e.g., slit widths.
 
 ```{Note}
 Proxies override the `_compute` method from the signal of the device they are configured to act upon. They can be enabled or disabled from the command-line interface for simple usage.
@@ -99,7 +99,7 @@ Finally, you can use `dev.bpm4i.sim.sim_show_all()` to obtain a comprehensive pr
 Out[15]: ['constant', 'gaussian']
 ```
 ### Simulation scenarios
-As mentioned earlier, the simulation frameworks enable us to replay certain simulation scenarios easily. The two current examples serve as templates for implementing new scenarios. New implementations need to inherit from the abstract class `DeviceProxy` and implement the `_compute` method, which overrides the computation method for the given signal. An example config entry for the given scenarios is stored in their docstring. For example, for the class `H5ImageReplayProxy`:
+As mentioned earlier, the simulation frameworks enable users to replay certain simulation scenarios easily. The two current examples serve as templates for implementing new scenarios. New implementations should to inherit from the abstract class `DeviceProxy` and implement the `_compute` method, which overrides the computation method for the given signal. An example config entry for the given scenarios is stored in their docstring. For example, for the class `H5ImageReplayProxy`:
 ```yaml
 h5_image_sim:
     readoutPriority: baseline
