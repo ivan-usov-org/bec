@@ -74,6 +74,12 @@ class ScanServer(BECService):
         if msg is None:
             logger.warning("Failed to retrieve scan number from redis.")
             return -1
+        if not isinstance(msg, messages.VariableMessage):
+            # This is a temporary fix for the scan number being stored as a string
+            # in the redis database. This will be removed in the future.
+            num = int(msg)
+            self.scan_number = num
+            return num
         return int(msg.value)
 
     @scan_number.setter
@@ -89,6 +95,12 @@ class ScanServer(BECService):
         if msg is None:
             logger.warning("Failed to retrieve dataset number from redis.")
             return -1
+        if not isinstance(msg, messages.VariableMessage):
+            # This is a temporary fix for the dataset number being stored as a string
+            # in the redis database. This will be removed in the future.
+            num = int(msg)
+            self.dataset_number = num
+            return num
         return int(msg.value)
 
     @dataset_number.setter

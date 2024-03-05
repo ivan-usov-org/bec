@@ -1089,7 +1089,7 @@ def test_pre_scan_macro():
 
     device_manager = DMMock()
     device_manager.add_device("samx")
-    macros = [inspect.getsource(pre_scan_macro).encode()]
+    macros = inspect.getsource(pre_scan_macro).encode()
     scan_msg = messages.ScanQueueMessage(
         scan_type="fermat_scan",
         parameter={"args": {"samx": (-5, 5), "samy": (-5, 5)}, "kwargs": {"step": 3}},
@@ -1102,7 +1102,7 @@ def test_pre_scan_macro():
         request.device_manager.connector,
         "lrange",
         new_callable=mock.PropertyMock,
-        return_value=macros,
+        return_value=[messages.VariableMessage(value=macros)],
     ) as macros_mock:
         with mock.patch.object(request, "_get_func_name_from_macro", return_value="pre_scan_macro"):
             with mock.patch("builtins.eval") as eval_mock:

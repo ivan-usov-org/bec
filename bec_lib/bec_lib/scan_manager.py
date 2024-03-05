@@ -151,6 +151,9 @@ class ScanManager:
         if msg is None:
             logger.warning("Failed to retrieve scan number from redis.")
             return -1
+        if not isinstance(msg, messages.VariableMessage):
+            # this is a temporary fix for providing backwards compatibility
+            return int(msg)
         return int(msg.value)
 
     @next_scan_number.setter
@@ -167,6 +170,9 @@ class ScanManager:
         if msg is None:
             logger.warning("Failed to retrieve dataset number from redis.")
             return -1
+        if isinstance(msg, messages.VariableMessage):
+            # this is a temporary fix for providing backwards compatibility
+            return int(msg)
         return int(msg.value)
 
     @next_dataset_number.setter
