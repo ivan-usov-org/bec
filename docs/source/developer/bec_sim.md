@@ -99,7 +99,7 @@ Finally, you can use `dev.bpm4i.sim.sim_show_all()` to obtain a comprehensive pr
 Out[15]: ['constant', 'gaussian']
 ```
 ### Simulation scenarios
-As mentioned earlier, the simulation frameworks enable users to replay certain simulation scenarios easily. The two current examples serve as templates for implementing new scenarios. New implementations should to inherit from the abstract class `DeviceProxy` and implement the `_compute` method, which overrides the computation method for the given signal. An example config entry for the given scenarios is stored in their docstring. For example, for the class `H5ImageReplayProxy`:
+As mentioned earlier, the simulation frameworks enable users to replay certain simulation scenarios easily. The two current examples serve as templates for implementing new scenarios. New implementations should inherit from the abstract class `DeviceProxy` and implement the `_compute` method, which overrides the computation method for the given signal. An example config entry for the given scenarios is stored in their docstring. For example, for the class `H5ImageReplayProxy`:
 ```yaml
 h5_image_sim:
     readoutPriority: baseline
