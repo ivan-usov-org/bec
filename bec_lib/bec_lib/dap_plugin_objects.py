@@ -1,3 +1,7 @@
+"""
+This module contains the base classes for DAP plugin objects. These classes should be used to create custom DAP plugin objects.
+"""
+
 from __future__ import annotations
 
 import builtins

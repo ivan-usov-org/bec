@@ -1,9 +1,15 @@
+"""
+This module contains a class for writing pdfs.
+"""
+
 import datetime
 
 from fpdf import FPDF
 
 
 class BECPDF(FPDF):
+    """Custom PDF class for BEC."""
+
     def header(self):
         if not hasattr(self, "title"):
             return
@@ -31,6 +37,8 @@ class BECPDF(FPDF):
 
 
 class PDFWriter:
+    """Class for writing pdfs."""
+
     LEFT_MARGIN = 25
     TOP_MARGIN = 20
     RIGHT_MARGIN = 20

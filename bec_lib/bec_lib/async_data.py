@@ -1,3 +1,7 @@
+"""
+This module contains the AsyncDataHandler class which is used to handle async data from the BEC.
+"""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

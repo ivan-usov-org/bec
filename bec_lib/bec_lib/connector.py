@@ -1,3 +1,7 @@
+"""
+Connector defines the interface for a connector
+"""
+
 from __future__ import annotations
 
 import abc
@@ -10,16 +14,25 @@ logger = bec_logger.logger
 
 
 class ConsumerConnectorError(Exception):
-    pass
+    """
+    ConsumerConnectorError is raised when there is an error with the connector
+    """
 
 
 class MessageObject:
+    """
+    MessageObject is a wrapper for a message and its topic
+    """
+
     def __init__(self, topic: str, value: BECMessage) -> None:
         self.topic = topic
         self._value = value
 
     @property
     def value(self) -> BECMessage:
+        """
+        Get the message
+        """
         return self._value
 
     def __eq__(self, ref_val: MessageObject) -> bool:
@@ -38,38 +51,47 @@ class StoreInterface(abc.ABC):
         pass
 
     def pipeline(self):
-        pass
+        """Create a pipeline for batch operations"""
 
     def execute_pipeline(self, pipeline):
-        pass
+        """Execute a pipeline"""
 
     def lpush(
         self, topic: str, msg: str, pipe=None, max_size: int = None, expire: int = None
     ) -> None:
+        """Push a message to the left of the list"""
         raise NotImplementedError
 
     def lset(self, topic: str, index: int, msg: str, pipe=None) -> None:
+        """Set a value in the list at the given index"""
         raise NotImplementedError
 
     def rpush(self, topic: str, msg: str, pipe=None) -> int:
+        """Push a message to the right of the list"""
         raise NotImplementedError
 
     def lrange(self, topic: str, start: int, end: int, pipe=None):
+        """Get a range of values from the list"""
         raise NotImplementedError
 
     def set(self, topic: str, msg, pipe=None, expire: int = None) -> None:
+        """Set a value"""
         raise NotImplementedError
 
     def keys(self, pattern: str) -> list:
+        """Get keys that match the pattern"""
         raise NotImplementedError
 
     def delete(self, topic, pipe=None):
+        """Delete a key"""
         raise NotImplementedError
 
     def get(self, topic: str, pipe=None):
+        """Get a value"""
         raise NotImplementedError
 
     def xadd(self, topic: str, msg_dict: dict, max_size=None, pipe=None, expire: int = None):
+        """Add a message to the stream"""
         raise NotImplementedError
 
     def xread(
@@ -81,20 +103,27 @@ class StoreInterface(abc.ABC):
         pipe=None,
         from_start=False,
     ) -> list:
+        """Read from the stream"""
         raise NotImplementedError
 
     def xrange(self, topic: str, min: str, max: str, count: int = None, pipe=None):
+        """Read from the stream"""
         raise NotImplementedError
 
 
 class PubSubInterface(abc.ABC):
+    """PubSubBase defines the interface for a pub/sub connector"""
+
     def raw_send(self, topic: str, msg: bytes) -> None:
+        """Send a raw message without using the BECMessage class"""
         raise NotImplementedError
 
     def send(self, topic: str, msg: BECMessage) -> None:
+        """Send a message"""
         raise NotImplementedError
 
     def register(self, topics=None, patterns=None, cb=None, start_thread=True, **kwargs):
+        """Register a callback for a topic or pattern"""
         raise NotImplementedError
 
     def poll_messages(self, timeout=None):
@@ -102,6 +131,7 @@ class PubSubInterface(abc.ABC):
         raise NotImplementedError
 
     def run_messages_loop(self):
+        """Run the message loop"""
         raise NotImplementedError
 
     def shutdown(self):
@@ -109,7 +139,10 @@ class PubSubInterface(abc.ABC):
 
 
 class ConnectorBase(PubSubInterface, StoreInterface):
+    """ConnectorBase defines the interface for a connector"""
+
     def raise_warning(self, msg):
+        """Raise a warning"""
         raise NotImplementedError
 
     def log_warning(self, msg):
@@ -125,4 +158,5 @@ class ConnectorBase(PubSubInterface, StoreInterface):
         self.send(MessageEndpoints.log(), LogMessage(log_type="error", log_msg=msg))
 
     def set_and_publish(self, topic: str, msg, pipe=None, expire: int = None) -> None:
+        """Set a value and publish it"""
         raise NotImplementedError
