@@ -1,17 +1,14 @@
 import numpy as np
 import pytest
 
-from bec_lib.serialization import MsgpackSerialization
 from bec_lib import messages
+from bec_lib.serialization import MsgpackSerialization
 
 
 @pytest.mark.parametrize("version", [1.0, 1.1, 1.2, None])
 def test_bec_message_msgpack_serialization_version(version):
     msg = messages.DeviceInstructionMessage(
-        device="samx",
-        action="set",
-        parameter={"set": 0.5},
-        metadata={"RID": "1234"},
+        device="samx", action="set", parameter={"set": 0.5}, metadata={"RID": "1234"}
     )
     if version is not None and version < 1.2:
         with pytest.raises(RuntimeError) as exception:
@@ -29,8 +26,7 @@ def test_bec_message_msgpack_serialization_version(version):
 @pytest.mark.parametrize("version", [1.2, None])
 def test_bec_message_serialization_numpy_ndarray(version):
     msg = messages.DeviceMessage(
-        signals={"samx": {"value": np.random.rand(20).astype(np.float32)}},
-        metadata={"RID": "1234"},
+        signals={"samx": {"value": np.random.rand(20).astype(np.float32)}}, metadata={"RID": "1234"}
     )
     res = MsgpackSerialization.dumps(msg)
     print(res)
@@ -143,13 +139,7 @@ def test_ScanBaselineMessage():
 
 @pytest.mark.parametrize(
     "action,valid",
-    [
-        ("add", True),
-        ("set", True),
-        ("update", True),
-        ("reload", True),
-        ("wrong_action", False),
-    ],
+    [("add", True), ("set", True), ("update", True), ("reload", True), ("wrong_action", False)],
 )
 def test_DeviceConfigMessage(action, valid):
     msg = messages.DeviceConfigMessage(
@@ -268,10 +258,7 @@ def test_GUIConfigMessage():
 
 def test_ScanQueueHistoryMessage():
     msg = messages.ScanQueueHistoryMessage(
-        status="running",
-        queueID="queueID",
-        info={"val": "val"},
-        metadata={"RID": "1234"},
+        status="running", queueID="queueID", info={"val": "val"}, metadata={"RID": "1234"}
     )
     res = MsgpackSerialization.dumps(msg)
     res_loaded = MsgpackSerialization.loads(res)
@@ -280,8 +267,8 @@ def test_ScanQueueHistoryMessage():
 
 def test_DAPResponseMessage():
     msg = messages.DAPResponseMessage(success=True, data={}, metadata={"RID": "1234"})
-    res = msg.dumps()
-    res_loaded = messages.DAPResponseMessage.loads(res)
+    res = MsgpackSerialization.dumps(msg)
+    res_loaded = MsgpackSerialization.loads(res)
     assert res_loaded == msg
 
 
@@ -292,20 +279,20 @@ def test_DAPRequestMessage():
         config={"config": "value"},
         metadata={"RID": "1234"},
     )
-    res = msg.dumps()
-    res_loaded = messages.DAPRequestMessage.loads(res)
+    res = MsgpackSerialization.dumps(msg)
+    res_loaded = MsgpackSerialization.loads(res)
     assert res_loaded == msg
 
 
 def test_FileContentMessage():
     msg = messages.FileContentMessage(file_path="/path/to/file", data={}, metadata={"RID": "1234"})
-    res = msg.dumps()
-    res_loaded = messages.FileContentMessage.loads(res)
+    res = MsgpackSerialization.dumps(msg)
+    res_loaded = MsgpackSerialization.loads(res)
     assert res_loaded == msg
 
 
 def test_CredentialsMessage():
     msg = messages.CredentialsMessage(credentials={"username": "user", "password": "pass"})
-    res = msg.dumps()
-    res_loaded = messages.CredentialsMessage.loads(res)
+    res = MsgpackSerialization.dumps(msg)
+    res_loaded = MsgpackSerialization.loads(res)
     assert res_loaded == msg

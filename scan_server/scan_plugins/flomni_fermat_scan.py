@@ -23,8 +23,8 @@ but they are executed in a specific order:
 import time
 
 import numpy as np
-from bec_lib import MessageEndpoints, bec_logger, messages
 
+from bec_lib import MessageEndpoints, bec_logger, messages
 from scan_server.errors import ScanAbortion
 from scan_server.scans import SyncFlyScanBase
 
@@ -107,16 +107,14 @@ class FlomniFermatScan(SyncFlyScanBase):
 
     def reverse_trajectory(self):
         producer = self.device_manager.producer
-        msg = messages.VariableMessage.loads(
-            producer.get(MessageEndpoints.global_vars("reverse_flomni_trajectory"))
-        )
+        msg = producer.get(MessageEndpoints.global_vars("reverse_flomni_trajectory"))
         if msg:
             val = msg.content.get("value", False)
         else:
             val = False
         producer.set(
             MessageEndpoints.global_vars("reverse_flomni_trajectory"),
-            messages.VariableMessage(value=(not val)).dumps(),
+            messages.VariableMessage(value=(not val)),
         )
         return val
 
@@ -255,9 +253,8 @@ class FlomniFermatScan(SyncFlyScanBase):
         yield from self.stubs.kickoff(device="rtx")
         while True:
             yield from self.stubs.read_and_wait(group="primary", wait_group="readout_primary")
-            msg = self.device_manager.producer.get(MessageEndpoints.device_status("rt_scan"))
-            if msg:
-                status = messages.DeviceStatusMessage.loads(msg)
+            status = self.device_manager.producer.get(MessageEndpoints.device_status("rt_scan"))
+            if status:
                 status_id = status.content.get("status", 1)
                 request_id = status.metadata.get("RID")
                 if status_id == 0 and self.metadata.get("RID") == request_id:

@@ -35,7 +35,7 @@ class DAPServiceManager:
             msg (MessageObject): MessageObject instance
             parent (DAPService): DAPService instance
         """
-        dap_request_msg = messages.DAPRequestMessage.loads(msg.value)
+        dap_request_msg = msg.value
         if not dap_request_msg:
             return
         self.process_dap_request(dap_request_msg)
