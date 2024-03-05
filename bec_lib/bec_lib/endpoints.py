@@ -1,103 +1,48 @@
+"""
+Endpoints for communication within the BEC.
+"""
+
 # pylint: disable=too-many-public-methods
-from string import Template
+import enum
+from dataclasses import dataclass
+
+from bec_lib import messages
+
+
+class MessageOp(list[str], enum.Enum):
+    """Message operation enum"""
+
+    SET_PUBLISH = ["register", "set_and_publish", "delete", "get", "keys"]
+    SEND = ["send", "register"]
+    STREAM = ["xadd", "xrange", "xread", "register_stream", "keys"]
+    LIST = ["lpush", "lrange", "rpush", "ltrim", "keys"]
+    SET = ["set", "get", "delete", "keys"]
+
+
+@dataclass
+class EndpointInfo:
+    """
+    Dataclass for endpoint info.
+
+    Args:
+        endpoint (str): Endpoint.
+        message_type (messages.BECMessage): Message type.
+        message_op (MessageOp): Message operation.
+    """
+
+    endpoint: str
+    message_type: messages.BECMessage
+    message_op: MessageOp
 
 
 class MessageEndpoints:
-    # devices feedback
-    _device_status = "internal/devices/status"
-    _device_read = "internal/devices/read"
-    _device_read_configuration = "internal/devices/read_configuration"
-    _device_readback = "internal/devices/readback"
-    _device_limits = "internal/devices/limits"
-    _device_req_status = "internal/devices/req_status"
-    _device_progress = "internal/devices/progress"
-    _device_async_readback = Template("internal/devices/async_readback/$scanID/$device")
-
-    # device config
-    _device_config_request = "internal/devices/config_request"
-    _device_config_request_response = "internal/devices/config_request_response"
-    _device_server_config_update = "internal/devices/device_server_config_update"
-    _device_config_update = "internal/devices/config_update"
-    _device_config = "internal/devices/config"
-    _device_config_history = "internal/devices/config_history"
-    _device_info = "internal/devices/info"
-    _device_staged = "internal/devices/staged"
-
-    # device monitoring
-    _device_monitor = "internal/devices/monitor"
-
-    # scan queue
-    _scan_queue_modification = "internal/queue/queue_modification"
-    _scan_queue_modification_request = "internal/queue/queue_modification_request"
-    _scan_queue_insert = "internal/queue/queue_insert"
-    _scan_queue_request = "internal/queue/queue_request"
-    _scan_queue_request_response = "internal/queue/queue_request_response"
-    _scan_queue_status = "internal/queue/queue_status"
-    _scan_queue_history = "internal/queue/queue_history"
-
-    # scan info
-    _scan_number = "scans/scan_number"
-    _dataset_number = "scans/dataset_number"
-    _scan_status = "scans/scan_status"
-    _scan_status_list = "scans/scan_status_list"
-    _available_scans = "scans/available_scans"
-    _scan_segment = "scans/scan_segment"
-    _scan_baseline = "scans/scan_baseline"
-    _bluesky_events = "scans/bluesky-events"
-    _public_scan_info = Template("public/$scanID/scan_info")
-    _public_scan_segment = Template("public/$scanID/scan_segment/$pointID")
-    _public_scan_baseline = Template("public/$scanID/scan_baseline")
-    _public_file = Template("public/$scanID/file/$name")
-    _file_event = "public/file_event"
-    _file_content = "internal/file_content"
-
-    # instructions
-    _device_instructions = "internal/devices/instructions"
-    _device_rpc = "internal/devices/rpc"
-    _pre_scan_macros = "internal/pre_scan_macros"
-    _post_scan_macros = "internal/post_scan_macros"
-
-    # log
-    _log = "internal/log"
-    _alarms = "internal/alarms"
-
-    # service
-    _services_status = "internal/services/status"
-    _metrics = "internal/services/metrics"
-    _service_response = "internal/services/response"
-
-    # misc
-    _public_global_vars = "public/vars"
-    _observer = "internal/observer"
-    _progress = "public/progress"
-
-    # logbook
-    _logbook = "internal/logbook"
-
-    # scibec
-    _scibec = "internal/scibec"
-
-    # experiment
-    _account = "internal/account"
-
-    # data processing
-    _processed_data = "public/processed_data"
-    _dap_config = "internal/dap/config"
-    _available_dap_plugins = "internal/dap/available_plugins"
-    _dap_request = "internal/dap/request"
-    _dap_response = "internal/dap/response"
-
-    # GUI
-    _gui_config = "public/gui/config"
-    _gui_data = "public/gui/data"
-    _gui_instructions = "public/gui/instruction"
-    _gui_instruction_response = "public/gui/instruction_response"
-
-    ##########
+    """
+    Class for message endpoints.
+    """
 
     # devices feedback
-    @classmethod
-    def device_status(cls, device: str) -> str:
+    @staticmethod
+    def device_status(device: str) -> EndpointInfo:
         """
         Endpoint for device status. This endpoint is used by the device server to publish
         the device status using a messages.DeviceStatusMessage message.
@@ -105,10 +50,13 @@ class MessageEndpoints:
         Args:
             device (str): Device name, e.g. "samx".
         """
-        return f"{cls._device_status}/{device}"
+        endpoint = f"internal/devices/status/{device}"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.DeviceStatusMessage, message_op=MessageOp.SET
+        )
 
-    @classmethod
-    def device_read(cls, device: str) -> str:
+    @staticmethod
+    def device_read(device: str) -> EndpointInfo:
         """
         Endpoint for device readings. This endpoint is used by the device server to publish
         the device readings using a messages.DeviceMessage message.
@@ -117,12 +65,15 @@ class MessageEndpoints:
             device (str): Device name, e.g. "samx".
 
         Returns:
-            str: Endpoint for device readings of the specified device.
+            EndpointInfo: Endpoint for device readings of the specified device.
         """
-        return f"{cls._device_read}/{device}"
+        endpoint = f"internal/devices/read/{device}"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.DeviceMessage, message_op=MessageOp.SET_PUBLISH
+        )
 
-    @classmethod
-    def device_read_configuration(cls, device: str) -> str:
+    @staticmethod
+    def device_read_configuration(device: str) -> EndpointInfo:
         """
         Endpoint for device configuration readings. This endpoint is used by the device server
         to publish the device configuration readings using a messages.DeviceMessage message.
@@ -131,12 +82,15 @@ class MessageEndpoints:
             device (str): Device name, e.g. "samx".
 
         Returns:
-            str: Endpoint for device configuration readings of the specified device.
+            EndpointInfo: Endpoint for device configuration readings of the specified device.
         """
-        return f"{cls._device_read_configuration}/{device}"
+        endpoint = f"internal/devices/read_configuration/{device}"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.DeviceMessage, message_op=MessageOp.SET_PUBLISH
+        )
 
-    @classmethod
-    def device_readback(cls, device: str) -> str:
+    @staticmethod
+    def device_readback(device: str) -> EndpointInfo:
         """
         Endpoint for device readbacks. This endpoint is used by the device server to publish
         the device readbacks using a messages.DeviceMessage message.
@@ -145,12 +99,15 @@ class MessageEndpoints:
             device (str): Device name, e.g. "samx".
 
         Returns:
-            str: Endpoint for device readbacks of the specified device.
+            EndpointInfo: Endpoint for device readbacks of the specified device.
         """
-        return f"{cls._device_readback}/{device}"
+        endpoint = f"internal/devices/readback/{device}"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.DeviceMessage, message_op=MessageOp.SET_PUBLISH
+        )
 
-    @classmethod
-    def device_limits(cls, device: str) -> str:
+    @staticmethod
+    def device_limits(device: str) -> EndpointInfo:
         """
         Endpoint for device limits. This endpoint is used by the device server to publish
         the device limits using a messages.DeviceMessage message.
@@ -159,12 +116,15 @@ class MessageEndpoints:
             device (str): Device name, e.g. "samx".
 
         Returns:
-            str: Endpoint for device limits of the specified device.
+            EndpointInfo: Endpoint for device limits of the specified device.
         """
-        return f"{cls._device_limits}/{device}"
+        endpoint = f"internal/devices/limits/{device}"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.DeviceMessage, message_op=MessageOp.SET_PUBLISH
+        )
 
-    @classmethod
-    def device_req_status(cls, device: str) -> str:
+    @staticmethod
+    def device_req_status(device: str) -> EndpointInfo:
         """
         Endpoint for device request status. This endpoint is used by the device server to publish
         the device request status using a messages.DeviceReqStatusMessage message.
@@ -173,12 +133,36 @@ class MessageEndpoints:
             device (str): Device name, e.g. "samx".
 
         Returns:
-            str: Endpoint for device request status of the specified device.
+            EndpointInfo: Endpoint for device request status of the specified device.
         """
-        return f"{cls._device_req_status}/{device}"
+        endpoint = f"internal/devices/req_status/{device}"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.DeviceReqStatusMessage,
+            message_op=MessageOp.SET_PUBLISH,
+        )
 
-    @classmethod
-    def device_progress(cls, device: str) -> str:
+    @staticmethod
+    def device_req_status_container(RID: str) -> EndpointInfo:
+        """
+        Endpoint for device request status container. This endpoint is used by the device server to publish
+        the device request status using a messages.DeviceReqStatusMessage message.
+
+        Args:
+            RID (str): Request ID.
+
+        Returns:
+            EndpointInfo: Endpoint for device request status container.
+        """
+        endpoint = f"internal/devices/req_status_container/{RID}"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.DeviceReqStatusMessage,
+            message_op=MessageOp.LIST,
+        )
+
+    @staticmethod
+    def device_progress(device: str) -> EndpointInfo:
         """
         Endpoint for device progress. This endpoint is used by the device server to publish
         the device progress using a messages.ProgressMessage message.
@@ -187,25 +171,33 @@ class MessageEndpoints:
             device (str): Device name, e.g. "samx".
 
         Returns:
-            str: Endpoint for device progress of the specified device.
+            EndpointInfo: Endpoint for device progress of the specified device.
         """
-        return f"{cls._device_progress}/{device}"
+        endpoint = f"internal/devices/progress/{device}"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.ProgressMessage,
+            message_op=MessageOp.SET_PUBLISH,
+        )
 
     # device config
-    @classmethod
-    def device_config_request(cls) -> str:
+    @staticmethod
+    def device_config_request() -> EndpointInfo:
         """
         Endpoint for device config request. This endpoint can be used to
         request a modification to the device config. The request is sent using
         a messages.DeviceConfigMessage message.
 
         Returns:
-            str: Endpoint for device config request.
+            EndpointInfo: Endpoint for device config request.
         """
-        return cls._device_config_request
+        endpoint = "internal/devices/config_request"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.DeviceConfigMessage, message_op=MessageOp.SEND
+        )
 
-    @classmethod
-    def device_config_request_response(cls, RID: str) -> str:
+    @staticmethod
+    def device_config_request_response(RID: str) -> EndpointInfo:
         """
         Endpoint for device config request response. This endpoint is used by the
         device server and scihub connector to inform about whether the device config
@@ -216,12 +208,17 @@ class MessageEndpoints:
             RID (str): Request ID.
 
         Returns:
-            str: Endpoint for device config request response.
+            EndpointInfo: Endpoint for device config request response.
         """
-        return f"{cls._device_config_request_response}/{RID}"
+        endpoint = f"internal/devices/config_request_response/{RID}"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.RequestResponseMessage,
+            message_op=MessageOp.SET,
+        )
 
-    @classmethod
-    def device_server_config_request(cls) -> str:
+    @staticmethod
+    def device_server_config_request() -> EndpointInfo:
         """
         Endpoint for device server config request. This endpoint can be used to
         request changes to config. Typically used by the scihub connector following a
@@ -229,48 +226,62 @@ class MessageEndpoints:
         The request is sent using a messages.DeviceConfigMessage message.
 
         Returns:
-            str: Endpoint for device server config request.
+            EndpointInfo: Endpoint for device server config request.
         """
-        return cls._device_server_config_update
+        endpoint = "internal/devices/device_server_config_update"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.DeviceConfigMessage, message_op=MessageOp.SEND
+        )
 
-    @classmethod
-    def device_config_update(cls) -> str:
+    @staticmethod
+    def device_config_update() -> EndpointInfo:
         """
         Endpoint for device config update. This endpoint is used by the scihub connector
         to inform about a change to the device config. The update is sent using a
         messages.DeviceConfigMessage message.
 
         Returns:
-            str: Endpoint for device config update.
+            EndpointInfo: Endpoint for device config update.
 
         """
-        return cls._device_config_update
+        endpoint = "internal/devices/config_update"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.DeviceConfigMessage, message_op=MessageOp.SEND
+        )
 
-    @classmethod
-    def device_config(cls) -> str:
+    @staticmethod
+    def device_config() -> EndpointInfo:
         """
         Endpoint for device config. This endpoint is used by the scihub connector
         to set the device config.
 
         Returns:
-            str: Endpoint for device config.
+            EndpointInfo: Endpoint for device config.
         """
-        return cls._device_config
+        endpoint = "internal/devices/config"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.DeviceConfigMessage, message_op=MessageOp.SET
+        )
 
-    @classmethod
-    def device_config_history(cls) -> str:
+    @staticmethod
+    def device_config_history() -> EndpointInfo:
         """
         Endpoint for device config history. This endpoint is used to keep track of the
         device config history using a messages.AvailableResourceMessage message. The endpoint is
         connected to a redis list.
 
         Returns:
-            str: Endpoint for device config history.
+            EndpointInfo: Endpoint for device config history.
         """
-        return cls._device_config_history
+        endpoint = "internal/devices/config_history"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.AvailableResourceMessage,
+            message_op=MessageOp.LIST,
+        )
 
-    @classmethod
-    def device_info(cls, device: str) -> str:
+    @staticmethod
+    def device_info(device: str) -> EndpointInfo:
         """
         Endpoint for device info. This endpoint is used by the device server to publish
         the device info using a messages.DeviceInfoMessage message.
@@ -279,12 +290,15 @@ class MessageEndpoints:
             device (str): Device name, e.g. "samx".
 
         Returns:
-            str: Endpoint for device info of the specified device.
+            EndpointInfo: Endpoint for device info of the specified device.
         """
-        return f"{cls._device_info}/{device}"
+        endpoint = f"internal/devices/info/{device}"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.DeviceInfoMessage, message_op=MessageOp.SET
+        )
 
-    @classmethod
-    def device_staged(cls, device: str) -> str:
+    @staticmethod
+    def device_staged(device: str) -> EndpointInfo:
         """
         Endpoint for the device stage status. This endpoint is used by the device server
         to publish the device stage status using a messages.DeviceStatusMessage message.
@@ -295,12 +309,15 @@ class MessageEndpoints:
             device (str): Device name, e.g. "samx".
 
         Returns:
-            str: Endpoint for the device stage status of the specified device.
+            EndpointInfo: Endpoint for the device stage status of the specified device.
         """
-        return f"{cls._device_staged}/{device}"
+        endpoint = f"internal/devices/staged/{device}"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.DeviceStatusMessage, message_op=MessageOp.SET
+        )
 
-    @classmethod
-    def device_async_readback(cls, scanID: str, device: str) -> str:
+    @staticmethod
+    def device_async_readback(scanID: str, device: str) -> EndpointInfo:
         """
         Endpoint for receiving an async device readback over Redis streams.
         This endpoint is used by the device server to publish async device
@@ -313,12 +330,15 @@ class MessageEndpoints:
             device (str): Device name, e.g. "mcs".
 
         Returns:
-            str: Endpoint for the async device readback.
+            EndpointInfo: Endpoint for device async readback of the specified device.
         """
-        return cls._device_async_readback.substitute(scanID=scanID, device=device)
+        endpoint = f"internal/devices/async_readback/{scanID}/{device}"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.DeviceMessage, message_op=MessageOp.STREAM
+        )
 
-    @classmethod
-    def device_monitor(cls, device: str) -> str:
+    @staticmethod
+    def device_monitor(device: str) -> EndpointInfo:
         """
         Endpoint for device monitoring.
         This endpoint is used to publish image or wavefrom data from a monitor. An
@@ -326,30 +346,37 @@ class MessageEndpoints:
         forward a subset from the data to the monitoring endpoing for visualization
         purposes. Details on shape and type of data need to be specified in
         dtype/dshape of the dev.<device>.describe() method.
-        #TODO: Add here information that it should be a RedisStream?
 
         Args:
             device (str): Device name, e.g. "eiger".
 
         Returns:
-            str: Endpoint for device monitor of the specified device.
+            EndpointInfo: Endpoint for device monitoring.
         """
-        return f"{cls._device_monitor}/{device}"
+        endpoint = f"internal/devices/monitor/{device}"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.DeviceMessage, message_op=MessageOp.STREAM
+        )
 
     # scan queue
-    @classmethod
-    def scan_queue_modification(cls) -> str:
+    @staticmethod
+    def scan_queue_modification() -> EndpointInfo:
         """
         Endpoint for scan queue modification. This endpoint is used to publish accepted
         scan queue modifications using a messages.ScanQueueModificationMessage message.
 
         Returns:
-            str: Endpoint for scan queue modification.
+            EndpointInfo: Endpoint for scan queue modification.
         """
-        return cls._scan_queue_modification
+        endpoint = "internal/queue/queue_modification"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.ScanQueueModificationMessage,
+            message_op=MessageOp.SEND,
+        )
 
-    @classmethod
-    def scan_queue_modification_request(cls) -> str:
+    @staticmethod
+    def scan_queue_modification_request() -> EndpointInfo:
         """
         Endpoint for scan queue modification request. This endpoint is used to request
         a scan queue modification using a messages.ScanQueueModificationMessage message.
@@ -357,12 +384,17 @@ class MessageEndpoints:
         endpoint.
 
         Returns:
-            str: Endpoint for scan queue modification request.
+            EndpointInfo: Endpoint for scan queue modification request.
         """
-        return cls._scan_queue_modification_request
+        endpoint = "internal/queue/queue_modification_request"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.ScanQueueModificationMessage,
+            message_op=MessageOp.SEND,
+        )
 
-    @classmethod
-    def scan_queue_insert(cls) -> str:
+    @staticmethod
+    def scan_queue_insert() -> EndpointInfo:
         """
         Endpoint for scan queue inserts. This endpoint is used to publish accepted
         scans using a messages.ScanQueueMessage message.
@@ -370,60 +402,81 @@ class MessageEndpoints:
         scan queue.
 
         Returns:
-            str: Endpoint for scan queue inserts.
+            EndpointInfo: Endpoint for scan queue inserts.
         """
-        return cls._scan_queue_insert
+        endpoint = "internal/queue/queue_insert"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.ScanQueueMessage, message_op=MessageOp.SEND
+        )
 
-    @classmethod
-    def scan_queue_request(cls) -> str:
+    @staticmethod
+    def scan_queue_request() -> EndpointInfo:
         """
         Endpoint for scan queue request. This endpoint is used to request the new scans.
         The request is sent using a messages.ScanQueueMessage message.
 
         Returns:
-            str: Endpoint for scan queue request.
+            EndpointInfo: Endpoint for scan queue request.
         """
-        return cls._scan_queue_request
+        endpoint = "internal/queue/queue_request"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.ScanQueueMessage, message_op=MessageOp.SEND
+        )
 
-    @classmethod
-    def scan_queue_request_response(cls) -> str:
+    @staticmethod
+    def scan_queue_request_response() -> EndpointInfo:
         """
         Endpoint for scan queue request response. This endpoint is used to publish the
         information on whether the scan request was accepted or rejected. The response
         is sent using a messages.RequestResponseMessage message.
 
         Returns:
-            str: Endpoint for scan queue request response.
+            EndpointInfo: Endpoint for scan queue request response.
 
         """
-        return cls._scan_queue_request_response
+        endpoint = "internal/queue/queue_request_response"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.RequestResponseMessage,
+            message_op=MessageOp.SEND,
+        )
 
-    @classmethod
-    def scan_queue_status(cls) -> str:
+    @staticmethod
+    def scan_queue_status() -> EndpointInfo:
         """
         Endpoint for scan queue status. This endpoint is used to publish the scan queue
         status using a messages.ScanQueueStatusMessage message.
 
         Returns:
-            str: Endpoint for scan queue status.
+            EndpointInfo: Endpoint for scan queue status.
         """
-        return cls._scan_queue_status
+        endpoint = "internal/queue/queue_status"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.ScanQueueStatusMessage,
+            message_op=MessageOp.SET_PUBLISH,
+        )
 
-    @classmethod
-    def scan_queue_history(cls) -> str:
+    @staticmethod
+    def scan_queue_history() -> EndpointInfo:
         """
         Endpoint for scan queue history. This endpoint is used to keep track of the
         scan queue history using a messages.ScanQueueHistoryMessage message. The endpoint is
         connected to a redis list.
 
         Returns:
-            str: Endpoint for scan queue history.
+            EndpointInfo: Endpoint for scan queue history.
         """
-        return cls._scan_queue_history
+        endpoint = "internal/queue/queue_history"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.ScanQueueHistoryMessage,
+            message_op=MessageOp.LIST,
+        )
 
     # scan info
-    @classmethod
-    def scan_number(cls) -> str:
+    @staticmethod
+    def scan_number() -> str:
         """
         Endpoint for scan number. This endpoint is used to publish the scan number. The
         scan number is incremented after each scan and set in redis as an integer.
@@ -431,10 +484,10 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for scan number.
         """
-        return cls._scan_number
+        return "scans/scan_number"
 
-    @classmethod
-    def dataset_number(cls) -> str:
+    @staticmethod
+    def dataset_number() -> str:
         """
         Endpoint for dataset number. This endpoint is used to publish the dataset number.
         The dataset number is incremented after each dataset and set in redis as an integer.
@@ -442,34 +495,42 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for dataset number.
         """
-        return cls._dataset_number
+        return "scans/dataset_number"
 
-    @classmethod
-    def scan_status(cls) -> str:
+    @staticmethod
+    def scan_status() -> EndpointInfo:
         """
         Endpoint for scan status. This endpoint is used to publish the scan status using
         a messages.ScanStatusMessage message.
 
         Returns:
-            str: Endpoint for scan status.
+            EndpointInfo: Endpoint for scan status.
         """
-        return cls._scan_status
+        endpoint = "scans/scan_status"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.ScanStatusMessage,
+            message_op=MessageOp.SET_PUBLISH,
+        )
 
-    @classmethod
-    def available_scans(cls) -> str:
+    @staticmethod
+    def available_scans() -> EndpointInfo:
         """
         Endpoint for available scans. This endpoint is used to publish the available scans
-        using a direct msgpack dump of a dictionary containing the available scans.
-
-        #TODO: Change this to a messages.AvailableScans message.
+        using an AvailableResourceMessage.
 
         Returns:
-            str: Endpoint for available scans.
+            EndpointInfo: Endpoint for available scans.
         """
-        return cls._available_scans
+        endpoint = "scans/available_scans"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.AvailableResourceMessage,
+            message_op=MessageOp.SET,
+        )
 
-    @classmethod
-    def bluesky_events(cls) -> str:
+    @staticmethod
+    def bluesky_events() -> str:
         """
         Endpoint for bluesky events. This endpoint is used by the scan bundler to
         publish the bluesky events using a direct msgpack dump of the bluesky event.
@@ -477,10 +538,10 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for bluesky events.
         """
-        return cls._bluesky_events
+        return "scans/bluesky-events"
 
-    @classmethod
-    def scan_segment(cls) -> str:
+    @staticmethod
+    def scan_segment() -> EndpointInfo:
         """
         Endpoint for scan segment. This endpoint is used by the scan bundler to publish
         the scan segment using a messages.ScanMessage message.
@@ -488,10 +549,13 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for scan segments.
         """
-        return cls._scan_segment
+        endpoint = "scans/scan_segment"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.ScanMessage, message_op=MessageOp.SEND
+        )
 
-    @classmethod
-    def scan_baseline(cls) -> str:
+    @staticmethod
+    def scan_baseline() -> EndpointInfo:
         """
         Endpoint for scan baseline readings. This endpoint is used by the scan bundler to
         publish the scan baseline readings using a messages.ScanBaselineMessage message.
@@ -499,11 +563,16 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for scan baseline readings.
         """
-        return cls._scan_baseline
+        endpoint = "scans/scan_baseline"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.ScanBaselineMessage,
+            message_op=MessageOp.SET_PUBLISH,
+        )
 
     # instructions
-    @classmethod
-    def device_instructions(cls) -> str:
+    @staticmethod
+    def device_instructions() -> EndpointInfo:
         """
         Endpoint for device instructions. This endpoint is used by the scan server to
         publish the device instructions using a messages.DeviceInstructionMessage message.
@@ -513,10 +582,15 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for device instructions.
         """
-        return cls._device_instructions
+        endpoint = "internal/devices/instructions"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.DeviceInstructionMessage,
+            message_op=MessageOp.SEND,
+        )
 
-    @classmethod
-    def device_rpc(cls, rpc_id: str) -> str:
+    @staticmethod
+    def device_rpc(rpc_id: str) -> EndpointInfo:
         """
         Endpoint for device rpc. This endpoint is used by the device server to publish
         the result of a device rpc using a messages.DeviceRPCMessage message.
@@ -527,10 +601,13 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for device rpc.
         """
-        return f"{cls._device_rpc}/{rpc_id}"
+        endpoint = f"internal/devices/rpc/{rpc_id}"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.DeviceRPCMessage, message_op=MessageOp.SET
+        )
 
-    @classmethod
-    def pre_scan_macros(cls) -> str:
+    @staticmethod
+    def pre_scan_macros() -> str:
         """
         Endpoint for pre scan macros. This endpoint is used to keep track of the pre scan
         macros. The endpoint is connected to a redis list.
@@ -538,10 +615,10 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for pre scan macros.
         """
-        return cls._pre_scan_macros
+        return "internal/pre_scan_macros"
 
-    @classmethod
-    def post_scan_macros(cls) -> str:
+    @staticmethod
+    def post_scan_macros() -> str:
         """
         Endpoint for post scan macros. This endpoint is used to keep track of the post scan
         macros. The endpoint is connected to a redis list.
@@ -549,10 +626,10 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for post scan macros.
         """
-        return cls._post_scan_macros
+        return "internal/post_scan_macros"
 
-    @classmethod
-    def public_scan_info(cls, scanID: str) -> str:
+    @staticmethod
+    def public_scan_info(scanID: str) -> EndpointInfo:
         """
         Endpoint for scan info. This endpoint is used by the scan worker to publish the
         scan info using a messages.ScanStatusMessage message. In contrast to the scan_info endpoint,
@@ -565,10 +642,13 @@ class MessageEndpoints:
             str: Endpoint for scan info.
 
         """
-        return cls._public_scan_info.substitute(scanID=scanID)
+        endpoint = f"public/{scanID}/scan_info"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.ScanStatusMessage, message_op=MessageOp.SET
+        )
 
-    @classmethod
-    def public_scan_segment(cls, scanID: str, pointID: int) -> str:
+    @staticmethod
+    def public_scan_segment(scanID: str, pointID: int) -> EndpointInfo:
         """
         Endpoint for public scan segments. This endpoint is used by the scan bundler to
         publish the scan segment using a messages.ScanMessage message. In contrast to the
@@ -583,10 +663,13 @@ class MessageEndpoints:
             str: Endpoint for scan segments.
 
         """
-        return cls._public_scan_segment.substitute(scanID=scanID, pointID=pointID)
+        endpoint = f"public/{scanID}/scan_segment/{pointID}"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.ScanMessage, message_op=MessageOp.SET
+        )
 
-    @classmethod
-    def public_scan_baseline(cls, scanID: str) -> str:
+    @staticmethod
+    def public_scan_baseline(scanID: str) -> EndpointInfo:
         """
         Endpoint for public scan baseline readings. This endpoint is used by the scan bundler
         to publish the scan baseline readings using a messages.ScanBaselineMessage message.
@@ -599,10 +682,13 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for scan baseline readings.
         """
-        return cls._public_scan_baseline.substitute(scanID=scanID)
+        endpoint = f"public/{scanID}/scan_baseline"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.ScanBaselineMessage, message_op=MessageOp.SET
+        )
 
-    @classmethod
-    def public_file(cls, scanID: str, name: str) -> str:
+    @staticmethod
+    def public_file(scanID: str, name: str) -> EndpointInfo:
         """
         Endpoint for public file. This endpoint is used by the file writer to publish the
         status of the file writing using a messages.FileMessage message.
@@ -614,10 +700,13 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for public files.
         """
-        return cls._public_file.substitute(scanID=scanID, name=name)
+        endpoint = f"public/{scanID}/file/{name}"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.FileMessage, message_op=MessageOp.SET_PUBLISH
+        )
 
-    @classmethod
-    def file_event(cls, name: str) -> str:
+    @staticmethod
+    def file_event(name: str) -> EndpointInfo:
         """
         Endpoint for public file_event. This endpoint is used by the file writer to publish the
         status of the file writing using a messages.FileMessage message.
@@ -628,10 +717,13 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for public file_events.
         """
-        return f"{cls._file_event}/{name}"
+        endpoint = f"public/file_event/{name}"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.FileMessage, message_op=MessageOp.SET_PUBLISH
+        )
 
-    @classmethod
-    def file_content(cls) -> str:
+    @staticmethod
+    def file_content() -> EndpointInfo:
         """
         Endpoint for file content. This endpoint is used by the file writer to publish the
         file content using a messages.FileContentMessage message.
@@ -639,11 +731,16 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for file content.
         """
-        return cls._file_content
+        endpoint = "internal/file_content"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.FileContentMessage,
+            message_op=MessageOp.SET_PUBLISH,
+        )
 
     # log
-    @classmethod
-    def log(cls) -> str:
+    @staticmethod
+    def log() -> EndpointInfo:
         """
         Endpoint for log. This endpoint is used by the redis connector to publish logs using
         a messages.LogMessage message.
@@ -651,10 +748,13 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for log.
         """
-        return cls._log
+        endpoint = "internal/log"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.LogMessage, message_op=MessageOp.SET_PUBLISH
+        )
 
-    @classmethod
-    def alarm(cls) -> str:
+    @staticmethod
+    def alarm() -> EndpointInfo:
         """
         Endpoint for alarms. This endpoint is used by the redis connector to publish alarms
         using a messages.AlarmMessage message.
@@ -662,11 +762,14 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for alarms.
         """
-        return cls._alarms
+        endpoint = "internal/alarms"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.AlarmMessage, message_op=MessageOp.SET_PUBLISH
+        )
 
     # service
-    @classmethod
-    def service_status(cls, service_id: str) -> str:
+    @staticmethod
+    def service_status(service_id: str) -> EndpointInfo:
         """
         Endpoint for service status. This endpoint is used by all BEC services to publish
         their status using a messages.StatusMessage message.
@@ -675,10 +778,13 @@ class MessageEndpoints:
         Args:
             service_id (str): Service ID, typically a uuid4 string.
         """
-        return f"{cls._services_status}/{service_id}"
+        endpoint = f"internal/services/status/{service_id}"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.StatusMessage, message_op=MessageOp.SET_PUBLISH
+        )
 
-    @classmethod
-    def metrics(cls, service_id: str) -> str:
+    @staticmethod
+    def metrics(service_id: str) -> EndpointInfo:
         """
         Endpoint for metrics. This endpoint is used by all BEC services to publish their
         performance metrics using a messages.ServiceMetricMessage message.
@@ -689,10 +795,15 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for metrics.
         """
-        return f"{cls._metrics}/{service_id}"
+        endpoint = f"internal/services/metrics/{service_id}"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.ServiceMetricMessage,
+            message_op=MessageOp.SET_PUBLISH,
+        )
 
-    @classmethod
-    def service_response(cls, RID: str) -> str:
+    @staticmethod
+    def service_response(RID: str) -> EndpointInfo:
         """
         Endpoint for service response. This endpoint is used by all BEC services to publish
         the result of a service request using a messages.ServiceResponseMessage message.
@@ -703,11 +814,16 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for service response.
         """
-        return f"{cls._service_response}/{RID}"
+        endpoint = f"internal/services/response/{RID}"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.ServiceResponseMessage,
+            message_op=MessageOp.LIST,
+        )
 
     # misc
-    @classmethod
-    def global_vars(cls, var_name: str) -> str:
+    @staticmethod
+    def global_vars(var_name: str) -> EndpointInfo:
         """
         Endpoint for global variables. This endpoint is used to publish global variables
         using a messages.VariableMessage message.
@@ -718,10 +834,13 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for global variables.
         """
-        return f"{cls._public_global_vars}/{var_name}"
+        endpoint = f"public/vars/{var_name}"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.VariableMessage, message_op=MessageOp.SET
+        )
 
-    @classmethod
-    def observer(cls) -> str:
+    @staticmethod
+    def observer() -> EndpointInfo:
         """
         Endpoint for observer. This endpoint is used to keep track of observer states using a.
         messages.ObserverMessage message. This endpoint is currently not used.
@@ -729,10 +848,13 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for observer.
         """
-        return cls._observer
+        endpoint = "internal/observer"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.ObserverMessage, message_op=MessageOp.SET
+        )
 
-    @classmethod
-    def progress(cls, var_name) -> str:
+    @staticmethod
+    def progress(var_name) -> EndpointInfo:
         """
         Endpoint for progress. This endpoint is used to publish the current progress
         using a messages.ProgressMessage message.
@@ -743,11 +865,16 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for progress.
         """
-        return f"{cls._progress}/{var_name}"
+        endpoint = f"public/progress/{var_name}"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.ProgressMessage,
+            message_op=MessageOp.SET_PUBLISH,
+        )
 
     # logbook
-    @classmethod
-    def logbook(cls) -> str:
+    @staticmethod
+    def logbook() -> str:
         """
         Endpoint for logbook. This endpoint is used to publish logbook info such as
         url, user and token using a direct msgpack dump of a dictionary.
@@ -755,32 +882,35 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for logbook.
         """
-        return cls._logbook
+        return "internal/logbook"
 
     # scibec
-    @classmethod
-    def scibec(cls) -> str:
+    @staticmethod
+    def scibec() -> EndpointInfo:
         """
         Endpoint for scibec. This endpoint is used to publish scibec info such as
-        url, user and token using a direct msgpack dump of a dictionary.
+        url, user and token using a CredentialsMessage.
 
         Returns:
             str: Endpoint for scibec.
         """
-        return cls._scibec
+        endpoint = "internal/scibec"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.CredentialsMessage, message_op=MessageOp.SET
+        )
 
     # experiment
-    @classmethod
-    def account(cls) -> str:
+    @staticmethod
+    def account() -> str:
         """
         Endpoint for account. This endpoint is used to publish the current account.
         The value is set directly as a string.
         """
-        return cls._account
+        return "internal/account"
 
     # data processing
-    @classmethod
-    def processed_data(cls, process_id: str) -> str:
+    @staticmethod
+    def processed_data(process_id: str) -> EndpointInfo:
         """
         Endpoint for processed data. This endpoint is used to publish new processed data
         streams using a messages.ProcessedDataMessage message.
@@ -791,10 +921,15 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for processed data.
         """
-        return f"{cls._processed_data}/{process_id}"
+        endpoint = f"public/processed_data/{process_id}"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.ProcessedDataMessage,
+            message_op=MessageOp.STREAM,
+        )
 
-    @classmethod
-    def dap_config(cls) -> str:
+    @staticmethod
+    def dap_config() -> EndpointInfo:
         """
         Endpoint for DAP configuration. This endpoint is used to publish the DAP configuration
         using a messages.DAPConfigMessage message.
@@ -802,10 +937,15 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for DAP configuration.
         """
-        return cls._dap_config
+        endpoint = "internal/dap/config"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.DAPConfigMessage,
+            message_op=MessageOp.SET_PUBLISH,
+        )
 
-    @classmethod
-    def dap_available_plugins(cls, plugin_id: str) -> str:
+    @staticmethod
+    def dap_available_plugins(plugin_id: str) -> EndpointInfo:
         """
         Endpoint for available DAP plugins. This endpoint is used to publish the available DAP
         plugins using a messages.AvailableResourceMessage message.
@@ -816,10 +956,15 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for available DAP plugins.
         """
-        return f"{cls._available_dap_plugins}/{plugin_id}"
+        endpoint = f"internal/dap/available_plugins/{plugin_id}"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.AvailableResourceMessage,
+            message_op=MessageOp.SET,
+        )
 
-    @classmethod
-    def dap_request(cls) -> str:
+    @staticmethod
+    def dap_request() -> EndpointInfo:
         """
         Endpoint for DAP request. This endpoint is used to request a DAP using a
         messages.DAPRequestMessage message.
@@ -827,10 +972,15 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for DAP request.
         """
-        return cls._dap_request
+        endpoint = "internal/dap/request"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.DAPRequestMessage,
+            message_op=MessageOp.SET_PUBLISH,
+        )
 
-    @classmethod
-    def dap_response(cls, RID: str) -> str:
+    @staticmethod
+    def dap_response(RID: str) -> EndpointInfo:
         """
         Endpoint for DAP response. This endpoint is used to publish the DAP response using a
         messages.DAPResponseMessage message.
@@ -841,11 +991,16 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for DAP response.
         """
-        return f"{cls._dap_response}/{RID}"
+        endpoint = f"internal/dap/response/{RID}"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.DAPResponseMessage,
+            message_op=MessageOp.SET_PUBLISH,
+        )
 
     # GUI
-    @classmethod
-    def gui_config(cls, gui_id: str) -> str:
+    @staticmethod
+    def gui_config(gui_id: str) -> EndpointInfo:
         """
         Endpoint for GUI configuration. This endpoint is used to publish the GUI configuration
         using a messages.GUIConfigMessage message.
@@ -853,10 +1008,15 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for GUI configuration.
         """
-        return f"{cls._gui_config}/{gui_id}"
+        endpoint = f"public/gui/config/{gui_id}"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.GUIConfigMessage,
+            message_op=MessageOp.SET_PUBLISH,
+        )
 
-    @classmethod
-    def gui_data(cls, gui_id: str) -> str:
+    @staticmethod
+    def gui_data(gui_id: str) -> EndpointInfo:
         """
         Endpoint for GUI data. This endpoint is used to publish the GUI data using a
         messages.GUIDataMessage message.
@@ -864,10 +1024,15 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for GUI data.
         """
-        return f"{cls._gui_data}/{gui_id}"
+        endpoint = f"public/gui/data/{gui_id}"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.GUIDataMessage,
+            message_op=MessageOp.SET_PUBLISH,
+        )
 
-    @classmethod
-    def gui_instructions(cls, gui_id: str) -> str:
+    @staticmethod
+    def gui_instructions(gui_id: str) -> EndpointInfo:
         """
         Endpoint for GUI instructions. This endpoint is used to publish the GUI instructions
         using a messages.GUIInstructionMessage message.
@@ -875,10 +1040,15 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for GUI instructions.
         """
-        return f"{cls._gui_instructions}/{gui_id}"
+        endpoint = f"public/gui/instruction/{gui_id}"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.GUIInstructionMessage,
+            message_op=MessageOp.SET_PUBLISH,
+        )
 
-    @classmethod
-    def gui_instruction_response(cls, RID: str) -> str:
+    @staticmethod
+    def gui_instruction_response(RID: str) -> EndpointInfo:
         """
         Endpoint for GUI instruction response. This endpoint is used to publish the GUI instruction response
         using a messages.RequestResponseMessage message.
@@ -886,4 +1056,9 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for GUI instruction response.
         """
-        return f"{cls._gui_instruction_response}/{RID}"
+        endpoint = f"public/gui/instruction_response/{RID}"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.RequestResponseMessage,
+            message_op=MessageOp.SET_PUBLISH,
+        )

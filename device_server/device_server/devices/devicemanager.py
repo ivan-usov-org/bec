@@ -10,6 +10,10 @@ import numpy as np
 import ophyd
 import ophyd.sim as ops
 import ophyd_devices as opd
+from ophyd.ophydobj import OphydObject
+from ophyd.signal import EpicsSignalBase
+from typeguard import typechecked
+
 from bec_lib import (
     BECService,
     DeviceBase,
@@ -22,9 +26,6 @@ from bec_lib import (
 from bec_lib.connector import ConnectorBase
 from device_server.devices.config_update_handler import ConfigUpdateHandler
 from device_server.devices.device_serializer import get_device_info
-from ophyd.ophydobj import OphydObject
-from ophyd.signal import EpicsSignalBase
-from typeguard import typechecked
 
 try:
     from bec_plugins import devices as plugin_devices
@@ -64,7 +65,9 @@ class DSDevice(DeviceBase):
             limits = None
         pipe = connector.pipeline()
         connector.set_and_publish(MessageEndpoints.device_readback(self.name), dev_msg, pipe=pipe)
-        connector.set(topic=MessageEndpoints.device_read(self.name), msg=dev_msg, pipe=pipe)
+        connector.set_and_publish(
+            topic=MessageEndpoints.device_read(self.name), msg=dev_msg, pipe=pipe
+        )
         connector.set_and_publish(
             MessageEndpoints.device_read_configuration(self.name), dev_config_msg, pipe=pipe
         )
@@ -476,7 +479,7 @@ class DeviceManagerDS(DeviceManagerBase):
         device = kwargs["obj"].root.name
         status = 0
         metadata = self.devices[device].metadata
-        self.connector.send(
+        self.connector.set(
             MessageEndpoints.device_status(device),
             messages.DeviceStatusMessage(device=device, status=status, metadata=metadata),
         )

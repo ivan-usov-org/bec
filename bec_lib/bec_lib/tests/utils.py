@@ -13,7 +13,7 @@ import yaml
 from bec_lib import BECClient, messages
 from bec_lib.connector import ConnectorBase
 from bec_lib.devicemanager import DeviceManagerBase
-from bec_lib.endpoints import MessageEndpoints
+from bec_lib.endpoints import EndpointInfo, MessageEndpoints
 from bec_lib.logger import bec_logger
 from bec_lib.scans import Scans
 from bec_lib.service_config import ServiceConfig
@@ -542,24 +542,18 @@ class ConnectorMock(ConnectorBase):  # pragma: no cover
     def register(self, *args, **kwargs):
         pass
 
-    def set(self, *args, **kwargs):
-        pass
-
-    def set_and_publish(self, *args, **kwargs):
-        pass
-
     def keys(self, *args, **kwargs):
         return []
 
     def set(self, topic, msg, pipe=None, expire: int = None):
         if pipe:
-            pipe._pipe_buffer.append(("set", (topic, msg), {"expire": expire}))
+            pipe._pipe_buffer.append(("set", (topic.endpoint, msg), {"expire": expire}))
             return
         self.message_sent.append({"queue": topic, "msg": msg, "expire": expire})
 
     def raw_send(self, topic, msg, pipe=None):
         if pipe:
-            pipe._pipe_buffer.append(("send", (topic, msg), {}))
+            pipe._pipe_buffer.append(("send", (topic.endpoint, msg), {}))
             return
         self.message_sent.append({"queue": topic, "msg": msg})
 
@@ -570,7 +564,7 @@ class ConnectorMock(ConnectorBase):  # pragma: no cover
 
     def set_and_publish(self, topic, msg, pipe=None, expire: int = None):
         if pipe:
-            pipe._pipe_buffer.append(("set_and_publish", (topic, msg), {"expire": expire}))
+            pipe._pipe_buffer.append(("set_and_publish", (topic.endpoint, msg), {"expire": expire}))
             return
         self.message_sent.append({"queue": topic, "msg": msg, "expire": expire})
 
@@ -592,6 +586,8 @@ class ConnectorMock(ConnectorBase):  # pragma: no cover
         return []
 
     def get(self, topic, pipe=None):
+        if isinstance(topic, EndpointInfo):
+            topic = topic.endpoint
         if pipe:
             pipe._pipe_buffer.append(("get", (topic,), {}))
             return

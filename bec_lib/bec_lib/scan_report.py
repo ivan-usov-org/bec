@@ -90,7 +90,7 @@ class ScanReport:
         """get the status of a move request"""
         motors = list(self.request.request.content["parameter"]["args"].keys())
         request_status = self._client.device_manager.connector.lrange(
-            MessageEndpoints.device_req_status(self.request.requestID), 0, -1
+            MessageEndpoints.device_req_status_container(self.request.requestID), 0, -1
         )
         if len(request_status) == len(motors):
             return True

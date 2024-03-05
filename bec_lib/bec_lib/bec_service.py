@@ -109,7 +109,7 @@ class BECService:
         )
 
     def _update_existing_services(self):
-        service_keys = self.connector.keys(MessageEndpoints.service_status("*"))
+        service_keys = self.connector.keys(MessageEndpoints.service_status("*").endpoint)
         if not service_keys:
             return
         services = [service.decode().split(":", maxsplit=1)[0] for service in service_keys]

@@ -1,3 +1,7 @@
+"""
+BECMessage classes for communication between BEC components. 
+"""
+
 from __future__ import annotations
 
 import enum
@@ -83,8 +87,7 @@ class BundleMessage(BECMessage):
         """append a new BECMessage to the bundle"""
         if not isinstance(msg, BECMessage):
             raise AttributeError(f"Cannot append message of type {msg.__class__.__name__}")
-        else:
-            self.messages.append(msg)
+        self.messages.append(msg)
 
     def __len__(self):
         return len(self.messages)

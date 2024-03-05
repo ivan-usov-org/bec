@@ -16,6 +16,7 @@ from bec_lib.alarm_handler import Alarms
 from bec_lib.async_data import AsyncDataHandler
 from bec_lib.file_utils import FileWriterMixin
 from bec_lib.redis_connector import MessageObject, RedisConnector
+
 from file_writer.file_writer import NexusFileWriter
 
 logger = bec_logger.logger
@@ -229,9 +230,9 @@ class FileWriterManager(BECService):
             return
         for device_key in async_device_keys:
             key = device_key.decode()
-            device_name = key.split(MessageEndpoints.device_async_readback(scanID, ""))[-1].split(
-                ":"
-            )[0]
+            device_name = key.split(MessageEndpoints.device_async_readback(scanID, "").endpoint)[
+                -1
+            ].split(":")[0]
             msgs = self.connector.xrange(key, min="-", max="+")
             if not msgs:
                 continue

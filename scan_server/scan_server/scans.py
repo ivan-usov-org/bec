@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Literal
 
 import numpy as np
+
 from bec_lib import DeviceManagerBase, MessageEndpoints, bec_logger, messages
 
 from .errors import LimitError, ScanAbortion
@@ -561,7 +562,9 @@ class SyncFlyScanBase(ScanBase, ABC):
         connector = self.device_manager.connector
 
         pipe = connector.pipeline()
-        connector.lrange(MessageEndpoints.device_req_status(self.metadata["RID"]), 0, -1, pipe)
+        connector.lrange(
+            MessageEndpoints.device_req_status_container(self.metadata["RID"]), 0, -1, pipe
+        )
         connector.get(MessageEndpoints.device_readback(flyer), pipe)
         return connector.execute_pipeline(pipe)
 
@@ -1321,7 +1324,9 @@ class MonitorScan(ScanBase):
         connector = self.device_manager.connector
 
         pipe = connector.pipeline()
-        connector.lrange(MessageEndpoints.device_req_status(self.metadata["RID"]), 0, -1, pipe)
+        connector.lrange(
+            MessageEndpoints.device_req_status_container(self.metadata["RID"]), 0, -1, pipe
+        )
         connector.get(MessageEndpoints.device_readback(self.flyer), pipe)
         return connector.execute_pipeline(pipe)
 

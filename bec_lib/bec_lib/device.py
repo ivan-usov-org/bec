@@ -92,7 +92,7 @@ class Status:
 
         while True:
             request_status = self._connector.lrange(
-                MessageEndpoints.device_req_status(self._RID), 0, -1
+                MessageEndpoints.device_req_status_container(self._RID), 0, -1
             )
             if request_status:
                 break

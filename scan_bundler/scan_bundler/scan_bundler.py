@@ -72,7 +72,7 @@ class ScanBundler(BECService):
 
     def _device_read_callback(self, msg, **_kwargs):
         # pylint: disable=protected-access
-        dev = msg.topic.split(MessageEndpoints._device_read + "/")[-1]
+        dev = msg.topic.split(MessageEndpoints.device_read("").endpoint)[-1]
         msgs = msg.value
         logger.debug(f"Received reading from device {dev}")
         if not isinstance(msgs, list):
@@ -251,16 +251,12 @@ class ScanBundler(BECService):
                 )
             }
 
-    def _get_scan_status_history(self, length):
-        return self.connector.lrange(MessageEndpoints.scan_status() + "_list", length * -1, -1)
-
     def _wait_for_scanID(self, scanID, timeout_time=10):
         elapsed_time = 0
         while not scanID in self.storage_initialized:
-            msgs = self._get_scan_status_history(5)
-            for msg in msgs:
-                if msg.content["scanID"] == scanID:
-                    self.handle_scan_status_message(msg)
+            msg = self.connector.get(MessageEndpoints.public_scan_info(scanID))
+            if msg and msg.content["scanID"] == scanID:
+                self.handle_scan_status_message(msg)
             if scanID in self.sync_storage:
                 if self.sync_storage[scanID]["status"] in ["closed", "aborted"]:
                     logger.info(

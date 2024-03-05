@@ -141,8 +141,8 @@ def test_flyer_event_callback():
     assert progress[0] == "set_and_publish"
 
     # check endpoint
-    assert bundle[1][0] == MessageEndpoints.device_read("samx")
-    assert progress[1][0] == MessageEndpoints.device_progress("samx")
+    assert bundle[1][0] == MessageEndpoints.device_read("samx").endpoint
+    assert progress[1][0] == MessageEndpoints.device_progress("samx").endpoint
 
     # check message
     bundle_msg = bundle[1][1]

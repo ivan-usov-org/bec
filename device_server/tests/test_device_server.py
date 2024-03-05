@@ -621,6 +621,7 @@ def test_kickoff_device(device_server_mock, instr):
         kickoff.assert_called_once()
 
 
+@pytest.mark.timeout(5)
 @pytest.mark.parametrize(
     "instr",
     [
@@ -639,7 +640,7 @@ def test_set_device(device_server_mock, instr):
         res = [
             msg
             for msg in device_server.connector.message_sent
-            if msg["queue"] == MessageEndpoints.device_req_status("samx")
+            if msg["queue"] == MessageEndpoints.device_req_status("samx").endpoint
         ]
         if res:
             break
@@ -675,7 +676,7 @@ def test_read_device(device_server_mock, instr):
         res = [
             msg
             for msg in device_server.connector.message_sent
-            if msg["queue"] == MessageEndpoints.device_read(device)
+            if msg["queue"] == MessageEndpoints.device_read(device).endpoint
         ]
         assert res[-1]["msg"].metadata["RID"] == instr.metadata["RID"]
         assert res[-1]["msg"].metadata["stream"] == "primary"
@@ -689,12 +690,12 @@ def test_read_config_and_update_devices(device_server_mock, devices):
         res = [
             msg
             for msg in device_server.connector.message_sent
-            if msg["queue"] == MessageEndpoints.device_read_configuration(device)
+            if msg["queue"] == MessageEndpoints.device_read_configuration(device).endpoint
         ]
         config = device_server.device_manager.devices[device].obj.read_configuration()
         msg = res[-1]["msg"]
         assert msg.content["signals"].keys() == config.keys()
-        assert res[-1]["queue"] == MessageEndpoints.device_read_configuration(device)
+        assert res[-1]["queue"] == MessageEndpoints.device_read_configuration(device).endpoint
 
 
 def test_read_and_update_devices_exception(device_server_mock):

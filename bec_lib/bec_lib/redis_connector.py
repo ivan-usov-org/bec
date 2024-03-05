@@ -14,14 +14,38 @@ import redis
 import redis.client
 import redis.exceptions
 
-from bec_lib.logger import bec_logger
 from bec_lib.connector import ConnectorBase, MessageObject
-from bec_lib.endpoints import MessageEndpoints
+from bec_lib.endpoints import EndpointInfo, MessageEndpoints
+from bec_lib.logger import bec_logger
 from bec_lib.messages import AlarmMessage, BECMessage, LogMessage
 from bec_lib.serialization import MsgpackSerialization
 
 if TYPE_CHECKING:
     from bec_lib.alarm_handler import Alarms
+
+
+def _validate_endpoint(func, endpoint):
+    if not isinstance(endpoint, EndpointInfo):
+        return
+    if func.__name__ not in endpoint.message_op:
+        raise ValueError(f"Endpoint {endpoint} is not compatible with {func.__name__} method")
+
+
+def check_topic(func):
+    @wraps(func)
+    def wrapper(self, topic, *args, **kwargs):
+        if isinstance(topic, str):
+            warnings.warn(
+                "RedisConnector methods with a string topic are deprecated and should not be used anymore. Use RedisConnector methods with an EndpointInfo instead.",
+                DeprecationWarning,
+            )
+            return func(self, topic, *args, **kwargs)
+        if isinstance(topic, EndpointInfo):
+            _validate_endpoint(func, topic)
+            return func(self, topic.endpoint, *args, **kwargs)
+        return func(self, topic, *args, **kwargs)
+
+    return wrapper
 
 
 class RedisConnector(ConnectorBase):
@@ -74,21 +98,10 @@ class RedisConnector(ConnectorBase):
         """send an error as log"""
         self.send(MessageEndpoints.log(), LogMessage(log_type="error", log_msg=msg))
 
-    def raise_alarm(
-        self,
-        severity: Alarms,
-        alarm_type: str,
-        source: str,
-        msg: str,
-        metadata: dict,
-    ):
+    def raise_alarm(self, severity: Alarms, alarm_type: str, source: str, msg: str, metadata: dict):
         """raise an alarm"""
         alarm_msg = AlarmMessage(
-            severity=severity,
-            alarm_type=alarm_type,
-            source=source,
-            msg=msg,
-            metadata=metadata,
+            severity=severity, alarm_type=alarm_type, source=source, msg=msg, metadata=metadata
         )
         self.set_and_publish(MessageEndpoints.alarm(), alarm_msg)
 
@@ -112,6 +125,7 @@ class RedisConnector(ConnectorBase):
         client = pipe if pipe is not None else self._redis_conn
         client.publish(topic, msg)
 
+    @check_topic
     def send(self, topic: str, msg: BECMessage, pipe=None) -> None:
         """send to redis"""
         if not isinstance(msg, BECMessage):
@@ -124,8 +138,7 @@ class RedisConnector(ConnectorBase):
             # under the hood, it uses asyncio - this lets the possibility to stop
             # the loop on demand
             self._events_listener_thread = threading.Thread(
-                target=self._get_messages_loop,
-                args=(self._pubsub_conn,),
+                target=self._get_messages_loop, args=(self._pubsub_conn,)
             )
             self._events_listener_thread.start()
         # make a weakref from the callable, using louie;
@@ -135,6 +148,9 @@ class RedisConnector(ConnectorBase):
         if patterns is not None:
             if isinstance(patterns, str):
                 patterns = [patterns]
+            elif isinstance(patterns, EndpointInfo):
+                _validate_endpoint(self.register, patterns)
+                patterns = [patterns.endpoint]
 
             self._pubsub_conn.psubscribe(patterns)
             for pattern in patterns:
@@ -142,6 +158,9 @@ class RedisConnector(ConnectorBase):
         else:
             if isinstance(topics, str):
                 topics = [topics]
+            elif isinstance(topics, EndpointInfo):
+                _validate_endpoint(self.register, topics)
+                topics = [topics.endpoint]
 
             self._pubsub_conn.subscribe(topics)
             for topic in topics:
@@ -181,10 +200,7 @@ class RedisConnector(ConnectorBase):
             callbacks = self._topics_cb[msg["pattern"].decode()]
         else:
             callbacks = self._topics_cb[channel]
-        msg = MessageObject(
-            topic=channel,
-            value=MsgpackSerialization.loads(msg["data"]),
-        )
+        msg = MessageObject(topic=channel, value=MsgpackSerialization.loads(msg["data"]))
         for cb_ref, kwargs in callbacks:
             cb = cb_ref()
             if cb:
@@ -214,6 +230,7 @@ class RedisConnector(ConnectorBase):
         while self.poll_messages():
             ...
 
+    @check_topic
     def lpush(
         self, topic: str, msg: str, pipe=None, max_size: int = None, expire: int = None
     ) -> None:
@@ -234,12 +251,14 @@ class RedisConnector(ConnectorBase):
         if not pipe:
             client.execute()
 
+    @check_topic
     def lset(self, topic: str, index: int, msg: str, pipe=None) -> None:
         client = pipe if pipe is not None else self._redis_conn
         if isinstance(msg, BECMessage):
             msg = MsgpackSerialization.dumps(msg)
         return client.lset(topic, index, msg)
 
+    @check_topic
     def rpush(self, topic: str, msg: str, pipe=None) -> int:
         """O(1) for each element added, so O(N) to add N elements when the
         command is called with multiple arguments. Insert all the specified
@@ -251,6 +270,7 @@ class RedisConnector(ConnectorBase):
             msg = MsgpackSerialization.dumps(msg)
         return client.rpush(topic, msg)
 
+    @check_topic
     def lrange(self, topic: str, start: int, end: int, pipe=None):
         """O(S+N) where S is the distance of start offset from HEAD for small
         lists, from nearest end (HEAD or TAIL) for large lists; and N is the
@@ -262,16 +282,17 @@ class RedisConnector(ConnectorBase):
         cmd_result = client.lrange(topic, start, end)
         if pipe:
             return cmd_result
-        else:
-            # in case of command executed in a pipe, use 'execute_pipeline' method
-            ret = []
-            for msg in cmd_result:
-                try:
-                    ret.append(MsgpackSerialization.loads(msg))
-                except RuntimeError:
-                    ret.append(msg)
-            return ret
 
+        # in case of command executed in a pipe, use 'execute_pipeline' method
+        ret = []
+        for msg in cmd_result:
+            try:
+                ret.append(MsgpackSerialization.loads(msg))
+            except RuntimeError:
+                ret.append(msg)
+        return ret
+
+    @check_topic
     def set_and_publish(self, topic: str, msg, pipe=None, expire: int = None) -> None:
         """piped combination of self.publish and self.set"""
         client = pipe if pipe is not None else self.pipeline()
@@ -283,6 +304,7 @@ class RedisConnector(ConnectorBase):
         if not pipe:
             client.execute()
 
+    @check_topic
     def set(self, topic: str, msg, pipe=None, expire: int = None) -> None:
         """set redis value"""
         client = pipe if pipe is not None else self._redis_conn
@@ -292,13 +314,18 @@ class RedisConnector(ConnectorBase):
 
     def keys(self, pattern: str) -> list:
         """returns all keys matching a pattern"""
+        if isinstance(pattern, EndpointInfo):
+            _validate_endpoint(self.keys, pattern)
+            pattern = pattern.endpoint
         return self._redis_conn.keys(pattern)
 
+    @check_topic
     def delete(self, topic, pipe=None):
         """delete topic"""
         client = pipe if pipe is not None else self._redis_conn
         client.delete(topic)
 
+    @check_topic
     def get(self, topic: str, pipe=None):
         """retrieve entry, either via hgetall or get"""
         client = pipe if pipe is not None else self._redis_conn
@@ -311,6 +338,7 @@ class RedisConnector(ConnectorBase):
             except RuntimeError:
                 return data
 
+    @check_topic
     def xadd(self, topic: str, msg_dict: dict, max_size=None, pipe=None, expire: int = None):
         """
         add to stream
@@ -345,6 +373,7 @@ class RedisConnector(ConnectorBase):
         if not pipe and expire:
             client.execute()
 
+    @check_topic
     def get_last(self, topic: str, key="data"):
         """retrieve last entry from stream"""
         client = self._redis_conn
@@ -359,13 +388,9 @@ class RedisConnector(ConnectorBase):
                 return msg_dict
             return msg_dict.get(key)
 
+    @check_topic
     def xread(
-        self,
-        topic: str,
-        id: str = None,
-        count: int = None,
-        block: int = None,
-        from_start=False,
+        self, topic: str, id: str = None, count: int = None, block: int = None, from_start=False
     ) -> list:
         """
         read from stream
@@ -422,6 +447,7 @@ class RedisConnector(ConnectorBase):
                 self.stream_keys[topic] = index
         return out if out else None
 
+    @check_topic
     def xrange(self, topic: str, min: str, max: str, count: int = None):
         """
         read a range from stream
@@ -464,9 +490,9 @@ class RedisConnector(ConnectorBase):
 
         In order to keep this fail-safe and simple it uses 'mock'...
         """
-        from unittest.mock import (
+        from unittest.mock import (  # import is done here, to not pollute the file with something normally in tests
             Mock,
-        )  # import is done here, to not pollute the file with something normally in tests
+        )
 
         warnings.warn(
             "RedisConnector.consumer() is deprecated and should not be used anymore. Use RedisConnector.register() with 'topics', 'patterns', 'cb' or 'start_thread' instead. Additional keyword args are transmitted to the callback. For the caller, the main difference with RedisConnector.register() is that it does not return a new thread.",

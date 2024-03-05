@@ -89,8 +89,8 @@ def test_get_async_data_for_scan():
     producer = mock.MagicMock()
     async_data = AsyncDataHandler(producer)
     producer.keys.return_value = [
-        MessageEndpoints.device_async_readback("scanID", "samx").encode(),
-        MessageEndpoints.device_async_readback("scanID", "samy").encode(),
+        MessageEndpoints.device_async_readback("scanID", "samx").endpoint.encode(),
+        MessageEndpoints.device_async_readback("scanID", "samy").endpoint.encode(),
     ]
     with mock.patch.object(async_data, "get_async_data_for_device") as mock_get:
         async_data.get_async_data_for_scan("scanID")

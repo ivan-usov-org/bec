@@ -461,7 +461,7 @@ def test_check_for_failed_movements(scan_worker_mock, device_status, devices, in
     if abort:
         with pytest.raises(ScanAbortion):
             worker.device_manager.connector._get_buffer[
-                MessageEndpoints.device_readback("samx")
+                MessageEndpoints.device_readback("samx").endpoint
             ] = messages.DeviceMessage(signals={"samx": {"value": 4}}, metadata={})
             worker._check_for_failed_movements(device_status, devices, instr)
     else:
@@ -582,9 +582,9 @@ def test_wait_for_idle(scan_worker_mock, msg1, msg2, req_msg: messages.DeviceReq
     with mock.patch.object(
         worker.validate, "get_device_status", return_value=[req_msg]
     ) as device_status:
-        worker.device_manager.connector._get_buffer[MessageEndpoints.device_readback("samx")] = (
-            messages.DeviceMessage(signals={"samx": {"value": 4}}, metadata={})
-        )
+        worker.device_manager.connector._get_buffer[
+            MessageEndpoints.device_readback("samx").endpoint
+        ] = messages.DeviceMessage(signals={"samx": {"value": 4}}, metadata={})
 
         worker._add_wait_group(msg1)
         if req_msg.content["success"]:
@@ -644,7 +644,7 @@ def test_wait_for_read(scan_worker_mock, msg1, msg2, req_msg: messages.DeviceReq
             assert worker._groups == {}
             worker._groups["scan_motor"] = {"samx": 3, "samy": 4}
             worker.device_manager.connector._get_buffer[
-                MessageEndpoints.device_readback("samx")
+                MessageEndpoints.device_readback("samx").endpoint
             ] = messages.DeviceMessage(signals={"samx": {"value": 4}}, metadata={})
             worker._add_wait_group(msg1)
             worker._wait_for_read(msg2)
@@ -1289,7 +1289,7 @@ def test_send_scan_status(scan_worker_mock, status, expire):
     scan_info_msgs = [
         msg
         for msg in worker.device_manager.connector.message_sent
-        if msg["queue"] == MessageEndpoints.public_scan_info(scanID=worker.current_scanID)
+        if msg["queue"] == MessageEndpoints.public_scan_info(scanID=worker.current_scanID).endpoint
     ]
     assert len(scan_info_msgs) == 1
     assert scan_info_msgs[0]["expire"] == expire

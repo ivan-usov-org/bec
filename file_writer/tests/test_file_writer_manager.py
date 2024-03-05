@@ -196,7 +196,7 @@ def test_update_async_data():
     file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
     with mock.patch.object(file_manager, "connector") as mock_connector:
         with mock.patch.object(file_manager, "_process_async_data") as mock_process:
-            key = MessageEndpoints.device_async_readback("scanID", "dev1")
+            key = MessageEndpoints.device_async_readback("scanID", "dev1").endpoint
             mock_connector.keys.return_value = [key.encode()]
             data = [(b"0-0", b'{"data": "data"}')]
             mock_connector.xrange.return_value = data

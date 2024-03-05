@@ -44,12 +44,7 @@ class EmitterBase:
             msg_dump = msg
             msgs.append(msg_dump)
             if public:
-                self.connector.set(
-                    public,
-                    msg_dump,
-                    pipe=pipe,
-                    expire=1800,
-                )
+                self.connector.set(public, msg_dump, pipe=pipe, expire=1800)
         self.connector.send(endpoint, msgs, pipe=pipe)
         pipe.execute()
 

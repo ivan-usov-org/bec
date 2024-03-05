@@ -31,9 +31,9 @@ class AsyncDataHandler:
         async_data = {}
         for device_key in async_device_keys:
             key = device_key.decode()
-            device_name = key.split(MessageEndpoints.device_async_readback(scan_id, ""))[-1].split(
-                ":"
-            )[0]
+            device_name = key.split(MessageEndpoints.device_async_readback(scan_id, "").endpoint)[
+                -1
+            ].split(":")[0]
             data = self.get_async_data_for_device(scan_id, device_name)
             if not data:
                 continue

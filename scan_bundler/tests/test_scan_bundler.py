@@ -71,7 +71,7 @@ def test_device_read_callback():
         metadata={"scanID": "laksjd", "readout_priority": "monitored"},
     )
     msg.value = dev_msg
-    msg.topic = MessageEndpoints.device_read("samx")
+    msg.topic = MessageEndpoints.device_read("samx").endpoint
 
     with mock.patch.object(scan_bundler, "_add_device_to_storage") as add_dev:
         scan_bundler._device_read_callback(msg)
@@ -81,86 +81,48 @@ def test_device_read_callback():
 @pytest.mark.parametrize(
     "scanID,storageID,scan_msg",
     [
-        ("adlk-jalskdj", None, []),
+        ("adlk-jalskdj", None, None),
         (
             "adlk-jalskdjs",
             "adlk-jalskdjs",
-            [
-                messages.ScanStatusMessage(
-                    scanID="adlk-jalskdjs",
-                    status="open",
-                    info={
-                        "scan_motors": ["samx"],
-                        "readout_priority": {
-                            "monitored": ["samx"],
-                            "baseline": [],
-                            "on_request": [],
-                        },
-                        "queueID": "my-queue-ID",
-                        "scan_number": 5,
-                        "scan_type": "step",
-                    },
-                )
-            ],
+            messages.ScanStatusMessage(
+                scanID="adlk-jalskdjs",
+                status="open",
+                info={
+                    "scan_motors": ["samx"],
+                    "readout_priority": {"monitored": ["samx"], "baseline": [], "on_request": []},
+                    "queueID": "my-queue-ID",
+                    "scan_number": 5,
+                    "scan_type": "step",
+                },
+            ),
         ),
         (
             "adlk-jalskdjs",
             "",
-            [
-                messages.ScanStatusMessage(
-                    scanID="adlk-jalskdjs",
-                    status="open",
-                    info={
-                        "scan_motors": ["samx"],
-                        "readout_priority": {
-                            "monitored": ["samx"],
-                            "baseline": [],
-                            "on_request": [],
-                        },
-                        "queueID": "my-queue-ID",
-                        "scan_number": 5,
-                        "scan_type": "step",
-                    },
-                )
-            ],
+            messages.ScanStatusMessage(
+                scanID="adlk-jalskdjs",
+                status="open",
+                info={
+                    "scan_motors": ["samx"],
+                    "readout_priority": {"monitored": ["samx"], "baseline": [], "on_request": []},
+                    "queueID": "my-queue-ID",
+                    "scan_number": 5,
+                    "scan_type": "step",
+                },
+            ),
         ),
     ],
 )
 def test_wait_for_scanID(scanID, storageID, scan_msg):
     sb = load_ScanBundlerMock()
     sb.storage_initialized.add(storageID)
-    with mock.patch.object(sb, "_get_scan_status_history", return_value=scan_msg) as get_scan_msgs:
+    with mock.patch.object(sb.connector, "get", return_value=scan_msg) as get_scan_msgs:
         if not storageID and not scan_msg:
             with pytest.raises(TimeoutError):
                 sb._wait_for_scanID(scanID, 1)
             return
         sb._wait_for_scanID(scanID)
-
-
-@pytest.mark.parametrize(
-    "msgs",
-    [
-        [
-            messages.ScanStatusMessage(
-                scanID="scanID",
-                status="open",
-                info={
-                    "primary": ["samx"],
-                    "queueID": "my-queue-ID",
-                    "scan_number": 5,
-                    "scan_type": "step",
-                },
-            )
-        ],
-        [],
-    ],
-)
-def test_get_scan_status_history(msgs):
-    sb = load_ScanBundlerMock()
-    with mock.patch.object(sb.connector, "lrange", return_value=[msg for msg in msgs]) as lrange:
-        res = sb._get_scan_status_history(5)
-        lrange.assert_called_once_with(MessageEndpoints.scan_status() + "_list", -5, -1)
-        assert res == msgs
 
 
 def test_add_device_to_storage_returns_without_scanID():

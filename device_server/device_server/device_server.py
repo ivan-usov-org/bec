@@ -5,13 +5,13 @@ import traceback
 from concurrent.futures import ThreadPoolExecutor
 
 import ophyd
+from ophyd import Kind, OphydObject, Staged
+from ophyd.utils import errors as ophyd_errors
+
 from bec_lib import Alarms, BECService, MessageEndpoints, bec_logger, messages
 from bec_lib.connector import ConnectorBase
 from bec_lib.device import OnFailure
 from bec_lib.messages import BECStatus
-from ophyd import Kind, OphydObject, Staged
-from ophyd.utils import errors as ophyd_errors
-
 from device_server.devices import rgetattr
 from device_server.devices.devicemanager import DeviceManagerDS
 from device_server.rpc_mixin import RPCMixin
@@ -39,8 +39,7 @@ class DeviceServer(RPCMixin, BECService):
         self._tasks = []
         self.device_manager = None
         self.connector.register(
-            MessageEndpoints.scan_queue_modification(),
-            cb=self.register_interception_callback,
+            MessageEndpoints.scan_queue_modification(), cb=self.register_interception_callback
         )
         self.executor = ThreadPoolExecutor(max_workers=4)
         self._start_device_manager()
@@ -296,7 +295,7 @@ class DeviceServer(RPCMixin, BECService):
         response = status.instruction.metadata.get("response")
         if response:
             self.connector.lpush(
-                MessageEndpoints.device_req_status(status.instruction.metadata["RID"]),
+                MessageEndpoints.device_req_status_container(status.instruction.metadata["RID"]),
                 dev_msg,
                 pipe,
                 expire=18000,
