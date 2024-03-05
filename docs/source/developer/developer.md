@@ -13,6 +13,7 @@ contributing/
 install_developer_env/
 vscode/
 bec_cli/
+bec_sim/
 bec_gui/
 bec_config/
 data_access/
@@ -33,6 +34,7 @@ Here, we aim to provide you with all the essential information to kickstart your
 * [Installing Developer Environment](#developer.install_developer_env): Set up your developer environment to work with BEC.
 * [Developing with Visual Studio Code](#developer.vscode): Learn how to set up Visual Studio Code for developing Python applications and how to use it to work with BEC.
 * [BEC Command Line Interface (CLI)](#developer.bec_cli): Explore the command-line tool and customize its behaviour.
+* [BEC Simulation Framework](#developer.bec_sim): The simulation framework allows you to explore, test or develop within the BEC ecosystem with direct feedback.
 * [BEC Graphical User Interface (GUI)](#developer.bec_gui): Learn how to use the graphical user interface to interact with BEC and explore how to create your own GUIs.
 * [BEC Configuration](#developer.bec_config): Learn about the different ways of customizing BEC to your needs.
 * [Data Access](#developer.data_access): Explore different ways of accessing data acquired with BEC.
