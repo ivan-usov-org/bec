@@ -70,22 +70,32 @@ class ScanServer(BECService):
     @property
     def scan_number(self) -> int:
         """get the current scan number"""
-        return int(self.connector.get(MessageEndpoints.scan_number()))
+        msg = self.connector.get(MessageEndpoints.scan_number())
+        if msg is None:
+            logger.warning("Failed to retrieve scan number from redis.")
+            return -1
+        return int(msg.value)
 
     @scan_number.setter
     def scan_number(self, val: int):
         """set the current scan number"""
-        self.connector.set(MessageEndpoints.scan_number(), val)
+        msg = messages.VariableMessage(value=val)
+        self.connector.set(MessageEndpoints.scan_number(), msg)
 
     @property
     def dataset_number(self) -> int:
         """get the current dataset number"""
-        return int(self.connector.get(MessageEndpoints.dataset_number()))
+        msg = self.connector.get(MessageEndpoints.dataset_number())
+        if msg is None:
+            logger.warning("Failed to retrieve dataset number from redis.")
+            return -1
+        return int(msg.value)
 
     @dataset_number.setter
     def dataset_number(self, val: int):
         """set the current dataset number"""
-        self.connector.set(MessageEndpoints.dataset_number(), val)
+        msg = messages.VariableMessage(value=val)
+        self.connector.set(MessageEndpoints.dataset_number(), msg)
 
     def shutdown(self) -> None:
         """shutdown the scan server"""

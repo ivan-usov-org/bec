@@ -30,12 +30,10 @@ class ScanManager:
         self.scan_storage = ScanStorage(scan_manager=self)
 
         self.connector.register(
-            topics=MessageEndpoints.scan_queue_status(),
-            cb=self._scan_queue_status_callback,
+            topics=MessageEndpoints.scan_queue_status(), cb=self._scan_queue_status_callback
         )
         self.connector.register(
-            topics=MessageEndpoints.scan_queue_request(),
-            cb=self._scan_queue_request_callback,
+            topics=MessageEndpoints.scan_queue_request(), cb=self._scan_queue_request_callback
         )
         self.connector.register(
             topics=MessageEndpoints.scan_queue_request_response(),
@@ -149,28 +147,34 @@ class ScanManager:
     @property
     def next_scan_number(self):
         """get the next scan number from redis"""
-        num = self.connector.get(MessageEndpoints.scan_number())
-        if num is None:
+        msg = self.connector.get(MessageEndpoints.scan_number())
+        if msg is None:
             logger.warning("Failed to retrieve scan number from redis.")
             return -1
-        return int(num)
+        return int(msg.value)
 
     @next_scan_number.setter
     @typechecked
     def next_scan_number(self, val: int):
         """set the next scan number in redis"""
-        return self.connector.set(MessageEndpoints.scan_number(), val)
+        msg = messages.VariableMessage(value=val)
+        return self.connector.set(MessageEndpoints.scan_number(), msg)
 
     @property
     def next_dataset_number(self):
         """get the next dataset number from redis"""
-        return int(self.connector.get(MessageEndpoints.dataset_number()))
+        msg = self.connector.get(MessageEndpoints.dataset_number())
+        if msg is None:
+            logger.warning("Failed to retrieve dataset number from redis.")
+            return -1
+        return int(msg.value)
 
     @next_dataset_number.setter
     @typechecked
     def next_dataset_number(self, val: int):
         """set the next dataset number in redis"""
-        return self.connector.set(MessageEndpoints.dataset_number(), val)
+        msg = messages.VariableMessage(value=val)
+        return self.connector.set(MessageEndpoints.dataset_number(), msg)
 
     def _scan_queue_status_callback(self, msg, **_kwargs) -> None:
         queue_status = msg.value

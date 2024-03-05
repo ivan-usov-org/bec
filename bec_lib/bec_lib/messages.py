@@ -485,12 +485,12 @@ class FileContentMessage(BECMessage):
 class VariableMessage(BECMessage):
     """Message to inform about a global variable
     Args:
-        value (str): name of the global variable
+        value (any): Variable value
         metadata (dict, optional): additional metadata
     """
 
     msg_type = "var_message"
-    value: str
+    value: Any
     metadata: dict = field(default_factory=dict)
 
 

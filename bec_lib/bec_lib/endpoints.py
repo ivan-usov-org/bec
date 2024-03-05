@@ -476,7 +476,7 @@ class MessageEndpoints:
 
     # scan info
     @staticmethod
-    def scan_number() -> str:
+    def scan_number() -> EndpointInfo:
         """
         Endpoint for scan number. This endpoint is used to publish the scan number. The
         scan number is incremented after each scan and set in redis as an integer.
@@ -484,10 +484,13 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for scan number.
         """
-        return "scans/scan_number"
+        endpoint = "scans/scan_number"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.VariableMessage, message_op=MessageOp.SET
+        )
 
     @staticmethod
-    def dataset_number() -> str:
+    def dataset_number() -> EndpointInfo:
         """
         Endpoint for dataset number. This endpoint is used to publish the dataset number.
         The dataset number is incremented after each dataset and set in redis as an integer.
@@ -495,7 +498,10 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for dataset number.
         """
-        return "scans/dataset_number"
+        endpoint = "scans/dataset_number"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.VariableMessage, message_op=MessageOp.SET
+        )
 
     @staticmethod
     def scan_status() -> EndpointInfo:
