@@ -88,15 +88,26 @@ def test_redis_connector_raise_alarm(connector, severity, alarm_type, source, ms
 
 
 @pytest.mark.parametrize(
-    "topic , msg", [["topic1", TestMessage("msg1")], ["topic2", TestMessage("msg2")]]
+    "topic , msg",
+    [
+        ["topic1", TestMessage("msg1")],
+        ["topic2", TestMessage("msg2")],
+        [
+            MessageEndpoints.scan_segment(),
+            bec_messages.ScanMessage(point_id=1, scanID="scanID", data={}),
+        ],
+    ],
 )
 def test_redis_connector_send(connector, topic, msg):
     connector.send(topic, msg)
-    connector._redis_conn.publish.assert_called_once_with(topic, MsgpackSerialization.dumps(msg))
+    topic_str = topic if isinstance(topic, str) else topic.endpoint
+    connector._redis_conn.publish.assert_called_once_with(
+        topic_str, MsgpackSerialization.dumps(msg)
+    )
 
     connector.send(topic, msg, pipe=connector.pipeline())
     connector._redis_conn.pipeline().publish.assert_called_once_with(
-        topic, MsgpackSerialization.dumps(msg)
+        topic_str, MsgpackSerialization.dumps(msg)
     )
 
 
@@ -355,6 +366,16 @@ def test_redis_xrange(connector):
 def test_redis_xrange_topic_with_suffix(connector):
     connector.xrange("topic1", "start", "end")
     connector._redis_conn.xrange.assert_called_once_with("topic1", "start", "end", count=None)
+
+
+def test_send_raises_on_invalid_msg(connector):
+    with pytest.raises(TypeError):
+        connector.send("invalid_msg", "msg")
+
+
+def test_send_raises_on_invalid_topic(connector):
+    with pytest.raises(ValueError):
+        connector.send(MessageEndpoints.device_status("samx"), "msg")
 
 
 # def test_redis_stream_register_threaded_get_id():

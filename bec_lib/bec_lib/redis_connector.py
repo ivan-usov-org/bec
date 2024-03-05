@@ -94,7 +94,7 @@ class StreamRegisterMixin:
         newest_only=False,
         start_thread=True,
         **kwargs,
-    ):
+    ) -> int:
         """
         Register a callback for a stream topic or pattern
 
@@ -106,6 +106,9 @@ class StreamRegisterMixin:
             newest_only (bool, optional): read newest only. Defaults to False.
             start_thread (bool, optional): start the dispatcher thread. Defaults to True.
             **kwargs: additional keyword arguments to be transmitted to the callback
+
+        Returns:
+            int: stream id
 
         Examples:
             >>> def my_callback(msg, **kwargs):
@@ -140,8 +143,7 @@ class StreamRegisterMixin:
             # if newest_only is True, we need to provide a separate callback for each topic,
             # directly calling the callback. This is because we need to have a backpressure
             # mechanism in place, and we cannot rely on the dispatcher thread to handle it.
-            self._add_direct_stream_listener(stream_topic, cb_ref, **kwargs)
-            return
+            return self._add_direct_stream_listener(stream_topic, cb_ref, **kwargs)
 
         if self._stream_events_listener_thread is None:
             # create the thread that will get all messages for this connector;
@@ -170,6 +172,29 @@ class StreamRegisterMixin:
             self._stream_events_dispatcher_thread.start()
         return stream_id
 
+    def unregister_stream(self, stream_id: int) -> bool:
+        """
+        Unregister a stream listener.
+
+        Args:
+            stream_id (int): stream id
+
+        Returns:
+            bool: True if the stream listener has been removed, False otherwise
+        """
+
+        if stream_id in self._custom_stream_listeners:
+            listener = self._custom_stream_listeners.pop(stream_id)
+            event = listener["stop_event"]
+            thread = listener["thread"]
+            event.set()
+            thread.join()
+            return True
+        if stream_id in self._stream_topics_cb:
+            self._stream_topics_cb.pop(stream_id)
+            return True
+        return False
+
     def _add_direct_stream_listener(self, topic, cb, **kwargs) -> int:
         """
         Add a direct listener for a topic. This is used when newest_only is True.
@@ -192,14 +217,21 @@ class StreamRegisterMixin:
             cb=cb,
             kwargs=kwargs,
         )
-        thread = threading.Thread(target=self._direct_stream_listener, args=(info,), daemon=True)
-        self._custom_stream_listeners[stream_id] = {"info": info, "thread": thread}
+        event = threading.Event()
+        thread = threading.Thread(
+            target=self._direct_stream_listener, args=(info, event), daemon=True
+        )
+        self._custom_stream_listeners[stream_id] = {
+            "info": info,
+            "thread": thread,
+            "stop_event": event,
+        }
         thread.start()
 
         return stream_id
 
-    def _direct_stream_listener(self, info: StreamTopicInfo):
-        while True:
+    def _direct_stream_listener(self, info: StreamTopicInfo, stop_event: threading.Event):
+        while not stop_event.is_set():
             msg = self.xread(info.topic, count=1, block=1000)
             if not msg:
                 time.sleep(0.1)

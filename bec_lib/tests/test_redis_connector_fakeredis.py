@@ -1,3 +1,4 @@
+import threading
 import time
 from unittest import mock
 
@@ -15,6 +16,7 @@ from bec_lib.serialization import MsgpackSerialization
 # pylint: disable=missing-function-docstring
 # pylint: disable=missing-class-docstring
 # pylint: disable=redefined-outer-name
+# pylint: disable=unused-argument
 
 
 def fake_redis_server(host, port):
@@ -208,7 +210,7 @@ def test_redis_connector_get_last(connected_connector):
 def test_redis_connector_register_stream(connected_connector):
     connector = connected_connector
     cb_mock = mock.Mock(spec=[])  # spec is here to remove all attributes
-    connector.register_stream("test", cb=cb_mock, start_thread=False, a=1)
+    stream_id = connector.register_stream("test", cb=cb_mock, start_thread=False, a=1)
     time.sleep(0.1)
     connector.xadd("test", {"data": 1})
     connector.poll_stream_messages()
@@ -216,13 +218,17 @@ def test_redis_connector_register_stream(connected_connector):
     connector.xadd("test", {"data": 2})
     connector.poll_stream_messages()
     assert mock.call({"data": 2}, a=1) in cb_mock.mock_calls
+    connector.unregister_stream(stream_id)
+    assert connector._stream_topics_cb[stream_id] == []
 
 
 @pytest.mark.timeout(5)
 def test_redis_connector_register_stream_newest_only(connected_connector):
     connector = connected_connector
     cb_mock = mock.Mock(spec=[])  # spec is here to remove all attributes
-    connector.register_stream("test", cb=cb_mock, newest_only=True, start_thread=False, a=1)
+    stream_id = connector.register_stream(
+        "test", cb=cb_mock, newest_only=True, start_thread=False, a=1
+    )
     time.sleep(0.1)
     connector.xadd("test", {"data": 1})
     while cb_mock.call_count == 0:
@@ -233,3 +239,6 @@ def test_redis_connector_register_stream_newest_only(connected_connector):
         time.sleep(0.1)
     assert mock.call({"data": 2}, a=1) in cb_mock.mock_calls
     assert cb_mock.call_count == 2
+    num_threads = threading.active_count()
+    connector.unregister_stream(stream_id)
+    assert threading.active_count() == num_threads - 1
