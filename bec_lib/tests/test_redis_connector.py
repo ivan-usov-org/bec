@@ -11,6 +11,11 @@ from bec_lib.messages import AlarmMessage, BECMessage, LogMessage
 from bec_lib.redis_connector import RedisConnector
 from bec_lib.serialization import MsgpackSerialization
 
+# pylint: disable=protected-access
+# pylint: disable=missing-function-docstring
+# pylint: disable=missing-class-docstring
+# pylint: disable=redefined-outer-name
+
 
 @dataclass(eq=False)
 class TestMessage(BECMessage):
@@ -31,11 +36,11 @@ bec_messages.TestMessage = TestMessage
 @pytest.fixture
 def connector():
     with mock.patch("bec_lib.redis_connector.redis.Redis"):
-        connector = RedisConnector("localhost:1")
+        _connector = RedisConnector("localhost:1")
         try:
-            yield connector
+            yield _connector
         finally:
-            connector.shutdown()
+            _connector.shutdown()
 
 
 def test_redis_connector_log_warning(connector):

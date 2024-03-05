@@ -7,6 +7,11 @@ from bec_lib import messages
 from bec_lib.async_data import AsyncDataHandler
 from bec_lib.endpoints import MessageEndpoints
 
+# pylint: disable=protected-access
+# pylint: disable=missing-function-docstring
+# pylint: disable=missing-class-docstring
+# pylint: disable=redefined-outer-name
+
 
 @pytest.fixture
 def async_data():

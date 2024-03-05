@@ -11,6 +11,11 @@ from bec_lib import messages
 from bec_lib.redis_connector import MessageObject, RedisConnector
 from bec_lib.serialization import MsgpackSerialization
 
+# pylint: disable=protected-access
+# pylint: disable=missing-function-docstring
+# pylint: disable=missing-class-docstring
+# pylint: disable=redefined-outer-name
+
 
 def fake_redis_server(host, port):
     redis = fakeredis.FakeRedis()
