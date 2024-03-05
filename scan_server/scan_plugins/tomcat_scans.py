@@ -87,7 +87,7 @@ class AeroSequenceScan(FlyScanBase):
         super().__init__(parameter=parameter, **kwargs)
         self.axis = []
         self.scan_motors = ['es1_roty']
-
+        self.num_pos = 0
 
         self.scanStart   = self.caller_kwargs.get("startpos")
         self.scanRanges   = self.caller_kwargs.get("ranges")
@@ -99,8 +99,6 @@ class AeroSequenceScan(FlyScanBase):
         self.scanAcc = self.caller_kwargs.get("acceleration", 500)
         self.scanSafeDist = self.caller_kwargs.get("safedist", 10)
 
-
-        self.num_pos = self.scanRepNum
         if isinstance(self.scanRanges[0], (int, float)):
             self.scanRanges = (self.scanRanges)
 
@@ -163,41 +161,38 @@ class AeroSequenceScan(FlyScanBase):
         st = yield from self.stubs.send_rpc_and_wait("es1_ddaq", "kickoff")
         st.wait()
 
-
         print("Starting actual scan loop")
         for ii in range(self.scanRepNum):
             print(f"Scan segment {ii}")
             # No option to reset the index counter...
             yield from self.stubs.send_rpc_and_wait("es1_psod", "dstArrayRearm.set", 1)
-            #st = yield from self.stubs.set("es1_psod", "dstArrayRearm", 1)
-            #st.wait()
 
             if self.scanRepMode in ["Pos", "Neg"]:
-                yield from self.stubs.kickoff(device='es1_roty', parameter={'target': self.PosEnd},)
-                yield from self.stubs.wait(device=['es1_roty'], wait_group="kickoff", wait_type="move")
-                yield from self.stubs.complete(device='es1_roty')
-                yield from self.stubs.kickoff(device='es1_roty', parameter={'target': self.PosStart},)
-                yield from self.stubs.wait(device=['es1_roty'], wait_group="kickoff", wait_type="move")
-                yield from self.stubs.complete(device='es1_roty')
-
-                #st = yield from self.stubs.send_rpc_and_wait("es1_roty", "move", self.PosEnd)
-                #st.wait()
-                #st = yield from self.stubs.send_rpc_and_wait("es1_roty", "move", self.PosStart)
-                #st.wait()
-
-            if self.scanRepMode in ["PosNeg", "NegPos"]:
+                #yield from self.stubs.kickoff(device='es1_roty', parameter={'target': self.PosEnd},)
+                #yield from self.stubs.wait(device=['es1_roty'], wait_group="kickoff", wait_type="move")
+                #yield from self.stubs.complete(device='es1_roty')
+                #yield from self.stubs.kickoff(device='es1_roty', parameter={'target': self.PosStart},)
+                #yield from self.stubs.wait(device=['es1_roty'], wait_group="kickoff", wait_type="move")
+                #yield from self.stubs.complete(device='es1_roty')
+                yield from self.stubs.send_rpc_and_wait("es1_roty", "configure", {'velocity': self.scanVel, "acceleration":self.scanVel/self.scanAcc})
+                st = yield from self.stubs.send_rpc_and_wait("es1_roty", "move", self.PosEnd)
+                st.wait()
+                yield from self.stubs.send_rpc_and_wait("es1_roty", "configure", {'velocity': self.scanTra, "acceleration":self.scanTra/self.scanAcc})
+                st = yield from self.stubs.send_rpc_and_wait("es1_roty", "move", self.PosStart)
+                st.wait()
+            elif self.scanRepMode in ["PosNeg", "NegPos"]:
                 if ii % 2 == 0:
-                    yield from self.stubs.kickoff(device='es1_roty', parameter={'target': self.PosEnd},)
-                    yield from self.stubs.wait(device=['es1_roty'], wait_group="kickoff", wait_type="move")
-                    yield from self.stubs.complete(device='es1_roty')
-                    #st = yield from self.stubs.send_rpc_and_wait("es1_roty", "move", self.PosEnd)
-                    #st.wait()
+                    #yield from self.stubs.kickoff(device='es1_roty', parameter={'target': self.PosEnd},)
+                    #yield from self.stubs.wait(device=['es1_roty'], wait_group="kickoff", wait_type="move")
+                    #yield from self.stubs.complete(device='es1_roty')
+                    st = yield from self.stubs.send_rpc_and_wait("es1_roty", "move", self.PosEnd)
+                    st.wait()
                 else:   
-                    yield from self.stubs.kickoff(device='es1_roty', parameter={'target': self.PosStart},)
-                    yield from self.stubs.wait(device=['es1_roty'], wait_group="kickoff", wait_type="move")
-                    yield from self.stubs.complete(device='es1_roty')
-                    #st = yield from self.stubs.send_rpc_and_wait("es1_roty", "move", self.PosStart)
-                    #st.wait()
+                    #yield from self.stubs.kickoff(device='es1_roty', parameter={'target': self.PosStart},)
+                    #yield from self.stubs.wait(device=['es1_roty'], wait_group="kickoff", wait_type="move")
+                    #yield from self.stubs.complete(device='es1_roty')
+                    st = yield from self.stubs.send_rpc_and_wait("es1_roty", "move", self.PosStart)
+                    st.wait()
             self.pointID += 1
             self.num_pos += 1
             time.sleep(0.2)
@@ -210,13 +205,18 @@ class AeroSequenceScan(FlyScanBase):
         st = yield from self.stubs.send_rpc_and_wait("es1_ddaq", "complete")
         st.wait()
 
-        # Collect
+        # Collect -  Throws a warning due to returning a generator
         #st = yield from self.stubs.send_rpc_and_wait("es1_psod", "collect")
         #st = yield from self.stubs.send_rpc_and_wait("es1_ddaq", "collect")
 
         yield from self.stubs.read_and_wait(group="primary", wait_group="readout_primary")
         target_diid = self.DIID - 1
         
+
+        yield from self.stubs.kickoff(device='es1_roty', parameter={'target': self.PosStart},)
+        yield from self.stubs.wait(device=['es1_roty'], wait_group="kickoff", wait_type="move")
+        yield from self.stubs.complete(device='es1_roty')
+
         # Wait for motion to finish
         while True:
             pso_status = self.stubs.get_req_status(device='es1_psod', RID=self.metadata["RID"], DIID=target_diid)
@@ -227,17 +227,117 @@ class AeroSequenceScan(FlyScanBase):
             progress = self.stubs.get_device_progress(device='es1_roty', RID=self.metadata["RID"])
             print(f"pso: {pso_status}\tdaq: {daq_status}\tmot: {mot_status}\tprogress: {progress}")
             if progress:
-                self.num_pos = progress
-            #if mot_status:
-            #    break
+                self.num_pos = int(progress)
+            if mot_status:
+                break
             time.sleep(1)
-            break
-
         print("Scan done\n\n")
 
     def cleanup(self):
-        ret = super().cleanup()
-        class CloseScanError(Exception):
-            pass
-        raise CloseScanError("Close the fucking scan!")
+        """ Set scan progress to 1 to finish the scan"""
+        self.num_pos = 1
+        return super().cleanup()
+
+
+
+
+
+class AeroScriptedScan(FlyScanBase):
+    scan_name = "aero_scripted_scan"
+    scan_report_hint = "table"
+    required_kwargs = ["filename", "subs"]
+    arg_input = {}
+    arg_bundle_size = {"bundle": len(arg_input), "min": None, "max": None}
+
+    def __init__(self, *args, parameter: dict = None, **kwargs):
+        """ Executes an AeroScript template as a flyer
+
+        Examples:
+            >>> scans.aero_scripted_scan(filename="AerotechSnapAndStepTemplate.ascript", subs={'startpos': 42, 'stepsize': 0.1, 'numsteps': 1800, 'exptime': 0.1})
+
+        """
+        super().__init__(parameter=parameter, **kwargs)
+        self.axis = []
+        self.scan_motors = ['es1_roty']
+        self.num_pos = 0
+
+        self.filename   = self.caller_kwargs.get("filename")
+        self.subs   = self.caller_kwargs.get("subs")
+        self.taskIndex   = self.caller_kwargs.get("taskindex", 4)
+        #self.scanVel = self.caller_kwargs.get("velocity", 30)
+        #self.scanTra = self.caller_kwargs.get("travel", 80)
+        #self.scanAcc = self.caller_kwargs.get("acceleration", 500)
+
+    def pre_scan(self):
+        print("TOMCAT Loading Aeroscript template")  
+        print("TOMCAT Loading Aeroscript template")  
+        # Load the test file
+        with open(self.filename) as f:
+            templatetext = f.read()           
+        
+        import jinja2
+        tm = jinja2.Template(templatetext)
+        self.scripttext = tm.render(scan=self.subs)
+        
+        yield from self.stubs.pre_scan()
+
+    def scan_core(self):
+        print("TOMCAT Sequeence scan (via Jinjad AeroScript)")  
+        print("TOMCAT Sequeence scan (via Jinjad AeroScript)")  
+
+        t_start = time.time()                
+        # Configure by copiing text to controller file and compiling it
+        yield from self.stubs.send_rpc_and_wait("es1_aa1Tasks", "configure", {'text': self.scripttext, 'filename': "becExec.ascript", "taskIndex": self.taskIndex})
+
+        # Kickoff
+        st = yield from self.stubs.send_rpc_and_wait("es1_aa1Tasks", "kickoff")
+        st.wait()        
+        time.sleep(0.5)
+
+        # Wait for motion to finish
+        #yield from self.stubs.read_and_wait(group="primary", wait_group="readout_primary")
+        #target_diid = self.DIID - 1
+        while True:
+            #yield from self.stubs.read_and_wait(group="primary", wait_group="readout_primary")
+            #status = self.stubs.get_req_status(device='es1_aa1Tasks', RID=self.metadata["RID"], DIID=target_diid)
+            progress = yield from self.stubs.send_rpc_and_wait("es1_aa1Tasks", "_progress")
+            #progress = self.stubs.get_device_progress(device='es1_aa1Tasks', RID=self.metadata["RID"])
+            print(f"progress: {progress}")
+            if progress:
+                self.num_pos = progress
+                break
+        #    if status:
+        #        break
+            time.sleep(1)
+
+        # Complete
+        #yield from self.stubs.complete(device='es1_aa1Tasks')
+
+        # Complete
+        #st = yield from self.stubs.send_rpc_and_wait("es1_aa1Tasks", "complete")
+        #st.wait()  
+
+        t_end = time.time()
+        t_elapsed = t_end - t_start
+        print(f"Elapsed scan time: {t_elapsed}")
+
+        # Collect -  Throws a warning due to returning a generator
+        #st = yield from self.stubs.send_rpc_and_wait("es1_ddaq", "collect")
+        #st.wait()
+
+        print("Scan done\n\n")
+
+    def finalize(self):
+        """ Complete shouldnt be called here... """
+        print("Finalize placeholder")
+        yield from self.return_to_start()
+        yield from self.stubs.wait(wait_type="read", group="primary", wait_group="readout_primary")
+
+    def cleanup(self):
+        """ Set scan progress to 1 to finish the scan"""
+        self.num_pos = 1
+        print("Cleaning up scan")
+        return super().cleanup()
+
+
 
