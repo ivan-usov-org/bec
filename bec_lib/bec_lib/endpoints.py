@@ -880,7 +880,7 @@ class MessageEndpoints:
 
     # logbook
     @staticmethod
-    def logbook() -> str:
+    def logbook() -> EndpointInfo:
         """
         Endpoint for logbook. This endpoint is used to publish logbook info such as
         url, user and token using a direct msgpack dump of a dictionary.
@@ -888,7 +888,10 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for logbook.
         """
-        return "internal/logbook"
+        endpoint = "internal/logbook"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.CredentialsMessage, message_op=MessageOp.SET
+        )
 
     # scibec
     @staticmethod

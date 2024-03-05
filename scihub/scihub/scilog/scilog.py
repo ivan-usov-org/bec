@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 import msgpack
 import requests
-from bec_lib import MessageEndpoints, RedisConnector, bec_logger
+from bec_lib import MessageEndpoints, RedisConnector, bec_logger, messages
 from dotenv import dotenv_values
 
 from scihub.repeated_timer import RepeatedTimer
@@ -45,7 +45,9 @@ class SciLogConnector:
         """set the scilog token in redis"""
         self.connector.set(
             MessageEndpoints.logbook(),
-            msgpack.dumps({"url": self.host, "user": self.user, "token": f"Bearer {token}"}),
+            messages.CredentialsMessage(
+                credentials={"url": self.host, "token": f"Bearer {token}", "user": self.user}
+            ),
         )
 
     def _start_scilog_update(self) -> None:

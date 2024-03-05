@@ -4,7 +4,6 @@ import sys
 import warnings
 from typing import TYPE_CHECKING
 
-import msgpack
 from requests.exceptions import HTTPError
 
 from bec_lib.endpoints import MessageEndpoints
@@ -36,7 +35,7 @@ class LogbookConnector:
         msg = self.connector.get(MessageEndpoints.logbook())
         if not msg:
             return
-        msg = msgpack.loads(msg)
+        scilog_creds = msg.credentials
 
         account = self.connector.get(MessageEndpoints.account())
         if not account:
@@ -46,7 +45,9 @@ class LogbookConnector:
 
         self._scilog_module = scilog
 
-        self.log = self._scilog_module.SciLog(msg["url"], options={"token": msg["token"]})
+        self.log = self._scilog_module.SciLog(
+            scilog_creds["url"], options={"token": scilog_creds["token"]}
+        )
         # FIXME the python sdk should not use the ownergroup
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
