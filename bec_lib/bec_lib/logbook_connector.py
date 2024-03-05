@@ -37,10 +37,10 @@ class LogbookConnector:
             return
         scilog_creds = msg.credentials
 
-        account = self.connector.get(MessageEndpoints.account())
-        if not account:
+        account_msg = self.connector.get(MessageEndpoints.account())
+        if not account_msg:
             return
-        account = account.decode()
+        account = account_msg.value
         account = account.replace("e", "p")
 
         self._scilog_module = scilog

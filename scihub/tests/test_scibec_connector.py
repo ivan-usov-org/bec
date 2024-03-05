@@ -1,7 +1,7 @@
 from unittest import mock
 
 import pytest
-from bec_lib import DeviceManagerBase, MessageEndpoints, ServiceConfig
+from bec_lib import DeviceManagerBase, MessageEndpoints, ServiceConfig, messages
 from bec_lib.messages import BECStatus
 from bec_lib.tests.utils import ConnectorMock
 
@@ -140,4 +140,6 @@ def test_update_eaccount_in_redis(SciBecMock):
     SciBecMock.scibec_info = {"activeExperiment": {"writeAccount": "p12345"}}
     with mock.patch.object(SciBecMock, "connector") as mock_connector:
         SciBecMock._update_eaccount_in_redis()
-        mock_connector.set.assert_called_once_with(MessageEndpoints.account(), b"e12345")
+        mock_connector.set.assert_called_once_with(
+            MessageEndpoints.account(), messages.VariableMessage(value="e12345")
+        )

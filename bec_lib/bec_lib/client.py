@@ -92,7 +92,10 @@ class BECClient(BECService, UserScriptsMixin):
     @property
     def active_account(self) -> str:
         """get the currently active target (e)account"""
-        return self.connector.get(MessageEndpoints.account())
+        msg = self.connector.get(MessageEndpoints.account())
+        if msg:
+            return msg.value
+        return ""
 
     def start(self):
         """start the client"""

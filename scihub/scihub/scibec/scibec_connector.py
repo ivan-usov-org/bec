@@ -3,13 +3,13 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING
 
-from bec_lib import MessageEndpoints, bec_logger, messages
-from bec_lib.connector import ConnectorBase
 from dotenv import dotenv_values
 from py_scibec import SciBecCore
 from py_scibec.exceptions import ApiException
 from urllib3.exceptions import MaxRetryError
 
+from bec_lib import MessageEndpoints, bec_logger, messages
+from bec_lib.connector import ConnectorBase
 from scihub.repeated_timer import RepeatedTimer
 
 from .config_handler import ConfigHandler
@@ -203,7 +203,8 @@ class SciBecConnector:
         write_account = self.scibec_info["activeExperiment"]["writeAccount"]
         if write_account[0] == "p":
             write_account = write_account.replace("p", "e")
-        self.connector.set(MessageEndpoints.account(), write_account.encode())
+        msg = messages.VariableMessage(value=write_account)
+        self.connector.set(MessageEndpoints.account(), msg)
 
     def shutdown(self):
         """

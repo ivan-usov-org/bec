@@ -902,12 +902,14 @@ class MessageEndpoints:
 
     # experiment
     @staticmethod
-    def account() -> str:
+    def account() -> EndpointInfo:
         """
         Endpoint for account. This endpoint is used to publish the current account.
-        The value is set directly as a string.
         """
-        return "internal/account"
+        endpoint = "internal/account"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.VariableMessage, message_op=MessageOp.SET
+        )
 
     # data processing
     @staticmethod
