@@ -1,12 +1,12 @@
 (developer.bec_sim)=
 # BEC Simulation
 
-The BEC simulation framework comprises a set of simulated devices. These devices offer a platform for developers to explore, test, or add new features to the core libraries of BEC and BEC-Widgets. Additionally, the end-to-end test framework enables the simulation of user behavior at the beamline, facilitating the testing of newly developed features against common user commands. These end-to-end tests encompass various scans, motions, and scenarios, such as requesting a motor to move beyond its limits or simulating system recovery from user interruptions (CTRL-C). Moreover, the framework allows advanced users to develop scripts, GUIs, or data processing tools in parallel, preparing for upcoming beamtimes.
+The BEC simulation framework comprises a set of simulated devices. These devices offer a platform for developers to explore, test, or add new features to the core libraries of BEC and BEC-Widgets. Additionally, the end-to-end test framework enables the simulation of user behavior at the beamline, facilitating the testing of newly developed features against common user commands. These end-to-end tests encompass various scans, motions, and scenarios, such as requesting a motor to move beyond its limits or simulating system recovery from user interruptions (CTRL-C). Moreover, the framework enables users to develop scripts, GUIs, or data processing tools without requiring access to the physical devices, facilitating faster development cycles.
 
 ## Architecture
 ```{figure} ../assets/simulation_context_diagram.png
 Architecture Diagram:  
-The BEC simulation currently hosts three main devices: `SimMonitor`, `SimPositioner`, and `SimCamera`. Their state, as well as readback value, can be configured within the simulation_state of the device. Additionally, we provide two examples of `DeviceProxies` demonstrating how multiple devices can be linked within the simulation to imitate specific scenarios.
+The BEC simulation currently hosts three main device types: `SimMonitor`, `SimPositioner`, and `SimCamera`. Their state, as well as readback value, can be configured within the simulation_state of the device. Additionally, we provide two examples of `DeviceProxies` demonstrating how multiple devices can be linked within the simulation to imitate specific scenarios.
 ```
 
 This architecture diagram illustrates the relevant classes for the simulation and their interconnections. To comprehend individual components fully, we recommend reading the following sections with the architecture in mind.
