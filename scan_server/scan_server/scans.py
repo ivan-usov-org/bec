@@ -242,7 +242,7 @@ class RequestBase(ABC):
         """run pre scan macros if any"""
         macros = self.device_manager.connector.lrange(MessageEndpoints.pre_scan_macros(), 0, -1)
         for macro in macros:
-            macro = macro.decode().strip()
+            macro = macro.value.strip()
             func_name = self._get_func_name_from_macro(macro)
             exec(macro)
             eval(func_name)(self.device_manager.devices, self)

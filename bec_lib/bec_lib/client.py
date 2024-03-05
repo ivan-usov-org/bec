@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 from rich.console import Console
 from rich.table import Table
 
+from bec_lib import messages
 from bec_lib.alarm_handler import AlarmHandler, Alarms
 from bec_lib.bec_service import BECService
 from bec_lib.bl_checks import BeamlineChecks
@@ -131,15 +132,16 @@ class BECClient(BECService, UserScriptsMixin):
         self.alarm_handler.clear()
 
     @property
-    def pre_scan_hooks(self):
-        """currently stored pre-scan hooks"""
+    def pre_scan_macros(self):
+        """currently stored pre-scan macros"""
         return self.connector.lrange(MessageEndpoints.pre_scan_macros(), 0, -1)
 
-    @pre_scan_hooks.setter
-    def pre_scan_hooks(self, hooks: list):
+    @pre_scan_macros.setter
+    def pre_scan_macros(self, hooks: list[str]):
         self.connector.delete(MessageEndpoints.pre_scan_macros())
         for hook in hooks:
-            self.connector.lpush(MessageEndpoints.pre_scan_macros(), hook)
+            msg = messages.VariableMessage(value=hook)
+            self.connector.lpush(MessageEndpoints.pre_scan_macros(), msg)
 
     def _load_scans(self):
         self.scans = Scans(self)

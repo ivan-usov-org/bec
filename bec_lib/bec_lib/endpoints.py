@@ -613,7 +613,7 @@ class MessageEndpoints:
         )
 
     @staticmethod
-    def pre_scan_macros() -> str:
+    def pre_scan_macros() -> EndpointInfo:
         """
         Endpoint for pre scan macros. This endpoint is used to keep track of the pre scan
         macros. The endpoint is connected to a redis list.
@@ -621,18 +621,10 @@ class MessageEndpoints:
         Returns:
             str: Endpoint for pre scan macros.
         """
-        return "internal/pre_scan_macros"
-
-    @staticmethod
-    def post_scan_macros() -> str:
-        """
-        Endpoint for post scan macros. This endpoint is used to keep track of the post scan
-        macros. The endpoint is connected to a redis list.
-
-        Returns:
-            str: Endpoint for post scan macros.
-        """
-        return "internal/post_scan_macros"
+        endpoint = "internal/pre_scan_macros"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.VariableMessage, message_op=MessageOp.LIST
+        )
 
     @staticmethod
     def public_scan_info(scanID: str) -> EndpointInfo:
