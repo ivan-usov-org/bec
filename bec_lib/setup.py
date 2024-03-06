@@ -27,6 +27,7 @@ if __name__ == "__main__":
             "dev": [
                 "pytest",
                 "pytest-random-order",
+                "pytest-redis",
                 "pytest-timeout",
                 "coverage",
                 "pandas",
@@ -35,7 +36,13 @@ if __name__ == "__main__":
                 "fakeredis",
             ]
         },
-        entry_points={"console_scripts": ["bec-channel-monitor = bec_lib:channel_monitor_launch"]},
+        entry_points={
+            "console_scripts": ["bec-channel-monitor = bec_lib:channel_monitor_launch"],
+            "pytest11": [
+                "bec_lib_end2end_fixtures = bec_lib.tests.end2end_fixtures",
+                "bec_lib_fixtures = bec_lib.tests.fixtures",
+            ],
+        },
         package_data={"bec_lib.tests": ["*.yaml"], "bec_lib.configs": ["*.yaml", "*.json"]},
         version=__version__,
     )

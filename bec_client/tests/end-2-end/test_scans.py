@@ -7,41 +7,18 @@ from unittest.mock import PropertyMock
 import numpy as np
 import pytest
 
-from bec_client import BECIPythonClient
 from bec_client.callbacks.utils import ScanRequestError
-from bec_lib import MessageEndpoints, RedisConnector, ServiceConfig, bec_logger, configs
+from bec_lib import MessageEndpoints, bec_logger, configs
 from bec_lib.alarm_handler import AlarmBase
 from bec_lib.bec_errors import ScanAbortion, ScanInterruption
-from bec_lib.tests.utils import wait_for_empty_queue
 
 logger = bec_logger.logger
 
-CONFIG_PATH = "../ci/test_config.yaml"
-# CONFIG_PATH = "../bec_config_dev.yaml"
-# pylint: disable=no-member
-# pylint: disable=missing-function-docstring
-# pylint: disable=redefined-outer-name
-# pylint: disable=protected-access
-# pylint: disable=undefined-variable
-
-
-@pytest.fixture(scope="function")
-def client():
-    config = ServiceConfig(CONFIG_PATH)
-    bec = BECIPythonClient(config, RedisConnector, forced=True)
-    bec.start()
-    bec.queue.request_queue_reset()
-    bec.queue.request_scan_continuation()
-    time.sleep(1)
-    yield bec
-    bec.shutdown()
-
 
 @pytest.mark.timeout(100)
-def test_grid_scan(capsys, client):
-    bec = client
+def test_grid_scan(capsys, bec_client_fixture):
+    bec = bec_client_fixture
     scans = bec.scans
-    wait_for_empty_queue(bec)
     bec.metadata.update({"unit_test": "test_grid_scan"})
     dev = bec.device_manager.devices
     scans.umv(dev.samx, 0, dev.samy, 0, relative=False)
@@ -53,10 +30,9 @@ def test_grid_scan(capsys, client):
 
 
 @pytest.mark.timeout(100)
-def test_fermat_scan(capsys, client):
-    bec = client
+def test_fermat_scan(capsys, bec_client_fixture):
+    bec = bec_client_fixture
     scans = bec.scans
-    wait_for_empty_queue(bec)
     bec.metadata.update({"unit_test": "test_fermat_scan"})
     dev = bec.device_manager.devices
     status = scans.fermat_scan(
@@ -78,10 +54,9 @@ def test_fermat_scan(capsys, client):
 
 
 @pytest.mark.timeout(100)
-def test_line_scan(capsys, client):
-    bec = client
+def test_line_scan(capsys, bec_client_fixture):
+    bec = bec_client_fixture
     scans = bec.scans
-    wait_for_empty_queue(bec)
     bec.metadata.update({"unit_test": "test_line_scan"})
     dev = bec.device_manager.devices
     status = scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.01, relative=True)
@@ -93,10 +68,9 @@ def test_line_scan(capsys, client):
 
 @pytest.mark.flaky  # marked as flaky as the simulation might return a new readback value within the tolerance
 @pytest.mark.timeout(100)
-def test_mv_scan(capsys, client):
-    bec = client
+def test_mv_scan(capsys, bec_client_fixture):
+    bec = bec_client_fixture
     scans = bec.scans
-    wait_for_empty_queue(bec)
     bec.metadata.update({"unit_test": "test_mv_scan"})
     dev = bec.device_manager.devices
     scans.mv(dev.samx, 10, dev.samy, 20, relative=False).wait()
@@ -119,10 +93,9 @@ def test_mv_scan(capsys, client):
 
 
 @pytest.mark.timeout(100)
-def test_mv_scan_mv(client):
-    bec = client
+def test_mv_scan_mv(bec_client_fixture):
+    bec = bec_client_fixture
     scans = bec.scans
-    wait_for_empty_queue(bec)
     bec.metadata.update({"unit_test": "test_mv_scan_mv"})
     scan_number_start = bec.queue.next_scan_number
     dev = bec.device_manager.devices
@@ -184,7 +157,7 @@ def test_mv_scan_mv(client):
 
 
 @pytest.mark.timeout(100)
-def test_scan_abort(client):
+def test_scan_abort(bec_client_fixture):
     def send_abort(bec):
         while True:
             current_scan_info = bec.queue.scan_storage.current_scan_info
@@ -205,8 +178,7 @@ def test_scan_abort(client):
             time.sleep(0.5)
         _thread.interrupt_main()
 
-    bec = client
-    wait_for_empty_queue(bec)
+    bec = bec_client_fixture
     bec.metadata.update({"unit_test": "test_scan_abort"})
     scan_number_start = bec.queue.next_scan_number
     scans = bec.scans
@@ -237,9 +209,8 @@ def test_scan_abort(client):
 
 
 @pytest.mark.timeout(100)
-def test_limit_error(client):
-    bec = client
-    wait_for_empty_queue(bec)
+def test_limit_error(bec_client_fixture):
+    bec = bec_client_fixture
     bec.metadata.update({"unit_test": "test_limit_error"})
     scan_number_start = bec.queue.next_scan_number
     scans = bec.scans
@@ -268,9 +239,8 @@ def test_limit_error(client):
 
 
 @pytest.mark.timeout(100)
-def test_queued_scan(client):
-    bec = client
-    wait_for_empty_queue(bec)
+def test_queued_scan(bec_client_fixture):
+    bec = bec_client_fixture
     bec.metadata.update({"unit_test": "test_queued_scan"})
     scan_number_start = bec.queue.next_scan_number
     scans = bec.scans
@@ -301,9 +271,8 @@ def test_queued_scan(client):
 
 
 @pytest.mark.timeout(100)
-def test_fly_scan(client):
-    bec = client
-    wait_for_empty_queue(bec)
+def test_fly_scan(bec_client_fixture):
+    bec = bec_client_fixture
     bec.metadata.update({"unit_test": "test_fly_scan"})
     scans = bec.scans
     dev = bec.device_manager.devices
@@ -313,9 +282,8 @@ def test_fly_scan(client):
 
 
 @pytest.mark.timeout(100)
-def test_scan_restart(client):
-    bec = client
-    wait_for_empty_queue(bec)
+def test_scan_restart(bec_client_fixture):
+    bec = bec_client_fixture
     bec.metadata.update({"unit_test": "test_scan_restart"})
     scans = bec.scans
     dev = bec.device_manager.devices
@@ -352,9 +320,8 @@ def test_scan_restart(client):
 
 
 @pytest.mark.timeout(100)
-def test_scan_observer_repeat_queued(client):
-    bec = client
-    wait_for_empty_queue(bec)
+def test_scan_observer_repeat_queued(bec_client_fixture):
+    bec = bec_client_fixture
     bec.metadata.update({"unit_test": "test_scan_observer_repeat_queued"})
     scans = bec.scans
     dev = bec.device_manager.devices
@@ -393,9 +360,8 @@ def test_scan_observer_repeat_queued(client):
 
 
 @pytest.mark.timeout(100)
-def test_scan_observer_repeat(client):
-    bec = client
-    wait_for_empty_queue(bec)
+def test_scan_observer_repeat(bec_client_fixture):
+    bec = bec_client_fixture
     bec.metadata.update({"unit_test": "test_scan_observer_repeat"})
     scans = bec.scans
     dev = bec.device_manager.devices
@@ -432,9 +398,8 @@ def test_scan_observer_repeat(client):
 
 
 @pytest.mark.timeout(100)
-def test_file_writer(client):
-    bec = client
-    wait_for_empty_queue(bec)
+def test_file_writer(bec_client_fixture):
+    bec = bec_client_fixture
     bec.metadata.update({"unit_test": "test_file_writer"})
     scans = bec.scans
     dev = bec.device_manager.devices
@@ -479,9 +444,8 @@ def test_file_writer(client):
 
 
 @pytest.mark.timeout(100)
-def test_scan_def_callback(capsys, client):
-    bec = client
-    wait_for_empty_queue(bec)
+def test_scan_def_callback(capsys, bec_client_fixture):
+    bec = bec_client_fixture
     bec.metadata.update({"unit_test": "test_scan_def_callback"})
     scans = bec.scans
     dev = bec.device_manager.devices
@@ -502,9 +466,8 @@ def test_scan_def_callback(capsys, client):
 
 
 @pytest.mark.timeout(100)
-def test_scan_def(client):
-    bec = client
-    wait_for_empty_queue(bec)
+def test_scan_def(bec_client_fixture):
+    bec = bec_client_fixture
     bec.metadata.update({"unit_test": "test_scan_def"})
     scans = bec.scans
     dev = bec.device_manager.devices
@@ -529,9 +492,8 @@ def test_scan_def(client):
 
 
 @pytest.mark.timeout(100)
-def test_group_def(client):
-    bec = client
-    wait_for_empty_queue(bec)
+def test_group_def(bec_client_fixture):
+    bec = bec_client_fixture
     bec.metadata.update({"unit_test": "test_scan_def"})
     scans = bec.scans
     dev = bec.device_manager.devices
@@ -545,9 +507,8 @@ def test_group_def(client):
 
 
 @pytest.mark.timeout(100)
-def test_list_scan(client):
-    bec = client
-    wait_for_empty_queue(bec)
+def test_list_scan(bec_client_fixture):
+    bec = bec_client_fixture
     bec.metadata.update({"unit_test": "test_list_scan"})
     scans = bec.scans
     dev = bec.device_manager.devices
@@ -574,9 +535,8 @@ def test_list_scan(client):
 
 
 @pytest.mark.timeout(100)
-def test_time_scan(client):
-    bec = client
-    wait_for_empty_queue(bec)
+def test_time_scan(bec_client_fixture):
+    bec = bec_client_fixture
     bec.metadata.update({"unit_test": "test_time_scan"})
     scans = bec.scans
     status = scans.time_scan(points=5, interval=0.5, exp_time=0.1, relative=False)
@@ -584,9 +544,8 @@ def test_time_scan(client):
 
 
 @pytest.mark.timeout(100)
-def test_monitor_scan(client):
-    bec = client
-    wait_for_empty_queue(bec)
+def test_monitor_scan(bec_client_fixture):
+    bec = bec_client_fixture
     bec.metadata.update({"unit_test": "test_monitor_scan"})
     scans = bec.scans
     dev = bec.device_manager.devices
@@ -597,9 +556,8 @@ def test_monitor_scan(client):
 
 
 @pytest.mark.timeout(100)
-def test_rpc_calls(client):
-    bec = client
-    wait_for_empty_queue(bec)
+def test_rpc_calls(bec_client_fixture):
+    bec = bec_client_fixture
     bec.metadata.update({"unit_test": "test_rpc_calls"})
     dev = bec.device_manager.devices
     assert dev.samx.dummy_controller._func_with_args(2, 3) == [2, 3]
@@ -616,9 +574,8 @@ def test_rpc_calls(client):
 
 
 @pytest.mark.timeout(100)
-def test_burst_scan(client):
-    bec = client
-    wait_for_empty_queue(bec)
+def test_burst_scan(bec_client_fixture):
+    bec = bec_client_fixture
     bec.metadata.update({"unit_test": "test_burst_scan"})
     dev = bec.device_manager.devices
     s = scans.line_scan(dev.samx, 0, 1, burst_at_each_point=2, steps=10, relative=False)
@@ -626,9 +583,8 @@ def test_burst_scan(client):
 
 
 @pytest.mark.timeout(100)
-def test_callback_data_matches_scan_data(client):
-    bec = client
-    wait_for_empty_queue(bec)
+def test_callback_data_matches_scan_data(bec_client_fixture):
+    bec = bec_client_fixture
     bec.metadata.update({"unit_test": "test_callback_data_matches_scan_data"})
     dev = bec.device_manager.devices
     reference_container = {"data": [], "metadata": {}}
@@ -649,9 +605,8 @@ def test_callback_data_matches_scan_data(client):
 
 
 @pytest.mark.timeout(100)
-def test_async_callback_data_matches_scan_data(client):
-    bec = client
-    wait_for_empty_queue(bec)
+def test_async_callback_data_matches_scan_data(bec_client_fixture):
+    bec = bec_client_fixture
     bec.metadata.update({"unit_test": "test_async_callback_data_matches_scan_data"})
     dev = bec.device_manager.devices
     reference_container = {"data": [], "metadata": {}}
@@ -674,9 +629,8 @@ def test_async_callback_data_matches_scan_data(client):
 
 
 @pytest.mark.timeout(100)
-def test_disabled_device_raises_scan_request_error(client):
-    bec = client
-    wait_for_empty_queue(bec)
+def test_disabled_device_raises_scan_request_error(bec_client_fixture):
+    bec = bec_client_fixture
     bec.metadata.update({"unit_test": "test_disabled_device_raises_scan_rejection"})
     dev = bec.device_manager.devices
     dev.samx.enabled = False
@@ -689,10 +643,9 @@ def test_disabled_device_raises_scan_request_error(client):
 # @pytest.fixture(scope="function")
 @pytest.mark.timeout(100)
 @pytest.mark.parametrize("abort_on_ctrl_c", [True, False])
-def test_context_manager_export(tmp_path, client, abort_on_ctrl_c):
-    bec = client
+def test_context_manager_export(tmp_path, bec_client_fixture, abort_on_ctrl_c):
+    bec = bec_client_fixture
     scans = bec.scans
-    wait_for_empty_queue(bec)
     bec.metadata.update({"unit_test": "test_line_scan"})
     dev = bec.device_manager.devices
     bec._client._service_config = PropertyMock()
@@ -705,17 +658,17 @@ def test_context_manager_export(tmp_path, client, abort_on_ctrl_c):
                     dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.01, relative=True
                 )
     else:
-        with scans.scan_export(os.path.join(tmp_path, "test.csv")):
+        scan_file = os.path.join(tmp_path, "test.csv")
+        with scans.scan_export(scan_file):
             scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.01, relative=True)
             scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.01, relative=True)
 
-        assert len(list(tmp_path.iterdir())) == 1
+        assert os.path.exists(scan_file)
 
 
 @pytest.mark.timeout(100)
-def test_update_config(client):
-    bec = client
-    wait_for_empty_queue(bec)
+def test_update_config(bec_client_fixture):
+    bec = bec_client_fixture
     bec.metadata.update({"unit_test": "test_update_config"})
     demo_config_path = os.path.join(os.path.dirname(configs.__file__), "demo_config.yaml")
     config = bec.config._load_config_from_file(demo_config_path)

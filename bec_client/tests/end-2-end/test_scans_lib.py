@@ -1,56 +1,22 @@
 import os
-import threading
 import time
 
-import bec_lib
 import numpy as np
 import pytest
 import yaml
-from bec_lib import BECClient, DeviceConfigError, RedisConnector, ServiceConfig, bec_logger
+
+import bec_lib
+from bec_lib import DeviceConfigError, bec_logger
 from bec_lib.alarm_handler import AlarmBase
-from bec_lib.tests.utils import wait_for_empty_queue
 
 logger = bec_logger.logger
 
-CONFIG_PATH = "../ci/test_config.yaml"
-# CONFIG_PATH = "../bec_config_dev.yaml"
-# pylint: disable=no-member
-# pylint: disable=missing-function-docstring
-# pylint: disable=redefined-outer-name
-# pylint: disable=protected-access
-# pylint: disable=undefined-variable
-
-
-@pytest.fixture()
-def threads_check():
-    current_threads = set(th for th in threading.enumerate() if th is not threading.main_thread())
-    yield
-    threads_after = set(th for th in threading.enumerate() if th is not threading.main_thread())
-    additional_threads = threads_after - current_threads
-    assert (
-        len(additional_threads) == 0
-    ), f"Test creates {len(additional_threads)} threads that are not cleaned: {additional_threads}"
-
-
-@pytest.fixture(scope="function")
-def lib_client(threads_check):
-    config = ServiceConfig(CONFIG_PATH)
-    bec = BECClient(config, RedisConnector, forced=True)
-    bec.start()
-    bec.queue.request_queue_reset()
-    bec.queue.request_scan_continuation()
-    time.sleep(5)
-    yield bec
-    bec.shutdown()
-    bec._client._reset_singleton()
-
 
 @pytest.mark.timeout(100)
-def test_grid_scan_lib_client(lib_client):
-    bec = lib_client
+def test_grid_scan_lib(bec_client_lib):
+    bec = bec_client_lib
     scans = bec.scans
-    wait_for_empty_queue(bec)
-    bec.metadata.update({"unit_test": "test_grid_scan_lib_client"})
+    bec.metadata.update({"unit_test": "test_grid_scan_bec_client_lib"})
     dev = bec.device_manager.devices
     scans.umv(dev.samx, 0, dev.samy, 0, relative=False)
     status = scans.grid_scan(dev.samx, -5, 5, 10, dev.samy, -5, 5, 10, exp_time=0.01, relative=True)
@@ -60,11 +26,10 @@ def test_grid_scan_lib_client(lib_client):
 
 
 @pytest.mark.timeout(100)
-def test_mv_scan_lib_client(lib_client):
-    bec = lib_client
+def test_mv_scan_lib(bec_client_lib):
+    bec = bec_client_lib
     scans = bec.scans
-    wait_for_empty_queue(bec)
-    bec.metadata.update({"unit_test": "test_mv_scan_lib_client"})
+    bec.metadata.update({"unit_test": "test_mv_scan_bec_client_lib"})
     dev = bec.device_manager.devices
     scans.mv(dev.samx, 10, dev.samy, 20, relative=False).wait()
     current_pos_samx = dev.samx.read()["samx"]["value"]
@@ -78,10 +43,9 @@ def test_mv_scan_lib_client(lib_client):
 
 
 @pytest.mark.timeout(100)
-def test_mv_raises_limit_error(lib_client):
-    bec = lib_client
+def test_mv_raises_limit_error(bec_client_lib):
+    bec = bec_client_lib
     scans = bec.scans
-    wait_for_empty_queue(bec)
     bec.metadata.update({"unit_test": "test_mv_raises_limit_error"})
     dev = bec.device_manager.devices
     dev.samx.limits = [-50, 50]
@@ -90,9 +54,8 @@ def test_mv_raises_limit_error(lib_client):
 
 
 @pytest.mark.timeout(100)
-def test_async_callback_data_matches_scan_data_lib_client(lib_client):
-    bec = lib_client
-    wait_for_empty_queue(bec)
+def test_async_callback_data_matches_scan_data_lib(bec_client_lib):
+    bec = bec_client_lib
     bec.metadata.update({"unit_test": "test_async_callback_data_matches_scan_data"})
     dev = bec.device_manager.devices
     reference_container = {"data": [], "metadata": {}}
@@ -114,9 +77,8 @@ def test_async_callback_data_matches_scan_data_lib_client(lib_client):
 
 
 @pytest.mark.timeout(100)
-def test_config_updates(lib_client):
-    bec = lib_client
-    wait_for_empty_queue(bec)
+def test_config_updates(bec_client_lib):
+    bec = bec_client_lib
     bec.metadata.update({"unit_test": "test_config_updates"})
     dev = bec.device_manager.devices
     dev.samx.limits = [-80, 80]
@@ -150,9 +112,8 @@ def test_config_updates(lib_client):
 
 
 @pytest.mark.timeout(100)
-def test_dap_fit(lib_client):
-    bec = lib_client
-    wait_for_empty_queue(bec)
+def test_dap_fit(bec_client_lib):
+    bec = bec_client_lib
     bec.metadata.update({"unit_test": "test_dap_fit"})
     dev = bec.device_manager.devices
     scans = bec.scans
@@ -312,9 +273,8 @@ def test_dap_fit(lib_client):
         "invalid_device_class",
     ],
 )
-def test_config_reload(lib_client, config, raises_error, deletes_config, disabled_device):
-    bec = lib_client
-    wait_for_empty_queue(bec)
+def test_config_reload(bec_client_lib, config, raises_error, deletes_config, disabled_device):
+    bec = bec_client_lib
     bec.metadata.update({"unit_test": "test_config_reload"})
     try:
         # write new config to disk
@@ -343,9 +303,8 @@ def test_config_reload(lib_client, config, raises_error, deletes_config, disable
     # bec.config.load_demo_config()
 
 
-def test_computed_signal(lib_client):
-    bec = lib_client
-    wait_for_empty_queue(bec)
+def test_computed_signal(bec_client_lib):
+    bec = bec_client_lib
     bec.metadata.update({"unit_test": "test_computed_signal"})
     dev = bec.device_manager.devices
     scans = bec.scans

@@ -1,16 +1,12 @@
 from __future__ import annotations
 
 import builtins
-import copy
 import functools
 import os
-import threading
 import time
 import uuid
 from typing import TYPE_CHECKING
-from unittest import mock
 
-import pytest
 import yaml
 
 import bec_lib
@@ -20,7 +16,6 @@ from bec_lib.devicemanager import DeviceManagerBase
 from bec_lib.endpoints import EndpointInfo, MessageEndpoints
 from bec_lib.logger import bec_logger
 from bec_lib.scans import Scans
-from bec_lib.service_config import ServiceConfig
 
 if TYPE_CHECKING:
     from bec_lib.alarm_handler import Alarms
@@ -33,38 +28,6 @@ logger = bec_logger.logger
 # pylint: disable=missing-function-docstring
 # pylint: disable=redefined-outer-name
 # pylint: disable=protected-access
-
-
-@pytest.fixture(autouse=True)
-def threads_check():
-    current_threads = set(th for th in threading.enumerate() if th is not threading.main_thread())
-    yield
-    threads_after = set(th for th in threading.enumerate() if th is not threading.main_thread())
-    additional_threads = threads_after - current_threads
-    assert (
-        len(additional_threads) == 0
-    ), f"Test creates {len(additional_threads)} threads that are not cleaned: {additional_threads}"
-
-
-@pytest.fixture
-def dm():
-    service_mock = mock.MagicMock()
-    service_mock.connector = ConnectorMock("")
-    dev_manager = DMClientMock(service_mock)
-    yield dev_manager
-
-
-@functools.lru_cache
-def load_test_config():
-    with open(f"{dir_path}/tests/test_config.yaml", "r", encoding="utf-8") as f:
-        return create_session_from_config(yaml.safe_load(f))
-
-
-@pytest.fixture
-def dm_with_devices(dm):
-    dm._session = copy.deepcopy(load_test_config())
-    dm._load_session()
-    yield dm
 
 
 def queue_is_empty(queue) -> bool:  # pragma: no cover
@@ -491,24 +454,6 @@ class DMClientMock(DeviceManagerBase):
                 return dev
 
 
-@pytest.fixture()
-def bec_client(dm_with_devices):
-    client = ClientMock(
-        ServiceConfig(redis={"host": "host", "port": 123}, scibec={"host": "host", "port": 123}),
-        ConnectorMock,
-        wait_for_server=False,
-    )
-    client.start()
-    print(id(client))
-    device_manager = dm_with_devices
-    for name, dev in device_manager.devices.items():
-        dev._info["hints"] = {"fields": [name]}
-    client.device_manager = device_manager
-    yield client
-    client._reset_singleton()
-    device_manager.devices.flush()
-
-
 class PipelineMock:  # pragma: no cover
     _pipe_buffer = []
     _connector = None
@@ -668,3 +613,9 @@ def create_session_from_config(config: dict) -> dict:
         device_configs.append(dev_conf)
     session = {"accessGroups": "customer", "devices": device_configs}
     return session
+
+
+@functools.lru_cache
+def load_test_config():
+    with open(f"{dir_path}/tests/test_config.yaml", "r", encoding="utf-8") as f:
+        return create_session_from_config(yaml.safe_load(f))
