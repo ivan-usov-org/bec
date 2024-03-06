@@ -2,6 +2,19 @@
 
 <!--next-version-placeholder-->
 
+## v1.12.9 (2024-03-06)
+
+### Fix
+
+* **bec_lib:** Fixed support for lists in redis stream subscriptions ([`d4b7b42`](https://gitlab.psi.ch/bec/bec/-/commit/d4b7b42f4608464da417435350a0c73f7665a44f))
+* **bec_lib:** Added missing unsubscribe from streams ([`75cd651`](https://gitlab.psi.ch/bec/bec/-/commit/75cd6512ea4e0b00ad320d16f4298ca9f79d8105))
+* **bec_lib:** Fixed support for redis streams ([`7578395`](https://gitlab.psi.ch/bec/bec/-/commit/757839534c75bd3a8110256cdfd770f770a195e0))
+
+### Documentation
+
+* **bec_lib:** Improved endpoint doc strings ([`656478f`](https://gitlab.psi.ch/bec/bec/-/commit/656478f784440b91ada8fb1da1d3957276079765))
+* **bec_lib:** Updated doc strings ([`969b0a0`](https://gitlab.psi.ch/bec/bec/-/commit/969b0a02f842a8d9666277fa5c4cc98344b8b0f6))
+
 ## v1.12.8 (2024-03-06)
 
 ### Fix
