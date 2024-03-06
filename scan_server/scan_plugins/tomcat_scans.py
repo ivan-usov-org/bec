@@ -301,9 +301,7 @@ class AeroScriptedScan(FlyScanBase):
         t_elapsed = t_end - t_start
         print(f"Elapsed scan time: {t_elapsed}")
 
-        # Collect -  Throws a warning due to returning a generator
-        #st = yield from self.stubs.send_rpc_and_wait("es1_ddaq", "collect")
-        #st.wait()
+
 
         print("Scan done\n\n")
 
@@ -316,21 +314,54 @@ class AeroScriptedScan(FlyScanBase):
     def cleanup(self):
         """ Set scan progress to 1 to finish the scan"""
         self.num_pos = 1
-        print("Cleaning up scan")
         return super().cleanup()
 
 
 class AeroSnapNStep(AeroScriptedScan):
     scan_name = "aero_snapNstep"
     scan_report_hint = "table"
-    required_kwargs = ["filename", "subs"]
+    required_kwargs = ["startpos", "expnum"]
     arg_input = {}
     arg_bundle_size = {"bundle": len(arg_input), "min": None, "max": None}
 
+    def __init__(self, *args, parameter: dict = None, **kwargs):
+        """ Executes an AeroScript template as a flyer
+
+        Examples:
+            >>> scans.scans.aero_snapNstep(startpos=42, range=180, expnum=1800, exptime=0.1)
+        """
+        super().__init__(parameter=parameter, **kwargs)
+        self.axis = []
+        self.scan_motors = ['es1_roty']
+        self.num_pos = 0
+
+        self.filename   = "/afs/psi.ch/user/m/mohacsi_i/ophyd_devices/ophyd_devices/epics/devices/AerotechSnapAndStepTemplate.ascript"
+        self.scanTaskIndex   = self.caller_kwargs.get("taskindex", 4)
 
 
+        self.scanStart   = self.caller_kwargs.get("startpos")
+        self.scanExpNum   = self.caller_kwargs.get("expnum")
+        self.scanRange   = self.caller_kwargs.get("range", 180)
+        self.scanExpTime   = self.caller_kwargs.get("exptime", 0.1)
+        self.scanStepSize = self.scanRange / self.scanExpNum
+
+        #self.scanVel = self.caller_kwargs.get("velocity", 30)
+        #self.scanTra = self.caller_kwargs.get("travel", 80)
+        #self.scanAcc = self.caller_kwargs.get("acceleration", 500)
+
+        self.subs   = subs={'startpos': self.scanStart, 'stepsize': self.scanStepSize, 'numsteps': self.scanExpNum, 'exptime': self.scanExpTime}
 
 
+    def scan_core(self):
+        print("TOMCAT Snap N Step scan (via Jinjad AeroScript)")  
+        
+        # Wait for parent
+        yield from super().scan_core()
+
+        # Collect -  Throws a warning due to returning a generator
+        yield from self.stubs.send_rpc_and_wait("es1_ddaq", "npoints.put", self.scanExpNum)
+        #st = yield from self.stubs.send_rpc_and_wait("es1_ddaq", "collect")
+        #st.wait()       
 
 
 
