@@ -128,8 +128,13 @@ class PubSubInterface(abc.ABC):
     def register(self, topics=None, patterns=None, cb=None, start_thread=True, **kwargs):
         """Register a callback for a topic or pattern"""
 
-    def shutdown(self):
-        """Shutdown the connector"""
+    @abc.abstractmethod
+    def unregister(self, topics=None, pattern=None, cb=None):
+        """Unregister a callback for a topic or pattern"""
+
+    @abc.abstractmethod
+    def poll_messages(self, timeout=None):
+        """Poll for new messages, receive them and execute callbacks"""
 
 
 class ConnectorBase(PubSubInterface, StoreInterface):
@@ -154,3 +159,6 @@ class ConnectorBase(PubSubInterface, StoreInterface):
     def set_and_publish(self, topic: str, msg, pipe=None, expire: int = None) -> None:
         """Set a value and publish it"""
         raise NotImplementedError
+
+    def shutdown(self):
+        """Shutdown the connector"""

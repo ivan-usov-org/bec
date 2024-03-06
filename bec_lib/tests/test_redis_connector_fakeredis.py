@@ -86,6 +86,52 @@ def test_redis_connector_register(
             cb_mock.assert_called_with(msg_object, a=1)
 
 
+def test_redis_connector_unregister(connected_connector):
+    connector = connected_connector
+    redisdb = connector._redis_conn
+
+    on_msg_received = mock.Mock()
+    received_event = mock.Mock(
+        spec=[], side_effect=lambda msg_obj: on_msg_received(msg_obj.value.msg)
+    )
+
+    connector.register(topics=["topic1", "topic2"], cb=received_event, start_thread=False)
+
+    connector.send("topic1", TestMessage("topic1"))
+    connector.poll_messages(timeout=1)
+    on_msg_received.assert_called_once_with("topic1")
+    connector.send("topic2", TestMessage("topic2"))
+    connector.poll_messages(timeout=1)
+    on_msg_received.assert_called_with("topic2")
+
+    connector.unregister("topic1", cb=received_event)
+
+    on_msg_received.reset_mock()
+    connector.send("topic1", TestMessage("topic1"))
+    connector.send("topic2", TestMessage("topic2"))
+    connector.poll_messages(timeout=1)
+    on_msg_received.assert_called_once_with("topic2")
+
+    on_msg_received.reset_mock()
+    connector.unregister("topic2", cb=received_event)
+    connector.send("topic1", TestMessage("topic1"))
+    connector.send("topic2", TestMessage("topic2"))
+    assert on_msg_received.call_count == 0
+    assert redisdb.execute_command("PUBSUB CHANNELS") == []
+    assert len(connector._topics_cb) == 0
+
+    connector.register(topics=["topic1", "topic2"], cb=received_event, start_thread=False)
+
+    connector.send("topic1", TestMessage("topic1"))
+    connector.poll_messages(timeout=1)
+    on_msg_received.assert_called_once_with("topic1")
+    connector.send("topic2", TestMessage("topic2"))
+    connector.poll_messages(timeout=1)
+    on_msg_received.assert_called_with("topic2")
+    connector.unregister(topics=["topic1", "topic2"])
+    assert redisdb.execute_command("PUBSUB CHANNELS") == []
+    assert len(connector._topics_cb) == 0
+
 
 def test_redis_connector_register_identical(connected_connector):
     connector = connected_connector

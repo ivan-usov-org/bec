@@ -402,6 +402,7 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
         self._pubsub_conn.ignore_subscribe_messages = True
         # keep track of topics and callbacks
         self._topics_cb = collections.defaultdict(list)
+        self._topics_cb_lock = threading.Lock()
 
         self._events_listener_thread = None
         self._events_dispatcher_thread = None
@@ -551,15 +552,14 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
             >>> connector.register(patterns="test:*", cb=my_callback, start_thread=False)
             >>> connector.register(patterns="test:*", cb=my_callback, start_thread=False, my_arg="test")
         """
+        if cb is None:
+            raise ValueError("Callback cb cannot be None")
         if self._events_listener_thread is None:
             # create the thread that will get all messages for this connector;
             self._events_listener_thread = threading.Thread(
                 target=self._get_messages_loop, args=(self._pubsub_conn,), daemon=True
             )
             self._events_listener_thread.start()
-
-        if cb is None:
-            raise ValueError("Callback cb cannot be None")
         # make a weakref from the callable, using louie;
         # it can create safe refs for simple functions as well as methods
         cb_ref = louie.saferef.safe_ref(cb)
@@ -574,18 +574,20 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
                 patterns = [patterns]
 
             self._pubsub_conn.psubscribe(patterns)
-            for pattern in patterns:
-                if item not in self._topics_cb[pattern]:
-                    self._topics_cb[pattern].append(item)
+            with self._topics_cb_lock:
+                for pattern in patterns:
+                    if item not in self._topics_cb[pattern]:
+                        self._topics_cb[pattern].append(item)
         else:
             topics = self._convert_endpointinfo_to_str(topics)
             if not isinstance(topics, list):
                 topics = [topics]
 
             self._pubsub_conn.subscribe(topics)
-            for topic in topics:
-                if item not in self._topics_cb[topic]:
-                    self._topics_cb[topic].append(item)
+            with self._topics_cb_lock:
+                for topic in topics:
+                    if item not in self._topics_cb[topic]:
+                        self._topics_cb[topic].append(item)
 
         if start_thread and self._events_dispatcher_thread is None:
             # start dispatcher thread
@@ -593,6 +595,37 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
                 target=self._dispatch_events, daemon=True
             )
             self._events_dispatcher_thread.start()
+
+    def _filter_topics_cb(self, topics: list, cb: Union[callable, None]):
+        unsubscribe_list = []
+        with self._topics_cb_lock:
+            for topic in topics:
+                topics_cb = self._topics_cb[topic]
+                # remove callback from list
+                self._topics_cb[topic] = list(
+                    filter(lambda item: cb and item[0]() is not cb, topics_cb)
+                )
+                if not self._topics_cb[topic]:
+                    # no callbacks left, unsubscribe
+                    unsubscribe_list.append(topic)
+            # clean the topics that have been unsubscribed
+            for topic in unsubscribe_list:
+                del self._topics_cb[topic]
+        return unsubscribe_list
+
+    def unregister(self, topics=None, patterns=None, cb=None):
+        if self._events_listener_thread is None:
+            return
+        if patterns is not None:
+            if isinstance(patterns, str):
+                patterns = [patterns]
+            unsubscribe_list = self._filter_topics_cb(patterns, cb)
+            self._pubsub_conn.punsubscribe(unsubscribe_list)
+        else:
+            if isinstance(topics, str):
+                topics = [topics]
+            unsubscribe_list = self._filter_topics_cb(topics, cb)
+            self._pubsub_conn.unsubscribe(unsubscribe_list)
 
     def _convert_endpointinfo_to_str(self, endpoint):
         if isinstance(endpoint, EndpointInfo):
@@ -630,10 +663,11 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
 
     def _handle_message(self, msg):
         channel = msg["channel"].decode()
-        if msg["pattern"] is not None:
-            callbacks = self._topics_cb[msg["pattern"].decode()]
-        else:
-            callbacks = self._topics_cb[channel]
+        with self._topics_cb_lock:
+            if msg["pattern"] is not None:
+                callbacks = self._topics_cb[msg["pattern"].decode()]
+            else:
+                callbacks = self._topics_cb[channel]
         msg = MessageObject(topic=channel, value=MsgpackSerialization.loads(msg["data"]))
         for cb_ref, kwargs in callbacks:
             cb = cb_ref()

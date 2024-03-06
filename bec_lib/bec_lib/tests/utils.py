@@ -502,6 +502,12 @@ class ConnectorMock(ConnectorBase):  # pragma: no cover
     def register(self, *args, **kwargs):
         pass
 
+    def unregister(self, *args, **kwargs):
+        pass
+
+    def poll_messages(self, *args, **kwargs):
+        pass
+
     def keys(self, *args, **kwargs):
         return []
 
