@@ -7,9 +7,10 @@ import uuid
 from typing import TYPE_CHECKING
 from unittest import mock
 
-import bec_lib
 import pytest
 import yaml
+
+import bec_lib
 from bec_lib import BECClient, messages
 from bec_lib.connector import ConnectorBase
 from bec_lib.devicemanager import DeviceManagerBase
@@ -612,6 +613,29 @@ class ConnectorMock(ConnectorBase):  # pragma: no cover
 
     def producer(self):
         return self
+
+    def execute_pipeline(self, pipeline):
+        pipeline.execute()
+
+    def xadd(self, topic, msg_dict, max_size=None, pipe=None, expire: int = None):
+        if pipe:
+            pipe._pipe_buffer.append(("xadd", (topic, msg_dict), {"expire": expire}))
+            return
+        pass
+
+    def xread(self, topic, id=None, count=None, block=None, pipe=None, from_start=False):
+        if pipe:
+            pipe._pipe_buffer.append(
+                ("xread", (topic, id, count, block), {"from_start": from_start})
+            )
+            return
+        return []
+
+    def xrange(self, topic, min="-", max="+", pipe=None):
+        if pipe:
+            pipe._pipe_buffer.append(("xrange", (topic, min, max), {}))
+            return
+        return []
 
 
 def create_session_from_config(config: dict) -> dict:
