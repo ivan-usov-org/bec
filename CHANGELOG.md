@@ -2,6 +2,24 @@
 
 <!--next-version-placeholder-->
 
+## v1.12.8 (2024-03-06)
+
+### Fix
+
+* Added backward compatibility for scan numbers and dataset numbers ([`9ff2278`](https://gitlab.psi.ch/bec/bec/-/commit/9ff2278c38b9fcb671c5591f15fda9473155fbe3))
+* Account is now a variablemessage ([`79d57b5`](https://gitlab.psi.ch/bec/bec/-/commit/79d57b509d20451c73a0442adf477ae4299e9dc6))
+* Pre-scan macros are now using a VariableMessage ([`4239576`](https://gitlab.psi.ch/bec/bec/-/commit/4239576c94c44041f395261b42de1056de8c0d76))
+* Logbook is now using a credentialsmessage ([`b62960f`](https://gitlab.psi.ch/bec/bec/-/commit/b62960f6e697b116ffc4f3c5fded0c6bcd9ea4e2))
+* Scan_number and dataset_number is now a VariableMessage ([`f698605`](https://gitlab.psi.ch/bec/bec/-/commit/f698605579766536f1ec1e653e9d5e3dfd44166e))
+
+### Documentation
+
+* Updated contributing.md ([`af2bd27`](https://gitlab.psi.ch/bec/bec/-/commit/af2bd273d510f08f420f39ec519d1a97ac8a1cb1))
+* Typo ([`4ac0bbc`](https://gitlab.psi.ch/bec/bec/-/commit/4ac0bbca1631ed5226458307f7ad35d155617328))
+* Fixed last comments ([`aadbb01`](https://gitlab.psi.ch/bec/bec/-/commit/aadbb01a947ae5419dff7c18837ab8ea9b75d78c))
+* Adress comments ([`d556f84`](https://gitlab.psi.ch/bec/bec/-/commit/d556f842353e7ef335309fb42025d00de193b627))
+* Update documentation on the simulation ([`0ec3dac`](https://gitlab.psi.ch/bec/bec/-/commit/0ec3dac85fd03413c2cf79b5881e8dffbecd2877))
+
 ## v1.12.7 (2024-03-04)
 
 ### Fix
