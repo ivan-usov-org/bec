@@ -294,28 +294,8 @@ class AeroScriptedScan(FlyScanBase):
         st.wait()        
         time.sleep(0.5)
 
-        # Wait for motion to finish
-        #yield from self.stubs.read_and_wait(group="primary", wait_group="readout_primary")
-        #target_diid = self.DIID - 1
-        while True:
-            #yield from self.stubs.read_and_wait(group="primary", wait_group="readout_primary")
-            #status = self.stubs.get_req_status(device='es1_aa1Tasks', RID=self.metadata["RID"], DIID=target_diid)
-            progress = yield from self.stubs.send_rpc_and_wait("es1_aa1Tasks", "_progress")
-            #progress = self.stubs.get_device_progress(device='es1_aa1Tasks', RID=self.metadata["RID"])
-            print(f"progress: {progress}")
-            if progress:
-                self.num_pos = progress
-                break
-        #    if status:
-        #        break
-            time.sleep(1)
-
         # Complete
-        #yield from self.stubs.complete(device='es1_aa1Tasks')
-
-        # Complete
-        #st = yield from self.stubs.send_rpc_and_wait("es1_aa1Tasks", "complete")
-        #st.wait()  
+        yield from self.stubs.complete(device='es1_aa1Tasks')
 
         t_end = time.time()
         t_elapsed = t_end - t_start
@@ -338,6 +318,30 @@ class AeroScriptedScan(FlyScanBase):
         self.num_pos = 1
         print("Cleaning up scan")
         return super().cleanup()
+
+
+class AeroSnapNStep(AeroScriptedScan):
+    scan_name = "aero_snapNstep"
+    scan_report_hint = "table"
+    required_kwargs = ["filename", "subs"]
+    arg_input = {}
+    arg_bundle_size = {"bundle": len(arg_input), "min": None, "max": None}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
