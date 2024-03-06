@@ -9,6 +9,7 @@ from redis.client import Pipeline
 from test_redis_connector import TestMessage
 
 from bec_lib import messages
+from bec_lib.endpoints import MessageEndpoints
 from bec_lib.redis_connector import MessageObject, RedisConnector
 from bec_lib.serialization import MsgpackSerialization
 
@@ -207,6 +208,7 @@ def test_redis_connector_get_last(connected_connector):
     assert connector.get_last(5) is None
 
 
+@pytest.mark.timeout(5)
 def test_redis_connector_register_stream(connected_connector):
     connector = connected_connector
     cb_mock = mock.Mock(spec=[])  # spec is here to remove all attributes
@@ -223,18 +225,43 @@ def test_redis_connector_register_stream(connected_connector):
 
 
 @pytest.mark.timeout(5)
-def test_redis_connector_register_stream_newest_only(connected_connector):
+@pytest.mark.parametrize(
+    "endpoint",
+    [["test"], [MessageEndpoints.processed_data("test"), MessageEndpoints.processed_data("test2")]],
+)
+def test_redis_connector_register_stream_list(connected_connector, endpoint):
+    connector = connected_connector
+    cb_mock = mock.Mock(spec=[])  # spec is here to remove all attributes
+    stream_id = connector.register_stream(endpoint, cb=cb_mock, start_thread=False, a=1)
+    time.sleep(0.1)
+    for ep in endpoint:
+        connector.xadd(ep, {"data": 1})
+    connector.poll_stream_messages()
+    assert mock.call({"data": 1}, a=1) in cb_mock.mock_calls
+
+    for ep in endpoint:
+        connector.xadd(ep, {"data": 2})
+    connector.poll_stream_messages()
+    assert mock.call({"data": 2}, a=1) in cb_mock.mock_calls
+    for str_id in stream_id:
+        connector.unregister_stream(str_id)
+        assert connector._stream_topics_cb[str_id] == []
+
+
+@pytest.mark.timeout(5)
+@pytest.mark.parametrize("endpoint", ["test", MessageEndpoints.processed_data("test")])
+def test_redis_connector_register_stream_newest_only(connected_connector, endpoint):
     connector = connected_connector
     cb_mock = mock.Mock(spec=[])  # spec is here to remove all attributes
     stream_id = connector.register_stream(
-        "test", cb=cb_mock, newest_only=True, start_thread=False, a=1
+        endpoint, cb=cb_mock, newest_only=True, start_thread=False, a=1
     )
     time.sleep(0.1)
-    connector.xadd("test", {"data": 1})
+    connector.xadd(endpoint, {"data": 1})
     while cb_mock.call_count == 0:
         time.sleep(0.1)
     assert mock.call({"data": 1}, a=1) in cb_mock.mock_calls
-    connector.xadd("test", {"data": 2})
+    connector.xadd(endpoint, {"data": 2})
     while cb_mock.call_count == 1:
         time.sleep(0.1)
     assert mock.call({"data": 2}, a=1) in cb_mock.mock_calls
@@ -242,3 +269,63 @@ def test_redis_connector_register_stream_newest_only(connected_connector):
     num_threads = threading.active_count()
     connector.unregister_stream(stream_id)
     assert threading.active_count() == num_threads - 1
+
+
+@pytest.mark.timeout(5)
+@pytest.mark.parametrize("endpoint", [["test"], [MessageEndpoints.processed_data("test")]])
+def test_redis_connector_register_stream_newest_only_list(connected_connector, endpoint):
+    connector = connected_connector
+    cb_mock = mock.Mock(spec=[])  # spec is here to remove all attributes
+    stream_id = connector.register_stream(
+        endpoint, cb=cb_mock, newest_only=True, start_thread=False, a=1
+    )
+    time.sleep(0.1)
+    for ep in endpoint:
+        connector.xadd(ep, {"data": 1})
+    while cb_mock.call_count == 0:
+        time.sleep(0.1)
+    assert mock.call({"data": 1}, a=1) in cb_mock.mock_calls
+
+    for ep in endpoint:
+        connector.xadd(ep, {"data": 2})
+    while cb_mock.call_count == 1:
+        time.sleep(0.1)
+    assert mock.call({"data": 2}, a=1) in cb_mock.mock_calls
+    assert cb_mock.call_count == 2
+    num_threads = threading.active_count()
+
+    for str_id in stream_id:
+        connector.unregister_stream(str_id)
+    assert threading.active_count() == num_threads - 1
+
+
+def test_register_raises_if_no_cb(connected_connector):
+    connector = connected_connector
+    with pytest.raises(ValueError):
+        connector.register("test", cb=None, start_thread=False)
+
+
+def test_register_stream_raises_if_no_cb(connected_connector):
+    connector = connected_connector
+    with pytest.raises(ValueError):
+        connector.register_stream("test", cb=None, start_thread=False)
+
+
+def test_register_stream_raises_if_no_topic_nor_pattern(connected_connector):
+    connector = connected_connector
+    with pytest.raises(ValueError):
+        connector.register_stream(None, cb=mock.Mock(), start_thread=False)
+
+
+@pytest.mark.parametrize("topics", [5, [5, "test"], [5, 5], [None, "test"], None, [None, None]])
+def test_register_stream_raises_if_topic_is_not_str_nor_list(connected_connector, topics):
+    connector = connected_connector
+    with pytest.raises(ValueError):
+        connector.register_stream(topics, cb=lambda *args, **kwargs: ..., start_thread=False)
+
+
+@pytest.mark.parametrize("val", [messages.ScanMessage(point_id=5, scanID="1234", data={"a": 1})])
+def test_lrange_parses_messages(connected_connector, val):
+    connected_connector.lpush("test", val)
+    res = connected_connector.lrange("test", 0, -1)
+    assert isinstance(res[0], messages.ScanMessage)

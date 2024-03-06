@@ -278,10 +278,11 @@ def test_redis_connector_set(connector, topic, msg, expire):
         connector._redis_conn.set.assert_called_once_with(topic, msg, ex=expire)
 
 
-@pytest.mark.parametrize("pattern", ["samx", "samy"])
+@pytest.mark.parametrize("pattern", ["samx", "samy", MessageEndpoints.device_read("sam*")])
 def test_redis_connector_keys(connector, pattern):
     ret = connector.keys(pattern)
-    connector._redis_conn.keys.assert_called_once_with(pattern)
+    endpoint = pattern if isinstance(pattern, str) else pattern.endpoint
+    connector._redis_conn.keys.assert_called_once_with(endpoint)
     assert ret == redis.Redis().keys()
 
 
