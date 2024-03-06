@@ -482,7 +482,7 @@ class MessageEndpoints:
         scan number is incremented after each scan and set in redis as an integer.
 
         Returns:
-            str: Endpoint for scan number.
+            EndpointInfo: Endpoint for scan number.
         """
         endpoint = "scans/scan_number"
         return EndpointInfo(
@@ -496,7 +496,7 @@ class MessageEndpoints:
         The dataset number is incremented after each dataset and set in redis as an integer.
 
         Returns:
-            str: Endpoint for dataset number.
+            EndpointInfo: Endpoint for dataset number.
         """
         endpoint = "scans/dataset_number"
         return EndpointInfo(
@@ -553,7 +553,7 @@ class MessageEndpoints:
         the scan segment using a messages.ScanMessage message.
 
         Returns:
-            str: Endpoint for scan segments.
+            EndpointInfo: Endpoint for scan segment.
         """
         endpoint = "scans/scan_segment"
         return EndpointInfo(
@@ -567,7 +567,7 @@ class MessageEndpoints:
         publish the scan baseline readings using a messages.ScanBaselineMessage message.
 
         Returns:
-            str: Endpoint for scan baseline readings.
+            EndpointInfo: Endpoint for scan baseline readings.
         """
         endpoint = "scans/scan_baseline"
         return EndpointInfo(
@@ -586,7 +586,7 @@ class MessageEndpoints:
         certain actions, e.g. to move a motor.
 
         Returns:
-            str: Endpoint for device instructions.
+            EndpointInfo: Endpoint for device instructions.
         """
         endpoint = "internal/devices/instructions"
         return EndpointInfo(
@@ -605,7 +605,7 @@ class MessageEndpoints:
             rpc_id (str): RPC ID.
 
         Returns:
-            str: Endpoint for device rpc.
+            EndpointInfo: Endpoint for device rpc.
         """
         endpoint = f"internal/devices/rpc/{rpc_id}"
         return EndpointInfo(
@@ -619,7 +619,7 @@ class MessageEndpoints:
         macros. The endpoint is connected to a redis list.
 
         Returns:
-            str: Endpoint for pre scan macros.
+            EndpointInfo: Endpoint for pre scan macros.
         """
         endpoint = "internal/pre_scan_macros"
         return EndpointInfo(
@@ -637,7 +637,7 @@ class MessageEndpoints:
             scanID (str): Scan ID.
 
         Returns:
-            str: Endpoint for scan info.
+            EndpointInfo: Endpoint for scan info.
 
         """
         endpoint = f"public/{scanID}/scan_info"
@@ -658,7 +658,7 @@ class MessageEndpoints:
             pointID (int): Point ID to specify a single point in a scan.
 
         Returns:
-            str: Endpoint for scan segments.
+            EndpointInfo: Endpoint for public scan segments.
 
         """
         endpoint = f"public/{scanID}/scan_segment/{pointID}"
@@ -678,7 +678,7 @@ class MessageEndpoints:
             scanID (str): Scan ID.
 
         Returns:
-            str: Endpoint for scan baseline readings.
+            EndpointInfo: Endpoint for public scan baseline readings.
         """
         endpoint = f"public/{scanID}/scan_baseline"
         return EndpointInfo(
@@ -696,7 +696,7 @@ class MessageEndpoints:
             name (str): File name.
 
         Returns:
-            str: Endpoint for public files.
+            EndpointInfo: Endpoint for public files.
         """
         endpoint = f"public/{scanID}/file/{name}"
         return EndpointInfo(
@@ -713,7 +713,7 @@ class MessageEndpoints:
             name (str): File name.
 
         Returns:
-            str: Endpoint for public file_events.
+            EndpointInfo: Endpoint for public file events.
         """
         endpoint = f"public/file_event/{name}"
         return EndpointInfo(
@@ -727,7 +727,7 @@ class MessageEndpoints:
         file content using a messages.FileContentMessage message.
 
         Returns:
-            str: Endpoint for file content.
+            EndpointInfo: Endpoint for file content.
         """
         endpoint = "internal/file_content"
         return EndpointInfo(
@@ -744,7 +744,7 @@ class MessageEndpoints:
         a messages.LogMessage message.
 
         Returns:
-            str: Endpoint for log.
+            EndpointInfo: Endpoint for log.
         """
         endpoint = "internal/log"
         return EndpointInfo(
@@ -758,7 +758,7 @@ class MessageEndpoints:
         using a messages.AlarmMessage message.
 
         Returns:
-            str: Endpoint for alarms.
+            EndpointInfo: Endpoint for alarms.
         """
         endpoint = "internal/alarms"
         return EndpointInfo(
@@ -775,6 +775,9 @@ class MessageEndpoints:
 
         Args:
             service_id (str): Service ID, typically a uuid4 string.
+
+        Returns:
+            EndpointInfo: Endpoint for service status.
         """
         endpoint = f"internal/services/status/{service_id}"
         return EndpointInfo(
@@ -791,7 +794,7 @@ class MessageEndpoints:
             service_id (str): Service ID, typically a uuid4 string.
 
         Returns:
-            str: Endpoint for metrics.
+            EndpointInfo: Endpoint for metrics.
         """
         endpoint = f"internal/services/metrics/{service_id}"
         return EndpointInfo(
@@ -810,7 +813,7 @@ class MessageEndpoints:
             RID (str): Request ID.
 
         Returns:
-            str: Endpoint for service response.
+            EndpointInfo: Endpoint for service response.
         """
         endpoint = f"internal/services/response/{RID}"
         return EndpointInfo(
@@ -830,7 +833,7 @@ class MessageEndpoints:
             var_name (str): Variable name.
 
         Returns:
-            str: Endpoint for global variables.
+            EndpointInfo: Endpoint for global variables.
         """
         endpoint = f"public/vars/{var_name}"
         return EndpointInfo(
@@ -844,7 +847,7 @@ class MessageEndpoints:
         messages.ObserverMessage message. This endpoint is currently not used.
 
         Returns:
-            str: Endpoint for observer.
+            EndpointInfo: Endpoint for observer.
         """
         endpoint = "internal/observer"
         return EndpointInfo(
@@ -861,7 +864,7 @@ class MessageEndpoints:
             var_name (str): Variable name.
 
         Returns:
-            str: Endpoint for progress.
+            EndpointInfo: Endpoint for progress.
         """
         endpoint = f"public/progress/{var_name}"
         return EndpointInfo(
@@ -878,7 +881,7 @@ class MessageEndpoints:
         url, user and token using a direct msgpack dump of a dictionary.
 
         Returns:
-            str: Endpoint for logbook.
+            EndpointInfo: Endpoint for logbook.
         """
         endpoint = "internal/logbook"
         return EndpointInfo(
@@ -893,7 +896,7 @@ class MessageEndpoints:
         url, user and token using a CredentialsMessage.
 
         Returns:
-            str: Endpoint for scibec.
+            EndpointInfo: Endpoint for scibec.
         """
         endpoint = "internal/scibec"
         return EndpointInfo(
@@ -905,6 +908,9 @@ class MessageEndpoints:
     def account() -> EndpointInfo:
         """
         Endpoint for account. This endpoint is used to publish the current account.
+
+        Returns:
+            EndpointInfo: Endpoint for account.
         """
         endpoint = "internal/account"
         return EndpointInfo(
@@ -922,7 +928,7 @@ class MessageEndpoints:
             process_id (str): Process ID, typically a uuid4 string.
 
         Returns:
-            str: Endpoint for processed data.
+            EndpointInfo: Endpoint for processed data.
         """
         endpoint = f"public/processed_data/{process_id}"
         return EndpointInfo(
@@ -938,7 +944,7 @@ class MessageEndpoints:
         using a messages.DAPConfigMessage message.
 
         Returns:
-            str: Endpoint for DAP configuration.
+            EndpointInfo: Endpoint for DAP configuration.
         """
         endpoint = "internal/dap/config"
         return EndpointInfo(
@@ -957,7 +963,7 @@ class MessageEndpoints:
             plugin_id (str): Plugin ID.
 
         Returns:
-            str: Endpoint for available DAP plugins.
+            EndpointInfo: Endpoint for available DAP plugins.
         """
         endpoint = f"internal/dap/available_plugins/{plugin_id}"
         return EndpointInfo(
@@ -973,7 +979,7 @@ class MessageEndpoints:
         messages.DAPRequestMessage message.
 
         Returns:
-            str: Endpoint for DAP request.
+            EndpointInfo: Endpoint for DAP request.
         """
         endpoint = "internal/dap/request"
         return EndpointInfo(
@@ -992,7 +998,7 @@ class MessageEndpoints:
             RID (str): Request ID.
 
         Returns:
-            str: Endpoint for DAP response.
+            EndpointInfo: Endpoint for DAP response.
         """
         endpoint = f"internal/dap/response/{RID}"
         return EndpointInfo(
@@ -1009,7 +1015,7 @@ class MessageEndpoints:
         using a messages.GUIConfigMessage message.
 
         Returns:
-            str: Endpoint for GUI configuration.
+            EndpointInfo: Endpoint for GUI configuration.
         """
         endpoint = f"public/gui/config/{gui_id}"
         return EndpointInfo(
@@ -1025,7 +1031,7 @@ class MessageEndpoints:
         messages.GUIDataMessage message.
 
         Returns:
-            str: Endpoint for GUI data.
+            EndpointInfo: Endpoint for GUI data.
         """
         endpoint = f"public/gui/data/{gui_id}"
         return EndpointInfo(
@@ -1041,7 +1047,7 @@ class MessageEndpoints:
         using a messages.GUIInstructionMessage message.
 
         Returns:
-            str: Endpoint for GUI instructions.
+            EndpointInfo: Endpoint for GUI instructions.
         """
         endpoint = f"public/gui/instruction/{gui_id}"
         return EndpointInfo(
@@ -1057,7 +1063,7 @@ class MessageEndpoints:
         using a messages.RequestResponseMessage message.
 
         Returns:
-            str: Endpoint for GUI instruction response.
+            EndpointInfo: Endpoint for GUI instruction response.
         """
         endpoint = f"public/gui/instruction_response/{RID}"
         return EndpointInfo(
