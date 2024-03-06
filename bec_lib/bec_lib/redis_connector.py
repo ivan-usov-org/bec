@@ -87,20 +87,20 @@ class StreamRegisterMixin:
 
     def register_stream(
         self,
-        topic: str = None,
-        pattern: str = None,
+        topics: str | list[str] | EndpointInfo | list[EndpointInfo] = None,
+        patterns: str | list[str] | EndpointInfo | list[EndpointInfo] = None,
         cb: callable = None,
-        from_start=False,
-        newest_only=False,
-        start_thread=True,
+        from_start: bool = False,
+        newest_only: bool = False,
+        start_thread: bool = True,
         **kwargs,
     ) -> int:
         """
         Register a callback for a stream topic or pattern
 
         Args:
-            topic (str, optional): topic. Defaults to None.
-            pattern (str, optional): pattern. Defaults to None.
+            topic (str, optional): Topic. This should be a valid message endpoint in BEC and can be a string or an EndpointInfo object. Defaults to None. Either topic or pattern should be provided.
+            pattern (str, optional): Pattern of topics. In contrast to topics, patterns may contain "*" wildcards. The evaluated patterns should be a valid message endpoint in BEC and can be a string or an EndpointInfo object. Defaults to None. Either topic or pattern should be provided.
             cb (callable, optional): callback. Defaults to None.
             from_start (bool, optional): read from start. Defaults to False.
             newest_only (bool, optional): read newest only. Defaults to False.
@@ -121,8 +121,8 @@ class StreamRegisterMixin:
             >>> connector.register_stream(pattern="test:*", cb=my_callback, start_thread=False, my_arg="test")
         """
 
-        if topic is None and pattern is None:
-            raise ValueError("topic and pattern cannot be both None")
+        if topics is None and patterns is None:
+            raise ValueError("topics and pattern cannot be both None")
 
         if newest_only and from_start:
             raise ValueError("newest_only and from_start cannot be both True")
@@ -134,16 +134,21 @@ class StreamRegisterMixin:
         # it can create safe refs for simple functions as well as methods
         cb_ref = louie.saferef.safe_ref(cb)
 
-        if pattern is not None:
-            stream_topic = pattern
+        if patterns is not None:
+            stream_topics = self._convert_endpointinfo_to_str(patterns)
         else:
-            stream_topic = topic
+            stream_topics = self._convert_endpointinfo_to_str(topics)
 
         if newest_only:
             # if newest_only is True, we need to provide a separate callback for each topic,
             # directly calling the callback. This is because we need to have a backpressure
             # mechanism in place, and we cannot rely on the dispatcher thread to handle it.
-            return self._add_direct_stream_listener(stream_topic, cb_ref, **kwargs)
+            if isinstance(stream_topics, list):
+                out = []
+                for topic in stream_topics:
+                    out.append(self._add_direct_stream_listener(topic, cb_ref, **kwargs))
+                return out
+            return self._add_direct_stream_listener(stream_topics, cb_ref, **kwargs)
 
         if self._stream_events_listener_thread is None:
             # create the thread that will get all messages for this connector;
@@ -151,18 +156,34 @@ class StreamRegisterMixin:
                 target=self._get_stream_messages_loop
             )
             self._stream_events_listener_thread.start()
-        stream_id = self._stream_counter()
-        self._stream_topics_cb[stream_topic].append(
-            StreamTopicInfo(
-                id="0-0",
-                topic=stream_topic,
-                stream_id=stream_id,
-                newest_only=newest_only,
-                from_start=from_start,
-                cb=cb_ref,
-                kwargs=kwargs,
+        if isinstance(stream_topics, list):
+            stream_id = []
+            for topic in stream_topics:
+                stream_id.append(self._stream_counter())
+                self._stream_topics_cb[topic].append(
+                    StreamTopicInfo(
+                        id="0-0",
+                        topic=topic,
+                        stream_id=stream_id,
+                        newest_only=newest_only,
+                        from_start=from_start,
+                        cb=cb_ref,
+                        kwargs=kwargs,
+                    )
+                )
+        else:
+            stream_id = self._stream_counter()
+            self._stream_topics_cb[stream_topics].append(
+                StreamTopicInfo(
+                    id="0-0",
+                    topic=stream_topics,
+                    stream_id=stream_id,
+                    newest_only=newest_only,
+                    from_start=from_start,
+                    cb=cb_ref,
+                    kwargs=kwargs,
+                )
             )
-        )
 
         if start_thread and self._stream_events_dispatcher_thread is None:
             # start dispatcher thread
@@ -488,13 +509,20 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
             raise TypeError(f"Message {msg} is not a BECMessage")
         self.raw_send(topic, MsgpackSerialization.dumps(msg), pipe)
 
-    def register(self, topics=None, patterns=None, cb=None, start_thread=True, **kwargs):
+    def register(
+        self,
+        topics: str | list[str] | EndpointInfo | list[EndpointInfo] = None,
+        patterns: str | list[str] | EndpointInfo | list[EndpointInfo] = None,
+        cb: callable = None,
+        start_thread: bool = True,
+        **kwargs,
+    ):
         """
         Register a callback for a topic or a pattern
 
         Args:
-            topics (str, list, optional): topic or list of topics. Defaults to None.
-            patterns (str, list, optional): pattern or list of patterns. Defaults to None.
+            topics (str, list, EndpointInfo, list[EndpointInfo], optional): topic or list of topics. Defaults to None. The topic should be a valid message endpoint in BEC and can be a string or an EndpointInfo object.
+            patterns (str, list, optional): pattern or list of patterns. Defaults to None. In contrast to topics, patterns may contain "*" wildcards. The evaluated patterns should be a valid message endpoint in BEC and can be a string or an EndpointInfo object.
             cb (callable, optional): callback. Defaults to None.
             start_thread (bool, optional): start the dispatcher thread. Defaults to True.
             **kwargs: additional keyword arguments to be transmitted to the callback
@@ -515,6 +543,9 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
                 target=self._get_messages_loop, args=(self._pubsub_conn,)
             )
             self._events_listener_thread.start()
+
+        if cb is None:
+            raise ValueError("Callback cb cannot be None")
         # make a weakref from the callable, using louie;
         # it can create safe refs for simple functions as well as methods
         cb_ref = louie.saferef.safe_ref(cb)
@@ -523,21 +554,17 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
             raise ValueError("topics and patterns cannot be both None")
 
         if patterns is not None:
-            if isinstance(patterns, str):
+            patterns = self._convert_endpointinfo_to_str(patterns)
+            if not isinstance(patterns, list):
                 patterns = [patterns]
-            elif isinstance(patterns, EndpointInfo):
-                _validate_endpoint(self.register, patterns)
-                patterns = [patterns.endpoint]
 
             self._pubsub_conn.psubscribe(patterns)
             for pattern in patterns:
                 self._topics_cb[pattern].append((cb_ref, kwargs))
         else:
-            if isinstance(topics, str):
+            topics = self._convert_endpointinfo_to_str(topics)
+            if not isinstance(topics, list):
                 topics = [topics]
-            elif isinstance(topics, EndpointInfo):
-                _validate_endpoint(self.register, topics)
-                topics = [topics.endpoint]
 
             self._pubsub_conn.subscribe(topics)
             for topic in topics:
@@ -547,6 +574,15 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
             # start dispatcher thread
             self._events_dispatcher_thread = threading.Thread(target=self._dispatch_events)
             self._events_dispatcher_thread.start()
+
+    def _convert_endpointinfo_to_str(self, endpoint):
+        if isinstance(endpoint, EndpointInfo):
+            return endpoint.endpoint
+        if isinstance(endpoint, str):
+            return endpoint
+        if isinstance(endpoint, list):
+            return [self._convert_endpointinfo_to_str(e) for e in endpoint]
+        raise ValueError(f"Invalid endpoint {endpoint}")
 
     def _get_messages_loop(self, pubsub: redis.client.PubSub) -> None:
         """
