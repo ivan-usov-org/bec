@@ -1,0 +1,50 @@
+<html>
+    <head>
+	<script src="https://cdn.socket.io/4.7.4/socket.io.min.js" integrity="sha384-Gr6Lu2Ajx28mzwyVR8CFkULdCU7kMlZ9UthllibdOSo6qAiN+yXNHqtgdTvFXMT4" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.min.js"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.min.css">
+    </head>
+    <body>
+      <div id="terminal" style="height:100%;width:100%;"></div>
+      <script>
+	      const fitAddon = new FitAddon.FitAddon();
+	      const ws = io("ws://"+window.location.host);
+	      const term_div = document.getElementById("terminal");
+              const rows = parseInt(term_div.offsetHeight / 16);
+              const cols = parseInt(term_div.offsetWidth / 9);
+              const term = new Terminal({
+                  theme: { background: "white", foreground: "black", cursor: "black" },
+                  convertEol: true,
+                  rows: rows,
+                  cols: cols,
+              });
+
+              const handle_resize = () => {
+                  const dims = fitAddon.proposeDimensions();
+		  console.log("resizing terminal", dims);
+                  fitAddon.fit();
+              };
+
+              term.loadAddon(fitAddon);
+              term.open(term_div);
+              const resize_observer = new ResizeObserver(handle_resize);
+              resize_observer.observe(term_div);
+
+              ws.on("terminal_output", (data) => {
+                  typeof data === "string"
+                    ? term.write(data)
+                    : term.write(new Uint8Array(data));
+              });
+              term.onData((data) => {
+                  ws.emit("terminal_input", { input: data });
+              });
+              ws.emit("attach", { w: cols, h: rows });
+              term.options.disableStdin = true;
+              ws.on("ready", () => {
+                  term.options.disableStdin = false;
+              });
+
+      </script>
+    </body>
+</html>
