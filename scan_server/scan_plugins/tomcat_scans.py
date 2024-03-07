@@ -349,7 +349,7 @@ class AeroSnapNStep(AeroScriptedScan):
         #self.scanTra = self.caller_kwargs.get("travel", 80)
         #self.scanAcc = self.caller_kwargs.get("acceleration", 500)
 
-        self.subs   = subs={'startpos': self.scanStart, 'stepsize': self.scanStepSize, 'numsteps': self.scanExpNum, 'exptime': self.scanExpTime}
+        self.subs = {'startpos': self.scanStart, 'stepsize': self.scanStepSize, 'numsteps': self.scanExpNum, 'exptime': self.scanExpTime}
 
 
     def scan_core(self):
@@ -362,6 +362,137 @@ class AeroSnapNStep(AeroScriptedScan):
         yield from self.stubs.send_rpc_and_wait("es1_ddaq", "npoints.put", self.scanExpNum)
         #st = yield from self.stubs.send_rpc_and_wait("es1_ddaq", "collect")
         #st.wait()       
+
+
+
+class AeroScriptedSequence(AeroScriptedScan):
+    scan_name = "aero_scripted_sequence"
+    scan_report_hint = "table"
+    required_kwargs = ["startpos", "ranges"]
+    arg_input = {}
+    arg_bundle_size = {"bundle": len(arg_input), "min": None, "max": None}
+
+    def __init__(self, *args, parameter: dict = None, **kwargs):
+        """ Executes an AeroScript template as a flyer
+
+        Examples:
+            >>> scans.aero_scripted_sequence(startpos=42, ranges=([179.9, 0.1, 5]), expnum=3600, repnum=3, repmode="PosNeg")
+        """
+        super().__init__(parameter=parameter, **kwargs)
+        self.axis = []
+        self.scan_motors = ['es1_roty']
+        self.num_pos = 0
+
+        self.filename   = "/afs/psi.ch/user/m/mohacsi_i/ophyd_devices/ophyd_devices/epics/devices/AerotechSimpleSequenceTemplate.ascript"
+        self.scanTaskIndex   = self.caller_kwargs.get("taskindex", 4)
+
+        self.scanStart   = self.caller_kwargs.get("startpos")
+        self.scanRanges   = self.caller_kwargs.get("ranges")
+        self.scanExpNum   = self.caller_kwargs.get("expnum", 25000)
+        self.scanRepNum     = self.caller_kwargs.get("repnum", 1)
+        self.scanRepMode     = self.caller_kwargs.get("repmode", "Pos")
+
+        self.scanVel = self.caller_kwargs.get("velocity", 30)
+        self.scanTra = self.caller_kwargs.get("travel", 80)
+        self.scanAcc = self.caller_kwargs.get("acceleration", 500)
+        self.scanSafeDist = self.caller_kwargs.get("safedist", 10)
+
+        self.subs ={'startpos': self.scanStart, 'scandir': self.scanRepMode, 'nrepeat': self.scanRepNum, 'npoints': self.scanExpNum, 'scanvel': self.scanVel, 'jogvel': self.scanTra, 'scanacc': self.scanAcc}
+
+        if self.scanRepMode not in ["PosNeg", "Pos", "NegPos", "Neg"]:
+            raise RuntimeError(f"Unexpected sequence repetition mode: {self.scanRepMode}")
+
+        if isinstance(self.scanRanges[0], (int, float)):
+            self.scanRanges = (self.scanRanges)
+
+    def pre_scan(self):
+        # Calculate PSO positions from tables
+        AccDist = 0.5 * self.scanVel * self.scanVel / self.scanAcc + self.scanSafeDist
+
+        # Relative PSO bounds
+        self.psoBoundsPos = [AccDist]
+        try:
+            for line in self.scanRanges:
+                print(f"Line is: {line} of type {type(line)}")
+                for rr in range(int(line[2])):
+                    self.psoBoundsPos.append(line[0])
+                    self.psoBoundsPos.append(line[1])
+        except TypeError:
+            line = self.scanRanges
+            print(f"Line is: {line} of type {type(line)}")
+            for rr in range(int(line[2])):
+                self.psoBoundsPos.append(line[0])
+                self.psoBoundsPos.append(line[1])
+        del self.psoBoundsPos[-1]
+
+        self.psoBoundsNeg = [AccDist]
+        self.psoBoundsNeg.extend(self.psoBoundsPos[::-1])
+
+        self.scanrange = 2*AccDist + np.sum(self.psoBoundsPos)
+        if self.scanRepMode in ["PosNeg", "Pos"]:
+            self.PosStart = self.scanStart - AccDist
+        elif self.scanRepMode in ["NegPos", "Neg"]:
+            self.PosStart = self.scanStart + AccDist
+        else:
+            raise RuntimeError(f"Unexpected sequence repetition mode: {self.scanRepMode}")
+        print(f"\tCalculated scan range: {self.PosStart} range {self.scanrange}")        
+
+        # ToDo: We could append all distances and write a much longer 'distance array'. this would elliminate the need of rearming...
+        self.subs.update({'psoBoundsPos': self.psoBoundsPos, 'psoBoundsNeg': self.psoBoundsNeg, 'scanrange': self.scanrange})
+
+
+        # Move roughly to start position 
+        yield from self.stubs.send_rpc_and_wait("es1_roty", "configure", {'velocity': self.scanTra, "acceleration":self.scanTra/self.scanAcc})
+        st = yield from self.stubs.send_rpc_and_wait("es1_roty", "move", self.PosStart)
+        st.wait()
+
+        yield from super().pre_scan()
+
+    def scan_core(self):
+        print("TOMCAT Snap N Step scan (via Jinjad AeroScript)")  
+        
+        # Wait for parent
+        yield from super().scan_core()
+
+        # Collect -  Throws a warning due to returning a generator
+        yield from self.stubs.send_rpc_and_wait("es1_ddaq", "npoints.put", self.scanExpNum)
+        #st = yield from self.stubs.send_rpc_and_wait("es1_ddaq", "collect")
+        #st.wait()       
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
