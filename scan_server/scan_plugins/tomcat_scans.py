@@ -335,7 +335,7 @@ class AeroSnapNStep(AeroScriptedScan):
         self.scan_motors = ['es1_roty']
         self.num_pos = 0
 
-        self.filename   = "/afs/psi.ch/user/m/mohacsi_i/ophyd_devices/ophyd_devices/epics/devices/AerotechSnapAndStepTemplate.ascript"
+        self.filename   = "/afs/psi.ch/user/m/mohacsi_i/ophyd_devices/ophyd_devices/epics/devices/aerotech/AerotechSnapAndStepTemplate.ascript"
         self.scanTaskIndex   = self.caller_kwargs.get("taskindex", 4)
 
 
@@ -383,7 +383,7 @@ class AeroScriptedSequence(AeroScriptedScan):
         self.scan_motors = ['es1_roty']
         self.num_pos = 0
 
-        self.filename   = "/afs/psi.ch/user/m/mohacsi_i/ophyd_devices/ophyd_devices/epics/devices/AerotechSimpleSequenceTemplate.ascript"
+        self.filename   = "/afs/psi.ch/user/m/mohacsi_i/ophyd_devices/ophyd_devices/epics/devices/aerotech/AerotechSimpleSequenceTemplate.ascript"
         self.scanTaskIndex   = self.caller_kwargs.get("taskindex", 4)
 
         self.scanStart   = self.caller_kwargs.get("startpos")
