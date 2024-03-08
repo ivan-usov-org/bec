@@ -36,18 +36,14 @@ class FlomniInitStagesMixin:
 
     def flomni_init_stages(self):
 
-        user_input = input(
-            "Starting initialization of flOMNI stages. OK? [y/n]"
-        )
+        user_input = input("Starting initialization of flOMNI stages. OK? [y/n]")
         if user_input == "y":
             print("staring...")
         else:
             return
 
-        if(self.check_all_axes_of_fomni_referenced()):
-            user_input = input(
-            "Continue anyways? [y/n]"
-            )
+        if self.check_all_axes_of_fomni_referenced():
+            user_input = input("Continue anyways? [y/n]")
             if user_input == "y":
                 print("ok then...")
             else:
@@ -245,9 +241,7 @@ class FlomniInitStagesMixin:
                 continue
             break
 
-        user_input = input(
-            "Start limit switch search of fopty? [y/n]"
-        )
+        user_input = input("Start limit switch search of fopty? [y/n]")
         if user_input == "y":
             print("good then")
         else:
@@ -260,31 +254,28 @@ class FlomniInitStagesMixin:
         print("done")
 
         dev.fsamx.controller.galil_show_all()
- 
+
         self.set_limits()
 
         self._align_setup()
 
     def check_all_axes_of_fomni_referenced(self) -> bool:
-        if(
-            dev.fosax.controller.axis_is_referenced(0) &
-            dev.fosax.controller.axis_is_referenced(1) &
-            dev.fosax.controller.axis_is_referenced(2) &
-            dev.fsamx.controller.all_axes_referenced() &
-            dev.feyex.controller.all_axes_referenced() &
-            dev.fsamroy.controller.all_axes_referenced() &
-            dev.fsamroy.controller.is_motor_on('A')
+        if (
+            dev.fosax.controller.axis_is_referenced(0)
+            & dev.fosax.controller.axis_is_referenced(1)
+            & dev.fosax.controller.axis_is_referenced(2)
+            & dev.fsamx.controller.all_axes_referenced()
+            & dev.feyex.controller.all_axes_referenced()
+            & dev.fsamroy.controller.all_axes_referenced()
+            & dev.fsamroy.controller.is_motor_on("A")
         ):
             print("All axes of flomni are referenced.")
-            return(True)
+            return True
         else:
-            return(False)
-        
+            return False
 
     def set_limits(self):
-        user_input = input(
-            "Set default limits for flOMNI? [y/n]"
-        )
+        user_input = input("Set default limits for flOMNI? [y/n]")
         if user_input == "y":
             print("setting limits...")
         else:
@@ -312,9 +303,7 @@ class FlomniInitStagesMixin:
         dev.ftrackz.limits = [4.5, 5.5]
 
     def _align_setup(self):
-        user_input = input(
-            "Start moving stages to default initial positions? [y/n]"
-        )
+        user_input = input("Start moving stages to default initial positions? [y/n]")
         if user_input == "y":
             print("Start moving stages...")
         else:
