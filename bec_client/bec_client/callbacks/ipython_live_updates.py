@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import collections
 import time
 from typing import TYPE_CHECKING
@@ -25,6 +24,11 @@ logger = bec_logger.logger
 
 class IPythonLiveUpdates:
     def __init__(self, client: BECClient) -> None:
+        """Class to handle live updates for IPython, also works in Jupyterlab.
+
+        Args:
+            client (BECClient): The BECClient instance.
+        """
         self.client = client
         self._interrupted_request = None
         self._active_callback = None
@@ -36,6 +40,11 @@ class IPythonLiveUpdates:
         self.print_table_data = True
 
     def _process_report_instructions(self, report_instructions: list) -> None:
+        """Process instructions for the live updates.
+
+        Args:
+            report_instructions (list): The list of report instructions.
+        """
         scan_type = self._active_request.content["scan_type"]
         if scan_type in ["open_scan_def", "close_scan_def"]:
             self._process_instruction({"table_wait": 0})
@@ -55,57 +64,52 @@ class IPythonLiveUpdates:
             self._processed_instructions += 1
 
     def _process_instruction(self, instr: dict):
+        """Process the received instruction based on scan_report_type.
+
+        Args:
+            instr (dict): The instruction to process.
+        """
         scan_report_type = list(instr.keys())[0]
         scan_def_id = self.client.scans._scan_def_id
         if scan_def_id is None:
             if scan_report_type == "readback":
-                asyncio.run(
+                LiveUpdatesReadbackProgressbar(
+                    self.client,
+                    report_instruction=instr,
+                    request=self._active_request,
+                    callbacks=self._user_callback,
+                ).run()
+            elif scan_report_type == "table_wait":
+                LiveUpdatesTable(
+                    self.client,
+                    report_instruction=instr,
+                    request=self._active_request,
+                    callbacks=self._user_callback,
+                    print_table_data=self.print_table_data,
+                ).run()
+            elif scan_report_type == "scan_progress":
+                LiveUpdatesScanProgress(
+                    self.client,
+                    report_instruction=instr,
+                    request=self._active_request,
+                    callbacks=self._user_callback,
+                ).run()
+            else:
+                raise ValueError(f"Unknown scan report type: {scan_report_type}")
+        else:
+            if self._active_callback:
+                if scan_report_type == "readback":
                     LiveUpdatesReadbackProgressbar(
                         self.client,
                         report_instruction=instr,
                         request=self._active_request,
                         callbacks=self._user_callback,
                     ).run()
-                )
-            elif scan_report_type == "table_wait":
-                asyncio.run(
-                    LiveUpdatesTable(
-                        self.client,
-                        report_instruction=instr,
-                        request=self._active_request,
-                        callbacks=self._user_callback,
-                        print_table_data=self.print_table_data,
-                    ).run()
-                )
-            elif scan_report_type == "scan_progress":
-                asyncio.run(
-                    LiveUpdatesScanProgress(
-                        self.client,
-                        report_instruction=instr,
-                        request=self._active_request,
-                        callbacks=self._user_callback,
-                    ).run()
-                )
-            else:
-                raise ValueError(f"Unknown scan report type: {scan_report_type}")
-        else:
-            if self._active_callback:
-                if scan_report_type == "readback":
-                    asyncio.run(
-                        LiveUpdatesReadbackProgressbar(
-                            self.client,
-                            report_instruction=instr,
-                            request=self._active_request,
-                            callbacks=self._user_callback,
-                        ).run()
-                    )
                 else:
-                    asyncio.run(
-                        self._active_callback.resume(
-                            request=self._active_request,
-                            report_instruction=instr,
-                            callbacks=self._user_callback,
-                        )
+                    self._active_callback.resume(
+                        request=self._active_request,
+                        report_instruction=instr,
+                        callbacks=self._user_callback,
                     )
 
                 return
@@ -117,9 +121,15 @@ class IPythonLiveUpdates:
                 callbacks=self._user_callback,
                 print_table_data=self.print_table_data,
             )
-            asyncio.run(self._active_callback.run())
+            self._active_callback.run()
 
-    def _available_req_blocks(self, queue, request):
+    def _available_req_blocks(self, queue: QueueItem, request: messages.ScanQueueMessage):
+        """Get the available request blocks.
+
+        Args:
+            queue (QueueItem): The queue item.
+            request (messages.ScanQueueMessage): The request message.
+        """
         available_blocks = [
             req_block
             for req_block in queue.request_blocks
@@ -127,7 +137,10 @@ class IPythonLiveUpdates:
         ]
         return available_blocks
 
-    def process_request(self, request, scan_report_type, callbacks):
+    def process_request(
+        self, request: messages.ScanQueueMessage, scan_report_type: str, callbacks: any
+    ) -> None:
+        """Process the request and report instructions."""
         # pylint: disable=protected-access
         try:
             with self.client._sighandler:
@@ -135,7 +148,7 @@ class IPythonLiveUpdates:
                 self._active_request = request
                 self._user_callback = callbacks
                 scan_request = ScanRequestMixin(self.client, request.metadata["RID"])
-                asyncio.run(scan_request.wait())
+                scan_request.wait()
 
                 # get the corresponding queue item
                 while not scan_request.request_storage.storage[-1].queue:
@@ -207,6 +220,11 @@ class IPythonLiveUpdates:
         return False
 
     def _reset(self, forced=False):
+        """Reset the active request and callback.
+
+        Args:
+            forced(bool): If True, the reset is forced.
+        """
         self._interrupted_request = None
 
         self._user_callback = None
@@ -222,6 +240,7 @@ class IPythonLiveUpdates:
             self._active_callback = None
 
     def continue_request(self):
+        """Continue the interrupted request."""
         if not self._interrupted_request:
             return
         self.process_request(*self._interrupted_request, self._user_callback)

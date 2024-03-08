@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import abc
-import asyncio
 import threading
 import time
 import traceback
@@ -18,7 +17,7 @@ logger = bec_logger.logger
 
 
 class ScanRequestError(Exception):
-    pass
+    """Error raised when a scan request is rejected"""
 
 
 def set_event_delayed(event: threading.Event, delay: int) -> None:
@@ -51,6 +50,14 @@ class LiveUpdatesBase(abc.ABC):
         request: messages.ScanQueueMessage = None,
         callbacks: list[Callable] = None,
     ) -> None:
+        """Base class for live updates
+
+        Args:
+            bec (BECClient): BECClient instance
+            report_instruction (dict, optional): report instruction. Defaults to None.
+            request (messages.ScanQueueMessage, optional): scan queue request. Defaults to None.
+            callbacks (list[Callable], optional): list of callback functions. Defaults to None.
+        """
         self.bec = bec
         self.request = request
         self.RID = request.metadata["RID"]
@@ -60,9 +67,9 @@ class LiveUpdatesBase(abc.ABC):
             self.callbacks = []
         self.callbacks = callbacks if isinstance(callbacks, list) else [callbacks]
 
-    async def wait_for_request_acceptance(self):
+    def wait_for_request_acceptance(self):
         scan_request = ScanRequestMixin(self.bec, self.RID)
-        await scan_request.wait()
+        scan_request.wait()
         self.scan_queue_request = scan_request.scan_queue_request
 
     @abc.abstractmethod
@@ -82,39 +89,49 @@ class LiveUpdatesBase(abc.ABC):
 
 class ScanRequestMixin:
     def __init__(self, bec: BECClient, RID: str) -> None:
+        """Mixin to handle scan request acceptance
+
+        Args:
+            bec (BECClient): BECClient instance
+            RID (str): request ID
+        """
         self.bec = bec
         self.request_storage = self.bec.queue.request_storage
         self.RID = RID
         self.scan_queue_request = None
 
-    async def _wait_for_scan_request(self) -> RequestItem:
-        """wait for scan queuest"""
+    def _wait_for_scan_request(self) -> RequestItem:
+        """wait for scan queuest
+
+        Returns:
+            RequestItem: scan queue request
+        """
         logger.debug("Waiting for request ID")
         start = time.time()
         while self.request_storage.find_request_by_ID(self.RID) is None:
-            await asyncio.sleep(0.1)
+            time.sleep(0.1)
             check_alarms(self.bec)
         logger.debug(f"Waiting for request ID finished after {time.time()-start} s.")
         return self.request_storage.find_request_by_ID(self.RID)
 
-    async def _wait_for_scan_request_decision(self):
+    def _wait_for_scan_request_decision(self):
         """wait for a scan queuest decision"""
         logger.debug("Waiting for decision")
         start = time.time()
         while self.scan_queue_request.decision_pending:
-            await asyncio.sleep(0.1)
+            time.sleep(0.1)
             check_alarms(self.bec)
         logger.debug(f"Waiting for decision finished after {time.time()-start} s.")
 
-    async def wait(self):
+    def wait(self):
         """wait for the request acceptance"""
-        self.scan_queue_request = await self._wait_for_scan_request()
+        self.scan_queue_request = self._wait_for_scan_request()
 
-        await self._wait_for_scan_request_decision()
+        self._wait_for_scan_request_decision()
         check_alarms(self.bec)
 
         while self.scan_queue_request.accepted is None:
-            await asyncio.sleep(0.01)
+            time.sleep(0.1)
             check_alarms(self.bec)
 
         if not self.scan_queue_request.accepted[0]:
@@ -124,5 +141,5 @@ class ScanRequestMixin:
             )
 
         while self.scan_queue_request.queue is None:
-            await asyncio.sleep(0.01)
+            time.sleep(0.1)
             check_alarms(self.bec)

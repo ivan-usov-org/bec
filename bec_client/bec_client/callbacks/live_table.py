@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import asyncio
 from collections.abc import Callable
+import time
 from typing import TYPE_CHECKING
 
 from bec_lib import bec_logger, messages
@@ -58,11 +58,12 @@ class LiveUpdatesTable(LiveUpdatesBase):
         self.point_data = None
         self.point_id = 0
         self.table = None
+        self.__print_table_data = None
         self._print_table_data = (
             print_table_data if print_table_data is not None else self.REPORT_TYPE == "table_wait"
         )
 
-    async def wait_for_scan_to_start(self):
+    def wait_for_scan_to_start(self):
         """wait until the scan starts"""
         while True:
             queue_pos = self.scan_item.queue.queue_position
@@ -79,11 +80,11 @@ class LiveUpdatesTable(LiveUpdatesBase):
                 end="\r",
                 flush=True,
             )
-            await asyncio.sleep(0.1)
+            time.sleep(0.1)
         while not self.scan_item.scan_number:
-            await asyncio.sleep(0.05)
+            time.sleep(0.05)
 
-    async def wait_for_scan_item_to_finish(self):
+    def wait_for_scan_item_to_finish(self):
         """wait for scan completion"""
         while True:
             if self.scan_item.end_time:
@@ -92,16 +93,18 @@ class LiveUpdatesTable(LiveUpdatesBase):
                 if self.scan_item.queue.queue_position is None:
                     break
             self.check_alarms()
-            await asyncio.sleep(0.1)
+            time.sleep(0.1)
 
     def check_alarms(self):
+        """check for alarms"""
         check_alarms(self.bec)
 
-    async def resume(self, request, report_instruction, callbacks):
+    def resume(self, request: messages.ScanQueueMessage, report_instruction: str, callbacks):
+        """resume the scan after a pause"""
         super().__init__(
             self.bec, request=request, report_instruction=report_instruction, callbacks=callbacks
         )
-        await self.process_request()
+        self.process_request()
 
     @property
     def devices(self):
@@ -130,11 +133,19 @@ class LiveUpdatesTable(LiveUpdatesBase):
         return devices
 
     def _prepare_table(self) -> PrettyTable:
+        """Prepares the custom table for the live updates."""
         header = self._get_header()
+        print(header)
         max_len = max(len(head) for head in header)
+        print(max_len)
         return PrettyTable(header, padding=max_len)
 
     def _get_header(self) -> list:
+        """get the header for the table with up to self.MAX_DEVICES as entries
+
+        Returns:
+            list: header for the table
+        """
         header = ["seq. num"]
         for dev in self.devices:
             if dev in self.bec.device_manager.devices:
@@ -144,14 +155,18 @@ class LiveUpdatesTable(LiveUpdatesBase):
                 header.append(dev)
         return header
 
-    async def update_scan_item(self):
+    def update_scan_item(self, timeout: float = 15):
         """get the current scan item"""
+        start = time.time()
         while self.scan_queue_request.scan is None:
             self.check_alarms()
-            await asyncio.sleep(0.1)
+            time.sleep(0.1)
+            if time.time() - start > timeout:
+                raise TimeoutError("Could not find scan item.")
         self.scan_item = self.scan_queue_request.scan
 
-    async def core(self):
+    def core(self):
+        """core function to run the live updates for the table"""
         req_ID = self.scan_queue_request.requestID
         while True:
             request_block = [
@@ -163,9 +178,14 @@ class LiveUpdatesTable(LiveUpdatesBase):
                 break
             self.check_alarms()
 
-        await self._run_update(self.report_instruction[self.REPORT_TYPE])
+        self._run_update(self.report_instruction[self.REPORT_TYPE])
 
-    async def _run_update(self, target_num_points):
+    def _run_update(self, target_num_points: int):
+        """run the update loop with the progress bar
+
+        Args:
+            target_num_points (int): number of points to be collected
+        """
         with ScanProgressBar(
             scan_number=self.scan_item.scan_number, clear_on_exit=self._print_table_data
         ) as progressbar:
@@ -188,7 +208,7 @@ class LiveUpdatesTable(LiveUpdatesBase):
                     self.scan_item.poll_callbacks()
                 else:
                     logger.debug("waiting for new data point")
-                    await asyncio.sleep(0.1)
+                    time.sleep(0.1)
 
                 if not self.scan_item.num_points:
                     continue
@@ -198,13 +218,43 @@ class LiveUpdatesTable(LiveUpdatesBase):
                 if self.point_id > self.scan_item.num_points:
                     raise RuntimeError("Received more points than expected.")
 
+    @property
+    def _print_table_data(self) -> bool:
+        """Checks if the table should be printed or not.
+
+        Returns:
+            bool: True/False
+        """
+        if not self.__print_table_data:
+            return False
+        try:
+            # pylint: disable=protected-access
+            # pylint: disable=undefined-variable
+            if get_ipython().__class__.__name__ == "ZMQInteractiveShell":
+                self.__print_table_data = False
+                return False
+        except Exception:
+            pass
+        return self.__print_table_data
+
+    @_print_table_data.setter
+    def _print_table_data(self, value: bool):
+        """Set the print_table_data attribute.
+
+        Args:
+            value (bool): value to set
+        """
+        self.__print_table_data = value
+
     def print_table_data(self):
+        """print the table data for the current point_id"""
         if not self._print_table_data:
             return
 
         if not self.table:
             self.dev_values = (len(self._get_header()) - 1) * [0]
             self.table = self._prepare_table()
+            print(len(self.table.get_header_lines()))
             print(self.table.get_header_lines())
 
         if self.point_id % 100 == 0:
@@ -244,6 +294,7 @@ class LiveUpdatesTable(LiveUpdatesBase):
         print(self.table.get_row(str(self.point_id), *self.dev_values))
 
     def close_table(self):
+        """close the table and print the footer"""
         if not self.table:
             return
         elapsed_time = self.scan_item.end_time - self.scan_item.start_time
@@ -253,15 +304,16 @@ class LiveUpdatesTable(LiveUpdatesBase):
             )
         )
 
-    async def process_request(self):
+    def process_request(self):
+        """process the request and start the core loop for live updates"""
         if self.request.content["scan_type"] == "close_scan_def":
-            await self.wait_for_scan_item_to_finish()
+            self.wait_for_scan_item_to_finish()
             self.close_table()
             return
 
-        await self.wait_for_request_acceptance()
-        await asyncio.wait_for(self.update_scan_item(), timeout=15)
-        await self.wait_for_scan_to_start()
+        self.wait_for_request_acceptance()
+        self.update_scan_item(timeout=15)
+        self.wait_for_scan_to_start()
 
         if self.table:
             self.table = None
@@ -269,13 +321,14 @@ class LiveUpdatesTable(LiveUpdatesBase):
             if self._print_table_data:
                 print(f"\nStarting scan {self.scan_item.scan_number}.")
 
-        await self.core()
+        self.core()
 
-    async def run(self):
+    def run(self):
+        """run the live updates"""
         if self.request.content["scan_type"] == "open_scan_def":
-            await self.wait_for_request_acceptance()
+            self.wait_for_request_acceptance()
             return
-        await self.process_request()
-        await self.wait_for_scan_item_to_finish()
+        self.process_request()
+        self.wait_for_scan_item_to_finish()
         if self._print_table_data:
             self.close_table()

@@ -15,12 +15,22 @@ if TYPE_CHECKING:
 
 
 class ReadbackDataMixin:
-    def __init__(self, device_manager: DeviceManagerBase, devices) -> None:
+    def __init__(self, device_manager: DeviceManagerBase, devices: list) -> None:
+        """Mixin to get the current device values and request-done messages.
+
+        Args:
+            device_manager (DeviceManagerBase): device manager
+            devices (list): list of devices to monitor
+        """
         self.device_manager = device_manager
         self.devices = devices
 
-    def get_device_values(self):
-        """get the current device values"""
+    def get_device_values(self) -> list:
+        """get the current device values
+
+        Returns:
+            list: list of device values
+        """
         values = []
         for dev in self.devices:
             val = self.device_manager.devices[dev].read(cached=True)
@@ -43,8 +53,12 @@ class ReadbackDataMixin:
             self.device_manager.connector.get(MessageEndpoints.device_req_status(dev), pipe)
         return self.device_manager.connector.execute_pipeline(pipe)
 
-    def wait_for_RID(self, request):
-        """wait for the readback's metadata to match the request ID"""
+    def wait_for_RID(self, request: messages.ScanQueueMessage) -> None:
+        """wait for the readback's metadata to match the request ID
+
+        Args:
+            request (messages.ScanQueueMessage): request message
+        """
         while True:
             msgs = [
                 self.device_manager.connector.get(MessageEndpoints.device_readback(dev))
@@ -79,10 +93,11 @@ class LiveUpdatesReadbackProgressbar(LiveUpdatesBase):
         else:
             self.devices = list(request.content["parameter"]["args"].keys())
 
-    async def core(self):
+    def core(self):
+        """core function to monitor the device values and update the progressbar accordingly."""
         data_source = ReadbackDataMixin(self.bec.device_manager, self.devices)
         start_values = data_source.get_device_values()
-        await self.wait_for_request_acceptance()
+        self.wait_for_request_acceptance()
         data_source.wait_for_RID(self.request)
         if self.report_instruction:
             self.devices = self.report_instruction["readback"]["devices"]
@@ -115,7 +130,7 @@ class LiveUpdatesReadbackProgressbar(LiveUpdatesBase):
                     for msg in msgs
                 ]
                 if set(request_ids) != set([self.request.metadata["RID"]]):
-                    await progress.sleep()
+                    progress.sleep()
                     continue
 
                 req_done = True
@@ -124,6 +139,9 @@ class LiveUpdatesReadbackProgressbar(LiveUpdatesBase):
                         continue
                     if msg.content.get("success", False):
                         progress.set_finished(dev)
+                # pylint: disable=protected-access
+                progress._progress.refresh()
 
-    async def run(self):
-        await self.core()
+    def run(self):
+        """run the progressbar."""
+        self.core()
