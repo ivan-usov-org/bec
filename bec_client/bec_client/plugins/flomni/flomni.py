@@ -35,20 +35,48 @@ class FlomniError(Exception):
 class FlomniInitStagesMixin:
 
     def flomni_init_stages(self):
+
+        user_input = input(
+            "Starting initialization of flOMNI stages. OK? [y/n]"
+        )
+        if user_input == "y":
+            print("staring...")
+        else:
+            return
+
+        if(self.check_all_axes_of_fomni_referenced()):
+            user_input = input(
+            "Continue anyways? [y/n]"
+            )
+            if user_input == "y":
+                print("ok then...")
+            else:
+                return
+
+        print("Starting to drive ftransy to +y limit")
         self.drive_axis_to_limit(dev.ftransy, "forward")
         dev.ftransy.limits = [-100, 0]
+        print("done")
 
+        print("Starting to drive ftransz to -z limit")
         self.drive_axis_to_limit(dev.ftransz, "reverse")
         dev.ftransz.limits = [0, 145]
+        print("done")
 
+        print("Starting to drive ftransx to -x limit")
         self.drive_axis_to_limit(dev.ftransx, "reverse")
         dev.ftransx.limits = [0, 50]
+        print("done")
 
+        print("Starting to drive feyey to +y limit")
         self.drive_axis_to_limit(dev.feyey, "forward")
         dev.feyey.limits = [-1, -10]
+        print("done")
 
+        print("Starting to drive feyex to +x limit")
         self.drive_axis_to_limit(dev.feyex, "forward")
         dev.feyex.limits = [-30, -1]
+        print("done")
 
         user_input = input(
             "Init of foptz. Can the stage move to the upstream limit without collision? [y/n]"
@@ -58,14 +86,18 @@ class FlomniInitStagesMixin:
         else:
             return
 
+        print("Starting to drive foptz to -z limit")
         self.drive_axis_to_limit(dev.foptz, "reverse")
         dev.foptz.limits = [0, 27]
+        print("done")
 
+        print("Init of Smaract stages")
         ## smaract stages
         max_repeat = 100
         repeat = 0
         axis_id_fosaz = dev.fosaz._config["deviceConfig"].get("axis_Id")
         axis_id_numeric_fosaz = self.axis_id_to_numeric(axis_id_fosaz)
+        print("Moving fosaz upstream into the light curtain")
         while True:
             curtain_is_triggered = dev.foptz.controller.fosaz_light_curtain_is_triggered()
             if curtain_is_triggered:
@@ -78,6 +110,7 @@ class FlomniInitStagesMixin:
             time.sleep(1)
             repeat += 1
 
+        print("Finding index of fosax, fosay, fosaz")
         for ii in range(3):
             dev.fosax.controller.find_reference_mark(ii, 0, 1000, 1)
             time.sleep(1)
@@ -87,14 +120,20 @@ class FlomniInitStagesMixin:
         dev.fosaz.limits = [-6, -4]
         # dev.fosax.controller.describe()
 
+        print("Moving fosa stages to approximate beam positions")
         umv(dev.fosaz, -5)
         umv(dev.fosax, 10.4, dev.fosay, -3)
+        print("done")
 
+        print("Moving fheater to +y limit")
         self.drive_axis_to_limit(dev.fheater, "reverse")
         dev.fheater.limits = [-15, 0]
+        print("done")
 
+        print("Moving fsamy to -y limit")
         self.drive_axis_to_limit(dev.fsamy, "reverse")
         dev.fsamy.limits = [2, 3.1]
+        print("done")
 
         user_input = input(
             "Init of tracking stages. Did you remove the outer laser flight tubes? [y/n]"
@@ -105,11 +144,15 @@ class FlomniInitStagesMixin:
             print("Stopping.")
             return
 
+        print("Moving tracky to -y limit")
         self.drive_axis_to_limit(dev.ftracky, "reverse")
         dev.ftracky.limits = [2.2, 2.8]
+        print("done")
 
+        print("Moving ftrackz to -z limit")
         self.drive_axis_to_limit(dev.ftrackz, "reverse")
         dev.ftrackz.limits = [4.5, 5.5]
+        print("done")
 
         user_input = input("Init of sample stage. Is the piezo at about 0 deg? [y/n]")
         if user_input == "y":
@@ -118,11 +161,15 @@ class FlomniInitStagesMixin:
             print("Stopping.")
             return
 
+        print("Moving fsamx to +x limit")
         self.drive_axis_to_limit(dev.fsamx, "forward")
         dev.fsamx.limits = [-162, 0]
+        print("done")
 
+        print("Moving ftray to IN limit")
         self.drive_axis_to_limit(dev.ftray, "reverse")
         dev.ftray.limits = [-200, 0]
+        print("done")
 
         print("Initializing UPR stage.")
         user_input = input(
@@ -152,7 +199,7 @@ class FlomniInitStagesMixin:
             break
         user_input = input("Shall I start the index search? [y/n]")
         if user_input == "y":
-            print("good then")
+            print("good then. Starting index search.")
         else:
             print("Stopping.")
             return
@@ -168,6 +215,7 @@ class FlomniInitStagesMixin:
             print("Waiting for fsamroy to be referenced.")
             time.sleep(1)
         dev.fsamroy.limits = [-5, 365]
+        print("done")
 
         user_input = input(
             "Init of foptx. Can the stage move to the positive limit without collision? Attention:"
@@ -179,8 +227,10 @@ class FlomniInitStagesMixin:
             print("Stopping.")
             return
 
+        print("Moving foptx to +x limit")
         self.drive_axis_to_limit(dev.foptx, "forward")
         dev.foptx.limits = [-16, -14]
+        print("done")
 
         axis_id_fopty = dev.fopty._config["deviceConfig"].get("axis_Id")
 
@@ -195,14 +245,51 @@ class FlomniInitStagesMixin:
                 continue
             break
 
+        user_input = input(
+            "Start limit switch search of fopty? [y/n]"
+        )
+        if user_input == "y":
+            print("good then")
+        else:
+            print("Stopping.")
+            return
+
+        print("Moving fopty to -y limit")
         self.drive_axis_to_limit(dev.fopty, "reverse")
         dev.fopty.limits = [0, 4]
+        print("done")
 
+        dev.fsamx.controller.galil_show_all()
+ 
         self.set_limits()
 
         self._align_setup()
 
+    def check_all_axes_of_fomni_referenced(self) -> bool:
+        if(
+            dev.fosax.controller.axis_is_referenced(0) &
+            dev.fosax.controller.axis_is_referenced(1) &
+            dev.fosax.controller.axis_is_referenced(2) &
+            dev.fsamx.controller.all_axes_referenced() &
+            dev.feyex.controller.all_axes_referenced() &
+            dev.fsamroy.controller.all_axes_referenced() &
+            dev.fsamroy.controller.is_motor_on('A')
+        ):
+            print("All axes of flomni are referenced.")
+            return(True)
+        else:
+            return(False)
+        
+
     def set_limits(self):
+        user_input = input(
+            "Set default limits for flOMNI? [y/n]"
+        )
+        if user_input == "y":
+            print("setting limits...")
+        else:
+            print("Stopping.")
+            return
         dev.ftransy.limits = [-100, 0]
         dev.ftransz.limits = [0, 145]
         dev.ftransx.limits = [0, 50]
@@ -225,6 +312,14 @@ class FlomniInitStagesMixin:
         dev.ftrackz.limits = [4.5, 5.5]
 
     def _align_setup(self):
+        user_input = input(
+            "Start moving stages to default initial positions? [y/n]"
+        )
+        if user_input == "y":
+            print("Start moving stages...")
+        else:
+            print("Stopping.")
+            return
         # positions for optics out and 50 mm distance to sample
         umv(dev.ftrackz, 4.73, dev.ftracky, 2.5170, dev.foptx, -14.3, dev.fopty, 3.87)
 
