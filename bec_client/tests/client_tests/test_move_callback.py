@@ -17,8 +17,7 @@ def readback_data_mixin(bec_client):
         yield ReadbackDataMixin(bec_client.device_manager, ["samx", "samy"])
 
 
-@pytest.mark.asyncio
-async def test_move_callback(bec_client):
+def test_move_callback(bec_client):
     client = bec_client
     request = messages.ScanQueueMessage(
         scan_type="umv",
@@ -51,11 +50,10 @@ async def test_move_callback(bec_client):
                     with mock.patch.object(
                         ReadbackDataMixin, "get_request_done_msgs", mock_req_msg
                     ):
-                        await LiveUpdatesReadbackProgressbar(bec=client, request=request).run()
+                        LiveUpdatesReadbackProgressbar(bec=client, request=request).run()
 
 
-@pytest.mark.asyncio
-async def test_move_callback_with_report_instruction(bec_client):
+def test_move_callback_with_report_instruction(bec_client):
     client = bec_client
     request = messages.ScanQueueMessage(
         scan_type="umv",
@@ -96,7 +94,7 @@ async def test_move_callback_with_report_instruction(bec_client):
                     with mock.patch.object(
                         ReadbackDataMixin, "get_request_done_msgs", mock_req_msg
                     ):
-                        await LiveUpdatesReadbackProgressbar(
+                        LiveUpdatesReadbackProgressbar(
                             bec=client, report_instruction=report_instruction, request=request
                         ).run()
 

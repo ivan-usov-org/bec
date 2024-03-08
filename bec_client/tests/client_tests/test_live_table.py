@@ -1,3 +1,4 @@
+# pylint: disable=missing-function-docstring
 import threading
 import time
 from unittest import mock
@@ -26,8 +27,7 @@ def client_with_grid_scan(bec_client):
 
 
 @pytest.mark.timeout(20)
-@pytest.mark.asyncio
-async def test_scan_request_mixin(client_with_grid_scan):
+def test_scan_request_mixin(client_with_grid_scan):
     client, request_msg = client_with_grid_scan
     response_msg = messages.RequestResponseMessage(
         accepted=True, message="", metadata={"RID": "something"}
@@ -41,7 +41,7 @@ async def test_scan_request_mixin(client_with_grid_scan):
     client.queue.request_storage.update_with_request(request_msg)
     threading.Thread(target=update_with_response, args=(response_msg,)).start()
     with mock.patch.object(client.queue.queue_storage, "find_queue_item_by_requestID"):
-        await request_mixin.wait()
+        request_mixin.wait()
 
 
 def test_sort_devices():
@@ -84,8 +84,7 @@ def test_get_devices_from_scan_data(bec_client, request_msg, scan_report_devices
 
 
 @pytest.mark.timeout(20)
-@pytest.mark.asyncio
-async def test_wait_for_request_acceptance(client_with_grid_scan):
+def test_wait_for_request_acceptance(client_with_grid_scan):
     client, request_msg = client_with_grid_scan
     response_msg = messages.RequestResponseMessage(
         accepted=True, message="", metadata={"RID": "something"}
@@ -94,7 +93,7 @@ async def test_wait_for_request_acceptance(client_with_grid_scan):
     client.queue.request_storage.update_with_response(response_msg)
     live_update = LiveUpdatesTable(client, {"table_wait": 10}, request_msg)
     with mock.patch.object(client.queue.queue_storage, "find_queue_item_by_requestID"):
-        await live_update.wait_for_request_acceptance()
+        live_update.wait_for_request_acceptance()
 
 
 class ScanItemMock:
