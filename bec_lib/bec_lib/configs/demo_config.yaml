@@ -22,6 +22,17 @@ dyn_signals:
   enabled: true
   readOnly: false
 
+pseudo_signal1:
+  deviceClass: ComputedSignal
+  deviceConfig:
+    compute_method: "def compute_signals(signal1, signal2):\n    return signal1.get()*signal2.get()\n"
+    input_signals: 
+      - "bpm4i_readback"
+      - "bpm5i_readback"
+  enabled: true
+  readOnly: false
+  readoutPriority: baseline
+
 ############################################################
 ####################### User motors ########################
 ############################################################
@@ -294,7 +305,6 @@ samz:
 bpm3a:
   readoutPriority: monitored
   deviceClass: SimMonitor
-  deviceConfig:
   deviceConfig:
   deviceTags:
     - beamline
