@@ -5,8 +5,7 @@ from unittest import mock
 import numpy as np
 import pytest
 from bec_lib import messages
-from bec_lib.devicemanager import DeviceContainer
-from bec_lib.tests.utils import ConnectorMock
+from utils import DMMock
 
 from scan_plugins.LamNIFermatScan import LamNIFermatScan
 from scan_plugins.otf_scan import OTFScan
@@ -41,49 +40,6 @@ from scan_server.scans import (
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=protected-access
-
-
-class DeviceMock:
-    def __init__(self, name: str):
-        self.name = name
-        self.read_buffer = None
-        self._config = {"deviceConfig": {"limits": [-50, 50]}, "userParameter": None}
-        self._read_only = False
-        self._enabled = True
-
-    def read(self):
-        return self.read_buffer
-
-    def readback(self):
-        return self.read_buffer
-
-    @property
-    def read_only(self) -> bool:
-        return self._read_only
-
-    @read_only.setter
-    def read_only(self, val: bool):
-        self._read_only = val
-
-    @property
-    def enabled(self) -> bool:
-        return self._enabled
-
-    @enabled.setter
-    def enabled(self, val: bool):
-        self._enabled = val
-
-    @property
-    def user_parameter(self):
-        return self._config["userParameter"]
-
-
-class DMMock:
-    devices = DeviceContainer()
-    connector = ConnectorMock()
-
-    def add_device(self, name):
-        self.devices[name] = DeviceMock(name)
 
 
 def test_unpack_scan_args_empty_dict():

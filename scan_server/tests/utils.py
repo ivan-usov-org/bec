@@ -1,24 +1,14 @@
-import os
-
-import bec_lib
 import pytest
-import yaml
-from bec_lib import DeviceManagerBase as DeviceManager
-from bec_lib import MessageEndpoints, ServiceConfig
+from bec_lib import ServiceConfig
+from bec_lib.devicemanager import DeviceContainer
 from bec_lib.messages import BECStatus
-from bec_lib.tests.utils import ConnectorMock, create_session_from_config, dm, dm_with_devices
+from bec_lib.tests.utils import ConnectorMock
 
-from scan_server.scan_assembler import ScanAssembler
-from scan_server.scan_queue import InstructionQueueItem, RequestBlock, RequestBlockQueue, ScanQueue
 from scan_server.scan_server import ScanServer
 from scan_server.scan_worker import InstructionQueueStatus
-from scan_server.scans import RequestBase
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=protected-access
-
-# dir_path = os.path.dirname(os.path.realpath(__file__))
-dir_path = os.path.dirname(bec_lib.__file__)
 
 
 @pytest.fixture
@@ -76,3 +66,46 @@ class ScanServerMock(ScanServer):
     @dataset_number.setter
     def dataset_number(self, val: int):
         pass
+
+
+class DeviceMock:
+    def __init__(self, name: str):
+        self.name = name
+        self.read_buffer = None
+        self._config = {"deviceConfig": {"limits": [-50, 50]}, "userParameter": None}
+        self._read_only = False
+        self._enabled = True
+
+    def read(self):
+        return self.read_buffer
+
+    def readback(self):
+        return self.read_buffer
+
+    @property
+    def read_only(self) -> bool:
+        return self._read_only
+
+    @read_only.setter
+    def read_only(self, val: bool):
+        self._read_only = val
+
+    @property
+    def enabled(self) -> bool:
+        return self._enabled
+
+    @enabled.setter
+    def enabled(self, val: bool):
+        self._enabled = val
+
+    @property
+    def user_parameter(self):
+        return self._config["userParameter"]
+
+
+class DMMock:
+    devices = DeviceContainer()
+    connector = ConnectorMock()
+
+    def add_device(self, name):
+        self.devices[name] = DeviceMock(name)

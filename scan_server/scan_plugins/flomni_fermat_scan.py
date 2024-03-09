@@ -23,8 +23,8 @@ but they are executed in a specific order:
 import time
 
 import numpy as np
-
 from bec_lib import MessageEndpoints, bec_logger, messages
+
 from scan_server.errors import ScanAbortion
 from scan_server.scans import SyncFlyScanBase
 
@@ -105,7 +105,16 @@ class FlomniFermatScan(SyncFlyScanBase):
             self.positions, corridor_size=self.optim_trajectory_corridor
         )
 
+    @property
+    def monitor_sync(self):
+        return "rt_flomni"
+
     def reverse_trajectory(self):
+        """
+        Reverse the trajectory. Every other scan should be reversed to
+        shorten the movement time. In order to keep the last state, even if the
+        server is restarted, the state is stored in a global variable in redis.
+        """
         producer = self.device_manager.producer
         msg = producer.get(MessageEndpoints.global_vars("reverse_flomni_trajectory"))
         if msg:
