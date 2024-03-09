@@ -185,25 +185,39 @@ def test_readoutpriority_raises_with_conflicting_input(dm_with_devices, readout_
 
 
 @pytest.mark.parametrize(
-    "readout_priority_in, priority_out",
+    "readout_priority_in, priority_out, raises_exception",
     [
-        ({"monitored": ["samx"], "baseline": ["samx"]}, {"monitored": ["samx"]}),
+        ({"monitored": ["samx"], "baseline": ["samx"]}, {"monitored": ["samx"]}, False),
         (
             {"monitored": ["samx"], "continuous": ["samx", "samy"]},
             {"monitored": ["samx"], "continuous": ["samy"]},
+            True,
         ),
         (
             {"monitored": ["samx"], "on_request": ["samx", "samy"]},
             {"monitored": ["samx"], "on_request": ["samy"]},
+            False,
         ),
         (
             {"baseline": ["samx"], "on_request": ["samx", "samy"]},
             {"baseline": ["samx"], "on_request": ["samy"]},
+            False,
         ),
     ],
 )
-def test_readoutpriority_highest_priority_wins(dm_with_devices, readout_priority_in, priority_out):
+def test_readoutpriority_highest_priority_wins(
+    dm_with_devices, readout_priority_in, priority_out, raises_exception
+):
     dm = dm_with_devices
+    if raises_exception:
+        with pytest.raises(ValueError):
+            monitored_devices = dm.devices.monitored_devices(readout_priority=readout_priority_in)
+            baseline_devices = dm.devices.baseline_devices(readout_priority=readout_priority_in)
+            async_devices = dm.devices.async_devices(readout_priority=readout_priority_in)
+            continuous_devices = dm.devices.continuous_devices(readout_priority=readout_priority_in)
+            on_request_devices = dm.devices.on_request_devices(readout_priority=readout_priority_in)
+        return
+
     monitored_devices = dm.devices.monitored_devices(readout_priority=readout_priority_in)
     baseline_devices = dm.devices.baseline_devices(readout_priority=readout_priority_in)
     async_devices = dm.devices.async_devices(readout_priority=readout_priority_in)
