@@ -366,6 +366,680 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
                 }
             },
         ),
+        "hexapod": messages.DeviceInfoMessage(
+            device="hexapod",
+            info={
+                "device_name": "hexapod",
+                "device_info": {
+                    "device_attr_name": "",
+                    "device_dotted_name": "",
+                    "device_base_class": "device",
+                    "signals": [],
+                    "hints": {"fields": ["hexapod_x", "hexapod_y", "hexapod_z_zsub"]},
+                    "describe": {
+                        "hexapod_x": {
+                            "source": "SIM:hexapod_x",
+                            "dtype": "integer",
+                            "shape": [],
+                            "precision": 3,
+                        },
+                        "hexapod_x_setpoint": {
+                            "source": "SIM:hexapod_x_setpoint",
+                            "dtype": "integer",
+                            "shape": [],
+                            "precision": 3,
+                        },
+                        "hexapod_x_motor_is_moving": {
+                            "source": "SIM:hexapod_x_motor_is_moving",
+                            "dtype": "integer",
+                            "shape": [],
+                            "precision": 3,
+                        },
+                        "hexapod_y": {
+                            "source": "SIM:hexapod_y",
+                            "dtype": "integer",
+                            "shape": [],
+                            "precision": 3,
+                        },
+                        "hexapod_y_setpoint": {
+                            "source": "SIM:hexapod_y_setpoint",
+                            "dtype": "integer",
+                            "shape": [],
+                            "precision": 3,
+                        },
+                        "hexapod_y_motor_is_moving": {
+                            "source": "SIM:hexapod_y_motor_is_moving",
+                            "dtype": "integer",
+                            "shape": [],
+                            "precision": 3,
+                        },
+                        "hexapod_z_zsub": {
+                            "source": "SIM:hexapod_z_zsub",
+                            "dtype": "integer",
+                            "shape": [],
+                            "precision": 3,
+                        },
+                        "hexapod_z_zsub_setpoint": {
+                            "source": "SIM:hexapod_z_zsub_setpoint",
+                            "dtype": "integer",
+                            "shape": [],
+                            "precision": 3,
+                        },
+                        "hexapod_z_zsub_motor_is_moving": {
+                            "source": "SIM:hexapod_z_zsub_motor_is_moving",
+                            "dtype": "integer",
+                            "shape": [],
+                            "precision": 3,
+                        },
+                    },
+                    "describe_configuration": {
+                        "hexapod_x_velocity": {
+                            "source": "SIM:hexapod_x_velocity",
+                            "dtype": "integer",
+                            "shape": [],
+                            "precision": 3,
+                        },
+                        "hexapod_x_acceleration": {
+                            "source": "SIM:hexapod_x_acceleration",
+                            "dtype": "integer",
+                            "shape": [],
+                            "precision": 3,
+                        },
+                        "hexapod_y_velocity": {
+                            "source": "SIM:hexapod_y_velocity",
+                            "dtype": "integer",
+                            "shape": [],
+                            "precision": 3,
+                        },
+                        "hexapod_y_acceleration": {
+                            "source": "SIM:hexapod_y_acceleration",
+                            "dtype": "integer",
+                            "shape": [],
+                            "precision": 3,
+                        },
+                        "hexapod_z_zsub_velocity": {
+                            "source": "SIM:hexapod_z_zsub_velocity",
+                            "dtype": "integer",
+                            "shape": [],
+                            "precision": 3,
+                        },
+                        "hexapod_z_zsub_acceleration": {
+                            "source": "SIM:hexapod_z_zsub_acceleration",
+                            "dtype": "integer",
+                            "shape": [],
+                            "precision": 3,
+                        },
+                    },
+                    "sub_devices": [
+                        {
+                            "device_name": "hexapod_x",
+                            "device_info": {
+                                "device_attr_name": "x",
+                                "device_dotted_name": "x",
+                                "device_base_class": "positioner",
+                                "signals": [
+                                    {
+                                        "component_name": "readback",
+                                        "obj_name": "hexapod_x",
+                                        "kind_int": 5,
+                                        "kind_str": "Kind.hinted",
+                                    },
+                                    {
+                                        "component_name": "setpoint",
+                                        "obj_name": "hexapod_x_setpoint",
+                                        "kind_int": 1,
+                                        "kind_str": "Kind.normal",
+                                    },
+                                    {
+                                        "component_name": "motor_is_moving",
+                                        "obj_name": "hexapod_x_motor_is_moving",
+                                        "kind_int": 1,
+                                        "kind_str": "Kind.normal",
+                                    },
+                                    {
+                                        "component_name": "velocity",
+                                        "obj_name": "hexapod_x_velocity",
+                                        "kind_int": 2,
+                                        "kind_str": "Kind.config",
+                                    },
+                                    {
+                                        "component_name": "acceleration",
+                                        "obj_name": "hexapod_x_acceleration",
+                                        "kind_int": 2,
+                                        "kind_str": "Kind.config",
+                                    },
+                                    {
+                                        "component_name": "high_limit_travel",
+                                        "obj_name": "hexapod_x_high_limit_travel",
+                                        "kind_int": 0,
+                                        "kind_str": "Kind.omitted",
+                                    },
+                                    {
+                                        "component_name": "low_limit_travel",
+                                        "obj_name": "hexapod_x_low_limit_travel",
+                                        "kind_int": 0,
+                                        "kind_str": "Kind.omitted",
+                                    },
+                                    {
+                                        "component_name": "unused",
+                                        "obj_name": "hexapod_x_unused",
+                                        "kind_int": 0,
+                                        "kind_str": "Kind.omitted",
+                                    },
+                                ],
+                                "hints": {"fields": ["hexapod_x"]},
+                                "describe": {
+                                    "hexapod_x": {
+                                        "source": "SIM:hexapod_x",
+                                        "dtype": "integer",
+                                        "shape": [],
+                                        "precision": 3,
+                                    },
+                                    "hexapod_x_setpoint": {
+                                        "source": "SIM:hexapod_x_setpoint",
+                                        "dtype": "integer",
+                                        "shape": [],
+                                        "precision": 3,
+                                    },
+                                    "hexapod_x_motor_is_moving": {
+                                        "source": "SIM:hexapod_x_motor_is_moving",
+                                        "dtype": "integer",
+                                        "shape": [],
+                                        "precision": 3,
+                                    },
+                                },
+                                "describe_configuration": {
+                                    "hexapod_x_velocity": {
+                                        "source": "SIM:hexapod_x_velocity",
+                                        "dtype": "integer",
+                                        "shape": [],
+                                        "precision": 3,
+                                    },
+                                    "hexapod_x_acceleration": {
+                                        "source": "SIM:hexapod_x_acceleration",
+                                        "dtype": "integer",
+                                        "shape": [],
+                                        "precision": 3,
+                                    },
+                                },
+                                "sub_devices": [],
+                                "custom_user_access": {
+                                    "dummy_controller": {
+                                        "_func_with_args": {"type": "func", "doc": None},
+                                        "_func_with_args_and_kwargs": {"type": "func", "doc": None},
+                                        "_func_with_kwargs": {"type": "func", "doc": None},
+                                        "_func_without_args_kwargs": {"type": "func", "doc": None},
+                                        "controller_show_all": {
+                                            "type": "func",
+                                            "doc": "dummy controller show all\n\n        Raises:\n            in: _description_\n            LimitError: _description_\n\n        Returns:\n            _type_: _description_\n        ",
+                                        },
+                                        "some_var": {"type": "int"},
+                                    },
+                                    "sim": {
+                                        "get_sim_params": {
+                                            "type": "func",
+                                            "doc": "Return the currently parameters for the active simulation type in sim_type.\n\n        These parameters can be changed with set_sim_params.\n\n        Returns:\n            dict: Parameters of the currently active simulation in sim_type.\n        ",
+                                        },
+                                        "get_sim_type": {
+                                            "type": "func",
+                                            "doc": 'Return the simulation type of the simulation.\n\n        Returns:\n            SimulationType: Type of simulation (e.g. "constant" or "gauss).\n        ',
+                                        },
+                                        "set_sim_params": {
+                                            "type": "func",
+                                            "doc": "Change the current set of parameters for the active simulation type.\n\n        Args:\n            params (dict): New parameters for the active simulation type.\n\n        Raises:\n            SimulatedDataException: If the new parameters can not be set or is not part of the parameters initiated.\n        ",
+                                        },
+                                        "set_sim_type": {
+                                            "type": "func",
+                                            "doc": "Set the simulation type of the simulation.",
+                                        },
+                                    },
+                                    "speed": {"type": "int"},
+                                },
+                            },
+                        },
+                        {
+                            "device_name": "hexapod_y",
+                            "device_info": {
+                                "device_attr_name": "y",
+                                "device_dotted_name": "y",
+                                "device_base_class": "positioner",
+                                "signals": [
+                                    {
+                                        "component_name": "readback",
+                                        "obj_name": "hexapod_y",
+                                        "kind_int": 5,
+                                        "kind_str": "Kind.hinted",
+                                    },
+                                    {
+                                        "component_name": "setpoint",
+                                        "obj_name": "hexapod_y_setpoint",
+                                        "kind_int": 1,
+                                        "kind_str": "Kind.normal",
+                                    },
+                                    {
+                                        "component_name": "motor_is_moving",
+                                        "obj_name": "hexapod_y_motor_is_moving",
+                                        "kind_int": 1,
+                                        "kind_str": "Kind.normal",
+                                    },
+                                    {
+                                        "component_name": "velocity",
+                                        "obj_name": "hexapod_y_velocity",
+                                        "kind_int": 2,
+                                        "kind_str": "Kind.config",
+                                    },
+                                    {
+                                        "component_name": "acceleration",
+                                        "obj_name": "hexapod_y_acceleration",
+                                        "kind_int": 2,
+                                        "kind_str": "Kind.config",
+                                    },
+                                    {
+                                        "component_name": "high_limit_travel",
+                                        "obj_name": "hexapod_y_high_limit_travel",
+                                        "kind_int": 0,
+                                        "kind_str": "Kind.omitted",
+                                    },
+                                    {
+                                        "component_name": "low_limit_travel",
+                                        "obj_name": "hexapod_y_low_limit_travel",
+                                        "kind_int": 0,
+                                        "kind_str": "Kind.omitted",
+                                    },
+                                    {
+                                        "component_name": "unused",
+                                        "obj_name": "hexapod_y_unused",
+                                        "kind_int": 0,
+                                        "kind_str": "Kind.omitted",
+                                    },
+                                ],
+                                "hints": {"fields": ["hexapod_y"]},
+                                "describe": {
+                                    "hexapod_y": {
+                                        "source": "SIM:hexapod_y",
+                                        "dtype": "integer",
+                                        "shape": [],
+                                        "precision": 3,
+                                    },
+                                    "hexapod_y_setpoint": {
+                                        "source": "SIM:hexapod_y_setpoint",
+                                        "dtype": "integer",
+                                        "shape": [],
+                                        "precision": 3,
+                                    },
+                                    "hexapod_y_motor_is_moving": {
+                                        "source": "SIM:hexapod_y_motor_is_moving",
+                                        "dtype": "integer",
+                                        "shape": [],
+                                        "precision": 3,
+                                    },
+                                },
+                                "describe_configuration": {
+                                    "hexapod_y_velocity": {
+                                        "source": "SIM:hexapod_y_velocity",
+                                        "dtype": "integer",
+                                        "shape": [],
+                                        "precision": 3,
+                                    },
+                                    "hexapod_y_acceleration": {
+                                        "source": "SIM:hexapod_y_acceleration",
+                                        "dtype": "integer",
+                                        "shape": [],
+                                        "precision": 3,
+                                    },
+                                },
+                                "sub_devices": [],
+                                "custom_user_access": {
+                                    "dummy_controller": {
+                                        "_func_with_args": {"type": "func", "doc": None},
+                                        "_func_with_args_and_kwargs": {"type": "func", "doc": None},
+                                        "_func_with_kwargs": {"type": "func", "doc": None},
+                                        "_func_without_args_kwargs": {"type": "func", "doc": None},
+                                        "controller_show_all": {
+                                            "type": "func",
+                                            "doc": "dummy controller show all\n\n        Raises:\n            in: _description_\n            LimitError: _description_\n\n        Returns:\n            _type_: _description_\n        ",
+                                        },
+                                        "some_var": {"type": "int"},
+                                    },
+                                    "sim": {
+                                        "get_sim_params": {
+                                            "type": "func",
+                                            "doc": "Return the currently parameters for the active simulation type in sim_type.\n\n        These parameters can be changed with set_sim_params.\n\n        Returns:\n            dict: Parameters of the currently active simulation in sim_type.\n        ",
+                                        },
+                                        "get_sim_type": {
+                                            "type": "func",
+                                            "doc": 'Return the simulation type of the simulation.\n\n        Returns:\n            SimulationType: Type of simulation (e.g. "constant" or "gauss).\n        ',
+                                        },
+                                        "set_sim_params": {
+                                            "type": "func",
+                                            "doc": "Change the current set of parameters for the active simulation type.\n\n        Args:\n            params (dict): New parameters for the active simulation type.\n\n        Raises:\n            SimulatedDataException: If the new parameters can not be set or is not part of the parameters initiated.\n        ",
+                                        },
+                                        "set_sim_type": {
+                                            "type": "func",
+                                            "doc": "Set the simulation type of the simulation.",
+                                        },
+                                    },
+                                    "speed": {"type": "int"},
+                                },
+                            },
+                        },
+                        {
+                            "device_name": "hexapod_z",
+                            "device_info": {
+                                "device_attr_name": "z",
+                                "device_dotted_name": "z",
+                                "device_base_class": "device",
+                                "signals": [],
+                                "hints": {"fields": ["hexapod_z_zsub"]},
+                                "describe": {
+                                    "hexapod_z_zsub": {
+                                        "source": "SIM:hexapod_z_zsub",
+                                        "dtype": "integer",
+                                        "shape": [],
+                                        "precision": 3,
+                                    },
+                                    "hexapod_z_zsub_setpoint": {
+                                        "source": "SIM:hexapod_z_zsub_setpoint",
+                                        "dtype": "integer",
+                                        "shape": [],
+                                        "precision": 3,
+                                    },
+                                    "hexapod_z_zsub_motor_is_moving": {
+                                        "source": "SIM:hexapod_z_zsub_motor_is_moving",
+                                        "dtype": "integer",
+                                        "shape": [],
+                                        "precision": 3,
+                                    },
+                                },
+                                "describe_configuration": {
+                                    "hexapod_z_zsub_velocity": {
+                                        "source": "SIM:hexapod_z_zsub_velocity",
+                                        "dtype": "integer",
+                                        "shape": [],
+                                        "precision": 3,
+                                    },
+                                    "hexapod_z_zsub_acceleration": {
+                                        "source": "SIM:hexapod_z_zsub_acceleration",
+                                        "dtype": "integer",
+                                        "shape": [],
+                                        "precision": 3,
+                                    },
+                                },
+                                "sub_devices": [
+                                    {
+                                        "device_name": "hexapod_z_zsub",
+                                        "device_info": {
+                                            "device_attr_name": "zsub",
+                                            "device_dotted_name": "z.zsub",
+                                            "device_base_class": "positioner",
+                                            "signals": [
+                                                {
+                                                    "component_name": "readback",
+                                                    "obj_name": "hexapod_z_zsub",
+                                                    "kind_int": 5,
+                                                    "kind_str": "Kind.hinted",
+                                                },
+                                                {
+                                                    "component_name": "setpoint",
+                                                    "obj_name": "hexapod_z_zsub_setpoint",
+                                                    "kind_int": 1,
+                                                    "kind_str": "Kind.normal",
+                                                },
+                                                {
+                                                    "component_name": "motor_is_moving",
+                                                    "obj_name": "hexapod_z_zsub_motor_is_moving",
+                                                    "kind_int": 1,
+                                                    "kind_str": "Kind.normal",
+                                                },
+                                                {
+                                                    "component_name": "velocity",
+                                                    "obj_name": "hexapod_z_zsub_velocity",
+                                                    "kind_int": 2,
+                                                    "kind_str": "Kind.config",
+                                                },
+                                                {
+                                                    "component_name": "acceleration",
+                                                    "obj_name": "hexapod_z_zsub_acceleration",
+                                                    "kind_int": 2,
+                                                    "kind_str": "Kind.config",
+                                                },
+                                                {
+                                                    "component_name": "high_limit_travel",
+                                                    "obj_name": "hexapod_z_zsub_high_limit_travel",
+                                                    "kind_int": 0,
+                                                    "kind_str": "Kind.omitted",
+                                                },
+                                                {
+                                                    "component_name": "low_limit_travel",
+                                                    "obj_name": "hexapod_z_zsub_low_limit_travel",
+                                                    "kind_int": 0,
+                                                    "kind_str": "Kind.omitted",
+                                                },
+                                                {
+                                                    "component_name": "unused",
+                                                    "obj_name": "hexapod_z_zsub_unused",
+                                                    "kind_int": 0,
+                                                    "kind_str": "Kind.omitted",
+                                                },
+                                            ],
+                                            "hints": {"fields": ["hexapod_z_zsub"]},
+                                            "describe": {
+                                                "hexapod_z_zsub": {
+                                                    "source": "SIM:hexapod_z_zsub",
+                                                    "dtype": "integer",
+                                                    "shape": [],
+                                                    "precision": 3,
+                                                },
+                                                "hexapod_z_zsub_setpoint": {
+                                                    "source": "SIM:hexapod_z_zsub_setpoint",
+                                                    "dtype": "integer",
+                                                    "shape": [],
+                                                    "precision": 3,
+                                                },
+                                                "hexapod_z_zsub_motor_is_moving": {
+                                                    "source": "SIM:hexapod_z_zsub_motor_is_moving",
+                                                    "dtype": "integer",
+                                                    "shape": [],
+                                                    "precision": 3,
+                                                },
+                                            },
+                                            "describe_configuration": {
+                                                "hexapod_z_zsub_velocity": {
+                                                    "source": "SIM:hexapod_z_zsub_velocity",
+                                                    "dtype": "integer",
+                                                    "shape": [],
+                                                    "precision": 3,
+                                                },
+                                                "hexapod_z_zsub_acceleration": {
+                                                    "source": "SIM:hexapod_z_zsub_acceleration",
+                                                    "dtype": "integer",
+                                                    "shape": [],
+                                                    "precision": 3,
+                                                },
+                                            },
+                                            "sub_devices": [],
+                                            "custom_user_access": {
+                                                "dummy_controller": {
+                                                    "_func_with_args": {
+                                                        "type": "func",
+                                                        "doc": None,
+                                                    },
+                                                    "_func_with_args_and_kwargs": {
+                                                        "type": "func",
+                                                        "doc": None,
+                                                    },
+                                                    "_func_with_kwargs": {
+                                                        "type": "func",
+                                                        "doc": None,
+                                                    },
+                                                    "_func_without_args_kwargs": {
+                                                        "type": "func",
+                                                        "doc": None,
+                                                    },
+                                                    "controller_show_all": {
+                                                        "type": "func",
+                                                        "doc": "dummy controller show all\n\n        Raises:\n            in: _description_\n            LimitError: _description_\n\n        Returns:\n            _type_: _description_\n        ",
+                                                    },
+                                                    "some_var": {"type": "int"},
+                                                },
+                                                "sim": {
+                                                    "get_sim_params": {
+                                                        "type": "func",
+                                                        "doc": "Return the currently parameters for the active simulation type in sim_type.\n\n        These parameters can be changed with set_sim_params.\n\n        Returns:\n            dict: Parameters of the currently active simulation in sim_type.\n        ",
+                                                    },
+                                                    "get_sim_type": {
+                                                        "type": "func",
+                                                        "doc": 'Return the simulation type of the simulation.\n\n        Returns:\n            SimulationType: Type of simulation (e.g. "constant" or "gauss).\n        ',
+                                                    },
+                                                    "set_sim_params": {
+                                                        "type": "func",
+                                                        "doc": "Change the current set of parameters for the active simulation type.\n\n        Args:\n            params (dict): New parameters for the active simulation type.\n\n        Raises:\n            SimulatedDataException: If the new parameters can not be set or is not part of the parameters initiated.\n        ",
+                                                    },
+                                                    "set_sim_type": {
+                                                        "type": "func",
+                                                        "doc": "Set the simulation type of the simulation.",
+                                                    },
+                                                },
+                                                "speed": {"type": "int"},
+                                            },
+                                        },
+                                    }
+                                ],
+                                "custom_user_access": {},
+                            },
+                        },
+                        {
+                            "device_name": "hexapod_z_zsub",
+                            "device_info": {
+                                "device_attr_name": "zsub",
+                                "device_dotted_name": "z.zsub",
+                                "device_base_class": "positioner",
+                                "signals": [
+                                    {
+                                        "component_name": "readback",
+                                        "obj_name": "hexapod_z_zsub",
+                                        "kind_int": 5,
+                                        "kind_str": "Kind.hinted",
+                                    },
+                                    {
+                                        "component_name": "setpoint",
+                                        "obj_name": "hexapod_z_zsub_setpoint",
+                                        "kind_int": 1,
+                                        "kind_str": "Kind.normal",
+                                    },
+                                    {
+                                        "component_name": "motor_is_moving",
+                                        "obj_name": "hexapod_z_zsub_motor_is_moving",
+                                        "kind_int": 1,
+                                        "kind_str": "Kind.normal",
+                                    },
+                                    {
+                                        "component_name": "velocity",
+                                        "obj_name": "hexapod_z_zsub_velocity",
+                                        "kind_int": 2,
+                                        "kind_str": "Kind.config",
+                                    },
+                                    {
+                                        "component_name": "acceleration",
+                                        "obj_name": "hexapod_z_zsub_acceleration",
+                                        "kind_int": 2,
+                                        "kind_str": "Kind.config",
+                                    },
+                                    {
+                                        "component_name": "high_limit_travel",
+                                        "obj_name": "hexapod_z_zsub_high_limit_travel",
+                                        "kind_int": 0,
+                                        "kind_str": "Kind.omitted",
+                                    },
+                                    {
+                                        "component_name": "low_limit_travel",
+                                        "obj_name": "hexapod_z_zsub_low_limit_travel",
+                                        "kind_int": 0,
+                                        "kind_str": "Kind.omitted",
+                                    },
+                                    {
+                                        "component_name": "unused",
+                                        "obj_name": "hexapod_z_zsub_unused",
+                                        "kind_int": 0,
+                                        "kind_str": "Kind.omitted",
+                                    },
+                                ],
+                                "hints": {"fields": ["hexapod_z_zsub"]},
+                                "describe": {
+                                    "hexapod_z_zsub": {
+                                        "source": "SIM:hexapod_z_zsub",
+                                        "dtype": "integer",
+                                        "shape": [],
+                                        "precision": 3,
+                                    },
+                                    "hexapod_z_zsub_setpoint": {
+                                        "source": "SIM:hexapod_z_zsub_setpoint",
+                                        "dtype": "integer",
+                                        "shape": [],
+                                        "precision": 3,
+                                    },
+                                    "hexapod_z_zsub_motor_is_moving": {
+                                        "source": "SIM:hexapod_z_zsub_motor_is_moving",
+                                        "dtype": "integer",
+                                        "shape": [],
+                                        "precision": 3,
+                                    },
+                                },
+                                "describe_configuration": {
+                                    "hexapod_z_zsub_velocity": {
+                                        "source": "SIM:hexapod_z_zsub_velocity",
+                                        "dtype": "integer",
+                                        "shape": [],
+                                        "precision": 3,
+                                    },
+                                    "hexapod_z_zsub_acceleration": {
+                                        "source": "SIM:hexapod_z_zsub_acceleration",
+                                        "dtype": "integer",
+                                        "shape": [],
+                                        "precision": 3,
+                                    },
+                                },
+                                "sub_devices": [],
+                                "custom_user_access": {
+                                    "dummy_controller": {
+                                        "_func_with_args": {"type": "func", "doc": None},
+                                        "_func_with_args_and_kwargs": {"type": "func", "doc": None},
+                                        "_func_with_kwargs": {"type": "func", "doc": None},
+                                        "_func_without_args_kwargs": {"type": "func", "doc": None},
+                                        "controller_show_all": {
+                                            "type": "func",
+                                            "doc": "dummy controller show all\n\n        Raises:\n            in: _description_\n            LimitError: _description_\n\n        Returns:\n            _type_: _description_\n        ",
+                                        },
+                                        "some_var": {"type": "int"},
+                                    },
+                                    "sim": {
+                                        "get_sim_params": {
+                                            "type": "func",
+                                            "doc": "Return the currently parameters for the active simulation type in sim_type.\n\n        These parameters can be changed with set_sim_params.\n\n        Returns:\n            dict: Parameters of the currently active simulation in sim_type.\n        ",
+                                        },
+                                        "get_sim_type": {
+                                            "type": "func",
+                                            "doc": 'Return the simulation type of the simulation.\n\n        Returns:\n            SimulationType: Type of simulation (e.g. "constant" or "gauss).\n        ',
+                                        },
+                                        "set_sim_params": {
+                                            "type": "func",
+                                            "doc": "Change the current set of parameters for the active simulation type.\n\n        Args:\n            params (dict): New parameters for the active simulation type.\n\n        Raises:\n            SimulatedDataException: If the new parameters can not be set or is not part of the parameters initiated.\n        ",
+                                        },
+                                        "set_sim_type": {
+                                            "type": "func",
+                                            "doc": "Set the simulation type of the simulation.",
+                                        },
+                                    },
+                                    "speed": {"type": "int"},
+                                },
+                            },
+                        },
+                    ],
+                    "custom_user_access": {},
+                },
+            },
+            metadata={},
+        ),
     }
     if device_name in device_info:
         return device_info[device_name]

@@ -20,6 +20,7 @@ from bec_lib.device import ComputedSignal, Device, DeviceBase, Positioner, Reado
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
 from bec_lib.messages import BECStatus, DeviceConfigMessage, DeviceInfoMessage
+from bec_lib.utils import rgetattr
 
 if TYPE_CHECKING:
     from bec_lib import BECService
@@ -48,9 +49,9 @@ class DeviceContainer(dict):
             # IPython completer
             return self.get(attr)
         dev = self.get(attr)
-        if not dev:
-            raise DeviceConfigError(f"Device {attr} does not exist.")
-        return dev
+        if dev:
+            return dev
+        raise DeviceConfigError(f"Device {attr} does not exist.")
 
     def __setattr__(self, key, value):
         if isinstance(value, DeviceBase):
@@ -61,6 +62,12 @@ class DeviceContainer(dict):
     def __setitem__(self, key, value):
         super().__setitem__(key, value)
         self.__dict__.update({key: value})
+
+    def __getitem__(self, item):
+        if item in self:
+            return super().__getitem__(item)
+        if isinstance(item, str) and "." in item:
+            return rgetattr(self, item)
 
     def __delattr__(self, item):
         self.__delitem__(item)
@@ -109,11 +116,31 @@ class DeviceContainer(dict):
         if readout_priority_mod is None:
             readout_priority_mod = {}
 
-        devices = [self.get(dev) if isinstance(dev, str) else dev for dev in devices]
+        bec_triggered = (
+            set(readout_priority_mod.get("monitored", []))
+            .union(readout_priority_mod.get("on_request", []))
+            .union(readout_priority_mod.get("baseline", []))
+        )
+
+        async_intersection = bec_triggered.intersection(set(readout_priority_mod.get("async", [])))
+        if async_intersection:
+            raise ValueError(
+                f"Devices {async_intersection} cannot be async and monitored/baseline/on_request at the same time"
+            )
+
+        continuous_intersection = bec_triggered.intersection(
+            set(readout_priority_mod.get("continuous", []))
+        )
+        if continuous_intersection:
+            raise ValueError(
+                f"Devices {continuous_intersection} cannot be continuous and monitored/baseline/on_request at the same time"
+            )
+
+        devices = [self[dev] if isinstance(dev, str) else dev for dev in devices]
 
         devices.extend(self.readout_priority(readout_priority))
         devices.extend(
-            [self.get(dev) for dev in readout_priority_mod.get(readout_priority.name.lower(), [])]
+            [self[dev] for dev in readout_priority_mod.get(readout_priority.name.lower(), [])]
         )
 
         excluded_readout_priority = [

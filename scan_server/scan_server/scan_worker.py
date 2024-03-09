@@ -448,9 +448,9 @@ class ScanWorker(threading.Thread):
             raise DeviceMessageError("Device message metadata does not contain a DIID entry.")
 
         if wait_group in self._groups:
-            self._groups[wait_group].update({dev.name: DIID for dev in devices})
+            self._groups[wait_group].update({dev.root.name: DIID for dev in devices})
         else:
-            self._groups[wait_group] = {dev.name: DIID for dev in devices}
+            self._groups[wait_group] = {dev.root.name: DIID for dev in devices}
 
     def _check_for_failed_movements(
         self, device_status: list, devices: list, instr: messages.DeviceInstructionMessage
@@ -663,31 +663,31 @@ class ScanWorker(threading.Thread):
 
         self.current_scan_info["readout_priority"] = {
             "monitored": [
-                dev.name
+                dev.full_name
                 for dev in self.device_manager.devices.monitored_devices(
                     readout_priority=self.readout_priority
                 )
             ],
             "baseline": [
-                dev.name
+                dev.full_name
                 for dev in self.device_manager.devices.baseline_devices(
                     readout_priority=self.readout_priority
                 )
             ],
             "async": [
-                dev.name
+                dev.full_name
                 for dev in self.device_manager.devices.async_devices(
                     readout_priority=self.readout_priority
                 )
             ],
             "continuous": [
-                dev.name
+                dev.full_name
                 for dev in self.device_manager.devices.continuous_devices(
                     readout_priority=self.readout_priority
                 )
             ],
             "on_request": [
-                dev.name
+                dev.full_name
                 for dev in self.device_manager.devices.on_request_devices(
                     readout_priority=self.readout_priority
                 )

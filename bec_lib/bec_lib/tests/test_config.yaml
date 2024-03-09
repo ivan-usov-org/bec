@@ -37,6 +37,15 @@ pseudo_signal1:
 ####################### User motors ########################
 ############################################################
 
+hexapod:
+  readoutPriority: baseline
+  deviceClass: SynDeviceOPAAS
+  deviceConfig:
+  deviceTags:
+    - user motors
+  enabled: true
+  readOnly: false
+
 eyefoc:
   readoutPriority: baseline
   deviceClass: SimPositioner

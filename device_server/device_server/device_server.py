@@ -249,17 +249,27 @@ class DeviceServer(RPCMixin, BECService):
             status.add_callback(self._status_callback)
 
     def _set_device(self, instr: messages.DeviceInstructionMessage) -> None:
-        device_obj = self.device_manager.devices.get(instr.content["device"])
+        device_name = instr.content["device"]
+        child_access = None
+        if "." in device_name:
+            device_name, child_access = device_name.split(".", 1)
+        device_obj = self.device_manager.devices.get(device_name)
         if device_obj.read_only:
             raise DisabledDeviceError(
                 f"Setting the device {device_obj.name} is currently disabled."
             )
         logger.debug(f"Setting device: {instr}")
         val = instr.content["parameter"]["value"]
-        obj = self.device_manager.devices.get(instr.content["device"]).obj
-        # self.device_manager.add_req_done_sub(obj)
+        sub_id = None
+        if child_access:
+            obj = rgetattr(device_obj.obj, child_access)
+            if "readback" in obj.event_types or "value" in obj.event_types:
+                sub_id = obj.subscribe(self.device_manager._obj_callback_readback, run=True)
+        else:
+            obj = device_obj.obj
         status = obj.set(val)
         status.__dict__["instruction"] = instr
+        status.__dict__["sub_id"] = sub_id
         status.add_callback(self._status_callback)
 
     def _pre_scan(self, instr: messages.DeviceInstructionMessage) -> None:
@@ -284,6 +294,14 @@ class DeviceServer(RPCMixin, BECService):
             obj = status.device
         else:
             obj = status.obj
+
+        # if we've started a subscription, we need to unsubscribe now
+        # this is typically the case for operations on nested devices.
+        # For normal devices, we don't need to unsubscribe, as the
+        # subscription is handled by the device manager
+        if getattr(status, "sub_id", None):
+            obj.unsubscribe(status.sub_id)
+
         device_name = obj.root.name
         dev_msg = messages.DeviceReqStatusMessage(
             device=device_name, success=status.success, metadata=status.instruction.metadata
@@ -358,7 +376,7 @@ class DeviceServer(RPCMixin, BECService):
             )
         pipe.execute()
         logger.debug(
-            f"Elapsed time for reading and updating status info: {(time.time()-start)*1000} ms"
+            f"Elapsed time for reading and updating status info for {devices}: {(time.time()-start)*1000} ms"
         )
         return signal_container
 

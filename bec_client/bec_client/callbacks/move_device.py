@@ -4,7 +4,6 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 import numpy as np
-
 from bec_client.progressbar import DeviceProgressBar
 from bec_lib import DeviceManagerBase, MessageEndpoints, messages
 
@@ -48,10 +47,12 @@ class ReadbackDataMixin:
 
     def get_request_done_msgs(self):
         """get all request-done messages"""
-        pipe = self.device_manager.connector.pipeline()
+        dm = self.device_manager
+        pipe = dm.connector.pipeline()
         for dev in self.devices:
-            self.device_manager.connector.get(MessageEndpoints.device_req_status(dev), pipe)
-        return self.device_manager.connector.execute_pipeline(pipe)
+            obj = dm.devices[dev]
+            dm.connector.get(MessageEndpoints.device_req_status(obj.root.name), pipe)
+        return dm.connector.execute_pipeline(pipe)
 
     def wait_for_RID(self, request: messages.ScanQueueMessage) -> None:
         """wait for the readback's metadata to match the request ID

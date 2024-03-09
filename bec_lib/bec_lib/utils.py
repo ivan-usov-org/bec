@@ -17,6 +17,15 @@ if TYPE_CHECKING:
     from bec_lib.scan_report import ScanReport
 
 
+def rgetattr(obj, attr, *args):
+    """See https://stackoverflow.com/questions/31174295/getattr-and-setattr-on-nested-objects"""
+
+    def _getattr(obj, attr):
+        return getattr(obj, attr, *args)
+
+    return functools.reduce(_getattr, [obj] + attr.split("."))
+
+
 class user_access:
 
     def __init__(self, meth):
@@ -171,12 +180,7 @@ def _extract_scan_data(
     num_entries = len(list(scan_dict["value"].values())[0])
     for ii in range(num_entries):
         sub_list = []
-        sub_list.extend(
-            [
-                scan_metadata["scan_number"],
-                scan_metadata["dataset_number"],
-            ]
-        )
+        sub_list.extend([scan_metadata["scan_number"], scan_metadata["dataset_number"]])
         for key in scan_dict["value"]:
             sub_list.extend([scan_dict["value"][key][ii], scan_dict["timestamp"][key][ii]])
         body_tmp.append(sub_list)

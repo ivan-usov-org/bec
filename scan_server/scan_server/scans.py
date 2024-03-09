@@ -253,9 +253,10 @@ class RequestBase(ABC):
     def _check_limits(self):
         logger.debug("check limits")
         for ii, dev in enumerate(self.scan_motors):
-            low_limit, high_limit = (
-                self.device_manager.devices[dev]._config["deviceConfig"].get("limits", [0, 0])
-            )
+            obj = self.device_manager.devices[dev]
+            if not obj._config or "deviceConfig" not in obj._config:
+                continue
+            low_limit, high_limit = obj._config["deviceConfig"].get("limits", [0, 0])
             if low_limit >= high_limit:
                 # if both limits are equal or low > high, no restrictions ought to be applied
                 return
@@ -449,7 +450,8 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         self.start_pos = []
         for dev in self.scan_motors:
             val = yield from self.stubs.send_rpc_and_wait(dev, "read")
-            self.start_pos.append(val[dev].get("value"))
+            obj = self.device_manager.devices[dev]
+            self.start_pos.append(val[obj.full_name].get("value"))
         if self.relative:
             self.positions += self.start_pos
 
@@ -712,7 +714,8 @@ class Move(RequestBase):
         self.start_pos = []
         for dev in self.scan_motors:
             val = yield from self.stubs.send_rpc_and_wait(dev, "read")
-            self.start_pos.append(val[dev].get("value"))
+            obj = self.device_manager.devices[dev]
+            self.start_pos.append(val[obj.full_name].get("value"))
         if not self.relative:
             return
         self.positions += self.start_pos

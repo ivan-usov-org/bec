@@ -448,7 +448,7 @@ class DeviceManagerDS(DeviceManagerBase):
     def _obj_callback_readback(self, *_args, obj: OphydObject, **kwargs):
         if obj.connected:
             name = obj.root.name
-            signals = obj.read()
+            signals = obj.root.read()
             metadata = self.devices.get(obj.root.name).metadata
             dev_msg = messages.DeviceMessage(signals=signals, metadata=metadata)
             pipe = self.connector.pipeline()

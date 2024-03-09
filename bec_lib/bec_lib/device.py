@@ -438,7 +438,7 @@ class DeviceBase:
     def set_device_config(self, val: dict):
         """set the device config for this device"""
         self._config["deviceConfig"].update(val)
-        return self.parent.config_helper.send_config_request(
+        return self.root.parent.config_helper.send_config_request(
             action="update", config={self.name: {"deviceConfig": self._config["deviceConfig"]}}
         )
 
@@ -450,7 +450,7 @@ class DeviceBase:
     def set_device_tags(self, val: list):
         """set the device tags for this device"""
         self._config["deviceTags"] = val
-        return self.parent.config_helper.send_config_request(
+        return self.root.parent.config_helper.send_config_request(
             action="update", config={self.name: {"deviceTags": self._config["deviceTags"]}}
         )
 
@@ -460,7 +460,7 @@ class DeviceBase:
         if val in self._config["deviceTags"]:
             return None
         self._config["deviceTags"].append(val)
-        return self.parent.config_helper.send_config_request(
+        return self.root.parent.config_helper.send_config_request(
             action="update", config={self.name: {"deviceTags": self._config["deviceTags"]}}
         )
 
@@ -469,14 +469,14 @@ class DeviceBase:
         if val not in self._config["deviceTags"]:
             return None
         self._config["deviceTags"].remove(val)
-        return self.parent.config_helper.send_config_request(
+        return self.root.parent.config_helper.send_config_request(
             action="update", config={self.name: {"deviceTags": self._config["deviceTags"]}}
         )
 
     @property
     def wm(self) -> None:
         """get the current position of a device"""
-        self.parent.devices.wm(self.name)
+        self.root.parent.devices.wm(self.name)
 
     @property
     def readout_priority(self) -> ReadoutPriority:
@@ -489,7 +489,7 @@ class DeviceBase:
         if not isinstance(val, ReadoutPriority):
             val = ReadoutPriority(val)
         self._config["readoutPriority"] = val
-        return self.parent.config_helper.send_config_request(
+        return self.root.parent.config_helper.send_config_request(
             action="update", config={self.name: {"readoutPriority": val}}
         )
 
@@ -504,7 +504,7 @@ class DeviceBase:
         if not isinstance(val, OnFailure):
             val = OnFailure(val)
         self._config["onFailure"] = val
-        return self.parent.config_helper.send_config_request(
+        return self.root.parent.config_helper.send_config_request(
             action="update", config={self.name: {"onFailure": self._config["onFailure"]}}
         )
 
@@ -516,7 +516,7 @@ class DeviceBase:
     @read_only.setter
     def read_only(self, value: bool):
         """Whether or not the device is read only"""
-        self.parent.config_helper.send_config_request(
+        self.root.parent.config_helper.send_config_request(
             action="update", config={self.name: {"readOnly": value}}
         )
         self._config["readOnly"] = value
@@ -529,7 +529,7 @@ class DeviceBase:
     @software_trigger.setter
     def software_trigger(self, value: bool):
         """Whether or not the device can be software triggered"""
-        self.parent.config_helper.send_config_request(
+        self.root.parent.config_helper.send_config_request(
             action="update", config={self.name: {"softwareTrigger": value}}
         )
         self._config["softwareTrigger"] = value
@@ -542,7 +542,7 @@ class DeviceBase:
     @typechecked
     def set_user_parameter(self, val: dict):
         """set the user parameter for this device"""
-        self.parent.config_helper.send_config_request(
+        self.root.parent.config_helper.send_config_request(
             action="update", config={self.name: {"userParameter": val}}
         )
 
