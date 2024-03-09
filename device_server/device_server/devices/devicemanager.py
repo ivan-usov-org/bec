@@ -10,10 +10,6 @@ import numpy as np
 import ophyd
 import ophyd.sim as ops
 import ophyd_devices as opd
-from ophyd.ophydobj import OphydObject
-from ophyd.signal import EpicsSignalBase
-from typeguard import typechecked
-
 from bec_lib import (
     BECService,
     DeviceBase,
@@ -24,6 +20,10 @@ from bec_lib import (
     messages,
 )
 from bec_lib.connector import ConnectorBase
+from ophyd.ophydobj import OphydObject
+from ophyd.signal import EpicsSignalBase
+from typeguard import typechecked
+
 from device_server.devices.config_update_handler import ConfigUpdateHandler
 from device_server.devices.device_serializer import get_device_info
 
@@ -147,7 +147,7 @@ class DeviceManagerDS(DeviceManagerBase):
                 logger.info(f"Adding device {name}: {'ENABLED' if enabled else 'DISABLED'}")
                 try:
                     dev_cls = self._get_device_class(dev.get("deviceClass"))
-                    if issubclass(dev_cls, opd.DeviceProxy):
+                    if issubclass(dev_cls, (opd.DeviceProxy, opd.ComputedSignal)):
                         delayed_init.append(dev)
                         continue
                     self.initialize_device(dev)
@@ -178,8 +178,12 @@ class DeviceManagerDS(DeviceManagerBase):
         name = dev.get("name")
         enabled = dev.get("enabled")
         logger.info(f"Adding device {name}: {'ENABLED' if enabled else 'DISABLED'}")
-        self.initialize_device(dev)
+        obj = self.initialize_device(dev)
 
+        if hasattr(obj.obj, "lookup"):
+            self._register_device_proxy(name)
+
+    def _register_device_proxy(self, name: str) -> None:
         obj_lookup = self.devices.get(name).obj.lookup
         for key in obj_lookup.keys():
             signal_name = obj_lookup[key].get("signal_name")
@@ -194,9 +198,11 @@ class DeviceManagerDS(DeviceManagerBase):
                     f"Failed to init DeviceProxy {name}, no signal {signal_name} found for device {key}."
                 )
             if key not in registered_proxies:
+                # pylint: disable=protected-access
                 self.devices[key].obj._registered_proxies.update({name: signal_name})
                 continue
             if key in registered_proxies and signal_name not in registered_proxies[key]:
+                # pylint: disable=protected-access
                 self.devices[key].obj._registered_proxies.update({name: signal_name})
                 continue
             if key in registered_proxies.keys() and signal_name in registered_proxies[key]:

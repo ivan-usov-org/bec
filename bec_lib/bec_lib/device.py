@@ -1,18 +1,23 @@
+from __future__ import annotations
+
 import enum
 import functools
+import inspect
 import time
 import uuid
 from collections import namedtuple
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from typeguard import typechecked
 
 from bec_lib import messages
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
-from bec_lib.redis_connector import RedisConnector
 
 logger = bec_logger.logger
+
+if TYPE_CHECKING:
+    from bec_lib.redis_connector import RedisConnector
 
 
 class RPCError(Exception):
@@ -456,7 +461,7 @@ class DeviceBase:
     @property
     def on_failure(self) -> OnFailure:
         """get the failure behaviour for this device"""
-        return OnFailure(self._config["onFailure"])
+        return OnFailure(self._config.get("onFailure", "retry"))
 
     @on_failure.setter
     def on_failure(self, val: OnFailure):
@@ -806,6 +811,22 @@ class AdjustableMixin:
 
 class Signal(AdjustableMixin, OphydInterfaceBase):
     pass
+
+
+class ComputedSignal(Signal):
+
+    def set_compute_method(self, method: callable) -> None:
+        if not callable(method):
+            raise ValueError("The compute method must be callable.")
+
+        method = inspect.getsource(method)
+        self.update_config({"deviceConfig": {"compute_method": method}})
+
+    def set_input_signals(self, *signals) -> None:
+        if not all(isinstance(signal, Signal) for signal in signals):
+            raise ValueError("All input signals must be of type Signal.")
+        signals = [signal.full_name for signal in signals]
+        self.update_config({"deviceConfig": {"input_signals": signals}})
 
 
 class Positioner(AdjustableMixin, Device):

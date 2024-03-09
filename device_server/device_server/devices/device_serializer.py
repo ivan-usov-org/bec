@@ -1,7 +1,7 @@
 import msgpack
 from bec_lib.numpy_encoder import numpy_encode
 from ophyd import Device, PositionerBase, Signal
-from ophyd_devices import BECDeviceBase
+from ophyd_devices import BECDeviceBase, ComputedSignal
 
 
 def is_serializable(var) -> bool:
@@ -34,12 +34,15 @@ def get_custom_user_access_info(obj, obj_interface):
 def get_device_base_class(obj) -> str:
     if isinstance(obj, PositionerBase):
         return "positioner"
+    if isinstance(obj, ComputedSignal):
+        return "computed_signal"
     if isinstance(obj, Signal):
         return "signal"
     if isinstance(obj, Device):
         return "device"
     if isinstance(obj, BECDeviceBase):
         return "device"
+
     return "unknown"
 
 

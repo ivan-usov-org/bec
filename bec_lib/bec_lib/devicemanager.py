@@ -12,7 +12,7 @@ from typeguard import typechecked
 from bec_lib import messages
 from bec_lib.bec_errors import DeviceConfigError
 from bec_lib.config_helper import ConfigHelper
-from bec_lib.device import Device, DeviceBase, Positioner, ReadoutPriority, Signal
+from bec_lib.device import ComputedSignal, Device, DeviceBase, Positioner, ReadoutPriority, Signal
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
 from bec_lib.messages import BECStatus, DeviceConfigMessage, DeviceInfoMessage
@@ -560,6 +560,9 @@ class DeviceManagerBase:
         elif base_class == "signal":
             logger.info(f"Adding new signal {name}")
             obj = Signal(name=name, info=info, parent=self)
+        elif base_class == "computed_signal":
+            logger.info(f"Adding new computed signal {name}")
+            obj = ComputedSignal(name=name, info=info, parent=self)
         else:
             logger.error(f"Trying to add new device {name} of type {base_class}")
 
