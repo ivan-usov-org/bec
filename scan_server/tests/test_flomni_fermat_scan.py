@@ -31,29 +31,27 @@ def test_flomni_fermat_scan(scan_request):
 
 
 def test_flomni_rotation_no_rotation_required(scan_request):
-    with mock.patch.object(scan_request.stubs, "send_rpc_and_wait") as send_rpc_mock:
-        send_rpc_mock.return_value = 90
+    with mock.patch.object(scan_request.stubs, "_get_from_rpc") as get_from_rpc_mock:
+        get_from_rpc_mock.return_value = 90
         with mock.patch.object(scan_request.stubs, "scan_report_instruction") as scan_report_mock:
             with mock.patch.object(scan_request.stubs, "set") as set_mock:
-                scan_request.flomni_rotation(90)
-                assert send_rpc_mock.called_once_with("fsamroy", "user_setpoint.get")
-                assert not scan_report_mock.called
+                list(scan_request.flomni_rotation(90))
+                scan_report_mock.assert_not_called()
                 assert not set_mock.called
 
 
 def test_flomni_rotation_rotation_required(scan_request):
-    with mock.patch.object(scan_request.stubs, "send_rpc_and_wait") as send_rpc_mock:
-        send_rpc_mock.iter.return_value = 0
+    with mock.patch.object(scan_request.stubs, "_get_from_rpc") as get_from_rpc_mock:
+        get_from_rpc_mock.return_value = 0
         with mock.patch.object(scan_request.stubs, "scan_report_instruction") as scan_report_mock:
             with mock.patch.object(scan_request.stubs, "set") as set_mock:
                 list(scan_request.flomni_rotation(90))
-                send_rpc_mock.assert_called_once_with("fsamroy", "user_setpoint.get")
                 scan_report_mock.assert_called_once_with(
                     {
                         "readback": {
                             "RID": scan_request.metadata["RID"],
                             "devices": ["fsamroy"],
-                            "start": [None],
+                            "start": [0],
                             "end": [90],
                         }
                     }
