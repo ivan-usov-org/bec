@@ -349,3 +349,23 @@ def test_config_reload(lib_client, config, raises_error, deletes_config, disable
         )
         bec.config.update_session_with_file(test_device_config)
     # bec.config.load_demo_config()
+
+
+def test_computed_signal(lib_client):
+    bec = lib_client
+    wait_for_empty_queue(bec)
+    bec.metadata.update({"unit_test": "test_computed_signal"})
+    dev = bec.device_manager.devices
+    scans = bec.scans
+
+    res = scans.line_scan(dev.samx, -0.1, 0.1, steps=10, relative=False, exp_time=0)
+    res.wait()
+    assert "pseudo_signal1" in res.scan.baseline
+
+    def compute_signal1(*args, **kwargs):
+        return 5
+
+    dev.pseudo_signal1.set_compute_method(compute_signal1)
+    dev.pseudo_signal1.set_input_signals()
+
+    assert dev.pseudo_signal1.read(cached=False)["pseudo_signal1"]["value"] == 5
