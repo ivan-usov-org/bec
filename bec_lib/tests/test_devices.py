@@ -4,7 +4,16 @@ import pytest
 from typeguard import TypeCheckError
 
 from bec_lib import messages
-from bec_lib.device import AdjustableMixin, Device, DeviceBase, Positioner, RPCError, Signal, Status
+from bec_lib.device import (
+    AdjustableMixin,
+    ComputedSignal,
+    Device,
+    DeviceBase,
+    Positioner,
+    RPCError,
+    Signal,
+    Status,
+)
 from bec_lib.devicemanager import DeviceContainer, DeviceManagerBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.tests.utils import ConnectorMock, bec_client, get_device_info_mock
@@ -599,3 +608,49 @@ def test_adjustable_mixin_set_high_limit():
     )
     adj.high_limit = 20
     adj.update_config.assert_called_once_with({"deviceConfig": {"limits": [-12, 20]}})
+
+
+def test_computed_signal_set_compute_method():
+    comp_signal = ComputedSignal(name="comp_signal", parent=mock.MagicMock())
+
+    def my_compute_method():
+        return "a + b"
+
+    with mock.patch.object(comp_signal, "update_config") as update_config:
+        comp_signal.set_compute_method(my_compute_method)
+        update_config.assert_called_once_with(
+            {
+                "deviceConfig": {
+                    "compute_method": '    def my_compute_method():\n        return "a + b"\n'
+                }
+            }
+        )
+
+
+def test_computed_signal_set_signals():
+    comp_signal = ComputedSignal(name="comp_signal", parent=mock.MagicMock())
+    with mock.patch.object(comp_signal, "update_config") as update_config:
+        comp_signal.set_input_signals(
+            Signal(name="a", parent=mock.MagicMock(spec=DeviceManagerBase)),
+            Signal(name="b", parent=mock.MagicMock(spec=DeviceManagerBase)),
+        )
+        update_config.assert_called_once_with({"deviceConfig": {"input_signals": ["a", "b"]}})
+
+
+def test_computed_signal_set_signals_raises_error():
+    comp_signal = ComputedSignal(name="comp_signal", parent=mock.MagicMock())
+    with pytest.raises(ValueError):
+        comp_signal.set_input_signals("a", "b")
+
+
+def test_computed_signal_set_signals_empty():
+    comp_signal = ComputedSignal(name="comp_signal", parent=mock.MagicMock())
+    with mock.patch.object(comp_signal, "update_config") as update_config:
+        comp_signal.set_input_signals()
+        update_config.assert_called_once_with({"deviceConfig": {"input_signals": []}})
+
+
+def test_computed_signal_raises_error_on_set_compute_method():
+    comp_signal = ComputedSignal(name="comp_signal", parent=mock.MagicMock())
+    with pytest.raises(ValueError):
+        comp_signal.set_compute_method("a + b")
