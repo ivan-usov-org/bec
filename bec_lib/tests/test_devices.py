@@ -1,8 +1,6 @@
 from unittest import mock
 
 import pytest
-from typeguard import TypeCheckError
-
 from bec_lib import messages
 from bec_lib.device import (
     AdjustableMixin,
@@ -17,6 +15,7 @@ from bec_lib.device import (
 from bec_lib.devicemanager import DeviceContainer, DeviceManagerBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.tests.utils import ConnectorMock, bec_client, get_device_info_mock
+from typeguard import TypeCheckError
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=protected-access
@@ -381,107 +380,112 @@ def test_status_wait_raises_timeout():
         status.wait(timeout=0.1)
 
 
-def test_device_get_device_config():
-    device = DeviceBase(name="test", config={"deviceConfig": {"tolerance": 1}})
+@pytest.fixture
+def device_with_config():
+    parent = mock.MagicMock(spec=DeviceManagerBase)
+    device = DeviceBase(
+        name="test",
+        config={
+            "deviceConfig": {"tolerance": 1},
+            "deviceTags": ["tag1", "tag2"],
+            "readoutPriority": "baseline",
+            "onFailure": "buffer",
+            "read_only": False,
+        },
+        parent=parent,
+    )
+    yield device
+
+
+def test_device_get_device_config(device_with_config):
+    device = device_with_config
     assert device.get_device_config() == {"tolerance": 1}
 
 
-def test_device_set_device_config():
-    parent = mock.MagicMock()
-    device = DeviceBase(name="test", config={"deviceConfig": {"tolerance": 1}}, parent=parent)
+def test_device_set_device_config(device_with_config):
+    device = device_with_config
     device.set_device_config({"tolerance": 2})
     assert device.get_device_config() == {"tolerance": 2}
-    parent.config_helper.send_config_request.assert_called_once()
+    device.parent.config_helper.send_config_request.assert_called_once()
 
 
-def test_get_device_tags():
-    device = DeviceBase(name="test", config={"deviceTags": ["tag1", "tag2"]})
+def test_get_device_tags(device_with_config):
+    device = device_with_config
     assert device.get_device_tags() == ["tag1", "tag2"]
 
     device = DeviceBase(name="test", config={})
     assert device.get_device_tags() == []
 
 
-def test_set_device_tags():
-    parent = mock.MagicMock()
-    device = DeviceBase(name="test", config={"deviceTags": ["tag1", "tag2"]}, parent=parent)
+def test_set_device_tags(device_with_config):
+    device = device_with_config
     device.set_device_tags(["tag3", "tag4"])
     assert device.get_device_tags() == ["tag3", "tag4"]
-    parent.config_helper.send_config_request.assert_called_once()
+    device.parent.config_helper.send_config_request.assert_called_once()
 
 
-def test_add_device_tag():
-    parent = mock.MagicMock()
-    device = DeviceBase(name="test", config={"deviceTags": ["tag1", "tag2"]}, parent=parent)
+def test_add_device_tag(device_with_config):
+    device = device_with_config
     device.add_device_tag("tag3")
     assert device.get_device_tags() == ["tag1", "tag2", "tag3"]
-    parent.config_helper.send_config_request.assert_called_once()
+    device.parent.config_helper.send_config_request.assert_called_once()
 
 
-def test_add_device_tags_duplicate():
-    parent = mock.MagicMock()
-    device = DeviceBase(name="test", config={"deviceTags": ["tag1", "tag2"]}, parent=parent)
+def test_add_device_tags_duplicate(device_with_config):
+    device = device_with_config
     device.add_device_tag("tag1")
     assert device.get_device_tags() == ["tag1", "tag2"]
-    parent.config_helper.send_config_request.assert_not_called()
+    device.parent.config_helper.send_config_request.assert_not_called()
 
 
-def test_remove_device_tag():
-    parent = mock.MagicMock()
-    device = DeviceBase(name="test", config={"deviceTags": ["tag1", "tag2"]}, parent=parent)
+def test_remove_device_tag(device_with_config):
+    device = device_with_config
     device.remove_device_tag("tag1")
     assert device.get_device_tags() == ["tag2"]
-    parent.config_helper.send_config_request.assert_called_once()
+    device.parent.config_helper.send_config_request.assert_called_once()
 
 
-def test_device_wm():
-    parent = mock.MagicMock()
-    device = DeviceBase(name="test", config={"deviceTags": ["tag1", "tag2"]}, parent=parent)
-    with mock.patch.object(parent.devices, "wm", new_callable=mock.PropertyMock) as wm:
+def test_device_wm(device_with_config):
+    device = device_with_config
+    with mock.patch.object(device.parent.devices, "wm", new_callable=mock.PropertyMock) as wm:
         res = device.wm
-        parent.devices.wm.assert_called_once()
+        device.parent.devices.wm.assert_called_once()
 
 
-def test_readout_priority():
-    parent = mock.MagicMock()
-    device = DeviceBase(name="test", config={"readoutPriority": "baseline"}, parent=parent)
+def test_readout_priority(device_with_config):
+    device = device_with_config
     assert device.readout_priority == "baseline"
 
 
-def test_set_readout_priority():
-    parent = mock.MagicMock()
-    device = DeviceBase(name="test", config={"readoutPriority": "baseline"}, parent=parent)
+def test_set_readout_priority(device_with_config):
+    device = device_with_config
     device.readout_priority = "monitored"
     assert device.readout_priority == "monitored"
-    parent.config_helper.send_config_request.assert_called_once()
+    device.parent.config_helper.send_config_request.assert_called_once()
 
 
-def test_on_failure():
-    parent = mock.MagicMock()
-    device = DeviceBase(name="test", config={"onFailure": "buffer"}, parent=parent)
+def test_on_failure(device_with_config):
+    device = device_with_config
     assert device.on_failure == "buffer"
 
 
-def test_set_on_failure():
-    parent = mock.MagicMock()
-    device = DeviceBase(name="test", config={"onFailure": "buffer"}, parent=parent)
+def test_set_on_failure(device_with_config):
+    device = device_with_config
     device.on_failure = "retry"
     assert device.on_failure == "retry"
-    parent.config_helper.send_config_request.assert_called_once()
+    device.parent.config_helper.send_config_request.assert_called_once()
 
 
-def test_read_only():
-    parent = mock.MagicMock()
-    device = DeviceBase(name="test", config={"read_only": False}, parent=parent)
+def test_read_only(device_with_config):
+    device = device_with_config
     assert device.read_only is False
 
 
-def test_set_read_only():
-    parent = mock.MagicMock()
-    device = DeviceBase(name="test", config={"read_only": False}, parent=parent)
+def test_set_read_only(device_with_config):
+    device = device_with_config
     device.read_only = True
     assert device.read_only is True
-    parent.config_helper.send_config_request.assert_called_once()
+    device.parent.config_helper.send_config_request.assert_called_once()
 
 
 def test_device_container_wm():
