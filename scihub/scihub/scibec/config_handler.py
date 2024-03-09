@@ -151,7 +151,9 @@ class ConfigHandler:
         if "deviceConfig" in dev_config:
             RID = str(uuid.uuid4())
             self._update_device_server(RID, {device.name: dev_config})
-            updated, _ = self._wait_for_device_server_update(RID)
+            updated, msg = self._wait_for_device_server_update(RID)
+            if not updated:
+                raise DeviceConfigError(f"Failed to update device {device.name}. {msg.message}")
             device._config["deviceConfig"].update(dev_config["deviceConfig"])
             dev_config.pop("deviceConfig")
 
@@ -160,7 +162,9 @@ class ConfigHandler:
             device._config["enabled"] = dev_config["enabled"]
             RID = str(uuid.uuid4())
             self._update_device_server(RID, {device.name: dev_config})
-            updated, _ = self._wait_for_device_server_update(RID)
+            updated, msg = self._wait_for_device_server_update(RID)
+            if not updated:
+                raise DeviceConfigError(f"Failed to update device {device.name}. {msg.message}")
             dev_config.pop("enabled")
 
         if not dev_config:
