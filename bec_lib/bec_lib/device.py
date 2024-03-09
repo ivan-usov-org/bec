@@ -823,6 +823,9 @@ class ComputedSignal(Signal):
         self.update_config({"deviceConfig": {"compute_method": method}})
 
     def set_input_signals(self, *signals) -> None:
+        if not signals:
+            self.update_config({"deviceConfig": {"input_signals": []}})
+            return
         if not all(isinstance(signal, Signal) for signal in signals):
             raise ValueError("All input signals must be of type Signal.")
         signals = [signal.full_name for signal in signals]
