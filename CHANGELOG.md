@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.13.1 (2024-03-10)
+
+### Fix
+
+* **scan_server:** Fixed flomni init; added tests ([`a3ceac7`](https://gitlab.psi.ch/bec/bec/-/commit/a3ceac7a95f593da23575aaf60693519d4789764))
+
 ## v1.13.0 (2024-03-10)
 
 ### Feature
