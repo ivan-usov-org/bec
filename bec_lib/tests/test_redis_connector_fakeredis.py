@@ -330,3 +330,22 @@ def test_lrange_parses_messages(connected_connector, val):
     connected_connector.lpush("test", val)
     res = connected_connector.lrange("test", 0, -1)
     assert isinstance(res[0], messages.ScanMessage)
+
+
+def test_redis_connector_message_alternated_pass(connected_connector):
+    data_original = {
+        "mca1": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        "mca2": [10, 9, 8, 7, 6, 5, 4, 3, 2, 1],
+    }
+
+    data_to_check = {
+        "mca1": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        "mca2": [10, 9, 8, 7, 6, 5, 4, 3, 2, 1],
+    }  # same as data_original, but not passed through xadd method
+
+    assert connected_connector.xread(topic="topic") == None
+    connected_connector.xadd("topic", data_original)
+    msg_received = connected_connector.xread(topic="topic")
+
+    assert msg_received == [data_to_check]
+    assert msg_received == [data_original]

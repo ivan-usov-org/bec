@@ -779,8 +779,7 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
         else:
             client = self._redis_conn
 
-        for key, msg in msg_dict.items():
-            msg_dict[key] = MsgpackSerialization.dumps(msg)
+        msg_dict = {key: MsgpackSerialization.dumps(val) for key, val in msg_dict.items()}
 
         if max_size:
             client.xadd(topic, msg_dict, maxlen=max_size)
