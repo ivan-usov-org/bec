@@ -195,6 +195,7 @@ class BECClient(BECService, UserScriptsMixin):
             self.alarm_handler.shutdown()
         if self.bl_checks:
             self.bl_checks.stop()
+        bec_logger.logger.remove()
 
     def _print_available_commands(self, title: str, data: tuple) -> None:
         console = Console()
