@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.13.0 (2024-03-10)
+
+### Feature
+
+* Remove asyncio from BECIPythonclient to support jupyter notebook output for progressbar ([`f9c1e81`](https://gitlab.psi.ch/bec/bec/-/commit/f9c1e818e0c1aa43947c6c82e052af3f162338fa))
+
 ## v1.12.9 (2024-03-06)
 
 ### Fix
