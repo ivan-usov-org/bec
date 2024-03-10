@@ -371,7 +371,6 @@ trigger_bec-widgets:
   trigger:
     project: bec/bec-widgets
     strategy: depend
-  allow_failure: true
   rules:
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
