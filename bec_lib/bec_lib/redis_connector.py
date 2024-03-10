@@ -153,7 +153,7 @@ class StreamRegisterMixin:
         if self._stream_events_listener_thread is None:
             # create the thread that will get all messages for this connector;
             self._stream_events_listener_thread = threading.Thread(
-                target=self._get_stream_messages_loop
+                target=self._get_stream_messages_loop, daemon=True
             )
             self._stream_events_listener_thread.start()
         if isinstance(stream_topics, list):
@@ -188,7 +188,7 @@ class StreamRegisterMixin:
         if start_thread and self._stream_events_dispatcher_thread is None:
             # start dispatcher thread
             self._stream_events_dispatcher_thread = threading.Thread(
-                target=self._dispatch_stream_events
+                target=self._dispatch_stream_events, daemon=True
             )
             self._stream_events_dispatcher_thread.start()
         return stream_id
@@ -540,7 +540,7 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
         if self._events_listener_thread is None:
             # create the thread that will get all messages for this connector;
             self._events_listener_thread = threading.Thread(
-                target=self._get_messages_loop, args=(self._pubsub_conn,)
+                target=self._get_messages_loop, args=(self._pubsub_conn,), daemon=True
             )
             self._events_listener_thread.start()
 
@@ -572,7 +572,9 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
 
         if start_thread and self._events_dispatcher_thread is None:
             # start dispatcher thread
-            self._events_dispatcher_thread = threading.Thread(target=self._dispatch_events)
+            self._events_dispatcher_thread = threading.Thread(
+                target=self._dispatch_events, daemon=True
+            )
             self._events_dispatcher_thread.start()
 
     def _convert_endpointinfo_to_str(self, endpoint):
@@ -917,9 +919,9 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
 
         In order to keep this fail-safe and simple it uses 'mock'...
         """
-        from unittest.mock import (  # import is done here, to not pollute the file with something normally in tests
+        from unittest.mock import (
             Mock,
-        )
+        )  # import is done here, to not pollute the file with something normally in tests
 
         warnings.warn(
             "RedisConnector.consumer() is deprecated and should not be used anymore. Use RedisConnector.register() with 'topics', 'patterns', 'cb' or 'start_thread' instead. Additional keyword args are transmitted to the callback. For the caller, the main difference with RedisConnector.register() is that it does not return a new thread.",
