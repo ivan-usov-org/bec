@@ -2,6 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## v1.14.0 (2024-03-10)
+
+### Feature
+
+* Added support for computed signals ([`720d6e2`](https://gitlab.psi.ch/bec/bec/-/commit/720d6e210df11071f0d5c30442e6e50e34833844))
+
+### Fix
+
+* **bec_lib:** Fixed signal update ([`689e2d9`](https://gitlab.psi.ch/bec/bec/-/commit/689e2d968c4967bcaf8d19e2756997898671bf79))
+* **scihub:** Rejected config should raise ([`af2e4c5`](https://gitlab.psi.ch/bec/bec/-/commit/af2e4c58e1143b39e58f5e4f292d66dfcd36123f))
+
 ## v1.13.3 (2024-03-10)
 
 ### Fix
