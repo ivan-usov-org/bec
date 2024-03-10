@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v1.13.2 (2024-03-10)
+
+### Fix
+
+* **bec_lib:** Shutdown loguru ([`3f8d655`](https://gitlab.psi.ch/bec/bec/-/commit/3f8d655b2e199268bd23746fd0fe96bc316fcb8c))
+* **bec_lib:** Daemonized connector threads ([`be1f3fd`](https://gitlab.psi.ch/bec/bec/-/commit/be1f3fd140af8fdf6216f41b92e92ed9126d3791))
+
 ## v1.13.1 (2024-03-10)
 
 ### Fix
