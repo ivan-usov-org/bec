@@ -28,6 +28,7 @@ def fake_redis_server(host, port):
 @pytest.fixture
 def connected_connector():
     connector = RedisConnector("localhost:1", redis_cls=fake_redis_server)
+    connector._redis_conn.flushall()
     try:
         yield connector
     finally:
