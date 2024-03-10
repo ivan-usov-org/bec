@@ -114,7 +114,7 @@ tests:
   script:
     - git clone --branch $OPHYD_DEVICES_BRANCH https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
     - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices
-    - pip install pytest pytest-random-order pytest-cov pytest-asyncio pytest-timeout
+    - pip install pytest pytest-random-order pytest-cov pytest-timeout
     - apt-get update
     - apt-get install -y gcc
     - apt-get install -y redis
@@ -138,7 +138,7 @@ tests-3.11:
   script:
     - git clone --branch $OPHYD_DEVICES_BRANCH https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
     - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices
-    - pip install pytest pytest-random-order pytest-cov pytest-asyncio pytest-timeout
+    - pip install pytest pytest-random-order pytest-cov pytest-timeout
     - apt-get update
     - apt-get install -y gcc
     - apt-get install -y redis
@@ -276,7 +276,7 @@ end-2-end-conda:
 
     - bec-server start --config ./ci/test_config.yaml
 
-    - pip install pytest pytest-random-order pytest-cov pytest-asyncio pytest-timeout pytest-retry
+    - pip install pytest pytest-random-order pytest-cov pytest-timeout pytest-retry
     - cd ./bec_client
     - pytest -v ./tests/end-2-end/test_scans.py::test_grid_scan
 
@@ -326,7 +326,7 @@ end-2-end-conda-310:
 
     - bec-server start --config ./ci/test_config.yaml
 
-    - pip install pytest pytest-random-order pytest-cov pytest-asyncio pytest-timeout
+    - pip install pytest pytest-random-order pytest-cov pytest-timeout
     - cd ./bec_client
     - pytest -v ./tests/end-2-end/test_scans.py
 

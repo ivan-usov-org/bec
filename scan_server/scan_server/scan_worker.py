@@ -2,7 +2,6 @@ import datetime
 import threading
 import time
 import traceback
-from asyncio.log import logger
 
 from bec_lib import Alarms, DeviceBase, MessageEndpoints, bec_logger, messages
 

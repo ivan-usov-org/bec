@@ -1,4 +1,3 @@
-import asyncio
 from unittest import mock
 from bec_lib import messages
 

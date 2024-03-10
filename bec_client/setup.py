@@ -57,7 +57,6 @@ if __name__ == "__main__":
             "dev": [
                 "pytest",
                 "pytest-random-order",
-                "pytest-asyncio",
                 "pytest-timeout",
                 "pytest-retry",
                 "coverage",
