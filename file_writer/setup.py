@@ -9,7 +9,7 @@ current_path = pathlib.Path(__file__).parent.resolve()
 
 bec_lib = f"{current_path}/../bec_lib/"
 
-__version__ = "1.13.2"
+__version__ = "1.13.3"
 
 
 def run_install(setup_args: dict, bec_deps: list, editable=False):

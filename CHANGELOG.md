@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.13.3 (2024-03-10)
+
+### Fix
+
+* **bec_lib:** Fixed bug that caused data to be modified when using xadd; closes #220 ([`3dbb8a0`](https://gitlab.psi.ch/bec/bec/-/commit/3dbb8a00a1439e3030d9406a223040ef99cb60a8))
+
 ## v1.13.2 (2024-03-10)
 
 ### Fix
