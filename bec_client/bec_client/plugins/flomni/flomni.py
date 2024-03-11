@@ -1331,7 +1331,7 @@ class Flomni(
             successful = False
             error_caught = False
             if 0 <= angle < 180.05:
-                print(f"Starting LamNI scan for angle {angle}")
+                print(f"Starting flOMNI scan for angle {angle}")
                 while not successful:
                     self._start_beam_check()
                     if not self.special_angles:

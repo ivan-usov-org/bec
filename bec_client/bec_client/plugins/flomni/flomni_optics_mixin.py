@@ -90,7 +90,7 @@ class FlomniOpticsMixin:
         dev.fosax.limits = [fosax_in - 0.1, fosax_in + 0.1]
         dev.fosay.limits = [fosay_in - 0.1, fosay_in + 0.1]
         dev.fosaz.limits = [fosaz_in - 0.1, fosaz_in + 0.1]
-        umv(dev.fosax, fosax_in, dev.losay, fosay_in)
+        umv(dev.fosax, fosax_in, dev.fosay, fosay_in)
         umv(dev.fosaz, fosaz_in)
 
         # 11 kev
@@ -108,19 +108,25 @@ class FlomniOpticsMixin:
         dev.fosax.limits = [fosax_out - 0.1, fosax_out + 0.1]
         umv(dev.fosax, fosax_out)
 
-    def ffzp_info(self):
+    def ffzp_info(self, mokev_val=-1):
+
+        if mokev_val == -1:
+            try:
+                mokev_val = dev.mokev.readback.get()
+            except:
+                print(
+                    "Device mokev does not exist. You can specify the energy in keV as an argument instead."
+                )
+                return
         foptz_val = dev.foptz.readback.get()
         distance = -foptz_val + 43.15 + 36.7
-        print(f"The sample is in a distance of {distance:.1f} mm from the FZP.")
+        print(f"\nThe sample is in a distance of \033[1m{distance:.1f} mm\033[0m from the FZP.\n")
+        print(f"At the current energy of {mokev_val:.4f} keV we have following options:\n")
 
         diameters = [80e-6, 100e-6, 120e-6, 150e-6, 170e-6, 200e-6, 220e-6, 250e-6]
 
-        mokev_val = dev.mokev.readback.get()
         console = Console()
-        table = Table(
-            title=f"At the current energy of {mokev_val:.4f} keV we have following options:",
-            box=box.SQUARE,
-        )
+        table = Table(title=f"Outermost zone width \033[1m60 nm\033[0m", box=box.SQUARE)
         table.add_column("Diameter", justify="center")
         table.add_column("Focal distance", justify="center")
         table.add_column("Current beam size", justify="center")
@@ -141,8 +147,35 @@ class FlomniOpticsMixin:
 
         console.print(table)
 
-        print("OSA Information:")
+        diameters = [150e-6, 250e-6]
+
+        console = Console()
+        table = Table(title=f"Outermost zone width \033[1m30 nm\033[0m", box=box.SQUARE)
+        table.add_column("Diameter", justify="center")
+        table.add_column("Focal distance", justify="center")
+        table.add_column("Current beam size", justify="center")
+
+        wavelength = 1.2398e-9 / mokev_val
+
+        for diameter in diameters:
+            outermost_zonewidth = 30e-9
+            focal_distance = diameter * outermost_zonewidth / wavelength
+            beam_size = (
+                -diameter / (focal_distance * 1000) * (focal_distance * 1000 - distance) * 1e6
+            )
+            table.add_row(
+                f"{diameter*1e6:.2f} microns",
+                f"{focal_distance:.2f} mm",
+                f"{beam_size:.2f} microns",
+            )
+
+        console.print(table)
+
+        fosaz_val = dev.fosaz.readback.get()
+
+        print("\nOSA Information:")
+        print(f"  Current fosaz {fosaz_val:.1f}")
         print(
-            "The numbers presented here are for a sample in the plane of the flomni sample"
-            " holder.\n"
+            f"  The OSA will collide with a normal OMNY pin at fosaz \033[1m{(33-fosaz_val):.1f}\033[0m"
         )
+        print(f"  Remaining space: \033[1m{-fosaz_val+(33-foptz_val):.1f}\033[0m")
