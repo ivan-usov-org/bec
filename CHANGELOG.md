@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.14.1 (2024-03-11)
+
+### Fix
+
+* **scan_server:** Added cm for preventing race conditions within queue updates ([`b98dd52`](https://gitlab.psi.ch/bec/bec/-/commit/b98dd52d6ac4bce23c0916028810340e1af74649))
+
 ## v1.14.0 (2024-03-10)
 
 ### Feature
