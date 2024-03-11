@@ -1509,6 +1509,8 @@ def test_cleanup(scan_worker_mock):
 def test_shutdown(scan_worker_mock):
     worker = scan_worker_mock
     with mock.patch.object(worker.signal_event, "set") as set_mock:
+        worker._started = mock.MagicMock()
+        worker._started.is_set.return_value = True
         with mock.patch.object(worker, "join") as join_mock:
             worker.shutdown()
             set_mock.assert_called_once()
