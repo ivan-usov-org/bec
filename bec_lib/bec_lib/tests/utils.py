@@ -1,16 +1,17 @@
 from __future__ import annotations
 
 import builtins
+import copy
+import functools
 import os
 import time
 import uuid
 from typing import TYPE_CHECKING
 from unittest import mock
 
+import bec_lib
 import pytest
 import yaml
-
-import bec_lib
 from bec_lib import BECClient, messages
 from bec_lib.connector import ConnectorBase
 from bec_lib.devicemanager import DeviceManagerBase
@@ -40,10 +41,15 @@ def dm():
     yield dev_manager
 
 
+@functools.lru_cache
+def load_test_config():
+    with open(f"{dir_path}/tests/test_config.yaml", "r", encoding="utf-8") as f:
+        return create_session_from_config(yaml.safe_load(f))
+
+
 @pytest.fixture
 def dm_with_devices(dm):
-    with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
-        dm._session = create_session_from_config(yaml.safe_load(f))
+    dm._session = copy.deepcopy(load_test_config())
     dm._load_session()
     yield dm
 

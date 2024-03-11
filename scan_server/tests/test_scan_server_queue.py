@@ -38,6 +38,8 @@ def queuemanager_mock(scan_server_mock) -> QueueManager:
 
     yield _get_queuemanager
 
+    scan_server_mock.queue_manager.shutdown()
+
 
 class RequestBlockQueueMock(RequestBlockQueue):
     request_blocks = []

@@ -1,3 +1,5 @@
+import copy
+import functools
 import os
 from unittest import mock
 
@@ -48,14 +50,19 @@ class EpicsDeviceMock(DeviceMock):
         self._connected = True
 
 
+@functools.lru_cache()
+def load_test_config():
+    with open(f"{dir_path}/tests/test_config.yaml", "r", encoding="utf-8") as session_file:
+        return create_session_from_config(yaml.safe_load(session_file))
+
+
 def load_device_manager():
     service_mock = mock.MagicMock()
     service_mock.connector = ConnectorMock("", store_data=False)
     device_manager = DeviceManagerDS(service_mock, "")
     device_manager.connector = service_mock.connector
     device_manager.config_update_handler = mock.MagicMock()
-    with open(f"{dir_path}/tests/test_config.yaml", "r") as session_file:
-        device_manager._session = create_session_from_config(yaml.safe_load(session_file))
+    device_manager._session = copy.deepcopy(load_test_config())
     device_manager._load_session()
     return device_manager
 
@@ -101,8 +108,7 @@ def test_disable_unreachable_devices():
     device_manager = DeviceManagerDS(service_mock)
 
     def get_config_from_mock():
-        with open(f"{dir_path}/tests/test_config.yaml", "r") as session_file:
-            device_manager._session = create_session_from_config(yaml.safe_load(session_file))
+        device_manager._session = copy.deepcopy(load_test_config())
         device_manager._load_session()
 
     def mocked_failed_connection(obj):

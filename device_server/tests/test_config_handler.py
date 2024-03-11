@@ -1,3 +1,4 @@
+import copy
 import os
 from unittest import mock
 
@@ -5,7 +6,7 @@ import bec_lib
 import pytest
 import yaml
 from bec_lib import messages
-from bec_lib.tests.utils import ConnectorMock, create_session_from_config
+from bec_lib.tests.utils import ConnectorMock, create_session_from_config, load_test_config
 from test_device_manager_ds import device_manager
 
 from device_server.devices.config_update_handler import ConfigUpdateHandler
@@ -20,8 +21,7 @@ def test_request_response():
     device_manager = DeviceManagerDS(service_mock)
 
     def get_config_from_mock():
-        with open(f"{dir_path}/tests/test_config.yaml", "r") as session_file:
-            device_manager._session = create_session_from_config(yaml.safe_load(session_file))
+        device_manager._session = copy.deepcopy(load_test_config())
         device_manager._load_session()
 
     def mocked_failed_connection(obj):

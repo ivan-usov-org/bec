@@ -725,6 +725,8 @@ class ScanWorker(threading.Thread):
         Returns:
 
         """
+        if not queue:
+            return None
         self.current_instruction_queue_item = queue
 
         start = time.time()
@@ -872,7 +874,8 @@ class ScanWorker(threading.Thread):
                 alarm_type=exc.__class__.__name__,
                 metadata={},
             )
-            self.parent.queue_manager.queues[self.queue_name].abort()
+            if self.queue_name in self.parent.queue_manager.queues:
+                self.parent.queue_manager.queues[self.queue_name].abort()
             self.reset()
         finally:
             self.connector.shutdown()
@@ -880,4 +883,5 @@ class ScanWorker(threading.Thread):
     def shutdown(self):
         """shutdown the scan worker"""
         self.signal_event.set()
-        self.join()
+        if self._started.is_set():
+            self.join()

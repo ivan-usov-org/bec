@@ -134,15 +134,19 @@ class QueueManager:
     def set_pause(self, scanID=None, queue="primary", parameter: dict = None) -> None:
         # pylint: disable=unused-argument
         """pause the queue and the currenlty running instruction queue"""
-        self.queues[queue].status = ScanQueueStatus.PAUSED
-        self.queues[queue].worker_status = InstructionQueueStatus.PAUSED
+        que = self.queues[queue]
+        with AutoResetCM(que):
+            que.status = ScanQueueStatus.PAUSED
+            que.worker_status = InstructionQueueStatus.PAUSED
 
     @requires_queue
     def set_deferred_pause(self, scanID=None, queue="primary", parameter: dict = None) -> None:
         # pylint: disable=unused-argument
         """pause the queue but continue with the currently running instruction queue until the next checkpoint"""
-        self.queues[queue].status = ScanQueueStatus.PAUSED
-        self.queues[queue].worker_status = InstructionQueueStatus.DEFERRED_PAUSE
+        que = self.queues[queue]
+        with AutoResetCM(que):
+            que.status = ScanQueueStatus.PAUSED
+            que.worker_status = InstructionQueueStatus.DEFERRED_PAUSE
 
     @requires_queue
     def set_continue(self, scanID=None, queue="primary", parameter: dict = None) -> None:
@@ -154,10 +158,11 @@ class QueueManager:
     @requires_queue
     def set_abort(self, scanID=None, queue="primary", parameter: dict = None) -> None:
         """abort the scan and remove it from the queue. This will leave the queue in a paused state after the cleanup"""
-        if self.queues[queue].queue:
-            self.queues[queue].status = ScanQueueStatus.PAUSED
-        self.queues[queue].worker_status = InstructionQueueStatus.STOPPED
-        # self.queues[queue].remove_queue_item(scanID=scanID)
+        que = self.queues[queue]
+        with AutoResetCM(que):
+            if que.queue:
+                que.status = ScanQueueStatus.PAUSED
+            que.worker_status = InstructionQueueStatus.STOPPED
 
     @requires_queue
     def set_halt(self, scanID=None, queue="primary", parameter: dict = None) -> None:
@@ -172,9 +177,11 @@ class QueueManager:
         # pylint: disable=unused-argument
         """pause the queue and clear all its elements"""
         logger.info("clearing queue")
-        self.queues[queue].status = ScanQueueStatus.PAUSED
-        self.queues[queue].worker_status = InstructionQueueStatus.STOPPED
-        self.queues[queue].clear()
+        que = self.queues[queue]
+        with AutoResetCM(que):
+            que.status = ScanQueueStatus.PAUSED
+            que.worker_status = InstructionQueueStatus.STOPPED
+            que.clear()
 
     @requires_queue
     def set_restart(self, scanID=None, queue="primary", parameter: dict = None) -> None:
@@ -185,8 +192,10 @@ class QueueManager:
             return
         if isinstance(scanID, list):
             scanID = scanID[0]
-        self.queues[queue].status = ScanQueueStatus.PAUSED
-        self.queues[queue].worker_status = InstructionQueueStatus.STOPPED
+        que = self.queues[queue]
+        with AutoResetCM(que):
+            que.status = ScanQueueStatus.PAUSED
+            que.worker_status = InstructionQueueStatus.STOPPED
         self._lock.release()
         instruction_queue = self._wait_for_queue_to_appear_in_history(scanID, queue)
         self._lock.acquire()
@@ -283,6 +292,8 @@ class QueueManager:
         """shutdown the queue"""
         for queue in self.queues.values():
             queue.signal_event.set()
+            queue.stop_worker()
+        self.queues.clear()
 
 
 class ScanQueue:
@@ -320,6 +331,7 @@ class ScanQueue:
         self._status = self.DEFAULT_QUEUE_STATUS
         self.signal_event = threading.Event()
         self.scan_worker = None
+        self.auto_reset_enabled = True
         self.init_scan_worker()
 
     def init_scan_worker(self):
@@ -331,6 +343,10 @@ class ScanQueue:
     def start_worker(self):
         """start the scan worker"""
         self.scan_worker.start()
+
+    def stop_worker(self):
+        """stop the scan worker"""
+        self.scan_worker.shutdown()
 
     @property
     def worker_status(self) -> InstructionQueueStatus | None:
@@ -406,9 +422,10 @@ class ScanQueue:
                 return True
 
             while self.status == ScanQueueStatus.PAUSED:
-                if len(self.queue) == 0:
+                if len(self.queue) == 0 and self.auto_reset_enabled:
                     # we don't need to pause if there is no scan enqueued
                     self.status = ScanQueueStatus.RUNNING
+                    print("resetting queue status to running")
                 time.sleep(0.1)
 
             self.active_instruction_queue = self.queue[0]
@@ -475,6 +492,21 @@ class ScanQueue:
                 queue_found = queue
                 return queue_found
         return queue_found
+
+
+class AutoResetCM:
+    """Context manager to automatically reset the queue status"""
+
+    def __init__(self, queue: ScanQueue) -> None:
+        self.queue = queue
+
+    def __enter__(self):
+        self.queue.auto_reset_enabled = False
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        self.queue.auto_reset_enabled = True
+        return False
 
 
 class RequestBlock:
