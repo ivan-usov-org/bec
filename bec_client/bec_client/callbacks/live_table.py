@@ -135,9 +135,7 @@ class LiveUpdatesTable(LiveUpdatesBase):
     def _prepare_table(self) -> PrettyTable:
         """Prepares the custom table for the live updates."""
         header = self._get_header()
-        print(header)
         max_len = max(len(head) for head in header)
-        print(max_len)
         return PrettyTable(header, padding=max_len)
 
     def _get_header(self) -> list:
@@ -254,7 +252,6 @@ class LiveUpdatesTable(LiveUpdatesBase):
         if not self.table:
             self.dev_values = (len(self._get_header()) - 1) * [0]
             self.table = self._prepare_table()
-            print(len(self.table.get_header_lines()))
             print(self.table.get_header_lines())
 
         if self.point_id % 100 == 0:
