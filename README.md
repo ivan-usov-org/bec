@@ -37,7 +37,7 @@ Afterwards, you may follow this step-by-step guide to suggest your code improvem
 3. Use Black to format your code:
 
     ```bash
-    black --line-length=100 --skip-magic-trailing-comma --experimental-string-processing .
+    black --line-length=100 --skip-magic-trailing-comma .
     ```
 
 4. Run Pylint on your code to ensure it meets coding standards:
