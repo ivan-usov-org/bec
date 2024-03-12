@@ -1,10 +1,10 @@
 from unittest import mock
 
 import IPython
-
-from bec_client import BECIPythonClient
 from bec_lib import RedisConnector, ServiceConfig
 from bec_lib.tests.utils import ConnectorMock, bec_client
+
+from bec_client import BECIPythonClient
 
 
 def test_ipython_device_completion(bec_client):
@@ -15,6 +15,17 @@ def test_ipython_device_completion(bec_client):
     completer = IPython.get_ipython().Completer
     assert "dev.samx" in completer.all_completions("dev.sa")
     assert len(completer.all_completions("dev.sa")) == 3
+
+
+def test_ipython_device_completion_property_access(bec_client):
+    client = bec_client
+    client.start()
+    shell = IPython.terminal.interactiveshell.TerminalInteractiveShell.instance()
+    shell.user_ns["dev"] = client.device_manager.devices
+    completer = IPython.get_ipython().Completer
+    assert "dev.samx.dummy_controller.some_var" in completer.all_completions(
+        "dev.samx.dummy_controller.som"
+    )
 
 
 def test_bec_client_initialize():

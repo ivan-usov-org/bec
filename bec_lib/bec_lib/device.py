@@ -153,6 +153,12 @@ class DeviceBase:
 
     def __getattribute__(self, name: str) -> Any:
         if name in object.__getattribute__(self, "_property_container"):
+            caller_frame = inspect.currentframe().f_back
+            while caller_frame:
+                if "jedi" in caller_frame.f_globals:
+                    # Jedi module is present, likely tab completion
+                    return object.__getattribute__(self, name)
+                caller_frame = caller_frame.f_back
             return object.__getattribute__(self, "_run")(fcn=name, cached=False)
         return object.__getattribute__(self, name)
 
@@ -504,42 +510,6 @@ class DeviceBase:
             action="update", config={self.name: {"softwareTrigger": value}}
         )
         self._config["softwareTrigger"] = value
-
-    # def read(self, cached, filter_readback=True):
-    #     """get the last reading from a device"""
-    #     val = self.parent.connector.get(MessageEndpoints.device_read(self.name))
-    #     if not val:
-    #         return None
-    #     if filter_readback:
-    #         return messages.DeviceMessage.loads(val).content["signals"].get(self.name)
-    #     return messages.DeviceMessage.loads(val).content["signals"]
-    #
-    # def readback(self, filter_readback=True):
-    #     """get the last readback value from a device"""
-    #     val = self.parent.connector.get(MessageEndpoints.device_readback(self.name))
-    #     if not val:
-    #         return None
-    #     if filter_readback:
-    #         return DeviceMessage.loads(val).content["signals"].get(self.name)
-    #     return DeviceMessage.loads(val).content["signals"]
-
-    # @property
-    # def device_status(self):
-    #     """get the current status of the device"""
-    #     val = self.parent.connector.get(MessageEndpoints.device_status(self.name))
-    #     if val is None:
-    #         return val
-    #     val = DeviceStatusMessage.loads(val)
-    #     return val.content.get("status")
-
-    # @property
-    # def signals(self):
-    #     """get the last signals from a device"""
-    #     val = self.parent.connector.get(MessageEndpoints.device_read(self.name))
-    #     if val is None:
-    #         return None
-    #     self._signals = DeviceMessage.loads(val).content["signals"]
-    #     return self._signals
 
     @property
     def user_parameter(self) -> dict:
