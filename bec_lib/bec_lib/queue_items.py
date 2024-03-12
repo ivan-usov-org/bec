@@ -38,7 +38,7 @@ class QueueItem:
         request_blocks: list,
         status: str,
         active_request_block: dict,
-        scanID: list(str),
+        scanID: list[str],
         **_kwargs,
     ) -> None:
         self.scan_manager = scan_manager
@@ -80,7 +80,7 @@ class QueueItem:
             if queue_item["queueID"] == self.queueID:
                 self.update_queue_item(queue_item)
                 return
-        history = self.scan_manager.queue_storage.queue_history()
+        history = self.scan_manager.queue_storage.queue_history
         for queue_item in history:
             if queue_item.content["queueID"] == self.queueID:
                 self.update_queue_item(queue_item.content["info"])
@@ -113,32 +113,13 @@ class QueueStorage:
         self.storage: deque[QueueItem] = deque(maxlen=maxlen)
         self._lock = threading.RLock()
         self.scan_manager = scan_manager
-        self._current_scan_queue = None
+        self.current_scan_queue = None
+        self.queue_history = None
 
-    def queue_history(self, history=5):
-        """get the queue history of length 'history'"""
-        if not history:
-            raise ValueError("History length cannot be 0.")
-        if history < 0:
-            history *= -1
-
-        return self.scan_manager.connector.lrange(
-            MessageEndpoints.scan_queue_history(),
-            0,
-            history,
+    def _update_queue_history(self):
+        self.queue_history = self.scan_manager.connector.lrange(
+            MessageEndpoints.scan_queue_history(), 0, 5
         )
-
-    @property
-    def current_scan_queue(self) -> dict:
-        """get the current scan queue from redis"""
-        msg = self.scan_manager.connector.get(MessageEndpoints.scan_queue_status())
-        if msg:
-            self._current_scan_queue = msg.content["queue"]
-        return self._current_scan_queue
-
-    @current_scan_queue.setter
-    def current_scan_queue(self, val: dict):
-        self._current_scan_queue = val
 
     def describe_queue(self):
         """create a rich.table description of the current scan queue"""
@@ -174,6 +155,7 @@ class QueueStorage:
     def update_with_status(self, queue_msg: messages.ScanQueueStatusMessage) -> None:
         """update a queue item with a new ScanQueueStatusMessage / queue message"""
         self.current_scan_queue = queue_msg.content["queue"]
+        self._update_queue_history()
         queue_info = queue_msg.content["queue"]["primary"].get("info")
         for queue_item in queue_info:
             queue = self.find_queue_item_by_ID(queueID=queue_item["queueID"])
