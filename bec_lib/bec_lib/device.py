@@ -71,6 +71,10 @@ class ReadoutPriority(str, enum.Enum):
 
 
 class Status:
+    """
+    Status object for RPC calls
+    """
+
     def __init__(self, connector: RedisConnector, RID: str) -> None:
         """
         Status object for RPC calls
@@ -100,7 +104,13 @@ class Status:
                 break
 
     def wait(self, timeout=None):
-        """wait until the request is completed"""
+        """
+        Wait for the request to complete. If the request is not completed within the specified time,
+        a TimeoutError is raised.
+
+        Args:
+            timeout (float, optional): Timeout in seconds. Defaults to None. If None, the method waits indefinitely.
+        """
         try:
             self._device_req_thread = threading.Thread(
                 target=self._wait_device_req, daemon=True, name=f"device_req_thread_{self._RID}"
