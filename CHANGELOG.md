@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.14.3 (2024-03-12)
+
+### Fix
+
+* **bec_lib:** Fixed dataset number setter ([`5dcffe0`](https://gitlab.psi.ch/bec/bec/-/commit/5dcffe022c2a5d2c1e2cb50265f5d0b1cefe547a))
+
 ## v1.14.2 (2024-03-12)
 
 ### Fix
