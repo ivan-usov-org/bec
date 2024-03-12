@@ -15,7 +15,6 @@ If you need to install BEC yourself, the following section will guide you throug
 
 On a PSI-system, requirements are available via pmodules. If you run BEC on your own system, make sure to install the required packages.
 ```{code-block} bash
-module use unstable
 module add psi-python311/2024.02
 module add redis/7.0.12
 module add tmux/3.2
