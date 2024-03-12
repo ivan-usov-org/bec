@@ -3,6 +3,7 @@ from __future__ import annotations
 import enum
 import functools
 import inspect
+import threading
 import time
 import uuid
 from collections import namedtuple
@@ -76,32 +77,40 @@ class Status:
         """
         self._connector = connector
         self._RID = RID
+        self._event = threading.Event()
+        self._thread_event = threading.Event()
+        self._device_req_thread = None
 
     def __eq__(self, __value: object) -> bool:
         if isinstance(__value, Status):
             return self._RID == __value._RID
         return False
 
-    def wait(self, timeout=None):
-        """wait until the request is completed"""
-        sleep_time_step = 0.1
-        sleep_count = 0
-
-        def _sleep(sleep_time):
-            nonlocal sleep_count
-            nonlocal timeout
-            time.sleep(sleep_time)
-            sleep_count += sleep_time
-            if timeout is not None and sleep_count > timeout:
-                raise TimeoutError()
-
-        while True:
+    def _wait_device_req(self):
+        while self._thread_event.is_set() is False:
             request_status = self._connector.lrange(
                 MessageEndpoints.device_req_status_container(self._RID), 0, -1
             )
             if request_status:
+                self._event.set()
                 break
-            _sleep(sleep_time_step)
+
+    def wait(self, timeout=None):
+        """wait until the request is completed"""
+        try:
+            self._device_req_thread = threading.Thread(
+                target=self._wait_device_req, daemon=True, name=f"device_req_thread_{self._RID}"
+            )
+            self._device_req_thread.start()
+
+            if not self._event.wait(timeout):
+                self._thread_event.set()
+                raise TimeoutError("The request has not been completed within the specified time.")
+        finally:
+            self._thread_event.set()
+            self._device_req_thread.join()
+            self._event.clear()
+            self._thread_event.clear()
 
 
 class DeviceBase:

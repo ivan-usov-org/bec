@@ -370,6 +370,14 @@ def test_status_wait():
     status.wait()
 
 
+def test_status_wait_raises_timeout():
+    connector = mock.MagicMock()
+    connector.lrange.return_value = False
+    status = Status(connector, "test")
+    with pytest.raises(TimeoutError):
+        status.wait(timeout=0.1)
+
+
 def test_device_get_device_config():
     device = DeviceBase(name="test", config={"deviceConfig": {"tolerance": 1}})
     assert device.get_device_config() == {"tolerance": 1}
