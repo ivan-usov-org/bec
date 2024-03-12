@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v1.14.2 (2024-03-12)
+
+### Fix
+
+* Remove debug prints from livetable ([`7efb387`](https://gitlab.psi.ch/bec/bec/-/commit/7efb3878d8687ba4e747c99e517d4c6df40c6965))
+* Add recovery_config files to .gitignore ([`6201757`](https://gitlab.psi.ch/bec/bec/-/commit/62017574baea74dfff5f4d13ea1d1886ee6581a8))
+
 ## v1.14.1 (2024-03-11)
 
 ### Fix
