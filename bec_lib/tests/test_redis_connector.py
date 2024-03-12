@@ -354,8 +354,31 @@ def test_redis_connector_xread_without_id(connector):
     connector._redis_conn.xread.assert_called_once_with({"topic1": "0-0"}, count=None, block=None)
     connector._redis_conn.xread.reset_mock()
 
-    connector.stream_keys["topic1"] = "id"
+    connector.stream_keys["default"]["topic1"] = "id"
     connector.xread("topic1")
+    connector._redis_conn.xread.assert_called_once_with({"topic1": "id"}, count=None, block=None)
+
+
+def test_redis_connector_xread_with_group_from_end(connector):
+    connector.xread("topic1", group="group1", from_start=False)
+    connector._redis_conn.xrevrange.assert_called_once_with("topic1", "+", "-", count=1)
+
+
+def test_redis_connector_xread_with_group_from_start(connector):
+    connector.xread("topic1", group="group1", from_start=True)
+    connector._redis_conn.xread.assert_called_once_with({"topic1": "0-0"}, count=None, block=None)
+
+
+def test_redis_connector_xread_with_group(connector):
+    assert "topic1" not in connector.stream_keys["group1"]
+    connector.stream_keys["default"]["topic1"] = "id"
+    connector.xread("topic1", group="group1")
+    connector._redis_conn.xrevrange.assert_called_once_with("topic1", "+", "-", count=1)
+
+    assert "topic1" in connector.stream_keys["group1"]
+    connector.stream_keys["group1"]["topic1"] = "id"
+    connector._redis_conn.reset_mock()
+    connector.xread("topic1", group="group1")
     connector._redis_conn.xread.assert_called_once_with({"topic1": "id"}, count=None, block=None)
 
 

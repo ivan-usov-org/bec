@@ -57,6 +57,11 @@ def check_topic(func):
 
 @dataclass
 class StreamTopicInfo:
+    """
+    Stream topic info. This class is used to store information about a stream topic
+    and is only used internally by the StreamRegisterMixin class.
+    """
+
     topic: str | list[str]
     stream_id: int
     id: str
@@ -393,7 +398,7 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
         self._messages_queue = queue.Queue()
         self._stop_events_listener_thread = threading.Event()
 
-        self.stream_keys = {}
+        self.stream_keys = collections.defaultdict(dict)
 
     def shutdown(self):
         """
@@ -815,7 +820,13 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
 
     @check_topic
     def xread(
-        self, topic: str, id: str = None, count: int = None, block: int = None, from_start=False
+        self,
+        topic: str,
+        id: str = None,
+        count: int = None,
+        block: int = None,
+        from_start=False,
+        group="default",
     ) -> list:
         """
         read from stream
@@ -826,6 +837,7 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
             count (int, optional): number of messages to read. Defaults to None, which means all.
             block (int, optional): block for x milliseconds. Defaults to None.
             from_start (bool, optional): read from start. Defaults to False.
+            group (str, optional): group name. Defaults to "default".
 
         Returns:
             [list]: list of messages
@@ -842,34 +854,34 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
         """
         client = self._redis_conn
         if from_start:
-            self.stream_keys[topic] = "0-0"
-        if topic not in self.stream_keys:
+            self.stream_keys[group][topic] = "0-0"
+        if topic not in self.stream_keys[group]:
             if id is None:
                 try:
                     msg = client.xrevrange(topic, "+", "-", count=1)
                     if msg:
-                        self.stream_keys[topic] = msg[0][0].decode()
+                        self.stream_keys[group][topic] = msg[0][0].decode()
                         out = {}
                         for key, val in msg[0][1].items():
                             out[key.decode()] = MsgpackSerialization.loads(val)
                         return [out]
-                    self.stream_keys[topic] = "0-0"
+                    self.stream_keys[group][topic] = "0-0"
                 except redis.exceptions.ResponseError:
-                    self.stream_keys[topic] = "0-0"
+                    self.stream_keys[group][topic] = "0-0"
         if id is None:
-            id = self.stream_keys[topic]
+            id = self.stream_keys[group][topic]
 
         msg = client.xread({topic: id}, count=count, block=block)
-        return self._decode_stream_messages_xread(msg)
+        return self._decode_stream_messages_xread(msg, group)
 
-    def _decode_stream_messages_xread(self, msg):
+    def _decode_stream_messages_xread(self, msg, group):
         out = []
         for topic, msgs in msg:
             for index, record in msgs:
                 out.append(
                     {k.decode(): MsgpackSerialization.loads(msg) for k, msg in record.items()}
                 )
-                self.stream_keys[topic.decode()] = index
+                self.stream_keys[group][topic.decode()] = index
         return out if out else None
 
     @check_topic
@@ -918,9 +930,9 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
 
         In order to keep this fail-safe and simple it uses 'mock'...
         """
-        from unittest.mock import (
+        from unittest.mock import (  # import is done here, to not pollute the file with something normally in tests
             Mock,
-        )  # import is done here, to not pollute the file with something normally in tests
+        )
 
         warnings.warn(
             "RedisConnector.consumer() is deprecated and should not be used anymore. Use RedisConnector.register() with 'topics', 'patterns', 'cb' or 'start_thread' instead. Additional keyword args are transmitted to the callback. For the caller, the main difference with RedisConnector.register() is that it does not return a new thread.",
