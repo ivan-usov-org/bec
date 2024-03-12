@@ -2,6 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## v1.14.4 (2024-03-12)
+
+### Fix
+
+* **bec_lib:** Don't call rpc on jedi completer ([`8a6a968`](https://gitlab.psi.ch/bec/bec/-/commit/8a6a968cc8c31fbb5fb20ce872b8bbdc76039ee8))
+* **bec_lib:** Added tab complete for property vars ([`ef531d0`](https://gitlab.psi.ch/bec/bec/-/commit/ef531d0d4a1848ac5917b56eebea385fac9b7a4c))
+
+### Documentation
+
+* Updated readme ([`c490574`](https://gitlab.psi.ch/bec/bec/-/commit/c490574b9bafc217bf29bec9b087fa75c50abab6))
+
 ## v1.14.3 (2024-03-12)
 
 ### Fix
