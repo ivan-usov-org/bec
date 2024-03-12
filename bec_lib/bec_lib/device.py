@@ -151,6 +151,11 @@ class DeviceBase:
             return fcn(self, *args, **kwargs)
         return self._run_rpc_call(device, func_call, *args, **kwargs)
 
+    def __getattribute__(self, name: str) -> Any:
+        if name in object.__getattribute__(self, "_property_container"):
+            return object.__getattribute__(self, "_run")(fcn=name, cached=False)
+        return object.__getattribute__(self, name)
+
     def __getattr__(self, name: str) -> Any:
         if name in self._property_container:
             return object.__getattribute__(self, "_run")(fcn=name, cached=False)
@@ -378,6 +383,7 @@ class DeviceBase:
                     setattr(self, user_access_name, self._custom_rpc_methods[user_access_name].run)
                     setattr(getattr(self, user_access_name), "__doc__", descr.get("doc"))
                 else:
+                    setattr(self, user_access_name, user_access_name)
                     self._property_container.add(user_access_name)
             else:
                 self._custom_rpc_methods[user_access_name] = DeviceBase(
