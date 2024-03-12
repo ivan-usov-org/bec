@@ -8,6 +8,9 @@
 **/.pytest_cache
 **/*.egg*
 
+# recovery_config files
+recovery_config_*
+
 # file writer data
 **.h5
 
