@@ -33,7 +33,7 @@ class FlomniOpticsMixin:
         feyex_in = self._get_user_param_safe("feyex", "in")
         feyey_in = self._get_user_param_safe("feyey", "in")
         umv(dev.feyex, feyex_in, dev.feyey, feyey_in)
-        self._align.update_frame()
+        self.align.update_frame()
 
     def _ffzp_in(self):
         foptx_in = self._get_user_param_safe("foptx", "in")

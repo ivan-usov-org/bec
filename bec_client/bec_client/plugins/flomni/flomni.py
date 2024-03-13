@@ -406,11 +406,17 @@ class FlomniSampleTransferMixin:
         umv(dev.fsamx, fsamx_in)
         dev.fsamx.limits = [fsamx_in - 0.4, fsamx_in + 0.4]
 
+    def laser_tracker_show_all(self):
+        dev.rtx.controller.laser_tracker_show_all()
+
     def laser_tracker_on(self):
         dev.rtx.controller.laser_tracker_on()
 
     def laser_tracker_off(self):
         dev.rtx.controller.laser_tracker_off()
+
+    def show_signal_strength_interferometer(self):
+        dev.rtx.controller.show_signal_strength_interferometer()
 
     def rt_feedback_disable(self):
         self.device_manager.devices.rtx.controller.feedback_disable()
@@ -419,7 +425,14 @@ class FlomniSampleTransferMixin:
         self.device_manager.devices.rtx.controller.feedback_enable_with_reset()
 
     def rt_feedback_enable_without_reset(self):
-        self.device_manager.devices.rtx.controller.feedback_enable_without_reset()
+        feedback_status = self.device_manager.devices.rtx.controller.feedback_is_running()
+        if feedback_status == True:
+            print("The rt feedback is \x1b[92mrunning\x1b[0m.")
+        else:
+            print("The rt feedback is \x1b[91mNOT\x1b[0m running.")
+
+    def rt_feedback_status(self):
+        self
 
     def lights_off(self):
         self.device_manager.devices.fsamx.controller.lights_off()
@@ -494,7 +507,7 @@ class FlomniSampleTransferMixin:
             print("good then")
         else:
             print("Stopping.")
-            return
+            raise FlomniError(f"The sample transfer was manually aborted.")
 
         self.ftransfer_gripper_move(position)
 
@@ -524,6 +537,9 @@ class FlomniSampleTransferMixin:
         signal_name = getattr(dev.flomni_samples.sample_names, f"sample{position}")
         self.flomni_modify_storage_non_interactive(100, 1, signal_name.get())
         self.flomni_modify_storage_non_interactive(position, 0, "-")
+
+    def ftransfer_show_all(self):
+        dev.flomni_samples.show_all()
 
     def ftransfer_put_sample(self, position: int):
         self.check_position_is_valid(position)
@@ -628,9 +644,9 @@ class FlomniSampleTransferMixin:
         self.ftransfer_get_sample(new_sample_position)
         self.ftransfer_put_sample(0)
 
-    def flomni_modify_storage(self, position: int, used: int):
+    def ftransfer_modify_storage(self, position: int, used: int):
         if used:
-            name = input("What's the name of this sample?")
+            name = input("What's the name of this sample? ")
         else:
             name = "-"
         self.flomni_modify_storage_non_interactive(position, used, name)
@@ -936,14 +952,14 @@ class FlomniAlignmentMixin:
 
         print("New alignment parameters loaded")
         print(
-            f"X Amplitude {tomo_alignment_fit[0][0]},"
+            f"X Amplitude {tomo_alignment_fit[0][0]}, "
             f"X Phase {tomo_alignment_fit[0][1]}, "
-            f"X Offset {tomo_alignment_fit[0][2]},"
-            f"Y Amplitude {tomo_alignment_fit[1][0]},"
-            f"Y Phase {tomo_alignment_fit[1][1]},"
-            f"Y Offset {tomo_alignment_fit[1][2]}",
-            f"Y 3rd Order Amplitude {tomo_alignment_fit[1][3]},"
-            f"Y 3rd Order Phase {tomo_alignment_fit[1][4]},",
+            f"X Offset {tomo_alignment_fit[0][2]}, "
+            f"Y Amplitude {tomo_alignment_fit[1][0]}, "
+            f"Y Phase {tomo_alignment_fit[1][1]}, "
+            f"Y Offset {tomo_alignment_fit[1][2]}, "
+            f"Y 3rd Order Amplitude {tomo_alignment_fit[1][3]}, "
+            f"Y 3rd Order Phase {tomo_alignment_fit[1][4]}."
         )
 
     def get_alignment_offset(self, angle: float):
@@ -1067,19 +1083,29 @@ class Flomni(
         self.corr_angle_y = []
         self.corr_pos_y_2 = []
         self.corr_angle_y_2 = []
-        self._align = None
+        self.align = XrayEyeAlign(self.client, self)
 
     def start_x_ray_eye_alignment(self):
-        self._align = XrayEyeAlign(self.client, self)
-        try:
-            self._align.align()
-        except KeyboardInterrupt as exc:
-            fsamx_in = self._get_user_param_safe(dev.fsamx, "in")
-            if np.isclose(fsamx_in, dev.fsamx.readback.get(), 0.5):
-                print("Stopping alignment. Returning to fsamx in position.")
-                self.rt_feedback_disable()
-                umv(dev.fsamx, fsamx_in)
-            raise exc
+        user_input = input(
+            "Starting Xrayeye alignment. Deleting any potential existing alignment for this sample. [Y/n]"
+        )
+        if user_input == "y" or user_input == "":
+            self.align = XrayEyeAlign(self.client, self)
+            try:
+                self.align.align()
+            except KeyboardInterrupt as exc:
+                fsamx_in = self._get_user_param_safe(dev.fsamx, "in")
+                if np.isclose(fsamx_in, dev.fsamx.readback.get(), 0.5):
+                    print("Stopping alignment. Returning to fsamx in position.")
+                    self.rt_feedback_disable()
+                    umv(dev.fsamx, fsamx_in)
+                raise exc
+
+    def xrayeye_update_frame(self):
+        self.align.update_frame()
+
+    def xrayeye_alignment_start(self):
+        self.start_x_ray_eye_alignment()
 
     def drive_axis_to_limit(self, device, direction):
         axis_id = device._config["deviceConfig"].get("axis_Id")
@@ -1488,14 +1514,10 @@ class Flomni(
         print("Current settings:")
         print(f"Counting time           <ctime>  =  {self.tomo_countingtime} s")
         print(f"Stepsize microns         <step>  =  {self.tomo_shellstep}")
-        print(f"FOV (200/100)  <microns>  =  {self.fovx}, {self.fovy}")
+        print(f"FOV (200/100)  <microns>         =  {self.fovx}, {self.fovy}")
         print(f"Stitching number x,y             =  {self.stitch_x}, {self.stitch_y}")
         print(f"Stitching overlap                =  {self.tomo_stitch_overlap}")
         print(f"Reconstruction queue name        =  {self.ptycho_reconstruct_foldername}")
-        print(
-            "For information, fov offset is rotating and finding the ROI, manual shift moves"
-            " rotation center"
-        )
         print(f"   _manual_shift_y         <mm>  =  {self.manual_shift_y}")
         print(f"Angular step within sub-tomogram:   {self.tomo_angle_stepsize} degrees")
         print(f"Resulting in number of projections: {180/self.tomo_angle_stepsize*8}")
@@ -1521,7 +1543,6 @@ class Flomni(
             print(f"The angular step will be {180/tomo_numberofprojections}")
             self.tomo_angle_stepsize = 180 / tomo_numberofprojections * 8
             print(f"The angular step in a subtomogram it will be {self.tomo_angle_stepsize}")
-            self.sample_name = self._get_val("sample name", self.sample_name, str)
 
     @staticmethod
     def _get_val(msg: str, default_value, data_type):

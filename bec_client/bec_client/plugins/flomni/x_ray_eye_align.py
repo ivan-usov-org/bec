@@ -219,11 +219,6 @@ class XrayEyeAlign:
         self.write_output()
         fovx = self._xray_fov_xy[0] * self.PIXEL_CALIBRATION * 1000 / 2
         fovy = self._xray_fov_xy[1] * self.PIXEL_CALIBRATION * 1000 / 2
-        print(
-            f"The largest field of view from the xrayeyealign was \nfovx = {fovx:.0f} microns, fovy"
-            f" = {fovy:.0f} microns"
-        )
-        print("Use matlab routine to fit the current alignment...")
 
         self.tomo_rotate(0)
 
@@ -232,7 +227,13 @@ class XrayEyeAlign:
         # free camera
         epics_put("XOMNYI-XEYE-ACQ:0", 2)
 
-        print("\n\nNEXT LOAD ALIGNMENT PARAMETERS\nby running flomni.read_alignment_offset()\n")
+        print(
+            f"The largest field of view from the xrayeyealign was \nfovx = {fovx:.0f} microns, fovy"
+            f" = {fovy:.0f} microns"
+        )
+        print("Use the matlab routine to FIT the current alignment...")
+
+        print("Then LOAD ALIGNMENT PARAMETERS by running flomni.read_alignment_offset()\n")
 
     def write_output(self):
         file = os.path.expanduser("~/Data10/specES1/internal/xrayeye_alignmentvalues")
