@@ -327,20 +327,28 @@ def test_redis_connector_register_stream_list(connected_connector, endpoint):
 @pytest.mark.parametrize("endpoint", ["test", MessageEndpoints.processed_data("test")])
 def test_redis_connector_register_stream_newest_only(connected_connector, endpoint):
     connector = connected_connector
-    cb_mock = mock.Mock(spec=[])  # spec is here to remove all attributes
-    stream_id = connector.register_stream(
-        endpoint, cb=cb_mock, newest_only=True, start_thread=False, a=1
-    )
-    time.sleep(0.1)
-    connector.xadd(endpoint, {"data": 1})
+    # simulate callback taking 1s to perform its task
+    cb_mock = mock.Mock(spec=[], side_effect=lambda _: time.sleep(1))
+
+    stream_id = connector.register_stream(endpoint, cb=cb_mock, newest_only=True, start_thread=False)
+    connector.xadd(endpoint, {"data": 0})
+    # from here: cb_mock will be called from another thread when new stream item is pushed
+    # cb_mock.call_count will be increased before sleep time (when call has just been done)
     while cb_mock.call_count == 0:
-        time.sleep(0.1)
-    assert mock.call({"data": 1}, a=1) in cb_mock.mock_calls
+        time.sleep(0.01)
+    cb_mock.assert_called_once_with({"data": 0})
+    cb_mock.reset_mock()
+    # cb_mock is now sleeping...
+    # Meanwhile data is published:
+    connector.xadd(endpoint, {"data": 1})
     connector.xadd(endpoint, {"data": 2})
-    while cb_mock.call_count == 1:
-        time.sleep(0.1)
-    assert mock.call({"data": 2}, a=1) in cb_mock.mock_calls
-    assert cb_mock.call_count == 2
+    connector.xadd(endpoint, {"data": 3})
+    while cb_mock.call_count == 0:
+        time.sleep(0.01)
+    # cb_mock has been called for the second time ;
+    # 'newest_only' means it should be called with newest data
+    cb_mock.assert_called_once_with({"data": 3})
+
     num_threads = threading.active_count()
     connector.unregister_stream(stream_id)
     assert threading.active_count() == num_threads - 1
