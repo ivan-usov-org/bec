@@ -1,3 +1,7 @@
+"""
+This module contains functions to serialize and deserialize function signatures.
+"""
+
 from __future__ import annotations
 
 import ast

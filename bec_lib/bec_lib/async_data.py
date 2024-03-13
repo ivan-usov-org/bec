@@ -1,5 +1,5 @@
 """
-This module contains the AsyncDataHandler class which is used to handle async data from the BEC.
+This module contains the AsyncDataHandler class which is used to receive and store async device data from the BEC.
 """
 
 from __future__ import annotations

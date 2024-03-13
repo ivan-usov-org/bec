@@ -1,3 +1,8 @@
+"""
+BECClient class. This class is the main entry point for the BEC client and all 
+derived classes. It is used to initialize the client and start the client.
+"""
+
 from __future__ import annotations, print_function
 
 import builtins

@@ -1,3 +1,7 @@
+"""
+Utility functions for the bec_lib package.
+"""
+
 from __future__ import annotations
 
 import csv
@@ -8,8 +12,8 @@ from typing import TYPE_CHECKING
 from typeguard import typechecked
 
 if TYPE_CHECKING:
-    from bec_lib.scan_report import ScanReport
     from bec_lib.scan_items import ScanItem
+    from bec_lib.scan_report import ScanReport
 
 
 class user_access:

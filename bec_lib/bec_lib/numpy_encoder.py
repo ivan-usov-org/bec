@@ -1,4 +1,5 @@
 """
+This module contains the numpy encoder and decoder functions for serializing and deserializing numpy objects.
 Modified from https://github.com/lebedov/msgpack-numpy
 """
 

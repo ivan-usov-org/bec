@@ -1,3 +1,7 @@
+"""
+This module provides a class to validate the device configuration against the openapi schema of SciBec.
+"""
+
 import json
 import os
 

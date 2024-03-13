@@ -1,3 +1,7 @@
+"""
+This module provides the DeviceBase class as well as its derived classes Signal, ComputedSignal, Positioner, and Device.
+"""
+
 from __future__ import annotations
 
 import enum

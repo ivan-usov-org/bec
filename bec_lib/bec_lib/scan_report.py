@@ -1,3 +1,8 @@
+"""
+Scan Report class that provides a convenient way to access the status of a scan request. It is typically
+the return value of a scan request. 
+"""
+
 from __future__ import annotations
 
 import time

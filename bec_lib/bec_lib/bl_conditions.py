@@ -1,3 +1,7 @@
+"""
+This module contains classes for beamline checks, used to check the beamline status.
+"""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod

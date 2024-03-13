@@ -1,3 +1,7 @@
+"""
+Serialization module for BEC messages
+"""
+
 from __future__ import annotations
 
 import contextlib

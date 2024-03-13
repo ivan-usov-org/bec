@@ -1,3 +1,7 @@
+"""
+This module contains the DeviceManager class which is used to manage devices and their configuration.
+"""
+
 from __future__ import annotations
 
 import re

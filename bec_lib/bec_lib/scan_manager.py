@@ -1,3 +1,8 @@
+"""
+This module provides a class that provides a convenient way to interact with the scan queue as well
+as the requests and scans that are currently running or have been completed.
+"""
+
 from __future__ import annotations
 
 import uuid

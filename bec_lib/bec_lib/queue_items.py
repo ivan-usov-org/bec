@@ -1,3 +1,7 @@
+"""
+This module contains the QueueItem and QueueStorage classes.
+"""
+
 from __future__ import annotations
 
 import functools

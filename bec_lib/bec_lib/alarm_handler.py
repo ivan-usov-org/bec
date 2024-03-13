@@ -1,3 +1,7 @@
+"""
+This module provides the alarm handler class and its related functionality.
+"""
+
 from __future__ import annotations
 
 import enum

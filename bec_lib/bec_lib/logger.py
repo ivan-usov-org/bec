@@ -1,3 +1,8 @@
+"""
+This module contains the BECLogger class, which is a wrapper around the loguru logger. It is used to
+configure and manage the logging of the BEC.
+"""
+
 from __future__ import annotations
 
 import enum

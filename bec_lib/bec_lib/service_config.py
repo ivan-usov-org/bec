@@ -1,3 +1,7 @@
+"""
+This module provides a class to handle the service configuration.
+"""
+
 import json
 import os
 

@@ -1,3 +1,8 @@
+"""
+This module contains the RequestItem class and RequestStorage class. The RequestItem class is used to store information
+about a scan request. The RequestStorage class is used to store request items.
+"""
+
 from __future__ import annotations
 
 import threading

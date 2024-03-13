@@ -1,3 +1,7 @@
+"""
+This module provides a connector to the electronic logbook SciLog.
+"""
+
 from __future__ import annotations
 
 import sys

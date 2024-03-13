@@ -1,3 +1,9 @@
+"""
+This module provides the Observer class and the ObserverManager class. The Observer class is used
+to define an observer object, which is used to monitor a device for a specific condition. The
+ObserverManager class is used to manage the observer objects.
+"""
+
 from __future__ import annotations
 
 import enum

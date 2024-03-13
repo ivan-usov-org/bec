@@ -1,3 +1,7 @@
+"""
+This module provides a command line interface to monitor a channel.
+"""
+
 import argparse
 import json
 import threading

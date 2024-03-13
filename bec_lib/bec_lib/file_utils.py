@@ -1,3 +1,7 @@
+"""
+File writer mixin class for BEC services.
+"""
+
 import os
 
 from bec_lib.bec_errors import ServiceConfigError

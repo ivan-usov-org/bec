@@ -1,3 +1,7 @@
+"""
+This module contains functions for serializing and deserializing lmfit objects.
+"""
+
 from lmfit import Parameter, Parameters
 
 

@@ -1,3 +1,8 @@
+"""
+This module contains the ScanItem and ScanStorage classes. The ScanItem class is used to store
+information about a scan. The ScanStorage class is used to store scan items.
+"""
+
 from __future__ import annotations
 
 import builtins

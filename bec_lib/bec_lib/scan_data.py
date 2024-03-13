@@ -1,3 +1,7 @@
+"""
+This module contains the classes for storing scan data from scan_segments. 
+"""
+
 import collections
 from typing import Any
 

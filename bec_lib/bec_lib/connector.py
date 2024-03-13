@@ -1,5 +1,5 @@
 """
-Connector defines the interface for a connector
+This module defines the interface for a connector
 """
 
 from __future__ import annotations

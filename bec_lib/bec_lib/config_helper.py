@@ -1,3 +1,7 @@
+"""
+This module provides a helper class for updating and saving the BEC device configuration.
+"""
+
 from __future__ import annotations
 
 import datetime

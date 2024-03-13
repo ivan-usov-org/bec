@@ -1,4 +1,7 @@
 # pylint: disable = missing-module-docstring
+"""
+This module provides the BECPlotter class and its related functionality.
+"""
 from __future__ import annotations
 
 import builtins

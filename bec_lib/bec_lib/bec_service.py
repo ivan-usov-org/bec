@@ -1,3 +1,7 @@
+"""
+This module provides the BECService class, which is the base class for all BEC services.
+"""
+
 from __future__ import annotations
 
 import getpass

@@ -1,3 +1,7 @@
+"""
+This module provides the DAPPlugins class, which is used to access all available DAP plugins.
+"""
+
 from __future__ import annotations
 
 import bec_lib.dap_plugin_objects as dap_plugin_objects

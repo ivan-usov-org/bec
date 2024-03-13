@@ -1,3 +1,7 @@
+"""
+This module provides a mixin class for the BEC class that allows the user to load and unload scripts from the `scripts` directory.
+"""
+
 from __future__ import annotations
 
 import builtins

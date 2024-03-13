@@ -1,3 +1,8 @@
+"""
+This module contains the custom exceptions used in the BEC library.
+"""
+
+
 class ScanAbortion(Exception):
     """Scan abortion exception"""
 
