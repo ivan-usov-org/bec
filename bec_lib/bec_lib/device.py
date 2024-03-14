@@ -102,6 +102,7 @@ class Status:
             if request_status:
                 self._event.set()
                 break
+            time.sleep(0.01)
 
     def wait(self, timeout=None):
         """
@@ -118,7 +119,6 @@ class Status:
             self._device_req_thread.start()
 
             if not self._event.wait(timeout):
-                self._thread_event.set()
                 raise TimeoutError("The request has not been completed within the specified time.")
         finally:
             self._thread_event.set()
