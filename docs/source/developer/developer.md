@@ -20,6 +20,7 @@ data_access/
 event_data/
 ophyd/
 external_sources/
+bec_plugins/
 glossary/
 reference/
 ```
