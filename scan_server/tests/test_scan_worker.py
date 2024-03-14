@@ -5,7 +5,7 @@ from unittest import mock
 import pytest
 from bec_lib import MessageEndpoints, messages
 from bec_lib.tests.utils import ConnectorMock, dm, dm_with_devices
-from utils import scan_server_mock
+from utils import scan_server_mock, threads_check
 
 from scan_server.errors import DeviceMessageError, ScanAbortion
 from scan_server.scan_assembler import ScanAssembler

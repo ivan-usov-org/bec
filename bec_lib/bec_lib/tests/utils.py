@@ -4,6 +4,7 @@ import builtins
 import copy
 import functools
 import os
+import threading
 import time
 import uuid
 from typing import TYPE_CHECKING
@@ -31,6 +32,17 @@ logger = bec_logger.logger
 # pylint: disable=missing-function-docstring
 # pylint: disable=redefined-outer-name
 # pylint: disable=protected-access
+
+
+@pytest.fixture(autouse=True)
+def threads_check():
+    current_threads = set(th for th in threading.enumerate() if th is not threading.main_thread())
+    yield
+    threads_after = set(th for th in threading.enumerate() if th is not threading.main_thread())
+    additional_threads = threads_after - current_threads
+    assert (
+        len(additional_threads) == 0
+    ), f"Test creates {len(additional_threads)} threads that are not cleaned: {additional_threads}"
 
 
 @pytest.fixture
