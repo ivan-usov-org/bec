@@ -2,6 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## v1.14.5 (2024-03-14)
+
+### Fix
+
+* **bec_lib:** Fixed status timeout ([`c4f0a18`](https://gitlab.psi.ch/bec/bec/-/commit/c4f0a18e7317caf54e95e7c7b1f09bf033e65380))
+
+### Documentation
+
+* **bec_lib:** Improved doc string for device module ([`c605846`](https://gitlab.psi.ch/bec/bec/-/commit/c605846adeee080dbdecd55d5f758e2acd884d83))
+* **bec_lib:** Added module docs ([`7031c24`](https://gitlab.psi.ch/bec/bec/-/commit/7031c2483163eb3268760b5ecd4888c9c5b6b372))
+
 ## v1.14.4 (2024-03-12)
 
 ### Fix
