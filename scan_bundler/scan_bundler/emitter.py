@@ -9,6 +9,8 @@ class EmitterBase:
     def __init__(self, connector) -> None:
         self._send_buffer = Queue()
         self.connector = connector
+        self._buffered_connector_thread = None
+        self._buffered_publisher_stop_event = threading.Event()
         self._start_buffered_connector()
 
     def _start_buffered_connector(self):
@@ -21,7 +23,7 @@ class EmitterBase:
         self._send_buffer.put((msg, endpoint, public))
 
     def _buffered_publish(self):
-        while True:
+        while not self._buffered_publisher_stop_event.is_set():
             self._publish_data()
 
     def _get_messages_from_buffer(self) -> list:
@@ -59,3 +61,8 @@ class EmitterBase:
 
     def on_cleanup(self, scan_id: str):
         pass
+
+    def shutdown(self):
+        self._buffered_publisher_stop_event.set()
+        if self._buffered_connector_thread:
+            self._buffered_connector_thread.join()

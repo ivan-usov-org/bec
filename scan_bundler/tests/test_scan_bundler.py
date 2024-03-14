@@ -7,7 +7,12 @@ import yaml
 import bec_lib
 from bec_lib import DeviceManagerBase, MessageEndpoints, ServiceConfig, messages
 from bec_lib.messages import BECStatus
-from bec_lib.tests.utils import ConnectorMock, create_session_from_config, get_device_info_mock
+from bec_lib.tests.utils import (
+    ConnectorMock,
+    create_session_from_config,
+    get_device_info_mock,
+    threads_check,
+)
 from scan_bundler import ScanBundler
 from scan_bundler.emitter import EmitterBase
 
@@ -32,7 +37,8 @@ class MessageMock:
     topic: str = ""
 
 
-def load_ScanBundlerMock():
+@pytest.fixture
+def scan_bundler(threads_check):
     service_mock = mock.MagicMock()
     service_mock.connector = ConnectorMock("")
     device_manager = ScanBundlerDeviceManagerMock(service_mock, "")
@@ -40,7 +46,9 @@ def load_ScanBundlerMock():
     with open(f"{dir_path}/tests/test_config.yaml", "r") as session_file:
         device_manager._session = create_session_from_config(yaml.safe_load(session_file))
     device_manager._load_session()
-    return ScanBundlerMock(device_manager, service_mock.connector)
+    scan_bundler_mock = ScanBundlerMock(device_manager, service_mock.connector)
+    yield scan_bundler_mock
+    scan_bundler_mock.shutdown()
 
 
 class ScanBundlerMock(ScanBundler):
@@ -63,8 +71,7 @@ class ScanBundlerMock(ScanBundler):
         pass
 
 
-def test_device_read_callback():
-    scan_bundler = load_ScanBundlerMock()
+def test_device_read_callback(scan_bundler):
     msg = MessageMock()
     dev_msg = messages.DeviceMessage(
         signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
@@ -114,8 +121,8 @@ def test_device_read_callback():
         ),
     ],
 )
-def test_wait_for_scan_id(scan_id, storageID, scan_msg):
-    sb = load_ScanBundlerMock()
+def test_wait_for_scan_id(scan_bundler, scan_id, storageID, scan_msg):
+    sb = scan_bundler
     sb.storage_initialized.add(storageID)
     with mock.patch.object(sb.connector, "get", return_value=scan_msg) as get_scan_msgs:
         if not storageID and not scan_msg:
@@ -125,42 +132,42 @@ def test_wait_for_scan_id(scan_id, storageID, scan_msg):
         sb._wait_for_scan_id(scan_id)
 
 
-def test_add_device_to_storage_returns_without_scan_id():
+def test_add_device_to_storage_returns_without_scan_id(scan_bundler):
     msg = messages.DeviceMessage(
         signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
         metadata={"readout_priority": "monitored"},
     )
-    sb = load_ScanBundlerMock()
+    sb = scan_bundler
     sb._add_device_to_storage([msg], "samx", timeout_time=1)
     assert "samx" not in sb.device_storage
 
 
-def test_add_device_to_storage_returns_without_signal():
+def test_add_device_to_storage_returns_without_signal(scan_bundler):
     msg = messages.DeviceMessage(
         signals={}, metadata={"scan_id": "scan_id", "readout_priority": "monitored"}
     )
-    sb = load_ScanBundlerMock()
+    sb = scan_bundler
     sb._add_device_to_storage([msg], "samx", timeout_time=1)
     assert "samx" not in sb.device_storage
 
 
-def test_add_device_to_storage_returns_on_timeout():
+def test_add_device_to_storage_returns_on_timeout(scan_bundler):
     msg = messages.DeviceMessage(
         signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
         metadata={"scan_id": "scan_id", "readout_priority": "monitored"},
     )
-    sb = load_ScanBundlerMock()
+    sb = scan_bundler
     sb._add_device_to_storage([msg], "samx", timeout_time=1)
     assert "samx" not in sb.device_storage
 
 
 @pytest.mark.parametrize("scan_status", ["aborted", "closed"])
-def test_add_device_to_storage_returns_without_scan_info(scan_status):
+def test_add_device_to_storage_returns_without_scan_info(scan_bundler, scan_status):
     msg = messages.DeviceMessage(
         signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
         metadata={"scan_id": "scan_id", "readout_priority": "monitored"},
     )
-    sb = load_ScanBundlerMock()
+    sb = scan_bundler
     sb.sync_storage["scan_id"] = {"info": {}}
     sb.sync_storage["scan_id"]["status"] = scan_status
     sb._add_device_to_storage([msg], "samx", timeout_time=1)
@@ -193,8 +200,8 @@ def test_add_device_to_storage_returns_without_scan_info(scan_status):
         ),
     ],
 )
-def test_add_device_to_storage_primary(msg, scan_type):
-    sb = load_ScanBundlerMock()
+def test_add_device_to_storage_primary(scan_bundler, msg, scan_type):
+    sb = scan_bundler
     sb.sync_storage["scan_id"] = {"info": {"scan_type": scan_type, "monitor_sync": "bec"}}
     sb.sync_storage["scan_id"]["status"] = "open"
     sb.monitored_devices["scan_id"] = {"devices": [sb.device_manager.devices.samx]}
@@ -238,8 +245,8 @@ def test_add_device_to_storage_primary(msg, scan_type):
         ),
     ],
 )
-def test_add_device_to_storage_primary_flyer(msg, scan_type):
-    sb = load_ScanBundlerMock()
+def test_add_device_to_storage_primary_flyer(scan_bundler, msg, scan_type):
+    sb = scan_bundler
     sb.sync_storage["scan_id"] = {"info": {"scan_type": scan_type, "monitor_sync": "flyer"}}
     sb.sync_storage["scan_id"]["status"] = "open"
     sb.storage_initialized.add("scan_id")
@@ -268,8 +275,8 @@ def test_add_device_to_storage_primary_flyer(msg, scan_type):
         )
     ],
 )
-def test_add_device_to_storage_baseline(msg, scan_type):
-    sb = load_ScanBundlerMock()
+def test_add_device_to_storage_baseline(scan_bundler, msg, scan_type):
+    sb = scan_bundler
     sb.sync_storage["scan_id"] = {"info": {"scan_type": scan_type, "monitor_sync": "bec"}}
     sb.sync_storage["scan_id"]["status"] = "open"
     sb.monitored_devices["scan_id"] = {"devices": []}
@@ -329,8 +336,8 @@ def test_add_device_to_storage_baseline(msg, scan_type):
         )
     ],
 )
-def test_scan_queue_callback(queue_msg):
-    sb = load_ScanBundlerMock()
+def test_scan_queue_callback(scan_bundler, queue_msg):
+    sb = scan_bundler
     msg = MessageMock()
     msg.value = queue_msg
     sb._scan_queue_callback(msg)
@@ -355,8 +362,8 @@ def test_scan_queue_callback(queue_msg):
         )
     ],
 )
-def test_scan_status_callback(scan_msg):
-    sb = load_ScanBundlerMock()
+def test_scan_status_callback(scan_bundler, scan_msg):
+    sb = scan_bundler
     msg = MessageMock()
     msg.value = scan_msg
 
@@ -402,8 +409,8 @@ def test_scan_status_callback(scan_msg):
         ],
     ],
 )
-def test_handle_scan_status_message(scan_msg, sync_storage):
-    sb = load_ScanBundlerMock()
+def test_handle_scan_status_message(scan_bundler, scan_msg, sync_storage):
+    sb = scan_bundler
     scan_id = scan_msg.content["scan_id"]
     sb.sync_storage = sync_storage
 
@@ -423,9 +430,8 @@ def test_handle_scan_status_message(scan_msg, sync_storage):
                     status_mock.assert_not_called()
 
 
-def test_status_modification():
+def test_status_modification(scan_bundler):
     scan_id = "test_scan_id"
-    scan_bundler = load_ScanBundlerMock()
     scan_bundler.sync_storage[scan_id] = {"status": "open"}
     msg = messages.ScanStatusMessage(
         scan_id=scan_id,
@@ -498,8 +504,8 @@ def test_status_modification():
         ),
     ],
 )
-def test_initialize_scan_container(scan_msg):
-    sb = load_ScanBundlerMock()
+def test_initialize_scan_container(scan_bundler, scan_msg):
+    sb = scan_bundler
     scan_id = scan_msg.content["scan_id"]
     scan_info = scan_msg.content["info"]
     scan_motors = list(set(sb.device_manager.devices[m] for m in scan_info["scan_motors"]))
@@ -568,8 +574,8 @@ def test_initialize_scan_container(scan_msg):
         ],
     ],
 )
-def test_step_scan_update(scan_msg, pointID, primary):
-    sb = load_ScanBundlerMock()
+def test_step_scan_update(scan_bundler, scan_msg, pointID, primary):
+    sb = scan_bundler
 
     metadata = scan_msg.metadata
     scan_id = metadata.get("scan_id")
@@ -622,8 +628,8 @@ def test_step_scan_update(scan_msg, pointID, primary):
         ("poiflkj", {"status": "aborted"}, True),
     ],
 )
-def test_cleanup_storage(scan_id, storage, remove):
-    sb = load_ScanBundlerMock()
+def test_cleanup_storage(scan_bundler, scan_id, storage, remove):
+    sb = scan_bundler
     sb.sync_storage[scan_id] = storage
     sb.storage_initialized.add(scan_id)
     with mock.patch.object(sb, "run_emitter") as emitter:
@@ -637,8 +643,8 @@ def test_cleanup_storage(scan_id, storage, remove):
 
 
 @pytest.mark.parametrize("scan_id,pointID,sent", [("lkasjd", 1, True), ("alskjd", 2, False)])
-def test_send_scan_point(scan_id, pointID, sent):
-    sb = load_ScanBundlerMock()
+def test_send_scan_point(scan_bundler, scan_id, pointID, sent):
+    sb = scan_bundler
     sb.sync_storage[scan_id] = {"sent": set([1])}
     sb.sync_storage[scan_id][pointID] = {}
     with mock.patch.object(sb, "run_emitter") as emitter:
@@ -649,13 +655,12 @@ def test_send_scan_point(scan_id, pointID, sent):
                 logger.debug.assert_called_once()
 
 
-def test_run_emitter():
-    sb = load_ScanBundlerMock()
+def test_run_emitter(scan_bundler):
+    sb = scan_bundler
     with mock.patch("scan_bundler.scan_bundler.logger") as logger:
         sb.run_emitter("on_init", "jlaksjd", "jlkasjd")
         logger.error.assert_called()
 
-    sb._emitter = [EmitterBase(sb)]
     with mock.patch.object(sb._emitter[0], "on_init") as init:
         sb.run_emitter("on_init", "jlaksjd")
         init.assert_called_once_with("jlaksjd")
@@ -668,8 +673,8 @@ def test_run_emitter():
         ("scan_id-lkjd", "bpm4r", {"value": 5}, {}),
     ],
 )
-def test_fly_scan_update(scan_id, device, signal, metadata):
-    sb = load_ScanBundlerMock()
+def test_fly_scan_update(scan_bundler, scan_id, device, signal, metadata):
+    sb = scan_bundler
     sb.sync_storage[scan_id] = {}
     with mock.patch.object(sb, "_update_monitor_signals") as update_signals:
         with mock.patch.object(sb, "_send_scan_point") as send_point:
@@ -682,8 +687,8 @@ def test_fly_scan_update(scan_id, device, signal, metadata):
 
 
 @pytest.mark.parametrize("scan_id,device,signal", [("scan_id-lkjd", "bpm4r", {"value": 5})])
-def test_baseline_update(scan_id, device, signal):
-    sb = load_ScanBundlerMock()
+def test_baseline_update(scan_bundler, scan_id, device, signal):
+    sb = scan_bundler
     sb.baseline_devices[scan_id] = {"done": {device: False}}
     sb.sync_storage[scan_id] = {}
     sb.scan_motors[scan_id] = []
@@ -693,10 +698,10 @@ def test_baseline_update(scan_id, device, signal):
         emitter.assert_called_once_with("on_baseline_emit", scan_id)
 
 
-def test_update_monitor_signals():
+def test_update_monitor_signals(scan_bundler):
     scan_id = "ljlaskdj"
     pointID = 2
-    sb = load_ScanBundlerMock()
+    sb = scan_bundler
     sb.sync_storage[scan_id] = {"info": {"scan_type": "fly"}, pointID: {}}
     sb.monitored_devices[scan_id] = {
         "devices": sb.device_manager.devices.monitored_devices([]),
@@ -710,8 +715,8 @@ def test_update_monitor_signals():
         assert sb.sync_storage[scan_id][pointID]["bpm3a"] == {"value": 400}
 
 
-def test_get_last_device_readback():
-    sb = load_ScanBundlerMock()
+def test_get_last_device_readback(scan_bundler):
+    sb = scan_bundler
     dev_msg = messages.DeviceMessage(
         signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
         metadata={"scan_id": "laksjd", "readout_priority": "monitored"},

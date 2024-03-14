@@ -1,33 +1,33 @@
 from unittest import mock
 
-from test_scan_bundler import load_ScanBundlerMock
+import pytest
+from test_scan_bundler import scan_bundler, threads_check
 
 from bec_lib import MessageEndpoints, messages
 from scan_bundler.bec_emitter import BECEmitter
 
 
-def test_on_scan_point_emit_BEC():
-    sb = load_ScanBundlerMock()
-    bec_emitter = BECEmitter(sb)
+@pytest.fixture
+def bec_emitter(scan_bundler):
+    emitter = BECEmitter(scan_bundler)
+    yield emitter
+    emitter.shutdown()
 
+
+def test_on_scan_point_emit_BEC(bec_emitter):
     with mock.patch.object(bec_emitter, "_send_bec_scan_point") as send:
         bec_emitter.on_scan_point_emit("scan_id", 2)
         send.assert_called_once_with("scan_id", 2)
 
 
-def test_on_baseline_emit_BEC():
-    sb = load_ScanBundlerMock()
-    bec_emitter = BECEmitter(sb)
-
+def test_on_baseline_emit_BEC(bec_emitter):
     with mock.patch.object(bec_emitter, "_send_baseline") as send:
         bec_emitter.on_baseline_emit("scan_id")
         send.assert_called_once_with("scan_id")
 
 
-def test_send_bec_scan_point():
-    sb = load_ScanBundlerMock()
-    bec_emitter = BECEmitter(sb)
-
+def test_send_bec_scan_point(bec_emitter):
+    sb = bec_emitter.scan_bundler
     scan_id = "lkajsdlkj"
     pointID = 2
     sb.sync_storage[scan_id] = {"info": {}, "status": "open", "sent": set()}
@@ -47,10 +47,8 @@ def test_send_bec_scan_point():
         )
 
 
-def test_send_baseline_BEC():
-    sb = load_ScanBundlerMock()
-    bec_emitter = BECEmitter(sb)
-
+def test_send_baseline_BEC(bec_emitter):
+    sb = bec_emitter.scan_bundler
     scan_id = "lkajsdlkj"
     sb.sync_storage[scan_id] = {"info": {}, "status": "open", "sent": set()}
     sb.sync_storage[scan_id]["baseline"] = {}
