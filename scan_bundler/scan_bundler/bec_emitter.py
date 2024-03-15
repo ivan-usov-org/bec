@@ -33,8 +33,8 @@ class BECEmitter(EmitterBase):
             data=sb.sync_storage[scanID][pointID],
             metadata={
                 "scanID": scanID,
-                "scan_type": info["scan_type"],
-                "scan_report_devices": info["scan_report_devices"],
+                "scan_type": info.get("scan_type"),
+                "scan_report_devices": info.get("scan_report_devices"),
             },
         )
         self.add_message(

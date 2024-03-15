@@ -1,10 +1,8 @@
 from unittest import mock
 
-from bec_lib import messages
-
+from bec_lib import MessageEndpoints, messages
 from test_scan_bundler import load_ScanBundlerMock
 
-from bec_lib import MessageEndpoints
 from scan_bundler.bec_emitter import BECEmitter
 
 
@@ -38,7 +36,7 @@ def test_send_bec_scan_point():
         point_id=pointID,
         scanID=scanID,
         data=sb.sync_storage[scanID][pointID],
-        metadata=sb.sync_storage[scanID]["info"],
+        metadata={"scanID": "lkajsdlkj", "scan_type": None, "scan_report_devices": None},
     )
     with mock.patch.object(bec_emitter, "add_message") as send:
         bec_emitter._send_bec_scan_point(scanID, pointID)
@@ -61,13 +59,8 @@ def test_send_baseline_BEC():
         bec_emitter._send_baseline(scanID)
         pipe = connector.pipeline()
         connector.set.assert_called_once_with(
-            MessageEndpoints.public_scan_baseline(scanID),
-            msg,
-            expire=1800,
-            pipe=pipe,
+            MessageEndpoints.public_scan_baseline(scanID), msg, expire=1800, pipe=pipe
         )
         connector.set_and_publish.assert_called_once_with(
-            MessageEndpoints.scan_baseline(),
-            msg,
-            pipe=pipe,
+            MessageEndpoints.scan_baseline(), msg, pipe=pipe
         )
