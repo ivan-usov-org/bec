@@ -22,7 +22,17 @@ if __name__ == "__main__":
     except ImportError:
         startup = None
 
+    try:
+        from bec_widgets.cli import BECFigure
+    except ImportError:
+        BECFigure = None
+
     args = sys.argv[1:]
+
+    START_BEC_WIDGETS = True
+    if "--nogui" in args:
+        args.remove("--nogui")
+        START_BEC_WIDGETS = False
 
     if "--config" in args:
         config_file = args[args.index("--config") + 1]
@@ -53,6 +63,10 @@ if __name__ == "__main__":
 
     dev = bec.device_manager.devices
     scans = bec.scans
+
+    if START_BEC_WIDGETS and BECFigure is not None:
+        fig = BECFigure()
+        fig.show()
 
     ####################### END OF INIT #############################
     #################################################################
