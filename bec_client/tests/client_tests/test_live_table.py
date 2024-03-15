@@ -10,12 +10,11 @@ from bec_client.callbacks.live_table import LiveUpdatesTable, sort_devices
 from bec_client.callbacks.utils import ScanRequestMixin
 from bec_lib import messages
 from bec_lib.scan_items import ScanItem
-from bec_lib.tests.utils import bec_client, dm, dm_with_devices
 
 
 @pytest.fixture
-def client_with_grid_scan(bec_client):
-    client = bec_client
+def client_with_grid_scan(bec_client_mock):
+    client = bec_client_mock
     request_msg = messages.ScanQueueMessage(
         scan_type="grid_scan",
         parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
@@ -38,9 +37,11 @@ def test_scan_request_mixin(client_with_grid_scan):
         client.queue.request_storage.update_with_response(response_msg)
 
     client.queue.request_storage.update_with_request(request_msg)
-    threading.Thread(target=update_with_response, args=(response_msg,)).start()
+    update_thread = threading.Thread(target=update_with_response, args=(response_msg,))
+    update_thread.start()
     with mock.patch.object(client.queue.queue_storage, "find_queue_item_by_requestID"):
         request_mixin.wait()
+    update_thread.join()
 
 
 def test_sort_devices():
@@ -71,8 +72,8 @@ def test_sort_devices():
         ),
     ],
 )
-def test_get_devices_from_scan_data(bec_client, request_msg, scan_report_devices):
-    client = bec_client
+def test_get_devices_from_scan_data(bec_client_mock, request_msg, scan_report_devices):
+    client = bec_client_mock
     client.start()
     data = messages.ScanMessage(
         point_id=0, scan_id="", data={}, metadata={"scan_report_devices": scan_report_devices}

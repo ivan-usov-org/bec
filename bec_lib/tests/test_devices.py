@@ -16,15 +16,15 @@ from bec_lib.device import (
 )
 from bec_lib.devicemanager import DeviceContainer, DeviceManagerBase
 from bec_lib.endpoints import MessageEndpoints
-from bec_lib.tests.utils import ConnectorMock, bec_client, dm, dm_with_devices, get_device_info_mock
+from bec_lib.tests.utils import ConnectorMock, get_device_info_mock
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=protected-access
 
 
 @pytest.fixture(name="dev")
-def fixture_dev(bec_client):
-    yield bec_client.device_manager.devices
+def fixture_dev(bec_client_mock):
+    yield bec_client_mock.device_manager.devices
 
 
 def test_nested_device_root(dev):
@@ -245,11 +245,13 @@ def test_handle_rpc_response(dev):
     assert dev.samx._handle_rpc_response(msg) == 1
 
 
-def test_handle_rpc_response_returns_status(dev, bec_client):
+def test_handle_rpc_response_returns_status(dev, bec_client_mock):
     msg = messages.DeviceRPCMessage(
         device="samx", return_val={"type": "status", "RID": "request_id"}, out="done", success=True
     )
-    assert dev.samx._handle_rpc_response(msg) == Status(bec_client.device_manager, "request_id")
+    assert dev.samx._handle_rpc_response(msg) == Status(
+        bec_client_mock.device_manager, "request_id"
+    )
 
 
 def test_handle_rpc_response_raises(dev):

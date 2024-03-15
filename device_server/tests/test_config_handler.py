@@ -6,7 +6,7 @@ import bec_lib
 import pytest
 import yaml
 from bec_lib import messages
-from bec_lib.tests.utils import ConnectorMock, create_session_from_config, load_test_config
+from bec_lib.tests.utils import ConnectorMock, load_test_config
 from test_device_manager_ds import device_manager
 
 from device_server.devices.config_update_handler import ConfigUpdateHandler

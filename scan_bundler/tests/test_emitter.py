@@ -3,7 +3,6 @@ from unittest import mock
 import pytest
 
 from bec_lib import MessageEndpoints, messages
-from bec_lib.tests.utils import threads_check
 from scan_bundler.emitter import EmitterBase
 
 
@@ -50,7 +49,7 @@ from scan_bundler.emitter import EmitterBase
         ),
     ],
 )
-def test_publish_data(threads_check, msgs):
+def test_publish_data(msgs):
     connector = mock.MagicMock()
     with mock.patch.object(EmitterBase, "_start_buffered_connector") as start:
         emitter = EmitterBase(connector)

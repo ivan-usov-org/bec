@@ -367,6 +367,5 @@ class ScanBundler(BECService):
         self.device_manager.shutdown()
         self.connector.shutdown()
         self.executor.shutdown()
-        logger.remove()
         for emi in self._emitter:
             emi.shutdown()

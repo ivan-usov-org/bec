@@ -3,19 +3,18 @@ from unittest import mock
 
 import pytest
 from bec_lib import MessageEndpoints, messages
-from bec_lib.tests.utils import bec_client, dm, dm_with_devices
 
 from bec_client.callbacks.move_device import LiveUpdatesReadbackProgressbar, ReadbackDataMixin
 
 
 @pytest.fixture
-def readback_data_mixin(bec_client):
-    with mock.patch.object(bec_client.device_manager, "connector"):
-        yield ReadbackDataMixin(bec_client.device_manager, ["samx", "samy"])
+def readback_data_mixin(bec_client_mock):
+    with mock.patch.object(bec_client_mock.device_manager, "connector"):
+        yield ReadbackDataMixin(bec_client_mock.device_manager, ["samx", "samy"])
 
 
-def test_move_callback(bec_client):
-    client = bec_client
+def test_move_callback(bec_client_mock):
+    client = bec_client_mock
     request = messages.ScanQueueMessage(
         scan_type="umv",
         parameter={"args": {"samx": [10]}, "kwargs": {"relative": True}},
@@ -50,8 +49,8 @@ def test_move_callback(bec_client):
                         LiveUpdatesReadbackProgressbar(bec=client, request=request).run()
 
 
-def test_move_callback_with_report_instruction(bec_client):
-    client = bec_client
+def test_move_callback_with_report_instruction(bec_client_mock):
+    client = bec_client_mock
     request = messages.ScanQueueMessage(
         scan_type="umv",
         parameter={"args": {"samx": [10]}, "kwargs": {"relative": True}},

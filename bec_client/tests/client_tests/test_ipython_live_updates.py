@@ -5,13 +5,11 @@ import pytest
 from bec_client.callbacks.ipython_live_updates import IPythonLiveUpdates
 from bec_lib import messages
 from bec_lib.queue_items import QueueItem
-from bec_lib.tests.utils import bec_client, dm, dm_with_devices
 
 
 @pytest.mark.timeout(20)
-def test_live_updates_process_queue_pending(bec_client):
-    client = bec_client
-    client.start()
+def test_live_updates_process_queue_pending(bec_client_mock):
+    client = bec_client_mock
     live_updates = IPythonLiveUpdates(client)
     request_msg = messages.ScanQueueMessage(
         scan_type="grid_scan",
@@ -47,9 +45,8 @@ def test_live_updates_process_queue_pending(bec_client):
 
 
 @pytest.mark.timeout(20)
-def test_live_updates_process_queue_running(bec_client):
-    client = bec_client
-    client.start()
+def test_live_updates_process_queue_running(bec_client_mock):
+    client = bec_client_mock
     live_updates = IPythonLiveUpdates(client)
     request_msg = messages.ScanQueueMessage(
         scan_type="grid_scan",
@@ -91,9 +88,8 @@ def test_live_updates_process_queue_running(bec_client):
 
 
 @pytest.mark.timeout(20)
-def test_live_updates_process_queue_without_status(bec_client):
-    client = bec_client
-    client.start()
+def test_live_updates_process_queue_without_status(bec_client_mock):
+    client = bec_client_mock
     live_updates = IPythonLiveUpdates(client)
     request_msg = messages.ScanQueueMessage(
         scan_type="grid_scan",
@@ -114,9 +110,8 @@ def test_live_updates_process_queue_without_status(bec_client):
 
 
 @pytest.mark.timeout(20)
-def test_live_updates_process_queue_without_queue_number(bec_client):
-    client = bec_client
-    client.start()
+def test_live_updates_process_queue_without_queue_number(bec_client_mock):
+    client = bec_client_mock
     live_updates = IPythonLiveUpdates(client)
     request_msg = messages.ScanQueueMessage(
         scan_type="grid_scan",
@@ -143,9 +138,8 @@ def test_live_updates_process_queue_without_queue_number(bec_client):
 
 # @pytest.mark.timeout(20)
 # @pytest.mark.asyncio
-# def test_live_updates_process_instruction_readback(bec_client):
-#     client = bec_client
-#     client.start()
+# def test_live_updates_process_instruction_readback(bec_client_mock):
+#     client = bec_client_mock
 #     live_updates = IPythonLiveUpdates(client)
 #     request_msg = messages.ScanQueueMessage(
 #         scan_type="grid_scan",
@@ -157,7 +151,7 @@ def test_live_updates_process_queue_without_queue_number(bec_client):
 #     live_updates._user_callback = []
 #     client.queue.queue_storage.current_scan_queue = {"primary": {"status": "RUNNING"}}
 #     with mock.patch(
-#         "bec_client.callbacks.ipython_live_updates.LiveUpdatesTable", new_callable=mock.Co
+#         "bec_client_mock.callbacks.ipython_live_updates.LiveUpdatesTable", new_callable=mock.Co
 #     ) as table:
 #         live_updates._process_instruction({"table_wait": 10})
 #         table.assert_called_once_with(

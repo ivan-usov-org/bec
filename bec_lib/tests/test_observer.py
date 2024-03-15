@@ -10,7 +10,6 @@ from bec_lib import messages
 from bec_lib.devicemanager import DeviceManagerBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.observer import Observer, ObserverManager
-from bec_lib.tests.utils import ConnectorMock, create_session_from_config, dm, dm_with_devices
 
 dir_path = os.path.dirname(bec_lib.__file__)
 

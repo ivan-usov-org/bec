@@ -1,11 +1,12 @@
 from unittest import mock
 
 import pytest
-from utils import scan_server_mock, threads_check
+from utils import scan_server_mock
 
 from bec_lib import MessageEndpoints, messages
 from bec_lib.redis_connector import MessageObject
-from bec_lib.tests.utils import dm, dm_with_devices
+from utils import scan_server_mock
+
 from scan_server.scan_guard import ScanGuard, ScanRejection, ScanStatus
 
 

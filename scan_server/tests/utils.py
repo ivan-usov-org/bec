@@ -6,7 +6,8 @@ from bec_lib import ServiceConfig
 from bec_lib.devicemanager import DeviceContainer
 from bec_lib.logger import bec_logger
 from bec_lib.messages import BECStatus
-from bec_lib.tests.utils import ConnectorMock, threads_check
+from bec_lib.tests.utils import ConnectorMock
+
 from scan_server.scan_server import ScanServer
 from scan_server.scan_worker import InstructionQueueStatus
 
@@ -15,7 +16,7 @@ from scan_server.scan_worker import InstructionQueueStatus
 
 
 @pytest.fixture
-def scan_server_mock(dm_with_devices, threads_check):
+def scan_server_mock(dm_with_devices):
     server = ScanServerMock(dm_with_devices, dm_with_devices.connector)
     yield server
     bec_logger.logger.remove()

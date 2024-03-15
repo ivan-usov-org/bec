@@ -3,11 +3,10 @@ from unittest import mock
 import pytest
 
 from bec_lib.scans import ScanObject
-from bec_lib.tests.utils import bec_client, dm, dm_with_devices
 
 
 @pytest.fixture
-def scan_obj(bec_client):
+def scan_obj(bec_client_mock):
     scan_info = {
         "class": "FermatSpiralScan",
         "arg_input": {"device": "device", "start": "float", "stop": "float"},
@@ -25,8 +24,8 @@ def scan_obj(bec_client):
         ),
     }
     scan_name = "fermat_scan"
-    obj = ScanObject(scan_name, scan_info, bec_client)
-    with mock.patch.object(bec_client, "alarm_handler"):
+    obj = ScanObject(scan_name, scan_info, bec_client_mock)
+    with mock.patch.object(bec_client_mock, "alarm_handler"):
         yield obj
 
 

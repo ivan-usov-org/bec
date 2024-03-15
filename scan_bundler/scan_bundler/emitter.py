@@ -63,6 +63,7 @@ class EmitterBase:
         pass
 
     def shutdown(self):
-        self._buffered_publisher_stop_event.set()
         if self._buffered_connector_thread:
+            self._buffered_publisher_stop_event.set()
             self._buffered_connector_thread.join()
+            self._buffered_connector_thread = None

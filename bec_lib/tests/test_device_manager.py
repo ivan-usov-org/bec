@@ -13,13 +13,7 @@ from bec_lib import messages
 from bec_lib.connector import MessageObject
 from bec_lib.device import Device, Status
 from bec_lib.devicemanager import DeviceConfigError, DeviceContainer, DeviceManagerBase
-from bec_lib.tests.utils import (
-    ConnectorMock,
-    DMClientMock,
-    create_session_from_config,
-    dm,
-    dm_with_devices,
-)
+from bec_lib.tests.utils import create_session_from_config
 
 dir_path = os.path.dirname(bec_lib.__file__)
 

@@ -1,87 +1,23 @@
-import os
+import pytest
 from unittest import mock
 
-import pytest
-import yaml
-
-import bec_lib
-from bec_lib import DeviceManagerBase, MessageEndpoints, ServiceConfig, messages
-from bec_lib.messages import BECStatus
-from bec_lib.tests.utils import (
-    ConnectorMock,
-    create_session_from_config,
-    get_device_info_mock,
-    threads_check,
-)
-from scan_bundler import ScanBundler
-from scan_bundler.emitter import EmitterBase
+from bec_lib import MessageEndpoints
+from bec_lib import messages
+from bec_lib.connector import MessageObject
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=protected-access
 
-dir_path = os.path.dirname(bec_lib.__file__)
 
-
-class ScanBundlerDeviceManagerMock(DeviceManagerBase):
-    def _get_device_info(self, device_name) -> messages.DeviceInfoMessage:
-        return get_device_info_mock(device_name, self.get_device(device_name)["deviceClass"])
-
-    def get_device(self, device_name):
-        for dev in self._session["devices"]:
-            if dev["name"] == device_name:
-                return dev
-
-
-class MessageMock:
-    value = None
-    topic: str = ""
-
-
-@pytest.fixture
-def scan_bundler(threads_check):
-    service_mock = mock.MagicMock()
-    service_mock.connector = ConnectorMock("")
-    device_manager = ScanBundlerDeviceManagerMock(service_mock, "")
-    device_manager.connector = service_mock.connector
-    with open(f"{dir_path}/tests/test_config.yaml", "r") as session_file:
-        device_manager._session = create_session_from_config(yaml.safe_load(session_file))
-    device_manager._load_session()
-    scan_bundler_mock = ScanBundlerMock(device_manager, service_mock.connector)
-    yield scan_bundler_mock
-    scan_bundler_mock.shutdown()
-
-
-class ScanBundlerMock(ScanBundler):
-    def __init__(self, device_manager, connector_cls) -> None:
-        super().__init__(
-            ServiceConfig(redis={"host": "dummy", "port": 6379}), connector_cls=ConnectorMock
-        )
-        self.device_manager = device_manager
-
-    def _start_device_manager(self):
-        pass
-
-    def _start_metrics_emitter(self):
-        pass
-
-    def _start_update_service_info(self):
-        pass
-
-    def wait_for_service(self, name, status=BECStatus.RUNNING):
-        pass
-
-
-def test_device_read_callback(scan_bundler):
-    msg = MessageMock()
+def test_device_read_callback(scan_bundler_mock):
     dev_msg = messages.DeviceMessage(
         signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
         metadata={"scan_id": "laksjd", "readout_priority": "monitored"},
     )
-    msg.value = dev_msg
-    msg.topic = MessageEndpoints.device_read("samx").endpoint
+    msg = MessageObject(MessageEndpoints.device_read("samx").endpoint, dev_msg)
 
-    with mock.patch.object(scan_bundler, "_add_device_to_storage") as add_dev:
-        scan_bundler._device_read_callback(msg)
+    with mock.patch.object(scan_bundler_mock, "_add_device_to_storage") as add_dev:
+        scan_bundler_mock._device_read_callback(msg)
         add_dev.assert_called_once_with([dev_msg], "samx")
 
 
@@ -121,8 +57,8 @@ def test_device_read_callback(scan_bundler):
         ),
     ],
 )
-def test_wait_for_scan_id(scan_bundler, scan_id, storageID, scan_msg):
-    sb = scan_bundler
+def test_wait_for_scan_id(scan_bundler_mock, scan_id, storageID, scan_msg):
+    sb = scan_bundler_mock
     sb.storage_initialized.add(storageID)
     with mock.patch.object(sb.connector, "get", return_value=scan_msg) as get_scan_msgs:
         if not storageID and not scan_msg:
@@ -132,42 +68,42 @@ def test_wait_for_scan_id(scan_bundler, scan_id, storageID, scan_msg):
         sb._wait_for_scan_id(scan_id)
 
 
-def test_add_device_to_storage_returns_without_scan_id(scan_bundler):
+def test_add_device_to_storage_returns_without_scan_id(scan_bundler_mock):
     msg = messages.DeviceMessage(
         signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
         metadata={"readout_priority": "monitored"},
     )
-    sb = scan_bundler
+    sb = scan_bundler_mock
     sb._add_device_to_storage([msg], "samx", timeout_time=1)
     assert "samx" not in sb.device_storage
 
 
-def test_add_device_to_storage_returns_without_signal(scan_bundler):
+def test_add_device_to_storage_returns_without_signal(scan_bundler_mock):
     msg = messages.DeviceMessage(
         signals={}, metadata={"scan_id": "scan_id", "readout_priority": "monitored"}
     )
-    sb = scan_bundler
+    sb = scan_bundler_mock
     sb._add_device_to_storage([msg], "samx", timeout_time=1)
     assert "samx" not in sb.device_storage
 
 
-def test_add_device_to_storage_returns_on_timeout(scan_bundler):
+def test_add_device_to_storage_returns_on_timeout(scan_bundler_mock):
     msg = messages.DeviceMessage(
         signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
         metadata={"scan_id": "scan_id", "readout_priority": "monitored"},
     )
-    sb = scan_bundler
+    sb = scan_bundler_mock
     sb._add_device_to_storage([msg], "samx", timeout_time=1)
     assert "samx" not in sb.device_storage
 
 
 @pytest.mark.parametrize("scan_status", ["aborted", "closed"])
-def test_add_device_to_storage_returns_without_scan_info(scan_bundler, scan_status):
+def test_add_device_to_storage_returns_without_scan_info(scan_bundler_mock, scan_status):
     msg = messages.DeviceMessage(
         signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
         metadata={"scan_id": "scan_id", "readout_priority": "monitored"},
     )
-    sb = scan_bundler
+    sb = scan_bundler_mock
     sb.sync_storage["scan_id"] = {"info": {}}
     sb.sync_storage["scan_id"]["status"] = scan_status
     sb._add_device_to_storage([msg], "samx", timeout_time=1)
@@ -200,8 +136,8 @@ def test_add_device_to_storage_returns_without_scan_info(scan_bundler, scan_stat
         ),
     ],
 )
-def test_add_device_to_storage_primary(scan_bundler, msg, scan_type):
-    sb = scan_bundler
+def test_add_device_to_storage_primary(scan_bundler_mock, msg, scan_type):
+    sb = scan_bundler_mock
     sb.sync_storage["scan_id"] = {"info": {"scan_type": scan_type, "monitor_sync": "bec"}}
     sb.sync_storage["scan_id"]["status"] = "open"
     sb.monitored_devices["scan_id"] = {"devices": [sb.device_manager.devices.samx]}
@@ -245,8 +181,8 @@ def test_add_device_to_storage_primary(scan_bundler, msg, scan_type):
         ),
     ],
 )
-def test_add_device_to_storage_primary_flyer(scan_bundler, msg, scan_type):
-    sb = scan_bundler
+def test_add_device_to_storage_primary_flyer(scan_bundler_mock, msg, scan_type):
+    sb = scan_bundler_mock
     sb.sync_storage["scan_id"] = {"info": {"scan_type": scan_type, "monitor_sync": "flyer"}}
     sb.sync_storage["scan_id"]["status"] = "open"
     sb.storage_initialized.add("scan_id")
@@ -275,8 +211,8 @@ def test_add_device_to_storage_primary_flyer(scan_bundler, msg, scan_type):
         )
     ],
 )
-def test_add_device_to_storage_baseline(scan_bundler, msg, scan_type):
-    sb = scan_bundler
+def test_add_device_to_storage_baseline(scan_bundler_mock, msg, scan_type):
+    sb = scan_bundler_mock
     sb.sync_storage["scan_id"] = {"info": {"scan_type": scan_type, "monitor_sync": "bec"}}
     sb.sync_storage["scan_id"]["status"] = "open"
     sb.monitored_devices["scan_id"] = {"devices": []}
@@ -336,10 +272,9 @@ def test_add_device_to_storage_baseline(scan_bundler, msg, scan_type):
         )
     ],
 )
-def test_scan_queue_callback(scan_bundler, queue_msg):
-    sb = scan_bundler
-    msg = MessageMock()
-    msg.value = queue_msg
+def test_scan_queue_callback(scan_bundler_mock, queue_msg):
+    sb = scan_bundler_mock
+    msg = MessageObject("", queue_msg)
     sb._scan_queue_callback(msg)
     assert sb.current_queue == queue_msg.content["queue"]["primary"].get("info")
 
@@ -362,10 +297,9 @@ def test_scan_queue_callback(scan_bundler, queue_msg):
         )
     ],
 )
-def test_scan_status_callback(scan_bundler, scan_msg):
-    sb = scan_bundler
-    msg = MessageMock()
-    msg.value = scan_msg
+def test_scan_status_callback(scan_bundler_mock, scan_msg):
+    sb = scan_bundler_mock
+    msg = MessageObject("", scan_msg)
 
     with mock.patch.object(sb, "handle_scan_status_message") as handle_scan_status_message_mock:
         sb._scan_status_callback(msg)
@@ -409,8 +343,8 @@ def test_scan_status_callback(scan_bundler, scan_msg):
         ],
     ],
 )
-def test_handle_scan_status_message(scan_bundler, scan_msg, sync_storage):
-    sb = scan_bundler
+def test_handle_scan_status_message(scan_bundler_mock, scan_msg, sync_storage):
+    sb = scan_bundler_mock
     scan_id = scan_msg.content["scan_id"]
     sb.sync_storage = sync_storage
 
@@ -430,9 +364,9 @@ def test_handle_scan_status_message(scan_bundler, scan_msg, sync_storage):
                     status_mock.assert_not_called()
 
 
-def test_status_modification(scan_bundler):
+def test_status_modification(scan_bundler_mock):
     scan_id = "test_scan_id"
-    scan_bundler.sync_storage[scan_id] = {"status": "open"}
+    scan_bundler_mock.sync_storage[scan_id] = {"status": "open"}
     msg = messages.ScanStatusMessage(
         scan_id=scan_id,
         status="closed",
@@ -443,8 +377,8 @@ def test_status_modification(scan_bundler):
             "scan_type": "step",
         },
     )
-    scan_bundler._scan_status_modification(msg)
-    assert scan_bundler.sync_storage[scan_id]["status"] == "closed"
+    scan_bundler_mock._scan_status_modification(msg)
+    assert scan_bundler_mock.sync_storage[scan_id]["status"] == "closed"
 
     scan_id = "scan_id_not_available"
     msg = messages.ScanStatusMessage(
@@ -457,8 +391,8 @@ def test_status_modification(scan_bundler):
             "scan_type": "step",
         },
     )
-    scan_bundler._scan_status_modification(msg)
-    assert scan_bundler.sync_storage[scan_id]["info"] == {}
+    scan_bundler_mock._scan_status_modification(msg)
+    assert scan_bundler_mock.sync_storage[scan_id]["info"] == {}
 
 
 @pytest.mark.parametrize(
@@ -504,8 +438,8 @@ def test_status_modification(scan_bundler):
         ),
     ],
 )
-def test_initialize_scan_container(scan_bundler, scan_msg):
-    sb = scan_bundler
+def test_initialize_scan_container(scan_bundler_mock, scan_msg):
+    sb = scan_bundler_mock
     scan_id = scan_msg.content["scan_id"]
     scan_info = scan_msg.content["info"]
     scan_motors = list(set(sb.device_manager.devices[m] for m in scan_info["scan_motors"]))
@@ -574,8 +508,8 @@ def test_initialize_scan_container(scan_bundler, scan_msg):
         ],
     ],
 )
-def test_step_scan_update(scan_bundler, scan_msg, pointID, primary):
-    sb = scan_bundler
+def test_step_scan_update(scan_bundler_mock, scan_msg, pointID, primary):
+    sb = scan_bundler_mock
 
     metadata = scan_msg.metadata
     scan_id = metadata.get("scan_id")
@@ -628,8 +562,8 @@ def test_step_scan_update(scan_bundler, scan_msg, pointID, primary):
         ("poiflkj", {"status": "aborted"}, True),
     ],
 )
-def test_cleanup_storage(scan_bundler, scan_id, storage, remove):
-    sb = scan_bundler
+def test_cleanup_storage(scan_bundler_mock, scan_id, storage, remove):
+    sb = scan_bundler_mock
     sb.sync_storage[scan_id] = storage
     sb.storage_initialized.add(scan_id)
     with mock.patch.object(sb, "run_emitter") as emitter:
@@ -643,8 +577,8 @@ def test_cleanup_storage(scan_bundler, scan_id, storage, remove):
 
 
 @pytest.mark.parametrize("scan_id,pointID,sent", [("lkasjd", 1, True), ("alskjd", 2, False)])
-def test_send_scan_point(scan_bundler, scan_id, pointID, sent):
-    sb = scan_bundler
+def test_send_scan_point(scan_bundler_mock, scan_id, pointID, sent):
+    sb = scan_bundler_mock
     sb.sync_storage[scan_id] = {"sent": set([1])}
     sb.sync_storage[scan_id][pointID] = {}
     with mock.patch.object(sb, "run_emitter") as emitter:
@@ -655,8 +589,8 @@ def test_send_scan_point(scan_bundler, scan_id, pointID, sent):
                 logger.debug.assert_called_once()
 
 
-def test_run_emitter(scan_bundler):
-    sb = scan_bundler
+def test_run_emitter(scan_bundler_mock):
+    sb = scan_bundler_mock
     with mock.patch("scan_bundler.scan_bundler.logger") as logger:
         sb.run_emitter("on_init", "jlaksjd", "jlkasjd")
         logger.error.assert_called()
@@ -673,8 +607,8 @@ def test_run_emitter(scan_bundler):
         ("scan_id-lkjd", "bpm4r", {"value": 5}, {}),
     ],
 )
-def test_fly_scan_update(scan_bundler, scan_id, device, signal, metadata):
-    sb = scan_bundler
+def test_fly_scan_update(scan_bundler_mock, scan_id, device, signal, metadata):
+    sb = scan_bundler_mock
     sb.sync_storage[scan_id] = {}
     with mock.patch.object(sb, "_update_monitor_signals") as update_signals:
         with mock.patch.object(sb, "_send_scan_point") as send_point:
@@ -687,8 +621,8 @@ def test_fly_scan_update(scan_bundler, scan_id, device, signal, metadata):
 
 
 @pytest.mark.parametrize("scan_id,device,signal", [("scan_id-lkjd", "bpm4r", {"value": 5})])
-def test_baseline_update(scan_bundler, scan_id, device, signal):
-    sb = scan_bundler
+def test_baseline_update(scan_bundler_mock, scan_id, device, signal):
+    sb = scan_bundler_mock
     sb.baseline_devices[scan_id] = {"done": {device: False}}
     sb.sync_storage[scan_id] = {}
     sb.scan_motors[scan_id] = []
@@ -698,10 +632,10 @@ def test_baseline_update(scan_bundler, scan_id, device, signal):
         emitter.assert_called_once_with("on_baseline_emit", scan_id)
 
 
-def test_update_monitor_signals(scan_bundler):
+def test_update_monitor_signals(scan_bundler_mock):
     scan_id = "ljlaskdj"
     pointID = 2
-    sb = scan_bundler
+    sb = scan_bundler_mock
     sb.sync_storage[scan_id] = {"info": {"scan_type": "fly"}, pointID: {}}
     sb.monitored_devices[scan_id] = {
         "devices": sb.device_manager.devices.monitored_devices([]),
@@ -715,8 +649,8 @@ def test_update_monitor_signals(scan_bundler):
         assert sb.sync_storage[scan_id][pointID]["bpm3a"] == {"value": 400}
 
 
-def test_get_last_device_readback(scan_bundler):
-    sb = scan_bundler
+def test_get_last_device_readback(scan_bundler_mock):
+    sb = scan_bundler_mock
     dev_msg = messages.DeviceMessage(
         signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
         metadata={"scan_id": "laksjd", "readout_priority": "monitored"},

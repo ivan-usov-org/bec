@@ -2,16 +2,14 @@ from unittest import mock
 
 import msgpack
 import pytest
-from test_scan_bundler import scan_bundler
 
-from bec_lib import MessageEndpoints, messages
-from bec_lib.tests.utils import threads_check
+from bec_lib import MessageEndpoints
 from scan_bundler.bluesky_emitter import BlueskyEmitter
 
 
 @pytest.fixture
-def bls_emitter(scan_bundler):
-    emitter = BlueskyEmitter(scan_bundler)
+def bls_emitter(scan_bundler_mock):
+    emitter = BlueskyEmitter(scan_bundler_mock)
     yield emitter
     emitter.shutdown()
 

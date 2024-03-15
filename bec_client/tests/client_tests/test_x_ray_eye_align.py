@@ -3,7 +3,6 @@ from unittest import mock
 from bec_lib.device import DeviceBase
 
 # pylint: disable=unused-import
-from bec_lib.tests.utils import bec_client, dm, dm_with_devices
 
 from bec_client.plugins.LamNI import LamNI, XrayEyeAlign
 
@@ -26,8 +25,8 @@ class RTMock(DeviceBase):
     enabled = True
 
 
-def test_save_frame(bec_client):
-    client = bec_client
+def test_save_frame(bec_client_mock):
+    client = bec_client_mock
     client.device_manager.devices.xeye = DeviceBase(name="xeye", config={})
     lamni = LamNI(client)
     align = XrayEyeAlign(client, lamni)
@@ -36,11 +35,11 @@ def test_save_frame(bec_client):
         epics_put_mock.assert_called_once_with("XOMNYI-XEYE-SAVFRAME:0", 1)
 
 
-def test_update_frame(bec_client):
+def test_update_frame(bec_client_mock):
     epics_put = "bec_client.plugins.LamNI.x_ray_eye_align.epics_put"
     epics_get = "bec_client.plugins.LamNI.x_ray_eye_align.epics_get"
     fshopen = "bec_client.plugins.LamNI.x_ray_eye_align.fshopen"
-    client = bec_client
+    client = bec_client_mock
     client.device_manager.devices.xeye = DeviceBase(name="xeye", config={})
     lamni = LamNI(client)
     align = XrayEyeAlign(client, lamni)
@@ -60,8 +59,8 @@ def test_update_frame(bec_client):
                 epics_get_mock.assert_called_with("XOMNYI-XEYE-ACQDONE:0")
 
 
-def test_disable_rt_feedback(bec_client):
-    client = bec_client
+def test_disable_rt_feedback(bec_client_mock):
+    client = bec_client_mock
     client.device_manager.devices.xeye = DeviceBase(name="xeye", config={})
     lamni = LamNI(client)
     align = XrayEyeAlign(client, lamni)
@@ -73,8 +72,8 @@ def test_disable_rt_feedback(bec_client):
         fdb_disable.assert_called_once()
 
 
-def test_enable_rt_feedback(bec_client):
-    client = bec_client
+def test_enable_rt_feedback(bec_client_mock):
+    client = bec_client_mock
     client.device_manager.devices.xeye = DeviceBase(name="xeye", config={})
     lamni = LamNI(client)
     align = XrayEyeAlign(client, lamni)
@@ -86,10 +85,10 @@ def test_enable_rt_feedback(bec_client):
         fdb_enable.assert_called_once()
 
 
-def test_tomo_rotate(bec_client):
+def test_tomo_rotate(bec_client_mock):
     import builtins
 
-    client = bec_client
+    client = bec_client_mock
     client.load_high_level_interface("spec_hli")
     client.device_manager.devices.xeye = DeviceBase(name="xeye", config={})
     lamni = LamNI(client)

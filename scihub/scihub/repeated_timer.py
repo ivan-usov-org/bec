@@ -26,4 +26,5 @@ class RepeatedTimer:
     def stop(self):
         """stop the timer"""
         self._timer.cancel()
+        self._timer.join()  # cancel just stops from firing, does not stop the thread or wait for it
         self.is_running = False
