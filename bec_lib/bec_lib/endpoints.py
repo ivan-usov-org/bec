@@ -1071,3 +1071,17 @@ class MessageEndpoints:
             message_type=messages.RequestResponseMessage,
             message_op=MessageOp.SET_PUBLISH,
         )
+
+    @staticmethod
+    def gui_heartbeat(gui_id: str) -> EndpointInfo:
+        """
+        Endpoint for GUI heartbeat. This endpoint is used to publish the GUI heartbeat
+        using a messages.StatusMessage message.
+
+        Returns:
+        EndpointInfo: Endpoint for GUI heartbeat.
+        """
+        endpoint = f"public/gui/heartbeat/{gui_id}"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.StatusMessage, message_op=MessageOp.SET
+        )
