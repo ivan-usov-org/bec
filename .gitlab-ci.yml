@@ -303,7 +303,7 @@ end-2-end-conda:
 
     - cd ./bec_client
     - pip install .[dev]
-    - pytest --start-servers -v ./tests/end-2-end/test_scans.py::test_grid_scan
+    - pytest --start-servers -v ./tests/end-2-end/test_scans_e2e.py::test_grid_scan
 
   artifacts:
     when: on_failure
