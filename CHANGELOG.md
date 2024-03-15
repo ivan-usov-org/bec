@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v1.17.0 (2024-03-15)
+
+### Feature
+
+* **bec_client:** Becfigure start automatically on startup ([`9092122`](https://gitlab.psi.ch/bec/bec/-/commit/9092122e67bf78b62d4d2afe4fdeaa2fd154495f))
+
+### Fix
+
+* **bec_client:** Fixed gui shutdown procedure ([`15649ac`](https://gitlab.psi.ch/bec/bec/-/commit/15649acc5eae4a45b20ec8f2039c4d4f32bc41fd))
+
 ## v1.16.1 (2024-03-15)
 
 ### Fix
