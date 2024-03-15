@@ -18,9 +18,12 @@ from bec_lib.devicemanager import DeviceContainer, DeviceManagerBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.tests.utils import ConnectorMock, bec_client, get_device_info_mock
 
+# pylint: disable=missing-function-docstring
+# pylint: disable=protected-access
 
-@pytest.fixture
-def dev(bec_client):
+
+@pytest.fixture(name="dev")
+def fixture_dev(bec_client):
     yield bec_client.device_manager.devices
 
 
