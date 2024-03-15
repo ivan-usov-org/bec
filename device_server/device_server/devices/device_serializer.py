@@ -1,11 +1,29 @@
+"""
+This module contains functions to get the device info from an object. The device info 
+is used to create the device interface for proxy objects on other services.
+"""
+
+import functools
+from typing import Any
+
 import msgpack
+from bec_lib.bec_errors import DeviceConfigError
+from bec_lib.device import DeviceBase
 from bec_lib.numpy_encoder import numpy_encode
 from ophyd import Device, PositionerBase, Signal
 from ophyd_devices import BECDeviceBase, ComputedSignal
 
 
-def is_serializable(var) -> bool:
-    """check if an object is serializable"""
+def is_serializable(var: Any) -> bool:
+    """
+    Check if a variable is serializable
+
+    Args:
+        var (Any): variable to check
+
+    Returns:
+        bool: True if the variable is serializable, False otherwise
+    """
     try:
         msgpack.dumps(var, default=numpy_encode)
         return True
@@ -13,8 +31,17 @@ def is_serializable(var) -> bool:
         return False
 
 
-def get_custom_user_access_info(obj, obj_interface):
-    """extract user access method from an object"""
+def get_custom_user_access_info(obj: Any, obj_interface: dict) -> dict:
+    """
+    Get the custom user access info
+
+    Args:
+        obj (Any): object to get the user access info from
+        obj_interface (dict): object interface
+
+    Returns:
+        dict: updated object interface
+    """
     # user_funcs = get_user_functions(obj)
     if hasattr(obj, "USER_ACCESS"):
         for var in [func for func in dir(obj) if func in obj.USER_ACCESS]:
@@ -31,7 +58,22 @@ def get_custom_user_access_info(obj, obj_interface):
     return obj_interface
 
 
-def get_device_base_class(obj) -> str:
+@functools.lru_cache(maxsize=2)
+def get_protected_class_methods():
+    """get protected methods of the DeviceBase class"""
+    return [func for func in dir(DeviceBase) if not func.startswith("__")]
+
+
+def get_device_base_class(obj: Any) -> str:
+    """
+    Get the base class of the object
+
+    Args:
+        obj (Any): object to get the base class from
+
+    Returns:
+        str: base class of the object
+    """
     if isinstance(obj, PositionerBase):
         return "positioner"
     if isinstance(obj, ComputedSignal):
@@ -46,38 +88,33 @@ def get_device_base_class(obj) -> str:
     return "unknown"
 
 
-def get_device_info(obj, device_info):
+def get_device_info(obj: PositionerBase | ComputedSignal | Signal | Device | BECDeviceBase) -> dict:
     """
-    {
-        "device_name": "samx",
-            "device_info": {
-                "device_base_class": "",
-                "signals": {},
-                "custom_user_access": {},
-                "sub_devices": {
-                    "device_name": "samx_sub",
-                    "device_info": {
-                        "device_base_class": "",
-                        "signals": {},
-                        "custom_user_access": {},
-                        "sub_devices": {},
-                    },
-                },
-            },
-        }
+    Get the device info from the object
 
     Args:
-        obj (_type_): _description_
-        device_info (_type_): _description_
+        obj (PositionerBase | ComputedSignal | Signal | Device | BECDeviceBase): object to get the device info from
+        device_info (dict): device info
 
     Returns:
-        _type_: _description_
+        dict: updated device info
     """
+    protected_names = get_protected_class_methods()
+
     user_access = get_custom_user_access_info(obj, {})
+    if set(user_access.keys()) & set(protected_names):
+        raise DeviceConfigError(
+            f"User access method name {set(user_access.keys()) & set(protected_names)} is protected and cannot be used. Please rename the method."
+        )
+
     signals = []
     if hasattr(obj, "component_names"):
         for component_name in obj.component_names:
             if get_device_base_class(getattr(obj, component_name)) == "signal":
+                if component_name in protected_names:
+                    raise DeviceConfigError(
+                        f"Signal name {component_name} is protected and cannot be used. Please rename the signal."
+                    )
                 signals.append(
                     {
                         "component_name": component_name,
@@ -87,9 +124,14 @@ def get_device_info(obj, device_info):
                     }
                 )
     sub_devices = []
+
     if hasattr(obj, "walk_subdevices"):
         for _, dev in obj.walk_subdevices():
-            sub_devices.append(get_device_info(dev, {}))
+            sub_devices.append(get_device_info(dev))
+    if obj.name in protected_names or getattr(obj, "dotted_name", None) in protected_names:
+        raise DeviceConfigError(
+            f"Device name {obj.name} is protected and cannot be used. Please rename the device."
+        )
     return {
         "device_name": obj.name,
         "device_info": {

@@ -1,7 +1,12 @@
+"""
+This module contains the DeviceManagerDS class, which is a subclass of 
+the DeviceManagerBase class and is the main device manager for devices 
+in BEC. It is the only place where devices are initialized and managed.
+"""
+
 from __future__ import annotations
 
 import inspect
-import sys
 import time
 import traceback
 from functools import reduce
@@ -19,7 +24,6 @@ from bec_lib import (
     bec_logger,
     messages,
 )
-from bec_lib.connector import ConnectorBase
 from ophyd.ophydobj import OphydObject
 from ophyd.signal import EpicsSignalBase
 from typeguard import typechecked
@@ -428,7 +432,7 @@ class DeviceManagerDS(DeviceManagerBase):
             obj (_type_): _description_
         """
 
-        interface = get_device_info(obj, {})
+        interface = get_device_info(obj)
         self.connector.set(
             MessageEndpoints.device_info(obj.name),
             messages.DeviceInfoMessage(device=obj.name, info=interface),
