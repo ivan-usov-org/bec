@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v1.16.1 (2024-03-15)
+
+### Fix
+
+* Fix scan_export and unit tests ([`914b332`](https://gitlab.psi.ch/bec/bec/-/commit/914b332781683b2c738b3693341cebdcb799393e))
+* **scan_bundler:** Allow missing entries in scan info ([`7349545`](https://gitlab.psi.ch/bec/bec/-/commit/7349545ee056da9ec226dc6be9dff12748ce2066))
+* **scan_segments:** Segments should not include the entire scan status ([`46ae12c`](https://gitlab.psi.ch/bec/bec/-/commit/46ae12ccbe9c643f42a6d90014e0f37ecd16589d))
+
 ## v1.16.0 (2024-03-15)
 
 ### Feature
