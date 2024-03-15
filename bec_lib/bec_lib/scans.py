@@ -421,5 +421,5 @@ class ScanExport:
             try:
                 self._export_to_csv()
                 self.scans = None
-            except:
-                logger.warning("Could not export scans to csv file.")
+            except Exception as exc:
+                logger.warning(f"Could not export scans to csv file, due to exception {exc}")

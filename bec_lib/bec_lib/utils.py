@@ -5,6 +5,7 @@ Utility functions for the bec_lib package.
 from __future__ import annotations
 
 import csv
+import datetime
 import functools
 from collections import defaultdict
 from typing import TYPE_CHECKING
@@ -88,7 +89,7 @@ def scan_to_csv(
     for ii, scan_rep in enumerate(scan_report):
         if hasattr(scan_rep, "scan"):
             scan_rep = scan_rep.scan
-        header_out.append([f"#{ii}"])
+        header_out.append(["#ScanNumber", f"{scan_rep.scan_number}"])
         header_tmp, body_tmp = _extract_scan_data(
             scan_item=scan_rep, header=header, write_metadata=write_metadata
         )
@@ -134,9 +135,22 @@ def _extract_scan_data(
     """
     scan_dict = scan_to_dict(scan_item, flat=True)
 
-    header_tmp = [["#" + entry.replace("\t", "")] for entry in str(scan_item).split("\n")]
-    header_tmp.insert(1, ["#ScanStatus", scan_item.status])
-    scan_metadata = scan_item.data.messages[list(scan_item.data.messages.keys())[-1]].metadata
+    header_tmp = []
+    header_tmp.append(["#scanID", f"{scan_item.scanID}"])
+    header_tmp.append(["#ScanStatus", f"{scan_item.status}"])
+
+    start_time = f"{datetime.datetime.fromtimestamp(scan_item.start_time).strftime('%c')}"
+    header_tmp.append(["#StartTime", start_time])
+    end_time = f"{datetime.datetime.fromtimestamp(scan_item.start_time).strftime('%c')}"
+    header_tmp.append(["#EndTime", end_time])
+    elapsed_time = (
+        f"\tElapsed time: {(scan_item.end_time-scan_item.start_time):.1f} s\n"
+        if scan_item.end_time and scan_item.start_time
+        else ""
+    )
+    header_tmp.append(["#ElapsedTime", elapsed_time])
+
+    scan_metadata = scan_item.status_message.info
     if write_metadata:
         header_tmp.append(["#ScanMetadata"])
         for key, value in scan_metadata.items():
@@ -157,7 +171,12 @@ def _extract_scan_data(
     num_entries = len(list(scan_dict["value"].values())[0])
     for ii in range(num_entries):
         sub_list = []
-        sub_list.extend([scan_metadata["scan_number"], scan_metadata["dataset_number"]])
+        sub_list.extend(
+            [
+                scan_metadata["scan_number"],
+                scan_metadata["dataset_number"],
+            ]
+        )
         for key in scan_dict["value"]:
             sub_list.extend([scan_dict["value"][key][ii], scan_dict["timestamp"][key][ii]])
         body_tmp.append(sub_list)
