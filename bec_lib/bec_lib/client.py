@@ -88,6 +88,7 @@ class BECClient(BECService, UserScriptsMixin):
         self.live_updates = None
         self.dap = None
         self.bl_checks = None
+        self.started = False
 
     @property
     def username(self) -> str:
@@ -122,6 +123,7 @@ class BECClient(BECService, UserScriptsMixin):
         self.dap = DAPPlugins(self)
         self.bl_checks = BeamlineChecks(self)
         self.bl_checks.start()
+        self.started = True
 
     def alarms(self, severity=Alarms.WARNING):
         """get the next alarm with at least the specified severity"""
@@ -201,6 +203,7 @@ class BECClient(BECService, UserScriptsMixin):
         if self.bl_checks:
             self.bl_checks.stop()
         bec_logger.logger.remove()
+        self.started = False
 
     def _print_available_commands(self, title: str, data: tuple) -> None:
         console = Console()
