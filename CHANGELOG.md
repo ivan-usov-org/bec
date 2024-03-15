@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v1.14.6 (2024-03-15)
+
+### Fix
+
+* **bec_lib:** Device.describe should not be an rpc method ([`42fae6a`](https://gitlab.psi.ch/bec/bec/-/commit/42fae6a70baa01565599899437a3bdca1d4783ee))
+
+### Documentation
+
+* Added bec_plugins link to developer.md ([`911192d`](https://gitlab.psi.ch/bec/bec/-/commit/911192d566255dcf19e5c80442baeddb13e26908))
+
 ## v1.14.5 (2024-03-14)
 
 ### Fix
