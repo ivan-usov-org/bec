@@ -2,6 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## v1.16.0 (2024-03-15)
+
+### Feature
+
+* **device_server:** Added guards against using protected methods; closes #228 ([`67e8eeb`](https://gitlab.psi.ch/bec/bec/-/commit/67e8eeb255fabf44ed00605f056066b111791d2c))
+* **bec_lib:** Added endpoint for gui heartbeats ([`01066dd`](https://gitlab.psi.ch/bec/bec/-/commit/01066dd777e5800f69709e9f76fc192bd9a75a25))
+
+### Fix
+
+* **bec_lib:** Fixed support in dap for scan reports ([`0666013`](https://gitlab.psi.ch/bec/bec/-/commit/0666013d909fa72f500179f0ce6926588bed9249))
+
 ## v1.15.0 (2024-03-15)
 
 ### Feature
