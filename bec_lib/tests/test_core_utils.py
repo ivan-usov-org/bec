@@ -10,11 +10,13 @@ from bec_lib.scan_items import ScanItem
 from bec_lib.scan_report import ScanReport
 from bec_lib.utils import _write_csv, scan_to_dict, scan_to_csv, user_access, _extract_scan_data
 
+
 class ScanReportMock(ScanReport):
     def __init__(self, scanID: str) -> None:
         super().__init__()
         self.request = mock.MagicMock()
         self.request.scan.scanID = scanID
+
 
 @pytest.fixture
 def scan_data():
@@ -33,11 +35,15 @@ def scan_data():
         scan_data.set(ii, msg)
     yield scan_data
 
+
 @pytest.fixture
 def scanitem():
-    scanitem = ScanItem(mock.MagicMock(), queueID="queueID", scanID="scanID", scan_number=1, status="closed")
+    scanitem = ScanItem(
+        mock.MagicMock(), queueID="queueID", scanID="scanID", scan_number=1, status="closed"
+    )
     scanitem.status_message = mock.MagicMock()
     yield scanitem
+
 
 class class_mock:
     USER_ACCESS = []
@@ -80,23 +86,26 @@ def test__write_csv():
 
     os.remove("test.csv")
 
+
 def test_scan_to_dict(scanitem, scan_data):
     """Test scan_to_dict function."""
     scanitem.data = scan_data
     return_dict = scan_to_dict(scanitem, flat=True)
     assert return_dict.keys() == {"timestamp", "value"}
-    assert return_dict['value'].keys() == {"samx", "setpoint"}
-    assert len(return_dict['value']['samx']) == 10
+    assert return_dict["value"].keys() == {"samx", "setpoint"}
+    assert len(return_dict["value"]["samx"]) == 10
+
 
 def test_extract_scan_data(scanitem, scan_data):
     """Test _extract_scan_data function"""
     datasetnumber = 5
     scanitem.start_time = 1620000000
-    scanitem.end_time = 1620000000+3.5
-    scanitem.status_message.return_value = messages.ScanStatusMessage(scanID=scanitem.scanID,
-                                                                      status=scanitem.status,
-                                                                      info={"scan_number": scanitem.scan_number, 
-                                                                            "dataset_number": datasetnumber})
+    scanitem.end_time = 1620000000 + 3.5
+    scanitem.status_message.return_value = messages.ScanStatusMessage(
+        scanID=scanitem.scanID,
+        status=scanitem.status,
+        info={"scan_number": scanitem.scan_number, "dataset_number": datasetnumber},
+    )
     scanitem.data = scan_data
     header, body = _extract_scan_data(scanitem, header=None, write_metadata=True)
     assert len(header) == 7
