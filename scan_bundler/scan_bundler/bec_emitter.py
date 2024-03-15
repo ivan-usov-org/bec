@@ -26,11 +26,16 @@ class BECEmitter(EmitterBase):
     def _send_bec_scan_point(self, scanID: str, pointID: int) -> None:
         sb = self.scan_bundler
 
+        info = sb.sync_storage[scanID]["info"]
         msg = messages.ScanMessage(
             point_id=pointID,
             scanID=scanID,
             data=sb.sync_storage[scanID][pointID],
-            metadata=sb.sync_storage[scanID]["info"],
+            metadata={
+                "scanID": scanID,
+                "scan_type": info["scan_type"],
+                "scan_report_devices": info["scan_report_devices"],
+            },
         )
         self.add_message(
             msg,
@@ -48,14 +53,7 @@ class BECEmitter(EmitterBase):
         )
         pipe = sb.connector.pipeline()
         sb.connector.set(
-            MessageEndpoints.public_scan_baseline(scanID=scanID),
-            msg,
-            expire=1800,
-            pipe=pipe,
+            MessageEndpoints.public_scan_baseline(scanID=scanID), msg, expire=1800, pipe=pipe
         )
-        sb.connector.set_and_publish(
-            MessageEndpoints.scan_baseline(),
-            msg,
-            pipe=pipe,
-        )
+        sb.connector.set_and_publish(MessageEndpoints.scan_baseline(), msg, pipe=pipe)
         pipe.execute()

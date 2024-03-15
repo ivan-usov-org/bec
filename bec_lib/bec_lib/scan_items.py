@@ -201,6 +201,7 @@ class ScanStorage:
 
         # update status message
         scan_item.status = scan_status.content.get("status")
+        scan_item.status_message = scan_status
 
         # update total number of points
         if scan_status.content["info"].get("num_points"):
