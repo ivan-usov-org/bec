@@ -41,6 +41,7 @@ class BECIPythonClient(BECClient):
         self._exit_handler_thread = None
         self._hli_funcs = {}
         self.live_updates = IPythonLiveUpdates(self)
+        self.fig = None
 
     def start(self):
         """start the client"""
@@ -84,7 +85,6 @@ class BECIPythonClient(BECClient):
 
     def _start_exit_handler(self):
         self._exit_handler_thread = threading.Thread(target=self._exit_thread)
-        self._exit_handler_thread.daemon = True
         self._exit_handler_thread.start()
 
     def _shutdown_exit_handler(self):
@@ -96,18 +96,20 @@ class BECIPythonClient(BECClient):
         magics = BECMagics(self._ip, self)
         self._ip.register_magics(magics)
 
-    def shutdown(self):
+    def shutdown(self, shutdown_exit_thread=True):
         """shutdown the client and all its components"""
+        if self.fig:
+            self.fig.close()
         super().shutdown()
-        self._shutdown_exit_handler()
-        print("done")
+        if shutdown_exit_thread:
+            self._shutdown_exit_handler()
 
     def _exit_thread(self):
         main_thread = threading.main_thread()
         while main_thread.is_alive() and not self._exit_event.is_set():
             time.sleep(0.1)
         if not self._exit_event.is_set():
-            self.shutdown()
+            self.shutdown(shutdown_exit_thread=False)
 
 
 def _ip_exception_handler(self, etype, evalue, tb, tb_offset=None):

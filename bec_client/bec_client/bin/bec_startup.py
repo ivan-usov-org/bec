@@ -65,7 +65,7 @@ if __name__ == "__main__":
     scans = bec.scans
 
     if START_BEC_WIDGETS and BECFigure is not None:
-        fig = BECFigure()
+        fig = bec.fig = BECFigure()
         fig.show()
 
     ####################### END OF INIT #############################
