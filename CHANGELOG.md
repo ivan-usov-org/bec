@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.15.0 (2024-03-15)
+
+### Feature
+
+* **bec_lib:** Added started flag to bec client ([`e8eba90`](https://gitlab.psi.ch/bec/bec/-/commit/e8eba9049ae33b5b83615ced8d2526dde54a5c7d))
+
 ## v1.14.6 (2024-03-15)
 
 ### Fix
