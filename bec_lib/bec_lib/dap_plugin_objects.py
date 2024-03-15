@@ -18,6 +18,7 @@ from bec_lib.device import DeviceBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.lmfit_serializer import serialize_param_object
 from bec_lib.scan_items import ScanItem
+from bec_lib.scan_report import ScanReport
 
 if TYPE_CHECKING:
     from bec_lib.client import BECClient
@@ -69,6 +70,8 @@ class DAPPluginObjectBase:
         for arg in args:
             if isinstance(arg, ScanItem):
                 converted_args.append(arg.scanID)
+            elif isinstance(arg, ScanReport):
+                converted_args.append(arg.scan.scanID)
             else:
                 converted_args.append(arg)
         args = converted_args
@@ -76,6 +79,8 @@ class DAPPluginObjectBase:
         for key, val in kwargs.items():
             if isinstance(val, ScanItem):
                 converted_kwargs[key] = val.scanID
+            elif isinstance(arg, ScanReport):
+                converted_kwargs[key] = arg.scan.scanID
             elif isinstance(val, lmfit.Parameter):
                 converted_kwargs[key] = serialize_param_object(val)
             else:

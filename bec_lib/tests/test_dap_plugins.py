@@ -7,6 +7,8 @@ from bec_lib import MessageEndpoints, messages
 from bec_lib.dap_plugin_objects import DAPPluginObject, DAPPluginObjectAutoRun, LmfitService1D
 from bec_lib.dap_plugins import DAPPlugins
 from bec_lib.device import DeviceBase
+from bec_lib.scan_items import ScanItem
+from bec_lib.scan_report import ScanReport
 
 
 @pytest.fixture
@@ -368,6 +370,44 @@ def test_dap_plugin_fit(dap):
     with mock.patch.object(dap.GaussianModel, "_wait_for_dap_response") as mock_wait:
         dap.GaussianModel.fit()
         dap._parent.connector.set_and_publish.assert_called_once()
+        mock_wait.assert_called_once()
+
+
+class ScanReportMock(ScanReport):
+    def __init__(self, scanID: str) -> None:
+        super().__init__()
+        self.request = mock.MagicMock()
+        self.request.scan.scanID = scanID
+
+
+@pytest.mark.parametrize(
+    "input",
+    [
+        "scanID",
+        ScanItem(
+            mock.MagicMock(), queueID="queueID", scanID="scanID", scan_number=1, status="closed"
+        ),
+        ScanReportMock("scanID"),
+    ],
+)
+def test_dap_plugin_fit_input(dap, input):
+    with mock.patch.object(dap.GaussianModel, "_wait_for_dap_response") as mock_wait:
+        dap.GaussianModel.fit(input)
+        request_id = dap._parent.connector.set_and_publish.call_args[0][1].metadata["RID"]
+        dap._parent.connector.set_and_publish.assert_called_once_with(
+            MessageEndpoints.dap_request(),
+            messages.DAPRequestMessage(
+                "LmfitService1D",
+                "on_demand",
+                config={
+                    "args": ["scanID"],
+                    "kwargs": {},
+                    "class_args": [],
+                    "class_kwargs": {"model": "GaussianModel"},
+                },
+                metadata={"RID": request_id},
+            ),
+        )
         mock_wait.assert_called_once()
 
 
