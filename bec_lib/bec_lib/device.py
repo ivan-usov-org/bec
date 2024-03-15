@@ -653,16 +653,16 @@ class OphydInterfaceBase(DeviceBase):
                 cached = False
         return is_signal, is_config_signal, cached
 
-    @rpc
     def describe(self):
         """
         Describes the device and yields information about the device's signals, including
         the signal's name, source, shape, data type, precision etc.
         """
+        return self._info.get("describe", {})
 
-    @rpc
     def describe_configuration(self):
         """Describes the device configuration."""
+        return self._info.get("describe_configuration", {})
 
     def get(self, cached=True):
         """

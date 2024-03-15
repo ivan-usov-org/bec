@@ -515,7 +515,7 @@ def test_device_has_describe_method(device_cls):
     assert hasattr(devs.test, "describe")
     with mock.patch.object(devs.test, "_run_rpc_call") as mock_rpc:
         devs.test.describe()
-        mock_rpc.assert_called_once_with("test", "describe")
+        mock_rpc.assert_not_called()
 
 
 @pytest.mark.parametrize("device_cls", [Device, Signal, Positioner])
@@ -526,7 +526,7 @@ def test_device_has_describe_configuration_method(device_cls):
     assert hasattr(devs.test, "describe_configuration")
     with mock.patch.object(devs.test, "_run_rpc_call") as mock_rpc:
         devs.test.describe_configuration()
-        mock_rpc.assert_called_once_with("test", "describe_configuration")
+        mock_rpc.assert_not_called()
 
 
 def test_show_all():
