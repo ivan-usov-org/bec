@@ -852,11 +852,14 @@ class ScanWorker(threading.Thread):
                             queue.append_to_queue_history()
 
                 except ScanAbortion:
+                    content = traceback.format_exc()
+                    logger.error(content)
                     queue.queue.increase_scan_number()
                     if queue.return_to_start:
                         self._send_scan_status("aborted")
                     else:
                         self._send_scan_status("halted")
+                    logger.info(f"Scan aborted: {queue.queue_id}")
                     queue.status = InstructionQueueStatus.STOPPED
                     queue.append_to_queue_history()
                     self.cleanup()

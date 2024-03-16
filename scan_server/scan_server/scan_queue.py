@@ -203,6 +203,7 @@ class QueueManager:
         RID = parameter.get("RID")
         if RID:
             scan_msg.metadata["RID"] = RID
+        self.queues[queue].worker_status = InstructionQueueStatus.RUNNING
         self.add_to_queue(queue, scan_msg, 0)
 
     def _get_active_scanID(self, queue):
@@ -333,6 +334,7 @@ class ScanQueue:
         self.scan_worker = None
         self.auto_reset_enabled = True
         self.init_scan_worker()
+        self._lock = threading.RLock()
 
     def init_scan_worker(self):
         """init the scan worker"""
@@ -396,6 +398,7 @@ class ScanQueue:
             if updated:
                 return self.active_instruction_queue
 
+    @threadlocked
     def _next_instruction_queue(self) -> bool:
         """get the next instruction queue from the queue. If no update is available, it will return False."""
         try:
@@ -405,6 +408,7 @@ class ScanQueue:
                 and len(self.queue) > 0
                 and self.queue[0].status != InstructionQueueStatus.PENDING
             ):
+                logger.info(f"Removing queue item {self.queue[0].describe()} from queue")
                 self.queue.popleft()
                 self.queue_manager.send_queue_status()
 
@@ -425,7 +429,7 @@ class ScanQueue:
                 if len(self.queue) == 0 and self.auto_reset_enabled:
                     # we don't need to pause if there is no scan enqueued
                     self.status = ScanQueueStatus.RUNNING
-                    print("resetting queue status to running")
+                    logger.info("resetting queue status to running")
                 time.sleep(0.1)
 
             self.active_instruction_queue = self.queue[0]
@@ -437,6 +441,9 @@ class ScanQueue:
 
     def insert(self, msg: messages.ScanQueueMessage, position=-1, **_kwargs):
         """insert a new message to the queue"""
+        while self.worker_status == InstructionQueueStatus.STOPPED:
+            logger.info("Waiting for worker to become active.")
+            time.sleep(0.1)
         target_group = msg.metadata.get("queue_group")
         scan_def_id = msg.metadata.get("scan_def_id")
         logger.debug(f"Inserting new queue message {msg}")
@@ -763,8 +770,9 @@ class InstructionQueueItem:
     def status(self, val: InstructionQueueStatus) -> None:
         """update the status of the instruction queue. By doing so, it will
         also update its worker and publish the updated queue."""
-        if val == InstructionQueueStatus.PENDING:
-            print("stop!")
+        logger.info(
+            f"Setting status of instruction queue {self.queue_id} to {val.name} from thread {threading.current_thread().name}"
+        )
         self._status = val
         self.worker.status = val
         self.parent.queue_manager.send_queue_status()

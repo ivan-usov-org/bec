@@ -499,6 +499,7 @@ def bec_client(dm_with_devices):
         wait_for_server=False,
     )
     client.start()
+    print(id(client))
     device_manager = dm_with_devices
     for name, dev in device_manager.devices.items():
         dev._info["hints"] = {"fields": [name]}

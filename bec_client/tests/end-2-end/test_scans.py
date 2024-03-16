@@ -6,6 +6,9 @@ from unittest.mock import PropertyMock
 
 import numpy as np
 import pytest
+
+from bec_client import BECIPythonClient
+from bec_client.callbacks.utils import ScanRequestError
 from bec_lib import (
     BECClient,
     MessageEndpoints,
@@ -18,9 +21,6 @@ from bec_lib import (
 from bec_lib.alarm_handler import AlarmBase
 from bec_lib.bec_errors import ScanAbortion, ScanInterruption
 from bec_lib.tests.utils import wait_for_empty_queue
-
-from bec_client import BECIPythonClient
-from bec_client.callbacks.utils import ScanRequestError
 
 logger = bec_logger.logger
 
@@ -40,7 +40,7 @@ def client():
     bec.start()
     bec.queue.request_queue_reset()
     bec.queue.request_scan_continuation()
-    time.sleep(5)
+    time.sleep(1)
     yield bec
     bec.shutdown()
 
@@ -315,9 +315,9 @@ def test_fly_scan(client):
     bec.metadata.update({"unit_test": "test_fly_scan"})
     scans = bec.scans
     dev = bec.device_manager.devices
-    status = scans.round_scan_fly(dev.flyer_sim, 0, 50, 20, 3, exp_time=0.1, relative=True)
-    assert len(status.scan.data) == 693
-    assert status.scan.num_points == 693
+    status = scans.round_scan_fly(dev.flyer_sim, 0, 40, 5, 3, exp_time=0.05, relative=True)
+    assert len(status.scan.data) == 63
+    assert status.scan.num_points == 63
 
 
 @pytest.mark.timeout(100)
@@ -686,11 +686,9 @@ def test_disabled_device_raises_scan_request_error(client):
     bec.metadata.update({"unit_test": "test_disabled_device_raises_scan_rejection"})
     dev = bec.device_manager.devices
     dev.samx.enabled = False
-    time.sleep(1)
     with pytest.raises((AlarmBase, ScanRequestError)):
         scans.line_scan(dev.samx, 0, 1, steps=10, relative=False)
     dev.samx.enabled = True
-    time.sleep(1)
     scans.line_scan(dev.samx, 0, 1, steps=10, relative=False)
 
 
@@ -703,8 +701,8 @@ def test_context_manager_export(tmp_path, client, abort_on_ctrl_c):
     wait_for_empty_queue(bec)
     bec.metadata.update({"unit_test": "test_line_scan"})
     dev = bec.device_manager.devices
-    bec._service_config = PropertyMock()
-    bec._service_config.abort_on_ctrl_c = abort_on_ctrl_c
+    bec._client._service_config = PropertyMock()
+    bec._client._service_config.abort_on_ctrl_c = abort_on_ctrl_c
     if not abort_on_ctrl_c:
         with pytest.raises(RuntimeError):
             with scans.scan_export(os.path.join(tmp_path, "test.csv")):
@@ -729,7 +727,6 @@ def test_update_config(client):
     config = bec.config._load_config_from_file(demo_config_path)
     config.pop("samx")
     bec.config.send_config_request(action="set", config=config)
-    time.sleep(1)
     assert "samx" not in bec.device_manager.devices
     config = bec.config._load_config_from_file(demo_config_path)
     bec.config.send_config_request(action="set", config=config)

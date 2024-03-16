@@ -92,11 +92,11 @@ class BECClient(BECService, UserScriptsMixin):
     def __str__(self) -> str:
         return "BECClient\n\nTo get a list of available commands, type `bec.show_all_commands()`"
 
-    @staticmethod
-    def _reset_singleton():
-        BECClient._client = None
-        BECClient._initialized = False
-        BECClient.started = False
+    @classmethod
+    def _reset_singleton(cls):
+        cls._client = None
+        cls._initialized = False
+        cls.started = False
 
     @property
     def username(self) -> str:

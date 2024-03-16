@@ -6,8 +6,6 @@ import pytest
 from bec_lib import Alarms, MessageEndpoints, messages
 from bec_lib.redis_connector import MessageObject
 from bec_lib.tests.utils import dm, dm_with_devices
-from utils import scan_server_mock, threads_check
-
 from scan_server.scan_assembler import ScanAssembler
 from scan_server.scan_queue import (
     InstructionQueueItem,
@@ -19,6 +17,8 @@ from scan_server.scan_queue import (
     ScanQueueStatus,
 )
 from scan_server.scan_worker import ScanWorker
+
+from utils import scan_server_mock, threads_check
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=protected-access
@@ -217,6 +217,7 @@ def test_set_abort(queuemanager_mock):
         metadata={"RID": "something"},
     )
     queue_manager.add_to_queue(scan_queue="primary", msg=msg)
+    queue_manager.add_to_queue(scan_queue="primary", msg=msg)
     queue_manager.set_abort(queue="primary")
     wait_to_reach_state(queue_manager, "primary", ScanQueueStatus.PAUSED)
     assert len(queue_manager.connector.message_sent) == 2
@@ -255,6 +256,7 @@ def test_set_clear_sends_message(queuemanager_mock):
         )
 
 
+@pytest.mark.timeout(5)
 def test_set_restart(queuemanager_mock):
     queue_manager = queuemanager_mock()
     msg = messages.ScanQueueMessage(
