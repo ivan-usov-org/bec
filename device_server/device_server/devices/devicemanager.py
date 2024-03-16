@@ -56,6 +56,12 @@ class DSDevice(DeviceBase):
         self.metadata = {}
         self.initialized = False
 
+    def __getattr__(self, name: str) -> inspect.Any:
+        if hasattr(self.obj, name):
+            # compatibility with ophyd devices accessed on the client side
+            return rgetattr(self.obj, name)
+        return super().__getattr__(name)
+
     def initialize_device_buffer(self, connector):
         """initialize the device read and readback buffer on redis with a new reading"""
         dev_msg = messages.DeviceMessage(signals=self.obj.read(), metadata={})
