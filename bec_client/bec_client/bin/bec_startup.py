@@ -56,8 +56,7 @@ if __name__ == "__main__":
     if not "config" in locals():
         config = ServiceConfig()
 
-    bec = BECIPythonClient()
-    bec.initialize(config, RedisConnector)
+    bec = BECIPythonClient(config, RedisConnector)
     bec.load_high_level_interface("spec_hli")
     bec.start()
 

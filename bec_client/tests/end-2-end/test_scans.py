@@ -36,8 +36,7 @@ CONFIG_PATH = "../ci/test_config.yaml"
 @pytest.fixture(scope="function")
 def client():
     config = ServiceConfig(CONFIG_PATH)
-    bec = BECIPythonClient(forced=True)
-    bec.initialize(config, RedisConnector)
+    bec = BECIPythonClient(config, RedisConnector, forced=True)
     bec.start()
     bec.queue.request_queue_reset()
     bec.queue.request_scan_continuation()

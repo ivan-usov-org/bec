@@ -3,12 +3,9 @@ from unittest import mock
 
 import pytest
 from bec_lib import MessageEndpoints, messages
-from bec_lib.tests.utils import bec_client
+from bec_lib.tests.utils import bec_client, dm, dm_with_devices
 
-from bec_client.callbacks.move_device import (
-    LiveUpdatesReadbackProgressbar,
-    ReadbackDataMixin,
-)
+from bec_client.callbacks.move_device import LiveUpdatesReadbackProgressbar, ReadbackDataMixin
 
 
 @pytest.fixture
@@ -63,12 +60,7 @@ def test_move_callback_with_report_instruction(bec_client):
     readback = collections.deque()
     readback.extend([[-10], [0], [10]])
     report_instruction = {
-        "readback": {
-            "RID": "something",
-            "devices": ["samx"],
-            "start": [0],
-            "end": [10],
-        }
+        "readback": {"RID": "something", "devices": ["samx"], "start": [0], "end": [10]}
     }
 
     def mock_readback(*args):

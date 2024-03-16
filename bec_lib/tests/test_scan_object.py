@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 
 from bec_lib.scans import ScanObject
-from bec_lib.tests.utils import bec_client
+from bec_lib.tests.utils import bec_client, dm, dm_with_devices
 
 
 @pytest.fixture

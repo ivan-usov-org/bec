@@ -4,7 +4,7 @@ import pytest
 
 from bec_lib.device import DeviceBase
 from bec_lib.scans import DatasetIdOnHold, HideReport, Metadata, ScanDef, ScanExport, ScanGroup
-from bec_lib.tests.utils import bec_client
+from bec_lib.tests.utils import bec_client, dm, dm_with_devices
 
 # pylint: disable=no-member
 # pylint: disable=missing-function-docstring

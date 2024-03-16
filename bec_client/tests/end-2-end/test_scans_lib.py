@@ -23,17 +23,9 @@ CONFIG_PATH = "../ci/test_config.yaml"
 
 @pytest.fixture()
 def threads_check():
-    current_threads = set(
-        th
-        for th in threading.enumerate()
-        if "loguru" not in th.name and th is not threading.main_thread()
-    )
+    current_threads = set(th for th in threading.enumerate() if th is not threading.main_thread())
     yield
-    threads_after = set(
-        th
-        for th in threading.enumerate()
-        if "loguru" not in th.name and th is not threading.main_thread()
-    )
+    threads_after = set(th for th in threading.enumerate() if th is not threading.main_thread())
     additional_threads = threads_after - current_threads
     assert (
         len(additional_threads) == 0
@@ -43,14 +35,14 @@ def threads_check():
 @pytest.fixture(scope="function")
 def lib_client(threads_check):
     config = ServiceConfig(CONFIG_PATH)
-    bec = BECClient(forced=True)
-    bec.initialize(config, RedisConnector)
+    bec = BECClient(config, RedisConnector, forced=True)
     bec.start()
     bec.queue.request_queue_reset()
     bec.queue.request_scan_continuation()
     time.sleep(5)
     yield bec
     bec.shutdown()
+    bec._client._reset_singleton()
 
 
 @pytest.mark.timeout(100)

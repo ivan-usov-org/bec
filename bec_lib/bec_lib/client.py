@@ -19,7 +19,6 @@ from bec_lib.alarm_handler import AlarmHandler, Alarms
 from bec_lib.bec_service import BECService
 from bec_lib.bl_checks import BeamlineChecks
 from bec_lib.callback_handler import CallbackHandler
-from bec_lib.config_helper import ConfigHelper
 from bec_lib.dap_plugins import DAPPlugins
 from bec_lib.devicemanager import DeviceManagerBase
 from bec_lib.endpoints import MessageEndpoints
@@ -38,11 +37,54 @@ logger = bec_logger.logger
 
 
 class BECClient(BECService, UserScriptsMixin):
-    def __init__(self, forced=False) -> None:
-        pass
+    """
+    The BECClient class is the main entry point for the BEC client and all derived classes.
+    """
+
+    _client = None
+    _initialized = False
+    started = False
+
+    def __init__(
+        self,
+        config: ServiceConfig = None,
+        connector_cls: ConnectorBase = None,
+        wait_for_server=False,
+        forced=False,
+        parent=None,
+    ) -> None:
+        """
+        Initialize the BECClient
+
+        Args:
+            config (ServiceConfig, optional): The configuration for the client. Defaults to None.
+            connector_cls (ConnectorBase, optional): The connector class to use. Defaults to None.
+            wait_for_server (bool, optional): Whether to wait for the server to be available before starting. Defaults to False.
+            forced (bool, optional): Whether to force the initialization of a new client. Defaults to False.
+        """
+        if self._initialized:
+            return
+        self.__init_params = {
+            "config": config if config is not None else ServiceConfig(),
+            "connector_cls": connector_cls if connector_cls is not None else RedisConnector,
+            "wait_for_server": wait_for_server,
+        }
+        self.device_manager = None
+        self.queue = None
+        self.alarm_handler = None
+        self.config = None
+        self.history = None
+        self.live_updates = None
+        self.dap = None
+        self.bl_checks = None
+        self._hli_funcs = {}
+        self.metadata = {}
+        self.callbacks = None
+        self._parent = parent if parent is not None else self
+        self._initialized = True
 
     def __new__(cls, *args, forced=False, **kwargs):
-        if not hasattr(cls, "_client") or forced or cls._client is None:
+        if forced or cls._client is None:
             cls._client = super(BECClient, cls).__new__(cls)
             cls._initialized = False
         return cls._client
@@ -50,45 +92,11 @@ class BECClient(BECService, UserScriptsMixin):
     def __str__(self) -> str:
         return "BECClient\n\nTo get a list of available commands, type `bec.show_all_commands()`"
 
-    def initialize(
-        self,
-        config: ServiceConfig = None,
-        connector_cls: ConnectorBase = None,
-        wait_for_server=False,
-    ) -> None:
-        """
-        Initialize the client.
-
-        Args:
-            config (ServiceConfig, optional): ServiceConfig object. Defaults to None. If None, default config will be used.
-            connector_cls (ConnectorBase, optional): Connector class. Defaults to None. If None, RedisConnector will be used.
-            wait_for_server (bool, optional): Wait for BEC server to be available. Defaults to False.
-        """
-        if not config:
-            config = ServiceConfig()
-
-        if not connector_cls:
-            connector_cls = RedisConnector
-        super().__init__(config, connector_cls, wait_for_server=wait_for_server)
-        self._configure_logger()
-        # pylint: disable=attribute-defined-outside-init
-        self.device_manager = None
-        self.queue = None
-        self.alarm_handler = None
-        self._load_scans()
-        self._hli_funcs = {}
-        self._initialized = True
-        self.config = None
-        builtins.bec = self
-        self.metadata = {}
-        # self.logbook = LogbookConnector(self.connector)
-        self._update_username()
-        self.history = None
-        self.callbacks = CallbackHandler()
-        self.live_updates = None
-        self.dap = None
-        self.bl_checks = None
-        self.started = False
+    @staticmethod
+    def _reset_singleton():
+        BECClient._client = None
+        BECClient._initialized = False
+        BECClient.started = False
 
     @property
     def username(self) -> str:
@@ -105,25 +113,32 @@ class BECClient(BECService, UserScriptsMixin):
 
     def start(self):
         """start the client"""
-        if not self._initialized:
-            logger.warning(
-                "Client has not been initialized with 'client.initialize(config, connector_cls)'."
-                " Trying to initialize with default values."
-            )
-            self.initialize()
-
+        if self.started:
+            return
+        config = self.__init_params["config"]
+        connector_cls = self.__init_params["connector_cls"]
+        wait_for_server = self.__init_params["wait_for_server"]
+        super().__init__(config, connector_cls, wait_for_server=wait_for_server)
+        builtins.bec = self._parent
+        self._start_services()
         logger.info("Starting new client")
+        self.started = True
+
+    def _start_services(self):
+        self._configure_logger()
+        self._load_scans()
+        # self.logbook = LogbookConnector(self.connector)
+        self._update_username()
+        self.callbacks = CallbackHandler()
         self._start_device_manager()
         self._start_scan_queue()
         self._start_alarm_handler()
-
         self.load_all_user_scripts()
         self.config = self.device_manager.config_helper
         self.history = self.queue.queue_storage.storage
         self.dap = DAPPlugins(self)
         self.bl_checks = BeamlineChecks(self)
         self.bl_checks.start()
-        self.started = True
 
     def alarms(self, severity=Alarms.WARNING):
         """get the next alarm with at least the specified severity"""
@@ -154,7 +169,7 @@ class BECClient(BECService, UserScriptsMixin):
             self.connector.lpush(MessageEndpoints.pre_scan_macros(), msg)
 
     def _load_scans(self):
-        self.scans = Scans(self)
+        self.scans = Scans(self._parent)
         builtins.scans = self.scans
 
     def load_high_level_interface(self, module_name):
@@ -193,7 +208,8 @@ class BECClient(BECService, UserScriptsMixin):
 
     def shutdown(self):
         """shutdown the client and all its components"""
-        super().shutdown()
+        if self.started:
+            super().shutdown()
         if self.device_manager:
             self.device_manager.shutdown()
         if self.queue:

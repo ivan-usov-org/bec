@@ -10,9 +10,13 @@ class DAPServer(BECClient):
     """Data processing server class."""
 
     def __init__(
-        self, config: ServiceConfig, connector_cls: ConnectorBase, provided_services: list
+        self,
+        config: ServiceConfig,
+        connector_cls: ConnectorBase,
+        provided_services: list,
+        forced=True,
     ) -> None:
-        super().__init__()
+        super().__init__(config=config, connector_cls=connector_cls, forced=forced)
         self.config = config
         self.connector_cls = connector_cls
         self._dap_service_manager = None
@@ -27,7 +31,6 @@ class DAPServer(BECClient):
     def start(self):
         if not self._provided_services:
             raise ValueError("No services provided")
-        self.initialize(self.config, self.connector_cls, wait_for_server=True)
         super().start()
         self._start_dap_serivce()
         bec_logger.level = bec_logger.LOGLEVEL.INFO

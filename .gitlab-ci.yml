@@ -208,7 +208,6 @@ end-2-end:
     - docker cp scan_bundler:/code/bec/scan_bundler/ScanBundler.log $CI_PROJECT_DIR/ScanBundler.log
     - docker cp device_server:/code/bec/device_server/DeviceServer.log $CI_PROJECT_DIR/DeviceServer.log
     - docker cp file_writer:/code/bec/file_writer/FileWriterManager.log $CI_PROJECT_DIR/FileWriterManager.log
-    - docker cp end2end_client:/code/bec/bec_client/BECIPythonClient.log $CI_PROJECT_DIR/BECIPythonClient.log
     - docker cp end2end_client:/code/bec/bec_client/BECClient.log $CI_PROJECT_DIR/BECClient.log
     - docker cp scihub:/code/bec/scihub/SciHub.log $CI_PROJECT_DIR/SciHub.log
     - docker cp data_processing:/code/bec/data_processing/DAPServer.log $CI_PROJECT_DIR/DAPServer.log
@@ -337,7 +336,6 @@ end-2-end-conda-310:
       - ScanBundler.log
       - DeviceServer.log
       - BECClient.log
-      - BECIPythonClient.log
       - FileWriterManager.log
       - SciHub.log
       - DAPServer.log

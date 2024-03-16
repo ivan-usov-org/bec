@@ -1,11 +1,11 @@
 from unittest import mock
 
 import pytest
-
-from bec_client.callbacks.ipython_live_updates import IPythonLiveUpdates
 from bec_lib import messages
 from bec_lib.queue_items import QueueItem
-from bec_lib.tests.utils import bec_client
+from bec_lib.tests.utils import bec_client, dm, dm_with_devices
+
+from bec_client.callbacks.ipython_live_updates import IPythonLiveUpdates
 
 
 @pytest.mark.timeout(20)

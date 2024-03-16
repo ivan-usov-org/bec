@@ -10,9 +10,10 @@ import uuid
 from typing import TYPE_CHECKING
 from unittest import mock
 
-import bec_lib
 import pytest
 import yaml
+
+import bec_lib
 from bec_lib import BECClient, messages
 from bec_lib.connector import ConnectorBase
 from bec_lib.devicemanager import DeviceManagerBase
@@ -111,9 +112,8 @@ class ClientMock(BECClient):
         self.scans = ScansMock(self)
         builtins.scans = self.scans
 
-    def start(self):
-        self._start_scan_queue()
-        self._start_alarm_handler()
+    # def _start_services(self):
+    #     pass
 
     def _start_metrics_emitter(self):
         pass
@@ -492,24 +492,19 @@ class DMClientMock(DeviceManagerBase):
 
 
 @pytest.fixture()
-def bec_client():
-    client = ClientMock()
-    client.initialize(
+def bec_client(dm_with_devices):
+    client = ClientMock(
         ServiceConfig(redis={"host": "host", "port": 123}, scibec={"host": "host", "port": 123}),
         ConnectorMock,
+        wait_for_server=False,
     )
-    device_manager = DMClientMock(client)
-    if "test_session" not in builtins.__dict__:
-        with open(f"{dir_path}/tests/test_config.yaml", "r", encoding="utf-8") as f:
-            builtins.__dict__["test_session"] = create_session_from_config(yaml.safe_load(f))
-    device_manager._session = builtins.__dict__["test_session"]
-    client.wait_for_service = lambda service_name: None
-    device_manager._load_session()
+    client.start()
+    device_manager = dm_with_devices
     for name, dev in device_manager.devices.items():
         dev._info["hints"] = {"fields": [name]}
     client.device_manager = device_manager
     yield client
-    ClientMock._client = None
+    client._reset_singleton()
     device_manager.devices.flush()
 
 

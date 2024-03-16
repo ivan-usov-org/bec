@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import threading
 import time
+from typing import Iterable
 
 import IPython
 from bec_lib import ServiceConfig, bec_logger
@@ -18,36 +19,45 @@ from .signals import ScanInterruption, SigintHandler
 logger = bec_logger.logger
 
 
-class BECIPythonClient(BECClient):
-    def __init__(self, forced=False) -> None:
-        pass
-
-    def __str__(self) -> str:
-        return "BECClient\n\nTo get a list of available commands, type `bec.show_all_commands()`"
-
-    def initialize(
+class BECIPythonClient:
+    def __init__(
         self,
         config: ServiceConfig = None,
         connector_cls: ConnectorBase = None,
         wait_for_server=True,
-    ):
-        """initialize the BEC client"""
-        super().initialize(config, connector_cls, wait_for_server=wait_for_server)
-        # pylint: disable=attribute-defined-outside-init
-        self._sighandler = SigintHandler(self)
-        self._beamline_mixin = BeamlineMixin()
+        forced=False,
+    ) -> None:
+        self._client = BECClient(config, connector_cls, wait_for_server, forced, parent=self)
         self._ip = None
-        self._exit_event = threading.Event()
+        self.started = False
+        self._sighandler = None
+        self._beamline_mixin = None
+        self._exit_event = None
         self._exit_handler_thread = None
-        self._hli_funcs = {}
-        self.live_updates = IPythonLiveUpdates(self)
+        self.live_updates = None
         self.fig = None
+
+    def __getattr__(self, name):
+        return getattr(self._client, name)
+
+    def __dir__(self) -> Iterable[str]:
+        return dir(self._client) + dir(self.__class__)
+
+    def __str__(self) -> str:
+        return "BECIPythonClient\n\nTo get a list of available commands, type `bec.show_all_commands()`"
 
     def start(self):
         """start the client"""
-        super().start()
+        if self.started:
+            return
+        self._client.start()
+        self._sighandler = SigintHandler(self)
+        self._beamline_mixin = BeamlineMixin()
+        self._exit_event = threading.Event()
+        self.live_updates = IPythonLiveUpdates(self)
         self._start_exit_handler()
         self._configure_ipython()
+        self.started = True
 
     def bl_show_all(self):
         self._beamline_mixin.bl_show_all()
@@ -61,7 +71,7 @@ class BECIPythonClient(BECClient):
         if self._ip is None:
             return
 
-        self._ip.prompts = BECClientPrompt(ip=self._ip, client=self, username="demo")
+        self._ip.prompts = BECClientPrompt(ip=self._ip, client=self._client, username="demo")
         self._load_magics()
         self._ip.events.register("post_run_cell", log_console)
         self._ip.set_custom_exc((Exception,), _ip_exception_handler)  # register your handler
@@ -93,14 +103,14 @@ class BECIPythonClient(BECClient):
             self._exit_handler_thread.join()
 
     def _load_magics(self):
-        magics = BECMagics(self._ip, self)
+        magics = BECMagics(self._ip, self._client)
         self._ip.register_magics(magics)
 
     def shutdown(self, shutdown_exit_thread=True):
         """shutdown the client and all its components"""
         if self.fig:
             self.fig.close()
-        super().shutdown()
+        self._client.shutdown()
         if shutdown_exit_thread:
             self._shutdown_exit_handler()
 

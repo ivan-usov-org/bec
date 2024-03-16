@@ -7,7 +7,7 @@ import numpy as np
 import pytest
 from bec_lib import messages
 from bec_lib.scan_items import ScanItem
-from bec_lib.tests.utils import bec_client
+from bec_lib.tests.utils import bec_client, dm, dm_with_devices
 
 from bec_client.callbacks.live_table import LiveUpdatesTable, sort_devices
 from bec_client.callbacks.utils import ScanRequestMixin
@@ -16,7 +16,6 @@ from bec_client.callbacks.utils import ScanRequestMixin
 @pytest.fixture
 def client_with_grid_scan(bec_client):
     client = bec_client
-    client.start()
     request_msg = messages.ScanQueueMessage(
         scan_type="grid_scan",
         parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
