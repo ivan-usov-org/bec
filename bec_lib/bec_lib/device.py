@@ -212,7 +212,7 @@ class DeviceBase:
 
     def get_device_config(self):
         """get the device config for this device"""
-        return self._config["deviceConfig"]
+        return self.root._config["deviceConfig"]
 
     @property
     def enabled(self):
@@ -437,19 +437,19 @@ class DeviceBase:
     @typechecked
     def set_device_config(self, val: dict):
         """set the device config for this device"""
-        self._config["deviceConfig"].update(val)
+        self.root._config["deviceConfig"].update(val)
         return self.root.parent.config_helper.send_config_request(
             action="update", config={self.name: {"deviceConfig": self._config["deviceConfig"]}}
         )
 
     def get_device_tags(self) -> list:
         """get the device tags for this device"""
-        return self._config.get("deviceTags", [])
+        return self.root._config.get("deviceTags", [])
 
     @typechecked
     def set_device_tags(self, val: list):
         """set the device tags for this device"""
-        self._config["deviceTags"] = val
+        self.root._config["deviceTags"] = val
         return self.root.parent.config_helper.send_config_request(
             action="update", config={self.name: {"deviceTags": self._config["deviceTags"]}}
         )
@@ -457,20 +457,20 @@ class DeviceBase:
     @typechecked
     def add_device_tag(self, val: str):
         """add a device tag for this device"""
-        if val in self._config["deviceTags"]:
+        if val in self.root._config["deviceTags"]:
             return None
-        self._config["deviceTags"].append(val)
+        self.root._config["deviceTags"].append(val)
         return self.root.parent.config_helper.send_config_request(
-            action="update", config={self.name: {"deviceTags": self._config["deviceTags"]}}
+            action="update", config={self.name: {"deviceTags": self.root._config["deviceTags"]}}
         )
 
     def remove_device_tag(self, val: str):
         """remove a device tag for this device"""
-        if val not in self._config["deviceTags"]:
+        if val not in self.root._config["deviceTags"]:
             return None
-        self._config["deviceTags"].remove(val)
+        self.root._config["deviceTags"].remove(val)
         return self.root.parent.config_helper.send_config_request(
-            action="update", config={self.name: {"deviceTags": self._config["deviceTags"]}}
+            action="update", config={self.name: {"deviceTags": self.root._config["deviceTags"]}}
         )
 
     @property
@@ -481,14 +481,14 @@ class DeviceBase:
     @property
     def readout_priority(self) -> ReadoutPriority:
         """get the readout priority for this device"""
-        return ReadoutPriority(self._config["readoutPriority"])
+        return ReadoutPriority(self.root._config["readoutPriority"])
 
     @readout_priority.setter
     def readout_priority(self, val: ReadoutPriority):
         """set the readout priority for this device"""
         if not isinstance(val, ReadoutPriority):
             val = ReadoutPriority(val)
-        self._config["readoutPriority"] = val
+        self.root._config["readoutPriority"] = val
         return self.root.parent.config_helper.send_config_request(
             action="update", config={self.name: {"readoutPriority": val}}
         )
@@ -496,22 +496,22 @@ class DeviceBase:
     @property
     def on_failure(self) -> OnFailure:
         """get the failure behaviour for this device"""
-        return OnFailure(self._config.get("onFailure", "retry"))
+        return OnFailure(self.root._config("onFailure", "retry"))
 
     @on_failure.setter
     def on_failure(self, val: OnFailure):
         """set the failure behaviour for this device"""
         if not isinstance(val, OnFailure):
             val = OnFailure(val)
-        self._config["onFailure"] = val
+        self.root._config["onFailure"] = val
         return self.root.parent.config_helper.send_config_request(
-            action="update", config={self.name: {"onFailure": self._config["onFailure"]}}
+            action="update", config={self.name: {"onFailure": self.root._config["onFailure"]}}
         )
 
     @property
     def read_only(self):
         """Whether or not the device can be set"""
-        return self._config.get("readOnly", False)
+        return self.root._config.get("readOnly", False)
 
     @read_only.setter
     def read_only(self, value: bool):
@@ -519,12 +519,12 @@ class DeviceBase:
         self.root.parent.config_helper.send_config_request(
             action="update", config={self.name: {"readOnly": value}}
         )
-        self._config["readOnly"] = value
+        self.root._config["readOnly"] = value
 
     @property
     def software_trigger(self):
         """Whether or not the device can be software triggered"""
-        return self._config.get("softwareTrigger", False)
+        return self.root._config.get("softwareTrigger", False)
 
     @software_trigger.setter
     def software_trigger(self, value: bool):
@@ -532,12 +532,12 @@ class DeviceBase:
         self.root.parent.config_helper.send_config_request(
             action="update", config={self.name: {"softwareTrigger": value}}
         )
-        self._config["softwareTrigger"] = value
+        self.root._config["softwareTrigger"] = value
 
     @property
     def user_parameter(self) -> dict:
         """get the user parameter for this device"""
-        return self._config.get("userParameter")
+        return self.root._config.get("userParameter")
 
     @typechecked
     def set_user_parameter(self, val: dict):

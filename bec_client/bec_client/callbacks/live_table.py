@@ -20,7 +20,8 @@ logger = bec_logger.logger
 def sort_devices(devices, scan_devices) -> list:
     """sort the devices to ensure that the table starts with scan motors"""
     for scan_dev in list(scan_devices)[::-1]:
-        devices.remove(scan_dev)
+        root_dev = scan_dev.split(".")[0]
+        devices.remove(root_dev)
         devices.insert(0, scan_dev)
     return devices
 
@@ -122,6 +123,7 @@ class LiveUpdatesTable(LiveUpdatesBase):
         """extract interesting devices from a scan request"""
         device_manager = self.bec.device_manager
         scan_devices = data.metadata.get("scan_report_devices")
+        scan_devices = [dev.root for dev in scan_devices if dev in device_manager.devices]
         monitored_devices = device_manager.devices.monitored_devices(
             [device_manager.devices[dev] for dev in scan_devices]
         )

@@ -106,7 +106,7 @@ class DeviceContainer(dict):
         """
         val = ReadoutPriority(readout_priority)
         # pylint: disable=protected-access
-        return [dev for _, dev in self.items() if dev._config["readoutPriority"] == val]
+        return [dev for _, dev in self.items() if dev.root._config["readoutPriority"] == val]
 
     def _filter_devices(
         self, readout_priority: ReadoutPriority, readout_priority_mod: dict, devices: list = None
@@ -151,11 +151,11 @@ class DeviceContainer(dict):
                 f"Devices {continuous_intersection} cannot be continuous and monitored/baseline/on_request at the same time"
             )
 
-        devices = [self[dev] if isinstance(dev, str) else dev for dev in devices]
+        devices = [self[dev].root if isinstance(dev, str) else dev.root for dev in devices]
 
         devices.extend(self.readout_priority(readout_priority))
         devices.extend(
-            [self[dev] for dev in readout_priority_mod.get(readout_priority.name.lower(), [])]
+            [self[dev].root for dev in readout_priority_mod.get(readout_priority.name.lower(), [])]
         )
 
         excluded_readout_priority = [
@@ -163,7 +163,9 @@ class DeviceContainer(dict):
         ]
         excluded_devices = self.disabled_devices
         for priority in excluded_readout_priority:
-            excluded_devices.extend(self.get(dev) for dev in readout_priority_mod.get(priority, []))
+            excluded_devices.extend(
+                self[dev].root for dev in readout_priority_mod.get(priority, [])
+            )
 
         return [dev for dev in set(devices) if dev not in excluded_devices]
 
@@ -194,9 +196,9 @@ class DeviceContainer(dict):
             for scan_motor in scan_motors:
                 if scan_motor not in devices:
                     if isinstance(scan_motor, DeviceBase):
-                        devices.append(scan_motor)
+                        devices.append(scan_motor.root)
                     else:
-                        devices.append(self.get(scan_motor))
+                        devices.append(self.get(scan_motor).root)
 
         return self._filter_devices(ReadoutPriority.MONITORED, readout_priority, devices)
 

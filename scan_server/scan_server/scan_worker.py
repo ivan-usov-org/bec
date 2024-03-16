@@ -135,7 +135,9 @@ class ScanWorker(threading.Thread):
             instr (DeviceInstructionMessage): Device instruction received from the scan assembler
 
         """
-        devices = [dev.name for dev in self.device_manager.devices.get_software_triggered_devices()]
+        devices = [
+            dev.root.name for dev in self.device_manager.devices.get_software_triggered_devices()
+        ]
         self._last_trigger = instr
         self.device_manager.connector.send(
             MessageEndpoints.device_instructions(),
@@ -175,7 +177,7 @@ class ScanWorker(threading.Thread):
         devices = instr.content.get("device")
         if devices is None:
             devices = [
-                dev.name
+                dev.root.name
                 for dev in self.device_manager.devices.monitored_devices(
                     readout_priority=self.readout_priority
                 )
@@ -219,7 +221,7 @@ class ScanWorker(threading.Thread):
 
         """
         if instr.content.get("device") is None:
-            devices = [dev.name for dev in self.device_manager.devices.enabled_devices]
+            devices = [dev.root.name for dev in self.device_manager.devices.enabled_devices]
         else:
             devices = instr.content.get("device")
         if not isinstance(devices, list):
@@ -244,7 +246,7 @@ class ScanWorker(threading.Thread):
 
         """
         baseline_devices = [
-            dev.name
+            dev.root.name
             for dev in self.device_manager.devices.baseline_devices(
                 readout_priority=self.readout_priority
             )
@@ -264,7 +266,7 @@ class ScanWorker(threading.Thread):
         Args:
             instr (DeviceInstructionMessage): Device instruction received from the scan assembler
         """
-        devices = [dev.name for dev in self.device_manager.devices.enabled_devices]
+        devices = [dev.root.name for dev in self.device_manager.devices.enabled_devices]
         self.device_manager.connector.send(
             MessageEndpoints.device_instructions(),
             messages.DeviceInstructionMessage(
@@ -326,12 +328,12 @@ class ScanWorker(threading.Thread):
 
         """
         async_devices = self.device_manager.devices.async_devices()
-        async_device_names = [dev.name for dev in async_devices]
+        async_device_names = [dev.root.name for dev in async_devices]
         excluded_devices = async_devices
         excluded_devices.extend(self.device_manager.devices.on_request_devices())
         excluded_devices.extend(self.device_manager.devices.continuous_devices())
         stage_device_names_without_async = [
-            dev.name
+            dev.root.name
             for dev in self.device_manager.devices.enabled_devices
             if dev not in excluded_devices
         ]
@@ -376,7 +378,7 @@ class ScanWorker(threading.Thread):
 
         """
         if not devices:
-            devices = [dev.name for dev in self.device_manager.devices.enabled_devices]
+            devices = [dev.root.name for dev in self.device_manager.devices.enabled_devices]
         parameter = {} if not instr else instr.content["parameter"]
         metadata = {} if not instr else instr.metadata
         self._staged_devices.difference_update(devices)
@@ -493,7 +495,7 @@ class ScanWorker(threading.Thread):
         if not wait_group or wait_group not in self._groups:
             return
 
-        group_devices = [dev.name for dev in self._get_devices_from_instruction(instr)]
+        group_devices = [dev.full_name for dev in self._get_devices_from_instruction(instr)]
         wait_group_devices = [
             (dev_name, DIID)
             for dev_name, DIID in self._groups[wait_group].items()
@@ -527,7 +529,7 @@ class ScanWorker(threading.Thread):
         if not wait_group or wait_group not in self._groups:
             return
 
-        group_devices = [dev.name for dev in self._get_devices_from_instruction(instr)]
+        group_devices = [dev.full_name for dev in self._get_devices_from_instruction(instr)]
         wait_group_devices = [
             (dev_name, DIID)
             for dev_name, DIID in self._groups[wait_group].items()
@@ -583,7 +585,9 @@ class ScanWorker(threading.Thread):
             "frames_per_trigger", 1
         )
         time.sleep(trigger_time)
-        devices = [dev.name for dev in self.device_manager.devices.get_software_triggered_devices()]
+        devices = [
+            dev.full_name for dev in self.device_manager.devices.get_software_triggered_devices()
+        ]
         metadata = self._last_trigger.metadata
         self._wait_for_status(devices, metadata)
 
@@ -786,7 +790,7 @@ class ScanWorker(threading.Thread):
 
         self._add_wait_group(instr)
 
-        logger.debug(f"Device instruction: {instr}")
+        logger.info(f"Device instruction: {instr}")
         self._check_for_interruption()
 
         if action == "open_scan":
