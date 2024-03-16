@@ -9,15 +9,7 @@ import pytest
 
 from bec_client import BECIPythonClient
 from bec_client.callbacks.utils import ScanRequestError
-from bec_lib import (
-    BECClient,
-    MessageEndpoints,
-    RedisConnector,
-    ServiceConfig,
-    bec_logger,
-    configs,
-    messages,
-)
+from bec_lib import MessageEndpoints, RedisConnector, ServiceConfig, bec_logger, configs
 from bec_lib.alarm_handler import AlarmBase
 from bec_lib.bec_errors import ScanAbortion, ScanInterruption
 from bec_lib.tests.utils import wait_for_empty_queue
