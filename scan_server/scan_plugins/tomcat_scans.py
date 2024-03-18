@@ -16,7 +16,7 @@ class AeroSingleScan(FlyScanBase):
     arg_bundle_size = {"bundle": len(arg_input), "min": None, "max": None}
 
     def __init__(self, *args, parameter: dict = None, **kwargs):
-        """Performs a single line scan with PSO output and data collection
+        """Performs a single line scan with PSO output and data collection.
 
         Examples:
             >>> scans.aero_single_scan(startpos=42, scanrange=2*10+3*180, psodist=[10, 180, 0.01, 180, 0.01, 180])
@@ -29,25 +29,34 @@ class AeroSingleScan(FlyScanBase):
 
         self.scanStart = self.caller_kwargs.get("startpos")
         self.scanEnd = self.scanStart + self.caller_kwargs.get("scanrange")
-        self.scanPsoDist = self.caller_kwargs.get("psodist")
+        self.psoBounds = self.caller_kwargs.get("psodist")
         # self.scanDaqPts  = self.caller_kwargs.get("daqpoints")
 
     def pre_scan(self):
+        # Move to start position
         st = yield from self.stubs.send_rpc_and_wait("es1_roty", "move", self.scanStart)
         st.wait()
         yield from self.stubs.pre_scan()
 
     def scan_core(self):
+        # Configure PSO, DDC and motor
+        yield from self.stubs.send_rpc_and_wait(
+            "es1_roty",
+            "configure",
+            {"velocity": self.scanTra, "acceleration": self.scanTra / self.scanAcc},
+        )
+        yield from self.stubs.send_rpc_and_wait(
+            "es1_psod", "configure", {"distance": self.psoBounds, "wmode": "toggle"}
+        )
+        yield from self.stubs.send_rpc_and_wait(
+            "es1_ddaq",
+            "configure",
+            {"npoints": self.scanExpNum},
+        )
         # DAQ with real trigger
         # yield from self.stubs.send_rpc_and_wait(
-        #    "es1_ddaq", "configure", {"npoints": self.scanExpNum, "trigger": "HSINP0_RISE"}
+        #    "es1_ddaq", "configure", {"npoints": self.scanExpNum, "trigger": "HSINP0_RISE"},
         # )
-
-        # Refresh the PSO distance array
-        st = yield from self.stubs.send_rpc_and_wait(
-            "es1_psod", "dstDistanceArr.set", self.scanPsoDist
-        )
-        st.wait()
 
         # Kick off PSO and DDC
         st = yield from self.stubs.send_rpc_and_wait("es1_psod", "kickoff")
@@ -207,20 +216,14 @@ class AeroSequenceScan(FlyScanBase):
                 yield from self.stubs.send_rpc_and_wait(
                     "es1_roty",
                     "configure",
-                    {
-                        "velocity": self.scanVel,
-                        "acceleration": self.scanVel / self.scanAcc,
-                    },
+                    {"velocity": self.scanVel, "acceleration": self.scanVel / self.scanAcc},
                 )
                 st = yield from self.stubs.send_rpc_and_wait("es1_roty", "move", self.PosEnd)
                 st.wait()
                 yield from self.stubs.send_rpc_and_wait(
                     "es1_roty",
                     "configure",
-                    {
-                        "velocity": self.scanTra,
-                        "acceleration": self.scanTra / self.scanAcc,
-                    },
+                    {"velocity": self.scanTra, "acceleration": self.scanTra / self.scanAcc},
                 )
                 st = yield from self.stubs.send_rpc_and_wait("es1_roty", "move", self.PosStart)
                 st.wait()
@@ -315,6 +318,7 @@ class AeroScriptedScan(FlyScanBase):
         with open(self.filename) as f:
             templatetext = f.read()
 
+        # Substitute jinja template
         import jinja2
 
         tm = jinja2.Template(templatetext)
@@ -330,11 +334,7 @@ class AeroScriptedScan(FlyScanBase):
         yield from self.stubs.send_rpc_and_wait(
             "es1_aa1Tasks",
             "configure",
-            {
-                "text": self.scripttext,
-                "filename": "becExec.ascript",
-                "taskIndex": self.taskIndex,
-            },
+            {"text": self.scripttext, "filename": "becExec.ascript", "taskIndex": self.taskIndex},
         )
 
         # Kickoff
@@ -345,18 +345,11 @@ class AeroScriptedScan(FlyScanBase):
         # Complete
         yield from self.stubs.complete(device="es1_aa1Tasks")
 
-        # Collect is up to implementation
+        # Collect - up to implementation
 
         t_end = time.time()
         t_elapsed = t_end - t_start
         print(f"Elapsed scan time: {t_elapsed}")
-        print("Scan done\n\n")
-
-    def finalize(self):
-        """Complete shouldnt be called here..."""
-        print("Finalize placeholder")
-        yield from self.return_to_start()
-        yield from self.stubs.wait(wait_type="read", group="primary", wait_group="readout_primary")
 
     def cleanup(self):
         """Set scan progress to 1 to finish the scan"""
