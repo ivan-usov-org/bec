@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.18.0 (2024-03-18)
+
+### Feature
+
+* **device_server:** Simplified access to ophyd objects in the device server ([`9af29e4`](https://gitlab.psi.ch/bec/bec/-/commit/9af29e48668d91a1e79da6c0c70608a24ad1cddc))
+
 ## v1.17.0 (2024-03-15)
 
 ### Feature
