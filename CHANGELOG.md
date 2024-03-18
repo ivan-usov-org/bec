@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v1.18.1 (2024-03-18)
+
+### Fix
+
+* **bec_lib:** Added pyepics compliant wait function to put ([`eb15e3a`](https://gitlab.psi.ch/bec/bec/-/commit/eb15e3ae493d5046c20965846c702f6acfb055dc))
+* Unified access to limits; closes #233 ([`648b720`](https://gitlab.psi.ch/bec/bec/-/commit/648b720a9828c7ed6d7ac3c3750b80d18b8d0e24))
+
 ## v1.18.0 (2024-03-18)
 
 ### Feature
