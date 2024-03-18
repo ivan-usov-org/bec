@@ -30,7 +30,10 @@ class AeroSingleScan(FlyScanBase):
         self.scanStart = self.caller_kwargs.get("startpos")
         self.scanEnd = self.scanStart + self.caller_kwargs.get("scanrange")
         self.psoBounds = self.caller_kwargs.get("psodist")
-        # self.scanDaqPts  = self.caller_kwargs.get("daqpoints")
+        self.scanVel = self.caller_kwargs.get("velocity", 30)
+        self.scanTra = self.caller_kwargs.get("travel", 80)
+        self.scanAcc = self.caller_kwargs.get("acceleration", 500)
+        self.scanExpNum  = self.caller_kwargs.get("daqpoints", 5000)
 
     def pre_scan(self):
         # Move to start position
@@ -43,7 +46,7 @@ class AeroSingleScan(FlyScanBase):
         yield from self.stubs.send_rpc_and_wait(
             "es1_roty",
             "configure",
-            {"velocity": self.scanTra, "acceleration": self.scanTra / self.scanAcc},
+            {"velocity": self.scanVel, "acceleration": self.scanVel / self.scanAcc},
         )
         yield from self.stubs.send_rpc_and_wait(
             "es1_psod", "configure", {"distance": self.psoBounds, "wmode": "toggle"}
