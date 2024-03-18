@@ -121,13 +121,25 @@ class QueueStorage:
         self.queue_history = None
 
     def _update_queue_history(self):
+        """get the queue history from redis"""
         self.queue_history = self.scan_manager.connector.lrange(
             MessageEndpoints.scan_queue_history(), 0, 5
         )
 
+    def _update_current_scan_queue(self):
+        """get the current scan queue from redis"""
+        msg = self.scan_manager.connector.get(MessageEndpoints.scan_queue_status())
+        if msg:
+            self.current_scan_queue = msg.content["queue"]
+
+    def _update_queue(self):
+        self._update_current_scan_queue()
+        self._update_queue_history()
+
     def describe_queue(self):
         """create a rich.table description of the current scan queue"""
         queue_tables = []
+        self._update_queue()
         console = Console()
         for queue_name, scan_queue in self.current_scan_queue.items():
             table = Table(title=f"{queue_name} queue / {scan_queue.get('status')}")
