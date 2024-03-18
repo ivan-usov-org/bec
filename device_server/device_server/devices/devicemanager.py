@@ -383,6 +383,16 @@ class DeviceManagerDS(DeviceManagerBase):
         if hasattr(obj, "motor_is_moving"):
             obj.motor_is_moving.subscribe(self._obj_callback_is_moving, run=opaas_obj.enabled)
 
+        if hasattr(obj, "component_names"):
+            for component_name in obj.component_names:
+                component = getattr(obj, component_name)
+                if not getattr(component, "_auto_monitor", False):
+                    continue
+                if component.kind in (ophyd.Kind.normal, ophyd.Kind.hinted):
+                    component.subscribe(self._obj_callback_readback, run=False)
+                elif component.kind == ophyd.Kind.config:
+                    component.subscribe(self._obj_callback_configuration, run=False)
+
         return opaas_obj
 
     def initialize_enabled_device(self, opaas_obj):
@@ -452,14 +462,28 @@ class DeviceManagerDS(DeviceManagerBase):
         self.connector.delete(MessageEndpoints.device_info(obj.name), pipe)
 
     def _obj_callback_readback(self, *_args, obj: OphydObject, **kwargs):
-        if obj.connected:
-            name = obj.root.name
-            signals = obj.read()
-            metadata = self.devices.get(obj.root.name).metadata
-            dev_msg = messages.DeviceMessage(signals=signals, metadata=metadata)
-            pipe = self.connector.pipeline()
-            self.connector.set_and_publish(MessageEndpoints.device_readback(name), dev_msg, pipe)
-            pipe.execute()
+        if not obj.connected:
+            return
+        name = obj.root.name
+        signals = obj.read()
+        metadata = self.devices.get(obj.root.name).metadata
+        dev_msg = messages.DeviceMessage(signals=signals, metadata=metadata)
+        pipe = self.connector.pipeline()
+        self.connector.set_and_publish(MessageEndpoints.device_readback(name), dev_msg, pipe)
+        pipe.execute()
+
+    def _obj_callback_configuration(self, *_args, obj: OphydObject, **kwargs):
+        if not obj.connected:
+            return
+        name = obj.root.name
+        signals = obj.read_configuration()
+        metadata = self.devices.get(obj.root.name).metadata
+        dev_msg = messages.DeviceMessage(signals=signals, metadata=metadata)
+        pipe = self.connector.pipeline()
+        self.connector.set_and_publish(
+            MessageEndpoints.device_read_configuration(name), dev_msg, pipe
+        )
+        pipe.execute()
 
     @typechecked
     def _obj_callback_monitor(self, *_args, obj: OphydObject, value: np.ndarray, **kwargs):
