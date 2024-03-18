@@ -682,11 +682,23 @@ class OphydInterfaceBase(DeviceBase):
             return None
         return ret.get(self._signal_info.get("obj_name"), {}).get("value")
 
-    @rpc
-    def put(self, value: Any):
+    def put(self, value: Any, wait=False):
         """
-        Puts the device value.
+        Puts the device value. In contrast to the set method, the put method does not
+        return a status object and does not wait for the device to settle. However,
+        the put method can be converted into a blocking call by setting the wait argument to True,
+        which will be equivalent to the set method + wait.
+
+        Use the put method if you want to update a value without waiting for the device to settle.
+        Use the set method if you want to update a value and wait for the device to settle.
+
+        Args:
+            value (Any): The value to put.
+            wait (bool, optional): If True, the method waits for the device to settle. Defaults to False.
         """
+        if wait:
+            return self.set(value).wait()
+        return self._run(value, fcn=self.put)
 
 
 class Device(OphydInterfaceBase):
@@ -759,11 +771,15 @@ class Device(OphydInterfaceBase):
 
 class AdjustableMixin:
     @rpc
-    def set(self, val):
+    def set(self, val: Any) -> Status:
         """
-        Sets the device value.
+        Sets the device value. This method returns a status object that can be used to wait for the device to settle.
+        In contrast to the put method, the set method can be made into a blocking call by calling the wait method on the
+        returned status object.
+
+        Args:
+            val (Any): The value to set.
         """
-        pass
 
     @property
     def limits(self):

@@ -177,6 +177,24 @@ def test_run_rpc_call(dev):
         mock_rpc.assert_called_once()
 
 
+def test_set_calls_rpc(dev):
+    with mock.patch.object(dev.samx.setpoint, "_run_rpc_call") as mock_rpc:
+        dev.samx.setpoint.set(1)
+        mock_rpc.assert_called_once_with("samx", "setpoint.set", 1)
+
+
+def test_put_calls_set_if_wait(dev):
+    with mock.patch.object(dev.samx.setpoint, "_run_rpc_call") as mock_rpc:
+        dev.samx.setpoint.put(1, wait=True)
+        mock_rpc.assert_called_once_with("samx", "setpoint.set", 1)
+
+
+def test_put_calls_rpc(dev):
+    with mock.patch.object(dev.samx.setpoint, "_run_rpc_call") as mock_rpc:
+        dev.samx.setpoint.put(1)
+        mock_rpc.assert_called_once_with("samx", "setpoint.put", 1)
+
+
 def test_get_rpc_func_name_decorator(dev):
     with mock.patch.object(dev.samx.setpoint, "_run_rpc_call") as mock_rpc:
         dev.samx.setpoint.set(1)
