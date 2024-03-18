@@ -1,12 +1,12 @@
 import threading
 
 import pytest
+
 from bec_lib import ServiceConfig
 from bec_lib.devicemanager import DeviceContainer
 from bec_lib.logger import bec_logger
 from bec_lib.messages import BECStatus
 from bec_lib.tests.utils import ConnectorMock, threads_check
-
 from scan_server.scan_server import ScanServer
 from scan_server.scan_worker import InstructionQueueStatus
 
@@ -86,6 +86,10 @@ class DeviceMock:
 
     def readback(self):
         return self.read_buffer
+
+    @property
+    def limits(self):
+        return self._config["deviceConfig"]["limits"]
 
     @property
     def read_only(self) -> bool:

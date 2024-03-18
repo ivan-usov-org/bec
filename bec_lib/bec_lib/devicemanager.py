@@ -280,9 +280,8 @@ class DeviceContainer(dict):
         setpoints = {}
         limits = {}
         for dev in device_names:
-            # pylint: disable=protected-access
-            if "limits" in dev._config.get("deviceConfig", {}):
-                limits[dev.name] = str(dev._config["deviceConfig"]["limits"])
+            if hasattr(dev, "limits"):
+                limits[dev.name] = str(dev.limits)
             else:
                 limits[dev.name] = "[]"
 

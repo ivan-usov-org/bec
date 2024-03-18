@@ -253,9 +253,7 @@ class RequestBase(ABC):
     def _check_limits(self):
         logger.debug("check limits")
         for ii, dev in enumerate(self.scan_motors):
-            low_limit, high_limit = (
-                self.device_manager.devices[dev]._config["deviceConfig"].get("limits", [0, 0])
-            )
+            low_limit, high_limit = self.device_manager.devices[dev].limits
             if low_limit >= high_limit:
                 # if both limits are equal or low > high, no restrictions ought to be applied
                 return
