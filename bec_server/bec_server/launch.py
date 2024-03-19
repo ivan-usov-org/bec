@@ -1,6 +1,8 @@
 import argparse
 import os
 
+import libtmux
+
 from bec_server.service_handler import ServiceHandler
 
 
@@ -12,20 +14,14 @@ def main():
     command = parser.add_subparsers(dest="command")
     start = command.add_parser("start", help="Start the BEC server")
     start.add_argument(
-        "--config",
-        type=str,
-        default=None,
-        help="Path to the BEC service config file",
+        "--config", type=str, default=None, help="Path to the BEC service config file"
     )
     command.add_parser("stop", help="Stop the BEC server")
     restart = command.add_parser("restart", help="Restart the BEC server")
     restart.add_argument(
-        "--config",
-        type=str,
-        default=None,
-        help="Path to the BEC service config file",
+        "--config", type=str, default=None, help="Path to the BEC service config file"
     )
-    command.add_parser("status", help="Show the status of the BEC server")
+    command.add_parser("attach", help="Open the currently running BEC server session")
 
     args = parser.parse_args()
 
@@ -44,3 +40,10 @@ def main():
         service_handler.stop()
     elif args.command == "restart":
         service_handler.restart()
+    elif args.command == "attach":
+        server = libtmux.Server()
+        session = server.find_where({"session_name": "bec"})
+        if session is None:
+            print("No BEC session found")
+            return
+        session.attach_session()
