@@ -6,6 +6,8 @@ import pytest
 from bec_lib import Alarms, MessageEndpoints, messages
 from bec_lib.redis_connector import MessageObject
 from bec_lib.tests.utils import dm, dm_with_devices
+from utils import scan_server_mock, threads_check
+
 from scan_server.scan_assembler import ScanAssembler
 from scan_server.scan_queue import (
     InstructionQueueItem,
@@ -17,8 +19,6 @@ from scan_server.scan_queue import (
     ScanQueueStatus,
 )
 from scan_server.scan_worker import ScanWorker
-
-from utils import scan_server_mock, threads_check
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=protected-access
@@ -206,6 +206,7 @@ def test_set_continue(queuemanager_mock):
     )
 
 
+# @pytest.mark.repeat(500)
 @pytest.mark.timeout(5)
 def test_set_abort(queuemanager_mock):
     queue_manager = queuemanager_mock()

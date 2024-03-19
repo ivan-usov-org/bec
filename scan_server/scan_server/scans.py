@@ -1,11 +1,11 @@
 import ast
 import enum
+import threading
 import time
 from abc import ABC, abstractmethod
 from typing import Any, Literal
 
 import numpy as np
-
 from bec_lib import DeviceManagerBase, MessageEndpoints, bec_logger, messages
 
 from .errors import LimitError, ScanAbortion
@@ -193,6 +193,7 @@ class RequestBase(ABC):
         **kwargs,
     ) -> None:
         super().__init__()
+        self._shutdown_event = threading.Event()
         self.parameter = parameter if parameter is not None else {}
         self.caller_args = self.parameter.get("args", {})
         self.caller_kwargs = self.parameter.get("kwargs", {})
@@ -214,7 +215,9 @@ class RequestBase(ABC):
         if metadata is None:
             self.metadata = {}
         self.stubs = ScanStubs(
-            connector=self.device_manager.connector, device_msg_callback=self.device_msg_metadata
+            connector=self.device_manager.connector,
+            device_msg_callback=self.device_msg_metadata,
+            shutdown_event=self._shutdown_event,
         )
 
     @property

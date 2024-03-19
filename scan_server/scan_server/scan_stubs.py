@@ -1,11 +1,11 @@
 from __future__ import annotations
 
+import threading
 import time
 import uuid
 from collections.abc import Callable
 
 import numpy as np
-
 from bec_lib import MessageEndpoints, Status, bec_logger, messages
 from bec_lib.connector import ConnectorBase
 
@@ -15,11 +15,17 @@ logger = bec_logger.logger
 
 
 class ScanStubs:
-    def __init__(self, connector: ConnectorBase, device_msg_callback: Callable = None) -> None:
+    def __init__(
+        self,
+        connector: ConnectorBase,
+        device_msg_callback: Callable = None,
+        shutdown_event: threading.Event = None,
+    ) -> None:
         self.connector = connector
         self.device_msg_metadata = (
             device_msg_callback if device_msg_callback is not None else lambda: {}
         )
+        self.shutdown_event = shutdown_event
 
     @staticmethod
     def _exclude_nones(input_dict: dict):
@@ -63,7 +69,7 @@ class ScanStubs:
         return self._get_from_rpc(rpc_id)
 
     def _get_from_rpc(self, rpc_id):
-        while True:
+        while not self.shutdown_event.is_set():
             msg = self.connector.get(MessageEndpoints.device_rpc(rpc_id))
             if msg:
                 break

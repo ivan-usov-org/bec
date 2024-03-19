@@ -1,3 +1,4 @@
+import threading
 from unittest import mock
 
 import pytest
@@ -11,7 +12,9 @@ from scan_server.scan_stubs import ScanAbortion, ScanStubs
 @pytest.fixture
 def stubs():
     connector = ConnectorMock("")
-    yield ScanStubs(connector)
+    shutdown_event = threading.Event()
+    yield ScanStubs(connector, shutdown_event=shutdown_event)
+    shutdown_event.set()
 
 
 @pytest.mark.parametrize(
@@ -36,11 +39,7 @@ def stubs():
                 device="rtx",
                 action="kickoff",
                 parameter={
-                    "configure": {
-                        "num_pos": 5,
-                        "positions": [1, 2, 3, 4, 5],
-                        "exp_time": 2,
-                    },
+                    "configure": {"num_pos": 5, "positions": [1, 2, 3, 4, 5], "exp_time": 2},
                     "wait_group": "kickoff",
                 },
                 metadata={},
@@ -58,19 +57,12 @@ def test_kickoff(stubs, device, parameter, metadata, reference_msg):
 @pytest.mark.parametrize(
     "msg,raised_error",
     [
-        (
-            messages.DeviceRPCMessage(device="samx", return_val="", out="", success=True),
-            None,
-        ),
+        (messages.DeviceRPCMessage(device="samx", return_val="", out="", success=True), None),
         (
             messages.DeviceRPCMessage(
                 device="samx",
                 return_val="",
-                out={
-                    "error": "TypeError",
-                    "msg": "some weird error",
-                    "traceback": "traceback",
-                },
+                out={"error": "TypeError", "msg": "some weird error", "traceback": "traceback"},
                 success=False,
             ),
             ScanAbortion,

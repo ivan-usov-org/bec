@@ -348,6 +348,11 @@ class ScanQueue:
 
     def stop_worker(self):
         """stop the scan worker"""
+        if len(self.queue) > 0:
+            blcks = self.queue[0].queue.request_blocks
+            if len(blcks) > 0:
+                for blck in blcks:
+                    blck.scan._shutdown_event.set()
         self.scan_worker.shutdown()
 
     @property
@@ -425,7 +430,7 @@ class ScanQueue:
                 self.history_queue.append(self.active_instruction_queue)
                 return True
 
-            while self.status == ScanQueueStatus.PAUSED:
+            while self.status == ScanQueueStatus.PAUSED and not self.signal_event.is_set():
                 if len(self.queue) == 0 and self.auto_reset_enabled:
                     # we don't need to pause if there is no scan enqueued
                     self.status = ScanQueueStatus.RUNNING
