@@ -95,9 +95,13 @@ Check the command-line printout for instructions of tmux.
 You may open the tmux session to look at the different BEC services via
 
 ```bash
-tmux attach -t bec
+bec-server attach
 ```
+
 and exit the tmux session again via `CTRL+B+D`.
+```{note}
+You can also connect to the tmux session via `tmux attach -t bec` and detach via `CTRL+B+D`.
+```
 Both commands are also highlighted in your command-line interface.
 
 ```{note}
