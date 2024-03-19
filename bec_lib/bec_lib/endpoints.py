@@ -14,7 +14,7 @@ class MessageOp(list[str], enum.Enum):
 
     SET_PUBLISH = ["register", "set_and_publish", "delete", "get", "keys"]
     SEND = ["send", "register"]
-    STREAM = ["xadd", "xrange", "xread", "register_stream", "keys"]
+    STREAM = ["xadd", "xrange", "xread", "register_stream", "keys", "get_last"]
     LIST = ["lpush", "lrange", "rpush", "ltrim", "keys"]
     SET = ["set", "get", "delete", "keys"]
 

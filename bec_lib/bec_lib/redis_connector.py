@@ -7,6 +7,7 @@ redis server.
 from __future__ import annotations
 
 import collections
+import inspect
 import queue
 import sys
 import threading
@@ -31,28 +32,42 @@ if TYPE_CHECKING:
     from bec_lib.alarm_handler import Alarms
 
 
-def _validate_endpoint(func, endpoint):
-    if not isinstance(endpoint, EndpointInfo):
-        return
-    if func.__name__ not in endpoint.message_op:
-        raise ValueError(f"Endpoint {endpoint} is not compatible with {func.__name__} method")
+def validate_endpoint(endpoint_arg):
+    def decorator(func):
+        argspec = inspect.getfullargspec(func)
+        argument_index = argspec.args.index(endpoint_arg)
 
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                endpoint = args[argument_index]
+                arg = list(args)
+            except IndexError:
+                endpoint = kwargs[endpoint_arg]
+                arg = kwargs
+            if isinstance(endpoint, str):
+                warnings.warn(
+                    "RedisConnector methods with a string topic are deprecated and should not be used anymore. Use RedisConnector methods with an EndpointInfo instead.",
+                    DeprecationWarning,
+                )
+                return func(*args, **kwargs)
+            elif isinstance(endpoint, EndpointInfo):
+                if func.__name__ not in endpoint.message_op:
+                    raise ValueError(
+                        f"Endpoint {endpoint} is not compatible with {func.__name__} method"
+                    )
+                if isinstance(arg, list):
+                    arg[argument_index] = endpoint.endpoint
+                    return func(*arg, **kwargs)
+                else:
+                    arg[endpoint_arg] = endpoint.endpoint
+                    return func(*args, **arg)
+            else:
+                raise TypeError(f"Endpoint {endpoint} is not EndpointInfo")
 
-def check_topic(func):
-    @wraps(func)
-    def wrapper(self, topic, *args, **kwargs):
-        if isinstance(topic, str):
-            warnings.warn(
-                "RedisConnector methods with a string topic are deprecated and should not be used anymore. Use RedisConnector methods with an EndpointInfo instead.",
-                DeprecationWarning,
-            )
-            return func(self, topic, *args, **kwargs)
-        if isinstance(topic, EndpointInfo):
-            _validate_endpoint(func, topic)
-            return func(self, topic.endpoint, *args, **kwargs)
-        return func(self, topic, *args, **kwargs)
+        return wrapper
 
-    return wrapper
+    return decorator
 
 
 @dataclass
@@ -495,8 +510,8 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
         client = pipe if pipe is not None else self._redis_conn
         client.publish(topic, msg)
 
-    @check_topic
-    def send(self, topic: str, msg: BECMessage, pipe=None) -> None:
+    @validate_endpoint("topic")
+    def send(self, topic: EndpointInfo, msg: BECMessage, pipe=None) -> None:
         """
         Send a message to a topic
 
@@ -648,9 +663,9 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
         while self.poll_messages():
             ...
 
-    @check_topic
+    @validate_endpoint("topic")
     def lpush(
-        self, topic: str, msg: str, pipe=None, max_size: int = None, expire: int = None
+        self, topic: EndpointInfo, msg: str, pipe=None, max_size: int = None, expire: int = None
     ) -> None:
         """Time complexity: O(1) for each element added, so O(N) to
         add N elements when the command is called with multiple arguments.
@@ -669,15 +684,15 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
         if not pipe:
             client.execute()
 
-    @check_topic
-    def lset(self, topic: str, index: int, msg: str, pipe=None) -> None:
+    @validate_endpoint("topic")
+    def lset(self, topic: EndpointInfo, index: int, msg: str, pipe=None) -> None:
         client = pipe if pipe is not None else self._redis_conn
         if isinstance(msg, BECMessage):
             msg = MsgpackSerialization.dumps(msg)
         return client.lset(topic, index, msg)
 
-    @check_topic
-    def rpush(self, topic: str, msg: str, pipe=None) -> int:
+    @validate_endpoint("topic")
+    def rpush(self, topic: EndpointInfo, msg: str, pipe=None) -> int:
         """O(1) for each element added, so O(N) to add N elements when the
         command is called with multiple arguments. Insert all the specified
         values at the tail of the list stored at key. If key does not exist,
@@ -688,8 +703,8 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
             msg = MsgpackSerialization.dumps(msg)
         return client.rpush(topic, msg)
 
-    @check_topic
-    def lrange(self, topic: str, start: int, end: int, pipe=None):
+    @validate_endpoint("topic")
+    def lrange(self, topic: EndpointInfo, start: int, end: int, pipe=None):
         """O(S+N) where S is the distance of start offset from HEAD for small
         lists, from nearest end (HEAD or TAIL) for large lists; and N is the
         number of elements in the specified range. Returns the specified elements
@@ -710,8 +725,8 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
                 ret.append(msg)
         return ret
 
-    @check_topic
-    def set_and_publish(self, topic: str, msg, pipe=None, expire: int = None) -> None:
+    @validate_endpoint("topic")
+    def set_and_publish(self, topic: EndpointInfo, msg, pipe=None, expire: int = None) -> None:
         """piped combination of self.publish and self.set"""
         client = pipe if pipe is not None else self.pipeline()
         if not isinstance(msg, BECMessage):
@@ -722,29 +737,27 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
         if not pipe:
             client.execute()
 
-    @check_topic
-    def set(self, topic: str, msg, pipe=None, expire: int = None) -> None:
+    @validate_endpoint("topic")
+    def set(self, topic: EndpointInfo, msg, pipe=None, expire: int = None) -> None:
         """set redis value"""
         client = pipe if pipe is not None else self._redis_conn
         if isinstance(msg, BECMessage):
             msg = MsgpackSerialization.dumps(msg)
         client.set(topic, msg, ex=expire)
 
-    def keys(self, pattern: str) -> list:
+    @validate_endpoint("pattern")
+    def keys(self, pattern: EndpointInfo) -> list:
         """returns all keys matching a pattern"""
-        if isinstance(pattern, EndpointInfo):
-            _validate_endpoint(self.keys, pattern)
-            pattern = pattern.endpoint
         return self._redis_conn.keys(pattern)
 
-    @check_topic
-    def delete(self, topic, pipe=None):
+    @validate_endpoint("topic")
+    def delete(self, topic: EndpointInfo, pipe=None):
         """delete topic"""
         client = pipe if pipe is not None else self._redis_conn
         client.delete(topic)
 
-    @check_topic
-    def get(self, topic: str, pipe=None):
+    @validate_endpoint("topic")
+    def get(self, topic: EndpointInfo, pipe=None):
         """retrieve entry, either via hgetall or get"""
         client = pipe if pipe is not None else self._redis_conn
         data = client.get(topic)
@@ -756,8 +769,10 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
             except RuntimeError:
                 return data
 
-    @check_topic
-    def xadd(self, topic: str, msg_dict: dict, max_size=None, pipe=None, expire: int = None):
+    @validate_endpoint("topic")
+    def xadd(
+        self, topic: EndpointInfo, msg_dict: dict, max_size=None, pipe=None, expire: int = None
+    ):
         """
         add to stream
 
@@ -790,7 +805,8 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
         if not pipe and expire:
             client.execute()
 
-    def get_last(self, topic: str, key=None):
+    @validate_endpoint("topic")
+    def get_last(self, topic: EndpointInfo, key=None):
         """
         Get last message from stream. Repeated calls will return
         the same message until a new message is added to the stream.
@@ -813,9 +829,14 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
             return msg_dict
         return msg_dict.get(key)
 
-    @check_topic
+    @validate_endpoint("topic")
     def xread(
-        self, topic: str, id: str = None, count: int = None, block: int = None, from_start=False
+        self,
+        topic: EndpointInfo,
+        id: str = None,
+        count: int = None,
+        block: int = None,
+        from_start=False,
     ) -> list:
         """
         read from stream
@@ -872,8 +893,8 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
                 self.stream_keys[topic.decode()] = index
         return out if out else None
 
-    @check_topic
-    def xrange(self, topic: str, min: str, max: str, count: int = None):
+    @validate_endpoint("topic")
+    def xrange(self, topic: EndpointInfo, min: str, max: str, count: int = None):
         """
         read a range from stream
 

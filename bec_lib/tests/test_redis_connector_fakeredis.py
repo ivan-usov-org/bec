@@ -198,15 +198,20 @@ def test_redis_connector_xrange(connected_connector):
     assert connector.xrange("test2", "-", "+") is None
 
 
-def test_redis_connector_get_last(connected_connector):
+@pytest.mark.parametrize(
+    "endpoint",
+    ["test", MessageEndpoints.processed_data("test")],
+)
+def test_redis_connector_get_last(connected_connector, endpoint):
     connector = connected_connector
-    connector.xadd("test", {"data": 1})
-    connector.xadd("test", {"data": 2})
-    connector.xadd("test", {"data": 3})
-    assert connector.get_last("test") == {"data": 3}
-    assert connector.get_last("test") == {"data": 3}
+    connector.xadd(endpoint, {"data": 1})
+    connector.xadd(endpoint, {"data": 2})
+    connector.xadd(endpoint, {"data": 3})
+    assert connector.get_last(endpoint) == {"data": 3}
+    assert connector.get_last(endpoint) == {"data": 3}
     assert connector.get_last("test2") is None
-    assert connector.get_last(5) is None
+    with pytest.raises(TypeError):
+        assert connector.get_last(5)
 
 
 @pytest.mark.timeout(5)
