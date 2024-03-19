@@ -806,7 +806,7 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
             client.execute()
 
     @validate_endpoint("topic")
-    def get_last(self, topic: EndpointInfo, key=None):
+    def get_last(self, topic: EndpointInfo, key=None, count=1):
         """
         Get last message from stream. Repeated calls will return
         the same message until a new message is added to the stream.
@@ -814,20 +814,29 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
         Args:
             topic (str): redis topic
             key (str, optional): key to retrieve. Defaults to None. If None, the whole message is returned.
+            count (int, optional): number of last elements to retrieve
         """
+        if count <= 0:
+            return None
+        ret = []
         client = self._redis_conn
         try:
-            res = client.xrevrange(topic, "+", "-", count=1)
+            res = client.xrevrange(topic, "+", "-", count=count)
             if not res:
                 return None
-            _, msg_dict = res[0]
+            for _, msg_dict in reversed(res):
+                ret.append(
+                    {k.decode(): MsgpackSerialization.loads(msg) for k, msg in msg_dict.items()}
+                    if key is None
+                    else MsgpackSerialization.loads(msg_dict[key.encode()])
+                )
         except TypeError:
             return None
-        msg_dict = {k.decode(): MsgpackSerialization.loads(msg) for k, msg in msg_dict.items()}
 
-        if key is None:
-            return msg_dict
-        return msg_dict.get(key)
+        if count > 1:
+            return ret
+        else:
+            return ret[0]
 
     @validate_endpoint("topic")
     def xread(

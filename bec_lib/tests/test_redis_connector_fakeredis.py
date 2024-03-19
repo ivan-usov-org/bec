@@ -212,6 +212,10 @@ def test_redis_connector_get_last(connected_connector, endpoint):
     assert connector.get_last("test2") is None
     with pytest.raises(TypeError):
         assert connector.get_last(5)
+    assert list(connector.get_last(endpoint, "data", count=3)) == [1, 2, 3]
+    assert list(connector.get_last(endpoint, count=4)) == [{"data": 1}, {"data": 2}, {"data": 3}]
+    assert connector.get_last(endpoint, count=0) is None
+    assert connector.get_last(endpoint, count=-1) is None
 
 
 @pytest.mark.timeout(5)
