@@ -698,7 +698,8 @@ class OphydInterfaceBase(DeviceBase):
         """
         if wait:
             return self.set(value).wait()
-        return self._run(value, fcn=self.put)
+        self._run(value, fcn=self.put)
+        return
 
 
 class Device(OphydInterfaceBase):
