@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.19.0 (2024-03-19)
+
+### Feature
+
+* **device_server:** Added subscription to all auto monitored signals ([`816da5c`](https://gitlab.psi.ch/bec/bec/-/commit/816da5cbc673b788973bd302fbf55cfd787e1c50))
+
 ## v1.18.1 (2024-03-18)
 
 ### Fix
