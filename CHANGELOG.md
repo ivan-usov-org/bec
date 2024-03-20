@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v1.20.1 (2024-03-20)
+
+### Fix
+
+* **bec_lib:** Fixed return value for put; closes #234 ([`9109177`](https://gitlab.psi.ch/bec/bec/-/commit/9109177a2e395eefb87f96750d3068e6936b2a25))
+* **bec_lib:** Added queue update ([`1ee251d`](https://gitlab.psi.ch/bec/bec/-/commit/1ee251d6e75fd84c9644e8cdc7b61ba99d0d155c))
+
 ## v1.20.0 (2024-03-20)
 
 ### Feature
