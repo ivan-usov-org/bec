@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.20.3 (2024-03-20)
+
+### Fix
+
+* **bec_lib:** Fixed client shutdown for failed inits ([`fc8ff9b`](https://gitlab.psi.ch/bec/bec/-/commit/fc8ff9bd7508119c303f5c589e05aab0ade17d77))
+
 ## v1.20.2 (2024-03-20)
 
 ### Fix
