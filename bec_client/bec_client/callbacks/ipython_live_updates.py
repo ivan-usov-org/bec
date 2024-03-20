@@ -38,6 +38,7 @@ class IPythonLiveUpdates:
         self._request_block_index = collections.defaultdict(lambda: 0)
         self._request_block_id = None
         self.print_table_data = True
+        self._current_queue = None
 
     def _process_report_instructions(self, report_instructions: list) -> None:
         """Process instructions for the live updates.
@@ -154,7 +155,7 @@ class IPythonLiveUpdates:
                 while not scan_request.request_storage.storage[-1].queue:
                     time.sleep(0.01)
 
-                queue = scan_request.request_storage.storage[-1].queue
+                self._current_queue = queue = scan_request.request_storage.storage[-1].queue
                 self._request_block_id = req_id = self._active_request.metadata.get("RID")
 
                 while queue.status not in ["COMPLETED", "ABORTED", "HALTED"]:
@@ -170,8 +171,29 @@ class IPythonLiveUpdates:
 
         except ScanInterruption as scan_interr:
             self._interrupted_request = (request, scan_report_type)
+            if self._current_queue:
+                self._wait_for_cleanup()
             self._reset(forced=True)
             raise scan_interr
+
+    def _wait_for_cleanup(self):
+        """Wait for the scan to be cleaned up."""
+        try:
+            if not self._element_in_queue():
+                return
+            print("Waiting for the scan to be cleaned up...")
+            while self._element_in_queue():
+                time.sleep(0.1)
+        except KeyboardInterrupt:
+            self.client.queue.request_scan_halt()
+
+    def _element_in_queue(self) -> bool:
+        queue = self.client.queue.queue_storage.current_scan_queue.get("primary", {}).get(
+            "info", []
+        )
+        if not queue:
+            return False
+        return self._current_queue.queueID in queue[0].get("queueID")
 
     def _process_queue(
         self, queue: QueueItem, request: messages.ScanQueueMessage, req_id: str
@@ -227,6 +249,7 @@ class IPythonLiveUpdates:
         """
         self._interrupted_request = None
 
+        self._current_queue = None
         self._user_callback = None
         self._processed_instructions = 0
         scan_closed = forced or (self._active_request.content["scan_type"] == "close_scan_def")
