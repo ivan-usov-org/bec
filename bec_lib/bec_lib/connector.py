@@ -141,15 +141,15 @@ class ConnectorBase(PubSubInterface, StoreInterface):
 
     def log_warning(self, msg):
         """send a warning"""
-        self.send(MessageEndpoints.log(), LogMessage(log_type="warning", log_msg=msg))
+        self.set_and_publish(MessageEndpoints.log(), LogMessage(log_type="warning", log_msg=msg))
 
     def log_message(self, msg):
         """send a log message"""
-        self.send(MessageEndpoints.log(), LogMessage(log_type="log", log_msg=msg))
+        self.set_and_publish(MessageEndpoints.log(), LogMessage(log_type="log", log_msg=msg))
 
     def log_error(self, msg):
         """send an error as log"""
-        self.send(MessageEndpoints.log(), LogMessage(log_type="error", log_msg=msg))
+        self.set_and_publish(MessageEndpoints.log(), LogMessage(log_type="error", log_msg=msg))
 
     def set_and_publish(self, topic: str, msg, pipe=None, expire: int = None) -> None:
         """Set a value and publish it"""

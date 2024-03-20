@@ -113,7 +113,6 @@ class AlarmHandler:
         """
         alarms = self.get_unhandled_alarms(severity=severity)
         for alarm in alarms:
-            self.alarms_stack.remove(alarm)
             yield alarm
 
     def raise_alarms(self, severity=Alarms.MAJOR):

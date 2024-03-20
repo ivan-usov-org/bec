@@ -420,7 +420,7 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
         Args:
             msg (str): warning message
         """
-        self.send(MessageEndpoints.log(), LogMessage(log_type="warning", log_msg=msg))
+        self.set_and_publish(MessageEndpoints.log(), LogMessage(log_type="warning", log_msg=msg))
 
     def log_message(self, msg):
         """
@@ -429,7 +429,7 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
         Args:
             msg (str): message
         """
-        self.send(MessageEndpoints.log(), LogMessage(log_type="log", log_msg=msg))
+        self.set_and_publish(MessageEndpoints.log(), LogMessage(log_type="log", log_msg=msg))
 
     def log_error(self, msg):
         """
@@ -438,7 +438,7 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
         Args:
             msg (str): error message
         """
-        self.send(MessageEndpoints.log(), LogMessage(log_type="error", log_msg=msg))
+        self.set_and_publish(MessageEndpoints.log(), LogMessage(log_type="error", log_msg=msg))
 
     def raise_alarm(self, severity: Alarms, alarm_type: str, source: str, msg: str, metadata: dict):
         """
@@ -918,9 +918,9 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
 
         In order to keep this fail-safe and simple it uses 'mock'...
         """
-        from unittest.mock import (
+        from unittest.mock import (  # import is done here, to not pollute the file with something normally in tests
             Mock,
-        )  # import is done here, to not pollute the file with something normally in tests
+        )
 
         warnings.warn(
             "RedisConnector.consumer() is deprecated and should not be used anymore. Use RedisConnector.register() with 'topics', 'patterns', 'cb' or 'start_thread' instead. Additional keyword args are transmitted to the callback. For the caller, the main difference with RedisConnector.register() is that it does not return a new thread.",
