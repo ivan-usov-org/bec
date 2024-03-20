@@ -1,10 +1,10 @@
-###############################################################
-####### INITIALIZE THE BEC CLIENT - DO NOT MODIFY #############
-###############################################################
-import os
+import argparse
 import sys
+from importlib.metadata import version
 
-from bec_client import BECIPythonClient
+from IPython.terminal.ipapp import TerminalIPythonApp
+
+from bec_client.bec_ipython_client import BECIPythonClient
 from bec_lib import RedisConnector, ServiceConfig, bec_logger
 
 # pylint: disable=wrong-import-position
@@ -12,35 +12,41 @@ from bec_lib import RedisConnector, ServiceConfig, bec_logger
 # pylint: disable=unused-import
 # pylint: disable=ungrouped-imports
 
+try:
+    from bec_plugins.bec_client import startup
+except ImportError:
+    startup = None
+
+try:
+    from bec_widgets.cli import BECFigure
+except ImportError:
+    BECFigure = None
 
 logger = bec_logger.logger
 
-if __name__ == "__main__":
-    try:
-        from bec_plugins.bec_client import startup
-    except ImportError:
-        startup = None
 
-    try:
-        from bec_widgets.cli import BECFigure
-    except ImportError:
-        BECFigure = None
+def main():
+    parser = argparse.ArgumentParser(
+        prog="BEC IPython client", description="BEC command line interface"
+    )
+    parser.add_argument("--version", action="store_true", default=False)
+    parser.add_argument("--nogui", action="store_true", default=False)
+    parser.add_argument("--config", action="store", default=None)
+    args, left_args = parser.parse_known_args()
 
-    args = sys.argv[1:]
+    # remove already parsed args from command line args
+    sys.argv = sys.argv[:1] + left_args
 
-    START_BEC_WIDGETS = True
-    if "--nogui" in args:
-        args.remove("--nogui")
-        START_BEC_WIDGETS = False
+    if args.version:
+        print(f"BEC IPython client: {version('bec_client')}")
+        sys.exit(0)
 
-    if "--config" in args:
-        config_file = args[args.index("--config") + 1]
+    config_file = args.config
+    if config_file:
         if not os.path.isfile(config_file):
             raise FileNotFoundError("Config file not found.")
         print("Using config file: ", config_file)
         config = ServiceConfig(config_file)
-        args.remove("--config")
-        args.remove(config_file)
 
     if startup and "config" not in locals():
         # check if pre-startup.py script exists
@@ -55,6 +61,10 @@ if __name__ == "__main__":
     if "config" not in locals():
         config = ServiceConfig()
 
+    app = TerminalIPythonApp()
+    app.interact = True
+    app.initialize(argv=[])
+
     bec = BECIPythonClient(config, RedisConnector)
     bec.load_high_level_interface("spec_hli")
     bec.start()
@@ -62,7 +72,7 @@ if __name__ == "__main__":
     dev = bec.device_manager.devices
     scans = bec.scans
 
-    if START_BEC_WIDGETS and BECFigure is not None:
+    if not args.nogui and BECFigure is not None:
         fig = bec.fig = BECFigure()
         fig.show()
 
@@ -78,10 +88,8 @@ if __name__ == "__main__":
     bec._ip.prompts.status = 1
 
     # SETUP BEAMLINE INFO
-    # from bec_client.plugins.cSAXS.beamline_info import BeamlineInfo
     from bec_client.plugins.SLS.sls_info import OperatorInfo, SLSInfo
 
-    # bec._beamline_mixin._bl_info_register(BeamlineInfo)
     bec._beamline_mixin._bl_info_register(SLSInfo)
     bec._beamline_mixin._bl_info_register(OperatorInfo)
 
@@ -92,3 +100,12 @@ if __name__ == "__main__":
             with open(file_name, "r", encoding="utf-8") as file:
                 # pylint: disable=exec-used
                 exec(file.read())
+
+    try:
+        app.start()
+    finally:
+        bec.shutdown()
+
+
+if __name__ == "__main__":
+    main()

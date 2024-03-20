@@ -13,7 +13,7 @@ from .move_device import LiveUpdatesReadbackProgressbar
 from .utils import ScanRequestMixin, check_alarms
 
 if TYPE_CHECKING:
-    from bec_client import BECClient
+    from bec_client.bec_ipython_client import BECClient
     from bec_lib import messages
     from bec_lib.queue_items import QueueItem
 

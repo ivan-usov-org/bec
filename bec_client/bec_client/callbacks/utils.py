@@ -11,7 +11,7 @@ from bec_lib import bec_logger, messages
 from bec_lib.request_items import RequestItem
 
 if TYPE_CHECKING:
-    from bec_client.bec_client import BECClient
+    from bec_client.bec_ipython_client import BECClient
 
 logger = bec_logger.logger
 

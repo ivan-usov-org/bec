@@ -42,7 +42,7 @@ def run_install(setup_args: dict, bec_deps: list, editable=False):
 
 if __name__ == "__main__":
     setup_args_in = {
-        "scripts": ["bec_client/bin/bec"],
+        "entry_points": {"console_scripts": ["bec = bec_client.main:main"]},
         "install_requires": [
             "numpy",
             "requests",
