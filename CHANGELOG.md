@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v1.20.2 (2024-03-20)
+
+### Fix
+
+* **scan_server:** Improved shutdown procedure ([`2417eb5`](https://gitlab.psi.ch/bec/bec/-/commit/2417eb5e321944b10ef2568135828121f0023537))
+* **scan_server:** Fixed queue update ([`926f028`](https://gitlab.psi.ch/bec/bec/-/commit/926f0287be5dffe63c9e318b19908431abbc54de))
+
 ## v1.20.1 (2024-03-20)
 
 ### Fix
