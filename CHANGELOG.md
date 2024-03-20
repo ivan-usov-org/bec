@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.20.6 (2024-03-20)
+
+### Fix
+
+* Get username using standard "getpass" module ([`06b4afa`](https://gitlab.psi.ch/bec/bec/-/commit/06b4afae4d2979e0bddc22d185d272b1f232c548))
+
 ## v1.20.5 (2024-03-20)
 
 ### Fix
