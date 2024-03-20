@@ -15,6 +15,10 @@ import numpy as np
 import ophyd
 import ophyd.sim as ops
 import ophyd_devices as opd
+from ophyd.ophydobj import OphydObject
+from ophyd.signal import EpicsSignalBase
+from typeguard import typechecked
+
 from bec_lib import (
     BECService,
     DeviceBase,
@@ -24,10 +28,6 @@ from bec_lib import (
     bec_logger,
     messages,
 )
-from ophyd.ophydobj import OphydObject
-from ophyd.signal import EpicsSignalBase
-from typeguard import typechecked
-
 from device_server.devices.config_update_handler import ConfigUpdateHandler
 from device_server.devices.device_serializer import get_device_info
 
@@ -465,7 +465,7 @@ class DeviceManagerDS(DeviceManagerBase):
         if not obj.connected:
             return
         name = obj.root.name
-        signals = obj.read()
+        signals = obj.root.read()
         metadata = self.devices.get(obj.root.name).metadata
         dev_msg = messages.DeviceMessage(signals=signals, metadata=metadata)
         pipe = self.connector.pipeline()
@@ -476,7 +476,7 @@ class DeviceManagerDS(DeviceManagerBase):
         if not obj.connected:
             return
         name = obj.root.name
-        signals = obj.read_configuration()
+        signals = obj.root.read_configuration()
         metadata = self.devices.get(obj.root.name).metadata
         dev_msg = messages.DeviceMessage(signals=signals, metadata=metadata)
         pipe = self.connector.pipeline()
