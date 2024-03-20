@@ -115,6 +115,7 @@ class BECClient(BECService, UserScriptsMixin):
         """start the client"""
         if self.started:
             return
+        self.started = True
         config = self.__init_params["config"]
         connector_cls = self.__init_params["connector_cls"]
         wait_for_server = self.__init_params["wait_for_server"]
@@ -122,7 +123,6 @@ class BECClient(BECService, UserScriptsMixin):
         builtins.bec = self._parent
         self._start_services()
         logger.info("Starting new client")
-        self.started = True
 
     def _start_services(self):
         self._configure_logger()

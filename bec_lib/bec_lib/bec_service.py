@@ -265,13 +265,16 @@ class BECService:
 
     def shutdown(self):
         """shutdown the BECService"""
-        self.connector.shutdown()
-        self._service_info_event.set()
-        if self._service_info_thread:
-            self._service_info_thread.join()
-        self._metrics_emitter_event.set()
-        if self._metrics_emitter_thread:
-            self._metrics_emitter_thread.join()
+        try:
+            self.connector.shutdown()
+            self._service_info_event.set()
+            if self._service_info_thread:
+                self._service_info_thread.join()
+            self._metrics_emitter_event.set()
+            if self._metrics_emitter_thread:
+                self._metrics_emitter_thread.join()
+        except AttributeError:
+            print("Failed to shutdown BECService.")
 
     @property
     def service_status(self):
