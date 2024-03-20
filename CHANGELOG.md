@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.20.5 (2024-03-20)
+
+### Fix
+
+* **bec_lib:** Fixed error propagation after client refactoring ([`eb5774a`](https://gitlab.psi.ch/bec/bec/-/commit/eb5774a5da157834ff0a4f0e1e03ac6b7237267d))
+
 ## v1.20.4 (2024-03-20)
 
 ### Fix
