@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.20.4 (2024-03-20)
+
+### Fix
+
+* **device_server:** Fixed readback for automonitor ([`7a3e1c2`](https://gitlab.psi.ch/bec/bec/-/commit/7a3e1c21ee200484942ad0eafe748640ebeaf1f8))
+
 ## v1.20.3 (2024-03-20)
 
 ### Fix
