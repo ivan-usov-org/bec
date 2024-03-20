@@ -407,7 +407,6 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
         self._events_dispatcher_thread = None
         self._messages_queue = queue.Queue()
         self._stop_events_listener_thread = threading.Event()
-
         self.stream_keys = {}
 
     def shutdown(self):

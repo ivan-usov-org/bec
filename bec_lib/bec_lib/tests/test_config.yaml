@@ -33,6 +33,15 @@ pseudo_signal1:
   readOnly: false
   readoutPriority: baseline
 
+failure_device:
+  deviceClass: sim:sim:SimPositionerWithCommFailure
+  deviceConfig:
+    delay: 1
+    update_frequency: 400
+  enabled: true
+  readOnly: false
+  readoutPriority: baseline
+
 ############################################################
 ####################### User motors ########################
 ############################################################

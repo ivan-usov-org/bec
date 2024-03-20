@@ -171,7 +171,7 @@ class IPythonLiveUpdates:
 
         except ScanInterruption as scan_interr:
             self._interrupted_request = (request, scan_report_type)
-            if self._current_queue:
+            if self._current_queue and self.client._service_config.abort_on_ctrl_c:
                 self._wait_for_cleanup()
             self._reset(forced=True)
             raise scan_interr
