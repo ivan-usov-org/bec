@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v1.20.0 (2024-03-20)
+
+### Feature
+
+* **bec_server:** Added cli option to attach to the tmux session ([`5115c31`](https://gitlab.psi.ch/bec/bec/-/commit/5115c316763c5674fd438ee0702e8f42c2f92109))
+
+### Documentation
+
+* Added reference to bec-server attach ([`b92d757`](https://gitlab.psi.ch/bec/bec/-/commit/b92d757c059f457a81a0324ca079f757f5e03d3b))
+
 ## v1.19.0 (2024-03-19)
 
 ### Feature
