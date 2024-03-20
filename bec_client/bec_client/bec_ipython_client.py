@@ -1,7 +1,6 @@
 from __future__ import print_function
 
 import time
-import threading
 from typing import Iterable
 
 import IPython
@@ -54,9 +53,7 @@ class BECIPythonClient:
         self._client.start()
         self._sighandler = SigintHandler(self)
         self._beamline_mixin = BeamlineMixin()
-        self._exit_event = threading.Event()
         self.live_updates = IPythonLiveUpdates(self)
-        self._start_exit_handler()
         self._configure_ipython()
         self.started = True
 
@@ -94,33 +91,15 @@ class BECIPythonClient:
         if self._ip is not None:
             self._ip.prompts.status = 2
 
-    def _start_exit_handler(self):
-        self._exit_handler_thread = threading.Thread(target=self._exit_thread)
-        self._exit_handler_thread.start()
-
-    def _shutdown_exit_handler(self):
-        self._exit_event.set()
-        if self._exit_handler_thread:
-            self._exit_handler_thread.join()
-
     def _load_magics(self):
         magics = BECMagics(self._ip, self._client)
         self._ip.register_magics(magics)
 
-    def shutdown(self, shutdown_exit_thread=True):
+    def shutdown(self):
         """shutdown the client and all its components"""
         if self.fig:
             self.fig.close()
         self._client.shutdown()
-        if shutdown_exit_thread:
-            self._shutdown_exit_handler()
-
-    def _exit_thread(self):
-        main_thread = threading.main_thread()
-        while main_thread.is_alive() and not self._exit_event.is_set():
-            time.sleep(0.1)
-        if not self._exit_event.is_set():
-            self.shutdown(shutdown_exit_thread=False)
 
 
 def _ip_exception_handler(self, etype, evalue, tb, tb_offset=None):

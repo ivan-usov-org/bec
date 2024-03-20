@@ -59,18 +59,14 @@ def test_bec_client_start(service_config):
     )
     try:
         with mock.patch.object(client._client, "wait_for_service") as wait_for_service:
-            with mock.patch.object(client, "_start_exit_handler") as start_exit_handler:
-                with mock.patch.object(client, "_configure_ipython") as configure_ipython:
-                    with mock.patch.object(client, "_load_scans"):
-                        client.start()
-                        start_exit_handler.assert_called_once()
-                        configure_ipython.assert_called_once()
-                        assert mock.call("ScanBundler", mock.ANY) in wait_for_service.call_args_list
-                        assert mock.call("ScanServer", mock.ANY) in wait_for_service.call_args_list
-                        assert (
-                            mock.call("DeviceServer", mock.ANY) in wait_for_service.call_args_list
-                        )
-                        assert client.started
+            with mock.patch.object(client, "_configure_ipython") as configure_ipython:
+                with mock.patch.object(client, "_load_scans"):
+                    client.start()
+                    configure_ipython.assert_called_once()
+                    assert mock.call("ScanBundler", mock.ANY) in wait_for_service.call_args_list
+                    assert mock.call("ScanServer", mock.ANY) in wait_for_service.call_args_list
+                    assert mock.call("DeviceServer", mock.ANY) in wait_for_service.call_args_list
+                    assert client.started
     finally:
         client.shutdown()
         client._client._reset_singleton()
@@ -79,10 +75,8 @@ def test_bec_client_start(service_config):
 def test_bec_client_start_without_bec_services(ipython_client):
     client = ipython_client
     with mock.patch.object(client, "wait_for_service") as wait_for_service:
-        with mock.patch.object(client, "_start_exit_handler") as start_exit_handler:
-            with mock.patch.object(client, "_configure_ipython") as configure_ipython:
-                with mock.patch.object(client, "_load_scans"):
-                    client.start()
-                    start_exit_handler.assert_called_once()
-                    configure_ipython.assert_called_once()
-                    wait_for_service.assert_not_called()
+        with mock.patch.object(client, "_configure_ipython") as configure_ipython:
+            with mock.patch.object(client, "_load_scans"):
+                client.start()
+                configure_ipython.assert_called_once()
+                wait_for_service.assert_not_called()
