@@ -8,9 +8,10 @@ import traceback
 import uuid
 from enum import Enum
 
-from bec_lib import Alarms, MessageEndpoints, bec_logger, messages, threadlocked
 from rich.console import Console
 from rich.table import Table
+
+from bec_lib import Alarms, MessageEndpoints, bec_logger, messages, threadlocked
 
 from .errors import LimitError, ScanAbortion
 from .scan_assembler import ScanAssembler
@@ -349,10 +350,7 @@ class ScanQueue:
     def stop_worker(self):
         """stop the scan worker"""
         if len(self.queue) > 0:
-            blcks = self.queue[0].queue.request_blocks
-            if len(blcks) > 0:
-                for blck in blcks:
-                    blck.scan._shutdown_event.set()
+            self.queue[0].stop()
         self.scan_worker.shutdown()
 
     @property
@@ -780,6 +778,8 @@ class InstructionQueueItem:
         )
         self._status = val
         self.worker.status = val
+        if val == InstructionQueueStatus.STOPPED:
+            self.stop()
         self.parent.queue_manager.send_queue_status()
 
     @property
@@ -915,3 +915,11 @@ class InstructionQueueItem:
             return self._get_next(queue="subqueue", raise_stopiteration=False)
 
         return self._get_next()
+
+    def stop(self):
+        """stop the instruction queue"""
+        blcks = self.queue.request_blocks
+        if len(blcks) > 0:
+            for blck in blcks:
+                # pylint: disable=protected-access
+                blck.scan._shutdown_event.set()
