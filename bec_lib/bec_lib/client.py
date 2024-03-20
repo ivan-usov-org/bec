@@ -6,6 +6,7 @@ derived classes. It is used to initialize the client and start the client.
 from __future__ import annotations, print_function
 
 import builtins
+import getpass
 import importlib
 import inspect
 import subprocess
@@ -180,11 +181,7 @@ class BECClient(BECService, UserScriptsMixin):
         builtins.__dict__.update(funcs)
 
     def _update_username(self):
-        self._username = (
-            subprocess.run("whoami", shell=True, stdout=subprocess.PIPE)
-            .stdout.decode()
-            .split("\n")[0]
-        )
+        self._username = getpass.getuser()
 
     def _start_scan_queue(self):
         self.queue = ScanManager(self.connector)
