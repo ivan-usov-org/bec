@@ -344,6 +344,9 @@ class FlomniSampleTransferMixin:
         if not curtain_is_triggered:
             raise FlomniError("Fosaz did not reach light curtain")
 
+    def move_fheater_up(self):
+        self.ensure_fheater_up()
+
     def ensure_fheater_up(self):
         axis_id = dev.fheater._config["deviceConfig"].get("axis_Id")
         axis_id_numeric = self.axis_id_to_numeric(axis_id)
@@ -423,16 +426,18 @@ class FlomniSampleTransferMixin:
 
     def rt_feedback_enable_with_reset(self):
         self.device_manager.devices.rtx.controller.feedback_enable_with_reset()
+        self.rt_feedback_status()
 
     def rt_feedback_enable_without_reset(self):
+        self.device_manager.devices.rtx.controller.feedback_enable_without_reset()
+        self.rt_feedback_status()
+
+    def rt_feedback_status(self):
         feedback_status = self.device_manager.devices.rtx.controller.feedback_is_running()
         if feedback_status == True:
             print("The rt feedback is \x1b[92mrunning\x1b[0m.")
         else:
             print("The rt feedback is \x1b[91mNOT\x1b[0m running.")
-
-    def rt_feedback_status(self):
-        self
 
     def lights_off(self):
         self.device_manager.devices.fsamx.controller.lights_off()
@@ -1002,7 +1007,6 @@ class FlomniAlignmentMixin:
         with open(correction_file, "r") as f:
             num_elements = f.readline()
             int_num_elements = int(num_elements.split(" ")[2])
-            print(int_num_elements)
             corr_pos = []
             corr_angle = []
             for j in range(int_num_elements * 2):
@@ -1013,6 +1017,9 @@ class FlomniAlignmentMixin:
                     corr_pos.append(float(value) / 1000)
                 elif name == "corr_angle":
                     corr_angle.append(float(value))
+        print(
+            f"Loading default mirror correction from file {correction_file} containing {int_num_elements} elements."
+        )
         return corr_pos, corr_angle
 
     def read_additional_correction_y(self, correction_file: str):
@@ -1067,9 +1074,9 @@ class Flomni(
         super().__init__()
         self.client = client
         self.device_manager = client.device_manager
-        self.check_shutter = True
-        self.check_light_available = True
-        self.check_fofb = True
+        self.check_shutter = False
+        self.check_light_available = False
+        self.check_fofb = False
         self._check_msgs = []
         self.tomo_id = -1
         self.special_angles = []
@@ -1309,6 +1316,56 @@ class Flomni(
         except Exception:
             logger.warning("Failed to write to scilog.")
 
+    def tomo_alignment_scan(self):
+        """
+        Performs a tomogram alignment scan.
+        """
+        if self.get_alignment_offset(0) == (0, 0, 0):
+            print("It appears that the xrayeye alignemtn was not performend or loaded. Aborting.")
+            return
+        dev = builtins.__dict__.get("dev")
+        bec = builtins.__dict__.get("bec")
+        tags = ["alignment", self.sample_name]
+        self.write_to_scilog(
+            f"Starting alignment scan. First scan number: {bec.queue.next_scan_number}.", tags
+        )
+
+        start_angle = 0
+
+        angle_end = start_angle + 180
+        for angle in np.linspace(start_angle, angle_end, num=int(180 / 45) + 1, endpoint=True):
+            successful = False
+            error_caught = False
+            if 0 <= angle < 180.05:
+                print(f"Starting flOMNI scan for angle {angle}")
+                while not successful:
+                    self._start_beam_check()
+
+                    try:
+                        start_scan_number = bec.queue.next_scan_number
+                        self.tomo_scan_projection(angle)
+                        self.tomo_reconstruct()
+                        error_caught = False
+                    except AlarmBase as exc:
+                        if exc.alarm_type == "TimeoutError":
+                            bec.queue.request_queue_reset()
+                            time.sleep(2)
+                            error_caught = True
+                        else:
+                            raise exc
+
+                    if self._was_beam_okay() and not error_caught:
+                        successful = True
+                    else:
+                        self._wait_for_beamline_checks()
+                end_scan_number = bec.queue.next_scan_number
+                for scan_nr in range(start_scan_number, end_scan_number):
+                    self._write_tomo_scan_number(scan_nr, angle, 0)
+
+        print("Alignment scan finished. Please run SPEC_ptycho_align and load the new fit.")
+
+        umv(dev.fsamroy, 0)
+
     def sub_tomo_scan(self, subtomo_number, start_angle=None):
         """
         Performs a sub tomogram scan.
@@ -1458,7 +1515,7 @@ class Flomni(
         with open(tomo_scan_numbers_file, "a+") as out_file:
             # pylint: disable=undefined-variable
             out_file.write(
-                f"{scan_number} {angle} {dev.lsamrot.read()['lsamrot']['value']:.3f} {self.tomo_id} {subtomo_number} {0} {'lamni'}\n"
+                f"{scan_number} {angle} {dev.fsamroy.read()['fsamroy']['value']:.3f} {self.tomo_id} {subtomo_number} {0} {self.sample_name}\n"
             )
 
     def tomo_scan_projection(self, angle: float):
@@ -1551,17 +1608,18 @@ class Flomni(
     def write_pdf_report(self):
         """create and write the pdf report with the current flomni settings"""
         dev = builtins.__dict__.get("dev")
-        header = ""
-        # header = (
-        #     " \n" * 3
-        #     + "  :::            :::       :::   :::   ::::    ::: ::::::::::: \n"
-        #     + "  :+:          :+: :+:    :+:+: :+:+:  :+:+:   :+:     :+:     \n"
-        #     + "  +:+         +:+   +:+  +:+ +:+:+ +:+ :+:+:+  +:+     +:+     \n"
-        #     + "  +#+        +#++:++#++: +#+  +:+  +#+ +#+ +:+ +#+     +#+     \n"
-        #     + "  +#+        +#+     +#+ +#+       +#+ +#+  +#+#+#     +#+     \n"
-        #     + "  #+#        #+#     #+# #+#       #+# #+#   #+#+#     #+#     \n"
-        #     + "  ########## ###     ### ###       ### ###    #### ########### \n"
-        # )
+        # header = ""
+        header = (
+            " \n" * 3
+            + "  .d888 888  .d88888b.  888b     d888 888b    888 8888888 \n"
+            + ' d88P"  888 d88P" "Y88b 8888b   d8888 8888b   888   888 \n'
+            + " 888    888 888     888 88888b.d88888 88888b  888   888   \n"
+            + " 888888 888 888     888 888Y88888P888 888Y88b 888   888   \n"
+            + " 888    888 888     888 888 Y888P 888 888 Y88b888   888   \n"
+            + " 888    888 888     888 888  Y8P  888 888  Y88888   888   \n"
+            + ' 888    888 Y88b. .d88P 888   "   888 888   Y8888   888   \n'
+            + ' 888    888  "Y88888P"  888       888 888    Y888 8888888 \n'
+        )
         padding = 20
         fovxy = f"{self.fovx:.2f}/{self.fovy:.2f}"
         stitching = f"{self.stitch_x:.2f}/{self.stitch_y:.2f}"

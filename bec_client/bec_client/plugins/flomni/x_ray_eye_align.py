@@ -33,9 +33,6 @@ class XrayEyeAlign:
         self.flomni.reset_correction()
         self.flomni.reset_tomo_alignment_fit()
 
-    def reset_xray_eye_correction(self):
-        self.client.delete_global_var("tomo_fit_xray_eye")
-
     def _reset_init_values(self):
         self.shift_xy = [0, 0]
         self._xray_fov_xy = [0, 0]
