@@ -274,13 +274,10 @@ class ScanBundler(BECService):
 
             scanID = metadata.get("scanID")
             if not scanID:
-                logger.error("Received device message without scanID")
+                logger.info("Received device message without scanID")
                 return
 
             signal = msg.content.get("signals")
-            # if not signal:
-            #     logger.error("Received device message without signals")
-            #     return
 
             try:
                 self._wait_for_scanID(scanID, timeout_time=timeout_time)
