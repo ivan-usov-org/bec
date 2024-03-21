@@ -6,14 +6,14 @@ import time
 from pathlib import Path
 
 import numpy as np
-from bec_lib import bec_logger
-from bec_lib.alarm_handler import AlarmBase
-from bec_lib.pdf_writer import PDFWriter
 from typeguard import typechecked
 
 from bec_client.plugins.cSAXS import cSAXSBeamlineChecks
 from bec_client.plugins.flomni.flomni_optics_mixin import FlomniOpticsMixin
 from bec_client.plugins.flomni.x_ray_eye_align import XrayEyeAlign
+from bec_lib import bec_logger
+from bec_lib.alarm_handler import AlarmBase
+from bec_lib.pdf_writer import PDFWriter
 
 logger = bec_logger.logger
 

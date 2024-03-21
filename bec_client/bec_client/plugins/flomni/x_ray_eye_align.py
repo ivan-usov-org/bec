@@ -5,9 +5,8 @@ import os
 import time
 from typing import TYPE_CHECKING
 
-from bec_lib import bec_logger
-
 from bec_client.plugins.cSAXS import epics_get, epics_put, fshopen
+from bec_lib import bec_logger
 
 logger = bec_logger.logger
 # import builtins to avoid linter errors
