@@ -135,9 +135,9 @@ class FlomniOpticsMixin:
 
         for diameter in diameters:
             outermost_zonewidth = 60e-9
-            focal_distance = diameter * outermost_zonewidth / wavelength
+            focal_distance = diameter * outermost_zonewidth / wavelength * 1000
             beam_size = (
-                -diameter / (focal_distance * 1000) * (focal_distance * 1000 - distance) * 1e6
+                -diameter / (focal_distance * 1000) * (focal_distance - distance) * 1e9
             )
             table.add_row(
                 f"{diameter*1e6:.2f} microns",
@@ -159,9 +159,9 @@ class FlomniOpticsMixin:
 
         for diameter in diameters:
             outermost_zonewidth = 30e-9
-            focal_distance = diameter * outermost_zonewidth / wavelength
+            focal_distance = diameter * outermost_zonewidth / wavelength * 1000
             beam_size = (
-                -diameter / (focal_distance * 1000) * (focal_distance * 1000 - distance) * 1e6
+                -diameter / (focal_distance * 1000) * (focal_distance - distance) * 1e9
             )
             table.add_row(
                 f"{diameter*1e6:.2f} microns",
