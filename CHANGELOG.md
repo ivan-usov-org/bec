@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v1.21.0 (2024-03-21)
+
+### Feature
+
+* Add "count" keyword arg to stream connector .get_last(), to retrieve last "count" items ([`e281b6a`](https://gitlab.psi.ch/bec/bec/-/commit/e281b6aaa10567538476e71fa307fc266216ef9a))
+
+### Fix
+
+* Validate endpoint for .get_last (#236), enhance endpoint validation ([`da5df48`](https://gitlab.psi.ch/bec/bec/-/commit/da5df48008216cd609d47bebbf9a6f90b050ba53))
+
 ## v1.20.6 (2024-03-20)
 
 ### Fix
