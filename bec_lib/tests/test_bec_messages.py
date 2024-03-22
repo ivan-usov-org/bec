@@ -258,7 +258,7 @@ def test_GUIConfigMessage():
 
 def test_ScanQueueHistoryMessage():
     msg = messages.ScanQueueHistoryMessage(
-        status="running", queueID="queueID", info={"val": "val"}, metadata={"RID": "1234"}
+        status="running", queue_id="queue_id", info={"val": "val"}, metadata={"RID": "1234"}
     )
     res = MsgpackSerialization.dumps(msg)
     res_loaded = MsgpackSerialization.loads(res)

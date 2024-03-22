@@ -753,7 +753,7 @@ class ScanWorker(threading.Thread):
             for instr in cleanup:
                 self._check_for_interruption()
                 instr.metadata["scan_id"] = queue.queue.active_rb.scan_id
-                instr.metadata["queueID"] = queue.queue_id
+                instr.metadata["queue_id"] = queue.queue_id
                 self._instruction_step(instr)
             raise ScanAbortion from exc
         except Exception as exc:

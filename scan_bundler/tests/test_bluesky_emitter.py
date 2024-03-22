@@ -29,12 +29,12 @@ def test_get_run_start_document():
     sb = load_ScanBundlerMock()
     bls_emitter = BlueskyEmitter(sb)
     scan_id = "lkajsdl"
-    sb.sync_storage[scan_id] = {"info": {"queueID": "jdklj", "scan_number": 5}}
+    sb.sync_storage[scan_id] = {"info": {"queue_id": "jdklj", "scan_number": 5}}
     sb.scan_motors[scan_id] = [sb.device_manager.devices.samx, sb.device_manager.devices.samy]
 
     data = bls_emitter._get_run_start_document(scan_id)
 
-    assert all(key in data for key in ["time", "uid", "scan_id", "queueID", "scan_id", "motors"])
+    assert all(key in data for key in ["time", "uid", "scan_id", "queue_id", "scan_id", "motors"])
     assert data["motors"] == ("samx", "samy")
     assert data["scan_id"] == 5
 

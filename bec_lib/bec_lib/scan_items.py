@@ -37,14 +37,14 @@ class ScanItem:
     def __init__(
         self,
         scan_manager: ScanManager,
-        queueID: str,
+        queue_id: str,
         scan_number: list,
         scan_id: list,
         status: str,
         **_kwargs,
     ) -> None:
         self.scan_manager = scan_manager
-        self._queueID = queueID
+        self._queue_id = queue_id
         self.scan_number = scan_number
         self.scan_id = scan_id
         self.status = status
@@ -64,7 +64,7 @@ class ScanItem:
     @property
     def queue(self):
         """get the queue item for the current scan item"""
-        return self.scan_manager.queue_storage.find_queue_item_by_ID(self._queueID)
+        return self.scan_manager.queue_storage.find_queue_item_by_ID(self._queue_id)
 
     def emit_data(self, scan_msg: messages.ScanMessage) -> None:
         self.bec.callbacks.run("scan_segment", scan_msg.content, scan_msg.metadata)
@@ -263,9 +263,9 @@ class ScanStorage:
             time.sleep(0.01)
 
     @threadlocked
-    def add_scan_item(self, queueID: str, scan_number: list, scan_id: list, status: str):
+    def add_scan_item(self, queue_id: str, scan_number: list, scan_id: list, status: str):
         """append new scan item to scan storage"""
-        self.storage.append(ScanItem(self.scan_manager, queueID, scan_number, scan_id, status))
+        self.storage.append(ScanItem(self.scan_manager, queue_id, scan_number, scan_id, status))
 
     @threadlocked
     def update_with_queue_status(self, queue_msg: messages.ScanQueueStatusMessage):
@@ -285,7 +285,7 @@ class ScanStorage:
 
                 logger.debug(f"Appending new scan: {queue_item}")
                 self.add_scan_item(
-                    queueID=queue_item["queueID"],
+                    queue_id=queue_item["queue_id"],
                     scan_number=queue_item["scan_number"][ii],
                     scan_id=queue_item["scan_id"][ii],
                     status=queue_item["status"],

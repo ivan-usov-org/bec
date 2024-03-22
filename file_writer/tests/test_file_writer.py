@@ -123,7 +123,7 @@ def test_create_device_data_storage():
             {
                 "RID": "5ee455b8-d0ef-452d-b54a-e7cea5cea19e",
                 "scan_id": "a9fb36e4-3f38-486c-8434-c8eca19472ba",
-                "queueID": "14463a5b-1c65-4888-8f87-4808c90a241f",
+                "queue_id": "14463a5b-1c65-4888-8f87-4808c90a241f",
                 "primary": ["samx"],
                 "num_points": 2,
                 "positions": [[-100], [100]],

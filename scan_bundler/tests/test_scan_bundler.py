@@ -91,7 +91,7 @@ def test_device_read_callback():
                 info={
                     "scan_motors": ["samx"],
                     "readout_priority": {"monitored": ["samx"], "baseline": [], "on_request": []},
-                    "queueID": "my-queue-ID",
+                    "queue_id": "my-queue-ID",
                     "scan_number": 5,
                     "scan_type": "step",
                 },
@@ -106,7 +106,7 @@ def test_device_read_callback():
                 info={
                     "scan_motors": ["samx"],
                     "readout_priority": {"monitored": ["samx"], "baseline": [], "on_request": []},
-                    "queueID": "my-queue-ID",
+                    "queue_id": "my-queue-ID",
                     "scan_number": 5,
                     "scan_type": "step",
                 },
@@ -287,7 +287,7 @@ def test_add_device_to_storage_baseline(msg, scan_type):
                 "primary": {
                     "info": [
                         {
-                            "queueID": "7c15c9a2-71d4-4f2a-91a7-c4a63088fa38",
+                            "queue_id": "7c15c9a2-71d4-4f2a-91a7-c4a63088fa38",
                             "scan_id": ["bfa582aa-f9cd-4258-ab5d-3e5d54d3dde5"],
                             "is_scan": [True],
                             "request_blocks": [
@@ -348,7 +348,7 @@ def test_scan_queue_callback(queue_msg):
                 "DIID": 4,
                 "RID": "a53538b4-79f3-4132-91b5-d044e438f460",
                 "scan_id": "3ea07f69-b0ee-44fa-8451-b85824a37397",
-                "queueID": "84e5bc19-e2fc-4b03-b706-004420322813",
+                "queue_id": "84e5bc19-e2fc-4b03-b706-004420322813",
                 "primary": ["samx", "samy"],
                 "num_points": 143,
             },
@@ -377,7 +377,7 @@ def test_scan_status_callback(scan_msg):
                     "DIID": 4,
                     "RID": "a53538b4-79f3-4132-91b5-d044e438f460",
                     "scan_id": "3ea07f69-b0ee-44fa-8451-b85824a37397",
-                    "queueID": "84e5bc19-e2fc-4b03-b706-004420322813",
+                    "queue_id": "84e5bc19-e2fc-4b03-b706-004420322813",
                     "primary": ["samx", "samy"],
                     "num_points": 143,
                 },
@@ -393,7 +393,7 @@ def test_scan_status_callback(scan_msg):
                     "DIID": 4,
                     "RID": "a53538b4-79f3-4132-91b5-d044e438f460",
                     "scan_id": "3ea07f69-b0ee-44fa-8451-b85824a37397",
-                    "queueID": "84e5bc19-e2fc-4b03-b706-004420322813",
+                    "queue_id": "84e5bc19-e2fc-4b03-b706-004420322813",
                     "primary": ["samx", "samy"],
                     "num_points": 143,
                 },
@@ -430,7 +430,12 @@ def test_status_modification():
     msg = messages.ScanStatusMessage(
         scan_id=scan_id,
         status="closed",
-        info={"primary": ["samx"], "queueID": "my-queue-ID", "scan_number": 5, "scan_type": "step"},
+        info={
+            "primary": ["samx"],
+            "queue_id": "my-queue-ID",
+            "scan_number": 5,
+            "scan_type": "step",
+        },
     )
     scan_bundler._scan_status_modification(msg)
     assert scan_bundler.sync_storage[scan_id]["status"] == "closed"
@@ -439,7 +444,12 @@ def test_status_modification():
     msg = messages.ScanStatusMessage(
         scan_id=scan_id,
         status="closed",
-        info={"primary": ["samx"], "queueID": "my-queue-ID", "scan_number": 5, "scan_type": "step"},
+        info={
+            "primary": ["samx"],
+            "queue_id": "my-queue-ID",
+            "scan_number": 5,
+            "scan_type": "step",
+        },
     )
     scan_bundler._scan_status_modification(msg)
     assert scan_bundler.sync_storage[scan_id]["info"] == {}
@@ -456,7 +466,7 @@ def test_status_modification():
                 "DIID": 4,
                 "RID": "a53538b4-79f3-4132-91b5-d044e438f460",
                 "scan_id": "3ea07f69-b0ee-44fa-8451-b85824a37397",
-                "queueID": "84e5bc19-e2fc-4b03-b706-004420322813",
+                "queue_id": "84e5bc19-e2fc-4b03-b706-004420322813",
                 "scan_number": 5,
                 "scan_motors": ["samx", "samy"],
                 "readout_priority": {
@@ -475,7 +485,7 @@ def test_status_modification():
                 "DIID": 4,
                 "RID": "a53538b4-79f3-4132-91b5-d044e438f460",
                 "scan_id": "3ea07f69-b0ee-44fa-8451-b85824a37397",
-                "queueID": "84e5bc19-e2fc-4b03-b706-004420322813",
+                "queue_id": "84e5bc19-e2fc-4b03-b706-004420322813",
                 "scan_number": 5,
                 "scan_motors": ["samx", "samy", "eyex", "bpm3a"],
                 "readout_priority": {

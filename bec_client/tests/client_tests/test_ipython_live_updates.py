@@ -21,7 +21,7 @@ def test_live_updates_process_queue_pending(bec_client):
     )
     queue = QueueItem(
         scan_manager=client.queue,
-        queueID="queueID",
+        queue_id="queue_id",
         request_blocks=[request_msg],
         status="PENDING",
         active_request_block={},
@@ -59,7 +59,7 @@ def test_live_updates_process_queue_running(bec_client):
     )
     queue = QueueItem(
         scan_manager=client.queue,
-        queueID="queueID",
+        queue_id="queue_id",
         request_blocks=[request_msg],
         status="RUNNING",
         active_request_block={},
@@ -103,7 +103,7 @@ def test_live_updates_process_queue_without_status(bec_client):
     )
     queue = QueueItem(
         scan_manager=client.queue,
-        queueID="queueID",
+        queue_id="queue_id",
         request_blocks=[request_msg],
         status=None,
         active_request_block={},
@@ -130,7 +130,7 @@ def test_live_updates_process_queue_without_queue_number(bec_client):
     ) as queue_pos:
         queue = QueueItem(
             scan_manager=client.queue,
-            queueID="queueID",
+            queue_id="queue_id",
             request_blocks=[request_msg],
             status="PENDING",
             active_request_block={},

@@ -256,7 +256,7 @@ class QueueManager:
         console = Console()
         for queue_name, scan_queue in self.queues.items():
             table = Table(title=f"{queue_name} queue / {scan_queue.status}")
-            table.add_column("queueID", justify="center")
+            table.add_column("queue_id", justify="center")
             table.add_column("scan_id", justify="center")
             table.add_column("is_scan", justify="center")
             table.add_column("type", justify="center")
@@ -834,7 +834,7 @@ class InstructionQueueItem:
         """description of the instruction queue"""
         request_blocks = [rb.describe() for rb in self.queue.request_blocks]
         content = {
-            "queueID": self.queue_id,
+            "queue_id": self.queue_id,
             "scan_id": self.scan_id,
             "is_scan": self.is_scan,
             "request_blocks": request_blocks,
@@ -849,7 +849,7 @@ class InstructionQueueItem:
     def append_to_queue_history(self):
         """append a new queue item to the redis history buffer"""
         msg = messages.ScanQueueHistoryMessage(
-            status=self.status.name, queueID=self.queue_id, info=self.describe()
+            status=self.status.name, queue_id=self.queue_id, info=self.describe()
         )
         self.parent.queue_manager.connector.lpush(
             MessageEndpoints.scan_queue_history(), msg, max_size=100
@@ -880,7 +880,7 @@ class InstructionQueueItem:
                     self.queue.scan_def_ids.pop(scan_def_id)
 
             instr.metadata["scan_id"] = self.queue.active_rb.scan_id
-            instr.metadata["queueID"] = self.queue_id
+            instr.metadata["queue_id"] = self.queue_id
             self.set_active()
             return instr
 

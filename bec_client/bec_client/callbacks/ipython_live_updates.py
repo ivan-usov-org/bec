@@ -4,20 +4,18 @@ import collections
 import time
 from typing import TYPE_CHECKING
 
+from bec_client.callbacks.scan_progress import LiveUpdatesScanProgress
 from bec_lib import bec_logger
 from bec_lib.bec_errors import ScanInterruption
-
-from bec_client.callbacks.scan_progress import LiveUpdatesScanProgress
 
 from .live_table import LiveUpdatesTable
 from .move_device import LiveUpdatesReadbackProgressbar
 from .utils import ScanRequestMixin, check_alarms
 
 if TYPE_CHECKING:
+    from bec_client import BECClient
     from bec_lib import messages
     from bec_lib.queue_items import QueueItem
-
-    from bec_client import BECClient
 
 logger = bec_logger.logger
 
@@ -193,7 +191,7 @@ class IPythonLiveUpdates:
         )
         if not queue:
             return False
-        return self._current_queue.queueID in queue[0].get("queueID")
+        return self._current_queue.queue_id in queue[0].get("queue_id")
 
     def _process_queue(
         self, queue: QueueItem, request: messages.ScanQueueMessage, req_id: str

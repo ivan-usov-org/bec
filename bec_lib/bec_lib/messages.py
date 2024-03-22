@@ -122,7 +122,7 @@ class ScanQueueHistoryMessage(BECMessage):
     Sent by the API server / user to the scan_queue topic. It will be consumed by the scan server.
     Args:
         status(str):  current scan status
-        queueID(str): unique queue ID
+        queue_id(str): unique queue ID
         info(dict): dictionary containing additional information about the scan
         queue (str): either "primary" or "interception"
         metadata (dict, optional): additional metadata to describe the scan
@@ -130,7 +130,7 @@ class ScanQueueHistoryMessage(BECMessage):
 
     msg_type = "queue_history"
     status: str
-    queueID: str
+    queue_id: str
     info: dict
     queue: str = field(default="primary")
     metadata: dict = field(default_factory=dict)
@@ -247,7 +247,7 @@ class DeviceMessage(BECMessage):
         signals (dict): dictionary of device signals
         metadata (dict, optional): metadata to describe the conditions of the device reading
     Examples:
-        >>> BECMessage.DeviceMessage(signals={'samx': {'value': 14.999033949016491, 'timestamp': 1686385306.0265112}, 'samx_setpoint': {'value': 15.0, 'timestamp': 1686385306.016806}, 'samx_motor_is_moving': {'value': 0, 'timestamp': 1686385306.026888}}}, metadata={'stream': 'primary', 'DIID': 353, 'RID': 'd3471acc-309d-43b7-8ff8-f986c3fdecf1', 'pointID': 49, 'scan_id': '8e234698-358e-402d-a272-73e168a72f66', 'queueID': '7a232746-6c90-44f5-81f5-74ab0ea22d4a'})
+        >>> BECMessage.DeviceMessage(signals={'samx': {'value': 14.999033949016491, 'timestamp': 1686385306.0265112}, 'samx_setpoint': {'value': 15.0, 'timestamp': 1686385306.016806}, 'samx_motor_is_moving': {'value': 0, 'timestamp': 1686385306.026888}}}, metadata={'stream': 'primary', 'DIID': 353, 'RID': 'd3471acc-309d-43b7-8ff8-f986c3fdecf1', 'pointID': 49, 'scan_id': '8e234698-358e-402d-a272-73e168a72f66', 'queue_id': '7a232746-6c90-44f5-81f5-74ab0ea22d4a'})
     """
 
     msg_type = "device_message"

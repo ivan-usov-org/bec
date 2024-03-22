@@ -104,7 +104,7 @@ class SciBecMetadataHandler:
                 "owner": scibec_info["activeExperiment"]["owner"],
                 "scanType": info.get("scan_name", ""),
                 "scanId": info.get("scan_id", ""),
-                "queueId": info.get("queueID", ""),
+                "queueId": info.get("queue_id", ""),
                 "requestId": info.get("RID", ""),
                 "exitStatus": msg.content["status"],
                 # "queue": info.get("stream", ""),

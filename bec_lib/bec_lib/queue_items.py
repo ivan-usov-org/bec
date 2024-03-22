@@ -38,7 +38,7 @@ class QueueItem:
     def __init__(
         self,
         scan_manager: ScanManager,
-        queueID: str,
+        queue_id: str,
         request_blocks: list,
         status: str,
         active_request_block: dict,
@@ -46,7 +46,7 @@ class QueueItem:
         **_kwargs,
     ) -> None:
         self.scan_manager = scan_manager
-        self.queueID = queueID
+        self.queue_id = queue_id
         self.request_blocks = request_blocks
         self._status = status
         self.active_request_block = active_request_block
@@ -83,12 +83,12 @@ class QueueItem:
         current_queue = self.scan_manager.queue_storage.current_scan_queue
         queue_info = current_queue["primary"].get("info")
         for queue_item in queue_info:
-            if queue_item["queueID"] == self.queueID:
+            if queue_item["queue_id"] == self.queue_id:
                 self.update_queue_item(queue_item)
                 return
         history = self.scan_manager.queue_storage.queue_history
         for queue_item in history:
-            if queue_item.content["queueID"] == self.queueID:
+            if queue_item.content["queue_id"] == self.queue_id:
                 self.update_queue_item(queue_item.content["info"])
                 return
 
@@ -107,7 +107,7 @@ class QueueItem:
             if not isinstance(queue_group, dict):
                 continue
             for queue_position, queue in enumerate(queue_group["info"]):
-                if self.queueID == queue["queueID"]:
+                if self.queue_id == queue["queue_id"]:
                     return queue_position
         return None
 
@@ -145,7 +145,7 @@ class QueueStorage:
         console = Console()
         for queue_name, scan_queue in self.current_scan_queue.items():
             table = Table(title=f"{queue_name} queue / {scan_queue.get('status')}")
-            table.add_column("queueID", justify="center")
+            table.add_column("queue_id", justify="center")
             table.add_column("scan_id", justify="center")
             table.add_column("is_scan", justify="center")
             table.add_column("type", justify="center")
@@ -157,7 +157,7 @@ class QueueStorage:
                     msg.get("content") for msg in instruction_queue.get("request_blocks", [])
                 ]
                 table.add_row(
-                    instruction_queue.get("queueID"),
+                    instruction_queue.get("queue_id"),
                     ", ".join([str(s) for s in instruction_queue.get("scan_id")]),
                     ", ".join([str(s) for s in instruction_queue.get("is_scan")]),
                     ", ".join([msg["scan_type"] for msg in scan_msgs]),
@@ -176,17 +176,17 @@ class QueueStorage:
         self._update_queue_history()
         queue_info = queue_msg.content["queue"]["primary"].get("info")
         for queue_item in queue_info:
-            queue = self.find_queue_item_by_ID(queueID=queue_item["queueID"])
+            queue = self.find_queue_item_by_ID(queue_id=queue_item["queue_id"])
             if queue:
                 queue.update_queue_item(queue_item)
                 continue
             self.storage.append(QueueItem(scan_manager=self.scan_manager, **queue_item))
 
     @threadlocked
-    def find_queue_item_by_ID(self, queueID: str) -> QueueItem | None:
-        """find a queue item based on its queueID"""
+    def find_queue_item_by_ID(self, queue_id: str) -> QueueItem | None:
+        """find a queue item based on its queue_id"""
         for queue_item in self.storage:
-            if queue_item.queueID == queueID:
+            if queue_item.queue_id == queue_id:
                 return queue_item
         return None
 

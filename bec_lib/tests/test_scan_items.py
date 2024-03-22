@@ -24,7 +24,7 @@ from bec_lib.tests.utils import ConnectorMock
                 "primary": {
                     "info": [
                         {
-                            "queueID": "7c15c9a2-71d4-4f2a-91a7-c4a63088fa38",
+                            "queue_id": "7c15c9a2-71d4-4f2a-91a7-c4a63088fa38",
                             "scan_id": ["bfa582aa-f9cd-4258-ab5d-3e5d54d3dde5"],
                             "is_scan": [True],
                             "request_blocks": [
@@ -73,7 +73,7 @@ def test_update_with_queue_status(queue_msg):
 
 def test_scan_item_to_pandas():
     scan_manager = ScanManager(ConnectorMock(""))
-    scan_item = ScanItem(scan_manager, "queueID", [1], ["scan_id"], "status")
+    scan_item = ScanItem(scan_manager, "queue_id", [1], ["scan_id"], "status")
     scan_item.data = ScanData()
     data = {
         0: messages.ScanMessage(
@@ -96,7 +96,7 @@ def test_scan_item_to_pandas():
 
 def test_scan_item_to_pandas_empty_data():
     scan_manager = ScanManager(ConnectorMock(""))
-    scan_item = ScanItem(scan_manager, "queueID", [1], ["scan_id"], "status")
+    scan_item = ScanItem(scan_manager, "queue_id", [1], ["scan_id"], "status")
     scan_item.data = ScanData()
 
     df = scan_item.to_pandas()
@@ -106,7 +106,7 @@ def test_scan_item_to_pandas_empty_data():
 def test_scan_item_to_pandas_raises_without_pandas_installed():
     """Test that to_pandas raises an ImportError if pandas is not installed."""
     scan_manager = ScanManager(ConnectorMock(""))
-    scan_item = ScanItem(scan_manager, "queueID", [1], ["scan_id"], "status")
+    scan_item = ScanItem(scan_manager, "queue_id", [1], ["scan_id"], "status")
 
     with mock.patch.dict("sys.modules"):
         del sys.modules["pandas"]
@@ -116,7 +116,7 @@ def test_scan_item_to_pandas_raises_without_pandas_installed():
 
 def test_scan_item_str():
     scan_manager = ScanManager(ConnectorMock(""))
-    scan_item = ScanItem(scan_manager, "queueID", [1], ["scan_id"], "status")
+    scan_item = ScanItem(scan_manager, "queue_id", [1], ["scan_id"], "status")
     start_time = "Fri Jun 23 15:11:06 2023"
     # convert to datetime string to timestamp
     scan_item.start_time = time.mktime(
@@ -134,13 +134,13 @@ def test_scan_item_str():
 
 def test_scan_item_str_plain():
     scan_manager = ScanManager(ConnectorMock(""))
-    scan_item = ScanItem(scan_manager, "queueID", [1], ["scan_id"], "status")
+    scan_item = ScanItem(scan_manager, "queue_id", [1], ["scan_id"], "status")
     assert str(scan_item) == "ScanItem:\n \tScan ID: ['scan_id']\n\tScan number: [1]\n"
 
 
 def test_emit_data():
     scan_manager = ScanManager(ConnectorMock(""))
-    scan_item = ScanItem(scan_manager, "queueID", [1], ["scan_id"], "status")
+    scan_item = ScanItem(scan_manager, "queue_id", [1], ["scan_id"], "status")
     scan_item.bec = mock.Mock()
     scan_item.bec.callbacks = mock.Mock()
     scan_item._run_request_callbacks = mock.Mock()
@@ -154,7 +154,7 @@ def test_emit_data():
 
 def test_emit_status():
     scan_manager = ScanManager(ConnectorMock(""))
-    scan_item = ScanItem(scan_manager, "queueID", [1], ["scan_id"], "status")
+    scan_item = ScanItem(scan_manager, "queue_id", [1], ["scan_id"], "status")
     scan_item.bec = mock.Mock()
     scan_item.bec.callbacks = mock.Mock()
     scan_item._run_request_callbacks = mock.Mock()
@@ -168,9 +168,9 @@ def test_emit_status():
 
 def test_run_request_callbacks():
     scan_manager = ScanManager(ConnectorMock(""))
-    scan_item = ScanItem(scan_manager, "queueID", [1], ["scan_id"], "status")
+    scan_item = ScanItem(scan_manager, "queue_id", [1], ["scan_id"], "status")
     queue_item = QueueItem(
-        scan_manager, "queueID", [{"RID": "requestID"}], "status", None, ["scan_id"]
+        scan_manager, "queue_id", [{"RID": "requestID"}], "status", None, ["scan_id"]
     )
     with mock.patch("bec_lib.queue_items.update_queue") as mock_update_queue:
         with mock.patch.object(queue_item, "_update_with_buffer") as mock_update_buffer:
@@ -189,9 +189,9 @@ def test_run_request_callbacks():
 
 def test_poll_callbacks():
     scan_manager = ScanManager(ConnectorMock(""))
-    scan_item = ScanItem(scan_manager, "queueID", [1], ["scan_id"], "status")
+    scan_item = ScanItem(scan_manager, "queue_id", [1], ["scan_id"], "status")
     queue_item = QueueItem(
-        scan_manager, "queueID", [{"RID": "requestID"}], "status", None, ["scan_id"]
+        scan_manager, "queue_id", [{"RID": "requestID"}], "status", None, ["scan_id"]
     )
     with mock.patch("bec_lib.queue_items.update_queue") as mock_update_queue:
         with mock.patch.object(queue_item, "_update_with_buffer") as mock_update_buffer:
@@ -208,15 +208,15 @@ def test_poll_callbacks():
 
 def test_scan_item_eq():
     scan_manager = ScanManager(ConnectorMock(""))
-    scan_item1 = ScanItem(scan_manager, "queueID", [1], ["scan_id"], "status")
-    scan_item2 = ScanItem(scan_manager, "queueID", [1], ["scan_id"], "status")
+    scan_item1 = ScanItem(scan_manager, "queue_id", [1], ["scan_id"], "status")
+    scan_item2 = ScanItem(scan_manager, "queue_id", [1], ["scan_id"], "status")
     assert scan_item1 == scan_item2
 
 
 def test_scan_item_neq():
     scan_manager = ScanManager(ConnectorMock(""))
-    scan_item1 = ScanItem(scan_manager, "queueID", [1], ["scan_id"], "status")
-    scan_item2 = ScanItem(scan_manager, "queueID", [1], ["scan_id"], "status")
+    scan_item1 = ScanItem(scan_manager, "queue_id", [1], ["scan_id"], "status")
+    scan_item2 = ScanItem(scan_manager, "queue_id", [1], ["scan_id"], "status")
     scan_item2.scan_id = ["scan_id2"]
     assert scan_item1 != scan_item2
 

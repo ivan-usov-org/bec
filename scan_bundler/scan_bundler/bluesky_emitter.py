@@ -37,7 +37,7 @@ class BlueskyEmitter(EmitterBase):
             "time": time.time(),
             "uid": str(uuid.uuid4()),
             "scan_id": scan_id,
-            "queueID": sb.sync_storage[scan_id]["info"]["queueID"],
+            "queue_id": sb.sync_storage[scan_id]["info"]["queue_id"],
             "scan_id": sb.sync_storage[scan_id]["info"]["scan_number"],
             "motors": tuple(dev.name for dev in sb.scan_motors[scan_id]),
         }

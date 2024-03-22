@@ -385,7 +385,7 @@ class ScanReportMock(ScanReport):
     [
         "scan_id",
         ScanItem(
-            mock.MagicMock(), queueID="queueID", scan_id="scan_id", scan_number=1, status="closed"
+            mock.MagicMock(), queue_id="queue_id", scan_id="scan_id", scan_number=1, status="closed"
         ),
         ScanReportMock("scan_id"),
     ],
