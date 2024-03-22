@@ -61,6 +61,7 @@ if __name__ == "__main__":
                 "pytest-retry",
                 "coverage",
                 "black",
+                "isort",
                 "pylint",
             ]
         },

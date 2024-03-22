@@ -54,13 +54,7 @@ if __name__ == "__main__":
         "install_requires": ["libtmux"],
         "version": __version__,
         "extras_require": {
-            "dev": [
-                "pytest",
-                "pytest-random-order",
-                "coverage",
-                "black",
-                "pylint",
-            ]
+            "dev": ["pytest", "pytest-random-order", "coverage", "black", "isort", "pylint"]
         },
     }
 

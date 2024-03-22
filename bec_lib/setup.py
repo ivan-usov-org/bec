@@ -31,6 +31,7 @@ if __name__ == "__main__":
                 "coverage",
                 "pandas",
                 "black",
+                "isort",
                 "pylint",
                 "fakeredis",
             ]
