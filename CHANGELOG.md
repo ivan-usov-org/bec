@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v1.21.1 (2024-03-22)
+
+### Fix
+
+* Fixed cleanup execution ([`fd02675`](https://gitlab.psi.ch/bec/bec/-/commit/fd02675256bd5160c8d658871019bff3705d60cd))
+* **bec_client:** Report cleanup ([`e7e5413`](https://gitlab.psi.ch/bec/bec/-/commit/e7e5413ac4e0e6f829797c314f558a26accc78be))
+* **scan_server:** Shut down scan if scan worker is stopped ([`9e626a0`](https://gitlab.psi.ch/bec/bec/-/commit/9e626a0c2fd15e77259fc8a1c32fc97892e5a830))
+
 ## v1.21.0 (2024-03-21)
 
 ### Feature
