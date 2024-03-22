@@ -62,6 +62,7 @@ if __name__ == "__main__":
                 "pytest-redis",
                 "coverage",
                 "black",
+                "isort",
                 "pylint",
             ]
         },

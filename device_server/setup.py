@@ -46,12 +46,11 @@ if __name__ == "__main__":
         "entry_points": {"console_scripts": ["bec-device-server = device_server:main"]},
         "install_requires": ["numpy", "ophyd", "msgpack", "pyyaml"],
         "version": __version__,
-        "extras_require": {"dev": ["pytest", "pytest-random-order", "coverage", "black", "pylint"]},
+        "extras_require": {
+            "dev": ["pytest", "pytest-random-order", "coverage", "black", "isort", "pylint"]
+        },
     }
-    bec_deps = [
-        ("bec_lib", "bec_lib", bec_lib),
-        ("ophyd_devices", "ophyd_devices", ophyd_devices),
-    ]
+    bec_deps = [("bec_lib", "bec_lib", bec_lib), ("ophyd_devices", "ophyd_devices", ophyd_devices)]
     is_local = os.path.dirname(os.path.abspath(__file__)).split("/")[-1] == "device_server"
     is_build = "bdist_wheel" in sys.argv
 

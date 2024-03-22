@@ -45,7 +45,9 @@ if __name__ == "__main__":
         "entry_points": {"console_scripts": ["bec-scihub = scihub:main"]},
         "install_requires": ["msgpack", "python-dotenv", "py-scibec"],
         "version": __version__,
-        "extras_require": {"dev": ["pytest", "pytest-random-order", "coverage", "black", "pylint"]},
+        "extras_require": {
+            "dev": ["pytest", "pytest-random-order", "coverage", "black", "isort", "pylint"]
+        },
     }
     bec_deps_in = [("bec_lib", "bec_lib", bec_lib)]
     is_local = os.path.dirname(os.path.abspath(__file__)).split("/")[-1] == "scihub"

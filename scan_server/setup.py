@@ -44,11 +44,11 @@ if __name__ == "__main__":
         "entry_points": {"console_scripts": ["bec-scan-server = scan_server:main"]},
         "install_requires": ["numpy", "msgpack", "pyyaml", "cytoolz", "rich"],
         "version": __version__,
-        "extras_require": {"dev": ["pytest", "pytest-random-order", "coverage", "black", "pylint"]},
+        "extras_require": {
+            "dev": ["pytest", "pytest-random-order", "coverage", "black", "isort", "pylint"]
+        },
     }
-    bec_deps_in = [
-        ("bec_lib", "bec_lib", bec_lib),
-    ]
+    bec_deps_in = [("bec_lib", "bec_lib", bec_lib)]
     is_local = os.path.dirname(os.path.abspath(__file__)).split("/")[-1] == "scan_server"
     is_build = "bdist_wheel" in sys.argv
 
