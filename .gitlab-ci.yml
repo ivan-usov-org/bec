@@ -6,6 +6,7 @@ image: $CI_DOCKER_REGISTRY/python:3.10
 variables:
   DOCKER_TLS_CERTDIR: ""
   OPHYD_DEVICES_BRANCH: "master"
+  BEC_WIDGETS_BRANCH: "master"
 
 workflow:
   rules:
@@ -371,7 +372,10 @@ trigger_bec-widgets:
   trigger:
     project: bec/bec-widgets
     strategy: depend
+  variables:
+    BEC_CORE_BRANCH: $CI_COMMIT_REF_NAME
   rules:
+    - if: '$CI_PIPELINE_SOURCE == "web"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
 
@@ -379,7 +383,10 @@ trigger_ophyd-devices:
   trigger:
     project: bec/ophyd_devices
     strategy: depend
+  variables:
+    BEC_CORE_BRANCH: $CI_COMMIT_REF_NAME
   rules:
+    - if: '$CI_PIPELINE_SOURCE == "web"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
 
