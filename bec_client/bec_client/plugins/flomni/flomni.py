@@ -1325,7 +1325,7 @@ class Flomni(
             return
         dev = builtins.__dict__.get("dev")
         bec = builtins.__dict__.get("bec")
-        tags = ["alignment", self.sample_name]
+        tags = ["BEC_alignment_tomo", self.sample_name]
         self.write_to_scilog(
             f"Starting alignment scan. First scan number: {bec.queue.next_scan_number}.", tags
         )
@@ -1340,7 +1340,6 @@ class Flomni(
                 print(f"Starting flOMNI scan for angle {angle}")
                 while not successful:
                     self._start_beam_check()
-
                     try:
                         start_scan_number = bec.queue.next_scan_number
                         self.tomo_scan_projection(angle)
@@ -1455,16 +1454,19 @@ class Flomni(
 
         if subtomo_start == 1 and start_angle is None:
             # pylint: disable=undefined-variable
-            self.tomo_id = self.add_sample_database(
-                self.sample_name,
-                str(datetime.date.today()),
-                bec.active_account.decode(),
-                bec.queue.next_scan_number,
-                "flomni",
-                "test additional info",
-                "BEC",
-            )
-            self.write_pdf_report()
+            if bec.active_account != "":
+                self.tomo_id = self.add_sample_database(
+                    self.sample_name,
+                    str(datetime.date.today()),
+                    bec.active_account.decode(),
+                    bec.queue.next_scan_number,
+                    "flomni",
+                    "test additional info",
+                    "BEC",
+                )
+                self.write_pdf_report()
+            else:
+                self.tomo_id = 0
         with scans.dataset_id_on_hold:
             for ii in range(subtomo_start, 9):
                 self.sub_tomo_scan(ii, start_angle=start_angle)
