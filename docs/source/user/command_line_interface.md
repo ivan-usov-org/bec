@@ -352,7 +352,7 @@ For example, we might want to run a grid scan (2D scan) with our sample motor st
 Normally, this would create multiple output files that one would need to merge together later. 
 
 This is where the scan definition comes in. 
-It allows us to run a sequence of functions as if it were a scan, resulting in a single `scan_number`, a single `scanID` and a single output file. 
+It allows us to run a sequence of functions as if it were a scan, resulting in a single `scan_number`, a single `scan_id` and a single output file. 
 
 ```python
 

@@ -42,7 +42,7 @@ class QueueItem:
         request_blocks: list,
         status: str,
         active_request_block: dict,
-        scanID: list[str],
+        scan_id: list[str],
         **_kwargs,
     ) -> None:
         self.scan_manager = scan_manager
@@ -50,13 +50,15 @@ class QueueItem:
         self.request_blocks = request_blocks
         self._status = status
         self.active_request_block = active_request_block
-        self.scanIDs = scanID
+        self.scan_ids = scan_id
 
     @property
     @update_queue
     def scans(self) -> list[ScanItem]:
         """get the scans items assigned to the current queue item"""
-        return [self.scan_manager.scan_storage.find_scan_by_ID(scanID) for scanID in self.scanIDs]
+        return [
+            self.scan_manager.scan_storage.find_scan_by_ID(scan_id) for scan_id in self.scan_ids
+        ]
 
     @property
     @update_queue
@@ -95,7 +97,7 @@ class QueueItem:
         self.request_blocks = queue_item.get("request_blocks")
         self._status = queue_item.get("status")
         self.active_request_block = queue_item.get("active_request_block")
-        self.scanIDs = queue_item.get("scanID")
+        self.scan_ids = queue_item.get("scan_id")
 
     @property
     def queue_position(self) -> int | None:
@@ -144,7 +146,7 @@ class QueueStorage:
         for queue_name, scan_queue in self.current_scan_queue.items():
             table = Table(title=f"{queue_name} queue / {scan_queue.get('status')}")
             table.add_column("queueID", justify="center")
-            table.add_column("scanID", justify="center")
+            table.add_column("scan_id", justify="center")
             table.add_column("is_scan", justify="center")
             table.add_column("type", justify="center")
             table.add_column("scan_number", justify="center")
@@ -156,7 +158,7 @@ class QueueStorage:
                 ]
                 table.add_row(
                     instruction_queue.get("queueID"),
-                    ", ".join([str(s) for s in instruction_queue.get("scanID")]),
+                    ", ".join([str(s) for s in instruction_queue.get("scan_id")]),
                     ", ".join([str(s) for s in instruction_queue.get("is_scan")]),
                     ", ".join([msg["scan_type"] for msg in scan_msgs]),
                     ", ".join([str(s) for s in instruction_queue.get("scan_number")]),
@@ -197,9 +199,9 @@ class QueueStorage:
         return None
 
     @threadlocked
-    def find_queue_item_by_scanID(self, scanID: str) -> QueueItem | None:
-        """find a queue item based on its scanID"""
+    def find_queue_item_by_scan_id(self, scan_id: str) -> QueueItem | None:
+        """find a queue item based on its scan_id"""
         for queue_item in self.storage:
-            if scanID in queue_item.scans:
+            if scan_id in queue_item.scans:
                 return queue_item
         return None

@@ -59,69 +59,69 @@ class ScanManager:
         self.queue_storage.update_with_status(queue)
         self.scan_storage.update_with_queue_status(queue)
 
-    def request_scan_interruption(self, deferred_pause=True, scanID: str = None) -> None:
+    def request_scan_interruption(self, deferred_pause=True, scan_id: str = None) -> None:
         """request a scan interruption
 
         Args:
             deferred_pause (bool, optional): Request a deferred pause. If False, a pause will be requested. Defaults to True.
-            scanID (str, optional): ScanID. Defaults to None.
+            scan_id (str, optional): ScanID. Defaults to None.
 
         """
-        if scanID is None:
-            scanID = self.scan_storage.current_scanID
-        if not any(scanID):
+        if scan_id is None:
+            scan_id = self.scan_storage.current_scan_id
+        if not any(scan_id):
             return self.request_scan_abortion()
 
         action = "deferred_pause" if deferred_pause else "pause"
         logger.info(f"Requesting {action}")
         return self.connector.send(
             MessageEndpoints.scan_queue_modification_request(),
-            messages.ScanQueueModificationMessage(scanID=scanID, action=action, parameter={}),
+            messages.ScanQueueModificationMessage(scan_id=scan_id, action=action, parameter={}),
         )
 
-    def request_scan_abortion(self, scanID=None):
+    def request_scan_abortion(self, scan_id=None):
         """request a scan abortion
 
         Args:
-            scanID (str, optional): ScanID. Defaults to None.
+            scan_id (str, optional): ScanID. Defaults to None.
 
         """
-        if scanID is None:
-            scanID = self.scan_storage.current_scanID
+        if scan_id is None:
+            scan_id = self.scan_storage.current_scan_id
         logger.info("Requesting scan abortion")
         self.connector.send(
             MessageEndpoints.scan_queue_modification_request(),
-            messages.ScanQueueModificationMessage(scanID=scanID, action="abort", parameter={}),
+            messages.ScanQueueModificationMessage(scan_id=scan_id, action="abort", parameter={}),
         )
 
-    def request_scan_halt(self, scanID=None):
+    def request_scan_halt(self, scan_id=None):
         """request a scan halt
 
         Args:
-            scanID (str, optional): ScanID. Defaults to None.
+            scan_id (str, optional): ScanID. Defaults to None.
 
         """
-        if scanID is None:
-            scanID = self.scan_storage.current_scanID
+        if scan_id is None:
+            scan_id = self.scan_storage.current_scan_id
         logger.info("Requesting scan halt")
         self.connector.send(
             MessageEndpoints.scan_queue_modification_request(),
-            messages.ScanQueueModificationMessage(scanID=scanID, action="halt", parameter={}),
+            messages.ScanQueueModificationMessage(scan_id=scan_id, action="halt", parameter={}),
         )
 
-    def request_scan_continuation(self, scanID=None):
+    def request_scan_continuation(self, scan_id=None):
         """request a scan continuation
 
         Args:
-            scanID (str, optional): ScanID. Defaults to None.
+            scan_id (str, optional): ScanID. Defaults to None.
 
         """
-        if scanID is None:
-            scanID = self.scan_storage.current_scanID
+        if scan_id is None:
+            scan_id = self.scan_storage.current_scan_id
         logger.info("Requesting scan continuation")
         self.connector.send(
             MessageEndpoints.scan_queue_modification_request(),
-            messages.ScanQueueModificationMessage(scanID=scanID, action="continue", parameter={}),
+            messages.ScanQueueModificationMessage(scan_id=scan_id, action="continue", parameter={}),
         )
 
     def request_queue_reset(self):
@@ -129,13 +129,13 @@ class ScanManager:
         logger.info("Requesting a queue reset")
         self.connector.send(
             MessageEndpoints.scan_queue_modification_request(),
-            messages.ScanQueueModificationMessage(scanID=None, action="clear", parameter={}),
+            messages.ScanQueueModificationMessage(scan_id=None, action="clear", parameter={}),
         )
 
-    def request_scan_restart(self, scanID=None, requestID=None, replace=True) -> str:
+    def request_scan_restart(self, scan_id=None, requestID=None, replace=True) -> str:
         """request to restart a scan"""
-        if scanID is None:
-            scanID = self.scan_storage.current_scanID
+        if scan_id is None:
+            scan_id = self.scan_storage.current_scan_id
         if requestID is None:
             requestID = str(uuid.uuid4())
         logger.info("Requesting to abort and repeat a scan")
@@ -144,7 +144,9 @@ class ScanManager:
         self.connector.send(
             MessageEndpoints.scan_queue_modification_request(),
             messages.ScanQueueModificationMessage(
-                scanID=scanID, action="restart", parameter={"position": position, "RID": requestID}
+                scan_id=scan_id,
+                action="restart",
+                parameter={"position": position, "RID": requestID},
             ),
         )
         return requestID

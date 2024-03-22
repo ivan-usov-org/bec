@@ -2,9 +2,9 @@ from unittest import mock
 
 import numpy as np
 import pytest
+
 from bec_lib import MessageEndpoints, messages
 from bec_lib.redis_connector import MessageObject
-
 from scihub.scibec.scibec_metadata_handler import SciBecMetadataHandler
 
 
@@ -16,7 +16,7 @@ def md_handler():
 
 def test_handle_scan_status(md_handler):
     # pylint: disable=protected-access
-    msg = messages.ScanStatusMessage(scanID="scanID", status={}, info={})
+    msg = messages.ScanStatusMessage(scan_id="scan_id", status={}, info={})
     with mock.patch.object(md_handler, "update_scan_status") as mock_update_scan_status:
         md_handler._handle_scan_status(
             MessageObject(value=msg, topic="scan_status"), parent=md_handler
@@ -26,7 +26,7 @@ def test_handle_scan_status(md_handler):
 
 def test_handle_scan_status_ignores_errors(md_handler):
     # pylint: disable=protected-access
-    msg = messages.ScanStatusMessage(scanID="scanID", status={}, info={})
+    msg = messages.ScanStatusMessage(scan_id="scan_id", status={}, info={})
     with mock.patch("scihub.scibec.scibec_metadata_handler.logger") as mock_logger:
         with mock.patch.object(md_handler, "update_scan_status") as mock_update_scan_status:
             mock_update_scan_status.side_effect = Exception("test")
@@ -41,14 +41,14 @@ def test_handle_scan_status_ignores_errors(md_handler):
 
 def test_update_scan_status_returns_without_scibec(md_handler):
     # pylint: disable=protected-access
-    msg = messages.ScanStatusMessage(scanID="scanID", status={}, info={})
+    msg = messages.ScanStatusMessage(scan_id="scan_id", status={}, info={})
     md_handler.scibec_connector.scibec = None
     md_handler.update_scan_status(msg)
 
 
 def test_update_scan_status(md_handler):
     # pylint: disable=protected-access
-    msg = messages.ScanStatusMessage(scanID="scanID", status={}, info={"dataset_number": 12})
+    msg = messages.ScanStatusMessage(scan_id="scan_id", status={}, info={"dataset_number": 12})
     scibec = mock.Mock()
     md_handler.scibec_connector.scibec = scibec
     scibec_info = {
@@ -70,7 +70,9 @@ def test_update_scan_status(md_handler):
 
 def test_update_scan_status_patch(md_handler):
     # pylint: disable=protected-access
-    msg = messages.ScanStatusMessage(scanID="scanID", status="closed", info={"dataset_number": 12})
+    msg = messages.ScanStatusMessage(
+        scan_id="scan_id", status="closed", info={"dataset_number": 12}
+    )
     scibec = mock.Mock()
     md_handler.scibec_connector.scibec = scibec
     scibec_info = {
@@ -124,7 +126,7 @@ def test_update_scan_data_without_scan(md_handler):
     md_handler.scibec_connector.scibec = scibec
     type(scibec.scan.scan_controller_find()).body = mock.PropertyMock(return_value=[])
     md_handler.update_scan_data(
-        file_path="my_file.h5", data={"data": {}, "metadata": {"scanID": "scanID"}}
+        file_path="my_file.h5", data={"data": {}, "metadata": {"scan_id": "scan_id"}}
     )
 
 
@@ -138,7 +140,7 @@ def test_update_scan_data(md_handler):
         ]
     )
     md_handler.update_scan_data(
-        file_path="my_file.h5", data={"data": {}, "metadata": {"scanID": "scanID"}}
+        file_path="my_file.h5", data={"data": {}, "metadata": {"scan_id": "scan_id"}}
     )
     scibec.scan_data.scan_data_controller_create_many.assert_called_once_with(
         body=scibec.models.ScanData(
@@ -148,7 +150,7 @@ def test_update_scan_data(md_handler):
                 "owner": "owner",
                 "scanId": "id",
                 "filePath": "my_file.h5",
-                "data": {"data": {}, "metadata": {"scanID": "scanID"}},
+                "data": {"data": {}, "metadata": {"scan_id": "scan_id"}},
             }
         )
     )
@@ -165,7 +167,7 @@ def test_update_scan_data_exceeding_limit(md_handler):
         ]
     )
     data_block = {f"key_{i}": {"signal": list(range(100))} for i in range(10)}
-    data_block.update({"metadata": {"scanID": "scanID"}})
+    data_block.update({"metadata": {"scan_id": "scan_id"}})
     md_handler.update_scan_data(file_path="my_file.h5", data=data_block)
     num_calls = scibec.scan_data.scan_data_controller_create_many.call_count
     assert num_calls == 5

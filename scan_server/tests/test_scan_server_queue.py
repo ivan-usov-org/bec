@@ -3,11 +3,11 @@ import uuid
 from unittest import mock
 
 import pytest
+from utils import scan_server_mock, threads_check
+
 from bec_lib import Alarms, MessageEndpoints, messages
 from bec_lib.redis_connector import MessageObject
 from bec_lib.tests.utils import dm, dm_with_devices
-from utils import scan_server_mock, threads_check
-
 from scan_server.scan_assembler import ScanAssembler
 from scan_server.scan_queue import (
     InstructionQueueItem,
@@ -43,11 +43,11 @@ def queuemanager_mock(scan_server_mock) -> QueueManager:
 
 class RequestBlockQueueMock(RequestBlockQueue):
     request_blocks = []
-    _scanID = []
+    _scan_id = []
 
     @property
-    def scanID(self):
-        return self._scanID
+    def scan_id(self):
+        return self._scan_id
 
     def append(self, msg):
         pass
@@ -126,7 +126,7 @@ def test_queuemanager_scan_queue_callback(queuemanager_mock):
 def test_scan_queue_modification_callback(queuemanager_mock):
     queue_manager = queuemanager_mock()
     msg = messages.ScanQueueModificationMessage(
-        scanID="dummy", action="halt", parameter={}, metadata={"RID": "something"}
+        scan_id="dummy", action="halt", parameter={}, metadata={"RID": "something"}
     )
     obj = MessageObject("scan_queue_modification", msg)
     with mock.patch.object(queue_manager, "scan_interception") as scan_interception:
@@ -139,18 +139,18 @@ def test_scan_queue_modification_callback(queuemanager_mock):
 def test_scan_interception_halt(queuemanager_mock):
     queue_manager = queuemanager_mock()
     msg = messages.ScanQueueModificationMessage(
-        scanID="dummy", action="halt", parameter={}, metadata={"RID": "something"}
+        scan_id="dummy", action="halt", parameter={}, metadata={"RID": "something"}
     )
     with mock.patch.object(queue_manager, "set_halt") as set_halt:
         queue_manager.scan_interception(msg)
-        set_halt.assert_called_once_with(scanID="dummy", parameter={})
+        set_halt.assert_called_once_with(scan_id="dummy", parameter={})
 
 
 def test_set_halt(queuemanager_mock):
     queue_manager = queuemanager_mock()
     with mock.patch.object(queue_manager, "set_abort") as set_abort:
-        queue_manager.set_halt(scanID="dummy", parameter={})
-        set_abort.assert_called_once_with(scanID="dummy", queue="primary")
+        queue_manager.set_halt(scan_id="dummy", parameter={})
+        set_abort.assert_called_once_with(scan_id="dummy", queue="primary")
 
 
 def test_set_halt_disables_return_to_start(queuemanager_mock):
@@ -160,8 +160,8 @@ def test_set_halt_disables_return_to_start(queuemanager_mock):
     )
     queue_manager.queues["primary"].active_instruction_queue.return_to_start = True
     with mock.patch.object(queue_manager, "set_abort") as set_abort:
-        queue_manager.set_halt(scanID="dummy", parameter={})
-        set_abort.assert_called_once_with(scanID="dummy", queue="primary")
+        queue_manager.set_halt(scan_id="dummy", parameter={})
+        set_abort.assert_called_once_with(scan_id="dummy", queue="primary")
         assert queue_manager.queues["primary"].active_instruction_queue.return_to_start == False
 
 
@@ -267,13 +267,13 @@ def test_set_restart(queuemanager_mock):
         metadata={"RID": "something"},
     )
     queue_manager.add_to_queue(scan_queue="primary", msg=msg)
-    with mock.patch.object(queue_manager, "_get_active_scanID", return_value="new_scanID"):
+    with mock.patch.object(queue_manager, "_get_active_scan_id", return_value="new_scan_id"):
         with mock.patch.object(
             queue_manager, "_wait_for_queue_to_appear_in_history"
         ) as scan_msg_wait:
             with queue_manager._lock:
                 queue_manager.set_restart(queue="primary", parameter={"RID": "something_new"})
-            scan_msg_wait.assert_called_once_with("new_scanID", "primary")
+            scan_msg_wait.assert_called_once_with("new_scan_id", "primary")
 
 
 def test_request_block(scan_server_mock):
@@ -317,7 +317,7 @@ def test_request_block_scan_number(scan_server_mock, scan_queue_msg):
     with mock.patch.object(
         RequestBlock, "_scan_server_scan_number", new_callable=mock.PropertyMock, return_value=5
     ):
-        with mock.patch.object(RequestBlock, "scanIDs_head", return_value=0):
+        with mock.patch.object(RequestBlock, "scan_ids_head", return_value=0):
             assert request_block.scan_number == 5
 
 
@@ -330,8 +330,8 @@ def test_remove_queue_item(queuemanager_mock):
         metadata={"RID": "something"},
     )
     queue_manager.add_to_queue(scan_queue="primary", msg=msg)
-    queue_manager.queues["primary"].queue[0].queue.request_blocks[0].scanID = "random"
-    queue_manager.queues["primary"].remove_queue_item(scanID=["random"])
+    queue_manager.queues["primary"].queue[0].queue.request_blocks[0].scan_id = "random"
+    queue_manager.queues["primary"].remove_queue_item(scan_id=["random"])
     assert len(queue_manager.queues["primary"].queue) == 0
 
 
@@ -375,19 +375,19 @@ def test_scan_queue_next_instruction_queue_does_not_pop(queuemanager_mock):
 
 
 class RequestBlockMock(RequestBlock):
-    def __init__(self, msg, scanID) -> None:
-        self.scanID = scanID
+    def __init__(self, msg, scan_id) -> None:
+        self.scan_id = scan_id
         self.msg = msg
         self.scan = None
 
 
-def test_request_block_queue_scanIDs():
+def test_request_block_queue_scan_ids():
     req_block_queue = RequestBlockQueue(mock.MagicMock(), mock.MagicMock())
     rb1 = RequestBlockMock("", str(uuid.uuid4()))
     rb2 = RequestBlockMock("", str(uuid.uuid4()))
     req_block_queue.request_blocks.append(rb1)
     req_block_queue.request_blocks.append(rb2)
-    assert req_block_queue.scanID == [rb1.scanID, rb2.scanID]
+    assert req_block_queue.scan_id == [rb1.scan_id, rb2.scan_id]
 
 
 def test_request_block_queue_append():
@@ -407,7 +407,7 @@ def test_request_block_queue_append():
 
 
 @pytest.mark.parametrize(
-    "scan_queue_msg,scanID",
+    "scan_queue_msg,scan_id",
     [
         (
             messages.ScanQueueMessage(
@@ -425,7 +425,7 @@ def test_request_block_queue_append():
                 queue="primary",
                 metadata={"RID": "something", "scan_def_id": "something"},
             ),
-            "scanID1",
+            "scan_id1",
         ),
         (
             messages.ScanQueueMessage(
@@ -434,21 +434,21 @@ def test_request_block_queue_append():
                 queue="primary",
                 metadata={"RID": "something", "scan_def_id": "existing_scan_def_id"},
             ),
-            "scanID2",
+            "scan_id2",
         ),
     ],
 )
-def test_update_scan_def_id(scan_queue_msg, scanID):
+def test_update_scan_def_id(scan_queue_msg, scan_id):
     req_block_queue = RequestBlockQueue(mock.MagicMock(), mock.MagicMock())
-    req_block_queue.scan_def_ids["existing_scan_def_id"] = {"scanID": "existing_scanID"}
-    rbl = RequestBlockMock(scan_queue_msg, scanID)
+    req_block_queue.scan_def_ids["existing_scan_def_id"] = {"scan_id": "existing_scan_id"}
+    rbl = RequestBlockMock(scan_queue_msg, scan_id)
     if rbl.msg.metadata.get("scan_def_id") in req_block_queue.scan_def_ids:
         req_block_queue._update_scan_def_id(rbl)
         scan_def_id = scan_queue_msg.metadata.get("scan_def_id")
-        assert rbl.scanID == req_block_queue.scan_def_ids[scan_def_id]["scanID"]
+        assert rbl.scan_id == req_block_queue.scan_def_ids[scan_def_id]["scan_id"]
         return
     req_block_queue._update_scan_def_id(rbl)
-    assert rbl.scanID == scanID
+    assert rbl.scan_id == scan_id
 
 
 def test_append_request_block():
@@ -462,7 +462,7 @@ def test_append_request_block():
 
 
 @pytest.mark.parametrize(
-    "scan_queue_msg,scanID",
+    "scan_queue_msg,scan_id",
     [
         (
             messages.ScanQueueMessage(
@@ -471,7 +471,7 @@ def test_append_request_block():
                 queue="primary",
                 metadata={"RID": "something", "scan_def_id": "something"},
             ),
-            "scanID1",
+            "scan_id1",
         ),
         (
             messages.ScanQueueMessage(
@@ -480,17 +480,17 @@ def test_append_request_block():
                 queue="primary",
                 metadata={"RID": "something", "scan_def_id": "existing_scan_def_id"},
             ),
-            "scanID2",
+            "scan_id2",
         ),
     ],
 )
-def test_update_point_id(scan_queue_msg, scanID):
+def test_update_point_id(scan_queue_msg, scan_id):
     req_block_queue = RequestBlockQueue(mock.MagicMock(), mock.MagicMock())
     req_block_queue.scan_def_ids["existing_scan_def_id"] = {
-        "scanID": "existing_scanID",
+        "scan_id": "existing_scan_id",
         "pointID": 10,
     }
-    rbl = RequestBlockMock(scan_queue_msg, scanID)
+    rbl = RequestBlockMock(scan_queue_msg, scan_id)
     rbl.scan = mock.MagicMock()
     scan_def_id = scan_queue_msg.metadata.get("scan_def_id")
     if rbl.msg.metadata.get("scan_def_id") in req_block_queue.scan_def_ids:
@@ -546,7 +546,7 @@ def test_increase_scan_number(scan_queue_msg, is_scan):
     req_block_queue = RequestBlockQueue(mock.MagicMock(), mock.MagicMock())
     req_block_queue.scan_queue.queue_manager.parent.scan_number = 20
     req_block_queue.scan_queue.queue_manager.parent.dataset_number = 5
-    rbl = RequestBlockMock(scan_queue_msg, "scanID")
+    rbl = RequestBlockMock(scan_queue_msg, "scan_id")
     rbl.is_scan = is_scan
     dataset_id_on_hold = scan_queue_msg.metadata.get("dataset_id_on_hold")
     req_block_queue.active_rb = rbl
@@ -569,7 +569,7 @@ def test_pull_request_block_non_empyt_rb():
         queue="primary",
         metadata={"RID": "something"},
     )
-    rbl = RequestBlockMock(scan_queue_msg, "scanID")
+    rbl = RequestBlockMock(scan_queue_msg, "scan_id")
     req_block_queue.active_rb = rbl
     with mock.patch.object(req_block_queue, "request_blocks_queue") as rbqs:
         req_block_queue._pull_request_block()
@@ -584,7 +584,7 @@ def test_pull_request_block_empyt_rb():
             rbqs.assert_not_called()
 
 
-def test_queue_manager_get_active_scanID(queuemanager_mock):
+def test_queue_manager_get_active_scan_id(queuemanager_mock):
     queue_manager = queuemanager_mock()
     msg = messages.ScanQueueMessage(
         scan_type="mv",
@@ -593,17 +593,17 @@ def test_queue_manager_get_active_scanID(queuemanager_mock):
         metadata={"RID": "something"},
     )
     queue_manager.add_to_queue(scan_queue="primary", msg=msg)
-    rbl = RequestBlockMock(msg, "scanID")
+    rbl = RequestBlockMock(msg, "scan_id")
     queue_manager.queues["primary"].queue[0].queue.active_rb = rbl
-    assert queue_manager._get_active_scanID("primary") == "scanID"
+    assert queue_manager._get_active_scan_id("primary") == "scan_id"
 
 
-def test_queue_manager_get_active_scanID_returns_None(queuemanager_mock):
+def test_queue_manager_get_active_scan_id_returns_None(queuemanager_mock):
     queue_manager = queuemanager_mock()
-    assert queue_manager._get_active_scanID("primary") == None
+    assert queue_manager._get_active_scan_id("primary") == None
 
 
-def test_queue_manager_get_active_scanID_wo_rbl_returns_None(queuemanager_mock):
+def test_queue_manager_get_active_scan_id_wo_rbl_returns_None(queuemanager_mock):
     queue_manager = queuemanager_mock()
     msg = messages.ScanQueueMessage(
         scan_type="mv",
@@ -612,7 +612,7 @@ def test_queue_manager_get_active_scanID_wo_rbl_returns_None(queuemanager_mock):
         metadata={"RID": "something"},
     )
     queue_manager.add_to_queue(scan_queue="primary", msg=msg)
-    assert queue_manager._get_active_scanID("primary") == None
+    assert queue_manager._get_active_scan_id("primary") == None
 
 
 def test_request_block_queue_next():
@@ -623,7 +623,7 @@ def test_request_block_queue_next():
         queue="primary",
         metadata={"RID": "something"},
     )
-    rbl = RequestBlockMock(msg, "scanID")
+    rbl = RequestBlockMock(msg, "scan_id")
     rbl.instructions = iter(["instruction1", "instruction2"])
     req_block_queue.active_rb = rbl
     with mock.patch.object(req_block_queue, "_pull_request_block") as pull_rb:
@@ -639,7 +639,7 @@ def test_request_block_queue_next_raises_stopiteration():
         queue="primary",
         metadata={"RID": "something"},
     )
-    rbl = RequestBlockMock(msg, "scanID")
+    rbl = RequestBlockMock(msg, "scan_id")
     rbl.instructions = iter([])
     req_block_queue.active_rb = rbl
     with mock.patch.object(req_block_queue, "increase_scan_number") as increase_scan_number:
@@ -656,7 +656,7 @@ def test_request_block_queue_next_updates_pointID():
         queue="primary",
         metadata={"RID": "something", "scan_def_id": "scan_def_id"},
     )
-    rbl = RequestBlockMock(msg, "scanID")
+    rbl = RequestBlockMock(msg, "scan_id")
     rbl.instructions = iter([])
     rbl.scan = mock.MagicMock()
     rbl.scan.pointID = 10

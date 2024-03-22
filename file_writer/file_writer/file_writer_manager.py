@@ -16,23 +16,22 @@ from bec_lib.alarm_handler import Alarms
 from bec_lib.async_data import AsyncDataHandler
 from bec_lib.file_utils import FileWriterMixin
 from bec_lib.redis_connector import MessageObject, RedisConnector
-
 from file_writer.file_writer import NexusFileWriter
 
 logger = bec_logger.logger
 
 
 class ScanStorage:
-    def __init__(self, scan_number: int, scanID: str) -> None:
+    def __init__(self, scan_number: int, scan_id: str) -> None:
         """
         Helper class to store scan data until it is ready to be written to file.
 
         Args:
             scan_number (int): Scan number
-            scanID (str): Scan ID
+            scan_id (str): Scan ID
         """
         self.scan_number = scan_number
-        self.scanID = scanID
+        self.scan_id = scan_id
         self.scan_segments = {}
         self.scan_finished = False
         self.num_points = None
@@ -111,19 +110,19 @@ class FileWriterManager(BECService):
         Args:
             msg (messages.ScanStatusMessage): Scan status message
         """
-        scanID = msg.content.get("scanID")
-        if scanID is None:
+        scan_id = msg.content.get("scan_id")
+        if scan_id is None:
             return
 
-        if not self.scan_storage.get(scanID):
-            self.scan_storage[scanID] = ScanStorage(
-                scan_number=msg.content["info"].get("scan_number"), scanID=scanID
+        if not self.scan_storage.get(scan_id):
+            self.scan_storage[scan_id] = ScanStorage(
+                scan_number=msg.content["info"].get("scan_number"), scan_id=scan_id
             )
         metadata = msg.content.get("info").copy()
         metadata.pop("DIID", None)
         metadata.pop("stream", None)
 
-        scan_storage = self.scan_storage[scanID]
+        scan_storage = self.scan_storage[scan_id]
         scan_storage.metadata.update(metadata)
         status = msg.content.get("status")
         if status:
@@ -144,7 +143,7 @@ class FileWriterManager(BECService):
                     scan_storage.enforce_sync = True
                 else:
                     scan_storage.enforce_sync = info["monitor_sync"] == "bec"
-            self.check_storage_status(scanID=scanID)
+            self.check_storage_status(scan_id=scan_id)
 
     def insert_to_scan_storage(self, msg: messages.ScanMessage) -> None:
         """
@@ -153,58 +152,58 @@ class FileWriterManager(BECService):
         Args:
             msg (messages.ScanMessage): Scan message
         """
-        scanID = msg.content.get("scanID")
-        if scanID is None:
+        scan_id = msg.content.get("scan_id")
+        if scan_id is None:
             return
-        if not self.scan_storage.get(scanID):
-            self.scan_storage[scanID] = ScanStorage(
-                scan_number=msg.metadata.get("scan_number"), scanID=scanID
+        if not self.scan_storage.get(scan_id):
+            self.scan_storage[scan_id] = ScanStorage(
+                scan_number=msg.metadata.get("scan_number"), scan_id=scan_id
             )
-        self.scan_storage[scanID].append(
+        self.scan_storage[scan_id].append(
             pointID=msg.content.get("point_id"), data=msg.content.get("data")
         )
         logger.debug(msg.content.get("point_id"))
-        self.check_storage_status(scanID=scanID)
+        self.check_storage_status(scan_id=scan_id)
 
-    def update_baseline_reading(self, scanID: str) -> None:
+    def update_baseline_reading(self, scan_id: str) -> None:
         """
         Update the baseline reading for the scan.
 
         Args:
-            scanID (str): Scan ID
+            scan_id (str): Scan ID
         """
-        if not self.scan_storage.get(scanID):
+        if not self.scan_storage.get(scan_id):
             return
-        if self.scan_storage[scanID].baseline:
+        if self.scan_storage[scan_id].baseline:
             return
-        baseline = self.connector.get(MessageEndpoints.public_scan_baseline(scanID))
+        baseline = self.connector.get(MessageEndpoints.public_scan_baseline(scan_id))
         if not baseline:
             return
-        self.scan_storage[scanID].baseline = baseline.content["data"]
+        self.scan_storage[scan_id].baseline = baseline.content["data"]
         return
 
-    def update_file_references(self, scanID: str) -> None:
+    def update_file_references(self, scan_id: str) -> None:
         """
         Update the file references for the scan.
         All external files ought to be announced to the endpoint public_file before the scan finishes. This function
         retrieves the file references and adds them to the scan storage.
 
         Args:
-            scanID (str): Scan ID
+            scan_id (str): Scan ID
         """
-        if not self.scan_storage.get(scanID):
+        if not self.scan_storage.get(scan_id):
             return
-        msgs = self.connector.keys(MessageEndpoints.public_file(scanID, "*"))
+        msgs = self.connector.keys(MessageEndpoints.public_file(scan_id, "*"))
         if not msgs:
             return
 
-        # extract name from 'public/<scanID>/file/<name>'
+        # extract name from 'public/<scan_id>/file/<name>'
         names = [msg.decode().split("/")[-1] for msg in msgs]
         file_msgs = [self.connector.get(msg.decode()) for msg in msgs]
         if not file_msgs:
             return
         for name, file_msg in zip(names, file_msgs):
-            self.scan_storage[scanID].file_references[name] = {
+            self.scan_storage[scan_id].file_references[name] = {
                 "path": file_msg.content["file_path"],
                 "done": file_msg.content["done"],
                 "successful": file_msg.content["successful"],
@@ -212,71 +211,73 @@ class FileWriterManager(BECService):
             }
         return
 
-    def update_async_data(self, scanID: str) -> None:
+    def update_async_data(self, scan_id: str) -> None:
         """
         Update the async data for the scan.
-        All async data is sent to the endpoint MessageEndpoints.device_async_readback(scanID, device_name)
+        All async data is sent to the endpoint MessageEndpoints.device_async_readback(scan_id, device_name)
         before the scan finishes. This function retrieves the async data and adds them to the scan storage.
 
         Args:
-            scanID (str): Scan ID
+            scan_id (str): Scan ID
         """
 
-        if not self.scan_storage.get(scanID):
+        if not self.scan_storage.get(scan_id):
             return
         # get all async devices
-        async_device_keys = self.connector.keys(MessageEndpoints.device_async_readback(scanID, "*"))
+        async_device_keys = self.connector.keys(
+            MessageEndpoints.device_async_readback(scan_id, "*")
+        )
         if not async_device_keys:
             return
         for device_key in async_device_keys:
             key = device_key.decode()
-            device_name = key.split(MessageEndpoints.device_async_readback(scanID, "").endpoint)[
+            device_name = key.split(MessageEndpoints.device_async_readback(scan_id, "").endpoint)[
                 -1
             ].split(":")[0]
             msgs = self.connector.xrange(key, min="-", max="+")
             if not msgs:
                 continue
-            self._process_async_data(msgs, scanID, device_name)
+            self._process_async_data(msgs, scan_id, device_name)
 
-    def _process_async_data(self, msgs: list, scanID: str, device_name: str):
+    def _process_async_data(self, msgs: list, scan_id: str, device_name: str):
         """
         Process the async data for the scan and add it to the scan storage. If needed, concatenate the data.
 
         Args:
             msgs (list): List of async data messages
-            scanID (str): Scan ID
+            scan_id (str): Scan ID
             device_name (str): Device name
         """
-        self.scan_storage[scanID].async_data[device_name] = AsyncDataHandler.process_async_data(
+        self.scan_storage[scan_id].async_data[device_name] = AsyncDataHandler.process_async_data(
             msgs
         )
 
     @threadlocked
-    def check_storage_status(self, scanID: str) -> None:
+    def check_storage_status(self, scan_id: str) -> None:
         """
         Check if the scan storage is ready to be written to file and write it if it is.
 
         Args:
-            scanID (str): Scan ID
+            scan_id (str): Scan ID
         """
-        if not self.scan_storage.get(scanID):
+        if not self.scan_storage.get(scan_id):
             return
-        self.update_baseline_reading(scanID)
-        self.update_file_references(scanID)
-        if self.scan_storage[scanID].ready_to_write():
-            self.update_async_data(scanID)
-            self.write_file(scanID)
+        self.update_baseline_reading(scan_id)
+        self.update_file_references(scan_id)
+        if self.scan_storage[scan_id].ready_to_write():
+            self.update_async_data(scan_id)
+            self.write_file(scan_id)
 
-    def write_file(self, scanID: str) -> None:
+    def write_file(self, scan_id: str) -> None:
         """
         Write scan data to file.
 
         Args:
-            scanID (str): Scan ID
+            scan_id (str): Scan ID
         """
-        if not self.scan_storage.get(scanID):
+        if not self.scan_storage.get(scan_id):
             return
-        storage = self.scan_storage[scanID]
+        storage = self.scan_storage[scan_id]
         if storage.scan_number is None:
             return
         scan = storage.scan_number
@@ -288,7 +289,7 @@ class FileWriterManager(BECService):
         try:
             file_path = self.writer_mixin.compile_full_filename(scan, file_suffix)
             self.connector.set_and_publish(
-                MessageEndpoints.public_file(scanID, "master"),
+                MessageEndpoints.public_file(scan_id, "master"),
                 messages.FileMessage(file_path=file_path, done=False),
             )
             successful = True
@@ -304,12 +305,12 @@ class FileWriterManager(BECService):
                 alarm_type="FileWriterError",
                 source="file_writer_manager",
                 msg=f"Failed to write to file {file_path}. Error: {content}",
-                metadata=self.scan_storage[scanID].metadata,
+                metadata=self.scan_storage[scan_id].metadata,
             )
             successful = False
-        self.scan_storage.pop(scanID)
+        self.scan_storage.pop(scan_id)
         self.connector.set_and_publish(
-            MessageEndpoints.public_file(scanID, "master"),
+            MessageEndpoints.public_file(scan_id, "master"),
             messages.FileMessage(file_path=file_path, successful=successful),
         )
         if successful:

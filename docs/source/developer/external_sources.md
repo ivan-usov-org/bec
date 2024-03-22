@@ -6,7 +6,7 @@ As of now, only external data sources that are based on HDF5 files are supported
 ```python
 from bec_lib import MessageEndpoints, messages, RedisConnector
 
-scanID = "scan id of the current scan"
+scan_id = "scan id of the current scan"
 
 # get a new producer for redis messages
 producer = RedisConnector(["localhost:6379"]).producer()
@@ -14,9 +14,9 @@ producer = RedisConnector(["localhost:6379"]).producer()
 # prepare the message
 msg = messages.FileMessage(file_path="/path/to/file.h5", done=False)
 
-# send the message using the scanID and a user-friendly but unique name to describe the source (e.g. "eiger")
+# send the message using the scan_id and a user-friendly but unique name to describe the source (e.g. "eiger")
 producer.set_and_publish(
-    MessageEndpoints.public_file(scanID, "eiger"),
+    MessageEndpoints.public_file(scan_id, "eiger"),
     msg,
 )
 ```

@@ -1,11 +1,11 @@
 from unittest import mock
 
 import pytest
+
+from bec_client.callbacks.ipython_live_updates import IPythonLiveUpdates
 from bec_lib import messages
 from bec_lib.queue_items import QueueItem
 from bec_lib.tests.utils import bec_client, dm, dm_with_devices
-
-from bec_client.callbacks.ipython_live_updates import IPythonLiveUpdates
 
 
 @pytest.mark.timeout(20)
@@ -25,7 +25,7 @@ def test_live_updates_process_queue_pending(bec_client):
         request_blocks=[request_msg],
         status="PENDING",
         active_request_block={},
-        scanID=["scanID"],
+        scan_id=["scan_id"],
     )
     client.queue.queue_storage.current_scan_queue = {"primary": {"status": "RUNNING"}}
     with mock.patch.object(queue, "_update_with_buffer"):
@@ -63,7 +63,7 @@ def test_live_updates_process_queue_running(bec_client):
         request_blocks=[request_msg],
         status="RUNNING",
         active_request_block={},
-        scanID=["scanID"],
+        scan_id=["scan_id"],
     )
     live_updates._active_request = request_msg
     client.queue.queue_storage.current_scan_queue = {"primary": {"status": "RUNNING"}}
@@ -107,7 +107,7 @@ def test_live_updates_process_queue_without_status(bec_client):
         request_blocks=[request_msg],
         status=None,
         active_request_block={},
-        scanID=["scanID"],
+        scan_id=["scan_id"],
     )
     with mock.patch.object(queue, "_update_with_buffer"):
         assert live_updates._process_queue(queue, request_msg, "req_id") is False
@@ -134,7 +134,7 @@ def test_live_updates_process_queue_without_queue_number(bec_client):
             request_blocks=[request_msg],
             status="PENDING",
             active_request_block={},
-            scanID=["scanID"],
+            scan_id=["scan_id"],
         )
         queue_pos.return_value = None
         with mock.patch.object(queue, "_update_with_buffer"):

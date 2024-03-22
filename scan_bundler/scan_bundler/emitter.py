@@ -48,14 +48,14 @@ class EmitterBase:
         self.connector.send(endpoint, msgs, pipe=pipe)
         pipe.execute()
 
-    def on_init(self, scanID: str):
+    def on_init(self, scan_id: str):
         pass
 
-    def on_scan_point_emit(self, scanID: str, pointID: int):
+    def on_scan_point_emit(self, scan_id: str, pointID: int):
         pass
 
-    def on_baseline_emit(self, scanID: str):
+    def on_baseline_emit(self, scan_id: str):
         pass
 
-    def on_cleanup(self, scanID: str):
+    def on_cleanup(self, scan_id: str):
         pass

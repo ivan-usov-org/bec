@@ -5,6 +5,7 @@ import time
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
+
 from bec_lib import MessageEndpoints, bec_logger
 from bec_lib.serialization import json_ext
 
@@ -12,7 +13,6 @@ logger = bec_logger.logger
 
 if TYPE_CHECKING:
     from bec_lib import messages
-
     from scihub.scibec import SciBecConnector
 
 
@@ -72,7 +72,7 @@ class SciBecMetadataHandler:
         # experiment_id = scibec_info["activeSession"][0]["experimentId"]
         logger.debug(f"Received new scan status {msg}")
         scan = scibec.scan.scan_controller_find(
-            query_params={"filter": {"where": {"scanId": msg.content["scanID"]}}}
+            query_params={"filter": {"where": {"scanId": msg.content["scan_id"]}}}
         ).body
         if not scan:
             info = msg.content["info"]
@@ -103,7 +103,7 @@ class SciBecMetadataHandler:
                 "writeACL": scibec_info["activeExperiment"]["readACL"],
                 "owner": scibec_info["activeExperiment"]["owner"],
                 "scanType": info.get("scan_name", ""),
-                "scanId": info.get("scanID", ""),
+                "scanId": info.get("scan_id", ""),
                 "queueId": info.get("queueID", ""),
                 "requestId": info.get("RID", ""),
                 "exitStatus": msg.content["status"],
@@ -175,11 +175,11 @@ class SciBecMetadataHandler:
         if not scibec:
             return
         scan = scibec.scan.scan_controller_find(
-            query_params={"filter": {"where": {"scanId": data["metadata"]["scanID"]}}}
+            query_params={"filter": {"where": {"scanId": data["metadata"]["scan_id"]}}}
         ).body
         if not scan:
             logger.warning(
-                f"Could not find scan with scanID {data['metadata']['scanID']}. Cannot write scan"
+                f"Could not find scan with scan_id {data['metadata']['scan_id']}. Cannot write scan"
                 " data to SciBec."
             )
             return
@@ -209,7 +209,7 @@ class SciBecMetadataHandler:
                 )
             )
         logger.info(
-            f"Wrote scan data to SciBec for scanID {data['metadata']['scanID']} in {time.time() - start} seconds."
+            f"Wrote scan data to SciBec for scan_id {data['metadata']['scan_id']} in {time.time() - start} seconds."
         )
 
     def _write_scan_data_chunks(self, file_path: str, data_bec: dict, scan: dict):

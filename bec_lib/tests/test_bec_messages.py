@@ -47,7 +47,7 @@ def test_bundled_message():
 
 def test_ScanQueueModificationMessage():
     msg = messages.ScanQueueModificationMessage(
-        scanID="1234", action="halt", parameter={"RID": "1234"}
+        scan_id="1234", action="halt", parameter={"RID": "1234"}
     )
     res = MsgpackSerialization.dumps(msg)
     res_loaded = MsgpackSerialization.loads(res)
@@ -56,7 +56,7 @@ def test_ScanQueueModificationMessage():
 
 def test_ScanQueueModificationMessage_with_wrong_action_returns_None():
     msg = messages.ScanQueueModificationMessage(
-        scanID="1234", action="wrong_action", parameter={"RID": "1234"}
+        scan_id="1234", action="wrong_action", parameter={"RID": "1234"}
     )
     res = MsgpackSerialization.dumps(msg)
     res_loaded = MsgpackSerialization.loads(res)
@@ -124,14 +124,14 @@ def test_DeviceInfoMessage():
 
 
 def test_ScanMessage():
-    msg = messages.ScanMessage(point_id=1, scanID=2, data={"value": 3}, metadata={"RID": "1234"})
+    msg = messages.ScanMessage(point_id=1, scan_id=2, data={"value": 3}, metadata={"RID": "1234"})
     res = MsgpackSerialization.dumps(msg)
     res_loaded = MsgpackSerialization.loads(res)
     assert res_loaded == msg
 
 
 def test_ScanBaselineMessage():
-    msg = messages.ScanBaselineMessage(scanID=2, data={"value": 3}, metadata={"RID": "1234"})
+    msg = messages.ScanBaselineMessage(scan_id=2, data={"value": 3}, metadata={"RID": "1234"})
     res = MsgpackSerialization.dumps(msg)
     res_loaded = MsgpackSerialization.loads(res)
     assert res_loaded == msg

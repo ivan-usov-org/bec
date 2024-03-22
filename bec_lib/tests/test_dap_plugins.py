@@ -374,20 +374,20 @@ def test_dap_plugin_fit(dap):
 
 
 class ScanReportMock(ScanReport):
-    def __init__(self, scanID: str) -> None:
+    def __init__(self, scan_id: str) -> None:
         super().__init__()
         self.request = mock.MagicMock()
-        self.request.scan.scanID = scanID
+        self.request.scan.scan_id = scan_id
 
 
 @pytest.mark.parametrize(
     "input",
     [
-        "scanID",
+        "scan_id",
         ScanItem(
-            mock.MagicMock(), queueID="queueID", scanID="scanID", scan_number=1, status="closed"
+            mock.MagicMock(), queueID="queueID", scan_id="scan_id", scan_number=1, status="closed"
         ),
-        ScanReportMock("scanID"),
+        ScanReportMock("scan_id"),
     ],
 )
 def test_dap_plugin_fit_input(dap, input):
@@ -400,7 +400,7 @@ def test_dap_plugin_fit_input(dap, input):
                 "LmfitService1D",
                 "on_demand",
                 config={
-                    "args": ["scanID"],
+                    "args": ["scan_id"],
                     "kwargs": {},
                     "class_args": [],
                     "class_kwargs": {"model": "GaussianModel"},

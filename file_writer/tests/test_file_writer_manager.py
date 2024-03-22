@@ -1,16 +1,16 @@
 import os
 from unittest import mock
 
-import bec_lib
 import numpy as np
 import pytest
 import yaml
+
+import bec_lib
 from bec_lib import DeviceManagerBase, MessageEndpoints, ServiceConfig, messages
 from bec_lib.bec_errors import ServiceConfigError
 from bec_lib.messages import BECStatus
 from bec_lib.redis_connector import MessageObject
 from bec_lib.tests.utils import ConnectorMock, create_session_from_config
-
 from file_writer import FileWriterManager
 from file_writer.file_writer import FileWriter
 from file_writer.file_writer_manager import ScanStorage
@@ -54,20 +54,20 @@ class FileWriterManagerMock(FileWriterManager):
 def test_scan_segment_callback():
     file_manager = load_FileWriter()
     msg = messages.ScanMessage(
-        point_id=1, scanID="scanID", data={"data": "data"}, metadata={"scan_number": 1}
+        point_id=1, scan_id="scan_id", data={"data": "data"}, metadata={"scan_number": 1}
     )
     msg_bundle = messages.BundleMessage()
     msg_bundle.append(msg)
     msg_raw = MessageObject(value=msg_bundle, topic="scan_segment")
 
     file_manager._scan_segment_callback(msg_raw, parent=file_manager)
-    assert file_manager.scan_storage["scanID"].scan_segments[1] == {"data": "data"}
+    assert file_manager.scan_storage["scan_id"].scan_segments[1] == {"data": "data"}
 
 
 def test_scan_status_callback():
     file_manager = load_FileWriter()
     msg = messages.ScanStatusMessage(
-        scanID="scanID",
+        scan_id="scan_id",
         status="closed",
         info={
             "scan_number": 1,
@@ -81,7 +81,7 @@ def test_scan_status_callback():
     msg_raw = MessageObject(value=msg, topic="scan_status")
 
     file_manager._scan_status_callback(msg_raw, parent=file_manager)
-    assert file_manager.scan_storage["scanID"].scan_finished is True
+    assert file_manager.scan_storage["scan_id"].scan_finished is True
 
 
 class MockWriter(FileWriter):
@@ -95,35 +95,35 @@ class MockWriter(FileWriter):
 
 def test_write_file():
     file_manager = load_FileWriter()
-    file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
+    file_manager.scan_storage["scan_id"] = ScanStorage(10, "scan_id")
     with mock.patch.object(
         file_manager.writer_mixin, "compile_full_filename"
     ) as mock_create_file_path:
         mock_create_file_path.return_value = "path"
         # replace NexusFileWriter with MockWriter
         file_manager.file_writer = MockWriter(file_manager)
-        file_manager.write_file("scanID")
+        file_manager.write_file("scan_id")
         assert file_manager.file_writer.write_called is True
 
 
-def test_write_file_invalid_scanID():
+def test_write_file_invalid_scan_id():
     file_manager = load_FileWriter()
-    file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
+    file_manager.scan_storage["scan_id"] = ScanStorage(10, "scan_id")
     with mock.patch.object(
         file_manager.writer_mixin, "compile_full_filename"
     ) as mock_create_file_path:
-        file_manager.write_file("scanID1")
+        file_manager.write_file("scan_id1")
         mock_create_file_path.assert_not_called()
 
 
 def test_write_file_invalid_scan_number():
     file_manager = load_FileWriter()
-    file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
-    file_manager.scan_storage["scanID"].scan_number = None
+    file_manager.scan_storage["scan_id"] = ScanStorage(10, "scan_id")
+    file_manager.scan_storage["scan_id"].scan_number = None
     with mock.patch.object(
         file_manager.writer_mixin, "compile_full_filename"
     ) as mock_create_file_path:
-        file_manager.write_file("scanID")
+        file_manager.write_file("scan_id")
         mock_create_file_path.assert_not_called()
 
 
@@ -136,7 +136,7 @@ def test_create_file_path():
 
 def test_write_file_raises_alarm_on_error():
     file_manager = load_FileWriter()
-    file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
+    file_manager.scan_storage["scan_id"] = ScanStorage(10, "scan_id")
     with mock.patch.object(
         file_manager.writer_mixin, "compile_full_filename"
     ) as mock_compile_filename:
@@ -145,31 +145,31 @@ def test_write_file_raises_alarm_on_error():
             # replace NexusFileWriter with MockWriter
             file_manager.file_writer = MockWriter(file_manager)
             file_manager.file_writer.write = mock.Mock(side_effect=Exception("error"))
-            file_manager.write_file("scanID")
+            file_manager.write_file("scan_id")
             mock_connector.raise_alarm.assert_called_once()
 
 
 def test_update_baseline_reading():
     file_manager = load_FileWriter()
-    file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
+    file_manager.scan_storage["scan_id"] = ScanStorage(10, "scan_id")
     with mock.patch.object(file_manager, "connector") as mock_connector:
         mock_connector.get.return_value = messages.ScanBaselineMessage(
-            scanID="scanID", data={"data": "data"}
+            scan_id="scan_id", data={"data": "data"}
         )
-        file_manager.update_baseline_reading("scanID")
-        assert file_manager.scan_storage["scanID"].baseline == {"data": "data"}
-        mock_connector.get.assert_called_once_with(MessageEndpoints.public_scan_baseline("scanID"))
+        file_manager.update_baseline_reading("scan_id")
+        assert file_manager.scan_storage["scan_id"].baseline == {"data": "data"}
+        mock_connector.get.assert_called_once_with(MessageEndpoints.public_scan_baseline("scan_id"))
 
 
 def test_scan_storage_append():
-    storage = ScanStorage(10, "scanID")
+    storage = ScanStorage(10, "scan_id")
     storage.append(1, {"data": "data"})
     assert storage.scan_segments[1] == {"data": "data"}
     assert storage.scan_finished is False
 
 
 def test_scan_storage_ready_to_write():
-    storage = ScanStorage(10, "scanID")
+    storage = ScanStorage(10, "scan_id")
     storage.num_points = 1
     storage.scan_finished = True
     storage.append(1, {"data": "data"})
@@ -179,45 +179,45 @@ def test_scan_storage_ready_to_write():
 def test_update_file_references():
     file_manager = load_FileWriter()
     with mock.patch.object(file_manager, "connector") as mock_connector:
-        file_manager.update_file_references("scanID")
+        file_manager.update_file_references("scan_id")
         mock_connector.keys.assert_not_called()
 
 
 def test_update_file_references_gets_keys():
     file_manager = load_FileWriter()
-    file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
+    file_manager.scan_storage["scan_id"] = ScanStorage(10, "scan_id")
     with mock.patch.object(file_manager, "connector") as mock_connector:
-        file_manager.update_file_references("scanID")
-        mock_connector.keys.assert_called_once_with(MessageEndpoints.public_file("scanID", "*"))
+        file_manager.update_file_references("scan_id")
+        mock_connector.keys.assert_called_once_with(MessageEndpoints.public_file("scan_id", "*"))
 
 
 def test_update_async_data():
     file_manager = load_FileWriter()
-    file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
+    file_manager.scan_storage["scan_id"] = ScanStorage(10, "scan_id")
     with mock.patch.object(file_manager, "connector") as mock_connector:
         with mock.patch.object(file_manager, "_process_async_data") as mock_process:
-            key = MessageEndpoints.device_async_readback("scanID", "dev1").endpoint
+            key = MessageEndpoints.device_async_readback("scan_id", "dev1").endpoint
             mock_connector.keys.return_value = [key.encode()]
             data = [(b"0-0", b'{"data": "data"}')]
             mock_connector.xrange.return_value = data
-            file_manager.update_async_data("scanID")
+            file_manager.update_async_data("scan_id")
             mock_connector.xrange.assert_called_once_with(key, min="-", max="+")
-            mock_process.assert_called_once_with(data, "scanID", "dev1")
+            mock_process.assert_called_once_with(data, "scan_id", "dev1")
 
 
 def test_process_async_data_single_entry():
     file_manager = load_FileWriter()
-    file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
+    file_manager.scan_storage["scan_id"] = ScanStorage(10, "scan_id")
     data = [{"data": messages.DeviceMessage(signals={"data": np.zeros((10, 10))})}]
-    file_manager._process_async_data(data, "scanID", "dev1")
+    file_manager._process_async_data(data, "scan_id", "dev1")
     assert np.isclose(
-        file_manager.scan_storage["scanID"].async_data["dev1"]["data"], np.zeros((10, 10))
+        file_manager.scan_storage["scan_id"].async_data["dev1"]["data"], np.zeros((10, 10))
     ).all()
 
 
 def test_process_async_data_extend():
     file_manager = load_FileWriter()
-    file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
+    file_manager.scan_storage["scan_id"] = ScanStorage(10, "scan_id")
     data = [
         {
             "data": messages.DeviceMessage(
@@ -226,8 +226,8 @@ def test_process_async_data_extend():
         }
         for ii in range(10)
     ]
-    file_manager._process_async_data(data, "scanID", "dev1")
-    assert file_manager.scan_storage["scanID"].async_data["dev1"]["data"]["value"].shape == (
+    file_manager._process_async_data(data, "scan_id", "dev1")
+    assert file_manager.scan_storage["scan_id"].async_data["dev1"]["data"]["value"].shape == (
         100,
         10,
     )
@@ -235,7 +235,7 @@ def test_process_async_data_extend():
 
 def test_process_async_data_append():
     file_manager = load_FileWriter()
-    file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
+    file_manager.scan_storage["scan_id"] = ScanStorage(10, "scan_id")
     data = [
         {
             "data": messages.DeviceMessage(
@@ -244,13 +244,13 @@ def test_process_async_data_append():
         }
         for ii in range(10)
     ]
-    file_manager._process_async_data(data, "scanID", "dev1")
-    assert len(file_manager.scan_storage["scanID"].async_data["dev1"]["data"]) == 10
+    file_manager._process_async_data(data, "scan_id", "dev1")
+    assert len(file_manager.scan_storage["scan_id"].async_data["dev1"]["data"]) == 10
 
 
 def test_process_async_data_replace():
     file_manager = load_FileWriter()
-    file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
+    file_manager.scan_storage["scan_id"] = ScanStorage(10, "scan_id")
     data = [
         {
             "data": messages.DeviceMessage(
@@ -260,35 +260,38 @@ def test_process_async_data_replace():
         }
         for ii in range(10)
     ]
-    file_manager._process_async_data(data, "scanID", "dev1")
-    assert file_manager.scan_storage["scanID"].async_data["dev1"]["data"]["value"].shape == (10, 10)
+    file_manager._process_async_data(data, "scan_id", "dev1")
+    assert file_manager.scan_storage["scan_id"].async_data["dev1"]["data"]["value"].shape == (
+        10,
+        10,
+    )
 
 
 def test_update_scan_storage_with_status_ignores_none():
     file_manager = load_FileWriter()
     file_manager.update_scan_storage_with_status(
-        messages.ScanStatusMessage(scanID=None, status="closed", info={})
+        messages.ScanStatusMessage(scan_id=None, status="closed", info={})
     )
     assert file_manager.scan_storage == {}
 
 
 def test_ready_to_write():
     file_manager = load_FileWriter()
-    file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
-    file_manager.scan_storage["scanID"].scan_finished = True
-    file_manager.scan_storage["scanID"].num_points = 1
-    file_manager.scan_storage["scanID"].scan_segments = {"0": {"data": np.zeros((10, 10))}}
-    assert file_manager.scan_storage["scanID"].ready_to_write() is True
-    file_manager.scan_storage["scanID1"] = ScanStorage(101, "scanID1")
-    file_manager.scan_storage["scanID1"].scan_finished = True
-    file_manager.scan_storage["scanID1"].num_points = 2
-    file_manager.scan_storage["scanID1"].scan_segments = {"0": {"data": np.zeros((10, 10))}}
-    assert file_manager.scan_storage["scanID1"].ready_to_write() is False
+    file_manager.scan_storage["scan_id"] = ScanStorage(10, "scan_id")
+    file_manager.scan_storage["scan_id"].scan_finished = True
+    file_manager.scan_storage["scan_id"].num_points = 1
+    file_manager.scan_storage["scan_id"].scan_segments = {"0": {"data": np.zeros((10, 10))}}
+    assert file_manager.scan_storage["scan_id"].ready_to_write() is True
+    file_manager.scan_storage["scan_id1"] = ScanStorage(101, "scan_id1")
+    file_manager.scan_storage["scan_id1"].scan_finished = True
+    file_manager.scan_storage["scan_id1"].num_points = 2
+    file_manager.scan_storage["scan_id1"].scan_segments = {"0": {"data": np.zeros((10, 10))}}
+    assert file_manager.scan_storage["scan_id1"].ready_to_write() is False
 
 
 def test_ready_to_write_forced():
     file_manager = load_FileWriter()
-    file_manager.scan_storage["scanID"] = ScanStorage(10, "scanID")
-    file_manager.scan_storage["scanID"].scan_finished = False
-    file_manager.scan_storage["scanID"].forced_finish = True
-    assert file_manager.scan_storage["scanID"].ready_to_write() is True
+    file_manager.scan_storage["scan_id"] = ScanStorage(10, "scan_id")
+    file_manager.scan_storage["scan_id"].scan_finished = False
+    file_manager.scan_storage["scan_id"].forced_finish = True
+    assert file_manager.scan_storage["scan_id"].ready_to_write() is True

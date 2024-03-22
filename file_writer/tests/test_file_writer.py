@@ -5,13 +5,13 @@ from unittest import mock
 import h5py
 import numpy as np
 import pytest
+from file_writer_plugins.cSAXS import NeXus_format as cSAXS_Nexus_format
 from test_file_writer_manager import load_FileWriter
 
 import file_writer
 from file_writer import NexusFileWriter, NeXusFileXMLWriter
 from file_writer.file_writer import HDF5Storage
 from file_writer.file_writer_manager import ScanStorage
-from file_writer_plugins.cSAXS import NeXus_format as cSAXS_Nexus_format
 
 dir_path = os.path.dirname(file_writer.__file__)
 
@@ -60,7 +60,7 @@ def test_nexus_file_writer():
             ]
         },
     ):
-        file_writer.write("./test.h5", ScanStorage(2, "scanID-string"))
+        file_writer.write("./test.h5", ScanStorage(2, "scan_id-string"))
     with h5py.File("./test.h5", "r") as test_file:
         assert list(test_file) == ["entry"]
         assert list(test_file["entry"]) == ["collection", "control", "instrument", "sample"]
@@ -74,7 +74,7 @@ def test_nexus_file_writer():
 def test_create_device_data_storage():
     file_manager = load_FileWriter()
     file_writer = NexusFileWriter(file_manager)
-    storage = ScanStorage("2", "scanID-string")
+    storage = ScanStorage("2", "scan_id-string")
     storage.num_points = 2
     storage.scan_segments = {
         0: {"samx": {"samx": {"value": 0.1}}, "samy": {"samy": {"value": 1.1}}},
@@ -122,7 +122,7 @@ def test_create_device_data_storage():
             },
             {
                 "RID": "5ee455b8-d0ef-452d-b54a-e7cea5cea19e",
-                "scanID": "a9fb36e4-3f38-486c-8434-c8eca19472ba",
+                "scan_id": "a9fb36e4-3f38-486c-8434-c8eca19472ba",
                 "queueID": "14463a5b-1c65-4888-8f87-4808c90a241f",
                 "primary": ["samx"],
                 "num_points": 2,
@@ -146,7 +146,7 @@ def test_create_device_data_storage():
 def test_write_data_storage(segments, baseline, metadata):
     file_manager = load_FileWriter()
     file_writer = NexusFileWriter(file_manager)
-    storage = ScanStorage("2", "scanID-string")
+    storage = ScanStorage("2", "scan_id-string")
     storage.num_points = 2
     storage.scan_segments = segments
     storage.baseline = baseline

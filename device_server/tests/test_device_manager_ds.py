@@ -3,13 +3,13 @@ import functools
 import os
 from unittest import mock
 
-import bec_lib
 import numpy as np
 import pytest
 import yaml
+
+import bec_lib
 from bec_lib import MessageEndpoints, messages
 from bec_lib.tests.utils import ConnectorMock, create_session_from_config
-
 from device_server.devices.devicemanager import DeviceManagerDS
 
 # pylint: disable=missing-function-docstring
@@ -134,7 +134,7 @@ def test_disable_unreachable_devices():
 def test_flyer_event_callback():
     device_manager = load_device_manager()
     samx = device_manager.devices.samx
-    samx.metadata = {"scanID": "12345"}
+    samx.metadata = {"scan_id": "12345"}
 
     device_manager._obj_flyer_callback(
         obj=samx.obj, value={"data": {"idata": np.random.rand(20), "edata": np.random.rand(20)}}
@@ -161,14 +161,14 @@ def test_flyer_event_callback():
 def test_obj_progress_callback():
     device_manager = load_device_manager()
     samx = device_manager.devices.samx
-    samx.metadata = {"scanID": "12345"}
+    samx.metadata = {"scan_id": "12345"}
 
     with mock.patch.object(device_manager, "connector") as mock_connector:
         device_manager._obj_progress_callback(obj=samx.obj, value=1, max_value=2, done=False)
         mock_connector.set_and_publish.assert_called_once_with(
             MessageEndpoints.device_progress("samx"),
             messages.ProgressMessage(
-                value=1, max_value=2, done=False, metadata={"scanID": "12345"}
+                value=1, max_value=2, done=False, metadata={"scan_id": "12345"}
             ),
         )
 
@@ -179,7 +179,7 @@ def test_obj_progress_callback():
 def test_obj_monitor_callback(value):
     device_manager = load_device_manager()
     eiger = device_manager.devices.eiger
-    eiger.metadata = {"scanID": "12345"}
+    eiger.metadata = {"scan_id": "12345"}
     value_size = len(value.tobytes()) / 1e6  # MB
     max_size = 100
     with mock.patch.object(device_manager, "connector") as mock_connector:
@@ -188,7 +188,7 @@ def test_obj_monitor_callback(value):
             MessageEndpoints.device_monitor(eiger.name),
             {
                 "data": messages.DeviceMonitorMessage(
-                    device=eiger.name, data=value, metadata={"scanID": "12345"}
+                    device=eiger.name, data=value, metadata={"scan_id": "12345"}
                 )
             },
             max_size=int(min(100, max_size / value_size)),

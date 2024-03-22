@@ -1,11 +1,11 @@
 from unittest import mock
 
 import pytest
+from utils import scan_server_mock, threads_check
+
 from bec_lib import MessageEndpoints, messages
 from bec_lib.redis_connector import MessageObject
 from bec_lib.tests.utils import dm, dm_with_devices
-from utils import scan_server_mock, threads_check
-
 from scan_server.scan_guard import ScanGuard, ScanRejection, ScanStatus
 
 
@@ -182,7 +182,7 @@ def test_check_valid_scan_device_rpc_raises(scan_guard_mock):
 def test_handle_scan_modification_request(scan_guard_mock):
     sg = scan_guard_mock
     msg = messages.ScanQueueModificationMessage(
-        scanID="scanID", action="abort", parameter={}, metadata={"RID": "RID"}
+        scan_id="scan_id", action="abort", parameter={}, metadata={"RID": "RID"}
     )
     with mock.patch.object(sg.device_manager.connector, "send") as send:
         sg._handle_scan_modification_request(msg)
@@ -192,7 +192,7 @@ def test_handle_scan_modification_request(scan_guard_mock):
 def test_handle_scan_modification_request_restart(scan_guard_mock):
     sg = scan_guard_mock
     msg = messages.ScanQueueModificationMessage(
-        scanID="scanID", action="restart", parameter={"RID": "RID"}, metadata={"RID": "new_RID"}
+        scan_id="scan_id", action="restart", parameter={"RID": "RID"}, metadata={"RID": "new_RID"}
     )
     with mock.patch.object(sg, "_send_scan_request_response") as send_response:
         with mock.patch("scan_server.scan_guard.ScanStatus") as scan_status:
@@ -228,7 +228,7 @@ def test_scan_queue_request_callback(scan_guard_mock):
 def test_scan_queue_modification_request_callback(scan_guard_mock):
     sg = scan_guard_mock
     msg = messages.ScanQueueModificationMessage(
-        scanID="scanID", action="abort", parameter={}, metadata={"RID": "RID"}
+        scan_id="scan_id", action="abort", parameter={}, metadata={"RID": "RID"}
     )
     msg_obj = MessageObject(MessageEndpoints.scan_queue_modification(), msg)
     with mock.patch.object(sg, "_handle_scan_modification_request") as handle:

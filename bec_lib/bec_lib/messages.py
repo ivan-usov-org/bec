@@ -140,18 +140,18 @@ class ScanQueueHistoryMessage(BECMessage):
 class ScanStatusMessage(BECMessage):
     """Message type for sending scan status updates
     Args:
-        scanID(str): unique scan ID
+        scan_id(str): unique scan ID
         status(dict): dictionary containing the current scan status
         info(dict): dictionary containing additional information about the scan
         timestamp(float, optional): timestamp of the scan status update. If None, the current time is used.
         metadata(dict, optional): additional metadata to describe and identify the scan.
 
     Examples:
-        >>> ScanStatusMessage(scanID="1234", status={"scan_number": 1, "scan_motors": ["samx", "samy"], "scan_type": "dscan", "scan_status": "RUNNING"}, info={"positions": {"samx": 0.5, "samy": 0.5}})
+        >>> ScanStatusMessage(scan_id="1234", status={"scan_number": 1, "scan_motors": ["samx", "samy"], "scan_type": "dscan", "scan_status": "RUNNING"}, info={"positions": {"samx": 0.5, "samy": 0.5}})
     """
 
     msg_type = "scan_status"
-    scanID: str
+    scan_id: str
     status: dict
     info: dict
     timestamp: float = field(default_factory=time.time)
@@ -168,7 +168,7 @@ class ScanStatusMessage(BECMessage):
 class ScanQueueModificationMessage(BECMessage):
     """Message type for sending scan queue modifications
     Args:
-        scanID(str): unique scan ID
+        scan_id(str): unique scan ID
         action(str): one of the actions defined in ACTIONS
                      ("pause", "deferred_pause", "continue", "abort", "clear", "restart", "halt")
         parameter(dict): additional parameters for the action
@@ -177,7 +177,7 @@ class ScanQueueModificationMessage(BECMessage):
 
     ACTIONS = ["pause", "deferred_pause", "continue", "abort", "clear", "restart", "halt"]
     msg_type = "scan_queue_modification"
-    scanID: str
+    scan_id: str
     action: str
     parameter: dict
     metadata: dict = field(default_factory=dict)
@@ -247,7 +247,7 @@ class DeviceMessage(BECMessage):
         signals (dict): dictionary of device signals
         metadata (dict, optional): metadata to describe the conditions of the device reading
     Examples:
-        >>> BECMessage.DeviceMessage(signals={'samx': {'value': 14.999033949016491, 'timestamp': 1686385306.0265112}, 'samx_setpoint': {'value': 15.0, 'timestamp': 1686385306.016806}, 'samx_motor_is_moving': {'value': 0, 'timestamp': 1686385306.026888}}}, metadata={'stream': 'primary', 'DIID': 353, 'RID': 'd3471acc-309d-43b7-8ff8-f986c3fdecf1', 'pointID': 49, 'scanID': '8e234698-358e-402d-a272-73e168a72f66', 'queueID': '7a232746-6c90-44f5-81f5-74ab0ea22d4a'})
+        >>> BECMessage.DeviceMessage(signals={'samx': {'value': 14.999033949016491, 'timestamp': 1686385306.0265112}, 'samx_setpoint': {'value': 15.0, 'timestamp': 1686385306.016806}, 'samx_motor_is_moving': {'value': 0, 'timestamp': 1686385306.026888}}}, metadata={'stream': 'primary', 'DIID': 353, 'RID': 'd3471acc-309d-43b7-8ff8-f986c3fdecf1', 'pointID': 49, 'scan_id': '8e234698-358e-402d-a272-73e168a72f66', 'queueID': '7a232746-6c90-44f5-81f5-74ab0ea22d4a'})
     """
 
     msg_type = "device_message"
@@ -345,14 +345,14 @@ class ScanMessage(BECMessage):
     """Message type for sending scan segment data from the scan bundler
     Args:
         point_id (int): point ID from scan segment
-        scanID (int): scan ID
+        scan_id (int): scan ID
         data (dict): scan segment data
         metadata (dict, optional): additional metadata to describe the conditions of the scan segment
     """
 
     msg_type = "scan_message"
     point_id: int
-    scanID: int
+    scan_id: int
     data: dict
     metadata: dict = field(default_factory=dict)
 
@@ -361,13 +361,13 @@ class ScanMessage(BECMessage):
 class ScanBaselineMessage(BECMessage):
     """Message type for sending scan baseline data from the scan bundler
     Args:
-        scanID (int): scan ID
+        scan_id (int): scan ID
         data (dict): scan baseline data
         metadata (dict, optional): additional metadata to describe the conditions of the scan baseline
     """
 
     msg_type = "scan_baseline_message"
-    scanID: int
+    scan_id: int
     data: dict
     metadata: dict = field(default_factory=dict)
 

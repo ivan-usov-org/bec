@@ -30,7 +30,7 @@ class RequestItem:
         scan_manager: ScanManager,
         requestID: str,
         decision_pending: bool = True,
-        scanID: str = None,
+        scan_id: str = None,
         request=None,
         response=None,
         accepted: bool = None,
@@ -42,7 +42,7 @@ class RequestItem:
         self.response = response
         self.accepted = accepted
         self._decision_pending = decision_pending
-        self._scanID = scanID
+        self._scan_id = scan_id
         self.callbacks = CallbackHandler()
 
     def update_with_response(self, response: messages.RequestResponseMessage):

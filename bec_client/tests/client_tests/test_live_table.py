@@ -5,12 +5,12 @@ from unittest import mock
 
 import numpy as np
 import pytest
-from bec_lib import messages
-from bec_lib.scan_items import ScanItem
-from bec_lib.tests.utils import bec_client, dm, dm_with_devices
 
 from bec_client.callbacks.live_table import LiveUpdatesTable, sort_devices
 from bec_client.callbacks.utils import ScanRequestMixin
+from bec_lib import messages
+from bec_lib.scan_items import ScanItem
+from bec_lib.tests.utils import bec_client, dm, dm_with_devices
 
 
 @pytest.fixture
@@ -75,7 +75,7 @@ def test_get_devices_from_scan_data(bec_client, request_msg, scan_report_devices
     client = bec_client
     client.start()
     data = messages.ScanMessage(
-        point_id=0, scanID="", data={}, metadata={"scan_report_devices": scan_report_devices}
+        point_id=0, scan_id="", data={}, metadata={"scan_report_devices": scan_report_devices}
     )
     live_update = LiveUpdatesTable(client, {"table_wait": 10}, request_msg)
     devices = live_update.get_devices_from_scan_data(data)
@@ -111,7 +111,7 @@ def test_print_table_data(client_with_grid_scan):
     live_update = LiveUpdatesTable(client, {"table_wait": 10}, request_msg)
     live_update.point_data = messages.ScanMessage(
         point_id=0,
-        scanID="",
+        scan_id="",
         data={"samx": {"samx": {"value": 0}}},
         metadata={"scan_report_devices": ["samx"], "scan_type": "step"},
     )
@@ -130,7 +130,7 @@ def test_print_table_data_lamni_flyer(client_with_grid_scan):
     live_update = LiveUpdatesTable(client, {"table_wait": 10}, request_msg)
     live_update.point_data = messages.ScanMessage(
         point_id=0,
-        scanID="",
+        scan_id="",
         data={"lamni_flyer_1": {"value": 0}},
         metadata={"scan_report_devices": ["samx"], "scan_type": "fly"},
     )
@@ -151,7 +151,7 @@ def test_print_table_data_hinted_value(client_with_grid_scan):
     client.device_manager.devices["samx"].precision = 3
     live_update.point_data = messages.ScanMessage(
         point_id=0,
-        scanID="",
+        scan_id="",
         data={"samx": {"samx_hint": {"value": 0}}},
         metadata={"scan_report_devices": ["samx"], "scan_type": "fly"},
     )
@@ -175,7 +175,7 @@ def test_print_table_data_hinted_value_with_precision(client_with_grid_scan):
     client.device_manager.devices["samx"].precision = 2
     live_update.point_data = messages.ScanMessage(
         point_id=0,
-        scanID="",
+        scan_id="",
         data={"samx": {"samx_hint": {"value": 0}}},
         metadata={"scan_report_devices": ["samx"], "scan_type": "fly"},
     )
@@ -215,7 +215,7 @@ def test_print_table_data_variants(client_with_grid_scan, value, expected):
     live_update = LiveUpdatesTable(client, {"table_wait": 10}, request_msg)
     live_update.point_data = messages.ScanMessage(
         point_id=0,
-        scanID="",
+        scan_id="",
         data={"lamni_flyer_1": {"value": value}},
         metadata={"scan_report_devices": ["samx"], "scan_type": "fly"},
     )

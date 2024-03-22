@@ -52,10 +52,7 @@ class DeviceValidation:
         Returns:
             bool: True if all checks are successful, False otherwise.
         """
-        default_checks = [
-            self.matching_scanID,
-            self.matching_DIID,
-        ]
+        default_checks = [self.matching_scan_id, self.matching_DIID]
         if checks is None:
             checks = []
         checks = default_checks + checks
@@ -78,20 +75,20 @@ class DeviceValidation:
         return False
 
     # pylint: disable=invalid-name
-    def matching_scanID(
+    def matching_scan_id(
         self, metadata: dict, response: list[messages.BECMessage], **kwargs
     ) -> bool:
         """
-        Check if the scanID in the response matches the scanID in the instruction
+        Check if the scan_id in the response matches the scan_id in the instruction
 
         Args:
             metadata (dict): Metadata of the instruction
             response (list[messages.BECMessage]): List of BECMessage objects
 
         Returns:
-            bool: True if the scanID matches, False otherwise
+            bool: True if the scan_id matches, False otherwise
         """
-        return all(dev.metadata.get("scanID") == metadata["scanID"] for dev in response)
+        return all(dev.metadata.get("scan_id") == metadata["scan_id"] for dev in response)
 
     # pylint: disable=invalid-name
     def matching_DIID(

@@ -317,7 +317,7 @@ class MessageEndpoints:
         )
 
     @staticmethod
-    def device_async_readback(scanID: str, device: str) -> EndpointInfo:
+    def device_async_readback(scan_id: str, device: str) -> EndpointInfo:
         """
         Endpoint for receiving an async device readback over Redis streams.
         This endpoint is used by the device server to publish async device
@@ -326,13 +326,13 @@ class MessageEndpoints:
         Further keyword arguments for GUI handling might be attached.
 
         Args:
-            scanID (str): unique scan identifier
+            scan_id (str): unique scan identifier
             device (str): Device name, e.g. "mcs".
 
         Returns:
             EndpointInfo: Endpoint for device async readback of the specified device.
         """
-        endpoint = f"internal/devices/async_readback/{scanID}/{device}"
+        endpoint = f"internal/devices/async_readback/{scan_id}/{device}"
         return EndpointInfo(
             endpoint=endpoint, message_type=messages.DeviceMessage, message_op=MessageOp.STREAM
         )
@@ -627,26 +627,26 @@ class MessageEndpoints:
         )
 
     @staticmethod
-    def public_scan_info(scanID: str) -> EndpointInfo:
+    def public_scan_info(scan_id: str) -> EndpointInfo:
         """
         Endpoint for scan info. This endpoint is used by the scan worker to publish the
         scan info using a messages.ScanStatusMessage message. In contrast to the scan_info endpoint,
         this endpoint is specific to a scan and has a retentioni time of 30 minutes.
 
         Args:
-            scanID (str): Scan ID.
+            scan_id (str): Scan ID.
 
         Returns:
             EndpointInfo: Endpoint for scan info.
 
         """
-        endpoint = f"public/{scanID}/scan_info"
+        endpoint = f"public/{scan_id}/scan_info"
         return EndpointInfo(
             endpoint=endpoint, message_type=messages.ScanStatusMessage, message_op=MessageOp.SET
         )
 
     @staticmethod
-    def public_scan_segment(scanID: str, pointID: int) -> EndpointInfo:
+    def public_scan_segment(scan_id: str, pointID: int) -> EndpointInfo:
         """
         Endpoint for public scan segments. This endpoint is used by the scan bundler to
         publish the scan segment using a messages.ScanMessage message. In contrast to the
@@ -654,20 +654,20 @@ class MessageEndpoints:
         of 30 minutes.
 
         Args:
-            scanID (str): Scan ID.
+            scan_id (str): Scan ID.
             pointID (int): Point ID to specify a single point in a scan.
 
         Returns:
             EndpointInfo: Endpoint for public scan segments.
 
         """
-        endpoint = f"public/{scanID}/scan_segment/{pointID}"
+        endpoint = f"public/{scan_id}/scan_segment/{pointID}"
         return EndpointInfo(
             endpoint=endpoint, message_type=messages.ScanMessage, message_op=MessageOp.SET
         )
 
     @staticmethod
-    def public_scan_baseline(scanID: str) -> EndpointInfo:
+    def public_scan_baseline(scan_id: str) -> EndpointInfo:
         """
         Endpoint for public scan baseline readings. This endpoint is used by the scan bundler
         to publish the scan baseline readings using a messages.ScanBaselineMessage message.
@@ -675,30 +675,30 @@ class MessageEndpoints:
         a retention time of 30 minutes.
 
         Args:
-            scanID (str): Scan ID.
+            scan_id (str): Scan ID.
 
         Returns:
             EndpointInfo: Endpoint for public scan baseline readings.
         """
-        endpoint = f"public/{scanID}/scan_baseline"
+        endpoint = f"public/{scan_id}/scan_baseline"
         return EndpointInfo(
             endpoint=endpoint, message_type=messages.ScanBaselineMessage, message_op=MessageOp.SET
         )
 
     @staticmethod
-    def public_file(scanID: str, name: str) -> EndpointInfo:
+    def public_file(scan_id: str, name: str) -> EndpointInfo:
         """
         Endpoint for public file. This endpoint is used by the file writer to publish the
         status of the file writing using a messages.FileMessage message.
 
         Args:
-            scanID (str): Scan ID.
+            scan_id (str): Scan ID.
             name (str): File name.
 
         Returns:
             EndpointInfo: Endpoint for public files.
         """
-        endpoint = f"public/{scanID}/file/{name}"
+        endpoint = f"public/{scan_id}/file/{name}"
         return EndpointInfo(
             endpoint=endpoint, message_type=messages.FileMessage, message_op=MessageOp.SET_PUBLISH
         )

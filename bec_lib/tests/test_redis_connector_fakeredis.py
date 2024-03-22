@@ -125,7 +125,7 @@ def test_redis_connector_execute_pipeline_returns_list(connected_connector):
     connector = connected_connector
     pipe = connector.pipeline()
     connector.lpush(
-        "test", messages.ScanMessage(point_id=5, scanID="1234", data={"a": 1}), pipe=pipe
+        "test", messages.ScanMessage(point_id=5, scan_id="1234", data={"a": 1}), pipe=pipe
     )
 
     res = connector.execute_pipeline(pipe)
@@ -133,10 +133,10 @@ def test_redis_connector_execute_pipeline_returns_list(connected_connector):
 
     pipe = connector.pipeline()
     connector.lpush(
-        "test", messages.ScanMessage(point_id=5, scanID="1234", data={"a": 1}), pipe=pipe
+        "test", messages.ScanMessage(point_id=5, scan_id="1234", data={"a": 1}), pipe=pipe
     )
     connector.lpush(
-        "test", messages.ScanMessage(point_id=5, scanID="1234", data={"a": 1}), pipe=pipe
+        "test", messages.ScanMessage(point_id=5, scan_id="1234", data={"a": 1}), pipe=pipe
     )
 
     res = connector.execute_pipeline(pipe)
@@ -198,10 +198,7 @@ def test_redis_connector_xrange(connected_connector):
     assert connector.xrange("test2", "-", "+") is None
 
 
-@pytest.mark.parametrize(
-    "endpoint",
-    ["test", MessageEndpoints.processed_data("test")],
-)
+@pytest.mark.parametrize("endpoint", ["test", MessageEndpoints.processed_data("test")])
 def test_redis_connector_get_last(connected_connector, endpoint):
     connector = connected_connector
     connector.xadd(endpoint, {"data": 1})
@@ -334,7 +331,7 @@ def test_register_stream_raises_if_topic_is_not_str_nor_list(connected_connector
         connector.register_stream(topics, cb=lambda *args, **kwargs: ..., start_thread=False)
 
 
-@pytest.mark.parametrize("val", [messages.ScanMessage(point_id=5, scanID="1234", data={"a": 1})])
+@pytest.mark.parametrize("val", [messages.ScanMessage(point_id=5, scan_id="1234", data={"a": 1})])
 def test_lrange_parses_messages(connected_connector, val):
     connected_connector.lpush("test", val)
     res = connected_connector.lrange("test", 0, -1)

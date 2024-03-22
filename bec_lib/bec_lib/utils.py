@@ -136,7 +136,7 @@ def _extract_scan_data(
     scan_dict = scan_to_dict(scan_item, flat=True)
 
     header_tmp = []
-    header_tmp.append(["#scanID", f"{scan_item.scanID}"])
+    header_tmp.append(["#scan_id", f"{scan_item.scan_id}"])
     header_tmp.append(["#ScanStatus", f"{scan_item.status}"])
 
     start_time = f"{datetime.datetime.fromtimestamp(scan_item.start_time).strftime('%c')}"
@@ -171,12 +171,7 @@ def _extract_scan_data(
     num_entries = len(list(scan_dict["value"].values())[0])
     for ii in range(num_entries):
         sub_list = []
-        sub_list.extend(
-            [
-                scan_metadata["scan_number"],
-                scan_metadata["dataset_number"],
-            ]
-        )
+        sub_list.extend([scan_metadata["scan_number"], scan_metadata["dataset_number"]])
         for key in scan_dict["value"]:
             sub_list.extend([scan_dict["value"][key][ii], scan_dict["timestamp"][key][ii]])
         body_tmp.append(sub_list)

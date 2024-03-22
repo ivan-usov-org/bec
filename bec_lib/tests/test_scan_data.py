@@ -11,7 +11,7 @@ def scan_data():
     for ii in range(10):
         msg = messages.ScanMessage(
             point_id=ii,
-            scanID="scanID",
+            scan_id="scan_id",
             data={
                 "samx": {
                     "setpoint": {"value": ii, "timestamp": ii},
@@ -26,14 +26,14 @@ def scan_data():
 def test_scan_data_provides_BECMessages(scan_data):
     assert scan_data[0] == messages.ScanMessage(
         point_id=0,
-        scanID="scanID",
+        scan_id="scan_id",
         data={
             "samx": {"setpoint": {"value": 0, "timestamp": 0}, "samx": {"value": 0, "timestamp": 0}}
         },
     )
     assert scan_data[1] == messages.ScanMessage(
         point_id=1,
-        scanID="scanID",
+        scan_id="scan_id",
         data={
             "samx": {"setpoint": {"value": 1, "timestamp": 1}, "samx": {"value": 1, "timestamp": 1}}
         },

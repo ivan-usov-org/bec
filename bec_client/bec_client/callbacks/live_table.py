@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-from collections.abc import Callable
 import time
+from collections.abc import Callable
 from typing import TYPE_CHECKING
-
-from bec_lib import bec_logger, messages
 
 from bec_client.prettytable import PrettyTable
 from bec_client.progressbar import ScanProgressBar
+from bec_lib import bec_logger, messages
 
 from .utils import LiveUpdatesBase, check_alarms
 
@@ -71,7 +70,7 @@ class LiveUpdatesTable(LiveUpdatesBase):
             if self.scan_item.status == "closed":
                 break
             if queue_pos is None:
-                logger.debug(f"Could not find queue entry for scanID {self.scan_item.scanID}")
+                logger.debug(f"Could not find queue entry for scan_id {self.scan_item.scan_id}")
                 continue
             if queue_pos == 0:
                 break
@@ -297,7 +296,7 @@ class LiveUpdatesTable(LiveUpdatesBase):
         elapsed_time = self.scan_item.end_time - self.scan_item.start_time
         print(
             self.table.get_footer(
-                f"Scan {self.scan_item.scan_number} finished. Scan ID {self.scan_item.scanID}. Elapsed time: {elapsed_time:.2f} s"
+                f"Scan {self.scan_item.scan_number} finished. Scan ID {self.scan_item.scan_id}. Elapsed time: {elapsed_time:.2f} s"
             )
         )
 

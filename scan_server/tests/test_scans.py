@@ -4,12 +4,12 @@ from unittest import mock
 
 import numpy as np
 import pytest
-from bec_lib import messages
-from utils import DMMock
-
 from scan_plugins.LamNIFermatScan import LamNIFermatScan
 from scan_plugins.otf_scan import OTFScan
 from scan_plugins.owis_grid import OwisGrid
+from utils import DMMock
+
+from bec_lib import messages
 from scan_server.errors import ScanAbortion
 from scan_server.scans import (
     Acquire,
@@ -633,10 +633,10 @@ def test_scan_scan(scan_msg, reference_scan_list):
     for step in scan.run():
         if step:
             msg_list.append(step)
-    scan_uid = msg_list[0].metadata.get("scanID")
+    scan_uid = msg_list[0].metadata.get("scan_id")
     for ii, _ in enumerate(reference_scan_list):
-        if reference_scan_list[ii].metadata.get("scanID") is not None:
-            reference_scan_list[ii].metadata["scanID"] = scan_uid
+        if reference_scan_list[ii].metadata.get("scan_id") is not None:
+            reference_scan_list[ii].metadata["scan_id"] = scan_uid
         reference_scan_list[ii].metadata["DIID"] = ii
     assert msg_list == reference_scan_list
 
@@ -906,10 +906,10 @@ def test_cont_line_scan(scan_msg, reference_scan_list):
     with mock.patch.object(scan.device_manager.devices["samx"], "readback", mock_readback):
         msg_list = [val for val in list(scan.run()) if val is not None]
 
-        scan_uid = msg_list[0].metadata.get("scanID")
+        scan_uid = msg_list[0].metadata.get("scan_id")
         for ii, _ in enumerate(reference_scan_list):
-            if reference_scan_list[ii].metadata.get("scanID") is not None:
-                reference_scan_list[ii].metadata["scanID"] = scan_uid
+            if reference_scan_list[ii].metadata.get("scan_id") is not None:
+                reference_scan_list[ii].metadata["scan_id"] = scan_uid
             reference_scan_list[ii].metadata["DIID"] = ii
         assert msg_list == reference_scan_list
 
@@ -1031,10 +1031,10 @@ def test_acquire(scan_msg, reference_scan_list):
 
     scan = Acquire(exp_time=1, device_manager=device_manager)
     scan_instructions = list(scan.run())
-    scan_uid = scan_instructions[0].metadata.get("scanID")
+    scan_uid = scan_instructions[0].metadata.get("scan_id")
     for ii, _ in enumerate(reference_scan_list):
-        if reference_scan_list[ii].metadata.get("scanID") is not None:
-            reference_scan_list[ii].metadata["scanID"] = scan_uid
+        if reference_scan_list[ii].metadata.get("scan_id") is not None:
+            reference_scan_list[ii].metadata["scan_id"] = scan_uid
         reference_scan_list[ii].metadata["DIID"] = ii
     assert scan_instructions == reference_scan_list
 
@@ -1696,10 +1696,10 @@ def test_LamNIFermatScan(scan_msg, reference_scan_list):
     with mock.patch.object(scan, "_check_min_positions") as check_min_pos:
         scan_instructions = list(scan.run())
         check_min_pos.assert_called_once()
-        scan_uid = scan_instructions[0].metadata.get("scanID")
+        scan_uid = scan_instructions[0].metadata.get("scan_id")
         for ii, instr in enumerate(reference_scan_list):
-            if instr.metadata.get("scanID") is not None:
-                instr.metadata["scanID"] = scan_uid
+            if instr.metadata.get("scan_id") is not None:
+                instr.metadata["scan_id"] = scan_uid
             instr.metadata["DIID"] = ii
             instr.metadata["RID"] = scan.metadata.get("RID")
             if instr.content["action"] == "rpc":

@@ -94,7 +94,7 @@ def test_redis_connector_raise_alarm(connector, severity, alarm_type, source, ms
         ["topic2", TestMessage("msg2")],
         [
             MessageEndpoints.scan_segment(),
-            bec_messages.ScanMessage(point_id=1, scanID="scanID", data={}),
+            bec_messages.ScanMessage(point_id=1, scan_id="scan_id", data={}),
         ],
     ],
 )

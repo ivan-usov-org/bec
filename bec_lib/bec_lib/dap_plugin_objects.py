@@ -69,18 +69,18 @@ class DAPPluginObjectBase:
         converted_args = []
         for arg in args:
             if isinstance(arg, ScanItem):
-                converted_args.append(arg.scanID)
+                converted_args.append(arg.scan_id)
             elif isinstance(arg, ScanReport):
-                converted_args.append(arg.scan.scanID)
+                converted_args.append(arg.scan.scan_id)
             else:
                 converted_args.append(arg)
         args = converted_args
         converted_kwargs = {}
         for key, val in kwargs.items():
             if isinstance(val, ScanItem):
-                converted_kwargs[key] = val.scanID
+                converted_kwargs[key] = val.scan_id
             elif isinstance(arg, ScanReport):
-                converted_kwargs[key] = arg.scan.scanID
+                converted_kwargs[key] = arg.scan.scan_id
             elif isinstance(val, lmfit.Parameter):
                 converted_kwargs[key] = serialize_param_object(val)
             else:

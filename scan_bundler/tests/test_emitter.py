@@ -1,9 +1,8 @@
 from unittest import mock
-from bec_lib import messages
 
 import pytest
 
-from bec_lib import MessageEndpoints
+from bec_lib import MessageEndpoints, messages
 from scan_bundler.emitter import EmitterBase
 
 
@@ -14,7 +13,7 @@ from scan_bundler.emitter import EmitterBase
         (
             [
                 (
-                    messages.ScanMessage(point_id=1, scanID="scanID", data={}, metadata={}),
+                    messages.ScanMessage(point_id=1, scan_id="scan_id", data={}, metadata={}),
                     "endpoint",
                     None,
                 )
@@ -23,12 +22,12 @@ from scan_bundler.emitter import EmitterBase
         (
             [
                 (
-                    messages.ScanMessage(point_id=1, scanID="scanID", data={}, metadata={}),
+                    messages.ScanMessage(point_id=1, scan_id="scan_id", data={}, metadata={}),
                     "endpoint",
                     None,
                 ),
                 (
-                    messages.ScanMessage(point_id=2, scanID="scanID", data={}, metadata={}),
+                    messages.ScanMessage(point_id=2, scan_id="scan_id", data={}, metadata={}),
                     "endpoint",
                     None,
                 ),
@@ -37,12 +36,12 @@ from scan_bundler.emitter import EmitterBase
         (
             [
                 (
-                    messages.ScanMessage(point_id=1, scanID="scanID", data={}, metadata={}),
+                    messages.ScanMessage(point_id=1, scan_id="scan_id", data={}, metadata={}),
                     "endpoint",
                     "public_endpoint",
                 ),
                 (
-                    messages.ScanMessage(point_id=2, scanID="scanID", data={}, metadata={}),
+                    messages.ScanMessage(point_id=2, scan_id="scan_id", data={}, metadata={}),
                     "endpoint",
                     "public_endpoint",
                 ),
@@ -81,12 +80,12 @@ def test_publish_data(msgs):
     "msg,endpoint,public",
     [
         (
-            messages.ScanMessage(point_id=1, scanID="scanID", data={}, metadata={}),
+            messages.ScanMessage(point_id=1, scan_id="scan_id", data={}, metadata={}),
             "endpoint",
             None,
         ),
         (
-            messages.ScanMessage(point_id=1, scanID="scanID", data={}, metadata={}),
+            messages.ScanMessage(point_id=1, scan_id="scan_id", data={}, metadata={}),
             "endpoint",
             "public",
         ),

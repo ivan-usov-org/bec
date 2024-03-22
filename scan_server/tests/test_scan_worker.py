@@ -3,10 +3,10 @@ import uuid
 from unittest import mock
 
 import pytest
-from bec_lib import MessageEndpoints, messages
-from bec_lib.tests.utils import ConnectorMock, dm, dm_with_devices
 from utils import scan_server_mock, threads_check
 
+from bec_lib import MessageEndpoints, messages
+from bec_lib.tests.utils import ConnectorMock, dm, dm_with_devices
 from scan_server.errors import DeviceMessageError, ScanAbortion
 from scan_server.scan_assembler import ScanAssembler
 from scan_server.scan_queue import (
@@ -29,11 +29,11 @@ def scan_worker_mock(scan_server_mock) -> ScanWorker:
 
 class RequestBlockQueueMock(RequestBlockQueue):
     request_blocks = []
-    _scanID = []
+    _scan_id = []
 
     @property
-    def scanID(self):
-        return self._scanID
+    def scan_id(self):
+        return self._scan_id
 
     def append(self, msg):
         pass
@@ -353,7 +353,7 @@ def test_pre_scan(scan_worker_mock, instructions):
                     metadata={
                         "readout_priority": "monitored",
                         "DIID": 3,
-                        "scanID": "scanID",
+                        "scan_id": "scan_id",
                         "RID": "requestID",
                     },
                 )
@@ -366,7 +366,7 @@ def test_pre_scan(scan_worker_mock, instructions):
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 4,
-                    "scanID": "scanID",
+                    "scan_id": "scan_id",
                     "RID": "requestID",
                 },
             ),
@@ -380,7 +380,7 @@ def test_pre_scan(scan_worker_mock, instructions):
                     metadata={
                         "readout_priority": "monitored",
                         "DIID": 3,
-                        "scanID": "scanID",
+                        "scan_id": "scan_id",
                         "RID": "request",
                     },
                 )
@@ -393,7 +393,7 @@ def test_pre_scan(scan_worker_mock, instructions):
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 4,
-                    "scanID": "scanID",
+                    "scan_id": "scan_id",
                     "RID": "requestID",
                 },
             ),
@@ -407,7 +407,7 @@ def test_pre_scan(scan_worker_mock, instructions):
                     metadata={
                         "readout_priority": "monitored",
                         "DIID": 4,
-                        "scanID": "scanID",
+                        "scan_id": "scan_id",
                         "RID": "requestID",
                     },
                 )
@@ -420,7 +420,7 @@ def test_pre_scan(scan_worker_mock, instructions):
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 4,
-                    "scanID": "scanID",
+                    "scan_id": "scan_id",
                     "RID": "requestID",
                 },
             ),
@@ -434,7 +434,7 @@ def test_pre_scan(scan_worker_mock, instructions):
                     metadata={
                         "readout_priority": "monitored",
                         "DIID": 3,
-                        "scanID": "scanID",
+                        "scan_id": "scan_id",
                         "RID": "requestID",
                     },
                 )
@@ -447,7 +447,7 @@ def test_pre_scan(scan_worker_mock, instructions):
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 4,
-                    "scanID": "scanID",
+                    "scan_id": "scan_id",
                     "RID": "requestID",
                 },
             ),
@@ -479,7 +479,7 @@ def test_check_for_failed_movements(scan_worker_mock, device_status, devices, in
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 3,
-                    "scanID": "scanID",
+                    "scan_id": "scan_id",
                     "RID": "requestID",
                 },
             ),
@@ -490,7 +490,7 @@ def test_check_for_failed_movements(scan_worker_mock, device_status, devices, in
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 4,
-                    "scanID": "scanID",
+                    "scan_id": "scan_id",
                     "RID": "requestID",
                 },
             ),
@@ -500,7 +500,7 @@ def test_check_for_failed_movements(scan_worker_mock, device_status, devices, in
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 3,
-                    "scanID": "scanID",
+                    "scan_id": "scan_id",
                     "RID": "requestID",
                 },
             ),
@@ -513,7 +513,7 @@ def test_check_for_failed_movements(scan_worker_mock, device_status, devices, in
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 3,
-                    "scanID": "scanID",
+                    "scan_id": "scan_id",
                     "RID": "requestID",
                 },
             ),
@@ -524,7 +524,7 @@ def test_check_for_failed_movements(scan_worker_mock, device_status, devices, in
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 4,
-                    "scanID": "scanID",
+                    "scan_id": "scan_id",
                     "RID": "requestID",
                 },
             ),
@@ -534,7 +534,7 @@ def test_check_for_failed_movements(scan_worker_mock, device_status, devices, in
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 3,
-                    "scanID": "scanID",
+                    "scan_id": "scan_id",
                     "RID": "requestID",
                 },
             ),
@@ -547,7 +547,7 @@ def test_check_for_failed_movements(scan_worker_mock, device_status, devices, in
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 3,
-                    "scanID": "scanID",
+                    "scan_id": "scan_id",
                     "RID": "requestID",
                 },
             ),
@@ -558,7 +558,7 @@ def test_check_for_failed_movements(scan_worker_mock, device_status, devices, in
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 4,
-                    "scanID": "scanID",
+                    "scan_id": "scan_id",
                     "RID": "requestID",
                 },
             ),
@@ -568,7 +568,7 @@ def test_check_for_failed_movements(scan_worker_mock, device_status, devices, in
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 5,
-                    "scanID": "scanID",
+                    "scan_id": "scan_id",
                     "RID": "requestID",
                 },
             ),
@@ -605,7 +605,7 @@ def test_wait_for_idle(scan_worker_mock, msg1, msg2, req_msg: messages.DeviceReq
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 3,
-                    "scanID": "scanID",
+                    "scan_id": "scan_id",
                     "RID": "requestID",
                 },
             ),
@@ -616,7 +616,7 @@ def test_wait_for_idle(scan_worker_mock, msg1, msg2, req_msg: messages.DeviceReq
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 4,
-                    "scanID": "scanID",
+                    "scan_id": "scan_id",
                     "RID": "requestID",
                 },
             ),
@@ -626,7 +626,7 @@ def test_wait_for_idle(scan_worker_mock, msg1, msg2, req_msg: messages.DeviceReq
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 3,
-                    "scanID": "scanID",
+                    "scan_id": "scan_id",
                     "RID": "requestID",
                 },
             ),
@@ -663,7 +663,7 @@ def test_wait_for_read(scan_worker_mock, msg1, msg2, req_msg: messages.DeviceReq
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 3,
-                    "scanID": "scanID",
+                    "scan_id": "scan_id",
                     "RID": "requestID",
                 },
             )
@@ -683,7 +683,7 @@ def test_wait_for_trigger(scan_worker_mock, instr):
                     metadata={
                         "readout_priority": "monitored",
                         "DIID": 3,
-                        "scanID": "scanID",
+                        "scan_id": "scan_id",
                         "RID": "requestID",
                     },
                 )
@@ -721,7 +721,7 @@ def test_wait_for_device_server(scan_worker_mock):
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 3,
-                    "scanID": "scanID",
+                    "scan_id": "scan_id",
                     "RID": "requestID",
                 },
             )
@@ -746,7 +746,7 @@ def test_set_devices(scan_worker_mock, instr):
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 3,
-                    "scanID": "scanID",
+                    "scan_id": "scan_id",
                     "RID": "requestID",
                 },
             )
@@ -770,7 +770,7 @@ def test_trigger_devices(scan_worker_mock, instr):
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 3,
-                    "scanID": "scanID",
+                    "scan_id": "scan_id",
                     "RID": "requestID",
                 },
             ),
@@ -788,7 +788,7 @@ def test_trigger_devices(scan_worker_mock, instr):
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 3,
-                    "scanID": "scanID",
+                    "scan_id": "scan_id",
                     "RID": "requestID",
                 },
             )
@@ -813,7 +813,7 @@ def test_send_rpc(scan_worker_mock, instr):
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 3,
-                    "scanID": "scanID",
+                    "scan_id": "scan_id",
                     "RID": "requestID",
                 },
             )
@@ -826,7 +826,7 @@ def test_send_rpc(scan_worker_mock, instr):
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 3,
-                    "scanID": "scanID",
+                    "scan_id": "scan_id",
                     "RID": "requestID",
                 },
             )
@@ -876,13 +876,13 @@ def test_read_devices(scan_worker_mock, instr):
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 3,
-                    "scanID": "scanID",
+                    "scan_id": "scan_id",
                     "RID": "requestID",
                 },
             ),
             ["samx"],
             {"value": 10, "wait_group": "scan_motor", "time": 30},
-            {"readout_priority": "monitored", "DIID": 3, "scanID": "scanID", "RID": "requestID"},
+            {"readout_priority": "monitored", "DIID": 3, "scan_id": "scan_id", "RID": "requestID"},
         )
     ],
 )
@@ -909,7 +909,7 @@ def test_kickoff_devices(scan_worker_mock, instr, devices, parameter, metadata):
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 3,
-                    "scanID": "scanID",
+                    "scan_id": "scan_id",
                     "RID": "requestID",
                 },
             ),
@@ -952,7 +952,7 @@ def test_publish_data_as_read(scan_worker_mock):
         metadata={
             "readout_priority": "monitored",
             "DIID": 3,
-            "scanID": "scanID",
+            "scan_id": "scan_id",
             "RID": "requestID",
         },
     )
@@ -977,7 +977,7 @@ def test_publish_data_as_read_multiple(scan_worker_mock):
         metadata={
             "readout_priority": "monitored",
             "DIID": 3,
-            "scanID": "scanID",
+            "scan_id": "scan_id",
             "RID": "requestID",
         },
     )
@@ -1008,7 +1008,7 @@ def test_check_for_interruption(scan_worker_mock):
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 18,
-                    "scanID": "12345",
+                    "scan_id": "12345",
                     "scan_def_id": 100,
                     "pointID": 50,
                     "RID": 11,
@@ -1025,7 +1025,7 @@ def test_check_for_interruption(scan_worker_mock):
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 18,
-                    "scanID": "12345",
+                    "scan_id": "12345",
                     "RID": 11,
                 },
             ),
@@ -1061,7 +1061,7 @@ def test_open_scan(scan_worker_mock, instr, corr_num_points, scan_id):
                         worker.open_scan(instr)
 
                         if not scan_id:
-                            assert worker.scan_id == instr.metadata.get("scanID")
+                            assert worker.scan_id == instr.metadata.get("scan_id")
                             assert worker.scan_motors == [
                                 worker.device_manager.devices["samx"],
                                 worker.device_manager.devices["samy"],
@@ -1128,7 +1128,7 @@ def test_initialize_scan_info(scan_worker_mock, msg):
                 device=None,
                 action="close_scan",
                 parameter={},
-                metadata={"readout_priority": "monitored", "DIID": 18, "scanID": "12345"},
+                metadata={"readout_priority": "monitored", "DIID": 18, "scan_id": "12345"},
             ),
             "12345",
             19,
@@ -1139,7 +1139,7 @@ def test_initialize_scan_info(scan_worker_mock, msg):
                 device=None,
                 action="close_scan",
                 parameter={},
-                metadata={"readout_priority": "monitored", "DIID": 18, "scanID": "12345"},
+                metadata={"readout_priority": "monitored", "DIID": 18, "scan_id": "12345"},
             ),
             "0987",
             200,
@@ -1152,7 +1152,7 @@ def test_close_scan(scan_worker_mock, msg, scan_id, max_point_id, exp_num_points
     worker.scan_id = scan_id
     worker.current_scan_info["num_points"] = 19
 
-    reset = bool(worker.scan_id == msg.metadata["scanID"])
+    reset = bool(worker.scan_id == msg.metadata["scan_id"])
     with mock.patch.object(worker, "_send_scan_status") as send_scan_status_mock:
         worker.close_scan(msg, max_point_id=max_point_id)
         if reset:
@@ -1170,7 +1170,7 @@ def test_close_scan(scan_worker_mock, msg, scan_id, max_point_id, exp_num_points
             device=None,
             action="stage",
             parameter={},
-            metadata={"readout_priority": "async", "DIID": 18, "scanID": "12345"},
+            metadata={"readout_priority": "async", "DIID": 18, "scan_id": "12345"},
         )
     ],
 )
@@ -1248,11 +1248,11 @@ def test_stage_device(scan_worker_mock, msg):
                 device=None,
                 action="close_scan",
                 parameter={"parameter": "param"},
-                metadata={"readout_priority": "monitored", "DIID": 18, "scanID": "12345"},
+                metadata={"readout_priority": "monitored", "DIID": 18, "scan_id": "12345"},
             ),
             ["samx"],
             {"parameter": "param"},
-            {"readout_priority": "monitored", "DIID": 18, "scanID": "12345"},
+            {"readout_priority": "monitored", "DIID": 18, "scan_id": "12345"},
             False,
         ),
         (None, None, {}, {}, False),
@@ -1284,12 +1284,13 @@ def test_unstage_device(scan_worker_mock, msg, devices, parameter, metadata, cle
 def test_send_scan_status(scan_worker_mock, status, expire):
     worker = scan_worker_mock
     worker.device_manager.connector = ConnectorMock()
-    worker.current_scanID = str(uuid.uuid4())
+    worker.current_scan_id = str(uuid.uuid4())
     worker._send_scan_status(status)
     scan_info_msgs = [
         msg
         for msg in worker.device_manager.connector.message_sent
-        if msg["queue"] == MessageEndpoints.public_scan_info(scanID=worker.current_scanID).endpoint
+        if msg["queue"]
+        == MessageEndpoints.public_scan_info(scan_id=worker.current_scan_id).endpoint
     ]
     assert len(scan_info_msgs) == 1
     assert scan_info_msgs[0]["expire"] == expire
@@ -1345,7 +1346,7 @@ def test_process_instructions(scan_worker_mock, abortion):
                 device=None,
                 action="open_scan",
                 parameter={"readout_priority": {"monitored": [], "baseline": [], "on_request": []}},
-                metadata={"readout_priority": "monitored", "DIID": 18, "scanID": "12345"},
+                metadata={"readout_priority": "monitored", "DIID": 18, "scan_id": "12345"},
             ),
             "open_scan",
         ),
@@ -1354,7 +1355,7 @@ def test_process_instructions(scan_worker_mock, abortion):
                 device=None,
                 action="close_scan",
                 parameter={},
-                metadata={"readout_priority": "monitored", "DIID": 18, "scanID": "12345"},
+                metadata={"readout_priority": "monitored", "DIID": 18, "scan_id": "12345"},
             ),
             "close_scan",
         ),
@@ -1366,7 +1367,7 @@ def test_process_instructions(scan_worker_mock, abortion):
                 metadata={
                     "readout_priority": "monitored",
                     "DIID": 4,
-                    "scanID": "12345",
+                    "scan_id": "12345",
                     "RID": "123456",
                 },
             ),
@@ -1483,7 +1484,7 @@ def test_instruction_step(scan_worker_mock, msg, method):
 def test_reset(scan_worker_mock):
     worker = scan_worker_mock
     worker._gropus = 1
-    worker.current_scanID = 1
+    worker.current_scan_id = 1
     worker.current_scan_info = 1
     worker.scan_id = 1
     worker.interception_msg = 1
@@ -1492,7 +1493,7 @@ def test_reset(scan_worker_mock):
     worker.reset()
 
     assert worker._groups == {}
-    assert worker.current_scanID == ""
+    assert worker.current_scan_id == ""
     assert worker.current_scan_info == {}
     assert worker.scan_id == None
     assert worker.interception_msg == None

@@ -94,11 +94,11 @@ def test_get_async_data_for_scan():
     producer = mock.MagicMock()
     async_data = AsyncDataHandler(producer)
     producer.keys.return_value = [
-        MessageEndpoints.device_async_readback("scanID", "samx").endpoint.encode(),
-        MessageEndpoints.device_async_readback("scanID", "samy").endpoint.encode(),
+        MessageEndpoints.device_async_readback("scan_id", "samx").endpoint.encode(),
+        MessageEndpoints.device_async_readback("scan_id", "samy").endpoint.encode(),
     ]
     with mock.patch.object(async_data, "get_async_data_for_device") as mock_get:
-        async_data.get_async_data_for_scan("scanID")
+        async_data.get_async_data_for_scan("scan_id")
         assert mock_get.call_count == 2
 
 
@@ -112,10 +112,10 @@ def test_get_async_data_for_device():
             )
         }
     ]
-    res = async_data.get_async_data_for_device("scanID", "samx")
+    res = async_data.get_async_data_for_device("scan_id", "samx")
     assert res["data"]["value"].shape == (10, 10)
     assert len(res) == 1
     assert producer.xrange.call_count == 1
     producer.xrange.assert_called_with(
-        MessageEndpoints.device_async_readback("scanID", "samx"), min="-", max="+"
+        MessageEndpoints.device_async_readback("scan_id", "samx"), min="-", max="+"
     )

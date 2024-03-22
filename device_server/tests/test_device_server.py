@@ -3,15 +3,15 @@ from unittest import mock
 from unittest.mock import ANY
 
 import pytest
+from ophyd import Staged
+from ophyd.utils import errors as ophyd_errors
+from test_device_manager_ds import device_manager, load_device_manager
+
 from bec_lib import Alarms, MessageEndpoints, ServiceConfig, messages
 from bec_lib.device import OnFailure
 from bec_lib.messages import BECStatus
 from bec_lib.redis_connector import MessageObject
 from bec_lib.tests.utils import ConnectorMock
-from ophyd import Staged
-from ophyd.utils import errors as ophyd_errors
-from test_device_manager_ds import device_manager, load_device_manager
-
 from device_server import DeviceServer
 from device_server.device_server import InvalidDeviceError
 
@@ -127,7 +127,7 @@ def test_stop_devices(device_server_mock):
             MessageObject(
                 "test",
                 messages.ScanQueueModificationMessage(
-                    scanID="scanID",
+                    scan_id="scan_id",
                     action="pause",
                     parameter={},
                     metadata={"stream": "primary", "DIID": 1, "RID": "test"},
@@ -139,7 +139,7 @@ def test_stop_devices(device_server_mock):
             MessageObject(
                 "test",
                 messages.ScanQueueModificationMessage(
-                    scanID="scanID",
+                    scan_id="scan_id",
                     action="abort",
                     parameter={},
                     metadata={"stream": "primary", "DIID": 1, "RID": "test"},
@@ -151,7 +151,7 @@ def test_stop_devices(device_server_mock):
             MessageObject(
                 "test",
                 messages.ScanQueueModificationMessage(
-                    scanID="scanID",
+                    scan_id="scan_id",
                     action="halt",
                     parameter={},
                     metadata={"stream": "primary", "DIID": 1, "RID": "test"},
@@ -163,7 +163,7 @@ def test_stop_devices(device_server_mock):
             MessageObject(
                 "test",
                 messages.ScanQueueModificationMessage(
-                    scanID="scanID",
+                    scan_id="scan_id",
                     action="resume",
                     parameter={},
                     metadata={"stream": "primary", "DIID": 1, "RID": "test"},
@@ -175,7 +175,7 @@ def test_stop_devices(device_server_mock):
             MessageObject(
                 "test",
                 messages.ScanQueueModificationMessage(
-                    scanID="scanID",
+                    scan_id="scan_id",
                     action="deferred_pause",
                     parameter={},
                     metadata={"stream": "primary", "DIID": 1, "RID": "test"},

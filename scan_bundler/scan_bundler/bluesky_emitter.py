@@ -5,6 +5,7 @@ import uuid
 from typing import TYPE_CHECKING
 
 import msgpack
+
 from bec_lib import MessageEndpoints, bec_logger
 
 from .emitter import EmitterBase
@@ -21,76 +22,76 @@ class BlueskyEmitter(EmitterBase):
         self.scan_bundler = scan_bundler
         self.bluesky_metadata = {}
 
-    def send_run_start_document(self, scanID) -> None:
+    def send_run_start_document(self, scan_id) -> None:
         """Bluesky only: send run start documents."""
-        logger.debug(f"sending run start doc for scanID {scanID}")
-        self.bluesky_metadata[scanID] = {}
-        doc = self._get_run_start_document(scanID)
-        self.bluesky_metadata[scanID]["start"] = doc
+        logger.debug(f"sending run start doc for scan_id {scan_id}")
+        self.bluesky_metadata[scan_id] = {}
+        doc = self._get_run_start_document(scan_id)
+        self.bluesky_metadata[scan_id]["start"] = doc
         self.connector.raw_send(MessageEndpoints.bluesky_events(), msgpack.dumps(("start", doc)))
-        self.send_descriptor_document(scanID)
+        self.send_descriptor_document(scan_id)
 
-    def _get_run_start_document(self, scanID) -> dict:
+    def _get_run_start_document(self, scan_id) -> dict:
         sb = self.scan_bundler
         doc = {
             "time": time.time(),
             "uid": str(uuid.uuid4()),
-            "scanID": scanID,
-            "queueID": sb.sync_storage[scanID]["info"]["queueID"],
-            "scan_id": sb.sync_storage[scanID]["info"]["scan_number"],
-            "motors": tuple(dev.name for dev in sb.scan_motors[scanID]),
+            "scan_id": scan_id,
+            "queueID": sb.sync_storage[scan_id]["info"]["queueID"],
+            "scan_id": sb.sync_storage[scan_id]["info"]["scan_number"],
+            "motors": tuple(dev.name for dev in sb.scan_motors[scan_id]),
         }
         return doc
 
-    def _get_data_keys(self, scanID):
+    def _get_data_keys(self, scan_id):
         sb = self.scan_bundler
         signals = {}
-        for dev in sb.monitored_devices[scanID]["devices"]:
+        for dev in sb.monitored_devices[scan_id]["devices"]:
             # copied from bluesky/callbacks/stream.py:
             signals[dev.name] = sb.device_manager.devices[dev.name]._info.get("describe", {})
         return signals
 
-    def _get_descriptor_document(self, scanID) -> dict:
+    def _get_descriptor_document(self, scan_id) -> dict:
         sb = self.scan_bundler
         doc = {
-            "run_start": self.bluesky_metadata[scanID]["start"]["uid"],
+            "run_start": self.bluesky_metadata[scan_id]["start"]["uid"],
             "time": time.time(),
-            "data_keys": self._get_data_keys(scanID),
+            "data_keys": self._get_data_keys(scan_id),
             "uid": str(uuid.uuid4()),
             "configuration": {},
             "name": "primary",
             "hints": {"samx": {"fields": ["samx"]}, "samy": {"fields": ["samy"]}},
             "object_keys": {
                 dev.name: [val["obj_name"] for val in dev._info.get("signals", {})]
-                for dev in sb.monitored_devices[scanID]["devices"]
+                for dev in sb.monitored_devices[scan_id]["devices"]
             },
         }
         return doc
 
-    def send_descriptor_document(self, scanID) -> None:
+    def send_descriptor_document(self, scan_id) -> None:
         """Bluesky only: send descriptor document"""
-        doc = self._get_descriptor_document(scanID)
-        self.bluesky_metadata[scanID]["descriptor"] = doc
+        doc = self._get_descriptor_document(scan_id)
+        self.bluesky_metadata[scan_id]["descriptor"] = doc
         self.connector.raw_send(
             MessageEndpoints.bluesky_events(), msgpack.dumps(("descriptor", doc))
         )
 
-    def cleanup_storage(self, scanID):
-        """remove old scanIDs to free memory"""
+    def cleanup_storage(self, scan_id):
+        """remove old scan_ids to free memory"""
 
         for storage in ["bluesky_metadata"]:
             try:
-                getattr(self, storage).pop(scanID)
+                getattr(self, storage).pop(scan_id)
             except KeyError:
-                logger.warning(f"Failed to remove {scanID} from {storage}.")
+                logger.warning(f"Failed to remove {scan_id} from {storage}.")
 
-    def send_bluesky_scan_point(self, scanID, pointID) -> None:
+    def send_bluesky_scan_point(self, scan_id, pointID) -> None:
         self.connector.raw_send(
             MessageEndpoints.bluesky_events(),
-            msgpack.dumps(("event", self._prepare_bluesky_event_data(scanID, pointID))),
+            msgpack.dumps(("event", self._prepare_bluesky_event_data(scan_id, pointID))),
         )
 
-    def _prepare_bluesky_event_data(self, scanID, pointID) -> dict:
+    def _prepare_bluesky_event_data(self, scan_id, pointID) -> dict:
         # event = {
         #     "descriptor": "5605e810-bb4e-4e40-b...d45279e3a4",
         #     "time": 1648468217.524021,
@@ -113,7 +114,7 @@ class BlueskyEmitter(EmitterBase):
         #     "filled": {},
         # }
         sb = self.scan_bundler
-        metadata = self.bluesky_metadata[scanID]
+        metadata = self.bluesky_metadata[scan_id]
         while not metadata.get("descriptor"):
             time.sleep(0.01)
 
@@ -126,14 +127,14 @@ class BlueskyEmitter(EmitterBase):
             "data": {},
             "timestamps": {},
         }
-        for data_point in sb.sync_storage[scanID][pointID].values():
+        for data_point in sb.sync_storage[scan_id][pointID].values():
             for key, val in data_point.items():
                 bls_event["data"][key] = val["value"]
                 bls_event["timestamps"][key] = val["timestamp"]
         return bls_event
 
-    def on_cleanup(self, scanID: str):
-        self.cleanup_storage(scanID)
+    def on_cleanup(self, scan_id: str):
+        self.cleanup_storage(scan_id)
 
-    def on_init(self, scanID: str):
-        self.send_run_start_document(scanID)
+    def on_init(self, scan_id: str):
+        self.send_run_start_document(scan_id)

@@ -41,7 +41,7 @@ class LiveUpdatesScanProgress(LiveUpdatesTable):
             logger.debug("waiting for new data point")
             time.sleep(0.1)
             return False
-        if status.metadata.get("scanID") != self.scan_item.scanID:
+        if status.metadata.get("scan_id") != self.scan_item.scan_id:
             logger.debug("waiting for new data point")
             time.sleep(0.1)
             return False

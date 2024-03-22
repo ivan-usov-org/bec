@@ -542,13 +542,13 @@ class DeviceManagerDS(DeviceManagerBase):
         data = kwargs["value"].get("data")
         ds_obj = self.devices[obj.root.name]
         metadata = ds_obj.metadata
-        if "scanID" not in metadata:
+        if "scan_id" not in metadata:
             return
 
         if not hasattr(ds_obj, "emitted_points"):
             ds_obj.emitted_points = {}
 
-        emitted_points = ds_obj.emitted_points.get(metadata["scanID"], 0)
+        emitted_points = ds_obj.emitted_points.get(metadata["scan_id"], 0)
 
         # make sure all arrays are of equal length
         max_points = min(len(d) for d in data.values())
@@ -563,7 +563,7 @@ class DeviceManagerDS(DeviceManagerBase):
                     signals={obj.name: signals}, metadata={"pointID": ii, **metadata}
                 )
             )
-        ds_obj.emitted_points[metadata["scanID"]] = max_points
+        ds_obj.emitted_points[metadata["scan_id"]] = max_points
         pipe = self.connector.pipeline()
         self.connector.send(MessageEndpoints.device_read(obj.root.name), bundle, pipe=pipe)
         msg = messages.DeviceStatusMessage(

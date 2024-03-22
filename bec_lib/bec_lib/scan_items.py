@@ -39,14 +39,14 @@ class ScanItem:
         scan_manager: ScanManager,
         queueID: str,
         scan_number: list,
-        scanID: list,
+        scan_id: list,
         status: str,
         **_kwargs,
     ) -> None:
         self.scan_manager = scan_manager
         self._queueID = queueID
         self.scan_number = scan_number
-        self.scanID = scanID
+        self.scan_id = scan_id
         self.status = status
         self.data = ScanData()
         self.async_data = {}
@@ -103,12 +103,12 @@ class ScanItem:
         return pd.DataFrame(tmp)
 
     def _update_async_data(self):
-        self.async_data = self._async_data_handler.get_async_data_for_scan(self.scanID)
-        # msg = messages.ScanMessage(point_id=0, scanID=self.scanID, data=data)
+        self.async_data = self._async_data_handler.get_async_data_for_scan(self.scan_id)
+        # msg = messages.ScanMessage(point_id=0, scan_id=self.scan_id, data=data)
         # self.async_data.set(0, msg)
 
     def __eq__(self, other):
-        return self.scanID == other.scanID
+        return self.scan_id == other.scan_id
 
     def describe(self) -> str:
         """describe the scan item"""
@@ -127,10 +127,10 @@ class ScanItem:
             if self.end_time and self.start_time
             else ""
         )
-        scanID = f"\tScan ID: {self.scanID}\n" if self.scanID else ""
+        scan_id = f"\tScan ID: {self.scan_id}\n" if self.scan_id else ""
         scan_number = f"\tScan number: {self.scan_number}\n" if self.scan_number else ""
         num_points = f"\tNumber of points: {self.num_points}\n" if self.num_points else ""
-        details = start_time + end_time + elapsed_time + scanID + scan_number + num_points
+        details = start_time + end_time + elapsed_time + scan_id + scan_number + num_points
         return details
 
     def __str__(self) -> str:
@@ -157,30 +157,30 @@ class ScanStorage:
     @property
     def current_scan(self) -> ScanItem | None:
         """get the current scan item"""
-        if not self.current_scanID:
+        if not self.current_scan_id:
             return None
-        return self.find_scan_by_ID(scanID=self.current_scanID[0])
+        return self.find_scan_by_ID(scan_id=self.current_scan_id[0])
 
     @property
-    def current_scanID(self) -> str | None:
-        """get the current scanID"""
+    def current_scan_id(self) -> str | None:
+        """get the current scan_id"""
         if self.current_scan_info is None:
             return None
-        return self.current_scan_info.get("scanID")
+        return self.current_scan_info.get("scan_id")
 
     @threadlocked
-    def find_scan_by_ID(self, scanID: str) -> ScanItem | None:
-        """find a scan item based on its scanID"""
+    def find_scan_by_ID(self, scan_id: str) -> ScanItem | None:
+        """find a scan item based on its scan_id"""
         for scan in self.storage:
-            if scanID == scan.scanID:
+            if scan_id == scan.scan_id:
                 return scan
         return None
 
     def update_with_scan_status(self, scan_status: messages.ScanStatusMessage) -> None:
         """update scan item in storage with a new ScanStatusMessage"""
 
-        scanID = scan_status.content["scanID"]
-        if not scanID:
+        scan_id = scan_status.content["scan_id"]
+        if not scan_id:
             return
 
         scan_number = scan_status.content["info"].get("scan_number")
@@ -188,7 +188,7 @@ class ScanStorage:
             self.last_scan_number = scan_number
 
         while True:
-            scan_item = self.find_scan_by_ID(scanID=scan_status.content["scanID"])
+            scan_item = self.find_scan_by_ID(scan_id=scan_status.content["scan_id"])
             if scan_item:
                 break
             time.sleep(0.1)
@@ -239,12 +239,12 @@ class ScanStorage:
         """update a scan item with a new scan segment"""
         logger.info(
             f"Received scan segment {scan_msg.content['point_id']} for scan"
-            f" {scan_msg.metadata['scanID']}: "
+            f" {scan_msg.metadata['scan_id']}: "
         )
         while True:
             with self._lock:
                 for scan_item in self.storage:
-                    if scan_item.scanID == scan_msg.metadata["scanID"]:
+                    if scan_item.scan_id == scan_msg.metadata["scan_id"]:
                         scan_item.data.set(scan_msg.content["point_id"], scan_msg)
                         scan_item.emit_data(scan_msg)
                         return
@@ -252,20 +252,20 @@ class ScanStorage:
 
     def add_scan_baseline(self, scan_msg: messages.ScanBaselineMessage) -> None:
         """update a scan item with a new scan baseline"""
-        logger.info(f"Received scan baseline for scan {scan_msg.metadata['scanID']}: ")
+        logger.info(f"Received scan baseline for scan {scan_msg.metadata['scan_id']}: ")
         while True:
             with self._lock:
                 for scan_item in self.storage:
-                    if scan_item.scanID == scan_msg.metadata["scanID"]:
+                    if scan_item.scan_id == scan_msg.metadata["scan_id"]:
                         point = len(scan_item.baseline)
                         scan_item.baseline.set(point, scan_msg)
                         return
             time.sleep(0.01)
 
     @threadlocked
-    def add_scan_item(self, queueID: str, scan_number: list, scanID: list, status: str):
+    def add_scan_item(self, queueID: str, scan_number: list, scan_id: list, status: str):
         """append new scan item to scan storage"""
-        self.storage.append(ScanItem(self.scan_manager, queueID, scan_number, scanID, status))
+        self.storage.append(ScanItem(self.scan_manager, queueID, scan_number, scan_id, status))
 
     @threadlocked
     def update_with_queue_status(self, queue_msg: messages.ScanQueueStatusMessage):
@@ -274,12 +274,12 @@ class ScanStorage:
         for queue_item in queue_info:
             # append = True
             # for scan_obj in self.storage:
-            #     if len(set(scan_obj.scanID) & set(queue_item["scanID"])) > 0:
+            #     if len(set(scan_obj.scan_id) & set(queue_item["scan_id"])) > 0:
             #         append = False
             if not any(queue_item["is_scan"]):
                 continue
 
-            for ii, scan in enumerate(queue_item["scanID"]):
+            for ii, scan in enumerate(queue_item["scan_id"]):
                 if self.find_scan_by_ID(scan):
                     continue
 
@@ -287,6 +287,6 @@ class ScanStorage:
                 self.add_scan_item(
                     queueID=queue_item["queueID"],
                     scan_number=queue_item["scan_number"][ii],
-                    scanID=queue_item["scanID"][ii],
+                    scan_id=queue_item["scan_id"][ii],
                     status=queue_item["status"],
                 )

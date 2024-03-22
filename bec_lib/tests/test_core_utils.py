@@ -2,20 +2,20 @@ import csv
 import os
 from unittest import mock
 
-from bec_lib.scan_data import ScanData
 import pytest
 
 from bec_lib import messages
+from bec_lib.scan_data import ScanData
 from bec_lib.scan_items import ScanItem
 from bec_lib.scan_report import ScanReport
-from bec_lib.utils import _write_csv, scan_to_dict, scan_to_csv, user_access, _extract_scan_data
+from bec_lib.utils import _extract_scan_data, _write_csv, scan_to_csv, scan_to_dict, user_access
 
 
 class ScanReportMock(ScanReport):
-    def __init__(self, scanID: str) -> None:
+    def __init__(self, scan_id: str) -> None:
         super().__init__()
         self.request = mock.MagicMock()
-        self.request.scan.scanID = scanID
+        self.request.scan.scan_id = scan_id
 
 
 @pytest.fixture
@@ -24,7 +24,7 @@ def scan_data():
     for ii in range(10):
         msg = messages.ScanMessage(
             point_id=ii,
-            scanID="scanID",
+            scan_id="scan_id",
             data={
                 "samx": {
                     "setpoint": {"value": ii, "timestamp": ii},
@@ -39,7 +39,7 @@ def scan_data():
 @pytest.fixture
 def scanitem():
     scanitem = ScanItem(
-        mock.MagicMock(), queueID="queueID", scanID="scanID", scan_number=1, status="closed"
+        mock.MagicMock(), queueID="queueID", scan_id="scan_id", scan_number=1, status="closed"
     )
     scanitem.status_message = mock.MagicMock()
     yield scanitem
@@ -102,7 +102,7 @@ def test_extract_scan_data(scanitem, scan_data):
     scanitem.start_time = 1620000000
     scanitem.end_time = 1620000000 + 3.5
     scanitem.status_message.return_value = messages.ScanStatusMessage(
-        scanID=scanitem.scanID,
+        scan_id=scanitem.scan_id,
         status=scanitem.status,
         info={"scan_number": scanitem.scan_number, "dataset_number": datasetnumber},
     )

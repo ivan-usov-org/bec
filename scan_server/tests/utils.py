@@ -25,7 +25,7 @@ class WorkerMock:
     def __init__(self) -> None:
         self.scan_id = None
         self.scan_motors = []
-        self.current_scanID = None
+        self.current_scan_id = None
         self.current_scan_info = None
         self.status = InstructionQueueStatus.IDLE
         self.current_instruction_queue_item = None

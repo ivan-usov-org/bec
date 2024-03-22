@@ -30,7 +30,7 @@ class ScanWorker(threading.Thread):
         self.scan_motors = []
         self.readout_priority = {}
         self.scan_type = None
-        self.current_scanID = None
+        self.current_scan_id = None
         self.current_scan_info = None
         self._staged_devices = set()
         self.max_point_id = 0
@@ -51,7 +51,7 @@ class ScanWorker(threading.Thread):
 
         """
         if not self.scan_id:
-            self.scan_id = instr.metadata.get("scanID")
+            self.scan_id = instr.metadata.get("scan_id")
             if instr.content["parameter"].get("scan_motors") is not None:
                 self.scan_motors = [
                     self.device_manager.devices[dev]
@@ -87,7 +87,7 @@ class ScanWorker(threading.Thread):
             instr (DeviceInstructionMessage): Device instruction received from the scan assembler
             max_point_id (int): Maximum point ID of the scan
         """
-        scan_id = instr.metadata.get("scanID")
+        scan_id = instr.metadata.get("scan_id")
 
         if self.scan_id != scan_id:
             return
@@ -699,15 +699,15 @@ class ScanWorker(threading.Thread):
         if current_scan_info_print.get("positions", []):
             current_scan_info_print["positions"] = "..."
         logger.info(
-            f"New scan status: {self.current_scanID} / {status} / {current_scan_info_print}"
+            f"New scan status: {self.current_scan_id} / {status} / {current_scan_info_print}"
         )
         msg = messages.ScanStatusMessage(
-            scanID=self.current_scanID, status=status, info=self.current_scan_info
+            scan_id=self.current_scan_id, status=status, info=self.current_scan_info
         )
         expire = None if status in ["open", "paused"] else 1800
         pipe = self.device_manager.connector.pipeline()
         self.device_manager.connector.set(
-            MessageEndpoints.public_scan_info(self.current_scanID), msg, pipe=pipe, expire=expire
+            MessageEndpoints.public_scan_info(self.current_scan_id), msg, pipe=pipe, expire=expire
         )
         self.device_manager.connector.set_and_publish(
             MessageEndpoints.scan_status(), msg, pipe=pipe
@@ -752,7 +752,7 @@ class ScanWorker(threading.Thread):
             self.status = InstructionQueueStatus.RUNNING
             for instr in cleanup:
                 self._check_for_interruption()
-                instr.metadata["scanID"] = queue.queue.active_rb.scanID
+                instr.metadata["scan_id"] = queue.queue.active_rb.scan_id
                 instr.metadata["queueID"] = queue.queue_id
                 self._instruction_step(instr)
             raise ScanAbortion from exc
@@ -778,8 +778,8 @@ class ScanWorker(threading.Thread):
         logger.debug(instr)
         action = instr.content.get("action")
         scan_def_id = instr.metadata.get("scan_def_id")
-        if self.current_scanID != instr.metadata.get("scanID"):
-            self.current_scanID = instr.metadata.get("scanID")
+        if self.current_scan_id != instr.metadata.get("scan_id"):
+            self.current_scan_id = instr.metadata.get("scan_id")
 
         if "pointID" in instr.metadata:
             self.max_point_id = instr.metadata["pointID"]
@@ -832,7 +832,7 @@ class ScanWorker(threading.Thread):
     def reset(self):
         """reset the scan worker and its member variables"""
         self._groups = {}
-        self.current_scanID = ""
+        self.current_scan_id = ""
         self.current_scan_info = {}
         self.scan_id = None
         self.interception_msg = None

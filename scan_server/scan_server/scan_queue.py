@@ -129,10 +129,10 @@ class QueueManager:
         logger.info(f"Scan interception: {scan_mod_msg}")
         action = scan_mod_msg.content["action"]
         parameter = scan_mod_msg.content["parameter"]
-        getattr(self, f"set_{action}")(scanID=scan_mod_msg.content["scanID"], parameter=parameter)
+        getattr(self, f"set_{action}")(scan_id=scan_mod_msg.content["scan_id"], parameter=parameter)
 
     @requires_queue
-    def set_pause(self, scanID=None, queue="primary", parameter: dict = None) -> None:
+    def set_pause(self, scan_id=None, queue="primary", parameter: dict = None) -> None:
         # pylint: disable=unused-argument
         """pause the queue and the currenlty running instruction queue"""
         que = self.queues[queue]
@@ -141,7 +141,7 @@ class QueueManager:
             que.worker_status = InstructionQueueStatus.PAUSED
 
     @requires_queue
-    def set_deferred_pause(self, scanID=None, queue="primary", parameter: dict = None) -> None:
+    def set_deferred_pause(self, scan_id=None, queue="primary", parameter: dict = None) -> None:
         # pylint: disable=unused-argument
         """pause the queue but continue with the currently running instruction queue until the next checkpoint"""
         que = self.queues[queue]
@@ -150,14 +150,14 @@ class QueueManager:
             que.worker_status = InstructionQueueStatus.DEFERRED_PAUSE
 
     @requires_queue
-    def set_continue(self, scanID=None, queue="primary", parameter: dict = None) -> None:
+    def set_continue(self, scan_id=None, queue="primary", parameter: dict = None) -> None:
         # pylint: disable=unused-argument
         """continue with the currently scheduled queue and instruction queue"""
         self.queues[queue].status = ScanQueueStatus.RUNNING
         self.queues[queue].worker_status = InstructionQueueStatus.RUNNING
 
     @requires_queue
-    def set_abort(self, scanID=None, queue="primary", parameter: dict = None) -> None:
+    def set_abort(self, scan_id=None, queue="primary", parameter: dict = None) -> None:
         """abort the scan and remove it from the queue. This will leave the queue in a paused state after the cleanup"""
         que = self.queues[queue]
         with AutoResetCM(que):
@@ -166,15 +166,15 @@ class QueueManager:
             que.worker_status = InstructionQueueStatus.STOPPED
 
     @requires_queue
-    def set_halt(self, scanID=None, queue="primary", parameter: dict = None) -> None:
+    def set_halt(self, scan_id=None, queue="primary", parameter: dict = None) -> None:
         """abort the scan and do not perform any cleanup routines"""
         instruction_queue = self.queues[queue].active_instruction_queue
         if instruction_queue:
             instruction_queue.return_to_start = False
-        self.set_abort(scanID=scanID, queue=queue)
+        self.set_abort(scan_id=scan_id, queue=queue)
 
     @requires_queue
-    def set_clear(self, scanID=None, queue="primary", parameter: dict = None) -> None:
+    def set_clear(self, scan_id=None, queue="primary", parameter: dict = None) -> None:
         # pylint: disable=unused-argument
         """pause the queue and clear all its elements"""
         logger.info("clearing queue")
@@ -185,20 +185,20 @@ class QueueManager:
             que.clear()
 
     @requires_queue
-    def set_restart(self, scanID=None, queue="primary", parameter: dict = None) -> None:
+    def set_restart(self, scan_id=None, queue="primary", parameter: dict = None) -> None:
         """abort and restart the currently running scan. The active scan will be aborted."""
-        if not scanID:
-            scanID = self._get_active_scanID(queue)
-        if not scanID:
+        if not scan_id:
+            scan_id = self._get_active_scan_id(queue)
+        if not scan_id:
             return
-        if isinstance(scanID, list):
-            scanID = scanID[0]
+        if isinstance(scan_id, list):
+            scan_id = scan_id[0]
         que = self.queues[queue]
         with AutoResetCM(que):
             que.status = ScanQueueStatus.PAUSED
             que.worker_status = InstructionQueueStatus.STOPPED
         self._lock.release()
-        instruction_queue = self._wait_for_queue_to_appear_in_history(scanID, queue)
+        instruction_queue = self._wait_for_queue_to_appear_in_history(scan_id, queue)
         self._lock.acquire()
         scan_msg = instruction_queue.scan_msgs[0]
         RID = parameter.get("RID")
@@ -207,31 +207,31 @@ class QueueManager:
         self.queues[queue].worker_status = InstructionQueueStatus.RUNNING
         self.add_to_queue(queue, scan_msg, 0)
 
-    def _get_active_scanID(self, queue):
+    def _get_active_scan_id(self, queue):
         if len(self.queues[queue].queue) == 0:
             return None
         if self.queues[queue].queue[0].active_request_block is None:
             return None
-        return self.queues[queue].queue[0].active_request_block.scanID
+        return self.queues[queue].queue[0].active_request_block.scan_id
 
-    def _wait_for_queue_to_appear_in_history(self, scanID, queue):
+    def _wait_for_queue_to_appear_in_history(self, scan_id, queue):
         timeout_time = 10
         elapsed_time = 0
         while True:
             if elapsed_time > timeout_time:
                 raise TimeoutError(
-                    f"Scan {scanID} did not appear in history within {timeout_time}s"
+                    f"Scan {scan_id} did not appear in history within {timeout_time}s"
                 )
             elapsed_time += 0.1
             history = self.queues[queue].history_queue
             if len(history) == 0:
                 time.sleep(0.1)
                 continue
-            if not scanID in history[-1].scanID:
+            if not scan_id in history[-1].scan_id:
                 time.sleep(0.1)
                 continue
 
-            if len(self.queues[queue].queue) > 0 and scanID in self.queues[queue].queue[0].scanID:
+            if len(self.queues[queue].queue) > 0 and scan_id in self.queues[queue].queue[0].scan_id:
                 time.sleep(0.1)
                 continue
             return history[-1]
@@ -257,7 +257,7 @@ class QueueManager:
         for queue_name, scan_queue in self.queues.items():
             table = Table(title=f"{queue_name} queue / {scan_queue.status}")
             table.add_column("queueID", justify="center")
-            table.add_column("scanID", justify="center")
+            table.add_column("scan_id", justify="center")
             table.add_column("is_scan", justify="center")
             table.add_column("type", justify="center")
             table.add_column("scan_number", justify="center")
@@ -267,7 +267,7 @@ class QueueManager:
             for instruction_queue in queue:
                 table.add_row(
                     instruction_queue.queue_id,
-                    ", ".join([str(s) for s in instruction_queue.scanID]),
+                    ", ".join([str(s) for s in instruction_queue.scan_id]),
                     ", ".join([str(s) for s in instruction_queue.is_scan]),
                     ", ".join([msg.content["scan_type"] for msg in instruction_queue.scan_msgs]),
                     ", ".join([str(s) for s in instruction_queue.scan_number]),
@@ -375,13 +375,13 @@ class ScanQueue:
         self._status = val
         self.queue_manager.send_queue_status()
 
-    def remove_queue_item(self, scanID: str) -> None:
+    def remove_queue_item(self, scan_id: str) -> None:
         """remove a queue item from the queue"""
-        if not scanID:
+        if not scan_id:
             return
         remove = []
         for queue in self.queue:
-            if len(set(scanID) & set(queue.scanID)) > 0:
+            if len(set(scan_id) & set(queue.scan_id)) > 0:
                 remove.append(queue)
         if remove:
             for rmv in remove:
@@ -494,11 +494,11 @@ class ScanQueue:
         if self.active_instruction_queue is not None:
             self.active_instruction_queue.abort()
 
-    def get_scan(self, scanID: str) -> InstructionQueueItem | None:
-        """get the instruction queue item based on its scanID"""
+    def get_scan(self, scan_id: str) -> InstructionQueueItem | None:
+        """get the instruction queue item based on its scan_id"""
         queue_found = None
         for queue in self.history_queue + self.queue:
-            if queue.scanID == scanID:
+            if queue.scan_id == scan_id:
                 queue_found = queue
                 return queue_found
         return queue_found
@@ -529,7 +529,7 @@ class RequestBlock:
         self.RID = msg.metadata["RID"]
         self.scan_assembler = assembler
         self.is_scan = False
-        self.scanID = None
+        self.scan_id = None
         self._scan_number = None
         self.parent = parent
         self._assemble()
@@ -540,8 +540,8 @@ class RequestBlock:
         self.is_scan = isinstance(self.scan, ScanBase)
         self.scan = self.scan_assembler.assemble_device_instructions(self.msg)
         self.instructions = self.scan.run()
-        if (self.is_scan or self.scan_def_id is not None) and self.scanID is None:
-            self.scanID = str(uuid.uuid4())
+        if (self.is_scan or self.scan_def_id is not None) and self.scan_id is None:
+            self.scan_id = str(uuid.uuid4())
         if self.scan.caller_args:
             self.scan_motors = self.scan.scan_motors
         self.readout_priority = self.scan.readout_priority
@@ -561,7 +561,7 @@ class RequestBlock:
             return None
         if self._scan_number is not None:
             return self._scan_number
-        return self._scan_server_scan_number + self.scanIDs_head()
+        return self._scan_server_scan_number + self.scan_ids_head()
 
     @property
     def _scan_server_scan_number(self):
@@ -571,22 +571,22 @@ class RequestBlock:
         """assign and fix the current scan number prediction"""
         if not self.is_scan:
             return None
-        self._scan_number = self._scan_server_scan_number + self.scanIDs_head()
+        self._scan_number = self._scan_server_scan_number + self.scan_ids_head()
         return None
 
-    def scanIDs_head(self) -> int:
-        """calculate the scanID offset in the queue for the current request block"""
+    def scan_ids_head(self) -> int:
+        """calculate the scan_id offset in the queue for the current request block"""
         offset = 0
         for queue in self.parent.scan_queue.queue:
             if queue.status == InstructionQueueStatus.COMPLETED:
                 continue
             if queue.queue_id != self.parent.instruction_queue.queue_id:
-                offset += len([scanID for scanID in queue.scanID if scanID])
+                offset += len([scan_id for scan_id in queue.scan_id if scan_id])
             else:
-                for scanID in queue.scanID:
-                    if scanID == self.scanID:
+                for scan_id in queue.scan_id:
+                    if scan_id == self.scan_id:
                         return offset
-                    if scanID:
+                    if scan_id:
                         offset += 1
                 return offset
         return offset
@@ -600,7 +600,7 @@ class RequestBlock:
             "readout_priority": self.readout_priority,
             "is_scan": self.is_scan,
             "scan_number": self.scan_number,
-            "scanID": self.scanID,
+            "scan_id": self.scan_id,
             "metadata": self.msg.metadata,
             "content": self.msg.content,
             "report_instructions": self.scan_report_instructions,
@@ -618,9 +618,9 @@ class RequestBlockQueue:
         self.scan_def_ids = {}
 
     @property
-    def scanID(self) -> list[str]:
-        """get the scanIDs for all request blocks"""
-        return [rb.scanID for rb in self.request_blocks]
+    def scan_id(self) -> list[str]:
+        """get the scan_ids for all request blocks"""
+        return [rb.scan_id for rb in self.request_blocks]
 
     @property
     def is_scan(self) -> list[bool]:
@@ -643,9 +643,9 @@ class RequestBlockQueue:
             return
         scan_def_id = request_block.msg.metadata["scan_def_id"]
         if scan_def_id in self.scan_def_ids:
-            request_block.scanID = self.scan_def_ids[scan_def_id]["scanID"]
+            request_block.scan_id = self.scan_def_ids[scan_def_id]["scan_id"]
         else:
-            self.scan_def_ids[scan_def_id] = {"scanID": request_block.scanID, "pointID": 0}
+            self.scan_def_ids[scan_def_id] = {"scan_id": request_block.scan_id, "pointID": 0}
 
     def append_request_block(self, request_block: RequestBlock) -> None:
         """append a new request block to the queue"""
@@ -729,7 +729,7 @@ class RequestBlockQueue:
 class InstructionQueueItem:
     """The InstructionQueueItem contains and manages the request blocks for a queue item.
     While an InstructionQueueItem can be comprised of multiple requests,
-    it will always have at max one scan_number / scanID.
+    it will always have at max one scan_number / scan_id.
 
     Raises:
         StopIteration: _description_
@@ -793,9 +793,9 @@ class InstructionQueueItem:
         return len(self.queue.scan_def_ids) == 0
 
     @property
-    def scanID(self) -> list[str]:
-        """get the scanIDs"""
-        return self.queue.scanID
+    def scan_id(self) -> list[str]:
+        """get the scan_ids"""
+        return self.queue.scan_id
 
     @property
     def is_scan(self) -> list[bool]:
@@ -835,7 +835,7 @@ class InstructionQueueItem:
         request_blocks = [rb.describe() for rb in self.queue.request_blocks]
         content = {
             "queueID": self.queue_id,
-            "scanID": self.scanID,
+            "scan_id": self.scan_id,
             "is_scan": self.is_scan,
             "request_blocks": request_blocks,
             "scan_number": self.scan_number,
@@ -879,7 +879,7 @@ class InstructionQueueItem:
                 if scan_def_id in self.queue.scan_def_ids:
                     self.queue.scan_def_ids.pop(scan_def_id)
 
-            instr.metadata["scanID"] = self.queue.active_rb.scanID
+            instr.metadata["scan_id"] = self.queue.active_rb.scan_id
             instr.metadata["queueID"] = self.queue_id
             self.set_active()
             return instr

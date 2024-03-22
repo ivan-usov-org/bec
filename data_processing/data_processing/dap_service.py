@@ -114,7 +114,7 @@ class DAPServiceBase(abc.ABC):
         Args:
             status (dict): Scan status
         """
-        scan_id = status.get("scanID")
+        scan_id = status.get("scan_id")
         if scan_id != self.scan_id:
             self.current_scan_item = self.client.queue.scan_storage.find_scan_by_ID(scan_id)
         self.scan_id = scan_id
