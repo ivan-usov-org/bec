@@ -2,10 +2,11 @@ import os
 import threading
 import time
 
-import bec_lib
 import numpy as np
 import pytest
 import yaml
+
+import bec_lib
 from bec_lib import BECClient, DeviceConfigError, RedisConnector, ServiceConfig, bec_logger
 from bec_lib.alarm_handler import AlarmBase
 from bec_lib.tests.utils import wait_for_empty_queue

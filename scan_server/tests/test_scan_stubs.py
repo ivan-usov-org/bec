@@ -2,9 +2,9 @@ import threading
 from unittest import mock
 
 import pytest
+
 from bec_lib import MessageEndpoints, messages
 from bec_lib.tests.utils import ConnectorMock
-
 from scan_server.errors import DeviceMessageError
 from scan_server.scan_stubs import ScanAbortion, ScanStubs
 

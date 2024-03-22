@@ -2,10 +2,10 @@ import collections
 from unittest import mock
 
 import pytest
-from bec_lib import MessageEndpoints, messages
-from bec_lib.tests.utils import bec_client, dm, dm_with_devices
 
 from bec_client.callbacks.move_device import LiveUpdatesReadbackProgressbar, ReadbackDataMixin
+from bec_lib import MessageEndpoints, messages
+from bec_lib.tests.utils import bec_client, dm, dm_with_devices
 
 
 @pytest.fixture

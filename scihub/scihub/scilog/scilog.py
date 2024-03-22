@@ -5,9 +5,9 @@ from typing import TYPE_CHECKING
 
 import msgpack
 import requests
-from bec_lib import MessageEndpoints, RedisConnector, bec_logger, messages
 from dotenv import dotenv_values
 
+from bec_lib import MessageEndpoints, RedisConnector, bec_logger, messages
 from scihub.repeated_timer import RepeatedTimer
 
 logger = bec_logger.logger

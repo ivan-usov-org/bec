@@ -1,9 +1,8 @@
 import argparse
 import threading
 
-from bec_lib import RedisConnector, ServiceConfig, bec_logger
-
 import data_processing
+from bec_lib import RedisConnector, ServiceConfig, bec_logger
 from data_processing.lmfit1d_service import LmfitService1D
 
 logger = bec_logger.logger

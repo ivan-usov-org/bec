@@ -4,8 +4,8 @@ from io import StringIO
 from typing import Any
 
 import ophyd
-from bec_lib import Alarms, MessageEndpoints, bec_logger, messages
 
+from bec_lib import Alarms, MessageEndpoints, bec_logger, messages
 from device_server.devices import is_serializable, rgetattr
 
 logger = bec_logger.logger

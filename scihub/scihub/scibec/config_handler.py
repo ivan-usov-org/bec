@@ -15,7 +15,6 @@ from bec_lib.scibec_validator import SciBecValidator
 
 if TYPE_CHECKING:
     from bec_lib.device import DeviceBase
-
     from scihub.scibec.scibec_connector import SciBecConnector
 
 logger = bec_logger.logger

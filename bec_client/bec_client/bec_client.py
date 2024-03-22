@@ -5,11 +5,12 @@ import time
 from typing import Iterable
 
 import IPython
+from IPython.terminal.prompts import Prompts, Token
+
 from bec_lib import ServiceConfig, bec_logger
 from bec_lib.alarm_handler import AlarmBase
 from bec_lib.client import BECClient
 from bec_lib.connector import ConnectorBase
-from IPython.terminal.prompts import Prompts, Token
 
 from .beamline_mixin import BeamlineMixin
 from .bec_magics import BECMagics

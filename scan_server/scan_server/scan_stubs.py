@@ -7,6 +7,7 @@ from collections.abc import Callable
 from typing import Generator, Literal
 
 import numpy as np
+
 from bec_lib import MessageEndpoints, Status, bec_logger, messages
 from bec_lib.connector import ConnectorBase
 

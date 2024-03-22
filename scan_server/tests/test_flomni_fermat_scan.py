@@ -1,9 +1,8 @@
 from unittest import mock
 
 import pytest
-from utils import DMMock
-
 from scan_plugins.flomni_fermat_scan import FlomniFermatScan
+from utils import DMMock
 
 
 @pytest.fixture

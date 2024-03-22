@@ -1,11 +1,10 @@
 from unittest import mock
 
+from bec_client.plugins.LamNI import LamNI, XrayEyeAlign
 from bec_lib.device import DeviceBase
 
 # pylint: disable=unused-import
 from bec_lib.tests.utils import bec_client, dm, dm_with_devices
-
-from bec_client.plugins.LamNI import LamNI, XrayEyeAlign
 
 # pylint: disable=no-member
 # pylint: disable=missing-function-docstring

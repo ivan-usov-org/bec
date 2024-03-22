@@ -23,7 +23,6 @@ but they are executed in a specific order:
 import time
 
 from bec_lib import MessageEndpoints, bec_logger, messages
-
 from scan_server.scans import AsyncFlyScanBase
 
 logger = bec_logger.logger
