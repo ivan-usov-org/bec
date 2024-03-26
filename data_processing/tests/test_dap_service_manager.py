@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from bec_lib import MessageEndpoints, messages
+from bec_lib import messages
 from bec_lib.redis_connector import MessageObject
 from data_processing.dap_service import DAPServiceBase
 from data_processing.dap_service_manager import DAPServiceManager

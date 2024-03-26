@@ -6,7 +6,6 @@ import argparse
 import json
 import threading
 
-from bec_lib import messages
 from bec_lib.redis_connector import RedisConnector
 from bec_lib.service_config import ServiceConfig
 

@@ -3,8 +3,6 @@ import uuid
 from unittest import mock
 
 import pytest
-from bec_lib import MessageEndpoints, messages
-from bec_lib.tests.utils import ConnectorMock
 from utils import scan_server_mock
 
 from bec_lib import MessageEndpoints, messages

@@ -1,14 +1,12 @@
-import os
 import contextlib
+import os
 from unittest import mock
 
 import numpy as np
-import pytest
 import yaml
 
 import bec_lib
 from bec_lib import DeviceManagerBase, MessageEndpoints, ServiceConfig, messages
-from bec_lib.bec_errors import ServiceConfigError
 from bec_lib.messages import BECStatus
 from bec_lib.redis_connector import MessageObject
 from bec_lib.tests.utils import ConnectorMock, create_session_from_config, get_device_info_mock

@@ -5,7 +5,7 @@ from rich import box
 from rich.console import Console
 from rich.table import Table
 
-from bec_client.plugins.cSAXS import epics_get, epics_put, fshclose
+from bec_client.plugins.cSAXS import epics_put, fshclose
 
 # import builtins to avoid linter errors
 dev = builtins.__dict__.get("dev")

@@ -12,7 +12,6 @@ from bec_lib import Alarms, BECService, MessageEndpoints, bec_logger, messages
 from bec_lib.connector import ConnectorBase
 from bec_lib.device import OnFailure
 from bec_lib.messages import BECStatus
-from device_server.devices import rgetattr
 from device_server.devices.devicemanager import DeviceManagerDS
 from device_server.rpc_mixin import RPCMixin
 

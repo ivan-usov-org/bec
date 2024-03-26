@@ -11,7 +11,6 @@ from typing import TYPE_CHECKING
 
 from typeguard import typechecked
 
-from bec_lib import messages
 from bec_lib.device import Device
 from bec_lib.endpoints import MessageEndpoints
 

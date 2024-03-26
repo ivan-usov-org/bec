@@ -1,5 +1,4 @@
 import pytest
-from _collections_abc import dict_items, dict_keys, dict_values
 
 from bec_lib import messages
 from bec_lib.scan_data import ScanData

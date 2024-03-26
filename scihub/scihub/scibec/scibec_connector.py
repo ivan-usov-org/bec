@@ -5,8 +5,6 @@ from typing import TYPE_CHECKING
 
 from dotenv import dotenv_values
 from py_scibec import SciBecCore
-from py_scibec.exceptions import ApiException
-from urllib3.exceptions import MaxRetryError
 
 from bec_lib import MessageEndpoints, bec_logger, messages
 from bec_lib.connector import ConnectorBase

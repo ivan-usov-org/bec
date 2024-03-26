@@ -1,5 +1,3 @@
-import threading
-
 import pytest
 
 from bec_lib import ServiceConfig
@@ -7,7 +5,6 @@ from bec_lib.devicemanager import DeviceContainer
 from bec_lib.logger import bec_logger
 from bec_lib.messages import BECStatus
 from bec_lib.tests.utils import ConnectorMock
-
 from scan_server.scan_server import ScanServer
 from scan_server.scan_worker import InstructionQueueStatus
 

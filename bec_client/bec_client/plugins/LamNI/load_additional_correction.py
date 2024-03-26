@@ -1,7 +1,6 @@
 def lamni_read_additional_correction():
     # "additional_correction_shift"
     # [0][] x , [1][] y, [2][] angle, [3][0] number of elements
-    import numpy as np
 
     with open("correction_lamni_um_S01405_.txt", "r") as f:
         num_elements = f.readline()

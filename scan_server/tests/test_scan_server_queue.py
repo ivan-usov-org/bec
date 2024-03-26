@@ -1,4 +1,3 @@
-import threading
 import uuid
 from unittest import mock
 
@@ -7,8 +6,6 @@ from utils import scan_server_mock
 
 from bec_lib import Alarms, MessageEndpoints, messages
 from bec_lib.redis_connector import MessageObject
-from utils import scan_server_mock
-
 from scan_server.scan_assembler import ScanAssembler
 from scan_server.scan_queue import (
     InstructionQueueItem,

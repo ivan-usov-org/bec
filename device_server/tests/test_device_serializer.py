@@ -1,8 +1,8 @@
 import pytest
-from bec_lib.bec_errors import DeviceConfigError
 from ophyd import Component as Cpt
 from ophyd import Device, Signal
 
+from bec_lib.bec_errors import DeviceConfigError
 from device_server.devices.device_serializer import get_device_info
 
 

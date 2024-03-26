@@ -3,9 +3,9 @@ from collections import namedtuple
 from unittest import mock
 
 import pytest
-from bec_lib import Alarms, MessageEndpoints, messages
 from ophyd import Device, Kind, Signal, Staged, StatusBase
 
+from bec_lib import Alarms, MessageEndpoints, messages
 from device_server.rpc_mixin import RPCMixin
 
 

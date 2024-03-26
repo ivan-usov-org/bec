@@ -11,7 +11,7 @@ import h5py
 import numpy as np
 from typeguard import typechecked
 
-from bec_client.plugins.cSAXS import epics_get, epics_put, fshclose, fshopen
+from bec_client.plugins.cSAXS import epics_get, epics_put, fshopen
 from bec_lib import bec_logger
 from bec_lib.alarm_handler import AlarmBase
 from bec_lib.pdf_writer import PDFWriter

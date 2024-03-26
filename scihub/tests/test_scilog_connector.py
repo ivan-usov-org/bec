@@ -1,8 +1,8 @@
 from unittest import mock
 
-from bec_lib import MessageEndpoints, messages
 from test_scibec_connector import SciHubMock
 
+from bec_lib import MessageEndpoints, messages
 from scihub.scilog import SciLogConnector
 
 

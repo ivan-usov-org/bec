@@ -1,8 +1,8 @@
-import pytest
 from unittest import mock
 
-from bec_lib import MessageEndpoints
-from bec_lib import messages
+import pytest
+
+from bec_lib import MessageEndpoints, messages
 from bec_lib.connector import MessageObject
 
 # pylint: disable=missing-function-docstring

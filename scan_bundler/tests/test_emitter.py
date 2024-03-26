@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from bec_lib import MessageEndpoints, messages
+from bec_lib import messages
 from scan_bundler.emitter import EmitterBase
 
 

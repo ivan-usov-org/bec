@@ -4,7 +4,7 @@ import copy
 import traceback
 from typing import TYPE_CHECKING
 
-from bec_lib import BECStatus, DeviceConfigError, MessageEndpoints, bec_logger, messages
+from bec_lib import DeviceConfigError, MessageEndpoints, bec_logger, messages
 
 if TYPE_CHECKING:
     from devicemanager import DeviceManagerDS

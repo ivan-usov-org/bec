@@ -2,10 +2,9 @@ from unittest import mock
 
 import IPython
 import pytest
-from bec_lib import RedisConnector, ServiceConfig
-from bec_lib.tests.utils import ConnectorMock
 
 from bec_client import BECIPythonClient
+from bec_lib import RedisConnector, ServiceConfig
 
 
 def test_ipython_device_completion(bec_client_mock):

@@ -1,6 +1,4 @@
 import builtins
-import os
-import pathlib
 from unittest import mock
 
 from bec_lib.user_scripts_mixin import UserScriptsMixin

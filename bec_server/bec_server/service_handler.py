@@ -1,8 +1,8 @@
 import sys
 from string import Template
 
-from bec_server.tmux_launch import tmux_start, tmux_stop
 from bec_server.subprocess_launch import subprocess_start, subprocess_stop
+from bec_server.tmux_launch import tmux_start, tmux_stop
 
 
 class bcolors:

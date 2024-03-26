@@ -5,7 +5,6 @@ This module contains the DeviceManager class which is used to manage devices and
 from __future__ import annotations
 
 import re
-import time
 import traceback
 from typing import TYPE_CHECKING
 
@@ -23,8 +22,6 @@ from bec_lib.messages import BECStatus, DeviceConfigMessage, DeviceInfoMessage
 
 if TYPE_CHECKING:
     from bec_lib import BECService
-    from bec_lib.connector import ConnectorBase
-    from bec_lib.redis_connector import RedisProducer
 
 logger = bec_logger.logger
 

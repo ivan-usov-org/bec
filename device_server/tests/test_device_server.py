@@ -1,4 +1,3 @@
-import traceback
 from unittest import mock
 from unittest.mock import ANY
 
@@ -8,7 +7,6 @@ from ophyd.utils import errors as ophyd_errors
 from test_device_manager_ds import device_manager, load_device_manager
 
 from bec_lib import Alarms, MessageEndpoints, ServiceConfig, messages
-from bec_lib.device import OnFailure
 from bec_lib.messages import BECStatus
 from bec_lib.redis_connector import MessageObject
 from bec_lib.tests.utils import ConnectorMock

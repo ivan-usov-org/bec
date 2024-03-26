@@ -1,9 +1,7 @@
 from unittest import mock
 
-import pytest
-
 from bec_client.callbacks.scan_progress import LiveUpdatesScanProgress
-from bec_lib import MessageEndpoints, messages
+from bec_lib import messages
 
 
 def test_update_progressbar_continues_without_device_data():

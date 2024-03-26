@@ -7,11 +7,12 @@ import functools
 from typing import Any
 
 import msgpack
+from ophyd import Device, PositionerBase, Signal
+from ophyd_devices import BECDeviceBase, ComputedSignal
+
 from bec_lib.bec_errors import DeviceConfigError
 from bec_lib.device import DeviceBase
 from bec_lib.numpy_encoder import numpy_encode
-from ophyd import Device, PositionerBase, Signal
-from ophyd_devices import BECDeviceBase, ComputedSignal
 
 
 def is_serializable(var: Any) -> bool:

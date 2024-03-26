@@ -9,7 +9,6 @@ import builtins
 import getpass
 import importlib
 import inspect
-import subprocess
 from typing import TYPE_CHECKING
 
 from rich.console import Console
@@ -23,7 +22,6 @@ from bec_lib.callback_handler import CallbackHandler
 from bec_lib.dap_plugins import DAPPlugins
 from bec_lib.devicemanager import DeviceManagerBase
 from bec_lib.endpoints import MessageEndpoints
-from bec_lib.logbook_connector import LogbookConnector
 from bec_lib.logger import bec_logger
 from bec_lib.redis_connector import RedisConnector
 from bec_lib.scan_manager import ScanManager

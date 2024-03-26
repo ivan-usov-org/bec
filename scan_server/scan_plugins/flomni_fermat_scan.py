@@ -23,8 +23,8 @@ but they are executed in a specific order:
 import time
 
 import numpy as np
-from bec_lib import MessageEndpoints, bec_logger, messages
 
+from bec_lib import MessageEndpoints, bec_logger, messages
 from scan_server.errors import ScanAbortion
 from scan_server.scans import SyncFlyScanBase
 

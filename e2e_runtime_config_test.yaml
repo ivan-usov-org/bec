@@ -1,0 +1,16 @@
+eyefoc:
+  deviceClass: WrongDeviceClass
+  deviceConfig: {}
+  deviceTags:
+  - user motors
+  enabled: true
+  readOnly: false
+  readoutPriority: baseline
+hexapod:
+  deviceClass: SynDeviceOPAAS
+  deviceConfig: {}
+  deviceTags:
+  - user motors
+  enabled: true
+  readOnly: false
+  readoutPriority: baseline

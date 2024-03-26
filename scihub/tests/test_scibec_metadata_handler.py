@@ -3,7 +3,7 @@ from unittest import mock
 import numpy as np
 import pytest
 
-from bec_lib import MessageEndpoints, messages
+from bec_lib import messages
 from bec_lib.redis_connector import MessageObject
 from scihub.scibec.scibec_metadata_handler import SciBecMetadataHandler
 

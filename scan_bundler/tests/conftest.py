@@ -1,19 +1,14 @@
 import os
-import pytest
-import yaml
 from unittest import mock
 
-import bec_lib
-from bec_lib import bec_logger
-from bec_lib import DeviceManagerBase, ServiceConfig, messages
-from bec_lib.messages import BECStatus
-from bec_lib.tests.utils import (
-    ConnectorMock,
-    create_session_from_config,
-    get_device_info_mock,
-)
-from scan_bundler import ScanBundler
+import pytest
+import yaml
 
+import bec_lib
+from bec_lib import DeviceManagerBase, ServiceConfig, bec_logger, messages
+from bec_lib.messages import BECStatus
+from bec_lib.tests.utils import ConnectorMock, create_session_from_config, get_device_info_mock
+from scan_bundler import ScanBundler
 
 # overwrite threads_check fixture from bec_lib,
 # to have it in autouse

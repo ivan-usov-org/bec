@@ -1,8 +1,6 @@
 from unittest import mock
 
 from bec_lib import ServiceConfig
-from bec_lib.client import BECClient
-
 from data_processing.dap_server import DAPServer
 from data_processing.dap_service import DAPServiceBase
 

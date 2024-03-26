@@ -1,6 +1,5 @@
 from bec_lib import BECService, BECStatus, ServiceConfig
 from bec_lib.connector import ConnectorBase
-
 from scihub.scibec import SciBecConnector
 from scihub.scilog import SciLogConnector
 

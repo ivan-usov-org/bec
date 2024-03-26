@@ -9,7 +9,6 @@ import pytest
 from bec_client.callbacks.live_table import LiveUpdatesTable, sort_devices
 from bec_client.callbacks.utils import ScanRequestMixin
 from bec_lib import messages
-from bec_lib.scan_items import ScanItem
 
 
 @pytest.fixture

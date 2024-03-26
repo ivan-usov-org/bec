@@ -2,12 +2,10 @@ import os
 from unittest import mock
 
 import pytest
-import yaml
 from typeguard import TypeCheckError
 
 import bec_lib
 from bec_lib import messages
-from bec_lib.devicemanager import DeviceManagerBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.observer import Observer, ObserverManager
 

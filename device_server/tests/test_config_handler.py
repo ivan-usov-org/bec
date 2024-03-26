@@ -2,13 +2,12 @@ import copy
 import os
 from unittest import mock
 
-import bec_lib
 import pytest
-import yaml
-from bec_lib import messages
-from bec_lib.tests.utils import ConnectorMock, load_test_config
 from test_device_manager_ds import device_manager
 
+import bec_lib
+from bec_lib import messages
+from bec_lib.tests.utils import ConnectorMock, load_test_config
 from device_server.devices.config_update_handler import ConfigUpdateHandler
 from device_server.devices.devicemanager import DeviceConfigError, DeviceManagerDS
 

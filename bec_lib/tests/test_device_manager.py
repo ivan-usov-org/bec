@@ -5,14 +5,11 @@ from unittest import mock
 
 import pytest
 import yaml
-from rich.console import Console
-from rich.table import Table
 
 import bec_lib
 from bec_lib import messages
 from bec_lib.connector import MessageObject
-from bec_lib.device import Device, Status
-from bec_lib.devicemanager import DeviceConfigError, DeviceContainer, DeviceManagerBase
+from bec_lib.devicemanager import DeviceConfigError
 from bec_lib.tests.utils import create_session_from_config
 
 dir_path = os.path.dirname(bec_lib.__file__)
