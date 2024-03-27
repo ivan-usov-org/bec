@@ -267,19 +267,22 @@ class StreamRegisterMixin:
         return stream_id
 
     def _direct_stream_listener(self, info: StreamTopicInfo, stop_event: threading.Event):
+        last_id = "-"
         while not stop_event.is_set():
-            msg = self.xread(info.topic, count=1, block=1000)
-            if not msg:
+            ret = self._redis_conn.xrevrange(info.topic, "+", last_id, count=1)
+            if not ret:
                 time.sleep(0.1)
                 continue
+            redis_id, msg_dict = ret[0]
+            timestamp, _, ind = redis_id.partition(b"-")
+            last_id = f"{timestamp.decode()}-{int(ind.decode())+1}"
+            msg_dict = {
+                key.decode(): MsgpackSerialization.loads(val) for key, val in msg_dict.items()
+            }
             cb = info.cb()
             if not cb:
                 return
-            try:
-                cb(msg[0], **info.kwargs)
-            # pylint: disable=broad-except
-            except Exception:
-                sys.excepthook(*sys.exc_info())
+            self._execute_callback(cb, msg_dict, info.kwargs)
 
     def _dispatch_stream_events(self):
         while self.poll_stream_messages():
