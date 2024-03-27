@@ -135,7 +135,6 @@ def test_redis_connector_unregister(connected_connector):
 
 def test_redis_connector_register_identical(connected_connector):
     connector = connected_connector
-    redisdb = connector._redis_conn
 
     received_event1 = mock.Mock(spec=[])
     received_event2 = mock.Mock(spec=[])
@@ -286,17 +285,55 @@ def test_redis_connector_get_last(connected_connector, endpoint):
 @pytest.mark.timeout(5)
 def test_redis_connector_register_stream(connected_connector):
     connector = connected_connector
-    cb_mock = mock.Mock(spec=[])  # spec is here to remove all attributes
-    stream_id = connector.register_stream("test", cb=cb_mock, start_thread=False, a=1)
-    time.sleep(0.1)
+    cb_mock1 = mock.Mock(spec=[])  # spec is here to remove all attributes
+    cb_mock2 = mock.Mock(spec=[])  # spec is here to remove all attributes
+    connector.register_stream("test", cb=cb_mock1, start_thread=False, a=1)
+    connector.register_stream("test", cb=cb_mock2, start_thread=False, a=2)
     connector.xadd("test", {"data": 1})
-    connector.poll_stream_messages()
-    assert mock.call({"data": 1}, a=1) in cb_mock.mock_calls
+    connector.poll_messages()
+    cb_mock1.assert_called_once_with({"data": 1}, a=1)
+    cb_mock2.assert_called_once_with({"data": 1}, a=2)
+    cb_mock1.reset_mock()
+    cb_mock2.reset_mock()
+    connector.unregister_stream("test", cb=cb_mock1)
     connector.xadd("test", {"data": 2})
-    connector.poll_stream_messages()
-    assert mock.call({"data": 2}, a=1) in cb_mock.mock_calls
-    connector.unregister_stream(stream_id)
-    assert connector._stream_topics_cb[stream_id] == []
+    connector.poll_messages()
+    cb_mock1.assert_not_called()
+    cb_mock2.assert_called_once_with({"data": 2}, a=2)
+    connector.unregister_stream("test")
+    assert connector._stream_topics_subscription["test"] == []
+
+
+def test_redis_connector_register_stream_identical(connected_connector):
+    connector = connected_connector
+
+    received_event1 = mock.Mock(spec=[])
+    received_event2 = mock.Mock(spec=[])
+
+    connector.register_stream(topics="topic1", cb=received_event1, start_thread=False)
+    connector.register_stream(topics="topic1", cb=received_event1, start_thread=False)
+    connector.register_stream(topics="topic1", cb=received_event2, start_thread=False)
+    connector.register_stream(topics="topic2", cb=received_event1, start_thread=False)
+    connector.xadd("topic1", {"data": 1})
+    connector.poll_messages(timeout=1)
+    assert received_event1.call_count == 1
+    assert received_event2.call_count == 1
+    connector.xadd("topic2", {"data": 1})
+    connector.poll_messages(timeout=1)
+    assert received_event1.call_count == 2
+
+    try:
+        with pytest.raises(RuntimeError):
+            connector.register_stream(
+                "topic2", cb=received_event1, newest_only=True, start_thread=False
+            )
+        connector.register_stream(
+            "topic2", cb=received_event2, newest_only=True, start_thread=False
+        )
+        with pytest.raises(RuntimeError):
+            connector.register_stream("topic2", cb=received_event2, start_thread=False)
+    finally:
+        connector.unregister_stream("topic2")
 
 
 @pytest.mark.timeout(5)
@@ -307,20 +344,18 @@ def test_redis_connector_register_stream(connected_connector):
 def test_redis_connector_register_stream_list(connected_connector, endpoint):
     connector = connected_connector
     cb_mock = mock.Mock(spec=[])  # spec is here to remove all attributes
-    stream_id = connector.register_stream(endpoint, cb=cb_mock, start_thread=False, a=1)
-    time.sleep(0.1)
+    connector.register_stream(endpoint, cb=cb_mock, start_thread=False, a=1)
     for ep in endpoint:
         connector.xadd(ep, {"data": 1})
-    connector.poll_stream_messages()
+        connector.poll_messages()
     assert mock.call({"data": 1}, a=1) in cb_mock.mock_calls
 
     for ep in endpoint:
         connector.xadd(ep, {"data": 2})
-    connector.poll_stream_messages()
+        connector.poll_messages()
     assert mock.call({"data": 2}, a=1) in cb_mock.mock_calls
-    for str_id in stream_id:
-        connector.unregister_stream(str_id)
-        assert connector._stream_topics_cb[str_id] == []
+    connector.unregister_stream(endpoint)
+    assert len(connector._stream_topics_subscription) == 0
 
 
 @pytest.mark.timeout(5)
@@ -330,7 +365,7 @@ def test_redis_connector_register_stream_newest_only(connected_connector, endpoi
     # simulate callback taking 1s to perform its task
     cb_mock = mock.Mock(spec=[], side_effect=lambda _: time.sleep(1))
 
-    stream_id = connector.register_stream(endpoint, cb=cb_mock, newest_only=True, start_thread=False)
+    stream_id = connector.register_stream(endpoint, cb=cb_mock, newest_only=True)
     connector.xadd(endpoint, {"data": 0})
     # from here: cb_mock will be called from another thread when new stream item is pushed
     # cb_mock.call_count will be increased before sleep time (when call has just been done)
@@ -350,7 +385,7 @@ def test_redis_connector_register_stream_newest_only(connected_connector, endpoi
     cb_mock.assert_called_once_with({"data": 3})
 
     num_threads = threading.active_count()
-    connector.unregister_stream(stream_id)
+    connector.unregister_stream(endpoint, cb_mock)
     assert threading.active_count() == num_threads - 1
 
 
@@ -359,9 +394,7 @@ def test_redis_connector_register_stream_newest_only(connected_connector, endpoi
 def test_redis_connector_register_stream_newest_only_list(connected_connector, endpoint):
     connector = connected_connector
     cb_mock = mock.Mock(spec=[])  # spec is here to remove all attributes
-    stream_id = connector.register_stream(
-        endpoint, cb=cb_mock, newest_only=True, start_thread=False, a=1
-    )
+    connector.register_stream(endpoint, cb=cb_mock, newest_only=True, a=1)
     time.sleep(0.1)
     for ep in endpoint:
         connector.xadd(ep, {"data": 1})
@@ -377,8 +410,7 @@ def test_redis_connector_register_stream_newest_only_list(connected_connector, e
     assert cb_mock.call_count == 2
     num_threads = threading.active_count()
 
-    for str_id in stream_id:
-        connector.unregister_stream(str_id)
+    connector.unregister_stream(endpoint, cb_mock)
     assert threading.active_count() == num_threads - 1
 
 

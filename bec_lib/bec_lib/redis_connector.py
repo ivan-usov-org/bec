@@ -71,312 +71,33 @@ def validate_endpoint(endpoint_arg):
 
 
 @dataclass
-class StreamTopicInfo:
-    topic: str | list[str]
-    stream_id: int
+class StreamSubscriptionInfo:
     id: str
+    topic: str
     newest_only: bool
     from_start: bool
-    cb: callable
+    cb_ref: callable
     kwargs: dict
 
-
-class StreamRegisterMixin:
-    """
-    Mixin to add stream registration capabilities to a connector
-    """
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._stream_topics_cb = collections.defaultdict(list)
-        self._stream_events_listener_thread = None
-        self._stream_events_dispatcher_thread = None
-        self._stream_messages_queue = queue.Queue()
-        self._stop_stream_events_listener_thread = threading.Event()
-        self._custom_stream_listeners = {}
-        self.__stream_counter = 0
-
-    def _stream_counter(self):
-        self.__stream_counter += 1
-        return self.__stream_counter
-
-    def register_stream(
-        self,
-        topics: str | list[str] | EndpointInfo | list[EndpointInfo] = None,
-        patterns: str | list[str] | EndpointInfo | list[EndpointInfo] = None,
-        cb: callable = None,
-        from_start: bool = False,
-        newest_only: bool = False,
-        start_thread: bool = True,
-        **kwargs,
-    ) -> int:
-        """
-        Register a callback for a stream topic or pattern
-
-        Args:
-            topic (str, optional): Topic. This should be a valid message endpoint in BEC and can be a string or an EndpointInfo object. Defaults to None. Either topic or pattern should be provided.
-            pattern (str, optional): Pattern of topics. In contrast to topics, patterns may contain "*" wildcards. The evaluated patterns should be a valid message endpoint in BEC and can be a string or an EndpointInfo object. Defaults to None. Either topic or pattern should be provided.
-            cb (callable, optional): callback. Defaults to None.
-            from_start (bool, optional): read from start. Defaults to False.
-            newest_only (bool, optional): read newest only. Defaults to False.
-            start_thread (bool, optional): start the dispatcher thread. Defaults to True.
-            **kwargs: additional keyword arguments to be transmitted to the callback
-
-        Returns:
-            int: stream id
-
-        Examples:
-            >>> def my_callback(msg, **kwargs):
-            ...     print(msg)
-            ...
-            >>> connector.register_stream("test", my_callback)
-            >>> connector.register_stream(topic="test", cb=my_callback)
-            >>> connector.register_stream(pattern="test:*", cb=my_callback)
-            >>> connector.register_stream(pattern="test:*", cb=my_callback, start_thread=False)
-            >>> connector.register_stream(pattern="test:*", cb=my_callback, start_thread=False, my_arg="test")
-        """
-
-        if topics is None and patterns is None:
-            raise ValueError("topics and pattern cannot be both None")
-
-        if newest_only and from_start:
-            raise ValueError("newest_only and from_start cannot be both True")
-
-        if not cb:
-            raise ValueError("Callback cb cannot be None")
-
-        # make a weakref from the callable, using louie;
-        # it can create safe refs for simple functions as well as methods
-        cb_ref = louie.saferef.safe_ref(cb)
-
-        if patterns is not None:
-            stream_topics = self._convert_endpointinfo_to_str(patterns)
-        else:
-            stream_topics = self._convert_endpointinfo_to_str(topics)
-
-        if newest_only:
-            # if newest_only is True, we need to provide a separate callback for each topic,
-            # directly calling the callback. This is because we need to have a backpressure
-            # mechanism in place, and we cannot rely on the dispatcher thread to handle it.
-            if isinstance(stream_topics, list):
-                out = []
-                for topic in stream_topics:
-                    out.append(self._add_direct_stream_listener(topic, cb_ref, **kwargs))
-                return out
-            return self._add_direct_stream_listener(stream_topics, cb_ref, **kwargs)
-
-        if self._stream_events_listener_thread is None:
-            # create the thread that will get all messages for this connector;
-            self._stream_events_listener_thread = threading.Thread(
-                target=self._get_stream_messages_loop, daemon=True
-            )
-            self._stream_events_listener_thread.start()
-        if isinstance(stream_topics, list):
-            stream_id = []
-            for topic in stream_topics:
-                stream_id.append(self._stream_counter())
-                self._stream_topics_cb[topic].append(
-                    StreamTopicInfo(
-                        id="0-0",
-                        topic=topic,
-                        stream_id=stream_id,
-                        newest_only=newest_only,
-                        from_start=from_start,
-                        cb=cb_ref,
-                        kwargs=kwargs,
-                    )
-                )
-        else:
-            stream_id = self._stream_counter()
-            self._stream_topics_cb[stream_topics].append(
-                StreamTopicInfo(
-                    id="0-0",
-                    topic=stream_topics,
-                    stream_id=stream_id,
-                    newest_only=newest_only,
-                    from_start=from_start,
-                    cb=cb_ref,
-                    kwargs=kwargs,
-                )
-            )
-
-        if start_thread and self._stream_events_dispatcher_thread is None:
-            # start dispatcher thread
-            self._stream_events_dispatcher_thread = threading.Thread(
-                target=self._dispatch_stream_events, daemon=True
-            )
-            self._stream_events_dispatcher_thread.start()
-        return stream_id
-
-    def unregister_stream(self, stream_id: int) -> bool:
-        """
-        Unregister a stream listener.
-
-        Args:
-            stream_id (int): stream id
-
-        Returns:
-            bool: True if the stream listener has been removed, False otherwise
-        """
-
-        if stream_id in self._custom_stream_listeners:
-            listener = self._custom_stream_listeners.pop(stream_id)
-            event = listener["stop_event"]
-            thread = listener["thread"]
-            event.set()
-            thread.join()
-            return True
-        if stream_id in self._stream_topics_cb:
-            self._stream_topics_cb.pop(stream_id)
-            return True
-        return False
-
-    def _add_direct_stream_listener(self, topic, cb, **kwargs) -> int:
-        """
-        Add a direct listener for a topic. This is used when newest_only is True.
-
-        Args:
-            topic (str): topic
-            cb (callable): callback
-            kwargs (dict): additional keyword arguments to be transmitted to the callback
-
-        Returns:
-            int: stream id
-        """
-        stream_id = self._stream_counter()
-        info = StreamTopicInfo(
-            id="0-0",
-            topic=topic,
-            stream_id=stream_id,
-            newest_only=True,
-            from_start=False,
-            cb=cb,
-            kwargs=kwargs,
-        )
-        event = threading.Event()
-        thread = threading.Thread(
-            target=self._direct_stream_listener, args=(info, event), daemon=True
-        )
-        self._custom_stream_listeners[stream_id] = {
-            "info": info,
-            "thread": thread,
-            "stop_event": event,
-        }
-        thread.start()
-
-        return stream_id
-
-    def _direct_stream_listener(self, info: StreamTopicInfo, stop_event: threading.Event):
-        last_id = "-"
-        while not stop_event.is_set():
-            ret = self._redis_conn.xrevrange(info.topic, "+", last_id, count=1)
-            if not ret:
-                time.sleep(0.1)
-                continue
-            redis_id, msg_dict = ret[0]
-            timestamp, _, ind = redis_id.partition(b"-")
-            last_id = f"{timestamp.decode()}-{int(ind.decode())+1}"
-            msg_dict = {
-                key.decode(): MsgpackSerialization.loads(val) for key, val in msg_dict.items()
-            }
-            cb = info.cb()
-            if not cb:
-                return
-            self._execute_callback(cb, msg_dict, info.kwargs)
-
-    def _dispatch_stream_events(self):
-        while self.poll_stream_messages():
-            ...
-
-    def _get_stream_topics(self) -> dict:
-        stream_topics = {}
-        for topic, subscriber in self._stream_topics_cb.items():
-            for info in subscriber:
-                stream_topics[topic] = info.id
-        return stream_topics
-
-    def _get_stream_messages_loop(self) -> None:
-        """
-        Get stream messages loop. This method is run in a separate thread and listens
-        for messages from the redis server.
-        """
-        error = False
-        while not self._stop_stream_events_listener_thread.is_set():
-            try:
-                stream_topics = self._get_stream_topics()
-                if not stream_topics:
-                    continue
-                msg = self._redis_conn.xread(streams=stream_topics, block=1000)
-                print(stream_topics)
-
-            except redis.exceptions.ConnectionError:
-                if not error:
-                    error = True
-                    bec_logger.logger.error("Failed to connect to redis. Is the server running?")
-                time.sleep(1)
-            # pylint: disable=broad-except
-            except Exception:
-                sys.excepthook(*sys.exc_info())
-            else:
-                error = False
-                if msg is not None:
-                    self._stream_messages_queue.put(msg)
-
-    def poll_stream_messages(self, timeout=None) -> None:
-        """
-        Poll for new messages, receive them and execute callbacks
-
-        Args:
-            timeout ([type], optional): timeout in seconds. Defaults to None.
-        """
-        while True:
-            try:
-                msg = self._stream_messages_queue.get(timeout=timeout)
-            except queue.Empty as exc:
-                raise TimeoutError(
-                    f"{self}: poll_stream_messages: did not receive a message within {timeout} seconds"
-                ) from exc
-            if msg is StopIteration:
-                return False
-            if self._handle_stream_message(msg):
-                return True
-
-    def _handle_stream_message(self, msg):
-        if not msg:
+    def __eq__(self, other):
+        if not isinstance(other, StreamSubscriptionInfo):
             return False
-        for topic, msgs in msg:
-            callbacks = self._stream_topics_cb[topic.decode()]
-            for index, record in msgs:
-                msg_dict = {
-                    k.decode(): MsgpackSerialization.loads(msg) for k, msg in record.items()
-                }
-                for info in callbacks:
-                    info.id = index
-                    cb = info.cb()
-                    if cb:
-                        try:
-                            cb(msg_dict, **info.kwargs)
-                        # pylint: disable=broad-except
-                        except Exception:
-                            sys.excepthook(*sys.exc_info())
-        return True
-
-    def shutdown(self):
-        """
-        Shutdown the connector
-        """
-        super().shutdown()
-        if self._stream_events_listener_thread:
-            self._stop_stream_events_listener_thread.set()
-            self._stream_events_listener_thread.join()
-            self._stream_events_listener_thread = None
-        if self._stream_events_dispatcher_thread:
-            self._stream_messages_queue.put(StopIteration)
-            self._stream_events_dispatcher_thread.join()
-            self._stream_events_dispatcher_thread = None
+        return self.topic == other.topic and self.cb_ref == other.cb_ref
 
 
-class RedisConnector(StreamRegisterMixin, ConnectorBase):
+@dataclass
+class DirectReadingStreamSubscriptionInfo(StreamSubscriptionInfo):
+    thread = None
+    stop_event = None
+
+
+@dataclass
+class StreamMessage:
+    msg: dict
+    callbacks: list
+
+
+class RedisConnector(ConnectorBase):
     """
     Redis connector class. This class is a wrapper around the redis library providing
     a simple interface to send and receive messages from a redis server.
@@ -406,11 +127,15 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
         # keep track of topics and callbacks
         self._topics_cb = collections.defaultdict(list)
         self._topics_cb_lock = threading.Lock()
+        self._stream_topics_subscription = collections.defaultdict(list)
+        self._stream_topics_subscription_lock = threading.Lock()
 
         self._events_listener_thread = None
+        self._stream_events_listener_thread = None
         self._events_dispatcher_thread = None
         self._messages_queue = queue.Queue()
         self._stop_events_listener_thread = threading.Event()
+        self._stop_stream_events_listener_thread = threading.Event()
         self.stream_keys = {}
 
     def shutdown(self):
@@ -422,6 +147,10 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
             self._stop_events_listener_thread.set()
             self._events_listener_thread.join()
             self._events_listener_thread = None
+        if self._stream_events_listener_thread:
+            self._stop_stream_events_listener_thread.set()
+            self._stream_events_listener_thread.join()
+            self._stream_events_listener_thread = None
         if self._events_dispatcher_thread:
             self._messages_queue.put(StopIteration)
             self._events_dispatcher_thread.join()
@@ -527,6 +256,25 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
             raise TypeError(f"Message {msg} is not a BECMessage")
         self.raw_send(topic, MsgpackSerialization.dumps(msg), pipe)
 
+    def _start_events_dispatcher_thread(self, start_thread):
+        if start_thread and self._events_dispatcher_thread is None:
+            # start dispatcher thread
+            started_event = threading.Event()
+            self._events_dispatcher_thread = threading.Thread(
+                target=self._dispatch_events, args=(started_event,), daemon=True
+            )
+            self._events_dispatcher_thread.start()
+            started_event.wait()  # synchronization of thread start
+
+    def _convert_endpointinfo_to_str(self, endpoint):
+        if isinstance(endpoint, EndpointInfo):
+            return endpoint.endpoint
+        if isinstance(endpoint, str):
+            return endpoint
+        if isinstance(endpoint, list):
+            return [self._convert_endpointinfo_to_str(e) for e in endpoint]
+        raise ValueError(f"Invalid endpoint {endpoint}")
+
     def register(
         self,
         topics: str | list[str] | EndpointInfo | list[EndpointInfo] = None,
@@ -592,12 +340,201 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
                     if item not in self._topics_cb[topic]:
                         self._topics_cb[topic].append(item)
 
-        if start_thread and self._events_dispatcher_thread is None:
-            # start dispatcher thread
-            self._events_dispatcher_thread = threading.Thread(
-                target=self._dispatch_events, daemon=True
+        self._start_events_dispatcher_thread(start_thread)
+
+    def _add_direct_stream_listener(self, topic, cb_ref, **kwargs) -> int:
+        """
+        Add a direct listener for a topic. This is used when newest_only is True.
+
+        Args:
+            topic (str): topic
+            cb (callable): weakref to callback
+            kwargs (dict): additional keyword arguments to be transmitted to the callback
+
+        Returns:
+            int: stream id
+        """
+        info = DirectReadingStreamSubscriptionInfo(
+            id="-",
+            topic=topic,
+            newest_only=True,
+            from_start=False,
+            cb_ref=cb_ref,
+            kwargs=kwargs,
+        )
+        if info in self._stream_topics_subscription[topic]:
+            raise RuntimeError("Already registered stream topic with the same callback")
+
+        info.stop_event = threading.Event()
+        info.thread = threading.Thread(
+            target=self._direct_stream_listener, args=(info,), daemon=True
+        )
+        with self._stream_topics_subscription_lock:
+            self._stream_topics_subscription[topic].append(info)
+        info.thread.start()
+
+    def _direct_stream_listener(self, info: DirectReadingStreamSubscriptionInfo):
+        stop_event = info.stop_event
+        cb_ref = info.cb_ref
+        kwargs = info.kwargs
+        topic = info.topic
+        while not stop_event.is_set():
+            ret = self._redis_conn.xrevrange(topic, "+", info.id, count=1)
+            if not ret:
+                time.sleep(0.1)
+                continue
+            redis_id, msg_dict = ret[0]
+            timestamp, _, ind = redis_id.partition(b"-")
+            info.id = f"{timestamp.decode()}-{int(ind.decode())+1}"
+            stream_msg = StreamMessage(
+                {key.decode(): MsgpackSerialization.loads(val) for key, val in msg_dict.items()},
+                ((cb_ref, kwargs),),
             )
-            self._events_dispatcher_thread.start()
+            self._messages_queue.put(stream_msg)
+
+    def _get_stream_topics_id(self) -> dict:
+        stream_topics_id = {}
+        for topic, subscriber_info_list in self._stream_topics_subscription.items():
+            for info in subscriber_info_list:
+                if isinstance(info, DirectReadingStreamSubscriptionInfo):
+                    continue
+                stream_topics_id[topic] = info.id
+        return stream_topics_id
+
+    def _get_stream_messages_loop(self) -> None:
+        """
+        Get stream messages loop. This method is run in a separate thread and listens
+        for messages from the redis server.
+        """
+        error = False
+
+        while not self._stop_stream_events_listener_thread.is_set():
+            try:
+                stream_topics_id = self._get_stream_topics_id()
+                if not stream_topics_id:
+                    time.sleep(0.1)
+                    continue
+                msg_list = self._redis_conn.xread(streams=stream_topics_id, block=1000)
+            except redis.exceptions.ConnectionError:
+                if not error:
+                    error = True
+                    bec_logger.logger.error("Failed to connect to redis. Is the server running?")
+                time.sleep(1)
+            # pylint: disable=broad-except
+            except Exception:
+                sys.excepthook(*sys.exc_info())
+            else:
+                error = False
+                if msg_list is not None:
+                    for topic, msgs in msg_list:
+                        subscription_infos = self._stream_topics_subscription[topic.decode()]
+                        for index, record in msgs:
+                            msg_dict = {
+                                k.decode(): MsgpackSerialization.loads(msg)
+                                for k, msg in record.items()
+                            }
+                            callbacks = []
+                            for info in subscription_infos:
+                                info.id = index
+                                callbacks.append((info.cb_ref, info.kwargs))
+                            msg = StreamMessage(msg_dict, callbacks)
+                            self._messages_queue.put(msg)
+        return True
+
+    def register_stream(
+        self,
+        topics: str | list[str] | EndpointInfo | list[EndpointInfo] = None,
+        patterns: str | list[str] | EndpointInfo | list[EndpointInfo] = None,
+        cb: callable = None,
+        from_start: bool = False,
+        newest_only: bool = False,
+        start_thread: bool = True,
+        **kwargs,
+    ) -> int:
+        """
+        Register a callback for a stream topic or pattern
+
+        Args:
+            topic (str, optional): Topic. This should be a valid message endpoint in BEC and can be a string or an EndpointInfo object. Defaults to None. Either topic or pattern should be provided.
+            pattern (str, optional): Pattern of topics. In contrast to topics, patterns may contain "*" wildcards. The evaluated patterns should be a valid message endpoint in BEC and can be a string or an EndpointInfo object. Defaults to None. Either topic or pattern should be provided.
+            cb (callable, optional): callback. Defaults to None.
+            from_start (bool, optional): read from start. Defaults to False.
+            newest_only (bool, optional): read newest only. Defaults to False.
+            start_thread (bool, optional): start the dispatcher thread. Defaults to True.
+            **kwargs: additional keyword arguments to be transmitted to the callback
+
+        Returns:
+            int: stream id
+
+        Examples:
+            >>> def my_callback(msg, **kwargs):
+            ...     print(msg)
+            ...
+            >>> connector.register_stream("test", my_callback)
+            >>> connector.register_stream(topic="test", cb=my_callback)
+            >>> connector.register_stream(pattern="test:*", cb=my_callback)
+            >>> connector.register_stream(pattern="test:*", cb=my_callback, start_thread=False)
+            >>> connector.register_stream(pattern="test:*", cb=my_callback, start_thread=False, my_arg="test")
+        """
+        if topics is None and patterns is None:
+            raise ValueError("topics and pattern cannot be both None")
+
+        if newest_only and from_start:
+            raise ValueError("newest_only and from_start cannot be both True")
+
+        if not cb:
+            raise ValueError("Callback cb cannot be None")
+
+        # make a weakref from the callable, using louie;
+        # it can create safe refs for simple functions as well as methods
+        cb_ref = louie.saferef.safe_ref(cb)
+
+        if patterns is not None:
+            stream_topics = self._convert_endpointinfo_to_str(patterns)
+        else:
+            stream_topics = self._convert_endpointinfo_to_str(topics)
+
+        self._start_events_dispatcher_thread(start_thread)
+
+        if not isinstance(stream_topics, list):
+            stream_topics = [stream_topics]
+
+        if newest_only:
+            # if newest_only is True, we need to provide a separate callback for each topic,
+            # directly calling the callback. This is because we need to have a backpressure
+            # mechanism in place, and we cannot rely on the dispatcher thread to handle it.
+            for topic in stream_topics:
+                self._add_direct_stream_listener(topic, cb_ref, **kwargs)
+        else:
+            with self._stream_topics_subscription_lock:
+                for topic in stream_topics:
+                    new_subscription = StreamSubscriptionInfo(
+                        id="0-0",
+                        topic=topic,
+                        newest_only=newest_only,
+                        from_start=from_start,
+                        cb_ref=cb_ref,
+                        kwargs=kwargs,
+                    )
+                    subscriptions = self._stream_topics_subscription[topic]
+                    if new_subscription in subscriptions:
+                        # raise an error if attempted to register a stream with the same callback,
+                        # whereas it has already been registered as a 'direct reading' stream with
+                        # newest_only=True ; it is clearly an error case that would produce weird results
+                        index = subscriptions.index(new_subscription)
+                        if isinstance(subscriptions[index], DirectReadingStreamSubscriptionInfo):
+                            raise RuntimeError(
+                                "Already registered stream topic with the same callback with 'newest_only=True'"
+                            )
+                    else:
+                        subscriptions.append(new_subscription)
+
+            if self._stream_events_listener_thread is None:
+                # create the thread that will get all messages for this connector
+                self._stream_events_listener_thread = threading.Thread(
+                    target=self._get_stream_messages_loop, daemon=True
+                )
+                self._stream_events_listener_thread.start()
 
     def _filter_topics_cb(self, topics: list, cb: Union[callable, None]):
         unsubscribe_list = []
@@ -630,14 +567,48 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
             unsubscribe_list = self._filter_topics_cb(topics, cb)
             self._pubsub_conn.unsubscribe(unsubscribe_list)
 
-    def _convert_endpointinfo_to_str(self, endpoint):
-        if isinstance(endpoint, EndpointInfo):
-            return endpoint.endpoint
-        if isinstance(endpoint, str):
-            return endpoint
-        if isinstance(endpoint, list):
-            return [self._convert_endpointinfo_to_str(e) for e in endpoint]
-        raise ValueError(f"Invalid endpoint {endpoint}")
+    def unregister_stream(
+        self, topics: str | list[str] | EndpointInfo | list[EndpointInfo], cb: callable = None
+    ) -> bool:
+        """
+        Unregister a stream listener.
+
+        Args:
+            stream_id (int): stream id
+
+        Returns:
+            bool: True if the stream listener has been removed, False otherwise
+        """
+        if isinstance(topics, EndpointInfo) or isinstance(topics, str):
+            topics = [topics]
+
+        unsubscribe_list = []
+        with self._stream_topics_subscription_lock:
+            for topic in topics:
+                if isinstance(topic, EndpointInfo):
+                    topic = topic.endpoint
+                subscription_infos = self._stream_topics_subscription[topic]
+                # remove from list if callback corresponds
+                self._stream_topics_subscription[topic] = list(
+                    filter(lambda sub_info: cb and sub_info.cb_ref() is not cb, subscription_infos)
+                )
+                if not self._stream_topics_subscription[topic]:
+                    # no callbacks left, unsubscribe
+                    unsubscribe_list += subscription_infos
+            # clean the topics that have been unsubscribed
+            for subscription_info in unsubscribe_list:
+                if isinstance(subscription_info, DirectReadingStreamSubscriptionInfo):
+                    subscription_info.stop_event.set()
+                    subscription_info.thread.join()
+                # it is possible to register the same stream multiple times with different
+                # callbacks, in this case when unregistering with cb=None (unregister all)
+                # the topic can be deleted multiple times, hence try...except in code below
+                try:
+                    del self._stream_topics_subscription[subscription_info.topic]
+                except KeyError:
+                    pass
+
+        return len(unsubscribe_list) > 0
 
     def _get_messages_loop(self, pubsub: redis.client.PubSub) -> None:
         """
@@ -664,7 +635,23 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
                 if msg is not None:
                     self._messages_queue.put(msg)
 
+    def _execute_callback(self, cb, msg, kwargs):
+        try:
+            cb(msg, **kwargs)
+        # pylint: disable=broad-except
+        except Exception:
+            sys.excepthook(*sys.exc_info())
+
+    def _handle_stream_message(self, stream_msg):
+        for cb_ref, kwargs in stream_msg.callbacks:
+            cb = cb_ref()
+            if cb:
+                self._execute_callback(cb, stream_msg.msg, kwargs)
+        return True
+
     def _handle_message(self, msg):
+        if isinstance(msg, StreamMessage):
+            return self._handle_stream_message(msg)
         channel = msg["channel"].decode()
         with self._topics_cb_lock:
             if msg["pattern"] is not None:
@@ -677,13 +664,6 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
             if cb:
                 self._execute_callback(cb, msg, kwargs)
         return True
-
-    def _execute_callback(self, cb, msg, kwargs):
-        try:
-            cb(msg, **kwargs)
-        # pylint: disable=broad-except
-        except Exception:
-            sys.excepthook(*sys.exc_info())
 
     def poll_messages(self, timeout=None) -> None:
         while True:
@@ -698,7 +678,8 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
             if self._handle_message(msg):
                 return True
 
-    def _dispatch_events(self):
+    def _dispatch_events(self, started_event):
+        started_event.set()
         while self.poll_messages():
             ...
 
