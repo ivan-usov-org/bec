@@ -560,7 +560,7 @@ class DeviceManagerDS(DeviceManagerBase):
                 signals[key] = {"value": val[ii], "timestamp": timestamp}
             bundle.append(
                 messages.DeviceMessage(
-                    signals={obj.name: signals}, metadata={"pointID": ii, **metadata}
+                    signals={obj.name: signals}, metadata={"point_id": ii, **metadata}
                 )
             )
         ds_obj.emitted_points[metadata["scan_id"]] = max_points

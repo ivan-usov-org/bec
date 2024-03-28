@@ -781,8 +781,8 @@ class ScanWorker(threading.Thread):
         if self.current_scan_id != instr.metadata.get("scan_id"):
             self.current_scan_id = instr.metadata.get("scan_id")
 
-        if "pointID" in instr.metadata:
-            self.max_point_id = instr.metadata["pointID"]
+        if "point_id" in instr.metadata:
+            self.max_point_id = instr.metadata["point_id"]
 
         self._add_wait_group(instr)
 

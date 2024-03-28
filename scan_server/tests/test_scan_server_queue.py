@@ -486,17 +486,17 @@ def test_update_point_id(scan_queue_msg, scan_id):
     req_block_queue = RequestBlockQueue(mock.MagicMock(), mock.MagicMock())
     req_block_queue.scan_def_ids["existing_scan_def_id"] = {
         "scan_id": "existing_scan_id",
-        "pointID": 10,
+        "point_id": 10,
     }
     rbl = RequestBlockMock(scan_queue_msg, scan_id)
     rbl.scan = mock.MagicMock()
     scan_def_id = scan_queue_msg.metadata.get("scan_def_id")
     if rbl.msg.metadata.get("scan_def_id") in req_block_queue.scan_def_ids:
         req_block_queue._update_point_id(rbl)
-        assert rbl.scan.pointID == req_block_queue.scan_def_ids[scan_def_id]["pointID"]
+        assert rbl.scan.point_id == req_block_queue.scan_def_ids[scan_def_id]["point_id"]
         return
     req_block_queue._update_point_id(rbl)
-    assert rbl.scan.pointID != 10
+    assert rbl.scan.point_id != 10
 
 
 @pytest.mark.parametrize(
@@ -646,7 +646,7 @@ def test_request_block_queue_next_raises_stopiteration():
             increase_scan_number.assert_called_once_with()
 
 
-def test_request_block_queue_next_updates_pointID():
+def test_request_block_queue_next_updates_point_id():
     req_block_queue = RequestBlockQueue(mock.MagicMock(), mock.MagicMock())
     msg = messages.ScanQueueMessage(
         scan_type="mv",
@@ -657,15 +657,15 @@ def test_request_block_queue_next_updates_pointID():
     rbl = RequestBlockMock(msg, "scan_id")
     rbl.instructions = iter([])
     rbl.scan = mock.MagicMock()
-    rbl.scan.pointID = 10
-    req_block_queue.scan_def_ids["scan_def_id"] = {"pointID": 0}
+    rbl.scan.point_id = 10
+    req_block_queue.scan_def_ids["scan_def_id"] = {"point_id": 0}
 
     req_block_queue.active_rb = rbl
     with mock.patch.object(req_block_queue, "increase_scan_number") as increase_scan_number:
         with pytest.raises(StopIteration):
             next(req_block_queue)
             increase_scan_number.assert_called_once_with()
-            assert req_block_queue.scan_def_ids["scan_def_id"]["pointID"] == 10
+            assert req_block_queue.scan_def_ids["scan_def_id"]["point_id"] == 10
 
 
 def test_request_block_queue_flush_request_blocks():

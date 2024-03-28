@@ -645,7 +645,7 @@ class RequestBlockQueue:
         if scan_def_id in self.scan_def_ids:
             request_block.scan_id = self.scan_def_ids[scan_def_id]["scan_id"]
         else:
-            self.scan_def_ids[scan_def_id] = {"scan_id": request_block.scan_id, "pointID": 0}
+            self.scan_def_ids[scan_def_id] = {"scan_id": request_block.scan_id, "point_id": 0}
 
     def append_request_block(self, request_block: RequestBlock) -> None:
         """append a new request block to the queue"""
@@ -671,8 +671,8 @@ class RequestBlockQueue:
     def _update_point_id(self, request_block: RequestBlock):
         if request_block.scan_def_id not in self.scan_def_ids:
             return
-        if hasattr(request_block.scan, "pointID"):
-            request_block.scan.pointID = self.scan_def_ids[request_block.scan_def_id]["pointID"]
+        if hasattr(request_block.scan, "point_id"):
+            request_block.scan.point_id = self.scan_def_ids[request_block.scan_def_id]["point_id"]
 
     def increase_scan_number(self) -> None:
         """increase the scan number counter"""
@@ -696,9 +696,9 @@ class RequestBlockQueue:
             return next(self.active_rb.instructions)
         except StopIteration:
             if self.active_rb.scan_def_id in self.scan_def_ids:
-                pointID = getattr(self.active_rb.scan, "pointID", None)
-                if pointID is not None:
-                    self.scan_def_ids[self.active_rb.scan_def_id]["pointID"] = pointID
+                point_id = getattr(self.active_rb.scan, "point_id", None)
+                if point_id is not None:
+                    self.scan_def_ids[self.active_rb.scan_def_id]["point_id"] = point_id
             self.increase_scan_number()
             self.active_rb = None
             self._pull_request_block()

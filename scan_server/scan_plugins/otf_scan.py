@@ -110,8 +110,8 @@ class HystScan(ScanBase):
         self._check_limits()
 
     def _at_each_point(self):
-        yield from self.stubs.read(group="primary", wait_group="primary", pointID=self.pointID)
-        self.pointID += 1
+        yield from self.stubs.read(group="primary", wait_group="primary", point_id=self.point_id)
+        self.point_id += 1
 
     def _get_next_scan_motor_position(self):
         while True:
@@ -163,10 +163,10 @@ class HystScan(ScanBase):
             yield from self.stubs.read_and_wait(
                 device=[self.flyer, self.scan_motors[0], *monitored_devices],
                 wait_group="readout_primary",
-                pointID=self.pointID,
+                point_id=self.point_id,
             )
             # time.sleep(1)
-            self.pointID += 1
+            self.point_id += 1
             self.scan_motors[0]
             self.num_pos += 1
 

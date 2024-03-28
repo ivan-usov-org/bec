@@ -134,7 +134,7 @@ class ScanBundler(BECService):
                 "devices": self.device_manager.devices.monitored_devices(
                     readout_priority=self.readout_priority[scan_id]
                 ),
-                "pointID": {},
+                "point_id": {},
             }
             self.baseline_devices[scan_id] = {
                 "devices": self.device_manager.devices.baseline_devices(
@@ -152,25 +152,25 @@ class ScanBundler(BECService):
             return
 
     def _step_scan_update(self, scan_id, device, signal, metadata):
-        if "pointID" not in metadata:
+        if "point_id" not in metadata:
             return
         with self._lock:
             dev = {device: signal}
-            pointID = metadata["pointID"]
+            point_id = metadata["point_id"]
             monitored_devices = self.monitored_devices[scan_id]
 
-            self.sync_storage[scan_id][pointID] = {
-                **self.sync_storage[scan_id].get(pointID, {}),
+            self.sync_storage[scan_id][point_id] = {
+                **self.sync_storage[scan_id].get(point_id, {}),
                 **dev,
             }
 
-            if monitored_devices["pointID"].get(pointID) is None:
-                monitored_devices["pointID"][pointID] = {
+            if monitored_devices["point_id"].get(point_id) is None:
+                monitored_devices["point_id"][point_id] = {
                     dev.name: False for dev in monitored_devices["devices"]
                 }
-            monitored_devices["pointID"][pointID][device] = True
+            monitored_devices["point_id"][point_id][device] = True
 
-            monitored_devices_completed = list(monitored_devices["pointID"][pointID].values())
+            monitored_devices_completed = list(monitored_devices["point_id"][point_id].values())
 
             all_monitored_devices_completed = bool(
                 all(monitored_devices_completed)
@@ -180,32 +180,32 @@ class ScanBundler(BECService):
                 )
             )
 
-            if all_monitored_devices_completed and self.sync_storage[scan_id].get(pointID):
-                self._update_monitor_signals(scan_id, pointID)
-                self._send_scan_point(scan_id, pointID)
+            if all_monitored_devices_completed and self.sync_storage[scan_id].get(point_id):
+                self._update_monitor_signals(scan_id, point_id)
+                self._send_scan_point(scan_id, point_id)
 
     def _fly_scan_update(self, scan_id, device, signal, metadata):
-        if "pointID" not in metadata:
+        if "point_id" not in metadata:
             return
         with self._lock:
             dev = {device: signal}
-            pointID = metadata["pointID"]
+            point_id = metadata["point_id"]
             if self.sync_storage[scan_id].get("info", {}).get("monitor_sync", "bec") == "bec":
-                # For monitor sync with BEC, we use the pointID as the key for the sync_storage.
+                # For monitor sync with BEC, we use the point_id as the key for the sync_storage.
                 monitored_devices = self.monitored_devices[scan_id]
 
-                self.sync_storage[scan_id][pointID] = {
-                    **self.sync_storage[scan_id].get(pointID, {}),
+                self.sync_storage[scan_id][point_id] = {
+                    **self.sync_storage[scan_id].get(point_id, {}),
                     **dev,
                 }
 
-                if monitored_devices["pointID"].get(pointID) is None:
-                    monitored_devices["pointID"][pointID] = {
+                if monitored_devices["point_id"].get(point_id) is None:
+                    monitored_devices["point_id"][point_id] = {
                         dev.name: False for dev in monitored_devices["devices"]
                     }
-                monitored_devices["pointID"][pointID][device] = True
+                monitored_devices["point_id"][point_id][device] = True
 
-                monitored_devices_completed = list(monitored_devices["pointID"][pointID].values())
+                monitored_devices_completed = list(monitored_devices["point_id"][point_id].values())
 
                 all_monitored_devices_completed = bool(
                     all(monitored_devices_completed)
@@ -214,18 +214,18 @@ class ScanBundler(BECService):
                         == len(self.monitored_devices[scan_id]["devices"])
                     )
                 )
-                if all_monitored_devices_completed and self.sync_storage[scan_id].get(pointID):
-                    self._update_monitor_signals(scan_id, pointID)
-                    self._send_scan_point(scan_id, pointID)
+                if all_monitored_devices_completed and self.sync_storage[scan_id].get(point_id):
+                    self._update_monitor_signals(scan_id, point_id)
+                    self._send_scan_point(scan_id, point_id)
             else:
-                self.sync_storage[scan_id][pointID] = {
-                    **self.sync_storage[scan_id].get(pointID, {}),
+                self.sync_storage[scan_id][point_id] = {
+                    **self.sync_storage[scan_id].get(point_id, {}),
                     **signal,
                 }
 
-                if self.sync_storage[scan_id].get(pointID):
-                    self._update_monitor_signals(scan_id, pointID)
-                    self._send_scan_point(scan_id, pointID)
+                if self.sync_storage[scan_id].get(point_id):
+                    self._update_monitor_signals(scan_id, point_id)
+                    self._send_scan_point(scan_id, point_id)
 
     def _baseline_update(self, scan_id, device, signal):
         with self._lock:
@@ -310,7 +310,7 @@ class ScanBundler(BECService):
             else:
                 logger.warning(f"Received reading from unknown device {device}")
 
-    def _update_monitor_signals(self, scan_id, pointID) -> None:
+    def _update_monitor_signals(self, scan_id, point_id) -> None:
         if self.sync_storage[scan_id]["info"]["scan_type"] == "fly":
             # for fly scans, take all primary and monitor signals
             devices = self.monitored_devices[scan_id]["devices"]
@@ -318,7 +318,7 @@ class ScanBundler(BECService):
             readings = self._get_last_device_readback(devices)
 
             for read, dev in zip(readings, devices):
-                self.sync_storage[scan_id][pointID][dev.name] = read
+                self.sync_storage[scan_id][point_id][dev.name] = read
 
     def _get_last_device_readback(self, devices: list) -> list:
         pipe = self.connector.pipeline()
@@ -352,16 +352,16 @@ class ScanBundler(BECService):
             self.run_emitter("on_cleanup", scan_id)
             self.storage_initialized.remove(scan_id)
 
-    def _send_scan_point(self, scan_id, pointID) -> None:
-        logger.info(f"Sending point {pointID} for scan_id {scan_id}.")
-        logger.debug(f"{pointID}, {self.sync_storage[scan_id][pointID]}")
+    def _send_scan_point(self, scan_id, point_id) -> None:
+        logger.info(f"Sending point {point_id} for scan_id {scan_id}.")
+        logger.debug(f"{point_id}, {self.sync_storage[scan_id][point_id]}")
 
-        self.run_emitter("on_scan_point_emit", scan_id, pointID)
+        self.run_emitter("on_scan_point_emit", scan_id, point_id)
 
-        if pointID not in self.sync_storage[scan_id]["sent"]:
-            self.sync_storage[scan_id]["sent"].add(pointID)
+        if point_id not in self.sync_storage[scan_id]["sent"]:
+            self.sync_storage[scan_id]["sent"].add(point_id)
         else:
-            logger.warning(f"Resubmitting existing pointID {pointID} for scan_id {scan_id}")
+            logger.warning(f"Resubmitting existing point_id {point_id} for scan_id {scan_id}")
 
     def shutdown(self):
         self.device_manager.shutdown()

@@ -30,21 +30,21 @@ def test_on_baseline_emit_BEC(bec_emitter_mock):
 def test_send_bec_scan_point(bec_emitter_mock):
     sb = bec_emitter_mock.scan_bundler
     scan_id = "lkajsdlkj"
-    pointID = 2
+    point_id = 2
     sb.sync_storage[scan_id] = {"info": {}, "status": "open", "sent": set()}
-    sb.sync_storage[scan_id][pointID] = {}
+    sb.sync_storage[scan_id][point_id] = {}
     msg = messages.ScanMessage(
-        point_id=pointID,
+        point_id=point_id,
         scan_id=scan_id,
-        data=sb.sync_storage[scan_id][pointID],
+        data=sb.sync_storage[scan_id][point_id],
         metadata={"scan_id": "lkajsdlkj", "scan_type": None, "scan_report_devices": None},
     )
     with mock.patch.object(bec_emitter_mock, "add_message") as send:
-        bec_emitter_mock._send_bec_scan_point(scan_id, pointID)
+        bec_emitter_mock._send_bec_scan_point(scan_id, point_id)
         send.assert_called_once_with(
             msg,
             MessageEndpoints.scan_segment(),
-            MessageEndpoints.public_scan_segment(scan_id, pointID),
+            MessageEndpoints.public_scan_segment(scan_id, point_id),
         )
 
 

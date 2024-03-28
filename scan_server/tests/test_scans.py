@@ -465,7 +465,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
-                    metadata={"pointID": 0, "readout_priority": "monitored", "DIID": 3},
+                    metadata={"point_id": 0, "readout_priority": "monitored", "DIID": 3},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
@@ -477,7 +477,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "readout_primary"},
-                    metadata={"pointID": 0, "readout_priority": "monitored", "DIID": 5},
+                    metadata={"point_id": 0, "readout_priority": "monitored", "DIID": 5},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
@@ -511,7 +511,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
-                    metadata={"pointID": 1, "readout_priority": "monitored", "DIID": 10},
+                    metadata={"point_id": 1, "readout_priority": "monitored", "DIID": 10},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
@@ -523,7 +523,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "readout_primary"},
-                    metadata={"pointID": 1, "readout_priority": "monitored", "DIID": 12},
+                    metadata={"point_id": 1, "readout_priority": "monitored", "DIID": 12},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
@@ -557,7 +557,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
-                    metadata={"pointID": 2, "readout_priority": "monitored", "DIID": 17},
+                    metadata={"point_id": 2, "readout_priority": "monitored", "DIID": 17},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
@@ -569,7 +569,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "readout_primary"},
-                    metadata={"pointID": 2, "readout_priority": "monitored", "DIID": 19},
+                    metadata={"point_id": 2, "readout_priority": "monitored", "DIID": 19},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
@@ -809,37 +809,37 @@ def test_fermat_scan(scan_msg, reference_scan_list):
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
-                    metadata={"pointID": 0, "readout_priority": "monitored", "DIID": 8},
+                    metadata={"point_id": 0, "readout_priority": "monitored", "DIID": 8},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "primary"},
-                    metadata={"pointID": 0, "readout_priority": "monitored", "DIID": 9},
+                    metadata={"point_id": 0, "readout_priority": "monitored", "DIID": 9},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
-                    metadata={"pointID": 1, "readout_priority": "monitored", "DIID": 10},
+                    metadata={"point_id": 1, "readout_priority": "monitored", "DIID": 10},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "primary"},
-                    metadata={"pointID": 1, "readout_priority": "monitored", "DIID": 11},
+                    metadata={"point_id": 1, "readout_priority": "monitored", "DIID": 11},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
-                    metadata={"pointID": 2, "readout_priority": "monitored", "DIID": 12},
+                    metadata={"point_id": 2, "readout_priority": "monitored", "DIID": 12},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "primary"},
-                    metadata={"pointID": 2, "readout_priority": "monitored", "DIID": 13},
+                    metadata={"point_id": 2, "readout_priority": "monitored", "DIID": 13},
                 ),
                 messages.DeviceInstructionMessage(
                     device="samx",
@@ -986,7 +986,7 @@ def test_device_rpc():
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
-                    metadata={"pointID": 0, "readout_priority": "monitored", "DIID": 3},
+                    metadata={"point_id": 0, "readout_priority": "monitored", "DIID": 3},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
@@ -998,7 +998,7 @@ def test_device_rpc():
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "readout_primary"},
-                    metadata={"pointID": 0, "readout_priority": "monitored", "DIID": 5},
+                    metadata={"point_id": 0, "readout_priority": "monitored", "DIID": 5},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
@@ -1574,7 +1574,7 @@ def test_scan_base_set_position_offset():
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
-                    metadata={"readout_priority": "monitored", "DIID": 20, "pointID": 0},
+                    metadata={"readout_priority": "monitored", "DIID": 20, "point_id": 0},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
@@ -1586,7 +1586,7 @@ def test_scan_base_set_position_offset():
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "readout_primary"},
-                    metadata={"readout_priority": "monitored", "DIID": 22, "pointID": 0},
+                    metadata={"readout_priority": "monitored", "DIID": 22, "point_id": 0},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
@@ -1626,7 +1626,7 @@ def test_scan_base_set_position_offset():
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
-                    metadata={"readout_priority": "monitored", "DIID": 28, "pointID": 1},
+                    metadata={"readout_priority": "monitored", "DIID": 28, "point_id": 1},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
@@ -1638,7 +1638,7 @@ def test_scan_base_set_position_offset():
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "readout_primary"},
-                    metadata={"readout_priority": "monitored", "DIID": 30, "pointID": 1},
+                    metadata={"readout_priority": "monitored", "DIID": 30, "point_id": 1},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
@@ -1996,7 +1996,7 @@ def test_list_scan_raises_for_different_lengths():
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
-                    metadata={"readout_priority": "monitored", "DIID": 6, "pointID": 0},
+                    metadata={"readout_priority": "monitored", "DIID": 6, "point_id": 0},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
@@ -2008,7 +2008,7 @@ def test_list_scan_raises_for_different_lengths():
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "readout_primary"},
-                    metadata={"readout_priority": "monitored", "DIID": 8, "pointID": 0},
+                    metadata={"readout_priority": "monitored", "DIID": 8, "point_id": 0},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
@@ -2026,7 +2026,7 @@ def test_list_scan_raises_for_different_lengths():
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
-                    metadata={"readout_priority": "monitored", "DIID": 11, "pointID": 1},
+                    metadata={"readout_priority": "monitored", "DIID": 11, "point_id": 1},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
@@ -2038,7 +2038,7 @@ def test_list_scan_raises_for_different_lengths():
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "readout_primary"},
-                    metadata={"readout_priority": "monitored", "DIID": 13, "pointID": 1},
+                    metadata={"readout_priority": "monitored", "DIID": 13, "point_id": 1},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
@@ -2056,7 +2056,7 @@ def test_list_scan_raises_for_different_lengths():
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
-                    metadata={"readout_priority": "monitored", "DIID": 16, "pointID": 2},
+                    metadata={"readout_priority": "monitored", "DIID": 16, "point_id": 2},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
@@ -2068,7 +2068,7 @@ def test_list_scan_raises_for_different_lengths():
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "readout_primary"},
-                    metadata={"readout_priority": "monitored", "DIID": 18, "pointID": 2},
+                    metadata={"readout_priority": "monitored", "DIID": 18, "point_id": 2},
                 ),
                 messages.DeviceInstructionMessage(
                     device=None,
@@ -2275,7 +2275,7 @@ def test_owis_grid(scan_msg):
     ) as mock_get_init_motor_properties:
         scan_instructions = list(request.run())
         mock_get_init_motor_properties.assert_called_once()
-        assert request.pointID == scan_msg.content["parameter"]["args"]["interval_x"]
+        assert request.point_id == scan_msg.content["parameter"]["args"]["interval_x"]
         assert np.isclose(
             request.target_velocity,
             (
@@ -2425,7 +2425,7 @@ def test_monitor_scan_run():
                         device="samx",
                         action="publish_data_as_read",
                         parameter={"data": {"samx": {"rb1": {"value": 1}}}},
-                        metadata={"readout_priority": "monitored", "DIID": 11, "pointID": 0},
+                        metadata={"readout_priority": "monitored", "DIID": 11, "point_id": 0},
                     ),
                     messages.DeviceInstructionMessage(
                         device="samx",
@@ -2581,7 +2581,7 @@ def test_AddInteractiveScanPointn():
             device=None,
             action="trigger",
             parameter={"group": "trigger"},
-            metadata={"readout_priority": "monitored", "DIID": 1, "pointID": 0},
+            metadata={"readout_priority": "monitored", "DIID": 1, "point_id": 0},
         ),
         messages.DeviceInstructionMessage(
             device=None,
@@ -2593,7 +2593,7 @@ def test_AddInteractiveScanPointn():
             device=None,
             action="read",
             parameter={"group": "primary", "wait_group": "readout_primary"},
-            metadata={"readout_priority": "monitored", "DIID": 3, "pointID": 0},
+            metadata={"readout_priority": "monitored", "DIID": 3, "point_id": 0},
         ),
         messages.DeviceInstructionMessage(
             device=None,

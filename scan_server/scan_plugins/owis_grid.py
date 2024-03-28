@@ -278,9 +278,9 @@ class OwisGrid(AsyncFlyScanBase):
             # if devices are slow to response. For optimizing performance, primary devices
             # could be read out only once at beginning and end
             yield from self.stubs.read_and_wait(
-                group="primary", wait_group="readout_primary", pointID=self.pointID
+                group="primary", wait_group="readout_primary", point_id=self.point_id
             )
-            self.pointID += 1
+            self.point_id += 1
 
             # Wait for motion to finish
             yield from self.stubs.wait(device="samy", wait_group="flyer", wait_type="move")

@@ -646,7 +646,7 @@ class MessageEndpoints:
         )
 
     @staticmethod
-    def public_scan_segment(scan_id: str, pointID: int) -> EndpointInfo:
+    def public_scan_segment(scan_id: str, point_id: int) -> EndpointInfo:
         """
         Endpoint for public scan segments. This endpoint is used by the scan bundler to
         publish the scan segment using a messages.ScanMessage message. In contrast to the
@@ -655,13 +655,13 @@ class MessageEndpoints:
 
         Args:
             scan_id (str): Scan ID.
-            pointID (int): Point ID to specify a single point in a scan.
+            point_id (int): Point ID to specify a single point in a scan.
 
         Returns:
             EndpointInfo: Endpoint for public scan segments.
 
         """
-        endpoint = f"public/{scan_id}/scan_segment/{pointID}"
+        endpoint = f"public/{scan_id}/scan_segment/{point_id}"
         return EndpointInfo(
             endpoint=endpoint, message_type=messages.ScanMessage, message_op=MessageOp.SET
         )

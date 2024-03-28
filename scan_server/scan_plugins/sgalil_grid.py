@@ -194,9 +194,9 @@ class SgalilGrid(AsyncFlyScanBase):
         while True:
             # readout the primary device and wait for the fly scan to finish
             yield from self.stubs.read_and_wait(
-                group="primary", wait_group="readout_primary", pointID=self.pointID
+                group="primary", wait_group="readout_primary", point_id=self.point_id
             )
-            self.pointID += 1
+            self.point_id += 1
             status = self.stubs.get_req_status(
                 device="samx", RID=self.metadata["RID"], DIID=target_diid
             )

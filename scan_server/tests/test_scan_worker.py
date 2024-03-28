@@ -1010,7 +1010,7 @@ def test_check_for_interruption(scan_worker_mock):
                     "DIID": 18,
                     "scan_id": "12345",
                     "scan_def_id": 100,
-                    "pointID": 50,
+                    "point_id": 50,
                     "RID": 11,
                 },
             ),
@@ -1043,8 +1043,8 @@ def test_open_scan(scan_worker_mock, instr, corr_num_points, scan_id):
         worker.scan_id = 111
         worker.scan_motors = ["bpm4i"]
 
-    if "pointID" in instr.metadata:
-        worker.max_point_id = instr.metadata["pointID"]
+    if "point_id" in instr.metadata:
+        worker.max_point_id = instr.metadata["point_id"]
 
     assert worker.parent.connector.get(MessageEndpoints.scan_number()) == None
 
@@ -1378,7 +1378,7 @@ def test_process_instructions(scan_worker_mock, abortion):
                 device=None,
                 action="trigger",
                 parameter={"group": "trigger"},
-                metadata={"readout_priority": "monitored", "DIID": 20, "pointID": 0},
+                metadata={"readout_priority": "monitored", "DIID": 20, "point_id": 0},
             ),
             "trigger_devices",
         ),
@@ -1396,7 +1396,7 @@ def test_process_instructions(scan_worker_mock, abortion):
                 device=None,
                 action="read",
                 parameter={"group": "primary", "wait_group": "readout_primary"},
-                metadata={"readout_priority": "monitored", "DIID": 30, "pointID": 1},
+                metadata={"readout_priority": "monitored", "DIID": 30, "point_id": 1},
             ),
             "read_devices",
         ),

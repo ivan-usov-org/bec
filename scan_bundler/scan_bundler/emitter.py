@@ -53,7 +53,7 @@ class EmitterBase:
     def on_init(self, scan_id: str):
         pass
 
-    def on_scan_point_emit(self, scan_id: str, pointID: int):
+    def on_scan_point_emit(self, scan_id: str, point_id: int):
         pass
 
     def on_baseline_emit(self, scan_id: str):

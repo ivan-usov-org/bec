@@ -85,13 +85,13 @@ class BlueskyEmitter(EmitterBase):
             except KeyError:
                 logger.warning(f"Failed to remove {scan_id} from {storage}.")
 
-    def send_bluesky_scan_point(self, scan_id, pointID) -> None:
+    def send_bluesky_scan_point(self, scan_id, point_id) -> None:
         self.connector.raw_send(
             MessageEndpoints.bluesky_events(),
-            msgpack.dumps(("event", self._prepare_bluesky_event_data(scan_id, pointID))),
+            msgpack.dumps(("event", self._prepare_bluesky_event_data(scan_id, point_id))),
         )
 
-    def _prepare_bluesky_event_data(self, scan_id, pointID) -> dict:
+    def _prepare_bluesky_event_data(self, scan_id, point_id) -> dict:
         # event = {
         #     "descriptor": "5605e810-bb4e-4e40-b...d45279e3a4",
         #     "time": 1648468217.524021,
@@ -121,13 +121,13 @@ class BlueskyEmitter(EmitterBase):
         bls_event = {
             "descriptor": metadata["descriptor"].get("uid"),
             "time": time.time(),
-            "seq_num": pointID,
+            "seq_num": point_id,
             "uid": str(uuid.uuid4()),
             "filled": {},
             "data": {},
             "timestamps": {},
         }
-        for data_point in sb.sync_storage[scan_id][pointID].values():
+        for data_point in sb.sync_storage[scan_id][point_id].values():
             for key, val in data_point.items():
                 bls_event["data"][key] = val["value"]
                 bls_event["timestamps"][key] = val["timestamp"]

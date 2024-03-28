@@ -17,20 +17,20 @@ class BECEmitter(EmitterBase):
         super().__init__(scan_bundler.connector)
         self.scan_bundler = scan_bundler
 
-    def on_scan_point_emit(self, scan_id: str, pointID: int):
-        self._send_bec_scan_point(scan_id, pointID)
+    def on_scan_point_emit(self, scan_id: str, point_id: int):
+        self._send_bec_scan_point(scan_id, point_id)
 
     def on_baseline_emit(self, scan_id: str):
         self._send_baseline(scan_id)
 
-    def _send_bec_scan_point(self, scan_id: str, pointID: int) -> None:
+    def _send_bec_scan_point(self, scan_id: str, point_id: int) -> None:
         sb = self.scan_bundler
 
         info = sb.sync_storage[scan_id]["info"]
         msg = messages.ScanMessage(
-            point_id=pointID,
+            point_id=point_id,
             scan_id=scan_id,
-            data=sb.sync_storage[scan_id][pointID],
+            data=sb.sync_storage[scan_id][point_id],
             metadata={
                 "scan_id": scan_id,
                 "scan_type": info.get("scan_type"),
@@ -40,7 +40,7 @@ class BECEmitter(EmitterBase):
         self.add_message(
             msg,
             MessageEndpoints.scan_segment(),
-            MessageEndpoints.public_scan_segment(scan_id=scan_id, pointID=pointID),
+            MessageEndpoints.public_scan_segment(scan_id=scan_id, point_id=point_id),
         )
 
     def _send_baseline(self, scan_id: str) -> None:

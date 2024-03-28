@@ -129,7 +129,7 @@ class ScanStubs:
         yield from self.wait(device=device, wait_type="move", wait_group="scan_motor")
 
     def read_and_wait(
-        self, *, wait_group: str, device: list = None, group: str = None, pointID: int = None
+        self, *, wait_group: str, device: list = None, group: str = None, point_id: int = None
     ) -> Generator[None, None, None]:
         """Trigger a reading and wait for completion.
 
@@ -137,14 +137,14 @@ class ScanStubs:
             wait_group (str): wait group
             device (list, optional): List of device names. Can be specified instead of group. Defaults to None.
             group (str, optional): Group name of devices. Can be specified instead of device. Defaults to None.
-            pointID (int, optional): _description_. Defaults to None.
+            point_id (int, optional): _description_. Defaults to None.
 
         Returns:
             Generator[None, None, None]: Generator that yields a device message.
 
         """
         self._check_device_and_groups(device, group)
-        yield from self.read(device=device, group=group, wait_group=wait_group, pointID=pointID)
+        yield from self.read(device=device, group=group, wait_group=wait_group, point_id=point_id)
         yield from self.wait(device=device, wait_type="read", group=group, wait_group=wait_group)
 
     def open_scan(
@@ -348,7 +348,7 @@ class ScanStubs:
         *,
         wait_group: str,
         device: list[str] | str | None = None,
-        pointID: int | None = None,
+        point_id: int | None = None,
         group: Literal["scan_motor", "primary", None] = None,
     ) -> Generator[None, None, None]:
         """
@@ -359,40 +359,40 @@ class ScanStubs:
                 to wait for the completion of this event. Please note that the wait group has to be
                 unique. within the scope of the read / wait event.
             device (list, optional): Device name. Can be used instead of group. Defaults to None.
-            pointID (int, optional): pointID to assign this reading to point within the scan. Defaults to None.
+            point_id (int, optional): point_id to assign this reading to point within the scan. Defaults to None.
             group (Literal["scan_motor", "primary", None], optional): Device group. Can be used instead of device. Defaults to None.
 
         Returns:
             Generator[None, None, None]: Generator that yields a device message.
 
         Example:
-            >>> yield from self.stubs.read(wait_group="readout_primary", group="primary", pointID=self.pointID)
-            >>> yield from self.stubs.read(wait_group="sample_stage", device="samx", pointID=self.pointID)
+            >>> yield from self.stubs.read(wait_group="readout_primary", group="primary", point_id=self.point_id)
+            >>> yield from self.stubs.read(wait_group="sample_stage", device="samx", point_id=self.point_id)
 
         """
         self._check_device_and_groups(device, group)
         parameter = {"group": group, "wait_group": wait_group}
-        metadata = {"pointID": pointID}
+        metadata = {"point_id": point_id}
         self._exclude_nones(parameter)
         self._exclude_nones(metadata)
         yield self._device_msg(device=device, action="read", parameter=parameter, metadata=metadata)
 
     def publish_data_as_read(
-        self, *, device: str, data: dict, pointID: int
+        self, *, device: str, data: dict, point_id: int
     ) -> Generator[None, None, None]:
         """
-        Publish the given data as a read event and assign it to the given pointID.
+        Publish the given data as a read event and assign it to the given point_id.
         This method can be used to customize the assignment of data to a specific point within a scan.
 
         Args:
             device (str): Device name.
             data (dict): Data that should be published.
-            pointID (int): pointID that should be attached to this data.
+            point_id (int): point_id that should be attached to this data.
 
         Returns:
             Generator[None, None, None]: Generator that yields a device message.
         """
-        metadata = {"pointID": pointID}
+        metadata = {"point_id": point_id}
         yield self._device_msg(
             device=device,
             action="publish_data_as_read",
@@ -400,18 +400,21 @@ class ScanStubs:
             metadata=metadata,
         )
 
-    def trigger(self, *, group: str, pointID: int) -> Generator[None, None, None]:
+    def trigger(self, *, group: str, point_id: int) -> Generator[None, None, None]:
         """Trigger a device group
 
         Args:
             group (str): Device group that should receive the trigger.
-            pointID (int): pointID that should be attached to this trigger event.
+            point_id (int): point_id that should be attached to this trigger event.
 
         Returns:
             Generator[None, None, None]: Generator that yields a device message.
         """
         yield self._device_msg(
-            device=None, action="trigger", parameter={"group": group}, metadata={"pointID": pointID}
+            device=None,
+            action="trigger",
+            parameter={"group": group},
+            metadata={"point_id": point_id},
         )
 
     def set(self, *, device: str, value: float, wait_group: str, metadata=None):

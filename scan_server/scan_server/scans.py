@@ -367,7 +367,7 @@ class ScanBase(RequestBase, PathOptimizerMixin):
             **kwargs,
         )
         self.DIID = 0
-        self.pointID = 0
+        self.point_id = 0
         self.exp_time = exp_time
         self.readout_time = readout_time
         self.acquisition_config = acquisition_config
@@ -491,16 +491,16 @@ class ScanBase(RequestBase, PathOptimizerMixin):
                 wait_type="read", group="primary", wait_group="readout_primary"
             )
         time.sleep(self.settling_time)
-        yield from self.stubs.trigger(group="trigger", pointID=self.pointID)
+        yield from self.stubs.trigger(group="trigger", point_id=self.point_id)
         yield from self.stubs.wait(wait_type="trigger", group="trigger", wait_time=self.exp_time)
         yield from self.stubs.read(
-            group="primary", wait_group="readout_primary", pointID=self.pointID
+            group="primary", wait_group="readout_primary", point_id=self.point_id
         )
         yield from self.stubs.wait(
             wait_type="read", group="scan_motor", wait_group="readout_primary"
         )
 
-        self.pointID += 1
+        self.point_id += 1
 
     def _move_and_wait(self, pos):
         if not isinstance(pos, list) and not isinstance(pos, np.ndarray):
@@ -1006,9 +1006,9 @@ class ContLineScan(ScanBase):
         self.positions = np.array(list(zip(*self.axis)))
 
     def _at_each_point(self):
-        yield from self.stubs.trigger(group="trigger", pointID=self.pointID)
-        yield from self.stubs.read(group="primary", wait_group="primary", pointID=self.pointID)
-        self.pointID += 1
+        yield from self.stubs.trigger(group="trigger", point_id=self.point_id)
+        yield from self.stubs.read(group="primary", wait_group="primary", point_id=self.point_id)
+        self.point_id += 1
 
     def scan_core(self):
         yield from self._move_and_wait(self.positions[0] - self.offset)
@@ -1017,7 +1017,7 @@ class ContLineScan(ScanBase):
             device=self.scan_motors[0], value=self.positions[-1][0], wait_group="scan_motor"
         )
 
-        while self.pointID < len(self.positions[:]):
+        while self.point_id < len(self.positions[:]):
             cont_motor_positions = self.device_manager.devices[self.scan_motors[0]].readback()
 
             if not cont_motor_positions:
@@ -1025,12 +1025,12 @@ class ContLineScan(ScanBase):
 
             cont_motor_positions = cont_motor_positions.get("value")
             logger.debug(f"Current position of {self.scan_motors[0]}: {cont_motor_positions}")
-            if np.isclose(cont_motor_positions, self.positions[self.pointID][0], atol=0.5):
-                logger.debug(f"reading point {self.pointID}")
+            if np.isclose(cont_motor_positions, self.positions[self.point_id][0], atol=0.5):
+                logger.debug(f"reading point {self.point_id}")
                 yield from self._at_each_point()
                 continue
-            if cont_motor_positions > self.positions[self.pointID][0]:
-                raise ScanAbortion(f"Skipped point {self.pointID + 1}")
+            if cont_motor_positions > self.positions[self.point_id][0]:
+                raise ScanAbortion(f"Skipped point {self.point_id + 1}")
 
 
 class RoundScanFlySim(SyncFlyScanBase):
@@ -1257,13 +1257,13 @@ class TimeScan(ScanBase):
             yield from self.stubs.wait(
                 wait_type="read", group="primary", wait_group="readout_primary"
             )
-        yield from self.stubs.trigger(group="trigger", pointID=self.pointID)
+        yield from self.stubs.trigger(group="trigger", point_id=self.point_id)
         yield from self.stubs.wait(wait_type="trigger", group="trigger", wait_time=self.exp_time)
         yield from self.stubs.read(
-            group="primary", wait_group="readout_primary", pointID=self.pointID
+            group="primary", wait_group="readout_primary", point_id=self.point_id
         )
         yield from self.stubs.wait(wait_type="trigger", group="trigger", wait_time=self.interval)
-        self.pointID += 1
+        self.point_id += 1
 
     def scan_core(self):
         for ind in range(self.num_pos):
@@ -1356,9 +1356,9 @@ class MonitorScan(ScanBase):
                 continue
             readback = readback.content["signals"]
             yield from self.stubs.publish_data_as_read(
-                device=self.flyer, data=readback, pointID=self.pointID
+                device=self.flyer, data=readback, point_id=self.point_id
             )
-            self.pointID += 1
+            self.point_id += 1
             self.num_pos += 1
 
 
@@ -1399,12 +1399,12 @@ class Acquire(ScanBase):
             yield from self.stubs.wait(
                 wait_type="read", group="primary", wait_group="readout_primary"
             )
-        yield from self.stubs.trigger(group="trigger", pointID=self.pointID)
+        yield from self.stubs.trigger(group="trigger", point_id=self.point_id)
         yield from self.stubs.wait(wait_type="trigger", group="trigger", wait_time=self.exp_time)
         yield from self.stubs.read(
-            group="primary", wait_group="readout_primary", pointID=self.pointID
+            group="primary", wait_group="readout_primary", point_id=self.point_id
         )
-        self.pointID += 1
+        self.point_id += 1
 
     def scan_core(self):
         for self.burst_index in range(self.burst_at_each_point):
@@ -1557,12 +1557,12 @@ class AddInteractiveScanPoint(ScanComponent):
         self.scan_motors = list(self.caller_args.keys())
 
     def _at_each_point(self, ind=None, pos=None):
-        yield from self.stubs.trigger(group="trigger", pointID=self.pointID)
+        yield from self.stubs.trigger(group="trigger", point_id=self.point_id)
         yield from self.stubs.wait(wait_type="trigger", group="trigger", wait_time=self.exp_time)
         yield from self.stubs.read_and_wait(
-            group="primary", wait_group="readout_primary", pointID=self.pointID
+            group="primary", wait_group="readout_primary", point_id=self.point_id
         )
-        self.pointID += 1
+        self.point_id += 1
 
     def run(self):
         yield from self.open_scan()

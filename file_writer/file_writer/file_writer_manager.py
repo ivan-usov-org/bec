@@ -44,15 +44,15 @@ class ScanStorage:
         self.enforce_sync = True
         self.forced_finish = False
 
-    def append(self, pointID, data):
+    def append(self, point_id, data):
         """
         Append data to the scan storage.
 
         Args:
-            pointID (int): Point ID
+            point_id (int): Point ID
             data (dict): Data to be stored
         """
-        self.scan_segments[pointID] = data
+        self.scan_segments[point_id] = data
 
     def ready_to_write(self) -> bool:
         """
@@ -162,7 +162,7 @@ class FileWriterManager(BECService):
                 scan_number=msg.metadata.get("scan_number"), scan_id=scan_id
             )
         self.scan_storage[scan_id].append(
-            pointID=msg.content.get("point_id"), data=msg.content.get("data")
+            point_id=msg.content.get("point_id"), data=msg.content.get("data")
         )
         logger.debug(msg.content.get("point_id"))
         self.check_storage_status(scan_id=scan_id)
