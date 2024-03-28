@@ -29,5 +29,5 @@ def main():
         event = threading.Event()
         logger.success("Started ScanBundler")
         event.wait()
-    except KeyboardInterrupt as e:
+    except KeyboardInterrupt:
         sb.shutdown()

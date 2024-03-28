@@ -352,7 +352,7 @@ def test_handle_scan_status_message(scan_bundler_mock, scan_msg, sync_storage):
         with mock.patch.object(sb, "_initialize_scan_container") as init_mock:
             with mock.patch.object(sb, "_scan_status_modification") as status_mock:
                 sb.handle_scan_status_message(scan_msg)
-                if not scan_id in sb.sync_storage:
+                if scan_id not in sb.sync_storage:
                     init_mock.assert_called_once_with(scan_msg)
                     assert scan_id in sb.scan_id_history
                 else:

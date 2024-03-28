@@ -43,5 +43,5 @@ def main():
         s.start()
         logger.success("Started DeviceServer")
         event.wait()
-    except KeyboardInterrupt as e:
+    except KeyboardInterrupt:
         s.shutdown()

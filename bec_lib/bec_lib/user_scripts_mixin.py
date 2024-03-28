@@ -87,7 +87,7 @@ class UserScriptsMixin:
 
     def forget_user_script(self, name: str) -> None:
         """unload / remove a user scripts. The file will remain on disk."""
-        if not name in self._scripts:
+        if name not in self._scripts:
             logger.error(f"{name} is not a known user script.")
             return
         builtins.__dict__.pop(name)

@@ -34,7 +34,7 @@ bec_servers_scope = (
     lambda fixture_name, config: config.getoption("--flush-redis") and "function" or "session"
 )
 
-config_template = f"""
+config_template = """
 redis:
   host: %(redis_host)s
   port: %(redis_port)s

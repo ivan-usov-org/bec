@@ -44,7 +44,7 @@ class ScanGuard:
             self._check_baton(request)
             self._check_motors_movable(request)
             self._check_soft_limits(request)
-        except Exception as error:
+        except Exception:
             content = traceback.format_exc()
             return ScanStatus(False, str(content))
         return ScanStatus()

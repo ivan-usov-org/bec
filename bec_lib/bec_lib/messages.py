@@ -30,7 +30,7 @@ class BECMessage:
         # in case "metadata" is passed None as keyword arg, for example
         for f in fields(self):
             value = getattr(self, f.name)
-            if value is None and not f.default_factory is MISSING:
+            if value is None and f.default_factory is not MISSING:
                 setattr(self, f.name, f.default_factory())
 
     @property

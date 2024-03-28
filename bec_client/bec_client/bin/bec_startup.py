@@ -42,7 +42,7 @@ if __name__ == "__main__":
         args.remove("--config")
         args.remove(config_file)
 
-    if startup and not "config" in locals():
+    if startup and "config" not in locals():
         # check if pre-startup.py script exists
         file_name = os.path.join(os.path.dirname(startup.__file__), "pre_startup.py")
         if os.path.isfile(file_name):
@@ -52,7 +52,7 @@ if __name__ == "__main__":
                 exec(file.read(), globals(), locals())
 
     # check if config was defined in pre-startup.py
-    if not "config" in locals():
+    if "config" not in locals():
         config = ServiceConfig()
 
     bec = BECIPythonClient(config, RedisConnector)

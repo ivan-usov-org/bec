@@ -257,7 +257,7 @@ class HDF5StorageWriter:
             dataset = container.create_dataset(name, data=data)
             self.add_attribute(dataset, val.attrs)
             self.add_content(dataset, val._storage)
-        except Exception as exc:
+        except Exception:
             content = traceback.format_exc()
             logger.error(f"Failed to write dataset {name}: {content}")
         return

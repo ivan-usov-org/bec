@@ -204,7 +204,7 @@ class SgalilGrid(AsyncFlyScanBase):
                 break
             time.sleep(self.sleep_time)
             if self.scan_progress() > int(self.timeout_scan_abortion / self.sleep_time):
-                logger.info(f"would have raised a scan abortion here")
+                logger.info("would have raised a scan abortion here")
                 # raise ScanAbortion()
 
             # try:

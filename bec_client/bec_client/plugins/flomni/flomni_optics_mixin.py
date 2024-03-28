@@ -126,7 +126,7 @@ class FlomniOpticsMixin:
         diameters = [80e-6, 100e-6, 120e-6, 150e-6, 170e-6, 200e-6, 220e-6, 250e-6]
 
         console = Console()
-        table = Table(title=f"Outermost zone width \033[1m60 nm\033[0m", box=box.SQUARE)
+        table = Table(title="Outermost zone width \033[1m60 nm\033[0m", box=box.SQUARE)
         table.add_column("Diameter", justify="center")
         table.add_column("Focal distance", justify="center")
         table.add_column("Current beam size", justify="center")
@@ -148,7 +148,7 @@ class FlomniOpticsMixin:
         diameters = [150e-6, 250e-6]
 
         console = Console()
-        table = Table(title=f"Outermost zone width \033[1m30 nm\033[0m", box=box.SQUARE)
+        table = Table(title="Outermost zone width \033[1m30 nm\033[0m", box=box.SQUARE)
         table.add_column("Diameter", justify="center")
         table.add_column("Focal distance", justify="center")
         table.add_column("Current beam size", justify="center")

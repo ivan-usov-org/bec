@@ -30,5 +30,5 @@ def main():
         event = threading.Event()
         logger.success("Started SciHub connector")
         event.wait()
-    except KeyboardInterrupt as e:
+    except KeyboardInterrupt:
         sh.shutdown()

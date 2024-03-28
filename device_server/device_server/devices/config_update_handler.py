@@ -47,7 +47,7 @@ class ConfigUpdateHandler:
                 if self.device_manager.failed_devices:
                     msg.metadata["failed_devices"] = self.device_manager.failed_devices
 
-        except DeviceConfigError as dev_conf_error:
+        except DeviceConfigError:
             error_msg = traceback.format_exc()
             accepted = False
         finally:

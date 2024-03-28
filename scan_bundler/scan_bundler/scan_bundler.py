@@ -94,7 +94,7 @@ class ScanBundler(BECService):
         logger.info(f"Received new scan status: {msg}")
         scan_id = msg.content["scan_id"]
         self.cleanup_storage()
-        if not scan_id in self.sync_storage:
+        if scan_id not in self.sync_storage:
             self._initialize_scan_container(msg)
             if scan_id not in self.scan_id_history:
                 self.scan_id_history.append(scan_id)
@@ -128,7 +128,7 @@ class ScanBundler(BECService):
         scan_motors = list(set(self.device_manager.devices[m] for m in scan_info["scan_motors"]))
         self.scan_motors[scan_id] = scan_motors
         self.readout_priority[scan_id] = scan_info["readout_priority"]
-        if not scan_id in self.storage_initialized:
+        if scan_id not in self.storage_initialized:
             self.sync_storage[scan_id] = {"info": scan_info, "status": "open", "sent": set()}
             self.monitored_devices[scan_id] = {
                 "devices": self.device_manager.devices.monitored_devices(
@@ -253,7 +253,7 @@ class ScanBundler(BECService):
 
     def _wait_for_scan_id(self, scan_id, timeout_time=10):
         elapsed_time = 0
-        while not scan_id in self.storage_initialized:
+        while scan_id not in self.storage_initialized:
             msg = self.connector.get(MessageEndpoints.public_scan_info(scan_id))
             if msg and msg.content["scan_id"] == scan_id:
                 self.handle_scan_status_message(msg)
@@ -358,7 +358,7 @@ class ScanBundler(BECService):
 
         self.run_emitter("on_scan_point_emit", scan_id, pointID)
 
-        if not pointID in self.sync_storage[scan_id]["sent"]:
+        if pointID not in self.sync_storage[scan_id]["sent"]:
             self.sync_storage[scan_id]["sent"].add(pointID)
         else:
             logger.warning(f"Resubmitting existing pointID {pointID} for scan_id {scan_id}")

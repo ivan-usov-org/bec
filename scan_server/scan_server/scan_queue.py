@@ -227,7 +227,7 @@ class QueueManager:
             if len(history) == 0:
                 time.sleep(0.1)
                 continue
-            if not scan_id in history[-1].scan_id:
+            if scan_id not in history[-1].scan_id:
                 time.sleep(0.1)
                 continue
 

@@ -236,7 +236,7 @@ class XrayEyeAlign:
         if not os.path.exists(file):
             os.makedirs(os.path.dirname(file), exist_ok=True)
         with open(file, "w") as alignment_values_file:
-            alignment_values_file.write(f"angle\thorizontal\n")
+            alignment_values_file.write("angle\thorizontal\n")
             for k in range(1, 6):
                 fovx_offset = self.alignment_values[0] - self.alignment_values[k]
                 print(f"Writing to file new alignment: number {k}, value x {fovx_offset}")

@@ -32,5 +32,5 @@ def main():
         event = threading.Event()
         logger.success("Started FileWriter")
         event.wait()
-    except KeyboardInterrupt as e:
+    except KeyboardInterrupt:
         file_writer_manager.shutdown()

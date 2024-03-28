@@ -331,7 +331,7 @@ class XrayEyeAlign:
         with open(
             os.path.expanduser("~/Data10/specES1/internal/xrayeye_alignmentvalues"), "w"
         ) as alignment_values_file:
-            alignment_values_file.write(f"angle\thorizontal\tvertical\n")
+            alignment_values_file.write("angle\thorizontal\tvertical\n")
             for k in range(2, 11):
                 fovx_offset = (self.alignment_values[0][0] - self.alignment_values[k][0]) * 1000
                 fovy_offset = (self.alignment_values[k][1] - self.alignment_values[0][1]) * 1000
@@ -1094,7 +1094,7 @@ class LamNI(LamNIOpticsMixin):
         with open(ptycho_queue_file, "w") as queue_file:
             scans = " ".join([str(scan) for scan in self._current_scan_list])
             queue_file.write(f"p.scan_number {scans}\n")
-            queue_file.write(f"p.check_nextscan_started 1\n")
+            queue_file.write("p.check_nextscan_started 1\n")
 
     def write_pdf_report(self):
         """create and write the pdf report with the current LamNI settings"""

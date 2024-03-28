@@ -512,7 +512,7 @@ class FlomniSampleTransferMixin:
             print("good then")
         else:
             print("Stopping.")
-            raise FlomniError(f"The sample transfer was manually aborted.")
+            raise FlomniError("The sample transfer was manually aborted.")
 
         self.ftransfer_gripper_move(position)
 
@@ -621,7 +621,7 @@ class FlomniSampleTransferMixin:
             # find a new home for the sample...
             empty_slots = []
             for name, val in dev.flomni_samples.read().items():
-                if not "flomni_samples_sample_placed_sample" in name:
+                if "flomni_samples_sample_placed_sample" not in name:
                     continue
                 if val.get("value") == 0:
                     empty_slots.append(int(name.split("flomni_samples_sample_placed_sample")[1]))
@@ -634,7 +634,7 @@ class FlomniSampleTransferMixin:
                 user_input = input(f"Where shall I put the sample? Default: [{empty_slots[0]}]")
                 try:
                     user_input = int(user_input)
-                    if not user_input in empty_slots:
+                    if user_input not in empty_slots:
                         raise ValueError
                     break
                 except ValueError:
@@ -1508,7 +1508,7 @@ class Flomni(
         with open(ptycho_queue_file, "w") as queue_file:
             scans = " ".join([str(scan) for scan in self._current_scan_list])
             queue_file.write(f"p.scan_number {scans}\n")
-            queue_file.write(f"p.check_nextscan_started 1\n")
+            queue_file.write("p.check_nextscan_started 1\n")
 
     def _write_tomo_scan_number(self, scan_number: int, angle: float, subtomo_number: int) -> None:
         tomo_scan_numbers_file = os.path.expanduser(

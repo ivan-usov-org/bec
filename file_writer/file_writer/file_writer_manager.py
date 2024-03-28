@@ -297,7 +297,7 @@ class FileWriterManager(BECService):
             self.file_writer.write(file_path=file_path, data=storage)
         # pylint: disable=broad-except
         # pylint: disable=unused-variable
-        except Exception as exc:
+        except Exception:
             content = traceback.format_exc()
             logger.error(f"Failed to write to file {file_path}. Error: {content}")
             self.connector.raise_alarm(

@@ -46,7 +46,7 @@ def _run_with_bl_checks(bl_checks, fcn, *args, **kwargs):
     nested_call = len(bl_checks._levels) > 1
     if bl_checks._is_paused and bl_checks._beamline_checks:
         logger.warning(
-            f"Beamline checks are currently paused. Use `bec.bl_checks.resume()` to reactivate them."
+            "Beamline checks are currently paused. Use `bec.bl_checks.resume()` to reactivate them."
         )
     try:
         if nested_call:
