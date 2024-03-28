@@ -13,6 +13,7 @@ import sys
 import threading
 import time
 import warnings
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from functools import wraps
 from typing import TYPE_CHECKING
@@ -79,6 +80,44 @@ class StreamTopicInfo:
     from_start: bool
     cb: callable
     kwargs: dict
+
+
+class ThreadsafeSet:
+    def __init__(self):
+        self._set = set()
+        self._lock = threading.RLock()
+
+    def add(self, item):
+        with self._lock:
+            self._set.add(item)
+
+    def remove(self, item):
+        with self._lock:
+            self._set.remove(item)
+
+    def __contains__(self, item):
+        with self._lock:
+            return item in self._set
+
+    def __len__(self):
+        with self._lock:
+            return len(self._set)
+
+    def __iter__(self):
+        with self._lock:
+            return iter(self._set)
+
+    def __repr__(self):
+        with self._lock:
+            return repr(self._set)
+
+    def __str__(self):
+        with self._lock:
+            return str(self._set)
+
+    def clear(self):
+        with self._lock:
+            self._set.clear()
 
 
 class StreamRegisterMixin:
@@ -391,7 +430,7 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
         self.host, self.port = (
             bootstrap[0].split(":") if isinstance(bootstrap, list) else bootstrap.split(":")
         )
-
+        self._lock = threading.RLock()
         if redis_cls:
             self._redis_conn = redis_cls(host=self.host, port=self.port)
         else:
@@ -402,6 +441,9 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
         self._pubsub_conn.ignore_subscribe_messages = True
         # keep track of topics and callbacks
         self._topics_cb = collections.defaultdict(list)
+        self._tp_executor = None
+        self._active_callbacks = ThreadsafeSet()
+        self._callback_queue = collections.defaultdict(queue.Queue)
 
         self._events_listener_thread = None
         self._events_dispatcher_thread = None
@@ -414,6 +456,8 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
         Shutdown the connector
         """
         super().shutdown()
+        if self._tp_executor:
+            self._tp_executor.shutdown()
         if self._events_listener_thread:
             self._stop_events_listener_thread.set()
             self._events_listener_thread.join()
@@ -585,6 +629,10 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
                 self._topics_cb[topic].append((cb_ref, kwargs))
 
         if start_thread and self._events_dispatcher_thread is None:
+            # start threadpool
+            self._tp_executor = ThreadPoolExecutor(
+                max_workers=10, thread_name_prefix="RedisConnector_dispatcher"
+            )
             # start dispatcher thread
             self._events_dispatcher_thread = threading.Thread(
                 target=self._dispatch_events, daemon=True
@@ -637,13 +685,26 @@ class RedisConnector(StreamRegisterMixin, ConnectorBase):
         msg = MessageObject(topic=channel, value=MsgpackSerialization.loads(msg["data"]))
         for cb_ref, kwargs in callbacks:
             cb = cb_ref()
-            if cb:
-                try:
-                    cb(msg, **kwargs)
-                # pylint: disable=broad-except
-                except Exception:
-                    sys.excepthook(*sys.exc_info())
+            if not cb:
+                continue
+            self._callback_queue[cb].put((cb, msg, kwargs))
+            submit_callback_dispatcher = bool(cb not in self._active_callbacks)
+            if submit_callback_dispatcher:
+                self._active_callbacks.add(cb)
+                self._tp_executor.submit(self._run_callback_dispatcher, cb)
         return True
+
+    def _run_callback_dispatcher(self, cb):
+        try:
+            self._active_callbacks.add(cb)
+            while not self._callback_queue[cb].empty():
+                cb, msg, kwargs = self._callback_queue[cb].get()
+                cb(msg, **kwargs)
+        # pylint: disable=broad-except
+        except Exception:
+            sys.excepthook(*sys.exc_info())
+        finally:
+            self._active_callbacks.remove(cb)
 
     def poll_messages(self, timeout=None) -> None:
         while True:
