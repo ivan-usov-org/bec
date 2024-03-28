@@ -2,6 +2,24 @@
 
 <!--next-version-placeholder-->
 
+## v1.22.0 (2024-03-28)
+
+### Feature
+
+* 'bec_services_config_file_path' and 'bec_test_config_file_path' fixtures ([`d3f3071`](https://gitlab.psi.ch/bec/bec/-/commit/d3f30712f957ecdaa5bd52d98e4acce060a8b1d9))
+* **tests:** Fixtures for end-2-end tests (available as a pytest plugin) ([`b24f65a`](https://gitlab.psi.ch/bec/bec/-/commit/b24f65a2a16f7048c9370ef576dede63da40e00e))
+
+### Fix
+
+* Temporary make 'end-2-end tests with multiple hosts' manual ([`54bfe36`](https://gitlab.psi.ch/bec/bec/-/commit/54bfe36fe6becc80b3b893def94a14e0ed1ecdab))
+* Temporary fix, do not check for dangling threads in device server tests ([`a1cddc0`](https://gitlab.psi.ch/bec/bec/-/commit/a1cddc0639b509531341beb24003479158ea8cd7))
+* **tests:** Rename files to prevent error during tests collection with 2 files with same name ([`6fcef45`](https://gitlab.psi.ch/bec/bec/-/commit/6fcef459b855968e3e179d1d4ae48a0f00487bd2))
+* **tests:** Ensure all tests do not leak threads ([`f371098`](https://gitlab.psi.ch/bec/bec/-/commit/f37109873a0c173dc56a254fdcfca52d8c3ad215))
+
+### Documentation
+
+* **scan_server:** Improved docs for scan stubs ([`c5f18e5`](https://gitlab.psi.ch/bec/bec/-/commit/c5f18e56a5f382a18ffc048907fea917f101bf75))
+
 ## v1.21.1 (2024-03-22)
 
 ### Fix
