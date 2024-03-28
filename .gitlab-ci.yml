@@ -170,12 +170,14 @@ end-2-end:
 
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
     - if: '$CI_PIPELINE_SOURCE == "pipeline"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
   script:
     # build and run the tests
-    - docker build -t end2end_client:test -f ./ci/Dockerfile.run_pytest --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=bec_client .
+    - echo $OPHYD_DEVICES_BRANCH 
+    - docker build -t end2end_client:test -f ./ci/Dockerfile.run_pytest --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=bec_client --build-arg OPHYD_BRANCH=$OPHYD_DEVICES_BRANCH .
     - docker run --network=host --name end2end_client end2end_client:test
 
   after_script:
@@ -236,12 +238,12 @@ end-2-end-services_on_multi_hosts:
     # build containers
     # /!\ build-arg is interpreted differently by podman,
     # have to use buildah here
-    - buildah bud --network=host -t device_server_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=device_server 
-    - buildah bud --network=host -t scan_server_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=scan_server 
-    - buildah bud --network=host -t scan_bundler_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=scan_bundler 
-    - buildah bud --network=host -t file_writer_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=file_writer 
-    - buildah bud --network=host -t dap_server_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=data_processing
-    - buildah bud --network=host -t scihub_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=scihub
+    - buildah bud --network=host -t device_server_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=device_server --build-arg OPHYD_BRANCH=$OPHYD_DEVICES_BRANCH
+    - buildah bud --network=host -t scan_server_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=scan_server --build-arg OPHYD_BRANCH=$OPHYD_DEVICES_BRANCH 
+    - buildah bud --network=host -t scan_bundler_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=scan_bundler --build-arg OPHYD_BRANCH=$OPHYD_DEVICES_BRANCH
+    - buildah bud --network=host -t file_writer_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=file_writer --build-arg OPHYD_BRANCH=$OPHYD_DEVICES_BRANCH
+    - buildah bud --network=host -t dap_server_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=data_processing --build-arg OPHYD_BRANCH=$OPHYD_DEVICES_BRANCH
+    - buildah bud --network=host -t scihub_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=scihub --build-arg OPHYD_BRANCH=$OPHYD_DEVICES_BRANCH
     # default service is bec_client
     - buildah bud --network=host -t end2end_client_test -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10
 
@@ -276,6 +278,7 @@ end-2-end-services_on_multi_hosts:
     expire_in: 1 week
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
     - if: '$CI_PIPELINE_SOURCE == "pipeline"'     
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
@@ -314,6 +317,7 @@ end-2-end-conda:
 
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
     - if: '$CI_PIPELINE_SOURCE == "pipeline"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
