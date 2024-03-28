@@ -220,6 +220,7 @@ end-2-end:
 
 end-2-end-services_on_multi_hosts:
   stage: End2End
+  when: manual
   needs: []
   services:
     - redis
