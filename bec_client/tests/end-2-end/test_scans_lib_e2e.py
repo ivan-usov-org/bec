@@ -1,11 +1,9 @@
-import os
 import time
 
 import numpy as np
 import pytest
 import yaml
 
-import bec_lib
 from bec_lib import DeviceConfigError, bec_logger
 from bec_lib.alarm_handler import AlarmBase
 
@@ -273,17 +271,20 @@ def test_dap_fit(bec_client_lib):
         "invalid_device_class",
     ],
 )
-def test_config_reload(bec_client_lib, config, raises_error, deletes_config, disabled_device):
+def test_config_reload(
+    bec_test_config_file_path, bec_client_lib, config, raises_error, deletes_config, disabled_device
+):
     bec = bec_client_lib
     bec.metadata.update({"unit_test": "test_config_reload"})
+    runtime_config_file_path = bec_test_config_file_path.parent / "e2e_runtime_config_test.yaml"
     try:
         # write new config to disk
-        with open("./e2e_runtime_config_test.yaml", "w") as f:
+        with open(runtime_config_file_path, "w") as f:
             f.write(yaml.dump(config))
         num_devices = len(bec.device_manager.devices)
         if raises_error:
             with pytest.raises(DeviceConfigError):
-                bec.config.update_session_with_file("./e2e_runtime_config_test.yaml")
+                bec.config.update_session_with_file(runtime_config_file_path)
             if deletes_config:
                 assert len(bec.device_manager.devices) == 0
             elif disabled_device:
@@ -291,16 +292,12 @@ def test_config_reload(bec_client_lib, config, raises_error, deletes_config, dis
             else:
                 assert len(bec.device_manager.devices) == num_devices
         else:
-            bec.config.update_session_with_file("./e2e_runtime_config_test.yaml")
+            bec.config.update_session_with_file(runtime_config_file_path)
             assert len(bec.device_manager.devices) == 2
         for dev in disabled_device:
             assert bec.device_manager.devices[dev].enabled is False
     finally:
-        test_device_config = os.path.join(
-            os.path.dirname(os.path.abspath(bec_lib.tests.__file__)), "test_config.yaml"
-        )
-        bec.config.update_session_with_file(test_device_config)
-    # bec.config.load_demo_config()
+        bec.config.update_session_with_file(bec_test_config_file_path)
 
 
 def test_computed_signal(bec_client_lib):

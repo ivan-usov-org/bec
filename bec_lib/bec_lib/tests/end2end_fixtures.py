@@ -34,7 +34,7 @@ bec_servers_scope = (
     lambda fixture_name, config: config.getoption("--flush-redis") and "function" or "session"
 )
 
-config_template = """
+services_config_template = """
 redis:
   host: %(redis_host)s
   port: %(redis_port)s
@@ -112,7 +112,7 @@ def pytest_configure(config):
 
 
 @pytest.fixture(scope=bec_servers_scope)
-def bec_services_config_path(request):
+def bec_files_path(request):
     user_tmp_path = request.config.getoption("--files-path")
     if user_tmp_path is not None:
         yield _check_path(user_tmp_path)
@@ -126,17 +126,40 @@ def bec_services_config_path(request):
 
 
 @pytest.fixture(scope=bec_servers_scope)
-def bec_servers(bec_services_config_path, redis_server_fixture):
-    config_path = bec_services_config_path / "test_config.yaml"
-    file_writer_path = bec_services_config_path  # / "writer_output"
+def bec_services_config_file_path(bec_files_path):
+    return pathlib.Path(bec_files_path / "services_config.yaml")
+
+
+@pytest.fixture(scope=bec_servers_scope)
+def bec_test_config_file_path(bec_files_path):
+    return pathlib.Path(bec_files_path / "test_config.yaml")
+
+
+@pytest.fixture(scope=bec_servers_scope)
+def bec_servers(
+    bec_services_config_file_path, bec_test_config_file_path, bec_files_path, redis_server_fixture
+):
+    # ensure configuration files are written where appropriate for tests,
+    # i.e. either in /tmp/pytest/... directory, or following user "--files-path"
+    # 1) test config (devices...)
+    with open(bec_test_config_file_path, "w") as test_config_file:
+        with open(
+            os.path.join(os.path.dirname(__file__), "test_config.yaml"), "r"
+        ) as original_test_config_file:
+            test_config_file.write(original_test_config_file.read())
+    # 2) path where files are saved
+    file_writer_path = bec_services_config_file_path.parent  # / "writer_output"
     # file_writer_path.mkdir(exist_ok=True)
-    config_content = config_template % {
-        "redis_host": redis_server_fixture.host,
-        "redis_port": redis_server_fixture.port,
-        "file_writer_base_path": file_writer_path,
-    }
-    with open(config_path, "w") as config_file:
-        config_file.write(config_content)
+    # 3) services config
+    with open(bec_services_config_file_path, "w") as services_config_file:
+        services_config_file.write(
+            services_config_template
+            % {
+                "redis_host": redis_server_fixture.host,
+                "redis_port": redis_server_fixture.port,
+                "file_writer_base_path": file_writer_path,
+            }
+        )
 
     if _start_servers:
         from bec_server.service_handler import ServiceHandler
@@ -145,8 +168,8 @@ def bec_servers(bec_services_config_path, redis_server_fixture):
         # when no_tmux=True, 'bec_path' indicate the cwd
         # for the process (working directory), i.e. where log files will go
         service_handler = ServiceHandler(
-            bec_path=bec_services_config_path,
-            config_path=config_path,
+            bec_path=bec_files_path,
+            config_path=bec_services_config_file_path,
             no_tmux=True,
         )
         processes = service_handler.start()
@@ -163,8 +186,8 @@ def bec_servers(bec_services_config_path, redis_server_fixture):
 
 
 @pytest.fixture
-def bec_client_with_demo_config(bec_redis, bec_services_config_path, bec_servers):
-    config = ServiceConfig(bec_services_config_path / "test_config.yaml")
+def bec_client_with_demo_config(bec_redis, bec_services_config_file_path, bec_servers):
+    config = ServiceConfig(bec_services_config_file_path)
     bec = BECIPythonClient(config, RedisConnector, forced=True)
     bec.start()
     ConfigHelper(bec._client.connector).load_demo_config()
@@ -176,8 +199,8 @@ def bec_client_with_demo_config(bec_redis, bec_services_config_path, bec_servers
 
 
 @pytest.fixture
-def bec_client_lib_with_demo_config(bec_redis, bec_services_config_path, bec_servers):
-    config = ServiceConfig(bec_services_config_path / "test_config.yaml")
+def bec_client_lib_with_demo_config(bec_redis, bec_services_config_file_path, bec_servers):
+    config = ServiceConfig(bec_services_config_file_path)
     bec = BECClient(config, RedisConnector, forced=True, wait_for_server=True)
     bec.start()
     ConfigHelper(bec._client.connector).load_demo_config()
