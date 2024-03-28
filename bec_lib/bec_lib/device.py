@@ -832,6 +832,20 @@ class Signal(AdjustableMixin, OphydInterfaceBase):
 class ComputedSignal(Signal):
 
     def set_compute_method(self, method: callable) -> None:
+        """Set the compute method for the ComputedSignal.
+
+        We allow users to use two additional packages which are imported to simplify computations:
+        - numpy as np
+        - scipy as sp
+
+        Args:
+            method (callable) : Method to execute as computation method, i.e.
+            def calculate_readback(signal):
+            ...:     return -1 * signal.get()
+
+        >>> dev.<dev_name>.set_compute_method(calculate_readback)
+
+        """
         if not callable(method):
             raise ValueError("The compute method must be callable.")
 
@@ -839,6 +853,14 @@ class ComputedSignal(Signal):
         self.update_config({"deviceConfig": {"compute_method": method}})
 
     def set_input_signals(self, *signals) -> None:
+        """Set input signals for compute method.
+        The signals need to be valid signals and match the computation of the compute method.
+
+        Args:
+            signals : All signals to be added for the comput method
+
+        >>> dev.<dev_name>.set_input_signals(dev.bpm4i.readback, dev.bpm5i.readback)
+        """
         if not signals:
             self.update_config({"deviceConfig": {"input_signals": []}})
             return

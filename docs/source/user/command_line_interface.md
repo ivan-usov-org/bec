@@ -368,4 +368,41 @@ It allows us to run a sequence of functions as if it were a scan, resulting in a
 
 By adding the decorator ``@scans.scan_def`` to the function definition, we mark this function as a scan definition. 
 
+### Computed Signal
+Here, we introduce the `ComputedSignal`, which enables users to effortlessly generate custom signals based on signals from other devices.
 
+To utilize this feature, add a new signal, such as `pseudo_signal`, to the device configuration
+
+``` yaml
+pseudo_signal:
+  deviceClass: ComputedSignal
+  deviceConfig:
+    compute_method: "def compute_signals(signal1, signal2):\n    return signal1.get()*signal2.get()\n"
+    input_signals: 
+      - "bpm4i_readback"
+      - "bpm5i_readback"
+  enabled: true
+  readOnly: false
+  readoutPriority: baseline
+```
+The `pseudo_signal` is a `ComputedSignal` where the *readback* is calculated based on the configured *input_signals* and *compute_method*. In the provided example, the *readback* of `bpm4i` and `bpm5i` is multiplied to produce the `readback` of the `pseudo_signal`.
+
+Additionally, we offer users a straightforward interface through the client (CLI) to adjust the *compute_method* and *input_signals*. The process involves two steps:
+
+1. Define the *input_signals* using `dev.<device_name>.set_input_signal`.
+2. Upload a method for the *compute_method* via `dev.<device_name>.set_compute_method`.
+
+It's worth noting that users have the option to leverage additional packages such as `numpy as np` and `scipy as sp` for accelerated computations.
+
+Below is an example demonstrating the use of the `pseudo_signal` to compute the sum over a 2D detector (`dev.eiger`), excluding hot pixel values:
+
+``` ipython
+def calculate_readback(signal):
+    data = signal.get()
+    std = np.std(data)
+    mean = np.mean(data)
+    return np.sum(data[data>mean+3*std])
+dev.pseudo_signal.set_compute_method(calculate_readback)
+dev.pseudo_signal.set_input_signals(dev.eiger.image)
+```
+This setup enhances flexibility and efficiency in signal processing, empowering users to tailor computations to their specific needs.
