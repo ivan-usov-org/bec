@@ -30,16 +30,22 @@ Afterwards, you may follow this step-by-step guide to suggest your code improvem
     black --line-length=100 --skip-magic-trailing-comma .
     ```
 
-4. Run Pylint on your code to ensure it meets coding standards:
+4. Use isort to sort your imports:
+
+    ```bash
+    isort isort --line-length=100 --profile=black --multi-line=3 --trailing-comma .
+    ```
+
+5. Run Pylint on your code to ensure it meets coding standards:
 
     ```bash
     pylint your_module_or_package
     ```
 
-5. Write tests for new features or fixed bugs, and add them to the test folder. 
+6. Write tests for new features or fixed bugs, and add them to the test folder. 
 We use [pytest](https://github.com/pytest-dev/pytest) within our team to test code. 
 
-6. Follow [Conventional Commit Messages](https://www.conventionalcommits.org/en/v1.0.0/) when writing commit messages. This helps us automatically generate a changelog. For example:
+7. Follow [Conventional Commit Messages](https://www.conventionalcommits.org/en/v1.0.0/) when writing commit messages. This helps us automatically generate a changelog. For example:
 
     ```bash
     git commit -m "feat: add new feature"
@@ -57,13 +63,13 @@ We use [pytest](https://github.com/pytest-dev/pytest) within our team to test co
     git commit -m "docs: update documentation"
     ```
 
-7. Push your commits to the remote branch:
+8. Push your commits to the remote branch:
 
     ```bash
     git push origin feature/your-feature
     ```
 
-8. Open a merge request on GitLab. Be sure to include a clear title and description of your changes. If your merge request fixes an issue, include `closes #123` in the description to automatically close the issue when the merge request is merged.
+9. Open a merge request on GitLab. Be sure to include a clear title and description of your changes. If your merge request fixes an issue, include `closes #123` in the description to automatically close the issue when the merge request is merged.
 
 ## Contributing Documentation:
 
