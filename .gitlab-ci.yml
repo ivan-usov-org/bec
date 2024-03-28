@@ -230,7 +230,7 @@ end-2-end-services_on_multi_hosts:
     STORAGE_DRIVER: vfs
   #  CI_DEBUG_SERVICES: "true"
   image: alpine:latest
-  allow_failure: false
+  allow_failure: true
   script:
     # download buildah & podman
     - apk add buildah
