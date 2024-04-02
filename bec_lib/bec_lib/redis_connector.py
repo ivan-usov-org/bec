@@ -143,6 +143,9 @@ class RedisConnector(ConnectorBase):
         Shutdown the connector
         """
         super().shutdown()
+        for topic in list(self._stream_topics_subscription):
+            # this will take care of shutting down direct listening threads
+            self.unregister_stream(topic)
         if self._events_listener_thread:
             self._stop_events_listener_thread.set()
             self._events_listener_thread.join()
@@ -261,7 +264,7 @@ class RedisConnector(ConnectorBase):
             # start dispatcher thread
             started_event = threading.Event()
             self._events_dispatcher_thread = threading.Thread(
-                target=self._dispatch_events, args=(started_event,), daemon=True
+                target=self._dispatch_events, args=(started_event,)
             )
             self._events_dispatcher_thread.start()
             started_event.wait()  # synchronization of thread start
@@ -308,7 +311,7 @@ class RedisConnector(ConnectorBase):
         if self._events_listener_thread is None:
             # create the thread that will get all messages for this connector;
             self._events_listener_thread = threading.Thread(
-                target=self._get_messages_loop, args=(self._pubsub_conn,), daemon=True
+                target=self._get_messages_loop, args=(self._pubsub_conn,)
             )
             self._events_listener_thread.start()
         # make a weakref from the callable, using louie;
@@ -366,9 +369,7 @@ class RedisConnector(ConnectorBase):
             raise RuntimeError("Already registered stream topic with the same callback")
 
         info.stop_event = threading.Event()
-        info.thread = threading.Thread(
-            target=self._direct_stream_listener, args=(info,), daemon=True
-        )
+        info.thread = threading.Thread(target=self._direct_stream_listener, args=(info,))
         with self._stream_topics_subscription_lock:
             self._stream_topics_subscription[topic].append(info)
         info.thread.start()
@@ -532,7 +533,7 @@ class RedisConnector(ConnectorBase):
             if self._stream_events_listener_thread is None:
                 # create the thread that will get all messages for this connector
                 self._stream_events_listener_thread = threading.Thread(
-                    target=self._get_stream_messages_loop, daemon=True
+                    target=self._get_stream_messages_loop
                 )
                 self._stream_events_listener_thread.start()
 
