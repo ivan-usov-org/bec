@@ -351,7 +351,7 @@ end-2-end-conda-310:
     - bec-server start --config ./ci/test_config.yaml
 
     - cd ./bec_client
-    - pytest -v ./tests/end-2-end/test_scans.py
+    - pytest -v ./tests/end-2-end/test_scans_e2e.py
 
   artifacts:
     when: on_failure
