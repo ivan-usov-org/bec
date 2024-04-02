@@ -20,12 +20,12 @@ A diagram with the hierarchy of inheritance is shown below.
 ```{figure} ../assets/bec_device_structure.png
 Inheritance scheme for devices and signals in BEC.
 ```
-We note that this hierarchy is inspired by different class types within Ophyd;
-`Device`, `Signal`, `Positioner` and `Flyer`, while extending certain aspects of the classes for convenient usage.
+We note that this hierarchy is inspired by different base class from Ophyd:
+`Device`, `Signal`, `PositionerBase` and `FlyerInterface`, while also enhancing certain aspects of these classes for ease of use.
 
 ### Core functionality
 The following section lists core properties and methods. 
-We note that by inheriting from Ophyd `Device`, `Signal` or a children class like `PvPositioner`, all methods and properties below will already be implemented. 
+We note that by inheriting from Ophyd `Device`, `Signal` or a children class like `PvPositioner` for EPICs devices, all methods and properties below will already be implemented. 
 
 * **name -> str**\
 Property with name of the device; it will also be used for naming convention of signals from a device.
