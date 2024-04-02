@@ -5,31 +5,27 @@
 It is a Python library that provides a uniform interface to different hardware components. 
 Ophyd is used to control the hardware and to read out (meta)data of devices. 
 It is also used to create a virtual representation of the hardware in the form of `devices` and `signals`.
-Hardware can be tested without spinning up BEC, simply by importing the ophyd library.
+Hardware can be tested without spinning up BEC, simply by importing the Ophyd library.
 
 (developer.ophyd.ophyd_device)=
 ## Ophyd devices
 
 Representative objects for different type of devices are created dynamically on the device server.
 For the most simple case, a certain set of core methods and properties need to be implemented.
-Based on the type of device, `BEC` expects ophyd devices to provide certain functionality.
-Signal and Device are the most simple cases for which the core functionality is extended by certain interfaces that add functionality to the objects.
-Overall, BEC differentiate between `device`, `signal`, `positioner` and `flyer`.
-A small diagram with the hierarchy of inheritance is shown below.
+Based on the type of device, BEC expects ophyd devices to provide certain functionality.
+Signal and Device are the most simple type of devices that are used within BEC.
+Overall, BEC differentiates between `device`, `signal`, `positioner` and `flyer`.
+A diagram with the hierarchy of inheritance is shown below.
 
 ```{figure} ../assets/bec_device_structure.png
 Inheritance scheme for devices and signals in BEC.
 ```
 We note that this hierarchy is inspired by different class types within Ophyd;
-`Device`, `Signal`, `PVPositioner` and `FlyerInterface`, while extending certain aspects of the classes for convenient usage.
+`Device`, `Signal`, `Positioner` and `Flyer`, while extending certain aspects of the classes for convenient usage.
 
 ### Core functionality
-The following section lists core properties and methods required to load a device in BEC. 
+The following section lists core properties and methods. 
 We note that by inheriting from Ophyd `Device`, `Signal` or a children class like `PvPositioner`, all methods and properties below will already be implemented. 
-
-* **_destroyed -> bool**\
-Instance attribute that indicates whether a device has been destroyed, should be False by default.
-The destroy method should set this to True.
 
 * **name -> str**\
 Property with name of the device; it will also be used for naming convention of signals from a device.
@@ -48,47 +44,51 @@ Property that returns a dictionary with hints for callback operations on the dev
 <!-- TODO this should be more specific, I don't quite know yet what this is used for by BEC. -->
 
 * **connected -> bool**\
-Check if the signal is connected, settable property.
+Property to check if a device or signal is connected (settable).
+
+* **_destroyed -> bool**\
+Instance attribute that indicates whether a device has been destroyed, should be False by default.
+The destroy method should set this to True.
+
+* **destroy() -> None**\
+Method to destroy the device. A destroyed device can not be reconnected, in addition, the instance attribute `_destroyed` must be set to `True`.
 
 * **read() -> dict**\
-Read method of the device. Returns nested dictionary with all signals of type `kind.normal` and `kind.hinted`. Example: {'signal_name': {'value': ..., "timestamp": ...}, ...}
+Read method of the device which returns a nested dictionary with all signals of type `kind.normal` and `kind.hinted`. Example: {'signal_name': {'value': ..., "timestamp": ...}, ...}
 
 * **read_configuration() -> dict**\
-Read configuration method of the device. Returns nested dictionary with all signals of type `kind.config`. Example: {'signal_name': {'value': ..., "timestamp": ...}, ...}
+Read configuration method of the device which returns a nested dictionary with all signals of type `kind.config`. Example: {'signal_name': {'value': ..., "timestamp": ...}, ...}
 
 * **describe() -> dict**\
-Describe method of the device. Returns dictionary with signal descriptions of `kind.normal` and `kind.hinted`.
-The dictionary is composed of entries for each signal with additional information about 'source', 'dtype' and 'shape' of the signal's return value.
+Describe method of the device which returns dictionary with signal descriptions of `kind.normal` and `kind.hinted`.
+The dictionary is composed of entries for each signal with additional information about *source*, *dtype* and *shape* of the signal's return value.
 <!-- TODO Check -->
 
 * **describe_configuration() -> dict**\
 Similar like describe, but returns a dictionary with information about signals of type `kind.config`.
-Again, each entry relates to a signal with additional information about `source`, `dtype` and `shape`
+Again, each entry relates to a signal with additional information about *source*, *dtype* and *shape*
 The same pattern as for describe applies.
 <!-- TODO Check -->
 
-* **destroy() -> None**\
-Destroy the device. The instance attribute `_destroyed` must be set to `True` after calling this method.
-
 * **trigger() -> ophyd.DeviceStatus**\
-Trigger the device. Returns an [ophyd.DeviceStatus](https://nsls-ii.github.io/ophyd/status.html?highlight=devicestatus#status-api-details) object, which is used to track the status of the trigger call. One may also implement the method as blocking, and return the status object with `.set_finished()` method called.
+Trigger the device and return an [ophyd.DeviceStatus](https://nsls-ii.github.io/ophyd/status.html?highlight=devicestatus#status-api-details) object, which is used to track the status of the trigger call.
+The status should resolve once the device has been triggered successfully, which means the `.set_finished()` method is called on the status object.
 
 ### Signal
 
-Signals are among the simplest objects that can be loaded by `BEC`. For instance, we can utilize the readback value of an *EPICS* PV to create a basic signal. Alternatively, we may generate a custom signal from a temperature controller to track during the measurement process.
+Signals are among the simplest objects that can be loaded by BEC. For instance, we can utilize the readback value of an *EPICS* PV to create a basic signal. Alternatively, we may generate a custom signal from a temperature controller to track during the measurement process.
 
 Implementing a signal involves extending the core functionality with a few additional methods. It's important to note that by inheriting from `ophyd.signal`, these methods are already provided. However, their functionality needs to be ensured at the device level, particularly for devices with custom integration, and potentially override methods from `ophyd.signal`.
 
 * **limits -> tuple[float, float]**\
 Property that represents the limits of the signal and returns a tuple with high, low limits. 
-We note, high_limit == low_limit is equivalent to NO limits.
+We note, high_limit == low_limit is equivalent to no limits.
 
 * **high_limit -> float**\
 High limit property for the signal.
 
 * **low_limit -> float**\
 Low limit property for the signal.
-<!-- Is this device dependent whether limits can be set or not? - just curious, I guess if yes than this could be mentioned here. -->
 
 * **write_access -> bool**\
 Property which defines whether the signal can be written to.
@@ -105,34 +105,34 @@ Set method of signal. This typically calls `put` in a thread and returns an `oph
 
 ### Device
 
-Devices provide additional methods that become relevant for the scan interface within `BEC`.
-In `BEC`, scans usually follow a pattern of bootstrapping devices for the upcoming scan.
+Devices provide additional methods that become relevant for the scan interface within BEC.
+In BEC, scans usually follow a pattern of bootstrapping devices for the upcoming scan.
 The relevant methods are implemented through the interface provided here, i.e. again in analogy to the interface implemented for `ophyd.device`.
 
 * **_staged -> ophyd.Staged**\
-Instance attribute that indicates whether a device has been staged, and should return an `ophyd.Staged` state, i.e. `Staged.yes`, `Staged.no` or `Staged.partially`.
+Instance attribute that indicates whether a device has been staged, and should return an `ophyd.Staged` state, i.e. *Staged.yes*, *Staged.no* or *Staged.partially*.
 
 * **stage -> list[object]**\
 The stage method prepares the device for an upcoming acquisition.
 The method is idempotent, meaning it should raise if called twice without an `unstage` called in between. 
 If possible, we suggest the implementation of a bootstrap approach throughout this function where devices prepare themselves for an upcoming scan based on the metadata provided by the scan itself, i.e. *exposure time*, *number of images/frames* or *scantype==fly/step*.
 Stage will return a list of objects that were staged, i.e. itself -> `[self]`.
-We recommend to return super().stage() from the parent class if the parent is inherited from the Ophyd repository to ensure that all stage signals are properly set.
+We recommend to return `super().stage()` from the parent class if the parent is inherited from the Ophyd repository to ensure that all stage signals are properly set.
 
 * **unstage -> list[object]**\
 The unstage method should be used to cleanup the device after an acquisition.
 It should be possible to call unstage multiple times in a row, and it should resolve fast in case no acquisition took place.
 After an actual acquisition, unstage can be used to check whether the acquisition finished properly and potentially raise if not (i.e. logic to be discussed during device integration with BEC developer). 
-Again, we recommend to return super().unstage() from the parent class if inheritance from Ophyd is present.
+Again, we recommend to return `super().unstage()` from the parent class if inheritance from Ophyd is present.
 
 * **stop(success : bool) -> None**\
 Stop method of the device. The success flag should be used to indicate whether the device 
 has been successfully stopped.
-We recommend calling super().stop(success=success) if a class inherits from the Ophyd repository. Note, the stop call should also resolve whether a device is staged or not, i.e. call unstage of the device. Here, we see that additional instance attributes such as *_stopped* can be useful to handle internal logic of stage/unstage/stop.
+We recommend calling `super().stop(success=success)` if a class inherits from the Ophyd repository. Note, the stop call should also resolve whether a device is staged or not, i.e. call unstage of the device. Here, we see that additional instance attributes such as *_stopped* can be useful to handle internal logic of stage/unstage/stop.
 
 ### Positioner
 A simple example for a positioner is the implementation of a motor.
-Positioners extend the functionality of the devices, and mix in similar properties as seen for the signal. In addition, they need to implement a move method that executes the motion and provides feedback/updates to `BEC`. 
+Positioners extend the functionality of the devices, and mix in similar properties as seen for the signal. In addition, they need to implement a move method that executes the motion and provides feedback/updates to BEC. 
 Below is the functionality that is required to extend the methods of the device to comply with the interface of a positioner.
 
 * **limits -> tuple[float, float]**\
@@ -170,10 +170,10 @@ Upon calling this method, the flyer should start and return a status object that
 The complete method of a flyer returns a status object that should resolve once the flyer finishes its flying. It should be used to identify when a scan of the flyer is finished.
 
 * **configure(d : dict) -> None**\
-This method is optional, since its functionality can be similarly implemented in the stage command which is called by `BEC`, i.e. called in preparation for each scan. If implemented, it can be used through additional arguments within `kickoff` and will be called just before the latter.
+This method is optional, since its functionality can be similarly implemented in the stage command which is called by BEC, i.e. called in preparation for each scan. If implemented, it can be used through additional arguments within `kickoff` and called just before it.
 
 ## Ophyd device configuration
-Within BEC, representative devices and signals are created dynamically on the devices server, following the specifications given in the device configuration. 
+As mentioned before, BEC creates representative devices and signals dynamically on the devices server, following the specifications given in the device configuration. 
 As explained in the [device configuration](#developer.bec_config) section, the device configuration can be loaded from and stored to a yaml file and contains all necessary information about the devices. 
 
 An example of an ophyd device based on EPICS is a single PV, e.g. the synchrotron's ring current: 
