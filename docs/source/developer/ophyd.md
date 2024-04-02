@@ -14,6 +14,8 @@ Representative objects for different type of devices are created dynamically on 
 For the most simple case, a certain set of core methods and properties need to be implemented.
 Based on the type of device, BEC expects ophyd devices to provide certain functionality.
 Signal and Device are the most simple type of devices that are used within BEC.
+A signal has no sub-components, while a devices may contain sub-devices as well as sub-signals.
+Nevertheless, the interface provided by Ophyd allows both to share a similar interface. 
 Overall, BEC differentiates between `device`, `signal`, `positioner` and `flyer`.
 A diagram with the hierarchy of inheritance is shown below.
 
@@ -31,7 +33,7 @@ We note that by inheriting from Ophyd `Device`, `Signal` or a children class lik
 Property with name of the device; it will also be used for naming convention of signals from a device.
 
 * **kind -> int or ophyd.Kind**\
-Property for the kind ([ophyd.Kind](https://nsls-ii.github.io/ophyd/signals.html#kind)) of the device/signal.
+Property for the kind ([ophyd.Kind](https://nsls-ii.github.io/ophyd/signals.html#kind)) of the device or signal.
 
 * **parent -> object**\
 Property that points to the parent device.
@@ -40,8 +42,8 @@ Property that points to the parent device.
 Property that points to the root device.
 
 * **hints -> dict**\
-Property that returns a dictionary with hints for callback operations on the device.
-<!-- TODO this should be more specific, I don't quite know yet what this is used for by BEC. -->
+Property that returns a dictionary with hints for callback operations on the device. 
+The return dictionary lists all signals of type `kind.hinted` with the structure `{'fields' : ['signal_name', ...]}`.
 
 * **connected -> bool**\
 Property to check if a device or signal is connected (settable).
@@ -54,25 +56,24 @@ The destroy method should set this to True.
 Method to destroy the device. A destroyed device can not be reconnected, in addition, the instance attribute `_destroyed` must be set to `True`.
 
 * **read() -> dict**\
-Read method of the device which returns a nested dictionary with all signals of type `kind.normal` and `kind.hinted`. Example: {'signal_name': {'value': ..., "timestamp": ...}, ...}
+Read method of the device which returns a nested dictionary with all signals of type `kind.normal` and `kind.hinted`. Example: `{'signal_name': {'value': ..., "timestamp": ...}, ...}`
 
 * **read_configuration() -> dict**\
-Read configuration method of the device which returns a nested dictionary with all signals of type `kind.config`. Example: {'signal_name': {'value': ..., "timestamp": ...}, ...}
+Read configuration method of the device which returns a nested dictionary with all signals of type `kind.config`. Example: `{'signal_name': {'value': ..., "timestamp": ...}, ...}`
 
 * **describe() -> dict**\
-Describe method of the device which returns dictionary with signal descriptions of `kind.normal` and `kind.hinted`.
+Describe method of the device which returns a dictionary with signal descriptions of `kind.normal` and `kind.hinted`.
 The dictionary is composed of entries for each signal with additional information about *source*, *dtype* and *shape* of the signal's return value.
-<!-- TODO Check -->
+Example: `{'signal_name': {'source': ..., "dtype": ..., "shape" : ...}, ...}`
 
 * **describe_configuration() -> dict**\
 Similar like describe, but returns a dictionary with information about signals of type `kind.config`.
-Again, each entry relates to a signal with additional information about *source*, *dtype* and *shape*
 The same pattern as for describe applies.
-<!-- TODO Check -->
 
 * **trigger() -> ophyd.DeviceStatus**\
 Trigger the device and return an [ophyd.DeviceStatus](https://nsls-ii.github.io/ophyd/status.html?highlight=devicestatus#status-api-details) object, which is used to track the status of the trigger call.
-The status should resolve once the device has been triggered successfully, which means the `.set_finished()` method is called on the status object.
+The status should resolve once the device has been triggered successfully, which means the `.set_finished()` method has been called on the status object.
+
 
 ### Signal
 
@@ -103,10 +104,11 @@ Calls of put should be non-blocking, and if not force, it should check the reque
 * **set(value : any, force : bool=False, timeout : float=None) -> ophyd.Status**\
 Set method of signal. This typically calls `put` in a thread and returns an `ophyd.status` object that will resolve once the call return successfully. It can be made a blocking call by running `.wait()` on the status object.
 
+(developer.ophyd_devices.device)=
 ### Device
 
 Devices provide additional methods that become relevant for the scan interface within BEC.
-In BEC, scans usually follow a pattern of bootstrapping devices for the upcoming scan.
+Scans usually follow a pattern of bootstrapping devices using *stage* and *unstage* for the cleanup procedure.
 The relevant methods are implemented through the interface provided here, i.e. again in analogy to the interface implemented for `ophyd.device`.
 
 * **_staged -> ophyd.Staged**\
@@ -130,9 +132,17 @@ Stop method of the device. The success flag should be used to indicate whether t
 has been successfully stopped.
 We recommend calling `super().stop(success=success)` if a class inherits from the Ophyd repository. Note, the stop call should also resolve whether a device is staged or not, i.e. call unstage of the device. Here, we see that additional instance attributes such as *_stopped* can be useful to handle internal logic of stage/unstage/stop.
 
+* **configure(d:dict) -> dict**\
+The configure method accepts a dictionary with signal_name, value pairs to set signals on the device.
+In the upstream Ophyd repository, e.g. for `ophyd.device`, the method implements a way to set signals of *kind.config*. 
+
+* **summary() -> dict**\
+The summary method provides a string representation of the device. 
+This includes the different type of signals of the device.
+
 ### Positioner
 A simple example for a positioner is the implementation of a motor.
-Positioners extend the functionality of the devices, and mix in similar properties as seen for the signal. In addition, they need to implement a move method that executes the motion and provides feedback/updates to BEC. 
+Positioners extend the functionality of the [device](#developer.ophyd_devices.device), and mix in similar properties as seen for the signal. In addition, they need to implement a move method that executes the motion and provides feedback to BEC. 
 Below is the functionality that is required to extend the methods of the device to comply with the interface of a positioner.
 
 * **limits -> tuple[float, float]**\
@@ -154,23 +164,18 @@ Returns None, but should raise `LimitError` if the value is not within limits.
 Method to initiate a motion of the device. It should return a status object of type *DeviceStatus* that needs to resolve once the motion is finished. It should become a blocking call by calling `.wait()` on the status.
 
 * **set(value : float, timeout : float=None, move_cb : callable=None, wait : bool=False) -> ophyd.DeviceStatus**\
-With direct inheritance from `PositionerBase` from the upstream repository, the set method of a positioner is calling the move method. This behavior can be overridden by children.
-<!-- We need to review whether this method is required, or whether it would be sufficient to not discuss the method here in addition. -->
+With direct inheritance from `PositionerBase` from the upstream repository, the set method of a positioner is calling the move method. The behaviour can be overridden by children but a motion should be executed upon using set.
 
 ### Flyer
-Flyers extend the existing interface for scans with two required and one optional method compared to standard devices.
+Flyers extend the existing interface for [device](#developer.ophyd_devices.device) with two more methods.
 During a fly scan, the scan logic implemented on the scan server is more linked to the functionality of a device, i.e. continuous line scans.
-The additional methods are listed below; note, implementing *configure* is optional.
 
 * **kickoff() -> ophyd.DeviceStatus**\
-Kickoff method from the flyer. 
-Upon calling this method, the flyer should start and return a status object that is marked once the flyer flies, i.e. is ready to or already acquiring data.
+Upon calling kickoff, the flyer should start and return a status object that resolves once the flyer flies, i.e. is ready to or already acquiring data.
 
 * **complete() -> ophyd.DeviceStatus**\
-The complete method of a flyer returns a status object that should resolve once the flyer finishes its flying. It should be used to identify when a scan of the flyer is finished.
-
-* **configure(d : dict) -> None**\
-This method is optional, since its functionality can be similarly implemented in the stage command which is called by BEC, i.e. called in preparation for each scan. If implemented, it can be used through additional arguments within `kickoff` and called just before it.
+The complete method of the flyer returns a status object. 
+This status should resolve once the flyer finishes, thus, the method can be used to identify when a flyer is finished.
 
 ## Ophyd device configuration
 As mentioned before, BEC creates representative devices and signals dynamically on the devices server, following the specifications given in the device configuration. 
