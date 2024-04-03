@@ -1,0 +1,11 @@
+[project]
+name = "csaxs_plugin"
+version = "0.1"
+dependencies = [
+    "bec-lib",
+    "bec-client"
+]
+
+[project.entry-points.'bec.plugins']
+csaxs = 'bec_csaxs_plugin'
+

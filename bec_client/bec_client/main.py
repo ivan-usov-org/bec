@@ -1,6 +1,7 @@
 import argparse
 import sys
 from importlib.metadata import version
+from importlib.metadata import entry_points
 
 from IPython.terminal.ipapp import TerminalIPythonApp
 
@@ -11,11 +12,6 @@ from bec_lib import RedisConnector, ServiceConfig, bec_logger
 # pylint: disable=protected-access
 # pylint: disable=unused-import
 # pylint: disable=ungrouped-imports
-
-try:
-    from bec_plugins.bec_client import startup
-except ImportError:
-    startup = None
 
 try:
     from bec_widgets.cli import BECFigure
@@ -32,6 +28,16 @@ def main():
     parser.add_argument("--version", action="store_true", default=False)
     parser.add_argument("--nogui", action="store_true", default=False)
     parser.add_argument("--config", action="store", default=None)
+
+    # look for plugins, complete parser with extra args
+    discovered_plugins = entry_points(group='bec.plugins')
+    plugin_modules = []
+    for plugin in discovered_plugins:
+        print(f"Loading BEC plugin: {plugin.name}")
+        plugin_module = plugin.load()
+        plugin_modules.append(plugin_module)
+        plugin_module.extend_command_line_args(parser)
+
     args, left_args = parser.parse_known_args()
 
     # remove already parsed args from command line args
@@ -48,18 +54,7 @@ def main():
         print("Using config file: ", config_file)
         config = ServiceConfig(config_file)
 
-    if startup and "config" not in locals():
-        # check if pre-startup.py script exists
-        file_name = os.path.join(os.path.dirname(startup.__file__), "pre_startup.py")
-        if os.path.isfile(file_name):
-            with open(file_name, "r", encoding="utf-8") as file:
-                # exec the pre-startup.py script and pass the arguments
-                # pylint: disable=exec-used
-                exec(file.read(), globals(), locals())
-
-    # check if config was defined in pre-startup.py
-    if "config" not in locals():
-        config = ServiceConfig()
+    config = ServiceConfig()
 
     app = TerminalIPythonApp()
     app.interact = True
@@ -93,13 +88,9 @@ def main():
     bec._beamline_mixin._bl_info_register(SLSInfo)
     bec._beamline_mixin._bl_info_register(OperatorInfo)
 
-    if startup:
-        # check if post-startup.py script exists
-        file_name = os.path.join(os.path.dirname(startup.__file__), "post_startup.py")
-        if os.path.isfile(file_name):
-            with open(file_name, "r", encoding="utf-8") as file:
-                # pylint: disable=exec-used
-                exec(file.read())
+    # go through plugins and initialize those
+    for plugin in plugin_modules:
+        plugin.setup(parser)
 
     try:
         app.start()
