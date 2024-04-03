@@ -25,7 +25,10 @@ class FileWriterManagerMock(FileWriterManager):
         self.device_manager = device_manager
         config = ServiceConfig(
             redis={"host": "dummy", "port": 6379},
-            config={"file_writer": {"plugin": "default_NeXus_format", "base_path": "./"}},
+            config={
+                "file_writer": {"plugin": "default_NeXus_format", "base_path": "./"},
+                "log_writer": {"base_path": "./"},
+            },
         )
         super().__init__(config=config, connector_cls=ConnectorMock)
 
@@ -143,15 +146,6 @@ def test_write_file_invalid_scan_number():
         ) as mock_create_file_path:
             file_manager.write_file("scan_id")
             mock_create_file_path.assert_not_called()
-
-
-def test_create_file_path():
-    with file_writer_manager_mock() as file_manager:
-        file_manager.file_writer_config["base_path"] = "./"
-        file_path = file_manager.writer_mixin.compile_full_filename(
-            10, "master.h5", create_dir=False
-        )
-        assert file_path == os.path.abspath("./data/S00000-00999/S00010/S00010_master.h5")
 
 
 def test_write_file_raises_alarm_on_error():

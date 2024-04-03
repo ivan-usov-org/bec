@@ -18,6 +18,7 @@ import bec_lib
 from bec_lib import messages
 from bec_lib.bec_errors import DeviceConfigError
 from bec_lib.endpoints import MessageEndpoints
+from bec_lib.file_utils import DeviceConfigWriter
 from bec_lib.logger import bec_logger
 from bec_lib.messages import DeviceConfigMessage, RequestResponseMessage
 
@@ -28,9 +29,19 @@ logger = bec_logger.logger
 
 
 class ConfigHelper:
+    """Config Helper"""
+
     def __init__(self, connector: RedisConnector, service_name: str = None) -> None:
+        """Helper class for updating and saving the BEC device configuration.
+
+        Args:
+            connector (RedisConnector): Redis connector.
+            service_name (str, optional): Name of the service. Defaults to None.
+        """
         self.connector = connector
         self._service_name = service_name
+        self.writer_mixin = None
+        self._base_path_recovery = None
 
     def update_session_with_file(self, file_path: str, save_recovery: bool = True) -> None:
         """Update the current session with a yaml file from disk.
@@ -41,12 +52,28 @@ class ConfigHelper:
         """
         if save_recovery:
             time_stamp = f"{datetime.datetime.now():%Y-%m-%d_%H-%M-%S}"
-            fname = f"recovery_config_{time_stamp}.yaml"
+            if not self._base_path_recovery:
+                self._update_base_path_recovery()
+            if os.path.exists(self._base_path_recovery) is False:
+                self.writer_mixin.create_directory(self._base_path_recovery)
+            fname = os.path.join(self._base_path_recovery, f"recovery_config_{time_stamp}.yaml")
             success = self._save_config_to_file(fname, raise_on_error=False)
             if success:
                 print(f"A recovery config was written to {fname}.")
         config = self._load_config_from_file(file_path)
         self.send_config_request(action="set", config=config)
+
+    def _update_base_path_recovery(self):
+        """
+        Compile the filepath for the recovery configs.
+        """
+        # pylint: disable=import-outside-toplevel
+        from bec_lib.bec_service import SERVICE_CONFIG
+
+        service_cfg = SERVICE_CONFIG.config["service_config"]["log_writer"]
+        self.writer_mixin = DeviceConfigWriter(service_cfg)
+        self._base_path_recovery = self.writer_mixin.get_recovery_directory()
+        self.writer_mixin.create_directory(self._base_path_recovery)
 
     def _load_config_from_file(self, file_path: str) -> dict:
         data = {}

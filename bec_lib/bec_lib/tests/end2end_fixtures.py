@@ -1,3 +1,6 @@
+""" Fixtures for end-to-end tests """
+
+# pylint: skip-file
 import os
 import pathlib
 import platform
@@ -50,6 +53,8 @@ service_config:
   enforce_ACLs: False
   file_writer:
     plugin: default_NeXus_format
+    base_path: %(file_writer_base_path)s
+  log_writer:
     base_path: %(file_writer_base_path)s
 """
 

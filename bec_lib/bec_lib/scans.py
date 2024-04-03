@@ -57,15 +57,26 @@ class ScanObject:
             if sample_name is not None:
                 metadata["sample_name"] = sample_name
 
+        file_writer_data = self.client.file_writer_data.copy()
+
         if "md" in kwargs:
             metadata.update(kwargs["md"])
 
         if "file_suffix" in kwargs:
-            # ensure that file_suffix is only containing alphanumeric characters
             suffix = kwargs.pop("file_suffix")
-            if not suffix.isalnum() or not suffix.isascii():
+            # to check if suffix is alphanumeric and ascii, however we allow in addition - and _
+            check_suffix = suffix.replace("_", "").replace("-", "")
+            if not check_suffix.isalnum() or not check_suffix.isascii():
                 raise ValueError("file_suffix must only contain alphanumeric ASCII characters.")
-            metadata["file_suffix"] = suffix
+            file_writer_data["file_suffix"] = suffix
+        if "file_directory" in kwargs:
+            directory = kwargs.pop("file_directory")
+            check_directory = directory.replace("/", "").replace("_", "").replace("-", "")
+            if not check_directory.isalnum() or not check_directory.isascii():
+                raise ValueError("file_suffix must only contain alphanumeric ASCII characters.")
+            file_writer_data["file_directory"] = directory.strip("/")
+
+        metadata["file_writer_data"] = file_writer_data
 
         # pylint: disable=protected-access
         if scans._scan_group:
@@ -357,6 +368,33 @@ class DatasetIdOnHold(ContextDecorator):
         queue.next_dataset_number += 1
 
 
+class FileWriterData:
+    @typechecked
+    def __init__(self, file_writer_data: dict) -> None:
+        """Context manager for updating metadata
+
+        Args:
+            metadata (dict): Metadata dictionary
+        """
+        self.client = self._get_client()
+        self._file_writer_data = file_writer_data
+        self._orig_file_writer_data = None
+
+    def _get_client(self):
+        """Get BEC client"""
+        return builtins.__dict__["bec"]
+
+    def __enter__(self):
+        """Enter the context manager"""
+        self._orig_file_writer_data = self.client.file_writer_data.copy()
+        self.client.file_writer_data.update(self._file_writer_data)
+        return self
+
+    def exit(self, *exc):
+        """Exit the context manager"""
+        self.client.file_writer_data = self._orig_file_writer_data
+
+
 class Metadata:
     @typechecked
     def __init__(self, metadata: dict) -> None:
@@ -370,14 +408,17 @@ class Metadata:
         self._orig_metadata = None
 
     def _get_client(self):
+        """Get BEC client"""
         return builtins.__dict__["bec"]
 
     def __enter__(self):
+        """Enter the context manager"""
         self._orig_metadata = self.client.metadata.copy()
         self.client.metadata.update(self._metadata)
         return self
 
     def __exit__(self, *exc):
+        """Exit the context manager"""
         self.client.metadata = self._orig_metadata
 
 

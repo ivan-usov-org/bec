@@ -109,7 +109,10 @@ class BECService:
 
     def _initialize_logger(self) -> None:
         bec_logger.configure(
-            self.bootstrap_server, self._connector_cls, service_name=self.__class__.__name__
+            self.bootstrap_server,
+            self._connector_cls,
+            service_name=self.__class__.__name__,
+            service_config=self._service_config.config["service_config"],
         )
 
     def _update_existing_services(self):

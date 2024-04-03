@@ -31,6 +31,7 @@ def test_config_helper_update_session_with_file():
             config_helper, "_load_config_from_file"
         ) as mock_load_config_from_file:
             mock_load_config_from_file.return_value = {"test": "test"}
+            config_helper._base_path_recovery = "."
             config_helper.update_session_with_file("test.yaml")
             mock_send_config_request.assert_called_once_with(action="set", config={"test": "test"})
 

@@ -1,5 +1,6 @@
 import contextlib
 import os
+from pathlib import Path
 from unittest import mock
 
 import pytest
@@ -56,10 +57,7 @@ def test_init_runs_service_check():
     with mock.patch.object(
         BECService, "_update_existing_services", return_value=False
     ) as mock_update_existing_services:
-        with bec_service(
-            f"{dir_path}/tests/test_service_config.yaml",
-            unique_service=True,
-        ):
+        with bec_service(f"{dir_path}/tests/test_service_config.yaml", unique_service=True):
             mock_update_existing_services.assert_called_once()
 
 
@@ -68,8 +66,7 @@ def test_run_service_check_raises_for_existing_service():
         BECService, "_update_existing_services", return_value=False
     ) as mock_update_existing_services:
         with bec_service(
-            f"{dir_path}/tests/test_service_config.yaml",
-            unique_service=True,
+            f"{dir_path}/tests/test_service_config.yaml", unique_service=True
         ) as service:
             service._services_info = {"BECService": mock.MagicMock()}
             with pytest.raises(RuntimeError):
@@ -81,8 +78,7 @@ def test_run_service_check_repeats():
         BECService, "_update_existing_services", return_value=False
     ) as mock_update_existing_services:
         with bec_service(
-            f"{dir_path}/tests/test_service_config.yaml",
-            unique_service=True,
+            f"{dir_path}/tests/test_service_config.yaml", unique_service=True
         ) as service:
             service._services_info = {"BECService": mock.MagicMock()}
             assert service._run_service_check(timeout_time=0.5, elapsed_time=0) is True
@@ -93,8 +89,7 @@ def test_bec_service_service_status():
         BECService, "_update_existing_services", return_value=False
     ) as mock_update_existing_services:
         with bec_service(
-            f"{dir_path}/tests/test_service_config.yaml",
-            unique_service=True,
+            f"{dir_path}/tests/test_service_config.yaml", unique_service=True
         ) as service:
             mock_update_existing_services.reset_mock()
             status = service.service_status
@@ -139,3 +134,16 @@ def test_bec_service_update_existing_services_ignores_wrong_msgs():
         unique_service=True,
     ) as service:
         assert service._services_info == {"service1": service_msgs[0]}
+
+
+def test_bec_service_default_config():
+    with bec_service(
+        f"{os.path.dirname(bec_lib.__file__)}/tests/test_service_config.yaml", unique_service=True
+    ) as service:
+        assert service._service_config.service_config["file_writer"]["base_path"] == "./"
+
+    config = ServiceConfig(redis={"host": "localhost", "port": 6379})
+    with bec_service(config=config, unique_service=True) as service:
+        assert os.path.abspath(
+            service._service_config.service_config["file_writer"]["base_path"]
+        ) == str(Path(bec_lib.service_config.__file__).resolve().parent.parent.parent)

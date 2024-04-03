@@ -14,7 +14,7 @@ from bec_lib import (
 )
 from bec_lib.alarm_handler import Alarms
 from bec_lib.async_data import AsyncDataHandler
-from bec_lib.file_utils import FileWriterMixin
+from bec_lib.file_utils import FileWriter
 from bec_lib.redis_connector import MessageObject, RedisConnector
 from file_writer.file_writer import NexusFileWriter
 
@@ -77,7 +77,6 @@ class FileWriterManager(BECService):
         super().__init__(config, connector_cls, unique_service=True)
         self._lock = threading.RLock()
         self.file_writer_config = self._service_config.service_config.get("file_writer")
-        self.writer_mixin = FileWriterMixin(self.file_writer_config)
         self._start_device_manager()
         self.connector.register(
             patterns=MessageEndpoints.scan_segment(), cb=self._scan_segment_callback, parent=self
@@ -86,6 +85,9 @@ class FileWriterManager(BECService):
             MessageEndpoints.scan_status(), cb=self._scan_status_callback, parent=self
         )
         self.scan_storage = {}
+        self.writer_mixin = FileWriter(
+            service_config=self.file_writer_config, connector=self.connector
+        )
         self.file_writer = NexusFileWriter(self)
 
     def _start_device_manager(self):
@@ -280,14 +282,12 @@ class FileWriterManager(BECService):
         storage = self.scan_storage[scan_id]
         if storage.scan_number is None:
             return
-        scan = storage.scan_number
 
         file_path = ""
-        custom_suffix = storage.metadata.get("file_suffix")
-        file_suffix = f"master_{custom_suffix}.h5" if custom_suffix else "master.h5"
+        file_suffix = "master"
 
         try:
-            file_path = self.writer_mixin.compile_full_filename(scan, file_suffix)
+            file_path = self.writer_mixin.compile_full_filename(suffix=file_suffix)
             self.connector.set_and_publish(
                 MessageEndpoints.public_file(scan_id, "master"),
                 messages.FileMessage(file_path=file_path, done=False),

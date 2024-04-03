@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import enum
 import json
+import os
 import sys
 from typing import TYPE_CHECKING
 
@@ -16,12 +17,15 @@ from loguru import logger as loguru_logger
 # logger <-> messages circular import. But there could be a better solution.
 import bec_lib
 from bec_lib.endpoints import MessageEndpoints
+from bec_lib.file_utils import LogWriter
 
 if TYPE_CHECKING:
     from bec_lib.connector import ConnectorBase
 
 
 class LogLevel(int, enum.Enum):
+    """Mapping of Loguru log levels to BEC log levels."""
+
     TRACE = 5
     DEBUG = 10
     INFO = 20
@@ -33,6 +37,8 @@ class LogLevel(int, enum.Enum):
 
 
 class BECLogger:
+    """Logger for BEC."""
+
     DEBUG_FORMAT = (
         "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level}</level> |"
         " <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> -"
@@ -50,6 +56,8 @@ class BECLogger:
         self.bootstrap_server = None
         self.connector = None
         self.service_name = None
+        self.writer_mixin = None
+        self._base_path = None
         self.logger = loguru_logger
         self._log_level = LogLevel.INFO
         self.level = self._log_level
@@ -63,7 +71,11 @@ class BECLogger:
         return cls._logger
 
     def configure(
-        self, bootstrap_server: list, connector_cls: ConnectorBase, service_name: str
+        self,
+        bootstrap_server: list,
+        connector_cls: ConnectorBase,
+        service_name: str,
+        service_config: dict = None,
     ) -> None:
         """
         Configure the logger.
@@ -73,12 +85,28 @@ class BECLogger:
             connector_cls (ConnectorBase): Connector class.
             service_name (str): Name of the service to which the logger belongs.
         """
-
+        if not self._base_path:
+            self._update_base_path(service_config)
+        if os.path.exists(self._base_path) is False:
+            self.writer_mixin.create_directory(self._base_path)
         self.bootstrap_server = bootstrap_server
         self.connector = connector_cls(bootstrap_server)
         self.service_name = service_name
         self._configured = True
         self._update_sinks()
+
+    def _update_base_path(self, service_config: dict = None):
+        """
+        Compile the log base path.
+        """
+        # pylint: disable=import-outside-toplevel
+        if service_config:
+            service_cfg = service_config["log_writer"]
+        else:
+            service_cfg = {"base_path": "./"}
+        self.writer_mixin = LogWriter(service_cfg)
+        self._base_path = self.writer_mixin.directory
+        self.writer_mixin.create_directory(self._base_path)
 
     def _logger_callback(self, msg):
         if not self._configured:
@@ -141,9 +169,8 @@ class BECLogger:
         """
         if not self.service_name:
             return
-        self.logger.add(
-            f"{self.service_name}.log", level=level, format=self.format(level), enqueue=True
-        )
+        filename = os.path.join(self._base_path, f"{self.service_name}.log")
+        self.logger.add(filename, level=level, format=self.format(level), enqueue=True)
 
     def add_console_log(self):
         """
@@ -151,8 +178,9 @@ class BECLogger:
         """
         if not self.service_name:
             return
+        filename = os.path.join(self._base_path, f"{self.service_name}_CONSOLE.log")
         self.logger.add(
-            f"{self.service_name}_CONSOLE.log",
+            filename,
             level=LogLevel.CONSOLE_LOG,
             format=self.format(LogLevel.CONSOLE_LOG),
             filter=lambda record: record["level"].no == LogLevel.CONSOLE_LOG,

@@ -4,6 +4,7 @@ This module provides a class to handle the service configuration.
 
 import json
 import os
+from pathlib import Path
 
 import yaml
 
@@ -16,10 +17,18 @@ except ImportError:
 
 logger = bec_logger.logger
 
+DEFAULT_BASE_PATH = (
+    str(Path(__file__).resolve().parent.parent.parent) if "site-packages" not in __file__ else "./"
+)
+
 DEFAULT_SERVICE_CONFIG = {
     "redis": {"host": os.environ.get("BEC_REDIS_HOST", "localhost"), "port": 6379},
     "service_config": {
-        "file_writer": {"plugin": "default_NeXus_format", "base_path": os.path.dirname(__file__)}
+        "file_writer": {
+            "plugin": "default_NeXus_format",
+            "base_path": DEFAULT_BASE_PATH,
+        },
+        "log_writer": {"base_path": DEFAULT_BASE_PATH},
     },
 }
 
