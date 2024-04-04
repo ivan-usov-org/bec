@@ -1221,6 +1221,27 @@ class Flomni(
         self.client.set_global_var("fovy", val)
 
     @property
+    def tomo_type(self):
+        val = self.client.get_global_var("tomo_type")
+        if val is None:
+            return 1
+        return val
+
+    @tomo_type.setter
+    def tomo_type(self, val: float):
+        if val == 1:
+            # equally spaced tomography with 8 sub tomograms
+            self.client.set_global_var("tomo_type", val)
+        elif val == 2:
+            # golden ratio tomography (sorted bunches)
+            self.client.set_global_var("tomo_type", val)
+        elif val == 3:
+            # equally spaced tomography with starting angles shifted by golden ratio
+            self.client.set_global_var("tomo_type", val)
+        else:
+            raise ValueError("Unknown tomo_type.")
+
+    @property
     def corridor_size(self):
         val = self.client.get_global_var("corridor_size")
         if val is None:
@@ -1287,6 +1308,17 @@ class Flomni(
     @tomo_stitch_overlap.setter
     def tomo_stitch_overlap(self, val: float):
         self.client.set_global_var("tomo_stitch_overlap", val)
+
+    @property
+    def golden_ratio_bunch_size(self):
+        val = self.client.get_global_var("golden_ratio_bunch_size")
+        if val is None:
+            return 20
+        return val
+
+    @golden_ratio_bunch_size.setter
+    def golden_ratio_bunch_size(self, val: float):
+        self.client.set_global_var("golden_ratio_bunch_size", val)
 
     @property
     def sample_name(self):
@@ -1493,6 +1525,52 @@ class Flomni(
         self.tomo_scan_projection(angle)
         self.tomo_reconstruct()
 
+    def _golden(self, ii, howmany_sorted, maxangle):
+        """returns the iis golden ratio angle of sorted bunches of howmany_sorted and its subtomo number"""
+        golden = []
+        # occupy array with the range of golden angles
+        for iji in range(
+            (ii - (ii % howmany_sorted)), (ii - (ii % howmany_sorted)) + howmany_sorted, 1
+        ):
+            golden.append(
+                ((iji * maxangle * (1 + pow(5, 0.5)) / 2) * 1000 % (maxangle * 1000)) / 1000
+            )
+        golden.sort()
+        subtomo_number = int(ii / howmany_sorted) + 1
+        return (golden[ii % howmany_sorted], subtomo_number)
+
+    def _golden_equally_spaced(
+        self, ii, number_of_projections_per_subtomo, maxangle, reverse, verbose
+    ):
+        """returns angles for equally spaced tomography with strting angles of sub tomograms shifted according to golden ratio"""
+        """ii is projection number starting at 1, reverse will execute the even sub tomograms in reverse direction"""
+        # ii is projection number starting at 1
+        angular_step = maxangle / number_of_projections_per_subtomo
+        subtomo_number = int(((ii - 1) * angular_step) / maxangle) + 1
+        start_angle = self._golden(subtomo_number - 1, 1, angular_step)
+        projection_number_of_subtomo = (
+            ii - (subtomo_number - 1) * number_of_projections_per_subtomo
+        ) - 1
+
+        if reverse:
+            if subtomo_number % 2:
+                angle = start_angle[0] + projection_number_of_subtomo * angular_step
+            else:
+                angle = (
+                    start_angle[0]
+                    + (number_of_projections_per_subtomo - 1) * angular_step
+                    - projection_number_of_subtomo * angular_step
+                )
+        else:
+            angle = start_angle[0] + projection_number_of_subtomo * angular_step
+
+        if verbose:
+            print(
+                f"Equally spaced golden ratio tomography.\nAngular step: {angular_step}\nSubtomo Number: {subtomo_number}\nAngle: {angle}"
+            )
+
+        return angle
+
     def tomo_reconstruct(self, base_path="~/Data10/specES1"):
         """write the tomo reconstruct file for the reconstruction queue"""
         bec = builtins.__dict__.get("bec")
@@ -1578,13 +1656,25 @@ class Flomni(
         print(f"Stitching overlap                =  {self.tomo_stitch_overlap}")
         print(f"Reconstruction queue name        =  {self.ptycho_reconstruct_foldername}")
         print(f"   _manual_shift_y         <mm>  =  {self.manual_shift_y}")
-        print(f"Angular step within sub-tomogram:   {self.tomo_angle_stepsize} degrees")
-        print(f"Resulting in number of projections: {180/self.tomo_angle_stepsize*8}")
-        print(f"Sample name: {self.sample_name}\n")
+        print("")
+        if self.tomo_type == 1:
+            print("\x1b[1mTomo type 1:\x1b[0m 8 equally spaced sub-tomograms")
+            print(f"Total number of projections: {180/self.tomo_angle_stepsize*8}")
+            print(f"Angular step within sub-tomogram:   {self.tomo_angle_stepsize} degrees")
+        if self.tomo_type == 2:
+            print("\x1b[1mTomo type 2:\x1b[0m Golden ratio tomography")
+            print(f"Sorted in bunches of: {self.golden_ratio_bunch_size}")
+        if self.tomo_type == 3:
+            print(
+                "\x1b[1mTomo type 3:\x1b[0m Equally spaced tomography, golden ratio starting angle"
+            )
+            print(f"Number of projections per sub-tomogram: {180/self.tomo_angle_stepsize}")
+            print(f"Angular step within sub-tomogram:    {self.tomo_angle_stepsize} degrees")
+        print(f"\nSample name: {self.sample_name}\n")
 
         user_input = input("Are these parameters correctly set for your scan? [Y/n]")
         if user_input == "y" or user_input == "":
-            print("good then")
+            print("... excellent!")
         else:
             self.tomo_countingtime = self._get_val("<ctime> s", self.tomo_countingtime, float)
             self.tomo_shellstep = self._get_val("<step size> um", self.tomo_shellstep, float)
@@ -1595,13 +1685,34 @@ class Flomni(
             self.ptycho_reconstruct_foldername = self._get_val(
                 "Reconstruction queue ", self.ptycho_reconstruct_foldername, str
             )
-            tomo_numberofprojections = self._get_val(
-                "Number of projections", 180 / self.tomo_angle_stepsize * 8, int
-            )
 
-            print(f"The angular step will be {180/tomo_numberofprojections}")
-            self.tomo_angle_stepsize = 180 / tomo_numberofprojections * 8
-            print(f"The angular step in a subtomogram it will be {self.tomo_angle_stepsize}")
+            print("Tomography type:")
+            print("  1: 8 equally spaced sub-tomograms")
+            print("  2: Golden ratio tomography")
+            print("  3: Equally spaced tomography, golden ratio starting angle")
+            self.tomo_type = self._get_val("Tomography type", self.tomo_type, int)
+
+            if self.tomo_type == 1:
+                tomo_numberofprojections = self._get_val(
+                    "Total number of projections", 180 / self.tomo_angle_stepsize * 8, int
+                )
+                print(f"The angular step will be {180/tomo_numberofprojections}")
+                self.tomo_angle_stepsize = 180 / tomo_numberofprojections * 8
+                print(f"The angular step in a subtomogram it will be {self.tomo_angle_stepsize}")
+
+            if self.tomo_type == 2:
+                self.golden_ratio_bunch_size = self._get_val(
+                    "Number of projections sorted per bunch (default 20)",
+                    self.golden_ratio_bunch_size,
+                    int,
+                )
+            if self.tomo_type == 3:
+                numprj = self._get_val(
+                    "Number of projections per sub-tomogram",
+                    int(180 / self.tomo_angle_stepsize),
+                    int,
+                )
+                self.tomo_angle_stepsize = 180 / numprj
 
     @staticmethod
     def _get_val(msg: str, default_value, data_type):
