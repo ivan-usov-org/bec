@@ -2,6 +2,22 @@
 
 <!--next-version-placeholder-->
 
+## v1.22.1 (2024-04-04)
+
+### Fix
+
+* **bec_client:** Unnecessary complex exit thread ([`9377a84`](https://gitlab.psi.ch/bec/bec/-/commit/9377a84f8b3e3ffc70bd81a08878d634a4f63db7))
+
+### Documentation
+
+* Refactor summary, configure in docs ([`536f2ef`](https://gitlab.psi.ch/bec/bec/-/commit/536f2efc0cbc9e877dfc6c908e413910e5460cb8))
+* Adapt user installation; closes #246 ([`e669252`](https://gitlab.psi.ch/bec/bec/-/commit/e6692524136595ed20640db49db4420278e3d5cc))
+* Fix wording ([`8dd3ee0`](https://gitlab.psi.ch/bec/bec/-/commit/8dd3ee0946728fe394e8863d04934d70c1e96ba7))
+* Address comments ([`2de2e1b`](https://gitlab.psi.ch/bec/bec/-/commit/2de2e1b4bc5fb4cd3060e082fd641dc1c9cafb74))
+* Update documentation about ophyd devices ([`04b3bb0`](https://gitlab.psi.ch/bec/bec/-/commit/04b3bb03b9c9697217e7b2fa703581a29a8b61f4))
+* Add documentation for pytest fixtures provided as pytest plugins ([`4b3851e`](https://gitlab.psi.ch/bec/bec/-/commit/4b3851e2825c5676e6ae8cdf4334296a69546d02))
+* Added isort to developer instructions ([`720e3c3`](https://gitlab.psi.ch/bec/bec/-/commit/720e3c39eec764824efe5e30edebd449fab1e92d))
+
 ## v1.22.0 (2024-03-28)
 
 ### Feature
