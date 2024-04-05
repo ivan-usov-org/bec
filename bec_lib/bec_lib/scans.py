@@ -203,7 +203,7 @@ class Scans:
             TypeError: Raised if an argument is not of the required type as specified in scan_info.
 
         Returns:
-            messages.ScanQueueMessage: _description_
+            messages.ScanQueueMessage: scan request message
         """
         arg_input = list(scan_info.get("arg_input", {}).values())
 
@@ -220,6 +220,17 @@ class Scans:
                     f"{scan_info.get('doc')}\n Not all required keyword arguments have been"
                     f" specified. The required arguments are: {scan_info.get('required_kwargs')}"
                 )
+            # check that all specified devices in args are different objects
+            for arg in args:
+                if not isinstance(arg, DeviceBase):
+                    continue
+                if args.count(arg) > 1:
+                    raise TypeError(
+                        f"{scan_info.get('doc')}\n All specified devices must be different"
+                        f" objects."
+                    )
+
+            # check that all arguments are of the correct type
             for ii, arg in enumerate(args):
                 if not isinstance(arg, Scans.get_arg_type(arg_input[ii % len(arg_input)])):
                     raise TypeError(
