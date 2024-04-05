@@ -414,13 +414,14 @@ class FlomniSampleTransferMixin:
 
     def laser_tracker_on(self):
         dev.rtx.controller.laser_tracker_on()
-        time.sleep(.2)
+        time.sleep(0.2)
         signal = dev.rtx.controller.read_ssi_interferometer(1)
         if signal < 10000:
             time.sleep(1)
             if signal < 10000:
                 print("\x1b[91mThe signal of the tracker is low. Please readjust!\x1b[0m")
-    #change hard coded number to a user parameter!
+
+    # change hard coded number to a user parameter!
 
     def laser_tracker_off(self):
         dev.rtx.controller.laser_tracker_off()
@@ -1415,8 +1416,7 @@ class Flomni(
 
         umv(dev.fsamroy, 0)
 
-
-    def _write_subtomo_to_scilog(self,subtomo_number):
+    def _write_subtomo_to_scilog(self, subtomo_number):
         dev = builtins.__dict__.get("dev")
         bec = builtins.__dict__.get("bec")
         if self.tomo_id > 0:
@@ -1435,19 +1435,18 @@ class Flomni(
             subtomo_number (int): The sub tomogram number.
             start_angle (float, optional): The start angle of the scan. Defaults to None.
         """
-#        dev = builtins.__dict__.get("dev")
-#        bec = builtins.__dict__.get("bec")
-#        if self.tomo_id > 0:
-#            tags = ["BEC_subtomo", self.sample_name, f"tomo_id_{self.tomo_id}"]
-#        else:
-#            tags = ["BEC_subtomo", self.sample_name]
-#        self.write_to_scilog(
-#            f"Starting subtomo: {subtomo_number}. First scan number: {bec.queue.next_scan_number}.",
-#            tags,
-#        )
+        #        dev = builtins.__dict__.get("dev")
+        #        bec = builtins.__dict__.get("bec")
+        #        if self.tomo_id > 0:
+        #            tags = ["BEC_subtomo", self.sample_name, f"tomo_id_{self.tomo_id}"]
+        #        else:
+        #            tags = ["BEC_subtomo", self.sample_name]
+        #        self.write_to_scilog(
+        #            f"Starting subtomo: {subtomo_number}. First scan number: {bec.queue.next_scan_number}.",
+        #            tags,
+        #        )
 
         self._write_subtomo_to_scilog(subtomo_number)
-
 
         if start_angle is None:
             if subtomo_number == 1:
@@ -1477,12 +1476,12 @@ class Flomni(
             endpoint=True,
         )
         # reverse even sub-tomograms
-        if not (subtomo_number%2):
-            angles=np.flip(angles)
+        if not (subtomo_number % 2):
+            angles = np.flip(angles)
         for angle in angles:
-            self._tomo_scan_at_angle(angle,subtomo_number)
-            
-    def _tomo_scan_at_angle(self,angle,subtomo_number):
+            self._tomo_scan_at_angle(angle, subtomo_number)
+
+    def _tomo_scan_at_angle(self, angle, subtomo_number):
         successful = False
         error_caught = False
         if 0 <= angle < 180.05:
@@ -1542,48 +1541,59 @@ class Flomni(
                 self.tomo_id = 0
         with scans.dataset_id_on_hold:
             if self.tomo_type == 1:
-                #8 equally spaced sub-tomograms
+                # 8 equally spaced sub-tomograms
                 for ii in range(subtomo_start, 9):
                     self.sub_tomo_scan(ii, start_angle=start_angle)
                     start_angle = None
 
             elif self.tomo_type == 2:
-                #Golden ratio tomography
+                # Golden ratio tomography
                 previous_subtomo_number = -1
                 if projection_number == None:
                     ii = 0
                 else:
                     ii = projection_number
                 while True:
-                    angle,subtomo_number = self._golden(ii, self.golden_ratio_bunch_size, 180,1)
+                    angle, subtomo_number = self._golden(ii, self.golden_ratio_bunch_size, 180, 1)
                     if previous_subtomo_number != subtomo_number:
                         self._write_subtomo_to_scilog(subtomo_number)
                         previous_subtomo_number = subtomo_number
-                    self._tomo_scan_at_angle(angle,subtomo_number)
+                    self._tomo_scan_at_angle(angle, subtomo_number)
                     ii += 1
-                    if ii > self.golden_max_number_of_projections and self.golden_max_number_of_projections > 0:
-                        print(f"Golden ratio tomography stopped automatically after the requested {self.golden_max_number_of_projections} projections")
+                    if (
+                        ii > self.golden_max_number_of_projections
+                        and self.golden_max_number_of_projections > 0
+                    ):
+                        print(
+                            f"Golden ratio tomography stopped automatically after the requested {self.golden_max_number_of_projections} projections"
+                        )
                         break
             elif self.tomo_type == 3:
-                #Equally spaced tomography, golden ratio starting angle
+                # Equally spaced tomography, golden ratio starting angle
                 previous_subtomo_number = -1
                 if projection_number == None:
                     ii = 0
                 else:
                     ii = projection_number
                 while True:
-                    angle,subtomo_number = self._golden_equally_spaced(ii, int(180/self.tomo_angle_stepsize), 180, 1, 0)
+                    angle, subtomo_number = self._golden_equally_spaced(
+                        ii, int(180 / self.tomo_angle_stepsize), 180, 1, 0
+                    )
                     if previous_subtomo_number != subtomo_number:
                         self._write_subtomo_to_scilog(subtomo_number)
                         previous_subtomo_number = subtomo_number
-                    self._tomo_scan_at_angle(angle,subtomo_number)
+                    self._tomo_scan_at_angle(angle, subtomo_number)
                     ii += 1
-                    if ii > self.golden_max_number_of_projections and self.golden_max_number_of_projections>0:
-                        print(f"Golden ratio tomography stopped automatically after the requested {self.golden_max_number_of_projections} projections")
+                    if (
+                        ii > self.golden_max_number_of_projections
+                        and self.golden_max_number_of_projections > 0
+                    ):
+                        print(
+                            f"Golden ratio tomography stopped automatically after the requested {self.golden_max_number_of_projections} projections"
+                        )
                         break
             else:
                 raise FlomniError("undefined tomo type")
-
 
     def add_sample_database(
         self, samplename, date, eaccount, scan_number, setup, sample_additional_info, user
@@ -1618,10 +1628,9 @@ class Flomni(
             )
         golden.sort()
         subtomo_number = int(ii / howmany_sorted) + 1
-        if reverse and not subtomo_number%2:
+        if reverse and not subtomo_number % 2:
             golden.reverse()
         return (golden[ii % howmany_sorted], subtomo_number)
-    
 
     def _golden_equally_spaced(
         self, ii, number_of_projections_per_subtomo, maxangle, reverse, verbose
@@ -1653,7 +1662,7 @@ class Flomni(
                 f"Equally spaced golden ratio tomography.\nAngular step: {angular_step}\nSubtomo Number: {subtomo_number}\nAngle: {angle}"
             )
 
-        return angle,subtomo_number
+        return angle, subtomo_number
 
     def tomo_reconstruct(self, base_path="~/Data10/specES1"):
         """write the tomo reconstruct file for the reconstruction queue"""
