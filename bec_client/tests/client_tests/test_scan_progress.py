@@ -30,21 +30,6 @@ def test_update_progressbar_continues_when_scan_id_doesnt_match():
     assert res is False
 
 
-def test_update_progressbar_continues_when_msg_specifies_no_value():
-    bec = mock.MagicMock()
-    request = mock.MagicMock()
-    live_update = LiveUpdatesScanProgress(bec=bec, report_instruction={}, request=request)
-    progressbar = mock.MagicMock()
-    live_update.scan_item = mock.MagicMock()
-    live_update.scan_item.scan_id = "scan_id"
-
-    bec.connector.get.return_value = messages.ProgressMessage(
-        value=None, max_value=None, done=None, metadata={"scan_id": "scan_id"}
-    )
-    res = live_update._update_progressbar(progressbar, "async_dev1")
-    assert res is False
-
-
 def test_update_progressbar_updates_max_value():
     bec = mock.MagicMock()
     request = mock.MagicMock()

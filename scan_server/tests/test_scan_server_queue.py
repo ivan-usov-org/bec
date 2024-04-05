@@ -71,7 +71,7 @@ def test_queuemanager_queue_inits_without_queues(queuemanager_mock):
     assert len(queue_manager.queues) == 0
 
 
-@pytest.mark.parametrize("queue", [("primary",), ("alignment",)])
+@pytest.mark.parametrize("queue", ["primary", "alignment"])
 def test_queuemanager_add_to_queue(queuemanager_mock, queue):
     queue_manager = queuemanager_mock()
     msg = messages.ScanQueueMessage(

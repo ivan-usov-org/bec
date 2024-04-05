@@ -1,8 +1,10 @@
 from dataclasses import dataclass, field
+from typing import ClassVar
 from unittest import mock
 
 import pytest
 import redis
+from pydantic import Field
 
 import bec_lib.messages as bec_messages
 from bec_lib.alarm_handler import Alarms
@@ -17,15 +19,10 @@ from bec_lib.serialization import MsgpackSerialization
 # pylint: disable=redefined-outer-name
 
 
-@dataclass(eq=False)
 class TestMessage(BECMessage):
-    __test__ = False  # just for pytest to ignore this class
-    msg_type = "test_message"
+    __test__: ClassVar[bool] = False  # just for pytest to ignore this class
+    msg_type: ClassVar[str] = "test_message"
     msg: str
-    # have to add this field here,
-    # could be inherited but it requires Python 3.10
-    # and 'kw_only=True'
-    metadata: dict = field(default_factory=lambda: {})
 
 
 # register at BEC messages module level, to be able to
@@ -70,9 +67,9 @@ def test_redis_connector_log_error(connector):
 @pytest.mark.parametrize(
     "severity, alarm_type, source, msg, metadata",
     [
-        [Alarms.MAJOR, "alarm", "source", "content1", {"metadata": "metadata1"}],
-        [Alarms.MINOR, "alarm", "source", "content1", {"metadata": "metadata1"}],
-        [Alarms.WARNING, "alarm", "source", "content1", {"metadata": "metadata1"}],
+        [Alarms.MAJOR, "alarm", {"source": "test"}, "content1", {"metadata": "metadata1"}],
+        [Alarms.MINOR, "alarm", {"source": "test"}, "content1", {"metadata": "metadata1"}],
+        [Alarms.WARNING, "alarm", {"source": "test"}, "content1", {"metadata": "metadata1"}],
     ],
 )
 def test_redis_connector_raise_alarm(connector, severity, alarm_type, source, msg, metadata):
@@ -90,8 +87,8 @@ def test_redis_connector_raise_alarm(connector, severity, alarm_type, source, ms
 @pytest.mark.parametrize(
     "topic , msg",
     [
-        ["topic1", TestMessage("msg1")],
-        ["topic2", TestMessage("msg2")],
+        ["topic1", TestMessage(msg="msg1")],
+        ["topic2", TestMessage(msg="msg2")],
         [
             MessageEndpoints.scan_segment(),
             bec_messages.ScanMessage(point_id=1, scan_id="scan_id", data={}),
@@ -132,9 +129,9 @@ def test_redis_connector_lpush(connector, topic, msgs, max_size, expire):
 @pytest.mark.parametrize(
     "topic, msgs, max_size, expire",
     [
-        ["topic1", TestMessage("msgs"), None, None],
-        ["topic1", TestMessage("msgs"), 10, None],
-        ["topic1", TestMessage("msgs"), None, 100],
+        ["topic1", TestMessage(msg="msgs"), None, None],
+        ["topic1", TestMessage(msg="msgs"), 10, None],
+        ["topic1", TestMessage(msg="msgs"), None, 100],
     ],
 )
 def test_redis_connector_lpush_BECMessage(connector, topic, msgs, max_size, expire):
@@ -171,7 +168,7 @@ def test_redis_connector_lset(connector, topic, index, msgs, use_pipe):
 
 @pytest.mark.parametrize(
     "topic , index , msgs, use_pipe",
-    [["topic1", 1, TestMessage("msg1"), True], ["topic2", 4, TestMessage("msg2"), False]],
+    [["topic1", 1, TestMessage(msg="msg1"), True], ["topic2", 4, TestMessage(msg="msg2"), False]],
 )
 def test_redis_connector_lset_BECMessage(connector, topic, index, msgs, use_pipe):
     pipe = use_pipe_fcn(connector, use_pipe)
@@ -208,7 +205,7 @@ def test_redis_connector_rpush(connector, topic, msgs, use_pipe):
 
 @pytest.mark.parametrize(
     "topic, msgs, use_pipe",
-    [["topic1", TestMessage("msg1"), True], ["topic2", TestMessage("msg2"), False]],
+    [["topic1", TestMessage(msg="msg1"), True], ["topic2", TestMessage(msg="msg2"), False]],
 )
 def test_redis_connector_rpush_BECMessage(connector, topic, msgs, use_pipe):
     pipe = use_pipe_fcn(connector, use_pipe)
@@ -244,8 +241,8 @@ def test_redis_connector_lrange(connector, topic, start, end, use_pipe):
 @pytest.mark.parametrize(
     "topic, msg, pipe, expire",
     [
-        ["topic1", TestMessage("msg1"), None, 400],
-        ["topic2", TestMessage("msg2"), None, None],
+        ["topic1", TestMessage(msg="msg1"), None, 400],
+        ["topic2", TestMessage(msg="msg2"), None, None],
         ["topic3", "msg3", None, None],
     ],
 )

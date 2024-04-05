@@ -158,7 +158,7 @@ def test_emit_status():
     scan_item.bec = mock.Mock()
     scan_item.bec.callbacks = mock.Mock()
     scan_item._run_request_callbacks = mock.Mock()
-    msg = messages.ScanStatusMessage(scan_id="scan_id", status="status", info={"info": "info"})
+    msg = messages.ScanStatusMessage(scan_id="scan_id", status="open", info={"info": "info"})
     scan_item.emit_status(msg)
     scan_item.bec.callbacks.run.assert_called_once_with("scan_status", msg.content, msg.metadata)
     scan_item._run_request_callbacks.assert_called_once_with(

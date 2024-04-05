@@ -66,7 +66,7 @@ def test_DAPServiceManager_init(service_manager):
     "msg, process_called",
     [
         (messages.DAPRequestMessage(dap_cls="dap_cls", dap_type="on_demand", config={}), True),
-        (messages.ScanStatusMessage(scan_id="scan_id", status={}, info={}), False),
+        (messages.ScanStatusMessage(scan_id="scan_id", status="open", info={}), False),
     ],
 )
 def test_DAPServiceManager_request_callback(service_manager, msg, process_called):
@@ -100,11 +100,6 @@ def test_DAPServiceManager_request_callback(service_manager, msg, process_called
             messages.DAPRequestMessage(dap_cls="ServiceMock", dap_type="on_demand", config={}),
             False,
             "",
-        ),
-        (
-            messages.DAPRequestMessage(dap_cls="ServiceMock", dap_type="unknown", config={}),
-            True,
-            "Unknown dap type unknown",
         ),
     ],
 )

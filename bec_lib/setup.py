@@ -22,6 +22,7 @@ if __name__ == "__main__":
             "fpdf",
             "fastjsonschema",
             "lmfit",
+            "pydantic~=2.0",
         ],
         extras_require={
             "dev": [
@@ -31,7 +32,7 @@ if __name__ == "__main__":
                 "pytest-timeout",
                 "coverage",
                 "pandas",
-                "black",
+                "black~=24.0",
                 "isort",
                 "pylint",
                 "fakeredis",

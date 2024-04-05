@@ -42,7 +42,7 @@ def run_install(setup_args: dict, bec_deps: list, editable=False):
 if __name__ == "__main__":
     setup_args_in = {
         "entry_points": {"console_scripts": ["bec-scan-server = scan_server:main"]},
-        "install_requires": ["numpy", "msgpack", "pyyaml", "cytoolz", "rich"],
+        "install_requires": ["numpy", "msgpack", "pyyaml", "cytoolz", "rich", "pydantic"],
         "version": __version__,
         "extras_require": {
             "dev": ["pytest", "pytest-random-order", "coverage", "black", "isort", "pylint"]

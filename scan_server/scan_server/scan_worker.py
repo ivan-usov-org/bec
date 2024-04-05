@@ -761,7 +761,7 @@ class ScanWorker(threading.Thread):
             logger.error(content)
             self.connector.raise_alarm(
                 severity=Alarms.MAJOR,
-                source="ScanWorker",
+                source={"ScanWorker": "_process_instructions"},
                 msg=content,
                 alarm_type=exc.__class__.__name__,
                 metadata={},
@@ -872,7 +872,7 @@ class ScanWorker(threading.Thread):
             logger.error(content)
             self.connector.raise_alarm(
                 severity=Alarms.MAJOR,
-                source="ScanWorker",
+                source={"ScanWorker": "run"},
                 msg=content,
                 alarm_type=exc.__class__.__name__,
                 metadata={},

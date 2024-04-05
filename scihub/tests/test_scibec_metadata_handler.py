@@ -16,7 +16,7 @@ def md_handler():
 
 def test_handle_scan_status(md_handler):
     # pylint: disable=protected-access
-    msg = messages.ScanStatusMessage(scan_id="scan_id", status={}, info={})
+    msg = messages.ScanStatusMessage(scan_id="scan_id", status="open", info={})
     with mock.patch.object(md_handler, "update_scan_status") as mock_update_scan_status:
         md_handler._handle_scan_status(
             MessageObject(value=msg, topic="scan_status"), parent=md_handler
@@ -26,7 +26,7 @@ def test_handle_scan_status(md_handler):
 
 def test_handle_scan_status_ignores_errors(md_handler):
     # pylint: disable=protected-access
-    msg = messages.ScanStatusMessage(scan_id="scan_id", status={}, info={})
+    msg = messages.ScanStatusMessage(scan_id="scan_id", status="open", info={})
     with mock.patch("scihub.scibec.scibec_metadata_handler.logger") as mock_logger:
         with mock.patch.object(md_handler, "update_scan_status") as mock_update_scan_status:
             mock_update_scan_status.side_effect = Exception("test")
@@ -41,14 +41,14 @@ def test_handle_scan_status_ignores_errors(md_handler):
 
 def test_update_scan_status_returns_without_scibec(md_handler):
     # pylint: disable=protected-access
-    msg = messages.ScanStatusMessage(scan_id="scan_id", status={}, info={})
+    msg = messages.ScanStatusMessage(scan_id="scan_id", status="open", info={})
     md_handler.scibec_connector.scibec = None
     md_handler.update_scan_status(msg)
 
 
 def test_update_scan_status(md_handler):
     # pylint: disable=protected-access
-    msg = messages.ScanStatusMessage(scan_id="scan_id", status={}, info={"dataset_number": 12})
+    msg = messages.ScanStatusMessage(scan_id="scan_id", status="open", info={"dataset_number": 12})
     scibec = mock.Mock()
     md_handler.scibec_connector.scibec = scibec
     scibec_info = {

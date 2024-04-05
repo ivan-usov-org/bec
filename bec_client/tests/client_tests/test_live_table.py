@@ -27,7 +27,7 @@ def client_with_grid_scan(bec_client_mock):
 def test_scan_request_mixin(client_with_grid_scan):
     client, request_msg = client_with_grid_scan
     response_msg = messages.RequestResponseMessage(
-        accepted=True, message="", metadata={"RID": "something"}
+        accepted=True, message={"msg": ""}, metadata={"RID": "something"}
     )
     request_mixin = ScanRequestMixin(client, "something")
 
@@ -86,7 +86,7 @@ def test_get_devices_from_scan_data(bec_client_mock, request_msg, scan_report_de
 def test_wait_for_request_acceptance(client_with_grid_scan):
     client, request_msg = client_with_grid_scan
     response_msg = messages.RequestResponseMessage(
-        accepted=True, message="", metadata={"RID": "something"}
+        accepted=True, message={"msg": ""}, metadata={"RID": "something"}
     )
     client.queue.request_storage.update_with_request(request_msg)
     client.queue.request_storage.update_with_response(response_msg)
@@ -104,7 +104,7 @@ class ScanItemMock:
 def test_print_table_data(client_with_grid_scan):
     client, request_msg = client_with_grid_scan
     response_msg = messages.RequestResponseMessage(
-        accepted=True, message="", metadata={"RID": "something"}
+        accepted=True, message={"msg": ""}, metadata={"RID": "something"}
     )
     client.queue.request_storage.update_with_request(request_msg)
     client.queue.request_storage.update_with_response(response_msg)
@@ -123,7 +123,7 @@ def test_print_table_data(client_with_grid_scan):
 def test_print_table_data_lamni_flyer(client_with_grid_scan):
     client, request_msg = client_with_grid_scan
     response_msg = messages.RequestResponseMessage(
-        accepted=True, message="", metadata={"RID": "something"}
+        accepted=True, message={"msg": ""}, metadata={"RID": "something"}
     )
     client.queue.request_storage.update_with_request(request_msg)
     client.queue.request_storage.update_with_response(response_msg)
@@ -142,7 +142,7 @@ def test_print_table_data_lamni_flyer(client_with_grid_scan):
 def test_print_table_data_hinted_value(client_with_grid_scan):
     client, request_msg = client_with_grid_scan
     response_msg = messages.RequestResponseMessage(
-        accepted=True, message="", metadata={"RID": "something"}
+        accepted=True, message={"msg": ""}, metadata={"RID": "something"}
     )
     client.queue.request_storage.update_with_request(request_msg)
     client.queue.request_storage.update_with_response(response_msg)
@@ -166,7 +166,7 @@ def test_print_table_data_hinted_value(client_with_grid_scan):
 def test_print_table_data_hinted_value_with_precision(client_with_grid_scan):
     client, request_msg = client_with_grid_scan
     response_msg = messages.RequestResponseMessage(
-        accepted=True, message="", metadata={"RID": "something"}
+        accepted=True, message={"msg": ""}, metadata={"RID": "something"}
     )
     client.queue.request_storage.update_with_request(request_msg)
     client.queue.request_storage.update_with_response(response_msg)
@@ -208,7 +208,7 @@ def test_print_table_data_hinted_value_with_precision(client_with_grid_scan):
 def test_print_table_data_variants(client_with_grid_scan, value, expected):
     client, request_msg = client_with_grid_scan
     response_msg = messages.RequestResponseMessage(
-        accepted=True, message="", metadata={"RID": "something"}
+        accepted=True, message={"msg": ""}, metadata={"RID": "something"}
     )
     client.queue.request_storage.update_with_request(request_msg)
     client.queue.request_storage.update_with_response(response_msg)

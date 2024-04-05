@@ -397,8 +397,8 @@ def test_dap_plugin_fit_input(dap, input):
         dap._parent.connector.set_and_publish.assert_called_once_with(
             MessageEndpoints.dap_request(),
             messages.DAPRequestMessage(
-                "LmfitService1D",
-                "on_demand",
+                dap_cls="LmfitService1D",
+                dap_type="on_demand",
                 config={
                     "args": ["scan_id"],
                     "kwargs": {},
@@ -421,7 +421,7 @@ def test_dap_auto_run(dap):
 
 def test_dap_wait_for_dap_response_waits_for_RID(dap):
     dap._parent.connector.get.return_value = messages.DAPResponseMessage(
-        success=True, data={}, metadata={"RID": "wrong_ID"}
+        success=True, data=({}, None), metadata={"RID": "wrong_ID"}
     )
     with pytest.raises(TimeoutError):
         dap.GaussianModel._wait_for_dap_response(request_id="1234", timeout=0.1)
@@ -429,10 +429,12 @@ def test_dap_wait_for_dap_response_waits_for_RID(dap):
 
 def test_dap_wait_for_dap_respnse_returns(dap):
     dap._parent.connector.get.return_value = messages.DAPResponseMessage(
-        success=True, data={}, metadata={"RID": "1234"}
+        success=True, data=({}, None), metadata={"RID": "1234"}
     )
     val = dap.GaussianModel._wait_for_dap_response(request_id="1234", timeout=0.1)
-    assert val == messages.DAPResponseMessage(success=True, data={}, metadata={"RID": "1234"})
+    assert val == messages.DAPResponseMessage(
+        success=True, data=({}, None), metadata={"RID": "1234"}
+    )
 
 
 def test_dap_select(dap):

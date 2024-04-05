@@ -1,17 +1,11 @@
-"""
-BECMessage classes for communication between BEC components. 
-"""
-
-from __future__ import annotations
-
 import enum
 import time
 import warnings
 from copy import deepcopy
-from dataclasses import MISSING, dataclass, field, fields
-from typing import Any, Literal
+from typing import Any, ClassVar, Literal
 
 import numpy as np
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class BECStatus(enum.Enum):
@@ -23,15 +17,16 @@ class BECStatus(enum.Enum):
     ERROR = -1
 
 
-@dataclass
-class BECMessage:
+class BECMessage(BaseModel):
+    msg_type: ClassVar[str]
+    metadata: dict | None = Field(default_factory=dict)
 
-    def __post_init__(self):
-        # in case "metadata" is passed None as keyword arg, for example
-        for f in fields(self):
-            value = getattr(self, f.name)
-            if value is None and f.default_factory is not MISSING:
-                setattr(self, f.name, f.default_factory())
+    @field_validator("metadata")
+    @classmethod
+    def check_metadata(cls, v):
+        if v is None:
+            return {}
+        return v
 
     @property
     def content(self):
@@ -39,26 +34,17 @@ class BECMessage:
         content.pop("metadata", None)
         return content
 
-    def _is_valid(self) -> bool:
-        return True
-
     def __eq__(self, other):
         if not isinstance(other, BECMessage):
             # don't attempt to compare against unrelated types
             return False
 
         try:
-            np.testing.assert_equal(self.__dict__, other.__dict__)
+            np.testing.assert_equal(self.model_dump(), other.model_dump())
         except AssertionError:
             return False
 
-        # remove the pylint disable when we upgrade to python 3.10. dataclasses will support kw_only
-        # pylint: disable=no-member
         return self.msg_type == other.msg_type and self.metadata == other.metadata
-
-    def __str__(self):
-        # pylint: disable=no-member
-        return f"messages.{self.__class__.__name__}(**{self.content}, metadata={self.metadata})"
 
     def loads(self):
         warnings.warn(
@@ -75,13 +61,11 @@ class BECMessage:
         return self
 
 
-@dataclass
 class BundleMessage(BECMessage):
     """Bundle of BECMessages"""
 
-    msg_type = "bundle_message"
-    messages: list = field(default_factory=list)
-    metadata: dict = field(default_factory=dict)
+    msg_type: ClassVar[str] = "bundle_message"
+    messages: list = Field(default_factory=list[BECMessage])
 
     def append(self, msg: BECMessage):
         """append a new BECMessage to the bundle"""
@@ -96,7 +80,6 @@ class BundleMessage(BECMessage):
         yield from self.messages
 
 
-@dataclass(eq=False)
 class ScanQueueMessage(BECMessage):
     """Message type for sending scan requests to the scan queue
     Sent by the API server / user to the scan_queue topic. It will be consumed by the scan server.
@@ -109,14 +92,12 @@ class ScanQueueMessage(BECMessage):
             >>> ScanQueueMessage(scan_type="dscan", parameter={"motor1": "samx", "from_m1:": -5, "to_m1": 5, "steps_m1": 10, "motor2": "samy", "from_m2": -5, "to_m2": 5, "steps_m2": 10, "exp_time": 0.1})
     """
 
-    msg_type = "scan_queue_message"
+    msg_type: ClassVar[str] = "scan_queue_message"
     scan_type: str
     parameter: dict
-    queue: str = field(default="primary")
-    metadata: dict = field(default_factory=dict)
+    queue: str = Field(default="primary")
 
 
-@dataclass(eq=False)
 class ScanQueueHistoryMessage(BECMessage):
     """Sent after removal from the active queue. Contains information about the scan.
     Sent by the API server / user to the scan_queue topic. It will be consumed by the scan server.
@@ -128,34 +109,31 @@ class ScanQueueHistoryMessage(BECMessage):
         metadata (dict, optional): additional metadata to describe the scan
     """
 
-    msg_type = "queue_history"
+    msg_type: ClassVar[str] = "queue_history"
     status: str
     queue_id: str
     info: dict
-    queue: str = field(default="primary")
-    metadata: dict = field(default_factory=dict)
+    queue: str = Field(default="primary")
 
 
-@dataclass(eq=False)
 class ScanStatusMessage(BECMessage):
     """Message type for sending scan status updates
     Args:
         scan_id(str): unique scan ID
-        status(dict): dictionary containing the current scan status
+        status(str): scan status ("open", "paused", "aborted", "halted", "closed")
         info(dict): dictionary containing additional information about the scan
         timestamp(float, optional): timestamp of the scan status update. If None, the current time is used.
         metadata(dict, optional): additional metadata to describe and identify the scan.
 
     Examples:
-        >>> ScanStatusMessage(scan_id="1234", status={"scan_number": 1, "scan_motors": ["samx", "samy"], "scan_type": "dscan", "scan_status": "RUNNING"}, info={"positions": {"samx": 0.5, "samy": 0.5}})
+        >>> ScanStatusMessage(scan_id="1234", status="open", info={"positions": {"samx": 0.5, "samy": 0.5}})
     """
 
-    msg_type = "scan_status"
-    scan_id: str
-    status: dict
+    msg_type: ClassVar[str] = "scan_status"
+    scan_id: str | None
+    status: Literal["open", "paused", "aborted", "halted", "closed"]
     info: dict
-    timestamp: float = field(default_factory=time.time)
-    metadata: dict = field(default_factory=dict)
+    timestamp: float = Field(default_factory=time.time)
 
     def __str__(self):
         content = deepcopy(self.__dict__)
@@ -164,7 +142,6 @@ class ScanStatusMessage(BECMessage):
         return f"{self.__class__.__name__}({content, self.metadata}))"
 
 
-@dataclass(eq=False)
 class ScanQueueModificationMessage(BECMessage):
     """Message type for sending scan queue modifications
     Args:
@@ -175,18 +152,30 @@ class ScanQueueModificationMessage(BECMessage):
         metadata(dict, optional): additional metadata to describe and identify the scan.
     """
 
-    ACTIONS = ["pause", "deferred_pause", "continue", "abort", "clear", "restart", "halt"]
-    msg_type = "scan_queue_modification"
-    scan_id: str
+    ACTIONS: ClassVar[list] = [
+        "pause",
+        "deferred_pause",
+        "continue",
+        "abort",
+        "clear",
+        "restart",
+        "halt",
+        "resume",
+    ]
+    msg_type: ClassVar[str] = "scan_queue_modification"
+    scan_id: str | list[str] | None
     action: str
     parameter: dict
-    metadata: dict = field(default_factory=dict)
 
-    def _is_valid(self) -> bool:
-        return self.action in self.ACTIONS
+    @field_validator("action")
+    @classmethod
+    def check_action(cls, v):
+        """Validate the action"""
+        if v not in cls.ACTIONS:
+            raise ValueError(f"Invalid action {v}. Must be one of {cls.ACTIONS}")
+        return v
 
 
-@dataclass(eq=False)
 class ScanQueueStatusMessage(BECMessage):
     """Message type for sending scan queue status updates
     Args:
@@ -194,21 +183,20 @@ class ScanQueueStatusMessage(BECMessage):
         metadata(dict, optional): additional metadata to describe and identify the scan.
     """
 
-    msg_type = "scan_queue_status"
+    msg_type: ClassVar[str] = "scan_queue_status"
     queue: dict
-    metadata: dict = field(default_factory=dict)
 
-    def _is_valid(self) -> bool:
-        if (
-            not isinstance(self.queue, dict)
-            or "primary" not in self.queue
-            or not isinstance(self.queue["primary"], dict)
-        ):
-            return False
-        return True
+    @field_validator("queue")
+    @classmethod
+    def check_queue(cls, v):
+        """Validate the queue"""
+        if not isinstance(v, dict):
+            raise ValueError(f"Invalid queue {v}. Must be a dictionary")
+        if "primary" not in v:
+            raise ValueError(f"Invalid queue {v}. Must contain a 'primary' key")
+        return v
 
 
-@dataclass(eq=False)
 class RequestResponseMessage(BECMessage):
     """Message type for sending back decisions on the acceptance of requests
     Args:
@@ -217,13 +205,11 @@ class RequestResponseMessage(BECMessage):
         metadata (dict, optional): additional metadata to describe and identify the request / response
     """
 
-    msg_type = "request_response"
+    msg_type: ClassVar[str] = "request_response"
     accepted: bool
-    message: str
-    metadata: dict = field(default_factory=dict)
+    message: str | dict | None = Field(default=None)
 
 
-@dataclass(eq=False)
 class DeviceInstructionMessage(BECMessage):
     """Message type for sending device instructions to the device server
     Args:
@@ -233,14 +219,12 @@ class DeviceInstructionMessage(BECMessage):
         metadata (dict, optional): metadata to describe the conditions of the device instruction
     """
 
-    msg_type = "device_instruction"
-    device: str
+    msg_type: ClassVar[str] = "device_instruction"
+    device: str | list[str] | None
     action: str
     parameter: dict
-    metadata: dict = field(default_factory=dict)
 
 
-@dataclass(eq=False)
 class DeviceMessage(BECMessage):
     """Message type for sending device readings from the device server
     Args:
@@ -250,15 +234,10 @@ class DeviceMessage(BECMessage):
         >>> BECMessage.DeviceMessage(signals={'samx': {'value': 14.999033949016491, 'timestamp': 1686385306.0265112}, 'samx_setpoint': {'value': 15.0, 'timestamp': 1686385306.016806}, 'samx_motor_is_moving': {'value': 0, 'timestamp': 1686385306.026888}}}, metadata={'stream': 'primary', 'DIID': 353, 'RID': 'd3471acc-309d-43b7-8ff8-f986c3fdecf1', 'point_id': 49, 'scan_id': '8e234698-358e-402d-a272-73e168a72f66', 'queue_id': '7a232746-6c90-44f5-81f5-74ab0ea22d4a'})
     """
 
-    msg_type = "device_message"
-    signals: dict
-    metadata: dict = field(default_factory=dict)
-
-    def _is_valid(self) -> bool:
-        return isinstance(self.signals, dict)
+    msg_type: ClassVar[str] = "device_message"
+    signals: dict = Field(default_factory=dict)
 
 
-@dataclass(eq=False)
 class DeviceRPCMessage(BECMessage):
     """Message type for sending device RPC return values from the device server
     Args:
@@ -269,18 +248,13 @@ class DeviceRPCMessage(BECMessage):
         metadata (dict, optional): metadata to describe the conditions of the device RPC call
     """
 
-    msg_type = "device_rpc_message"
+    msg_type: ClassVar[str] = "device_rpc_message"
     device: str
     return_val: Any
-    out: str
-    success: bool = field(default=True)
-    metadata: dict = field(default_factory=dict)
-
-    def _is_valid(self) -> bool:
-        return isinstance(self.device, str)
+    out: str | dict
+    success: bool = Field(default=True)
 
 
-@dataclass(eq=False)
 class DeviceStatusMessage(BECMessage):
     """Message type for sending device status updates from the device server
     Args:
@@ -289,13 +263,11 @@ class DeviceStatusMessage(BECMessage):
         metadata (dict, optional): additional metadata to describe the conditions of the device status
     """
 
-    msg_type = "device_status_message"
+    msg_type: ClassVar[str] = "device_status_message"
     device: str
     status: int
-    metadata: dict = field(default_factory=dict)
 
 
-@dataclass(eq=False)
 class DeviceReqStatusMessage(BECMessage):
     """Message type for sending device request status updates from the device server
     Args:
@@ -304,13 +276,11 @@ class DeviceReqStatusMessage(BECMessage):
         metadata (dict, optional): additional metadata to describe the conditions of the device request status
     """
 
-    msg_type = "device_req_status_message"
+    msg_type: ClassVar[str] = "device_req_status_message"
     device: str
     success: bool
-    metadata: dict = field(default_factory=dict)
 
 
-@dataclass(eq=False)
 class DeviceInfoMessage(BECMessage):
     """Message type for sending device info updates from the device server
     Args:
@@ -319,13 +289,11 @@ class DeviceInfoMessage(BECMessage):
         metadata (dict, optional): additional metadata to describe the conditions of the device info
     """
 
-    msg_type = "device_info_message"
+    msg_type: ClassVar[str] = "device_info_message"
     device: str
     info: dict
-    metadata: dict = field(default_factory=dict)
 
 
-@dataclass(eq=False)
 class DeviceMonitorMessage(BECMessage):
     """Message type for sending device monitor updates from the device server
     Args:
@@ -334,45 +302,42 @@ class DeviceMonitorMessage(BECMessage):
         metadata (dict, optional): additional metadata to describe the conditions of the device monitor
     """
 
-    msg_type = "device_monitor_message"
+    msg_type: ClassVar[str] = "device_monitor_message"
     device: str
     data: np.ndarray
-    metadata: dict = field(default_factory=dict)
+
+    class Config:
+        arbitrary_types_allowed = True
 
 
-@dataclass(eq=False)
 class ScanMessage(BECMessage):
     """Message type for sending scan segment data from the scan bundler
     Args:
         point_id (int): point ID from scan segment
-        scan_id (int): scan ID
+        scan_id (str): scan ID
         data (dict): scan segment data
         metadata (dict, optional): additional metadata to describe the conditions of the scan segment
     """
 
-    msg_type = "scan_message"
+    msg_type: ClassVar[str] = "scan_message"
     point_id: int
-    scan_id: int
+    scan_id: str
     data: dict
-    metadata: dict = field(default_factory=dict)
 
 
-@dataclass(eq=False)
 class ScanBaselineMessage(BECMessage):
     """Message type for sending scan baseline data from the scan bundler
     Args:
-        scan_id (int): scan ID
+        scan_id (str): scan ID
         data (dict): scan baseline data
         metadata (dict, optional): additional metadata to describe the conditions of the scan baseline
     """
 
-    msg_type = "scan_baseline_message"
-    scan_id: int
+    msg_type: ClassVar[str] = "scan_baseline_message"
+    scan_id: str
     data: dict
-    metadata: dict = field(default_factory=dict)
 
 
-@dataclass(eq=False)
 class DeviceConfigMessage(BECMessage):
     """Message type for sending device config updates
     Args:
@@ -381,17 +346,21 @@ class DeviceConfigMessage(BECMessage):
         metadata (dict, optional): additional metadata to describe the conditions of the device config
     """
 
-    ACTIONS = ["add", "set", "update", "reload"]
-    msg_type = "device_config_message"
-    action: str
-    config: dict
-    metadata: dict = field(default_factory=dict)
+    msg_type: ClassVar[str] = "device_config_message"
+    action: Literal["add", "set", "update", "reload", "remove"] = Field(
+        default=None, validate_default=True
+    )
+    config: dict | None = Field(default=None)
 
-    def _is_valid(self) -> bool:
-        return self.action in self.ACTIONS
+    @model_validator(mode="after")
+    @classmethod
+    def check_config(cls, values):
+        """Validate the config"""
+        if values.action in ["add", "set", "update"] and not values.config:
+            raise ValueError(f"Invalid config {values.config}. Must be a dictionary")
+        return values
 
 
-@dataclass(eq=False)
 class LogMessage(BECMessage):
     """Log message
     Args:
@@ -400,13 +369,11 @@ class LogMessage(BECMessage):
         metadata (dict, optional):
     """
 
-    msg_type = "log_message"
+    msg_type: ClassVar[str] = "log_message"
     log_type: str
     log_msg: dict | str
-    metadata: dict = field(default_factory=dict)
 
 
-@dataclass(eq=False)
 class AlarmMessage(BECMessage):
     """Alarm message
     Severity 1: Minor alarm, no user interaction needed. The system can continue.
@@ -420,15 +387,13 @@ class AlarmMessage(BECMessage):
         metadata (dict, optional): Additional metadata.
     """
 
-    msg_type = "alarm_message"
+    msg_type: ClassVar[str] = "alarm_message"
     severity: int
     alarm_type: str
-    source: str
+    source: dict
     msg: str
-    metadata: dict = field(default_factory=dict)
 
 
-@dataclass(eq=False)
 class StatusMessage(BECMessage):
     """Status message
     Args:
@@ -442,14 +407,12 @@ class StatusMessage(BECMessage):
         metadata (dict, optional): additional metadata
     """
 
-    msg_type = "status_message"
+    msg_type: ClassVar[str] = "status_message"
     name: str
     status: BECStatus
     info: dict
-    metadata: dict = field(default_factory=dict)
 
 
-@dataclass(eq=False)
 class FileMessage(BECMessage):
     """File message to inform about the status of a file writing operation
     Args:
@@ -459,14 +422,12 @@ class FileMessage(BECMessage):
         metadata (dict, optional): status metadata. Defaults to None.
     """
 
-    msg_type = "file_message"
+    msg_type: ClassVar[str] = "file_message"
     file_path: str
-    done: bool = field(default=True)
-    successful: bool = field(default=True)
-    metadata: dict = field(default_factory=dict)
+    done: bool = Field(default=True)
+    successful: bool = Field(default=True)
 
 
-@dataclass(eq=False)
 class FileContentMessage(BECMessage):
     """File content message to inform about the content of a file
     Args:
@@ -475,13 +436,11 @@ class FileContentMessage(BECMessage):
         metadata (dict, optional): status metadata. Defaults to None.
     """
 
-    msg_type = "file_content_message"
+    msg_type: ClassVar[str] = "file_content_message"
     file_path: str
     data: dict
-    metadata: dict = field(default_factory=dict)
 
 
-@dataclass(eq=False)
 class VariableMessage(BECMessage):
     """Message to inform about a global variable
     Args:
@@ -489,12 +448,10 @@ class VariableMessage(BECMessage):
         metadata (dict, optional): additional metadata
     """
 
-    msg_type = "var_message"
+    msg_type: ClassVar[str] = "var_message"
     value: Any
-    metadata: dict = field(default_factory=dict)
 
 
-@dataclass(eq=False)
 class ObserverMessage(BECMessage):
     """Message for observer updates
     Args:
@@ -502,12 +459,10 @@ class ObserverMessage(BECMessage):
         metadata (dict, optional): additional metadata
     """
 
-    msg_type = "observer_message"
+    msg_type: ClassVar[str] = "observer_message"
     observer: list[dict]
-    metadata: dict = field(default_factory=dict)
 
 
-@dataclass(eq=False)
 class ServiceMetricMessage(BECMessage):
     """Message for service metrics
     Args:
@@ -516,13 +471,11 @@ class ServiceMetricMessage(BECMessage):
         metadata (dict, optional): additional metadata
     """
 
-    msg_type = "service_metric_message"
+    msg_type: ClassVar[str] = "service_metric_message"
     name: str
     metrics: dict
-    metadata: dict = field(default_factory=dict)
 
 
-@dataclass(eq=False)
 class ProcessedDataMessage(BECMessage):
     """Message for processed data
     Args:
@@ -530,12 +483,10 @@ class ProcessedDataMessage(BECMessage):
         metadata (dict, optional): metadata. Defaults to None.
     """
 
-    msg_type = "processed_data_message"
-    data: str
-    metadata: dict = field(default_factory=dict)
+    msg_type: ClassVar[str] = "processed_data_message"
+    data: dict | list[dict]
 
 
-@dataclass(eq=False)
 class DAPConfigMessage(BECMessage):
     """Message for DAP configuration
     Args:
@@ -543,12 +494,10 @@ class DAPConfigMessage(BECMessage):
         metadata (dict, optional): metadata. Defaults to None.
     """
 
-    msg_type = "dap_config_message"
+    msg_type: ClassVar[str] = "dap_config_message"
     config: dict
-    metadata: dict = field(default_factory=dict)
 
 
-@dataclass(eq=False)
 class DAPRequestMessage(BECMessage):
     """Message for DAP requests
     Args:
@@ -558,39 +507,38 @@ class DAPRequestMessage(BECMessage):
         metadata (dict, optional): metadata. Defaults to None.
     """
 
-    msg_type = "dap_request_message"
+    msg_type: ClassVar[str] = "dap_request_message"
     dap_cls: str
     dap_type: Literal["continuous", "on_demand"]
     config: dict
-    metadata: dict = field(default_factory=dict)
 
-    def _is_valid(self) -> bool:
-        if self.dap_type not in ["continuous", "on_demand"]:
-            return False
-        return True
+    @field_validator("dap_type")
+    @classmethod
+    def check_dap_type(cls, v):
+        """Validate the dap_type"""
+        if v not in ["continuous", "on_demand"]:
+            raise ValueError(f"Invalid dap_type {v}. Must be one of ['continuous', 'on_demand']")
+        return v
 
 
-@dataclass(eq=False)
 class DAPResponseMessage(BECMessage):
     """
     Message for DAP responses
     Args:
         success (bool): True if the request was successful
-        data (dict, optional): DAP data. Defaults to None.
+        data (tuple, optional): DAP data (tuple of data and metadata). Defaults to None.
         error (dict, optional): DAP error. Defaults to None.
         dap_request (dict, optional): DAP request. Defaults to None.
         metadata (dict, optional): metadata. Defaults to None.
     """
 
-    msg_type = "dap_response_message"
+    msg_type: ClassVar[str] = "dap_response_message"
     success: bool
-    data: dict = field(default_factory=dict)
-    error: dict = field(default_factory=dict)
-    dap_request: dict = field(default_factory=dict)
-    metadata: dict = field(default_factory=dict)
+    data: tuple | None = Field(default_factory=lambda: ({}, None))
+    error: str | None = None
+    dap_request: BECMessage | None = Field(default=None)
 
 
-@dataclass(eq=False)
 class AvailableResourceMessage(BECMessage):
     """Message for available resources such as scans, data processing plugins etc
     Args:
@@ -598,12 +546,10 @@ class AvailableResourceMessage(BECMessage):
         metadata (dict, optional): metadata. Defaults to None.
     """
 
-    msg_type = "available_resource_message"
-    resource: dict
-    metadata: dict = field(default_factory=dict)
+    msg_type: ClassVar[str] = "available_resource_message"
+    resource: dict | list[dict]
 
 
-@dataclass(eq=False)
 class ProgressMessage(BECMessage):
     """Message for communicating the progress of a long running task
     Args:
@@ -613,14 +559,12 @@ class ProgressMessage(BECMessage):
         metadata (dict, optional): metadata. Defaults to None.
     """
 
-    msg_type = "progress_message"
+    msg_type: ClassVar[str] = "progress_message"
     value: float
     max_value: float
     done: bool
-    metadata: dict = field(default_factory=dict)
 
 
-@dataclass(eq=False)
 class GUIConfigMessage(BECMessage):
     """Message for GUI configuration
     Args:
@@ -628,12 +572,10 @@ class GUIConfigMessage(BECMessage):
         metadata (dict, optional): metadata. Defaults to None.
     """
 
-    msg_type = "gui_config_message"
+    msg_type: ClassVar[str] = "gui_config_message"
     config: dict
-    metadata: dict = field(default_factory=dict)
 
 
-@dataclass(eq=False)
 class GUIDataMessage(BECMessage):
     """Message for GUI data
     Args:
@@ -641,12 +583,10 @@ class GUIDataMessage(BECMessage):
         metadata (dict, optional): metadata. Defaults to None.
     """
 
-    msg_type = "gui_data_message"
+    msg_type: ClassVar[str] = "gui_data_message"
     data: dict
-    metadata: dict = field(default_factory=dict)
 
 
-@dataclass(eq=False)
 class GUIInstructionMessage(BECMessage):
     """Message for GUI instructions
     Args:
@@ -654,13 +594,11 @@ class GUIInstructionMessage(BECMessage):
         metadata (dict, optional): metadata. Defaults to None.
     """
 
-    msg_type = "gui_instruction_message"
+    msg_type: ClassVar[str] = "gui_instruction_message"
     action: str
     parameter: dict
-    metadata: dict = field(default_factory=dict)
 
 
-@dataclass(eq=False)
 class ServiceResponseMessage(BECMessage):
     """Message for service responses
     Args:
@@ -668,12 +606,10 @@ class ServiceResponseMessage(BECMessage):
         metadata (dict, optional): metadata. Defaults to None.
     """
 
-    msg_type = "service_response_message"
+    msg_type: ClassVar[str] = "service_response_message"
     response: dict
-    metadata: dict = field(default_factory=dict)
 
 
-@dataclass(eq=False)
 class CredentialsMessage(BECMessage):
     """Message for credentials
     Args:
@@ -681,6 +617,5 @@ class CredentialsMessage(BECMessage):
         metadata (dict, optional): metadata. Defaults to None.
     """
 
-    msg_type = "credentials_message"
+    msg_type: ClassVar[str] = "credentials_message"
     credentials: dict
-    metadata: dict = field(default_factory=dict)

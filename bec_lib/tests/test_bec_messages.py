@@ -1,4 +1,5 @@
 import numpy as np
+import pydantic
 import pytest
 
 from bec_lib import messages
@@ -17,7 +18,7 @@ def test_bec_message_msgpack_serialization_version(version):
     else:
         res = MsgpackSerialization.dumps(msg)
         print(res)
-        v12res = b'\xc7z\x01BECMSG_1.2_34_67_EOH_{"msg_type": "device_instruction"}\x84\xa6device\xa4samx\xa6action\xa3set\xa9parameter\x81\xa3set\xcb?\xe0\x00\x00\x00\x00\x00\x00\xa8metadata\x81\xa3RID\xa41234'
+        v12res = b'\xc7z\x01BECMSG_1.2_34_67_EOH_{"msg_type": "device_instruction"}\x84\xa8metadata\x81\xa3RID\xa41234\xa6device\xa4samx\xa6action\xa3set\xa9parameter\x81\xa3set\xcb?\xe0\x00\x00\x00\x00\x00\x00'
         assert res == v12res
         res_loaded = MsgpackSerialization.loads(res)
         assert res_loaded == msg
@@ -55,19 +56,15 @@ def test_ScanQueueModificationMessage():
 
 
 def test_ScanQueueModificationMessage_with_wrong_action_returns_None():
-    msg = messages.ScanQueueModificationMessage(
-        scan_id="1234", action="wrong_action", parameter={"RID": "1234"}
-    )
-    res = MsgpackSerialization.dumps(msg)
-    res_loaded = MsgpackSerialization.loads(res)
-    assert res_loaded is None
+    with pytest.raises(pydantic.ValidationError):
+        messages.ScanQueueModificationMessage(
+            scan_id="1234", action="wrong_action", parameter={"RID": "1234"}
+        )
 
 
 def test_ScanQueueStatusMessage_must_include_primary_queue():
-    msg = messages.ScanQueueStatusMessage(queue={}, metadata={"RID": "1234"})
-    res = MsgpackSerialization.dumps(msg)
-    res_loaded = MsgpackSerialization.loads(res)
-    assert res_loaded is None
+    with pytest.raises(pydantic.ValidationError):
+        messages.ScanQueueStatusMessage(queue={}, metadata={"RID": "1234"})
 
 
 def test_ScanQueueStatusMessage_loads_successfully():
@@ -85,10 +82,8 @@ def test_DeviceMessage_loads_successfully():
 
 
 def test_DeviceMessage_must_include_signals_as_dict():
-    msg = messages.DeviceMessage(signals="wrong_signals", metadata={"RID": "1234"})
-    res = MsgpackSerialization.dumps(msg)
-    res_loaded = MsgpackSerialization.loads(res)
-    assert res_loaded is None
+    with pytest.raises(pydantic.ValidationError):
+        messages.DeviceMessage(signals="wrong_signals", metadata={"RID": "1234"})
 
 
 def test_DeviceRPCMessage():
@@ -101,7 +96,7 @@ def test_DeviceRPCMessage():
 
 
 def test_DeviceStatusMessage():
-    msg = messages.DeviceStatusMessage(device="samx", status="done", metadata={"RID": "1234"})
+    msg = messages.DeviceStatusMessage(device="samx", status=0, metadata={"RID": "1234"})
     res = MsgpackSerialization.dumps(msg)
     res_loaded = MsgpackSerialization.loads(res)
     assert res_loaded == msg
@@ -124,14 +119,18 @@ def test_DeviceInfoMessage():
 
 
 def test_ScanMessage():
-    msg = messages.ScanMessage(point_id=1, scan_id=2, data={"value": 3}, metadata={"RID": "1234"})
+    msg = messages.ScanMessage(
+        point_id=1, scan_id="scan_id", data={"value": 3}, metadata={"RID": "1234"}
+    )
     res = MsgpackSerialization.dumps(msg)
     res_loaded = MsgpackSerialization.loads(res)
     assert res_loaded == msg
 
 
 def test_ScanBaselineMessage():
-    msg = messages.ScanBaselineMessage(scan_id=2, data={"value": 3}, metadata={"RID": "1234"})
+    msg = messages.ScanBaselineMessage(
+        scan_id="scan_id", data={"value": 3}, metadata={"RID": "1234"}
+    )
     res = MsgpackSerialization.dumps(msg)
     res_loaded = MsgpackSerialization.loads(res)
     assert res_loaded == msg
@@ -142,15 +141,18 @@ def test_ScanBaselineMessage():
     [("add", True), ("set", True), ("update", True), ("reload", True), ("wrong_action", False)],
 )
 def test_DeviceConfigMessage(action, valid):
-    msg = messages.DeviceConfigMessage(
-        action=action, config={"device": "samx"}, metadata={"RID": "1234"}
-    )
-    res = MsgpackSerialization.dumps(msg)
-    res_loaded = MsgpackSerialization.loads(res)
     if valid:
+        msg = messages.DeviceConfigMessage(
+            action=action, config={"device": "samx"}, metadata={"RID": "1234"}
+        )
+        res = MsgpackSerialization.dumps(msg)
+        res_loaded = MsgpackSerialization.loads(res)
         assert res_loaded == msg
     else:
-        assert res_loaded is None
+        with pytest.raises(pydantic.ValidationError):
+            messages.DeviceConfigMessage(
+                action=action, config={"device": "samx"}, metadata={"RID": "1234"}
+            )
 
 
 def test_LogMessage():
@@ -166,7 +168,7 @@ def test_AlarmMessage():
     msg = messages.AlarmMessage(
         severity=2,
         alarm_type="major",
-        source="system",
+        source={"system": "samx"},
         msg="An error occurred",
         metadata={"RID": "1234"},
     )
@@ -266,7 +268,14 @@ def test_ScanQueueHistoryMessage():
 
 
 def test_DAPResponseMessage():
-    msg = messages.DAPResponseMessage(success=True, data={}, metadata={"RID": "1234"})
+    msg = messages.DAPResponseMessage(success=True, data=({}, None), metadata={"RID": "1234"})
+    res = MsgpackSerialization.dumps(msg)
+    res_loaded = MsgpackSerialization.loads(res)
+    assert res_loaded == msg
+
+
+def test_DAPResponseMessage_accepts_None():
+    msg = messages.DAPResponseMessage(success=True, data=None, metadata={"RID": "1234"})
     res = MsgpackSerialization.dumps(msg)
     res_loaded = MsgpackSerialization.loads(res)
     assert res_loaded == msg
@@ -296,3 +305,13 @@ def test_CredentialsMessage():
     res = MsgpackSerialization.dumps(msg)
     res_loaded = MsgpackSerialization.loads(res)
     assert res_loaded == msg
+
+
+def test_DeviceInstructionMessage():
+    msg = messages.DeviceInstructionMessage(
+        device="samx", action="set", parameter={"set": 0.5}, metadata=None
+    )
+    res = MsgpackSerialization.dumps(msg)
+    res_loaded = MsgpackSerialization.loads(res)
+    assert res_loaded == msg
+    assert res_loaded.metadata == {}

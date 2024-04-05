@@ -64,25 +64,25 @@ def test_redis_connector_register(
     connected_connector, subscribed_topics, subscribed_patterns, msgs
 ):
     connector = connected_connector
-    test_msg = TestMessage("test")
+    test_msg = TestMessage(msg="test")
     cb_mock = mock.Mock(spec=[])  # spec is here to remove all attributes
     if subscribed_topics:
         connector.register(
             subscribed_topics, subscribed_patterns, cb=cb_mock, start_thread=False, a=1
         )
         for msg in msgs:
-            connector.send(msg, TestMessage(msg))
+            connector.send(msg, TestMessage(msg=msg))
             connector.poll_messages()
-            msg_object = MessageObject(msg, TestMessage(msg))
+            msg_object = MessageObject(msg, TestMessage(msg=msg))
             cb_mock.assert_called_with(msg_object, a=1)
     if subscribed_patterns:
         connector.register(
             subscribed_topics, subscribed_patterns, cb=cb_mock, start_thread=False, a=1
         )
         for msg in msgs:
-            connector.send(msg, TestMessage(msg))
+            connector.send(msg, TestMessage(msg=msg))
             connector.poll_messages()
-            msg_object = MessageObject(msg, TestMessage(msg))
+            msg_object = MessageObject(msg, TestMessage(msg=msg))
             cb_mock.assert_called_with(msg_object, a=1)
 
 
@@ -95,7 +95,7 @@ def test_redis_register_poll_messages(connected_connector):
         cb_fcn_has_been_called = True
         assert kwargs["a"] == 1
 
-    test_msg = TestMessage("test")
+    test_msg = TestMessage(msg="test")
     connector.register("test", cb=cb_fcn, a=1, start_thread=False)
     connector._redis_conn.publish("test", MsgpackSerialization.dumps(test_msg))
 

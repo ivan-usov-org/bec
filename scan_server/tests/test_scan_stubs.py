@@ -101,7 +101,7 @@ def test_rpc_raises_scan_abortion(stubs, msg, raised_error):
             False,
         ),
         (
-            messages.DeviceStatusMessage(device="samx", status="enabled", metadata={"RID": "rid"}),
+            messages.DeviceStatusMessage(device="samx", status=0, metadata={"RID": "rid"}),
             None,
             True,
         ),

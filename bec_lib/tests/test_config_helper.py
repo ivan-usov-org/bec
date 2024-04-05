@@ -141,7 +141,7 @@ def test_send_config_request_raises_with_empty_config(config_helper):
 def test_send_config_request(config_helper):
     config_helper.send_config_request(action="update", config={"test": "test"})
     config_helper.wait_for_config_reply.return_value = messages.RequestResponseMessage(
-        accepted=True, message="test"
+        accepted=True, message={"msg": "test"}
     )
     config_helper.wait_for_config_reply.assert_called_once_with(mock.ANY)
     config_helper.wait_for_service_response.assert_called_once_with(mock.ANY)
@@ -149,7 +149,7 @@ def test_send_config_request(config_helper):
 
 def test_send_config_request_raises_for_rejected_update(config_helper):
     config_helper.wait_for_config_reply.return_value = messages.RequestResponseMessage(
-        accepted=False, message="test"
+        accepted=False, message={"msg": "test"}
     )
     with pytest.raises(DeviceConfigError):
         config_helper.send_config_request(action="update", config={"test": "test"})
@@ -159,10 +159,12 @@ def test_send_config_request_raises_for_rejected_update(config_helper):
 def test_wait_for_config_reply():
     connector = mock.MagicMock()
     config_helper = ConfigHelper(connector)
-    connector.get.return_value = messages.RequestResponseMessage(accepted=True, message="test")
+    connector.get.return_value = messages.RequestResponseMessage(
+        accepted=True, message={"msg": "test"}
+    )
 
     res = config_helper.wait_for_config_reply("test")
-    assert res == messages.RequestResponseMessage(accepted=True, message="test")
+    assert res == messages.RequestResponseMessage(accepted=True, message={"msg": "test"})
 
 
 def test_wait_for_config_raises_timeout():

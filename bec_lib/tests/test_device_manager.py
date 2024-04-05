@@ -3,6 +3,7 @@ import os
 from collections import defaultdict
 from unittest import mock
 
+import pydantic
 import pytest
 import yaml
 
@@ -24,19 +25,21 @@ def test_dm_initialize(dm):
 @pytest.mark.parametrize(
     "msg",
     [
-        (messages.DeviceConfigMessage(action="update", config={})),
-        (messages.DeviceConfigMessage(action="add", config={})),
-        (messages.DeviceConfigMessage(action="remove", config={})),
+        (messages.DeviceConfigMessage(action="update", config={"samx": {}})),
+        (messages.DeviceConfigMessage(action="add", config={"samx": {}})),
+        (messages.DeviceConfigMessage(action="remove", config={"samx": {}})),
     ],
 )
 def test_parse_config_request(dm, msg):
-    dm.parse_config_message(msg)
+    with mock.patch.object(dm, "_add_device"):
+        dm.parse_config_message(msg)
 
 
 def test_config_request_update(dm_with_devices):
     dm = dm_with_devices
-    msg = messages.DeviceConfigMessage(action="update", config={})
-    dm.parse_config_message(msg)
+    msg = messages.DeviceConfigMessage(action="update", config={"samx": {}})
+    with mock.patch.object(dm, "_add_device") as add_device:
+        dm.parse_config_message(msg)
 
     msg = messages.DeviceConfigMessage(
         action="update", config={"samx": {"deviceConfig": {"tolerance": 1}}}
@@ -62,19 +65,20 @@ def test_config_request_reload(dm_with_devices):
 @pytest.mark.parametrize(
     "msg,raised",
     [
-        (messages.DeviceConfigMessage(action="wrong_action", config={}), True),
-        (messages.DeviceConfigMessage(action="add", config={}), True),
-        (messages.DeviceConfigMessage(action="remove", config={}), True),
-        (messages.DeviceConfigMessage(action="reload", config={}), False),
-        (messages.DeviceConfigMessage(action="add", config={"new_device": {}}), False),
+        ({"action": "add", "config": {}}, True),
+        ({"action": "remove", "config": {}}, True),
+        ({"action": "reload", "config": {}}, False),
+        ({"action": "add", "config": {"new_device": {}}}, False),
     ],
 )
 def test_check_request_validity(dm, msg, raised):
     if raised:
-        with pytest.raises(DeviceConfigError):
-            dm.check_request_validity(msg)
+        with pytest.raises((DeviceConfigError, pydantic.ValidationError)):
+            msg_in = messages.DeviceConfigMessage(**msg)
+            dm.check_request_validity(msg_in)
     else:
-        dm.check_request_validity(msg)
+        msg_in = messages.DeviceConfigMessage(**msg)
+        dm.check_request_validity(msg_in)
 
 
 def test_get_config_calls_load(dm):

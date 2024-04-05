@@ -56,8 +56,7 @@ def decode_bec_message_v12(raw_bytes):
         raise RuntimeError("Failed to decode BECMessage") from exception
 
     # shouldn't this be checked when the msg is used? or when the message is created?
-    if msg._is_valid():
-        return msg
+    return msg
 
 
 def encode_bec_status(status):
