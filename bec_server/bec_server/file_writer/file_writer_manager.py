@@ -79,7 +79,7 @@ class FileWriterManager(BECService):
         self.file_writer_config = self._service_config.service_config.get("file_writer")
         self._start_device_manager()
         self.connector.register(
-            patterns=MessageEndpoints.scan_segment(), cb=self._scan_segment_callback, parent=self
+            MessageEndpoints.scan_segment(), cb=self._scan_segment_callback, parent=self
         )
         self.connector.register(
             MessageEndpoints.scan_status(), cb=self._scan_status_callback, parent=self

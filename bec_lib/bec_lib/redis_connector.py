@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import collections
 import inspect
+import itertools
 import queue
 import sys
 import threading
@@ -15,7 +16,7 @@ import time
 import warnings
 from dataclasses import dataclass
 from functools import wraps
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 import louie
 import redis
@@ -143,9 +144,9 @@ class RedisConnector(ConnectorBase):
         Shutdown the connector
         """
         super().shutdown()
-        for topic in list(self._stream_topics_subscription):
-            # this will take care of shutting down direct listening threads
-            self.unregister_stream(topic)
+        # this will take care of shutting down direct listening threads
+        self._unregister_stream(self._stream_topics_subscription)
+
         if self._events_listener_thread:
             self._stop_events_listener_thread.set()
             self._events_listener_thread.join()
@@ -269,21 +270,47 @@ class RedisConnector(ConnectorBase):
             self._events_dispatcher_thread.start()
             started_event.wait()  # synchronization of thread start
 
-    def _convert_endpointinfo_to_str(self, endpoint):
+    def _convert_endpointinfo(self, endpoint, check_message_op=True):
         if isinstance(endpoint, EndpointInfo):
-            return endpoint.endpoint
+            return [endpoint.endpoint], endpoint.message_op.name
         if isinstance(endpoint, str):
-            return endpoint
-        if isinstance(endpoint, list):
-            return [self._convert_endpointinfo_to_str(e) for e in endpoint]
+            return [endpoint], ""
+        if isinstance(endpoint, collections.abc.Sequence):
+            endpoints_str = []
+            ref_message_op = None
+            for e in endpoint:
+                e_str, message_op = self._convert_endpointinfo(e, check_message_op=check_message_op)
+                if check_message_op:
+                    if ref_message_op is None:
+                        ref_message_op = message_op
+                    else:
+                        if message_op != ref_message_op:
+                            raise ValueError(
+                                f"All endpoints do not have the same type: {ref_message_op}"
+                            )
+                endpoints_str.append(e_str)
+            return list(itertools.chain(*endpoints_str)), ref_message_op or ""
         raise ValueError(f"Invalid endpoint {endpoint}")
+
+    def _normalize_patterns(self, patterns):
+        patterns, _ = self._convert_endpointinfo(patterns)
+        if isinstance(patterns, str):
+            return [patterns]
+        elif isinstance(patterns, list):
+            if not all(isinstance(p, str) for p in patterns):
+                raise ValueError("register: patterns must be a string or a list of strings")
+        else:
+            raise ValueError("register: patterns must be a string or a list of strings")
+        return patterns
 
     def register(
         self,
         topics: str | list[str] | EndpointInfo | list[EndpointInfo] = None,
-        patterns: str | list[str] | EndpointInfo | list[EndpointInfo] = None,
+        patterns: str | list[str] = None,
         cb: callable = None,
         start_thread: bool = True,
+        from_start: bool = False,
+        newest_only: bool = False,
         **kwargs,
     ):
         """
@@ -291,9 +318,11 @@ class RedisConnector(ConnectorBase):
 
         Args:
             topics (str, list, EndpointInfo, list[EndpointInfo], optional): topic or list of topics. Defaults to None. The topic should be a valid message endpoint in BEC and can be a string or an EndpointInfo object.
-            patterns (str, list, optional): pattern or list of patterns. Defaults to None. In contrast to topics, patterns may contain "*" wildcards. The evaluated patterns should be a valid message endpoint in BEC and can be a string or an EndpointInfo object.
+            patterns (str, list, optional): pattern or list of patterns. Defaults to None. In contrast to topics, patterns may contain "*" wildcards. The evaluated patterns should be a valid pub/sub message endpoint in BEC
             cb (callable, optional): callback. Defaults to None.
             start_thread (bool, optional): start the dispatcher thread. Defaults to True.
+            from_start (bool, optional): for streams only: return data from start on first reading. Defaults to False.
+            newest_only (bool, optional): for streams only: return newest data only. Defaults to False.
             **kwargs: additional keyword arguments to be transmitted to the callback
 
         Examples:
@@ -308,24 +337,24 @@ class RedisConnector(ConnectorBase):
         """
         if cb is None:
             raise ValueError("Callback cb cannot be None")
+
+        if topics is None and patterns is None:
+            raise ValueError("topics and patterns cannot be both None")
+
+        # make a weakref from the callable, using louie;
+        # it can create safe refs for simple functions as well as methods
+        cb_ref = louie.saferef.safe_ref(cb)
+        item = (cb_ref, kwargs)
+
         if self._events_listener_thread is None:
             # create the thread that will get all messages for this connector;
             self._events_listener_thread = threading.Thread(
                 target=self._get_messages_loop, args=(self._pubsub_conn,)
             )
             self._events_listener_thread.start()
-        # make a weakref from the callable, using louie;
-        # it can create safe refs for simple functions as well as methods
-        cb_ref = louie.saferef.safe_ref(cb)
-        item = (cb_ref, kwargs)
-
-        if topics is None and patterns is None:
-            raise ValueError("topics and patterns cannot be both None")
 
         if patterns is not None:
-            patterns = self._convert_endpointinfo_to_str(patterns)
-            if not isinstance(patterns, list):
-                patterns = [patterns]
+            patterns = self._normalize_patterns(patterns)
 
             self._pubsub_conn.psubscribe(patterns)
             with self._topics_cb_lock:
@@ -333,16 +362,22 @@ class RedisConnector(ConnectorBase):
                     if item not in self._topics_cb[pattern]:
                         self._topics_cb[pattern].append(item)
         else:
-            topics = self._convert_endpointinfo_to_str(topics)
-            if not isinstance(topics, list):
-                topics = [topics]
+            topics, message_op = self._convert_endpointinfo(topics)
+            if message_op == "STREAM":
+                return self._register_stream(
+                    topics=topics,
+                    cb=cb,
+                    from_start=from_start,
+                    newest_only=newest_only,
+                    start_thread=start_thread,
+                    **kwargs,
+                )
 
             self._pubsub_conn.subscribe(topics)
             with self._topics_cb_lock:
                 for topic in topics:
                     if item not in self._topics_cb[topic]:
                         self._topics_cb[topic].append(item)
-
         self._start_events_dispatcher_thread(start_thread)
 
     def _add_direct_stream_listener(self, topic, cb_ref, **kwargs) -> int:
@@ -442,73 +477,45 @@ class RedisConnector(ConnectorBase):
                             self._messages_queue.put(msg)
         return True
 
-    def register_stream(
+    def _register_stream(
         self,
-        topics: str | list[str] | EndpointInfo | list[EndpointInfo] = None,
-        patterns: str | list[str] | EndpointInfo | list[EndpointInfo] = None,
+        topics: list[str] = None,
         cb: callable = None,
         from_start: bool = False,
         newest_only: bool = False,
         start_thread: bool = True,
         **kwargs,
-    ) -> int:
+    ) -> None:
         """
         Register a callback for a stream topic or pattern
 
         Args:
-            topic (str, optional): Topic. This should be a valid message endpoint in BEC and can be a string or an EndpointInfo object. Defaults to None. Either topic or pattern should be provided.
-            pattern (str, optional): Pattern of topics. In contrast to topics, patterns may contain "*" wildcards. The evaluated patterns should be a valid message endpoint in BEC and can be a string or an EndpointInfo object. Defaults to None. Either topic or pattern should be provided.
+            topic (str, optional): Topic. This should be a valid message endpoint string.
             cb (callable, optional): callback. Defaults to None.
             from_start (bool, optional): read from start. Defaults to False.
             newest_only (bool, optional): read newest only. Defaults to False.
             start_thread (bool, optional): start the dispatcher thread. Defaults to True.
             **kwargs: additional keyword arguments to be transmitted to the callback
 
-        Returns:
-            int: stream id
-
-        Examples:
-            >>> def my_callback(msg, **kwargs):
-            ...     print(msg)
-            ...
-            >>> connector.register_stream("test", my_callback)
-            >>> connector.register_stream(topic="test", cb=my_callback)
-            >>> connector.register_stream(pattern="test:*", cb=my_callback)
-            >>> connector.register_stream(pattern="test:*", cb=my_callback, start_thread=False)
-            >>> connector.register_stream(pattern="test:*", cb=my_callback, start_thread=False, my_arg="test")
         """
-        if topics is None and patterns is None:
-            raise ValueError("topics and pattern cannot be both None")
-
         if newest_only and from_start:
             raise ValueError("newest_only and from_start cannot be both True")
-
-        if not cb:
-            raise ValueError("Callback cb cannot be None")
 
         # make a weakref from the callable, using louie;
         # it can create safe refs for simple functions as well as methods
         cb_ref = louie.saferef.safe_ref(cb)
 
-        if patterns is not None:
-            stream_topics = self._convert_endpointinfo_to_str(patterns)
-        else:
-            stream_topics = self._convert_endpointinfo_to_str(topics)
-
         self._start_events_dispatcher_thread(start_thread)
-
-        if not isinstance(stream_topics, list):
-            stream_topics = [stream_topics]
 
         if newest_only:
             # if newest_only is True, we need to provide a separate callback for each topic,
             # directly calling the callback. This is because we need to have a backpressure
             # mechanism in place, and we cannot rely on the dispatcher thread to handle it.
-            for topic in stream_topics:
+            for topic in topics:
                 self._add_direct_stream_listener(topic, cb_ref, **kwargs)
         else:
             with self._stream_topics_subscription_lock:
-                for topic in stream_topics:
+                for topic in topics:
                     new_subscription = StreamSubscriptionInfo(
                         id="0-0",
                         topic=topic,
@@ -557,37 +564,35 @@ class RedisConnector(ConnectorBase):
     def unregister(self, topics=None, patterns=None, cb=None):
         if self._events_listener_thread is None:
             return
-        if patterns is not None:
-            if isinstance(patterns, str):
-                patterns = [patterns]
-            unsubscribe_list = self._filter_topics_cb(patterns, cb)
-            self._pubsub_conn.punsubscribe(unsubscribe_list)
-        else:
-            if isinstance(topics, str):
-                topics = [topics]
-            unsubscribe_list = self._filter_topics_cb(topics, cb)
-            self._pubsub_conn.unsubscribe(unsubscribe_list)
 
-    def unregister_stream(
-        self, topics: str | list[str] | EndpointInfo | list[EndpointInfo], cb: callable = None
-    ) -> bool:
+        if patterns is not None:
+            patterns = self._normalize_patterns(patterns)
+            # see if registered streams can be unregistered
+            for pattern in patterns:
+                self._unregister_stream(
+                    fnmatch.filter(self._stream_topics_subscription, pattern), cb
+                )
+            pubsub_unsubscribe_list = self._filter_topics_cb(patterns, cb)
+            self._pubsub_conn.punsubscribe(pubsub_unsubscribe_list)
+        else:
+            topics, _ = self._convert_endpointinfo(topics, check_message_op=False)
+            if not self._unregister_stream(topics, cb):
+                unsubscribe_list = self._filter_topics_cb(topics, cb)
+                self._pubsub_conn.unsubscribe(unsubscribe_list)
+
+    def _unregister_stream(self, topics: list[str], cb: callable = None) -> bool:
         """
         Unregister a stream listener.
 
         Args:
-            stream_id (int): stream id
+            topics (list[str]): list of stream topics
 
         Returns:
             bool: True if the stream listener has been removed, False otherwise
         """
-        if isinstance(topics, EndpointInfo) or isinstance(topics, str):
-            topics = [topics]
-
         unsubscribe_list = []
         with self._stream_topics_subscription_lock:
             for topic in topics:
-                if isinstance(topic, EndpointInfo):
-                    topic = topic.endpoint
                 subscription_infos = self._stream_topics_subscription[topic]
                 # remove from list if callback corresponds
                 self._stream_topics_subscription[topic] = list(
