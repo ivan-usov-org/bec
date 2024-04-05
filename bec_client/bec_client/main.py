@@ -1,11 +1,11 @@
 import argparse
+import os
 import sys
 from importlib.metadata import version
 
 from IPython.terminal.ipapp import TerminalIPythonApp
 
-from bec_client.bec_ipython_client import BECIPythonClient
-from bec_lib import RedisConnector, ServiceConfig, bec_logger
+from bec_lib import ServiceConfig
 
 # pylint: disable=wrong-import-position
 # pylint: disable=protected-access
@@ -17,15 +17,10 @@ try:
 except ImportError:
     startup = None
 
-try:
-    from bec_widgets.cli import BECFigure
-except ImportError:
-    BECFigure = None
-
-logger = bec_logger.logger
+main_dict = {"startup": startup}
 
 
-def main():
+def main(wait_for_server=True):
     parser = argparse.ArgumentParser(
         prog="BEC IPython client", description="BEC command line interface"
     )
@@ -61,50 +56,20 @@ def main():
     if "config" not in locals():
         config = ServiceConfig()
 
+    main_dict["config"] = config
+    main_dict["args"] = args
+    main_dict["wait_for_server"] = wait_for_server
+
     app = TerminalIPythonApp()
     app.interact = True
-    app.initialize(argv=[])
-
-    bec = BECIPythonClient(config, RedisConnector)
-    bec.load_high_level_interface("spec_hli")
-    bec.start()
-
-    dev = bec.device_manager.devices
-    scans = bec.scans
-
-    if not args.nogui and BECFigure is not None:
-        fig = bec.fig = BECFigure()
-        fig.show()
-
-    ####################### END OF INIT #############################
-    #################################################################
-
-    # MODIFY THE SECTIONS BELOW TO CUSTOMIZE THE BEC
-
-    ################################################################
-    ################################################################
-    import numpy as np  # not needed but always nice to have
-
-    bec._ip.prompts.status = 1
-
-    # SETUP BEAMLINE INFO
-    from bec_client.plugins.SLS.sls_info import OperatorInfo, SLSInfo
-
-    bec._beamline_mixin._bl_info_register(SLSInfo)
-    bec._beamline_mixin._bl_info_register(OperatorInfo)
-
-    if startup:
-        # check if post-startup.py script exists
-        file_name = os.path.join(os.path.dirname(startup.__file__), "post_startup.py")
-        if os.path.isfile(file_name):
-            with open(file_name, "r", encoding="utf-8") as file:
-                # pylint: disable=exec-used
-                exec(file.read())
+    app.initialize(argv=["-i", os.path.join(os.path.dirname(__file__), "bec_startup.py")])
 
     try:
         app.start()
     finally:
-        bec.shutdown()
+        if "bec" in main_dict:
+            # bec object is inserted into main_dict by bec_startup
+            main_dict["bec"].shutdown()
 
 
 if __name__ == "__main__":

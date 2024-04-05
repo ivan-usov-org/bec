@@ -1,10 +1,35 @@
+import multiprocessing
+from types import SimpleNamespace
 from unittest import mock
 
 import IPython
 import pytest
 
-from bec_client import BECIPythonClient
+from bec_client import BECIPythonClient, main
 from bec_lib import RedisConnector, ServiceConfig
+
+
+def test_bec_entry_point_globals_and_post_startup(tmpdir, capfd):
+    file_to_execute = tmpdir / "post_startup.py"
+    main.main_dict["startup"] = SimpleNamespace(__file__=file_to_execute)
+    with open(file_to_execute, "w") as f:
+        f.write(
+            """
+completer=get_ipython().Completer
+import sys
+print(completer.all_completions('bec.'), flush=True)
+print(completer.all_completions('BECIP'), flush=True)
+exit()
+"""
+        )
+    p = multiprocessing.Process(target=main.main, kwargs={"wait_for_server": False})
+    p.start()
+    p.join()
+    output = capfd.readouterr().out
+    assert "bec.device_manager" in output  # just one of many completions
+    assert (
+        "BECIPythonClient" not in output
+    )  # just to ensure something we don't want is really not there
 
 
 def test_ipython_device_completion(bec_client_mock):
