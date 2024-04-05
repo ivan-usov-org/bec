@@ -414,6 +414,13 @@ class FlomniSampleTransferMixin:
 
     def laser_tracker_on(self):
         dev.rtx.controller.laser_tracker_on()
+        time.sleep(.2)
+        signal = dev.rtx.controller.read_ssi_interferometer(1)
+        if signal < 10000:
+            time.sleep(1)
+            if signal < 10000:
+                print("\x1b[91mThe signal of the tracker is low. Please readjust!\x1b[0m")
+    #change hard coded number to a user parameter!
 
     def laser_tracker_off(self):
         dev.rtx.controller.laser_tracker_off()
@@ -1299,6 +1306,17 @@ class Flomni(
         self.client.set_global_var("tomo_angle_stepsize", val)
 
     @property
+    def golden_max_number_of_projections(self):
+        val = self.client.get_global_var("golden_max_number_of_projections")
+        if val is None:
+            return 1000.0
+        return val
+
+    @golden_max_number_of_projections.setter
+    def golden_max_number_of_projections(self, val: float):
+        self.client.set_global_var("golden_max_number_of_projections", val)
+
+    @property
     def tomo_stitch_overlap(self):
         val = self.client.get_global_var("tomo_stitch_overlap")
         if val is None:
@@ -1397,13 +1415,8 @@ class Flomni(
 
         umv(dev.fsamroy, 0)
 
-    def sub_tomo_scan(self, subtomo_number, start_angle=None):
-        """
-        Performs a sub tomogram scan.
-        Args:
-            subtomo_number (int): The sub tomogram number.
-            start_angle (float, optional): The start angle of the scan. Defaults to None.
-        """
+
+    def _write_subtomo_to_scilog(self,subtomo_number):
         dev = builtins.__dict__.get("dev")
         bec = builtins.__dict__.get("bec")
         if self.tomo_id > 0:
@@ -1414,6 +1427,27 @@ class Flomni(
             f"Starting subtomo: {subtomo_number}. First scan number: {bec.queue.next_scan_number}.",
             tags,
         )
+
+    def sub_tomo_scan(self, subtomo_number, start_angle=None):
+        """
+        Performs a sub tomogram scan.
+        Args:
+            subtomo_number (int): The sub tomogram number.
+            start_angle (float, optional): The start angle of the scan. Defaults to None.
+        """
+#        dev = builtins.__dict__.get("dev")
+#        bec = builtins.__dict__.get("bec")
+#        if self.tomo_id > 0:
+#            tags = ["BEC_subtomo", self.sample_name, f"tomo_id_{self.tomo_id}"]
+#        else:
+#            tags = ["BEC_subtomo", self.sample_name]
+#        self.write_to_scilog(
+#            f"Starting subtomo: {subtomo_number}. First scan number: {bec.queue.next_scan_number}.",
+#            tags,
+#        )
+
+        self._write_subtomo_to_scilog(subtomo_number)
+
 
         if start_angle is None:
             if subtomo_number == 1:
@@ -1436,49 +1470,56 @@ class Flomni(
         # _tomo_shift_angles (potential global variable)
         _tomo_shift_angles = 0
         angle_end = start_angle + 180
-        for angle in np.linspace(
+        angles = np.linspace(
             start_angle + _tomo_shift_angles,
             angle_end,
             num=int(180 / self.tomo_angle_stepsize) + 1,
             endpoint=True,
-        ):
-            successful = False
-            error_caught = False
-            if 0 <= angle < 180.05:
-                print(f"Starting flOMNI scan for angle {angle}")
-                while not successful:
-                    self._start_beam_check()
-                    if not self.special_angles:
-                        self._current_special_angles = []
-                    if self._current_special_angles:
-                        next_special_angle = self._current_special_angles[0]
-                        if np.isclose(angle, next_special_angle, atol=0.5):
-                            self._current_special_angles.pop(0)
-                            num_repeats = self.special_angle_repeats
+        )
+        # reverse even sub-tomograms
+        if not (subtomo_number%2):
+            angles=np.flip(angles)
+        for angle in angles:
+            self._tomo_scan_at_angle(angle,subtomo_number)
+            
+    def _tomo_scan_at_angle(self,angle,subtomo_number):
+        successful = False
+        error_caught = False
+        if 0 <= angle < 180.05:
+            print(f"Starting flOMNI scan for angle {angle} in subtomo {subtomo_number}")
+            while not successful:
+                self._start_beam_check()
+                if not self.special_angles:
+                    self._current_special_angles = []
+                if self._current_special_angles:
+                    next_special_angle = self._current_special_angles[0]
+                    if np.isclose(angle, next_special_angle, atol=0.5):
+                        self._current_special_angles.pop(0)
+                        num_repeats = self.special_angle_repeats
+                else:
+                    num_repeats = 1
+                try:
+                    start_scan_number = bec.queue.next_scan_number
+                    for i in range(num_repeats):
+                        self._at_each_angle(angle)
+                    error_caught = False
+                except AlarmBase as exc:
+                    if exc.alarm_type == "TimeoutError":
+                        bec.queue.request_queue_reset()
+                        time.sleep(2)
+                        error_caught = True
                     else:
-                        num_repeats = 1
-                    try:
-                        start_scan_number = bec.queue.next_scan_number
-                        for i in range(num_repeats):
-                            self._at_each_angle(angle)
-                        error_caught = False
-                    except AlarmBase as exc:
-                        if exc.alarm_type == "TimeoutError":
-                            bec.queue.request_queue_reset()
-                            time.sleep(2)
-                            error_caught = True
-                        else:
-                            raise exc
+                        raise exc
 
-                    if self._was_beam_okay() and not error_caught:
-                        successful = True
-                    else:
-                        self._wait_for_beamline_checks()
-                end_scan_number = bec.queue.next_scan_number
-                for scan_nr in range(start_scan_number, end_scan_number):
-                    self._write_tomo_scan_number(scan_nr, angle, subtomo_number)
+                if self._was_beam_okay() and not error_caught:
+                    successful = True
+                else:
+                    self._wait_for_beamline_checks()
+            end_scan_number = bec.queue.next_scan_number
+            for scan_nr in range(start_scan_number, end_scan_number):
+                self._write_tomo_scan_number(scan_nr, angle, subtomo_number)
 
-    def tomo_scan(self, subtomo_start=1, start_angle=None):
+    def tomo_scan(self, subtomo_start=1, start_angle=None, projection_number=None):
         """start a tomo scan"""
         bec = builtins.__dict__.get("bec")
         scans = builtins.__dict__.get("scans")
@@ -1500,9 +1541,49 @@ class Flomni(
             else:
                 self.tomo_id = 0
         with scans.dataset_id_on_hold:
-            for ii in range(subtomo_start, 9):
-                self.sub_tomo_scan(ii, start_angle=start_angle)
-                start_angle = None
+            if self.tomo_type == 1:
+                #8 equally spaced sub-tomograms
+                for ii in range(subtomo_start, 9):
+                    self.sub_tomo_scan(ii, start_angle=start_angle)
+                    start_angle = None
+
+            elif self.tomo_type == 2:
+                #Golden ratio tomography
+                previous_subtomo_number = -1
+                if projection_number == None:
+                    ii = 0
+                else:
+                    ii = projection_number
+                while True:
+                    angle,subtomo_number = self._golden(ii, self.golden_ratio_bunch_size, 180,1)
+                    if previous_subtomo_number != subtomo_number:
+                        self._write_subtomo_to_scilog(subtomo_number)
+                        previous_subtomo_number = subtomo_number
+                    self._tomo_scan_at_angle(angle,subtomo_number)
+                    ii += 1
+                    if ii > self.golden_max_number_of_projections and self.golden_max_number_of_projections > 0:
+                        print(f"Golden ratio tomography stopped automatically after the requested {self.golden_max_number_of_projections} projections")
+                        break
+            elif self.tomo_type == 3:
+                #Equally spaced tomography, golden ratio starting angle
+                previous_subtomo_number = -1
+                if projection_number == None:
+                    ii = 0
+                else:
+                    ii = projection_number
+                while True:
+                    angle,subtomo_number = self._golden_equally_spaced(ii, int(180/self.tomo_angle_stepsize), 180, 1, 0)
+                    if previous_subtomo_number != subtomo_number:
+                        self._write_subtomo_to_scilog(subtomo_number)
+                        previous_subtomo_number = subtomo_number
+                    self._tomo_scan_at_angle(angle,subtomo_number)
+                    ii += 1
+                    if ii > self.golden_max_number_of_projections and self.golden_max_number_of_projections>0:
+                        print(f"Golden ratio tomography stopped automatically after the requested {self.golden_max_number_of_projections} projections")
+                        break
+            else:
+                raise FlomniError("undefined tomo type")
+
 
     def add_sample_database(
         self, samplename, date, eaccount, scan_number, setup, sample_additional_info, user
@@ -1525,7 +1606,7 @@ class Flomni(
         self.tomo_scan_projection(angle)
         self.tomo_reconstruct()
 
-    def _golden(self, ii, howmany_sorted, maxangle):
+    def _golden(self, ii, howmany_sorted, maxangle, reverse=False):
         """returns the iis golden ratio angle of sorted bunches of howmany_sorted and its subtomo number"""
         golden = []
         # occupy array with the range of golden angles
@@ -1537,12 +1618,15 @@ class Flomni(
             )
         golden.sort()
         subtomo_number = int(ii / howmany_sorted) + 1
+        if reverse and not subtomo_number%2:
+            golden.reverse()
         return (golden[ii % howmany_sorted], subtomo_number)
+    
 
     def _golden_equally_spaced(
         self, ii, number_of_projections_per_subtomo, maxangle, reverse, verbose
     ):
-        """returns angles for equally spaced tomography with strting angles of sub tomograms shifted according to golden ratio"""
+        """returns angles for equally spaced tomography with starting angles of sub tomograms shifted according to golden ratio"""
         """ii is projection number starting at 1, reverse will execute the even sub tomograms in reverse direction"""
         # ii is projection number starting at 1
         angular_step = maxangle / number_of_projections_per_subtomo
@@ -1569,7 +1653,7 @@ class Flomni(
                 f"Equally spaced golden ratio tomography.\nAngular step: {angular_step}\nSubtomo Number: {subtomo_number}\nAngle: {angle}"
             )
 
-        return angle
+        return angle,subtomo_number
 
     def tomo_reconstruct(self, base_path="~/Data10/specES1"):
         """write the tomo reconstruct file for the reconstruction queue"""
@@ -1664,12 +1748,20 @@ class Flomni(
         if self.tomo_type == 2:
             print("\x1b[1mTomo type 2:\x1b[0m Golden ratio tomography")
             print(f"Sorted in bunches of: {self.golden_ratio_bunch_size}")
+            if self.golden_max_number_of_projections > 0:
+                print(f"ending after {self.golden_max_number_of_projections} projections")
+            else:
+                print("ending by manual interruption")
         if self.tomo_type == 3:
             print(
                 "\x1b[1mTomo type 3:\x1b[0m Equally spaced tomography, golden ratio starting angle"
             )
             print(f"Number of projections per sub-tomogram: {180/self.tomo_angle_stepsize}")
             print(f"Angular step within sub-tomogram:    {self.tomo_angle_stepsize} degrees")
+            if self.golden_max_number_of_projections > 0:
+                print(f"ending after {self.golden_max_number_of_projections} projections")
+            else:
+                print("ending by manual interruption")
         print(f"\nSample name: {self.sample_name}\n")
 
         user_input = input("Are these parameters correctly set for your scan? [Y/n]")
@@ -1706,6 +1798,12 @@ class Flomni(
                     self.golden_ratio_bunch_size,
                     int,
                 )
+                self.golden_max_number_of_projections = self._get_val(
+                    "Stop after number of projections (zero for endless)",
+                    self.golden_max_number_of_projections,
+                    int,
+                )
+
             if self.tomo_type == 3:
                 numprj = self._get_val(
                     "Number of projections per sub-tomogram",
@@ -1713,10 +1811,29 @@ class Flomni(
                     int,
                 )
                 self.tomo_angle_stepsize = 180 / numprj
+                self.golden_max_number_of_projections = self._get_val(
+                    "Stop after number of projections (zero for endless)",
+                    self.golden_max_number_of_projections,
+                    int,
+                )
 
     @staticmethod
     def _get_val(msg: str, default_value, data_type):
         return data_type(input(f"{msg} ({default_value}): ") or default_value)
+
+    def rt_off(self):
+        dev.rtx.enabled = False
+        dev.rty.enabled = False
+        dev.rtz.enabled = False
+
+    def rt_on(self):
+        dev.rtx.enabled = True
+        dev.rty.enabled = True
+        dev.rtz.enabled = True
+        if dev.rtx.enabled == True:
+            print("rt is enabled")
+        else:
+            print("failed to enable rt")
 
     def write_pdf_report(self):
         """create and write the pdf report with the current flomni settings"""
