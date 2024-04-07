@@ -26,7 +26,7 @@ but they are executed in a specific order:
 # import numpy as np
 
 # from bec_lib import MessageEndpoints, bec_logger, messages
-# from scan_server.errors import ScanAbortion
-# from scan_server.scans import FlyScanBase, RequestBase, ScanArgType, ScanBase
+# from bec_server.scan_server.errors import ScanAbortion
+# from bec_server.scan_server.scans import FlyScanBase, RequestBase, ScanArgType, ScanBase
 
 # logger = bec_logger.logger

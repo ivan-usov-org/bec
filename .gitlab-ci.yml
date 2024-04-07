@@ -39,15 +39,6 @@ stages:
   - Build
   - Deploy
 
-.install-bec-services: &install-bec-services
-    - pip install -e ./device_server
-    - pip install -e ./scan_server
-    - pip install -e ./scan_bundler
-    - pip install -e ./bec_client
-    - pip install -e ./file_writer
-    - pip install -e ./scihub
-    - pip install -e ./data_processing
-
 .install-bec-services-dev: &install-bec-services-dev
     - pip install wheel
     - pip install -e ./bec_server[dev]
@@ -69,7 +60,7 @@ pylint:
     - pip install pylint pylint-exit anybadge
   script:
     - mkdir ./pylint
-    - pylint ./data_processing/data_processing ./bec_lib/bec_lib ./scan_server/scan_server ./device_server/device_server ./scan_bundler/scan_bundler ./bec_client/bec_client ./file_writer/file_writer --output-format=text | tee ./pylint/pylint.log || pylint-exit $?
+    - pylint ./bec_server/bec_server ./bec_lib/bec_lib ./bec_client/bec_client --output-format=text | tee ./pylint/pylint.log || pylint-exit $?
     - PYLINT_SCORE=$(sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' ./pylint/pylint.log)
     - anybadge --label=Pylint --file=pylint/pylint.svg --value=$PYLINT_SCORE 2=red 4=orange 8=yellow 10=green
     - echo "Pylint score is $PYLINT_SCORE"
@@ -123,7 +114,7 @@ tests:
     - apt-get install -y gcc
     - apt-get install -y redis
     - *install-bec-services-dev
-    - coverage run --source=./data_processing/data_processing,./bec_lib/bec_lib,./device_server/device_server,./scan_server/scan_server,./scan_bundler/scan_bundler,./bec_client/bec_client,./file_writer/file_writer,./scihub/scihub --omit=*/bec_client/bec_client/plugins/*,*/bec_client/scripts/*,./bec_lib/bec_lib/tests -m pytest -v --junitxml=report.xml --random-order ./data_processing/tests ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests ./file_writer/tests ./scihub/tests ./bec_lib/tests
+    - coverage run --source=./bec_server/bec_server,./bec_lib/bec_lib,./bec_client/bec_client, --omit=*/bec_server/scan_server/scan_plugins/*,*/bec_client/bec_client/plugins/*,*/bec_client/scripts/*,./bec_lib/bec_lib/tests -m pytest -v --junitxml=report.xml --random-order ./bec_server/tests ./bec_client/tests/client_tests ./bec_lib/tests
     - coverage report
     - coverage xml
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
@@ -147,7 +138,7 @@ tests-3.11:
     - apt-get install -y gcc
     - apt-get install -y redis
     - *install-bec-services-dev
-    - pytest -v --junitxml=report.xml --random-order ./data_processing/tests ./bec_lib/tests ./scan_server/tests ./device_server/tests ./scan_bundler/tests ./bec_client/tests/client_tests ./file_writer/tests ./scihub/tests
+    - pytest -v --junitxml=report.xml --random-order ./bec_server/tests ./bec_lib/tests ./bec_client/tests/client_tests 
 
 tests-3.12:
   extends: "tests-3.11"
