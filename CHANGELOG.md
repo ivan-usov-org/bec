@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v1.22.2 (2024-04-08)
+
+### Fix
+
+* **issue #253:** Split startup in bec entry point in 2 parts, ensure globals are in IPython namespace ([`42625c3`](https://gitlab.psi.ch/bec/bec/-/commit/42625c357e0a74824f79ef59d22cd622da4e4d52))
+
+### Documentation
+
+* **developer:** Fixed isort description ([`cb41c6f`](https://gitlab.psi.ch/bec/bec/-/commit/cb41c6f1acadd8652634b76c58a740046f7bf834))
+
 ## v1.22.1 (2024-04-04)
 
 ### Fix
