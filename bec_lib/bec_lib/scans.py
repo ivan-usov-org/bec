@@ -9,6 +9,7 @@ import builtins
 import uuid
 from collections.abc import Callable
 from contextlib import ContextDecorator
+from copy import deepcopy
 from typing import TYPE_CHECKING
 
 from toolz import partition
@@ -51,13 +52,13 @@ class ScanObject:
         # pylint: disable=protected-access
         hide_report = hide_report_kwarg or scans._hide_report
 
-        metadata = self.client.metadata.copy()
+        metadata = deepcopy(self.client.metadata)
         if "sample_name" not in metadata:
             sample_name = self.client.get_global_var("sample_name")
             if sample_name is not None:
                 metadata["sample_name"] = sample_name
 
-        file_writer_data = self.client.file_writer_data.copy()
+        file_writer_data = deepcopy(self.client.file_writer_data)
 
         if "md" in kwargs:
             metadata.update(kwargs["md"])
@@ -386,7 +387,7 @@ class FileWriterData:
 
     def __enter__(self):
         """Enter the context manager"""
-        self._orig_file_writer_data = self.client.file_writer_data.copy()
+        self._orig_file_writer_data = deepcopy(self.client.file_writer_data)
         self.client.file_writer_data.update(self._file_writer_data)
         return self
 
@@ -413,7 +414,7 @@ class Metadata:
 
     def __enter__(self):
         """Enter the context manager"""
-        self._orig_metadata = self.client.metadata.copy()
+        self._orig_metadata = deepcopy(self.client.metadata)
         self.client.metadata.update(self._metadata)
         return self
 
