@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v1.23.0 (2024-04-08)
+
+### Feature
+
+* Adapt file writing; log files to common dir and refactoring of filewriter ([`246f271`](https://gitlab.psi.ch/bec/bec/-/commit/246f271bc9404d38e4100c8dbd0094af7b1136f6))
+
+### Fix
+
+* Fix .deepcopy vs copy for metadata from client ([`9ad68ab`](https://gitlab.psi.ch/bec/bec/-/commit/9ad68ab69a67b1fce61682a6fd24716df10b2208))
+
 ## v1.22.2 (2024-04-08)
 
 ### Fix
