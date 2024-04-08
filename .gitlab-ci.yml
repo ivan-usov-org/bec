@@ -58,7 +58,9 @@ formatter:
   stage: Formatter
   needs: []
   script:
-    - pip install black isort wheel
+    - pip install black isort
+    - git clone --branch $OPHYD_DEVICES_BRANCH https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
+    - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices    
     - *install-bec-services-dev
     - isort --check --diff --line-length=100 --profile=black --multi-line=3 --trailing-comma ./
     - black --check --diff --color --line-length=100 ./
