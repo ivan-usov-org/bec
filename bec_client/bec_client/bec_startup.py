@@ -42,7 +42,12 @@ else:
     bec._beamline_mixin._bl_info_register(SLSInfo)
     bec._beamline_mixin._bl_info_register(OperatorInfo)
 
-if _main_dict["startup"]:
+
+if _main_dict["startup_file"]:
+    with open(_main_dict["startup_file"], "r", encoding="utf-8") as file:
+        # pylint: disable=exec-used
+        exec(file.read())
+elif _main_dict["startup"]:
     # check if post-startup.py script exists
     file_name = os.path.join(os.path.dirname(_main_dict["startup"].__file__), "post_startup.py")
     if os.path.isfile(file_name):

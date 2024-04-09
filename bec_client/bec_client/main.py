@@ -19,14 +19,20 @@ except ImportError:
 
 main_dict = {"startup": startup}
 
+sys.modules["bec_client.main"] = sys.modules[
+    __name__
+]  # properly register module when file is executed directly, like in test
 
-def main(wait_for_server=True):
+
+def main():
     parser = argparse.ArgumentParser(
         prog="BEC IPython client", description="BEC command line interface"
     )
     parser.add_argument("--version", action="store_true", default=False)
     parser.add_argument("--nogui", action="store_true", default=False)
     parser.add_argument("--config", action="store", default=None)
+    parser.add_argument("--dont-wait-for-server", action="store_true", default=False)
+    parser.add_argument("--post-startup-file", action="store", default=None)
     args, left_args = parser.parse_known_args()
 
     # remove already parsed args from command line args
@@ -58,7 +64,8 @@ def main(wait_for_server=True):
 
     main_dict["config"] = config
     main_dict["args"] = args
-    main_dict["wait_for_server"] = wait_for_server
+    main_dict["wait_for_server"] = not args.dont_wait_for_server
+    main_dict["startup_file"] = args.post_startup_file
 
     app = TerminalIPythonApp()
     app.interact = True
