@@ -166,7 +166,7 @@ end-2-end:
   artifacts:
     when: on_failure
     paths:
-      - ./*.log
+      - ./logs/*.log
     expire_in: 2 week
 
   rules:
@@ -264,18 +264,18 @@ end-2-end-services_on_multi_hosts:
     # start end-to-end test, using previously started servers and previously running redis instance 
     - podman run --network=host --env BEC_REDIS_HOST --name end2end_test end2end_client_test pytest --bec-redis-host $BEC_REDIS_HOST -v --random-order tests/end-2-end || true
     # copy the log files to the project directory in order to be reachable by git artifacts
-    - podman cp device_server:/code/bec/device_server/DeviceServer.log $CI_PROJECT_DIR/
-    - podman cp scan_server:/code/bec/scan_server/ScanServer.log $CI_PROJECT_DIR/
-    - podman cp scan_bundler:/code/bec/scan_bundler/ScanBundler.log $CI_PROJECT_DIR/
-    - podman cp file_writer:/code/bec/file_writer/FileWriterManager.log $CI_PROJECT_DIR/
-    - podman cp scihub:/code/bec/scihub/SciHub.log $CI_PROJECT_DIR/
-    - podman cp dap:/code/bec/data_processing/DAPServer.log $CI_PROJECT_DIR/
-    - podman cp end2end_test:/code/bec/bec_client/BECClient.log $CI_PROJECT_DIR/
+    - podman cp device_server:/code/bec/logs/DeviceServer.log $CI_PROJECT_DIR/
+    - podman cp scan_server:/code/bec/logs/ScanServer.log $CI_PROJECT_DIR/
+    - podman cp scan_bundler:/code/bec/logs/ScanBundler.log $CI_PROJECT_DIR/
+    - podman cp file_writer:/code/bec/logs/FileWriterManager.log $CI_PROJECT_DIR/
+    - podman cp scihub:/code/bec/logs/SciHub.log $CI_PROJECT_DIR/
+    - podman cp dap:/code/bec/logs/DAPServer.log $CI_PROJECT_DIR/
+    - podman cp end2end_test:/code/bec/logs/BECClient.log $CI_PROJECT_DIR/
 
   artifacts:
     when: on_failure
     paths:
-      - ./*.log
+      - ./logs/*.log
     expire_in: 1 week
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
@@ -313,7 +313,7 @@ end-2-end-conda:
   artifacts:
     when: on_failure
     paths:
-      - ./*.log
+      - ./logs/*.log
     expire_in: 1 week
 
   rules:
@@ -356,7 +356,7 @@ end-2-end-conda-310:
   artifacts:
     when: on_failure
     paths:
-      - ./*.log
+      - ./logs/*.log
     expire_in: 1 week
 
   rules:
