@@ -1,5 +1,5 @@
-import multiprocessing
-from types import SimpleNamespace
+import subprocess
+import sys
 from unittest import mock
 
 import IPython
@@ -9,23 +9,36 @@ from bec_client import BECIPythonClient, main
 from bec_lib import RedisConnector, ServiceConfig
 
 
-def test_bec_entry_point_globals_and_post_startup(tmpdir, capfd):
+def test_bec_entry_point_globals_and_post_startup(tmpdir):  # , capfd):
     file_to_execute = tmpdir / "post_startup.py"
-    main.main_dict["startup"] = SimpleNamespace(__file__=file_to_execute)
     with open(file_to_execute, "w") as f:
         f.write(
             """
-completer=get_ipython().Completer
-import sys
-print(completer.all_completions('bec.'), flush=True)
-print(completer.all_completions('BECIP'), flush=True)
-exit()
+try:
+  completer=get_ipython().Completer
+  import sys
+  print(completer.all_completions('bec.'), flush=True)
+  print(completer.all_completions('BECIP'), flush=True)
+finally:
+  import os
+  import signal
+  os.kill(os.getpid(), signal.SIGTERM)
 """
         )
-    p = multiprocessing.Process(target=main.main, kwargs={"wait_for_server": False})
-    p.start()
-    p.join()
-    output = capfd.readouterr().out
+    p = subprocess.Popen(
+        [
+            sys.executable,
+            main.__file__,
+            "--nogui",
+            "--dont-wait-for-server",
+            "--post-startup-file",
+            file_to_execute,
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+    )
+    output, _ = p.communicate()
     assert "bec.device_manager" in output  # just one of many completions
     assert (
         "BECIPythonClient" not in output
