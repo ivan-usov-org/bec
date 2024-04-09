@@ -186,10 +186,16 @@ class ScanBundler(BECService):
 
     def _fly_scan_update(self, scan_id, device, signal, metadata):
         if "point_id" not in metadata:
+            logger.warning(
+                f"Received device message from device {device} without point_id in metadata. {metadata}"
+            )
             return
         with self._lock:
             dev = {device: signal}
             point_id = metadata["point_id"]
+            logger.info(
+                f"Received reading from device {device} for scan_id {scan_id} at point {point_id}."
+            )
             if self.sync_storage[scan_id].get("info", {}).get("monitor_sync", "bec") == "bec":
                 # For monitor sync with BEC, we use the point_id as the key for the sync_storage.
                 monitored_devices = self.monitored_devices[scan_id]
