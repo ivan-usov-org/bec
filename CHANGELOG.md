@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v1.23.1 (2024-04-09)
+
+### Fix
+
+* Add random order to full end-2-end tests ([`8a47f76`](https://gitlab.psi.ch/bec/bec/-/commit/8a47f76f25b65b9252fa90055074267e207512ae))
+* Fix logs for ci pipeline ([`28d3dda`](https://gitlab.psi.ch/bec/bec/-/commit/28d3dda2c398baa7251da0b64e42b7704177ffc9))
+
 ## v1.23.0 (2024-04-08)
 
 ### Feature
