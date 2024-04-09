@@ -894,8 +894,6 @@ class ScanWorker(threading.Thread):
                 self.parent.queue_manager.queues[self.queue_name].abort()
             self.reset()
             logger.error(f"Scan worker stopped: {exc}. Unrecoverable error.")
-        finally:
-            self.connector.shutdown()
 
     def shutdown(self):
         """shutdown the scan worker"""

@@ -87,9 +87,16 @@ class QueueManager:
     @threadlocked
     def add_queue(self, queue_name: str) -> None:
         """add a new queue to the queue manager"""
-        if queue_name not in self.queues:
-            self.queues[queue_name] = ScanQueue(self, queue_name=queue_name)
-            self.queues[queue_name].start_worker()
+        if queue_name in self.queues:
+            queue = self.queues[queue_name]
+            if not queue.scan_worker.is_alive():
+                logger.info(f"Restarting worker for queue {queue_name}")
+                queue.clear()
+                self.queues[queue_name] = ScanQueue(self, queue_name=queue_name)
+                self.queues[queue_name].start_worker()
+            return
+        self.queues[queue_name] = ScanQueue(self, queue_name=queue_name)
+        self.queues[queue_name].start_worker()
 
     def _start_scan_queue_register(self) -> None:
         self.connector.register(
