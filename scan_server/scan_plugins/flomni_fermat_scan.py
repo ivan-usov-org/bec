@@ -282,11 +282,19 @@ class FlomniFermatScan(SyncFlyScanBase):
         """return to the start position"""
         # in flomni, we need to move to the start position of the next scan
         if isinstance(self.positions, np.ndarray) and len(self.positions[-1]) == 3:
-            yield from self.stubs.set(device="rtx", value=self.positions[-1][0], wait_group="scan_motor")
-            yield from self.stubs.set(device="rty", value=self.positions[-1][1], wait_group="scan_motor")
-            yield from self.stubs.set(device="rtz", value=self.positions[-1][2], wait_group="scan_motor")
+            yield from self.stubs.set(
+                device="rtx", value=self.positions[-1][0], wait_group="scan_motor"
+            )
+            yield from self.stubs.set(
+                device="rty", value=self.positions[-1][1], wait_group="scan_motor"
+            )
+            yield from self.stubs.set(
+                device="rtz", value=self.positions[-1][2], wait_group="scan_motor"
+            )
 
-            yield from self.stubs.wait(wait_type="move", device=["rtx", "rty", "rtz"], wait_group="scan_motor")
+            yield from self.stubs.wait(
+                wait_type="move", device=["rtx", "rty", "rtz"], wait_group="scan_motor"
+            )
             return
 
         logger.warning("No positions found to return to start")
