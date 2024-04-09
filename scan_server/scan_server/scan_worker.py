@@ -748,13 +748,26 @@ class ScanWorker(threading.Thread):
             if queue.stopped or not (queue.return_to_start and queue.active_request_block):
                 raise ScanAbortion from exc
             queue.stopped = True
-            cleanup = queue.active_request_block.scan.return_to_start()
-            self.status = InstructionQueueStatus.RUNNING
-            for instr in cleanup:
-                self._check_for_interruption()
-                instr.metadata["scan_id"] = queue.queue.active_rb.scan_id
-                instr.metadata["queue_id"] = queue.queue_id
-                self._instruction_step(instr)
+            try:
+                cleanup = queue.active_request_block.scan.return_to_start()
+                self.status = InstructionQueueStatus.RUNNING
+                for instr in cleanup:
+                    self._check_for_interruption()
+                    instr.metadata["scan_id"] = queue.queue.active_rb.scan_id
+                    instr.metadata["queue_id"] = queue.queue_id
+                    self._instruction_step(instr)
+            except Exception as exc_return_to_start:
+                # if the return_to_start fails, raise the original exception
+                content = traceback.format_exc()
+                logger.error(content)
+                self.connector.raise_alarm(
+                    severity=Alarms.MAJOR,
+                    source="ScanWorker",
+                    msg=content,
+                    alarm_type=exc_return_to_start.__class__.__name__,
+                    metadata={},
+                )
+                raise ScanAbortion from exc
             raise ScanAbortion from exc
         except Exception as exc:
             content = traceback.format_exc()
@@ -880,6 +893,7 @@ class ScanWorker(threading.Thread):
             if self.queue_name in self.parent.queue_manager.queues:
                 self.parent.queue_manager.queues[self.queue_name].abort()
             self.reset()
+            logger.error(f"Scan worker stopped: {exc}. Unrecoverable error.")
         finally:
             self.connector.shutdown()
 

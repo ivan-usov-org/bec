@@ -89,6 +89,8 @@ class ScanStubs:
             if msg:
                 break
             time.sleep(0.001)
+        if self.shutdown_event.is_set():
+            raise ScanAbortion("The scan was aborted.")
         if not msg.content["success"]:
             error = msg.content["out"]
             if isinstance(error, dict) and {"error", "msg", "traceback"}.issubset(
