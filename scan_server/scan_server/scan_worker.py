@@ -878,6 +878,7 @@ class ScanWorker(threading.Thread):
                     self.cleanup()
                     self.parent.queue_manager.queues[self.queue_name].abort()
                     self.reset()
+                    self.status = InstructionQueueStatus.RUNNING
 
         # pylint: disable=broad-except
         except Exception as exc:
