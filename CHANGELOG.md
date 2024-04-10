@@ -2,6 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## v1.24.1 (2024-04-10)
+
+### Fix
+
+* **scan_server:** Break out of run loop if signal event is set ([`6edac2f`](https://gitlab.psi.ch/bec/bec/-/commit/6edac2f54d1d1c33f8d1e7329298361a5b1c62f1))
+* **scan_server:** Set queue to stopped after reaching a limit error ([`8470f63`](https://gitlab.psi.ch/bec/bec/-/commit/8470f636a2d1db2ff6f1dd68e7db0e18555c085b))
+* **flomni:** Wait for cleanup to be finished ([`8660096`](https://gitlab.psi.ch/bec/bec/-/commit/8660096e536f59f04b8fb3f179cdcf7bf078b1cf))
+* **scan_server:** Reset worker to running after failed cleanup ([`fa6f2da`](https://gitlab.psi.ch/bec/bec/-/commit/fa6f2da8af434517da2001df9775a2b834132ec3))
+* **scan_server:** Restart queue if worker died ([`a59eb9c`](https://gitlab.psi.ch/bec/bec/-/commit/a59eb9c8886a410f0dbaa4351b1b37de72dbdc20))
+* **scan_server:** Error during return_to_start was not caught and caused the scan worker to shut down ([`1fa372b`](https://gitlab.psi.ch/bec/bec/-/commit/1fa372b59023210d602c5d5627e34107418e14b7))
+
 ## v1.24.0 (2024-04-10)
 
 ### Feature
