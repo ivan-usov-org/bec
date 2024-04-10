@@ -4,12 +4,6 @@
 declare -a dirs=(
     "bec_client"
     "bec_lib"
-    "scan_server"
-    "device_server"
-    "scan_bundler"
-    "file_writer"
-    "data_processing"
-    "scihub"
     "bec_server"
 )
 
