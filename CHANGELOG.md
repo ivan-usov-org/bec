@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v2.0.0 (2024-04-10)
+
+### Breaking
+
+* moved services to bec_server ([`405d12e`](https://gitlab.psi.ch/bec/bec/-/commit/405d12e74a3c7a27aa0e357a1d8438dc5f35b079))
+
 ## v1.24.1 (2024-04-10)
 
 ### Fix
