@@ -415,13 +415,7 @@ class FlomniSampleTransferMixin:
     def laser_tracker_on(self):
         dev.rtx.controller.laser_tracker_on()
         time.sleep(0.2)
-        signal = dev.rtx.controller.read_ssi_interferometer(1)
-        if signal < 10000:
-            time.sleep(1)
-            if signal < 10000:
-                print("\x1b[91mThe signal of the tracker is low. Please readjust!\x1b[0m")
-
-    # change hard coded number to a user parameter!
+        self._laser_tracker_check_signalstrength()
 
     def laser_tracker_off(self):
         dev.rtx.controller.laser_tracker_off()
@@ -1697,6 +1691,9 @@ class Flomni(
         # additional_correction = self.align.compute_additional_correction(angle)
         # additional_correction_2 = self.align.compute_additional_correction_2(angle)
         # correction_xeye_mu = self.align.lamni_compute_additional_correction_xeye_mu(angle)
+
+        dev.rtx.controller.laser_tracker_check_signalstrength()
+
         offsets = self.get_alignment_offset(angle)
         sum_offset_x = offsets[0]
         sum_offset_y = (
