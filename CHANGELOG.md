@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.24.0 (2024-04-10)
+
+### Feature
+
+* Add check for logger to load correct config, add tests ([`2317fd3`](https://gitlab.psi.ch/bec/bec/-/commit/2317fd3df797468dcd583c70221f65a5b2f5ea9b))
+
 ## v1.23.1 (2024-04-09)
 
 ### Fix
