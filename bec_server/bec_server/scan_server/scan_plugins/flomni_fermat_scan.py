@@ -158,6 +158,9 @@ class FlomniFermatScan(SyncFlyScanBase):
             device="rtz", value=self.positions[0][2], wait_group="prepare_setup_part2"
         )
         yield from self.stubs.send_rpc_and_wait("rtx", "controller.laser_tracker_on")
+        yield from self.stubs.send_rpc_and_wait(
+            "rtx", "controller.laser_tracker_check_signalstrength"
+        )
         yield from self.stubs.wait(
             wait_type="move", device=["rtx", "rtz"], wait_group="prepare_setup_part2"
         )
