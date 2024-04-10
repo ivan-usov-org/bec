@@ -50,6 +50,8 @@ class BECLogger:
     )
     LOGLEVEL = LogLevel
 
+    _logger = None
+
     def __init__(self) -> None:
         if hasattr(self, "_configured"):
             return
@@ -65,10 +67,13 @@ class BECLogger:
         self.logger.level("CONSOLE_LOG", no=21, color="<yellow>", icon="📣")
 
     def __new__(cls):
-        if not hasattr(cls, "_logger"):
+        if not hasattr(cls, "_logger") or cls._logger is None:
             cls._logger = super(BECLogger, cls).__new__(cls)
-            cls._initialized = False
         return cls._logger
+
+    @classmethod
+    def _reset_singleton(cls):
+        cls._logger = None
 
     def configure(
         self,

@@ -30,6 +30,7 @@ def bec_service(config, connector_cls=None, **kwargs):
     finally:
         service.shutdown()
         bec_logger.logger.remove()
+        bec_logger._reset_singleton()
 
 
 def test_bec_service_init_with_service_config():

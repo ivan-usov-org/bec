@@ -5,6 +5,7 @@ import pytest
 from bec_lib import MessageEndpoints, ServiceConfig, messages
 from bec_lib.messages import BECStatus
 from bec_lib.tests.utils import ConnectorMock
+from bec_lib.logger import bec_logger
 from scihub import SciHub
 from scihub.scibec import SciBecConnector
 
@@ -27,7 +28,10 @@ class SciHubMocked(SciHub):
 def SciHubMock():
     config = ServiceConfig(
         redis={"host": "dummy", "port": 6379},
-        config={"file_writer": {"plugin": "default_NeXus_format", "base_path": "./"}},
+        config={
+            "file_writer": {"plugin": "default_NeXus_format", "base_path": "./"},
+            "log_writer": {"base_path": "./"},
+        },
     )
     scihub_mocked = SciHubMocked(config, ConnectorMock)
     yield scihub_mocked
