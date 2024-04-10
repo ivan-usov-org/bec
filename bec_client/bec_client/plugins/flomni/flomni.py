@@ -1126,6 +1126,7 @@ class Flomni(
         self.corr_angle_y = []
         self.corr_pos_y_2 = []
         self.corr_angle_y_2 = []
+        self.progress = {}
         self.align = XrayEyeAlign(self.client, self)
 
     def start_x_ray_eye_alignment(self):
@@ -1518,6 +1519,14 @@ class Flomni(
         if not (subtomo_number % 2):
             angles = np.flip(angles)
         for angle in angles:
+            self.progress["subtomo"] = subtomo_number
+            self.progress["subtomo_projection"] = angles.index(angle)
+            self.progress["subtomo_total_projections"] = 180 / self.tomo_angle_stepsize
+            self.progress["projection"] = (subtomo_number - 1) * self.progress[
+                "subtomo_total_projections"
+            ] + self.progress["subtomo_projection"]
+            self.progress["total_projections"] = 180 / self.tomo_angle_stepsize * 8
+            self.progress["angle"] = angle
             self._tomo_scan_at_angle(angle, subtomo_number)
 
     def _tomo_scan_at_angle(self, angle, subtomo_number):
@@ -1525,6 +1534,7 @@ class Flomni(
         error_caught = False
         if 0 <= angle < 180.05:
             print(f"Starting flOMNI scan for angle {angle} in subtomo {subtomo_number}")
+            self._print_progress()
             while not successful:
                 self._start_beam_check()
                 if not self.special_angles:
@@ -1562,8 +1572,13 @@ class Flomni(
         bec = builtins.__dict__.get("bec")
         scans = builtins.__dict__.get("scans")
         self._current_special_angles = self.special_angles.copy()
+        # a new tomo scan was started
+        if (
+            (self.tomo_type == 1 and subtomo_start == 1 and start_angle is None)
+            or (self.tomo_type == 2 and projection_number == None)
+            or (self.tomo_type == 3 and projection_number == None)
+        ):
 
-        if subtomo_start == 1 and start_angle is None:
             # pylint: disable=undefined-variable
             if bec.active_account != "":
                 self.tomo_id = self.add_sample_database(
@@ -1578,9 +1593,11 @@ class Flomni(
                 self.write_pdf_report()
             else:
                 self.tomo_id = 0
+
         with scans.dataset_id_on_hold:
             if self.tomo_type == 1:
                 # 8 equally spaced sub-tomograms
+                self.progress["tomo_type"] = "Equally spaced sub-tomograms"
                 for ii in range(subtomo_start, 9):
                     self.sub_tomo_scan(ii, start_angle=start_angle)
                     start_angle = None
@@ -1603,6 +1620,24 @@ class Flomni(
                         ):
                             self._tomo_scan_at_angle(0, subtomo_number)
                         previous_subtomo_number = subtomo_number
+                    self.progress["tomo_type"] = "Golden ratio tomography"
+                    self.progress["subtomo"] = subtomo_number
+                    self.progress["projection"] = ii
+                    self.progress["angle"] = angle
+                    if self.golden_ratio_bunch_size > 0:
+                        self.progress["subtomo_total_projections"] = self.golden_ratio_bunch_size
+                        self.progress["subtomo_projection"] = (
+                            ii - (subtomo_number - 1) * self.golden_ratio_bunch_size
+                        )
+                    else:
+                        self.progress["subtomo_total_projections"] = 0
+                        self.progress["subtomo_projection"] = 0
+
+                    if self.golden_max_number_of_projections > 0:
+                        self.progress["total_projections"] = self.golden_max_number_of_projections
+                    else:
+                        self.progress["total_projections"] = 0
+
                     self._tomo_scan_at_angle(angle, subtomo_number)
                     ii += 1
                     if (
@@ -1633,6 +1668,22 @@ class Flomni(
                         ):
                             self._tomo_scan_at_angle(0, subtomo_number)
                         previous_subtomo_number = subtomo_number
+                    self.progress["tomo_type"] = (
+                        "Equally spaced tomography, golden ratio starting angle"
+                    )
+                    self.progress["subtomo"] = subtomo_number
+                    self.progress["projection"] = ii
+                    self.progress["angle"] = angle
+
+                    self.progress["subtomo_total_projections"] = 180 / self.tomo_angle_stepsize
+                    self.progress["subtomo_projection"] = (
+                        ii - (subtomo_number - 1) * self.progress["subtomo_total_projections"]
+                    )
+
+                    if self.golden_max_number_of_projections > 0:
+                        self.progress["total_projections"] = self.golden_max_number_of_projections
+                    else:
+                        self.progress["total_projections"] = 0
                     self._tomo_scan_at_angle(angle, subtomo_number)
                     ii += 1
                     if (
@@ -1645,6 +1696,15 @@ class Flomni(
                         break
             else:
                 raise FlomniError("undefined tomo type")
+
+    def _print_progress(self):
+        print("\x1b[95mProgress report:")
+        print(f"Tomo type: ....................... {self.progress['tomo_type']}")
+        print(f"Projection: ...................... {self.progress['projection']}")
+        print(f"Total projections expected ....... {self.progress['total_projections']}")
+        print(f"Angle: ........................... {self.progress['angle']}")
+        print(f"Current subtomo: ................. {self.progress['subtomo']}")
+        print(f"Current projection within subtomo: {self.progress['subtomo_projection']}\x1b[0m")
 
     def add_sample_database(
         self, samplename, date, eaccount, scan_number, setup, sample_additional_info, user
