@@ -718,6 +718,7 @@ class RequestBlockQueue:
                 alarm_type=limit_error.__class__.__name__,
                 metadata={},
             )
+            self.instruction_queue.stopped = True
             raise ScanAbortion from limit_error
         # pylint: disable=broad-except
         except Exception as exc:
