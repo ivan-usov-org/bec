@@ -920,7 +920,12 @@ class FlomniAlignmentMixin:
     def reset_tomo_alignment_fit(self):
         self.client.delete_global_var("tomo_alignment_fit")
 
-    def read_alignment_offset(self, dir_path=os.path.expanduser("~/Data10/specES1/internal/")):
+    def read_alignment_offset(
+        self,
+        dir_path=os.path.expanduser("~/Data10/specES1/internal/"),
+        setup="flomni",
+        use_vertical_default_values=True,
+    ):
         """
         Read the alignment offset from the given directory and set the global parameter
         tomo_alignment_fit.
@@ -953,11 +958,7 @@ class FlomniAlignmentMixin:
         with open(os.path.join(dir_path, "ptychotomoalign_Cy3.txt"), "r") as file:
             tomo_alignment_fit[1][4] = file.readline()
 
-        self.client.set_global_var("tomo_alignment_fit", tomo_alignment_fit.tolist())
-        # x amp, phase, offset, y amp, phase, offset, 3rd order amp, 3rd order phase
-        #  0 0    0 1    0 2     1 0    1 1    1 2       1 3           1 4
-
-        print("New alignment parameters loaded")
+        print("New alignment parameters loaded:")
         print(
             f"X Amplitude {tomo_alignment_fit[0][0]}, "
             f"X Phase {tomo_alignment_fit[0][1]}, "
@@ -966,8 +967,41 @@ class FlomniAlignmentMixin:
             f"Y Phase {tomo_alignment_fit[1][1]}, "
             f"Y Offset {tomo_alignment_fit[1][2]}, "
             f"Y 3rd Order Amplitude {tomo_alignment_fit[1][3]}, "
-            f"Y 3rd Order Phase {tomo_alignment_fit[1][4]}."
+            f"Y 3rd Order Phase {tomo_alignment_fit[1][4]} ."
         )
+
+        if use_vertical_default_values:
+            print(
+                f"Using default values for vertical alignment for setup {setup}. Optional: use_vertical_default_values=False"
+            )
+            if setup == "flomni":
+                tomo_alignment_fit[1][0] = 0
+                tomo_alignment_fit[1][1] = 0
+                tomo_alignment_fit[1][2] = 0
+                tomo_alignment_fit[1][3] = 0
+                tomo_alignment_fit[1][4] = 0
+            elif setup == "omny":
+                tomo_alignment_fit[1][0] = 2.588628
+                tomo_alignment_fit[1][1] = -2.385422
+                tomo_alignment_fit[1][2] = 0
+                tomo_alignment_fit[1][3] = 1.010583
+                tomo_alignment_fit[1][4] = -1.359157
+
+            print("Follwing parameters will be used:")
+            print(
+                f"X Amplitude {tomo_alignment_fit[0][0]}, "
+                f"X Phase {tomo_alignment_fit[0][1]}, "
+                f"X Offset {tomo_alignment_fit[0][2]}, "
+                f"Y Amplitude {tomo_alignment_fit[1][0]}, "
+                f"Y Phase {tomo_alignment_fit[1][1]}, "
+                f"Y Offset {tomo_alignment_fit[1][2]}, "
+                f"Y 3rd Order Amplitude {tomo_alignment_fit[1][3]}, "
+                f"Y 3rd Order Phase {tomo_alignment_fit[1][4]} ."
+            )
+
+        self.client.set_global_var("tomo_alignment_fit", tomo_alignment_fit.tolist())
+        # x amp, phase, offset, y amp, phase, offset, 3rd order amp, 3rd order phase
+        #  0 0    0 1    0 2     1 0    1 1    1 2       1 3           1 4
 
     def get_alignment_offset(self, angle: float):
         """
@@ -1691,8 +1725,6 @@ class Flomni(
         # additional_correction = self.align.compute_additional_correction(angle)
         # additional_correction_2 = self.align.compute_additional_correction_2(angle)
         # correction_xeye_mu = self.align.lamni_compute_additional_correction_xeye_mu(angle)
-
-        dev.rtx.controller.laser_tracker_check_signalstrength()
 
         offsets = self.get_alignment_offset(angle)
         sum_offset_x = offsets[0]

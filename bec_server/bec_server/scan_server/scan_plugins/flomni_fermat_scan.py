@@ -158,9 +158,6 @@ class FlomniFermatScan(SyncFlyScanBase):
             device="rtz", value=self.positions[0][2], wait_group="prepare_setup_part2"
         )
         yield from self.stubs.send_rpc_and_wait("rtx", "controller.laser_tracker_on")
-        yield from self.stubs.send_rpc_and_wait(
-            "rtx", "controller.laser_tracker_check_signalstrength"
-        )
         yield from self.stubs.wait(
             wait_type="move", device=["rtx", "rtz"], wait_group="prepare_setup_part2"
         )
@@ -168,6 +165,21 @@ class FlomniFermatScan(SyncFlyScanBase):
         yield from self.stubs.send_rpc_and_wait(
             "rtx", "controller.move_samx_to_scan_region", self.fovx, self.cenx
         )
+        tracker_signal_status = yield from self.stubs.send_rpc_and_wait(
+            "rtx", "controller.laser_tracker_check_signalstrength"
+        )
+        if tracker_signal_status == "low":
+            self.device_manager.connector.raise_alarm(
+                severity=0,
+                alarm_type="LaserTrackerSignalStrength",
+                source="rtx",
+                metadata={},
+                msg="Signal strength of the laser tracker is low, sufficient to continue. Realignment recommended!",
+            )
+        elif tracker_signal_status == "toolow":
+            raise ScanAbortion(
+                "Signal strength of the laser tracker is too low for scanning. Realignment required!"
+            )
 
     def flomni_rotation(self, angle):
         # get last setpoint (cannot be based on pos get because they will deviate slightly)
