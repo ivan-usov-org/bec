@@ -1726,8 +1726,6 @@ class Flomni(
         # additional_correction_2 = self.align.compute_additional_correction_2(angle)
         # correction_xeye_mu = self.align.lamni_compute_additional_correction_xeye_mu(angle)
 
-        dev.rtx.controller.laser_tracker_check_signalstrength()
-
         offsets = self.get_alignment_offset(angle)
         sum_offset_x = offsets[0]
         sum_offset_y = (
