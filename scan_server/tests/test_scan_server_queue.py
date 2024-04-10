@@ -85,6 +85,27 @@ def test_queuemanager_add_to_queue(queuemanager_mock, queue):
     assert queue_manager.queues[queue].queue.popleft().scan_msgs[0] == msg
 
 
+def test_queuemanager_add_to_queue_restarts_queue_if_worker_is_dead(queuemanager_mock):
+    queue_manager = queuemanager_mock()
+    queue_manager.queues["primary"].signal_event.set()
+    original_worker = queue_manager.queues["primary"].scan_worker
+    original_worker.shutdown()
+
+    assert original_worker.is_alive() is False
+
+    msg = messages.ScanQueueMessage(
+        scan_type="mv",
+        parameter={"args": {"samx": (1,)}, "kwargs": {}},
+        queue="primary",
+        metadata={"RID": "something"},
+    )
+    queue_manager.add_queue("primary")
+    queue_manager.add_to_queue(scan_queue="primary", msg=msg)
+    assert queue_manager.queues["primary"].queue.popleft().scan_msgs[0] == msg
+    assert queue_manager.queues["primary"].scan_worker.is_alive() is True
+    assert id(queue_manager.queues["primary"].scan_worker) != id(original_worker)
+
+
 def test_queuemanager_add_to_queue_error_send_alarm(queuemanager_mock):
     queue_manager = queuemanager_mock()
     msg = messages.ScanQueueMessage(

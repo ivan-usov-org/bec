@@ -2,9 +2,9 @@ import threading
 from unittest import mock
 
 import pytest
-
 from bec_lib import MessageEndpoints, messages
 from bec_lib.tests.utils import ConnectorMock
+
 from scan_server.errors import DeviceMessageError
 from scan_server.scan_stubs import ScanAbortion, ScanStubs
 
@@ -78,10 +78,16 @@ def test_rpc_raises_scan_abortion(stubs, msg, raised_error):
         if raised_error is None:
             stubs._get_from_rpc("rpc-id")
         else:
-            with pytest.raises(ScanAbortion):
+            with pytest.raises(raised_error):
                 stubs._get_from_rpc("rpc-id")
 
         prod_get.assert_called_with(MessageEndpoints.device_rpc("rpc-id"))
+
+
+def test_rpc_raises_scan_abortion_on_shutdown_event(stubs):
+    stubs.shutdown_event.set()
+    with pytest.raises(ScanAbortion):
+        stubs._get_from_rpc("rpc-id")
 
 
 @pytest.mark.parametrize(
