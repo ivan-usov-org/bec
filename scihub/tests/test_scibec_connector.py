@@ -3,9 +3,9 @@ from unittest import mock
 import pytest
 
 from bec_lib import MessageEndpoints, ServiceConfig, messages
+from bec_lib.logger import bec_logger
 from bec_lib.messages import BECStatus
 from bec_lib.tests.utils import ConnectorMock
-from bec_lib.logger import bec_logger
 from scihub import SciHub
 from scihub.scibec import SciBecConnector
 

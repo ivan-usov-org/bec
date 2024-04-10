@@ -5,11 +5,11 @@ from unittest import mock
 import h5py
 import numpy as np
 import pytest
-from bec_lib.tests.fixtures import dm_with_devices
 from file_writer_plugins.cSAXS import NeXus_format as cSAXS_Nexus_format
 from test_file_writer_manager import file_writer_manager_mock
 
 import file_writer
+from bec_lib.tests.fixtures import dm_with_devices
 from file_writer import NexusFileWriter, NeXusFileXMLWriter
 from file_writer.file_writer import HDF5Storage
 from file_writer.file_writer_manager import ScanStorage

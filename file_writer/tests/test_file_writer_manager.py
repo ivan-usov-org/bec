@@ -1,10 +1,10 @@
 # pylint: skip-file
 import contextlib
 import os
-import pytest
 from unittest import mock
 
 import numpy as np
+import pytest
 import yaml
 
 import bec_lib
@@ -16,7 +16,6 @@ from bec_lib.tests.utils import ConnectorMock, create_session_from_config, get_d
 from file_writer import FileWriterManager
 from file_writer.file_writer import FileWriter
 from file_writer.file_writer_manager import ScanStorage
-
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=protected-access

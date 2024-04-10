@@ -16,6 +16,7 @@ from loguru import logger as loguru_logger
 # TODO: Importing bec_lib, instead of `from bec_lib.messages import LogMessage`, avoids potential
 # logger <-> messages circular import. But there could be a better solution.
 import bec_lib
+from bec_lib.bec_errors import ServiceConfigError
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.file_utils import LogWriter
 
@@ -64,7 +65,8 @@ class BECLogger:
         self._log_level = LogLevel.INFO
         self.level = self._log_level
         self._configured = False
-        self.logger.level("CONSOLE_LOG", no=21, color="<yellow>", icon="📣")
+        # self.logger.level("CONSOLE_LOG", no=21, color="<yellow>", icon="📣")
+        self._update_logger_level()
 
     def __new__(cls):
         if not hasattr(cls, "_logger") or cls._logger is None:
@@ -73,7 +75,15 @@ class BECLogger:
 
     @classmethod
     def _reset_singleton(cls):
+        if cls._logger is not None:
+            cls._logger.logger.remove()
         cls._logger = None
+
+    def _update_logger_level(self):
+        try:
+            self.logger.level("CONSOLE_LOG", no=21, color="<yellow>", icon="📣")
+        except TypeError:
+            print("CONSOLE_LOG was already configured")
 
     def configure(
         self,
@@ -106,7 +116,11 @@ class BECLogger:
         """
         # pylint: disable=import-outside-toplevel
         if service_config:
-            service_cfg = service_config["log_writer"]
+            service_cfg = service_config.get("log_writer", None)
+            if not service_cfg:
+                raise ServiceConfigError(
+                    f"ServiceConfig {service_config} must at least contain key with 'log_writer'm"
+                )
         else:
             service_cfg = {"base_path": "./"}
         self.writer_mixin = LogWriter(service_cfg)
