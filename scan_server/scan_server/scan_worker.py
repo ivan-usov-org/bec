@@ -861,6 +861,8 @@ class ScanWorker(threading.Thread):
                 try:
                     for queue in self.parent.queue_manager.queues[self.queue_name]:
                         self._process_instructions(queue)
+                        if self.signal_event.is_set():
+                            break
                         if not queue.stopped:
                             queue.append_to_queue_history()
 
