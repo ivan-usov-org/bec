@@ -114,7 +114,7 @@ tests:
     - apt-get install -y gcc
     - apt-get install -y redis
     - *install-bec-services-dev
-    - coverage run --source=./bec_server/bec_server,./bec_lib/bec_lib,./bec_client/bec_client, --omit=*/bec_server/scan_server/scan_plugins/*,*/bec_client/bec_client/plugins/*,*/bec_client/scripts/*,./bec_lib/bec_lib/tests -m pytest -v --junitxml=report.xml --random-order ./bec_server/tests ./bec_client/tests/client_tests ./bec_lib/tests
+    - coverage run --source=./bec_server/bec_server,./bec_lib/bec_lib,./bec_client/bec_client, --omit=*/bec_server/scan_server/scan_plugins/*,*/bec_client/bec_client/plugins/*,*/bec_client/scripts/*,*/bec_lib/bec_lib/tests/* -m pytest -v --junitxml=report.xml --random-order ./bec_server/tests ./bec_client/tests/client_tests ./bec_lib/tests
     - coverage report
     - coverage xml
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
