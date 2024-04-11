@@ -1,3 +1,7 @@
+# This file is the entry point for the BEC device server. It is responsible for
+# launching the device server and handling command line arguments.
+# It is called either by the bec-device-server entry point or directly from the command line.
+
 # pylint: disable=wrong-import-position
 # pylint: disable=wrong-import-order
 # we need to run the startup script before we import anything else. This is
@@ -41,3 +45,7 @@ def main():
         event.wait()
     except KeyboardInterrupt:
         s.shutdown()
+
+
+if __name__ == "__main__":
+    main()

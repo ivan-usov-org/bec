@@ -1,3 +1,6 @@
+# Description: Launch the scan bundler.
+# This script is the entry point for the Scan Bundler. It is called either
+# by the bec-scan-bundler entry point or directly from the command line.
 import argparse
 import threading
 
@@ -27,3 +30,7 @@ def main():
         event.wait()
     except KeyboardInterrupt:
         sb.shutdown()
+
+
+if __name__ == "__main__":
+    main()

@@ -1,3 +1,6 @@
+# This file is the entry point for the Scan Server.
+# It is called either by the bec-scan-server entry point or directly from the command line.
+
 import argparse
 import threading
 
@@ -29,3 +32,7 @@ def main():
         bec_server.shutdown()
         event.set()
         raise e
+
+
+if __name__ == "__main__":
+    main()

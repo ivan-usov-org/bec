@@ -1,3 +1,6 @@
+# Description: Launch the SciHub connector.
+# This script is the entry point for the SciHub connector. It is called either
+# by the bec-dap entry point or directly from the command line.
 import argparse
 import threading
 
@@ -28,3 +31,7 @@ def main():
         event.wait()
     except KeyboardInterrupt:
         sh.shutdown()
+
+
+if __name__ == "__main__":
+    main()

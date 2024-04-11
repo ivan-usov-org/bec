@@ -1,3 +1,6 @@
+# Description: Launch the data processing server.
+# This script is the entry point for the Data Processing Server. It is called either
+# by the bec-dap entry point or directly from the command line.
 import argparse
 import threading
 
@@ -34,3 +37,7 @@ def main():
     except KeyboardInterrupt:
         bec_server.shutdown()
         event.set()
+
+
+if __name__ == "__main__":
+    main()

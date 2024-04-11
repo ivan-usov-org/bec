@@ -1,3 +1,5 @@
+# This file is the entry point for the file writer service.
+# It is called either by the bec-file-writer entry point or directly from the command line.
 import argparse
 import os
 import threading
@@ -30,3 +32,7 @@ def main():
         event.wait()
     except KeyboardInterrupt:
         file_writer_manager.shutdown()
+
+
+if __name__ == "__main__":
+    main()
