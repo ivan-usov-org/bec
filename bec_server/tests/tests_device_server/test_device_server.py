@@ -485,6 +485,7 @@ def test_complete_device(device_server_mock, instr):
     device_server = device_server_mock
     complete_mock = mock.MagicMock()
     device_server.device_manager.devices.flyer_sim.obj.complete = complete_mock
+    device_server.device_manager.devices.bpm4i.obj.complete = complete_mock
     device_server._complete_device(instr)
     if instr.content["device"] == "flyer_sim" or instr.content["device"] is None:
         complete_mock.assert_called_once()

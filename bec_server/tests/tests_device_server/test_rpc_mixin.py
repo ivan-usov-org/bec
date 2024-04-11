@@ -77,9 +77,11 @@ def test_get_result_from_rpc_not_serializable(rpc_cls):
 
 def test_get_result_from_rpc_ophyd_status(rpc_cls):
     rpc_var = mock.MagicMock()
-    rpc_var.return_value = StatusBase()
+    status = StatusBase()
+    rpc_var.return_value = status
     out = rpc_cls._get_result_from_rpc(rpc_var=rpc_var, instr_params={})
     assert out is rpc_var.return_value
+    status.set_finished()
 
 
 def test_get_result_from_rpc_list_from_stage(rpc_cls):
@@ -117,11 +119,10 @@ def test_send_rpc_result_to_client(rpc_cls):
 
 def test_run_rpc(rpc_cls, instr):
     rpc_cls._assert_device_is_enabled = mock.MagicMock()
-    with mock.patch.object(
-        rpc_cls, "_process_rpc_instruction"
-    ) as _process_rpc_instruction, mock.patch.object(
-        rpc_cls, "_send_rpc_result_to_client"
-    ) as _send_rpc_result_to_client:
+    with (
+        mock.patch.object(rpc_cls, "_process_rpc_instruction") as _process_rpc_instruction,
+        mock.patch.object(rpc_cls, "_send_rpc_result_to_client") as _send_rpc_result_to_client,
+    ):
         _process_rpc_instruction.return_value = 1
         rpc_cls.run_rpc(instr)
         rpc_cls._assert_device_is_enabled.assert_called_once_with(instr)
@@ -133,11 +134,10 @@ def test_run_rpc(rpc_cls, instr):
 
 def test_run_rpc_sends_rpc_exception(rpc_cls, instr):
     rpc_cls._assert_device_is_enabled = mock.MagicMock()
-    with mock.patch.object(
-        rpc_cls, "_process_rpc_instruction"
-    ) as _process_rpc_instruction, mock.patch.object(
-        rpc_cls, "_send_rpc_exception"
-    ) as _send_rpc_exception:
+    with (
+        mock.patch.object(rpc_cls, "_process_rpc_instruction") as _process_rpc_instruction,
+        mock.patch.object(rpc_cls, "_send_rpc_exception") as _send_rpc_exception,
+    ):
         _process_rpc_instruction.side_effect = Exception
         rpc_cls.run_rpc(instr)
         rpc_cls._assert_device_is_enabled.assert_called_once_with(instr)
@@ -207,6 +207,7 @@ def test_process_rpc_instruction_with_status_return(rpc_cls, dev_mock, instr):
             "done": status.done,
             "settle_time": status.settle_time,
         }
+        status.set_finished()
 
 
 def test_process_rpc_instruction_with_namedtuple_return(rpc_cls, dev_mock, instr):
