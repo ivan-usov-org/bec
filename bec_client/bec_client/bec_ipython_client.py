@@ -1,7 +1,7 @@
 from __future__ import print_function
 
 import time
-from typing import Iterable
+from typing import Iterable, Literal
 
 import IPython
 from IPython.terminal.prompts import Prompts, Token
@@ -78,6 +78,15 @@ class BECIPythonClient:
             object,
             lambda o, p, cycle: o.__str__ is object.__str__ and p.text(repr(o)) or p.text(str(o)),
         )
+
+    def _update_namespace_callback(self, action: Literal["add", "remove"], ns_objects: dict):
+        """update the namespace with the objects from the high level interface"""
+        if action == "add":
+            for name, obj in ns_objects.items():
+                self._ip.user_global_ns[name] = obj
+        elif action == "remove":
+            for name, obj in ns_objects.items():
+                self._ip.user_global_ns[name].pop()
 
     def _set_error(self):
         if self._ip is not None:

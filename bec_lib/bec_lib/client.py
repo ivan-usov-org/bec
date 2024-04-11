@@ -172,12 +172,14 @@ class BECClient(BECService, UserScriptsMixin):
         self.scans = Scans(self._parent)
         builtins.scans = self.scans
 
-    def load_high_level_interface(self, module_name):
+    def load_high_level_interface(self, module_name) -> dict[object]:
         mod = importlib.import_module(f"bec_client.high_level_interfaces.{module_name}")
         members = inspect.getmembers(mod)
         funcs = {name: func for name, func in members if not name.startswith("__")}
         self._hli_funcs = funcs
         builtins.__dict__.update(funcs)
+        if self._parent._ip is not None:
+            self._parent._update_namespace_callback(action="add", ns_objects=funcs)
 
     def _update_username(self):
         self._username = getpass.getuser()

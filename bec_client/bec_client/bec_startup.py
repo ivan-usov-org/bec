@@ -20,8 +20,6 @@ bec = _BECIPythonClient(
 )
 _main_dict["bec"] = bec
 
-bec.load_high_level_interface("spec_hli")
-
 if not _main_dict["args"].nogui and _BECFigure is not None:
     fig = bec.fig = _BECFigure()
     fig.show()
@@ -31,6 +29,7 @@ try:
 except Exception:
     sys.excepthook(*sys.exc_info())
 else:
+    bec.load_high_level_interface("bec_hli")
     dev = bec.device_manager.devices
     scans = bec.scans
 

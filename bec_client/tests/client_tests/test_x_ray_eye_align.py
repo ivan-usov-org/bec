@@ -89,7 +89,7 @@ def test_tomo_rotate(bec_client_mock):
     import builtins
 
     client = bec_client_mock
-    client.load_high_level_interface("spec_hli")
+    client.load_high_level_interface("bec_hli")
     client.device_manager.devices.xeye = DeviceBase(name="xeye", config={})
     lamni = LamNI(client)
     align = XrayEyeAlign(client, lamni)
