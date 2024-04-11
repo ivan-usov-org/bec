@@ -2,6 +2,21 @@
 
 <!--next-version-placeholder-->
 
+## v2.1.0 (2024-04-11)
+
+### Feature
+
+* **connector:** Add 'unregister' method to cancel subscription to pub/sub ([`e87812a`](https://gitlab.psi.ch/bec/bec/-/commit/e87812a816d06cd19e23705ff4221efe261b588c))
+* **redis connector:** Add _execute_callback method, to be able to overwrite how callbacks are run ([`1ddc7ee`](https://gitlab.psi.ch/bec/bec/-/commit/1ddc7eec53994e793cee371cae64474136faf963))
+
+### Fix
+
+* **test_fake_redis:** TestMessage fixed to pydantic BaseModel ([`eb9c812`](https://gitlab.psi.ch/bec/bec/-/commit/eb9c8125290615c0e15ffa70567ff198d22c30d5))
+* **redis_connector:** Support dict in convert_endpointinfo ([`d2942b1`](https://gitlab.psi.ch/bec/bec/-/commit/d2942b1436ed7ddc3c31feb61510f0dc9f6f7f5a))
+* .shutdown() will cleanly stop all threads ([`c1c7dd7`](https://gitlab.psi.ch/bec/bec/-/commit/c1c7dd7beaeb46d1ababd301b99d01266baeb26c))
+* Ensure "newest_only" works as expected in test ([`dc85f49`](https://gitlab.psi.ch/bec/bec/-/commit/dc85f494ed93727e7eb3b207cdddb2db60ceb3f5))
+* **redis connector:** Prevent multiple identical connections in 'register' ([`344ef50`](https://gitlab.psi.ch/bec/bec/-/commit/344ef508c0be199d5d8ab9b4c4bff3e4778acb87))
+
 ## v2.0.3 (2024-04-11)
 
 ### Fix
