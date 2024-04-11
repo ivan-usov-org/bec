@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v2.0.1 (2024-04-11)
+
+### Fix
+
+* Fixed build during semver job ([`0bb8cb0`](https://gitlab.psi.ch/bec/bec/-/commit/0bb8cb0bfbf2ce9ac69f7522ddf92e68eb2aa1e4))
+
 ## v2.0.0 (2024-04-10)
 
 ### Breaking
