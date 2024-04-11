@@ -18,7 +18,7 @@ from bec_lib import messages
 from bec_lib.alarm_handler import AlarmHandler, Alarms
 from bec_lib.bec_service import BECService
 from bec_lib.bl_checks import BeamlineChecks
-from bec_lib.callback_handler import CallbackHandler
+from bec_lib.callback_handler import CallbackHandler, EventType
 from bec_lib.dap_plugins import DAPPlugins
 from bec_lib.devicemanager import DeviceManagerBase
 from bec_lib.endpoints import MessageEndpoints
@@ -79,7 +79,7 @@ class BECClient(BECService, UserScriptsMixin):
         self._hli_funcs = {}
         self.metadata = {}
         self.file_writer_data = {}
-        self.callbacks = None
+        self.callbacks = CallbackHandler()
         self._parent = parent if parent is not None else self
         self._initialized = True
 
@@ -129,7 +129,6 @@ class BECClient(BECService, UserScriptsMixin):
         self._load_scans()
         # self.logbook = LogbookConnector(self.connector)
         self._update_username()
-        self.callbacks = CallbackHandler()
         self._start_device_manager()
         self._start_scan_queue()
         self._start_alarm_handler()
@@ -170,16 +169,22 @@ class BECClient(BECService, UserScriptsMixin):
 
     def _load_scans(self):
         self.scans = Scans(self._parent)
-        builtins.scans = self.scans
+        builtins.__dict__["scans"] = self.scans
 
-    def load_high_level_interface(self, module_name) -> dict[object]:
+    def load_high_level_interface(self, module_name: str) -> None:
+        """Load a high level interface module.
+        Runs a callback of type `EventType.NAMESPACE_UPDATE`
+        to inform clients about added objects in the namesapce.
+
+        Args:
+            module_name (str): The name of the module to load
+        """
         mod = importlib.import_module(f"bec_client.high_level_interfaces.{module_name}")
         members = inspect.getmembers(mod)
         funcs = {name: func for name, func in members if not name.startswith("__")}
         self._hli_funcs = funcs
         builtins.__dict__.update(funcs)
-        if self._parent._ip is not None:
-            self._parent._update_namespace_callback(action="add", ns_objects=funcs)
+        self.callbacks.run(EventType.NAMESPACE_UPDATE, action="add", ns_objects=funcs)
 
     def _update_username(self):
         self._username = getpass.getuser()

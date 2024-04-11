@@ -1974,7 +1974,6 @@ if __name__ == "__main__":
 
     bec = BECIPythonClient()
     bec.start()
-    bec.load_high_level_interface("bec_hli")
     scans = bec.scans
     dev = bec.device_manager.devices
     builtins.__dict__["scans"] = scans

@@ -29,7 +29,7 @@ try:
 except Exception:
     sys.excepthook(*sys.exc_info())
 else:
-    bec.load_high_level_interface("bec_hli")
+
     dev = bec.device_manager.devices
     scans = bec.scans
 

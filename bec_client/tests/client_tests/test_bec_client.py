@@ -45,6 +45,43 @@ finally:
     )  # just to ensure something we don't want is really not there
 
 
+def test_bec_load_hli_tab_completion(tmpdir):
+    """Test that bec hli is loaded and tab completion in the ipython client works"""
+    file_to_execute = tmpdir / "post_startup.py"
+    with open(file_to_execute, "w") as f:
+        f.write(
+            """
+try:
+  completer=get_ipython().Completer
+  import sys
+  print(completer.all_completions('umv'), flush=True)
+  print(completer.all_completions('mv'), flush=True)
+finally:
+  import os
+  import signal
+  os.kill(os.getpid(), signal.SIGTERM)
+"""
+        )
+    p = subprocess.Popen(
+        [
+            sys.executable,
+            main.__file__,
+            "--nogui",
+            "--dont-wait-for-server",
+            "--post-startup-file",
+            file_to_execute,
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+    )
+    output, _ = p.communicate()
+    assert "umvr" in output
+    assert "umv" in output
+    assert "mv" in output
+    assert "mvr" in output
+
+
 def test_ipython_device_completion(bec_client_mock):
     client = bec_client_mock
     # disable history saving (which runs in a separate thread)
@@ -108,6 +145,23 @@ def test_bec_client_start(service_config):
     finally:
         client.shutdown()
         client._client._reset_singleton()
+
+
+def test_bec_update_username_space(ipython_client):
+    client = ipython_client
+    client = ipython_client
+    with mock.patch.object(client, "wait_for_service") as wait_for_service:
+        with mock.patch.object(client, "_configure_ipython") as configure_ipython:
+            with mock.patch.object(client, "_load_scans"):
+                with mock.patch.object(client, "_ip") as mock_ipy:
+                    client.start()
+                    mock_ipy.user_global_ns = {}
+                    my_object = object()
+                    client._update_namespace_callback(action="add", ns_objects={"mv": my_object})
+                    assert "mv" in mock_ipy.user_global_ns
+                    assert mock_ipy.user_global_ns["mv"] == my_object
+                    client._update_namespace_callback(action="remove", ns_objects={"mv": my_object})
+                    assert "mv" not in mock_ipy.user_global_ns
 
 
 def test_bec_client_start_without_bec_services(ipython_client):

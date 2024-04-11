@@ -89,6 +89,9 @@ def test_tomo_rotate(bec_client_mock):
     import builtins
 
     client = bec_client_mock
+    client._ip = mock.MagicMock()
+    client._update_namespace_callback = mock.MagicMock()
+    client.callbacks = mock.MagicMock()
     client.load_high_level_interface("bec_hli")
     client.device_manager.devices.xeye = DeviceBase(name="xeye", config={})
     lamni = LamNI(client)

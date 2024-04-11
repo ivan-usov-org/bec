@@ -17,6 +17,7 @@ from pylint.reporters import CollectingReporter
 from rich.console import Console
 from rich.table import Table
 
+from bec_lib.callback_handler import EventType
 from bec_lib.logger import bec_logger
 
 if TYPE_CHECKING:
@@ -36,7 +37,11 @@ class UserScriptsMixin:
         self._scripts = {}
 
     def load_all_user_scripts(self) -> None:
-        """Load all scripts from the `scripts` directory."""
+        """Load all scripts from the `scripts` directory.
+
+        Runs a callback of type `EventType.NAMESPACE_UPDATE`
+        to inform clients about added objects in the namesapce.
+        """
         self.forget_all_user_scripts()
 
         # load all scripts from the scripts directory
@@ -61,9 +66,17 @@ class UserScriptsMixin:
         builtins.__dict__.update({name: v["cls"] for name, v in self._scripts.items()})
 
     def forget_all_user_scripts(self) -> None:
-        """unload / remove loaded user scripts from builtins. The files will remain on disk though!"""
-        for name in self._scripts:
+        """unload / remove loaded user scripts from builtins. Files will remain untouched.
+
+        Runs a callback of type `EventType.NAMESPACE_UPDATE`
+        to inform clients about removing objects from the namesapce.
+
+        """
+        for name, obj in self._scripts.items():
             builtins.__dict__.pop(name)
+            self.callbacks.run(
+                EventType.NAMESPACE_UPDATE, action="remove", ns_objects={name: obj["cls"]}
+            )
         self._scripts.clear()
 
     def load_user_script(self, file: str) -> None:
@@ -84,12 +97,18 @@ class UserScriptsMixin:
                 logger.warning(f"Conflicting definitions for {name}.")
             logger.info(f"Importing {name}")
             self._scripts[name] = {"cls": cls, "fname": file}
+            self.callbacks.run(EventType.NAMESPACE_UPDATE, action="add", ns_objects={name: cls})
 
     def forget_user_script(self, name: str) -> None:
         """unload / remove a user scripts. The file will remain on disk."""
         if name not in self._scripts:
             logger.error(f"{name} is not a known user script.")
             return
+        self.callbacks.run(
+            EventType.NAMESPACE_UPDATE,
+            action="remove",
+            ns_objects={name: self._scripts[name]["cls"]},
+        )
         builtins.__dict__.pop(name)
         self._scripts.pop(name)
 
@@ -114,6 +133,7 @@ class UserScriptsMixin:
     def _run_linter_on_file(self, file) -> None:
         accepted_vars = ",".join([key for key in builtins.__dict__ if not key.startswith("_")])
         reporter = CollectingReporter()
+        print(f"{accepted_vars}")
         lint.Run(
             [file, "--errors-only", f"--additional-builtins={accepted_vars}"],
             exit=False,

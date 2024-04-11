@@ -8,6 +8,7 @@ from IPython.terminal.prompts import Prompts, Token
 
 from bec_lib import ServiceConfig, bec_logger
 from bec_lib.alarm_handler import AlarmBase
+from bec_lib.callback_handler import EventType
 from bec_lib.client import BECClient
 from bec_lib.connector import ConnectorBase
 
@@ -28,7 +29,7 @@ class BECIPythonClient:
         forced=False,
     ) -> None:
         self._client = BECClient(config, connector_cls, wait_for_server, forced, parent=self)
-        self._ip = None
+        self._ip = IPython.get_ipython()
         self.started = False
         self._sighandler = None
         self._beamline_mixin = None
@@ -36,6 +37,10 @@ class BECIPythonClient:
         self._exit_handler_thread = None
         self.live_updates = None
         self.fig = None
+        self._client.callbacks.register(
+            event_type=EventType.NAMESPACE_UPDATE, callback=self._update_namespace_callback
+        )
+        self._client.load_high_level_interface("bec_hli")
 
     def __getattr__(self, name):
         return getattr(self._client, name)
@@ -65,7 +70,7 @@ class BECIPythonClient:
             self._ip.prompts.scan_number = scan_number + 1
 
     def _configure_ipython(self):
-        self._ip = IPython.get_ipython()
+
         if self._ip is None:
             return
 
@@ -80,13 +85,22 @@ class BECIPythonClient:
         )
 
     def _update_namespace_callback(self, action: Literal["add", "remove"], ns_objects: dict):
-        """update the namespace with the objects from the high level interface"""
+        """Callback to update the global namespace of ipython.
+
+        Within BEC, the callback is triggered by the CallbackHandler when
+        the namespace changes, e.g. load_high_level_interface, load_user_script, etc.
+
+        Args:
+            action (Literal["add", "remove"]): action to perform
+            ns_objects (dict): objects to add or remove
+
+        """
         if action == "add":
             for name, obj in ns_objects.items():
                 self._ip.user_global_ns[name] = obj
         elif action == "remove":
             for name, obj in ns_objects.items():
-                self._ip.user_global_ns[name].pop()
+                self._ip.user_global_ns.pop(name)
 
     def _set_error(self):
         if self._ip is not None:
