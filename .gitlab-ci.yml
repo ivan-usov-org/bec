@@ -377,6 +377,7 @@ end-2-end-conda-313:
 trigger_bec-widgets:
   trigger:
     project: bec/bec-widgets
+    branch: $BEC_WIDGETS_BRANCH
     strategy: depend
   variables:
     BEC_CORE_BRANCH: $CI_COMMIT_REF_NAME
@@ -388,6 +389,7 @@ trigger_bec-widgets:
 trigger_ophyd-devices:
   trigger:
     project: bec/ophyd_devices
+    branch: $OPHYD_DEVICES_BRANCH
     strategy: depend
   variables:
     BEC_CORE_BRANCH: $CI_COMMIT_REF_NAME
