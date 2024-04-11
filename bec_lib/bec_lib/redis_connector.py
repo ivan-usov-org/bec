@@ -14,10 +14,10 @@ import sys
 import threading
 import time
 import warnings
+from collections.abc import MutableMapping, Sequence
 from dataclasses import dataclass
 from functools import wraps
 from typing import TYPE_CHECKING, Optional
-
 import louie
 import redis
 import redis.client
@@ -275,7 +275,8 @@ class RedisConnector(ConnectorBase):
             return [endpoint.endpoint], endpoint.message_op.name
         if isinstance(endpoint, str):
             return [endpoint], ""
-        if isinstance(endpoint, collections.abc.Sequence):
+        # Support list of endpoints or dict with endpoints as keys
+        if isinstance(endpoint, (Sequence, MutableMapping)):
             endpoints_str = []
             ref_message_op = None
             for e in endpoint:
