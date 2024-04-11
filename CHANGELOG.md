@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v2.0.3 (2024-04-11)
+
+### Fix
+
+* Fixed entry points ([`82b4689`](https://gitlab.psi.ch/bec/bec/-/commit/82b4689beb96b3a11ea1c2d5203167cb45746ffa))
+
+### Documentation
+
+* **developer:** Updated developer instructions after bec server refactoring ([`792c5cd`](https://gitlab.psi.ch/bec/bec/-/commit/792c5cdb95e7838d3198171e0dac2533ba73a8a4))
+
 ## v2.0.2 (2024-04-11)
 
 ### Fix

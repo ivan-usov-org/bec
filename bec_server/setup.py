@@ -4,7 +4,7 @@ from setuptools import setup
 
 current_path = pathlib.Path(__file__).parent.resolve()
 
-__version__ = "2.0.2"
+__version__ = "2.0.3"
 
 
 if __name__ == "__main__":
