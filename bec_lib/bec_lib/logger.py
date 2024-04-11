@@ -119,7 +119,7 @@ class BECLogger:
             service_cfg = service_config.get("log_writer", None)
             if not service_cfg:
                 raise ServiceConfigError(
-                    f"ServiceConfig {service_config} must at least contain key with 'log_writer'm"
+                    f"ServiceConfig {service_config} must at least contain key with 'log_writer'"
                 )
         else:
             service_cfg = {"base_path": "./"}

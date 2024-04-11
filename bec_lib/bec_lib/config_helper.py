@@ -16,7 +16,7 @@ import yaml
 
 import bec_lib
 from bec_lib import messages
-from bec_lib.bec_errors import DeviceConfigError
+from bec_lib.bec_errors import DeviceConfigError, ServiceConfigError
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.file_utils import DeviceConfigWriter
 from bec_lib.logger import bec_logger
@@ -70,7 +70,11 @@ class ConfigHelper:
         # pylint: disable=import-outside-toplevel
         from bec_lib.bec_service import SERVICE_CONFIG
 
-        service_cfg = SERVICE_CONFIG.config["service_config"]["log_writer"]
+        service_cfg = SERVICE_CONFIG.config["service_config"].get("log_writer", None)
+        if not service_cfg:
+            raise ServiceConfigError(
+                f"ServiceConfig {service_cfg} must at least contain key with 'log_writer'"
+            )
         self.writer_mixin = DeviceConfigWriter(service_cfg)
         self._base_path_recovery = self.writer_mixin.get_recovery_directory()
         self.writer_mixin.create_directory(self._base_path_recovery)
