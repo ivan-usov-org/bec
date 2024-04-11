@@ -1,0 +1,66 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "bec_lib"
+version = "2.4.1"
+description = "BEC library"
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "hiredis",
+    "louie",
+    "numpy",
+    "scipy",
+    "msgpack",
+    "requests",
+    "typeguard>=4.0.1",
+    "pyyaml",
+    "redis",
+    "toolz",
+    "rich",
+    "pylint",
+    "loguru",
+    "psutil",
+    "fpdf",
+    "fastjsonschema",
+    "lmfit",
+    "pydantic~=2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black~=24.0",
+    "isort",
+    "coverage",
+    "pylint",
+    "pytest",
+    "pytest-random-order",
+    "pytest-timeout",
+    "pytest-redis",
+    "fakeredis",
+    "pandas",
+]
+
+[project.scripts]
+bec-channel-monitor = "bec_lib:channel_monitor_launch"
+
+[project.entry-points.pytest11]
+bec_lib_end2end_fixtures = "bec_lib.tests.end2end_fixtures"
+bec_lib_fixtures = "bec_lib.tests.fixtures"
+
+[project.urls]
+"Bug Tracker" = "https://gitlab.psi.ch/bec/bec/issues"
+Homepage = "https://gitlab.psi.ch/bec/bec"
+
+[tool.hatch.build.targets.wheel]
+include = ["*"]
+
+[tool.black]
+line-length = 100
+skip-magic-trailing-comma = true
