@@ -60,7 +60,9 @@ Note, you need to install the package in editable mode (with `-e` flag), to allo
 
 ```bash
 pip install wheel
-pip install -e './bec_server/.[dev]'
+pip install -e './bec_server[dev]'
+pip install -e './bec_client[dev]'
+pip install -e './bec_lib[dev]'
 ```
 ```{warning}
 On newer versions of pip (pip>22.3.1) wheel must be installed manually before installing the BEC server! If not, it will crash with an import error within pip. Should you run into problems, please run `pip cache purge` twice before repeating the commands above.
