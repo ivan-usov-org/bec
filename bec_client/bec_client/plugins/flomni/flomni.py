@@ -1357,6 +1357,17 @@ class Flomni(
         self.client.set_global_var("tomo_stitch_overlap", val)
 
     @property
+    def golden_projections_at_0_deg_for_damage_estimation(self):
+        val = self.client.get_global_var("golden_projections_at_0_deg_for_damage_estimation")
+        if val is None:
+            return 0
+        return val
+
+    @golden_projections_at_0_deg_for_damage_estimation.setter
+    def golden_projections_at_0_deg_for_damage_estimation(self, val: float):
+        self.client.set_global_var("golden_projections_at_0_deg_for_damage_estimation", val)
+
+    @property
     def golden_ratio_bunch_size(self):
         val = self.client.get_global_var("golden_ratio_bunch_size")
         if val is None:
@@ -1585,6 +1596,12 @@ class Flomni(
                     angle, subtomo_number = self._golden(ii, self.golden_ratio_bunch_size, 180, 1)
                     if previous_subtomo_number != subtomo_number:
                         self._write_subtomo_to_scilog(subtomo_number)
+                        if (
+                            subtomo_number % 2 == 1
+                            and ii > 10
+                            and self.golden_projections_at_0_deg_for_damage_estimation == 1
+                        ):
+                            self._tomo_scan_at_angle(0, subtomo_number)
                         previous_subtomo_number = subtomo_number
                     self._tomo_scan_at_angle(angle, subtomo_number)
                     ii += 1
@@ -1609,6 +1626,12 @@ class Flomni(
                     )
                     if previous_subtomo_number != subtomo_number:
                         self._write_subtomo_to_scilog(subtomo_number)
+                        if (
+                            subtomo_number % 2 == 1
+                            and ii > 10
+                            and self.golden_projections_at_0_deg_for_damage_estimation == 1
+                        ):
+                            self._tomo_scan_at_angle(0, subtomo_number)
                         previous_subtomo_number = subtomo_number
                     self._tomo_scan_at_angle(angle, subtomo_number)
                     ii += 1
@@ -1790,6 +1813,10 @@ class Flomni(
                 print(f"ending after {self.golden_max_number_of_projections} projections")
             else:
                 print("ending by manual interruption")
+            if self.golden_projections_at_0_deg_for_damage_estimation == 1:
+                print(
+                    "repeating prjections at 0 degrees at the beginning of every second subtomogram"
+                )
         if self.tomo_type == 3:
             print(
                 "\x1b[1mTomo type 3:\x1b[0m Equally spaced tomography, golden ratio starting angle"
@@ -1800,6 +1827,10 @@ class Flomni(
                 print(f"ending after {self.golden_max_number_of_projections} projections")
             else:
                 print("ending by manual interruption")
+            if self.golden_projections_at_0_deg_for_damage_estimation == 1:
+                print(
+                    "repeating prjections at 0 degrees at the beginning of every second subtomogram"
+                )
         print(f"\nSample name: {self.sample_name}\n")
 
         user_input = input("Are these parameters correctly set for your scan? [Y/n]")
@@ -1841,6 +1872,11 @@ class Flomni(
                     self.golden_max_number_of_projections,
                     int,
                 )
+                self.golden_projections_at_0_deg_for_damage_estimation = self._get_val(
+                    "Repeat projections at 0 deg every second subtomo 1/0 ?",
+                    self.golden_projections_at_0_deg_for_damage_estimation,
+                    int,
+                )
 
             if self.tomo_type == 3:
                 numprj = self._get_val(
@@ -1852,6 +1888,11 @@ class Flomni(
                 self.golden_max_number_of_projections = self._get_val(
                     "Stop after number of projections (zero for endless)",
                     self.golden_max_number_of_projections,
+                    int,
+                )
+                self.golden_projections_at_0_deg_for_damage_estimation = self._get_val(
+                    "Repeat projections at 0 deg every second subtomo",
+                    self.golden_projections_at_0_deg_for_damage_estimation,
                     int,
                 )
 
