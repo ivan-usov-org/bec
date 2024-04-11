@@ -1,0 +1,54 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "bec_ipython_client"
+version = "2.4.2"
+description = "BEC IPython client"
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "bec_lib",
+    "numpy",
+    "requests",
+    "typeguard",
+    "ipython",
+    "rich",
+    "pyepics",
+    "h5py",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black~=24.0",
+    "isort",
+    "coverage",
+    "pylint",
+    "pytest",
+    "pytest-random-order",
+    "pytest-timeout",
+    "pytest-redis",
+    "pytest-retry",
+]
+
+[project.scripts]
+bec = "bec_ipython_client.main:main"
+
+[project.entry-points.pytest11]
+bec_lib_end2end_fixtures = "bec_ipython_client.tests.end2end_fixtures"
+
+[project.urls]
+"Bug Tracker" = "https://gitlab.psi.ch/bec/bec/issues"
+Homepage = "https://gitlab.psi.ch/bec/bec"
+
+[tool.hatch.build.targets.wheel]
+include = ["*"]
+
+[tool.black]
+line-length = 100
+skip-magic-trailing-comma = true

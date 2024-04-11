@@ -14,7 +14,7 @@ for dir in "${dirs[@]}"
 do
     echo "Building $dir"
     cd $dir
-    python setup.py sdist bdist_wheel
+    python -m build
     cp dist/* ../dist
     rm -r ./dist
     cd ..

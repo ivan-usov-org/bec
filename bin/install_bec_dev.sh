@@ -89,9 +89,9 @@ fi
 # check if the conda environment has the correct dependencies. If not, install them.
 conda activate ${conda_env_name}
 
+dependencies=(bec_lib bec_ipython_client bec_server)
 # split virtual environment into separate environments for each package
 if [ "$split_env" = true ]; then
-    dependencies=(bec_lib bec_client bec_server)
     for package in "${dependencies[@]}"
     do
         echo "Creating virtual environment for $package..."
@@ -99,7 +99,6 @@ if [ "$split_env" = true ]; then
         rm -rf ${package}_venv
         python -m venv ./${package}_venv
         source ./${package}_venv/bin/activate
-        pip install -q -q wheel
         pip install -q -q -e '.[dev]'
         cd ../
         deactivate
@@ -112,9 +111,14 @@ else # install all packages in one virtual environment
     rm -rf ./bec_venv
     python -m venv ./bec_venv
     source ./bec_venv/bin/activate
-    cd ./bec_server
-    pip install -q -q wheel
-    pip install -q -q -e '.[dev]'
-    cd ../
+
+    for package in "${dependencies[@]}"
+    do
+        echo "Installing $package..."
+        cd ./$package
+        pip install -q -q -e '.[dev]'
+        cd ../
+        echo "Installed $package"
+    done
     echo "Created virtual environment for all packages"
 fi
