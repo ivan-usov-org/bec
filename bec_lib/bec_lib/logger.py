@@ -40,14 +40,24 @@ class LogLevel(int, enum.Enum):
 class BECLogger:
     """Logger for BEC."""
 
+    SERVICE_ABBREVIATION = {
+        "ScanServer": "SCS",
+        "SciHub": "SIH",
+        "DeviceServer": "DVS",
+        "DAPServer": "DAP",
+        "FileWriterManager": "FWM",
+        "ScanBundler": "SCB",
+        "BECClient": "CLI",
+    }
+
     DEBUG_FORMAT = (
-        "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level}</level> |"
-        " <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> -"
-        " <level>{message}</level>"
+        "<green>{service_name} | {{time:YYYY-MM-DD HH:mm:ss.SSS}}</green> | <level>{{level}}</level> |"
+        " <cyan>{{name}}</cyan>:<cyan>{{function}}</cyan>:<cyan>{{line}}</cyan> -"
+        " <level>{{message}}</level>"
     )
     LOG_FORMAT = (
-        "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>[{level}]</level> |"
-        " <level>{message}</level>"
+        "<green>{service_name} | {{time:YYYY-MM-DD HH:mm:ss}}</green> | <level>[{{level}}]</level> |"
+        " <level>{{message}}</level>"
     )
     LOGLEVEL = LogLevel
 
@@ -156,12 +166,14 @@ class BECLogger:
         Returns:
             str: Log format.
         """
+        # abr = self.SERVICE_ABBREVIATION[self.service_name] if self.service_name else ""
+        abr = self.service_name if self.service_name else ""
         if level is None:
             level = self.level
         if level > self.LOGLEVEL.DEBUG:
-            return self.LOG_FORMAT
+            return self.LOG_FORMAT.format(service_name=abr)
 
-        return self.DEBUG_FORMAT
+        return self.DEBUG_FORMAT.format(service_name=abr)
 
     def _update_sinks(self):
         self.logger.remove()
