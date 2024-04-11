@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v2.2.0 (2024-04-11)
+
+### Feature
+
+* Add bec_service names to log files ([`329e9ed`](https://gitlab.psi.ch/bec/bec/-/commit/329e9eda5b31f033af4535c01545b4d1ceeb12c6))
+
 ## v2.1.0 (2024-04-11)
 
 ### Feature
