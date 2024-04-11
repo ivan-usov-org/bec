@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v2.0.2 (2024-04-11)
+
+### Fix
+
+* Add raise condition for fetching path from service_config for recovery_device_config dumps ([`0a9a674`](https://gitlab.psi.ch/bec/bec/-/commit/0a9a6747da87e318ed8ec6e4c6e594f05fa7070a))
+
 ## v2.0.1 (2024-04-11)
 
 ### Fix
