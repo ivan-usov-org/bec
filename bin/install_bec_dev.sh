@@ -91,7 +91,7 @@ conda activate ${conda_env_name}
 
 # split virtual environment into separate environments for each package
 if [ "$split_env" = true ]; then
-    dependencies=(bec_lib scan_server scan_bundler data_processing file_writer device_server scihub bec_client bec_server)
+    dependencies=(bec_lib bec_client bec_server)
     for package in "${dependencies[@]}"
     do
         echo "Creating virtual environment for $package..."
