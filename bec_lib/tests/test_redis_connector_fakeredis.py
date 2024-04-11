@@ -35,8 +35,8 @@ def connected_connector():
         connector.shutdown()
 
 
-TestStreamEndpoint = EndpointInfo("test", TestMessage("test"), MessageOp.STREAM)
-TestStreamEndpoint2 = EndpointInfo("test2", TestMessage("test2"), MessageOp.STREAM)
+TestStreamEndpoint = EndpointInfo("test", TestMessage(), MessageOp.STREAM)
+TestStreamEndpoint2 = EndpointInfo("test2", TestMessage(), MessageOp.STREAM)
 
 
 @pytest.mark.parametrize(
@@ -68,25 +68,25 @@ def test_redis_connector_register(
     connected_connector, subscribed_topics, subscribed_patterns, msgs
 ):
     connector = connected_connector
-    test_msg = TestMessage(msg="test")
+    test_msg = TestMessage()
     cb_mock = mock.Mock(spec=[])  # spec is here to remove all attributes
     if subscribed_topics:
         connector.register(
             subscribed_topics, subscribed_patterns, cb=cb_mock, start_thread=False, a=1
         )
         for msg in msgs:
-            connector.send(msg, TestMessage(msg=msg))
+            connector.send(msg, TestMessage())
             connector.poll_messages()
-            msg_object = MessageObject(msg, TestMessage(msg=msg))
+            msg_object = MessageObject(msg, TestMessage())
             cb_mock.assert_called_with(msg_object, a=1)
     if subscribed_patterns:
         connector.register(
             subscribed_topics, subscribed_patterns, cb=cb_mock, start_thread=False, a=1
         )
         for msg in msgs:
-            connector.send(msg, TestMessage(msg=msg))
+            connector.send(msg, TestMessage())
             connector.poll_messages()
-            msg_object = MessageObject(msg, TestMessage(msg=msg))
+            msg_object = MessageObject(msg, TestMessage())
             cb_mock.assert_called_with(msg_object, a=1)
 
 
@@ -101,35 +101,35 @@ def test_redis_connector_unregister(connected_connector):
 
     connector.register(topics=["topic1", "topic2"], cb=received_event, start_thread=False)
 
-    connector.send("topic1", TestMessage("topic1"))
+    connector.send("topic1", TestMessage(msg="topic1"))
     connector.poll_messages(timeout=1)
     on_msg_received.assert_called_once_with("topic1")
-    connector.send("topic2", TestMessage("topic2"))
+    connector.send("topic2", TestMessage(msg="topic2"))
     connector.poll_messages(timeout=1)
     on_msg_received.assert_called_with("topic2")
 
     connector.unregister("topic1", cb=received_event)
 
     on_msg_received.reset_mock()
-    connector.send("topic1", TestMessage("topic1"))
-    connector.send("topic2", TestMessage("topic2"))
+    connector.send("topic1", TestMessage(msg="topic1"))
+    connector.send("topic2", TestMessage(msg="topic2"))
     connector.poll_messages(timeout=1)
     on_msg_received.assert_called_once_with("topic2")
 
     on_msg_received.reset_mock()
     connector.unregister("topic2", cb=received_event)
-    connector.send("topic1", TestMessage("topic1"))
-    connector.send("topic2", TestMessage("topic2"))
+    connector.send("topic1", TestMessage(msg="topic1"))
+    connector.send("topic2", TestMessage(msg="topic2"))
     assert on_msg_received.call_count == 0
     assert redisdb.execute_command("PUBSUB CHANNELS") == []
     assert len(connector._topics_cb) == 0
 
     connector.register(topics=["topic1", "topic2"], cb=received_event, start_thread=False)
 
-    connector.send("topic1", TestMessage("topic1"))
+    connector.send("topic1", TestMessage(msg="topic1"))
     connector.poll_messages(timeout=1)
     on_msg_received.assert_called_once_with("topic1")
-    connector.send("topic2", TestMessage("topic2"))
+    connector.send("topic2", TestMessage(msg="topic2"))
     connector.poll_messages(timeout=1)
     on_msg_received.assert_called_with("topic2")
     connector.unregister(topics=["topic1", "topic2"])
@@ -148,11 +148,11 @@ def test_redis_connector_register_identical(connected_connector):
     connector.register(topics="topic1", cb=received_event2, start_thread=False)
     connector.register(topics="topic2", cb=received_event1, start_thread=False)
 
-    connector.send("topic1", TestMessage("topic1"))
+    connector.send("topic1", TestMessage())
     connector.poll_messages(timeout=1)
     assert received_event1.call_count == 1
     assert received_event2.call_count == 1
-    connector.send("topic2", TestMessage("topic2"))
+    connector.send("topic2", TestMessage())
     connector.poll_messages(timeout=1)
     assert received_event1.call_count == 2
 
@@ -166,7 +166,7 @@ def test_redis_register_poll_messages(connected_connector):
         cb_fcn_has_been_called = True
         assert kwargs["a"] == 1
 
-    test_msg = TestMessage(msg="test")
+    test_msg = TestMessage()
     connector.register("test", cb=cb_fcn, a=1, start_thread=False)
     connector._redis_conn.publish("test", MsgpackSerialization.dumps(test_msg))
 

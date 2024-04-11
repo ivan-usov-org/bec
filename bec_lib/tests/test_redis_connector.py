@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import ClassVar
+from typing import ClassVar, Optional
 from unittest import mock
 
 import pytest
@@ -22,7 +22,7 @@ from bec_lib.serialization import MsgpackSerialization
 class TestMessage(BECMessage):
     __test__: ClassVar[bool] = False  # just for pytest to ignore this class
     msg_type: ClassVar[str] = "test_message"
-    msg: str
+    msg: Optional[str] = None
 
 
 # register at BEC messages module level, to be able to
