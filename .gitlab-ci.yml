@@ -422,6 +422,7 @@ semver:
       -D version_variable=./semantic_release/__init__.py:__version__,./bec_client/setup.py:__version__,./bec_lib/setup.py:__version__,./bec_server/setup.py:__version__
       -D hvcs=gitlab
       -D build_command="./ci/build_python_services.sh"
+      -D branch=main
 
   allow_failure: false
   rules:
