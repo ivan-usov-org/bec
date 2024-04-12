@@ -37,8 +37,8 @@ def test_config_helper_update_session_with_file():
 
 
 @pytest.mark.parametrize("config_file", ["test.yaml", "test.yml"])
-def test_config_helper_load_config_from_file(config_file, tmp_path):
-    orig_cfg_file = f"{dir_path}/tests/test_config.yaml"
+def test_config_helper_load_config_from_file(tmp_path, test_config_yaml_file_path, config_file):
+    orig_cfg_file = test_config_yaml_file_path
     test_cfg_file = tmp_path / config_file
     shutil.copyfile(orig_cfg_file, test_cfg_file)
     connector = mock.MagicMock()

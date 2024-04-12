@@ -42,7 +42,7 @@ stages:
 .install-bec-services-dev: &install-bec-services-dev
     - pip install wheel
     - pip install -e ./bec_server[dev]
-    - pip install -e ./bec_client[dev]
+    - pip install -e ./bec_ipython_client[dev]
     - pip install -e ./bec_lib[dev]
 
 formatter:
@@ -60,7 +60,7 @@ pylint:
     - pip install pylint pylint-exit anybadge
   script:
     - mkdir ./pylint
-    - pylint ./bec_server/bec_server ./bec_lib/bec_lib ./bec_client/bec_client --output-format=text | tee ./pylint/pylint.log || pylint-exit $?
+    - pylint ./bec_server/bec_server ./bec_lib/bec_lib ./bec_ipython_client/bec_ipython_client --output-format=text | tee ./pylint/pylint.log || pylint-exit $?
     - PYLINT_SCORE=$(sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' ./pylint/pylint.log)
     - anybadge --label=Pylint --file=pylint/pylint.svg --value=$PYLINT_SCORE 2=red 4=orange 8=yellow 10=green
     - echo "Pylint score is $PYLINT_SCORE"
@@ -114,7 +114,7 @@ tests:
     - apt-get install -y gcc
     - apt-get install -y redis
     - *install-bec-services-dev
-    - coverage run --source=./bec_server/bec_server,./bec_lib/bec_lib,./bec_client/bec_client, --omit=*/bec_server/scan_server/scan_plugins/*,*/bec_client/bec_client/plugins/*,*/bec_client/scripts/*,*/bec_lib/bec_lib/tests/* -m pytest -v --junitxml=report.xml --random-order ./bec_server/tests ./bec_client/tests/client_tests ./bec_lib/tests
+    - coverage run --source=./bec_server/bec_server,./bec_lib/bec_lib,./bec_ipython_client/bec_ipython_client, --omit=*/bec_server/scan_server/scan_plugins/*,*/bec_ipython_client/bec_ipython_client/plugins/*,*/bec_ipython_client/scripts/*,*/bec_lib/bec_lib/tests/* -m pytest -v --junitxml=report.xml --random-order ./bec_server/tests ./bec_ipython_client/tests/client_tests ./bec_lib/tests
     - coverage report
     - coverage xml
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
@@ -137,7 +137,7 @@ tests-3.11:
     - apt-get install -y gcc
     - apt-get install -y redis
     - *install-bec-services-dev
-    - pytest -v --junitxml=report.xml --random-order ./bec_server/tests ./bec_lib/tests ./bec_client/tests/client_tests 
+    - pytest -v --junitxml=report.xml --random-order ./bec_server/tests ./bec_lib/tests ./bec_ipython_client/tests/client_tests 
 
 tests-3.12:
   extends: "tests-3.11"
@@ -168,7 +168,7 @@ end-2-end:
   script:
     # build and run the tests
     - echo $OPHYD_DEVICES_BRANCH 
-    - docker build -t end2end_client:test -f ./ci/Dockerfile.run_pytest --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=bec_client --build-arg OPHYD_BRANCH=$OPHYD_DEVICES_BRANCH .
+    - docker build -t end2end_client:test -f ./ci/Dockerfile.run_pytest --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=bec_ipython_client --build-arg OPHYD_BRANCH=$OPHYD_DEVICES_BRANCH .
     - docker run --network=host --name end2end_client end2end_client:test
 
   after_script:
@@ -208,7 +208,7 @@ end-2-end:
 #     - docker run --network=host -d --name file_writer file_writer:test
 
 #     # build and run the tests
-#     - docker build -t en2end_client:test -f ./bec_client/tests/Dockerfile .
+#     - docker build -t en2end_client:test -f ./bec_ipython_client/tests/Dockerfile .
 #     - docker run --network=host --name end2end_client en2end_client:test
 
 # end-2-end-services_on_multi_hosts:
@@ -235,7 +235,7 @@ end-2-end:
 #     - buildah bud --network=host -t file_writer_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=file_writer --build-arg OPHYD_BRANCH=$OPHYD_DEVICES_BRANCH
 #     - buildah bud --network=host -t dap_server_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=data_processing --build-arg OPHYD_BRANCH=$OPHYD_DEVICES_BRANCH
 #     - buildah bud --network=host -t scihub_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=scihub --build-arg OPHYD_BRANCH=$OPHYD_DEVICES_BRANCH
-#     # default service is bec_client
+#     # default service is bec_ipython_client
 #     - buildah bud --network=host -t end2end_client_test -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10
 
 #     # now for the run phase...
@@ -296,7 +296,7 @@ end-2-end-conda:
 
     - source ./bin/install_bec_dev.sh -t
 
-    - cd ./bec_client
+    - cd ./bec_ipython_client
     - pip install .[dev]
     - pytest --start-servers -v ./tests/end-2-end/test_scans_e2e.py::test_grid_scan
 
@@ -340,7 +340,7 @@ end-2-end-conda-310:
 
     - bec-server start --config ./ci/test_config.yaml
 
-    - cd ./bec_client
+    - cd ./bec_ipython_client
     - pytest -v --random-order ./tests/end-2-end/test_scans_e2e.py
 
   artifacts:
@@ -418,7 +418,7 @@ semver:
     - export REPOSITORY_PASSWORD=$CI_PYPI_TOKEN
     - >
       semantic-release publish -v DEBUG
-      -D version_variable=./semantic_release/__init__.py:__version__,./bec_client/setup.py:__version__,./bec_lib/setup.py:__version__,./bec_server/setup.py:__version__
+      -D version_variable=./semantic_release/__init__.py:__version__,./bec_ipython_client/setup.py:__version__,./bec_lib/setup.py:__version__,./bec_server/setup.py:__version__
       -D hvcs=gitlab
       -D build_command="./ci/build_python_services.sh"
       -D branch=main

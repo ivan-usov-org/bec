@@ -1,8 +1,8 @@
 # set base image (host OS)
-ARG PY_VERSION=3.10 BEC_SERVICE=bec_client OPHYD_BRANCH=master
+ARG PY_VERSION=3.10 BEC_SERVICE=bec_ipython_client OPHYD_BRANCH=master
 FROM morgana-harbor.psi.ch/bec/python:${PY_VERSION}
 
-ARG BEC_SERVICE=bec_client OPHYD_BRANCH=master
+ARG BEC_SERVICE=bec_ipython_client OPHYD_BRANCH=master
 
 RUN echo "Building ${BEC_SERVICE} with Ophyd branch ${OPHYD_BRANCH} "
 

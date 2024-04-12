@@ -179,7 +179,7 @@ class BECClient(BECService, UserScriptsMixin):
         Args:
             module_name (str): The name of the module to load
         """
-        mod = importlib.import_module(f"bec_client.high_level_interfaces.{module_name}")
+        mod = importlib.import_module(f"bec_ipython_client.high_level_interfaces.{module_name}")
         members = inspect.getmembers(mod)
         funcs = {name: func for name, func in members if not name.startswith("__")}
         self._hli_funcs = funcs

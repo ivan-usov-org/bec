@@ -16,10 +16,10 @@ parse the --session argument, add the following lines to the script:
 
     if args.session == "my_session":
         print("Loading my_session session")
-        from bec_plugins.bec_client.plugins.my_session import *
+        from bec_plugins.bec_ipython_client.plugins.my_session import *
     else:
         print("Loading default session")
-        from bec_plugins.bec_client.plugins.default_session import *
+        from bec_plugins.bec_ipython_client.plugins.default_session import *
 """
 
 # pylint: disable=invalid-name, unused-import, import-error, undefined-variable, unused-variable, unused-argument, no-name-in-module
@@ -31,16 +31,16 @@ parse the --session argument, add the following lines to the script:
 
 # if args.session == "my_session":
 #     print("Loading my_session session")
-#     from bec_plugins.bec_client.plugins.my_session import *
+#     from bec_plugins.bec_ipython_client.plugins.my_session import *
 # else:
 #     print("Loading default session")
-#     from bec_plugins.bec_client.plugins.default_session import *
+#     from bec_plugins.bec_ipython_client.plugins.default_session import *
 
 
 # SETUP BEAMLINE INFO
-# from bec_client.plugins.SLS.sls_info import OperatorInfo, SLSInfo
+# from bec_ipython_client.plugins.SLS.sls_info import OperatorInfo, SLSInfo
 
-# from bec_plugins.bec_client.plugins.MyBeamline.beamline_info import BeamlineInfo
+# from bec_plugins.bec_ipython_client.plugins.MyBeamline.beamline_info import BeamlineInfo
 
 # bec._beamline_mixin._bl_info_register(BeamlineInfo)
 # bec._beamline_mixin._bl_info_register(SLSInfo)

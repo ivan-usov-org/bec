@@ -50,26 +50,28 @@ class PluginStructure:
         )
 
     def add_client(self):
-        self.create_dir("bec_plugins/bec_client")
-        self.create_init_file("bec_plugins/bec_client")
+        self.create_dir("bec_plugins/bec_ipython_client")
+        self.create_init_file("bec_plugins/bec_ipython_client")
 
         # high level interface
-        self.create_dir("bec_plugins/bec_client/high_level_interface")
-        self.create_init_file("bec_plugins/bec_client/high_level_interface")
+        self.create_dir("bec_plugins/bec_ipython_client/high_level_interface")
+        self.create_init_file("bec_plugins/bec_ipython_client/high_level_interface")
 
         # plugins
-        self.create_dir("bec_plugins/bec_client/plugins")
-        self.create_init_file("bec_plugins/bec_client/plugins")
+        self.create_dir("bec_plugins/bec_ipython_client/plugins")
+        self.create_init_file("bec_plugins/bec_ipython_client/plugins")
 
         # startup
-        self.create_dir("bec_plugins/bec_client/startup")
-        self.create_init_file("bec_plugins/bec_client/startup")
+        self.create_dir("bec_plugins/bec_ipython_client/startup")
+        self.create_init_file("bec_plugins/bec_ipython_client/startup")
         ## copy pre_startup.py
         pre_startup_file = os.path.join(current_dir, "plugin_setup_files", "pre_startup.py")
-        os.system(f"cp {pre_startup_file} {self.target_dir}/bec_plugins/bec_client/startup")
+        os.system(f"cp {pre_startup_file} {self.target_dir}/bec_plugins/bec_ipython_client/startup")
         ## copy post_startup.py
         post_startup_file = os.path.join(current_dir, "plugin_setup_files", "post_startup.py")
-        os.system(f"cp {post_startup_file} {self.target_dir}/bec_plugins/bec_client/startup")
+        os.system(
+            f"cp {post_startup_file} {self.target_dir}/bec_plugins/bec_ipython_client/startup"
+        )
 
     def add_device_server(self):
         self.create_dir("bec_plugins/device_server")

@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 logger = bec_logger.logger
 
 try:
-    from bec_plugins import bec_client as client_plugins
+    from bec_plugins import bec_ipython_client as client_plugins
 except ImportError:
     client_plugins = None
 

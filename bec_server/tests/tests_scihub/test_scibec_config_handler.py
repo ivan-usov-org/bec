@@ -11,7 +11,6 @@ import bec_lib
 from bec_lib import DeviceBase, messages
 from bec_lib.bec_errors import DeviceConfigError
 from bec_lib.device import OnFailure, ReadoutPriority
-from bec_lib.tests.utils import ConnectorMock
 from bec_server.scihub import SciHub
 from bec_server.scihub.scibec import ConfigHandler, SciBecConnector
 
@@ -30,10 +29,9 @@ def config_handler(SciHubMock):
                 scibec_connector.shutdown()
 
 
-def create_available_keys_fixture():
-    config_content = None
-    with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
-        config_content = yaml.safe_load(f)
+@pytest.fixture
+def available_keys_fixture(test_config_yaml):
+    config_content = test_config_yaml
     config_keys_from_config = []
     for dev_config in config_content.values():
         for k in dev_config.keys():
@@ -42,7 +40,7 @@ def create_available_keys_fixture():
     # remove enabled and deviceClass, as it is not handled from config_handler
     config_keys_from_config.remove("enabled")
     config_keys_from_config.remove("deviceClass")
-    return list(config_keys_from_config)
+    return config_keys_from_config
 
 
 def test_parse_config_request_update(config_handler):
@@ -280,56 +278,58 @@ def test_config_handler_update_device_config_raise(config_handler):
             config_handler._update_device_config(device, {"doesnt_exist": False})
 
 
-@pytest.mark.parametrize("available_key", create_available_keys_fixture())
-def test_config_handler_update_device_config_available_keys(config_handler, available_key):
-    dev = config_handler.device_manager.devices
-    if available_key in ["deviceConfig", "userParameter"]:
-        init = {"something": "to_update"}
-        dev.samx = DeviceBase(name="samx", config={available_key: init})
-    elif available_key in ["softwareTrigger", "readOnly"]:
-        init = True
-        dev.samx = DeviceBase(name="samx", config={available_key: init})
-    elif available_key in ["readoutPriority"]:
-        init = ReadoutPriority.BASELINE
-        dev.samx = DeviceBase(name="samx", config={available_key: init})
-    elif available_key in ["onFailure"]:
-        init = OnFailure.BUFFER
-        dev.samx = DeviceBase(name="samx", config={available_key: init})
-    elif available_key in ["deviceTags"]:
-        init = ["something"]
-        dev.samx = DeviceBase(name="samx", config={available_key: init})
-    else:
-        dev.samx = DeviceBase(name="samx", config={})
-    with mock.patch.object(config_handler, "_update_device_server") as update_dev_server:
-        with mock.patch.object(
-            config_handler, "_wait_for_device_server_update", return_value=(True, mock.MagicMock())
-        ) as wait:
-            with mock.patch("bec_server.scihub.scibec.config_handler.uuid") as uuid:
-                device = dev["samx"]
-                rid = str(uuid.uuid4())
-                if available_key in ["deviceConfig", "userParameter"]:
-                    update = {"something": "to_update"}
-                    config_handler._update_device_config(device, {available_key: update})
-                elif available_key in ["softwareTrigger", "readOnly"]:
-                    update = True
-                    config_handler._update_device_config(device, {available_key: update})
-                elif available_key in ["readoutPriority"]:
-                    update = ReadoutPriority.MONITORED
-                    config_handler._update_device_config(device, {available_key: update})
-                elif available_key in ["readoutPriority"]:
-                    update = OnFailure.RETRY
-                    config_handler._update_device_config(device, {available_key: update})
-                elif available_key in ["deviceTags"]:
-                    update = ["something"]
-                    config_handler._update_device_config(device, {available_key: update})
-                else:
-                    update = ""
-                    config_handler._update_device_config(device, {available_key: update})
-                # mock doesn't copy the data, hence the popped result:
-                if available_key == "deviceConfig":
-                    update_dev_server.assert_called_once_with(rid, {device.name: {}})
-                    wait.assert_called_once_with(rid)
-                assert dev.samx._config == {available_key: update}
+def test_config_handler_update_device_config_available_keys(config_handler, available_keys_fixture):
+    for available_key in available_keys_fixture:
+        dev = config_handler.device_manager.devices
+        if available_key in ["deviceConfig", "userParameter"]:
+            init = {"something": "to_update"}
+            dev.samx = DeviceBase(name="samx", config={available_key: init})
+        elif available_key in ["softwareTrigger", "readOnly"]:
+            init = True
+            dev.samx = DeviceBase(name="samx", config={available_key: init})
+        elif available_key in ["readoutPriority"]:
+            init = ReadoutPriority.BASELINE
+            dev.samx = DeviceBase(name="samx", config={available_key: init})
+        elif available_key in ["onFailure"]:
+            init = OnFailure.BUFFER
+            dev.samx = DeviceBase(name="samx", config={available_key: init})
+        elif available_key in ["deviceTags"]:
+            init = ["something"]
+            dev.samx = DeviceBase(name="samx", config={available_key: init})
+        else:
+            dev.samx = DeviceBase(name="samx", config={})
+        with mock.patch.object(config_handler, "_update_device_server") as update_dev_server:
+            with mock.patch.object(
+                config_handler,
+                "_wait_for_device_server_update",
+                return_value=(True, mock.MagicMock()),
+            ) as wait:
+                with mock.patch("bec_server.scihub.scibec.config_handler.uuid") as uuid:
+                    device = dev["samx"]
+                    rid = str(uuid.uuid4())
+                    if available_key in ["deviceConfig", "userParameter"]:
+                        update = {"something": "to_update"}
+                        config_handler._update_device_config(device, {available_key: update})
+                    elif available_key in ["softwareTrigger", "readOnly"]:
+                        update = True
+                        config_handler._update_device_config(device, {available_key: update})
+                    elif available_key in ["readoutPriority"]:
+                        update = ReadoutPriority.MONITORED
+                        config_handler._update_device_config(device, {available_key: update})
+                    elif available_key in ["readoutPriority"]:
+                        update = OnFailure.RETRY
+                        config_handler._update_device_config(device, {available_key: update})
+                    elif available_key in ["deviceTags"]:
+                        update = ["something"]
+                        config_handler._update_device_config(device, {available_key: update})
+                    else:
+                        update = ""
+                        config_handler._update_device_config(device, {available_key: update})
+                    # mock doesn't copy the data, hence the popped result:
+                    if available_key == "deviceConfig":
+                        update_dev_server.assert_called_once_with(rid, {device.name: {}})
+                        wait.assert_called_once_with(rid)
+                    assert dev.samx._config == {available_key: update}
 
 
 def test_config_handler_wait_for_device_server_update(config_handler):

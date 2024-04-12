@@ -2,7 +2,7 @@
 
 # define all target directories
 declare -a dirs=(
-    "bec_client"
+    "bec_ipython_client"
     "bec_lib"
     "bec_server"
 )

@@ -35,7 +35,7 @@ class user_access:
         self.meth = meth
 
     def __set_name__(self, owner, name):
-        """Write registered method into the owner class USER_ACCESS list for the bec_client"""
+        """Write registered method into the owner class USER_ACCESS list for the bec_ipython_client"""
         if not hasattr(owner, "USER_ACCESS"):
             owner.USER_ACCESS = []
         if name not in owner.USER_ACCESS:
