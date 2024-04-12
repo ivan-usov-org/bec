@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v2.2.1 (2024-04-12)
+
+### Fix
+
+* **client:** Removed outdated bec plotter; to be replaced by BECFigure once ready ([`52b33d8`](https://gitlab.psi.ch/bec/bec/-/commit/52b33d8b65a9496fa38719cb30ba5666cccd4b55))
+
+### Documentation
+
+* Added link to BECFigure docs ([`6d13618`](https://gitlab.psi.ch/bec/bec/-/commit/6d13618a6fec7104bcb72cb32745ad645851bec3))
+
 ## v2.2.0 (2024-04-11)
 
 ### Feature
