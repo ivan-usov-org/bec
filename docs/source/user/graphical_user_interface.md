@@ -7,4 +7,6 @@ Additionally, some GUI elements can be directly accessed through the command lin
 
 ## BECFigure
 
-coming soon...
+For the time being, please refer to the [API reference](https://bec-widgets.readthedocs.io/en/latest/developer/_autosummary/bec_widgets.cli.client.BECFigure.html#bec_widgets.cli.client.BECFigure). 
+
+A more detailed documentation is coming soon!
