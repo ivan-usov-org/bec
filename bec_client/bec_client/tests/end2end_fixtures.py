@@ -10,12 +10,7 @@ import warnings
 import pytest
 from pytest_redis import factories as pytest_redis_factories
 
-try:
-    from bec_client import BECIPythonClient
-except ImportError:
-    warnings.warn(
-        "No BEC IPython client installed, 'bec_client_fixture_with_demo_config' is not available"
-    )
+from bec_client import BECIPythonClient
 
 from bec_lib import BECClient, ConfigHelper, RedisConnector, ServiceConfig
 from bec_lib.tests.utils import wait_for_empty_queue

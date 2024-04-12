@@ -42,7 +42,10 @@ def run_install(setup_args: dict, bec_deps: list, editable=False):
 
 if __name__ == "__main__":
     setup_args_in = {
-        "entry_points": {"console_scripts": ["bec = bec_client.main:main"]},
+        "entry_points": {
+            "console_scripts": ["bec = bec_client.main:main"],
+            "pytest11": ["bec_lib_end2end_fixtures = bec_client.tests.end2end_fixtures"],
+        },
         "install_requires": [
             "numpy",
             "requests",
