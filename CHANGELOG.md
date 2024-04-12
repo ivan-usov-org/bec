@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v2.3.0 (2024-04-12)
+
+### Feature
+
+* Rename spec_hli to bec_hli, add load_hli function to BECIPythonCLient; closes #263 ([`6974cb2`](https://gitlab.psi.ch/bec/bec/-/commit/6974cb2f13e865d1395eda2274ac25abd6e44ef8))
+
 ## v2.2.1 (2024-04-12)
 
 ### Fix
