@@ -164,7 +164,7 @@ end-2-end:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
     - if: '$CI_PIPELINE_SOURCE == "web"'
     - if: '$CI_PIPELINE_SOURCE == "pipeline"'
-    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
   script:
     # build and run the tests
@@ -272,7 +272,7 @@ end-2-end:
 #     - if: '$CI_PIPELINE_SOURCE == "schedule"'
 #     - if: '$CI_PIPELINE_SOURCE == "web"'
 #     - if: '$CI_PIPELINE_SOURCE == "pipeline"'     
-#     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+#     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
 #     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
 
 
@@ -311,7 +311,7 @@ end-2-end-conda:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
     - if: '$CI_PIPELINE_SOURCE == "web"'
     - if: '$CI_PIPELINE_SOURCE == "pipeline"'
-    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
 
 end-2-end-conda-310:
@@ -383,7 +383,7 @@ trigger_bec-widgets:
     BEC_CORE_BRANCH: $CI_COMMIT_REF_NAME
   rules:
     - if: '$CI_PIPELINE_SOURCE == "web"'
-    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
 
 trigger_ophyd-devices:
@@ -395,7 +395,7 @@ trigger_ophyd-devices:
     BEC_CORE_BRANCH: $CI_COMMIT_REF_NAME
   rules:
     - if: '$CI_PIPELINE_SOURCE == "web"'
-    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
 
 semver:
@@ -425,7 +425,7 @@ semver:
 
   allow_failure: false
   rules:
-    - if: '$CI_COMMIT_REF_NAME == "master"'
+    - if: '$CI_COMMIT_REF_NAME == "main"'
 
 dev-pages:
   stage: Deploy
@@ -450,7 +450,7 @@ pages:
     - if: '$CI_COMMIT_TAG != null'
       variables:
         TARGET_BRANCH: $CI_COMMIT_TAG
-    - if: '$CI_COMMIT_REF_NAME == "master"'
+    - if: '$CI_COMMIT_REF_NAME == "main"'
     - if: '$CI_COMMIT_REF_NAME == "production"'
   script:
     - curl -X POST -d "branches=$CI_COMMIT_REF_NAME" -d "token=$RTD_TOKEN" https://readthedocs.org/api/v2/webhook/beamline-experiment-control/221870/
