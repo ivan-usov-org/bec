@@ -1,0 +1,95 @@
+eyex:
+  readoutPriority: baseline
+  description: X-ray eye translation x
+  deviceClass: EpicsMotor
+  deviceConfig:
+    prefix: MTEST-X05LA-ES2-XRAYEYE:M1
+  deviceTags:
+    - xray-eye
+  onFailure: buffer
+  enabled: true
+  readOnly: false
+  softwareTrigger: false
+eyey:
+  readoutPriority: baseline
+  description: X-ray eye translation y
+  deviceClass: EpicsMotor
+  deviceConfig:
+    prefix: MTEST-X05LA-ES2-XRAYEYE:M2
+  deviceTags:
+    - xray-eye
+  onFailure: buffer
+  enabled: true
+  readOnly: false
+  softwareTrigger: false  
+eyez:
+  readoutPriority: baseline
+  description: X-ray eye translation z
+  deviceClass: EpicsMotor
+  deviceConfig:
+    prefix: MTEST-X05LA-ES2-XRAYEYE:M3
+  deviceTags:
+    - xray-eye
+  onFailure: buffer
+  enabled: true
+  readOnly: false
+  softwareTrigger: false
+femto_mean_curr:
+  readoutPriority: monitored
+  description: Femto mean current
+  deviceClass: EpicsSignal
+  deviceConfig:
+    auto_monitor: true
+    read_pv: MTEST-X05LA-ES2-XRAYEYE:FEMTO-MEAN-CURR
+  deviceTags:
+    - xray-eye
+  onFailure: buffer
+  enabled: true
+  readOnly: true
+  softwareTrigger: false    
+es1_roty:
+  description: 'Test rotation stage'
+  deviceClass: epics:devices:EpicsMotorX 
+  deviceConfig: {prefix: 'X02DA-ES1-SMP1:ROTY'}
+  onFailure: buffer
+  enabled: true
+  readoutPriority: monitored
+
+# es1_tasks:
+#   description: 'AA1 task management interface'
+#   deviceClass: epics:devices:aa1Tasks 
+#   deviceConfig: {prefix: 'X02DA-ES1-SMP1:TASK:'}
+#   onFailure: buffer
+#   enabled: true
+#   readoutPriority: monitored
+
+# es1_psod:
+#   description: 'AA1 PSO output interface'
+#   deviceClass: epics:devices:aa1AxisPsoDistance 
+#   deviceConfig: {prefix: 'X02DA-ES1-SMP1:ROTY:PSO:'}
+#   onFailure: buffer
+#   enabled: true
+#   readoutPriority: monitored
+
+# es1_ddaq:
+#   description: 'AA1 drive data collection interface'
+#   deviceClass: epics:devices:aa1AxisDriveDataCollection 
+#   deviceConfig: {prefix: 'X02DA-ES1-SMP1:ROTY:DDC:'}
+#   onFailure: buffer
+#   enabled: true
+#   readoutPriority: monitored
+
+camera:
+  description: Grashopper Camera
+  deviceClass: epics:devices:GrashopperTOMCAT
+  deviceConfig:
+    prefix: 'X02DA-PG-USB:'
+  deviceTags:
+  - camera
+  enabled: true
+  onFailure: buffer
+  readOnly: false
+  readoutPriority: monitored
+  softwareTrigger: true
+
+
