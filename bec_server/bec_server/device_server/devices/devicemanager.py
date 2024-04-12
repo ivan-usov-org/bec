@@ -470,7 +470,7 @@ class DeviceManagerDS(DeviceManagerBase):
         """
         # Convert sizes from bytes to MB
         dsize = len(value.tobytes()) / 1e6
-        max_size = 100
+        max_size = 1000
         if dsize > max_size:
             logger.warning(
                 f"Data size of single message is too large to send, current max_size {max_size}."

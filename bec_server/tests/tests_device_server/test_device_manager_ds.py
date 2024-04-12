@@ -160,7 +160,7 @@ def test_obj_monitor_callback(dm_with_devices, value):
     eiger = device_manager.devices.eiger
     eiger.metadata = {"scan_id": "12345"}
     value_size = len(value.tobytes()) / 1e6  # MB
-    max_size = 100
+    max_size = 1000
     with mock.patch.object(device_manager, "connector") as mock_connector:
         device_manager._obj_callback_monitor(obj=eiger.obj, value=value)
         mock_connector.xadd.assert_called_once_with(

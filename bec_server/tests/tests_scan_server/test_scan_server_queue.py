@@ -158,11 +158,15 @@ def test_scan_queue_modification_callback(queuemanager_mock):
 def test_scan_interception_halt(queuemanager_mock):
     queue_manager = queuemanager_mock()
     msg = messages.ScanQueueModificationMessage(
-        scan_id="dummy", action="halt", parameter={}, metadata={"RID": "something"}
+        scan_id="dummy",
+        action="halt",
+        queue="secondary",
+        parameter={},
+        metadata={"RID": "something"},
     )
     with mock.patch.object(queue_manager, "set_halt") as set_halt:
         queue_manager.scan_interception(msg)
-        set_halt.assert_called_once_with(scan_id="dummy", parameter={})
+        set_halt.assert_called_once_with(scan_id="dummy", queue="secondary", parameter={})
 
 
 def test_set_halt(queuemanager_mock):

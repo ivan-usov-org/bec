@@ -293,6 +293,16 @@ def test_DAPRequestMessage():
     assert res_loaded == msg
 
 
+def test_wrong_DAPRequestMessage():
+    with pytest.raises(pydantic.ValidationError):
+        messages.DAPRequestMessage(
+            dap_cls="dap_cls",
+            dap_type="error",
+            config={"config": "value"},
+            metadata={"RID": "1234"},
+        )
+
+
 def test_FileContentMessage():
     msg = messages.FileContentMessage(file_path="/path/to/file", data={}, metadata={"RID": "1234"})
     res = MsgpackSerialization.dumps(msg)

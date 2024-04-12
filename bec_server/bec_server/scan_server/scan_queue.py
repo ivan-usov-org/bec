@@ -136,7 +136,10 @@ class QueueManager:
         logger.info(f"Scan interception: {scan_mod_msg}")
         action = scan_mod_msg.content["action"]
         parameter = scan_mod_msg.content["parameter"]
-        getattr(self, f"set_{action}")(scan_id=scan_mod_msg.content["scan_id"], parameter=parameter)
+        queue = scan_mod_msg.content.get("queue", "primary")
+        getattr(self, f"set_{action}")(
+            scan_id=scan_mod_msg.content["scan_id"], queue=queue, parameter=parameter
+        )
 
     @requires_queue
     def set_pause(self, scan_id=None, queue="primary", parameter: dict = None) -> None:
