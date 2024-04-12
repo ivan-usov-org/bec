@@ -9,13 +9,10 @@ import yaml
 
 import bec_lib
 from bec_lib import MessageEndpoints, messages
-from bec_lib.tests.utils import ConnectorMock, create_session_from_config
 from bec_server.device_server.devices.devicemanager import DeviceManagerDS
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=protected-access
-
-dir_path = os.path.dirname(bec_lib.__file__)
 
 
 class ControllerMock:
@@ -50,38 +47,18 @@ class EpicsDeviceMock(DeviceMock):
         self._connected = True
 
 
-@functools.lru_cache()
-def load_test_config():
-    with open(f"{dir_path}/tests/test_config.yaml", "r", encoding="utf-8") as session_file:
-        return create_session_from_config(yaml.safe_load(session_file))
-
-
-def load_device_manager():
-    service_mock = mock.MagicMock()
-    service_mock.connector = ConnectorMock("", store_data=False)
-    device_manager = DeviceManagerDS(service_mock, "")
-    device_manager.connector = service_mock.connector
-    device_manager.config_update_handler = mock.MagicMock()
-    device_manager._session = copy.deepcopy(load_test_config())
-    device_manager._load_session()
-    return device_manager
-
-
-@pytest.fixture(scope="function")
-def device_manager():
-    device_manager = load_device_manager()
-    yield device_manager
-    device_manager.shutdown()
-
-
-def test_device_init(device_manager):
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
+def test_device_init(dm_with_devices):
+    device_manager = dm_with_devices
     for dev in device_manager.devices.values():
         if not dev.enabled:
             continue
         assert dev.initialized is True
 
 
-def test_device_proxy_init(device_manager):
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
+def test_device_proxy_init(dm_with_devices):
+    device_manager = dm_with_devices
     assert "sim_proxy_test" in device_manager.devices.keys()
     assert "proxy_cam_test" in device_manager.devices.keys()
     assert "image" in device_manager.devices["proxy_cam_test"].obj.registered_proxies.values()
@@ -94,7 +71,9 @@ def test_device_proxy_init(device_manager):
     "obj,raises_error",
     [(DeviceMock(), True), (DeviceControllerMock(), False), (EpicsDeviceMock(), False)],
 )
-def test_conntect_device(device_manager, obj, raises_error):
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
+def test_connect_device(dm_with_devices, obj, raises_error):
+    device_manager = dm_with_devices
     if raises_error:
         with pytest.raises(ConnectionError):
             device_manager.connect_device(obj)
@@ -102,13 +81,10 @@ def test_conntect_device(device_manager, obj, raises_error):
     device_manager.connect_device(obj)
 
 
-def test_disable_unreachable_devices():
-    service_mock = mock.MagicMock()
-    service_mock.connector = ConnectorMock("")
-    device_manager = DeviceManagerDS(service_mock)
-
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
+def test_disable_unreachable_devices(device_manager, session_from_test_config):
     def get_config_from_mock():
-        device_manager._session = copy.deepcopy(load_test_config())
+        device_manager._session = copy.deepcopy(session_from_test_config)
         device_manager._load_session()
 
     def mocked_failed_connection(obj):
@@ -131,8 +107,9 @@ def test_disable_unreachable_devices():
                     )
 
 
-def test_flyer_event_callback():
-    device_manager = load_device_manager()
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
+def test_flyer_event_callback(dm_with_devices):
+    device_manager = dm_with_devices
     samx = device_manager.devices.samx
     samx.metadata = {"scan_id": "12345"}
 
@@ -158,8 +135,9 @@ def test_flyer_event_callback():
     assert progress_msg.content["status"] == 20
 
 
-def test_obj_progress_callback():
-    device_manager = load_device_manager()
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
+def test_obj_progress_callback(dm_with_devices):
+    device_manager = dm_with_devices
     samx = device_manager.devices.samx
     samx.metadata = {"scan_id": "12345"}
 
@@ -176,8 +154,9 @@ def test_obj_progress_callback():
 @pytest.mark.parametrize(
     "value", [np.empty(shape=(10, 10)), np.empty(shape=(100, 100)), np.empty(shape=(1000, 1000))]
 )
-def test_obj_monitor_callback(value):
-    device_manager = load_device_manager()
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
+def test_obj_monitor_callback(dm_with_devices, value):
+    device_manager = dm_with_devices
     eiger = device_manager.devices.eiger
     eiger.metadata = {"scan_id": "12345"}
     value_size = len(value.tobytes()) / 1e6  # MB

@@ -601,27 +601,3 @@ class ConnectorMock(ConnectorBase):  # pragma: no cover
             pipe._pipe_buffer.append(("xrange", (topic, min, max), {}))
             return
         return []
-
-
-def create_session_from_config(config: dict) -> dict:
-    device_configs = []
-    session_id = str(uuid.uuid4())
-    for name, conf in config.items():
-        dev_conf = {
-            "id": str(uuid.uuid4()),
-            "accessGroups": "customer",
-            "name": name,
-            "sessionId": session_id,
-            "enabled": conf["enabled"],
-            "read_only": conf["readOnly"],
-        }
-        dev_conf.update(conf)
-        device_configs.append(dev_conf)
-    session = {"accessGroups": "customer", "devices": device_configs}
-    return session
-
-
-@functools.lru_cache
-def load_test_config():
-    with open(f"{dir_path}/tests/test_config.yaml", "r", encoding="utf-8") as f:
-        return create_session_from_config(yaml.safe_load(f))

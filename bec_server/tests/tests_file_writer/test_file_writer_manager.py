@@ -12,7 +12,7 @@ from bec_lib import DeviceManagerBase, MessageEndpoints, ServiceConfig, messages
 from bec_lib.logger import bec_logger
 from bec_lib.messages import BECStatus
 from bec_lib.redis_connector import MessageObject
-from bec_lib.tests.utils import ConnectorMock, create_session_from_config, get_device_info_mock
+from bec_lib.tests.utils import ConnectorMock
 from bec_server.file_writer import FileWriterManager
 from bec_server.file_writer.file_writer import FileWriter
 from bec_server.file_writer.file_writer_manager import ScanStorage

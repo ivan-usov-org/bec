@@ -3,24 +3,19 @@ import os
 from unittest import mock
 
 import pytest
-from test_device_manager_ds import device_manager
 
 import bec_lib
 from bec_lib import messages
-from bec_lib.tests.utils import ConnectorMock, load_test_config
 from bec_server.device_server.devices.config_update_handler import ConfigUpdateHandler
 from bec_server.device_server.devices.devicemanager import DeviceConfigError, DeviceManagerDS
 
 dir_path = os.path.dirname(bec_lib.__file__)
 
 
-def test_request_response():
-    service_mock = mock.MagicMock()
-    service_mock.connector = ConnectorMock("")
-    device_manager = DeviceManagerDS(service_mock)
-
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
+def test_request_response(session_from_test_config, device_manager):
     def get_config_from_mock():
-        device_manager._session = copy.deepcopy(load_test_config())
+        device_manager._session = copy.deepcopy(session_from_test_config)
         device_manager._load_session()
 
     def mocked_failed_connection(obj):
@@ -46,7 +41,9 @@ def test_request_response():
                         request_reply.assert_called_once()
 
 
-def test_config_handler_update_config(device_manager):
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
+def test_config_handler_update_config(dm_with_devices):
+    device_manager = dm_with_devices
     handler = ConfigUpdateHandler(device_manager)
 
     # bpm4i doesn't have a controller, so it should be destroyed
@@ -63,7 +60,9 @@ def test_config_handler_update_config(device_manager):
     assert device_manager.devices.bpm4i.obj._destroyed is False
 
 
-def test_config_handler_update_config_raises(device_manager):
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
+def test_config_handler_update_config_raises(dm_with_devices):
+    device_manager = dm_with_devices
     handler = ConfigUpdateHandler(device_manager)
 
     msg = messages.DeviceConfigMessage(
@@ -75,7 +74,9 @@ def test_config_handler_update_config_raises(device_manager):
     assert device_manager.devices.samx._config["deviceConfig"] == old_config
 
 
-def test_reload_action(device_manager):
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
+def test_reload_action(dm_with_devices):
+    device_manager = dm_with_devices
     handler = ConfigUpdateHandler(device_manager)
     dm = handler.device_manager
     with mock.patch.object(dm.devices.samx.obj, "destroy") as obj_destroy:
@@ -85,8 +86,9 @@ def test_reload_action(device_manager):
             get_config.assert_called_once()
 
 
-def test_parse_config_request_update(device_manager):
-    handler = ConfigUpdateHandler(device_manager)
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
+def test_parse_config_request_update(dm_with_devices):
+    handler = ConfigUpdateHandler(dm_with_devices)
     msg = messages.DeviceConfigMessage(
         action="update", config={"samx": {"deviceConfig": {"doesntexist": True}}}
     )
@@ -95,6 +97,7 @@ def test_parse_config_request_update(device_manager):
         update_config.assert_called_once_with(msg)
 
 
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
 def test_parse_config_request_reload(device_manager):
     handler = ConfigUpdateHandler(device_manager)
     dm = handler.device_manager

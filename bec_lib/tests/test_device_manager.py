@@ -11,14 +11,13 @@ import bec_lib
 from bec_lib import messages
 from bec_lib.connector import MessageObject
 from bec_lib.devicemanager import DeviceConfigError
-from bec_lib.tests.utils import create_session_from_config
 
 dir_path = os.path.dirname(bec_lib.__file__)
 
 
-def test_dm_initialize(dm):
-    with mock.patch.object(dm, "_get_config") as get_config:
-        dm.initialize("")
+def test_device_manager_initialize(device_manager):
+    with mock.patch.object(device_manager, "_get_config") as get_config:
+        device_manager.initialize("")
         get_config.assert_called_once()
 
 
@@ -30,35 +29,35 @@ def test_dm_initialize(dm):
         (messages.DeviceConfigMessage(action="remove", config={"samx": {}})),
     ],
 )
-def test_parse_config_request(dm, msg):
-    with mock.patch.object(dm, "_add_device"):
-        dm.parse_config_message(msg)
+def test_parse_config_request(device_manager, msg):
+    with mock.patch.object(device_manager, "_add_device"):
+        device_manager.parse_config_message(msg)
 
 
 def test_config_request_update(dm_with_devices):
-    dm = dm_with_devices
+    device_manager = dm_with_devices
     msg = messages.DeviceConfigMessage(action="update", config={"samx": {}})
-    with mock.patch.object(dm, "_add_device") as add_device:
-        dm.parse_config_message(msg)
+    with mock.patch.object(device_manager, "_add_device") as add_device:
+        device_manager.parse_config_message(msg)
 
     msg = messages.DeviceConfigMessage(
         action="update", config={"samx": {"deviceConfig": {"tolerance": 1}}}
     )
-    dm.parse_config_message(msg)
-    assert dm.devices.samx._config["deviceConfig"]["tolerance"] == 1
+    device_manager.parse_config_message(msg)
+    assert device_manager.devices.samx._config["deviceConfig"]["tolerance"] == 1
 
     msg = messages.DeviceConfigMessage(action="update", config={"samx": {"enabled": False}})
-    dm.parse_config_message(msg)
-    assert dm.devices.samx._config["enabled"] is False
+    device_manager.parse_config_message(msg)
+    assert device_manager.devices.samx._config["enabled"] is False
 
 
 def test_config_request_reload(dm_with_devices):
-    dm = dm_with_devices
+    device_manager = dm_with_devices
 
     msg = messages.DeviceConfigMessage(action="reload", config=None)
-    with mock.patch.object(dm, "_get_config") as get_config:
-        dm.parse_config_message(msg)
-        assert len(dm.devices) == 0
+    with mock.patch.object(device_manager, "_get_config") as get_config:
+        device_manager.parse_config_message(msg)
+        assert len(device_manager.devices) == 0
         get_config.assert_called_once()
 
 
@@ -71,38 +70,36 @@ def test_config_request_reload(dm_with_devices):
         ({"action": "add", "config": {"new_device": {}}}, False),
     ],
 )
-def test_check_request_validity(dm, msg, raised):
+def test_check_request_validity(device_manager, msg, raised):
     if raised:
         with pytest.raises((DeviceConfigError, pydantic.ValidationError)):
             msg_in = messages.DeviceConfigMessage(**msg)
-            dm.check_request_validity(msg_in)
+            device_manager.check_request_validity(msg_in)
     else:
         msg_in = messages.DeviceConfigMessage(**msg)
-        dm.check_request_validity(msg_in)
+        device_manager.check_request_validity(msg_in)
 
 
-def test_get_config_calls_load(dm):
+def test_get_config_calls_load(device_manager):
     with mock.patch.object(
-        dm, "_get_redis_device_config", return_value={"devices": [{}]}
+        device_manager, "_get_redis_device_config", return_value={"devices": [{}]}
     ) as get_redis_config:
-        with mock.patch.object(dm, "_load_session") as load_session:
-            dm._get_config()
+        with mock.patch.object(device_manager, "_load_session") as load_session:
+            device_manager._get_config()
             get_redis_config.assert_called_once()
             load_session.assert_called_once()
 
 
-def test_get_redis_device_config(dm):
-    with mock.patch.object(dm, "connector") as connector:
+def test_get_redis_device_config(device_manager):
+    with mock.patch.object(device_manager, "connector") as connector:
         connector.get.return_value = messages.AvailableResourceMessage(resource={"devices": [{}]})
-        assert dm._get_redis_device_config() == {"devices": [{}]}
+        assert device_manager._get_redis_device_config() == {"devices": [{}]}
 
 
-def test_get_devices_with_tags(dm):
-    config_content = None
-    with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
-        config_content = yaml.safe_load(f)
-        dm._session = create_session_from_config(config_content)
-    dm._load_session()
+def test_get_devices_with_tags(test_config_yaml, dm_with_devices):
+    config_content = test_config_yaml
+    device_manager = dm_with_devices
+
     available_tags = defaultdict(lambda: [])
     for dev_name, dev in config_content.items():
         tags = dev.get("deviceTags")
@@ -112,35 +109,31 @@ def test_get_devices_with_tags(dm):
             available_tags[tag].append(dev_name)
 
     for tag, devices in available_tags.items():
-        dev_list = dm.devices.get_devices_with_tags(tag)
+        dev_list = device_manager.devices.get_devices_with_tags(tag)
         dev_names = {dev.name for dev in dev_list}
         assert dev_names == set(devices)
 
-    assert len(dm.devices.get_devices_with_tags("someting")) == 0
+    assert len(device_manager.devices.get_devices_with_tags("someting")) == 0
 
 
-def test_get_software_triggered_devices(dm):
-    config_content = None
-    with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
-        config_content = yaml.safe_load(f)
-        dm._session = create_session_from_config(config_content)
-    dm._load_session()
-    # Only eiger has softwareTrigger set to True in test_config.yaml
+def test_get_software_triggered_devices(test_config_yaml, dm_with_devices):
+    config_content = test_config_yaml
+    device_manager = dm_with_devices
+
+    # Only eiger has softwareTrigger set to True in test config
     software_triggered_devices = []
     for dev_name, dev_cfg in config_content.items():
         if dev_cfg.get("softwareTrigger", None):
-            software_triggered_devices.append(dm.devices.get(dev_name))
+            software_triggered_devices.append(device_manager.devices.get(dev_name))
 
-    dev_list = dm.devices.get_software_triggered_devices()
+    dev_list = device_manager.devices.get_software_triggered_devices()
     assert software_triggered_devices == dev_list
 
 
-def test_show_tags(dm):
-    config_content = None
-    with open(f"{dir_path}/tests/test_config.yaml", "r") as f:
-        config_content = yaml.safe_load(f)
-        dm._session = create_session_from_config(config_content)
-    dm._load_session()
+def test_show_tags(test_config_yaml, dm_with_devices):
+    config_content = test_config_yaml
+    device_manager = dm_with_devices
+
     available_tags = defaultdict(lambda: [])
     for dev_name, dev in config_content.items():
         tags = dev.get("deviceTags")
@@ -149,7 +142,7 @@ def test_show_tags(dm):
         for tag in tags:
             available_tags[tag].append(dev_name)
 
-    assert set(dm.devices.show_tags()) == set(available_tags.keys())
+    assert set(device_manager.devices.show_tags()) == set(available_tags.keys())
 
 
 @pytest.mark.parametrize(
@@ -157,9 +150,9 @@ def test_show_tags(dm):
     [([], {}), (["samx"], {}), ([], {"monitored": ["samx"]}), ([], {"baseline": ["samx"]})],
 )
 def test_monitored_devices_are_unique(dm_with_devices, scan_motors_in, readout_priority_in):
-    dm = dm_with_devices
-    scan_motors = [dm.devices.get(dev) for dev in scan_motors_in]
-    devices = dm.devices.monitored_devices(
+    device_manager = dm_with_devices
+    scan_motors = [device_manager.devices.get(dev) for dev in scan_motors_in]
+    devices = device_manager.devices.monitored_devices(
         scan_motors=scan_motors, readout_priority=readout_priority_in
     )
     device_names = set(dev.name for dev in devices)
@@ -178,12 +171,12 @@ def test_monitored_devices_are_unique(dm_with_devices, scan_motors_in, readout_p
 def test_monitored_devices_with_readout_priority(
     dm_with_devices, scan_motors_in, readout_priority_in
 ):
-    dm = dm_with_devices
-    scan_motors = [dm.devices.get(dev) for dev in scan_motors_in]
-    monitored_devices = dm.devices.monitored_devices(
+    device_manager = dm_with_devices
+    scan_motors = [device_manager.devices.get(dev) for dev in scan_motors_in]
+    monitored_devices = device_manager.devices.monitored_devices(
         scan_motors=scan_motors, readout_priority=readout_priority_in
     )
-    baseline_devices = dm.devices.baseline_devices(
+    baseline_devices = device_manager.devices.baseline_devices(
         scan_motors=scan_motors, readout_priority=readout_priority_in
     )
     primary_device_names = set(dev.name for dev in monitored_devices)
@@ -234,17 +227,21 @@ def test_monitored_devices_with_readout_priority(
     ],
 )
 def test_baseline_devices(dm_with_devices, scan_motors_in, readout_priority_in):
-    dm = dm_with_devices
-    scan_motors = [dm.devices.get(dev) for dev in scan_motors_in]
-    monitored_devices = dm.devices.monitored_devices(
+    device_manager = dm_with_devices
+    scan_motors = [device_manager.devices.get(dev) for dev in scan_motors_in]
+    monitored_devices = device_manager.devices.monitored_devices(
         scan_motors=scan_motors, readout_priority=readout_priority_in
     )
-    baseline_devices = dm.devices.baseline_devices(
+    baseline_devices = device_manager.devices.baseline_devices(
         scan_motors=scan_motors, readout_priority=readout_priority_in
     )
-    async_devices = dm.devices.async_devices(readout_priority=readout_priority_in)
-    continuous_devices = dm.devices.continuous_devices(readout_priority=readout_priority_in)
-    on_request_devices = dm.devices.on_request_devices(readout_priority=readout_priority_in)
+    async_devices = device_manager.devices.async_devices(readout_priority=readout_priority_in)
+    continuous_devices = device_manager.devices.continuous_devices(
+        readout_priority=readout_priority_in
+    )
+    on_request_devices = device_manager.devices.on_request_devices(
+        readout_priority=readout_priority_in
+    )
 
     primary_device_names = set(dev.name for dev in monitored_devices)
     baseline_devices_names = set(dev.name for dev in baseline_devices)
@@ -306,12 +303,12 @@ def test_baseline_devices(dm_with_devices, scan_motors_in, readout_priority_in):
 
 
 def test_device_config_update_callback(dm_with_devices):
-    dm = dm_with_devices
+    device_manager = dm_with_devices
     dev_config_msg = messages.DeviceConfigMessage(action="update", config={"samx": {}})
     msg = MessageObject(value=dev_config_msg, topic="")
 
-    with mock.patch.object(dm, "parse_config_message") as parse_config_message:
-        dm._device_config_update_callback(msg, parent=dm)
+    with mock.patch.object(device_manager, "parse_config_message") as parse_config_message:
+        device_manager._device_config_update_callback(msg, parent=device_manager)
         parse_config_message.assert_called_once_with(dev_config_msg)
 
 

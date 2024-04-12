@@ -4,7 +4,6 @@ from unittest.mock import ANY
 import pytest
 from ophyd import Staged
 from ophyd.utils import errors as ophyd_errors
-from test_device_manager_ds import device_manager, load_device_manager
 
 from bec_lib import Alarms, MessageEndpoints, ServiceConfig, messages
 from bec_lib.messages import BECStatus
@@ -12,23 +11,10 @@ from bec_lib.redis_connector import MessageObject
 from bec_lib.tests.utils import ConnectorMock
 from bec_server.device_server import DeviceServer
 from bec_server.device_server.device_server import InvalidDeviceError
+from bec_server.device_server.devices.devicemanager import DeviceManagerDS
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=protected-access
-
-
-@pytest.fixture(scope="function")
-def device_server_mock(device_manager):
-    connector = ConnectorMock("")
-    device_server = DeviceServerMock(device_manager, connector)
-    yield device_server
-    device_server.shutdown()
-
-
-def load_DeviceServerMock():
-    connector = ConnectorMock("")
-    device_manager = load_device_manager()
-    return DeviceServerMock(device_manager, connector)
 
 
 class DeviceServerMock(DeviceServer):
@@ -45,6 +31,14 @@ class DeviceServerMock(DeviceServer):
 
     def _start_update_service_info(self):
         pass
+
+
+@pytest.fixture
+def device_server_mock(dm_with_devices):
+    device_manager = dm_with_devices
+    device_server = DeviceServerMock(device_manager, device_manager.connector)
+    yield device_server
+    device_server.shutdown()
 
 
 def test_start(device_server_mock):
@@ -101,6 +95,7 @@ def test_update_device_metadata(device_server_mock, instr):
         assert device_server.device_manager.devices.get(dev).metadata == instr.metadata
 
 
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
 def test_stop_devices(device_server_mock):
     device_server = device_server_mock
     dev = device_server.device_manager.devices
@@ -183,6 +178,7 @@ def test_stop_devices(device_server_mock):
         ),
     ],
 )
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
 def test_register_interception_callback(device_server_mock, msg, stop_called):
     device_server = device_server_mock
     with mock.patch.object(device_server, "stop_devices") as stop:
@@ -293,6 +289,7 @@ def test_assert_device_is_valid(device_server_mock, instr):
         )
     ],
 )
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
 def test_handle_device_instructions_set(device_server_mock, instructions):
     device_server = device_server_mock
 
@@ -324,6 +321,7 @@ def test_handle_device_instructions_set(device_server_mock, instructions):
         )
     ],
 )
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
 def test_handle_device_instructions_exception(device_server_mock, instructions):
     device_server = device_server_mock
 
@@ -355,6 +353,7 @@ def test_handle_device_instructions_exception(device_server_mock, instructions):
         )
     ],
 )
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
 def test_handle_device_instructions_limit_error(device_server_mock, instructions):
     device_server = device_server_mock
 
@@ -402,6 +401,7 @@ def test_handle_device_instructions_read(device_server_mock, instructions):
         )
     ],
 )
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
 def test_handle_device_instructions_rpc(device_server_mock, instructions):
     device_server = device_server_mock
     with mock.patch.object(device_server, "_assert_device_is_valid") as assert_device_is_valid_mock:
@@ -431,6 +431,7 @@ def test_handle_device_instructions_rpc(device_server_mock, instructions):
         )
     ],
 )
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
 def test_handle_device_instructions_kickoff(device_server_mock, instructions):
     device_server = device_server_mock
 
@@ -450,6 +451,7 @@ def test_handle_device_instructions_kickoff(device_server_mock, instructions):
         )
     ],
 )
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
 def test_handle_device_instructions_complete(device_server_mock, instructions):
     device_server = device_server_mock
 
@@ -481,6 +483,7 @@ def test_handle_device_instructions_complete(device_server_mock, instructions):
         ),
     ],
 )
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
 def test_complete_device(device_server_mock, instr):
     device_server = device_server_mock
     complete_mock = mock.MagicMock()
@@ -503,6 +506,7 @@ def test_complete_device(device_server_mock, instr):
         )
     ],
 )
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
 def test_handle_device_instructions_pre_scan(device_server_mock, instructions):
     device_server = device_server_mock
 
@@ -585,6 +589,7 @@ def test_handle_device_instructions_unstage(device_server_mock, instructions):
         ),
     ],
 )
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
 def test_trigger_device(device_server_mock, instr):
     device_server = device_server_mock
     devices = instr.content["device"]
@@ -610,6 +615,7 @@ def test_trigger_device(device_server_mock, instr):
         )
     ],
 )
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
 def test_kickoff_device(device_server_mock, instr):
     device_server = device_server_mock
     with mock.patch.object(
@@ -631,6 +637,7 @@ def test_kickoff_device(device_server_mock, instr):
         )
     ],
 )
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
 def test_set_device(device_server_mock, instr):
     device_server = device_server_mock
     device_server._set_device(instr)
@@ -664,6 +671,7 @@ def test_set_device(device_server_mock, instr):
         ),
     ],
 )
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
 def test_read_device(device_server_mock, instr):
     device_server = device_server_mock
     device_server._read_device(instr)
@@ -681,6 +689,7 @@ def test_read_device(device_server_mock, instr):
 
 
 @pytest.mark.parametrize("devices", [["samx", "samy"], ["samx"]])
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
 def test_read_config_and_update_devices(device_server_mock, devices):
     device_server = device_server_mock
     device_server._read_config_and_update_devices(devices, metadata={"RID": "test"})
@@ -696,6 +705,7 @@ def test_read_config_and_update_devices(device_server_mock, devices):
         assert res[-1]["queue"] == MessageEndpoints.device_read_configuration(device).endpoint
 
 
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
 def test_read_and_update_devices_exception(device_server_mock):
     device_server = device_server_mock
     samx_obj = device_server.device_manager.devices.samx.obj
@@ -708,6 +718,7 @@ def test_read_and_update_devices_exception(device_server_mock):
                 mock_retry.assert_called_once_with("samx", samx_obj, "read", Exception())
 
 
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
 def test_read_config_and_update_devices_exception(device_server_mock):
     device_server = device_server_mock
     samx_obj = device_server.device_manager.devices.samx.obj
@@ -722,6 +733,7 @@ def test_read_config_and_update_devices_exception(device_server_mock):
                 )
 
 
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
 def test_retry_obj_method_raise(device_server_mock):
     device_server = device_server_mock
     samx = device_server.device_manager.devices.samx
@@ -732,6 +744,7 @@ def test_retry_obj_method_raise(device_server_mock):
             device_server._retry_obj_method("samx", samx.obj, "read_configuration", Exception())
 
 
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
 def test_retry_obj_method_retry(device_server_mock):
     device_server = device_server_mock
     samx = device_server.device_manager.devices.samx
@@ -742,6 +755,7 @@ def test_retry_obj_method_retry(device_server_mock):
 
 
 @pytest.mark.parametrize("instr", ["read", "read_configuration", "unknown_method"])
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
 def test_retry_obj_method_buffer(device_server_mock, instr):
     device_server = device_server_mock
     samx = device_server.device_manager.devices.samx
@@ -781,6 +795,7 @@ def test_retry_obj_method_buffer(device_server_mock, instr):
         ),
     ],
 )
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
 def test_stage_device(device_server_mock, instr):
     device_server = device_server_mock
     device_server._stage_device(instr)
