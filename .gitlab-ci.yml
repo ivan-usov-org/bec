@@ -6,7 +6,7 @@ image: $CI_DOCKER_REGISTRY/python:3.10
 variables:
   DOCKER_TLS_CERTDIR: ""
   OPHYD_DEVICES_BRANCH: "master"
-  BEC_WIDGETS_BRANCH: "master"
+  BEC_WIDGETS_BRANCH: "main"
 
 workflow:
   rules:
