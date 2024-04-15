@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v2.4.0 (2024-04-15)
+
+### Feature
+
+* **flomni:** Scan status for tomography ([`eca3e64`](https://gitlab.psi.ch/bec/bec/-/commit/eca3e64facd2b1faa46787d9d70f8ce027df645f))
+
 ## v2.3.0 (2024-04-12)
 
 ### Feature
