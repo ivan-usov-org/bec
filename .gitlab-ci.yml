@@ -128,7 +128,6 @@ tests:
 tests-3.11:
   stage: AdditionalTests
   image: $CI_DOCKER_REGISTRY/python:3.11
-  needs: ["tests"]
   allow_failure: true
   script:
     - git clone --branch $OPHYD_DEVICES_BRANCH https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
