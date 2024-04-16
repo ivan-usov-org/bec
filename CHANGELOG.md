@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v2.4.2 (2024-04-16)
+
+### Fix
+
+* **ci:** Add rules to trigger child pipelines ([`5a1894b`](https://gitlab.psi.ch/bec/bec/-/commit/5a1894bfca881b9791704c8a6aeb274e2f002a51))
+
 ## v2.4.1 (2024-04-16)
 
 ### Fix
