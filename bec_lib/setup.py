@@ -19,7 +19,7 @@ if __name__ == "__main__":
             "pylint",
             "loguru",
             "psutil",
-            "fpdf",
+            "fpdf2~=2.7",
             "fastjsonschema",
             "lmfit",
             "pydantic~=2.0",
