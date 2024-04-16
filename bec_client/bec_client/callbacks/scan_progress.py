@@ -61,6 +61,7 @@ class LiveUpdatesScanProgress(LiveUpdatesTable):
         self.bec.callbacks.poll()
         self.scan_item.poll_callbacks()
 
-        if point_id == max_value:
+        done = status.content.get("done")
+        if point_id == max_value or done:
             return True
         return False
