@@ -16,9 +16,9 @@ def threads_check():
     yield
     threads_after = set(th for th in threading.enumerate() if th is not threading.main_thread())
     additional_threads = threads_after - threads_at_start
-    #assert (
-    #    len(additional_threads) == 0
-    #), f"Test creates {len(additional_threads)} threads that are not cleaned: {additional_threads}"
+    assert (
+        len(additional_threads) == 0
+    ), f"Test creates {len(additional_threads)} threads that are not cleaned: {additional_threads}"
 
 
 @pytest.fixture
