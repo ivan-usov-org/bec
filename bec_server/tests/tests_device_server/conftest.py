@@ -19,6 +19,6 @@ from bec_lib import bec_logger
 
 
 @pytest.fixture(autouse=True)
-def clean_logger():
+def threads_check():
     yield
     bec_logger.logger.remove()
