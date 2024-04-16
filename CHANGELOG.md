@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v2.4.1 (2024-04-16)
+
+### Fix
+
+* **client:** Resolve on done ([`5ea7ed3`](https://gitlab.psi.ch/bec/bec/-/commit/5ea7ed3e3e4b7b9edfff5008321eaf5e5cdaf9ae))
+
 ## v2.4.0 (2024-04-15)
 
 ### Feature
