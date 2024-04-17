@@ -45,12 +45,12 @@ def get_plugin_class(class_spec: str, additional_modules=None) -> type:
     return getattr(module, class_name)
 
 
-def get_scan_plugins() -> list:
+def get_scan_plugins() -> dict:
     """
     Load all scan plugins.
 
     Returns:
-        list: A list of scan plugins.
+        dict: A dictionary with the plugin names as keys and the plugin classes as values.
     """
     modules = _get_available_plugins("bec.scans")
     loaded_plugins = {}
