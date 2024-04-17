@@ -418,7 +418,7 @@ semver:
     - pip install python-semantic-release==9.* build twine
     - export GL_TOKEN=$CI_UPDATES
     - semantic-release -vv --config ./ci/semantic_release.toml version
-    - twine upload dist/* -u __token__ -p $CI_PYPI_TOKEN --skip-existing
+    - twine upload ./ci/dist/* -u __token__ -p $CI_PYPI_TOKEN --skip-existing
 
   allow_failure: false
   rules:
