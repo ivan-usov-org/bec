@@ -1,11 +1,6 @@
-import glob
-import importlib
-import importlib.util
 import inspect
-import os
-from pathlib import Path
 
-from bec_lib import MessageEndpoints, bec_logger
+from bec_lib import MessageEndpoints, bec_logger, plugin_helper
 from bec_lib.messages import AvailableResourceMessage
 from bec_lib.signature_serializer import signature_to_dict
 
@@ -15,7 +10,6 @@ logger = bec_logger.logger
 
 
 class ScanManager:
-    DEFAULT_PLUGIN_PATH = Path(os.path.dirname(os.path.abspath(__file__)) + "/../../").resolve()
 
     def __init__(self, *, parent):
         """
@@ -31,30 +25,17 @@ class ScanManager:
 
     def load_plugins(self):
         """load scan plugins"""
-        plugin_path = os.environ.get("BEC_PLUGIN_PATH")
-        if not plugin_path:
-            logger.info("BEC_PLUGIN_PATH not set. Using default plugin path.")
-            plugin_path = self.DEFAULT_PLUGIN_PATH
-        else:
-            logger.info(f"Using plugin path {plugin_path}")
-        plugin_path = os.path.join(plugin_path, "scan_server/scan_plugins")
-        files = glob.glob(os.path.join(plugin_path, "*.py"))
-        for file in files:
-            if file.endswith("__init__.py"):
+        plugins = plugin_helper.get_scan_plugins()
+        if not plugins:
+            return
+        for name, cls in plugins.items():
+            if not issubclass(cls, ScanServerScans.RequestBase):
+                logger.error(
+                    f"Plugin {name} is not a valid scan plugin as it does not inherit from RequestBase. Skipping."
+                )
                 continue
-            module_spec = importlib.util.spec_from_file_location("scan_plugins", file)
-            plugin_module = importlib.util.module_from_spec(module_spec)
-            module_spec.loader.exec_module(plugin_module)
-            module_members = inspect.getmembers(plugin_module)
-            for name, cls in module_members:
-                if not inspect.isclass(cls):
-                    continue
-                # ignore imported classes
-                if cls.__module__ != "scan_plugins":
-                    continue
-                if issubclass(cls, ScanServerScans.RequestBase):
-                    self._plugins[name] = cls
-                    logger.info(f"Loading scan plugin {name}")
+            self._plugins[name] = cls
+            logger.info(f"Loading scan plugin {name}")
 
     def update_available_scans(self):
         """load all scans and plugin scans"""
