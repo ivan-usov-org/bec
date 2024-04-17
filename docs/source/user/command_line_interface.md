@@ -375,7 +375,7 @@ To utilize this feature, add a new signal, such as `pseudo_signal`, to the devic
 
 ``` yaml
 pseudo_signal:
-  deviceClass: ComputedSignal
+  deviceClass: ophyd_devices.ComputedSignal
   deviceConfig:
     compute_method: "def compute_signals(signal1, signal2):\n    return signal1.get()*signal2.get()\n"
     input_signals: 
