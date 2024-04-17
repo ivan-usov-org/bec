@@ -1,12 +1,11 @@
 # set base image (host OS)
-ARG PY_VERSION=3.10 OPHYD_BRANCH=master BEC_SERVICE=bec_ipython_client
-
-ARG BEC_SERVICE=bec_ipython_client OPHYD_BRANCH=master
-ARG CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX
+ARG PY_VERSION=3.10 CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX
 
 FROM $CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/python:${PY_VERSION}
 
-RUN echo "Building ${BEC_SERVICE} with Ophyd branch ${OPHYD_BRANCH}"
+ARG BEC_SERVICE=bec_ipython_client OPHYD_DEVICES_BRANCH=main 
+
+RUN echo "Building ${BEC_SERVICE} with Ophyd branch ${OPHYD_DEVICES_BRANCH}"
 
 RUN apt update
 RUN apt install git -y
@@ -20,7 +19,7 @@ COPY . ./bec
 ENV OPHYD_DEVICES_PATH=/code/bec/ophyd_devices
 
 WORKDIR /code/bec
-RUN git clone --branch ${OPHYD_BRANCH} https://gitlab.psi.ch/bec/ophyd_devices
+RUN git clone --branch ${OPHYD_DEVICES_BRANCH} https://gitlab.psi.ch/bec/ophyd_devices
 WORKDIR /code/bec/ophyd_devices
 RUN pip install -e .
 WORKDIR /code/bec/pytest_bec_e2e
