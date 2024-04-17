@@ -29,4 +29,4 @@ WORKDIR /code/bec/${BEC_SERVICE}
 RUN pip install -e .[dev]
 
 # command to run on container start
-ENTRYPOINT ["pytest", "--files-path", "/code/bec/test_files", "--start-servers", "--flush-redis", "-v", "--random-order", "./tests/end-2-end"]
+ENTRYPOINT ["pytest", "--files-path", "/code/bec/test_files", "--start-servers", "--flush-redis", "-v", "--random-order", "--maxfail=2",  "./tests/end-2-end"]
