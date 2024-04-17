@@ -3,7 +3,7 @@ build_command = "./ci/build_python_services.sh"
 version_toml = [
     "./bec_server/pyproject.toml:project.version",
     "./bec_lib/pyproject.toml:project.version",
-    "./bec_client/pyproject.toml:project.version",
+    "./bec_ipython_client/pyproject.toml:project.version",
 ]
 
 [tool.semantic_release.commit_author]
