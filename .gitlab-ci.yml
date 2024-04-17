@@ -41,7 +41,6 @@ stages:
   - Deploy
 
 .install-bec-services-dev: &install-bec-services-dev
-    - pip install wheel
     - pip install -e ./bec_server[dev]
     - pip install -e ./bec_ipython_client[dev]
     - pip install -e ./bec_lib[dev]
@@ -416,7 +415,7 @@ semver:
     - git tag
 
     # build and publish
-    - pip install python-semantic-release==9.* wheel build twine
+    - pip install python-semantic-release==9.* build twine
     - export GL_TOKEN=$CI_UPDATES
     - semantic-release -vv --config ./ci/semantic_release.toml version
     - twine upload dist/* -u __token__ -p $CI_PYPI_TOKEN --skip-existing
