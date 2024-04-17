@@ -2,14 +2,14 @@ version: "3.7"
 
 services:
   mongodb-test:
-    image: morgana-harbor.psi.ch/bec/mongo
+    image: $CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/mongo
     ports:
       - "27017:27017"
   redis-test:
-    image: morgana-harbor.psi.ch/bec/redis
+    image: $CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/redis
     network_mode: host
   scibec-test-server:
-    image: morgana-harbor.psi.ch/bec/scibec
+    image: $CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/scibec
     network_mode: host
     depends_on:
       - "mongodb-test"

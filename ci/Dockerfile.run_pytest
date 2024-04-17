@@ -1,6 +1,6 @@
 # set base image (host OS)
-ARG PY_VERSION=3.10 BEC_SERVICE=bec_ipython_client OPHYD_BRANCH=master
-FROM morgana-harbor.psi.ch/bec/python:${PY_VERSION}
+ARG PY_VERSION=3.10 BEC_SERVICE=bec_ipython_client OPHYD_BRANCH=master CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX
+FROM $CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/python:${PY_VERSION}
 
 ARG BEC_SERVICE=bec_ipython_client OPHYD_BRANCH=master
 

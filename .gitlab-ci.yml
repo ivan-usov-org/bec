@@ -169,7 +169,8 @@ end-2-end:
   script:
     # build and run the tests
     - echo $OPHYD_DEVICES_BRANCH 
-    - docker build -t end2end_client:test -f ./ci/Dockerfile.run_pytest --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=bec_ipython_client --build-arg OPHYD_BRANCH=$OPHYD_DEVICES_BRANCH .
+    - echo "$CI_DEPENDENCY_PROXY_PASSWORD" | docker login $CI_DEPENDENCY_PROXY_SERVER --username $CI_DEPENDENCY_PROXY_USER --password-stdin
+    - docker build -t end2end_client:test -f ./ci/Dockerfile.run_pytest --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=bec_ipython_client --build-arg OPHYD_BRANCH=$OPHYD_DEVICES_BRANCH --build-arg CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX .
     - docker run --network=host --name end2end_client end2end_client:test
 
   after_script:
@@ -230,14 +231,14 @@ end-2-end:
 #     # build containers
 #     # /!\ build-arg is interpreted differently by podman,
 #     # have to use buildah here
-#     - buildah bud --network=host -t device_server_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=device_server --build-arg OPHYD_BRANCH=$OPHYD_DEVICES_BRANCH
-#     - buildah bud --network=host -t scan_server_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=scan_server --build-arg OPHYD_BRANCH=$OPHYD_DEVICES_BRANCH 
-#     - buildah bud --network=host -t scan_bundler_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=scan_bundler --build-arg OPHYD_BRANCH=$OPHYD_DEVICES_BRANCH
-#     - buildah bud --network=host -t file_writer_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=file_writer --build-arg OPHYD_BRANCH=$OPHYD_DEVICES_BRANCH
-#     - buildah bud --network=host -t dap_server_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=data_processing --build-arg OPHYD_BRANCH=$OPHYD_DEVICES_BRANCH
-#     - buildah bud --network=host -t scihub_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=scihub --build-arg OPHYD_BRANCH=$OPHYD_DEVICES_BRANCH
+#     - buildah bud --network=host -t device_server_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=device_server --build-arg OPHYD_BRANCH=$OPHYD_DEVICES_BRANCH --build-arg CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX
+#     - buildah bud --network=host -t scan_server_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=scan_server --build-arg OPHYD_BRANCH=$OPHYD_DEVICES_BRANCH --build-arg CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX
+#     - buildah bud --network=host -t scan_bundler_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=scan_bundler --build-arg OPHYD_BRANCH=$OPHYD_DEVICES_BRANCH --build-arg CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX
+#     - buildah bud --network=host -t file_writer_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=file_writer --build-arg OPHYD_BRANCH=$OPHYD_DEVICES_BRANCH --build-arg CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX
+#     - buildah bud --network=host -t dap_server_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=data_processing --build-arg OPHYD_BRANCH=$OPHYD_DEVICES_BRANCH --build-arg CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX
+#     - buildah bud --network=host -t scihub_vm -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=scihub --build-arg OPHYD_BRANCH=$OPHYD_DEVICES_BRANCH --build-arg CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX
 #     # default service is bec_ipython_client
-#     - buildah bud --network=host -t end2end_client_test -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10
+#     - buildah bud --network=host -t end2end_client_test -f ./ci/Dockerfile.run_server --build-arg PY_VERSION=3.10 --build-arg CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX
 
 #     # now for the run phase...
 #     - REDIS_IP=$(cat /etc/hosts | awk '{if ($2 == "redis") print $1;}')
