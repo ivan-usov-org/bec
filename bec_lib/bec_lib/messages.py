@@ -71,12 +71,14 @@ class BundleMessage(BECMessage):
         """append a new BECMessage to the bundle"""
         if not isinstance(msg, BECMessage):
             raise AttributeError(f"Cannot append message of type {msg.__class__.__name__}")
+        # pylint: disable=no-member
         self.messages.append(msg)
 
     def __len__(self):
         return len(self.messages)
 
     def __iter__(self):
+        # pylint: disable=not-an-iterable
         yield from self.messages
 
 
