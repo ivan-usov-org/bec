@@ -4,7 +4,7 @@
 
 eiger:
   readoutPriority: monitored
-  deviceClass: SimCamera
+  deviceClass: ophyd_devices.SimCamera
   deviceConfig:
     device_access: true
   deviceTags:
@@ -17,13 +17,13 @@ eiger:
 
 dyn_signals:
   readoutPriority: baseline
-  deviceClass: sim:sim:SynDynamicComponents
+  deviceClass: ophyd_devices.sim.sim.SynDynamicComponents
   deviceConfig:
   enabled: true
   readOnly: false
 
 pseudo_signal1:
-  deviceClass: ComputedSignal
+  deviceClass: ophyd_devices.ComputedSignal
   deviceConfig:
     compute_method: "def compute_signals(signal1, signal2):\n    return signal1.get()*signal2.get()\n"
     input_signals: 
@@ -34,7 +34,7 @@ pseudo_signal1:
   readoutPriority: baseline
 
 failure_device:
-  deviceClass: sim:sim:SimPositionerWithCommFailure
+  deviceClass: ophyd_devices.sim.sim.SimPositionerWithCommFailure
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -48,7 +48,7 @@ failure_device:
 
 eyefoc:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1    
     limits:
@@ -62,7 +62,7 @@ eyefoc:
   readOnly: false
 eyex:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     limits:
@@ -76,7 +76,7 @@ eyex:
   readOnly: false
 eyey:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1    
     limits:
@@ -90,7 +90,7 @@ eyey:
   readOnly: false
 flyer_sim:
   readoutPriority: on_request
-  deviceClass: SynFlyer
+  deviceClass: ophyd_devices.SynFlyer
   deviceConfig:
     delay: 1    
     device_access: true
@@ -101,7 +101,7 @@ flyer_sim:
   readOnly: false
 hrox:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1    
     limits:
@@ -115,7 +115,7 @@ hrox:
   readOnly: false
 hroy:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1    
     limits:
@@ -129,7 +129,7 @@ hroy:
   readOnly: false
 hroz:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1    
     limits:
@@ -143,7 +143,7 @@ hroz:
   readOnly: false
 hx:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1    
     limits:
@@ -157,7 +157,7 @@ hx:
   readOnly: false
 hy:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     limits:
@@ -171,7 +171,7 @@ hy:
   readOnly: false
 hz:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1    
     limits:
@@ -185,7 +185,7 @@ hz:
   readOnly: false
 mbsx:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1    
     limits:
@@ -199,7 +199,7 @@ mbsx:
   readOnly: false
 mbsy:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     limits:
@@ -213,7 +213,7 @@ mbsy:
   readOnly: false
 pinx:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1    
     limits:
@@ -227,7 +227,7 @@ pinx:
   readOnly: false
 piny:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1    
     limits:
@@ -241,7 +241,7 @@ piny:
   readOnly: false
 pinz:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1    
     limits:
@@ -255,7 +255,7 @@ pinz:
   readOnly: false
 samx:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1    
     limits:
@@ -269,7 +269,7 @@ samx:
   readOnly: false
 samy:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1    
     limits:
@@ -283,7 +283,7 @@ samy:
   readOnly: false
 samz:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1    
     limits:
@@ -304,7 +304,7 @@ samz:
 
 bpm3a:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -312,7 +312,7 @@ bpm3a:
   readOnly: false
 bpm3b:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -320,7 +320,7 @@ bpm3b:
   readOnly: false
 bpm3c:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -328,7 +328,7 @@ bpm3c:
   readOnly: false
 bpm3d:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -336,7 +336,7 @@ bpm3d:
   readOnly: false
 bpm3i:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -344,7 +344,7 @@ bpm3i:
   readOnly: false
 bpm3x:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -352,7 +352,7 @@ bpm3x:
   readOnly: false
 bpm3y:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -360,7 +360,7 @@ bpm3y:
   readOnly: false
 bpm3z:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -368,7 +368,7 @@ bpm3z:
   readOnly: false
 bpm4a:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -376,7 +376,7 @@ bpm4a:
   readOnly: false
 bpm4b:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -384,7 +384,7 @@ bpm4b:
   readOnly: false
 bpm4c:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -392,7 +392,7 @@ bpm4c:
   readOnly: false
 bpm4d:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -400,7 +400,7 @@ bpm4d:
   readOnly: false
 bpm4i:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -408,7 +408,7 @@ bpm4i:
   readOnly: false
 bpm4s:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -416,7 +416,7 @@ bpm4s:
   readOnly: false
 bpm4x:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -424,7 +424,7 @@ bpm4x:
   readOnly: false
 bpm4xf:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -432,7 +432,7 @@ bpm4xf:
   readOnly: false
 bpm4xm:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -440,7 +440,7 @@ bpm4xm:
   readOnly: false
 bpm4y:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -448,7 +448,7 @@ bpm4y:
   readOnly: false
 bpm4yf:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -456,7 +456,7 @@ bpm4yf:
   readOnly: false
 bpm4ym:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -464,7 +464,7 @@ bpm4ym:
   readOnly: false
 bpm4z:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -472,7 +472,7 @@ bpm4z:
   readOnly: false
 bpm5a:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -480,7 +480,7 @@ bpm5a:
   readOnly: false
 bpm5b:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -488,7 +488,7 @@ bpm5b:
   readOnly: false
 bpm5c:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -496,7 +496,7 @@ bpm5c:
   readOnly: false
 bpm5d:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -504,7 +504,7 @@ bpm5d:
   readOnly: false
 bpm5i:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -512,7 +512,7 @@ bpm5i:
   readOnly: false
 bpm5x:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -520,7 +520,7 @@ bpm5x:
   readOnly: false
 bpm5y:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -528,7 +528,7 @@ bpm5y:
   readOnly: false
 bpm5z:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -536,7 +536,7 @@ bpm5z:
   readOnly: false
 bpm6a:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -544,7 +544,7 @@ bpm6a:
   readOnly: false
 bpm6b:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -552,7 +552,7 @@ bpm6b:
   readOnly: false
 bpm6c:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -560,7 +560,7 @@ bpm6c:
   readOnly: false
 bpm6d:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -568,7 +568,7 @@ bpm6d:
   readOnly: false
 bpm6i:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -576,7 +576,7 @@ bpm6i:
   readOnly: false
 bpm6x:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -584,7 +584,7 @@ bpm6x:
   readOnly: false
 bpm6y:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -592,7 +592,7 @@ bpm6y:
   readOnly: false
 bpm6z:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -600,7 +600,7 @@ bpm6z:
   readOnly: false
 curr:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -608,7 +608,7 @@ curr:
   readOnly: false
 diode:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -616,7 +616,7 @@ diode:
   readOnly: false
 ebpmdx:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -624,7 +624,7 @@ ebpmdx:
   readOnly: false
 ebpmdy:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -632,7 +632,7 @@ ebpmdy:
   readOnly: false
 ebpmux:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -640,7 +640,7 @@ ebpmux:
   readOnly: false
 ebpmuy:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -648,7 +648,7 @@ ebpmuy:
   readOnly: false
 ftp:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -656,7 +656,7 @@ ftp:
   readOnly: false
 temp:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -664,7 +664,7 @@ temp:
   readOnly: false
 transd:
   readoutPriority: monitored
-  deviceClass: SimMonitor
+  deviceClass: ophyd_devices.SimMonitor
   deviceConfig:
   deviceTags:
     - beamline
@@ -679,7 +679,7 @@ transd:
 
 aptrx:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -689,7 +689,7 @@ aptrx:
   readOnly: false
 aptry:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -699,7 +699,7 @@ aptry:
   readOnly: false
 bim2x:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -709,7 +709,7 @@ bim2x:
   readOnly: false
 bim2y:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -719,7 +719,7 @@ bim2y:
   readOnly: false
 bm1trx:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -729,7 +729,7 @@ bm1trx:
   readOnly: false
 bm1try:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -739,7 +739,7 @@ bm1try:
   readOnly: false
 bm2trx:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -749,7 +749,7 @@ bm2trx:
   readOnly: false
 bm2try:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -759,7 +759,7 @@ bm2try:
   readOnly: false
 bm3trx:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -769,7 +769,7 @@ bm3trx:
   readOnly: false
 bm3try:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -779,7 +779,7 @@ bm3try:
   readOnly: false
 bm4trx:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -789,7 +789,7 @@ bm4trx:
   readOnly: false
 bm4try:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -799,7 +799,7 @@ bm4try:
   readOnly: false
 bm5trx:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -809,7 +809,7 @@ bm5trx:
   readOnly: false
 bm5try:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -819,7 +819,7 @@ bm5try:
   readOnly: false
 bm6trx:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -829,7 +829,7 @@ bm6trx:
   readOnly: false
 bm6try:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -839,7 +839,7 @@ bm6try:
   readOnly: false
 bpm4r:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -849,7 +849,7 @@ bpm4r:
   readOnly: false
 bpm5r:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -859,7 +859,7 @@ bpm5r:
   readOnly: false
 bs1x:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -869,7 +869,7 @@ bs1x:
   readOnly: false
 bs1y:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -879,7 +879,7 @@ bs1y:
   readOnly: false
 bs2x:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -889,7 +889,7 @@ bs2x:
   readOnly: false
 bs2y:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -899,7 +899,7 @@ bs2y:
   readOnly: false
 burstn:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -909,7 +909,7 @@ burstn:
   readOnly: false
 burstr:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -919,7 +919,7 @@ burstr:
   readOnly: false
 ddg1a:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -929,7 +929,7 @@ ddg1a:
   readOnly: false
 ddg1b:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -939,7 +939,7 @@ ddg1b:
   readOnly: false
 ddg1c:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -949,7 +949,7 @@ ddg1c:
   readOnly: false
 ddg1d:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -959,7 +959,7 @@ ddg1d:
   readOnly: false
 ddg1e:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -969,7 +969,7 @@ ddg1e:
   readOnly: false
 ddg1f:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -979,7 +979,7 @@ ddg1f:
   readOnly: false
 ddg1g:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -989,7 +989,7 @@ ddg1g:
   readOnly: false
 ddg1h:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -999,7 +999,7 @@ ddg1h:
   readOnly: false
 dettrx:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1009,7 +1009,7 @@ dettrx:
   readOnly: false
 di2trx:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1019,7 +1019,7 @@ di2trx:
   readOnly: false
 di2try:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1029,7 +1029,7 @@ di2try:
   readOnly: false
 dtpush:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1039,7 +1039,7 @@ dtpush:
   readOnly: false
 dtth:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1049,7 +1049,7 @@ dtth:
   readOnly: false
 dttrx:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1059,7 +1059,7 @@ dttrx:
   readOnly: false
 dttry:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1069,7 +1069,7 @@ dttry:
   readOnly: false
 dttrz:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1079,7 +1079,7 @@ dttrz:
   readOnly: false
 ebcsx:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1089,7 +1089,7 @@ ebcsx:
   readOnly: false
 ebcsy:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1099,7 +1099,7 @@ ebcsy:
   readOnly: false
 ebfi1:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1109,7 +1109,7 @@ ebfi1:
   readOnly: false
 ebfi2:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1119,7 +1119,7 @@ ebfi2:
   readOnly: false
 ebfi3:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1129,7 +1129,7 @@ ebfi3:
   readOnly: false
 ebfi4:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1139,7 +1139,7 @@ ebfi4:
   readOnly: false
 ebfzpx:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1149,7 +1149,7 @@ ebfzpx:
   readOnly: false
 ebfzpy:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1159,7 +1159,7 @@ ebfzpy:
   readOnly: false
 ebtrx:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1169,7 +1169,7 @@ ebtrx:
   readOnly: false
 ebtry:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1179,7 +1179,7 @@ ebtry:
   readOnly: false
 ebtrz:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1189,7 +1189,7 @@ ebtrz:
   readOnly: false
 fi1try:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1199,7 +1199,7 @@ fi1try:
   readOnly: false
 fi2try:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1209,7 +1209,7 @@ fi2try:
   readOnly: false
 fi3try:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1219,7 +1219,7 @@ fi3try:
   readOnly: false
 fsh1x:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1229,7 +1229,7 @@ fsh1x:
   readOnly: false
 fsh2x:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1239,7 +1239,7 @@ fsh2x:
   readOnly: false
 ftrans:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1249,7 +1249,7 @@ ftrans:
   readOnly: false
 fttrx1:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1259,7 +1259,7 @@ fttrx1:
   readOnly: false
 fttrx2:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1269,7 +1269,7 @@ fttrx2:
   readOnly: false
 fttry1:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1279,7 +1279,7 @@ fttry1:
   readOnly: false
 fttry2:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1289,7 +1289,7 @@ fttry2:
   readOnly: false
 fttrz:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1299,7 +1299,7 @@ fttrz:
   readOnly: false
 idgap:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1309,7 +1309,7 @@ idgap:
   readOnly: false
 mibd:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1319,7 +1319,7 @@ mibd:
   readOnly: false
 mibd1:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1329,7 +1329,7 @@ mibd1:
   readOnly: false
 mibd2:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1339,7 +1339,7 @@ mibd2:
   readOnly: false
 miroll:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1349,7 +1349,7 @@ miroll:
   readOnly: false
 mith:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1359,7 +1359,7 @@ mith:
   readOnly: false
 mitrx:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1369,7 +1369,7 @@ mitrx:
   readOnly: false
 mitry:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1379,7 +1379,7 @@ mitry:
   readOnly: false
 mitry1:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1389,7 +1389,7 @@ mitry1:
   readOnly: false
 mitry2:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1399,7 +1399,7 @@ mitry2:
   readOnly: false
 mitry3:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1409,7 +1409,7 @@ mitry3:
   readOnly: false
 mobd:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1419,7 +1419,7 @@ mobd:
   readOnly: false
 mobdai:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1429,7 +1429,7 @@ mobdai:
   readOnly: false
 mobdbo:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1439,7 +1439,7 @@ mobdbo:
   readOnly: false
 mobdco:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1449,7 +1449,7 @@ mobdco:
   readOnly: false
 mobddi:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1459,7 +1459,7 @@ mobddi:
   readOnly: false
 mokev:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1469,7 +1469,7 @@ mokev:
   readOnly: false
 mopush1:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1479,7 +1479,7 @@ mopush1:
   readOnly: false
 mopush2:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1489,7 +1489,7 @@ mopush2:
   readOnly: false
 moroll1:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1499,7 +1499,7 @@ moroll1:
   readOnly: false
 moroll2:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1509,7 +1509,7 @@ moroll2:
   readOnly: false
 moth1:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1519,7 +1519,7 @@ moth1:
   readOnly: false
 moth1e:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1529,7 +1529,7 @@ moth1e:
   readOnly: false
 moth2:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1539,7 +1539,7 @@ moth2:
   readOnly: false
 moth2e:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1549,7 +1549,7 @@ moth2e:
   readOnly: false
 motrx2:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1559,7 +1559,7 @@ motrx2:
   readOnly: false
 motry:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1569,7 +1569,7 @@ motry:
   readOnly: false
 motry2:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1579,7 +1579,7 @@ motry2:
   readOnly: false
 motrz1:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1589,7 +1589,7 @@ motrz1:
   readOnly: false
 motrz1e:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1599,7 +1599,7 @@ motrz1e:
   readOnly: false
 moyaw2:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1609,7 +1609,7 @@ moyaw2:
   readOnly: false
 sl0ch:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1619,7 +1619,7 @@ sl0ch:
   readOnly: false
 sl0trxi:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1629,7 +1629,7 @@ sl0trxi:
   readOnly: false
 sl0trxo:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1639,7 +1639,7 @@ sl0trxo:
   readOnly: false
 sl0wh:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1649,7 +1649,7 @@ sl0wh:
   readOnly: false
 sl1ch:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1659,7 +1659,7 @@ sl1ch:
   readOnly: false
 sl1cv:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1669,7 +1669,7 @@ sl1cv:
   readOnly: false
 sl1trxi:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1679,7 +1679,7 @@ sl1trxi:
   readOnly: false
 sl1trxo:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1689,7 +1689,7 @@ sl1trxo:
   readOnly: false
 sl1tryb:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1699,7 +1699,7 @@ sl1tryb:
   readOnly: false
 sl1tryt:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1709,7 +1709,7 @@ sl1tryt:
   readOnly: false
 sl1wh:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1719,7 +1719,7 @@ sl1wh:
   readOnly: false
 sl1wv:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1729,7 +1729,7 @@ sl1wv:
   readOnly: false
 sl2ch:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1739,7 +1739,7 @@ sl2ch:
   readOnly: false
 sl2cv:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1749,7 +1749,7 @@ sl2cv:
   readOnly: false
 sl2trxi:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1759,7 +1759,7 @@ sl2trxi:
   readOnly: false
 sl2trxo:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1769,7 +1769,7 @@ sl2trxo:
   readOnly: false
 sl2tryb:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1779,7 +1779,7 @@ sl2tryb:
   readOnly: false
 sl2tryt:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1789,7 +1789,7 @@ sl2tryt:
   readOnly: false
 sl2wh:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1799,7 +1799,7 @@ sl2wh:
   readOnly: false
 sl2wv:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1809,7 +1809,7 @@ sl2wv:
   readOnly: false
 sl3ch:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1819,7 +1819,7 @@ sl3ch:
   readOnly: false
 sl3cv:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1829,7 +1829,7 @@ sl3cv:
   readOnly: false
 sl3trxi:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1839,7 +1839,7 @@ sl3trxi:
   readOnly: false
 sl3trxo:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1849,7 +1849,7 @@ sl3trxo:
   readOnly: false
 sl3tryb:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1859,7 +1859,7 @@ sl3tryb:
   readOnly: false
 sl3tryt:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1869,7 +1869,7 @@ sl3tryt:
   readOnly: false
 sl3wh:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1879,7 +1879,7 @@ sl3wh:
   readOnly: false
 sl3wv:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1889,7 +1889,7 @@ sl3wv:
   readOnly: false
 sl4ch:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1899,7 +1899,7 @@ sl4ch:
   readOnly: false
 sl4cv:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1909,7 +1909,7 @@ sl4cv:
   readOnly: false
 sl4trxi:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1919,7 +1919,7 @@ sl4trxi:
   readOnly: false
 sl4trxo:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1929,7 +1929,7 @@ sl4trxo:
   readOnly: false
 sl4tryb:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1939,7 +1939,7 @@ sl4tryb:
   readOnly: false
 sl4tryt:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1949,7 +1949,7 @@ sl4tryt:
   readOnly: false
 sl4wh:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1959,7 +1959,7 @@ sl4wh:
   readOnly: false
 sl4wv:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1969,7 +1969,7 @@ sl4wv:
   readOnly: false
 sl5ch:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1979,7 +1979,7 @@ sl5ch:
   readOnly: false
 sl5cv:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1989,7 +1989,7 @@ sl5cv:
   readOnly: false
 sl5trxi:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -1999,7 +1999,7 @@ sl5trxi:
   readOnly: false
 sl5trxo:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -2009,7 +2009,7 @@ sl5trxo:
   readOnly: false
 sl5tryb:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -2019,7 +2019,7 @@ sl5tryb:
   readOnly: false
 sl5tryt:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -2029,7 +2029,7 @@ sl5tryt:
   readOnly: false
 sl5wh:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -2039,7 +2039,7 @@ sl5wh:
   readOnly: false
 sl5wv:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -2049,7 +2049,7 @@ sl5wv:
   readOnly: false
 strox:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -2059,7 +2059,7 @@ strox:
   readOnly: false
 stroy:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -2069,7 +2069,7 @@ stroy:
   readOnly: false
 stroz:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -2079,7 +2079,7 @@ stroz:
   readOnly: false
 sttrx:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -2089,7 +2089,7 @@ sttrx:
   readOnly: false
 sttry:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -2106,7 +2106,7 @@ sttry:
 
 ring_current_sim:
   readoutPriority: monitored
-  deviceClass: ReadOnlySignal
+  deviceClass: ophyd_devices.ReadOnlySignal
   deviceConfig:
   deviceTags:
     - beamline
@@ -2121,7 +2121,7 @@ ring_current_sim:
 
 motor1_disabled:
   readoutPriority: monitored
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     labels: motor1_disabled
@@ -2137,7 +2137,7 @@ motor1_disabled:
   readOnly: false
 motor1_disabled_set:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     labels: motor1_disabled_set
@@ -2153,7 +2153,7 @@ motor1_disabled_set:
   readOnly: true
 motor2_disabled:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     labels: motor2_disabled
@@ -2169,7 +2169,7 @@ motor2_disabled:
   readOnly: false
 motor2_disabled_set:
   readoutPriority: baseline
-  deviceClass: SimPositioner
+  deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
     delay: 1
     labels: motor2_disabled_set
@@ -2186,7 +2186,7 @@ motor2_disabled_set:
 ######### DeviceProxy and SimCamera for delayed init tests ##########
 proxy_cam_test:
   readoutPriority: monitored
-  deviceClass: SimCamera
+  deviceClass: ophyd_devices.SimCamera
   deviceConfig:
     device_access: true
   deviceTags:
@@ -2196,7 +2196,7 @@ proxy_cam_test:
   softwareTrigger: false
 sim_proxy_test:
   readoutPriority: on_request
-  deviceClass: SlitProxy
+  deviceClass: ophyd_devices.SlitProxy
   deviceConfig:
     proxy_cam_test:
       signal_name: image

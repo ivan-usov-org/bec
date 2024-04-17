@@ -54,6 +54,7 @@ def test_mv_raises_limit_error(bec_client_lib):
 @pytest.mark.timeout(100)
 def test_async_callback_data_matches_scan_data_lib(bec_client_lib):
     bec = bec_client_lib
+    scans = bec.scans  # not needed but to silence pylint...
     bec.metadata.update({"unit_test": "test_async_callback_data_matches_scan_data"})
     dev = bec.device_manager.devices
     reference_container = {"data": [], "metadata": {}}
@@ -139,7 +140,7 @@ def test_dap_fit(bec_client_lib):
         (
             {
                 "hexapod": {
-                    "deviceClass": "SynDeviceOPAAS",
+                    "deviceClass": "ophyd_devices.SynDeviceOPAAS",
                     "deviceConfig": {},
                     "deviceTags": ["user motors"],
                     "readoutPriority": "baseline",
@@ -147,7 +148,7 @@ def test_dap_fit(bec_client_lib):
                     "readOnly": False,
                 },
                 "eyefoc": {
-                    "deviceClass": "SimPositioner",
+                    "deviceClass": "ophyd_devices.SimPositioner",
                     "deviceConfig": {
                         "delay": 1,
                         "limits": [-50, 50],
@@ -167,7 +168,7 @@ def test_dap_fit(bec_client_lib):
         (
             {
                 "hexapod": {
-                    "deviceClass": "SynDeviceOPAAS",
+                    "deviceClass": "ophyd_devices.SynDeviceOPAAS",
                     "deviceConfig": {},
                     "deviceTags": ["user motors"],
                     "readoutPriority": "baseline",
@@ -175,7 +176,7 @@ def test_dap_fit(bec_client_lib):
                     "readOnly": False,
                 },
                 "eyefoc": {
-                    "deviceClass": "SimPositioner",
+                    "deviceClass": "ophyd_devices.SimPositioner",
                     "deviceConfig": {
                         "delay": 1,
                         "limits": [-50, 50],
@@ -196,7 +197,7 @@ def test_dap_fit(bec_client_lib):
         (
             {
                 "hexapod": {
-                    "deviceClass": "SynDeviceOPAAS",
+                    "deviceClass": "ophyd_devices.SynDeviceOPAAS",
                     "deviceConfig": {},
                     "deviceTags": ["user motors"],
                     "readoutPriority": "baseline",
@@ -204,7 +205,7 @@ def test_dap_fit(bec_client_lib):
                     "readOnly": False,
                 },
                 "eyefoc": {
-                    "deviceClass": "utils:bec_utils:DeviceClassConnectionError",
+                    "deviceClass": "ophyd_devices.utils.bec_utils.DeviceClassConnectionError",
                     "deviceConfig": {},
                     "readoutPriority": "baseline",
                     "deviceTags": ["user motors"],
@@ -227,7 +228,7 @@ def test_dap_fit(bec_client_lib):
                     "readOnly": False,
                 },
                 "eyefoc": {
-                    "deviceClass": "utils:bec_utils:DeviceClassInitError",
+                    "deviceClass": "ophyd_devices.utils.bec_utils.DeviceClassInitError",
                     "deviceConfig": {},
                     "readoutPriority": "baseline",
                     "deviceTags": ["user motors"],
@@ -250,7 +251,7 @@ def test_dap_fit(bec_client_lib):
                     "readOnly": False,
                 },
                 "eyefoc": {
-                    "deviceClass": "WrongDeviceClass",
+                    "deviceClass": "ophyd_devices.WrongDeviceClass",
                     "deviceConfig": {},
                     "readoutPriority": "baseline",
                     "deviceTags": ["user motors"],
@@ -272,12 +273,7 @@ def test_dap_fit(bec_client_lib):
     ],
 )
 def test_config_reload(
-    bec_test_config_file_path,
-    bec_client_lib,
-    config,
-    raises_error,
-    deletes_config,
-    disabled_device,
+    bec_test_config_file_path, bec_client_lib, config, raises_error, deletes_config, disabled_device
 ):
     bec = bec_client_lib
     bec.metadata.update({"unit_test": "test_config_reload"})

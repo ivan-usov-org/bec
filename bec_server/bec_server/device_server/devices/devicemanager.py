@@ -13,7 +13,6 @@ from functools import reduce
 
 import numpy as np
 import ophyd
-import ophyd.sim as ops
 import ophyd_devices as opd
 from ophyd.ophydobj import OphydObject
 from ophyd.signal import EpicsSignalBase
@@ -27,15 +26,10 @@ from bec_lib import (
     MessageEndpoints,
     bec_logger,
     messages,
+    plugin_helper,
 )
 from bec_server.device_server.devices.config_update_handler import ConfigUpdateHandler
 from bec_server.device_server.devices.device_serializer import get_device_info
-
-try:
-    from bec_plugins import devices as plugin_devices
-except ImportError:
-    plugin_devices = None
-
 
 logger = bec_logger.logger
 
@@ -118,30 +112,8 @@ class DeviceManagerDS(DeviceManagerBase):
 
     @staticmethod
     def _get_device_class(dev_type: str) -> type:
-        """
-        Return the class object from 'dev_type' string in the form '[module:][submodule:]class_name'
-        The class is looked after in ophyd devices[.module][.submodule] first, if it is not
-        present plugin_devices, ophyd, ophyd_devices.sim are searched too
-
-        Args:
-            dev_type (str): device type string
-
-        Returns:
-            type: class object
-        """
-        submodule, _, class_name = dev_type.rpartition(":")
-        if submodule:
-            submodule = f".{submodule.replace(':', '.')}"
-        for parent_module in (opd, plugin_devices, ophyd, ops):
-            try:
-                module = __import__(f"{parent_module.__name__}{submodule}", fromlist=[""])
-            except ModuleNotFoundError:
-                continue
-            else:
-                break
-        else:
-            raise TypeError(f"Unknown device class {dev_type}")
-        return getattr(module, class_name)
+        """Get the device class from the device type"""
+        return plugin_helper.get_plugin_class(dev_type, [opd, ophyd])
 
     def _load_session(self, *_args, **_kwargs):
         delayed_init = []
