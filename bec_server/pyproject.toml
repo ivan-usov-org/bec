@@ -27,7 +27,6 @@ dependencies = [
     "pyyaml",
     "python-dotenv",
     "rich",
-    "xmltodict",
 ]
 
 [project.optional-dependencies]

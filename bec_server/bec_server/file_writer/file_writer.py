@@ -8,7 +8,6 @@ import traceback
 import typing
 
 import h5py
-import xmltodict
 
 import bec_server.file_writer_plugins as fwp
 from bec_lib import MessageEndpoints, bec_logger, messages
@@ -47,107 +46,6 @@ class FileWriter(abc.ABC):
                     continue
                 device_storage[dev].append(data.scan_segments[point][dev])
         return device_storage
-
-
-class XMLWriter:
-    @staticmethod
-    def get_type(type_string: str):
-        if type_string == "float":
-            return float
-        if type_string == "string":
-            return str
-        if type_string == "int":
-            return int
-        raise NeXusLayoutError(f"Unsupported data type {type_string}.")
-
-    def get_value(self, value, entry, source, data_type):
-        if source == "constant":
-            if data_type:
-                return self.get_type(data_type)(value)
-            return value
-        return entry
-
-    def add_group(self, container, val):
-        name = val.pop("@name")
-        group = container.create_group(name)
-        self.add_content(group, val)
-
-    def add_dataset(self, container, val):
-        name = val.pop("@name")
-        source = val.pop("@source")
-        value = val.pop("@value", None)
-        data_type = val.pop("@type", None)
-        entry = val.pop("@entry", None)
-
-        data = self.get_value(value=value, entry=entry, source=source, data_type=data_type)
-        if data is None:
-            return
-        dataset = container.create_dataset(name, data=data)
-        self.add_content(dataset, val)
-        return
-
-    def add_attribute(self, container, val):
-        name = val.pop("@name")
-        source = val.pop("@source")
-        value = val.pop("@value", None)
-        data_type = val.pop("@type", None)
-        entry = val.pop("@entry", None)
-
-        data = self.get_value(value=value, entry=entry, source=source, data_type=data_type)
-        setattr(container.attrs, name, data)
-
-    def add_hardlink(self, container, val):
-        pass
-
-    def add_softlink(self, container, val):
-        pass
-
-    def add_content(self, container, layout):
-        for key, values in layout.items():
-            if not isinstance(values, list):
-                values = [values]
-            for val in values:
-                if key == "group":
-                    self.add_group(container, val)
-                elif key == "hdf5_layout":
-                    self.add_base_entry(container, val)
-                elif key == "attribute":
-                    self.add_attribute(container, val)
-                elif key == "dataset":
-                    self.add_dataset(container, val)
-                elif key == "hardlink":
-                    self.add_hardlink(container, val)
-                elif key == "softlink":
-                    self.add_softlink(container, val)
-                else:
-                    pass
-                    # raise NeXusLayoutError()
-
-    def add_base_entry(self, container, val):
-        self.add_group(container, val["group"])
-
-
-class NeXusFileXMLWriter(FileWriter, XMLWriter):
-    def configure(self, layout_file, **kwargs):
-        self.layout_file = layout_file
-        with open(self.layout_file, "br") as f:
-            self.layout = xmltodict.parse(f)
-
-    def get_value(self, value, entry, source, data_type):
-        if source == "constant":
-            if data_type:
-                return self.get_type(data_type)(value)
-            return value
-        if source == "bec":
-            return self.data.get(entry)
-        return entry
-
-    def write(self, file_path: str, data):
-        print(f"writing file to {file_path}")
-        self.data = self._create_device_data_storage(data)
-
-        with h5py.File(file_path, "w") as file:
-            self.add_content(file, self.layout)
 
 
 class HDF5Storage:

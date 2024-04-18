@@ -23,9 +23,6 @@ def main():
     config = ServiceConfig(config_path)
 
     file_writer_manager = file_writer.FileWriterManager(config, RedisConnector)
-    file_writer_manager.file_writer.configure(
-        layout_file=os.path.abspath("./layout_cSAXS_NXsas.xml")
-    )
     try:
         event = threading.Event()
         logger.success("Started FileWriter")
