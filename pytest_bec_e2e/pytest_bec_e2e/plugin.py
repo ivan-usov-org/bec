@@ -6,7 +6,6 @@ import pathlib
 import platform
 import shutil
 import tempfile
-import warnings
 
 import pytest
 from pytest_redis import factories as pytest_redis_factories

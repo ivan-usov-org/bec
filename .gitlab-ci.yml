@@ -41,6 +41,7 @@ stages:
   - Deploy
 
 .install-bec-services-dev: &install-bec-services-dev
+    - pip install -e ./pytest_bec_e2e
     - pip install -e ./bec_server[dev]
     - pip install -e ./bec_ipython_client[dev]
     - pip install -e ./bec_lib[dev]
@@ -297,6 +298,7 @@ end-2-end-conda:
 
     - source ./bin/install_bec_dev.sh -t
 
+    - pip install ./pytest_bec_e2e
     - cd ./bec_ipython_client
     - pip install .[dev]
     - pytest --start-servers -v ./tests/end-2-end/test_scans_e2e.py::test_grid_scan

@@ -23,6 +23,8 @@ WORKDIR /code/bec
 RUN git clone --branch ${OPHYD_BRANCH} https://gitlab.psi.ch/bec/ophyd_devices
 WORKDIR /code/bec/ophyd_devices
 RUN pip install -e .
+WORKDIR /code/bec/pytest_bec_e2e
+RUN pip install -e .
 WORKDIR /code/bec/${BEC_SERVICE}
 RUN pip install -e .[dev]
 
