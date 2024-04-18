@@ -60,7 +60,7 @@ Note, you need to install the package in editable mode (with `-e` flag), to allo
 
 ```bash
 pip install -e './bec_server[dev]'
-pip install -e './bec_client[dev]'
+pip install -e './bec_ipython_client[dev]'
 pip install -e './bec_lib[dev]'
 ```
 
