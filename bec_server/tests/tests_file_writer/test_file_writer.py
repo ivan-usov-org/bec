@@ -9,7 +9,7 @@ from test_file_writer_manager import file_writer_manager_mock
 
 from bec_lib.tests.fixtures import dm_with_devices
 from bec_server import file_writer
-from bec_server.file_writer import NexusFileWriter, NeXusFileXMLWriter
+from bec_server.file_writer import NexusFileWriter
 from bec_server.file_writer.file_writer import HDF5Storage
 from bec_server.file_writer.file_writer_manager import ScanStorage
 from bec_server.file_writer_plugins.cSAXS import NeXus_format as cSAXS_Nexus_format
