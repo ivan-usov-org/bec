@@ -9,9 +9,9 @@ import typing
 
 import h5py
 
-import bec_server.file_writer_plugins as fwp
-from bec_lib import MessageEndpoints, bec_logger, messages
+from bec_lib import MessageEndpoints, bec_logger, messages, plugin_helper
 
+from .default_writer import NeXus_format as default_NeXus_format
 from .merged_dicts import merge_dicts
 
 logger = bec_logger.logger
@@ -208,7 +208,16 @@ class NexusFileWriter(FileWriter):
             ).isoformat()
         if data.end_time is not None:
             device_storage["end_time"] = datetime.datetime.fromtimestamp(data.end_time).isoformat()
-        writer_format = getattr(fwp, self.file_writer_manager.file_writer_config.get("plugin"))
+
+        requested_plugin = self.file_writer_manager.file_writer_config.get("plugin")
+        if requested_plugin == "default_NeXus_format":
+            writer_format = default_NeXus_format
+        else:
+            plugins = plugin_helper.get_file_writer_plugins()
+            if requested_plugin not in plugins:
+                logger.error(f"Plugin {requested_plugin} not found. Using default plugin.")
+                writer_format = default_NeXus_format
+
         for file_ref in data.file_references.values():
             rel_path = os.path.relpath(file_ref["path"], os.path.dirname(file_path))
             file_ref["path"] = rel_path
