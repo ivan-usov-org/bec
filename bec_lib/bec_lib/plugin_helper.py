@@ -1,6 +1,7 @@
 import importlib
 import inspect
 from functools import lru_cache
+from typing import Literal
 
 from bec_lib.logger import bec_logger
 
@@ -79,6 +80,27 @@ def get_file_writer_plugins() -> dict:
                 logger.warning(f"Duplicated file writer plugin {name}.")
             loaded_plugins[name] = mod_cls
     return loaded_plugins
+
+
+def get_ipython_client_startup_plugins(state: Literal["pre", "post"]) -> dict:
+    """
+    Load all IPython client startup plugins.
+
+    Args:
+        state (str): The state of the plugin. Either "pre" or "post".
+
+    Returns:
+        dict: A dictionary with the plugin names as keys and the plugin module and source name as values.
+    """
+    group = "bec.ipython_client_startup"
+    target = f"plugin_ipython_client_{state}"
+    entry_points = importlib.metadata.entry_points(group=group)
+    modules = {
+        entry_point.name: {"source": entry_point.dist.name, "module": entry_point.load()}
+        for entry_point in entry_points
+        if entry_point.name == target
+    }
+    return modules
 
 
 def _filter_plugins(module) -> bool:
