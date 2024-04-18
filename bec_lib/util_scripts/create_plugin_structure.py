@@ -36,10 +36,11 @@ class PluginStructure:
     def copy_plugin_setup_files(self):
         # copy setup files
         self.copy_toml_file()
-        git_hooks = os.path.join(current_dir, "plugin_setup_files", ".git_hooks")
-        os.system(f"cp -R {git_hooks} {self.target_dir}")
-        gitignore = os.path.join(current_dir, "plugin_setup_files", ".gitignore")
-        os.system(f"cp {gitignore} {self.target_dir}")
+        git_hooks = os.path.join(current_dir, "plugin_setup_files", "git_hooks/*")
+        self.create_dir(".git_hooks")
+        os.system(f"cp -R {git_hooks} {self.target_dir}/.git_hooks/")
+        gitignore = os.path.join(current_dir, "plugin_setup_files", "gitignore")
+        os.system(f"cp {gitignore} {self.target_dir}/.gitignore")
 
     def copy_toml_file(self):
         """Copy the toml file and change the template name in the file"""
@@ -113,12 +114,27 @@ class PluginStructure:
         self.create_dir(f"{self.plugin_name}/bec_widgets")
         self.create_init_file(f"{self.plugin_name}/bec_widgets")
 
+    def add_file_writer(self):
+        self.create_dir(f"{self.plugin_name}/file_writer")
+        self.create_init_file(f"{self.plugin_name}/file_writer")
+
     def add_tests(self):
         self.create_dir("tests/tests_bec_ipython_client")
+        self.copy_tests_readme("tests/tests_bec_ipython_client")
         self.create_dir("tests/tests_dap_services")
+        self.copy_tests_readme("tests/tests_dap_services")
         self.create_dir("tests/tests_bec_widgets")
+        self.copy_tests_readme("tests/tests_bec_widgets")
         self.create_dir("tests/tests_devices")
+        self.copy_tests_readme("tests/tests_devices")
         self.create_dir("tests/tests_scans")
+        self.copy_tests_readme("tests/tests_scans")
+        self.create_dir("tests/tests_file_writer")
+        self.copy_tests_readme("tests/tests_file_writer")
+
+    def copy_tests_readme(self, file_path: str):
+        readme_file = os.path.join(current_dir, "plugin_setup_files", "README_template_tests.md")
+        os.system(f"cp {readme_file} {self.target_dir}/{file_path}/README.md")
 
     def add_bin(self):
         self.create_dir("bin")
@@ -134,6 +150,7 @@ if __name__ == "__main__":
     struc.add_device_configs()
     struc.add_dap_services()
     struc.add_bec_widgets()
+    struc.add_file_writer()
     struc.add_tests()
     struc.add_bin()
 
