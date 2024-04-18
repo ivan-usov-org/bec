@@ -63,6 +63,24 @@ def get_scan_plugins() -> dict:
     return loaded_plugins
 
 
+def get_file_writer_plugins() -> dict:
+    """
+    Load all file writer plugins.
+
+    Returns:
+        dict: A dictionary with the plugin names as keys and the plugin classes as values.
+    """
+    modules = _get_available_plugins("bec.file_writer")
+    loaded_plugins = {}
+    for module in modules:
+        mods = inspect.getmembers(module, predicate=_filter_plugins)
+        for name, mod_cls in mods:
+            if name in loaded_plugins:
+                logger.warning(f"Duplicated file writer plugin {name}.")
+            loaded_plugins[name] = mod_cls
+    return loaded_plugins
+
+
 def _filter_plugins(module) -> bool:
     """
     Filter out classes that are not plugins.
