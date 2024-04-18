@@ -4,27 +4,25 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 import datetime
+import pathlib
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
-import os
-import pathlib
+import tomli
 
 project = "BEC"
 copyright = f"{datetime.datetime.today().year}, Paul Scherrer Institute, Switzerland"
 author = "Klaus Wakonig"
 
 current_path = pathlib.Path(__file__).parent.parent.parent.resolve()
-version_path = f"{current_path}/semantic_release/"
+version_path = f"{current_path}/bec_server/pyproject.toml"
 
 
 def get_version():
     """load the version from the version file"""
-    version_file = os.path.join(version_path, "__init__.py")
-    with open(version_file, "r", encoding="utf-8") as file:
-        res = file.readline()
-        version = res.split("=")[1]
-    return version.strip().strip('"')
+    with open(version_path, "r", encoding="utf-8") as file:
+        res = tomli.loads(file.read())
+    return res["project"]["version"]
 
 
 release = get_version()

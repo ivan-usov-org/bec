@@ -1,3 +1,4 @@
+tomli
 sphinx
 sphinx_copybutton
 recommonmark
