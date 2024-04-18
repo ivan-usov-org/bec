@@ -5,6 +5,7 @@ declare -a dirs=(
     "bec_ipython_client"
     "bec_lib"
     "bec_server"
+    "pytest_bec_e2e"
 )
 
 mkdir dist

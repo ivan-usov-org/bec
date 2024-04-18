@@ -24,7 +24,11 @@ RUN git clone --branch ${OPHYD_BRANCH} https://gitlab.psi.ch/bec/ophyd_devices
 WORKDIR /code/bec/ophyd_devices
 RUN pip install -e .
 WORKDIR /code/bec/
-RUN pip install -e bec_server
+RUN pip install -e pytest_bec_e2e
+RUN pip install -e bec_server[dev]
+RUN pip install -e bec_ipython_client[dev]
+RUN pip install -e bec_lib[dev]
+
 WORKDIR /code/bec/${BEC_SERVICE}
 RUN pip install -e .[dev]
 

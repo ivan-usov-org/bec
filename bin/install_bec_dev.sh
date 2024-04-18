@@ -89,7 +89,7 @@ fi
 # check if the conda environment has the correct dependencies. If not, install them.
 conda activate ${conda_env_name}
 
-dependencies=(bec_lib bec_ipython_client bec_server)
+dependencies=(pytest_bec_e2e bec_lib bec_ipython_client bec_server)
 # split virtual environment into separate environments for each package
 if [ "$split_env" = true ]; then
     for package in "${dependencies[@]}"
