@@ -12,7 +12,7 @@ from bec_ipython_client.beamline_mixin import BeamlineMixin
 from bec_ipython_client.bec_magics import BECMagics
 from bec_ipython_client.callbacks.ipython_live_updates import IPythonLiveUpdates
 from bec_ipython_client.signals import ScanInterruption, SigintHandler
-from bec_lib import ServiceConfig, bec_logger
+from bec_lib import ServiceConfig, bec_logger, plugin_helper
 from bec_lib.alarm_handler import AlarmBase
 from bec_lib.callback_handler import EventType
 from bec_lib.client import BECClient
@@ -182,12 +182,7 @@ def log_console(execution_info):
 # pylint: disable=unused-import
 # pylint: disable=ungrouped-imports
 
-try:
-    from bec_plugins.bec_client import startup
-except ImportError:
-    startup = None
-
-main_dict = {"startup": startup}
+main_dict = {}
 
 sys.modules["bec_ipython_client.main"] = sys.modules[
     __name__
@@ -195,6 +190,12 @@ sys.modules["bec_ipython_client.main"] = sys.modules[
 
 
 def main():
+    """
+    Main function to start the BEC IPython client.
+    """
+
+    available_plugins = plugin_helper.get_ipython_client_startup_plugins(state="pre")
+
     parser = argparse.ArgumentParser(
         prog="BEC IPython client", description="BEC command line interface"
     )
@@ -203,6 +204,11 @@ def main():
     parser.add_argument("--config", action="store", default=None)
     parser.add_argument("--dont-wait-for-server", action="store_true", default=False)
     parser.add_argument("--post-startup-file", action="store", default=None)
+
+    for plugin in available_plugins.values():
+        if hasattr(plugin["module"], "extend_command_line_args"):
+            plugin["module"].extend_command_line_args(parser)
+
     args, left_args = parser.parse_known_args()
 
     # remove already parsed args from command line args
@@ -219,14 +225,12 @@ def main():
         print("Using config file: ", config_file)
         config = ServiceConfig(config_file)
 
-    if startup and "config" not in locals():
+    if available_plugins and "config" not in locals():
         # check if pre-startup.py script exists
-        file_name = os.path.join(os.path.dirname(startup.__file__), "pre_startup.py")
-        if os.path.isfile(file_name):
-            with open(file_name, "r", encoding="utf-8") as file:
-                # exec the pre-startup.py script and pass the arguments
-                # pylint: disable=exec-used
-                exec(file.read(), globals(), locals())
+        for plugin in available_plugins.values():
+            if hasattr(plugin["module"], "get_config"):
+                config = plugin.get_config()
+                break
 
     # check if config was defined in pre-startup.py
     if "config" not in locals():

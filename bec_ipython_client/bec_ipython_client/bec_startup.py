@@ -7,6 +7,7 @@ from bec_ipython_client.main import BECIPythonClient as _BECIPythonClient
 from bec_ipython_client.main import main_dict as _main_dict
 from bec_lib import RedisConnector as _RedisConnector
 from bec_lib import bec_logger as _bec_logger
+from bec_lib import plugin_helper
 
 try:
     from bec_widgets.cli import BECFigure as _BECFigure
@@ -33,23 +34,19 @@ else:
     dev = bec.device_manager.devices
     scans = bec.scans
 
-    bec._ip.prompts.status = 1
+    _available_plugins = plugin_helper.get_ipython_client_startup_plugins(state="post")
+    if _available_plugins:
+        for name, plugin in _available_plugins.items():
+            logger.success(f"Loading plugin: {plugin['source']}")
+            base = os.path.dirname(plugin["module"].__file__)
+            with open(os.path.join(base, "post_startup.py"), "r", encoding="utf-8") as file:
+                # pylint: disable=exec-used
+                exec(file.read())
 
-    # SETUP BEAMLINE INFO
-    from bec_ipython_client.plugins.SLS.sls_info import OperatorInfo, SLSInfo
-
-    bec._beamline_mixin._bl_info_register(SLSInfo)
-    bec._beamline_mixin._bl_info_register(OperatorInfo)
-
+    else:
+        bec._ip.prompts.status = 1
 
 if _main_dict["startup_file"]:
     with open(_main_dict["startup_file"], "r", encoding="utf-8") as file:
         # pylint: disable=exec-used
         exec(file.read())
-elif _main_dict["startup"]:
-    # check if post-startup.py script exists
-    file_name = os.path.join(os.path.dirname(_main_dict["startup"].__file__), "post_startup.py")
-    if os.path.isfile(file_name):
-        with open(file_name, "r", encoding="utf-8") as file:
-            # pylint: disable=exec-used
-            exec(file.read())
