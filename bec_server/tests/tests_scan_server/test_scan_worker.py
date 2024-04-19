@@ -3,7 +3,6 @@ import uuid
 from unittest import mock
 
 import pytest
-from utils import scan_server_mock
 
 from bec_lib import MessageEndpoints, messages
 from bec_lib.tests.utils import ConnectorMock
@@ -18,6 +17,7 @@ from bec_server.scan_server.scan_queue import (
     ScanQueue,
 )
 from bec_server.scan_server.scan_worker import ScanWorker
+from bec_server.scan_server.tests.fixtures import scan_server_mock
 
 
 @pytest.fixture

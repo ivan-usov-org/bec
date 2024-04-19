@@ -78,7 +78,6 @@ class LogbookConnector:
 
 #     logbook = LogbookConnector()
 #     msg = LogbookMessage(logbook)
-#     # msg.add_text("Test").add_file("/Users/wakonig_k/Desktop/lamni_logo.png")
 #     msg.add_text(
 #         f"<p><mark class='pen-red'><strong>Beamline checks failed at {str(datetime.datetime.now())}.</strong></mark></p>"
 #     ).add_tag("BEC")

@@ -19,11 +19,6 @@ scans = bec.scans
 
 # dev.samx.readback.read()
 
-# from bec_ipython_client.plugins.cSAXS import *
-# from bec_ipython_client.plugins import LamNI
-
-# lamni = LamNI.LamNI(bec)
-# bec._ip.prompts.username = "LamNI"
 # bec._ip.prompts.status = 1
 
 

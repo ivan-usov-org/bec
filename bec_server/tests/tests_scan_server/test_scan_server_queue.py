@@ -2,7 +2,6 @@ import uuid
 from unittest import mock
 
 import pytest
-from utils import scan_server_mock
 
 from bec_lib import Alarms, MessageEndpoints, messages
 from bec_lib.redis_connector import MessageObject
@@ -17,6 +16,7 @@ from bec_server.scan_server.scan_queue import (
     ScanQueueStatus,
 )
 from bec_server.scan_server.scan_worker import ScanWorker
+from bec_server.scan_server.tests.fixtures import scan_server_mock
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=protected-access
