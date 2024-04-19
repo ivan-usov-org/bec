@@ -5,7 +5,7 @@ image: $CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/python:3.10
 #commands to run in the Docker container before starting each job.
 variables:
   DOCKER_TLS_CERTDIR: ""
-  OPHYD_DEVICES_BRANCH: "master"
+  OPHYD_DEVICES_BRANCH: "main"
   BEC_WIDGETS_BRANCH: "main"
 
 workflow:
