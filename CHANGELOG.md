@@ -2,6 +2,39 @@
 
 
 
+## v2.6.0 (2024-04-19)
+
+### Ci
+
+* ci: fixed build process during e2e test ([`369af7c`](https://gitlab.psi.ch/bec/bec/-/commit/369af7c2006114ece464f5cf96c332c059ab3154))
+
+* ci: stop after two failures ([`90b7f45`](https://gitlab.psi.ch/bec/bec/-/commit/90b7f45c135f63b7384ef5feaee71902fb11ec74))
+
+### Documentation
+
+* docs(dev/install): fixed install guide for developers bec_client -&gt; bec_ipython_client ([`a8d270e`](https://gitlab.psi.ch/bec/bec/-/commit/a8d270e0d702e4750b63631bf9fb34e4f30ed610))
+
+* docs: fixed version update for sphinx ([`8366896`](https://gitlab.psi.ch/bec/bec/-/commit/836689667c03c0aa1a35db97ca772f2ae05f5f79))
+
+### Feature
+
+* feat(bec_client): added support for plugin-based startup scripts ([`aec75b4`](https://gitlab.psi.ch/bec/bec/-/commit/aec75b4966e570bd3e16ac295b09009eb1589acd))
+
+* feat(file_writer): added support for file writer layout plugins ([`a6578fb`](https://gitlab.psi.ch/bec/bec/-/commit/a6578fb13349c0cabd24d313a7d58f63772fa584))
+
+* feat(scan_server): added support for plugins ([`23f8721`](https://gitlab.psi.ch/bec/bec/-/commit/23f872127b06d321564fa343b069ae962ba2b6c6))
+
+* feat(bec_lib): added plugin helper ([`7f1b789`](https://gitlab.psi.ch/bec/bec/-/commit/7f1b78978bbe2ad61e490416e44bc23001757d5e))
+
+### Refactor
+
+* refactor: removed outdated xml writer ([`c9bd092`](https://gitlab.psi.ch/bec/bec/-/commit/c9bd0928ea9f42e6b11aadd6ac42d7fe5e649ec7))
+
+* refactor: minor cleanup ([`b7bd584`](https://gitlab.psi.ch/bec/bec/-/commit/b7bd584898a8ca6f11ff79e11fda2727d0fc6381))
+
+* refactor: moved to dot notation for specifying device classes ([`1f21b90`](https://gitlab.psi.ch/bec/bec/-/commit/1f21b90ba31ec8eb8ae2922a7d1353c2e8ea48f6))
+
+
 ## v2.5.0 (2024-04-18)
 
 ### Build
@@ -121,12 +154,6 @@ The docker-compose file/command might need further fixes, once the related end-2
 
 * ci(bec-widgets): environmental variable added to test script for ci ([`8e2fa9b`](https://gitlab.psi.ch/bec/bec/-/commit/8e2fa9b910e2d52da60b0e4db00e608b511eb7ee))
 
-### Feature
-
-* feat(connector): add &#39;unregister&#39; method to cancel subscription to pub/sub ([`e87812a`](https://gitlab.psi.ch/bec/bec/-/commit/e87812a816d06cd19e23705ff4221efe261b588c))
-
-* feat(redis connector): add _execute_callback method, to be able to overwrite how callbacks are run ([`1ddc7ee`](https://gitlab.psi.ch/bec/bec/-/commit/1ddc7eec53994e793cee371cae64474136faf963))
-
 ### Fix
 
 * fix(test_fake_redis): TestMessage fixed to pydantic BaseModel ([`eb9c812`](https://gitlab.psi.ch/bec/bec/-/commit/eb9c8125290615c0e15ffa70567ff198d22c30d5))
@@ -135,50 +162,6 @@ The docker-compose file/command might need further fixes, once the related end-2
 
 * fix: .shutdown() will cleanly stop all threads ([`c1c7dd7`](https://gitlab.psi.ch/bec/bec/-/commit/c1c7dd7beaeb46d1ababd301b99d01266baeb26c))
 
-* fix: ensure &#34;newest_only&#34; works as expected in test ([`dc85f49`](https://gitlab.psi.ch/bec/bec/-/commit/dc85f494ed93727e7eb3b207cdddb2db60ceb3f5))
-
-* fix(redis connector): prevent multiple identical connections in &#39;register&#39; ([`344ef50`](https://gitlab.psi.ch/bec/bec/-/commit/344ef508c0be199d5d8ab9b4c4bff3e4778acb87))
-
 ### Refactor
 
 * refactor: (un)register to work with pub/sub or stream endpoints ([`93a5a28`](https://gitlab.psi.ch/bec/bec/-/commit/93a5a2854b7408f7ff4ba32863f2cb3918b885e5))
-
-* refactor: make &#39;(un)register_stream&#39; similar to pub/sub registration API
-
-- StreamTopicInfo renamed to StreamSubscriptionInfo
-- &#34;cb&#34; field renamed to &#34;cb_ref&#34; (because it is really a weakref)
-- removed StreamRegisterMixin class
-    - merged with RedisConnector, since there is no other class to mix
-      with
-- removed need for custom stream listeners
-    - differenciation between &#39;direct&#39; reading and &#39;bunch&#39; reading is
-      made with a specialized StreamSubscriptionInfo object called
-      &#39;DirectReadingStreamSubscriptionInfo&#39;
-- use a single events queue for all messages
-    - all messages callbacks treated the same, by the same thread
-- pay attention to registering multiple times a stream to the same
-  callback, and prevent newest_only=True streams to also be registered
-with the same callback with newest_only=False ([`e1ad412`](https://gitlab.psi.ch/bec/bec/-/commit/e1ad412be7d224b6169db7cf45b105b287334781))
-
-### Unknown
-
-* tests: improve test_redis_connector_register_stream_newest_only ([`913dd6d`](https://gitlab.psi.ch/bec/bec/-/commit/913dd6dca24cfb23fa562b968062b67db03615d9))
-
-
-## v2.0.3 (2024-04-11)
-
-### Documentation
-
-* docs(developer): updated developer instructions after bec server refactoring ([`792c5cd`](https://gitlab.psi.ch/bec/bec/-/commit/792c5cdb95e7838d3198171e0dac2533ba73a8a4))
-
-### Fix
-
-* fix: fixed entry points ([`82b4689`](https://gitlab.psi.ch/bec/bec/-/commit/82b4689beb96b3a11ea1c2d5203167cb45746ffa))
-
-### Unknown
-
-* feature/repeat_proj_at_zero ([`8e9ea06`](https://gitlab.psi.ch/bec/bec/-/commit/8e9ea0628482ed241da87f10daa525b7211682a2))
-
-* feature/default_alignment_values_and_signal_check_in_scan ([`d94cff7`](https://gitlab.psi.ch/bec/bec/-/commit/d94cff7649cbeb79dba299748f37b5678aecadf2))
-
-* feature/flomni_updates ([`632fd0c`](https://gitlab.psi.ch/bec/bec/-/commit/632fd0c5fa7bbb88111bf95f647cb86aded8cecf))
