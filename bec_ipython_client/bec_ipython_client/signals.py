@@ -98,9 +98,7 @@ class SigintHandler(SignalHandler):
                 print("It has been 10 seconds since the last SIGINT. Resetting SIGINT handler.")
 
             threading.Thread(
-                target=self.bec.queue.request_scan_interruption,
-                args=(True,),
-                daemon=True,
+                target=self.bec.queue.request_scan_interruption, args=(True,), daemon=True
             ).start()
             print(
                 "A 'deferred pause' has been requested. The "
@@ -115,15 +113,10 @@ class SigintHandler(SignalHandler):
         # - Ctrl-C twice within 10 seconds or a direct command (e.g. mv) -> hard pause
         if self.bec._service_config.abort_on_ctrl_c:
             print("The scan will be aborted.")
-            threading.Thread(
-                target=self.bec.queue.request_scan_abortion,
-                daemon=True,
-            ).start()
+            threading.Thread(target=self.bec.queue.request_scan_abortion, daemon=True).start()
             raise ScanInterruption("User abort.")
         print("A hard pause will be requested.")
         threading.Thread(
-            target=self.bec.queue.request_scan_interruption,
-            args=(False,),
-            daemon=True,
+            target=self.bec.queue.request_scan_interruption, args=(False,), daemon=True
         ).start()
         raise ScanInterruption(PAUSE_MSG)

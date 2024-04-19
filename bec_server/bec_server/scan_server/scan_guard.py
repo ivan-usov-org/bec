@@ -26,9 +26,7 @@ class ScanGuard:
         self.connector = self.parent.connector
 
         self.connector.register(
-            MessageEndpoints.scan_queue_request(),
-            cb=self._scan_queue_request_callback,
-            parent=self,
+            MessageEndpoints.scan_queue_request(), cb=self._scan_queue_request_callback, parent=self
         )
 
         self.connector.register(
@@ -127,9 +125,7 @@ class ScanGuard:
         """
         sqrr = MessageEndpoints.scan_queue_request_response()
         rrm = messages.RequestResponseMessage(
-            accepted=scan_status.accepted,
-            message=scan_status.message,
-            metadata=metadata,
+            accepted=scan_status.accepted, message=scan_status.message, metadata=metadata
         )
         self.device_manager.connector.send(sqrr, rrm)
 

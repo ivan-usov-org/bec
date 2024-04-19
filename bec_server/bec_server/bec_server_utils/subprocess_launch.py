@@ -11,14 +11,7 @@ def subprocess_start(bec_path: str, config_path: str, services: dict):
         cwd = os.path.abspath(os.path.join(service_path, ".."))
         if config_path:
             processes.append(
-                subprocess.Popen(
-                    (
-                        service_config["command"],
-                        "--config",
-                        config_path,
-                    ),
-                    cwd=cwd,
-                )
+                subprocess.Popen((service_config["command"], "--config", config_path), cwd=cwd)
             )
         else:
             processes.append(subprocess.Popen((service_config["command"],), cwd=cwd))

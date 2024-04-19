@@ -395,12 +395,7 @@ class RedisConnector(ConnectorBase):
             int: stream id
         """
         info = DirectReadingStreamSubscriptionInfo(
-            id="-",
-            topic=topic,
-            newest_only=True,
-            from_start=False,
-            cb_ref=cb_ref,
-            kwargs=kwargs,
+            id="-", topic=topic, newest_only=True, from_start=False, cb_ref=cb_ref, kwargs=kwargs
         )
         if info in self._stream_topics_subscription[topic]:
             raise RuntimeError("Already registered stream topic with the same callback")

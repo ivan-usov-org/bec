@@ -211,17 +211,12 @@ class ScanProgressBar(ProgressBarBase):
         """
         if self.max_points:
             self._progress.update(
-                self._tasks[task],
-                completed=value,
-                fields={"current_scan_pos": value},
-                refresh=True,
+                self._tasks[task], completed=value, fields={"current_scan_pos": value}, refresh=True
             )
             self._progress.refresh()
         else:
             self._progress.update(
-                self._tasks[task],
-                fields={"current_scan_pos": value},
-                refresh=True,
+                self._tasks[task], fields={"current_scan_pos": value}, refresh=True
             )
             self._progress.refresh()
 
