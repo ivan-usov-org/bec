@@ -2,6 +2,25 @@
 
 
 
+## v2.7.0 (2024-04-19)
+
+### Ci
+
+* ci: skip trailing comma for black ([`fe657b6`](https://gitlab.psi.ch/bec/bec/-/commit/fe657b6adc416e7bc63b0a1e2970fdddcca63c29))
+
+* ci: removed pipeline as trigger source for downstream jobs ([`92bb7ef`](https://gitlab.psi.ch/bec/bec/-/commit/92bb7ef3c59f14d25db63615a86445454201aafd))
+
+* ci: update default ophyd branch to main ([`3334a7f`](https://gitlab.psi.ch/bec/bec/-/commit/3334a7f8e70d220daeaef51ac39328e3019a9bf0))
+
+### Feature
+
+* feat: move cSAXS plugin files from core ([`0a609a5`](https://gitlab.psi.ch/bec/bec/-/commit/0a609a56c0295026d04c4f5dea51800ad4ab8edf))
+
+### Unknown
+
+* flomni config ([`92fcb3b`](https://gitlab.psi.ch/bec/bec/-/commit/92fcb3b4024a4729a85673747c72c6abd1d1a4ef))
+
+
 ## v2.6.0 (2024-04-19)
 
 ### Ci
@@ -146,22 +165,3 @@ The docker-compose file/command might need further fixes, once the related end-2
 ### Feature
 
 * feat: add bec_service names to log files ([`329e9ed`](https://gitlab.psi.ch/bec/bec/-/commit/329e9eda5b31f033af4535c01545b4d1ceeb12c6))
-
-
-## v2.1.0 (2024-04-11)
-
-### Ci
-
-* ci(bec-widgets): environmental variable added to test script for ci ([`8e2fa9b`](https://gitlab.psi.ch/bec/bec/-/commit/8e2fa9b910e2d52da60b0e4db00e608b511eb7ee))
-
-### Fix
-
-* fix(test_fake_redis): TestMessage fixed to pydantic BaseModel ([`eb9c812`](https://gitlab.psi.ch/bec/bec/-/commit/eb9c8125290615c0e15ffa70567ff198d22c30d5))
-
-* fix(redis_connector): support dict in convert_endpointinfo ([`d2942b1`](https://gitlab.psi.ch/bec/bec/-/commit/d2942b1436ed7ddc3c31feb61510f0dc9f6f7f5a))
-
-* fix: .shutdown() will cleanly stop all threads ([`c1c7dd7`](https://gitlab.psi.ch/bec/bec/-/commit/c1c7dd7beaeb46d1ababd301b99d01266baeb26c))
-
-### Refactor
-
-* refactor: (un)register to work with pub/sub or stream endpoints ([`93a5a28`](https://gitlab.psi.ch/bec/bec/-/commit/93a5a2854b7408f7ff4ba32863f2cb3918b885e5))
