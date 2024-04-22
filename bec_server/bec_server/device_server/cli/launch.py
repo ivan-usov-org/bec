@@ -6,15 +6,12 @@
 # pylint: disable=wrong-import-order
 # we need to run the startup script before we import anything else. This is
 # to ensure that the epics environment variables are set correctly.
+import importlib.metadata as imd
 
-try:
-    from bec_plugins.device_server import startup
-except ImportError:
-    startup = None
-
-if startup is not None:
-    startup.run()
-
+entry_points = imd.entry_points(group="bec.deployment.device_server")
+for entry_point in entry_points:
+    if entry_point.name == "plugin_ds_startup":
+        entry_point.load()()
 
 import argparse
 import threading
