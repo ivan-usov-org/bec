@@ -6,58 +6,31 @@ information and to setup the prompts.
 The script is executed in the global namespace of the IPython shell. This
 means that all variables defined here are available in the shell.
 
-If needed, bec command-line arguments can be parsed here. For example, to
-parse the --session argument, add the following lines to the script:
+While command-line arguments have to be set in the pre-startup script, the
+post-startup script can be used to load beamline specific information and
+to setup the prompts.
 
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--session", help="Session name", type=str, default="my_default_session")
-    args = parser.parse_args()
+    from bec_lib import bec_logger
 
-    if args.session == "my_session":
-        print("Loading my_session session")
-        from bec_plugins.bec_ipython_client.plugins.my_session import *
-    else:
-        print("Loading default session")
-        from bec_plugins.bec_ipython_client.plugins.default_session import *
+    logger = bec_logger.logger
+
+    # pylint: disable=import-error
+    _args = _main_dict["args"]
+
+    _session_name = "cSAXS"
+    if _args.session.lower() == "lamni":
+        from csaxs_bec.bec_ipython_client.plugins.cSAXS import *
+        from csaxs_bec.bec_ipython_client.plugins.LamNI import *
+
+        _session_name = "LamNI"
+        lamni = LamNI(bec)
+        logger.success("LamNI session loaded.")
+
+    elif _args.session.lower() == "csaxs":
+        print("Loading cSAXS session")
+        from csaxs_bec.bec_ipython_client.plugins.cSAXS import *
+
+        logger.success("cSAXS session loaded.")
 """
 
 # pylint: disable=invalid-name, unused-import, import-error, undefined-variable, unused-variable, unused-argument, no-name-in-module
-
-# import argparse
-# parser = argparse.ArgumentParser()
-# parser.add_argument("--session", help="Session name", type=str, default="my_default_session")
-# args = parser.parse_args()
-
-# if args.session == "my_session":
-#     print("Loading my_session session")
-#     from bec_plugins.bec_ipython_client.plugins.my_session import *
-# else:
-#     print("Loading default session")
-#     from bec_plugins.bec_ipython_client.plugins.default_session import *
-
-
-# SETUP BEAMLINE INFO
-# from bec_ipython_client.plugins.SLS.sls_info import OperatorInfo, SLSInfo
-
-# from bec_plugins.bec_ipython_client.plugins.MyBeamline.beamline_info import BeamlineInfo
-
-# bec._beamline_mixin._bl_info_register(BeamlineInfo)
-# bec._beamline_mixin._bl_info_register(SLSInfo)
-# bec._beamline_mixin._bl_info_register(OperatorInfo)
-
-# SETUP PROMPTS
-# bec._ip.prompts.username = args.session
-# bec._ip.prompts.status = 1
-
-
-# REGISTER BEAMLINE CHECKS
-# from bec_lib.bl_conditions import (
-#     LightAvailableCondition,
-#     ShutterCondition,
-# )
-
-# _light_available_condition = LightAvailableCondition(dev.sls_machine_status)
-# _shutter_condition = ShutterCondition(dev.x12sa_es1_shutter_status)
-# bec.bl_checks.register(_light_available_condition)
-# bec.bl_checks.register(_shutter_condition)

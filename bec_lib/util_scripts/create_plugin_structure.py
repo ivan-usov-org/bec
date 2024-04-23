@@ -118,6 +118,17 @@ class PluginStructure:
         self.create_dir(f"{self.plugin_name}/file_writer")
         self.create_init_file(f"{self.plugin_name}/file_writer")
 
+    def add_deployments(self):
+        self.create_dir(f"{self.plugin_name}/deployments")
+        self.create_init_file(f"{self.plugin_name}/deployments")
+        self.create_dir(f"{self.plugin_name}/deployments/device_server")
+        self.create_init_file(f"{self.plugin_name}/deployments/device_server")
+
+        ds_startup = os.path.join(current_dir, "plugin_setup_files", "setup_device_server.py")
+        os.system(
+            f"cp {ds_startup} {self.target_dir}/{self.plugin_name}/deployments/device_server/startup.py"
+        )
+
     def add_tests(self):
         self.create_dir("tests/tests_bec_ipython_client")
         self.copy_tests_readme("tests/tests_bec_ipython_client")
@@ -153,5 +164,6 @@ if __name__ == "__main__":
     struc.add_file_writer()
     struc.add_tests()
     struc.add_bin()
+    struc.add_deployments()
 
     print(f"Plugin structure created in {sys.argv[1]}")

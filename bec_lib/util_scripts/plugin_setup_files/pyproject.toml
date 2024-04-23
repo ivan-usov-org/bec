@@ -20,17 +20,21 @@ dev = ["black", "isort", "coverage", "pylint", "pytest", "pytest-random-order"]
 [project.entry-points."bec"]
 plugin_bec = "{template_name}"
 
-[project.entry-points."bec.scans"]
-plugin_scans = "{template_name}.scans"
-
-[project.entry-points."bec.ipython_client"]
-plugin_ipython_client = "{template_name}.bec_ipython_client"
-
-[project.entry-points."bec.widgets"]
-plugin_widgets = "{template_name}.bec_widgets"
+[project.entry-points."bec.deployment.device_server"]
+plugin_ds_startup = "{template_name}.deployment.device_server.startup:run"
 
 [project.entry-points."bec.file_writer"]
 plugin_file_writer = "{template_name}.file_writer"
+
+[project.entry-points."bec.scans"]
+plugin_scans = "{template_name}.scans"
+
+[project.entry-points."bec.ipython_client_startup"]
+plugin_ipython_client_pre = "{template_name}.bec_ipython_client.startup.pre_startup"
+plugin_ipython_client_post = "{template_name}.bec_ipython_client.startup"
+
+[project.entry-points."bec.widgets"]
+plugin_widgets = "{template_name}.bec_widgets"
 
 [tool.hatch.build.targets.wheel]
 include = ["*"]
