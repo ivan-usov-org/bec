@@ -2,6 +2,13 @@
 
 
 
+## v2.7.1 (2024-04-23)
+
+### Fix
+
+* fix: fixed device server startup for CA override ([`773572b`](https://gitlab.psi.ch/bec/bec/-/commit/773572b33b23230b06ea6cc7b8e7e5ab3f792f3e))
+
+
 ## v2.7.0 (2024-04-19)
 
 ### Ci
@@ -158,10 +165,3 @@ The docker-compose file/command might need further fixes, once the related end-2
 ### Unknown
 
 * tests: use of subprocess.Popen instead of multiprocessing.Process (#256) ([`8ae98ec`](https://gitlab.psi.ch/bec/bec/-/commit/8ae98ec2992dae23634db649f0bdbdc795b2efb0))
-
-
-## v2.2.0 (2024-04-11)
-
-### Feature
-
-* feat: add bec_service names to log files ([`329e9ed`](https://gitlab.psi.ch/bec/bec/-/commit/329e9eda5b31f033af4535c01545b4d1ceeb12c6))
