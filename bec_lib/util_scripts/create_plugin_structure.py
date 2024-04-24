@@ -106,9 +106,9 @@ class PluginStructure:
         self.create_dir(f"{self.plugin_name}/device_configs")
         self.create_init_file(f"{self.plugin_name}/device_configs")
 
-    def add_dap_services(self):
-        self.create_dir(f"{self.plugin_name}/dap_services")
-        self.create_init_file(f"{self.plugin_name}/dap_services")
+    def add_services(self):
+        self.create_dir(f"{self.plugin_name}/services")
+        self.create_init_file(f"{self.plugin_name}/services")
 
     def add_bec_widgets(self):
         self.create_dir(f"{self.plugin_name}/bec_widgets")
@@ -133,7 +133,7 @@ class PluginStructure:
         self.create_dir("tests/tests_bec_ipython_client")
         self.copy_tests_readme("tests/tests_bec_ipython_client")
         self.create_dir("tests/tests_dap_services")
-        self.copy_tests_readme("tests/tests_dap_services")
+        self.copy_tests_readme("tests/tests_services")
         self.create_dir("tests/tests_bec_widgets")
         self.copy_tests_readme("tests/tests_bec_widgets")
         self.create_dir("tests/tests_devices")

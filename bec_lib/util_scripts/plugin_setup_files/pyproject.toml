@@ -21,7 +21,7 @@ dev = ["black", "isort", "coverage", "pylint", "pytest", "pytest-random-order"]
 plugin_bec = "{template_name}"
 
 [project.entry-points."bec.deployment.device_server"]
-plugin_ds_startup = "{template_name}.deployment.device_server.startup:run"
+plugin_ds_startup = "{template_name}.deployments.device_server.startup:run"
 
 [project.entry-points."bec.file_writer"]
 plugin_file_writer = "{template_name}.file_writer"
