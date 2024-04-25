@@ -570,12 +570,14 @@ class RedisConnector(ConnectorBase):
                     fnmatch.filter(self._stream_topics_subscription, pattern), cb
                 )
             pubsub_unsubscribe_list = self._filter_topics_cb(patterns, cb)
-            self._pubsub_conn.punsubscribe(pubsub_unsubscribe_list)
+            if pubsub_unsubscribe_list:
+                self._pubsub_conn.punsubscribe(pubsub_unsubscribe_list)
         else:
             topics, _ = self._convert_endpointinfo(topics, check_message_op=False)
             if not self._unregister_stream(topics, cb):
                 unsubscribe_list = self._filter_topics_cb(topics, cb)
-                self._pubsub_conn.unsubscribe(unsubscribe_list)
+                if unsubscribe_list:
+                    self._pubsub_conn.unsubscribe(unsubscribe_list)
 
     def _unregister_stream(self, topics: list[str], cb: callable = None) -> bool:
         """
