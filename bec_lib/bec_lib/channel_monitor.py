@@ -23,7 +23,6 @@ def _start_register(config_path, topic):
     config = ServiceConfig(config_path)
     connector = RedisConnector(config.redis)
     register = connector.register(topics=topic, cb=channel_callback)
-    register.start()
     event = threading.Event()
     event.wait()
 

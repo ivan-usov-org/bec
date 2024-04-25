@@ -27,5 +27,4 @@ def test_channel_monitor_start_register():
                     mock_connector.return_value = mock.MagicMock()
                     channel_monitor_launch()
                     mock_connector().register.assert_called_once()
-                    mock_connector().register.return_value.start.assert_called_once()
                     mock_threading.Event().wait.assert_called_once()
