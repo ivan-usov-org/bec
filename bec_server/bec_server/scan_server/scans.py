@@ -200,6 +200,7 @@ class RequestBase(ABC):
         self.caller_kwargs = self.parameter.get("kwargs", {})
         self.metadata = metadata
         self.device_manager = device_manager
+        self.connector = device_manager.connector
         self.DIID = 0
         self.scan_motors = []
         self.positions = []

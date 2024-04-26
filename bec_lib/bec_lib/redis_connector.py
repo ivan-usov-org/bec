@@ -27,7 +27,7 @@ import redis.exceptions
 from bec_lib.connector import ConnectorBase, MessageObject
 from bec_lib.endpoints import EndpointInfo, MessageEndpoints
 from bec_lib.logger import bec_logger
-from bec_lib.messages import AlarmMessage, BECMessage, LogMessage
+from bec_lib.messages import AlarmMessage, BECMessage, ClientInfoMessage, LogMessage
 from bec_lib.serialization import MsgpackSerialization
 
 if TYPE_CHECKING:
@@ -165,32 +165,32 @@ class RedisConnector(ConnectorBase):
         self._pubsub_conn.close()
         self._redis_conn.close()
 
-    def log_warning(self, msg):
+    def send_client_info(
+        self,
+        message: str,
+        rid: str = None,
+        source: str = None,
+        severity: int = 0,
+        show_asap: bool = False,
+        scope: str = None,
+        metadata: dict = None,
+    ):
         """
-        send a warning
-
-        Args:
-            msg (str): warning message
-        """
-        self.send(MessageEndpoints.log(), LogMessage(log_type="warning", log_msg=msg))
-
-    def log_message(self, msg):
-        """
-        send a message as log
+        Send a message to the client
 
         Args:
             msg (str): message
         """
-        self.send(MessageEndpoints.log(), LogMessage(log_type="info", log_msg=msg))
-
-    def log_error(self, msg):
-        """
-        send an error as log
-
-        Args:
-            msg (str): error message
-        """
-        self.send(MessageEndpoints.log(), LogMessage(log_type="error", log_msg=msg))
+        client_msg = ClientInfoMessage(
+            message=message,
+            source=source,
+            severity=severity,
+            show_asap=show_asap,
+            scope=scope,
+            RID=rid,
+            metadata=metadata,
+        )
+        self.xadd(MessageEndpoints.client_info(), msg_dict={"data": client_msg}, max_size=100)
 
     def raise_alarm(self, severity: Alarms, alarm_type: str, source: str, msg: str, metadata: dict):
         """

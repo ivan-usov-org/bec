@@ -9,7 +9,7 @@ from pydantic import Field
 import bec_lib.messages as bec_messages
 from bec_lib.alarm_handler import Alarms
 from bec_lib.endpoints import MessageEndpoints
-from bec_lib.messages import AlarmMessage, BECMessage, LogMessage
+from bec_lib.messages import AlarmMessage, BECMessage, ClientInfoMessage, LogMessage
 from bec_lib.redis_connector import RedisConnector
 from bec_lib.serialization import MsgpackSerialization
 
@@ -40,27 +40,15 @@ def connector():
             _connector.shutdown()
 
 
-def test_redis_connector_log_warning(connector):
-    with mock.patch.object(connector, "send", return_value=None):
-        connector.log_warning("msg")
-        connector.send.assert_called_once_with(
-            MessageEndpoints.log(), LogMessage(log_type="warning", log_msg="msg")
-        )
-
-
-def test_redis_connector_log_message(connector):
-    with mock.patch.object(connector, "send", return_value=None):
-        connector.log_message("msg")
-        connector.send.assert_called_once_with(
-            MessageEndpoints.log(), LogMessage(log_type="info", log_msg="msg")
-        )
-
-
-def test_redis_connector_log_error(connector):
-    with mock.patch.object(connector, "send", return_value=None):
-        connector.log_error("msg")
-        connector.send.assert_called_once_with(
-            MessageEndpoints.log(), LogMessage(log_type="error", log_msg="msg")
+def test_redis_connector_send_client_info(connector):
+    with mock.patch.object(connector, "xadd", return_value=None):
+        connector.send_client_info(message="msg", show_asap=True, source="scan_server")
+        connector.xadd.assert_called_once_with(
+            MessageEndpoints.client_info(),
+            msg_dict={
+                "data": ClientInfoMessage(message="msg", show_asap=True, source="scan_server")
+            },
+            max_size=100,
         )
 
 

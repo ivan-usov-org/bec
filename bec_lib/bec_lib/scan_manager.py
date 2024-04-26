@@ -54,6 +54,8 @@ class ScanManager:
 
         self.connector.register(topics=MessageEndpoints.scan_baseline(), cb=self._baseline_callback)
 
+        self.connector.register(topics=MessageEndpoints.client_info(), cb=self._client_msg_callback)
+
     def update_with_queue_status(self, queue: messages.ScanQueueStatusMessage) -> None:
         """update storage with a new queue status message"""
         self.queue_storage.update_with_status(queue)
@@ -203,6 +205,10 @@ class ScanManager:
         response = msg.value
         logger.debug(response)
         self.request_storage.update_with_response(response)
+
+    def _client_msg_callback(self, msg: dict, **_kwargs) -> None:
+        message = msg["data"]
+        self.request_storage.update_with_client_message(message)
 
     def _scan_status_callback(self, msg, **_kwargs) -> None:
         scan = msg.value

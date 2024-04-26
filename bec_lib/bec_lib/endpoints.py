@@ -752,6 +752,20 @@ class MessageEndpoints:
         )
 
     @staticmethod
+    def client_info() -> EndpointInfo:
+        """
+        Endpoint for client info. This endpoint is used by the redis connector to publish
+        client info using a messages.ClientInfoMessage message.
+
+        Returns:
+            EndpointInfo: Endpoint for client info.
+        """
+        endpoint = "public/client_info"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.ClientInfoMessage, message_op=MessageOp.STREAM
+        )
+
+    @staticmethod
     def alarm() -> EndpointInfo:
         """
         Endpoint for alarms. This endpoint is used by the redis connector to publish alarms

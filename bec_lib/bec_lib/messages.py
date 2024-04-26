@@ -224,6 +224,48 @@ class ScanQueueStatusMessage(BECMessage):
         return v
 
 
+class ClientInfoMessage(BECMessage):
+    """Message type for sending information to the client
+    Args:
+        message (str): message to the client
+        show_asap (bool, optional): True if the message should be shown immediately. Defaults to True
+        # Note: The option show_asap = True/False is temporary disabled until a decision is made on how to handle it. TODO #286
+        RID (str, optional): Request ID forwarded from the service, if available will be used to filter on the client site. Defaults to None.
+        source (str, Literal[
+            "bec_ipython_client",
+            "scan_server",
+            "device_server",
+            "scan_bundler",
+            "file_writer",
+            "scihub",
+            "dap",
+            None]
+            : Source of the message. Defaults to None.
+        scope (str, optional): Scope of the message; Defaults to None. One can follow
+                               a pattern to filter afterwards for specific client info; e.g. "scan", "rotation"
+        severity (int, optional): severity level of the message (0: INFO, 1: WARNING, 2: ERROR); Defaults to 0
+    """
+
+    msg_type: ClassVar[str] = "client_info"
+    message: str
+    show_asap: bool = Field(default=True)
+    RID: str | None = Field(default=None)
+    source: Literal[
+        "bec_ipython_client",
+        "scan_server",
+        "device_server",
+        "scan_bundler",
+        "file_writer",
+        "scihub",
+        "dap",
+        None,
+    ] = Field(default=None)
+    scope: str | None = Field(default=None)
+    severity: int = Field(
+        default=0
+    )  # TODO add enum for severity levels INFO = 0, WARNING = 1, ERROR = 2
+
+
 class RequestResponseMessage(BECMessage):
     """Message type for sending back decisions on the acceptance of requests
 

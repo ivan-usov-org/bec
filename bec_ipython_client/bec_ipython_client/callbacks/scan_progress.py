@@ -25,6 +25,10 @@ class LiveUpdatesScanProgress(LiveUpdatesTable):
             while True:
                 if self._update_progressbar(progressbar, device_names):
                     break
+                self._print_client_msgs_asap()
+
+        # TODO #286
+        # self._print_client_msgs_all()
 
     def _update_progressbar(self, progressbar: ScanProgressBar, device_names: str) -> bool:
         """Update the progressbar based on the device status message

@@ -86,6 +86,26 @@ def test_DeviceMessage_must_include_signals_as_dict():
         messages.DeviceMessage(signals="wrong_signals", metadata={"RID": "1234"})
 
 
+def test_ClientInfoMessage():
+    msg = messages.ClientInfoMessage(
+        message="test", show_asap=True, RID="1234", metadata={"RID": "1234"}
+    )
+    res = MsgpackSerialization.dumps(msg)
+    res_loaded = MsgpackSerialization.loads(res)
+    assert res_loaded == msg
+
+
+def test_ClientInfoMessage_raises():
+    with pytest.raises(pydantic.ValidationError):
+        messages.ClientInfoMessage(
+            message="test",
+            source="abc",
+            show_asap=True,
+            RID="1234",
+            metadata={"RID": "1234", "wrong": "wrong"},
+        )
+
+
 def test_DeviceRPCMessage():
     msg = messages.DeviceRPCMessage(
         device="samx", return_val=1, out="done", success=True, metadata={"RID": "1234"}

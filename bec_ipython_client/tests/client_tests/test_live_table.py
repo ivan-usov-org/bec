@@ -1,6 +1,8 @@
 # pylint: disable=missing-function-docstring
 import threading
 import time
+from contextlib import redirect_stdout
+from io import StringIO
 from unittest import mock
 
 import numpy as np
@@ -116,8 +118,9 @@ def test_print_table_data(client_with_grid_scan):
         metadata={"scan_report_devices": ["samx"], "scan_type": "step"},
     )
     live_update.scan_item = ScanItemMock(data=[live_update.point_data])
-
-    live_update.print_table_data()
+    with mock.patch.object(live_update, "_print_client_msgs_asap") as mock_client_msgs:
+        live_update.print_table_data()
+        assert mock_client_msgs.called
 
 
 def test_print_table_data_lamni_flyer(client_with_grid_scan):
@@ -135,8 +138,9 @@ def test_print_table_data_lamni_flyer(client_with_grid_scan):
         metadata={"scan_report_devices": ["samx"], "scan_type": "fly"},
     )
     live_update.scan_item = ScanItemMock(data=[live_update.point_data])
-
-    live_update.print_table_data()
+    with mock.patch.object(live_update, "_print_client_msgs_asap") as mock_client_msgs:
+        live_update.print_table_data()
+        assert mock_client_msgs.called
 
 
 def test_print_table_data_hinted_value(client_with_grid_scan):
@@ -157,10 +161,14 @@ def test_print_table_data_hinted_value(client_with_grid_scan):
     )
     live_update.scan_item = ScanItemMock(data=[live_update.point_data])
 
-    with mock.patch.object(live_update, "table") as mocked_table:
+    with (
+        mock.patch.object(live_update, "table") as mocked_table,
+        mock.patch.object(live_update, "_print_client_msgs_asap") as mock_client_msgs,
+    ):
         live_update.dev_values = (len(live_update._get_header()) - 1) * [0]
         live_update.print_table_data()
         mocked_table.get_row.assert_called_with("0", "0.000")
+        assert mock_client_msgs.called
 
 
 def test_print_table_data_hinted_value_with_precision(client_with_grid_scan):
@@ -181,7 +189,10 @@ def test_print_table_data_hinted_value_with_precision(client_with_grid_scan):
     )
     live_update.scan_item = ScanItemMock(data=[live_update.point_data])
 
-    with mock.patch.object(live_update, "table") as mocked_table:
+    with (
+        mock.patch.object(live_update, "table") as mocked_table,
+        mock.patch.object(live_update, "_print_client_msgs_asap") as mock_client_msgs,
+    ):
         live_update.dev_values = (len(live_update._get_header()) - 1) * [0]
         live_update.print_table_data()
         mocked_table.get_row.assert_called_with("0", f"{0:.2f}")
@@ -221,8 +232,49 @@ def test_print_table_data_variants(client_with_grid_scan, value, expected):
     )
     live_update.scan_item = ScanItemMock(data=[live_update.point_data])
 
-    live_update.print_table_data()
-    with mock.patch.object(live_update, "table") as mocked_table:
-        live_update.dev_values = (len(live_update._get_header()) - 1) * [value]
+    with mock.patch.object(live_update, "_print_client_msgs_asap") as mock_client_msgs:
         live_update.print_table_data()
-        mocked_table.get_row.assert_called_with("0", expected)
+        with mock.patch.object(live_update, "table") as mocked_table:
+            live_update.dev_values = (len(live_update._get_header()) - 1) * [value]
+            live_update.print_table_data()
+            mocked_table.get_row.assert_called_with("0", expected)
+
+
+def test_print_client_msgs(client_with_grid_scan):
+    client, request_msg = client_with_grid_scan
+    response_msg = messages.RequestResponseMessage(
+        accepted=True, message={"msg": ""}, metadata={"RID": "something"}
+    )
+    client.queue.request_storage.update_with_request(request_msg)
+    client.queue.request_storage.update_with_response(response_msg)
+    client_msg = messages.ClientInfoMessage(
+        message="message", RID="something", show_asap=True, source="scan_server"
+    )
+    client.queue.request_storage.update_with_client_message(client_msg)
+    with mock.patch.object(
+        client.queue.request_storage.scan_manager.queue_storage, "find_queue_item_by_requestID"
+    ):
+        live_update = LiveUpdatesTable(client, {"table_wait": 10}, request_msg)
+        live_update.wait_for_request_acceptance()
+        result = StringIO()
+        with redirect_stdout(result):
+            live_update._print_client_msgs_asap()
+            rtr1 = "Client info (scan_server) : message" + "\n"
+            assert result.getvalue() == rtr1
+            # second time should not add anything
+            live_update._print_client_msgs_asap()
+            assert result.getvalue() == rtr1
+            # live_update._print_client_msgs_all()
+            # rtr2 = (
+            #     "------------------------"
+            #     + "\n"
+            #     + "Summary of client messages"
+            #     + "\n"
+            #     + "------------------------"
+            #     + "\n"
+            #     + "Client info (scan_server) : message"
+            #     + "\n"
+            #     + "------------------------"
+            #     + "\n"
+            # )
+            # assert result.getvalue() == rtr1 + rtr2

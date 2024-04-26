@@ -288,6 +288,8 @@ class LiveUpdatesTable(LiveUpdatesBase):
                 self.dev_values[ind] = print_value
                 ind += 1
         print(self.table.get_row(str(self.point_id), *self.dev_values))
+        # pylint: disable=protected-access
+        self._print_client_msgs_asap()
 
     def close_table(self):
         """close the table and print the footer"""
@@ -299,6 +301,8 @@ class LiveUpdatesTable(LiveUpdatesBase):
                 f"Scan {self.scan_item.scan_number} finished. Scan ID {self.scan_item.scan_id}. Elapsed time: {elapsed_time:.2f} s"
             )
         )
+        # TODO #286
+        # self._print_client_msgs_all()
 
     def process_request(self):
         """process the request and start the core loop for live updates"""

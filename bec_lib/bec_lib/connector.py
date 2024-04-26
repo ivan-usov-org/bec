@@ -144,17 +144,9 @@ class ConnectorBase(PubSubInterface, StoreInterface):
         """Raise a warning"""
         raise NotImplementedError
 
-    def log_warning(self, msg):
-        """send a warning"""
-        self.send(MessageEndpoints.log(), LogMessage(log_type="warning", log_msg=msg))
-
-    def log_message(self, msg):
-        """send a log message"""
-        self.send(MessageEndpoints.log(), LogMessage(log_type="log", log_msg=msg))
-
-    def log_error(self, msg):
-        """send an error as log"""
-        self.send(MessageEndpoints.log(), LogMessage(log_type="error", log_msg=msg))
+    def send_client_info(self, msg):
+        """send a msg to the client, will automatically be logged too."""
+        raise NotImplementedError
 
     def set_and_publish(self, topic: str, msg, pipe=None, expire: int = None) -> None:
         """Set a value and publish it"""

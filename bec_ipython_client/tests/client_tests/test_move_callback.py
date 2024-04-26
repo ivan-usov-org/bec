@@ -45,11 +45,15 @@ def test_move_callback(bec_client_mock):
     with mock.patch("bec_ipython_client.callbacks.move_device.check_alarms") as check_alarms_mock:
         with mock.patch.object(ReadbackDataMixin, "wait_for_RID"):
             with mock.patch.object(LiveUpdatesReadbackProgressbar, "wait_for_request_acceptance"):
-                with mock.patch.object(ReadbackDataMixin, "get_device_values", mock_readback):
-                    with mock.patch.object(
-                        ReadbackDataMixin, "get_request_done_msgs", mock_req_msg
-                    ):
-                        LiveUpdatesReadbackProgressbar(bec=client, request=request).run()
+                with mock.patch.object(
+                    LiveUpdatesReadbackProgressbar, "_print_client_msgs_asap"
+                ) as mock_client_msgs:
+                    with mock.patch.object(ReadbackDataMixin, "get_device_values", mock_readback):
+                        with mock.patch.object(
+                            ReadbackDataMixin, "get_request_done_msgs", mock_req_msg
+                        ):
+                            LiveUpdatesReadbackProgressbar(bec=client, request=request).run()
+                            assert mock_client_msgs.called
 
 
 def test_move_callback_with_report_instruction(bec_client_mock):
@@ -84,13 +88,16 @@ def test_move_callback_with_report_instruction(bec_client_mock):
     with mock.patch("bec_ipython_client.callbacks.move_device.check_alarms") as check_alarms_mock:
         with mock.patch.object(ReadbackDataMixin, "wait_for_RID"):
             with mock.patch.object(LiveUpdatesReadbackProgressbar, "wait_for_request_acceptance"):
-                with mock.patch.object(ReadbackDataMixin, "get_device_values", mock_readback):
-                    with mock.patch.object(
-                        ReadbackDataMixin, "get_request_done_msgs", mock_req_msg
-                    ):
-                        LiveUpdatesReadbackProgressbar(
-                            bec=client, report_instruction=report_instruction, request=request
-                        ).run()
+                with mock.patch.object(
+                    LiveUpdatesReadbackProgressbar, "_print_client_msgs_asap"
+                ) as mock_client_msgs:
+                    with mock.patch.object(ReadbackDataMixin, "get_device_values", mock_readback):
+                        with mock.patch.object(
+                            ReadbackDataMixin, "get_request_done_msgs", mock_req_msg
+                        ):
+                            LiveUpdatesReadbackProgressbar(
+                                bec=client, report_instruction=report_instruction, request=request
+                            ).run()
 
 
 def test_readback_data_mixin(readback_data_mixin):

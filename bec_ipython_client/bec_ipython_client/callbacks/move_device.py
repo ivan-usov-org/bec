@@ -123,6 +123,7 @@ class LiveUpdatesReadbackProgressbar(LiveUpdatesBase):
 
                 values = data_source.get_device_values()
                 progress.update(values=values)
+                self._print_client_msgs_asap()
 
                 msgs = data_source.get_request_done_msgs()
                 request_ids = [
@@ -141,6 +142,8 @@ class LiveUpdatesReadbackProgressbar(LiveUpdatesBase):
                         progress.set_finished(dev)
                 # pylint: disable=protected-access
                 progress._progress.refresh()
+        # TODO #286
+        # self._print_client_msgs_all()
 
     def run(self):
         """run the progressbar."""
