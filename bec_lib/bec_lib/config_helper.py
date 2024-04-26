@@ -17,6 +17,7 @@ import yaml
 import bec_lib
 from bec_lib import messages
 from bec_lib.bec_errors import DeviceConfigError, ServiceConfigError
+from bec_lib.bec_yaml_loader import yaml_load
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.file_utils import DeviceConfigWriter
 from bec_lib.logger import bec_logger
@@ -86,7 +87,7 @@ class ConfigHelper:
 
         with open(file_path, "r", encoding="utf-8") as stream:
             try:
-                data = yaml.safe_load(stream)
+                data = yaml_load(stream)
                 logger.trace(
                     f"Loaded new config from disk: {json.dumps(data, sort_keys=True, indent=4)}"
                 )

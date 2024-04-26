@@ -229,6 +229,46 @@ The on failure parameter specifies the behavior of the device in case of a failu
 * **description** \
 The description contains the description of the device. It is used to provide additional information about the device.
 
+## Combining config files
+The device configuration can be split into multiple files. This can be useful to group devices by their functionality or to split the configuration into smaller files for better maintainability. To combine multiple device configuration files, use the `!include` tag in the device configuration.  The paths can be either relative or absolute. Please note that the `!include` tag cannot be placed at the root level of the device configuration and must be within a dictionary, e.g.:
+
+```yaml
+base_config:
+  - !include ./path/to/base_config.yaml
+
+endstation:
+  - !include ./path/to/endstation_config.yaml
+
+curr:
+  readoutPriority: baseline
+  description: SLS ring current
+  deviceClass: EpicsSignalRO
+  deviceConfig:
+    auto_monitor: true
+    read_pv: ARIDI-PCT:CURRENT
+  deviceTags:
+    - cSAXS
+  onFailure: buffer
+  enabled: true
+  readOnly: true
+  softwareTrigger: false
+```
+
+In the example above, the `base_config.yaml` and `endstation_config.yaml` files are included in the device configuration. The `curr` device is defined directly in the device configuration. Alternatively, the `base_config.yaml` and `endstation_config.yaml` files can bec combined into a single tag:
+  
+```yaml
+external_config:
+  - !include ./path/to/base_config.yaml
+  - !include ./path/to/endstation_config.yaml
+```
+
+For a single file, the `!include` tag can also be merged into a single line:
+
+```yaml
+base_config: !include ./path/to/base_config.yaml
+```
+
+
 (developer.ophyd.config_validation)=
 ## Validation of the device config
 To avoid errors during loading of the device config, the device config should be validated before loading it. This can be done by installing the `ophyd_devices` package and running the following command:
