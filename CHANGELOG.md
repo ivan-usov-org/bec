@@ -2,6 +2,23 @@
 
 
 
+## v2.7.3 (2024-04-26)
+
+### Documentation
+
+* docs: fixed bec config template ([`87d0986`](https://gitlab.psi.ch/bec/bec/-/commit/87d0986f21ba367dbb23db50c7c13f10b4007030))
+
+* docs: review docs, fix ScanModificationMessage, monitor callback and DAPRequestMessage ([`6b89240`](https://gitlab.psi.ch/bec/bec/-/commit/6b89240f46b2f892847e81963b7898649cb1c8d9))
+
+### Fix
+
+* fix: fixed loading of plugin-based configs ([`f927735`](https://gitlab.psi.ch/bec/bec/-/commit/f927735cd4012d4e4182596dc2ac2735d5ec4697))
+
+### Test
+
+* test(bec_lib): added test for unregistering callbacks ([`6e14de3`](https://gitlab.psi.ch/bec/bec/-/commit/6e14de35dc43b7eed3244f5fe327d79ddc1302ae))
+
+
 ## v2.7.2 (2024-04-25)
 
 ### Fix
@@ -143,25 +160,6 @@ The docker-compose file/command might need further fixes, once the related end-2
 
 ## v2.4.0 (2024-04-15)
 
-### Ci
-
-* ci: remove AdditionalTests dependency on tests job ([`54b139f`](https://gitlab.psi.ch/bec/bec/-/commit/54b139f40cebba03f1302f7828d30a9602cc807d))
-
 ### Feature
 
 * feat(flomni): scan status for tomography ([`eca3e64`](https://gitlab.psi.ch/bec/bec/-/commit/eca3e64facd2b1faa46787d9d70f8ce027df645f))
-
-
-## v2.3.0 (2024-04-12)
-
-### Ci
-
-* ci: specify main branch for semver job ([`31a54ca`](https://gitlab.psi.ch/bec/bec/-/commit/31a54cab9325fa0932a2189b4032404036cfbbe6))
-
-### Feature
-
-* feat: rename spec_hli to bec_hli, add load_hli function to BECIPythonCLient; closes #263 ([`6974cb2`](https://gitlab.psi.ch/bec/bec/-/commit/6974cb2f13e865d1395eda2274ac25abd6e44ef8))
-
-### Refactor
-
-* refactor: use callback_handler for namespace updates of clients and add tests ([`0a832a1`](https://gitlab.psi.ch/bec/bec/-/commit/0a832a149dbbc37627ff84674a6d38f5697db8ab))
