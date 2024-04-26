@@ -229,7 +229,7 @@ def main():
         # check if pre-startup.py script exists
         for plugin in available_plugins.values():
             if hasattr(plugin["module"], "get_config"):
-                config = plugin.get_config()
+                config = plugin["module"].get_config()
                 break
 
     # check if config was defined in pre-startup.py
