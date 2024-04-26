@@ -224,8 +224,8 @@ class QueueManager:
             return None
         return self.queues[queue].queue[0].active_request_block.scan_id
 
-    def _wait_for_queue_to_appear_in_history(self, scan_id, queue):
-        timeout_time = 10
+    def _wait_for_queue_to_appear_in_history(self, scan_id, queue, timeout=10):
+        timeout_time = timeout
         elapsed_time = 0
         while True:
             if elapsed_time > timeout_time:

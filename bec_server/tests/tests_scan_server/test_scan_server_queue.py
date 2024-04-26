@@ -397,6 +397,25 @@ def test_scan_queue_next_instruction_queue_does_not_pop(queuemanager_mock):
     assert len(queue.queue) == 1
 
 
+def test_queue_manager_wait_for_queue_to_appear_in_history_raises_timeout(queuemanager_mock):
+    queue_manager = queuemanager_mock()
+    with pytest.raises(TimeoutError):
+        queue_manager._wait_for_queue_to_appear_in_history("scan_id", "primary", timeout=0.5)
+
+
+def test_queue_manager_wait_for_queue_to_appear_in_history(queuemanager_mock):
+    queue_manager = queuemanager_mock()
+    scan_queue = ScanQueue(queue_manager, InstructionQueueMock)
+    instruction_queue = InstructionQueueItem(scan_queue, mock.MagicMock(), mock.MagicMock())
+    request_queue = RequestBlockQueue(instruction_queue, mock.MagicMock())
+    request_block = RequestBlock(mock.MagicMock(), mock.MagicMock(), request_queue)
+    request_block.scan_id = "scan_id"
+    request_queue.request_blocks.append(request_block)
+    instruction_queue.queue = request_queue
+    queue_manager.queues["primary"].history_queue.append(instruction_queue)
+    queue_manager._wait_for_queue_to_appear_in_history("scan_id", "primary", timeout=0.5)
+
+
 class RequestBlockMock(RequestBlock):
     def __init__(self, msg, scan_id) -> None:
         self.scan_id = scan_id
