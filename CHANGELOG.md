@@ -2,6 +2,17 @@
 
 
 
+## v2.8.0 (2024-04-27)
+
+### Build
+
+* build: fixed fpdf version ([`94b6995`](https://gitlab.psi.ch/bec/bec/-/commit/94b6995fd32224557b2fc8b3aeafcf73acdb8a2c))
+
+### Feature
+
+* feat(bec_lib): added option to combine yaml files ([`39bb628`](https://gitlab.psi.ch/bec/bec/-/commit/39bb6281bda2960de7e70c45463f62dde2b454f5))
+
+
 ## v2.7.3 (2024-04-26)
 
 ### Documentation
@@ -149,17 +160,6 @@ The docker-compose file/command might need further fixes, once the related end-2
 
 ## v2.4.1 (2024-04-16)
 
-### Ci
-
-* ci: updated default BECWidgets branch name to main ([`c41fe08`](https://gitlab.psi.ch/bec/bec/-/commit/c41fe0845532a05a7dfbd2f9aec038b1801e29c3))
-
 ### Fix
 
 * fix(client): resolve on done ([`5ea7ed3`](https://gitlab.psi.ch/bec/bec/-/commit/5ea7ed3e3e4b7b9edfff5008321eaf5e5cdaf9ae))
-
-
-## v2.4.0 (2024-04-15)
-
-### Feature
-
-* feat(flomni): scan status for tomography ([`eca3e64`](https://gitlab.psi.ch/bec/bec/-/commit/eca3e64facd2b1faa46787d9d70f8ce027df645f))
