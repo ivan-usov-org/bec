@@ -9,6 +9,8 @@ import enum
 import json
 import os
 import sys
+import traceback
+from itertools import takewhile
 from typing import TYPE_CHECKING
 
 from loguru import logger as loguru_logger
@@ -50,14 +52,18 @@ class BECLogger:
         "BECClient": "CLI",
     }
 
-    DEBUG_FORMAT = (
-        "<green>{service_name} | {{time:YYYY-MM-DD HH:mm:ss.SSS}}</green> | <level>{{level}}</level> |"
-        " <cyan>{{name}}</cyan>:<cyan>{{function}}</cyan>:<cyan>{{line}}</cyan> -"
-        " <level>{{message}}</level>"
-    )
     LOG_FORMAT = (
         "<green>{service_name} | {{time:YYYY-MM-DD HH:mm:ss}}</green> | <level>[{{level}}]</level> |"
-        " <level>{{message}}</level>"
+        " <level>{{message}}</level>\n"
+    )
+    DEBUG_FORMAT = (
+        "<green>{service_name} | {{time:YYYY-MM-DD HH:mm:ss.SSS}}</green> | <level>{{level}}</level> |"
+        "  <level>{{thread.name}} ({{thread.id}})</level> | <cyan>{{name}}</cyan>:<cyan>{{function}}</cyan>:<cyan>{{line}}</cyan> -"
+        " <level>{{message}}</level>\n"
+    )
+    TRACE_FORMAT = (
+        "<green>{service_name} | {{time:YYYY-MM-DD HH:mm:ss.SSS}}</green> | <level>{{level}}</level> |"
+        " <level>{{thread.name}} ({{thread.id}})</level> | <cyan>{{extra[stack]}}</cyan> - <level>{{message}}</level>\n"
     )
     LOGLEVEL = LogLevel
 
@@ -143,7 +149,7 @@ class BECLogger:
         msg = json.loads(msg)
         msg["service_name"] = self.service_name
         try:
-            self.connector.send(
+            self.connector.set_and_publish(
                 topic=MessageEndpoints.log(),
                 msg=bec_lib.messages.LogMessage(
                     log_type=msg["record"]["level"]["name"], log_msg=msg
@@ -156,7 +162,7 @@ class BECLogger:
             # because it depends on the connector
             pass
 
-    def format(self, level: LogLevel = None) -> str:
+    def get_format(self, level: LogLevel = None) -> str:
         """
         Get the format for a specific log level.
 
@@ -172,8 +178,26 @@ class BECLogger:
             level = self.level
         if level > self.LOGLEVEL.DEBUG:
             return self.LOG_FORMAT.format(service_name=abr)
+        if level > self.LOGLEVEL.TRACE:
+            return self.DEBUG_FORMAT.format(service_name=abr)
+        return self.TRACE_FORMAT.format(service_name=abr)
 
-        return self.DEBUG_FORMAT.format(service_name=abr)
+    def formatting(self, record):
+        """
+        Format the log message.
+
+        Args:
+            record (dict): Log record.
+
+        Returns:
+            dict: Formatted log record.
+        """
+        level = self.level
+        if level <= self.LOGLEVEL.TRACE:
+            frames = takewhile(lambda f: "/loguru/" not in f.filename, traceback.extract_stack())
+            stack = " > ".join("{}:{}:{}".format(f.filename, f.name, f.lineno) for f in frames)
+            record["extra"]["stack"] = stack
+        return self.get_format(level)
 
     def _update_sinks(self):
         self.logger.remove()
@@ -189,7 +213,7 @@ class BECLogger:
         Args:
             level (LogLevel): Log level.
         """
-        self.logger.add(sys.stderr, level=level, format=self.format(level), enqueue=True)
+        self.logger.add(sys.stderr, level=level, format=self.formatting, enqueue=True)
 
     def add_file_log(self, level: LogLevel):
         """
@@ -201,19 +225,26 @@ class BECLogger:
         if not self.service_name:
             return
         filename = os.path.join(self._base_path, f"{self.service_name}.log")
-        self.logger.add(filename, level=level, format=self.format(level), enqueue=True)
+        self.logger.add(filename, level=level, format=self.formatting, enqueue=True)
 
     def add_console_log(self):
         """
         Add a sink to the console log.
         """
-        if not self.service_name:
+        if not self.service_name or self.service_name in [
+            "ScanServer",
+            "SciHub",
+            "DAPServer",
+            "DeviceServer",
+            "ScanBundler",
+            "FileWriterManager",
+        ]:
             return
         filename = os.path.join(self._base_path, f"{self.service_name}_CONSOLE.log")
         self.logger.add(
             filename,
             level=LogLevel.CONSOLE_LOG,
-            format=self.format(LogLevel.CONSOLE_LOG),
+            format=self.get_format(LogLevel.CONSOLE_LOG),
             filter=lambda record: record["level"].no == LogLevel.CONSOLE_LOG,
             enqueue=True,
         )
@@ -225,7 +256,7 @@ class BECLogger:
         Args:
             level (LogLevel): Log level.
         """
-        self.logger.add(self._logger_callback, serialize=True, level=level)
+        self.logger.add(self._logger_callback, serialize=True, level=level, format=self.formatting)
 
     @property
     def level(self):

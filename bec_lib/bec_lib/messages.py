@@ -464,8 +464,7 @@ class LogMessage(BECMessage):
     """
 
     msg_type: ClassVar[str] = "log_message"
-    log_type: Literal["warning", "log", "error"]
-    log_type: Literal["warning", "log", "error"]
+    log_type: str
     log_msg: dict | str
 
 
