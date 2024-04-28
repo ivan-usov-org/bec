@@ -1,6 +1,6 @@
 from bec_lib.alarm_handler import Alarms
 from bec_lib.bec_service import BECService
-from bec_lib.channel_monitor import channel_monitor_launch
+from bec_lib.channel_monitor import channel_monitor_launch, log_monitor_launch
 from bec_lib.client import BECClient
 from bec_lib.config_helper import ConfigHelper
 from bec_lib.device import DeviceBase, DeviceStatus, Status
