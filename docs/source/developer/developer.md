@@ -11,6 +11,7 @@ hidden: true
 architecture/
 contributing/
 install_developer_env/
+logs/
 vscode/
 bec_cli/
 bec_sim/
@@ -34,6 +35,7 @@ Here, we aim to provide you with all the essential information to kickstart your
 * [Contributing](#developer.contributing): Learn how to actively participate and contribute to the development of BEC.
 * [Installing Developer Environment](#developer.install_developer_env): Set up your developer environment to work with BEC.
 * [Developing with Visual Studio Code](#developer.vscode): Learn how to set up Visual Studio Code for developing Python applications and how to use it to work with BEC.
+* [Logging](#developer.logging): Understand how to use the logger in BEC and monitor log messages in real-time.
 * [BEC Command Line Interface (CLI)](#developer.bec_cli): Explore the command-line tool and customize its behaviour.
 * [BEC Simulation Framework](#developer.bec_sim): The simulation framework allows you to explore, test or develop within the BEC ecosystem with direct feedback.
 * [BEC Graphical User Interface (GUI)](#developer.bec_gui): Learn how to use the graphical user interface to interact with BEC and explore how to create your own GUIs.
