@@ -21,10 +21,6 @@ bec = _BECIPythonClient(
 )
 _main_dict["bec"] = bec
 
-if not _main_dict["args"].nogui and _BECFigure is not None:
-    fig = bec.fig = _BECFigure()
-    fig.show()
-
 try:
     bec.start()
 except Exception:
@@ -33,6 +29,10 @@ else:
 
     dev = bec.device_manager.devices
     scans = bec.scans
+
+    if not _main_dict["args"].nogui and _BECFigure is not None:
+        fig = bec.fig = _BECFigure()
+        fig.show()
 
     _available_plugins = plugin_helper.get_ipython_client_startup_plugins(state="post")
     if _available_plugins:
