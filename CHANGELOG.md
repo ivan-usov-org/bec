@@ -2,6 +2,13 @@
 
 
 
+## v2.9.2 (2024-04-29)
+
+### Fix
+
+* fix(bec_startup): BECFigure starts up after client ([`6b48858`](https://gitlab.psi.ch/bec/bec/-/commit/6b488588fed818ee1fefae8d5620821381b2eee0))
+
+
 ## v2.9.1 (2024-04-29)
 
 ### Documentation
@@ -144,19 +151,11 @@
 
 * build: removed wheel dependency ([`ff0d2a1`](https://gitlab.psi.ch/bec/bec/-/commit/ff0d2a1ebb266d08d93aa088ff3151d27c828446))
 
-* build: moved to pyproject ([`f7f7eba`](https://gitlab.psi.ch/bec/bec/-/commit/f7f7eba2316ec78f2f46a59c52234f827d509101))
-
 ### Ci
 
 * ci: exit job if no artifacts need to be uploaded to pypi ([`2e00112`](https://gitlab.psi.ch/bec/bec/-/commit/2e00112447e5aee5ce91bc0fa9f51e9faf0f4ee5))
 
 * ci: updated ci for pyproject ([`3b541fb`](https://gitlab.psi.ch/bec/bec/-/commit/3b541fb7600e499046d053f21a399de01263fb24))
-
-* ci: migrate docker to gitlab Dependency Proxy
-
-Related to 1108662db13e8142b37cb3645ff7e9bc94d242b8
-
-The docker-compose file/command might need further fixes, once the related end-2-end tests are activated. ([`80270f8`](https://gitlab.psi.ch/bec/bec/-/commit/80270f81968bfb717a0c631f0a87a0b809912f6a))
 
 ### Feature
 
