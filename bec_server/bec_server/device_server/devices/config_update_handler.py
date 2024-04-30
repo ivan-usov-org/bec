@@ -88,8 +88,8 @@ class ConfigUpdateHandler:
 
                 if "limits" in dev_config["deviceConfig"]:
                     limits = {
-                        "low": device.obj.low_limit_travel.get(),
-                        "high": device.obj.high_limit_travel.get(),
+                        "low": {"value": device.obj.low_limit_travel.get()},
+                        "high": {"value": device.obj.high_limit_travel.get()},
                     }
                     self.device_manager.connector.set_and_publish(
                         MessageEndpoints.device_limits(device.name),

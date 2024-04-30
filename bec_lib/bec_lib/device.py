@@ -791,8 +791,8 @@ class AdjustableMixin:
         if not limit_msg:
             return [0, 0]
         limits = [
-            limit_msg.content["signals"].get("low", 0),
-            limit_msg.content["signals"].get("high", 0),
+            limit_msg.content["signals"].get("low", {}).get("value", 0),
+            limit_msg.content["signals"].get("high", {}).get("value", 0),
         ]
         return limits
 

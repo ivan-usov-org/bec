@@ -398,7 +398,7 @@ class ScanStubs:
         yield self._device_msg(
             device=device,
             action="publish_data_as_read",
-            parameter={"data": {device: data}},
+            parameter={"data": data},
             metadata=metadata,
         )
 

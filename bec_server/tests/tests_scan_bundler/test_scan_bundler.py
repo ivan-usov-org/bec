@@ -9,10 +9,24 @@ from bec_lib.connector import MessageObject
 # pylint: disable=protected-access
 
 
-def test_device_read_callback(scan_bundler_mock):
+@pytest.fixture()
+def dummy_signal_data():
+    return {
+        "samx": {"value": 0.51, "timestamp": 1234.56},
+        "samx_setpoint": {"value": 0.51, "timestamp": 1234.56},
+    }
+
+
+@pytest.fixture()
+def dummy_device_data_message(dummy_signal_data):
+    return messages.DeviceMessage(
+        signals=dummy_signal_data, metadata={"scan_id": "scan_id", "readout_priority": "monitored"}
+    )
+
+
+def test_device_read_callback(scan_bundler_mock, dummy_signal_data):
     dev_msg = messages.DeviceMessage(
-        signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-        metadata={"scan_id": "laksjd", "readout_priority": "monitored"},
+        signals=dummy_signal_data, metadata={"scan_id": "laksjd", "readout_priority": "monitored"}
     )
     msg = MessageObject(MessageEndpoints.device_read("samx").endpoint, dev_msg)
 
@@ -68,10 +82,9 @@ def test_wait_for_scan_id(scan_bundler_mock, scan_id, storageID, scan_msg):
         sb._wait_for_scan_id(scan_id)
 
 
-def test_add_device_to_storage_returns_without_scan_id(scan_bundler_mock):
+def test_add_device_to_storage_returns_without_scan_id(scan_bundler_mock, dummy_signal_data):
     msg = messages.DeviceMessage(
-        signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-        metadata={"readout_priority": "monitored"},
+        signals=dummy_signal_data, metadata={"readout_priority": "monitored"}
     )
     sb = scan_bundler_mock
     sb._add_device_to_storage([msg], "samx", timeout_time=1)
@@ -87,10 +100,9 @@ def test_add_device_to_storage_returns_without_signal(scan_bundler_mock):
     assert "samx" not in sb.device_storage
 
 
-def test_add_device_to_storage_returns_on_timeout(scan_bundler_mock):
+def test_add_device_to_storage_returns_on_timeout(scan_bundler_mock, dummy_signal_data):
     msg = messages.DeviceMessage(
-        signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-        metadata={"scan_id": "scan_id", "readout_priority": "monitored"},
+        signals=dummy_signal_data, metadata={"scan_id": "scan_id", "readout_priority": "monitored"}
     )
     sb = scan_bundler_mock
     sb._add_device_to_storage([msg], "samx", timeout_time=1)
@@ -98,10 +110,11 @@ def test_add_device_to_storage_returns_on_timeout(scan_bundler_mock):
 
 
 @pytest.mark.parametrize("scan_status", ["aborted", "closed"])
-def test_add_device_to_storage_returns_without_scan_info(scan_bundler_mock, scan_status):
+def test_add_device_to_storage_returns_without_scan_info(
+    scan_bundler_mock, scan_status, dummy_signal_data
+):
     msg = messages.DeviceMessage(
-        signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-        metadata={"scan_id": "scan_id", "readout_priority": "monitored"},
+        signals=dummy_signal_data, metadata={"scan_id": "scan_id", "readout_priority": "monitored"}
     )
     sb = scan_bundler_mock
     sb.sync_storage["scan_id"] = {"info": {}}
@@ -113,30 +126,13 @@ def test_add_device_to_storage_returns_without_scan_info(scan_bundler_mock, scan
 @pytest.mark.parametrize(
     "msg,scan_type",
     [
-        (
-            messages.DeviceMessage(
-                signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-                metadata={"scan_id": "scan_id", "readout_priority": "monitored"},
-            ),
-            "step",
-        ),
-        (
-            messages.DeviceMessage(
-                signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-                metadata={"scan_id": "scan_id", "readout_priority": "monitored"},
-            ),
-            "fly",
-        ),
-        (
-            messages.DeviceMessage(
-                signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
-                metadata={"scan_id": "scan_id", "readout_priority": "monitored"},
-            ),
-            "wrong",
-        ),
+        ("dummy_device_data_message", "step"),
+        ("dummy_device_data_message", "fly"),
+        ("dummy_device_data_message", "wrong"),
     ],
 )
-def test_add_device_to_storage_primary(scan_bundler_mock, msg, scan_type):
+def test_add_device_to_storage_primary(scan_bundler_mock, msg, scan_type, request):
+    msg = request.getfixturevalue(msg)
     sb = scan_bundler_mock
     sb.sync_storage["scan_id"] = {"info": {"scan_type": scan_type, "monitor_sync": "bec"}}
     sb.sync_storage["scan_id"]["status"] = "open"
@@ -165,7 +161,11 @@ def test_add_device_to_storage_primary(scan_bundler_mock, msg, scan_type):
     [
         (
             messages.DeviceMessage(
-                signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
+                signals={
+                    "samx": {"value": 0.51},
+                    "setpoint": {"value": 0.5},
+                    "motor_is_moving": {"value": 0},
+                },
                 metadata={"scan_id": "scan_id"},
             ),
             "fly",
@@ -173,7 +173,9 @@ def test_add_device_to_storage_primary(scan_bundler_mock, msg, scan_type):
         (
             messages.DeviceMessage(
                 signals={
-                    "flyer": {"flyer": 0.51, "flyer_setpoint": 0.5, "flyer_motor_is_moving": 0}
+                    "flyer": {"value": 0.51},
+                    "flyer_setpoint": {"value": 0.5},
+                    "flyer_motor_is_moving": {"value": 0},
                 },
                 metadata={"scan_id": "scan_id"},
             ),
@@ -204,7 +206,11 @@ def test_add_device_to_storage_primary_flyer(scan_bundler_mock, msg, scan_type):
     [
         (
             messages.DeviceMessage(
-                signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
+                signals={
+                    "samx": {"value": 0.51},
+                    "setpoint": {"value": 0.5},
+                    "motor_is_moving": {"value": 0},
+                },
                 metadata={"scan_id": "scan_id", "readout_priority": "baseline"},
             ),
             "step",
@@ -402,7 +408,6 @@ def test_status_modification(scan_bundler_mock):
             scan_id="6ff7a89a-79e5-43ad-828b-c1e1aeed5803",
             status="closed",
             info={
-                "readout_priority": "monitored",
                 "DIID": 4,
                 "RID": "a53538b4-79f3-4132-91b5-d044e438f460",
                 "scan_id": "3ea07f69-b0ee-44fa-8451-b85824a37397",
@@ -421,7 +426,6 @@ def test_status_modification(scan_bundler_mock):
             scan_id="6ff7a89a-79e5-43ad-828b-c1e1aeed5803",
             status="open",
             info={
-                "readout_priority": "monitored",
                 "DIID": 4,
                 "RID": "a53538b4-79f3-4132-91b5-d044e438f460",
                 "scan_id": "3ea07f69-b0ee-44fa-8451-b85824a37397",
@@ -476,7 +480,7 @@ def test_initialize_scan_container(scan_bundler_mock, scan_msg):
     [
         [
             messages.DeviceMessage(
-                signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
+                signals={"samx": {"value": 0.51, "timestamp": 1234.56}},
                 metadata={
                     "scan_id": "adlk-jalskdja",
                     "readout_priority": "monitored",
@@ -488,7 +492,7 @@ def test_initialize_scan_container(scan_bundler_mock, scan_msg):
         ],
         [
             messages.DeviceMessage(
-                signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
+                signals={"samx": {"value": 0.51, "timestamp": 1234.56}},
                 metadata={
                     "scan_id": "adlk-jalskdjb",
                     "readout_priority": "monitored",
@@ -500,7 +504,7 @@ def test_initialize_scan_container(scan_bundler_mock, scan_msg):
         ],
         [
             messages.DeviceMessage(
-                signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
+                signals={"samx": {"value": 0.51, "timestamp": 1234.56}},
                 metadata={"scan_id": "adlk-jalskdjc", "readout_priority": "monitored"},
             ),
             23,
@@ -652,7 +656,11 @@ def test_update_monitor_signals(scan_bundler_mock):
 def test_get_last_device_readback(scan_bundler_mock):
     sb = scan_bundler_mock
     dev_msg = messages.DeviceMessage(
-        signals={"samx": {"samx": 0.51, "setpoint": 0.5, "motor_is_moving": 0}},
+        signals={
+            "samx": {"value": 0.51},
+            "setpoint": {"value": 0.5},
+            "motor_is_moving": {"value": 0},
+        },
         metadata={"scan_id": "laksjd", "readout_priority": "monitored"},
     )
     with mock.patch.object(sb, "connector") as connector_mock:

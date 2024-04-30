@@ -301,7 +301,7 @@ class DeviceMessage(BECMessage):
     """Message type for sending device readings from the device server
 
     Args:
-        signals (dict): Dictionary of device signals
+        signals (dict): Dictionary containing the device signals and their values
         metadata (dict, optional): Metadata to describe the conditions of the device reading
 
     Examples:
@@ -309,7 +309,7 @@ class DeviceMessage(BECMessage):
     """
 
     msg_type: ClassVar[str] = "device_message"
-    signals: dict = Field(default_factory=dict)
+    signals: dict[str, dict[Literal["value", "timestamp"], Any]]
 
 
 class DeviceRPCMessage(BECMessage):

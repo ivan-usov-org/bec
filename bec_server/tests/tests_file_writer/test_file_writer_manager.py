@@ -1,16 +1,13 @@
 # pylint: skip-file
-import contextlib
 import os
 from unittest import mock
 
 import numpy as np
 import pytest
-import yaml
 
 import bec_lib
-from bec_lib import DeviceManagerBase, MessageEndpoints, ServiceConfig, messages
+from bec_lib import MessageEndpoints, ServiceConfig, messages
 from bec_lib.logger import bec_logger
-from bec_lib.messages import BECStatus
 from bec_lib.redis_connector import MessageObject
 from bec_lib.tests.utils import ConnectorMock
 from bec_server.file_writer import FileWriterManager
@@ -33,9 +30,10 @@ def file_writer_manager_mock():
             "log_writer": {"base_path": "./"},
         },
     )
-    with mock.patch.object(
-        FileWriterManager, "_start_device_manager", return_value=None
-    ), mock.patch.object(FileWriterManager, "wait_for_service"):
+    with (
+        mock.patch.object(FileWriterManager, "_start_device_manager", return_value=None),
+        mock.patch.object(FileWriterManager, "wait_for_service"),
+    ):
         file_writer_manager_mock = FileWriterManager(config=config, connector_cls=connector_cls)
         try:
             yield file_writer_manager_mock
@@ -195,10 +193,10 @@ def test_update_async_data(file_writer_manager_mock):
 def test_process_async_data_single_entry(file_writer_manager_mock):
     file_manager = file_writer_manager_mock
     file_manager.scan_storage["scan_id"] = ScanStorage(10, "scan_id")
-    data = [{"data": messages.DeviceMessage(signals={"data": np.zeros((10, 10))})}]
+    data = [{"data": messages.DeviceMessage(signals={"data": {"value": np.zeros((10, 10))}})}]
     file_manager._process_async_data(data, "scan_id", "dev1")
     assert np.isclose(
-        file_manager.scan_storage["scan_id"].async_data["dev1"]["data"], np.zeros((10, 10))
+        file_manager.scan_storage["scan_id"].async_data["dev1"]["data"]["value"], np.zeros((10, 10))
     ).all()
 
 

@@ -1953,7 +1953,7 @@ def test_monitor_scan_run():
                     messages.DeviceInstructionMessage(
                         device="samx",
                         action="publish_data_as_read",
-                        parameter={"data": {"samx": {"rb1": {"value": 1}}}},
+                        parameter={"data": {"rb1": {"value": 1}}},
                         metadata={"readout_priority": "monitored", "DIID": 11, "point_id": 0},
                     ),
                     messages.DeviceInstructionMessage(

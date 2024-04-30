@@ -62,8 +62,8 @@ class DSDevice(DeviceBase):
         dev_config_msg = messages.DeviceMessage(signals=self.obj.read_configuration(), metadata={})
         if hasattr(self.obj, "low_limit_travel") and hasattr(self.obj, "high_limit_travel"):
             limits = {
-                "low": self.obj.low_limit_travel.get(),
-                "high": self.obj.high_limit_travel.get(),
+                "low": {"value": self.obj.low_limit_travel.get()},
+                "high": {"value": self.obj.high_limit_travel.get()},
             }
         else:
             limits = None
@@ -531,9 +531,7 @@ class DeviceManagerDS(DeviceManagerBase):
             for key, val in data.items():
                 signals[key] = {"value": val[ii], "timestamp": timestamp}
             bundle.append(
-                messages.DeviceMessage(
-                    signals={obj.name: signals}, metadata={"point_id": ii, **metadata}
-                )
+                messages.DeviceMessage(signals=signals, metadata={"point_id": ii, **metadata})
             )
         ds_obj.emitted_points[metadata["scan_id"]] = max_points
         pipe = self.connector.pipeline()

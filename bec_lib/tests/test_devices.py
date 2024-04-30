@@ -600,7 +600,7 @@ def test_adjustable_mixin_limits():
     adj = AdjustableMixin()
     adj.root = mock.MagicMock()
     adj.root.parent.connector.get.return_value = messages.DeviceMessage(
-        signals={"low": -12, "high": 12}, metadata={}
+        signals={"low": {"value": -12}, "high": {"value": 12}}, metadata={}
     )
     assert adj.limits == [-12, 12]
 
@@ -624,7 +624,7 @@ def test_adjustable_mixin_set_low_limit():
     adj.update_config = mock.MagicMock()
     adj.root = mock.MagicMock()
     adj.root.parent.connector.get.return_value = messages.DeviceMessage(
-        signals={"low": -12, "high": 12}, metadata={}
+        signals={"low": {"value": -12}, "high": {"value": 12}}, metadata={}
     )
     adj.low_limit = -20
     adj.update_config.assert_called_once_with({"deviceConfig": {"limits": [-20, 12]}})
@@ -635,7 +635,7 @@ def test_adjustable_mixin_set_high_limit():
     adj.update_config = mock.MagicMock()
     adj.root = mock.MagicMock()
     adj.root.parent.connector.get.return_value = messages.DeviceMessage(
-        signals={"low": -12, "high": 12}, metadata={}
+        signals={"low": {"value": -12}, "high": {"value": 12}}, metadata={}
     )
     adj.high_limit = 20
     adj.update_config.assert_called_once_with({"deviceConfig": {"limits": [-12, 20]}})

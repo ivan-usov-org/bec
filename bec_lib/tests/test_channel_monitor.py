@@ -9,7 +9,9 @@ from bec_lib.redis_connector import MessageObject
 
 def test_channel_monitor_callback():
     with mock.patch("builtins.print") as mock_print:
-        msg = messages.DeviceMessage(signals={"x": 1, "y": 2, "z": 3}, metadata={"name": "test"})
+        msg = messages.DeviceMessage(
+            signals={"x": {"value": 1}, "y": {"value": 2}}, metadata={"name": "test"}
+        )
         msg_obj = MessageObject("test", msg)
         channel_callback(msg_obj)
         mock_print.assert_called_once()
