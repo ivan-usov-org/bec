@@ -274,7 +274,7 @@ class DeviceServer(RPCMixin, BECService):
             dev_msg = messages.DeviceReqStatusMessage(
                 device=dev, success=True, metadata=instr.metadata
             )
-            self.connector.set_and_publish(MessageEndpoints.device_req_status(dev), dev_msg, pipe)
+            self.connector.set(MessageEndpoints.device_req_status(dev), dev_msg, pipe)
         pipe.execute()
 
     def _status_callback(self, status):
@@ -288,9 +288,7 @@ class DeviceServer(RPCMixin, BECService):
             device=device_name, success=status.success, metadata=status.instruction.metadata
         )
         logger.debug(f"req status for device {device_name}: {status.success}")
-        self.connector.set_and_publish(
-            MessageEndpoints.device_req_status(device_name), dev_msg, pipe
-        )
+        self.connector.set(MessageEndpoints.device_req_status(device_name), dev_msg, pipe)
         response = status.instruction.metadata.get("response")
         if response:
             self.connector.lpush(

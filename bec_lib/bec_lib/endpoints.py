@@ -139,7 +139,7 @@ class MessageEndpoints:
         return EndpointInfo(
             endpoint=endpoint,
             message_type=messages.DeviceReqStatusMessage,
-            message_op=MessageOp.SET_PUBLISH,
+            message_op=MessageOp.SET,
         )
 
     @staticmethod
