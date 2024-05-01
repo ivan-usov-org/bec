@@ -140,6 +140,11 @@ class ServiceHandler:
             else:
                 redis_cmd = base_redis_cmd
 
+            redis_data_host_port = config.redis_data
+            redis_data_port = redis_data_host_port.split(":")[-1]
+            maxmemory = config.redis_data_memory_limit
+            redis_ext_modules_path = pathlib.Path(os.environ.get("CONDA_PREFIX", "/usr")) / "lib"
+
             services.update(
                 {
                     "redis": ServiceDesc(
@@ -147,7 +152,29 @@ class ServiceHandler:
                         redis_cmd,
                         TmuxSession("bec-redis", "BEC Redis servers"),
                         wait_func=functools.partial(wait_ready, redis_host_port),
-                    )
+                    ),
+                    "redis_data": ServiceDesc(
+                        Template(""),
+                        " ".join(
+                            [
+                                f"redis-server --port {redis_data_port} --save '' --dbfilename ''",
+                                f"--maxmemory {maxmemory}",
+                                "--maxmemory-policy noeviction",
+                                f"--loadmodule {str(redis_ext_modules_path / 'librejson.so')}",
+                                f"--loadmodule {str(redis_ext_modules_path / 'redisearch.so')}",
+                            ]
+                        ),
+                        TmuxSession("bec-redis", "BEC Redis servers"),
+                        wait_func=functools.partial(wait_ready, redis_data_host_port),
+                    ),
+                    "memory-tracker": ServiceDesc(
+                        Template(""),
+                        f"memory_tracker --init-db --redis-url=redis://{redis_data_host_port}",
+                        TmuxSession("bec-redis", "BEC Redis servers"),
+                        wait_func=functools.partial(
+                            wait_ready, redis_data_host_port, key="_PROTOCOL_VERSION_"
+                        ),
+                    ),
                 }
             )
 

@@ -252,12 +252,11 @@ class FileWriterManager(BECService):
             return
 
         file_path = ""
-        file_suffix = "master"
 
         start_time = time.time()
 
         try:
-            file_path = self.writer_mixin.compile_full_filename(suffix=file_suffix)
+            file_path = self.writer_mixin.compile_full_filename()
             self.connector.set_and_publish(
                 MessageEndpoints.public_file(scan_id, "master"),
                 messages.FileMessage(file_path=file_path, done=False, successful=False),
