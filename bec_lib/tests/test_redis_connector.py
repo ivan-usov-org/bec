@@ -41,25 +41,25 @@ def connector():
 
 
 def test_redis_connector_log_warning(connector):
-    with mock.patch.object(connector, "set_and_publish", return_value=None):
+    with mock.patch.object(connector, "send", return_value=None):
         connector.log_warning("msg")
-        connector.set_and_publish.assert_called_once_with(
+        connector.send.assert_called_once_with(
             MessageEndpoints.log(), LogMessage(log_type="warning", log_msg="msg")
         )
 
 
 def test_redis_connector_log_message(connector):
-    with mock.patch.object(connector, "set_and_publish", return_value=None):
+    with mock.patch.object(connector, "send", return_value=None):
         connector.log_message("msg")
-        connector.set_and_publish.assert_called_once_with(
+        connector.send.assert_called_once_with(
             MessageEndpoints.log(), LogMessage(log_type="log", log_msg="msg")
         )
 
 
 def test_redis_connector_log_error(connector):
-    with mock.patch.object(connector, "set_and_publish", return_value=None):
+    with mock.patch.object(connector, "send", return_value=None):
         connector.log_error("msg")
-        connector.set_and_publish.assert_called_once_with(
+        connector.send.assert_called_once_with(
             MessageEndpoints.log(), LogMessage(log_type="error", log_msg="msg")
         )
 

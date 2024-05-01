@@ -172,7 +172,7 @@ class RedisConnector(ConnectorBase):
         Args:
             msg (str): warning message
         """
-        self.set_and_publish(MessageEndpoints.log(), LogMessage(log_type="warning", log_msg=msg))
+        self.send(MessageEndpoints.log(), LogMessage(log_type="warning", log_msg=msg))
 
     def log_message(self, msg):
         """
@@ -181,7 +181,7 @@ class RedisConnector(ConnectorBase):
         Args:
             msg (str): message
         """
-        self.set_and_publish(MessageEndpoints.log(), LogMessage(log_type="log", log_msg=msg))
+        self.send(MessageEndpoints.log(), LogMessage(log_type="log", log_msg=msg))
 
     def log_error(self, msg):
         """
@@ -190,7 +190,7 @@ class RedisConnector(ConnectorBase):
         Args:
             msg (str): error message
         """
-        self.set_and_publish(MessageEndpoints.log(), LogMessage(log_type="error", log_msg=msg))
+        self.send(MessageEndpoints.log(), LogMessage(log_type="error", log_msg=msg))
 
     def raise_alarm(self, severity: Alarms, alarm_type: str, source: str, msg: str, metadata: dict):
         """

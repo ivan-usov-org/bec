@@ -149,7 +149,7 @@ class BECLogger:
         msg = json.loads(msg)
         msg["service_name"] = self.service_name
         try:
-            self.connector.set_and_publish(
+            self.connector.send(
                 topic=MessageEndpoints.log(),
                 msg=bec_lib.messages.LogMessage(
                     log_type=msg["record"]["level"]["name"], log_msg=msg
