@@ -52,7 +52,7 @@ def test_redis_connector_log_message(connector):
     with mock.patch.object(connector, "send", return_value=None):
         connector.log_message("msg")
         connector.send.assert_called_once_with(
-            MessageEndpoints.log(), LogMessage(log_type="log", log_msg="msg")
+            MessageEndpoints.log(), LogMessage(log_type="info", log_msg="msg")
         )
 
 

@@ -181,7 +181,7 @@ class RedisConnector(ConnectorBase):
         Args:
             msg (str): message
         """
-        self.send(MessageEndpoints.log(), LogMessage(log_type="log", log_msg=msg))
+        self.send(MessageEndpoints.log(), LogMessage(log_type="info", log_msg=msg))
 
     def log_error(self, msg):
         """
