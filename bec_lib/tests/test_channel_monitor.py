@@ -32,7 +32,7 @@ def test_channel_monitor_start_register():
 
 def test_log_monitor_callback_without_filter():
     with mock.patch("builtins.print") as mock_print:
-        msg = messages.LogMessage(log_type="INFO", log_msg={"text": "test"})
+        msg = messages.LogMessage(log_type="info", log_msg={"text": "test"})
         msg_obj = MessageObject("test", msg)
         log_callback(msg_obj)
         mock_print.assert_called_once_with("test")
@@ -50,7 +50,7 @@ def test_log_monitor_callback_without_filter():
 )
 def test_log_monitor_callback_filter(text, log_filter, printed):
     with mock.patch("builtins.print") as mock_print:
-        msg = messages.LogMessage(log_type="INFO", log_msg={"text": text})
+        msg = messages.LogMessage(log_type="info", log_msg={"text": text})
         msg_obj = MessageObject("test", msg)
         log_callback(msg_obj, log_filter=log_filter)
         if printed:

@@ -152,7 +152,7 @@ class BECLogger:
             self.connector.send(
                 topic=MessageEndpoints.log(),
                 msg=bec_lib.messages.LogMessage(
-                    log_type=msg["record"]["level"]["name"], log_msg=msg
+                    log_type=msg["record"]["level"]["name"].lower(), log_msg=msg
                 ),
             )
         except Exception:
