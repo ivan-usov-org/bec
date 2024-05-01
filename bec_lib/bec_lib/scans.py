@@ -90,7 +90,9 @@ class ScanObject:
         kwargs["md"] = metadata
 
         request = Scans.prepare_scan_request(self.scan_name, self.scan_info, *args, **kwargs)
-        requestID = str(uuid.uuid4())  # TODO: move this to the API server
+        requestID = str(uuid.uuid4())
+
+        # pylint: disable=unsupported-assignment-operation
         request.metadata["RID"] = requestID
 
         self._send_scan_request(request)
