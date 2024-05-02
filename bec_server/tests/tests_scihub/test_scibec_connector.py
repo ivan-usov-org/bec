@@ -3,7 +3,6 @@ from unittest import mock
 import pytest
 
 from bec_lib import MessageEndpoints, ServiceConfig, messages
-from bec_lib.logger import bec_logger
 from bec_lib.messages import BECStatus
 from bec_lib.tests.utils import ConnectorMock
 from bec_server.scihub import SciHub
@@ -114,36 +113,18 @@ def test_scibec_connect_to_scibec(SciBecMock):
                     mock_update_eaccount_in_redis.assert_called_once()
 
 
-class ServerResponseMock:
-    def __init__(self, body):
-        self.body = body
-
-
-def test_scibec_update_experiment_info(SciBecMock):
+def test_scibec_update_experiment_info(SciBecMock, active_experiment, beamline_document):
     with mock.patch.object(SciBecMock, "scibec") as mock_scibec:
-        beamline_document = {
-            "name": "dummy_bl",
-            "activeExperiment": "dummy_experiment",
-            "id": "dummy_id",
-        }
-        mock_scibec.beamline.beamline_controller_find.return_value = ServerResponseMock(
-            (beamline_document,)
-        )
-        experiment_document = {
-            "name": "dummy_experiment",
-            "writeAccount": "dummy_write_account",
-            "id": "dummy_experiment_id",
-        }
-        mock_scibec.experiment.experiment_controller_find_by_id.return_value = ServerResponseMock(
-            experiment_document
-        )
+        mock_scibec.beamline.beamline_controller_find.return_value = (beamline_document,)
+        experiment_document = active_experiment
+        mock_scibec.experiment.experiment_controller_find_by_id.return_value = experiment_document
         SciBecMock._update_experiment_info()
         assert SciBecMock.scibec_info["activeExperiment"] == experiment_document
         assert SciBecMock.scibec_info["beamline"] == beamline_document
 
 
-def test_update_eaccount_in_redis(SciBecMock):
-    SciBecMock.scibec_info = {"activeExperiment": {"writeAccount": "p12345"}}
+def test_update_eaccount_in_redis(SciBecMock, active_experiment):
+    SciBecMock.scibec_info = {"activeExperiment": active_experiment}
     with mock.patch.object(SciBecMock, "connector") as mock_connector:
         SciBecMock._update_eaccount_in_redis()
         mock_connector.set.assert_called_once_with(

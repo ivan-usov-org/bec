@@ -2,6 +2,7 @@ from unittest import mock
 
 import numpy as np
 import pytest
+from py_scibec_openapi_client.models import NewScanData, ScanPartial
 
 from bec_lib import messages
 from bec_lib.redis_connector import MessageObject
@@ -46,48 +47,33 @@ def test_update_scan_status_returns_without_scibec(md_handler):
     md_handler.update_scan_status(msg)
 
 
-def test_update_scan_status(md_handler):
+def test_update_scan_status(md_handler, active_experiment, dataset_document):
     # pylint: disable=protected-access
     msg = messages.ScanStatusMessage(scan_id="scan_id", status="open", info={"dataset_number": 12})
     scibec = mock.Mock()
     md_handler.scibec_connector.scibec = scibec
-    scibec_info = {
-        "activeExperiment": {
-            "id": "id",
-            "readACL": ["readACL"],
-            "writeACL": ["writeACL"],
-            "owner": "owner",
-        }
-    }
+    scibec_info = {"activeExperiment": active_experiment}
     md_handler.scibec_connector.scibec_info = scibec_info
-    type(scibec.scan.scan_controller_find()).body = mock.PropertyMock(return_value=[])
-    type(scibec.dataset.dataset_controller_find()).body = mock.PropertyMock(return_value=[])
-    type(scibec.dataset.dataset_controller_create()).body = mock.PropertyMock(
-        return_value={"id": "id"}
-    )
+    scibec.scan.scan_controller_find = mock.MagicMock(return_value=[])
+    scibec.dataset.dataset_controller_find = mock.MagicMock(return_value=[])
+    scibec.dataset.dataset_controller_create = mock.MagicMock(return_value=dataset_document)
     md_handler.update_scan_status(msg)
 
 
-def test_update_scan_status_patch(md_handler):
+def test_update_scan_status_patch(md_handler, active_experiment, scan_document):
     # pylint: disable=protected-access
     msg = messages.ScanStatusMessage(
         scan_id="scan_id", status="closed", info={"dataset_number": 12}
     )
     scibec = mock.Mock()
     md_handler.scibec_connector.scibec = scibec
-    scibec_info = {
-        "activeExperiment": {
-            "id": "id",
-            "readACL": ["readACL"],
-            "writeACL": ["writeACL"],
-            "owner": "owner",
-        }
-    }
+    scibec_info = {"activeExperiment": active_experiment}
     md_handler.scibec_connector.scibec_info = scibec_info
-    type(scibec.scan.scan_controller_find()).body = mock.PropertyMock(return_value=[{"id": "id"}])
+    scibec.scan.scan_controller_find = mock.MagicMock(return_value=[scan_document])
     md_handler.update_scan_status(msg)
     scibec.scan.scan_controller_update_by_id.assert_called_once_with(
-        path_params={"id": "id"}, body={"metadata": {"dataset_number": 12}, "exitStatus": "closed"}
+        id="dummy_id",
+        scan_partial=ScanPartial(exit_status="closed", metadata={"dataset_number": 12}),
     )
 
 
@@ -124,31 +110,27 @@ def test_update_scan_data_without_scan(md_handler):
     # pylint: disable=protected-access
     scibec = mock.Mock()
     md_handler.scibec_connector.scibec = scibec
-    type(scibec.scan.scan_controller_find()).body = mock.PropertyMock(return_value=[])
+    scibec.scan.scan_controller_find = mock.MagicMock(return_value=[])
     md_handler.update_scan_data(
         file_path="my_file.h5", data={"data": {}, "metadata": {"scan_id": "scan_id"}}
     )
 
 
-def test_update_scan_data(md_handler):
+def test_update_scan_data(md_handler, scan_document):
     # pylint: disable=protected-access
     scibec = mock.Mock()
     md_handler.scibec_connector.scibec = scibec
-    type(scibec.scan.scan_controller_find()).body = mock.PropertyMock(
-        return_value=[
-            {"id": "id", "readACL": ["readACL"], "writeACL": ["writeACL"], "owner": "owner"}
-        ]
-    )
+    scibec.scan.scan_controller_find = mock.MagicMock(return_value=[scan_document])
     md_handler.update_scan_data(
         file_path="my_file.h5", data={"data": {}, "metadata": {"scan_id": "scan_id"}}
     )
     scibec.scan_data.scan_data_controller_create_many.assert_called_once_with(
-        body=scibec.models.ScanData(
+        NewScanData(
             **{
-                "readACL": "readACL",
-                "writeACL": "readACL",
-                "owner": "owner",
-                "scanId": "id",
+                "readACL": ["readACL"],
+                "writeACL": ["readACL"],
+                "owner": ["owner"],
+                "scanId": "dummy_id",
                 "filePath": "my_file.h5",
                 "data": {"data": {}, "metadata": {"scan_id": "scan_id"}},
             }
@@ -156,16 +138,12 @@ def test_update_scan_data(md_handler):
     )
 
 
-def test_update_scan_data_exceeding_limit(md_handler):
+def test_update_scan_data_exceeding_limit(md_handler, scan_document):
     # pylint: disable=protected-access
     scibec = mock.Mock()
     md_handler.MAX_DATA_SIZE = 1000
     md_handler.scibec_connector.scibec = scibec
-    type(scibec.scan.scan_controller_find()).body = mock.PropertyMock(
-        return_value=[
-            {"id": "id", "readACL": ["readACL"], "writeACL": ["writeACL"], "owner": "owner"}
-        ]
-    )
+    scibec.scan.scan_controller_find = mock.MagicMock(return_value=[scan_document])
     data_block = {f"key_{i}": {"signal": list(range(100))} for i in range(10)}
     data_block.update({"metadata": {"scan_id": "scan_id"}})
     md_handler.update_scan_data(file_path="my_file.h5", data=data_block)

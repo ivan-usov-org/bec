@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING
 
+import py_scibec
 from dotenv import dotenv_values
 from py_scibec import SciBecCore
 
@@ -176,29 +177,24 @@ class SciBecConnector:
         self.scibec.login(username=self.ingestor, password=self.ingestor_secret)
 
     def _update_experiment_info(self):
-        beamline_info = self.scibec.beamline.beamline_controller_find(
-            query_params={"filter": {"where": {"name": self.target_bl}}}
-        )
-        if not beamline_info.body:
+        bl_filter = py_scibec.bec.BeamlineFilterWhere(where={"name": self.target_bl})
+        beamline_info = self.scibec.beamline.beamline_controller_find(bl_filter)
+        if not beamline_info:
             raise SciBecConnectorError(f"Could not find a beamline with the name {self.target_bl}")
-        beamline_info = beamline_info.body[0]
-        self.scibec_info["beamline"] = beamline_info
-        experiment_id = beamline_info.get("activeExperiment")
+        self.scibec_info["beamline"] = beamline_info[0]
+        experiment_id = beamline_info[0].active_experiment
 
         if not experiment_id:
             raise SciBecConnectorError(f"Could not find an active experiment on {self.target_bl}")
 
-        experiment = self.scibec.experiment.experiment_controller_find_by_id(
-            path_params={"id": experiment_id}
-        )
+        experiment = self.scibec.experiment.experiment_controller_find_by_id(experiment_id)
 
         if not experiment:
             raise SciBecConnectorError(f"Could not find an experiment with the id {experiment_id}")
-        experiment = experiment.body
         self.scibec_info["activeExperiment"] = experiment
 
     def _update_eaccount_in_redis(self):
-        write_account = self.scibec_info["activeExperiment"]["writeAccount"]
+        write_account = self.scibec_info["activeExperiment"].write_account
         if write_account[0] == "p":
             write_account = write_account.replace("p", "e")
         msg = messages.VariableMessage(value=write_account)

@@ -5,6 +5,8 @@ import time
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
+import py_scibec
+import py_scibec_openapi_client.models as py_scibec_models
 
 from bec_lib import MessageEndpoints, bec_logger
 from bec_lib.serialization import json_ext
@@ -67,59 +69,60 @@ class SciBecMetadataHandler:
         if not scibec:
             return
         scibec_info = self.scibec_connector.scibec_info
-        experiment_id = scibec_info["activeExperiment"]["id"]
+        experiment_id = scibec_info["activeExperiment"].id
         # session_id = scibec_info["activeSession"][0]["id"]
         # experiment_id = scibec_info["activeSession"][0]["experimentId"]
         logger.debug(f"Received new scan status {msg}")
-        scan = scibec.scan.scan_controller_find(
-            query_params={"filter": {"where": {"scanId": msg.content["scan_id"]}}}
-        ).body
+        scan_filter = py_scibec.bec.ScanFilterWhere(where={"scanId": msg.content["scan_id"]})
+        scan = scibec.scan.scan_controller_find(scan_filter)
         if not scan:
             info = msg.content["info"]
             dataset_number = info.get("dataset_number")
-            dataset = scibec.dataset.dataset_controller_find(
-                query_params={
-                    "filter": {"where": {"number": dataset_number, "experimentId": experiment_id}}
-                }
-            ).body
+            dataset_filter = py_scibec.bec.DatasetFilterWhere(
+                where={"number": dataset_number, "experimentId": experiment_id}
+            )
+            dataset = scibec.dataset.dataset_controller_find(dataset_filter)
             if dataset:
                 dataset = dataset[0]
             else:
-                dataset = scibec.dataset.dataset_controller_create(
-                    body=scibec.models.Dataset(
-                        **{
-                            "readACL": scibec_info["activeExperiment"]["readACL"],
-                            "writeACL": scibec_info["activeExperiment"]["readACL"],
-                            "owner": scibec_info["activeExperiment"]["owner"],
-                            "number": dataset_number,
-                            "experimentId": experiment_id,
-                            "name": info.get("dataset_name", ""),
-                        }
-                    )
-                ).body
+                new_dataset = py_scibec.bec.NewDataset(
+                    **{
+                        "readACL": scibec_info["activeExperiment"].read_acl,
+                        "writeACL": scibec_info["activeExperiment"].read_acl,
+                        "owner": scibec_info["activeExperiment"].owner,
+                        "number": dataset_number,
+                        "experimentId": experiment_id,
+                        "name": info.get("dataset_name", ""),
+                    }
+                )
+                dataset = scibec.dataset.dataset_controller_create(new_dataset)
 
-            scan_data = {
-                "readACL": scibec_info["activeExperiment"]["readACL"],
-                "writeACL": scibec_info["activeExperiment"]["readACL"],
-                "owner": scibec_info["activeExperiment"]["owner"],
-                "scanType": info.get("scan_name", ""),
-                "scanId": info.get("scan_id", ""),
-                "queueId": info.get("queue_id", ""),
-                "requestId": info.get("RID", ""),
-                "exitStatus": msg.content["status"],
-                # "queue": info.get("stream", ""),
-                "metadata": info,
-                # "sessionId": session_id,
-                "datasetId": dataset["id"],
-                "scanNumber": info.get("scan_number", 0),
-            }
-            scan = scibec.scan.scan_controller_create(body=scibec.models.Scan(**scan_data)).body
+            new_scan = py_scibec.bec.NewScan(
+                **{
+                    "readACL": scibec_info["activeExperiment"].read_acl,
+                    "writeACL": scibec_info["activeExperiment"].read_acl,
+                    "owner": scibec_info["activeExperiment"].owner,
+                    "scanType": info.get("scan_name", ""),
+                    "scanId": info.get("scan_id", ""),
+                    "queueId": info.get("queue_id", ""),
+                    "requestId": info.get("RID", ""),
+                    "exitStatus": msg.content["status"],
+                    # "queue": info.get("stream", ""),
+                    "metadata": info,
+                    # "sessionId": session_id,
+                    "datasetId": dataset.id,
+                    "scanNumber": info.get("scan_number", 0),
+                }
+            )
+            scan = scibec.scan.scan_controller_create(new_scan)
             # scan = scibec.add_scan(scan_data)
         else:
             info = msg.content["info"]
             scan = scibec.scan.scan_controller_update_by_id(
-                path_params={"id": scan[0]["id"]},
-                body={"metadata": info, "exitStatus": msg.content["status"]},
+                id=scan[0].id,
+                scan_partial=py_scibec.bec.ScanPartial(
+                    metadata=info, exitStatus=msg.content["status"]
+                ),
             )
         return scan
 
@@ -174,9 +177,8 @@ class SciBecMetadataHandler:
         scibec = self.scibec_connector.scibec
         if not scibec:
             return
-        scan = scibec.scan.scan_controller_find(
-            query_params={"filter": {"where": {"scanId": data["metadata"]["scan_id"]}}}
-        ).body
+        scan_filter = py_scibec.bec.ScanFilterWhere(where={"scanId": data["metadata"]["scan_id"]})
+        scan = scibec.scan.scan_controller_find(scan_filter)
         if not scan:
             logger.warning(
                 f"Could not find scan with scan_id {data['metadata']['scan_id']}. Cannot write scan"
@@ -195,24 +197,24 @@ class SciBecMetadataHandler:
             )
             self._write_scan_data_chunks(file_path, data_bec, scan)
         else:
-
-            scibec.scan_data.scan_data_controller_create_many(
-                body=scibec.models.ScanData(
-                    **{
-                        "readACL": scan["readACL"],
-                        "writeACL": scan["readACL"],
-                        "owner": scan["owner"],
-                        "scanId": scan["id"],
-                        "filePath": file_path,
-                        "data": data_bec,
-                    }
-                )
+            new_scan_data = py_scibec.bec.NewScanData(
+                **{
+                    "readACL": scan.read_acl,
+                    "writeACL": scan.read_acl,
+                    "owner": scan.owner,
+                    "scanId": scan.id,
+                    "filePath": file_path,
+                    "data": data_bec,
+                }
             )
+            scibec.scan_data.scan_data_controller_create_many(new_scan_data)
         logger.info(
             f"Wrote scan data to SciBec for scan_id {data['metadata']['scan_id']} in {time.time() - start} seconds."
         )
 
-    def _write_scan_data_chunks(self, file_path: str, data_bec: dict, scan: dict):
+    def _write_scan_data_chunks(
+        self, file_path: str, data_bec: dict, scan: py_scibec_models.ScanWithRelations
+    ):
         """
         Write the scan data to SciBec in chunks. This method is called if the scan data is larger
         than 1 MB. The method loops through all keys in the data dictionary and creates chunks of
@@ -234,35 +236,33 @@ class SciBecMetadataHandler:
                 )
                 continue
             if len(json.dumps(chunk)) + len(json.dumps({key: value})) > self.MAX_DATA_SIZE:
-                scibec.scan_data.scan_data_controller_create_many(
-                    body=scibec.models.ScanData(
-                        **{
-                            "readACL": scan["readACL"],
-                            "writeACL": scan["readACL"],
-                            "owner": scan["owner"],
-                            "scanId": scan["id"],
-                            "filePath": file_path,
-                            "data": chunk,
-                        }
-                    )
+                new_scan_data = py_scibec.bec.NewScanData(
+                    **{
+                        "readACL": scan.read_acl,
+                        "writeACL": scan.read_acl,
+                        "owner": scan.owner,
+                        "scanId": scan.id,
+                        "filePath": file_path,
+                        "data": chunk,
+                    }
                 )
+                scibec.scan_data.scan_data_controller_create_many(new_scan_data)
                 chunk = {}
             chunk[key] = value
 
         # Write the last chunk
         if chunk:
-            scibec.scan_data.scan_data_controller_create_many(
-                body=scibec.models.ScanData(
-                    **{
-                        "readACL": scan["readACL"],
-                        "writeACL": scan["readACL"],
-                        "owner": scan["owner"],
-                        "scanId": scan["id"],
-                        "filePath": file_path,
-                        "data": chunk,
-                    }
-                )
+            new_scan_data = py_scibec.bec.NewScanData(
+                **{
+                    "readACL": scan.read_acl,
+                    "writeACL": scan.read_acl,
+                    "owner": scan.owner,
+                    "scanId": scan.id,
+                    "filePath": file_path,
+                    "data": chunk,
+                }
             )
+            scibec.scan_data.scan_data_controller_create_many(new_scan_data)
 
     def shutdown(self):
         """
