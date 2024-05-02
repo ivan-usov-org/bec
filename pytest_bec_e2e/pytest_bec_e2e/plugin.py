@@ -9,6 +9,7 @@ import tempfile
 
 import pytest
 from pytest_redis import factories as pytest_redis_factories
+from redis import Redis
 
 from bec_ipython_client import BECIPythonClient
 from bec_lib import BECClient, ConfigHelper, RedisConnector, ServiceConfig
@@ -25,7 +26,7 @@ def pytest_addoption(parser):
 
 
 redis_server_fixture = None
-bec_redis = None
+bec_redis_fixture = None
 _start_servers = False
 bec_servers_scope = (
     lambda fixture_name, config: config.getoption("--flush-redis") and "function" or "session"
@@ -72,7 +73,7 @@ def _get_tmp_dir():
 @pytest.hookimpl
 def pytest_configure(config):
     global redis_server_fixture
-    global bec_redis
+    global bec_redis_fixture
     global _start_servers
     global _bec_servers_scope
 
@@ -92,12 +93,12 @@ def pytest_configure(config):
         )
 
         if config.getoption("--flush-redis"):
-            bec_redis = pytest_redis_factories.redisdb("redis_server_fixture")
+            bec_redis_fixture = pytest_redis_factories.redisdb("redis_server_fixture")
             _bec_servers_scope = "function"  # have to restart servers at each test
         else:
-            bec_redis = redis_server_fixture
+            bec_redis_fixture = redis_server_fixture
     else:
-        # do not automatically start redis - bec_redis will use existing
+        # do not automatically start redis - bec_redis_fixture will use existing
         # process, will wait for 3 seconds max (must be running already);
         # there is no point checking if we want to flush redis
         # since it would remove available scans which are only populated
@@ -105,7 +106,7 @@ def pytest_configure(config):
         redis_server_fixture = pytest_redis_factories.redis_noproc(
             host=config.getoption("--bec-redis-host"), startup_timeout=3
         )
-        bec_redis = redis_server_fixture
+        bec_redis_fixture = redis_server_fixture
 
     _start_servers = config.getoption("--start-servers")
 
@@ -135,13 +136,23 @@ def bec_test_config_file_path(bec_files_path):
 
 
 @pytest.fixture(scope=bec_servers_scope)
+def bec_redis_host_port(request, bec_redis_fixture):
+    if isinstance(bec_redis_fixture, Redis):
+        server_fixture = request.getfixturevalue("redis_server_fixture")
+        return server_fixture.host, server_fixture.port
+    else:
+        return bec_redis_fixture.host, bec_redis_fixture.port
+
+
+@pytest.fixture(scope=bec_servers_scope)
 def bec_servers(
     test_config_yaml_file_path,
     bec_services_config_file_path,
     bec_test_config_file_path,
     bec_files_path,
-    redis_server_fixture,
+    bec_redis_host_port,
 ):
+    redis_host, redis_port = bec_redis_host_port
     # ensure configuration files are written where appropriate for tests,
     # i.e. either in /tmp/pytest/... directory, or following user "--files-path"
     # 1) test config (devices...)
@@ -154,8 +165,8 @@ def bec_servers(
         services_config_file.write(
             services_config_template
             % {
-                "redis_host": redis_server_fixture.host,
-                "redis_port": redis_server_fixture.port,
+                "redis_host": redis_host,
+                "redis_port": redis_port,
                 "file_writer_base_path": file_writer_path,
             }
         )
@@ -183,7 +194,9 @@ def bec_servers(
 
 
 @pytest.fixture
-def bec_ipython_client_with_demo_config(bec_redis, bec_services_config_file_path, bec_servers):
+def bec_ipython_client_with_demo_config(
+    bec_redis_fixture, bec_services_config_file_path, bec_servers
+):
     config = ServiceConfig(bec_services_config_file_path)
     bec = BECIPythonClient(config, RedisConnector, forced=True)
     bec.start()
@@ -196,7 +209,7 @@ def bec_ipython_client_with_demo_config(bec_redis, bec_services_config_file_path
 
 
 @pytest.fixture
-def bec_client_lib_with_demo_config(bec_redis, bec_services_config_file_path, bec_servers):
+def bec_client_lib_with_demo_config(bec_redis_fixture, bec_services_config_file_path, bec_servers):
     config = ServiceConfig(bec_services_config_file_path)
     bec = BECClient(config, RedisConnector, forced=True, wait_for_server=True)
     bec.start()
