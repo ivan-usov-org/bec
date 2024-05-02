@@ -96,6 +96,8 @@ class BECIPythonClient:
             ns_objects (dict): objects to add or remove
 
         """
+        if self._ip is None:
+            return
         if action == "add":
             for name, obj in ns_objects.items():
                 self._ip.user_global_ns[name] = obj
