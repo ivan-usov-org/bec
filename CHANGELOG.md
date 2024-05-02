@@ -2,6 +2,13 @@
 
 
 
+## v2.9.6 (2024-05-02)
+
+### Fix
+
+* fix(scihub): fixed scibec connector for new api ([`fc94c82`](https://gitlab.psi.ch/bec/bec/-/commit/fc94c827e40f12293c59b139ccd455df8b8b4d70))
+
+
 ## v2.9.5 (2024-05-02)
 
 ### Fix
@@ -151,17 +158,11 @@
 
 ## v2.6.0 (2024-04-19)
 
-### Ci
-
-* ci: fixed build process during e2e test ([`369af7c`](https://gitlab.psi.ch/bec/bec/-/commit/369af7c2006114ece464f5cf96c332c059ab3154))
-
 ### Feature
 
 * feat(bec_client): added support for plugin-based startup scripts ([`aec75b4`](https://gitlab.psi.ch/bec/bec/-/commit/aec75b4966e570bd3e16ac295b09009eb1589acd))
 
 * feat(file_writer): added support for file writer layout plugins ([`a6578fb`](https://gitlab.psi.ch/bec/bec/-/commit/a6578fb13349c0cabd24d313a7d58f63772fa584))
-
-* feat(scan_server): added support for plugins ([`23f8721`](https://gitlab.psi.ch/bec/bec/-/commit/23f872127b06d321564fa343b069ae962ba2b6c6))
 
 ### Refactor
 
