@@ -10,9 +10,9 @@ from bec_lib import bec_logger as _bec_logger
 from bec_lib import plugin_helper
 
 try:
-    from bec_widgets.cli import BECFigure as _BECFigure
+    from bec_widgets.cli.client import BECDockArea as _BECDockArea
 except ImportError:
-    _BECFigure = None
+    _BECDockArea = None
 
 logger = _bec_logger.logger
 
@@ -30,9 +30,10 @@ else:
     dev = bec.device_manager.devices
     scans = bec.scans
 
-    if not _main_dict["args"].nogui and _BECFigure is not None:
-        fig = bec.fig = _BECFigure()
-        fig.show()
+    if not _main_dict["args"].nogui and _BECDockArea is not None:
+        gui = bec.gui = _BECDockArea()
+        gui.show()
+        fig = gui.add_dock().add_widget_bec("BECFigure")
 
     _available_plugins = plugin_helper.get_ipython_client_startup_plugins(state="post")
     if _available_plugins:

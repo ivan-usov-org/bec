@@ -37,7 +37,7 @@ class BECIPythonClient:
         self._exit_event = None
         self._exit_handler_thread = None
         self.live_updates = None
-        self.fig = None
+        self.gui = None
         self._client.callbacks.register(
             event_type=EventType.NAMESPACE_UPDATE, callback=self._update_namespace_callback
         )
@@ -123,8 +123,9 @@ class BECIPythonClient:
 
     def shutdown(self):
         """shutdown the client and all its components"""
-        if self.fig:
-            self.fig.close()
+        if self.gui:
+            self.gui.close()
+
         self._client.shutdown()
 
 
