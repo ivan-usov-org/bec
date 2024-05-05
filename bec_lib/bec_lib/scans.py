@@ -39,18 +39,45 @@ class ScanObject:
         self.client = client
 
         # run must be an anonymous function to allow for multiple doc strings
+        # pylint: disable=unnecessary-lambda
         self.run = lambda *args, **kwargs: self._run(*args, **kwargs)
 
-    def _run(self, *args, callback: Callable = None, async_callback: Callable = None, **kwargs):
+    def _run(
+        self,
+        *args,
+        callback: Callable = None,
+        async_callback: Callable = None,
+        hide_report: bool = False,
+        md: dict = None,
+        file_suffix: str = None,
+        file_directory: str = None,
+        monitored: list[str | DeviceBase] = None,
+        **kwargs,
+    ) -> ScanReport:
+        """
+        Run the request with the given arguments.
+
+        Args:
+            *args: Arguments for the scan
+            callback: Callback function
+            async_callback: Asynchronous callback function
+            hide_report: Hide the report
+            md: Metadata dictionary
+            file_suffix: File suffix
+            file_directory: File directory
+            monitored: List of monitored devices
+            **kwargs: Keyword arguments
+
+        Returns:
+            ScanReport
+        """
         if self.client.alarm_handler.alarms_stack:
             logger.info("The alarm stack is not empty but will be cleared now.")
             self.client.clear_all_alarms()
         scans = self.client.scans
 
-        # handle reserved kwargs:
-        hide_report_kwarg = kwargs.get("hide_report", False)
         # pylint: disable=protected-access
-        hide_report = hide_report_kwarg or scans._hide_report
+        hide_report = hide_report or scans._hide_report
 
         metadata = deepcopy(self.client.metadata)
         if "sample_name" not in metadata:
@@ -60,24 +87,36 @@ class ScanObject:
 
         file_writer_data = deepcopy(self.client.file_writer_data)
 
-        if "md" in kwargs:
-            metadata.update(kwargs["md"])
+        if md is not None:
+            metadata.update(md)
 
-        if "file_suffix" in kwargs:
-            suffix = kwargs.pop("file_suffix")
+        if file_suffix is not None:
+            suffix = file_suffix
             # to check if suffix is alphanumeric and ascii, however we allow in addition - and _
             check_suffix = suffix.replace("_", "").replace("-", "")
             if not check_suffix.isalnum() or not check_suffix.isascii():
                 raise ValueError("file_suffix must only contain alphanumeric ASCII characters.")
             file_writer_data["file_suffix"] = suffix
-        if "file_directory" in kwargs:
-            directory = kwargs.pop("file_directory")
+        if file_directory is not None:
+            directory = file_directory
             check_directory = directory.replace("/", "").replace("_", "").replace("-", "")
             if not check_directory.isalnum() or not check_directory.isascii():
                 raise ValueError("file_suffix must only contain alphanumeric ASCII characters.")
             file_writer_data["file_directory"] = directory.strip("/")
 
         metadata["file_writer_data"] = file_writer_data
+
+        if monitored is not None:
+            if not isinstance(monitored, list):
+                monitored = [monitored]
+            for mon_device in monitored:
+                if isinstance(mon_device, str):
+                    mon_device = self.client.device_manager.devices.get(mon_device)
+                    if not mon_device:
+                        raise RuntimeError(
+                            f"Specified monitored device {mon_device} does not exist in the current device configuration."
+                        )
+            kwargs["monitored"] = monitored
 
         # pylint: disable=protected-access
         if scans._scan_group:
@@ -90,10 +129,10 @@ class ScanObject:
         kwargs["md"] = metadata
 
         request = Scans.prepare_scan_request(self.scan_name, self.scan_info, *args, **kwargs)
-        requestID = str(uuid.uuid4())
+        request_id = str(uuid.uuid4())
 
         # pylint: disable=unsupported-assignment-operation
-        request.metadata["RID"] = requestID
+        request.metadata["RID"] = request_id
 
         self._send_scan_request(request)
 
