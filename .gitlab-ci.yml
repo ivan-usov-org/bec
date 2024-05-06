@@ -378,7 +378,7 @@ end-2-end-conda-313:
 
 trigger_bec-widgets:
   trigger:
-    project: bec/bec-widgets
+    project: bec/bec_widgets
     branch: $BEC_WIDGETS_BRANCH
     strategy: depend
   variables:
