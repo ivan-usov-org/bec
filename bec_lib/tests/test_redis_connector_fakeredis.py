@@ -195,18 +195,11 @@ def test_redis_connector_unregister_cb_not_topic(connected_connector):
 
 
 def test_redis_connector_unregister_topic_keeps_others_alive(connected_connector):
-
-    def poll_until_timeout():
-        while True:
-            try:
-                connector.poll_messages(timeout=0.5)
-            except TimeoutError:
-                break
-
-    def send_msgs_and_poll():
+    def send_msgs_and_poll(timeout=None):
         connector.send(topic1, TestMessage())
         connector.send(topic2, TestMessage())
-        poll_until_timeout()
+        time.sleep(0.1)  # give some time for messages to be received
+        connector.poll_messages(timeout=timeout)
 
     connector = connected_connector
 
@@ -232,7 +225,8 @@ def test_redis_connector_unregister_topic_keeps_others_alive(connected_connector
 
     # unregistering the last callback for a topic should remove the topic from the list
     connector.unregister(topic2, cb=received_event2)
-    send_msgs_and_poll()
+    with pytest.raises(TimeoutError):
+        send_msgs_and_poll(timeout=1)
     assert received_event1.call_count == 1
     assert received_event2.call_count == 2
 
@@ -449,6 +443,31 @@ def test_redis_connector_register_stream_list(connected_connector, endpoint):
     assert mock.call({"data": 2}, a=1) in cb_mock.mock_calls
     connector.unregister(endpoint)
     assert len(connector._stream_topics_subscription) == 0
+
+
+@pytest.mark.timeout(5)
+def test_redis_connector_register_stream_from_start(connected_connector):
+    connector = connected_connector
+    cb_mock1 = mock.Mock(spec=[])  # spec is here to remove all attributes
+    cb_mock2 = mock.Mock(spec=[])  # spec is here to remove all attributes
+    connector.xadd("test", {"data": 1})
+    connector.xadd("test", {"data": 2})
+    connector.register(TestStreamEndpoint, cb=cb_mock1, from_start=True, start_thread=False, a=1)
+    connector.register(TestStreamEndpoint, cb=cb_mock2, start_thread=False, a=2)
+    connector.poll_messages(timeout=1)
+    cb_mock1.assert_has_calls([mock.call({"data": 1}, a=1), mock.call({"data": 2}, a=1)])
+    cb_mock1.reset_mock()
+    assert cb_mock2.call_count == 0
+    connector.xadd("test", {"data": 3})
+    connector.poll_messages(timeout=1)
+    cb_mock1.assert_called_once_with({"data": 3}, a=1)
+    cb_mock2.assert_called_once_with({"data": 3}, a=2)
+    cb_mock1.reset_mock()
+    connector.register(TestStreamEndpoint, cb=cb_mock1, from_start=True, start_thread=False, a=3)
+    connector.poll_messages(timeout=1)
+    cb_mock1.assert_has_calls(
+        [mock.call({"data": 1}, a=3), mock.call({"data": 2}, a=3), mock.call({"data": 3}, a=3)]
+    )
 
 
 @pytest.mark.timeout(5)

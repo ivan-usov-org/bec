@@ -84,7 +84,11 @@ class StreamSubscriptionInfo:
     def __eq__(self, other):
         if not isinstance(other, StreamSubscriptionInfo):
             return False
-        return self.topic == other.topic and self.cb_ref == other.cb_ref
+        return (
+            self.topic == other.topic
+            and self.cb_ref == other.cb_ref
+            and self.from_start == other.from_start
+        )
 
 
 @dataclass
@@ -145,9 +149,6 @@ class RedisConnector(ConnectorBase):
         Shutdown the connector
         """
         super().shutdown()
-        # this will take care of shutting down direct listening threads
-        self._unregister_stream(self._stream_topics_subscription)
-
         if self._events_listener_thread:
             self._stop_events_listener_thread.set()
             self._events_listener_thread.join()
@@ -160,6 +161,9 @@ class RedisConnector(ConnectorBase):
             self._messages_queue.put(StopIteration)
             self._events_dispatcher_thread.join()
             self._events_dispatcher_thread = None
+
+        # this will take care of shutting down direct listening threads
+        self._unregister_stream(self._stream_topics_subscription)
 
         # release all connections
         self._pubsub_conn.close()
@@ -427,12 +431,36 @@ class RedisConnector(ConnectorBase):
 
     def _get_stream_topics_id(self) -> dict:
         stream_topics_id = {}
-        for topic, subscriber_info_list in self._stream_topics_subscription.items():
-            for info in subscriber_info_list:
-                if isinstance(info, DirectReadingStreamSubscriptionInfo):
-                    continue
-                stream_topics_id[topic] = info.id
-        return stream_topics_id
+        from_start_stream_topics_id = {}
+        with self._stream_topics_subscription_lock:
+            for topic, subscription_info_list in self._stream_topics_subscription.items():
+                for info in subscription_info_list:
+                    if isinstance(info, DirectReadingStreamSubscriptionInfo):
+                        continue
+                    if info.from_start:
+                        from_start_stream_topics_id[topic] = info.id
+                    else:
+                        stream_topics_id[topic] = info.id
+        return from_start_stream_topics_id, stream_topics_id
+
+    def _handle_stream_msg_list(self, msg_list, from_start=False):
+        for topic, msgs in msg_list:
+            subscription_info_list = self._stream_topics_subscription[topic.decode()]
+            for index, record in msgs:
+                callbacks = []
+                for info in subscription_info_list:
+                    info.id = index.decode()
+                    if from_start and not info.from_start:
+                        continue
+                    callbacks.append((info.cb_ref, info.kwargs))
+                if callbacks:
+                    msg_dict = {
+                        k.decode(): MsgpackSerialization.loads(msg) for k, msg in record.items()
+                    }
+                    msg = StreamMessage(msg_dict, callbacks)
+                    self._messages_queue.put(msg)
+            for info in subscription_info_list:
+                info.from_start = False
 
     def _get_stream_messages_loop(self) -> None:
         """
@@ -443,11 +471,21 @@ class RedisConnector(ConnectorBase):
 
         while not self._stop_stream_events_listener_thread.is_set():
             try:
-                stream_topics_id = self._get_stream_topics_id()
-                if not stream_topics_id:
+                from_start_stream_topics_id, stream_topics_id = self._get_stream_topics_id()
+                if not any((stream_topics_id, from_start_stream_topics_id)):
                     time.sleep(0.1)
                     continue
-                msg_list = self._redis_conn.xread(streams=stream_topics_id, block=1000)
+                msg_list = []
+                from_start_msg_list = []
+                # first handle the 'from_start' streams ;
+                # in the case of reading from start what is expected is to call the
+                # callbacks for existing items, without waiting for a new element to be added
+                # to the stream
+                if from_start_stream_topics_id:
+                    # read the streams contents from beginning, not blocking
+                    from_start_msg_list = self._redis_conn.xread(from_start_stream_topics_id)
+                if stream_topics_id:
+                    msg_list = self._redis_conn.xread(stream_topics_id, block=200)
             except redis.exceptions.ConnectionError:
                 if not error:
                     error = True
@@ -458,20 +496,9 @@ class RedisConnector(ConnectorBase):
                 sys.excepthook(*sys.exc_info())
             else:
                 error = False
-                if msg_list is not None:
-                    for topic, msgs in msg_list:
-                        subscription_infos = self._stream_topics_subscription[topic.decode()]
-                        for index, record in msgs:
-                            msg_dict = {
-                                k.decode(): MsgpackSerialization.loads(msg)
-                                for k, msg in record.items()
-                            }
-                            callbacks = []
-                            for info in subscription_infos:
-                                info.id = index
-                                callbacks.append((info.cb_ref, info.kwargs))
-                            msg = StreamMessage(msg_dict, callbacks)
-                            self._messages_queue.put(msg)
+                with self._stream_topics_subscription_lock:
+                    self._handle_stream_msg_list(from_start_msg_list, from_start=True)
+                    self._handle_stream_msg_list(msg_list)
         return True
 
     def _register_stream(
@@ -514,7 +541,7 @@ class RedisConnector(ConnectorBase):
             with self._stream_topics_subscription_lock:
                 for topic in topics:
                     new_subscription = StreamSubscriptionInfo(
-                        id="0-0",
+                        id="0-0" if from_start else "$",
                         topic=topic,
                         newest_only=newest_only,
                         from_start=from_start,
@@ -671,17 +698,42 @@ class RedisConnector(ConnectorBase):
         return True
 
     def poll_messages(self, timeout=None) -> None:
+        """Poll messages from the messages queue
+
+        If timeout is None, wait for at least one message. Processes until queue is empty,
+        or until timeout is reached.
+
+        Args:
+
+          timeout (float): timeout in seconds
+        """
+        start_time = time.perf_counter()
+        remaining_timeout = timeout
         while True:
             try:
-                msg = self._messages_queue.get(timeout=timeout)
+                # wait for a message and return it before timeout expires
+                msg = self._messages_queue.get(timeout=remaining_timeout, block=True)
             except queue.Empty as exc:
-                raise TimeoutError(
-                    f"{self}: poll_messages: did not receive a message within {timeout} seconds"
-                ) from exc
-            if msg is StopIteration:
-                return False
-            if self._handle_message(msg):
-                return True
+                if remaining_timeout < timeout:
+                    # at least one message has been processed, so we do not raise
+                    # the timeout error
+                    return True
+                raise TimeoutError(f"{self}: timeout waiting for messages") from exc
+            else:
+                if msg is StopIteration:
+                    return False
+
+                self._handle_message(msg)
+
+                if timeout is None:
+                    if self._messages_queue.empty():
+                        # no message to process
+                        return True
+                else:
+                    # calculate how much time remains and retry getting a message
+                    remaining_timeout = timeout - (time.perf_counter() - start_time)
+                    if remaining_timeout <= 0:
+                        return True
 
     def _dispatch_events(self, started_event):
         started_event.set()
