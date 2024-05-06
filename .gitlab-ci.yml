@@ -7,12 +7,16 @@ variables:
   DOCKER_TLS_CERTDIR: ""
   OPHYD_DEVICES_BRANCH: "main"
   BEC_WIDGETS_BRANCH: "main"
+  CSAXS_BEC_BRANCH: "main"
+  PXIII_BEC_BRANCH: "main"
+  DEBYE_BEC_BRANCH: "main"
 
 workflow:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
     - if: '$CI_PIPELINE_SOURCE == "web"'
     - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+    - if: '$CI_PIPELINE_SOURCE == "parent_pipeline"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
       when: never
@@ -21,15 +25,6 @@ workflow:
 
 include:
   - template: Security/Secret-Detection.gitlab-ci.yml
-
-
-# don't run the pipeline for release pushes, that is with changes to semantic_release
-# workflow:
-#   rules:
-#       - changes:
-#           - ./semantic_release/__init__.py
-#         when: never
-#       - when: always
 
 # different stages in the pipeline
 stages:
@@ -376,25 +371,30 @@ end-2-end-conda-313:
   variables:
     PYTHON_VERSION: "3.13"
 
-trigger_bec-widgets:
-  trigger:
-    project: bec/bec_widgets
-    branch: $BEC_WIDGETS_BRANCH
-    strategy: depend
-  variables:
-    BEC_CORE_BRANCH: $CI_COMMIT_REF_NAME
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "web"'
-    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
-    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
+trigger:
+  parallel:
+    matrix:
+      - CHILD_PROJECT: bec_widgets
+        CHILD_PIPELINE_BRANCH: $BEC_WIDGETS_BRANCH
+      - CHILD_PROJECT: ophyd_devices
+        CHILD_PIPELINE_BRANCH: $OPHYD_DEVICES_BRANCH
+      - CHILD_PROJECT: csaxs_bec
+        CHILD_PIPELINE_BRANCH: $CSAXS_BEC_BRANCH        
+      - CHILD_PROJECT: pxiii_bec
+        CHILD_PIPELINE_BRANCH: $PXIII_BEC_BRANCH
+      - CHILD_PROJECT: debye_bec
+        CHILD_PIPELINE_BRANCH: $DEBYE_BEC_BRANCH
 
-trigger_ophyd-devices:
+  needs: []
   trigger:
-    project: bec/ophyd_devices
-    branch: $OPHYD_DEVICES_BRANCH
     strategy: depend
+    include:
+      - project: bec/$CHILD_PROJECT
+        ref: $CHILD_PIPELINE_BRANCH
+        file: /.gitlab-ci.yml
   variables:
     BEC_CORE_BRANCH: $CI_COMMIT_REF_NAME
+    CHILD_PROJECTS: ""
   rules:
     - if: '$CI_PIPELINE_SOURCE == "web"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
