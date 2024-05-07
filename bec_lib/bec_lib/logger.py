@@ -13,17 +13,18 @@ import traceback
 from itertools import takewhile
 from typing import TYPE_CHECKING
 
-from loguru import logger as loguru_logger
-
 # TODO: Importing bec_lib, instead of `from bec_lib.messages import LogMessage`, avoids potential
 # logger <-> messages circular import. But there could be a better solution.
 import bec_lib
 from bec_lib.bec_errors import ServiceConfigError
 from bec_lib.endpoints import MessageEndpoints
-from bec_lib.file_utils import LogWriter
+from bec_lib.utils.import_utils import lazy_import_from
 
 if TYPE_CHECKING:
     from bec_lib.connector import ConnectorBase
+
+loguru_logger = lazy_import_from("loguru", ("logger",))
+LogWriter = lazy_import_from("bec_lib.file_utils", ("LogWriter",))
 
 
 class LogLevel(int, enum.Enum):
@@ -79,10 +80,8 @@ class BECLogger:
         self._base_path = None
         self.logger = loguru_logger
         self._log_level = LogLevel.INFO
-        self.level = self._log_level
         self._configured = False
         # self.logger.level("CONSOLE_LOG", no=21, color="<yellow>", icon="📣")
-        self._update_logger_level()
 
     def __new__(cls):
         if not hasattr(cls, "_logger") or cls._logger is None:
@@ -116,6 +115,8 @@ class BECLogger:
             connector_cls (ConnectorBase): Connector class.
             service_name (str): Name of the service to which the logger belongs.
         """
+        self.level = self._log_level
+        self._update_logger_level()
         if not self._base_path:
             self._update_base_path(service_config)
         if os.path.exists(self._base_path) is False:

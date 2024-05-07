@@ -9,7 +9,6 @@ import time
 import uuid
 from typing import TYPE_CHECKING
 
-import lmfit
 import numpy as np
 from typeguard import typechecked
 
@@ -19,6 +18,9 @@ from bec_lib.endpoints import MessageEndpoints
 from bec_lib.lmfit_serializer import serialize_param_object
 from bec_lib.scan_items import ScanItem
 from bec_lib.scan_report import ScanReport
+from bec_lib.utils.import_utils import lazy_import
+
+lmfit = lazy_import("lmfit")
 
 if TYPE_CHECKING:
     from bec_lib.client import BECClient

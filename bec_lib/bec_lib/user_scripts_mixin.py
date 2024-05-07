@@ -12,18 +12,19 @@ import os
 import pathlib
 from typing import TYPE_CHECKING
 
-from pylint import lint
-from pylint.reporters import CollectingReporter
 from rich.console import Console
 from rich.table import Table
 
 from bec_lib.callback_handler import EventType
 from bec_lib.logger import bec_logger
+from bec_lib.utils.import_utils import lazy_import, lazy_import_from
 
 if TYPE_CHECKING:
     from pylint.message import Message
 
 logger = bec_logger.logger
+pylint = lazy_import("pylint")
+CollectingReporter = lazy_import_from("pylint.reporters", ("CollectingReporter",))
 
 
 class UserScriptsMixin:
@@ -133,7 +134,7 @@ class UserScriptsMixin:
         accepted_vars = ",".join([key for key in builtins.__dict__ if not key.startswith("_")])
         reporter = CollectingReporter()
         print(f"{accepted_vars}")
-        lint.Run(
+        pylint.lint.Run(
             [file, "--errors-only", f"--additional-builtins={accepted_vars}"],
             exit=False,
             reporter=reporter,
