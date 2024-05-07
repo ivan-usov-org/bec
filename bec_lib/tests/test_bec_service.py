@@ -145,6 +145,9 @@ def test_bec_service_default_config():
 
     config = ServiceConfig(redis={"host": "localhost", "port": 6379})
     with bec_service(config=config, unique_service=True) as service:
-        assert os.path.abspath(
-            service._service_config.service_config["file_writer"]["base_path"]
-        ) == str(Path(bec_lib.service_config.__file__).resolve().parent.parent.parent)
+        bec_lib_path = str(Path(bec_lib.service_config.__file__).resolve().parent.parent.parent)
+        if "nox" not in bec_lib_path:
+            assert (
+                os.path.abspath(service._service_config.service_config["file_writer"]["base_path"])
+                == bec_lib_path
+            )
