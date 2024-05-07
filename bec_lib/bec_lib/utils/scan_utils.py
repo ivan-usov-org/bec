@@ -1,12 +1,11 @@
 """
-Utility functions for the bec_lib package.
+Scan-related utils
 """
 
 from __future__ import annotations
 
 import csv
 import datetime
-import functools
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
@@ -15,45 +14,6 @@ from typeguard import typechecked
 if TYPE_CHECKING:
     from bec_lib.scan_items import ScanItem
     from bec_lib.scan_report import ScanReport
-
-
-class user_access:
-
-    def __init__(self, meth):
-        """
-        Decorator to mark <device_class> methods to be accessible from the bec client
-
-        Args:
-            meth: method to be marked as accessible
-
-        Examples:
-            >>> @user_access
-            >>> def my_method(self, *args, **kwargs):
-            >>>     return fcn(self, *args, **kwargs)
-
-        """
-        self.meth = meth
-
-    def __set_name__(self, owner, name):
-        """Write registered method into the owner class USER_ACCESS list for the bec_ipython_client"""
-        if not hasattr(owner, "USER_ACCESS"):
-            owner.USER_ACCESS = []
-        if name not in owner.USER_ACCESS:
-            owner.USER_ACCESS.append(name)
-
-        setattr(owner, name, self.meth)
-
-
-def threadlocked(fcn):
-    """Ensure that the thread acquires and releases the lock."""
-
-    @functools.wraps(fcn)
-    def wrapper(self, *args, **kwargs):
-        # pylint: disable=protected-access
-        with self._lock:
-            return fcn(self, *args, **kwargs)
-
-    return wrapper
 
 
 @typechecked

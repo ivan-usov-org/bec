@@ -8,7 +8,8 @@ from bec_lib import messages
 from bec_lib.scan_data import ScanData
 from bec_lib.scan_items import ScanItem
 from bec_lib.scan_report import ScanReport
-from bec_lib.utils import _extract_scan_data, _write_csv, scan_to_csv, scan_to_dict, user_access
+from bec_lib.utils.rpc_utils import user_access
+from bec_lib.utils.scan_utils import _extract_scan_data, _write_csv, scan_to_csv, scan_to_dict
 
 
 class ScanReportMock(ScanReport):
