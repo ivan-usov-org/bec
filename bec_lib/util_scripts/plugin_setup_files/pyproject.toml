@@ -15,7 +15,16 @@ classifiers = [
 dependencies = []
 
 [project.optional-dependencies]
-dev = ["black", "isort", "coverage", "pylint", "pytest", "pytest-random-order"]
+dev = [
+    "black",
+    "isort",
+    "coverage",
+    "pylint",
+    "pytest",
+    "pytest-random-order",
+    "ophyd_devices",
+    "bec_server",
+]
 
 [project.entry-points."bec"]
 plugin_bec = "{template_name}"
@@ -33,8 +42,11 @@ plugin_scans = "{template_name}.scans"
 plugin_ipython_client_pre = "{template_name}.bec_ipython_client.startup.pre_startup"
 plugin_ipython_client_post = "{template_name}.bec_ipython_client.startup"
 
-[project.entry-points."bec.widgets"]
-plugin_widgets = "{template_name}.bec_widgets"
+[project.entry-points."bec.widgets.auto_updates"]
+plugin_widgets_update = "{template_name}.bec_widgets.auto_updates:PlotUpdate"
+
+[project.entry-points."bec.widgets.user_widgets"]
+plugin_widgets = "{template_name}.bec_widgets.widgets"
 
 [tool.hatch.build.targets.wheel]
 include = ["*"]

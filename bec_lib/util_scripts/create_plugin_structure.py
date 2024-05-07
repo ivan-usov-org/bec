@@ -5,6 +5,8 @@ Helper script to create a new plugin structure
 import os
 import sys
 
+import yaml
+
 # current directory:
 current_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -114,6 +116,10 @@ class PluginStructure:
         self.create_dir(f"{self.plugin_name}/bec_widgets")
         self.create_init_file(f"{self.plugin_name}/bec_widgets")
 
+        self.create_dir(f"{self.plugin_name}/bec_widgets/configs")
+        self.create_dir(f"{self.plugin_name}/bec_widgets/widgets")
+        self.create_init_file(f"{self.plugin_name}/bec_widgets/widgets")
+
     def add_file_writer(self):
         self.create_dir(f"{self.plugin_name}/file_writer")
         self.create_init_file(f"{self.plugin_name}/file_writer")
@@ -128,6 +134,19 @@ class PluginStructure:
         os.system(
             f"cp {ds_startup} {self.target_dir}/{self.plugin_name}/deployments/device_server/startup.py"
         )
+
+    def add_gitlab_ci(self):
+        out = {
+            "include": [
+                {
+                    "project": "bec/awi_utils",
+                    "file": "/templates/plugin-repo-template.yml",
+                    "inputs": {"name": self.plugin_name, "target": self.plugin_name},
+                }
+            ]
+        }
+        with open(os.path.join(self.target_dir, ".gitlab-ci.yml"), "w", encoding="utf-8") as f:
+            yaml.dump(out, f)
 
     def add_tests(self):
         self.create_dir("tests/tests_bec_ipython_client")
@@ -159,11 +178,12 @@ if __name__ == "__main__":
     struc.add_client()
     struc.add_devices()
     struc.add_device_configs()
-    struc.add_dap_services()
+    struc.add_services()
     struc.add_bec_widgets()
     struc.add_file_writer()
     struc.add_tests()
     struc.add_bin()
     struc.add_deployments()
+    struc.add_gitlab_ci()
 
     print(f"Plugin structure created in {sys.argv[1]}")
