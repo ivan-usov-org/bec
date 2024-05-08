@@ -2,6 +2,13 @@
 
 
 
+## v2.10.3 (2024-05-08)
+
+### Fix
+
+* fix: upgraded to ophyd_devices v1 ([`3077dbe`](https://gitlab.psi.ch/bec/bec/-/commit/3077dbe22ae50e6aae317c72022df6ea88b14cce))
+
+
 ## v2.10.2 (2024-05-08)
 
 ### Ci
@@ -163,10 +170,3 @@
 ### Refactor
 
 * refactor: add file_writer and readme for tests ([`d8f76f5`](https://gitlab.psi.ch/bec/bec/-/commit/d8f76f505726fe12bdf572a9b5659a3c04620fde))
-
-### Unknown
-
-* Refactor(bec_lib.utils_script): Update util script for new plugin structure ([`6e36eaf`](https://gitlab.psi.ch/bec/bec/-/commit/6e36eaf3b1c7c77ba78e956613c9ac7f3d6865db))
-
-
-## v2.7.1 (2024-04-23)
