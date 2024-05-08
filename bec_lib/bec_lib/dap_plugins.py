@@ -4,7 +4,8 @@ This module provides the DAPPlugins class, which is used to access all available
 
 from __future__ import annotations
 
-import bec_lib.dap_plugin_objects as dap_plugin_objects
+import importlib
+
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
 from bec_lib.signature_serializer import dict_to_signature
@@ -74,6 +75,7 @@ class DAPPlugins:
                     logger.error(f"Error importing plugin {plugin_name}: {e}")
 
     def _get_plugin_class(self, plugin_info):
+        dap_plugin_objects = importlib.import_module("bec_lib.dap_plugin_objects")
         if hasattr(dap_plugin_objects, plugin_info["class"]):
             return getattr(dap_plugin_objects, plugin_info["class"])
         if plugin_info.get("auto_run_supported"):
