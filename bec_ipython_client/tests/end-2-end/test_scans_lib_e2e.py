@@ -4,8 +4,9 @@ import numpy as np
 import pytest
 import yaml
 
-from bec_lib import DeviceConfigError, bec_logger
 from bec_lib.alarm_handler import AlarmBase
+from bec_lib.devicemanager import DeviceConfigError
+from bec_lib.logger import bec_logger
 
 logger = bec_logger.logger
 

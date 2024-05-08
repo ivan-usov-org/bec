@@ -7,7 +7,9 @@ from typing import Any, Literal
 
 import numpy as np
 
-from bec_lib import DeviceManagerBase, MessageEndpoints, bec_logger
+from bec_lib.devicemanager import DeviceManagerBase
+from bec_lib.endpoints import MessageEndpoints
+from bec_lib.logger import bec_logger
 
 from .errors import LimitError, ScanAbortion
 from .path_optimization import PathOptimizerMixin

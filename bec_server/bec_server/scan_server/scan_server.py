@@ -1,9 +1,13 @@
 from __future__ import annotations
 
-from bec_lib import Alarms, BECService, BECStatus
-from bec_lib import DeviceManagerBase as DeviceManager
-from bec_lib import MessageEndpoints, ServiceConfig, bec_logger, messages
+from bec_lib import messages
+from bec_lib.alarm_handler import Alarms
+from bec_lib.bec_service import BECService
 from bec_lib.connector import ConnectorBase
+from bec_lib.devicemanager import DeviceManagerBase as DeviceManager
+from bec_lib.endpoints import MessageEndpoints
+from bec_lib.logger import bec_logger
+from bec_lib.service_config import ServiceConfig
 
 from .scan_assembler import ScanAssembler
 from .scan_guard import ScanGuard
@@ -31,7 +35,7 @@ class ScanServer(BECService):
         # self._start_scan_server()
         self._start_alarm_handler()
         self._reset_scan_number()
-        self.status = BECStatus.RUNNING
+        self.status = messages.BECStatus.RUNNING
 
     def _start_device_manager(self):
         self.wait_for_service("DeviceServer")

@@ -6,9 +6,10 @@ from unittest import mock
 import pytest
 
 import bec_lib
-from bec_lib import bec_logger, messages
+from bec_lib import messages
 from bec_lib.bec_service import BECService
 from bec_lib.endpoints import MessageEndpoints
+from bec_lib.logger import bec_logger
 from bec_lib.messages import BECStatus
 from bec_lib.service_config import ServiceConfig
 

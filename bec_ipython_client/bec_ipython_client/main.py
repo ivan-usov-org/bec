@@ -12,11 +12,13 @@ from bec_ipython_client.beamline_mixin import BeamlineMixin
 from bec_ipython_client.bec_magics import BECMagics
 from bec_ipython_client.callbacks.ipython_live_updates import IPythonLiveUpdates
 from bec_ipython_client.signals import ScanInterruption, SigintHandler
-from bec_lib import ServiceConfig, bec_logger, plugin_helper
+from bec_lib import plugin_helper
 from bec_lib.alarm_handler import AlarmBase
 from bec_lib.callback_handler import EventType
 from bec_lib.client import BECClient
 from bec_lib.connector import ConnectorBase
+from bec_lib.logger import bec_logger
+from bec_lib.service_config import ServiceConfig
 
 logger = bec_logger.logger
 

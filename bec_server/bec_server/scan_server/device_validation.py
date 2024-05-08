@@ -1,6 +1,9 @@
 from collections.abc import Callable
 
-from bec_lib import DeviceStatus, MessageEndpoints, bec_logger, messages
+from bec_lib import messages
+from bec_lib.device import DeviceStatus
+from bec_lib.endpoints import MessageEndpoints
+from bec_lib.logger import bec_logger
 
 logger = bec_logger.logger
 

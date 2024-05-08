@@ -8,9 +8,13 @@ import ophyd
 from ophyd import Kind, OphydObject, Staged
 from ophyd.utils import errors as ophyd_errors
 
-from bec_lib import Alarms, BECService, MessageEndpoints, bec_logger, messages
+from bec_lib import messages
+from bec_lib.alarm_handler import Alarms
+from bec_lib.bec_service import BECService
 from bec_lib.connector import ConnectorBase
 from bec_lib.device import OnFailure
+from bec_lib.endpoints import MessageEndpoints
+from bec_lib.logger import bec_logger
 from bec_lib.messages import BECStatus
 from bec_server.device_server.devices.devicemanager import DeviceManagerDS
 from bec_server.device_server.rpc_mixin import RPCMixin

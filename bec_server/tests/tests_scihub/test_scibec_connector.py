@@ -2,8 +2,10 @@ from unittest import mock
 
 import pytest
 
-from bec_lib import MessageEndpoints, ServiceConfig, messages
+from bec_lib import messages
+from bec_lib.endpoints import MessageEndpoints
 from bec_lib.messages import BECStatus
+from bec_lib.service_config import ServiceConfig
 from bec_lib.tests.utils import ConnectorMock
 from bec_server.scihub import SciHub
 from bec_server.scihub.scibec import SciBecConnector

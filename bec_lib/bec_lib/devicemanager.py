@@ -12,16 +12,16 @@ from rich.console import Console
 from rich.table import Table
 from typeguard import typechecked
 
-from bec_lib import messages
 from bec_lib.bec_errors import DeviceConfigError
 from bec_lib.config_helper import ConfigHelper
 from bec_lib.device import ComputedSignal, Device, DeviceBase, Positioner, ReadoutPriority, Signal
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
-from bec_lib.messages import BECStatus, DeviceConfigMessage, DeviceInfoMessage
+from bec_lib.messages import BECStatus, ServiceResponseMessage
 
 if TYPE_CHECKING:
-    from bec_lib import BECService
+    from bec_lib.bec_service import BECService
+    from bec_lib.messages import DeviceConfigMessage, DeviceInfoMessage
 
 logger = bec_logger.logger
 
@@ -470,7 +470,7 @@ class DeviceManagerBase:
             return
         self.connector.lpush(
             MessageEndpoints.service_response(msg.metadata["RID"]),
-            messages.ServiceResponseMessage(
+            ServiceResponseMessage(
                 # pylint: disable=no-member
                 response={"accepted": True, "service": self._service._service_name}
             ),
@@ -545,7 +545,7 @@ class DeviceManagerBase:
             return []
         return devices.content["resource"]
 
-    def _add_device(self, dev: dict, msg: messages.DeviceInfoMessage):
+    def _add_device(self, dev: dict, msg: DeviceInfoMessage):
         name = msg.content["device"]
         info = msg.content["info"]
 

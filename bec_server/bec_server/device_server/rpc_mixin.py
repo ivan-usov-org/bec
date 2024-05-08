@@ -5,7 +5,10 @@ from typing import Any
 
 import ophyd
 
-from bec_lib import Alarms, MessageEndpoints, bec_logger, messages
+from bec_lib import messages
+from bec_lib.alarm_handler import Alarms
+from bec_lib.endpoints import MessageEndpoints
+from bec_lib.logger import bec_logger
 from bec_server.device_server.devices import is_serializable, rgetattr
 
 logger = bec_logger.logger

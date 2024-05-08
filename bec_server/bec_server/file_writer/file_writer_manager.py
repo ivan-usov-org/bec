@@ -3,19 +3,16 @@ from __future__ import annotations
 import threading
 import traceback
 
-from bec_lib import (
-    BECService,
-    DeviceManagerBase,
-    MessageEndpoints,
-    ServiceConfig,
-    bec_logger,
-    messages,
-    threadlocked,
-)
+from bec_lib import messages
 from bec_lib.alarm_handler import Alarms
 from bec_lib.async_data import AsyncDataHandler
+from bec_lib.bec_service import BECService
+from bec_lib.devicemanager import DeviceManagerBase
+from bec_lib.endpoints import MessageEndpoints
 from bec_lib.file_utils import FileWriter
+from bec_lib.logger import bec_logger
 from bec_lib.redis_connector import MessageObject, RedisConnector
+from bec_lib.service_config import ServiceConfig
 from bec_server.file_writer.file_writer import NexusFileWriter
 
 logger = bec_logger.logger
@@ -254,7 +251,6 @@ class FileWriterManager(BECService):
             msgs
         )
 
-    @threadlocked
     def check_storage_status(self, scan_id: str) -> None:
         """
         Check if the scan storage is ready to be written to file and write it if it is.
@@ -262,13 +258,14 @@ class FileWriterManager(BECService):
         Args:
             scan_id (str): Scan ID
         """
-        if not self.scan_storage.get(scan_id):
-            return
-        self.update_baseline_reading(scan_id)
-        self.update_file_references(scan_id)
-        if self.scan_storage[scan_id].ready_to_write():
-            self.update_async_data(scan_id)
-            self.write_file(scan_id)
+        with self._lock:
+            if not self.scan_storage.get(scan_id):
+                return
+            self.update_baseline_reading(scan_id)
+            self.update_file_references(scan_id)
+            if self.scan_storage[scan_id].ready_to_write():
+                self.update_async_data(scan_id)
+                self.write_file(scan_id)
 
     def write_file(self, scan_id: str) -> None:
         """

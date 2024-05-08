@@ -15,15 +15,15 @@ from typing import TYPE_CHECKING
 import yaml
 
 import bec_lib
-from bec_lib import messages
 from bec_lib.bec_errors import DeviceConfigError, ServiceConfigError
 from bec_lib.bec_yaml_loader import yaml_load
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.file_utils import DeviceConfigWriter
 from bec_lib.logger import bec_logger
-from bec_lib.messages import DeviceConfigMessage, RequestResponseMessage
+from bec_lib.messages import DeviceConfigMessage
 
 if TYPE_CHECKING:
+    from bec_lib.messages import RequestResponseMessage, ServiceResponseMessage
     from bec_lib.redis_connector import RedisConnector
 
 logger = bec_logger.logger
@@ -166,7 +166,7 @@ class ConfigHelper:
             # wait for the device server and scan server to acknowledge the config change
             self.wait_for_service_response(RID)
 
-    def wait_for_service_response(self, RID: str, timeout=10) -> messages.ServiceResponseMessage:
+    def wait_for_service_response(self, RID: str, timeout=10) -> ServiceResponseMessage:
         """
         wait for service response
 

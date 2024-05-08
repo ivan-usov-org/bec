@@ -6,7 +6,8 @@ import IPython
 import pytest
 
 from bec_ipython_client import BECIPythonClient, main
-from bec_lib import RedisConnector, ServiceConfig
+from bec_lib.redis_connector import RedisConnector
+from bec_lib.service_config import ServiceConfig
 
 
 def test_bec_entry_point_globals_and_post_startup(tmpdir):  # , capfd):

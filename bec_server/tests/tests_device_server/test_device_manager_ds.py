@@ -7,8 +7,8 @@ import numpy as np
 import pytest
 import yaml
 
-import bec_lib
-from bec_lib import MessageEndpoints, messages
+from bec_lib import messages
+from bec_lib.endpoints import MessageEndpoints
 from bec_server.device_server.devices.devicemanager import DeviceManagerDS
 
 # pylint: disable=missing-function-docstring

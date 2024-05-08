@@ -3,7 +3,7 @@ from unittest import mock
 import msgpack
 import pytest
 
-from bec_lib import MessageEndpoints
+from bec_lib.endpoints import MessageEndpoints
 from bec_server.scan_bundler.bluesky_emitter import BlueskyEmitter
 
 

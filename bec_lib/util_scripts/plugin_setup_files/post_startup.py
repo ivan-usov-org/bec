@@ -10,7 +10,7 @@ While command-line arguments have to be set in the pre-startup script, the
 post-startup script can be used to load beamline specific information and
 to setup the prompts.
 
-    from bec_lib import bec_logger
+    from bec_lib.logger import bec_logger
 
     logger = bec_logger.logger
 

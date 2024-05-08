@@ -59,7 +59,7 @@ It could be useful to automatically enable the threads check and `loguru` cleani
 following fixture to a `conftest.py` file with your new test files:
 
 ```
-from bec_lib import bec_logger
+from bec_lib.logger import bec_logger
 def auto_check_threads(threads_check):
     yield
     bec_logger.logger.remove()

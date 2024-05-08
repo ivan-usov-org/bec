@@ -12,7 +12,6 @@ from typing import TYPE_CHECKING
 from bec_lib import messages
 from bec_lib.callback_handler import CallbackHandler
 from bec_lib.logger import bec_logger
-from bec_lib.utils import threadlocked
 
 logger = bec_logger.logger
 
@@ -134,54 +133,54 @@ class RequestStorage:
         self._lock = threading.RLock()
         self.scan_manager = scan_manager
 
-    @threadlocked
     def find_request_by_ID(self, requestID: str) -> RequestItem | None:
         """find a request item based on its requestID"""
-        for request in self.storage:
-            if request.requestID == requestID:
-                return request
-        return None
+        with self._lock:
+            for request in self.storage:
+                if request.requestID == requestID:
+                    return request
+            return None
 
-    @threadlocked
     def update_with_response(self, response_msg: messages.RequestResponseMessage) -> None:
         """create or update request item based on a new RequestResponseMessage"""
-        request_item = self.find_request_by_ID(response_msg.metadata.get("RID"))
-        if request_item:
-            request_item.update_with_response(response_msg)
-            logger.debug("Scan queue request exists. Updating with response.")
-            return
+        with self._lock:
+            request_item = self.find_request_by_ID(response_msg.metadata.get("RID"))
+            if request_item:
+                request_item.update_with_response(response_msg)
+                logger.debug("Scan queue request exists. Updating with response.")
+                return
 
-        # it could be that the response arrived before the request
-        self.storage.append(RequestItem.from_response(self.scan_manager, response_msg))
-        logger.debug("Scan queue request does not exist. Creating from response.")
+            # it could be that the response arrived before the request
+            self.storage.append(RequestItem.from_response(self.scan_manager, response_msg))
+            logger.debug("Scan queue request does not exist. Creating from response.")
 
-    @threadlocked
     def update_with_request(self, request_msg: messages.ScanQueueMessage) -> None:
         """create or update request item based on a new ScanQueueMessage (i.e. request message)"""
-        if not request_msg.metadata:
+        with self._lock:
+            if not request_msg.metadata:
+                return
+
+            if not request_msg.metadata.get("RID"):
+                return
+
+            request_item = self.find_request_by_ID(request_msg.metadata.get("RID"))
+            if request_item:
+                request_item.update_with_request(request_msg)
+                return
+
+            self.storage.append(RequestItem.from_request(self.scan_manager, request_msg))
             return
 
-        if not request_msg.metadata.get("RID"):
-            return
-
-        request_item = self.find_request_by_ID(request_msg.metadata.get("RID"))
-        if request_item:
-            request_item.update_with_request(request_msg)
-            return
-
-        self.storage.append(RequestItem.from_request(self.scan_manager, request_msg))
-        return
-
-    @threadlocked
     def update_with_client_message(self, client_message: messages.ClientInfoMessage) -> None:
         """Update the request item with a new ClientInfoMessage"""
-        if not client_message.RID:
-            return
+        with self._lock:
+            if not client_message.RID:
+                return
 
-        request_item = self.find_request_by_ID(client_message.RID)
-        if request_item:
-            request_item.update_with_client_message(client_message)
-            return
+            request_item = self.find_request_by_ID(client_message.RID)
+            if request_item:
+                request_item.update_with_client_message(client_message)
+                return
 
-        self.storage.append(RequestItem.from_client_message(self.scan_manager, client_message))
-        return
+            self.storage.append(RequestItem.from_client_message(self.scan_manager, client_message))
+            return

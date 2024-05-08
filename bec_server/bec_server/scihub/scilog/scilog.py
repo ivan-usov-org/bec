@@ -6,7 +6,10 @@ from typing import TYPE_CHECKING
 import requests
 from dotenv import dotenv_values
 
-from bec_lib import MessageEndpoints, RedisConnector, bec_logger, messages
+from bec_lib import messages
+from bec_lib.endpoints import MessageEndpoints
+from bec_lib.logger import bec_logger
+from bec_lib.redis_connector import RedisConnector
 from bec_server.scihub.repeated_timer import RepeatedTimer
 
 logger = bec_logger.logger

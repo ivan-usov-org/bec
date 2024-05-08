@@ -5,9 +5,12 @@ import pytest
 from ophyd import Staged
 from ophyd.utils import errors as ophyd_errors
 
-from bec_lib import Alarms, MessageEndpoints, ServiceConfig, messages
+from bec_lib import messages
+from bec_lib.alarm_handler import Alarms
+from bec_lib.endpoints import MessageEndpoints
 from bec_lib.messages import BECStatus
 from bec_lib.redis_connector import MessageObject
+from bec_lib.service_config import ServiceConfig
 from bec_lib.tests.utils import ConnectorMock
 from bec_server.device_server import DeviceServer
 from bec_server.device_server.device_server import InvalidDeviceError

@@ -7,10 +7,12 @@ import uuid
 from typing import TYPE_CHECKING
 
 import bec_lib
-from bec_lib import DeviceConfigError
-from bec_lib import DeviceManagerBase as DeviceManager
-from bec_lib import MessageEndpoints, bec_logger, messages
+from bec_lib import messages
+from bec_lib.bec_errors import DeviceConfigError
 from bec_lib.connector import ConnectorBase
+from bec_lib.devicemanager import DeviceManagerBase as DeviceManager
+from bec_lib.endpoints import MessageEndpoints
+from bec_lib.logger import bec_logger
 from bec_lib.scibec_validator import SciBecValidator
 
 if TYPE_CHECKING:

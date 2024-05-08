@@ -3,7 +3,11 @@ import threading
 import time
 import traceback
 
-from bec_lib import Alarms, DeviceBase, MessageEndpoints, bec_logger, messages
+from bec_lib import messages
+from bec_lib.alarm_handler import Alarms
+from bec_lib.device import DeviceBase
+from bec_lib.endpoints import MessageEndpoints
+from bec_lib.logger import bec_logger
 
 from .device_validation import DeviceValidation
 from .errors import DeviceMessageError, ScanAbortion

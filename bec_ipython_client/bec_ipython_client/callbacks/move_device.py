@@ -6,7 +6,9 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from bec_ipython_client.progressbar import DeviceProgressBar
-from bec_lib import DeviceManagerBase, MessageEndpoints, messages
+from bec_lib import messages
+from bec_lib.devicemanager import DeviceManagerBase
+from bec_lib.endpoints import MessageEndpoints
 
 from .utils import LiveUpdatesBase, check_alarms
 

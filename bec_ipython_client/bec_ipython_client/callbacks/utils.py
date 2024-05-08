@@ -7,10 +7,11 @@ import traceback
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
-from bec_lib import bec_logger, messages
+from bec_lib.logger import bec_logger
 from bec_lib.request_items import RequestItem
 
 if TYPE_CHECKING:
+    from bec_lib import messages
     from bec_lib.client import BECClient
 
 logger = bec_logger.logger

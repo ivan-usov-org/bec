@@ -1,6 +1,6 @@
 import pytest
 
-from bec_lib import bec_logger
+from bec_lib.logger import bec_logger
 
 ### THE NEXT FIXTURE HAS TO BE RE-ACTIVATED ONCE
 ### OPHYD "STATUS CALLBACKS" THREADS ARE CLEANED

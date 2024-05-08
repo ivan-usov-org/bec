@@ -8,9 +8,11 @@ import numpy as np
 import pytest
 
 from bec_ipython_client.callbacks.utils import ScanRequestError
-from bec_lib import MessageEndpoints, bec_logger, configs
+from bec_lib import configs
 from bec_lib.alarm_handler import AlarmBase
 from bec_lib.bec_errors import ScanAbortion, ScanInterruption
+from bec_lib.endpoints import MessageEndpoints
+from bec_lib.logger import bec_logger
 
 logger = bec_logger.logger
 

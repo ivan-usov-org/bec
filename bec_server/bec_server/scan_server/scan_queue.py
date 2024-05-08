@@ -11,7 +11,10 @@ from enum import Enum
 from rich.console import Console
 from rich.table import Table
 
-from bec_lib import Alarms, MessageEndpoints, bec_logger, messages, threadlocked
+from bec_lib import messages
+from bec_lib.alarm_handler import Alarms
+from bec_lib.endpoints import MessageEndpoints
+from bec_lib.logger import bec_logger
 
 from .errors import LimitError, ScanAbortion
 from .scan_assembler import ScanAssembler
@@ -84,19 +87,19 @@ class QueueManager:
                 metadata=msg.metadata,
             )
 
-    @threadlocked
     def add_queue(self, queue_name: str) -> None:
         """add a new queue to the queue manager"""
-        if queue_name in self.queues:
-            queue = self.queues[queue_name]
-            if not queue.scan_worker.is_alive():
-                logger.info(f"Restarting worker for queue {queue_name}")
-                queue.clear()
-                self.queues[queue_name] = ScanQueue(self, queue_name=queue_name)
-                self.queues[queue_name].start_worker()
-            return
-        self.queues[queue_name] = ScanQueue(self, queue_name=queue_name)
-        self.queues[queue_name].start_worker()
+        with self._lock:
+            if queue_name in self.queues:
+                queue = self.queues[queue_name]
+                if not queue.scan_worker.is_alive():
+                    logger.info(f"Restarting worker for queue {queue_name}")
+                    queue.clear()
+                    self.queues[queue_name] = ScanQueue(self, queue_name=queue_name)
+                    self.queues[queue_name].start_worker()
+                return
+            self.queues[queue_name] = ScanQueue(self, queue_name=queue_name)
+            self.queues[queue_name].start_worker()
 
     def _start_scan_queue_register(self) -> None:
         self.connector.register(
@@ -125,7 +128,6 @@ class QueueManager:
             parent.scan_interception(scan_mod_msg)
             parent.send_queue_status()
 
-    @threadlocked
     def scan_interception(self, scan_mod_msg: messages.ScanQueueModificationMessage) -> None:
         """handle a scan interception by compiling the requested method name and forwarding the request.
 
@@ -133,13 +135,14 @@ class QueueManager:
             scan_mod_msg (messages.ScanQueueModificationMessage): ScanQueueModificationMessage
 
         """
-        logger.info(f"Scan interception: {scan_mod_msg}")
-        action = scan_mod_msg.content["action"]
-        parameter = scan_mod_msg.content["parameter"]
-        queue = scan_mod_msg.content.get("queue", "primary")
-        getattr(self, f"set_{action}")(
-            scan_id=scan_mod_msg.content["scan_id"], queue=queue, parameter=parameter
-        )
+        with self._lock:
+            logger.info(f"Scan interception: {scan_mod_msg}")
+            action = scan_mod_msg.content["action"]
+            parameter = scan_mod_msg.content["parameter"]
+            queue = scan_mod_msg.content.get("queue", "primary")
+            getattr(self, f"set_{action}")(
+                scan_id=scan_mod_msg.content["scan_id"], queue=queue, parameter=parameter
+            )
 
     @requires_queue
     def set_pause(self, scan_id=None, queue="primary", parameter: dict = None) -> None:
@@ -246,19 +249,19 @@ class QueueManager:
                 continue
             return history[-1]
 
-    @threadlocked
     def send_queue_status(self) -> None:
         """send the current queue to redis"""
-        queue_export = self.export_queue()
-        if not queue_export:
-            return
-        logger.info("New scan queue:")
-        for queue in self.describe_queue():
-            logger.info(f"\n {queue}")
-        self.connector.set_and_publish(
-            MessageEndpoints.scan_queue_status(),
-            messages.ScanQueueStatusMessage(queue=queue_export),
-        )
+        with self._lock:
+            queue_export = self.export_queue()
+            if not queue_export:
+                return
+            logger.info("New scan queue:")
+            for queue in self.describe_queue():
+                logger.info(f"\n {queue}")
+            self.connector.set_and_publish(
+                MessageEndpoints.scan_queue_status(),
+                messages.ScanQueueStatusMessage(queue=queue_export),
+            )
 
     def describe_queue(self) -> list:
         """create a rich.table description of the current scan queue"""
@@ -411,46 +414,46 @@ class ScanQueue:
             if updated:
                 return self.active_instruction_queue
 
-    @threadlocked
     def _next_instruction_queue(self) -> bool:
         """get the next instruction queue from the queue. If no update is available, it will return False."""
-        try:
-            aiq = self.active_instruction_queue
-            if (
-                aiq is not None
-                and len(self.queue) > 0
-                and self.queue[0].status != InstructionQueueStatus.PENDING
-            ):
-                logger.info(f"Removing queue item {self.queue[0].describe()} from queue")
-                self.queue.popleft()
-                self.queue_manager.send_queue_status()
+        with self._lock:
+            try:
+                aiq = self.active_instruction_queue
+                if (
+                    aiq is not None
+                    and len(self.queue) > 0
+                    and self.queue[0].status != InstructionQueueStatus.PENDING
+                ):
+                    logger.info(f"Removing queue item {self.queue[0].describe()} from queue")
+                    self.queue.popleft()
+                    self.queue_manager.send_queue_status()
 
-            if self.status != ScanQueueStatus.PAUSED:
-                if len(self.queue) == 0:
-                    if aiq is None:
-                        time.sleep(0.1)
+                if self.status != ScanQueueStatus.PAUSED:
+                    if len(self.queue) == 0:
+                        if aiq is None:
+                            time.sleep(0.1)
+                            return False
+                        self.active_instruction_queue = None
+                        time.sleep(0.01)
                         return False
-                    self.active_instruction_queue = None
-                    time.sleep(0.01)
-                    return False
+
+                    self.active_instruction_queue = self.queue[0]
+                    self.history_queue.append(self.active_instruction_queue)
+                    return True
+
+                while self.status == ScanQueueStatus.PAUSED and not self.signal_event.is_set():
+                    if len(self.queue) == 0 and self.auto_reset_enabled:
+                        # we don't need to pause if there is no scan enqueued
+                        self.status = ScanQueueStatus.RUNNING
+                        logger.info("resetting queue status to running")
+                    time.sleep(0.1)
 
                 self.active_instruction_queue = self.queue[0]
                 self.history_queue.append(self.active_instruction_queue)
                 return True
-
-            while self.status == ScanQueueStatus.PAUSED and not self.signal_event.is_set():
-                if len(self.queue) == 0 and self.auto_reset_enabled:
-                    # we don't need to pause if there is no scan enqueued
-                    self.status = ScanQueueStatus.RUNNING
-                    logger.info("resetting queue status to running")
-                time.sleep(0.1)
-
-            self.active_instruction_queue = self.queue[0]
-            self.history_queue.append(self.active_instruction_queue)
-            return True
-        except IndexError:
-            time.sleep(0.01)
-        return False
+            except IndexError:
+                time.sleep(0.01)
+            return False
 
     def insert(self, msg: messages.ScanQueueMessage, position=-1, **_kwargs):
         """insert a new message to the queue"""

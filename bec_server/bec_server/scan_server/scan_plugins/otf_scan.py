@@ -1,6 +1,6 @@
 import time
 
-from bec_lib import bec_logger
+from bec_lib.logger import bec_logger
 from bec_server.scan_server.scans import ScanArgType, ScanBase, SyncFlyScanBase
 
 logger = bec_logger.logger

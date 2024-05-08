@@ -4,11 +4,11 @@ import abc
 from typing import TYPE_CHECKING
 
 # import numpy as np
-from bec_lib import bec_logger
+from bec_lib.logger import bec_logger
 from bec_lib.signature_serializer import signature_to_dict
 
 if TYPE_CHECKING:
-    from bec_lib import BECClient
+    from bec_lib.client import BECClient
 
 
 logger = bec_logger.logger

@@ -6,7 +6,8 @@ from typing import TYPE_CHECKING
 
 import msgpack
 
-from bec_lib import MessageEndpoints, bec_logger
+from bec_lib.endpoints import MessageEndpoints
+from bec_lib.logger import bec_logger
 
 from .emitter import EmitterBase
 

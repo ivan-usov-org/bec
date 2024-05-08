@@ -2,6 +2,8 @@
 Endpoints for communication within the BEC.
 """
 
+from __future__ import annotations
+
 # pylint: disable=too-many-public-methods
 import enum
 from dataclasses import dataclass

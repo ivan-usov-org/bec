@@ -7,7 +7,8 @@ from bec_ipython_client.callbacks.move_device import (
     LiveUpdatesReadbackProgressbar,
     ReadbackDataMixin,
 )
-from bec_lib import MessageEndpoints, messages
+from bec_lib import messages
+from bec_lib.endpoints import MessageEndpoints
 
 
 @pytest.fixture

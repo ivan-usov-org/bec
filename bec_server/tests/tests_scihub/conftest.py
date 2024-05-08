@@ -4,7 +4,7 @@ from py_scibec_openapi_client.models.dataset_with_relations import DatasetWithRe
 from py_scibec_openapi_client.models.experiment_with_relations import ExperimentWithRelations
 from py_scibec_openapi_client.models.scan_with_relations import ScanWithRelations
 
-from bec_lib import bec_logger
+from bec_lib.logger import bec_logger
 
 # overwrite threads_check fixture from bec_lib,
 # to have it in autouse

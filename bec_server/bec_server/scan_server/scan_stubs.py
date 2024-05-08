@@ -8,8 +8,11 @@ from typing import Generator, Literal
 
 import numpy as np
 
-from bec_lib import MessageEndpoints, Status, bec_logger, messages
+from bec_lib import messages
 from bec_lib.connector import ConnectorBase
+from bec_lib.device import Status
+from bec_lib.endpoints import MessageEndpoints
+from bec_lib.logger import bec_logger
 
 from .errors import DeviceMessageError, ScanAbortion
 

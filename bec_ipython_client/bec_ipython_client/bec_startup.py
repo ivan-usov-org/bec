@@ -5,9 +5,9 @@ import numpy as np  # not needed but always nice to have
 
 from bec_ipython_client.main import BECIPythonClient as _BECIPythonClient
 from bec_ipython_client.main import main_dict as _main_dict
-from bec_lib import RedisConnector as _RedisConnector
-from bec_lib import bec_logger as _bec_logger
 from bec_lib import plugin_helper
+from bec_lib.logger import bec_logger as _bec_logger
+from bec_lib.redis_connector import RedisConnector as _RedisConnector
 
 try:
     from bec_widgets.cli.client import BECDockArea as _BECDockArea

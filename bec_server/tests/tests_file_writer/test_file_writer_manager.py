@@ -6,9 +6,11 @@ import numpy as np
 import pytest
 
 import bec_lib
-from bec_lib import MessageEndpoints, ServiceConfig, messages
+from bec_lib import messages
+from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
 from bec_lib.redis_connector import MessageObject
+from bec_lib.service_config import ServiceConfig
 from bec_lib.tests.utils import ConnectorMock
 from bec_server.file_writer import FileWriterManager
 from bec_server.file_writer.file_writer import FileWriter

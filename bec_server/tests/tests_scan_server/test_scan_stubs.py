@@ -3,7 +3,8 @@ from unittest import mock
 
 import pytest
 
-from bec_lib import MessageEndpoints, messages
+from bec_lib import messages
+from bec_lib.endpoints import MessageEndpoints
 from bec_lib.tests.utils import ConnectorMock
 from bec_server.scan_server.errors import DeviceMessageError
 from bec_server.scan_server.scan_stubs import ScanAbortion, ScanStubs

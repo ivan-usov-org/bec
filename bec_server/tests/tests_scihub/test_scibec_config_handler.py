@@ -8,9 +8,9 @@ from fastjsonschema import JsonSchemaException
 from test_scibec_connector import SciBecMock, SciHubMock
 
 import bec_lib
-from bec_lib import DeviceBase, messages
+from bec_lib import messages
 from bec_lib.bec_errors import DeviceConfigError
-from bec_lib.device import OnFailure, ReadoutPriority
+from bec_lib.device import DeviceBase, OnFailure, ReadoutPriority
 from bec_server.scihub import SciHub
 from bec_server.scihub.scibec import ConfigHandler, SciBecConnector
 

@@ -10,7 +10,8 @@ from typing import TYPE_CHECKING
 import yaml
 
 import bec_lib
-from bec_lib import BECClient, messages
+from bec_lib import messages
+from bec_lib.client import BECClient
 from bec_lib.connector import ConnectorBase
 from bec_lib.devicemanager import DeviceManagerBase
 from bec_lib.endpoints import EndpointInfo, MessageEndpoints

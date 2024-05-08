@@ -1,7 +1,8 @@
 import time
 
 from bec_ipython_client.progressbar import ScanProgressBar
-from bec_lib import MessageEndpoints, bec_logger
+from bec_lib.endpoints import MessageEndpoints
+from bec_lib.logger import bec_logger
 
 from .live_table import LiveUpdatesTable
 

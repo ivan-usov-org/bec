@@ -6,7 +6,7 @@ import numpy as np
 import rich.progress
 from rich.text import Text
 
-from bec_lib import bec_logger
+from bec_lib.logger import bec_logger
 
 logger = bec_logger.logger
 

@@ -8,7 +8,8 @@ import numpy as np
 import py_scibec
 import py_scibec_openapi_client.models as py_scibec_models
 
-from bec_lib import MessageEndpoints, bec_logger
+from bec_lib.endpoints import MessageEndpoints
+from bec_lib.logger import bec_logger
 from bec_lib.serialization import json_ext
 
 logger = bec_logger.logger

@@ -1,6 +1,6 @@
 import pytest
 
-from bec_lib import bec_logger
+from bec_lib.logger import bec_logger
 
 # overwrite threads_check fixture from bec_lib,
 # to have it in autouse

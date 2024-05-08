@@ -7,8 +7,10 @@ import py_scibec
 from dotenv import dotenv_values
 from py_scibec import SciBecCore
 
-from bec_lib import MessageEndpoints, bec_logger, messages
+from bec_lib import messages
 from bec_lib.connector import ConnectorBase
+from bec_lib.endpoints import MessageEndpoints
+from bec_lib.logger import bec_logger
 from bec_server.scihub.repeated_timer import RepeatedTimer
 
 from .config_handler import ConfigHandler

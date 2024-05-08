@@ -29,7 +29,7 @@ The log level can be set for each service and even each sink individually. While
 Using the logger in BEC is straightforward. The logger is already included in the BEC environment and can be imported via
 
 ```python
-from bec_lib import bec_logger
+from bec_lib.logger import bec_logger
 logger = bec_logger.logger
 ```
 

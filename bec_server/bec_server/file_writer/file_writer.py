@@ -9,7 +9,9 @@ import typing
 
 import h5py
 
-from bec_lib import MessageEndpoints, bec_logger, messages, plugin_helper
+from bec_lib import messages, plugin_helper
+from bec_lib.endpoints import MessageEndpoints
+from bec_lib.logger import bec_logger
 
 from .default_writer import NeXus_format as default_NeXus_format
 from .merged_dicts import merge_dicts

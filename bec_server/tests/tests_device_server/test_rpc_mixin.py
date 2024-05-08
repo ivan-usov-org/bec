@@ -5,7 +5,9 @@ from unittest import mock
 import pytest
 from ophyd import Device, Kind, Signal, Staged, StatusBase
 
-from bec_lib import Alarms, MessageEndpoints, messages
+from bec_lib import messages
+from bec_lib.alarm_handler import Alarms
+from bec_lib.endpoints import MessageEndpoints
 from bec_server.device_server.rpc_mixin import RPCMixin
 
 

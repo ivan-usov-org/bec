@@ -12,7 +12,10 @@ from pytest_redis import factories as pytest_redis_factories
 from redis import Redis
 
 from bec_ipython_client import BECIPythonClient
-from bec_lib import BECClient, ConfigHelper, RedisConnector, ServiceConfig
+from bec_lib.client import BECClient
+from bec_lib.config_helper import ConfigHelper
+from bec_lib.redis_connector import RedisConnector
+from bec_lib.service_config import ServiceConfig
 from bec_lib.tests.utils import wait_for_empty_queue
 
 

@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from bec_lib import BECClient, MessageEndpoints, bec_logger, messages
+from bec_lib import messages
+from bec_lib.client import BECClient
+from bec_lib.endpoints import MessageEndpoints
+from bec_lib.logger import bec_logger
 from bec_lib.redis_connector import MessageObject
 
 logger = bec_logger.logger

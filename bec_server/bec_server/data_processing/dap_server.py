@@ -1,5 +1,7 @@
-from bec_lib import BECClient, ServiceConfig, bec_logger
+from bec_lib.client import BECClient
 from bec_lib.connector import ConnectorBase
+from bec_lib.logger import bec_logger
+from bec_lib.service_config import ServiceConfig
 
 from .dap_service_manager import DAPServiceManager
 

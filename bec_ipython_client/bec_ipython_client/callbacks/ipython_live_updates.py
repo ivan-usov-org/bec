@@ -5,8 +5,8 @@ import time
 from typing import TYPE_CHECKING
 
 from bec_ipython_client.callbacks.scan_progress import LiveUpdatesScanProgress
-from bec_lib import bec_logger
 from bec_lib.bec_errors import ScanInterruption
+from bec_lib.logger import bec_logger
 
 from .live_table import LiveUpdatesTable
 from .move_device import LiveUpdatesReadbackProgressbar

@@ -1,6 +1,8 @@
 import inspect
 
-from bec_lib import MessageEndpoints, bec_logger, plugin_helper
+from bec_lib import plugin_helper
+from bec_lib.endpoints import MessageEndpoints
+from bec_lib.logger import bec_logger
 from bec_lib.messages import AvailableResourceMessage
 from bec_lib.signature_serializer import signature_to_dict
 

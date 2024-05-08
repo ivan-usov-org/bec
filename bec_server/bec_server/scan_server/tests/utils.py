@@ -1,5 +1,5 @@
-from bec_lib import ServiceConfig
 from bec_lib.messages import BECStatus
+from bec_lib.service_config import ServiceConfig
 from bec_lib.tests.utils import ConnectorMock
 from bec_server.scan_server.scan_server import ScanServer
 from bec_server.scan_server.scan_worker import InstructionQueueStatus

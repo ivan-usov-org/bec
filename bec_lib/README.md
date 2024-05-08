@@ -17,7 +17,7 @@ The documentation is part of the BEC documentation and can be found [here](https
 ## Usage
 
 ```python
-from bec_lib import BECClient
+from bec_lib.client import BECClient
 
 # Create a new BECClient instance and start it
 bec = BECClient()
