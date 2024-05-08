@@ -9,7 +9,6 @@ import threading
 from collections import deque
 from typing import TYPE_CHECKING
 
-from bec_lib import messages
 from bec_lib.callback_handler import CallbackHandler
 from bec_lib.logger import bec_logger
 
@@ -17,6 +16,7 @@ logger = bec_logger.logger
 
 
 if TYPE_CHECKING:
+    from bec_lib import messages
     from bec_lib.queue_items import QueueItem
     from bec_lib.scan_items import ScanItem
     from bec_lib.scan_manager import ScanManager

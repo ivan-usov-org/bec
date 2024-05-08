@@ -2,12 +2,15 @@
 This module contains the classes for storing scan data from scan_segments. 
 """
 
+from __future__ import annotations
+
 import collections
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from _collections_abc import dict_items, dict_keys, dict_values
 
-from bec_lib import messages
+if TYPE_CHECKING:
+    from bec_lib import messages
 
 
 class SignalData:

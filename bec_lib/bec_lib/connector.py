@@ -5,10 +5,13 @@ This module defines the interface for a connector
 from __future__ import annotations
 
 import abc
+from typing import TYPE_CHECKING
 
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
-from bec_lib.messages import BECMessage, LogMessage
+
+if TYPE_CHECKING:
+    from bec_lib.messages import BECMessage
 
 logger = bec_logger.logger
 

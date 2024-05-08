@@ -108,8 +108,8 @@ def test_scan_item_to_pandas_raises_without_pandas_installed():
     scan_manager = ScanManager(ConnectorMock(""))
     scan_item = ScanItem(scan_manager, "queue_id", [1], ["scan_id"], "status")
 
-    with mock.patch.dict("sys.modules"):
-        del sys.modules["pandas"]
+    with mock.patch.object(scan_item, "_get_pandas") as get_pandas:
+        get_pandas.side_effect = ImportError
         with pytest.raises(ImportError):
             scan_item.to_pandas()
 

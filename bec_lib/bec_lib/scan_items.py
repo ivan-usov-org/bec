@@ -7,27 +7,28 @@ from __future__ import annotations
 
 import builtins
 import datetime
+import importlib
 import sys
 import threading
 import time
 from collections import defaultdict, deque
 from typing import TYPE_CHECKING
 
-from bec_lib import messages
 from bec_lib.async_data import AsyncDataHandler
 from bec_lib.logger import bec_logger
 from bec_lib.scan_data import ScanData
 from bec_lib.utils import threadlocked
 
 if TYPE_CHECKING:
+    from bec_lib import messages
     from bec_lib.scan_manager import ScanManager
 
-logger = bec_logger.logger
+    try:
+        import pandas as pd
+    except ImportError:
+        logger.info("Unable to import `pandas` optional dependency")
 
-try:
-    import pandas as pd
-except ImportError:
-    logger.info("Unable to import `pandas` optional dependency")
+logger = bec_logger.logger
 
 
 class ScanItem:
@@ -88,11 +89,15 @@ class ScanItem:
                 continue
             req.callbacks.poll()
 
-    def to_pandas(self) -> pd.DataFrame:
-        """convert to pandas dataframe"""
-        if "pandas" not in sys.modules:
+    def _get_pandas(self):
+        try:
+            return importlib.import_module("pandas")
+        except ImportError:
             raise ImportError("Install `pandas` to use to_pandas() method")
 
+    def to_pandas(self) -> pd.DataFrame:
+        """convert to pandas dataframe"""
+        pd = self._get_pandas()
         tmp = defaultdict(list)
         for scan_msg in self.data.messages.values():
             scan_msg_data = scan_msg.content["data"]
