@@ -10,6 +10,7 @@ variables:
   CSAXS_BEC_BRANCH: "main"
   PXIII_BEC_BRANCH: "main"
   DEBYE_BEC_BRANCH: "main"
+  TOMCAT_BEC_BRANCH: "main"
 
 workflow:
   rules:
@@ -384,6 +385,8 @@ trigger:
         CHILD_PIPELINE_BRANCH: $PXIII_BEC_BRANCH
       - CHILD_PROJECT: debye_bec
         CHILD_PIPELINE_BRANCH: $DEBYE_BEC_BRANCH
+      - CHILD_PROJECT: tomcat_bec
+        CHILD_PIPELINE_BRANCH: $TOMCAT_BEC_BRANCH
 
   needs: []
   trigger:
