@@ -8,7 +8,11 @@ from __future__ import annotations
 import enum
 from dataclasses import dataclass
 
-from bec_lib import messages
+from bec_lib.utils.import_utils import lazy_import
+
+# TODO: put back normal import when Pydantic gets faster
+# from bec_lib import messages
+messages = lazy_import("bec_lib.messages")
 
 
 class MessageOp(list[str], enum.Enum):

@@ -17,7 +17,12 @@ from bec_lib.config_helper import ConfigHelper
 from bec_lib.device import ComputedSignal, Device, DeviceBase, Positioner, ReadoutPriority, Signal
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
-from bec_lib.messages import BECStatus, ServiceResponseMessage
+from bec_lib.utils.import_utils import lazy_import_from
+
+# TODO: put back normal import when Pydantic gets faster
+BECStatus, ServiceResponseMessage = lazy_import_from(
+    "bec_lib.messages", ("BECStatus", "ServiceResponseMessage")
+)
 
 if TYPE_CHECKING:
     from bec_lib.bec_service import BECService

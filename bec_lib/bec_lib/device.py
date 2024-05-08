@@ -15,14 +15,19 @@ from typing import TYPE_CHECKING, Any
 
 from typeguard import typechecked
 
-from bec_lib import messages
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
+from bec_lib.utils.import_utils import lazy_import
 
-logger = bec_logger.logger
+# TODO: put back normal import when Pydantic gets faster
+# from bec_lib import messages
+messages = lazy_import("bec_lib.messages")
+
 
 if TYPE_CHECKING:
     from bec_lib.redis_connector import RedisConnector
+
+logger = bec_logger.logger
 
 
 class RPCError(Exception):

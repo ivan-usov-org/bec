@@ -14,7 +14,6 @@ from typing import TYPE_CHECKING
 from rich.console import Console
 from rich.table import Table
 
-from bec_lib import messages
 from bec_lib.alarm_handler import AlarmHandler, Alarms
 from bec_lib.bec_service import BECService
 from bec_lib.bl_checks import BeamlineChecks
@@ -23,16 +22,19 @@ from bec_lib.dap_plugins import DAPPlugins
 from bec_lib.devicemanager import DeviceManagerBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
-from bec_lib.redis_connector import RedisConnector
-from bec_lib.scan_manager import ScanManager
-from bec_lib.scans import Scans
 from bec_lib.service_config import ServiceConfig
 from bec_lib.user_scripts_mixin import UserScriptsMixin
+from bec_lib.utils.import_utils import lazy_import_from
 
 if TYPE_CHECKING:
     from bec_lib.connector import ConnectorBase
 
 logger = bec_logger.logger
+# TODO: put back normal import when Pydantic gets faster
+VariableMessage = lazy_import_from("bec_lib.messages", ("VariableMessage",))
+RedisConnector = lazy_import_from("bec_lib.redis_connector", ("RedisConnector",))
+ScanManager = lazy_import_from("bec_lib.scan_manager", ("ScanManager",))
+Scans = lazy_import_from("bec_lib.scans", ("Scans",))
 
 
 class BECClient(BECService, UserScriptsMixin):
@@ -164,7 +166,7 @@ class BECClient(BECService, UserScriptsMixin):
     def pre_scan_macros(self, hooks: list[str]):
         self.connector.delete(MessageEndpoints.pre_scan_macros())
         for hook in hooks:
-            msg = messages.VariableMessage(value=hook)
+            msg = VariableMessage(value=hook)
             self.connector.lpush(MessageEndpoints.pre_scan_macros(), msg)
 
     def _load_scans(self):

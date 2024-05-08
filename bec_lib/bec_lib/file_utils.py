@@ -8,7 +8,10 @@ from typing import TYPE_CHECKING
 
 from bec_lib.bec_errors import ServiceConfigError
 from bec_lib.endpoints import MessageEndpoints
-from bec_lib.messages import ScanStatusMessage
+from bec_lib.utils.import_utils import lazy_import_from
+
+# TODO: put back normal import when Pydantic gets faster
+ScanStatusMessage = lazy_import_from("bec_lib.messages", ("ScanStatusMessage",))
 
 if TYPE_CHECKING:
     from bec_lib.redis_connector import RedisConnector

@@ -20,7 +20,10 @@ from bec_lib.bec_yaml_loader import yaml_load
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.file_utils import DeviceConfigWriter
 from bec_lib.logger import bec_logger
-from bec_lib.messages import DeviceConfigMessage
+from bec_lib.utils.import_utils import lazy_import_from
+
+# TODO: put back normal import when Pydantic gets faster
+DeviceConfigMessage = lazy_import_from("bec_lib.messages", ("DeviceConfigMessage",))
 
 if TYPE_CHECKING:
     from bec_lib.messages import RequestResponseMessage, ServiceResponseMessage

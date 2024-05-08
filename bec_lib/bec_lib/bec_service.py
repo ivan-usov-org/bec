@@ -16,14 +16,17 @@ import psutil
 from rich.console import Console
 from rich.table import Table
 
-from bec_lib import messages
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
-from bec_lib.messages import BECStatus
 from bec_lib.service_config import ServiceConfig
+from bec_lib.utils.import_utils import lazy_import, lazy_import_from
 
 if TYPE_CHECKING:
     from bec_lib.connector import ConnectorBase
+
+# TODO: put back normal imports when Pydantic gets faster
+messages = lazy_import("bec_lib.messages")
+BECStatus = lazy_import_from("bec_lib.messages", ("BECStatus",))
 
 
 logger = bec_logger.logger
@@ -285,7 +288,9 @@ class BECService:
         self._update_existing_services()
         return self._services_info
 
-    def wait_for_service(self, name, status=BECStatus.RUNNING):
+    def wait_for_service(self, name, status=None):
+        if status is None:
+            status = BECStatus.RUNNING
         logger.info(f"Waiting for {name}.")
         while True:
             service_status_msg = self.service_status.get(name)
