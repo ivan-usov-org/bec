@@ -111,6 +111,7 @@ class SciBecMetadataHandler:
                     # "queue": info.get("stream", ""),
                     "metadata": info,
                     # "sessionId": session_id,
+                    "experimentId": experiment_id,
                     "datasetId": dataset.id,
                     "scanNumber": info.get("scan_number", 0),
                 }
