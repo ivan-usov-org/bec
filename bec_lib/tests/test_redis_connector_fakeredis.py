@@ -445,7 +445,7 @@ def test_redis_connector_register_stream_list(connected_connector, endpoint):
     assert len(connector._stream_topics_subscription) == 0
 
 
-@pytest.mark.timeout(5)
+@pytest.mark.timeout(10)
 def test_redis_connector_register_stream_from_start(connected_connector):
     connector = connected_connector
     cb_mock1 = mock.Mock(spec=[])  # spec is here to remove all attributes
@@ -468,6 +468,11 @@ def test_redis_connector_register_stream_from_start(connected_connector):
     cb_mock1.assert_has_calls(
         [mock.call({"data": 1}, a=3), mock.call({"data": 2}, a=3), mock.call({"data": 3}, a=3)]
     )
+    cb_mock1.reset_mock()
+    connector.register(TestStreamEndpoint, cb=cb_mock1, start_thread=False, a=4)
+    with pytest.raises(TimeoutError):
+        connector.poll_messages(timeout=1)
+    cb_mock1.assert_not_called()
 
 
 @pytest.mark.timeout(5)

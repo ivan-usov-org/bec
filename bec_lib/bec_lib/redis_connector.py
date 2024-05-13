@@ -540,8 +540,15 @@ class RedisConnector(ConnectorBase):
         else:
             with self._stream_topics_subscription_lock:
                 for topic in topics:
+                    try:
+                        stream_info = self._redis_conn.xinfo_stream(topic)
+                    except redis.exceptions.ResponseError:
+                        # no such key
+                        last_id = "0-0"
+                    else:
+                        last_id = stream_info["last-entry"][0].decode()
                     new_subscription = StreamSubscriptionInfo(
-                        id="0-0" if from_start else "$",
+                        id="0-0" if from_start else last_id,
                         topic=topic,
                         newest_only=newest_only,
                         from_start=from_start,
