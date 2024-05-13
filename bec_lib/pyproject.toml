@@ -39,7 +39,7 @@ dependencies = [
 dev = [
     "black~=24.0",
     "coverage~=7.0",
-    "fakeredis~=2.21",
+    "fakeredis~=2.21, <2.23",
     "isort~=5.13, >=5.13.2",
     "pandas~=2.0",
     "pytest~=8.0",
