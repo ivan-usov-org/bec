@@ -141,7 +141,11 @@ class PluginStructure:
                 {
                     "project": "bec/awi_utils",
                     "file": "/templates/plugin-repo-template.yml",
-                    "inputs": {"name": self.plugin_name, "target": self.plugin_name},
+                    "inputs": {
+                        "name": self.plugin_name,
+                        "target": self.plugin_name,
+                        "branch": "$CHILD_PIPELINE_BRANCH",
+                    },
                 }
             ]
         }
