@@ -85,7 +85,8 @@ class UserScriptsMixin:
         Args:
             file (str): Full path to the script file.
         """
-        self._run_linter_on_file(file)
+        # TODO: re-enable linter
+        # self._run_linter_on_file(file)
         module_members = self._load_script_module(file)
         for name, cls in module_members:
             if not callable(cls):
