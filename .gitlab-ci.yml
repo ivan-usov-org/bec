@@ -5,12 +5,24 @@ image: $CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/python:3.10
 #commands to run in the Docker container before starting each job.
 variables:
   DOCKER_TLS_CERTDIR: ""
-  OPHYD_DEVICES_BRANCH: "main"
-  BEC_WIDGETS_BRANCH: "main"
-  CSAXS_BEC_BRANCH: "main"
-  PXIII_BEC_BRANCH: "main"
-  DEBYE_BEC_BRANCH: "main"
-  TOMCAT_BEC_BRANCH: "main"
+  OPHYD_DEVICES_BRANCH:
+    description: ophyd_devices branch
+    value: main
+  BEC_WIDGETS_BRANCH:
+    description: bec_widgets branch
+    value: main
+  CSAXS_BEC_BRANCH:
+    description: csaxs_bec branch
+    value: main
+  PXIII_BEC_BRANCH:
+    description: pxiii_bec branch
+    value: main
+  DEBYE_BEC_BRANCH:
+    description: debye_bec branch
+    value: main
+  TOMCAT_BEC_BRANCH:
+    description: tomcat_bec branch
+    value: main
 
 workflow:
   rules:
@@ -47,7 +59,14 @@ include:
       pytest_args: "-v --random-order tests/client_tests"
       exclude_packages: "bec_lib"
       job_name: "check_dep_ipython_client"
-
+  - local: "/ci/trigger_downstream.yml"
+    inputs:
+      bec_widgets_branch: $BEC_WIDGETS_BRANCH
+      ophyd_devices_branch: $OPHYD_DEVICES_BRANCH
+      csaxs_bec_branch: $CSAXS_BEC_BRANCH
+      pxiii_bec_branch: $PXIII_BEC_BRANCH
+      debye_bec_branch: $DEBYE_BEC_BRANCH
+      tomcat_bec_branch: $TOMCAT_BEC_BRANCH
 
 
 # different stages in the pipeline
@@ -394,37 +413,6 @@ end-2-end-conda-313:
   allow_failure: true
   variables:
     PYTHON_VERSION: "3.13"
-
-trigger:
-  parallel:
-    matrix:
-      - CHILD_PROJECT: bec_widgets
-        CHILD_PIPELINE_BRANCH: $BEC_WIDGETS_BRANCH
-      - CHILD_PROJECT: ophyd_devices
-        CHILD_PIPELINE_BRANCH: $OPHYD_DEVICES_BRANCH
-      - CHILD_PROJECT: csaxs_bec
-        CHILD_PIPELINE_BRANCH: $CSAXS_BEC_BRANCH        
-      - CHILD_PROJECT: pxiii_bec
-        CHILD_PIPELINE_BRANCH: $PXIII_BEC_BRANCH
-      - CHILD_PROJECT: debye_bec
-        CHILD_PIPELINE_BRANCH: $DEBYE_BEC_BRANCH
-      - CHILD_PROJECT: tomcat_bec
-        CHILD_PIPELINE_BRANCH: $TOMCAT_BEC_BRANCH
-
-  needs: []
-  trigger:
-    strategy: depend
-    include:
-      - project: bec/$CHILD_PROJECT
-        ref: $CHILD_PIPELINE_BRANCH
-        file: /.gitlab-ci.yml
-  variables:
-    BEC_CORE_BRANCH: $CI_COMMIT_REF_NAME
-    CHILD_PROJECTS: ""
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "web"'
-    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
-    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
 
 semver:
   stage: Build

@@ -1,0 +1,52 @@
+spec:
+  inputs:
+    bec_widgets_branch:
+      type: string
+      default: main
+    ophyd_devices_branch:
+      type: string
+      default: main 
+    csaxs_bec_branch:
+      type: string
+      default: main
+    pxiii_bec_branch:
+      type: string
+      default: main
+    debye_bec_branch:
+      type: string
+      default: main
+    tomcat_bec_branch:
+      type: string
+      default: main
+---
+
+trigger:
+  parallel:
+    matrix:
+      - CHILD_PROJECT: bec_widgets
+        CHILD_PIPELINE_BRANCH: $[[ inputs.bec_widgets_branch | expand_vars ]]
+      - CHILD_PROJECT: ophyd_devices
+        CHILD_PIPELINE_BRANCH: $[[ inputs.ophyd_devices_branch | expand_vars ]]
+      - CHILD_PROJECT: csaxs_bec
+        CHILD_PIPELINE_BRANCH: $[[ inputs.csaxs_bec_branch | expand_vars ]]
+      - CHILD_PROJECT: pxiii_bec
+        CHILD_PIPELINE_BRANCH: $[[ inputs.pxiii_bec_branch | expand_vars ]]
+      - CHILD_PROJECT: debye_bec
+        CHILD_PIPELINE_BRANCH: $[[ inputs.debye_bec_branch | expand_vars ]]
+      - CHILD_PROJECT: tomcat_bec
+        CHILD_PIPELINE_BRANCH: $[[ inputs.tomcat_bec_branch | expand_vars ]]
+
+  needs: []
+  trigger:
+    strategy: depend
+    include:
+      - project: bec/$CHILD_PROJECT
+        ref: $CHILD_PIPELINE_BRANCH
+        file: /.gitlab-ci.yml
+  variables:
+    BEC_CORE_BRANCH: $CI_COMMIT_REF_NAME
+    CHILD_PROJECTS: ""
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
