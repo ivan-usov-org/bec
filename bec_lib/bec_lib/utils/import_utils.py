@@ -11,7 +11,7 @@ def lazy_import(module_name):
 
 
 def lazy_import_from(module_name, from_list):
-    ret = (Proxy(lambda: getattr(import_module(module_name), name)) for name in from_list)
+    ret = (Proxy(lambda name=name: getattr(import_module(module_name), name)) for name in from_list)
     if len(from_list) == 1:
         return next(ret)
     else:
