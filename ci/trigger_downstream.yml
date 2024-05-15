@@ -20,7 +20,7 @@ spec:
       default: main
 ---
 
-trigger:
+trigger-job:
   parallel:
     matrix:
       - CHILD_PROJECT: bec_widgets
@@ -40,9 +40,18 @@ trigger:
   trigger:
     strategy: depend
     include:
+      - local: "/ci/test_beamline.yml"
+        inputs:
+          name: $CHILD_PROJECT
+          target: $CHILD_PROJECT
+          branch: $CHILD_PIPELINE_BRANCH
+        rules:
+          - if: $CHILD_PROJECT != "bec_widgets" && $CHILD_PROJECT != "ophyd_devices"
       - project: bec/$CHILD_PROJECT
         ref: $CHILD_PIPELINE_BRANCH
         file: /.gitlab-ci.yml
+        rules:
+          - if: $CHILD_PROJECT == "bec_widgets" || $CHILD_PROJECT == "ophyd_devices"
   variables:
     BEC_CORE_BRANCH: $CI_COMMIT_REF_NAME
     CHILD_PROJECTS: ""

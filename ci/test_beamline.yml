@@ -1,0 +1,15 @@
+spec:
+  inputs:
+    name:
+    target:
+    branch:
+---
+
+include:
+  - project: bec/awi_utils
+    file: /templates/plugin-repo-template.yml
+    inputs:
+      name: $[[ inputs.target ]]
+      target: $[[ inputs.target ]]
+      branch: $[[ inputs.branch ]]
+
