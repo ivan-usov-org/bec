@@ -25,11 +25,6 @@ if TYPE_CHECKING:
 
 logger = bec_logger.logger
 
-try:
-    from bec_plugins import bec_ipython_client as client_plugins
-except ImportError:
-    client_plugins = None
-
 
 class UserScriptsMixin:
     def __init__(self) -> None:
@@ -54,12 +49,15 @@ class UserScriptsMixin:
             script_files.extend(glob.glob(os.path.abspath(os.path.join(user_script_dir, "*.py"))))
 
         # load scripts from the plugins
-        if client_plugins:
-            plugin_scripts_dir = os.path.join(client_plugins.__path__[0], "scripts")
-            if os.path.exists(plugin_scripts_dir):
-                script_files.extend(
-                    glob.glob(os.path.abspath(os.path.join(plugin_scripts_dir, "*.py")))
-                )
+        plugins = importlib.metadata.entry_points(group="bec")
+        for plugin in plugins:
+            if plugin.name == "plugin_bec":
+                plugin = plugin.load()
+                plugin_scripts_dir = os.path.join(plugin.__path__[0], "scripts")
+                if os.path.exists(plugin_scripts_dir):
+                    script_files.extend(
+                        glob.glob(os.path.abspath(os.path.join(plugin_scripts_dir, "*.py")))
+                    )
 
         for file in script_files:
             self.load_user_script(file)
