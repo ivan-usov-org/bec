@@ -520,6 +520,22 @@ class MessageEndpoints:
         )
 
     @staticmethod
+    def scan_progress() -> EndpointInfo:
+        """
+        Endpoint for scan progress. This endpoint is used to publish the scan progress using
+        a messages.ProgressMessage message.
+
+        Returns:
+            EndpointInfo: Endpoint for scan progress.
+        """
+        endpoint = "scans/scan_progress"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.ProgressMessage,
+            message_op=MessageOp.SET_PUBLISH,
+        )
+
+    @staticmethod
     def available_scans() -> EndpointInfo:
         """
         Endpoint for available scans. This endpoint is used to publish the available scans

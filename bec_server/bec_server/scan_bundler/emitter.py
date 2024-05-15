@@ -62,6 +62,9 @@ class EmitterBase:
     def on_cleanup(self, scan_id: str):
         pass
 
+    def on_scan_status_update(self, status_msg: messages.ScanStatusMessage):
+        pass
+
     def shutdown(self):
         if self._buffered_connector_thread:
             self._buffered_publisher_stop_event.set()

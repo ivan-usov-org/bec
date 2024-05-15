@@ -42,6 +42,21 @@ class BECEmitter(EmitterBase):
             MessageEndpoints.scan_segment(),
             MessageEndpoints.public_scan_segment(scan_id=scan_id, point_id=point_id),
         )
+        self._update_scan_progress(scan_id, point_id)
+
+    def _update_scan_progress(self, scan_id: str, point_id: int, done=False) -> None:
+        info = self.scan_bundler.sync_storage[scan_id]["info"]
+        msg = messages.ProgressMessage(
+            value=point_id + 1,
+            max_value=info.get("num_points", point_id + 1),
+            done=done,
+            metadata={
+                "scan_id": scan_id,
+                "RID": info.get("RID", ""),
+                "queue_id": info.get("queue_id", ""),
+            },
+        )
+        self.scan_bundler.connector.set_and_publish(MessageEndpoints.scan_progress(), msg)
 
     def _send_baseline(self, scan_id: str) -> None:
         sb = self.scan_bundler
@@ -57,3 +72,9 @@ class BECEmitter(EmitterBase):
         )
         sb.connector.set_and_publish(MessageEndpoints.scan_baseline(), msg, pipe=pipe)
         pipe.execute()
+
+    def on_scan_status_update(self, status_msg: messages.ScanStatusMessage):
+        if status_msg.status == "open":
+            return
+        num_points = status_msg.info.get("num_points", 0) - 1
+        self._update_scan_progress(status_msg.scan_id, num_points, done=True)

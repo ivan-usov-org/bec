@@ -98,6 +98,7 @@ class ScanBundler(BECService):
             self._initialize_scan_container(msg)
             if scan_id not in self.scan_id_history:
                 self.scan_id_history.append(scan_id)
+        self.run_emitter("on_scan_status_update", msg)
         if msg.content.get("status") != "open":
             self._scan_status_modification(msg)
 
@@ -106,7 +107,6 @@ class ScanBundler(BECService):
         if status not in ["closed", "aborted", "paused", "halted"]:
             logger.error(f"Unknown scan status {status}")
             return
-
         scan_id = msg.content.get("scan_id")
         if not scan_id:
             logger.warning(f"Received scan status update without scan_id: {msg}")
