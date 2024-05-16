@@ -2,6 +2,13 @@
 
 
 
+## v2.12.0 (2024-05-16)
+
+### Feature
+
+* feat(scan_bundler): added scan progress ([`27befe9`](https://gitlab.psi.ch/bec/bec/-/commit/27befe966607a3ae319dbee3af9e59ef0d044bc8))
+
+
 ## v2.11.1 (2024-05-16)
 
 ### Ci
@@ -166,11 +173,3 @@ User scripts from plugins were still relying on the old plugin structure ([`3264
 
 
 ## v2.9.0 (2024-04-29)
-
-### Documentation
-
-* docs: added section on logging ([`ebcd2a4`](https://gitlab.psi.ch/bec/bec/-/commit/ebcd2a4dbc2a52dc1e8679e54784daa0f6a3901b))
-
-### Test
-
-* test(bec_lib): added test for log monitor ([`64d5c30`](https://gitlab.psi.ch/bec/bec/-/commit/64d5c304d98c04f5943dd6365de364974a6fc931))
