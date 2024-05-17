@@ -2,6 +2,13 @@
 
 
 
+## v2.12.2 (2024-05-17)
+
+### Fix
+
+* fix(scihub): added experimentId to scan entries in BEC db ([`8ba7213`](https://gitlab.psi.ch/bec/bec/-/commit/8ba7213e29ac0335bca126b9d8a08a9ec46e469f))
+
+
 ## v2.12.1 (2024-05-17)
 
 ### Fix
@@ -165,7 +172,3 @@ User scripts from plugins were still relying on the old plugin structure ([`3264
 ### Fix
 
 * fix: fixed log message log type ([`af85937`](https://gitlab.psi.ch/bec/bec/-/commit/af8593794c2ea9d0b4851b367aca4e6546fc760f))
-
-* fix: fixed log message signature and added literal checks; closes #277 ([`ca7c238`](https://gitlab.psi.ch/bec/bec/-/commit/ca7c23851976111d81c811bf16b6d6f371d24dc6))
-
-* fix: logs should be send, not set_and_publish; closes #278 ([`3964870`](https://gitlab.psi.ch/bec/bec/-/commit/396487074905930c410978144e986d1b9b373a2c))
