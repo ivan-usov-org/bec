@@ -4,7 +4,7 @@ import collections
 import time
 from typing import TYPE_CHECKING
 
-from bec_ipython_client.callbacks.scan_progress import LiveUpdatesScanProgress
+from bec_ipython_client.callbacks.device_progress import LiveUpdatesDeviceProgress
 from bec_lib.bec_errors import ScanInterruption
 from bec_lib.logger import bec_logger
 
@@ -86,8 +86,8 @@ class IPythonLiveUpdates:
                     callbacks=self._user_callback,
                     print_table_data=self.print_table_data,
                 ).run()
-            elif scan_report_type == "scan_progress":
-                LiveUpdatesScanProgress(
+            elif scan_report_type == "device_progress":
+                LiveUpdatesDeviceProgress(
                     self.client,
                     report_instruction=instr,
                     request=self._active_request,

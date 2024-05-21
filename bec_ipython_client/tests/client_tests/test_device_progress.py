@@ -1,13 +1,13 @@
 from unittest import mock
 
-from bec_ipython_client.callbacks.scan_progress import LiveUpdatesScanProgress
+from bec_ipython_client.callbacks.device_progress import LiveUpdatesDeviceProgress
 from bec_lib import messages
 
 
 def test_update_progressbar_continues_without_device_data():
     bec = mock.MagicMock()
     request = mock.MagicMock()
-    live_update = LiveUpdatesScanProgress(bec=bec, report_instruction={}, request=request)
+    live_update = LiveUpdatesDeviceProgress(bec=bec, report_instruction={}, request=request)
     progressbar = mock.MagicMock()
 
     bec.connector.get.return_value = None
@@ -18,7 +18,7 @@ def test_update_progressbar_continues_without_device_data():
 def test_update_progressbar_continues_when_scan_id_doesnt_match():
     bec = mock.MagicMock()
     request = mock.MagicMock()
-    live_update = LiveUpdatesScanProgress(bec=bec, report_instruction={}, request=request)
+    live_update = LiveUpdatesDeviceProgress(bec=bec, report_instruction={}, request=request)
     progressbar = mock.MagicMock()
     live_update.scan_item = mock.MagicMock()
     live_update.scan_item.scan_id = "scan_id2"
@@ -33,7 +33,7 @@ def test_update_progressbar_continues_when_scan_id_doesnt_match():
 def test_update_progressbar_updates_max_value():
     bec = mock.MagicMock()
     request = mock.MagicMock()
-    live_update = LiveUpdatesScanProgress(bec=bec, report_instruction={}, request=request)
+    live_update = LiveUpdatesDeviceProgress(bec=bec, report_instruction={}, request=request)
     progressbar = mock.MagicMock()
     live_update.scan_item = mock.MagicMock()
     live_update.scan_item.scan_id = "scan_id"
@@ -50,7 +50,7 @@ def test_update_progressbar_updates_max_value():
 def test_update_progressbar_returns_true_when_max_value_is_reached():
     bec = mock.MagicMock()
     request = mock.MagicMock()
-    live_update = LiveUpdatesScanProgress(bec=bec, report_instruction={}, request=request)
+    live_update = LiveUpdatesDeviceProgress(bec=bec, report_instruction={}, request=request)
     progressbar = mock.MagicMock()
     live_update.scan_item = mock.MagicMock()
     live_update.scan_item.scan_id = "scan_id"

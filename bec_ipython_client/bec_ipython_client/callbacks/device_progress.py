@@ -9,10 +9,10 @@ from .live_table import LiveUpdatesTable
 logger = bec_logger.logger
 
 
-class LiveUpdatesScanProgress(LiveUpdatesTable):
+class LiveUpdatesDeviceProgress(LiveUpdatesTable):
     """Live updates for scans using a progress bar based on the progress of one or more devices"""
 
-    REPORT_TYPE = "scan_progress"
+    REPORT_TYPE = "device_progress"
 
     def _run_update(self, device_names: str):
         """Run the update loop for the progress bar.
