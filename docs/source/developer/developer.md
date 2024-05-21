@@ -22,6 +22,7 @@ event_data/
 ophyd/
 external_sources/
 bec_plugins/
+scans/
 glossary/
 reference/
 ```
@@ -45,6 +46,7 @@ Here, we aim to provide you with all the essential information to kickstart your
 * [Ophyd](#developer.ophyd): Familiarize yourself with Ophyd, the underlying library for device control in BEC, and learn how to integrate and work with Ophyd devices in the BEC context.
 * [External Sources](#developer.external_sources): Understand how to incorporate external data sources into your BEC workflow.
 * [BEC Plugins](#developer.bec_plugins): Learn how to create and use plugins to extend BEC's functionality and tailor it to your needs.
+* [Scans](#developer.scans): Dive into the world of scans in BEC, understand the basic structure of a scan, and learn how to create a scan plugin.
 * [Writing tests](#developer.tests): how to write tests for your code, and usage information about BEC fixtures
 * [Glossary](#developer.glossary): Refer to a glossary of terms used throughout the BEC documentation.
 * [Reference](#developer.reference): Access a comprehensive reference of all BEC classes, functions, and methods.

@@ -1,3 +1,8 @@
+"""
+Scan stubs are commands that can be used to control devices during a scan. They typically yield device messages that are
+consumed by the scan worker and potentially forwarded to the device server.
+"""
+
 from __future__ import annotations
 
 import threading
@@ -20,6 +25,11 @@ logger = bec_logger.logger
 
 
 class ScanStubs:
+    """
+    Scan stubs are commands that can be used to control devices during a scan. They typically yield device messages that are
+    consumed by the scan worker and potentially forwarded to the device server.
+    """
+
     def __init__(
         self,
         connector: ConnectorBase,

@@ -337,10 +337,6 @@ class ScanBase(RequestBase, PathOptimizerMixin):
     # perform pre-move action before the pre_scan trigger is sent
     pre_move = True
 
-    # # synchronize primary readings with the scan motor readings. Set to False if the master device
-    # # does not provide single readouts or are too fast to be synchronized with primary readings
-    # enforce_sync = True
-
     def __init__(
         self,
         *args,

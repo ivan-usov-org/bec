@@ -177,6 +177,7 @@ Upon calling kickoff, the flyer should start and return a status object that res
 The complete method of the flyer returns a status object. 
 This status should resolve once the flyer finishes, thus, the method can be used to identify when a flyer is finished.
 
+(developer.ophyd_device_config)=
 ## Ophyd device configuration
 As mentioned before, BEC creates representative devices and signals dynamically on the devices server, following the specifications given in the device configuration. 
 As explained in the [device configuration](#developer.bec_config) section, the device configuration can be loaded from and stored to a yaml file and contains all necessary information about the devices. 
