@@ -113,21 +113,22 @@ class BECClient(BECService, UserScriptsMixin):
             return msg.value
         return ""
 
-    def start(self):
+    def start(self, write_logs: bool = True):
         """start the client"""
         if self.started:
             return
         self.started = True
+        bec_logger.write_file_logs = write_logs
         config = self.__init_params["config"]
         connector_cls = self.__init_params["connector_cls"]
         wait_for_server = self.__init_params["wait_for_server"]
         super().__init__(config, connector_cls, wait_for_server=wait_for_server)
         builtins.bec = self._parent
-        self._start_services()
+        self._start_services(write_logs=write_logs)
         logger.info("Starting new client")
 
-    def _start_services(self):
-        self._configure_logger()
+    def _start_services(self, write_logs: bool = True):
+        self._configure_logger(write_logs=write_logs)
         self._load_scans()
         # self.logbook = LogbookConnector(self.connector)
         self._update_username()
@@ -194,11 +195,12 @@ class BECClient(BECService, UserScriptsMixin):
     def _start_scan_queue(self):
         self.queue = ScanManager(self.connector)
 
-    def _configure_logger(self):
+    def _configure_logger(self, write_logs: bool = True):
         bec_logger.logger.remove()
-        bec_logger.add_file_log(bec_logger.LOGLEVEL.DEBUG)
+        if write_logs:
+            bec_logger.add_file_log(bec_logger.LOGLEVEL.DEBUG)
+            bec_logger.add_console_log()
         bec_logger.add_sys_stderr(bec_logger.LOGLEVEL.SUCCESS)
-        bec_logger.add_console_log()
 
     def _start_device_manager(self):
         logger.info("Starting device manager")

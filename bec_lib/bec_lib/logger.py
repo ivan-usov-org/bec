@@ -81,7 +81,7 @@ class BECLogger:
         self.logger = loguru_logger
         self._log_level = LogLevel.INFO
         self._configured = False
-        # self.logger.level("CONSOLE_LOG", no=21, color="<yellow>", icon="📣")
+        self.write_file_logs = True
 
     def __new__(cls):
         if not hasattr(cls, "_logger") or cls._logger is None:
@@ -202,10 +202,11 @@ class BECLogger:
 
     def _update_sinks(self):
         self.logger.remove()
-        self.add_console_log()
+        if self.write_file_logs:
+            self.add_console_log()
+            self.add_file_log(self._log_level)
         self.add_redis_log(self._log_level)
         self.add_sys_stderr(self._log_level)
-        self.add_file_log(self._log_level)
 
     def add_sys_stderr(self, level: LogLevel):
         """
