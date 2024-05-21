@@ -458,13 +458,12 @@ dev-pages:
   stage: Deploy
   needs: ["formatter"]
   rules:
-    - if: $CI_COMMIT_REF_NAME == "development"
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
   script:
-    - git config --global user.name "ci_update_bot"
-    - git config --global user.email "ci_update_bot@bec.ch"
-    - git tag -f development "$CI_COMMIT_SHA"
-    - git push --force origin development
-
     - curl -X POST -d "branches=development" -d "token=$RTD_TOKEN" https://readthedocs.org/api/v2/webhook/beamline-experiment-control/221870/
     - curl -X POST -d "branches=development" -d "token=$RTD_TOKEN_BEC" https://readthedocs.org/api/v2/webhook/bec/246899/
 
