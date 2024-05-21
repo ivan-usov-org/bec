@@ -79,7 +79,7 @@ def test_get_devices_from_scan_data(bec_client_mock, request_msg, scan_report_de
     data = messages.ScanMessage(
         point_id=0, scan_id="", data={}, metadata={"scan_report_devices": scan_report_devices}
     )
-    live_update = LiveUpdatesTable(client, {"table_wait": 10}, request_msg)
+    live_update = LiveUpdatesTable(client, {"scan_progress": 10}, request_msg)
     devices = live_update.get_devices_from_scan_data(data)
     assert devices[0 : len(scan_report_devices)] == scan_report_devices
 
@@ -92,7 +92,7 @@ def test_wait_for_request_acceptance(client_with_grid_scan):
     )
     client.queue.request_storage.update_with_request(request_msg)
     client.queue.request_storage.update_with_response(response_msg)
-    live_update = LiveUpdatesTable(client, {"table_wait": 10}, request_msg)
+    live_update = LiveUpdatesTable(client, {"scan_progress": 10}, request_msg)
     with mock.patch.object(client.queue.queue_storage, "find_queue_item_by_requestID"):
         live_update.wait_for_request_acceptance()
 
@@ -110,7 +110,7 @@ def test_print_table_data(client_with_grid_scan):
     )
     client.queue.request_storage.update_with_request(request_msg)
     client.queue.request_storage.update_with_response(response_msg)
-    live_update = LiveUpdatesTable(client, {"table_wait": 10}, request_msg)
+    live_update = LiveUpdatesTable(client, {"scan_progress": 10}, request_msg)
     live_update.point_data = messages.ScanMessage(
         point_id=0,
         scan_id="",
@@ -130,7 +130,7 @@ def test_print_table_data_lamni_flyer(client_with_grid_scan):
     )
     client.queue.request_storage.update_with_request(request_msg)
     client.queue.request_storage.update_with_response(response_msg)
-    live_update = LiveUpdatesTable(client, {"table_wait": 10}, request_msg)
+    live_update = LiveUpdatesTable(client, {"scan_progress": 10}, request_msg)
     live_update.point_data = messages.ScanMessage(
         point_id=0,
         scan_id="",
@@ -150,7 +150,7 @@ def test_print_table_data_hinted_value(client_with_grid_scan):
     )
     client.queue.request_storage.update_with_request(request_msg)
     client.queue.request_storage.update_with_response(response_msg)
-    live_update = LiveUpdatesTable(client, {"table_wait": 10}, request_msg)
+    live_update = LiveUpdatesTable(client, {"scan_progress": 10}, request_msg)
     client.device_manager.devices["samx"]._info["hints"] = {"fields": ["samx_hint"]}
     client.device_manager.devices["samx"].precision = 3
     live_update.point_data = messages.ScanMessage(
@@ -178,7 +178,7 @@ def test_print_table_data_hinted_value_with_precision(client_with_grid_scan):
     )
     client.queue.request_storage.update_with_request(request_msg)
     client.queue.request_storage.update_with_response(response_msg)
-    live_update = LiveUpdatesTable(client, {"table_wait": 10}, request_msg)
+    live_update = LiveUpdatesTable(client, {"scan_progress": 10}, request_msg)
     client.device_manager.devices["samx"]._info["hints"] = {"fields": ["samx_hint"]}
     client.device_manager.devices["samx"].precision = 2
     live_update.point_data = messages.ScanMessage(
@@ -223,7 +223,7 @@ def test_print_table_data_variants(client_with_grid_scan, value, expected):
     )
     client.queue.request_storage.update_with_request(request_msg)
     client.queue.request_storage.update_with_response(response_msg)
-    live_update = LiveUpdatesTable(client, {"table_wait": 10}, request_msg)
+    live_update = LiveUpdatesTable(client, {"scan_progress": 10}, request_msg)
     live_update.point_data = messages.ScanMessage(
         point_id=0,
         scan_id="",
@@ -254,7 +254,7 @@ def test_print_client_msgs(client_with_grid_scan):
     with mock.patch.object(
         client.queue.request_storage.scan_manager.queue_storage, "find_queue_item_by_requestID"
     ):
-        live_update = LiveUpdatesTable(client, {"table_wait": 10}, request_msg)
+        live_update = LiveUpdatesTable(client, {"scan_progress": 10}, request_msg)
         live_update.wait_for_request_acceptance()
         result = StringIO()
         with redirect_stdout(result):

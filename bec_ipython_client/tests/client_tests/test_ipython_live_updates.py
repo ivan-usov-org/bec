@@ -153,7 +153,7 @@ def test_live_updates_process_queue_without_queue_number(bec_client_mock):
 #     with mock.patch(
 #         "bec_client_mock.callbacks.ipython_live_updates.LiveUpdatesTable", new_callable=mock.Co
 #     ) as table:
-#         live_updates._process_instruction({"table_wait": 10})
+#         live_updates._process_instruction({"scan_progress": 10})
 #         table.assert_called_once_with(
-#             client, report_instructions={"table_wait": 10}, request=request_msg, callbacks=[]
+#             client, report_instructions={"scan_progress": 10}, request=request_msg, callbacks=[]
 #         )

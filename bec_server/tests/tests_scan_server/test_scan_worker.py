@@ -1072,7 +1072,7 @@ def test_open_scan(scan_worker_mock, instr, corr_num_points, scan_id):
                             assert worker.scan_motors == ["bpm4i"]
                         init_mock.assert_called_once_with(active_rb, instr, corr_num_points)
                         assert active_rb.scan_report_instructions == [
-                            {"table_wait": corr_num_points}
+                            {"scan_progress": corr_num_points}
                         ]
                         queue_status_mock.assert_called_once()
                         send_mock.assert_called_once_with("open")

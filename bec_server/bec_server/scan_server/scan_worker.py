@@ -74,11 +74,11 @@ class ScanWorker(threading.Thread):
 
         self._initialize_scan_info(active_rb, instr, num_points)
 
-        # only append the table_wait if the scan is not using device_progress
+        # only append the scan_progress if the scan is not using device_progress
         if not self.scan_report_instructions or not self.scan_report_instructions[-1].get(
             "device_progress"
         ):
-            self.scan_report_instructions.append({"table_wait": num_points})
+            self.scan_report_instructions.append({"scan_progress": num_points})
         self.current_instruction_queue_item.parent.queue_manager.send_queue_status()
 
         self._send_scan_status("open")

@@ -46,7 +46,7 @@ class IPythonLiveUpdates:
         """
         scan_type = self._active_request.content["scan_type"]
         if scan_type in ["open_scan_def", "close_scan_def"]:
-            self._process_instruction({"table_wait": 0})
+            self._process_instruction({"scan_progress": 0})
             return
         if scan_type == "close_scan_group":
             return
@@ -78,7 +78,7 @@ class IPythonLiveUpdates:
                     request=self._active_request,
                     callbacks=self._user_callback,
                 ).run()
-            elif scan_report_type == "table_wait":
+            elif scan_report_type == "scan_progress":
                 LiveUpdatesTable(
                     self.client,
                     report_instruction=instr,

@@ -39,7 +39,7 @@ class LiveUpdatesTable(LiveUpdatesBase):
     """
 
     MAX_DEVICES = 10
-    REPORT_TYPE = "table_wait"
+    REPORT_TYPE = "scan_progress"
 
     def __init__(
         self,
@@ -60,7 +60,9 @@ class LiveUpdatesTable(LiveUpdatesBase):
         self.table = None
         self.__print_table_data = None
         self._print_table_data = (
-            print_table_data if print_table_data is not None else self.REPORT_TYPE == "table_wait"
+            print_table_data
+            if print_table_data is not None
+            else self.REPORT_TYPE == "scan_progress"
         )
 
     def wait_for_scan_to_start(self):
