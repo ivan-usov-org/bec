@@ -2,6 +2,15 @@
 
 
 
+## v2.12.3 (2024-05-21)
+
+### Fix
+
+* fix: renamed table_wait to scan_progress ([`855f9a8`](https://gitlab.psi.ch/bec/bec/-/commit/855f9a8412e9c0d8b02d131ece533b4d85882b36))
+
+* fix: renamed scan_progress to device_progress ([`d344e85`](https://gitlab.psi.ch/bec/bec/-/commit/d344e8513781f29a1390adc92826f23d1702964b))
+
+
 ## v2.12.2 (2024-05-17)
 
 ### Fix
@@ -156,19 +165,8 @@ User scripts from plugins were still relying on the old plugin structure ([`3264
 
 ## v2.9.4 (2024-05-01)
 
-### Fix
-
-* fix: unified device message signature ([`c54dfc1`](https://gitlab.psi.ch/bec/bec/-/commit/c54dfc166fe9dd925b15e8cc8750cebaec8896cb))
-
 ### Refactor
 
 * refactor: added isort params to pyproject ([`0a1beae`](https://gitlab.psi.ch/bec/bec/-/commit/0a1beae06ae128d9817272644d2f38ca761756ab))
 
 * refactor(bec_lib): cleanup ([`6bf0998`](https://gitlab.psi.ch/bec/bec/-/commit/6bf0998c71387307ad8d842931488ec2aea566a8))
-
-
-## v2.9.3 (2024-05-01)
-
-### Fix
-
-* fix: fixed log message log type ([`af85937`](https://gitlab.psi.ch/bec/bec/-/commit/af8593794c2ea9d0b4851b367aca4e6546fc760f))
