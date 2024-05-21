@@ -464,6 +464,21 @@ dev-pages:
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
   script:
+    - git config --global user.name "ci_update_bot"
+    - git config --global user.email "ci_update_bot@bec.ch"
+    - git tag -l | xargs git tag -d
+    - git fetch --tags
+    - git tag -d development || true
+    - git push https://oauth2:$CI_DEV_DEPLOY@gitlab.psi.ch/bec/bec.git :refs/tags/development || true
+    - git tag development $CI_COMMIT_SHA
+    - git push https://oauth2:$CI_DEV_DEPLOY@gitlab.psi.ch/bec/bec.git development
+    
+
+    # - git branch -a | grep development
+    # - git checkout remotes/origin/development
+    # - git reset --hard origin/$CI_COMMIT_REF_NAME
+    # - git push --force https://oauth2:$CI_DEV_DEPLOY@gitlab.psi.ch/bec/bec.git HEAD:refs/heads/development;
+
     - curl -X POST -d "branches=development" -d "token=$RTD_TOKEN" https://readthedocs.org/api/v2/webhook/beamline-experiment-control/221870/
     - curl -X POST -d "branches=development" -d "token=$RTD_TOKEN_BEC" https://readthedocs.org/api/v2/webhook/bec/246899/
 
