@@ -122,7 +122,7 @@ class HystScan(ScanBase):
             self._current_scan_motor_index += self._scan_motor_direction
 
     def scan_core(self):
-        # yield from self._move_and_wait(self.positions[0])
+        # yield from self._move_scan_motors_and_wait(self.positions[0])
         status = yield from self.stubs.send_rpc_and_wait(
             "field_x", "ramprate.set", self.default_ramp_rate
         )

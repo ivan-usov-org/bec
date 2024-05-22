@@ -468,7 +468,7 @@ class ScanBase(RequestBase, PathOptimizerMixin):
 
     def return_to_start(self):
         """return to the start position"""
-        yield from self._move_and_wait(self.start_pos)
+        yield from self._move_scan_motors_and_wait(self.start_pos)
 
     def finalize(self):
         """finalize the scan"""
@@ -485,7 +485,7 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         yield from self.close_scan()
 
     def _at_each_point(self, ind=None, pos=None):
-        yield from self._move_and_wait(pos)
+        yield from self._move_scan_motors_and_wait(pos)
         if ind > 0:
             yield from self.stubs.wait(
                 wait_type="read", group="primary", wait_group="readout_primary"
@@ -502,7 +502,7 @@ class ScanBase(RequestBase, PathOptimizerMixin):
 
         self.point_id += 1
 
-    def _move_and_wait(self, pos):
+    def _move_scan_motors_and_wait(self, pos):
         if not isinstance(pos, list) and not isinstance(pos, np.ndarray):
             pos = [pos]
         if len(pos) == 0:
@@ -525,7 +525,7 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         perform additional tasks before the scan is started. This
         """
         if self.pre_move and len(self.positions) > 0:
-            yield from self._move_and_wait(self.positions[0])
+            yield from self._move_scan_motors_and_wait(self.positions[0])
         yield from self.stubs.pre_scan()
 
     def run(self):
@@ -1002,7 +1002,7 @@ class ContLineScan(ScanBase):
         self.point_id += 1
 
     def scan_core(self):
-        yield from self._move_and_wait(self.positions[0] - self.offset)
+        yield from self._move_scan_motors_and_wait(self.positions[0] - self.offset)
         # send the slow motor on its way
         yield from self.stubs.set(
             device=self.scan_motors[0], value=self.positions[-1][0], wait_group="scan_motor"
