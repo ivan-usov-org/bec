@@ -655,7 +655,6 @@ class ScanWorker(threading.Thread):
                 "settling_time": active_rb.scan.settling_time,
                 "readout_time": active_rb.scan.readout_time,
                 "acquisition_config": active_rb.scan.acquisition_config,
-                "scan_report_hint": active_rb.scan.scan_report_hint,
                 "scan_report_devices": active_rb.scan.scan_report_devices,
                 "monitor_sync": active_rb.scan.monitor_sync,
                 "num_points": num_points,

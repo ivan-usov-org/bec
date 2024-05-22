@@ -77,7 +77,6 @@ class ScanManager:
                 "arg_input": scan_cls.arg_input,
                 "required_kwargs": scan_cls.required_kwargs,
                 "arg_bundle_size": scan_cls.arg_bundle_size,
-                "scan_report_hint": scan_cls.scan_report_hint,
                 "doc": scan_cls.__doc__ or scan_cls.__init__.__doc__,
                 "signature": signature_to_dict(scan_cls.__init__),
             }

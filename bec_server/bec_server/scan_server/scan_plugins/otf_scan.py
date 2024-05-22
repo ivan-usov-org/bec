@@ -8,7 +8,6 @@ logger = bec_logger.logger
 
 class OTFScan(SyncFlyScanBase):
     scan_name = "otf_scan"
-    scan_report_hint = "table"
     required_kwargs = ["e1", "e2", "time"]
     arg_input = {}
     arg_bundle_size = {"bundle": len(arg_input), "min": None, "max": None}
@@ -66,7 +65,6 @@ class OTFScan(SyncFlyScanBase):
 
 class HystScan(ScanBase):
     scan_name = "hyst_scan"
-    scan_report_hint = "table"
     required_kwargs = []
     arg_input = {
         "field_motor": ScanArgType.DEVICE,

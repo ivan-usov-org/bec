@@ -12,7 +12,6 @@ def scan_obj(bec_client_mock):
         "arg_input": {"device": "device", "start": "float", "stop": "float"},
         "required_kwargs": ["step", "relative"],
         "arg_bundle_size": {"bundle": 3, "min": 2, "max": 2},
-        "scan_report_hint": "table",
         "doc": (
             "\n        A scan following Fermat's spiral.\n\n        Args:\n            *args: pairs"
             " of device / start position / end position / steps arguments\n            relative:"

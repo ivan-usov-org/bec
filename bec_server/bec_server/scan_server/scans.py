@@ -180,7 +180,6 @@ class RequestBase(ABC):
     """
 
     scan_name = ""
-    scan_report_hint = None
     arg_input = {"device": ScanArgType.DEVICE}
     arg_bundle_size = {"bundle": len(arg_input), "min": 1, "max": None}
     required_kwargs = []
@@ -318,7 +317,6 @@ class ScanBase(RequestBase, PathOptimizerMixin):
 
     Attributes:
         scan_name (str): name of the scan
-        scan_report_hint (str): hint for the scan report
         scan_type (str): scan type. Can be "step" or "fly"
         arg_input (list): list of scan argument types
         arg_bundle_size (dict):
@@ -330,7 +328,6 @@ class ScanBase(RequestBase, PathOptimizerMixin):
     """
 
     scan_name = ""
-    scan_report_hint = None
     scan_type = "step"
     arg_input = {"device": ScanArgType.DEVICE}
     arg_bundle_size = {"bundle": len(arg_input), "min": 1, "max": None}
@@ -633,7 +630,6 @@ class ScanStub(RequestBase):
 
 class OpenScanDef(ScanStub):
     scan_name = "open_scan_def"
-    scan_report_hint = None
     arg_input = {}
     arg_bundle_size = {"bundle": len(arg_input), "min": 0, "max": 0}
 
@@ -643,7 +639,6 @@ class OpenScanDef(ScanStub):
 
 class CloseScanDef(ScanStub):
     scan_name = "close_scan_def"
-    scan_report_hint = "table"
     arg_input = {}
     arg_bundle_size = {"bundle": len(arg_input), "min": 0, "max": 0}
 
@@ -664,7 +659,6 @@ class DeviceRPC(ScanStub):
     scan_name = "device_rpc"
     arg_input = [ScanArgType.DEVICE, ScanArgType.STR, ScanArgType.LIST, ScanArgType.DICT]
     arg_bundle_size = {"bundle": len(arg_input), "min": 1, "max": 1}
-    scan_report_hint = None
 
     def _get_scan_motors(self):
         pass
@@ -678,7 +672,6 @@ class Move(RequestBase):
     scan_name = "mv"
     arg_input = {"device": ScanArgType.DEVICE, "target": ScanArgType.FLOAT}
     arg_bundle_size = {"bundle": len(arg_input), "min": 1, "max": None}
-    scan_report_hint = None
     required_kwargs = ["relative"]
 
     def __init__(self, *args, relative=False, **kwargs):
@@ -728,19 +721,7 @@ class Move(RequestBase):
         self._check_limits()
 
     def scan_report_instructions(self):
-        if not self.scan_report_hint:
-            yield None
-            return
-        yield from self.stubs.scan_report_instruction(
-            {
-                "readback": {
-                    "RID": self.metadata["RID"],
-                    "devices": self.scan_motors,
-                    "start": self.start_pos,
-                    "end": self.positions[0],
-                }
-            }
-        )
+        yield None
 
     def run(self):
         self.initialize()
@@ -764,7 +745,6 @@ class UpdatedMove(Move):
     """
 
     scan_name = "umv"
-    scan_report_hint = "readback"
 
     def _at_each_point(self, pos=None):
         for ii, motor in enumerate(self.scan_motors):
@@ -775,10 +755,21 @@ class UpdatedMove(Move):
         for motor in self.scan_motors:
             yield from self.stubs.wait(wait_type="move", device=motor, wait_group="scan_motor")
 
+    def scan_report_instructions(self):
+        yield from self.stubs.scan_report_instruction(
+            {
+                "readback": {
+                    "RID": self.metadata["RID"],
+                    "devices": self.scan_motors,
+                    "start": self.start_pos,
+                    "end": self.positions[0],
+                }
+            }
+        )
+
 
 class Scan(ScanBase):
     scan_name = "grid_scan"
-    scan_report_hint = "table"
     arg_input = {
         "device": ScanArgType.DEVICE,
         "start": ScanArgType.FLOAT,
@@ -832,7 +823,6 @@ class Scan(ScanBase):
 
 class FermatSpiralScan(ScanBase):
     scan_name = "fermat_scan"
-    scan_report_hint = "table"
     required_kwargs = ["step", "relative"]
     arg_input = {
         "device": ScanArgType.DEVICE,
@@ -898,7 +888,6 @@ class FermatSpiralScan(ScanBase):
 
 class RoundScan(ScanBase):
     scan_name = "round_scan"
-    scan_report_hint = "table"
     required_kwargs = ["relative"]
     arg_input = {
         "motor_1": ScanArgType.DEVICE,
@@ -956,7 +945,6 @@ class RoundScan(ScanBase):
 
 class ContLineScan(ScanBase):
     scan_name = "cont_line_scan"
-    scan_report_hint = "table"
     required_kwargs = ["steps", "relative"]
     arg_input = {
         "device": ScanArgType.DEVICE,
@@ -1038,7 +1026,6 @@ class ContLineScan(ScanBase):
 
 class RoundScanFlySim(SyncFlyScanBase):
     scan_name = "round_scan_fly"
-    scan_report_hint = "table"
     scan_type = "fly"
     pre_move = False
     required_kwargs = ["relative"]
@@ -1120,7 +1107,6 @@ class RoundScanFlySim(SyncFlyScanBase):
 
 class RoundROIScan(ScanBase):
     scan_name = "round_roi_scan"
-    scan_report_hint = "table"
     required_kwargs = ["dr", "nth", "relative"]
     arg_input = {
         "motor_1": ScanArgType.DEVICE,
@@ -1175,7 +1161,6 @@ class RoundROIScan(ScanBase):
 
 class ListScan(ScanBase):
     scan_name = "list_scan"
-    scan_report_hint = "table"
     required_kwargs = ["relative"]
     arg_input = {"device": ScanArgType.DEVICE, "positions": ScanArgType.LIST}
     arg_bundle_size = {"bundle": len(arg_input), "min": 1, "max": None}
@@ -1208,7 +1193,6 @@ class ListScan(ScanBase):
 
 class TimeScan(ScanBase):
     scan_name = "time_scan"
-    scan_report_hint = "table"
     required_kwargs = ["points", "interval"]
     arg_input = {}
     arg_bundle_size = {"bundle": len(arg_input), "min": None, "max": None}
@@ -1275,7 +1259,6 @@ class TimeScan(ScanBase):
 
 class MonitorScan(ScanBase):
     scan_name = "monitor_scan"
-    scan_report_hint = "table"
     required_kwargs = ["relative"]
     arg_input = {
         "device": ScanArgType.DEVICE,
@@ -1367,7 +1350,6 @@ class MonitorScan(ScanBase):
 
 class Acquire(ScanBase):
     scan_name = "acquire"
-    scan_report_hint = "table"
     required_kwargs = []
     arg_input = {}
     arg_bundle_size = {"bundle": len(arg_input), "min": None, "max": None}
@@ -1429,7 +1411,6 @@ class Acquire(ScanBase):
 
 class LineScan(ScanBase):
     scan_name = "line_scan"
-    scan_report_hint = "table"
     required_kwargs = ["steps", "relative"]
     arg_input = {
         "device": ScanArgType.DEVICE,
@@ -1484,7 +1465,6 @@ class ScanComponent(ScanBase):
 
 class OpenInteractiveScan(ScanComponent):
     scan_name = "open_interactive_scan"
-    scan_report_hint = ""
     required_kwargs = []
     arg_input = {"device": ScanArgType.DEVICE}
     arg_bundle_size = {"bundle": len(arg_input), "min": 1, "max": None}
@@ -1528,7 +1508,6 @@ class OpenInteractiveScan(ScanComponent):
 
 class AddInteractiveScanPoint(ScanComponent):
     scan_name = "interactive_scan_trigger"
-    scan_report_hint = ""
     arg_input = {"device": ScanArgType.DEVICE}
     arg_bundle_size = {"bundle": len(arg_input), "min": 1, "max": None}
 
@@ -1575,7 +1554,6 @@ class AddInteractiveScanPoint(ScanComponent):
 
 class CloseInteractiveScan(ScanComponent):
     scan_name = "close_interactive_scan"
-    scan_report_hint = ""
     arg_input = {}
     arg_bundle_size = {"bundle": len(arg_input), "min": None, "max": None}
 

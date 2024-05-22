@@ -128,7 +128,6 @@ def test_create_device_data_storage(file_writer_manager_mock_with_dm):
                 "scan_number": 88,
                 "dataset_number": 88,
                 "exp_time": 0.1,
-                "scan_report_hint": "table",
                 "scan_report_devices": ["samx"],
                 "scan_msgs": [
                     "ScanQueueMessage(({'scan_type': 'monitor_scan', 'parameter': {'args': {'samx':"

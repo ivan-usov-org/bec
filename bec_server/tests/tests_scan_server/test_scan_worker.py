@@ -1109,7 +1109,6 @@ def test_initialize_scan_info(scan_worker_mock, msg):
         assert worker.current_scan_info["RID"] == "something"
         assert worker.current_scan_info["scan_number"] == 2
         assert worker.current_scan_info["dataset_number"] == 3
-        assert worker.current_scan_info["scan_report_hint"] == rb.scan.scan_report_hint
         assert worker.current_scan_info["scan_report_devices"] == rb.scan.scan_report_devices
         assert worker.current_scan_info["num_points"] == 100
         assert worker.current_scan_info["scan_msgs"] == []

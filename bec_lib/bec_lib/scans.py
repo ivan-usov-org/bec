@@ -105,19 +105,11 @@ class ScanObject:
             scans._scan_export.scans.append(report)
 
         if not hide_report and self.client.live_updates:
-            scan_report_type = self._get_scan_report_type(hide_report)
-            # call process_requests even if report_type is None
-            self.client.live_updates.process_request(request, scan_report_type, callback)
+            self.client.live_updates.process_request(request, callback)
 
         self.client.callbacks.poll()
 
         return report
-
-    def _get_scan_report_type(self, hide_report) -> str:
-        """get the scan report type"""
-        if hide_report:
-            return None
-        return self.scan_info.get("scan_report_hint")
 
     def _start_register(self, request: messages.ScanQueueMessage) -> ConsumerConnector:
         """Start a register for the given request"""

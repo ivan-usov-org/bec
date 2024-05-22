@@ -136,9 +136,7 @@ class IPythonLiveUpdates:
         ]
         return available_blocks
 
-    def process_request(
-        self, request: messages.ScanQueueMessage, scan_report_type: str, callbacks: any
-    ) -> None:
+    def process_request(self, request: messages.ScanQueueMessage, callbacks: any) -> None:
         """Process the request and report instructions."""
         # pylint: disable=protected-access
         try:
@@ -168,7 +166,7 @@ class IPythonLiveUpdates:
             self._reset()
 
         except ScanInterruption as scan_interr:
-            self._interrupted_request = (request, scan_report_type)
+            self._interrupted_request = (request,)
             if self._current_queue and self.client._service_config.abort_on_ctrl_c:
                 self._wait_for_cleanup()
             self._reset(forced=True)
