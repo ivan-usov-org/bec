@@ -104,7 +104,6 @@ However, `--start-servers` command line argument can be specified on pytest comm
     - could be `docker run ...` for example, otherwise it defaults to `redis-server`
 
 ### BEC client fixtures
-
 Depending how the new code interfaces with BEC, the following fixtures provide a `BECClient` object:
 
 - `bec_client_with_demo_config` is a fixture returning a `BECIPythonClient` object, which also initializes BEC with the demo config

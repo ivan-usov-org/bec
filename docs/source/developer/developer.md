@@ -4,27 +4,16 @@ Welcome to the developer/expert section of the BEC documentation! This section s
 
 ```{toctree}
 ---
-maxdepth: 1
+maxdepth: 2
 hidden: true
 ---
 
-architecture/
-contributing/
-install_developer_env/
-logs/
-vscode/
-bec_cli/
-bec_sim/
-bec_gui/
-bec_config/
-data_access/
-event_data/
-ophyd/
-external_sources/
-bec_plugins/
-scans/
+getting_started/getting_started.md
+devices/devices.md
+user_interfaces/user_interfaces.md
+data_access/data_access.md
+scans/scans.md
 glossary/
-reference/
 ```
 
 ***

@@ -1,9 +1,8 @@
 (developer.architecture)= 
 # Architecture
-
 BEC is an event-driven system with Redis as the central component for message passing with a service-oriented backend server. The backend server is composed of multiple smaller services that can be deployed independently. The services are connected to Redis and can communicate with each other solely through the message broker.
 
-```{figure} ../assets/bec_architecture.png
+```{figure} ../../assets/bec_architecture.png
 Architecture diagram. BEC relies on a service-oriented backend server with multiple smaller services and Redis as a central message broker and in-memory database. Moreover, any client can be considered as another service to the entire system with access to the same message broker instance. 
 ```
 

@@ -1,6 +1,5 @@
 (developer.bec_plugins)=
 # BEC Plugins
-
 BEC plugins are a way to extend the functionality of BEC. They are written in Python and can be used to add new features to BEC or to modify existing ones. This enables beamlines to customize BEC to their needs without having to modify the core code. Plugins can be used for various purposes but the most common ones are:
 * Adding new scan types
 * Adding new device types

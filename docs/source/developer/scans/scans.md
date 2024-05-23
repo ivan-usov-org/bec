@@ -1,5 +1,5 @@
 (developer.scans)=
-# BEC Scans
+# Scans
 BEC uses scans to orchestrate the data acquisition. While script-based scans can also be defined in the command-line interface, acquisitions that require more complex orchestration should be defined as scan plugins for the BEC scan server. This section describes the basic structure of a scan and how to create a scan plugin.
 
 ## Scan Structure

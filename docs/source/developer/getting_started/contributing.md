@@ -1,6 +1,5 @@
 (developer.contributing)=
 # Contributing
-
 Thank you for considering contributing to BEC! Contributions are essential for improving the project and helping it grow. 
 We welcome your bug reports and feature requests via [GitLab issues](https://gitlab.psi.ch/bec/bec/-/issues?sort=created_date&state=opened), as well as contribution for documentation improvements, and code extensions or improvements.
 

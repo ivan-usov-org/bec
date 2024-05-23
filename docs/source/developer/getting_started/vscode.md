@@ -14,7 +14,7 @@ Visual Studio Code (VSCode) relies heavily on extensions to provide additional f
 
 ## Configuration
 
-```{figure} ../assets/vscode_with_annotations.png
+```{figure} ../../assets/vscode_with_annotations.png
 :align: center
 :alt: VSCode editor with annotations
 :width: 800
@@ -55,7 +55,7 @@ Some services such as the device server, the file writer and the scan server are
 All services provide a `launch.py` file in their cli directory, e.g. `bec/bec_server/bec_server/device_server/cli/launch.py`. You can start the service by opening the `launch.py` file and then clicking on the "Debug" button in the top right corner of the window. This will start the service in debug mode, and you can see the output of the service in the Debug Console. 
 ```{note}
 The debug button looks like a play button with a bug on it. If you don't see the debug button, you can click on the "Run" menu and select "Start Debugging".
-````{figure} ../assets/vscode_debug_button.png
+````{figure} ../../assets/vscode_debug_button.png
 :align: center
 :alt: Debug button in VSCode
 :width: 400

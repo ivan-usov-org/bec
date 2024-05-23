@@ -51,11 +51,12 @@ To monitor the log messages of BEC, BEC provides a log monitor. The log monitor 
 bec-log-monitor
 ```
 
-```{note}
+````{note}
 If redis is running on a different host or port, you can specify the redis address via the `--redis` flag, e.g. 
 ```bash
 bec-log-monitor --redis my_bec_vm:6379
 ```
+````
 
 The log monitor also allows you to filter log messages by strings or regular expressions. To this end, you can specify the filter via the `--filter` flag, e.g. 
 
