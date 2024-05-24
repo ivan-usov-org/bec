@@ -20,7 +20,7 @@ The scan worker executes the scan instructions and if necessary publishes device
 ## Device Server
 This service provides a thin layer on top of Bluesky’s Ophyd library to support remote procedure calls (RPC) through Redis. 
 It listens to device instructions sent to Redis and performs the specified operations on [Ophyd objects](#developer.ophyd). 
-The available Ophyd objects are determined by loading a device configuration, either through the client, e.g., through yaml files, or from the connected database. 
+The available Ophyd objects are determined by loading a [device configuration](#developer.ophyd_device_config), typically by loading a YAML file from the command-line interface.
 Providing Ophyd objects through a service layer also facilitates sharing access to devices that require a direct socket connection, bypassing the EPICS layer. 
 
 ## Scan Bundler

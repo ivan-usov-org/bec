@@ -21,6 +21,8 @@ curr:
   softwareTrigger: false
 ```
 
+More examples of device configurations can be found in the [Ophyd devices repository](https://gitlab.psi.ch/bec/ophyd_devices/-/tree/main/ophyd_devices/configs).
+
 The following sections explain the different parts of the device configuration in more detail.
 
 * **deviceClass** \

@@ -9,7 +9,7 @@ A scan in BEC is a Python class that inherits from the `ScanBase` class and impl
 :icon: code-square
 :animate: fade-in-slide-down
 
-```{literalinclude} ../../../bec_server/bec_server/scan_server/scans.py
+```{literalinclude} ../../../../bec_server/bec_server/scan_server/scans.py
 :language: python
 :pyobject: ScanBase
 ```
@@ -17,7 +17,7 @@ A scan in BEC is a Python class that inherits from the `ScanBase` class and impl
 
 The order of execution is defined by the `run` method, which is called by the scan server. By default, the `run` method calls the following methods in the following order:
 
-```{literalinclude} ../../../bec_server/bec_server/scan_server/scans.py
+```{literalinclude} ../../../../bec_server/bec_server/scan_server/scans.py
 :language: python
 :pyobject: ScanBase.run
 ```
@@ -37,7 +37,7 @@ After reading out the current scan motor positions with `read_scan_motors`, the 
 
 The default implementation of the `prepare_positions` method in the `ScanBase` class is as follows:
 
-```{literalinclude} ../../../bec_server/bec_server/scan_server/scans.py
+```{literalinclude} ../../../../bec_server/bec_server/scan_server/scans.py
 :language: python
 :pyobject: ScanBase.prepare_positions
 ``` 
@@ -51,7 +51,7 @@ New scans that only require a new way of calculating the positions can simply ov
 :icon: code-square
 :animate: fade-in-slide-down
 
-```{literalinclude} ../../../bec_server/bec_server/scan_server/scans.py
+```{literalinclude} ../../../../bec_server/bec_server/scan_server/scans.py
 :language: python
 :pyobject: FermatSpiralScan
 ```
@@ -70,7 +70,7 @@ Once all devices are staged and thus ready for the upcoming scan, a baseline rea
 
 It is sometimes necessary to perform additional operations before the core of the scan is executed. In BEC, these operations can be implemented in the `pre_scan` method:
 
-```{literalinclude} ../../../bec_server/bec_server/scan_server/scans.py
+```{literalinclude} ../../../../bec_server/bec_server/scan_server/scans.py
 :language: python
 :pyobject: ScanBase.pre_scan
 ```
@@ -79,14 +79,14 @@ If the class attribute `pre_move` is set to `True`, the default `pre_scan` metho
 
 Now that all motors are ready and in position, we are finally ready to start the core of the scan. This is done by calling the `scan_core` method. Its default implementation is quite simple:
 
-```{literalinclude} ../../../bec_server/bec_server/scan_server/scans.py
+```{literalinclude} ../../../../bec_server/bec_server/scan_server/scans.py
 :language: python
 :pyobject: ScanBase.scan_core
 ```
 
 For each position in the scan, the method `_at_each_point` is called, providing the current index and a list of positions. The default implementation of `_at_each_point` performs the following actions:
 
-```{literalinclude} ../../../bec_server/bec_server/scan_server/scans.py
+```{literalinclude} ../../../../bec_server/bec_server/scan_server/scans.py
 :language: python
 :pyobject: ScanBase._at_each_point
 ```
@@ -135,7 +135,7 @@ The following example shows the configuration of the line scan:
 :icon: code-square
 :animate: fade-in-slide-down
 
-```{literalinclude} ../../../bec_server/bec_server/scan_server/scans.py
+```{literalinclude} ../../../../bec_server/bec_server/scan_server/scans.py
 :language: python
 :pyobject: LineScan
 ```
@@ -152,7 +152,7 @@ Both types of fly scans provide dedicated base classes that can and should be us
 :icon: code-square
 :animate: fade-in-slide-down
 
-```{literalinclude} ../../../bec_server/bec_server/scan_server/scans.py
+```{literalinclude} ../../../../bec_server/bec_server/scan_server/scans.py
 :language: python
 :pyobject: SyncFlyScanBase
 ```
@@ -164,7 +164,7 @@ Both types of fly scans provide dedicated base classes that can and should be us
 :icon: code-square
 :animate: fade-in-slide-down
 
-```{literalinclude} ../../../bec_server/bec_server/scan_server/scans.py
+```{literalinclude} ../../../../bec_server/bec_server/scan_server/scans.py
 :language: python
 :pyobject: AsyncFlyScanBase
 ```

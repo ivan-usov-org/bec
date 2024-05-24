@@ -1,10 +1,16 @@
 (developer.devices)=
 # Devices
+Whether new devices need to be added to BEC or existing devices need to be modified, the daily operation of beamlines at large-scale facilities depends on the ability change the behavior and configuration of devices. This section provides information on how to configure and use devices in BEC.
+
+After an introduction to the [Ophyd libary](ophyd/ophyd.md), the section [device configuration](device_configuration/device_configuration.md) explains how to configure devices in BEC and how to load new configs. 
+
+A dedicated section on the [BEC simulation framework](bec_sim/bec_sim.md) explains how to simulate devices in BEC, either for testing or for development purposes. Finally, a section on [external sources](external_sources/external_sources.md) explains how to deal with external data sources in BEC. 
 
 
 ```{toctree}
 ---
 maxdepth: 2
+hidden: true
 ---
 ophyd/
 device_configuration/

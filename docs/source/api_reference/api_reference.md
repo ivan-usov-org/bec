@@ -1,3 +1,4 @@
+(api_reference)=
 # API Reference
 
 ```{eval-rst}
