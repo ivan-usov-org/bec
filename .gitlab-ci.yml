@@ -456,22 +456,11 @@ semver:
 
 dev-pages:
   stage: Deploy
-  needs: ["formatter"]
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-    - if: '$CI_PIPELINE_SOURCE == "web"'
-    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
-    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
-    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
+  allow_failure: true
+  when: manual
   script:
     - git config --global user.name "ci_update_bot"
     - git config --global user.email "ci_update_bot@bec.ch"
-    # - git tag -l | xargs git tag -d
-    # - git fetch --tags
-    # - git tag -d development || true
-    # - git push https://oauth2:$CI_DEV_DEPLOY@gitlab.psi.ch/bec/bec.git :refs/tags/development || true
-    # - git tag development $CI_COMMIT_SHA
-    # - git push https://oauth2:$CI_DEV_DEPLOY@gitlab.psi.ch/bec/bec.git development
     
     - git fetch --all
     - git branch -a | grep MR_DEV_BRANCH
