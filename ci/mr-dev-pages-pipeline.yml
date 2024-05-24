@@ -1,4 +1,7 @@
 
+stages:
+  - Deploy
+
 dev-pages:
   stage: Deploy
   needs: []

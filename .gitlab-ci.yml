@@ -1,7 +1,19 @@
-
+# This file is a template, and might need editing before it works on your project.
+# Official language image. Look for the different tagged releases at:
+# https://hub.docker.com/r/library/python/tags/
+image: $CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/python:3.10
+#commands to run in the Docker container before starting each job.
+variables:
+  DOCKER_TLS_CERTDIR: ""
+  OPHYD_DEVICES_BRANCH: "main"
+  BEC_WIDGETS_BRANCH: "main"
+  CSAXS_BEC_BRANCH: "main"
+  PXIII_BEC_BRANCH: "main"
+  DEBYE_BEC_BRANCH: "main"
+  TOMCAT_BEC_BRANCH: "main"
 
 include:
-  - local: './ci/default-pipeline.yml'
+  - local: /ci/default-pipeline.yml
     rules:
       - if: '$CI_PIPELINE_SOURCE == "schedule"'
       - if: '$CI_PIPELINE_SOURCE == "web"'
@@ -13,6 +25,6 @@ include:
       - if: $CI_COMMIT_BRANCH
       - if: '$CI_COMMIT_REF_NAME == "MR_DEV_BRANCH"'
         when: never
-  - local: './ci/mr-dev-pages-pipeline.yml'
+  - local: /ci/mr-dev-pages-pipeline.yml
     rules:
       - if: '$CI_COMMIT_REF_NAME == "MR_DEV_BRANCH"'
