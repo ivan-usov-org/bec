@@ -53,11 +53,12 @@ Before you start a service from VSCode, you need to ensure that the service is i
 Some services such as the device server, the file writer and the scan server are actively checking if another instance of the service is already running. If you start a service that is ought to be unique, you will get an error message saying that another instance of the service is already running. Please make sure to stop the service before starting a new instance.
 ```
 All services provide a `launch.py` file in their cli directory, e.g. `bec/bec_server/bec_server/device_server/cli/launch.py`. You can start the service by opening the `launch.py` file and then clicking on the "Debug" button in the top right corner of the window. This will start the service in debug mode, and you can see the output of the service in the Debug Console. 
-```{note}
+````{note}
 The debug button looks like a play button with a bug on it. If you don't see the debug button, you can click on the "Run" menu and select "Start Debugging".
-````{figure} ../../assets/vscode_debug_button.png
+```{figure} ../../assets/vscode_debug_button.png
 :align: center
 :alt: Debug button in VSCode
 :width: 400
 ```
+````
 
