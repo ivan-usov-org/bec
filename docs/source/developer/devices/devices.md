@@ -6,6 +6,9 @@ After an introduction to the [Ophyd libary](ophyd/ophyd.md), the section [device
 
 A dedicated section on the [BEC simulation framework](bec_sim/bec_sim.md) explains how to simulate devices in BEC, either for testing or for development purposes. Finally, a section on [external sources](external_sources/external_sources.md) explains how to deal with external data sources in BEC. 
 
+```{note}
+Before you start, make sure you have familiarized yourself with the [user interfaces for managing devices in BEC](#user.devices).
+```
 
 ```{toctree}
 ---
