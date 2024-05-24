@@ -3,7 +3,7 @@
 BEC uses scans to orchestrate the data acquisition. While script-based scans can also be defined in the command-line interface, acquisitions that require more complex orchestration should be defined as scan plugins for the BEC scan server. This section describes the basic structure of a scan and how to create a scan plugin.
 
 ## Scan Structure
-A scan in BEC is a Python class that inherits from the `ScanBase` class and implements methods that should be executed in a specific order.
+A scan in BEC is a Python class that inherits from the [`ScanBase`](/api_reference/_autosummary/bec_server.scan_server.scans.ScanBase.rst#bec_server.scan_server.scans.ScanBase) class and implements methods that should be executed in a specific order.
 
 ````{dropdown} View code: ScanBase class
 :icon: code-square
@@ -15,7 +15,7 @@ A scan in BEC is a Python class that inherits from the `ScanBase` class and impl
 ```
 ````
 
-The order of execution is defined by the `run` method, which is called by the scan server. By default, the `run` method calls the following methods in the following order:
+The order of execution is defined by the [`run`](/api_reference/_autosummary/bec_server.scan_server.scans.ScanBase.rst#bec_server.scan_server.scans.ScanBase.run) method, which is called by the scan server. By default, the `run` method calls the following methods in the following order:
 
 ```{literalinclude} ../../../../bec_server/bec_server/scan_server/scans.py
 :language: python
@@ -174,32 +174,32 @@ Both types of fly scans provide dedicated base classes that can and should be us
 In order to simplify the creation of new scans, BEC provides a set of scan stubs that can be used as building blocks for new scans. The scan stubs are located in `bec_server/bec_server/scan_server/scan_stubs.py`. The following scan stubs are available:
 
 *Device operations*
-- [`set_and_wait`](./_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.set_and_wait) Set a device to a value and wait for it to finish.
-- [`read_and_wait`](./_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.read_and_wait) Read a device and wait for it to finish.
-- [`stage`](./_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.stage) Stage a device.
-- [`unstage`](./_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.unstage) Unstage a device.
-- [`kickoff`](./_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.kickoff) Kickoff a device. Usually only needed for fly scans.
-- [`complete`](./_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.complete) Wait for a device to finish.
-- [`get_req_status`](./_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.get_req_status) Check if a device request status matches the given RID and DIID.
-- [`get_device_progress`](./_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.get_device_progress) Get the progress of a device. 
-- [`pre_scan`](./_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.pre_scan) Trigger the pre_scan method of a device.
-- [`baseline_reading`](./_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.baseline_reading) Trigger the baseline readings. 
-- [`wait`](./_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.wait) Wait for an event to finish. Could be a trigger, a readout or a movement. 
-- [`read`](./_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.read) Read from a device.
-- [`trigger`](./_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.trigger) Trigger a device.
-- [`set`](./_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.set) Set a device to a value.
-- [`rpc`](./_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.rpc) Send an RPC command to a device.
-- [`send_rpc_and_wait`](./_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.send_rpc_and_wait) Send an RPC command to a device and wait for it to finish.
+- [`set_and_wait`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.set_and_wait) Set a device to a value and wait for it to finish.
+- [`read_and_wait`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.read_and_wait) Read a device and wait for it to finish.
+- [`stage`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.stage) Stage a device.
+- [`unstage`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.unstage) Unstage a device.
+- [`kickoff`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.kickoff) Kickoff a device. Usually only needed for fly scans.
+- [`complete`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.complete) Wait for a device to finish.
+- [`get_req_status`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.get_req_status) Check if a device request status matches the given RID and DIID.
+- [`get_device_progress`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.get_device_progress) Get the progress of a device. 
+- [`pre_scan`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.pre_scan) Trigger the pre_scan method of a device.
+- [`baseline_reading`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.baseline_reading) Trigger the baseline readings. 
+- [`wait`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.wait) Wait for an event to finish. Could be a trigger, a readout or a movement. 
+- [`read`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.read) Read from a device.
+- [`trigger`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.trigger) Trigger a device.
+- [`set`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.set) Set a device to a value.
+- [`rpc`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.rpc) Send an RPC command to a device.
+- [`send_rpc_and_wait`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.send_rpc_and_wait) Send an RPC command to a device and wait for it to finish.
 
 *Scan operations*
-- [`open_scan`](./_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.open_scan) Open a scan.
-- [`close_scan`](./_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.close_scan) Close a scan. 
-- [`publish_data_as_read`](./_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.publish_data_as_read) Publish data as read.
-- [`open_scan_def`](./_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.open_scan_def) Open a scan definition. 
-- [`close_scan_def`](./_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.close_scan_def) Close a scan definition. 
-- [`scan_report_instruction`](./_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.scan_report_instruction) Update the scan report instruction.
+- [`open_scan`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.open_scan) Open a scan.
+- [`close_scan`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.close_scan) Close a scan. 
+- [`publish_data_as_read`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.publish_data_as_read) Publish data as read.
+- [`open_scan_def`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.open_scan_def) Open a scan definition. 
+- [`close_scan_def`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.close_scan_def) Close a scan definition. 
+- [`scan_report_instruction`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.scan_report_instruction) Update the scan report instruction.
 
-More information on the scan stubs can be found in the [API reference](./_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs).
+More information on the scan stubs can be found in the [API reference](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs).
 
 
 
