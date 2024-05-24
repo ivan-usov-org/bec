@@ -5,7 +5,7 @@ recommonmark
 sphinx-toolbox
 pydata-sphinx-theme
 sphinx-copybutton
-myst-parser
+myst-parser[linkify]
 sphinx-design
 bec_server
 bec_ipython_client

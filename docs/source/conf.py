@@ -54,6 +54,7 @@ myst_enable_extensions = [
     "strikethrough",
     "substitution",
     "tasklist",
+    "linkify",
 ]
 
 autosummary_generate = True  # Turn on sphinx.ext.autosummary
