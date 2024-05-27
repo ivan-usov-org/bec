@@ -7,6 +7,7 @@ from typing import Any, Literal
 
 import numpy as np
 
+from bec_lib.device import DeviceBase
 from bec_lib.devicemanager import DeviceManagerBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
@@ -329,8 +330,8 @@ class ScanBase(RequestBase, PathOptimizerMixin):
 
     scan_name = ""
     scan_type = "step"
-    arg_input = {"device": ScanArgType.DEVICE}
-    arg_bundle_size = {"bundle": len(arg_input), "min": 1, "max": None}
+    arg_input = {}
+    arg_bundle_size = {"bundle": len(arg_input), "min": None, "max": None}
     required_kwargs = ["required"]
     return_to_start_after_abort = True
 
@@ -405,7 +406,6 @@ class ScanBase(RequestBase, PathOptimizerMixin):
     @abstractmethod
     def _calculate_positions(self) -> None:
         """Calculate the positions"""
-        pass
 
     def _optimize_trajectory(self):
         if not self.optim_trajectory:
@@ -626,8 +626,6 @@ class ScanStub(RequestBase):
 
 class OpenScanDef(ScanStub):
     scan_name = "open_scan_def"
-    arg_input = {}
-    arg_bundle_size = {"bundle": len(arg_input), "min": 0, "max": 0}
 
     def run(self):
         yield from self.stubs.open_scan_def()
@@ -635,8 +633,6 @@ class OpenScanDef(ScanStub):
 
 class CloseScanDef(ScanStub):
     scan_name = "close_scan_def"
-    arg_input = {}
-    arg_bundle_size = {"bundle": len(arg_input), "min": 0, "max": 0}
 
     def run(self):
         yield from self.stubs.close_scan_def()
@@ -644,8 +640,6 @@ class CloseScanDef(ScanStub):
 
 class CloseScanGroup(ScanStub):
     scan_name = "close_scan_group"
-    arg_input = {}
-    arg_bundle_size = {"bundle": len(arg_input), "min": 0, "max": 0}
 
     def run(self):
         yield from self.stubs.close_scan_group()
@@ -653,7 +647,12 @@ class CloseScanGroup(ScanStub):
 
 class DeviceRPC(ScanStub):
     scan_name = "device_rpc"
-    arg_input = [ScanArgType.DEVICE, ScanArgType.STR, ScanArgType.LIST, ScanArgType.DICT]
+    arg_input = {
+        "device": ScanArgType.DEVICE,
+        "func": ScanArgType.STR,
+        "args": ScanArgType.LIST,
+        "kwargs": ScanArgType.DICT,
+    }
     arg_bundle_size = {"bundle": len(arg_input), "min": 1, "max": 1}
 
     def _get_scan_motors(self):
@@ -820,16 +819,15 @@ class Scan(ScanBase):
 class FermatSpiralScan(ScanBase):
     scan_name = "fermat_scan"
     required_kwargs = ["step", "relative"]
-    arg_input = {
-        "device": ScanArgType.DEVICE,
-        "start": ScanArgType.FLOAT,
-        "stop": ScanArgType.FLOAT,
-    }
-    arg_bundle_size = {"bundle": len(arg_input), "min": 2, "max": 2}
 
     def __init__(
         self,
-        *args,
+        motor1: DeviceBase,
+        start_motor1: float,
+        stop_motor1: float,
+        motor2: DeviceBase,
+        start_motor2: float,
+        stop_motor2: float,
         step: float = 0.1,
         exp_time: float = 0,
         settling_time: float = 0,
@@ -861,6 +859,12 @@ class FermatSpiralScan(ScanBase):
         """
         super().__init__(**kwargs)
         self.axis = []
+        self.motor1 = motor1
+        self.motor2 = motor2
+        self.start_motor1 = start_motor1
+        self.stop_motor1 = stop_motor1
+        self.start_motor2 = start_motor2
+        self.stop_motor2 = stop_motor2
         self.step = step
         self.exp_time = exp_time
         self.settling_time = settling_time
@@ -870,12 +874,11 @@ class FermatSpiralScan(ScanBase):
         self.optim_trajectory = optim_trajectory
 
     def _calculate_positions(self):
-        params = list(self.caller_args.values())
         self.positions = get_fermat_spiral_pos(
-            params[0][0],
-            params[0][1],
-            params[1][0],
-            params[1][1],
+            self.start_motor1,
+            self.stop_motor1,
+            self.start_motor2,
+            self.stop_motor2,
             step=self.step,
             spiral_type=self.spiral_type,
             center=False,
@@ -885,25 +888,15 @@ class FermatSpiralScan(ScanBase):
 class RoundScan(ScanBase):
     scan_name = "round_scan"
     required_kwargs = ["relative"]
-    arg_input = {
-        "motor_1": ScanArgType.DEVICE,
-        "motor_2": ScanArgType.DEVICE,
-        "inner_ring": ScanArgType.FLOAT,
-        "outer_ring": ScanArgType.FLOAT,
-        "number_of_rings": ScanArgType.INT,
-        "number_of_positions_in_first_ring": ScanArgType.INT,
-    }
-    arg_bundle_size = {"bundle": len(arg_input), "min": 1, "max": 1}
 
     def __init__(
         self,
-        motor_1,
-        motor2,
+        motor_1: DeviceBase,
+        motor2: DeviceBase,
         inner_ring: float,
         outer_ring: float,
         number_of_rings: int,
         pos_in_first_ring: int,
-        *args,
         relative: bool = False,
         burst_at_each_point: int = 1,
         **kwargs,
@@ -912,7 +905,12 @@ class RoundScan(ScanBase):
         A scan following a round shell-like pattern.
 
         Args:
-            *args: motor1, motor2, inner ring, outer ring, number of rings, number of positions in the first ring
+            motor_1 (DeviceBase): first motor
+            motor2 (DeviceBase): second motor
+            inner_ring (float): inner radius
+            outer_ring (float): outer radius
+            number_of_rings (int): number of rings
+            pos_in_first_ring (int): number of positions in the first ring
             relative (bool): if True, the motors will be moved relative to their current position. Default is False.
             burst_at_each_point (int): number of exposures at each point. Default is 1.
 
@@ -927,15 +925,23 @@ class RoundScan(ScanBase):
         self.relative = relative
         self.burst_at_each_point = burst_at_each_point
         self.axis = []
+        self.motor_1 = motor_1
+        self.motor_2 = motor2
+        self.inner_ring = inner_ring
+        self.outer_ring = outer_ring
+        self.number_of_rings = number_of_rings
+        self.pos_in_first_ring = pos_in_first_ring
 
     def _get_scan_motors(self):
         caller_args = list(self.caller_args.items())[0]
         self.scan_motors = [caller_args[0], caller_args[1][0]]
 
     def _calculate_positions(self):
-        params = list(self.caller_args.values())[0]
         self.positions = get_round_scan_positions(
-            r_in=params[1], r_out=params[2], nr=params[3], nth=params[4]
+            r_in=self.inner_ring,
+            r_out=self.outer_ring,
+            nr=self.number_of_rings,
+            nth=self.pos_in_first_ring,
         )
 
 
