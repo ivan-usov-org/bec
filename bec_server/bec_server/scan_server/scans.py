@@ -181,8 +181,8 @@ class RequestBase(ABC):
     """
 
     scan_name = ""
-    arg_input = {"device": ScanArgType.DEVICE}
-    arg_bundle_size = {"bundle": len(arg_input), "min": 1, "max": None}
+    arg_input = {}
+    arg_bundle_size = {"bundle": len(arg_input), "min": None, "max": None}
     required_kwargs = []
     return_to_start_after_abort = False
 
@@ -330,8 +330,6 @@ class ScanBase(RequestBase, PathOptimizerMixin):
 
     scan_name = ""
     scan_type = "step"
-    arg_input = {}
-    arg_bundle_size = {"bundle": len(arg_input), "min": None, "max": None}
     required_kwargs = ["required"]
     return_to_start_after_abort = True
 
