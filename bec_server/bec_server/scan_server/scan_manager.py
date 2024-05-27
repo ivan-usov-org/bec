@@ -1,6 +1,7 @@
 import inspect
 
 from bec_lib import plugin_helper
+from bec_lib.device import DeviceBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
 from bec_lib.messages import AvailableResourceMessage
@@ -74,12 +75,32 @@ class ScanManager:
             self.available_scans[scan_cls.scan_name] = {
                 "class": scan_cls.__name__,
                 "base_class": base_cls,
-                "arg_input": scan_cls.arg_input,
+                "arg_input": self.convert_arg_input(scan_cls.arg_input),
                 "required_kwargs": scan_cls.required_kwargs,
                 "arg_bundle_size": scan_cls.arg_bundle_size,
                 "doc": scan_cls.__doc__ or scan_cls.__init__.__doc__,
                 "signature": signature_to_dict(scan_cls.__init__),
             }
+
+    def convert_arg_input(self, arg_input) -> dict:
+        """
+        Convert the arg_input to supported data types
+
+        Args:
+            arg_input: dict
+
+        Returns:
+            dict: converted arg_input
+        """
+        for key, value in arg_input.items():
+            if isinstance(value, ScanServerScans.ScanArgType):
+                continue
+            if issubclass(value, DeviceBase):
+                # once we have generalized the device types, this should be removed
+                arg_input[key] = "device"
+            else:
+                arg_input[key] = value.__name__
+        return arg_input
 
     def publish_available_scans(self):
         """send all available scans to the broker"""
