@@ -1049,8 +1049,10 @@ def test_pre_scan_macro():
         parameter={"args": {"samx": (-5, 5), "samy": (-5, 5)}, "kwargs": {"step": 3}},
         queue="primary",
     )
+    args = unpack_scan_args(scan_msg.content.get("parameter", {}).get("args", []))
+    kwargs = scan_msg.content.get("parameter", {}).get("kwargs", {})
     request = FermatSpiralScan(
-        device_manager=device_manager, parameter=scan_msg.content["parameter"]
+        *args, device_manager=device_manager, parameter=scan_msg.content["parameter"], **kwargs
     )
     with mock.patch.object(
         request.device_manager.connector,
@@ -1184,8 +1186,10 @@ def test_get_func_name_from_macro():
         parameter={"args": {"samx": (-5, 5), "samy": (-5, 5)}, "kwargs": {"step": 3}},
         queue="primary",
     )
+    args = unpack_scan_args(scan_msg.content.get("parameter", {}).get("args", []))
+    kwargs = scan_msg.content.get("parameter", {}).get("kwargs", {})
     request = FermatSpiralScan(
-        device_manager=device_manager, parameter=scan_msg.content["parameter"]
+        *args, device_manager=device_manager, parameter=scan_msg.content["parameter"], **kwargs
     )
     assert request._get_func_name_from_macro(macros[0].decode().strip()) == "pre_scan_macro"
 
@@ -1193,13 +1197,17 @@ def test_get_func_name_from_macro():
 def test_scan_report_devices():
     device_manager = DMMock()
     device_manager.add_device("samx")
+    device_manager.add_device("samy")
     scan_msg = messages.ScanQueueMessage(
         scan_type="fermat_scan",
         parameter={"args": {"samx": (-5, 5), "samy": (-5, 5)}, "kwargs": {"step": 3}},
         queue="primary",
     )
+    args = unpack_scan_args(scan_msg.content.get("parameter", {}).get("args", []))
+    kwargs = scan_msg.content.get("parameter", {}).get("kwargs", {})
+
     request = FermatSpiralScan(
-        device_manager=device_manager, parameter=scan_msg.content["parameter"]
+        *args, device_manager=device_manager, parameter=scan_msg.content["parameter"], **kwargs
     )
     assert set(request.scan_report_devices) == set(["samx", "samy"])
 
@@ -1317,27 +1325,31 @@ def test_scan_base_init():
 def test_scan_base_set_position_offset():
     device_manager = DMMock()
     device_manager.add_device("samx")
+    device_manager.add_device("samy")
 
     scan_msg = messages.ScanQueueMessage(
         scan_type="fermat_scan",
-        parameter={"args": {"samx": (-5, 5), "samy": (-5, 5)}, "kwargs": {"step": 3}},
+        parameter={
+            "args": {"samx": (-5, 5), "samy": (-5, 5)},
+            "kwargs": {"step": 3, "relative": False},
+        },
         queue="primary",
     )
+
+    args = unpack_scan_args(scan_msg.content.get("parameter", {}).get("args", []))
+    kwargs = scan_msg.content.get("parameter", {}).get("kwargs", {})
     request = FermatSpiralScan(
-        device_manager=device_manager, parameter=scan_msg.content["parameter"]
+        *args, device_manager=device_manager, parameter=scan_msg.content["parameter"], **kwargs
     )
 
     assert request.positions == []
     request._set_position_offset()
     assert request.positions == []
 
-    request.relative == True
+    assert request.relative is False
     request._set_position_offset()
 
-    start_pos_ref = [0, 0]
-    request.positions += start_pos_ref
-    assert request.positions == [0, 0]
-    assert request.start_pos == start_pos_ref
+    assert request.start_pos == [0, 0]
 
 
 def test_round_scan_fly_sim_get_scan_motors():

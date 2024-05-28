@@ -996,7 +996,7 @@ class ContLineScan(ScanBase):
             self.axis.append(ax_pos)
         self.positions = np.array(list(zip(*self.axis)))
 
-    def _at_each_point(self):
+    def _at_each_point(self, _pos=None):
         yield from self.stubs.trigger(group="trigger", point_id=self.point_id)
         yield from self.stubs.read(group="primary", wait_group="primary", point_id=self.point_id)
         self.point_id += 1
@@ -1194,8 +1194,6 @@ class ListScan(ScanBase):
 class TimeScan(ScanBase):
     scan_name = "time_scan"
     required_kwargs = ["points", "interval"]
-    arg_input = {}
-    arg_bundle_size = {"bundle": len(arg_input), "min": None, "max": None}
 
     def __init__(
         self,
@@ -1351,8 +1349,6 @@ class MonitorScan(ScanBase):
 class Acquire(ScanBase):
     scan_name = "acquire"
     required_kwargs = []
-    arg_input = {}
-    arg_bundle_size = {"bundle": len(arg_input), "min": None, "max": None}
 
     def __init__(self, *args, exp_time: float = 0, burst_at_each_point: int = 1, **kwargs):
         """

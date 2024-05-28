@@ -267,7 +267,7 @@ class Scans:
 
         """
         if not bundle_size:
-            return [cmd.name if hasattr(cmd, "name") else cmd for cmd in args]
+            return tuple(cmd.name if hasattr(cmd, "name") else cmd for cmd in args)
         params = {}
         for cmds in partition(bundle_size, args):
             cmds_serialized = [cmd.name if hasattr(cmd, "name") else cmd for cmd in cmds]
