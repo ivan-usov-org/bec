@@ -2,6 +2,13 @@
 
 
 
+## v2.12.5 (2024-05-28)
+
+### Fix
+
+* fix: remove deprecated arg speed from deviceconfig ([`67f0bea`](https://gitlab.psi.ch/bec/bec/-/commit/67f0beac75bbeecf69768662e373b96a0839f122))
+
+
 ## v2.12.4 (2024-05-28)
 
 ### Ci
@@ -147,14 +154,6 @@ User scripts from plugins were still relying on the old plugin structure ([`3264
 
 ## v2.10.2 (2024-05-08)
 
-### Ci
-
-* ci: added ds pipeline for tomcat ([`55d210c`](https://gitlab.psi.ch/bec/bec/-/commit/55d210c7ae06ea509328510e6aec636caf009cfd))
-
 ### Fix
 
 * fix(RedisConnector): add &#39;from_start&#39; support in &#39;register&#39; for streams ([`f059bf9`](https://gitlab.psi.ch/bec/bec/-/commit/f059bf9318038404ebbcc82b5abf5cd148486021))
-
-### Refactor
-
-* refactor(bec_startup): default gui is BECDockArea (gui variable) with fig in first dock ([`7dc2426`](https://gitlab.psi.ch/bec/bec/-/commit/7dc242689f0966d692d3aeb77ca7689ea8709680))
