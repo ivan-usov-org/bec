@@ -152,7 +152,7 @@ class PluginStructure:
         self.create_dir("tests/tests_bec_ipython_client")
         self.copy_tests_readme("tests/tests_bec_ipython_client")
         self.create_dir("tests/tests_dap_services")
-        self.copy_tests_readme("tests/tests_services")
+        self.copy_tests_readme("tests/tests_dap_services")
         self.create_dir("tests/tests_bec_widgets")
         self.copy_tests_readme("tests/tests_bec_widgets")
         self.create_dir("tests/tests_devices")
