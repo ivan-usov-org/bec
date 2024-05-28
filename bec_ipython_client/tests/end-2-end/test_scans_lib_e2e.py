@@ -153,7 +153,6 @@ def test_dap_fit(bec_client_lib):
                     "deviceConfig": {
                         "delay": 1,
                         "limits": [-50, 50],
-                        "speed": 100,
                         "tolerance": 0.01,
                         "update_frequency": 400,
                     },
@@ -181,7 +180,6 @@ def test_dap_fit(bec_client_lib):
                     "deviceConfig": {
                         "delay": 1,
                         "limits": [-50, 50],
-                        "speed": 100,
                         "tolerance": 0.01,
                         "update_frequency": 400,
                     },
