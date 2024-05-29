@@ -132,7 +132,12 @@ class LiveUpdatesReadbackProgressbar(LiveUpdatesBase):
                     msg.metadata["RID"] if (msg and msg.metadata.get("RID")) else None
                     for msg in msgs
                 ]
-                if set(request_ids) != set([self.request.metadata["RID"]]):
+
+                if self.report_instruction:
+                    compare_rids = set([self.report_instruction["readback"]["RID"]])
+                else:
+                    compare_rids = set([self.request.metadata["RID"]])
+                if set(request_ids) != set(compare_rids):
                     progress.sleep()
                     continue
 
