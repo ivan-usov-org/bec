@@ -122,3 +122,21 @@ def test_device_progress(stubs, msg, ret_value, raised_error):
         return
     with mock.patch.object(stubs.connector, "get", return_value=msg):
         assert stubs.get_device_progress(device="samx", RID="rid") == ret_value
+
+
+def test_set_with_response(stubs):
+    out = stubs.set_with_response(device="samx", value=5, request_id="rid")
+    assert list(out) == [
+        messages.DeviceInstructionMessage(
+            metadata={"response": True, "RID": "rid"},
+            device="samx",
+            action="set",
+            parameter={"value": 5, "wait_group": "set"},
+        )
+    ]
+
+
+def test_request_is_completed(stubs):
+    with mock.patch.object(stubs.connector, "lrange", side_effect=[[], ["msg"]]):
+        assert stubs.request_is_completed("rid") is False
+        assert stubs.request_is_completed("rid") is True
