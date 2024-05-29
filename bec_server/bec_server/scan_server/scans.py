@@ -2,6 +2,7 @@ import ast
 import enum
 import threading
 import time
+import uuid
 from abc import ABC, abstractmethod
 from typing import Any, Literal
 
@@ -185,6 +186,7 @@ class RequestBase(ABC):
     arg_bundle_size = {"bundle": len(arg_input), "min": None, "max": None}
     required_kwargs = []
     return_to_start_after_abort = False
+    use_scan_progress_report = False
 
     def __init__(
         self,
@@ -332,6 +334,7 @@ class ScanBase(RequestBase, PathOptimizerMixin):
     scan_type = "step"
     required_kwargs = ["required"]
     return_to_start_after_abort = True
+    use_scan_progress_report = True
 
     # perform pre-move action before the pre_scan trigger is sent
     pre_move = True
@@ -375,7 +378,7 @@ class ScanBase(RequestBase, PathOptimizerMixin):
 
         self.start_pos = np.repeat(0, len(self.scan_motors)).tolist()
         self.positions = []
-        self.num_pos = None
+        self.num_pos = 0
 
         if self.scan_name == "":
             raise ValueError("scan_name cannot be empty")
@@ -965,7 +968,8 @@ class ContLineScan(ScanBase):
         **kwargs,
     ):
         """
-        A line scan for one or more motors.
+        A continuous line scan. Use this scan if you want to move a motor continuously from start to stop position whilst
+        acquiring data at predefined positions. The scan will abort if the motor moves too fast and a point is skipped.
 
         Args:
             *args (Device, float, float): pairs of device / start position / end position
@@ -1024,28 +1028,116 @@ class ContLineScan(ScanBase):
                 raise ScanAbortion(f"Skipped point {self.point_id + 1}")
 
 
+class ContLineFlyScan(AsyncFlyScanBase):
+    scan_name = "cont_line_fly_scan"
+    required_kwargs = []
+    use_scan_progress_report = False
+
+    def __init__(
+        self,
+        motor: DeviceBase,
+        start: float,
+        stop: float,
+        exp_time: float = 0,
+        relative: bool = False,
+        **kwargs,
+    ):
+        """
+        A continuous line fly scan. Use this scan if you want to move a motor continuously from start to stop position whilst
+        acquiring data as fast as possible (respecting the exposure time). The scan will stop automatically when the motor
+        reaches the end position.
+
+        Args:
+            motor (DeviceBase): motor to move continuously from start to stop position
+            start (float): start position
+            stop (float): stop position
+            exp_time (float): exposure time in seconds. Default is 0.
+            relative (bool): if True, the motor will be moved relative to its current position. Default is False.
+
+        Returns:
+            ScanReport
+
+        Examples:
+            >>> scans.cont_line_fly_scan(dev.sam_rot, 0, 180, exp_time=0.1)
+
+        """
+        super().__init__(**kwargs)
+        self.motor = motor
+        self.start = start
+        self.stop = stop
+        self.exp_time = exp_time
+        self.relative = relative
+        self.device_move_request_id = str(uuid.uuid4())
+
+    def prepare_positions(self):
+        self.positions = np.array([[self.start], [self.stop]])
+        self.num_pos = None
+        yield from self._set_position_offset()
+
+    def scan_report_instructions(self):
+        yield from self.stubs.scan_report_instruction(
+            {
+                "readback": {
+                    "RID": self.device_move_request_id,
+                    "devices": [self.motor],
+                    "start": [self.start],
+                    "end": [self.stop],
+                }
+            }
+        )
+
+    def scan_core(self):
+        # move the motor to the start position
+        yield from self.stubs.set_and_wait(device=[self.motor], positions=self.positions[0])
+
+        # start the flyer
+        flyer_request = yield from self.stubs.set_with_response(
+            device=self.motor, value=self.positions[1][0], request_id=self.device_move_request_id
+        )
+
+        while True:
+            yield from self.stubs.trigger(group="trigger", point_id=self.point_id)
+            yield from self.stubs.read_and_wait(
+                group="primary", wait_group="readout_primary", point_id=self.point_id
+            )
+            yield from self.stubs.wait(
+                wait_type="trigger", group="trigger", wait_time=self.exp_time
+            )
+            if self.stubs.request_is_completed(flyer_request):
+                break
+            self.point_id += 1
+
+    def finalize(self):
+        yield from super().finalize()
+        self.num_pos = self.point_id + 1
+
+
 class RoundScanFlySim(SyncFlyScanBase):
     scan_name = "round_scan_fly"
     scan_type = "fly"
     pre_move = False
     required_kwargs = ["relative"]
-    arg_input = {
-        "flyer": ScanArgType.DEVICE,
-        "inner_ring": ScanArgType.FLOAT,
-        "outer_ring": ScanArgType.FLOAT,
-        "number_of_rings": ScanArgType.INT,
-        "number_of_positions_in_first_ring": ScanArgType.INT,
-    }
-    arg_bundle_size = {"bundle": len(arg_input), "min": 1, "max": 1}
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        flyer: DeviceBase,
+        inner_ring: float,
+        outer_ring: float,
+        number_of_rings: int,
+        number_pos: int,
+        **kwargs,
+    ):
         """
         A fly scan following a round shell-like pattern.
 
         Args:
-            *args: motor1, motor2, inner ring, outer ring, number of rings, number of positions in the first ring
-            relative: Start from an absolute or relative position
-            burst: number of acquisition per point
+            flyer (DeviceBase): flyer device
+            inner_ring (float): inner radius
+            outer_ring (float): outer radius
+            number_of_rings (int): number of rings
+            number_pos (int): number of positions in the first ring
+            relative (bool): if True, the motors will be moved relative to their current position. Default is False.
+            burst_at_each_point (int): number of exposures at each point. Default is 1.
 
         Returns:
             ScanReport
@@ -1056,10 +1148,14 @@ class RoundScanFlySim(SyncFlyScanBase):
         """
         super().__init__(**kwargs)
         self.axis = []
+        self.flyer = flyer
+        self.inner_ring = inner_ring
+        self.outer_ring = outer_ring
+        self.number_of_rings = number_of_rings
+        self.number_pos = number_pos
 
     def _get_scan_motors(self):
         self.scan_motors = []
-        self.flyer = list(self.caller_args.keys())[0]
 
     @property
     def monitor_sync(self):
@@ -1075,9 +1171,11 @@ class RoundScanFlySim(SyncFlyScanBase):
         yield
 
     def _calculate_positions(self):
-        params = list(self.caller_args.values())[0]
         self.positions = get_round_scan_positions(
-            r_in=params[0], r_out=params[1], nr=params[2], nth=params[3]
+            r_in=self.inner_ring,
+            r_out=self.outer_ring,
+            nr=self.number_of_rings,
+            nth=self.number_pos,
         )
 
     def scan_core(self):
@@ -1108,17 +1206,13 @@ class RoundScanFlySim(SyncFlyScanBase):
 class RoundROIScan(ScanBase):
     scan_name = "round_roi_scan"
     required_kwargs = ["dr", "nth", "relative"]
-    arg_input = {
-        "motor_1": ScanArgType.DEVICE,
-        "motor_2": ScanArgType.DEVICE,
-        "width_1": ScanArgType.FLOAT,
-        "width_2": ScanArgType.FLOAT,
-    }
-    arg_bundle_size = {"bundle": len(arg_input), "min": 1, "max": 1}
 
     def __init__(
         self,
-        *args,
+        motor_1: DeviceBase,
+        width_1: float,
+        motor_2: DeviceBase,
+        width_2: float,
         dr: float = 1,
         nth: int = 5,
         exp_time: float = 0,
@@ -1130,7 +1224,10 @@ class RoundROIScan(ScanBase):
         A scan following a round-roi-like pattern.
 
         Args:
-            *args: motor1, width for motor1, motor2, width for motor2,
+            motor_1 (DeviceBase): first motor
+            width_1 (float): width of region of interest for motor_1
+            motor_2 (DeviceBase): second motor
+            width_2 (float): width of region of interest for motor_2
             dr (float): shell width. Default is 1.
             nth (int): number of points in the first shell. Default is 5.
             exp_time (float): exposure time in seconds. Default is 0.
@@ -1146,6 +1243,10 @@ class RoundROIScan(ScanBase):
         """
         super().__init__(**kwargs)
         self.axis = []
+        self.motor_1 = motor_1
+        self.motor_2 = motor_2
+        self.width_1 = width_1
+        self.width_2 = width_2
         self.dr = dr
         self.nth = nth
         self.exp_time = exp_time
@@ -1153,9 +1254,8 @@ class RoundROIScan(ScanBase):
         self.burst_at_each_point = burst_at_each_point
 
     def _calculate_positions(self) -> None:
-        params = list(self.caller_args.values())
         self.positions = get_round_roi_scan_positions(
-            lx=params[0][0], ly=params[1][0], dr=self.dr, nth=self.nth
+            lx=self.width_1, ly=self.width_2, dr=self.dr, nth=self.nth
         )
 
 
@@ -1258,15 +1358,11 @@ class TimeScan(ScanBase):
 class MonitorScan(ScanBase):
     scan_name = "monitor_scan"
     required_kwargs = ["relative"]
-    arg_input = {
-        "device": ScanArgType.DEVICE,
-        "start": ScanArgType.FLOAT,
-        "stop": ScanArgType.FLOAT,
-    }
-    arg_bundle_size = {"bundle": len(arg_input), "min": 1, "max": 1}
     scan_type = "fly"
 
-    def __init__(self, device, start: float, stop: float, *args, relative: bool = False, **kwargs):
+    def __init__(
+        self, device: DeviceBase, start: float, stop: float, relative: bool = False, **kwargs
+    ):
         """
         Readout all primary devices at each update of the monitored device.
 
@@ -1298,7 +1394,7 @@ class MonitorScan(ScanBase):
         return self.flyer
 
     def _calculate_positions(self) -> None:
-        self.positions = np.vstack(tuple(self.caller_args.values())).T.tolist()
+        self.positions = np.array([[self.start], [self.stop]])
 
     def prepare_positions(self):
         self._calculate_positions()
@@ -1550,8 +1646,6 @@ class AddInteractiveScanPoint(ScanComponent):
 
 class CloseInteractiveScan(ScanComponent):
     scan_name = "close_interactive_scan"
-    arg_input = {}
-    arg_bundle_size = {"bundle": len(arg_input), "min": None, "max": None}
 
     def __init__(self, *args, **kwargs):
         """

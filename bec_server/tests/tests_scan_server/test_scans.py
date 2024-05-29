@@ -1088,6 +1088,7 @@ def test_round_roi_scan_positions(in_args, reference_positions):
 def test_round_roi_scan():
     device_manager = DMMock()
     device_manager.add_device("samx")
+    device_manager.add_device("samy")
     scan_msg = messages.ScanQueueMessage(
         scan_type="round_roi_scan",
         parameter={
@@ -1361,7 +1362,13 @@ def test_round_scan_fly_sim_get_scan_motors():
         queue="primary",
     )
     request = RoundScanFlySim(
-        device_manager=device_manager, parameter=scan_msg.content["parameter"]
+        flyer="flyer_sim",
+        inner_ring=0,
+        outer_ring=50,
+        number_of_rings=5,
+        number_pos=3,
+        device_manager=device_manager,
+        parameter=scan_msg.content["parameter"],
     )
 
     request._get_scan_motors()
@@ -1378,7 +1385,13 @@ def test_round_scan_fly_sim_prepare_positions():
         queue="primary",
     )
     request = RoundScanFlySim(
-        device_manager=device_manager, parameter=scan_msg.content["parameter"]
+        flyer="flyer_sim",
+        inner_ring=0,
+        outer_ring=50,
+        number_of_rings=5,
+        number_pos=3,
+        device_manager=device_manager,
+        parameter=scan_msg.content["parameter"],
     )
     request._calculate_positions = mock.MagicMock()
     request._check_limits = mock.MagicMock()
@@ -1404,7 +1417,13 @@ def test_round_scan_fly_sim_calculate_positions(in_args, reference_positions):
         queue="primary",
     )
     request = RoundScanFlySim(
-        device_manager=device_manager, parameter=scan_msg.content["parameter"]
+        flyer="flyer_sim",
+        inner_ring=in_args[0],
+        outer_ring=in_args[1],
+        number_of_rings=in_args[2],
+        number_pos=in_args[3],
+        device_manager=device_manager,
+        parameter=scan_msg.content["parameter"],
     )
 
     request._calculate_positions()
@@ -1423,7 +1442,13 @@ def test_round_scan_fly_sim_scan_core(in_args, reference_positions):
         queue="primary",
     )
     request = RoundScanFlySim(
-        device_manager=device_manager, parameter=scan_msg.content["parameter"]
+        flyer="flyer_sim",
+        inner_ring=in_args[0],
+        outer_ring=in_args[1],
+        number_of_rings=in_args[2],
+        number_pos=in_args[3],
+        device_manager=device_manager,
+        parameter=scan_msg.content["parameter"],
     )
     request.positions = np.array(reference_positions)
 
@@ -1432,7 +1457,7 @@ def test_round_scan_fly_sim_scan_core(in_args, reference_positions):
         device="flyer_sim",
         action="kickoff",
         parameter={
-            "configure": {"num_pos": None, "positions": reference_positions, "exp_time": 0},
+            "configure": {"num_pos": 0, "positions": reference_positions, "exp_time": 0},
             "wait_group": "kickoff",
         },
         metadata={"readout_priority": "monitored", "DIID": 0},
@@ -2061,7 +2086,7 @@ def test_OpenInteractiveScan():
                     "on_request": [],
                     "async": [],
                 },
-                "num_points": None,
+                "num_points": 0,
                 "positions": [],
                 "scan_name": "open_interactive_scan",
                 "scan_type": "step",
@@ -2111,7 +2136,7 @@ def test_AddInteractiveScanPointn():
                     "on_request": [],
                     "async": [],
                 },
-                "num_points": None,
+                "num_points": 0,
                 "positions": [],
                 "scan_name": "interactive_scan_trigger",
                 "scan_type": "step",
