@@ -125,7 +125,7 @@ class ScanStubs:
     def set_with_response(
         self, *, device: str, value: float, request_id: str = None, metadata=None
     ) -> Generator[None, None, None]:
-        """Set a device to a specific value and return the request ID.
+        """Set a device to a specific value and return the request ID. Use :func:`request_is_completed` to later check if the request is completed.
 
         Args:
             device (str): Device name.
@@ -133,6 +133,8 @@ class ScanStubs:
 
         Returns:
             Generator[None, None, None]: Generator that yields a device message.
+
+        see also: :func:`request_is_completed`
 
         """
         request_id = str(uuid.uuid4()) if request_id is None else request_id
@@ -142,7 +144,7 @@ class ScanStubs:
         return request_id
 
     def request_is_completed(self, RID: str) -> bool:
-        """Check if a request is completed.
+        """Check if a request that was initiated with :func:`set_with_response` is completed.
 
         Args:
             RID (str): Request ID.
@@ -167,6 +169,8 @@ class ScanStubs:
 
         Returns:
             Generator[None, None, None]: Generator that yields a device message.
+
+        see also: :func:`set`, :func:`wait`, :func:`set_with_response`
 
         """
         if not isinstance(positions, list) and not isinstance(positions, np.ndarray):
@@ -313,6 +317,8 @@ class ScanStubs:
 
         Returns:
             Generator[None, None, None]: Generator that yields a device message.
+
+        see also: :func:`open_scan`
         """
 
         yield self._device_msg(device=None, action="close_scan", parameter={})
@@ -323,6 +329,8 @@ class ScanStubs:
 
         Returns:
             Generator[None, None, None]: Generator that yields a device message.
+
+        see also: :func:`unstage`
         """
         yield self._device_msg(device=None, action="stage", parameter={})
 
@@ -332,6 +340,8 @@ class ScanStubs:
 
         Returns:
             Generator[None, None, None]: Generator that yields a device message.
+
+        see also: :func:`stage`
         """
         yield self._device_msg(device=None, action="unstage", parameter={})
 
@@ -450,7 +460,8 @@ class ScanStubs:
         )
 
     def trigger(self, *, group: str, point_id: int) -> Generator[None, None, None]:
-        """Trigger a device group
+        """Trigger a device group. Note that the trigger event is not blocking and does not wait for the completion of the trigger event.
+        To wait for the completion of the trigger event, use the :func:`wait` command, specifying the wait_type as "trigger".
 
         Args:
             group (str): Device group that should receive the trigger.
@@ -458,6 +469,8 @@ class ScanStubs:
 
         Returns:
             Generator[None, None, None]: Generator that yields a device message.
+
+        see also: :func:`wait`
         """
         yield self._device_msg(
             device=None,
@@ -467,7 +480,10 @@ class ScanStubs:
         )
 
     def set(self, *, device: str, value: float, wait_group: str, metadata=None):
-        """Set the device to a specific value.
+        """Set the device to a specific value. This is similar to the direct set command
+        in the command-line interface. The wait_group can be used to wait for the completion of this event.
+        For a set operation, this simply means that the device has acknowledged the set command and does not
+        necessarily mean that the device has reached the target value.
 
         Args:
             device (str): Device name
@@ -476,6 +492,13 @@ class ScanStubs:
 
         Returns:
             Generator[None, None, None]: Generator that yields a device message.
+
+        .. warning::
+
+            Do not use this command to kickoff a long running operation. Use :func:`kickoff` instead or, if the
+            device does not support the kickoff command, use :func:`set_with_response` instead.
+
+        see also: :func:`wait`, :func:`set_and_wait`, :func:`set_with_response`
 
         """
         yield self._device_msg(
