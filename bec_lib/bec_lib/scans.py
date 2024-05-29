@@ -59,26 +59,26 @@ class ScanObject:
             if sample_name is not None:
                 metadata["sample_name"] = sample_name
 
-        file_writer_data = deepcopy(self.client.file_writer_data)
+        file_writer = deepcopy(self.client.file_writer)
 
         if "md" in kwargs:
             metadata.update(kwargs["md"])
 
-        if "file_suffix" in kwargs:
-            suffix = kwargs.pop("file_suffix")
+        if "file_suffix" in file_writer or "file_suffix" in kwargs:
+            suffix = kwargs.pop("file_suffix", file_writer.get("file_suffix"))
             # to check if suffix is alphanumeric and ascii, however we allow in addition - and _
             check_suffix = suffix.replace("_", "").replace("-", "")
             if not check_suffix.isalnum() or not check_suffix.isascii():
                 raise ValueError("file_suffix must only contain alphanumeric ASCII characters.")
-            file_writer_data["file_suffix"] = suffix
-        if "file_directory" in kwargs:
-            directory = kwargs.pop("file_directory")
+            file_writer["file_suffix"] = suffix
+        if "file_directory" in file_writer or "file_directory" in kwargs:
+            directory = kwargs.pop("file_directory", file_writer.get("file_directory"))
             check_directory = directory.replace("/", "").replace("_", "").replace("-", "")
             if not check_directory.isalnum() or not check_directory.isascii():
-                raise ValueError("file_suffix must only contain alphanumeric ASCII characters.")
-            file_writer_data["file_directory"] = directory.strip("/")
+                raise ValueError("file_directory must only contain alphanumeric ASCII characters.")
+            file_writer["file_directory"] = directory.strip("/")
 
-        metadata["file_writer_data"] = file_writer_data
+        metadata["file_writer"] = file_writer
 
         # pylint: disable=protected-access
         if scans._scan_group:
@@ -379,15 +379,15 @@ class DatasetIdOnHold(ContextDecorator):
 
 class FileWriterData:
     @typechecked
-    def __init__(self, file_writer_data: dict) -> None:
+    def __init__(self, file_writer: dict) -> None:
         """Context manager for updating metadata
 
         Args:
             metadata (dict): Metadata dictionary
         """
         self.client = self._get_client()
-        self._file_writer_data = file_writer_data
-        self._orig_file_writer_data = None
+        self._file_writer = file_writer
+        self._orig_file_writer = None
 
     def _get_client(self):
         """Get BEC client"""
@@ -395,13 +395,13 @@ class FileWriterData:
 
     def __enter__(self):
         """Enter the context manager"""
-        self._orig_file_writer_data = deepcopy(self.client.file_writer_data)
-        self.client.file_writer_data.update(self._file_writer_data)
+        self._orig_file_writer = deepcopy(self.client.file_writer)
+        self.client.file_writer.update(self._file_writer)
         return self
 
     def exit(self, *exc):
         """Exit the context manager"""
-        self.client.file_writer_data = self._orig_file_writer_data
+        self.client.file_writer = self._orig_file_writer
 
 
 class Metadata:

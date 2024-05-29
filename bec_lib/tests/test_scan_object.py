@@ -91,8 +91,7 @@ def test_scan_object_file_suffix(scan_obj, dev):
                 file_suffix="testsample",
             )
             assert (
-                scan_report.call_args.args[0].metadata["file_writer_data"]["file_suffix"]
-                == "testsample"
+                scan_report.call_args.args[0].metadata["file_writer"]["file_suffix"] == "testsample"
             )
 
 
@@ -143,7 +142,7 @@ def test_scan_object_raises_on_non_ascii_chars(scan_obj, dev, file_suffix, file_
                     file_suffix=file_suffix,
                 )
                 assert (
-                    scan_report.call_args.args[0].metadata["file_writer_data"]["file_suffix"]
+                    scan_report.call_args.args[0].metadata["file_writer"]["file_suffix"]
                     == file_suffix
                 )
 
@@ -189,7 +188,7 @@ def test_scan_object_raises_on_non_ascii_chars_dir(scan_obj, dev, file_dir, file
                     relative=False,
                     file_directory=file_dir,
                 )
-                assert scan_report.call_args.args[0].metadata["file_writer_data"][
+                assert scan_report.call_args.args[0].metadata["file_writer"][
                     "file_directory"
                 ] == file_dir.strip("/")
 

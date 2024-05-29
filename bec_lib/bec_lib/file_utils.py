@@ -234,8 +234,8 @@ class FileWriter:
                 warnings.warn("No scan message available.")
                 return ""
             scannr = scan_msg.content["info"]["scan_number"]
-            user_suffix = scan_msg.info["file_writer_data"].get("file_suffix")
-            scan_dir = scan_msg.info["file_writer_data"].get("file_directory")
+            user_suffix = scan_msg.info["file_writer"].get("file_suffix")
+            scan_dir = scan_msg.info["file_writer"].get("file_directory")
             if not scan_dir:
                 scan_dir = self.get_scan_directory(
                     scannr, self.scan_bundle, self.leading_zeros, user_suffix=user_suffix

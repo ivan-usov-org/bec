@@ -201,7 +201,6 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
                             "some_var": {"type": "int"},
                         },
                         "sim_state": {"type": "dict"},
-                        "speed": {"type": "int"},
                     },
                 }
             },
