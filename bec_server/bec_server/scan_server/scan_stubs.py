@@ -122,6 +122,40 @@ class ScanStubs:
             return Status(self.connector, return_val.get("RID"))
         return return_val
 
+    def set_with_response(
+        self, *, device: str, value: float, request_id: str = None, metadata=None
+    ) -> Generator[None, None, None]:
+        """Set a device to a specific value and return the request ID.
+
+        Args:
+            device (str): Device name.
+            value (float): Target value.
+
+        Returns:
+            Generator[None, None, None]: Generator that yields a device message.
+
+        """
+        request_id = str(uuid.uuid4()) if request_id is None else request_id
+        metadata = metadata if metadata is not None else {}
+        metadata.update({"response": True, "RID": request_id})
+        yield from self.set(device=device, value=value, wait_group="set", metadata=metadata)
+        return request_id
+
+    def request_is_completed(self, RID: str) -> bool:
+        """Check if a request is completed.
+
+        Args:
+            RID (str): Request ID.
+
+        Returns:
+            bool: True if the request is completed, False otherwise.
+
+        """
+        msg = self.connector.lrange(MessageEndpoints.device_req_status_container(RID), 0, -1)
+        if not msg:
+            return False
+        return True
+
     def set_and_wait(
         self, *, device: list[str], positions: list | np.ndarray
     ) -> Generator[None, None, None]:
