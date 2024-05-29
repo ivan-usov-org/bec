@@ -66,7 +66,10 @@ class ScanWorker(threading.Thread):
 
         if not instr.metadata.get("scan_def_id"):
             self.max_point_id = 0
-        num_points = self.max_point_id + instr.content["parameter"]["num_points"]
+        instr_num_points = instr.content["parameter"].get("num_points", 0)
+        if instr_num_points is None:
+            instr_num_points = 0
+        num_points = self.max_point_id + instr_num_points
         if self.max_point_id:
             num_points += 1
 
@@ -75,10 +78,11 @@ class ScanWorker(threading.Thread):
         self._initialize_scan_info(active_rb, instr, num_points)
 
         # only append the scan_progress if the scan is not using device_progress
-        if not self.scan_report_instructions or not self.scan_report_instructions[-1].get(
-            "device_progress"
-        ):
-            self.scan_report_instructions.append({"scan_progress": num_points})
+        if active_rb.scan.use_scan_progress_report:
+            if not self.scan_report_instructions or not self.scan_report_instructions[-1].get(
+                "device_progress"
+            ):
+                self.scan_report_instructions.append({"scan_progress": num_points})
         self.current_instruction_queue_item.parent.queue_manager.send_queue_status()
 
         self._send_scan_status("open")
@@ -765,7 +769,7 @@ class ScanWorker(threading.Thread):
                 logger.error(content)
                 self.connector.raise_alarm(
                     severity=Alarms.MAJOR,
-                    source="ScanWorker",
+                    source={"ScanWorker": "_process_instructions"},
                     msg=content,
                     alarm_type=exc_return_to_start.__class__.__name__,
                     metadata={},
