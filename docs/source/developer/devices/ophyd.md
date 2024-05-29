@@ -1,23 +1,25 @@
 (developer.ophyd)=
 # Ophyd 
 
-[Ophyd](https://nsls-ii.github.io/ophyd/) is the hardware abstraction layer developed by NSLS-II and used by BEC to communicate with the hardware. 
-It is a Python library that provides a uniform interface to different hardware components. 
-Ophyd is used to control the hardware and to read out (meta)data of devices. 
-It is also used to create a virtual representation of the hardware in the form of `devices` and `signals`.
-Hardware can be tested without spinning up BEC, simply by importing the Ophyd library.
+[Ophyd](https://nsls-ii.github.io/ophyd/) is the hardware abstraction layer developed by NSLS-II and used by BEC to communicate with hardware. It is a Python library that provides a consistent interface between the underlying control communication protocol and the high-level software BEC.
+
+## Introduction
+
+Ophyd bundles sets of underlying process variables into hierarchical devices and exposes a semantic API in terms of control system primitives. This statement is taken from Ophyd's documentation. In detail, this means that Ophyd allows high-level software, i.e. BEC, to be ignorant of the details of how the communication protocol to a device is implemented. It knows that it can expect certain functionality, methods, and properties. A good example is that any motor integrated into Ophyd looks the same to BEC, and its move method will move the motor to the target position. Two key terms that will reappear are `Signal` and `Device`, which are fundamental building blocks of Ophyd.
+
+### Signal
+
+A signal represents an atomic process variable. This can be, for instance, a read-only value based on the *readback* of a beam monitor or a settable variable for any type of device, i.e. *velocity* of a motor. Signals can also have strings or arrays as return values—basically anything that the underlying hardware provides. However, as mentioned before, signals are atomic and cannot be further decomposed. Another important aspect is the [`kind`](https://nsls-ii.github.io/ophyd/signals.html#kind) attribute. It allows the developer to classify signals into different categories, which becomes relevant for handling callbacks, for instance `read()` or `read_configuration()` for devices.
+
+### Device
+ 
+A device represents a hierarchy of signals and devices, meaning that devices are composed of signals and potentially sub-devices. These are implemented as components in the device (further details in the Ophyd [documentation](https://nsls-ii.github.io/ophyd/device-overview.html)) and can be inspected individually by BEC. For a motor, we would, for example, expect *readback*, *setpoint*, and some sort of status, e.g. *motor_is_moving* components. More complex devices, such as detectors, may be composed of various components used to configure and prepare the detector for an upcoming acquisition. Besides components, devices also implement different methods and properties. Two important methods any device implements are `read()` and `read_configuration()`. They read the values for all signals of type `kind.hinted` & `kind.normal` or `kind.config`, respectively. We will now provide more information on different type of devices from the perspective of BEC.
 
 (developer.ophyd.ophyd_device)=
-## Ophyd devices
+## Ophyd Devices
 
-Representative objects for different type of devices are created dynamically on the device server.
-For the most simple case, a certain set of core methods and properties need to be implemented.
-Based on the type of device, BEC expects ophyd devices to provide certain functionality.
-Signal and Device are the most simple type of devices that are used within BEC.
-A signal has no sub-components, while a devices may contain sub-devices as well as sub-signals.
-Nevertheless, the interface provided by Ophyd allows both to share a similar interface. 
-Overall, BEC differentiates between `device`, `signal`, `positioner` and `flyer`.
-A diagram with the hierarchy of inheritance is shown below.
+In BEC, we create representative objects for different types of devices or signals dynamically on the device server. All of them provide a set of core methods with customizations on top. For BEC, a motor becomes a positioner and expects the class to implement, for instance, a `move` method, `limits`, and a few more properties/methods. In total, BEC differentiates between `device`, `signal`, `positioner`, and `flyer`. The hierarchy between these is shown in the diagram below.
+
 
 ```{figure} ../../assets/bec_device_structure.png
 Inheritance scheme for devices and signals in BEC.
@@ -26,8 +28,8 @@ We note that this hierarchy is inspired by different base class from Ophyd:
 `Device`, `Signal`, `PositionerBase` and `FlyerInterface`, while also enhancing certain aspects of these classes for ease of use.
 
 ### Core functionality
-The following section lists core properties and methods. 
-We note that by inheriting from Ophyd `Device`, `Signal` or a children class like `PvPositioner` for EPICs devices, all methods and properties below will already be implemented. 
+In the following section, core properties and methods are listed that are required for the device server to load the class into BEC. 
+We note that by inheriting from Ophyd `Device` or `Signal`, all methods and properties below will already be implemented. 
 
 * **name -> str**\
 Property with name of the device; it will also be used for naming convention of signals from a device.
@@ -73,7 +75,6 @@ The same pattern as for describe applies.
 * **trigger() -> ophyd.DeviceStatus**\
 Trigger the device and return an [ophyd.DeviceStatus](https://nsls-ii.github.io/ophyd/status.html?highlight=devicestatus#status-api-details) object, which is used to track the status of the trigger call.
 The status should resolve once the device has been triggered successfully, which means the `.set_finished()` method has been called on the status object.
-
 
 ### Signal
 
