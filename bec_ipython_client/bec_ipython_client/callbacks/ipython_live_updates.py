@@ -220,7 +220,10 @@ class IPythonLiveUpdates:
             )
         available_blocks = self._available_req_blocks(queue, request)
         req_block = available_blocks[self._request_block_index[req_id]]
-        if req_block["content"]["scan_type"] == "open_scan_def":
+        if req_block["content"]["scan_type"] in [
+            "open_scan_def",
+            "mv",
+        ]:  # TODO: make this more general for all scan types that don't have report instructions
             return True
 
         report_instructions = req_block["report_instructions"]

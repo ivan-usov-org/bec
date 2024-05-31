@@ -16,6 +16,7 @@ from toolz import partition
 from typeguard import typechecked
 
 from bec_lib import messages
+from bec_lib.bec_errors import ScanAbortion
 from bec_lib.device import DeviceBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
@@ -324,6 +325,8 @@ class ScanDef(ContextDecorator):
         self.parent = parent
 
     def __enter__(self):
+        if self.parent._scan_def_id is not None:
+            raise ScanAbortion("Nested scan definitions currently not supported.")
         scan_def_id = str(uuid.uuid4())
         self.parent._scan_def_id = scan_def_id
         self.parent.open_scan_def()

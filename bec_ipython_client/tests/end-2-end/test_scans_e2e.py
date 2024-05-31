@@ -478,6 +478,7 @@ def test_scan_def(bec_ipython_client_fixture):
         scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=False)
         scans.umv(dev.samy, 5, relative=False)
         scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=False)
+        scans.mv(dev.samx, 0, relative=False)
 
     assert scan_number == bec.queue.next_scan_number - 1
 
@@ -488,6 +489,7 @@ def test_scan_def(bec_ipython_client_fixture):
         scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=False)
         scans.umv(dev.samy, 5, relative=False)
         scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.1, relative=False)
+        scans.mv(dev.samx, 0, relative=False)
 
     scan_def_with_decorator()
     assert scan_number == bec.queue.next_scan_number - 1
