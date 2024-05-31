@@ -38,10 +38,7 @@ def scan_msg():
     """Scan message fixture"""
     yield ScanStatusMessage(
         scan_id="1111",
-        info={
-            "scan_number": 5,
-            "file_writer": {"file_suffix": "SampleA", "file_directory": "test_dir"},
-        },
+        info={"scan_number": 5, "file_suffix": "SampleA", "file_directory": "test_dir"},
         status="closed",
     )
 
@@ -133,18 +130,18 @@ def test_compile_full_filename(file_writer, scan_msg):
     with mock.patch.object(file_writer, "get_scan_msg", return_value=scan_msg):
         return_value = file_writer.compile_full_filename(suffix=suffix)
         scannr = scan_msg.info.get("scan_number")
-        suffix2 = suffix + f"_{scan_msg.info['file_writer']['file_suffix']}"
+        suffix2 = suffix + f"_{scan_msg.info['file_suffix']}"
         expected = os.path.join(
             file_writer._base_path,
             "data",
-            scan_msg.info["file_writer"]["file_directory"],
+            scan_msg.info["file_directory"],
             f"S{scannr:0{file_writer._leading_zeros}d}_{suffix2}.h5",
         )
         assert return_value == expected
 
     # case 3
-    scan_msg.info["file_writer"].pop("file_suffix")
-    scan_msg.info["file_writer"].pop("file_directory")
+    scan_msg.info.pop("file_suffix")
+    scan_msg.info.pop("file_directory")
     with mock.patch.object(file_writer, "get_scan_msg", return_value=scan_msg):
         scannr = scan_msg.info.get("scan_number")
         scan_dir = f"S0000-0999/S{scannr:0{file_writer._leading_zeros}d}"

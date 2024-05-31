@@ -82,7 +82,6 @@ class BECClient(BECService, UserScriptsMixin):
         self.bl_checks = None
         self._hli_funcs = {}
         self.metadata = {}
-        self.file_writer = {}
         self.callbacks = CallbackHandler()
         self._parent = parent if parent is not None else self
         self._initialized = True
