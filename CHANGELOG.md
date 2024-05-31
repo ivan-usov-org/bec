@@ -2,6 +2,13 @@
 
 
 
+## v2.12.6 (2024-05-31)
+
+### Fix
+
+* fix: end the color sequence ([`22be4c4`](https://gitlab.psi.ch/bec/bec/-/commit/22be4c4c6b54133277411e837e9c102aa39685d3))
+
+
 ## v2.12.5 (2024-05-28)
 
 ### Fix
@@ -150,10 +157,3 @@ User scripts from plugins were still relying on the old plugin structure ([`3264
 ### Fix
 
 * fix: upgraded to ophyd_devices v1 ([`3077dbe`](https://gitlab.psi.ch/bec/bec/-/commit/3077dbe22ae50e6aae317c72022df6ea88b14cce))
-
-
-## v2.10.2 (2024-05-08)
-
-### Fix
-
-* fix(RedisConnector): add &#39;from_start&#39; support in &#39;register&#39; for streams ([`f059bf9`](https://gitlab.psi.ch/bec/bec/-/commit/f059bf9318038404ebbcc82b5abf5cd148486021))
