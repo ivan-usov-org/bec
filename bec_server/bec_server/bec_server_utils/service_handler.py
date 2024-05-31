@@ -81,7 +81,7 @@ class ServiceHandler:
             print("Starting BEC server using tmux...")
             tmux_start(self.bec_path, self.config_path, self.SERVICES)
             print(
-                f"{bcolors.OKCYAN}{bcolors.BOLD}Use `tmux attach -t bec` to attach to the BEC server. Once connected, use `ctrl+b d` to detach again."
+                f"{bcolors.OKCYAN}{bcolors.BOLD}Use `tmux attach -t bec` to attach to the BEC server. Once connected, use `ctrl+b d` to detach again.{bcolors.ENDC}"
             )
         elif self.interface == "iterm2":
             pass
