@@ -13,13 +13,14 @@ devices/devices.md
 user_interfaces/user_interfaces.md
 data_access/data_access.md
 scans/scans.md
+file_writer/file_writer.md
 glossary/
 ```
 
 ***
 
 ````{grid} 2
-:gutter: 5
+:gutter: 6
 
 ```{grid-item-card}
 :link: developer.getting_started
@@ -58,6 +59,17 @@ Understand the basic structure of a scan in BEC and learn how to create a scan p
 
 ```{grid-item-card}
 :link: developer.user_interfaces
+:link-type: ref
+:img-top: /assets/portrait_48dp.svg
+:text-align: center
+
+## File Writer
+
+Explore and understand BEC's file writer and how it can be configured.
+```
+
+```{grid-item-card}
+:link: developer.file_writer
 :link-type: ref
 :img-top: /assets/portrait_48dp.svg
 :text-align: center
