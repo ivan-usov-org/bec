@@ -1,3 +1,7 @@
+"""
+Scan Manager loads the available scans and publishes them to redis.
+"""
+
 import inspect
 
 from bec_lib import plugin_helper
@@ -13,6 +17,9 @@ logger = bec_logger.logger
 
 
 class ScanManager:
+    """
+    Scan Manager loads the available scans and publishes them to redis.
+    """
 
     def __init__(self, *, parent):
         """
@@ -98,6 +105,9 @@ class ScanManager:
             if issubclass(value, DeviceBase):
                 # once we have generalized the device types, this should be removed
                 arg_input[key] = "device"
+            elif issubclass(value, bool):
+                # should be unified with the ScanArgType.BOOL
+                arg_input[key] = "boolean"
             else:
                 arg_input[key] = value.__name__
         return arg_input
