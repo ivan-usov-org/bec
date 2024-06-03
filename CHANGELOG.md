@@ -2,6 +2,13 @@
 
 
 
+## v2.13.2 (2024-06-03)
+
+### Fix
+
+* fix(bec_lib): fixed serialization for message endpoints ([`1be3830`](https://gitlab.psi.ch/bec/bec/-/commit/1be38300abcd0c7cc4a5f5dcf3c72cf19deb27d6))
+
+
 ## v2.13.1 (2024-06-03)
 
 ### Fix
@@ -139,10 +146,3 @@ TODO: put back imports as normal when Pydantic gets faster ([`791be9b`](https://
 
 
 ## v2.12.0 (2024-05-16)
-
-### Feature
-
-* feat(scan_bundler): added scan progress ([`27befe9`](https://gitlab.psi.ch/bec/bec/-/commit/27befe966607a3ae319dbee3af9e59ef0d044bc8))
-
-
-## v2.11.1 (2024-05-16)
