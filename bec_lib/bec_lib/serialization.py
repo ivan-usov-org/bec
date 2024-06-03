@@ -111,6 +111,25 @@ def decode_endpointinfo(obj):
     return obj
 
 
+def encode_bec_type(msg):
+    if isinstance(msg, type):
+        return {"__msgpack__": {"type": "bec_type", "data": msg.__name__, "module": msg.__module__}}
+    return msg
+
+
+def decode_bec_type(obj):
+    if isinstance(obj, dict) and "__msgpack__" in obj and obj["__msgpack__"]["type"] == "bec_type":
+        if obj["__msgpack__"]["module"] == "bec_lib.messages":
+            return getattr(messages_module, obj["__msgpack__"]["data"])
+        if (
+            obj["__msgpack__"]["module"] == "builtins"
+            and obj["__msgpack__"]["data"] in __builtins__
+        ):
+            return __builtins__.get(obj["__msgpack__"]["data"])
+        raise ValueError("Unknown module")
+    return obj
+
+
 class SerializationRegistry:
     """Registry for serialization codecs"""
 
@@ -177,6 +196,12 @@ class SerializationRegistry:
         Register codec for MessageEndpoints
         """
         self.register_object_hook(encode_endpointInfo, decode_endpointinfo)
+
+    def register_bec_message_type(self):
+        """
+        Register codec for BECMessage type
+        """
+        self.register_object_hook(encode_bec_type, decode_bec_type)
 
 
 class MsgpackExt(SerializationRegistry):
@@ -270,12 +295,14 @@ json_ext.register_numpy(use_list=True)
 json_ext.register_bec_message()
 json_ext.register_set_encoder()
 json_ext.register_message_endpoint()
+json_ext.register_bec_message_type()
 
 msgpack = MsgpackExt()
 msgpack.register_numpy()
 msgpack.register_bec_message()
 msgpack.register_set_encoder()
 msgpack.register_message_endpoint()
+msgpack.register_bec_message_type()
 
 
 class SerializationInterface:
