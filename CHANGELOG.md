@@ -2,6 +2,13 @@
 
 
 
+## v2.13.1 (2024-06-03)
+
+### Fix
+
+* fix: fixed support for mv during scan defs; closes #308 ([`835bf50`](https://gitlab.psi.ch/bec/bec/-/commit/835bf5004ad1c9aaec1792ed20f3ffc613584d31))
+
+
 ## v2.13.0 (2024-06-03)
 
 ### Documentation
@@ -139,13 +146,3 @@ TODO: put back imports as normal when Pydantic gets faster ([`791be9b`](https://
 
 
 ## v2.11.1 (2024-05-16)
-
-### Documentation
-
-* docs(bec_lib): improved scripts documentation ([`79f487e`](https://gitlab.psi.ch/bec/bec/-/commit/79f487ea8b9dc135102204872390631e59a60e54))
-
-### Fix
-
-* fix(bec_lib): fixed loading scripts from plugins
-
-User scripts from plugins were still relying on the old plugin structure ([`3264434`](https://gitlab.psi.ch/bec/bec/-/commit/3264434d40647d260400045f7bbd4c2ee9bb2c4e))
