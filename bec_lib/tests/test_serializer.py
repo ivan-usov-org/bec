@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 
+from bec_lib.endpoints import MessageEndpoints
 from bec_lib.serialization import json_ext, msgpack
 
 
@@ -25,6 +26,7 @@ def serializer(request):
                 "hroz_setpoint": {"value": 0, "timestamp": 1708336264.573121},
             }
         },
+        MessageEndpoints.progress("test"),
     ],
 )
 def test_serialize(serializer, data):
