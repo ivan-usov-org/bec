@@ -203,6 +203,8 @@ In order to simplify the creation of new scans, BEC provides a set of scan stubs
 More information on the scan stubs can be found in the [API reference](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs).
 
 
+## Tutorials:
 
+- [Tutorial: Fly Scan with Continuous Line](/developer/scans/tutorial_fly_scan_cont_line)
 
 
