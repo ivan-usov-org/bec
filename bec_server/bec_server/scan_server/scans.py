@@ -288,7 +288,12 @@ class RequestBase(ABC):
     def update_readout_priority(self):
         """update the readout priority for this request. Typically the monitored devices should also include the scan motors."""
         self.readout_priority["monitored"].extend(self.scan_motors)
-        self.readout_priority["monitored"] = list(set(self.readout_priority["monitored"]))
+        self.readout_priority["monitored"] = list(
+            sorted(
+                set(self.readout_priority["monitored"]),
+                key=self.readout_priority["monitored"].index,
+            )
+        )
 
     @abstractmethod
     def run(self):
