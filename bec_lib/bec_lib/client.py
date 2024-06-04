@@ -22,6 +22,7 @@ from bec_lib.dap_plugins import DAPPlugins
 from bec_lib.devicemanager import DeviceManagerBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
+from bec_lib.plugin_helper import _get_available_plugins
 from bec_lib.service_config import ServiceConfig
 from bec_lib.user_scripts_mixin import UserScriptsMixin
 from bec_lib.utils.import_utils import lazy_import_from
@@ -181,10 +182,25 @@ class BECClient(BECService, UserScriptsMixin):
         Args:
             module_name (str): The name of the module to load
         """
-        mod = importlib.import_module(f"bec_ipython_client.high_level_interfaces.{module_name}")
-        members = inspect.getmembers(mod)
+        plugins = _get_available_plugins("bec")
+        for plugin in plugins:
+            try:
+                module = importlib.import_module(
+                    f"{plugin.__name__}.bec_ipython_client.high_level_interface.{module_name}"
+                )
+                members = inspect.getmembers(module)
+                logger.info(
+                    f"Loaded high level interface {module_name} from plugin {plugin.__name__}."
+                )
+                break
+            except Exception:
+                continue
+        else:
+            mod = importlib.import_module(f"bec_ipython_client.high_level_interfaces.{module_name}")
+            members = inspect.getmembers(mod)
+            logger.info(f"Loaded high level interface {module_name} from bec.")
         funcs = {name: func for name, func in members if not name.startswith("__")}
-        self._hli_funcs = funcs
+        self._hli_funcs.update(funcs)
         builtins.__dict__.update(funcs)
         self.callbacks.run(EventType.NAMESPACE_UPDATE, action="add", ns_objects=funcs)
 

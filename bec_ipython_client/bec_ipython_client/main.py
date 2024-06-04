@@ -43,7 +43,6 @@ class BECIPythonClient:
         self._client.callbacks.register(
             event_type=EventType.NAMESPACE_UPDATE, callback=self._update_namespace_callback
         )
-        self._client.load_high_level_interface("bec_hli")
 
     def __getattr__(self, name):
         return getattr(self._client, name)
