@@ -10,6 +10,7 @@ from bec_lib.logger import bec_logger as _bec_logger
 from bec_lib.redis_connector import RedisConnector as _RedisConnector
 
 try:
+    from bec_widgets.cli.auto_updates import AutoUpdates
     from bec_widgets.cli.client import BECDockArea as _BECDockArea
 except ImportError:
     _BECDockArea = None
@@ -33,7 +34,13 @@ else:
     if not _main_dict["args"].nogui and _BECDockArea is not None:
         gui = bec.gui = _BECDockArea()
         gui.show()
-        fig = gui.add_dock().add_widget_bec("BECFigure")
+        if gui.auto_updates is None:
+            AutoUpdates.create_default_dock = True
+            AutoUpdates.enabled = True
+            gui.auto_updates = AutoUpdates(gui=gui)
+        if gui.auto_updates.create_default_dock:
+            gui.auto_updates.start_default_dock()
+        fig = gui.auto_updates.get_default_figure()
 
     _available_plugins = plugin_helper.get_ipython_client_startup_plugins(state="post")
     if _available_plugins:
