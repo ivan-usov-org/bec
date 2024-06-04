@@ -2,6 +2,13 @@
 
 
 
+## v2.13.3 (2024-06-04)
+
+### Fix
+
+* fix(scan_server): fixed order of reported devices in readout priority ([`64ecbb6`](https://gitlab.psi.ch/bec/bec/-/commit/64ecbb6856de8b108e75f9a4bd2736adb5b4ca74))
+
+
 ## v2.13.2 (2024-06-03)
 
 ### Fix
@@ -141,8 +148,3 @@ TODO: put back imports as normal when Pydantic gets faster ([`791be9b`](https://
 * fix: clean all imports from bec_lib, remove use of @threadlocked ([`8a017ef`](https://gitlab.psi.ch/bec/bec/-/commit/8a017ef3d7666f173a70f2e6a8606d73b1af0095))
 
 * fix: use lazy import to reduce bec_lib import time ([`649502e`](https://gitlab.psi.ch/bec/bec/-/commit/649502e364e4e4c0ea53f932418c479f2d6978d4))
-
-* fix: solve scope problem with &#39;name&#39; variable in lambda ([`417e73e`](https://gitlab.psi.ch/bec/bec/-/commit/417e73e5d65f0c774c92889a44d1262c7f4f343b))
-
-
-## v2.12.0 (2024-05-16)
