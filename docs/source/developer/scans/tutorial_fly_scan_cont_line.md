@@ -17,6 +17,12 @@ class TutorialFlyScanContLine(AsyncFlyScanBase):
     scan_name = "tutorial_fly_scan_cont_line"
 ```
 
+To make the scan available to the BEC server, we need to add it the `__init__.py` file in the scans directory. To this end, add the following line to the `__init__.py` file:
+
+```python
+from .tutorial_fly_scan_cont_line import TutorialFlyScanContLine
+```
+
 ## Step 2: Define the Scan Parameters
 Next, we need to define the scan parameters. In our case, we want to pass in the following parameters:
 - `motor`: The motor to move during the scan. This should be a `DeviceBase` object, i.e. any device that inherits from the `DeviceBase` class.
@@ -73,7 +79,7 @@ Let's also add a proper doc string for the users of our scan:
             ScanReport
 
         Examples:
-            >>> scans.cont_line_fly_scan(dev.sam_rot, 0, 180, exp_time=0.1)
+            >>> scans.tutorial_cont_line_fly_scan(dev.sam_rot, 0, 180, exp_time=0.1)
 
         """
         super().__init__(**kwargs)
@@ -97,11 +103,12 @@ Our scan should move the motor from the start position to the stop position at a
 By using `self._set_position_offset()`, we ensure that the motor is moved to the correct position before starting the scan, respecting the relative flag.
 
 ## Step 4: Define the scan logic
-Next, we need to define the scan logic. In our case, the following steps are required:
-- Move the motor to the start position.
-- Send the flyer on its way to the defined stop position. 
-- While the motor is moving, send triggers as fast as possible (respecting the exposure time).
-- Stop the scan once the motor reaches the stop position.
+Next, we need to define the scan logic. In our case, the following steps are required and can be built upon the [scan stubs](#developer.scans.scan_stubs) provided by the BEC server:
+- Move the motor to the start position. This can be achieved by using the [`set_and_wait`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.set_and_wait) method. 
+- Send the flyer on its way to the defined stop position. This can be achieved by using the [`set_with_response`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.set_with_response) method.
+- Wait for the trigger to complete. This can be achieved by using the [`wait`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.wait) method.
+- Read out all devices on readout priority "monitored". This can be achieved by using the [`read_and_wait`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.read_and_wait) method, using the group "primary". 
+- Check if the flyer has reached the stop position. This can be achieved by using the [`request_is_completed`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.request_is_completed) method.
 
 Let's build the method accordingly:
 
@@ -117,13 +124,13 @@ Let's build the method accordingly:
         while True:
             # send a trigger
             yield from self.stubs.trigger(group="trigger", point_id=self.point_id)
-            # read the data
-            yield from self.stubs.read_and_wait(
-                group="primary", wait_group="readout_primary", point_id=self.point_id
-            )
             # wait for the trigger to complete
             yield from self.stubs.wait(
                 wait_type="trigger", group="trigger", wait_time=self.exp_time
+            )
+            # read the data
+            yield from self.stubs.read_and_wait(
+                group="primary", wait_group="readout_primary", point_id=self.point_id
             )
 
             if self.stubs.request_is_completed(flyer_request):
@@ -182,7 +189,7 @@ class TutorialFlyScanContLine(AsyncFlyScanBase):
             ScanReport
 
         Examples:
-            >>> scans.cont_line_fly_scan(dev.sam_rot, 0, 180, exp_time=0.1)
+            >>> scans.tutorial_cont_line_fly_scan(dev.sam_rot, 0, 180, exp_time=0.1)
 
         """
         super().__init__(**kwargs)
@@ -208,13 +215,13 @@ class TutorialFlyScanContLine(AsyncFlyScanBase):
         while True:
             # send a trigger
             yield from self.stubs.trigger(group="trigger", point_id=self.point_id)
-            # read the data
-            yield from self.stubs.read_and_wait(
-                group="primary", wait_group="readout_primary", point_id=self.point_id
-            )
             # wait for the trigger to complete
             yield from self.stubs.wait(
                 wait_type="trigger", group="trigger", wait_time=self.exp_time
+            )
+            # read the data
+            yield from self.stubs.read_and_wait(
+                group="primary", wait_group="readout_primary", point_id=self.point_id
             )
 
             if self.stubs.request_is_completed(flyer_request):
@@ -230,3 +237,246 @@ class TutorialFlyScanContLine(AsyncFlyScanBase):
 ```
 
 Once you have saved the file, restart the BEC server and the client. You should now be able to see your new scan showing up as `tutorial_fly_scan_cont_line` within `scans.<tab>`.
+
+## Step 6: (Optional) Test the Scan
+Testing the scan is crucial to ensure that the scan works as expected, even if the components of BEC change. The architecture of scans in BEC allows for easy testing as the scan logic is separated from the hardware control. As a result, we only need to ensure that the scan logic is correct. This can be achieved by ensuring that the correct instructions are sent to the scan worker. 
+
+Let's create a new test file in the `tests/tests_scans` directory of our plugin repository and name it `test_tutorial_fly_scan_cont_line.py`. 
+
+```{important}
+In BEC, we are relying on the `pytest` package for testing. Therefore, all test files must be prefixed with `test_` to be picked up by the test runner.
+Similarly, any file that should not be picked up by the test runner must not be prefixed with `test_`.
+```
+
+We will start by importing the necessary modules and defining the test class. We will then write a test that checks if the scan worker receives the correct instructions.
+
+```python
+from unittest import mock
+from bec_server.device_server.tests.utils import DMMock
+from <beamline_repo>.scans import TutorialFlyScanContLine
+```
+
+Of course, you need to replace `<beamline_repo>` with the name of your beamline repository.
+
+Next, we will define the test for the scan. 
+
+```python
+def test_TutorialFlyScanContLine():
+    # create a fake device manager that we can use to add devices
+    device_manager = DMMock()  
+    device_manager.add_device("samx")
+
+    request = TutorialFlyScanContLine(
+        motor="samx", start=0, stop=5, relative=False, device_manager=device_manager
+    )
+```
+
+So far, the test has created a fake device manager and initialized the scan. We will now mock the `request_is_completed` method to simulate the device's response. 
+
+```python
+    with mock.patch.object(request.stubs, "request_is_completed", side_effect=[False, True]):
+        reference_commands = list(request.run())
+```
+This test configuration will run two rounds within the while loop: On the first round, the `request_is_completed` method will return `False`, and on the second round, it will return `True`. All device instructions will be stored in the `reference_commands` list.
+
+Finally, we will check if the scan worker receives the correct instructions. To ignore the {term}`request_id` / `RID` field, we will replace it with a fixed value.
+
+```python
+    for cmd in reference_commands:
+        if not cmd:
+            continue
+        if "RID" in cmd.metadata:
+            cmd.metadata["RID"] = "1948acad-afac-4f73-9492-2e10a084db91"
+
+    assert reference_commands == [
+        None,
+        None,
+        DeviceInstructionMessage(
+            metadata={"readout_priority": "monitored", "DIID": 0},
+            device=None,
+            action="open_scan",
+            parameter={
+                "scan_motors": [],
+                "readout_priority": {
+                    "monitored": [],
+                    "baseline": [],
+                    "on_request": [],
+                    "async": [],
+                },
+                "num_points": None,
+                "positions": [[0], [5]],
+                "scan_name": "tutorial_cont_line_fly_scan",
+                "scan_type": "fly",
+            },
+        ),
+        ... # add the rest of the instructions here
+    ]
+```
+
+````{dropdown} Full Test Code
+```python
+from unittest import mock
+
+from bec_lib.messages import DeviceInstructionMessage
+from bec_server.device_server.tests.utils import DMMock
+
+from tomcat_bec.scans import TutorialFlyScanContLine
+
+
+def test_TutorialFlyScanContLine():
+    # create a fake device manager that we can use to add devices
+    device_manager = DMMock()
+    device_manager.add_device("samx")
+
+    request = TutorialFlyScanContLine(
+        motor="samx", start=0, stop=5, relative=False, device_manager=device_manager
+    )
+
+    with mock.patch.object(request.stubs, "request_is_completed", side_effect=[False, True]):
+        reference_commands = list(request.run())
+
+    for cmd in reference_commands:
+        if not cmd:
+            continue
+        if "RID" in cmd.metadata:
+            cmd.metadata["RID"] = "1948acad-afac-4f73-9492-2e10a084db91"
+
+    assert reference_commands == [
+        None,
+        None,
+        DeviceInstructionMessage(
+            metadata={"readout_priority": "monitored", "DIID": 0},
+            device=None,
+            action="open_scan",
+            parameter={
+                "scan_motors": [],
+                "readout_priority": {
+                    "monitored": [],
+                    "baseline": [],
+                    "on_request": [],
+                    "async": [],
+                },
+                "num_points": None,
+                "positions": [[0], [5]],
+                "scan_name": "tutorial_cont_line_fly_scan",
+                "scan_type": "fly",
+            },
+        ),
+        DeviceInstructionMessage(
+            metadata={"readout_priority": "monitored", "DIID": 1},
+            device=None,
+            action="stage",
+            parameter={},
+        ),
+        DeviceInstructionMessage(
+            metadata={"readout_priority": "baseline", "DIID": 2},
+            device=None,
+            action="baseline_reading",
+            parameter={},
+        ),
+        DeviceInstructionMessage(
+            metadata={"readout_priority": "monitored", "DIID": 3},
+            device=None,
+            action="pre_scan",
+            parameter={},
+        ),
+        DeviceInstructionMessage(
+            metadata={"readout_priority": "monitored", "DIID": 4},
+            device="samx",
+            action="set",
+            parameter={"value": 0, "wait_group": "scan_motor"},
+        ),
+        DeviceInstructionMessage(
+            metadata={"readout_priority": "monitored", "DIID": 5},
+            device=["samx"],
+            action="wait",
+            parameter={"type": "move", "wait_group": "scan_motor"},
+        ),
+        DeviceInstructionMessage(
+            metadata={
+                "readout_priority": "monitored",
+                "DIID": 6,
+                "response": True,
+                "RID": "1948acad-afac-4f73-9492-2e10a084db91",
+            },
+            device="samx",
+            action="set",
+            parameter={"value": 5, "wait_group": "set"},
+        ),
+        DeviceInstructionMessage(
+            metadata={"readout_priority": "monitored", "DIID": 7, "point_id": 0},
+            device=None,
+            action="trigger",
+            parameter={"group": "trigger"},
+        ),
+        DeviceInstructionMessage(
+            metadata={"readout_priority": "monitored", "DIID": 8, "point_id": 0},
+            device=None,
+            action="read",
+            parameter={"group": "primary", "wait_group": "readout_primary"},
+        ),
+        DeviceInstructionMessage(
+            metadata={"readout_priority": "monitored", "DIID": 9},
+            device=None,
+            action="wait",
+            parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
+        ),
+        DeviceInstructionMessage(
+            metadata={"readout_priority": "monitored", "DIID": 10},
+            device=None,
+            action="wait",
+            parameter={"type": "trigger", "time": 0, "group": "trigger"},
+        ),
+        DeviceInstructionMessage(
+            metadata={"readout_priority": "monitored", "DIID": 11, "point_id": 1},
+            device=None,
+            action="trigger",
+            parameter={"group": "trigger"},
+        ),
+        DeviceInstructionMessage(
+            metadata={"readout_priority": "monitored", "DIID": 12, "point_id": 1},
+            device=None,
+            action="read",
+            parameter={"group": "primary", "wait_group": "readout_primary"},
+        ),
+        DeviceInstructionMessage(
+            metadata={"readout_priority": "monitored", "DIID": 13},
+            device=None,
+            action="wait",
+            parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
+        ),
+        DeviceInstructionMessage(
+            metadata={"readout_priority": "monitored", "DIID": 14},
+            device=None,
+            action="wait",
+            parameter={"type": "trigger", "time": 0, "group": "trigger"},
+        ),
+        DeviceInstructionMessage(
+            metadata={"readout_priority": "monitored", "DIID": 15},
+            device=None,
+            action="wait",
+            parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
+        ),
+        DeviceInstructionMessage(
+            metadata={"readout_priority": "monitored", "DIID": 16},
+            device=None,
+            action="complete",
+            parameter={},
+        ),
+        DeviceInstructionMessage(
+            metadata={"readout_priority": "monitored", "DIID": 17},
+            device=None,
+            action="unstage",
+            parameter={},
+        ),
+        DeviceInstructionMessage(
+            metadata={"readout_priority": "monitored", "DIID": 18},
+            device=None,
+            action="close_scan",
+            parameter={},
+        ),
+    ]
+```
+````
+
+<!-- ## Step 7: (Optional) Change client feedback from table to progress bar -->
