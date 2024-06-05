@@ -27,11 +27,7 @@ try:
 except Exception:
     sys.excepthook(*sys.exc_info())
 else:
-
-    dev = bec.device_manager.devices
-    scans = bec.scans
-
-    if not _main_dict["args"].nogui and _BECDockArea is not None:
+    if bec.started and not _main_dict["args"].nogui and _BECDockArea is not None:
         gui = bec.gui = _BECDockArea()
         gui.show()
         if gui.auto_updates is None:

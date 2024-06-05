@@ -11,6 +11,7 @@ import importlib
 import inspect
 from typing import TYPE_CHECKING
 
+import redis
 from rich.console import Console
 from rich.table import Table
 
@@ -118,14 +119,22 @@ class BECClient(BECService, UserScriptsMixin):
         """start the client"""
         if self.started:
             return
-        self.started = True
-        config = self.__init_params["config"]
-        connector_cls = self.__init_params["connector_cls"]
-        wait_for_server = self.__init_params["wait_for_server"]
-        super().__init__(config, connector_cls, wait_for_server=wait_for_server)
-        builtins.bec = self._parent
-        self._start_services()
-        logger.info("Starting new client")
+        try:
+            self.started = True
+            config = self.__init_params["config"]
+            connector_cls = self.__init_params["connector_cls"]
+            wait_for_server = self.__init_params["wait_for_server"]
+            super().__init__(config, connector_cls, wait_for_server=wait_for_server)
+            builtins.bec = self._parent
+            self._start_services()
+            default_namespace = {"dev": self.device_manager.devices, "scans": self.scans}
+            self.callbacks.run(
+                EventType.NAMESPACE_UPDATE, action="add", ns_objects=default_namespace
+            )
+            logger.info("Starting new client")
+        except redis.exceptions.ConnectionError:
+            logger.error("Failed to start the client: Could not connect to Redis server.")
+            self.shutdown()
 
     def _start_services(self):
         self._configure_logger()
@@ -229,8 +238,7 @@ class BECClient(BECService, UserScriptsMixin):
 
     def shutdown(self):
         """shutdown the client and all its components"""
-        if self.started:
-            super().shutdown()
+        super().shutdown()
         if self.device_manager:
             self.device_manager.shutdown()
         if self.queue:

@@ -62,7 +62,7 @@ class BECIPythonClient:
         self._beamline_mixin = BeamlineMixin()
         self.live_updates = IPythonLiveUpdates(self)
         self._configure_ipython()
-        self.started = True
+        self.started = self._client.started
 
     def bl_show_all(self):
         self._beamline_mixin.bl_show_all()
