@@ -238,7 +238,7 @@ class TutorialFlyScanContLine(AsyncFlyScanBase):
 
 Once you have saved the file, restart the BEC server and the client. You should now be able to see your new scan showing up as `tutorial_fly_scan_cont_line` within `scans.<tab>`.
 
-## Step 6: (Optional) Test the Scan
+## Step 6: (Optional) Test the scan
 Testing the scan is crucial to ensure that the scan works as expected, even if the components of BEC change. The architecture of scans in BEC allows for easy testing as the scan logic is separated from the hardware control. As a result, we only need to ensure that the scan logic is correct. This can be achieved by ensuring that the correct instructions are sent to the scan worker. 
 
 Let's create a new test file in the `tests/tests_scans` directory of our plugin repository and name it `test_tutorial_fly_scan_cont_line.py`. 
@@ -277,9 +277,10 @@ So far, the test has created a fake device manager and initialized the scan. We 
     with mock.patch.object(request.stubs, "request_is_completed", side_effect=[False, True]):
         reference_commands = list(request.run())
 ```
+
 This test configuration will run two rounds within the while loop: On the first round, the `request_is_completed` method will return `False`, and on the second round, it will return `True`. All device instructions will be stored in the `reference_commands` list.
 
-Finally, we will check if the scan worker receives the correct instructions. To ignore the {term}`request_id` / `RID` field, we will replace it with a fixed value.
+Finally, we will check if the scan worker receives the correct instructions. To ignore the request ID (`RID`) field, we will replace it with a fixed value.
 
 ```python
     for cmd in reference_commands:
