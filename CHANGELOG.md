@@ -2,6 +2,13 @@
 
 
 
+## v2.13.4 (2024-06-05)
+
+### Fix
+
+* fix(bec_ipython_client): fixed gui startup ([`8f4d89e`](https://gitlab.psi.ch/bec/bec/-/commit/8f4d89e7a49dc7ca9cbbe64e832ddef19b418f16))
+
+
 ## v2.13.3 (2024-06-04)
 
 ### Fix
@@ -144,7 +151,3 @@
 TODO: put back imports as normal when Pydantic gets faster ([`791be9b`](https://gitlab.psi.ch/bec/bec/-/commit/791be9b25aa618d508feed99a201e0c58b56f3ce))
 
 * fix: do not import modules if only for type checking (faster import) ([`1c628fd`](https://gitlab.psi.ch/bec/bec/-/commit/1c628fd6105ef5df99e97c8945d3382c45ef5350))
-
-* fix: clean all imports from bec_lib, remove use of @threadlocked ([`8a017ef`](https://gitlab.psi.ch/bec/bec/-/commit/8a017ef3d7666f173a70f2e6a8606d73b1af0095))
-
-* fix: use lazy import to reduce bec_lib import time ([`649502e`](https://gitlab.psi.ch/bec/bec/-/commit/649502e364e4e4c0ea53f932418c479f2d6978d4))
