@@ -480,4 +480,83 @@ def test_TutorialFlyScanContLine():
 ```
 ````
 
-<!-- ## Step 7: (Optional) Change client feedback from table to progress bar -->
+## Step 7: (Optional) Setting up more devices 
+In general, it is good practice to keep the scan logic as simple as possible and to move as much device-specific logic as possible to the device classes. However, there are cases where it is necessary to set up devices after they have been staged for the scan. While we have already seen how to move a device to a specific position, the scan server also grants you access to any ophyd method available on the device. Let's take a delay generator (DDG) as an example: Before the scan, we want to configure the DDG and effectly run the following method on the ophyd object `ddg_detectors`:
+
+```python
+ddg_detectors.burst_enable(count=1, delay=0.01, period=exp_time+readout_time,config="first")
+```
+
+To run the same command from within the scan server, we can use the `send_rpc_and_wait` method:
+    
+```python
+yield from self.stubs.send_rpc_and_wait(
+    "ddg_detectors",
+    "burst_enable",
+    count=1,
+    delay=0.01,
+    period=self.exp_time,
+    config="first",
+)
+```
+
+Even nested methods can be called using the `send_rpc_and_wait` method. For example, to run the following command:
+
+```python
+status_ddg_detectors_source = yield from self.stubs.send_rpc_and_wait(
+    "ddg_detectors", "source.set", 5
+)
+```
+
+## Step 8: (Optional) Changing the scan report instruction
+By default, the scan report instruction is set to `scan_progress` and usually results in a display of the scan progress by using a progress bar and a table report with monitored devices. However, especially for fly scans, it might be more meaningful to display the status of a specific device, e.g. the flyer. Here, two options are available:
+- `readback` to display the readback value of a device. This is useful if you want to display the current position of the motor. It requires a constantly updating readback value. 
+- `device_progress` to display the progress of a device. This is useful if you want to display the progress of the flyer. It requires a dedicated progress report on the device using the Ophyd `SUB_PROGRESS` event type. 
+
+To demonstrate how to change the scan report instruction, we will use the `readback` option. 
+
+To uniquely identify the readback progress, we need to retrieve the request ID of the flyer. This can be achieved by creating a unique request ID during the initialization of the flyer:
+
+
+```python
+import uuid
+
+... 
+
+super().__init__(**kwargs)
+self.motor = motor
+self.start = start
+self.stop = stop
+self.exp_time = exp_time
+self.relative = relative
+self.device_move_request_id = str(uuid.uuid4())
+
+```
+
+Next, we need to update the `scan_report_instruction` method to instruct the client to display the readback value of the motor. 
+
+```python
+def scan_report_instructions(self):
+    yield from self.stubs.scan_report_instruction(
+        {
+            "readback": {
+                "RID": self.device_move_request_id,
+                "devices": [self.motor],
+                "start": [self.start],
+                "end": [self.stop],
+            }
+        }
+    )
+```
+
+We also need to update the flyer to use our newly created request ID:
+
+```python
+# start the flyer
+flyer_request = yield from self.stubs.set_with_response(
+    device=self.motor, value=self.positions[1][0], request_id=self.device_move_request_id
+)
+```
+
+
+With these changes, the scan report will now display the readback value of the motor instead of the scan progress.
