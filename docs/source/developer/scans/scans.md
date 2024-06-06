@@ -10,5 +10,6 @@ hidden: true
 scan_structure/
 scan_stubs/
 tutorial_fly_scan_cont_line/
+scan_metadata/
 
 ```
