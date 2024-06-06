@@ -119,11 +119,17 @@ class BECService:
         )
 
     def _update_existing_services(self):
-        service_keys = self.connector.keys(MessageEndpoints.service_status("*").endpoint)
+        service_keys = self.connector.keys(MessageEndpoints.service_status("*"))
         if not service_keys:
             return
-        services = [service.decode().split(":", maxsplit=1)[0] for service in service_keys]
-        msgs = [self.connector.get(service) for service in services]
+        # service keys are in the form of: "internal/services/status/4b9d1af8-44ed-4f3a-8787-ef9f958f59b"
+        services = []
+        for service_key in service_keys:
+            _, _, service_id = service_key.decode().rpartition("/")
+            services.append(service_id)
+        msgs = [
+            self.connector.get(MessageEndpoints.service_status(service)) for service in services
+        ]
         self._services_info = {msg.content["name"]: msg for msg in msgs if msg is not None}
 
     def _update_service_info(self):
