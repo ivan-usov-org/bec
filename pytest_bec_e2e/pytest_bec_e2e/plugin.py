@@ -96,7 +96,7 @@ def pytest_configure(config):
         )
 
         if config.getoption("--flush-redis"):
-            bec_redis_fixture = pytest_redis_factories.redisdb("redis_server_fixture")
+            bec_redis_fixture = pytest_redis_factories.client.redisdb("redis_server_fixture")
             _bec_servers_scope = "function"  # have to restart servers at each test
         else:
             bec_redis_fixture = redis_server_fixture
@@ -106,7 +106,7 @@ def pytest_configure(config):
         # there is no point checking if we want to flush redis
         # since it would remove available scans which are only populated
         # when scan server starts
-        redis_server_fixture = pytest_redis_factories.redis_noproc(
+        redis_server_fixture = pytest_redis_factories.noproc.redis_noproc(
             host=config.getoption("--bec-redis-host"), startup_timeout=3
         )
         bec_redis_fixture = redis_server_fixture
