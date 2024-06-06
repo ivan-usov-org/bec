@@ -289,7 +289,7 @@ class FileWriterManager(BECService):
             file_path = self.writer_mixin.compile_full_filename(suffix=file_suffix)
             self.connector.set_and_publish(
                 MessageEndpoints.public_file(scan_id, "master"),
-                messages.FileMessage(file_path=file_path, done=False),
+                messages.FileMessage(file_path=file_path, done=False, successful=False),
             )
             successful = True
             logger.info(f"Starting writing to file {file_path}.")
@@ -310,7 +310,7 @@ class FileWriterManager(BECService):
         self.scan_storage.pop(scan_id)
         self.connector.set_and_publish(
             MessageEndpoints.public_file(scan_id, "master"),
-            messages.FileMessage(file_path=file_path, successful=successful),
+            messages.FileMessage(file_path=file_path, done=True, successful=successful),
         )
         if successful:
             logger.success(f"Finished writing file {file_path}.")

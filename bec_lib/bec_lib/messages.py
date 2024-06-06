@@ -555,16 +555,16 @@ class FileMessage(BECMessage):
 
     Args:
         file_path (str): Path to the file.
-        done (bool, optional): True if the file writing operation is done. Defaults to True.
-        successful (bool, optional): True if the file writing operation was successful. Defaults to True.
+        done (bool): True if the file writing operation is done.
+        successful (bool): True if the file writing operation was successful.
         metadata (dict, optional): Additional metadata. Defaults to None.
 
     """
 
     msg_type: ClassVar[str] = "file_message"
     file_path: str
-    done: bool = Field(default=True)
-    successful: bool = Field(default=True)
+    done: bool
+    successful: bool
 
 
 class FileContentMessage(BECMessage):

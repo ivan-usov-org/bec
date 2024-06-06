@@ -4,6 +4,7 @@ import threading
 import time
 from unittest.mock import PropertyMock
 
+import h5py
 import numpy as np
 import pytest
 
@@ -405,7 +406,7 @@ def test_file_writer(bec_ipython_client_fixture):
     bec.metadata.update({"unit_test": "test_file_writer"})
     scans = bec.scans
     dev = bec.device_manager.devices
-
+    dataset_number = bec.queue.next_dataset_number
     scan = scans.grid_scan(
         dev.samx,
         -5,
@@ -417,32 +418,36 @@ def test_file_writer(bec_ipython_client_fixture):
         10,
         exp_time=0.01,
         relative=True,
-        md={"datasetID": 325},
+        metadata={"sample": "my_sample"},
     )
     assert len(scan.scan.data) == 100
     msg = bec.device_manager.connector.get(
         MessageEndpoints.public_file(scan.scan.scan_id, "master")
     )
     while True:
-        if msg:
-            break
         msg = bec.device_manager.connector.get(
             MessageEndpoints.public_file(scan.scan.scan_id, "master")
         )
 
+        if not msg:
+            continue
+        if msg.successful and msg.done:
+            time.sleep(0.1)
+            break
+
     file_msg = msg
-    assert file_msg.content["successful"]
 
-    # currently not working due to access restrictions in docker:
-
-    # with h5py.File(file_msg.content["file_path"], "r") as file:
-    #     assert file["entry"]["collection"]["bec"]["metadata"]["datasetID"][()] == 325
-
-    #     file_data = file["entry"]["collection"]["bec"]["samx"][()]
-    #     stream_data = [
-    #         msg.content["data"]["samx"]["samx"]["value"] for msg in scan.scan.data.values()
-    #     ]
-    #     assert all(file_data == stream_data)
+    with h5py.File(file_msg.content["file_path"], "r") as file:
+        assert (
+            file["entry"]["collection"]["bec"]["metadata"]["user_metadata"]["sample"][()].decode()
+            == "my_sample"
+        )
+        assert (
+            file["entry"]["collection"]["bec"]["metadata"]["dataset_number"][()] == dataset_number
+        )
+        file_data = file["entry"]["collection"]["bec"]["samx"]["samx"]["value"][...]
+        stream_data = scan.scan.data["samx"]["samx"]["value"]
+        assert all(file_data == stream_data)
 
 
 @pytest.mark.timeout(100)
