@@ -816,7 +816,7 @@ class RedisConnector(ConnectorBase):
         if not isinstance(msg, BECMessage):
             raise TypeError(f"Message {msg} is not a BECMessage")
         msg = MsgpackSerialization.dumps(msg)
-        self.set(topic, msg, pipe=client, expire=expire)
+        client.set(topic, msg, ex=expire)
         self.raw_send(topic, msg, pipe=client)
         if not pipe:
             client.execute()
