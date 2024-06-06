@@ -20,7 +20,7 @@ glossary/
 ***
 
 ````{grid} 2
-:gutter: 6
+:gutter: 5
 
 ```{grid-item-card}
 :link: developer.getting_started

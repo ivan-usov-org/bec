@@ -59,6 +59,7 @@ myst_enable_extensions = [
 autosummary_generate = True  # Turn on sphinx.ext.autosummary
 add_module_names = False  # Remove namespaces from class/method signatures
 autodoc_inherit_docstrings = True  # If no docstring, inherit from base class
+autodoc_mock_imports = ["pydantic"]
 set_type_checking_flag = True  # Enable 'expensive' imports for sphinx_autodoc_typehints
 autoclass_content = "both"  # Include both class docstring and __init__
 

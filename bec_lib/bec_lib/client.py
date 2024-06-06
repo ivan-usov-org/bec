@@ -12,6 +12,7 @@ import inspect
 from typing import TYPE_CHECKING
 
 import redis
+from pydantic import BaseModel, Field, field_validator
 from rich.console import Console
 from rich.table import Table
 
@@ -37,6 +38,39 @@ VariableMessage = lazy_import_from("bec_lib.messages", ("VariableMessage",))
 RedisConnector = lazy_import_from("bec_lib.redis_connector", ("RedisConnector",))
 ScanManager = lazy_import_from("bec_lib.scan_manager", ("ScanManager",))
 Scans = lazy_import_from("bec_lib.scans", ("Scans",))
+
+
+class SystemConfig(BaseModel):
+    """System configuration model"""
+
+    file_suffix: str | None = Field(default=None)
+    file_directory: str | None = Field(default=None)
+    model_config: dict = {"validate_assignment": True}
+
+    @field_validator("file_suffix", "file_directory")
+    @staticmethod
+    def check_validity(value: str, field: Field) -> str:
+        """Check the validity of the value
+
+        Args:
+            value (str): The value to check
+            field_name (str): The name of the field
+
+        Returns:
+            str: The value if it is valid
+        """
+        if value is None:
+            return value
+        field_name = field.field_name
+        check_value = value.replace("_", "").replace("-", "")
+        if field_name == "file_directory":
+            value = value.strip("/")
+            check_value = check_value.replace("/", "")
+        if not check_value.isalnum() or not check_value.isascii():
+            raise ValueError(
+                f"{field_name} must only contain alphanumeric ASCII characters. Provided string is: {value}"
+            )
+        return value
 
 
 class BECClient(BECService, UserScriptsMixin):
@@ -82,6 +116,7 @@ class BECClient(BECService, UserScriptsMixin):
         self.bl_checks = None
         self._hli_funcs = {}
         self.metadata = {}
+        self.system_config = SystemConfig()
         self.callbacks = CallbackHandler()
         self._parent = parent if parent is not None else self
         self._initialized = True

@@ -88,7 +88,7 @@ def test_scan_object_file_suffix(scan_obj, dev):
                 step=0.5,
                 exp_time=0.1,
                 relative=False,
-                metadata={"file_suffix": "testsample"},
+                file_suffix="testsample",
             )
             assert scan_report.call_args.args[0].metadata["file_suffix"] == "testsample"
 
@@ -124,7 +124,7 @@ def test_scan_object_raises_on_non_ascii_chars(scan_obj, dev, file_suffix, file_
                         step=0.5,
                         exp_time=0.1,
                         relative=False,
-                        metadata={"file_suffix": file_suffix},
+                        file_suffix=file_suffix,
                     )
             else:
                 scan_obj._run(
@@ -137,7 +137,7 @@ def test_scan_object_raises_on_non_ascii_chars(scan_obj, dev, file_suffix, file_
                     step=0.5,
                     exp_time=0.1,
                     relative=False,
-                    metadata={"file_suffix": file_suffix},
+                    file_suffix=file_suffix,
                 )
                 assert scan_report.call_args.args[0].metadata["file_suffix"] == file_suffix
 
@@ -168,7 +168,7 @@ def test_scan_object_raises_on_non_ascii_chars_dir(scan_obj, dev, file_dir, file
                         step=0.5,
                         exp_time=0.1,
                         relative=False,
-                        metadata={"file_directory": file_dir},
+                        file_directory=file_dir,
                     )
             else:
                 scan_obj._run(
@@ -181,7 +181,7 @@ def test_scan_object_raises_on_non_ascii_chars_dir(scan_obj, dev, file_dir, file
                     step=0.5,
                     exp_time=0.1,
                     relative=False,
-                    metadata={"file_directory": file_dir},
+                    file_directory=file_dir,
                 )
                 assert scan_report.call_args.args[0].metadata["file_directory"] == file_dir.strip(
                     "/"
@@ -201,7 +201,10 @@ def test_scan_object_receives_sample_name(scan_obj, dev):
             scan_obj.client, "get_global_var", side_effect=get_global_var_side_effect
         ):
             scan_obj._run(dev.samx, -5, 5, dev.samy, -5, 5, step=0.5, exp_time=0.1, relative=False)
-            assert scan_report.call_args.args[0].metadata["sample_name"] == "test_sample"
+            assert (
+                scan_report.call_args.args[0].metadata["user_metadata"]["sample_name"]
+                == "test_sample"
+            )
 
 
 def test_scan_object_receives_scan_group(scan_obj, dev):

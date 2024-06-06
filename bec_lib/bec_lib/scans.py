@@ -17,6 +17,7 @@ from typeguard import typechecked
 
 from bec_lib import messages
 from bec_lib.bec_errors import ScanAbortion
+from bec_lib.client import SystemConfig
 from bec_lib.device import DeviceBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
@@ -51,6 +52,8 @@ class ScanObject:
         hide_report: bool = False,
         metadata: dict = None,
         monitored: list[str | DeviceBase] = None,
+        file_suffix: str = None,
+        file_directory: str = None,
         **kwargs,
     ) -> ScanReport:
         """
@@ -76,28 +79,21 @@ class ScanObject:
         # pylint: disable=protected-access
         hide_report = hide_report or scans._hide_report
 
-        md = deepcopy(self.client.metadata)
-        key_parameter = ["sample_name", "file_suffix", "file_directory"]
-        for key in key_parameter:
-            if key not in md:
-                var = self.client.get_global_var(key)
-                if var is not None:
-                    md[key] = var
+        user_metadata = deepcopy(self.client.metadata)
+
+        sys_config = self.client.system_config.model_copy(deep=True)
+        if file_suffix:
+            sys_config.file_suffix = file_suffix
+        if file_directory:
+            sys_config.file_directory = file_directory
+
+        if "sample_name" not in user_metadata:
+            var = self.client.get_global_var("sample_name")
+            if var is not None:
+                user_metadata["sample_name"] = var
 
         if metadata is not None:
-            md.update(metadata)
-
-        if "file_suffix" in md:
-            suffix = md.get("file_suffix")
-            check_suffix = suffix.replace("_", "").replace("-", "")
-            if not check_suffix.isalnum() or not check_suffix.isascii():
-                raise ValueError("file_suffix must only contain alphanumeric ASCII characters.")
-        if "file_directory" in md:
-            directory = md.get("file_directory")
-            check_directory = directory.replace("/", "").replace("_", "").replace("-", "")
-            if not check_directory.isalnum() or not check_directory.isascii():
-                raise ValueError("file_directory must only contain alphanumeric ASCII characters.")
-            md["file_directory"] = directory.strip("/")
+            user_metadata.update(metadata)
 
         if monitored is not None:
             if not isinstance(monitored, list):
@@ -111,15 +107,17 @@ class ScanObject:
                         )
             kwargs["monitored"] = monitored
 
+        sys_config = sys_config.model_dump()
         # pylint: disable=protected-access
         if scans._scan_group:
-            md["queue_group"] = scans._scan_group
+            sys_config["queue_group"] = scans._scan_group
         if scans._scan_def_id:
-            md["scan_def_id"] = scans._scan_def_id
+            sys_config["scan_def_id"] = scans._scan_def_id
         if scans._dataset_id_on_hold:
-            md["dataset_id_on_hold"] = scans._dataset_id_on_hold
+            sys_config["dataset_id_on_hold"] = scans._dataset_id_on_hold
 
-        kwargs["metadata"] = md
+        kwargs["user_metadata"] = user_metadata
+        kwargs["system_config"] = sys_config
 
         request = Scans.prepare_scan_request(self.scan_name, self.scan_info, *args, **kwargs)
         request_id = str(uuid.uuid4())
@@ -265,8 +263,9 @@ class Scans:
                     )
 
         metadata = {}
-        if "metadata" in kwargs:
-            metadata = kwargs.pop("metadata")
+        metadata.update(kwargs["system_config"])
+        metadata["user_metadata"] = kwargs.pop("user_metadata", {})
+
         params = {"args": Scans._parameter_bundler(args, bundle_size), "kwargs": kwargs}
         # check the number of arg bundles against the number of required bundles
         if bundle_size:
@@ -408,17 +407,20 @@ class DatasetIdOnHold(ContextDecorator):
         queue.next_dataset_number += 1
 
 
-class FileWriterData:
+class FileWriter:
     @typechecked
-    def __init__(self, fw_config: Dict[Literal["file_suffix", "file_directory"], str]) -> None:
+    def __init__(self, file_suffix: str = None, file_directory: str = None) -> None:
         """Context manager for updating metadata
 
         Args:
             fw_config (dict): Dictionary with metadata for the filewriter, can only have keys "file_suffix" and "file_directory"
         """
         self.client = self._get_client()
-        self._fw_config = fw_config
+        self.system_config = self.client.system_config
+        self._orig_system_config = None
         self._orig_metadata = None
+        self.file_suffix = file_suffix
+        self.file_directory = file_directory
 
     def _get_client(self):
         """Get BEC client"""
@@ -427,12 +429,16 @@ class FileWriterData:
     def __enter__(self):
         """Enter the context manager"""
         self._orig_metadata = deepcopy(self.client.metadata)
-        self.client.metadata.update(self._fw_config)
+        self._orig_system_config = self.system_config.model_copy(deep=True)
+        self.system_config.file_suffix = self.file_suffix
+        self.system_config.file_directory = self.file_directory
         return self
 
-    def exit(self, *exc):
+    def __exit__(self, *exc):
         """Exit the context manager"""
         self.client.metadata = self._orig_metadata
+        self.system_config.file_suffix = self._orig_system_config.file_suffix
+        self.system_config.file_directory = self._orig_system_config.file_directory
 
 
 class Metadata:
