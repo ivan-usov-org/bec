@@ -13,7 +13,7 @@ from bec_lib.file_utils import FileWriter
 from bec_lib.logger import bec_logger
 from bec_lib.redis_connector import MessageObject, RedisConnector
 from bec_lib.service_config import ServiceConfig
-from bec_server.file_writer.file_writer import NexusFileWriter
+from bec_server.file_writer.file_writer import HDF5FileWriter
 
 logger = bec_logger.logger
 
@@ -85,7 +85,7 @@ class FileWriterManager(BECService):
         self.writer_mixin = FileWriter(
             service_config=self.file_writer_config, connector=self.connector
         )
-        self.file_writer = NexusFileWriter(self)
+        self.file_writer = HDF5FileWriter(self)
 
     def _start_device_manager(self):
         self.wait_for_service("DeviceServer")

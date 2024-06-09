@@ -1,77 +1,119 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from bec_lib.devicemanager import DeviceManagerBase
     from bec_server.file_writer.file_writer import HDF5Storage
 
 
-def NeXus_format(
-    storage: HDF5Storage, data: dict, file_references: dict, device_manager: DeviceManagerBase
-) -> HDF5Storage:
+class DefaultFormat:
     """
-    Prepare the NeXus file format.
-
-    Args:
-        storage (HDF5Storage): HDF5 storage. Pseudo hdf5 file container that will be written to disk later.
-        data (dict): scan data
-        file_references (dict): File references. Can be used to add external files to the HDF5 file.
-        device_manager (DeviceManagerBase): Device manager. Can be used to check if devices are available.
-
-    Returns:
-        HDF5Storage: Updated HDF5 storage
+    Default NeXus file format.
     """
-    # /entry
-    entry = storage.create_group("entry")
-    entry.attrs["NX_class"] = "NXentry"
-    entry.attrs["version"] = 1.0
 
-    # entry.attrs["definition"] = "NXsas"
-    entry.attrs["start_time"] = data.get("start_time")
-    entry.attrs["end_time"] = data.get("end_time")
+    def __init__(
+        self,
+        storage: HDF5Storage,
+        data: dict,
+        file_references: dict,
+        device_manager: DeviceManagerBase,
+    ):
+        self.storage = storage
+        self.data = data
+        self.file_references = file_references
+        self.device_manager = device_manager
 
-    # /entry/collection
-    collection = entry.create_group("collection")
-    collection.attrs["NX_class"] = "NXcollection"
-    bec_collection = collection.create_group("bec")
+    def get_storage_format(self) -> dict:
+        """
+        Internal method to extract the storage format after formatting the data. This method
+        should not be called directly.
 
-    # /entry/control
-    control = entry.create_group("control")
-    control.attrs["NX_class"] = "NXmonitor"
-    control.create_dataset(name="mode", data="monitor")
+        Returns:
+            dict: The storage format.
+        """
+        self.format()
+        # pylint: disable=protected-access
+        return self.storage._storage
 
-    # /entry/data
-    if "eiger_4" in device_manager.devices:
-        entry.create_soft_link(name="data", target="/entry/instrument/eiger_4")
+    def get_entry(self, name: str, default=None) -> Any:
+        """
+        Get an entry from the scan data assuming a <device>.<device>.value structure.
 
-    # /entry/sample
-    control = entry.create_group("sample")
-    control.attrs["NX_class"] = "NXsample"
-    control.create_dataset(name="name", data=data.get("samplename"))
-    control.create_dataset(name="description", data=data.get("sample_description"))
+        This method is a helper to extract the device data from the scan data, irrespective of the
+        data structure (list of entries or single entry).
 
-    # /entry/instrument
-    instrument = entry.create_group("instrument")
-    instrument.attrs["NX_class"] = "NXinstrument"
-    # instrument.create_dataset(name="name", data="cSAXS beamline")
+        Args:
+            name (str): Entry name
+            default (Any, optional): Default value. Defaults to None.
+        """
+        if isinstance(self.data.get(name), list) and isinstance(self.data.get(name)[0], dict):
+            return [
+                sub_data.get(name, {}).get("value", default) for sub_data in self.data.get(name)
+            ]
 
-    source = instrument.create_group("source")
-    source.attrs["NX_class"] = "NXsource"
-    source.create_dataset(name="type", data="Synchrotron X-ray Source")
-    source.create_dataset(name="name", data="Swiss Light Source")
-    source.create_dataset(name="probe", data="x-ray")
-    # distance = source.create_dataset(name="distance", data=-33800 - np.asarray(data.get("samz", 0)))
-    # distance.attrs["units"] = "mm"
-    # sigma_x = source.create_dataset(name="sigma_x", data=0.202)
-    # sigma_x.attrs["units"] = "mm"
-    # sigma_y = source.create_dataset(name="sigma_y", data=0.018)
-    # sigma_y.attrs["units"] = "mm"
-    # divergence_x = source.create_dataset(name="divergence_x", data=0.000135)
-    # divergence_x.attrs["units"] = "radians"
-    # divergence_y = source.create_dataset(name="divergence_y", data=0.000025)
-    # divergence_y.attrs["units"] = "radians"
-    # current = source.create_dataset(name="current", data=data.get("curr"))
-    # current.attrs["units"] = "mA"
+        return self.data.get(name, {}).get(name, {}).get("value", default)
 
-    return storage
+    def format(self) -> None:
+        """
+        Prepare the NeXus file format.
+        Override this method in file writer plugins to customize the HDF5 file format.
+
+        The class provides access to the following attributes:
+        - self.storage: The HDF5Storage object.
+        - self.data: The data dictionary.
+        - self.file_references: The file references dictionary.
+        - self.device_manager: The DeviceManagerBase object.
+
+        See also: :class:`bec_server.file_writer.file_writer.HDF5Storage`.
+
+        """
+        # /entry
+        entry = self.storage.create_group("entry")
+        entry.attrs["NX_class"] = "NXentry"
+        entry.attrs["start_time"] = self.data.get("start_time")
+        entry.attrs["end_time"] = self.data.get("end_time")
+        entry.attrs["version"] = 1.0
+
+        # /entry/collection
+        collection = entry.create_group("collection")
+        collection.attrs["NX_class"] = "NXcollection"
+        bec_collection = collection.create_group("bec")
+
+        # /entry/control
+        control = entry.create_group("control")
+        control.attrs["NX_class"] = "NXmonitor"
+        control.create_dataset(name="mode", data="monitor")
+
+        # /entry/data
+        if "eiger_4" in self.device_manager.devices:
+            entry.create_soft_link(name="data", target="/entry/instrument/eiger_4")
+
+        # /entry/sample
+        control = entry.create_group("sample")
+        control.attrs["NX_class"] = "NXsample"
+        control.create_dataset(name="name", data=self.data.get("samplename"))
+        control.create_dataset(name="description", data=self.data.get("sample_description"))
+
+        # /entry/instrument
+        instrument = entry.create_group("instrument")
+        instrument.attrs["NX_class"] = "NXinstrument"
+        # instrument.create_dataset(name="name", data="cSAXS beamline")
+
+        source = instrument.create_group("source")
+        source.attrs["NX_class"] = "NXsource"
+        source.create_dataset(name="type", data="Synchrotron X-ray Source")
+        source.create_dataset(name="name", data="Swiss Light Source")
+        source.create_dataset(name="probe", data="x-ray")
+        # distance = source.create_dataset(name="distance", data=-33800 - np.asarray(self.data.get("samz", 0)))
+        # distance.attrs["units"] = "mm"
+        # sigma_x = source.create_dataset(name="sigma_x", data=0.202)
+        # sigma_x.attrs["units"] = "mm"
+        # sigma_y = source.create_dataset(name="sigma_y", data=0.018)
+        # sigma_y.attrs["units"] = "mm"
+        # divergence_x = source.create_dataset(name="divergence_x", data=0.000135)
+        # divergence_x.attrs["units"] = "radians"
+        # divergence_y = source.create_dataset(name="divergence_y", data=0.000025)
+        # divergence_y.attrs["units"] = "radians"
+        # current = source.create_dataset(name="current", data=self.data.get("curr"))
+        # current.attrs["units"] = "mA"

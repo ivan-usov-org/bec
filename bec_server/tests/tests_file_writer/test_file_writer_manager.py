@@ -13,7 +13,7 @@ from bec_lib.redis_connector import MessageObject
 from bec_lib.service_config import ServiceConfig
 from bec_lib.tests.utils import ConnectorMock
 from bec_server.file_writer import FileWriterManager
-from bec_server.file_writer.file_writer import FileWriter
+from bec_server.file_writer.file_writer import HDF5FileWriter
 from bec_server.file_writer.file_writer_manager import ScanStorage
 
 # pylint: disable=missing-function-docstring
@@ -78,7 +78,7 @@ def test_scan_status_callback(file_writer_manager_mock):
     assert file_manager.scan_storage["scan_id"].scan_finished is True
 
 
-class MockWriter(FileWriter):
+class MockWriter(HDF5FileWriter):
     def __init__(self, file_writer_manager):
         super().__init__(file_writer_manager)
         self.write_called = False

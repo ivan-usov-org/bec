@@ -9,10 +9,10 @@ from test_file_writer_manager import file_writer_manager_mock
 
 from bec_lib.tests.fixtures import dm_with_devices
 from bec_server import file_writer
-from bec_server.file_writer import NexusFileWriter
+from bec_server.file_writer import HDF5FileWriter
 from bec_server.file_writer.file_writer import HDF5Storage
 from bec_server.file_writer.file_writer_manager import ScanStorage
-from bec_server.file_writer_plugins.cSAXS import NeXus_format as cSAXS_Nexus_format
+from bec_server.file_writer_plugins.cSAXS import cSAXSFormat
 
 dir_path = os.path.dirname(file_writer.__file__)
 
@@ -26,23 +26,19 @@ def file_writer_manager_mock_with_dm(file_writer_manager_mock, dm_with_devices):
 
 def test_csaxs_nexus_format(file_writer_manager_mock_with_dm):
     file_manager = file_writer_manager_mock_with_dm
-    writer_storage = cSAXS_Nexus_format(
+    writer_storage = cSAXSFormat(
         storage=HDF5Storage(),
         data={"samx": {"samx": {"value": [0, 1, 2]}}, "mokev": {"mokev": {"value": 12.456}}},
         file_references={},
         device_manager=file_manager.device_manager,
-    )
-    assert writer_storage._storage["entry"].attrs["definition"] == "NXsas"
-    assert writer_storage._storage["entry"]._storage["sample"]._storage["x_translation"]._data == [
-        0,
-        1,
-        2,
-    ]
+    ).get_storage_format()
+    assert writer_storage["entry"].attrs["definition"] == "NXsas"
+    assert writer_storage["entry"]._storage["sample"]._storage["x_translation"]._data == [0, 1, 2]
 
 
 def test_nexus_file_writer(file_writer_manager_mock_with_dm):
     file_manager = file_writer_manager_mock_with_dm
-    file_writer = NexusFileWriter(file_manager)
+    file_writer = HDF5FileWriter(file_manager)
     with mock.patch.object(
         file_writer,
         "_create_device_data_storage",
@@ -69,7 +65,7 @@ def test_nexus_file_writer(file_writer_manager_mock_with_dm):
 
 def test_create_device_data_storage(file_writer_manager_mock_with_dm):
     file_manager = file_writer_manager_mock_with_dm
-    file_writer = NexusFileWriter(file_manager)
+    file_writer = HDF5FileWriter(file_manager)
     storage = ScanStorage("2", "scan_id-string")
     storage.num_points = 2
     storage.scan_segments = {
@@ -140,7 +136,7 @@ def test_create_device_data_storage(file_writer_manager_mock_with_dm):
 )
 def test_write_data_storage(segments, baseline, metadata, file_writer_manager_mock_with_dm):
     file_manager = file_writer_manager_mock_with_dm
-    file_writer = NexusFileWriter(file_manager)
+    file_writer = HDF5FileWriter(file_manager)
     storage = ScanStorage("2", "scan_id-string")
     storage.num_points = 2
     storage.scan_segments = segments

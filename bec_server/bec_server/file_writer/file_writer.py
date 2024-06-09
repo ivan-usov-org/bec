@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import abc
 import datetime
 import json
 import os
@@ -13,41 +12,16 @@ from bec_lib import messages, plugin_helper
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
 
-from .default_writer import NeXus_format as default_NeXus_format
+from .default_writer import DefaultFormat as default_NeXus_format
 from .merged_dicts import merge_dicts
 
 logger = bec_logger.logger
 
 
 class NeXusLayoutError(Exception):
-    pass
-
-
-class FileWriter(abc.ABC):
-    def __init__(self, file_writer_manager):
-        self.file_writer_manager = file_writer_manager
-
-    def configure(self, *args, **kwargs): ...
-
-    @abc.abstractmethod
-    def write(self, file_path: str, data): ...
-
-    @staticmethod
-    def _create_device_data_storage(data):
-        device_storage = {}
-        if data.baseline:
-            device_storage.update(data.baseline)
-        if data.async_data:
-            device_storage.update(data.async_data)
-        keys = list(data.scan_segments.keys())
-        keys.sort()
-        for point in keys:
-            for dev in data.scan_segments[point]:
-                if dev not in device_storage:
-                    device_storage[dev] = [data.scan_segments[point][dev]]
-                    continue
-                device_storage[dev].append(data.scan_segments[point][dev])
-        return device_storage
+    """
+    Exception raised when the NeXus layout is incorrect.
+    """
 
 
 class HDF5Storage:
@@ -120,6 +94,12 @@ class HDF5Storage:
 
 
 class HDF5StorageWriter:
+    """
+    The HDF5StorageWriter class is used to write the HDF5Storage object to an HDF5 file.
+
+    The class
+    """
+
     device_storage = None
 
     def add_group(self, name: str, container: typing.Any, val: HDF5Storage):
@@ -198,8 +178,45 @@ class HDF5StorageWriter:
         writer.add_content(file, writer_storage)
 
 
-class NexusFileWriter(FileWriter):
+class HDF5FileWriter:
+    """
+    The HDF5FileWriter class is used to write data to an HDF5 file. Internally, it uses the HDF5StorageWriter class to
+    write the HDF5Storage object to the file.
+
+    Its primary purpose is to prepare the data, select the correct writer plugin and initiate the writing process.
+    """
+
+    def __init__(self, file_writer_manager):
+        self.file_writer_manager = file_writer_manager
+
+    @staticmethod
+    def _create_device_data_storage(data):
+        device_storage = {}
+        if data.baseline:
+            device_storage.update(data.baseline)
+        if data.async_data:
+            device_storage.update(data.async_data)
+        keys = list(data.scan_segments.keys())
+        keys.sort()
+        for point in keys:
+            for dev in data.scan_segments[point]:
+                if dev not in device_storage:
+                    device_storage[dev] = [data.scan_segments[point][dev]]
+                    continue
+                device_storage[dev].append(data.scan_segments[point][dev])
+        return device_storage
+
     def write(self, file_path: str, data):
+        """
+        Write the data to an HDF5 file.
+
+        Args:
+            file_path (str): File path
+            data (ScanStorage): Scan data
+
+        Raises:
+            NeXusLayoutError: Raised when the NeXus layout is incorrect.
+        """
         device_storage = self._create_device_data_storage(data)
         device_storage["metadata"] = data.metadata
 
@@ -213,23 +230,26 @@ class NexusFileWriter(FileWriter):
 
         requested_plugin = self.file_writer_manager.file_writer_config.get("plugin")
         if requested_plugin == "default_NeXus_format":
-            writer_format = default_NeXus_format
+            writer_format_cls = default_NeXus_format
         else:
             plugins = plugin_helper.get_file_writer_plugins()
             if requested_plugin not in plugins:
                 logger.error(f"Plugin {requested_plugin} not found. Using default plugin.")
-                writer_format = default_NeXus_format
+                writer_format_cls = default_NeXus_format
+            else:
+                writer_format_cls = plugins[requested_plugin]
 
         for file_ref in data.file_references.values():
             rel_path = os.path.relpath(file_ref["path"], os.path.dirname(file_path))
             file_ref["path"] = rel_path
 
-        writer_storage = writer_format(
+        writer_storage = writer_format_cls(
             storage=HDF5Storage(),
             data=device_storage,
             file_references=data.file_references,
             device_manager=self.file_writer_manager.device_manager,
-        )
+        ).get_storage_format()
+
         file_data = {}
         for key, val in device_storage.items():
             file_data[key] = val if not isinstance(val, list) else merge_dicts(val)
@@ -238,7 +258,7 @@ class NexusFileWriter(FileWriter):
         self.file_writer_manager.connector.set_and_publish(MessageEndpoints.file_content(), msg)
 
         with h5py.File(file_path, "w") as file:
-            HDF5StorageWriter.write(writer_storage._storage, device_storage, file)
+            HDF5StorageWriter.write(writer_storage, device_storage, file)
 
 
 def dict_to_storage(storage, data):
