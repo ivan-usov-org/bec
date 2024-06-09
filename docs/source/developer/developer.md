@@ -46,6 +46,17 @@ No matter if you need to add new devices to BEC or modify existing ones, this se
 ```
 
 ```{grid-item-card}
+:link: developer.user_interfaces
+:link-type: ref
+:img-top: /assets/portrait_48dp.svg
+:text-align: center
+
+## User Interfaces
+
+Discover and learn how to contribute to the command-line tool and graphical user interface for interacting with BEC.
+```
+
+```{grid-item-card}
 :link: developer.scans
 :link-type: ref
 :img-top: /assets/timeline_48dp.svg
@@ -58,25 +69,14 @@ Understand the basic structure of a scan in BEC and learn how to create a scan p
 ```
 
 ```{grid-item-card}
-:link: developer.user_interfaces
+:link: developer.file_writer
 :link-type: ref
-:img-top: /assets/portrait_48dp.svg
+:img-top: /assets/source_48dp.svg
 :text-align: center
 
 ## File Writer
 
 Explore and understand BEC's file writer and how it can be configured.
-```
-
-```{grid-item-card}
-:link: developer.file_writer
-:link-type: ref
-:img-top: /assets/portrait_48dp.svg
-:text-align: center
-
-## User Interfaces
-
-Discover and learn how to contribute to the command-line tool and graphical user interface for interacting with BEC.
 ```
 
 ```{grid-item-card}
