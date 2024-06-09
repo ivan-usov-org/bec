@@ -87,6 +87,8 @@ class FileWriterManager(BECService):
         )
         self.file_writer = HDF5FileWriter(self)
 
+        self.status = messages.BECStatus.RUNNING
+
     def _start_device_manager(self):
         self.wait_for_service("DeviceServer")
         self.device_manager = DeviceManagerBase(self)
