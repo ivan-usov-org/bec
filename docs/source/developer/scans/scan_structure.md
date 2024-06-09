@@ -17,6 +17,7 @@ The order of execution is defined by the [`run`](/api_reference/_autosummary/bec
 ```{literalinclude} ../../../../bec_server/bec_server/scan_server/scans.py
 :language: python
 :pyobject: ScanBase.run
+:dedent: 4
 ```
 
 The `run` method is a generator function that, like most other scan methods, yields control to the scan server after each method call. This allows the scan server to handle asynchronous operations, such as moving motors or waiting for certain events. The scan server will call the next method in the scan after the current method has completed. All methods that set or retrieve data from devices must be implemented as generator functions.
@@ -37,6 +38,7 @@ The default implementation of the `prepare_positions` method in the `ScanBase` c
 ```{literalinclude} ../../../../bec_server/bec_server/scan_server/scans.py
 :language: python
 :pyobject: ScanBase.prepare_positions
+:dedent: 4
 ``` 
 
 In addition to simply calculating the positions, the default implementation also respects the user's request to perform the scan relative to the current position or absolute (`relative=True` or `relative=False`) by adding the position offset using `_set_position_offset`.
@@ -70,6 +72,7 @@ It is sometimes necessary to perform additional operations before the core of th
 ```{literalinclude} ../../../../bec_server/bec_server/scan_server/scans.py
 :language: python
 :pyobject: ScanBase.pre_scan
+:dedent: 4
 ```
 
 If the class attribute `pre_move` is set to `True`, the default `pre_scan` method will move the scan motors to the first position before the scan core is executed and afterwards call the `pre_scan` method of all devices that have a `pre_scan` method implemented.
@@ -79,6 +82,7 @@ Now that all motors are ready and in position, we are finally ready to start the
 ```{literalinclude} ../../../../bec_server/bec_server/scan_server/scans.py
 :language: python
 :pyobject: ScanBase.scan_core
+:dedent: 4
 ```
 
 For each position in the scan, the method `_at_each_point` is called, providing the current index and a list of positions. The default implementation of `_at_each_point` performs the following actions:
@@ -86,6 +90,7 @@ For each position in the scan, the method `_at_each_point` is called, providing 
 ```{literalinclude} ../../../../bec_server/bec_server/scan_server/scans.py
 :language: python
 :pyobject: ScanBase._at_each_point
+:dedent: 4
 ```
 
 1. Move the scan motors to the target position. 

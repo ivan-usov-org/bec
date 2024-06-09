@@ -1,32 +1,33 @@
 (developer.file_writer)=
-## File Writer
-BEC’s file writer is a dedicated service that writes HDF5 files with Nexus-compatible metadata entries to disk. It also adds external links to files written by other services, such as data backends for large 2D detector data. The internal structure of the files can be adjusted to the beamline’s needs using customizable plugins to comply with the desired [NeXus application definition](https://manual.nexusformat.org/classes/applications/index.html).
+# File Writer
+BEC’s file writer is a dedicated service that writes [HDF5](https://www.hdfgroup.org/solutions/hdf5) files to disk. It is highly customizable and facilitates the adoption of community-driven file and data structures, cf. [NeXus application definition](https://manual.nexusformat.org/classes/applications/index.html). Beamline-specific file structures can be implemented through file writer plugins. The file writer can also be used to add external links to files written by other services, such as data backends for large data sources such as 2D detectors. 
 
-When the service starts, a **base_path** is configured, and all data can only be written to disk relative to this path. By default, the relative path follows the template `/data/S00000-S00999/S00001/S00001_master.h5` for scan number 1. To compile the appropriate path for secondary services, we provide the utility class [`bec_lib.file_utils.FileWriter`](/api_reference/_autosummary/bec_lib.file_utils.FileWriter.rst#bec_lib.file_utils.FileWriter) with the method [`compile_full_filename`](/api_reference/_autosummary/bec_lib.file_utils.FileWriter.rst#bec_lib.file_utils.FileWriter.compile_full_filename), which automatically prepares the correct filepath. 
-If secondary services within *ophyd_devices* need to be configured with the appropriate file path, we recommend using this function since it will ensure that all custom changes to the file name and directory will be properly compiled and returned.
+The following sections provide an overview of the file writer service and how to customize the file path, file format, and file writer plugins. 
 
-### Changing the file directory or adding a suffix
+```{seealso}
+If you are new to HDF5, we recommend heading over to the [HDF5 documentation](ttps://www.hdfgroup.org/solutions/hdf5) to get a better understanding of the file format. HDF5 also provides a [getting started guide](https://portal.hdfgroup.org/hdf5/v1_14_4/_getting_started.html) that might be helpful.
 
-The relative filepath can be configured and adapted dynamically. 
-We provide the possibility to change the file directory or add a suffix to the file name through a **system_config**.
-Keep in mind that the file_directory will always be considered relative to the **base_path**. Providing an absolute path by accident will be transformed into a relative path. 
-In addition, both file_suffix and file_directory may only contain alphanumeric ASCII characters and the following special characters: '-', '_' and '/'. 
-This will be automatically checked, and raise for an invalid input.
-You may use one of the two options below:
-
-1. **Changing the system_config**
-
-The **system_config** is accessible via [`bec.system_config`](/api_reference/_autosummary/bec_lib.client.SystemConfig) and can be used to change file_suffix and file_directory. It is directly exposed to users via the client. Changing the *file_suffix* and *file_directory* will be considered for all following scans.
-```python
-bec.system_config.file_suffix = 'sampleA'
-bec.system_config.file_directory = 'my_dir/my_setup'
+For more information on the NeXus format, please refer to the [NeXus documentation](https://manual.nexusformat.org/introduction.html).
 ```
-Assuming the *basepath* to be `'/bec/data'` and a `scannr = 101`, the file writer now writes to the following filepath: `'/bec/data/my_dir/my_setup/S00101_master_sampleA.h5'`.
-If you only provide *file_suffix*, but no additional *file_directory*, the filepath will be:`'/bec/data/S00000-S00999/S00101_sampleA/S00101_master_sampleA.h5'`. 
 
-2.  **Adding additional arguments to a scan**
-
-You can also add the *file_suffix* and *file_directory* as arguments to the scan command. This will only affect the current scan and will not be considered for following scans. Adding the arguments to the scan command has priority and will override the information provided in *system_config*.
-```python
-scans.line_scan(dev.samx, -5, 5, steps=1, relative=True, file_suffix='sampleA', file_directory='my_dir/my_setup')
+```{note}
+There are various community-developed tools available that can be used to visualize and analyze HDF5 files. The following list is by no means exhaustive, but it provides a good starting point:
+- [HDFView](https://www.hdfgroup.org/downloads/hdfview/): Official HDF5 viewer developed by the HDF Group
+- [NeXpy](https://nexpy.github.io/nexpy/): Python-based viewer for NeXus files
+- [silx view](http://www.silx.org/doc/silx/latest/applications/view.html#silx-view): Python-based viewer for scientific data developed by the European Synchrotron Radiation Facility
+- [h5web VSCode extension](https://marketplace.visualstudio.com/items?itemName=h5web.vscode-h5web): Visual Studio Code extension for viewing HDF5 files
 ```
+
+```{toctree}
+---
+maxdepth: 1
+hidden: true
+---
+file_path/
+file_format/
+
+```
+
+
+
+
