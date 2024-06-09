@@ -5,7 +5,7 @@ BEC’s file writer is a dedicated service that writes [HDF5](https://www.hdfgro
 The following sections provide an overview of the file writer service and how to customize the file path, file format, and file writer plugins. 
 
 ```{seealso}
-If you are new to HDF5, we recommend heading over to the [HDF5 documentation](ttps://www.hdfgroup.org/solutions/hdf5) to get a better understanding of the file format. HDF5 also provides a [getting started guide](https://portal.hdfgroup.org/hdf5/v1_14_4/_getting_started.html) that might be helpful.
+If you are new to HDF5, we recommend heading over to the [HDF5 documentation](https://www.hdfgroup.org/solutions/hdf5) to get a better understanding of the file format. HDF5 also provides a [getting started guide](https://portal.hdfgroup.org/hdf5/v1_14_4/_getting_started.html) that might be helpful.
 
 For more information on the NeXus format, please refer to the [NeXus documentation](https://manual.nexusformat.org/introduction.html).
 ```
