@@ -24,6 +24,13 @@ def file_writer_manager_mock_with_dm(file_writer_manager_mock, dm_with_devices):
     yield file_writer
 
 
+@pytest.fixture
+def hdf5_file_writer(file_writer_manager_mock_with_dm):
+    file_manager = file_writer_manager_mock_with_dm
+    file_writer = HDF5FileWriter(file_manager)
+    yield file_writer
+
+
 def test_csaxs_nexus_format(file_writer_manager_mock_with_dm):
     file_manager = file_writer_manager_mock_with_dm
     writer_storage = cSAXSFormat(
@@ -36,9 +43,8 @@ def test_csaxs_nexus_format(file_writer_manager_mock_with_dm):
     assert writer_storage["entry"]._storage["sample"]._storage["x_translation"]._data == [0, 1, 2]
 
 
-def test_nexus_file_writer(file_writer_manager_mock_with_dm):
-    file_manager = file_writer_manager_mock_with_dm
-    file_writer = HDF5FileWriter(file_manager)
+def test_nexus_file_writer(hdf5_file_writer):
+    file_writer = hdf5_file_writer
     with mock.patch.object(
         file_writer,
         "_create_device_data_storage",
@@ -63,9 +69,8 @@ def test_nexus_file_writer(file_writer_manager_mock_with_dm):
         # assert all(np.asarray(test_file["entry"]["sample"]["x_translation"]) == [0, 1, 2])
 
 
-def test_create_device_data_storage(file_writer_manager_mock_with_dm):
-    file_manager = file_writer_manager_mock_with_dm
-    file_writer = HDF5FileWriter(file_manager)
+def test_create_device_data_storage(hdf5_file_writer):
+    file_writer = hdf5_file_writer
     storage = ScanStorage("2", "scan_id-string")
     storage.num_points = 2
     storage.scan_segments = {
@@ -134,9 +139,8 @@ def test_create_device_data_storage(file_writer_manager_mock_with_dm):
         )
     ],
 )
-def test_write_data_storage(segments, baseline, metadata, file_writer_manager_mock_with_dm):
-    file_manager = file_writer_manager_mock_with_dm
-    file_writer = HDF5FileWriter(file_manager)
+def test_write_data_storage(segments, baseline, metadata, hdf5_file_writer):
+    file_writer = hdf5_file_writer
     storage = ScanStorage("2", "scan_id-string")
     storage.num_points = 2
     storage.scan_segments = segments
@@ -158,3 +162,29 @@ def test_write_data_storage(segments, baseline, metadata, file_writer_manager_mo
             test_file["entry"].attrs["end_time"]
             == datetime.datetime.fromtimestamp(1679226971.580867).isoformat()
         )
+
+
+def test_load_format_from_plugin(tmp_path, hdf5_file_writer):
+    file_writer = hdf5_file_writer
+    file_writer.file_writer_manager.file_writer_config["plugin"] = "cSAXS"
+
+    with mock.patch(
+        "bec_lib.plugin_helper.get_file_writer_plugins"
+    ) as mock_get_file_writer_plugins:
+        mock_get_file_writer_plugins.return_value = {"cSAXS": cSAXSFormat}
+        file_writer.write(f"{tmp_path}/test.h5", ScanStorage(2, "scan_id-string"))
+    with h5py.File(f"{tmp_path}/test.h5", "r") as test_file:
+        assert test_file["entry"].attrs["definition"] == "NXsas"
+
+
+def test_load_format_from_plugin_uses_default(tmp_path, hdf5_file_writer):
+    file_writer = hdf5_file_writer
+    file_writer.file_writer_manager.file_writer_config["plugin"] = "wrong_plugin"
+
+    with mock.patch(
+        "bec_lib.plugin_helper.get_file_writer_plugins"
+    ) as mock_get_file_writer_plugins:
+        mock_get_file_writer_plugins.return_value = {"cSAXS": cSAXSFormat}
+        file_writer.write(f"{tmp_path}/test.h5", ScanStorage(2, "scan_id-string"))
+    with h5py.File(f"{tmp_path}/test.h5", "r") as test_file:
+        assert "definition" not in test_file["entry"].attrs
