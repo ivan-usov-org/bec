@@ -98,22 +98,9 @@ class DefaultFormat:
         # /entry/instrument
         instrument = entry.create_group("instrument")
         instrument.attrs["NX_class"] = "NXinstrument"
-        # instrument.create_dataset(name="name", data="cSAXS beamline")
 
         source = instrument.create_group("source")
         source.attrs["NX_class"] = "NXsource"
         source.create_dataset(name="type", data="Synchrotron X-ray Source")
         source.create_dataset(name="name", data="Swiss Light Source")
         source.create_dataset(name="probe", data="x-ray")
-        # distance = source.create_dataset(name="distance", data=-33800 - np.asarray(self.data.get("samz", 0)))
-        # distance.attrs["units"] = "mm"
-        # sigma_x = source.create_dataset(name="sigma_x", data=0.202)
-        # sigma_x.attrs["units"] = "mm"
-        # sigma_y = source.create_dataset(name="sigma_y", data=0.018)
-        # sigma_y.attrs["units"] = "mm"
-        # divergence_x = source.create_dataset(name="divergence_x", data=0.000135)
-        # divergence_x.attrs["units"] = "radians"
-        # divergence_y = source.create_dataset(name="divergence_y", data=0.000025)
-        # divergence_y.attrs["units"] = "radians"
-        # current = source.create_dataset(name="current", data=self.data.get("curr"))
-        # current.attrs["units"] = "mA"
