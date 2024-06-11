@@ -15,13 +15,13 @@ import numpy as np
 import ophyd
 import ophyd_devices as opd
 from ophyd.ophydobj import OphydObject
-from ophyd.signal import EpicsSignalBase
 from typeguard import typechecked
 
-from bec_lib import messages, plugin_helper
+from bec_lib import messages
 from bec_lib.bec_errors import DeviceConfigError
 from bec_lib.bec_service import BECService
 from bec_lib.device import DeviceBase
+from bec_lib.device_connector import DeviceConnector
 from bec_lib.devicemanager import DeviceManagerBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
@@ -82,7 +82,7 @@ class DSDevice(DeviceBase):
         self.initialized = True
 
 
-class DeviceManagerDS(DeviceManagerBase):
+class DeviceManagerDS(DeviceManagerBase, DeviceConnector):
     def __init__(
         self,
         service: BECService,
@@ -106,11 +106,6 @@ class DeviceManagerDS(DeviceManagerBase):
 
     def _reload_action(self) -> None:
         pass
-
-    @staticmethod
-    def _get_device_class(dev_type: str) -> type:
-        """Get the device class from the device type"""
-        return plugin_helper.get_plugin_class(dev_type, [opd, ophyd])
 
     def _load_session(self, *_args, **_kwargs):
         delayed_init = []
@@ -245,53 +240,6 @@ class DeviceManagerDS(DeviceManagerBase):
                 else:
                     setattr(obj, config_key, config_value)
 
-    @staticmethod
-    def construct_device_obj(dev: dict, device_manager: DeviceManagerDS) -> (OphydObject, dict):
-        """
-        Construct a device object from a device config dictionary.
-
-        Args:
-            dev (dict): device config dictionary
-            device_manager (DeviceManagerDS): device manager instance
-
-        Returns:
-            (OphydObject, dict): device object and updated config dictionary
-        """
-        name = dev.get("name")
-        dev_cls = DeviceManagerDS._get_device_class(dev["deviceClass"])
-        device_config = dev.get("deviceConfig")
-        device_config = device_config if device_config is not None else {}
-        config = device_config.copy()
-        config["name"] = name
-
-        # pylint: disable=protected-access
-        device_classes = [dev_cls]
-        if issubclass(dev_cls, ophyd.Signal):
-            device_classes.append(ophyd.Signal)
-        if issubclass(dev_cls, EpicsSignalBase):
-            device_classes.append(EpicsSignalBase)
-        if issubclass(dev_cls, ophyd.OphydObject):
-            device_classes.append(ophyd.OphydObject)
-
-        # get all init parameters of the device class and its parents
-        class_params = set()
-        for device_class in device_classes:
-            class_params.update(inspect.signature(device_class)._parameters)
-        class_params_and_config_keys = class_params & config.keys()
-
-        init_kwargs = {key: config.pop(key) for key in class_params_and_config_keys}
-        device_access = config.pop("device_access", None)
-        if device_access or (device_access is None and config.get("device_mapping")):
-            init_kwargs["device_manager"] = device_manager
-
-        signature = inspect.signature(dev_cls)
-        if "device_manager" in signature.parameters:
-            init_kwargs["device_manager"] = device_manager
-
-        # initialize the device object
-        obj = dev_cls(**init_kwargs)
-        return obj, config
-
     def initialize_device(self, dev: dict) -> DSDevice:
         """
         Prepares a device for later usage.
@@ -320,16 +268,7 @@ class DeviceManagerDS(DeviceManagerBase):
         if not enabled:
             return opaas_obj
 
-        # update device buffer for enabled devices
-        # try:
         self.initialize_enabled_device(opaas_obj)
-        # pylint:disable=broad-except
-        # except Exception:
-        #     error_traceback = traceback.format_exc()
-        #     logger.error(
-        #         f"{error_traceback}. Failed to stage {opaas_obj.name}. The device will be disabled."
-        #     )
-        #     opaas_obj.enabled = False
 
         obj = opaas_obj.obj
         # add subscriptions
@@ -369,44 +308,9 @@ class DeviceManagerDS(DeviceManagerBase):
         self.connect_device(opaas_obj.obj)
         opaas_obj.initialize_device_buffer(self.connector)
 
-    @staticmethod
-    def disconnect_device(obj):
-        """disconnect from a device"""
-        if not obj.connected:
-            return
-        if hasattr(obj, "controller"):
-            obj.controller.off()
-            return
-        obj.destroy()
-
     def reset_device(self, obj: DSDevice):
         """reset a device"""
         obj.initialized = False
-
-    @staticmethod
-    def connect_device(obj, wait_for_all=False):
-        """establish a connection to a device"""
-        try:
-            if obj.connected:
-                return
-            if hasattr(obj, "controller"):
-                obj.controller.on()
-                return
-            if hasattr(obj, "wait_for_connection"):
-                try:
-                    obj.wait_for_connection(all_signals=wait_for_all, timeout=10)
-                except TypeError:
-                    obj.wait_for_connection(timeout=10)
-                return
-            logger.error(
-                f"Device {obj.name} does not implement the socket controller interface nor"
-                " wait_for_connection and cannot be turned on."
-            )
-            raise ConnectionError(f"Failed to establish a connection to device {obj.name}")
-        except Exception:
-            error_traceback = traceback.format_exc()
-            logger.error(f"{error_traceback}. Failed to connect to {obj.name}.")
-            raise ConnectionError(f"Failed to establish a connection to device {obj.name}")
 
     def publish_device_info(self, obj: OphydObject, pipe=None) -> None:
         """
