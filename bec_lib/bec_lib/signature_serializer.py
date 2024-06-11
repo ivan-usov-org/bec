@@ -96,7 +96,7 @@ def deserialize_dtype(dtype: Any) -> type:
         return ScanItem
 
 
-def signature_to_dict(func: Callable, include_class_obj=False) -> dict:
+def signature_to_dict(func: Callable, include_class_obj=False) -> list[dict]:
     """
     Convert a function signature to a dictionary.
     The dictionary can be used to reconstruct the signature using dict_to_signature.
@@ -105,7 +105,7 @@ def signature_to_dict(func: Callable, include_class_obj=False) -> dict:
         func (Callable): Function to be converted
 
     Returns:
-        dict: Dictionary representation of the function signature
+        list[dict]: List of dictionaries representing the function signature
     """
     out = []
     params = inspect.signature(func).parameters

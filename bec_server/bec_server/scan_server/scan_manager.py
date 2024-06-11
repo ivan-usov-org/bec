@@ -10,6 +10,7 @@ from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
 from bec_lib.messages import AvailableResourceMessage
 from bec_lib.signature_serializer import signature_to_dict
+from bec_server.scan_server.scan_gui_models import GUIConfig
 
 from . import scans as ScanServerScans
 
@@ -79,15 +80,42 @@ class ScanManager:
                 if issubclass(scan_cls, report_cls):
                     base_cls = report_cls.__name__
             self.scan_dict[scan_cls.__name__] = scan_cls
+            gui_config = self.validate_gui_config(scan_cls)
             self.available_scans[scan_cls.scan_name] = {
                 "class": scan_cls.__name__,
                 "base_class": base_cls,
                 "arg_input": self.convert_arg_input(scan_cls.arg_input),
+                "gui_config": gui_config,
                 "required_kwargs": scan_cls.required_kwargs,
                 "arg_bundle_size": scan_cls.arg_bundle_size,
                 "doc": scan_cls.__doc__ or scan_cls.__init__.__doc__,
                 "signature": signature_to_dict(scan_cls.__init__),
             }
+
+    def validate_gui_config(self, scan_cls) -> dict:
+        """
+        Validate the gui_config of the scan class
+
+        Args:
+            scan_cls: class
+
+        Returns:
+            dict: gui_config
+        """
+
+        if not hasattr(scan_cls, "gui_config"):
+            return {}
+        if not isinstance(scan_cls.gui_config, GUIConfig) and not isinstance(
+            scan_cls.gui_config, dict
+        ):
+            logger.error(
+                f"Invalid gui_config for {scan_cls.scan_name}. gui_config must be of type GUIConfig or dict."
+            )
+            return {}
+        gui_config = scan_cls.gui_config
+        if isinstance(scan_cls.gui_config, dict):
+            gui_config = GUIConfig.from_dict(scan_cls)
+        return gui_config.model_dump()
 
     def convert_arg_input(self, arg_input) -> dict:
         """

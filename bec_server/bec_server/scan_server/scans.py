@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import ast
 import enum
 import threading
@@ -184,6 +186,7 @@ class RequestBase(ABC):
     scan_name = ""
     arg_input = {}
     arg_bundle_size = {"bundle": len(arg_input), "min": None, "max": None}
+    gui_args = {}
     required_kwargs = []
     return_to_start_after_abort = False
     use_scan_progress_report = False
@@ -779,6 +782,9 @@ class Scan(ScanBase):
     }
     arg_bundle_size = {"bundle": len(arg_input), "min": 2, "max": None}
     required_kwargs = ["relative"]
+    gui_config = {
+        "Scan Parameters": ["exp_time", "settling_time", "burst_at_each_point", "relative"]
+    }
 
     def __init__(
         self,
@@ -827,6 +833,12 @@ class Scan(ScanBase):
 class FermatSpiralScan(ScanBase):
     scan_name = "fermat_scan"
     required_kwargs = ["step", "relative"]
+    gui_config = {
+        "Device 1": ["motor1", "start_motor1", "stop_motor1"],
+        "Device 2": ["motor2", "start_motor2", "stop_motor2"],
+        "Movement Parameters": ["step", "relative"],
+        "Acquisition Parameters": ["exp_time", "settling_time", "burst_at_each_point"],
+    }
 
     def __init__(
         self,
@@ -854,6 +866,7 @@ class FermatSpiralScan(ScanBase):
             stop_motor1 (float): end position motor 1
             motor2 (DeviceBase): second motor
             start_motor2 (float): start position motor 2
+            stop_motor2 (float): end position motor 2
             step (float): step size in motor units. Default is 0.1.
             exp_time (float): exposure time in seconds. Default is 0.
             settling_time (float): settling time in seconds. Default is 0.
@@ -901,11 +914,16 @@ class FermatSpiralScan(ScanBase):
 class RoundScan(ScanBase):
     scan_name = "round_scan"
     required_kwargs = ["relative"]
+    gui_config = {
+        "Motors": ["motor_1", "motor_2"],
+        "Ring Parameters": ["inner_ring", "outer_ring", "number_of_rings", "pos_in_first_ring"],
+        "Scan Parameters": ["relative", "burst_at_each_point"],
+    }
 
     def __init__(
         self,
         motor_1: DeviceBase,
-        motor2: DeviceBase,
+        motor_2: DeviceBase,
         inner_ring: float,
         outer_ring: float,
         number_of_rings: int,
@@ -919,7 +937,7 @@ class RoundScan(ScanBase):
 
         Args:
             motor_1 (DeviceBase): first motor
-            motor2 (DeviceBase): second motor
+            motor_2 (DeviceBase): second motor
             inner_ring (float): inner radius
             outer_ring (float): outer radius
             number_of_rings (int): number of rings
@@ -937,7 +955,7 @@ class RoundScan(ScanBase):
         super().__init__(relative=relative, burst_at_each_point=burst_at_each_point, **kwargs)
         self.axis = []
         self.motor_1 = motor_1
-        self.motor_2 = motor2
+        self.motor_2 = motor_2
         self.inner_ring = inner_ring
         self.outer_ring = outer_ring
         self.number_of_rings = number_of_rings
@@ -960,6 +978,11 @@ class ContLineScan(ScanBase):
     scan_name = "cont_line_scan"
     required_kwargs = ["steps", "relative"]
     scan_type = "step"
+    gui_config = {
+        "Device": ["device", "start", "stop"],
+        "Movement Parameters": ["steps", "relative", "offset"],
+        "Acquisition Parameters": ["exp_time", "burst_at_each_point"],
+    }
 
     def __init__(
         self,
@@ -1039,6 +1062,7 @@ class ContLineFlyScan(AsyncFlyScanBase):
     scan_name = "cont_line_fly_scan"
     required_kwargs = []
     use_scan_progress_report = False
+    gui_config = {"Device": ["motor", "start", "stop"], "Scan Parameters": ["exp_time", "relative"]}
 
     def __init__(
         self,
@@ -1122,6 +1146,10 @@ class RoundScanFlySim(SyncFlyScanBase):
     scan_type = "fly"
     pre_move = False
     required_kwargs = ["relative"]
+    gui_config = {
+        "Fly Parameters": ["flyer", "relative"],
+        "Ring Parameters": ["inner_ring", "outer_ring", "number_of_rings", "number_pos"],
+    }
 
     def __init__(
         self,
@@ -1130,6 +1158,7 @@ class RoundScanFlySim(SyncFlyScanBase):
         outer_ring: float,
         number_of_rings: int,
         number_pos: int,
+        relative: bool = False,
         **kwargs,
     ):
         """
@@ -1210,6 +1239,12 @@ class RoundScanFlySim(SyncFlyScanBase):
 class RoundROIScan(ScanBase):
     scan_name = "round_roi_scan"
     required_kwargs = ["dr", "nth", "relative"]
+    gui_config = {
+        "Motor 1": ["motor_1", "width_1"],
+        "Motor 2": ["motor_2", "width_2"],
+        "Shell Parametes": ["dr", "nth"],
+        "Acquisition Parameters": ["exp_time", "relative", "burst_at_each_point"],
+    }
 
     def __init__(
         self,
@@ -1295,6 +1330,7 @@ class ListScan(ScanBase):
 class TimeScan(ScanBase):
     scan_name = "time_scan"
     required_kwargs = ["points", "interval"]
+    gui_config = {"Scan Parameters": ["points", "interval", "exp_time", "burst_at_each_point"]}
 
     def __init__(
         self,
@@ -1357,6 +1393,7 @@ class MonitorScan(ScanBase):
     scan_name = "monitor_scan"
     required_kwargs = ["relative"]
     scan_type = "fly"
+    gui_config = {"Device": ["device", "start", "stop"], "Scan Parameters": ["relative"]}
 
     def __init__(
         self, device: DeviceBase, start: float, stop: float, relative: bool = False, **kwargs
@@ -1368,6 +1405,7 @@ class MonitorScan(ScanBase):
             device (Device): monitored device
             start (float): start position of the monitored device
             stop (float): stop position of the monitored device
+            relative (bool): if True, the motor will be moved relative to its current position. Default is False.
 
         Returns:
             ScanReport
@@ -1441,12 +1479,14 @@ class MonitorScan(ScanBase):
 class Acquire(ScanBase):
     scan_name = "acquire"
     required_kwargs = []
+    gui_config = {"Scan Parameters": ["exp_time", "burst_at_each_point"]}
 
     def __init__(self, *args, exp_time: float = 0, burst_at_each_point: int = 1, **kwargs):
         """
         A simple acquisition at the current position.
 
         Args:
+            exp_time (float): exposure time in s
             burst: number of acquisition per point
 
         Returns:
@@ -1503,6 +1543,10 @@ class LineScan(ScanBase):
         "stop": ScanArgType.FLOAT,
     }
     arg_bundle_size = {"bundle": len(arg_input), "min": 1, "max": None}
+    gui_config = {
+        "Movement Parameters": ["steps", "relative"],
+        "Acquisition Parameters": ["exp_time", "burst_at_each_point"],
+    }
 
     def __init__(
         self,
