@@ -2,7 +2,6 @@ import threading
 import time
 from unittest import mock
 
-import fakeredis
 import pytest
 import redis
 from redis.client import Pipeline
@@ -18,21 +17,6 @@ from bec_lib.serialization import MsgpackSerialization
 # pylint: disable=missing-class-docstring
 # pylint: disable=redefined-outer-name
 # pylint: disable=unused-argument
-
-
-def fake_redis_server(host, port):
-    redis = fakeredis.FakeRedis()
-    return redis
-
-
-@pytest.fixture
-def connected_connector():
-    connector = RedisConnector("localhost:1", redis_cls=fake_redis_server)
-    connector._redis_conn.flushall()
-    try:
-        yield connector
-    finally:
-        connector.shutdown()
 
 
 TestStreamEndpoint = EndpointInfo("test", TestMessage(), MessageOp.STREAM)

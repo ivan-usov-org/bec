@@ -152,3 +152,26 @@ def test_bec_service_default_config():
                 os.path.abspath(service._service_config.service_config["file_writer"]["base_path"])
                 == bec_lib_path
             )
+
+
+def test_bec_service_show_global_vars(capsys):
+    config = ServiceConfig(redis={"host": "localhost", "port": 6379})
+    with bec_service(config=config, unique_service=True) as service:
+        ep = MessageEndpoints.global_vars("test").endpoint.encode()
+        with mock.patch.object(service.connector, "keys", return_value=[ep]):
+            with mock.patch.object(service, "get_global_var", return_value="test_value"):
+                service.show_global_vars()
+                captured = capsys.readouterr()
+                assert "test" in captured.out
+                assert "test_value" in captured.out
+
+
+def test_bec_service_globals(connected_connector):
+    config = ServiceConfig(redis={"host": "localhost", "port": 1})
+    with bec_service(config=config, unique_service=True) as service:
+        service.connector = connected_connector
+        service.set_global_var("test", "test_value")
+        assert service.get_global_var("test") == "test_value"
+
+        service.delete_global_var("test")
+        assert service.get_global_var("test") is None

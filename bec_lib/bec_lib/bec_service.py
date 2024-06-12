@@ -250,13 +250,13 @@ class BECService:
         """
         self.connector.delete(MessageEndpoints.global_vars(name))
 
-    def global_vars(self) -> str:
+    def show_global_vars(self) -> str:
         """Get all available global variables"""
         # sadly, this cannot be a property as it causes side effects with IPython's tab completion
         available_keys = self.connector.keys(MessageEndpoints.global_vars("*"))
 
         def get_endpoint_from_topic(topic: str) -> str:
-            return topic.decode().split(MessageEndpoints.global_vars(""))[-1]
+            return topic.decode().split(MessageEndpoints.global_vars("").endpoint)[-1]
 
         endpoints = [get_endpoint_from_topic(k) for k in available_keys]
 
