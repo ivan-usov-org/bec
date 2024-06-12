@@ -806,20 +806,22 @@ class Scan(ScanBase):
             >>> scans.grid_scan(dev.motor1, -5, 5, 10, dev.motor2, -5, 5, 10, exp_time=0.1, relative=True)
 
         """
-        super().__init__(**kwargs)
-        self.relative = relative
-        self.exp_time = exp_time
-        self.settling_time = settling_time
-        self.burst_at_each_point = burst_at_each_point
-        self.axis = []
+        super().__init__(
+            exp_time=exp_time,
+            settling_time=settling_time,
+            relative=relative,
+            burst_at_each_point=burst_at_each_point,
+            **kwargs,
+        )
 
     def _calculate_positions(self):
+        axis = []
         for _, val in self.caller_args.items():
-            self.axis.append(np.linspace(val[0], val[1], val[2]))
-        if len(self.axis) > 1:
-            self.positions = get_2D_raster_pos(self.axis)
+            axis.append(np.linspace(val[0], val[1], val[2]))
+        if len(axis) > 1:
+            self.positions = get_2D_raster_pos(axis)
         else:
-            self.positions = np.vstack(tuple(self.axis)).T
+            self.positions = np.vstack(tuple(axis)).T
 
 
 class FermatSpiralScan(ScanBase):
@@ -847,7 +849,11 @@ class FermatSpiralScan(ScanBase):
         A scan following Fermat's spiral.
 
         Args:
-            *args: pairs of device / start position / end position arguments
+            motor1 (DeviceBase): first motor
+            start_motor1 (float): start position motor 1
+            stop_motor1 (float): end position motor 1
+            motor2 (DeviceBase): second motor
+            start_motor2 (float): start position motor 2
             step (float): step size in motor units. Default is 0.1.
             exp_time (float): exposure time in seconds. Default is 0.
             settling_time (float): settling time in seconds. Default is 0.
@@ -863,8 +869,14 @@ class FermatSpiralScan(ScanBase):
             >>> scans.fermat_scan(dev.motor1, -5, 5, dev.motor2, -5, 5, step=0.5, exp_time=0.1, relative=True, optim_trajectory="corridor")
 
         """
-        super().__init__(**kwargs)
-        self.axis = []
+        super().__init__(
+            exp_time=exp_time,
+            settling_time=settling_time,
+            relative=relative,
+            burst_at_each_point=burst_at_each_point,
+            optim_trajectory=optim_trajectory,
+            **kwargs,
+        )
         self.motor1 = motor1
         self.motor2 = motor2
         self.start_motor1 = start_motor1
@@ -872,12 +884,7 @@ class FermatSpiralScan(ScanBase):
         self.start_motor2 = start_motor2
         self.stop_motor2 = stop_motor2
         self.step = step
-        self.exp_time = exp_time
-        self.settling_time = settling_time
-        self.relative = relative
-        self.burst_at_each_point = burst_at_each_point
         self.spiral_type = spiral_type
-        self.optim_trajectory = optim_trajectory
 
     def _calculate_positions(self):
         self.positions = get_fermat_spiral_pos(
@@ -927,9 +934,7 @@ class RoundScan(ScanBase):
             >>> scans.round_scan(dev.motor1, dev.motor2, 0, 25, 5, 3, exp_time=0.1, relative=True)
 
         """
-        super().__init__(**kwargs)
-        self.relative = relative
-        self.burst_at_each_point = burst_at_each_point
+        super().__init__(relative=relative, burst_at_each_point=burst_at_each_point, **kwargs)
         self.axis = []
         self.motor_1 = motor_1
         self.motor_2 = motor2
@@ -954,17 +959,13 @@ class RoundScan(ScanBase):
 class ContLineScan(ScanBase):
     scan_name = "cont_line_scan"
     required_kwargs = ["steps", "relative"]
-    arg_input = {
-        "device": ScanArgType.DEVICE,
-        "start": ScanArgType.FLOAT,
-        "stop": ScanArgType.FLOAT,
-    }
-    arg_bundle_size = {"bundle": len(arg_input), "min": 1, "max": 1}
     scan_type = "step"
 
     def __init__(
         self,
-        *args,
+        device: DeviceBase,
+        start: float,
+        stop: float,
         exp_time: float = 0,
         steps: int = 10,
         relative: bool = False,
@@ -977,7 +978,9 @@ class ContLineScan(ScanBase):
         acquiring data at predefined positions. The scan will abort if the motor moves too fast and a point is skipped.
 
         Args:
-            *args (Device, float, float): pairs of device / start position / end position
+            device (DeviceBase): motor to move continuously from start to stop position
+            start (float): start position
+            stop (float): stop position
             exp_time (float): exposure time in seconds. Default is 0.
             steps (int): number of steps. Default is 10.
             relative (bool): if True, the motors will be moved relative to their current position. Default is False.
@@ -991,19 +994,18 @@ class ContLineScan(ScanBase):
             >>> scans.cont_line_scan(dev.motor1, -5, 5, steps=10, exp_time=0.1, relative=True)
 
         """
-        super().__init__(**kwargs)
-        self.axis = []
-        self.exp_time = exp_time
+        super().__init__(
+            exp_time=exp_time, relative=relative, burst_at_each_point=burst_at_each_point, **kwargs
+        )
         self.steps = steps
-        self.relative = relative
-        self.burst_at_each_point = burst_at_each_point
         self.offset = offset
 
     def _calculate_positions(self) -> None:
+        axis = []
         for _, val in self.caller_args.items():
             ax_pos = np.linspace(val[0], val[1], self.steps)
-            self.axis.append(ax_pos)
-        self.positions = np.array(list(zip(*self.axis)))
+            axis.append(ax_pos)
+        self.positions = np.array(list(zip(*axis)))
 
     def _at_each_point(self, _pos=None):
         yield from self.stubs.trigger(group="trigger", point_id=self.point_id)
@@ -1066,12 +1068,10 @@ class ContLineFlyScan(AsyncFlyScanBase):
             >>> scans.cont_line_fly_scan(dev.sam_rot, 0, 180, exp_time=0.1)
 
         """
-        super().__init__(**kwargs)
+        super().__init__(relative=relative, exp_time=exp_time, **kwargs)
         self.motor = motor
         self.start = start
         self.stop = stop
-        self.exp_time = exp_time
-        self.relative = relative
         self.device_move_request_id = str(uuid.uuid4())
 
     def prepare_positions(self):
@@ -1152,7 +1152,6 @@ class RoundScanFlySim(SyncFlyScanBase):
 
         """
         super().__init__(**kwargs)
-        self.axis = []
         self.flyer = flyer
         self.inner_ring = inner_ring
         self.outer_ring = outer_ring
@@ -1246,17 +1245,15 @@ class RoundROIScan(ScanBase):
             >>> scans.round_roi_scan(dev.motor1, 20, dev.motor2, 20, dr=2, nth=3, exp_time=0.1, relative=True)
 
         """
-        super().__init__(**kwargs)
-        self.axis = []
+        super().__init__(
+            exp_time=exp_time, relative=relative, burst_at_each_point=burst_at_each_point, **kwargs
+        )
         self.motor_1 = motor_1
         self.motor_2 = motor_2
         self.width_1 = width_1
         self.width_2 = width_2
         self.dr = dr
         self.nth = nth
-        self.exp_time = exp_time
-        self.relative = relative
-        self.burst_at_each_point = burst_at_each_point
 
     def _calculate_positions(self) -> None:
         self.positions = get_round_roi_scan_positions(
@@ -1288,7 +1285,6 @@ class ListScan(ScanBase):
 
         """
         super().__init__(parameter=parameter, **kwargs)
-        self.axis = []
         if len(set(len(entry[0]) for entry in self.caller_args.values())) != 1:
             raise ValueError("All position lists must be of equal length.")
 
@@ -1327,11 +1323,8 @@ class TimeScan(ScanBase):
             >>> scans.time_scan(points=10, interval=1.5, exp_time=0.1, relative=True)
 
         """
-        super().__init__(**kwargs)
-        self.axis = []
+        super().__init__(exp_time=exp_time, burst_at_each_point=burst_at_each_point, **kwargs)
         self.points = points
-        self.exp_time = exp_time
-        self.burst_at_each_point = burst_at_each_point
         self.interval = interval
         self.interval -= self.exp_time
 
@@ -1384,11 +1377,9 @@ class MonitorScan(ScanBase):
 
         """
         self.device = device
+        super().__init__(relative=relative, **kwargs)
         self.start = start
         self.stop = stop
-        super().__init__(**kwargs)
-        self.axis = []
-        self.relative = relative
 
     def _get_scan_motors(self):
         self.scan_motors = [self.device]
@@ -1465,10 +1456,7 @@ class Acquire(ScanBase):
             >>> scans.acquire(exp_time=0.1, relative=True)
 
         """
-        super().__init__(**kwargs)
-        self.exp_time = exp_time
-        self.burst_at_each_point = burst_at_each_point
-        self.axis = []
+        super().__init__(exp_time=exp_time, burst_at_each_point=burst_at_each_point, **kwargs)
 
     def _calculate_positions(self) -> None:
         self.num_pos = self.burst_at_each_point
@@ -1542,18 +1530,17 @@ class LineScan(ScanBase):
             >>> scans.line_scan(dev.motor1, -5, 5, dev.motor2, -5, 5, steps=10, exp_time=0.1, relative=True)
 
         """
-        super().__init__(**kwargs)
-        self.exp_time = exp_time
+        super().__init__(
+            exp_time=exp_time, relative=relative, burst_at_each_point=burst_at_each_point, **kwargs
+        )
         self.steps = steps
-        self.relative = relative
-        self.burst_at_each_point = burst_at_each_point
-        self.axis = []
 
     def _calculate_positions(self) -> None:
+        axis = []
         for _, val in self.caller_args.items():
             ax_pos = np.linspace(val[0], val[1], self.steps)
-            self.axis.append(ax_pos)
-        self.positions = np.array(list(zip(*self.axis)))
+            axis.append(ax_pos)
+        self.positions = np.array(list(zip(*axis)))
 
 
 class ScanComponent(ScanBase):
@@ -1585,7 +1572,6 @@ class OpenInteractiveScan(ScanComponent):
 
         """
         super().__init__(**kwargs)
-        self.axis = []
 
     def _calculate_positions(self):
         pass
@@ -1627,7 +1613,6 @@ class AddInteractiveScanPoint(ScanComponent):
 
         """
         super().__init__(**kwargs)
-        self.axis = []
 
     def _calculate_positions(self):
         pass
@@ -1671,7 +1656,6 @@ class CloseInteractiveScan(ScanComponent):
 
         """
         super().__init__(**kwargs)
-        self.axis = []
 
     def _calculate_positions(self):
         pass
