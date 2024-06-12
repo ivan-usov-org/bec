@@ -43,15 +43,13 @@ With this in mind, we can define the `__init__` method of our scan class as foll
         relative: bool = False,
         **kwargs,
     ):
-        super().__init__(**kwargs)
+        super().__init__(exp_time=exp_time, relative=relative, **kwargs)
         self.motor = motor
         self.start = start
         self.stop = stop
-        self.exp_time = exp_time
-        self.relative = relative
 ```
 
-Here, the `**kwargs` parameter allows us to pass additional keyword arguments to the base class. This is important as the base class may require additional parameters that we do not need to define in our scan class. After initializing the base class (FlyScanBase) using `super().__init__(**kwargs)`, we store the motor, start, stop, exp_time, and relative parameters as attributes of the scan class.
+Here, the `**kwargs` parameter allows us to pass additional keyword arguments to the base class. This is important as the base class may require additional parameters that we do not need to define in our scan class. After initializing the base class (FlyScanBase) using `super().__init__(exp_time=exp_time, relative=relative, **kwargs)`, we store the motor, start, stop, exp_time, and relative parameters as attributes of the scan class.
 
 Let's also add a proper doc string for the users of our scan:
 
@@ -82,12 +80,10 @@ Let's also add a proper doc string for the users of our scan:
             >>> scans.tutorial_cont_line_fly_scan(dev.sam_rot, 0, 180, exp_time=0.1)
 
         """
-        super().__init__(**kwargs)
+        super().__init__(exp_time=exp_time, relative=relative, **kwargs)
         self.motor = motor
         self.start = start
         self.stop = stop
-        self.exp_time = exp_time
-        self.relative = relative
 ```
 
 ## Step 3: Prepare the positions
@@ -192,12 +188,10 @@ class TutorialFlyScanContLine(AsyncFlyScanBase):
             >>> scans.tutorial_cont_line_fly_scan(dev.sam_rot, 0, 180, exp_time=0.1)
 
         """
-        super().__init__(**kwargs)
+        super().__init__(exp_time=exp_time, relative=relative, **kwargs)
         self.motor = motor
         self.start = start
         self.stop = stop
-        self.exp_time = exp_time
-        self.relative = relative
 
     def prepare_positions(self):
         self.positions = np.array([[self.start], [self.stop]])
@@ -523,12 +517,10 @@ import uuid
 
 ... 
 
-super().__init__(**kwargs)
+super().__init__(exp_time=exp_time, relative=relative, **kwargs)
 self.motor = motor
 self.start = start
 self.stop = stop
-self.exp_time = exp_time
-self.relative = relative
 self.device_move_request_id = str(uuid.uuid4())
 
 ```
