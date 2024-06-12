@@ -2,17 +2,7 @@
 # Scan Structure
 A scan in BEC is a Python class that inherits from the [`ScanBase`](/api_reference/_autosummary/bec_server.scan_server.scans.ScanBase.rst#bec_server.scan_server.scans.ScanBase) class and implements methods that should be executed in a specific order.
 
-````{dropdown} View code: ScanBase class
-:icon: code-square
-:animate: fade-in-slide-down
-
-```{literalinclude} ../../../../bec_server/bec_server/scan_server/scans.py
-:language: python
-:pyobject: ScanBase
-```
-````
-
-The order of execution is defined by the [`run`](/api_reference/_autosummary/bec_server.scan_server.scans.ScanBase.rst#bec_server.scan_server.scans.ScanBase.run) method, which is called by the scan server. By default, the `run` method calls the following methods in the following order:
+The order of execution is defined by the [`run`](/api_reference/_autosummary/bec_server.scan_server.scans.ScanBase.rst#bec_server.scan_server.scans.ScanBase.run) method, which is called by the scan server. By default, the `run` method calls the following methods in order:
 
 ```{literalinclude} ../../../../bec_server/bec_server/scan_server/scans.py
 :language: python
@@ -26,6 +16,15 @@ The `run` method is a generator function that, like most other scan methods, yie
 If you want to learn more about generator functions, we recommend to go through the tutorial on [generators](https://realpython.com/introduction-to-python-generators/) on Real Python. A brief introduction can also be found [here](https://wiki.python.org/moin/Generators). For a more detailed explanation, you can read the [official Python documentation](https://docs.python.org/3/reference/expressions.html#generator-iterator-methods). 
 ```
 
+````{dropdown} View code: ScanBase class
+:icon: code-square
+:animate: fade-in-slide-down
+
+```{literalinclude} ../../../../bec_server/bec_server/scan_server/scans.py
+:language: python
+:pyobject: ScanBase
+```
+````
 
 ### Basic scan structure
 The following structure is targeted at step scans, i.e. scans where the scan server is in control of the scan and the overall progress is determined by the number of steps within the scan. Modifications of the structure as needed for fly scans are described later on.
@@ -125,9 +124,9 @@ The scan class can be further configured by setting class attributes. The follow
 
 - `scan_name` (required): The name of the scan. This name is used to identify the scan in the user interface.
 - `scan_type` (required): The type of the scan. This can be either `step` or `fly`.
-- `arg_input` (required): Sometimes, scans accept `*args` to support different types of scans. For example, a line scan can accept any number of motors to scan but each motor must define a start and stop position. The `arg_input` attribute is a dictionary that defines the type of the arguments that the scan accepts. The keys are the argument names and the values are the types of the arguments. The types are defined in the `ScanArgType` class.
-- `arg_bundle_size` (required): A dictionary that defines the bundle size of the input arguments passed in through `*args`. The dictionary must contain the key `bundle` with the number of arguments that are bundled together and the key `min` with the minimum number of arguments that are required. Set the value of `max` to `None` if there is no maximum number of arguments.
-- `required_kwargs` (required): A list of required keyword arguments that must be passed to the scan.
+- `arg_input` (optional): Sometimes, scans accept `*args` to support different types of scans. For example, a line scan can accept any number of motors to scan but each motor must define a start and stop position. The `arg_input` attribute is a dictionary that defines the type of the arguments that the scan accepts. The keys are the argument names and the values are the types of the arguments. The types are defined in the `ScanArgType` class.
+- `arg_bundle_size` (optional): A dictionary that defines the bundle size of the input arguments passed in through `*args`. The dictionary must contain the key `bundle` with the number of arguments that are bundled together and the key `min` with the minimum number of arguments that are required. Set the value of `max` to `None` if there is no maximum number of arguments.
+- `required_kwargs` (optional): A list of required keyword arguments that must be passed to the scan.
 - `return_to_start_after_abort` (optional): If set to `True`, the scan server will return the scan motors to the start position if the scan is aborted. Default is `True`.
 - `pre_move` (optional): If set to `True`, the scan server will move the scan motors to the first position before the scan core is executed. Default is `True`.
 
