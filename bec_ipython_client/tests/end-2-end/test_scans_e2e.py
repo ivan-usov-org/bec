@@ -438,14 +438,11 @@ def test_file_writer(bec_ipython_client_fixture):
     file_msg = msg
 
     with h5py.File(file_msg.content["file_path"], "r") as file:
+        assert file["entry"]["collection"]["metadata"]["sample"][()].decode() == "my_sample"
         assert (
-            file["entry"]["collection"]["bec"]["metadata"]["user_metadata"]["sample"][()].decode()
-            == "my_sample"
+            file["entry"]["collection"]["metadata"]["bec"]["dataset_number"][()] == dataset_number
         )
-        assert (
-            file["entry"]["collection"]["bec"]["metadata"]["dataset_number"][()] == dataset_number
-        )
-        file_data = file["entry"]["collection"]["bec"]["samx"]["samx"]["value"][...]
+        file_data = file["entry"]["collection"]["devices"]["samx"]["samx"]["value"][...]
         stream_data = scan.scan.data["samx"]["samx"]["value"]
         assert all(file_data == stream_data)
 

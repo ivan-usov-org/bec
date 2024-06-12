@@ -16,6 +16,7 @@ class DefaultFormat:
         self,
         storage: HDF5Storage,
         data: dict,
+        info_storage: dict,
         file_references: dict,
         device_manager: DeviceManagerBase,
     ):
@@ -23,6 +24,7 @@ class DefaultFormat:
         self.data = data
         self.file_references = file_references
         self.device_manager = device_manager
+        self.info_storage = info_storage
 
     def get_storage_format(self) -> dict:
         """
@@ -71,14 +73,17 @@ class DefaultFormat:
         # /entry
         entry = self.storage.create_group("entry")
         entry.attrs["NX_class"] = "NXentry"
-        entry.attrs["start_time"] = self.data.get("start_time")
-        entry.attrs["end_time"] = self.data.get("end_time")
+        entry.attrs["start_time"] = self.info_storage.get("start_time")
+        entry.attrs["end_time"] = self.info_storage.get("end_time")
         entry.attrs["version"] = 1.0
 
         # /entry/collection
         collection = entry.create_group("collection")
         collection.attrs["NX_class"] = "NXcollection"
-        bec_collection = collection.create_group("bec")
+        devices = collection.create_dataset("devices", data=self.data)
+        devices.attrs["NX_class"] = "NXcollection"
+        metadata = collection.create_dataset("metadata", data=self.info_storage)
+        metadata.attrs["NX_class"] = "NXcollection"
 
         # /entry/control
         control = entry.create_group("control")

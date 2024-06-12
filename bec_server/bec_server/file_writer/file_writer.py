@@ -101,33 +101,42 @@ class HDF5StorageWriter:
     """
 
     device_storage = None
+    info_storage = None
 
     def add_group(self, name: str, container: typing.Any, val: HDF5Storage):
         group = container.create_group(name)
         self.add_attribute(group, val.attrs)
         self.add_content(group, val._storage)
 
-        if name == "bec" and container.attrs.get("NX_class") == "NXcollection":
-            for key, value in self.device_storage.items():
-                if value is None:
-                    continue
-                if isinstance(value, dict):
-                    sub_storage = HDF5Storage(key)
-                    dict_to_storage(sub_storage, value)
-                    self.add_group(key, group, sub_storage)
-                    # self.add_content(group, sub_storage._storage)
-                    continue
-                if isinstance(value, list) and isinstance(value[0], dict):
-                    merged_dict = merge_dicts(value)
-                    sub_storage = HDF5Storage(key)
-                    dict_to_storage(sub_storage, merged_dict)
-                    self.add_group(key, group, sub_storage)
-                    continue
+        data = val._data
 
-                group.create_dataset(name=key, data=value)
+        if not data:
+            return
+
+        for key, value in data.items():
+            if value is None:
+                continue
+            if isinstance(value, dict):
+                sub_storage = HDF5Storage(key)
+                dict_to_storage(sub_storage, value)
+                self.add_group(key, group, sub_storage)
+                # self.add_content(group, sub_storage._storage)
+                continue
+            if isinstance(value, list) and isinstance(value[0], dict):
+                merged_dict = merge_dicts(value)
+                sub_storage = HDF5Storage(key)
+                dict_to_storage(sub_storage, merged_dict)
+                self.add_group(key, group, sub_storage)
+                continue
+
+            group.create_dataset(name=key, data=value)
 
     def add_dataset(self, name: str, container: typing.Any, val: HDF5Storage):
         try:
+            if isinstance(val._data, dict):
+                self.add_group(name, container, val)
+                return
+
             data = val._data
             if data is None:
                 return
@@ -172,9 +181,8 @@ class HDF5StorageWriter:
                 pass
 
     @classmethod
-    def write(cls, writer_storage, device_storage, file):
+    def write(cls, writer_storage, file):
         writer = cls()
-        writer.device_storage = device_storage
         writer.add_content(file, writer_storage)
 
 
@@ -218,15 +226,18 @@ class HDF5FileWriter:
             NeXusLayoutError: Raised when the NeXus layout is incorrect.
         """
         device_storage = self._create_device_data_storage(data)
-        device_storage["metadata"] = data.metadata
+        info_storage = {}
+        info_storage["bec"] = data.metadata
 
         # NeXus needs start_time and end_time in ISO8601 format, so we have to convert it
         if data.start_time is not None:
-            device_storage["start_time"] = datetime.datetime.fromtimestamp(
+            info_storage["start_time"] = datetime.datetime.fromtimestamp(
                 data.start_time
             ).isoformat()
         if data.end_time is not None:
-            device_storage["end_time"] = datetime.datetime.fromtimestamp(data.end_time).isoformat()
+            info_storage["end_time"] = datetime.datetime.fromtimestamp(data.end_time).isoformat()
+        info_storage.update(info_storage["bec"].get("user_metadata", {}))
+        info_storage["bec"].pop("user_metadata", None)
 
         requested_plugin = self.file_writer_manager.file_writer_config.get("plugin")
         if requested_plugin == "default_NeXus_format":
@@ -246,6 +257,7 @@ class HDF5FileWriter:
         writer_storage = writer_format_cls(
             storage=HDF5Storage(),
             data=device_storage,
+            info_storage=info_storage,
             file_references=data.file_references,
             device_manager=self.file_writer_manager.device_manager,
         ).get_storage_format()
@@ -258,7 +270,7 @@ class HDF5FileWriter:
         self.file_writer_manager.connector.set_and_publish(MessageEndpoints.file_content(), msg)
 
         with h5py.File(file_path, "w") as file:
-            HDF5StorageWriter.write(writer_storage, device_storage, file)
+            HDF5StorageWriter.write(writer_storage, file)
 
 
 def dict_to_storage(storage, data):

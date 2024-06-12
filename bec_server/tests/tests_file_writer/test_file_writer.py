@@ -37,6 +37,7 @@ def test_csaxs_nexus_format(file_writer_manager_mock_with_dm):
         storage=HDF5Storage(),
         data={"samx": {"samx": {"value": [0, 1, 2]}}, "mokev": {"mokev": {"value": 12.456}}},
         file_references={},
+        info_storage={},
         device_manager=file_manager.device_manager,
     ).get_storage_format()
     assert writer_storage["entry"].attrs["definition"] == "NXsas"
@@ -62,7 +63,9 @@ def test_nexus_file_writer(hdf5_file_writer):
     with h5py.File("./test.h5", "r") as test_file:
         assert list(test_file) == ["entry"]
         assert list(test_file["entry"]) == ["collection", "control", "instrument", "sample"]
-        assert np.allclose(test_file["entry/collection/bec/samx/samx/value"][...], [0, 1, 2, 3, 4])
+        assert np.allclose(
+            test_file["entry/collection/devices/samx/samx/value"][...], [0, 1, 2, 3, 4]
+        )
         # assert list(test_file["entry"]["sample"]) == ["x_translation"]
         # assert test_file["entry"]["sample"].attrs["NX_class"] == "NXsample"
         # assert test_file["entry"]["sample"]["x_translation"].attrs["units"] == "mm"
