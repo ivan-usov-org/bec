@@ -7,7 +7,7 @@ Welcome to the User section of the BEC documentation! BEC is an experiment contr
 
 **Key Topics**
 
-* [Installing BEC](#user.installation): Set up BEC on your system.
+* [Installing the BEC client](#user.installation): Set up a local BEC client on your machine to interact with an already deployed BEC system.
 * [Devices](#user.devices): Learn how to access, configure and update device settings.
 * [Command-Line Interface (CLI)](#user.command_line_interface): Interact with BEC through the CLI, including device access, motor control, and scan execution. Learn how to use the scan interface and write your own scripts and macros. 
 * [Graphical User Interface (GUI)](#user.graphical_user_interface): Learn how to utilize the modular widgets and functionalities of the GUI.

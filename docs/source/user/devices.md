@@ -13,6 +13,7 @@ The config file is a yaml file. If you are not familiar with yaml, please have a
 
 But don't worry, we have prepared a device config with simulated devices for you, which allows us to explore BEC right away.
 
+(user.devices.load_demo_config)=
 ### Load demo device config for simulation
 You can load the demo config `demo_config.yaml` directly in the command-line interface via: 
 
