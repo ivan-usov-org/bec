@@ -1,13 +1,28 @@
 # CHANGELOG
 
+## v2.14.3 (2024-06-17)
 
+### Documentation
+
+* docs: improved dev install instructions ([`d43cd25`](https://gitlab.psi.ch/bec/bec/-/commit/d43cd25786aa0e3892592350feb4def8ab541120))
+
+* docs: adjusted init for flyer class ([`fa0c96f`](https://gitlab.psi.ch/bec/bec/-/commit/fa0c96f2dba82b22395cc91fb5b8fe63956e698c))
+
+* docs: moved scanbase code to end of section to not tempt readers to jump directly into the code ([`ff9d4ad`](https://gitlab.psi.ch/bec/bec/-/commit/ff9d4ad9508ffda81c49977519cf5d2fc95676d7))
+
+### Fix
+
+* fix(file_writer): fixed file writer messages to report successful only after it is written ([`27a0f89`](https://gitlab.psi.ch/bec/bec/-/commit/27a0f8920ce17116aad10b422d0c5b2ad33ca20c))
+
+### Refactor
+
+* refactor(scan_server): cleanup of scan args ([`d61f58c`](https://gitlab.psi.ch/bec/bec/-/commit/d61f58c362021f29b937a088b6a0a892cacc9176))
 
 ## v2.14.2 (2024-06-12)
 
 ### Fix
 
 * fix(bec_lib): fixed access to global vars ([`f621ef2`](https://gitlab.psi.ch/bec/bec/-/commit/f621ef280e5121a44277d1b51de586d8eae82be5))
-
 
 ## v2.14.1 (2024-06-12)
 
@@ -22,7 +37,6 @@
 * fix: use endpoints instead of simple strings to avoid warning ([`62b2c10`](https://gitlab.psi.ch/bec/bec/-/commit/62b2c106de24c5de955fc619fa6b95f949295d21))
 
 * fix: in set_and_publish, do not call set() to not have a warning ([`700584c`](https://gitlab.psi.ch/bec/bec/-/commit/700584ce3516ba59be56dcfa62cb57a7d693f69f))
-
 
 ## v2.14.0 (2024-06-09)
 
@@ -45,7 +59,6 @@
 ### Test
 
 * test(file_writer): added tests to load format from plugins ([`9adbdaf`](https://gitlab.psi.ch/bec/bec/-/commit/9adbdaf0fae5f1f9332790a46073613602c821bc))
-
 
 ## v2.13.8 (2024-06-07)
 
@@ -71,7 +84,6 @@
 
 * refactor: remove bec.file_writer, and moved info to metadata, renamed md to metadata in kwargs from scans ([`92bd51e`](https://gitlab.psi.ch/bec/bec/-/commit/92bd51e788233c1597b0aeb317b16642312b9cb0))
 
-
 ## v2.13.7 (2024-06-06)
 
 ### Documentation
@@ -86,7 +98,6 @@
 
 * fix: adapt to pytest-redis 3.1 ([`0a987c0`](https://gitlab.psi.ch/bec/bec/-/commit/0a987c0815a3173e43dce22e2accef0e87ea284d))
 
-
 ## v2.13.6 (2024-06-05)
 
 ### Ci
@@ -99,13 +110,11 @@
 
 * fix(bec_ipython_client): fixed support for loading hlis from plugins ([`45869aa`](https://gitlab.psi.ch/bec/bec/-/commit/45869aab773d4e288f7c2d4152be140f91f5bb79))
 
-
 ## v2.13.5 (2024-06-05)
 
 ### Fix
 
 * fix(bec_lib): fixed msg type serialization ([`05c24e8`](https://gitlab.psi.ch/bec/bec/-/commit/05c24e880bfbf2257c973ec4b451f93918290915))
-
 
 ## v2.13.4 (2024-06-05)
 
@@ -113,13 +122,11 @@
 
 * fix(bec_ipython_client): fixed gui startup ([`8f4d89e`](https://gitlab.psi.ch/bec/bec/-/commit/8f4d89e7a49dc7ca9cbbe64e832ddef19b418f16))
 
-
 ## v2.13.3 (2024-06-04)
 
 ### Fix
 
 * fix(scan_server): fixed order of reported devices in readout priority ([`64ecbb6`](https://gitlab.psi.ch/bec/bec/-/commit/64ecbb6856de8b108e75f9a4bd2736adb5b4ca74))
-
 
 ## v2.13.2 (2024-06-03)
 
@@ -127,37 +134,17 @@
 
 * fix(bec_lib): fixed serialization for message endpoints ([`1be3830`](https://gitlab.psi.ch/bec/bec/-/commit/1be38300abcd0c7cc4a5f5dcf3c72cf19deb27d6))
 
-
 ## v2.13.1 (2024-06-03)
 
 ### Fix
 
 * fix: fixed support for mv during scan defs; closes #308 ([`835bf50`](https://gitlab.psi.ch/bec/bec/-/commit/835bf5004ad1c9aaec1792ed20f3ffc613584d31))
 
-
 ## v2.13.0 (2024-06-03)
 
 ### Documentation
 
 * docs: improved scan stub docs and glossary ([`e04cf65`](https://gitlab.psi.ch/bec/bec/-/commit/e04cf65f9cbcff4ea8fe3676813e4dce663757a4))
-
-### Feature
-
-* feat(scan_server): added set_with_response and request_is_completed stubs ([`8ac80c1`](https://gitlab.psi.ch/bec/bec/-/commit/8ac80c11ce0e83bb782254b06e2552e8a15c1002))
-
-### Fix
-
-* fix(scan_server): worker respects use_scan_progress_report ([`3ad46ef`](https://gitlab.psi.ch/bec/bec/-/commit/3ad46efb148ab9c32e34a6500f1f1af0dbd7144c))
-
-* fix(ipython_client): readback callback must listen to instruction RID ([`c4551d3`](https://gitlab.psi.ch/bec/bec/-/commit/c4551d3b953bc97557e285f350e81b000f7c2cbe))
-
-* fix: minor cleanup ([`8d4a066`](https://gitlab.psi.ch/bec/bec/-/commit/8d4a066832dc45d67b77d13b484d7cd2e565c2f9))
-
-* fix(scan_server): fixed default args ([`0f42a49`](https://gitlab.psi.ch/bec/bec/-/commit/0f42a4926de28252f01d9f9fab53244cc099ca21))
-
-### Refactor
-
-* refactor(scan_server): cleanup of scan args ([`3acc13a`](https://gitlab.psi.ch/bec/bec/-/commit/3acc13a8c4fa45765c1b29f446c01df21b056135))
 
 ### Test
 
