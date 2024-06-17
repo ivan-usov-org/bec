@@ -9,7 +9,7 @@ An example of an ophyd device based on EPICS is a single PV, e.g. the synchrotro
 curr:
   readoutPriority: baseline
   description: SLS ring current
-  deviceClass: EpicsSignalRO
+  deviceClass: ophyd.EpicsSignalRO
   deviceConfig:
     auto_monitor: true
     read_pv: ARIDI-PCT:CURRENT
@@ -66,7 +66,7 @@ endstation:
 curr:
   readoutPriority: baseline
   description: SLS ring current
-  deviceClass: EpicsSignalRO
+  deviceClass: ophyd.EpicsSignalRO
   deviceConfig:
     auto_monitor: true
     read_pv: ARIDI-PCT:CURRENT
