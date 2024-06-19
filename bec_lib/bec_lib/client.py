@@ -17,7 +17,7 @@ from rich.console import Console
 from rich.table import Table
 
 from bec_lib.alarm_handler import AlarmHandler, Alarms
-from bec_lib.bec_service import BECService
+from bec_lib.bec_service import BECService, BECStatus
 from bec_lib.bl_checks import BeamlineChecks
 from bec_lib.callback_handler import CallbackHandler, EventType
 from bec_lib.dap_plugins import DAPPlugins
@@ -35,6 +35,7 @@ if TYPE_CHECKING:
 logger = bec_logger.logger
 # TODO: put back normal import when Pydantic gets faster
 VariableMessage = lazy_import_from("bec_lib.messages", ("VariableMessage",))
+BECStatus = lazy_import_from("bec_lib.messages", ("BECStatus",))
 RedisConnector = lazy_import_from("bec_lib.redis_connector", ("RedisConnector",))
 ScanManager = lazy_import_from("bec_lib.scan_manager", ("ScanManager",))
 Scans = lazy_import_from("bec_lib.scans", ("Scans",))
@@ -166,6 +167,7 @@ class BECClient(BECService, UserScriptsMixin):
                 EventType.NAMESPACE_UPDATE, action="add", ns_objects=default_namespace
             )
             logger.info("Starting new client")
+            self.status = BECStatus.RUNNING
         except redis.exceptions.ConnectionError:
             logger.error("Failed to start the client: Could not connect to Redis server.")
             self.shutdown()

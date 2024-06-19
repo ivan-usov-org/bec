@@ -56,6 +56,7 @@ class BECService:
         self._metrics_emitter_thread = None
         self._metrics_emitter_event = threading.Event()
         self._services_info = {}
+        self._services_metric = {}
         self._initialize_logger()
         self._check_services()
         self._status = BECStatus.BUSY
@@ -131,6 +132,8 @@ class BECService:
             self.connector.get(MessageEndpoints.service_status(service)) for service in services
         ]
         self._services_info = {msg.content["name"]: msg for msg in msgs if msg is not None}
+        msgs = [self.connector.get(MessageEndpoints.metrics(service)) for service in services]
+        self._services_metric = {msg.content["name"]: msg for msg in msgs if msg is not None}
 
     def _update_service_info(self):
         while not self._service_info_event.is_set():
@@ -208,9 +211,9 @@ class BECService:
                     create_time=res["create_time"],
                 )
             )
-            msg = messages.ServiceMetricMessage(name=self.__class__.__name__, metrics=data)
+            msg = messages.ServiceMetricMessage(name=self._service_name, metrics=data)
             try:
-                self.connector.send(MessageEndpoints.metrics(self._service_id), msg)
+                self.connector.set_and_publish(MessageEndpoints.metrics(self._service_id), msg)
             except Exception:
                 # exception is not explicitely specified,
                 # because it depends on the underlying connector
