@@ -1,5 +1,6 @@
 import contextlib
 import os
+import time
 from pathlib import Path
 from unittest import mock
 
@@ -107,15 +108,24 @@ def test_bec_service_update_existing_services():
         messages.StatusMessage(name="service1", status=BECStatus.RUNNING, info={}, metadata={}),
         messages.StatusMessage(name="service2", status=BECStatus.IDLE, info={}, metadata={}),
     ]
+    service_metric_msgs = [
+        messages.ServiceMetricMessage(name="service1", metrics={}),
+        messages.ServiceMetricMessage(name="service2", metrics={}),
+    ]
     connector_cls = mock.MagicMock()
     connector_cls().keys.return_value = service_keys
-    connector_cls().get.side_effect = [msg for msg in service_msgs]
+    msgs = service_msgs + service_metric_msgs
+    connector_cls().get.side_effect = [msg for msg in msgs]
     with bec_service(
         f"{os.path.dirname(bec_lib.__file__)}/tests/test_service_config.yaml",
         connector_cls=connector_cls,
         unique_service=True,
     ) as service:
         assert service._services_info == {"service1": service_msgs[0], "service2": service_msgs[1]}
+        assert service._services_metric == {
+            "service1": service_metric_msgs[0],
+            "service2": service_metric_msgs[1],
+        }
 
 
 def test_bec_service_update_existing_services_ignores_wrong_msgs():
@@ -127,9 +137,11 @@ def test_bec_service_update_existing_services_ignores_wrong_msgs():
         messages.StatusMessage(name="service1", status=BECStatus.RUNNING, info={}, metadata={}),
         None,
     ]
+    service_metric_msgs = [None, messages.ServiceMetricMessage(name="service2", metrics={})]
+    msgs = service_msgs + service_metric_msgs
     connector_cls = mock.MagicMock()
     connector_cls().keys.return_value = service_keys
-    connector_cls().get.side_effect = [service_msgs[0], None]
+    connector_cls().get.side_effect = [msg for msg in msgs]
     with bec_service(
         f"{os.path.dirname(bec_lib.__file__)}/tests/test_service_config.yaml",
         connector_cls=connector_cls,
@@ -175,3 +187,17 @@ def test_bec_service_globals(connected_connector):
 
         service.delete_global_var("test")
         assert service.get_global_var("test") is None
+
+
+def test_bec_service_metrics(connected_connector):
+    config = ServiceConfig(redis={"host": "localhost", "port": 1})
+    with mock.patch("bec_lib.bec_service.BECService._start_metrics_emitter") as mock_emitter:
+        with bec_service(config=config, unique_service=True) as service:
+            service._metrics_emitter_event = mock.MagicMock()
+            service._metrics_emitter_event.is_set.side_effect = [False, True]
+            service.connector = connected_connector
+            assert service._services_metric == {}
+            service._send_service_status()
+            service._get_metrics()
+            service._update_existing_services()
+            assert service._services_metric != {}
