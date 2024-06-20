@@ -31,7 +31,9 @@ class BECIPythonClient:
         wait_for_server=True,
         forced=False,
     ) -> None:
-        self._client = BECClient(config, connector_cls, wait_for_server, forced, parent=self)
+        self._client = BECClient(
+            config, connector_cls, wait_for_server, forced, parent=self, name="BECIPythonClient"
+        )
         self._ip = IPython.get_ipython()
         self.started = False
         self._sighandler = None

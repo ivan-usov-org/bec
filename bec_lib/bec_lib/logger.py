@@ -232,14 +232,7 @@ class BECLogger:
         """
         Add a sink to the console log.
         """
-        if not self.service_name or self.service_name in [
-            "ScanServer",
-            "SciHub",
-            "DAPServer",
-            "DeviceServer",
-            "ScanBundler",
-            "FileWriterManager",
-        ]:
+        if self.service_name != "BECIPythonClient":
             return
         filename = os.path.join(self._base_path, f"{self.service_name}_CONSOLE.log")
         self.logger.add(
