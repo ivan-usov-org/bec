@@ -80,6 +80,7 @@ class BECLogger:
         self._base_path = None
         self.logger = loguru_logger
         self._log_level = LogLevel.INFO
+        self._console_log = False
         self._configured = False
         # self.logger.level("CONSOLE_LOG", no=21, color="<yellow>", icon="📣")
 
@@ -201,10 +202,11 @@ class BECLogger:
 
     def _update_sinks(self):
         self.logger.remove()
-        self.add_console_log()
         self.add_redis_log(self._log_level)
         self.add_sys_stderr(self._log_level)
         self.add_file_log(self._log_level)
+        if self._console_log:
+            self.add_console_log()
 
     def add_sys_stderr(self, level: LogLevel):
         """
@@ -231,15 +233,6 @@ class BECLogger:
         """
         Add a sink to the console log.
         """
-        if not self.service_name or self.service_name in [
-            "ScanServer",
-            "SciHub",
-            "DAPServer",
-            "DeviceServer",
-            "ScanBundler",
-            "FileWriterManager",
-        ]:
-            return
         filename = os.path.join(self._base_path, f"{self.service_name}_CONSOLE.log")
         self.logger.add(
             filename,
@@ -248,6 +241,7 @@ class BECLogger:
             filter=lambda record: record["level"].no == LogLevel.CONSOLE_LOG,
             enqueue=True,
         )
+        self._console_log = True
 
     def add_redis_log(self, level: LogLevel):
         """

@@ -58,6 +58,7 @@ class BECIPythonClient:
         if self.started:
             return
         self._client.start()
+        bec_logger.add_console_log()
         self._sighandler = SigintHandler(self)
         self._beamline_mixin = BeamlineMixin()
         self.live_updates = IPythonLiveUpdates(self)
