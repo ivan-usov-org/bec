@@ -57,3 +57,81 @@ def test_scan_manager_next_dataset_number_setter(scan_manager):
     scan_manager.connector.set.assert_called_once_with(
         MessageEndpoints.dataset_number(), messages.VariableMessage(value=3)
     )
+
+
+def test_scan_manager_request_scan_abortion(scan_manager):
+    scan_manager.request_scan_abortion("scan_id")
+    scan_manager.connector.send.assert_called_once_with(
+        MessageEndpoints.scan_queue_modification_request(),
+        messages.ScanQueueModificationMessage(scan_id="scan_id", action="abort", parameter={}),
+    )
+
+
+@pytest.mark.parametrize("scan_id", [None, "scan_id", ["scan_id"], [None]])
+def test_scan_manager_request_scan_abortion_scan_id(scan_manager, scan_id):
+
+    class ScanStorage:
+        current_scan_info = {"scan_id": scan_id}
+
+        @property
+        def current_scan_id(self):
+            return self.current_scan_info["scan_id"]
+
+    scan_manager.scan_storage = ScanStorage()
+    scan_manager.request_scan_abortion()
+    scan_manager.connector.send.assert_called_once_with(
+        MessageEndpoints.scan_queue_modification_request(),
+        messages.ScanQueueModificationMessage(scan_id=scan_id, action="abort", parameter={}),
+    )
+
+
+def test_scan_manager_request_scan_halt(scan_manager):
+    scan_manager.request_scan_halt("scan_id")
+    scan_manager.connector.send.assert_called_once_with(
+        MessageEndpoints.scan_queue_modification_request(),
+        messages.ScanQueueModificationMessage(scan_id="scan_id", action="halt", parameter={}),
+    )
+
+
+@pytest.mark.parametrize("scan_id", [None, "scan_id", ["scan_id"], [None]])
+def test_scan_manager_request_scan_halt_scan_id(scan_manager, scan_id):
+
+    class ScanStorage:
+        current_scan_info = {"scan_id": scan_id}
+
+        @property
+        def current_scan_id(self):
+            return self.current_scan_info["scan_id"]
+
+    scan_manager.scan_storage = ScanStorage()
+    scan_manager.request_scan_halt()
+    scan_manager.connector.send.assert_called_once_with(
+        MessageEndpoints.scan_queue_modification_request(),
+        messages.ScanQueueModificationMessage(scan_id=scan_id, action="halt", parameter={}),
+    )
+
+
+def test_scan_manager_request_scan_continuation(scan_manager):
+    scan_manager.request_scan_continuation("scan_id")
+    scan_manager.connector.send.assert_called_once_with(
+        MessageEndpoints.scan_queue_modification_request(),
+        messages.ScanQueueModificationMessage(scan_id="scan_id", action="continue", parameter={}),
+    )
+
+
+@pytest.mark.parametrize("scan_id", [None, "scan_id", ["scan_id"], [None]])
+def test_scan_manager_request_scan_continuation_scan_id(scan_manager, scan_id):
+
+    class ScanStorage:
+        current_scan_info = {"scan_id": scan_id}
+
+        @property
+        def current_scan_id(self):
+            return self.current_scan_info["scan_id"]
+
+    scan_manager.scan_storage = ScanStorage()
+    scan_manager.request_scan_continuation()
+    scan_manager.connector.send.assert_called_once_with(
+        MessageEndpoints.scan_queue_modification_request(),
+        messages.ScanQueueModificationMessage(scan_id=scan_id, action="continue", parameter={}),
+    )

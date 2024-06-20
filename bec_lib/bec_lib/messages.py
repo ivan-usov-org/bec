@@ -193,7 +193,7 @@ class ScanQueueModificationMessage(BECMessage):
     """
 
     msg_type: ClassVar[str] = "scan_queue_modification"
-    scan_id: str | list[str] | None
+    scan_id: str | list[str] | None | list[None]
     action: Literal[
         "pause", "deferred_pause", "continue", "abort", "clear", "restart", "halt", "resume"
     ]
