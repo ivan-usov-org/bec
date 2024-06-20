@@ -173,7 +173,6 @@ class BECClient(BECService, UserScriptsMixin):
             self.shutdown()
 
     def _start_services(self):
-        self._configure_logger()
         self._load_scans()
         # self.logbook = LogbookConnector(self.connector)
         self._update_username()
