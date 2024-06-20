@@ -213,7 +213,7 @@ class BECLogger:
         Args:
             level (LogLevel): Log level.
         """
-        self.logger.add(sys.stderr, level=level, format=self.formatting, enqueue=True)
+        self.logger.add(sys.__stderr__, level=level, format=self.formatting, enqueue=True)
 
     def add_file_log(self, level: LogLevel):
         """
