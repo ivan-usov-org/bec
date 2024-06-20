@@ -41,8 +41,10 @@ class BECService:
         connector_cls: ConnectorBase,
         unique_service=False,
         wait_for_server=False,
+        name: str | None = None,
     ) -> None:
         super().__init__()
+        self._name = name if name else self.__class__.__name__
         self._import_config(config)
         self._connector_cls = connector_cls
         self.connector = connector_cls(self.bootstrap_server)
@@ -66,11 +68,7 @@ class BECService:
 
     @property
     def _service_name(self):
-        return (
-            self.__class__.__name__
-            if self._unique_service
-            else f"{self.__class__.__name__}/{self._service_id}"
-        )
+        return self._name if self._unique_service else f"{self._name}/{self._service_id}"
 
     @property
     def _service_id(self):
@@ -115,7 +113,7 @@ class BECService:
         bec_logger.configure(
             self.bootstrap_server,
             self._connector_cls,
-            service_name=self.__class__.__name__,
+            service_name=self._name,
             service_config=self._service_config.config["service_config"],
         )
 

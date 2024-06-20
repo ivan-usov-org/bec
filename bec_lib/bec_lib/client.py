@@ -90,6 +90,7 @@ class BECClient(BECService, UserScriptsMixin):
         wait_for_server=False,
         forced=False,
         parent=None,
+        name: str | None = None,
     ) -> None:
         """
         Initialize the BECClient
@@ -99,6 +100,7 @@ class BECClient(BECService, UserScriptsMixin):
             connector_cls (ConnectorBase, optional): The connector class to use. Defaults to None.
             wait_for_server (bool, optional): Whether to wait for the server to be available before starting. Defaults to False.
             forced (bool, optional): Whether to force the initialization of a new client. Defaults to False.
+            name (str, optional): The name of the client. Defaults to None.
         """
         if self._initialized:
             return
@@ -107,6 +109,7 @@ class BECClient(BECService, UserScriptsMixin):
             "connector_cls": connector_cls if connector_cls is not None else RedisConnector,
             "wait_for_server": wait_for_server,
         }
+        self._name = name
         self.device_manager = None
         self.queue = None
         self.alarm_handler = None
@@ -159,7 +162,9 @@ class BECClient(BECService, UserScriptsMixin):
             config = self.__init_params["config"]
             connector_cls = self.__init_params["connector_cls"]
             wait_for_server = self.__init_params["wait_for_server"]
-            super().__init__(config, connector_cls, wait_for_server=wait_for_server)
+            super().__init__(
+                config, connector_cls, wait_for_server=wait_for_server, name=self._name
+            )
             builtins.bec = self._parent
             self._start_services()
             default_namespace = {"dev": self.device_manager.devices, "scans": self.scans}
