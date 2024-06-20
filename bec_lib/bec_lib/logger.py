@@ -115,8 +115,6 @@ class BECLogger:
             connector_cls (ConnectorBase): Connector class.
             service_name (str): Name of the service to which the logger belongs.
         """
-        self.level = self._log_level
-        self._update_logger_level()
         if not self._base_path:
             self._update_base_path(service_config)
         if os.path.exists(self._base_path) is False:
@@ -125,7 +123,8 @@ class BECLogger:
         self.connector = connector_cls(bootstrap_server)
         self.service_name = service_name
         self._configured = True
-        self._update_sinks()
+        self.level = self._log_level
+        self._update_logger_level()
 
     def _update_base_path(self, service_config: dict = None):
         """
