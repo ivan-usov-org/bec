@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v2.14.5 (2024-06-21)
+
+### Fix
+
+* fix(bec_lib): fixed pydantic type for scanqueuemodifications ([`6bf60f9`](https://gitlab.psi.ch/bec/bec/-/commit/6bf60f98fcaf80e1ab19ab2752d2d2e71f005225))
+
 ## v2.14.4 (2024-06-20)
 
 ### Documentation
@@ -147,9 +153,3 @@
 ### Fix
 
 * fix(bec_lib): fixed serialization for message endpoints ([`1be3830`](https://gitlab.psi.ch/bec/bec/-/commit/1be38300abcd0c7cc4a5f5dcf3c72cf19deb27d6))
-
-## v2.13.1 (2024-06-03)
-
-### Fix
-
-* fix: fixed support for mv during scan defs; closes #308 ([`835bf50`](https://gitlab.psi.ch/bec/bec/-/commit/835bf5004ad1c9aaec1792ed20f3ffc613584d31))
