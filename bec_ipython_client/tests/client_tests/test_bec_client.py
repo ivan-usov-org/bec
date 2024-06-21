@@ -40,9 +40,13 @@ finally:
         text=True,
     )
     output, _ = p.communicate()
-    assert "bec.device_manager" in output  # just one of many completions
+
+    # all_completions('bec.') should return a list of strings, one of which is 'bec.device_manager'
+    # we can therefore limit the output to lines that start with '[' and end with ']'
+    output_lines = [out for out in output.split("\n") if out.startswith("[") and out.endswith("]")]
+    assert "bec.device_manager" in output_lines[0]
     assert (
-        "BECIPythonClient" not in output
+        "BECIPythonClient" not in output_lines[1]
     )  # just to ensure something we don't want is really not there
 
 
