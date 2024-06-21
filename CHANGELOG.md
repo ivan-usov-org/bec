@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v2.15.0 (2024-06-21)
+
+### Feature
+
+* feat(file_writer): separated device collection from metadata ([`75e6df4`](https://gitlab.psi.ch/bec/bec/-/commit/75e6df47f722439df827a307c61849a3828925da))
+
 ## v2.14.5 (2024-06-21)
 
 ### Fix
@@ -147,9 +153,3 @@
 ### Fix
 
 * fix(scan_server): fixed order of reported devices in readout priority ([`64ecbb6`](https://gitlab.psi.ch/bec/bec/-/commit/64ecbb6856de8b108e75f9a4bd2736adb5b4ca74))
-
-## v2.13.2 (2024-06-03)
-
-### Fix
-
-* fix(bec_lib): fixed serialization for message endpoints ([`1be3830`](https://gitlab.psi.ch/bec/bec/-/commit/1be38300abcd0c7cc4a5f5dcf3c72cf19deb27d6))
