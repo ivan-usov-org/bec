@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v2.16.0 (2024-06-21)
+
+### Feature
+
+* feat(scan_server): added support for additional gui config ([`c6987b6`](https://gitlab.psi.ch/bec/bec/-/commit/c6987b6ec220ab98690b10bdbeef9823a0c7ed8a))
+
 ## v2.15.0 (2024-06-21)
 
 ### Feature
@@ -147,9 +153,3 @@
 ### Fix
 
 * fix(bec_ipython_client): fixed gui startup ([`8f4d89e`](https://gitlab.psi.ch/bec/bec/-/commit/8f4d89e7a49dc7ca9cbbe64e832ddef19b418f16))
-
-## v2.13.3 (2024-06-04)
-
-### Fix
-
-* fix(scan_server): fixed order of reported devices in readout priority ([`64ecbb6`](https://gitlab.psi.ch/bec/bec/-/commit/64ecbb6856de8b108e75f9a4bd2736adb5b4ca74))
