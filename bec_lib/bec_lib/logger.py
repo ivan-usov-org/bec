@@ -215,7 +215,7 @@ class BECLogger:
         Args:
             level (LogLevel): Log level.
         """
-        self.logger.add(sys.__stderr__, level=level, format=self.formatting, enqueue=True)
+        self.logger.add(sys.__stderr__, level=level, format=self.formatting)
 
     def add_file_log(self, level: LogLevel):
         """
@@ -227,7 +227,7 @@ class BECLogger:
         if not self.service_name:
             return
         filename = os.path.join(self._base_path, f"{self.service_name}.log")
-        self.logger.add(filename, level=level, format=self.formatting, enqueue=True)
+        self.logger.add(filename, level=level, format=self.formatting)
 
     def add_console_log(self):
         """
@@ -239,7 +239,6 @@ class BECLogger:
             level=LogLevel.CONSOLE_LOG,
             format=self.get_format(LogLevel.CONSOLE_LOG),
             filter=lambda record: record["level"].no == LogLevel.CONSOLE_LOG,
-            enqueue=True,
         )
         self._console_log = True
 
