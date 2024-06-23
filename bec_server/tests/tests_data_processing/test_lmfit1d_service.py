@@ -132,9 +132,9 @@ def test_LmfitService1D_process_until_finished(lmfit_service):
         with mock.patch.object(lmfit_service, "process") as process:
             process.return_value = ({"result": "result"}, {"metadata": "metadata"})
             lmfit_service.process_until_finished(event)
-            assert get_data.call_count == 2
-            assert process.call_count == 2
-            assert lmfit_service.client.connector.xadd.call_count == 2
+            assert get_data.call_count == 3
+            assert process.call_count == 3
+            assert lmfit_service.client.connector.xadd.call_count == 3
 
 
 def test_LmfitService1D_configure(lmfit_service):

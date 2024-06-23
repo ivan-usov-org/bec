@@ -133,6 +133,16 @@ def test_dap_fit(bec_client_lib):
 
     assert np.isclose(fit.center, 5, atol=0.5)
 
+    bec.dap.GaussianModel.select("bpm4i")
+    bec.dap.GaussianModel.auto_run = True
+
+    res = scans.line_scan(dev.samx, 0, 8, steps=20, relative=False)
+    res.wait()
+    time.sleep(1)
+    fit = bec.dap.GaussianModel.get_data()
+    assert res.scan.scan_id == fit.report["input"]["scan_id"]
+    assert np.isclose(fit.center, 5, atol=0.5)
+
 
 @pytest.mark.timeout(100)
 @pytest.mark.parametrize(

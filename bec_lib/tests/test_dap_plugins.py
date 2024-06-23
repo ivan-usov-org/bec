@@ -472,9 +472,11 @@ def test_dap_select_raises_on_wrong_device(dap):
 
 
 def test_dap_get_data(dap):
-    dap._parent.connector.get_last.return_value = messages.ProcessedDataMessage(
-        data=[{"x": [1, 2, 3], "y": [4, 5, 6]}, {"fit_parameters": {"amplitude": 1}}]
-    )
+    dap._parent.connector.get_last.return_value = {
+        "data": messages.ProcessedDataMessage(
+            data={"x": [1, 2, 3], "y": [4, 5, 6]}, metadata={"fit_parameters": {"amplitude": 1}}
+        )
+    }
     data = dap.GaussianModel.get_data()
     dap._parent.connector.get_last.assert_called_once_with(
         MessageEndpoints.processed_data("GaussianModel")

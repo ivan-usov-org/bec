@@ -105,6 +105,8 @@ class DAPPluginObjectBase:
         )
 
         response = self._wait_for_dap_response(request_id)
+        if isinstance(response, dict):
+            response = response.get("data")
         return self._convert_result(response)
 
     def _convert_result(self, result: messages.BECMessage):
@@ -113,7 +115,7 @@ class DAPPluginObjectBase:
         if not callable(self._result_cls):
             return result.content["data"]
         # pylint: disable=not-callable
-        return self._result_cls(result.content["data"], self._plugin_info["user_friendly_name"])
+        return self._result_cls(result, self._plugin_info["user_friendly_name"])
 
     def _wait_for_dap_response(self, request_id: str, timeout: float = 5.0):
         start_time = time.time()
@@ -163,6 +165,8 @@ class DAPPluginObject(DAPPluginObjectBase):
         msg = self._client.connector.get_last(MessageEndpoints.processed_data(self._service_name))
         if not msg:
             return None
+        if isinstance(msg, dict):
+            msg = msg.get("data")
         return self._convert_result(msg)
 
 
@@ -192,7 +196,16 @@ class LmfitService1DResult:
     Result of fitting 1D data using lmfit.
     """
 
-    def __init__(self, result: list[dict], model_name: str = None, client: BECClient = None):
+    def __init__(
+        self,
+        result: list[dict] | messages.ProcessedDataMessage,
+        model_name: str = None,
+        client: BECClient = None,
+    ):
+        if isinstance(result, messages.ProcessedDataMessage):
+            result = [result.content["data"], result.metadata]
+        elif isinstance(result, messages.DAPResponseMessage):
+            result = result.data
         self._data = result[0]
         self._report = result[1]
         self._model = model_name

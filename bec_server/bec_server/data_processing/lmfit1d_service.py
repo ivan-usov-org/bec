@@ -142,7 +142,7 @@ class LmfitService1D(DAPServiceBase):
         """
         Process until the scan is finished.
         """
-        while not event.is_set():
+        while True:
             data = self.get_data_from_current_scan(scan_item=self.current_scan_item)
             if not data:
                 time.sleep(0.1)
@@ -153,12 +153,12 @@ class LmfitService1D(DAPServiceBase):
                 stream_output, metadata = out
                 self.client.connector.xadd(
                     MessageEndpoints.processed_data(self.model.__class__.__name__),
-                    msg={
-                        "data": MsgpackSerialization.dumps(
-                            messages.ProcessedDataMessage(data=stream_output, metadata=metadata)
-                        )
+                    msg_dict={
+                        "data": messages.ProcessedDataMessage(data=stream_output, metadata=metadata)
                     },
                 )
+            if event.is_set():
+                break
             time.sleep(0.1)
 
     def configure(
