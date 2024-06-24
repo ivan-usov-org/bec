@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v2.16.1 (2024-06-24)
+
+### Fix
+
+* fix(dap): fixed auto-run and added e2e test ([`5de45d0`](https://gitlab.psi.ch/bec/bec/-/commit/5de45d059c7bcfa6e7df769b72128bed7f0dbcda))
+
 ## v2.16.0 (2024-06-21)
 
 ### Feature
@@ -147,9 +153,3 @@
 ### Fix
 
 * fix(bec_lib): fixed msg type serialization ([`05c24e8`](https://gitlab.psi.ch/bec/bec/-/commit/05c24e880bfbf2257c973ec4b451f93918290915))
-
-## v2.13.4 (2024-06-05)
-
-### Fix
-
-* fix(bec_ipython_client): fixed gui startup ([`8f4d89e`](https://gitlab.psi.ch/bec/bec/-/commit/8f4d89e7a49dc7ca9cbbe64e832ddef19b418f16))
