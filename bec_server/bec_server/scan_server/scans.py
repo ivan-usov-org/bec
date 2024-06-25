@@ -175,7 +175,7 @@ def get_round_scan_positions(r_in: float, r_out: float, nr: int, nth: int, cenx=
                 for ith in range(nth * ir)
             ]
         )
-    return np.array(positions)
+    return np.array(positions, dtype=float)
 
 
 class RequestBase(ABC):
@@ -384,7 +384,7 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         self.optim_trajectory = optim_trajectory
         self.burst_index = 0
 
-        self.start_pos = np.repeat(0, len(self.scan_motors)).tolist()
+        self.start_pos = []
         self.positions = []
         self.num_pos = 0
 
@@ -697,7 +697,7 @@ class Move(RequestBase):
         """
         super().__init__(**kwargs)
         self.relative = relative
-        self.start_pos = np.repeat(0, len(self.scan_motors)).tolist()
+        self.start_pos = []
 
     def _calculate_positions(self):
         self.positions = np.asarray([[val[0] for val in self.caller_args.values()]], dtype=float)
@@ -1032,7 +1032,7 @@ class ContLineScan(ScanBase):
         for _, val in self.caller_args.items():
             ax_pos = np.linspace(val[0], val[1], self.steps)
             axis.append(ax_pos)
-        self.positions = np.array(list(zip(*axis)))
+        self.positions = np.array(list(zip(*axis)), dtype=float)
 
     def _at_each_point(self, _pos=None):
         yield from self.stubs.trigger(group="trigger", point_id=self.point_id)
@@ -1103,7 +1103,7 @@ class ContLineFlyScan(AsyncFlyScanBase):
         self.device_move_request_id = str(uuid.uuid4())
 
     def prepare_positions(self):
-        self.positions = np.array([[self.start], [self.stop]])
+        self.positions = np.array([[self.start], [self.stop]], dtype=float)
         self.num_pos = None
         yield from self._set_position_offset()
 
@@ -1328,7 +1328,7 @@ class ListScan(ScanBase):
             raise ValueError("All position lists must be of equal length.")
 
     def _calculate_positions(self):
-        self.positions = np.vstack(tuple(self.caller_args.values())).T.tolist()
+        self.positions = np.vstack(tuple(self.caller_args.values()), dtype=float).T.tolist()
 
 
 class TimeScan(ScanBase):
@@ -1432,7 +1432,7 @@ class MonitorScan(ScanBase):
         return self.flyer
 
     def _calculate_positions(self) -> None:
-        self.positions = np.array([[self.start], [self.stop]])
+        self.positions = np.array([[self.start], [self.stop]], dtype=float)
 
     def prepare_positions(self):
         self._calculate_positions()
@@ -1588,7 +1588,7 @@ class LineScan(ScanBase):
         for _, val in self.caller_args.items():
             ax_pos = np.linspace(val[0], val[1], self.steps)
             axis.append(ax_pos)
-        self.positions = np.array(list(zip(*axis)))
+        self.positions = np.array(list(zip(*axis)), dtype=float)
 
 
 class ScanComponent(ScanBase):
