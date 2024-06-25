@@ -95,7 +95,7 @@ class BECLogger:
             cls._logger.logger.remove()
         cls._logger = None
 
-    def _update_logger_level(self):
+    def _update_console_logger_level(self):
         try:
             self.logger.level("CONSOLE_LOG", no=21, color="<yellow>", icon="📣")
         except TypeError:
@@ -125,7 +125,7 @@ class BECLogger:
         self.service_name = service_name
         self._configured = True
         self.level = self._log_level
-        self._update_logger_level()
+        self._update_console_logger_level()
 
     def _update_base_path(self, service_config: dict = None):
         """
