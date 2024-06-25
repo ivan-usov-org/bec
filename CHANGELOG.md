@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v2.16.2 (2024-06-25)
+
+### Fix
+
+* fix(scan_server): ensure that scan server rpc calls use a unique request id ([`f3f6966`](https://gitlab.psi.ch/bec/bec/-/commit/f3f69669dd15d6d2284afbba336576603d77169b))
+
 ## v2.16.1 (2024-06-24)
 
 ### Fix
@@ -147,9 +153,3 @@
 * fix: handle redis connection failures more gracefully ([`49425c7`](https://gitlab.psi.ch/bec/bec/-/commit/49425c7eed456f446c837e09c4fa88afedba31ae))
 
 * fix(bec_ipython_client): fixed support for loading hlis from plugins ([`45869aa`](https://gitlab.psi.ch/bec/bec/-/commit/45869aab773d4e288f7c2d4152be140f91f5bb79))
-
-## v2.13.5 (2024-06-05)
-
-### Fix
-
-* fix(bec_lib): fixed msg type serialization ([`05c24e8`](https://gitlab.psi.ch/bec/bec/-/commit/05c24e880bfbf2257c973ec4b451f93918290915))
