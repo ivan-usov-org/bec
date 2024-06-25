@@ -124,8 +124,8 @@ class BECLogger:
         self.connector = connector_cls(bootstrap_server)
         self.service_name = service_name
         self._configured = True
-        self.level = self._log_level
         self._update_console_logger_level()
+        self._update_sinks()
 
     def _update_base_path(self, service_config: dict = None):
         """
