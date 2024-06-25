@@ -205,9 +205,9 @@ class BECLogger:
 
     def _update_sinks(self):
         self.logger.remove()
-        self.add_redis_log(self._log_level)
-        self.add_sys_stderr(self._log_level)
-        self.add_file_log(self._log_level)
+        self.add_redis_log(self._redis_log_level)
+        self.add_sys_stderr(self._stderr_log_level)
+        self.add_file_log(self._file_log_level)
         if self._console_log:
             self.add_console_log()
 
