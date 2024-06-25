@@ -259,12 +259,6 @@ class BECClient(BECService, UserScriptsMixin):
     def _start_scan_queue(self):
         self.queue = ScanManager(self.connector)
 
-    def _configure_logger(self):
-        bec_logger.logger.remove()
-        bec_logger.add_file_log(bec_logger.LOGLEVEL.DEBUG)
-        bec_logger.add_sys_stderr(bec_logger.LOGLEVEL.SUCCESS)
-        bec_logger.add_console_log()
-
     def _start_device_manager(self):
         logger.info("Starting device manager")
         self.device_manager = DeviceManagerBase(self)

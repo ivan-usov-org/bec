@@ -17,7 +17,7 @@ from bec_lib.alarm_handler import AlarmBase
 from bec_lib.callback_handler import EventType
 from bec_lib.client import BECClient
 from bec_lib.connector import ConnectorBase
-from bec_lib.logger import bec_logger
+from bec_lib.logger import LogLevel, bec_logger
 from bec_lib.service_config import ServiceConfig
 
 logger = bec_logger.logger
@@ -31,6 +31,9 @@ class BECIPythonClient:
         wait_for_server=True,
         forced=False,
     ) -> None:
+        bec_logger._redis_log_level = LogLevel.INFO
+        bec_logger._stderr_log_level = LogLevel.SUCCESS
+        bec_logger._file_log_level = LogLevel.INFO
         self._client = BECClient(
             config, connector_cls, wait_for_server, forced, parent=self, name="BECIPythonClient"
         )
