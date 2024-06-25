@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v2.16.3 (2024-06-25)
+
+### Fix
+
+* fix(scan_server): sync fly scans should not retrieve scan motors ([`6dc16b4`](https://gitlab.psi.ch/bec/bec/-/commit/6dc16b4a89323c984b77f04cb76eacd442286e5b))
+
 ## v2.16.2 (2024-06-25)
 
 ### Fix
@@ -147,9 +153,3 @@
 ### Ci
 
 * ci: fixed pytest redis version for now ([`c6f1204`](https://gitlab.psi.ch/bec/bec/-/commit/c6f12042d3a0d00b1ab9c69a17e829adf76a2c12))
-
-### Fix
-
-* fix: handle redis connection failures more gracefully ([`49425c7`](https://gitlab.psi.ch/bec/bec/-/commit/49425c7eed456f446c837e09c4fa88afedba31ae))
-
-* fix(bec_ipython_client): fixed support for loading hlis from plugins ([`45869aa`](https://gitlab.psi.ch/bec/bec/-/commit/45869aab773d4e288f7c2d4152be140f91f5bb79))
