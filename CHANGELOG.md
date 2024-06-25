@@ -1,5 +1,34 @@
 # CHANGELOG
 
+## v2.17.0 (2024-06-25)
+
+### Feature
+
+* feat(bec_lib): added option to name the logger ([`5d6cc7d`](https://gitlab.psi.ch/bec/bec/-/commit/5d6cc7dd05ee49e5afd526409fb100b50aa9c56d))
+
+### Fix
+
+* fix(logger): do not enqueue log messages
+
+Enqueing log messages is useful when multiple processes (launched with
+multiprocess module) are logging to the same log file, which is not the
+use case for BEC - it creates processing threads, which can be avoided ([`1318b22`](https://gitlab.psi.ch/bec/bec/-/commit/1318b221cb6c26650535019175c74d748b003ea8))
+
+* fix: logger: make console_log opt-in instead of having it by default and removing for certain classes ([`1d1f795`](https://gitlab.psi.ch/bec/bec/-/commit/1d1f795f9143363fa73a7cc9d5e7827d613552c1))
+
+* fix: logger: log stderr to sys.__stderr__ to be compatible with sys.stderr redirection ([`9824ee4`](https://gitlab.psi.ch/bec/bec/-/commit/9824ee43aaf283c743762affead3c3b9e517abce))
+
+* fix: logger: do not update sinks twice in __init__ ([`051d6ad`](https://gitlab.psi.ch/bec/bec/-/commit/051d6ade9224f5aeb919bbe96e84dc49f4720482))
+
+* fix: client: do not configure logging in _start_services()
+
+Logging is already configured because BECClient inherits from BECService,
+and BECService configures logging when client is started ([`4809dc5`](https://gitlab.psi.ch/bec/bec/-/commit/4809dc512eec418e08bfa79b40d3b3b75a4498da))
+
+### Test
+
+* test: made completer test more targeted towards the completion results ([`cc5503f`](https://gitlab.psi.ch/bec/bec/-/commit/cc5503f86c32e266ef4755c78f01eed40cbad808))
+
 ## v2.16.3 (2024-06-25)
 
 ### Fix
@@ -118,8 +147,6 @@
 
 * docs: review documentation for ophyd, scan metadata and file_writer customizations ([`cb4a2f6`](https://gitlab.psi.ch/bec/bec/-/commit/cb4a2f6e62cbf4d756f575e594722a6971cf5258))
 
-* docs: added two more optional steps to the fly scan tutorial ([`ef1a757`](https://gitlab.psi.ch/bec/bec/-/commit/ef1a757a248c36aba9e6ef82ca53fb1bab3be3e2))
-
 ### Fix
 
 * fix: add scan_metadata to documentation ([`183152f`](https://gitlab.psi.ch/bec/bec/-/commit/183152fac63e174e5db4c7c0b1a064cddc25702e))
@@ -133,23 +160,3 @@
 * refactor: add changes from MR !614; improve kwargs handling for scan requests ([`3fece3a`](https://gitlab.psi.ch/bec/bec/-/commit/3fece3a063e4b10ed4ed6923a4b7044b0170efb5))
 
 * refactor: remove bec.file_writer, and moved info to metadata, renamed md to metadata in kwargs from scans ([`92bd51e`](https://gitlab.psi.ch/bec/bec/-/commit/92bd51e788233c1597b0aeb317b16642312b9cb0))
-
-## v2.13.7 (2024-06-06)
-
-### Documentation
-
-* docs: refactored scan docs ([`08e0978`](https://gitlab.psi.ch/bec/bec/-/commit/08e0978d2b7a137700fa1c552cbe079a290f32f5))
-
-* docs: added test instructions to fly scan tutorial ([`7cd40ff`](https://gitlab.psi.ch/bec/bec/-/commit/7cd40ffcf597e3b64e87d9206468118b400754d7))
-
-* docs: added tutorial for defining a new fly scan ([`df1fe4d`](https://gitlab.psi.ch/bec/bec/-/commit/df1fe4d64f97244862126d218be7fe9e2ebea925))
-
-### Fix
-
-* fix: adapt to pytest-redis 3.1 ([`0a987c0`](https://gitlab.psi.ch/bec/bec/-/commit/0a987c0815a3173e43dce22e2accef0e87ea284d))
-
-## v2.13.6 (2024-06-05)
-
-### Ci
-
-* ci: fixed pytest redis version for now ([`c6f1204`](https://gitlab.psi.ch/bec/bec/-/commit/c6f12042d3a0d00b1ab9c69a17e829adf76a2c12))
