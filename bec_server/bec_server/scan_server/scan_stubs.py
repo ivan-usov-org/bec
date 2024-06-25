@@ -80,7 +80,9 @@ class ScanStubs:
             "args": args,
             "kwargs": kwargs,
         }
-        yield from self.rpc(device=device, parameter=parameter, metadata={"response": True})
+        yield from self.rpc(
+            device=device, parameter=parameter, metadata={"response": True, "RID": rpc_id}
+        )
         return self._get_from_rpc(rpc_id)
 
     def _get_from_rpc(self, rpc_id) -> any:

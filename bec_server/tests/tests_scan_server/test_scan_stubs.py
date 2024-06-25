@@ -140,3 +140,13 @@ def test_request_is_completed(stubs):
     with mock.patch.object(stubs.connector, "lrange", side_effect=[[], ["msg"]]):
         assert stubs.request_is_completed("rid") is False
         assert stubs.request_is_completed("rid") is True
+
+
+def test_send_rpc_and_wait(stubs):
+    with mock.patch.object(stubs, "_get_from_rpc", return_value="msg") as get_rpc:
+        instructions = list(stubs.send_rpc_and_wait("sim_profile", "readback_profile"))
+        rpc_call_1 = instructions[0]
+        instructions = list(stubs.send_rpc_and_wait("sim_profile", "readback_profile"))
+        rpc_call_2 = instructions[0]
+        assert rpc_call_1 != rpc_call_2
+        assert rpc_call_1.metadata["RID"] != rpc_call_2.metadata["RID"]
