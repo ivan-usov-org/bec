@@ -80,6 +80,9 @@ class BECLogger:
         self._base_path = None
         self.logger = loguru_logger
         self._log_level = LogLevel.INFO
+        self._redis_log_level = self._log_level
+        self._stderr_log_level = self._log_level
+        self._file_log_level = self._log_level
         self._console_log = False
         self._configured = False
         # self.logger.level("CONSOLE_LOG", no=21, color="<yellow>", icon="📣")
@@ -261,6 +264,9 @@ class BECLogger:
     @level.setter
     def level(self, val: LogLevel):
         self._log_level = val
+        self._redis_log_level = val
+        self._file_log_level = val
+        self._stderr_log_level = val
         self._update_sinks()
 
 
