@@ -564,40 +564,10 @@ class SyncFlyScanBase(ScanBase, ABC):
     scan_type = "fly"
     pre_move = False
 
-    def _get_flyer_status(self) -> list:
-        flyer = self.scan_motors[0]
-        connector = self.device_manager.connector
-
-        pipe = connector.pipeline()
-        connector.lrange(
-            MessageEndpoints.device_req_status_container(self.metadata["RID"]), 0, -1, pipe
-        )
-        connector.get(MessageEndpoints.device_readback(flyer), pipe)
-        return connector.execute_pipeline(pipe)
-
-    @abstractmethod
-    def scan_core(self):
-        """perform the scan core procedure"""
-        ############################################
-        # Example of how to kickoff and wait for a flyer:
-        ############################################
-
-        # yield from self.stubs.kickoff(device=self.scan_motors[0], parameter=self.caller_kwargs)
-        # yield from self.stubs.complete(device=self.scan_motors[0])
-        # target_diid = self.DIID - 1
-
-        # while True:
-        #     status = self.stubs.get_req_status(
-        #         device=self.scan_motors[0], RID=self.metadata["RID"], DIID=target_diid
-        #     )
-        #     progress = self.stubs.get_device_progress(
-        #         device=self.scan_motors[0], RID=self.metadata["RID"]
-        #     )
-        #     if progress:
-        #         self.num_pos = progress
-        #     if status:
-        #         break
-        #     time.sleep(1)
+    def _get_scan_motors(self):
+        # fly scans normally do not have stepper scan motors so
+        # the default way of retrieving scan motors is not applicable
+        return []
 
     @property
     @abstractmethod
@@ -615,6 +585,40 @@ class SyncFlyScanBase(ScanBase, ABC):
 
     def prepare_positions(self):
         yield None
+
+    @abstractmethod
+    def scan_core(self):
+        """perform the scan core procedure"""
+        ############################################
+        # Example of how to kickoff and wait for a flyer:
+        ############################################
+
+        # yield from self.stubs.kickoff(device=self.flyer, parameter=self.caller_kwargs)
+        # yield from self.stubs.complete(device=self.flyer)
+        # target_diid = self.DIID - 1
+
+        # while True:
+        #     status = self.stubs.get_req_status(
+        #         device=self.flyer, RID=self.metadata["RID"], DIID=target_diid
+        #     )
+        #     progress = self.stubs.get_device_progress(
+        #         device=self.flyer, RID=self.metadata["RID"]
+        #     )
+        #     if progress:
+        #         self.num_pos = progress
+        #     if status:
+        #         break
+        #     time.sleep(1)
+
+    # def _get_flyer_status(self) -> list:
+    #     connector = self.device_manager.connector
+
+    #     pipe = connector.pipeline()
+    #     connector.lrange(
+    #         MessageEndpoints.device_req_status_container(self.metadata["RID"]), 0, -1, pipe
+    #     )
+    #     connector.get(MessageEndpoints.device_readback(self.flyer), pipe)
+    #     return connector.execute_pipeline(pipe)
 
 
 class AsyncFlyScanBase(SyncFlyScanBase):
@@ -796,7 +800,7 @@ class Scan(ScanBase):
         **kwargs,
     ):
         """
-        Scan two motors in a grid.
+        Scan two or more motors in a grid.
 
         Args:
             *args (Device, float, float, int): pairs of device / start / stop / steps arguments
