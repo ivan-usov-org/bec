@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## v2.17.1 (2024-06-25)
+
+### Fix
+
+* fix: configure logger levels for BECIPythonClient in constructor ([`72b6e3e`](https://gitlab.psi.ch/bec/bec/-/commit/72b6e3e543a64d86a615cf400fa5057317a722ad))
+
+* fix: _update_sinks applies different level for each logger ([`7ed5d6a`](https://gitlab.psi.ch/bec/bec/-/commit/7ed5d6ae82f0605de1f0422a0c6c658cec230159))
+
+* fix: set level for each logger to the given value ([`1428ba2`](https://gitlab.psi.ch/bec/bec/-/commit/1428ba27f9239aa67fcb4b9111980d1d0955de32))
+
+* fix: remove redundant update of loggers ([`8b82f35`](https://gitlab.psi.ch/bec/bec/-/commit/8b82f357970daab1ad0cac9ea36b42f460b1afd2))
+
+### Refactor
+
+* refactor: renaming of _update_logger_level to _update_console_logger_level ([`03a58d6`](https://gitlab.psi.ch/bec/bec/-/commit/03a58d6f1d035cfc0a31d4f6c61436825d0fd31a))
+
 ## v2.17.0 (2024-06-25)
 
 ### Feature
@@ -141,22 +157,6 @@ and BECService configures logging when client is started ([`4809dc5`](https://gi
 
 ## v2.13.8 (2024-06-07)
 
-### Documentation
-
-* docs: move file_writer to extra section in docs ([`8d4a712`](https://gitlab.psi.ch/bec/bec/-/commit/8d4a71269be9350d9f9d55395b851d7f9a997253))
-
-* docs: review documentation for ophyd, scan metadata and file_writer customizations ([`cb4a2f6`](https://gitlab.psi.ch/bec/bec/-/commit/cb4a2f6e62cbf4d756f575e594722a6971cf5258))
-
-### Fix
-
-* fix: add scan_metadata to documentation ([`183152f`](https://gitlab.psi.ch/bec/bec/-/commit/183152fac63e174e5db4c7c0b1a064cddc25702e))
-
-* fix: fix bec.file_writer option to configure writer from command line ([`83334f1`](https://gitlab.psi.ch/bec/bec/-/commit/83334f18c4ac2c8ce1881ac37231c03022f12442))
-
 ### Refactor
 
 * refactor: add system_config and review docs ([`a481fda`](https://gitlab.psi.ch/bec/bec/-/commit/a481fdadfe0c1e005b7a9bd35c7a3b8dd15e9756))
-
-* refactor: add changes from MR !614; improve kwargs handling for scan requests ([`3fece3a`](https://gitlab.psi.ch/bec/bec/-/commit/3fece3a063e4b10ed4ed6923a4b7044b0170efb5))
-
-* refactor: remove bec.file_writer, and moved info to metadata, renamed md to metadata in kwargs from scans ([`92bd51e`](https://gitlab.psi.ch/bec/bec/-/commit/92bd51e788233c1597b0aeb317b16642312b9cb0))
