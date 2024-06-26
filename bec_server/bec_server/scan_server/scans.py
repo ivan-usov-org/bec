@@ -453,7 +453,6 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         yield from self.stubs.baseline_reading()
 
     def _set_position_offset(self):
-        self.start_pos = []
         for dev in self.scan_motors:
             val = yield from self.stubs.send_rpc_and_wait(dev, "read")
             self.start_pos.append(val[dev].get("value"))
