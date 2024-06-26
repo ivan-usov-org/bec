@@ -826,7 +826,7 @@ class Scan(ScanBase):
     def _calculate_positions(self):
         axis = []
         for _, val in self.caller_args.items():
-            axis.append(np.linspace(val[0], val[1], val[2]))
+            axis.append(np.linspace(val[0], val[1], val[2], dtype=float))
         if len(axis) > 1:
             self.positions = get_2D_raster_pos(axis)
         else:
@@ -983,7 +983,7 @@ class ContLineScan(ScanBase):
     scan_type = "step"
     gui_config = {
         "Device": ["device", "start", "stop"],
-        "Movement Parameters": ["steps", "relative", "offset"],
+        "Movement Parameters": ["steps", "relative", "offset", "atol"],
         "Acquisition Parameters": ["exp_time", "burst_at_each_point"],
     }
 
@@ -992,10 +992,11 @@ class ContLineScan(ScanBase):
         device: DeviceBase,
         start: float,
         stop: float,
+        offset: float = 1,
+        atol: float = 0.5,
         exp_time: float = 0,
         steps: int = 10,
         relative: bool = False,
-        offset: float = 100,
         burst_at_each_point: int = 1,
         **kwargs,
     ):
@@ -1011,7 +1012,8 @@ class ContLineScan(ScanBase):
             steps (int): number of steps. Default is 10.
             relative (bool): if True, the motors will be moved relative to their current position. Default is False.
             burst_at_each_point (int): number of exposures at each point. Default is 1.
-            offset (float): offset in motor units. Default is 100.
+            offset (float): offset in motor units. Default is 1.
+            atol (float): absolute tolerance for position check. Default is 0.5.
 
         Returns:
             ScanReport
@@ -1024,14 +1026,33 @@ class ContLineScan(ScanBase):
             exp_time=exp_time, relative=relative, burst_at_each_point=burst_at_each_point, **kwargs
         )
         self.steps = steps
+        self.device = device
         self.offset = offset
+        self.start = start
+        self.stop = stop
+        self.atol = atol
 
     def _calculate_positions(self) -> None:
-        axis = []
-        for _, val in self.caller_args.items():
-            ax_pos = np.linspace(val[0], val[1], self.steps)
-            axis.append(ax_pos)
-        self.positions = np.array(list(zip(*axis)), dtype=float)
+        self.positions = np.linspace(self.start, self.stop, self.steps, dtype=float)[
+            np.newaxis, :
+        ].T
+
+    def _check_limits(self):
+        logger.debug("check limits")
+        low_limit, high_limit = self.device_manager.devices[self.device].limits
+        if low_limit >= high_limit:
+            # if both limits are equal or low > high, no restrictions ought to be applied
+            return
+        for ii, pos in enumerate(self.positions):
+            if ii == 0:
+                pos_axis = pos - self.offset
+            else:
+                pos_axis = pos
+            if not low_limit <= pos_axis <= high_limit:
+                raise LimitError(
+                    f"Target position {pos} for motor {self.device} is outside of range: [{low_limit},"
+                    f" {high_limit}]"
+                )
 
     def _at_each_point(self, _pos=None):
         yield from self.stubs.trigger(group="trigger", point_id=self.point_id)
@@ -1046,19 +1067,25 @@ class ContLineScan(ScanBase):
         )
 
         while self.point_id < len(self.positions[:]):
-            cont_motor_positions = self.device_manager.devices[self.scan_motors[0]].readback()
+            cont_motor_positions = self.device_manager.devices[self.scan_motors[0]].readback.read()
 
             if not cont_motor_positions:
                 continue
 
-            cont_motor_positions = cont_motor_positions.get("value")
+            cont_motor_positions = cont_motor_positions[self.scan_motors[0]].get("value")
             logger.debug(f"Current position of {self.scan_motors[0]}: {cont_motor_positions}")
-            if np.isclose(cont_motor_positions, self.positions[self.point_id][0], atol=0.5):
+            # TODO: consider the alternative, which triggers a readout for each point right after the motor passed it
+            # if cont_motor_positions > self.positions[self.point_id][0]:
+            if np.isclose(cont_motor_positions, self.positions[self.point_id][0], atol=self.atol):
                 logger.debug(f"reading point {self.point_id}")
                 yield from self._at_each_point()
                 continue
             if cont_motor_positions > self.positions[self.point_id][0]:
-                raise ScanAbortion(f"Skipped point {self.point_id + 1}")
+                raise ScanAbortion(
+                    f"Skipped point {self.point_id + 1}:"
+                    f"Consider reducing speed {self.device_manager.devices[self.scan_motors[0]].velocity.get()}, "
+                    f"increasing the atol {self.atol}, or increasing the offset {self.offset}"
+                )
 
 
 class ContLineFlyScan(AsyncFlyScanBase):
@@ -1585,7 +1612,7 @@ class LineScan(ScanBase):
     def _calculate_positions(self) -> None:
         axis = []
         for _, val in self.caller_args.items():
-            ax_pos = np.linspace(val[0], val[1], self.steps)
+            ax_pos = np.linspace(val[0], val[1], self.steps, dtype=float)
             axis.append(ax_pos)
         self.positions = np.array(list(zip(*axis)), dtype=float)
 
