@@ -5,9 +5,9 @@ import argparse
 import threading
 
 import bec_server.data_processing as data_processing
+from bec_lib.bec_service import parse_cmdline_args
 from bec_lib.logger import bec_logger
 from bec_lib.redis_connector import RedisConnector
-from bec_lib.service_config import ServiceConfig
 from bec_server.data_processing.lmfit1d_service import LmfitService1D
 
 logger = bec_logger.logger
@@ -18,12 +18,7 @@ def main():
     """
     Launch the data processing server.
     """
-    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("--config", default="", help="path to the config file")
-    clargs = parser.parse_args()
-    config_path = clargs.config
-
-    config = ServiceConfig(config_path)
+    _, _, config = parse_cmdline_args()
 
     bec_server = data_processing.dap_server.DAPServer(
         config=config, connector_cls=RedisConnector, provided_services=[LmfitService1D]

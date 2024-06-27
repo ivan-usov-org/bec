@@ -4,9 +4,9 @@
 import argparse
 import threading
 
+from bec_lib.bec_service import parse_cmdline_args
 from bec_lib.logger import bec_logger
 from bec_lib.redis_connector import RedisConnector
-from bec_lib.service_config import ServiceConfig
 from bec_server import scihub
 
 logger = bec_logger.logger
@@ -17,13 +17,7 @@ def main():
     """
     Launch the SciHub connector.
     """
-
-    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("--config", default="", help="path to the config file")
-    clargs = parser.parse_args()
-    config_path = clargs.config
-
-    config = ServiceConfig(config_path)
+    _, _, config = parse_cmdline_args()
 
     sh = scihub.SciHub(config, RedisConnector)
 

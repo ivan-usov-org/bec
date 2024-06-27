@@ -6,6 +6,7 @@ from bec_lib.service_config import ServiceConfig
 from .dap_service_manager import DAPServiceManager
 
 logger = bec_logger.logger
+bec_logger.level = bec_logger.LOGLEVEL.INFO
 
 
 class DAPServer(BECClient):
@@ -34,10 +35,9 @@ class DAPServer(BECClient):
         if not self._provided_services:
             raise ValueError("No services provided")
         super().start()
-        self._start_dap_serivce()
-        bec_logger.level = bec_logger.LOGLEVEL.INFO
+        self._start_dap_service()
 
-    def _start_dap_serivce(self):
+    def _start_dap_service(self):
         self._dap_service_manager = DAPServiceManager(self._provided_services)
         self._dap_service_manager.start(self)
 
