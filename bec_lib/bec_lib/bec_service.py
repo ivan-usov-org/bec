@@ -4,6 +4,7 @@ This module provides the BECService class, which is the base class for all BEC s
 
 from __future__ import annotations
 
+import argparse
 import getpass
 import os
 import socket
@@ -31,10 +32,60 @@ if TYPE_CHECKING:
 messages = lazy_import("bec_lib.messages")
 BECStatus = lazy_import_from("bec_lib.messages", ("BECStatus",))
 
-
 logger = bec_logger.logger
 
 SERVICE_CONFIG = None
+
+
+def parse_cmdline_args(parser=None):
+    """Return (parsed args, extra args, ServiceConfig object), the latter being initialized from command line arguments
+
+    Extra args are those passed on the command line, which are not known by the parser
+
+    Arguments:
+      - parser (optional): an existing argparse arguments parser, which will be extended with default BECService options
+    """
+    if parser is None:
+        parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("--config", default="", help="path to the config file")
+    parser.add_argument(
+        "--log-level",
+        default=None,
+        choices=["TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR", "CRITICAL"],
+        help=f"log level (default: {bec_logger.level.name})",
+    )
+    parser.add_argument(
+        "--file-log-level",
+        default=None,
+        choices=["TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR", "CRITICAL"],
+        help="log file log level (not set means 'same as --log-level')",
+    )
+    parser.add_argument(
+        "--redis-log-level",
+        default=None,
+        choices=["TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR", "CRITICAL"],
+        help="redis log level (not set means 'same as --log-level')",
+    )
+
+    args, extra_args = parser.parse_known_args()
+
+    bec_logger._stderr_log_level = (
+        bec_logger.level.name if args.log_level is None else args.log_level
+    )
+    bec_logger._file_log_level = (
+        bec_logger._stderr_log_level if args.file_log_level is None else args.file_log_level
+    )
+    bec_logger._redis_log_level = (
+        bec_logger._stderr_log_level if args.redis_log_level is None else args.redis_log_level
+    )
+
+    config_file = args.config
+    if config_file:
+        service_config = ServiceConfig(config_file)
+    else:
+        service_config = ServiceConfig()
+
+    return args, extra_args, service_config
 
 
 class BECService:
