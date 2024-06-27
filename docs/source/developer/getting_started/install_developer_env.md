@@ -140,8 +140,9 @@ redis-server
 On PSI-maintained systems with pmodules, you can simply load psi-python311/2024.02 and tmux/3.2 via
 
 ```{code-block} bash
-module add psi-python311/2024.02
 module add tmux/3.2
+module add redis/7.0.12
+redis-server
 ```
 ````
 `````
