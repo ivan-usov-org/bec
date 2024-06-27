@@ -1,9 +1,12 @@
 from collections.abc import Callable
 
 from bec_lib import messages
+from bec_lib.alarm_handler import Alarms
 from bec_lib.device import DeviceStatus
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
+
+from .errors import ScanAbortion
 
 logger = bec_logger.logger
 
@@ -58,24 +61,36 @@ class DeviceValidation:
         default_checks = [self.matching_scan_id, self.matching_DIID]
         if checks is None:
             checks = []
-        checks = default_checks + checks
+        checks = checks + default_checks
+        if self.devices_returned_successfully in checks:
+            checks.remove(self.devices_returned_successfully)
+            run_status_checks = True
+        else:
+            run_status_checks = False
+
         device_status = self.get_device_status(endpoint, devices)
         self.worker._check_for_interruption()
-        device_status = [dev for dev in device_status]
+        device_status = list(device_status)
 
         if None in device_status:
             return False
-        devices_are_ready = all(check(metadata, device_status, **kwargs) for check in checks)
-        if devices_are_ready:
-            return True
-        if print_status:
-            missing_devices = [
-                dev.content["device"]
-                for dev in device_status
-                if not all(check(metadata, [dev], **kwargs) for check in checks)
-            ]
-            logger.info(f"Waiting for a status response of: {missing_devices}")
-        return False
+
+        device_msgs_are_correct = all(check(metadata, device_status, **kwargs) for check in checks)
+        if not device_msgs_are_correct:
+            if print_status:
+                missing_devices = [
+                    dev.content["device"]
+                    for dev in device_status
+                    if not all(
+                        check(metadata, [dev], **kwargs) for check in checks + default_checks
+                    )
+                ]
+                logger.info(f"Waiting for a status response of: {missing_devices}")
+            return False
+        if run_status_checks:
+            return self.devices_returned_successfully(metadata, device_status, **kwargs)
+
+        return True
 
     # pylint: disable=invalid-name
     def matching_scan_id(
@@ -146,12 +161,27 @@ class DeviceValidation:
         Returns:
             bool: True if all devices moved successfully, False otherwise
         """
-        if instruction is None:
-            return all(dev.content.get("success") for dev in response)
         moved_successfully = all(dev.content.get("success") for dev in response)
-        if not moved_successfully:
-            self.worker._check_for_failed_movements(response, wait_group_devices, instruction)
-        return moved_successfully
+        if moved_successfully:
+            return True
+
+        if instruction:
+            return self.worker._check_for_failed_movements(
+                response, wait_group_devices, instruction
+            )
+
+        # get the first device msg that failed
+        failed_device = next(dev for dev in response if not dev.content.get("success"))
+        self.connector.raise_alarm(
+            severity=Alarms.MAJOR,
+            source=failed_device.content,
+            msg=(
+                f"Device {failed_device.device} returned unsuccessfully on {failed_device.metadata.get('action')}."
+            ),
+            alarm_type="DeviceError",
+            metadata=failed_device.metadata,
+        )
+        raise ScanAbortion
 
     def devices_are_staged(
         self, metadata: dict, response: list[messages.BECMessage], **kwargs

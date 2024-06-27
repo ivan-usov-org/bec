@@ -288,8 +288,10 @@ class DeviceServer(RPCMixin, BECService):
         else:
             obj = status.obj
         device_name = obj.root.name
+        metadata = {"action": status.instruction.content["action"]}
+        metadata.update(status.instruction.metadata)
         dev_msg = messages.DeviceReqStatusMessage(
-            device=device_name, success=status.success, metadata=status.instruction.metadata
+            device=device_name, success=status.success, metadata=metadata
         )
         logger.debug(f"req status for device {device_name}: {status.success}")
         self.connector.set(MessageEndpoints.device_req_status(device_name), dev_msg, pipe)
