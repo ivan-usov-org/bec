@@ -81,9 +81,9 @@ def parse_cmdline_args(parser=None):
 
     config_file = args.config
     if config_file:
-        service_config = ServiceConfig(config_file)
+        service_config = ServiceConfig(config_file, cmdline_args=vars(args))
     else:
-        service_config = ServiceConfig()
+        service_config = ServiceConfig(cmdline_args=vars(args))
 
     return args, extra_args, service_config
 

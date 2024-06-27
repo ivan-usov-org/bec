@@ -47,7 +47,7 @@ class ServiceConfig:
             self._load_urls("redis", required=True)
             self._load_urls("mongodb", required=False)
 
-        self._update_config(service_config=service_config, redis=redis)
+        self._update_config(service_config=service_config, redis=redis, **kwargs)
 
         self.service_config = self.config.get(
             "service_config", DEFAULT_SERVICE_CONFIG["service_config"]
@@ -61,6 +61,8 @@ class ServiceConfig:
 
     def _load_config(self):
         if self.config_path:
+            if not os.path.isfile(self.config_path):
+                raise FileNotFoundError(f"Config file {repr(self.config_path)} not found.")
             with open(self.config_path, "r") as stream:
                 self.config = yaml.safe_load(stream)
                 logger.info(
@@ -104,3 +106,7 @@ class ServiceConfig:
     @property
     def abort_on_ctrl_c(self):
         return self.service_config.get("abort_on_ctrl_c", True)
+
+    def is_default(self):
+        """Return whether config is DEFAULT_SERVICE_CONFIG"""
+        return self.config is DEFAULT_SERVICE_CONFIG

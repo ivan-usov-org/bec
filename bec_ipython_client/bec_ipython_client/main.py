@@ -14,6 +14,7 @@ from bec_ipython_client.callbacks.ipython_live_updates import IPythonLiveUpdates
 from bec_ipython_client.signals import ScanInterruption, SigintHandler
 from bec_lib import plugin_helper
 from bec_lib.alarm_handler import AlarmBase
+from bec_lib.bec_service import parse_cmdline_args
 from bec_lib.callback_handler import EventType
 from bec_lib.client import BECClient
 from bec_lib.connector import ConnectorBase
@@ -21,6 +22,18 @@ from bec_lib.logger import LogLevel, bec_logger
 from bec_lib.service_config import ServiceConfig
 
 logger = bec_logger.logger
+
+
+class CLIBECClient(BECClient):
+    def _wait_for_server(self):
+        ret = super()._wait_for_server()
+        cmdline_args = self._BECClient__init_params["config"].config.get("cmdline_args")
+        # set stderr logger level to SUCCESS (will not show messages <= INFO level)
+        # (see issue #318), except if user explicitely asked for another level from cmd line
+        if not cmdline_args or not cmdline_args.get("log_level"):
+            bec_logger._stderr_log_level = "SUCCESS"
+            bec_logger._update_sinks()
+        return ret
 
 
 class BECIPythonClient:
@@ -31,10 +44,7 @@ class BECIPythonClient:
         wait_for_server=True,
         forced=False,
     ) -> None:
-        bec_logger._redis_log_level = LogLevel.INFO
-        bec_logger._stderr_log_level = LogLevel.SUCCESS
-        bec_logger._file_log_level = LogLevel.INFO
-        self._client = BECClient(
+        self._client = CLIBECClient(
             config, connector_cls, wait_for_server, forced, parent=self, name="BECIPythonClient"
         )
         self._ip = IPython.get_ipython()
@@ -211,7 +221,6 @@ def main():
     )
     parser.add_argument("--version", action="store_true", default=False)
     parser.add_argument("--nogui", action="store_true", default=False)
-    parser.add_argument("--config", action="store", default=None)
     parser.add_argument("--dont-wait-for-server", action="store_true", default=False)
     parser.add_argument("--post-startup-file", action="store", default=None)
 
@@ -219,7 +228,7 @@ def main():
         if hasattr(plugin["module"], "extend_command_line_args"):
             plugin["module"].extend_command_line_args(parser)
 
-    args, left_args = parser.parse_known_args()
+    args, left_args, config = parse_cmdline_args(parser)
 
     # remove already parsed args from command line args
     sys.argv = sys.argv[:1] + left_args
@@ -228,23 +237,14 @@ def main():
         print(f"BEC IPython client: {version('bec_ipython_client')}")
         sys.exit(0)
 
-    config_file = args.config
-    if config_file:
-        if not os.path.isfile(config_file):
-            raise FileNotFoundError("Config file not found.")
-        print("Using config file: ", config_file)
-        config = ServiceConfig(config_file)
-
-    if available_plugins and "config" not in locals():
-        # check if pre-startup.py script exists
+    if available_plugins and config.is_default():
+        # check if config is defined in a plugin;
+        # in this case the plugin config takes precedence over
+        # the default config
         for plugin in available_plugins.values():
             if hasattr(plugin["module"], "get_config"):
                 config = plugin["module"].get_config()
                 break
-
-    # check if config was defined in pre-startup.py
-    if "config" not in locals():
-        config = ServiceConfig()
 
     main_dict["config"] = config
     main_dict["args"] = args
