@@ -1,0 +1,14 @@
+
+stages:
+  - Deploy
+
+dev-pages:
+  stage: Deploy
+  needs: []
+  script:
+    - curl -X POST -d "branches=development" -d "token=$RTD_TOKEN" https://readthedocs.org/api/v2/webhook/beamline-experiment-control/221870/
+    - curl -X POST -d "branches=development" -d "token=$RTD_TOKEN_BEC" https://readthedocs.org/api/v2/webhook/bec/246899/
+
+    # not sure why, but somehow it needs to be called twice to trigger the build
+    - curl -X POST -d "branches=development" -d "token=$RTD_TOKEN" https://readthedocs.org/api/v2/webhook/beamline-experiment-control/221870/
+    - curl -X POST -d "branches=development" -d "token=$RTD_TOKEN_BEC" https://readthedocs.org/api/v2/webhook/bec/246899/
