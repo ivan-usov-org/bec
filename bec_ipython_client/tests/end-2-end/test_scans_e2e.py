@@ -12,6 +12,7 @@ from bec_ipython_client.callbacks.utils import ScanRequestError
 from bec_lib import configs
 from bec_lib.alarm_handler import AlarmBase
 from bec_lib.bec_errors import ScanAbortion, ScanInterruption
+from bec_lib.device_monitor_utils import get_monitor_images
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
 
@@ -683,3 +684,23 @@ def test_update_config(bec_ipython_client_fixture):
     assert "samx" not in bec.device_manager.devices
     config = bec.config._load_config_from_file(demo_config_path)
     bec.config.send_config_request(action="set", config=config)
+
+
+@pytest.mark.timeout(100)
+def test_monitor_endpoint(bec_ipython_client_fixture):
+    bec = bec_ipython_client_fixture
+    bec.metadata.update({"unit_test": "test_monitor_endpoint"})
+    dev = bec.device_manager.devices
+    scans = bec.scans
+    monitor = "eiger"
+
+    orig_shape = getattr(dev, monitor).image_shape.get()
+    getattr(dev, monitor).image_shape.put([52, 52])
+    shape = tuple(getattr(dev, monitor).image_shape.get())
+    status = scans.line_scan(dev.samx, -5, 5, steps=10, exp_time=0.01, relative=True)
+    status.wait()
+    img = get_monitor_images(monitor, count=10)
+    assert len(img) == 10
+    assert img[0].shape == shape
+    getattr(dev, monitor).image_shape.put(orig_shape)
+    assert getattr(dev, monitor).image_shape.get() == orig_shape
