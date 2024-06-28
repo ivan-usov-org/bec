@@ -93,6 +93,7 @@ class Status:
         self._event = threading.Event()
         self._thread_event = threading.Event()
         self._device_req_thread = None
+        self._request_status = None
 
     def __eq__(self, __value: object) -> bool:
         if isinstance(__value, Status):
@@ -105,17 +106,19 @@ class Status:
                 MessageEndpoints.device_req_status_container(self._RID), 0, -1
             )
             if request_status:
+                self._request_status = request_status
                 self._event.set()
                 break
             time.sleep(0.01)
 
-    def wait(self, timeout=None):
+    def wait(self, timeout=None, raise_on_failure=True):
         """
         Wait for the request to complete. If the request is not completed within the specified time,
         a TimeoutError is raised.
 
         Args:
             timeout (float, optional): Timeout in seconds. Defaults to None. If None, the method waits indefinitely.
+            raise_on_failure (bool, optional): If True, an RPCError is raised if the request fails. Defaults to True.
         """
         try:
             self._device_req_thread = threading.Thread(
@@ -130,6 +133,13 @@ class Status:
             self._device_req_thread.join()
             self._event.clear()
             self._thread_event.clear()
+
+        if not raise_on_failure or self._request_status is None:
+            return
+
+        for msg in self._request_status:
+            if not msg.success:
+                raise RPCError(f"RPC call failed: {msg}")
 
 
 class DeviceBase:

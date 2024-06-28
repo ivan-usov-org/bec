@@ -254,6 +254,17 @@ def test_handle_rpc_response_returns_status(dev, bec_client_mock):
     )
 
 
+def test_rpc_status_raises_error(dev):
+    msg = messages.DeviceReqStatusMessage(device="samx", success=False, metadata={})
+    connector = mock.MagicMock()
+    status = Status(connector, "request_id")
+    connector.lrange.return_value = [msg]
+    with pytest.raises(RPCError):
+        status.wait(raise_on_failure=True)
+
+    status.wait(raise_on_failure=False)
+
+
 def test_handle_rpc_response_raises(dev):
     msg = messages.DeviceRPCMessage(
         device="samx",
