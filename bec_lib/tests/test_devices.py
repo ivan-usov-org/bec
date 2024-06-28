@@ -391,15 +391,10 @@ def test_device_update_user_parameter(device_obj, user_param, val, out, raised_e
 def test_status_wait():
     connector = mock.MagicMock()
 
-    def lrange_mock(*args, **kwargs):
-        yield False
-        yield True
-
-    def get_lrange(*args, **kwargs):
-        return next(lmock)
-
-    lmock = lrange_mock()
-    connector.lrange = get_lrange
+    connector.lrange.side_effect = [
+        [],
+        [messages.DeviceReqStatusMessage(device="test", success=True, metadata={})],
+    ]
     status = Status(connector, "test")
     status.wait()
 
