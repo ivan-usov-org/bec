@@ -327,3 +327,37 @@ def test_computed_signal(bec_client_lib):
     dev.pseudo_signal1.set_input_signals()
 
     assert dev.pseudo_signal1.read(cached=False)["pseudo_signal1"]["value"] == 5
+
+
+def test_cached_device_readout(bec_client_lib):
+    bec = bec_client_lib
+    bec.metadata.update({"unit_test": "test_cached_device_readout"})
+    dev = bec.device_manager.devices
+
+    dev.samx.setpoint.put(5)
+    data = dev.samx.setpoint.get()
+    assert data == 5
+
+    orig_velocity = dev.samx.velocity.get()
+    dev.samx.velocity.put(10)
+    data = dev.samx.velocity.get()
+    assert data == 10
+
+    config = dev.samx.read_configuration()
+    assert config["samx_velocity"]["value"] == 10
+
+    dev.samx.velocity.put(orig_velocity)
+
+    data = dev.hexapod.x.readback.read(cached=False)
+    timestamp = data["hexapod_x"]["timestamp"]
+    data = dev.hexapod.x.readback.read(cached=True)
+    assert data["hexapod_x"]["timestamp"] == timestamp
+
+    # check that .get also updates the cache
+    dev.hexapod.x.readback.get(cached=False)
+    timestamp_2 = dev.hexapod.x.readback.read(cached=True)["hexapod_x"]["timestamp"]
+    assert timestamp_2 != timestamp
+
+    dev.hexapod.x.readback.get(cached=True)
+    timestamp_3 = dev.hexapod.x.readback.read(cached=True)["hexapod_x"]["timestamp"]
+    assert timestamp_3 == timestamp_2
