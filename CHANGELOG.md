@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## v2.17.2 (2024-06-28)
+
+### Build
+
+* build: fakeredis dependency version update after fakeredis has been fixed ([`33db330`](https://gitlab.psi.ch/bec/bec/-/commit/33db33033c4d8028cffe84b154300e926c365315))
+
+### Documentation
+
+* docs: fix redis install for psi-maintained ([`bed9e90`](https://gitlab.psi.ch/bec/bec/-/commit/bed9e90183a236880d3e54d93571cdf4ad2ce9a5))
+
+### Fix
+
+* fix: fixed bug where a failed device status would not cause the scan to abort ([`2b93187`](https://gitlab.psi.ch/bec/bec/-/commit/2b93187c3522e99b09c68bc3b844e3ea6ffd1adf))
+
 ## v2.17.1 (2024-06-25)
 
 ### Fix
@@ -139,10 +153,6 @@ and BECService configures logging when client is started ([`4809dc5`](https://gi
 
 * docs: improved file writer docs; added plugin info ([`5eefa67`](https://gitlab.psi.ch/bec/bec/-/commit/5eefa6726b4e1d0312d2dc04fe36f3d9ba036c0f))
 
-### Feature
-
-* feat(file_writer): introduced defaultwriter class to simplify the plugin development ([`03c9592`](https://gitlab.psi.ch/bec/bec/-/commit/03c9592b6a72689b4c022678528bfd150bc2f837))
-
 ### Fix
 
 * fix(file_writer): set status to running after init ([`f4d494b`](https://gitlab.psi.ch/bec/bec/-/commit/f4d494b8dc1949842fea9b613b1394af603d29a7))
@@ -150,13 +160,3 @@ and BECService configures logging when client is started ([`4809dc5`](https://gi
 ### Refactor
 
 * refactor(file_writer): cleanup ([`8b5abd4`](https://gitlab.psi.ch/bec/bec/-/commit/8b5abd4522424fc898da485c0a9f84018c3d3f08))
-
-### Test
-
-* test(file_writer): added tests to load format from plugins ([`9adbdaf`](https://gitlab.psi.ch/bec/bec/-/commit/9adbdaf0fae5f1f9332790a46073613602c821bc))
-
-## v2.13.8 (2024-06-07)
-
-### Refactor
-
-* refactor: add system_config and review docs ([`a481fda`](https://gitlab.psi.ch/bec/bec/-/commit/a481fdadfe0c1e005b7a9bd35c7a3b8dd15e9756))
