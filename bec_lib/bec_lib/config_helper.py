@@ -142,7 +142,7 @@ class ConfigHelper:
             DeviceConfigMessage(action=action, config=config, metadata={"RID": RID}),
         )
 
-        reply = self.wait_for_config_reply(RID)
+        reply = self.wait_for_config_reply(RID, timeout=min(300, len(config) * 30) + 2)
 
         if not reply.content["accepted"] and not reply.metadata.get("updated_config"):
             raise DeviceConfigError(
@@ -169,7 +169,7 @@ class ConfigHelper:
             # wait for the device server and scan server to acknowledge the config change
             self.wait_for_service_response(RID)
 
-    def wait_for_service_response(self, RID: str, timeout=10) -> ServiceResponseMessage:
+    def wait_for_service_response(self, RID: str, timeout=60) -> ServiceResponseMessage:
         """
         wait for service response
 
@@ -210,7 +210,7 @@ class ConfigHelper:
                     " messages received."
                 )
 
-    def wait_for_config_reply(self, RID: str, timeout=10) -> RequestResponseMessage:
+    def wait_for_config_reply(self, RID: str, timeout=60) -> RequestResponseMessage:
         """
         wait for config reply
 

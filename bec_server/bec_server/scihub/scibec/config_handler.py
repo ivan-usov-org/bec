@@ -82,8 +82,11 @@ class ConfigHandler:
         msg.metadata["updated_config"] = True
         RID = str(uuid.uuid4())
         self._update_device_server(RID, config, action="reload")
-        accepted, server_response_msg = self._wait_for_device_server_update(RID, timeout_time=20)
+        accepted, server_response_msg = self._wait_for_device_server_update(
+            RID, timeout_time=min(300, 30 * len(config))
+        )
         if "failed_devices" in server_response_msg.metadata:
+            logger.warning(f"Failed devices: {server_response_msg.metadata['failed_devices']}")
             msg.metadata["failed_devices"] = server_response_msg.metadata["failed_devices"]
         reload_msg = messages.DeviceConfigMessage(action="reload", config={}, metadata=msg.metadata)
         if accepted:
@@ -134,7 +137,7 @@ class ConfigHandler:
         msg = messages.DeviceConfigMessage(action=action, config=config, metadata={"RID": RID})
         self.connector.send(MessageEndpoints.device_server_config_request(), msg)
 
-    def _wait_for_device_server_update(self, RID: str, timeout_time=10) -> bool:
+    def _wait_for_device_server_update(self, RID: str, timeout_time=30) -> bool:
         timeout = timeout_time
         time_step = 0.05
         elapsed_time = 0

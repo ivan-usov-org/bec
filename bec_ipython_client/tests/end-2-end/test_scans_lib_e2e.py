@@ -287,27 +287,25 @@ def test_config_reload(
     bec = bec_client_lib
     bec.metadata.update({"unit_test": "test_config_reload"})
     runtime_config_file_path = bec_test_config_file_path.parent / "e2e_runtime_config_test.yaml"
-    try:
-        # write new config to disk
-        with open(runtime_config_file_path, "w") as f:
-            f.write(yaml.dump(config))
-        num_devices = len(bec.device_manager.devices)
-        if raises_error:
-            with pytest.raises(DeviceConfigError):
-                bec.config.update_session_with_file(runtime_config_file_path)
-            if deletes_config:
-                assert len(bec.device_manager.devices) == 0
-            elif disabled_device:
-                assert len(bec.device_manager.devices) == 2
-            else:
-                assert len(bec.device_manager.devices) == num_devices
-        else:
+
+    # write new config to disk
+    with open(runtime_config_file_path, "w") as f:
+        f.write(yaml.dump(config))
+    num_devices = len(bec.device_manager.devices)
+    if raises_error:
+        with pytest.raises(DeviceConfigError):
             bec.config.update_session_with_file(runtime_config_file_path)
+        if deletes_config:
+            assert len(bec.device_manager.devices) == 0
+        elif disabled_device:
             assert len(bec.device_manager.devices) == 2
-        for dev in disabled_device:
-            assert bec.device_manager.devices[dev].enabled is False
-    finally:
-        bec.config.update_session_with_file(bec_test_config_file_path)
+        else:
+            assert len(bec.device_manager.devices) == num_devices
+    else:
+        bec.config.update_session_with_file(runtime_config_file_path)
+        assert len(bec.device_manager.devices) == 2
+    for dev in disabled_device:
+        assert bec.device_manager.devices[dev].enabled is False
 
 
 def test_computed_signal(bec_client_lib):

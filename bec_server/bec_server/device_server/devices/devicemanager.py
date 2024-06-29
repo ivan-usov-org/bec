@@ -124,21 +124,25 @@ class DeviceManagerDS(DeviceManagerBase):
                 name = dev.get("name")
                 enabled = dev.get("enabled")
                 logger.info(f"Adding device {name}: {'ENABLED' if enabled else 'DISABLED'}")
+                dev_cls = self._get_device_class(dev.get("deviceClass"))
+                if issubclass(dev_cls, (opd.DeviceProxy, opd.ComputedSignal)):
+                    delayed_init.append(dev)
+                    continue
+                obj, config = self.construct_device_obj(dev, device_manager=self)
                 try:
-                    dev_cls = self._get_device_class(dev.get("deviceClass"))
-                    if issubclass(dev_cls, (opd.DeviceProxy, opd.ComputedSignal)):
-                        delayed_init.append(dev)
-                        continue
-                    self.initialize_device(dev)
-                except ConnectionError:
+                    self.initialize_device(dev, config, obj)
+                # pylint: disable=broad-except
+                except Exception:
                     msg = traceback.format_exc()
                     self.failed_devices[name] = msg
 
             for dev in delayed_init:
+                name = dev.get("name")
+                obj, config = self.construct_device_obj(dev, device_manager=self)
                 try:
-                    name = dev.get("name")
-                    self.initialize_delayed_devices(dev)
-                except (ConnectionError, DeviceConfigError):
+                    self.initialize_delayed_devices(dev, config, obj)
+                # pylint: disable=broad-except
+                except Exception:
                     msg = traceback.format_exc()
                     self.failed_devices[name] = msg
             self.config_update_handler.handle_failed_device_inits()
@@ -152,12 +156,13 @@ class DeviceManagerDS(DeviceManagerBase):
                 f"Failed to initialize device: {dev}: {content}. The config will be reset."
             ) from exc
 
-    def initialize_delayed_devices(self, dev: dict) -> None:
+    def initialize_delayed_devices(self, dev: dict, config: dict, obj: OphydObject) -> None:
         """Initialize delayed device after all other devices have been initialized."""
         name = dev.get("name")
         enabled = dev.get("enabled")
         logger.info(f"Adding device {name}: {'ENABLED' if enabled else 'DISABLED'}")
-        obj = self.initialize_device(dev)
+
+        obj = self.initialize_device(dev, config, obj)
 
         if hasattr(obj.obj, "lookup"):
             self._register_device_proxy(name)
@@ -292,17 +297,24 @@ class DeviceManagerDS(DeviceManagerBase):
         obj = dev_cls(**init_kwargs)
         return obj, config
 
-    def initialize_device(self, dev: dict) -> DSDevice:
+    def initialize_device(self, dev: dict, config: dict, obj: OphydObject) -> DSDevice:
         """
         Prepares a device for later usage.
         This includes inspecting the device class signature,
         initializing the object, refreshing the device info and buffer,
         as well as adding subscriptions.
+
+        Args:
+            dev (dict): device config dictionary
+            config (dict): device config dictionary
+            obj (OphydObject): device object
+
+        Returns:
+            DSDevice: initialized device object
         """
         name = dev.get("name")
         enabled = dev.get("enabled")
 
-        obj, config = self.construct_device_obj(dev, device_manager=self)
         self.update_config(obj, config)
 
         # refresh the device info
@@ -394,9 +406,9 @@ class DeviceManagerDS(DeviceManagerBase):
                 return
             if hasattr(obj, "wait_for_connection"):
                 try:
-                    obj.wait_for_connection(all_signals=wait_for_all, timeout=10)
+                    obj.wait_for_connection(all_signals=wait_for_all, timeout=30)
                 except TypeError:
-                    obj.wait_for_connection(timeout=10)
+                    obj.wait_for_connection(timeout=30)
                 return
             logger.error(
                 f"Device {obj.name} does not implement the socket controller interface nor"

@@ -50,7 +50,7 @@ class ConfigUpdateHandler:
                 if self.device_manager.failed_devices:
                     msg.metadata["failed_devices"] = self.device_manager.failed_devices
 
-        except DeviceConfigError:
+        except Exception:
             error_msg = traceback.format_exc()
             accepted = False
         finally:
@@ -104,7 +104,10 @@ class ConfigUpdateHandler:
                 if dev_config["enabled"]:
                     # pylint:disable=protected-access
                     if device.obj._destroyed:
-                        self.device_manager.initialize_device(device._config)
+                        obj, config = self.device_manager.construct_device_obj(
+                            device._config, device_manager=self.device_manager
+                        )
+                        self.device_manager.initialize_device(device._config, config, obj)
                     else:
                         self.device_manager.initialize_enabled_device(device)
                 else:
@@ -141,4 +144,4 @@ class ConfigUpdateHandler:
             device_config["name"] = name
             config.append(device_config)
         msg = messages.AvailableResourceMessage(resource=config)
-        self.device_manager.producer.set(MessageEndpoints.device_config(), msg)
+        self.device_manager.connector.set(MessageEndpoints.device_config(), msg)

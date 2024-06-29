@@ -141,7 +141,7 @@ def test_send_config_request(config_helper):
     config_helper.wait_for_config_reply.return_value = messages.RequestResponseMessage(
         accepted=True, message={"msg": "test"}
     )
-    config_helper.wait_for_config_reply.assert_called_once_with(mock.ANY)
+    config_helper.wait_for_config_reply.assert_called_once_with(mock.ANY, timeout=32)
     config_helper.wait_for_service_response.assert_called_once_with(mock.ANY)
 
 
