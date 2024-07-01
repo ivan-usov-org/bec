@@ -103,18 +103,14 @@ class RPCMixin:
                 self.device_manager.devices[device_root].obj,
                 instr_params.get("func").split(".read")[0],
             )
-        if isinstance(obj, ophyd.Device):
-            return self._rpc_read_and_return(instr)
-        if isinstance(obj, ophyd.Signal):
+        if hasattr(obj, "kind"):
             if obj.kind not in [ophyd.Kind.omitted, ophyd.Kind.config]:
                 return self._rpc_read_and_return(instr)
             if obj.kind == ophyd.Kind.config:
                 return self._rpc_read_configuration_and_return(instr)
             if obj.kind == ophyd.Kind.omitted:
                 return obj.read()
-        raise ValueError(
-            f"Cannot read from object {obj}. The object is not a valid ophyd object (Device or Signal)."
-        )
+        return self._rpc_read_and_return(instr)
 
     def _handle_rpc_property_set(self, instr: messages.DeviceInstructionMessage) -> None:
         instr_params = instr.content.get("parameter")
