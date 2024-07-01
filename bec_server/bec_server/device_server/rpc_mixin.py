@@ -32,7 +32,7 @@ class RPCMixin:
                 instr_params = instr.content.get("parameter")
                 device = instr.content["device"]
                 self._assert_device_is_enabled(instr)
-                res = self._process_rpc_instruction(instr)
+                res = self.process_rpc_instruction(instr)
                 # send result to client
                 self._send_rpc_result_to_client(device, instr_params, res, result)
                 logger.trace(res)
@@ -93,47 +93,48 @@ class RPCMixin:
             res = res[0]
         return res
 
-    def _process_rpc_instruction(self, instr: messages.DeviceInstructionMessage) -> Any:
-        # handle ophyd read. This is a special case because we also want to update the
-        # buffered value in redis
+    def _handle_rpc_read(self, instr: messages.DeviceInstructionMessage) -> Any:
         instr_params = instr.content.get("parameter")
         device_root = instr.content["device"].split(".")[0]
-        if instr_params.get("func") == "read" or instr_params.get("func").endswith(".read"):
-            if instr_params.get("func") == "read":
-                obj = self.device_manager.devices[device_root].obj
-            else:
-                obj = rgetattr(
-                    self.device_manager.devices[device_root].obj,
-                    instr_params.get("func").split(".read")[0],
-                )
-            if isinstance(obj, ophyd.Device):
-                return self._rpc_read_and_return(instr)
-            if isinstance(obj, ophyd.Signal):
-                if obj.kind not in [ophyd.Kind.omitted, ophyd.Kind.config]:
-                    return self._rpc_read_and_return(instr)
-                if obj.kind == ophyd.Kind.config:
-                    return self._rpc_read_configuration_and_return(instr)
-                if obj.kind == ophyd.Kind.omitted:
-                    return obj.read()
-        if instr_params.get("func") == "read_configuration" or instr_params.get("func").endswith(
-            ".read_configuration"
-        ):
-            return self._rpc_read_configuration_and_return(instr)
-        if instr_params.get("kwargs", {}).get("_set_property"):
-            sub_access = instr_params.get("func").split(".")
-            property_name = sub_access[-1]
-            if len(sub_access) > 1:
-                sub_access = sub_access[0:-1]
-            else:
-                sub_access = []
+        if instr_params.get("func") == "read":
             obj = self.device_manager.devices[device_root].obj
-            if sub_access:
-                obj = rgetattr(obj, ".".join(sub_access))
-            setattr(obj, property_name, instr_params.get("args")[0])
-            return None
+        else:
+            obj = rgetattr(
+                self.device_manager.devices[device_root].obj,
+                instr_params.get("func").split(".read")[0],
+            )
+        if isinstance(obj, ophyd.Device):
+            return self._rpc_read_and_return(instr)
+        if isinstance(obj, ophyd.Signal):
+            if obj.kind not in [ophyd.Kind.omitted, ophyd.Kind.config]:
+                return self._rpc_read_and_return(instr)
+            if obj.kind == ophyd.Kind.config:
+                return self._rpc_read_configuration_and_return(instr)
+            if obj.kind == ophyd.Kind.omitted:
+                return obj.read()
+        raise ValueError(
+            f"Cannot read from object {obj}. The object is not a valid ophyd object (Device or Signal)."
+        )
 
-        # handle other ophyd methods
-        rpc_var = rgetattr(self.device_manager.devices[device_root].obj, instr_params.get("func"))
+    def _handle_rpc_property_set(self, instr: messages.DeviceInstructionMessage) -> None:
+        instr_params = instr.content.get("parameter")
+        device_root = instr.content["device"].split(".")[0]
+        sub_access = instr_params.get("func").split(".")
+        property_name = sub_access[-1]
+        if len(sub_access) > 1:
+            sub_access = sub_access[0:-1]
+        else:
+            sub_access = []
+        obj = self.device_manager.devices[device_root].obj
+        if sub_access:
+            obj = rgetattr(obj, ".".join(sub_access))
+        setattr(obj, property_name, instr_params.get("args")[0])
+
+    def _handle_misc_rpc(self, instr: messages.DeviceInstructionMessage) -> Any:
+        instr_params = instr.content.get("parameter")
+        device_root = instr.content["device"].split(".")[0]
+        obj = self.device_manager.devices[device_root].obj
+        rpc_var = rgetattr(obj, instr_params.get("func"))
         res = self._get_result_from_rpc(rpc_var, instr_params)
 
         # update the cache for value-updating functions
@@ -175,6 +176,24 @@ class RPCMixin:
         elif isinstance(res, list) and res and isinstance(res[0], ophyd.Staged):
             res = [str(stage) for stage in res]
         return res
+
+    def process_rpc_instruction(self, instr: messages.DeviceInstructionMessage) -> Any:
+        # handle ophyd read. This is a special case because we also want to update the
+        # buffered value in redis
+        instr_params = instr.content.get("parameter")
+
+        if instr_params.get("func") == "read" or instr_params.get("func").endswith(".read"):
+            return self._handle_rpc_read(instr)
+
+        if instr_params.get("func") == "read_configuration" or instr_params.get("func").endswith(
+            ".read_configuration"
+        ):
+            return self._rpc_read_configuration_and_return(instr)
+
+        if instr_params.get("kwargs", {}).get("_set_property"):
+            return self._handle_rpc_property_set(instr)
+
+        return self._handle_misc_rpc(instr)
 
     def _update_cache(self, obj, instr):
         if obj.kind == ophyd.Kind.config:

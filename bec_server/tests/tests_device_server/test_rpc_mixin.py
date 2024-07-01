@@ -122,7 +122,7 @@ def test_send_rpc_result_to_client(rpc_cls):
 def test_run_rpc(rpc_cls, instr):
     rpc_cls._assert_device_is_enabled = mock.MagicMock()
     with (
-        mock.patch.object(rpc_cls, "_process_rpc_instruction") as _process_rpc_instruction,
+        mock.patch.object(rpc_cls, "process_rpc_instruction") as _process_rpc_instruction,
         mock.patch.object(rpc_cls, "_send_rpc_result_to_client") as _send_rpc_result_to_client,
     ):
         _process_rpc_instruction.return_value = 1
@@ -137,7 +137,7 @@ def test_run_rpc(rpc_cls, instr):
 def test_run_rpc_sends_rpc_exception(rpc_cls, instr):
     rpc_cls._assert_device_is_enabled = mock.MagicMock()
     with (
-        mock.patch.object(rpc_cls, "_process_rpc_instruction") as _process_rpc_instruction,
+        mock.patch.object(rpc_cls, "process_rpc_instruction") as _process_rpc_instruction,
         mock.patch.object(rpc_cls, "_send_rpc_exception") as _send_rpc_exception,
     ):
         _process_rpc_instruction.side_effect = Exception
@@ -182,7 +182,7 @@ def test_process_rpc_instruction_read(rpc_cls, dev_mock, instr, func, read_calle
     rpc_cls.device_manager.devices = {"device": dev_mock}
     rpc_cls._read_and_update_devices = mock.MagicMock()
     rpc_cls._read_config_and_update_devices = mock.MagicMock()
-    rpc_cls._process_rpc_instruction(instr)
+    rpc_cls.process_rpc_instruction(instr)
     if read_called:
         rpc_cls._read_and_update_devices.assert_called_once_with(["device"], instr.metadata)
         rpc_cls._read_config_and_update_devices.assert_not_called()
@@ -200,7 +200,7 @@ def test_process_rpc_instruction_with_status_return(rpc_cls, dev_mock, instr):
     with mock.patch.object(rpc_cls, "_get_result_from_rpc") as rpc_result:
         status = StatusBase()
         rpc_result.return_value = status
-        res = rpc_cls._process_rpc_instruction(instr)
+        res = rpc_cls.process_rpc_instruction(instr)
         assert res == {
             "type": "status",
             "RID": "RID",
@@ -218,7 +218,7 @@ def test_process_rpc_instruction_with_namedtuple_return(rpc_cls, dev_mock, instr
         point_type = namedtuple("Point", ["x", "y"])
         point_tuple = point_type(5, 6)
         rpc_result.return_value = point_tuple
-        res = rpc_cls._process_rpc_instruction(instr)
+        res = rpc_cls.process_rpc_instruction(instr)
         assert res == {
             "type": "namedtuple",
             "RID": instr.metadata.get("RID"),
@@ -235,7 +235,7 @@ def test_process_rpc_instruction_with_list_return(rpc_cls, dev_mock, instr, retu
     rpc_cls.device_manager.devices = {"device": dev_mock}
     with mock.patch.object(rpc_cls, "_get_result_from_rpc") as rpc_result:
         rpc_result.return_value = return_val
-        res = rpc_cls._process_rpc_instruction(instr)
+        res = rpc_cls.process_rpc_instruction(instr)
         assert res == result
 
 
@@ -244,7 +244,7 @@ def test_process_rpc_instruction_set_attribute(rpc_cls, dev_mock, instr):
     instr.content["parameter"]["args"] = [5]
     instr.content["parameter"]["func"] = "attr_value"
     rpc_cls.device_manager.devices = {"device": dev_mock}
-    rpc_cls._process_rpc_instruction(instr)
+    rpc_cls.process_rpc_instruction(instr)
     rpc_cls.device_manager.devices["device"].obj.attr_value == 5
 
 
@@ -253,5 +253,5 @@ def test_process_rpc_instruction_set_attribute_on_sub_device(rpc_cls, dev_mock, 
     instr.content["parameter"]["args"] = [5]
     instr.content["parameter"]["func"] = "user_setpoint.attr_value"
     rpc_cls.device_manager.devices = {"device": dev_mock}
-    rpc_cls._process_rpc_instruction(instr)
+    rpc_cls.process_rpc_instruction(instr)
     rpc_cls.device_manager.devices["device"].obj.user_setpoint.attr_value == 5
