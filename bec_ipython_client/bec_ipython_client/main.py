@@ -14,6 +14,7 @@ from bec_ipython_client.callbacks.ipython_live_updates import IPythonLiveUpdates
 from bec_ipython_client.signals import ScanInterruption, SigintHandler
 from bec_lib import plugin_helper
 from bec_lib.alarm_handler import AlarmBase
+from bec_lib.bec_errors import DeviceConfigError
 from bec_lib.bec_service import parse_cmdline_args
 from bec_lib.callback_handler import EventType
 from bec_lib.client import BECClient
@@ -148,8 +149,8 @@ class BECIPythonClient:
 
 
 def _ip_exception_handler(self, etype, evalue, tb, tb_offset=None):
-    if issubclass(etype, (AlarmBase, ScanInterruption)):
-        print(f"\x1b[31m BEC alarm:\x1b[0m: {evalue}")
+    if issubclass(etype, (AlarmBase, ScanInterruption, DeviceConfigError)):
+        print(f"\x1b[31m BEC alarm:\x1b[0m {evalue}")
         return
     self.showtraceback((etype, evalue, tb), tb_offset=None)  # standard IPython's printout
 
