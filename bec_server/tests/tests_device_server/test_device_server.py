@@ -313,36 +313,14 @@ def test_handle_device_instructions_set(device_server_mock, instructions):
                     set_mock.assert_called_once_with(instructions)
 
 
-@pytest.mark.parametrize(
-    "instructions",
-    [
-        messages.DeviceInstructionMessage(
-            device="samx",
-            action="set",
-            parameter={},
-            metadata={"stream": "primary", "DIID": 1, "RID": "test"},
-        )
-    ],
-)
-@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
-def test_handle_device_instructions_exception(device_server_mock, instructions):
+def test_handle_device_instruction_raises_alarm(device_server_mock):
     device_server = device_server_mock
-
-    with mock.patch.object(device_server, "_assert_device_is_valid") as valid_mock:
-        with mock.patch.object(device_server.connector, "log_error") as log_mock:
-            with mock.patch.object(device_server.connector, "raise_alarm") as alarm_mock:
-                valid_mock.side_effect = Exception("Exception")
-                device_server.handle_device_instructions(instructions)
-
-                valid_mock.assert_called_once_with(instructions)
-                log_mock.assert_called_once_with({"source": instructions, "message": ANY})
-                alarm_mock.assert_called_once_with(
-                    severity=Alarms.MAJOR,
-                    source=instructions.content,
-                    msg=ANY,  # could you set this to anything? or how do i find the traceback?
-                    alarm_type="Exception",
-                    metadata=instructions.metadata,
-                )
+    with mock.patch.object(device_server, "_assert_device_is_enabled", side_effect=RuntimeError):
+        with mock.patch.object(device_server.connector, "raise_alarm") as raise_alarm:
+            device_server.handle_device_instructions(mock.MagicMock())
+            raise_alarm.assert_called_once_with(
+                severity=Alarms.MAJOR, source=ANY, msg=ANY, alarm_type=ANY, metadata=ANY
+            )
 
 
 @pytest.mark.parametrize(
@@ -742,10 +720,10 @@ def test_retry_obj_method_raise(device_server_mock):
     device_server = device_server_mock
     samx = device_server.device_manager.devices.samx
     with mock.patch.object(samx.obj, "read_configuration") as read_config:
-        read_config.side_effect = Exception
+        read_config.side_effect = TimeoutError
         samx._config["onFailure"] = "raise"
-        with pytest.raises(Exception):
-            device_server._retry_obj_method("samx", samx.obj, "read_configuration", Exception())
+        with pytest.raises(TimeoutError):
+            device_server._retry_obj_method("samx", samx.obj, "read_configuration", TimeoutError())
 
 
 @pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])

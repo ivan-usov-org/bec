@@ -187,7 +187,6 @@ class DeviceServer(RPCMixin, BECService):
                 self._send_rpc_exception(exc, instructions)
             else:
                 content = traceback.format_exc()
-                self.connector.log_error({"source": msg, "message": content})
                 logger.error(content)
                 self.connector.raise_alarm(
                     severity=Alarms.MAJOR,
@@ -392,7 +391,7 @@ class DeviceServer(RPCMixin, BECService):
         self.device_manager.connector.raise_alarm(
             severity=Alarms.WARNING,
             alarm_type="Warning",
-            source="DeviceServer",
+            source={"device": device, "method": method},
             msg=f"Failed to run {method} on device {device}.",
             metadata={},
         )

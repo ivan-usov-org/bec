@@ -491,7 +491,9 @@ class ConnectorMock(ConnectorBase):  # pragma: no cover
     def raise_alarm(
         self, severity: Alarms, alarm_type: str, source: str, msg: dict, metadata: dict
     ):
-        pass
+        messages.AlarmMessage(
+            severity=severity, alarm_type=alarm_type, source=source, msg=msg, metadata=metadata
+        )
 
     def log_error(self, *args, **kwargs):
         pass

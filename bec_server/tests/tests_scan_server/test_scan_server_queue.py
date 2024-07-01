@@ -292,13 +292,15 @@ def test_set_restart(queuemanager_mock):
         metadata={"RID": "something"},
     )
     queue_manager.add_to_queue(scan_queue="primary", msg=msg)
-    with mock.patch.object(queue_manager, "_get_active_scan_id", return_value="new_scan_id"):
-        with mock.patch.object(
-            queue_manager, "_wait_for_queue_to_appear_in_history"
-        ) as scan_msg_wait:
-            with queue_manager._lock:
-                queue_manager.set_restart(queue="primary", parameter={"RID": "something_new"})
-            scan_msg_wait.assert_called_once_with("new_scan_id", "primary")
+    with mock.patch.object(queue_manager, "add_to_queue") as add_to_queue:
+        with mock.patch.object(queue_manager, "_get_active_scan_id", return_value="new_scan_id"):
+            with mock.patch.object(
+                queue_manager, "_wait_for_queue_to_appear_in_history"
+            ) as scan_msg_wait:
+                with queue_manager._lock:
+                    queue_manager.set_restart(queue="primary", parameter={"RID": "something_new"})
+                scan_msg_wait.assert_called_once_with("new_scan_id", "primary")
+                add_to_queue.assert_called_once_with("primary", scan_msg_wait().scan_msgs[0], 0)
 
 
 def test_request_block(scan_server_mock):
