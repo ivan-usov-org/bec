@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v2.17.5 (2024-07-01)
+
+### Fix
+
+* fix(device_server): fixed bug that caused alarms not to be raised ([`7a5fa85`](https://gitlab.psi.ch/bec/bec/-/commit/7a5fa85c0f715602b1edec5b5a499c2139b86b7e))
+
 ## v2.17.4 (2024-07-01)
 
 ### Fix
@@ -154,9 +160,3 @@ and BECService configures logging when client is started ([`4809dc5`](https://gi
 ### Fix
 
 * fix(bec_lib): fixed access to global vars ([`f621ef2`](https://gitlab.psi.ch/bec/bec/-/commit/f621ef280e5121a44277d1b51de586d8eae82be5))
-
-## v2.14.1 (2024-06-12)
-
-### Fix
-
-* fix: use endpoints instead of simple strings to avoid warning ([`62b2c10`](https://gitlab.psi.ch/bec/bec/-/commit/62b2c106de24c5de955fc619fa6b95f949295d21))
