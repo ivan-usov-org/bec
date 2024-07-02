@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v2.17.6 (2024-07-02)
+
+### Fix
+
+* fix(device_server): fixed readout of objects that are neither devices nor signals ([`b4ee786`](https://gitlab.psi.ch/bec/bec/-/commit/b4ee7865cabe9010b49e928d4aa5f6107afd2df4))
+
 ## v2.17.5 (2024-07-01)
 
 ### Fix
@@ -154,9 +160,3 @@ and BECService configures logging when client is started ([`4809dc5`](https://gi
 ### Refactor
 
 * refactor(scan_server): cleanup of scan args ([`d61f58c`](https://gitlab.psi.ch/bec/bec/-/commit/d61f58c362021f29b937a088b6a0a892cacc9176))
-
-## v2.14.2 (2024-06-12)
-
-### Fix
-
-* fix(bec_lib): fixed access to global vars ([`f621ef2`](https://gitlab.psi.ch/bec/bec/-/commit/f621ef280e5121a44277d1b51de586d8eae82be5))
