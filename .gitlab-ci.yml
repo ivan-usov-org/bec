@@ -11,6 +11,10 @@ variables:
   PXIII_BEC_BRANCH: "main"
   DEBYE_BEC_BRANCH: "main"
   TOMCAT_BEC_BRANCH: "main"
+  SUPERXAS_BEC_BRANCH: "main"
+  PHOENIX_BEC_BRANCH: "main"
+  SIM_BEC_BRANCH: "main"
+
 
 workflow:
   rules:
@@ -411,6 +415,12 @@ trigger:
         CHILD_PIPELINE_BRANCH: $DEBYE_BEC_BRANCH
       - CHILD_PROJECT: tomcat_bec
         CHILD_PIPELINE_BRANCH: $TOMCAT_BEC_BRANCH
+      - CHILD_PROJECT: superxas_bec
+        CHILD_PIPELINE_BRANCH: $SUPERXAS_BEC_BRANCH
+      - CHILD_PROJECT: phoenix_bec
+        CHILD_PIPELINE_BRANCH: $PHOENIX_BEC_BRANCH 
+      - CHILD_PROJECT: sim_bec
+        CHILD_PIPELINE_BRANCH: $SIM_BEC_BRANCH                 
 
   needs: []
   trigger:
