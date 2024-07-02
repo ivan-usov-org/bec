@@ -5,14 +5,17 @@ This module provides the BECService class, which is the base class for all BEC s
 from __future__ import annotations
 
 import getpass
+import os
 import socket
 import threading
 import time
 import uuid
 from dataclasses import asdict, dataclass
+from importlib.metadata import version as importlib_version
 from typing import TYPE_CHECKING, Any
 
 import psutil
+import tomli
 from rich.console import Console
 from rich.table import Table
 
@@ -65,6 +68,7 @@ class BECService:
         self._start_update_service_info()
         self._start_metrics_emitter()
         self._wait_for_server()
+        self._version = None
 
     @property
     def _service_name(self):
@@ -133,6 +137,20 @@ class BECService:
         msgs = [self.connector.get(MessageEndpoints.metrics(service)) for service in services]
         self._services_metric = {msg.content["name"]: msg for msg in msgs if msg is not None}
 
+    def _get_version_number(self):
+        if self._version:
+            return self._version
+
+        bec_lib_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+        if os.path.exists(os.path.join(bec_lib_path, "pyproject.toml")):
+            with open(os.path.join(bec_lib_path, "pyproject.toml"), "rb") as f:
+                pyproject = tomli.load(f)
+                self._version = pyproject["project"]["version"]
+                return self._version
+        self._version = importlib_version("bec-lib")
+        return self._version
+
     def _update_service_info(self):
         while not self._service_info_event.is_set():
             logger.trace("Updating service info")
@@ -145,12 +163,18 @@ class BECService:
             self._service_info_event.wait(timeout=3)
 
     def _send_service_status(self):
+        version = self._get_version_number()
         self.connector.set_and_publish(
             topic=MessageEndpoints.service_status(self._service_id),
             msg=messages.StatusMessage(
                 name=self._service_name,
                 status=self.status,
-                info={"user": self._user, "hostname": self._hostname, "timestamp": time.time()},
+                info={
+                    "user": self._user,
+                    "hostname": self._hostname,
+                    "timestamp": time.time(),
+                    "version": version,
+                },
             ),
             expire=6,
         )
