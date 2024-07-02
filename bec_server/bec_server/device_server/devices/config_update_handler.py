@@ -100,11 +100,13 @@ class ConfigUpdateHandler:
                     )
 
             if "enabled" in dev_config:
+                # pylint: disable=protected-access
                 device._config["enabled"] = dev_config["enabled"]
                 if dev_config["enabled"]:
-                    # pylint:disable=protected-access
-                    if device.obj._destroyed:
-                        self.device_manager.initialize_device(device._config)
+                    # if the device does not provide a _destroyed attribute, it is assumed to be destroyed
+                    destroyed = getattr(device.obj, "_destroyed", True)
+                    if destroyed:
+                        self.device_manager.initialize_device(device)
                     else:
                         self.device_manager.initialize_enabled_device(device)
                 else:
