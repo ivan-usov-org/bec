@@ -682,16 +682,27 @@ def test_wait_for_trigger(scan_worker_mock, instr):
                     device="eiger",
                     success=True,
                     metadata={
-                        "readout_priority": "monitored",
+                        "readout_priority": "async",
                         "DIID": 3,
                         "scan_id": "scan_id",
                         "RID": "requestID",
                     },
-                )
+                ),
+                messages.DeviceReqStatusMessage(
+                    device="monitor_async",
+                    success=True,
+                    metadata={
+                        "readout_priority": "async",
+                        "DIID": 3,
+                        "scan_id": "scan_id",
+                        "RID": "requestID",
+                    },
+                ),
             ]
             worker._wait_for_trigger(instr)
-            status_mock.assert_called_once_with(MessageEndpoints.device_req_status, ["eiger"])
-            interruption_mock.assert_called_once()
+            assert status_mock.call_count == 1
+            assert "eiger" in status_mock.call_args[0][1]
+            assert "monitor_async" in status_mock.call_args[0][1]
 
 
 def test_wait_for_stage(scan_worker_mock):
