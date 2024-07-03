@@ -26,10 +26,10 @@ If you want to learn more about generator functions, we recommend to go through 
 ```
 ````
 
-### Basic scan structure
+## Basic scan structure
 The following structure is targeted at step scans, i.e. scans where the scan server is in control of the scan and the overall progress is determined by the number of steps within the scan. Modifications of the structure as needed for fly scans are described later on.
 
-#### Preparation for the scan
+### Preparation for the scan
 After reading out the current scan motor positions with `read_scan_motors`, the scan server will call the `prepare_positions` method to prepare the scan positions. This method should calculate two values: the number of points in the scan (`self.num_pos`) and the positions of the scan motors (`self.positions`). The `num_pos` attribute must be of type `int` while the `positions` attribute must be of type `np.ndarray` with the shape `n x m`, where `n` is the number of points in the scan and `m` is the number of scan motors. The method should also ensure that the calculated positions are within soft limits of the devices. This can be achieved, for example, by calling the `_check_limits` method. 
 
 The default implementation of the `prepare_positions` method in the `ScanBase` class is as follows:
@@ -62,7 +62,7 @@ The `scan_report_instructions` method is then called to update the instructions 
 3. readback: Useful for basic move commands.  
 
 
-#### Starting the scan
+### Starting the scan
 The scan server will then call the `open_scan` method to open the scan, followed by the `stage` method to stage all devices (see also: [ophyd devices](#developer.ophyd_devices.device)). 
 Once all devices are staged and thus ready for the upcoming scan, a baseline reading is triggered. This will read out all devices that are on `readout_priority="baseline"` and are currently enabled (see also: [ophyd device configuration](#developer.ophyd_device_config)).
 
@@ -108,7 +108,7 @@ The `point_id` is an identifier for the current point in the scan. It is used la
 ``` 
 
 
-#### Finalizing the scan and cleaning up
+### Finalizing the scan and cleaning up
 Once the core of the scan is finished, `finalize`, `unstage` and `cleanup` are called in this order. The `finalize` method is used to perform additional operations such as 
 1. returning the scan motors to the start position,
 1. waiting for the last readout of the devices to finish and 
@@ -119,7 +119,7 @@ The `unstage` method is used to unstage all devices. Afterwards, no further oper
 Finally, the `cleanup` method closes the scan and can be further extended to perform additional operations after the scan is finished. 
 
 
-### Scan class configuration
+## Scan class configuration
 The scan class can be further configured by setting class attributes. The following class attributes are available:
 
 - `scan_name` (required): The name of the scan. This name is used to identify the scan in the user interface.
@@ -142,7 +142,7 @@ The following example shows the configuration of the line scan:
 ```
 ````
 
-### Scan Structure for a Fly Scan
+## Scan Structure for a Fly Scan
 Fly scans are scans where the scan server does not trigger every step and thus cannot determine the overall progress. Instead, the progress is determined by a specified device, e.g. a detector's total number of acquired frames or the number of triggers sent out by a controller.
 BEC distinguishes between two types of fly scans: synchronous and asynchronous fly scans. In a synchronous fly scan, the readout of the flyer is synchronized with the readout of the monitored devices. In an asynchronous fly scan, the readout of the flyer is not synchronized with the readout of the monitored devices.
 

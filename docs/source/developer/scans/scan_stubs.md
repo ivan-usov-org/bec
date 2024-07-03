@@ -1,6 +1,6 @@
 
 (developer.scans.scan_stubs)=
-### Scan stubs - the building blocks of a scan
+# Scan stubs - the building blocks of a scan
 In order to simplify the creation of new scans, BEC provides a set of scan stubs that can be used as building blocks for new scans. The scan stubs are located in `bec_server/bec_server/scan_server/scan_stubs.py`. The following scan stubs are available:
 
 *Device operations*

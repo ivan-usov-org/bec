@@ -97,6 +97,29 @@ Finally, you can use `dev.bpm4i.sim.show_all()` to obtain a comprehensive printo
 • demo [15/171] ❯❯ dev.eiger.sim.get_models()
 Out[15]: ['constant', 'gaussian']
 ```
+
+````{note}
+The simulated device can also be configured through the config file to start a simulation with a specific model and noise type. 
+This can be accomplished by passing sim_init through the deviceConfig to the init of the device. 
+Below is an example of configuring `bpm4i` to simulate a Gaussian model:
+``` yaml
+bpm4i:
+  readoutPriority: monitored
+  deviceClass: ophyd_devices.sim.sim_monitor.SimMonitor
+  deviceConfig:
+    sim_init:
+      model: GaussianModel
+      params:
+        amplitude: 500
+        center: 0
+        sigma: 1
+  deviceTags:
+    - beamline
+  enabled: true
+  readOnly: false
+  softwareTrigger: true
+```
+````
 ### Simulation scenarios
 As mentioned earlier, the simulation frameworks enable users to replay certain simulation scenarios easily. The two current examples serve as templates for implementing new scenarios. New implementations should inherit from the abstract class `DeviceProxy` and implement the `_compute` method, which overrides the computation method for the given signal. An example config entry for the given scenarios is stored in their docstring. For example, for the class `H5ImageReplayProxy`:
 ```yaml
