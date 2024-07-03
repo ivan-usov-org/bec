@@ -26,7 +26,7 @@ pseudo_signal1:
   deviceClass: ophyd_devices.ComputedSignal
   deviceConfig:
     compute_method: "def compute_signals(signal1, signal2):\n    return signal1.get()*signal2.get()\n"
-    input_signals: 
+    input_signals:
       - "bpm4i_readback"
       - "bpm5i_readback"
   enabled: true
@@ -50,7 +50,7 @@ eyefoc:
   readoutPriority: baseline
   deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
-    delay: 1    
+    delay: 1
     limits:
       - -50
       - 50
@@ -78,7 +78,7 @@ eyey:
   readoutPriority: baseline
   deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
-    delay: 1    
+    delay: 1
     limits:
       - -50
       - 50
@@ -92,7 +92,7 @@ flyer_sim:
   readoutPriority: on_request
   deviceClass: ophyd_devices.SynFlyer
   deviceConfig:
-    delay: 1    
+    delay: 1
     device_access: true
     update_frequency: 400
   deviceTags:
@@ -103,7 +103,7 @@ hrox:
   readoutPriority: baseline
   deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
-    delay: 1    
+    delay: 1
     limits:
       - -50
       - 50
@@ -117,7 +117,7 @@ hroy:
   readoutPriority: baseline
   deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
-    delay: 1    
+    delay: 1
     limits:
       - -50
       - 50
@@ -131,7 +131,7 @@ hroz:
   readoutPriority: baseline
   deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
-    delay: 1    
+    delay: 1
     limits:
       - -50
       - 50
@@ -145,7 +145,7 @@ hx:
   readoutPriority: baseline
   deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
-    delay: 1    
+    delay: 1
     limits:
       - -50
       - 50
@@ -173,7 +173,7 @@ hz:
   readoutPriority: baseline
   deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
-    delay: 1    
+    delay: 1
     limits:
       - -50
       - 50
@@ -187,7 +187,7 @@ mbsx:
   readoutPriority: baseline
   deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
-    delay: 1    
+    delay: 1
     limits:
       - -50
       - 50
@@ -215,7 +215,7 @@ pinx:
   readoutPriority: baseline
   deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
-    delay: 1    
+    delay: 1
     limits:
       - -50
       - 50
@@ -229,7 +229,7 @@ piny:
   readoutPriority: baseline
   deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
-    delay: 1    
+    delay: 1
     limits:
       - -50
       - 50
@@ -243,7 +243,7 @@ pinz:
   readoutPriority: baseline
   deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
-    delay: 1    
+    delay: 1
     limits:
       - -50
       - 50
@@ -257,7 +257,7 @@ samx:
   readoutPriority: baseline
   deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
-    delay: 1    
+    delay: 1
     limits:
       - -50
       - 50
@@ -271,7 +271,7 @@ samy:
   readoutPriority: baseline
   deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
-    delay: 1    
+    delay: 1
     limits:
       - -50
       - 50
@@ -285,7 +285,7 @@ samz:
   readoutPriority: baseline
   deviceClass: ophyd_devices.SimPositioner
   deviceConfig:
-    delay: 1    
+    delay: 1
     limits:
       - -50
       - 50
@@ -670,6 +670,22 @@ transd:
     - beamline
   enabled: true
   readOnly: false
+
+monitor_async:
+  readoutPriority: async
+  deviceClass: ophyd_devices.sim.sim_monitor.SimMonitorAsync
+  deviceConfig:
+    sim_init:
+      model: GaussianModel
+      params:
+        amplitude: 500
+        center: 0
+        sigma: 1
+  deviceTags:
+    - beamline
+  enabled: true
+  readOnly: false
+  softwareTrigger: true
 
 ################ Beamline monitors end here ################
 
@@ -2114,7 +2130,6 @@ ring_current_sim:
   readOnly: false
 ################ Read-only signals end here ################
 
-
 ############################################################
 ##################### Disabled devices #####################
 ############################################################
@@ -2126,13 +2141,13 @@ motor1_disabled:
     delay: 1
     labels: motor1_disabled
     limits:
-    - -50
-    - 50
+      - -50
+      - 50
     name: motor1_disabled
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-  - user motors
+    - user motors
   enabled: false
   readOnly: false
 motor1_disabled_set:
@@ -2142,13 +2157,13 @@ motor1_disabled_set:
     delay: 1
     labels: motor1_disabled_set
     limits:
-    - -50
-    - 50
+      - -50
+      - 50
     name: motor1_disabled_set
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-  - user motors
+    - user motors
   enabled: true
   readOnly: true
 motor2_disabled:
@@ -2158,13 +2173,13 @@ motor2_disabled:
     delay: 1
     labels: motor2_disabled
     limits:
-    - -50
-    - 50
+      - -50
+      - 50
     name: motor2_disabled
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-  - user motors
+    - user motors
   enabled: false
   readOnly: false
 motor2_disabled_set:
@@ -2174,13 +2189,13 @@ motor2_disabled_set:
     delay: 1
     labels: motor2_disabled_set
     limits:
-    - -50
-    - 50
+      - -50
+      - 50
     name: motor2_disabled_set
     tolerance: 0.01
     update_frequency: 400
   deviceTags:
-  - user motors
+    - user motors
   enabled: true
   readOnly: true
 ######### DeviceProxy and SimCamera for delayed init tests ##########

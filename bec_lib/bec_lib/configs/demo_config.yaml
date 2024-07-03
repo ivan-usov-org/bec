@@ -14,7 +14,6 @@ eiger:
   softwareTrigger: true
 
 ############## Cameras and detectors end here ##############
-
 dyn_signals:
   readoutPriority: baseline
   deviceClass: ophyd_devices.sim.sim.SynDynamicComponents
@@ -2114,3 +2113,18 @@ ring_current_sim:
   readOnly: false
 ################ Read-only signals end here ################
 
+monitor_async:
+  readoutPriority: async
+  deviceClass: ophyd_devices.sim.sim_monitor.SimMonitorAsync
+  deviceConfig:
+    sim_init:
+      model: GaussianModel
+      params:
+        amplitude: 500
+        center: 0
+        sigma: 1
+  deviceTags:
+    - beamline
+  enabled: true
+  readOnly: false
+  softwareTrigger: true

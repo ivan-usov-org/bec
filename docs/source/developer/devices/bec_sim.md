@@ -23,13 +23,13 @@ Proxies override the `_compute` method from the signal of the device they are co
 ```
 ## Usage
 
-The simulation framework for each simulated device can be accessed through `dev.<devname>.sim`. We have implemented three methods and a property to facilitate easy access configuration and configuration of the simulation parameters. These are `dev.<devname>.sim.sim_get_models()`, `dev.<devname>.sim.sim_select_model()`, `dev.<devname>.sim.sim_show_all()`, and `dev.<devname>.sim.sim_params`. With these functions, you can configure the simulation of your device as needed.
+The simulation framework for each simulated device can be accessed through `dev.<devname>.sim`. We have implemented three methods and a property to facilitate easy access configuration and configuration of the simulation parameters. These are `dev.<devname>.sim.get_models()`, `dev.<devname>.sim.select_model()`, `dev.<devname>.sim.show_all()`, and `dev.<devname>.sim.params`. With these functions, you can configure the simulation of your device as needed.
 
 ### Configuration of simulated devices
 As mentioned earlier, `SimMonitor` and `SimCamera` offer different simulation types. To receive a list of strings with all available simulation types for `SimMonitor`, you can use the code below:
 
 ```ipython
-• demo [11/171] ❯❯ dev.bpm4i.sim.sim_get_models()
+• demo [11/171] ❯❯ dev.bpm4i.sim.get_models()
 Out[11]:
 ['BreitWignerModel',
  'ConstantModel',
@@ -62,7 +62,7 @@ Out[11]:
 ```
 By default, monitors are initialized with the *ConstantModel* and a uniform noise pattern. To change this for the device `dev.bpm4i` to first simulate a *Gaussian* function and then use *Poisson* noise, follow the steps below:
 ```ipython
-• demo [12/171] ❯❯ dev.bpm4i.sim.sim_select_model("GaussianModel")
+• demo [12/171] ❯❯ dev.bpm4i.sim.select_model("GaussianModel")
 +------------------------------------------------------------------------------------------------------------------------------------------+
 |                                          Currently active model: <lmfit.Model: Model(gaussian)>                                          |
 +----------------------------------------------------------+-------------------+-----------------------------------------------------------+
@@ -77,8 +77,8 @@ By default, monitors are initialized with the *ConstantModel* and a uniform nois
 |                     noise_multiplier                     |         10        |                       <class 'int'>                       |
 |                        ref_motor                         |        samx       |                       <class 'str'>                       |
 +----------------------------------------------------------+-------------------+-----------------------------------------------------------+
-• demo [13/171] ❯❯ dev.bpm4i.sim.sim_params = {"noise" : "poisson"}
-• demo [14/171] ❯❯ dev.bpm4i.sim.sim_params
+• demo [13/171] ❯❯ dev.bpm4i.sim.params = {"noise" : "poisson"}
+• demo [14/171] ❯❯ dev.bpm4i.sim.params
 Out[14]:
 {'amplitude': 100,
  'center': 0,
@@ -90,11 +90,11 @@ Out[14]:
  'ref_motor': 'samx'}
 ```
 ```{note}
-`dev.<devname>.sim.sim_params` is a property and by assigning a new dictionary to it, you will not override all parameters but update the current set of parameters stored in the property. It will raise if you are trying to set a key to an irregular value, e.g. non existing model, or in case of a key does not exist in sim_params.
+`dev.<devname>.sim.params` is a property and by assigning a new dictionary to it, you will not override all parameters but update the current set of parameters stored in the property. It will raise if you are trying to set a key to an irregular value, e.g. non existing model, or in case of a key does not exist in params.
 ```
-Finally, you can use `dev.bpm4i.sim.sim_show_all()` to obtain a comprehensive printout of the currently active model, all available methods, and the available models for this device. Similarly, you may configure the `SimCamera`, which implements only a limited scope of simulation models, as shown below:
+Finally, you can use `dev.bpm4i.sim.show_all()` to obtain a comprehensive printout of the currently active model, all available methods, and the available models for this device. Similarly, you may configure the `SimCamera`, which implements only a limited scope of simulation models, as shown below:
 ```ipython
-• demo [15/171] ❯❯ dev.eiger.sim.sim_get_models()
+• demo [15/171] ❯❯ dev.eiger.sim.get_models()
 Out[15]: ['constant', 'gaussian']
 ```
 ### Simulation scenarios
