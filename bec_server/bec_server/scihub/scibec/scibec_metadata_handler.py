@@ -168,22 +168,23 @@ class SciBecMetadataHandler:
             return self.serialize_special_data(data.tolist())
         return json_ext.dumps(data)
 
-    def update_scan_data(self, file_path: str, data: dict):
+    def update_scan_data(self, file_path: str, data: dict, scan_info: dict):
         """
         Update the scan data in SciBec
 
         Args:
             file_path(str): The path to the original NeXuS file
             data(dict): The scan data
+            scan_info(dict): The scan information
         """
         scibec = self.scibec_connector.scibec
         if not scibec:
             return
-        scan_filter = py_scibec.bec.ScanFilterWhere(where={"scanId": data["metadata"]["scan_id"]})
+        scan_filter = py_scibec.bec.ScanFilterWhere(where={"scanId": scan_info["bec"]["scan_id"]})
         scan = scibec.scan.scan_controller_find(scan_filter)
         if not scan:
             logger.warning(
-                f"Could not find scan with scan_id {data['metadata']['scan_id']}. Cannot write scan"
+                f"Could not find scan with scan_id {scan_info['bec']['scan_id']}. Cannot write scan"
                 " data to SciBec."
             )
             return
@@ -211,7 +212,7 @@ class SciBecMetadataHandler:
             )
             scibec.scan_data.scan_data_controller_create_many(new_scan_data)
         logger.info(
-            f"Wrote scan data to SciBec for scan_id {data['metadata']['scan_id']} in {time.time() - start} seconds."
+            f"Wrote scan data to SciBec for scan_id {scan_info['bec']['scan_id']} in {time.time() - start} seconds."
         )
 
     def _write_scan_data_chunks(

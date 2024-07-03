@@ -79,7 +79,7 @@ def test_update_scan_status_patch(md_handler, active_experiment, scan_document):
 
 def test_handle_file_content(md_handler):
     # pylint: disable=protected-access
-    msg = messages.FileContentMessage(file_path="my_file.h5", data={"data": {}})
+    msg = messages.FileContentMessage(file_path="my_file.h5", data={"data": {}}, scan_info={})
     msg_raw = MessageObject(value=msg, topic="file_content")
     with mock.patch.object(md_handler, "update_scan_data") as mock_update_scan_data:
         md_handler._handle_file_content(msg_raw, parent=md_handler)
@@ -88,7 +88,7 @@ def test_handle_file_content(md_handler):
 
 def test_handle_file_content_ignores_errors(md_handler):
     # pylint: disable=protected-access
-    msg = messages.FileContentMessage(file_path="my_file.h5", data={"data": {}})
+    msg = messages.FileContentMessage(file_path="my_file.h5", data={"data": {}}, scan_info={})
     msg_raw = MessageObject(value=msg, topic="file_content")
     with mock.patch("bec_server.scihub.scibec.scibec_metadata_handler.logger") as mock_logger:
         with mock.patch.object(md_handler, "update_scan_data") as mock_update_scan_data:
@@ -103,7 +103,7 @@ def test_handle_file_content_ignores_errors(md_handler):
 def test_update_scan_data_return_without_scibec(md_handler):
     # pylint: disable=protected-access
     md_handler.scibec_connector.scibec = None
-    md_handler.update_scan_data(file_path="my_file.h5", data={"data": {}})
+    md_handler.update_scan_data(file_path="my_file.h5", data={"data": {}}, scan_info={})
 
 
 def test_update_scan_data_without_scan(md_handler):
@@ -112,7 +112,7 @@ def test_update_scan_data_without_scan(md_handler):
     md_handler.scibec_connector.scibec = scibec
     scibec.scan.scan_controller_find = mock.MagicMock(return_value=[])
     md_handler.update_scan_data(
-        file_path="my_file.h5", data={"data": {}, "metadata": {"scan_id": "scan_id"}}
+        file_path="my_file.h5", data={"data": {}}, scan_info={"bec": {"scan_id": "scan_id"}}
     )
 
 
@@ -122,7 +122,7 @@ def test_update_scan_data(md_handler, scan_document):
     md_handler.scibec_connector.scibec = scibec
     scibec.scan.scan_controller_find = mock.MagicMock(return_value=[scan_document])
     md_handler.update_scan_data(
-        file_path="my_file.h5", data={"data": {}, "metadata": {"scan_id": "scan_id"}}
+        file_path="my_file.h5", data={"data": {}}, scan_info={"bec": {"scan_id": "scan_id"}}
     )
     scibec.scan_data.scan_data_controller_create_many.assert_called_once_with(
         NewScanData(
@@ -132,7 +132,8 @@ def test_update_scan_data(md_handler, scan_document):
                 "owner": ["owner"],
                 "scanId": "dummy_id",
                 "filePath": "my_file.h5",
-                "data": {"data": {}, "metadata": {"scan_id": "scan_id"}},
+                "data": {"data": {}},
+                "scaninfo": {"bec": {"scan_id": "scan_id"}},
             }
         )
     )
@@ -145,8 +146,9 @@ def test_update_scan_data_exceeding_limit(md_handler, scan_document):
     md_handler.scibec_connector.scibec = scibec
     scibec.scan.scan_controller_find = mock.MagicMock(return_value=[scan_document])
     data_block = {f"key_{i}": {"signal": list(range(100))} for i in range(10)}
-    data_block.update({"metadata": {"scan_id": "scan_id"}})
-    md_handler.update_scan_data(file_path="my_file.h5", data=data_block)
+    md_handler.update_scan_data(
+        file_path="my_file.h5", data=data_block, scan_info={"bec": {"scan_id": "scan_id"}}
+    )
     num_calls = scibec.scan_data.scan_data_controller_create_many.call_count
     assert num_calls == 5
 

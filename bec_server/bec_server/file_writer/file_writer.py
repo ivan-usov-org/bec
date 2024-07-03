@@ -265,7 +265,7 @@ class HDF5FileWriter:
         file_data = {}
         for key, val in device_storage.items():
             file_data[key] = val if not isinstance(val, list) else merge_dicts(val)
-        msg_data = {"file_path": file_path, "data": file_data}
+        msg_data = {"file_path": file_path, "data": file_data, "scan_info": info_storage}
         msg = messages.FileContentMessage(**msg_data)
         self.file_writer_manager.connector.set_and_publish(MessageEndpoints.file_content(), msg)
 

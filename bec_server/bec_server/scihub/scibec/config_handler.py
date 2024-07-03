@@ -68,7 +68,11 @@ class ConfigHandler:
         config = msg.content["config"]
         scibec = self.scibec_connector.scibec
         logger.debug(self.scibec_connector.scibec_info)
-        experiment = self.scibec_connector.scibec_info.get("beamline", {}).get("activeExperiment")
+        beamline = self.scibec_connector.scibec_info.get("beamline", {})
+        if beamline:
+            experiments = beamline.experiments
+        else:
+            experiments = None
 
         msg.metadata["updated_config"] = False
         for name, device in config.items():

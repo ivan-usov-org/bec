@@ -573,6 +573,7 @@ class FileContentMessage(BECMessage):
     Args:
         file_path (str): Path to the file.
         data (str): Content of the file.
+        scan_info (dict): Scan information.
         metadata (dict, optional): Status metadata. Defaults to None.
 
     """
@@ -580,6 +581,7 @@ class FileContentMessage(BECMessage):
     msg_type: ClassVar[str] = "file_content_message"
     file_path: str
     data: dict
+    scan_info: dict
 
 
 class VariableMessage(BECMessage):
