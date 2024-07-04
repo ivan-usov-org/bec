@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## v2.18.1 (2024-07-04)
+
+### Documentation
+
+* docs: improve docs ([`b25a670`](https://gitlab.psi.ch/bec/bec/-/commit/b25a6704adf405344b3acfb2417cf5896fa77009))
+
+### Fix
+
+* fix: add async monitor to config and fix dap tests due to API changes in ophyd ([`f9ec240`](https://gitlab.psi.ch/bec/bec/-/commit/f9ec2403db1dc64d2a975814976f6560336ec184))
+
+* fix: bugfix within scibec metadata handler to accomodate changes of metadata ([`eef2764`](https://gitlab.psi.ch/bec/bec/-/commit/eef2764f448b749345e53158ecccf09ea4f463cb))
+
+### Test
+
+* test: fix tests due to config changes ([`22c1e57`](https://gitlab.psi.ch/bec/bec/-/commit/22c1e5734e0171e8e2a526e947e3f7d8098dad06))
+
 ## v2.18.0 (2024-07-03)
 
 ### Build
@@ -144,21 +160,3 @@ and BECService configures logging when client is started ([`4809dc5`](https://gi
 * fix(bec_lib): fixed pydantic type for scanqueuemodifications ([`6bf60f9`](https://gitlab.psi.ch/bec/bec/-/commit/6bf60f98fcaf80e1ab19ab2752d2d2e71f005225))
 
 ## v2.14.4 (2024-06-20)
-
-### Documentation
-
-* docs: added reference to epics configs ([`76c2c52`](https://gitlab.psi.ch/bec/bec/-/commit/76c2c5285ccc28f701614b9a8aed1b6f03d566ed))
-
-### Fix
-
-* fix: fix bug in emit service info and metrics ([`abf77c8`](https://gitlab.psi.ch/bec/bec/-/commit/abf77c80804afbb5fbe4d328f88ce4ab88c4710e))
-
-### Test
-
-* test: add tests for metrics ([`1ceae8b`](https://gitlab.psi.ch/bec/bec/-/commit/1ceae8ba0ce78aa074ea7ed1f0bd374b7ced632f))
-
-## v2.14.3 (2024-06-17)
-
-### Fix
-
-* fix(file_writer): fixed file writer messages to report successful only after it is written ([`27a0f89`](https://gitlab.psi.ch/bec/bec/-/commit/27a0f8920ce17116aad10b422d0c5b2ad33ca20c))
