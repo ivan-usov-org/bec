@@ -3,9 +3,9 @@ ARG PY_VERSION=3.10 CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX
 
 FROM $CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/python:${PY_VERSION}
 
-ARG BEC_SERVICE=bec_ipython_client OPHYD_DEVICES_BRANCH=main
+ARG BEC_SERVICE=bec_ipython_client OPHYD_DEVICES_BRANCH=main BEC_CORE_BRANCH=main
 
-RUN echo "Building ${BEC_SERVICE} with Ophyd branch ${OPHYD_DEVICES_BRANCH} "
+RUN echo "Building ${BEC_SERVICE} with Ophyd branch ${OPHYD_DEVICES_BRANCH} and Bec branch ${BEC_CORE_BRANCH}"
 
 RUN apt update
 RUN apt install redis -y
@@ -14,8 +14,8 @@ RUN apt install git -y
 # set the working directory in the container
 WORKDIR /code
 
-# copy the content of the local opaas directory to the working directory
-COPY . ./bec
+# clone the bec repo
+RUN git clone --branch ${BEC_CORE_BRANCH} https://gitlab.psi.ch/bec/bec.git
 
 RUN mkdir /code/bec/test_files
 ENV OPHYD_DEVICES_PATH=/code/bec/ophyd_devices

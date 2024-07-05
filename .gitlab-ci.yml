@@ -19,6 +19,8 @@ workflow:
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
       when: never
     - if: $CI_COMMIT_BRANCH
+  auto_cancel:
+    on_new_commit: interruptible
 
 include:
   - template: Security/Secret-Detection.gitlab-ci.yml
@@ -64,6 +66,12 @@ stages:
   - pip install -e ./bec_ipython_client[dev]
   - pip install -e ./bec_lib[dev]
 
+before_script:
+  - if [[ "$CI_PROJECT_PATH" != "bec/bec" ]]; then
+    echo -e "\033[35;1m Using branch $CHILD_PIPELINE_BRANCH of BEC \033[0;m";
+    test -d bec || git clone --branch $CHILD_PIPELINE_BRANCH https://gitlab.psi.ch/bec/bec.git; cd bec;
+    fi  
+
 formatter:
   stage: Formatter
   needs: []
@@ -71,13 +79,20 @@ formatter:
     - pip install black isort
     - isort --check --diff --line-length=100 --profile=black --multi-line=3 --trailing-comma ./
     - black --check --diff --color --line-length=100 --skip-magic-trailing-comma ./
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'  
+    - if: '$CI_PIPELINE_SOURCE == "parent_pipeline"'
+      when: never
+    - if: $CI_COMMIT_BRANCH
 
 pylint:
   stage: Formatter
   needs: []
-  before_script:
-    - pip install pylint pylint-exit anybadge
   script:
+    - pip install pylint pylint-exit anybadge
     - mkdir ./pylint
     - pylint ./bec_server/bec_server ./bec_lib/bec_lib ./bec_ipython_client/bec_ipython_client --output-format=text | tee ./pylint/pylint.log || pylint-exit $?
     - PYLINT_SCORE=$(sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' ./pylint/pylint.log)
@@ -87,16 +102,23 @@ pylint:
     paths:
       - ./pylint/
     expire_in: 1 week
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'  
+    - if: '$CI_PIPELINE_SOURCE == "parent_pipeline"'
+      when: never
+    - if: $CI_COMMIT_BRANCH
 
 pylint-check:
   stage: Formatter
   needs: []
   allow_failure: true
-  before_script:
+  script:
     - pip install pylint pylint-exit anybadge
     - apt-get update
-    - apt-get install -y bc
-  script:
+    - apt-get install -y bc  
     # Identify changed Python files
     - if [ "$CI_PIPELINE_SOURCE" == "merge_request_event" ]; then
       TARGET_BRANCH_COMMIT_SHA=$(git rev-parse origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME);
@@ -120,6 +142,14 @@ pylint-check:
     paths:
       - ./pylint/
     expire_in: 1 week
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'  
+    - if: '$CI_PIPELINE_SOURCE == "parent_pipeline"'
+      when: never
+    - if: $CI_COMMIT_BRANCH
 
 tests:
   stage: test
@@ -177,7 +207,9 @@ end-2-end:
     paths:
       - ./logs/*.log
     expire_in: 2 week
+  before_script:
 
+    - echo "Starting the end-2-end tests"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
     - if: '$CI_PIPELINE_SOURCE == "web"'
@@ -185,10 +217,15 @@ end-2-end:
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
   script:
+    - if [[ "$CI_PROJECT_PATH" != "bec/bec" ]]; then
+      apk update; apk add git; echo -e "\033[35;1m Using branch $CHILD_PIPELINE_BRANCH of BEC \033[0;m";
+      test -d bec || git clone --branch $CHILD_PIPELINE_BRANCH https://gitlab.psi.ch/bec/bec.git; cd bec;
+      fi  
+
     # build and run the tests
     - echo $OPHYD_DEVICES_BRANCH
     - echo "$CI_DEPENDENCY_PROXY_PASSWORD" | docker login $CI_DEPENDENCY_PROXY_SERVER --username $CI_DEPENDENCY_PROXY_USER --password-stdin
-    - docker build -t end2end_client:test -f ./ci/Dockerfile.run_pytest --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=bec_ipython_client --build-arg OPHYD_DEVICES_BRANCH --build-arg CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX .
+    - docker build -t end2end_client:test -f ./ci/Dockerfile.run_pytest --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=bec_ipython_client --build-arg OPHYD_DEVICES_BRANCH --build-arg CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX --build-arg BEC_CORE_BRANCH=$CHILD_PIPELINE_BRANCH  .
     - docker run --network=host --name end2end_client end2end_client:test
 
   after_script:
@@ -405,9 +442,13 @@ trigger-ophyd_devices:
     BEC_CORE_BRANCH: $CI_COMMIT_REF_NAME
     CHILD_PIPELINE_BRANCH: $OPHYD_DEVICES_BRANCH
   rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
     - if: '$CI_PIPELINE_SOURCE == "web"'
-    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
-    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'  
+    - if: '$CI_PIPELINE_SOURCE == "parent_pipeline"'
+      when: never
+    - if: $CI_COMMIT_BRANCH
 
 trigger-bec_widgets:
   needs: []
@@ -422,9 +463,13 @@ trigger-bec_widgets:
     OPHYD_DEVICES_BRANCH: ${OPHYD_DEVICES_BRANCH}
     CHILD_PIPELINE_BRANCH: $BEC_WIDGETS_BRANCH
   rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
     - if: '$CI_PIPELINE_SOURCE == "web"'
-    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
-    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'  
+    - if: '$CI_PIPELINE_SOURCE == "parent_pipeline"'
+      when: never
+    - if: $CI_COMMIT_BRANCH
 
 semver:
   stage: Build
@@ -455,13 +500,20 @@ semver:
 
 dev-pages:
   stage: Deploy
-  needs: ["formatter"]
+  needs:
+    - job: "formatter"
+      optional: true
+    - job: "pylint"
+      optional: true
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
     - if: '$CI_PIPELINE_SOURCE == "web"'
     - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+    - if: '$CI_PIPELINE_SOURCE == "parent_pipeline"'
+      when: never
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
+
   script:
     - git config --global user.name "ci_update_bot"
     - git config --global user.email "ci_update_bot@bec.ch"
