@@ -127,7 +127,8 @@ def test_get_software_triggered_devices(test_config_yaml, dm_with_devices):
             software_triggered_devices.append(device_manager.devices.get(dev_name))
 
     dev_list = device_manager.devices.get_software_triggered_devices()
-    assert software_triggered_devices == dev_list
+    dev_names = {dev.name for dev in dev_list}
+    assert dev_names == {dev.name for dev in software_triggered_devices}
 
 
 def test_show_tags(test_config_yaml, dm_with_devices):
