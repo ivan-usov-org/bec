@@ -29,7 +29,7 @@ class SciHubMocked(SciHub):
 def SciHubMock():
     config = ServiceConfig(
         redis={"host": "dummy", "port": 6379},
-        config={
+        service_config={
             "file_writer": {"plugin": "default_NeXus_format", "base_path": "./"},
             "log_writer": {"base_path": "./"},
         },

@@ -41,7 +41,8 @@ class ServiceConfig:
     ) -> None:
         self.config_path = config_path
         self.config = config if config else {}
-        self._load_config()
+        if not self.config:
+            self._load_config()
         if self.config:
             self._load_urls("redis", required=True)
             self._load_urls("mongodb", required=False)
