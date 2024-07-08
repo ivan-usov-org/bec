@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v2.18.2 (2024-07-08)
+
+### Fix
+
+* fix(bec_lib): accept config as input to ServiceConfig ([`86714ae`](https://gitlab.psi.ch/bec/bec/-/commit/86714ae57b5952eaa739a5ba60d20aa6ab51bf91))
+
+### Test
+
+* test: fixed test for triggered devices ([`05e82ef`](https://gitlab.psi.ch/bec/bec/-/commit/05e82efe088a9ad0ac24542099c1008562287dbf))
+
 ## v2.18.1 (2024-07-04)
 
 ### Documentation
@@ -152,11 +162,3 @@ and BECService configures logging when client is started ([`4809dc5`](https://gi
 ### Feature
 
 * feat(file_writer): separated device collection from metadata ([`75e6df4`](https://gitlab.psi.ch/bec/bec/-/commit/75e6df47f722439df827a307c61849a3828925da))
-
-## v2.14.5 (2024-06-21)
-
-### Fix
-
-* fix(bec_lib): fixed pydantic type for scanqueuemodifications ([`6bf60f9`](https://gitlab.psi.ch/bec/bec/-/commit/6bf60f98fcaf80e1ab19ab2752d2d2e71f005225))
-
-## v2.14.4 (2024-06-20)
