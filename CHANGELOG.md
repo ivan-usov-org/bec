@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v2.18.3 (2024-07-08)
+
+### Fix
+
+* fix(bec_lib): fixed bug that caused the specified service config to be overwritten by defaults ([`5cf162c`](https://gitlab.psi.ch/bec/bec/-/commit/5cf162c19d573afde19f795a968f1513461aec9a))
+
 ## v2.18.2 (2024-07-08)
 
 ### Fix
@@ -156,9 +162,3 @@ and BECService configures logging when client is started ([`4809dc5`](https://gi
 ### Feature
 
 * feat(scan_server): added support for additional gui config ([`c6987b6`](https://gitlab.psi.ch/bec/bec/-/commit/c6987b6ec220ab98690b10bdbeef9823a0c7ed8a))
-
-## v2.15.0 (2024-06-21)
-
-### Feature
-
-* feat(file_writer): separated device collection from metadata ([`75e6df4`](https://gitlab.psi.ch/bec/bec/-/commit/75e6df47f722439df827a307c61849a3828925da))
