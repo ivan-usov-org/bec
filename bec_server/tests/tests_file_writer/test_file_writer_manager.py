@@ -27,7 +27,7 @@ def file_writer_manager_mock():
     connector_cls = ConnectorMock
     config = ServiceConfig(
         redis={"host": "dummy", "port": 6379},
-        config={
+        service_config={
             "file_writer": {"plugin": "default_NeXus_format", "base_path": "./"},
             "log_writer": {"base_path": "./"},
         },

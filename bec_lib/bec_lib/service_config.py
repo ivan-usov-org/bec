@@ -32,16 +32,21 @@ DEFAULT_SERVICE_CONFIG = {
 
 class ServiceConfig:
     def __init__(
-        self, config_path: str = None, redis: dict = None, config: dict = None, **kwargs
+        self,
+        config_path: str = None,
+        redis: dict = None,
+        service_config: dict = None,
+        config: dict = None,
+        **kwargs,
     ) -> None:
         self.config_path = config_path
-        self.config = {}
+        self.config = config if config else {}
         self._load_config()
         if self.config:
             self._load_urls("redis", required=True)
             self._load_urls("mongodb", required=False)
 
-        self._update_config(service_config=config, redis=redis)
+        self._update_config(service_config=service_config, redis=redis)
 
         self.service_config = self.config.get(
             "service_config", DEFAULT_SERVICE_CONFIG["service_config"]
