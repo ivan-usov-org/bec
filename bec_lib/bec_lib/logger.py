@@ -43,16 +43,6 @@ class LogLevel(int, enum.Enum):
 class BECLogger:
     """Logger for BEC."""
 
-    SERVICE_ABBREVIATION = {
-        "ScanServer": "SCS",
-        "SciHub": "SIH",
-        "DeviceServer": "DVS",
-        "DAPServer": "DAP",
-        "FileWriterManager": "FWM",
-        "ScanBundler": "SCB",
-        "BECClient": "CLI",
-    }
-
     LOG_FORMAT = (
         "<green>{service_name} | {{time:YYYY-MM-DD HH:mm:ss}}</green> | <level>[{{level}}]</level> |"
         " <level>{{message}}</level>\n"
@@ -85,7 +75,6 @@ class BECLogger:
         self._file_log_level = self._log_level
         self._console_log = False
         self._configured = False
-        # self.logger.level("CONSOLE_LOG", no=21, color="<yellow>", icon="📣")
 
     def __new__(cls):
         if not hasattr(cls, "_logger") or cls._logger is None:
@@ -97,12 +86,6 @@ class BECLogger:
         if cls._logger is not None:
             cls._logger.logger.remove()
         cls._logger = None
-
-    def _update_console_logger_level(self):
-        try:
-            self.logger.level("CONSOLE_LOG", no=21, color="<yellow>", icon="📣")
-        except TypeError:
-            print("CONSOLE_LOG was already configured")
 
     def configure(
         self,
@@ -127,7 +110,6 @@ class BECLogger:
         self.connector = connector_cls(bootstrap_server)
         self.service_name = service_name
         self._configured = True
-        self._update_console_logger_level()
         self._update_sinks()
 
     def _update_base_path(self, service_config: dict = None):
@@ -176,15 +158,14 @@ class BECLogger:
         Returns:
             str: Log format.
         """
-        # abr = self.SERVICE_ABBREVIATION[self.service_name] if self.service_name else ""
-        abr = self.service_name if self.service_name else ""
+        service_name = self.service_name if self.service_name else ""
         if level is None:
             level = self.level
         if level > self.LOGLEVEL.DEBUG:
-            return self.LOG_FORMAT.format(service_name=abr)
+            return self.LOG_FORMAT.format(service_name=service_name)
         if level > self.LOGLEVEL.TRACE:
-            return self.DEBUG_FORMAT.format(service_name=abr)
-        return self.TRACE_FORMAT.format(service_name=abr)
+            return self.DEBUG_FORMAT.format(service_name=service_name)
+        return self.TRACE_FORMAT.format(service_name=service_name)
 
     def formatting(self, record):
         """
@@ -196,7 +177,7 @@ class BECLogger:
         Returns:
             dict: Formatted log record.
         """
-        level = self.level
+        level = record["level"].no
         if level <= self.LOGLEVEL.TRACE:
             frames = takewhile(lambda f: "/loguru/" not in f.filename, traceback.extract_stack())
             stack = " > ".join("{}:{}:{}".format(f.filename, f.name, f.lineno) for f in frames)
@@ -218,7 +199,12 @@ class BECLogger:
         Args:
             level (LogLevel): Log level.
         """
-        self.logger.add(sys.__stderr__, level=level, format=self.formatting)
+        self.logger.add(
+            sys.__stderr__,
+            level=level,
+            format=self.formatting,
+            filter=lambda record: record["level"].no != LogLevel.CONSOLE_LOG,
+        )
 
     def add_file_log(self, level: LogLevel):
         """
@@ -230,17 +216,34 @@ class BECLogger:
         if not self.service_name:
             return
         filename = os.path.join(self._base_path, f"{self.service_name}.log")
-        self.logger.add(filename, level=level, format=self.formatting)
+        self.logger.add(
+            filename,
+            level=level,
+            format=self.formatting,
+            filter=lambda record: record["level"].no != LogLevel.CONSOLE_LOG,
+        )
 
     def add_console_log(self):
         """
         Add a sink to the console log.
         """
+        if not self.service_name:
+            return
         filename = os.path.join(self._base_path, f"{self.service_name}_CONSOLE.log")
+
+        # define a level corresponding to console log - this is to be able to filter messages
+        # (only those with this particular level will be recorded by the console logger,
+        # while other loggers will ignore them)
+        try:
+            self.logger.level("CONSOLE_LOG", no=21, color="<yellow>", icon="📣")
+        except TypeError:
+            # level with same severity already exists: already configured
+            pass
+
         self.logger.add(
             filename,
             level=LogLevel.CONSOLE_LOG,
-            format=self.get_format(LogLevel.CONSOLE_LOG),
+            format=self.get_format(LogLevel.CONSOLE_LOG).rstrip(),
             filter=lambda record: record["level"].no == LogLevel.CONSOLE_LOG,
         )
         self._console_log = True
@@ -252,7 +255,13 @@ class BECLogger:
         Args:
             level (LogLevel): Log level.
         """
-        self.logger.add(self._logger_callback, serialize=True, level=level, format=self.formatting)
+        self.logger.add(
+            self._logger_callback,
+            serialize=True,
+            level=level,
+            format=self.formatting,
+            filter=lambda record: record["level"].no != LogLevel.CONSOLE_LOG,
+        )
 
     @property
     def level(self):
