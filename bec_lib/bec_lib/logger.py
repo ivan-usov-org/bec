@@ -102,6 +102,11 @@ class BECLogger:
             connector_cls (ConnectorBase): Connector class.
             service_name (str): Name of the service to which the logger belongs.
         """
+        if self._configured:
+            # already configured, nothing to do - this can happen
+            # if running another BECClient (or BECService) in addition
+            # to a main one
+            return
         if not self._base_path:
             self._update_base_path(service_config)
         if os.path.exists(self._base_path) is False:
