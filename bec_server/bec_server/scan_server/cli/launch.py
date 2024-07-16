@@ -24,10 +24,9 @@ def main():
         # pylint: disable=E1102
         logger.success("Started ScanServer")
         event.wait()
-    except KeyboardInterrupt as e:
+    except KeyboardInterrupt:
         bec_server.shutdown()
         event.set()
-        raise e
 
 
 if __name__ == "__main__":
