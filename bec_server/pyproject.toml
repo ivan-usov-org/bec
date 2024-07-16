@@ -40,12 +40,12 @@ dev = [
 ]
 
 [project.scripts]
-bec-dap = "bec_server.data_processing:main"
-bec-device-server = "bec_server.device_server:main"
-bec-file-writer = "bec_server.file_writer:main"
-bec-scan-server = "bec_server.scan_server:main"
-bec-scan-bundler = "bec_server.scan_bundler:main"
-bec-scihub = "bec_server.scihub:main"
+bec-dap = "bec_server.data_processing.cli.launch:main"
+bec-device-server = "bec_server.device_server.cli.launch:main"
+bec-file-writer = "bec_server.file_writer.cli.launch:main"
+bec-scan-server = "bec_server.scan_server.cli.launch:main"
+bec-scan-bundler = "bec_server.scan_bundler.cli.launch:main"
+bec-scihub = "bec_server.scihub.cli.launch:main"
 bec-server = "bec_server:main"
 
 
