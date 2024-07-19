@@ -653,7 +653,7 @@ class MessageEndpoints:
         """
         Endpoint for scan info. This endpoint is used by the scan worker to publish the
         scan info using a messages.ScanStatusMessage message. In contrast to the scan_info endpoint,
-        this endpoint is specific to a scan and has a retentioni time of 30 minutes.
+        this endpoint is specific to a scan and has a retention time of 30 minutes.
 
         Args:
             scan_id (str): Scan ID.

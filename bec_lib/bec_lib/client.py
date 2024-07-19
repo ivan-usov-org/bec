@@ -17,6 +17,7 @@ from rich.console import Console
 from rich.table import Table
 
 from bec_lib.alarm_handler import AlarmHandler, Alarms
+from bec_lib.bec_events import BECEvents
 from bec_lib.bec_service import BECService, BECStatus
 from bec_lib.bl_checks import BeamlineChecks
 from bec_lib.callback_handler import CallbackHandler, EventType
@@ -118,6 +119,7 @@ class BECClient(BECService, UserScriptsMixin):
         self.live_updates = None
         self.dap = None
         self.bl_checks = None
+        self.events = None
         self._hli_funcs = {}
         self.metadata = {}
         self.system_config = SystemConfig()
@@ -187,6 +189,7 @@ class BECClient(BECService, UserScriptsMixin):
         self.load_all_user_scripts()
         self.config = self.device_manager.config_helper
         self.history = self.queue.queue_storage.storage
+        self.events = BECEvents(self)
         self.dap = DAPPlugins(self)
         self.bl_checks = BeamlineChecks(self)
         self.bl_checks.start()
