@@ -40,7 +40,11 @@ def scan_data():
 @pytest.fixture
 def scanitem():
     scanitem = ScanItem(
-        mock.MagicMock(), queue_id="queue_id", scan_id="scan_id", scan_number=1, status="closed"
+        queue_id="queue_id",
+        scan_id="scan_id",
+        scan_number=1,
+        status="closed",
+        scan_manager=mock.MagicMock(),
     )
     scanitem.status_message = mock.MagicMock()
     yield scanitem
