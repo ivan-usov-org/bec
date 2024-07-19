@@ -19,6 +19,8 @@ from bec_lib.logger import bec_logger
 from bec_lib.scan_data import ScanData
 from bec_lib.utils import threadlocked
 
+logger = bec_logger.logger
+
 if TYPE_CHECKING:
     from bec_lib import messages
     from bec_lib.scan_manager import ScanManager
@@ -28,8 +30,6 @@ if TYPE_CHECKING:
     except ImportError:
         logger.info("Unable to import `pandas` optional dependency")
 
-logger = bec_logger.logger
-
 
 class ScanItem:
     status: dict
@@ -37,14 +37,15 @@ class ScanItem:
     # pylint: disable=too-many-arguments
     def __init__(
         self,
-        scan_manager: ScanManager,
         queue_id: str,
         scan_number: list,
         scan_id: list,
         status: str,
+        scan_manager: ScanManager | None = None,
         **_kwargs,
     ) -> None:
         self.scan_manager = scan_manager
+        self._async_data_handler = None
         self._queue_id = queue_id
         self.scan_number = scan_number
         self.scan_id = scan_id
@@ -52,7 +53,8 @@ class ScanItem:
         self.data = ScanData()
         self.async_data = {}
         self.baseline = ScanData()
-        self._async_data_handler = AsyncDataHandler(scan_manager.connector)
+        if self.scan_manager is not None:
+            self._async_data_handler = AsyncDataHandler(scan_manager.connector)
         self.open_scan_defs = set()
         self.open_queue_group = None
         self.num_points = None
@@ -270,7 +272,15 @@ class ScanStorage:
     @threadlocked
     def add_scan_item(self, queue_id: str, scan_number: list, scan_id: list, status: str):
         """append new scan item to scan storage"""
-        self.storage.append(ScanItem(self.scan_manager, queue_id, scan_number, scan_id, status))
+        self.storage.append(
+            ScanItem(
+                scan_manager=self.scan_manager,
+                queue_id=queue_id,
+                scan_number=scan_number,
+                scan_id=scan_id,
+                status=status,
+            )
+        )
 
     @threadlocked
     def update_with_queue_status(self, queue_msg: messages.ScanQueueStatusMessage):
