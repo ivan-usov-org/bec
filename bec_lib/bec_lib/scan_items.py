@@ -8,7 +8,6 @@ from __future__ import annotations
 import builtins
 import datetime
 import importlib
-import sys
 import threading
 import time
 from collections import defaultdict, deque
@@ -50,6 +49,7 @@ class ScanItem:
         self.scan_number = scan_number
         self.scan_id = scan_id
         self.status = status
+        self.status_message = None
         self.data = ScanData()
         self.async_data = {}
         self.baseline = ScanData()
@@ -61,8 +61,8 @@ class ScanItem:
         self.start_time = None
         self.end_time = None
         self.scan_report_instructions = []
-        self.callbacks = []
-        self.bec = builtins.__dict__.get("bec")
+        self._callbacks = []
+        self._bec = builtins.__dict__.get("bec")
 
     @property
     def queue(self):
@@ -70,11 +70,11 @@ class ScanItem:
         return self.scan_manager.queue_storage.find_queue_item_by_ID(self._queue_id)
 
     def emit_data(self, scan_msg: messages.ScanMessage) -> None:
-        self.bec.callbacks.run("scan_segment", scan_msg.content, scan_msg.metadata)
+        self._bec.callbacks.run("scan_segment", scan_msg.content, scan_msg.metadata)
         self._run_request_callbacks("scan_segment", scan_msg.content, scan_msg.metadata)
 
     def emit_status(self, scan_status: messages.ScanStatusMessage) -> None:
-        self.bec.callbacks.run("scan_status", scan_status.content, scan_status.metadata)
+        self._bec.callbacks.run("scan_status", scan_status.content, scan_status.metadata)
         self._run_request_callbacks("scan_status", scan_status.content, scan_status.metadata)
 
     def _run_request_callbacks(self, event_type: str, data: dict, metadata: dict):

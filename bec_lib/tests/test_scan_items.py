@@ -141,24 +141,24 @@ def test_scan_item_str_plain(scan_item):
 
 
 def test_emit_data(scan_item):
-    scan_item.bec = mock.Mock()
-    scan_item.bec.callbacks = mock.Mock()
+    scan_item._bec = mock.Mock()
+    scan_item._bec.callbacks = mock.Mock()
     scan_item._run_request_callbacks = mock.Mock()
     msg = messages.ScanMessage(point_id=0, scan_id="scan_id", data={"samx": {"value": 1}})
     scan_item.emit_data(msg)
-    scan_item.bec.callbacks.run.assert_called_once_with("scan_segment", msg.content, msg.metadata)
+    scan_item._bec.callbacks.run.assert_called_once_with("scan_segment", msg.content, msg.metadata)
     scan_item._run_request_callbacks.assert_called_once_with(
         "scan_segment", msg.content, msg.metadata
     )
 
 
 def test_emit_status(scan_item):
-    scan_item.bec = mock.Mock()
-    scan_item.bec.callbacks = mock.Mock()
+    scan_item._bec = mock.Mock()
+    scan_item._bec.callbacks = mock.Mock()
     scan_item._run_request_callbacks = mock.Mock()
     msg = messages.ScanStatusMessage(scan_id="scan_id", status="open", info={"info": "info"})
     scan_item.emit_status(msg)
-    scan_item.bec.callbacks.run.assert_called_once_with("scan_status", msg.content, msg.metadata)
+    scan_item._bec.callbacks.run.assert_called_once_with("scan_status", msg.content, msg.metadata)
     scan_item._run_request_callbacks.assert_called_once_with(
         "scan_status", msg.content, msg.metadata
     )
