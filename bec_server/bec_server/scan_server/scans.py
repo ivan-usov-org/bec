@@ -1031,11 +1031,22 @@ class ContLineScan(ScanBase):
         self.start = start
         self.stop = stop
         self.atol = atol
+        self.motor_velocity = self.device_manager.devices[self.device].read()[
+            f"{self.device}_velocity"
+        ]["value"]
 
     def _calculate_positions(self) -> None:
         self.positions = np.linspace(self.start, self.stop, self.steps, dtype=float)[
             np.newaxis, :
         ].T
+        # Check if the motor is moving faster than the exp_time
+        dist_setp = self.positions[1][0] - self.positions[0][0]
+        time_per_step = dist_setp / self.motor_velocity
+        if time_per_step < self.exp_time:
+            raise ScanAbortion(
+                f"Motor {self.device} is moving too fast. Time per step: {time_per_step:.03f} < Exp_time: {self.exp_time:.03f}."
+                + f" Consider reducing speed {self.motor_velocity} or reducing exp_time {self.exp_time}"
+            )
 
     def _check_limits(self):
         logger.debug("check limits")

@@ -7,7 +7,11 @@ from bec_lib.tests.utils import ConnectorMock
 class DeviceMock:
     def __init__(self, name: str, value=None):
         self.name = name
-        self.read_buffer = {self.name: {"value": value}} if value is not None else None
+        self.read_buffer = (
+            {self.name: {"value": value}, f"{self.name}_velocity": 10}
+            if value is not None
+            else None
+        )
         self._config = {"deviceConfig": {"limits": [-50, 50]}, "userParameter": None}
         self._read_only = False
         self._enabled = True
@@ -16,7 +20,11 @@ class DeviceMock:
         return self.read_buffer
 
     def readback(self):
-        return self.read_buffer
+        return {"name": self.read_buffer["name"]}
+
+    @property
+    def velocity(self):
+        return {f"{self.name}_velocity": self.read_buffer[f"{self.name}_velocity"]}
 
     @property
     def obj(self):

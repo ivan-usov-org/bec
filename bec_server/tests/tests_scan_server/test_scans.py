@@ -621,7 +621,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
 def test_scan_scan(scan_msg, reference_scan_list):
     device_manager = DMMock()
     device_manager.add_device("samx")
-    device_manager.devices["samx"].read_buffer = {"value": 0}
+    device_manager.devices["samx"].read_buffer = {"samx": {"value": 0}}
     msg_list = []
 
     def offset_mock():
@@ -689,9 +689,9 @@ def test_scan_scan(scan_msg, reference_scan_list):
 def test_fermat_scan(scan_msg, reference_scan_list):
     device_manager = DMMock()
     device_manager.add_device("samx")
-    device_manager.devices["samx"].read_buffer = {"value": 0}
+    device_manager.devices["samx"].read_buffer = {"samx": {"value": 0}}
     device_manager.add_device("samy")
-    device_manager.devices["samy"].read_buffer = {"value": 0}
+    device_manager.devices["samy"].read_buffer = {"samx": {"value": 0}}
     args = unpack_scan_args(scan_msg.content.get("parameter").get("args"))
     kwargs = scan_msg.content.get("parameter").get("kwargs")
     scan = FermatSpiralScan(
@@ -899,7 +899,10 @@ def test_fermat_scan(scan_msg, reference_scan_list):
 def test_cont_line_scan(scan_msg, reference_scan_list):
     device_manager = DMMock()
     device_manager.add_device("samx")
-    device_manager.devices["samx"].read_buffer = {"value": 0}
+    device_manager.devices["samx"].read_buffer = {
+        "samx": {"value": 0},
+        "samx_velocity": {"value": 10},
+    }
 
     args = unpack_scan_args(scan_msg.content["parameter"]["args"])
     kwargs = scan_msg.content["parameter"]["kwargs"]
