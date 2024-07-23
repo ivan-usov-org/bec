@@ -54,6 +54,18 @@ No matter if you need to add new devices to BEC or modify existing ones, this se
 ## User Interfaces
 
 Discover and learn how to contribute to the command-line tool and graphical user interface for interacting with BEC.
+
+```
+
+```{grid-item-card}
+:link: developer.data_access
+:link-type: ref
+:img-top: /assets/rocket_launch_48dp.svg
+:text-align: center
+
+## Data Access
+
+Discover how to get access to data in BEC. This ranges from an introduction into BEC's messaging system and event data subscriptions to the structure of a *ScanItems*.
 ```
 
 ```{grid-item-card}

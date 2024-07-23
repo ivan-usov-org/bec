@@ -5,11 +5,11 @@ The BEC messaging system is the backbone of the BEC system and is responsible fo
 Redis is an open-source, in-memory data structure store that can be used as a database, cache, and message broker. Every entry is associated with a unique channel name, e.g. `internal/devices/readback/samx`. Depending on the stored data, it supports various operations such as get, set, delete, publish/subscribe as well as stream operations and many more. To learn more about the core functionality of Redis, visit the [Redis website](https://redis.io/). 
 
 For storing and retrieving data in BEC, there are three building blocks to describe any communication:
-- `RedisConnector`
+- [`RedisConnector`](/api_reference/_autosummary/bec_lib.redis_connector.RedisConnector)
     A wrapper around the `redis-py` package to simplify the interaction with the Redis server.
-- `BECMessage`
+- [`BECMessage`](/api_reference/_autosummary/bec_lib.messages.BECMessage)
     A set of classes that provide a uniform way to send and receive data irrespective of the data type.
-- `EndpointInfo`
+- [`EndpointInfo`](/api_reference/_autosummary/bec_lib.endpoints.EndpointInfo)
     A class that provides a mapping between the Redis channel, the BECMessage class and the supported operations for the channel. 
 
 Sending a message to Redis typically involves using an already existing instance of the `RedisConnector` class, creating a new instance of a `BECMessage` class and sending it to the desired endpoint using corresponding method of the EndpointInfo class and the `RedisConnector` class.

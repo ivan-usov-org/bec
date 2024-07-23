@@ -52,7 +52,7 @@ The ``wm`` command can receive multiple devices as strings, e.g. ``dev.wm(["samx
 ### Inspect a device
 
 To inspect the device samx, you can simply type ``dev.samx`` and you'll get a printout of the relevant information about this device.
-```ipython
+``` ipython
 demo [1/3] ❯❯ dev.samx
 Out[1]:
 Positioner(name=samx, enabled=True):

@@ -82,7 +82,7 @@ To change the readout priority of a device (e.g. samx), use
 dev.samx.readout_priority = "monitored" 
 ```
 
-Possible values are `monitored`, `baseline`, `on_request`, `async` and `continuous`. More details on the readout priority and the different modes can be found in the [developer guide](#developer.ophyd_device).
+Possible values are `monitored`, `baseline`, `on_request`, `async` and `continuous`. More details on the readout priority and the different modes can be found in the [developer guide](#developer.ophyd_device_config).
 
 (user.devices.update_device_config)=
 ### Update the device config
@@ -93,7 +93,7 @@ To update the device config, use
 dev.samx.set_device_config({"tolerance":0.02})
 ```
  which will update the tolerance window for the motor to reach its target position. 
- Keep in mind though, that the parameter exposed through the device_config must be configurable in the [ophyd_device](#developer.ophyd_device) of the bespoken device.
+ Keep in mind though, that the parameter exposed through the device_config must be configurable in the [ophyd_device](#developer.ophyd.ophyd_device) of the bespoken device.
 
 ### Set or update the user parameters
 
