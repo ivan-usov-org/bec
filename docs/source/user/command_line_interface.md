@@ -34,7 +34,7 @@ This allows users to use tab-completion for finding devices.
 
 To get a quick glance at all available devices, you can type
     
-```ipython
+``` ipython
 demo [1/3] ❯❯ dev.show_all()
 ```
 
@@ -244,7 +244,7 @@ dev.samx.limits = [-50, 50]
 You may also directly access the low and high limits via `dev.samx.low_limit = -50` and `dev.samx.high_limit=50`.
 Both access patterns are identical.
 Software limits are updated in the device_config, however, when done via command-line this only updates the current device_config session in redis.
-To make sure that limits are stored after reloading the device BEC config, you need to update the deviceConfig on disk, please check [bec.config.save_current_session()](#user.devices.export_device_config).
+To make sure that limits are stored after reloading the device BEC config, you need to update the deviceConfig on disk, please check [bec.config.save_current_session()](#user.devices).
 
 As per default, software limits for motors are set to the values specified in the [BEC device config](#developer.ophyd), subfield device_config. 
 

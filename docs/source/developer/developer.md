@@ -57,6 +57,17 @@ Discover and learn how to contribute to the command-line tool and graphical user
 ```
 
 ```{grid-item-card}
+:link: developer.getting_started
+:link-type: ref
+:img-top: /assets/rocket_launch_48dp.svg
+:text-align: center
+
+## Data Access
+
+Discover how to access data in BEC, including the structure of *ScanItems* to being able to get and subscribe to the event system of BEC.
+```
+
+```{grid-item-card}
 :link: developer.scans
 :link-type: ref
 :img-top: /assets/timeline_48dp.svg
