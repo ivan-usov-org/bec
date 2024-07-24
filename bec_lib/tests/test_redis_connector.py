@@ -359,6 +359,19 @@ def test_send_raises_on_invalid_msg(connector):
         connector.send("invalid_msg", "msg")
 
 
+def test_send_raises_on_invalid_message_type(connector):
+    correct_msg = bec_messages.DeviceMessage(
+        signals={"samx": {"value": 1, "timestamp": 1}}, metadata={}
+    )
+    connector.set_and_publish(MessageEndpoints.device_read("samx"), correct_msg)
+    with pytest.raises(TypeError) as excinfo:
+        msg = bec_messages.ScanMessage(point_id=1, scan_id="scan_id", data={}, metadata={})
+        connector.set_and_publish(MessageEndpoints.device_read("samx"), msg)
+    assert "Message type <class 'bec_lib.messages.ScanMessage'> is not compatible " in str(
+        excinfo.value
+    )
+
+
 def test_send_raises_on_invalid_topic(connector):
     with pytest.raises(ValueError):
         connector.send(MessageEndpoints.device_status("samx"), "msg")

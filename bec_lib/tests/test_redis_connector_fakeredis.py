@@ -19,8 +19,8 @@ from bec_lib.serialization import MsgpackSerialization
 # pylint: disable=unused-argument
 
 
-TestStreamEndpoint = EndpointInfo("test", TestMessage(), MessageOp.STREAM)
-TestStreamEndpoint2 = EndpointInfo("test2", TestMessage(), MessageOp.STREAM)
+TestStreamEndpoint = EndpointInfo("test", TestMessage, MessageOp.STREAM)
+TestStreamEndpoint2 = EndpointInfo("test2", TestMessage, MessageOp.STREAM)
 
 
 @pytest.mark.parametrize(
@@ -144,8 +144,8 @@ def test_redis_connector_register_identical(connected_connector):
 def test_redis_connector_unregister_cb_not_topic(connected_connector):
     connector = connected_connector
 
-    topic1 = EndpointInfo("topic1", TestMessage(), MessageOp.SEND)
-    topic2 = EndpointInfo("topic2", TestMessage(), MessageOp.SEND)
+    topic1 = EndpointInfo("topic1", TestMessage, MessageOp.SEND)
+    topic2 = EndpointInfo("topic2", TestMessage, MessageOp.SEND)
 
     received_event1 = mock.Mock(spec=[])
     received_event2 = mock.Mock(spec=[])
@@ -187,8 +187,8 @@ def test_redis_connector_unregister_topic_keeps_others_alive(connected_connector
 
     connector = connected_connector
 
-    topic1 = EndpointInfo("topic1", TestMessage(), MessageOp.SEND)
-    topic2 = EndpointInfo("topic2", TestMessage(), MessageOp.SEND)
+    topic1 = EndpointInfo("topic1", TestMessage, MessageOp.SEND)
+    topic2 = EndpointInfo("topic2", TestMessage, MessageOp.SEND)
 
     received_event1 = mock.Mock(spec=[])
     received_event2 = mock.Mock(spec=[])
