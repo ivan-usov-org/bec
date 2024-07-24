@@ -456,7 +456,7 @@ class DeviceManagerDS(DeviceManagerBase):
 
     @typechecked
     def _obj_callback_device_monitor_2d(
-        self, *_args, obj: OphydObject, value: np.ndarray, **kwargs
+        self, *_args, obj: OphydObject, value: np.ndarray, timestamp: float | None = None, **kwargs
     ):
         """
         Callback for ophyd monitor events. Sends the data to redis.
@@ -478,7 +478,12 @@ class DeviceManagerDS(DeviceManagerBase):
         if obj.connected:
             name = obj.root.name
             metadata = self.devices[name].metadata
-            msg = messages.DeviceMonitorMessage(device=name, data=value, metadata=metadata)
+            msg = messages.DeviceMonitor2DMessage(
+                device=name,
+                data=value,
+                metadata=metadata,
+                timestamp=timestamp if timestamp else time.time(),
+            )
             stream_msg = {"data": msg}
             self.connector.xadd(
                 MessageEndpoints.device_monitor_2d(name),

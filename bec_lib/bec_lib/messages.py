@@ -7,7 +7,7 @@ from copy import deepcopy
 from typing import Any, ClassVar, Literal
 
 import numpy as np
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class BECStatus(enum.Enum):
@@ -420,7 +420,7 @@ class DeviceInfoMessage(BECMessage):
     info: dict
 
 
-class DeviceMonitorMessage(BECMessage):
+class DeviceMonitor2DMessage(BECMessage):
     """Message type for sending device monitor updates from the device server.
 
     The message is send from the device_server to monitor data coming from larger detector.
@@ -435,9 +435,26 @@ class DeviceMonitorMessage(BECMessage):
     msg_type: ClassVar[str] = "device_monitor_message"
     device: str
     data: np.ndarray
+    timestamp: float = Field(default_factory=time.time)
 
-    class Config:
-        arbitrary_types_allowed = True
+    metadata: dict | None = Field(default_factory=dict)
+
+    # Needed for pydantic to accept numpy arrays
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    @field_validator("data")
+    @classmethod
+    def check_data(cls, v: np.ndarray):
+        """Validate the entry in data. Has to be a 2D numpy array
+
+        Args:
+            v (np.ndarray): data array
+        """
+        if not isinstance(v, np.ndarray):
+            raise ValueError(f"Invalid array type: {type(v)}. Must be a numpy array.")
+        if not v.ndim == 2:
+            raise ValueError(f"Invalid dimenson {v.ndim} for numpy array. Must be a 2D array.")
+        return v
 
 
 class ScanMessage(BECMessage):

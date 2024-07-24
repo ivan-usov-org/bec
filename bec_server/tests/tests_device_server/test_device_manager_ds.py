@@ -1,6 +1,7 @@
 import copy
 import functools
 import os
+import time
 from unittest import mock
 
 import numpy as np
@@ -155,20 +156,26 @@ def test_obj_progress_callback(dm_with_devices):
     "value", [np.empty(shape=(10, 10)), np.empty(shape=(100, 100)), np.empty(shape=(1000, 1000))]
 )
 @pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
-def test_obj_monitor_callback(dm_with_devices, value):
+def test_obj_device_monitor_2d_callback(dm_with_devices, value):
     device_manager = dm_with_devices
     eiger = device_manager.devices.eiger
     eiger.metadata = {"scan_id": "12345"}
     value_size = len(value.tobytes()) / 1e6  # MB
     max_size = 1000
+    timestamp = time.time()
     with mock.patch.object(device_manager, "connector") as mock_connector:
-        device_manager._obj_callback_monitor(obj=eiger.obj, value=value)
-        mock_connector.xadd.assert_called_once_with(
+        device_manager._obj_callback_device_monitor_2d(
+            obj=eiger.obj, value=value, timestamp=timestamp
+        )
+        stream_msg = {
+            "data": messages.DeviceMonitor2DMessage(
+                device=eiger.name, data=value, metadata={"scan_id": "12345"}, timestamp=timestamp
+            )
+        }
+
+        assert mock_connector.xadd.call_count == 1
+        assert mock_connector.xadd.call_args == mock.call(
             MessageEndpoints.device_monitor_2d(eiger.name),
-            {
-                "data": messages.DeviceMonitorMessage(
-                    device=eiger.name, data=value, metadata={"scan_id": "12345"}
-                )
-            },
-            max_size=int(min(100, max_size / value_size)),
+            stream_msg,
+            max_size=min(100, int(max_size // value_size)),
         )

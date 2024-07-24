@@ -362,7 +362,7 @@ class MessageEndpoints:
         endpoint = f"internal/devices/monitor/{device}"
         return EndpointInfo(
             endpoint=endpoint,
-            message_type=messages.DeviceMonitorMessage,
+            message_type=messages.DeviceMonitor2DMessage,
             message_op=MessageOp.STREAM,
         )
 
