@@ -683,3 +683,21 @@ def test_update_config(bec_ipython_client_fixture):
     assert "samx" not in bec.device_manager.devices
     config = bec.config._load_config_from_file(demo_config_path)
     bec.config.send_config_request(action="set", config=config)
+
+
+@pytest.mark.timeout(100)
+def test_device_monitor(bec_ipython_client_fixture):
+    bec = bec_ipython_client_fixture
+    bec.metadata.update({"unit_test": "test_device_monitor"})
+    dev = bec.device_manager.devices
+    dev.eiger.image_shape.set([10, 10])
+    s1 = scans.line_scan(dev.samx, 0, 1, steps=10, relative=False)
+    s1.wait()
+    data = bec.device_monitor.get_data("eiger", 1)
+    assert data[0].shape == (10, 10)
+    s2 = scans.line_scan(dev.samx, 0, 1, steps=5, relative=False)
+    s2.wait()
+    data = bec.device_monitor.get_data_for_scan("eiger", s1.scan.scan_id)
+    assert len(data) == 10
+    data = bec.device_monitor.get_data_for_scan("samx", s1.scan.scan_id)
+    assert data is None
