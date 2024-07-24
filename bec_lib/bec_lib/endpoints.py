@@ -266,7 +266,9 @@ class MessageEndpoints:
         """
         endpoint = "internal/devices/config"
         return EndpointInfo(
-            endpoint=endpoint, message_type=messages.DeviceConfigMessage, message_op=MessageOp.SET
+            endpoint=endpoint,
+            message_type=messages.AvailableResourceMessage,
+            message_op=MessageOp.SET,
         )
 
     @staticmethod
