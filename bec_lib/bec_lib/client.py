@@ -21,6 +21,7 @@ from bec_lib.bec_service import BECService, BECStatus
 from bec_lib.bl_checks import BeamlineChecks
 from bec_lib.callback_handler import CallbackHandler, EventType
 from bec_lib.dap_plugins import DAPPlugins
+from bec_lib.device_monitor_plugin import DeviceMonitorPlugin
 from bec_lib.devicemanager import DeviceManagerBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
@@ -117,6 +118,7 @@ class BECClient(BECService, UserScriptsMixin):
         self.history = None
         self.live_updates = None
         self.dap = None
+        self.device_monitor = None
         self.bl_checks = None
         self._hli_funcs = {}
         self.metadata = {}
@@ -190,6 +192,7 @@ class BECClient(BECService, UserScriptsMixin):
         self.dap = DAPPlugins(self)
         self.bl_checks = BeamlineChecks(self)
         self.bl_checks.start()
+        self.device_monitor = DeviceMonitorPlugin(self.connector)
 
     def alarms(self, severity=Alarms.WARNING):
         """get the next alarm with at least the specified severity"""
