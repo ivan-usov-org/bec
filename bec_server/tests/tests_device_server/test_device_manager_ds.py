@@ -164,7 +164,7 @@ def test_obj_monitor_callback(dm_with_devices, value):
     with mock.patch.object(device_manager, "connector") as mock_connector:
         device_manager._obj_callback_monitor(obj=eiger.obj, value=value)
         mock_connector.xadd.assert_called_once_with(
-            MessageEndpoints.device_monitor(eiger.name),
+            MessageEndpoints.device_monitor_2d(eiger.name),
             {
                 "data": messages.DeviceMonitorMessage(
                     device=eiger.name, data=value, metadata={"scan_id": "12345"}

@@ -341,8 +341,8 @@ class DeviceManagerDS(DeviceManagerBase):
         elif "value" in obj.event_types:
             obj.subscribe(self._obj_callback_readback, run=opaas_obj.enabled)
 
-        if "monitor" in obj.event_types:
-            obj.subscribe(self._obj_callback_monitor, run=False)
+        if "device_monitor_2d" in obj.event_types:
+            obj.subscribe(self._obj_callback_device_monitor_2d, run=False)
         if "done_moving" in obj.event_types:
             obj.subscribe(self._obj_callback_done_moving, event_type="done_moving", run=False)
         if "flyer" in obj.event_types:
@@ -455,7 +455,9 @@ class DeviceManagerDS(DeviceManagerBase):
         pipe.execute()
 
     @typechecked
-    def _obj_callback_monitor(self, *_args, obj: OphydObject, value: np.ndarray, **kwargs):
+    def _obj_callback_device_monitor_2d(
+        self, *_args, obj: OphydObject, value: np.ndarray, **kwargs
+    ):
         """
         Callback for ophyd monitor events. Sends the data to redis.
         Introduces a check of the data size, and incoporates a limit which is defined in max_size (in MB)
@@ -479,7 +481,7 @@ class DeviceManagerDS(DeviceManagerBase):
             msg = messages.DeviceMonitorMessage(device=name, data=value, metadata=metadata)
             stream_msg = {"data": msg}
             self.connector.xadd(
-                MessageEndpoints.device_monitor(name),
+                MessageEndpoints.device_monitor_2d(name),
                 stream_msg,
                 max_size=min(100, int(max_size // dsize)),
             )

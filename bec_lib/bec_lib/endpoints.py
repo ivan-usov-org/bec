@@ -344,14 +344,14 @@ class MessageEndpoints:
         )
 
     @staticmethod
-    def device_monitor(device: str) -> EndpointInfo:
+    def device_monitor_2d(device: str) -> EndpointInfo:
         """
-        Endpoint for device monitoring.
-        This endpoint is used to publish image or wavefrom data from a monitor. An
-        example can be a 2D area dertector or a 1D waveform (XRF), for which we
-        forward a subset from the data to the monitoring endpoing for visualization
-        purposes. Details on shape and type of data need to be specified in
-        dtype/dshape of the dev.<device>.describe() method.
+        Endpoint for device monitoring of 2D detectors.
+        This endpoint is used to publish image data from a 2D area dertector.
+        The purpose is to be able to monitor the detector data in real-time
+        at reduced frequency/volumes. The data will most likely be made available
+        from the the data backend of the detector. Details on shape and type of data
+        should be specified in dtype/dshape of the dev.<device>.describe() method.
 
         Args:
             device (str): Device name, e.g. "eiger".
@@ -361,7 +361,9 @@ class MessageEndpoints:
         """
         endpoint = f"internal/devices/monitor/{device}"
         return EndpointInfo(
-            endpoint=endpoint, message_type=messages.DeviceMessage, message_op=MessageOp.STREAM
+            endpoint=endpoint,
+            message_type=messages.DeviceMonitorMessage,
+            message_op=MessageOp.STREAM,
         )
 
     # scan queue
