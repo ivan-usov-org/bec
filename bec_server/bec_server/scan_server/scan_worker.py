@@ -667,7 +667,8 @@ class ScanWorker(threading.Thread):
         self.current_scan_info["scan_msgs"] = [
             str(scan_msg) for scan_msg in self.current_instruction_queue_item.scan_msgs
         ]
-
+        self.current_scan_info["args"] = active_rb.scan.parameter["args"]
+        self.current_scan_info["kwargs"] = active_rb.scan.parameter["kwargs"]
         self.current_scan_info["readout_priority"] = {
             "monitored": [
                 dev.name
