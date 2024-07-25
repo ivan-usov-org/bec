@@ -1,5 +1,25 @@
 # CHANGELOG
 
+## v2.20.0 (2024-07-25)
+
+### Build
+
+* build(ci): pass ophyd_devices branch to child pipeline ([`a3e2b2e`](https://gitlab.psi.ch/bec/bec/-/commit/a3e2b2e37634fe7f445cce7e0ff2ac0b01d093b3))
+
+### Feature
+
+* feat: add device_monitor plugin for client ([`c9a6f3b`](https://gitlab.psi.ch/bec/bec/-/commit/c9a6f3b1fad8cbb455c6a79379e03efa73fe984d))
+
+### Refactor
+
+* refactor: renamed DeviceMonitor2DMessage ([`0bb42d0`](https://gitlab.psi.ch/bec/bec/-/commit/0bb42d01bf7d7a03cf8e2a0859582ab14d8c99b8))
+
+* refactor: renamed device_monitor to device_monitor_2d, adapted SUB_EVENT name ([`c7b59b5`](https://gitlab.psi.ch/bec/bec/-/commit/c7b59b59c16ac18134ab73bf020137d28da56775))
+
+### Unknown
+
+* test (device_monitor): add end-2-end test for device_monitor ([`4c578ce`](https://gitlab.psi.ch/bec/bec/-/commit/4c578ce15545e70072471e8def3bee2108b03ffb))
+
 ## v2.19.1 (2024-07-25)
 
 ### Fix
@@ -157,8 +177,6 @@ use case for BEC - it creates processing threads, which can be avoided ([`1318b2
 * fix: logger: make console_log opt-in instead of having it by default and removing for certain classes ([`1d1f795`](https://gitlab.psi.ch/bec/bec/-/commit/1d1f795f9143363fa73a7cc9d5e7827d613552c1))
 
 * fix: logger: log stderr to sys.__stderr__ to be compatible with sys.stderr redirection ([`9824ee4`](https://gitlab.psi.ch/bec/bec/-/commit/9824ee43aaf283c743762affead3c3b9e517abce))
-
-* fix: logger: do not update sinks twice in __init__ ([`051d6ad`](https://gitlab.psi.ch/bec/bec/-/commit/051d6ade9224f5aeb919bbe96e84dc49f4720482))
 
 ### Test
 
