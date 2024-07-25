@@ -1094,7 +1094,11 @@ def test_open_scan(scan_worker_mock, instr, corr_num_points, scan_id):
     [
         messages.ScanQueueMessage(
             scan_type="grid_scan",
-            parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}, "num_points": 100},
+            parameter={
+                "args": {"samx": (-5, 5, 5), "samy": (-1, 1, 2)},
+                "kwargs": {"exp_time": 1, "relative": True},
+                "num_points": 10,
+            },
             queue="primary",
             metadata={"RID": "something"},
         )
@@ -1115,18 +1119,19 @@ def test_initialize_scan_info(scan_worker_mock, msg):
             "continuous": [],
             "on_request": [],
         }
-        worker._initialize_scan_info(rb, msg, msg.content["parameter"].get("num_points"))
+        open_scan_msg = list(rb.scan.open_scan())[0]
+        worker._initialize_scan_info(rb, open_scan_msg, msg.content["parameter"].get("num_points"))
 
         assert worker.current_scan_info["RID"] == "something"
         assert worker.current_scan_info["scan_number"] == 2
         assert worker.current_scan_info["dataset_number"] == 3
         assert worker.current_scan_info["scan_report_devices"] == rb.scan.scan_report_devices
-        assert worker.current_scan_info["num_points"] == 100
+        assert worker.current_scan_info["num_points"] == 10
         assert worker.current_scan_info["scan_msgs"] == []
         assert worker.current_scan_info["monitor_sync"] == "bec"
         assert worker.current_scan_info["frames_per_trigger"] == 1
-        assert worker.current_scan_info["args"] == {"samx": (-5, 5, 3)}
-        assert worker.current_scan_info["kwargs"] == {}
+        assert worker.current_scan_info["args"] == {"samx": (-5, 5, 5), "samy": (-1, 1, 2)}
+        assert worker.current_scan_info["kwargs"] == {"exp_time": 1, "relative": True}
         assert "samx" in worker.current_scan_info["readout_priority"]["monitored"]
         assert "samy" in worker.current_scan_info["readout_priority"]["baseline"]
 
