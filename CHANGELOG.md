@@ -1,5 +1,27 @@
 # CHANGELOG
 
+## v2.20.1 (2024-07-25)
+
+### Ci
+
+* ci: added child_pipeline_branch var ([`8ca8478`](https://gitlab.psi.ch/bec/bec/-/commit/8ca8478019b532db2ab2f5c0fbc8297ca9d56327))
+
+* ci: added inputs to beamline trigger pipelines ([`5e11c0c`](https://gitlab.psi.ch/bec/bec/-/commit/5e11c0c06543a5d6f875575fe2a3cf9748421c5d))
+
+* ci: cleanup and moved beamline trigger pipelines to awi utils ([`3030451`](https://gitlab.psi.ch/bec/bec/-/commit/303045198ec77c7a6b7ef5d5e7c4ab308c14a52f))
+
+* ci: wip - downstream pipeline args for ophyd ([`81b1682`](https://gitlab.psi.ch/bec/bec/-/commit/81b168299bf9f05085b61eafe94aa3bc279c41b4))
+
+* ci: wip - downstream pipeline args for ophyd ([`a5712c3`](https://gitlab.psi.ch/bec/bec/-/commit/a5712c379da39861b69bbb9129ea91eac6bbfda0))
+
+### Fix
+
+* fix: unpack args and kwargs in scaninfo ([`2955a85`](https://gitlab.psi.ch/bec/bec/-/commit/2955a855ca742e4cafcf33cc262b439c5afb2b5e))
+
+### Test
+
+* test: fix msg in init scan info ([`1357b21`](https://gitlab.psi.ch/bec/bec/-/commit/1357b216a83d130efb3ba9af21c0a1eef7d3a9e1))
+
 ## v2.20.0 (2024-07-25)
 
 ### Build
@@ -132,10 +154,6 @@ Add &#34;--log-level&#34; and &#34;--file-log-level&#34; to be able to change lo
 
 ## v2.17.2 (2024-06-28)
 
-### Build
-
-* build: fakeredis dependency version update after fakeredis has been fixed ([`33db330`](https://gitlab.psi.ch/bec/bec/-/commit/33db33033c4d8028cffe84b154300e926c365315))
-
 ### Documentation
 
 * docs: fix redis install for psi-maintained ([`bed9e90`](https://gitlab.psi.ch/bec/bec/-/commit/bed9e90183a236880d3e54d93571cdf4ad2ce9a5))
@@ -143,41 +161,3 @@ Add &#34;--log-level&#34; and &#34;--file-log-level&#34; to be able to change lo
 ### Fix
 
 * fix: fixed bug where a failed device status would not cause the scan to abort ([`2b93187`](https://gitlab.psi.ch/bec/bec/-/commit/2b93187c3522e99b09c68bc3b844e3ea6ffd1adf))
-
-## v2.17.1 (2024-06-25)
-
-### Fix
-
-* fix: configure logger levels for BECIPythonClient in constructor ([`72b6e3e`](https://gitlab.psi.ch/bec/bec/-/commit/72b6e3e543a64d86a615cf400fa5057317a722ad))
-
-* fix: _update_sinks applies different level for each logger ([`7ed5d6a`](https://gitlab.psi.ch/bec/bec/-/commit/7ed5d6ae82f0605de1f0422a0c6c658cec230159))
-
-* fix: set level for each logger to the given value ([`1428ba2`](https://gitlab.psi.ch/bec/bec/-/commit/1428ba27f9239aa67fcb4b9111980d1d0955de32))
-
-* fix: remove redundant update of loggers ([`8b82f35`](https://gitlab.psi.ch/bec/bec/-/commit/8b82f357970daab1ad0cac9ea36b42f460b1afd2))
-
-### Refactor
-
-* refactor: renaming of _update_logger_level to _update_console_logger_level ([`03a58d6`](https://gitlab.psi.ch/bec/bec/-/commit/03a58d6f1d035cfc0a31d4f6c61436825d0fd31a))
-
-## v2.17.0 (2024-06-25)
-
-### Feature
-
-* feat(bec_lib): added option to name the logger ([`5d6cc7d`](https://gitlab.psi.ch/bec/bec/-/commit/5d6cc7dd05ee49e5afd526409fb100b50aa9c56d))
-
-### Fix
-
-* fix(logger): do not enqueue log messages
-
-Enqueing log messages is useful when multiple processes (launched with
-multiprocess module) are logging to the same log file, which is not the
-use case for BEC - it creates processing threads, which can be avoided ([`1318b22`](https://gitlab.psi.ch/bec/bec/-/commit/1318b221cb6c26650535019175c74d748b003ea8))
-
-* fix: logger: make console_log opt-in instead of having it by default and removing for certain classes ([`1d1f795`](https://gitlab.psi.ch/bec/bec/-/commit/1d1f795f9143363fa73a7cc9d5e7827d613552c1))
-
-* fix: logger: log stderr to sys.__stderr__ to be compatible with sys.stderr redirection ([`9824ee4`](https://gitlab.psi.ch/bec/bec/-/commit/9824ee43aaf283c743762affead3c3b9e517abce))
-
-### Test
-
-* test: made completer test more targeted towards the completion results ([`cc5503f`](https://gitlab.psi.ch/bec/bec/-/commit/cc5503f86c32e266ef4755c78f01eed40cbad808))
