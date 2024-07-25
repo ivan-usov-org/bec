@@ -425,7 +425,6 @@ trigger:
         file: /.gitlab-ci.yml
   variables:
     BEC_CORE_BRANCH: $CI_COMMIT_REF_NAME
-    OPHYD_DEVICES_BRANCH: $OPHYD_DEVICES_BRANCH
     CHILD_PROJECTS: ""
   rules:
     - if: '$CI_PIPELINE_SOURCE == "web"'
