@@ -87,6 +87,7 @@ formatter:
     - if: '$CI_PIPELINE_SOURCE == "parent_pipeline"'
       when: never
     - if: $CI_COMMIT_BRANCH
+  interruptible: true
 
 pylint:
   stage: Formatter
@@ -110,6 +111,7 @@ pylint:
     - if: '$CI_PIPELINE_SOURCE == "parent_pipeline"'
       when: never
     - if: $CI_COMMIT_BRANCH
+  interruptible: true
 
 pylint-check:
   stage: Formatter
@@ -150,6 +152,7 @@ pylint-check:
     - if: '$CI_PIPELINE_SOURCE == "parent_pipeline"'
       when: never
     - if: $CI_COMMIT_BRANCH
+  interruptible: true
 
 tests:
   stage: test
@@ -172,6 +175,7 @@ tests:
       coverage_report:
         coverage_format: cobertura
         path: coverage.xml
+  interruptible: true
 
 tests-3.11:
   stage: AdditionalTests
@@ -187,6 +191,7 @@ tests-3.11:
     - apt-get install -y redis
     - *install-bec-services-dev
     - pytest -v --junitxml=report.xml --random-order ./bec_server/tests ./bec_lib/tests ./bec_ipython_client/tests/client_tests
+  interruptible: true
 
 tests-3.12:
   extends: "tests-3.11"
@@ -227,10 +232,10 @@ end-2-end:
     - echo "$CI_DEPENDENCY_PROXY_PASSWORD" | docker login $CI_DEPENDENCY_PROXY_SERVER --username $CI_DEPENDENCY_PROXY_USER --password-stdin
     - docker build -t end2end_client:test -f ./ci/Dockerfile.run_pytest --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=bec_ipython_client --build-arg OPHYD_DEVICES_BRANCH --build-arg CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX --build-arg BEC_CORE_BRANCH=$CHILD_PIPELINE_BRANCH  .
     - docker run --network=host --name end2end_client end2end_client:test
-
   after_script:
     # copy the log files to the project directory in order to be reachable by git artifacts
     - docker cp end2end_client:/code/bec/test_files/. $CI_PROJECT_DIR
+  interruptible: true
 
 # end-2-end-scibec:
 #   extends: "end-2-end"
@@ -369,6 +374,7 @@ end-2-end-conda:
     - if: '$CI_PIPELINE_SOURCE == "pipeline"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
+  interruptible: true
 
 end-2-end-conda-310:
   stage: End2End
@@ -408,6 +414,7 @@ end-2-end-conda-310:
 
   rules:
     - if: '$E2E_FULL == "1"'
+  interruptible: true
 
 end-2-end-conda-311:
   stage: End2End
@@ -449,6 +456,7 @@ trigger-ophyd_devices:
     - if: '$CI_PIPELINE_SOURCE == "parent_pipeline"'
       when: never
     - if: $CI_COMMIT_BRANCH
+  interruptible: true
 
 trigger-bec_widgets:
   needs: []
@@ -470,6 +478,7 @@ trigger-bec_widgets:
     - if: '$CI_PIPELINE_SOURCE == "parent_pipeline"'
       when: never
     - if: $CI_COMMIT_BRANCH
+  interruptible: true
 
 semver:
   stage: Build
@@ -497,6 +506,7 @@ semver:
   allow_failure: false
   rules:
     - if: '$CI_COMMIT_REF_NAME == "main"'
+  interruptible: true
 
 dev-pages:
   stage: Deploy
@@ -533,6 +543,8 @@ dev-pages:
     - curl -X POST -d "branches=development" -d "token=$RTD_TOKEN" https://readthedocs.org/api/v2/webhook/beamline-experiment-control/221870/
     - curl -X POST -d "branches=development" -d "token=$RTD_TOKEN_BEC" https://readthedocs.org/api/v2/webhook/bec/246899/
 
+  interruptible: true
+
 pages:
   stage: Deploy
   needs: ["semver"]
@@ -547,3 +559,4 @@ pages:
   script:
     - curl -X POST -d "branches=$CI_COMMIT_REF_NAME" -d "token=$RTD_TOKEN" https://readthedocs.org/api/v2/webhook/beamline-experiment-control/221870/
     - curl -X POST -d "branches=$CI_COMMIT_REF_NAME" -d "token=$RTD_TOKEN_BEC" https://readthedocs.org/api/v2/webhook/bec/246899/
+  interruptible: true
