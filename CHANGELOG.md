@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v2.19.1 (2024-07-25)
+
+### Fix
+
+* fix: add velocity vs exp_time check for contline_scan to make it more robust ([`2848682`](https://gitlab.psi.ch/bec/bec/-/commit/2848682644624c024ac37fe946fbd2b6ddc377dc))
+
 ## v2.19.0 (2024-07-19)
 
 ### Feature
@@ -154,13 +160,6 @@ use case for BEC - it creates processing threads, which can be avoided ([`1318b2
 
 * fix: logger: do not update sinks twice in __init__ ([`051d6ad`](https://gitlab.psi.ch/bec/bec/-/commit/051d6ade9224f5aeb919bbe96e84dc49f4720482))
 
-* fix: client: do not configure logging in _start_services()
-
-Logging is already configured because BECClient inherits from BECService,
-and BECService configures logging when client is started ([`4809dc5`](https://gitlab.psi.ch/bec/bec/-/commit/4809dc512eec418e08bfa79b40d3b3b75a4498da))
-
 ### Test
 
 * test: made completer test more targeted towards the completion results ([`cc5503f`](https://gitlab.psi.ch/bec/bec/-/commit/cc5503f86c32e266ef4755c78f01eed40cbad808))
-
-## v2.16.3 (2024-06-25)
