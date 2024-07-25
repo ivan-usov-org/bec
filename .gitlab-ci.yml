@@ -15,7 +15,6 @@ variables:
   PHOENIX_BEC_BRANCH: "main"
   SIM_BEC_BRANCH: "main"
 
-
 workflow:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
@@ -26,7 +25,6 @@ workflow:
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
       when: never
     - if: $CI_COMMIT_BRANCH
-
 
 include:
   - template: Security/Secret-Detection.gitlab-ci.yml
@@ -52,8 +50,6 @@ include:
       exclude_packages: "bec_lib"
       job_name: "check_dep_ipython_client"
 
-
-
 # different stages in the pipeline
 stages:
   - Formatter
@@ -64,10 +60,10 @@ stages:
   - Deploy
 
 .install-bec-services-dev: &install-bec-services-dev
-    - pip install -e ./pytest_bec_e2e
-    - pip install -e ./bec_server[dev]
-    - pip install -e ./bec_ipython_client[dev]
-    - pip install -e ./bec_lib[dev]
+  - pip install -e ./pytest_bec_e2e
+  - pip install -e ./bec_server[dev]
+  - pip install -e ./bec_ipython_client[dev]
+  - pip install -e ./bec_lib[dev]
 
 formatter:
   stage: Formatter
@@ -104,10 +100,10 @@ pylint-check:
   script:
     # Identify changed Python files
     - if [ "$CI_PIPELINE_SOURCE" == "merge_request_event" ]; then
-        TARGET_BRANCH_COMMIT_SHA=$(git rev-parse origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME);
-        CHANGED_FILES=$(git diff --name-only $TARGET_BRANCH_COMMIT_SHA HEAD | grep '\.py$' || true);
+      TARGET_BRANCH_COMMIT_SHA=$(git rev-parse origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME);
+      CHANGED_FILES=$(git diff --name-only $TARGET_BRANCH_COMMIT_SHA HEAD | grep '\.py$' || true);
       else
-        CHANGED_FILES=$(git diff --name-only $CI_COMMIT_BEFORE_SHA $CI_COMMIT_SHA | grep '\.py$' || true);
+      CHANGED_FILES=$(git diff --name-only $CI_COMMIT_BEFORE_SHA $CI_COMMIT_SHA | grep '\.py$' || true);
       fi
     - if [ -z "$CHANGED_FILES" ]; then echo "No Python files changed."; exit 0; fi
 
@@ -125,7 +121,6 @@ pylint-check:
     paths:
       - ./pylint/
     expire_in: 1 week
-
 
 tests:
   stage: test
@@ -162,7 +157,7 @@ tests-3.11:
     - apt-get install -y gcc
     - apt-get install -y redis
     - *install-bec-services-dev
-    - pytest -v --junitxml=report.xml --random-order ./bec_server/tests ./bec_lib/tests ./bec_ipython_client/tests/client_tests 
+    - pytest -v --junitxml=report.xml --random-order ./bec_server/tests ./bec_lib/tests ./bec_ipython_client/tests/client_tests
 
 tests-3.12:
   extends: "tests-3.11"
@@ -192,7 +187,7 @@ end-2-end:
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
   script:
     # build and run the tests
-    - echo $OPHYD_DEVICES_BRANCH 
+    - echo $OPHYD_DEVICES_BRANCH
     - echo "$CI_DEPENDENCY_PROXY_PASSWORD" | docker login $CI_DEPENDENCY_PROXY_SERVER --username $CI_DEPENDENCY_PROXY_USER --password-stdin
     - docker build -t end2end_client:test -f ./ci/Dockerfile.run_pytest --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=bec_ipython_client --build-arg OPHYD_DEVICES_BRANCH --build-arg CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX .
     - docker run --network=host --name end2end_client end2end_client:test
@@ -277,7 +272,7 @@ end-2-end:
 #     - podman run -d --network=host --env BEC_REDIS_HOST --name file_writer file_writer_vm bec-file-writer
 #     - podman run -d --network=host --env BEC_REDIS_HOST --name dap dap_server_vm bec-dap
 #     - podman run -d --network=host --env BEC_REDIS_HOST --name scihub scihub_vm bec-scihub
-#     # start end-to-end test, using previously started servers and previously running redis instance 
+#     # start end-to-end test, using previously started servers and previously running redis instance
 #     - podman run --network=host --env BEC_REDIS_HOST --name end2end_test end2end_client_test pytest --bec-redis-host $BEC_REDIS_HOST -v --random-order tests/end-2-end || true
 #     # copy the log files to the project directory in order to be reachable by git artifacts
 #     - podman cp device_server:/code/bec/logs/DeviceServer.log $CI_PROJECT_DIR/
@@ -296,10 +291,9 @@ end-2-end:
 #   rules:
 #     - if: '$CI_PIPELINE_SOURCE == "schedule"'
 #     - if: '$CI_PIPELINE_SOURCE == "web"'
-#     - if: '$CI_PIPELINE_SOURCE == "pipeline"'     
+#     - if: '$CI_PIPELINE_SOURCE == "pipeline"'
 #     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
 #     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"'
-
 
 end-2-end-conda:
   stage: End2End
@@ -408,7 +402,7 @@ trigger:
       - CHILD_PROJECT: ophyd_devices
         CHILD_PIPELINE_BRANCH: $OPHYD_DEVICES_BRANCH
       - CHILD_PROJECT: csaxs_bec
-        CHILD_PIPELINE_BRANCH: $CSAXS_BEC_BRANCH        
+        CHILD_PIPELINE_BRANCH: $CSAXS_BEC_BRANCH
       - CHILD_PROJECT: pxiii_bec
         CHILD_PIPELINE_BRANCH: $PXIII_BEC_BRANCH
       - CHILD_PROJECT: debye_bec
@@ -418,9 +412,9 @@ trigger:
       - CHILD_PROJECT: superxas_bec
         CHILD_PIPELINE_BRANCH: $SUPERXAS_BEC_BRANCH
       - CHILD_PROJECT: phoenix_bec
-        CHILD_PIPELINE_BRANCH: $PHOENIX_BEC_BRANCH 
+        CHILD_PIPELINE_BRANCH: $PHOENIX_BEC_BRANCH
       - CHILD_PROJECT: sim_bec
-        CHILD_PIPELINE_BRANCH: $SIM_BEC_BRANCH                 
+        CHILD_PIPELINE_BRANCH: $SIM_BEC_BRANCH
 
   needs: []
   trigger:
@@ -431,6 +425,7 @@ trigger:
         file: /.gitlab-ci.yml
   variables:
     BEC_CORE_BRANCH: $CI_COMMIT_REF_NAME
+    OPHYD_DEVICES_BRANCH: ${OPHYD_DEVICES_BRANCH}
     CHILD_PROJECTS: ""
   rules:
     - if: '$CI_PIPELINE_SOURCE == "web"'
@@ -482,7 +477,7 @@ dev-pages:
     # - git push https://oauth2:$CI_DEV_DEPLOY@gitlab.psi.ch/bec/bec.git :refs/tags/development || true
     # - git tag development $CI_COMMIT_SHA
     # - git push https://oauth2:$CI_DEV_DEPLOY@gitlab.psi.ch/bec/bec.git development
-    
+
     - git fetch --all
     - git branch -a | grep MR_DEV_BRANCH
     - git checkout remotes/origin/MR_DEV_BRANCH
@@ -498,7 +493,7 @@ pages:
   variables:
     TARGET_BRANCH: $CI_COMMIT_REF_NAME
   rules:
-    - if: '$CI_COMMIT_TAG != null'
+    - if: "$CI_COMMIT_TAG != null"
       variables:
         TARGET_BRANCH: $CI_COMMIT_TAG
     - if: '$CI_COMMIT_REF_NAME == "main"'
