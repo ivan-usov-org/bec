@@ -44,6 +44,9 @@ include:
       job_name: "check_dep_ipython_client"
   - project: "bec/awi_utils"
     file: "/templates/trigger-beamline-repos.yml"
+    inputs:
+      bec_core_branch: $CI_COMMIT_REF_NAME
+      ophyd_devices_branch: $OPHYD_DEVICES_BRANCH
 
 # different stages in the pipeline
 stages:
