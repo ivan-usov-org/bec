@@ -108,7 +108,7 @@ def get_device_info(obj: PositionerBase | ComputedSignal | Signal | Device | BEC
             f"User access method name {set(user_access.keys()) & set(protected_names)} is protected and cannot be used. Please rename the method."
         )
 
-    signals = []
+    signals = {}  # []
     if hasattr(obj, "component_names"):
         for component_name in obj.component_names:
             if get_device_base_class(getattr(obj, component_name)) == "signal":
@@ -116,15 +116,29 @@ def get_device_info(obj: PositionerBase | ComputedSignal | Signal | Device | BEC
                     raise DeviceConfigError(
                         f"Signal name {component_name} is protected and cannot be used. Please rename the signal."
                     )
-                signals.append(
+                # signals.append(
+                #     {
+                #         "component_name": component_name,
+                #         "obj_name": getattr(obj, component_name).name,
+                #         "kind_int": getattr(obj, component_name).kind,
+                #         "kind_str": str(getattr(obj, component_name).kind),
+                #         "metadata": getattr(obj, component_name)._metadata,
+                #     }
+                signals.update(
                     {
-                        "component_name": component_name,
-                        "obj_name": getattr(obj, component_name).name,
-                        "kind_int": getattr(obj, component_name).kind,
-                        "kind_str": str(getattr(obj, component_name).kind),
+                        component_name: {
+                            "component_name": component_name,
+                            "obj_name": getattr(obj, component_name).name,
+                            "kind_int": getattr(obj, component_name).kind,
+                            "kind_str": str(getattr(obj, component_name).kind),
+                            "metadata": getattr(obj, component_name)._metadata,
+                        }
                     }
                 )
     sub_devices = []
+
+    if isinstance(obj, Signal):
+        signals.update({obj.name: {"metadata": obj._metadata}})
 
     if hasattr(obj, "walk_subdevices"):
         for _, dev in obj.walk_subdevices():

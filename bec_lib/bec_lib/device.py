@@ -382,8 +382,8 @@ class DeviceBase:
 
     def _parse_info(self):
         if self._info.get("signals"):
-            for signal_info in self._info.get("signals"):
-                signal_name = signal_info.get("component_name")
+            for signal_name, signal_info in self._info.get("signals").items():
+                # signal_name = signal_info.get("component_name")
                 setattr(
                     self,
                     signal_name,
@@ -572,7 +572,31 @@ class DeviceBase:
         return self.name.__hash__()
 
     def __str__(self):
-        return f"{type(self).__name__}(name={self.name}, enabled={self.enabled})"
+        return self._compile_str(self)
+
+    @staticmethod
+    def _compile_str(obj: DeviceBase):
+        # pylint: disable=import-outside-toplevel
+        from bec_lib.devicemanager import DeviceManagerBase
+
+        if isinstance(obj.parent, DeviceManagerBase):
+            config = "".join(
+                [f"\t{key}: {val}\n" for key, val in obj._config.get("deviceConfig").items()]
+            )
+            separator = "--" * 10
+            return (
+                f"{type(obj).__name__}(name={obj.name},"
+                f" enabled={obj.enabled}):\n{separator}\nDetails:\n\tDescription:"
+                f" {obj._config.get('description', obj.name)}\n\tStatus:"
+                f" {'enabled' if obj.enabled else 'disabled'}\n\tRead only:"
+                f" {obj.read_only}\n\tSoftware Trigger: {obj.software_trigger}\n\tLast recorded value:"
+                f" {obj.read(cached=True)}\n\tDevice class:"
+                f" {obj._config.get('deviceClass')}\n\treadoutPriority:"
+                f" {obj._config.get('readoutPriority')}\n\tDevice tags:"
+                f" {obj._config.get('deviceTags', [])}\n\tUser parameter:"
+                f" {obj._config.get('userParameter')}\n{separator}\nConfig:\n{config}"
+            )
+        return f"{type(obj).__name__}(name={obj.name}, enabled={obj.enabled})"
 
 
 class OphydInterfaceBase(DeviceBase):
@@ -750,29 +774,6 @@ class Device(OphydInterfaceBase):
         """
         Provides a summary of the device, all associated signals and their type.
         """
-
-    def __str__(self):
-        # pylint: disable=import-outside-toplevel
-        from bec_lib.devicemanager import DeviceManagerBase
-
-        if isinstance(self.parent, DeviceManagerBase):
-            config = "".join(
-                [f"\t{key}: {val}\n" for key, val in self._config.get("deviceConfig").items()]
-            )
-            separator = "--" * 10
-            return (
-                f"{type(self).__name__}(name={self.name},"
-                f" enabled={self.enabled}):\n{separator}\nDetails:\n\tDescription:"
-                f" {self._config.get('description', self.name)}\n\tStatus:"
-                f" {'enabled' if self.enabled else 'disabled'}\n\tRead only:"
-                f" {self.read_only}\n\tSoftware Trigger: {self.software_trigger}\n\t"
-                f"Last recorded value: {self.read(cached=True)}\n\tDevice"
-                f" class: {self._config.get('deviceClass')}\n\treadoutPriority:"
-                f" {self._config.get('readoutPriority')}\n\tDevice tags:"
-                f" {self._config.get('deviceTags', [])}\n\tUser parameter:"
-                f" {self._config.get('userParameter')}\n{separator}\nConfig:\n{config}"
-            )
-        return f"{type(self).__name__}(name={self.name}, enabled={self.enabled})"
 
 
 class AdjustableMixin:
