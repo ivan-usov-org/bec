@@ -116,14 +116,6 @@ def get_device_info(obj: PositionerBase | ComputedSignal | Signal | Device | BEC
                     raise DeviceConfigError(
                         f"Signal name {component_name} is protected and cannot be used. Please rename the signal."
                     )
-                # signals.append(
-                #     {
-                #         "component_name": component_name,
-                #         "obj_name": getattr(obj, component_name).name,
-                #         "kind_int": getattr(obj, component_name).kind,
-                #         "kind_str": str(getattr(obj, component_name).kind),
-                #         "metadata": getattr(obj, component_name)._metadata,
-                #     }
                 signals.update(
                     {
                         component_name: {
@@ -131,6 +123,7 @@ def get_device_info(obj: PositionerBase | ComputedSignal | Signal | Device | BEC
                             "obj_name": getattr(obj, component_name).name,
                             "kind_int": getattr(obj, component_name).kind,
                             "kind_str": str(getattr(obj, component_name).kind),
+                            # pylint: disable=protected-access
                             "metadata": getattr(obj, component_name)._metadata,
                         }
                     }
@@ -138,6 +131,7 @@ def get_device_info(obj: PositionerBase | ComputedSignal | Signal | Device | BEC
     sub_devices = []
 
     if isinstance(obj, Signal):
+        # pylint: disable=protected-access
         signals.update({obj.name: {"metadata": obj._metadata}})
 
     if hasattr(obj, "walk_subdevices"):

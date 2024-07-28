@@ -93,62 +93,128 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
             info={
                 "device_info": {
                     "device_base_class": "positioner",
-                    "signals": [
-                        {
+                    "signals": {
+                        "readback": {
                             "component_name": "readback",
                             "obj_name": device_name,
                             "kind_int": 5,
                             "kind_str": "Kind.hinted",
+                            "metadata": {
+                                "connected": True,
+                                "read_access": True,
+                                "write_access": False,
+                                "timestamp": 0,
+                                "status": None,
+                                "severity": None,
+                                "precision": None,
+                            },
                         },
-                        {
+                        "setpoint": {
                             "component_name": "setpoint",
                             "obj_name": f"{device_name}_setpoint",
                             "kind_int": 1,
                             "kind_str": "Kind.normal",
+                            "metadata": {
+                                "connected": True,
+                                "read_access": True,
+                                "write_access": True,
+                                "timestamp": 0,
+                                "status": None,
+                                "severity": None,
+                                "precision": None,
+                            },
                         },
-                        {
+                        "motor_is_moving": {
                             "component_name": "motor_is_moving",
                             "obj_name": f"{device_name}_motor_is_moving",
                             "kind_int": 1,
                             "kind_str": "Kind.normal",
+                            "metadata": {
+                                "connected": True,
+                                "read_access": True,
+                                "write_access": True,
+                                "timestamp": 0,
+                                "status": None,
+                                "severity": None,
+                                "precision": None,
+                            },
                         },
-                        {
-                            "component_name": "readback",
-                            "obj_name": device_name,
-                            "kind_int": 5,
-                            "kind_str": "Kind.hinted",
-                        },
-                        {
+                        "velocity": {
                             "component_name": "velocity",
                             "obj_name": f"{device_name}_velocity",
                             "kind_int": 2,
                             "kind_str": "Kind.config",
+                            "metadata": {
+                                "connected": True,
+                                "read_access": True,
+                                "write_access": True,
+                                "timestamp": 0,
+                                "status": None,
+                                "severity": None,
+                                "precision": None,
+                            },
                         },
-                        {
+                        "acceleration": {
                             "component_name": "acceleration",
                             "obj_name": f"{device_name}_acceleration",
                             "kind_int": 2,
                             "kind_str": "Kind.config",
+                            "metadata": {
+                                "connected": True,
+                                "read_access": True,
+                                "write_access": True,
+                                "timestamp": 0,
+                                "status": None,
+                                "severity": None,
+                                "precision": None,
+                            },
                         },
-                        {
+                        "high_limit_travel": {
                             "component_name": "high_limit_travel",
                             "obj_name": f"{device_name}_high_limit_travel",
                             "kind_int": 2,
                             "kind_str": "Kind.config",
+                            "metadata": {
+                                "connected": True,
+                                "read_access": True,
+                                "write_access": True,
+                                "timestamp": 0,
+                                "status": None,
+                                "severity": None,
+                                "precision": None,
+                            },
                         },
-                        {
+                        "low_limit_travel": {
                             "component_name": "low_limit_travel",
                             "obj_name": f"{device_name}_low_limit_travel",
                             "kind_int": 2,
                             "kind_str": "Kind.config",
+                            "metadata": {
+                                "connected": True,
+                                "read_access": True,
+                                "write_access": True,
+                                "timestamp": 0,
+                                "status": None,
+                                "severity": None,
+                                "precision": None,
+                            },
                         },
-                        {
+                        "unused": {
                             "component_name": "unused",
                             "obj_name": f"{device_name}_unused",
                             "kind_int": 0,
                             "kind_str": "Kind.omitted",
+                            "metadata": {
+                                "connected": True,
+                                "read_access": True,
+                                "write_access": True,
+                                "timestamp": 0,
+                                "status": None,
+                                "severity": None,
+                                "precision": None,
+                            },
                         },
-                    ],
+                    },
                     "hints": {"fields": ["samx"]},
                     "describe": {
                         "samx": {
@@ -254,38 +320,83 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
                                 "device_attr_name": "messages",
                                 "device_dotted_name": "messages",
                                 "device_base_class": "device",
-                                "signals": [
-                                    {
+                                "signals": {
+                                    "message1": {
                                         "component_name": "message1",
                                         "obj_name": "dyn_signals_messages_message1",
                                         "kind_int": 1,
                                         "kind_str": "Kind.normal",
+                                        "metadata": {
+                                            "connected": True,
+                                            "read_access": True,
+                                            "write_access": True,
+                                            "timestamp": 0,
+                                            "status": None,
+                                            "severity": None,
+                                            "precision": None,
+                                        },
                                     },
-                                    {
+                                    "message2": {
                                         "component_name": "message2",
                                         "obj_name": "dyn_signals_messages_message2",
                                         "kind_int": 1,
                                         "kind_str": "Kind.normal",
+                                        "metadata": {
+                                            "connected": True,
+                                            "read_access": True,
+                                            "write_access": True,
+                                            "timestamp": 0,
+                                            "status": None,
+                                            "severity": None,
+                                            "precision": None,
+                                        },
                                     },
-                                    {
+                                    "message3": {
                                         "component_name": "message3",
                                         "obj_name": "dyn_signals_messages_message3",
                                         "kind_int": 1,
                                         "kind_str": "Kind.normal",
+                                        "metadata": {
+                                            "connected": True,
+                                            "read_access": True,
+                                            "write_access": True,
+                                            "timestamp": 0,
+                                            "status": None,
+                                            "severity": None,
+                                            "precision": None,
+                                        },
                                     },
-                                    {
+                                    "message4": {
                                         "component_name": "message4",
                                         "obj_name": "dyn_signals_messages_message4",
                                         "kind_int": 1,
                                         "kind_str": "Kind.normal",
+                                        "metadata": {
+                                            "connected": True,
+                                            "read_access": True,
+                                            "write_access": True,
+                                            "timestamp": 0,
+                                            "status": None,
+                                            "severity": None,
+                                            "precision": None,
+                                        },
                                     },
-                                    {
+                                    "message5": {
                                         "component_name": "message5",
                                         "obj_name": "dyn_signals_messages_message5",
                                         "kind_int": 1,
                                         "kind_str": "Kind.normal",
+                                        "metadata": {
+                                            "connected": True,
+                                            "read_access": True,
+                                            "write_access": True,
+                                            "timestamp": 0,
+                                            "status": None,
+                                            "severity": None,
+                                            "precision": None,
+                                        },
                                     },
-                                ],
+                                },
                                 "hints": {"fields": []},
                                 "describe": {
                                     "dyn_signals_messages_message1": {
@@ -335,101 +446,133 @@ def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessag
 
     device_base_class = "positioner" if device_class == "SimPositioner" else "signal"
     if device_base_class == "positioner":
-        signals = [
-            {
+        signals = {
+            "readback": {
                 "component_name": "readback",
                 "obj_name": device_name,
                 "kind_int": 5,
                 "kind_str": "Kind.hinted",
+                "metadata": {
+                    "connected": True,
+                    "read_access": True,
+                    "write_access": False,
+                    "timestamp": 0,
+                    "status": None,
+                    "severity": None,
+                    "precision": None,
+                },
             },
-            {
+            "setpoint": {
                 "component_name": "setpoint",
                 "obj_name": f"{device_name}_setpoint",
                 "kind_int": 1,
                 "kind_str": "Kind.normal",
+                "metadata": {
+                    "connected": True,
+                    "read_access": True,
+                    "write_access": True,
+                    "timestamp": 0,
+                    "status": None,
+                    "severity": None,
+                    "precision": None,
+                },
             },
-            {
+            "motor_is_moving": {
                 "component_name": "motor_is_moving",
                 "obj_name": f"{device_name}_motor_is_moving",
                 "kind_int": 1,
                 "kind_str": "Kind.normal",
             },
-            {
-                "component_name": "readback",
-                "obj_name": device_name,
-                "kind_int": 5,
-                "kind_str": "Kind.hinted",
-            },
-            {
+            "velocity": {
                 "component_name": "velocity",
                 "obj_name": f"{device_name}_velocity",
                 "kind_int": 2,
                 "kind_str": "Kind.config",
+                "metadata": {
+                    "connected": True,
+                    "read_access": True,
+                    "write_access": True,
+                    "timestamp": 0,
+                    "status": None,
+                    "severity": None,
+                    "precision": None,
+                },
             },
-            {
+            "acceleration": {
                 "component_name": "acceleration",
                 "obj_name": f"{device_name}_acceleration",
                 "kind_int": 2,
                 "kind_str": "Kind.config",
+                "metadata": {
+                    "connected": True,
+                    "read_access": True,
+                    "write_access": True,
+                    "timestamp": 0,
+                    "status": None,
+                    "severity": None,
+                    "precision": None,
+                },
             },
-            {
+            "high_limit_travel": {
                 "component_name": "high_limit_travel",
                 "obj_name": f"{device_name}_high_limit_travel",
                 "kind_int": 2,
                 "kind_str": "Kind.config",
+                "metadata": {
+                    "connected": True,
+                    "read_access": True,
+                    "write_access": True,
+                    "timestamp": 0,
+                    "status": None,
+                    "severity": None,
+                    "precision": None,
+                },
             },
-            {
+            "low_limit_travel": {
                 "component_name": "low_limit_travel",
                 "obj_name": f"{device_name}_low_limit_travel",
                 "kind_int": 2,
                 "kind_str": "Kind.config",
+                "metadata": {
+                    "connected": True,
+                    "read_access": True,
+                    "write_access": True,
+                    "timestamp": 0,
+                    "status": None,
+                    "severity": None,
+                    "precision": None,
+                },
             },
-            {
+            "unused": {
                 "component_name": "unused",
                 "obj_name": f"{device_name}_unused",
                 "kind_int": 0,
                 "kind_str": "Kind.omitted",
+                "metadata": {
+                    "connected": True,
+                    "read_access": True,
+                    "write_access": True,
+                    "timestamp": 0,
+                    "status": None,
+                    "severity": None,
+                    "precision": None,
+                },
             },
-        ]
+        }
     elif device_base_class == "signal":
-        signals = [
-            {
-                "component_name": "readback",
-                "obj_name": device_name,
-                "kind_int": 5,
-                "kind_str": "Kind.hinted",
-            },
-            {
-                "component_name": "velocity",
-                "obj_name": f"{device_name}_velocity",
-                "kind_int": 2,
-                "kind_str": "Kind.config",
-            },
-            {
-                "component_name": "acceleration",
-                "obj_name": f"{device_name}_acceleration",
-                "kind_int": 2,
-                "kind_str": "Kind.config",
-            },
-            {
-                "component_name": "high_limit_travel",
-                "obj_name": f"{device_name}_high_limit_travel",
-                "kind_int": 2,
-                "kind_str": "Kind.config",
-            },
-            {
-                "component_name": "low_limit_travel",
-                "obj_name": f"{device_name}_low_limit_travel",
-                "kind_int": 2,
-                "kind_str": "Kind.config",
-            },
-            {
-                "component_name": "unused",
-                "obj_name": f"{device_name}_unused",
-                "kind_int": 0,
-                "kind_str": "Kind.omitted",
-            },
-        ]
+        signals = {
+            device_name: {
+                "metadata": {
+                    "connected": True,
+                    "read_access": True,
+                    "write_access": False,
+                    "timestamp": 0,
+                    "status": None,
+                    "severity": None,
+                    "precision": None,
+                }
+            }
+        }
     dev_info = {
         "device_name": device_name,
         "device_info": {

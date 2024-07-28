@@ -382,8 +382,7 @@ class DeviceBase:
 
     def _parse_info(self):
         if self._info.get("signals"):
-            for signal_name, signal_info in self._info.get("signals").items():
-                # signal_name = signal_info.get("component_name")
+            for signal_name, signal_info in self._info.get("signals", {}).items():
                 setattr(
                     self,
                     signal_name,
