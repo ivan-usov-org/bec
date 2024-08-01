@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## v2.20.2 (2024-08-01)
+
+### Ci
+
+* ci: made jobs interruptible ([`1fc6bc4`](https://gitlab.psi.ch/bec/bec/-/commit/1fc6bc4b22c48715eff4d27709cffc5c08037769))
+
+* ci: added support for child pipelines ([`d3385f6`](https://gitlab.psi.ch/bec/bec/-/commit/d3385f66e50e6b19e79030ec0af13054a7ab2f47))
+
+### Fix
+
+* fix: do not import cli.launch.main in __init__
+
+This has the side effect of reconfiguring loggers to the level specified
+in the main module (INFO in general) ([`45b3263`](https://gitlab.psi.ch/bec/bec/-/commit/45b32632181fff18758e2195b84f8254f365465a))
+
 ## v2.20.1 (2024-07-25)
 
 ### Ci
@@ -146,18 +161,6 @@ Add &#34;--log-level&#34; and &#34;--file-log-level&#34; to be able to change lo
 
 * fix: fixed cont_line_scan ([`d9df652`](https://gitlab.psi.ch/bec/bec/-/commit/d9df652e0464ce44eccb4b79c6bc63a54890edef))
 
-* fix: bugfix on dtype int/float missmatch for self.positions ([`37c4868`](https://gitlab.psi.ch/bec/bec/-/commit/37c4868b13df95c56792c89be7171859ba9d9295))
-
 ### Test
 
 * test: fix tests ([`b5ee738`](https://gitlab.psi.ch/bec/bec/-/commit/b5ee738153a2fc20d89822018cd420fbab415bba))
-
-## v2.17.2 (2024-06-28)
-
-### Documentation
-
-* docs: fix redis install for psi-maintained ([`bed9e90`](https://gitlab.psi.ch/bec/bec/-/commit/bed9e90183a236880d3e54d93571cdf4ad2ce9a5))
-
-### Fix
-
-* fix: fixed bug where a failed device status would not cause the scan to abort ([`2b93187`](https://gitlab.psi.ch/bec/bec/-/commit/2b93187c3522e99b09c68bc3b844e3ea6ffd1adf))
