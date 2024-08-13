@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v2.21.2 (2024-08-13)
+
+### Fix
+
+* fix(bec_lib): raise on rpc status failure ([`efc07ff`](https://gitlab.psi.ch/bec/bec/-/commit/efc07ff4ff6ddf810d3a40ec52b35877e7ae67a7))
+
+### Test
+
+* test: fixed test for status wait ([`4c5dd4a`](https://gitlab.psi.ch/bec/bec/-/commit/4c5dd4ab40a0c8d2ebef38d36ec61c230243f649))
+
 ## v2.21.1 (2024-08-13)
 
 ### Fix
@@ -152,13 +162,3 @@ Add &#34;--log-level&#34; and &#34;--file-log-level&#34; to be able to change lo
 ### Test
 
 * test: fix tests due to config changes ([`22c1e57`](https://gitlab.psi.ch/bec/bec/-/commit/22c1e5734e0171e8e2a526e947e3f7d8098dad06))
-
-## v2.18.0 (2024-07-03)
-
-### Build
-
-* build: added tomli dependency ([`d1b7841`](https://gitlab.psi.ch/bec/bec/-/commit/d1b78417c03db383f11385add1362be2a6ce7175))
-
-### Feature
-
-* feat(bec_lib): added service version tag to service info ([`326cd21`](https://gitlab.psi.ch/bec/bec/-/commit/326cd218d0a4e1e1444f88964365954fca426900))
