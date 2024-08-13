@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## v2.21.1 (2024-08-13)
+
+### Fix
+
+* fix(redis_connector): fixed support for bundle message ([`ef637c0`](https://gitlab.psi.ch/bec/bec/-/commit/ef637c0e59f94ad471ec1dce5906a56ae0299f9a))
+
+* fix(bec_lib): fixed reported msg type for device_config endpoint ([`28f9882`](https://gitlab.psi.ch/bec/bec/-/commit/28f98822173cba43860dcd20f890fee93a978d6a))
+
+* fix(bec_lib): added check to ensure becmessage type is correct ([`c8b4ab9`](https://gitlab.psi.ch/bec/bec/-/commit/c8b4ab9d99530351fa2005b69e118a5fb563d1e3))
+
+### Refactor
+
+* refactor: minor cleanup ([`f08c652`](https://gitlab.psi.ch/bec/bec/-/commit/f08c652dd6eca114331be4b915bec66fe911ff12))
+
+* refactor(scan_bundler): moved specific bec emitter methods from emitterbase to bec emitter ([`b0bc0da`](https://gitlab.psi.ch/bec/bec/-/commit/b0bc0da54f66e5ad4d26471c88eb7d1c8910bead))
+
 ## v2.21.0 (2024-08-13)
 
 ### Documentation
@@ -143,24 +159,6 @@ Add &#34;--log-level&#34; and &#34;--file-log-level&#34; to be able to change lo
 
 * build: added tomli dependency ([`d1b7841`](https://gitlab.psi.ch/bec/bec/-/commit/d1b78417c03db383f11385add1362be2a6ce7175))
 
-### Ci
-
-* ci: added phoenix, sim and superxas pipelines ([`3e91a99`](https://gitlab.psi.ch/bec/bec/-/commit/3e91a99945f73bf8fa7b4ddb6dacbab4614d6bdf))
-
 ### Feature
 
 * feat(bec_lib): added service version tag to service info ([`326cd21`](https://gitlab.psi.ch/bec/bec/-/commit/326cd218d0a4e1e1444f88964365954fca426900))
-
-## v2.17.6 (2024-07-02)
-
-### Fix
-
-* fix(device_server): fixed readout of objects that are neither devices nor signals ([`b4ee786`](https://gitlab.psi.ch/bec/bec/-/commit/b4ee7865cabe9010b49e928d4aa5f6107afd2df4))
-
-## v2.17.5 (2024-07-01)
-
-### Fix
-
-* fix(device_server): fixed bug that caused alarms not to be raised ([`7a5fa85`](https://gitlab.psi.ch/bec/bec/-/commit/7a5fa85c0f715602b1edec5b5a499c2139b86b7e))
-
-## v2.17.4 (2024-07-01)
