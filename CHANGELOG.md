@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## v2.21.0 (2024-08-13)
+
+### Documentation
+
+* docs(messaging): added first draft of bec messaging docs ([`efbeca3`](https://gitlab.psi.ch/bec/bec/-/commit/efbeca3c322fa62a95b51ebc5670a6d446dcdebc))
+
+### Feature
+
+* feat: Add metadata entry to _info for signal and device ([`fe4979a`](https://gitlab.psi.ch/bec/bec/-/commit/fe4979adbd4804c6f3b69902ade0d22c1b70f8cd))
+
+### Test
+
+* test: fix tests for adapted device_info ([`8778843`](https://gitlab.psi.ch/bec/bec/-/commit/877884336b52aa9e66e8b463fcb3bc7abcd654d1))
+
+### Unknown
+
+* docs (data_access): Data Access, messaging and event system. ([`27c838d`](https://gitlab.psi.ch/bec/bec/-/commit/27c838db04749e8051f57582c65492243b967094))
+
 ## v2.20.2 (2024-08-01)
 
 ### Ci
@@ -146,21 +164,3 @@ Add &#34;--log-level&#34; and &#34;--file-log-level&#34; to be able to change lo
 * fix(device_server): fixed bug that caused alarms not to be raised ([`7a5fa85`](https://gitlab.psi.ch/bec/bec/-/commit/7a5fa85c0f715602b1edec5b5a499c2139b86b7e))
 
 ## v2.17.4 (2024-07-01)
-
-### Fix
-
-* fix(rpc): fixed bug that caused get to not update the cache ([`814f501`](https://gitlab.psi.ch/bec/bec/-/commit/814f50132e4018efaafc1f687cc3678bde4af316))
-
-### Refactor
-
-* refactor(device_server): rpc_mixin cleanup ([`58c0425`](https://gitlab.psi.ch/bec/bec/-/commit/58c0425772e2eee871aecbdb8a9dc88f4c0cb39e))
-
-## v2.17.3 (2024-06-28)
-
-### Fix
-
-* fix: fixed cont_line_scan ([`d9df652`](https://gitlab.psi.ch/bec/bec/-/commit/d9df652e0464ce44eccb4b79c6bc63a54890edef))
-
-### Test
-
-* test: fix tests ([`b5ee738`](https://gitlab.psi.ch/bec/bec/-/commit/b5ee738153a2fc20d89822018cd420fbab415bba))
