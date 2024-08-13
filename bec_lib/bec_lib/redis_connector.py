@@ -27,7 +27,7 @@ import redis.exceptions
 from bec_lib.connector import ConnectorBase, MessageObject
 from bec_lib.endpoints import EndpointInfo, MessageEndpoints
 from bec_lib.logger import bec_logger
-from bec_lib.messages import AlarmMessage, BECMessage, ClientInfoMessage, LogMessage
+from bec_lib.messages import AlarmMessage, BECMessage, BundleMessage, ClientInfoMessage, LogMessage
 from bec_lib.serialization import MsgpackSerialization
 
 if TYPE_CHECKING:
@@ -60,9 +60,16 @@ def validate_endpoint(endpoint_arg):
                     )
                 for val in list(args) + list(kwargs.values()):
                     if isinstance(val, BECMessage) and not isinstance(val, endpoint.message_type):
-                        raise TypeError(
-                            f"Message type {type(val)} is not compatible with endpoint {endpoint}. Expected {endpoint.message_type}"
-                        )
+                        if not isinstance(val, BundleMessage):
+                            raise TypeError(
+                                f"Message type {type(val)} is not compatible with endpoint {endpoint}. Expected {endpoint.message_type}"
+                            )
+                        for msg in val.messages:
+                            if not isinstance(msg, endpoint.message_type):
+                                raise TypeError(
+                                    f"Message type {type(msg)} is not compatible with endpoint {endpoint}. Expected {endpoint.message_type}"
+                                )
+
                     if isinstance(val, dict):
                         for sub_val in val.values():
                             if isinstance(sub_val, BECMessage) and not isinstance(
