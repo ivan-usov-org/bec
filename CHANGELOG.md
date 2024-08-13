@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v2.21.3 (2024-08-13)
+
+### Fix
+
+* fix: fix bug in bluesky emitter get descriptor method ([`27fa758`](https://gitlab.psi.ch/bec/bec/-/commit/27fa7584cd61c6453db01ab05f49b9c712155641))
+
 ## v2.21.2 (2024-08-13)
 
 ### Fix
@@ -152,12 +158,6 @@ Add &#34;--log-level&#34; and &#34;--file-log-level&#34; to be able to change lo
 ### Documentation
 
 * docs: improve docs ([`b25a670`](https://gitlab.psi.ch/bec/bec/-/commit/b25a6704adf405344b3acfb2417cf5896fa77009))
-
-### Fix
-
-* fix: add async monitor to config and fix dap tests due to API changes in ophyd ([`f9ec240`](https://gitlab.psi.ch/bec/bec/-/commit/f9ec2403db1dc64d2a975814976f6560336ec184))
-
-* fix: bugfix within scibec metadata handler to accomodate changes of metadata ([`eef2764`](https://gitlab.psi.ch/bec/bec/-/commit/eef2764f448b749345e53158ecccf09ea4f463cb))
 
 ### Test
 
