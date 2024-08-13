@@ -63,7 +63,7 @@ class BlueskyEmitter(EmitterBase):
             "name": "primary",
             "hints": {"samx": {"fields": ["samx"]}, "samy": {"fields": ["samy"]}},
             "object_keys": {
-                dev.name: [val["obj_name"] for val in dev._info.get("signals", {})]
+                dev.name: [val for val in dev._info.get("signals", {})]
                 for dev in sb.monitored_devices[scan_id]["devices"]
             },
         }
