@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v2.21.5 (2024-08-14)
+
+### Fix
+
+* fix(tmux): retry tmux launch on error
+
+Sometimes, restarting the tmux client is flaky ([`8ba44f6`](https://gitlab.psi.ch/bec/bec/-/commit/8ba44f6eef7bd9f118933ba03900134d9bb6cf32))
+
 ## v2.21.4 (2024-08-14)
 
 ### Fix
@@ -154,9 +162,3 @@ Add &#34;--log-level&#34; and &#34;--file-log-level&#34; to be able to change lo
 ### Fix
 
 * fix(bec_lib): accept config as input to ServiceConfig ([`86714ae`](https://gitlab.psi.ch/bec/bec/-/commit/86714ae57b5952eaa739a5ba60d20aa6ab51bf91))
-
-### Test
-
-* test: fixed test for triggered devices ([`05e82ef`](https://gitlab.psi.ch/bec/bec/-/commit/05e82efe088a9ad0ac24542099c1008562287dbf))
-
-## v2.18.1 (2024-07-04)
