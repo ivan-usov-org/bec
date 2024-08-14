@@ -17,7 +17,8 @@ import warnings
 from collections.abc import MutableMapping, Sequence
 from dataclasses import dataclass
 from functools import wraps
-from typing import TYPE_CHECKING, Optional
+from glob import fnmatch
+from typing import TYPE_CHECKING
 
 import louie
 import redis
@@ -27,10 +28,12 @@ import redis.exceptions
 from bec_lib.connector import ConnectorBase, MessageObject
 from bec_lib.endpoints import EndpointInfo, MessageEndpoints
 from bec_lib.logger import bec_logger
-from bec_lib.messages import AlarmMessage, BECMessage, BundleMessage, ClientInfoMessage, LogMessage
+from bec_lib.messages import AlarmMessage, BECMessage, BundleMessage, ClientInfoMessage
 from bec_lib.serialization import MsgpackSerialization
 
 if TYPE_CHECKING:
+    from typing import Union
+
     from bec_lib.alarm_handler import Alarms
 
 
