@@ -108,7 +108,7 @@ def test_redis_connector_unregister(connected_connector):
     assert redisdb.execute_command("PUBSUB CHANNELS") == []
     assert len(connector._topics_cb) == 0
 
-    connector.register(topics=["topic1", "topic2"], cb=received_event, start_thread=False)
+    connector.register(patterns=["topic*"], cb=received_event, start_thread=False)
 
     connector.send("topic1", TestMessage(msg="topic1"))
     connector.poll_messages(timeout=1)
@@ -116,7 +116,7 @@ def test_redis_connector_unregister(connected_connector):
     connector.send("topic2", TestMessage(msg="topic2"))
     connector.poll_messages(timeout=1)
     on_msg_received.assert_called_with("topic2")
-    connector.unregister(topics=["topic1", "topic2"])
+    connector.unregister(patterns=["topic*"])
     assert redisdb.execute_command("PUBSUB CHANNELS") == []
     assert len(connector._topics_cb) == 0
 
