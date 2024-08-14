@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v2.21.4 (2024-08-14)
+
+### Fix
+
+* fix(client): fixed client init of singleton instance ([`cfae861`](https://gitlab.psi.ch/bec/bec/-/commit/cfae8617fdb7f7a7fc613206f0f27d7274d899c1))
+
 ## v2.21.3 (2024-08-13)
 
 ### Fix
@@ -154,11 +160,3 @@ Add &#34;--log-level&#34; and &#34;--file-log-level&#34; to be able to change lo
 * test: fixed test for triggered devices ([`05e82ef`](https://gitlab.psi.ch/bec/bec/-/commit/05e82efe088a9ad0ac24542099c1008562287dbf))
 
 ## v2.18.1 (2024-07-04)
-
-### Documentation
-
-* docs: improve docs ([`b25a670`](https://gitlab.psi.ch/bec/bec/-/commit/b25a6704adf405344b3acfb2417cf5896fa77009))
-
-### Test
-
-* test: fix tests due to config changes ([`22c1e57`](https://gitlab.psi.ch/bec/bec/-/commit/22c1e5734e0171e8e2a526e947e3f7d8098dad06))
