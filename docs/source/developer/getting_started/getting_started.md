@@ -13,7 +13,7 @@ architecture/
 contributing/
 install_developer_env/
 vscode/
-bec_config/
+bec_service_config/
 bec_plugins/
 logs/
 tests/

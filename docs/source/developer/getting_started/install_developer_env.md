@@ -72,20 +72,7 @@ conda create -n bec python=3.11
 conda activate bec
 ```
 ````
-
-````{tab-item} PSI pmodules
-On PSI-maintained systems with pmodules, you can simply load psi-python311/2024.02 via
-
-```{code-block} bash
-module add psi-python311/2024.02
-python -m venv ./bec_venv
-source ./bec_venv/bin/activate
-```
-
-Note that pmodule environments are activated _only_ in the current shell.
-
-````
-`````
+````` 
 
 ### Install BEC
 Make sure that the Python environment is activated as described above before you install BEC.
@@ -132,16 +119,6 @@ On MacOS, you can install Redis via [Homebrew](https://brew.sh) and start the se
 ```bash
 brew install redis
 brew install tmux
-redis-server
-```
-````
-
-````{tab-item} PSI-maintained Linux
-On PSI-maintained systems with pmodules, you can simply load psi-python311/2024.02 and tmux/3.2 via
-
-```{code-block} bash
-module add tmux/3.2
-module add redis/7.0.12
 redis-server
 ```
 ````
