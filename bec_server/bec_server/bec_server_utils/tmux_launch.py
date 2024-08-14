@@ -1,6 +1,8 @@
 import os
+import time
 
 import libtmux
+from libtmux.exc import LibTmuxException
 
 
 def activate_venv(pane, service_name, service_path):
@@ -42,10 +44,20 @@ def tmux_start(bec_path: str, config_path: str, services: dict):
         services (dict): Dictionary of services to launch. Keys are the service names, values are path and command templates.
 
     """
-    tmux_server = libtmux.Server()
-    session = tmux_server.new_session(
-        "bec", window_name="BEC server. Use `ctrl+b d` to detach.", kill_session=True
-    )
+
+    def get_new_session():
+        tmux_server = libtmux.Server()
+        session = tmux_server.new_session(
+            "bec", window_name="BEC server. Use `ctrl+b d` to detach.", kill_session=True
+        )
+        return session
+
+    try:
+        session = get_new_session()
+    except LibTmuxException:
+        # retry once... sometimes there is a hiccup in creating the session
+        time.sleep(1)
+        session = get_new_session()
 
     # create panes and run commands
     panes = []
