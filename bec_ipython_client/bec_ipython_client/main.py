@@ -25,6 +25,7 @@ logger = bec_logger.logger
 
 
 class CLIBECClient(BECClient):
+
     def _wait_for_server(self):
         ret = super()._wait_for_server()
         cmdline_args = self._BECClient__init_params["config"].config.get("cmdline_args")

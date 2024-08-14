@@ -128,19 +128,19 @@ class BECClient(BECService, UserScriptsMixin):
         self._initialized = True
 
     def __new__(cls, *args, forced=False, **kwargs):
-        if forced or cls._client is None:
-            cls._client = super(BECClient, cls).__new__(cls)
-            cls._initialized = False
-        return cls._client
+        if forced or BECClient._client is None:
+            BECClient._client = super(BECClient, cls).__new__(cls)
+            BECClient._initialized = False
+        return BECClient._client
 
     def __str__(self) -> str:
         return "BECClient\n\nTo get a list of available commands, type `bec.show_all_commands()`"
 
     @classmethod
     def _reset_singleton(cls):
-        cls._client = None
-        cls._initialized = False
-        cls.started = False
+        BECClient._client = None
+        BECClient._initialized = False
+        BECClient.started = False
 
     @property
     def username(self) -> str:
