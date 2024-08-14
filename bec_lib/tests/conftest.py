@@ -2,6 +2,7 @@ import fakeredis
 import pytest
 
 from bec_lib import bec_logger
+from bec_lib.client import BECClient
 from bec_lib.redis_connector import RedisConnector
 
 # overwrite threads_check fixture from bec_lib,
@@ -12,6 +13,15 @@ from bec_lib.redis_connector import RedisConnector
 def threads_check(threads_check):
     yield
     bec_logger.logger.remove()
+
+
+@pytest.fixture(autouse=True)
+def bec_client_singleton_reset():
+    """Reset the BECClient singleton before and after each test."""
+    # pylint: disable=protected-access
+    BECClient._reset_singleton()
+    yield
+    BECClient._reset_singleton()
 
 
 def fake_redis_server(host, port):
