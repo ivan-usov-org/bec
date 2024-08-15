@@ -160,6 +160,7 @@ tests:
   script:
     - git clone --branch $OPHYD_DEVICES_BRANCH https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
     - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices
+    - pip install ./ophyd_devices
     - pip install pytest pytest-random-order pytest-cov pytest-timeout
     - apt-get update
     - apt-get install -y gcc
@@ -185,6 +186,7 @@ tests-3.11:
   script:
     - git clone --branch $OPHYD_DEVICES_BRANCH https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
     - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices
+    - pip install ./ophyd_devices
     - pip install pytest pytest-random-order pytest-cov pytest-timeout
     - apt-get update
     - apt-get install -y gcc
@@ -354,6 +356,7 @@ end-2-end-conda:
     # get ophyd devices repo (needed for the device_server)
     - git clone --branch $OPHYD_DEVICES_BRANCH https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
     - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices
+    - pip install ./ophyd_devices
 
     - source ./bin/install_bec_dev.sh -t
 
@@ -398,6 +401,7 @@ end-2-end-conda-310:
     # get ophyd devices repo (needed for the device_server)
     - git clone --branch $OPHYD_DEVICES_BRANCH https://oauth2:$CI_OPHYD_DEVICES_KEY@gitlab.psi.ch/bec/ophyd_devices.git
     - export OPHYD_DEVICES_PATH=$PWD/ophyd_devices
+    - pip install ./ophyd_devices
 
     - *install-bec-services-dev
 
