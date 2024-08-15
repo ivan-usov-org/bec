@@ -87,10 +87,12 @@ def test_config_updates(bec_client_lib):
     assert dev.rt_controller.limits == [-50, 50]
 
     dev.rt_controller.velocity.set(10).wait()
-    assert dev.rt_controller.velocity.read()["samx_velocity"]["value"] == 10
-    assert dev.rt_controller.velocity.read(cached=False)["samx_velocity"]["value"] == 10
-    assert dev.rt_controller.read_configuration()["samx_velocity"]["value"] == 10
-    assert dev.rt_controller.read_configuration(cached=False)["samx_velocity"]["value"] == 10
+    assert dev.rt_controller.velocity.read()["rt_controller_velocity"]["value"] == 10
+    assert dev.rt_controller.velocity.read(cached=False)["rt_controller_velocity"]["value"] == 10
+    assert dev.rt_controller.read_configuration()["rt_controller_velocity"]["value"] == 10
+    assert (
+        dev.rt_controller.read_configuration(cached=False)["rt_controller_velocity"]["value"] == 10
+    )
 
     dev.rt_controller.velocity.put(5)
     assert dev.rt_controller.velocity.get() == 5
