@@ -800,3 +800,15 @@ class RawMessage(BECMessage):
 
     msg_type: ClassVar[str] = "raw_message"
     data: dict
+
+
+class ServiceRequestMessage(BECMessage):
+    """Message for service requests
+
+    Args:
+        request (dict): Service request
+        metadata (dict, optional): Metadata. Defaults to None.
+    """
+
+    msg_type: ClassVar[str] = "service_request_message"
+    action: Literal["restart"]

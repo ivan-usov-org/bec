@@ -862,6 +862,22 @@ class MessageEndpoints:
             message_op=MessageOp.LIST,
         )
 
+    @staticmethod
+    def service_request() -> EndpointInfo:
+        """
+        Endpoint for service request. This endpoint is used to
+        request e.g. resarts of the bec server.
+
+        Returns:
+            EndpointInfo: Endpoint for service request.
+        """
+        endpoint = "internal/services/request"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.ServiceRequestMessage,
+            message_op=MessageOp.SEND,
+        )
+
     # misc
     @staticmethod
     def global_vars(var_name: str) -> EndpointInfo:

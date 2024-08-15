@@ -51,3 +51,7 @@ def main():
             print("No BEC session found")
             return
         session.attach_session()
+
+
+if __name__ == "__main__":
+    main()
