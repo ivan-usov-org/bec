@@ -105,8 +105,8 @@ def test_ipython_device_completion_property_access(bec_client_mock):
         shell = IPython.terminal.interactiveshell.TerminalInteractiveShell.instance()
         shell.user_ns["dev"] = client.device_manager.devices
         completer = IPython.get_ipython().Completer
-        assert "dev.samx.dummy_controller.some_var" in completer.all_completions(
-            "dev.samx.dummy_controller.som"
+        assert "dev.rt_controller.dummy_controller.some_var" in completer.all_completions(
+            "dev.rt_controller.dummy_controller.som"
         )
 
 

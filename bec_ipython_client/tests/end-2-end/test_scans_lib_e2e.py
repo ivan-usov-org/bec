@@ -81,34 +81,34 @@ def test_config_updates(bec_client_lib):
     bec = bec_client_lib
     bec.metadata.update({"unit_test": "test_config_updates"})
     dev = bec.device_manager.devices
-    dev.samx.limits = [-80, 80]
-    assert dev.samx.limits == [-80, 80]
-    dev.samx.limits = [-50, 50]
-    assert dev.samx.limits == [-50, 50]
+    dev.rt_controller.limits = [-80, 80]
+    assert dev.rt_controller.limits == [-80, 80]
+    dev.rt_controller.limits = [-50, 50]
+    assert dev.rt_controller.limits == [-50, 50]
 
-    dev.samx.velocity.set(10).wait()
-    assert dev.samx.velocity.read()["samx_velocity"]["value"] == 10
-    assert dev.samx.velocity.read(cached=False)["samx_velocity"]["value"] == 10
-    assert dev.samx.read_configuration()["samx_velocity"]["value"] == 10
-    assert dev.samx.read_configuration(cached=False)["samx_velocity"]["value"] == 10
+    dev.rt_controller.velocity.set(10).wait()
+    assert dev.rt_controller.velocity.read()["samx_velocity"]["value"] == 10
+    assert dev.rt_controller.velocity.read(cached=False)["samx_velocity"]["value"] == 10
+    assert dev.rt_controller.read_configuration()["samx_velocity"]["value"] == 10
+    assert dev.rt_controller.read_configuration(cached=False)["samx_velocity"]["value"] == 10
 
-    dev.samx.velocity.put(5)
-    assert dev.samx.velocity.get() == 5
+    dev.rt_controller.velocity.put(5)
+    assert dev.rt_controller.velocity.get() == 5
 
-    dev.samx.velocity.set(10).wait()
-    assert dev.samx.velocity.get() == 10
+    dev.rt_controller.velocity.set(10).wait()
+    assert dev.rt_controller.velocity.get() == 10
 
-    dev.samx.setpoint.put(5)
-    assert dev.samx.setpoint.get() == 5
+    dev.rt_controller.setpoint.put(5)
+    assert dev.rt_controller.setpoint.get() == 5
 
-    dev.samx.setpoint.set(10).wait()
-    assert dev.samx.setpoint.get() == 10
-    assert dev.samx.dummy_controller.some_var == 10
-    dev.samx.dummy_controller.some_var = 20
-    assert dev.samx.dummy_controller.some_var == 20
-    dev.samx.dummy_controller.some_var = 10
-    val = dev.samx.readback.get()
-    assert np.isclose(val, dev.samx.position, atol=0.05)
+    dev.rt_controller.setpoint.set(10).wait()
+    assert dev.rt_controller.setpoint.get() == 10
+    assert dev.rt_controller.dummy_controller.some_var == 10
+    dev.rt_controller.dummy_controller.some_var = 20
+    assert dev.rt_controller.dummy_controller.some_var == 20
+    dev.rt_controller.dummy_controller.some_var = 10
+    val = dev.rt_controller.readback.get()
+    assert np.isclose(val, dev.rt_controller.position, atol=0.05)
 
 
 @pytest.mark.timeout(100)

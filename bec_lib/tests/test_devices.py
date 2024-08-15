@@ -233,11 +233,13 @@ def test_get_rpc_func_name_readback_get(dev, kind, cached):
 
 def test_get_rpc_func_name_nested(dev):
     with mock.patch.object(
-        dev.samx._custom_rpc_methods["dummy_controller"]._custom_rpc_methods["_func_with_args"],
+        dev.rt_controller._custom_rpc_methods["dummy_controller"]._custom_rpc_methods[
+            "_func_with_args"
+        ],
         "_run_rpc_call",
     ) as mock_rpc:
-        dev.samx.dummy_controller._func_with_args(1, 2)
-        mock_rpc.assert_called_once_with("samx", "dummy_controller._func_with_args", 1, 2)
+        dev.rt_controller.dummy_controller._func_with_args(1, 2)
+        mock_rpc.assert_called_once_with("rt_controller", "dummy_controller._func_with_args", 1, 2)
 
 
 def test_handle_rpc_response(dev):

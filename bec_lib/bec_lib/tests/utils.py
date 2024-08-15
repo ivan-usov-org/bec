@@ -88,8 +88,8 @@ class ClientMock(BECClient):
 
 def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessage:
     device_info = {
-        "samx": messages.DeviceInfoMessage(
-            device="samx",
+        "rt_controller": messages.DeviceInfoMessage(
+            device="rt_controller",
             info={
                 "device_info": {
                     "device_base_class": "positioner",
