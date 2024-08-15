@@ -621,7 +621,7 @@ def test_scan_updated_move(mv_msg, reference_msg_list):
 def test_scan_scan(scan_msg, reference_scan_list):
     device_manager = DMMock()
     device_manager.add_device("samx")
-    device_manager.devices["samx"].read_buffer = {"samx": {"value": 0}}
+    device_manager.devices["samx"].readback.put(0)
     msg_list = []
 
     def offset_mock():
@@ -689,9 +689,9 @@ def test_scan_scan(scan_msg, reference_scan_list):
 def test_fermat_scan(scan_msg, reference_scan_list):
     device_manager = DMMock()
     device_manager.add_device("samx")
-    device_manager.devices["samx"].read_buffer = {"samx": {"value": 0}}
+    device_manager.devices["samx"].readback.put(0)
     device_manager.add_device("samy")
-    device_manager.devices["samy"].read_buffer = {"samx": {"value": 0}}
+    device_manager.devices["samy"].readback.put(0)
     args = unpack_scan_args(scan_msg.content.get("parameter").get("args"))
     kwargs = scan_msg.content.get("parameter").get("kwargs")
     scan = FermatSpiralScan(
@@ -860,7 +860,7 @@ def test_fermat_scan(scan_msg, reference_scan_list):
                     metadata={"readout_priority": "monitored", "DIID": 18},
                     device="samx",
                     action="set",
-                    parameter={"value": 0, "wait_group": "scan_motor"},
+                    parameter={"value": -1.0, "wait_group": "scan_motor"},
                 ),
                 messages.DeviceInstructionMessage(
                     metadata={"readout_priority": "monitored", "DIID": 19},
@@ -899,10 +899,7 @@ def test_fermat_scan(scan_msg, reference_scan_list):
 def test_cont_line_scan(scan_msg, reference_scan_list):
     device_manager = DMMock()
     device_manager.add_device("samx")
-    device_manager.devices["samx"].read_buffer = {
-        "samx": {"value": 0},
-        "samx_velocity": {"value": 10},
-    }
+    # TODO Why can I just add an attribute here?
 
     args = unpack_scan_args(scan_msg.content["parameter"]["args"])
     kwargs = scan_msg.content["parameter"]["kwargs"]
@@ -913,17 +910,28 @@ def test_cont_line_scan(scan_msg, reference_scan_list):
     readback = collections.deque()
     readback.extend([{"samx": {"value": -1}}, {"samx": {"value": 0}}, {"samx": {"value": 1}}])
 
-    def mock_readback_return():
+    def mock_readback_return(*args, **kwargs):
         if len(readback) > 0:
             return readback.popleft()
         return None
 
+    samx_read_val = collections.deque()
+    samx_read_val.extend([{"samx": {"value": -1}}, {"samx": {"value": 0}}, {"samx": {"value": 1}}])
+
+    def samx_read(*args, **kwargs):
+        if len(samx_read_val) > 0:
+            return samx_read_val.popleft()
+        return None
+
+    def set_motor_velocity():
+        request.motor_velocity = 10
+        request.motor_acceleration = 1
+
     with (
-        mock.patch.object(request.device_manager.devices["samx"], "readback") as mock_readback,
-        mock.patch.object(request.stubs, "_get_from_rpc") as mock_rpc,
+        mock.patch.object(request.stubs, "_get_from_rpc", side_effect=mock_readback_return),
+        mock.patch.object(request, "_get_motor_attributes", side_effect=set_motor_velocity),
+        mock.patch.object(device_manager.devices["samx"], "read", side_effect=samx_read),
     ):
-        mock_readback.read.side_effect = mock_readback_return
-        mock_rpc.return_value = {"samx": {"value": 0}}
 
         msg_list = list(request.run())
 

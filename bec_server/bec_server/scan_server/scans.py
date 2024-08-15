@@ -992,8 +992,8 @@ class ContLineScan(ScanBase):
         device: DeviceBase,
         start: float,
         stop: float,
-        offset: float = 1,
-        atol: float = 0.5,
+        offset: float = None,
+        atol: float = None,
         exp_time: float = 0,
         steps: int = 10,
         relative: bool = False,
@@ -1031,20 +1031,74 @@ class ContLineScan(ScanBase):
         self.start = start
         self.stop = stop
         self.atol = atol
-        self.motor_velocity = self.device_manager.devices[self.device].read()[
-            f"{self.device}_velocity"
-        ]["value"]
+        self.motor_acceleration = None
+        self.motor_velocity = None
+        self.dist_step = None
+        self.time_per_step = None
+        self.hinted_signal = None
+
+    def _get_motor_attributes(self):
+        """Get the motor attributes"""
+        if hasattr(self.device_manager.devices[self.device], "velocity"):
+            self.motor_velocity = yield self.stubs.send_rpc_and_wait(
+                self.device_manager.devices[self.device], "velocity.get"
+            )
+        else:
+            raise ScanAbortion(f"Motor {self.device} does not have a velocity attribute.")
+        if hasattr(self.device_manager.devices[self.device], "acceleration"):
+            self.motor_acceleration = yield self.stubs.send_rpc_and_wait(
+                self.device_manager.devices[self.device], "acceleration.get"
+            )
+        else:
+            raise ScanAbortion(f"Motor {self.device} does not have an acceleration attribute.")
+        # pylint: ignore=access-to-protected-member
+        hinted_signal = self.device_manager.devices[self.device]._info["hints"]["fields"]
+        if len(hinted_signal) > 1:
+            raise ScanAbortion(
+                f"Device {self.device} has more than one signal {hinted_signal}. Only one signal is allowed."
+            )
+        self.hinted_signal = hinted_signal[0]
+
+    def _calculate_atol(self):
+        """Utility function to calculate the tolerance for the scan if not provided.
+        The tolerance is calculated at 10% of the step size, however, we take into consideration
+        that EPICs typically only updates the position with 100ms intervals, which defines a lower limit for the atol.
+        """
+        update_freq = 10  # Hz for Epics
+        tolerance = 0.1
+        precision = 10 ** (-self.device_manager.devices[self.device].precision)
+        if self.atol is not None:
+            return
+        # Use 10% of the step size as atol
+        self.atol = tolerance * self.motor_velocity * self.exp_time
+        self.atol = max(self.atol, precision)
+        if self.atol / update_freq > self.motor_velocity:
+            raise ScanAbortion(
+                f"Motor {self.device} is moving too fast with the calculated tolerance. Consider reducing speed {self.motor_velocity} or increasing the atol {self.atol}"
+            )
+        # the lower udate limit is 100ms, so we set the atol to 0.2s/v if the atol is smaller
+        self.atol = min(self.atol, 0.2 / self.motor_velocity)
+
+    def _calculate_offset(self):
+        """Utility function to calculate the offset for the acceleration if not provided.
+        The offset is calculated as 0.5*acc_time*target_velocity"""
+        if self.offset is not None:
+            return
+        self.offset = 0.5 * self.motor_acceleration * self.motor_velocity
 
     def _calculate_positions(self) -> None:
+        self._get_motor_attributes()
         self.positions = np.linspace(self.start, self.stop, self.steps, dtype=float)[
             np.newaxis, :
         ].T
         # Check if the motor is moving faster than the exp_time
-        dist_setp = self.positions[1][0] - self.positions[0][0]
-        time_per_step = dist_setp / self.motor_velocity
-        if time_per_step < self.exp_time:
+        self.dist_step = self.positions[1][0] - self.positions[0][0]
+        self._calculate_offset()
+        self._calculate_atol()
+        self.time_per_step = self.dist_step / self.motor_velocity
+        if self.time_per_step < self.exp_time:
             raise ScanAbortion(
-                f"Motor {self.device} is moving too fast. Time per step: {time_per_step:.03f} < Exp_time: {self.exp_time:.03f}."
+                f"Motor {self.device} is moving too fast. Time per step: {self.time_per_step:.03f} < Exp_time: {self.exp_time:.03f}."
                 + f" Consider reducing speed {self.motor_velocity} or reducing exp_time {self.exp_time}"
             )
 
@@ -1078,7 +1132,7 @@ class ContLineScan(ScanBase):
         )
 
         while self.point_id < len(self.positions[:]):
-            cont_motor_positions = self.device_manager.devices[self.scan_motors[0]].readback.read()
+            cont_motor_positions = self.device_manager.devices[self.scan_motors[0]].read()
 
             if not cont_motor_positions:
                 continue
