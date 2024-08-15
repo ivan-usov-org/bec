@@ -227,12 +227,15 @@ end-2-end:
     - if [[ "$CI_PROJECT_PATH" != "bec/bec" ]]; then
       apk update; apk add git; echo -e "\033[35;1m Using branch $CHILD_PIPELINE_BRANCH of BEC \033[0;m";
       test -d bec || git clone --branch $CHILD_PIPELINE_BRANCH https://gitlab.psi.ch/bec/bec.git; cd bec;
+      TARGET_BEC_BRANCH=$CHILD_PIPELINE_BRANCH;
+      else
+      TARGET_BEC_BRANCH=$CI_COMMIT_REF_NAME;
       fi  
 
     # build and run the tests
     - echo $OPHYD_DEVICES_BRANCH
     - echo "$CI_DEPENDENCY_PROXY_PASSWORD" | docker login $CI_DEPENDENCY_PROXY_SERVER --username $CI_DEPENDENCY_PROXY_USER --password-stdin
-    - docker build -t end2end_client:test -f ./ci/Dockerfile.run_pytest --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=bec_ipython_client --build-arg OPHYD_DEVICES_BRANCH --build-arg CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX --build-arg BEC_CORE_BRANCH=$CHILD_PIPELINE_BRANCH  .
+    - docker build -t end2end_client:test -f ./ci/Dockerfile.run_pytest --build-arg PY_VERSION=3.10 --build-arg BEC_SERVICE=bec_ipython_client --build-arg OPHYD_DEVICES_BRANCH --build-arg CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX --build-arg BEC_CORE_BRANCH=$TARGET_BEC_BRANCH  .
     - docker run --network=host --name end2end_client end2end_client:test
   after_script:
     # copy the log files to the project directory in order to be reachable by git artifacts
