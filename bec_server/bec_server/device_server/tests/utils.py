@@ -1,6 +1,7 @@
 import enum
+import inspect
 import time
-from typing import Protocol
+from typing import Generator, Protocol
 
 from ophyd import DeviceStatus, Kind
 from ophyd_devices.interfaces.protocols.bec_protocols import (
@@ -15,30 +16,26 @@ from bec_lib.tests.utils import ConnectorMock
 # pylint: disable=missing-function-docstring
 # pylint: disable=protected-access
 
-POSITIONER_SIGNALS = {
-    "readback": {"kind": "normal", "value": 0, "precision": 3},
-    "setpoint": {"kind": "normal", "value": 0, "precision": 3},
-    "velocity": {"kind": "config", "value": 0, "precision": 3},
-    "acceleration": {"kind": "config", "value": 0, "precision": 3},
-}
-
 
 class DeviceMockType(enum.Enum):
     POSITIONER = "positioner"
     SIGNAL = "signal"
 
 
-class DeviceObjectMock(BECDeviceProtocol, Protocol):
+class DeviceObjectMock(BECDeviceProtocol):
     def __init__(self, name: str, kind=Kind.normal, dev_type=None, parent=None):
         self._name = name
         self._kind = kind if isinstance(kind, Kind) else getattr(Kind, kind)
         self._parent = parent
+        self._dev_type = dev_type
         self._read_only = False
         self._enabled = True
-        self._dev_type = dev_type
-        self._signals_container = None
         self._connected = True
         self._destroyed = False
+
+    @property
+    def destroyed(self):
+        return self._destroyed
 
     @property
     def name(self):
@@ -61,8 +58,28 @@ class DeviceObjectMock(BECDeviceProtocol, Protocol):
         return self._parent
 
     @property
+    def obj(self):
+        return self
+
+    @property
+    def enabled(self):
+        return self._enabled
+
+    @enabled.setter
+    def enabled(self, val: bool):
+        self._enabled = val
+
+    @property
+    def read_only(self):
+        return self._read_only
+
+    @read_only.setter
+    def read_only(self, val: bool):
+        self._read_only = val
+
+    @property
     def hints(self):
-        if self._dev_type == DeviceMockType.POSITIONER:
+        if isinstance(self, PositionerMock):
             return {"fields": [self.name]}
         else:
             return {"fields": []}
@@ -80,17 +97,14 @@ class DeviceObjectMock(BECDeviceProtocol, Protocol):
         self._connected = val
 
     def destroy(self):
-        self._connected = False
+        self.connected = False
+        self.enabled = False
+        for _, obj in inspect.getmembers(self):
+            if isinstance(obj, DeviceObjectMock) and obj.destroyed is False:
+                obj.destroy()
         self._destroyed = True
-        if self._signals_container is None:
-            return
-        for signal in self._signals_container.values():
-            signal["signal"].destroy()
 
     def trigger(self) -> None:
-        # status = DeviceStatus(self)
-        # status.set_finished()
-        # return status
         pass
 
 
@@ -99,10 +113,16 @@ class MockSignal(DeviceObjectMock, BECSignalProtocol):
     def __init__(
         self, name: str, value: any = 0, kind: Kind = Kind.normal, parent=None, precision=None
     ):
-        super().__init__(name, dev_type=DeviceMockType.SIGNAL, parent=parent, kind=kind)
+        super().__init__(name=name, parent=parent, kind=kind)
         self._value = value
         self._config = {"deviceConfig": {"limits": [0, 0]}, "userParameter": None}
         self._metadata = dict(read_access=True, write_access=True, precision=precision)
+        self._info = {
+            "signals": {},
+            "hints": self.hints,
+            "write_access": self.write_access,
+            "read_access": self.read_access,
+        }
 
     def read(self):
         return {self.name: {"value": self._value, "timestamp": time.time()}}
@@ -169,86 +189,81 @@ class MockSignal(DeviceObjectMock, BECSignalProtocol):
 class PositionerMock(DeviceObjectMock, BECPositionerProtocol):
 
     def __init__(self, name: str, kind: Kind = Kind.normal, parent=None):
-        super().__init__(name, dev_type=DeviceMockType.POSITIONER, parent=parent, kind=kind)
-        if getattr(self, "readback", None):
-            self.readback.name = self.name
-        self._signals_container = POSITIONER_SIGNALS
+        super().__init__(name=name, parent=parent, kind=kind)
+        # Name of readback signal is the same as the name of the positioner
+        self.readback = MockSignal(name=self.name, kind=Kind.normal, value=0, precision=3)
+        self.setpoint = MockSignal(name=f"{self.name}_setpoint", kind=Kind.normal, value=0)
+        self.motor_is_moving = MockSignal(
+            name=f"{self.name}_motor_is_moving", kind=Kind.normal, value=0
+        )
+        self.velocity = MockSignal(name=f"{self.name}_velocity", kind=Kind.config, value=0)
+        self.acceleration = MockSignal(name=f"{self.name}_acceleration", kind=Kind.config, value=0)
         self._config = {"deviceConfig": {"limits": [-50, 50]}, "userParameter": None}
-        self._create_attrs()
-        if hasattr(self, "readback"):
-            self.readback.name = self.name
+        self._read_attrs = ["readback", "setpoint", "motor_is_moving"]
+        self._read_config_attrs = ["velocity", "acceleration"]
+        self._info = {
+            "signals": {
+                name: {
+                    "read_access": getattr(self, name).read_access,
+                    "write_access": getattr(self, name).write_access,
+                }
+                for name in self._walk_components()
+            },
+            "hints": self.hints,
+        }
 
-    def _create_attrs(self):
-        for name, options in self._signals_container.items():
-            setattr(
-                self,
-                name,
-                MockSignal(
-                    name=f"{self.name}_{name}",
-                    kind=options["kind"],
-                    value=options["value"],
-                    parent=self,
-                    precision=options["precision"],
-                ),
-            )
-            self._signals_container[name].update({"signal": getattr(self, name)})
+    def _walk_components(self) -> Generator[str, None, None]:
+        for name, obj in inspect.getmembers(self):
+            if isinstance(obj, MockSignal):
+                yield name
 
     def read(self):
         ret = {}
-        for name, signal_info in self._signals_container.items():
-            if (
-                signal_info["signal"].kind == Kind.normal
-                or signal_info["signal"].kind == Kind.hinted
-            ):
-                ret.update(signal_info["signal"].read())
+        for name in self._read_attrs:
+            ret.update(getattr(self, name).read())
         return ret
 
     def read_configuration(self):
         ret = {}
-        for signal_info in self._signals_container.values():
-            if signal_info["signal"].kind == Kind.config:
-                ret.update(signal_info["signal"].read())
+        for name in self._read_config_attrs:
+            ret.update(getattr(self, name).read())
         return ret
 
     def describe_configuration(self) -> dict:
         ret = {}
-        for name, signal_info in self._signals_container.items():
-            if signal_info["signal"].kind == Kind.config:
-                ret.update(
-                    {
-                        name: {
-                            "source": signal_info["signal"].__class__.__name__,
-                            "dtype": type(signal_info["signal"]._value),
-                            "shape": [],
-                        }
+        for name in self._read_config_attrs:
+            ret.update(
+                {
+                    name: {
+                        "source": getattr(self, name).__class__.__name__,
+                        "dtype": type(getattr(self, name)._value),
+                        "shape": [],
                     }
-                )
+                }
+            )
         return ret
 
     def describe(self) -> dict:
         ret = {}
-        for name, signal_info in self._signals_container.items():
-            if (
-                signal_info["signal"].kind == Kind.normal
-                or signal_info["signal"].kind == Kind.hinted
-            ):
-                ret.update(
-                    {
-                        name: {
-                            "source": signal_info["signal"].__class__.__name__,
-                            "dtype": type(signal_info["signal"]._value),
-                            "shape": [],
-                            "precision": signal_info["signal"].precision,
-                        }
+        for name in self._read_attrs:
+            ret.update(
+                {
+                    name: {
+                        "source": getattr(self, name).__class__.__name__,
+                        "dtype": type(getattr(self, name)._value),
+                        "shape": [],
                     }
-                )
+                }
+            )
         return ret
 
     @property
+    def user_parameter(self):
+        return self._config["userParameter"]
+
+    @property
     def precision(self):
-        if getattr(self, "readback", None):
-            return self.readback.precision
-        raise AttributeError(f"PositionerMock {self.name} does not have readback signal")
+        return self.readback.precision
 
     @property
     def limits(self):
@@ -273,16 +288,10 @@ class PositionerMock(DeviceObjectMock, BECPositionerProtocol):
         if not limits[0] <= value <= limits[1]:
             raise ValueError(f"Value {value} is outside limits {limits}")
 
-    def move(self, position: float, **kwargs) -> None:
+    def move(self, position: float, wait=False, **kwargs) -> None:
         self.check_value(position)
-
-        if getattr(self, "setpoint", None) and getattr(self, "readback", None):
-            self.setpoint.put(position)
-            self.readback.put(position)
-        else:
-            raise AttributeError(
-                f"PositionerMock {self.name} does not have setpoint or readback signals from signals: {self._signals_container}"
-            )
+        self.setpoint.put(position)
+        self.readback.put(position)
 
     def set(self, position: float, **kwargs):
         self.move(position)

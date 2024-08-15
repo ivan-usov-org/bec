@@ -1040,14 +1040,14 @@ class ContLineScan(ScanBase):
     def _get_motor_attributes(self):
         """Get the motor attributes"""
         if hasattr(self.device_manager.devices[self.device], "velocity"):
-            self.motor_velocity = yield self.stubs.send_rpc_and_wait(
-                self.device_manager.devices[self.device], "velocity.get"
+            self.motor_velocity = yield from self.stubs.send_rpc_and_wait(
+                self.device, "velocity.get"
             )
         else:
             raise ScanAbortion(f"Motor {self.device} does not have a velocity attribute.")
         if hasattr(self.device_manager.devices[self.device], "acceleration"):
-            self.motor_acceleration = yield self.stubs.send_rpc_and_wait(
-                self.device_manager.devices[self.device], "acceleration.get"
+            self.motor_acceleration = yield from self.stubs.send_rpc_and_wait(
+                self.device, "acceleration.get"
             )
         else:
             raise ScanAbortion(f"Motor {self.device} does not have an acceleration attribute.")
@@ -1071,13 +1071,13 @@ class ContLineScan(ScanBase):
             return
         # Use 10% of the step size as atol
         self.atol = tolerance * self.motor_velocity * self.exp_time
-        self.atol = max(self.atol, precision)
+        self.atol = max(self.atol, 2 * precision)
         if self.atol / update_freq > self.motor_velocity:
             raise ScanAbortion(
                 f"Motor {self.device} is moving too fast with the calculated tolerance. Consider reducing speed {self.motor_velocity} or increasing the atol {self.atol}"
             )
         # the lower udate limit is 100ms, so we set the atol to 0.2s/v if the atol is smaller
-        self.atol = min(self.atol, 0.2 / self.motor_velocity)
+        self.atol = max(self.atol, 2 * 1 / update_freq * self.motor_velocity)
 
     def _calculate_offset(self):
         """Utility function to calculate the offset for the acceleration if not provided.
@@ -1086,8 +1086,16 @@ class ContLineScan(ScanBase):
             return
         self.offset = 0.5 * self.motor_acceleration * self.motor_velocity
 
+    def prepare_positions(self):
+        """prepare the positions for the scan"""
+        yield from self._calculate_positions()
+        self._optimize_trajectory()
+        self.num_pos = len(self.positions) * self.burst_at_each_point
+        yield from self._set_position_offset()
+        self._check_limits()
+
     def _calculate_positions(self) -> None:
-        self._get_motor_attributes()
+        yield from self._get_motor_attributes()
         self.positions = np.linspace(self.start, self.stop, self.steps, dtype=float)[
             np.newaxis, :
         ].T

@@ -737,25 +737,42 @@ def test_fermat_scan(scan_msg, reference_scan_list):
             ),
             [
                 messages.DeviceInstructionMessage(
-                    metadata={"readout_priority": "monitored", "DIID": 0},
+                    metadata={"readout_priority": "monitored"},
                     device=["samx"],
                     action="read",
                     parameter={"wait_group": "scan_motor"},
                 ),
                 messages.DeviceInstructionMessage(
-                    metadata={"readout_priority": "monitored", "DIID": 1},
+                    metadata={"readout_priority": "monitored"},
                     device=["samx"],
                     action="wait",
                     parameter={"type": "read", "wait_group": "scan_motor"},
                 ),
                 messages.DeviceInstructionMessage(
-                    metadata={"readout_priority": "monitored", "DIID": 2, "response": True},
+                    metadata={"readout_priority": "monitored", "response": True},
+                    device="samx",
+                    action="rpc",
+                    parameter={"device": "samx", "func": "velocity.get", "args": (), "kwargs": {}},
+                ),
+                messages.DeviceInstructionMessage(
+                    metadata={"readout_priority": "monitored", "response": True},
+                    device="samx",
+                    action="rpc",
+                    parameter={
+                        "device": "samx",
+                        "func": "acceleration.get",
+                        "args": (),
+                        "kwargs": {},
+                    },
+                ),
+                messages.DeviceInstructionMessage(
+                    metadata={"readout_priority": "monitored", "response": True},
                     device="samx",
                     action="rpc",
                     parameter={"device": "samx", "func": "read", "args": (), "kwargs": {}},
                 ),
                 messages.DeviceInstructionMessage(
-                    metadata={"readout_priority": "monitored", "DIID": 3},
+                    metadata={"readout_priority": "monitored", "DIID": 5},
                     device=None,
                     action="open_scan",
                     parameter={
@@ -773,121 +790,121 @@ def test_fermat_scan(scan_msg, reference_scan_list):
                     },
                 ),
                 messages.DeviceInstructionMessage(
-                    metadata={"readout_priority": "monitored", "DIID": 4},
+                    metadata={"readout_priority": "monitored"},
                     device=None,
                     action="stage",
                     parameter={},
                 ),
                 messages.DeviceInstructionMessage(
-                    metadata={"readout_priority": "baseline", "DIID": 5},
+                    metadata={"readout_priority": "baseline"},
                     device=None,
                     action="baseline_reading",
                     parameter={},
                 ),
                 messages.DeviceInstructionMessage(
-                    metadata={"readout_priority": "monitored", "DIID": 6},
+                    metadata={"readout_priority": "monitored"},
                     device="samx",
                     action="set",
                     parameter={"value": -1.0, "wait_group": "scan_motor"},
                 ),
                 messages.DeviceInstructionMessage(
-                    metadata={"readout_priority": "monitored", "DIID": 7},
+                    metadata={"readout_priority": "monitored"},
                     device=None,
                     action="wait",
                     parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
                 ),
                 messages.DeviceInstructionMessage(
-                    metadata={"readout_priority": "monitored", "DIID": 8},
+                    metadata={"readout_priority": "monitored"},
                     device=None,
                     action="pre_scan",
                     parameter={},
                 ),
                 messages.DeviceInstructionMessage(
-                    metadata={"readout_priority": "monitored", "DIID": 9},
+                    metadata={"readout_priority": "monitored"},
                     device="samx",
                     action="set",
                     parameter={"value": -4.0, "wait_group": "scan_motor"},
                 ),
                 messages.DeviceInstructionMessage(
-                    metadata={"readout_priority": "monitored", "DIID": 10},
+                    metadata={"readout_priority": "monitored"},
                     device=None,
                     action="wait",
                     parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
                 ),
                 messages.DeviceInstructionMessage(
-                    metadata={"readout_priority": "monitored", "DIID": 11},
+                    metadata={"readout_priority": "monitored"},
                     device="samx",
                     action="set",
                     parameter={"value": 1.0, "wait_group": "scan_motor"},
                 ),
                 messages.DeviceInstructionMessage(
-                    metadata={"readout_priority": "monitored", "DIID": 12, "point_id": 0},
+                    metadata={"readout_priority": "monitored", "point_id": 0},
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
                 ),
                 messages.DeviceInstructionMessage(
-                    metadata={"readout_priority": "monitored", "DIID": 13, "point_id": 0},
+                    metadata={"readout_priority": "monitored", "point_id": 0},
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "primary"},
                 ),
                 messages.DeviceInstructionMessage(
-                    metadata={"readout_priority": "monitored", "DIID": 14, "point_id": 1},
+                    metadata={"readout_priority": "monitored", "point_id": 1},
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
                 ),
                 messages.DeviceInstructionMessage(
-                    metadata={"readout_priority": "monitored", "DIID": 15, "point_id": 1},
+                    metadata={"readout_priority": "monitored", "point_id": 1},
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "primary"},
                 ),
                 messages.DeviceInstructionMessage(
-                    metadata={"readout_priority": "monitored", "DIID": 16, "point_id": 2},
+                    metadata={"readout_priority": "monitored", "point_id": 2},
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
                 ),
                 messages.DeviceInstructionMessage(
-                    metadata={"readout_priority": "monitored", "DIID": 17, "point_id": 2},
+                    metadata={"readout_priority": "monitored", "point_id": 2},
                     device=None,
                     action="read",
                     parameter={"group": "primary", "wait_group": "primary"},
                 ),
                 messages.DeviceInstructionMessage(
-                    metadata={"readout_priority": "monitored", "DIID": 18},
+                    metadata={"readout_priority": "monitored"},
                     device="samx",
                     action="set",
-                    parameter={"value": -1.0, "wait_group": "scan_motor"},
+                    parameter={"value": -1, "wait_group": "scan_motor"},
                 ),
                 messages.DeviceInstructionMessage(
-                    metadata={"readout_priority": "monitored", "DIID": 19},
+                    metadata={"readout_priority": "monitored"},
                     device=None,
                     action="wait",
                     parameter={"type": "move", "group": "scan_motor", "wait_group": "scan_motor"},
                 ),
                 messages.DeviceInstructionMessage(
-                    metadata={"readout_priority": "monitored", "DIID": 20},
+                    metadata={"readout_priority": "monitored"},
                     device=None,
                     action="wait",
                     parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
                 ),
                 messages.DeviceInstructionMessage(
-                    metadata={"readout_priority": "monitored", "DIID": 21},
+                    metadata={"readout_priority": "monitored"},
                     device=None,
                     action="complete",
                     parameter={},
                 ),
                 messages.DeviceInstructionMessage(
-                    metadata={"readout_priority": "monitored", "DIID": 22},
+                    metadata={"readout_priority": "monitored"},
                     device=None,
                     action="unstage",
                     parameter={},
                 ),
                 messages.DeviceInstructionMessage(
-                    metadata={"readout_priority": "monitored", "DIID": 23},
+                    metadata={"readout_priority": "monitored"},
                     device=None,
                     action="close_scan",
                     parameter={},
@@ -908,7 +925,9 @@ def test_cont_line_scan(scan_msg, reference_scan_list):
     )
 
     readback = collections.deque()
-    readback.extend([{"samx": {"value": -1}}, {"samx": {"value": 0}}, {"samx": {"value": 1}}])
+    readback.extend(
+        [10, 1, {"samx": {"value": -1}}, {"samx": {"value": 0}}, {"samx": {"value": 1}}]
+    )
 
     def mock_readback_return(*args, **kwargs):
         if len(readback) > 0:
@@ -923,13 +942,8 @@ def test_cont_line_scan(scan_msg, reference_scan_list):
             return samx_read_val.popleft()
         return None
 
-    def set_motor_velocity():
-        request.motor_velocity = 10
-        request.motor_acceleration = 1
-
     with (
         mock.patch.object(request.stubs, "_get_from_rpc", side_effect=mock_readback_return),
-        mock.patch.object(request, "_get_motor_attributes", side_effect=set_motor_velocity),
         mock.patch.object(device_manager.devices["samx"], "read", side_effect=samx_read),
     ):
 
@@ -942,6 +956,8 @@ def test_cont_line_scan(scan_msg, reference_scan_list):
                 continue
             if msg.metadata.get("RID") is not None:
                 msg.metadata.pop("RID")
+            if msg.metadata.get("DIID") is not None:
+                msg.metadata.pop("DIID")
             if msg.action == "rpc":
                 msg.parameter.pop("rpc_id")
         assert msg_list == reference_scan_list

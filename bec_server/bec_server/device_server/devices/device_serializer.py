@@ -130,10 +130,6 @@ def get_device_info(obj: PositionerBase | ComputedSignal | Signal | Device | BEC
                 )
     sub_devices = []
 
-    if isinstance(obj, Signal):
-        # pylint: disable=protected-access
-        signals.update({obj.name: {"metadata": obj._metadata}})
-
     if hasattr(obj, "walk_subdevices"):
         for _, dev in obj.walk_subdevices():
             sub_devices.append(get_device_info(dev))
@@ -147,6 +143,8 @@ def get_device_info(obj: PositionerBase | ComputedSignal | Signal | Device | BEC
             "device_attr_name": getattr(obj, "attr_name", ""),
             "device_dotted_name": getattr(obj, "dotted_name", ""),
             "device_base_class": get_device_base_class(obj),
+            "read_access": getattr(obj, "read_access", None),
+            "write_access": getattr(obj, "write_access", None),
             "signals": signals,
             "hints": obj.hints,
             "describe": obj.describe(),
