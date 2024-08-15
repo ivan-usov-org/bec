@@ -34,7 +34,7 @@ pseudo_signal1:
   readoutPriority: baseline
 
 failure_device:
-  deviceClass: ophyd_devices.sim.sim.SimPositionerWithCommFailure
+  deviceClass: ophyd_devices.sim.SimPositionerWithCommFailure
   deviceConfig:
     delay: 1
     update_frequency: 400
@@ -2226,7 +2226,7 @@ sim_proxy_test:
 
 rt_controller:
   readoutPriority: baseline
-  deviceClass: ophyd_devices.sim.sim_positioner.SimPositionerWithController
+  deviceClass: ophyd_devices.sim.SimPositionerWithController
   deviceConfig:
     delay: 1
     limits:

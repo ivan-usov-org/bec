@@ -1,13 +1,10 @@
 from __future__ import annotations
 
 import builtins
-import functools
+import copy
 import os
 import time
-import uuid
 from typing import TYPE_CHECKING
-
-import yaml
 
 import bec_lib
 from bec_lib import messages
@@ -87,190 +84,196 @@ class ClientMock(BECClient):
 
 
 def get_device_info_mock(device_name, device_class) -> messages.DeviceInfoMessage:
+
+    positioner_info = {
+        "device_info": {
+            "device_base_class": "positioner",
+            "signals": {
+                "readback": {
+                    "component_name": "readback",
+                    "obj_name": device_name,
+                    "kind_int": 5,
+                    "kind_str": "Kind.hinted",
+                    "metadata": {
+                        "connected": True,
+                        "read_access": True,
+                        "write_access": False,
+                        "timestamp": 0,
+                        "status": None,
+                        "severity": None,
+                        "precision": None,
+                    },
+                },
+                "setpoint": {
+                    "component_name": "setpoint",
+                    "obj_name": f"{device_name}_setpoint",
+                    "kind_int": 1,
+                    "kind_str": "Kind.normal",
+                    "metadata": {
+                        "connected": True,
+                        "read_access": True,
+                        "write_access": True,
+                        "timestamp": 0,
+                        "status": None,
+                        "severity": None,
+                        "precision": None,
+                    },
+                },
+                "motor_is_moving": {
+                    "component_name": "motor_is_moving",
+                    "obj_name": f"{device_name}_motor_is_moving",
+                    "kind_int": 1,
+                    "kind_str": "Kind.normal",
+                    "metadata": {
+                        "connected": True,
+                        "read_access": True,
+                        "write_access": True,
+                        "timestamp": 0,
+                        "status": None,
+                        "severity": None,
+                        "precision": None,
+                    },
+                },
+                "velocity": {
+                    "component_name": "velocity",
+                    "obj_name": f"{device_name}_velocity",
+                    "kind_int": 2,
+                    "kind_str": "Kind.config",
+                    "metadata": {
+                        "connected": True,
+                        "read_access": True,
+                        "write_access": True,
+                        "timestamp": 0,
+                        "status": None,
+                        "severity": None,
+                        "precision": None,
+                    },
+                },
+                "acceleration": {
+                    "component_name": "acceleration",
+                    "obj_name": f"{device_name}_acceleration",
+                    "kind_int": 2,
+                    "kind_str": "Kind.config",
+                    "metadata": {
+                        "connected": True,
+                        "read_access": True,
+                        "write_access": True,
+                        "timestamp": 0,
+                        "status": None,
+                        "severity": None,
+                        "precision": None,
+                    },
+                },
+                "high_limit_travel": {
+                    "component_name": "high_limit_travel",
+                    "obj_name": f"{device_name}_high_limit_travel",
+                    "kind_int": 2,
+                    "kind_str": "Kind.config",
+                    "metadata": {
+                        "connected": True,
+                        "read_access": True,
+                        "write_access": True,
+                        "timestamp": 0,
+                        "status": None,
+                        "severity": None,
+                        "precision": None,
+                    },
+                },
+                "low_limit_travel": {
+                    "component_name": "low_limit_travel",
+                    "obj_name": f"{device_name}_low_limit_travel",
+                    "kind_int": 2,
+                    "kind_str": "Kind.config",
+                    "metadata": {
+                        "connected": True,
+                        "read_access": True,
+                        "write_access": True,
+                        "timestamp": 0,
+                        "status": None,
+                        "severity": None,
+                        "precision": None,
+                    },
+                },
+                "unused": {
+                    "component_name": "unused",
+                    "obj_name": f"{device_name}_unused",
+                    "kind_int": 0,
+                    "kind_str": "Kind.omitted",
+                    "metadata": {
+                        "connected": True,
+                        "read_access": True,
+                        "write_access": True,
+                        "timestamp": 0,
+                        "status": None,
+                        "severity": None,
+                        "precision": None,
+                    },
+                },
+            },
+            "hints": {"fields": [device_name]},
+            "describe": {
+                device_name: {
+                    "source": f"SIM:{device_name}",
+                    "dtype": "integer",
+                    "shape": [],
+                    "precision": 3,
+                },
+                f"{device_name}_setpoint": {
+                    "source": f"SIM:{device_name}_setpoint",
+                    "dtype": "integer",
+                    "shape": [],
+                    "precision": 3,
+                },
+                f"{device_name}_motor_is_moving": {
+                    "source": f"SIM:{device_name}_motor_is_moving",
+                    "dtype": "integer",
+                    "shape": [],
+                    "precision": 3,
+                },
+            },
+            "describe_configuration": {
+                f"{device_name}_velocity": {
+                    "source": f"SIM:{device_name}_velocity",
+                    "dtype": "integer",
+                    "shape": [],
+                },
+                f"{device_name}_acceleration": {
+                    "source": f"SIM:{device_name}_acceleration",
+                    "dtype": "integer",
+                    "shape": [],
+                },
+            },
+            "sub_devices": [],
+            "custom_user_access": {},
+        }
+    }
+    positioner_info_with_user_access = copy.deepcopy(positioner_info)
+    positioner_info_with_user_access["device_info"]["custom_user_access"].update(
+        {
+            "dummy_controller": {
+                "_func_with_args": {"type": "func", "doc": None},
+                "_func_with_args_and_kwargs": {"type": "func", "doc": None},
+                "_func_with_kwargs": {"type": "func", "doc": None},
+                "_func_without_args_kwargs": {"type": "func", "doc": None},
+                "controller_show_all": {
+                    "type": "func",
+                    "doc": (
+                        "dummy controller show all\n\n        Raises:\n           "
+                        " in: _description_\n            LimitError:"
+                        " _description_\n\n        Returns:\n            _type_:"
+                        " _description_\n        "
+                    ),
+                },
+                "some_var": {"type": "int"},
+            },
+            "sim_state": {"type": "dict"},
+        }
+    )
     device_info = {
         "rt_controller": messages.DeviceInfoMessage(
-            device="rt_controller",
-            info={
-                "device_info": {
-                    "device_base_class": "positioner",
-                    "signals": {
-                        "readback": {
-                            "component_name": "readback",
-                            "obj_name": device_name,
-                            "kind_int": 5,
-                            "kind_str": "Kind.hinted",
-                            "metadata": {
-                                "connected": True,
-                                "read_access": True,
-                                "write_access": False,
-                                "timestamp": 0,
-                                "status": None,
-                                "severity": None,
-                                "precision": None,
-                            },
-                        },
-                        "setpoint": {
-                            "component_name": "setpoint",
-                            "obj_name": f"{device_name}_setpoint",
-                            "kind_int": 1,
-                            "kind_str": "Kind.normal",
-                            "metadata": {
-                                "connected": True,
-                                "read_access": True,
-                                "write_access": True,
-                                "timestamp": 0,
-                                "status": None,
-                                "severity": None,
-                                "precision": None,
-                            },
-                        },
-                        "motor_is_moving": {
-                            "component_name": "motor_is_moving",
-                            "obj_name": f"{device_name}_motor_is_moving",
-                            "kind_int": 1,
-                            "kind_str": "Kind.normal",
-                            "metadata": {
-                                "connected": True,
-                                "read_access": True,
-                                "write_access": True,
-                                "timestamp": 0,
-                                "status": None,
-                                "severity": None,
-                                "precision": None,
-                            },
-                        },
-                        "velocity": {
-                            "component_name": "velocity",
-                            "obj_name": f"{device_name}_velocity",
-                            "kind_int": 2,
-                            "kind_str": "Kind.config",
-                            "metadata": {
-                                "connected": True,
-                                "read_access": True,
-                                "write_access": True,
-                                "timestamp": 0,
-                                "status": None,
-                                "severity": None,
-                                "precision": None,
-                            },
-                        },
-                        "acceleration": {
-                            "component_name": "acceleration",
-                            "obj_name": f"{device_name}_acceleration",
-                            "kind_int": 2,
-                            "kind_str": "Kind.config",
-                            "metadata": {
-                                "connected": True,
-                                "read_access": True,
-                                "write_access": True,
-                                "timestamp": 0,
-                                "status": None,
-                                "severity": None,
-                                "precision": None,
-                            },
-                        },
-                        "high_limit_travel": {
-                            "component_name": "high_limit_travel",
-                            "obj_name": f"{device_name}_high_limit_travel",
-                            "kind_int": 2,
-                            "kind_str": "Kind.config",
-                            "metadata": {
-                                "connected": True,
-                                "read_access": True,
-                                "write_access": True,
-                                "timestamp": 0,
-                                "status": None,
-                                "severity": None,
-                                "precision": None,
-                            },
-                        },
-                        "low_limit_travel": {
-                            "component_name": "low_limit_travel",
-                            "obj_name": f"{device_name}_low_limit_travel",
-                            "kind_int": 2,
-                            "kind_str": "Kind.config",
-                            "metadata": {
-                                "connected": True,
-                                "read_access": True,
-                                "write_access": True,
-                                "timestamp": 0,
-                                "status": None,
-                                "severity": None,
-                                "precision": None,
-                            },
-                        },
-                        "unused": {
-                            "component_name": "unused",
-                            "obj_name": f"{device_name}_unused",
-                            "kind_int": 0,
-                            "kind_str": "Kind.omitted",
-                            "metadata": {
-                                "connected": True,
-                                "read_access": True,
-                                "write_access": True,
-                                "timestamp": 0,
-                                "status": None,
-                                "severity": None,
-                                "precision": None,
-                            },
-                        },
-                    },
-                    "hints": {"fields": ["samx"]},
-                    "describe": {
-                        "samx": {
-                            "source": "SIM:samx",
-                            "dtype": "integer",
-                            "shape": [],
-                            "precision": 3,
-                        },
-                        "samx_setpoint": {
-                            "source": "SIM:samx_setpoint",
-                            "dtype": "integer",
-                            "shape": [],
-                            "precision": 3,
-                        },
-                        "samx_motor_is_moving": {
-                            "source": "SIM:samx_motor_is_moving",
-                            "dtype": "integer",
-                            "shape": [],
-                            "precision": 3,
-                        },
-                    },
-                    "describe_configuration": {
-                        "samx_velocity": {
-                            "source": "SIM:samx_velocity",
-                            "dtype": "integer",
-                            "shape": [],
-                        },
-                        "samx_acceleration": {
-                            "source": "SIM:samx_acceleration",
-                            "dtype": "integer",
-                            "shape": [],
-                        },
-                    },
-                    "sub_devices": [],
-                    "custom_user_access": {
-                        "dummy_controller": {
-                            "_func_with_args": {"type": "func", "doc": None},
-                            "_func_with_args_and_kwargs": {"type": "func", "doc": None},
-                            "_func_with_kwargs": {"type": "func", "doc": None},
-                            "_func_without_args_kwargs": {"type": "func", "doc": None},
-                            "controller_show_all": {
-                                "type": "func",
-                                "doc": (
-                                    "dummy controller show all\n\n        Raises:\n           "
-                                    " in: _description_\n            LimitError:"
-                                    " _description_\n\n        Returns:\n            _type_:"
-                                    " _description_\n        "
-                                ),
-                            },
-                            "some_var": {"type": "int"},
-                        },
-                        "sim_state": {"type": "dict"},
-                    },
-                }
-            },
+            device="rt_controller", info=positioner_info_with_user_access
         ),
+        "samx": messages.DeviceInfoMessage(device="samx", info=positioner_info),
         "dyn_signals": messages.DeviceInfoMessage(
             device="dyn_signals",
             info={

@@ -2132,7 +2132,7 @@ monitor_async:
 
 rt_controller:
   readoutPriority: baseline
-  deviceClass: ophyd_devices.sim.sim_positioner.SimPositionerWithController
+  deviceClass: ophyd_devices.sim.SimPositionerWithController
   deviceConfig:
     delay: 1
     limits:
