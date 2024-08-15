@@ -2128,3 +2128,19 @@ monitor_async:
   enabled: true
   readOnly: false
   softwareTrigger: true
+  
+############################################################
+#################### SoftPositioner ########################
+############################################################
+
+softy_pos:
+  readoutPriority: baseline
+  deviceClass: ophyd_devices.SoftPositioner
+  deviceConfig:
+    init_pos: 0.1
+    limits:
+      - 0
+      - 0
+    egu: 'mm'
+  enabled: true
+  readOnly: false
