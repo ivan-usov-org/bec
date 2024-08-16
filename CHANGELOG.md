@@ -1,5 +1,43 @@
 # CHANGELOG
 
+## v2.22.0 (2024-08-16)
+
+### Ci
+
+* ci: use target branch instead of default pipeline branch for e2e tests ([`83e0097`](https://gitlab.psi.ch/bec/bec/-/commit/83e00970d1e5f105ee3e05bce6fd7376bd9698e4))
+
+* ci: install ophyd_devices from the repo ([`1e805b4`](https://gitlab.psi.ch/bec/bec/-/commit/1e805b47c6df2bc08966ffd250ba0b3f22ab9563))
+
+### Documentation
+
+* docs: update dev docs
+
+renamed bec_config to bec_service_config; removed pmodule instructions as they are not available anymore ([`82ffc52`](https://gitlab.psi.ch/bec/bec/-/commit/82ffc521760fda34c594f89f10c174ae0b959710))
+
+### Feature
+
+* feat(device_server): gracefully handle timeouts
+
+Failed config updates should only lead to config flush if the object initialization fails. If we simply can&#39;t connect to the signals, the device should be disabled. ([`ec5abd6`](https://gitlab.psi.ch/bec/bec/-/commit/ec5abd6dde4c71e41395ee6f532f27f24215e168))
+
+### Fix
+
+* fix: fixed bug in client fixture for loading configs ([`7636f4d`](https://gitlab.psi.ch/bec/bec/-/commit/7636f4d15a36a4f32a202643771e4b5d97ff5ae6))
+
+* fix(client): handle deviceconfigerrors more gracefully in the console ([`433b831`](https://gitlab.psi.ch/bec/bec/-/commit/433b8313021eb89fd7135fa79504ba34270d12eb))
+
+### Test
+
+* test: fixed data access in dummy controller device ([`624c257`](https://gitlab.psi.ch/bec/bec/-/commit/624c25763fdef2a9ee913e5936311f421bd9b8d6))
+
+* test: use simpositionerwithcontroller for controller access ([`49b53a9`](https://gitlab.psi.ch/bec/bec/-/commit/49b53a95d9317c6ec1bf14c81e2b3886788690d5))
+
+* test: ensure BECClient singleton is reset ([`75dd67b`](https://gitlab.psi.ch/bec/bec/-/commit/75dd67ba17ab0d79881501f2f902ef0a8c2233a2))
+
+### Unknown
+
+* wip ([`a39a6c1`](https://gitlab.psi.ch/bec/bec/-/commit/a39a6c197a1a297a67e11b15d5ccbce7dbe3b95c))
+
 ## v2.21.5 (2024-08-14)
 
 ### Fix
@@ -126,39 +164,3 @@ in the main module (INFO in general) ([`45b3263`](https://gitlab.psi.ch/bec/bec/
 ### Fix
 
 * fix: add velocity vs exp_time check for contline_scan to make it more robust ([`2848682`](https://gitlab.psi.ch/bec/bec/-/commit/2848682644624c024ac37fe946fbd2b6ddc377dc))
-
-## v2.19.0 (2024-07-19)
-
-### Feature
-
-* feat: add &#34;parse_cmdline_args&#34; to bec_service, to handle common arguments parsing in services
-
-Add &#34;--log-level&#34; and &#34;--file-log-level&#34; to be able to change log level from the command line ([`41b8005`](https://gitlab.psi.ch/bec/bec/-/commit/41b80058f8409131be483950dfb88e7b93282bff))
-
-### Fix
-
-* fix: prevent already configured logger to be re-configured ([`dfdc397`](https://gitlab.psi.ch/bec/bec/-/commit/dfdc39776e1cadffc53cf0193d2fa1791df821d5))
-
-* fix: make a CONSOLE_LOG level to be able to filter console log messages and fix extra line feed ([`7f73606`](https://gitlab.psi.ch/bec/bec/-/commit/7f73606dfc4b4b97afe1f85a641626f0ab134b34))
-
-### Refactor
-
-* refactor: use &#39;parse_cmdline_args&#39; in servers ([`06902f7`](https://gitlab.psi.ch/bec/bec/-/commit/06902f78240c5ded0674349a125fd80f30aab580))
-
-### Unknown
-
-* tests: update tests following new &#34;parse_cmdline_args&#34; function ([`7e46cf9`](https://gitlab.psi.ch/bec/bec/-/commit/7e46cf94ef0454cf7d2299fad0bdcf7005fc8482))
-
-* refactor, fix #318: use &#39;parse_cmdline_args&#39; for BEC IPython client ([`814b6b2`](https://gitlab.psi.ch/bec/bec/-/commit/814b6b21c6ae62fa71f8574a87d0e6279f32e266))
-
-## v2.18.3 (2024-07-08)
-
-### Fix
-
-* fix(bec_lib): fixed bug that caused the specified service config to be overwritten by defaults ([`5cf162c`](https://gitlab.psi.ch/bec/bec/-/commit/5cf162c19d573afde19f795a968f1513461aec9a))
-
-## v2.18.2 (2024-07-08)
-
-### Fix
-
-* fix(bec_lib): accept config as input to ServiceConfig ([`86714ae`](https://gitlab.psi.ch/bec/bec/-/commit/86714ae57b5952eaa739a5ba60d20aa6ab51bf91))
