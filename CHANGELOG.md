@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v2.22.1 (2024-08-16)
+
+### Fix
+
+* fix: remove unused imports, add missing import ([`92b5e4a`](https://gitlab.psi.ch/bec/bec/-/commit/92b5e4a50b45ee9d960fcf9839500fc420b9e0be))
+
+### Test
+
+* test: add connector unregister test with &#39;patterns&#39; ([`7f93933`](https://gitlab.psi.ch/bec/bec/-/commit/7f93933847dd387847930fb81171ca29f1b2d3be))
+
 ## v2.22.0 (2024-08-16)
 
 ### Ci
@@ -153,14 +163,6 @@ in the main module (INFO in general) ([`45b3263`](https://gitlab.psi.ch/bec/bec/
 
 * refactor: renamed DeviceMonitor2DMessage ([`0bb42d0`](https://gitlab.psi.ch/bec/bec/-/commit/0bb42d01bf7d7a03cf8e2a0859582ab14d8c99b8))
 
-* refactor: renamed device_monitor to device_monitor_2d, adapted SUB_EVENT name ([`c7b59b5`](https://gitlab.psi.ch/bec/bec/-/commit/c7b59b59c16ac18134ab73bf020137d28da56775))
-
 ### Unknown
 
 * test (device_monitor): add end-2-end test for device_monitor ([`4c578ce`](https://gitlab.psi.ch/bec/bec/-/commit/4c578ce15545e70072471e8def3bee2108b03ffb))
-
-## v2.19.1 (2024-07-25)
-
-### Fix
-
-* fix: add velocity vs exp_time check for contline_scan to make it more robust ([`2848682`](https://gitlab.psi.ch/bec/bec/-/commit/2848682644624c024ac37fe946fbd2b6ddc377dc))
