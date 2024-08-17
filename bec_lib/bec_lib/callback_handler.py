@@ -24,6 +24,7 @@ class EventType(str, enum.Enum):
     SCAN_SEGMENT = "scan_segment"
     SCAN_STATUS = "scan_status"
     NAMESPACE_UPDATE = "namespace_update"
+    DEVICE_UPDATE = "device_update"
 
 
 class CallbackEntry:

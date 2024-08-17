@@ -13,6 +13,7 @@ from rich.table import Table
 from typeguard import typechecked
 
 from bec_lib.bec_errors import DeviceConfigError
+from bec_lib.callback_handler import EventType
 from bec_lib.config_helper import ConfigHelper
 from bec_lib.device import ComputedSignal, Device, DeviceBase, Positioner, ReadoutPriority, Signal
 from bec_lib.endpoints import MessageEndpoints
@@ -461,6 +462,8 @@ class DeviceManagerBase:
             self._remove_action(config)
         self.update_status(BECStatus.RUNNING)
         self._acknowledge_config_request(msg)
+        if hasattr(self._service, "callbacks"):
+            self._service.callbacks.run(EventType.DEVICE_UPDATE, action, config)
 
     def _acknowledge_config_request(self, msg: DeviceConfigMessage) -> None:
         """
