@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v2.23.1 (2024-08-19)
+
+### Fix
+
+* fix(serialization): added json decoder as fallback option for raw messages ([`5e7f630`](https://gitlab.psi.ch/bec/bec/-/commit/5e7f630ce7b2e7a3ff3337d966155e4b5f5cc7ff))
+
+### Test
+
+* test: wait for dap to finish ([`be0d589`](https://gitlab.psi.ch/bec/bec/-/commit/be0d589ae89cc663687402fd4c2fb0a738643f22))
+
 ## v2.23.0 (2024-08-17)
 
 ### Feature
@@ -154,13 +164,3 @@ in the main module (INFO in general) ([`45b3263`](https://gitlab.psi.ch/bec/bec/
 ### Test
 
 * test: fix msg in init scan info ([`1357b21`](https://gitlab.psi.ch/bec/bec/-/commit/1357b216a83d130efb3ba9af21c0a1eef7d3a9e1))
-
-## v2.20.0 (2024-07-25)
-
-### Build
-
-* build(ci): pass ophyd_devices branch to child pipeline ([`a3e2b2e`](https://gitlab.psi.ch/bec/bec/-/commit/a3e2b2e37634fe7f445cce7e0ff2ac0b01d093b3))
-
-### Refactor
-
-* refactor: renamed DeviceMonitor2DMessage ([`0bb42d0`](https://gitlab.psi.ch/bec/bec/-/commit/0bb42d01bf7d7a03cf8e2a0859582ab14d8c99b8))
