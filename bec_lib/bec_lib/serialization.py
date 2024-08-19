@@ -367,6 +367,11 @@ class MsgpackSerialization(SerializationInterface):
             try:
                 msg = msgpack.loads(msg)
             except Exception as exception:
+                try:
+                    data = json.loads(msg)
+                    return messages_module.RawMessage(data=data)
+                except Exception:
+                    pass
                 raise RuntimeError("Failed to decode BECMessage") from exception
             else:
                 if isinstance(msg, BECMessage):

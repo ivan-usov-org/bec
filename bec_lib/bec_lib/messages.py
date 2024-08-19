@@ -787,3 +787,16 @@ class CredentialsMessage(BECMessage):
 
     msg_type: ClassVar[str] = "credentials_message"
     credentials: dict
+
+
+class RawMessage(BECMessage):
+    """Message for raw data that was not encoded as a BECMessage.
+    The data dictionary is simply the raw data loaded using json.loads
+
+    Args:
+        data (dict): Raw data
+        metadata (dict, optional): Metadata. Defaults to None.
+    """
+
+    msg_type: ClassVar[str] = "raw_message"
+    data: dict
