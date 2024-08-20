@@ -51,6 +51,7 @@ class LmfitService1D(DAPServiceBase):
         self.finish_event = None
         self.data = None
         self.continuous = continuous
+        self.oversample = 1
 
     @staticmethod
     def available_models():
@@ -173,6 +174,7 @@ class LmfitService1D(DAPServiceBase):
         amplitude: lmfit.Parameter = None,
         center: lmfit.Parameter = None,
         sigma: lmfit.Parameter = None,
+        oversample: int = 1,
         **kwargs,
     ):
         """
@@ -185,10 +187,13 @@ class LmfitService1D(DAPServiceBase):
             x_min (float): Minimum x value
             x_max (float): Maximum x value
             parameters (dict): Fit parameters
+            oversample (int): Oversample factor
         """
         # we only receive scan IDs from the client. However, users may
         # pass in a scan item in the CLI which is converted to a scan ID
         # within BEC lib.
+
+        self.oversample = oversample
 
         selected_device = kwargs.get("selected_device")
         if selected_device:
@@ -207,10 +212,16 @@ class LmfitService1D(DAPServiceBase):
             self.device_x = device_x
         if signal_x:
             self.signal_x = signal_x
+        elif device_x and self.client.device_manager.devices.get(device_x):
+            if len(self.client.device_manager.devices[device_x]._hints) == 1:
+                self.signal_x = self.client.device_manager.devices[device_x]._hints[0]
         if device_y:
             self.device_y = device_y
         if signal_y:
             self.signal_y = signal_y
+        elif device_y and self.client.device_manager.devices.get(device_y):
+            if len(self.client.device_manager.devices[device_y]._hints) == 1:
+                self.signal_y = self.client.device_manager.devices[device_y]._hints[0]
         if amplitude:
             self.parameters["amplitude"] = amplitude
         if center:
@@ -338,13 +349,16 @@ class LmfitService1D(DAPServiceBase):
             result = self.model.fit(y, x=x)
 
         # if the fit was only on a subset of the data, add the original x values to the output
-        if self.data["x_lim"]:
-            y_out = np.asarray(self.model.eval(**result.best_values, x=self.data["x_original"]))
+        if self.data["x_lim"] or self.oversample != 1:
+            x_data = self.data["x_original"]
+            x_out = np.linspace(x_data.min(), x_data.max(), int(len(x_data) * self.oversample))
+            y_out = np.asarray(self.model.eval(**result.best_values, x=x_out))
         else:
+            x_out = self.data["x_original"]
             y_out = np.asarray(result.best_fit)
 
         # add the fit result to the output
-        stream_output = {"x": self.data["x_original"], "y": y_out}
+        stream_output = {"x": x_out, "y": y_out}
 
         # add the fit parameters to the metadata
         metadata = {}
