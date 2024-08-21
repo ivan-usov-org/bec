@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v2.24.0 (2024-08-21)
+
+### Feature
+
+* feat(lmfit): added fallback to hinted signals; added oversampling option ([`b66b928`](https://gitlab.psi.ch/bec/bec/-/commit/b66b9286899a69ab8bc71ec2a65e16189e52cb07))
+
 ## v2.23.2 (2024-08-21)
 
 ### Fix
@@ -154,10 +160,6 @@ in the main module (INFO in general) ([`45b3263`](https://gitlab.psi.ch/bec/bec/
 ### Ci
 
 * ci: added child_pipeline_branch var ([`8ca8478`](https://gitlab.psi.ch/bec/bec/-/commit/8ca8478019b532db2ab2f5c0fbc8297ca9d56327))
-
-* ci: added inputs to beamline trigger pipelines ([`5e11c0c`](https://gitlab.psi.ch/bec/bec/-/commit/5e11c0c06543a5d6f875575fe2a3cf9748421c5d))
-
-* ci: cleanup and moved beamline trigger pipelines to awi utils ([`3030451`](https://gitlab.psi.ch/bec/bec/-/commit/303045198ec77c7a6b7ef5d5e7c4ab308c14a52f))
 
 ### Fix
 
