@@ -68,6 +68,37 @@ class RequestItem:
         # if message.show_asap:
         self.client_messages_asap.append(message)
 
+    @staticmethod
+    def _format_client_msg(msg: messages.ClientInfoMessage) -> str:
+        """Pop messages from the client message handler.
+
+        Args:
+            messages (list, optional): List of messages to be popped. Defaults to None.
+        """
+        scope_info = []
+        if msg.source:
+            scope_info.append(msg.source)
+        if msg.scope:
+            scope_info.append(msg.scope)
+        scope_info = "|".join(scope_info)
+
+        rtr = (
+            f"Client info ({scope_info}): {msg.message}"
+            if scope_info
+            else f"Client info: {msg.message}"
+        )
+        return rtr
+
+    def _print_all_client_asap_messages(self):
+        """Print client messages flagged as show_asap"""
+        # pylint: disable=protected-access
+        if not self.client_messages_asap:
+            return
+        # pylint: disable=protected-access
+        while len(self.client_messages_asap) > 0:
+            msg = self.client_messages_asap.pop(0)
+            print(self._format_client_msg(msg))
+
     @property
     def decision_pending(self) -> bool:
         """indicates whether a decision has been made to accept or decline a scan request"""
@@ -174,13 +205,17 @@ class RequestStorage:
     def update_with_client_message(self, client_message: messages.ClientInfoMessage) -> None:
         """Update the request item with a new ClientInfoMessage"""
         with self._lock:
-            if not client_message.RID:
-                return
+            if client_message.RID:
+                request_item = self.find_request_by_ID(client_message.RID)
+                if request_item:
+                    request_item.update_with_client_message(client_message)
+                    return
 
-            request_item = self.find_request_by_ID(client_message.RID)
-            if request_item:
-                request_item.update_with_client_message(client_message)
+                self.storage.append(
+                    RequestItem.from_client_message(self.scan_manager, client_message)
+                )
                 return
-
-            self.storage.append(RequestItem.from_client_message(self.scan_manager, client_message))
+            if client_message.show_asap:
+                # pylint: disable=protected-access
+                print(RequestItem._format_client_msg(client_message))
             return

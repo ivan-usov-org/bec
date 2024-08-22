@@ -324,6 +324,8 @@ class DeviceBase:
             msg = self.root.parent.connector.get(MessageEndpoints.device_rpc(rpc_id))
             if msg:
                 break
+            # pylint: disable=protected-access
+            scan_queue_request._print_all_client_asap_messages()
             time.sleep(0.01)
 
         return self._handle_rpc_response(msg)
