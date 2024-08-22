@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v2.25.0 (2024-08-22)
+
+### Feature
+
+* feat(server): added endpoint and handler to restart server through redis ([`9bde681`](https://gitlab.psi.ch/bec/bec/-/commit/9bde68138c5930c0f050ffd9ee6fcd21a294a488))
+
 ## v2.24.0 (2024-08-21)
 
 ### Feature
@@ -157,14 +163,6 @@ in the main module (INFO in general) ([`45b3263`](https://gitlab.psi.ch/bec/bec/
 
 ## v2.20.1 (2024-07-25)
 
-### Ci
-
-* ci: added child_pipeline_branch var ([`8ca8478`](https://gitlab.psi.ch/bec/bec/-/commit/8ca8478019b532db2ab2f5c0fbc8297ca9d56327))
-
 ### Fix
 
 * fix: unpack args and kwargs in scaninfo ([`2955a85`](https://gitlab.psi.ch/bec/bec/-/commit/2955a855ca742e4cafcf33cc262b439c5afb2b5e))
-
-### Test
-
-* test: fix msg in init scan info ([`1357b21`](https://gitlab.psi.ch/bec/bec/-/commit/1357b216a83d130efb3ba9af21c0a1eef7d3a9e1))
