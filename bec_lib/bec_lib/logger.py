@@ -232,6 +232,12 @@ class BECLogger:
         """
         Add a sink to the console log.
         """
+        try:
+            self.logger.level("CONSOLE_LOG", no=21, color="<yellow>", icon="📣")
+        except TypeError:
+            # level with same severity already exists: already configured
+            pass
+
         if not self.service_name:
             return
         filename = os.path.join(self._base_path, f"{self.service_name}_CONSOLE.log")
@@ -239,11 +245,6 @@ class BECLogger:
         # define a level corresponding to console log - this is to be able to filter messages
         # (only those with this particular level will be recorded by the console logger,
         # while other loggers will ignore them)
-        try:
-            self.logger.level("CONSOLE_LOG", no=21, color="<yellow>", icon="📣")
-        except TypeError:
-            # level with same severity already exists: already configured
-            pass
 
         self.logger.add(
             filename,
