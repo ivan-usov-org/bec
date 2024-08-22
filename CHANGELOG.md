@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v2.26.0 (2024-08-22)
+
+### Feature
+
+* feat(bec_lib): print all asap client messages during rpc ([`5de3235`](https://gitlab.psi.ch/bec/bec/-/commit/5de3235788f5bc573e2b1daa2c81c977e200e921))
+
 ## v2.25.1 (2024-08-22)
 
 ### Fix
@@ -153,12 +159,6 @@ Sometimes, restarting the tmux client is flaky ([`8ba44f6`](https://gitlab.psi.c
 * docs (data_access): Data Access, messaging and event system. ([`27c838d`](https://gitlab.psi.ch/bec/bec/-/commit/27c838db04749e8051f57582c65492243b967094))
 
 ## v2.20.2 (2024-08-01)
-
-### Ci
-
-* ci: made jobs interruptible ([`1fc6bc4`](https://gitlab.psi.ch/bec/bec/-/commit/1fc6bc4b22c48715eff4d27709cffc5c08037769))
-
-* ci: added support for child pipelines ([`d3385f6`](https://gitlab.psi.ch/bec/bec/-/commit/d3385f66e50e6b19e79030ec0af13054a7ab2f47))
 
 ### Fix
 
