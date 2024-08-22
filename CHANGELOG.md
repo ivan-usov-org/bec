@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v2.25.1 (2024-08-22)
+
+### Fix
+
+* fix: try/expect CONSOLE logger changed order ([`ca36128`](https://gitlab.psi.ch/bec/bec/-/commit/ca3612816bcb1bd86bc2480724fad57ce9af9892))
+
 ## v2.25.0 (2024-08-22)
 
 ### Feature
@@ -160,9 +166,3 @@ Sometimes, restarting the tmux client is flaky ([`8ba44f6`](https://gitlab.psi.c
 
 This has the side effect of reconfiguring loggers to the level specified
 in the main module (INFO in general) ([`45b3263`](https://gitlab.psi.ch/bec/bec/-/commit/45b32632181fff18758e2195b84f8254f365465a))
-
-## v2.20.1 (2024-07-25)
-
-### Fix
-
-* fix: unpack args and kwargs in scaninfo ([`2955a85`](https://gitlab.psi.ch/bec/bec/-/commit/2955a855ca742e4cafcf33cc262b439c5afb2b5e))
