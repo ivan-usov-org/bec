@@ -116,80 +116,13 @@ def test_stop_devices(device_server_mock):
         stop.assert_not_called()
 
 
-@pytest.mark.parametrize(
-    "msg,stop_called",
-    [
-        (
-            MessageObject(
-                "test",
-                messages.ScanQueueModificationMessage(
-                    scan_id="scan_id",
-                    action="pause",
-                    parameter={},
-                    metadata={"stream": "primary", "DIID": 1, "RID": "test"},
-                ),
-            ),
-            True,
-        ),
-        (
-            MessageObject(
-                "test",
-                messages.ScanQueueModificationMessage(
-                    scan_id="scan_id",
-                    action="abort",
-                    parameter={},
-                    metadata={"stream": "primary", "DIID": 1, "RID": "test"},
-                ),
-            ),
-            True,
-        ),
-        (
-            MessageObject(
-                "test",
-                messages.ScanQueueModificationMessage(
-                    scan_id="scan_id",
-                    action="halt",
-                    parameter={},
-                    metadata={"stream": "primary", "DIID": 1, "RID": "test"},
-                ),
-            ),
-            True,
-        ),
-        (
-            MessageObject(
-                "test",
-                messages.ScanQueueModificationMessage(
-                    scan_id="scan_id",
-                    action="resume",
-                    parameter={},
-                    metadata={"stream": "primary", "DIID": 1, "RID": "test"},
-                ),
-            ),
-            False,
-        ),
-        (
-            MessageObject(
-                "test",
-                messages.ScanQueueModificationMessage(
-                    scan_id="scan_id",
-                    action="deferred_pause",
-                    parameter={},
-                    metadata={"stream": "primary", "DIID": 1, "RID": "test"},
-                ),
-            ),
-            False,
-        ),
-    ],
-)
 @pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
-def test_register_interception_callback(device_server_mock, msg, stop_called):
+def test_on_stop_all_devices(device_server_mock):
+    msg = messages.VariableMessage(value=1, metadata={})
     device_server = device_server_mock
     with mock.patch.object(device_server, "stop_devices") as stop:
-        device_server.register_interception_callback(msg, parent=device_server)
-        if stop_called:
-            stop.assert_called_once()
-        else:
-            stop.assert_not_called()
+        device_server.on_stop_all_devices(msg, parent=device_server)
+        stop.assert_called_once()
 
 
 @pytest.mark.parametrize(

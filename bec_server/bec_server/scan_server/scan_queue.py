@@ -128,6 +128,13 @@ class QueueManager:
             parent.scan_interception(scan_mod_msg)
             parent.send_queue_status()
 
+    def stop_all_devices(self):
+        """
+        Send a message to the device server to stop all devices.
+        """
+        msg = messages.VariableMessage(value=1, metadata={})
+        self.connector.send(MessageEndpoints.stop_all_devices(), msg)
+
     def scan_interception(self, scan_mod_msg: messages.ScanQueueModificationMessage) -> None:
         """handle a scan interception by compiling the requested method name and forwarding the request.
 
@@ -173,10 +180,21 @@ class QueueManager:
     def set_abort(self, scan_id=None, queue="primary", parameter: dict = None) -> None:
         """abort the scan and remove it from the queue. This will leave the queue in a paused state after the cleanup"""
         que = self.queues[queue]
+        if scan_id is not None:
+            if not isinstance(scan_id, list):
+                scan_id = [scan_id]
+            current_scan_id = self._get_active_scan_id(queue)
+            if not isinstance(current_scan_id, list):
+                current_scan_id = [current_scan_id]
+            if len(set(scan_id) & set(current_scan_id)) == 0:
+                self.queues[queue].remove_queue_item(scan_id)
+                return
+
         with AutoResetCM(que):
             if que.queue:
                 que.status = ScanQueueStatus.PAUSED
             que.worker_status = InstructionQueueStatus.STOPPED
+            self.stop_all_devices()
 
     @requires_queue
     def set_halt(self, scan_id=None, queue="primary", parameter: dict = None) -> None:
@@ -392,6 +410,8 @@ class ScanQueue:
         """remove a queue item from the queue"""
         if not scan_id:
             return
+        if not isinstance(scan_id, list):
+            scan_id = [scan_id]
         remove = []
         for queue in self.queue:
             if len(set(scan_id) & set(queue.scan_id)) > 0:

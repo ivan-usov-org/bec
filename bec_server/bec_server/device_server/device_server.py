@@ -41,9 +41,7 @@ class DeviceServer(RPCMixin, BECService):
         super().__init__(config, connector_cls, unique_service=True)
         self._tasks = []
         self.device_manager = None
-        self.connector.register(
-            MessageEndpoints.scan_queue_modification(), cb=self.register_interception_callback
-        )
+        self.connector.register(MessageEndpoints.stop_all_devices(), cb=self.on_stop_all_devices)
         self.executor = ThreadPoolExecutor(max_workers=4)
         self._start_device_manager()
 
@@ -88,15 +86,14 @@ class DeviceServer(RPCMixin, BECService):
             device_root = dev.split(".")[0]
             self.device_manager.devices.get(device_root).metadata = instr.metadata
 
-    def register_interception_callback(self, msg, **_kwargs) -> None:
+    def on_stop_all_devices(self, msg, **_kwargs) -> None:
         """callback for receiving scan modifications / interceptions"""
         mvalue = msg.value
         if mvalue is None:
             logger.warning("Failed to parse scan queue modification message.")
             return
-        logger.info(f"Receiving: {mvalue.content}")
-        if mvalue.content.get("action") in ["pause", "abort", "halt"]:
-            self.stop_devices()
+        logger.info(f"Receiving request to stop all devices.")
+        self.stop_devices()
 
     def stop_devices(self) -> None:
         """stop all enabled devices"""

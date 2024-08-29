@@ -246,7 +246,11 @@ def test_set_abort(queuemanager_mock):
     queue_manager.add_to_queue(scan_queue="primary", msg=msg)
     queue_manager.set_abort(queue="primary")
     wait_to_reach_state(queue_manager, "primary", ScanQueueStatus.PAUSED)
-    assert len(queue_manager.connector.message_sent) == 2
+    assert len(queue_manager.connector.message_sent) == 3
+    assert {
+        "queue": MessageEndpoints.stop_all_devices(),
+        "msg": messages.VariableMessage(value=1, metadata={}),
+    } in queue_manager.connector.message_sent
     assert (
         queue_manager.connector.message_sent[0].get("queue") == MessageEndpoints.scan_queue_status()
     )
@@ -258,7 +262,11 @@ def test_set_abort_with_empty_queue(queuemanager_mock):
     queue_manager.connector.message_sent = []
     queue_manager.set_abort(queue="primary")
     wait_to_reach_state(queue_manager, "primary", ScanQueueStatus.RUNNING)
-    assert len(queue_manager.connector.message_sent) == 0
+    assert len(queue_manager.connector.message_sent) == 1
+    assert {
+        "queue": MessageEndpoints.stop_all_devices(),
+        "msg": messages.VariableMessage(value=1, metadata={}),
+    } in queue_manager.connector.message_sent
 
 
 @pytest.mark.timeout(5)
