@@ -388,8 +388,12 @@ class ScanStubs:
             wait_type (Literal["move", "read", "trigger"]): Type of wait event. Can be "move", "read" or "trigger".
             device (list[str] | str, optional): List of device names. Defaults to None.
             group (Literal["scan_motor", "primary", None]): Device group that can be used instead of device. Defaults to None.
-            wait_group (str, optional): Wait group for this event. Defaults to None.
-            wait_time (float, optional): Wait time (for wait_type="trigger"). Defaults to None.
+                "scan_motor" is used to select the provided "scan_motors" of the scan. "primary" is used to select all monitored devices.
+            wait_group (str, optional): Wait group for this event. Defaults to None. The specified wait group must match the wait group
+                that was used in the corresponding trigger, read or set command, cf. :func:`read`, :func:`set`, :func:`trigger`.
+            wait_time (float, optional): Wait time (for wait_type="trigger"). Defaults to None. The specified wait time is the minimum time
+                the wait event will wait for the completion of the trigger. Additionally, the wait event will wait for the completion of the
+                status events of the triggered devices.
 
         Returns:
             Generator[None, None, None]: Generator that yields a device message.
