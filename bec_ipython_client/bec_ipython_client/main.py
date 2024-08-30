@@ -137,7 +137,7 @@ class BECIPythonClient:
             self._ip.prompts.status = 2
 
     def _load_magics(self):
-        magics = BECMagics(self._ip, self._client)
+        magics = BECMagics(self._ip, self)
         self._ip.register_magics(magics)
 
     def shutdown(self):

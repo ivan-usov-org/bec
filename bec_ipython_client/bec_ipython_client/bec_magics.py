@@ -5,12 +5,12 @@ from typing import TYPE_CHECKING
 from IPython.core.magic import Magics, line_magic, magics_class
 
 if TYPE_CHECKING:
-    from bec_ipython_client import BECClient
+    from bec_ipython_client import BECIPythonClient
 
 
 @magics_class
 class BECMagics(Magics):
-    def __init__(self, shell, client: BECClient):
+    def __init__(self, shell, client: BECIPythonClient):
         super(BECMagics, self).__init__(shell)
         self.client = client
 
