@@ -1,5 +1,27 @@
 # CHANGELOG
 
+## v2.27.0 (2024-08-30)
+
+### Documentation
+
+* docs(stubs): improvements to the stubs doc strings ([`89b4353`](https://gitlab.psi.ch/bec/bec/-/commit/89b4353433c603398e8c87da36e6ebc7aa2fc47c))
+
+* docs(stubs): minor improvements to the wait docstring ([`9db0c03`](https://gitlab.psi.ch/bec/bec/-/commit/9db0c03bec9aa2fa50e2ad727d0a43727c2db482))
+
+### Feature
+
+* feat(endpoint): added stop_all_devices endpoint ([`13beb51`](https://gitlab.psi.ch/bec/bec/-/commit/13beb51a520e9ef6569fff45807bd50d076ce787))
+
+### Fix
+
+* fix(ipython client): fixed magic command for resume ([`2289036`](https://gitlab.psi.ch/bec/bec/-/commit/228903628b3dd624a20bea48ccf65ec9ff1cc5ed))
+
+* fix(queue): moved queue modifications to dedicated message for the device server ([`3e0e5cf`](https://gitlab.psi.ch/bec/bec/-/commit/3e0e5cf9a8ab477acdbeb85b703beb86207fec18))
+
+### Refactor
+
+* refactor(docs): new bec logo ([`4070521`](https://gitlab.psi.ch/bec/bec/-/commit/4070521e6c4b6b8ee6b29730fdefb5def2f5be22))
+
 ## v2.26.0 (2024-08-22)
 
 ### Feature
@@ -139,30 +161,3 @@ Sometimes, restarting the tmux client is flaky ([`8ba44f6`](https://gitlab.psi.c
 * refactor: minor cleanup ([`f08c652`](https://gitlab.psi.ch/bec/bec/-/commit/f08c652dd6eca114331be4b915bec66fe911ff12))
 
 * refactor(scan_bundler): moved specific bec emitter methods from emitterbase to bec emitter ([`b0bc0da`](https://gitlab.psi.ch/bec/bec/-/commit/b0bc0da54f66e5ad4d26471c88eb7d1c8910bead))
-
-## v2.21.0 (2024-08-13)
-
-### Documentation
-
-* docs(messaging): added first draft of bec messaging docs ([`efbeca3`](https://gitlab.psi.ch/bec/bec/-/commit/efbeca3c322fa62a95b51ebc5670a6d446dcdebc))
-
-### Feature
-
-* feat: Add metadata entry to _info for signal and device ([`fe4979a`](https://gitlab.psi.ch/bec/bec/-/commit/fe4979adbd4804c6f3b69902ade0d22c1b70f8cd))
-
-### Test
-
-* test: fix tests for adapted device_info ([`8778843`](https://gitlab.psi.ch/bec/bec/-/commit/877884336b52aa9e66e8b463fcb3bc7abcd654d1))
-
-### Unknown
-
-* docs (data_access): Data Access, messaging and event system. ([`27c838d`](https://gitlab.psi.ch/bec/bec/-/commit/27c838db04749e8051f57582c65492243b967094))
-
-## v2.20.2 (2024-08-01)
-
-### Fix
-
-* fix: do not import cli.launch.main in __init__
-
-This has the side effect of reconfiguring loggers to the level specified
-in the main module (INFO in general) ([`45b3263`](https://gitlab.psi.ch/bec/bec/-/commit/45b32632181fff18758e2195b84f8254f365465a))
