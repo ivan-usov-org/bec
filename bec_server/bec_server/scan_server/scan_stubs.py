@@ -56,6 +56,10 @@ class ScanStubs:
 
     def send_rpc_and_wait(self, device: str, func_name: str, *args, **kwargs) -> any:
         """Perform an RPC (remote procedure call) on a device and wait for its return value.
+        This method can be used to call any function on a device, irrespective of the
+        function's USER ACCESS settings. The function will be called with the provided arguments
+        and return the return value of the function. If the function returns a status object, the
+        status object will be returned instead.
 
         Args:
             device (str): Name of the device
@@ -128,6 +132,9 @@ class ScanStubs:
         self, *, device: str, value: float, request_id: str = None, metadata=None
     ) -> Generator[None, None, None]:
         """Set a device to a specific value and return the request ID. Use :func:`request_is_completed` to later check if the request is completed.
+        Use this method if you want to wait for the completion of a set operation whilst still being able to perform other operations on the same device.
+
+        On the device server, `set_with_response` will call the `set` method of the device.
 
         Args:
             device (str): Device name.
@@ -165,6 +172,8 @@ class ScanStubs:
     ) -> Generator[None, None, None]:
         """Set devices to a specific position and wait completion.
 
+        On the device server, `set_and_wait` will call the `set` method of the device.
+
         Args:
             device (list[str]): List of device names.
             positions (list | np.ndarray): Target position.
@@ -186,7 +195,9 @@ class ScanStubs:
     def read_and_wait(
         self, *, wait_group: str, device: list = None, group: str = None, point_id: int = None
     ) -> Generator[None, None, None]:
-        """Trigger a reading and wait for completion.
+        """Perform a reading and wait for completion.
+
+        On the device server, `read_and_wait` will call the `read` method of the device.
 
         Args:
             wait_group (str): wait group
@@ -246,6 +257,8 @@ class ScanStubs:
     ) -> Generator[None, None, None]:
         """Kickoff a fly scan device.
 
+        On the device server, `kickoff` will call the `kickoff` method of the device.
+
         Args:
             device (str): Device name of flyer.
             parameter (dict, optional): Additional parameters that should be forwarded to the device. Defaults to {}.
@@ -261,6 +274,8 @@ class ScanStubs:
 
     def complete(self, *, device: str, metadata=None) -> Generator[None, None, None]:
         """Complete a fly scan device.
+
+        On the device server, `complete` will call the `complete` method of the device.
 
         Args:
             device (str): Device name of flyer.
@@ -327,7 +342,9 @@ class ScanStubs:
 
     def stage(self) -> Generator[None, None, None]:
         """
-        Stage all devices
+        Stage all devices.
+
+        On the device server, `stage` will call the `stage` method of the device.
 
         Returns:
             Generator[None, None, None]: Generator that yields a device message.
@@ -338,7 +355,9 @@ class ScanStubs:
 
     def unstage(self) -> Generator[None, None, None]:
         """
-        Unstage all devices
+        Unstage all devices.
+
+        On the device server, `unstage` will call the `unstage` method of the device.
 
         Returns:
             Generator[None, None, None]: Generator that yields a device message.
@@ -353,6 +372,8 @@ class ScanStubs:
         are used to perform time-critical actions.
         The event will be sent to all devices that have a pre_scan method implemented.
 
+        On the device server, `pre_scan` will call the `pre_scan` method of the device, if implemented.
+
         Returns:
             Generator[None, None, None]: Generator that yields a device message.
         """
@@ -361,6 +382,8 @@ class ScanStubs:
     def baseline_reading(self) -> Generator[None, None, None]:
         """
         Run the baseline readings. This will readout all devices that are marked with the readout_priority "baseline".
+
+        On the device server, `baseline_reading` will call the `read` method of the device.
 
         Returns:
             Generator[None, None, None]: Generator that yields a device message.
@@ -417,7 +440,9 @@ class ScanStubs:
         group: Literal["scan_motor", "primary", None] = None,
     ) -> Generator[None, None, None]:
         """
-        Trigger a reading on a device or device group.
+        Perform a reading on a device or device group.
+
+        On the device server, `read` will call the `read` method of the device.
 
         Args:
             wait_group (str): Wait group for this event. The specified wait group can later be used
@@ -469,6 +494,8 @@ class ScanStubs:
         """Trigger a device group. Note that the trigger event is not blocking and does not wait for the completion of the trigger event.
         To wait for the completion of the trigger event, use the :func:`wait` command, specifying the wait_type as "trigger".
 
+        On the device server, `trigger` will call the `trigger` method of the device.
+
         Args:
             group (str): Device group that should receive the trigger.
             point_id (int): point_id that should be attached to this trigger event.
@@ -490,6 +517,8 @@ class ScanStubs:
         in the command-line interface. The wait_group can be used to wait for the completion of this event.
         For a set operation, this simply means that the device has acknowledged the set command and does not
         necessarily mean that the device has reached the target value.
+
+        On the device server, `set` will call the `set` method of the device.
 
         Args:
             device (str): Device name
@@ -543,6 +572,7 @@ class ScanStubs:
 
     def rpc(self, *, device: str, parameter: dict, metadata=None) -> Generator[None, None, None]:
         """Perfrom an RPC (remote procedure call) on a device.
+        Do not use this command directly. Instead, use :func:`send_rpc_and_wait` to perform an RPC and wait for its return value.
 
         Args:
             device (str): Device name.
