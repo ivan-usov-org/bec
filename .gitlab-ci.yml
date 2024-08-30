@@ -6,8 +6,12 @@ image: $CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/python:3.10
 variables:
   DOCKER_TLS_CERTDIR: ""
   CHILD_PIPELINE_BRANCH: $CI_DEFAULT_BRANCH
-  OPHYD_DEVICES_BRANCH: "main"
-  BEC_WIDGETS_BRANCH: "main"
+  OPHYD_DEVICES_BRANCH:
+    description: ophyd_devices branch
+    value: main
+  BEC_WIDGETS_BRANCH:
+    description: bec_widgets branch
+    value: main
 
 workflow:
   rules:
