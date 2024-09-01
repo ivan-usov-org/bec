@@ -107,3 +107,47 @@ def test_parse_config_request_reload(device_manager):
         handler.parse_config_request(msg)
         reload_config.assert_called_once()
         assert msg.metadata["failed_devices"] == ["samx"]
+
+
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
+def test_parse_config_request_add_remove(dm_with_devices):
+    """
+    Test adding and removing a device from the device manager
+    """
+    handler = ConfigUpdateHandler(dm_with_devices)
+    config = {
+        "new_device": {
+            "readoutPriority": "baseline",
+            "deviceClass": "ophyd_devices.SimPositioner",
+            "deviceConfig": {
+                "delay": 1,
+                "limits": [-50, 50],
+                "tolerance": 0.01,
+                "update_frequency": 400,
+            },
+            "deviceTags": ["user motors"],
+            "enabled": True,
+            "readOnly": False,
+            "name": "new_device",
+        }
+    }
+    msg = messages.DeviceConfigMessage(action="add", config=config)
+    handler.parse_config_request(msg)
+    assert "new_device" in dm_with_devices.devices
+
+    config = {"new_device": {}}
+    msg = messages.DeviceConfigMessage(action="remove", config=config)
+    handler.parse_config_request(msg)
+    assert "new_device" not in dm_with_devices.devices
+
+
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
+def test_parse_config_request_remove_device_not_in_config(dm_with_devices):
+    """
+    Test that removing a device that is not in the config does not raise an error
+    """
+    handler = ConfigUpdateHandler(dm_with_devices)
+    config = {"new_device": {}}
+    msg = messages.DeviceConfigMessage(action="remove", config=config)
+    handler.parse_config_request(msg)
+    assert "new_device" not in dm_with_devices.devices

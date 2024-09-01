@@ -6,6 +6,7 @@ import yaml
 
 from bec_lib.alarm_handler import AlarmBase
 from bec_lib.devicemanager import DeviceConfigError
+from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
 
 logger = bec_logger.logger
@@ -315,6 +316,38 @@ def test_config_reload(
         assert len(bec.device_manager.devices) == 2
     for dev in disabled_device:
         assert bec.device_manager.devices[dev].enabled is False
+
+
+def test_config_add_remove_device(bec_client_lib):
+    bec = bec_client_lib
+    bec.metadata.update({"unit_test": "test_config_add_device"})
+    dev = bec.device_manager.devices
+    config = {
+        "new_device": {
+            "deviceClass": "ophyd_devices.SimPositioner",
+            "deviceConfig": {
+                "delay": 1,
+                "limits": [-50, 50],
+                "tolerance": 0.01,
+                "update_frequency": 400,
+            },
+            "readoutPriority": "baseline",
+            "deviceTags": ["user motors"],
+            "enabled": True,
+            "readOnly": False,
+        }
+    }
+    bec.config.send_config_request(action="add", config=config)
+    assert "new_device" in dev
+
+    bec.config.send_config_request(action="remove", config={"new_device": {}})
+    assert "new_device" not in dev
+
+    config = bec.connector.get(MessageEndpoints.device_config())
+    device_configs = config.content["resource"]
+    available_devices = [dev["name"] for dev in device_configs]
+    assert "new_device" not in available_devices
+    assert "samx" in available_devices
 
 
 def test_computed_signal(bec_client_lib):

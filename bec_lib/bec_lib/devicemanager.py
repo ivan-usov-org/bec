@@ -486,8 +486,9 @@ class DeviceManagerBase:
         )
 
     def _add_action(self, config) -> None:
-        for dev in config:
-            self._add_device(dev, config)
+        for dev, dev_config in config.items():
+            msg = self._get_device_info(dev)
+            self._add_device(dev_config, msg)
 
     def _reload_action(self) -> None:
         logger.info("Reloading config.")

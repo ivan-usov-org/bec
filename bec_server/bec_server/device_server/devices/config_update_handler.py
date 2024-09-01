@@ -10,7 +10,7 @@ from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
 
 if TYPE_CHECKING:
-    from devicemanager import DeviceManagerDS
+    from bec_server.device_server.devices.devicemanager import DeviceManagerDS
 
 logger = bec_logger.logger
 
@@ -44,11 +44,15 @@ class ConfigUpdateHandler:
             if msg.content["action"] == "update":
                 self._update_config(msg)
             if msg.content["action"] == "add":
-                raise NotImplementedError
+                self._add_config(msg)
+                if self.device_manager.failed_devices:
+                    msg.metadata["failed_devices"] = self.device_manager.failed_devices
             if msg.content["action"] == "reload":
                 self._reload_config()
                 if self.device_manager.failed_devices:
                     msg.metadata["failed_devices"] = self.device_manager.failed_devices
+            if msg.content["action"] == "remove":
+                self._remove_config(msg)
 
         except Exception:
             error_msg = traceback.format_exc()
@@ -126,6 +130,49 @@ class ConfigUpdateHandler:
         if self.device_manager.failed_devices:
             self.handle_failed_device_inits()
         return
+
+    def _add_config(self, msg: messages.DeviceConfigMessage) -> None:
+        """
+        Adds new devices to the config and initializes them. If a device fails to initialize, it is added to the
+        failed_devices dictionary.
+
+        Args:
+            msg (BECMessage.DeviceConfigMessage): Config message containing the new devices
+
+        """
+        # pylint:disable=protected-access
+        self.device_manager.failed_devices = {}
+        dm: DeviceManagerDS = self.device_manager
+        for dev, dev_config in msg.content["config"].items():
+            name = dev_config["name"]
+            logger.info(f"Adding device {name}")
+            if dev in dm.devices:
+                continue  # tbd what to do here: delete and add new device?
+            obj, config = dm.construct_device_obj(dev_config, device_manager=dm)
+            try:
+                dm.initialize_device(dev_config, config, obj)
+            # pylint: disable=broad-except
+            except Exception:
+                msg = traceback.format_exc()
+                dm.failed_devices[name] = msg
+                logger.error(f"Failed to initialize device {name}: {msg}")
+
+    def _remove_config(self, msg: messages.DeviceConfigMessage) -> None:
+        """
+        Removes devices from the config and disconnects them.
+
+        Args:
+            msg (BECMessage.DeviceConfigMessage): Config message containing the devices to be removed
+
+        """
+        for dev in msg.content["config"]:
+            logger.info(f"Removing device {dev}")
+            if dev not in self.device_manager.devices:
+                continue
+            device = self.device_manager.devices[dev]
+            self.device_manager.disconnect_device(device)
+            self.device_manager.reset_device(device)
+            self.device_manager.devices.pop(dev)
 
     def handle_failed_device_inits(self):
         if self.device_manager.failed_devices:

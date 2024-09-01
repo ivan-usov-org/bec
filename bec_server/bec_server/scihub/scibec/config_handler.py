@@ -47,6 +47,10 @@ class ConfigHandler:
                 self._reload_config(msg)
             if msg.content["action"] == "set":
                 self._set_config(msg)
+            if msg.content["action"] == "add":
+                self._add_to_config(msg)
+            if msg.content["action"] == "remove":
+                self._remove_from_config(msg)
 
         except Exception:
             content = traceback.format_exc()
@@ -75,24 +79,37 @@ class ConfigHandler:
             experiments = None
 
         msg.metadata["updated_config"] = False
+
+        # make sure the config is valid before setting it in redis
         for name, device in config.items():
             self._convert_to_db_config(name, device)
             self.validator.validate_device(device)
         self.scibec_connector.set_redis_config(list(config.values()))
+
         msg.metadata["updated_config"] = True
+
+        # update the devices in the device server
+        # if the server fails, the config is wrong
         RID = str(uuid.uuid4())
         self._update_device_server(RID, config, action="reload")
         accepted, server_response_msg = self._wait_for_device_server_update(
             RID, timeout_time=min(300, 30 * len(config))
         )
         if "failed_devices" in server_response_msg.metadata:
+            # failed devices indicate that the server was able to initialize them but failed to
+            # connect to them
             logger.warning(f"Failed devices: {server_response_msg.metadata['failed_devices']}")
             msg.metadata["failed_devices"] = server_response_msg.metadata["failed_devices"]
+
         reload_msg = messages.DeviceConfigMessage(action="reload", config={}, metadata=msg.metadata)
+
         if accepted:
+            # inform the user that the config was accepted and inform all services about the new config
             self.send_config_request_reply(accepted=accepted, error_msg=None, metadata=msg.metadata)
             self.send_config(reload_msg)
             return
+
+        # the server failed to update the config and flushed the config
         self.send_config_request_reply(
             accepted=accepted,
             error_msg=f"{server_response_msg.message} Error during loading. The config will be flushed",
@@ -111,10 +128,52 @@ class ConfigHandler:
             self.scibec_connector.update_session()
         self.send_config_request_reply(accepted=True, error_msg=None, metadata=msg.metadata)
         self.send_config(msg)
-        # self.device_manager.update_status(BECStatus.BUSY)
-        # self.device_manager.devices.flush()
-        # self.device_manager._get_config()
-        # self.device_manager.update_status(BECStatus.RUNNING)
+
+    def _add_to_config(self, msg: messages.DeviceConfigMessage):
+        dev_configs = msg.content["config"]
+
+        for dev, config in dev_configs.items():
+            self._convert_to_db_config(dev, config)
+            self.validator.validate_device(config)
+
+        rid = str(uuid.uuid4())
+        self._update_device_server(rid, dev_configs, action="add")
+        accepted, server_response_msg = self._wait_for_device_server_update(rid)
+        if accepted:
+            # update config in redis
+            self.add_devices_to_redis(dev_configs)
+            self.send_config_request_reply(accepted=True, error_msg=None, metadata=msg.metadata)
+            self.send_config(msg)
+            return
+
+        self.send_config_request_reply(
+            accepted=False,
+            error_msg=f"{server_response_msg.message} Failed to add devices to the server.",
+            metadata=msg.metadata,
+        )
+
+    def _remove_from_config(self, msg: messages.DeviceConfigMessage):
+        dev_configs = msg.content["config"]
+
+        for dev in dev_configs:
+            if dev not in self.device_manager.devices:
+                raise DeviceConfigError(f"Device {dev} not found in the device manager.")
+
+        rid = str(uuid.uuid4())
+        self._update_device_server(rid, dev_configs, action="remove")
+        accepted, server_response_msg = self._wait_for_device_server_update(rid)
+        if accepted:
+            # update config in redis
+            self.remove_devices_from_redis(dev_configs)
+            self.send_config_request_reply(accepted=True, error_msg=None, metadata=msg.metadata)
+            self.send_config(msg)
+            return
+
+        self.send_config_request_reply(
+            accepted=False,
+            error_msg=f"{server_response_msg.message} Failed to remove devices from the server.",
+            metadata=msg.metadata,
+        )
 
     def _update_config(self, msg: messages.DeviceConfigMessage):
         updated = False
@@ -199,12 +258,62 @@ class ConfigHandler:
     def _validate_update(self, update):
         self.validator.validate_device_patch(update)
 
-    def update_config_in_redis(self, device):
-        config = self.device_manager.connector.get(MessageEndpoints.device_config())
-        config = config.content["resource"]
+    def update_config_in_redis(self, device: DeviceBase):
+        """
+        Update the device config in redis
+
+        Args:
+            device (DeviceBase): Device to update
+        """
+        config = self.get_config_from_redis()
         index = next(
             index for index, dev_conf in enumerate(config) if dev_conf["name"] == device.name
         )
+        # pylint: disable=protected-access
         config[index] = device._config
+        self.set_config_in_redis(config)
+
+    def add_devices_to_redis(self, dev_configs: dict):
+        """
+        Add devices to the redis config
+
+        Args:
+            dev_configs (dict): Dictionary of device configs
+        """
+        config = self.get_config_from_redis()
+        for dev, dev_config in dev_configs.items():
+            config.append(dev_config)
+        self.set_config_in_redis(config)
+
+    def remove_devices_from_redis(self, dev_configs: dict):
+        """
+        Remove devices from the redis config
+
+        Args:
+            dev_configs (dict): Dictionary of device configs
+        """
+        config = self.get_config_from_redis()
+        for dev in dev_configs:
+            index = next(index for index, dev_conf in enumerate(config) if dev_conf["name"] == dev)
+            config.pop(index)
+        self.set_config_in_redis(config)
+
+    def get_config_from_redis(self):
+        """
+        Get the config from redis
+
+        Returns:
+            list: List of device configs
+        """
+        config = self.device_manager.connector.get(MessageEndpoints.device_config())
+        return config.content["resource"]
+
+    def set_config_in_redis(self, config):
+        """
+        Set the config in redis
+
+        Args:
+            config (list): List of device configs
+        """
         msg = messages.AvailableResourceMessage(resource=config)
         self.device_manager.connector.set(MessageEndpoints.device_config(), msg)

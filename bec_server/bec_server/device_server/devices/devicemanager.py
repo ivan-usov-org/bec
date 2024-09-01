@@ -107,6 +107,12 @@ class DeviceManagerDS(DeviceManagerBase):
     def _reload_action(self) -> None:
         pass
 
+    def _add_action(self, msg: messages.DeviceConfigMessage) -> None:
+        pass
+
+    def _remove_action(self, msg: messages.DeviceConfigMessage) -> None:
+        pass
+
     @staticmethod
     def _get_device_class(dev_type: str) -> type:
         """Get the device class from the device type"""
@@ -195,19 +201,22 @@ class DeviceManagerDS(DeviceManagerBase):
                 )
 
     def _reset_config(self):
+        """
+        Reset the device config in redis and add the current config to the history.
+        """
         current_config = self._session["devices"]
         if current_config:
             # store the current config in the history
             current_config_msg = messages.AvailableResourceMessage(
                 resource=current_config, metadata={"removed_at": time.time()}
             )
-            self.producer.lpush(
+            self.connector.lpush(
                 MessageEndpoints.device_config_history(), current_config_msg, max_size=50
             )
         msg = messages.AvailableResourceMessage(resource=[])
-        self.producer.set(MessageEndpoints.device_config(), msg)
+        self.connector.set(MessageEndpoints.device_config(), msg)
         reload_msg = messages.DeviceConfigMessage(action="reload", config={})
-        self.producer.send(MessageEndpoints.device_config_update(), reload_msg)
+        self.connector.send(MessageEndpoints.device_config_update(), reload_msg)
 
     @staticmethod
     def update_config(obj: OphydObject, config: dict) -> None:

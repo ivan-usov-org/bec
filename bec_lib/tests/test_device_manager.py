@@ -30,8 +30,12 @@ def test_device_manager_initialize(device_manager):
     ],
 )
 def test_parse_config_request(device_manager, msg):
-    with mock.patch.object(device_manager, "_add_device"):
-        device_manager.parse_config_message(msg)
+    with mock.patch.object(device_manager, "_add_device") as add_device:
+        with mock.patch.object(device_manager, "_get_device_info") as get_device_info:
+            device_manager.parse_config_message(msg)
+            if msg.action == "add":
+                get_device_info.assert_called_once()
+                add_device.assert_called_once()
 
 
 def test_config_request_update(dm_with_devices):

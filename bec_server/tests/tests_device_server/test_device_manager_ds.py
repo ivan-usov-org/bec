@@ -179,3 +179,18 @@ def test_obj_device_monitor_2d_callback(dm_with_devices, value):
             stream_msg,
             max_size=min(100, int(max_size // value_size)),
         )
+
+
+@pytest.mark.parametrize("device_manager_class", [DeviceManagerDS])
+def test_device_manager_ds_reset_config(dm_with_devices):
+    with mock.patch.object(dm_with_devices, "connector") as mock_connector:
+        device_manager = dm_with_devices
+        config = device_manager._session["devices"]
+        device_manager._reset_config()
+
+        config_msg = messages.AvailableResourceMessage(
+            resource=config, metadata=mock_connector.lpush.call_args[0][1].metadata
+        )
+        mock_connector.lpush.assert_called_once_with(
+            MessageEndpoints.device_config_history(), config_msg, max_size=50
+        )
