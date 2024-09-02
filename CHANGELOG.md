@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## v2.29.0 (2024-09-02)
+
+### Ci
+
+* ci: prefill variables for manual pipeline start ([`d4b4bf8`](https://gitlab.psi.ch/bec/bec/-/commit/d4b4bf816a73923a90d0e7d1d5158f0e26016e92))
+
+### Feature
+
+* feat(config): added support for adding and removing devices ([`070b041`](https://gitlab.psi.ch/bec/bec/-/commit/070b0417d80c56b69093c768d25238cb0465de36))
+
+### Fix
+
+* fix(device_manager): fixed init value for failed devices ([`61c4fb6`](https://gitlab.psi.ch/bec/bec/-/commit/61c4fb69cdc068bdc997a53b26fccc15f00217b1))
+
 ## v2.28.0 (2024-09-02)
 
 ### Feature
@@ -151,15 +165,3 @@ Sometimes, restarting the tmux client is flaky ([`8ba44f6`](https://gitlab.psi.c
 ### Test
 
 * test: fixed test for status wait ([`4c5dd4a`](https://gitlab.psi.ch/bec/bec/-/commit/4c5dd4ab40a0c8d2ebef38d36ec61c230243f649))
-
-## v2.21.1 (2024-08-13)
-
-### Fix
-
-* fix(redis_connector): fixed support for bundle message ([`ef637c0`](https://gitlab.psi.ch/bec/bec/-/commit/ef637c0e59f94ad471ec1dce5906a56ae0299f9a))
-
-### Refactor
-
-* refactor: minor cleanup ([`f08c652`](https://gitlab.psi.ch/bec/bec/-/commit/f08c652dd6eca114331be4b915bec66fe911ff12))
-
-* refactor(scan_bundler): moved specific bec emitter methods from emitterbase to bec emitter ([`b0bc0da`](https://gitlab.psi.ch/bec/bec/-/commit/b0bc0da54f66e5ad4d26471c88eb7d1c8910bead))
