@@ -94,7 +94,7 @@ class DeviceManagerDS(DeviceManagerBase):
         self._device_instructions_connector = None
         self._config_update_handler_cls = config_update_handler
         self.config_update_handler = None
-        self.failed_devices = []
+        self.failed_devices = {}
 
     def initialize(self, bootstrap_server) -> None:
         self.config_update_handler = (
