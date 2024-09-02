@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v2.28.0 (2024-09-02)
+
+### Feature
+
+* feat(queue schedule): added endpoint and queue schedule methods ([`0c7e0eb`](https://gitlab.psi.ch/bec/bec/-/commit/0c7e0eb37f3d88e94bbb0ae0ee346b9736bc582c))
+
 ## v2.27.0 (2024-08-30)
 
 ### Documentation
@@ -151,10 +157,6 @@ Sometimes, restarting the tmux client is flaky ([`8ba44f6`](https://gitlab.psi.c
 ### Fix
 
 * fix(redis_connector): fixed support for bundle message ([`ef637c0`](https://gitlab.psi.ch/bec/bec/-/commit/ef637c0e59f94ad471ec1dce5906a56ae0299f9a))
-
-* fix(bec_lib): fixed reported msg type for device_config endpoint ([`28f9882`](https://gitlab.psi.ch/bec/bec/-/commit/28f98822173cba43860dcd20f890fee93a978d6a))
-
-* fix(bec_lib): added check to ensure becmessage type is correct ([`c8b4ab9`](https://gitlab.psi.ch/bec/bec/-/commit/c8b4ab9d99530351fa2005b69e118a5fb563d1e3))
 
 ### Refactor
 
