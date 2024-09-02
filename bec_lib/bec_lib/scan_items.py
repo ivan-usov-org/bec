@@ -63,6 +63,7 @@ class ScanItem:
         self.scan_report_instructions = []
         self._callbacks = []
         self._bec = builtins.__dict__.get("bec")
+        self.public_files = {}
 
     @property
     def queue(self):
@@ -137,7 +138,15 @@ class ScanItem:
         scan_id = f"\tScan ID: {self.scan_id}\n" if self.scan_id else ""
         scan_number = f"\tScan number: {self.scan_number}\n" if self.scan_number else ""
         num_points = f"\tNumber of points: {self.num_points}\n" if self.num_points else ""
-        details = start_time + end_time + elapsed_time + scan_id + scan_number + num_points
+        public_file = ""
+        if self.public_files:
+            for file_path in self.public_files:
+                file_name = file_path.split("/")[-1]
+                if "_master" in file_name:
+                    public_file = "\tFile: " + file_path + "\n"
+        details = (
+            start_time + end_time + elapsed_time + scan_id + scan_number + num_points + public_file
+        )
         return details
 
     def __str__(self) -> str:
@@ -266,6 +275,22 @@ class ScanStorage:
                     if scan_item.scan_id == scan_msg.metadata["scan_id"]:
                         point = len(scan_item.baseline)
                         scan_item.baseline.set(point, scan_msg)
+                        return
+            time.sleep(0.01)
+
+    def add_public_file(self, scan_id: str, msg: messages.FileMessage) -> None:
+        """add a public file to the scan item"""
+        while True:
+            with self._lock:
+                for scan_item in self.storage:
+                    if scan_item.scan_id == scan_id:
+                        file_path = msg.content["file_path"]
+                        done_state = msg.content["done"]
+                        successful = msg.content["successful"]
+                        scan_item.public_files[file_path] = {
+                            "done_state": done_state,
+                            "successful": successful,
+                        }
                         return
             time.sleep(0.01)
 

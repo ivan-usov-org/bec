@@ -60,6 +60,10 @@ class ScanManager:
 
         self.connector.register(topics=MessageEndpoints.client_info(), cb=self._client_msg_callback)
 
+        self.connector.register(
+            patterns=MessageEndpoints.public_file("*", "*"), cb=self._public_file_callback
+        )
+
     def update_with_queue_status(self, queue: messages.ScanQueueStatusMessage) -> None:
         """update storage with a new queue status message"""
         self.queue_storage.update_with_status(queue)
@@ -286,6 +290,12 @@ class ScanManager:
         keys = self.get_scan_queue_schedule_names()
         for key in keys:
             self.clear_scan_queue_schedule(key)
+
+    def _public_file_callback(self, msg, **_kwargs) -> None:
+        topic = msg.topic
+        value = msg.value
+        scan_id = topic.split("/")[1]
+        self.scan_storage.add_public_file(scan_id, value)
 
     def __str__(self) -> str:
         try:
