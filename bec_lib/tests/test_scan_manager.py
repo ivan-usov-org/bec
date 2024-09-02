@@ -1,16 +1,30 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 from unittest import mock
 
 import pytest
+from typeguard import TypeCheckError
 
 from bec_lib import messages
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.scan_manager import ScanManager
+
+if TYPE_CHECKING:
+    from bec_lib.redis_connector import RedisConnector
 
 
 @pytest.fixture
 def scan_manager():
     connector = mock.MagicMock()
     manager = ScanManager(connector=connector)
+    yield manager
+    manager.shutdown()
+
+
+@pytest.fixture
+def scan_manager_with_fakeredis(connected_connector: RedisConnector):
+    manager = ScanManager(connector=connected_connector)
     yield manager
     manager.shutdown()
 
@@ -135,3 +149,43 @@ def test_scan_manager_request_scan_continuation_scan_id(scan_manager, scan_id):
         MessageEndpoints.scan_queue_modification_request(),
         messages.ScanQueueModificationMessage(scan_id=scan_id, action="continue", parameter={}),
     )
+
+
+def test_scan_manager_add_scan_to_queue_schedule(scan_manager_with_fakeredis):
+    """
+    Test the interaction with queue schedules
+
+    Args:
+        scan_manager_with_fakeredis: The scan manager fixture with a fakeredis connection
+    """
+    manager: ScanManager = scan_manager_with_fakeredis
+    msg = messages.ScanQueueMessage(scan_type="mv", parameter={"args": {"samx": [5], "samy": [5]}})
+    manager.add_scan_to_queue_schedule("new_schedule", msg)
+
+    with pytest.raises(TypeCheckError):
+        manager.add_scan_to_queue_schedule("new_schedule", {})
+
+    assert manager.get_scan_queue_schedule("new_schedule") == [msg]
+
+    msg2 = messages.ScanQueueMessage(scan_type="mv", parameter={"args": {"samx": [6], "samy": [6]}})
+    manager.add_scan_to_queue_schedule("new_schedule", msg2)
+
+    assert manager.get_scan_queue_schedule("new_schedule") == [msg, msg2]
+
+    manager.add_scan_to_queue_schedule("new_schedule2", msg)
+
+    assert manager.get_scan_queue_schedule("new_schedule2") == [msg]
+
+    assert manager.get_scan_queue_schedule_names() == ["new_schedule", "new_schedule2"]
+
+    manager.clear_scan_queue_schedule("new_schedule2")
+
+    assert manager.get_scan_queue_schedule_names() == ["new_schedule"]
+
+    assert manager.get_scan_queue_schedule("new_schedule2") == []
+
+    assert manager.get_scan_queue_schedule("new_schedule") == [msg, msg2]
+
+    manager.clear_all_scan_queue_schedules()
+
+    assert manager.get_scan_queue_schedule_names() == []

@@ -6,6 +6,7 @@ as the requests and scans that are currently running or have been completed.
 from __future__ import annotations
 
 import uuid
+from typing import TYPE_CHECKING
 
 from typeguard import typechecked
 
@@ -18,9 +19,12 @@ from bec_lib.scan_items import ScanStorage
 
 logger = bec_logger.logger
 
+if TYPE_CHECKING:
+    from bec_lib.redis_connector import RedisConnector
+
 
 class ScanManager:
-    def __init__(self, connector):
+    def __init__(self, connector: RedisConnector):
         """
         ScanManager is a class that provides a convenient way to interact with the scan queue as well
         as the requests and scans that are currently running or have been completed.
@@ -224,6 +228,64 @@ class ScanManager:
     def _baseline_callback(self, msg, **_kwargs) -> None:
         msg = msg.value
         self.scan_storage.add_scan_baseline(msg)
+
+    @typechecked
+    def add_scan_to_queue_schedule(
+        self, schedule_name: str, msg: messages.ScanQueueMessage
+    ) -> None:
+        """
+        Add a scan to the queue schedule
+
+        Args:
+            schedule_name (str): name of the queue schedule
+            msg (messages.ScanQueueMessage): scan message
+        """
+        self.connector.rpush(MessageEndpoints.scan_queue_schedule(schedule_name=schedule_name), msg)
+
+    @typechecked
+    def get_scan_queue_schedule(self, schedule_name: str) -> list:
+        """
+        Get the scan queue schedule
+
+        Args:
+            schedule_name (str): name of the queue schedule
+
+        Returns:
+            list: list of scan messages
+        """
+        return self.connector.lrange(
+            MessageEndpoints.scan_queue_schedule(schedule_name=schedule_name), 0, -1
+        )
+
+    @typechecked
+    def clear_scan_queue_schedule(self, schedule_name: str) -> None:
+        """
+        Clear the scan queue schedule
+
+        Args:
+            schedule_name (str): name of the queue schedule
+        """
+        self.connector.delete(MessageEndpoints.scan_queue_schedule(schedule_name=schedule_name))
+
+    def get_scan_queue_schedule_names(self) -> list:
+        """
+        Get the names of the scan queue schedules
+
+        Returns:
+            list: list of schedule names
+        """
+        keys = self.connector.keys(MessageEndpoints.scan_queue_schedule(schedule_name="*"))
+        if not keys:
+            return []
+        return [key.decode().split("/")[-1] for key in keys]
+
+    def clear_all_scan_queue_schedules(self) -> None:
+        """
+        Clear all scan queue schedules
+        """
+        keys = self.get_scan_queue_schedule_names()
+        for key in keys:
+            self.clear_scan_queue_schedule(key)
 
     def __str__(self) -> str:
         try:

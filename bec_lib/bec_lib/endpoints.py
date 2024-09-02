@@ -21,7 +21,7 @@ class MessageOp(list[str], enum.Enum):
     SET_PUBLISH = ["register", "set_and_publish", "delete", "get", "keys"]
     SEND = ["send", "register"]
     STREAM = ["xadd", "xrange", "xread", "register_stream", "keys", "get_last"]
-    LIST = ["lpush", "lrange", "rpush", "ltrim", "keys"]
+    LIST = ["lpush", "lrange", "rpush", "ltrim", "keys", "delete"]
     SET = ["set", "get", "delete", "keys"]
 
 
@@ -497,6 +497,23 @@ class MessageEndpoints:
             endpoint=endpoint,
             message_type=messages.ScanQueueHistoryMessage,
             message_op=MessageOp.LIST,
+        )
+
+    @staticmethod
+    def scan_queue_schedule(schedule_name: str) -> EndpointInfo:
+        """
+        Endpoint for scan queue schedule. This endpoint is used to store messages.ScanQueueScheduleMessage messages
+        in a redis list.
+
+        Args:
+            schedule_name (str): Name of the schedule.
+
+        Returns:
+            EndpointInfo: Endpoint for scan queue schedule.
+        """
+        endpoint = f"internal/queue/queue_schedule/{schedule_name}"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.ScanQueueMessage, message_op=MessageOp.LIST
         )
 
     # scan info
