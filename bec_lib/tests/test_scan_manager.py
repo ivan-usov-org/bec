@@ -8,6 +8,7 @@ from typeguard import TypeCheckError
 
 from bec_lib import messages
 from bec_lib.endpoints import MessageEndpoints
+from bec_lib.redis_connector import MessageObject
 from bec_lib.scan_manager import ScanManager
 
 if TYPE_CHECKING:
@@ -18,6 +19,15 @@ if TYPE_CHECKING:
 def scan_manager():
     connector = mock.MagicMock()
     manager = ScanManager(connector=connector)
+    yield manager
+    manager.shutdown()
+
+
+@pytest.fixture
+def scan_manager_with_scan(scan_queue_status_msg):
+    connector = mock.MagicMock()
+    manager = ScanManager(connector=connector)
+    manager.scan_storage.update_with_queue_status(scan_queue_status_msg)
     yield manager
     manager.shutdown()
 
@@ -189,3 +199,31 @@ def test_scan_manager_add_scan_to_queue_schedule(scan_manager_with_fakeredis):
     manager.clear_all_scan_queue_schedules()
 
     assert manager.get_scan_queue_schedule_names() == []
+
+
+def test_scan_manager_add_public_file(scan_manager_with_scan):
+    """
+    Test the public file callback. It should add the file info to the scan item
+    of the file's scan.
+
+    For this, we use the scan_manager_with_scan fixture, which has a scan item
+    already in the queue. The queue fixture is defined in conftest.py.
+    """
+    msg = messages.FileMessage(
+        file_path="/Users/scans/S00001_master.h5", done=True, successful=True
+    )
+    msg_object = MessageObject(
+        topic=MessageEndpoints.public_file(
+            "bfa582aa-f9cd-4258-ab5d-3e5d54d3dde5", "master"
+        ).endpoint,
+        value=msg,
+    )
+    # pylint: disable=protected-access
+    scan_manager_with_scan._public_file_callback(msg=msg_object)
+    assert scan_manager_with_scan.scan_storage.storage[-1].public_files == {
+        msg.file_path: {"done_state": True, "successful": True}
+    }
+    assert (
+        "File: /Users/scans/S00001_master.h5"
+        in scan_manager_with_scan.scan_storage.storage[-1].describe()
+    )
