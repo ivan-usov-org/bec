@@ -43,8 +43,12 @@ class LogLevel(int, enum.Enum):
 class BECLogger:
     """Logger for BEC."""
 
+    LOG_FORMAT_STDERR = (
+        "<green>{service_name} | {{time:YYYY-MM-DD HH:mm:ss}}</green> | {{name}} | <level>[{{level}}]</level> |"
+        " <level>{{message}}</level>\n"
+    )
     LOG_FORMAT = (
-        "<green>{service_name} | {{time:YYYY-MM-DD HH:mm:ss}}</green> | <level>[{{level}}]</level> |"
+        "<green>{{time:YYYY-MM-DD HH:mm:ss}}</green> | {{name}} | <level>[{{level}}]</level> |"
         " <level>{{message}}</level>\n"
     )
     DEBUG_FORMAT = (
@@ -75,6 +79,7 @@ class BECLogger:
         self._file_log_level = self._log_level
         self._console_log = False
         self._configured = False
+        self._disabled_modules = set()
 
     def __new__(cls):
         if not hasattr(cls, "_logger") or cls._logger is None:
@@ -153,12 +158,13 @@ class BECLogger:
             # because it depends on the connector
             pass
 
-    def get_format(self, level: LogLevel = None) -> str:
+    def get_format(self, level: LogLevel = None, is_stderr=False) -> str:
         """
         Get the format for a specific log level.
 
         Args:
             level (LogLevel, optional): Log level. Defaults to None. If None, the current log level will be used.
+            is_stderr (bool, optional): Whether the log is for stderr. Defaults to False.
 
         Returns:
             str: Log format.
@@ -167,12 +173,14 @@ class BECLogger:
         if level is None:
             level = self.level
         if level > self.LOGLEVEL.DEBUG:
+            if is_stderr:
+                return self.LOG_FORMAT_STDERR.format(service_name=service_name)
             return self.LOG_FORMAT.format(service_name=service_name)
         if level > self.LOGLEVEL.TRACE:
             return self.DEBUG_FORMAT.format(service_name=service_name)
         return self.TRACE_FORMAT.format(service_name=service_name)
 
-    def formatting(self, record):
+    def formatting(self, is_stderr=False):
         """
         Format the log message.
 
@@ -182,12 +190,28 @@ class BECLogger:
         Returns:
             dict: Formatted log record.
         """
-        level = record["level"].no
-        if level <= self.LOGLEVEL.TRACE:
-            frames = takewhile(lambda f: "/loguru/" not in f.filename, traceback.extract_stack())
-            stack = " > ".join("{}:{}:{}".format(f.filename, f.name, f.lineno) for f in frames)
-            record["extra"]["stack"] = stack
-        return self.get_format(level)
+
+        def _update_record(record):
+            level = record["level"].no
+            if level <= self.LOGLEVEL.TRACE:
+                frames = takewhile(
+                    lambda f: "/loguru/" not in f.filename, traceback.extract_stack()
+                )
+                stack = " > ".join("{}:{}:{}".format(f.filename, f.name, f.lineno) for f in frames)
+                record["extra"]["stack"] = stack
+            return level
+
+        def _format(record):
+            level = _update_record(record)
+            return self.get_format(level)
+
+        def _format_stderr(record):
+            level = _update_record(record)
+            return self.get_format(level, is_stderr=True)
+
+        if is_stderr:
+            return _format_stderr
+        return _format
 
     def _update_sinks(self):
         self.logger.remove()
@@ -196,6 +220,29 @@ class BECLogger:
         self.add_file_log(self._file_log_level)
         if self._console_log:
             self.add_console_log()
+
+    def filter(self, is_console: bool = False):
+        """
+        Filter factory function for log messages.
+
+        Args:
+            is_console (bool, optional): Whether the log is for the console. Defaults to False.
+
+        Returns:
+            function: Filter function.
+        """
+
+        def _filter(record):
+            if record["name"] in self._disabled_modules:
+                return False
+            for module in self._disabled_modules:
+                if record["name"].startswith(module):
+                    return False
+            if not is_console and record["level"].no == LogLevel.CONSOLE_LOG:
+                return False
+            return True
+
+        return _filter
 
     def add_sys_stderr(self, level: LogLevel):
         """
@@ -207,8 +254,8 @@ class BECLogger:
         self.logger.add(
             sys.__stderr__,
             level=level,
-            format=self.formatting,
-            filter=lambda record: record["level"].no != LogLevel.CONSOLE_LOG,
+            format=self.formatting(is_stderr=True),
+            filter=self.filter(),
         )
 
     def add_file_log(self, level: LogLevel):
@@ -224,8 +271,10 @@ class BECLogger:
         self.logger.add(
             filename,
             level=level,
-            format=self.formatting,
-            filter=lambda record: record["level"].no != LogLevel.CONSOLE_LOG,
+            format=self.formatting(),
+            filter=self.filter(),
+            retention="3 days",
+            rotation="3 days",
         )
 
     def add_console_log(self):
@@ -250,7 +299,9 @@ class BECLogger:
             filename,
             level=LogLevel.CONSOLE_LOG,
             format=self.get_format(LogLevel.CONSOLE_LOG).rstrip(),
-            filter=lambda record: record["level"].no == LogLevel.CONSOLE_LOG,
+            filter=self.filter(is_console=True),
+            retention="3 days",
+            rotation="3 days",
         )
         self._console_log = True
 
@@ -265,9 +316,28 @@ class BECLogger:
             self._logger_callback,
             serialize=True,
             level=level,
-            format=self.formatting,
-            filter=lambda record: record["level"].no != LogLevel.CONSOLE_LOG,
+            format=self.formatting(),
+            filter=self.filter(),
         )
+
+    @property
+    def disabled_modules(self) -> set[str]:
+        """
+        Get the disabled modules.
+        """
+        return self._disabled_modules
+
+    @disabled_modules.setter
+    def disabled_modules(self, module_names: str | list[str]) -> None:
+        """
+        Disable log messages from specific modules.
+
+        Args:
+            module_names (str | list[str]): Module name(s).
+        """
+        if isinstance(module_names, str):
+            module_names = [module_names]
+        self._disabled_modules.update(module_names)
 
     @property
     def level(self):
