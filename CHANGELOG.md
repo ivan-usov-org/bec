@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v2.30.0 (2024-09-04)
+
+### Feature
+
+* feat(logger): added option to disable modules; added retention and rotation; changed log format for stderr ([`868f40d`](https://gitlab.psi.ch/bec/bec/-/commit/868f40db8e1420dab7eaf3fed6eed2e8313ab539))
+
 ## v2.29.0 (2024-09-02)
 
 ### Ci
@@ -157,11 +163,3 @@ Sometimes, restarting the tmux client is flaky ([`8ba44f6`](https://gitlab.psi.c
 * fix: fix bug in bluesky emitter get descriptor method ([`27fa758`](https://gitlab.psi.ch/bec/bec/-/commit/27fa7584cd61c6453db01ab05f49b9c712155641))
 
 ## v2.21.2 (2024-08-13)
-
-### Fix
-
-* fix(bec_lib): raise on rpc status failure ([`efc07ff`](https://gitlab.psi.ch/bec/bec/-/commit/efc07ff4ff6ddf810d3a40ec52b35877e7ae67a7))
-
-### Test
-
-* test: fixed test for status wait ([`4c5dd4a`](https://gitlab.psi.ch/bec/bec/-/commit/4c5dd4ab40a0c8d2ebef38d36ec61c230243f649))
