@@ -26,8 +26,8 @@ pseudo_signal1:
   deviceConfig:
     compute_method: "def compute_signals(signal1, signal2):\n    return signal1.get()*signal2.get()\n"
     input_signals:
-      - "bpm4i_readback"
-      - "bpm5i_readback"
+      - "bpm4i"
+      - "bpm5i"
   enabled: true
   readOnly: false
   readoutPriority: baseline
@@ -2128,7 +2128,6 @@ monitor_async:
   enabled: true
   readOnly: false
   softwareTrigger: true
-
 
 rt_controller:
   readoutPriority: baseline
