@@ -137,6 +137,11 @@ def get_device_info(obj: PositionerBase | ComputedSignal | Signal | Device | BEC
         raise DeviceConfigError(
             f"Device name {obj.name} is protected and cannot be used. Please rename the device."
         )
+    if isinstance(obj, Signal):
+        # needed because ophyd signals have empty hints
+        hints = {"fields": [obj.name]}
+    else:
+        hints = obj.hints
     return {
         "device_name": obj.name,
         "device_info": {
@@ -146,7 +151,7 @@ def get_device_info(obj: PositionerBase | ComputedSignal | Signal | Device | BEC
             "read_access": getattr(obj, "read_access", None),
             "write_access": getattr(obj, "write_access", None),
             "signals": signals,
-            "hints": obj.hints,
+            "hints": hints,
             "describe": obj.describe(),
             "describe_configuration": obj.describe_configuration(),
             "sub_devices": sub_devices,
