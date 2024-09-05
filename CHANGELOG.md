@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## v2.30.1 (2024-09-05)
+
+### Fix
+
+* fix: fix hints for devices of type ophyd.signal ([`1b8b2c7`](https://gitlab.psi.ch/bec/bec/-/commit/1b8b2c7b490113e0b7acd3a070c9bec1c1626b4f))
+
+* fix: bugfix in cont_line_scan; reworked device and signal mocks ([`c91dcf4`](https://gitlab.psi.ch/bec/bec/-/commit/c91dcf4d37bc1add18d2f0682af97358e4abdee6))
+
+### Refactor
+
+* refactor: reworked R/W info in device info; removed bug for devices with type Signal ([`d0ee4ec`](https://gitlab.psi.ch/bec/bec/-/commit/d0ee4ec5544dcc400568dc5311cea0e1d4074c8e))
+
 ## v2.30.0 (2024-09-04)
 
 ### Feature
@@ -151,15 +163,3 @@ Failed config updates should only lead to config flush if the object initializat
 Sometimes, restarting the tmux client is flaky ([`8ba44f6`](https://gitlab.psi.ch/bec/bec/-/commit/8ba44f6eef7bd9f118933ba03900134d9bb6cf32))
 
 ## v2.21.4 (2024-08-14)
-
-### Fix
-
-* fix(client): fixed client init of singleton instance ([`cfae861`](https://gitlab.psi.ch/bec/bec/-/commit/cfae8617fdb7f7a7fc613206f0f27d7274d899c1))
-
-## v2.21.3 (2024-08-13)
-
-### Fix
-
-* fix: fix bug in bluesky emitter get descriptor method ([`27fa758`](https://gitlab.psi.ch/bec/bec/-/commit/27fa7584cd61c6453db01ab05f49b9c712155641))
-
-## v2.21.2 (2024-08-13)
