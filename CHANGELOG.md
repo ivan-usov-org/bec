@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## v2.30.2 (2024-09-05)
+
+### Fix
+
+* fix: updated device_config of pseudo_signal1 ([`529663f`](https://gitlab.psi.ch/bec/bec/-/commit/529663f4fdef795c7863622ee01328bf3a1385a6))
+
+### Refactor
+
+* refactor: ScanItem attributes bec and callback made private ([`a70af8f`](https://gitlab.psi.ch/bec/bec/-/commit/a70af8f58cba31294a6b84bb1b45d62f2dcb4cc0))
+
+* refactor: refactoring to make scan_manager optional kwarg ([`a5ccefa`](https://gitlab.psi.ch/bec/bec/-/commit/a5ccefa978aa2b3c79d7b4617614bbde689036a0))
+
+### Test
+
+* test: fix tests ([`46738ad`](https://gitlab.psi.ch/bec/bec/-/commit/46738ad259c9e99095067b67ffbacbaff83115ea))
+
 ## v2.30.1 (2024-09-05)
 
 ### Fix
@@ -124,12 +140,6 @@
 
 * ci: install ophyd_devices from the repo ([`1e805b4`](https://gitlab.psi.ch/bec/bec/-/commit/1e805b47c6df2bc08966ffd250ba0b3f22ab9563))
 
-### Documentation
-
-* docs: update dev docs
-
-renamed bec_config to bec_service_config; removed pmodule instructions as they are not available anymore ([`82ffc52`](https://gitlab.psi.ch/bec/bec/-/commit/82ffc521760fda34c594f89f10c174ae0b959710))
-
 ### Feature
 
 * feat(device_server): gracefully handle timeouts
@@ -148,18 +158,6 @@ Failed config updates should only lead to config flush if the object initializat
 
 * test: use simpositionerwithcontroller for controller access ([`49b53a9`](https://gitlab.psi.ch/bec/bec/-/commit/49b53a95d9317c6ec1bf14c81e2b3886788690d5))
 
-* test: ensure BECClient singleton is reset ([`75dd67b`](https://gitlab.psi.ch/bec/bec/-/commit/75dd67ba17ab0d79881501f2f902ef0a8c2233a2))
-
 ### Unknown
 
 * wip ([`a39a6c1`](https://gitlab.psi.ch/bec/bec/-/commit/a39a6c197a1a297a67e11b15d5ccbce7dbe3b95c))
-
-## v2.21.5 (2024-08-14)
-
-### Fix
-
-* fix(tmux): retry tmux launch on error
-
-Sometimes, restarting the tmux client is flaky ([`8ba44f6`](https://gitlab.psi.ch/bec/bec/-/commit/8ba44f6eef7bd9f118933ba03900134d9bb6cf32))
-
-## v2.21.4 (2024-08-14)
