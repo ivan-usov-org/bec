@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v2.31.0 (2024-09-05)
+
+### Feature
+
+* feat(scan_report): added public files to scan item and report on the master file in scan report ([`adca248`](https://gitlab.psi.ch/bec/bec/-/commit/adca248dfd592b1cdbfa2cddf1a10c13ac11e176))
+
+### Test
+
+* test: added test for file events ([`b976fb4`](https://gitlab.psi.ch/bec/bec/-/commit/b976fb4a084910da5ae0a4fac32d1152b0f1cc04))
+
 ## v2.30.2 (2024-09-05)
 
 ### Fix
@@ -138,8 +148,6 @@
 
 * ci: use target branch instead of default pipeline branch for e2e tests ([`83e0097`](https://gitlab.psi.ch/bec/bec/-/commit/83e00970d1e5f105ee3e05bce6fd7376bd9698e4))
 
-* ci: install ophyd_devices from the repo ([`1e805b4`](https://gitlab.psi.ch/bec/bec/-/commit/1e805b47c6df2bc08966ffd250ba0b3f22ab9563))
-
 ### Feature
 
 * feat(device_server): gracefully handle timeouts
@@ -155,9 +163,3 @@ Failed config updates should only lead to config flush if the object initializat
 ### Test
 
 * test: fixed data access in dummy controller device ([`624c257`](https://gitlab.psi.ch/bec/bec/-/commit/624c25763fdef2a9ee913e5936311f421bd9b8d6))
-
-* test: use simpositionerwithcontroller for controller access ([`49b53a9`](https://gitlab.psi.ch/bec/bec/-/commit/49b53a95d9317c6ec1bf14c81e2b3886788690d5))
-
-### Unknown
-
-* wip ([`a39a6c1`](https://gitlab.psi.ch/bec/bec/-/commit/a39a6c197a1a297a67e11b15d5ccbce7dbe3b95c))
