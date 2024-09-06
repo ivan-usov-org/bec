@@ -412,7 +412,6 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         """read the scan motors"""
         yield from self.stubs.read_and_wait(device=self.scan_motors, wait_group="scan_motor")
 
-    @abstractmethod
     def _calculate_positions(self) -> None:
         """Calculate the positions"""
 
@@ -1695,10 +1694,10 @@ class ScanComponent(ScanBase):
 
 
 class OpenInteractiveScan(ScanComponent):
-    scan_name = "open_interactive_scan"
+    scan_name = "_open_interactive_scan"
     required_kwargs = []
-    arg_input = {"device": ScanArgType.DEVICE}
-    arg_bundle_size = {"bundle": len(arg_input), "min": 1, "max": None}
+    # arg_input = {}
+    # arg_bundle_size = {"bundle": len(arg_input), "min": None, "max": None}
 
     def __init__(self, *args, **kwargs):
         """
@@ -1723,66 +1722,48 @@ class OpenInteractiveScan(ScanComponent):
     def _calculate_positions(self):
         pass
 
-    def _get_scan_motors(self):
-        caller_args = list(self.caller_args.keys())
-        self.scan_motors = caller_args
-
     def run(self):
         yield from self.stubs.open_scan_def()
         self.initialize()
-        yield from self.read_scan_motors()
         yield from self.open_scan()
         yield from self.stage()
         yield from self.run_baseline_reading()
 
 
-class AddInteractiveScanPoint(ScanComponent):
-    scan_name = "interactive_scan_trigger"
-    arg_input = {"device": ScanArgType.DEVICE}
-    arg_bundle_size = {"bundle": len(arg_input), "min": 1, "max": None}
+class InteractiveTrigger(ScanComponent):
+    scan_name = "_interactive_trigger"
+    required_kwargs = []
 
     def __init__(self, *args, **kwargs):
         """
-        An interactive scan for one or more motors.
-
-        Args:
-            *args: devices
-            exp_time: exposure time in s
-            steps: number of steps (please note: 5 steps == 6 positions)
-            relative: Start from an absolute or relative position
-            burst: number of acquisition per point
-
-        Returns:
-            ScanReport
-
-        Examples:
-            >>> scans.interactive_scan_trigger()
-
+        Send a trigger to all enabled devices that are on softwareTrigger mode.
         """
         super().__init__(**kwargs)
 
-    def _calculate_positions(self):
-        pass
-
-    def _get_scan_motors(self):
-        self.scan_motors = list(self.caller_args.keys())
-
-    def _at_each_point(self, ind=None, pos=None):
+    def run(self):
         yield from self.stubs.trigger(group="trigger", point_id=self.point_id)
         yield from self.stubs.wait(wait_type="trigger", group="trigger", wait_time=self.exp_time)
+
+
+class InteractiveReadMontiored(ScanComponent):
+    scan_name = "_interactive_read_monitored"
+    required_kwargs = {"point_id": ScanArgType.INT}
+
+    def __init__(self, *args, point_id: int = 0, **kwargs):
+        """
+        Read the devices that are on readoutPriority "monitored".
+        """
+        super().__init__(**kwargs)
+        self.point_id = point_id
+
+    def run(self):
         yield from self.stubs.read_and_wait(
             group="primary", wait_group="readout_primary", point_id=self.point_id
         )
-        self.point_id += 1
-
-    def run(self):
-        yield from self.open_scan()
-        yield from self._at_each_point()
-        yield from self.close_scan()
 
 
 class CloseInteractiveScan(ScanComponent):
-    scan_name = "close_interactive_scan"
+    scan_name = "_close_interactive_scan"
 
     def __init__(self, *args, **kwargs):
         """
@@ -1803,9 +1784,6 @@ class CloseInteractiveScan(ScanComponent):
 
         """
         super().__init__(**kwargs)
-
-    def _calculate_positions(self):
-        pass
 
     def run(self):
         yield from self.finalize()

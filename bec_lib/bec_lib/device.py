@@ -25,6 +25,7 @@ messages = lazy_import("bec_lib.messages")
 
 
 if TYPE_CHECKING:
+    from bec_lib.client import BECClient
     from bec_lib.redis_connector import RedisConnector
 
 logger = bec_logger.logger
@@ -350,9 +351,11 @@ class DeviceBase:
             rpc_id = str(uuid.uuid4())
             request_id = str(uuid.uuid4())
             msg = self._prepare_rpc_msg(rpc_id, request_id, device, func_call, *args, **kwargs)
-
+            client: BECClient = self.root.parent.parent
+            if client.scans._scan_def_id:
+                msg.metadata["scan_def_id"] = client.scans._scan_def_id
             # send RPC message
-            self.root.parent.connector.send(MessageEndpoints.scan_queue_request(), msg)
+            client.connector.send(MessageEndpoints.scan_queue_request(), msg)
 
             # wait for RPC response
             if not wait_for_rpc_response:

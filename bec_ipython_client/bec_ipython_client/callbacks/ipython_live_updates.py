@@ -70,7 +70,8 @@ class IPythonLiveUpdates:
         """
         scan_report_type = list(instr.keys())[0]
         scan_def_id = self.client.scans._scan_def_id
-        if scan_def_id is None:
+        interactive_scan = self.client.scans._interactive_scan
+        if scan_def_id is None or interactive_scan:
             if scan_report_type == "readback":
                 LiveUpdatesReadbackProgressbar(
                     self.client,
@@ -233,6 +234,9 @@ class IPythonLiveUpdates:
 
         complete_rbl = len(available_blocks) == self._request_block_index[req_id] + 1
         if self._active_callback and complete_rbl:
+            return True
+
+        if complete_rbl and self.client.scans._interactive_scan:
             return True
 
         if not queue.active_request_block:

@@ -161,3 +161,57 @@ def test_get_arg_type_raises(bec_client_mock):
     client = bec_client_mock
     with pytest.raises(TypeError):
         client.scans.get_arg_type("not_existing")
+
+
+def test_interactive_scan_cm(bec_client_mock):
+    client = bec_client_mock
+    client.scans._open_interactive_scan = mock.MagicMock()
+    client.scans._close_interactive_scan = mock.MagicMock()
+    client.scans._interactive_trigger = mock.MagicMock()
+    client.scans._interactive_read_monitored = mock.MagicMock()
+
+    with client.scans.interactive_scan("samx") as scan:
+        scan.trigger()
+        scan.read_monitored_devices()
+
+    client.scans._open_interactive_scan.assert_called_once()
+    client.scans._close_interactive_scan.assert_called_once()
+    client.scans._interactive_trigger.assert_called_once()
+    client.scans._interactive_read_monitored.assert_called_once()
+
+
+def test_interactive_scan_cm_raise_calls_close(bec_client_mock):
+    client = bec_client_mock
+    client.scans._open_interactive_scan = mock.MagicMock()
+    client.scans._close_interactive_scan = mock.MagicMock()
+    client.scans._interactive_trigger = mock.MagicMock()
+    client.scans._interactive_read_monitored = mock.MagicMock()
+
+    with pytest.raises(AttributeError):
+        with client.scans.interactive_scan("samx") as scan:
+            scan.trigger()
+            scan.read_monitored_devices()
+            raise AttributeError()
+
+    client.scans._open_interactive_scan.assert_called_once()
+    client.scans._close_interactive_scan.assert_called_once()
+    client.scans._interactive_trigger.assert_called_once()
+    client.scans._interactive_read_monitored.assert_called_once()
+
+
+def test_interactive_scan_cm_raises_scan_motors(bec_client_mock):
+    client = bec_client_mock
+    client.scans._open_interactive_scan = mock.MagicMock()
+    client.scans._close_interactive_scan = mock.MagicMock()
+    client.scans._interactive_trigger = mock.MagicMock()
+    client.scans._interactive_read_monitored = mock.MagicMock()
+
+    with pytest.raises(ValueError):
+        with client.scans.interactive_scan() as scan:
+            scan.trigger()
+            scan.read_monitored_devices()
+
+    client.scans._open_interactive_scan.assert_not_called()
+    client.scans._close_interactive_scan.assert_not_called()
+    client.scans._interactive_trigger.assert_not_called()
+    client.scans._interactive_read_monitored.assert_not_called()

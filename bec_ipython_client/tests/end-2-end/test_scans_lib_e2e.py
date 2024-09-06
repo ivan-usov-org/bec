@@ -401,3 +401,25 @@ def test_cached_device_readout(bec_client_lib):
     dev.hexapod.x.readback.get(cached=True)
     timestamp_3 = dev.hexapod.x.readback.read(cached=True)["hexapod_x"]["timestamp"]
     assert timestamp_3 == timestamp_2
+
+
+def test_interactive_scan(bec_client_lib):
+    bec = bec_client_lib
+    bec.metadata.update({"unit_test": "test_interactive_scan"})
+    dev = bec.device_manager.devices
+    scans = bec.scans
+
+    with scans.interactive_scan(scan_motors=[dev.samx, dev.samy], exp_time=0.1) as scan:
+        for ii in range(10):
+            samx_status = dev.samx.set(ii)
+            samy_status = dev.samy.set(ii)
+            samx_status.wait()
+            samy_status.wait()
+            scan.trigger()
+            scan.read_monitored_devices(devices=[dev.samx, dev.samy])
+        report = scan.status
+
+    report.wait()
+
+    assert len(report.scan.data) == 10
+    assert len(report.scan.data.samx.samx.val) == 10

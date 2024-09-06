@@ -24,6 +24,14 @@ scans = bec.scans
 
 logger.success("Started BECClient")
 scans.umv(dev.samx, 5, relative=True)
+
+# with scans.interactive_scan() as scan:
+#     for ii in range(10):
+#         scans.umv(dev.samx, ii, relative=False)
+#         scan.trigger()
+#         scan.read_monitored_devices()
+
+
 # scans.line_scan(dev.samx, -5, 5, dev.samy, -5, 5, steps=10, exp_time=0.1, relative=True)
 
 # scans.round_scan_fly(dev.flyer_sim, 0, 50, 20, 3, exp_time=0.1, relative=True)

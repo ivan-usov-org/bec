@@ -7,16 +7,16 @@ import pytest
 
 from bec_lib import messages
 from bec_server.device_server.tests.utils import DMMock
-from bec_server.scan_server.errors import ScanAbortion
 from bec_server.scan_server.scan_plugins.otf_scan import OTFScan
 from bec_server.scan_server.scans import (
     Acquire,
-    AddInteractiveScanPoint,
     CloseInteractiveScan,
     ContLineFlyScan,
     ContLineScan,
     DeviceRPC,
     FermatSpiralScan,
+    InteractiveReadMontiored,
+    InteractiveTrigger,
     LineScan,
     ListScan,
     MonitorScan,
@@ -2093,120 +2093,98 @@ def test_OpenInteractiveScan():
     ref_list = list(request.run())
     assert ref_list == [
         messages.DeviceInstructionMessage(
+            metadata={"readout_priority": "monitored", "DIID": 0},
             device=None,
             action="open_scan_def",
             parameter={},
-            metadata={"readout_priority": "monitored", "DIID": 0},
         ),
         messages.DeviceInstructionMessage(
-            device=["samx"],
-            action="read",
-            parameter={"wait_group": "scan_motor"},
             metadata={"readout_priority": "monitored", "DIID": 1},
-        ),
-        messages.DeviceInstructionMessage(
-            device=["samx"],
-            action="wait",
-            parameter={"type": "read", "wait_group": "scan_motor"},
-            metadata={"readout_priority": "monitored", "DIID": 2},
-        ),
-        messages.DeviceInstructionMessage(
             device=None,
             action="open_scan",
             parameter={
-                "scan_motors": ["samx"],
+                "scan_motors": [],
                 "readout_priority": {
-                    "monitored": ["samx"],
+                    "monitored": [],
                     "baseline": [],
                     "on_request": [],
                     "async": [],
                 },
                 "num_points": 0,
                 "positions": [],
-                "scan_name": "open_interactive_scan",
+                "scan_name": "_open_interactive_scan",
                 "scan_type": "step",
             },
-            metadata={"readout_priority": "monitored", "DIID": 3},
         ),
         messages.DeviceInstructionMessage(
+            metadata={"readout_priority": "monitored", "DIID": 2},
             device=None,
             action="stage",
             parameter={},
-            metadata={"readout_priority": "monitored", "DIID": 4},
         ),
         messages.DeviceInstructionMessage(
+            metadata={"readout_priority": "baseline", "DIID": 3},
             device=None,
             action="baseline_reading",
             parameter={},
-            metadata={"readout_priority": "baseline", "DIID": 5},
         ),
     ]
 
 
-def test_AddInteractiveScanPointn():
+def test_InteractiveReadMontiored():
     device_manager = DMMock()
     scan_msg = messages.ScanQueueMessage(
-        scan_type="interactive_scan_trigger",
+        scan_type="_interactive_scan_trigger",
         parameter={"args": {"samx": []}, "kwargs": {"relative": True, "exp_time": 0.1}},
         queue="primary",
     )
     args = unpack_scan_args(scan_msg.content["parameter"]["args"])
     kwargs = scan_msg.content["parameter"]["kwargs"]
-    request = AddInteractiveScanPoint(
-        *args,
-        device_manager=device_manager,
-        parameter=scan_msg.content["parameter"],
-        **scan_msg.content["parameter"]["kwargs"],
+    request = InteractiveReadMontiored(
+        *args, device_manager=device_manager, parameter=scan_msg.content["parameter"], **kwargs
     )
     ref_list = list(request.run())
     assert ref_list == [
         messages.DeviceInstructionMessage(
             device=None,
-            action="open_scan",
-            parameter={
-                "scan_motors": ["samx"],
-                "readout_priority": {
-                    "monitored": ["samx"],
-                    "baseline": [],
-                    "on_request": [],
-                    "async": [],
-                },
-                "num_points": 0,
-                "positions": [],
-                "scan_name": "interactive_scan_trigger",
-                "scan_type": "step",
-            },
-            metadata={"readout_priority": "monitored", "DIID": 0},
-        ),
-        messages.DeviceInstructionMessage(
-            device=None,
-            action="trigger",
-            parameter={"group": "trigger"},
-            metadata={"readout_priority": "monitored", "DIID": 1, "point_id": 0},
-        ),
-        messages.DeviceInstructionMessage(
-            device=None,
-            action="wait",
-            parameter={"type": "trigger", "time": 0.1, "group": "trigger"},
-            metadata={"readout_priority": "monitored", "DIID": 2},
-        ),
-        messages.DeviceInstructionMessage(
-            device=None,
             action="read",
             parameter={"group": "primary", "wait_group": "readout_primary"},
-            metadata={"readout_priority": "monitored", "DIID": 3, "point_id": 0},
+            metadata={"readout_priority": "monitored", "DIID": 0, "point_id": 0},
         ),
         messages.DeviceInstructionMessage(
             device=None,
             action="wait",
             parameter={"type": "read", "group": "primary", "wait_group": "readout_primary"},
-            metadata={"readout_priority": "monitored", "DIID": 4},
+            metadata={"readout_priority": "monitored", "DIID": 1},
+        ),
+    ]
+
+
+def test_InteractiveTrigger():
+    device_manager = DMMock()
+    scan_msg = messages.ScanQueueMessage(
+        scan_type="_interactive_scan_trigger",
+        parameter={"args": {"samx": []}, "kwargs": {"relative": True, "exp_time": 0.1}},
+        queue="primary",
+    )
+    args = unpack_scan_args(scan_msg.content["parameter"]["args"])
+    kwargs = scan_msg.content["parameter"]["kwargs"]
+    request = InteractiveTrigger(
+        *args, device_manager=device_manager, parameter=scan_msg.content["parameter"], **kwargs
+    )
+    ref_list = list(request.run())
+    assert ref_list == [
+        messages.DeviceInstructionMessage(
+            device=None,
+            action="trigger",
+            parameter={"group": "trigger"},
+            metadata={"readout_priority": "monitored", "DIID": 0, "point_id": 0},
         ),
         messages.DeviceInstructionMessage(
             device=None,
-            action="close_scan",
-            parameter={},
-            metadata={"readout_priority": "monitored", "DIID": 5},
+            action="wait",
+            parameter={"type": "trigger", "time": 0.1, "group": "trigger"},
+            metadata={"readout_priority": "monitored", "DIID": 1},
         ),
     ]
 

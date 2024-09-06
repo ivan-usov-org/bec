@@ -785,7 +785,15 @@ class RequestBlockQueue:
         if request_block.scan_def_id not in self.scan_def_ids:
             return
         if hasattr(request_block.scan, "point_id"):
-            request_block.scan.point_id = self.scan_def_ids[request_block.scan_def_id]["point_id"]
+            if isinstance(request_block.scan.point_id, (int, float)):
+                request_block.scan.point_id = max(
+                    request_block.scan.point_id,
+                    self.scan_def_ids[request_block.scan_def_id]["point_id"],
+                )
+            else:
+                request_block.scan.point_id = self.scan_def_ids[request_block.scan_def_id][
+                    "point_id"
+                ]
 
     def increase_scan_number(self) -> None:
         """increase the scan number counter"""
@@ -811,7 +819,10 @@ class RequestBlockQueue:
             if self.active_rb.scan_def_id in self.scan_def_ids:
                 point_id = getattr(self.active_rb.scan, "point_id", None)
                 if point_id is not None:
-                    self.scan_def_ids[self.active_rb.scan_def_id]["point_id"] = point_id
+                    current_point_id = self.scan_def_ids[self.active_rb.scan_def_id]["point_id"]
+                    self.scan_def_ids[self.active_rb.scan_def_id]["point_id"] = max(
+                        current_point_id, point_id
+                    )
             self.increase_scan_number()
             self.active_rb = None
             self._pull_request_block()

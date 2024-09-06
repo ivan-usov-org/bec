@@ -10,7 +10,7 @@ def identity(obj):
     return obj
 
 
-class _ProxyMethods(object):
+class _ProxyMethods(object):  # pragma: no cover
     # We use properties to override the values of __module__ and
     # __doc__. If we add these in ObjectProxy, the derived class
     # __dict__ will still be setup to have string variants of these
@@ -65,7 +65,7 @@ class _ProxyMetaType(type):
         return type.__new__(cls, name, bases, dictionary)
 
 
-class Proxy(with_metaclass(_ProxyMetaType)):
+class Proxy(with_metaclass(_ProxyMetaType)):  # pragma: no cover
     """
     A proxy implementation in pure Python, using slots. You can subclass this to add
     local methods or attributes, or enable __dict__.

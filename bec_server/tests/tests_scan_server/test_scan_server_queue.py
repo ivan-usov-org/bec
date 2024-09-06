@@ -556,6 +556,33 @@ def test_update_point_id(scan_queue_msg, scan_id):
 
 
 @pytest.mark.parametrize(
+    "scan_queue_msg,scan_id",
+    [
+        (
+            messages.ScanQueueMessage(
+                scan_type="grid_scan",
+                parameter={"args": {"samx": (-5, 5, 3)}, "kwargs": {}},
+                queue="primary",
+                metadata={"RID": "something", "scan_def_id": "existing_scan_def_id"},
+            ),
+            "scan_id2",
+        )
+    ],
+)
+def test_update_point_id_takes_max(scan_queue_msg, scan_id):
+    req_block_queue = RequestBlockQueue(mock.MagicMock(), mock.MagicMock())
+    req_block_queue.scan_def_ids["existing_scan_def_id"] = {
+        "scan_id": "existing_scan_id",
+        "point_id": 10,
+    }
+    rbl = RequestBlockMock(scan_queue_msg, scan_id)
+    rbl.scan = mock.MagicMock()
+    rbl.scan.point_id = 20
+    req_block_queue._update_point_id(rbl)
+    assert rbl.scan.point_id == 20
+
+
+@pytest.mark.parametrize(
     "scan_queue_msg,is_scan",
     [
         (
