@@ -415,16 +415,12 @@ class FileWriter:
         Args:
             fw_config (dict): Dictionary with metadata for the filewriter, can only have keys "file_suffix" and "file_directory"
         """
-        self.client = self._get_client()
+        self.client = _get_client()
         self.system_config = self.client.system_config
         self._orig_system_config = None
         self._orig_metadata = None
         self.file_suffix = file_suffix
         self.file_directory = file_directory
-
-    def _get_client(self):
-        """Get BEC client"""
-        return builtins.__dict__["bec"]
 
     def __enter__(self):
         """Enter the context manager"""
@@ -449,13 +445,9 @@ class Metadata:
         Args:
             metadata (dict): Metadata dictionary
         """
-        self.client = self._get_client()
+        self.client = _get_client()
         self._metadata = metadata
         self._orig_metadata = None
-
-    def _get_client(self):
-        """Get BEC client"""
-        return builtins.__dict__["bec"]
 
     def __enter__(self):
         """Enter the context manager"""
@@ -487,12 +479,9 @@ class ScanExport:
                 "ScanExport context manager can only be used if abort_on_ctrl_c is set to True"
             )
 
-    def _get_client(self):
-        return builtins.__dict__["bec"]
-
     def __enter__(self):
         self.scans = []
-        self.client = self._get_client()
+        self.client = _get_client()
         self.client.scans._scan_export = self
         self._check_abort_on_ctrl_c()
         return self
@@ -510,3 +499,10 @@ class ScanExport:
                 self.scans = None
             except Exception as exc:
                 logger.warning(f"Could not export scans to csv file, due to exception {exc}")
+
+
+def _get_client():
+    """
+    Get the BEC client
+    """
+    return builtins.__dict__["bec"]
