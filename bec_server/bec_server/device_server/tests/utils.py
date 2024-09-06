@@ -298,8 +298,10 @@ class PositionerMock(DeviceObjectMock, BECPositionerProtocol):
 
 
 class DMMock:
-    devices = DeviceContainer()
-    connector = ConnectorMock()
+
+    def __init__(self):
+        self.devices = DeviceContainer()
+        self.connector = ConnectorMock()
 
     def add_device(self, name, value=None, dev_type: DeviceMockType = DeviceMockType.POSITIONER):
         if dev_type == DeviceMockType.POSITIONER:
