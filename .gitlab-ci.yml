@@ -502,7 +502,7 @@ semver:
 
     # delete all local tags
     - git tag -l | xargs git tag -d
-    - git fetch --tags
+    - git fetch --unshallow
     - git tag
 
     # build and publish
