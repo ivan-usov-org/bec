@@ -117,3 +117,4 @@ class ScanServer(BECService):
         """shutdown the scan server"""
         self.device_manager.shutdown()
         self.queue_manager.shutdown()
+        super().shutdown()

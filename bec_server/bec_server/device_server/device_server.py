@@ -77,6 +77,7 @@ class DeviceServer(RPCMixin, BECService):
         super().shutdown()
         self.stop()
         self.device_manager.shutdown()
+        self.executor.shutdown()
 
     def _update_device_metadata(self, instr) -> None:
         devices = instr.content["device"]

@@ -175,6 +175,7 @@ class BECService:
     def _update_existing_services(self):
         service_keys = self.connector.keys(MessageEndpoints.service_status("*"))
         if not service_keys:
+            self._services_info = {}
             return
         # service keys are in the form of: "internal/services/status/4b9d1af8-44ed-4f3a-8787-ef9f958f59b"
         services = []
@@ -354,13 +355,14 @@ class BECService:
     def shutdown(self):
         """shutdown the BECService"""
         try:
-            self.connector.shutdown()
             self._service_info_event.set()
             if self._service_info_thread:
                 self._service_info_thread.join()
             self._metrics_emitter_event.set()
             if self._metrics_emitter_thread:
                 self._metrics_emitter_thread.join()
+            self.connector.delete(MessageEndpoints.service_status(self._service_id))
+            self.connector.shutdown()
         except AttributeError:
             print("Failed to shutdown BECService.")
 

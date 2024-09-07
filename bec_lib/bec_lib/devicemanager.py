@@ -369,19 +369,18 @@ class DeviceContainer(dict):
 
 
 class DeviceManagerBase:
-    devices = DeviceContainer()
-    _config = {}  # valid config
-    _session = {}
-    _request = None  # requested config
-    _request_config_parsed = None  # parsed config request
-    _response = None  # response message
-
-    _connector_base_register = {}
-    config_helper = None
-    _device_cls = DeviceBase
-    _status_cb = []
 
     def __init__(self, service: BECService, status_cb: list = None) -> None:
+        self.devices = DeviceContainer()
+        self._config = {}  # valid config
+        self._session = {}
+        self._request = None  # requested config
+        self._request_config_parsed = None  # parsed config request
+        self._response = None  # response message
+        self._connector_base_register = {}
+        self.config_helper = None
+        self._device_cls = DeviceBase
+        self._status_cb = []
         self._service = service
         self.parent = service  # for backwards compatibility; will be removed in the future
         self.connector = self._service.connector
