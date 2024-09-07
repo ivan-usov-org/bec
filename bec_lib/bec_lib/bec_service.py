@@ -361,7 +361,10 @@ class BECService:
             self._metrics_emitter_event.set()
             if self._metrics_emitter_thread:
                 self._metrics_emitter_thread.join()
-            self.connector.delete(MessageEndpoints.service_status(self._service_id))
+            try:
+                self.connector.delete(MessageEndpoints.service_status(self._service_id))
+            except Exception:
+                pass
             self.connector.shutdown()
         except AttributeError:
             print("Failed to shutdown BECService.")
