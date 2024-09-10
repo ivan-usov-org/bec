@@ -9,6 +9,7 @@ import builtins
 import getpass
 import importlib
 import inspect
+from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
 import redis
@@ -121,6 +122,7 @@ class BECClient(BECService, UserScriptsMixin):
         self.dap = None
         self.device_monitor = None
         self.bl_checks = None
+        self.scans_namespace = SimpleNamespace()
         self._hli_funcs = {}
         self.metadata = {}
         self.system_config = SystemConfig()
@@ -170,7 +172,7 @@ class BECClient(BECService, UserScriptsMixin):
             )
             builtins.bec = self._parent
             self._start_services()
-            default_namespace = {"dev": self.device_manager.devices, "scans": self.scans}
+            default_namespace = {"dev": self.device_manager.devices, "scans": self.scans_namespace}
             self.callbacks.run(
                 EventType.NAMESPACE_UPDATE, action="add", ns_objects=default_namespace
             )
@@ -226,6 +228,9 @@ class BECClient(BECService, UserScriptsMixin):
     def _load_scans(self):
         self.scans = Scans(self._parent)
         builtins.__dict__["scans"] = self.scans
+        self.scans_namespace = SimpleNamespace(
+            **{scan_name: scan.run for scan_name, scan in self.scans._available_scans.items()}
+        )
 
     def load_high_level_interface(self, module_name: str) -> None:
         """Load a high level interface module.
