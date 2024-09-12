@@ -917,9 +917,8 @@ class Positioner(AdjustableMixin, Device):
     def timeout(self):
         pass
 
-    @rpc
     def egu(self):
-        pass
+        return self.describe_configuration().get("egu")
 
     def move(self, val: float, relative=False):
         return self.parent.parent.scans.mv(self, val, relative=relative)

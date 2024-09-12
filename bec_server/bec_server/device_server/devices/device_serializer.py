@@ -153,7 +153,8 @@ def get_device_info(obj: PositionerBase | ComputedSignal | Signal | Device | BEC
             "signals": signals,
             "hints": hints,
             "describe": obj.describe(),
-            "describe_configuration": obj.describe_configuration(),
+            "describe_configuration": obj.describe_configuration()
+            | {"egu": getattr(obj, "egu", None)},
             "sub_devices": sub_devices,
             "custom_user_access": user_access,
         },
