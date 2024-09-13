@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v2.31.2 (2024-09-13)
+
+### Fix
+
+* fix(dap): dap service should run independent of scan segment callbacks ([`026b12f`](https://gitlab.psi.ch/bec/bec/-/commit/026b12f2025ea33fd0be52518345834198364119))
+
 ## v2.31.1 (2024-09-12)
 
 ### Ci
