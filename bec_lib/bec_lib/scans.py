@@ -523,12 +523,7 @@ class InteractiveScan(ContextDecorator):
     """
 
     def __init__(
-        self,
-        scan_motors=None,
-        monitored_devices=None,
-        exp_time: float = None,
-        metadata=None,
-        **kwargs,
+        self, scan_motors=None, monitored_devices=None, exp_time: float = 0, metadata=None, **kwargs
     ) -> None:
         """
         InteractiveScan is a context manager for running interactive scans.
@@ -599,6 +594,7 @@ class InteractiveScan(ContextDecorator):
     def __exit__(self, *exc):
         self._scans._close_interactive_scan(hide_report=True, **self._scan_kwargs)
         self._scans._scan_def_id = None
+        self._scans._interactive_scan = False
         if not exc[0]:
             self.status.wait()
 
@@ -606,6 +602,7 @@ class InteractiveScan(ContextDecorator):
         """
         Trigger all enabled devices that have softwareTrigger set to True
         """
+        # self._client.alarm_handler.check_for_alarms()
         # pylint: disable=protected-access
         self._scans._interactive_trigger(hide_report=True, **self._scan_kwargs)
 
@@ -637,6 +634,7 @@ class InteractiveScan(ContextDecorator):
         Wait for the all readings to arrive at the client
         """
         while len(self.status.scan.data) != self._point_id:
+            self._client.alarm_handler.raise_alarms()
             time.sleep(0.1)
 
 
