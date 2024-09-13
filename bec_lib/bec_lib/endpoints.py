@@ -113,6 +113,23 @@ class MessageEndpoints:
         )
 
     @staticmethod
+    def device_raw(device: str) -> EndpointInfo:
+        """
+        Endpoint for device raw readings. This endpoint is used by the device server to publish
+        the device raw readings using a messages.DeviceMessage message.
+
+        Args:
+            device (str): Device name, e.g. "samx".
+
+        Returns:
+            EndpointInfo: Endpoint for device raw readings of the specified device.
+        """
+        endpoint = f"internal/devices/raw/{device}"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.DeviceMessage, message_op=MessageOp.STREAM
+        )
+
+    @staticmethod
     def device_limits(device: str) -> EndpointInfo:
         """
         Endpoint for device limits. This endpoint is used by the device server to publish
