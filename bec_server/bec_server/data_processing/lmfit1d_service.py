@@ -13,7 +13,6 @@ from bec_lib.device import DeviceBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.lmfit_serializer import deserialize_param_object, serialize_lmfit_params
 from bec_lib.logger import bec_logger
-from bec_lib.serialization import MsgpackSerialization
 from bec_server.data_processing.dap_service import DAPError, DAPServiceBase
 
 if TYPE_CHECKING:

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
+
 from bec_lib import messages
 from bec_lib.client import BECClient
 from bec_lib.endpoints import MessageEndpoints
@@ -21,6 +23,7 @@ class DAPServiceManager:
         self.dap_services = {}
         self.continuous_dap = None
         self.services = services if isinstance(services, list) else [services]
+        self.threadpool = ThreadPoolExecutor(max_workers=4)
 
     def _start_dap_request_consumer(self) -> None:
         """
@@ -41,7 +44,7 @@ class DAPServiceManager:
         dap_request_msg = msg.value
         if not dap_request_msg:
             return
-        self.process_dap_request(dap_request_msg)
+        self.threadpool.submit(self.process_dap_request, dap_request_msg)
 
     def process_dap_request(self, dap_request_msg: messages.DAPRequestMessage) -> None:
         """
@@ -268,6 +271,7 @@ class DAPServiceManager:
         )
 
     def shutdown(self) -> None:
+        self.threadpool.shutdown()
         if not self._started:
             return
         self.connector.shutdown()
