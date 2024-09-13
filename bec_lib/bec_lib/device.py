@@ -312,9 +312,11 @@ class DeviceBase:
     def _get_rpc_response(self, request_id, rpc_id) -> Any:
         queue = self.root.parent.parent.queue
         while queue.request_storage.find_request_by_ID(request_id) is None:
+            self.root.parent.parent.alarm_handler.raise_alarms()
             time.sleep(0.01)
         scan_queue_request = queue.request_storage.find_request_by_ID(request_id)
         while scan_queue_request.decision_pending:
+            self.root.parent.parent.alarm_handler.raise_alarms()
             time.sleep(0.01)
         if not all(scan_queue_request.accepted):
             raise ScanRequestError(
@@ -327,6 +329,7 @@ class DeviceBase:
                 break
             # pylint: disable=protected-access
             scan_queue_request._print_all_client_asap_messages()
+            self.root.parent.parent.alarm_handler.raise_alarms()
             time.sleep(0.01)
 
         return self._handle_rpc_response(msg)
