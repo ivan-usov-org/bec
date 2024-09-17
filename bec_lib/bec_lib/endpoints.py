@@ -404,6 +404,55 @@ class MessageEndpoints:
         )
 
     @staticmethod
+    def scan_queue_order_change_request() -> EndpointInfo:
+        """
+        Endpoint for scan queue order change request. This endpoint is used to request
+        a change in the scan queue order using a messages.ScanQueueOrderChangeMessage message.
+
+        Returns:
+            EndpointInfo: Endpoint for scan queue order change request.
+        """
+        endpoint = "internal/queue/queue_order_change_request"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.ScanQueueOrderMessage,
+            message_op=MessageOp.SEND,
+        )
+
+    @staticmethod
+    def scan_queue_order_change_response() -> EndpointInfo:
+        """
+        Endpoint for scan queue order change response. This endpoint is used to publish the
+        information on whether the scan queue order change was accepted or rejected. The response
+        is sent using a messages.RequestResponseMessage message.
+
+        Returns:
+            EndpointInfo: Endpoint for scan queue order change response.
+        """
+        endpoint = "internal/queue/queue_order_change_response"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.RequestResponseMessage,
+            message_op=MessageOp.SEND,
+        )
+
+    @staticmethod
+    def scan_queue_order_change() -> EndpointInfo:
+        """
+        Endpoint for scan queue order change. This endpoint is used to publish the
+        scan queue order change using a messages.ScanQueueOrderMessage message.
+
+        Returns:
+            EndpointInfo: Endpoint for scan queue order change.
+        """
+        endpoint = "internal/queue/queue_order_change"
+        return EndpointInfo(
+            endpoint=endpoint,
+            message_type=messages.ScanQueueOrderMessage,
+            message_op=MessageOp.SEND,
+        )
+
+    @staticmethod
     def scan_queue_insert() -> EndpointInfo:
         """
         Endpoint for scan queue inserts. This endpoint is used to publish accepted

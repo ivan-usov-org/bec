@@ -6,6 +6,7 @@ from bec_lib import messages
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.redis_connector import MessageObject
 from bec_server.scan_server.scan_guard import ScanGuard, ScanRejection, ScanStatus
+from bec_server.scan_server.scan_queue import ScanQueueStatus
 from bec_server.scan_server.tests.fixtures import scan_server_mock
 
 
@@ -306,3 +307,77 @@ def test_check_valid_request_raises_for_empty_request(scan_guard_mock):
     with pytest.raises(ScanRejection) as scan_rejection:
         sg._check_valid_request(None)
     assert "Invalid request." in scan_rejection.value.args
+
+
+@pytest.mark.parametrize(
+    "msg, queue_paused, valid, response_message",
+    [
+        (
+            messages.ScanQueueOrderMessage(
+                queue="primary", scan_id="scan_id", action="move_bottom"
+            ),
+            True,
+            True,
+            "",
+        ),
+        (
+            messages.ScanQueueOrderMessage(
+                queue="primary", scan_id="scan_id", action="move_bottom"
+            ),
+            False,
+            False,
+            "Queue primary is not paused. Cannot move scans.",
+        ),
+        (
+            messages.ScanQueueOrderMessage(queue="wrong", scan_id="scan_id", action="move_bottom"),
+            False,
+            False,
+            "Invalid queue: wrong",
+        ),
+        (
+            messages.ScanQueueOrderMessage(queue="primary", scan_id="scan_id", action="move_to"),
+            True,
+            False,
+            "Missing target_position for move_to",
+        ),
+        (
+            messages.ScanQueueOrderMessage(
+                queue="primary", scan_id="wrong_scan_id", action="move_bottom"
+            ),
+            True,
+            False,
+            "Scan wrong_scan_id not found in queue primary",
+        ),
+    ],
+)
+def test_check_queue_order_callback(scan_guard_mock, msg, queue_paused, valid, response_message):
+    sg = scan_guard_mock
+
+    class MockQueue:
+        def __init__(self):
+            self.queue = [MockInstructionItem()]
+            self.status = ScanQueueStatus.PAUSED if queue_paused else ScanQueueStatus.RUNNING
+
+    class MockInstructionItem:
+        def __init__(self):
+            self.queue = MockRequestBlockQueue()
+
+    class MockRequestBlockQueue:
+        def __init__(self):
+            self.scan_id = "scan_id"
+
+    sg.parent.queue_manager.queues = {"primary": MockQueue()}
+    msg_obj = MessageObject(MessageEndpoints.scan_queue_order_change_request(), msg)
+    sg._scan_queue_order_callback(msg_obj, sg)
+    success_call = mock.call(MessageEndpoints.scan_queue_order_change(), msg)
+    if valid:
+        assert success_call in sg.device_manager.connector.send.mock_calls
+    else:
+        assert (
+            mock.call(
+                MessageEndpoints.scan_queue_order_change_response(),
+                messages.RequestResponseMessage(accepted=False, message=response_message),
+            )
+            in sg.device_manager.connector.send.mock_calls
+        )
+        assert success_call not in sg.device_manager.connector.send.calls

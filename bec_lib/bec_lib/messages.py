@@ -201,6 +201,26 @@ class ScanQueueModificationMessage(BECMessage):
     queue: str = Field(default="primary")
 
 
+class ScanQueueOrderMessage(BECMessage):
+    """Message type for sending scan queue order modifications
+
+    Args:
+        scan_id (str): Unique scan ID
+        action (str): One of the actions defined in ACTIONS: ("move_up", "move_down", "move_top", "move_bottom", "move_to")
+        queue (str): Defaults to "primary" queue. The name of the queue that receives the modification.
+        metadata (dict, optional): Additional metadata to describe and identify the scan.
+
+    Examples:
+        >>> ScanQueueOrderMessage(scan_id=scan_id, action="move_up")
+    """
+
+    msg_type: ClassVar[str] = "scan_queue_order"
+    scan_id: str
+    action: Literal["move_up", "move_down", "move_top", "move_bottom", "move_to"]
+    queue: str = Field(default="primary")
+    target_position: int | None = None
+
+
 class ScanQueueStatusMessage(BECMessage):
     """Message type for sending scan queue status updates
 

@@ -5,8 +5,9 @@ as the requests and scans that are currently running or have been completed.
 
 from __future__ import annotations
 
+import time
 import uuid
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from typeguard import typechecked
 
@@ -160,6 +161,60 @@ class ScanManager:
             ),
         )
         return requestID
+
+    @typechecked
+    def request_queue_order_modification(
+        self,
+        scan_id: str,
+        action: Literal["move_up", "move_down", "move_top", "move_bottom", "move_to"],
+        position: int | None = None,
+        queue: str = "primary",
+        wait_for_response: bool = False,
+    ) -> messages.RequestResponseMessage | None:
+        """
+        Request to modify the order of a scan in the queue.
+
+        Args:
+            scan_id (str): ScanID
+            action (Literal["move_up", "move_down", "move_top", "move_bottom", "move_to"]): Action to perform
+            position (int, optional): Position to move to. Required if action is "move_to". Defaults to None.
+            queue (str, optional): Queue to modify. Defaults to "primary".
+            wait_for_response (bool, optional): Wait for a response. Defaults to False.
+
+        Returns:
+            dict: Response message if wait_for_response is True
+        """
+        logger.info(f"Requesting to {action} a scan in the queue")
+
+        if action == "move_to" and position is None:
+            raise ValueError("Position must be provided when action is 'move_to'")
+
+        if wait_for_response:
+            update = {}
+            self.connector.register(
+                topics=MessageEndpoints.scan_queue_order_change_response(),
+                cb=self._request_response_callback,
+                update=update,
+            )
+        self.connector.send(
+            MessageEndpoints.scan_queue_order_change_request(),
+            messages.ScanQueueOrderMessage(
+                scan_id=scan_id, action=action, target_position=position, queue=queue
+            ),
+        )
+        if wait_for_response:
+            while "response" not in update:
+                time.sleep(0.1)
+            self.connector.unregister(
+                topics=MessageEndpoints.scan_queue_order_change_response(),
+                cb=self._request_response_callback,
+            )
+            return update["response"]
+
+    @staticmethod
+    def _request_response_callback(msg, update):
+        response = msg.value
+        update["response"] = response
 
     @property
     def next_scan_number(self):

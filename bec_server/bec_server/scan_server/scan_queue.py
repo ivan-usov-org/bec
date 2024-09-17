@@ -7,6 +7,7 @@ import time
 import traceback
 import uuid
 from enum import Enum
+from typing import Deque
 
 from rich.console import Console
 from rich.table import Table
@@ -57,7 +58,7 @@ class QueueManager:
         self.connector = parent.connector
         self.num_queues = 1
         self.key = ""
-        self.queues = {}
+        self.queues: dict[str, ScanQueue] = {}
         self._start_scan_queue_register()
         self._lock = threading.RLock()
 
@@ -110,6 +111,11 @@ class QueueManager:
             cb=self._scan_queue_modification_callback,
             parent=self,
         )
+        self.connector.register(
+            MessageEndpoints.scan_queue_order_change(),
+            cb=self._scan_queue_order_callback,
+            parent=self,
+        )
 
     @staticmethod
     def _scan_queue_callback(msg, parent, **_kwargs) -> None:
@@ -127,6 +133,80 @@ class QueueManager:
         if scan_mod_msg:
             parent.scan_interception(scan_mod_msg)
             parent.send_queue_status()
+
+    @staticmethod
+    def _scan_queue_order_callback(msg, parent, **_kwargs):
+        parent._handle_scan_order_change(msg.value)
+
+    def _handle_scan_order_change(self, msg: messages.ScanQueueOrderMessage) -> None:
+        """Handle the scan queue order change request.
+
+        Args:
+            msg (messages.ScanQueueOrderMessage): ScanQueueOrderMessage
+
+        """
+        with self._lock:
+            logger.info(f"Handling scan queue order change: {msg}")
+            target_queue = msg.queue
+            queue = self.queues[target_queue].queue
+            queue_item = self._get_queue_item_by_scan_id(msg)
+            if not queue_item:
+                logger.error(f"Scan {msg.scan_id} not found in queue {target_queue}")
+                return
+
+            if msg.action == "move_to":
+                # move the scan to the target position
+                if msg.target_position is None:
+                    logger.error("Missing target_position")
+                    return
+
+                position = max(0, min(msg.target_position, len(queue) - 1))
+
+                queue.remove(queue_item)
+                queue.insert(position, queue_item)
+
+            if msg.action == "move_up":
+                # move the scan up by one position
+                idx = queue.index(queue_item)
+                if idx == 0:
+                    return
+                queue.remove(queue_item)
+                queue.insert(idx - 1, queue_item)
+
+            if msg.action == "move_down":
+                # move the scan down by one position
+                idx = queue.index(queue_item)
+                if idx == len(queue) - 1:
+                    return
+                queue.remove(queue_item)
+                queue.insert(idx + 1, queue_item)
+
+            if msg.action == "move_top":
+                # move the scan to the top of the queue
+                queue.remove(queue_item)
+                queue.insert(0, queue_item)
+
+            if msg.action == "move_bottom":
+                # move the scan to the bottom of the queue
+                queue.remove(queue_item)
+                queue.append(queue_item)
+
+            self.send_queue_status()
+
+    def _get_queue_item_by_scan_id(
+        self, msg: messages.ScanQueueOrderMessage
+    ) -> InstructionQueueItem | None:
+        """
+        Get the queue item by scan_id.
+
+        Args:
+            msg (messages.ScanQueueOrderMessage): ScanQueueOrderMessage
+        """
+        queue = self.queues[msg.queue]
+        for instruction_queue in queue.queue:
+            if msg.scan_id in instruction_queue.queue.scan_id:
+                return instruction_queue
+        return None
 
     def stop_all_devices(self):
         """
@@ -350,7 +430,7 @@ class ScanQueue:
         queue_name="primary",
         instruction_queue_item_cls: InstructionQueueItem = None,
     ) -> None:
-        self.queue = collections.deque()
+        self.queue: Deque[InstructionQueueItem] = collections.deque()
         self.queue_name = queue_name
         self.history_queue = collections.deque(maxlen=self.MAX_HISTORY)
         self.active_instruction_queue = None

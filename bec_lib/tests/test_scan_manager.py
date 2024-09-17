@@ -161,6 +161,62 @@ def test_scan_manager_request_scan_continuation_scan_id(scan_manager, scan_id):
     )
 
 
+@pytest.mark.parametrize(
+    "action, target_position, raises_error",
+    [
+        ("move", 0, True),
+        ("move_to", 1, False),
+        ("move_up", None, False),
+        ("move_down", None, False),
+        ("move_top", None, False),
+        ("move_bottom", None, False),
+        ("move_to", None, True),
+    ],
+)
+def test_scan_manager_request_order_change(scan_manager, action, target_position, raises_error):
+    """
+    Test the request order change method and ensure that the correct messages are sent
+    """
+    if raises_error:
+        with pytest.raises((TypeCheckError, ValueError)):
+            scan_manager.request_queue_order_modification(
+                scan_id="scan_id", action=action, position=target_position
+            )
+        return
+    scan_manager.request_queue_order_modification(
+        scan_id="scan_id", action=action, position=target_position
+    )
+    assert (
+        mock.call(
+            MessageEndpoints.scan_queue_order_change_request(),
+            messages.ScanQueueOrderMessage(
+                scan_id="scan_id", action=action, target_position=target_position, queue="primary"
+            ),
+        )
+        in scan_manager.connector.send.mock_calls
+    )
+
+
+def test_scan_manager_request_order_change_with_response(scan_manager_with_fakeredis):
+    scan_manager = scan_manager_with_fakeredis
+    response_msg = messages.RequestResponseMessage(accepted=True, message="Order change accepted")
+
+    def send_response(msg):
+        scan_manager.connector.send(
+            MessageEndpoints.scan_queue_order_change_response(), response_msg
+        )
+
+    scan_manager.connector.register(
+        MessageEndpoints.scan_queue_order_change_request(), cb=send_response
+    )
+
+    out = scan_manager.request_queue_order_modification(
+        scan_id="scan_id", action="move_to", position=1, wait_for_response=True
+    )
+
+    assert out == response_msg
+
+
 def test_scan_manager_add_scan_to_queue_schedule(scan_manager_with_fakeredis):
     """
     Test the interaction with queue schedules

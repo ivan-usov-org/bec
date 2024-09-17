@@ -729,3 +729,60 @@ def test_request_block_queue_flush_request_blocks():
     with mock.patch.object(req_block_queue, "request_blocks_queue") as request_blocks_queue:
         req_block_queue.flush_request_blocks()
         request_blocks_queue.clear.assert_called_once_with()
+
+
+@pytest.mark.parametrize(
+    "order_msg,position",
+    [
+        (
+            messages.ScanQueueOrderMessage(
+                scan_id="scan_id", queue="primary", action="move_to", target_position=2
+            ),
+            2,
+        ),
+        (messages.ScanQueueOrderMessage(scan_id="scan_id", queue="primary", action="move_top"), 0),
+        (
+            messages.ScanQueueOrderMessage(
+                scan_id="scan_id", queue="primary", action="move_bottom"
+            ),
+            9,
+        ),
+        (
+            messages.ScanQueueOrderMessage(
+                scan_id="scan_id", queue="primary", action="move_to", target_position=20
+            ),
+            9,
+        ),
+        (
+            messages.ScanQueueOrderMessage(
+                scan_id="scan_id", queue="primary", action="move_to", target_position=9
+            ),
+            9,
+        ),
+        (messages.ScanQueueOrderMessage(scan_id="scan_id", queue="primary", action="move_up"), 4),
+        (messages.ScanQueueOrderMessage(scan_id="scan_id", queue="primary", action="move_down"), 6),
+    ],
+)
+def test_queue_order_change(queuemanager_mock, order_msg, position):
+    queue_manager = queuemanager_mock()
+    msg = messages.ScanQueueMessage(
+        scan_type="line_scan",
+        parameter={"args": {"samx": (-5, 5)}, "kwargs": {"steps": 3}},
+        queue="primary",
+        metadata={"RID": "something"},
+    )
+    queue_manager.add_queue("primary")
+    for _ in range(10):
+        queue_manager.add_to_queue(scan_queue="primary", msg=msg)
+
+    queue = queue_manager.queues["primary"]
+    assert len(queue.queue) == 10
+
+    target_id = queue.queue[5].queue.scan_id
+    order_msg.scan_id = target_id[0]
+    queue_manager._handle_scan_order_change(order_msg)
+    for ii in range(10):
+        if ii == position:
+            assert queue.queue[ii].queue.scan_id == target_id
+        else:
+            assert queue.queue[ii].queue.scan_id != target_id

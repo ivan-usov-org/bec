@@ -1,10 +1,17 @@
+from __future__ import annotations
+
 import traceback
+from typing import TYPE_CHECKING
 
 from bec_lib import messages
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
+from bec_server.scan_server.scan_queue import ScanQueueStatus
 
 logger = bec_logger.logger
+
+if TYPE_CHECKING:
+    from bec_server.scan_server.scan_server import ScanServer
 
 
 class ScanRejection(Exception):
@@ -18,7 +25,7 @@ class ScanStatus:
 
 
 class ScanGuard:
-    def __init__(self, *, parent):
+    def __init__(self, *, parent: ScanServer):
         """
         Scan guard receives scan requests and checks their validity. If the scan is
         accepted, it enqueues a new scan message.
@@ -34,6 +41,11 @@ class ScanGuard:
         self.connector.register(
             MessageEndpoints.scan_queue_modification_request(),
             cb=self._scan_queue_modification_request_callback,
+            parent=self,
+        )
+        self.connector.register(
+            MessageEndpoints.scan_queue_order_change_request(),
+            cb=self._scan_queue_order_callback,
             parent=self,
         )
 
@@ -177,3 +189,60 @@ class ScanGuard:
         msg = msg
         sqi = MessageEndpoints.scan_queue_insert()
         self.device_manager.connector.send(sqi, msg)
+
+    @staticmethod
+    def _scan_queue_order_callback(msg, parent, **_kwargs):
+        # pylint: disable=protected-access
+        parent._handle_scan_order_change(msg.value)
+
+    def _handle_scan_order_change(self, msg: messages.ScanQueueOrderMessage):
+        """
+        Handle the scan queue order change request.
+        Args:
+            msg: ScanQueueOrderMessage
+
+        """
+        logger.info("Handling scan queue order change")
+        sqoc = MessageEndpoints.scan_queue_order_change()
+        target_queue = msg.queue
+        if target_queue not in self.parent.queue_manager.queues:
+            logger.error(f"Invalid queue: {target_queue}")
+            self._send_scan_queue_order_change_response(False, f"Invalid queue: {target_queue}")
+            return
+        if self.parent.queue_manager.queues[target_queue].status != ScanQueueStatus.PAUSED:
+            logger.error(f"Queue {target_queue} is not paused.")
+            self._send_scan_queue_order_change_response(
+                False, f"Queue {target_queue} is not paused. Cannot move scans."
+            )
+            return
+        if msg.action == "move_to" and msg.target_position is None:
+            logger.error("Missing target_position")
+            self._send_scan_queue_order_change_response(
+                False, "Missing target_position for move_to"
+            )
+            return
+
+        queue = self.parent.queue_manager.queues[target_queue]
+        for scan in queue.queue:
+            if msg.scan_id in scan.queue.scan_id:
+                break
+        else:
+            logger.error(f"Scan {msg.scan_id} not found in queue {target_queue}")
+            self._send_scan_queue_order_change_response(
+                False, f"Scan {msg.scan_id} not found in queue {target_queue}"
+            )
+            return
+        self.device_manager.connector.send(sqoc, msg)
+        self._send_scan_queue_order_change_response(True, "Order change accepted")
+
+    def _send_scan_queue_order_change_response(self, accepted: bool, message: str):
+        """
+        Send a response to the scan queue order change request.
+        Args:
+            msg: ScanQueueOrderMessage
+
+        """
+        logger.info(f"Sending scan queue order change response: {message}")
+        sqocp = MessageEndpoints.scan_queue_order_change_response()
+        msg = messages.RequestResponseMessage(accepted=accepted, message=message)
+        self.device_manager.connector.send(sqocp, msg)
