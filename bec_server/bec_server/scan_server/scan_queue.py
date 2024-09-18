@@ -802,7 +802,10 @@ class RequestBlockQueue:
             return
         if not rbl.is_scan and rbl.scan_def_id is None:
             return
-        if rbl.scan_def_id is None or rbl.msg.content["scan_type"] == "close_scan_def":
+        if rbl.scan_def_id is None or rbl.msg.content["scan_type"] in [
+            "close_scan_def",
+            "_close_interactive_scan",
+        ]:
             self.scan_queue.queue_manager.parent.scan_number += 1
             if not rbl.msg.metadata.get("dataset_id_on_hold"):
                 self.scan_queue.queue_manager.parent.dataset_number += 1

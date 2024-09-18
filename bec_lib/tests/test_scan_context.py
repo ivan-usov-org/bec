@@ -206,7 +206,7 @@ def test_interactive_scan_cm_raises_scan_motors(bec_client_mock):
     client.scans._interactive_trigger = mock.MagicMock()
     client.scans._interactive_read_monitored = mock.MagicMock()
 
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         with client.scans.interactive_scan() as scan:
             scan.trigger()
             scan.read_monitored_devices()

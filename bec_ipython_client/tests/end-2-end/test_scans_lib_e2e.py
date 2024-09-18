@@ -409,7 +409,7 @@ def test_interactive_scan(bec_client_lib):
     dev = bec.device_manager.devices
     scans = bec.scans
 
-    with scans.interactive_scan(scan_motors=[dev.samx, dev.samy], exp_time=0.1) as scan:
+    with scans.interactive_scan(monitored=[dev.samx, dev.samy], exp_time=0.1) as scan:
         for ii in range(10):
             samx_status = dev.samx.set(ii)
             samy_status = dev.samy.set(ii)

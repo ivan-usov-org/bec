@@ -175,6 +175,7 @@ class Scans:
         self._dataset_id_on_hold = None
         self._dataset_id_on_hold_ctx = DatasetIdOnHold(parent=self)
         self._scan_export = None
+        setattr(self.interactive_scan, "__doc__", InteractiveScan.__doc__)
 
     def _import_scans(self):
         """Import scans from the scan server"""
@@ -332,7 +333,6 @@ class Scans:
 
     @property
     def interactive_scan(self):
-        """Context manager / decorator for running interactive scans"""
         return InteractiveScan
 
 
@@ -512,35 +512,34 @@ class InteractiveScan(ContextDecorator):
     InteractiveScan is a context manager for running interactive scans.
     Opening the interactive scan will stage all devices and perform the baseline reading.
     Exiting the context manager will unstage all devices.
-
-    Example:
-    >>> with scans.interactive_scan(exp_time=0.1, metadata={"sample": "A"}) as scan:
-    >>>     for i in range(10):
-    >>>         samx_status = dev.samx.set(i)
-    >>>         samx_status.wait()
-    >>>         scan.trigger()
-    >>>         scan.read_all_monitored_devices()
     """
 
     def __init__(
-        self, scan_motors=None, monitored_devices=None, exp_time: float = 0, metadata=None, **kwargs
+        self, monitored: list[str] | list[DeviceBase], exp_time: float = 0, metadata=None, **kwargs
     ) -> None:
         """
         InteractiveScan is a context manager for running interactive scans.
+        Opening the interactive scan will stage all devices and perform the baseline reading.
+        Exiting the context manager will unstage all devices.
 
-        Use scan_motors to specify the scan motors that should be monitored in addition
-        to the default monitored devices. Alternatively, use monitored_devices to specify
-        the devices that should be monitored directly.
+        Use "monitored" to specify the devices that should be monitored during the scan in addition
+        to the default monitored devices.
 
         Args:
-            scan_motors (list[str]): List of scan motors that should be
-                monitored. Either scan_motors or monitored_devices must be specified but not both.
-            monitored_devices (list[str]): List of monitored devices. Either scan_motors or
-                monitored_devices must be specified but not both.
-            exp_time (float): Exposure time for the scan.
-            metadata (dict): Metadata dictionary.
+            scan_motors (list[str] | list[DeviceBase]): List of scan motors that should be monitored.
+            exp_time (float): Exposure time for the scan. Default is 0.
+            metadata (dict): Metadata dictionary. Default is None.
             kwargs: Keyword arguments that should be passed to the scan.
+
+        Example:
+            >>> with scans.interactive_scan(monitored=["samx"], exp_time=0.1, metadata={"sample": "A"}) as scan:
+            >>>     for i in range(10):
+            >>>         samx_status = dev.samx.set(i)
+            >>>         samx_status.wait()
+            >>>         scan.trigger()
+            >>>         scan.read_all_monitored_devices()
         """
+
         self._client = None
         self._scans = None
         self._point_id = 0
@@ -548,25 +547,13 @@ class InteractiveScan(ContextDecorator):
         self._scan_kwargs["exp_time"] = exp_time
         self._scan_kwargs["metadata"] = metadata
 
-        if scan_motors is None and monitored_devices is None:
-            raise ValueError("Either scan_motors or monitored_devices must be specified.")
-        if scan_motors is not None and monitored_devices is not None:
-            raise ValueError("Both scan_motors and monitored_devices cannot be specified.")
-        self._input_scan_motors = scan_motors
-        self._input_monitored_devices = monitored_devices
+        self._input_monitored_devices = monitored
 
     def _update_monitored_devices(self):
         """
         Update the monitored devices based on the scan_motors or monitored_devices arguments.
         """
-        scan_motors = self._input_scan_motors
         monitored_devices = self._input_monitored_devices
-        if scan_motors is not None:
-            if not isinstance(scan_motors, list):
-                scan_motors = [scan_motors]
-            self._scan_kwargs["monitored"] = self._client.device_manager.devices.monitored_devices(
-                scan_motors
-            )
         if monitored_devices is not None:
             if not isinstance(monitored_devices, list):
                 monitored_devices = [monitored_devices]
@@ -636,6 +623,10 @@ class InteractiveScan(ContextDecorator):
         while len(self.status.scan.data) != self._point_id:
             self._client.alarm_handler.raise_alarms()
             time.sleep(0.1)
+
+
+# this is a workaround to make the InteractiveScan doc string available to the interactive_scan property
+Scans.interactive_scan.__doc__ = InteractiveScan.__init__.__doc__
 
 
 def _get_client():
