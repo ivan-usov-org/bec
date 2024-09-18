@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v2.32.0 (2024-09-18)
+
+### Feature
+
+* feat(endpoint): added device_raw endpoint ([`1a9bb96`](https://gitlab.psi.ch/bec/bec/-/commit/1a9bb962f28f8f0c4319c9ee3177a6ca8cc660d1))
+
+* feat(scan queue): added support for changing the order of scans in the queue ([`7eb4ead`](https://gitlab.psi.ch/bec/bec/-/commit/7eb4ead57d163e045a88f3af906aa928cc2bca0f))
+
 ## v2.31.2 (2024-09-13)
 
 ### Fix
