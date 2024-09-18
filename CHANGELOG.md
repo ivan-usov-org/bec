@@ -1,5 +1,31 @@
 # CHANGELOG
 
+## v2.33.0 (2024-09-18)
+
+### Feature
+
+* feat(interactive scans): added support for interactive scans
+
+This commit adds support for interactive scans. This is a new feature that allows users to interactively define scans in the BEC client. The user can specify the scan parameters in a context manager and then run the scan interactively by accessing the device objects directly. Dedicated trigger and read function are provided to perform larger actions. ([`d842e20`](https://gitlab.psi.ch/bec/bec/-/commit/d842e20dc8df809413a4017539019d8d644bcf68))
+
+### Fix
+
+* fix(interactive_scan): fixed bug in scan number calculation; simplified interface ([`ca4eb1e`](https://gitlab.psi.ch/bec/bec/-/commit/ca4eb1e5d42b272f5de4620ac73d5ae415136415))
+
+* fix(interactive_scan): fixed default exp_time ([`e9839bf`](https://gitlab.psi.ch/bec/bec/-/commit/e9839bf79b44a004b1d3050d8cf3d71c86fff5e4))
+
+* fix(scan_worker): exp time is optional; default 0 ([`90b07ed`](https://gitlab.psi.ch/bec/bec/-/commit/90b07ed690da05e397bc6971d497b09d583e0ac4))
+
+* fix(rpc): check for alarms during rpc calls ([`99a1553`](https://gitlab.psi.ch/bec/bec/-/commit/99a1553794766ebbe9441a16b29a91be5dfba162))
+
+### Refactor
+
+* refactor(bec_lib): minor cleanup for cli scan context managers ([`c67e80a`](https://gitlab.psi.ch/bec/bec/-/commit/c67e80a29a1aa50566192f5f45d2e895256cfc40))
+
+### Test
+
+* test(dmmock): fixed mocked devicemanager to avoid leakage between tests ([`020856d`](https://gitlab.psi.ch/bec/bec/-/commit/020856d4febba1fa24e073fe27e6165b8ccdd450))
+
 ## v2.32.0 (2024-09-18)
 
 ### Feature
