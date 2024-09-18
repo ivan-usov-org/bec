@@ -472,9 +472,13 @@ class DeviceMonitor2DMessage(BECMessage):
         """
         if not isinstance(v, np.ndarray):
             raise ValueError(f"Invalid array type: {type(v)}. Must be a numpy array.")
-        if not v.ndim == 2:
-            raise ValueError(f"Invalid dimenson {v.ndim} for numpy array. Must be a 2D array.")
-        return v
+        if v.ndim == 2:
+            return v
+        if v.ndim == 3 and v.shape[2] == 3:
+            return v
+        raise ValueError(
+            f"Invalid dimenson {v.ndim} for numpy array. Must be a 2D array or 3D array for rgb v.shape[2]=3."
+        )
 
 
 class ScanMessage(BECMessage):

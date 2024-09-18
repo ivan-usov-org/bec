@@ -347,3 +347,20 @@ def test_DeviceInstructionMessage():
     res_loaded = MsgpackSerialization.loads(res)
     assert res_loaded == msg
     assert res_loaded.metadata == {}
+
+
+def test_DeviceMonitor2DMessage():
+    # Test 2D data
+    msg = messages.DeviceMonitor2DMessage(
+        device="eiger", data=np.random.rand(2, 100), metadata=None
+    )
+    res = MsgpackSerialization.dumps(msg)
+    res_loaded = MsgpackSerialization.loads(res)
+    assert res_loaded == msg
+    assert res_loaded.metadata == {}
+    # Test rgb image, i.e. image with 3 channels
+    msg = messages.DeviceMonitor2DMessage(device="eiger", data=np.random.rand(3, 3), metadata=None)
+    res = MsgpackSerialization.dumps(msg)
+    res_loaded = MsgpackSerialization.loads(res)
+    assert res_loaded == msg
+    assert res_loaded.metadata == {}
