@@ -143,7 +143,9 @@ class ScanWorker(threading.Thread):
             instr (DeviceInstructionMessage): Device instruction received from the scan assembler
 
         """
-        devices = [dev.name for dev in self.device_manager.devices.get_software_triggered_devices()]
+        devices = [
+            dev.root.name for dev in self.device_manager.devices.get_software_triggered_devices()
+        ]
         self._last_trigger = instr
         self.device_manager.connector.send(
             MessageEndpoints.device_instructions(),
@@ -183,7 +185,7 @@ class ScanWorker(threading.Thread):
         devices = instr.content.get("device")
         if devices is None:
             devices = [
-                dev.name
+                dev.root.name
                 for dev in self.device_manager.devices.monitored_devices(
                     readout_priority=self.readout_priority
                 )
@@ -227,7 +229,7 @@ class ScanWorker(threading.Thread):
 
         """
         if instr.content.get("device") is None:
-            devices = [dev.name for dev in self.device_manager.devices.enabled_devices]
+            devices = [dev.root.name for dev in self.device_manager.devices.enabled_devices]
         else:
             devices = instr.content.get("device")
         if not isinstance(devices, list):
@@ -252,7 +254,7 @@ class ScanWorker(threading.Thread):
 
         """
         baseline_devices = [
-            dev.name
+            dev.root.name
             for dev in self.device_manager.devices.baseline_devices(
                 readout_priority=self.readout_priority
             )
@@ -272,7 +274,7 @@ class ScanWorker(threading.Thread):
         Args:
             instr (DeviceInstructionMessage): Device instruction received from the scan assembler
         """
-        devices = [dev.name for dev in self.device_manager.devices.enabled_devices]
+        devices = [dev.root.name for dev in self.device_manager.devices.enabled_devices]
         self.device_manager.connector.send(
             MessageEndpoints.device_instructions(),
             messages.DeviceInstructionMessage(
@@ -334,12 +336,12 @@ class ScanWorker(threading.Thread):
 
         """
         async_devices = self.device_manager.devices.async_devices()
-        async_device_names = [dev.name for dev in async_devices]
+        async_device_names = [dev.root.name for dev in async_devices]
         excluded_devices = async_devices
         excluded_devices.extend(self.device_manager.devices.on_request_devices())
         excluded_devices.extend(self.device_manager.devices.continuous_devices())
         stage_device_names_without_async = [
-            dev.name
+            dev.root.name
             for dev in self.device_manager.devices.enabled_devices
             if dev not in excluded_devices
         ]
@@ -384,7 +386,7 @@ class ScanWorker(threading.Thread):
 
         """
         if not devices:
-            devices = [dev.name for dev in self.device_manager.devices.enabled_devices]
+            devices = [dev.root.name for dev in self.device_manager.devices.enabled_devices]
         parameter = {} if not instr else instr.content["parameter"]
         metadata = {} if not instr else instr.metadata
         self._staged_devices.difference_update(devices)
@@ -456,9 +458,9 @@ class ScanWorker(threading.Thread):
             raise DeviceMessageError("Device message metadata does not contain a DIID entry.")
 
         if wait_group in self._groups:
-            self._groups[wait_group].update({dev.name: DIID for dev in devices})
+            self._groups[wait_group].update({dev.dotted_name: DIID for dev in devices})
         else:
-            self._groups[wait_group] = {dev.name: DIID for dev in devices}
+            self._groups[wait_group] = {dev.dotted_name: DIID for dev in devices}
 
     def _check_for_failed_movements(
         self, device_status: list, devices: list, instr: messages.DeviceInstructionMessage
@@ -501,7 +503,7 @@ class ScanWorker(threading.Thread):
         if not wait_group or wait_group not in self._groups:
             return
 
-        group_devices = [dev.name for dev in self._get_devices_from_instruction(instr)]
+        group_devices = [dev.dotted_name for dev in self._get_devices_from_instruction(instr)]
         wait_group_devices = [
             (dev_name, DIID)
             for dev_name, DIID in self._groups[wait_group].items()
@@ -535,7 +537,7 @@ class ScanWorker(threading.Thread):
         if not wait_group or wait_group not in self._groups:
             return
 
-        group_devices = [dev.name for dev in self._get_devices_from_instruction(instr)]
+        group_devices = [dev.root.name for dev in self._get_devices_from_instruction(instr)]
         wait_group_devices = [
             (dev_name, DIID)
             for dev_name, DIID in self._groups[wait_group].items()
@@ -591,7 +593,9 @@ class ScanWorker(threading.Thread):
             instr.content["parameter"].get("time", 0)
         ) * self.current_scan_info.get("frames_per_trigger", 1)
         time.sleep(trigger_time)
-        devices = [dev.name for dev in self.device_manager.devices.get_software_triggered_devices()]
+        devices = [
+            dev.dotted_name for dev in self.device_manager.devices.get_software_triggered_devices()
+        ]
         metadata = self._last_trigger.metadata
         self._wait_for_status(devices, metadata)
 
@@ -671,31 +675,31 @@ class ScanWorker(threading.Thread):
         self.current_scan_info["kwargs"] = active_rb.scan.parameter["kwargs"]
         self.current_scan_info["readout_priority"] = {
             "monitored": [
-                dev.name
+                dev.full_name
                 for dev in self.device_manager.devices.monitored_devices(
                     readout_priority=self.readout_priority
                 )
             ],
             "baseline": [
-                dev.name
+                dev.full_name
                 for dev in self.device_manager.devices.baseline_devices(
                     readout_priority=self.readout_priority
                 )
             ],
             "async": [
-                dev.name
+                dev.full_name
                 for dev in self.device_manager.devices.async_devices(
                     readout_priority=self.readout_priority
                 )
             ],
             "continuous": [
-                dev.name
+                dev.full_name
                 for dev in self.device_manager.devices.continuous_devices(
                     readout_priority=self.readout_priority
                 )
             ],
             "on_request": [
-                dev.name
+                dev.full_name
                 for dev in self.device_manager.devices.on_request_devices(
                     readout_priority=self.readout_priority
                 )

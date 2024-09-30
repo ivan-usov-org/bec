@@ -95,6 +95,37 @@ def test_mv_scan(capsys, bec_ipython_client_fixture):
     assert ref_out_samy in captured.out
 
 
+@pytest.mark.flaky  # marked as flaky as the simulation might return a new readback value within the tolerance
+@pytest.mark.timeout(100)
+def test_mv_scan_nested_device(capsys, bec_ipython_client_fixture):
+    bec = bec_ipython_client_fixture
+    scans = bec.scans
+    bec.metadata.update({"unit_test": "test_mv_scan_nested_device"})
+    dev = bec.device_manager.devices
+    scans.mv(dev.hexapod.x, 10, dev.hexapod.y, 20, relative=False).wait()
+    current_pos_hexapod_x = dev.hexapod.x.read(cached=True)["hexapod_x"]["value"]
+    current_pos_hexapod_y = dev.hexapod.y.read(cached=True)["hexapod_y"]["value"]
+    assert np.isclose(
+        current_pos_hexapod_x, 10, atol=dev.hexapod._config["deviceConfig"].get("tolerance", 0.5)
+    )
+    assert np.isclose(
+        current_pos_hexapod_y, 20, atol=dev.hexapod._config["deviceConfig"].get("tolerance", 0.5)
+    )
+    scans.umv(dev.hexapod.x, 10, dev.hexapod.y, 20, relative=False)
+    current_pos_hexapod_x = dev.hexapod.x.read(cached=True)["hexapod_x"]["value"]
+    current_pos_hexapod_y = dev.hexapod.y.read(cached=True)["hexapod_y"]["value"]
+    captured = capsys.readouterr()
+    ref_out_hexapod_x = (
+        f"━━━━━━━━━━ {current_pos_hexapod_x:10.2f} /      10.00 / 100 % 0:00:00 0:00:00"
+    )
+    ref_out_hexapod_y = (
+        f"━━━━━━━━━━ {current_pos_hexapod_y:10.2f} /      20.00 / 100 % 0:00:00 0:00:00"
+    )
+
+    assert ref_out_hexapod_x in captured.out
+    assert ref_out_hexapod_y in captured.out
+
+
 @pytest.mark.timeout(100)
 def test_mv_scan_mv(bec_ipython_client_fixture):
     bec = bec_ipython_client_fixture

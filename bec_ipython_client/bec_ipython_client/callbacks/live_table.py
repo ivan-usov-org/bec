@@ -20,7 +20,9 @@ logger = bec_logger.logger
 def sort_devices(devices, scan_devices) -> list:
     """sort the devices to ensure that the table starts with scan motors"""
     for scan_dev in list(scan_devices)[::-1]:
-        devices.remove(scan_dev)
+        root_dev = scan_dev.split(".")[0]
+        if root_dev in devices:
+            devices.remove(root_dev)
         devices.insert(0, scan_dev)
     return devices
 
@@ -127,7 +129,6 @@ class LiveUpdatesTable(LiveUpdatesBase):
         monitored_devices = device_manager.devices.monitored_devices(
             [device_manager.devices[dev] for dev in scan_devices]
         )
-        # devices = [hint for dev in monitored_devices for hint in dev._hints]
         devices = [dev.name for dev in monitored_devices]
         devices = sort_devices(devices, scan_devices)
         if len(devices) > self.MAX_DEVICES:
@@ -263,7 +264,7 @@ class LiveUpdatesTable(LiveUpdatesBase):
             if dev in self.bec.device_manager.devices:
                 obj = self.bec.device_manager.devices[dev]
                 for hint in obj._hints:
-                    signal = self.point_data.content["data"].get(dev, {}).get(hint)
+                    signal = self.point_data.content["data"].get(obj.root.name, {}).get(hint)
                     if signal is None or signal.get("value") is None:
                         print_value = "N/A"
                     else:

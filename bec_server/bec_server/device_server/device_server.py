@@ -16,6 +16,7 @@ from bec_lib.device import OnFailure
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
 from bec_lib.messages import BECStatus
+from bec_lib.utils.rpc_utils import rgetattr
 from bec_server.device_server.devices.devicemanager import DeviceManagerDS
 from bec_server.device_server.rpc_mixin import RPCMixin
 
@@ -92,7 +93,7 @@ class DeviceServer(RPCMixin, BECService):
         if mvalue is None:
             logger.warning("Failed to parse scan queue modification message.")
             return
-        logger.info(f"Receiving request to stop all devices.")
+        logger.info("Received request to stop all devices.")
         self.stop_devices()
 
     def stop_devices(self) -> None:
@@ -248,17 +249,27 @@ class DeviceServer(RPCMixin, BECService):
             status.add_callback(self._status_callback)
 
     def _set_device(self, instr: messages.DeviceInstructionMessage) -> None:
-        device_obj = self.device_manager.devices.get(instr.content["device"])
+        device_name = instr.content["device"]
+        child_access = None
+        if "." in device_name:
+            device_name, child_access = device_name.split(".", 1)
+        device_obj = self.device_manager.devices.get(device_name)
         if device_obj.read_only:
             raise DisabledDeviceError(
                 f"Setting the device {device_obj.name} is currently disabled."
             )
         logger.debug(f"Setting device: {instr}")
         val = instr.content["parameter"]["value"]
-        obj = self.device_manager.devices.get(instr.content["device"]).obj
-        # self.device_manager.add_req_done_sub(obj)
+        sub_id = None
+        if child_access:
+            obj = rgetattr(device_obj.obj, child_access)
+            if "readback" in obj.event_types or "value" in obj.event_types:
+                sub_id = obj.subscribe(self.device_manager._obj_callback_readback, run=True)
+        else:
+            obj = device_obj.obj
         status = obj.set(val)
         status.__dict__["instruction"] = instr
+        status.__dict__["sub_id"] = sub_id
         status.add_callback(self._status_callback)
 
     def _pre_scan(self, instr: messages.DeviceInstructionMessage) -> None:
@@ -274,7 +285,7 @@ class DeviceServer(RPCMixin, BECService):
             dev_msg = messages.DeviceReqStatusMessage(
                 device=dev, success=True, metadata=instr.metadata
             )
-            self.connector.set(MessageEndpoints.device_req_status(dev), dev_msg, pipe)
+            self.connector.set(MessageEndpoints.device_req_status(dev), dev_msg, pipe, expire=18000)
         pipe.execute()
 
     def _status_callback(self, status):
@@ -283,14 +294,26 @@ class DeviceServer(RPCMixin, BECService):
             obj = status.device
         else:
             obj = status.obj
-        device_name = obj.root.name
+
+        # if we've started a subscription, we need to unsubscribe now
+        # this is typically the case for operations on nested devices.
+        # For normal devices, we don't need to unsubscribe, as the
+        # subscription is handled by the device manager
+        if getattr(status, "sub_id", None):
+            obj.unsubscribe(status.sub_id)
+
+        device_name = (
+            ".".join([obj.root.name, obj.dotted_name]) if obj.dotted_name else obj.root.name
+        )
         metadata = {"action": status.instruction.content["action"]}
         metadata.update(status.instruction.metadata)
         dev_msg = messages.DeviceReqStatusMessage(
             device=device_name, success=status.success, metadata=metadata
         )
         logger.debug(f"req status for device {device_name}: {status.success}")
-        self.connector.set(MessageEndpoints.device_req_status(device_name), dev_msg, pipe)
+        self.connector.set(
+            MessageEndpoints.device_req_status(device_name), dev_msg, pipe, expire=18000
+        )
         response = status.instruction.metadata.get("response")
         if response:
             self.connector.lpush(

@@ -415,7 +415,7 @@ def test_device_get_device_config():
 
 
 def test_device_set_device_config():
-    parent = mock.MagicMock()
+    parent = mock.MagicMock(spec=DeviceManagerBase)
     device = DeviceBase(name="test", config={"deviceConfig": {"tolerance": 1}}, parent=parent)
     device.set_device_config({"tolerance": 2})
     assert device.get_device_config() == {"tolerance": 2}
@@ -431,7 +431,7 @@ def test_get_device_tags():
 
 
 def test_set_device_tags():
-    parent = mock.MagicMock()
+    parent = mock.MagicMock(spec=DeviceManagerBase)
     device = DeviceBase(name="test", config={"deviceTags": ["tag1", "tag2"]}, parent=parent)
     device.set_device_tags(["tag3", "tag4"])
     assert device.get_device_tags() == ["tag3", "tag4"]
@@ -439,7 +439,7 @@ def test_set_device_tags():
 
 
 def test_add_device_tag():
-    parent = mock.MagicMock()
+    parent = mock.MagicMock(spec=DeviceManagerBase)
     device = DeviceBase(name="test", config={"deviceTags": ["tag1", "tag2"]}, parent=parent)
     device.add_device_tag("tag3")
     assert device.get_device_tags() == ["tag1", "tag2", "tag3"]
@@ -447,7 +447,7 @@ def test_add_device_tag():
 
 
 def test_add_device_tags_duplicate():
-    parent = mock.MagicMock()
+    parent = mock.MagicMock(spec=DeviceManagerBase)
     device = DeviceBase(name="test", config={"deviceTags": ["tag1", "tag2"]}, parent=parent)
     device.add_device_tag("tag1")
     assert device.get_device_tags() == ["tag1", "tag2"]
@@ -455,7 +455,7 @@ def test_add_device_tags_duplicate():
 
 
 def test_remove_device_tag():
-    parent = mock.MagicMock()
+    parent = mock.MagicMock(spec=DeviceManagerBase)
     device = DeviceBase(name="test", config={"deviceTags": ["tag1", "tag2"]}, parent=parent)
     device.remove_device_tag("tag1")
     assert device.get_device_tags() == ["tag2"]
@@ -463,7 +463,7 @@ def test_remove_device_tag():
 
 
 def test_device_wm():
-    parent = mock.MagicMock()
+    parent = mock.MagicMock(spec=DeviceManagerBase)
     device = DeviceBase(name="test", config={"deviceTags": ["tag1", "tag2"]}, parent=parent)
     with mock.patch.object(parent.devices, "wm", new_callable=mock.PropertyMock) as wm:
         res = device.wm
@@ -471,13 +471,13 @@ def test_device_wm():
 
 
 def test_readout_priority():
-    parent = mock.MagicMock()
+    parent = mock.MagicMock(spec=DeviceManagerBase)
     device = DeviceBase(name="test", config={"readoutPriority": "baseline"}, parent=parent)
     assert device.readout_priority == "baseline"
 
 
 def test_set_readout_priority():
-    parent = mock.MagicMock()
+    parent = mock.MagicMock(spec=DeviceManagerBase)
     device = DeviceBase(name="test", config={"readoutPriority": "baseline"}, parent=parent)
     device.readout_priority = "monitored"
     assert device.readout_priority == "monitored"
@@ -485,13 +485,13 @@ def test_set_readout_priority():
 
 
 def test_on_failure():
-    parent = mock.MagicMock()
+    parent = mock.MagicMock(spec=DeviceManagerBase)
     device = DeviceBase(name="test", config={"onFailure": "buffer"}, parent=parent)
     assert device.on_failure == "buffer"
 
 
 def test_set_on_failure():
-    parent = mock.MagicMock()
+    parent = mock.MagicMock(spec=DeviceManagerBase)
     device = DeviceBase(name="test", config={"onFailure": "buffer"}, parent=parent)
     device.on_failure = "retry"
     assert device.on_failure == "retry"
@@ -499,13 +499,13 @@ def test_set_on_failure():
 
 
 def test_read_only():
-    parent = mock.MagicMock()
+    parent = mock.MagicMock(spec=DeviceManagerBase)
     device = DeviceBase(name="test", config={"read_only": False}, parent=parent)
     assert device.read_only is False
 
 
 def test_set_read_only():
-    parent = mock.MagicMock()
+    parent = mock.MagicMock(spec=DeviceManagerBase)
     device = DeviceBase(name="test", config={"read_only": False}, parent=parent)
     device.read_only = True
     assert device.read_only is True
@@ -514,7 +514,7 @@ def test_set_read_only():
 
 def test_device_container_wm():
     devs = DeviceContainer()
-    devs["test"] = Device(name="test", config={}, parent=mock.MagicMock())
+    devs["test"] = Device(name="test", config={}, parent=mock.MagicMock(spec=DeviceManagerBase))
     with mock.patch.object(devs.test, "read", return_value={"test": {"value": 1}}) as read:
         devs.wm("test")
         devs.wm("tes*")
@@ -522,7 +522,7 @@ def test_device_container_wm():
 
 def test_device_container_wm_with_setpoint():
     devs = DeviceContainer()
-    devs["test"] = Device(name="test", config={}, parent=mock.MagicMock())
+    devs["test"] = Device(name="test", config={}, parent=mock.MagicMock(spec=DeviceManagerBase))
     with mock.patch.object(
         devs.test, "read", return_value={"test": {"value": 1}, "test_setpoint": {"value": 1}}
     ) as read:
@@ -531,7 +531,7 @@ def test_device_container_wm_with_setpoint():
 
 def test_device_container_wm_with_user_setpoint():
     devs = DeviceContainer()
-    devs["test"] = Device(name="test", config={}, parent=mock.MagicMock())
+    devs["test"] = Device(name="test", config={}, parent=mock.MagicMock(spec=DeviceManagerBase))
     with mock.patch.object(
         devs.test, "read", return_value={"test": {"value": 1}, "test_user_setpoint": {"value": 1}}
     ) as read:

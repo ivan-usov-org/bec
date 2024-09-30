@@ -23,6 +23,7 @@ from bec_lib.utils.import_utils import lazy_import
 # from bec_lib import messages
 messages = lazy_import("bec_lib.messages")
 
+_MAX_RECURSION_DEPTH = 100
 
 if TYPE_CHECKING:
     from bec_lib.client import BECClient
@@ -228,7 +229,7 @@ class DeviceBase:
 
     def get_device_config(self):
         """get the device config for this device"""
-        return self._config["deviceConfig"]
+        return self.root._config["deviceConfig"]
 
     @property
     def enabled(self):
@@ -245,18 +246,17 @@ class DeviceBase:
     @property
     def root(self):
         """Returns the root object of the device tree."""
-        # pylint: disable=import-outside-toplevel
-        from bec_lib.devicemanager import DeviceManagerBase
-
-        parent = self
-        while not isinstance(parent.parent, DeviceManagerBase):
-            parent = parent.parent
-        return parent
+        return self._get_root_recursively(self)[0]
 
     @property
     def full_name(self):
-        """Returns the full name of the device."""
+        """Returns the full name of the device or signal, separated by "_" e.g. samx_velocity"""
         return self._compile_function_path().replace(".", "_")
+
+    @property
+    def dotted_name(self):
+        """Returns the full dotted name of the device or signal e.g. samx.velocity"""
+        return self._compile_function_path()
 
     def _prepare_rpc_msg(
         self, rpc_id: str, request_id: str, device: str, func_call: str, *args, **kwargs
@@ -385,18 +385,31 @@ class DeviceBase:
         return (device, func_call)
 
     def _compile_function_path(self, use_parent=False) -> str:
-        # pylint: disable=import-outside-toplevel
-        from bec_lib.devicemanager import DeviceManagerBase
-
         if use_parent:
             parent = self.parent
         else:
             parent = self
-        func_call = []
-        while not isinstance(parent, DeviceManagerBase):
-            func_call.append(parent.name)
-            parent = parent.parent
+        parent, func_call = self._get_root_recursively(parent)
+        func_call.append(parent.name)
         return ".".join(func_call[::-1])
+
+    def _get_root_recursively(self, parent) -> tuple[Any, list]:
+        # pylint: disable=import-outside-toplevel
+        from bec_lib.devicemanager import DeviceManagerBase
+
+        max_depth = _MAX_RECURSION_DEPTH
+        func_call = []
+
+        while not isinstance(parent.parent, DeviceManagerBase):
+            func_call.append(parent.name)
+            if parent.parent is None:
+                return (parent, func_call)
+            parent = parent.parent
+            max_depth -= 1
+            if max_depth == 0:
+                logger.error("Max depth reached in device tree.")
+                raise RecursionError("Max depth reached in device tree.")
+        return (parent, func_call)
 
     def _parse_info(self):
         if self._info.get("signals"):
@@ -459,40 +472,45 @@ class DeviceBase:
     @typechecked
     def set_device_config(self, val: dict):
         """set the device config for this device"""
-        self._config["deviceConfig"].update(val)
-        return self.parent.config_helper.send_config_request(
-            action="update", config={self.name: {"deviceConfig": self._config["deviceConfig"]}}
+        # pylint: disable=protected-access
+        self.root._config["deviceConfig"].update(val)
+        return self.root.parent.config_helper.send_config_request(
+            action="update", config={self.name: {"deviceConfig": self.root._config["deviceConfig"]}}
         )
 
     def get_device_tags(self) -> list:
         """get the device tags for this device"""
-        return self._config.get("deviceTags", [])
+        # pylint: disable=protected-access
+        return self.root._config.get("deviceTags", [])
 
     @typechecked
     def set_device_tags(self, val: list):
         """set the device tags for this device"""
-        self._config["deviceTags"] = val
-        return self.parent.config_helper.send_config_request(
-            action="update", config={self.name: {"deviceTags": self._config["deviceTags"]}}
+        # pylint: disable=protected-access
+        self.root._config["deviceTags"] = val
+        return self.root.parent.config_helper.send_config_request(
+            action="update", config={self.name: {"deviceTags": self.root._config["deviceTags"]}}
         )
 
     @typechecked
     def add_device_tag(self, val: str):
         """add a device tag for this device"""
-        if val in self._config["deviceTags"]:
+        # pylint: disable=protected-access
+        if val in self.root._config["deviceTags"]:
             return None
-        self._config["deviceTags"].append(val)
-        return self.parent.config_helper.send_config_request(
-            action="update", config={self.name: {"deviceTags": self._config["deviceTags"]}}
+        self.root._config["deviceTags"].append(val)
+        return self.root.parent.config_helper.send_config_request(
+            action="update", config={self.name: {"deviceTags": self.root._config["deviceTags"]}}
         )
 
     def remove_device_tag(self, val: str):
         """remove a device tag for this device"""
-        if val not in self._config["deviceTags"]:
+        # pylint: disable=protected-access
+        if val not in self.root._config["deviceTags"]:
             return None
-        self._config["deviceTags"].remove(val)
-        return self.parent.config_helper.send_config_request(
-            action="update", config={self.name: {"deviceTags": self._config["deviceTags"]}}
+        self.root._config["deviceTags"].remove(val)
+        return self.root.parent.config_helper.send_config_request(
+            action="update", config={self.name: {"deviceTags": self.root._config["deviceTags"]}}
         )
 
     @property
@@ -503,68 +521,77 @@ class DeviceBase:
     @property
     def readout_priority(self) -> ReadoutPriority:
         """get the readout priority for this device"""
-        return ReadoutPriority(self._config["readoutPriority"])
+        # pylint: disable=protected-access
+        return ReadoutPriority(self.root._config["readoutPriority"])
 
     @readout_priority.setter
     def readout_priority(self, val: ReadoutPriority):
         """set the readout priority for this device"""
         if not isinstance(val, ReadoutPriority):
             val = ReadoutPriority(val)
-        self._config["readoutPriority"] = val
-        return self.parent.config_helper.send_config_request(
+        # pylint: disable=protected-access
+        self.root._config["readoutPriority"] = val
+        return self.root.parent.config_helper.send_config_request(
             action="update", config={self.name: {"readoutPriority": val}}
         )
 
     @property
     def on_failure(self) -> OnFailure:
         """get the failure behaviour for this device"""
-        return OnFailure(self._config.get("onFailure", "retry"))
+        # pylint: disable=protected-access
+        return OnFailure(self.root._config.get("onFailure", "retry"))
 
     @on_failure.setter
     def on_failure(self, val: OnFailure):
         """set the failure behaviour for this device"""
         if not isinstance(val, OnFailure):
             val = OnFailure(val)
-        self._config["onFailure"] = val
-        return self.parent.config_helper.send_config_request(
-            action="update", config={self.name: {"onFailure": self._config["onFailure"]}}
+        # pylint: disable=protected-access
+        self.root._config["onFailure"] = val
+        return self.root.parent.config_helper.send_config_request(
+            action="update", config={self.name: {"onFailure": self.root._config["onFailure"]}}
         )
 
     @property
     def read_only(self):
         """Whether or not the device can be set"""
-        return self._config.get("readOnly", False)
+        # pylint: disable=protected-access
+        return self.root._config.get("readOnly", False)
 
     @read_only.setter
     def read_only(self, value: bool):
         """Whether or not the device is read only"""
-        self.parent.config_helper.send_config_request(
+        # pylint: disable=protected-access
+        self.root.parent.config_helper.send_config_request(
             action="update", config={self.name: {"readOnly": value}}
         )
-        self._config["readOnly"] = value
+        self.root._config["readOnly"] = value
 
     @property
     def software_trigger(self):
         """Whether or not the device can be software triggered"""
-        return self._config.get("softwareTrigger", False)
+        # pylint: disable=protected-access
+        return self.root._config.get("softwareTrigger", False)
 
     @software_trigger.setter
     def software_trigger(self, value: bool):
         """Whether or not the device can be software triggered"""
-        self.parent.config_helper.send_config_request(
+        # pylint: disable=protected-access
+        self.root.parent.config_helper.send_config_request(
             action="update", config={self.name: {"softwareTrigger": value}}
         )
-        self._config["softwareTrigger"] = value
+        self.root._config["softwareTrigger"] = value
 
     @property
     def user_parameter(self) -> dict:
         """get the user parameter for this device"""
-        return self._config.get("userParameter")
+        # pylint: disable=protected-access
+        return self.root._config.get("userParameter")
 
     @typechecked
     def set_user_parameter(self, val: dict):
         """set the user parameter for this device"""
-        self.parent.config_helper.send_config_request(
+        self.root.parent.config_helper.send_config_request(
             action="update", config={self.name: {"userParameter": val}}
         )
 
@@ -597,6 +624,7 @@ class DeviceBase:
         from bec_lib.devicemanager import DeviceManagerBase
 
         if isinstance(obj.parent, DeviceManagerBase):
+            # pylint: disable=protected-access
             config = "".join(
                 [f"\t{key}: {val}\n" for key, val in obj._config.get("deviceConfig").items()]
             )

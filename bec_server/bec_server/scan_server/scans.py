@@ -454,7 +454,8 @@ class ScanBase(RequestBase, PathOptimizerMixin):
     def _set_position_offset(self):
         for dev in self.scan_motors:
             val = yield from self.stubs.send_rpc_and_wait(dev, "read")
-            self.start_pos.append(val[dev].get("value"))
+            obj = self.device_manager.devices[dev]
+            self.start_pos.append(val[obj.full_name].get("value"))
         if self.relative:
             self.positions += self.start_pos
 
@@ -716,7 +717,8 @@ class Move(RequestBase):
         self.start_pos = []
         for dev in self.scan_motors:
             val = yield from self.stubs.send_rpc_and_wait(dev, "read")
-            self.start_pos.append(val[dev].get("value"))
+            obj = self.device_manager.devices[dev]
+            self.start_pos.append(val[obj.full_name].get("value"))
         if not self.relative:
             return
         self.positions += self.start_pos

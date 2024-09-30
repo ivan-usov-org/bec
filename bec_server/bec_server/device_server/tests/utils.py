@@ -258,6 +258,10 @@ class PositionerMock(DeviceObjectMock, BECPositionerProtocol):
         return ret
 
     @property
+    def full_name(self):
+        return self.name
+
+    @property
     def user_parameter(self):
         return self._config["userParameter"]
 

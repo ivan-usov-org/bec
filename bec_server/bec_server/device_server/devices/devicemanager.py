@@ -9,7 +9,6 @@ from __future__ import annotations
 import inspect
 import time
 import traceback
-from functools import reduce
 
 import numpy as np
 import ophyd
@@ -25,19 +24,11 @@ from bec_lib.device import DeviceBase
 from bec_lib.devicemanager import DeviceManagerBase
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
+from bec_lib.utils.rpc_utils import rgetattr
 from bec_server.device_server.devices.config_update_handler import ConfigUpdateHandler
 from bec_server.device_server.devices.device_serializer import get_device_info
 
 logger = bec_logger.logger
-
-
-def rgetattr(obj, attr, *args):
-    """See https://stackoverflow.com/questions/31174295/getattr-and-setattr-on-nested-objects"""
-
-    def _getattr(obj, attr):
-        return getattr(obj, attr, *args)
-
-    return reduce(_getattr, [obj] + attr.split("."))
 
 
 class DSDevice(DeviceBase):

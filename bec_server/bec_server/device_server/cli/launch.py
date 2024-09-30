@@ -13,7 +13,6 @@ for entry_point in entry_points:
     if entry_point.name == "plugin_ds_startup":
         entry_point.load()()
 
-import argparse
 import threading
 
 from bec_lib.bec_service import parse_cmdline_args

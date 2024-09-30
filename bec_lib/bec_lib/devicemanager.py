@@ -4,6 +4,8 @@ This module contains the DeviceManager class which is used to manage devices and
 
 from __future__ import annotations
 
+import collections
+import copy
 import re
 import traceback
 from typing import TYPE_CHECKING
@@ -19,6 +21,7 @@ from bec_lib.device import ComputedSignal, Device, DeviceBase, Positioner, Reado
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
 from bec_lib.utils.import_utils import lazy_import_from
+from bec_lib.utils.rpc_utils import rgetattr
 
 # TODO: put back normal import when Pydantic gets faster
 BECStatus, ServiceResponseMessage = lazy_import_from(
@@ -32,6 +35,13 @@ if TYPE_CHECKING:
 logger = bec_logger.logger
 
 
+def _rgetattr_safe(obj, attr, *args):
+    try:
+        return rgetattr(obj, attr, *args)
+    except DeviceConfigError:
+        return None
+
+
 class DeviceContainer(dict):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -43,6 +53,11 @@ class DeviceContainer(dict):
         if kwargs:
             for k, v in kwargs.items():
                 self[k] = v
+
+    def __contains__(self, key: object) -> bool:
+        if isinstance(key, str) and "." in key:
+            return _rgetattr_safe(self, key) is not None
+        return super().__contains__(key)
 
     def __getattr__(self, attr):
         if attr.startswith("_"):
@@ -60,6 +75,11 @@ class DeviceContainer(dict):
             self.__setitem__(key, value)
         else:
             raise AttributeError("Unsupported device type.")
+
+    def __getitem__(self, item):
+        if isinstance(item, str) and "." in item:
+            return rgetattr(self, item)
+        return super().__getitem__(item)
 
     def __setitem__(self, key, value):
         super().__setitem__(key, value)
@@ -100,7 +120,7 @@ class DeviceContainer(dict):
         """
         val = ReadoutPriority(readout_priority)
         # pylint: disable=protected-access
-        return [dev for _, dev in self.items() if dev._config["readoutPriority"] == val]
+        return [dev for _, dev in self.items() if dev.root._config["readoutPriority"] == val]
 
     def _filter_devices(
         self, readout_priority: ReadoutPriority, readout_priority_mod: dict, devices: list = None
@@ -111,12 +131,45 @@ class DeviceContainer(dict):
 
         if readout_priority_mod is None:
             readout_priority_mod = {}
+        else:
+            readout_priority_mod = copy.deepcopy(readout_priority_mod)
 
-        devices = [self.get(dev) if isinstance(dev, str) else dev for dev in devices]
+        bec_triggered = (
+            set(readout_priority_mod.get("monitored", []))
+            .union(readout_priority_mod.get("on_request", []))
+            .union(readout_priority_mod.get("baseline", []))
+        )
+
+        if readout_priority == ReadoutPriority.MONITORED:
+            for dev in readout_priority_mod.get("monitored", []):
+                if dev in readout_priority_mod.get("on_request", []):
+                    readout_priority_mod["on_request"].remove(dev)
+                if dev in readout_priority_mod.get("baseline", []):
+                    readout_priority_mod["baseline"].remove(dev)
+        elif readout_priority == ReadoutPriority.BASELINE:
+            for dev in readout_priority_mod.get("baseline", []):
+                if dev in readout_priority_mod.get("on_request", []):
+                    readout_priority_mod["on_request"].remove(dev)
+
+        async_intersection = bec_triggered.intersection(set(readout_priority_mod.get("async", [])))
+        if async_intersection:
+            raise ValueError(
+                f"Devices {async_intersection} cannot be async and monitored/baseline/on_request at the same time"
+            )
+
+        continuous_intersection = bec_triggered.intersection(
+            set(readout_priority_mod.get("continuous", []))
+        )
+        if continuous_intersection:
+            raise ValueError(
+                f"Devices {continuous_intersection} cannot be continuous and monitored/baseline/on_request at the same time"
+            )
+
+        devices = [self[dev].root if isinstance(dev, str) else dev.root for dev in devices]
 
         devices.extend(self.readout_priority(readout_priority))
         devices.extend(
-            [self.get(dev) for dev in readout_priority_mod.get(readout_priority.name.lower(), [])]
+            [self[dev].root for dev in readout_priority_mod.get(readout_priority.name.lower(), [])]
         )
 
         excluded_readout_priority = [
@@ -124,7 +177,9 @@ class DeviceContainer(dict):
         ]
         excluded_devices = self.disabled_devices
         for priority in excluded_readout_priority:
-            excluded_devices.extend(self.get(dev) for dev in readout_priority_mod.get(priority, []))
+            excluded_devices.extend(
+                self[dev].root for dev in readout_priority_mod.get(priority, [])
+            )
 
         return [dev for dev in set(devices) if dev not in excluded_devices]
 
@@ -155,9 +210,9 @@ class DeviceContainer(dict):
             for scan_motor in scan_motors:
                 if scan_motor not in devices:
                     if isinstance(scan_motor, DeviceBase):
-                        devices.append(scan_motor)
+                        devices.append(scan_motor.root)
                     else:
-                        devices.append(self.get(scan_motor))
+                        devices.append(self.get(scan_motor).root)
 
         return self._filter_devices(ReadoutPriority.MONITORED, readout_priority, devices)
 
@@ -175,29 +230,20 @@ class DeviceContainer(dict):
             list: list of baseline devices
         """
         devices = self.readout_priority(ReadoutPriority.BASELINE)
+        if readout_priority is None:
+            readout_priority = collections.defaultdict(list)
+
         if scan_motors:
             if not isinstance(scan_motors, list):
                 scan_motors = [scan_motors]
             for scan_motor in scan_motors:
                 if scan_motor not in devices:
                     if isinstance(scan_motor, DeviceBase):
-                        devices.append(scan_motor)
+                        readout_priority["monitored"].append(scan_motor)
                     else:
-                        devices.append(self.get(scan_motor))
-            excluded_devices = scan_motors
-        else:
-            excluded_devices = []
-        if readout_priority is None:
-            readout_priority = {}
+                        readout_priority["monitored"].append(self.get(scan_motor))
 
-        devices.extend([self.get(dev) for dev in readout_priority.get("baseline", [])])
-        excluded_devices.extend(self.disabled_devices)
-        excluded_devices.extend([self.get(dev) for dev in readout_priority.get("monitored", [])])
-        excluded_devices.extend([self.get(dev) for dev in readout_priority.get("on_request", [])])
-        excluded_devices.extend([self.get(dev) for dev in readout_priority.get("continuous", [])])
-        excluded_devices.extend([self.get(dev) for dev in readout_priority.get("async", [])])
-
-        return [dev for dev in set(devices) if dev not in excluded_devices]
+        return self._filter_devices(ReadoutPriority.BASELINE, readout_priority, devices)
 
     def get_devices_with_tags(self, tags: list) -> list:
         """

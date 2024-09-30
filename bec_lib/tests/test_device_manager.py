@@ -307,6 +307,91 @@ def test_baseline_devices(dm_with_devices, scan_motors_in, readout_priority_in):
     )
 
 
+@pytest.mark.parametrize(
+    "readout_priority_in",
+    [
+        {"monitored": ["samx"], "async": ["samx"]},
+        {"monitored": ["samx"], "continuous": ["samx", "samy"]},
+    ],
+)
+def test_readoutpriority_raises_with_conflicting_input(dm_with_devices, readout_priority_in):
+    dm = dm_with_devices
+    with pytest.raises(ValueError):
+        dm.devices.monitored_devices(readout_priority=readout_priority_in)
+
+
+@pytest.mark.parametrize(
+    "readout_priority_in, priority_out, raises_exception",
+    [
+        ({"monitored": ["samx"], "baseline": ["samx"]}, {"monitored": ["samx"]}, False),
+        (
+            {"monitored": ["samx"], "continuous": ["samx", "samy"]},
+            {"monitored": ["samx"], "continuous": ["samy"]},
+            True,
+        ),
+        (
+            {"monitored": ["samx"], "on_request": ["samx", "samy"]},
+            {"monitored": ["samx"], "on_request": ["samy"]},
+            False,
+        ),
+        (
+            {"baseline": ["samx"], "on_request": ["samx", "samy"]},
+            {"baseline": ["samx"], "on_request": ["samy"]},
+            False,
+        ),
+    ],
+)
+def test_readoutpriority_highest_priority_wins(
+    dm_with_devices, readout_priority_in, priority_out, raises_exception
+):
+    dm = dm_with_devices
+    if raises_exception:
+        with pytest.raises(ValueError):
+            monitored_devices = dm.devices.monitored_devices(readout_priority=readout_priority_in)
+            baseline_devices = dm.devices.baseline_devices(readout_priority=readout_priority_in)
+            async_devices = dm.devices.async_devices(readout_priority=readout_priority_in)
+            continuous_devices = dm.devices.continuous_devices(readout_priority=readout_priority_in)
+            on_request_devices = dm.devices.on_request_devices(readout_priority=readout_priority_in)
+        return
+
+    monitored_devices = dm.devices.monitored_devices(readout_priority=readout_priority_in)
+    baseline_devices = dm.devices.baseline_devices(readout_priority=readout_priority_in)
+    async_devices = dm.devices.async_devices(readout_priority=readout_priority_in)
+    continuous_devices = dm.devices.continuous_devices(readout_priority=readout_priority_in)
+    on_request_devices = dm.devices.on_request_devices(readout_priority=readout_priority_in)
+
+    monitored_device_names = set(dev.name for dev in monitored_devices)
+    baseline_device_names = set(dev.name for dev in baseline_devices)
+    async_device_names = set(dev.name for dev in async_devices)
+    continuous_device_names = set(dev.name for dev in continuous_devices)
+    on_request_device_names = set(dev.name for dev in on_request_devices)
+
+    assert (
+        monitored_device_names.intersection(
+            baseline_device_names,
+            async_device_names,
+            continuous_device_names,
+            on_request_device_names,
+        )
+        == set()
+    )
+    assert set(priority_out.get("monitored", [])).intersection(monitored_device_names) == set(
+        priority_out.get("monitored", [])
+    )
+    assert set(priority_out.get("baseline", [])).intersection(baseline_device_names) == set(
+        priority_out.get("baseline", [])
+    )
+    assert set(priority_out.get("async", [])).intersection(async_device_names) == set(
+        priority_out.get("async", [])
+    )
+    assert set(priority_out.get("continuous", [])).intersection(continuous_device_names) == set(
+        priority_out.get("continuous", [])
+    )
+    assert set(priority_out.get("on_request", [])).intersection(on_request_device_names) == set(
+        priority_out.get("on_request", [])
+    )
+
+
 def test_device_config_update_callback(dm_with_devices):
     device_manager = dm_with_devices
     dev_config_msg = messages.DeviceConfigMessage(action="update", config={"samx": {}})

@@ -9,7 +9,8 @@ from bec_lib import messages
 from bec_lib.alarm_handler import Alarms
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.logger import bec_logger
-from bec_server.device_server.devices import is_serializable, rgetattr
+from bec_lib.utils.rpc_utils import rgetattr
+from bec_server.device_server.devices import is_serializable
 
 logger = bec_logger.logger
 
@@ -174,11 +175,21 @@ class RPCMixin:
         return res
 
     def process_rpc_instruction(self, instr: messages.DeviceInstructionMessage) -> Any:
-        # handle ophyd read. This is a special case because we also want to update the
-        # buffered value in redis
+        """
+        Process RPC instruction and return result.
+
+        Args:
+            instr(messages.DeviceInstructionMessage): RPC instruction
+
+        Returns:
+            Any: Result of RPC instruction
+        """
+
         instr_params = instr.content.get("parameter")
 
         if instr_params.get("func") == "read" or instr_params.get("func").endswith(".read"):
+            # handle ophyd read. This is a special case because we also want to update the
+            # buffered value in redis
             return self._handle_rpc_read(instr)
 
         if instr_params.get("func") == "read_configuration" or instr_params.get("func").endswith(

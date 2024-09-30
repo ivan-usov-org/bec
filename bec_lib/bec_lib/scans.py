@@ -303,7 +303,10 @@ class Scans:
             return tuple(cmd.name if hasattr(cmd, "name") else cmd for cmd in args)
         params = {}
         for cmds in partition(bundle_size, args):
-            cmds_serialized = [cmd.name if hasattr(cmd, "name") else cmd for cmd in cmds]
+            cmds_serialized = [
+                cmd._compile_function_path() if hasattr(cmd, "_compile_function_path") else cmd
+                for cmd in cmds
+            ]
             params[cmds_serialized[0]] = cmds_serialized[1:]
         return params
 
