@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v2.34.1 (2024-10-01)
+
+### Fix
+
+* fix: min version for typeguard to support literals is 4.1.5 ([`c2e05c0`](https://gitlab.psi.ch/bec/bec/-/commit/c2e05c04febf8ef019f6c08fdf890627158bb5a4))
+
 ## v2.34.0 (2024-10-01)
 
 ### Build
