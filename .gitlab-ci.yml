@@ -12,6 +12,9 @@ variables:
   BEC_WIDGETS_BRANCH:
     description: bec_widgets branch
     value: main
+  CHECK_PKG_VERSIONS:
+    description: Whether to run additional tests against min/max/random selection of dependencies. Set to 1 for running. 
+    value: 0
 
 workflow:
   rules:
