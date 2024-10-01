@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v2.34.3 (2024-10-01)
+
+### Fix
+
+* fix: fixed support for nested devices ([`56e98e8`](https://gitlab.psi.ch/bec/bec/-/commit/56e98e8b19b6698cc96392429ef4922b20ec38bb))
+
 ## v2.34.2 (2024-10-01)
 
 ### Fix
