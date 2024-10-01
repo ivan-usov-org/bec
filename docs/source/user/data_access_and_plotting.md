@@ -18,10 +18,11 @@ Below is an example how to access it.
 
 ## Inspect the scan data
 
-The return value of a scan is a python object of type `ScanReport`. All data is stored in `<scan_report>.scan.data`, e.g.
+The return value of a scan is a python object of type `ScanReport`. All data from devices for which the `readoutPriority` is `'monitored'`, data is stored in `<scan_report>.scan.data`; `baseline` readings are stored in `<scan_report>.scan.baseline`.
 
 ```python
-print(s.scan.data) # access to all of the data
+print(s.scan.data) 
+print(s.scan.baseline)
 ```
 Typically, only specific motors are of interest. 
 A convenient access pattern `s.scan.data.device.hinted_signal.val` is implemented, that allows you to quickly access the data directly.
@@ -33,26 +34,22 @@ samx_data = s.scan.data.samx.samx.val
 gauss_bpm_data = s.scan.data.gauss_bpm.gauss_bpm.val 
 # or s.scan.data['gauss_bpm']['gauss_bpm'].val
 ```
-You may now use the given data to manipulate it as you see fit.
+If our gui framework is running, and the default figure `fig` has not been close, you may now directly plot the data using:
+``` python
+fig.plot(gauss_bpm_data, samx_data)
+```
+Please check the section about our [graphical user interface](#user.graphical_user_interface) for more details on all available widgets not only to plot but also to interact with BEC and its services. A quick start guide can be found [here](https://bec.readthedocs.io/projects/bec-widgets/en/latest/user/getting_started/quick_start.html). You can also manipulate the data directly in the IPython shell.
 Keep in mind though, these manipulations only happen locally for yourself in the IPython shell. 
 They will not be forwarded to the BEC data in Redis, thus, your modification won't be stored in the raw data file (HDF5 file).
 
-## Plot the scan data on your own
-You can install `pandas` as an additional dependency to directly export the data to a panda's dataframe. 
-If on top, `matplotlib` is installed in the environment and imported `import matplotlib.pyplot as plt`, one may use the built-in plotting capabilities of pandas to plot from the shell.
-
+## Export to pandas
+Below, we demonstrate how you may easily convert the data into the commonly used `pandas` dataframe. 
+If `pandas` is not installed as a dependency, you can install it via `pip install pandas`.
 ```python
 df = s.scan.to_pandas()
-df.plot(x=('samx','samx','value'),y=('gauss_bpm','gauss_bpm','value'),kind='scatter')
-plt.show()
 ```
-This will plot the following curve from the device `gauss_bpm`, which simulates a gaussian signal and was potentially added by you to the demo device config in the section [devices](#user.devices.add_gauss_bpm).
-
-```{image} ../assets/gauss_scatter_plot.png
-:align: center
-:alt: tab completion for finding devices
-:width: 800
-```
+You can interact with the dataframe as you see fit, for instance by additionally installing libraries like `matplotlib` to use the `pandas` plotting capabilities linked to `matplotlib`.
+However, we still recommend you check out our [graphical user interface](#user.graphical_user_interface) for more advanced plotting capabilities.
 
 ## Fit the scan data
 You can use the builtin models to fit the data. All models are available in the `bec.dap` namespace. As an example, we can fit the data with a Gaussian model and select the `samx` and `bpm4i` devices with their respective (readback) signals `samx` and `bpm4i`:
@@ -77,15 +74,12 @@ Often, a fit is simply a means to find the optimal position of a motor. Therefor
 umv(dev.samx, res.center)
 ```
 
-
-
-
-
 ## Accessing scan data from the history
 The BEC client maintains a local history of the 50 most recent scans since the client's startup. 
-You can easily retrieve scan data from `bec.history`, which is a Python `list`, as demonstrated in the example below, where we fetch data from the latest scan:
+You can easily retrieve scan data from `bec.history`, which is a Python `list`, as demonstrated in the example below, where we fetch data from the latest scan. You will receive a list of all scan_items, which most likely is going to be a single scan item for most use cases.
 ```ipython
-scan_data = bec.history[-1].scan
+scan_data_list = bec.history[-1].scans
+scan_data = scan_data_list[0]
 ```
 
 ## Export scan data from client
@@ -105,7 +99,7 @@ Additionally, you can directly import the export function `scan_to_csv`, enablin
 ``` ipython
 from bec_lib.utils import scan_to_csv
 
-scan_data = bec.history[-1].scan
+scan_data = bec.history[-1].scans[0]
 scan_to_csv(scan_data, "<path_to_output_file.csv>")
 ```
 

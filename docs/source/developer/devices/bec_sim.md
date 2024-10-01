@@ -120,20 +120,8 @@ bpm4i:
   softwareTrigger: true
 ```
 ````
-### Simulation scenarios
-As mentioned earlier, the simulation frameworks enable users to replay certain simulation scenarios easily. The two current examples serve as templates for implementing new scenarios. New implementations should inherit from the abstract class `DeviceProxy` and implement the `_compute` method, which overrides the computation method for the given signal. An example config entry for the given scenarios is stored in their docstring. For example, for the class `H5ImageReplayProxy`:
-```yaml
-h5_image_sim:
-    readoutPriority: baseline
-    deviceClass: H5ImageReplayProxy
-    deviceConfig:
-        eiger:
-            signal_name: image
-            file_source: /path/to/h5file.h5
-            h5_entry: /entry/data
-    enabled: true
-    readOnly: false
-```
-You will need to adapt *file_source* and *h5_entry* to point to an h5 file for the device to work. The device itself becomes available in the client like any other device and can be enabled and disabled on demand. This allows the user to control whether data is to be replayed from the file.
- 
+### Simulation configurations 
+We provide a couple of examples how to configure the various different devices for the simulation. 
+A range of examples can be found in the ophyd_devices repositroy for the [`ophyd_devices_simulation.yaml`](https://gitlab.psi.ch/bec/ophyd_devices/-/blob/main/ophyd_devices/configs/ophyd_devices_simulation.yaml).
+Here, we've also added two examples for `DeviceProxy` classes that simulated certain scenarios. `hdf5_proxy` replays data from an h5 file, while `slit_proxy` allows us to simulate scanning the center position of two slits for a 2D camera. Please be aware that both simulations target a camera device, but there is currently a one-to-one mapping between the camera device and proxy. `BEC` will not allow you to add multiple proxies to the same camera device.
 
