@@ -74,8 +74,8 @@ def test_process_async_update_append(async_data):
         for ii in range(10)
     ]
     res = async_data.process_async_data(data)
-    assert res["data"][0]["value"].shape == (10, 10)
-    assert len(res["data"]) == 10
+    assert res["data"]["value"][0].shape == (10, 10)
+    assert len(res["data"]["value"]) == 10
 
 
 def test_process_async_data_single(async_data):

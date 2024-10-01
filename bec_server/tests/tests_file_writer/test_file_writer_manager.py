@@ -232,7 +232,7 @@ def test_process_async_data_append(file_writer_manager_mock):
         for ii in range(10)
     ]
     file_manager._process_async_data(data, "scan_id", "dev1")
-    assert len(file_manager.scan_storage["scan_id"].async_data["dev1"]["data"]) == 10
+    assert len(file_manager.scan_storage["scan_id"].async_data["dev1"]["data"]["value"]) == 10
 
 
 def test_process_async_data_replace(file_writer_manager_mock):

@@ -364,3 +364,29 @@ def test_DeviceMonitor2DMessage():
     res_loaded = MsgpackSerialization.loads(res)
     assert res_loaded == msg
     assert res_loaded.metadata == {}
+    # no float
+    with pytest.raises(pydantic.ValidationError):
+        messages.DeviceMonitor2DMessage(device="eiger", data=0.0, metadata={"RID": "1234"})
+    # no 1D array
+    with pytest.raises(pydantic.ValidationError):
+        messages.DeviceMonitor2DMessage(
+            device="eiger", data=np.random.rand(100), metadata={"RID": "1234"}
+        )
+
+
+def test_DeviceMonitor1DMessage():
+    # Test 2D data
+    msg = messages.DeviceMonitor1DMessage(device="eiger", data=np.random.rand(100), metadata=None)
+    res = MsgpackSerialization.dumps(msg)
+    res_loaded = MsgpackSerialization.loads(res)
+    assert res_loaded == msg
+    assert res_loaded.metadata == {}
+    # no float
+    with pytest.raises(pydantic.ValidationError):
+        messages.DeviceMonitor1DMessage(device="eiger", data=0.0, metadata={"RID": "1234"})
+
+    # no 2xN array
+    with pytest.raises(pydantic.ValidationError):
+        messages.DeviceMonitor1DMessage(
+            device="eiger", data=np.random.rand(2, 3), metadata={"RID": "1234"}
+        )

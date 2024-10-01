@@ -2144,3 +2144,19 @@ rt_controller:
     - test device
   enabled: true
   readOnly: false
+waveform:
+  readoutPriority: async
+  deviceClass: ophyd_devices.SimWaveform
+  deviceConfig:
+    waveform_shape: 1000
+    sim_init:
+      model: GaussianModel
+      params:
+        amplitude: 100
+        center: 500
+        sigma: 50
+  deviceTags:
+    - detector
+  enabled: true
+  readOnly: false
+  softwareTrigger: true

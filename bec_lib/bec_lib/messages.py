@@ -452,7 +452,7 @@ class DeviceMonitor2DMessage(BECMessage):
 
     """
 
-    msg_type: ClassVar[str] = "device_monitor_message"
+    msg_type: ClassVar[str] = "device_monitor2d_message"
     device: str
     data: np.ndarray
     timestamp: float = Field(default_factory=time.time)
@@ -479,6 +479,43 @@ class DeviceMonitor2DMessage(BECMessage):
         raise ValueError(
             f"Invalid dimenson {v.ndim} for numpy array. Must be a 2D array or 3D array for rgb v.shape[2]=3."
         )
+
+
+class DeviceMonitor1DMessage(BECMessage):
+    """Message type for sending device monitor updates from the device server.
+
+    The message is send from the device_server to monitor data coming from larger detector.
+
+    Args:
+        device (str): Device name.
+        data (np.ndarray): Numpy array data from the monitor
+        metadata (dict, optional): Additional metadata.
+
+    """
+
+    msg_type: ClassVar[str] = "device_monitor1d_message"
+    device: str
+    data: np.ndarray
+    timestamp: float = Field(default_factory=time.time)
+
+    metadata: dict | None = Field(default_factory=dict)
+
+    # Needed for pydantic to accept numpy arrays
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    @field_validator("data")
+    @classmethod
+    def check_data(cls, v: np.ndarray):
+        """Validate the entry in data. Has to be a 2D numpy array
+
+        Args:
+            v (np.ndarray): data array
+        """
+        if not isinstance(v, np.ndarray):
+            raise ValueError(f"Invalid array type: {type(v)}. Must be a numpy array.")
+        if v.ndim == 1:
+            return v
+        raise ValueError(f"Invalid dimenson {v.ndim} for numpy array. Must be a 1D array.")
 
 
 class ScanMessage(BECMessage):

@@ -352,9 +352,10 @@ class DeviceManagerDS(DeviceManagerBase):
             obj.subscribe(self._obj_callback_readback, run=opaas_obj.enabled)
         elif "value" in obj.event_types:
             obj.subscribe(self._obj_callback_readback, run=opaas_obj.enabled)
-
         if "device_monitor_2d" in obj.event_types:
             obj.subscribe(self._obj_callback_device_monitor_2d, run=False)
+        if "device_monitor_1d" in obj.event_types:
+            obj.subscribe(self._obj_callback_device_monitor_1d, run=False)
         if "done_moving" in obj.event_types:
             obj.subscribe(self._obj_callback_done_moving, event_type="done_moving", run=False)
         if "flyer" in obj.event_types:
@@ -499,6 +500,42 @@ class DeviceManagerDS(DeviceManagerBase):
             stream_msg = {"data": msg}
             self.connector.xadd(
                 MessageEndpoints.device_monitor_2d(name),
+                stream_msg,
+                max_size=min(100, int(max_size // dsize)),
+            )
+
+    def _obj_callback_device_monitor_1d(
+        self, *_args, obj: OphydObject, value: np.ndarray, timestamp: float | None = None, **kwargs
+    ):
+        """
+        Callback for ophyd monitor events. Sends the data to redis.
+        Introduces a check of the data size, and incoporates a limit which is defined in max_size (in MB)
+
+        Args:
+            obj (OphydObject): ophyd object
+            value (np.ndarray): data from ophyd device
+
+        """
+        # Convert sizes from bytes to MB
+        dsize = len(value.tobytes()) / 1e6
+        max_size = 1000
+        if dsize > max_size:
+            logger.warning(
+                f"Data size of single message is too large to send, current max_size {max_size}."
+            )
+            return
+        if obj.connected:
+            name = obj.root.name
+            metadata = self.devices[name].metadata
+            msg = messages.DeviceMonitor1DMessage(
+                device=name,
+                data=value,
+                metadata=metadata,
+                timestamp=timestamp if timestamp else time.time(),
+            )
+            stream_msg = {"data": msg}
+            self.connector.xadd(
+                MessageEndpoints.device_monitor_1d(name),
                 stream_msg,
                 max_size=min(100, int(max_size // dsize)),
             )

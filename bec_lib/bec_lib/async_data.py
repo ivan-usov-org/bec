@@ -97,9 +97,11 @@ class AsyncDataHandler:
         if concat_type == "append":
             # concatenate the lists
             for key in data[0].keys():
-                async_data[key] = []
+                async_data[key] = {"value": [], "timestamp": []}
                 for d in data:
-                    async_data[key].append(d[key])
+                    async_data[key]["value"].append(d[key]["value"])
+                    if "timestamp" in d[key]:
+                        async_data[key]["timestamp"].append(d[key]["timestamp"])
             return async_data
         if concat_type == "replace":
             # replace the dictionaries

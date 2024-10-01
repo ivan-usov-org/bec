@@ -10,21 +10,24 @@ class DeviceMonitorPlugin:
     def __init__(self, connector):
         self._connector = connector
 
-    def _check_device_avail_for_endpoint(
-        self, device_name: str, endpoint: MessageEndpoints
-    ) -> bool:
+    def _get_monitor_endpoint_for_device(
+        self, device_name: str, endpoint_list: list[MessageEndpoints]
+    ) -> MessageEndpoints:
         """Check if the device is available for the given endpoint.
 
         Args:
             device_name (str): Name of the device
-            endpoint (str): Endpoint to check
+            endpoint_list (list[MessageEndpoints]): Check if the device is available for any of the endpoints in the list
 
         Returns:
-            bool: True if device is available for the endpoint
+            Returns the endpoint if the device is valid for an endpoint, if it is not valid for any endpoint, returns None.
         """
-        entries = self._connector.keys(f"{endpoint('').endpoint}*")
-        avail_devices = [entry.decode().split("/")[-1] for entry in entries]
-        return device_name in avail_devices
+        for endpoint in endpoint_list:
+            entries = self._connector.keys(f"{endpoint('').endpoint}*")
+            avail_devices = [entry.decode().split("/")[-1] for entry in entries]
+            if device_name in avail_devices:
+                return endpoint
+        return None
 
     def get_data(self, device: str | Device, count: int) -> list:
         """Load the last <count> entries of the device data monitor stream.
@@ -38,12 +41,15 @@ class DeviceMonitorPlugin:
         """
         if isinstance(device, Device):
             device = device.name
-        if not self._check_device_avail_for_endpoint(device, MessageEndpoints.device_monitor_2d):
+        endpoint = self._get_monitor_endpoint_for_device(
+            device, [MessageEndpoints.device_monitor_2d, MessageEndpoints.device_monitor_1d]
+        )
+        if endpoint is None:
             logger.warning(
                 f"Device {device} not available for endpoint MessageEndpoints.device_monitor_2d. Returning None."
             )
             return None
-        msgs = self._connector.get_last(MessageEndpoints.device_monitor_2d(device), count=count)
+        msgs = self._connector.get_last(endpoint(device), count=count)
         if msgs is None:
             logger.warning(f"No data found for device {device}. Returning None.")
             return None
@@ -65,7 +71,10 @@ class DeviceMonitorPlugin:
         scan_id = None
         if isinstance(device, Device):
             device = device.name
-        if not self._check_device_avail_for_endpoint(device, MessageEndpoints.device_monitor_2d):
+        endpoint = self._get_monitor_endpoint_for_device(
+            device, [MessageEndpoints.device_monitor_2d, MessageEndpoints.device_monitor_1d]
+        )
+        if endpoint is None:
             logger.warning(
                 f"Device {device} not available for endpoint MessageEndpoints.device_monitor_2d. Returning None."
             )

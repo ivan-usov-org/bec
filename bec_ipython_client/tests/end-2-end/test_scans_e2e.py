@@ -731,3 +731,28 @@ def test_device_monitor(bec_ipython_client_fixture):
     assert len(data) == 10
     data = bec.device_monitor.get_data_for_scan("samx", s1.scan.scan_id)
     assert data is None
+
+
+@pytest.mark.timeout(100)
+def test_async_data(bec_ipython_client_fixture):
+    """Test "extend" and "append" for async data and their expected return values"""
+    bec = bec_ipython_client_fixture
+    bec.metadata.update({"unit_test": "test_device_monitor"})
+    dev = bec.device_manager.devices
+    # Set amplitude to 100
+    amplitude = 100
+    dev.waveform.sim.select_model("ConstantModel")
+    dev.waveform.sim.params = {"noise": "none", "c": amplitude}
+    dev.waveform.waveform_shape.set(10)
+    dev.waveform.async_update.set("append")
+    s1 = scans.line_scan(dev.samx, 0, 1, steps=10, relative=False)
+    s1.wait()
+    np.testing.assert_array_equal(
+        s1.scan.async_data["waveform"]["waveform_waveform"]["value"], amplitude * np.ones((10, 10))
+    )
+    dev.waveform.async_update.set("extend")
+    s1 = scans.line_scan(dev.samx, 0, 1, steps=10, relative=False)
+    s1.wait()
+    np.testing.assert_array_equal(
+        s1.scan.async_data["waveform"]["waveform_waveform"]["value"], amplitude * np.ones(100)
+    )
