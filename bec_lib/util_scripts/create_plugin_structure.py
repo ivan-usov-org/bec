@@ -44,6 +44,10 @@ class PluginStructure:
         gitignore = os.path.join(current_dir, "plugin_setup_files", "gitignore")
         os.system(f"cp {gitignore} {self.target_dir}/.gitignore")
 
+        # copy license
+        repo_license = os.path.join(current_dir, "plugin_setup_files", "plugin_repo_cliense.md")
+        os.system(f"cp {repo_license} {self.target_dir}/LICENSE")
+
     def copy_toml_file(self):
         """Copy the toml file and change the template name in the file"""
         # copy toml file
