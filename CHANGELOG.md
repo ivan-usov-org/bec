@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v2.34.2 (2024-10-01)
+
+### Fix
+
+* fix: fixed min version of msgpack ([`00d9572`](https://gitlab.psi.ch/bec/bec/-/commit/00d957267a70bbe56f25a36f8b8ae9d7dcbd97d6))
+
 ## v2.34.1 (2024-10-01)
 
 ### Fix
