@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## v2.34.0 (2024-10-01)
+
+### Build
+
+* build: updated numpy and hiredis version ([`88f5e9d`](https://gitlab.psi.ch/bec/bec/-/commit/88f5e9d508d924d7e364808b2a8476a72bb365a4))
+
+### Feature
+
+* feat(utils): added plugin repo license ([`d32ed2b`](https://gitlab.psi.ch/bec/bec/-/commit/d32ed2b6deb4bbb6fbfb5833ad5c341249967b39))
+
+### Refactor
+
+* refactor: allow rgb array data within DeviceMonitor2DMessage ([`eb3c302`](https://gitlab.psi.ch/bec/bec/-/commit/eb3c30287410f76eadacadb3e53f98e6d44c4406))
+
 ## v2.33.0 (2024-09-18)
 
 ### Feature
