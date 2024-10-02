@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v2.34.4 (2024-10-02)
+
+### Documentation
+
+* docs: update documentation ([`f836910`](https://gitlab.psi.ch/bec/bec/-/commit/f836910b3d58f9207bdf388956ddf2c7e4d52a43))
+
+### Fix
+
+* fix: add 1d monitor endpoint, add waveform device and fix its updates. unify async &#39;extend&#39; and &#39;append&#39; accumulation ([`a06d03f`](https://gitlab.psi.ch/bec/bec/-/commit/a06d03f212169e0a8104827c6ed50171abd42341))
+
 ## v2.34.3 (2024-10-01)
 
 ### Fix
