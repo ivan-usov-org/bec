@@ -350,11 +350,16 @@ class DeviceBase:
             Any: The return value of the RPC call.
         """
         try:
+            client: BECClient = self.root.parent.parent
+            # clear the alarm stack
+            client.alarm_handler.clear()
+
             # prepare RPC message
             rpc_id = str(uuid.uuid4())
             request_id = str(uuid.uuid4())
             msg = self._prepare_rpc_msg(rpc_id, request_id, device, func_call, *args, **kwargs)
-            client: BECClient = self.root.parent.parent
+
+            # pylint: disable=protected-access
             if client.scans._scan_def_id:
                 msg.metadata["scan_def_id"] = client.scans._scan_def_id
             # send RPC message
