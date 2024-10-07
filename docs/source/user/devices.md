@@ -33,7 +33,7 @@ bec.config.save_current_session("./config_saved.yaml")
 which will save a file `config_saved.yaml` in the directory in which the client is running.
 To modify and add a new device to the config, open `config_saved.yaml` with a suitable editor, for instance *VSCode*, and add a new device to the device config. 
 For this, you may use the device gauss_bpm which is shown below. 
-For more information about fields within the device config, you can check out the section [Ophyd](#developer.ophyd) in our developer guide.
+
 ``` {code-block} yaml
 ---
 name: user.devices.add_gauss_bpm
@@ -41,16 +41,21 @@ name: user.devices.add_gauss_bpm
 
 gauss_bpm:
   readoutPriority: monitored
-  deviceClass: sim:sim:SynGaussBEC
+  deviceClass: ophyd_devices.sim.sim_monitor.SimMonitor
   deviceConfig:
-    sigma: 1
-    noise: 'uniform'
-    noise_multiplier: 0.4
+    sim_init:
+      model: GaussianModel
+      params:
+        amplitude: 500
+        center: 0
+        sigma: 1
   deviceTags:
-  - beamline
+    - beamline
   enabled: true
-  readOnly: False
+  readOnly: false
+  softwareTrigger: true
 ```
+For more information about various topics linked to Ophyd and the simulation, please also check our developer section of the documentation. In particular, [Ophyd](#developer.ophyd), the [Ophyd device configuration](#developer.ophyd_device_config) and the [simulation framework](#developer.bec_sim).
 ### Upload a new device config
 
 From the client, you can now run the follow command to update the session with a new device config file.
