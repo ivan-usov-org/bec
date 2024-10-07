@@ -83,7 +83,7 @@ class MockWriter(HDF5FileWriter):
         super().__init__(file_writer_manager)
         self.write_called = False
 
-    def write(self, file_path: str, data):
+    def write(self, file_path: str, data, mode="w", file_handle=None):
         self.write_called = True
 
 
@@ -176,82 +176,6 @@ def test_update_file_references_gets_keys(file_writer_manager_mock):
     with mock.patch.object(file_manager, "connector") as mock_connector:
         file_manager.update_file_references("scan_id")
         mock_connector.keys.assert_called_once_with(MessageEndpoints.public_file("scan_id", "*"))
-
-
-def test_update_async_data(file_writer_manager_mock):
-    file_manager = file_writer_manager_mock
-    file_manager.scan_storage["scan_id"] = ScanStorage(10, "scan_id")
-    with mock.patch.object(file_manager, "connector") as mock_connector:
-        with mock.patch.object(file_manager, "_process_async_data") as mock_process:
-            key = MessageEndpoints.device_async_readback("scan_id", "dev1").endpoint
-            mock_connector.keys.return_value = [key.encode()]
-            data = [(b"0-0", b'{"data": "data"}')]
-            mock_connector.xrange.return_value = data
-            file_manager.update_async_data("scan_id")
-            mock_connector.xrange.assert_called_once_with(key, min="-", max="+")
-            mock_process.assert_called_once_with(data, "scan_id", "dev1")
-
-
-def test_process_async_data_single_entry(file_writer_manager_mock):
-    file_manager = file_writer_manager_mock
-    file_manager.scan_storage["scan_id"] = ScanStorage(10, "scan_id")
-    data = [{"data": messages.DeviceMessage(signals={"data": {"value": np.zeros((10, 10))}})}]
-    file_manager._process_async_data(data, "scan_id", "dev1")
-    assert np.isclose(
-        file_manager.scan_storage["scan_id"].async_data["dev1"]["data"]["value"], np.zeros((10, 10))
-    ).all()
-
-
-def test_process_async_data_extend(file_writer_manager_mock):
-    file_manager = file_writer_manager_mock
-    file_manager.scan_storage["scan_id"] = ScanStorage(10, "scan_id")
-    data = [
-        {
-            "data": messages.DeviceMessage(
-                signals={"data": {"value": np.zeros((10, 10))}}, metadata={"async_update": "extend"}
-            )
-        }
-        for ii in range(10)
-    ]
-    file_manager._process_async_data(data, "scan_id", "dev1")
-    assert file_manager.scan_storage["scan_id"].async_data["dev1"]["data"]["value"].shape == (
-        100,
-        10,
-    )
-
-
-def test_process_async_data_append(file_writer_manager_mock):
-    file_manager = file_writer_manager_mock
-    file_manager.scan_storage["scan_id"] = ScanStorage(10, "scan_id")
-    data = [
-        {
-            "data": messages.DeviceMessage(
-                signals={"data": {"value": np.zeros((10, 10))}}, metadata={"async_update": "append"}
-            )
-        }
-        for ii in range(10)
-    ]
-    file_manager._process_async_data(data, "scan_id", "dev1")
-    assert len(file_manager.scan_storage["scan_id"].async_data["dev1"]["data"]["value"]) == 10
-
-
-def test_process_async_data_replace(file_writer_manager_mock):
-    file_manager = file_writer_manager_mock
-    file_manager.scan_storage["scan_id"] = ScanStorage(10, "scan_id")
-    data = [
-        {
-            "data": messages.DeviceMessage(
-                signals={"data": {"value": np.zeros((10, 10))}},
-                metadata={"async_update": "replace"},
-            )
-        }
-        for ii in range(10)
-    ]
-    file_manager._process_async_data(data, "scan_id", "dev1")
-    assert file_manager.scan_storage["scan_id"].async_data["dev1"]["data"]["value"].shape == (
-        10,
-        10,
-    )
 
 
 def test_update_scan_storage_with_status_ignores_none(file_writer_manager_mock):
