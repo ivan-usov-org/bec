@@ -635,6 +635,10 @@ class FileMessage(BECMessage):
         file_path (str): Path to the file.
         done (bool): True if the file writing operation is done.
         successful (bool): True if the file writing operation was successful.
+        hinted_locations (dict, optional): Hinted location of important datasets within
+            the file. Can be used to automatically link a master file with its data files.
+            Defaults to None.
+        devices (list, optional): List of devices that are associated with the file.
         metadata (dict, optional): Additional metadata. Defaults to None.
 
     """
@@ -643,6 +647,8 @@ class FileMessage(BECMessage):
     file_path: str
     done: bool
     successful: bool
+    hinted_locations: dict[str, str] | None = None
+    devices: list[str] | None = None
 
 
 class FileContentMessage(BECMessage):
