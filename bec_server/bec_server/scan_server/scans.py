@@ -692,7 +692,7 @@ class Move(RequestBase):
             ScanReport
 
         Examples:
-            >>> scans.mv(dev.samx, 1, dev.samy,2)
+            >>> scans.mv(dev.samx, 1, dev.samy,2, relative=False)
         """
         super().__init__(**kwargs)
         self.relative = relative
@@ -749,7 +749,7 @@ class UpdatedMove(Move):
         ScanReport
 
     Examples:
-        >>> scans.umv(dev.samx, 1, dev.samy,2)
+        >>> scans.umv(dev.samx, 1, dev.samy,2, relative=False)
     """
 
     scan_name = "umv"
