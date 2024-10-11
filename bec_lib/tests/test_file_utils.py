@@ -46,18 +46,22 @@ def scan_msg():
 def test_device_config_writer():
     """Device config writer fixture and ServiceConfigParser class"""
     with mock.patch("os.makedirs") as mock_make_dirs:
-        dcw = DeviceConfigWriter(service_config={"base_path": "/tmp"})
-        assert mock_make_dirs.call_count == 1
-        assert dcw.directory == "/tmp/device_configs"
-        assert dcw.get_recovery_directory() == "/tmp/device_configs/recovery_configs"
+        with mock.patch("os.chmod") as mock_chmod:
+            dcw = DeviceConfigWriter(service_config={"base_path": "/tmp"})
+            assert mock_make_dirs.call_count == 1
+            assert dcw.directory == "/tmp/device_configs"
+            assert dcw.get_recovery_directory() == "/tmp/device_configs/recovery_configs"
+            mock_chmod.assert_called_once_with("/tmp/device_configs", int("0o511", 8))
 
 
 def test_log_writer():
     """Device config writer fixture and ServiceConfigParser class"""
     with mock.patch("os.makedirs") as mock_make_dirs:
-        lw = LogWriter(service_config={"base_path": "/tmp"})
-        assert mock_make_dirs.call_count == 1
-        assert lw.directory == "/tmp/logs"
+        with mock.patch("os.chmod") as mock_chmod:
+            lw = LogWriter(service_config={"base_path": "/tmp"})
+            assert mock_make_dirs.call_count == 1
+            assert lw.directory == "/tmp/logs"
+            mock_chmod.assert_called_once_with("/tmp/logs", int("0o771", 8))
 
 
 @pytest.mark.parametrize(
