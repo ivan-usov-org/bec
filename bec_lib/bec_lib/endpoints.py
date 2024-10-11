@@ -895,7 +895,7 @@ class MessageEndpoints:
         """
         endpoint = "internal/log"
         return EndpointInfo(
-            endpoint=endpoint, message_type=messages.LogMessage, message_op=MessageOp.SEND
+            endpoint=endpoint, message_type=messages.LogMessage, message_op=MessageOp.STREAM
         )
 
     @staticmethod

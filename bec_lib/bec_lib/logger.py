@@ -145,11 +145,14 @@ class BECLogger:
         msg = json.loads(msg)
         msg["service_name"] = self.service_name
         try:
-            self.connector.send(
+            self.connector.xadd(
                 topic=MessageEndpoints.log(),
-                msg=bec_lib.messages.LogMessage(
-                    log_type=msg["record"]["level"]["name"].lower(), log_msg=msg
-                ),
+                msg_dict={
+                    "data": bec_lib.messages.LogMessage(
+                        log_type=msg["record"]["level"]["name"].lower(), log_msg=msg
+                    )
+                },
+                max_size=10000,
             )
         except Exception:
             # connector disconnected?

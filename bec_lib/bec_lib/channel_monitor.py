@@ -15,7 +15,9 @@ def channel_callback(msg, **_kwargs):
     """
     Callback for channel monitor.
     """
-    msg = msg.value
+    msg = msg.get("data")
+    if not msg:
+        return
     out = {"msg_type": msg.msg_type, "content": msg.content, "metadata": msg.metadata}
     print(json.dumps(out, indent=4, default=lambda o: "<not serializable object>"))
 
@@ -49,7 +51,10 @@ def log_callback(msg, log_filter=None):
     """
     Callback for channel monitor.
     """
-    msg = msg.value
+    msg = msg.get("data")
+    if not msg:
+        return
+
     print_msg = msg.log_msg["text"]
     if log_filter is not None:
         found = log_filter.lower() in print_msg.lower() or re.search(log_filter, print_msg)
@@ -78,5 +83,5 @@ def log_monitor_launch():
 # if __name__ == "__main__":
 #     import sys
 
-#     sys.argv = ["", "--filter", "sim.py"]
+#     sys.argv = ["", "--filter", "waveform"]
 #     log_monitor_launch()
