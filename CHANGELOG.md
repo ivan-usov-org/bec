@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## v2.34.7 (2024-10-11)
+
+### Fixes
+
+* fix(log): fixed file permissions ([`29af160`](https://gitlab.psi.ch/bec/bec/-/commit/29af160ab9de5a699f81db319d6d0d92c2a51ec0))
+
+### Testing
+
+* test(file_utils): fixed tests ([`9b30f00`](https://gitlab.psi.ch/bec/bec/-/commit/9b30f004ac4b86637798eba3089f9dea9cb70e92))
+
+
 ## v2.34.6 (2024-10-11)
 
 ### Fixes
