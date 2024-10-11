@@ -1,6 +1,13 @@
 # CHANGELOG
 
 
+## v2.34.6 (2024-10-11)
+
+### Fixes
+
+* fix(logger): log messages should be streams, not pub sub ([`9141280`](https://gitlab.psi.ch/bec/bec/-/commit/914128088986e0473d9a74c56e3c4d17e60dc9ee))
+
+
 ## v2.34.5 (2024-10-11)
 
 ### Continuous Integration
