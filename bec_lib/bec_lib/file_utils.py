@@ -41,9 +41,10 @@ class ServiceConfigParser:
             raise ServiceConfigError("File writer config must define a base path.")
         return os.path.abspath(os.path.expanduser(self.service_config.get("base_path")))
 
-    def create_directory(self, directory: str, mode=511) -> None:
+    def create_directory(self, directory: str, mode=0o511) -> None:
         """Create a directory if it does not exist."""
         os.makedirs(directory, mode=mode, exist_ok=True)
+        os.chmod(directory, mode)
 
 
 class LogWriter:
@@ -63,7 +64,7 @@ class LogWriter:
 
     def create_directory(self, fname: str = None) -> None:
         """Create the log directory."""
-        self.service_config_parser.create_directory(fname, mode=771)
+        self.service_config_parser.create_directory(fname, mode=0o771)
 
     @property
     def directory(self) -> str:

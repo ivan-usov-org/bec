@@ -21,10 +21,13 @@ from bec_lib.endpoints import MessageEndpoints
 from bec_lib.utils.import_utils import lazy_import_from
 
 if TYPE_CHECKING:
-    from bec_lib.connector import ConnectorBase
+    from loguru import logger as loguru_logger
 
-loguru_logger = lazy_import_from("loguru", ("logger",))
-LogWriter = lazy_import_from("bec_lib.file_utils", ("LogWriter",))
+    from bec_lib.connector import ConnectorBase
+    from bec_lib.file_utils import LogWriter
+else:
+    loguru_logger = lazy_import_from("loguru", ("logger",))
+    LogWriter = lazy_import_from("bec_lib.file_utils", ("LogWriter",))
 
 
 class LogLevel(int, enum.Enum):
@@ -278,6 +281,7 @@ class BECLogger:
             filter=self.filter(),
             retention="3 days",
             rotation="3 days",
+            opener=self._file_opener,
         )
 
     def add_console_log(self):
@@ -305,6 +309,7 @@ class BECLogger:
             filter=self.filter(is_console=True),
             retention="3 days",
             rotation="3 days",
+            opener=self._file_opener,
         )
         self._console_log = True
 
@@ -356,6 +361,23 @@ class BECLogger:
         self._file_log_level = val
         self._stderr_log_level = val
         self._update_sinks()
+
+    def _file_opener(self, path: str, mode: str, **kwargs):
+        """
+        Open the log file.
+
+        Args:
+            path (str): Path to the log file.
+            mode (str): File mode.
+
+        Returns:
+            file: File object.
+        """
+        # pylint: disable=consider-using-with
+        # pylint: disable=unspecified-encoding
+        textio = os.open(path, mode)
+        os.chmod(path, 0o664)
+        return textio
 
 
 bec_logger = BECLogger()
