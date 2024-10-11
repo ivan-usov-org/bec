@@ -7,12 +7,16 @@ from __future__ import annotations
 # pylint: disable=too-many-public-methods
 import enum
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from bec_lib.utils.import_utils import lazy_import
 
-# TODO: put back normal import when Pydantic gets faster
-# from bec_lib import messages
-messages = lazy_import("bec_lib.messages")
+if TYPE_CHECKING:
+    from bec_lib import messages
+else:
+    # TODO: put back normal import when Pydantic gets faster
+    # from bec_lib import messages
+    messages = lazy_import("bec_lib.messages")
 
 
 class MessageOp(list[str], enum.Enum):
