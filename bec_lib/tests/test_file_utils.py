@@ -51,7 +51,7 @@ def test_device_config_writer():
             assert mock_make_dirs.call_count == 1
             assert dcw.directory == "/tmp/device_configs"
             assert dcw.get_recovery_directory() == "/tmp/device_configs/recovery_configs"
-            mock_chmod.assert_called_once_with("/tmp/device_configs", int("0o511", 8))
+            mock_chmod.assert_called_once_with("/tmp/device_configs", int("0o771", 8))
 
 
 def test_log_writer():
