@@ -1,6 +1,13 @@
 # CHANGELOG
 
 
+## v2.34.8 (2024-10-15)
+
+### Fixes
+
+* fix: fixed folder permission for log and recovery_config writing ([`d2ce95c`](https://gitlab.psi.ch/bec/bec/-/commit/d2ce95c10eab96d8358259039fe1349ae6a780ad))
+
+
 ## v2.34.7 (2024-10-11)
 
 ### Fixes
