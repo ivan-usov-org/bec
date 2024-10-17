@@ -4,16 +4,16 @@ import copy
 import time
 from collections import deque
 from collections.abc import Iterable
+from functools import wraps
 from typing import TYPE_CHECKING, Any, Dict, Literal, Tuple
 
 import h5py
+from _collections_abc import dict_items, dict_keys
+from prettytable import PrettyTable
 
 from bec_lib.logger import bec_logger
 
 logger = bec_logger.logger
-
-if TYPE_CHECKING:
-    from bec_lib.scan_items import ScanItem
 
 
 class DataCache:
@@ -72,8 +72,34 @@ class DataCache:
             _, _, memory_usage = self._cache.pop()
             self._memory_usage -= memory_usage
 
+    def clear_cache(self) -> None:
+        """
+        Clear the cache.
+        """
+        self._cache.clear()
+        self._memory_usage = 0
+
 
 _file_cache = DataCache()
+
+
+def retry_file_access(func):
+    """
+    Retry accessing the file three times with a 0.1 second delay between retries.
+    """
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        for _ in range(3):
+            try:
+                return func(*args, **kwargs)
+            # pylint: disable=broad-except
+            except Exception as e:
+                logger.info(f"Error accessing file: {e}")
+                time.sleep(0.1)
+        raise RuntimeError("Error accessing file.")
+
+    return wrapper
 
 
 class FileReference:
@@ -91,6 +117,7 @@ class FileReference:
         """
         self.file_path = file_path
 
+    @retry_file_access
     def read(self, entry_path: str, cached=True) -> Any:
         """
         Recurisively read the data from the HDF5 file and return it as a dictionary.
@@ -107,7 +134,6 @@ class FileReference:
             if out is not None:
                 return out
         out = {}
-        print(f"Reading {entry_path} from {self.file_path}")
         with h5py.File(self.file_path, "r") as f:
             entry = f[entry_path]
             if isinstance(entry, h5py.Group):
@@ -146,22 +172,7 @@ class FileReference:
                 size += value.size * value.dtype.itemsize
         return out, size
 
-    def get_group_names(self, entry_path: str) -> list:
-        """
-        Get the names of all groups in the HDF5 file at the given entry path.
-
-        Args:
-            entry_path (str): The path to the entry in the HDF5 file, e.g. "entry/collection/devices/samx".
-
-        Returns:
-            list: The names of all groups in the HDF5 file.
-        """
-        with h5py.File(self.file_path, "r") as f:
-            entry = f[entry_path]
-            if isinstance(entry, h5py.Group):
-                return list(entry.keys())
-            return []
-
+    @retry_file_access
     def get_hdf5_structure(self) -> dict:
         """
         Get the structure of the HDF5 file.
@@ -189,7 +200,12 @@ class FileReference:
             if isinstance(value, h5py.Group):
                 out[key] = self._get_hdf5_structure(value)
             else:
-                out[key] = {"type": "dataset", "shape": value.shape, "dtype": value.dtype}
+                out[key] = {
+                    "type": "dataset",
+                    "shape": value.shape,
+                    "dtype": value.dtype,
+                    "mem_size": value.size * value.dtype.itemsize,
+                }
         return out
 
 
@@ -215,15 +231,24 @@ class AttributeDict(dict):
 
 class SignalDataReference:
 
-    def __init__(self, file_path: str, entry_path: str, dict_entry: str | list[str] = None):
+    def __init__(
+        self, file_path: str, entry_path: str, dict_entry: str | list[str] = None, info: dict = None
+    ):
         self._file_reference = FileReference(file_path)
         self._entry_path = entry_path
+        self._info = info
         if dict_entry is None:
             self._dict_entry = None
         else:
             self._dict_entry = dict_entry if isinstance(dict_entry, list) else [dict_entry]
 
-    def read(self) -> dict:
+    def read(self) -> dict[Literal["value", "timestamp"], Any]:
+        """
+        Read the data from the HDF5 file.
+
+        Returns:
+            dict: The data from the HDF5 file, including the value and timestamp (optional).
+        """
         return self._get_entry()
 
     def _get_entry(self) -> dict:
@@ -233,17 +258,38 @@ class SignalDataReference:
                 data = data[entry]
         return data
 
-    def __str__(self) -> str:
-        return f"{self._file_reference.file_path}::{self._entry_path}::{self._dict_entry}"
-
 
 class DeviceDataReference(AttributeDict, SignalDataReference):
 
     def __init__(
-        self, content: dict, file_path: str, entry_path: str, dict_entry: str | list[str] = None
+        self,
+        content: dict,
+        file_path: str,
+        entry_path: str,
+        dict_entry: str | list[str] = None,
+        info: dict = None,
+        device_group: str = None,
     ):
         super().__init__(content)
-        SignalDataReference.__init__(self, file_path, entry_path, dict_entry)
+        SignalDataReference.__init__(self, file_path, entry_path, dict_entry, info)
+        self._group = device_group
+
+    def __repr__(self) -> str:
+        table = PrettyTable(title=self._dict_entry[0] if self._dict_entry else None)
+        table.field_names = ["Signal", "Shape", "Size", "DType"]
+        for signal in self:
+            if signal.startswith("_"):
+                continue
+            signal_info = self._info.get(signal, {}).get("value", {})
+            table.add_row(
+                [
+                    signal,
+                    signal_info.get("shape", "N/A"),
+                    f"{signal_info.get('mem_size', 0)/1024/1024:.2f} MB",
+                    signal_info.get("dtype", "N/A"),
+                ]
+            )
+        return str(table)
 
 
 class LazyAttributeDict(AttributeDict):
@@ -272,37 +318,153 @@ class LazyAttributeDict(AttributeDict):
         object.__getattribute__(self, "_load")()
         return super().__getitem__(key)
 
+    def keys(self) -> dict_keys:
+        object.__getattribute__(self, "_load")()
+        return super().keys()
+
+    def items(self) -> dict_items:
+        object.__getattribute__(self, "_load")()
+        return super().items()
+
+    def values(self) -> Iterable:
+        object.__getattribute__(self, "_load")()
+        return super().values()
+
+
+class LazyDeviceAttributeDict(LazyAttributeDict):
+
+    def __repr__(self) -> str:
+        object.__getattribute__(self, "_load")()
+        table = PrettyTable(title="Devices")
+        table.field_names = ["Device", "Readout priority"]
+        for device, device_container in self.items():
+            if device.startswith("_"):
+                continue
+            table.add_row([device, device_container._group])
+        return str(table)
+
+
+class LazyMetadataAttributeDict(LazyAttributeDict):
+
+    def __repr__(self) -> str:
+        object.__getattribute__(self, "_load")()
+        table = PrettyTable(title="Metadata")
+        table.field_names = ["Key", "Value"]
+        for key, value in self.items():
+            if key.startswith("_"):
+                continue
+            table.add_row([key, value])
+        return str(table)
+
+
+class LinkedAttributeDict(AttributeDict):
+    def __init__(self, container: LazyAttributeDict, group: str):
+        self._container = container
+        self._group = group
+
+    def __dir__(self) -> Iterable[str]:
+        return [
+            name
+            for name, device in self._container.items()
+            if not name.startswith("_") and device._group == self._group
+        ]
+
+    def __getattr__(self, name: str) -> Any:
+        if name.startswith("_"):
+            return super().__getattr__(name)
+        return self._container[name]
+
+    def __getitem__(self, key: Any) -> Any:
+        if key.startswith("_"):
+            return super().__getitem__(key)
+        return self._container[key]
+
+    def __repr__(self) -> str:
+        table = PrettyTable(title=self._group)
+        table.field_names = ["Device", "Readout priority"]
+        for device, device_container in self._container.items():
+            if device.startswith("_") or device_container._group != self._group:
+                continue
+            table.add_row([device, device_container._group])
+        return str(table)
+
+
+class ReadoutGroup:
+    baseline_devices: LinkedAttributeDict
+    monitored_devices: LinkedAttributeDict
+    async_devices: LinkedAttributeDict
+
+    def __init__(self, container: LazyDeviceAttributeDict):
+        self.baseline_devices = LinkedAttributeDict(container, "baseline")
+        self.monitored_devices = LinkedAttributeDict(container, "monitored")
+        self.async_devices = LinkedAttributeDict(container, "async")
+
 
 class ScanDataContainer:
+    """
+    This is a helper class for accessing data in an HDF5 file.
+    """
 
-    def __init__(self, parent: ScanItem = None, file_path: str = None):
-        self.parent = parent
+    def __init__(self, file_path: str = None):
         self._file_reference = None
-        self.devices = LazyAttributeDict(self._load_devices)
+        self.devices = LazyDeviceAttributeDict(self._load_devices)
+        self.readout_groups = ReadoutGroup(self.devices)
+        self.metadata = LazyAttributeDict(self._load_metadata)
         self._baseline_devices = None
         self._monitored_devices = None
         self._async_devices = None
-        self._loaded = False
+        self._loaded_devices = False
+        self._loaded_metadata = False
+        self._info = None
         if file_path is not None:
             self.set_file(file_path)
 
     def set_file(self, file_path: str):
+        """
+        Set the file path for the ScanDataContainer.
+
+        Args:
+            file_path (str): The path to the HDF5 file.
+        """
         self._file_reference = FileReference(file_path)
 
-    def _load_devices(self) -> None:
+    def _load_metadata(self) -> None:
+        """
+        Load the metadata from the HDF5 file.
+        """
+        if self._loaded_metadata:
+            return
+        self.metadata.update(self._file_reference.read("entry/collection/metadata"))
+        self._loaded_metadata = True
+
+    def _load_devices(self, timeout_time: float = 3) -> None:
+        """
+        Load the device metadata from the HDF5 file.
+
+        Args:
+            timeout_time (float): The time to wait for the file reference to be set.
+
+        Raises:
+            ValueError: If the file reference is not set after the timeout time.
+        """
         _start = time.time()
 
-        if self._loaded:
+        if self._loaded_devices:
             return
 
         if self._file_reference is None:
-            return
+            elapsed_time = 0
+            while self._file_reference is None and elapsed_time < timeout_time:
+                time.sleep(0.1)
+                elapsed_time += 0.1
+            if self._file_reference is None:
+                raise ValueError("File reference not set. Cannot load devices.")
 
-        # self.devices = AttributeDict()
-        info = self._file_reference.get_hdf5_structure()
-        self._load_device_group("baseline", info)
-        self._load_device_group("monitored", info)
-        self._load_device_group("async", info, grouped_cache=False)
+        if self._info is None:
+            self._info = self._file_reference.get_hdf5_structure()
+        self._load_device_group("baseline", self._info)
+        self._load_device_group("monitored", self._info)
+        self._load_device_group("async", self._info, grouped_cache=False)
         self._loaded = True
         logger.debug(f"devices loaded in {time.time() - _start:.2f} s")
 
@@ -317,6 +479,8 @@ class ScanDataContainer:
         )
         base_path = f"entry/collection/readout_groups/{group}"
         for device_name, device_info in device_group.items():
+            if device_name.startswith("_"):
+                continue
             entry_path = base_path if grouped_cache else f"{base_path}/{device_name}"
             self.devices[device_name] = DeviceDataReference(
                 {
@@ -330,6 +494,8 @@ class ScanDataContainer:
                 file_path=self._file_reference.file_path,
                 entry_path=entry_path,
                 dict_entry=device_name if grouped_cache else None,
+                info=device_info,
+                device_group=group,
             )
 
 
@@ -340,6 +506,7 @@ if __name__ == "__main__":  # pragma: no cover
         "/Users/wakonig_k/software/work/bec/data/S00000-00999/S00248/S00248_master.h5"
     )
     start = time.time()
-    print(dir(scan_item.devices))
+    print(scan_item.metadata)
+    print(dir(scan_item.readout_groups.baseline_devices))
     print(time.time() - start)
     print(scan_item.devices.aptrx.aptrx.read())
