@@ -535,6 +535,35 @@ class ScanMessage(BECMessage):
     data: dict
 
 
+class ScanHistoryMessage(BECMessage):
+    """Message type for sending scan history data from the file writer
+
+    Args:
+        scan_id (str): Scan ID.
+        scan_number (int): Scan number.
+        dataset_number (int): Dataset number.
+        file_path (str): Path to the file.
+        exit_status (Literal["closed", "aborted", "halted"]): Exit status of the scan.
+        start_time (float): Start time of the scan.
+        end_time (float): End time of the scan.
+        scan_name (str): Name of the scan.
+        num_points (int): Number of points in the scan.
+        metadata (dict, optional): Additional metadata.
+
+    """
+
+    msg_type: ClassVar[str] = "scan_history_message"
+    scan_id: str
+    scan_number: int
+    dataset_number: int
+    file_path: str
+    exit_status: Literal["closed", "aborted", "halted"]
+    start_time: float
+    end_time: float
+    scan_name: str
+    num_points: int
+
+
 class ScanBaselineMessage(BECMessage):
     """Message type for sending scan baseline data from the scan bundler
 
