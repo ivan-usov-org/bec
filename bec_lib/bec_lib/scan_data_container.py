@@ -1,6 +1,12 @@
+"""
+This module contains classes for accessing data in an HDF5 file.
+"""
+
 from __future__ import annotations
 
 import copy
+import datetime
+import importlib
 import time
 from collections import deque
 from collections.abc import Iterable
@@ -12,6 +18,9 @@ from _collections_abc import dict_items, dict_keys
 from prettytable import PrettyTable
 
 from bec_lib.logger import bec_logger
+
+if TYPE_CHECKING:
+    from bec_lib import messages
 
 logger = bec_logger.logger
 
@@ -61,7 +70,7 @@ class DataCache:
         for i, (item_key, item_value, _) in enumerate(self._cache):
             if item_key == key:
                 self._cache.rotate(-i)
-                return copy.deepcopy(item_value)
+                return item_value
         return None
 
     def run_cleanup(self) -> None:
@@ -118,13 +127,14 @@ class FileReference:
         self.file_path = file_path
 
     @retry_file_access
-    def read(self, entry_path: str, cached=True) -> Any:
+    def read(self, entry_path: str, cached=True, entry_filter=list[str] | None) -> Any:
         """
         Recurisively read the data from the HDF5 file and return it as a dictionary.
 
         Args:
             entry_path (str): The path to the entry in the HDF5 file, e.g. "entry/collection/devices/samx".
             cached (bool): Whether to use the cache for reading the data.
+            entry_filter (list[str], optional): The dict entry to further filter the data. Defaults to None.
 
         Returns:
             dict: The data from the HDF5 file.
@@ -132,7 +142,7 @@ class FileReference:
         if cached:
             out = _file_cache.get_item(f"{self.file_path}::{entry_path}")
             if out is not None:
-                return out
+                return self._filter_entry(out, entry_filter)
         out = {}
         with h5py.File(self.file_path, "r") as f:
             entry = f[entry_path]
@@ -146,6 +156,24 @@ class FileReference:
                 raise ValueError(f"Entry at {entry_path} is not a group or dataset.")
 
         _file_cache.add_item(f"{self.file_path}::{entry_path}", out, size)
+        return self._filter_entry(out, entry_filter)
+
+    def _filter_entry(self, entry: Any, entry_filter: list[str]) -> Any:
+        """
+        Filter the entry by the filter list.
+
+        Args:
+            entry (Any): The entry to filter.
+            entry_filter (list[str]): The list of keys to filter the entry by.
+
+        Returns:
+            Any: The filtered entry.
+        """
+        if not entry_filter:
+            return copy.deepcopy(entry)
+        out = {}
+        for key in entry_filter:
+            out[key] = entry[key]
         return copy.deepcopy(out)
 
     def _read_group(self, group: h5py.Group) -> Tuple[Dict[str, Any], int]:
@@ -230,6 +258,9 @@ class AttributeDict(dict):
 
 
 class SignalDataReference:
+    """
+    This class is a reference to a signal in an HDF5 file.
+    """
 
     def __init__(
         self, file_path: str, entry_path: str, dict_entry: str | list[str] = None, info: dict = None
@@ -252,14 +283,14 @@ class SignalDataReference:
         return self._get_entry()
 
     def _get_entry(self) -> dict:
-        data = self._file_reference.read(self._entry_path)
-        if self._dict_entry is not None:
-            for entry in self._dict_entry:
-                data = data[entry]
+        data = self._file_reference.read(self._entry_path, entry_filter=self._dict_entry)
         return data
 
 
 class DeviceDataReference(AttributeDict, SignalDataReference):
+    """
+    This class is a reference to a device in an HDF5 file.
+    """
 
     def __init__(
         self,
@@ -332,6 +363,9 @@ class LazyAttributeDict(AttributeDict):
 
 
 class LazyDeviceAttributeDict(LazyAttributeDict):
+    """
+    This class is a lazy attribute dictionary for device data.
+    """
 
     def __repr__(self) -> str:
         object.__getattribute__(self, "_load")()
@@ -345,6 +379,9 @@ class LazyDeviceAttributeDict(LazyAttributeDict):
 
 
 class LazyMetadataAttributeDict(LazyAttributeDict):
+    """
+    This class is a lazy attribute dictionary for metadata.
+    """
 
     def __repr__(self) -> str:
         object.__getattribute__(self, "_load")()
@@ -358,6 +395,10 @@ class LazyMetadataAttributeDict(LazyAttributeDict):
 
 
 class LinkedAttributeDict(AttributeDict):
+    """
+    This class is a linked attribute dictionary that groups devices by readout priority.
+    """
+
     def __init__(self, container: LazyAttributeDict, group: str):
         self._container = container
         self._group = group
@@ -370,14 +411,31 @@ class LinkedAttributeDict(AttributeDict):
         ]
 
     def __getattr__(self, name: str) -> Any:
-        if name.startswith("_"):
+        if name.startswith("_") or name == "read":
             return super().__getattr__(name)
         return self._container[name]
 
     def __getitem__(self, key: Any) -> Any:
-        if key.startswith("_"):
+        if key.startswith("_") or key == "read":
             return super().__getitem__(key)
         return self._container[key]
+
+    def __get_filtered_items(self) -> dict:
+        return {
+            name: device
+            for name, device in self._container.items()
+            # pylint: disable=protected-access
+            if not name.startswith("_") and device._group == self._group
+        }
+
+    def items(self) -> dict_items:
+        return self.__get_filtered_items().items()
+
+    def keys(self) -> dict_keys:
+        return self.__get_filtered_items().keys()
+
+    def values(self) -> Iterable:
+        return self.__get_filtered_items().values()
 
     def __repr__(self) -> str:
         table = PrettyTable(title=self._group)
@@ -389,14 +447,56 @@ class LinkedAttributeDict(AttributeDict):
         return str(table)
 
 
+class ReadableLinkedAttributeDict(LinkedAttributeDict):
+    """
+    This class is a linked attribute dictionary that groups devices by readout priority
+    and provides a read method for reading the data from the devices.
+    """
+
+    def read(self) -> dict:
+        """
+        Read the data from the devices.
+
+        Returns:
+            dict: The data from the devices.
+        """
+        return {name: device.read() for name, device in self.items()}
+
+    def _get_pandas(self):
+        try:
+            return importlib.import_module("pandas")
+        except ImportError as exc:
+            raise ImportError("Install `pandas` to use to_pandas() method") from exc
+
+    def to_pandas(self) -> "pandas.DataFrame":
+        """
+        Convert the data to a pandas DataFrame.
+
+        Returns:
+            pandas.DataFrame: The data as a pandas DataFrame.
+        """
+        pd = self._get_pandas()
+        data = self.read()
+        frame = {}
+        for device, device_data in data.items():
+            for signal, signal_data in device_data.items():
+                for key, value in signal_data.items():
+                    frame[(device, signal, key)] = value
+        return pd.DataFrame(frame)
+
+
 class ReadoutGroup:
+    """
+    This class is a container for readout groups.
+    """
+
     baseline_devices: LinkedAttributeDict
     monitored_devices: LinkedAttributeDict
     async_devices: LinkedAttributeDict
 
     def __init__(self, container: LazyDeviceAttributeDict):
-        self.baseline_devices = LinkedAttributeDict(container, "baseline")
-        self.monitored_devices = LinkedAttributeDict(container, "monitored")
+        self.baseline_devices = ReadableLinkedAttributeDict(container, "baseline")
+        self.monitored_devices = ReadableLinkedAttributeDict(container, "monitored")
         self.async_devices = LinkedAttributeDict(container, "async")
 
 
@@ -405,8 +505,9 @@ class ScanDataContainer:
     This is a helper class for accessing data in an HDF5 file.
     """
 
-    def __init__(self, file_path: str = None):
+    def __init__(self, file_path: str = None, msg: messages.ScanHistoryMessage = None):
         self._file_reference = None
+        self._msg = msg
         self.devices = LazyDeviceAttributeDict(self._load_devices)
         self.readout_groups = ReadoutGroup(self.devices)
         self.metadata = LazyAttributeDict(self._load_metadata)
@@ -465,7 +566,7 @@ class ScanDataContainer:
         self._load_device_group("baseline", self._info)
         self._load_device_group("monitored", self._info)
         self._load_device_group("async", self._info, grouped_cache=False)
-        self._loaded = True
+        self._loaded_devices = True
         logger.debug(f"devices loaded in {time.time() - _start:.2f} s")
 
     def _load_device_group(
@@ -497,6 +598,36 @@ class ScanDataContainer:
                 info=device_info,
                 device_group=group,
             )
+
+    def __repr__(self) -> str:
+        """
+        Get a string representation of the ScanDataContainer.
+        """
+        if not self._msg:
+            return f"ScanDataContainer: {self._file_reference.file_path}"
+        start_time = f"\tStart time: {datetime.datetime.fromtimestamp(self._msg.start_time).strftime('%c')}\n"
+        end_time = (
+            f"\tEnd time: {datetime.datetime.fromtimestamp(self._msg.end_time).strftime('%c')}\n"
+        )
+        elapsed_time = f"\tElapsed time: {(self._msg.end_time-self._msg.start_time):.1f} s\n"
+        scan_id = f"\tScan ID: {self._msg.scan_id}\n"
+        scan_number = f"\tScan number: {self._msg.scan_number}\n"
+        scan_name = f"\tScan name: {self._msg.scan_name}\n"
+        exit_status = f"\tStatus: {self._msg.exit_status}\n"
+        num_points = f"\tNumber of points (monitored): {self._msg.num_points}\n"
+        public_file = f"\tFile: {self._msg.file_path}\n"
+        details = (
+            start_time
+            + end_time
+            + elapsed_time
+            + scan_id
+            + scan_number
+            + scan_name
+            + exit_status
+            + num_points
+            + public_file
+        )
+        return f"ScanDataContainer:\n {details}"
 
 
 if __name__ == "__main__":  # pragma: no cover
