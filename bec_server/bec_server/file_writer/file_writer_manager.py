@@ -296,6 +296,20 @@ class FileWriterManager(BECService):
             MessageEndpoints.public_file(scan_id, "master"),
             messages.FileMessage(file_path=file_path, done=True, successful=successful),
         )
+        history_msg = messages.ScanHistoryMessage(
+            scan_id=scan_id,
+            scan_number=storage.scan_number,
+            dataset_number=storage.metadata.get("dataset_number"),
+            exit_status=storage.metadata.get("exit_status"),
+            file_path=file_path,
+            start_time=storage.start_time,
+            end_time=storage.end_time,
+            num_points=storage.num_points,
+            scan_name=storage.metadata.get("scan_name"),
+        )
+        self.connector.xadd(
+            topic=MessageEndpoints.scan_history(), msg_dict={"data": history_msg}, max_size=10000
+        )
         if successful:
             logger.success(f"Finished writing file {file_path}.")
             return

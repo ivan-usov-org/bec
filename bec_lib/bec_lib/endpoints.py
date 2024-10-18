@@ -671,6 +671,20 @@ class MessageEndpoints:
         )
 
     @staticmethod
+    def scan_history() -> EndpointInfo:
+        """
+        Endpoint for scan history. This endpoint is used to keep track of the scan history
+        using a messages.ScanHistoryMessage message. The endpoint is connected to a redis stream.
+
+        Returns:
+            EndpointInfo: Endpoint for scan history.
+        """
+        endpoint = "scans/scan_history"
+        return EndpointInfo(
+            endpoint=endpoint, message_type=messages.ScanHistoryMessage, message_op=MessageOp.STREAM
+        )
+
+    @staticmethod
     def available_scans() -> EndpointInfo:
         """
         Endpoint for available scans. This endpoint is used to publish the available scans
