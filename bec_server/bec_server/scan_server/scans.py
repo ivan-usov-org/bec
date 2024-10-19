@@ -1052,7 +1052,7 @@ class ContLineScan(ScanBase):
             )
         else:
             raise ScanAbortion(f"Motor {self.device} does not have an acceleration attribute.")
-        # pylint: ignore=access-to-protected-member
+        # pylint: disable=protected-access
         hinted_signal = self.device_manager.devices[self.device]._info["hints"]["fields"]
         if len(hinted_signal) > 1:
             raise ScanAbortion(
