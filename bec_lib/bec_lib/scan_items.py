@@ -146,7 +146,7 @@ class ScanItem:
 class ScanStorage:
     """stores scan items"""
 
-    def __init__(self, scan_manager: ScanManager, maxlen=50, init_scan_number=0) -> None:
+    def __init__(self, scan_manager: ScanManager, maxlen=5, init_scan_number=0) -> None:
         self.scan_manager = scan_manager
         self.storage = deque(maxlen=maxlen)
         self.last_scan_number = init_scan_number
