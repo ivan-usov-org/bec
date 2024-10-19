@@ -148,6 +148,8 @@ class HDF5StorageWriter:
             if isinstance(data, list):
                 if data and isinstance(data[0], dict):
                     data = json.dumps(data)
+                elif not all(isinstance(x, type(data[0])) for x in data):
+                    data = json.dumps(data)
             dataset = container.create_dataset(name, data=data)
             self.add_attribute(dataset, val.attrs)
             self.add_content(dataset, val._storage)
