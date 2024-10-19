@@ -1130,6 +1130,7 @@ class ContLineScan(ScanBase):
 
     def _at_each_point(self, _pos=None):
         yield from self.stubs.trigger(group="trigger", point_id=self.point_id)
+        yield from self.stubs.wait(wait_type="trigger", group="trigger", wait_time=self.exp_time)
         yield from self.stubs.read(group="primary", wait_group="primary", point_id=self.point_id)
         self.point_id += 1
 
