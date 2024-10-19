@@ -844,6 +844,12 @@ def test_fermat_scan(scan_msg, reference_scan_list):
                     parameter={"group": "trigger"},
                 ),
                 messages.DeviceInstructionMessage(
+                    metadata={"readout_priority": "monitored"},
+                    device=None,
+                    action="wait",
+                    parameter={"type": "trigger", "time": 0.1, "group": "trigger"},
+                ),
+                messages.DeviceInstructionMessage(
                     metadata={"readout_priority": "monitored", "point_id": 0},
                     device=None,
                     action="read",
@@ -856,6 +862,12 @@ def test_fermat_scan(scan_msg, reference_scan_list):
                     parameter={"group": "trigger"},
                 ),
                 messages.DeviceInstructionMessage(
+                    metadata={"readout_priority": "monitored"},
+                    device=None,
+                    action="wait",
+                    parameter={"type": "trigger", "time": 0.1, "group": "trigger"},
+                ),
+                messages.DeviceInstructionMessage(
                     metadata={"readout_priority": "monitored", "point_id": 1},
                     device=None,
                     action="read",
@@ -866,6 +878,12 @@ def test_fermat_scan(scan_msg, reference_scan_list):
                     device=None,
                     action="trigger",
                     parameter={"group": "trigger"},
+                ),
+                messages.DeviceInstructionMessage(
+                    metadata={"readout_priority": "monitored"},
+                    device=None,
+                    action="wait",
+                    parameter={"type": "trigger", "time": 0.1, "group": "trigger"},
                 ),
                 messages.DeviceInstructionMessage(
                     metadata={"readout_priority": "monitored", "point_id": 2},
