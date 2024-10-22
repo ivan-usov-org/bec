@@ -787,7 +787,13 @@ class Scan(ScanBase):
     arg_bundle_size = {"bundle": len(arg_input), "min": 2, "max": None}
     required_kwargs = ["relative"]
     gui_config = {
-        "Scan Parameters": ["exp_time", "settling_time", "burst_at_each_point", "relative"]
+        "Scan Parameters": [
+            "exp_time",
+            "settling_time",
+            "burst_at_each_point",
+            "relative",
+            "snaked",
+        ]
     }
 
     def __init__(
@@ -797,6 +803,7 @@ class Scan(ScanBase):
         settling_time: float = 0,
         relative: bool = False,
         burst_at_each_point: int = 1,
+        snaked: bool = True,
         **kwargs,
     ):
         """
@@ -808,6 +815,7 @@ class Scan(ScanBase):
             settling_time (float): settling time in seconds. Default is 0.
             relative (bool): if True, the motors will be moved relative to their current position. Default is False.
             burst_at_each_point (int): number of exposures at each point. Default is 1.
+            snaked (bool): if True, the scan will be snaked. Default is True.
 
         Returns:
             ScanReport
@@ -816,6 +824,7 @@ class Scan(ScanBase):
             >>> scans.grid_scan(dev.motor1, -5, 5, 10, dev.motor2, -5, 5, 10, exp_time=0.1, relative=True)
 
         """
+        self.snaked = snaked
         super().__init__(
             exp_time=exp_time,
             settling_time=settling_time,
@@ -829,7 +838,7 @@ class Scan(ScanBase):
         for _, val in self.caller_args.items():
             axis.append(np.linspace(val[0], val[1], val[2], dtype=float))
         if len(axis) > 1:
-            self.positions = get_2D_raster_pos(axis)
+            self.positions = get_2D_raster_pos(axis, snaked=self.snaked)
         else:
             self.positions = np.vstack(tuple(axis)).T
 
