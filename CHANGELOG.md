@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v2.34.11 (2024-10-22)
+
+### Bug Fixes
+
+* fix: ensure 'bec.scans' (default namespace) points to a clean namespace
+
+BECClient.scans is the same as before ; BECClient.scans_namespace is a
+SimpleNamespace with only functions to run scans. BECClient's
+default namespace points to the latter. As a consequence, IPython
+client "bec.scans" == BECClient.scans_namespace , users can only see
+scan run functions. ([`e51a2fb`](https://gitlab.psi.ch/bec/bec/-/commit/e51a2fbe1c956405b1e8dc0f66e3e76bf346af70))
+
+
 ## v2.34.10 (2024-10-22)
 
 ### Bug Fixes
