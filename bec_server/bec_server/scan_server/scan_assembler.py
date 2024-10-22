@@ -54,4 +54,4 @@ class ScanAssembler:
             logger.error(
                 f"Failed to initialize the scan class of type {scan_cls.__name__}. {content}"
             )
-            raise ScanAbortion from exc
+            raise ScanAbortion(content) from exc
