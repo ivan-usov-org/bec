@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 from bec_lib.endpoints import MessageEndpoints
 from bec_lib.scan_data_container import ScanDataContainer
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from bec_lib import messages
     from bec_lib.redis_connector import RedisConnector
 
@@ -61,7 +61,7 @@ class ScanHistory:
                 self._remove_oldest_scan()
 
     def _remove_oldest_scan(self) -> None:
-        if len(self._scan_ids) >= self._max_scans:
+        while len(self._scan_ids) > self._max_scans:
             scan_id = self._scan_ids[0]
             self._scan_data.pop(scan_id, None)
             self._scan_ids.pop(0)
