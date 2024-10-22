@@ -5,7 +5,7 @@ from unittest import mock
 import pytest
 
 from bec_lib import messages
-from bec_lib.scan_data import ScanData
+from bec_lib.live_scan_data import LiveScanData
 from bec_lib.scan_items import ScanItem
 from bec_lib.scan_report import ScanReport
 from bec_lib.utils.rpc_utils import user_access
@@ -21,7 +21,7 @@ class ScanReportMock(ScanReport):
 
 @pytest.fixture
 def scan_data():
-    scan_data = ScanData()
+    scan_data = LiveScanData()
     for ii in range(10):
         msg = messages.ScanMessage(
             point_id=ii,

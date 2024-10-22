@@ -13,8 +13,8 @@ import time
 from collections import defaultdict, deque
 from typing import TYPE_CHECKING
 
+from bec_lib.live_scan_data import LiveScanData
 from bec_lib.logger import bec_logger
-from bec_lib.scan_data import ScanData
 from bec_lib.scan_data_container import ScanDataContainer
 from bec_lib.utils import threadlocked
 
@@ -50,7 +50,7 @@ class ScanItem:
         self.status = status
         self.status_message = None
         self.data = ScanDataContainer()
-        self.live_data = ScanData()
+        self.live_data = LiveScanData()
         self.open_scan_defs = set()
         self.open_queue_group = None
         self.num_points = None
@@ -96,8 +96,8 @@ class ScanItem:
     def _get_pandas(self):
         try:
             return importlib.import_module("pandas")
-        except ImportError:
-            raise ImportError("Install `pandas` to use to_pandas() method")
+        except ImportError as exc:
+            raise ImportError("Install `pandas` to use to_pandas() method") from exc
 
     def to_pandas(self) -> pd.DataFrame:
         """convert to pandas dataframe"""
