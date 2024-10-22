@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## v2.34.10 (2024-10-22)
+
+### Bug Fixes
+
+* fix(scans): expose snaked kwarg to user ([`121b9eb`](https://gitlab.psi.ch/bec/bec/-/commit/121b9eb57ad022d794e8bf79a7f2d10e6761ce46))
+
+### Continuous Integration
+
+* ci: run e2e tests on pre_release ([`e35477b`](https://gitlab.psi.ch/bec/bec/-/commit/e35477b3d69d6a8bc3a0ef384a91397841c3a493))
+
+
 ## v2.34.9 (2024-10-18)
 
 ### Bug Fixes
