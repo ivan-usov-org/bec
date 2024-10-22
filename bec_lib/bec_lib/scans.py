@@ -231,8 +231,16 @@ class Scans:
         Returns:
             messages.ScanQueueMessage: scan request message
         """
-        arg_input = list(scan_info.get("arg_input", {}).values())
 
+        # check that all required keyword arguments have been specified
+        if not all(req_kwarg in kwargs for req_kwarg in scan_info.get("required_kwargs")):
+            raise TypeError(
+                f"{scan_info.get('doc')}\n Not all required keyword arguments have been"
+                f" specified. The required arguments are: {scan_info.get('required_kwargs')}"
+            )
+
+        # check that all required arguments have been specified
+        arg_input = list(scan_info.get("arg_input", {}).values())
         arg_bundle_size = scan_info.get("arg_bundle_size", {})
         bundle_size = arg_bundle_size.get("bundle")
         if len(arg_input) > 0:
@@ -240,11 +248,6 @@ class Scans:
                 raise TypeError(
                     f"{scan_info.get('doc')}\n {scan_name} takes multiples of"
                     f" {len(arg_input)} arguments ({len(args)} given)."
-                )
-            if not all(req_kwarg in kwargs for req_kwarg in scan_info.get("required_kwargs")):
-                raise TypeError(
-                    f"{scan_info.get('doc')}\n Not all required keyword arguments have been"
-                    f" specified. The required arguments are: {scan_info.get('required_kwargs')}"
                 )
             # check that all specified devices in args are different objects
             for arg in args:
