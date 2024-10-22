@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## v2.34.12 (2024-10-22)
+
+### Bug Fixes
+
+* fix(scans): removed default from required kwarg ([`5c0d825`](https://gitlab.psi.ch/bec/bec/-/commit/5c0d8257858adc7b282d97964b88150faffd33a7))
+
+* fix(scan_assembler): forward error message content ([`6fb87c7`](https://gitlab.psi.ch/bec/bec/-/commit/6fb87c725bdb0cca93c880a7869aac06e3851dd7))
+
+* fix(scans): fixed kwarg check for scans without args but required kwargs ([`96734c3`](https://gitlab.psi.ch/bec/bec/-/commit/96734c3dd2ec08e539081f282669af7b95571c10))
+
+
 ## v2.34.11 (2024-10-22)
 
 ### Bug Fixes
