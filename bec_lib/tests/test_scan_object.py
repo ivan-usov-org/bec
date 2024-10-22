@@ -29,6 +29,24 @@ def scan_obj(bec_client_mock):
 
 
 @pytest.fixture
+def scan_obj_no_args(bec_client_mock):
+    scan_info = {
+        "class": "TimeScan",
+        "base_class": "ScanBase",
+        "arg_input": {},
+        "gui_config": {"scan_class_name": "TimeScan", "arg_group": "", "kwarg_groups": ""},
+        "required_kwargs": ["points", "interval"],
+        "arg_bundle_size": {"bundle": 0, "min": None, "max": None},
+        "doc": '\n        Trigger and readout devices at a fixed interval.\n        Note that the interval time cannot be less than the exposure time.\n        The effective "sleep" time between points is\n            sleep_time = interval - exp_time\n\n        Args:\n            points: number of points\n            interval: time interval between points\n            exp_time: exposure time in s\n            burst: number of acquisition per point\n\n        Returns:\n            ScanReport\n\n        Examples:\n            >>> scans.time_scan(points=10, interval=1.5, exp_time=0.1, relative=True)\n\n        ',
+        "signature": "",
+    }
+    scan_name = "fermat_scan"
+    obj = ScanObject(scan_name, scan_info, bec_client_mock)
+    with mock.patch.object(bec_client_mock, "alarm_handler"):
+        yield obj
+
+
+@pytest.fixture
 def dev(scan_obj):
     devices = scan_obj.client.device_manager.devices
     yield devices
@@ -42,6 +60,12 @@ def test_scan_object_raises(scan_obj):
 def test_scan_object_raises_not_enough_bundles(scan_obj, dev):
     with pytest.raises(TypeError):
         scan_obj._run(dev.samx, -5, 5, step=0.5, exp_time=0.1, relative=False)
+
+
+def test_scan_object_raises_kwargs(scan_obj_no_args, dev):
+    with pytest.raises(TypeError) as exc:
+        scan_obj_no_args._run(10)
+    assert "The required arguments are: ['points', 'interval']" in str(exc.value)
 
 
 def test_scan_object_raises_too_many_bundles(scan_obj, dev):
