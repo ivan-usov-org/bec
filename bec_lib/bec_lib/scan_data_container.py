@@ -127,7 +127,7 @@ class FileReference:
         self.file_path = file_path
 
     @retry_file_access
-    def read(self, entry_path: str, cached=True, entry_filter=list[str] | None) -> Any:
+    def read(self, entry_path: str, cached=True, entry_filter: list[str] | None = None) -> Any:
         """
         Recurisively read the data from the HDF5 file and return it as a dictionary.
 
@@ -150,7 +150,7 @@ class FileReference:
                 out, size = self._read_group(entry)
             elif isinstance(entry, h5py.Dataset):
                 # TODO: Add here a safeguard for large datasets to avoid loading them into memory all at once
-                out = entry[()]
+                out = self._read_value(entry)
                 size = entry.size * entry.dtype.itemsize
             else:
                 raise ValueError(f"Entry at {entry_path} is not a group or dataset.")
@@ -171,9 +171,9 @@ class FileReference:
         """
         if not entry_filter:
             return copy.deepcopy(entry)
-        out = {}
+        out = entry
         for key in entry_filter:
-            out[key] = entry[key]
+            out = out.get(key)
         return copy.deepcopy(out)
 
     def _read_group(self, group: h5py.Group) -> Tuple[Dict[str, Any], int]:
@@ -196,9 +196,27 @@ class FileReference:
                 out[key], group_size = self._read_group(value)
                 size += group_size
             else:
-                out[key] = value[()]
+                out[key] = self._read_value(value)
                 size += value.size * value.dtype.itemsize
         return out, size
+
+    def _read_value(self, value: h5py.Dataset) -> Any:
+        """
+        Read the value from a dataset in the HDF5 file.
+
+        Args:
+            value (h5py.Dataset): The dataset to read the value from.
+
+        Returns:
+            Any: The value of the dataset.
+        """
+        out = value[()]
+        if isinstance(out, bytes):
+            try:
+                out = out.decode("utf-8")
+            except UnicodeDecodeError:
+                pass
+        return out
 
     @retry_file_access
     def get_hdf5_structure(self) -> dict:
@@ -468,7 +486,7 @@ class ReadableLinkedAttributeDict(LinkedAttributeDict):
         except ImportError as exc:
             raise ImportError("Install `pandas` to use to_pandas() method") from exc
 
-    def to_pandas(self) -> "pandas.DataFrame":
+    def to_pandas(self):
         """
         Convert the data to a pandas DataFrame.
 
