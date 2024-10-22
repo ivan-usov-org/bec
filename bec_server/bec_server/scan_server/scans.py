@@ -340,7 +340,7 @@ class ScanBase(RequestBase, PathOptimizerMixin):
 
     scan_name = ""
     scan_type = "step"
-    required_kwargs = ["required"]
+    required_kwargs = []
     return_to_start_after_abort = True
     use_scan_progress_report = True
 
