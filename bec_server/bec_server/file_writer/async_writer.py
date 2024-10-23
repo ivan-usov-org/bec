@@ -120,8 +120,6 @@ class AsyncWriter(threading.Thread):
             self.initialize_stream_keys()
             if not self.devices:
                 return
-            with h5py.File(self.file_path, "w") as f:
-                pass
             # self.register_async_callbacks()
             while not self.shutdown_event.is_set():
                 self.poll_and_write_data()
@@ -173,7 +171,7 @@ class AsyncWriter(threading.Thread):
 
         """
         if self.file_handle is None:
-            self.file_handle = h5py.File(self.file_path, "a")
+            self.file_handle = h5py.File(self.file_path, "w")
 
         f = self.file_handle
 
