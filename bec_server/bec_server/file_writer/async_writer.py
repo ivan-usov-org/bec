@@ -199,6 +199,7 @@ class AsyncWriter(threading.Thread):
                         self._write_timestamp_data(signal_group, value)
                     else:
                         raise ValueError(f"Unknown key {key}")
+        f.flush()
 
     def _write_value_data(self, signal_group, value, async_update):
 
