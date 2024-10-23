@@ -148,5 +148,5 @@ class HystScan(ScanBase):
         )
         status.wait()
 
-    def return_to_start(self):
+    def move_to_start(self):
         yield None

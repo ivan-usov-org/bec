@@ -204,6 +204,7 @@ class RequestBase(ABC):
         metadata: dict = None,
         instruction_handler: InstructionHandler = None,
         scan_id: str = None,
+        return_to_start: bool = False,
         **kwargs,
     ) -> None:
         super().__init__()
@@ -218,6 +219,7 @@ class RequestBase(ABC):
         self.DIID = 0
         self.scan_motors = []
         self.positions = []
+        self.return_to_start = return_to_start
         self._pre_scan_macros = []
         self._scan_report_devices = None
         self.update_scan_motors()
@@ -347,7 +349,8 @@ class ScanBase(RequestBase, PathOptimizerMixin):
             - min: minimum number of bundles
             - max: maximum number of bundles
         required_kwargs (list): list of required kwargs
-        return_to_start_after_abort (bool): if True, the scan will return to the start position after an abort
+        return_to_start_after_abort (bool): if True, the scan will return to the start position after an abort if
+            return_to_start is set to True in the kwargs
     """
 
     scan_name = ""
@@ -373,6 +376,7 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         frames_per_trigger: int = 1,
         optim_trajectory: Literal["corridor", None] = None,
         monitored: list = None,
+        return_to_start: bool = False,
         metadata: dict = None,
         **kwargs,
     ):
@@ -382,6 +386,7 @@ class ScanBase(RequestBase, PathOptimizerMixin):
             monitored=monitored,
             parameter=parameter,
             metadata=metadata,
+            return_to_start=return_to_start,
             **kwargs,
         )
         self.DIID = 0
@@ -400,6 +405,11 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         self.start_pos = []
         self.positions = []
         self.num_pos = 0
+
+        if "return_to_start" not in self.caller_kwargs:
+            # if return_to_start is not set in the kwargs, return to start only if
+            # it is a relative scan
+            self.return_to_start = self.relative
 
         if self.scan_name == "":
             raise ValueError("scan_name cannot be empty")
@@ -483,13 +493,15 @@ class ScanBase(RequestBase, PathOptimizerMixin):
                 yield from self._at_each_point(ind, pos)
             self.burst_index = 0
 
-    def return_to_start(self):
+    def move_to_start(self):
         """return to the start position"""
+        if not self.return_to_start:
+            return
         yield from self._move_scan_motors_and_wait(self.start_pos)
 
     def finalize(self):
         """finalize the scan"""
-        yield from self.return_to_start()
+        yield from self.move_to_start()
         yield from self.stubs.complete(device=None)
 
         if self._baseline_status:

@@ -302,7 +302,7 @@ class ScanWorker(threading.Thread):
                 raise ScanAbortion from exc
             queue.stopped = True
             try:
-                cleanup = queue.active_request_block.scan.return_to_start()
+                cleanup = queue.active_request_block.scan.move_to_start()
                 self.status = InstructionQueueStatus.RUNNING
                 for instr in cleanup:
                     self._check_for_interruption()

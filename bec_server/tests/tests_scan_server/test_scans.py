@@ -685,12 +685,6 @@ def test_fermat_scan(scan_msg, reference_scan_list, scan_assembler):
                 ),
                 messages.DeviceInstructionMessage(
                     metadata={"readout_priority": "monitored"},
-                    device="samx",
-                    action="set",
-                    parameter={"value": -1},
-                ),
-                messages.DeviceInstructionMessage(
-                    metadata={"readout_priority": "monitored"},
                     device=["bpm4i", "eiger", "rtx", "samx", "samy", "samz"],
                     action="complete",
                     parameter={},
@@ -2022,7 +2016,6 @@ def test_ContLineFlyScan(scan_assembler, ScanStubStatusMock):
             action="read",
             parameter={"group": "monitored"},
         ),
-        "fake_set",
         messages.DeviceInstructionMessage(
             metadata={"readout_priority": "monitored"},
             device=["bpm4i", "eiger", "rtx", "samx", "samy", "samz"],
