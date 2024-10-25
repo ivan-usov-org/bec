@@ -21,12 +21,10 @@ dependencies = [
     "msgpack~=1.0",
     "numpy>=1.24, <3.0",
     "ophyd~=1.9",
-    "ophyd_devices>=1.10.3, <2.0",
-    "psutil",
+    "ophyd_devices@git+https://gitlab.psi.ch/bec/ophyd_devices#egg=signal_valueinfo",
     "pydantic~=2.8",
     "py-scibec~=1.15",
-    "pydantic~=2.0",
-    "py-scibec~=1.14",
+    "psutil",
     "pyyaml~=6.0",
     "python-dotenv~=1.0",
     "rich~=13.7",
@@ -60,6 +58,9 @@ Homepage = "https://gitlab.psi.ch/bec/bec"
 
 [tool.hatch.build.targets.wheel]
 include = ["*"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.black]
 line-length = 100
