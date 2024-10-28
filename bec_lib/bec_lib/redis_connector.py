@@ -21,7 +21,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from functools import wraps
 from glob import fnmatch
-from typing import TYPE_CHECKING, Any, Awaitable, Generator
+from typing import TYPE_CHECKING, Any, Awaitable, Generator, Literal
 
 import louie
 import redis
@@ -247,7 +247,16 @@ class RedisConnector(ConnectorBase):
         self,
         message: str,
         rid: str = None,
-        source: str = None,
+        source: Literal[
+            "bec_ipython_client",
+            "scan_server",
+            "device_server",
+            "scan_bundler",
+            "file_writer",
+            "scihub",
+            "dap",
+            None,
+        ] = None,
         severity: int = 0,
         show_asap: bool = False,
         scope: str = None,
@@ -1030,7 +1039,7 @@ class RedisConnector(ConnectorBase):
         count: int = None,
         block: int = None,
         from_start=False,
-    ) -> list:
+    ) -> list | None:
         """
         read from stream
 
