@@ -1,6 +1,13 @@
 # CHANGELOG
 
 
+## v2.34.13 (2024-11-05)
+
+### Bug Fixes
+
+* fix: fix permission issue for file created by other user ([`f41e8bc`](https://gitlab.psi.ch/bec/bec/-/commit/f41e8bcabc5c9c1f705cfaa985f91cd0b03292bf))
+
+
 ## v2.34.12 (2024-10-22)
 
 ### Bug Fixes
