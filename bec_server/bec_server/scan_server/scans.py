@@ -846,9 +846,13 @@ class Scan(ScanBase):
 class FermatSpiralScan(ScanBase):
     scan_name = "fermat_scan"
     required_kwargs = ["step", "relative"]
+    arg_input = {
+        "device": ScanArgType.DEVICE,
+        "start": ScanArgType.FLOAT,
+        "stop": ScanArgType.FLOAT,
+    }
+    arg_bundle_size = {"bundle": len(arg_input), "min": 2, "max": 2}
     gui_config = {
-        "Device 1": ["motor1", "start_motor1", "stop_motor1"],
-        "Device 2": ["motor2", "start_motor2", "stop_motor2"],
         "Movement Parameters": ["step", "relative"],
         "Acquisition Parameters": ["exp_time", "settling_time", "burst_at_each_point"],
     }
