@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v2.34.15 (2024-11-11)
+
+### Bug Fixes
+
+- **client**: Fixed queue item update
+  ([`243af03`](https://gitlab.psi.ch/bec/bec/-/commit/243af03f8cdc02ca487fa547c4ccca2659590313))
+
+
 ## v2.34.14 (2024-11-11)
 
 ### Bug Fixes
