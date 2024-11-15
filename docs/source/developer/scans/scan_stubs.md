@@ -1,6 +1,6 @@
 
 (developer.scans.scan_stubs)=
-# Scan stubs - the building blocks of a scan
+# Scan Stubs - The building blocks of a scan
 In order to simplify the creation of new scans, BEC provides a set of scan stubs that can be used as building blocks for new scans. The scan stubs are located in `bec_server/bec_server/scan_server/scan_stubs.py`. The following scan stubs are available:
 
 *Device operations*
@@ -29,19 +29,19 @@ In order to simplify the creation of new scans, BEC provides a set of scan stubs
 More information on the scan stubs can be found in the [API reference](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs).
 
 
-## Synchronous and asynchronous usage
-The device scan stubs can be used in a synchronous or asynchronous way. The synchronous way is the default and is used when the `wait` parameter is set to `True`. In this case, the scan stub will wait for the device to finish the operation before continuing. The asynchronous way is used when the `wait` parameter is set to `False`. In this case, the scan stub will start the operation and continue immediately without waiting for the device to finish. The asynchronous way is useful when you want to interact with multiple devices at the same time.
+## Blocking and non-blocking usage
+The device scan stubs can be used in a blocking or non-blocking way. The blocking way is the default and is used when the `wait` parameter is set to `True`. In this case, the scan stub will wait for the device to finish the operation before continuing. The non-blocking operation is used when the `wait` parameter is set to `False`. In this case, the scan stub will start the operation and continue immediately without waiting for the device to finish. The non-blocking mode is useful when you want to interact with multiple devices at the same time.
 
-To use the scan stubs in an asynchronous way, you can use the returned `ScanStubStatus` object to later wait for the operation to finish. 
+To use the scan stubs in an non-blocking way, you can use the returned `ScanStubStatus` object to later wait for the operation to finish. 
 
-The following example demonstrates how a synchronous and asynchronous operation can be used:
+The following example demonstrates how a blocking and non-blocking operation can be used:
 
 ```python
-# Synchronous operation: Set the device to the value 10 and wait for it to finish
+# Blocking operation: Set the device to the value 10 and wait for it to finish
 def my_func(self):
     yield from self.set(device=self.my_motor, value=10)
 
-# Asynchronous operation: Set the device to the value 10 and continue immediately
+# Non-blocking operation: Set the device to the value 10 and continue immediately
 def my_func_async(self):
     status = yield from self.set(device=self.my_motor, value=10, wait=False)
     # Do something else
@@ -49,7 +49,7 @@ def my_func_async(self):
 ```
 
 
-Especially for fly scans, the asynchronous way is useful as it allows you to start your flyer and in the meantime do other operations.
+Especially for fly scans, the non-blocking way is useful as it allows you to start your flyer and in the meantime do other operations.
 
 ```python
 def fly_scan_core(self):

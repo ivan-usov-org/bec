@@ -1,4 +1,4 @@
-# Tutorial - Automatic Scan GUI Generation
+# Automatic Scan GUI Generation
 
 The gui_config feature is an optional addition for users who want to control their scans using the automatically
 generated ScanControl GUI from `bec_widgets`. This configuration helps in organizing scan parameters into specific

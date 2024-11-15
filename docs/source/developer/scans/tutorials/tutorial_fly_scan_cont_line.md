@@ -1,4 +1,4 @@
-# Tutorial - Continuous Line / Fly Scan
+# Continuous Line / Fly Scan
 In this tutorial, we will show you how to write a continuous line fly scan using a BEC server plugin. This tutorial assumes that you have already set up the BEC server and that you have a basic understanding of the scan structure in the BEC server. If not, please refer to the [scan documentation](#developer.scans).
 
 ## Desired Outcome
@@ -98,6 +98,7 @@ Our scan should move the motor from the start position to the stop position at a
         self.num_pos = None
         yield from self._set_position_offset()
 ```
+Since we don't know the exact number of positions in advance, we set `self.num_pos` to `None` and update it later in the `scan_core` method.
 
 By using `self._set_position_offset()`, we ensure that the motor is moved to the correct position before starting the scan, respecting the relative flag.
 
@@ -107,7 +108,7 @@ Next, we need to define the scan logic. In our case, the following steps are req
 - Send the flyer on its way to the defined stop position. This can be achieved by using the [`set`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.set_with_response) method. Since we want to perform additional operations while the flyer is moving, we set the `wait` parameter to `False` and store the returned status object.
 - While the flyer is moving:
     - Send a trigger to all devices that are set to `softwareTrigger = True`. This can be achieved by using the [`trigger`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.trigger) method and wait at least the exposure time.
-    - Read out all devices on readout priority "monitored" and assign them to a new `point_id`. This can be achieved by using the [`read`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.read) method, using the group "primary".
+    - Read out all devices on readout priority "monitored" and assign them to a new `point_id`. This can be achieved by using the [`read`](/api_reference/_autosummary/bec_server.scan_server.scan_stubs.ScanStubs.rst#bec_server.scan_server.scan_stubs.ScanStubs.read) method, using the group "monitored".
     - Increase the `point_id` by one.
 
 
