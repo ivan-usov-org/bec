@@ -203,9 +203,11 @@ class RequestBase(ABC):
         parameter: dict = None,
         metadata: dict = None,
         instruction_handler: InstructionHandler = None,
+        scan_id: str = None,
         **kwargs,
     ) -> None:
         super().__init__()
+        self.scan_id = scan_id
         self._shutdown_event = threading.Event()
         self.parameter = parameter if parameter is not None else {}
         self.caller_args = self.parameter.get("args", {})

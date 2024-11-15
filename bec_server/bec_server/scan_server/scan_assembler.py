@@ -7,7 +7,7 @@ from bec_lib import messages
 from bec_lib.logger import bec_logger
 
 from .errors import ScanAbortion
-from .scans import RequestBase, unpack_scan_args
+from .scans import RequestBase, ScanBase, unpack_scan_args
 
 logger = bec_logger.logger
 
@@ -26,12 +26,29 @@ class ScanAssembler:
         self.connector = self.parent.connector
         self.scan_manager = self.parent.scan_manager
 
-    def assemble_device_instructions(self, msg: messages.ScanQueueMessage) -> RequestBase:
+    def is_scan_message(self, msg: messages.ScanQueueMessage) -> bool:
+        """Check if the scan queue message would construct a new scan.
+
+        Args:
+            msg (messages.ScanQueueMessage): message to be checked
+
+        Returns:
+            bool: True if the message is a scan message, False otherwise
+        """
+        scan = msg.content.get("scan_type")
+        cls_name = self.scan_manager.available_scans[scan]["class"]
+        scan_cls = self.scan_manager.scan_dict[cls_name]
+        return issubclass(scan_cls, ScanBase)
+
+    def assemble_device_instructions(
+        self, msg: messages.ScanQueueMessage, scan_id: str
+    ) -> RequestBase:
         """Assemble the device instructions for a given ScanQueueMessage.
         This will be achieved by calling the specified class (must be a derived class of RequestBase)
 
         Args:
             msg (messages.ScanQueueMessage): scan queue message for which the instruction should be assembled
+            scan_id (str): scan id of the scan
 
         Raises:
             ScanAbortion: Raised if the scan initialization fails.
@@ -53,6 +70,7 @@ class ScanAssembler:
                 parameter=msg.content.get("parameter"),
                 metadata=msg.metadata,
                 instruction_handler=self.parent.queue_manager.instruction_handler,
+                scan_id=scan_id,
                 **kwargs,
             )
             return scan_instance

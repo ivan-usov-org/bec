@@ -655,12 +655,11 @@ class RequestBlock:
         self.scan_report_instructions = []
 
     def _assemble(self):
-        self.scan = self.scan_assembler.assemble_device_instructions(self.msg)
-        self.is_scan = isinstance(self.scan, ScanBase)
-        self.scan = self.scan_assembler.assemble_device_instructions(self.msg)
-        self.instructions = self.scan.run()
+        self.is_scan = self.scan_assembler.is_scan_message(self.msg)
         if (self.is_scan or self.scan_def_id is not None) and self.scan_id is None:
             self.scan_id = str(uuid.uuid4())
+        self.scan = self.scan_assembler.assemble_device_instructions(self.msg, self.scan_id)
+        self.instructions = self.scan.run()
         if self.scan.caller_args:
             self.scan_motors = self.scan.scan_motors
         self.readout_priority = self.scan.readout_priority
