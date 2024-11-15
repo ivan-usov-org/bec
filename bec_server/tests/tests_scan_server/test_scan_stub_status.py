@@ -278,3 +278,9 @@ def test_stub_status_as_container_results(instruction_handler):
     container.wait()
     assert container.done is True
     assert container.result == list(range(10))
+
+
+def test_stub_status_result_does_not_block(scan_stub_status):
+    status = scan_stub_status
+    assert status.done is False
+    assert status.result is None
