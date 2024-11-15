@@ -145,10 +145,14 @@ class ScanStubStatus:
         """
         Get the result of the operation.
         If the status object is a container of multiple status objects, the result will be a list of the results of the sub status objects.
+        If the status object is not done, the result will be None.
 
         Returns:
             Any: Result of the operation, or list of results of the sub status objects.
         """
+
+        if not self._done or not self._get_sub_status_done():
+            return None
 
         if self._sub_status_objects:
             out = []
