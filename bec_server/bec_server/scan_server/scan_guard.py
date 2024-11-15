@@ -103,6 +103,8 @@ class ScanGuard:
         for motor in motor_args:
             if not motor:
                 continue
+            if not isinstance(motor, str):
+                continue
             if motor not in self.device_manager.devices:
                 continue
             if not self.device_manager.devices[motor].enabled:
