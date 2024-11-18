@@ -212,4 +212,7 @@ class TutorialTemperatureStepScan(ScanBase):
 
 Once you have saved the file, restart the BEC server and the client. You should now be able to see your new scan showing up as `tutorial_temperature_step_scan` within `scans.<tab>`.
 
-<!-- ## Step 5: (Optional) Test the scan -->
+```{note}
+For information on how to test your newly written scan plugin, please refer to the [fly scan tutorial](developer.scans.tutorials.fly_scan_cont_line).
+```
+

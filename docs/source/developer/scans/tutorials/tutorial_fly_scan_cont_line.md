@@ -1,3 +1,4 @@
+(developer.scans.tutorials.fly_scan_cont_line)=
 # Continuous Line / Fly Scan
 In this tutorial, we will show you how to write a continuous line fly scan using a BEC server plugin. This tutorial assumes that you have already set up the BEC server and that you have a basic understanding of the scan structure in the BEC server. If not, please refer to the [scan documentation](#developer.scans).
 
