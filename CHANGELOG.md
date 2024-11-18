@@ -1,6 +1,190 @@
 # CHANGELOG
 
 
+## v3.0.0 (2024-11-18)
+
+### Bug Fixes
+
+- **scan guard**: Only check strings
+  ([`e2583ed`](https://gitlab.psi.ch/bec/bec/-/commit/e2583edb5af4aa495b541fa82a4f3fe5557653bc))
+
+- **scan_stub**: Do not wait for the status result
+  ([`f9e17fc`](https://gitlab.psi.ch/bec/bec/-/commit/f9e17fc6bb16cc79b7f396dc44e4ef440ecc768e))
+
+- **scans**: Scan id should back-propagate to the scan instance
+  ([`a6c8d18`](https://gitlab.psi.ch/bec/bec/-/commit/a6c8d18487d4da0c8695123d664591ad12f06916))
+
+- **scan stubs**: Fixed support for receiving results from multiple stubs; closes #375; cleanup of
+  docs
+  ([`ddf2faf`](https://gitlab.psi.ch/bec/bec/-/commit/ddf2faf148413abe4862fd06807827f1644d85c4))
+
+- **fermat_spiral**: Scan motors should use the defined motors, not args
+  ([`9c895e4`](https://gitlab.psi.ch/bec/bec/-/commit/9c895e47b1ccb8ca3fdd196f4d54037cc888d332))
+
+- **scan_stubs**: Done check must also propagate to sub status objects
+  ([`e0822ba`](https://gitlab.psi.ch/bec/bec/-/commit/e0822ba034672073c71d28990f651ce58255adcd))
+
+- **scan**: Fixed stub guard
+  ([`a980e9e`](https://gitlab.psi.ch/bec/bec/-/commit/a980e9e885259c22310d8a9112188ab929f0bc43))
+
+- **scans**: Fixed various smaller bugs and improved the doc strings
+  ([`7d50839`](https://gitlab.psi.ch/bec/bec/-/commit/7d50839179b75b668a0ba9a29ec8c72e049e6240))
+
+- **bec_client**: Added scan_def to scans namespace
+  ([`7c854ef`](https://gitlab.psi.ch/bec/bec/-/commit/7c854efda0578061774963396ee8b2bff92daa53))
+
+- Fix bug related to usage of ConnectorMock
+  ([`1978ee4`](https://gitlab.psi.ch/bec/bec/-/commit/1978ee4f30fff43696819f2dcdd3f0936ec39960))
+
+- Bugfix in PipelineMock; _pipe_buffer and _connector become istance variables
+  ([`eefe1e3`](https://gitlab.psi.ch/bec/bec/-/commit/eefe1e397191ddb91a9b563cbdca76107f9f525d))
+
+- **async_writer**: Flush to disk after writing to make the data available to readers
+  ([`012832b`](https://gitlab.psi.ch/bec/bec/-/commit/012832ba324ba250f3f1b5b7d91c9514df319178))
+
+- **scan_history**: Fixed cleanup routine
+  ([`9eaf398`](https://gitlab.psi.ch/bec/bec/-/commit/9eaf398c36814bf5ecae52025d560a2c3f47de7f))
+
+- **scan_data_container**: Fixed read access
+  ([`3e68e80`](https://gitlab.psi.ch/bec/bec/-/commit/3e68e80725e75b6e9d8b9393c9987d12960c278a))
+
+- **cont_line_scan**: Wait for trigger before moving on
+  ([`07edd47`](https://gitlab.psi.ch/bec/bec/-/commit/07edd47821b2df8f8a9ac19ee322bf10c1ad6900))
+
+- **file_writer**: Fixed support for mixed data types
+  ([`d7cf798`](https://gitlab.psi.ch/bec/bec/-/commit/d7cf798034a6ccaa794329136a4dc4bc8a9bfdc8))
+
+- **enpoints**: Allow delete on streams
+  ([`fbbc57a`](https://gitlab.psi.ch/bec/bec/-/commit/fbbc57a0969256ce2b506102505f717112e94263))
+
+### Continuous Integration
+
+- Added missing e2e run for pre-release
+  ([`14c1b49`](https://gitlab.psi.ch/bec/bec/-/commit/14c1b49c4261519a38f2426680e86caecd8a3463))
+
+### Documentation
+
+- Added reference to test docs to step scan tutorial
+  ([`1063bc7`](https://gitlab.psi.ch/bec/bec/-/commit/1063bc72a841f472e1b48b4f09db7861b776124f))
+
+- Scan docs improvements
+  ([`55b2107`](https://gitlab.psi.ch/bec/bec/-/commit/55b2107f27dce668a27a8aeb9d0e52cdcfbc8bd6))
+
+- **data access**: Fixed typo
+  ([`12a041f`](https://gitlab.psi.ch/bec/bec/-/commit/12a041fdaea6c23291400e72cb70bf357a74a84f))
+
+- **tutorial**: Extended explanation for fixtures
+  ([`106ce80`](https://gitlab.psi.ch/bec/bec/-/commit/106ce80aed519734157834cce7ba7e24312ca824))
+
+- **data access**: Cleanup
+  ([`fcbdf91`](https://gitlab.psi.ch/bec/bec/-/commit/fcbdf911fcd388757adea0adee3d65369c7e7a9e))
+
+- **scan tutorial**: Updated tutorial with new stubs interface
+  ([`df2ca84`](https://gitlab.psi.ch/bec/bec/-/commit/df2ca846866a27b8cc7c7be8b4c1aac508788702))
+
+- **scan_server**: Cleanup
+  ([`ebf1280`](https://gitlab.psi.ch/bec/bec/-/commit/ebf12802e7cd98371264c6ac80439938b7121cb9))
+
+- **scans**: Cleanup
+  ([`1ddd4de`](https://gitlab.psi.ch/bec/bec/-/commit/1ddd4de4556101ba24e5628b92533796f7793ed0))
+
+- **data_access**: Updated docs for new data access pattern
+  ([`454284e`](https://gitlab.psi.ch/bec/bec/-/commit/454284e8c8f9650675d7f2fb0192a117bfd11fc8))
+
+### Features
+
+- **scans**: Added return_to_start kwarg to all scans. If set to true, the scan returns to start.
+  ([`1032dd5`](https://gitlab.psi.ch/bec/bec/-/commit/1032dd5856a2d5ad41d3eb3b17035a4f5f6c6bbf))
+
+BREAKING CHANGE: In the past, this was always set to true. Now, the default will depend on the
+  relative flag. Relative scans return to start to avoid shifts for repeated scans. Absolute scans
+  will not return to start. However, this behaviour can be overridden by providing the additional
+  return_to_start kwarg or subclassing the scan base.
+
+closes #332
+
+- **stubs**: Added support for setting multiple devices at once
+  ([`41683ae`](https://gitlab.psi.ch/bec/bec/-/commit/41683ae5f86fa675ead4c559324eef0962c3ddf7))
+
+- **scan**: Added stub registry
+  ([`0c934c1`](https://gitlab.psi.ch/bec/bec/-/commit/0c934c161975b7111432ffa9442b653c0cc7fe96))
+
+- **scan_server**: Moved to unique device instruction ids and ScanStubStatus objects
+  ([`a4f99e2`](https://gitlab.psi.ch/bec/bec/-/commit/a4f99e29f9199888167944fc27be0b143f1bf8e0))
+
+BREAKING CHANGE: This commit changes the scan definition to use unique device instruction ids and
+  ScanStubStatus objects. This is a breaking change and will require updates to the scan
+  definitions.
+
+- Add file_event as new SUB_EVENT to device manager; closes #335
+  ([`ccbde45`](https://gitlab.psi.ch/bec/bec/-/commit/ccbde45a48a19fb2a7580bc9f332b424ac06e41d))
+
+- **scan_history**: New file-based scan history
+  ([`5f4f12b`](https://gitlab.psi.ch/bec/bec/-/commit/5f4f12b6f027f0c1bcacc7e0fadec741ff27dc02))
+
+- **data_access**: Moved to file access
+  ([`1d8bc6d`](https://gitlab.psi.ch/bec/bec/-/commit/1d8bc6d7ec33261fab8835b2fccafa6ac3a8805a))
+
+BREAKING CHANGE: baseline data and async data is no longer cached on the client and instead provided
+  through file references. To this end, the data access through scan_item.data has been generalized.
+  Live data (i.e. monitored data) is now accessible through scan_item.live_data
+
+- **file_writer**: Added async file writer
+  ([`f787e6d`](https://gitlab.psi.ch/bec/bec/-/commit/f787e6d23d97d64a40ad2323930bd1c3800f0a39))
+
+### Refactoring
+
+- **scans**: Renamed _get_scan_motors to update_scan_motors; minor fixes
+  ([`da43279`](https://gitlab.psi.ch/bec/bec/-/commit/da432792fd3b35df71e60686deab44736728d517))
+
+- **scan stubs**: Added typecheck
+  ([`981acce`](https://gitlab.psi.ch/bec/bec/-/commit/981acceda032af0ad2ca272afdcb03ee1a8b74cd))
+
+- **scans**: Renamed group primary to group monitored
+  ([`7b03fc3`](https://gitlab.psi.ch/bec/bec/-/commit/7b03fc36b6833302475a0f2a5172cd7aa967a3b3))
+
+- **scans**: Moved fixtures to scan server module
+  ([`d2a738b`](https://gitlab.psi.ch/bec/bec/-/commit/d2a738b8c26c6434f8fcfce1b83cb1f766b589c3))
+
+- **scan_stubs**: Changed default to wait=True
+  ([`9114a58`](https://gitlab.psi.ch/bec/bec/-/commit/9114a58875197a2f6410e26b613ad87bbc672ac8))
+
+- **stubs**: Renamed rpc to send_rpc
+  ([`49cd06e`](https://gitlab.psi.ch/bec/bec/-/commit/49cd06e60ef470d5c3a2b5534bf0e6fac1dd95b2))
+
+- **scan_server**: Minor cleanup
+  ([`c425909`](https://gitlab.psi.ch/bec/bec/-/commit/c425909e221efc25da20a9957f81bf63c2e587b1))
+
+- **async_writer**: Cleanup
+  ([`11e356e`](https://gitlab.psi.ch/bec/bec/-/commit/11e356e90bf696e3fd23c8edd5d043482c842982))
+
+- **bec_lib**: Renamed ScanData to LiveScanData
+  ([`b77211f`](https://gitlab.psi.ch/bec/bec/-/commit/b77211fe869438c4453f4be06205a6aae6993355))
+
+- **scans**: Fixed pylint pragma
+  ([`1c1cc21`](https://gitlab.psi.ch/bec/bec/-/commit/1c1cc2135bc888429dbb9ad32b2c74191f5de3fd))
+
+- **bec_service**: Minor type hints improvements
+  ([`15ce6cf`](https://gitlab.psi.ch/bec/bec/-/commit/15ce6cfb97ca620b534f971430d92fcce996a797))
+
+- **endpoints**: Allow for type checks despite lazy import
+  ([`710bd8a`](https://gitlab.psi.ch/bec/bec/-/commit/710bd8ab82cbae8a175cd787db0ae64fc12c3ffb))
+
+- **bec_lib**: Minor improvements to type hints
+  ([`f6ae344`](https://gitlab.psi.ch/bec/bec/-/commit/f6ae344b3408baba99b4f3c9847e8ab428ab5196))
+
+- **file_writer**: Cleanup
+  ([`a5a860b`](https://gitlab.psi.ch/bec/bec/-/commit/a5a860bd3b662db27d0f0b1b4722a70a4bdd5234))
+
+### Testing
+
+- Added test to ensure access to status results is not blocking
+  ([`06ad81f`](https://gitlab.psi.ch/bec/bec/-/commit/06ad81f1d106b01e0c3052e92d3912c0dde0d1cb))
+
+- **scan_history,data_container**: Added tests; refactored to use conftest for shared fixtures
+  ([`ec57e07`](https://gitlab.psi.ch/bec/bec/-/commit/ec57e077a2cfbee0e6344427302d49634c1939b2))
+
+
 ## v2.34.15 (2024-11-11)
 
 ### Bug Fixes
