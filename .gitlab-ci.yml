@@ -42,15 +42,13 @@ include:
     inputs:
       stage: test
       path: "bec_server"
-      exclude_packages: "bec_lib"
       job_name: "check_dep_bec_server"
   - project: "bec/awi_utils"
     file: "/templates/check-packages-job.yml"
     inputs:
       stage: test
       path: "bec_ipython_client"
-      pytest_args: "-v --random-order tests/client_tests"
-      exclude_packages: "bec_lib"
+      pytest_args: "-v,--random-order,tests/client_tests"
       job_name: "check_dep_ipython_client"
   - project: "bec/awi_utils"
     file: "/templates/trigger-beamline-repos.yml"
