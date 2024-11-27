@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v3.1.0 (2024-11-27)
+
+### Continuous Integration
+
+- Fix ci syntax for check package job
+  ([`68a6b5b`](https://gitlab.psi.ch/bec/bec/-/commit/68a6b5b41db83d4ae85ddfad41a4220328c29844))
+
+### Features
+
+- Use callback to asynchronously setup GUI at startup, use proxy to defer GUI commands
+  ([`d6d7e86`](https://gitlab.psi.ch/bec/bec/-/commit/d6d7e862aef1436b38acf3b4c2c3cb7208625ab6))
+
+
 ## v3.0.0 (2024-11-18)
 
 ### Bug Fixes
