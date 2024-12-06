@@ -290,7 +290,7 @@ class BECLogger:
         """
         try:
             self.logger.level("CONSOLE_LOG", no=21, color="<yellow>", icon="📣")
-        except TypeError:
+        except (TypeError, ValueError):
             # level with same severity already exists: already configured
             pass
 
