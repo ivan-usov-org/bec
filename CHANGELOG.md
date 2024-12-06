@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v3.1.1 (2024-12-06)
+
+### Bug Fixes
+
+- Bugfix to capture exception for console_log
+  ([`9c3c088`](https://gitlab.psi.ch/bec/bec/-/commit/9c3c0884d1d8458c0cc93119a8d6a0a26c23dc1e))
+
+
 ## v3.1.0 (2024-11-27)
 
 ### Continuous Integration
@@ -18,57 +26,57 @@
 
 ### Bug Fixes
 
+- Bugfix in PipelineMock; _pipe_buffer and _connector become istance variables
+  ([`eefe1e3`](https://gitlab.psi.ch/bec/bec/-/commit/eefe1e397191ddb91a9b563cbdca76107f9f525d))
+
+- Fix bug related to usage of ConnectorMock
+  ([`1978ee4`](https://gitlab.psi.ch/bec/bec/-/commit/1978ee4f30fff43696819f2dcdd3f0936ec39960))
+
+- **async_writer**: Flush to disk after writing to make the data available to readers
+  ([`012832b`](https://gitlab.psi.ch/bec/bec/-/commit/012832ba324ba250f3f1b5b7d91c9514df319178))
+
+- **bec_client**: Added scan_def to scans namespace
+  ([`7c854ef`](https://gitlab.psi.ch/bec/bec/-/commit/7c854efda0578061774963396ee8b2bff92daa53))
+
+- **cont_line_scan**: Wait for trigger before moving on
+  ([`07edd47`](https://gitlab.psi.ch/bec/bec/-/commit/07edd47821b2df8f8a9ac19ee322bf10c1ad6900))
+
+- **enpoints**: Allow delete on streams
+  ([`fbbc57a`](https://gitlab.psi.ch/bec/bec/-/commit/fbbc57a0969256ce2b506102505f717112e94263))
+
+- **fermat_spiral**: Scan motors should use the defined motors, not args
+  ([`9c895e4`](https://gitlab.psi.ch/bec/bec/-/commit/9c895e47b1ccb8ca3fdd196f4d54037cc888d332))
+
+- **file_writer**: Fixed support for mixed data types
+  ([`d7cf798`](https://gitlab.psi.ch/bec/bec/-/commit/d7cf798034a6ccaa794329136a4dc4bc8a9bfdc8))
+
+- **scan**: Fixed stub guard
+  ([`a980e9e`](https://gitlab.psi.ch/bec/bec/-/commit/a980e9e885259c22310d8a9112188ab929f0bc43))
+
 - **scan guard**: Only check strings
   ([`e2583ed`](https://gitlab.psi.ch/bec/bec/-/commit/e2583edb5af4aa495b541fa82a4f3fe5557653bc))
-
-- **scan_stub**: Do not wait for the status result
-  ([`f9e17fc`](https://gitlab.psi.ch/bec/bec/-/commit/f9e17fc6bb16cc79b7f396dc44e4ef440ecc768e))
-
-- **scans**: Scan id should back-propagate to the scan instance
-  ([`a6c8d18`](https://gitlab.psi.ch/bec/bec/-/commit/a6c8d18487d4da0c8695123d664591ad12f06916))
 
 - **scan stubs**: Fixed support for receiving results from multiple stubs; closes #375; cleanup of
   docs
   ([`ddf2faf`](https://gitlab.psi.ch/bec/bec/-/commit/ddf2faf148413abe4862fd06807827f1644d85c4))
 
-- **fermat_spiral**: Scan motors should use the defined motors, not args
-  ([`9c895e4`](https://gitlab.psi.ch/bec/bec/-/commit/9c895e47b1ccb8ca3fdd196f4d54037cc888d332))
-
-- **scan_stubs**: Done check must also propagate to sub status objects
-  ([`e0822ba`](https://gitlab.psi.ch/bec/bec/-/commit/e0822ba034672073c71d28990f651ce58255adcd))
-
-- **scan**: Fixed stub guard
-  ([`a980e9e`](https://gitlab.psi.ch/bec/bec/-/commit/a980e9e885259c22310d8a9112188ab929f0bc43))
-
-- **scans**: Fixed various smaller bugs and improved the doc strings
-  ([`7d50839`](https://gitlab.psi.ch/bec/bec/-/commit/7d50839179b75b668a0ba9a29ec8c72e049e6240))
-
-- **bec_client**: Added scan_def to scans namespace
-  ([`7c854ef`](https://gitlab.psi.ch/bec/bec/-/commit/7c854efda0578061774963396ee8b2bff92daa53))
-
-- Fix bug related to usage of ConnectorMock
-  ([`1978ee4`](https://gitlab.psi.ch/bec/bec/-/commit/1978ee4f30fff43696819f2dcdd3f0936ec39960))
-
-- Bugfix in PipelineMock; _pipe_buffer and _connector become istance variables
-  ([`eefe1e3`](https://gitlab.psi.ch/bec/bec/-/commit/eefe1e397191ddb91a9b563cbdca76107f9f525d))
-
-- **async_writer**: Flush to disk after writing to make the data available to readers
-  ([`012832b`](https://gitlab.psi.ch/bec/bec/-/commit/012832ba324ba250f3f1b5b7d91c9514df319178))
+- **scan_data_container**: Fixed read access
+  ([`3e68e80`](https://gitlab.psi.ch/bec/bec/-/commit/3e68e80725e75b6e9d8b9393c9987d12960c278a))
 
 - **scan_history**: Fixed cleanup routine
   ([`9eaf398`](https://gitlab.psi.ch/bec/bec/-/commit/9eaf398c36814bf5ecae52025d560a2c3f47de7f))
 
-- **scan_data_container**: Fixed read access
-  ([`3e68e80`](https://gitlab.psi.ch/bec/bec/-/commit/3e68e80725e75b6e9d8b9393c9987d12960c278a))
+- **scan_stub**: Do not wait for the status result
+  ([`f9e17fc`](https://gitlab.psi.ch/bec/bec/-/commit/f9e17fc6bb16cc79b7f396dc44e4ef440ecc768e))
 
-- **cont_line_scan**: Wait for trigger before moving on
-  ([`07edd47`](https://gitlab.psi.ch/bec/bec/-/commit/07edd47821b2df8f8a9ac19ee322bf10c1ad6900))
+- **scan_stubs**: Done check must also propagate to sub status objects
+  ([`e0822ba`](https://gitlab.psi.ch/bec/bec/-/commit/e0822ba034672073c71d28990f651ce58255adcd))
 
-- **file_writer**: Fixed support for mixed data types
-  ([`d7cf798`](https://gitlab.psi.ch/bec/bec/-/commit/d7cf798034a6ccaa794329136a4dc4bc8a9bfdc8))
+- **scans**: Fixed various smaller bugs and improved the doc strings
+  ([`7d50839`](https://gitlab.psi.ch/bec/bec/-/commit/7d50839179b75b668a0ba9a29ec8c72e049e6240))
 
-- **enpoints**: Allow delete on streams
-  ([`fbbc57a`](https://gitlab.psi.ch/bec/bec/-/commit/fbbc57a0969256ce2b506102505f717112e94263))
+- **scans**: Scan id should back-propagate to the scan instance
+  ([`a6c8d18`](https://gitlab.psi.ch/bec/bec/-/commit/a6c8d18487d4da0c8695123d664591ad12f06916))
 
 ### Continuous Integration
 
@@ -83,14 +91,14 @@
 - Scan docs improvements
   ([`55b2107`](https://gitlab.psi.ch/bec/bec/-/commit/55b2107f27dce668a27a8aeb9d0e52cdcfbc8bd6))
 
+- **data access**: Cleanup
+  ([`fcbdf91`](https://gitlab.psi.ch/bec/bec/-/commit/fcbdf911fcd388757adea0adee3d65369c7e7a9e))
+
 - **data access**: Fixed typo
   ([`12a041f`](https://gitlab.psi.ch/bec/bec/-/commit/12a041fdaea6c23291400e72cb70bf357a74a84f))
 
-- **tutorial**: Extended explanation for fixtures
-  ([`106ce80`](https://gitlab.psi.ch/bec/bec/-/commit/106ce80aed519734157834cce7ba7e24312ca824))
-
-- **data access**: Cleanup
-  ([`fcbdf91`](https://gitlab.psi.ch/bec/bec/-/commit/fcbdf911fcd388757adea0adee3d65369c7e7a9e))
+- **data_access**: Updated docs for new data access pattern
+  ([`454284e`](https://gitlab.psi.ch/bec/bec/-/commit/454284e8c8f9650675d7f2fb0192a117bfd11fc8))
 
 - **scan tutorial**: Updated tutorial with new stubs interface
   ([`df2ca84`](https://gitlab.psi.ch/bec/bec/-/commit/df2ca846866a27b8cc7c7be8b4c1aac508788702))
@@ -101,10 +109,36 @@
 - **scans**: Cleanup
   ([`1ddd4de`](https://gitlab.psi.ch/bec/bec/-/commit/1ddd4de4556101ba24e5628b92533796f7793ed0))
 
-- **data_access**: Updated docs for new data access pattern
-  ([`454284e`](https://gitlab.psi.ch/bec/bec/-/commit/454284e8c8f9650675d7f2fb0192a117bfd11fc8))
+- **tutorial**: Extended explanation for fixtures
+  ([`106ce80`](https://gitlab.psi.ch/bec/bec/-/commit/106ce80aed519734157834cce7ba7e24312ca824))
 
 ### Features
+
+- Add file_event as new SUB_EVENT to device manager; closes #335
+  ([`ccbde45`](https://gitlab.psi.ch/bec/bec/-/commit/ccbde45a48a19fb2a7580bc9f332b424ac06e41d))
+
+- **data_access**: Moved to file access
+  ([`1d8bc6d`](https://gitlab.psi.ch/bec/bec/-/commit/1d8bc6d7ec33261fab8835b2fccafa6ac3a8805a))
+
+BREAKING CHANGE: baseline data and async data is no longer cached on the client and instead provided
+  through file references. To this end, the data access through scan_item.data has been generalized.
+  Live data (i.e. monitored data) is now accessible through scan_item.live_data
+
+- **file_writer**: Added async file writer
+  ([`f787e6d`](https://gitlab.psi.ch/bec/bec/-/commit/f787e6d23d97d64a40ad2323930bd1c3800f0a39))
+
+- **scan**: Added stub registry
+  ([`0c934c1`](https://gitlab.psi.ch/bec/bec/-/commit/0c934c161975b7111432ffa9442b653c0cc7fe96))
+
+- **scan_history**: New file-based scan history
+  ([`5f4f12b`](https://gitlab.psi.ch/bec/bec/-/commit/5f4f12b6f027f0c1bcacc7e0fadec741ff27dc02))
+
+- **scan_server**: Moved to unique device instruction ids and ScanStubStatus objects
+  ([`a4f99e2`](https://gitlab.psi.ch/bec/bec/-/commit/a4f99e29f9199888167944fc27be0b143f1bf8e0))
+
+BREAKING CHANGE: This commit changes the scan definition to use unique device instruction ids and
+  ScanStubStatus objects. This is a breaking change and will require updates to the scan
+  definitions.
 
 - **scans**: Added return_to_start kwarg to all scans. If set to true, the scan returns to start.
   ([`1032dd5`](https://gitlab.psi.ch/bec/bec/-/commit/1032dd5856a2d5ad41d3eb3b17035a4f5f6c6bbf))
@@ -119,63 +153,16 @@ closes #332
 - **stubs**: Added support for setting multiple devices at once
   ([`41683ae`](https://gitlab.psi.ch/bec/bec/-/commit/41683ae5f86fa675ead4c559324eef0962c3ddf7))
 
-- **scan**: Added stub registry
-  ([`0c934c1`](https://gitlab.psi.ch/bec/bec/-/commit/0c934c161975b7111432ffa9442b653c0cc7fe96))
-
-- **scan_server**: Moved to unique device instruction ids and ScanStubStatus objects
-  ([`a4f99e2`](https://gitlab.psi.ch/bec/bec/-/commit/a4f99e29f9199888167944fc27be0b143f1bf8e0))
-
-BREAKING CHANGE: This commit changes the scan definition to use unique device instruction ids and
-  ScanStubStatus objects. This is a breaking change and will require updates to the scan
-  definitions.
-
-- Add file_event as new SUB_EVENT to device manager; closes #335
-  ([`ccbde45`](https://gitlab.psi.ch/bec/bec/-/commit/ccbde45a48a19fb2a7580bc9f332b424ac06e41d))
-
-- **scan_history**: New file-based scan history
-  ([`5f4f12b`](https://gitlab.psi.ch/bec/bec/-/commit/5f4f12b6f027f0c1bcacc7e0fadec741ff27dc02))
-
-- **data_access**: Moved to file access
-  ([`1d8bc6d`](https://gitlab.psi.ch/bec/bec/-/commit/1d8bc6d7ec33261fab8835b2fccafa6ac3a8805a))
-
-BREAKING CHANGE: baseline data and async data is no longer cached on the client and instead provided
-  through file references. To this end, the data access through scan_item.data has been generalized.
-  Live data (i.e. monitored data) is now accessible through scan_item.live_data
-
-- **file_writer**: Added async file writer
-  ([`f787e6d`](https://gitlab.psi.ch/bec/bec/-/commit/f787e6d23d97d64a40ad2323930bd1c3800f0a39))
-
 ### Refactoring
-
-- **scans**: Renamed _get_scan_motors to update_scan_motors; minor fixes
-  ([`da43279`](https://gitlab.psi.ch/bec/bec/-/commit/da432792fd3b35df71e60686deab44736728d517))
-
-- **scan stubs**: Added typecheck
-  ([`981acce`](https://gitlab.psi.ch/bec/bec/-/commit/981acceda032af0ad2ca272afdcb03ee1a8b74cd))
-
-- **scans**: Renamed group primary to group monitored
-  ([`7b03fc3`](https://gitlab.psi.ch/bec/bec/-/commit/7b03fc36b6833302475a0f2a5172cd7aa967a3b3))
-
-- **scans**: Moved fixtures to scan server module
-  ([`d2a738b`](https://gitlab.psi.ch/bec/bec/-/commit/d2a738b8c26c6434f8fcfce1b83cb1f766b589c3))
-
-- **scan_stubs**: Changed default to wait=True
-  ([`9114a58`](https://gitlab.psi.ch/bec/bec/-/commit/9114a58875197a2f6410e26b613ad87bbc672ac8))
-
-- **stubs**: Renamed rpc to send_rpc
-  ([`49cd06e`](https://gitlab.psi.ch/bec/bec/-/commit/49cd06e60ef470d5c3a2b5534bf0e6fac1dd95b2))
-
-- **scan_server**: Minor cleanup
-  ([`c425909`](https://gitlab.psi.ch/bec/bec/-/commit/c425909e221efc25da20a9957f81bf63c2e587b1))
 
 - **async_writer**: Cleanup
   ([`11e356e`](https://gitlab.psi.ch/bec/bec/-/commit/11e356e90bf696e3fd23c8edd5d043482c842982))
 
+- **bec_lib**: Minor improvements to type hints
+  ([`f6ae344`](https://gitlab.psi.ch/bec/bec/-/commit/f6ae344b3408baba99b4f3c9847e8ab428ab5196))
+
 - **bec_lib**: Renamed ScanData to LiveScanData
   ([`b77211f`](https://gitlab.psi.ch/bec/bec/-/commit/b77211fe869438c4453f4be06205a6aae6993355))
-
-- **scans**: Fixed pylint pragma
-  ([`1c1cc21`](https://gitlab.psi.ch/bec/bec/-/commit/1c1cc2135bc888429dbb9ad32b2c74191f5de3fd))
 
 - **bec_service**: Minor type hints improvements
   ([`15ce6cf`](https://gitlab.psi.ch/bec/bec/-/commit/15ce6cfb97ca620b534f971430d92fcce996a797))
@@ -183,11 +170,32 @@ BREAKING CHANGE: baseline data and async data is no longer cached on the client 
 - **endpoints**: Allow for type checks despite lazy import
   ([`710bd8a`](https://gitlab.psi.ch/bec/bec/-/commit/710bd8ab82cbae8a175cd787db0ae64fc12c3ffb))
 
-- **bec_lib**: Minor improvements to type hints
-  ([`f6ae344`](https://gitlab.psi.ch/bec/bec/-/commit/f6ae344b3408baba99b4f3c9847e8ab428ab5196))
-
 - **file_writer**: Cleanup
   ([`a5a860b`](https://gitlab.psi.ch/bec/bec/-/commit/a5a860bd3b662db27d0f0b1b4722a70a4bdd5234))
+
+- **scan stubs**: Added typecheck
+  ([`981acce`](https://gitlab.psi.ch/bec/bec/-/commit/981acceda032af0ad2ca272afdcb03ee1a8b74cd))
+
+- **scan_server**: Minor cleanup
+  ([`c425909`](https://gitlab.psi.ch/bec/bec/-/commit/c425909e221efc25da20a9957f81bf63c2e587b1))
+
+- **scan_stubs**: Changed default to wait=True
+  ([`9114a58`](https://gitlab.psi.ch/bec/bec/-/commit/9114a58875197a2f6410e26b613ad87bbc672ac8))
+
+- **scans**: Fixed pylint pragma
+  ([`1c1cc21`](https://gitlab.psi.ch/bec/bec/-/commit/1c1cc2135bc888429dbb9ad32b2c74191f5de3fd))
+
+- **scans**: Moved fixtures to scan server module
+  ([`d2a738b`](https://gitlab.psi.ch/bec/bec/-/commit/d2a738b8c26c6434f8fcfce1b83cb1f766b589c3))
+
+- **scans**: Renamed _get_scan_motors to update_scan_motors; minor fixes
+  ([`da43279`](https://gitlab.psi.ch/bec/bec/-/commit/da432792fd3b35df71e60686deab44736728d517))
+
+- **scans**: Renamed group primary to group monitored
+  ([`7b03fc3`](https://gitlab.psi.ch/bec/bec/-/commit/7b03fc36b6833302475a0f2a5172cd7aa967a3b3))
+
+- **stubs**: Renamed rpc to send_rpc
+  ([`49cd06e`](https://gitlab.psi.ch/bec/bec/-/commit/49cd06e60ef470d5c3a2b5534bf0e6fac1dd95b2))
 
 ### Testing
 
@@ -196,6 +204,13 @@ BREAKING CHANGE: baseline data and async data is no longer cached on the client 
 
 - **scan_history,data_container**: Added tests; refactored to use conftest for shared fixtures
   ([`ec57e07`](https://gitlab.psi.ch/bec/bec/-/commit/ec57e077a2cfbee0e6344427302d49634c1939b2))
+
+### BREAKING CHANGES
+
+- **scans**: In the past, this was always set to true. Now, the default will depend on the relative
+  flag. Relative scans return to start to avoid shifts for repeated scans. Absolute scans will not
+  return to start. However, this behaviour can be overridden by providing the additional
+  return_to_start kwarg or subclassing the scan base.
 
 
 ## v2.34.15 (2024-11-11)
@@ -226,14 +241,14 @@ BREAKING CHANGE: baseline data and async data is no longer cached on the client 
 
 ### Bug Fixes
 
-- **scans**: Removed default from required kwarg
-  ([`5c0d825`](https://gitlab.psi.ch/bec/bec/-/commit/5c0d8257858adc7b282d97964b88150faffd33a7))
-
 - **scan_assembler**: Forward error message content
   ([`6fb87c7`](https://gitlab.psi.ch/bec/bec/-/commit/6fb87c725bdb0cca93c880a7869aac06e3851dd7))
 
 - **scans**: Fixed kwarg check for scans without args but required kwargs
   ([`96734c3`](https://gitlab.psi.ch/bec/bec/-/commit/96734c3dd2ec08e539081f282669af7b95571c10))
+
+- **scans**: Removed default from required kwarg
+  ([`5c0d825`](https://gitlab.psi.ch/bec/bec/-/commit/5c0d8257858adc7b282d97964b88150faffd33a7))
 
 
 ## v2.34.11 (2024-10-22)
@@ -312,11 +327,11 @@ BECClient.scans is the same as before ; BECClient.scans_namespace is a SimpleNam
 
 ### Documentation
 
-- **scans**: Added missing relative flag to umv and mv examples
-  ([`6231724`](https://gitlab.psi.ch/bec/bec/-/commit/62317242ef4f6de3fa9f8d4fb10e9c3020a78253))
-
 - Update outdated yaml for simulated gauss in user section
   ([`eb84c67`](https://gitlab.psi.ch/bec/bec/-/commit/eb84c673246044e92dcbcd2e041ff7aa0e14ff2a))
+
+- **scans**: Added missing relative flag to umv and mv examples
+  ([`6231724`](https://gitlab.psi.ch/bec/bec/-/commit/62317242ef4f6de3fa9f8d4fb10e9c3020a78253))
 
 
 ## v2.34.4 (2024-10-02)
@@ -385,11 +400,11 @@ BECClient.scans is the same as before ; BECClient.scans_namespace is a SimpleNam
 - **interactive_scan**: Fixed default exp_time
   ([`e9839bf`](https://gitlab.psi.ch/bec/bec/-/commit/e9839bf79b44a004b1d3050d8cf3d71c86fff5e4))
 
-- **scan_worker**: Exp time is optional; default 0
-  ([`90b07ed`](https://gitlab.psi.ch/bec/bec/-/commit/90b07ed690da05e397bc6971d497b09d583e0ac4))
-
 - **rpc**: Check for alarms during rpc calls
   ([`99a1553`](https://gitlab.psi.ch/bec/bec/-/commit/99a1553794766ebbe9441a16b29a91be5dfba162))
+
+- **scan_worker**: Exp time is optional; default 0
+  ([`90b07ed`](https://gitlab.psi.ch/bec/bec/-/commit/90b07ed690da05e397bc6971d497b09d583e0ac4))
 
 ### Features
 
@@ -469,11 +484,11 @@ This commit adds support for interactive scans. This is a new feature that allow
 
 ### Refactoring
 
-- Scanitem attributes bec and callback made private
-  ([`a70af8f`](https://gitlab.psi.ch/bec/bec/-/commit/a70af8f58cba31294a6b84bb1b45d62f2dcb4cc0))
-
 - Refactoring to make scan_manager optional kwarg
   ([`a5ccefa`](https://gitlab.psi.ch/bec/bec/-/commit/a5ccefa978aa2b3c79d7b4617614bbde689036a0))
+
+- Scanitem attributes bec and callback made private
+  ([`a70af8f`](https://gitlab.psi.ch/bec/bec/-/commit/a70af8f58cba31294a6b84bb1b45d62f2dcb4cc0))
 
 ### Testing
 
@@ -485,11 +500,11 @@ This commit adds support for interactive scans. This is a new feature that allow
 
 ### Bug Fixes
 
-- Fix hints for devices of type ophyd.signal
-  ([`1b8b2c7`](https://gitlab.psi.ch/bec/bec/-/commit/1b8b2c7b490113e0b7acd3a070c9bec1c1626b4f))
-
 - Bugfix in cont_line_scan; reworked device and signal mocks
   ([`c91dcf4`](https://gitlab.psi.ch/bec/bec/-/commit/c91dcf4d37bc1add18d2f0682af97358e4abdee6))
+
+- Fix hints for devices of type ophyd.signal
+  ([`1b8b2c7`](https://gitlab.psi.ch/bec/bec/-/commit/1b8b2c7b490113e0b7acd3a070c9bec1c1626b4f))
 
 ### Refactoring
 
@@ -647,11 +662,11 @@ This commit adds support for interactive scans. This is a new feature that allow
 
 ### Continuous Integration
 
-- Use target branch instead of default pipeline branch for e2e tests
-  ([`83e0097`](https://gitlab.psi.ch/bec/bec/-/commit/83e00970d1e5f105ee3e05bce6fd7376bd9698e4))
-
 - Install ophyd_devices from the repo
   ([`1e805b4`](https://gitlab.psi.ch/bec/bec/-/commit/1e805b47c6df2bc08966ffd250ba0b3f22ab9563))
+
+- Use target branch instead of default pipeline branch for e2e tests
+  ([`83e0097`](https://gitlab.psi.ch/bec/bec/-/commit/83e00970d1e5f105ee3e05bce6fd7376bd9698e4))
 
 ### Documentation
 
@@ -671,14 +686,14 @@ Failed config updates should only lead to config flush if the object initializat
 
 ### Testing
 
+- Ensure BECClient singleton is reset
+  ([`75dd67b`](https://gitlab.psi.ch/bec/bec/-/commit/75dd67ba17ab0d79881501f2f902ef0a8c2233a2))
+
 - Fixed data access in dummy controller device
   ([`624c257`](https://gitlab.psi.ch/bec/bec/-/commit/624c25763fdef2a9ee913e5936311f421bd9b8d6))
 
 - Use simpositionerwithcontroller for controller access
   ([`49b53a9`](https://gitlab.psi.ch/bec/bec/-/commit/49b53a95d9317c6ec1bf14c81e2b3886788690d5))
-
-- Ensure BECClient singleton is reset
-  ([`75dd67b`](https://gitlab.psi.ch/bec/bec/-/commit/75dd67ba17ab0d79881501f2f902ef0a8c2233a2))
 
 
 ## v2.21.5 (2024-08-14)
@@ -724,14 +739,14 @@ Sometimes, restarting the tmux client is flaky
 
 ### Bug Fixes
 
-- **redis_connector**: Fixed support for bundle message
-  ([`ef637c0`](https://gitlab.psi.ch/bec/bec/-/commit/ef637c0e59f94ad471ec1dce5906a56ae0299f9a))
+- **bec_lib**: Added check to ensure becmessage type is correct
+  ([`c8b4ab9`](https://gitlab.psi.ch/bec/bec/-/commit/c8b4ab9d99530351fa2005b69e118a5fb563d1e3))
 
 - **bec_lib**: Fixed reported msg type for device_config endpoint
   ([`28f9882`](https://gitlab.psi.ch/bec/bec/-/commit/28f98822173cba43860dcd20f890fee93a978d6a))
 
-- **bec_lib**: Added check to ensure becmessage type is correct
-  ([`c8b4ab9`](https://gitlab.psi.ch/bec/bec/-/commit/c8b4ab9d99530351fa2005b69e118a5fb563d1e3))
+- **redis_connector**: Fixed support for bundle message
+  ([`ef637c0`](https://gitlab.psi.ch/bec/bec/-/commit/ef637c0e59f94ad471ec1dce5906a56ae0299f9a))
 
 ### Refactoring
 
@@ -772,11 +787,11 @@ This has the side effect of reconfiguring loggers to the level specified in the 
 
 ### Continuous Integration
 
-- Made jobs interruptible
-  ([`1fc6bc4`](https://gitlab.psi.ch/bec/bec/-/commit/1fc6bc4b22c48715eff4d27709cffc5c08037769))
-
 - Added support for child pipelines
   ([`d3385f6`](https://gitlab.psi.ch/bec/bec/-/commit/d3385f66e50e6b19e79030ec0af13054a7ab2f47))
+
+- Made jobs interruptible
+  ([`1fc6bc4`](https://gitlab.psi.ch/bec/bec/-/commit/1fc6bc4b22c48715eff4d27709cffc5c08037769))
 
 
 ## v2.20.1 (2024-07-25)
@@ -823,11 +838,11 @@ This has the side effect of reconfiguring loggers to the level specified in the 
 
 ### Refactoring
 
-- Renamed DeviceMonitor2DMessage
-  ([`0bb42d0`](https://gitlab.psi.ch/bec/bec/-/commit/0bb42d01bf7d7a03cf8e2a0859582ab14d8c99b8))
-
 - Renamed device_monitor to device_monitor_2d, adapted SUB_EVENT name
   ([`c7b59b5`](https://gitlab.psi.ch/bec/bec/-/commit/c7b59b59c16ac18134ab73bf020137d28da56775))
+
+- Renamed DeviceMonitor2DMessage
+  ([`0bb42d0`](https://gitlab.psi.ch/bec/bec/-/commit/0bb42d01bf7d7a03cf8e2a0859582ab14d8c99b8))
 
 
 ## v2.19.1 (2024-07-25)
@@ -842,11 +857,11 @@ This has the side effect of reconfiguring loggers to the level specified in the 
 
 ### Bug Fixes
 
-- Prevent already configured logger to be re-configured
-  ([`dfdc397`](https://gitlab.psi.ch/bec/bec/-/commit/dfdc39776e1cadffc53cf0193d2fa1791df821d5))
-
 - Make a CONSOLE_LOG level to be able to filter console log messages and fix extra line feed
   ([`7f73606`](https://gitlab.psi.ch/bec/bec/-/commit/7f73606dfc4b4b97afe1f85a641626f0ab134b34))
+
+- Prevent already configured logger to be re-configured
+  ([`dfdc397`](https://gitlab.psi.ch/bec/bec/-/commit/dfdc39776e1cadffc53cf0193d2fa1791df821d5))
 
 ### Features
 
@@ -954,11 +969,11 @@ Add "--log-level" and "--file-log-level" to be able to change log level from the
 
 ### Bug Fixes
 
-- Fixed cont_line_scan
-  ([`d9df652`](https://gitlab.psi.ch/bec/bec/-/commit/d9df652e0464ce44eccb4b79c6bc63a54890edef))
-
 - Bugfix on dtype int/float missmatch for self.positions
   ([`37c4868`](https://gitlab.psi.ch/bec/bec/-/commit/37c4868b13df95c56792c89be7171859ba9d9295))
+
+- Fixed cont_line_scan
+  ([`d9df652`](https://gitlab.psi.ch/bec/bec/-/commit/d9df652e0464ce44eccb4b79c6bc63a54890edef))
 
 ### Testing
 
@@ -988,17 +1003,17 @@ Add "--log-level" and "--file-log-level" to be able to change log level from the
 
 ### Bug Fixes
 
-- Configure logger levels for BECIPythonClient in constructor
-  ([`72b6e3e`](https://gitlab.psi.ch/bec/bec/-/commit/72b6e3e543a64d86a615cf400fa5057317a722ad))
-
 - _update_sinks applies different level for each logger
   ([`7ed5d6a`](https://gitlab.psi.ch/bec/bec/-/commit/7ed5d6ae82f0605de1f0422a0c6c658cec230159))
 
-- Set level for each logger to the given value
-  ([`1428ba2`](https://gitlab.psi.ch/bec/bec/-/commit/1428ba27f9239aa67fcb4b9111980d1d0955de32))
+- Configure logger levels for BECIPythonClient in constructor
+  ([`72b6e3e`](https://gitlab.psi.ch/bec/bec/-/commit/72b6e3e543a64d86a615cf400fa5057317a722ad))
 
 - Remove redundant update of loggers
   ([`8b82f35`](https://gitlab.psi.ch/bec/bec/-/commit/8b82f357970daab1ad0cac9ea36b42f460b1afd2))
+
+- Set level for each logger to the given value
+  ([`1428ba2`](https://gitlab.psi.ch/bec/bec/-/commit/1428ba27f9239aa67fcb4b9111980d1d0955de32))
 
 ### Refactoring
 
@@ -1010,27 +1025,27 @@ Add "--log-level" and "--file-log-level" to be able to change log level from the
 
 ### Bug Fixes
 
+- Client: do not configure logging in _start_services()
+  ([`4809dc5`](https://gitlab.psi.ch/bec/bec/-/commit/4809dc512eec418e08bfa79b40d3b3b75a4498da))
+
+Logging is already configured because BECClient inherits from BECService, and BECService configures
+  logging when client is started
+
+- Logger: do not update sinks twice in __init__
+  ([`051d6ad`](https://gitlab.psi.ch/bec/bec/-/commit/051d6ade9224f5aeb919bbe96e84dc49f4720482))
+
+- Logger: log stderr to sys.__stderr__ to be compatible with sys.stderr redirection
+  ([`9824ee4`](https://gitlab.psi.ch/bec/bec/-/commit/9824ee43aaf283c743762affead3c3b9e517abce))
+
+- Logger: make console_log opt-in instead of having it by default and removing for certain classes
+  ([`1d1f795`](https://gitlab.psi.ch/bec/bec/-/commit/1d1f795f9143363fa73a7cc9d5e7827d613552c1))
+
 - **logger**: Do not enqueue log messages
   ([`1318b22`](https://gitlab.psi.ch/bec/bec/-/commit/1318b221cb6c26650535019175c74d748b003ea8))
 
 Enqueing log messages is useful when multiple processes (launched with multiprocess module) are
   logging to the same log file, which is not the use case for BEC - it creates processing threads,
   which can be avoided
-
-- Logger: make console_log opt-in instead of having it by default and removing for certain classes
-  ([`1d1f795`](https://gitlab.psi.ch/bec/bec/-/commit/1d1f795f9143363fa73a7cc9d5e7827d613552c1))
-
-- Logger: log stderr to sys.__stderr__ to be compatible with sys.stderr redirection
-  ([`9824ee4`](https://gitlab.psi.ch/bec/bec/-/commit/9824ee43aaf283c743762affead3c3b9e517abce))
-
-- Logger: do not update sinks twice in __init__
-  ([`051d6ad`](https://gitlab.psi.ch/bec/bec/-/commit/051d6ade9224f5aeb919bbe96e84dc49f4720482))
-
-- Client: do not configure logging in _start_services()
-  ([`4809dc5`](https://gitlab.psi.ch/bec/bec/-/commit/4809dc512eec418e08bfa79b40d3b3b75a4498da))
-
-Logging is already configured because BECClient inherits from BECService, and BECService configures
-  logging when client is started
 
 ### Features
 
@@ -1118,11 +1133,11 @@ Logging is already configured because BECClient inherits from BECService, and BE
 
 ### Documentation
 
-- Improved dev install instructions
-  ([`d43cd25`](https://gitlab.psi.ch/bec/bec/-/commit/d43cd25786aa0e3892592350feb4def8ab541120))
-
 - Adjusted init for flyer class
   ([`fa0c96f`](https://gitlab.psi.ch/bec/bec/-/commit/fa0c96f2dba82b22395cc91fb5b8fe63956e698c))
+
+- Improved dev install instructions
+  ([`d43cd25`](https://gitlab.psi.ch/bec/bec/-/commit/d43cd25786aa0e3892592350feb4def8ab541120))
 
 - Moved scanbase code to end of section to not tempt readers to jump directly into the code
   ([`ff9d4ad`](https://gitlab.psi.ch/bec/bec/-/commit/ff9d4ad9508ffda81c49977519cf5d2fc95676d7))
@@ -1145,11 +1160,11 @@ Logging is already configured because BECClient inherits from BECService, and BE
 
 ### Bug Fixes
 
-- Use endpoints instead of simple strings to avoid warning
-  ([`62b2c10`](https://gitlab.psi.ch/bec/bec/-/commit/62b2c106de24c5de955fc619fa6b95f949295d21))
-
 - In set_and_publish, do not call set() to not have a warning
   ([`700584c`](https://gitlab.psi.ch/bec/bec/-/commit/700584ce3516ba59be56dcfa62cb57a7d693f69f))
+
+- Use endpoints instead of simple strings to avoid warning
+  ([`62b2c10`](https://gitlab.psi.ch/bec/bec/-/commit/62b2c106de24c5de955fc619fa6b95f949295d21))
 
 ### Documentation
 
@@ -1200,22 +1215,22 @@ Logging is already configured because BECClient inherits from BECService, and BE
 
 ### Documentation
 
+- Added two more optional steps to the fly scan tutorial
+  ([`ef1a757`](https://gitlab.psi.ch/bec/bec/-/commit/ef1a757a248c36aba9e6ef82ca53fb1bab3be3e2))
+
 - Move file_writer to extra section in docs
   ([`8d4a712`](https://gitlab.psi.ch/bec/bec/-/commit/8d4a71269be9350d9f9d55395b851d7f9a997253))
 
 - Review documentation for ophyd, scan metadata and file_writer customizations
   ([`cb4a2f6`](https://gitlab.psi.ch/bec/bec/-/commit/cb4a2f6e62cbf4d756f575e594722a6971cf5258))
 
-- Added two more optional steps to the fly scan tutorial
-  ([`ef1a757`](https://gitlab.psi.ch/bec/bec/-/commit/ef1a757a248c36aba9e6ef82ca53fb1bab3be3e2))
-
 ### Refactoring
-
-- Add system_config and review docs
-  ([`a481fda`](https://gitlab.psi.ch/bec/bec/-/commit/a481fdadfe0c1e005b7a9bd35c7a3b8dd15e9756))
 
 - Add changes from MR !614; improve kwargs handling for scan requests
   ([`3fece3a`](https://gitlab.psi.ch/bec/bec/-/commit/3fece3a063e4b10ed4ed6923a4b7044b0170efb5))
+
+- Add system_config and review docs
+  ([`a481fda`](https://gitlab.psi.ch/bec/bec/-/commit/a481fdadfe0c1e005b7a9bd35c7a3b8dd15e9756))
 
 - Remove bec.file_writer, and moved info to metadata, renamed md to metadata in kwargs from scans
   ([`92bd51e`](https://gitlab.psi.ch/bec/bec/-/commit/92bd51e788233c1597b0aeb317b16642312b9cb0))
@@ -1230,14 +1245,14 @@ Logging is already configured because BECClient inherits from BECService, and BE
 
 ### Documentation
 
-- Refactored scan docs
-  ([`08e0978`](https://gitlab.psi.ch/bec/bec/-/commit/08e0978d2b7a137700fa1c552cbe079a290f32f5))
-
 - Added test instructions to fly scan tutorial
   ([`7cd40ff`](https://gitlab.psi.ch/bec/bec/-/commit/7cd40ffcf597e3b64e87d9206468118b400754d7))
 
 - Added tutorial for defining a new fly scan
   ([`df1fe4d`](https://gitlab.psi.ch/bec/bec/-/commit/df1fe4d64f97244862126d218be7fe9e2ebea925))
+
+- Refactored scan docs
+  ([`08e0978`](https://gitlab.psi.ch/bec/bec/-/commit/08e0978d2b7a137700fa1c552cbe079a290f32f5))
 
 
 ## v2.13.6 (2024-06-05)
@@ -1300,14 +1315,14 @@ Logging is already configured because BECClient inherits from BECService, and BE
 
 ### Bug Fixes
 
-- **scan_server**: Worker respects use_scan_progress_report
-  ([`3ad46ef`](https://gitlab.psi.ch/bec/bec/-/commit/3ad46efb148ab9c32e34a6500f1f1af0dbd7144c))
+- Minor cleanup
+  ([`8d4a066`](https://gitlab.psi.ch/bec/bec/-/commit/8d4a066832dc45d67b77d13b484d7cd2e565c2f9))
+
+- **bec_lib**: Convert devices to strings for scan requests
+  ([`3b176f7`](https://gitlab.psi.ch/bec/bec/-/commit/3b176f7b97087fe87fcfaacd4d575c27be4cbcaf))
 
 - **ipython_client**: Readback callback must listen to instruction RID
   ([`c4551d3`](https://gitlab.psi.ch/bec/bec/-/commit/c4551d3b953bc97557e285f350e81b000f7c2cbe))
-
-- Minor cleanup
-  ([`8d4a066`](https://gitlab.psi.ch/bec/bec/-/commit/8d4a066832dc45d67b77d13b484d7cd2e565c2f9))
 
 - **scan_server**: Fixed default args
   ([`0f42a49`](https://gitlab.psi.ch/bec/bec/-/commit/0f42a4926de28252f01d9f9fab53244cc099ca21))
@@ -1315,8 +1330,8 @@ Logging is already configured because BECClient inherits from BECService, and BE
 - **scan_server**: Simplify scan args
   ([`005ff56`](https://gitlab.psi.ch/bec/bec/-/commit/005ff5685609b403b35131cdff0380d8e5b2b742))
 
-- **bec_lib**: Convert devices to strings for scan requests
-  ([`3b176f7`](https://gitlab.psi.ch/bec/bec/-/commit/3b176f7b97087fe87fcfaacd4d575c27be4cbcaf))
+- **scan_server**: Worker respects use_scan_progress_report
+  ([`3ad46ef`](https://gitlab.psi.ch/bec/bec/-/commit/3ad46efb148ab9c32e34a6500f1f1af0dbd7144c))
 
 ### Documentation
 
@@ -1338,11 +1353,11 @@ Logging is already configured because BECClient inherits from BECService, and BE
 
 ### Testing
 
-- **scan_server**: Added test for convert_arg_input
-  ([`a302844`](https://gitlab.psi.ch/bec/bec/-/commit/a302844d70659e2d1b074a76c2649a2c15bf0754))
-
 - Added tests for stubs and contlineflyscan
   ([`8fed5f6`](https://gitlab.psi.ch/bec/bec/-/commit/8fed5f64a09ea28bb911aaf57a96ba4b50498a56))
+
+- **scan_server**: Added test for convert_arg_input
+  ([`a302844`](https://gitlab.psi.ch/bec/bec/-/commit/a302844d70659e2d1b074a76c2649a2c15bf0754))
 
 
 ## v2.12.6 (2024-05-31)
@@ -1375,23 +1390,32 @@ Logging is already configured because BECClient inherits from BECService, and BE
 
 ### Documentation
 
-- Fixed broken links
-  ([`5dfcbe6`](https://gitlab.psi.ch/bec/bec/-/commit/5dfcbe6d132dd199be9f42980ed254efb2dc0e82))
+- Added docs for developing scans
+  ([`5f44521`](https://gitlab.psi.ch/bec/bec/-/commit/5f4452110519404573484d2c6a95d8a46c325a1f))
+
+- Added linkify
+  ([`3a363f5`](https://gitlab.psi.ch/bec/bec/-/commit/3a363f5f52b644bc2542913cf4e9acf224ef69f9))
 
 - Added reference to gitlab issues
   ([`7277ac3`](https://gitlab.psi.ch/bec/bec/-/commit/7277ac3c40f86ff465f7af69a060fb9d5f2d4acc))
 
-- Fixed api reference; added reference to scanbase
-  ([`121e592`](https://gitlab.psi.ch/bec/bec/-/commit/121e5922eb3806eff88f49b5378b1f12056be132))
+- Added reference to user docs for loading new device configs
+  ([`fd29dfb`](https://gitlab.psi.ch/bec/bec/-/commit/fd29dfb5f7d63d864e08adae1b5128f0f0fed14a))
 
 - Cleanup
   ([`7254755`](https://gitlab.psi.ch/bec/bec/-/commit/7254755aacda0f9c50b09237a59cd3584fb48e74))
 
-- Added reference to user docs for loading new device configs
-  ([`fd29dfb`](https://gitlab.psi.ch/bec/bec/-/commit/fd29dfb5f7d63d864e08adae1b5128f0f0fed14a))
+- Fixed api reference
+  ([`29862dc`](https://gitlab.psi.ch/bec/bec/-/commit/29862dca51873d4c22db6a693014ecf7addb4447))
 
-- Added linkify
-  ([`3a363f5`](https://gitlab.psi.ch/bec/bec/-/commit/3a363f5f52b644bc2542913cf4e9acf224ef69f9))
+- Fixed api reference; added reference to scanbase
+  ([`121e592`](https://gitlab.psi.ch/bec/bec/-/commit/121e5922eb3806eff88f49b5378b1f12056be132))
+
+- Fixed broken links
+  ([`5dfcbe6`](https://gitlab.psi.ch/bec/bec/-/commit/5dfcbe6d132dd199be9f42980ed254efb2dc0e82))
+
+- Fixed dependency for building sphinx
+  ([`9cbde72`](https://gitlab.psi.ch/bec/bec/-/commit/9cbde72505723b5e4da94eeab4c8313e29c295c5))
 
 - Improvements for the dev docs
   ([`e5a98d7`](https://gitlab.psi.ch/bec/bec/-/commit/e5a98d718d06004819b32db1fabf77e634bdefd0))
@@ -1399,33 +1423,24 @@ Logging is already configured because BECClient inherits from BECService, and BE
 - Restructured developer docs
   ([`7fd66f8`](https://gitlab.psi.ch/bec/bec/-/commit/7fd66f895905cb3e46ee90b98bfac8985837d6ca))
 
-- Added docs for developing scans
-  ([`5f44521`](https://gitlab.psi.ch/bec/bec/-/commit/5f4452110519404573484d2c6a95d8a46c325a1f))
-
-- Fixed dependency for building sphinx
-  ([`9cbde72`](https://gitlab.psi.ch/bec/bec/-/commit/9cbde72505723b5e4da94eeab4c8313e29c295c5))
-
-- Fixed api reference
-  ([`29862dc`](https://gitlab.psi.ch/bec/bec/-/commit/29862dca51873d4c22db6a693014ecf7addb4447))
-
 ### Refactoring
-
-- Renamed move_and_wait to move_scan_motors_and_wait
-  ([`eaa8bd8`](https://gitlab.psi.ch/bec/bec/-/commit/eaa8bd8e67aa75a00d6a5b3e2494ed9828e7d6cf))
 
 - Deprecated scan report hint
   ([`0382ac5`](https://gitlab.psi.ch/bec/bec/-/commit/0382ac52dd9d68e6871866311416632ee39ed232))
+
+- Renamed move_and_wait to move_scan_motors_and_wait
+  ([`eaa8bd8`](https://gitlab.psi.ch/bec/bec/-/commit/eaa8bd8e67aa75a00d6a5b3e2494ed9828e7d6cf))
 
 
 ## v2.12.3 (2024-05-21)
 
 ### Bug Fixes
 
-- Renamed table_wait to scan_progress
-  ([`855f9a8`](https://gitlab.psi.ch/bec/bec/-/commit/855f9a8412e9c0d8b02d131ece533b4d85882b36))
-
 - Renamed scan_progress to device_progress
   ([`d344e85`](https://gitlab.psi.ch/bec/bec/-/commit/d344e8513781f29a1390adc92826f23d1702964b))
+
+- Renamed table_wait to scan_progress
+  ([`855f9a8`](https://gitlab.psi.ch/bec/bec/-/commit/855f9a8412e9c0d8b02d131ece533b4d85882b36))
 
 
 ## v2.12.2 (2024-05-17)
@@ -1440,8 +1455,11 @@ Logging is already configured because BECClient inherits from BECService, and BE
 
 ### Bug Fixes
 
-- Race condition when reading new value from stream
-  ([`87cc71a`](https://gitlab.psi.ch/bec/bec/-/commit/87cc71aa91c9d35b6483f4ef6c5de3c59575e9dc))
+- Clean all imports from bec_lib, remove use of @threadlocked
+  ([`8a017ef`](https://gitlab.psi.ch/bec/bec/-/commit/8a017ef3d7666f173a70f2e6a8606d73b1af0095))
+
+- Do not import modules if only for type checking (faster import)
+  ([`1c628fd`](https://gitlab.psi.ch/bec/bec/-/commit/1c628fd6105ef5df99e97c8945d3382c45ef5350))
 
 - Import 'dap_plugin_objects' at last minute to speed up initial import
   ([`d7db6be`](https://gitlab.psi.ch/bec/bec/-/commit/d7db6befe9b8e4689ed37ccad44f8a5d06694180))
@@ -1451,17 +1469,14 @@ Logging is already configured because BECClient inherits from BECService, and BE
 
 TODO: put back imports as normal when Pydantic gets faster
 
-- Do not import modules if only for type checking (faster import)
-  ([`1c628fd`](https://gitlab.psi.ch/bec/bec/-/commit/1c628fd6105ef5df99e97c8945d3382c45ef5350))
-
-- Clean all imports from bec_lib, remove use of @threadlocked
-  ([`8a017ef`](https://gitlab.psi.ch/bec/bec/-/commit/8a017ef3d7666f173a70f2e6a8606d73b1af0095))
-
-- Use lazy import to reduce bec_lib import time
-  ([`649502e`](https://gitlab.psi.ch/bec/bec/-/commit/649502e364e4e4c0ea53f932418c479f2d6978d4))
+- Race condition when reading new value from stream
+  ([`87cc71a`](https://gitlab.psi.ch/bec/bec/-/commit/87cc71aa91c9d35b6483f4ef6c5de3c59575e9dc))
 
 - Solve scope problem with 'name' variable in lambda
   ([`417e73e`](https://gitlab.psi.ch/bec/bec/-/commit/417e73e5d65f0c774c92889a44d1262c7f4f343b))
+
+- Use lazy import to reduce bec_lib import time
+  ([`649502e`](https://gitlab.psi.ch/bec/bec/-/commit/649502e364e4e4c0ea53f932418c479f2d6978d4))
 
 
 ## v2.12.0 (2024-05-16)
@@ -1506,14 +1521,14 @@ This is a followup to !573
 
 ### Features
 
-- Add utility function to determine instance of an object by class name
-  ([`0ccd13c`](https://gitlab.psi.ch/bec/bec/-/commit/0ccd13cd738dc12d4a587b4c5e0d6b447d7cfc50))
+- Add 'Proxy' to bec_lib utils
+  ([`11a3f6d`](https://gitlab.psi.ch/bec/bec/-/commit/11a3f6daa46b3e6a82b66bd781b7590d01478b54))
 
 - Add utilities to lazy import a module
   ([`a37ae57`](https://gitlab.psi.ch/bec/bec/-/commit/a37ae577f68c154dc3da544816b7c7f0cb532c50))
 
-- Add 'Proxy' to bec_lib utils
-  ([`11a3f6d`](https://gitlab.psi.ch/bec/bec/-/commit/11a3f6daa46b3e6a82b66bd781b7590d01478b54))
+- Add utility function to determine instance of an object by class name
+  ([`0ccd13c`](https://gitlab.psi.ch/bec/bec/-/commit/0ccd13cd738dc12d4a587b4c5e0d6b447d7cfc50))
 
 
 ## v2.10.4 (2024-05-14)
@@ -1574,11 +1589,11 @@ This is a followup to !573
 
 ### Continuous Integration
 
-- Moved from multi-project pipelines to parent-child pipelines
-  ([`9eff5ca`](https://gitlab.psi.ch/bec/bec/-/commit/9eff5ca3580c3536e1edff5ade264dc6fc3f6f6e))
-
 - Changed repo name to bec_widgets in downstream tests
   ([`698029b`](https://gitlab.psi.ch/bec/bec/-/commit/698029b637b1c84c5b1e836d8c6fbc8c8c7e3e0e))
+
+- Moved from multi-project pipelines to parent-child pipelines
+  ([`9eff5ca`](https://gitlab.psi.ch/bec/bec/-/commit/9eff5ca3580c3536e1edff5ade264dc6fc3f6f6e))
 
 
 ## v2.10.0 (2024-05-03)
@@ -1601,12 +1616,12 @@ This is a followup to !573
 
 ### Bug Fixes
 
+- Do not try to populate `user_global_ns` if IPython interpreter is not there
+  ([`cf07feb`](https://gitlab.psi.ch/bec/bec/-/commit/cf07febc5cf0fdadec0e9658c2469ce1adb1a369))
+
 - Use the right redis fixture in "bec_servers" fixture to prevent multiple redis processes to be
   started
   ([`51d65e2`](https://gitlab.psi.ch/bec/bec/-/commit/51d65e2e9547765c34cc4a0a43f1adca90e7e5c3))
-
-- Do not try to populate `user_global_ns` if IPython interpreter is not there
-  ([`cf07feb`](https://gitlab.psi.ch/bec/bec/-/commit/cf07febc5cf0fdadec0e9658c2469ce1adb1a369))
 
 ### Testing
 
@@ -1634,6 +1649,9 @@ This is a followup to !573
 
 ### Bug Fixes
 
+- Device_req_status only needs set
+  ([`587cfcc`](https://gitlab.psi.ch/bec/bec/-/commit/587cfccbe576dcd2eb10fc16e225ee3175f8d2a0))
+
 - Fixed log message log type
   ([`af85937`](https://gitlab.psi.ch/bec/bec/-/commit/af8593794c2ea9d0b4851b367aca4e6546fc760f))
 
@@ -1642,9 +1660,6 @@ This is a followup to !573
 
 - Logs should be send, not set_and_publish; closes #278
   ([`3964870`](https://gitlab.psi.ch/bec/bec/-/commit/396487074905930c410978144e986d1b9b373a2c))
-
-- Device_req_status only needs set
-  ([`587cfcc`](https://gitlab.psi.ch/bec/bec/-/commit/587cfccbe576dcd2eb10fc16e225ee3175f8d2a0))
 
 
 ## v2.9.2 (2024-04-29)
@@ -1754,11 +1769,11 @@ This is a followup to !573
 
 ### Continuous Integration
 
-- Skip trailing comma for black
-  ([`fe657b6`](https://gitlab.psi.ch/bec/bec/-/commit/fe657b6adc416e7bc63b0a1e2970fdddcca63c29))
-
 - Removed pipeline as trigger source for downstream jobs
   ([`92bb7ef`](https://gitlab.psi.ch/bec/bec/-/commit/92bb7ef3c59f14d25db63615a86445454201aafd))
+
+- Skip trailing comma for black
+  ([`fe657b6`](https://gitlab.psi.ch/bec/bec/-/commit/fe657b6adc416e7bc63b0a1e2970fdddcca63c29))
 
 - Update default ophyd branch to main
   ([`3334a7f`](https://gitlab.psi.ch/bec/bec/-/commit/3334a7f8e70d220daeaef51ac39328e3019a9bf0))
@@ -1781,16 +1796,19 @@ This is a followup to !573
 
 ### Documentation
 
-- **dev/install**: Fixed install guide for developers bec_client -> bec_ipython_client
-  ([`a8d270e`](https://gitlab.psi.ch/bec/bec/-/commit/a8d270e0d702e4750b63631bf9fb34e4f30ed610))
-
 - Fixed version update for sphinx
   ([`8366896`](https://gitlab.psi.ch/bec/bec/-/commit/836689667c03c0aa1a35db97ca772f2ae05f5f79))
+
+- **dev/install**: Fixed install guide for developers bec_client -> bec_ipython_client
+  ([`a8d270e`](https://gitlab.psi.ch/bec/bec/-/commit/a8d270e0d702e4750b63631bf9fb34e4f30ed610))
 
 ### Features
 
 - **bec_client**: Added support for plugin-based startup scripts
   ([`aec75b4`](https://gitlab.psi.ch/bec/bec/-/commit/aec75b4966e570bd3e16ac295b09009eb1589acd))
+
+- **bec_lib**: Added plugin helper
+  ([`7f1b789`](https://gitlab.psi.ch/bec/bec/-/commit/7f1b78978bbe2ad61e490416e44bc23001757d5e))
 
 - **file_writer**: Added support for file writer layout plugins
   ([`a6578fb`](https://gitlab.psi.ch/bec/bec/-/commit/a6578fb13349c0cabd24d313a7d58f63772fa584))
@@ -1798,19 +1816,16 @@ This is a followup to !573
 - **scan_server**: Added support for plugins
   ([`23f8721`](https://gitlab.psi.ch/bec/bec/-/commit/23f872127b06d321564fa343b069ae962ba2b6c6))
 
-- **bec_lib**: Added plugin helper
-  ([`7f1b789`](https://gitlab.psi.ch/bec/bec/-/commit/7f1b78978bbe2ad61e490416e44bc23001757d5e))
-
 ### Refactoring
-
-- Removed outdated xml writer
-  ([`c9bd092`](https://gitlab.psi.ch/bec/bec/-/commit/c9bd0928ea9f42e6b11aadd6ac42d7fe5e649ec7))
 
 - Minor cleanup
   ([`b7bd584`](https://gitlab.psi.ch/bec/bec/-/commit/b7bd584898a8ca6f11ff79e11fda2727d0fc6381))
 
 - Moved to dot notation for specifying device classes
   ([`1f21b90`](https://gitlab.psi.ch/bec/bec/-/commit/1f21b90ba31ec8eb8ae2922a7d1353c2e8ea48f6))
+
+- Removed outdated xml writer
+  ([`c9bd092`](https://gitlab.psi.ch/bec/bec/-/commit/c9bd0928ea9f42e6b11aadd6ac42d7fe5e649ec7))
 
 
 ## v2.5.0 (2024-04-18)
@@ -1820,11 +1835,11 @@ This is a followup to !573
 - Fix path to bec_ipython_client version
   ([`4420148`](https://gitlab.psi.ch/bec/bec/-/commit/4420148a09e2f92354aa20be75a9d3b0f19f4514))
 
-- Removed wheel dependency
-  ([`ff0d2a1`](https://gitlab.psi.ch/bec/bec/-/commit/ff0d2a1ebb266d08d93aa088ff3151d27c828446))
-
 - Moved to pyproject
   ([`f7f7eba`](https://gitlab.psi.ch/bec/bec/-/commit/f7f7eba2316ec78f2f46a59c52234f827d509101))
+
+- Removed wheel dependency
+  ([`ff0d2a1`](https://gitlab.psi.ch/bec/bec/-/commit/ff0d2a1ebb266d08d93aa088ff3151d27c828446))
 
 - **bec_lib**: Upgraded to fpdf2
   ([`c9818c3`](https://gitlab.psi.ch/bec/bec/-/commit/c9818c35e4b1f3732ae6403c534bb505ad1121fc))
@@ -1834,9 +1849,6 @@ This is a followup to !573
 - Exit job if no artifacts need to be uploaded to pypi
   ([`2e00112`](https://gitlab.psi.ch/bec/bec/-/commit/2e00112447e5aee5ce91bc0fa9f51e9faf0f4ee5))
 
-- Updated ci for pyproject
-  ([`3b541fb`](https://gitlab.psi.ch/bec/bec/-/commit/3b541fb7600e499046d053f21a399de01263fb24))
-
 - Migrate docker to gitlab Dependency Proxy
   ([`80270f8`](https://gitlab.psi.ch/bec/bec/-/commit/80270f81968bfb717a0c631f0a87a0b809912f6a))
 
@@ -1844,6 +1856,9 @@ Related to 1108662db13e8142b37cb3645ff7e9bc94d242b8
 
 The docker-compose file/command might need further fixes, once the related end-2-end tests are
   activated.
+
+- Updated ci for pyproject
+  ([`3b541fb`](https://gitlab.psi.ch/bec/bec/-/commit/3b541fb7600e499046d053f21a399de01263fb24))
 
 ### Features
 
@@ -1899,11 +1914,11 @@ The docker-compose file/command might need further fixes, once the related end-2
 
 ### Continuous Integration
 
-- Specify main branch for semver job
-  ([`31a54ca`](https://gitlab.psi.ch/bec/bec/-/commit/31a54cab9325fa0932a2189b4032404036cfbbe6))
-
 - Changes due to renaming of master to main
   ([`291779f`](https://gitlab.psi.ch/bec/bec/-/commit/291779f4c362b5241b5ca636408cb4b36e4f551d))
+
+- Specify main branch for semver job
+  ([`31a54ca`](https://gitlab.psi.ch/bec/bec/-/commit/31a54cab9325fa0932a2189b4032404036cfbbe6))
 
 ### Features
 
@@ -1941,12 +1956,6 @@ The docker-compose file/command might need further fixes, once the related end-2
 
 ### Bug Fixes
 
-- **test_fake_redis**: Testmessage fixed to pydantic BaseModel
-  ([`eb9c812`](https://gitlab.psi.ch/bec/bec/-/commit/eb9c8125290615c0e15ffa70567ff198d22c30d5))
-
-- **redis_connector**: Support dict in convert_endpointinfo
-  ([`d2942b1`](https://gitlab.psi.ch/bec/bec/-/commit/d2942b1436ed7ddc3c31feb61510f0dc9f6f7f5a))
-
 - .shutdown() will cleanly stop all threads
   ([`c1c7dd7`](https://gitlab.psi.ch/bec/bec/-/commit/c1c7dd7beaeb46d1ababd301b99d01266baeb26c))
 
@@ -1955,6 +1964,12 @@ The docker-compose file/command might need further fixes, once the related end-2
 
 - **redis connector**: Prevent multiple identical connections in 'register'
   ([`344ef50`](https://gitlab.psi.ch/bec/bec/-/commit/344ef508c0be199d5d8ab9b4c4bff3e4778acb87))
+
+- **redis_connector**: Support dict in convert_endpointinfo
+  ([`d2942b1`](https://gitlab.psi.ch/bec/bec/-/commit/d2942b1436ed7ddc3c31feb61510f0dc9f6f7f5a))
+
+- **test_fake_redis**: Testmessage fixed to pydantic BaseModel
+  ([`eb9c812`](https://gitlab.psi.ch/bec/bec/-/commit/eb9c8125290615c0e15ffa70567ff198d22c30d5))
 
 ### Continuous Integration
 
@@ -2044,14 +2059,15 @@ All services are now in the bec_server package. This is a breaking change as the
 
 ### Bug Fixes
 
+- **flomni**: Wait for cleanup to be finished
+  ([`8660096`](https://gitlab.psi.ch/bec/bec/-/commit/8660096e536f59f04b8fb3f179cdcf7bf078b1cf))
+
 - **scan_server**: Break out of run loop if signal event is set
   ([`6edac2f`](https://gitlab.psi.ch/bec/bec/-/commit/6edac2f54d1d1c33f8d1e7329298361a5b1c62f1))
 
-- **scan_server**: Set queue to stopped after reaching a limit error
-  ([`8470f63`](https://gitlab.psi.ch/bec/bec/-/commit/8470f636a2d1db2ff6f1dd68e7db0e18555c085b))
-
-- **flomni**: Wait for cleanup to be finished
-  ([`8660096`](https://gitlab.psi.ch/bec/bec/-/commit/8660096e536f59f04b8fb3f179cdcf7bf078b1cf))
+- **scan_server**: Error during return_to_start was not caught and caused the scan worker to shut
+  down
+  ([`1fa372b`](https://gitlab.psi.ch/bec/bec/-/commit/1fa372b59023210d602c5d5627e34107418e14b7))
 
 - **scan_server**: Reset worker to running after failed cleanup
   ([`fa6f2da`](https://gitlab.psi.ch/bec/bec/-/commit/fa6f2da8af434517da2001df9775a2b834132ec3))
@@ -2059,9 +2075,8 @@ All services are now in the bec_server package. This is a breaking change as the
 - **scan_server**: Restart queue if worker died
   ([`a59eb9c`](https://gitlab.psi.ch/bec/bec/-/commit/a59eb9c8886a410f0dbaa4351b1b37de72dbdc20))
 
-- **scan_server**: Error during return_to_start was not caught and caused the scan worker to shut
-  down
-  ([`1fa372b`](https://gitlab.psi.ch/bec/bec/-/commit/1fa372b59023210d602c5d5627e34107418e14b7))
+- **scan_server**: Set queue to stopped after reaching a limit error
+  ([`8470f63`](https://gitlab.psi.ch/bec/bec/-/commit/8470f636a2d1db2ff6f1dd68e7db0e18555c085b))
 
 ### Code Style
 
@@ -2099,14 +2114,14 @@ All services are now in the bec_server package. This is a breaking change as the
 
 ### Refactoring
 
-- **scan_bundler**: Added more logger outputs
-  ([`8642495`](https://gitlab.psi.ch/bec/bec/-/commit/8642495afa651ba4d70edcc4baf499c44c621eba))
+- Renamed pointID to point_id
+  ([`d08526f`](https://gitlab.psi.ch/bec/bec/-/commit/d08526f6e9992bfd08a987b8ff4e0d741f558e8e))
 
 - **bec_lib**: Prevent devices to appear in multiple args
   ([`be2330c`](https://gitlab.psi.ch/bec/bec/-/commit/be2330c2219073d6d047b7a5702be8b23994f20e))
 
-- Renamed pointID to point_id
-  ([`d08526f`](https://gitlab.psi.ch/bec/bec/-/commit/d08526f6e9992bfd08a987b8ff4e0d741f558e8e))
+- **scan_bundler**: Added more logger outputs
+  ([`8642495`](https://gitlab.psi.ch/bec/bec/-/commit/8642495afa651ba4d70edcc4baf499c44c621eba))
 
 
 ## v1.23.0 (2024-04-08)
@@ -2156,26 +2171,26 @@ All services are now in the bec_server package. This is a breaking change as the
 
 ### Documentation
 
-- Refactor summary, configure in docs
-  ([`536f2ef`](https://gitlab.psi.ch/bec/bec/-/commit/536f2efc0cbc9e877dfc6c908e413910e5460cb8))
-
 - Adapt user installation; closes #246
   ([`e669252`](https://gitlab.psi.ch/bec/bec/-/commit/e6692524136595ed20640db49db4420278e3d5cc))
-
-- Fix wording
-  ([`8dd3ee0`](https://gitlab.psi.ch/bec/bec/-/commit/8dd3ee0946728fe394e8863d04934d70c1e96ba7))
-
-- Address comments
-  ([`2de2e1b`](https://gitlab.psi.ch/bec/bec/-/commit/2de2e1b4bc5fb4cd3060e082fd641dc1c9cafb74))
-
-- Update documentation about ophyd devices
-  ([`04b3bb0`](https://gitlab.psi.ch/bec/bec/-/commit/04b3bb03b9c9697217e7b2fa703581a29a8b61f4))
 
 - Add documentation for pytest fixtures provided as pytest plugins
   ([`4b3851e`](https://gitlab.psi.ch/bec/bec/-/commit/4b3851e2825c5676e6ae8cdf4334296a69546d02))
 
 - Added isort to developer instructions
   ([`720e3c3`](https://gitlab.psi.ch/bec/bec/-/commit/720e3c39eec764824efe5e30edebd449fab1e92d))
+
+- Address comments
+  ([`2de2e1b`](https://gitlab.psi.ch/bec/bec/-/commit/2de2e1b4bc5fb4cd3060e082fd641dc1c9cafb74))
+
+- Fix wording
+  ([`8dd3ee0`](https://gitlab.psi.ch/bec/bec/-/commit/8dd3ee0946728fe394e8863d04934d70c1e96ba7))
+
+- Refactor summary, configure in docs
+  ([`536f2ef`](https://gitlab.psi.ch/bec/bec/-/commit/536f2efc0cbc9e877dfc6c908e413910e5460cb8))
+
+- Update documentation about ophyd devices
+  ([`04b3bb0`](https://gitlab.psi.ch/bec/bec/-/commit/04b3bb03b9c9697217e7b2fa703581a29a8b61f4))
 
 ### Refactoring
 
@@ -2187,17 +2202,17 @@ All services are now in the bec_server package. This is a breaking change as the
 
 ### Bug Fixes
 
-- Temporary make 'end-2-end tests with multiple hosts' manual
-  ([`54bfe36`](https://gitlab.psi.ch/bec/bec/-/commit/54bfe36fe6becc80b3b893def94a14e0ed1ecdab))
-
 - Temporary fix, do not check for dangling threads in device server tests
   ([`a1cddc0`](https://gitlab.psi.ch/bec/bec/-/commit/a1cddc0639b509531341beb24003479158ea8cd7))
 
-- **tests**: Rename files to prevent error during tests collection with 2 files with same name
-  ([`6fcef45`](https://gitlab.psi.ch/bec/bec/-/commit/6fcef459b855968e3e179d1d4ae48a0f00487bd2))
+- Temporary make 'end-2-end tests with multiple hosts' manual
+  ([`54bfe36`](https://gitlab.psi.ch/bec/bec/-/commit/54bfe36fe6becc80b3b893def94a14e0ed1ecdab))
 
 - **tests**: Ensure all tests do not leak threads
   ([`f371098`](https://gitlab.psi.ch/bec/bec/-/commit/f37109873a0c173dc56a254fdcfca52d8c3ad215))
+
+- **tests**: Rename files to prevent error during tests collection with 2 files with same name
+  ([`6fcef45`](https://gitlab.psi.ch/bec/bec/-/commit/6fcef459b855968e3e179d1d4ae48a0f00487bd2))
 
 ### Build System
 
@@ -2206,19 +2221,19 @@ All services are now in the bec_server package. This is a breaking change as the
 
 ### Code Style
 
-- Fix pep8 compliance
-  ([`9b6ac54`](https://gitlab.psi.ch/bec/bec/-/commit/9b6ac547e7158df9351f485543c849419bc00858))
-
 - Apply isort to the whole codebase, clean unused imports
   ([`2d66967`](https://gitlab.psi.ch/bec/bec/-/commit/2d66967e04a3cbcecde4027d4f0f5ecb1c3c640d))
 
-### Continuous Integration
+- Fix pep8 compliance
+  ([`9b6ac54`](https://gitlab.psi.ch/bec/bec/-/commit/9b6ac547e7158df9351f485543c849419bc00858))
 
-- Added web as trigger for downstream pipelines
-  ([`b46aac7`](https://gitlab.psi.ch/bec/bec/-/commit/b46aac7a8ae6d3eeacacb7dc673e42ad7f55c97f))
+### Continuous Integration
 
 - Added CI variables for downstream pipelines and web source
   ([`b3ebe4e`](https://gitlab.psi.ch/bec/bec/-/commit/b3ebe4e35dc29c03caa4e3a7dae3bdc24542bbe0))
+
+- Added web as trigger for downstream pipelines
+  ([`b46aac7`](https://gitlab.psi.ch/bec/bec/-/commit/b46aac7a8ae6d3eeacacb7dc673e42ad7f55c97f))
 
 ### Documentation
 
@@ -2235,6 +2250,12 @@ All services are now in the bec_server package. This is a breaking change as the
 
 ### Refactoring
 
+- Renamed queueID to queue_id
+  ([`996809f`](https://gitlab.psi.ch/bec/bec/-/commit/996809f3a0915e3562c5d6f5cf9266b13508e6b6))
+
+- Renamed scanID to scan_id
+  ([`01b4e9c`](https://gitlab.psi.ch/bec/bec/-/commit/01b4e9cc68efc3770a328e2165b69026186359c1))
+
 - **CI**: End-to-end tests on the same host, with flushing and on multiple hosts, without flushing
   ([`57f4115`](https://gitlab.psi.ch/bec/bec/-/commit/57f4115dfb24012ca49ab57d51ab0c1d94fe68c3))
 
@@ -2243,12 +2264,6 @@ Environment variables are used to parametrize dockerfile and scripts Introduce '
 
 - **tests**: New 'subprocess_start' with 'no-tmux' option
   ([`b5ca2c3`](https://gitlab.psi.ch/bec/bec/-/commit/b5ca2c30dd99fb8be5081b6a22fcd8f9b7b367bb))
-
-- Renamed queueID to queue_id
-  ([`996809f`](https://gitlab.psi.ch/bec/bec/-/commit/996809f3a0915e3562c5d6f5cf9266b13508e6b6))
-
-- Renamed scanID to scan_id
-  ([`01b4e9c`](https://gitlab.psi.ch/bec/bec/-/commit/01b4e9cc68efc3770a328e2165b69026186359c1))
 
 ### Testing
 
@@ -2271,11 +2286,11 @@ Environment variables are used to parametrize dockerfile and scripts Introduce '
 
 ### Refactoring
 
-- **scan_bundler**: Reduced logger level for msgs without scanID
-  ([`e6c7098`](https://gitlab.psi.ch/bec/bec/-/commit/e6c7098f7da52a6b2b39a3a19a4694b1f8ef374b))
-
 - **bec_client**: Fixed formatter
   ([`53070d9`](https://gitlab.psi.ch/bec/bec/-/commit/53070d94d7063abf9bdc6e7ca154728be5a0a95f))
+
+- **scan_bundler**: Reduced logger level for msgs without scanID
+  ([`e6c7098`](https://gitlab.psi.ch/bec/bec/-/commit/e6c7098f7da52a6b2b39a3a19a4694b1f8ef374b))
 
 
 ## v1.21.0 (2024-03-21)
@@ -2334,11 +2349,11 @@ count=1 by default
 
 ### Bug Fixes
 
-- **scan_server**: Improved shutdown procedure
-  ([`2417eb5`](https://gitlab.psi.ch/bec/bec/-/commit/2417eb5e321944b10ef2568135828121f0023537))
-
 - **scan_server**: Fixed queue update
   ([`926f028`](https://gitlab.psi.ch/bec/bec/-/commit/926f0287be5dffe63c9e318b19908431abbc54de))
+
+- **scan_server**: Improved shutdown procedure
+  ([`2417eb5`](https://gitlab.psi.ch/bec/bec/-/commit/2417eb5e321944b10ef2568135828121f0023537))
 
 ### Refactoring
 
@@ -2355,11 +2370,11 @@ count=1 by default
 
 ### Bug Fixes
 
-- **bec_lib**: Fixed return value for put; closes #234
-  ([`9109177`](https://gitlab.psi.ch/bec/bec/-/commit/9109177a2e395eefb87f96750d3068e6936b2a25))
-
 - **bec_lib**: Added queue update
   ([`1ee251d`](https://gitlab.psi.ch/bec/bec/-/commit/1ee251d6e75fd84c9644e8cdc7b61ba99d0d155c))
+
+- **bec_lib**: Fixed return value for put; closes #234
+  ([`9109177`](https://gitlab.psi.ch/bec/bec/-/commit/9109177a2e395eefb87f96750d3068e6936b2a25))
 
 
 ## v1.20.0 (2024-03-20)
@@ -2387,11 +2402,11 @@ count=1 by default
 
 ### Bug Fixes
 
-- **bec_lib**: Added pyepics compliant wait function to put
-  ([`eb15e3a`](https://gitlab.psi.ch/bec/bec/-/commit/eb15e3ae493d5046c20965846c702f6acfb055dc))
-
 - Unified access to limits; closes #233
   ([`648b720`](https://gitlab.psi.ch/bec/bec/-/commit/648b720a9828c7ed6d7ac3c3750b80d18b8d0e24))
+
+- **bec_lib**: Added pyepics compliant wait function to put
+  ([`eb15e3a`](https://gitlab.psi.ch/bec/bec/-/commit/eb15e3ae493d5046c20965846c702f6acfb055dc))
 
 
 ## v1.18.0 (2024-03-18)
@@ -2443,11 +2458,11 @@ count=1 by default
 
 ### Features
 
-- **device_server**: Added guards against using protected methods; closes #228
-  ([`67e8eeb`](https://gitlab.psi.ch/bec/bec/-/commit/67e8eeb255fabf44ed00605f056066b111791d2c))
-
 - **bec_lib**: Added endpoint for gui heartbeats
   ([`01066dd`](https://gitlab.psi.ch/bec/bec/-/commit/01066dd777e5800f69709e9f76fc192bd9a75a25))
+
+- **device_server**: Added guards against using protected methods; closes #228
+  ([`67e8eeb`](https://gitlab.psi.ch/bec/bec/-/commit/67e8eeb255fabf44ed00605f056066b111791d2c))
 
 
 ## v1.15.0 (2024-03-15)
@@ -2490,11 +2505,11 @@ count=1 by default
 
 ### Documentation
 
-- **bec_lib**: Improved doc string for device module
-  ([`c605846`](https://gitlab.psi.ch/bec/bec/-/commit/c605846adeee080dbdecd55d5f758e2acd884d83))
-
 - **bec_lib**: Added module docs
   ([`7031c24`](https://gitlab.psi.ch/bec/bec/-/commit/7031c2483163eb3268760b5ecd4888c9c5b6b372))
+
+- **bec_lib**: Improved doc string for device module
+  ([`c605846`](https://gitlab.psi.ch/bec/bec/-/commit/c605846adeee080dbdecd55d5f758e2acd884d83))
 
 ### Testing
 
@@ -2506,11 +2521,11 @@ count=1 by default
 
 ### Bug Fixes
 
-- **bec_lib**: Don't call rpc on jedi completer
-  ([`8a6a968`](https://gitlab.psi.ch/bec/bec/-/commit/8a6a968cc8c31fbb5fb20ce872b8bbdc76039ee8))
-
 - **bec_lib**: Added tab complete for property vars
   ([`ef531d0`](https://gitlab.psi.ch/bec/bec/-/commit/ef531d0d4a1848ac5917b56eebea385fac9b7a4c))
+
+- **bec_lib**: Don't call rpc on jedi completer
+  ([`8a6a968`](https://gitlab.psi.ch/bec/bec/-/commit/8a6a968cc8c31fbb5fb20ce872b8bbdc76039ee8))
 
 ### Documentation
 
@@ -2535,11 +2550,11 @@ count=1 by default
 
 ### Bug Fixes
 
-- Remove debug prints from livetable
-  ([`7efb387`](https://gitlab.psi.ch/bec/bec/-/commit/7efb3878d8687ba4e747c99e517d4c6df40c6965))
-
 - Add recovery_config files to .gitignore
   ([`6201757`](https://gitlab.psi.ch/bec/bec/-/commit/62017574baea74dfff5f4d13ea1d1886ee6581a8))
+
+- Remove debug prints from livetable
+  ([`7efb387`](https://gitlab.psi.ch/bec/bec/-/commit/7efb3878d8687ba4e747c99e517d4c6df40c6965))
 
 
 ## v1.14.1 (2024-03-11)
@@ -2582,11 +2597,11 @@ count=1 by default
 
 ### Testing
 
-- **bec_lib**: Added tests for computed signal
-  ([`286e05d`](https://gitlab.psi.ch/bec/bec/-/commit/286e05d2b34e44be7f1a9f2baaec50d71098568f))
-
 - Added e2e test for pseudo signal
   ([`8b85165`](https://gitlab.psi.ch/bec/bec/-/commit/8b85165bc4afcb044048e3b239b4dc7465d2636b))
+
+- **bec_lib**: Added tests for computed signal
+  ([`286e05d`](https://gitlab.psi.ch/bec/bec/-/commit/286e05d2b34e44be7f1a9f2baaec50d71098568f))
 
 
 ## v1.13.3 (2024-03-10)
@@ -2601,11 +2616,11 @@ count=1 by default
 
 ### Bug Fixes
 
-- **bec_lib**: Shutdown loguru
-  ([`3f8d655`](https://gitlab.psi.ch/bec/bec/-/commit/3f8d655b2e199268bd23746fd0fe96bc316fcb8c))
-
 - **bec_lib**: Daemonized connector threads
   ([`be1f3fd`](https://gitlab.psi.ch/bec/bec/-/commit/be1f3fd140af8fdf6216f41b92e92ed9126d3791))
+
+- **bec_lib**: Shutdown loguru
+  ([`3f8d655`](https://gitlab.psi.ch/bec/bec/-/commit/3f8d655b2e199268bd23746fd0fe96bc316fcb8c))
 
 
 ## v1.13.1 (2024-03-10)
@@ -2649,11 +2664,11 @@ count=1 by default
 
 ### Bug Fixes
 
-- **bec_lib**: Fixed support for lists in redis stream subscriptions
-  ([`d4b7b42`](https://gitlab.psi.ch/bec/bec/-/commit/d4b7b42f4608464da417435350a0c73f7665a44f))
-
 - **bec_lib**: Added missing unsubscribe from streams
   ([`75cd651`](https://gitlab.psi.ch/bec/bec/-/commit/75cd6512ea4e0b00ad320d16f4298ca9f79d8105))
+
+- **bec_lib**: Fixed support for lists in redis stream subscriptions
+  ([`d4b7b42`](https://gitlab.psi.ch/bec/bec/-/commit/d4b7b42f4608464da417435350a0c73f7665a44f))
 
 - **bec_lib**: Fixed support for redis streams
   ([`7578395`](https://gitlab.psi.ch/bec/bec/-/commit/757839534c75bd3a8110256cdfd770f770a195e0))
@@ -2689,17 +2704,17 @@ count=1 by default
 
 ### Bug Fixes
 
-- Added backward compatibility for scan numbers and dataset numbers
-  ([`9ff2278`](https://gitlab.psi.ch/bec/bec/-/commit/9ff2278c38b9fcb671c5591f15fda9473155fbe3))
-
 - Account is now a variablemessage
   ([`79d57b5`](https://gitlab.psi.ch/bec/bec/-/commit/79d57b509d20451c73a0442adf477ae4299e9dc6))
 
-- Pre-scan macros are now using a VariableMessage
-  ([`4239576`](https://gitlab.psi.ch/bec/bec/-/commit/4239576c94c44041f395261b42de1056de8c0d76))
+- Added backward compatibility for scan numbers and dataset numbers
+  ([`9ff2278`](https://gitlab.psi.ch/bec/bec/-/commit/9ff2278c38b9fcb671c5591f15fda9473155fbe3))
 
 - Logbook is now using a credentialsmessage
   ([`b62960f`](https://gitlab.psi.ch/bec/bec/-/commit/b62960f6e697b116ffc4f3c5fded0c6bcd9ea4e2))
+
+- Pre-scan macros are now using a VariableMessage
+  ([`4239576`](https://gitlab.psi.ch/bec/bec/-/commit/4239576c94c44041f395261b42de1056de8c0d76))
 
 - Scan_number and dataset_number is now a VariableMessage
   ([`f698605`](https://gitlab.psi.ch/bec/bec/-/commit/f698605579766536f1ec1e653e9d5e3dfd44166e))
@@ -2711,28 +2726,28 @@ count=1 by default
 
 ### Documentation
 
-- Updated contributing.md
-  ([`af2bd27`](https://gitlab.psi.ch/bec/bec/-/commit/af2bd273d510f08f420f39ec519d1a97ac8a1cb1))
-
-- Typo
-  ([`4ac0bbc`](https://gitlab.psi.ch/bec/bec/-/commit/4ac0bbca1631ed5226458307f7ad35d155617328))
+- Adress comments
+  ([`d556f84`](https://gitlab.psi.ch/bec/bec/-/commit/d556f842353e7ef335309fb42025d00de193b627))
 
 - Fixed last comments
   ([`aadbb01`](https://gitlab.psi.ch/bec/bec/-/commit/aadbb01a947ae5419dff7c18837ab8ea9b75d78c))
 
-- Adress comments
-  ([`d556f84`](https://gitlab.psi.ch/bec/bec/-/commit/d556f842353e7ef335309fb42025d00de193b627))
+- Typo
+  ([`4ac0bbc`](https://gitlab.psi.ch/bec/bec/-/commit/4ac0bbca1631ed5226458307f7ad35d155617328))
 
 - Update documentation on the simulation
   ([`0ec3dac`](https://gitlab.psi.ch/bec/bec/-/commit/0ec3dac85fd03413c2cf79b5881e8dffbecd2877))
 
-### Refactoring
+- Updated contributing.md
+  ([`af2bd27`](https://gitlab.psi.ch/bec/bec/-/commit/af2bd273d510f08f420f39ec519d1a97ac8a1cb1))
 
-- Removed remaining loads/dumps
-  ([`2fd1953`](https://gitlab.psi.ch/bec/bec/-/commit/2fd1953a551bcb1a0868034b28c629a2add64790))
+### Refactoring
 
 - Endpoints return EndpointInfo object instead of string
   ([`a4adb64`](https://gitlab.psi.ch/bec/bec/-/commit/a4adb64f5fb083e4d3c20fe30247ce3b480e68cb))
+
+- Removed remaining loads/dumps
+  ([`2fd1953`](https://gitlab.psi.ch/bec/bec/-/commit/2fd1953a551bcb1a0868034b28c629a2add64790))
 
 ### Testing
 
@@ -2852,17 +2867,17 @@ With deprecation warnings
 
 ### Bug Fixes
 
-- **scan_bundler**: Fixed scan bundler update
-  ([`2e5b147`](https://gitlab.psi.ch/bec/bec/-/commit/2e5b147a2c9ccd6ca7169f45f0431ed1df902b0f))
-
-- **scan_server**: Reverted changes to monitor scan
-  ([`636e060`](https://gitlab.psi.ch/bec/bec/-/commit/636e0609f2d05ea079661872858084b3f9b3847e))
-
 - **file_writer**: Fixed data update
   ([`16f8f30`](https://gitlab.psi.ch/bec/bec/-/commit/16f8f30ea6fc15173abbfccee65b869018659bca))
 
+- **scan_bundler**: Fixed scan bundler update
+  ([`2e5b147`](https://gitlab.psi.ch/bec/bec/-/commit/2e5b147a2c9ccd6ca7169f45f0431ed1df902b0f))
+
 - **scan_server**: Fixed inheritance for flyers
   ([`5f80220`](https://gitlab.psi.ch/bec/bec/-/commit/5f80220fa2d062112dd5770b3485dd478ead63f8))
+
+- **scan_server**: Reverted changes to monitor scan
+  ([`636e060`](https://gitlab.psi.ch/bec/bec/-/commit/636e0609f2d05ea079661872858084b3f9b3847e))
 
 ### Refactoring
 
@@ -2882,26 +2897,26 @@ With deprecation warnings
 
 ### Bug Fixes
 
-- **bec_lib**: Fixed service init
-  ([`b09b5ff`](https://gitlab.psi.ch/bec/bec/-/commit/b09b5ff7cddd0d13c6c4a2d55d00914b131e59fd))
-
 - **bec_lib**: Fix after refactoring
   ([`0337f13`](https://gitlab.psi.ch/bec/bec/-/commit/0337f13d0453ca1fac77413d757746f2bc06eb95))
-
-- **scihub**: Added updated config flag to detect failed validations
-  ([`3a133bf`](https://gitlab.psi.ch/bec/bec/-/commit/3a133bf7d44a9578587e5bbee484183a21e9cc7c))
-
-- **bec_lib**: Fixed config helper for failed config updates
-  ([`f603419`](https://gitlab.psi.ch/bec/bec/-/commit/f6034191f5763495130cab25edc5d600d0da274d))
 
 - **bec_lib**: Fixed bl_checks cleanup
   ([`05b00da`](https://gitlab.psi.ch/bec/bec/-/commit/05b00dadbbabffc5efd32e9621336e335564db76))
 
+- **bec_lib**: Fixed config helper for failed config updates
+  ([`f603419`](https://gitlab.psi.ch/bec/bec/-/commit/f6034191f5763495130cab25edc5d600d0da274d))
+
 - **bec_lib**: Fixed service id assignment
   ([`3826d41`](https://gitlab.psi.ch/bec/bec/-/commit/3826d410527177acce339e307a17c2943a921aa4))
 
+- **bec_lib**: Fixed service init
+  ([`b09b5ff`](https://gitlab.psi.ch/bec/bec/-/commit/b09b5ff7cddd0d13c6c4a2d55d00914b131e59fd))
+
 - **bec_lib**: Save guard device manager init
   ([`fcbc240`](https://gitlab.psi.ch/bec/bec/-/commit/fcbc2402e437a756c11b09f5d1ce9a5351a0cc54))
+
+- **scihub**: Added updated config flag to detect failed validations
+  ([`3a133bf`](https://gitlab.psi.ch/bec/bec/-/commit/3a133bf7d44a9578587e5bbee484183a21e9cc7c))
 
 ### Continuous Integration
 
@@ -2910,17 +2925,17 @@ With deprecation warnings
 
 ### Features
 
-- **scihub**: Added config reply handler for device_server updates
-  ([`29a1d19`](https://gitlab.psi.ch/bec/bec/-/commit/29a1d19504d6cbfb4a4601106d5341aadb0f43f7))
-
-- **device_server**: Connection errors and init errors are separated and forwarded
-  ([`c2214b8`](https://gitlab.psi.ch/bec/bec/-/commit/c2214b86468a2ac590ee3fd5eda19734dbac1c26))
+- **bec_lib**: Added config history endpoint
+  ([`ee7ecef`](https://gitlab.psi.ch/bec/bec/-/commit/ee7ecef8d52320356f2190620bc3e42fa37db304))
 
 - **bec_lib**: Report on failed devices; save recovery file to disk
   ([`8062503`](https://gitlab.psi.ch/bec/bec/-/commit/806250300e472a780329e6438c1891565481d8f7))
 
-- **bec_lib**: Added config history endpoint
-  ([`ee7ecef`](https://gitlab.psi.ch/bec/bec/-/commit/ee7ecef8d52320356f2190620bc3e42fa37db304))
+- **device_server**: Connection errors and init errors are separated and forwarded
+  ([`c2214b8`](https://gitlab.psi.ch/bec/bec/-/commit/c2214b86468a2ac590ee3fd5eda19734dbac1c26))
+
+- **scihub**: Added config reply handler for device_server updates
+  ([`29a1d19`](https://gitlab.psi.ch/bec/bec/-/commit/29a1d19504d6cbfb4a4601106d5341aadb0f43f7))
 
 ### Refactoring
 
@@ -2929,17 +2944,17 @@ With deprecation warnings
 
 ### Testing
 
+- Fixed tests
+  ([`e5aeb51`](https://gitlab.psi.ch/bec/bec/-/commit/e5aeb510bfd0a477d817a45007a66b89f83bdd7f))
+
 - **bec_lib**: Added config test for invalid device class
   ([`32df081`](https://gitlab.psi.ch/bec/bec/-/commit/32df081906db6c80dfb572828bc06446b7134cba))
-
-- **scibec**: Fixed expected return values
-  ([`79cd2ff`](https://gitlab.psi.ch/bec/bec/-/commit/79cd2ff2f696713f405ce575bb8dbce26e49e8e8))
 
 - **bec_lib**: Added tests for config updates; added threads check
   ([`67b96b9`](https://gitlab.psi.ch/bec/bec/-/commit/67b96b9a6f96346e23f9b0eac9b3ac642e447d13))
 
-- Fixed tests
-  ([`e5aeb51`](https://gitlab.psi.ch/bec/bec/-/commit/e5aeb510bfd0a477d817a45007a66b89f83bdd7f))
+- **scibec**: Fixed expected return values
+  ([`79cd2ff`](https://gitlab.psi.ch/bec/bec/-/commit/79cd2ff2f696713f405ce575bb8dbce26e49e8e8))
 
 
 ## v1.9.0 (2024-02-22)
@@ -2990,9 +3005,6 @@ With deprecation warnings
 
 ### Testing
 
-- **pdf_writer**: Added tests
-  ([`f64bdea`](https://gitlab.psi.ch/bec/bec/-/commit/f64bdea7978c7ba5d98cb8b6933c91b54dd2865f))
-
 - **async_data**: Added more tests
   ([`fb7c84f`](https://gitlab.psi.ch/bec/bec/-/commit/fb7c84fcc6b60f021684b3bd14e9ce22e5e3af72))
 
@@ -3001,6 +3013,9 @@ With deprecation warnings
 
 - **file_writer**: Updated test data to new xrange return values
   ([`d5cfbb3`](https://gitlab.psi.ch/bec/bec/-/commit/d5cfbb37538618fe2be5aaee10d9b0ac9122df7c))
+
+- **pdf_writer**: Added tests
+  ([`f64bdea`](https://gitlab.psi.ch/bec/bec/-/commit/f64bdea7978c7ba5d98cb8b6933c91b54dd2865f))
 
 
 ## v1.7.3 (2024-02-19)
@@ -3044,11 +3059,11 @@ With deprecation warnings
 
 ### Features
 
-- **scan_worker**: Emitted readout priority contains all devices, not just the modification
-  ([`21187ad`](https://gitlab.psi.ch/bec/bec/-/commit/21187adb48495422aa9c0f0adbeeaa23b2d6c8a5))
-
 - **devicemanager**: Added filter methods for continuous and on_request devices
   ([`708aaff`](https://gitlab.psi.ch/bec/bec/-/commit/708aaff918e7e858c3c1070057a17cedab248c88))
+
+- **scan_worker**: Emitted readout priority contains all devices, not just the modification
+  ([`21187ad`](https://gitlab.psi.ch/bec/bec/-/commit/21187adb48495422aa9c0f0adbeeaa23b2d6c8a5))
 
 ### Testing
 
@@ -3137,11 +3152,11 @@ With deprecation warnings
 
 ### Refactoring
 
-- Fix typos and structure
-  ([`4dd6263`](https://gitlab.psi.ch/bec/bec/-/commit/4dd6263c649afc8ea7a3faf33de2722152923156))
-
 - Add dap_services, renamed ophyd_devices to devices and hli to high_level_interface
   ([`0c33ba7`](https://gitlab.psi.ch/bec/bec/-/commit/0c33ba7616d170748a79aae9405e841b76097adc))
+
+- Fix typos and structure
+  ([`4dd6263`](https://gitlab.psi.ch/bec/bec/-/commit/4dd6263c649afc8ea7a3faf33de2722152923156))
 
 ### Testing
 
@@ -3168,19 +3183,19 @@ With deprecation warnings
 
 ### Documentation
 
-- **dap**: Added data fitting to user docs
-  ([`b881b08`](https://gitlab.psi.ch/bec/bec/-/commit/b881b081726c659056c5120e0a71e09d41ef8881))
-
 - Fixed typo ophyd.md
   ([`c1f4b38`](https://gitlab.psi.ch/bec/bec/-/commit/c1f4b388032689cf4f2d9492f6e49d32851b6035))
+
+- **dap**: Added data fitting to user docs
+  ([`b881b08`](https://gitlab.psi.ch/bec/bec/-/commit/b881b081726c659056c5120e0a71e09d41ef8881))
 
 - **ophyd**: Fixed ophyd config description
   ([`6a272de`](https://gitlab.psi.ch/bec/bec/-/commit/6a272dede1d23ac7af9bb158105b2d5eb2c7445b))
 
 ### Features
 
-- **dap**: Added option to filter x range before fitting data
-  ([`7068c1f`](https://gitlab.psi.ch/bec/bec/-/commit/7068c1f738d9876ef13cb62d797ba15fada3bd98))
+- Added support for customized dap plugins objects
+  ([`cf8430f`](https://gitlab.psi.ch/bec/bec/-/commit/cf8430f8787c8028d518c17fea5f00aba6e94093))
 
 - **dap**: Added input_data and plot options
   ([`c4029a0`](https://gitlab.psi.ch/bec/bec/-/commit/c4029a098db66baf1741bf4bcc1bbd71d14aca7f))
@@ -3188,36 +3203,36 @@ With deprecation warnings
 - **DAP**: Added option to customize results based on the dap service
   ([`dd48519`](https://gitlab.psi.ch/bec/bec/-/commit/dd4851941c14b1ace0227ab3ff28b50826c22f89))
 
-- Added support for customized dap plugins objects
-  ([`cf8430f`](https://gitlab.psi.ch/bec/bec/-/commit/cf8430f8787c8028d518c17fea5f00aba6e94093))
+- **dap**: Added option to filter x range before fitting data
+  ([`7068c1f`](https://gitlab.psi.ch/bec/bec/-/commit/7068c1f738d9876ef13cb62d797ba15fada3bd98))
 
 ### Refactoring
-
-- Removed outdated worker manager
-  ([`ba74299`](https://gitlab.psi.ch/bec/bec/-/commit/ba74299a1dbd3aa3fd8ba38134889eb00df03142))
 
 - Added str method to message objects
   ([`f9b2813`](https://gitlab.psi.ch/bec/bec/-/commit/f9b2813a1deda03d5c1061fcbe7a20442405e056))
 
+- Removed outdated worker manager
+  ([`ba74299`](https://gitlab.psi.ch/bec/bec/-/commit/ba74299a1dbd3aa3fd8ba38134889eb00df03142))
+
 ### Testing
-
-- Fixed test as get data returns a np array instead of list
-  ([`867773b`](https://gitlab.psi.ch/bec/bec/-/commit/867773be376c0e7c43890337b4f86ceace8b4472))
-
-- Fixed test after modifying dap interface
-  ([`d57e95e`](https://gitlab.psi.ch/bec/bec/-/commit/d57e95e20d2951746c86a51a1f2d307a4b7d2448))
-
-- Fixed import for dap plugins
-  ([`b119e46`](https://gitlab.psi.ch/bec/bec/-/commit/b119e464d6d3f6b325ec3dd53454bab7ff10a1fe))
 
 - Added more tests for bec scans
   ([`101bc1f`](https://gitlab.psi.ch/bec/bec/-/commit/101bc1ff1578e54b0dbd5b11ea3a92e7c32e5a96))
 
-- Use dev dependencies instead of hard-coded deps in Dockerfile
-  ([`53bb5a6`](https://gitlab.psi.ch/bec/bec/-/commit/53bb5a61290da65791525d4bf6f7c11998eee90b))
+- Fixed import for dap plugins
+  ([`b119e46`](https://gitlab.psi.ch/bec/bec/-/commit/b119e464d6d3f6b325ec3dd53454bab7ff10a1fe))
+
+- Fixed test after modifying dap interface
+  ([`d57e95e`](https://gitlab.psi.ch/bec/bec/-/commit/d57e95e20d2951746c86a51a1f2d307a4b7d2448))
+
+- Fixed test as get data returns a np array instead of list
+  ([`867773b`](https://gitlab.psi.ch/bec/bec/-/commit/867773be376c0e7c43890337b4f86ceace8b4472))
 
 - Marked mv as flaky
   ([`496442a`](https://gitlab.psi.ch/bec/bec/-/commit/496442a6c8b1009c5f152a5863dc17a7cfc9a3c6))
+
+- Use dev dependencies instead of hard-coded deps in Dockerfile
+  ([`53bb5a6`](https://gitlab.psi.ch/bec/bec/-/commit/53bb5a61290da65791525d4bf6f7c11998eee90b))
 
 
 ## v1.2.1 (2024-02-10)
@@ -3229,12 +3244,12 @@ With deprecation warnings
 
 ### Refactoring
 
+- Clean up SimMonitor related changes
+  ([`782dea8`](https://gitlab.psi.ch/bec/bec/-/commit/782dea87f303a9a25fa98496dbf9710dfba337e5))
+
 - **configs**: Cleanup configs and removed old SynDevices, exchanged with
   SimCamera/SimMonitor/SimPositioner
   ([`3293925`](https://gitlab.psi.ch/bec/bec/-/commit/3293925256b1c7e1f9c99d93d05a2047ececb91f))
-
-- Clean up SimMonitor related changes
-  ([`782dea8`](https://gitlab.psi.ch/bec/bec/-/commit/782dea87f303a9a25fa98496dbf9710dfba337e5))
 
 
 ## v1.2.0 (2024-02-09)
@@ -3263,11 +3278,11 @@ test: add test for decorator
 
 ### Continuous Integration
 
-- Added missing docker file to build dap
-  ([`950504c`](https://gitlab.psi.ch/bec/bec/-/commit/950504c72836ed192d29c6fdb93169b08c6f8e52))
-
 - Added dap to e2e tests
   ([`6f4fb10`](https://gitlab.psi.ch/bec/bec/-/commit/6f4fb10a28d8b47f1f29ac53d43ecc107a58e316))
+
+- Added missing docker file to build dap
+  ([`950504c`](https://gitlab.psi.ch/bec/bec/-/commit/950504c72836ed192d29c6fdb93169b08c6f8e52))
 
 ### Refactoring
 
@@ -3276,22 +3291,22 @@ test: add test for decorator
 
 ### Testing
 
-- Fixed sim type for dap test
-  ([`7e9da19`](https://gitlab.psi.ch/bec/bec/-/commit/7e9da194459acded34924331c09c92977c4b2363))
-
 - Added e2e test for dap and sim fit
   ([`7f257a9`](https://gitlab.psi.ch/bec/bec/-/commit/7f257a929c486d0280c91ea8351a015a63b5e232))
+
+- Fixed sim type for dap test
+  ([`7e9da19`](https://gitlab.psi.ch/bec/bec/-/commit/7e9da194459acded34924331c09c92977c4b2363))
 
 
 ## v1.1.2 (2024-02-09)
 
 ### Bug Fixes
 
-- Fixed xread decoding
-  ([`c684a76`](https://gitlab.psi.ch/bec/bec/-/commit/c684a76a5eff0bf478121dcde25e9e4447e839dc))
-
 - Fixed init config script
   ([`f0f9fe3`](https://gitlab.psi.ch/bec/bec/-/commit/f0f9fe304f24cb61053ce12d785b82745a14210e))
+
+- Fixed xread decoding
+  ([`c684a76`](https://gitlab.psi.ch/bec/bec/-/commit/c684a76a5eff0bf478121dcde25e9e4447e839dc))
 
 - Removed outdated msgpack packing
   ([`15f8e21`](https://gitlab.psi.ch/bec/bec/-/commit/15f8e213053a635da4ed8d54bcb562a690e71517))
@@ -3329,17 +3344,11 @@ This allows to call .loads() on any bytes string
 
 ### Bug Fixes
 
-- Fixed support for scan items as args
-  ([`b15e38b`](https://gitlab.psi.ch/bec/bec/-/commit/b15e38bd39511e09ed4e456843e54e755a1c10ce))
+- Accept args, kwargs in new client
+  ([`47f4ecf`](https://gitlab.psi.ch/bec/bec/-/commit/47f4ecff540e03004ad16afaa6d11150efd0d3ba))
 
-- Fixed typo
-  ([`4c8dd55`](https://gitlab.psi.ch/bec/bec/-/commit/4c8dd5570cde952a24b60ac4a9eb6227d2b5d364))
-
-- Preliminary fix for missing xadd serialization
-  ([`11b8326`](https://gitlab.psi.ch/bec/bec/-/commit/11b8326393e0b21f0f2ad140c826af18619193f0))
-
-- Fixed scan_data for .get default values
-  ([`aa403c4`](https://gitlab.psi.ch/bec/bec/-/commit/aa403c4a53a7c2462d623097a2f3275f2e7c1c90))
+- Fixed dap loading
+  ([`0c71b5f`](https://gitlab.psi.ch/bec/bec/-/commit/0c71b5f7c2c7d198ced36de9ced40bf99287025a))
 
 - Fixed dataclass for availableresourcemessage
   ([`cfc5237`](https://gitlab.psi.ch/bec/bec/-/commit/cfc5237025806d91eb32f2ebe135e2ddb55e8c1a))
@@ -3350,17 +3359,17 @@ This allows to call .loads() on any bytes string
 - Fixed plugin handling for multiple service provider
   ([`ef4b66f`](https://gitlab.psi.ch/bec/bec/-/commit/ef4b66fd928600e40c06880cba807e667b1b4ed2))
 
+- Fixed scan_data for .get default values
+  ([`aa403c4`](https://gitlab.psi.ch/bec/bec/-/commit/aa403c4a53a7c2462d623097a2f3275f2e7c1c90))
+
 - Fixed support for multiple dap services
   ([`e2595bc`](https://gitlab.psi.ch/bec/bec/-/commit/e2595bc22535de384d2747bbb5d4c225507f2a11))
 
-- Accept args, kwargs in new client
-  ([`47f4ecf`](https://gitlab.psi.ch/bec/bec/-/commit/47f4ecff540e03004ad16afaa6d11150efd0d3ba))
+- Fixed support for scan items as args
+  ([`b15e38b`](https://gitlab.psi.ch/bec/bec/-/commit/b15e38bd39511e09ed4e456843e54e755a1c10ce))
 
-- Use service id property for status updates
-  ([`5d33146`](https://gitlab.psi.ch/bec/bec/-/commit/5d33146b0cf7e6f9f23f98275e2697459d3692dd))
-
-- Fixed dap loading
-  ([`0c71b5f`](https://gitlab.psi.ch/bec/bec/-/commit/0c71b5f7c2c7d198ced36de9ced40bf99287025a))
+- Fixed typo
+  ([`4c8dd55`](https://gitlab.psi.ch/bec/bec/-/commit/4c8dd5570cde952a24b60ac4a9eb6227d2b5d364))
 
 - Fixed xread
   ([`f1219ae`](https://gitlab.psi.ch/bec/bec/-/commit/f1219ae0f051a872bdbb6e5d5e68c8e8b16232ea))
@@ -3371,6 +3380,12 @@ This allows to call .loads() on any bytes string
 - Improved error handling for scihub
   ([`5d8028d`](https://gitlab.psi.ch/bec/bec/-/commit/5d8028db6bb9c510a8738ddba1545797b07dd7eb))
 
+- Preliminary fix for missing xadd serialization
+  ([`11b8326`](https://gitlab.psi.ch/bec/bec/-/commit/11b8326393e0b21f0f2ad140c826af18619193f0))
+
+- Use service id property for status updates
+  ([`5d33146`](https://gitlab.psi.ch/bec/bec/-/commit/5d33146b0cf7e6f9f23f98275e2697459d3692dd))
+
 ### Build System
 
 - Added lmfit dependency
@@ -3378,19 +3393,31 @@ This allows to call .loads() on any bytes string
 
 ### Features
 
-- Lmfit serializer
-  ([`ed679bb`](https://gitlab.psi.ch/bec/bec/-/commit/ed679bb6650dcd7d77ebbe16212745ac985eeba8))
+- Added dap endpoints and messages
+  ([`6dc09cf`](https://gitlab.psi.ch/bec/bec/-/commit/6dc09cf6e5ea26f8b64e266776322cbee19550bc))
 
 - Dap services
   ([`2b08662`](https://gitlab.psi.ch/bec/bec/-/commit/2b08662c08baf89ecbbd051a428914b78bbbcd97))
 
-- Added dap endpoints and messages
-  ([`6dc09cf`](https://gitlab.psi.ch/bec/bec/-/commit/6dc09cf6e5ea26f8b64e266776322cbee19550bc))
+- Lmfit serializer
+  ([`ed679bb`](https://gitlab.psi.ch/bec/bec/-/commit/ed679bb6650dcd7d77ebbe16212745ac985eeba8))
 
 ### Refactoring
 
+- Added private method to simplify the on_scan_status update routine
+  ([`8b223a1`](https://gitlab.psi.ch/bec/bec/-/commit/8b223a1e914f4af2af9e0ed49dd609ad2dce5163))
+
+- Cleanup
+  ([`9d1a494`](https://gitlab.psi.ch/bec/bec/-/commit/9d1a494d9d19cfd50c2a92954c6eb1213a8af3f0))
+
 - Cleanup after rebasing
   ([`514a516`](https://gitlab.psi.ch/bec/bec/-/commit/514a51624bd94fb4af55fcedba37bb155db29dc1))
+
+- Cleanup and formatting
+  ([`9a98dba`](https://gitlab.psi.ch/bec/bec/-/commit/9a98dbafd4f91189d5a8a5a97bb45568bbdedace))
+
+- Removed outdated dap files
+  ([`bd2a4dd`](https://gitlab.psi.ch/bec/bec/-/commit/bd2a4ddd75d6d16dc22d16a50a408b85c7119b05))
 
 - Renamed fit to run and added service property to override default method name
   ([`d510ae2`](https://gitlab.psi.ch/bec/bec/-/commit/d510ae2b61472d258f887c8c8ea4d3c653d5a723))
@@ -3401,35 +3428,18 @@ test: fixed test after refactoring
 
 test: added more tests
 
-- Cleanup and formatting
-  ([`9a98dba`](https://gitlab.psi.ch/bec/bec/-/commit/9a98dbafd4f91189d5a8a5a97bb45568bbdedace))
-
-- Removed outdated dap files
-  ([`bd2a4dd`](https://gitlab.psi.ch/bec/bec/-/commit/bd2a4ddd75d6d16dc22d16a50a408b85c7119b05))
-
-- Added private method to simplify the on_scan_status update routine
-  ([`8b223a1`](https://gitlab.psi.ch/bec/bec/-/commit/8b223a1e914f4af2af9e0ed49dd609ad2dce5163))
-
-- Cleanup
-  ([`9d1a494`](https://gitlab.psi.ch/bec/bec/-/commit/9d1a494d9d19cfd50c2a92954c6eb1213a8af3f0))
-
 ### Testing
-
-- More tests
-  ([`aa9ff2d`](https://gitlab.psi.ch/bec/bec/-/commit/aa9ff2d3d0fdf0db102748a9c5968e969824b34f))
 
 - Added tests for dap plugins
   ([`b09524e`](https://gitlab.psi.ch/bec/bec/-/commit/b09524eb0b1a2686e2d377f9836139a948c25b8d))
+
+- More tests
+  ([`aa9ff2d`](https://gitlab.psi.ch/bec/bec/-/commit/aa9ff2d3d0fdf0db102748a9c5968e969824b34f))
 
 
 ## v1.0.0 (2024-02-07)
 
 ### Bug Fixes
-
-- **messages**: Set msg_type of ScanQueueMessage to "scan_queue_message"
-  ([`8b125a0`](https://gitlab.psi.ch/bec/bec/-/commit/8b125a05b95084c676552c483b4d35eaa45724a2))
-
-This allows 'shortcut lookup' for message class
 
 - **AlarmMessage**: Content member (dict) changed to msg (str)
   ([`3d087ef`](https://gitlab.psi.ch/bec/bec/-/commit/3d087ef87d1480ff4c96873e658441a833f477c6))
@@ -3438,6 +3448,11 @@ In practice it was already used as a message.
 
 - **global var**: Remove builtins.__BEC_SERVICE__
   ([`80fddc5`](https://gitlab.psi.ch/bec/bec/-/commit/80fddc5a4c3ec16d0ac464c79dcfba6bf449242e))
+
+- **messages**: Set msg_type of ScanQueueMessage to "scan_queue_message"
+  ([`8b125a0`](https://gitlab.psi.ch/bec/bec/-/commit/8b125a05b95084c676552c483b4d35eaa45724a2))
+
+This allows 'shortcut lookup' for message class
 
 - **scan_manager**: Publish available scans using a BECMessage
   ([`ac5fafc`](https://gitlab.psi.ch/bec/bec/-/commit/ac5fafc7fa30dc8006edb7554c9e261c30edc9a0))
@@ -3481,8 +3496,26 @@ To have a better separation of concern between messages and how they are conveye
 
 ### Continuous Integration
 
+- Added development tag update
+  ([`05c4328`](https://gitlab.psi.ch/bec/bec/-/commit/05c432852cb976e85e7f18a0ee5b997645883d0a))
+
+- Added rtd deployment to dev on MR
+  ([`b897c4f`](https://gitlab.psi.ch/bec/bec/-/commit/b897c4fd0509104223f7d60344b49728e7f80cc9))
+
+- Changed job order for dev rtd deployment
+  ([`a7afda9`](https://gitlab.psi.ch/bec/bec/-/commit/a7afda9d789010f8e800910e687635d58aaf9ed8))
+
 - Dockerfile accepts build var for python version
   ([`7b5391a`](https://gitlab.psi.ch/bec/bec/-/commit/7b5391a4f01a8acfcdc9c4eda7ef6065685d9dd3))
+
+- Excluded dev branch from pipeline
+  ([`9a7e817`](https://gitlab.psi.ch/bec/bec/-/commit/9a7e817e541a599dcee06ef2be7b93329f8f3632))
+
+- Moved branch exclusion to job
+  ([`d8381b9`](https://gitlab.psi.ch/bec/bec/-/commit/d8381b9850c6d77a6f1d3cb55bcbf31a266b79fc))
+
+- Removed no-ci
+  ([`c696317`](https://gitlab.psi.ch/bec/bec/-/commit/c696317f68ae0fd7f0130a800ad570b29af3b8f2))
 
 - Reverted changes to .gitlab-ci.yml
   ([`22261ad`](https://gitlab.psi.ch/bec/bec/-/commit/22261ad411c6d6f0b1cef201021656fba08072b6))
@@ -3496,37 +3529,19 @@ To have a better separation of concern between messages and how they are conveye
 - Updated .gitlab-ci.yml file
   ([`7edf969`](https://gitlab.psi.ch/bec/bec/-/commit/7edf96964953f999b83797662f9534af4439325e))
 
-- Moved branch exclusion to job
-  ([`d8381b9`](https://gitlab.psi.ch/bec/bec/-/commit/d8381b9850c6d77a6f1d3cb55bcbf31a266b79fc))
-
-- Excluded dev branch from pipeline
-  ([`9a7e817`](https://gitlab.psi.ch/bec/bec/-/commit/9a7e817e541a599dcee06ef2be7b93329f8f3632))
-
-- Removed no-ci
-  ([`c696317`](https://gitlab.psi.ch/bec/bec/-/commit/c696317f68ae0fd7f0130a800ad570b29af3b8f2))
-
-- Added development tag update
-  ([`05c4328`](https://gitlab.psi.ch/bec/bec/-/commit/05c432852cb976e85e7f18a0ee5b997645883d0a))
-
-- Changed job order for dev rtd deployment
-  ([`a7afda9`](https://gitlab.psi.ch/bec/bec/-/commit/a7afda9d789010f8e800910e687635d58aaf9ed8))
-
-- Added rtd deployment to dev on MR
-  ([`b897c4f`](https://gitlab.psi.ch/bec/bec/-/commit/b897c4fd0509104223f7d60344b49728e7f80cc9))
-
 ### Documentation
 
-- Fixed docstrings
-  ([`f1e8662`](https://gitlab.psi.ch/bec/bec/-/commit/f1e86627773659b76b8cff199709611d23a0c558))
+- Added references to the user guide
+  ([`a25c4b2`](https://gitlab.psi.ch/bec/bec/-/commit/a25c4b2bb0ef7d98ef72c0bfefd6b435d4bb1db0))
 
 - Complement documentation
   ([`b4ac84a`](https://gitlab.psi.ch/bec/bec/-/commit/b4ac84a960db767eed0d6686ab242d52e7c3ac06))
 
+- Fixed docstrings
+  ([`f1e8662`](https://gitlab.psi.ch/bec/bec/-/commit/f1e86627773659b76b8cff199709611d23a0c558))
+
 - Updated landing page readme
   ([`c30eb2e`](https://gitlab.psi.ch/bec/bec/-/commit/c30eb2e67e89542d87a7aef8d7e445165f827239))
-
-- Added references to the user guide
-  ([`a25c4b2`](https://gitlab.psi.ch/bec/bec/-/commit/a25c4b2bb0ef7d98ef72c0bfefd6b435d4bb1db0))
 
 
 ## v0.60.2 (2024-02-02)
@@ -3546,11 +3561,11 @@ To have a better separation of concern between messages and how they are conveye
 - Added scilog tests
   ([`f8bf994`](https://gitlab.psi.ch/bec/bec/-/commit/f8bf9943b18d8e94c7113862e987d7dd3be8764c))
 
-- Allow for some jitter
-  ([`d560432`](https://gitlab.psi.ch/bec/bec/-/commit/d5604323b6a33f86ecaae2e66a2cba0802cdd469))
-
 - Added shutdown methods to consumer mocks
   ([`4d827fe`](https://gitlab.psi.ch/bec/bec/-/commit/4d827fe16c982684fcca2e63f6bad1e486215309))
+
+- Allow for some jitter
+  ([`d560432`](https://gitlab.psi.ch/bec/bec/-/commit/d5604323b6a33f86ecaae2e66a2cba0802cdd469))
 
 
 ## v0.60.1 (2024-02-02)
@@ -3621,22 +3636,22 @@ To have a better separation of concern between messages and how they are conveye
 - Added put as trigger for an update of the config cache
   ([`5f19da9`](https://gitlab.psi.ch/bec/bec/-/commit/5f19da921eafab72d0f64f437e4d49fa7afff988))
 
-- Fixed status callback for cbs where the device is passed on
-  ([`d110711`](https://gitlab.psi.ch/bec/bec/-/commit/d1107119da4b40f0ed119ed578593a75b49f1f38))
-
 - Fixed rpc configuration updates to also update the cache
   ([`e4ef9b7`](https://gitlab.psi.ch/bec/bec/-/commit/e4ef9b725fc29502b175a20df2adf0c418024db7))
 
+- Fixed status callback for cbs where the device is passed on
+  ([`d110711`](https://gitlab.psi.ch/bec/bec/-/commit/d1107119da4b40f0ed119ed578593a75b49f1f38))
+
 ### Testing
+
+- Added e2e test for read_configuration and limit updates
+  ([`7cdf4c3`](https://gitlab.psi.ch/bec/bec/-/commit/7cdf4c3d47f1f8da5c0f8dccf0dd987772ed0154))
 
 - Fixed typo
   ([`4fae99c`](https://gitlab.psi.ch/bec/bec/-/commit/4fae99c0db47bd9971ea220d2f23d5dd7176db6f))
 
 - Fixed typo
   ([`2405053`](https://gitlab.psi.ch/bec/bec/-/commit/2405053ff08b1bb530ae0f64cd9f07a128b199ed))
-
-- Added e2e test for read_configuration and limit updates
-  ([`7cdf4c3`](https://gitlab.psi.ch/bec/bec/-/commit/7cdf4c3d47f1f8da5c0f8dccf0dd987772ed0154))
 
 
 ## v0.59.1 (2024-01-29)
@@ -3648,11 +3663,11 @@ To have a better separation of concern between messages and how they are conveye
 
 ### Refactoring
 
-- Fixed formatting for black24
-  ([`6d05dc2`](https://gitlab.psi.ch/bec/bec/-/commit/6d05dc2f7f920721d6f7421153d31bff20d0004b))
-
 - Add sotwaretrigger to repr and show_all
   ([`d0d8db0`](https://gitlab.psi.ch/bec/bec/-/commit/d0d8db0c46f403fd0060fdd45e8d3054a7c006f7))
+
+- Fixed formatting for black24
+  ([`6d05dc2`](https://gitlab.psi.ch/bec/bec/-/commit/6d05dc2f7f920721d6f7421153d31bff20d0004b))
 
 
 ## v0.59.0 (2024-01-25)
@@ -3685,14 +3700,14 @@ To have a better separation of concern between messages and how they are conveye
 
 ### Testing
 
-- Complement config_update_test with onFailure key
-  ([`b69dccb`](https://gitlab.psi.ch/bec/bec/-/commit/b69dccbf9693116a0e61c8633ca095a2dc0f263c))
-
 - Add test for config_handler; available keys for update
   ([`eed15d6`](https://gitlab.psi.ch/bec/bec/-/commit/eed15d6e8a864cf8327027e5c12b050a25e5e42c))
 
 - Add test for get_software_triggered_devices
   ([`70ec095`](https://gitlab.psi.ch/bec/bec/-/commit/70ec095e36a9a37dccd94ae63eb46fc6c763083c))
+
+- Complement config_update_test with onFailure key
+  ([`b69dccb`](https://gitlab.psi.ch/bec/bec/-/commit/b69dccbf9693116a0e61c8633ca095a2dc0f263c))
 
 
 ## v0.58.1 (2024-01-25)
@@ -3707,14 +3722,14 @@ To have a better separation of concern between messages and how they are conveye
 
 ### Bug Fixes
 
-- Fixed scan_to_csv export and scan_export cm
-  ([`07654ec`](https://gitlab.psi.ch/bec/bec/-/commit/07654ec0432201d44a4311d09efa62084f65c49e))
-
 - Fixed cm exit
   ([`09d231a`](https://gitlab.psi.ch/bec/bec/-/commit/09d231a783036b71e8a9d9edfaa7408ae8b69fd7))
 
 - Fixed context manager
   ([`52a2cdc`](https://gitlab.psi.ch/bec/bec/-/commit/52a2cdc8d1596e988d4a7f18acef4a179fc820ad))
+
+- Fixed scan_to_csv export and scan_export cm
+  ([`07654ec`](https://gitlab.psi.ch/bec/bec/-/commit/07654ec0432201d44a4311d09efa62084f65c49e))
 
 ### Documentation
 
@@ -3733,20 +3748,20 @@ To have a better separation of concern between messages and how they are conveye
 
 ### Testing
 
-- Removed time.sleep due to merge resolve
-  ([`f2a947b`](https://gitlab.psi.ch/bec/bec/-/commit/f2a947b967ce941b8c90d2fd6e7d2061a3cdef01))
+- Add and fixed tests for scan_to_csv and scan_export_cm
+  ([`260ff38`](https://gitlab.psi.ch/bec/bec/-/commit/260ff38d6223c4b34ba78d54dae10ce9e904974c))
 
 - Add end-2-end test for scan_export_cm; closes #81,#161
   ([`425a658`](https://gitlab.psi.ch/bec/bec/-/commit/425a658e6ab074b569ecf7cb885662d85939c063))
 
-- Add and fixed tests for scan_to_csv and scan_export_cm
-  ([`260ff38`](https://gitlab.psi.ch/bec/bec/-/commit/260ff38d6223c4b34ba78d54dae10ce9e904974c))
+- Added tests for metadata handler; closes #174
+  ([`624613c`](https://gitlab.psi.ch/bec/bec/-/commit/624613c3bdbde8974f019c3a3314ec1b2b854732))
 
 - Latency bodge
   ([`f6de378`](https://gitlab.psi.ch/bec/bec/-/commit/f6de378f5a930249acb906b3fc2277b8a275a1d5))
 
-- Added tests for metadata handler; closes #174
-  ([`624613c`](https://gitlab.psi.ch/bec/bec/-/commit/624613c3bdbde8974f019c3a3314ec1b2b854732))
+- Removed time.sleep due to merge resolve
+  ([`f2a947b`](https://gitlab.psi.ch/bec/bec/-/commit/f2a947b967ce941b8c90d2fd6e7d2061a3cdef01))
 
 
 ## v0.57.2 (2024-01-24)
@@ -3797,14 +3812,14 @@ To have a better separation of concern between messages and how they are conveye
 
 ### Bug Fixes
 
-- Disabled config updates on scibec
-  ([`78b5cd6`](https://gitlab.psi.ch/bec/bec/-/commit/78b5cd66d1391fd855d1913b1a1ea655c86787a6))
-
 - Add 'add' to message again
   ([`d99230a`](https://gitlab.psi.ch/bec/bec/-/commit/d99230a45fefa412c5b2678c554575b1b27afc13))
 
 - Bugfix for deviceConfigMessage validation
   ([`1c2a7d1`](https://gitlab.psi.ch/bec/bec/-/commit/1c2a7d1850911ee9a8c45f04dea0622d056785a7))
+
+- Disabled config updates on scibec
+  ([`78b5cd6`](https://gitlab.psi.ch/bec/bec/-/commit/78b5cd66d1391fd855d1913b1a1ea655c86787a6))
 
 ### Testing
 
@@ -3850,28 +3865,28 @@ To have a better separation of concern between messages and how they are conveye
 
 ### Features
 
-- Upgraded to new scibec structure
-  ([`b72894a`](https://gitlab.psi.ch/bec/bec/-/commit/b72894a5f6d2d013fe66df28ca7de29e89125890))
+- Added file content and credential messages
+  ([`416dd7e`](https://gitlab.psi.ch/bec/bec/-/commit/416dd7e1138ce37955fdb7fbfdfd1854771afc2a))
 
 - Added filecontent message
   ([`cade103`](https://gitlab.psi.ch/bec/bec/-/commit/cade10350cb4b83ee4819f81c178548cf5694a4b))
 
-- Added file content and credential messages
-  ([`416dd7e`](https://gitlab.psi.ch/bec/bec/-/commit/416dd7e1138ce37955fdb7fbfdfd1854771afc2a))
-
 - Added scibec and file content endpoint
   ([`b366414`](https://gitlab.psi.ch/bec/bec/-/commit/b366414e5ca66b37c309fae7cc33651e989db0fe))
+
+- Upgraded to new scibec structure
+  ([`b72894a`](https://gitlab.psi.ch/bec/bec/-/commit/b72894a5f6d2d013fe66df28ca7de29e89125890))
 
 ### Refactoring
 
 - Cleanup and tests for new scibec connector
   ([`daea3a3`](https://gitlab.psi.ch/bec/bec/-/commit/daea3a31cea04c8647ec5da1432272333ad1b409))
 
-- Removed scibec and mongodb config settings
-  ([`8c9ff08`](https://gitlab.psi.ch/bec/bec/-/commit/8c9ff08310ba593c3c09d225b7c4fd350dd44c4c))
-
 - Moved repeated timer to separate file
   ([`5dd9e28`](https://gitlab.psi.ch/bec/bec/-/commit/5dd9e28a23f861fb8fabe69508307630d52ad50d))
+
+- Removed scibec and mongodb config settings
+  ([`8c9ff08`](https://gitlab.psi.ch/bec/bec/-/commit/8c9ff08310ba593c3c09d225b7c4fd350dd44c4c))
 
 ### Testing
 
@@ -3893,19 +3908,19 @@ To have a better separation of concern between messages and how they are conveye
 
 ### Documentation
 
-- Updated scanqueuemessage doc string
-  ([`fd89d86`](https://gitlab.psi.ch/bec/bec/-/commit/fd89d8648f84c8029e141b646b99b2c9c13a68e1))
-
 - Reviewed docstring of BECMessages
   ([`a4be91f`](https://gitlab.psi.ch/bec/bec/-/commit/a4be91f37c43de4d19101578a94a62d629309427))
 
-### Features
+- Updated scanqueuemessage doc string
+  ([`fd89d86`](https://gitlab.psi.ch/bec/bec/-/commit/fd89d8648f84c8029e141b646b99b2c9c13a68e1))
 
-- Add sub for monitor, and callback; closes #158
-  ([`4767272`](https://gitlab.psi.ch/bec/bec/-/commit/4767272778693d8abd2db81aecf77ebd5d5f3109))
+### Features
 
 - Add monitor endpoint, device_monitor, and DeviceMonitor message
   ([`0a292b0`](https://gitlab.psi.ch/bec/bec/-/commit/0a292b0363479c288be029be35b8560b79a69d29))
+
+- Add sub for monitor, and callback; closes #158
+  ([`4767272`](https://gitlab.psi.ch/bec/bec/-/commit/4767272778693d8abd2db81aecf77ebd5d5f3109))
 
 ### Refactoring
 
@@ -3959,11 +3974,11 @@ To have a better separation of concern between messages and how they are conveye
 
 ### Refactoring
 
-- Clean up print statements
-  ([`ba7e08c`](https://gitlab.psi.ch/bec/bec/-/commit/ba7e08cd38b42823709d85589878cb0fa40a6308))
-
 - Bec_plotter.py changed attribute names for setting new configs
   ([`46682e6`](https://gitlab.psi.ch/bec/bec/-/commit/46682e626aaa5dbf21911f8a3336e7f86f6ddce7))
+
+- Clean up print statements
+  ([`ba7e08c`](https://gitlab.psi.ch/bec/bec/-/commit/ba7e08cd38b42823709d85589878cb0fa40a6308))
 
 ### Testing
 
@@ -4023,11 +4038,11 @@ Fix #156
 
 ### Continuous Integration
 
-- Fixed scihub log path
-  ([`794556d`](https://gitlab.psi.ch/bec/bec/-/commit/794556d265d7ff28578625d3c63de1f8a65dcc0e))
-
 - Added logs for scihub and dap
   ([`51ff5df`](https://gitlab.psi.ch/bec/bec/-/commit/51ff5dff3a80503c3d0f24e0bcd353752a2eb787))
+
+- Fixed scihub log path
+  ([`794556d`](https://gitlab.psi.ch/bec/bec/-/commit/794556d265d7ff28578625d3c63de1f8a65dcc0e))
 
 - Preliminary fixed ophyd devices branch
   ([`e24f046`](https://gitlab.psi.ch/bec/bec/-/commit/e24f0464b56c258c83b9dbd928132e4875a5fa4c))
@@ -4042,11 +4057,11 @@ Fix #156
 
 ### Testing
 
-- Fixed tests - service are now waiting for device server
-  ([`b70421c`](https://gitlab.psi.ch/bec/bec/-/commit/b70421c30965fa9eb4969d9b070167ba9700977d))
-
 - Fixed test after device_manager refactoring
   ([`14b2c9d`](https://gitlab.psi.ch/bec/bec/-/commit/14b2c9dbdf68e761ba1678d7b4b939ef5ba8f1fb))
+
+- Fixed tests - service are now waiting for device server
+  ([`b70421c`](https://gitlab.psi.ch/bec/bec/-/commit/b70421c30965fa9eb4969d9b070167ba9700977d))
 
 
 ## v0.52.6 (2023-12-18)
@@ -4085,11 +4100,11 @@ Fix #156
 
 ### Bug Fixes
 
-- Fixed log level init
-  ([`5280dad`](https://gitlab.psi.ch/bec/bec/-/commit/5280dadc0640eaf1d3fbdf2fd6b1ce37a9f8f8ff))
-
 - Fixed bug in alarambase that would prohibit error propagation
   ([`4c88bc6`](https://gitlab.psi.ch/bec/bec/-/commit/4c88bc687d90acbd41d0312cda42d1c049dd9423))
+
+- Fixed log level init
+  ([`5280dad`](https://gitlab.psi.ch/bec/bec/-/commit/5280dadc0640eaf1d3fbdf2fd6b1ce37a9f8f8ff))
 
 - Fixed timeout error in config_helper
   ([`6e75ca7`](https://gitlab.psi.ch/bec/bec/-/commit/6e75ca73bdd11740bcb5fd71c8157d8d66f05b53))
@@ -4131,11 +4146,11 @@ Fix #156
 
 ### Bug Fixes
 
-- Fixed config_ack for incomplete messages
-  ([`16c0a1d`](https://gitlab.psi.ch/bec/bec/-/commit/16c0a1d4d4d023239afb12862a5732ec5187cf6f))
-
 - Added service acknowledgement for config updates; closes #79
   ([`bc1c43e`](https://gitlab.psi.ch/bec/bec/-/commit/bc1c43e2da1775b191dd168ab96599a4ada425cc))
+
+- Fixed config_ack for incomplete messages
+  ([`16c0a1d`](https://gitlab.psi.ch/bec/bec/-/commit/16c0a1d4d4d023239afb12862a5732ec5187cf6f))
 
 ### Refactoring
 
@@ -4174,34 +4189,34 @@ Fix #156
 
 ### Bug Fixes
 
-- Fixed readout for omitted signals
-  ([`532d142`](https://gitlab.psi.ch/bec/bec/-/commit/532d142860ddac19dc1581db895514608dcfb65f))
-
-- Fixed bug in config readout
-  ([`4a640e5`](https://gitlab.psi.ch/bec/bec/-/commit/4a640e5ea05e7842fbfda851d79b97af0a801720))
-
-- Fixed read and read_config for cached readouts
-  ([`ba2a797`](https://gitlab.psi.ch/bec/bec/-/commit/ba2a797dfbd67b98b931b5f299bf53a2f4ed71a2))
+- Added option to read configuration from redis
+  ([`f7acd4c`](https://gitlab.psi.ch/bec/bec/-/commit/f7acd4cb0646a660676fd5561d23c00bc7157fcc))
 
 - Added read_config on init
   ([`3529108`](https://gitlab.psi.ch/bec/bec/-/commit/352910812487104a87b8d95dc37d1c2164574074))
 
-- Fixed rpc calls for read_configuration
-  ([`3a475e7`](https://gitlab.psi.ch/bec/bec/-/commit/3a475e7e6e0cf46420bfe99a7b9747110d608412))
-
-- Added option to read configuration from redis
-  ([`f7acd4c`](https://gitlab.psi.ch/bec/bec/-/commit/f7acd4cb0646a660676fd5561d23c00bc7157fcc))
+- Fixed bug in config readout
+  ([`4a640e5`](https://gitlab.psi.ch/bec/bec/-/commit/4a640e5ea05e7842fbfda851d79b97af0a801720))
 
 - Fixed ctrl c for rpc calls for unresponsive backends
   ([`6341059`](https://gitlab.psi.ch/bec/bec/-/commit/6341059dd068daf5fd6cce4947901cc3c3dcbe31))
 
-### Build System
+- Fixed read and read_config for cached readouts
+  ([`ba2a797`](https://gitlab.psi.ch/bec/bec/-/commit/ba2a797dfbd67b98b931b5f299bf53a2f4ed71a2))
 
-- Fixed install script to update the conda deps if they are outdated
-  ([`abedd5e`](https://gitlab.psi.ch/bec/bec/-/commit/abedd5e95489c20519e48215f58ed5d7a9eca824))
+- Fixed readout for omitted signals
+  ([`532d142`](https://gitlab.psi.ch/bec/bec/-/commit/532d142860ddac19dc1581db895514608dcfb65f))
+
+- Fixed rpc calls for read_configuration
+  ([`3a475e7`](https://gitlab.psi.ch/bec/bec/-/commit/3a475e7e6e0cf46420bfe99a7b9747110d608412))
+
+### Build System
 
 - Fix python requirement
   ([`4bfe93f`](https://gitlab.psi.ch/bec/bec/-/commit/4bfe93f6e2a5dc7b4fc778b043e5ccb5ba234674))
+
+- Fixed install script to update the conda deps if they are outdated
+  ([`abedd5e`](https://gitlab.psi.ch/bec/bec/-/commit/abedd5e95489c20519e48215f58ed5d7a9eca824))
 
 ### Documentation
 
@@ -4234,11 +4249,11 @@ Fix #156
 
 ### Bug Fixes
 
-- Remove redundant imports
-  ([`4a27b9a`](https://gitlab.psi.ch/bec/bec/-/commit/4a27b9a1ecde763e913774f8c23b308f79e7a181))
-
 - Fix devicemanger get_deviceType_devices bug and add test
   ([`4aa9ba4`](https://gitlab.psi.ch/bec/bec/-/commit/4aa9ba4a8ef26fef2ad51ef72cd600ce624b7542))
+
+- Remove redundant imports
+  ([`4a27b9a`](https://gitlab.psi.ch/bec/bec/-/commit/4a27b9a1ecde763e913774f8c23b308f79e7a181))
 
 ### Build System
 
@@ -4249,34 +4264,34 @@ All typeguard/3.x versions, and 4.0.0 have an issue with class property decorato
 
 ### Continuous Integration
 
-- Include python312
-  ([`36e33cb`](https://gitlab.psi.ch/bec/bec/-/commit/36e33cbf807ba1a9b8b3d4ba09af5a565221d30b))
-
 - Default to python39
   ([`ad10fb9`](https://gitlab.psi.ch/bec/bec/-/commit/ad10fb93f512c5bf36179caa38d5b3605943a64a))
 
+- Include python312
+  ([`36e33cb`](https://gitlab.psi.ch/bec/bec/-/commit/36e33cbf807ba1a9b8b3d4ba09af5a565221d30b))
+
 ### Documentation
-
-- Update user docs, read and get; closes #125, #150
-  ([`6cf5cfa`](https://gitlab.psi.ch/bec/bec/-/commit/6cf5cfa7a5456fb899fd649b89b2c22293d2a3d8))
-
-- Fix docs, merge ophyd_devices into ophyd in developer documentation
-  ([`26dabe6`](https://gitlab.psi.ch/bec/bec/-/commit/26dabe6f31333e8417ad569b484c80e1e4026f23))
-
-- Address merge comments
-  ([`c288a4e`](https://gitlab.psi.ch/bec/bec/-/commit/c288a4ee5341502abc08fd2d163462e1c8d95cbd))
-
-- Add fields to developer.ophyd as fillers
-  ([`3c64df3`](https://gitlab.psi.ch/bec/bec/-/commit/3c64df327af16485d68dc2d8d2b1a312af67f932))
-
-- Update docs, change software limits for motor
-  ([`e2a41c8`](https://gitlab.psi.ch/bec/bec/-/commit/e2a41c8b12e74debfe68a3d44424bde5a5841984))
 
 - Add docs for read and get interface access; closes #125
   ([`fad8662`](https://gitlab.psi.ch/bec/bec/-/commit/fad86626a4ff3d2b11a1c3dc2cf34baeb0bb5777))
 
+- Add fields to developer.ophyd as fillers
+  ([`3c64df3`](https://gitlab.psi.ch/bec/bec/-/commit/3c64df327af16485d68dc2d8d2b1a312af67f932))
+
+- Address merge comments
+  ([`c288a4e`](https://gitlab.psi.ch/bec/bec/-/commit/c288a4ee5341502abc08fd2d163462e1c8d95cbd))
+
+- Fix docs, merge ophyd_devices into ophyd in developer documentation
+  ([`26dabe6`](https://gitlab.psi.ch/bec/bec/-/commit/26dabe6f31333e8417ad569b484c80e1e4026f23))
+
 - Fix typos, add links to requirements
   ([`ab7a9fa`](https://gitlab.psi.ch/bec/bec/-/commit/ab7a9faf747cc8b4954050186113bdb2ab1ee4a7))
+
+- Update docs, change software limits for motor
+  ([`e2a41c8`](https://gitlab.psi.ch/bec/bec/-/commit/e2a41c8b12e74debfe68a3d44424bde5a5841984))
+
+- Update user docs, read and get; closes #125, #150
+  ([`6cf5cfa`](https://gitlab.psi.ch/bec/bec/-/commit/6cf5cfa7a5456fb899fd649b89b2c22293d2a3d8))
 
 ### Refactoring
 
@@ -4309,26 +4324,23 @@ All typeguard/3.x versions, and 4.0.0 have an issue with class property decorato
 
 ### Bug Fixes
 
-- Fix baseline_update
-  ([`c39bdc1`](https://gitlab.psi.ch/bec/bec/-/commit/c39bdc13b536e49909584c2398dd6ec595e67d27))
+- Added implicit ophyd device name assignment
+  ([`6b497e2`](https://gitlab.psi.ch/bec/bec/-/commit/6b497e2536a993a4ba870a146a5fc824408907bc))
 
-- Fixed bug and tests
-  ([`beb0651`](https://gitlab.psi.ch/bec/bec/-/commit/beb065124d0fcac7df4469a76a552ff057bd6a52))
+- Allow empty signals
+  ([`cdd1d0c`](https://gitlab.psi.ch/bec/bec/-/commit/cdd1d0cba0816692faeec9bd74ea97b4043579d3))
 
 - Clean up device_manager and scan_worker, add tests for baseline_devices; closes #144, #98
   ([`7d5c03b`](https://gitlab.psi.ch/bec/bec/-/commit/7d5c03b7b9a8683d59773fc0b7e5f0830e563519))
 
-- Fixed update for deviceConfig
-  ([`1b81ffb`](https://gitlab.psi.ch/bec/bec/-/commit/1b81ffb3323ed560f1791587f612b8dfb254f6c4))
+- Fix baseline_update
+  ([`c39bdc1`](https://gitlab.psi.ch/bec/bec/-/commit/c39bdc13b536e49909584c2398dd6ec595e67d27))
 
-- Fixed devicemanager for missing deviceConfig
-  ([`daa0e8e`](https://gitlab.psi.ch/bec/bec/-/commit/daa0e8e5e24518839b68dfebaca74f579ca49a9f))
+- Fixed bec_lib after refactoring
+  ([`9317220`](https://gitlab.psi.ch/bec/bec/-/commit/93172203b6292dfe8399fb47a277263002f94f01))
 
-- Added implicit ophyd device name assignment
-  ([`6b497e2`](https://gitlab.psi.ch/bec/bec/-/commit/6b497e2536a993a4ba870a146a5fc824408907bc))
-
-- Fixed fly scan sim
-  ([`50fc302`](https://gitlab.psi.ch/bec/bec/-/commit/50fc30216bd44ec46118fba5e37def56b859c8a5))
+- Fixed bug and tests
+  ([`beb0651`](https://gitlab.psi.ch/bec/bec/-/commit/beb065124d0fcac7df4469a76a552ff057bd6a52))
 
 - Fixed config update in config handler
   ([`cdbaf0c`](https://gitlab.psi.ch/bec/bec/-/commit/cdbaf0c6c4132af326ece5feb35ba302efa84c72))
@@ -4339,14 +4351,17 @@ All typeguard/3.x versions, and 4.0.0 have an issue with class property decorato
 - Fixed demo config
   ([`ab399cc`](https://gitlab.psi.ch/bec/bec/-/commit/ab399cc934f186d286595bfd325fe7d78f31351e))
 
-- Allow empty signals
-  ([`cdd1d0c`](https://gitlab.psi.ch/bec/bec/-/commit/cdd1d0cba0816692faeec9bd74ea97b4043579d3))
+- Fixed devicemanager for missing deviceConfig
+  ([`daa0e8e`](https://gitlab.psi.ch/bec/bec/-/commit/daa0e8e5e24518839b68dfebaca74f579ca49a9f))
+
+- Fixed fly scan sim
+  ([`50fc302`](https://gitlab.psi.ch/bec/bec/-/commit/50fc30216bd44ec46118fba5e37def56b859c8a5))
 
 - Fixed scan server after config refactoring
   ([`9397918`](https://gitlab.psi.ch/bec/bec/-/commit/939791889f9403c597ce7cbcb5f5c401ae6747a1))
 
-- Fixed bec_lib after refactoring
-  ([`9317220`](https://gitlab.psi.ch/bec/bec/-/commit/93172203b6292dfe8399fb47a277263002f94f01))
+- Fixed update for deviceConfig
+  ([`1b81ffb`](https://gitlab.psi.ch/bec/bec/-/commit/1b81ffb3323ed560f1791587f612b8dfb254f6c4))
 
 ### Documentation
 
@@ -4390,14 +4405,14 @@ All typeguard/3.x versions, and 4.0.0 have an issue with class property decorato
 - Added issue templates
   ([`a207011`](https://gitlab.psi.ch/bec/bec/-/commit/a2070113c7497c5f16cbd618c34b2fc91f6e4232))
 
-- Updated heading in default mr template
-  ([`abbb761`](https://gitlab.psi.ch/bec/bec/-/commit/abbb761838ab893516133e5a0ebbb45875e7e613))
+- Added merge request template
+  ([`d690f06`](https://gitlab.psi.ch/bec/bec/-/commit/d690f0670a72d11875aa3c233bf634512314bc83))
 
 - Updated default mr template
   ([`350545c`](https://gitlab.psi.ch/bec/bec/-/commit/350545ce67eb13e1ada9c1839ce8814d6c76c776))
 
-- Added merge request template
-  ([`d690f06`](https://gitlab.psi.ch/bec/bec/-/commit/d690f0670a72d11875aa3c233bf634512314bc83))
+- Updated heading in default mr template
+  ([`abbb761`](https://gitlab.psi.ch/bec/bec/-/commit/abbb761838ab893516133e5a0ebbb45875e7e613))
 
 ### Documentation
 
@@ -4417,8 +4432,8 @@ All typeguard/3.x versions, and 4.0.0 have an issue with class property decorato
 
 ### Bug Fixes
 
-- Removed hard-coded link to widgets
-  ([`3a99554`](https://gitlab.psi.ch/bec/bec/-/commit/3a99554b7e5310606a968c5e71eb7942d1381aaa))
+- Added missing set and append functions
+  ([`716f80e`](https://gitlab.psi.ch/bec/bec/-/commit/716f80e2ca6d6383f8dc630680e54984d3375da6))
 
 - Fixed print_log; added tests
   ([`9028693`](https://gitlab.psi.ch/bec/bec/-/commit/9028693a3cd8ebc81ac6dc4832edc52732cd6444))
@@ -4426,8 +4441,8 @@ All typeguard/3.x versions, and 4.0.0 have an issue with class property decorato
 - Fixed show for manually closed figures
   ([`b68f38e`](https://gitlab.psi.ch/bec/bec/-/commit/b68f38e866a1a4806e7cc79c840cabfebbd27d38))
 
-- Added missing set and append functions
-  ([`716f80e`](https://gitlab.psi.ch/bec/bec/-/commit/716f80e2ca6d6383f8dc630680e54984d3375da6))
+- Removed hard-coded link to widgets
+  ([`3a99554`](https://gitlab.psi.ch/bec/bec/-/commit/3a99554b7e5310606a968c5e71eb7942d1381aaa))
 
 ### Features
 
@@ -4439,11 +4454,11 @@ All typeguard/3.x versions, and 4.0.0 have an issue with class property decorato
 
 ### Refactoring
 
-- Minor refactoring; added test for print_log
-  ([`6dd3dfe`](https://gitlab.psi.ch/bec/bec/-/commit/6dd3dfea4e9781f23466b244472ea816056b5d41))
-
 - Cleanup
   ([`1561631`](https://gitlab.psi.ch/bec/bec/-/commit/1561631eb932488cf1d9c4dd146f9fbdf0c8a4db))
+
+- Minor refactoring; added test for print_log
+  ([`6dd3dfe`](https://gitlab.psi.ch/bec/bec/-/commit/6dd3dfea4e9781f23466b244472ea816056b5d41))
 
 ### Testing
 
@@ -4455,16 +4470,19 @@ All typeguard/3.x versions, and 4.0.0 have an issue with class property decorato
 
 ### Bug Fixes
 
-- Fixed cached readout for .get; closes #137
-  ([`4fc35ca`](https://gitlab.psi.ch/bec/bec/-/commit/4fc35cadc161c1b39fc5a891ab7150f9b043b9f0))
-
 - Fixed bug in readout for hinted and normal signals
   ([`bcd2433`](https://gitlab.psi.ch/bec/bec/-/commit/bcd243361af8eccd0771bc6950fcc3f86689c664))
+
+- Fixed cached readout for .get; closes #137
+  ([`4fc35ca`](https://gitlab.psi.ch/bec/bec/-/commit/4fc35cadc161c1b39fc5a891ab7150f9b043b9f0))
 
 - Made rpc interface more consistent with ophyd
   ([`e0e3a71`](https://gitlab.psi.ch/bec/bec/-/commit/e0e3a7158cee84c56f4ce82657e36ff88b18a36b))
 
 ### Documentation
+
+- Cleanup developer docs; remove usage folder
+  ([`329e30b`](https://gitlab.psi.ch/bec/bec/-/commit/329e30b722843d66396e3e4bd8fc0d12660a6f06))
 
 - Fixed paragraph level
   ([`01bba51`](https://gitlab.psi.ch/bec/bec/-/commit/01bba51da191e07d3ada050a78e031248cb4dd50))
@@ -4472,32 +4490,29 @@ All typeguard/3.x versions, and 4.0.0 have an issue with class property decorato
 - Improved introduction
   ([`1c82e80`](https://gitlab.psi.ch/bec/bec/-/commit/1c82e80960d27e85b73e1f308f06f44ec5a54316))
 
-- Cleanup developer docs; remove usage folder
-  ([`329e30b`](https://gitlab.psi.ch/bec/bec/-/commit/329e30b722843d66396e3e4bd8fc0d12660a6f06))
-
-- Resolved threadl small typo in install
-  ([`3236d1e`](https://gitlab.psi.ch/bec/bec/-/commit/3236d1ea725ce78b13828cdf6588e5c836983ef7))
-
-- Split ophyd and ophyd_devices
-  ([`173eb26`](https://gitlab.psi.ch/bec/bec/-/commit/173eb26b0c7469413075bb3766edd4f0ae626866))
-
-- Review install_developer_env
-  ([`5e3c10a`](https://gitlab.psi.ch/bec/bec/-/commit/5e3c10aca6517e5e4aa5eb00fc585e07f091b48c))
-
-- Review contributing section
-  ([`f4ffff3`](https://gitlab.psi.ch/bec/bec/-/commit/f4ffff3414baa62446e2810cbd389111d8d53183))
-
-- Reviewd architecture section
-  ([`1ac315d`](https://gitlab.psi.ch/bec/bec/-/commit/1ac315dc61094eee3d84f8cc2b3cf5b6331b04ba))
-
-- Review developer page
-  ([`c35e0be`](https://gitlab.psi.ch/bec/bec/-/commit/c35e0be40d13724d684109dcaea827a14d2a6dae))
-
 - Rem typo and add link in data_access
   ([`b5c7453`](https://gitlab.psi.ch/bec/bec/-/commit/b5c7453445c565e99703436b88420d7b8f98d197))
 
 - Rem typos in cli section
   ([`ede65af`](https://gitlab.psi.ch/bec/bec/-/commit/ede65af1c3c189bca137567096537709332c2b18))
+
+- Resolved threadl small typo in install
+  ([`3236d1e`](https://gitlab.psi.ch/bec/bec/-/commit/3236d1ea725ce78b13828cdf6588e5c836983ef7))
+
+- Review contributing section
+  ([`f4ffff3`](https://gitlab.psi.ch/bec/bec/-/commit/f4ffff3414baa62446e2810cbd389111d8d53183))
+
+- Review developer page
+  ([`c35e0be`](https://gitlab.psi.ch/bec/bec/-/commit/c35e0be40d13724d684109dcaea827a14d2a6dae))
+
+- Review install_developer_env
+  ([`5e3c10a`](https://gitlab.psi.ch/bec/bec/-/commit/5e3c10aca6517e5e4aa5eb00fc585e07f091b48c))
+
+- Reviewd architecture section
+  ([`1ac315d`](https://gitlab.psi.ch/bec/bec/-/commit/1ac315dc61094eee3d84f8cc2b3cf5b6331b04ba))
+
+- Split ophyd and ophyd_devices
+  ([`173eb26`](https://gitlab.psi.ch/bec/bec/-/commit/173eb26b0c7469413075bb3766edd4f0ae626866))
 
 ### Features
 
@@ -4506,11 +4521,11 @@ All typeguard/3.x versions, and 4.0.0 have an issue with class property decorato
 
 ### Refactoring
 
-- Removed device_server_config_response endpoint; closes #142
-  ([`6a0a1be`](https://gitlab.psi.ch/bec/bec/-/commit/6a0a1bea803cc94cc80904e1116f8da182a6b2c0))
-
 - Remove :sub :val :stream remnants
   ([`ade6ae4`](https://gitlab.psi.ch/bec/bec/-/commit/ade6ae4585098b2c5f4cdcc96e3fbbc11ff8c5d6))
+
+- Removed device_server_config_response endpoint; closes #142
+  ([`6a0a1be`](https://gitlab.psi.ch/bec/bec/-/commit/6a0a1bea803cc94cc80904e1116f8da182a6b2c0))
 
 
 ## v0.47.0 (2023-11-28)
@@ -4560,11 +4575,11 @@ All typeguard/3.x versions, and 4.0.0 have an issue with class property decorato
 
 ### Bug Fixes
 
-- Fixed import in spec_hli
-  ([`d5bc55a`](https://gitlab.psi.ch/bec/bec/-/commit/d5bc55aa8b047fafb59900394292e62d1a5c1b05))
-
 - Added missing file
   ([`e82604c`](https://gitlab.psi.ch/bec/bec/-/commit/e82604cab5c48e228dbdd0016725c0d3ddc3c659))
+
+- Fixed import in spec_hli
+  ([`d5bc55a`](https://gitlab.psi.ch/bec/bec/-/commit/d5bc55aa8b047fafb59900394292e62d1a5c1b05))
 
 ### Refactoring
 
@@ -4589,28 +4604,28 @@ All typeguard/3.x versions, and 4.0.0 have an issue with class property decorato
 
 ### Documentation
 
-- Update docstrings for endpoints
-  ([`945297d`](https://gitlab.psi.ch/bec/bec/-/commit/945297d4ac4be12c204546f5568a89eb4efb148b))
-
-These updates are based on their actual usage in the code
-
-- Include comments upon merge request
-  ([`e3c3607`](https://gitlab.psi.ch/bec/bec/-/commit/e3c3607fef0cb1238b9d3a60a61b3576a5660c14))
+- Add gauss_scatter_plot
+  ([`bf138ca`](https://gitlab.psi.ch/bec/bec/-/commit/bf138ca380261e2dcaf6659fceb9ab8f6daa4129))
 
 - Fix style
   ([`cb531c2`](https://gitlab.psi.ch/bec/bec/-/commit/cb531c2de16ea41a31c3bf80a31b463c5fbae28d))
 
+- Include comments upon merge request
+  ([`e3c3607`](https://gitlab.psi.ch/bec/bec/-/commit/e3c3607fef0cb1238b9d3a60a61b3576a5660c14))
+
+- Refactor device configuration.md
+  ([`12bd969`](https://gitlab.psi.ch/bec/bec/-/commit/12bd969d59dafde22cdd1fd1d0b6c15a16629a52))
+
 - Remove typo
   ([`e017900`](https://gitlab.psi.ch/bec/bec/-/commit/e01790062b93a132a6581cd023f215b87e30fc8e))
-
-- Add gauss_scatter_plot
-  ([`bf138ca`](https://gitlab.psi.ch/bec/bec/-/commit/bf138ca380261e2dcaf6659fceb9ab8f6daa4129))
 
 - Reviewed user documentation
   ([`15316ca`](https://gitlab.psi.ch/bec/bec/-/commit/15316caedb0ffa9846b199cc795e3bea3e031386))
 
-- Refactor device configuration.md
-  ([`12bd969`](https://gitlab.psi.ch/bec/bec/-/commit/12bd969d59dafde22cdd1fd1d0b6c15a16629a52))
+- Update docstrings for endpoints
+  ([`945297d`](https://gitlab.psi.ch/bec/bec/-/commit/945297d4ac4be12c204546f5568a89eb4efb148b))
+
+These updates are based on their actual usage in the code
 
 - Update user guide for installation
   ([`aa5a245`](https://gitlab.psi.ch/bec/bec/-/commit/aa5a245b46b46255b78b4f5d1a71898f6c2257bf))
@@ -4628,22 +4643,22 @@ These updates are based on their actual usage in the code
 
 ### Bug Fixes
 
-- Fixed config_init path to config file. again.
-  ([`6b714ef`](https://gitlab.psi.ch/bec/bec/-/commit/6b714ef375dd2e9599d462b4091194fbec264f94))
-
 - Fixed config_init path to config file
   ([`e1a2429`](https://gitlab.psi.ch/bec/bec/-/commit/e1a2429fac8756832bcc9937262fb72a8aace592))
+
+- Fixed config_init path to config file. again.
+  ([`6b714ef`](https://gitlab.psi.ch/bec/bec/-/commit/6b714ef375dd2e9599d462b4091194fbec264f94))
 
 - Fixed packaging of demo_config and openapi_schema
   ([`7f8b1b1`](https://gitlab.psi.ch/bec/bec/-/commit/7f8b1b1bbe8dee285b71e221161f0c86ad49dd01))
 
 ### Documentation
 
-- Fixed link to conventionalcommits
-  ([`6731a55`](https://gitlab.psi.ch/bec/bec/-/commit/6731a559422f7760a39fe160f22298022174bff1))
-
 - Added placeholder for developer doc
   ([`f5a9f7d`](https://gitlab.psi.ch/bec/bec/-/commit/f5a9f7dfa6ebf9d23b53fa33764f684228690c11))
+
+- Fixed link to conventionalcommits
+  ([`6731a55`](https://gitlab.psi.ch/bec/bec/-/commit/6731a559422f7760a39fe160f22298022174bff1))
 
 - Fixed page navigation
   ([`033c535`](https://gitlab.psi.ch/bec/bec/-/commit/033c53529e4947422968b258d26347c74b983d3d))
@@ -4684,6 +4699,18 @@ These updates are based on their actual usage in the code
 
 ### Refactoring
 
+- Avoid logger <-> messages circular import
+  ([`ddc12ba`](https://gitlab.psi.ch/bec/bec/-/commit/ddc12ba9bca8beeae3fb8e80bb11f99e217589be))
+
+This is a preventive measure. The logger module needs LogMessage, and messages module needs
+  bec_logger, so as one possible fix, delay LogMessage access in logger.
+
+- Avoid using bec message aliases
+  ([`331e653`](https://gitlab.psi.ch/bec/bec/-/commit/331e653ee60fad81da511728f369dd7bfed5e1ff))
+
+- Remove redundant BMessage from test_scans
+  ([`7ed8937`](https://gitlab.psi.ch/bec/bec/-/commit/7ed8937dec7a473953ad1dfb1ac68f50dbc8fc79))
+
 - Revert commits that added temp module stubs
   ([`5d254db`](https://gitlab.psi.ch/bec/bec/-/commit/5d254db6b78e684747f2350aacde845935313165))
 
@@ -4691,33 +4718,18 @@ Fix path to test_service_config.yaml This reverts commit 109453c1ccb3ebc8506e57f
   This reverts commit b73e9b3baac660bb7af3fc049c27e3bdb294bba9. This reverts commit
   108dc1179cf191c98b7891605d665371b5a2bca2.
 
-- Avoid using bec message aliases
-  ([`331e653`](https://gitlab.psi.ch/bec/bec/-/commit/331e653ee60fad81da511728f369dd7bfed5e1ff))
-
-- Avoid logger <-> messages circular import
-  ([`ddc12ba`](https://gitlab.psi.ch/bec/bec/-/commit/ddc12ba9bca8beeae3fb8e80bb11f99e217589be))
-
-This is a preventive measure. The logger module needs LogMessage, and messages module needs
-  bec_logger, so as one possible fix, delay LogMessage access in logger.
-
-- Remove redundant BMessage from test_scans
-  ([`7ed8937`](https://gitlab.psi.ch/bec/bec/-/commit/7ed8937dec7a473953ad1dfb1ac68f50dbc8fc79))
-
 ### Testing
-
-- Fixed tests for new scan data structure
-  ([`cbc3870`](https://gitlab.psi.ch/bec/bec/-/commit/cbc38708840b70c185a652990583e64a8018b4a5))
 
 - Added test for diid>=target_diid
   ([`298faaf`](https://gitlab.psi.ch/bec/bec/-/commit/298faaf14064aef3d74f1b7d2b77ef86605bd8e9))
+
+- Fixed tests for new scan data structure
+  ([`cbc3870`](https://gitlab.psi.ch/bec/bec/-/commit/cbc38708840b70c185a652990583e64a8018b4a5))
 
 
 ## v0.42.10 (2023-11-19)
 
 ### Bug Fixes
-
-- Fixed rpc func name compilation
-  ([`c576669`](https://gitlab.psi.ch/bec/bec/-/commit/c57666949582663124f8b7b02f1707f41164f35c))
 
 - Changes related to new read signature
   ([`80ee353`](https://gitlab.psi.ch/bec/bec/-/commit/80ee35371291831e5a9a3be3a7d9a09fadf710c2))
@@ -4725,19 +4737,13 @@ This is a preventive measure. The logger module needs LogMessage, and messages m
 - Fixed readback data mixin
   ([`a396f12`](https://gitlab.psi.ch/bec/bec/-/commit/a396f12ec434359ba8735ad466d6fbd75a74aca1))
 
+- Fixed rpc func name compilation
+  ([`c576669`](https://gitlab.psi.ch/bec/bec/-/commit/c57666949582663124f8b7b02f1707f41164f35c))
+
 - Read through rpc updates the redis entries
   ([`52f9a4e`](https://gitlab.psi.ch/bec/bec/-/commit/52f9a4eceef70b1fb9df428ff9740eac7a45ea2f))
 
 ### Refactoring
-
-- Made rpc a public method of rpc mixin
-  ([`1bb2f0c`](https://gitlab.psi.ch/bec/bec/-/commit/1bb2f0c101aa6c8406e20d87d36582bc59d2cb55))
-
-- Moved rpc_mixin to separate file
-  ([`35ea586`](https://gitlab.psi.ch/bec/bec/-/commit/35ea586f5a8220a7a8421136a598f38469fb2d08))
-
-- Moved rpc logic to separate mixin class
-  ([`ba3e780`](https://gitlab.psi.ch/bec/bec/-/commit/ba3e780400db04ab11d808a8291bc03e6dbeb1c6))
 
 - Clean up
   ([`d362aae`](https://gitlab.psi.ch/bec/bec/-/commit/d362aae393288f4795724b88fda9cb6f1062a679))
@@ -4745,16 +4751,25 @@ This is a preventive measure. The logger module needs LogMessage, and messages m
 - Improved dev.show_all
   ([`f491d40`](https://gitlab.psi.ch/bec/bec/-/commit/f491d40bac12550ecbc5234e9254b749c88f5bf5))
 
+- Made rpc a public method of rpc mixin
+  ([`1bb2f0c`](https://gitlab.psi.ch/bec/bec/-/commit/1bb2f0c101aa6c8406e20d87d36582bc59d2cb55))
+
+- Moved rpc logic to separate mixin class
+  ([`ba3e780`](https://gitlab.psi.ch/bec/bec/-/commit/ba3e780400db04ab11d808a8291bc03e6dbeb1c6))
+
+- Moved rpc_mixin to separate file
+  ([`35ea586`](https://gitlab.psi.ch/bec/bec/-/commit/35ea586f5a8220a7a8421136a598f38469fb2d08))
+
 ### Testing
+
+- Added tests for rpc mixin class
+  ([`773168e`](https://gitlab.psi.ch/bec/bec/-/commit/773168e2da87625fe9ee96824c53e88ce005ecb8))
 
 - Fixed floating point precision for table report
   ([`6e5a827`](https://gitlab.psi.ch/bec/bec/-/commit/6e5a8272f8c2d1158ca1c816e0720fce588594a2))
 
 - Fixed show_all test
   ([`de375b7`](https://gitlab.psi.ch/bec/bec/-/commit/de375b7579adec4dba5da2ef127bf4fd549eb195))
-
-- Added tests for rpc mixin class
-  ([`773168e`](https://gitlab.psi.ch/bec/bec/-/commit/773168e2da87625fe9ee96824c53e88ce005ecb8))
 
 - Updated rpc test
   ([`16d4d86`](https://gitlab.psi.ch/bec/bec/-/commit/16d4d8618ad850de7229c315fe6af0e03aaab9d4))
@@ -4769,44 +4784,44 @@ This is a preventive measure. The logger module needs LogMessage, and messages m
 
 ### Documentation
 
-- Fix typo
-  ([`77f4072`](https://gitlab.psi.ch/bec/bec/-/commit/77f407233421bd4838e8d22f53b3342cd67e47e1))
-
 - Add module docstring
   ([`81d40a2`](https://gitlab.psi.ch/bec/bec/-/commit/81d40a233148a34ab7fa71c16afc7ab361632e36))
 
+- Fix typo
+  ([`77f4072`](https://gitlab.psi.ch/bec/bec/-/commit/77f407233421bd4838e8d22f53b3342cd67e47e1))
+
 ### Refactoring
-
-- Move velo and acc calc. in separate function and call it from scan_core
-  ([`7c3ed51`](https://gitlab.psi.ch/bec/bec/-/commit/7c3ed5198cd7c8345d7066999867ac7e2d55efb7))
-
-- Finished refactoring of scan
-  ([`dfe8f1b`](https://gitlab.psi.ch/bec/bec/-/commit/dfe8f1ba1a0927464eebe5131acc32bf980a0805))
 
 - Cleaned up scan core and removed hard coded speec/acc from stages
   ([`ccb5b03`](https://gitlab.psi.ch/bec/bec/-/commit/ccb5b03add6424085abaefbc941b1bf160a16296))
 
+- Finished refactoring of scan
+  ([`dfe8f1b`](https://gitlab.psi.ch/bec/bec/-/commit/dfe8f1ba1a0927464eebe5131acc32bf980a0805))
+
 - Fix docstring
   ([`4e9eaad`](https://gitlab.psi.ch/bec/bec/-/commit/4e9eaad4ac5c2a815898b76acd3cbbb2a5ec7338))
 
-### Testing
+- Move velo and acc calc. in separate function and call it from scan_core
+  ([`7c3ed51`](https://gitlab.psi.ch/bec/bec/-/commit/7c3ed5198cd7c8345d7066999867ac7e2d55efb7))
 
-- Remove redundant lines
-  ([`afc2cc7`](https://gitlab.psi.ch/bec/bec/-/commit/afc2cc7fe7dd9e7bad8d89ce9c471d7eb6fe1280))
+### Testing
 
 - Add test to owis_grid
   ([`830d70d`](https://gitlab.psi.ch/bec/bec/-/commit/830d70d7fb91244e7f9d1fd912a6aae1c373cc21))
+
+- Remove redundant lines
+  ([`afc2cc7`](https://gitlab.psi.ch/bec/bec/-/commit/afc2cc7fe7dd9e7bad8d89ce9c471d7eb6fe1280))
 
 
 ## v0.42.8 (2023-11-18)
 
 ### Bug Fixes
 
-- Fixed ctrl c behaviour for rpc calls; closes #119
-  ([`9986a72`](https://gitlab.psi.ch/bec/bec/-/commit/9986a7292629668b6f398bee411bada04b535adc))
-
 - Added status eq dunder
   ([`f1327d4`](https://gitlab.psi.ch/bec/bec/-/commit/f1327d409117f91f17917d6fe30a1dae8e4cbb90))
+
+- Fixed ctrl c behaviour for rpc calls; closes #119
+  ([`9986a72`](https://gitlab.psi.ch/bec/bec/-/commit/9986a7292629668b6f398bee411bada04b535adc))
 
 ### Testing
 
@@ -4829,11 +4844,11 @@ This is a preventive measure. The logger module needs LogMessage, and messages m
 - Added type hints for optim_trajectory; closes #117
   ([`9689606`](https://gitlab.psi.ch/bec/bec/-/commit/968960646cfe5d19a327a63c33be60a32ab0752c))
 
-- Updated bec_lib import to new bec_lib structure
-  ([`c47a46f`](https://gitlab.psi.ch/bec/bec/-/commit/c47a46f049c36b224c9bee7977e0d1a7a2e43936))
-
 - Improved pylint score
   ([`fb1c015`](https://gitlab.psi.ch/bec/bec/-/commit/fb1c0154a5be7171a33a32d1ec698915a119ca7f))
+
+- Updated bec_lib import to new bec_lib structure
+  ([`c47a46f`](https://gitlab.psi.ch/bec/bec/-/commit/c47a46f049c36b224c9bee7977e0d1a7a2e43936))
 
 
 ## v0.42.6 (2023-11-18)
@@ -4871,6 +4886,21 @@ Fix #118
 
 ### Continuous Integration
 
+- Added pylint-check to .gitlab-ci.yml
+  ([`e33ce81`](https://gitlab.psi.ch/bec/bec/-/commit/e33ce811413be6bfcd67a1fb06f4f0265eebc921))
+
+- Fixed pylint test
+  ([`a9bbece`](https://gitlab.psi.ch/bec/bec/-/commit/a9bbecec011cf4c780f7f485c35bb8893d4a57c2))
+
+- Improved pylint check
+  ([`972c544`](https://gitlab.psi.ch/bec/bec/-/commit/972c544f3071268a784dce14fb316c8b8fcdaea2))
+
+- Made pylint check optional
+  ([`b6aca18`](https://gitlab.psi.ch/bec/bec/-/commit/b6aca18455a30c1d02c61e90bb1862dcb2739471))
+
+- Testing pylint
+  ([`b1bbee1`](https://gitlab.psi.ch/bec/bec/-/commit/b1bbee16ed6a9169912c27e7ec7a1b1fed13f342))
+
 - Testing pylint_check
   ([`087c5a3`](https://gitlab.psi.ch/bec/bec/-/commit/087c5a30984b2cde5363a5390446f1a9d960575f))
 
@@ -4880,29 +4910,14 @@ Fix #118
 - Testing pylint_check
   ([`d162f84`](https://gitlab.psi.ch/bec/bec/-/commit/d162f8414f44556b3efce41f11c73166300ff6e6))
 
-- Improved pylint check
-  ([`972c544`](https://gitlab.psi.ch/bec/bec/-/commit/972c544f3071268a784dce14fb316c8b8fcdaea2))
-
-- Made pylint check optional
-  ([`b6aca18`](https://gitlab.psi.ch/bec/bec/-/commit/b6aca18455a30c1d02c61e90bb1862dcb2739471))
-
 - Testing pylint_check
   ([`e0166d4`](https://gitlab.psi.ch/bec/bec/-/commit/e0166d40f6d5ebb6df98e3e49622868fb669c245))
-
-- Updated pylint check to handle floating point comparison"
-  ([`10bebbb`](https://gitlab.psi.ch/bec/bec/-/commit/10bebbb6fbc6b58522ccaa758d44b174e77942f4))
 
 - Testing pylint_check
   ([`e1074dd`](https://gitlab.psi.ch/bec/bec/-/commit/e1074dd1a005abc409ac38f5ff377e1a87ba0873))
 
-- Fixed pylint test
-  ([`a9bbece`](https://gitlab.psi.ch/bec/bec/-/commit/a9bbecec011cf4c780f7f485c35bb8893d4a57c2))
-
-- Testing pylint
-  ([`b1bbee1`](https://gitlab.psi.ch/bec/bec/-/commit/b1bbee16ed6a9169912c27e7ec7a1b1fed13f342))
-
-- Added pylint-check to .gitlab-ci.yml
-  ([`e33ce81`](https://gitlab.psi.ch/bec/bec/-/commit/e33ce811413be6bfcd67a1fb06f4f0265eebc921))
+- Updated pylint check to handle floating point comparison"
+  ([`10bebbb`](https://gitlab.psi.ch/bec/bec/-/commit/10bebbb6fbc6b58522ccaa758d44b174e77942f4))
 
 ### Refactoring
 
@@ -4930,29 +4945,20 @@ Fix #118
 
 ### Refactoring
 
-- Warn about importing from old module paths
-  ([`b73e9b3`](https://gitlab.psi.ch/bec/bec/-/commit/b73e9b3baac660bb7af3fc049c27e3bdb294bba9))
+- Flatten bec_lib structure
+  ([`524ef24`](https://gitlab.psi.ch/bec/bec/-/commit/524ef24da05fce33ad09e420f669fb50684af139))
 
-- Move Alarms enum into alarms_handler
-  ([`943b10d`](https://gitlab.psi.ch/bec/bec/-/commit/943b10dac0f9e21bd42145486552a8fb26ee6d11))
+- Major scan worker refactoring; added separate device validation mixin
+  ([`0c7ae79`](https://gitlab.psi.ch/bec/bec/-/commit/0c7ae795c41ba5f71b315da2d3a7c7895a0cf74c))
 
 - Make all type checking imports conditional
   ([`cc9227f`](https://gitlab.psi.ch/bec/bec/-/commit/cc9227f893e63fc594e5236414250f6960e096f4))
 
-- Rename module BECMessage -> messages
-  ([`06f2d78`](https://gitlab.psi.ch/bec/bec/-/commit/06f2d781ae445a3e03afce821b2f732d7f6e3f90))
-
-This should help to avoid confusion between BECMessage module and BECMessage class located in the
-  same module
-
-- Temporarily add module stubs
-  ([`108dc11`](https://gitlab.psi.ch/bec/bec/-/commit/108dc1179cf191c98b7891605d665371b5a2bca2))
-
-- Flatten bec_lib structure
-  ([`524ef24`](https://gitlab.psi.ch/bec/bec/-/commit/524ef24da05fce33ad09e420f669fb50684af139))
-
 - Make bec_lib imports absolute
   ([`7166c8b`](https://gitlab.psi.ch/bec/bec/-/commit/7166c8b5eef21a9146f5d5d78c6a83e3ddf8f03f))
+
+- Move Alarms enum into alarms_handler
+  ([`943b10d`](https://gitlab.psi.ch/bec/bec/-/commit/943b10dac0f9e21bd42145486552a8fb26ee6d11))
 
 - Move bec_lib test utils out of core folder
   ([`de5da55`](https://gitlab.psi.ch/bec/bec/-/commit/de5da559a651450bcab8ca40f553ca60ab27845f))
@@ -4960,19 +4966,28 @@ This should help to avoid confusion between BECMessage module and BECMessage cla
 - Move scripts into util_scripts folder
   ([`bbd0eee`](https://gitlab.psi.ch/bec/bec/-/commit/bbd0eee6bb04447456869304f5df1a1926ad7477))
 
+- Remove session_manager and singleton_threadpool
+  ([`d54453d`](https://gitlab.psi.ch/bec/bec/-/commit/d54453d7e7120555ae97584572ccc834d5050379))
+
 - Remove unused imports in bec_lib
   ([`171a5c6`](https://gitlab.psi.ch/bec/bec/-/commit/171a5c6609da76b3f17848ba01b50806e389255c))
 
-- Remove session_manager and singleton_threadpool
-  ([`d54453d`](https://gitlab.psi.ch/bec/bec/-/commit/d54453d7e7120555ae97584572ccc834d5050379))
+- Rename module BECMessage -> messages
+  ([`06f2d78`](https://gitlab.psi.ch/bec/bec/-/commit/06f2d781ae445a3e03afce821b2f732d7f6e3f90))
+
+This should help to avoid confusion between BECMessage module and BECMessage class located in the
+  same module
 
 - Run isort on all files
   ([`146898e`](https://gitlab.psi.ch/bec/bec/-/commit/146898ec3fd56e2fdf6df49999be80ab4778b618))
 
 $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
-- Major scan worker refactoring; added separate device validation mixin
-  ([`0c7ae79`](https://gitlab.psi.ch/bec/bec/-/commit/0c7ae795c41ba5f71b315da2d3a7c7895a0cf74c))
+- Temporarily add module stubs
+  ([`108dc11`](https://gitlab.psi.ch/bec/bec/-/commit/108dc1179cf191c98b7891605d665371b5a2bca2))
+
+- Warn about importing from old module paths
+  ([`b73e9b3`](https://gitlab.psi.ch/bec/bec/-/commit/b73e9b3baac660bb7af3fc049c27e3bdb294bba9))
 
 ### Testing
 
@@ -4989,11 +5004,11 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Continuous Integration
 
-- Disabled scibec end2end for now; re-enable once scibec is running
-  ([`93ab2c3`](https://gitlab.psi.ch/bec/bec/-/commit/93ab2c37e106d86640d53fcdd8b8107e6901296b))
-
 - Changed default order
   ([`53954d3`](https://gitlab.psi.ch/bec/bec/-/commit/53954d3bdc149d73d1cf013875dd269aa9d95cb9))
+
+- Disabled scibec end2end for now; re-enable once scibec is running
+  ([`93ab2c3`](https://gitlab.psi.ch/bec/bec/-/commit/93ab2c37e106d86640d53fcdd8b8107e6901296b))
 
 
 ## v0.42.0 (2023-11-07)
@@ -5097,11 +5112,11 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Bug Fixes
 
-- Fixed error that caused the scan worker to shut down instead of raising for scan abortion
-  ([`f1e8bfb`](https://gitlab.psi.ch/bec/bec/-/commit/f1e8bfba80468dc9aa7d057ecb57ef383c215c71))
-
 - Added device name to flyer readout
   ([`cd82727`](https://gitlab.psi.ch/bec/bec/-/commit/cd827271bb738ced288450dc79b7dc0316e6b0b9))
+
+- Fixed error that caused the scan worker to shut down instead of raising for scan abortion
+  ([`f1e8bfb`](https://gitlab.psi.ch/bec/bec/-/commit/f1e8bfba80468dc9aa7d057ecb57ef383c215c71))
 
 ### Refactoring
 
@@ -5168,23 +5183,11 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Bug Fixes
 
-- Fixed stage instruction for detectors
-  ([`ac7a386`](https://gitlab.psi.ch/bec/bec/-/commit/ac7a386acf62d381ad096d816da6db30bcfa5ce7))
-
-- Optimize staging of devices in scanserver and device server
-  ([`2c66dbb`](https://gitlab.psi.ch/bec/bec/-/commit/2c66dbbe4667120195151f49acfe5b45527e21b9))
-
-- Sgalil scan corrections
-  ([`2f8fce5`](https://gitlab.psi.ch/bec/bec/-/commit/2f8fce52207fdbab2a5db562ca7cfa3beb814e41))
+- Added missing pre scan to acquire
+  ([`d746093`](https://gitlab.psi.ch/bec/bec/-/commit/d7460938041dac4be45fa39cbdaa957dda5f88ca))
 
 - Adjusted sgalil_grid scan for updated mcs operation
   ([`b7a722c`](https://gitlab.psi.ch/bec/bec/-/commit/b7a722c0ef4ce14fd6843c368bf076bd1024db23))
-
-- Online changes e20643, file writer bugfix and add scanabortion check in sgalil_grid
-  ([`195a8dd`](https://gitlab.psi.ch/bec/bec/-/commit/195a8dd7541fa12ff5f4d9c9cc0a70651af805b1))
-
-- Fixed scan bundler for async fly scans
-  ([`d7a6b0f`](https://gitlab.psi.ch/bec/bec/-/commit/d7a6b0fee010877dfd18cbf23ff55126a399dec9))
 
 - Enabled scilog
   ([`64e82c6`](https://gitlab.psi.ch/bec/bec/-/commit/64e82c67782a701f5eeb04a3a9c1ce42832c1fdf))
@@ -5195,14 +5198,26 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 - Fixed primary readout for sgalil scan
   ([`4231d00`](https://gitlab.psi.ch/bec/bec/-/commit/4231d00e19aacc039ee9cc9f4a1f18294ea18ab0))
 
-- Added missing pre scan to acquire
-  ([`d746093`](https://gitlab.psi.ch/bec/bec/-/commit/d7460938041dac4be45fa39cbdaa957dda5f88ca))
+- Fixed scan bundler for async fly scans
+  ([`d7a6b0f`](https://gitlab.psi.ch/bec/bec/-/commit/d7a6b0fee010877dfd18cbf23ff55126a399dec9))
+
+- Fixed scan progress for messages without scanID
+  ([`64f3b13`](https://gitlab.psi.ch/bec/bec/-/commit/64f3b13e9710dbfb207c11fbd683db9cb9462dda))
+
+- Fixed stage instruction for detectors
+  ([`ac7a386`](https://gitlab.psi.ch/bec/bec/-/commit/ac7a386acf62d381ad096d816da6db30bcfa5ce7))
 
 - Fixed tmux launch for mono environments
   ([`5be5dda`](https://gitlab.psi.ch/bec/bec/-/commit/5be5dda1cfd3adfadae5e314a8ba87b394e8227a))
 
-- Fixed scan progress for messages without scanID
-  ([`64f3b13`](https://gitlab.psi.ch/bec/bec/-/commit/64f3b13e9710dbfb207c11fbd683db9cb9462dda))
+- Online changes e20643, file writer bugfix and add scanabortion check in sgalil_grid
+  ([`195a8dd`](https://gitlab.psi.ch/bec/bec/-/commit/195a8dd7541fa12ff5f4d9c9cc0a70651af805b1))
+
+- Optimize staging of devices in scanserver and device server
+  ([`2c66dbb`](https://gitlab.psi.ch/bec/bec/-/commit/2c66dbbe4667120195151f49acfe5b45527e21b9))
+
+- Sgalil scan corrections
+  ([`2f8fce5`](https://gitlab.psi.ch/bec/bec/-/commit/2f8fce52207fdbab2a5db562ca7cfa3beb814e41))
 
 ### Features
 
@@ -5217,11 +5232,11 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 - Cleanup
   ([`766b1bd`](https://gitlab.psi.ch/bec/bec/-/commit/766b1bd06f6fd624c17f56680d99901cf3d70501))
 
-- Fixed formatter
-  ([`b7ad6fe`](https://gitlab.psi.ch/bec/bec/-/commit/b7ad6fefc778c8e417e67aa49c336698d5fc428f))
-
 - Fix formatting for online changes
   ([`7232aef`](https://gitlab.psi.ch/bec/bec/-/commit/7232aeffc8fbfa053685aeb9d156e50080976da1))
+
+- Fixed formatter
+  ([`b7ad6fe`](https://gitlab.psi.ch/bec/bec/-/commit/b7ad6fefc778c8e417e67aa49c336698d5fc428f))
 
 
 ## v0.34.2 (2023-10-05)
@@ -5257,29 +5272,29 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Bug Fixes
 
+- Add eiger9m to cSAXS nexus file writer plugin
+  ([`8ba441f`](https://gitlab.psi.ch/bec/bec/-/commit/8ba441f55fdb9659aff12d2535799f268af1d815))
+
+- Add eiger9m to cSAXS nexus file writer plugin
+  ([`375150c`](https://gitlab.psi.ch/bec/bec/-/commit/375150ce58e00f2b6f53d713ac35cebdb087b6ad))
+
 - Add file_writer plugin cSAXS and file_event for new file from device
   ([`b1f4fcc`](https://gitlab.psi.ch/bec/bec/-/commit/b1f4fccaaaec9cded2182554900ca48ceeb2fdc3))
+
+- Add file_writer plugin cSAXS and file_event for new file from device
+  ([`0fdf164`](https://gitlab.psi.ch/bec/bec/-/commit/0fdf1647aaf153d480f952ff1515fda2a1a1640d))
 
 - Add frames_per_trigger to scans and scan server
   ([`51c8a54`](https://gitlab.psi.ch/bec/bec/-/commit/51c8a54f01c6b5a0a09c90cb5a21e5640b3cd884))
 
-- Add eiger9m to cSAXS nexus file writer plugin
-  ([`8ba441f`](https://gitlab.psi.ch/bec/bec/-/commit/8ba441f55fdb9659aff12d2535799f268af1d815))
+- Add frames_per_trigger to scans and scan server
+  ([`0c66dc3`](https://gitlab.psi.ch/bec/bec/-/commit/0c66dc33593379c7e2bee8499af8d6cecf32b761))
 
 - File_writer and scan_ser for falcon and eiger9m and sgalil grid scan
   ([`cec0b34`](https://gitlab.psi.ch/bec/bec/-/commit/cec0b342f0c518bb37c4403cb55336792a192cec))
 
 - Online fix for file writer
   ([`de5ba09`](https://gitlab.psi.ch/bec/bec/-/commit/de5ba09954468bf696e2aa27f00532fe7780ef27))
-
-- Add file_writer plugin cSAXS and file_event for new file from device
-  ([`0fdf164`](https://gitlab.psi.ch/bec/bec/-/commit/0fdf1647aaf153d480f952ff1515fda2a1a1640d))
-
-- Add frames_per_trigger to scans and scan server
-  ([`0c66dc3`](https://gitlab.psi.ch/bec/bec/-/commit/0c66dc33593379c7e2bee8499af8d6cecf32b761))
-
-- Add eiger9m to cSAXS nexus file writer plugin
-  ([`375150c`](https://gitlab.psi.ch/bec/bec/-/commit/375150ce58e00f2b6f53d713ac35cebdb087b6ad))
 
 ### Features
 
@@ -5354,11 +5369,11 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Features
 
-- Beamline check
-  ([`cae5f61`](https://gitlab.psi.ch/bec/bec/-/commit/cae5f61924744d0358527b074958bdfe102bb2cd))
-
 - Added preliminary version of bl_checks
   ([`bfa1d67`](https://gitlab.psi.ch/bec/bec/-/commit/bfa1d678735cc8dcfb303446517254290c7c7921))
+
+- Beamline check
+  ([`cae5f61`](https://gitlab.psi.ch/bec/bec/-/commit/cae5f61924744d0358527b074958bdfe102bb2cd))
 
 ### Refactoring
 
@@ -5407,14 +5422,14 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Testing
 
-- Added xrange and get_last tests
-  ([`1a24616`](https://gitlab.psi.ch/bec/bec/-/commit/1a24616cb3b2e8a44860a8e34f9294e635449505))
-
 - Added more file_manager tests
   ([`54517ca`](https://gitlab.psi.ch/bec/bec/-/commit/54517cabef2158bc33dcd7e30cb7de352c0a94bc))
 
 - Added more file_manager tests
   ([`153c38a`](https://gitlab.psi.ch/bec/bec/-/commit/153c38aea6c9f47123b47655fb1d20ff4b79fa1c))
+
+- Added xrange and get_last tests
+  ([`1a24616`](https://gitlab.psi.ch/bec/bec/-/commit/1a24616cb3b2e8a44860a8e34f9294e635449505))
 
 
 ## v0.27.0 (2023-08-31)
@@ -5429,14 +5444,14 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Bug Fixes
 
-- Fixed xadd for pipelines
-  ([`d19fce7`](https://gitlab.psi.ch/bec/bec/-/commit/d19fce7d21a12eac2f8ac9b083fff464e5d0da9e))
+- Adjust xadd to allow streams to expire
+  ([`33fbded`](https://gitlab.psi.ch/bec/bec/-/commit/33fbdedd3eed52ded4eb53043bc7407997d51e4a))
 
 - Bugfix
   ([`57c989c`](https://gitlab.psi.ch/bec/bec/-/commit/57c989cfe204a657bcefac2364a6a0ad98a77ff1))
 
-- Adjust xadd to allow streams to expire
-  ([`33fbded`](https://gitlab.psi.ch/bec/bec/-/commit/33fbdedd3eed52ded4eb53043bc7407997d51e4a))
+- Fixed xadd for pipelines
+  ([`d19fce7`](https://gitlab.psi.ch/bec/bec/-/commit/d19fce7d21a12eac2f8ac9b083fff464e5d0da9e))
 
 - Online changes
   ([`9b07e0f`](https://gitlab.psi.ch/bec/bec/-/commit/9b07e0f8a2d774a9a6a07ab9faa9167585532dcd))
@@ -5474,14 +5489,14 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Features
 
+- Added available resource endpoint/message
+  ([`5f5c80c`](https://gitlab.psi.ch/bec/bec/-/commit/5f5c80c2866236226dca717de0c67b32f5692ab9))
+
 - Added global var service config to simplify sharing the config with other classes
   ([`75f1f9c`](https://gitlab.psi.ch/bec/bec/-/commit/75f1f9cd4ebc6938f2cf47103fb64eef8be57ae3))
 
 - Added option to update the worker config directly
   ([`a417fd8`](https://gitlab.psi.ch/bec/bec/-/commit/a417fd8a18cadb4b480da243149c1186f3a07d88))
-
-- Added available resource endpoint/message
-  ([`5f5c80c`](https://gitlab.psi.ch/bec/bec/-/commit/5f5c80c2866236226dca717de0c67b32f5692ab9))
 
 
 ## v0.23.1 (2023-08-31)
@@ -5514,11 +5529,11 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Refactoring
 
-- Fixed formatting
-  ([`dbca77e`](https://gitlab.psi.ch/bec/bec/-/commit/dbca77ec5e46d3498a5a82bd4202082ce904c35c))
-
 - Fixed formatter
   ([`0446717`](https://gitlab.psi.ch/bec/bec/-/commit/044671730ed31916a5936f2b5bd104c65db081d0))
+
+- Fixed formatting
+  ([`dbca77e`](https://gitlab.psi.ch/bec/bec/-/commit/dbca77ec5e46d3498a5a82bd4202082ce904c35c))
 
 ### Testing
 
@@ -5597,30 +5612,30 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Bug Fixes
 
-- Remove parameters for saxs_imaging_processor
-  ([`39c7a9c`](https://gitlab.psi.ch/bec/bec/-/commit/39c7a9c0be0a0b9861961e5443f313e11fb35748))
-
 - Fixed dap worker for plugins
   ([`e2f3d8f`](https://gitlab.psi.ch/bec/bec/-/commit/e2f3d8f29ddc771798d0e2cc43f7f0d85db00fe9))
 
-### Features
+- Remove parameters for saxs_imaging_processor
+  ([`39c7a9c`](https://gitlab.psi.ch/bec/bec/-/commit/39c7a9c0be0a0b9861961e5443f313e11fb35748))
 
-- Added dap to client
-  ([`0ea549a`](https://gitlab.psi.ch/bec/bec/-/commit/0ea549a599f4ac3dccffe7fa2f148e48a0c5d7c1))
+### Features
 
 - Add bec_worker_manager.py
   ([`f0ba36d`](https://gitlab.psi.ch/bec/bec/-/commit/f0ba36db869b8a0e06918ef1fd9fc44a87cbd217))
+
+- Added dap to client
+  ([`0ea549a`](https://gitlab.psi.ch/bec/bec/-/commit/0ea549a599f4ac3dccffe7fa2f148e48a0c5d7c1))
 
 - Pluging support for data_processing
   ([`9e33418`](https://gitlab.psi.ch/bec/bec/-/commit/9e334185260e5f92964e1f3f5b5d6d3a86d4c1d6))
 
 ### Testing
 
-- Added missing tests
-  ([`30b3cb1`](https://gitlab.psi.ch/bec/bec/-/commit/30b3cb18ff70ff3db93a7fc585a1287df905ceb3))
-
 - Added logger output
   ([`11d7b41`](https://gitlab.psi.ch/bec/bec/-/commit/11d7b411c0466ab12f311a5c0fe9fb954a79f238))
+
+- Added missing tests
+  ([`30b3cb1`](https://gitlab.psi.ch/bec/bec/-/commit/30b3cb18ff70ff3db93a7fc585a1287df905ceb3))
 
 - Ensure that values are beyond limits
   ([`7c5c3ff`](https://gitlab.psi.ch/bec/bec/-/commit/7c5c3ff73599b4cdb95d68b5c442214ac5ca6204))
@@ -5630,22 +5645,22 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Bug Fixes
 
-- Removed timeout
-  ([`29df4ac`](https://gitlab.psi.ch/bec/bec/-/commit/29df4ac19ac189f4d7666c2c47c4539cf5e94372))
-
 - Fixed bug in wait function for aborted move commands
   ([`019fcda`](https://gitlab.psi.ch/bec/bec/-/commit/019fcdaa074dcb67c84132cb038067dca8578830))
 
+- Removed timeout
+  ([`29df4ac`](https://gitlab.psi.ch/bec/bec/-/commit/29df4ac19ac189f4d7666c2c47c4539cf5e94372))
+
 ### Continuous Integration
 
-- Fixed path to explorer
-  ([`3a319e2`](https://gitlab.psi.ch/bec/bec/-/commit/3a319e2006ef1b0edcc16a606e1dcefb08d2b505))
+- Added dummy functional account
+  ([`c468a7a`](https://gitlab.psi.ch/bec/bec/-/commit/c468a7ab18d3c676628ed14826148e073633d750))
 
 - Disabled end2end test with API server for now until the server is back in operation
   ([`9303171`](https://gitlab.psi.ch/bec/bec/-/commit/930317156cb09e9473eff36d875ae4252176bb7b))
 
-- Added dummy functional account
-  ([`c468a7a`](https://gitlab.psi.ch/bec/bec/-/commit/c468a7ab18d3c676628ed14826148e073633d750))
+- Fixed path to explorer
+  ([`3a319e2`](https://gitlab.psi.ch/bec/bec/-/commit/3a319e2006ef1b0edcc16a606e1dcefb08d2b505))
 
 - Fixed path to openapi file
   ([`6bb20c2`](https://gitlab.psi.ch/bec/bec/-/commit/6bb20c2d2d64ffa967a21695ffe33478a7a0e9ab))
@@ -5668,14 +5683,14 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Bug Fixes
 
-- Fixed typo in round_roi_scan init; added test
-  ([`75f2217`](https://gitlab.psi.ch/bec/bec/-/commit/75f221758f939c510a7766101cc3faa0250a0b6b))
+- Added missing file
+  ([`f55a518`](https://gitlab.psi.ch/bec/bec/-/commit/f55a518b9103f93b54c872fb4387956cb783d5b8))
 
 - Fixed bug in unpack_scan_args for empty lists
   ([`a693f84`](https://gitlab.psi.ch/bec/bec/-/commit/a693f84816d9074a3f4664a8530d0b130702f7a2))
 
-- Added missing file
-  ([`f55a518`](https://gitlab.psi.ch/bec/bec/-/commit/f55a518b9103f93b54c872fb4387956cb783d5b8))
+- Fixed typo in round_roi_scan init; added test
+  ([`75f2217`](https://gitlab.psi.ch/bec/bec/-/commit/75f221758f939c510a7766101cc3faa0250a0b6b))
 
 ### Continuous Integration
 
@@ -5728,14 +5743,14 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Bug Fixes
 
-- Fixed scans if redis is not available
-  ([`b0467a8`](https://gitlab.psi.ch/bec/bec/-/commit/b0467a86aaf4741484ef0fb66e6441e742142cb5))
+- Fixed bec_service if service keys are not available
+  ([`9b71f77`](https://gitlab.psi.ch/bec/bec/-/commit/9b71f77dacf0fe1313fe6f0c1e9de73572286b96))
 
 - Fixed scan number if redis is not available
   ([`8514d2d`](https://gitlab.psi.ch/bec/bec/-/commit/8514d2d6384516f53fd75d4ef671e24f32fad0f4))
 
-- Fixed bec_service if service keys are not available
-  ([`9b71f77`](https://gitlab.psi.ch/bec/bec/-/commit/9b71f77dacf0fe1313fe6f0c1e9de73572286b96))
+- Fixed scans if redis is not available
+  ([`b0467a8`](https://gitlab.psi.ch/bec/bec/-/commit/b0467a86aaf4741484ef0fb66e6441e742142cb5))
 
 ### Build System
 
@@ -5763,27 +5778,27 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 - Fixed default arg for initialize
   ([`b65aba8`](https://gitlab.psi.ch/bec/bec/-/commit/b65aba8a5fcdb8f2f5eeb488725144f46267f074))
 
-- Wait for bec server should only be done for ipython, not the bec lib
-  ([`9dfe389`](https://gitlab.psi.ch/bec/bec/-/commit/9dfe38943f2b8d6be051612de9f31ad8171f1073))
-
 - Scanbundler sets status to running
   ([`d0d46ba`](https://gitlab.psi.ch/bec/bec/-/commit/d0d46ba76b1351f5431d7c93a6d6591c250563d7))
 
-### Documentation
+- Wait for bec server should only be done for ipython, not the bec lib
+  ([`9dfe389`](https://gitlab.psi.ch/bec/bec/-/commit/9dfe38943f2b8d6be051612de9f31ad8171f1073))
 
-- Updated style; added css
-  ([`6ec5fac`](https://gitlab.psi.ch/bec/bec/-/commit/6ec5facd0cdf0588c6545828c53ccc9e8ed29875))
+### Documentation
 
 - Added simple ophyd description; added file_manager description
   ([`48cfcb6`](https://gitlab.psi.ch/bec/bec/-/commit/48cfcb6c6242c381aea71d0e1c686d10e3fb2c1b))
 
-### Testing
+- Updated style; added css
+  ([`6ec5fac`](https://gitlab.psi.ch/bec/bec/-/commit/6ec5facd0cdf0588c6545828c53ccc9e8ed29875))
 
-- Fixed client tests for new wait_for_server procedure
-  ([`1934827`](https://gitlab.psi.ch/bec/bec/-/commit/19348275eb0a7f9690621e53a4237a2db62b12bf))
+### Testing
 
 - Fixed cached readout signature
   ([`74d63a1`](https://gitlab.psi.ch/bec/bec/-/commit/74d63a19d2cbc3f84710227632171489f3ca5a93))
+
+- Fixed client tests for new wait_for_server procedure
+  ([`1934827`](https://gitlab.psi.ch/bec/bec/-/commit/19348275eb0a7f9690621e53a4237a2db62b12bf))
 
 - Fixed referenced readout
   ([`8ec7b23`](https://gitlab.psi.ch/bec/bec/-/commit/8ec7b2329dda24548338d4c2d1bac39f4e0b208a))
@@ -5822,17 +5837,14 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Documentation
 
-- Added missing reference file
-  ([`df19570`](https://gitlab.psi.ch/bec/bec/-/commit/df19570c9d658b35a04dbe7112c454793a8a2e54))
+- Added glossary
+  ([`b54e56f`](https://gitlab.psi.ch/bec/bec/-/commit/b54e56fe8fd7f29b2499770c7c392cdcf7e72fe8))
 
 - Added logo
   ([`3c40a28`](https://gitlab.psi.ch/bec/bec/-/commit/3c40a2856c7678d14517bfcae6fe2c935756f68d))
 
-- Fixed requirements
-  ([`76e9342`](https://gitlab.psi.ch/bec/bec/-/commit/76e93429f6eb3851c5fabc78ff425e28b3ba2427))
-
-- Added glossary
-  ([`b54e56f`](https://gitlab.psi.ch/bec/bec/-/commit/b54e56fe8fd7f29b2499770c7c392cdcf7e72fe8))
+- Added missing reference file
+  ([`df19570`](https://gitlab.psi.ch/bec/bec/-/commit/df19570c9d658b35a04dbe7112c454793a8a2e54))
 
 - Fixed indent
   ([`fe07a70`](https://gitlab.psi.ch/bec/bec/-/commit/fe07a702df434714fd500fc983502e106e410bee))
@@ -5840,22 +5852,25 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 - Fixed references
   ([`20254fb`](https://gitlab.psi.ch/bec/bec/-/commit/20254fb628206f934238f40765a3fa5d15c3274c))
 
-- Updated developer instructions
-  ([`823094a`](https://gitlab.psi.ch/bec/bec/-/commit/823094acb1b06074ef3180d2717986020b911b4f))
+- Fixed requirements
+  ([`76e9342`](https://gitlab.psi.ch/bec/bec/-/commit/76e93429f6eb3851c5fabc78ff425e28b3ba2427))
 
 - Redesigned documentation
   ([`ecf3ee9`](https://gitlab.psi.ch/bec/bec/-/commit/ecf3ee93de1fd0ea0f4694150c8c07fcc21da4b5))
 
-### Features
+- Updated developer instructions
+  ([`823094a`](https://gitlab.psi.ch/bec/bec/-/commit/823094acb1b06074ef3180d2717986020b911b4f))
 
-- Added support for file references and external links in the bec master file
-  ([`9a59bdc`](https://gitlab.psi.ch/bec/bec/-/commit/9a59bdce90110fded772bf4efd84b10e019a7837))
+### Features
 
 - Added done entry to filemessage
   ([`2c62fd7`](https://gitlab.psi.ch/bec/bec/-/commit/2c62fd72b16cc62840daba929c1afd8dc26956d0))
 
 - Added support for endpoints with and without suffix
   ([`ce0e54e`](https://gitlab.psi.ch/bec/bec/-/commit/ce0e54e561ad5ef03898e749e7333dc7535bf0d2))
+
+- Added support for file references and external links in the bec master file
+  ([`9a59bdc`](https://gitlab.psi.ch/bec/bec/-/commit/9a59bdce90110fded772bf4efd84b10e019a7837))
 
 ### Testing
 
@@ -5867,11 +5882,11 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Documentation
 
-- Updated sphinx conf file to deal with md files; added copy button
-  ([`7f48ce6`](https://gitlab.psi.ch/bec/bec/-/commit/7f48ce6aa1f2000993a4fb31e23a3efa3c122a57))
-
 - Minor improvements for scan_to_csv docs
   ([`21d371a`](https://gitlab.psi.ch/bec/bec/-/commit/21d371a80b8009e1df3c9d4148191f05a36a0abf))
+
+- Updated sphinx conf file to deal with md files; added copy button
+  ([`7f48ce6`](https://gitlab.psi.ch/bec/bec/-/commit/7f48ce6aa1f2000993a4fb31e23a3efa3c122a57))
 
 ### Features
 
@@ -5899,11 +5914,11 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Bug Fixes
 
-- Fixed build
-  ([`4eccc99`](https://gitlab.psi.ch/bec/bec/-/commit/4eccc996694d9b260d1df40cc5b2c74ccb587dbe))
-
 - Fixed bec_client install
   ([`bacda25`](https://gitlab.psi.ch/bec/bec/-/commit/bacda2580a47773bc4bdabc231049fb6470e7445))
+
+- Fixed build
+  ([`4eccc99`](https://gitlab.psi.ch/bec/bec/-/commit/4eccc996694d9b260d1df40cc5b2c74ccb587dbe))
 
 
 ## v0.14.5 (2023-07-24)
@@ -5934,11 +5949,11 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Bug Fixes
 
-- Fixed build for device_server
-  ([`fc90bfb`](https://gitlab.psi.ch/bec/bec/-/commit/fc90bfb9aab5ef42a9c6160be71357f0df5d21bc))
-
 - Fixed bec-server version
   ([`72fdd91`](https://gitlab.psi.ch/bec/bec/-/commit/72fdd91da495e2150463c8aa64cab1a86577289e))
+
+- Fixed build for device_server
+  ([`fc90bfb`](https://gitlab.psi.ch/bec/bec/-/commit/fc90bfb9aab5ef42a9c6160be71357f0df5d21bc))
 
 
 ## v0.14.2 (2023-07-24)
@@ -5961,19 +5976,19 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Bug Fixes
 
-- Fix writer functions
-  ([`fda9d07`](https://gitlab.psi.ch/bec/bec/-/commit/fda9d07e65039e833f51192d4a66a48875c3be46))
-
 - Code update
   ([`86b1985`](https://gitlab.psi.ch/bec/bec/-/commit/86b198595db33e1af6b8d2a26151658118b2ebe3))
 
-### Continuous Integration
+- Fix writer functions
+  ([`fda9d07`](https://gitlab.psi.ch/bec/bec/-/commit/fda9d07e65039e833f51192d4a66a48875c3be46))
 
-- Removed docs build
-  ([`6d37777`](https://gitlab.psi.ch/bec/bec/-/commit/6d377772039ce9da269b35f18e650dee1ef6a0a5))
+### Continuous Integration
 
 - Enforce sphinx version
   ([`84d0a69`](https://gitlab.psi.ch/bec/bec/-/commit/84d0a6923b19f634a475cb87c94d91b61190ad13))
+
+- Removed docs build
+  ([`6d37777`](https://gitlab.psi.ch/bec/bec/-/commit/6d377772039ce9da269b35f18e650dee1ef6a0a5))
 
 ### Documentation
 
@@ -5995,14 +6010,14 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Bug Fixes
 
-- Fixed tmux launch
-  ([`e4d7840`](https://gitlab.psi.ch/bec/bec/-/commit/e4d78402c0f0feca7d0731498b3b34701d9bc9a6))
+- Fixed bec_server install
+  ([`2ebf580`](https://gitlab.psi.ch/bec/bec/-/commit/2ebf580ede20c594951bde73f2a570b744904509))
 
 - Fixed single env install
   ([`929689c`](https://gitlab.psi.ch/bec/bec/-/commit/929689cb8e7d1fccda0ab2a5a6372e2d48696193))
 
-- Fixed bec_server install
-  ([`2ebf580`](https://gitlab.psi.ch/bec/bec/-/commit/2ebf580ede20c594951bde73f2a570b744904509))
+- Fixed tmux launch
+  ([`e4d7840`](https://gitlab.psi.ch/bec/bec/-/commit/e4d78402c0f0feca7d0731498b3b34701d9bc9a6))
 
 ### Build System
 
@@ -6027,17 +6042,17 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Documentation
 
-- Removed user api for now
-  ([`d8fd1d0`](https://gitlab.psi.ch/bec/bec/-/commit/d8fd1d0b984f4a32d090cfbebcf9a6511f734e09))
+- Added missing glossary file
+  ([`2529891`](https://gitlab.psi.ch/bec/bec/-/commit/2529891a2ca39e773651c3b96d70584c55115eab))
 
 - Fixed dependencies; added missing files
   ([`87e7ec2`](https://gitlab.psi.ch/bec/bec/-/commit/87e7ec2671578ffb2f5c6db1f5d98fcdebaeb61f))
 
-- Added missing glossary file
-  ([`2529891`](https://gitlab.psi.ch/bec/bec/-/commit/2529891a2ca39e773651c3b96d70584c55115eab))
-
 - Improved documentation; added how tos; added glossary
   ([`99f0c96`](https://gitlab.psi.ch/bec/bec/-/commit/99f0c9636b36f89dc156959184cdd31d65ffee5c))
+
+- Removed user api for now
+  ([`d8fd1d0`](https://gitlab.psi.ch/bec/bec/-/commit/d8fd1d0b984f4a32d090cfbebcf9a6511f734e09))
 
 
 ## v0.13.1 (2023-07-18)
@@ -6057,11 +6072,11 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Continuous Integration
 
-- Renamed unittest stage to test
-  ([`e990a44`](https://gitlab.psi.ch/bec/bec/-/commit/e990a44f7df88fec8c47089dc8d15065cf273d1c))
-
 - Added secret detection
   ([`ab9a833`](https://gitlab.psi.ch/bec/bec/-/commit/ab9a833a2e60715781ef62d78a5ddd264cd89fc2))
+
+- Renamed unittest stage to test
+  ([`e990a44`](https://gitlab.psi.ch/bec/bec/-/commit/e990a44f7df88fec8c47089dc8d15065cf273d1c))
 
 ### Features
 
@@ -6134,12 +6149,6 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 - Added missing services to the build script
   ([`6d45485`](https://gitlab.psi.ch/bec/bec/-/commit/6d45485b5a83d02612595c25a3fd3ec90f0c57b6))
 
-- Fixed bug in ipython live update
-  ([`a6a2c28`](https://gitlab.psi.ch/bec/bec/-/commit/a6a2c28a6a111ff552277686d7455eec9cbd56d1))
-
-- Fixed missing files
-  ([`047082b`](https://gitlab.psi.ch/bec/bec/-/commit/047082b38b7f4145c469a76f439fcac241a92b60))
-
 - Adjusted import routine for plugins
   ([`38c4c8c`](https://gitlab.psi.ch/bec/bec/-/commit/38c4c8c93e79a37314ad5579feb77455d2a5e38f))
 
@@ -6148,6 +6157,12 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 - Fixed bug in install script
   ([`05bf99a`](https://gitlab.psi.ch/bec/bec/-/commit/05bf99af739b4023ad75780fe2808f71adcc508f))
+
+- Fixed bug in ipython live update
+  ([`a6a2c28`](https://gitlab.psi.ch/bec/bec/-/commit/a6a2c28a6a111ff552277686d7455eec9cbd56d1))
+
+- Fixed missing files
+  ([`047082b`](https://gitlab.psi.ch/bec/bec/-/commit/047082b38b7f4145c469a76f439fcac241a92b60))
 
 - Improved tmux_launcher to handle merged and separated envs
   ([`088b1a4`](https://gitlab.psi.ch/bec/bec/-/commit/088b1a4a1956209c11c5a31f5c09eca8aed6b86a))
@@ -6158,12 +6173,6 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
   ([`85ecf30`](https://gitlab.psi.ch/bec/bec/-/commit/85ecf3083a304e8f505188a11486657b33b29f86))
 
 ### Continuous Integration
-
-- Changed init order
-  ([`331d282`](https://gitlab.psi.ch/bec/bec/-/commit/331d282a0b8a73452b06da53e85fca95ccc9fac6))
-
-- Fixed ci path
-  ([`96c44f6`](https://gitlab.psi.ch/bec/bec/-/commit/96c44f6c5f31537a41a4c055bfd827ae586cc833))
 
 - Added en2end test
   ([`103bc9d`](https://gitlab.psi.ch/bec/bec/-/commit/103bc9d0e022ea2b4ae9ed26914a07e5c573cab5))
@@ -6176,15 +6185,6 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 - Added en2end test
   ([`7c57bc5`](https://gitlab.psi.ch/bec/bec/-/commit/7c57bc5a33cc2d0dc9406c564d16d91d8278faa2))
-
-- Added tmux
-  ([`f7c9f49`](https://gitlab.psi.ch/bec/bec/-/commit/f7c9f49c875a2d2fdc9d1bd448df54460b33c30e))
-
-- Added tmux
-  ([`a709030`](https://gitlab.psi.ch/bec/bec/-/commit/a709030b5c5da412cd80176debdeef3b9526931c))
-
-- Added tmux
-  ([`1212ef4`](https://gitlab.psi.ch/bec/bec/-/commit/1212ef41226f238a4be98b25624ad8f0d41f74ad))
 
 - Added end2end test with conda
   ([`779507b`](https://gitlab.psi.ch/bec/bec/-/commit/779507ba61e2a552422eb9b2f5800964b3c8270b))
@@ -6204,6 +6204,21 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 - Added end2end test with conda
   ([`acf4e11`](https://gitlab.psi.ch/bec/bec/-/commit/acf4e11544498fd16e138e303ab1446ea3bd46e7))
 
+- Added tmux
+  ([`f7c9f49`](https://gitlab.psi.ch/bec/bec/-/commit/f7c9f49c875a2d2fdc9d1bd448df54460b33c30e))
+
+- Added tmux
+  ([`a709030`](https://gitlab.psi.ch/bec/bec/-/commit/a709030b5c5da412cd80176debdeef3b9526931c))
+
+- Added tmux
+  ([`1212ef4`](https://gitlab.psi.ch/bec/bec/-/commit/1212ef41226f238a4be98b25624ad8f0d41f74ad))
+
+- Changed init order
+  ([`331d282`](https://gitlab.psi.ch/bec/bec/-/commit/331d282a0b8a73452b06da53e85fca95ccc9fac6))
+
+- Fixed ci path
+  ([`96c44f6`](https://gitlab.psi.ch/bec/bec/-/commit/96c44f6c5f31537a41a4c055bfd827ae586cc833))
+
 ### Documentation
 
 - Updated deployment instructions
@@ -6214,17 +6229,17 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Features
 
+- Added clis to all services; added bec_server
+  ([`f563800`](https://gitlab.psi.ch/bec/bec/-/commit/f563800268e7047fd9baa05e48070475688b244f))
+
+- Added default service config
+  ([`b1a4b4f`](https://gitlab.psi.ch/bec/bec/-/commit/b1a4b4f75cad19e849d573beb767b18c6d93a308))
+
 - Added install_bec_dev script
   ([`db9539a`](https://gitlab.psi.ch/bec/bec/-/commit/db9539aba203e7e299620f76dfd1f3843ebfecbd))
 
 - Simplified bec-server interaction; removed hard-coded service config path
   ([`5dd1eb7`](https://gitlab.psi.ch/bec/bec/-/commit/5dd1eb7cd0ea0d401c411c9e46b8a567e58c9687))
-
-- Added default service config
-  ([`b1a4b4f`](https://gitlab.psi.ch/bec/bec/-/commit/b1a4b4f75cad19e849d573beb767b18c6d93a308))
-
-- Added clis to all services; added bec_server
-  ([`f563800`](https://gitlab.psi.ch/bec/bec/-/commit/f563800268e7047fd9baa05e48070475688b244f))
 
 ### Refactoring
 
@@ -6236,14 +6251,14 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Testing
 
-- Fixed tests
-  ([`aae5e1a`](https://gitlab.psi.ch/bec/bec/-/commit/aae5e1a05033709f8caccce34372f4caed13da42))
-
 - Added more tests
   ([`441afec`](https://gitlab.psi.ch/bec/bec/-/commit/441afec08bc4e244ca86524eac724e9ee6616721))
 
 - Fixed formatting
   ([`9d1b1c9`](https://gitlab.psi.ch/bec/bec/-/commit/9d1b1c9d3ae1a324ea9134ce8652963f82375009))
+
+- Fixed tests
+  ([`aae5e1a`](https://gitlab.psi.ch/bec/bec/-/commit/aae5e1a05033709f8caccce34372f4caed13da42))
 
 - Fixed threading problem in callback test
   ([`6d56d90`](https://gitlab.psi.ch/bec/bec/-/commit/6d56d901b137070e65d51d140f2035128a4b4f7a))
@@ -6256,17 +6271,17 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 - Added reset_device function
   ([`f235a17`](https://gitlab.psi.ch/bec/bec/-/commit/f235a1735f67f25eab9ae4ed746a1c101da43dc9))
 
-- Fixed re-enabling devices
-  ([`3f11144`](https://gitlab.psi.ch/bec/bec/-/commit/3f111442584b9abf39382620ccf137c93c89d6a8))
-
-- Improved getattr handling for dunder methods; added comment
-  ([`a6c49b3`](https://gitlab.psi.ch/bec/bec/-/commit/a6c49b34ad2a6960c9db57b6ab6336bb94b432d9))
-
 - Fixed bug in client callbacks that caused rejected scans to get stuck
   ([`2611f5b`](https://gitlab.psi.ch/bec/bec/-/commit/2611f5b4232fed7d930b21059c2cd0e8a1098a3a))
 
 - Fixed bug in ipython_live_updates in case of missing status messages
   ([`39c4323`](https://gitlab.psi.ch/bec/bec/-/commit/39c4323303287617918d7cd7101332b338026954))
+
+- Fixed re-enabling devices
+  ([`3f11144`](https://gitlab.psi.ch/bec/bec/-/commit/3f111442584b9abf39382620ccf137c93c89d6a8))
+
+- Improved getattr handling for dunder methods; added comment
+  ([`a6c49b3`](https://gitlab.psi.ch/bec/bec/-/commit/a6c49b34ad2a6960c9db57b6ab6336bb94b432d9))
 
 ### Build System
 
@@ -6280,23 +6295,23 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Testing
 
+- Added config handler tests
+  ([`734c6d0`](https://gitlab.psi.ch/bec/bec/-/commit/734c6d0a36eafcef4c4c3398b3f7600b10c8ee5f))
+
+- Added ipython client tests
+  ([`a927938`](https://gitlab.psi.ch/bec/bec/-/commit/a927938c53856331fe3107ccc5767543d1dc64b7))
+
 - Fixed client test
   ([`396f60f`](https://gitlab.psi.ch/bec/bec/-/commit/396f60f687f52a255cb7171dd6bd3369d939daac))
 
 - Fixed client test
   ([`e0330df`](https://gitlab.psi.ch/bec/bec/-/commit/e0330df80c21d2c2c9d502b7fe3406726f6a479b))
 
-- Improved client tests
-  ([`a857cff`](https://gitlab.psi.ch/bec/bec/-/commit/a857cffa7907698ed9a64fffb7cda368201d1a77))
-
-- Added ipython client tests
-  ([`a927938`](https://gitlab.psi.ch/bec/bec/-/commit/a927938c53856331fe3107ccc5767543d1dc64b7))
-
-- Added config handler tests
-  ([`734c6d0`](https://gitlab.psi.ch/bec/bec/-/commit/734c6d0a36eafcef4c4c3398b3f7600b10c8ee5f))
-
 - Fixed test
   ([`0f1161b`](https://gitlab.psi.ch/bec/bec/-/commit/0f1161bd828d77b853373ddad9510218e9c48646))
+
+- Improved client tests
+  ([`a857cff`](https://gitlab.psi.ch/bec/bec/-/commit/a857cffa7907698ed9a64fffb7cda368201d1a77))
 
 
 ## v0.9.1 (2023-07-03)
@@ -6395,11 +6410,11 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Documentation
 
-- Added scan server readme
-  ([`1663087`](https://gitlab.psi.ch/bec/bec/-/commit/1663087ff8866dff31a6974474b56dd3e73ffb1d))
-
 - Added readme for bec-client-lib
   ([`bd39147`](https://gitlab.psi.ch/bec/bec/-/commit/bd391470f86ece1e26b629c75341b2ee2c941da4))
+
+- Added scan server readme
+  ([`1663087`](https://gitlab.psi.ch/bec/bec/-/commit/1663087ff8866dff31a6974474b56dd3e73ffb1d))
 
 
 ## v0.6.13 (2023-06-27)
@@ -6465,23 +6480,23 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Continuous Integration
 
-- Set testpypi as target repository
-  ([`d0d8aff`](https://gitlab.psi.ch/bec/bec/-/commit/d0d8afff556ebe151949d860e012ee899ac0c956))
-
 - Added pypi builds
   ([`0579200`](https://gitlab.psi.ch/bec/bec/-/commit/0579200acb6898e9fec881e11d57c12f84b54db9))
-
-- Removed static mongodb version
-  ([`55f0716`](https://gitlab.psi.ch/bec/bec/-/commit/55f071631df53932863f934369bb14c67b592bab))
 
 - Fixed docker image; moved docker compose to private registry
   ([`3e9dc7f`](https://gitlab.psi.ch/bec/bec/-/commit/3e9dc7f459ca13a7390c201ec33132a4262973a1))
 
+- Fixed missing pytest dependency
+  ([`4ccc66a`](https://gitlab.psi.ch/bec/bec/-/commit/4ccc66a3a73c28d4a2312bfa0e850f3eb02d6f17))
+
 - Moved to morgana-harbor registry
   ([`de370db`](https://gitlab.psi.ch/bec/bec/-/commit/de370db0376150293d9f1209a8923038e618d67b))
 
-- Fixed missing pytest dependency
-  ([`4ccc66a`](https://gitlab.psi.ch/bec/bec/-/commit/4ccc66a3a73c28d4a2312bfa0e850f3eb02d6f17))
+- Removed static mongodb version
+  ([`55f0716`](https://gitlab.psi.ch/bec/bec/-/commit/55f071631df53932863f934369bb14c67b592bab))
+
+- Set testpypi as target repository
+  ([`d0d8aff`](https://gitlab.psi.ch/bec/bec/-/commit/d0d8afff556ebe151949d860e012ee899ac0c956))
 
 ### Documentation
 
@@ -6571,11 +6586,11 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Bug Fixes
 
-- Fixed scan item for intermediate repr queries
-  ([`9decff2`](https://gitlab.psi.ch/bec/bec/-/commit/9decff27a74af7d84f41ddd8f9b3585e1d353a88))
-
 - Fixed monitor scan for numpy v1.25
   ([`870c033`](https://gitlab.psi.ch/bec/bec/-/commit/870c03344cd55d22a89d236d88ec60e7677ed20e))
+
+- Fixed scan item for intermediate repr queries
+  ([`9decff2`](https://gitlab.psi.ch/bec/bec/-/commit/9decff27a74af7d84f41ddd8f9b3585e1d353a88))
 
 ### Continuous Integration
 
@@ -6589,22 +6604,22 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Refactoring
 
-- Use scan item repr in scan report
-  ([`33dda01`](https://gitlab.psi.ch/bec/bec/-/commit/33dda012ccdde515fdbf2f6811895a0f59c9e376))
-
 - Minor cleanup
   ([`5e40221`](https://gitlab.psi.ch/bec/bec/-/commit/5e4022161774f3b6125176041877852d7163fafd))
 
-### Testing
+- Use scan item repr in scan report
+  ([`33dda01`](https://gitlab.psi.ch/bec/bec/-/commit/33dda012ccdde515fdbf2f6811895a0f59c9e376))
 
-- Fixed scan item test
-  ([`1b27b54`](https://gitlab.psi.ch/bec/bec/-/commit/1b27b54fa8338d3c05984645599c99115025b689))
+### Testing
 
 - Added scan item tests
   ([`2eff23b`](https://gitlab.psi.ch/bec/bec/-/commit/2eff23bd7d59e89ebb948a3cc6da21e3ce1cd73d))
 
 - Added scan server tests
   ([`4f0b9b0`](https://gitlab.psi.ch/bec/bec/-/commit/4f0b9b046920470f073bcb5be1e181fa12eb3a74))
+
+- Fixed scan item test
+  ([`1b27b54`](https://gitlab.psi.ch/bec/bec/-/commit/1b27b54fa8338d3c05984645599c99115025b689))
 
 - More scan server tests
   ([`00ad593`](https://gitlab.psi.ch/bec/bec/-/commit/00ad593d5cdb56d876a8ca3148c8e3dc0c9261dd))
@@ -6720,20 +6735,20 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Bug Fixes
 
-- Pull from origin
-  ([`6c659a9`](https://gitlab.psi.ch/bec/bec/-/commit/6c659a94c4dbd5b7a4a3718c08b6fd1b117c3602))
+- Added git pull
+  ([`7e77444`](https://gitlab.psi.ch/bec/bec/-/commit/7e77444a70647706ae448186fb44c64a3622880c))
+
+- Added hvcs domain
+  ([`32856c5`](https://gitlab.psi.ch/bec/bec/-/commit/32856c50047c6a91a10f2a3666738dc6b7f16737))
 
 - Checkout master instead of commit
   ([`33e0669`](https://gitlab.psi.ch/bec/bec/-/commit/33e0669323e3fb01d079fb56018349d190537101))
 
-- Added git pull
-  ([`7e77444`](https://gitlab.psi.ch/bec/bec/-/commit/7e77444a70647706ae448186fb44c64a3622880c))
-
 - Fixed domain name
   ([`a3c2e5f`](https://gitlab.psi.ch/bec/bec/-/commit/a3c2e5ff85dbdd6badc182828ee85b6e01dc6377))
 
-- Added hvcs domain
-  ([`32856c5`](https://gitlab.psi.ch/bec/bec/-/commit/32856c50047c6a91a10f2a3666738dc6b7f16737))
+- Pull from origin
+  ([`6c659a9`](https://gitlab.psi.ch/bec/bec/-/commit/6c659a94c4dbd5b7a4a3718c08b6fd1b117c3602))
 
 
 ## v0.4.2 (2023-06-19)
@@ -6746,11 +6761,11 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 - Delete all local tags before adding new ones
   ([`b8d71f5`](https://gitlab.psi.ch/bec/bec/-/commit/b8d71f5cabf80d099bf76687758f398bff9214e1))
 
-- Only run semver on master; added git tag log
-  ([`b63d128`](https://gitlab.psi.ch/bec/bec/-/commit/b63d128cefb50dfdb52328bae7032a22cd9d5934))
-
 - Np.vstack must receive tuple
   ([`3286d46`](https://gitlab.psi.ch/bec/bec/-/commit/3286d46163e4ce7d262c170a0d04a59f287b40c1))
+
+- Only run semver on master; added git tag log
+  ([`b63d128`](https://gitlab.psi.ch/bec/bec/-/commit/b63d128cefb50dfdb52328bae7032a22cd9d5934))
 
 
 ## v0.4.1 (2023-06-19)
@@ -6760,155 +6775,255 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 
 ### Bug Fixes
 
-- Fixed message reader for bundled messages
-  ([`4d7b141`](https://gitlab.psi.ch/bec/bec/-/commit/4d7b141fb0c452eecf2f56330d3eacafb631923b))
+- Added bec status updates
+  ([`01bf0a3`](https://gitlab.psi.ch/bec/bec/-/commit/01bf0a35dbe28928d634ce6c7e71e5948d2c53c0))
 
-- Fixed default writer
-  ([`73f555f`](https://gitlab.psi.ch/bec/bec/-/commit/73f555f8457918251f46cef504268ddb7f5a95c8))
+- Added bpm4i to default csaxs config
+  ([`b04cf72`](https://gitlab.psi.ch/bec/bec/-/commit/b04cf72e5303483658cbae3d71378aa864d42233))
 
-- Fixed async callbacks for BECClient
-  ([`087595d`](https://gitlab.psi.ch/bec/bec/-/commit/087595dbf45a29818e6a53e631a9d7d5e4a71fa7))
+- Added check_alarms to wait function
+  ([`d5abeb8`](https://gitlab.psi.ch/bec/bec/-/commit/d5abeb89fa9d259310bc048d9de5829d798af34d))
 
-- Fixed sync scan item callbacks
-  ([`1ae04ac`](https://gitlab.psi.ch/bec/bec/-/commit/1ae04ac193ec9bb7a52cabf940a5aeb230288761))
+- Added config converter and validator in the absence of scibec
+  ([`f0a7c9f`](https://gitlab.psi.ch/bec/bec/-/commit/f0a7c9faf2affbbcfdb4506e41e02866dcaa22e0))
 
-- Fixed async callbacks for BECClient
-  ([`337d6e6`](https://gitlab.psi.ch/bec/bec/-/commit/337d6e61723d6cbf1db7b096bd39bdab03b1d9b3))
-
-- Fixed bec magics for new live_updates structure
-  ([`5433b35`](https://gitlab.psi.ch/bec/bec/-/commit/5433b35d4a8c2230d9f506994eabb030a37d414b))
-
-- Fixed ip exception handler for ScanInterruptions
-  ([`074ec13`](https://gitlab.psi.ch/bec/bec/-/commit/074ec1362bd1dff4d634e55935b2aa6c1c511f41))
-
-- Fixed feedback for queued scans
-  ([`a5c16fe`](https://gitlab.psi.ch/bec/bec/-/commit/a5c16feff717e75e793555cea9f600976645832a))
-
-- Fixed dependencies for bec_client_lib
-  ([`b3ff495`](https://gitlab.psi.ch/bec/bec/-/commit/b3ff49510571bdf912070b343a5336fc77ed7bdb))
-
-- Fixed bec_utils dependency
-  ([`f000f1c`](https://gitlab.psi.ch/bec/bec/-/commit/f000f1c87a8694ffccdb0ba1e5ca7b945ea6486c))
-
-- Checkout correct ophyd branch
-  ([`1ec4567`](https://gitlab.psi.ch/bec/bec/-/commit/1ec4567918e2152d90e30080e619e2fe6975e389))
-
-- Removed bec_utils after refactoring
-  ([`03d6a27`](https://gitlab.psi.ch/bec/bec/-/commit/03d6a274d0ab26ea5f6536e952846e617d013d01))
-
-- Fixed scan object for client lib; closes #74
-  ([`c285019`](https://gitlab.psi.ch/bec/bec/-/commit/c28501993a7696bdadb63011c339f049ec60f2c7))
-
-- Fixed startup script after mixin changes
-  ([`844cbc1`](https://gitlab.psi.ch/bec/bec/-/commit/844cbc1e0f67b95d1aee7a6af16e8bb170898a94))
-
-- Fixed tests
-  ([`dbd2e73`](https://gitlab.psi.ch/bec/bec/-/commit/dbd2e735a5886c55b1876baf3efe9f15cb956f5e))
-
-- Bug fixes related to client_lib refactoring
-  ([`79d5604`](https://gitlab.psi.ch/bec/bec/-/commit/79d5604e67443c161b56d7164774f81d596d86d5))
-
-- Fixed client dependency
-  ([`82e3384`](https://gitlab.psi.ch/bec/bec/-/commit/82e3384cd2ddb5bda45376f9bf2a26d3f29a49e3))
-
-- Fixed startup script after mixin changes
-  ([`e25c085`](https://gitlab.psi.ch/bec/bec/-/commit/e25c085d29ca4999d8e9e12abaaff72466c6f76c))
-
-- Fixed tests
-  ([`018d781`](https://gitlab.psi.ch/bec/bec/-/commit/018d781dbfa57209ab7cb5a6ab2b265a1b5df364))
-
-- Bug fixes related to client_lib refactoring
-  ([`0a58846`](https://gitlab.psi.ch/bec/bec/-/commit/0a588462f547707222c625676782ce77060e858f))
-
-- Fixed client dependency
-  ([`bd81815`](https://gitlab.psi.ch/bec/bec/-/commit/bd81815a7d3c7806d25664425f407e56a3396f1a))
-
-- Removed wait for hidden reports
-  ([`01c3850`](https://gitlab.psi.ch/bec/bec/-/commit/01c38501084d5138988ea9a2c8338c2d1316ccc7))
-
-- Fixed bug in scans._run
-  ([`2ea8c3e`](https://gitlab.psi.ch/bec/bec/-/commit/2ea8c3e33b2b136e5de33b744b2bb003a9eb31c9))
-
-- Renamed data_segment to scan_segment
-  ([`59dfa4e`](https://gitlab.psi.ch/bec/bec/-/commit/59dfa4e175bcea01db15af20afadb0400c20e834))
-
-- Added fpdf dependency
-  ([`d317dd8`](https://gitlab.psi.ch/bec/bec/-/commit/d317dd8229db6d1fc3cf1e65adc0e7f4bd34afaa))
-
-- Testing semver publish
-  ([`a0c70a5`](https://gitlab.psi.ch/bec/bec/-/commit/a0c70a51e2ef619004d69161a118f77525e1804a))
-
-- Removed apk install; not needed for python image
-  ([`0aa9ffc`](https://gitlab.psi.ch/bec/bec/-/commit/0aa9ffcd7939ca049a860f666bf3b24ce96b1325))
-
-- Added username to semver deploy
-  ([`1c3fc4d`](https://gitlab.psi.ch/bec/bec/-/commit/1c3fc4d01ed00120229559ed6a86fb2b1907d937))
-
-- Removed needs from semver job
-  ([`88f0136`](https://gitlab.psi.ch/bec/bec/-/commit/88f01360c48d26781b8a60c638abcd83a7ee4c08))
-
-- Fixed alarm_handler verbosity; changed default to Minor
-  ([`8e3f389`](https://gitlab.psi.ch/bec/bec/-/commit/8e3f3891ce77cf69f929becea1b5357fe5d6b412))
-
-- Reset logbook info on init http error
-  ([`e48c888`](https://gitlab.psi.ch/bec/bec/-/commit/e48c8883a8dc4c26bad7e0a9daa2389fdba94a88))
-
-- Fixed serializer check
-  ([`1d13e61`](https://gitlab.psi.ch/bec/bec/-/commit/1d13e61fadaf7c9ec644f172c002a9b20a723df2))
-
-- Fixed bec messages for numpy data; fixed message reader
-  ([`96a5f1b`](https://gitlab.psi.ch/bec/bec/-/commit/96a5f1b49d2a322c7c1d591f48d3ffc6f1e70091))
+- Added dummy fshon
+  ([`2ef2d59`](https://gitlab.psi.ch/bec/bec/-/commit/2ef2d599199c3d1294113476ad08f78e32e8fd3f))
 
 - Added error handling to catch failed device inits
   ([`8036c4b`](https://gitlab.psi.ch/bec/bec/-/commit/8036c4b26e8eda082cd0bfb541604d7e787dc676))
 
-- Fixed stdout and stderr redirect for tmux init
-  ([`561a144`](https://gitlab.psi.ch/bec/bec/-/commit/561a144fb9d74977d15cba6d698e2578ecf49457))
+- Added fpdf dependency
+  ([`d317dd8`](https://gitlab.psi.ch/bec/bec/-/commit/d317dd8229db6d1fc3cf1e65adc0e7f4bd34afaa))
 
-- Fixed bug in primary_devices
-  ([`79a74b1`](https://gitlab.psi.ch/bec/bec/-/commit/79a74b1b898e24a010ff8484112080c8472f1cb4))
+- Added jsonschema to dependencies
+  ([`a4bab2b`](https://gitlab.psi.ch/bec/bec/-/commit/a4bab2b715adfd4d1ba84fd0e23c5a7bedc9b2da))
 
-- Removed scan_motor usage
-  ([`52ff75a`](https://gitlab.psi.ch/bec/bec/-/commit/52ff75a52502c78ee247b8bde2ce217c8275d58e))
+- Added missing file
+  ([`2cb3a5b`](https://gitlab.psi.ch/bec/bec/-/commit/2cb3a5b00f849ea52a234bd4a78550da878a076e))
 
-- Primary devices must be unique
-  ([`0e4119e`](https://gitlab.psi.ch/bec/bec/-/commit/0e4119ebefb6428ef78d6fd0b8ee5b24e358056c))
-
-- Changes related to readout_priority
-  ([`a65aa9d`](https://gitlab.psi.ch/bec/bec/-/commit/a65aa9d055d0b09aa02f2be40cb9377c9f1ccbd7))
-
-- Fixed kickoff for old interface
-  ([`8d38101`](https://gitlab.psi.ch/bec/bec/-/commit/8d38101c741ff9c44de16e98551ba99841ef8c39))
-
-- Improvements for otf; added option to wait for kickoff
-  ([`b685301`](https://gitlab.psi.ch/bec/bec/-/commit/b6853012288a9fb3ebd991552cde8bed2ea7ddd8))
-
-- Reverted black for json files
-  ([`458e33a`](https://gitlab.psi.ch/bec/bec/-/commit/458e33a0f5e1feac0a29b0bfe01ffbb81ef3a8ce))
-
-- Fixed bug in primary devices
-  ([`d675cf3`](https://gitlab.psi.ch/bec/bec/-/commit/d675cf3264244515d8309e945ac5a36b0522e45b))
-
-- Fixed primary_device list for overlapping scan motors
-  ([`19b52ee`](https://gitlab.psi.ch/bec/bec/-/commit/19b52eef9cf9fedb48eb5fc55cb5f26a329f462a))
-
-- Fixed tomo scan file for repeated angles
-  ([`d25d974`](https://gitlab.psi.ch/bec/bec/-/commit/d25d9740f88540cc3de288314e0cb93ded7a2591))
-
-- Fixed model
-  ([`3475112`](https://gitlab.psi.ch/bec/bec/-/commit/3475112ffa01d2d0e132faa7d8c849634a89c498))
-
-- Fixed weird merge conflict
-  ([`56bd317`](https://gitlab.psi.ch/bec/bec/-/commit/56bd317e0f7c44b755c7de91638c2ff3027b4871))
-
-- Fixed bug for movements without report instructions
-  ([`4716a54`](https://gitlab.psi.ch/bec/bec/-/commit/4716a54e290e8b092c883964934f0f78d360c522))
+- Added missing file
+  ([`f256ec1`](https://gitlab.psi.ch/bec/bec/-/commit/f256ec1839ce1fdaea434452d253e998836a9736))
 
 - Added missing files
   ([`97b374f`](https://gitlab.psi.ch/bec/bec/-/commit/97b374f024fdafb4a19a16a3a360c56a6007f071))
 
+- Added missing files
+  ([`baf2367`](https://gitlab.psi.ch/bec/bec/-/commit/baf23679afd4011b45bde8277dfb0d8cb085a670))
+
+- Added missing files
+  ([`82953f9`](https://gitlab.psi.ch/bec/bec/-/commit/82953f9d4edf5638c1e2bbe8d1f69b8cc3bc1a74))
+
 - Added missing websocket file
   ([`6669a39`](https://gitlab.psi.ch/bec/bec/-/commit/6669a396cac76921dbdcaf5bfd4441a212ad6b0b))
+
+- Added redis config update to scihub init
+  ([`821f940`](https://gitlab.psi.ch/bec/bec/-/commit/821f940470bd39b5bd6264bd02331db1d0263270))
+
+- Added scan status messages for halted and paused
+  ([`c239c41`](https://gitlab.psi.ch/bec/bec/-/commit/c239c41394e47ea9abb8846fa18d483abbb8e8a5))
+
+- Added scihub dependency
+  ([`791fea1`](https://gitlab.psi.ch/bec/bec/-/commit/791fea1735e6fb02e627cb418cf6f0ce6f30fba7))
+
+- Added semver log to pre-commit
+  ([`aeb5fcb`](https://gitlab.psi.ch/bec/bec/-/commit/aeb5fcbed63037047d61bbe30a9a00996fe31d4c))
+
+- Added semver to all services
+  ([`b32edb5`](https://gitlab.psi.ch/bec/bec/-/commit/b32edb549067334c8dfc68f060c112e8ba7230ad))
+
+- Added sleep to ensure that the device server starts processing the data first. Should be changed
+  to a reply from SciHub
+  ([`e65a6a2`](https://gitlab.psi.ch/bec/bec/-/commit/e65a6a23cbab9bbd231459f0953392150b6fc7d4))
+
+- Added threadlock to scan queue status
+  ([`5912c0f`](https://gitlab.psi.ch/bec/bec/-/commit/5912c0f02b9ea44e8759c53a4b760e6d1b0bc910))
+
+- Added username to semver deploy
+  ([`1c3fc4d`](https://gitlab.psi.ch/bec/bec/-/commit/1c3fc4d01ed00120229559ed6a86fb2b1907d937))
+
+- Added wait for device server before loading the session
+  ([`1cff100`](https://gitlab.psi.ch/bec/bec/-/commit/1cff1009aa5e51f6788a2b50bce77fb0f87d1ea7))
+
+- Bug fixes related to client_lib refactoring
+  ([`79d5604`](https://gitlab.psi.ch/bec/bec/-/commit/79d5604e67443c161b56d7164774f81d596d86d5))
+
+- Bug fixes related to client_lib refactoring
+  ([`0a58846`](https://gitlab.psi.ch/bec/bec/-/commit/0a588462f547707222c625676782ce77060e858f))
+
+- Cb must be specified
+  ([`d79d005`](https://gitlab.psi.ch/bec/bec/-/commit/d79d005527f54a2a8f43dbd87a31c8544f73f4c5))
+
+- Change message to logger for _trigger_device
+  ([`5d662d1`](https://gitlab.psi.ch/bec/bec/-/commit/5d662d17ad099095350aea7ce2b6b878226d0847))
+
+- Change so that the topics creates a list only when topics is not None
+  ([`e31fe6d`](https://gitlab.psi.ch/bec/bec/-/commit/e31fe6d8b729ac31512be93add108202efb23f0c))
+
+- Changed so that all fcns does the same
+  ([`733ebc7`](https://gitlab.psi.ch/bec/bec/-/commit/733ebc70361d52e8991cab96020b85598c73934e))
+
+- Changes related to monitor scan
+  ([`d2dbc2f`](https://gitlab.psi.ch/bec/bec/-/commit/d2dbc2fb28ac11e05ac5f1696fe4203597622f0e))
+
+- Changes related to readout_priority
+  ([`a65aa9d`](https://gitlab.psi.ch/bec/bec/-/commit/a65aa9d055d0b09aa02f2be40cb9377c9f1ccbd7))
+
+- Checkout correct ophyd branch
+  ([`1ec4567`](https://gitlab.psi.ch/bec/bec/-/commit/1ec4567918e2152d90e30080e619e2fe6975e389))
+
+- Cleanup after lamni
+  ([`ac2fbc1`](https://gitlab.psi.ch/bec/bec/-/commit/ac2fbc18db9eca42b5536044561491e633e7de93))
+
+- Disabled quadems for now as they fail to connect
+  ([`0fc45ae`](https://gitlab.psi.ch/bec/bec/-/commit/0fc45ae58316077241c4619b504aa54c45c438d1))
+
+- Fixed a typo
+  ([`a314210`](https://gitlab.psi.ch/bec/bec/-/commit/a314210a01b976c930713cd4d6d7f844fc8be528))
+
+- Fixed abort level for alarms
+  ([`548d55e`](https://gitlab.psi.ch/bec/bec/-/commit/548d55ea90aeccedcf7099a0c2e7ea43d4a037dd))
+
+- Fixed alarm_handler verbosity; changed default to Minor
+  ([`8e3f389`](https://gitlab.psi.ch/bec/bec/-/commit/8e3f3891ce77cf69f929becea1b5357fe5d6b412))
+
+- Fixed async callbacks for BECClient
+  ([`087595d`](https://gitlab.psi.ch/bec/bec/-/commit/087595dbf45a29818e6a53e631a9d7d5e4a71fa7))
+
+- Fixed async callbacks for BECClient
+  ([`337d6e6`](https://gitlab.psi.ch/bec/bec/-/commit/337d6e61723d6cbf1db7b096bd39bdab03b1d9b3))
+
+- Fixed beamline mixin inheritance
+  ([`897e5d1`](https://gitlab.psi.ch/bec/bec/-/commit/897e5d1a38282efe7faa3adb7b803e3f998f1e43))
+
+- Fixed bec magics for new live_updates structure
+  ([`5433b35`](https://gitlab.psi.ch/bec/bec/-/commit/5433b35d4a8c2230d9f506994eabb030a37d414b))
+
+- Fixed bec messages for numpy data; fixed message reader
+  ([`96a5f1b`](https://gitlab.psi.ch/bec/bec/-/commit/96a5f1b49d2a322c7c1d591f48d3ffc6f1e70091))
+
+- Fixed bec_utils dependency
+  ([`f000f1c`](https://gitlab.psi.ch/bec/bec/-/commit/f000f1c87a8694ffccdb0ba1e5ca7b945ea6486c))
+
+- Fixed bl show output
+  ([`58b1e25`](https://gitlab.psi.ch/bec/bec/-/commit/58b1e250fcd0f25aba85c4809218c2471eb797a0))
+
+- Fixed bpm4i config
+  ([`ed143e0`](https://gitlab.psi.ch/bec/bec/-/commit/ed143e0204b8d3461bc3228310fa67c92d25e19f))
+
+- Fixed bug for movements without report instructions
+  ([`4716a54`](https://gitlab.psi.ch/bec/bec/-/commit/4716a54e290e8b092c883964934f0f78d360c522))
+
+- Fixed bug for umv
+  ([`3466e60`](https://gitlab.psi.ch/bec/bec/-/commit/3466e608f258b0f1af59325ec9858edd2f0c6c52))
+
+- Fixed bug for undefined status callbacks
+  ([`a6fe9e6`](https://gitlab.psi.ch/bec/bec/-/commit/a6fe9e614d9618be24c5da3d7604532fbfcb9fd4))
+
+- Fixed bug in bec_client init
+  ([`fff063c`](https://gitlab.psi.ch/bec/bec/-/commit/fff063ce2f8becdd9431eb441c525e9c12b6b43b))
+
+- Fixed bug in ci file
+  ([`64fd8d0`](https://gitlab.psi.ch/bec/bec/-/commit/64fd8d0696479fd03d9f898fe833e0754e03485b))
+
+- Fixed bug in file_writer
+  ([`3f21d40`](https://gitlab.psi.ch/bec/bec/-/commit/3f21d406139ae0577ee5ef6752be448053ad9bc1))
+
+- Fixed bug in init_config
+  ([`6d33cbe`](https://gitlab.psi.ch/bec/bec/-/commit/6d33cbe6bb65d5e36dab7857f3359fd5dd1f7c68))
+
+- Fixed bug in init_config
+  ([`ace2b2f`](https://gitlab.psi.ch/bec/bec/-/commit/ace2b2f3377e7705bf4b200f1d74a73dbcaf98b0))
+
+- Fixed bug in init_config
+  ([`c9baaba`](https://gitlab.psi.ch/bec/bec/-/commit/c9baaba7f225c5f784e10286e3ccd5c4da0368ed))
+
+- Fixed bug in live_table callback; #closes 64
+  ([`3c5e5b1`](https://gitlab.psi.ch/bec/bec/-/commit/3c5e5b12997f54ec9d31d64877f61ac1efa876a0))
+
+- Fixed bug in monitor scan
+  ([`6fe0984`](https://gitlab.psi.ch/bec/bec/-/commit/6fe0984fe007e81272568dbc116d1e1de45a4054))
+
+- Fixed bug in primary devices
+  ([`d675cf3`](https://gitlab.psi.ch/bec/bec/-/commit/d675cf3264244515d8309e945ac5a36b0522e45b))
+
+- Fixed bug in primary_devices
+  ([`79a74b1`](https://gitlab.psi.ch/bec/bec/-/commit/79a74b1b898e24a010ff8484112080c8472f1cb4))
+
+- Fixed bug in readoutPriority propert; fixed device status for strings
+  ([`52ce000`](https://gitlab.psi.ch/bec/bec/-/commit/52ce0003e30bb4d0dee101b377a697c44f27a728))
+
+- Fixed bug in scan worker max pointid assignment
+  ([`d4cbead`](https://gitlab.psi.ch/bec/bec/-/commit/d4cbead1decbcfdf968660f03699a4dc3c6bb3e3))
+
+- Fixed bug in scans._run
+  ([`2ea8c3e`](https://gitlab.psi.ch/bec/bec/-/commit/2ea8c3e33b2b136e5de33b744b2bb003a9eb31c9))
+
+- Fixed bug in scilog shutdown
+  ([`c94613b`](https://gitlab.psi.ch/bec/bec/-/commit/c94613b30c23fd7d89fac4c3378125109ea09376))
+
+- Fixed bug related to queue refactoring
+  ([`2949236`](https://gitlab.psi.ch/bec/bec/-/commit/29492366e225c11e520751f60f41828eea1e8eb5))
+
+- Fixed bugs related to refactoring
+  ([`a45d683`](https://gitlab.psi.ch/bec/bec/-/commit/a45d683f64bac1e5e62991a9d9afb66efdabb1fd))
+
+- Fixed bugs related to refactoring
+  ([`2f61b32`](https://gitlab.psi.ch/bec/bec/-/commit/2f61b328cfb098e39f00f064bd1e4a17774d8e1c))
+
+- Fixed callbacks for groups and scan defs; closes #32
+  ([`ed41416`](https://gitlab.psi.ch/bec/bec/-/commit/ed414167ad913cd22473c1da1b31d351e6e77ce1))
+
+- Fixed client dependency
+  ([`82e3384`](https://gitlab.psi.ch/bec/bec/-/commit/82e3384cd2ddb5bda45376f9bf2a26d3f29a49e3))
+
+- Fixed client dependency
+  ([`bd81815`](https://gitlab.psi.ch/bec/bec/-/commit/bd81815a7d3c7806d25664425f407e56a3396f1a))
+
+- Fixed config
+  ([`f7be217`](https://gitlab.psi.ch/bec/bec/-/commit/f7be2172a17d97e3b67f5ba91762accb82839276))
+
+- Fixed crash in exception
+  ([`1f7e573`](https://gitlab.psi.ch/bec/bec/-/commit/1f7e57362edf75daa6e69a1b557fe393d2cf7623))
+
+- Fixed csaxs config
+  ([`a03ae49`](https://gitlab.psi.ch/bec/bec/-/commit/a03ae49cd2a862f96bed1df0dc762b654f27ec3c))
+
+- Fixed default cSAXS config
+  ([`95bc9a9`](https://gitlab.psi.ch/bec/bec/-/commit/95bc9a9f949b49d30395ac620e2fd2c738b63030))
+
+- Fixed default writer
+  ([`73f555f`](https://gitlab.psi.ch/bec/bec/-/commit/73f555f8457918251f46cef504268ddb7f5a95c8))
+
+- Fixed dependencies
+  ([`61c03fe`](https://gitlab.psi.ch/bec/bec/-/commit/61c03fefa1a47a4c27ec87bd902d03b67db7c6cb))
+
+- Fixed dependencies for bec_client_lib
+  ([`b3ff495`](https://gitlab.psi.ch/bec/bec/-/commit/b3ff49510571bdf912070b343a5336fc77ed7bdb))
+
+- Fixed DeviceManager import
+  ([`41a19b1`](https://gitlab.psi.ch/bec/bec/-/commit/41a19b15fcdce6e0f58ccdf27936db7e738fdb6f))
+
+- Fixed eiger1p5m config
+  ([`fd795d8`](https://gitlab.psi.ch/bec/bec/-/commit/fd795d8f95101d49b8fb5cbfb98a0f7ccc1ff2c7))
+
+- Fixed empty device messages
+  ([`8bd4d3d`](https://gitlab.psi.ch/bec/bec/-/commit/8bd4d3d3fa4fb8eb12be19e79e9647b09842c503))
+
+- Fixed encoding
+  ([`8ca63da`](https://gitlab.psi.ch/bec/bec/-/commit/8ca63da3153725f5fccac68edeab712aba34378a))
+
+- Fixed feedback for queued scans
+  ([`a5c16fe`](https://gitlab.psi.ch/bec/bec/-/commit/a5c16feff717e75e793555cea9f600976645832a))
+
+- Fixed file writer
+  ([`7ff72f1`](https://gitlab.psi.ch/bec/bec/-/commit/7ff72f12ddfa6ca0d197ee3ec31515c3d2b7dacc))
+
+- Fixed file writer plugins
+  ([`44e938e`](https://gitlab.psi.ch/bec/bec/-/commit/44e938ee74e4b3337b5185283ef31b9bde64c395))
+
+- Fixed fly scan motors
+  ([`245e1c8`](https://gitlab.psi.ch/bec/bec/-/commit/245e1c8d0e45417b852801e98d3982a8dcbda153))
 
 - Fixed formatter
   ([`02b20a0`](https://gitlab.psi.ch/bec/bec/-/commit/02b20a0ac8c064b6b2437a030c394c7722fc75bf))
@@ -6922,294 +7037,47 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 - Fixed formatter
   ([`56f8a14`](https://gitlab.psi.ch/bec/bec/-/commit/56f8a14b41dd7376ab1403e59ab167501f7edb82))
 
-- Fixed dependencies
-  ([`61c03fe`](https://gitlab.psi.ch/bec/bec/-/commit/61c03fefa1a47a4c27ec87bd902d03b67db7c6cb))
-
-- Increased node version to 14.21
-  ([`95e8e2a`](https://gitlab.psi.ch/bec/bec/-/commit/95e8e2aefd98ac66b0b0e5034c313e61014643df))
-
-- Fixed missing package
-  ([`77a9bde`](https://gitlab.psi.ch/bec/bec/-/commit/77a9bded34eac9529d392d424a1a9fecb1944f72))
-
-- Fixed bug in scilog shutdown
-  ([`c94613b`](https://gitlab.psi.ch/bec/bec/-/commit/c94613b30c23fd7d89fac4c3378125109ea09376))
-
-- Fixes path to logbookmessage
-  ([`c3bdee3`](https://gitlab.psi.ch/bec/bec/-/commit/c3bdee3734acb4096221385f2d283896c3be3468))
-
-- Online changes lamni
-  ([`c0dba49`](https://gitlab.psi.ch/bec/bec/-/commit/c0dba49377c16f54f000098c948b267a8d78979d))
-
-- Lamni online changes
-  ([`a11b09b`](https://gitlab.psi.ch/bec/bec/-/commit/a11b09b027a3cb2d7012c4124980abdd83bcb4db))
-
-- Fixed bug for umv
-  ([`3466e60`](https://gitlab.psi.ch/bec/bec/-/commit/3466e608f258b0f1af59325ec9858edd2f0c6c52))
-
-- Fixed bug in scan worker max pointid assignment
-  ([`d4cbead`](https://gitlab.psi.ch/bec/bec/-/commit/d4cbead1decbcfdf968660f03699a4dc3c6bb3e3))
-
-- Fixed monitor scan update
-  ([`0c468a5`](https://gitlab.psi.ch/bec/bec/-/commit/0c468a5717884e319826f85ccd1f09a5c9ce963f))
-
-- Fixed encoding
-  ([`8ca63da`](https://gitlab.psi.ch/bec/bec/-/commit/8ca63da3153725f5fccac68edeab712aba34378a))
-
-- Fixed repr string
-  ([`8dc2d6f`](https://gitlab.psi.ch/bec/bec/-/commit/8dc2d6f61a9259b28aa9e3ec91674aa10cc1151f))
-
-- Fixed sub devices info name
-  ([`a37e057`](https://gitlab.psi.ch/bec/bec/-/commit/a37e0572347c09bd1ecfeea8e08934cb20b3c836))
-
-- Fixed merge conflict
-  ([`0b66cb0`](https://gitlab.psi.ch/bec/bec/-/commit/0b66cb0ce5f9e41abfa2b32657deaaa1f2c495ee))
-
-- Fixed file writer
-  ([`7ff72f1`](https://gitlab.psi.ch/bec/bec/-/commit/7ff72f12ddfa6ca0d197ee3ec31515c3d2b7dacc))
-
-- Fixed bug in file_writer
-  ([`3f21d40`](https://gitlab.psi.ch/bec/bec/-/commit/3f21d406139ae0577ee5ef6752be448053ad9bc1))
-
-- Fixed fly scan motors
-  ([`245e1c8`](https://gitlab.psi.ch/bec/bec/-/commit/245e1c8d0e45417b852801e98d3982a8dcbda153))
-
-- Fixed bug in monitor scan
-  ([`6fe0984`](https://gitlab.psi.ch/bec/bec/-/commit/6fe0984fe007e81272568dbc116d1e1de45a4054))
-
-- Moved flyer to hint-based
-  ([`11fb30f`](https://gitlab.psi.ch/bec/bec/-/commit/11fb30f64320f712ec93b24323079db7fe4831cb))
-
-- Fixed save_conig_file for locally created configs
-  ([`81d82ed`](https://gitlab.psi.ch/bec/bec/-/commit/81d82ed8977f0f417ac6e8807d7eec8e383c8a16))
-
-- Added sleep to ensure that the device server starts processing the data first. Should be changed
-  to a reply from SciHub
-  ([`e65a6a2`](https://gitlab.psi.ch/bec/bec/-/commit/e65a6a23cbab9bbd231459f0953392150b6fc7d4))
-
-- Fixed logger for scan status paused and halted
-  ([`c352ce0`](https://gitlab.psi.ch/bec/bec/-/commit/c352ce0128c8c8bfc05268282fea221809cf5569))
-
-- Added scan status messages for halted and paused
-  ([`c239c41`](https://gitlab.psi.ch/bec/bec/-/commit/c239c41394e47ea9abb8846fa18d483abbb8e8a5))
-
-- Fixed scan interruption message
-  ([`b822655`](https://gitlab.psi.ch/bec/bec/-/commit/b82265594cbaef68b13d6b1f3348315e91ec9221))
-
-- Skip None callbacks
-  ([`0a60289`](https://gitlab.psi.ch/bec/bec/-/commit/0a60289f0d0f3a5e23b683dafc316530010ab7b6))
-
-- Only pause if queue is not empty
-  ([`deca3d1`](https://gitlab.psi.ch/bec/bec/-/commit/deca3d1d77143379b559934e1307d2a85acea50a))
-
-- Removed duplicated reload call
-  ([`db043ea`](https://gitlab.psi.ch/bec/bec/-/commit/db043eaf47b983494ba8221ec646714e39d46665))
-
-- Fixed bug in bec_client init
-  ([`fff063c`](https://gitlab.psi.ch/bec/bec/-/commit/fff063ce2f8becdd9431eb441c525e9c12b6b43b))
-
-- Fixed bug for undefined status callbacks
-  ([`a6fe9e6`](https://gitlab.psi.ch/bec/bec/-/commit/a6fe9e614d9618be24c5da3d7604532fbfcb9fd4))
-
-- Added bec status updates
-  ([`01bf0a3`](https://gitlab.psi.ch/bec/bec/-/commit/01bf0a35dbe28928d634ce6c7e71e5948d2c53c0))
-
-- Fixed rpc calls
-  ([`183e5ae`](https://gitlab.psi.ch/bec/bec/-/commit/183e5aefafa06ed04836f03b9f7249a666ee05f5))
-
-- Added config converter and validator in the absence of scibec
-  ([`f0a7c9f`](https://gitlab.psi.ch/bec/bec/-/commit/f0a7c9faf2affbbcfdb4506e41e02866dcaa22e0))
-
-- Added wait for device server before loading the session
-  ([`1cff100`](https://gitlab.psi.ch/bec/bec/-/commit/1cff1009aa5e51f6788a2b50bce77fb0f87d1ea7))
-
-- Fixed bug in init_config
-  ([`6d33cbe`](https://gitlab.psi.ch/bec/bec/-/commit/6d33cbe6bb65d5e36dab7857f3359fd5dd1f7c68))
-
-- Fixed bug in init_config
-  ([`ace2b2f`](https://gitlab.psi.ch/bec/bec/-/commit/ace2b2f3377e7705bf4b200f1d74a73dbcaf98b0))
-
-- Fixed path to config file
-  ([`393db47`](https://gitlab.psi.ch/bec/bec/-/commit/393db479363cfe359440e79f47f250cf8b3b5638))
-
-- Fixed bug in init_config
-  ([`c9baaba`](https://gitlab.psi.ch/bec/bec/-/commit/c9baaba7f225c5f784e10286e3ccd5c4da0368ed))
-
-- Added missing file
-  ([`2cb3a5b`](https://gitlab.psi.ch/bec/bec/-/commit/2cb3a5b00f849ea52a234bd4a78550da878a076e))
-
-- Fixed bug in ci file
-  ([`64fd8d0`](https://gitlab.psi.ch/bec/bec/-/commit/64fd8d0696479fd03d9f898fe833e0754e03485b))
-
-- Fixed bugs related to refactoring
-  ([`a45d683`](https://gitlab.psi.ch/bec/bec/-/commit/a45d683f64bac1e5e62991a9d9afb66efdabb1fd))
-
-- Fixes after refactoring
-  ([`7547f8d`](https://gitlab.psi.ch/bec/bec/-/commit/7547f8d8c7cbeb3cf488f5673c1f1330ee7955e6))
-
-- Added missing file
-  ([`f256ec1`](https://gitlab.psi.ch/bec/bec/-/commit/f256ec1839ce1fdaea434452d253e998836a9736))
-
-- Fixed bugs related to refactoring
-  ([`2f61b32`](https://gitlab.psi.ch/bec/bec/-/commit/2f61b328cfb098e39f00f064bd1e4a17774d8e1c))
-
-- Added redis config update to scihub init
-  ([`821f940`](https://gitlab.psi.ch/bec/bec/-/commit/821f940470bd39b5bd6264bd02331db1d0263270))
-
-- Fixed config
-  ([`f7be217`](https://gitlab.psi.ch/bec/bec/-/commit/f7be2172a17d97e3b67f5ba91762accb82839276))
-
-- Added missing files
-  ([`baf2367`](https://gitlab.psi.ch/bec/bec/-/commit/baf23679afd4011b45bde8277dfb0d8cb085a670))
-
-- Removed numpy dependency
-  ([`f5b4a8a`](https://gitlab.psi.ch/bec/bec/-/commit/f5b4a8a0ac1b6ba48ab817fb60101811b4dd4854))
-
-- Added scihub dependency
-  ([`791fea1`](https://gitlab.psi.ch/bec/bec/-/commit/791fea1735e6fb02e627cb418cf6f0ce6f30fba7))
-
-- Improvements and fixes for redis config
-  ([`ec5f915`](https://gitlab.psi.ch/bec/bec/-/commit/ec5f9155ceac4d4df9eacd7ea5767d01d1c50029))
-
-- Fixed file writer plugins
-  ([`44e938e`](https://gitlab.psi.ch/bec/bec/-/commit/44e938ee74e4b3337b5185283ef31b9bde64c395))
-
 - Fixed gitignore
   ([`270dc82`](https://gitlab.psi.ch/bec/bec/-/commit/270dc827300ba10157b0a7b72f684194cd50cc23))
-
-- Added jsonschema to dependencies
-  ([`a4bab2b`](https://gitlab.psi.ch/bec/bec/-/commit/a4bab2b715adfd4d1ba84fd0e23c5a7bedc9b2da))
-
-- Added missing files
-  ([`82953f9`](https://gitlab.psi.ch/bec/bec/-/commit/82953f9d4edf5638c1e2bbe8d1f69b8cc3bc1a74))
-
-- Changes related to monitor scan
-  ([`d2dbc2f`](https://gitlab.psi.ch/bec/bec/-/commit/d2dbc2fb28ac11e05ac5f1696fe4203597622f0e))
-
-- Unused wait groups are ignored
-  ([`06cd3d5`](https://gitlab.psi.ch/bec/bec/-/commit/06cd3d58c7c91da019af08ae9c23993d7d2c71e2))
-
-- Fixed bug related to queue refactoring
-  ([`2949236`](https://gitlab.psi.ch/bec/bec/-/commit/29492366e225c11e520751f60f41828eea1e8eb5))
-
-- Fixed typo; fixed test
-  ([`b2799f6`](https://gitlab.psi.ch/bec/bec/-/commit/b2799f61f7ba927da766a36628804d4471537066))
-
-- Fixed DeviceManager import
-  ([`41a19b1`](https://gitlab.psi.ch/bec/bec/-/commit/41a19b15fcdce6e0f58ccdf27936db7e738fdb6f))
-
-- Fixed bug in live_table callback; #closes 64
-  ([`3c5e5b1`](https://gitlab.psi.ch/bec/bec/-/commit/3c5e5b12997f54ec9d31d64877f61ac1efa876a0))
-
-- Fixed path to bec_config yaml file
-  ([`9d18037`](https://gitlab.psi.ch/bec/bec/-/commit/9d180372d122b439766666f13a2f474cb40a8ad2))
-
-- Fixed a typo
-  ([`a314210`](https://gitlab.psi.ch/bec/bec/-/commit/a314210a01b976c930713cd4d6d7f844fc8be528))
-
-- Cb must be specified
-  ([`d79d005`](https://gitlab.psi.ch/bec/bec/-/commit/d79d005527f54a2a8f43dbd87a31c8544f73f4c5))
-
-- Fixed kwargs forwarding for threaded consumer
-  ([`5153847`](https://gitlab.psi.ch/bec/bec/-/commit/5153847674a377e205909ff8a6dc3a01e4223017))
-
-- Change so that the topics creates a list only when topics is not None
-  ([`e31fe6d`](https://gitlab.psi.ch/bec/bec/-/commit/e31fe6d8b729ac31512be93add108202efb23f0c))
-
-- Fixed beamline mixin inheritance
-  ([`897e5d1`](https://gitlab.psi.ch/bec/bec/-/commit/897e5d1a38282efe7faa3adb7b803e3f998f1e43))
-
-- Fixed empty device messages
-  ([`8bd4d3d`](https://gitlab.psi.ch/bec/bec/-/commit/8bd4d3d3fa4fb8eb12be19e79e9647b09842c503))
-
-- Change message to logger for _trigger_device
-  ([`5d662d1`](https://gitlab.psi.ch/bec/bec/-/commit/5d662d17ad099095350aea7ce2b6b878226d0847))
-
-- Changed so that all fcns does the same
-  ([`733ebc7`](https://gitlab.psi.ch/bec/bec/-/commit/733ebc70361d52e8991cab96020b85598c73934e))
-
-- Fixed crash in exception
-  ([`1f7e573`](https://gitlab.psi.ch/bec/bec/-/commit/1f7e57362edf75daa6e69a1b557fe393d2cf7623))
-
-- Added check_alarms to wait function
-  ([`d5abeb8`](https://gitlab.psi.ch/bec/bec/-/commit/d5abeb89fa9d259310bc048d9de5829d798af34d))
-
-- Fixed callbacks for groups and scan defs; closes #32
-  ([`ed41416`](https://gitlab.psi.ch/bec/bec/-/commit/ed414167ad913cd22473c1da1b31d351e6e77ce1))
-
-- Cleanup after lamni
-  ([`ac2fbc1`](https://gitlab.psi.ch/bec/bec/-/commit/ac2fbc18db9eca42b5536044561491e633e7de93))
-
-- Fixed userParameter assignment
-  ([`7dc43fa`](https://gitlab.psi.ch/bec/bec/-/commit/7dc43fa29eff9fdf27bb7c97d7587095ca39ccbd))
-
-- Fixed xrayeyealign init
-  ([`a56a3a2`](https://gitlab.psi.ch/bec/bec/-/commit/a56a3a2266f81a1866b994f0c491f6933386caef))
 
 - Fixed import bug
   ([`2813791`](https://gitlab.psi.ch/bec/bec/-/commit/2813791ae795fccfc1459f09d6d63c47d80cf864))
 
-- Fixed bpm4i config
-  ([`ed143e0`](https://gitlab.psi.ch/bec/bec/-/commit/ed143e0204b8d3461bc3228310fa67c92d25e19f))
-
-- Added dummy fshon
-  ([`2ef2d59`](https://gitlab.psi.ch/bec/bec/-/commit/2ef2d599199c3d1294113476ad08f78e32e8fd3f))
-
-- Added bpm4i to default csaxs config
-  ([`b04cf72`](https://gitlab.psi.ch/bec/bec/-/commit/b04cf72e5303483658cbae3d71378aa864d42233))
-
-- Left align bl_show_all output
-  ([`a35aa06`](https://gitlab.psi.ch/bec/bec/-/commit/a35aa0638405e01fd37f81cfcf523bb34eb8a33d))
-
-- Disabled quadems for now as they fail to connect
-  ([`0fc45ae`](https://gitlab.psi.ch/bec/bec/-/commit/0fc45ae58316077241c4619b504aa54c45c438d1))
-
-- Subscriptions should only be added after the connection has been established
-  ([`627cc45`](https://gitlab.psi.ch/bec/bec/-/commit/627cc45570ec6cf61e80f78241ce672e85a1ab90))
-
-- Fixed bug in readoutPriority propert; fixed device status for strings
-  ([`52ce000`](https://gitlab.psi.ch/bec/bec/-/commit/52ce0003e30bb4d0dee101b377a697c44f27a728))
-
-- Fixed bl show output
-  ([`58b1e25`](https://gitlab.psi.ch/bec/bec/-/commit/58b1e250fcd0f25aba85c4809218c2471eb797a0))
-
-- Added threadlock to scan queue status
-  ([`5912c0f`](https://gitlab.psi.ch/bec/bec/-/commit/5912c0f02b9ea44e8759c53a4b760e6d1b0bc910))
-
-- Fixed default cSAXS config
-  ([`95bc9a9`](https://gitlab.psi.ch/bec/bec/-/commit/95bc9a9f949b49d30395ac620e2fd2c738b63030))
-
-- Fixed eiger1p5m config
-  ([`fd795d8`](https://gitlab.psi.ch/bec/bec/-/commit/fd795d8f95101d49b8fb5cbfb98a0f7ccc1ff2c7))
-
-- Fixed csaxs config
-  ([`a03ae49`](https://gitlab.psi.ch/bec/bec/-/commit/a03ae49cd2a862f96bed1df0dc762b654f27ec3c))
-
 - Fixed intermediate config write action
   ([`a48fff5`](https://gitlab.psi.ch/bec/bec/-/commit/a48fff5f013be19914f18f1aef960ac649ddd03c))
 
-- New scans clear the alarm stack
-  ([`6cc2bcd`](https://gitlab.psi.ch/bec/bec/-/commit/6cc2bcdeb3ea484c4057a22c469fd47fedac9a54))
+- Fixed ip exception handler for ScanInterruptions
+  ([`074ec13`](https://gitlab.psi.ch/bec/bec/-/commit/074ec1362bd1dff4d634e55935b2aa6c1c511f41))
 
-- Only alarms are raised; warnings are logged
-  ([`7b01c63`](https://gitlab.psi.ch/bec/bec/-/commit/7b01c638a3aaf5c0b1056f1a80b2032628c7593e))
+- Fixed kickoff for old interface
+  ([`8d38101`](https://gitlab.psi.ch/bec/bec/-/commit/8d38101c741ff9c44de16e98551ba99841ef8c39))
 
-- Fixed abort level for alarms
-  ([`548d55e`](https://gitlab.psi.ch/bec/bec/-/commit/548d55ea90aeccedcf7099a0c2e7ea43d4a037dd))
+- Fixed kwargs forwarding for threaded consumer
+  ([`5153847`](https://gitlab.psi.ch/bec/bec/-/commit/5153847674a377e205909ff8a6dc3a01e4223017))
 
-- Removed on_failure from scan_worker as it is now handled for each device individually
-  ([`544d6fe`](https://gitlab.psi.ch/bec/bec/-/commit/544d6fec990e53a9d6ea03d8e52134b9ab4b699b))
+- Fixed logger for scan status paused and halted
+  ([`c352ce0`](https://gitlab.psi.ch/bec/bec/-/commit/c352ce0128c8c8bfc05268282fea221809cf5569))
 
-- Fixed sls and cSAXS config for new db structure
-  ([`6f898c6`](https://gitlab.psi.ch/bec/bec/-/commit/6f898c602d81d966ee059d2fe1808ecdf83fa3a2))
+- Fixed merge conflict
+  ([`0b66cb0`](https://gitlab.psi.ch/bec/bec/-/commit/0b66cb0ce5f9e41abfa2b32657deaaa1f2c495ee))
 
-- Fixed test for merged db updates
-  ([`ad56d59`](https://gitlab.psi.ch/bec/bec/-/commit/ad56d591e20bd5f8c616506104446d5bfa2e7bf5))
+- Fixed message reader for bundled messages
+  ([`4d7b141`](https://gitlab.psi.ch/bec/bec/-/commit/4d7b141fb0c452eecf2f56330d3eacafb631923b))
 
-- Renamed deviceGroup to deviceTags
-  ([`7e12750`](https://gitlab.psi.ch/bec/bec/-/commit/7e127509db7cda8fcf4f0156c9a969d306cd22f7))
+- Fixed missing package
+  ([`77a9bde`](https://gitlab.psi.ch/bec/bec/-/commit/77a9bded34eac9529d392d424a1a9fecb1944f72))
 
-- Moved onFailure from acquisition config to root
-  ([`72249ca`](https://gitlab.psi.ch/bec/bec/-/commit/72249ca8730e4bcf4ab5e5863092faa8fe3ea4bc))
+- Fixed model
+  ([`3475112`](https://gitlab.psi.ch/bec/bec/-/commit/3475112ffa01d2d0e132faa7d8c849634a89c498))
+
+- Fixed monitor scan update
+  ([`0c468a5`](https://gitlab.psi.ch/bec/bec/-/commit/0c468a5717884e319826f85ccd1f09a5c9ce963f))
+
+- Fixed path to bec_config yaml file
+  ([`9d18037`](https://gitlab.psi.ch/bec/bec/-/commit/9d180372d122b439766666f13a2f474cb40a8ad2))
+
+- Fixed path to config file
+  ([`393db47`](https://gitlab.psi.ch/bec/bec/-/commit/393db479363cfe359440e79f47f250cf8b3b5638))
 
 - Fixed pre/post commit
   ([`88d151f`](https://gitlab.psi.ch/bec/bec/-/commit/88d151fe2a56e1ff6e6e5d0729f1c324943c7b42))
@@ -7217,31 +7085,166 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 - Fixed pre/post commit
   ([`2c3f36e`](https://gitlab.psi.ch/bec/bec/-/commit/2c3f36ec8c60c8b424ad838d452eeb5eb3c2fe8b))
 
-- Added semver to all services
-  ([`b32edb5`](https://gitlab.psi.ch/bec/bec/-/commit/b32edb549067334c8dfc68f060c112e8ba7230ad))
+- Fixed primary_device list for overlapping scan motors
+  ([`19b52ee`](https://gitlab.psi.ch/bec/bec/-/commit/19b52eef9cf9fedb48eb5fc55cb5f26a329f462a))
+
+- Fixed repr string
+  ([`8dc2d6f`](https://gitlab.psi.ch/bec/bec/-/commit/8dc2d6f61a9259b28aa9e3ec91674aa10cc1151f))
+
+- Fixed rpc calls
+  ([`183e5ae`](https://gitlab.psi.ch/bec/bec/-/commit/183e5aefafa06ed04836f03b9f7249a666ee05f5))
+
+- Fixed save_conig_file for locally created configs
+  ([`81d82ed`](https://gitlab.psi.ch/bec/bec/-/commit/81d82ed8977f0f417ac6e8807d7eec8e383c8a16))
+
+- Fixed scan interruption message
+  ([`b822655`](https://gitlab.psi.ch/bec/bec/-/commit/b82265594cbaef68b13d6b1f3348315e91ec9221))
+
+- Fixed scan object for client lib; closes #74
+  ([`c285019`](https://gitlab.psi.ch/bec/bec/-/commit/c28501993a7696bdadb63011c339f049ec60f2c7))
+
+- Fixed serializer check
+  ([`1d13e61`](https://gitlab.psi.ch/bec/bec/-/commit/1d13e61fadaf7c9ec644f172c002a9b20a723df2))
+
+- Fixed sls and cSAXS config for new db structure
+  ([`6f898c6`](https://gitlab.psi.ch/bec/bec/-/commit/6f898c602d81d966ee059d2fe1808ecdf83fa3a2))
+
+- Fixed startup script after mixin changes
+  ([`844cbc1`](https://gitlab.psi.ch/bec/bec/-/commit/844cbc1e0f67b95d1aee7a6af16e8bb170898a94))
+
+- Fixed startup script after mixin changes
+  ([`e25c085`](https://gitlab.psi.ch/bec/bec/-/commit/e25c085d29ca4999d8e9e12abaaff72466c6f76c))
+
+- Fixed stdout and stderr redirect for tmux init
+  ([`561a144`](https://gitlab.psi.ch/bec/bec/-/commit/561a144fb9d74977d15cba6d698e2578ecf49457))
+
+- Fixed sub devices info name
+  ([`a37e057`](https://gitlab.psi.ch/bec/bec/-/commit/a37e0572347c09bd1ecfeea8e08934cb20b3c836))
+
+- Fixed sync scan item callbacks
+  ([`1ae04ac`](https://gitlab.psi.ch/bec/bec/-/commit/1ae04ac193ec9bb7a52cabf940a5aeb230288761))
+
+- Fixed test for merged db updates
+  ([`ad56d59`](https://gitlab.psi.ch/bec/bec/-/commit/ad56d591e20bd5f8c616506104446d5bfa2e7bf5))
+
+- Fixed tests
+  ([`dbd2e73`](https://gitlab.psi.ch/bec/bec/-/commit/dbd2e735a5886c55b1876baf3efe9f15cb956f5e))
+
+- Fixed tests
+  ([`018d781`](https://gitlab.psi.ch/bec/bec/-/commit/018d781dbfa57209ab7cb5a6ab2b265a1b5df364))
+
+- Fixed tomo scan file for repeated angles
+  ([`d25d974`](https://gitlab.psi.ch/bec/bec/-/commit/d25d9740f88540cc3de288314e0cb93ded7a2591))
+
+- Fixed typo; fixed test
+  ([`b2799f6`](https://gitlab.psi.ch/bec/bec/-/commit/b2799f61f7ba927da766a36628804d4471537066))
+
+- Fixed userParameter assignment
+  ([`7dc43fa`](https://gitlab.psi.ch/bec/bec/-/commit/7dc43fa29eff9fdf27bb7c97d7587095ca39ccbd))
+
+- Fixed weird merge conflict
+  ([`56bd317`](https://gitlab.psi.ch/bec/bec/-/commit/56bd317e0f7c44b755c7de91638c2ff3027b4871))
+
+- Fixed xrayeyealign init
+  ([`a56a3a2`](https://gitlab.psi.ch/bec/bec/-/commit/a56a3a2266f81a1866b994f0c491f6933386caef))
+
+- Fixes after refactoring
+  ([`7547f8d`](https://gitlab.psi.ch/bec/bec/-/commit/7547f8d8c7cbeb3cf488f5673c1f1330ee7955e6))
+
+- Fixes path to logbookmessage
+  ([`c3bdee3`](https://gitlab.psi.ch/bec/bec/-/commit/c3bdee3734acb4096221385f2d283896c3be3468))
+
+- Improvements and fixes for redis config
+  ([`ec5f915`](https://gitlab.psi.ch/bec/bec/-/commit/ec5f9155ceac4d4df9eacd7ea5767d01d1c50029))
+
+- Improvements for otf; added option to wait for kickoff
+  ([`b685301`](https://gitlab.psi.ch/bec/bec/-/commit/b6853012288a9fb3ebd991552cde8bed2ea7ddd8))
+
+- Increased node version to 14.21
+  ([`95e8e2a`](https://gitlab.psi.ch/bec/bec/-/commit/95e8e2aefd98ac66b0b0e5034c313e61014643df))
+
+- Lamni online changes
+  ([`a11b09b`](https://gitlab.psi.ch/bec/bec/-/commit/a11b09b027a3cb2d7012c4124980abdd83bcb4db))
+
+- Left align bl_show_all output
+  ([`a35aa06`](https://gitlab.psi.ch/bec/bec/-/commit/a35aa0638405e01fd37f81cfcf523bb34eb8a33d))
+
+- Moved flyer to hint-based
+  ([`11fb30f`](https://gitlab.psi.ch/bec/bec/-/commit/11fb30f64320f712ec93b24323079db7fe4831cb))
+
+- Moved onFailure from acquisition config to root
+  ([`72249ca`](https://gitlab.psi.ch/bec/bec/-/commit/72249ca8730e4bcf4ab5e5863092faa8fe3ea4bc))
 
 - Moved to separate release file
   ([`b29e191`](https://gitlab.psi.ch/bec/bec/-/commit/b29e191453c3fe26d80ed9e705bba4e71857b73f))
 
-- Added semver log to pre-commit
-  ([`aeb5fcb`](https://gitlab.psi.ch/bec/bec/-/commit/aeb5fcbed63037047d61bbe30a9a00996fe31d4c))
+- New scans clear the alarm stack
+  ([`6cc2bcd`](https://gitlab.psi.ch/bec/bec/-/commit/6cc2bcdeb3ea484c4057a22c469fd47fedac9a54))
+
+- Online changes lamni
+  ([`c0dba49`](https://gitlab.psi.ch/bec/bec/-/commit/c0dba49377c16f54f000098c948b267a8d78979d))
+
+- Only alarms are raised; warnings are logged
+  ([`7b01c63`](https://gitlab.psi.ch/bec/bec/-/commit/7b01c638a3aaf5c0b1056f1a80b2032628c7593e))
+
+- Only pause if queue is not empty
+  ([`deca3d1`](https://gitlab.psi.ch/bec/bec/-/commit/deca3d1d77143379b559934e1307d2a85acea50a))
+
+- Primary devices must be unique
+  ([`0e4119e`](https://gitlab.psi.ch/bec/bec/-/commit/0e4119ebefb6428ef78d6fd0b8ee5b24e358056c))
+
+- Removed apk install; not needed for python image
+  ([`0aa9ffc`](https://gitlab.psi.ch/bec/bec/-/commit/0aa9ffcd7939ca049a860f666bf3b24ce96b1325))
+
+- Removed bec_utils after refactoring
+  ([`03d6a27`](https://gitlab.psi.ch/bec/bec/-/commit/03d6a274d0ab26ea5f6536e952846e617d013d01))
+
+- Removed duplicated reload call
+  ([`db043ea`](https://gitlab.psi.ch/bec/bec/-/commit/db043eaf47b983494ba8221ec646714e39d46665))
+
+- Removed needs from semver job
+  ([`88f0136`](https://gitlab.psi.ch/bec/bec/-/commit/88f01360c48d26781b8a60c638abcd83a7ee4c08))
+
+- Removed numpy dependency
+  ([`f5b4a8a`](https://gitlab.psi.ch/bec/bec/-/commit/f5b4a8a0ac1b6ba48ab817fb60101811b4dd4854))
+
+- Removed on_failure from scan_worker as it is now handled for each device individually
+  ([`544d6fe`](https://gitlab.psi.ch/bec/bec/-/commit/544d6fec990e53a9d6ea03d8e52134b9ab4b699b))
+
+- Removed scan_motor usage
+  ([`52ff75a`](https://gitlab.psi.ch/bec/bec/-/commit/52ff75a52502c78ee247b8bde2ce217c8275d58e))
+
+- Removed wait for hidden reports
+  ([`01c3850`](https://gitlab.psi.ch/bec/bec/-/commit/01c38501084d5138988ea9a2c8338c2d1316ccc7))
+
+- Renamed data_segment to scan_segment
+  ([`59dfa4e`](https://gitlab.psi.ch/bec/bec/-/commit/59dfa4e175bcea01db15af20afadb0400c20e834))
+
+- Renamed deviceGroup to deviceTags
+  ([`7e12750`](https://gitlab.psi.ch/bec/bec/-/commit/7e127509db7cda8fcf4f0156c9a969d306cd22f7))
+
+- Reset logbook info on init http error
+  ([`e48c888`](https://gitlab.psi.ch/bec/bec/-/commit/e48c8883a8dc4c26bad7e0a9daa2389fdba94a88))
 
 - Reset version
   ([`564e599`](https://gitlab.psi.ch/bec/bec/-/commit/564e59958a9083caf4bf64570835b4fc1263a6c1))
 
+- Reverted black for json files
+  ([`458e33a`](https://gitlab.psi.ch/bec/bec/-/commit/458e33a0f5e1feac0a29b0bfe01ffbb81ef3a8ce))
+
+- Skip None callbacks
+  ([`0a60289`](https://gitlab.psi.ch/bec/bec/-/commit/0a60289f0d0f3a5e23b683dafc316530010ab7b6))
+
+- Subscriptions should only be added after the connection has been established
+  ([`627cc45`](https://gitlab.psi.ch/bec/bec/-/commit/627cc45570ec6cf61e80f78241ce672e85a1ab90))
+
+- Testing semver publish
+  ([`a0c70a5`](https://gitlab.psi.ch/bec/bec/-/commit/a0c70a51e2ef619004d69161a118f77525e1804a))
+
+- Unused wait groups are ignored
+  ([`06cd3d5`](https://gitlab.psi.ch/bec/bec/-/commit/06cd3d58c7c91da019af08ae9c23993d7d2c71e2))
+
 ### Continuous Integration
-
-- Upgraded docker and dind version to 23
-  ([`7e0c73a`](https://gitlab.psi.ch/bec/bec/-/commit/7e0c73aa9445e09fc2e812c13b6c594ee19a1c6f))
-
-- Removed ophyd_devices branch
-  ([`61fae3c`](https://gitlab.psi.ch/bec/bec/-/commit/61fae3c79563306a24b2ebb827984aa046d67810))
-
-- Fixed dockerfile
-  ([`c263548`](https://gitlab.psi.ch/bec/bec/-/commit/c263548947a4f8632b698f590c72ef30a63f66f0))
-
-- Fixed dockerfile
-  ([`5a1e5ba`](https://gitlab.psi.ch/bec/bec/-/commit/5a1e5baca0e71dd5bc42ada493c430730a296b75))
 
 - Added bec_client_lib to ci tests
   ([`2c50442`](https://gitlab.psi.ch/bec/bec/-/commit/2c504421bc97f3afa1d7a14ba9a8d4bffbd1ddaa))
@@ -7249,41 +7252,11 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 - Added bec_client_lib to ci tests
   ([`af13f0b`](https://gitlab.psi.ch/bec/bec/-/commit/af13f0b3868897ce8f397d526cb07bc4b1a6f98e))
 
-- Fixed test init
-  ([`732995a`](https://gitlab.psi.ch/bec/bec/-/commit/732995af833de8a2e8d1211284b88d09abae2ee1))
-
-- Fixed python image
-  ([`dfa9cdf`](https://gitlab.psi.ch/bec/bec/-/commit/dfa9cdfc0630af6feb6f3cbcebb95e531c9e1831))
-
-- Fixed build order
-  ([`ec5b0a3`](https://gitlab.psi.ch/bec/bec/-/commit/ec5b0a351f8a025ffb37ba9522a13ce19c5b2bce))
-
-- Fixed bug in ci file
-  ([`4dae74f`](https://gitlab.psi.ch/bec/bec/-/commit/4dae74f5642b84b3e64f37a37c7746b27373bfb0))
-
-- Added python3.11 tests; added end2end tests without scibec
-  ([`8a538de`](https://gitlab.psi.ch/bec/bec/-/commit/8a538de290712eed482e8a274ab9d92efeae9b67))
-
-- Removed light end2end for now
-  ([`33b2e76`](https://gitlab.psi.ch/bec/bec/-/commit/33b2e7694bb05038eb561380cbb24cf438e2a144))
-
 - Added end2end-light
   ([`6dfb75b`](https://gitlab.psi.ch/bec/bec/-/commit/6dfb75b88526fcf904aadfd840b99e2a7be77e33))
 
-- Moved from alpine to 3.8
-  ([`8e5464b`](https://gitlab.psi.ch/bec/bec/-/commit/8e5464bfeeb6c75abf87c8e4959701134be41e1e))
-
-- Update openapi schema file during the pipeline
-  ([`079a3e0`](https://gitlab.psi.ch/bec/bec/-/commit/079a3e06c82acf50d3fa6d3cf626d755c02cfba7))
-
-- Removed pytest parallel
-  ([`f732736`](https://gitlab.psi.ch/bec/bec/-/commit/f73273662ade38e3dfb76ceed9f378cbf1ed168d))
-
-- Added pytest parallel
-  ([`ba3d52f`](https://gitlab.psi.ch/bec/bec/-/commit/ba3d52ff31824682a07717e3a9af0d1bc9d41e9b))
-
-- Added pytest parallel
-  ([`20e0549`](https://gitlab.psi.ch/bec/bec/-/commit/20e054907d1363ce5ef413ae68dfc79ae2d7e930))
+- Added logger to waiting function
+  ([`5f9345a`](https://gitlab.psi.ch/bec/bec/-/commit/5f9345ae6ff00ab655ac49c38e2f685da2fb0aca))
 
 - Added needs
   ([`58d77e2`](https://gitlab.psi.ch/bec/bec/-/commit/58d77e2f6e48adfb96feb4c1877f475939f2890b))
@@ -7291,14 +7264,32 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 - Added pipeline report
   ([`9b3cde4`](https://gitlab.psi.ch/bec/bec/-/commit/9b3cde4f62c74039c19212f051f39d3d9aff11b1))
 
-- Fixed typo
-  ([`f970c97`](https://gitlab.psi.ch/bec/bec/-/commit/f970c9785c13db19e1a446f0a4b3116de315d6ce))
+- Added pytest parallel
+  ([`ba3d52f`](https://gitlab.psi.ch/bec/bec/-/commit/ba3d52ff31824682a07717e3a9af0d1bc9d41e9b))
+
+- Added pytest parallel
+  ([`20e0549`](https://gitlab.psi.ch/bec/bec/-/commit/20e054907d1363ce5ef413ae68dfc79ae2d7e930))
+
+- Added python3.11 tests; added end2end tests without scibec
+  ([`8a538de`](https://gitlab.psi.ch/bec/bec/-/commit/8a538de290712eed482e8a274ab9d92efeae9b67))
 
 - Added tests for different python versions
   ([`6af39af`](https://gitlab.psi.ch/bec/bec/-/commit/6af39af1648397a8ca21c9cd3e4a977729dcecac))
 
-- Moved requirements to requirements.txt file
-  ([`411a310`](https://gitlab.psi.ch/bec/bec/-/commit/411a310e65b67d7489e7cecc8996108ef7f3ff59))
+- Cleanup
+  ([`ecfd39e`](https://gitlab.psi.ch/bec/bec/-/commit/ecfd39e33e95020172c80203cac65b13cc4bb021))
+
+- Fixed bug in ci file
+  ([`4dae74f`](https://gitlab.psi.ch/bec/bec/-/commit/4dae74f5642b84b3e64f37a37c7746b27373bfb0))
+
+- Fixed build order
+  ([`ec5b0a3`](https://gitlab.psi.ch/bec/bec/-/commit/ec5b0a351f8a025ffb37ba9522a13ce19c5b2bce))
+
+- Fixed dockerfile
+  ([`c263548`](https://gitlab.psi.ch/bec/bec/-/commit/c263548947a4f8632b698f590c72ef30a63f66f0))
+
+- Fixed dockerfile
+  ([`5a1e5ba`](https://gitlab.psi.ch/bec/bec/-/commit/5a1e5baca0e71dd5bc42ada493c430730a296b75))
 
 - Fixed path to test_config
   ([`0120ccc`](https://gitlab.psi.ch/bec/bec/-/commit/0120ccca26919861d2f0a59f86643a62fe4245ea))
@@ -7306,25 +7297,40 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 - Fixed path to test_config
   ([`04613a7`](https://gitlab.psi.ch/bec/bec/-/commit/04613a7bf0db86d7568b0712fd156bd45fb9aae9))
 
-- Cleanup
-  ([`ecfd39e`](https://gitlab.psi.ch/bec/bec/-/commit/ecfd39e33e95020172c80203cac65b13cc4bb021))
+- Fixed python image
+  ([`dfa9cdf`](https://gitlab.psi.ch/bec/bec/-/commit/dfa9cdfc0630af6feb6f3cbcebb95e531c9e1831))
 
-- Added logger to waiting function
-  ([`5f9345a`](https://gitlab.psi.ch/bec/bec/-/commit/5f9345ae6ff00ab655ac49c38e2f685da2fb0aca))
+- Fixed test init
+  ([`732995a`](https://gitlab.psi.ch/bec/bec/-/commit/732995af833de8a2e8d1211284b88d09abae2ee1))
+
+- Fixed typo
+  ([`f970c97`](https://gitlab.psi.ch/bec/bec/-/commit/f970c9785c13db19e1a446f0a4b3116de315d6ce))
+
+- Moved from alpine to 3.8
+  ([`8e5464b`](https://gitlab.psi.ch/bec/bec/-/commit/8e5464bfeeb6c75abf87c8e4959701134be41e1e))
+
+- Moved requirements to requirements.txt file
+  ([`411a310`](https://gitlab.psi.ch/bec/bec/-/commit/411a310e65b67d7489e7cecc8996108ef7f3ff59))
+
+- Removed light end2end for now
+  ([`33b2e76`](https://gitlab.psi.ch/bec/bec/-/commit/33b2e7694bb05038eb561380cbb24cf438e2a144))
+
+- Removed ophyd_devices branch
+  ([`61fae3c`](https://gitlab.psi.ch/bec/bec/-/commit/61fae3c79563306a24b2ebb827984aa046d67810))
+
+- Removed pytest parallel
+  ([`f732736`](https://gitlab.psi.ch/bec/bec/-/commit/f73273662ade38e3dfb76ceed9f378cbf1ed168d))
+
+- Update openapi schema file during the pipeline
+  ([`079a3e0`](https://gitlab.psi.ch/bec/bec/-/commit/079a3e06c82acf50d3fa6d3cf626d755c02cfba7))
+
+- Upgraded docker and dind version to 23
+  ([`7e0c73a`](https://gitlab.psi.ch/bec/bec/-/commit/7e0c73aa9445e09fc2e812c13b6c594ee19a1c6f))
 
 ### Documentation
 
-- Added missing file
-  ([`f8fa8f4`](https://gitlab.psi.ch/bec/bec/-/commit/f8fa8f4136068b2370c8f63c23eb29c1cbd84a39))
-
-- Updated instructions for creating a new config file
-  ([`0491837`](https://gitlab.psi.ch/bec/bec/-/commit/0491837041323afe71d64bc2971207741dab7145))
-
-- Updated docs for new redis config
-  ([`e88fa30`](https://gitlab.psi.ch/bec/bec/-/commit/e88fa309c7806f3a6488728a5463434373d4dd55))
-
-- Updated drawings
-  ([`009ed3b`](https://gitlab.psi.ch/bec/bec/-/commit/009ed3b830fd648ad98929db3d4194feca6b1be7))
+- Added bec architecture
+  ([`5be499c`](https://gitlab.psi.ch/bec/bec/-/commit/5be499cc8ed0cc40198ef4286cbb5ce43b149b93))
 
 - Added bec context image
   ([`3b1d9e7`](https://gitlab.psi.ch/bec/bec/-/commit/3b1d9e7f9fb4d1331d54f6672548c35575104207))
@@ -7332,32 +7338,14 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 - Added bec context image
   ([`581792c`](https://gitlab.psi.ch/bec/bec/-/commit/581792c674c90709edd18349c994d1b8e95eb87a))
 
-- Update drawings
-  ([`40459f6`](https://gitlab.psi.ch/bec/bec/-/commit/40459f67c09bdc965c34678af485ad4943bca460))
-
-- Updated BEC c4 drawing
-  ([`7ccb80d`](https://gitlab.psi.ch/bec/bec/-/commit/7ccb80d2d32ae3871b35b482ec818d778108ac8a))
-
-- Added bec architecture
-  ([`5be499c`](https://gitlab.psi.ch/bec/bec/-/commit/5be499cc8ed0cc40198ef4286cbb5ce43b149b93))
-
-- Updated drawio
-  ([`4b7981e`](https://gitlab.psi.ch/bec/bec/-/commit/4b7981e9cf3c9ca1d234f4679710e2d7d8cbde44))
-
-- Updated config db drawing
-  ([`e39c3f4`](https://gitlab.psi.ch/bec/bec/-/commit/e39c3f489eb4d47d0709be27accfc25d63c98e1c))
-
-- Cleanup
-  ([`1381f74`](https://gitlab.psi.ch/bec/bec/-/commit/1381f74e43bcd74302f4a5827f4897c8067e1a8e))
-
-- Updated tutorial
-  ([`0a8b7dc`](https://gitlab.psi.ch/bec/bec/-/commit/0a8b7dc5268adbd47e5c2b5a48c79fc53ba890c6))
-
-- Removed switcher
-  ([`c802d9e`](https://gitlab.psi.ch/bec/bec/-/commit/c802d9e40809388f940422d159095f3a3bd62c11))
+- Added missing file
+  ([`f8fa8f4`](https://gitlab.psi.ch/bec/bec/-/commit/f8fa8f4136068b2370c8f63c23eb29c1cbd84a39))
 
 - Added version switcher
   ([`eaaff10`](https://gitlab.psi.ch/bec/bec/-/commit/eaaff100a12e888b5904a5709e20f00c522c44d2))
+
+- Cleanup
+  ([`1381f74`](https://gitlab.psi.ch/bec/bec/-/commit/1381f74e43bcd74302f4a5827f4897c8067e1a8e))
 
 - Fixed requirements formatting
   ([`e6beda3`](https://gitlab.psi.ch/bec/bec/-/commit/e6beda3b9c8d634efa1f855ca94fb91d167d4a95))
@@ -7368,10 +7356,235 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 - Improved doc string for lamNI move to scan center
   ([`6cc3e51`](https://gitlab.psi.ch/bec/bec/-/commit/6cc3e51d57565076d4d47f7e5e150b828fa45475))
 
+- Removed switcher
+  ([`c802d9e`](https://gitlab.psi.ch/bec/bec/-/commit/c802d9e40809388f940422d159095f3a3bd62c11))
+
+- Update drawings
+  ([`40459f6`](https://gitlab.psi.ch/bec/bec/-/commit/40459f67c09bdc965c34678af485ad4943bca460))
+
+- Updated BEC c4 drawing
+  ([`7ccb80d`](https://gitlab.psi.ch/bec/bec/-/commit/7ccb80d2d32ae3871b35b482ec818d778108ac8a))
+
+- Updated config db drawing
+  ([`e39c3f4`](https://gitlab.psi.ch/bec/bec/-/commit/e39c3f489eb4d47d0709be27accfc25d63c98e1c))
+
+- Updated docs for new redis config
+  ([`e88fa30`](https://gitlab.psi.ch/bec/bec/-/commit/e88fa309c7806f3a6488728a5463434373d4dd55))
+
+- Updated drawings
+  ([`009ed3b`](https://gitlab.psi.ch/bec/bec/-/commit/009ed3b830fd648ad98929db3d4194feca6b1be7))
+
+- Updated drawio
+  ([`4b7981e`](https://gitlab.psi.ch/bec/bec/-/commit/4b7981e9cf3c9ca1d234f4679710e2d7d8cbde44))
+
+- Updated instructions for creating a new config file
+  ([`0491837`](https://gitlab.psi.ch/bec/bec/-/commit/0491837041323afe71d64bc2971207741dab7145))
+
+- Updated tutorial
+  ([`0a8b7dc`](https://gitlab.psi.ch/bec/bec/-/commit/0a8b7dc5268adbd47e5c2b5a48c79fc53ba890c6))
+
 ### Features
+
+- Active account is now pulled from redis
+  ([`0837bc8`](https://gitlab.psi.ch/bec/bec/-/commit/0837bc8959a81be4e08952d332b7e05ca0e1f14f))
+
+- Added _raised_alarms
+  ([`ae5ba37`](https://gitlab.psi.ch/bec/bec/-/commit/ae5ba37716634705d4abcd621c6fca3a04f65356))
+
+- Added access to optics mixin from align
+  ([`4089f35`](https://gitlab.psi.ch/bec/bec/-/commit/4089f35d5ea97fb4ef0bfc12295addf1da45b696))
+
+- Added acquisition priority
+  ([`13927dc`](https://gitlab.psi.ch/bec/bec/-/commit/13927dc8d6d872f0bb0893d2d19001edd3df765d))
+
+- Added baseline endpoint
+  ([`f630272`](https://gitlab.psi.ch/bec/bec/-/commit/f630272fee3b67f65addb897e5c15f3ff6395595))
+
+- Added baseline publisher
+  ([`165e59e`](https://gitlab.psi.ch/bec/bec/-/commit/165e59e1948d521d7ac660e0c705a49c697acd76))
+
+- Added beamline info
+  ([`f80de69`](https://gitlab.psi.ch/bec/bec/-/commit/f80de691d6be48cc02ae1cd4c2a151f35de030ce))
+
+- Added bec cli command; added bec_startup script
+  ([`15e71e0`](https://gitlab.psi.ch/bec/bec/-/commit/15e71e073226f3eb895f7a8829dafffc7a0071a5))
+
+- Added bec metrics
+  ([`a3fa79b`](https://gitlab.psi.ch/bec/bec/-/commit/a3fa79bb9fa39c5ed6b6d3f8b8b80c1f922fd5c1))
+
+- Added becmessage version 1.1; added option to select compression
+  ([`0de43a8`](https://gitlab.psi.ch/bec/bec/-/commit/0de43a800f916b61c393384c038ef3425e3b9cc5))
+
+- Added complete and support for new kickoff signature
+  ([`c7c1c44`](https://gitlab.psi.ch/bec/bec/-/commit/c7c1c44be608f9d96b594fc2098f91cf5a0562bc))
+
+- Added config action set
+  ([`511cbcb`](https://gitlab.psi.ch/bec/bec/-/commit/511cbcbf4072011cd05ae0fe9a80977c08aa4a29))
+
+- Added console log; added target account property
+  ([`7a77429`](https://gitlab.psi.ch/bec/bec/-/commit/7a77429a4cebb7c10a1100dbe291ed057089d33d))
+
+- Added customized alarm handling for bec errors in ipython
+  ([`fa9723b`](https://gitlab.psi.ch/bec/bec/-/commit/fa9723b28230cb0d64815b75d4295dedf76f62cd))
+
+- Added device description to device report
+  ([`5b34204`](https://gitlab.psi.ch/bec/bec/-/commit/5b34204336349a255b4df3a17b98b81dba4adaf6))
+
+- Added device_schema
+  ([`8b26e81`](https://gitlab.psi.ch/bec/bec/-/commit/8b26e8153251ba06ad7bf471826f9f42ad28c1aa))
+
+- Added emitter log
+  ([`07bbaa0`](https://gitlab.psi.ch/bec/bec/-/commit/07bbaa05f325cc7aed25c19531b130ebd2ec3840))
+
+- Added event callback
+  ([`9e11f66`](https://gitlab.psi.ch/bec/bec/-/commit/9e11f66d8040052f7d36269b2cecce32d02eae5d))
+
+- Added event controller
+  ([`e25d077`](https://gitlab.psi.ch/bec/bec/-/commit/e25d0773c9e87b6eaf2e239617668b7ffc0c83ad))
+
+- Added event publisher to scihub
+  ([`a2efb91`](https://gitlab.psi.ch/bec/bec/-/commit/a2efb91d1b57945418bac6650bb6c014a5047063))
+
+- Added flyer event and callback
+  ([`636ee79`](https://gitlab.psi.ch/bec/bec/-/commit/636ee7950080db477a97acc3c9da6b696988ada5))
+
+- Added hyst_scan; online changes
+  ([`ff5706c`](https://gitlab.psi.ch/bec/bec/-/commit/ff5706c03dc001374055c1985fe4f44af005c494))
+
+- Added linter to check the imported user scripts
+  ([`6cc2e6a`](https://gitlab.psi.ch/bec/bec/-/commit/6cc2e6a700509e4ce9e30339ff603b19423e0eb5))
+
+- Added list scan
+  ([`32fab04`](https://gitlab.psi.ch/bec/bec/-/commit/32fab041a2a4bf81b6f082187638415407cbd56a))
+
+- Added logbook and account endpoints
+  ([`ae13604`](https://gitlab.psi.ch/bec/bec/-/commit/ae13604b344f40ad86377f36d46519db957768ab))
+
+- Added logbook message for beam checks
+  ([`f72881d`](https://gitlab.psi.ch/bec/bec/-/commit/f72881d66ec09254afd54b294b56bfb169bf5872))
+
+- Added metadata to callbacks
+  ([`1a14e00`](https://gitlab.psi.ch/bec/bec/-/commit/1a14e0000eaced0eefcbf14b41cc0bfee2fe3d2d))
+
+- Added monitor scan
+  ([`8ac476e`](https://gitlab.psi.ch/bec/bec/-/commit/8ac476e178979f5091e7a9c918fecb80756999b8))
+
+- Added multiple iterations for corridor optim
+  ([`1dff48e`](https://gitlab.psi.ch/bec/bec/-/commit/1dff48ea049948614dfe269f5588eeac8b3495d1))
+
+- Added on_failure options to device_server
+  ([`b96a931`](https://gitlab.psi.ch/bec/bec/-/commit/b96a93141f2ed8077864119605fe87f45daba421))
+
+- Added on_failure updates to device_manager
+  ([`ac3cfaa`](https://gitlab.psi.ch/bec/bec/-/commit/ac3cfaa5599be8182f898055d90404b6e417a5ca))
+
+- Added option to change the readout priority
+  ([`28e1500`](https://gitlab.psi.ch/bec/bec/-/commit/28e15001fc94d8c26ff79e665e870b22b1a2d4a1))
+
+- Added option to hide the table and only show the progressbar
+  ([`c0d76b1`](https://gitlab.psi.ch/bec/bec/-/commit/c0d76b1c5af46d3b366089b5ed0551d813a24cff))
 
 - Added option to override the singleton client
   ([`db0f2f7`](https://gitlab.psi.ch/bec/bec/-/commit/db0f2f7864323feadcb8bbcf56614682316ec692))
+
+- Added option to skip the signal filtering
+  ([`a593424`](https://gitlab.psi.ch/bec/bec/-/commit/a593424fe2815e42f8315dbce91aa43a797e4b7f))
+
+- Added otf scan
+  ([`09f636e`](https://gitlab.psi.ch/bec/bec/-/commit/09f636e61849c6f1090198d98e9571adba3e457e))
+
+- Added phase plates
+  ([`97ea86c`](https://gitlab.psi.ch/bec/bec/-/commit/97ea86c710de0738951f0d6889e2a4cfcdd55817))
+
+- Added readout_priority as replacement for scan_motors
+  ([`adedc1b`](https://gitlab.psi.ch/bec/bec/-/commit/adedc1b83bf45f888092538c51bd778f47f09dc1))
+
+- Added scan callbacks
+  ([`3ebc910`](https://gitlab.psi.ch/bec/bec/-/commit/3ebc9108928e3a753f7db4c1cf39bcf866f372f3))
+
+- Added scan history
+  ([`cb3ce8b`](https://gitlab.psi.ch/bec/bec/-/commit/cb3ce8b91b5d8cac445baef8d2182395b0277dbc))
+
+- Added scan report instructions
+  ([`35cd892`](https://gitlab.psi.ch/bec/bec/-/commit/35cd892d2bdbaa5922bad1c52bf13bef7f99e21c))
+
+- Added scan_item repr
+  ([`b611fbb`](https://gitlab.psi.ch/bec/bec/-/commit/b611fbbda2abc1ceae57b3d78f75c69889c64eaa))
+
+- Added scan_report_devices
+  ([`558416a`](https://gitlab.psi.ch/bec/bec/-/commit/558416a2f8530d9df2147f5c8f415f12bacca746))
+
+- Added scihub service
+  ([`bbabee1`](https://gitlab.psi.ch/bec/bec/-/commit/bbabee1c0c76433b0cfa1e967ebcce55f62739cd))
+
+- Added scilog export for lamni
+  ([`f6def4f`](https://gitlab.psi.ch/bec/bec/-/commit/f6def4f6ff86130be7efb831e45497c65422086e))
+
+- Added scilog to scihub
+  ([`7c297b3`](https://gitlab.psi.ch/bec/bec/-/commit/7c297b32d85c5822a95665cdf3e6f3d800d1ae1c))
+
+- Added scoped import for ophyd devices
+  ([`e644c19`](https://gitlab.psi.ch/bec/bec/-/commit/e644c19e061631086386e184b21545e5afdcf5e7))
+
+- Added script to test the validity of configs
+  ([`2958427`](https://gitlab.psi.ch/bec/bec/-/commit/2958427d64381c7e7f49381cb0251342993cdc38))
+
+- Added semver log to pre-commit
+  ([`b9f6bb5`](https://gitlab.psi.ch/bec/bec/-/commit/b9f6bb575921251f8d422ff6dcedb25a9a26af9a))
+
+- Added semver to ci
+  ([`672a6ad`](https://gitlab.psi.ch/bec/bec/-/commit/672a6adef4060e92882e907c1f329ebce90972da))
+
+- Added settling time; fixed burst_at_each_point; removed exp_time as req kwarg
+  ([`12ae5c7`](https://gitlab.psi.ch/bec/bec/-/commit/12ae5c715ef4bfda3fb19273f51a49cf7f5df251))
+
+- Added show_all; minor improvements
+  ([`03e63ce`](https://gitlab.psi.ch/bec/bec/-/commit/03e63cef167acce0764b4162ced7cee9022d5a66))
+
+- Added show_tags
+  ([`45dcf76`](https://gitlab.psi.ch/bec/bec/-/commit/45dcf767a0b7815d5e3afda57a23e4a940e1cc5e))
+
+- Added support for device tags
+  ([`d00a81d`](https://gitlab.psi.ch/bec/bec/-/commit/d00a81dde7920cdc02c0a1ea5c7315716e2ef195))
+
+- Added support for intermediate scan_report_instructions
+  ([`03027f3`](https://gitlab.psi.ch/bec/bec/-/commit/03027f3ae02cff96492bdda1a4ea05d359e7a9a8))
+
+- Added support for nested dataset id cms
+  ([`ada6493`](https://gitlab.psi.ch/bec/bec/-/commit/ada649387b3abd9dba5b53319f11c4ad195f477a))
+
+- Added support for new scibec structure
+  ([`b65259d`](https://gitlab.psi.ch/bec/bec/-/commit/b65259d4492a0fe9dc7efba577dec80fc3b65327))
+
+- Added support for rpc status
+  ([`87716db`](https://gitlab.psi.ch/bec/bec/-/commit/87716dbbafedc8f69210b9aa9da927653a0593b1))
+
+- Added support for rpc status return values
+  ([`1fcd6ff`](https://gitlab.psi.ch/bec/bec/-/commit/1fcd6ffb25c43e9fc6e17b1e6628232c232b3727))
+
+- Added test config cSAXS
+  ([`539ae01`](https://gitlab.psi.ch/bec/bec/-/commit/539ae01a64eb02cd00fab695e78929aa34456398))
+
+- Added time scan
+  ([`e77c5a6`](https://gitlab.psi.ch/bec/bec/-/commit/e77c5a6bb0da5f7bc071655132768e46b090c528))
+
+- Added user functions to show all commands
+  ([`8259cd3`](https://gitlab.psi.ch/bec/bec/-/commit/8259cd3a5488f51c527dd29bab3451d9cb36a629))
+
+- Added user params to lamni config
+  ([`48c9f94`](https://gitlab.psi.ch/bec/bec/-/commit/48c9f94b545a76d1ccf1dfab444534859a3f4835))
+
+- Added wm
+  ([`7a29d43`](https://gitlab.psi.ch/bec/bec/-/commit/7a29d43383bc9224560919c46d232ef242760fa8))
+
+- Added xtreme plugin
+  ([`342c2a6`](https://gitlab.psi.ch/bec/bec/-/commit/342c2a6f148fe26ca9d160576cca1e2871e324fe))
+
+- Decoupled scibec from core services; added config to redis
+  ([`d846d55`](https://gitlab.psi.ch/bec/bec/-/commit/d846d55cde40b124db7756caadcaa36968d034f9))
+
+- File writer raises minor error when file is not written
+  ([`3800917`](https://gitlab.psi.ch/bec/bec/-/commit/3800917695eca93738ab42f0704df46b5692bb07))
 
 - First version of bec_client_lib
   ([`cd58b13`](https://gitlab.psi.ch/bec/bec/-/commit/cd58b1358ca4cc9e0855b6c1ec0034ab1fcfd14f))
@@ -7382,253 +7595,55 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 - Improved becmessage repr for easy loading from string
   ([`acc5949`](https://gitlab.psi.ch/bec/bec/-/commit/acc59499532e0a415c08e70b7a45b87cf7b72022))
 
-- Added scan_item repr
-  ([`b611fbb`](https://gitlab.psi.ch/bec/bec/-/commit/b611fbbda2abc1ceae57b3d78f75c69889c64eaa))
-
-- Added event callback
-  ([`9e11f66`](https://gitlab.psi.ch/bec/bec/-/commit/9e11f66d8040052f7d36269b2cecce32d02eae5d))
-
-- Added semver to ci
-  ([`672a6ad`](https://gitlab.psi.ch/bec/bec/-/commit/672a6adef4060e92882e907c1f329ebce90972da))
-
-- Added customized alarm handling for bec errors in ipython
-  ([`fa9723b`](https://gitlab.psi.ch/bec/bec/-/commit/fa9723b28230cb0d64815b75d4295dedf76f62cd))
-
-- Added _raised_alarms
-  ([`ae5ba37`](https://gitlab.psi.ch/bec/bec/-/commit/ae5ba37716634705d4abcd621c6fca3a04f65356))
-
-- Added device description to device report
-  ([`5b34204`](https://gitlab.psi.ch/bec/bec/-/commit/5b34204336349a255b4df3a17b98b81dba4adaf6))
-
-- File writer raises minor error when file is not written
-  ([`3800917`](https://gitlab.psi.ch/bec/bec/-/commit/3800917695eca93738ab42f0704df46b5692bb07))
-
-- Added xtreme plugin
-  ([`342c2a6`](https://gitlab.psi.ch/bec/bec/-/commit/342c2a6f148fe26ca9d160576cca1e2871e324fe))
-
-- Added settling time; fixed burst_at_each_point; removed exp_time as req kwarg
-  ([`12ae5c7`](https://gitlab.psi.ch/bec/bec/-/commit/12ae5c715ef4bfda3fb19273f51a49cf7f5df251))
-
-- Added readout_priority as replacement for scan_motors
-  ([`adedc1b`](https://gitlab.psi.ch/bec/bec/-/commit/adedc1b83bf45f888092538c51bd778f47f09dc1))
-
-- Added event publisher to scihub
-  ([`a2efb91`](https://gitlab.psi.ch/bec/bec/-/commit/a2efb91d1b57945418bac6650bb6c014a5047063))
-
-- Added baseline publisher
-  ([`165e59e`](https://gitlab.psi.ch/bec/bec/-/commit/165e59e1948d521d7ac660e0c705a49c697acd76))
-
-- Added baseline endpoint
-  ([`f630272`](https://gitlab.psi.ch/bec/bec/-/commit/f630272fee3b67f65addb897e5c15f3ff6395595))
-
-- Added support for rpc status
-  ([`87716db`](https://gitlab.psi.ch/bec/bec/-/commit/87716dbbafedc8f69210b9aa9da927653a0593b1))
-
-- Added support for rpc status return values
-  ([`1fcd6ff`](https://gitlab.psi.ch/bec/bec/-/commit/1fcd6ffb25c43e9fc6e17b1e6628232c232b3727))
-
-- Added scoped import for ophyd devices
-  ([`e644c19`](https://gitlab.psi.ch/bec/bec/-/commit/e644c19e061631086386e184b21545e5afdcf5e7))
-
-- Added option to hide the table and only show the progressbar
-  ([`c0d76b1`](https://gitlab.psi.ch/bec/bec/-/commit/c0d76b1c5af46d3b366089b5ed0551d813a24cff))
-
-- Added support for nested dataset id cms
-  ([`ada6493`](https://gitlab.psi.ch/bec/bec/-/commit/ada649387b3abd9dba5b53319f11c4ad195f477a))
-
-- Online backend changes to support scan and dataset entries
-  ([`06be92c`](https://gitlab.psi.ch/bec/bec/-/commit/06be92c21d8fec6488d65e97a10525604e037cfc))
-
-- Added event controller
-  ([`e25d077`](https://gitlab.psi.ch/bec/bec/-/commit/e25d0773c9e87b6eaf2e239617668b7ffc0c83ad))
-
-- Upgraded scibec to new db structure
-  ([`84d76d3`](https://gitlab.psi.ch/bec/bec/-/commit/84d76d3a6d3e19c81c97a3185785cbcc30ce84df))
-
-- Added support for new scibec structure
-  ([`b65259d`](https://gitlab.psi.ch/bec/bec/-/commit/b65259d4492a0fe9dc7efba577dec80fc3b65327))
-
-- Active account is now pulled from redis
-  ([`0837bc8`](https://gitlab.psi.ch/bec/bec/-/commit/0837bc8959a81be4e08952d332b7e05ca0e1f14f))
-
-- Added scilog to scihub
-  ([`7c297b3`](https://gitlab.psi.ch/bec/bec/-/commit/7c297b32d85c5822a95665cdf3e6f3d800d1ae1c))
-
-- Added logbook and account endpoints
-  ([`ae13604`](https://gitlab.psi.ch/bec/bec/-/commit/ae13604b344f40ad86377f36d46519db957768ab))
-
-- Added console log; added target account property
-  ([`7a77429`](https://gitlab.psi.ch/bec/bec/-/commit/7a77429a4cebb7c10a1100dbe291ed057089d33d))
-
-- Added hyst_scan; online changes
-  ([`ff5706c`](https://gitlab.psi.ch/bec/bec/-/commit/ff5706c03dc001374055c1985fe4f44af005c494))
-
-- Added support for intermediate scan_report_instructions
-  ([`03027f3`](https://gitlab.psi.ch/bec/bec/-/commit/03027f3ae02cff96492bdda1a4ea05d359e7a9a8))
-
-- Added otf scan
-  ([`09f636e`](https://gitlab.psi.ch/bec/bec/-/commit/09f636e61849c6f1090198d98e9571adba3e457e))
-
-- Added complete and support for new kickoff signature
-  ([`c7c1c44`](https://gitlab.psi.ch/bec/bec/-/commit/c7c1c44be608f9d96b594fc2098f91cf5a0562bc))
-
-- Added flyer event and callback
-  ([`636ee79`](https://gitlab.psi.ch/bec/bec/-/commit/636ee7950080db477a97acc3c9da6b696988ada5))
-
-- Added becmessage version 1.1; added option to select compression
-  ([`0de43a8`](https://gitlab.psi.ch/bec/bec/-/commit/0de43a800f916b61c393384c038ef3425e3b9cc5))
-
 - Improved device info
   ([`1fd83d4`](https://gitlab.psi.ch/bec/bec/-/commit/1fd83d4c6a8e3937425e120b12e446b5ff6cde17))
-
-- Added scan history
-  ([`cb3ce8b`](https://gitlab.psi.ch/bec/bec/-/commit/cb3ce8b91b5d8cac445baef8d2182395b0277dbc))
-
-- Added metadata to callbacks
-  ([`1a14e00`](https://gitlab.psi.ch/bec/bec/-/commit/1a14e0000eaced0eefcbf14b41cc0bfee2fe3d2d))
-
-- Added scan callbacks
-  ([`3ebc910`](https://gitlab.psi.ch/bec/bec/-/commit/3ebc9108928e3a753f7db4c1cf39bcf866f372f3))
-
-- Added config action set
-  ([`511cbcb`](https://gitlab.psi.ch/bec/bec/-/commit/511cbcbf4072011cd05ae0fe9a80977c08aa4a29))
-
-- Added scihub service
-  ([`bbabee1`](https://gitlab.psi.ch/bec/bec/-/commit/bbabee1c0c76433b0cfa1e967ebcce55f62739cd))
-
-- Decoupled scibec from core services; added config to redis
-  ([`d846d55`](https://gitlab.psi.ch/bec/bec/-/commit/d846d55cde40b124db7756caadcaa36968d034f9))
-
-- Added bec metrics
-  ([`a3fa79b`](https://gitlab.psi.ch/bec/bec/-/commit/a3fa79bb9fa39c5ed6b6d3f8b8b80c1f922fd5c1))
-
-- Added monitor scan
-  ([`8ac476e`](https://gitlab.psi.ch/bec/bec/-/commit/8ac476e178979f5091e7a9c918fecb80756999b8))
-
-- Added time scan
-  ([`e77c5a6`](https://gitlab.psi.ch/bec/bec/-/commit/e77c5a6bb0da5f7bc071655132768e46b090c528))
-
-- Added list scan
-  ([`32fab04`](https://gitlab.psi.ch/bec/bec/-/commit/32fab041a2a4bf81b6f082187638415407cbd56a))
-
-- Added linter to check the imported user scripts
-  ([`6cc2e6a`](https://gitlab.psi.ch/bec/bec/-/commit/6cc2e6a700509e4ce9e30339ff603b19423e0eb5))
-
-- Added emitter log
-  ([`07bbaa0`](https://gitlab.psi.ch/bec/bec/-/commit/07bbaa05f325cc7aed25c19531b130ebd2ec3840))
 
 - Made emitter modular
   ([`63cc4ff`](https://gitlab.psi.ch/bec/bec/-/commit/63cc4ffe93351ca1a808eed1ec16f6f7f61add43))
 
-- Added bec cli command; added bec_startup script
-  ([`15e71e0`](https://gitlab.psi.ch/bec/bec/-/commit/15e71e073226f3eb895f7a8829dafffc7a0071a5))
-
-- Added scan_report_devices
-  ([`558416a`](https://gitlab.psi.ch/bec/bec/-/commit/558416a2f8530d9df2147f5c8f415f12bacca746))
-
-- Added scan report instructions
-  ([`35cd892`](https://gitlab.psi.ch/bec/bec/-/commit/35cd892d2bdbaa5922bad1c52bf13bef7f99e21c))
-
-- Added multiple iterations for corridor optim
-  ([`1dff48e`](https://gitlab.psi.ch/bec/bec/-/commit/1dff48ea049948614dfe269f5588eeac8b3495d1))
-
-- Added phase plates
-  ([`97ea86c`](https://gitlab.psi.ch/bec/bec/-/commit/97ea86c710de0738951f0d6889e2a4cfcdd55817))
-
-- Added user params to lamni config
-  ([`48c9f94`](https://gitlab.psi.ch/bec/bec/-/commit/48c9f94b545a76d1ccf1dfab444534859a3f4835))
-
-- Added access to optics mixin from align
-  ([`4089f35`](https://gitlab.psi.ch/bec/bec/-/commit/4089f35d5ea97fb4ef0bfc12295addf1da45b696))
-
-- Added logbook message for beam checks
-  ([`f72881d`](https://gitlab.psi.ch/bec/bec/-/commit/f72881d66ec09254afd54b294b56bfb169bf5872))
-
-- Added scilog export for lamni
-  ([`f6def4f`](https://gitlab.psi.ch/bec/bec/-/commit/f6def4f6ff86130be7efb831e45497c65422086e))
-
-- Added show_all; minor improvements
-  ([`03e63ce`](https://gitlab.psi.ch/bec/bec/-/commit/03e63cef167acce0764b4162ced7cee9022d5a66))
-
-- Added script to test the validity of configs
-  ([`2958427`](https://gitlab.psi.ch/bec/bec/-/commit/2958427d64381c7e7f49381cb0251342993cdc38))
-
-- Added device_schema
-  ([`8b26e81`](https://gitlab.psi.ch/bec/bec/-/commit/8b26e8153251ba06ad7bf471826f9f42ad28c1aa))
-
-- Added beamline info
-  ([`f80de69`](https://gitlab.psi.ch/bec/bec/-/commit/f80de691d6be48cc02ae1cd4c2a151f35de030ce))
-
 - Moved beam checks to redis
   ([`69e8a2b`](https://gitlab.psi.ch/bec/bec/-/commit/69e8a2bdbd9fd3de60351d0ae308f4b34de59ef9))
 
-- Added test config cSAXS
-  ([`539ae01`](https://gitlab.psi.ch/bec/bec/-/commit/539ae01a64eb02cd00fab695e78929aa34456398))
+- Online backend changes to support scan and dataset entries
+  ([`06be92c`](https://gitlab.psi.ch/bec/bec/-/commit/06be92c21d8fec6488d65e97a10525604e037cfc))
 
-- Added user functions to show all commands
-  ([`8259cd3`](https://gitlab.psi.ch/bec/bec/-/commit/8259cd3a5488f51c527dd29bab3451d9cb36a629))
-
-- Added option to change the readout priority
-  ([`28e1500`](https://gitlab.psi.ch/bec/bec/-/commit/28e15001fc94d8c26ff79e665e870b22b1a2d4a1))
-
-- Added wm
-  ([`7a29d43`](https://gitlab.psi.ch/bec/bec/-/commit/7a29d43383bc9224560919c46d232ef242760fa8))
-
-- Added option to skip the signal filtering
-  ([`a593424`](https://gitlab.psi.ch/bec/bec/-/commit/a593424fe2815e42f8315dbce91aa43a797e4b7f))
-
-- Added on_failure options to device_server
-  ([`b96a931`](https://gitlab.psi.ch/bec/bec/-/commit/b96a93141f2ed8077864119605fe87f45daba421))
-
-- Added acquisition priority
-  ([`13927dc`](https://gitlab.psi.ch/bec/bec/-/commit/13927dc8d6d872f0bb0893d2d19001edd3df765d))
-
-- Added show_tags
-  ([`45dcf76`](https://gitlab.psi.ch/bec/bec/-/commit/45dcf767a0b7815d5e3afda57a23e4a940e1cc5e))
-
-- Added support for device tags
-  ([`d00a81d`](https://gitlab.psi.ch/bec/bec/-/commit/d00a81dde7920cdc02c0a1ea5c7315716e2ef195))
-
-- Added on_failure updates to device_manager
-  ([`ac3cfaa`](https://gitlab.psi.ch/bec/bec/-/commit/ac3cfaa5599be8182f898055d90404b6e417a5ca))
-
-- Added semver log to pre-commit
-  ([`b9f6bb5`](https://gitlab.psi.ch/bec/bec/-/commit/b9f6bb575921251f8d422ff6dcedb25a9a26af9a))
+- Upgraded scibec to new db structure
+  ([`84d76d3`](https://gitlab.psi.ch/bec/bec/-/commit/84d76d3a6d3e19c81c97a3185785cbcc30ce84df))
 
 ### Refactoring
 
 - Added builtins to avoid pylint errors
   ([`7c9bae4`](https://gitlab.psi.ch/bec/bec/-/commit/7c9bae455d41773258b5da23b94cf63c792f8b94))
 
-- Removed unused endpoint device_last_read
-  ([`97e09f0`](https://gitlab.psi.ch/bec/bec/-/commit/97e09f0a5545275f2922bc96dbacfad2fb0b1ddc))
+- Added mixin class for redis consumer
+  ([`6e81164`](https://gitlab.psi.ch/bec/bec/-/commit/6e81164bc06e80172bc2e5a24a15ded2018a6444))
 
-- Refactoring for live updates
-  ([`36e66b6`](https://gitlab.psi.ch/bec/bec/-/commit/36e66b660045054a02e86c14043a87308c626d6d))
+- Added on_cleanup emitter
+  ([`8791ca5`](https://gitlab.psi.ch/bec/bec/-/commit/8791ca572555ca0b83f25f973fb0801165e44f3d))
 
-- Removed remaining bec_utils files
-  ([`7604797`](https://gitlab.psi.ch/bec/bec/-/commit/7604797b32e40bd29be2c53750ce0809a916db40))
+- Added option to specify the redis cls
+  ([`13a672d`](https://gitlab.psi.ch/bec/bec/-/commit/13a672dc4a59fa1fb05cbc9753c8dd454c9e92a9))
 
-- Moved tests from utils to bec_client_lib
-  ([`a47a75e`](https://gitlab.psi.ch/bec/bec/-/commit/a47a75e3917a45f4d8b43857979ce2c0b4a8e016))
+- Added raise alarm / warning to failed readings in ds
+  ([`f71c494`](https://gitlab.psi.ch/bec/bec/-/commit/f71c494123094fe3482c15a117761e571736e22b))
 
-- Moved utils into bec_client_lib
-  ([`f43d4eb`](https://gitlab.psi.ch/bec/bec/-/commit/f43d4ebac68e642eb8c151ebd6afb0d62709f249))
-
-- Cleanup
-  ([`a651567`](https://gitlab.psi.ch/bec/bec/-/commit/a651567506a3828f09d7f3c0404c6305ef64b92d))
-
-- Moved wait_for_empty_queue to utils
-  ([`73e7a64`](https://gitlab.psi.ch/bec/bec/-/commit/73e7a649855bb95c437ff707cd1223b2ee7f61ff))
-
-- Changes after rebase
-  ([`4515618`](https://gitlab.psi.ch/bec/bec/-/commit/45156183b6e51190ddba11419b3d301dd51b7ef4))
+- Added support for bl_show_all plugins
+  ([`737c386`](https://gitlab.psi.ch/bec/bec/-/commit/737c386e24618171d1cb4ef77935bdc44a968507))
 
 - Changed bl_show_all from inheritance to composition
   ([`b2e57e7`](https://gitlab.psi.ch/bec/bec/-/commit/b2e57e7d987d9c09e25fa29afadc0aa2be240747))
 
 - Changed bl_show_all from inheritance to composition
   ([`fb40a61`](https://gitlab.psi.ch/bec/bec/-/commit/fb40a61e77e6d38059cddecbfea295ac6c04db5f))
+
+- Changes after rebase
+  ([`4515618`](https://gitlab.psi.ch/bec/bec/-/commit/45156183b6e51190ddba11419b3d301dd51b7ef4))
+
+- Changes related to new config management
+  ([`d0134ca`](https://gitlab.psi.ch/bec/bec/-/commit/d0134ca4beca24206a20356cc43c3a065a9e5b94))
+
+- Cleanup
+  ([`a651567`](https://gitlab.psi.ch/bec/bec/-/commit/a651567506a3828f09d7f3c0404c6305ef64b92d))
 
 - Cleanup
   ([`b730fbf`](https://gitlab.psi.ch/bec/bec/-/commit/b730fbf3b87733813c33edb9632b1a9f6b2dd8df))
@@ -7639,11 +7654,23 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 - Cleanup
   ([`0df7811`](https://gitlab.psi.ch/bec/bec/-/commit/0df7811680777fe860b24d5a434b337600cd54af))
 
-- Renamed ipython_live_updates
-  ([`53f2876`](https://gitlab.psi.ch/bec/bec/-/commit/53f2876f7fa004545de77a47850581c45a1d10b0))
+- Cleanup
+  ([`d2459c9`](https://gitlab.psi.ch/bec/bec/-/commit/d2459c9a628420a69cadf0ad8fab1e6b697875b1))
 
-- Use raise_alarms instead of looping through alarms
-  ([`35784f3`](https://gitlab.psi.ch/bec/bec/-/commit/35784f37c38f9641de7a2bff6641241c43538456))
+- Cleanup
+  ([`8ebb7b2`](https://gitlab.psi.ch/bec/bec/-/commit/8ebb7b2430844e56855c34b70486f59d281d76bc))
+
+- Cleanup
+  ([`cfd3b19`](https://gitlab.psi.ch/bec/bec/-/commit/cfd3b19b499af2161a657257e593b2dd71e354e4))
+
+- Cleanup
+  ([`cd7d63a`](https://gitlab.psi.ch/bec/bec/-/commit/cd7d63a23b0f9463393dfabce5fa7da925c09cd9))
+
+- Cleanup
+  ([`8f9f865`](https://gitlab.psi.ch/bec/bec/-/commit/8f9f8659298662744a39aa0d6e3b12b8b7307b82))
+
+- Deviceinstructionmessage should always have at least one device
+  ([`8f3d6df`](https://gitlab.psi.ch/bec/bec/-/commit/8f3d6df6a1c6b0130896071aad2418ca24fd30b1))
 
 - Fixed formatter
   ([`de81c30`](https://gitlab.psi.ch/bec/bec/-/commit/de81c3092483c4c618556a5ad858366ce222c6ef))
@@ -7651,32 +7678,101 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 - Fixed formatter
   ([`f749900`](https://gitlab.psi.ch/bec/bec/-/commit/f7499005a9bac7533007c6d4b302b91e989afa97))
 
-- Cleanup
-  ([`d2459c9`](https://gitlab.psi.ch/bec/bec/-/commit/d2459c9a628420a69cadf0ad8fab1e6b697875b1))
-
 - Fixed formatting
   ([`9c72f89`](https://gitlab.psi.ch/bec/bec/-/commit/9c72f89144f58d5c9b08c6bf013a868693fda247))
 
-- Cleanup
-  ([`8ebb7b2`](https://gitlab.psi.ch/bec/bec/-/commit/8ebb7b2430844e56855c34b70486f59d281d76bc))
+- Improved log messages for scanstatus
+  ([`ce8300f`](https://gitlab.psi.ch/bec/bec/-/commit/ce8300f702253b32e33d02b08122bc6f816bac5e))
 
-- Replaced jsonschema by fastjsonschema
-  ([`d729fc2`](https://gitlab.psi.ch/bec/bec/-/commit/d729fc2b255b5e4ed3ae431a504be60d57f4aca8))
+- Improvements for bluesky emitter
+  ([`84310b8`](https://gitlab.psi.ch/bec/bec/-/commit/84310b8ef61f4dcccf83f9960b67dbd2c25d4dfa))
+
+- Merged config updates
+  ([`62420f3`](https://gitlab.psi.ch/bec/bec/-/commit/62420f30a2c97636e1cc40cbfe1a6ee36286539a))
+
+- Merged consumer and threaded consumer
+  ([`0649f56`](https://gitlab.psi.ch/bec/bec/-/commit/0649f56b9dea3f91289d3c45eba54aba5b243d64))
+
+- Merged send_logbook_message and send_message to always send the linkType
+  ([`e082ee6`](https://gitlab.psi.ch/bec/bec/-/commit/e082ee6a4b2ea05108c4f724a7f518ff7b6770e3))
+
+- Minor refactoring
+  ([`98c870a`](https://gitlab.psi.ch/bec/bec/-/commit/98c870a662fa3ad72b7819296f3568eb7e134e1a))
+
+- Minor refactoring
+  ([`7ded49c`](https://gitlab.psi.ch/bec/bec/-/commit/7ded49c65bf390b26d00b8d9d20b883f3e530067))
+
+- Minor refactoring for testing
+  ([`f8c0ef6`](https://gitlab.psi.ch/bec/bec/-/commit/f8c0ef620adbf7691610a43a05be2369e93636b8))
 
 - Moved config_helper from client to utils
   ([`5d326f9`](https://gitlab.psi.ch/bec/bec/-/commit/5d326f96eb05ab7f5558e153af0f7ebdfc3f4bae))
 
-- Changes related to new config management
-  ([`d0134ca`](https://gitlab.psi.ch/bec/bec/-/commit/d0134ca4beca24206a20356cc43c3a065a9e5b94))
+- Moved emitterbase to new file
+  ([`dce87ab`](https://gitlab.psi.ch/bec/bec/-/commit/dce87ab157af23107d8b5d0c96ef4e70694b391f))
 
-- Replaced epylint by pylint.run
-  ([`20f3804`](https://gitlab.psi.ch/bec/bec/-/commit/20f38044a27e0f42d16eb5f602cfb17a42bd7bdc))
+- Moved tests from utils to bec_client_lib
+  ([`a47a75e`](https://gitlab.psi.ch/bec/bec/-/commit/a47a75e3917a45f4d8b43857979ce2c0b4a8e016))
+
+- Moved utils into bec_client_lib
+  ([`f43d4eb`](https://gitlab.psi.ch/bec/bec/-/commit/f43d4ebac68e642eb8c151ebd6afb0d62709f249))
+
+- Moved wait_for_empty_queue to utils
+  ([`73e7a64`](https://gitlab.psi.ch/bec/bec/-/commit/73e7a649855bb95c437ff707cd1223b2ee7f61ff))
+
+- Only pass msg, not messageobjects
+  ([`6a3d387`](https://gitlab.psi.ch/bec/bec/-/commit/6a3d387131e400e4bc3deab1f0a8d441e7af0610))
+
+- Refactored device list extraction
+  ([`f77bd80`](https://gitlab.psi.ch/bec/bec/-/commit/f77bd805694ab7a26b2ab0e10720d37006dbbeac))
+
+- Refactored emitterbase
+  ([`d8a0d6a`](https://gitlab.psi.ch/bec/bec/-/commit/d8a0d6ad94dd8a29146edf5829ba8456605dae82))
+
+- Refactored scan bundler
+  ([`6583509`](https://gitlab.psi.ch/bec/bec/-/commit/6583509fa91f33d0de0fa015e93a1ca59cce0ebe))
+
+- Refactoring for live updates
+  ([`36e66b6`](https://gitlab.psi.ch/bec/bec/-/commit/36e66b660045054a02e86c14043a87308c626d6d))
+
+- Removed DeviceManagerDeviceServer
+  ([`6a04837`](https://gitlab.psi.ch/bec/bec/-/commit/6a04837697ba23e72af8c230fb5b77a8a99b7a02))
+
+- Removed DeviceManagerSB
+  ([`2e7321d`](https://gitlab.psi.ch/bec/bec/-/commit/2e7321d2d0758b34b7c3418c76d596b65fd5a8fa))
 
 - Removed influxdb forwarder
   ([`9a5c003`](https://gitlab.psi.ch/bec/bec/-/commit/9a5c0035964e0f9a6fd4f04526eb5fb15027f859))
 
-- Removed DeviceManagerDeviceServer
-  ([`6a04837`](https://gitlab.psi.ch/bec/bec/-/commit/6a04837697ba23e72af8c230fb5b77a8a99b7a02))
+- Removed pipeline
+  ([`66b329e`](https://gitlab.psi.ch/bec/bec/-/commit/66b329eaf6b29b293cf6a07e50586d8933cf17c3))
+
+- Removed remaining bec_utils files
+  ([`7604797`](https://gitlab.psi.ch/bec/bec/-/commit/7604797b32e40bd29be2c53750ce0809a916db40))
+
+- Removed unused endpoint device_last_read
+  ([`97e09f0`](https://gitlab.psi.ch/bec/bec/-/commit/97e09f0a5545275f2922bc96dbacfad2fb0b1ddc))
+
+- Removed unused import
+  ([`8c1ec1e`](https://gitlab.psi.ch/bec/bec/-/commit/8c1ec1e637183527da3e55899620d0e863661ad7))
+
+- Renamed ipython_live_updates
+  ([`53f2876`](https://gitlab.psi.ch/bec/bec/-/commit/53f2876f7fa004545de77a47850581c45a1d10b0))
+
+- Renamed priority to readoutPriority
+  ([`abe358d`](https://gitlab.psi.ch/bec/bec/-/commit/abe358d956a699318503c22f1213b69d7b572969))
+
+- Renamed readoutPriority enums
+  ([`c0873aa`](https://gitlab.psi.ch/bec/bec/-/commit/c0873aae87549921aa49d2c08963a991f387d67a))
+
+- Replaced epylint by pylint.run
+  ([`20f3804`](https://gitlab.psi.ch/bec/bec/-/commit/20f38044a27e0f42d16eb5f602cfb17a42bd7bdc))
+
+- Replaced jsonschema by fastjsonschema
+  ([`d729fc2`](https://gitlab.psi.ch/bec/bec/-/commit/d729fc2b255b5e4ed3ae431a504be60d57f4aca8))
+
+- Simplified assert_device_is_enabled; added assert_devices_is_valid
+  ([`0739de1`](https://gitlab.psi.ch/bec/bec/-/commit/0739de1d1f1272c6efec2173a4ed6ee38b4643b0))
 
 - Upgraded to black 23.1
   ([`989dd1f`](https://gitlab.psi.ch/bec/bec/-/commit/989dd1fd8742c1f143e5885b5c2dce1763074edb))
@@ -7687,127 +7783,13 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 - Upgraded to black 23.1
   ([`36e5965`](https://gitlab.psi.ch/bec/bec/-/commit/36e5965d61a081f2ce0edf4d4f86f92a6b6af6db))
 
-- Minor refactoring for testing
-  ([`f8c0ef6`](https://gitlab.psi.ch/bec/bec/-/commit/f8c0ef620adbf7691610a43a05be2369e93636b8))
-
-- Minor refactoring
-  ([`98c870a`](https://gitlab.psi.ch/bec/bec/-/commit/98c870a662fa3ad72b7819296f3568eb7e134e1a))
-
-- Improvements for bluesky emitter
-  ([`84310b8`](https://gitlab.psi.ch/bec/bec/-/commit/84310b8ef61f4dcccf83f9960b67dbd2c25d4dfa))
-
-- Added on_cleanup emitter
-  ([`8791ca5`](https://gitlab.psi.ch/bec/bec/-/commit/8791ca572555ca0b83f25f973fb0801165e44f3d))
-
-- Removed pipeline
-  ([`66b329e`](https://gitlab.psi.ch/bec/bec/-/commit/66b329eaf6b29b293cf6a07e50586d8933cf17c3))
-
-- Refactored emitterbase
-  ([`d8a0d6a`](https://gitlab.psi.ch/bec/bec/-/commit/d8a0d6ad94dd8a29146edf5829ba8456605dae82))
-
-- Removed DeviceManagerSB
-  ([`2e7321d`](https://gitlab.psi.ch/bec/bec/-/commit/2e7321d2d0758b34b7c3418c76d596b65fd5a8fa))
-
-- Moved emitterbase to new file
-  ([`dce87ab`](https://gitlab.psi.ch/bec/bec/-/commit/dce87ab157af23107d8b5d0c96ef4e70694b391f))
-
-- Refactored scan bundler
-  ([`6583509`](https://gitlab.psi.ch/bec/bec/-/commit/6583509fa91f33d0de0fa015e93a1ca59cce0ebe))
-
-- Minor refactoring
-  ([`7ded49c`](https://gitlab.psi.ch/bec/bec/-/commit/7ded49c65bf390b26d00b8d9d20b883f3e530067))
-
-- Refactored device list extraction
-  ([`f77bd80`](https://gitlab.psi.ch/bec/bec/-/commit/f77bd805694ab7a26b2ab0e10720d37006dbbeac))
-
-- Cleanup
-  ([`cfd3b19`](https://gitlab.psi.ch/bec/bec/-/commit/cfd3b19b499af2161a657257e593b2dd71e354e4))
-
-- Added mixin class for redis consumer
-  ([`6e81164`](https://gitlab.psi.ch/bec/bec/-/commit/6e81164bc06e80172bc2e5a24a15ded2018a6444))
-
-- Merged consumer and threaded consumer
-  ([`0649f56`](https://gitlab.psi.ch/bec/bec/-/commit/0649f56b9dea3f91289d3c45eba54aba5b243d64))
-
-- Added support for bl_show_all plugins
-  ([`737c386`](https://gitlab.psi.ch/bec/bec/-/commit/737c386e24618171d1cb4ef77935bdc44a968507))
-
-- Deviceinstructionmessage should always have at least one device
-  ([`8f3d6df`](https://gitlab.psi.ch/bec/bec/-/commit/8f3d6df6a1c6b0130896071aad2418ca24fd30b1))
-
-- Only pass msg, not messageobjects
-  ([`6a3d387`](https://gitlab.psi.ch/bec/bec/-/commit/6a3d387131e400e4bc3deab1f0a8d441e7af0610))
-
-- Simplified assert_device_is_enabled; added assert_devices_is_valid
-  ([`0739de1`](https://gitlab.psi.ch/bec/bec/-/commit/0739de1d1f1272c6efec2173a4ed6ee38b4643b0))
-
-- Added option to specify the redis cls
-  ([`13a672d`](https://gitlab.psi.ch/bec/bec/-/commit/13a672dc4a59fa1fb05cbc9753c8dd454c9e92a9))
-
-- Cleanup
-  ([`cd7d63a`](https://gitlab.psi.ch/bec/bec/-/commit/cd7d63a23b0f9463393dfabce5fa7da925c09cd9))
-
-- Cleanup
-  ([`8f9f865`](https://gitlab.psi.ch/bec/bec/-/commit/8f9f8659298662744a39aa0d6e3b12b8b7307b82))
-
-- Merged send_logbook_message and send_message to always send the linkType
-  ([`e082ee6`](https://gitlab.psi.ch/bec/bec/-/commit/e082ee6a4b2ea05108c4f724a7f518ff7b6770e3))
-
-- Removed unused import
-  ([`8c1ec1e`](https://gitlab.psi.ch/bec/bec/-/commit/8c1ec1e637183527da3e55899620d0e863661ad7))
-
-- Improved log messages for scanstatus
-  ([`ce8300f`](https://gitlab.psi.ch/bec/bec/-/commit/ce8300f702253b32e33d02b08122bc6f816bac5e))
-
-- Added raise alarm / warning to failed readings in ds
-  ([`f71c494`](https://gitlab.psi.ch/bec/bec/-/commit/f71c494123094fe3482c15a117761e571736e22b))
-
-- Renamed readoutPriority enums
-  ([`c0873aa`](https://gitlab.psi.ch/bec/bec/-/commit/c0873aae87549921aa49d2c08963a991f387d67a))
-
-- Renamed priority to readoutPriority
-  ([`abe358d`](https://gitlab.psi.ch/bec/bec/-/commit/abe358d956a699318503c22f1213b69d7b572969))
-
-- Merged config updates
-  ([`62420f3`](https://gitlab.psi.ch/bec/bec/-/commit/62420f30a2c97636e1cc40cbfe1a6ee36286539a))
+- Use raise_alarms instead of looping through alarms
+  ([`35784f3`](https://gitlab.psi.ch/bec/bec/-/commit/35784f37c38f9641de7a2bff6641241c43538456))
 
 ### Testing
 
-- Added tests; added doc strings
-  ([`2b51ceb`](https://gitlab.psi.ch/bec/bec/-/commit/2b51cebe1c4d7b140449bbbe034b5b05bf559253))
-
-- Improved tests
-  ([`fd746cc`](https://gitlab.psi.ch/bec/bec/-/commit/fd746cc8bf4137792a7a33aa5aaec2aef84f1ba0))
-
-- Fixed fixture
-  ([`bcd54ae`](https://gitlab.psi.ch/bec/bec/-/commit/bcd54aede82713ff29f8668359763c5be87c5730))
-
-- Fixed missing import
-  ([`2c9b60a`](https://gitlab.psi.ch/bec/bec/-/commit/2c9b60a7da9dcbb3fab9b2384eabe01615abc50a))
-
-- Fixed missing import
-  ([`7c5c7f8`](https://gitlab.psi.ch/bec/bec/-/commit/7c5c7f81875b2c99353f6e9ffef768ec94ca2683))
-
-- Fixed missing function after refactoring
-  ([`8f8003b`](https://gitlab.psi.ch/bec/bec/-/commit/8f8003baa16c13d2be26d5ce0de3546e9a19d0e3))
-
-- Fixed bec client import for end2end tests
-  ([`e84148e`](https://gitlab.psi.ch/bec/bec/-/commit/e84148ed3c2d8554a54d61de00ca55cbf2d606d9))
-
-- Fixed tests
-  ([`2cb847e`](https://gitlab.psi.ch/bec/bec/-/commit/2cb847e3b16b076497599fb0901a790f74712043))
-
-- Moved tests to bec lib
-  ([`93a251f`](https://gitlab.psi.ch/bec/bec/-/commit/93a251fc82109142a83229d221c943476735ce9a))
-
-- Fixed bec client import for end2end tests
-  ([`e896edb`](https://gitlab.psi.ch/bec/bec/-/commit/e896edbd3b1d589ed0674c28f112bafeb90bc171))
-
-- Fixed tests
-  ([`00c0c94`](https://gitlab.psi.ch/bec/bec/-/commit/00c0c940c8a5609733d79c8d13fa68775298cc43))
-
-- Added ScanObject tests
-  ([`aa63ffb`](https://gitlab.psi.ch/bec/bec/-/commit/aa63ffb2c5fb65cf6466701fc4f599189b780015))
+- Add test_assert_device_is_valid
+  ([`0b35a4c`](https://gitlab.psi.ch/bec/bec/-/commit/0b35a4c66926b1e0aef8f2b3b08e5a851534fd86))
 
 - Added callback tests
   ([`4f547a7`](https://gitlab.psi.ch/bec/bec/-/commit/4f547a7dac5db2533dd4a59ceabd41dff297bf17))
@@ -7815,44 +7797,83 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 - Added callback_handler tests
   ([`58b347e`](https://gitlab.psi.ch/bec/bec/-/commit/58b347e0951eb6f5f43ce6337dc706d76447a1d2))
 
-- Added x-ray-eye align tests
-  ([`bffb734`](https://gitlab.psi.ch/bec/bec/-/commit/bffb7341ca9de908d29f67caff5a3b019d53d7d5))
+- Added cleanup test
+  ([`1826f98`](https://gitlab.psi.ch/bec/bec/-/commit/1826f982ddbf07a88021244582ec1775f154adcf))
+
+- Added config_handler tests
+  ([`0848413`](https://gitlab.psi.ch/bec/bec/-/commit/0848413d3aa4e87e54abe861790da726a48032ce))
+
+- Added device server tests
+  ([`488654e`](https://gitlab.psi.ch/bec/bec/-/commit/488654e3a622bda2e58ef0aa4383cdd53207453e))
+
+- Added emitter tests
+  ([`3b47a83`](https://gitlab.psi.ch/bec/bec/-/commit/3b47a838b18ea0a3307623bd83c31137b6156fa8))
+
+- Added more scihub tests
+  ([`f68d854`](https://gitlab.psi.ch/bec/bec/-/commit/f68d85425e8a67eb64ec6905e8845f788fe9a912))
+
+- Added more tests
+  ([`d84cc6b`](https://gitlab.psi.ch/bec/bec/-/commit/d84cc6b0ba90e8aa1b65b1b66897c70f8693a18e))
+
+- Added more tests
+  ([`9b9bd59`](https://gitlab.psi.ch/bec/bec/-/commit/9b9bd5973b969bf633579618e8c24eaa4f27de7e))
+
+- Added num_iterations for path optim
+  ([`d94459c`](https://gitlab.psi.ch/bec/bec/-/commit/d94459c615c6d5c491e533f562827a5d05b68bec))
+
+- Added optim_trajectory to fermat spiral test
+  ([`7ad4a11`](https://gitlab.psi.ch/bec/bec/-/commit/7ad4a11c1c08a0fa9b96c53a3005ffdbe4d83f4d))
+
+- Added option to discard pipeline data
+  ([`c44da88`](https://gitlab.psi.ch/bec/bec/-/commit/c44da888014d9a9bc4feb2b9b6156c6841e3b570))
+
+- Added scan bundler test
+  ([`ceccbf5`](https://gitlab.psi.ch/bec/bec/-/commit/ceccbf534eac9da61c0973e71eb1086b6cb59611))
 
 - Added scan guard tests
   ([`a94e53e`](https://gitlab.psi.ch/bec/bec/-/commit/a94e53e047035bcc3ec9a681eb46985ddf419ce2))
 
-- Fixed tests for min positions
-  ([`c2578f6`](https://gitlab.psi.ch/bec/bec/-/commit/c2578f648c03c85bd9f7abf78f8ea791e003862c))
+- Added ScanObject tests
+  ([`aa63ffb`](https://gitlab.psi.ch/bec/bec/-/commit/aa63ffb2c5fb65cf6466701fc4f599189b780015))
 
-- Fixed tests for new default exp time
-  ([`d6b2c67`](https://gitlab.psi.ch/bec/bec/-/commit/d6b2c67a9e2944e2a873945780fbdad39831b00b))
+- Added sleep to wait for limit updates
+  ([`2eb9a36`](https://gitlab.psi.ch/bec/bec/-/commit/2eb9a36e994c214007e63d94986f4d03e205b910))
 
-- Fixed test for additional scan baseline
-  ([`4f1b80e`](https://gitlab.psi.ch/bec/bec/-/commit/4f1b80e8423bfebe1e882710d024373a59be9086))
+- Added test for bl_info
+  ([`5f06dcc`](https://gitlab.psi.ch/bec/bec/-/commit/5f06dcc7340df41d6141e7e435d2c30bb1206410))
 
-- Fixed messages for new rpc defaults
-  ([`b841eca`](https://gitlab.psi.ch/bec/bec/-/commit/b841ecaa64eb538a18d40866ff3dbf5b68bfa879))
+- Added test for emitter
+  ([`01a9a6f`](https://gitlab.psi.ch/bec/bec/-/commit/01a9a6f0e6f40b17ff06f279e80cb57d5abc4e74))
 
-- Fixed tests for new kickoff interface
-  ([`fb4fa18`](https://gitlab.psi.ch/bec/bec/-/commit/fb4fa183213b699ff415668a3e386ab8120d2ee5))
+- Added test for test_step_scan_update when there is no pointID
+  ([`d4d9e76`](https://gitlab.psi.ch/bec/bec/-/commit/d4d9e76dc886e60fb62e1209c566ed75a8edb7d6))
 
-- Fixed test for new data structure
-  ([`a9837aa`](https://gitlab.psi.ch/bec/bec/-/commit/a9837aa4fa446cd115685abe0c9e6425c8e96f70))
+- Added test_assert_device_is_enabled
+  ([`4d091b8`](https://gitlab.psi.ch/bec/bec/-/commit/4d091b8fdf60004e0816c96d3d3aede3f8df91a9))
 
-- Trigger
-  ([`f11ac5a`](https://gitlab.psi.ch/bec/bec/-/commit/f11ac5aafb768ba837beed74c36b8c2d9e62e6f7))
+- Added tests for bec emitter
+  ([`7984ef8`](https://gitlab.psi.ch/bec/bec/-/commit/7984ef8c3fca532438cd4df4dac885c2f33b5423))
 
-- Fixed scihub tests
-  ([`13e77ba`](https://gitlab.psi.ch/bec/bec/-/commit/13e77ba2e31a63f7bd6a2f1ac7d9f68873e65f59))
+- Added tests for tags
+  ([`4f86f62`](https://gitlab.psi.ch/bec/bec/-/commit/4f86f626ad4258fb0f1a006f27036dd769b0a1f6))
 
-- Fixed test for new otf implementation
-  ([`537203c`](https://gitlab.psi.ch/bec/bec/-/commit/537203ce0c35f559c9ceeb90b162530ba7a9a461))
+- Added tests; added doc strings
+  ([`2b51ceb`](https://gitlab.psi.ch/bec/bec/-/commit/2b51cebe1c4d7b140449bbbe034b5b05bf559253))
 
-- Fixed lamni tests
-  ([`b5e3919`](https://gitlab.psi.ch/bec/bec/-/commit/b5e391999fd8500ded6a50f40ae681a8e50d3aac))
+- Added x-ray-eye align tests
+  ([`bffb734`](https://gitlab.psi.ch/bec/bec/-/commit/bffb7341ca9de908d29f67caff5a3b019d53d7d5))
 
-- Fixed bug in pipeline mock
-  ([`d24de87`](https://gitlab.psi.ch/bec/bec/-/commit/d24de874c3d31c4a778f7d0ad2124db47d3e6cc1))
+- Changed from magicmock to context manager
+  ([`32e1f3b`](https://gitlab.psi.ch/bec/bec/-/commit/32e1f3b5594076aecaebcee4168a867cf97aa4ad))
+
+- Changed from magicmock to context manager in more tests
+  ([`6d31eb5`](https://gitlab.psi.ch/bec/bec/-/commit/6d31eb57d4218e8903fcbb54b55b70479714f43f))
+
+- Cleanup
+  ([`2cf693e`](https://gitlab.psi.ch/bec/bec/-/commit/2cf693e141b5ae1fae91bd6d8406e6d1e012f6e5))
+
+- Cleanup
+  ([`8256ded`](https://gitlab.psi.ch/bec/bec/-/commit/8256dedb77ca1b996b69f819631b0436933af5bc))
 
 - Disabled metrics and service info threads for tests
   ([`28d26b6`](https://gitlab.psi.ch/bec/bec/-/commit/28d26b6c39416e9da556f337dff42dc26e273e61))
@@ -7860,53 +7881,110 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 - Disabled service info and metrics messages for mocked scan server
   ([`41fcde8`](https://gitlab.psi.ch/bec/bec/-/commit/41fcde8df7aa5da7016091f45ea13a73b44b1c35))
 
-- Removed samx check
-  ([`a11787e`](https://gitlab.psi.ch/bec/bec/-/commit/a11787e052cb85e8fa2fd68fb40ccaa3126b6801))
+- Ensured that scan id changes for different test cases
+  ([`4cf853b`](https://gitlab.psi.ch/bec/bec/-/commit/4cf853b5b612a8c89687836a7b787ceee9d54c58))
 
-- Fixed tests
-  ([`79a02eb`](https://gitlab.psi.ch/bec/bec/-/commit/79a02ebc35782fbb8ccc71f8997f2224537d5828))
+- Expanded test_trigger_device, rearranged the order of the tests
+  ([`4715628`](https://gitlab.psi.ch/bec/bec/-/commit/4715628c9dd82e89854111ac0bf53615565c2430))
 
-- Improved tests for scibec
-  ([`cea26bb`](https://gitlab.psi.ch/bec/bec/-/commit/cea26bb89797129dfea59f4e674fac060cb4fbfb))
+- First test for test_get_device_status
+  ([`8bc0ae2`](https://gitlab.psi.ch/bec/bec/-/commit/8bc0ae27675c6e9ef024276373ca7dadbcb008a0))
 
-- Fixed test for updated rpc schema
-  ([`b2284bc`](https://gitlab.psi.ch/bec/bec/-/commit/b2284bcf7678aa8845be3337074d2f32940362ba))
+- First tests for redis_connector
+  ([`4791e10`](https://gitlab.psi.ch/bec/bec/-/commit/4791e104378da559393667d6c2ac91a2ff7b1e8e))
 
-- Fixed tests
-  ([`8a1e761`](https://gitlab.psi.ch/bec/bec/-/commit/8a1e7613a4bad1b1dfaead53b4ba368f1ce5a537))
+- Fixed bec client import for end2end tests
+  ([`e84148e`](https://gitlab.psi.ch/bec/bec/-/commit/e84148ed3c2d8554a54d61de00ca55cbf2d606d9))
 
-- Added more tests
-  ([`d84cc6b`](https://gitlab.psi.ch/bec/bec/-/commit/d84cc6b0ba90e8aa1b65b1b66897c70f8693a18e))
-
-- Added more scihub tests
-  ([`f68d854`](https://gitlab.psi.ch/bec/bec/-/commit/f68d85425e8a67eb64ec6905e8845f788fe9a912))
+- Fixed bec client import for end2end tests
+  ([`e896edb`](https://gitlab.psi.ch/bec/bec/-/commit/e896edbd3b1d589ed0674c28f112bafeb90bc171))
 
 - Fixed bug in config handler test
   ([`c62d84e`](https://gitlab.psi.ch/bec/bec/-/commit/c62d84ea8ca5504f1e664cf2331f0f3c54fa4df9))
 
-- Renamed test to avoid collision with the device_server
-  ([`809f001`](https://gitlab.psi.ch/bec/bec/-/commit/809f0010500f4578aafd4858cb9badf78bc5cf4f))
-
-- Added config_handler tests
-  ([`0848413`](https://gitlab.psi.ch/bec/bec/-/commit/0848413d3aa4e87e54abe861790da726a48032ce))
+- Fixed bug in pipeline mock
+  ([`d24de87`](https://gitlab.psi.ch/bec/bec/-/commit/d24de874c3d31c4a778f7d0ad2124db47d3e6cc1))
 
 - Fixed bug in scihub test
   ([`12f623c`](https://gitlab.psi.ch/bec/bec/-/commit/12f623cda603fa8ab6802907a56e930293d74c23))
 
-- Fixed tests for new scihub integration
-  ([`3424000`](https://gitlab.psi.ch/bec/bec/-/commit/3424000efe5cf34df122f4e4789b23a97b177d4f))
+- Fixed fixture
+  ([`bcd54ae`](https://gitlab.psi.ch/bec/bec/-/commit/bcd54aede82713ff29f8668359763c5be87c5730))
 
-- Added scan bundler test
-  ([`ceccbf5`](https://gitlab.psi.ch/bec/bec/-/commit/ceccbf534eac9da61c0973e71eb1086b6cb59611))
+- Fixed lamni tests
+  ([`b5e3919`](https://gitlab.psi.ch/bec/bec/-/commit/b5e391999fd8500ded6a50f40ae681a8e50d3aac))
+
+- Fixed lock acquire
+  ([`6a2a710`](https://gitlab.psi.ch/bec/bec/-/commit/6a2a710273becdce1b39928dd54cefa93dc9fff2))
+
+- Fixed messages for new rpc defaults
+  ([`b841eca`](https://gitlab.psi.ch/bec/bec/-/commit/b841ecaa64eb538a18d40866ff3dbf5b68bfa879))
+
+- Fixed missing function after refactoring
+  ([`8f8003b`](https://gitlab.psi.ch/bec/bec/-/commit/8f8003baa16c13d2be26d5ce0de3546e9a19d0e3))
+
+- Fixed missing import
+  ([`2c9b60a`](https://gitlab.psi.ch/bec/bec/-/commit/2c9b60a7da9dcbb3fab9b2384eabe01615abc50a))
+
+- Fixed missing import
+  ([`7c5c7f8`](https://gitlab.psi.ch/bec/bec/-/commit/7c5c7f81875b2c99353f6e9ffef768ec94ca2683))
 
 - Fixed sb test
   ([`0e56f95`](https://gitlab.psi.ch/bec/bec/-/commit/0e56f956af4c214dd0c27df1807cc4d807272ed6))
 
-- Added sleep to wait for limit updates
-  ([`2eb9a36`](https://gitlab.psi.ch/bec/bec/-/commit/2eb9a36e994c214007e63d94986f4d03e205b910))
+- Fixed scihub tests
+  ([`13e77ba`](https://gitlab.psi.ch/bec/bec/-/commit/13e77ba2e31a63f7bd6a2f1ac7d9f68873e65f59))
 
-- Added more tests
-  ([`9b9bd59`](https://gitlab.psi.ch/bec/bec/-/commit/9b9bd5973b969bf633579618e8c24eaa4f27de7e))
+- Fixed test
+  ([`cdf75b8`](https://gitlab.psi.ch/bec/bec/-/commit/cdf75b84803774d64bcb68c5f12532e22ee756f2))
+
+- Fixed test for additional scan baseline
+  ([`4f1b80e`](https://gitlab.psi.ch/bec/bec/-/commit/4f1b80e8423bfebe1e882710d024373a59be9086))
+
+- Fixed test for new data structure
+  ([`a9837aa`](https://gitlab.psi.ch/bec/bec/-/commit/a9837aa4fa446cd115685abe0c9e6425c8e96f70))
+
+- Fixed test for new otf implementation
+  ([`537203c`](https://gitlab.psi.ch/bec/bec/-/commit/537203ce0c35f559c9ceeb90b162530ba7a9a461))
+
+- Fixed test for refactored scan bundler
+  ([`1466a07`](https://gitlab.psi.ch/bec/bec/-/commit/1466a07fbd75b1a28f2bcbc4e7304cc3fc774961))
+
+- Fixed test for updated rpc schema
+  ([`b2284bc`](https://gitlab.psi.ch/bec/bec/-/commit/b2284bcf7678aa8845be3337074d2f32940362ba))
+
+- Fixed test_handle_device_instructions
+  ([`3b86d3e`](https://gitlab.psi.ch/bec/bec/-/commit/3b86d3e965198713694e091e8fea1256ef5c433d))
+
+- Fixed tests
+  ([`2cb847e`](https://gitlab.psi.ch/bec/bec/-/commit/2cb847e3b16b076497599fb0901a790f74712043))
+
+- Fixed tests
+  ([`00c0c94`](https://gitlab.psi.ch/bec/bec/-/commit/00c0c940c8a5609733d79c8d13fa68775298cc43))
+
+- Fixed tests
+  ([`79a02eb`](https://gitlab.psi.ch/bec/bec/-/commit/79a02ebc35782fbb8ccc71f8997f2224537d5828))
+
+- Fixed tests
+  ([`8a1e761`](https://gitlab.psi.ch/bec/bec/-/commit/8a1e7613a4bad1b1dfaead53b4ba368f1ce5a537))
+
+- Fixed tests for acquisition priority
+  ([`2d1d64c`](https://gitlab.psi.ch/bec/bec/-/commit/2d1d64caf8d8b8379ab4ce247bdf8373c9034fb9))
+
+- Fixed tests for left align bl_show_all; fixed lsamrot test
+  ([`b9d4750`](https://gitlab.psi.ch/bec/bec/-/commit/b9d47507ca31d9687522af0213050e5c1f345b3f))
+
+- Fixed tests for min positions
+  ([`c2578f6`](https://gitlab.psi.ch/bec/bec/-/commit/c2578f648c03c85bd9f7abf78f8ea791e003862c))
+
+- Fixed tests for new default exp time
+  ([`d6b2c67`](https://gitlab.psi.ch/bec/bec/-/commit/d6b2c67a9e2944e2a873945780fbdad39831b00b))
+
+- Fixed tests for new kickoff interface
+  ([`fb4fa18`](https://gitlab.psi.ch/bec/bec/-/commit/fb4fa183213b699ff415668a3e386ab8120d2ee5))
+
+- Fixed tests for new scihub integration
+  ([`3424000`](https://gitlab.psi.ch/bec/bec/-/commit/3424000efe5cf34df122f4e4789b23a97b177d4f))
 
 - Fixed tests for new wait group structure
   ([`f0616ea`](https://gitlab.psi.ch/bec/bec/-/commit/f0616ead21780b24edcfe5d85576ee79cd551299))
@@ -7914,71 +7992,26 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 - Improved client tests
   ([`e387660`](https://gitlab.psi.ch/bec/bec/-/commit/e3876609f22cb66a4933b494acf082c5c791590f))
 
-- Reverted changes in timeout tests
-  ([`6f8358d`](https://gitlab.psi.ch/bec/bec/-/commit/6f8358d7e6cfbbe05947ea5798f9232ab602e590))
+- Improved get_devices_from_scan_data
+  ([`0ff4b08`](https://gitlab.psi.ch/bec/bec/-/commit/0ff4b08acfadd18a877da7ea77807039a7187bc1))
 
 - Improved scan bundler tests
   ([`7bbf3a1`](https://gitlab.psi.ch/bec/bec/-/commit/7bbf3a1c1ee4f130126f476b636beaf76aa9bec3))
 
-- Added test for emitter
-  ([`01a9a6f`](https://gitlab.psi.ch/bec/bec/-/commit/01a9a6f0e6f40b17ff06f279e80cb57d5abc4e74))
-
-- Added cleanup test
-  ([`1826f98`](https://gitlab.psi.ch/bec/bec/-/commit/1826f982ddbf07a88021244582ec1775f154adcf))
-
-- Added emitter tests
-  ([`3b47a83`](https://gitlab.psi.ch/bec/bec/-/commit/3b47a838b18ea0a3307623bd83c31137b6156fa8))
-
-- Added tests for bec emitter
-  ([`7984ef8`](https://gitlab.psi.ch/bec/bec/-/commit/7984ef8c3fca532438cd4df4dac885c2f33b5423))
-
-- Fixed test for refactored scan bundler
-  ([`1466a07`](https://gitlab.psi.ch/bec/bec/-/commit/1466a07fbd75b1a28f2bcbc4e7304cc3fc774961))
-
-- Cleanup
-  ([`2cf693e`](https://gitlab.psi.ch/bec/bec/-/commit/2cf693e141b5ae1fae91bd6d8406e6d1e012f6e5))
-
-- Ensured that scan id changes for different test cases
-  ([`4cf853b`](https://gitlab.psi.ch/bec/bec/-/commit/4cf853b5b612a8c89687836a7b787ceee9d54c58))
-
-- Changed from magicmock to context manager in more tests
-  ([`6d31eb5`](https://gitlab.psi.ch/bec/bec/-/commit/6d31eb57d4218e8903fcbb54b55b70479714f43f))
-
-- Changed from magicmock to context manager
-  ([`32e1f3b`](https://gitlab.psi.ch/bec/bec/-/commit/32e1f3b5594076aecaebcee4168a867cf97aa4ad))
-
-- Added test for test_step_scan_update when there is no pointID
-  ([`d4d9e76`](https://gitlab.psi.ch/bec/bec/-/commit/d4d9e76dc886e60fb62e1209c566ed75a8edb7d6))
-
-- Removed bec_client
-  ([`0ca6d16`](https://gitlab.psi.ch/bec/bec/-/commit/0ca6d1648374e47eaef4d0f340df31881facb297))
-
-- Added optim_trajectory to fermat spiral test
-  ([`7ad4a11`](https://gitlab.psi.ch/bec/bec/-/commit/7ad4a11c1c08a0fa9b96c53a3005ffdbe4d83f4d))
-
-- Fixed test
-  ([`cdf75b8`](https://gitlab.psi.ch/bec/bec/-/commit/cdf75b84803774d64bcb68c5f12532e22ee756f2))
-
-- Improved get_devices_from_scan_data
-  ([`0ff4b08`](https://gitlab.psi.ch/bec/bec/-/commit/0ff4b08acfadd18a877da7ea77807039a7187bc1))
-
-- Removed test_get_scan_status, worked on my computer but not on pipeline, pipeline should be fixed
-  now ([`00f9531`](https://gitlab.psi.ch/bec/bec/-/commit/00f9531702d61ce75cb3332befc21d0a977d496a))
-
-- First test for test_get_device_status
-  ([`8bc0ae2`](https://gitlab.psi.ch/bec/bec/-/commit/8bc0ae27675c6e9ef024276373ca7dadbcb008a0))
+- Improved tes_get_fermat_spiral_pos
+  ([`31eec19`](https://gitlab.psi.ch/bec/bec/-/commit/31eec194dc3387f658241e340e7958731bbbd0ba))
 
 - Improved test_add_wait_group
   ([`984a5ac`](https://gitlab.psi.ch/bec/bec/-/commit/984a5ac4eb91e0d6b074d6480aac2420c47bf2d8))
 
-- Improved tes_get_fermat_spiral_pos
-  ([`31eec19`](https://gitlab.psi.ch/bec/bec/-/commit/31eec194dc3387f658241e340e7958731bbbd0ba))
+- Improved test_read_device
+  ([`5953765`](https://gitlab.psi.ch/bec/bec/-/commit/595376579b447803f8eed6fced56dc12bde7ec13))
 
-- Cleanup
-  ([`8256ded`](https://gitlab.psi.ch/bec/bec/-/commit/8256dedb77ca1b996b69f819631b0436933af5bc))
+- Improved tests
+  ([`fd746cc`](https://gitlab.psi.ch/bec/bec/-/commit/fd746cc8bf4137792a7a33aa5aaec2aef84f1ba0))
 
-- Test_redis_consumer_threaded_init
-  ([`a64cc23`](https://gitlab.psi.ch/bec/bec/-/commit/a64cc235b289ba22e07cecebada115748acbcb76))
+- Improved tests for scibec
+  ([`cea26bb`](https://gitlab.psi.ch/bec/bec/-/commit/cea26bb89797129dfea59f4e674fac060cb4fbfb))
 
 - Minor cleanup
   ([`81f0a48`](https://gitlab.psi.ch/bec/bec/-/commit/81f0a48e59ac2fa03053603088f042ce42802b9e))
@@ -7986,53 +8019,35 @@ $ isort . --profile=black --line-width=100 --multi-line=3 --trailing-comma
 - Moved test from utils to test dir
   ([`e13948d`](https://gitlab.psi.ch/bec/bec/-/commit/e13948d2b0697a06d420c45a35f5b14b09cd0a59))
 
-- First tests for redis_connector
-  ([`4791e10`](https://gitlab.psi.ch/bec/bec/-/commit/4791e104378da559393667d6c2ac91a2ff7b1e8e))
+- Moved tests to bec lib
+  ([`93a251f`](https://gitlab.psi.ch/bec/bec/-/commit/93a251fc82109142a83229d221c943476735ce9a))
 
-- Expanded test_trigger_device, rearranged the order of the tests
-  ([`4715628`](https://gitlab.psi.ch/bec/bec/-/commit/4715628c9dd82e89854111ac0bf53615565c2430))
+- Removed bec_client
+  ([`0ca6d16`](https://gitlab.psi.ch/bec/bec/-/commit/0ca6d1648374e47eaef4d0f340df31881facb297))
 
-- Test_update_device_metadata
-  ([`e72d4e0`](https://gitlab.psi.ch/bec/bec/-/commit/e72d4e07511fb174d49c2ad602f88d91d8aadaad))
+- Removed samx check
+  ([`a11787e`](https://gitlab.psi.ch/bec/bec/-/commit/a11787e052cb85e8fa2fd68fb40ccaa3126b6801))
+
+- Removed test_get_scan_status, worked on my computer but not on pipeline, pipeline should be fixed
+  now ([`00f9531`](https://gitlab.psi.ch/bec/bec/-/commit/00f9531702d61ce75cb3332befc21d0a977d496a))
+
+- Renamed test to avoid collision with the device_server
+  ([`809f001`](https://gitlab.psi.ch/bec/bec/-/commit/809f0010500f4578aafd4858cb9badf78bc5cf4f))
+
+- Reverted changes in timeout tests
+  ([`6f8358d`](https://gitlab.psi.ch/bec/bec/-/commit/6f8358d7e6cfbbe05947ea5798f9232ab602e590))
+
+- Test_redis_consumer_threaded_init
+  ([`a64cc23`](https://gitlab.psi.ch/bec/bec/-/commit/a64cc235b289ba22e07cecebada115748acbcb76))
 
 - Test_stop, test_start
   ([`34571d2`](https://gitlab.psi.ch/bec/bec/-/commit/34571d2d12ffa5e955685e068004e7fcc6b5235a))
 
+- Test_update_device_metadata
+  ([`e72d4e0`](https://gitlab.psi.ch/bec/bec/-/commit/e72d4e07511fb174d49c2ad602f88d91d8aadaad))
+
 - Test_update_status
   ([`b663290`](https://gitlab.psi.ch/bec/bec/-/commit/b6632900393ec4f4e493ee434ff74df6381979c1))
 
-- Fixed test_handle_device_instructions
-  ([`3b86d3e`](https://gitlab.psi.ch/bec/bec/-/commit/3b86d3e965198713694e091e8fea1256ef5c433d))
-
-- Added option to discard pipeline data
-  ([`c44da88`](https://gitlab.psi.ch/bec/bec/-/commit/c44da888014d9a9bc4feb2b9b6156c6841e3b570))
-
-- Add test_assert_device_is_valid
-  ([`0b35a4c`](https://gitlab.psi.ch/bec/bec/-/commit/0b35a4c66926b1e0aef8f2b3b08e5a851534fd86))
-
-- Added test_assert_device_is_enabled
-  ([`4d091b8`](https://gitlab.psi.ch/bec/bec/-/commit/4d091b8fdf60004e0816c96d3d3aede3f8df91a9))
-
-- Improved test_read_device
-  ([`5953765`](https://gitlab.psi.ch/bec/bec/-/commit/595376579b447803f8eed6fced56dc12bde7ec13))
-
-- Added device server tests
-  ([`488654e`](https://gitlab.psi.ch/bec/bec/-/commit/488654e3a622bda2e58ef0aa4383cdd53207453e))
-
-- Added num_iterations for path optim
-  ([`d94459c`](https://gitlab.psi.ch/bec/bec/-/commit/d94459c615c6d5c491e533f562827a5d05b68bec))
-
-- Fixed tests for left align bl_show_all; fixed lsamrot test
-  ([`b9d4750`](https://gitlab.psi.ch/bec/bec/-/commit/b9d47507ca31d9687522af0213050e5c1f345b3f))
-
-- Added test for bl_info
-  ([`5f06dcc`](https://gitlab.psi.ch/bec/bec/-/commit/5f06dcc7340df41d6141e7e435d2c30bb1206410))
-
-- Fixed lock acquire
-  ([`6a2a710`](https://gitlab.psi.ch/bec/bec/-/commit/6a2a710273becdce1b39928dd54cefa93dc9fff2))
-
-- Added tests for tags
-  ([`4f86f62`](https://gitlab.psi.ch/bec/bec/-/commit/4f86f626ad4258fb0f1a006f27036dd769b0a1f6))
-
-- Fixed tests for acquisition priority
-  ([`2d1d64c`](https://gitlab.psi.ch/bec/bec/-/commit/2d1d64caf8d8b8379ab4ce247bdf8373c9034fb9))
+- Trigger
+  ([`f11ac5a`](https://gitlab.psi.ch/bec/bec/-/commit/f11ac5aafb768ba837beed74c36b8c2d9e62e6f7))
