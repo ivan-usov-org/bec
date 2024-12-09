@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v3.1.2 (2024-12-09)
+
+### Bug Fixes
+
+- Update bec_server dependency for fakeredis
+  ([`c8f3b88`](https://gitlab.psi.ch/bec/bec/-/commit/c8f3b88ddeda0fb6480369650e889ccb47e16065))
+
+### Build System
+
+- Update pdes, bec_lib for v3, py-scibec>=1.5, pytest-bec-e2e~=3.0, and pydantic~=2.8dep
+  ([`e3d4d33`](https://gitlab.psi.ch/bec/bec/-/commit/e3d4d33d5790866cf1ae2a2317f9664fd55808a7))
+
+
 ## v3.1.1 (2024-12-06)
 
 ### Bug Fixes
