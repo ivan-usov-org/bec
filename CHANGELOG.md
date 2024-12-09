@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v3.1.3 (2024-12-09)
+
+### Bug Fixes
+
+- Bugfix for devicemanager to subscribe to correct event type of ophyd.
+  ([`4f8d96a`](https://gitlab.psi.ch/bec/bec/-/commit/4f8d96a18c7ce2c6c2ad3f474b6b37ebec6628b4))
+
+### Testing
+
+- Add test for subscriptions to event_types
+  ([`25c090c`](https://gitlab.psi.ch/bec/bec/-/commit/25c090cd94138fa461d92a26d1856e0f62890175))
+
+
 ## v3.1.2 (2024-12-09)
 
 ### Bug Fixes
