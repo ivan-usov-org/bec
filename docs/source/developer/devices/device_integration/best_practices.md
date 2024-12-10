@@ -3,14 +3,18 @@
 
 Integrating devices across beamlines while accommodating beamline-specific requirements is a critical aspect of reliable device management. Ideally, a device can be reused across multiple beamlines without compromising its core functionality. At the same time, beamline-specific requirements, such as customised behavior during scans, should be easily implemented. This section explains how to achieve this balance without rewriting the entire device class for each beamline. 
 
-````{admonition} Motivation
-A simple example for such a requirement is the need to set a motor's velocity to a specific value during a fly scan. This requirement is beamline-specific and should not be hardcoded into the motor class. If we were to implement these requirement, we would need to subclass the EpicsMotor class and override the *stage* and *unstage* methods. In addition, we would need to fetch the latest scan information from BEC to determine the scan type and adjust the motor's velocity accordingly. This approach is not only cumbersome but also leads to code duplication, is error-prone, and difficult to maintain. We recommend a more generic approach.
-````
-
 (developer.devices.device_integration.beamline_specific_integration.generic_approach)=
-## Generic Integration Approach
+## Generic Integration approach
 
-We recommend adopting a more generic approach to encapsulate beamline-specific logic in a single place. The idea is to wrap the standard Ophyd interface witha base class that provides hooks for beamline-specific logic. In this way, the device communication logic is separated from the beamline-specific logic, making it easier to manage and extend. We will explore this approach in the following.
+Let's take the example of setting a motor's velocity to a specific value during a fly scan.
+
+This example requires:
+
+- to determine the velocity value which can be applied depending on the scan type
+- to send the command to the corresponding EpicsMotor device before the scan
+- to put back velocity to its initial value after the scan
+
+The generic approach is to separate device communication and scan logic by wrapping the standard Ophyd interface with a base class providing hooks. Those hook methods contain the beamline-specific logic, making it easier to manage and extend. We will explore this approach in the following.
 
 ````{note}
 Please check the [ophyd section](#developer.ophyd.device) for more details on which methods Ophyd provides through its interface, and the [scan structure](#developer.scans.scan_structure) section to understand how BEC puts them to use within scans.
@@ -18,11 +22,13 @@ Please check the [ophyd section](#developer.ophyd.device) for more details on wh
 
 ### Introducing BECDeviceBase
 
-*BECDeviceBase* is the class written for this purpose. The actual logic to separate beamline specific logic is implemented through a *custom_prepare_cls* attribute. This attribute is an exchangable class that should be used to implement beamline specific logic through pre-defined hooks. The class itself is instantiated in the *__init__* method of *BECDeviceBase*, and receives the class itself as the parent. This gives the *custom_prepare_cls* access to all attributes, methods and properties of the device class. 
+*BECDeviceBase* is the class to wrap the underlying Ophyd device. It has a *custom_prepare_cls* class attribute ; this attribute points to the class that implements beamline specific logic through pre-defined hooks. 
 
 There are several hooks that can be implemented in the *custom_prepare_cls* class, such as `on_stage`, `on_unstage`, `on_complete`, etc. These hooks are called at specific stages of the device's lifecycle, such as staging, unstaging, or completion of a scan. *BECDeviceBase* ensures that upon calling these hooks, all the necessary information is available and loaded from BEC.
 
-````{dropdown} View code: PSIDeviceBase
+Upon instantiation within `BECDeviceBase` constructor, the `custom_prepare_cls` object receives its container `BECDeviceBase` object as a `.parent` member. Thanks to this property, the *custom_prepare_cls* object can have access to all attributes, methods and properties of the device class.
+
+````{dropdown} View code: BECDeviceBase
 :icon: code-square
 :animate: fade-in-slide-down
 
@@ -50,7 +56,7 @@ While this approach introduces several layers, it provides several key benefits:
 
 Some extra information about utilities available in the two classes are listed below:
 
-**PSIDeviceBase**
+**BECDeviceBase**
 
 Base class that wraps around the standard Ophyd interface and provides utility methods for BEC interaction. It includes the following attributes:
 * `self.scaninfo`: An object that represents the latest scan information fetched from BEC.
@@ -61,17 +67,17 @@ Base class that wraps around the standard Ophyd interface and provides utility m
 **CustomPrepare**
 
 Class that provides hooks for the beamline specific logic. 
-* `self.parent`: The parent attribute gives access to all attributes, properties and methods of the parent class which will be a subclas of PSIDeviceBase.
+* `self.parent`: The parent attribute gives access to all attributes, properties and methods of the parent class which will be a subclass of BECDeviceBase.
 * `self.wait_for_signal`: A utility method to simplify waiting for signals to reach certain conditions. This method is blocking.
-* `self.wait_with_status`: A utility method to simplify waiting for signals to reach certain conditions. This method is non-blocking and returns a status object. status.done and status.success can be used to check if the wait was successful.
+* `self.wait_with_status`: A utility method to simplify waiting for signals to reach certain conditions. This method is non-blocking and returns a status object ; `status.done` and `status.success` can be used to check if the wait was successful.
 
 ````{note}
-We invite you to explore the docstrings of all hooks and utility methods within the *CustomPrepare* class to understand their purpose and usage.
+Read docstrings of all hooks and utility methods within the *CustomPrepare* class to understand their purpose and usage.
 ````
 
-### Example: Customised EpicsMotor
+### Implementing custom EpicsMotor
 
-Revisiting the motor class example, we can now rewrite it with our generic approach. Our new class now inherits from both `EpicsMotor` and `PSIDeviceBase`. Beamline-specific logic is implemented in the `BeamlineCustomPrepare` class, which inherits from `CustomDetectorMixin` and overrides the necessary hooks. In this example, hooks like `on_stage`, `on_unstage` and `on_stop` ensure that motor velocity is restored to its original value even if the motor is stopped during an acquisition.
+Let's continue with the EpicsMotor example described above. The new custom class now inherits from both `EpicsMotor` and `BECDeviceBase`. Beamline-specific logic is implemented in the `BeamlineCustomPrepare` class, which inherits from `CustomDetectorMixin` and overrides the necessary hooks. In this example, hooks like `on_stage`, `on_unstage` and `on_stop` ensure that motor velocity is restored to its original value even if the motor is stopped during an acquisition.
 
 
 ``` python
@@ -109,18 +115,17 @@ class MyBeamlineMotor(BECDeviceBase, EpicsMotor):
     custom_prepare_cls = BeamlineCustomPrepare
 ```
 
-Check from here on the rest!!! 
-
 A few final remarks on the implementation:
 - The *parent* attribute allows beamline-specific logic to interact directly with the device class.
 - The *velocity* component from *EpicsMotor* is accessible via `self.parent.velocity`.
 - Since the *CustomDetectorMixin*'s `__init__` is overridden, ensure that `super().__init__(_args=_args, parent=parent, _kwargs=_kwargs)` is called correctly, especially passing the *parent* attribute.
 
 ````{note}
-Multiple inheritance in Python can be complex. Please ensure that the order of inheritance is correct, with the base class (e.g., `PSIDetectorBase`) listed first.
+Multiple inheritance in Python can be complex. Please ensure that the order of inheritance is correct, with the base class (e.g., `BECDeviceBase`) listed first.
 ````
 
 ## Summary
-This approach introduces a  *PSIDetectorBase* class that provides utility methods for BEC interaction and separates beamline-specific logic into a *CustomDetectorMixin* class. Device classes inherit from both the core device class (e.g. *EpicsMotor*) and *PSIDetectorBase*, using the *custom_prepare* class variable to integrate beamline-specific logic via hooks as `on_stage`, `on_unstage`, etc.
+This approach introduces a  *BECDeviceBase* class that provides utility methods for BEC interaction and separates beamline-specific logic into a *CustomDetectorMixin* class. Device classes inherit from both the core device class (e.g. *EpicsMotor*) and *BECDeviceBase*, and rely on the *custom_prepare_cls* variable to instantiate beamline-specific logic via hooks as `on_stage`, `on_unstage`, etc.
 
 By decoupling device communication, BEC interaction, and beamline-specific logic, this design improves code maintainability, extensibility, and modularity. Beamline-specific logic can now be implemented and extended within a dedicated plugin repository, ensuring a clean and organized implementation.
+
