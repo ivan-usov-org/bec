@@ -15,27 +15,16 @@ uniform hardware abstraction layer for BEC.
 Diagram representing the reading of device definitions to create Devices connected to the control system
 ```
 
-## BEC Devices and Signals API
+## Device Interfaces
 
 The BEC Device Server receives device definitions, and instantiates the corresponding objects from the hardware
-abstraction layer. Those objects are **wrapped to fit into 4 main classes**:
-
-- [_Device_](/api_reference/_autosummary/bec_lib.device.Device.rst#bec_lib.device.Device)
-    - which corresponds to the [Device type in Ophyd](https://nsls-ii.github.io/ophyd/device-overview.html#device)
-- [_Signal_](/api_reference/_autosummary/bec_lib.device.Signal.rst#bec_lib.device.Signal)
-    - which corresponds to the [Signal type in Ophyd](https://nsls-ii.github.io/ophyd/signals.html)
-- [_Positioner_](/api_reference/_autosummary/bec_lib.device.Signal.rst#bec_lib.device.Signal)
-- [_ComputedSignal_]((/api_reference/_autosummary/bec_lib.device.Signal.rst#bec_lib.device.Signal))
-
-BEC provides a set of protocols to define the interfaces of Device Server objects, described below:
+abstraction layer. Those objects are **wrapped to fit into 4 main interfaces**:
 
 ```{figure} /assets/bec_device_protocols.png
 Class diagram of BEC Device Server protocols
 ```
 
-## Device Interfaces
-
-We use a set of protocols to define and test against an expected interface for devices loaded into the BEC Device Server. This ensures that all devices conform to a common set of methods and properties. You can find the protocol definitions in the *ophyd devices* repository [here](https://gitlab.psi.ch/bec/ophyd_devices/-/blob/main/ophyd_devices/interfaces/protocols/bec_protocols.py?ref_type=heads).
+Protocols ensure all devices conform to a common set of methods and properties. Protocol definitions are in the *ophyd devices* repository [here](https://gitlab.psi.ch/bec/ophyd_devices/-/blob/main/ophyd_devices/interfaces/protocols/bec_protocols.py?ref_type=heads).
 * Any object of type device or signal within BEC must comply with the *BECBaseProtocol*. The equivalent in Ophyd is the [OphydObject](https://blueskyproject.io/ophyd/user/generated/ophyd.ophydobj.OphydObject.html).
 * A device must comply with the *BECDeviceProtocol*. The equivalent in Ophyd is the [Device](https://blueskyproject.io/ophyd/device-overview.html#device).
 * A signal must comply with the *BECSignalProtocol*. The equivalent in Ophyd is the [Signal](https://blueskyproject.io/ophyd/user/reference/signals.html).
