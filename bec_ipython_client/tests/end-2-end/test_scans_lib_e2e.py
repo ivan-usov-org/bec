@@ -129,7 +129,7 @@ def test_dap_fit(bec_client_lib):
     dev.bpm4i.sim.params = params
     time.sleep(1)
 
-    res = scans.line_scan(dev.samx, 0, 8, steps=50, relative=False)
+    res = scans.line_scan(dev.samx, 0, 8, steps=50, relative=False, exp_time=0.1)
     res.wait()
 
     while True:
@@ -141,7 +141,7 @@ def test_dap_fit(bec_client_lib):
     bec.dap.GaussianModel.select("bpm4i")
     bec.dap.GaussianModel.auto_run = True
 
-    res = scans.line_scan(dev.samx, 0, 8, steps=20, relative=False)
+    res = scans.line_scan(dev.samx, 0, 8, steps=20, relative=False, exp_time=0.1)
     res.wait()
 
     while True:
