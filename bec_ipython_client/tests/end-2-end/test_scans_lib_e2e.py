@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 import yaml
 
+from bec_lib import messages
 from bec_lib.alarm_handler import AlarmBase
 from bec_lib.devicemanager import DeviceConfigError
 from bec_lib.endpoints import MessageEndpoints
@@ -335,6 +336,63 @@ def test_config_reload(
         assert len(bec.device_manager.devices) == 2
     for dev in disabled_device:
         assert bec.device_manager.devices[dev].enabled is False
+
+
+def test_config_reload_with_describe_failure(bec_test_config_file_path, bec_client_lib):
+    bec = bec_client_lib
+    bec.metadata.update({"unit_test": "test_config_reload"})
+    runtime_config_file_path = bec_test_config_file_path.parent / "e2e_runtime_config_test.yaml"
+
+    config = {
+        "hexapod": {
+            "deviceClass": "ophyd_devices.sim.sim_test_devices.SimPositionerWithDescribeFailure",
+            "deviceConfig": {},
+            "deviceTags": ["user motors"],
+            "readoutPriority": "baseline",
+            "enabled": True,
+            "readOnly": False,
+        },
+        "eyefoc": {
+            "deviceClass": "ophyd_devices.SimPositioner",
+            "deviceConfig": {
+                "delay": 1,
+                "limits": [-50, 50],
+                "tolerance": 0.01,
+                "update_frequency": 400,
+            },
+            "readoutPriority": "baseline",
+            "deviceTags": ["user motors"],
+            "enabled": True,
+            "readOnly": False,
+        },
+    }
+
+    # set hexapod to fail
+    bec.connector.set(
+        f"e2e_test_hexapod_fail", messages.DeviceStatusMessage(device="hexapod", status=1)
+    )
+
+    # write new config to disk
+    with open(runtime_config_file_path, "w") as f:
+        f.write(yaml.dump(config))
+
+    with pytest.raises(DeviceConfigError):
+        bec.config.update_session_with_file(runtime_config_file_path)
+
+    assert len(bec.device_manager.devices) == 2
+    assert bec.device_manager.devices["eyefoc"].enabled is True
+    assert bec.device_manager.devices["hexapod"].enabled is False
+
+    # set hexapod to pass
+    bec.connector.set(
+        f"e2e_test_hexapod_fail", messages.DeviceStatusMessage(device="hexapod", status=0)
+    )
+
+    bec.config.update_session_with_file(runtime_config_file_path)
+    assert len(bec.device_manager.devices) == 2
+    assert bec.device_manager.devices["eyefoc"].enabled is True
+    assert bec.device_manager.devices["hexapod"].enabled is True
+    assert bec.device_manager.devices["hexapod"].precision == 3
 
 
 def test_config_add_remove_device(bec_client_lib):
