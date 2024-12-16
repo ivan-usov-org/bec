@@ -1,6 +1,24 @@
 # CHANGELOG
 
 
+## v3.2.0 (2024-12-16)
+
+### Bug Fixes
+
+- **fpdf**: Fixed support for new fpdf interface
+  ([`c7b5a92`](https://gitlab.psi.ch/bec/bec/-/commit/c7b5a92510f8ad45473f0c5e90f5c8ba71f9fd78))
+
+### Features
+
+- **redis**: Added auth method
+  ([`64fcbe3`](https://gitlab.psi.ch/bec/bec/-/commit/64fcbe37b91379f5e6717d0ff6d11012722e0f1b))
+
+### Testing
+
+- **dap fit**: Allow for more time to process the dap data
+  ([`c2500b4`](https://gitlab.psi.ch/bec/bec/-/commit/c2500b472f2f7bb5f9a5df0c8e2e4e414831fdd3))
+
+
 ## v3.1.3 (2024-12-09)
 
 ### Bug Fixes
