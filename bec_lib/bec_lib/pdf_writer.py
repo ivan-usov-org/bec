@@ -4,7 +4,7 @@ This module contains a class for writing pdfs.
 
 import datetime
 
-from fpdf import FPDF
+from fpdf import FPDF, XPos, YPos
 
 
 class BECPDF(FPDF):
@@ -13,13 +13,15 @@ class BECPDF(FPDF):
     def header(self):
         if not hasattr(self, "title"):
             return
+        if self.title is None:
+            self.title = ""
         # Arial bold 15
         self.set_font("Courier", "", 8)
         # Calculate width of title and position
         w = self.get_string_width(self.title) + 6
         self.set_x((210 - w) / 2)
         # Title
-        self.cell(w, 9, self.title, 0, 0, "C")
+        self.cell(w, 9, self.title, 0, new_x=XPos.RIGHT, new_y=YPos.TOP, align="C")
         # Line break
         self.ln(10)
 
@@ -31,9 +33,19 @@ class BECPDF(FPDF):
         # Text color in gray
         self.set_text_color(128)
         # date
-        self.cell(0, 10, f"BEC, {str(datetime.datetime.now())}", 0, 0, "L")
+        self.cell(
+            0,
+            10,
+            f"BEC, {str(datetime.datetime.now())}",
+            0,
+            new_x=XPos.RIGHT,
+            new_y=YPos.TOP,
+            align="L",
+        )
         # Page number
-        self.cell(0, 10, "Page " + str(self.page_no()), 0, 0, "R")
+        self.cell(
+            0, 10, "Page " + str(self.page_no()), 0, new_x=XPos.RIGHT, new_y=YPos.TOP, align="R"
+        )
 
 
 class PDFWriter:
@@ -75,7 +87,7 @@ class PDFWriter:
 
     def close(self):
         """close the pdf and write to disk"""
-        self._pdf.output(self.file, "F")
+        self._pdf.output(self.file)
 
 
 if __name__ == "__main__":  # pragma: no cover
