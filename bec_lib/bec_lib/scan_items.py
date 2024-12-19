@@ -16,7 +16,6 @@ from typing import TYPE_CHECKING
 from bec_lib.live_scan_data import LiveScanData
 from bec_lib.logger import bec_logger
 from bec_lib.scan_data_container import ScanDataContainer
-from bec_lib.utils import threadlocked
 
 logger = bec_logger.logger
 
@@ -155,7 +154,6 @@ class ScanStorage:
         self.scan_manager = scan_manager
         self.storage = deque(maxlen=maxlen)
         self.last_scan_number = init_scan_number
-        self._lock = threading.RLock()
 
     @property
     def current_scan_info(self) -> dict:
@@ -179,7 +177,6 @@ class ScanStorage:
             return None
         return self.current_scan_info.get("scan_id")
 
-    @threadlocked
     def find_scan_by_ID(self, scan_id: str) -> ScanItem | None:
         """find a scan item based on its scan_id"""
         for scan in self.storage:
@@ -198,11 +195,9 @@ class ScanStorage:
         if scan_number:
             self.last_scan_number = scan_number
 
-        while True:
-            scan_item = self.find_scan_by_ID(scan_id=scan_status.content["scan_id"])
-            if scan_item:
-                break
-            time.sleep(0.1)
+        scan_item = self.find_scan_by_ID(scan_id=scan_status.content["scan_id"])
+        if scan_item is None:
+            return
 
         # update timestamps
         if scan_status.content.get("status") == "open":
@@ -247,35 +242,28 @@ class ScanStorage:
             f"Received scan segment {scan_msg.content['point_id']} for scan"
             f" {scan_msg.metadata['scan_id']}: "
         )
-        while True:
-            with self._lock:
-                for scan_item in self.storage:
-                    if scan_item.scan_id == scan_msg.metadata["scan_id"]:
-                        scan_item.live_data.set(scan_msg.content["point_id"], scan_msg)
-                        scan_item.emit_data(scan_msg)
-                        return
-            time.sleep(0.01)
+        for scan_item in self.storage:
+            if scan_item.scan_id == scan_msg.metadata["scan_id"]:
+                scan_item.live_data.set(scan_msg.content["point_id"], scan_msg)
+                scan_item.emit_data(scan_msg)
+                break
 
     def add_public_file(self, scan_id: str, msg: messages.FileMessage) -> None:
         """add a public file to the scan item"""
-        while True:
-            with self._lock:
-                for scan_item in self.storage:
-                    if scan_item.scan_id == scan_id:
-                        # if we receive the master file, we can create the data container
-                        if "_master" in msg.content["file_path"] and msg.done:
-                            scan_item.data.set_file(file_path=msg.content["file_path"])
-                        file_path = msg.content["file_path"]
-                        done_state = msg.content["done"]
-                        successful = msg.content["successful"]
-                        scan_item.public_files[file_path] = {
-                            "done_state": done_state,
-                            "successful": successful,
-                        }
-                        return
-            time.sleep(0.01)
+        for scan_item in self.storage:
+            if scan_item.scan_id == scan_id:
+                # if we receive the master file, we can create the data container
+                if "_master" in msg.content["file_path"] and msg.done:
+                    scan_item.data.set_file(file_path=msg.content["file_path"])
+                file_path = msg.content["file_path"]
+                done_state = msg.content["done"]
+                successful = msg.content["successful"]
+                scan_item.public_files[file_path] = {
+                    "done_state": done_state,
+                    "successful": successful,
+                }
+                break
 
-    @threadlocked
     def add_scan_item(self, queue_id: str, scan_number: list, scan_id: list, status: str):
         """append new scan item to scan storage"""
         self.storage.append(
@@ -288,7 +276,6 @@ class ScanStorage:
             )
         )
 
-    @threadlocked
     def update_with_queue_status(self, queue_msg: messages.ScanQueueStatusMessage):
         """create new scan items based on their existence in the queue info"""
         queue_info = queue_msg.content["queue"]["primary"].get("info")
