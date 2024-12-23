@@ -1,6 +1,27 @@
 # CHANGELOG
 
 
+## v3.4.0 (2024-12-23)
+
+### Bug Fixes
+
+- Simplify code thanks to BEC Widgets MR #422
+  ([`899d556`](https://gitlab.psi.ch/bec/bec/-/commit/899d556f535f63dd3eb10f71e49b4bf2d55b77f4))
+
+### Features
+
+- Add support for generators in Connector event callbacks
+  ([`bf21d29`](https://gitlab.psi.ch/bec/bec/-/commit/bf21d29ad79722d7d9141f75012d2f6938775aeb))
+
+Allow to circumvent the problem of blocking calls in callbacks. Be aware that the generator
+  execution ("next" and "send") will happen in separate threads, but sequentially.
+
+- New 'GUIAutoUpdateConfigMessage' and corresponding entry point
+  ([`8f8b772`](https://gitlab.psi.ch/bec/bec/-/commit/8f8b772ae646d48b113e960edd245b70cb719bc9))
+
+This entry point is used to configure auto-update feature from a client.
+
+
 ## v3.3.0 (2024-12-23)
 
 ### Features
