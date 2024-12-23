@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v3.3.0 (2024-12-23)
+
+### Features
+
+- New cmdline argument to start redis servers
+  ([`8e99f36`](https://gitlab.psi.ch/bec/bec/-/commit/8e99f362412f79ed5f47d25859afdac5765ada9f))
+
+
 ## v3.2.0 (2024-12-16)
 
 ### Bug Fixes
