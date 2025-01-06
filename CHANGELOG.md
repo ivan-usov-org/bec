@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v3.4.1 (2025-01-06)
+
+### Bug Fixes
+
+- **device**: Improved misleading error message
+  ([`ff475c2`](https://gitlab.psi.ch/bec/bec/-/commit/ff475c27585ada58dcb44af9f6cdad8bb5340779))
+
+
 ## v3.4.0 (2024-12-23)
 
 ### Bug Fixes
