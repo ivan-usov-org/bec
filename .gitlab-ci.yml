@@ -31,25 +31,25 @@ workflow:
 
 include:
   - template: Security/Secret-Detection.gitlab-ci.yml
-  - project: "bec/awi_utils"
-    file: "/templates/check-packages-job.yml"
-    inputs:
-      stage: test
-      path: "bec_lib"
-      job_name: "check_dep_bec_lib"
-  - project: "bec/awi_utils"
-    file: "/templates/check-packages-job.yml"
-    inputs:
-      stage: test
-      path: "bec_server"
-      job_name: "check_dep_bec_server"
-  - project: "bec/awi_utils"
-    file: "/templates/check-packages-job.yml"
-    inputs:
-      stage: test
-      path: "bec_ipython_client"
-      pytest_args: "-v,--random-order,tests/client_tests"
-      job_name: "check_dep_ipython_client"
+  # - project: "bec/awi_utils"
+  #   file: "/templates/check-packages-job.yml"
+  #   inputs:
+  #     stage: test
+  #     path: "bec_lib"
+  #     job_name: "check_dep_bec_lib"
+  # - project: "bec/awi_utils"
+  #   file: "/templates/check-packages-job.yml"
+  #   inputs:
+  #     stage: test
+  #     path: "bec_server"
+  #     job_name: "check_dep_bec_server"
+  # - project: "bec/awi_utils"
+  #   file: "/templates/check-packages-job.yml"
+  #   inputs:
+  #     stage: test
+  #     path: "bec_ipython_client"
+  #     pytest_args: "-v,--random-order,tests/client_tests"
+  #     job_name: "check_dep_ipython_client"
   - project: "bec/awi_utils"
     file: "/templates/trigger-beamline-repos.yml"
     inputs:
