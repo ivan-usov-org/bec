@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v3.4.3 (2025-01-08)
+
+### Bug Fixes
+
+- **device init**: Improved error handling for disconnected epics motors
+  ([`6e7d4c0`](https://gitlab.psi.ch/bec/bec/-/commit/6e7d4c0ce48f2d9c8d5f38450d6b4a5068258dac))
+
+
 ## v3.4.2 (2025-01-08)
 
 ### Bug Fixes
