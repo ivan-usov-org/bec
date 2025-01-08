@@ -276,6 +276,8 @@ def test_stub_status_as_container_results(instruction_handler):
         container.add_status(sub_status)
         sub_status.set_done(ii)
     container.wait()
+    assert sub_status._done_checked is True
+    assert container._done_checked is True
     assert container.done is True
     assert container.result == list(range(10))
 

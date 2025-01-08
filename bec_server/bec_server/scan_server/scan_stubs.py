@@ -194,6 +194,9 @@ class ScanStubStatus:
             time.sleep(min_wait)
 
         if self._done and self._get_sub_status_done():
+            self._done_checked = True
+            for st in self._sub_status_objects:
+                st._done_checked = True
             return self
 
         # pylint: disable=protected-access
