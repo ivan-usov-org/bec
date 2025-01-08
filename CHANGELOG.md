@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v3.4.2 (2025-01-08)
+
+### Bug Fixes
+
+- **scan_bundler**: Do not run the emitter for messages without scan id
+  ([`d15f1da`](https://gitlab.psi.ch/bec/bec/-/commit/d15f1dae6aff7051a97dd00ec4ae17c6d2f695c8))
+
+### Continuous Integration
+
+- Disabled dep checks for now
+  ([`24f08d5`](https://gitlab.psi.ch/bec/bec/-/commit/24f08d5881e6cb5ec2ceee8d7f1b0694ea485ab0))
+
+
 ## v3.4.1 (2025-01-06)
 
 ### Bug Fixes
