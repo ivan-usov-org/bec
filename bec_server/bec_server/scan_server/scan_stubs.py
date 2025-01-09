@@ -43,6 +43,7 @@ class ScanStubStatus:
         shutdown_event: threading.Event = None,
         registry: dict = None,
         is_container: bool = False,
+        name: str | None = None,
     ) -> None:
         """
         Initialize the status object.
@@ -54,8 +55,10 @@ class ScanStubStatus:
             shutdown_event (threading.Event, optional): Shutdown event. Defaults to None.
             registry (dict, optional): Registry for status objects. Defaults to None.
             is_container (bool, optional): Flag that indicates if the status object is a container. Defaults to False.
+            name (str, optional): Name of the status object. Defaults to None.
 
         """
+        self._name = name
         self._instruction_handler = instruction_handler
         self._device_instr_id = (
             device_instr_id if device_instr_id is not None else str(uuid.uuid4())
@@ -227,11 +230,14 @@ class ScanStubStatus:
         return self
 
     def __repr__(self):
+        name = f"{self._name}, " if self._name else ""
         if self.message:
             instr = self.message.instruction.action
             devices = self.message.instruction.device
-            return f"ScanStubStatus({self._device_instr_id}, action={instr}, devices={devices})"
-        return f"ScanStubStatus({self._device_instr_id})"
+            return (
+                f"ScanStubStatus({name}{self._device_instr_id}, action={instr}, devices={devices})"
+            )
+        return f"ScanStubStatus({name}{self._device_instr_id})"
 
 
 class ScanStubs:
@@ -258,12 +264,13 @@ class ScanStubs:
         self._readout_priority = {}
         self._status_registry = {}
 
-    def _create_status(self, is_container=False) -> ScanStubStatus:
+    def _create_status(self, is_container=False, name: str | None = None) -> ScanStubStatus:
         status = ScanStubStatus(
             self._instruction_handler,
             shutdown_event=self.shutdown_event,
             registry=self._status_registry,
             is_container=is_container,
+            name=name,
         )
         self._status_registry[status._device_instr_id] = status
         return status
@@ -423,7 +430,7 @@ class ScanStubs:
         Returns:
             Generator[messages.DeviceInstructionMessage, None, ScanStubStatus]: Generator that yields a device message and returns a status object.
         """
-        status = self._create_status()
+        status = self._create_status(name="kickoff")
         parameter = parameter if parameter is not None else {}
         parameter = {"configure": parameter}
         metadata = metadata if metadata is not None else {}
@@ -452,7 +459,7 @@ class ScanStubs:
         Returns:
             Generator[messages.DeviceInstructionMessage, None, ScanStubStatus]: Generator that yields a device message and returns a status object.
         """
-        status = self._create_status()
+        status = self._create_status(name="complete")
         if device is None:
             device = [dev.root.name for dev in self._device_manager.devices.enabled_devices]
 
@@ -518,7 +525,7 @@ class ScanStubs:
 
         see also: :func:`unstage`
         """
-        status = self._create_status()
+        status = self._create_status(name="stage")
 
         async_devices = self._device_manager.devices.async_devices()
         excluded_devices = [device.name for device in async_devices]
@@ -537,7 +544,7 @@ class ScanStubs:
         if async_devices:
             async_devices = sorted(async_devices, key=lambda x: x.name)
         for det in async_devices:
-            sub_status = self._create_status()
+            sub_status = self._create_status(name=f"stage_{det.name}")
             instr = messages.DeviceInstructionMessage(
                 device=det.name,
                 action="stage",
@@ -570,7 +577,7 @@ class ScanStubs:
 
         see also: :func:`stage`
         """
-        status = self._create_status()
+        status = self._create_status(name="unstage")
         staged_devices = [dev.root.name for dev in self._device_manager.devices.enabled_devices]
         if staged_devices:
             staged_devices = sorted(staged_devices)
@@ -597,7 +604,7 @@ class ScanStubs:
         Returns:
             Generator[messages.DeviceInstructionMessage, None, ScanStubStatus]: Generator that yields a device message and returns a status object.
         """
-        status = self._create_status()
+        status = self._create_status(name="pre_scan")
         devices = [dev.root.name for dev in self._device_manager.devices.enabled_devices]
         if devices:
             devices = sorted(devices)
@@ -623,7 +630,7 @@ class ScanStubs:
             Generator[messages.DeviceInstructionMessage, None, ScanStubStatus]: Generator that yields a device message and returns a status object.
 
         """
-        status = self._create_status()
+        status = self._create_status(name="baseline_reading")
         baseline_devices = [
             dev.root.name
             for dev in self._device_manager.devices.baseline_devices(
@@ -671,7 +678,7 @@ class ScanStubs:
             >>> yield from self.stubs.read(device="samx", point_id=self.point_id)
 
         """
-        status = self._create_status()
+        status = self._create_status(name="read")
         self._check_device_and_groups(device, group)
         parameter = {"group": group}
         metadata = {"point_id": point_id, "device_instr_id": status._device_instr_id}
@@ -745,7 +752,7 @@ class ScanStubs:
             >>> # ... do something else
             >>> status.wait()
         """
-        status = self._create_status()
+        status = self._create_status(name="trigger")
         metadata = {"device_instr_id": status._device_instr_id}
         devices = [
             dev.root.name for dev in self._device_manager.devices.get_software_triggered_devices()
@@ -812,9 +819,9 @@ class ScanStubs:
         if len(device) != len(value):
             raise DeviceMessageError("The number of devices and values must match.")
 
-        status = self._create_status(is_container=True)
+        status = self._create_status(is_container=True, name="set")
         for dev, val in zip(device, value):
-            sub_status = self._create_status()
+            sub_status = self._create_status(name=f"set_{dev}")
             # pylint: disable=protected-access
             metadata["device_instr_id"] = sub_status._device_instr_id
             yield self._device_msg(
@@ -891,7 +898,7 @@ class ScanStubs:
             "args": args,
             "kwargs": kwargs,
         }
-        status = self._create_status()
+        status = self._create_status(name=f"rpc_{func_name}")
 
         metadata = metadata if metadata is not None else {}
 

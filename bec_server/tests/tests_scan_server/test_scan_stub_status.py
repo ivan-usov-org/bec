@@ -286,3 +286,48 @@ def test_stub_status_result_does_not_block(scan_stub_status):
     status = scan_stub_status
     assert status.done is False
     assert status.result is None
+
+
+def test_stub_status_repr(instruction_handler):
+    status = ScanStubStatus(instruction_handler, name="test")
+    assert repr(status) == f"ScanStubStatus(test, {status._device_instr_id})"
+
+    status = ScanStubStatus(instruction_handler)
+    assert repr(status) == f"ScanStubStatus({status._device_instr_id})"
+
+    status = ScanStubStatus(instruction_handler)
+    status.message = messages.DeviceInstructionResponse(
+        metadata={"device_instr_id": "test_diid"},
+        device="samx",
+        status="completed",
+        error_message="Error message",
+        instruction=messages.DeviceInstructionMessage(
+            device="samx",
+            action="set",
+            parameter={"value": 1},
+            metadata={"device_instr_id": "test_diid"},
+        ),
+        instruction_id="test_diid",
+        result=None,
+    )
+    assert repr(status) == f"ScanStubStatus({status._device_instr_id}, action=set, devices=samx)"
+
+    status = ScanStubStatus(instruction_handler, name="test_name")
+    status.message = messages.DeviceInstructionResponse(
+        metadata={"device_instr_id": "test_diid"},
+        device="samx",
+        status="completed",
+        error_message=None,
+        instruction=messages.DeviceInstructionMessage(
+            device="samx",
+            action="set",
+            parameter={"value": 1},
+            metadata={"device_instr_id": "test_diid"},
+        ),
+        instruction_id="test_diid",
+        result=10,
+    )
+    assert (
+        repr(status)
+        == f"ScanStubStatus(test_name, {status._device_instr_id}, action=set, devices=samx)"
+    )
