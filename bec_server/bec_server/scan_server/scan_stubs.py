@@ -85,15 +85,21 @@ class ScanStubStatus:
         Returns:
             bool: Done flag
         """
-        self._done_checked = True
-        for st in self._sub_status_objects:
-            st._done_checked = True
+        self.set_done_checked()
         sub_status_done = self._get_sub_status_done()
         return self._done and sub_status_done
 
     @done.setter
     def done(self, value: bool):
         self._done = value
+
+    def set_done_checked(self):
+        """
+        Manually set the done checked flag to avoid creating warnings for unchecked status objects.
+        """
+        self._done_checked = True
+        for st in self._sub_status_objects:
+            st._done_checked = True
 
     def add_status(self, status: ScanStubStatus):
         """
@@ -639,6 +645,7 @@ class ScanStubs:
         ]
         if not baseline_devices:
             status.set_done()
+            status.set_done_checked()
             return status
         baseline_devices = sorted(baseline_devices)
         yield self._device_msg(
@@ -678,7 +685,8 @@ class ScanStubs:
             >>> yield from self.stubs.read(device="samx", point_id=self.point_id)
 
         """
-        status = self._create_status(name="read")
+        name = f"read_{device}" if device is not None else f"read_{group}"
+        status = self._create_status(name=name)
         self._check_device_and_groups(device, group)
         parameter = {"group": group}
         metadata = {"point_id": point_id, "device_instr_id": status._device_instr_id}
@@ -693,6 +701,7 @@ class ScanStubs:
             ]
         if not device:
             status.set_done()
+            status.set_done_checked()
             return status
         if not isinstance(device, list):
             device = [device]
@@ -760,6 +769,7 @@ class ScanStubs:
         if not devices:
             yield None
             status.set_done()
+            status.set_done_checked()
             return status
 
         devices = sorted(devices)
