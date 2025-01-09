@@ -1,6 +1,22 @@
 # CHANGELOG
 
 
+## v3.5.0 (2025-01-09)
+
+### Bug Fixes
+
+- **scan_status**: Set done status manually if devices are None
+  ([`42af11b`](https://gitlab.psi.ch/bec/bec/-/commit/42af11b70a5253e73194ed21ad1bb158e194c8fa))
+
+- **scan_stubs**: Fixed check for pending stub status objects
+  ([`150210d`](https://gitlab.psi.ch/bec/bec/-/commit/150210d41839ee51e7e28a8e82116d68531e1862))
+
+### Features
+
+- **stub_status**: Added name to stub status
+  ([`b6f1754`](https://gitlab.psi.ch/bec/bec/-/commit/b6f175476c806333eaf5ae0832559bb56994f74c))
+
+
 ## v3.4.3 (2025-01-08)
 
 ### Bug Fixes
