@@ -69,6 +69,20 @@ def encode_bec_message_json(msg):
     return json_ext.dumps(out)
 
 
+def decode_bec_message_json(raw_bytes):
+    if not isinstance(raw_bytes, bytes):
+        return raw_bytes
+
+    try:
+        data = json_ext.loads(raw_bytes)
+        msg_class = get_message_class(data.pop("msg_type"))
+        msg = msg_class(**data["msg_body"])
+    except Exception as exception:
+        raise RuntimeError("Failed to decode BECMessage") from exception
+
+    return msg
+
+
 def encode_bec_status(status):
     if not isinstance(status, BECStatus):
         return status
@@ -198,7 +212,7 @@ class SerializationRegistry:
             self.register_ext_type(encode_bec_message_v12, decode_bec_message_v12)
         else:
             self.register_object_hook(encode_bec_status, decode_bec_status)
-            self.register_object_hook(encode_bec_message_json, decode_bec_message_v12)
+            self.register_object_hook(encode_bec_message_json, decode_bec_message_json)
 
     def register_set_encoder(self):
         """

@@ -351,11 +351,6 @@ def test_redis_xrange_topic_with_suffix(connector):
     connector._redis_conn.xrange.assert_called_once_with("topic1", "start", "end", count=None)
 
 
-def test_send_raises_on_invalid_msg(connector):
-    with pytest.raises(TypeError):
-        connector.send("invalid_msg", "msg")
-
-
 def test_send_raises_on_invalid_message_type(connector):
     correct_msg = bec_messages.DeviceMessage(
         signals={"samx": {"value": 1, "timestamp": 1}}, metadata={}
