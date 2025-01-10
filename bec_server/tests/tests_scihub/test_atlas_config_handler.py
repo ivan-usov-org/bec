@@ -3,30 +3,24 @@ import os
 from unittest import mock
 
 import pytest
-import yaml
 from fastjsonschema import JsonSchemaException
-from test_scibec_connector import SciBecMock, SciHubMock
 
 import bec_lib
 from bec_lib import messages
 from bec_lib.bec_errors import DeviceConfigError
 from bec_lib.device import DeviceBase, OnFailure, ReadoutPriority
 from bec_lib.endpoints import MessageEndpoints
-from bec_server.scihub.scibec import SciBecConnector
+from bec_server.scihub.atlas import AtlasConnector
 
 dir_path = os.path.dirname(bec_lib.__file__)
 
 
 @pytest.fixture()
 def config_handler(SciHubMock):
-    with mock.patch("bec_server.scihub.scibec.scibec_connector.os.path.exists", return_value=False):
-        scibec_connector = SciBecConnector(SciHubMock, SciHubMock.connector)
-    with mock.patch.object(scibec_connector, "_start_config_request_handler"):
-        with mock.patch.object(scibec_connector, "_start_metadata_handler"):
-            with mock.patch.object(scibec_connector, "_start_scibec_account_update"):
-                scibec_connector.scibec = None
-                yield scibec_connector.config_handler
-                scibec_connector.shutdown()
+    atlas_connector = AtlasConnector(SciHubMock, SciHubMock.connector)
+    with mock.patch.object(atlas_connector, "_start_config_request_handler"):
+        yield atlas_connector.config_handler
+    atlas_connector.shutdown()
 
 
 @pytest.fixture
@@ -85,7 +79,7 @@ def test_parse_config_request_exception(config_handler):
         action="update", config={"samx": {"enabled": True}}, metadata={}
     )
     with mock.patch.object(config_handler, "send_config_request_reply") as req_reply:
-        with mock.patch("bec_server.scihub.scibec.config_handler.traceback.format_exc") as exc:
+        with mock.patch("bec_server.scihub.atlas.config_handler.traceback.format_exc") as exc:
             with mock.patch.object(config_handler, "_update_config", side_effect=AttributeError()):
                 config_handler.parse_config_request(msg)
                 req_reply.assert_called_once_with(accepted=False, error_msg=exc(), metadata={})
@@ -97,21 +91,6 @@ def test_config_handler_reload_config(config_handler):
         with mock.patch.object(config_handler, "send_config") as send:
             config_handler.parse_config_request(msg)
             send.assert_called_once_with(msg)
-
-
-### Commented out as config updates on scibec are not supported yet
-
-# def test_config_handler_reload_config_with_scibec(SciHubMock):
-#     scibec_connector = SciBecMock
-#     config_handler = scibec_connector.config_handler
-#     msg = messages.DeviceConfigMessage(action="reload", config={}, metadata={})
-#     with mock.patch.object(config_handler, "send_config_request_reply") as req_reply:
-#         with mock.patch.object(scibec_connector, "scibec"):
-#             with mock.patch.object(scibec_connector, "update_session") as update_session:
-#                 with mock.patch.object(config_handler, "send_config") as send:
-#                     config_handler.parse_config_request(msg)
-#                     send.assert_called_once_with(msg)
-#                     update_session.assert_called_once()
 
 
 @pytest.mark.parametrize(
@@ -160,26 +139,6 @@ def test_config_handler_set_invalid_config_raises(config_handler):
             req_reply.assert_called_once_with(
                 accepted=True, error_msg=None, metadata={"RID": "12345"}
             )
-
-
-### Commented out as config updates on scibec are not supported yet
-
-# def test_config_handler_set_config_with_scibec(SciHubMock):
-#     scibec_connector = SciBecMock
-#     config_handler = scibec_connector.config_handler
-#     msg = messages.DeviceConfigMessage(
-#         action="set", config={"samx": {"enabled": True}}, metadata={}
-#     )
-#     scibec_connector.scibec_info = {"beamline": {"info": [], "activeExperiment": "12345"}}
-#     with mock.patch.object(scibec_connector, "scibec") as scibec:
-#         with mock.patch.object(config_handler, "send_config_request_reply") as req_reply:
-#             with mock.patch.object(scibec_connector, "update_session") as update_session:
-#                 config_handler._set_config(msg)
-#                 scibec.set_session_data.assert_called_once_with(
-#                     "12345", {"samx": {"enabled": True}}
-#                 )
-#                 req_reply.assert_called_once_with(accepted=True, error_msg=None, metadata={})
-#                 update_session.assert_called_once()
 
 
 def test_config_handler_update_config(config_handler):
@@ -235,7 +194,7 @@ def test_config_handler_update_device_config_enable(config_handler):
         with mock.patch.object(
             config_handler, "_wait_for_device_server_update", return_value=(True, mock.MagicMock())
         ) as wait:
-            with mock.patch("bec_server.scihub.scibec.config_handler.uuid") as uuid:
+            with mock.patch("bec_server.scihub.atlas.config_handler.uuid") as uuid:
                 device = dev["samx"]
                 rid = str(uuid.uuid4())
                 config_handler._update_device_config(device, {"enabled": True})
@@ -251,7 +210,7 @@ def test_config_handler_update_device_config_deviceConfig(config_handler):
         with mock.patch.object(
             config_handler, "_wait_for_device_server_update", return_value=(True, mock.MagicMock())
         ) as wait:
-            with mock.patch("bec_server.scihub.scibec.config_handler.uuid") as uuid:
+            with mock.patch("bec_server.scihub.atlas.config_handler.uuid") as uuid:
                 device = dev["samx"]
                 rid = str(uuid.uuid4())
                 config_handler._update_device_config(
@@ -307,7 +266,7 @@ def test_config_handler_update_device_config_available_keys(config_handler, avai
                 "_wait_for_device_server_update",
                 return_value=(True, mock.MagicMock()),
             ) as wait:
-                with mock.patch("bec_server.scihub.scibec.config_handler.uuid") as uuid:
+                with mock.patch("bec_server.scihub.atlas.config_handler.uuid") as uuid:
                     device = dev["samx"]
                     rid = str(uuid.uuid4())
                     if available_key in ["deviceConfig", "userParameter"]:
