@@ -41,8 +41,9 @@ class AtlasConnector:
         self.connect_to_atlas()
         self.config_handler = ConfigHandler(self, connector)
         self._start_config_request_handler()
-        self.metadata_handler = AtlasMetadataHandler(self)
-        self.atlas_forwarder = AtlasForwarder(self)
+        if self.connected_to_atlas:
+            self.metadata_handler = AtlasMetadataHandler(self)
+            self.atlas_forwarder = AtlasForwarder(self)
 
     @property
     def config(self):
