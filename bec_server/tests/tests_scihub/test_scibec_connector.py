@@ -18,7 +18,7 @@ class SciHubMocked(SciHub):
     def wait_for_service(self, name, status=BECStatus.RUNNING):
         pass
 
-    def _start_scibec_connector(self):
+    def _start_atlas_connector(self):
         pass
 
     def _start_scilog_connector(self):
