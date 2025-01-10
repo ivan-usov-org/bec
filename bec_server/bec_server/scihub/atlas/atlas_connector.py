@@ -35,6 +35,7 @@ class AtlasConnector:
         self._config_request_handler = None
         self.config_handler = None
         self.metadata_handler = None
+        self.atlas_forwarder = None
         self._start(connector)
 
     def _start(self, connector: ConnectorBase):
