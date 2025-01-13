@@ -1,3 +1,9 @@
+"""
+This module contains the AtlasMetadataHandler class, which is responsible for handling metadata sent to Atlas.
+It subscribes to e.g. scan status messages and forwards them to Atlas. The ingestor on the Atlas side will then 
+process the data and store it in the database.
+"""
+
 from __future__ import annotations
 
 import traceback
@@ -16,8 +22,6 @@ class AtlasMetadataHandler:
     """
     The AtlasMetadataHandler class is responsible for handling metadata sent to Atlas.
     """
-
-    MAX_DATA_SIZE = 1e6  # max data size for the backend; currently set to 1 MB
 
     def __init__(self, atlas_connector: AtlasConnector) -> None:
         self.atlas_connector = atlas_connector
@@ -38,7 +42,6 @@ class AtlasMetadataHandler:
         except Exception:
             content = traceback.format_exc()
             logger.exception(f"Failed to update scan status: {content}")
-            return
 
     def update_scan_status(self, msg: dict) -> None:
         """
