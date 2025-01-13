@@ -216,8 +216,6 @@ class HDF5FileWriter:
         device_storage = {}
         if data.baseline:
             device_storage.update(data.baseline)
-        if data.async_data:
-            device_storage.update(data.async_data)
         keys = list(data.scan_segments.keys())
         keys.sort()
         for point in keys:

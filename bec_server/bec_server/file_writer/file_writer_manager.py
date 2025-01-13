@@ -34,7 +34,7 @@ class ScanStorage:
         self.scan_finished = False
         self.num_points = None
         self.baseline = {}
-        self.async_data = {}
+        self.async_writer = None
         self.metadata = {}
         self.file_references = {}
         self.start_time = None
@@ -133,13 +133,13 @@ class FileWriterManager(BECService):
             scan_storage.metadata["exit_status"] = status
         if status == "open" and not scan_storage.start_time:
             scan_storage.start_time = msg.content.get("timestamp")
-            self.async_writer = AsyncWriter(
+            scan_storage.async_writer = AsyncWriter(
                 self.writer_mixin.compile_full_filename(suffix="master"),
                 scan_id=scan_id,
                 connector=self.connector,
                 devices=self.device_manager.devices.async_devices(),
             )
-            self.async_writer.start()
+            scan_storage.async_writer.start()
 
         if status in ["closed", "aborted", "halted"]:
             if status in ["aborted", "halted"]:
@@ -156,9 +156,9 @@ class FileWriterManager(BECService):
                 else:
                     scan_storage.enforce_sync = info["monitor_sync"] == "bec"
 
-            if self.async_writer:
-                self.async_writer.stop()
-                self.async_writer.join()
+            if scan_storage.async_writer:
+                scan_storage.async_writer.stop()
+                scan_storage.async_writer.join()
 
             self.check_storage_status(scan_id=scan_id)
 
@@ -268,7 +268,7 @@ class FileWriterManager(BECService):
             # If we've already written device data, we need to append to the file
             writte_devices = None if not self.async_writer else self.async_writer.written_devices
             write_mode = "w" if not writte_devices else "a"
-            file_handle = self.async_writer.file_handle if self.async_writer else None
+            file_handle = storage.async_writer.file_handle if storage.async_writer else None
             self.file_writer.write(
                 file_path=file_path, data=storage, mode=write_mode, file_handle=file_handle
             )
