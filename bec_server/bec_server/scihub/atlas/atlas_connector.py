@@ -22,12 +22,14 @@ logger = bec_logger.logger
 
 class AtlasConnector:
 
-    def __init__(self, scihub: SciHub, connector: ConnectorBase) -> None:
+    def __init__(
+        self, scihub: SciHub, connector: ConnectorBase, redis_atlas: RedisConnector = None
+    ) -> None:
         self.scihub = scihub
         self.connector = connector
+        self.redis_atlas = redis_atlas
 
         self.connected_to_atlas = False
-        self.redis_atlas: RedisConnector = None
         self.host = None
         self.deployment_name = None
         self.atlas_key = None
@@ -36,11 +38,10 @@ class AtlasConnector:
         self.config_handler = None
         self.metadata_handler = None
         self.atlas_forwarder = None
-        self._start(connector)
 
-    def _start(self, connector: ConnectorBase):
+    def start(self):
         self.connect_to_atlas()
-        self.config_handler = ConfigHandler(self, connector)
+        self.config_handler = ConfigHandler(self, self.connector)
         self._start_config_request_handler()
         if self.connected_to_atlas:
             self.metadata_handler = AtlasMetadataHandler(self)
@@ -61,9 +62,10 @@ class AtlasConnector:
             return
 
         try:
-            self.redis_atlas = RedisConnector(
-                self.host, username=f"ingestor_{self.deployment_name}", password=self.atlas_key
-            )
+            if self.redis_atlas is None:
+                self.redis_atlas = RedisConnector(
+                    self.host, username=f"ingestor_{self.deployment_name}", password=self.atlas_key
+                )
             # pylint: disable=protected-access
 
             # use authenticate method once merged.

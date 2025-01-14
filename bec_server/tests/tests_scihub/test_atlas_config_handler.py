@@ -10,17 +10,8 @@ from bec_lib import messages
 from bec_lib.bec_errors import DeviceConfigError
 from bec_lib.device import DeviceBase, OnFailure, ReadoutPriority
 from bec_lib.endpoints import MessageEndpoints
-from bec_server.scihub.atlas import AtlasConnector
 
 dir_path = os.path.dirname(bec_lib.__file__)
-
-
-@pytest.fixture()
-def config_handler(SciHubMock):
-    atlas_connector = AtlasConnector(SciHubMock, SciHubMock.connector)
-    with mock.patch.object(atlas_connector, "_start_config_request_handler"):
-        yield atlas_connector.config_handler
-    atlas_connector.shutdown()
 
 
 @pytest.fixture

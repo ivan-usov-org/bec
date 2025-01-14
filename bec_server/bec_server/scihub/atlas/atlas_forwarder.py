@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import threading
 from typing import TYPE_CHECKING
 
@@ -55,7 +56,7 @@ class AtlasForwarder:
 
     @staticmethod
     def _on_redis_request(msg_obj, parent):
-        msg = msg_obj.value
+        msg: messages.RawMessage = msg_obj.value
         redis_atlas: RedisConnector = parent.atlas_connector.redis_atlas
         redis_bec: RedisConnector = parent.atlas_connector.connector
         if msg.data.get("action") == "get":
@@ -64,8 +65,7 @@ class AtlasForwarder:
             out = redis_bec.get(key)
             topic = msg.data.get("response_endpoint")
             if out is None:
-                out = "null"
-            print(f"Sending response to {topic}: {out}")
+                out = json.dumps({"out": None})
             redis_atlas.send(topic, out)
 
     @staticmethod
