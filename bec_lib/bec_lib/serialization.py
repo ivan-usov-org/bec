@@ -66,15 +66,17 @@ def encode_bec_message_json(msg):
 
     msg_version = 1.2
     out = {"msg_type": msg.msg_type, "msg_version": msg_version, "msg_body": msg.__dict__}
-    return json_ext.dumps(out)
+    return out
 
 
-def decode_bec_message_json(raw_bytes):
-    if not isinstance(raw_bytes, bytes):
-        return raw_bytes
+def decode_bec_message_json(data):
+    if not isinstance(data, dict):
+        return data
+
+    if set(["msg_type", "msg_version", "msg_body"]) != set(data.keys()):
+        return data
 
     try:
-        data = json_ext.loads(raw_bytes)
         msg_class = get_message_class(data.pop("msg_type"))
         msg = msg_class(**data["msg_body"])
     except Exception as exception:
@@ -91,6 +93,18 @@ def encode_bec_status(status):
 
 def decode_bec_status(value):
     return BECStatus(int.from_bytes(value, "big"))
+
+
+def encode_bec_status_json(status):
+    if not isinstance(status, BECStatus):
+        return status
+    return {"__becstatus__": status.value}  # int.to_bytes
+
+
+def decode_bec_status_json(value):
+    if "__becstatus__" not in value:
+        return value
+    return BECStatus(value["__becstatus__"])
 
 
 def encode_set(obj):
@@ -211,8 +225,13 @@ class SerializationRegistry:
             self.register_ext_type(encode_bec_status, decode_bec_status)
             self.register_ext_type(encode_bec_message_v12, decode_bec_message_v12)
         else:
-            self.register_object_hook(encode_bec_status, decode_bec_status)
             self.register_object_hook(encode_bec_message_json, decode_bec_message_json)
+
+    def register_bec_status(self):
+        """
+        Register codec for BECStatus
+        """
+        self.register_object_hook(encode_bec_status_json, decode_bec_status_json)
 
     def register_set_encoder(self):
         """
@@ -324,6 +343,7 @@ class JsonExt(SerializationRegistry):
 json_ext = JsonExt()
 json_ext.register_numpy(use_list=True)
 json_ext.register_bec_message()
+json_ext.register_bec_status()
 json_ext.register_set_encoder()
 json_ext.register_message_endpoint()
 json_ext.register_bec_message_type()

@@ -31,6 +31,7 @@ def serializer(request):
         messages.DeviceMessage,
         float,
         messages.RawMessage(data={"a": 1, "b": 2}),
+        messages.BECStatus.RUNNING,
     ],
 )
 def test_serialize(serializer, data):
