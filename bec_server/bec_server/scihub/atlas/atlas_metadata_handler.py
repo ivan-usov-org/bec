@@ -14,7 +14,7 @@ from bec_lib.logger import bec_logger
 
 logger = bec_logger.logger
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from bec_server.scihub.atlas.atlas_connector import AtlasConnector
 
 

@@ -14,7 +14,7 @@ from .atlas_forwarder import AtlasForwarder
 from .atlas_metadata_handler import AtlasMetadataHandler
 from .config_handler import ConfigHandler
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from bec_server.scihub import SciHub
 
 logger = bec_logger.logger
