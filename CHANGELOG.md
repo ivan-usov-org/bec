@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v3.5.1 (2025-01-14)
+
+### Bug Fixes
+
+- **async_writer**: Fixed bug that caused async writer to overwrite already written datasets
+  ([`d63ddb2`](https://gitlab.psi.ch/bec/bec/-/commit/d63ddb21173fda86239c05646918d62f14825976))
+
+
 ## v3.5.0 (2025-01-09)
 
 ### Bug Fixes
