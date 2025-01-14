@@ -369,6 +369,11 @@ def test_send_raises_on_invalid_topic(connector):
         connector.send(MessageEndpoints.device_status("samx"), "msg")
 
 
+def test_mget(connector):
+    connector.mget(["topic1", "topic2"])
+    connector._redis_conn.mget.assert_called_once_with(["topic1", "topic2"])
+
+
 # def test_redis_stream_register_threaded_get_id():
 #    register = RedisStreamConsumerThreaded(
 #        "localhost", "1", topics="topic1", cb=mock.MagicMock(), redis_cls=mock.MagicMock()

@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
+from bec_lib import messages
 from bec_lib.endpoints import MessageEndpoints
-from bec_lib.messages import DeviceMessage
 from bec_lib.serialization import json_ext, msgpack
 
 
@@ -28,8 +28,9 @@ def serializer(request):
             }
         },
         MessageEndpoints.progress("test"),
-        DeviceMessage,
+        messages.DeviceMessage,
         float,
+        messages.RawMessage(data={"a": 1, "b": 2}),
     ],
 )
 def test_serialize(serializer, data):
