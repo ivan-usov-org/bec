@@ -1,6 +1,53 @@
 # CHANGELOG
 
 
+## v3.6.0 (2025-01-15)
+
+### Bug Fixes
+
+- **atlas**: Properly shut down atlas connector
+  ([`02edeec`](https://gitlab.psi.ch/bec/bec/-/commit/02edeec3246b8e101b9dbd753bbef2913db871e9))
+
+- **atlas connector**: Fixed shutdown when disconnected
+  ([`204a1a2`](https://gitlab.psi.ch/bec/bec/-/commit/204a1a22fc7adcddb3a79df1a79554dbf7a1a626))
+
+- **atlas connector**: Only launch the metada handler and forwarder if we are connected to atlas
+  ([`156c99e`](https://gitlab.psi.ch/bec/bec/-/commit/156c99e74e529a904c0b0cea337c05bded879d28))
+
+- **redis_connector**: Do not raise for non-BECMessage inputs
+  ([`9c828cd`](https://gitlab.psi.ch/bec/bec/-/commit/9c828cde3ebe5d410f857ce17de5591c4c3076ad))
+
+- **serialization**: Fixed json decoding for bec messages
+  ([`9f47f0b`](https://gitlab.psi.ch/bec/bec/-/commit/9f47f0bc7559d5d7429363741f1327cd9c6fdab1))
+
+- **serialization**: Fixed json serializer for BECStatus
+  ([`cebb43e`](https://gitlab.psi.ch/bec/bec/-/commit/cebb43e72311c4ec4e80351d5e63419f5f4fc12b))
+
+### Build System
+
+- **bec_server**: Removed duplicated entries; removed pyscibec
+  ([`4ded7e5`](https://gitlab.psi.ch/bec/bec/-/commit/4ded7e5f75f62511cd07820454baec9f701ae436))
+
+### Features
+
+- **atlas**: Added request parser
+  ([`4e5eb98`](https://gitlab.psi.ch/bec/bec/-/commit/4e5eb98472667caaf324a76538b7c016e7559d67))
+
+- **scihub**: Added bec atlas integration
+  ([`bc6f54f`](https://gitlab.psi.ch/bec/bec/-/commit/bc6f54fcd96275b4b1fdc004c2be7f7dc6946d14))
+
+- **serialization**: Added json serialization for bec messages
+  ([`df7ac75`](https://gitlab.psi.ch/bec/bec/-/commit/df7ac75b1d9070bc6ddde344195e069b92d36d49))
+
+### Refactoring
+
+- **atlas connector**: Cleanup and tests
+  ([`8be9a54`](https://gitlab.psi.ch/bec/bec/-/commit/8be9a545eace7624587b10f7caebfdfdce4c1033))
+
+- **bec_atlas**: Cleanup
+  ([`71b3bb0`](https://gitlab.psi.ch/bec/bec/-/commit/71b3bb03ef2d0e1373ba55012acb24b720f0818d))
+
+
 ## v3.5.1 (2025-01-14)
 
 ### Bug Fixes
