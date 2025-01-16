@@ -1,6 +1,22 @@
 # CHANGELOG
 
 
+## v3.7.0 (2025-01-16)
+
+### Documentation
+
+- **messages**: Improved doc string for scan status message
+  ([`8a3d647`](https://gitlab.psi.ch/bec/bec/-/commit/8a3d64796bdc6ec6beedec44dbe0e92fe3a93d01))
+
+### Features
+
+- **messages**: Flattened scan status message
+  ([`380749a`](https://gitlab.psi.ch/bec/bec/-/commit/380749a60754cb74c7505e588d4a96380ac0e1f2))
+
+- **scan_status**: Added support for request inputs and scan parameters
+  ([`24ff8a2`](https://gitlab.psi.ch/bec/bec/-/commit/24ff8a252e537b09a454e44e24aac9b62a25b19c))
+
+
 ## v3.6.0 (2025-01-15)
 
 ### Bug Fixes
