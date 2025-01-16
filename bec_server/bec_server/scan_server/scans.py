@@ -205,6 +205,7 @@ class RequestBase(ABC):
         instruction_handler: InstructionHandler = None,
         scan_id: str = None,
         return_to_start: bool = False,
+        request_inputs: dict = None,
         **kwargs,
     ) -> None:
         super().__init__()
@@ -239,6 +240,7 @@ class RequestBase(ABC):
             device_msg_callback=self.device_msg_metadata,
             shutdown_event=self._shutdown_event,
         )
+        self.request_inputs = request_inputs
 
     @property
     def scan_report_devices(self):
@@ -369,7 +371,6 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         parameter: dict = None,
         exp_time: float = 0,
         readout_time: float = 0,
-        acquisition_config: dict = None,
         settling_time: float = 0,
         relative: bool = False,
         burst_at_each_point: int = 1,
@@ -393,7 +394,6 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         self.point_id = 0
         self.exp_time = exp_time
         self.readout_time = readout_time
-        self.acquisition_config = acquisition_config
         self.settling_time = settling_time
         self.relative = relative
         self.burst_at_each_point = burst_at_each_point
@@ -414,10 +414,21 @@ class ScanBase(RequestBase, PathOptimizerMixin):
         if self.scan_name == "":
             raise ValueError("scan_name cannot be empty")
 
-        if acquisition_config is None or "default" not in acquisition_config:
-            self.acquisition_config = {
-                "default": {"exp_time": self.exp_time, "readout_time": self.readout_time}
-            }
+        self.scan_parameters = {
+            "exp_time": self.exp_time,
+            "frames_per_trigger": self.frames_per_trigger,
+            "settling_time": self.settling_time,
+            "readout_time": self.readout_time,
+            "optim_trajectory": self.optim_trajectory,
+            "return_to_start": self.return_to_start,
+            "relative": self.relative,
+        }
+
+        self.scan_parameters.update(**kwargs)
+        self.scan_parameters.pop("device_manager", None)
+        self.scan_parameters.pop("instruction_handler", None)
+        self.scan_parameters.pop("scan_id", None)
+        self.scan_parameters.pop("request_inputs", None)
 
     @property
     def monitor_sync(self):

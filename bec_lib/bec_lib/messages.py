@@ -167,7 +167,7 @@ class ScanStatusMessage(BECMessage):
         user_metadata (dict, optional): User metadata
         readout_priority (dict[Literal["monitored", "baseline", "async", "continuous", "on_request"], list[str]], optional): Readout priority
         scan_parameters (dict[Literal["exp_time", "frames_per_trigger", "settling_time", "readout_time"] | str, Any], optional): Scan parameters such as exposure time, frames per trigger, settling time, readout time
-        scan_input (dict[Literal["arg_bundles", "inputs", "kwargs"], Any], optional): Scan input
+        request_inputs (dict[Literal["arg_bundle", "inputs", "kwargs"], Any], optional): Scan input
         info (dict): Dictionary containing additional information about the scan
         timestamp (float, optional): Timestamp of the message. Defaults to time.time()
 
@@ -197,7 +197,7 @@ class ScanStatusMessage(BECMessage):
         dict[Literal["exp_time", "frames_per_trigger", "settling_time", "readout_time"] | str, Any]
         | None
     ) = None
-    scan_input: dict[Literal["arg_bundles", "inputs", "kwargs"], Any] | None = None
+    request_inputs: dict[Literal["arg_bundle", "inputs", "kwargs"], Any] | None = None
     info: dict
     timestamp: float = Field(default_factory=time.time)
 

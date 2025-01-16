@@ -188,10 +188,11 @@ class ScanWorker(threading.Thread):
                 "frames_per_trigger": active_rb.scan.frames_per_trigger,
                 "settling_time": active_rb.scan.settling_time,
                 "readout_time": active_rb.scan.readout_time,
-                "acquisition_config": active_rb.scan.acquisition_config,
                 "scan_report_devices": active_rb.scan.scan_report_devices,
                 "monitor_sync": active_rb.scan.monitor_sync,
                 "num_points": num_points,
+                "scan_parameters": active_rb.scan.scan_parameters,
+                "request_inputs": active_rb.scan.request_inputs,
             }
         )
         self.current_scan_info["scan_msgs"] = [
@@ -252,9 +253,11 @@ class ScanWorker(threading.Thread):
             user_metadata=self.current_scan_info.get("user_metadata"),
             readout_priority=self.current_scan_info.get("readout_priority"),
             scan_parameters=self.current_scan_info.get("scan_parameters"),
-            scan_input=self.current_scan_info.get("scan_input"),
+            request_inputs=self.current_scan_info.get("request_inputs"),
             info=self.current_scan_info,
         )
+        if msg.readout_priority != self.current_scan_info.get("readout_priority"):
+            raise RuntimeError("Readout priority mismatch")
         expire = None if status in ["open", "paused"] else 1800
         pipe = self.device_manager.connector.pipeline()
         self.device_manager.connector.set(

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 import traceback
 from typing import TYPE_CHECKING
 
@@ -64,6 +65,33 @@ class ScanAssembler:
         try:
             args = unpack_scan_args(msg.content.get("parameter", {}).get("args", []))
             kwargs = msg.content.get("parameter", {}).get("kwargs", {})
+
+            cls_input_args = [
+                name
+                for name, val in inspect.signature(scan_cls).parameters.items()
+                if val.default == inspect.Parameter.empty and name != "kwargs"
+            ]
+
+            request_inputs = {}
+            if scan_cls.arg_bundle_size["bundle"] > 0:
+                request_inputs["arg_bundle"] = args
+                request_inputs["inputs"] = {}
+                request_inputs["kwargs"] = kwargs
+            else:
+                request_inputs["arg_bundle"] = []
+                request_inputs["inputs"] = {}
+                request_inputs["kwargs"] = {}
+                for ii, key in enumerate(args):
+                    request_inputs["inputs"][cls_input_args[ii]] = key
+
+                for key in kwargs:
+                    if key in cls_input_args:
+                        request_inputs["inputs"][key] = kwargs[key]
+
+                for key, val in kwargs.items():
+                    if key not in cls_input_args:
+                        request_inputs["kwargs"][key] = val
+
             scan_instance = scan_cls(
                 *args,
                 device_manager=self.device_manager,
@@ -71,6 +99,7 @@ class ScanAssembler:
                 metadata=msg.metadata,
                 instruction_handler=self.parent.queue_manager.instruction_handler,
                 scan_id=scan_id,
+                request_inputs=request_inputs,
                 **kwargs,
             )
             return scan_instance
