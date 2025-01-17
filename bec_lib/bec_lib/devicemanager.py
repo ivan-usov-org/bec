@@ -8,6 +8,7 @@ import collections
 import copy
 import re
 import traceback
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from rich.console import Console
@@ -421,6 +422,11 @@ class DeviceContainer(dict):
         return "Device container."
 
 
+@dataclass
+class ScanInfo:
+    msg: ScanStatusMessage | None = None
+
+
 class DeviceManagerBase:
     devices = DeviceContainer()
     _config = {}  # valid config
@@ -431,6 +437,7 @@ class DeviceManagerBase:
 
     _connector_base_register = {}
     config_helper = None
+    scan_info = None
     _device_cls = DeviceBase
     _status_cb = []
 
@@ -438,6 +445,7 @@ class DeviceManagerBase:
         self._service = service
         self.parent = service  # for backwards compatibility; will be removed in the future
         self.connector = self._service.connector
+        self.scan_info = ScanInfo(msg=None)
         self.config_helper = ConfigHelper(self.connector, self._service._service_name)
         self._status_cb = status_cb if isinstance(status_cb, list) else [status_cb]
 
@@ -570,6 +578,9 @@ class DeviceManagerBase:
             cb=self._device_config_update_callback,
             parent=self,
         )
+        self.connector.register(
+            MessageEndpoints.scan_status(), cb=self._update_scan_info, parent=self
+        )
 
     @staticmethod
     def _log_callback(msg, *, parent, **kwargs) -> None:
@@ -598,6 +609,12 @@ class DeviceManagerBase:
         """
         logger.info(f"Received new config: {str(msg)}")
         parent.parse_config_message(msg.value)
+
+    @staticmethod
+    def _update_scan_info(msg, *, parent, **kwargs) -> None:
+        msg = msg.value
+        logger.info(f"Received new ScanStatusMessage with ID {msg.scan_id}")
+        parent.scan_info.msg = msg
 
     def _get_config(self):
         self._session["devices"] = self._get_redis_device_config()
