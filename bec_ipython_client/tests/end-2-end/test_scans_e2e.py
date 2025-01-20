@@ -1,7 +1,9 @@
 import _thread
+import io
 import os
 import threading
 import time
+from contextlib import redirect_stdout
 from unittest.mock import PropertyMock
 
 import h5py
@@ -768,3 +770,30 @@ def test_async_data(bec_ipython_client_fixture):
     s1.wait()
     waveform_data = s1.scan.data.devices.waveform.waveform_waveform.read()
     np.testing.assert_array_equal(waveform_data["value"], amplitude * np.ones(100))
+
+
+@pytest.mark.timeout(100)
+def test_client_info_message(bec_ipython_client_fixture):
+    bec = bec_ipython_client_fixture
+    bec.metadata.update({"unit_test": "test_client_info_message"})
+    dev = bec.device_manager.devices
+    scans = bec.scans
+
+    def send_info_message(bec):
+        """Send info message to the client from a thread"""
+        while True:
+            if not bec.queue.scan_storage.current_scan:
+                continue
+            if len(bec.queue.scan_storage.current_scan.live_data) > 0:
+                bec.connector.send_client_info(
+                    message="test_client_info_message", source="bec_ipython_client", show_asap=True
+                )
+                break
+
+    threading.Thread(target=send_info_message, args=(bec,), daemon=True).start()
+
+    buffer = io.StringIO()
+    with redirect_stdout(buffer):
+        s1 = scans.line_scan(dev.samx, 0, 1, steps=10, exp_time=0.5, relative=False)
+        output = buffer.getvalue()
+        assert "test_client_info_message" in output
