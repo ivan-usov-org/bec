@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## v3.7.1 (2025-01-20)
+
+### Bug Fixes
+
+- **atlas**: Fixed support for streams
+  ([`b81cef7`](https://gitlab.psi.ch/bec/bec/-/commit/b81cef7fbb6e8bb38b4a88530a1a4d488d6034ef))
+
+- **devicemanager**: Failed devices should not be added
+  ([`d95e86b`](https://gitlab.psi.ch/bec/bec/-/commit/d95e86bb8f05ee9ad653db1945662987a00531ea))
+
+
 ## v3.7.0 (2025-01-16)
 
 ### Documentation
