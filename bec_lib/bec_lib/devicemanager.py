@@ -624,6 +624,7 @@ class DeviceManagerBase:
             obj = ComputedSignal(name=name, info=info, parent=self)
         else:
             logger.error(f"Trying to add new device {name} of type {base_class}")
+            return
 
         # pylint: disable=protected-access
         obj._config = dev
