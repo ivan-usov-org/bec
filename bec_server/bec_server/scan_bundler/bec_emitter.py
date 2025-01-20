@@ -76,6 +76,10 @@ class BECEmitter(EmitterBase):
     def _send_bec_scan_point(self, scan_id: str, point_id: int) -> None:
         sb = self.scan_bundler
 
+        if scan_id not in sb.sync_storage:
+            logger.warning(f"Cannot send scan point: Scan {scan_id} not found in sync storage.")
+            return
+
         info = sb.sync_storage[scan_id]["info"]
         msg = messages.ScanMessage(
             point_id=point_id,
@@ -95,6 +99,11 @@ class BECEmitter(EmitterBase):
         self._update_scan_progress(scan_id, point_id)
 
     def _update_scan_progress(self, scan_id: str, point_id: int, done=False) -> None:
+        if scan_id not in self.scan_bundler.sync_storage:
+            logger.warning(
+                f"Cannot update scan progress: Scan {scan_id} not found in sync storage."
+            )
+            return
         info = self.scan_bundler.sync_storage[scan_id]["info"]
         msg = messages.ProgressMessage(
             value=point_id + 1,
@@ -110,6 +119,10 @@ class BECEmitter(EmitterBase):
 
     def _send_baseline(self, scan_id: str) -> None:
         sb = self.scan_bundler
+
+        if scan_id not in sb.sync_storage:
+            logger.warning(f"Cannot send baseline: Scan {scan_id} not found in sync storage.")
+            return
 
         msg = messages.ScanBaselineMessage(
             scan_id=scan_id,
