@@ -64,7 +64,7 @@ def test_atlas_forwarder_update_deployment_state(forwarder):
         }
     )
     forwarder.update_deployment_state(msg)
-    assert forwarder.active_subscriptions == {sub[0] for sub in subscriptions}
+    assert forwarder.active_subscriptions == {sub[1] for sub in subscriptions}
 
     subscriptions = [
         ["internal/devices/readback/samy", '{"endpoint":"device_readback","args":["samy"]}'],
@@ -82,4 +82,4 @@ def test_atlas_forwarder_update_deployment_state(forwarder):
     )
 
     forwarder.update_deployment_state(msg)
-    assert forwarder.active_subscriptions == {sub[0] for sub in subscriptions}
+    assert forwarder.active_subscriptions == {sub[1] for sub in subscriptions}

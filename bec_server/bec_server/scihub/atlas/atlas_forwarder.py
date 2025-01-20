@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 from bec_lib import messages
 from bec_lib.connector import MessageObject
+from bec_lib.endpoints import EndpointInfo, MessageEndpoints
 from bec_lib.logger import bec_logger
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -75,33 +76,43 @@ class AtlasForwarder:
 
     def update_deployment_state(self, msg: messages.RawMessage):
         requested_subscriptions = {
-            sub[0] for user_info in msg.data.values() for sub in user_info.get("subscriptions", [])
+            sub[1] for user_info in msg.data.values() for sub in user_info.get("subscriptions", [])
         }
 
         # Add new subscriptions
         new_subscriptions = requested_subscriptions - self.active_subscriptions
         for subscription in new_subscriptions:
             self.active_subscriptions.add(subscription)
+            endpoint = self._get_endpoint_from_subscription(subscription)
             self.atlas_connector.connector.register(
-                subscription, cb=self.forward_message, parent=self
+                endpoint, cb=self.forward_message, parent=self, endpoint=endpoint
             )
 
         # Remove subscriptions that are no longer needed
         stale_subscriptions = self.active_subscriptions - requested_subscriptions
         for subscription in stale_subscriptions:
             self.active_subscriptions.remove(subscription)
+            endpoint = self._get_endpoint_from_subscription(subscription)
             self.atlas_connector.connector.unregister(subscription)
 
         logger.info(f"Active subscriptions: {self.active_subscriptions}")
 
+    def _get_endpoint_from_subscription(self, subscription: str) -> EndpointInfo:
+        endpoint_info = json.loads(subscription)
+        func = getattr(MessageEndpoints, endpoint_info["endpoint"])
+        if endpoint_info.get("args"):
+            endpoint = func(*endpoint_info["args"])
+        else:
+            endpoint = func()
+        return endpoint
+
     @staticmethod
-    def forward_message(msg, parent):
+    def forward_message(msg, parent, endpoint):
+        endpoint = endpoint.endpoint
         if isinstance(msg, MessageObject):
             data = msg.value
-            endpoint = msg.topic
         else:
             data = msg
-            endpoint = None
         parent.atlas_connector.redis_atlas.xadd(
             f"internal/deployment/{parent.atlas_connector.deployment_name}/data/{endpoint}",
             data if isinstance(data, dict) else {"pubsub_data": data},
