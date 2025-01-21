@@ -81,8 +81,20 @@ class ScanAssembler:
                 request_inputs["arg_bundle"] = []
                 request_inputs["inputs"] = {}
                 request_inputs["kwargs"] = {}
-                for ii, key in enumerate(args):
-                    request_inputs["inputs"][cls_input_args[ii]] = key
+
+                if "args" in cls_input_args:
+                    split_index = cls_input_args.index("args")
+                    defined_cls_args = cls_input_args[:split_index]
+                    defined_args = args[:split_index]
+
+                    for ii, key in enumerate(defined_args):
+                        input_name = defined_cls_args[ii]
+                        request_inputs["inputs"][input_name] = key
+
+                    request_inputs["inputs"]["args"] = args[split_index:]
+                else:
+                    for ii, key in enumerate(args):
+                        request_inputs["inputs"][cls_input_args[ii]] = key
 
                 for key in kwargs:
                     if key in cls_input_args:
