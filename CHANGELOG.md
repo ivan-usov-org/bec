@@ -1,6 +1,27 @@
 # CHANGELOG
 
 
+## v3.7.2 (2025-01-21)
+
+### Bug Fixes
+
+- Add option to hide table and client info messages; closes #289
+  ([`1a3f6e0`](https://gitlab.psi.ch/bec/bec/-/commit/1a3f6e0848d54323d5c33e671bd5918ce831afa5))
+
+- Reenable print out of client info messages
+  ([`5c8024a`](https://gitlab.psi.ch/bec/bec/-/commit/5c8024a9e42b1ee6082a05240c75e3a8fa43eb5d))
+
+### Documentation
+
+- Add docs for client info message and live updates config
+  ([`448c88e`](https://gitlab.psi.ch/bec/bec/-/commit/448c88ea41b41e8ce856c966a34d52baaadfbc1c))
+
+### Testing
+
+- Add e2e test for client info message
+  ([`01b7c2a`](https://gitlab.psi.ch/bec/bec/-/commit/01b7c2a3a46016f5f6fe1ebd36e7d7ec57f68496))
+
+
 ## v3.7.1 (2025-01-20)
 
 ### Bug Fixes
