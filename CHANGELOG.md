@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v3.7.3 (2025-01-21)
+
+### Bug Fixes
+
+- **scan bundler**: Do not run bec emitter without scan id in storage
+  ([`98b88a0`](https://gitlab.psi.ch/bec/bec/-/commit/98b88a022f617e0c3f8ab28b3410d47c5804a3d7))
+
+
 ## v3.7.2 (2025-01-21)
 
 ### Bug Fixes
