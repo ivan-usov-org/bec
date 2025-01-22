@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v3.9.0 (2025-01-22)
+
+### Features
+
+- **dap**: Added support for custom dap data
+  ([`7a0c0be`](https://gitlab.psi.ch/bec/bec/-/commit/7a0c0be40dfb15be93d4071d9b140882d29b6f09))
+
+### Testing
+
+- **lmfit**: Adjusted mock data
+  ([`c50ea14`](https://gitlab.psi.ch/bec/bec/-/commit/c50ea141a8286c531a29d902fef5c89246de1d74))
+
+
 ## v3.8.0 (2025-01-22)
 
 ### Features
