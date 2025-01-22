@@ -71,9 +71,12 @@ def my_cb(msg, **kwargs):
 The callback needs to follow the argument signature of this example. The message object passed as the first argument is a [`bec_lib.connector.MessageObject`](/api_reference/_autosummary/bec_lib.connector.MessageObject), with two fields; `msg.topic` for the Endpointinfo and `msg.value` for the respective BECMessage. In the current example, we receive a *ScanMessage*, and print a line once the *point_id=20* is published.
 After defining the callback function, we can subscribe to the endpoint with the following code:
 ```python
-bec.connector.subscribe(MessageEndpoints.scan_segment(), my_cb)
+bec.connector.register(MessageEndpoints.scan_segment(), cb=my_cb)
 ```
-Each new message published on the *scan_segment* endpoint will trigger the callback.
+Each new message published on the *scan_segment* endpoint will trigger the callback. If necessary, additional arguments can be passed to the callback function by specifying them in as keyword arguments in the `register` method. 
+```python
+bec.connector.register(MessageEndpoints.scan_segment(), cb=my_cb, my_arg1=arg1, my_arg2=arg2)
+```
 
 ```{note}
 It is very important to keep the execution time of the callback function as short as possible. If the callback function takes too long to execute, it will block the thread and may compromise the performance of the system. For secondary operations, we recommend the callback function to trigger actions through an API call to a separate service.
