@@ -405,7 +405,7 @@ def calculate_readback(signal):
     data = signal.get()
     std = np.std(data)
     mean = np.mean(data)
-    return np.sum(data[data>mean+3*std])
+    return np.sum(data[data<mean+3*std])
 dev.pseudo_signal.set_compute_method(calculate_readback)
 dev.pseudo_signal.set_input_signals(dev.eiger.image)
 ```
