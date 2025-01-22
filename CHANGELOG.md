@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v3.8.0 (2025-01-22)
+
+### Features
+
+- Introduce a DAP service for simple statistical analysis on images
+  ([`1c225aa`](https://gitlab.psi.ch/bec/bec/-/commit/1c225aabfe594a9933037cbd9f73573bc4ad5edf))
+
+### Testing
+
+- Cleanup, refactor and add tests
+  ([`c48a97d`](https://gitlab.psi.ch/bec/bec/-/commit/c48a97d9bca0f290a8edaea18cec84dfc486d728))
+
+
 ## v3.7.3 (2025-01-21)
 
 ### Bug Fixes
