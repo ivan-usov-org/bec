@@ -1,6 +1,22 @@
 # CHANGELOG
 
 
+## v3.9.1 (2025-01-27)
+
+### Bug Fixes
+
+- **scan_data_container**: Get implemented to LazyAttributeDict and LinkedAttributeDict
+  ([`f578d5f`](https://gitlab.psi.ch/bec/bec/-/commit/f578d5fd810ac053756f0980e3511150ef948892))
+
+### Documentation
+
+- **event_data**: Fixed register example
+  ([`1f37e5b`](https://gitlab.psi.ch/bec/bec/-/commit/1f37e5ba9d1b6b2b0e54754c6fb8fc789ccc038f))
+
+- **user**: Fixed minor mistake in the example for computed signals
+  ([`a0d4642`](https://gitlab.psi.ch/bec/bec/-/commit/a0d4642182528b1ccd27ed76bc144a27f634056f))
+
+
 ## v3.9.0 (2025-01-22)
 
 ### Features
