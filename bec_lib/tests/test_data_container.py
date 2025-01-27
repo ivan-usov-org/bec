@@ -131,3 +131,29 @@ def test_data_container_to_pandas(mock_file):
     df = container.readout_groups.monitored_devices.to_pandas()
     assert df["samx"]["samx"]["value"].tolist() == [1, 2, 3]
     assert df["samx"]["samx"]["timestamp"].tolist() == [1, 2, 3]
+
+
+def test_data_container_get_device(mock_file):
+    container = ScanDataContainer(file_path=mock_file)
+    assert container.devices.get("samx") == container.devices.samx
+    assert container.devices.get("samz") == container.devices.samz
+    assert container.devices.get("doesn't exist") is None
+
+
+def test_data_container_get_signal(mock_file):
+    container = ScanDataContainer(file_path=mock_file)
+    assert container.devices.samx.get("samx") == container.devices.samx["samx"]
+    assert container.devices.samx.get("doesn't exist") is None
+
+
+def test_data_container_get_device_from_readout_group(mock_file):
+    container = ScanDataContainer(file_path=mock_file)
+    assert (
+        container.readout_groups.monitored_devices.get("samx")
+        == container.readout_groups.monitored_devices.samx
+    )
+    assert (
+        container.readout_groups.monitored_devices.get("samz")
+        == container.readout_groups.monitored_devices.samz
+    )
+    assert container.readout_groups.monitored_devices.get("doesn't exist") is None

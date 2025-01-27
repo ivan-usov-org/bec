@@ -367,6 +367,10 @@ class LazyAttributeDict(AttributeDict):
         object.__getattribute__(self, "_load")()
         return super().__getitem__(key)
 
+    def get(self, key: Any, default: Any = None) -> Any:
+        object.__getattribute__(self, "_load")()
+        return super().get(key, default)
+
     def keys(self) -> dict_keys:
         object.__getattribute__(self, "_load")()
         return super().keys()
@@ -437,6 +441,11 @@ class LinkedAttributeDict(AttributeDict):
         if key.startswith("_") or key == "read":
             return super().__getitem__(key)
         return self._container[key]
+
+    def get(self, key: Any, default: Any = None) -> Any:
+        if key.startswith("_") or key == "read":
+            return super().get(key, default)
+        return self._container.get(key, default)
 
     def __get_filtered_items(self) -> dict:
         return {
