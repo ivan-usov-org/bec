@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v3.9.2 (2025-01-27)
+
+### Bug Fixes
+
+- **messages**: Raw message should support any type
+  ([`9aa18ee`](https://gitlab.psi.ch/bec/bec/-/commit/9aa18eeb2b5104d48793689ef0b7d4436170c2d1))
+
+
 ## v3.9.1 (2025-01-27)
 
 ### Bug Fixes
