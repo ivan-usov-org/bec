@@ -960,12 +960,14 @@ class RawMessage(BECMessage):
     The data dictionary is simply the raw data loaded using json.loads
 
     Args:
-        data (dict): Raw data
+        data (any): Raw data
         metadata (dict, optional): Metadata. Defaults to None.
     """
 
     msg_type: ClassVar[str] = "raw_message"
-    data: dict
+    data: any
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class ServiceRequestMessage(BECMessage):
