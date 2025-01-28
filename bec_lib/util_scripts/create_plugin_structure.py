@@ -19,11 +19,11 @@ class PluginStructure:
     >>> python create_plugin_structure.py /path/to/my_plugin
     """
 
-    def __init__(self, target_dir):
+    def __init__(self, target_dir: str):
         """This class can be used to produce the folder structure
         of BEC. This includes copying templates for the structures
         """
-        self.target_dir = target_dir
+        self.target_dir = target_dir.rstrip("/")
         _, self.plugin_name = os.path.split(target_dir)
         self.create_dir("")
 
@@ -45,7 +45,7 @@ class PluginStructure:
         os.system(f"cp {gitignore} {self.target_dir}/.gitignore")
 
         # copy license
-        repo_license = os.path.join(current_dir, "plugin_setup_files", "plugin_repo_cliense.md")
+        repo_license = os.path.join(current_dir, "plugin_setup_files", "plugin_repo_license.md")
         os.system(f"cp {repo_license} {self.target_dir}/LICENSE")
 
     def copy_toml_file(self):
@@ -75,6 +75,18 @@ class PluginStructure:
             current_dir, "plugin_setup_files", "scan_plugin_template.py"
         )
         os.system(f"cp {scan_plugin_template_file} {self.target_dir}/{self.plugin_name}/scans")
+
+    def add_metadata_schema(self):
+        dir_ = "/scans/metadata_schema"
+        self.create_dir(f"{self.plugin_name}{dir_}")
+        self.create_init_file(f"{self.plugin_name}{dir_}")
+        # copy scan_plugin_template.py
+        template_files = [
+            os.path.join(current_dir, "plugin_setup_files", filename)
+            for filename in ["metadata_schema_registry.py", "metadata_schema_template.py"]
+        ]
+        for file in template_files:
+            os.system(f"cp {file} {self.target_dir}/{self.plugin_name}{dir_}")
 
     def add_client(self):
         self.create_dir(f"{self.plugin_name}/bec_ipython_client")
