@@ -7,7 +7,9 @@ from copy import deepcopy
 from typing import Any, ClassVar, Literal
 
 import numpy as np
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
+
+from bec_lib.metadata_schema import BasicScanMetadata, get_metadata_schema_for_scan
 
 
 class BECStatus(enum.Enum):
@@ -126,6 +128,20 @@ class ScanQueueMessage(BECMessage):
     scan_type: str
     parameter: dict
     queue: str = Field(default="primary")
+
+    @model_validator(mode="after")
+    @classmethod
+    def _validate_metadata(cls, data):
+        """Make sure the metadata conforms to the registered schema, but
+        leave it as a dict"""
+        schema = get_metadata_schema_for_scan(data.scan_type)
+        try:
+            schema.model_validate(data.metadata)
+        except ValidationError as e:
+            raise ValueError(
+                f"Scan metadata {data.metadata} does not conform to registered schema {schema}. \n Errors: {str(e)}"
+            ) from e
+        return data
 
 
 class ScanQueueHistoryMessage(BECMessage):

@@ -70,6 +70,9 @@ class PluginStructure:
         self.create_dir(f"{self.plugin_name}/scans")
         self.create_init_file(f"{self.plugin_name}/scans")
 
+        self.create_dir(f"{self.plugin_name}/scans/metadata_schema")
+        self.create_init_file(f"{self.plugin_name}/scans/metadata_schema")
+
         # copy scan_plugin_template.py
         scan_plugin_template_file = os.path.join(
             current_dir, "plugin_setup_files", "scan_plugin_template.py"
@@ -191,6 +194,7 @@ if __name__ == "__main__":
     struc.add_plugins()
     struc.copy_plugin_setup_files()
     struc.add_scans()
+    struc.add_metadata_schema()
     struc.add_client()
     struc.add_devices()
     struc.add_device_configs()

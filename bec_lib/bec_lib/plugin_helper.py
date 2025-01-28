@@ -82,6 +82,19 @@ def get_file_writer_plugins() -> dict:
     return loaded_plugins
 
 
+def get_metadata_schema_registry() -> dict:
+    module = _get_available_plugins("bec.scans.metadata_schema")
+    if len(module) == 0:
+        logger.warning("No plugin metadata schema module found!")
+        return {}
+    try:
+        registry_module = importlib.import_module(module[0].__name__ + ".metadata_schema_registry")
+        return registry_module.METADATA_SCHEMA
+    except Exception as e:
+        logger.error(f"Error while loading metadata schema registry from plugins: {e}")
+        return {}
+
+
 def get_ipython_client_startup_plugins(state: Literal["pre", "post"]) -> dict:
     """
     Load all IPython client startup plugins.

@@ -370,6 +370,44 @@ def test_remove_queue_item(queuemanager_mock):
     assert len(queue_manager.queues["primary"].queue) == 0
 
 
+def test_invalid_scan_specified_in_message(queuemanager_mock):
+    queue_manager = queuemanager_mock()
+    msg = messages.ScanQueueMessage(
+        scan_type="fake test scan which does not exist!",
+        parameter={"args": {"samx": (1,)}, "kwargs": {}},
+        queue="primary",
+        metadata={"RID": "something"},
+    )
+    with mock.patch.object(queue_manager, "connector") as connector:
+        queue_manager.add_to_queue(scan_queue="dummy", msg=msg)
+        connector.raise_alarm.assert_called_once_with(
+            severity=Alarms.MAJOR,
+            source=msg.content,
+            msg="fake test scan which does not exist!",
+            alarm_type="KeyError",
+            metadata={"RID": "something"},
+        )
+
+
+def test_invalid_scan_specified_in_message(queuemanager_mock):
+    queue_manager = queuemanager_mock()
+    msg = messages.ScanQueueMessage(
+        scan_type="fake test scan which does not exist!",
+        parameter={"args": {"samx": (1,)}, "kwargs": {}},
+        queue="primary",
+        metadata={"RID": "something"},
+    )
+    with mock.patch.object(queue_manager, "connector") as connector:
+        queue_manager.add_to_queue(scan_queue="dummy", msg=msg)
+        connector.raise_alarm.assert_called_once_with(
+            severity=Alarms.MAJOR,
+            source=msg.content,
+            msg="fake test scan which does not exist!",
+            alarm_type="KeyError",
+            metadata={"RID": "something"},
+        )
+
+
 def test_set_clear(queuemanager_mock):
     queue_manager = queuemanager_mock()
     msg = messages.ScanQueueMessage(

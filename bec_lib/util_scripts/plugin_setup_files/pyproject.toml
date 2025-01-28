@@ -38,6 +38,9 @@ plugin_file_writer = "{template_name}.file_writer"
 [project.entry-points."bec.scans"]
 plugin_scans = "{template_name}.scans"
 
+[project.entry-points."bec.scans.metadata_schema"]
+plugin_metadata_schema = "{template_name}.scans.metadata_schema"
+
 [project.entry-points."bec.ipython_client_startup"]
 plugin_ipython_client_pre = "{template_name}.bec_ipython_client.startup.pre_startup"
 plugin_ipython_client_post = "{template_name}.bec_ipython_client.startup"
