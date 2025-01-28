@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v3.9.3 (2025-01-28)
+
+### Bug Fixes
+
+- **scan_assembler**: Fixed assignment of request inputs for signature containing args
+  ([`3acab34`](https://gitlab.psi.ch/bec/bec/-/commit/3acab344c4e5c46cb2603beb2a0c036982c8c5ec))
+
+
 ## v3.9.2 (2025-01-27)
 
 ### Bug Fixes
