@@ -81,7 +81,7 @@ formatter:
   stage: Formatter
   needs: []
   script:
-    - pip install black isort
+    - pip install -e ./bec_lib[dev]
     - isort --check --diff --line-length=100 --profile=black --multi-line=3 --trailing-comma ./
     - black --check --diff --color --line-length=100 --skip-magic-trailing-comma ./
   rules:
