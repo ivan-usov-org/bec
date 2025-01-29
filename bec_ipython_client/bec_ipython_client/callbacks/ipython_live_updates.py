@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import collections
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from bec_ipython_client.callbacks.device_progress import LiveUpdatesDeviceProgress
 from bec_lib.bec_errors import ScanInterruption
@@ -140,7 +140,7 @@ class IPythonLiveUpdates:
         ]
         return available_blocks
 
-    def process_request(self, request: messages.ScanQueueMessage, callbacks: any) -> None:
+    def process_request(self, request: messages.ScanQueueMessage, callbacks: Any) -> None:
         """Process the request and report instructions."""
         # pylint: disable=protected-access
         try:

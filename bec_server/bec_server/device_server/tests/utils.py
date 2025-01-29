@@ -1,7 +1,7 @@
 import enum
 import inspect
 import time
-from typing import Generator, Literal, Protocol
+from typing import Any, Generator, Literal, Protocol
 
 from ophyd import DeviceStatus, Kind
 from ophyd_devices.interfaces.protocols.bec_protocols import (
@@ -113,7 +113,7 @@ class MockSignal(DeviceObjectMock, BECSignalProtocol):
     def __init__(
         self,
         name: str,
-        value: any = 0,
+        value: Any = 0,
         kind: Kind = Kind.normal,
         parent=None,
         precision=None,
@@ -145,10 +145,10 @@ class MockSignal(DeviceObjectMock, BECSignalProtocol):
     def get(self):
         return self._value
 
-    def put(self, value: any, force: bool = False, timeout: float = None):
+    def put(self, value: Any, force: bool = False, timeout: float = None):
         self._value = value
 
-    def set(self, value: any, timeout: float = None):
+    def set(self, value: Any, timeout: float = None):
         self._value = value
 
     @property
