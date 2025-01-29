@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v3.9.4 (2025-01-29)
+
+### Bug Fixes
+
+- **raw_message**: Fixed type annotation
+  ([`dbd8f1a`](https://gitlab.psi.ch/bec/bec/-/commit/dbd8f1a6744b558e8c485d8314fa2617a802c911))
+
+### Continuous Integration
+
+- **formatter**: Install black and isort from bec_lib
+  ([`84bb00b`](https://gitlab.psi.ch/bec/bec/-/commit/84bb00b5782a6d1ebab859fce4820e308b80fdc7))
+
+
 ## v3.9.3 (2025-01-28)
 
 ### Bug Fixes
