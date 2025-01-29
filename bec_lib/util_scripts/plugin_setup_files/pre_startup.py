@@ -1,6 +1,6 @@
 """
 Pre-startup script for BEC client. This script is executed before the BEC client
-is started. It can be used to add additional command line arguments. 
+is started. It can be used to add additional command line arguments.
 """
 
 from bec_lib.service_config import ServiceConfig

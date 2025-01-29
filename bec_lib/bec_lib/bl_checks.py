@@ -1,6 +1,6 @@
 """
 This module provides the BeamlineChecks class, which is used to perform beamline checks. It also provides the bl_check
-decorator. 
+decorator.
 """
 
 import builtins

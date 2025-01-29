@@ -1,6 +1,6 @@
 """
 This module contains the AtlasMetadataHandler class, which is responsible for handling metadata sent to Atlas.
-It subscribes to e.g. scan status messages and forwards them to Atlas. The ingestor on the Atlas side will then 
+It subscribes to e.g. scan status messages and forwards them to Atlas. The ingestor on the Atlas side will then
 process the data and store it in the database.
 """
 

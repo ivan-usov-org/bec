@@ -1,7 +1,7 @@
 """
-This module contains the CallbackHandler class to handle callbacks. 
-The CallbackHandler class is used to register and run callbacks for different 
-event types. The CallbackRegister class is used to register callbacks 
+This module contains the CallbackHandler class to handle callbacks.
+The CallbackHandler class is used to register and run callbacks for different
+event types. The CallbackRegister class is used to register callbacks
 in a with statement.
 """
 

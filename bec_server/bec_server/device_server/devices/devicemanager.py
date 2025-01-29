@@ -1,6 +1,6 @@
 """
-This module contains the DeviceManagerDS class, which is a subclass of 
-the DeviceManagerBase class and is the main device manager for devices 
+This module contains the DeviceManagerDS class, which is a subclass of
+the DeviceManagerBase class and is the main device manager for devices
 in BEC. It is the only place where devices are initialized and managed.
 """
 

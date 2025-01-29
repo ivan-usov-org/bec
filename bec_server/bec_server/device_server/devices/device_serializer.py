@@ -1,5 +1,5 @@
 """
-This module contains functions to get the device info from an object. The device info 
+This module contains functions to get the device info from an object. The device info
 is used to create the device interface for proxy objects on other services.
 """
 

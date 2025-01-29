@@ -1,4 +1,4 @@
-""" Module to test file_utils.py"""
+"""Module to test file_utils.py"""
 
 # pylint: skip-file
 import os

@@ -1,4 +1,4 @@
-""" Module for file utilities."""
+"""Module for file utilities."""
 
 from __future__ import annotations
 

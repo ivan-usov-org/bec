@@ -1,4 +1,4 @@
-""" Fixtures for end-to-end tests """
+"""Fixtures for end-to-end tests"""
 
 # pylint: skip-file
 import os

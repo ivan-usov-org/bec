@@ -1,5 +1,5 @@
 """
-This module contains the Scans class and related classes for defining and running scans in BEC 
+This module contains the Scans class and related classes for defining and running scans in BEC
 from the client side.
 """
 

@@ -1,5 +1,5 @@
 """
-This module contains the classes for storing scan data from scan_segments. 
+This module contains the classes for storing scan data from scan_segments.
 """
 
 from __future__ import annotations

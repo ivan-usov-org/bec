@@ -1,4 +1,4 @@
-""" This module tests the bec_lib.client module. """
+"""This module tests the bec_lib.client module."""
 
 import pytest
 
