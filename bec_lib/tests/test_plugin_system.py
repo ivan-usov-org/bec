@@ -29,10 +29,12 @@ class ExampleSchema(BasicScanMetadata):
 TEST_SCHEMA_REGISTRY = """
 from .example_schema import ExampleSchema
 
-METADATA_SCHEMA = {
+METADATA_SCHEMA_REGISTRY = {
     "test_scan_fail_on_type": "FailOnType",
     "example_scan": ExampleSchema,
 }
+
+DEFAULT_SCHEMA = None
 
 """
 
@@ -156,7 +158,7 @@ class TestPluginSystem:
             )
             md_reg_module = importlib.util.module_from_spec(md_reg_spec)
             md_reg_spec.loader.exec_module(md_reg_module)
-            assert md_reg_module.METADATA_SCHEMA is not None
+            assert md_reg_module.METADATA_SCHEMA_REGISTRY is not None
         finally:
             for mod in [TestPluginSystem._tmp_plugin_name, md_reg_mod_name]:
                 if mod in sys.modules:
@@ -185,5 +187,6 @@ class TestPluginSystem:
             "bec.scans.metadata_schema"
         )
         assert len(metadata_schema_plugin_module) > 0
-        metadata_registry = plugin_helper.get_metadata_schema_registry()
+        metadata_registry, default_schema = plugin_helper.get_metadata_schema_registry()
         assert set(["test_scan_fail_on_type", "example_scan"]) == set(metadata_registry.keys())
+        assert default_schema is None

@@ -14,14 +14,20 @@ class ChildMetadata(BasicScanMetadata):
     number_field: int
 
 
+class BeamlineDefaultSchema(BasicScanMetadata):
+    sample_name_long: str
+
+
 TEST_REGISTRY = {
     "fake_scan_with_extra_metadata": ChildMetadata,
     "fake_scan_with_basic_metadata": BasicScanMetadata,
 }
 
 
-@pytest.fixture(scope="module", autouse=True)
+@pytest.fixture(scope="function", autouse=True)
 def clear_schema_registry_cache():
+    metadata_schema.cache_clear()
+    yield
     metadata_schema.cache_clear()
 
 
@@ -57,3 +63,33 @@ def test_creating_scan_queue_message_validates_metadata():
             metadata={"number_field": 123, "extra": "data"},
         )
         assert msg_with_extra_keys.metadata["extra"] == "data"
+
+
+def test_default_schema_is_used_as_fallback():
+    with patch.dict(metadata_schema._METADATA_SCHEMA_REGISTRY, TEST_REGISTRY, clear=True):
+        metadata_schema.get_metadata_schema_for_scan("")  # create cache before patching default
+        with patch.object(metadata_schema, "_DEFAULT_SCHEMA", BeamlineDefaultSchema):
+
+            assert metadata_schema.get_default_schema() is BeamlineDefaultSchema
+            assert (
+                metadata_schema.get_metadata_schema_for_scan("not associated with anything")
+                is BeamlineDefaultSchema
+            )
+
+            with pytest.raises(ValidationError):
+                _msg_not_matching_default_and_no_specified_schema = ScanQueueMessage(
+                    scan_type="not associated with anything",
+                    parameter={},
+                    metadata={"number_field": 123},
+                )
+            with pytest.raises(ValidationError):
+                _msg_matching_default_but_with_specified_schema = ScanQueueMessage(
+                    scan_type="fake_scan_with_extra_metadata",
+                    parameter={},
+                    metadata={"sample_name_long": "long string of text"},
+                )
+            _msg_matching_default_and_no_specified_schema = ScanQueueMessage(
+                scan_type="not associated with anything",
+                parameter={},
+                metadata={"sample_name_long": "long string of text"},
+            )

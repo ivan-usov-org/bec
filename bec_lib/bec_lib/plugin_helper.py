@@ -1,9 +1,14 @@
+from __future__ import annotations
+
 import importlib
 import inspect
 from functools import lru_cache
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from bec_lib.logger import bec_logger
+
+if TYPE_CHECKING:
+    from bec_lib.metadata_schema import BasicScanMetadata
 
 logger = bec_logger.logger
 
@@ -82,17 +87,20 @@ def get_file_writer_plugins() -> dict:
     return loaded_plugins
 
 
-def get_metadata_schema_registry() -> dict:
+def get_metadata_schema_registry() -> tuple[dict, type[BasicScanMetadata]]:
     module = _get_available_plugins("bec.scans.metadata_schema")
     if len(module) == 0:
         logger.warning("No plugin metadata schema module found!")
-        return {}
+        return {}, None
     try:
         registry_module = importlib.import_module(module[0].__name__ + ".metadata_schema_registry")
-        return registry_module.METADATA_SCHEMA
+        return (
+            registry_module.METADATA_SCHEMA_REGISTRY,
+            getattr(registry_module, "DEFAULT_SCHEMA", None),
+        )
     except Exception as e:
         logger.error(f"Error while loading metadata schema registry from plugins: {e}")
-        return {}
+        return {}, None
 
 
 def get_ipython_client_startup_plugins(state: Literal["pre", "post"]) -> dict:
