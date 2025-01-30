@@ -1,6 +1,33 @@
 # CHANGELOG
 
 
+## v3.10.0 (2025-01-30)
+
+### Bug Fixes
+
+- Bugs in create_plugin_structure
+  ([`229a90e`](https://gitlab.psi.ch/bec/bec/-/commit/229a90e9e2324fe3ded44e909b2019ef567d3939))
+
+- Wrong use of 'any' for 'Any' type
+  ([`35fa9a8`](https://gitlab.psi.ch/bec/bec/-/commit/35fa9a83efa6e5849aef8d496ce9349115e27c3e))
+
+### Code Style
+
+- Update for black version 25.1.0
+  ([`1b1810c`](https://gitlab.psi.ch/bec/bec/-/commit/1b1810cccadba189433643ebc4084641ca747208))
+
+### Features
+
+- Allow specifying a default schema per plugin repo
+  ([`2efc73b`](https://gitlab.psi.ch/bec/bec/-/commit/2efc73b2a8c403dfdf6f74c5313527c060085e16))
+
+- Scan metadata schema plugin
+  ([`8bfe544`](https://gitlab.psi.ch/bec/bec/-/commit/8bfe54406673de9a6579d1b79550f684d1cee130))
+
+- adds a new submodule to the `scans` module in the plugin repo where models may be defined against
+  which the metadata added to ScanQueueMessage should be validated
+
+
 ## v3.9.4 (2025-01-29)
 
 ### Bug Fixes
