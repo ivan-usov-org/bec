@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v3.10.1 (2025-02-04)
+
+### Bug Fixes
+
+- Cache metadata reg to reduce warnings
+  ([`5d20aff`](https://gitlab.psi.ch/bec/bec/-/commit/5d20aff78732040a951d2f3d64ecf1424a855534))
+
+
 ## v3.10.0 (2025-01-30)
 
 ### Bug Fixes
