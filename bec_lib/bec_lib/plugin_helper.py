@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import importlib
 import inspect
-from functools import lru_cache
+from functools import cache, lru_cache
 from typing import TYPE_CHECKING, Literal
 
 from bec_lib.logger import bec_logger
@@ -87,10 +87,10 @@ def get_file_writer_plugins() -> dict:
     return loaded_plugins
 
 
+@cache
 def get_metadata_schema_registry() -> tuple[dict, type[BasicScanMetadata]]:
     module = _get_available_plugins("bec.scans.metadata_schema")
     if len(module) == 0:
-        logger.warning("No plugin metadata schema module found!")
         return {}, None
     try:
         registry_module = importlib.import_module(module[0].__name__ + ".metadata_schema_registry")

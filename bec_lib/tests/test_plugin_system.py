@@ -90,6 +90,7 @@ class TestPluginSystem:
         install(TestPluginSystem._tmp_plugin_dir)
         importlib.invalidate_caches()
         plugin_helper._get_available_plugins.cache_clear()
+        plugin_helper.get_metadata_schema_registry.cache_clear()
 
         piplist = subprocess.Popen(("pip", "list"), stdout=subprocess.PIPE)
         output = subprocess.check_output(("grep", "test_plugin"), stdin=piplist.stdout)
