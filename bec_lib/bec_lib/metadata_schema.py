@@ -39,7 +39,11 @@ def _schema_is_ok(schema: type[BasicScanMetadata], name: str | None = None) -> b
 def _get_metadata_schema_registry() -> dict[str, type[BasicScanMetadata]]:
     plugin_schema, default = plugin_helper.get_metadata_schema_registry()
     global _DEFAULT_SCHEMA
-    _DEFAULT_SCHEMA = default if _schema_is_ok(default, "default") else BasicScanMetadata
+    _DEFAULT_SCHEMA = (
+        default
+        if (default is not None and _schema_is_ok(default, "default"))
+        else BasicScanMetadata
+    )
     for name, schema in list(plugin_schema.items()):
         if not _schema_is_ok(schema, name):
             del plugin_schema[name]
